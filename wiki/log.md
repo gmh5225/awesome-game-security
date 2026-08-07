@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/s4killer`: entity [[s4killer]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-07** — ingest `description:gmh5225/sapphire`: entity [[sapphire]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `description:gmh5225/shellcode-EntropyFix`: entity [[shellcode-entropyfix]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

@@ -999,6 +999,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
+- [s4killer](entities/s4killer.md) — BYOVD via Samsung S4 `probmon.sys` (IOCTL phys/virt kernel R/W; unsigned load / AC bypass research; gmh5225)
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)
 - [so_loader](entities/so-loader.md) — C/C++ Android native `.so` memory loading (Cheat / Android memory loading)

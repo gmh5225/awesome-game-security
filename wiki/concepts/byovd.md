@@ -33,6 +33,7 @@ sources:
   - wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md
   - wiki/sources/descriptions/gmh5225__zam64-zemina.md
   - wiki/sources/descriptions/gmh5225__vdk.md
+  - wiki/sources/descriptions/gmh5225__s4killer.md
 updated: 2026-08-07
 confidence: high
 ---
@@ -60,6 +61,8 @@ Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDe
 Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` via IOCTL `0x22201C` (1036-byte buffer; first DWORD = target PID). (source: wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md)
 
 Zemana anti-malware driver abuse such as [[zam64-zemina]] targets **`zam64.sys`** via IOCTLs for process termination and memory access—another security-product driver in the known LOLdriver / process-kill lane. (source: wiki/sources/descriptions/gmh5225__zam64-zemina.md)
+
+Samsung S4 driver abuse such as [[s4killer]] targets **`probmon.sys`** via crafted IOCTLs for arbitrary physical or virtual kernel read/write—typical BYOVD primitives for unsigned driver load, kernel structure patching, or AC bypass research. (source: wiki/sources/descriptions/gmh5225__s4killer.md)
 
 OEM BootRepair terminate primitives such as [[phantomkiller]] abuse signed Lenovo `BootRepair.sys` via IOCTL `0x222014` → `ZwTerminateProcess` to kill PPL-protected AV/EDR. (source: wiki/sources/descriptions/redteamfortress__PhantomKiller.md)
 
@@ -97,5 +100,5 @@ Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
