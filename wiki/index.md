@@ -951,6 +951,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
+- [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
