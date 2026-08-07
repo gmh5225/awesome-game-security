@@ -490,6 +490,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md
   - wiki/sources/descriptions/gmh5225__valo-driver.md
   - wiki/sources/descriptions/gmh5225__titancf.md
+  - wiki/sources/descriptions/gmh5225__tim_apple.md
   - wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md
   - wiki/sources/descriptions/kem0x__FortKit.md
   - wiki/sources/descriptions/kirovgrad__Renamaida.md
@@ -888,7 +889,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 samples such as [[cs2-external-cheat]] (C++; D3D11 ImGui overlay / aimbot / memory read / offsets; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/sFIsAnExpert__CS2-External-Cheat.md)
 - External CS2 framework samples such as [[cs2-ext]] (C++17; pluggable kernel driver interface; D3D11/DXGI ImGui overlay; aimbot / ESP / spinbot; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/hendodev__cs2-ext.md)
 - Educational external CS2 ESP samples such as [[cs2-cheat]] (C++; SDL2 + ImGui; cs2-dumper offsets / hourly CI; offline insecure-mode study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/tiansongyu__cs2_cheat.md)
-- External CS2 samples such as [[tim-apple]] (`tim_apple.exe`; **External** tag; `offset_download.ps1` or manual `client.dll.json` / `offsets.json` / `buttons.json` beside the binary) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/kristofhracza__tim_apple.md)
+- External CS2 samples such as [[tim-apple]] (`tim_apple.exe`; **External** tag; kristofhracza offset bootstrap via `offset_download.ps1` or manual JSON; gmh5225 fork for Source 2 SDK / pattern-scan / memory-access study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/kristofhracza__tim_apple.md) (source: wiki/sources/descriptions/gmh5225__tim_apple.md)
 - Internal CS2 samples such as [[cs2-internal]] (C++; SDK generation / hooking / memory analysis; Internal tag) sit in the same cheat / game:cs2 lane. (source: wiki/sources/descriptions/redbg__CS2-Internal.md)
 - Open-source internal CS2 samples such as [[asphyxia-cs2]] (Asphyxia; ESP / aimbot / triggerbot; Source 2 SDK via interface pointers + pattern scan; Internal tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/maecry__asphyxia-cs2.md)
 - CS2 samples such as [[counterstrike2]] (C++; rendering / SDK generation / hooking) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/papstuc__counterstrike2.md)
