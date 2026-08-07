@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/subhook`: entity [[subhook]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-07** — ingest `description:gmh5225/superpeople-client`: entity [[superpeople-client]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
 - **2026-08-07** — ingest `description:gmh5225/t7-linker`: entity [[t7-linker]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
