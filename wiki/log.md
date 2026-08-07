@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `readme:categories`: bumped Cheat ~2660 (was ~2659; Anti Cheat ~651 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-07** — ingest `description:gmh5225/qiomem`: entity [[qiomem]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-07** — ingest `description:gmh5225/qsynthesis`: entity [[qsynthesis]]; cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]].
