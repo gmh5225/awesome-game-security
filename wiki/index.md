@@ -851,6 +851,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)
 - [oxorany](entities/oxorany.md) — C/C++ compile-time any-constant encryption (platform-agnostic; AC Compile Time)
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
+- [packer-tutorial](entities/packer-tutorial.md) — step-by-step PE packer-from-scratch tutorial (sections, imports, relocs, compression stub, OEP; Anti Cheat → Binary Packer `[Packer]`)
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [Page Table Injector](entities/page-table-injector.md) — PT-Injector (C/C++; kernel driver; page-table manipulation / injection:windows; AC research)
 - [page_no_access](entities/page-no-access.md) — C++ lazy decrypt-on-first-access page protection (modding; Anti Cheat → Page Protection)
