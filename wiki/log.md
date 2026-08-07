@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:google/grr`: entity [[grr]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
 - **2026-08-07** — ingest `description:googleprojectzero/winafl`: entity [[winafl]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `description:googlesamples/android-vulkan-tutorials`: entity [[android-vulkan-tutorials]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].

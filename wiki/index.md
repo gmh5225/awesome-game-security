@@ -477,6 +477,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GreyM](entities/greym.md) — PE-focused C/C++ debugging/packing (Anti Cheat → Binary Packer `[PE]`)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
+- [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [gta-reversed-modern](entities/gta-reversed-modern.md) — GTA:SA 1.0 US binary-compatible C++ reimplementation (decompilation / RenderWare-era engine study)
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
