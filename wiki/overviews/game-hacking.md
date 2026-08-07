@@ -407,6 +407,7 @@ sources:
   - wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md
   - wiki/sources/descriptions/gregkh__kernel-development.md
   - wiki/sources/descriptions/guoxing2024__magicmida-rs.md
+  - wiki/sources/descriptions/gmh5225__wasm-ceserver.md
   - wiki/sources/descriptions/gmh5225__wizard101-spoofer.md
   - wiki/sources/descriptions/gupr0x4__HWID-Spoofer-for-Fortnite-and-Valorant.md
   - wiki/sources/descriptions/guidedhacking__GH_AntiDebug_Bypass_Practice_Tool.md
@@ -650,6 +651,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Source 2 SDK generators such as [[source2gen]] (neverlosecc / praydog; C++ SDK generation + memory analysis; cheat / game engine explorer:source) sit in the same Cheat SDK CodeGen / Source 2 lane. (source: wiki/sources/descriptions/neverlosecc__source2gen.md) (source: wiki/sources/descriptions/praydog__Source2Gen.md) Generated multi-game Source 2 SDK dumps such as [[source2sdk]] (neverlosecc; C++) sit beside them as consumed SDK output. (source: wiki/sources/descriptions/neverlosecc__source2sdk.md) Source Engine² explorer platforms such as [[sourceengineexplorer]] (cheat/debug Valve code, hidden engine features, exploit development, assembly analyzer, network emulator, scripting interface, cloud decompiler; cheat / game engine explorer:source) sit in the same Cheat / Game Engine Explorer:Source lane. (source: wiki/sources/descriptions/keowu__sourceengineexplorer.md)
 - Cheat Engine Godot runtime dumpers such as [[gddumper]] (Lua; Godot 3.x/4.x SceneTree / GDScript on Win x86/x64; Address List dump + experimental hot-reload) sit in the Cheat Engine Plugins / game engine explorer:Godot lane. (source: wiki/sources/descriptions/palepine__GDDumper.md)
 - Cheat Engine value tracing in IDA via [[ce-tracer-ida]] (Python; CheatEngine Value Tracer plugin; memory analysis; cheat / IDA Plugins) bridges CE scan workflows into static IDA analysis. (source: wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md)
+- WebAssembly memory analysis via [[wasm-ceserver]] (Python/JavaScript; Cheat Engine ceserver-style remote debug for WASM; Cheat Engine Plugins / Analyzing WebAssembly) extends CE plugin workflows to browser and WASM-hosted game logic. (source: wiki/sources/descriptions/gmh5225__wasm-ceserver.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Non-linear MBA obfuscation via [[mba-obfuscator]] (`mba_obfuscator/` + `samples/`) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/nhpcc502__MBA-Obfuscator.md)
 - MBA expression simplification via [[cobra]] (Trail of Bits CoBRA; C++ coefficient-based reconstruction) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/trailofbits__CoBRA.md)

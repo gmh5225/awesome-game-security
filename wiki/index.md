@@ -1198,6 +1198,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
+- [wasm-ceserver](entities/wasm-ceserver.md) — WebAssembly memory analysis (Python/JavaScript; Cheat Engine ceserver-style remote debug; Analyzing WebAssembly)
 
 - [w1tn3ss](entities/w1tn3ss.md) — C++/C DBI / analysis / patching framework (modding / hooking / memory; Cheat DBI)
 - [Waldo](entities/waldo.md) — CS2 deep-learning triggerbot/aimbot detection (user-trained model; Detection:Aimbot)
