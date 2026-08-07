@@ -465,6 +465,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [godot-sandbox](entities/godot-sandbox.md) — Godot addon: sandboxed mod code for safe player extensions (all platforms; Plugins:Godot)
 - [godot-plush-character](entities/godot-plush-character.md) — Godot 4.x plush/soft-body character rendering (fabric shaders, soft deformation, procedural animation; stylized stuffed-animal aesthetic)
 - [godot](entities/godot.md) — Godot Engine OSS source (GDScript/C#; scene graph, scripting, rendering; Game Engine / source)
+- [godot-demo-projects](entities/godot-demo-projects.md) — official Godot demos + template projects (GitHub Pages exports; Game Develop / source)
 - [godogen](entities/godogen.md) — autonomous Godot/Bevy/Babylon.js game dev with Claude Code and Codex (feature planning, asset gen, screenshot self-repair; Game Develop / AI Agents)
 - [goldberg-emulator](entities/goldberg-emulator.md) — Goldberg Steam Emulator (offline Steamworks API; LAN; preservation / Steam DRM+API RE)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
