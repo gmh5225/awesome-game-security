@@ -1005,6 +1005,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
+- [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
