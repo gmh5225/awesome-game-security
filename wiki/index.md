@@ -1226,6 +1226,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinObjEx64](entities/winobjex64.md) — Windows Object Manager namespace explorer + callback enum (admin; AC / Ring0 callback research)
 - [WinDefCtl](entities/windefctl.md) — Defender / Tamper Protection control via kernel priv-esc (Win11 26H1)
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
+- [WinAFL](entities/winafl.md) — Windows AFL coverage-guided fuzzer (DynamoRIO/Intel PT; persistent mode; closed-source hook; corpus minimize + crash triage; Anti Cheat > Fuzzer)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
