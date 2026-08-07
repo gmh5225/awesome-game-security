@@ -1878,6 +1878,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/DSecurity/efiSeek [Ghidra analyzer for UEFI firmware]
 - https://github.com/LaurieWired/GhidraMCP [MCP for Ghidra]
 - https://github.com/Rantanen/ghidra-minidump-loader [Windows Minidump loader for Ghidra]
+- https://github.com/andrew-hoffman/ghidra-vxd-tools [Ghidra Jython scripts to annotate Windows 9x VxD INT 20h calls in legacy device drivers]
 - https://github.com/jtang613/GhidrAssistMCP [An MCP extension for Ghidra]
 - https://github.com/bethington/ghidra-mcp [Ghidra MCP server/plugin with 200+ tools for AI-assisted reverse engineering]
 - https://github.com/ant4g0nist/pyre [Ghidra decompiler in your browser]
