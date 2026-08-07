@@ -1,0 +1,4844 @@
+Project Path: arc_cs2-server-plugins_cs2-calladmin_gs04ynx2
+
+Source Tree:
+
+```txt
+arc_cs2-server-plugins_cs2-calladmin_gs04ynx2
+├── CallAdmin.Core
+│   ├── CallAdmin.Core.csproj
+│   ├── CallAdminPlugin.cs
+│   ├── Configuration
+│   │   └── CallAdminConfig.cs
+│   ├── Database
+│   │   ├── ReportEntity.cs
+│   │   └── ReportRepository.cs
+│   ├── IModule.cs
+│   ├── InterfaceBridge.cs
+│   ├── ModuleDependencyInjection.cs
+│   └── Modules
+│       ├── AdminPanelIntegrationModule.cs
+│       ├── CallAdminCommandModule.cs
+│       ├── ReportManager.cs
+│       └── SharedInterfaceModule.cs
+├── CallAdmin.Database
+│   ├── CallAdmin.Database.csproj
+│   ├── CallAdminDatabasePlugin.cs
+│   ├── Extensions
+│   │   ├── DependencyInjectionExtensions.cs
+│   │   └── Sugar.cs
+│   ├── InterfaceBridge.cs
+│   ├── PluginMessagePipeManager.cs
+│   └── Provider
+│       ├── DatabaseJoinQueryable.cs
+│       ├── DatabaseProvider.cs
+│       ├── DatabaseQueryable.cs
+│       ├── DatabaseTransaction.cs
+│       ├── LiteDbDatabaseProvider.cs
+│       ├── LiteDbJoinQueryable.cs
+│       ├── LiteDbQueryable.cs
+│       └── LiteDbTransaction.cs
+├── CallAdmin.Database.Shared
+│   ├── Attributes
+│   │   ├── DbColumnAttribute.cs
+│   │   └── DbTableAttribute.cs
+│   ├── CallAdmin.Database.Shared.csproj
+│   ├── IDatabaseJoinQueryable.cs
+│   ├── IDatabaseProvider.cs
+│   ├── IDatabaseQueryable.cs
+│   └── IDatabaseTransaction.cs
+├── CallAdmin.Discord
+│   ├── CallAdmin.Discord.csproj
+│   ├── CallAdminDiscordPlugin.cs
+│   ├── Configuration
+│   │   └── DiscordConfig.cs
+│   └── Services
+│       ├── EmbedBuilder.cs
+│       └── WebhookClient.cs
+├── CallAdmin.Shared
+│   ├── CallAdmin.Shared.csproj
+│   ├── Events
+│   │   └── ReportEvents.cs
+│   ├── Filters
+│   │   └── ITargetFilter.cs
+│   ├── ICallAdminShared.cs
+│   └── Models
+│       ├── Report.cs
+│       ├── ReportReason.cs
+│       └── ReportStatus.cs
+├── CallAdmin.slnx
+├── Directory.Build.props
+├── LICENSE
+└── README.md
+
+```
+
+`CallAdmin.Core/CallAdmin.Core.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>CallAdmin</AssemblyName>
+    <RootNamespace>CallAdmin.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="MessagePipe" Version="1.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(CallAdminRoot)CallAdmin.Shared\CallAdmin.Shared.csproj" Private="false" />
+    <ProjectReference Include="$(CallAdminRoot)CallAdmin.Database.Shared\CallAdmin.Database.Shared.csproj" Private="false" />
+    <PackageReference Include="YappersHQ.AdminPanel.Shared" Version="1.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+</Project>
+
+```
+
+`CallAdmin.Core/CallAdminPlugin.cs`:
+
+```cs
+using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Sharp.Shared;
+
+namespace CallAdmin.Core;
+
+/// <summary>
+/// CallAdmin — in-game player report system.
+///
+/// Architecture mirrors yappershq/poop's multi-project layout:
+///   CallAdmin.Shared              — public API (events + ICallAdminShared)
+///   CallAdmin.Database.Shared     — IDatabaseProvider surface (shared with sibling DBs)
+///   CallAdmin.Database            — LiteDB / MySQL / Postgres via SqlSugar
+///   CallAdmin.Core (this plugin)  — commands, lifecycle, business logic
+///   CallAdmin.Discord             — webhook notifier (consumes ICallAdminShared events)
+///
+/// Lifecycle:
+///   Init       — modules' Init (register chat callbacks, etc.)
+///   PostInit   — SharedInterfaceModule registers ICallAdminShared on SharpModuleManager
+///   OAM        — ReportManager attaches IDatabaseProvider, resolves AdminManager / Targeting /
+///                MenuManager / Localizer (all optional but recommended)
+/// </summary>
+public sealed class CallAdminPlugin : IModSharpModule
+{
+    public string DisplayName   => "CallAdmin";
+    public string DisplayAuthor => "yappershq";
+
+    private readonly ServiceProvider          _serviceProvider;
+    private readonly ILogger<CallAdminPlugin> _logger;
+    private readonly InterfaceBridge          _bridge;
+
+    public CallAdminPlugin(
+        ISharedSystem  sharedSystem,
+        string         dllPath,
+        string         sharpPath,
+        Version        version,
+        IConfiguration configuration,
+        bool           hotReload)
+    {
+        var loggerFactory = sharedSystem.GetLoggerFactory();
+        _logger = loggerFactory.CreateLogger<CallAdminPlugin>();
+
+        var bridge = new InterfaceBridge(dllPath,
+                                         sharpPath,
+                                         version,
+                                         sharedSystem,
+                                         this,
+                                         hotReload,
+                                         sharedSystem.GetModSharp().HasCommandLine("-debug"));
+
+        var services = new ServiceCollection();
+        services.AddSingleton(bridge);
+        services.AddSingleton(loggerFactory);
+        services.AddSingleton(sharedSystem);
+        services.AddLogging();
+        services.AddModuleDi();
+
+        _bridge          = bridge;
+        _serviceProvider = services.BuildServiceProvider();
+    }
+
+    public bool Init()
+    {
+        foreach (var service in _serviceProvider.GetServices<IModule>())
+        {
+            try
+            {
+                if (service.Init())
+                {
+                    if (_bridge.Debug)
+                        _logger.LogInformation("{Service} initialized", service.GetType().FullName);
+                    continue;
+                }
+                _logger.LogError("Failed to init {Service}!", service.GetType().FullName);
+            }
+            catch (Exception e) { _logger.LogError(e, "Init error in {Service}", service.GetType().FullName); }
+            return false;
+        }
+        return true;
+    }
+
+    public void PostInit()
+    {
+        foreach (var service in _serviceProvider.GetServices<IModule>())
+        {
+            try { service.OnPostInit(_serviceProvider); }
+            catch (Exception e) { _logger.LogError(e, "PostInit error in {Service}", service.GetType().FullName); }
+        }
+    }
+
+    public void OnAllModulesLoaded()
+    {
+        _bridge.ResolveOptionalModules();
+        _bridge.RegisterAdminPermissions();
+
+        foreach (var service in _serviceProvider.GetServices<IModule>())
+        {
+            try { service.OnAllModulesLoaded(_serviceProvider); }
+            catch (Exception e) { _logger.LogError(e, "OAM error in {Service}", service.GetType().FullName); }
+        }
+
+        _logger.LogInformation("[CallAdmin] Loaded (Localizer={Loc}, Menu={Menu}, Admin={Adm}, Targeting={Tgt})",
+            _bridge.LocalizerManager is not null,
+            _bridge.MenuManager      is not null,
+            _bridge.AdminManager     is not null,
+            _bridge.TargetingManager is not null);
+    }
+
+    public void Shutdown()
+    {
+        foreach (var service in _serviceProvider.GetServices<IModule>())
+        {
+            try { service.Shutdown(); }
+            catch (Exception e) { _logger.LogError(e, "Shutdown error in {Service}", service.GetType().FullName); }
+        }
+        _serviceProvider.Dispose();
+    }
+}
+
+```
+
+`CallAdmin.Core/Configuration/CallAdminConfig.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Shared.Models;
+
+namespace CallAdmin.Core.Configuration;
+
+internal sealed class CallAdminConfig
+{
+    [JsonPropertyName("reasons")]
+    public List<ReasonEntry> Reasons { get; set; } =
+    [
+        new() { Key = "hack",     LocaleKey = "calladmin.reason.hack" },
+        new() { Key = "wallhack", LocaleKey = "calladmin.reason.wallhack" },
+        new() { Key = "aimbot",   LocaleKey = "calladmin.reason.aimbot" },
+        new() { Key = "toxic",    LocaleKey = "calladmin.reason.toxic" },
+        new() { Key = "spam",     LocaleKey = "calladmin.reason.spam" },
+        new() { Key = "griefing", LocaleKey = "calladmin.reason.griefing" },
+        new() { Key = "other",    LocaleKey = "calladmin.reason.other" },
+    ];
+
+    /// <summary>Minutes a report may sit Pending (no admin claim) before it auto-closes as Cancelled. 0 disables auto-close.</summary>
+    [JsonPropertyName("autoCloseMinutes")]     public int   AutoCloseMinutes     { get; set; } = 60;
+
+    [JsonPropertyName("cooldownSeconds")]      public int   CooldownSeconds      { get; set; } = 300;
+    [JsonPropertyName("cancelWindowSeconds")]  public int   CancelWindowSeconds  { get; set; } = 300;
+    [JsonPropertyName("duplicateWindowSeconds")] public int DuplicateWindowSeconds { get; set; } = 600;
+    [JsonPropertyName("notifyAdminsInChat")]   public bool  NotifyAdminsInChat   { get; set; } = true;
+    [JsonPropertyName("allowReportAdmins")]    public bool  AllowReportAdmins    { get; set; } = false;
+    [JsonPropertyName("allowReportSpectators")] public bool AllowReportSpectators { get; set; } = false;
+
+    /// <summary>When true, only players granted <c>@calladmin/report</c> may submit reports. Off by default — everyone can report.</summary>
+    [JsonPropertyName("requireReportPermission")] public bool RequireReportPermission { get; set; } = false;
+
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling         = JsonCommentHandling.Skip,
+        AllowTrailingCommas         = true,
+        WriteIndented               = true,
+    };
+
+    public IReadOnlyList<ReportReason> GetReasonModels()
+    {
+        var list = new List<ReportReason>(Reasons.Count);
+        foreach (var r in Reasons)
+            list.Add(new ReportReason { Key = r.Key, LocaleKey = r.LocaleKey });
+        return list;
+    }
+
+    public static CallAdminConfig Load(string sharpPath, ILogger logger)
+    {
+        var path = Path.Combine(sharpPath, "configs", "calladmin.json");
+        try
+        {
+            if (!File.Exists(path))
+            {
+                var def = new CallAdminConfig();
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, JsonSerializer.Serialize(def, JsonOpts));
+                logger.LogInformation("[CallAdmin] Wrote default config to {Path}", path);
+                return def;
+            }
+
+            var cfg = JsonSerializer.Deserialize<CallAdminConfig>(File.ReadAllText(path), JsonOpts);
+            if (cfg is null)
+            {
+                logger.LogError("[CallAdmin] calladmin.json deserialized to null, using defaults");
+                return new CallAdminConfig();
+            }
+            logger.LogInformation("[CallAdmin] Loaded config from {Path} ({Reasons} reasons)", path, cfg.Reasons.Count);
+            return cfg;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "[CallAdmin] Failed to load calladmin.json, using defaults");
+            return new CallAdminConfig();
+        }
+    }
+}
+
+internal sealed class ReasonEntry
+{
+    [JsonPropertyName("key")]       public string Key       { get; set; } = string.Empty;
+    [JsonPropertyName("localeKey")] public string LocaleKey { get; set; } = string.Empty;
+}
+
+```
+
+`CallAdmin.Core/Database/ReportEntity.cs`:
+
+```cs
+using System;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Core.Database;
+
+[DbTable("calladmin_reports")]
+internal sealed class ReportEntity
+{
+    [DbColumn(IsPrimaryKey = true, IsIdentity = true)]
+    public int Id { get; set; }
+
+    [DbColumn(Length = 64)]   public string  ReporterSteamId { get; set; } = string.Empty;
+    [DbColumn(Length = 64)]   public string  ReporterName    { get; set; } = string.Empty;
+    [DbColumn(Length = 64)]   public string  TargetSteamId   { get; set; } = string.Empty;
+    [DbColumn(Length = 64)]   public string  TargetName      { get; set; } = string.Empty;
+    [DbColumn(Length = 32)]   public string  ReasonKey       { get; set; } = string.Empty;
+    [DbColumn(Length = 64)]   public string  MapName         { get; set; } = string.Empty;
+    [DbColumn(Length = 64)]   public string  ServerName      { get; set; } = string.Empty;
+
+    /// <summary>0=Pending 1=Claimed 2=Handled 3=Dismissed 4=Cancelled.</summary>
+    [DbColumn] public int Status { get; set; }
+
+    [DbColumn(IsNullable = true, Length = 64)] public string?  HandlerSteamId    { get; set; }
+    [DbColumn(IsNullable = true, Length = 64)] public string?  HandlerName       { get; set; }
+    [DbColumn(IsNullable = true)]              public DateTime? HandledAt        { get; set; }
+    [DbColumn(IsNullable = true, Length = 128)] public string? ExternalMessageId { get; set; }
+
+    /// <summary>Resolution outcome (ban/mute/gag/kick/warn/dismissed) — set by the website when a mod
+    /// resolves a report. The module owns the column so CodeFirst creates it natively (the web can't
+    /// rely on its own best-effort ALTER when it lacks DDL on this game-owned DB).</summary>
+    [DbColumn(IsNullable = true, Length = 32)] public string? Outcome { get; set; }
+
+    /// <summary>The Status the Discord webhook embed currently reflects. A periodic sweep compares it to
+    /// Status to detect resolutions done EXTERNALLY (the website writes the DB directly, bypassing
+    /// TransitionAsync) and edits the embed once — multi-server-safe via an atomic CAS on this column.</summary>
+    [DbColumn] public int DiscordSyncedStatus { get; set; }
+
+    [DbColumn] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+```
+
+`CallAdmin.Core/Database/ReportRepository.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Database.Shared;
+using CallAdmin.Shared.Models;
+
+namespace CallAdmin.Core.Database;
+
+/// <summary>
+/// Wraps the shared <see cref="IDatabaseProvider"/> with report-specific queries. The DB plugin
+/// publishes <see cref="IDatabaseProvider"/> in PostInit; we resolve it in OnAllModulesLoaded.
+/// </summary>
+internal sealed class ReportRepository
+{
+    private readonly InterfaceBridge          _bridge;
+    private readonly ILogger<ReportRepository> _logger;
+    private IDatabaseProvider?                _db;
+
+    public ReportRepository(InterfaceBridge bridge, ILogger<ReportRepository> logger)
+    {
+        _bridge = bridge;
+        _logger = logger;
+    }
+
+    public void Attach(IDatabaseProvider provider)
+    {
+        _db = provider;
+        try
+        {
+            _db.InitTables(typeof(ReportEntity));
+            _db.CreateIndex<ReportEntity>(["TargetSteamId", "Status"]);
+            _db.CreateIndex<ReportEntity>(["ReporterSteamId", "CreatedAt"]);
+            _logger.LogInformation("[CallAdmin] calladmin_reports table ready");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] Failed to init calladmin_reports table");
+            _db = null;
+        }
+    }
+
+    public async Task<int> InsertAsync(ReportEntity entity)
+    {
+        if (_db is null) return 0;
+        try
+        {
+            // Use the identity-returning insert so entity.Id reflects the DB-generated
+            // PK. The plain InsertAsync (SqlSugar ExecuteCommandAsync) returns row count
+            // and never backfills Id, leaving every report as #0 downstream.
+            var id = await _db.InsertReturnIdentityAsync(entity);
+            entity.Id = id;
+            return id;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] Insert failed");
+            return 0;
+        }
+    }
+
+    public async Task<ReportEntity?> GetByIdAsync(int id)
+    {
+        if (_db is null) return null;
+        try
+        {
+            return await _db.Queryable<ReportEntity>().Where(x => x.Id == id).FirstAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] GetById({Id}) failed", id);
+            return null;
+        }
+    }
+
+    public async Task<List<ReportEntity>> GetPendingAsync()
+    {
+        if (_db is null) return [];
+        try
+        {
+            return await _db.Queryable<ReportEntity>()
+                .Where(x => x.Status == (int) ReportStatus.Pending || x.Status == (int) ReportStatus.Claimed)
+                .OrderByDescending(x => x.CreatedAt)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] GetPending failed");
+            return [];
+        }
+    }
+
+    /// <summary>Pending reports created before <paramref name="cutoff"/>. Claimed reports are excluded — a claim means an admin already responded.</summary>
+    public async Task<List<ReportEntity>> GetExpiredPendingAsync(DateTime cutoff)
+    {
+        if (_db is null) return [];
+        try
+        {
+            return await _db.Queryable<ReportEntity>()
+                .Where(x => x.Status == (int) ReportStatus.Pending && x.CreatedAt < cutoff)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] GetExpiredPending failed");
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Atomic compare-and-swap: flips Pending → Cancelled only if the row is still Pending.
+    /// Returns true if THIS caller made the change. With many servers sharing one DB, exactly one
+    /// wins each row; the losers get false and must not re-publish the cancel event.
+    /// </summary>
+    public async Task<bool> TryTimeoutAsync(int id, DateTime handledAt)
+    {
+        if (_db is null) return false;
+        try
+        {
+            var affected = await _db.UpdateSetWhereAsync<ReportEntity>(
+                x => new ReportEntity { Status = (int) ReportStatus.Cancelled, HandledAt = handledAt },
+                x => x.Id == id && x.Status == (int) ReportStatus.Pending);
+            return affected > 0;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] TryTimeout({Id}) failed", id);
+            return false;
+        }
+    }
+
+    /// <summary>Recently-resolved reports that HAVE a Discord message — the sweep filters these to the
+    /// ones whose embed hasn't caught up (resolved externally on the website). Bounded to a recent
+    /// window (<paramref name="cutoff"/>) so old reports are never touched.</summary>
+    public async Task<List<ReportEntity>> GetRecentlyResolvedAsync(DateTime cutoff)
+    {
+        if (_db is null) return [];
+        try
+        {
+            return await _db.Queryable<ReportEntity>()
+                .Where(x => (x.Status == (int) ReportStatus.Handled || x.Status == (int) ReportStatus.Dismissed)
+                            && x.ExternalMessageId != null
+                            && x.HandledAt != null && x.HandledAt >= cutoff)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] GetRecentlyResolved failed");
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Atomic compare-and-swap: stamps DiscordSyncedStatus = <paramref name="status"/> only if it
+    /// still differs. Returns true if THIS caller won the claim. With 10 servers sharing one DB,
+    /// exactly one wins each externally-resolved report; the losers get false and must not re-edit.
+    /// </summary>
+    public async Task<bool> TryClaimDiscordSyncAsync(int id, int status)
+    {
+        if (_db is null) return false;
+        try
+        {
+            var affected = await _db.UpdateSetWhereAsync<ReportEntity>(
+                x => new ReportEntity { DiscordSyncedStatus = status },
+                x => x.Id == id && x.DiscordSyncedStatus != status);
+            return affected > 0;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] TryClaimDiscordSync({Id}) failed", id);
+            return false;
+        }
+    }
+
+    public async Task<ReportEntity?> FindDuplicateAsync(string reporterSteamId, string targetSteamId, DateTime since)
+    {
+        if (_db is null) return null;
+        try
+        {
+            return await _db.Queryable<ReportEntity>()
+                .Where(x => x.ReporterSteamId == reporterSteamId
+                            && x.TargetSteamId == targetSteamId
+                            && x.CreatedAt >= since
+                            && x.Status == (int) ReportStatus.Pending)
+                .FirstAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] FindDuplicate failed");
+            return null;
+        }
+    }
+
+    public async Task<DateTime?> LastReportTimeForAsync(string reporterSteamId)
+    {
+        if (_db is null) return null;
+        try
+        {
+            var row = await _db.Queryable<ReportEntity>()
+                .Where(x => x.ReporterSteamId == reporterSteamId)
+                .OrderByDescending(x => x.CreatedAt)
+                .FirstAsync();
+            return row?.CreatedAt;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] LastReportTimeFor failed");
+            return null;
+        }
+    }
+
+    public async Task<bool> UpdateAsync(ReportEntity entity)
+    {
+        if (_db is null) return false;
+        try
+        {
+            return await _db.UpdateAsync(entity) > 0;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin] Update failed for {Id}", entity.Id);
+            return false;
+        }
+    }
+}
+
+```
+
+`CallAdmin.Core/IModule.cs`:
+
+```cs
+using Microsoft.Extensions.DependencyInjection;
+
+namespace CallAdmin.Core;
+
+internal interface IModule
+{
+    bool Init();
+    void OnPostInit(ServiceProvider provider) { }
+    void OnAllModulesLoaded(ServiceProvider provider) { }
+    void Shutdown() { }
+}
+
+```
+
+`CallAdmin.Core/InterfaceBridge.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Sharp.Modules.AdminManager.Shared;
+using Sharp.Modules.LocalizerManager.Shared;
+using Sharp.Modules.MenuManager.Shared;
+using Sharp.Modules.TargetingManager.Shared;
+using Sharp.Shared;
+using Sharp.Shared.Managers;
+
+namespace CallAdmin.Core;
+
+internal sealed class InterfaceBridge
+{
+    internal string  DllPath   { get; }
+    internal string  SharpPath { get; }
+    internal Version Version   { get; }
+    internal bool    HotReload { get; }
+    internal bool    Debug     { get; }
+
+    internal IModSharpModule    Module             { get; }
+    internal ISharedSystem      SharedSystem       { get; }
+    internal ISharpModuleManager SharpModuleManager { get; }
+
+    internal IConVarManager  ConVarManager  { get; }
+    internal IEventManager   EventManager   { get; }
+    internal IClientManager  ClientManager  { get; }
+    internal IEntityManager  EntityManager  { get; }
+    internal IHookManager    HookManager    { get; }
+    internal IModSharp       ModSharp       { get; }
+    internal ILoggerFactory  LoggerFactory  { get; }
+
+    // Optional modules — resolved lazily, may be null until OnAllModulesLoaded
+    internal ILocalizerManager?  LocalizerManager   { get; private set; }
+    internal IMenuManager?       MenuManager        { get; private set; }
+    internal IAdminManager?      AdminManager       { get; private set; }
+    internal ITargetingManager?  TargetingManager   { get; private set; }
+
+    public InterfaceBridge(
+        string         dllPath,
+        string         sharpPath,
+        Version        version,
+        ISharedSystem  sharedSystem,
+        IModSharpModule module,
+        bool           hotReload,
+        bool           debug)
+    {
+        DllPath   = dllPath;
+        SharpPath = sharpPath;
+        Version   = version;
+        HotReload = hotReload;
+        Debug     = debug;
+        Module    = module;
+
+        SharedSystem       = sharedSystem;
+        SharpModuleManager = sharedSystem.GetSharpModuleManager();
+
+        ConVarManager  = sharedSystem.GetConVarManager();
+        EventManager   = sharedSystem.GetEventManager();
+        ClientManager  = sharedSystem.GetClientManager();
+        EntityManager  = sharedSystem.GetEntityManager();
+        HookManager    = sharedSystem.GetHookManager();
+        ModSharp       = sharedSystem.GetModSharp();
+        LoggerFactory  = sharedSystem.GetLoggerFactory();
+    }
+
+    internal void ResolveOptionalModules()
+    {
+        LocalizerManager   ??= SharpModuleManager.GetOptionalSharpModuleInterface<ILocalizerManager>(ILocalizerManager.Identity)?.Instance;
+        MenuManager        ??= SharpModuleManager.GetOptionalSharpModuleInterface<IMenuManager>(IMenuManager.Identity)?.Instance;
+        AdminManager       ??= SharpModuleManager.GetOptionalSharpModuleInterface<IAdminManager>(IAdminManager.Identity)?.Instance;
+        TargetingManager   ??= SharpModuleManager.GetOptionalSharpModuleInterface<ITargetingManager>(ITargetingManager.Identity)?.Instance;
+    }
+
+    // CallAdmin's permission strings only become grantable once they exist in the
+    // AdminManager permission index. Without this, even a root ('*') admin resolves
+    // to false for @calladmin/handle, because '*' expands over registered permissions
+    // only — an unregistered permission is granted to nobody.
+    internal void RegisterAdminPermissions()
+    {
+        if (AdminManager is not { } am)
+            return;
+
+        am.MountAdminManifest("CallAdmin", static () => new AdminTableManifest(
+            new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["calladmin"] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "@calladmin/report",
+                    "@calladmin/handle",
+                    "@calladmin/report_admin",
+                },
+            },
+            [],
+            []));
+    }
+}
+
+```
+
+`CallAdmin.Core/ModuleDependencyInjection.cs`:
+
+```cs
+using MessagePipe;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Core.Configuration;
+using CallAdmin.Core.Database;
+using CallAdmin.Core.Modules;
+using CallAdmin.Shared;
+using CallAdmin.Shared.Events;
+
+namespace CallAdmin.Core;
+
+internal static class ModuleDependencyInjection
+{
+    internal static IServiceCollection AddModuleDi(this IServiceCollection services)
+    {
+        // Restrict handler/filter auto-registration to CallAdmin's own assembly. MessagePipe's
+        // default scans the entire AppDomain (TypeCollector.CollectFromCurrentDomain), which makes
+        // it read custom attributes on OTHER plugins' SqlSugar-decorated entity types. Those resolve
+        // through our load context, which ships no SqlSugar.dll — once a mysql backend pulls SqlSugar
+        // into the process this throws FileLoadException and CallAdmin.Core fails to load entirely.
+        services.AddMessagePipe(options =>
+            options.SetAutoRegistrationSearchAssemblies(typeof(ModuleDependencyInjection).Assembly));
+
+        services.AddSingleton(sp =>
+            CallAdminConfig.Load(sp.GetRequiredService<InterfaceBridge>().SharpPath,
+                                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger<CallAdminConfig>()));
+
+        services.AddSingleton<ReportRepository>();
+        services.AddSingleton<ReportManager>();
+        services.AddSingleton<SharedInterfaceModule>();
+        services.AddSingleton<CallAdminCommandModule>();
+        services.AddSingleton<AdminPanelIntegrationModule>();
+
+        // Module ordering matters: SharedInterfaceModule.PostInit registers ICallAdminShared so
+        // consumers can resolve in OAM. ReportManager.OAM attaches the DB provider.
+        services.AddSingleton<IModule>(sp => sp.GetRequiredService<ReportManager>());
+        services.AddSingleton<IModule>(sp => sp.GetRequiredService<SharedInterfaceModule>());
+        services.AddSingleton<IModule>(sp => sp.GetRequiredService<CallAdminCommandModule>());
+        services.AddSingleton<IModule>(sp => sp.GetRequiredService<AdminPanelIntegrationModule>());
+
+        // Expose ICallAdminShared inside our DI graph too (for testing / future helpers)
+        services.AddSingleton<ICallAdminShared>(sp => sp.GetRequiredService<SharedInterfaceModule>());
+
+        return services;
+    }
+}
+
+```
+
+`CallAdmin.Core/Modules/AdminPanelIntegrationModule.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AdminPanel.Shared;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Shared.Models;
+using Sharp.Modules.MenuManager.Shared;
+using Sharp.Shared.Enums;
+using Sharp.Shared.Objects;
+using Sharp.Shared.Units;
+
+namespace CallAdmin.Core.Modules;
+
+/// <summary>
+/// Optional bridge: surfaces CallAdmin report-management as a single nested MenuManager
+/// menu inside the in-game AdminPanel. The admin selects "CallAdmin: Reports" from the
+/// panel, sees a list of active reports, picks one, then chooses Claim / Mark Handled /
+/// Dismiss from a per-report sub-menu.
+/// All gated on <c>@calladmin/handle</c> (same flag the chat admin commands use). Resolves
+/// IAdminPanelShared in OnAllModulesLoaded with a null-guard, so the plugin stays
+/// standalone-safe when AdminPanel is not installed. Falls back to chat-list output when
+/// MenuManager is unavailable.
+/// </summary>
+internal sealed class AdminPanelIntegrationModule : IModule
+{
+    private const string PermHandle = "@calladmin/handle";
+
+    private const string IdReports = "calladmin.reports";
+
+    private readonly InterfaceBridge                       _bridge;
+    private readonly ILogger<AdminPanelIntegrationModule>  _logger;
+    private readonly ReportManager                         _reports;
+
+    private IAdminPanelShared? _panel;
+
+    public AdminPanelIntegrationModule(InterfaceBridge bridge,
+                                       ILogger<AdminPanelIntegrationModule> logger,
+                                       ReportManager reports)
+    {
+        _bridge  = bridge;
+        _logger  = logger;
+        _reports = reports;
+    }
+
+    public bool Init() => true;
+
+    public void OnAllModulesLoaded(ServiceProvider provider)
+    {
+        _panel = _bridge.SharpModuleManager
+            .GetOptionalSharpModuleInterface<IAdminPanelShared>(IAdminPanelShared.Identity)?.Instance;
+
+        if (_panel is null)
+        {
+            _logger.LogInformation("[CallAdmin] AdminPanel not present — in-game panel actions skipped.");
+            return;
+        }
+
+        _panel.RegisterGlobalAction(new AdminPanelGlobalAction
+        {
+            Id         = IdReports,
+            Label      = "CallAdmin: Reports",
+            Permission = PermHandle,
+            SortOrder  = 100,
+            OnSelected = OpenReportsMenu,
+        });
+
+        _logger.LogInformation("[CallAdmin] Registered 1 AdminPanel global action (nested menu).");
+    }
+
+    public void Shutdown()
+    {
+        if (_panel is null) return;
+        _panel.Unregister(IdReports);
+        _panel = null;
+    }
+
+    // ===== Menu entry point (invoked on the game thread by AdminPanel) =====
+
+    private void OpenReportsMenu(int adminSlot)
+    {
+        // Fall back to chat list when MenuManager is unavailable.
+        if (_bridge.MenuManager is not { } mm)
+        {
+            ListPendingToChat(adminSlot);
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var pending = await _reports.GetPendingAsync();
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    if (ResolveAdmin(adminSlot) is not { } admin) return;
+                    mm.DisplayMenu(admin, BuildReportsMenu(adminSlot, pending));
+                });
+            }
+            catch (Exception e) { _logger.LogError(e, "[CallAdmin] OpenReportsMenu failed"); }
+        });
+    }
+
+    private Menu BuildReportsMenu(int adminSlot, IReadOnlyList<Report> reports)
+    {
+        var menu = new Menu();
+        menu.SetTitle("CallAdmin — Aktyvus reportai");
+
+        if (reports.Count == 0)
+        {
+            menu.AddDisabledItem("Nera aktyviu reportu");
+        }
+        else
+        {
+            foreach (var r in reports)
+            {
+                var captured = r;
+                menu.AddItem($"#{r.Id} {r.ReporterName} -> {r.TargetName} ({r.ReasonKey})",
+                    ctrl => ctrl.Next(BuildActionMenu(adminSlot, captured)));
+            }
+        }
+
+        menu.AddExitItem("Uzdaryti");
+        return menu;
+    }
+
+    private Menu BuildActionMenu(int adminSlot, Report report)
+    {
+        var menu = new Menu();
+        menu.SetTitle($"Reportas #{report.Id}");
+
+        menu.AddItem("Priskirti (Claim)",        ctrl => { ApplyTransition(adminSlot, report.Id, ReportStatus.Claimed,   "claimed");       ctrl.Exit(); });
+        menu.AddItem("Pazymeti kaip issprestas", ctrl => { ApplyTransition(adminSlot, report.Id, ReportStatus.Handled,   "marked handled"); ctrl.Exit(); });
+        menu.AddItem("Atmesti (Dismiss)",         ctrl => { ApplyTransition(adminSlot, report.Id, ReportStatus.Dismissed, "dismissed");      ctrl.Exit(); });
+
+        menu.AddBackItem("« Atgal");
+        menu.AddExitItem("Uzdaryti");
+        return menu;
+    }
+
+    // ===== Chat fallback (when MenuManager absent) =====
+
+    private void ListPendingToChat(int adminSlot)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var pending = await _reports.GetPendingAsync();
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    if (ResolveAdmin(adminSlot) is not { } admin) return;
+                    if (pending.Count == 0)
+                    {
+                        admin.Print(HudPrintChannel.Chat, " [CallAdmin] No pending reports.");
+                        return;
+                    }
+                    admin.Print(HudPrintChannel.Chat, $" [CallAdmin] {pending.Count} pending report(s):");
+                    foreach (var r in pending)
+                    {
+                        var age    = (int) (DateTime.UtcNow - r.CreatedAt).TotalSeconds;
+                        var status = r.Status == ReportStatus.Claimed ? $" claimed by {r.HandlerName}" : "";
+                        admin.Print(HudPrintChannel.Chat,
+                            $" #{r.Id} [{age}s ago] {r.ReporterName} -> {r.TargetName} ({r.ReasonKey}){status}");
+                    }
+                });
+            }
+            catch (Exception e) { _logger.LogError(e, "[CallAdmin] Panel list-pending failed"); }
+        });
+    }
+
+    private void ApplyTransition(int adminSlot, int id, ReportStatus to, string verb)
+    {
+        // Snapshot acting-admin identity on the game thread before going async.
+        var admin = ResolveAdmin(adminSlot);
+        if (admin is null) return;
+        var actorSid  = admin.SteamId.ToString();
+        var actorName = admin.Name ?? "?";
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var targetId = id;
+                if (targetId <= 0)
+                {
+                    var pending = await _reports.GetPendingAsync();
+                    var latest  = pending.OrderByDescending(r => r.CreatedAt).FirstOrDefault();
+                    if (latest is null)
+                    {
+                        _bridge.ModSharp.InvokeFrameAction(() =>
+                        {
+                            if (ResolveAdmin(adminSlot) is { } a)
+                                a.Print(HudPrintChannel.Chat, " [CallAdmin] No pending report to act on.");
+                        });
+                        return;
+                    }
+                    targetId = latest.Id;
+                }
+
+                var r = await _reports.TransitionAsync(targetId, to, actorSid, actorName);
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    if (ResolveAdmin(adminSlot) is not { } a) return;
+                    if (r is null)
+                        a.Print(HudPrintChannel.Chat, $" [CallAdmin] Report #{targetId} not found.");
+                    else
+                        a.Print(HudPrintChannel.Chat, $" [CallAdmin] Report #{r.Id} {verb}.");
+                });
+            }
+            catch (Exception e) { _logger.LogError(e, "[CallAdmin] Panel transition {Status} failed", to); }
+        });
+    }
+
+    private IGameClient? ResolveAdmin(int adminSlot)
+    {
+        var client = _bridge.ClientManager.GetGameClient((PlayerSlot) (byte) adminSlot);
+        return client is { IsValid: true } ? client : null;
+    }
+}
+
+```
+
+`CallAdmin.Core/Modules/CallAdminCommandModule.cs`:
+
+```cs
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Core.Configuration;
+using CallAdmin.Shared.Models;
+using Sharp.Shared.Enums;
+using Sharp.Shared.Managers;
+using Sharp.Shared.Objects;
+using Sharp.Shared.Types;
+
+namespace CallAdmin.Core.Modules;
+
+/// <summary>
+/// Chat / console command surface.
+///
+///   !report                       — open menu (if MenuManager loaded) or print usage
+///   !report &lt;name&gt; &lt;reason&gt;  — direct submit via TargetingManager + reason key
+///   !report_cancel                — cancel reporter's last pending report
+///   !calls                        — admin list of pending reports
+///   !claim &lt;id&gt;               — admin: claim
+///   !handled &lt;id&gt;             — admin: mark handled
+///   !dismiss &lt;id&gt;             — admin: dismiss
+/// </summary>
+internal sealed class CallAdminCommandModule : IModule
+{
+    private const string PermReport       = "@calladmin/report";
+    private const string PermHandle       = "@calladmin/handle";
+    private const string PermReportAdmin  = "@calladmin/report_admin";
+
+    private readonly InterfaceBridge                _bridge;
+    private readonly ILogger<CallAdminCommandModule> _logger;
+    private readonly ReportManager                  _reports;
+    private readonly CallAdminConfig                _config;
+
+    private readonly IClientManager.DelegateClientCommand _onReport;
+    private readonly IClientManager.DelegateClientCommand _onReportCancel;
+    private readonly IClientManager.DelegateClientCommand _onCalls;
+    private readonly IClientManager.DelegateClientCommand _onClaim;
+    private readonly IClientManager.DelegateClientCommand _onHandled;
+    private readonly IClientManager.DelegateClientCommand _onDismiss;
+
+    public CallAdminCommandModule(InterfaceBridge bridge, ILogger<CallAdminCommandModule> logger,
+                                  ReportManager reports, CallAdminConfig config)
+    {
+        _bridge  = bridge;
+        _logger  = logger;
+        _reports = reports;
+        _config  = config;
+
+        _onReport       = OnReport;
+        _onReportCancel = OnReportCancel;
+        _onCalls        = OnCalls;
+        _onClaim        = OnClaim;
+        _onHandled      = OnHandled;
+        _onDismiss      = OnDismiss;
+    }
+
+    public bool Init()
+    {
+        var cm = _bridge.ClientManager;
+        cm.InstallCommandCallback("report",        _onReport);
+        cm.InstallCommandCallback("calladmin",     _onReport);
+        cm.InstallCommandCallback("report_cancel", _onReportCancel);
+        cm.InstallCommandCallback("calls",         _onCalls);
+        cm.InstallCommandCallback("reports",       _onCalls);
+        cm.InstallCommandCallback("claim",         _onClaim);
+        cm.InstallCommandCallback("handled",       _onHandled);
+        cm.InstallCommandCallback("dismiss",       _onDismiss);
+        _logger.LogInformation("[CallAdmin] Commands installed");
+        return true;
+    }
+
+    public void Shutdown()
+    {
+        var cm = _bridge.ClientManager;
+        cm.RemoveCommandCallback("report",        _onReport);
+        cm.RemoveCommandCallback("calladmin",     _onReport);
+        cm.RemoveCommandCallback("report_cancel", _onReportCancel);
+        cm.RemoveCommandCallback("calls",         _onCalls);
+        cm.RemoveCommandCallback("reports",       _onCalls);
+        cm.RemoveCommandCallback("claim",         _onClaim);
+        cm.RemoveCommandCallback("handled",       _onHandled);
+        cm.RemoveCommandCallback("dismiss",       _onDismiss);
+    }
+
+    // ===== Player command =====
+
+    private ECommandAction OnReport(IGameClient client, StringCommand command)
+    {
+        if (client.IsFakeClient) return ECommandAction.Skipped;
+        if (!CheckReportPerm(client)) return ECommandAction.Handled;
+
+        if (command.ArgCount < 2)
+        {
+            // Usage hint — proper menu wiring lives in TargetMenuModule (TODO v0.2).
+            client.Print(HudPrintChannel.Chat,
+                " [CallAdmin] Usage: !report <name|steamid|@me|@t|@ct> <reason>");
+            client.Print(HudPrintChannel.Chat,
+                " [CallAdmin] Reasons: " + string.Join(", ", _config.Reasons.Select(r => r.Key)));
+            return ECommandAction.Handled;
+        }
+
+        var targetExpr = command.GetArg(1);
+        var reasonKey  = command.GetArg(2);
+
+        var tm = _bridge.TargetingManager;
+        if (tm is null)
+        {
+            client.Print(HudPrintChannel.Chat, " [CallAdmin] TargetingManager unavailable.");
+            return ECommandAction.Handled;
+        }
+
+        var targets = tm.GetByTarget(client, targetExpr).ToList();
+        if (targets.Count == 0)
+        {
+            client.Print(HudPrintChannel.Chat, $" [CallAdmin] No player matches '{targetExpr}'.");
+            return ECommandAction.Handled;
+        }
+        if (targets.Count > 1)
+        {
+            client.Print(HudPrintChannel.Chat, $" [CallAdmin] '{targetExpr}' matches multiple players — be more specific.");
+            return ECommandAction.Handled;
+        }
+
+        var target = targets[0];
+
+        // Surface specific rejection reasons before the generic "filtered" fallback in SubmitAsync
+        if (target.SteamId == client.SteamId)
+        {
+            client.Print(HudPrintChannel.Chat, " [CallAdmin] You can't report yourself.");
+            return ECommandAction.Handled;
+        }
+        if (target.IsFakeClient || target.IsHltv)
+        {
+            client.Print(HudPrintChannel.Chat, " [CallAdmin] You can't report bots or HLTV.");
+            return ECommandAction.Handled;
+        }
+        if (!_config.Reasons.Any(r => string.Equals(r.Key, reasonKey, StringComparison.OrdinalIgnoreCase)))
+        {
+            client.Print(HudPrintChannel.Chat,
+                $" [CallAdmin] Unknown reason '{reasonKey}'. Pick: " + string.Join(", ", _config.Reasons.Select(r => r.Key)));
+            return ECommandAction.Handled;
+        }
+
+        HandleSubmitAsync(client, target, reasonKey);
+        return ECommandAction.Handled;
+    }
+
+    private void HandleSubmitAsync(IGameClient reporter, IGameClient target, string reasonKey)
+    {
+        var snap = _reports.PrepareSubmit(reporter, target, reasonKey);
+        if (snap is null)
+        {
+            reporter.Print(HudPrintChannel.Chat, " [CallAdmin] Report rejected (cooldown, invalid reason, or filtered).");
+            return;
+        }
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var result = await _reports.SubmitAsync(snap);
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    if (!reporter.IsValid) return;
+                    if (result is null)
+                    {
+                        reporter.Print(HudPrintChannel.Chat, " [CallAdmin] Report rejected (cooldown or duplicate).");
+                        return;
+                    }
+                    reporter.Print(HudPrintChannel.Chat,
+                        $" [CallAdmin] ✓ Report #{result.Id} submitted against {result.TargetName}. Admins notified.");
+                    NotifyAdmins(result);
+                });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "[CallAdmin] HandleSubmit failed");
+            }
+        });
+    }
+
+    private void NotifyAdmins(Report report)
+    {
+        if (!_config.NotifyAdminsInChat) return;
+        var am = _bridge.AdminManager;
+        if (am is null) return;
+
+        foreach (var c in _bridge.ClientManager.GetGameClients(inGame: true))
+        {
+            if (c.IsFakeClient || c.IsHltv) continue;
+            if (am.GetAdmin(c.SteamId) is not { } admin) continue;
+            if (!admin.HasPermission(PermHandle)) continue;
+
+            c.Print(HudPrintChannel.Chat,
+                $" [CallAdmin] 📢 #{report.Id} {report.ReporterName} -> {report.TargetName} ({report.ReasonKey}). !claim {report.Id}");
+        }
+    }
+
+    private ECommandAction OnReportCancel(IGameClient client, StringCommand command)
+    {
+        if (client.IsFakeClient) return ECommandAction.Skipped;
+        var reporterSid = client.SteamId;
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var pending = await _reports.GetPendingAsync();
+                var own = pending.FirstOrDefault(r => r.ReporterSteamId == reporterSid
+                                                      && r.Status == ReportStatus.Pending);
+                if (own is null)
+                {
+                    _bridge.ModSharp.InvokeFrameAction(() =>
+                    {
+                        if (!client.IsValid) return;
+                        client.Print(HudPrintChannel.Chat, " [CallAdmin] No pending report to cancel.");
+                    });
+                    return;
+                }
+                if ((DateTime.UtcNow - own.CreatedAt).TotalSeconds > _config.CancelWindowSeconds)
+                {
+                    _bridge.ModSharp.InvokeFrameAction(() =>
+                    {
+                        if (!client.IsValid) return;
+                        client.Print(HudPrintChannel.Chat, " [CallAdmin] Cancel window has expired.");
+                    });
+                    return;
+                }
+                var updated = await _reports.TransitionAsync(own.Id, ReportStatus.Cancelled, null, null);
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    if (!client.IsValid) return;
+                    if (updated is not null)
+                        client.Print(HudPrintChannel.Chat, $" [CallAdmin] Report #{updated.Id} cancelled.");
+                });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "[CallAdmin] Cancel failed");
+            }
+        });
+        return ECommandAction.Handled;
+    }
+
+    // ===== Admin commands =====
+
+    private ECommandAction OnCalls(IGameClient client, StringCommand command)
+    {
+        if (!RequireHandlePerm(client)) return ECommandAction.Handled;
+        _ = Task.Run(async () =>
+        {
+            var pending = await _reports.GetPendingAsync();
+            _bridge.ModSharp.InvokeFrameAction(() =>
+            {
+                if (!client.IsValid) return;
+                if (pending.Count == 0)
+                {
+                    client.Print(HudPrintChannel.Chat, " [CallAdmin] No pending reports.");
+                    return;
+                }
+                client.Print(HudPrintChannel.Chat, $" [CallAdmin] {pending.Count} pending report(s):");
+                foreach (var r in pending)
+                {
+                    var age = (int) (DateTime.UtcNow - r.CreatedAt).TotalSeconds;
+                    var status = r.Status == ReportStatus.Claimed ? $" claimed by {r.HandlerName}" : "";
+                    client.Print(HudPrintChannel.Chat,
+                        $" #{r.Id} [{age}s ago] {r.ReporterName} -> {r.TargetName} ({r.ReasonKey}){status}");
+                }
+            });
+        });
+        return ECommandAction.Handled;
+    }
+
+    private ECommandAction OnClaim(IGameClient client, StringCommand command)
+        => HandleTransition(client, command, ReportStatus.Claimed, "claimed");
+
+    private ECommandAction OnHandled(IGameClient client, StringCommand command)
+        => HandleTransition(client, command, ReportStatus.Handled, "marked handled");
+
+    private ECommandAction OnDismiss(IGameClient client, StringCommand command)
+        => HandleTransition(client, command, ReportStatus.Dismissed, "dismissed");
+
+    private ECommandAction HandleTransition(IGameClient client, StringCommand command, ReportStatus to, string verb)
+    {
+        if (!RequireHandlePerm(client)) return ECommandAction.Handled;
+        if (command.ArgCount < 1)
+        {
+            client.Print(HudPrintChannel.Chat, " [CallAdmin] Usage: <command> <id>");
+            return ECommandAction.Handled;
+        }
+        if (!int.TryParse(command.GetArg(1), out var id))
+        {
+            client.Print(HudPrintChannel.Chat, $" [CallAdmin] '{command.GetArg(1)}' is not a number.");
+            return ECommandAction.Handled;
+        }
+        var adminSid  = client.SteamId.ToString();
+        var adminName = client.Name ?? "?";
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var r = await _reports.TransitionAsync(id, to, adminSid, adminName);
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    if (!client.IsValid) return;
+                    if (r is null)
+                    {
+                        client.Print(HudPrintChannel.Chat, $" [CallAdmin] Report #{id} not found.");
+                        return;
+                    }
+                    client.Print(HudPrintChannel.Chat, $" [CallAdmin] Report #{r.Id} {verb}.");
+                });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "[CallAdmin] Transition {Status} failed for #{Id}", to, id);
+            }
+        });
+        return ECommandAction.Handled;
+    }
+
+    private bool RequireHandlePerm(IGameClient client)
+    {
+        var am = _bridge.AdminManager;
+        if (am?.GetAdmin(client.SteamId) is not { } admin || !admin.HasPermission(PermHandle))
+        {
+            client.Print(HudPrintChannel.Chat, " [CallAdmin] You don't have permission for that.");
+            return false;
+        }
+        return true;
+    }
+
+    private bool CheckReportPerm(IGameClient client)
+    {
+        // Gate is off by default — anyone can submit. Servers that want a gate set
+        // requireReportPermission=true and grant @calladmin/report to allowed players.
+        if (!_config.RequireReportPermission) return true;
+
+        var am = _bridge.AdminManager;
+        if (am?.GetAdmin(client.SteamId) is not { } admin || !admin.HasPermission(PermReport))
+        {
+            client.Print(HudPrintChannel.Chat, " [CallAdmin] You don't have permission to use !report on this server.");
+            return false;
+        }
+        return true;
+    }
+}
+
+```
+
+`CallAdmin.Core/Modules/ReportManager.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MessagePipe;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Core.Configuration;
+using CallAdmin.Core.Database;
+using CallAdmin.Database.Shared;
+using CallAdmin.Shared.Events;
+using CallAdmin.Shared.Filters;
+using CallAdmin.Shared.Models;
+using Sharp.Shared.Objects;
+
+namespace CallAdmin.Core.Modules;
+
+internal sealed record ReportSnapshot(
+    string ReporterSteamId,
+    string ReporterName,
+    string TargetSteamId,
+    string TargetName,
+    string ReasonKey,
+    string MapName,
+    string ServerName);
+
+/// <summary>
+/// Core business logic for reports — gating (cooldown, dedupe, perms), persistence, lifecycle
+/// transitions, and event publication. Stateless apart from the in-memory caches (cooldowns,
+/// pending cache). All write paths go through the repository so persistence is the source of
+/// truth across map changes.
+/// </summary>
+internal sealed class ReportManager : IModule
+{
+    private readonly InterfaceBridge                    _bridge;
+    private readonly ILogger<ReportManager>             _logger;
+    private readonly CallAdminConfig                    _config;
+    private readonly ReportRepository                   _repo;
+    private readonly IPublisher<ReportSubmittedEvent>   _submitted;
+    private readonly IPublisher<ReportClaimedEvent>     _claimed;
+    private readonly IPublisher<ReportHandledEvent>     _handled;
+    private readonly IPublisher<ReportDismissedEvent>   _dismissed;
+    private readonly IPublisher<ReportCancelledEvent>   _cancelled;
+
+    private readonly List<ITargetFilter> _filters = new();
+
+    // Auto-close (timeout) sweep. _sweeping guards against overlapping runs on the threadpool.
+    private Timer? _sweepTimer;
+    private int    _sweeping;
+
+    // External-resolution → Discord sweep (website resolves the DB directly, bypassing TransitionAsync).
+    private Timer? _syncTimer;
+    private int    _syncing;
+    private const int ExternalSyncWindowMinutes = 30;
+
+    public ReportManager(
+        InterfaceBridge                  bridge,
+        ILogger<ReportManager>           logger,
+        CallAdminConfig                  config,
+        ReportRepository                 repo,
+        IPublisher<ReportSubmittedEvent> submitted,
+        IPublisher<ReportClaimedEvent>   claimed,
+        IPublisher<ReportHandledEvent>   handled,
+        IPublisher<ReportDismissedEvent> dismissed,
+        IPublisher<ReportCancelledEvent> cancelled)
+    {
+        _bridge    = bridge;
+        _logger    = logger;
+        _config    = config;
+        _repo      = repo;
+        _submitted = submitted;
+        _claimed   = claimed;
+        _handled   = handled;
+        _dismissed = dismissed;
+        _cancelled = cancelled;
+    }
+
+    public bool Init() => true;
+
+    public void OnAllModulesLoaded(ServiceProvider provider)
+    {
+        // Resolve DB provider once both modules are live.
+        var dbIface = _bridge.SharpModuleManager
+            .GetOptionalSharpModuleInterface<IDatabaseProvider>(IDatabaseProvider.Identity);
+        if (dbIface?.Instance is { } db)
+            _repo.Attach(db);
+        else
+            _logger.LogError("[CallAdmin] IDatabaseProvider not available — CallAdmin.Database not loaded?");
+
+        // Auto-close pending reports nobody picked up. Every server runs this, but the cancel is an
+        // atomic compare-and-swap (TryTimeoutAsync), so when many servers share one DB exactly one
+        // wins each row and only that one publishes the cancel event — no duplicate Discord edits.
+        if (_config.AutoCloseMinutes > 0)
+        {
+            _sweepTimer = new Timer(_ => _ = SweepTimeoutsAsync(), null,
+                TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(60));
+            _logger.LogInformation("[CallAdmin] Auto-close enabled: pending reports cancelled after {Min} min", _config.AutoCloseMinutes);
+        }
+
+        // Sync externally-resolved reports: the website resolves by writing the DB directly (bypassing
+        // TransitionAsync), so its resolutions never edit the Discord embed. This sweep catches them.
+        // Runs on every server; the per-row CAS claim means exactly one server edits each report.
+        _syncTimer = new Timer(_ => _ = SyncExternalResolutionsAsync(), null,
+            TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(60));
+    }
+
+    private async Task SyncExternalResolutionsAsync()
+    {
+        if (Interlocked.Exchange(ref _syncing, 1) == 1) return;
+        try
+        {
+            var cutoff = DateTime.UtcNow.AddMinutes(-ExternalSyncWindowMinutes);
+            foreach (var row in await _repo.GetRecentlyResolvedAsync(cutoff))
+            {
+                if (row.DiscordSyncedStatus == row.Status) continue;              // embed already reflects it
+                if (!await _repo.TryClaimDiscordSyncAsync(row.Id, row.Status)) continue; // another server won it
+
+                var model  = ToModel(row);
+                var status = (ReportStatus) row.Status;
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    try
+                    {
+                        if (status == ReportStatus.Handled)        _handled.Publish(new ReportHandledEvent(model));
+                        else if (status == ReportStatus.Dismissed) _dismissed.Publish(new ReportDismissedEvent(model));
+                    }
+                    catch (Exception e) { _logger.LogError(e, "[CallAdmin] External-sync publish failed for #{Id}", model.Id); }
+                });
+                _logger.LogInformation("[CallAdmin] Report #{Id} resolved externally ({Status}) — Discord embed synced", row.Id, status);
+            }
+        }
+        catch (Exception e) { _logger.LogError(e, "[CallAdmin] External-resolution sync failed"); }
+        finally { Interlocked.Exchange(ref _syncing, 0); }
+    }
+
+    private async Task SweepTimeoutsAsync()
+    {
+        // Skip if a previous sweep is still running (slow DB / many rows).
+        if (Interlocked.Exchange(ref _sweeping, 1) == 1) return;
+        try
+        {
+            var cutoff  = DateTime.UtcNow.AddMinutes(-_config.AutoCloseMinutes);
+            var expired = await _repo.GetExpiredPendingAsync(cutoff);
+            foreach (var row in expired)
+            {
+                var now = DateTime.UtcNow;
+                if (!await _repo.TryTimeoutAsync(row.Id, now))
+                    continue; // another server claimed this one
+
+                row.Status    = (int) ReportStatus.Cancelled;
+                row.HandledAt = now;
+                var model = ToModel(row);
+
+                _bridge.ModSharp.InvokeFrameAction(() =>
+                {
+                    try { _cancelled.Publish(new ReportCancelledEvent(model)); }
+                    catch (Exception e) { _logger.LogError(e, "[CallAdmin] Timeout cancel publish failed for #{Id}", model.Id); }
+                });
+
+                _logger.LogInformation("[CallAdmin] Report #{Id} auto-closed (no response in {Min} min)", row.Id, _config.AutoCloseMinutes);
+            }
+        }
+        catch (Exception e) { _logger.LogError(e, "[CallAdmin] Auto-close sweep failed"); }
+        finally { Interlocked.Exchange(ref _sweeping, 0); }
+    }
+
+    public void Shutdown()
+    {
+        _sweepTimer?.Dispose();
+        _sweepTimer = null;
+        _syncTimer?.Dispose();
+        _syncTimer = null;
+    }
+
+    public void RegisterTargetFilter(ITargetFilter filter)
+    {
+        _filters.Add(filter);
+    }
+
+    public bool CanTarget(IGameClient reporter, IGameClient candidate)
+    {
+        if (candidate.IsFakeClient || candidate.IsHltv)        return false;
+        if (candidate.SteamId == reporter.SteamId)             return false;
+        if (!_config.AllowReportAdmins && IsAdmin(candidate))  return false;
+
+        // Spectator gate (CT=3, T=2, Spec=1, None=0)
+        if (!_config.AllowReportSpectators)
+        {
+            var ctrl = candidate.GetPlayerController();
+            if (ctrl is not null && (int) ctrl.Team < 2)
+                return false;
+        }
+
+        foreach (var f in _filters)
+            if (!f.CanReport(reporter, candidate))
+                return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Must be called on the main thread. Validates target eligibility and snapshots all
+    /// engine-side data. Returns null if the report should be rejected before any DB work.
+    /// </summary>
+    public ReportSnapshot? PrepareSubmit(IGameClient reporter, IGameClient target, string reasonKey)
+    {
+        if (!CanTarget(reporter, target))
+        {
+            _logger.LogDebug("[CallAdmin] Submit blocked by filters: {Reporter} -> {Target}", reporter.SteamId, target.SteamId);
+            return null;
+        }
+
+        var reason = _config.Reasons.FirstOrDefault(r => string.Equals(r.Key, reasonKey, StringComparison.OrdinalIgnoreCase));
+        if (reason is null)
+        {
+            _logger.LogDebug("[CallAdmin] Unknown reason key {Reason}", reasonKey);
+            return null;
+        }
+
+        return new ReportSnapshot(
+            ReporterSteamId: reporter.SteamId.ToString(),
+            ReporterName:    reporter.Name ?? "?",
+            TargetSteamId:   target.SteamId.ToString(),
+            TargetName:      target.Name ?? "?",
+            ReasonKey:       reason.Key,
+            MapName:         _bridge.ModSharp.GetMapName() ?? "unknown",
+            ServerName:      _bridge.ConVarManager.FindConVar("hostname")?.GetString() ?? string.Empty
+        );
+    }
+
+    /// <summary>
+    /// Safe to call off the main thread. All engine-side data must already be snapshotted via
+    /// <see cref="PrepareSubmit"/>.
+    /// </summary>
+    public async Task<Report?> SubmitAsync(ReportSnapshot snap)
+    {
+        // Cooldown
+        var last = await _repo.LastReportTimeForAsync(snap.ReporterSteamId);
+        if (last is { } lt && (DateTime.UtcNow - lt).TotalSeconds < _config.CooldownSeconds)
+        {
+            _logger.LogDebug("[CallAdmin] {Reporter} on cooldown ({Remaining}s)", snap.ReporterSteamId,
+                _config.CooldownSeconds - (int)(DateTime.UtcNow - lt).TotalSeconds);
+            return null;
+        }
+
+        // Duplicate within window — same reporter+target => skip (no DB write)
+        var since = DateTime.UtcNow.AddSeconds(-_config.DuplicateWindowSeconds);
+        var dup = await _repo.FindDuplicateAsync(snap.ReporterSteamId, snap.TargetSteamId, since);
+        if (dup is not null)
+        {
+            _logger.LogDebug("[CallAdmin] Duplicate report skipped ({Reporter} -> {Target}, id #{Id})",
+                snap.ReporterSteamId, snap.TargetSteamId, dup.Id);
+            return ToModel(dup);
+        }
+
+        var entity = new ReportEntity
+        {
+            ReporterSteamId = snap.ReporterSteamId,
+            ReporterName    = snap.ReporterName,
+            TargetSteamId   = snap.TargetSteamId,
+            TargetName      = snap.TargetName,
+            ReasonKey       = snap.ReasonKey,
+            MapName         = snap.MapName,
+            ServerName      = snap.ServerName,
+            Status          = (int) ReportStatus.Pending,
+            CreatedAt       = DateTime.UtcNow,
+        };
+
+        await _repo.InsertAsync(entity);
+        var model = ToModel(entity);
+        _logger.LogInformation("[CallAdmin] Report #{Id} submitted by {Reporter} against {Target} ({Reason})",
+            entity.Id, entity.ReporterName, entity.TargetName, entity.ReasonKey);
+
+        _bridge.ModSharp.InvokeFrameAction(() =>
+        {
+            try { _submitted.Publish(new ReportSubmittedEvent(model)); }
+            catch (Exception e) { _logger.LogError(e, "[CallAdmin] ReportSubmittedEvent subscriber failed"); }
+        });
+
+        return model;
+    }
+
+    public async Task<Report?> TransitionAsync(int reportId, ReportStatus next, string? actorSid, string? actorName)
+    {
+        var row = await _repo.GetByIdAsync(reportId);
+        if (row is null) return null;
+        if (row.Status == (int) next) return ToModel(row);
+        if (row.Status == (int) ReportStatus.Handled || row.Status == (int) ReportStatus.Dismissed
+            || row.Status == (int) ReportStatus.Cancelled)
+            return ToModel(row); // already terminal
+
+        row.Status = (int) next;
+        if (actorSid is not null && next != ReportStatus.Cancelled)
+        {
+            row.HandlerSteamId = actorSid;
+            row.HandlerName    = actorName;
+            row.HandledAt      = DateTime.UtcNow;
+        }
+        if (next == ReportStatus.Cancelled)
+            row.HandledAt = DateTime.UtcNow;
+
+        // Our own resolution publishes its event below → Discord edits now. Pre-stamp the sync marker
+        // so the external-resolution sweep doesn't treat this as an un-synced (website) resolution.
+        if (next is ReportStatus.Handled or ReportStatus.Dismissed)
+            row.DiscordSyncedStatus = (int) next;
+
+        await _repo.UpdateAsync(row);
+        var model = ToModel(row);
+
+        _bridge.ModSharp.InvokeFrameAction(() =>
+        {
+            try
+            {
+                switch (next)
+                {
+                    case ReportStatus.Claimed:    _claimed.Publish(new ReportClaimedEvent(model));     break;
+                    case ReportStatus.Handled:    _handled.Publish(new ReportHandledEvent(model));     break;
+                    case ReportStatus.Dismissed:  _dismissed.Publish(new ReportDismissedEvent(model)); break;
+                    case ReportStatus.Cancelled:  _cancelled.Publish(new ReportCancelledEvent(model)); break;
+                }
+            }
+            catch (Exception e) { _logger.LogError(e, "[CallAdmin] {Next} publisher failed for #{Id}", next, reportId); }
+        });
+
+        return model;
+    }
+
+    public async Task<Report?> GetAsync(int id)
+    {
+        var row = await _repo.GetByIdAsync(id);
+        return row is null ? null : ToModel(row);
+    }
+
+    public async Task<IReadOnlyList<Report>> GetPendingAsync()
+    {
+        var rows = await _repo.GetPendingAsync();
+        var list = new List<Report>(rows.Count);
+        foreach (var row in rows)
+            list.Add(ToModel(row));
+        return list;
+    }
+
+    public async Task SetExternalMessageIdAsync(int id, string messageId)
+    {
+        var row = await _repo.GetByIdAsync(id);
+        if (row is null) return;
+        row.ExternalMessageId = messageId;
+        await _repo.UpdateAsync(row);
+    }
+
+    private bool IsAdmin(IGameClient client)
+    {
+        var am = _bridge.AdminManager;
+        return am?.GetAdmin(client.SteamId) is not null;
+    }
+
+    private static Report ToModel(ReportEntity e) => new Report
+    {
+        Id                = e.Id,
+        ReporterSteamId   = ulong.TryParse(e.ReporterSteamId, out var rs) ? rs : 0,
+        ReporterName      = e.ReporterName,
+        TargetSteamId     = ulong.TryParse(e.TargetSteamId, out var ts) ? ts : 0,
+        TargetName        = e.TargetName,
+        ReasonKey         = e.ReasonKey,
+        ReasonLabel       = e.ReasonKey, // localizer applied at render time, not here
+        MapName           = e.MapName,
+        ServerName        = e.ServerName,
+        CreatedAt         = e.CreatedAt,
+        Status            = (ReportStatus) e.Status,
+        HandlerSteamId    = ulong.TryParse(e.HandlerSteamId ?? "", out var hs) && hs != 0 ? hs : null,
+        HandlerName       = e.HandlerName,
+        HandledAt         = e.HandledAt,
+        ExternalMessageId = e.ExternalMessageId,
+        Outcome           = e.Outcome,
+    };
+}
+
+```
+
+`CallAdmin.Core/Modules/SharedInterfaceModule.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using MessagePipe;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Shared;
+using CallAdmin.Shared.Events;
+using CallAdmin.Shared.Filters;
+using CallAdmin.Shared.Models;
+using Sharp.Shared.Objects;
+
+namespace CallAdmin.Core.Modules;
+
+/// <summary>
+/// Publishes <see cref="ICallAdminShared"/> on PostInit (so consumers can resolve it in OAM).
+/// Methods delegate to <see cref="ReportManager"/>. Lifecycle events bridge the in-Core
+/// MessagePipe pipeline to plain C# events on the public interface so cross-plugin consumers
+/// (e.g. CallAdmin.Discord) can subscribe without a shared DI graph.
+/// </summary>
+internal sealed class SharedInterfaceModule : IModule, ICallAdminShared
+{
+    private readonly InterfaceBridge                _bridge;
+    private readonly ILogger<SharedInterfaceModule> _logger;
+    private readonly ReportManager                  _reports;
+    private readonly Configuration.CallAdminConfig  _config;
+
+    private readonly ISubscriber<ReportSubmittedEvent>  _submittedSub;
+    private readonly ISubscriber<ReportClaimedEvent>    _claimedSub;
+    private readonly ISubscriber<ReportHandledEvent>    _handledSub;
+    private readonly ISubscriber<ReportDismissedEvent>  _dismissedSub;
+    private readonly ISubscriber<ReportCancelledEvent>  _cancelledSub;
+
+    private IDisposable? _eventSubscriptions;
+
+    public event Action<Report>? OnReportSubmitted;
+    public event Action<Report>? OnReportClaimed;
+    public event Action<Report>? OnReportHandled;
+    public event Action<Report>? OnReportDismissed;
+    public event Action<Report>? OnReportCancelled;
+
+    public SharedInterfaceModule(InterfaceBridge bridge, ILogger<SharedInterfaceModule> logger,
+                                 ReportManager reports, Configuration.CallAdminConfig config,
+                                 ISubscriber<ReportSubmittedEvent> submittedSub,
+                                 ISubscriber<ReportClaimedEvent>   claimedSub,
+                                 ISubscriber<ReportHandledEvent>   handledSub,
+                                 ISubscriber<ReportDismissedEvent> dismissedSub,
+                                 ISubscriber<ReportCancelledEvent> cancelledSub)
+    {
+        _bridge        = bridge;
+        _logger        = logger;
+        _reports       = reports;
+        _config        = config;
+        _submittedSub  = submittedSub;
+        _claimedSub    = claimedSub;
+        _handledSub    = handledSub;
+        _dismissedSub  = dismissedSub;
+        _cancelledSub  = cancelledSub;
+    }
+
+    public bool Init()
+    {
+        var bag = DisposableBag.CreateBuilder();
+        _submittedSub.Subscribe(e => Raise(OnReportSubmitted, e.Report, nameof(OnReportSubmitted))).AddTo(bag);
+        _claimedSub  .Subscribe(e => Raise(OnReportClaimed,   e.Report, nameof(OnReportClaimed))).AddTo(bag);
+        _handledSub  .Subscribe(e => Raise(OnReportHandled,   e.Report, nameof(OnReportHandled))).AddTo(bag);
+        _dismissedSub.Subscribe(e => Raise(OnReportDismissed, e.Report, nameof(OnReportDismissed))).AddTo(bag);
+        _cancelledSub.Subscribe(e => Raise(OnReportCancelled, e.Report, nameof(OnReportCancelled))).AddTo(bag);
+        _eventSubscriptions = bag.Build();
+        return true;
+    }
+
+    public void Shutdown()
+    {
+        _eventSubscriptions?.Dispose();
+        _eventSubscriptions = null;
+    }
+
+    private void Raise(Action<Report>? handlers, Report report, string name)
+    {
+        if (handlers is null) return;
+        try { handlers.Invoke(report); }
+        catch (Exception e) { _logger.LogError(e, "[CallAdmin] {Event} subscriber threw", name); }
+    }
+
+    public void OnPostInit(ServiceProvider provider)
+    {
+        _bridge.SharpModuleManager.RegisterSharpModuleInterface<ICallAdminShared>(
+            _bridge.Module, ICallAdminShared.Identity, this);
+        _logger.LogInformation("[CallAdmin] Registered ICallAdminShared ({Id})", ICallAdminShared.Identity);
+    }
+
+    // ===== ICallAdminShared =====
+
+    public Task<Report?> SubmitReportAsync(IGameClient reporter, IGameClient target, string reasonKey)
+    {
+        var snap = _reports.PrepareSubmit(reporter, target, reasonKey);
+        if (snap is null) return Task.FromResult<Report?>(null);
+        return Task.Run(() => _reports.SubmitAsync(snap));
+    }
+
+    public Task<Report?> ClaimReportAsync(int reportId, IGameClient admin)
+        => Task.Run(() => _reports.TransitionAsync(reportId, ReportStatus.Claimed, admin.SteamId.ToString(), admin.Name ?? "?"));
+
+    public Task<Report?> MarkHandledAsync(int reportId, IGameClient admin)
+        => Task.Run(() => _reports.TransitionAsync(reportId, ReportStatus.Handled, admin.SteamId.ToString(), admin.Name ?? "?"));
+
+    public Task<Report?> DismissReportAsync(int reportId, IGameClient admin)
+        => Task.Run(() => _reports.TransitionAsync(reportId, ReportStatus.Dismissed, admin.SteamId.ToString(), admin.Name ?? "?"));
+
+    public Task<Report?> CancelReportAsync(int reportId, IGameClient reporter)
+        => Task.Run(() => _reports.TransitionAsync(reportId, ReportStatus.Cancelled, null, null));
+
+    public Task<Report?> GetReportAsync(int reportId) => _reports.GetAsync(reportId);
+
+    public Task<IReadOnlyList<Report>> GetPendingReportsAsync() => _reports.GetPendingAsync();
+
+    public IReadOnlyList<ReportReason> GetReasons() => _config.GetReasonModels();
+
+    public void RegisterTargetFilter(ITargetFilter filter) => _reports.RegisterTargetFilter(filter);
+
+    public Task SetExternalMessageIdAsync(int reportId, string messageId)
+        => _reports.SetExternalMessageIdAsync(reportId, messageId);
+}
+
+```
+
+`CallAdmin.Database.Shared/Attributes/DbColumnAttribute.cs`:
+
+```cs
+using System;
+
+namespace CallAdmin.Database.Shared;
+
+/// <summary>
+/// Configures a property as a database column. ORM-agnostic replacement for SqlSugar's [SugarColumn].
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class DbColumnAttribute : Attribute
+{
+    public bool IsPrimaryKey { get; set; }
+    public bool IsIdentity { get; set; }
+    public bool IsNullable { get; set; } = true;
+    public int Length { get; set; }
+    public string? DataType { get; set; }
+}
+
+```
+
+`CallAdmin.Database.Shared/Attributes/DbTableAttribute.cs`:
+
+```cs
+using System;
+
+namespace CallAdmin.Database.Shared;
+
+/// <summary>
+/// Maps a class to a database table. ORM-agnostic replacement for SqlSugar's [SugarTable].
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public sealed class DbTableAttribute(string tableName) : Attribute
+{
+    public string TableName { get; } = tableName;
+}
+
+```
+
+`CallAdmin.Database.Shared/CallAdmin.Database.Shared.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>CallAdmin.Database.Shared</AssemblyName>
+    <RootNamespace>CallAdmin.Database.Shared</RootNamespace>
+  </PropertyGroup>
+</Project>
+
+```
+
+`CallAdmin.Database.Shared/IDatabaseJoinQueryable.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace CallAdmin.Database.Shared;
+
+/// <summary>
+/// Fluent query builder for two-table join queries.
+/// </summary>
+public interface IDatabaseJoinQueryable<T1, T2>
+{
+    IDatabaseJoinQueryable<T1, T2> Where(Expression<Func<T1, T2, bool>> predicate);
+    IDatabaseJoinQueryable<T1, T2> OrderByDescending(Expression<Func<T1, T2, object>> keySelector);
+    IDatabaseJoinQueryable<T1, T2> Take(int count);
+
+    Task<List<TResult>> SelectToListAsync<TResult>(Expression<Func<T1, T2, TResult>> selector)
+        where TResult : class, new();
+}
+
+```
+
+`CallAdmin.Database.Shared/IDatabaseProvider.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace CallAdmin.Database.Shared;
+
+/// <summary>
+/// Centralized database provider. Obtained via SharpModuleManager using <see cref="Identity"/>.
+/// </summary>
+public interface IDatabaseProvider
+{
+    const string Identity = "CallAdmin.Database";
+
+    // Table management
+    void InitTables(params Type[] entityTypes);
+    string GetTableName<T>() where T : class, new();
+    void CreateIndex<T>(string[] columnNames) where T : class, new();
+
+    // Query builder
+    IDatabaseQueryable<T> Queryable<T>() where T : class, new();
+
+    // Insert
+    Task<int> InsertAsync<T>(T entity) where T : class, new();
+    Task<int> InsertRangeAsync<T>(List<T> entities) where T : class, new();
+    Task<int> InsertReturnIdentityAsync<T>(T entity) where T : class, new();
+
+    // Update
+    Task<int> UpdateAsync<T>(T entity) where T : class, new();
+    Task<int> UpdateRangeAsync<T>(List<T> entities) where T : class, new();
+    Task<int> UpdateColumnsAsync<T>(T entity, Expression<Func<T, object>> columns) where T : class, new();
+
+    /// <summary>
+    /// Conditional column update. On a SQL backend this is a single atomic
+    /// <c>UPDATE ... SET ... WHERE ...</c> — usable as a compare-and-swap so exactly one caller
+    /// wins a contended row across multiple servers sharing the database. Returns the number of
+    /// rows actually changed (0 if the predicate matched nothing / another caller won the race).
+    /// </summary>
+    Task<int> UpdateSetWhereAsync<T>(Expression<Func<T, T>> setColumns, Expression<Func<T, bool>> where) where T : class, new();
+
+    // Upsert
+    Task<int> UpsertAsync<T>(T entity, Expression<Func<T, object>> matchColumns) where T : class, new();
+
+    // Delete
+    Task<int> DeleteAsync<T>(Expression<Func<T, bool>> predicate) where T : class, new();
+
+    // Transaction
+    Task<IDatabaseTransaction> BeginTransactionAsync();
+}
+
+```
+
+`CallAdmin.Database.Shared/IDatabaseQueryable.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace CallAdmin.Database.Shared;
+
+/// <summary>
+/// Fluent query builder for single-table queries.
+/// </summary>
+public interface IDatabaseQueryable<T>
+{
+    IDatabaseQueryable<T> Where(Expression<Func<T, bool>> predicate);
+    IDatabaseQueryable<T> OrderBy(Expression<Func<T, object>> keySelector);
+    IDatabaseQueryable<T> OrderByDescending(Expression<Func<T, object>> keySelector);
+    IDatabaseQueryable<T> Take(int count);
+
+    IDatabaseJoinQueryable<T, T2> InnerJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
+        where T2 : class, new();
+
+    Task<T> FirstAsync();
+    Task<T?> FirstOrDefaultAsync();
+    Task<T> FirstAsync(Expression<Func<T, bool>> predicate);
+    Task<List<T>> ToListAsync();
+    Task<int> CountAsync();
+}
+
+```
+
+`CallAdmin.Database.Shared/IDatabaseTransaction.cs`:
+
+```cs
+using System;
+using System.Threading.Tasks;
+
+namespace CallAdmin.Database.Shared;
+
+/// <summary>
+/// Database transaction scope. Auto-rolls back on dispose if not committed.
+/// </summary>
+public interface IDatabaseTransaction : IAsyncDisposable
+{
+    Task CommitAsync();
+    Task RollbackAsync();
+}
+
+```
+
+`CallAdmin.Database/CallAdmin.Database.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>CallAdmin.Database</AssemblyName>
+    <RootNamespace>CallAdmin.Database</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.21" />
+    <PackageReference Include="MySqlConnector" Version="2.5.0" />
+    <PackageReference Include="Npgsql" Version="10.0.1" />
+    <PackageReference Include="SqlSugarCoreNoDrive" Version="5.1.4.211" />
+    <PackageReference Include="MessagePipe" Version="1.8.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(CallAdminRoot)CallAdmin.Database.Shared\CallAdmin.Database.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>
+
+```
+
+`CallAdmin.Database/CallAdminDatabasePlugin.cs`:
+
+```cs
+namespace CallAdmin.Database;
+
+using System;
+using System.IO;
+using LiteDB;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Database.Extensions;
+using CallAdmin.Database.Provider;
+using CallAdmin.Database.Shared;
+using Sharp.Shared;
+using SqlSugar;
+
+/// <summary>
+/// Poop Database Plugin — centralized database infrastructure.
+/// Supports LiteDB (default), MySQL, and PostgreSQL via the same <see cref="IDatabaseProvider"/>
+/// interface, switchable through <c>configs/poop.database.json</c>.
+///
+/// <para>Registered on <see cref="PostInit"/> via <c>SharpModuleManager</c> so any module
+/// can discover it with
+/// <c>GetOptionalSharpModuleInterface&lt;IDatabaseProvider&gt;(IDatabaseProvider.Identity)</c>.</para>
+/// </summary>
+public sealed class CallAdminDatabasePlugin : IModSharpModule
+{
+    public string DisplayName   => "CallAdmin.Database";
+    public string DisplayAuthor => "Prefix";
+
+    private readonly InterfaceBridge _bridge;
+    private readonly ILogger<CallAdminDatabasePlugin> _logger;
+    private readonly ServiceProvider _serviceProvider;
+
+    public CallAdminDatabasePlugin(
+        ISharedSystem   sharedSystem,
+        string?         dllPath,
+        string?         sharpPath,
+        Version?        version,
+        IConfiguration? coreConfiguration,
+        bool            hotReload)
+    {
+        ArgumentNullException.ThrowIfNull(sharpPath);
+
+        _bridge = new InterfaceBridge(this, sharedSystem, sharpPath);
+        _logger = sharedSystem.GetLoggerFactory().CreateLogger<CallAdminDatabasePlugin>();
+
+        var configuration = LoadConfiguration(sharpPath);
+
+        var services = new ServiceCollection();
+        services.AddSingleton(_bridge);
+        services.AddSingleton(sharedSystem);
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddLogging(sharedSystem.GetLoggerFactory());
+
+        var dbType = (configuration["Database:Type"] ?? "litedb").ToLowerInvariant();
+
+        if (dbType == "litedb")
+        {
+            var database = configuration["Database:Database"] ?? "calladmin";
+            var dataDir = Path.Combine(sharpPath, "data");
+            Directory.CreateDirectory(dataDir);
+            var dbPath = Path.Combine(dataDir, $"{database}.db");
+
+            _logger.LogInformation("[CallAdmin.Database] Using LiteDB: {DbPath}", dbPath);
+
+            services.AddSingleton(new LiteDatabase(new ConnectionString
+            {
+                Filename   = dbPath,
+                Connection = ConnectionType.Shared,
+            }));
+            services.AddSingleton<IDatabaseProvider, LiteDbDatabaseProvider>();
+        }
+        else
+        {
+            _logger.LogInformation("[CallAdmin.Database] Using SqlSugar ({DbType})", dbType);
+
+            services.AddSingleton<ISqlSugarClient>(_ =>
+                new SqlSugarScope(SugarExtensions.BuildConnectionConfig(configuration, _bridge.SharpPath)));
+            services.AddSingleton<IDatabaseProvider, DatabaseProvider>();
+        }
+
+        _serviceProvider = services.BuildServiceProvider();
+    }
+
+    public bool Init() => true;
+
+    public void PostInit()
+    {
+        var provider = _serviceProvider.GetRequiredService<IDatabaseProvider>();
+        _bridge.SharpModuleManager.RegisterSharpModuleInterface<IDatabaseProvider>(
+            _bridge.Module, IDatabaseProvider.Identity, provider);
+
+        _logger.LogInformation("[CallAdmin.Database] Registered IDatabaseProvider ({Id})", IDatabaseProvider.Identity);
+    }
+
+    public void OnAllModulesLoaded() { }
+    public void OnLibraryConnected(string name) { }
+    public void OnLibraryDisconnect(string name) { }
+
+    public void Shutdown() => _serviceProvider.Dispose();
+
+    private const string DefaultConfig =
+        """
+        {
+            "Database": {
+                "Type": "litedb",
+                "Host": "localhost",
+                "Port": 3306,
+                "Database": "calladmin",
+                "User": "root",
+                "Password": ""
+            }
+        }
+        """;
+
+    private static IConfigurationRoot LoadConfiguration(string sharpPath)
+    {
+        var configPath = Path.Combine(sharpPath, "configs", "calladmin.database.jsonc");
+
+        if (!File.Exists(configPath))
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(configPath)!);
+            File.WriteAllText(configPath, DefaultConfig);
+        }
+
+        return new ConfigurationBuilder()
+            .AddJsonFile(configPath, optional: false, reloadOnChange: false)
+            .Build();
+    }
+}
+
+```
+
+`CallAdmin.Database/Extensions/DependencyInjectionExtensions.cs`:
+
+```cs
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+namespace CallAdmin.Database.Extensions;
+
+internal static class DependencyInjectionExtensions
+{
+    public static IServiceCollection AddLogging(
+        this IServiceCollection services,
+        ILoggerFactory factory
+    )
+    {
+        services.AddSingleton(factory);
+        services.Add(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
+
+        return services;
+    }
+
+    public static IServiceCollection AddSingleton<TService1, TService2, T>(
+        this IServiceCollection services
+    )
+        where T : class, TService1, TService2
+        where TService1 : class
+        where TService2 : class
+    {
+        services.AddSingleton<T>();
+        services.AddSingleton<TService1, T>(x => x.GetRequiredService<T>());
+        services.AddSingleton<TService2, T>(x => x.GetRequiredService<T>());
+
+        return services;
+    }
+
+    public static IServiceCollection AddSingleton<TService1, TService2, TService3, T>(
+        this IServiceCollection services
+    )
+        where T : class, TService1, TService2, TService3
+        where TService1 : class
+        where TService2 : class
+        where TService3 : class
+    {
+        services.AddSingleton<T>();
+        services.AddSingleton<TService1, T>(x => x.GetRequiredService<T>());
+        services.AddSingleton<TService2, T>(x => x.GetRequiredService<T>());
+        services.AddSingleton<TService3, T>(x => x.GetRequiredService<T>());
+
+        return services;
+    }
+
+    public static IServiceCollection ImplSingleton<TService1, TService2, TImpl>(
+        this IServiceCollection services
+    )
+        where TImpl : class, TService1, TService2
+        where TService1 : class
+        where TService2 : class
+    {
+        services.AddSingleton<TService1>(x => x.GetRequiredService<TImpl>());
+        services.AddSingleton<TService2>(x => x.GetRequiredService<TImpl>());
+
+        return services;
+    }
+}
+
+```
+
+`CallAdmin.Database/Extensions/Sugar.cs`:
+
+```cs
+using System;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using SqlSugar;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Extensions;
+
+internal static class SugarExtensions
+{
+    internal static ConnectionConfig BuildConnectionConfig(
+        IConfiguration configuration,
+        string sharpPath
+    )
+    {
+        var dbTypeStr = configuration["Database:Type"] ?? "sqlite";
+        var host = configuration["Database:Host"] ?? "localhost";
+        var port = configuration["Database:Port"] ?? "3306";
+        var database = configuration["Database:Database"] ?? "poop";
+        var user = configuration["Database:User"] ?? "root";
+        var password = configuration["Database:Password"] ?? "";
+
+        var dbType = dbTypeStr.ToLowerInvariant() switch
+        {
+            "mysql" => DbType.MySql,
+            "postgresql" => DbType.PostgreSQL,
+            _ => throw new NotSupportedException(
+                $"Database type '{dbTypeStr}' is not supported. Supported types: mysql, postgresql"
+            ),
+        };
+
+        var connectionString = dbType switch
+        {
+            DbType.MySql =>
+                $"Server={host};Port={port};Database={database};User={user};Password={password};",
+            DbType.PostgreSQL =>
+                $"Host={host};Port={port};Database={database};Username={user};Password={password};",
+            _ => throw new NotSupportedException($"Database type '{dbTypeStr}' is not supported."),
+        };
+
+        return new ConnectionConfig
+        {
+            DbType = dbType,
+            ConnectionString = connectionString,
+            IsAutoCloseConnection = true,
+            InitKeyType = InitKeyType.Attribute,
+            MoreSettings = new ConnMoreSettings { DisableNvarchar = true },
+            LanguageType = LanguageType.English,
+            ConfigureExternalServices = new ConfigureExternalServices
+            {
+                EntityNameService = (type, entity) =>
+                {
+                    var attr = type.GetCustomAttribute<DbTableAttribute>();
+                    if (attr != null)
+                    {
+                        entity.DbTableName = attr.TableName;
+                    }
+                },
+                EntityService = (prop, column) =>
+                {
+                    var attr = prop.GetCustomAttribute<DbColumnAttribute>();
+                    if (attr == null) return;
+
+                    if (attr.IsPrimaryKey) column.IsPrimarykey = true;
+                    if (attr.IsIdentity) column.IsIdentity = true;
+                    column.IsNullable = attr.IsNullable;
+                    // Primary key / identity columns must be NOT NULL for AUTO_INCREMENT
+                    if (attr.IsPrimaryKey || attr.IsIdentity) column.IsNullable = false;
+                    if (attr.Length > 0) column.Length = attr.Length;
+                    if (!string.IsNullOrEmpty(attr.DataType)) column.DataType = attr.DataType;
+                },
+            },
+        };
+    }
+}
+
+```
+
+`CallAdmin.Database/InterfaceBridge.cs`:
+
+```cs
+namespace CallAdmin.Database;
+
+using System.IO;
+using Microsoft.Extensions.Logging;
+using Sharp.Shared;
+using Sharp.Shared.Managers;
+
+internal sealed class InterfaceBridge
+{
+    public static InterfaceBridge Instance { get; private set; } = null!;
+
+    public string               SharpPath          { get; }
+    public string               DllPath            { get; }
+    public string               DataPath           { get; }
+    public string               ConfigPath         { get; }
+    public IModSharp            ModSharp           { get; }
+    public ILoggerFactory       LoggerFactory      { get; }
+    public ISharpModuleManager  SharpModuleManager { get; }
+    public string               ModuleIdentity     { get; }
+    public CallAdminDatabasePlugin   Module             { get; }
+
+    public InterfaceBridge(CallAdminDatabasePlugin module, ISharedSystem sharedSystem, string sharpPath)
+    {
+        Instance = this;
+
+        Module     = module;
+        SharpPath  = sharpPath;
+        DllPath    = Path.GetFullPath(Path.Combine(sharpPath, "modules", "Poop.Database"));
+        DataPath   = Path.GetFullPath(Path.Combine(sharpPath, "data"));
+        ConfigPath = Path.GetFullPath(Path.Combine(sharpPath, "configs"));
+
+        ModSharp           = sharedSystem.GetModSharp();
+        LoggerFactory      = sharedSystem.GetLoggerFactory();
+        SharpModuleManager = sharedSystem.GetSharpModuleManager();
+        ModuleIdentity     = Path.GetFileNameWithoutExtension(DllPath);
+
+        Directory.CreateDirectory(DataPath);
+        Directory.CreateDirectory(ConfigPath);
+    }
+}
+
+```
+
+`CallAdmin.Database/PluginMessagePipeManager.cs`:
+
+```cs
+using System;
+using MessagePipe;
+using Microsoft.Extensions.Logging;
+
+namespace CallAdmin.Database;
+
+/// <summary>
+/// Plugin-scoped message pipe subscription manager for Poop.Database
+/// Manages DisposableBag independently from the core Poop MessagePipeManager
+/// Each plugin has its own bag for subscription tracking and cleanup
+/// </summary>
+internal sealed class PluginMessagePipeManager(ILogger<PluginMessagePipeManager> _logger)
+    : IDisposable
+{
+    private readonly DisposableBagBuilder _disposableBag = DisposableBag.CreateBuilder();
+    private IDisposable? _builtBag;
+
+    /// <summary>
+    /// Gets the DisposableBag builder for adding subscriptions.
+    /// Usage: subscriber.Subscribe(x => {}).AddTo(manager.SubscriptionBag);
+    /// All subscriptions added to this bag will be disposed on plugin shutdown.
+    /// </summary>
+    public DisposableBagBuilder SubscriptionBag
+    {
+        get { return _disposableBag; }
+    }
+
+    public void Dispose()
+    {
+        if (_builtBag != null)
+            return;
+
+        try
+        {
+            _builtBag = _disposableBag.Build();
+            _builtBag.Dispose();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[Poop.Database] Error disposing plugin subscriptions");
+        }
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/DatabaseJoinQueryable.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using SqlSugar;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class DatabaseJoinQueryable<T1, T2>(ISugarQueryable<T1, T2> query)
+    : IDatabaseJoinQueryable<T1, T2>
+    where T1 : class, new()
+    where T2 : class, new()
+{
+    public IDatabaseJoinQueryable<T1, T2> Where(Expression<Func<T1, T2, bool>> predicate)
+    {
+        query = query.Where(predicate);
+        return this;
+    }
+
+    public IDatabaseJoinQueryable<T1, T2> OrderByDescending(Expression<Func<T1, T2, object>> keySelector)
+    {
+        query = query.OrderByDescending(keySelector);
+        return this;
+    }
+
+    public IDatabaseJoinQueryable<T1, T2> Take(int count)
+    {
+        query = query.Take(count);
+        return this;
+    }
+
+    public async Task<List<TResult>> SelectToListAsync<TResult>(
+        Expression<Func<T1, T2, TResult>> selector)
+        where TResult : class, new()
+    {
+        return await query.Select(selector).ToListAsync();
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/DatabaseProvider.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using SqlSugar;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class DatabaseProvider(ISqlSugarClient db) : IDatabaseProvider
+{
+    public void InitTables(params Type[] entityTypes)
+    {
+        db.CodeFirst.InitTables(entityTypes);
+    }
+
+    public string GetTableName<T>() where T : class, new()
+    {
+        return db.EntityMaintenance.GetTableName<T>();
+    }
+
+    public void CreateIndex<T>(string[] columnNames) where T : class, new()
+    {
+        var tableName = db.EntityMaintenance.GetTableName<T>();
+        var indexName = $"Index_{tableName}_{string.Join("_", columnNames)}";
+        if (!db.DbMaintenance.IsAnyIndex(indexName))
+        {
+            db.DbMaintenance.CreateIndex(tableName, columnNames);
+        }
+    }
+
+    public IDatabaseQueryable<T> Queryable<T>() where T : class, new()
+    {
+        return new DatabaseQueryable<T>(db.Queryable<T>());
+    }
+
+    public async Task<int> InsertAsync<T>(T entity) where T : class, new()
+    {
+        return await db.Insertable(entity).ExecuteCommandAsync();
+    }
+
+    public async Task<int> InsertRangeAsync<T>(List<T> entities) where T : class, new()
+    {
+        return await db.Insertable(entities).ExecuteCommandAsync();
+    }
+
+    public async Task<int> InsertReturnIdentityAsync<T>(T entity) where T : class, new()
+    {
+        return await db.Insertable(entity).ExecuteReturnIdentityAsync();
+    }
+
+    public async Task<int> UpdateAsync<T>(T entity) where T : class, new()
+    {
+        return await db.Updateable(entity).ExecuteCommandAsync();
+    }
+
+    public async Task<int> UpdateRangeAsync<T>(List<T> entities) where T : class, new()
+    {
+        return await db.Updateable(entities).ExecuteCommandAsync();
+    }
+
+    public async Task<int> UpdateColumnsAsync<T>(T entity, Expression<Func<T, object>> columns)
+        where T : class, new()
+    {
+        return await db.Updateable(entity).UpdateColumns(columns).ExecuteCommandAsync();
+    }
+
+    public async Task<int> UpdateSetWhereAsync<T>(Expression<Func<T, T>> setColumns, Expression<Func<T, bool>> where)
+        where T : class, new()
+    {
+        // Single atomic UPDATE ... SET ... WHERE — the DB enforces the predicate, so concurrent
+        // callers on different servers can't both flip the same row.
+        return await db.Updateable<T>().SetColumns(setColumns).Where(where).ExecuteCommandAsync();
+    }
+
+    public async Task<int> UpsertAsync<T>(T entity, Expression<Func<T, object>> matchColumns)
+        where T : class, new()
+    {
+        return await db.Storageable(entity).WhereColumns(matchColumns).ExecuteCommandAsync();
+    }
+
+    public async Task<int> DeleteAsync<T>(Expression<Func<T, bool>> predicate) where T : class, new()
+    {
+        return await db.Deleteable<T>().Where(predicate).ExecuteCommandAsync();
+    }
+
+    public async Task<IDatabaseTransaction> BeginTransactionAsync()
+    {
+        await db.Ado.BeginTranAsync();
+        return new DatabaseTransaction(db);
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/DatabaseQueryable.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using SqlSugar;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class DatabaseQueryable<T>(ISugarQueryable<T> query) : IDatabaseQueryable<T>
+    where T : class, new()
+{
+    public IDatabaseQueryable<T> Where(Expression<Func<T, bool>> predicate)
+    {
+        query = query.Where(predicate);
+        return this;
+    }
+
+    public IDatabaseQueryable<T> OrderBy(Expression<Func<T, object>> keySelector)
+    {
+        query = query.OrderBy(keySelector);
+        return this;
+    }
+
+    public IDatabaseQueryable<T> OrderByDescending(Expression<Func<T, object>> keySelector)
+    {
+        query = query.OrderByDescending(keySelector);
+        return this;
+    }
+
+    public IDatabaseQueryable<T> Take(int count)
+    {
+        query = query.Take(count);
+        return this;
+    }
+
+    public IDatabaseJoinQueryable<T, T2> InnerJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
+        where T2 : class, new()
+    {
+        var joinQuery = query.InnerJoin(joinExpression);
+        return new DatabaseJoinQueryable<T, T2>(joinQuery);
+    }
+
+    public async Task<T> FirstAsync()
+    {
+        return await query.FirstAsync();
+    }
+
+    public async Task<T?> FirstOrDefaultAsync()
+    {
+        return await query.FirstAsync();
+    }
+
+    public async Task<T> FirstAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await query.FirstAsync(predicate);
+    }
+
+    public async Task<List<T>> ToListAsync()
+    {
+        return await query.ToListAsync();
+    }
+
+    public async Task<int> CountAsync()
+    {
+        return await query.CountAsync();
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/DatabaseTransaction.cs`:
+
+```cs
+using System.Threading.Tasks;
+using SqlSugar;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class DatabaseTransaction(ISqlSugarClient db) : IDatabaseTransaction
+{
+    private bool _completed;
+
+    public async Task CommitAsync()
+    {
+        await db.Ado.CommitTranAsync();
+        _completed = true;
+    }
+
+    public async Task RollbackAsync()
+    {
+        await db.Ado.RollbackTranAsync();
+        _completed = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (!_completed)
+        {
+            await db.Ado.RollbackTranAsync();
+        }
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/LiteDbDatabaseProvider.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading.Tasks;
+using LiteDB;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class LiteDbDatabaseProvider(LiteDatabase db) : IDatabaseProvider
+{
+    private static string GetCollectionName(Type type)
+    {
+        var attr = type.GetCustomAttribute<DbTableAttribute>();
+        return attr?.TableName ?? type.Name;
+    }
+
+    private ILiteCollection<T> GetCollection<T>() where T : class, new()
+    {
+        return db.GetCollection<T>(GetCollectionName(typeof(T)));
+    }
+
+    public void InitTables(params Type[] entityTypes)
+    {
+        // LiteDB auto-creates collections on first use.
+        // Ensure they exist by touching them.
+        foreach (var type in entityTypes)
+        {
+            var name = GetCollectionName(type);
+            db.GetCollection(name);
+        }
+    }
+
+    public string GetTableName<T>() where T : class, new()
+    {
+        return GetCollectionName(typeof(T));
+    }
+
+    public void CreateIndex<T>(string[] columnNames) where T : class, new()
+    {
+        var col = GetCollection<T>();
+        foreach (var columnName in columnNames)
+        {
+            col.EnsureIndex(columnName);
+        }
+    }
+
+    public IDatabaseQueryable<T> Queryable<T>() where T : class, new()
+    {
+        return new LiteDbQueryable<T>(db, GetCollection<T>().Query());
+    }
+
+    public Task<int> InsertAsync<T>(T entity) where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            col.Insert(entity);
+            return 1;
+        });
+    }
+
+    public Task<int> InsertRangeAsync<T>(List<T> entities) where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            return col.InsertBulk(entities);
+        });
+    }
+
+    public Task<int> InsertReturnIdentityAsync<T>(T entity) where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            var bsonId = col.Insert(entity);
+            return bsonId.AsInt32;
+        });
+    }
+
+    public Task<int> UpdateAsync<T>(T entity) where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            return col.Update(entity) ? 1 : 0;
+        });
+    }
+
+    public Task<int> UpdateRangeAsync<T>(List<T> entities) where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            return col.Update(entities);
+        });
+    }
+
+    public Task<int> UpdateColumnsAsync<T>(T entity, Expression<Func<T, object>> columns)
+        where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+
+            // Get the Id from entity to find the existing document
+            var idProp = typeof(T).GetProperty("Id");
+            var id = idProp?.GetValue(entity);
+
+            if (id == null || (id is int intId && intId == 0))
+            {
+                return 0;
+            }
+
+            var existing = col.FindById(new BsonValue(id));
+            if (existing == null) return 0;
+
+            // Extract column names from the expression and copy only those
+            var columnNames = ExtractMemberNames(columns);
+            foreach (var name in columnNames)
+            {
+                var prop = typeof(T).GetProperty(name);
+                if (prop != null)
+                {
+                    prop.SetValue(existing, prop.GetValue(entity));
+                }
+            }
+
+            return col.Update(existing) ? 1 : 0;
+        });
+    }
+
+    public Task<int> UpsertAsync<T>(T entity, Expression<Func<T, object>> matchColumns)
+        where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            var (propName, propValue) = ExtractMatchColumn(entity, matchColumns);
+
+            var existing = col.FindOne(Query.EQ(propName, new BsonValue(propValue)));
+            if (existing != null)
+            {
+                // Copy the Id from existing to entity so Update targets the right document
+                var idProp = typeof(T).GetProperty("Id");
+                if (idProp != null)
+                {
+                    idProp.SetValue(entity, idProp.GetValue(existing));
+                }
+
+                col.Update(entity);
+            }
+            else
+            {
+                col.Insert(entity);
+            }
+
+            return 1;
+        });
+    }
+
+    public Task<int> DeleteAsync<T>(Expression<Func<T, bool>> predicate) where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            var col = GetCollection<T>();
+            return col.DeleteMany(predicate);
+        });
+    }
+
+    public Task<int> UpdateSetWhereAsync<T>(Expression<Func<T, T>> setColumns, Expression<Func<T, bool>> where)
+        where T : class, new()
+    {
+        return Task.Run(() =>
+        {
+            // LiteDB is a single-process embedded file, so each server has its own DB — there is no
+            // cross-server race here (that only happens on a shared SQL backend, handled atomically
+            // by DatabaseProvider). Apply the SET expression to every matching row.
+            var col       = GetCollection<T>();
+            var setMembers = ExtractInitMembers(setColumns);
+            var apply      = setColumns.Compile();
+
+            var matches = col.Find(where).ToList();
+            var n = 0;
+            foreach (var existing in matches)
+            {
+                var template = apply(existing);
+                foreach (var name in setMembers)
+                {
+                    var prop = typeof(T).GetProperty(name);
+                    if (prop is not null && prop.CanWrite)
+                        prop.SetValue(existing, prop.GetValue(template));
+                }
+                if (col.Update(existing)) n++;
+            }
+            return n;
+        });
+    }
+
+    public Task<IDatabaseTransaction> BeginTransactionAsync()
+    {
+        return Task.Run<IDatabaseTransaction>(() => new LiteDbTransaction(db));
+    }
+
+    #region Helpers
+
+    private static (string PropertyName, object Value) ExtractMatchColumn<T>(
+        T entity,
+        Expression<Func<T, object>> matchColumns
+    )
+    {
+        var body = matchColumns.Body;
+        if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+            body = unary.Operand;
+
+        if (body is MemberExpression member)
+        {
+            var propName = member.Member.Name;
+            var propValue = matchColumns.Compile()(entity);
+            return (propName, propValue);
+        }
+
+        throw new ArgumentException("matchColumns must be a simple property expression");
+    }
+
+    private static List<string> ExtractMemberNames<T>(Expression<Func<T, object>> expression)
+    {
+        var body = expression.Body;
+        if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+            body = unary.Operand;
+
+        if (body is NewExpression newExpr)
+        {
+            return newExpr.Members?.Select(m => m.Name).ToList() ?? [];
+        }
+
+        if (body is MemberExpression member)
+        {
+            return [member.Member.Name];
+        }
+
+        throw new ArgumentException("Cannot extract member names from expression");
+    }
+
+    // Member names assigned in a `x => new T { A = ..., B = ... }` initializer.
+    private static List<string> ExtractInitMembers<T>(Expression<Func<T, T>> expression)
+    {
+        if (expression.Body is MemberInitExpression init)
+            return init.Bindings.Select(b => b.Member.Name).ToList();
+        if (expression.Body is NewExpression newExpr)
+            return newExpr.Members?.Select(m => m.Name).ToList() ?? [];
+        throw new ArgumentException("setColumns must be a member-init expression: x => new T { ... }");
+    }
+
+    #endregion
+}
+
+```
+
+`CallAdmin.Database/Provider/LiteDbJoinQueryable.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading.Tasks;
+using LiteDB;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+/// <summary>
+/// In-memory join implementation for LiteDB.
+/// Executes the T1 query first, then fetches matching T2 records and joins in memory.
+/// Suitable for small result sets (e.g., leaderboards with Take/Limit).
+/// </summary>
+internal sealed class LiteDbJoinQueryable<T1, T2>(
+    LiteDatabase db,
+    ILiteQueryable<T1> query,
+    Expression<Func<T1, T2, bool>> joinExpression
+) : IDatabaseJoinQueryable<T1, T2>
+    where T1 : class, new()
+    where T2 : class, new()
+{
+    private Expression<Func<T1, T2, bool>>? _whereExpr;
+    private Expression<Func<T1, T2, object>>? _orderByDescExpr;
+    private int? _take;
+
+    public IDatabaseJoinQueryable<T1, T2> Where(Expression<Func<T1, T2, bool>> predicate)
+    {
+        _whereExpr = predicate;
+        return this;
+    }
+
+    public IDatabaseJoinQueryable<T1, T2> OrderByDescending(
+        Expression<Func<T1, T2, object>> keySelector
+    )
+    {
+        _orderByDescExpr = keySelector;
+        return this;
+    }
+
+    public IDatabaseJoinQueryable<T1, T2> Take(int count)
+    {
+        _take = count;
+        return this;
+    }
+
+    public Task<List<TResult>> SelectToListAsync<TResult>(
+        Expression<Func<T1, T2, TResult>> selector
+    )
+        where TResult : class, new()
+    {
+        return Task.Run(() =>
+        {
+            // 1. Execute T1 query
+            var list1 = query.ToList();
+
+            // 2. Fetch all T2 records
+            var collectionName = GetCollectionName(typeof(T2));
+            var col2 = db.GetCollection<T2>(collectionName);
+            var list2 = col2.FindAll().ToList();
+
+            // 3. Join in memory
+            var joinFunc = joinExpression.Compile();
+            IEnumerable<(T1 t1, T2 t2)> joined =
+                from t1 in list1
+                from t2 in list2
+                where joinFunc(t1, t2)
+                select (t1, t2);
+
+            // 4. Apply Where
+            if (_whereExpr != null)
+            {
+                var whereFunc = _whereExpr.Compile();
+                joined = joined.Where(pair => whereFunc(pair.t1, pair.t2));
+            }
+
+            // 5. Apply OrderByDescending
+            if (_orderByDescExpr != null)
+            {
+                var orderFunc = _orderByDescExpr.Compile();
+                joined = joined.OrderByDescending(pair => orderFunc(pair.t1, pair.t2));
+            }
+
+            // 6. Apply Take
+            if (_take.HasValue)
+            {
+                joined = joined.Take(_take.Value);
+            }
+
+            // 7. Select
+            var selectFunc = selector.Compile();
+            return joined.Select(pair => selectFunc(pair.t1, pair.t2)).ToList();
+        });
+    }
+
+    private static string GetCollectionName(Type type)
+    {
+        var attr = type.GetCustomAttribute<DbTableAttribute>();
+        return attr?.TableName ?? type.Name;
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/LiteDbQueryable.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Threading.Tasks;
+using LiteDB;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class LiteDbQueryable<T> : IDatabaseQueryable<T>
+    where T : class, new()
+{
+    private readonly LiteDatabase _db;
+    private ILiteQueryable<T> _query;
+    private int? _limit;
+
+    public LiteDbQueryable(LiteDatabase db, ILiteQueryable<T> query)
+    {
+        _db = db;
+        _query = query;
+    }
+
+    public IDatabaseQueryable<T> Where(Expression<Func<T, bool>> predicate)
+    {
+        _query = _query.Where(predicate);
+        return this;
+    }
+
+    public IDatabaseQueryable<T> OrderBy(Expression<Func<T, object>> keySelector)
+    {
+        _query = _query.OrderBy(keySelector);
+        return this;
+    }
+
+    public IDatabaseQueryable<T> OrderByDescending(Expression<Func<T, object>> keySelector)
+    {
+        _query = _query.OrderByDescending(keySelector);
+        return this;
+    }
+
+    public IDatabaseQueryable<T> Take(int count)
+    {
+        _limit = count;
+        return this;
+    }
+
+    public IDatabaseJoinQueryable<T, T2> InnerJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
+        where T2 : class, new()
+    {
+        return new LiteDbJoinQueryable<T, T2>(_db, _query, joinExpression);
+    }
+
+    public Task<T> FirstAsync()
+    {
+        return Task.Run(() =>
+            _limit.HasValue
+                ? _query.Limit(_limit.Value).First()
+                : _query.First()
+        );
+    }
+
+    public Task<T?> FirstOrDefaultAsync()
+    {
+        return Task.Run<T?>(() =>
+            _limit.HasValue
+                ? _query.Limit(_limit.Value).FirstOrDefault()
+                : _query.FirstOrDefault()
+        );
+    }
+
+    public Task<T> FirstAsync(Expression<Func<T, bool>> predicate)
+    {
+        _query = _query.Where(predicate);
+        return Task.Run(() =>
+            _limit.HasValue
+                ? _query.Limit(_limit.Value).First()
+                : _query.First()
+        );
+    }
+
+    public Task<List<T>> ToListAsync()
+    {
+        return Task.Run(() =>
+            _limit.HasValue
+                ? _query.Limit(_limit.Value).ToList()
+                : _query.ToList()
+        );
+    }
+
+    public Task<int> CountAsync()
+    {
+        return Task.Run(() =>
+            _limit.HasValue
+                ? _query.Limit(_limit.Value).Count()
+                : _query.Count()
+        );
+    }
+}
+
+```
+
+`CallAdmin.Database/Provider/LiteDbTransaction.cs`:
+
+```cs
+using System.Threading.Tasks;
+using LiteDB;
+using CallAdmin.Database.Shared;
+
+namespace CallAdmin.Database.Provider;
+
+internal sealed class LiteDbTransaction : IDatabaseTransaction
+{
+    private readonly LiteDatabase _db;
+    private bool _completed;
+
+    public LiteDbTransaction(LiteDatabase db)
+    {
+        _db = db;
+        _db.BeginTrans();
+    }
+
+    public Task CommitAsync()
+    {
+        return Task.Run(() =>
+        {
+            _db.Commit();
+            _completed = true;
+        });
+    }
+
+    public Task RollbackAsync()
+    {
+        return Task.Run(() =>
+        {
+            _db.Rollback();
+            _completed = true;
+        });
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        if (!_completed)
+        {
+            _db.Rollback();
+        }
+
+        return ValueTask.CompletedTask;
+    }
+}
+
+```
+
+`CallAdmin.Discord/CallAdmin.Discord.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>CallAdmin.Discord</AssemblyName>
+    <RootNamespace>CallAdmin.Discord</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="MessagePipe" Version="1.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(CallAdminRoot)CallAdmin.Shared\CallAdmin.Shared.csproj" Private="false" />
+  </ItemGroup>
+</Project>
+
+```
+
+`CallAdmin.Discord/CallAdminDiscordPlugin.cs`:
+
+```cs
+using System;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using CallAdmin.Discord.Configuration;
+using CallAdmin.Discord.Services;
+using CallAdmin.Shared;
+using CallAdmin.Shared.Models;
+using Sharp.Shared;
+
+namespace CallAdmin.Discord;
+
+/// <summary>
+/// Discord notifier for CallAdmin. Subscribes to ICallAdminShared lifecycle events and pushes
+/// (POST) a webhook embed on submit, then edits (PATCH) that same embed in place as the report
+/// transitions claimed → handled / dismissed / cancelled. Pure consumer — does not reference
+/// CallAdmin.Core. Event handlers fire on the publishing thread, so all network work is
+/// dispatched onto Task.Run to avoid blocking the game loop.
+/// </summary>
+public sealed class CallAdminDiscordPlugin : IModSharpModule
+{
+    public string DisplayName   => "CallAdmin.Discord";
+    public string DisplayAuthor => "yappershq";
+
+    private readonly ILogger<CallAdminDiscordPlugin> _logger;
+    private readonly DiscordConfig                    _config;
+    private readonly WebhookClient                    _webhook;
+    private readonly ISharedSystem                    _shared;
+    private ICallAdminShared?                         _callAdmin;
+
+    // Cached delegates so we can unhook on Shutdown
+    private Action<Report>? _onSubmitted;
+    private Action<Report>? _onClaimed;
+    private Action<Report>? _onHandled;
+    private Action<Report>? _onDismissed;
+    private Action<Report>? _onCancelled;
+
+    public CallAdminDiscordPlugin(
+        ISharedSystem  sharedSystem,
+        string         dllPath,
+        string         sharpPath,
+        Version        version,
+        IConfiguration configuration,
+        bool           hotReload)
+    {
+        var loggerFactory = sharedSystem.GetLoggerFactory();
+        _logger  = loggerFactory.CreateLogger<CallAdminDiscordPlugin>();
+        _shared  = sharedSystem;
+        _config  = DiscordConfig.Load(sharpPath, loggerFactory.CreateLogger<DiscordConfig>());
+        _webhook = new WebhookClient(loggerFactory.CreateLogger<WebhookClient>());
+    }
+
+    public bool Init() => true;
+    public void PostInit() { }
+
+    public void OnAllModulesLoaded()
+    {
+        if (string.IsNullOrWhiteSpace(_config.WebhookUrl))
+        {
+            _logger.LogWarning("[CallAdmin.Discord] webhookUrl is empty in calladmin.discord.json — nothing will be posted");
+            return;
+        }
+
+        _callAdmin = _shared.GetSharpModuleManager()
+            .GetOptionalSharpModuleInterface<ICallAdminShared>(ICallAdminShared.Identity)?.Instance;
+        if (_callAdmin is null)
+        {
+            _logger.LogWarning("[CallAdmin.Discord] ICallAdminShared not available — CallAdmin.Core not loaded?");
+            return;
+        }
+
+        _onSubmitted = r => _ = OnSubmittedAsync(r);
+        _onClaimed   = r => _ = OnLifecycleAsync(r);
+        _onHandled   = r => _ = OnLifecycleAsync(r);
+        _onDismissed = r => _ = OnLifecycleAsync(r);
+        _onCancelled = r => _ = OnLifecycleAsync(r);
+
+        _callAdmin.OnReportSubmitted += _onSubmitted;
+        _callAdmin.OnReportClaimed   += _onClaimed;
+        _callAdmin.OnReportHandled   += _onHandled;
+        _callAdmin.OnReportDismissed += _onDismissed;
+        _callAdmin.OnReportCancelled += _onCancelled;
+
+        _logger.LogInformation("[CallAdmin.Discord] Subscribed to CallAdmin events; webhook ready");
+    }
+
+    public void Shutdown()
+    {
+        if (_callAdmin is null) return;
+        if (_onSubmitted is not null) _callAdmin.OnReportSubmitted -= _onSubmitted;
+        if (_onClaimed   is not null) _callAdmin.OnReportClaimed   -= _onClaimed;
+        if (_onHandled   is not null) _callAdmin.OnReportHandled   -= _onHandled;
+        if (_onDismissed is not null) _callAdmin.OnReportDismissed -= _onDismissed;
+        if (_onCancelled is not null) _callAdmin.OnReportCancelled -= _onCancelled;
+    }
+
+    private async Task OnSubmittedAsync(Report report)
+    {
+        try
+        {
+            var payload = EmbedBuilder.BuildPayload(report, _config, initialPost: true);
+            var messageId = await _webhook.SendAsync(_config.WebhookUrl, payload);
+            if (messageId is null) return;
+            // Persist the Discord message id so subsequent lifecycle events can PATCH instead of repost.
+            if (_callAdmin is not null)
+                await _callAdmin.SetExternalMessageIdAsync(report.Id, messageId);
+        }
+        catch (Exception e) { _logger.LogError(e, "[CallAdmin.Discord] OnSubmitted failed for report #{Id}", report.Id); }
+    }
+
+    private async Task OnLifecycleAsync(Report report)
+    {
+        try
+        {
+            // If we never stored a message id (first POST failed, or report was never posted), fall back to a new POST.
+            var payload = EmbedBuilder.BuildPayload(report, _config, initialPost: string.IsNullOrEmpty(report.ExternalMessageId));
+            if (string.IsNullOrEmpty(report.ExternalMessageId))
+            {
+                var messageId = await _webhook.SendAsync(_config.WebhookUrl, payload);
+                if (messageId is not null && _callAdmin is not null)
+                    await _callAdmin.SetExternalMessageIdAsync(report.Id, messageId);
+            }
+            else
+            {
+                await _webhook.EditAsync(_config.WebhookUrl, report.ExternalMessageId, payload);
+            }
+        }
+        catch (Exception e) { _logger.LogError(e, "[CallAdmin.Discord] Lifecycle update failed for report #{Id}", report.Id); }
+    }
+}
+
+```
+
+`CallAdmin.Discord/Configuration/DiscordConfig.cs`:
+
+```cs
+using System;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+
+namespace CallAdmin.Discord.Configuration;
+
+internal sealed class DiscordConfig
+{
+    [JsonPropertyName("webhookUrl")] public string WebhookUrl { get; set; } = string.Empty;
+    [JsonPropertyName("mentionRoleId")] public string MentionRoleId { get; set; } = string.Empty;
+    [JsonPropertyName("embedTitle")]  public string EmbedTitle  { get; set; } = "New Report";
+    [JsonPropertyName("embedFooter")] public string EmbedFooter { get; set; } = "CallAdmin";
+    [JsonPropertyName("connectIp")]   public string ConnectIp   { get; set; } = string.Empty;
+    [JsonPropertyName("connectPort")] public int    ConnectPort { get; set; } = 0;
+
+    // Base of the web connect-redirect. steam:// links are NOT clickable inside Discord embeds,
+    // so we link a https page that 302s to steam://connect. Final URL: {ConnectUrlBase}/{ip}:{port}.
+    [JsonPropertyName("connectUrlBase")] public string ConnectUrlBase { get; set; } = "https://cstema.lt/connect";
+
+    // Base of the web moderation lookup page. Reporter/Target/Handler names in the embed link to
+    // {LookupUrlBase}?tab=player_lookup&steamId={steamid64} so admins jump straight to the player's
+    // full profile. Leave empty to disable the links. Not hardcoded — override per server in config.
+    [JsonPropertyName("lookupUrlBase")] public string LookupUrlBase { get; set; } = "https://cstema.lt/moderavimas";
+
+    private static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReadCommentHandling         = JsonCommentHandling.Skip,
+        AllowTrailingCommas         = true,
+        WriteIndented               = true,
+    };
+
+    public static DiscordConfig Load(string sharpPath, ILogger logger)
+    {
+        var path = Path.Combine(sharpPath, "configs", "calladmin.discord.json");
+        try
+        {
+            if (!File.Exists(path))
+            {
+                var def = new DiscordConfig();
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                File.WriteAllText(path, JsonSerializer.Serialize(def, JsonOpts));
+                logger.LogInformation("[CallAdmin.Discord] Wrote default config to {Path}", path);
+                return def;
+            }
+            var cfg = JsonSerializer.Deserialize<DiscordConfig>(File.ReadAllText(path), JsonOpts);
+            return cfg ?? new DiscordConfig();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "[CallAdmin.Discord] Failed to load discord config");
+            return new DiscordConfig();
+        }
+    }
+}
+
+```
+
+`CallAdmin.Discord/Services/EmbedBuilder.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using CallAdmin.Discord.Configuration;
+using CallAdmin.Shared.Models;
+
+namespace CallAdmin.Discord.Services;
+
+/// <summary>
+/// Builds Discord webhook payload dictionaries (serialized to JSON by the client).
+/// One embed per report, status-coloured. Stable field layout so PATCH edits look correct.
+/// </summary>
+internal static class EmbedBuilder
+{
+    // Discord embed colors (decimal). Pending=red so it stands out, terminal states fade.
+    private const int ColorPending   = 15548997; // red
+    private const int ColorClaimed   = 16776960; // yellow
+    private const int ColorHandled   = 3066993;  // green
+    private const int ColorDismissed = 9807270;  // grey
+    private const int ColorCancelled = 4934475;  // dark grey
+
+    public static object BuildPayload(Report report, DiscordConfig config, bool initialPost)
+    {
+        var embed = BuildEmbed(report, config);
+        var dict  = new Dictionary<string, object?> { ["embeds"] = new[] { embed } };
+
+        // Mention the role only on the initial post; edits suppress repeats and keep mention silent.
+        if (initialPost && report.Status == ReportStatus.Pending && !string.IsNullOrWhiteSpace(config.MentionRoleId))
+        {
+            dict["content"] = $"<@&{config.MentionRoleId}>";
+            dict["allowed_mentions"] = new Dictionary<string, object?>
+            {
+                ["roles"] = new[] { config.MentionRoleId },
+            };
+        }
+        else if (!initialPost)
+        {
+            // Strip content on edit so we don't re-ping
+            dict["content"] = "";
+            dict["allowed_mentions"] = new Dictionary<string, object?>
+            {
+                ["parse"] = Array.Empty<string>(),
+            };
+        }
+
+        return dict;
+    }
+
+    private static object BuildEmbed(Report r, DiscordConfig config)
+    {
+        var fields = new List<object>
+        {
+            Field("Reporter", PlayerCell(r.ReporterName, r.ReporterSteamId, config), inline: true),
+            Field("Target",   PlayerCell(r.TargetName,   r.TargetSteamId,   config), inline: true),
+            Field("Reason",   $"`{Escape(r.ReasonKey)}`",                          inline: true),
+            Field("Map",      Escape(r.MapName),                                   inline: true),
+            Field("Status",   StatusLabel(r.Status),                               inline: true),
+        };
+
+        if (!string.IsNullOrWhiteSpace(r.ServerName))
+            fields.Add(Field("Server", Escape(r.ServerName), inline: true));
+
+        if (r.HandlerName is { Length: > 0 })
+            fields.Add(Field("Handled by", r.HandlerSteamId is { } hsid ? PlayerCell(r.HandlerName, hsid, config) : Escape(r.HandlerName), inline: false));
+
+        if (r.Outcome is { Length: > 0 })
+            fields.Add(Field("Outcome", OutcomeLabel(r.Outcome), inline: true));
+
+        // Admin commands for this report — what to type next, based on current stage. steam:// links
+        // aren't clickable in embeds, so admins need the in-game commands spelled out per stage.
+        var commands = CommandsFor(r);
+        if (commands is not null)
+            fields.Add(Field("How to handle (in-game chat)", commands, inline: false));
+
+        // Optional connect link. steam:// is dead text in embeds — link a https connect-redirect.
+        if (!string.IsNullOrWhiteSpace(config.ConnectIp) && config.ConnectPort > 0
+            && !string.IsNullOrWhiteSpace(config.ConnectUrlBase))
+        {
+            var url = $"{config.ConnectUrlBase.TrimEnd('/')}/{config.ConnectIp}:{config.ConnectPort}";
+            fields.Add(Field("Connect", $"[{config.ConnectIp}:{config.ConnectPort}]({url})", inline: false));
+        }
+
+        var embed = new Dictionary<string, object?>
+        {
+            ["title"]       = string.IsNullOrWhiteSpace(config.EmbedTitle) ? "CallAdmin Report" : config.EmbedTitle,
+            ["description"] = $"Report **#{r.Id}** — {StatusLabel(r.Status)}",
+            ["color"]       = StatusColor(r.Status),
+            ["timestamp"]   = r.CreatedAt.ToString("o", CultureInfo.InvariantCulture),
+            ["fields"]      = fields,
+            ["footer"]      = new Dictionary<string, object?>
+            {
+                ["text"] = string.IsNullOrWhiteSpace(config.EmbedFooter) ? $"CallAdmin · #{r.Id}" : $"{config.EmbedFooter} · #{r.Id}",
+            },
+        };
+
+        return embed;
+    }
+
+    // In-game admin commands to advance the report from its current stage. Null for terminal
+    // states (nothing left to do). Fenced as a code block so the columns line up in Discord.
+    private static string? CommandsFor(Report r) => r.Status switch
+    {
+        ReportStatus.Pending => $"```\n1) Claim it   →  !claim {r.Id}\n2) Resolve    →  !handled {r.Id}\n   or dismiss →  !dismiss {r.Id}\n```",
+        ReportStatus.Claimed => $"```\nResolve   →  !handled {r.Id}\nDismiss   →  !dismiss {r.Id}\n```",
+        _                    => null,
+    };
+
+    private static int StatusColor(ReportStatus s) => s switch
+    {
+        ReportStatus.Pending   => ColorPending,
+        ReportStatus.Claimed   => ColorClaimed,
+        ReportStatus.Handled   => ColorHandled,
+        ReportStatus.Dismissed => ColorDismissed,
+        ReportStatus.Cancelled => ColorCancelled,
+        _                      => ColorPending,
+    };
+
+    private static string StatusLabel(ReportStatus s) => s switch
+    {
+        ReportStatus.Pending   => "🔴 Pending",
+        ReportStatus.Claimed   => "🟡 Claimed",
+        ReportStatus.Handled   => "🟢 Handled",
+        ReportStatus.Dismissed => "⚪ Dismissed",
+        ReportStatus.Cancelled => "⚫ Cancelled",
+        _                      => s.ToString(),
+    };
+
+    private static string OutcomeLabel(string outcome) => outcome.ToLowerInvariant() switch
+    {
+        "ban"       => "🔨 Ban",
+        "mute"      => "🔇 Mute",
+        "gag"       => "🤐 Gag",
+        "kick"      => "👢 Kick",
+        "warn"      => "⚠️ Warning",
+        "dismissed" => "⚪ Dismissed (no action)",
+        _           => Escape(outcome),
+    };
+
+    private static Dictionary<string, object?> Field(string name, string value, bool inline) => new()
+    {
+        ["name"]   = name,
+        ["value"]  = string.IsNullOrEmpty(value) ? "-" : value,
+        ["inline"] = inline,
+    };
+
+    // Player cell: name links to the web lookup (moderavimas) for that SteamID when configured,
+    // with the raw SteamID kept in a code block for copy-paste. URL base comes from config.
+    private static string PlayerCell(string name, ulong steamId, DiscordConfig config)
+    {
+        var esc = Escape(name);
+        if (!string.IsNullOrWhiteSpace(config.LookupUrlBase))
+        {
+            var url = $"{config.LookupUrlBase.TrimEnd('/')}?tab=player_lookup&steamId={steamId}";
+            return $"[{esc}]({url})\n`{steamId}`";
+        }
+        return $"{esc}\n`{steamId}`";
+    }
+
+    // Escape Discord markdown / mention chars so player names can't break the embed
+    private static string Escape(string s)
+    {
+        if (string.IsNullOrEmpty(s)) return string.Empty;
+        // Only need to neuter the formatting set. backticks block code formatting.
+        return s
+            .Replace("\\", "\\\\")
+            .Replace("`", "\\`")
+            .Replace("*", "\\*")
+            .Replace("_", "\\_")
+            .Replace("~", "\\~")
+            .Replace("|", "\\|")
+            .Replace("@everyone", "@​everyone")
+            .Replace("@here",     "@​here");
+    }
+}
+
+```
+
+`CallAdmin.Discord/Services/WebhookClient.cs`:
+
+```cs
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+
+namespace CallAdmin.Discord.Services;
+
+internal sealed class WebhookClient
+{
+    private static readonly HttpClient Http = new();
+
+    private readonly ILogger _logger;
+
+    public WebhookClient(ILogger<WebhookClient> logger) => _logger = logger;
+
+    public async Task<string?> SendAsync(string url, object payload)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
+
+        try
+        {
+            // wait=true so the response carries the message id (needed to edit-in-place later).
+            var endpoint = url.Contains("?wait=") ? url : (url + (url.Contains('?') ? "&" : "?") + "wait=true");
+
+            var json    = JsonSerializer.Serialize(payload);
+            using var req = new HttpRequestMessage(HttpMethod.Post, endpoint)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
+            using var resp = await Http.SendAsync(req);
+            var body = await resp.Content.ReadAsStringAsync();
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("[CallAdmin.Discord] Webhook POST {Status}: {Body}", resp.StatusCode, body);
+                return null;
+            }
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin.Discord] Webhook POST failed");
+            return null;
+        }
+    }
+
+    public async Task EditAsync(string url, string messageId, object payload)
+    {
+        if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(messageId)) return;
+        try
+        {
+            var trimmed  = url.Split('?')[0];
+            var endpoint = $"{trimmed}/messages/{messageId}";
+            var json     = JsonSerializer.Serialize(payload);
+            using var req = new HttpRequestMessage(HttpMethod.Patch, endpoint)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            };
+            using var resp = await Http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+                _logger.LogWarning("[CallAdmin.Discord] Webhook PATCH {Status}", resp.StatusCode);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[CallAdmin.Discord] Webhook PATCH failed");
+        }
+    }
+}
+
+```
+
+`CallAdmin.Shared/CallAdmin.Shared.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>CallAdmin.Shared</AssemblyName>
+    <RootNamespace>CallAdmin.Shared</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    Packable so other plugins consume this contract from NuGet instead of an absolute ProjectReference or a
+    HintPath to a local .dll — neither of which resolves on anyone else's machine, which is what made this
+    public repo unbuildable for outsiders. Mirrors YappersHQ.Vip.Shared / .AdminPanel.Shared.
+
+    Consumers reference it with ExcludeAssets="runtime" and must NEVER ship their own copy: the copy the
+    owning plugin already installs under the server's shared directory has to be the assembly that actually
+    loads. A second copy under a different ALC breaks type identity across the SharpModuleManager boundary.
+  -->
+  <PropertyGroup>
+    <PackageId>YappersHQ.CallAdmin.Shared</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>yappershq</Authors>
+    <Description>Public contract for the CallAdmin module (ICallAdminShared) — consumed by plugins that integrate with it.</Description>
+    <IsPackable>true</IsPackable>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- nuget.org flags packages with no README on the package page. Ships the repo README inside the .nupkg. -->
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`CallAdmin.Shared/Events/ReportEvents.cs`:
+
+```cs
+using CallAdmin.Shared.Models;
+
+namespace CallAdmin.Shared.Events;
+
+/// <summary>Published once a report row is persisted (post-cooldown / duplicate / perm gates).</summary>
+public sealed record ReportSubmittedEvent(Report Report);
+
+/// <summary>Published when an admin claims a pending report.</summary>
+public sealed record ReportClaimedEvent(Report Report);
+
+/// <summary>Published when an admin marks a report handled.</summary>
+public sealed record ReportHandledEvent(Report Report);
+
+/// <summary>Published when an admin dismisses a report as false / no-action.</summary>
+public sealed record ReportDismissedEvent(Report Report);
+
+/// <summary>Published when the reporter cancels their own pending report (within the cancel window).</summary>
+public sealed record ReportCancelledEvent(Report Report);
+
+```
+
+`CallAdmin.Shared/Filters/ITargetFilter.cs`:
+
+```cs
+using Sharp.Shared.Objects;
+
+namespace CallAdmin.Shared.Filters;
+
+/// <summary>
+/// Extension point. Plugins implement this to hide specific players from the !report target list
+/// (e.g. donors, devs, staff). Registered via <see cref="ICallAdminShared.RegisterTargetFilter"/>.
+/// Return <c>false</c> to hide <paramref name="candidate"/> from <paramref name="reporter"/>.
+/// </summary>
+public interface ITargetFilter
+{
+    bool CanReport(IGameClient reporter, IGameClient candidate);
+}
+
+```
+
+`CallAdmin.Shared/ICallAdminShared.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using CallAdmin.Shared.Filters;
+using CallAdmin.Shared.Models;
+using Sharp.Shared.Objects;
+
+namespace CallAdmin.Shared;
+
+/// <summary>
+/// Public surface for CallAdmin. External plugins resolve this from
+/// <c>ISharpModuleManager</c> in <c>OnAllSharpModulesLoaded</c> and subscribe to the
+/// report-lifecycle events to react to submit / claim / handle / dismiss / cancel.
+/// </summary>
+public interface ICallAdminShared
+{
+    const string Identity = nameof(ICallAdminShared);
+
+    // Lifecycle events — fired after persistence completes. Subscribed across plugin
+    // boundaries (each consumer pulls the interface from SharpModuleManager and binds
+    // its own handlers). Handlers run synchronously on the publishing thread; do not
+    // block. Use `_ = Task.Run(...)` inside the handler for network / DB work.
+    event Action<Report>? OnReportSubmitted;
+    event Action<Report>? OnReportClaimed;
+    event Action<Report>? OnReportHandled;
+    event Action<Report>? OnReportDismissed;
+    event Action<Report>? OnReportCancelled;
+
+    /// <summary>Submit a new report. Returns the persisted <see cref="Report"/> or null if blocked.</summary>
+    Task<Report?> SubmitReportAsync(IGameClient reporter, IGameClient target, string reasonKey);
+
+    /// <summary>Mark an in-flight report as claimed by the given admin client.</summary>
+    Task<Report?> ClaimReportAsync(int reportId, IGameClient admin);
+
+    /// <summary>Mark a claimed (or pending) report as handled.</summary>
+    Task<Report?> MarkHandledAsync(int reportId, IGameClient admin);
+
+    /// <summary>Dismiss a pending / claimed report (false alarm, no action).</summary>
+    Task<Report?> DismissReportAsync(int reportId, IGameClient admin);
+
+    /// <summary>Reporter-side cancel of their own report (within the cancel window).</summary>
+    Task<Report?> CancelReportAsync(int reportId, IGameClient reporter);
+
+    /// <summary>Lookup a report by id.</summary>
+    Task<Report?> GetReportAsync(int reportId);
+
+    /// <summary>All pending (un-handled, un-claimed, un-dismissed) reports.</summary>
+    Task<IReadOnlyList<Report>> GetPendingReportsAsync();
+
+    /// <summary>Currently configured reasons (key + locale-key label pairs).</summary>
+    IReadOnlyList<ReportReason> GetReasons();
+
+    /// <summary>Register a filter that can hide players from the target list.</summary>
+    void RegisterTargetFilter(ITargetFilter filter);
+
+    /// <summary>Persist the Discord (or other external) message id alongside a report row.</summary>
+    Task SetExternalMessageIdAsync(int reportId, string messageId);
+}
+
+```
+
+`CallAdmin.Shared/Models/Report.cs`:
+
+```cs
+using System;
+
+namespace CallAdmin.Shared.Models;
+
+/// <summary>Public read-only view of a report. Extensions consume this via events / API.</summary>
+public sealed class Report
+{
+    public int          Id              { get; init; }
+    public ulong        ReporterSteamId { get; init; }
+    public string       ReporterName    { get; init; } = string.Empty;
+    public ulong        TargetSteamId   { get; init; }
+    public string       TargetName      { get; init; } = string.Empty;
+    public string       ReasonKey       { get; init; } = string.Empty;
+    public string       ReasonLabel     { get; init; } = string.Empty;
+    public string       MapName         { get; init; } = string.Empty;
+    public string       ServerName      { get; init; } = string.Empty;
+    public DateTime     CreatedAt       { get; init; }
+
+    public ReportStatus Status          { get; init; }
+    public ulong?       HandlerSteamId  { get; init; }
+    public string?      HandlerName     { get; init; }
+    public DateTime?    HandledAt       { get; init; }
+
+    /// <summary>Optional handle for the Discord-side notification message — extensions may use to edit-in-place.</summary>
+    public string?      ExternalMessageId { get; init; }
+
+    /// <summary>Resolution outcome (ban/mute/gag/kick/warn/dismissed) — set when a mod resolves via the
+    /// website. Null for in-game resolutions.</summary>
+    public string?      Outcome { get; init; }
+}
+
+```
+
+`CallAdmin.Shared/Models/ReportReason.cs`:
+
+```cs
+namespace CallAdmin.Shared.Models;
+
+/// <summary>One configurable report reason — key + locale-key label.</summary>
+public sealed class ReportReason
+{
+    public string Key      { get; init; } = string.Empty;
+    public string LocaleKey { get; init; } = string.Empty;
+}
+
+```
+
+`CallAdmin.Shared/Models/ReportStatus.cs`:
+
+```cs
+namespace CallAdmin.Shared.Models;
+
+/// <summary>Lifecycle states of a player report.</summary>
+public enum ReportStatus
+{
+    Pending,
+    Claimed,
+    Handled,
+    Dismissed,
+    Cancelled,
+}
+
+```
+
+`CallAdmin.slnx`:
+
+```slnx
+<Solution>
+  <Project Path="CallAdmin.Shared/CallAdmin.Shared.csproj" />
+  <Project Path="CallAdmin.Database.Shared/CallAdmin.Database.Shared.csproj" />
+  <Project Path="CallAdmin.Database/CallAdmin.Database.csproj" />
+  <Project Path="CallAdmin.Core/CallAdmin.Core.csproj" />
+  <Project Path="CallAdmin.Discord/CallAdmin.Discord.csproj" />
+</Solution>
+
+```
+
+`Directory.Build.props`:
+
+```props
+<Project>
+  <PropertyGroup>
+    <CallAdminRoot>$(MSBuildThisFileDirectory)</CallAdminRoot>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>yappershq</Authors>
+    <VersionPrefix>0.1</VersionPrefix>
+    <VersionSuffix>0</VersionSuffix>
+    <Version>$(VersionPrefix).$(VersionSuffix)</Version>
+
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <BuildDateTime>$([System.DateTime]::Now.ToString("yyyy-MM-dd HH:mm:ss"))</BuildDateTime>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsSharedProject Condition="$([System.String]::new('$(MSBuildProjectName)').EndsWith('.Shared'))">true</IsSharedProject>
+    <IsModuleProject Condition="'$(IsSharedProject)' != 'true'">true</IsModuleProject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsSharedProject)' == 'true'">
+    <OutputPath>$(MSBuildThisFileDirectory).build\shared\$(MSBuildProjectName)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsModuleProject)' == 'true'">
+    <OutputPath>$(MSBuildThisFileDirectory).build\modules\$(MSBuildProjectName)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>BuildTime</_Parameter1>
+      <_Parameter2>$(BuildDateTime)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ModSharpVersion>2.1.136</ModSharpVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModSharp.Sharp.Shared"                           Version="$(ModSharpVersion)" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="ModSharp.Sharp.Modules.LocalizerManager.Shared"  Version="$(ModSharpVersion)" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="ModSharp.Sharp.Modules.MenuManager.Shared"       Version="$(ModSharpVersion)" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="ModSharp.Sharp.Modules.AdminManager.Shared"      Version="$(ModSharpVersion)" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="ModSharp.Sharp.Modules.TargetingManager.Shared" Version="$(ModSharpVersion)" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+</Project>
+
+```
+
+`LICENSE`:
+
+```
+Special Exception Notice for ModSharp
+
+Notwithstanding the terms of the GNU Affero General Public License version 3 ,
+the original author grants the following special exceptions for this project:
+
+1. Linking Exception  
+  As a special exception, you are permitted to link the code of this
+  program (as well as its derivative works) with "Counter-Strike 2",
+  the "Source Engine 2" and any game or MOD that runs on software by
+  Valve Corporation. You must still comply with AGPLv3 for all other code.
+
+2. Dual-Licensing Exception for Derivative Works  
+  As an additional special exception to the GNU AGPLv3, the original author
+  permits dual-licensing of DERIVATIVE WORKS ONLY (that is, ModSharp modules,
+  or any software built from the ModSharp SDK or files or Nuget Package)
+  under the GNU Affero General Public License version 3 "or any later version."
+  As such, you may choose for your derivative work(s) to be compatible
+  with the GNU Affero General Public License version 3 as long as it is also
+  compatible with the AGPLv3 (by using the "or any later version" clause).
+
+-------------------------------------------------------------------------------
+
+                    GNU AFFERO GENERAL PUBLIC LICENSE
+                       Version 3, 19 November 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU Affero General Public License is a free, copyleft license for
+software and other kinds of works, specifically designed to ensure
+cooperation with the community in the case of network server software.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+our General Public Licenses are intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.
+
+  When we speak of free software, we are referring to freedom, not
+price.  Our General Public Licenses are designed to make sure that you
+have the freedom to distribute copies of free software (and charge for
+them if you wish), that you receive source code or can get it if you
+want it, that you can change the software or use pieces of it in new
+free programs, and that you know you can do these things.
+
+  Developers that use our General Public Licenses protect your rights
+with two steps: (1) assert copyright on the software, and (2) offer
+you this License which gives you legal permission to copy, distribute
+and/or modify the software.
+
+  A secondary benefit of defending all users' freedom is that
+improvements made in alternate versions of the program, if they
+receive widespread use, become available for other developers to
+incorporate.  Many developers of free software are heartened and
+encouraged by the resulting cooperation.  However, in the case of
+software used on network servers, this result may fail to come about.
+The GNU General Public License permits making a modified version and
+letting the public access it on a server without ever releasing its
+source code to the public.
+
+  The GNU Affero General Public License is designed specifically to
+ensure that, in such cases, the modified source code becomes available
+to the community.  It requires the operator of a network server to
+provide the source code of the modified version running there to the
+users of that server.  Therefore, public use of a modified version, on
+a publicly accessible server, gives the public access to the source
+code of the modified version.
+
+  An older license, called the Affero General Public License and
+published by Affero, was designed to accomplish similar goals.  This is
+a different license, not a version of the Affero GPL, but Affero has
+released a new version of the Affero GPL which permits relicensing under
+this license.
+
+  The precise terms and conditions for copying, distribution and
+modification follow.
+
+                       TERMS AND CONDITIONS
+
+  0. Definitions.
+
+  "This License" refers to version 3 of the GNU Affero General Public License.
+
+  "Copyright" also means copyright-like laws that apply to other kinds of
+works, such as semiconductor masks.
+
+  "The Program" refers to any copyrightable work licensed under this
+License.  Each licensee is addressed as "you".  "Licensees" and
+"recipients" may be individuals or organizations.
+
+  To "modify" a work means to copy from or adapt all or part of the work
+in a fashion requiring copyright permission, other than the making of an
+exact copy.  The resulting work is called a "modified version" of the
+earlier work or a work "based on" the earlier work.
+
+  A "covered work" means either the unmodified Program or a work based
+on the Program.
+
+  To "propagate" a work means to do anything with it that, without
+permission, would make you directly or secondarily liable for
+infringement under applicable copyright law, except executing it on a
+computer or modifying a private copy.  Propagation includes copying,
+distribution (with or without modification), making available to the
+public, and in some countries other activities as well.
+
+  To "convey" a work means any kind of propagation that enables other
+parties to make or receive copies.  Mere interaction with a user through
+a computer network, with no transfer of a copy, is not conveying.
+
+  An interactive user interface displays "Appropriate Legal Notices"
+to the extent that it includes a convenient and prominently visible
+feature that (1) displays an appropriate copyright notice, and (2)
+tells the user that there is no warranty for the work (except to the
+extent that warranties are provided), that licensees may convey the
+work under this License, and how to view a copy of this License.  If
+the interface presents a list of user commands or options, such as a
+menu, a prominent item in the list meets this criterion.
+
+  1. Source Code.
+
+  The "source code" for a work means the preferred form of the work
+for making modifications to it.  "Object code" means any non-source
+form of a work.
+
+  A "Standard Interface" means an interface that either is an official
+standard defined by a recognized standards body, or, in the case of
+interfaces specified for a particular programming language, one that
+is widely used among developers working in that language.
+
+  The "System Libraries" of an executable work include anything, other
+than the work as a whole, that (a) is included in the normal form of
+packaging a Major Component, but which is not part of that Major
+Component, and (b) serves only to enable use of the work with that
+Major Component, or to implement a Standard Interface for which an
+implementation is available to the public in source code form.  A
+"Major Component", in this context, means a major essential component
+(kernel, window system, and so on) of the specific operating system
+(if any) on which the executable work runs, or a compiler used to
+produce the work, or an object code interpreter used to run it.
+
+  The "Corresponding Source" for a work in object code form means all
+the source code needed to generate, install, and (for an executable
+work) run the object code and to modify the work, including scripts to
+control those activities.  However, it does not include the work's
+System Libraries, or general-purpose tools or generally available free
+programs which are used unmodified in performing those activities but
+which are not part of the work.  For example, Corresponding Source
+includes interface definition files associated with source files for
+the work, and the source code for shared libraries and dynamically
+linked subprograms that the work is specifically designed to require,
+such as by intimate data communication or control flow between those
+subprograms and other parts of the work.
+
+  The Corresponding Source need not include anything that users
+can regenerate automatically from other parts of the Corresponding
+Source.
+
+  The Corresponding Source for a work in source code form is that
+same work.
+
+  2. Basic Permissions.
+
+  All rights granted under this License are granted for the term of
+copyright on the Program, and are irrevocable provided the stated
+conditions are met.  This License explicitly affirms your unlimited
+permission to run the unmodified Program.  The output from running a
+covered work is covered by this License only if the output, given its
+content, constitutes a covered work.  This License acknowledges your
+rights of fair use or other equivalent, as provided by copyright law.
+
+  You may make, run and propagate covered works that you do not
+convey, without conditions so long as your license otherwise remains
+in force.  You may convey covered works to others for the sole purpose
+of having them make modifications exclusively for you, or provide you
+with facilities for running those works, provided that you comply with
+the terms of this License in conveying all material for which you do
+not control copyright.  Those thus making or running the covered works
+for you must do so exclusively on your behalf, under your direction
+and control, on terms that prohibit them from making any copies of
+your copyrighted material outside their relationship with you.
+
+  Conveying under any other circumstances is permitted solely under
+the conditions stated below.  Sublicensing is not allowed; section 10
+makes it unnecessary.
+
+  3. Protecting Users' Legal Rights From Anti-Circumvention Law.
+
+  No covered work shall be deemed part of an effective technological
+measure under any applicable law fulfilling obligations under article
+11 of the WIPO copyright treaty adopted on 20 December 1996, or
+similar laws prohibiting or restricting circumvention of such
+measures.
+
+  When you convey a covered work, you waive any legal power to forbid
+circumvention of technological measures to the extent such circumvention
+is effected by exercising rights under this License with respect to
+the covered work, and you disclaim any intention to limit operation or
+modification of the work as a means of enforcing, against the work's
+users, your or third parties' legal rights to forbid circumvention of
+technological measures.
+
+  4. Conveying Verbatim Copies.
+
+  You may convey verbatim copies of the Program's source code as you
+receive it, in any medium, provided that you conspicuously and
+appropriately publish on each copy an appropriate copyright notice;
+keep intact all notices stating that this License and any
+non-permissive terms added in accord with section 7 apply to the code;
+keep intact all notices of the absence of any warranty; and give all
+recipients a copy of this License along with the Program.
+
+  You may charge any price or no price for each copy that you convey,
+and you may offer support or warranty protection for a fee.
+
+  5. Conveying Modified Source Versions.
+
+  You may convey a work based on the Program, or the modifications to
+produce it from the Program, in the form of source code under the
+terms of section 4, provided that you also meet all of these conditions:
+
+    a) The work must carry prominent notices stating that you modified
+    it, and giving a relevant date.
+
+    b) The work must carry prominent notices stating that it is
+    released under this License and any conditions added under section
+    7.  This requirement modifies the requirement in section 4 to
+    "keep intact all notices".
+
+    c) You must license the entire work, as a whole, under this
+    License to anyone who comes into possession of a copy.  This
+    License will therefore apply, along with any applicable section 7
+    additional terms, to the whole of the work, and all its parts,
+    regardless of how they are packaged.  This License gives no
+    permission to license the work in any other way, but it does not
+    invalidate such permission if you have separately received it.
+
+    d) If the work has interactive user interfaces, each must display
+    Appropriate Legal Notices; however, if the Program has interactive
+    interfaces that do not display Appropriate Legal Notices, your
+    work need not make them do so.
+
+  A compilation of a covered work with other separate and independent
+works, which are not by their nature extensions of the covered work,
+and which are not combined with it such as to form a larger program,
+in or on a volume of a storage or distribution medium, is called an
+"aggregate" if the compilation and its resulting copyright are not
+used to limit the access or legal rights of the compilation's users
+beyond what the individual works permit.  Inclusion of a covered work
+in an aggregate does not cause this License to apply to the other
+parts of the aggregate.
+
+  6. Conveying Non-Source Forms.
+
+  You may convey a covered work in object code form under the terms
+of sections 4 and 5, provided that you also convey the
+machine-readable Corresponding Source under the terms of this License,
+in one of these ways:
+
+    a) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by the
+    Corresponding Source fixed on a durable physical medium
+    customarily used for software interchange.
+
+    b) Convey the object code in, or embodied in, a physical product
+    (including a physical distribution medium), accompanied by a
+    written offer, valid for at least three years and valid for as
+    long as you offer spare parts or customer support for that product
+    model, to give anyone who possesses the object code either (1) a
+    copy of the Corresponding Source for all the software in the
+    product that is covered by this License, on a durable physical
+    medium customarily used for software interchange, for a price no
+    more than your reasonable cost of physically performing this
+    conveying of source, or (2) access to copy the
+    Corresponding Source from a network server at no charge.
+
+    c) Convey individual copies of the object code with a copy of the
+    written offer to provide the Corresponding Source.  This
+    alternative is allowed only occasionally and noncommercially, and
+    only if you received the object code with such an offer, in accord
+    with subsection 6b.
+
+    d) Convey the object code by offering access from a designated
+    place (gratis or for a charge), and offer equivalent access to the
+    Corresponding Source in the same way through the same place at no
+    further charge.  You need not require recipients to copy the
+    Corresponding Source along with the object code.  If the place to
+    copy the object code is a network server, the Corresponding Source
+    may be on a different server (operated by you or a third party)
+    that supports equivalent copying facilities, provided you maintain
+    clear directions next to the object code saying where to find the
+    Corresponding Source.  Regardless of what server hosts the
+    Corresponding Source, you remain obligated to ensure that it is
+    available for as long as needed to satisfy these requirements.
+
+    e) Convey the object code using peer-to-peer transmission, provided
+    you inform other peers where the object code and Corresponding
+    Source of the work are being offered to the general public at no
+    charge under subsection 6d.
+
+  A separable portion of the object code, whose source code is excluded
+from the Corresponding Source as a System Library, need not be
+included in conveying the object code work.
+
+  A "User Product" is either (1) a "consumer product", which means any
+tangible personal property which is normally used for personal, family,
+or household purposes, or (2) anything designed or sold for incorporation
+into a dwelling.  In determining whether a product is a consumer product,
+doubtful cases shall be resolved in favor of coverage.  For a particular
+product received by a particular user, "normally used" refers to a
+typical or common use of that class of product, regardless of the status
+of the particular user or of the way in which the particular user
+actually uses, or expects or is expected to use, the product.  A product
+is a consumer product regardless of whether the product has substantial
+commercial, industrial or non-consumer uses, unless such uses represent
+the only significant mode of use of the product.
+
+  "Installation Information" for a User Product means any methods,
+procedures, authorization keys, or other information required to install
+and execute modified versions of a covered work in that User Product from
+a modified version of its Corresponding Source.  The information must
+suffice to ensure that the continued functioning of the modified object
+code is in no case prevented or interfered with solely because
+modification has been made.
+
+  If you convey an object code work under this section in, or with, or
+specifically for use in, a User Product, and the conveying occurs as
+part of a transaction in which the right of possession and use of the
+User Product is transferred to the recipient in perpetuity or for a
+fixed term (regardless of how the transaction is characterized), the
+Corresponding Source conveyed under this section must be accompanied
+by the Installation Information.  But this requirement does not apply
+if neither you nor any third party retains the ability to install
+modified object code on the User Product (for example, the work has
+been installed in ROM).
+
+  The requirement to provide Installation Information does not include a
+requirement to continue to provide support service, warranty, or updates
+for a work that has been modified or installed by the recipient, or for
+the User Product in which it has been modified or installed.  Access to a
+network may be denied when the modification itself materially and
+adversely affects the operation of the network or violates the rules and
+protocols for communication across the network.
+
+  Corresponding Source conveyed, and Installation Information provided,
+in accord with this section must be in a format that is publicly
+documented (and with an implementation available to the public in
+source code form), and must require no special password or key for
+unpacking, reading or copying.
+
+  7. Additional Terms.
+
+  "Additional permissions" are terms that supplement the terms of this
+License by making exceptions from one or more of its conditions.
+Additional permissions that are applicable to the entire Program shall
+be treated as though they were included in this License, to the extent
+that they are valid under applicable law.  If additional permissions
+apply only to part of the Program, that part may be used separately
+under those permissions, but the entire Program remains governed by
+this License without regard to the additional permissions.
+
+  When you convey a copy of a covered work, you may at your option
+remove any additional permissions from that copy, or from any part of
+it.  (Additional permissions may be written to require their own
+removal in certain cases when you modify the work.)  You may place
+additional permissions on material, added by you to a covered work,
+for which you have or can give appropriate copyright permission.
+
+  Notwithstanding any other provision of this License, for material you
+add to a covered work, you may (if authorized by the copyright holders of
+that material) supplement the terms of this License with terms:
+
+    a) Disclaiming warranty or limiting liability differently from the
+    terms of sections 15 and 16 of this License; or
+
+    b) Requiring preservation of specified reasonable legal notices or
+    author attributions in that material or in the Appropriate Legal
+    Notices displayed by works containing it; or
+
+    c) Prohibiting misrepresentation of the origin of that material, or
+    requiring that modified versions of such material be marked in
+    reasonable ways as different from the original version; or
+
+    d) Limiting the use for publicity purposes of names of licensors or
+    authors of the material; or
+
+    e) Declining to grant rights under trademark law for use of some
+    trade names, trademarks, or service marks; or
+
+    f) Requiring indemnification of licensors and authors of that
+    material by anyone who conveys the material (or modified versions of
+    it) with contractual assumptions of liability to the recipient, for
+    any liability that these contractual assumptions directly impose on
+    those licensors and authors.
+
+  All other non-permissive additional terms are considered "further
+restrictions" within the meaning of section 10.  If the Program as you
+received it, or any part of it, contains a notice stating that it is
+governed by this License along with a term that is a further
+restriction, you may remove that term.  If a license document contains
+a further restriction but permits relicensing or conveying under this
+License, you may add to a covered work material governed by the terms
+of that license document, provided that the further restriction does
+not survive such relicensing or conveying.
+
+  If you add terms to a covered work in accord with this section, you
+must place, in the relevant source files, a statement of the
+additional terms that apply to those files, or a notice indicating
+where to find the applicable terms.
+
+  Additional terms, permissive or non-permissive, may be stated in the
+form of a separately written license, or stated as exceptions;
+the above requirements apply either way.
+
+  8. Termination.
+
+  You may not propagate or modify a covered work except as expressly
+provided under this License.  Any attempt otherwise to propagate or
+modify it is void, and will automatically terminate your rights under
+this License (including any patent licenses granted under the third
+paragraph of section 11).
+
+  However, if you cease all violation of this License, then your
+license from a particular copyright holder is reinstated (a)
+provisionally, unless and until the copyright holder explicitly and
+finally terminates your license, and (b) permanently, if the copyright
+holder fails to notify you of the violation by some reasonable means
+prior to 60 days after the cessation.
+
+  Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+  Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, you do not qualify to receive new licenses for the same
+material under section 10.
+
+  9. Acceptance Not Required for Having Copies.
+
+  You are not required to accept this License in order to receive or
+run a copy of the Program.  Ancillary propagation of a covered work
+occurring solely as a consequence of using peer-to-peer transmission
+to receive a copy likewise does not require acceptance.  However,
+nothing other than this License grants you permission to propagate or
+modify any covered work.  These actions infringe copyright if you do
+not accept this License.  Therefore, by modifying or propagating a
+covered work, you indicate your acceptance of this License to do so.
+
+  10. Automatic Licensing of Downstream Recipients.
+
+  Each time you convey a covered work, the recipient automatically
+receives a license from the original licensors, to run, modify and
+propagate that work, subject to this License.  You are not responsible
+for enforcing compliance by third parties with this License.
+
+  An "entity transaction" is a transaction transferring control of an
+organization, or substantially all assets of one, or subdividing an
+organization, or merging organizations.  If propagation of a covered
+work results from an entity transaction, each party to that
+transaction who receives a copy of the work also receives whatever
+licenses to the work the party's predecessor in interest had or could
+give under the previous paragraph, plus a right to possession of the
+Corresponding Source of the work from the predecessor in interest, if
+the predecessor has it or can get it with reasonable efforts.
+
+  You may not impose any further restrictions on the exercise of the
+rights granted or affirmed under this License.  For example, you may
+not impose a license fee, royalty, or other charge for exercise of
+rights granted under this License, and you may not initiate litigation
+(including a cross-claim or counterclaim in a lawsuit) alleging that
+any patent claim is infringed by making, using, selling, offering for
+sale, or importing the Program or any portion of it.
+
+  11. Patents.
+
+  A "contributor" is a copyright holder who authorizes use under this
+License of the Program or a work on which the Program is based.  The
+work thus licensed is called the contributor's "contributor version".
+
+  A contributor's "essential patent claims" are all patent claims
+owned or controlled by the contributor, whether already acquired or
+hereafter acquired, that would be infringed by some manner, permitted
+by this License, of making, using, or selling its contributor version,
+but do not include claims that would be infringed only as a
+consequence of further modification of the contributor version.  For
+purposes of this definition, "control" includes the right to grant
+patent sublicenses in a manner consistent with the requirements of
+this License.
+
+  Each contributor grants you a non-exclusive, worldwide, royalty-free
+patent license under the contributor's essential patent claims, to
+make, use, sell, offer for sale, import and otherwise run, modify and
+propagate the contents of its contributor version.
+
+  In the following three paragraphs, a "patent license" is any express
+agreement or commitment, however denominated, not to enforce a patent
+(such as an express permission to practice a patent or covenant not to
+sue for patent infringement).  To "grant" such a patent license to a
+party means to make such an agreement or commitment not to enforce a
+patent against the party.
+
+  If you convey a covered work, knowingly relying on a patent license,
+and the Corresponding Source of the work is not available for anyone
+to copy, free of charge and under the terms of this License, through a
+publicly available network server or other readily accessible means,
+then you must either (1) cause the Corresponding Source to be so
+available, or (2) arrange to deprive yourself of the benefit of the
+patent license for this particular work, or (3) arrange, in a manner
+consistent with the requirements of this License, to extend the patent
+license to downstream recipients.  "Knowingly relying" means you have
+actual knowledge that, but for the patent license, your conveying the
+covered work in a country, or your recipient's use of the covered work
+in a country, would infringe one or more identifiable patents in that
+country that you have reason to believe are valid.
+
+  If, pursuant to or in connection with a single transaction or
+arrangement, you convey, or propagate by procuring conveyance of, a
+covered work, and grant a patent license to some of the parties
+receiving the covered work authorizing them to use, propagate, modify
+or convey a specific copy of the covered work, then the patent license
+you grant is automatically extended to all recipients of the covered
+work and works based on it.
+
+  A patent license is "discriminatory" if it does not include within
+the scope of its coverage, prohibits the exercise of, or is
+conditioned on the non-exercise of one or more of the rights that are
+specifically granted under this License.  You may not convey a covered
+work if you are a party to an arrangement with a third party that is
+in the business of distributing software, under which you make payment
+to the third party based on the extent of your activity of conveying
+the work, and under which the third party grants, to any of the
+parties who would receive the covered work from you, a discriminatory
+patent license (a) in connection with copies of the covered work
+conveyed by you (or copies made from those copies), or (b) primarily
+for and in connection with specific products or compilations that
+contain the covered work, unless you entered into that arrangement,
+or that patent license was granted, prior to 28 March 2007.
+
+  Nothing in this License shall be construed as excluding or limiting
+any implied license or other defenses to infringement that may
+otherwise be available to you under applicable patent law.
+
+  12. No Surrender of Others' Freedom.
+
+  If conditions are imposed on you (whether by court order, agreement or
+otherwise) that contradict the conditions of this License, they do not
+excuse you from the conditions of this License.  If you cannot convey a
+covered work so as to satisfy simultaneously your obligations under this
+License and any other pertinent obligations, then as a consequence you may
+not convey it at all.  For example, if you agree to terms that obligate you
+to collect a royalty for further conveying from those to whom you convey
+the Program, the only way you could satisfy both those terms and this
+License would be to refrain entirely from conveying the Program.
+
+  13. Remote Network Interaction; Use with the GNU General Public License.
+
+  Notwithstanding any other provision of this License, if you modify the
+Program, your modified version must prominently offer all users
+interacting with it remotely through a computer network (if your version
+supports such interaction) an opportunity to receive the Corresponding
+Source of your version by providing access to the Corresponding Source
+from a network server at no charge, through some standard or customary
+means of facilitating copying of software.  This Corresponding Source
+shall include the Corresponding Source for any work covered by version 3
+of the GNU General Public License that is incorporated pursuant to the
+following paragraph.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the work with which it is combined will remain governed by version
+3 of the GNU General Public License.
+
+  14. Revised Versions of this License.
+
+  The Free Software Foundation may publish revised and/or new versions of
+the GNU Affero General Public License from time to time.  Such new versions
+will be similar in spirit to the present version, but may differ in detail to
+address new problems or concerns.
+
+  Each version is given a distinguishing version number.  If the
+Program specifies that a certain numbered version of the GNU Affero General
+Public License "or any later version" applies to it, you have the
+option of following the terms and conditions either of that numbered
+version or of any later version published by the Free Software
+Foundation.  If the Program does not specify a version number of the
+GNU Affero General Public License, you may choose any version ever published
+by the Free Software Foundation.
+
+  If the Program specifies that a proxy can decide which future
+versions of the GNU Affero General Public License can be used, that proxy's
+public statement of acceptance of a version permanently authorizes you
+to choose that version for the Program.
+
+  Later license versions may give you additional or different
+permissions.  However, no additional obligations are imposed on any
+author or copyright holder as a result of your choosing to follow a
+later version.
+
+  15. Disclaimer of Warranty.
+
+  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW.  EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT
+HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY
+OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM
+IS WITH YOU.  SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF
+ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+
+  16. Limitation of Liability.
+
+  IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS
+THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF
+DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD
+PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS),
+EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+  17. Interpretation of Sections 15 and 16.
+
+  If the disclaimer of warranty and limitation of liability provided
+above cannot be given local legal effect according to their terms,
+reviewing courts shall apply local law that most closely approximates
+an absolute waiver of all civil liability in connection with the
+Program, unless a warranty or assumption of liability accompanies a
+copy of the Program in return for a fee.
+
+                     END OF TERMS AND CONDITIONS
+
+            How to Apply These Terms to Your New Programs
+
+  If you develop a new program, and you want it to be of the greatest
+possible use to the public, the best way to achieve this is to make it
+free software which everyone can redistribute and change under these terms.
+
+  To do so, attach the following notices to the program.  It is safest
+to attach them to the start of each source file to most effectively
+state the exclusion of warranty; and each file should have at least
+the "copyright" line and a pointer to where the full notice is found.
+
+    ModSharp
+    Copyright (C) 2023-2025  Kxnrl
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+Also add information on how to contact you by electronic and paper mail.
+
+  If your software can interact with users remotely through a computer
+network, you should also make sure that it provides a way for users to
+get its source.  For example, if your program is a web application, its
+interface could display a "Source" link that leads users to an archive
+of the code.  There are many ways you could offer source, and different
+solutions will be better for different programs; see section 13 for the
+specific requirements.
+
+  You should also get your employer (if you work as a programmer) or school,
+if any, to sign a "copyright disclaimer" for the program, if necessary.
+For more information on this, and how to apply and follow the GNU AGPL, see
+<https://www.gnu.org/licenses/>.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+  <h1>📣 <strong>CallAdmin</strong></h1>
+  <p>In-game player report system for CS2 ModSharp servers — players <code>!report</code> cheaters, admins claim and resolve them.</p>
+</div>
+
+<p align="center">
+  <a href="https://github.com/Kxnrl/modsharp-public"><img src="https://img.shields.io/badge/framework-ModSharp-5865F2?logo=github" alt="ModSharp"></a>
+  <img src="https://img.shields.io/badge/game-CS2-orange" alt="CS2">
+  <img src="https://img.shields.io/github/license/yappershq/cs2-calladmin" alt="License">
+  <img src="https://img.shields.io/github/stars/yappershq/cs2-calladmin?style=flat&logo=github" alt="Stars">
+</p>
+
+---
+
+CallAdmin lets players report rule-breakers from chat and gives admins a claim/handle/dismiss workflow, with persistence (LiteDB / MySQL / PostgreSQL) and an optional Discord webhook notifier that posts an embed and edits it in place as the report progresses. It is a from-scratch ModSharp rewrite inspired by [Impact123/CallAdmin](https://github.com/Impact123/CallAdmin) (SourceMod) and [1Mack/CS2-CallAdmin](https://github.com/1Mack/CS2-CallAdmin) (CounterStrikeSharp).
+
+The plugin ships as several projects so you can run only what you need:
+
+| Project | Role |
+|---------|------|
+| `CallAdmin.Core` | Main plugin — chat commands, report lifecycle, business logic |
+| `CallAdmin.Shared` | Public API (`ICallAdminShared`) + report models, consumed by other plugins |
+| `CallAdmin.Database` | Persistence backend — LiteDB / MySQL / PostgreSQL, switchable in config |
+| `CallAdmin.Database.Shared` | Database abstraction contract |
+| `CallAdmin.Discord` | Optional Discord webhook notifier (subscribes to CallAdmin events) |
+
+## 🚀 Install
+
+Copy the build output into your ModSharp install (`<sharp>` = your `sharp` directory):
+
+| From | To |
+|------|----|
+| `.build/modules/CallAdmin.Core/` | `<sharp>/modules/CallAdmin.Core/` |
+| `.build/modules/CallAdmin.Database/` | `<sharp>/modules/CallAdmin.Database/` |
+| `.build/modules/CallAdmin.Discord/` | `<sharp>/modules/CallAdmin.Discord/` (optional) |
+| `.build/shared/CallAdmin.Shared/` | `<sharp>/shared/CallAdmin.Shared/` |
+| `.build/shared/CallAdmin.Database.Shared/` | `<sharp>/shared/CallAdmin.Database.Shared/` |
+| `.build/locales/calladmin.json` | `<sharp>/locales/calladmin.json` |
+| `.assets/configs.example/*` | `<sharp>/configs/` (rename per file, see below) |
+
+`CallAdmin.Core` writes a default `configs/calladmin.json` on first run if none exists. Restart the server (or change map) to load. CallAdmin uses ModSharp's CommandCenter, AdminManager and LocalizerManager, which ship with the framework. `CallAdmin.Discord` is optional — install it only if you want Discord notifications.
+
+## ⌨️ Commands
+
+All commands are chat-triggered (also usable from console).
+
+| Command | Aliases | Description | Permission |
+|---------|---------|-------------|------------|
+| `!report <target> <reason>` | `!calladmin` | Submit a report. Target via ModSharp targeting (`name`, `#name`, `@me`, `@t`, `@ct`, SteamID64). | _none by default_ |
+| `!report_cancel` | — | Cancel your most recent pending report (within the cancel window). | reporter only |
+| `!calls` | `!reports` | List pending reports. | `@calladmin/handle` |
+| `!claim <id>` | — | Claim a pending report. | `@calladmin/handle` |
+| `!handled <id>` | — | Mark a report handled (terminal). | `@calladmin/handle` |
+| `!dismiss <id>` | — | Dismiss a report as a false alarm (terminal). | `@calladmin/handle` |
+
+Admin permissions are registered via `MountAdminManifest` under the `CallAdmin` table:
+
+| Permission | Grants |
+|------------|--------|
+| `@calladmin/report` | Submit reports — only enforced when `requireReportPermission` is `true` |
+| `@calladmin/handle` | View pending, claim, handle, dismiss |
+| `@calladmin/report_admin` | Report players who otherwise have admin-target immunity |
+
+## ⚙️ Configuration
+
+### `configs/calladmin.json`
+
+Auto-generated on first run. Report reasons, cooldowns and anti-abuse gates:
+
+| Setting | Default | Meaning |
+|---------|---------|---------|
+| `reasons` | hack, wallhack, aimbot, toxic, spam, griefing, other | Report reason list (`key` + `localeKey` label pairs) |
+| `autoCloseMinutes` | `60` | Minutes a pending report may sit before auto-closing as cancelled. `0` disables |
+| `cooldownSeconds` | `300` | Per-reporter cooldown between reports |
+| `cancelWindowSeconds` | `300` | How long after submitting a reporter may `!report_cancel` |
+| `duplicateWindowSeconds` | `600` | Window in which a repeat report of the same target is treated as a duplicate |
+| `notifyAdminsInChat` | `true` | Announce new reports to online admins in chat |
+| `allowReportAdmins` | `false` | Allow reporting players who hold admin |
+| `allowReportSpectators` | `false` | Allow reporting spectators |
+| `requireReportPermission` | `false` | When `true`, only players with `@calladmin/report` may report |
+
+### `configs/calladmin.database.jsonc`
+
+Selects the persistence backend. `Type` is `litedb` (zero-config single file at `sharp/data/calladmin.db`), `mysql`, or `postgresql`. For MySQL/PostgreSQL, fill `Host` / `Port` / `Database` / `User` / `Password`.
+
+### `configs/calladmin.discord.json` (optional)
+
+Used by `CallAdmin.Discord`. Set `webhookUrl` to enable; leave it empty to disable posting. Other keys cover the embed title/footer, an optional role mention, and the connect/lookup links shown in the embed.
+
+## 🔧 How it works
+
+A player runs `!report <target> <reason>`; Core resolves the target via ModSharp targeting, applies the cooldown / duplicate / immunity checks, then persists a `Report` through the database backend and fires the lifecycle events. Admins with `@calladmin/handle` see pending reports (`!calls`) and move each through `claim → handled` or `dismiss`. After persistence each transition raises a `Report` event on `ICallAdminShared`; `CallAdmin.Discord` subscribes to those events to POST a webhook embed on submit and PATCH it in place as the report is claimed, handled, dismissed or cancelled. If [AdminPanel](https://github.com/yappershq) is installed, Core also surfaces the list/claim/handle/dismiss actions inside the in-game admin menu (resolved with a null-guard, so it stays standalone-safe).
+
+## 🧩 Public API
+
+Other plugins consume `ICallAdminShared` (resolve in `OnAllSharpModulesLoaded`) to subscribe to the report lifecycle or drive reports programmatically:
+
+```csharp
+var callAdmin = sharpModuleManager
+    .GetOptionalSharpModuleInterface<ICallAdminShared>(ICallAdminShared.Identity)?.Instance;
+
+callAdmin.OnReportSubmitted += report => { /* react */ };
+// also: OnReportClaimed, OnReportHandled, OnReportDismissed, OnReportCancelled
+```
+
+The interface also exposes `SubmitReportAsync` / `ClaimReportAsync` / `MarkHandledAsync` / `DismissReportAsync` / `CancelReportAsync`, lookups (`GetReportAsync`, `GetPendingReportsAsync`, `GetReasons`), `RegisterTargetFilter` (hide players from the target list), and `SetExternalMessageIdAsync` (store an external message id alongside a report). Handlers run synchronously on the publishing thread — offload network/DB work with `_ = Task.Run(...)`.
+
+## 📦 Build
+
+```bash
+dotnet build -c Release
+```
+
+Outputs:
+
+- Modules → `.build/modules/CallAdmin.{Core,Database,Discord}/`
+- Shared contracts → `.build/shared/CallAdmin.{Shared,Database.Shared}/`
+- Locales → `.build/locales/calladmin.json`
+- Example configs → `.assets/configs.example/`
+
+## 🙏 Credits
+
+- Concept and inspiration: [Impact123/CallAdmin](https://github.com/Impact123/CallAdmin) (SourceMod), [1Mack/CS2-CallAdmin](https://github.com/1Mack/CS2-CallAdmin) (CounterStrikeSharp)
+- ModSharp framework: [Kxnrl/modsharp-public](https://github.com/Kxnrl/modsharp-public)
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by <a href="https://github.com/yappershq">yappershq</a></p>
+  <p>⭐ Star this repo if you find it useful!</p>
+</div>
+
+```
