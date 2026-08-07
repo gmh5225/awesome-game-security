@@ -297,6 +297,7 @@ sources:
   - wiki/sources/descriptions/greyb1t__GreyM.md
   - wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md
   - wiki/sources/descriptions/gregkh__kernel-development.md
+  - wiki/sources/descriptions/googleprojectzero__TinyInst.md
   - wiki/sources/descriptions/googleprojectzero__winafl.md
   - wiki/sources/descriptions/guidedhacking__GH_AntiDebug_Bypass_Practice_Tool.md
   - wiki/sources/descriptions/stuxnet147__Themida-Research.md
@@ -495,7 +496,7 @@ Engine-specific paths: Unity ([[il2cpp]] / Mono via dnSpy), Unreal (SDK generato
 
 ## Dynamic binary instrumentation
 
-Full DBI frameworks — [[frida]], DynamoRIO, Pin, TinyInst, QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy.
+Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy. Google Project Zero **TinyInst** (C/C++; lightweight module-selective DBI; hooking / debugging) sits in that lightweight instrumentation lane. (source: wiki/sources/descriptions/googleprojectzero__TinyInst.md)
 
 **Trap-and-emulate control-flow tracing (CFT):** patch branch sites with fault-generating sentinels (e.g. HLT/SALC, avoiding INT3 integrity scans), catch exceptions, emulate the original branch, log context, restore, and continue. Strategies range from bounded bulk patching (simple, integrity-detectable) through branch chasing and CFG-guided patching (better coverage/safety tradeoff). PAGE_GUARD + trap-flag single-steping avoids direct `.text` patches but remains timing- and guard-state detectable. Illustrative corpus: [[cpp-veh-dbi]], [[w1tn3ss]].
 

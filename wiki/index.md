@@ -26,7 +26,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec, d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
-- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
+- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening; [[etwti-fluctuation-monitor]] tamper alerts
 - [Frida](concepts/frida.md)
@@ -1075,6 +1075,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [thread-namecalling](entities/thread-namecalling.md) — SetThreadDescription + remote GetThreadDescription via APC (working-set probe; cheat / injection:windows)
 - [ThreadStackSpoofer](entities/thread-stack-spoofer.md) — PoC thread call-stack spoof for in-process shellcode hiding (mgeeky; Cheat Spoof Stack)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
+- [TinyInst](entities/tinyinst.md) — Google Project Zero lightweight DBI (C/C++; module-selective hooking / debugging; Cheat / DBI)
 - [TinyLoad](entities/tinyload.md) — minimal Windows PE manual-map loader + packer/crypter (custom VM stub; Binary Packer)
 - [TelemetrySourcerer](entities/telemetry-sourcerer.md) — kernel driver: enumerate/disable callbacks & ETW (unsigned; test signing / DSE)
 - [tim_apple](entities/tim-apple.md) — external CS2 cheat (offset script / JSON bootstrap; cheat / game:cs2)

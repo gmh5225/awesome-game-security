@@ -4,8 +4,9 @@ kind: concept
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/skills/reverse-engineering.md
+  - wiki/sources/descriptions/googleprojectzero__TinyInst.md
   - wiki/sources/descriptions/momo5502__vmtrace.md
-updated: 2026-07-29
+updated: 2026-08-07
 confidence: high
 ---
 
@@ -19,7 +20,7 @@ confidence: high
 |------|-------|
 | [[frida]] | Cross-platform; mobile + desktop hooking |
 | DynamoRIO / Pin / QBDI | Research-grade code manipulation |
-| TinyInst | Lightweight instrumentation |
+| [[tinyinst]] | Lightweight module-selective DBI; hooking / debugging |
 | [[pyda]] | QEMU user-mode Python DBI |
 | [[panda]] | Whole-system QEMU DBI |
 
@@ -43,4 +44,4 @@ WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID i
 
 ## Related
 
-[[frida]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[frida]] · [[tinyinst]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
