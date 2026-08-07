@@ -1284,6 +1284,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
+- [zam64-zemina](entities/zam64-zemina.md) — BYOVD via Zemana zam64.sys (IOCTL process kill + memory access)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 - [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
 - [zig-mcp-server](entities/zig-mcp-server.md) — high-performance memory-efficient MCP protocol implementation in Zig (Game Develop / MCP server)
