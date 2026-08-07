@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:lilyco-42/rev-tools-setup`: entity [[rev-tools-setup]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `readme:categories`: bumped Cheat ~2658 (was ~2657; Anti Cheat ~648 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-07** — ingest `description:gmh5225/unity-vrchat-template`: entity [[unity-vrchat-template]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
