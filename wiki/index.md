@@ -976,6 +976,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
 - [retoolkit](entities/retoolkit.md) — Windows Inno Setup bundle (80+ RE tools: debug/decompile/PE/hex/network/YARA)
+- [RetDec](entities/retdec.md) — retargetable machine-code decompiler (binary lifting; limited maintenance; Cheat Decompiler)
 - [rev-tools-setup](entities/rev-tools-setup.md) — One-click Windows RE toolchain (Scoop): CE/Ghidra/x64dbg + read-only CE MCP + AI agent client config
 - [Retract](entities/retract.md) — Go static binary workbench (PE/ELF/Mach-O; disasm, CFG, pseudocode, YARA; browser UI)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)

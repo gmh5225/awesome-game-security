@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/retdec`: entity [[retdec]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:gmh5225/ricochet-disabler`: entity [[ricochet-disabler]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked from [[ricochet-deobfuscator]].
 
 - **2026-08-07** — ingest `description:gmh5225/rust-dll-crab`: entity [[rust-dll-crab]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

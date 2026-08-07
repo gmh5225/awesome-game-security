@@ -502,6 +502,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__rust-dll-crab.md
   - wiki/sources/descriptions/gmh5225__rust-external-1.md
   - wiki/sources/descriptions/gmh5225__rust-internal.md
+  - wiki/sources/descriptions/gmh5225__retdec.md
   - wiki/sources/descriptions/gmh5225__superpeople-client.md
   - wiki/sources/descriptions/gmh5225__teamfortress2_internal.md
   - wiki/sources/descriptions/gmh5225__tim_apple.md
@@ -700,6 +701,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C++/C DBI / analysis / patching via [[w1tn3ss]] (modding / hooking / memory analysis) sits in the same Cheat DBI lane. (source: wiki/sources/descriptions/redthing1__w1tn3ss.md)
 - Python QEMU user-mode dynamic binary analysis via [[pyda]] (Linux binary instrument / hook / mem / syscall / insn callbacks without native exec) also sits in the Cheat DBI lane. (source: wiki/sources/descriptions/ndrewh__pyda.md) Python [[frida]] hook refresh automation via [[hook-updater]] (auto-update hook scripts when targets change; cheat / Frida) sits in the same lane. (source: wiki/sources/descriptions/jcalabres__hook-updater.md)
 - Rust-accelerated angr / Rust decompiler [[oxidizer]] (high-fidelity pseudocode from stripped binaries; enum/match/`?` recovery; Rust 1.39–1.93) sits in the Cheat RE Tools / Decompiler lane. (source: wiki/sources/descriptions/sefcom__oxidizer.md)
+- Retargetable machine-code decompiler [[retdec]] (binary lifting to high-level C; limited maintenance; PRs welcome; Cheat → Decompiler; gmh5225) sits in the same decompiler lane for offline game-client and cheat-binary analysis. (source: wiki/sources/descriptions/gmh5225__retdec.md)
 - Automated reverse-engineering platform [[re-architect]] (binary analysis + ML; extract meaningful info from binaries) sits in the Cheat RE Tools lane. (source: wiki/sources/descriptions/pandaadir05__re-architect.md)
 - .NET Harmony instrumentation of VMProtect-virtualized methods via [[vmunprotect]] (trace invokes / manipulate params; anti-debug bypass; VMP 3.6.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.md)
 - Dynamic .NET VMProtect unpack/dump via [[vmunprotect-dumper]] (force static ctor restore → AsmResolver PE dump; VMP 3.7.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md)
