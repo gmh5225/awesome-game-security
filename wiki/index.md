@@ -1044,6 +1044,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Splendid Implanter](entities/splendid-implanter.md) — BattlEye-compatible user-mode injector (secret.club; exploits UM BE flaw; Injector)
 - [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
+- [spoof-stack-SafeCall](entities/spoof-stack-safecall.md) — Windows return-address spoofing library (SafeCall; fake legitimate stack returns; Cheat Spoof Stack; gmh5225)
 
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)

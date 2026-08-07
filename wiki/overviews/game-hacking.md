@@ -494,6 +494,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__titancf.md
   - wiki/sources/descriptions/gmh5225__the-finals-interior-cheat.md
   - wiki/sources/descriptions/gmh5225__subhook.md
+  - wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md
   - wiki/sources/descriptions/gmh5225__superpeople-client.md
   - wiki/sources/descriptions/gmh5225__teamfortress2_internal.md
   - wiki/sources/descriptions/gmh5225__tim_apple.md
@@ -608,7 +609,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 
 ## Stack spoofing & driver I/O
 
-[[stack-spoofing]] — return-address replacement and synthetic frames to evade `RtlWalkFrameChain` / thread stack inspection; must pass `.pdata` / `RtlVirtualUnwind` checks. Thread call-stack spoof PoCs such as [[thread-stack-spoofer]] (mgeeky; in-memory evasion to bypass thread-based memory examination and hide in-process shellcode) (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md) and [[silent-moonwalk]] (klezVirus; TRUE call-stack spoofer from joint stack-spoofing research) (source: wiki/sources/descriptions/klezVirus__SilentMoonwalk.md) sit in the same `Cheat > Spoof Stack` lane; [[byoud]] (klezVirus; x64 unwind-metadata manipulation to hide call-chain segments from debuggers/EDRs) extends that lane with the opposite approach from classic frame spoofing. (source: wiki/sources/descriptions/klezVirus__BYOUD.md) Driver communication spans IOCTL, data-pointer swaps on win32k/nt calls ([[poseidon]], [[read-write-driver]], [[data-ptr-swap]]), shared sections, callbacks, pipes, WSK ([[ksocket]])—40+ README entries under `Cheat > Driver Communication`.
+[[stack-spoofing]] — return-address replacement and synthetic frames to evade `RtlWalkFrameChain` / thread stack inspection; must pass `.pdata` / `RtlVirtualUnwind` checks. Reusable return-address spoofing libraries such as [[spoof-stack-safecall]] (gmh5225/SafeCall; fake legitimate module return addresses before API calls; EDR/AC stack-walk evasion) (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md), thread call-stack spoof PoCs such as [[thread-stack-spoofer]] (mgeeky; in-memory evasion to bypass thread-based memory examination and hide in-process shellcode) (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md), and [[silent-moonwalk]] (klezVirus; TRUE call-stack spoofer from joint stack-spoofing research) (source: wiki/sources/descriptions/klezVirus__SilentMoonwalk.md) sit in the same `Cheat > Spoof Stack` lane; [[byoud]] (klezVirus; x64 unwind-metadata manipulation to hide call-chain segments from debuggers/EDRs) extends that lane with the opposite approach from classic frame spoofing. (source: wiki/sources/descriptions/klezVirus__BYOUD.md) Driver communication spans IOCTL, data-pointer swaps on win32k/nt calls ([[poseidon]], [[read-write-driver]], [[data-ptr-swap]]), shared sections, callbacks, pipes, WSK ([[ksocket]])—40+ README entries under `Cheat > Driver Communication`.
 
 ## Engine-specific surfaces
 
