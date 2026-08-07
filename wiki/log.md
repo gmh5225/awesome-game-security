@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/the-finals-interior-cheat`: entity [[the-finals-interior-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-07** — ingest `description:gmh5225/tim_apple`: updated entity [[tim-apple]] (gmh5225 fork); cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `readme:categories`: bumped Cheat ~2659 (was ~2658; Anti Cheat ~648 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
