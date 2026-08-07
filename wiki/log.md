@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/zygisk-imgui-modmenu`: entity [[zygisk-imgui-modmenu]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]].
+
 - **2026-08-07** — ingest `description:godotengine/godot-demo-projects`: entity [[godot-demo-projects]]; cross-linked [[godot]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-08-07** — ingest `description:godotengine/godot`: entity [[godot]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
