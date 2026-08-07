@@ -631,6 +631,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
+- [kernel-development](entities/kernel-development.md) — Greg Kroah-Hartman Linux kernel dev docs (patch workflow, drivers, LKM; guide lane)
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [Kernelmode Manual Mapping through IAT](entities/kernelmode-manual-mapping-through-iat.md) — kernel-mode IAT manual-map injector (process handle or KM driver; IAT Manual Map)

@@ -402,6 +402,7 @@ sources:
   - wiki/sources/descriptions/shalzuth__NativeNetSharp.md
   - wiki/sources/descriptions/singhhdev__Spoofer-AMIDEWIN.md
   - wiki/sources/descriptions/semihcevik__hwidspoofer.md
+  - wiki/sources/descriptions/gregkh__kernel-development.md
   - wiki/sources/descriptions/guoxing2024__magicmida-rs.md
   - wiki/sources/descriptions/gupr0x4__HWID-Spoofer-for-Fortnite-and-Valorant.md
   - wiki/sources/descriptions/guidedhacking__GH_AntiDebug_Bypass_Practice_Tool.md
@@ -537,7 +538,7 @@ sources:
   - wiki/sources/descriptions/katahiromz__RisohEditor.md
   - wiki/sources/descriptions/jmpews__Dobby.md
   - wiki/sources/descriptions/jnastarot__ice9.md
-updated: 2026-08-06
+updated: 2026-08-07
 confidence: high
 ---
 
@@ -820,7 +821,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Jailbreak-detection bypass tooling such as [[shadow]] (modern iOS jailbreaks; per-app compatibility varies; cheat / iOS jailbreak research) sits in the offensive iOS lane opposite [[free-rasp-ios]]-class jailbreak probes. (source: wiki/sources/descriptions/jjolano__shadow.md)
 - Theos iOS mod-menu templates such as [[ios-mod-menu-template-for-theos]] (Logos hooks; embedded 50×50 menu icons; cheat / `[IOS mod menu]`) sit in the Cheat / render-draw lane beside ImGui samples such as [[imgui-ios-mod-menu]]. (source: wiki/sources/descriptions/joeyjurjens__iOS-Mod-Menu-Template-for-Theos.md)
 - macOS native Roblox cheat frameworks such as [[roblox-cheats]] (Objective-C; `libESP.dylib` inject + Mach VM / shared-memory IPC; internal/external ESP, input simulation, remote calls, breakpoint hooks; per-game modules + offset finder from test place) sit in the Cheat / macOS injection lane for Roblox client memory-layout study. (source: wiki/sources/descriptions/notahacker8__RobloxCheats.md)
-- Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md) Linux kernel image → ELF symbolization via [[vmlinux-to-elf]] (Python; kallsyms + section rebuild for IDA/Ghidra) sits in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/marin-m__vmlinux-to-elf.md) Linux kernel rootkit hooking samples such as [[venom]] (C/C++; LKM hook mechanisms) sit in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/sad0p__venom.md)
+- Linux LKM vermagic/CRC rewriting via [[vermagic]] sits in the Cheat Linux / RE tools lane (load modules across mismatched kernel builds). (source: wiki/sources/descriptions/yaxinsn__vermagic.md) Linux kernel image → ELF symbolization via [[vmlinux-to-elf]] (Python; kallsyms + section rebuild for IDA/Ghidra) sits in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/marin-m__vmlinux-to-elf.md) Linux kernel rootkit hooking samples such as [[venom]] (C/C++; LKM hook mechanisms) sit in the same cheat / linux kernel explorer lane. (source: wiki/sources/descriptions/sad0p__venom.md) Upstream Linux kernel development tutorials via [[kernel-development]] (Greg Kroah-Hartman; patch submission, driver/LKM conventions) complement those offensive samples with canonical workflow guidance. (source: wiki/sources/descriptions/gregkh__kernel-development.md)
 - Title-specific DayZ cheat/modding samples such as [[dayzzz]] (SDK generation + overlays) illustrate game:dayz offensive research surface. (source: wiki/sources/descriptions/zhitkur__DayZzz.md)
 - Discontinued Escape From Tarkov internal trainers such as [[escapefromtarkov-trainer]] (Mono-era; stopped after 1.0 / [[il2cpp]] switch) illustrate the cheat / game:eft lane and Mono→IL2CPP internal-modding complexity. (source: wiki/sources/descriptions/sailro__EscapeFromTarkov-Trainer.md) OOP EFT cheat bases such as [[simple-eft-base]] (C/C++; driver / rendering / animation; stale offsets; cheat / game:eft) complement that lane as unmaintained structural references from the same author as [[simple-rust-base]]. (source: wiki/sources/descriptions/krispybyte__Simple-EFT-Base.md) External DMA radar clients such as [[meatyeftrelease]] (C++/ImGui; LeechCore/MemProcFS; DX11 fuser overlay; Unity entity modules; cheat / game:eft [DMA]) illustrate the below-OS external stack beside internal/driver scaffolds. (source: wiki/sources/descriptions/paul01784__MeatyEFTRelease.md)
 - Title-specific Dota 2 overlay samples such as [[dota2-overlay-2-0]] (C/C++) illustrate game:dota2 overlay research surface. (source: wiki/sources/descriptions/skrixx68__Dota2-Overlay-2.0.md)

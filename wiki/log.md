@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gregkh/kernel-development`: entity [[kernel-development]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:nulli83/Mj-lnir`: entity [[mj-lnir]]; cited on [[overviews/anti-cheat]].
 
 - **2026-08-07** — ingest `readme:categories`: bumped Anti Cheat ~647 (was ~646; Cheat ~2656 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
