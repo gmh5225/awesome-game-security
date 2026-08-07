@@ -2673,3 +2673,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-07** — ingest `description:gopro2027/ParadiseBO2`: entity [[paradise-bo2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `description:googleprojectzero/TinyInst`: entity [[tinyinst]]; cited on [[dynamic-binary-instrumentation]] and [[overviews/reverse-engineering]].
+
+- **2026-08-07** — ingest `description:google/orbit`: entity [[orbit]]; cited on [[overviews/game-engine]] (Game Testing / native C++ profiler lane beside [[tracy]] / [[rprof]]).
