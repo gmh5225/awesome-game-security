@@ -99,6 +99,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (Java/C++; Detection:Virtual Environments)
+- [android-classyshark](entities/android-classyshark.md) — Google ClassyShark APK/DEX/AAR/class bytecode viewer (hierarchies, dependencies, multidex triage)
 - [android-emulator](entities/android-emulator.md) — Android emulator (emulation focus; mobile-platform / emulator research)
 - [android-emulator-hypervisor-driver](entities/android-emulator-hypervisor-driver.md) — Google KVM-on-Windows hypervisor (Android Studio Emulator acceleration; Win8.1+ x64)
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
