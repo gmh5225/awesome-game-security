@@ -32,6 +32,7 @@ sources:
   - wiki/sources/descriptions/hfiref0x__KDU.md
   - wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md
   - wiki/sources/descriptions/gmh5225__zam64-zemina.md
+  - wiki/sources/descriptions/gmh5225__vdk.md
 updated: 2026-08-07
 confidence: high
 ---
@@ -92,7 +93,9 @@ Gigabyte **`gdrv.sys`** loader research such as [[gdrv-loader-v2]] (C/C++; drive
 
 Multi-provider unsigned-driver mappers such as [[kdu]] (Kernel Driver Utility; hfiref0x; extensible vulnerable-driver providers across Intel/ASUS/MSI/Gigabyte families; automated DSE bypass, PE map, cleanup) sit in the canonical cheat / driver-mapper research lane. (source: wiki/sources/descriptions/hfiref0x__KDU.md)
 
+Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh5225; unified interface across signed-driver backends including Speedfan.sys; kernel R/W, process manipulation, driver loading) complement single-driver PoCs in the same BYOVD research lane. (source: wiki/sources/descriptions/gmh5225__vdk.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

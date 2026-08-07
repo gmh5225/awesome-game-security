@@ -1174,6 +1174,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
 - [Van1338](entities/van1338.md) — timing-attack handle elevation; Windows object-callback design (AC stress testing)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
+- [VDK](entities/vdk.md) — Vulnerable Driver Kit; multi-backend BYOVD (Speedfan.sys; kernel R/W, process manipulation, driver load)
 - [veh](entities/veh.md) — VEH software debugger (no Debug API; CE plugin / manualmap VEH DLL)
 - [veh-dumper](entities/veh-dumper.md) — x64 VEH/VCH → synthetic PE64 dumps for IDA
 - [veh-printf-hook](entities/veh-printf-hook.md) — VEH + PAGE_GUARD non-invasive printf/output hook (VEH interception RE)
