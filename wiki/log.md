@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/vibe-blocks-mcp`: entity [[vibe-blocks-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
 - **2026-08-07** — ingest `description:gmh5225/vt-debuger`: entity [[vt-debuger]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-08-07** — ingest `description:gmh5225/wasm-ceserver`: entity [[wasm-ceserver]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
