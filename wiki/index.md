@@ -1286,6 +1286,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 - [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
+- [zig-mcp-server](entities/zig-mcp-server.md) — high-performance memory-efficient MCP protocol implementation in Zig (Game Develop / MCP server)
 - [ZombiesVsPlants](entities/zombies-vs-plants.md) — SDL2 Plants vs. Zombies clone (lane tower defense; plant placement / projectiles / waves / sun; Game Develop / source)
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
 - [zygisk-memdump](entities/zygisk-memdump.md) — Zygisk module dumps `.so` from process memory (C/C++; modding / hooking / memory analysis; Cheat Magisk)
