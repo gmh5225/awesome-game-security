@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/ue4_cheat_engine`: entity [[ue4-cheat-engine]]; cited on [[unreal-object-model]] and [[overviews/game-engine]].
+
 - **2026-08-07** — ingest `description:gmh5225/ue5-roll-a-ball-game`: entity [[ue5-roll-a-ball-game]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-08-07** — ingest `description:gmh5225/underTheHoodOfExecutables`: entity [[underthehoodofexecutables]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].

@@ -1117,6 +1117,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-Interview-Cheat-Sheet](entities/ue-interview-cheat-sheet.md) — Unreal Engine interview cheat sheet (Game Engine / Unreal guide)
 - [UE4-Freecam](entities/ue4-freecam.md) — UE4 FOV changer (hooking / overlays; Game Engine Explorer:Unreal)
+- [UE4 Cheat Engine](entities/ue4-cheat-engine.md) — Android UE4-aware CE (memory scan / GObject enum / UProperty / SDK gen; Cheat / Game Engine Explorer:Unreal)
 - [ue4dumper](entities/ue4dumper.md) — Android UE4 SDK dumper (C/C++; modding / SDK generation)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
