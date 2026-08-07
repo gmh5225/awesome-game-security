@@ -935,6 +935,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
 - [pubg](entities/pubg.md) — PUBG-focused OpenGL hooking/modding sample (C/C++; cheat / game:pubgm; gmh5225)
 - [pubg-dump-offset](entities/pubg-dump-offset.md) — PUBG desktop UE4 offset history (v19.1–24.2; Xenuine keys; GObjects/GWorld; cheat / game:pubg [Offset]; gmh5225)
+- [pubg-external-cheat](entities/pubg-external-cheat.md) — PUBG external cheat sample (C/C++; overlays + memory analysis; cheat / game:pubg; gmh5225)
 - [pubg-internal](entities/pubg-internal.md) — PUBG internal cheat reference (iCollin; learning-oriented RE; cheat / game:pubg)
 - [pubg-mobile-memory-hacking-examples](entities/pubg-mobile-memory-hacking-examples.md) — PUBG Mobile Android memory hacking examples (entity/player/weapon reads; scan + modify; cheat / game:pubgm; gmh5225)
 - [pubg-mobile-pak-extract](entities/pubg-mobile-pak-extract.md) — PUBG Mobile pak extractor (pre–1.1.0; post-update encryption unsupported; cheat / game:pubgm)
