@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/source-sdk-orangebox`: entity [[source-sdk-orangebox]]; cited on [[overviews/game-engine]] and [[concepts/source-netvars]].
+
 - **2026-08-07** — ingest `description:gmh5225/spoof-stack-SafeCall`: entity [[spoof-stack-safecall]]; cited on [[stack-spoofing]], [[overviews/game-hacking]], and [[overviews/anti-cheat]].
 
 - **2026-08-07** — ingest `description:talsec/Free-RASP-Cordova`: entity [[free-rasp-cordova]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].

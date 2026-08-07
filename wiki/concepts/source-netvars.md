@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md
   - wiki/sources/descriptions/guided-hacking__GH-Offset-Dumper.md
   - wiki/sources/descriptions/guided-hacking__GH-Entity-List-Finder.md
-updated: 2026-08-06
+  - wiki/sources/descriptions/gmh5225__source-sdk-orangebox.md
+updated: 2026-08-07
 confidence: high
 ---
 
@@ -38,8 +39,8 @@ Interface vtables and netvar tables drift per game build—verify against the ta
 
 ## Ground-truth sources
 
-Open or leaked trees such as [[source-engine]] and [[cstrike15-src]] help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] and Dota 2 layout dumps such as [[dota2dumped]] (netvar offsets, interface pointers, class headers after patches) illustrate the Source 2 netvar/entity-layout lane. (source: wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md)
+Open or leaked trees such as [[source-engine]], Orange Box SDK trees such as [[source-sdk-orangebox]] (gmh5225; shader/render/driver-oriented Source 1 SDK) (source: wiki/sources/descriptions/gmh5225__source-sdk-orangebox.md), and [[cstrike15-src]] help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] and Dota 2 layout dumps such as [[dota2dumped]] (netvar offsets, interface pointers, class headers after patches) illustrate the Source 2 netvar/entity-layout lane. (source: wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md)
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[gh-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[offsets]] · [[gh-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[source-engine]] · [[source-sdk-orangebox]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
