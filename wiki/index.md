@@ -934,6 +934,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
 - [pubg-internal](entities/pubg-internal.md) — PUBG internal cheat reference (iCollin; learning-oriented RE; cheat / game:pubg)
+- [pubg-mobile-memory-hacking-examples](entities/pubg-mobile-memory-hacking-examples.md) — PUBG Mobile Android memory hacking examples (entity/player/weapon reads; scan + modify; cheat / game:pubgm; gmh5225)
 - [pubg-mobile-pak-extract](entities/pubg-mobile-pak-extract.md) — PUBG Mobile pak extractor (pre–1.1.0; post-update encryption unsupported; cheat / game:pubgm)
 - [pubgm-sdk-and-offsets](entities/pubgm-sdk-and-offsets.md) — PUBG Mobile UE4 SDK + offsets (1.5 / 1.9; ARM32 reflection dump; cheat / game:pubgm [Offset])
 - [pwatch](entities/pwatch.md) — Linux/Android HWBP process watch (debug without attach; cheat / debugging)
