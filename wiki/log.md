@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:google/android-emulator-hypervisor-driver`: entity [[android-emulator-hypervisor-driver]]; cited on [[overviews/mobile-security]] and [[overviews/windows-kernel]].
+
 - **2026-08-07** — ingest `description:google/binexport`: entity [[binexport]]; cited on [[overviews/reverse-engineering]]; cross-linked [[diaphora]].
 
 - **2026-08-07** — ingest `description:not1cyyy/PowerVM`: entity [[powervm]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
