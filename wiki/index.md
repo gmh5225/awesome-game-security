@@ -1283,6 +1283,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [YaraVM](entities/yaravm.md) — IDA processor/loader for compiled YARA (`.yar.bin` bytecode/regex disasm; `libyara.til`; cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
+- [yuzu-android](entities/yuzu-android.md) — yuzu Switch emulator Android port (ARM64 JIT; Vulkan/OpenGL; Nintendo Switch lane)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [zam64-zemina](entities/zam64-zemina.md) — BYOVD via Zemana zam64.sys (IOCTL process kill + memory access)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
