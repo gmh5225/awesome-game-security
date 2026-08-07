@@ -290,6 +290,7 @@ sources:
   - wiki/sources/descriptions/singhhdev__Spoofer-AMIDEWIN.md
   - wiki/sources/descriptions/semihcevik__hwidspoofer.md
   - wiki/sources/descriptions/gmh5225__wizard101-spoofer.md
+  - wiki/sources/descriptions/gmh5225__underTheHoodOfExecutables.md
   - wiki/sources/descriptions/gmh5225__veh-printf-hook.md
   - wiki/sources/descriptions/gmh5225__veh_hide_memory.md
   - wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md
@@ -355,7 +356,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 Use [[research-rigor]] when turning detector hits into enforcement: define the decision unit (player/session/device/build); label telemetry as server-observed vs client-reported; keep **observation → finding → attribution → action** separate; calibrate thresholds on representative held-out data; report prevalence, FPR/FNR, and review volume; combine causally distinct signals and measure joint error—correlated detectors can fail together. Invariant findings need rollback/reconnect/game-bug exclusions before calling exploitation. (source: wiki/sources/skills/anti-cheat.md)
 
-Structured research indexes such as [[anti-cheat-research-index]] catalog public AC architecture, kernel execution/memory integrity, VT-x/EPT instrumentation, graphics presentation-path integrity, and x86/x64 RE references (shellcode, attach, present-hook, hardware-trace detection) for defensive engineering—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md)
+Structured research indexes such as [[anti-cheat-research-index]] catalog public AC architecture, kernel execution/memory integrity, VT-x/EPT instrumentation, graphics presentation-path integrity, and x86/x64 RE references (shellcode, attach, present-hook, hardware-trace detection) for defensive engineering—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md) Foundational C **linking/loading/executable-format** guide [[underthehoodofexecutables]] supports the same defensive-engineering primer lane. (source: wiki/sources/descriptions/gmh5225__underTheHoodOfExecutables.md)
 
 ## Major systems
 
