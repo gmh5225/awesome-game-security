@@ -1123,6 +1123,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unreal-mcp](entities/unreal-mcp.md) — MCP server for Unreal Editor (asset/level/blueprint automation; Game Develop / MCP)
 - [UnrealDumper-4.25](entities/unrealdumper-4-25.md) — external UE4.25+ SDK dumper (C++; GObjects/GNames pattern scan; no inject)
 - [ue5-cardgame](entities/ue5-cardgame.md) — UE5 card game (deck / turn-based / UMG / replication; Game Develop / Unreal source)
+- [ue5-roll-a-ball-game](entities/ue5-roll-a-ball-game.md) — UE5 Roll a Ball tutorial (asset pipelines / editor tooling / modding; Game Develop / Unreal source)
 - [UE5-With-Dear-ImGui](entities/ue5-with-dear-imgui.md) — UE 5.0.1 C++ Dear ImGui sample (Game Engine Plugins:Unreal)
 - [UEFI-Bootloader](entities/uefi-bootloader.md) — simple UEFI runtime-driver mmapper (C/C++; cheat / EFI driver)
 - [UEVR](entities/uevr.md) — universal UE4/UE5 VR inject mod (stereo / OpenXR·OpenVR; reflection + pattern scan)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/ue5-roll-a-ball-game`: entity [[ue5-roll-a-ball-game]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
 - **2026-08-07** — ingest `description:gmh5225/underTheHoodOfExecutables`: entity [[underthehoodofexecutables]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-08-07** — ingest `description:gmh5225/unispectDMAPlugin`: entity [[unispect-dma-plugin]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
