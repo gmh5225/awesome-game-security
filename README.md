@@ -829,6 +829,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/vt-debuger [VT debuger]
 - https://github.com/kkpwn/ErisDbg [VT debuger]
 - https://github.com/xhscfq/UnrealVTDbg [VT-x/EPT-assisted Windows kernel debugging framework with Delphi UI and C++ core for authorized anti-cheat and reverse-engineering research]
+- https://github.com/not1cyyy/powervm [Stealth AMD-SVM Type-1 hypervisor with NPT hooks and a customized Cheat Engine debug engine for inspecting VMProtect- and ACE-protected processes]
 - https://github.com/teemu-l/execution-trace-viewer
 - https://github.com/changeofpace/Force-Page-Protection [Bypass Remap Memory]
 - https://github.com/icsharpcode/ILSpy [For Unity]
