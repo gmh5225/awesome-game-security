@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/r69-driver`: entity [[r69-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:gmh5225/rAthenaCN`: entity [[rathenacn]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[rathena]].
 
 - **2026-08-07** — ingest `description:gmh5225/razer-rzctl`: entity [[razer-rzctl]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
