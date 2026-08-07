@@ -4235,6 +4235,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [Proof of concept Anti-Cheat plugin for CS:GO](https://github.com/ekknod/CSGO-AC)
 - https://github.com/Pintuzoft/OSAntiCheat [Server-side CS2 CounterStrikeSharp heuristic anti-cheat (spinbot/aimbot/triggerbot/wallhack detectors, log-only)]
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
+- https://github.com/cs2-server-plugins/cs2-calladmin [ModSharp CS2 server plugin for in-game cheater reports with admin claim/resolve workflow and optional Discord notifications]
 - https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/gmh5225/anti-cheat)
@@ -4429,6 +4430,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/talsec/Free-RASP-ReactNative [React Native freeRASP plugin for root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/rajssinde/rs-native-kit-security [React Native Nitro Modules RASP SDK for root/jailbreak, Frida/Xposed hook, tamper/integrity, VPN/proxy, and device risk scoring]
 - https://github.com/talsec/Free-RASP-Capacitor [Capacitor freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
+- https://github.com/talsec/Free-RASP-Cordova [Cordova freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/talsec/Free-RASP-Flutter [Flutter freeRASP plugin for mobile root/jailbreak, Frida, hook, emulator, tamper, and integrity detection]
 - https://github.com/talsec/Free-RASP-iOS [Native iOS freeRASP SDK for jailbreak, Frida, hook, emulator, tamper, and repackaging detection]
 - https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
