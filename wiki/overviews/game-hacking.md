@@ -495,6 +495,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__the-finals-interior-cheat.md
   - wiki/sources/descriptions/gmh5225__subhook.md
   - wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md
+  - wiki/sources/descriptions/gmh5225__sigmakerex.md
   - wiki/sources/descriptions/gmh5225__simple-rust-hack.md
   - wiki/sources/descriptions/gmh5225__superpeople-client.md
   - wiki/sources/descriptions/gmh5225__teamfortress2_internal.md
@@ -789,6 +790,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Unofficial YARA integration for IDA Pro via [[yara4ida]] (default **Alt-Y**; rebind via `plugins.cfg`; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/kweatherman__yara4ida.md)
 - Fast IDA signature scanner & creator via [[ida-fusion]] (unique sigs vs duplicated binary / anti-RE parts) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senator715__IDA-Fusion.md)
 - Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
+- Enhanced IDA Pro signature maker via [[sigmakerex]] (code/IDA/x64dbg pattern formats; automatic uniqueness verification; batch generation; clipboard integration; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__sigmakerex.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
 - Automatic standard-function enum identification via [[auto-enum]] (Python/C; identifies and applies enums for common API/stdlib calls) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/junron__auto-enum.md)

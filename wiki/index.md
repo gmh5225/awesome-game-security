@@ -1022,6 +1022,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SigFlip](entities/sigflip.md) — patch Authenticode signed PE without breaking signature (WIN_CERTIFICATE inject; SigLoader; Some Tricks / Ring3)
 - [SigThief](entities/sigthief.md) — steal PE Authenticode signatures (certTable transplant; Some Tricks / Ring3)
 - [sign-expired](entities/sign-expired.md) — signtool XmlLite.dll sideload; patch cert/time APIs to bypass expiry (Sign Leaked Cert)
+- [sigmakerex](entities/sigmakerex.md) — enhanced IDA Pro signature maker (code/IDA/x64dbg formats; uniqueness verify; batch; clipboard; cheat / IDA Plugins)
 - [SignToolEx](entities/signtoolex.md) — Sign Leaked Cert; expired/leaked Authenticode signing; no timestamp spoofing (Anti Cheat → Sign Tools)
 - [SignToolGUI](entities/signtoolgui.md) — Windows Forms signtool.exe GUI (cert store / PFX / Azure Trusted Signing; batch sign; Anti Cheat → Sign Tools)
 - [SilentMoonwalk](entities/silent-moonwalk.md) — TRUE call-stack spoofer PoC from joint stack-spoofing research (klezVirus; Cheat Spoof Stack)

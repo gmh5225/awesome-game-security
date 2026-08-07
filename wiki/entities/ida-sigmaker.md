@@ -27,4 +27,4 @@ Primary audience: reverse engineers and game-security practitioners who need dur
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-fusion]] · [[yarascan-ida]] · [[patternsleuth]] · [[sig-database]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[sigmakerex]] · [[ida-fusion]] · [[yarascan-ida]] · [[patternsleuth]] · [[sig-database]]

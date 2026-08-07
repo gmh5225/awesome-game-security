@@ -2785,3 +2785,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-07** — ingest `description:gmh5225/titancf`: entity [[titancf]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
 - **2026-08-07** — ingest `description:gmh5225/star_rail`: entity [[star-rail]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
+- **2026-08-07** — ingest `description:gmh5225/sigmakerex`: entity [[sigmakerex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
