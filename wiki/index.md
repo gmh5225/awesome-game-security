@@ -1016,6 +1016,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Shadow](entities/shadow.md) — iOS jailbreak detection bypass for modern jailbreaks (cheat / iOS jailbreak; per-app success not guaranteed)
 - [shprotect-ac](entities/shprotect-ac.md) — server-first Roblox Luau AC (movement/remote spam/fly/noclip; heartbeat/watchdog; scoring/rollback/kick)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
+- [shootergame-hack](entities/shootergame-hack.md) — Unreal ShooterGame Demo offensive research (C/C++; rendering / debugging; Cheat / Game Engine Explorer:Unreal; gmh5225)
 - [ShimCacheParser](entities/shimcacheparser.md) — AppCompat ShimCache parser (SYSTEM hive; paths/timestamps/flags; CSV/timeline; AC/IS forensics)
 - [Shtreeba](entities/shtreeba.md) — Windows manual-map DLL injector (MMap library; UI process picker; Injector)
 - [sig-database](entities/sig-database.md) — IDA FLIRT sigs for Linux libs (OpenSSL/Ubuntu amd64·i386; RE / library ID)
