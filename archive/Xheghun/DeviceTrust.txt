@@ -1,0 +1,1865 @@
+Project Path: arc_Xheghun_DeviceTrust_umkpmnn6
+
+Source Tree:
+
+```txt
+arc_Xheghun_DeviceTrust_umkpmnn6
+├── LICENSE
+├── README.md
+├── build.gradle.kts
+├── device-trust
+│   ├── build.gradle.kts
+│   ├── consumer-rules.pro
+│   ├── proguard-rules.pro
+│   └── src
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   ├── cpp
+│       │   │   ├── CMakeLists.txt
+│       │   │   └── device_trust.cpp
+│       │   └── kotlin
+│       │       └── com
+│       │           └── xheghun
+│       │               └── devicetrust
+│       │                   ├── DefaultDeviceTrustClient.kt
+│       │                   ├── DeviceTrust.kt
+│       │                   ├── Models.kt
+│       │                   ├── TrustPolicy.kt
+│       │                   └── internal
+│       │                       ├── BuildSignalSource.kt
+│       │                       └── NativeSignalSource.kt
+│       └── test
+│           └── kotlin
+│               └── com
+│                   └── xheghun
+│                       └── devicetrust
+│                           └── DefaultTrustPolicyTest.kt
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── jitpack.yml
+├── sample
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           ├── java
+│           │   └── com
+│           │       └── example
+│           │           └── devicetrust
+│           │               ├── MainActivity.kt
+│           │               ├── TrustViewModel.kt
+│           │               └── ui
+│           │                   └── theme
+│           │                       └── Theme.kt
+│           └── res
+│               ├── drawable
+│               │   ├── ic_launcher_background.xml
+│               │   └── ic_launcher_foreground.xml
+│               ├── mipmap-anydpi-v26
+│               │   ├── ic_launcher.xml
+│               │   └── ic_launcher_round.xml
+│               ├── mipmap-hdpi
+│               ├── mipmap-mdpi
+│               ├── mipmap-xhdpi
+│               ├── mipmap-xxhdpi
+│               ├── mipmap-xxxhdpi
+│               ├── values
+│               │   ├── strings.xml
+│               │   └── themes.xml
+│               └── xml
+│                   └── data_extraction_rules.xml
+└── settings.gradle.kts
+
+```
+
+`LICENSE`:
+
+```
+Copyright 2026 DeviceTrust contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+```
+
+`README.md`:
+
+```md
+# DeviceTrust
+
+DeviceTrust is an Android library for collecting device integrity signals. It detects indicators associated with rooted devices, runtime instrumentation, emulators, unlocked bootloaders, custom system images, and weakened platform security settings.
+
+The library includes:
+
+- A Kotlin API based on coroutines
+- Native Android NDK checks
+- Configurable risk thresholds
+- Versioned evidence models
+- Consumer R8 rules
+- Native binaries for ARM64, ARMv7, x86, and x86_64
+
+## Requirements
+
+- Android API 26 or later
+- Kotlin coroutines
+- JitPack repository access
+
+## Installation
+
+Add JitPack to `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven(url = "https://jitpack.io")
+    }
+}
+```
+
+Add DeviceTrust to the application or library module:
+
+```kotlin
+dependencies {
+    implementation("com.github.Xheghun:DeviceTrust:0.1.2")
+}
+```
+
+## Basic usage
+
+Create a client and run an assessment from a coroutine:
+
+```kotlin
+import com.xheghun.devicetrust.DeviceTrust
+import com.xheghun.devicetrust.TrustLevel
+
+val deviceTrust = DeviceTrust.create()
+val assessment = deviceTrust.assess()
+
+when (assessment.level) {
+    TrustLevel.LOW_RISK -> allowNormalFlow()
+    TrustLevel.REVIEW -> requireAdditionalVerification()
+    TrustLevel.HIGH_RISK -> sendForServerReview()
+}
+```
+
+`assess()` performs file and system inspection and runs on an I/O dispatcher. Call it from a lifecycle-aware coroutine, such as `viewModelScope`.
+
+```kotlin
+viewModelScope.launch {
+    val assessment = deviceTrust.assess()
+    _state.update { it.copy(assessment = assessment) }
+}
+```
+
+## Assessment results
+
+`TrustAssessment` contains:
+
+| Property | Description |
+|---|---|
+| `score` | Risk score from `0` to `100` |
+| `level` | `LOW_RISK`, `REVIEW`, or `HIGH_RISK` |
+| `signals` | Detected integrity signals ordered by weight |
+| `evidence` | Versioned evidence used to produce the assessment |
+| `isRootOrHookingSuspected` | Whether root or runtime-hooking signals were found |
+| `isEmulatorSuspected` | Whether emulator signals were found |
+| `isSystemIntegritySuspected` | Whether boot or system-integrity signals were found |
+
+Each `TrustSignal` provides an identifier, category, weight, title, and detail value.
+
+```kotlin
+assessment.signals.forEach { signal ->
+    Log.d(
+        "DeviceTrust",
+        "${signal.category}: ${signal.id} (${signal.weight})"
+    )
+}
+```
+
+Available signal categories are:
+
+- `ROOT`
+- `HOOKING`
+- `EMULATOR`
+- `SYSTEM_INTEGRITY`
+
+## Custom risk policy
+
+The default policy uses review and high-risk thresholds of `25` and `60`. Supply different thresholds when creating the client:
+
+```kotlin
+import com.xheghun.devicetrust.DefaultTrustPolicy
+import com.xheghun.devicetrust.DeviceTrust
+
+val deviceTrust = DeviceTrust.create(
+    policy = DefaultTrustPolicy(
+        reviewThreshold = 30,
+        highRiskThreshold = 70,
+    )
+)
+```
+
+Applications that require a different scoring model can implement `TrustPolicy`:
+
+```kotlin
+val policy = TrustPolicy { evidence ->
+    evaluateWithApplicationPolicy(evidence)
+}
+
+val deviceTrust = DeviceTrust.create(policy)
+```
+
+## Collecting evidence without local scoring
+
+Use `collectEvidence()` to obtain the signals without applying a policy:
+
+```kotlin
+val evidence = deviceTrust.collectEvidence()
+```
+
+`DeviceEvidence` includes a `schemaVersion`, collection timestamp, and list of signals. Store or transmit the schema version together with the evidence so that server implementations can handle future schema changes.
+
+## Checks
+
+DeviceTrust currently checks for:
+
+- Common `su`, Magisk, KernelSU, APatch, and root-related files
+- Suspicious mount and overlay entries
+- Frida, Xposed, LSPosed, Zygisk, and Substrate mappings
+- Anonymous writable and executable memory mappings
+- An attached process tracer
+- QEMU, goldfish, ranchu, and other emulator artifacts
+- Emulator-related kernel parameters and Android build properties
+- Bootloader lock state
+- Android Verified Boot state
+- Test-key and engineering builds
+- SELinux enforcement state
+
+## Security considerations
+
+DeviceTrust provides local risk signals, not proof that a device is trustworthy. An attacker with control of the operating system can modify system properties, filter procfs, hook JNI calls, or patch application code.
+
+Do not use the local result as the only authorization control for payments, account recovery, authentication, or other sensitive operations. Production fraud controls should combine these signals with server-verified Play Integrity results, account history, request context, and transaction risk.
+
+Avoid logging or retaining detailed device evidence unless the application has an appropriate privacy and data-retention policy.
+
+## Project structure
+
+```text
+device-trust/   Android library and native detector
+sample/         Compose sample application
+```
+
+## Building from source
+
+The project requires Android SDK 36, NDK 27.0.12077973 or compatible, CMake 3.22.1, and JDK 17 or 21.
+
+Run the unit tests and build the sample application:
+
+```bash
+./gradlew :device-trust:test :sample:assembleDebug
+```
+
+Publish the library to Maven Local:
+
+```bash
+./gradlew :device-trust:publishReleasePublicationToMavenLocal
+```
+
+## License
+
+DeviceTrust is available under the Apache License 2.0. See [LICENSE](LICENSE).
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+}
+
+```
+
+`device-trust/build.gradle.kts`:
+
+```kts
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    id("maven-publish")
+}
+
+group = providers.environmentVariable("GROUP").orElse("io.github.xheghun").get()
+version = providers.environmentVariable("VERSION").orElse("0.1.2").get()
+
+kotlin {
+    explicitApi()
+}
+
+android {
+    namespace = "com.xheghun.devicetrust"
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 26
+        consumerProguardFiles("consumer-rules.pro")
+        externalNativeBuild { cmake { cppFlags += "-std=c++20 -fvisibility=hidden" } }
+        ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64") }
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions { jvmTarget = "11" }
+    publishing {
+        singleVariant("release") { withSourcesJar() }
+    }
+}
+
+dependencies {
+    implementation(libs.kotlinx.coroutines.core)
+    testImplementation(libs.junit)
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = project.group.toString()
+            artifactId = "device-trust"
+            version = project.version.toString()
+            afterEvaluate { from(components["release"]) }
+            pom {
+                name = "DeviceTrust"
+                description = "Layered Android device-risk signals for root, hooking, emulators, and system integrity."
+                url = "https://github.com/Xheghun/DeviceTrust"
+                licenses {
+                    license {
+                        name = "Apache License 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer { id = "Xheghun"; name = "DeviceTrust contributors" }
+                }
+                scm {
+                    connection = "scm:git:https://github.com/Xheghun/DeviceTrust.git"
+                    developerConnection = "scm:git:ssh://git@github.com/Xheghun/DeviceTrust.git"
+                    url = "https://github.com/Xheghun/DeviceTrust"
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "localBuild"
+            url = uri(layout.buildDirectory.dir("repo"))
+        }
+    }
+}
+
+```
+
+`device-trust/consumer-rules.pro`:
+
+```pro
+# JNI entry points are discovered by name from native code.
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+
+```
+
+`device-trust/proguard-rules.pro`:
+
+```pro
+# Intentionally empty. Consumer-facing rules live in consumer-rules.pro.
+
+```
+
+`device-trust/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest />
+
+```
+
+`device-trust/src/main/cpp/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.22.1)
+project(devicetrust)
+add_library(devicetrust SHARED device_trust.cpp)
+target_link_libraries(devicetrust android log)
+target_compile_options(devicetrust PRIVATE -Wall -Wextra -Werror -fstack-protector-strong)
+target_link_options(devicetrust PRIVATE -Wl,-z,relro,-z,now)
+
+```
+
+`device-trust/src/main/cpp/device_trust.cpp`:
+
+```cpp
+#include <jni.h>
+#include <sys/syscall.h>
+#include <sys/system_properties.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <cerrno>
+#include <string>
+#include <vector>
+#include <array>
+#include <algorithm>
+#include <cctype>
+
+namespace {
+
+struct Signal {
+    std::string id;
+    std::string category;
+    std::string weight;
+    std::string title;
+    std::string detail;
+};
+
+int rawOpen(const char* path) {
+    return static_cast<int>(syscall(__NR_openat, AT_FDCWD, path, O_RDONLY | O_CLOEXEC, 0));
+}
+
+std::string rawRead(const char* path, size_t limit = 1024 * 1024) {
+    int fd = rawOpen(path);
+    if (fd < 0) return {};
+
+    std::string out;
+    std::array<char, 4096> buffer{};
+
+    while (out.size() < limit) {
+        auto count = static_cast<ssize_t>(syscall(__NR_read, fd, buffer.data(), buffer.size()));
+        if (count <= 0) break;
+        out.append(buffer.data(), static_cast<size_t>(count));
+    }
+
+    syscall(__NR_close, fd);
+    return out;
+}
+
+bool rawExists(const char* path) {
+    int fd = rawOpen(path);
+    if (fd < 0) return false;
+    syscall(__NR_close, fd);
+    return true;
+}
+
+std::string property(const char* key) {
+    std::array<char, PROP_VALUE_MAX> value{};
+    int length = __system_property_get(key, value.data());
+    return length > 0 ? std::string(value.data(), static_cast<size_t>(length)) : std::string{};
+}
+
+bool containsAny(const std::string& value, const std::vector<std::string>& needles) {
+    std::string lower = value;
+    std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    return std::any_of(needles.begin(), needles.end(), [&](const auto& needle) {
+        return lower.find(needle) != std::string::npos;
+    });
+}
+
+void add(std::vector<Signal>& out, const char* id, const char* category, int weight,
+         const char* title, const std::string& detail) {
+    out.push_back({id, category, std::to_string(weight), title, detail});
+}
+
+std::vector<Signal> collect() {
+    std::vector<Signal> out;
+
+    // Root Detection
+    const std::array<const char*, 10> rootPaths = {
+        "/system/bin/su", "/system/xbin/su", "/sbin/su", "/su/bin/su",
+        "/data/adb/magisk", "/data/adb/ksu", "/debug_ramdisk/.magisk",
+        "/system/app/Superuser.apk", "/system/bin/.ext/.su", "/cache/su"
+    };
+    for (const char* path : rootPaths) {
+        if (rawExists(path)) {
+            add(out, "root_artifact", "ROOT", 40, "Privileged artifact", path);
+            break;
+        }
+    }
+
+    // Mount Checks
+    const std::string mounts = rawRead("/proc/self/mountinfo");
+    if (containsAny(mounts, {"magisk", "kernelsu", "apatch", "overlay"}))
+        add(out, "suspicious_mount", "ROOT", 35, "Suspicious mount namespace", "Magisk, KernelSU, APatch, or overlay marker exposed");
+
+    // Memory Maps Checks
+    const std::string maps = rawRead("/proc/self/maps");
+
+    if (containsAny(maps, {"frida", "xposed", "lsposed", "zygisk", "substrate"}))
+        add(out, "injected_library", "HOOKING", 50, "Injected framework", "A known instrumentation or hooking marker is mapped");
+
+    bool anonymousExecutable = false;
+    size_t start = 0;
+    while (start < maps.size()) {
+        size_t end = maps.find('\n', start);
+        std::string line = maps.substr(start, end - start);
+        if (line.find("rwxp") != std::string::npos && line.find('/') == std::string::npos) {
+            anonymousExecutable = true;
+            break;
+        }
+        if (end == std::string::npos) break;
+        start = end + 1;
+    }
+    if (anonymousExecutable)
+        add(out, "anonymous_rwx", "HOOKING", 25, "Writable executable memory", "An anonymous RWX mapping is present");
+
+    // Tracer Detection
+    const std::string status = rawRead("/proc/self/status");
+    auto tracer = status.find("TracerPid:");
+    if (tracer != std::string::npos) {
+        auto value = status.find_first_of("123456789", tracer + 10);
+        if (value != std::string::npos && value < status.find('\n', tracer))
+            add(out, "tracer", "HOOKING", 30, "Process is traced", "TracerPid is non-zero");
+    }
+
+    // Emulator Detection
+    const std::array<const char*, 7> emulatorPaths = {
+        "/dev/qemu_pipe", "/dev/socket/qemud", "/dev/goldfish_pipe",
+        "/sys/qemu_trace", "/system/lib/libc_malloc_debug_qemu.so", "/dev/ttyS0", "/dev/ttyS1"
+    };
+    int virtualArtifacts = 0;
+    for (const char* path : emulatorPaths) if (rawExists(path)) ++virtualArtifacts;
+    if (virtualArtifacts > 0)
+        add(out, "virtual_device", "EMULATOR", std::min(45, 20 + virtualArtifacts * 5), "Virtual hardware artifacts", std::to_string(virtualArtifacts) + " emulator device nodes found");
+
+    const std::string cmdline = rawRead("/proc/cmdline");
+    if (containsAny(cmdline, {"qemu=1", "goldfish", "ranchu", "androidboot.hardware=virtual"}))
+        add(out, "virtual_kernel", "EMULATOR", 40, "Virtual kernel parameters", "Kernel command line exposes emulator markers");
+
+    const std::string hardware = property("ro.hardware") + " " + property("ro.boot.hardware") + " " + property("ro.product.board");
+    if (containsAny(hardware, {"goldfish", "ranchu", "vbox", "nox", "ttvm", "qemu"}))
+        add(out, "virtual_properties", "EMULATOR", 35, "Virtual hardware properties", hardware);
+
+    // ROM & Bootloader Checks
+    const std::string flashLocked = property("ro.boot.flash.locked");
+    if (flashLocked == "0") add(out, "bootloader_unlocked", "ROM", 35, "Bootloader unlocked", "ro.boot.flash.locked=0");
+
+    const std::string verified = property("ro.boot.verifiedbootstate");
+    if (verified == "orange" || verified == "red" || verified == "yellow")
+        add(out, "verified_boot", "ROM", verified == "red" ? 50 : 35, "Verified Boot degraded", "verified boot state=" + verified);
+
+    const std::string tags = property("ro.build.tags");
+    if (tags.find("test-keys") != std::string::npos)
+        add(out, "test_keys", "ROM", 25, "Build uses test keys", tags);
+
+    const std::string buildType = property("ro.build.type");
+    if (buildType == "eng" || buildType == "userdebug")
+        add(out, "debug_build", "ROM", 20, "Non-production system build", "ro.build.type=" + buildType);
+
+    const std::string selinux = rawRead("/sys/fs/selinux/enforce", 8);
+    if (!selinux.empty() && selinux[0] == '0')
+        add(out, "selinux_permissive", "ROM", 45, "SELinux is permissive", "Kernel is not enforcing mandatory access control");
+
+    return out;
+}
+
+} // namespace
+
+extern "C" JNIEXPORT jobjectArray JNICALL
+Java_com_xheghun_devicetrust_internal_NativeSignalSource_collectEncoded(JNIEnv* env, jobject) {
+    auto signals = collect();
+    jclass stringClass = env->FindClass("java/lang/String");
+    jobjectArray result = env->NewObjectArray(static_cast<jsize>(signals.size()), stringClass, nullptr);
+
+    for (size_t i = 0; i < signals.size(); ++i) {
+        const auto& s = signals[i];
+        std::string encoded = s.id + "\t" + s.category + "\t" + s.weight + "\t" + s.title + "\t" + s.detail;
+        jstring value = env->NewStringUTF(encoded.c_str());
+        env->SetObjectArrayElement(result, static_cast<jsize>(i), value);
+        env->DeleteLocalRef(value);
+    }
+
+    return result;
+}
+
+```
+
+`device-trust/src/main/kotlin/com/xheghun/devicetrust/DefaultDeviceTrustClient.kt`:
+
+```kt
+package com.xheghun.devicetrust
+
+import com.xheghun.devicetrust.internal.BuildSignalSource
+import com.xheghun.devicetrust.internal.NativeSignalSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+internal class DefaultDeviceTrustClient(private val policy: TrustPolicy) : DeviceTrustClient {
+    override suspend fun collectEvidence(): DeviceEvidence = withContext(Dispatchers.IO) {
+        DeviceEvidence(
+            schemaVersion = DeviceTrust.SIGNAL_SCHEMA_VERSION,
+            collectedAtEpochMillis = System.currentTimeMillis(),
+            signals = NativeSignalSource.collect() + BuildSignalSource.collect(),
+        )
+    }
+
+    override suspend fun assess(): TrustAssessment = policy.evaluate(collectEvidence())
+}
+
+```
+
+`device-trust/src/main/kotlin/com/xheghun/devicetrust/DeviceTrust.kt`:
+
+```kt
+package com.xheghun.devicetrust
+
+/** Entry point for creating a device-risk client. */
+public object DeviceTrust {
+    public const val SIGNAL_SCHEMA_VERSION: Int = 1
+
+    @JvmStatic
+    @JvmOverloads
+    public fun create(policy: TrustPolicy = DefaultTrustPolicy()): DeviceTrustClient =
+        DefaultDeviceTrustClient(policy)
+}
+
+public interface DeviceTrustClient {
+    /** Collects local evidence on a background dispatcher. */
+    public suspend fun collectEvidence(): DeviceEvidence
+
+    /** Collects evidence and evaluates it with the configured policy. */
+    public suspend fun assess(): TrustAssessment
+}
+
+```
+
+`device-trust/src/main/kotlin/com/xheghun/devicetrust/Models.kt`:
+
+```kt
+package com.xheghun.devicetrust
+
+public enum class SignalCategory { ROOT, HOOKING, EMULATOR, SYSTEM_INTEGRITY }
+public enum class TrustLevel { LOW_RISK, REVIEW, HIGH_RISK }
+
+public data class TrustSignal(
+    val id: String,
+    val category: SignalCategory,
+    val weight: Int,
+    val title: String,
+    val detail: String,
+)
+
+public data class DeviceEvidence(
+    val schemaVersion: Int,
+    val collectedAtEpochMillis: Long,
+    val signals: List<TrustSignal>,
+)
+
+public data class TrustAssessment(
+    val score: Int,
+    val level: TrustLevel,
+    val evidence: DeviceEvidence,
+) {
+    public val signals: List<TrustSignal> get() = evidence.signals
+    public val isRootOrHookingSuspected: Boolean get() = signals.any {
+        it.category == SignalCategory.ROOT || it.category == SignalCategory.HOOKING
+    }
+    public val isEmulatorSuspected: Boolean get() = signals.any { it.category == SignalCategory.EMULATOR }
+    public val isSystemIntegritySuspected: Boolean get() = signals.any { it.category == SignalCategory.SYSTEM_INTEGRITY }
+}
+
+```
+
+`device-trust/src/main/kotlin/com/xheghun/devicetrust/TrustPolicy.kt`:
+
+```kt
+package com.xheghun.devicetrust
+
+public fun interface TrustPolicy {
+    public fun evaluate(evidence: DeviceEvidence): TrustAssessment
+}
+
+/**
+ * Default advisory policy. Correlated signals in one category receive diminishing
+ * weight so a noisy signal family cannot dominate independent evidence.
+ */
+public class DefaultTrustPolicy(
+    private val reviewThreshold: Int = 25,
+    private val highRiskThreshold: Int = 60,
+) : TrustPolicy {
+    init {
+        require(reviewThreshold in 1..100) { "reviewThreshold must be in 1..100" }
+        require(highRiskThreshold in reviewThreshold..100) { "highRiskThreshold must be >= reviewThreshold and <= 100" }
+    }
+
+    override fun evaluate(evidence: DeviceEvidence): TrustAssessment {
+        val deduplicated = evidence.signals.distinctBy { it.id }
+        val score = deduplicated
+            .groupBy { it.category }
+            .values
+            .sumOf { categorySignals ->
+                categorySignals.sortedByDescending { it.weight }
+                    .mapIndexed { index, signal -> signal.weight / (index + 1) }
+                    .sum()
+            }
+            .coerceIn(0, 100)
+        val level = when {
+            score >= highRiskThreshold -> TrustLevel.HIGH_RISK
+            score >= reviewThreshold -> TrustLevel.REVIEW
+            else -> TrustLevel.LOW_RISK
+        }
+        val normalizedEvidence = evidence.copy(signals = deduplicated.sortedByDescending { it.weight })
+        return TrustAssessment(score, level, normalizedEvidence)
+    }
+}
+
+```
+
+`device-trust/src/main/kotlin/com/xheghun/devicetrust/internal/BuildSignalSource.kt`:
+
+```kt
+package com.xheghun.devicetrust.internal
+
+import android.os.Build
+import com.xheghun.devicetrust.SignalCategory
+import com.xheghun.devicetrust.TrustSignal
+
+internal object BuildSignalSource {
+    fun collect(): List<TrustSignal> = buildList {
+        val values = listOf(Build.FINGERPRINT, Build.MODEL, Build.PRODUCT, Build.BRAND).map(String::lowercase)
+        val markers = listOf("generic", "unknown", "emulator", "sdk_gphone", "google_sdk", "genymotion")
+        val matches = values.count { value -> markers.any(value::contains) }
+        if (matches >= 2) add(
+            TrustSignal("build_emulator", SignalCategory.EMULATOR, 25, "Emulator-like build identity", "$matches independent Build fields contain virtual-device markers")
+        )
+        if (Build.TAGS?.contains("test-keys") == true) add(
+            TrustSignal("java_test_keys", SignalCategory.SYSTEM_INTEGRITY, 20, "Android build uses test keys", Build.TAGS.orEmpty())
+        )
+    }
+}
+
+```
+
+`device-trust/src/main/kotlin/com/xheghun/devicetrust/internal/NativeSignalSource.kt`:
+
+```kt
+package com.xheghun.devicetrust.internal
+
+import com.xheghun.devicetrust.SignalCategory
+import com.xheghun.devicetrust.TrustSignal
+
+internal object NativeSignalSource {
+    init { System.loadLibrary("devicetrust") }
+
+    private external fun collectEncoded(): Array<String>
+
+    fun collect(): List<TrustSignal> = collectEncoded().mapNotNull { encoded ->
+        val parts = encoded.split('\t', limit = 5)
+        if (parts.size != 5) return@mapNotNull null
+        val category = when (parts[1]) {
+            "ROM" -> SignalCategory.SYSTEM_INTEGRITY
+            else -> runCatching { SignalCategory.valueOf(parts[1]) }.getOrNull()
+        } ?: return@mapNotNull null
+        TrustSignal(parts[0], category, parts[2].toIntOrNull() ?: 0, parts[3], parts[4])
+    }
+}
+
+```
+
+`device-trust/src/test/kotlin/com/xheghun/devicetrust/DefaultTrustPolicyTest.kt`:
+
+```kt
+package com.xheghun.devicetrust
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class DefaultTrustPolicyTest {
+    private val policy = DefaultTrustPolicy()
+
+    @Test fun `no signals is low risk`() {
+        val result = policy.evaluate(evidence())
+        assertEquals(0, result.score)
+        assertEquals(TrustLevel.LOW_RISK, result.level)
+    }
+
+    @Test fun `independent high confidence signals produce high risk`() {
+        val result = policy.evaluate(evidence(
+            signal("root", SignalCategory.ROOT, 40),
+            signal("hook", SignalCategory.HOOKING, 30),
+        ))
+        assertEquals(70, result.score)
+        assertEquals(TrustLevel.HIGH_RISK, result.level)
+        assertTrue(result.isRootOrHookingSuspected)
+    }
+
+    @Test fun `correlated signals have diminishing weight`() {
+        val result = policy.evaluate(evidence(
+            signal("a", SignalCategory.EMULATOR, 40),
+            signal("b", SignalCategory.EMULATOR, 30),
+            signal("c", SignalCategory.EMULATOR, 20),
+        ))
+        assertEquals(61, result.score)
+    }
+
+    @Test fun `duplicate ids cannot inflate score`() {
+        val duplicate = signal("same", SignalCategory.ROOT, 40)
+        assertEquals(40, policy.evaluate(evidence(duplicate, duplicate)).score)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `invalid thresholds are rejected`() {
+        DefaultTrustPolicy(reviewThreshold = 60, highRiskThreshold = 50)
+    }
+
+    private fun evidence(vararg signals: TrustSignal) = DeviceEvidence(1, 123L, signals.toList())
+    private fun signal(id: String, category: SignalCategory, weight: Int) =
+        TrustSignal(id, category, weight, id, "test")
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+kotlin.code.style=official
+android.nonTransitiveRClass=true
+
+```
+
+`gradle/libs.versions.toml`:
+
+```toml
+[versions]
+agp = "8.13.2"
+kotlin = "2.0.21"
+coreKtx = "1.17.0"
+lifecycle = "2.9.3"
+activityCompose = "1.11.0"
+composeBom = "2025.08.01"
+junit = "4.13.2"
+coroutines = "1.10.2"
+deviceTrust = "0.1.2"
+
+[libraries]
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
+androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+device-trust = { module = "com.github.Xheghun:DeviceTrust", version.ref = "deviceTrust" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+#Tue Dec 16 10:21:28 WAT 2025
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.13-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/HEAD/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH="\\\"\\\""
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`jitpack.yml`:
+
+```yml
+jdk:
+  - openjdk17
+
+install:
+  - ./gradlew :device-trust:publishReleasePublicationToMavenLocal
+
+```
+
+`sample/build.gradle.kts`:
+
+```kts
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    namespace = "com.example.devicetrust"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.example.devicetrust"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+    compileOptions { sourceCompatibility = JavaVersion.VERSION_11; targetCompatibility = JavaVersion.VERSION_11 }
+    kotlinOptions { jvmTarget = "11" }
+    buildFeatures { compose = true }
+}
+
+dependencies {
+    implementation(libs.device.trust)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
+    testImplementation(libs.junit)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+```
+
+`sample/proguard-rules.pro`:
+
+```pro
+-keepclasseswithmembernames class * { native <methods>; }
+
+```
+
+`sample/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.DeviceTrust">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+
+```
+
+`sample/src/main/java/com/example/devicetrust/MainActivity.kt`:
+
+```kt
+package com.example.devicetrust
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.devicetrust.ui.theme.DeviceTrustTheme
+import com.xheghun.devicetrust.*
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent { DeviceTrustTheme { TrustRoute() } }
+    }
+}
+
+@Composable
+private fun TrustRoute(viewModel: TrustViewModel = viewModel()) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    TrustScreen(state = state, onScan = viewModel::scan)
+}
+
+@Composable
+fun TrustScreen(state: TrustUiState, onScan: () -> Unit, modifier: Modifier = Modifier) {
+    Scaffold(modifier = modifier.fillMaxSize(), containerColor = MaterialTheme.colorScheme.background) { padding ->
+        when {
+            state.scanning -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    CircularProgressIndicator()
+                    Text("Inspecting device evidence…")
+                }
+            }
+            state.error != null -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Assessment unavailable", style = MaterialTheme.typography.headlineSmall)
+                    Text(state.error)
+                    Button(onClick = onScan) { Text("Try again") }
+                }
+            }
+            state.assessment != null -> AssessmentContent(state.assessment, onScan, Modifier.padding(padding))
+        }
+    }
+}
+
+@Composable
+private fun AssessmentContent(assessment: TrustAssessment, onScan: () -> Unit, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Text("DEVICE TRUST", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            Text("Environment assessment", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text("Signals are probabilistic. Server-verified Play Integrity should authorize sensitive actions.", color = Color(0xFFA9BAB3))
+        }
+        item { RiskCard(assessment) }
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatusChip("Root / hooks", assessment.isRootOrHookingSuspected, Modifier.weight(1f))
+                StatusChip("Emulator", assessment.isEmulatorSuspected, Modifier.weight(1f))
+                StatusChip("ROM / boot", assessment.isSystemIntegritySuspected, Modifier.weight(1f))
+            }
+        }
+        item {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("Evidence", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                TextButton(onClick = onScan) { Text("Scan again") }
+            }
+        }
+        if (assessment.signals.isEmpty()) item {
+            EvidenceCard("No local risk indicators", "This does not prove the device is genuine or uncompromised.", Color(0xFF5EE3B1))
+        }
+        items(assessment.signals, key = { it.id }) { signal ->
+            EvidenceCard(signal.title, signal.detail, categoryColor(signal.category))
+        }
+    }
+}
+
+@Composable
+private fun RiskCard(assessment: TrustAssessment) {
+    val accent = when (assessment.level) {
+        TrustLevel.LOW_RISK -> Color(0xFF5EE3B1)
+        TrustLevel.REVIEW -> Color(0xFFFFCA65)
+        TrustLevel.HIGH_RISK -> Color(0xFFFF7C7C)
+    }
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(24.dp)) {
+        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(assessment.level.name.replace('_', ' '), color = accent, fontWeight = FontWeight.Bold)
+            Text("${assessment.score}", style = MaterialTheme.typography.displayLarge, fontWeight = FontWeight.Bold)
+            LinearProgressIndicator(progress = { assessment.score / 100f }, modifier = Modifier.fillMaxWidth(), color = accent)
+            Text("Local risk score · ${assessment.signals.size} indicator(s)", color = Color(0xFFA9BAB3))
+        }
+    }
+}
+
+@Composable
+private fun StatusChip(label: String, flagged: Boolean, modifier: Modifier = Modifier) {
+    val color = if (flagged) Color(0xFFFFCA65) else Color(0xFF5EE3B1)
+    Column(modifier.background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp)).padding(12.dp)) {
+        Text(if (flagged) "FLAG" else "CLEAR", color = color, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+        Text(label, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun EvidenceCard(title: String, detail: String, accent: Color) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(18.dp)) {
+        Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Box(Modifier.size(8.dp).background(accent, RoundedCornerShape(4.dp)))
+            Column { Text(title, fontWeight = FontWeight.SemiBold); Text(detail, color = Color(0xFFA9BAB3), style = MaterialTheme.typography.bodySmall) }
+        }
+    }
+}
+
+private fun categoryColor(category: SignalCategory) = when (category) {
+    SignalCategory.ROOT -> Color(0xFFFF7C7C)
+    SignalCategory.HOOKING -> Color(0xFFD89BFF)
+    SignalCategory.EMULATOR -> Color(0xFF8BB8FF)
+    SignalCategory.SYSTEM_INTEGRITY -> Color(0xFFFFCA65)
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TrustScreenPreview() = DeviceTrustTheme {
+    TrustScreen(
+        TrustUiState(
+            scanning = false,
+            assessment = TrustAssessment(
+                score = 68,
+                level = TrustLevel.HIGH_RISK,
+                evidence = DeviceEvidence(1, 0, listOf(
+                    TrustSignal("mount", SignalCategory.ROOT, 35, "Suspicious mount namespace", "Magisk marker exposed"),
+                    TrustSignal("boot", SignalCategory.SYSTEM_INTEGRITY, 35, "Bootloader unlocked", "ro.boot.flash.locked=0"),
+                )),
+            ),
+        ),
+        onScan = {},
+    )
+}
+
+```
+
+`sample/src/main/java/com/example/devicetrust/TrustViewModel.kt`:
+
+```kt
+package com.example.devicetrust
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.xheghun.devicetrust.DeviceTrust
+import com.xheghun.devicetrust.DeviceTrustClient
+import com.xheghun.devicetrust.TrustAssessment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+data class TrustUiState(val scanning: Boolean = true, val assessment: TrustAssessment? = null, val error: String? = null)
+
+class TrustViewModel(private val client: DeviceTrustClient = DeviceTrust.create()) : ViewModel() {
+    private val _state = MutableStateFlow(TrustUiState())
+    val state = _state.asStateFlow()
+
+    init { scan() }
+
+    fun scan() {
+        _state.value = TrustUiState(scanning = true)
+        viewModelScope.launch {
+            _state.value = runCatching { withContext(Dispatchers.IO) { client.assess() } }
+                .fold(
+                    onSuccess = { TrustUiState(scanning = false, assessment = it) },
+                    onFailure = { TrustUiState(scanning = false, error = it.message ?: "Scan failed") },
+                )
+        }
+    }
+}
+
+```
+
+`sample/src/main/java/com/example/devicetrust/ui/theme/Theme.kt`:
+
+```kt
+package com.example.devicetrust.ui.theme
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+
+private val Scheme = darkColorScheme(
+    primary = Color(0xFF5EE3B1),
+    secondary = Color(0xFF8BB8FF),
+    background = Color(0xFF091411),
+    surface = Color(0xFF10231D),
+    surfaceVariant = Color(0xFF193128),
+)
+
+@Composable fun DeviceTrustTheme(content: @Composable () -> Unit) = MaterialTheme(colorScheme = Scheme, content = content)
+
+```
+
+`sample/src/main/res/drawable/ic_launcher_background.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#3DDC84"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M9,0L9,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,0L19,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,0L29,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,0L39,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M49,0L49,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M59,0L59,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M69,0L69,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,0L79,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M89,0L89,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M99,0L99,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,9L108,9"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,19L108,19"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,29L108,29"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,39L108,39"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,49L108,49"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,59L108,59"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,69L108,69"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,79L108,79"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,89L108,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,99L108,99"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,29L89,29"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,39L89,39"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,49L89,49"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,59L89,59"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,69L89,69"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,79L89,79"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,19L29,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,19L39,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M49,19L49,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M59,19L59,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M69,19L69,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,19L79,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+</vector>
+
+```
+
+`sample/src/main/res/drawable/ic_launcher_foreground.xml`:
+
+```xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="85.84757"
+                android:endY="92.4963"
+                android:startX="42.9492"
+                android:startY="49.59793"
+                android:type="linear">
+                <item
+                    android:color="#44000000"
+                    android:offset="0.0" />
+                <item
+                    android:color="#00000000"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="nonZero"
+        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+</vector>
+```
+
+`sample/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+```
+
+`sample/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+```
+
+`sample/src/main/res/values/strings.xml`:
+
+```xml
+<resources><string name="app_name">DeviceTrust</string></resources>
+
+```
+
+`sample/src/main/res/values/themes.xml`:
+
+```xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.DeviceTrust" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
+
+```
+
+`sample/src/main/res/xml/data_extraction_rules.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules><cloud-backup disableIfNoEncryptionCapabilities="true"/><device-transfer><exclude domain="root" path="."/></device-transfer></data-extraction-rules>
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven(url = "https://jitpack.io")
+    }
+}
+rootProject.name = "DeviceTrust"
+include(":device-trust", ":sample")
+
+```
