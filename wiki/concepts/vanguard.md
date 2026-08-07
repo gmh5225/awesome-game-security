@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md
   - wiki/sources/descriptions/kali11211__valorant-internal-cheat.md
   - wiki/sources/descriptions/gmh5225__valorant-internal.md
+  - wiki/sources/descriptions/gmh5225__valorant-internal-base.md
 updated: 2026-08-07
 confidence: medium
 ---
@@ -29,7 +30,7 @@ EFI manual-map research such as [[xigmapper]] notes a practical consequence of t
 
 Per-title Valorant UE dump tooling such as [[valorant-dumper]] (GObjects/GNames, player/weapon layouts from the live process) is useful when modeling what cheat SDK generators probe under a Vanguard-protected title. (source: wiki/sources/descriptions/xehn1337__valorant-dumper.md) Narrower FNamePool walk/decrypt samples such as [[valorant-fnamepool]] (iterate and decrypt `FNamePool->Entries`) sit in the same Valorant UE name-pool research lane. (source: wiki/sources/descriptions/percpopper__VALORANT-FNamePool.md)
 
-Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md) In-process internal cheat bases such as [[valorant-internal-cheat]] (C/C++; UE SDK generation + hooking) and [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225) illustrate the offensive in-process lane under Vanguard rather than dump-only or utility tooling. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md)
+Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md) In-process internal cheat bases such as [[valorant-internal-cheat]] (C/C++; UE SDK generation + hooking), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the offensive in-process lane under Vanguard rather than dump-only or utility tooling. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md)
 
 Update-monitoring tooling such as [[vanguard-update-notifier]] (Discord bot; polls Riot clientconfig, SHA-256 hashes Vanguard setup archive contents, alerts on version/hash drift) helps researchers track installer changes without manual diffing. (source: wiki/sources/descriptions/luavmload__vanguard-update-notifier.md)
 
@@ -39,4 +40,4 @@ Page-fault telemetry such as [[vgk-illegal-pf-logger]] (logs intentional illegal
 
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-internal]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]

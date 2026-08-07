@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/valorant-internal-base`: entity [[valorant-internal-base]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:gmh5225/valorant-internal`: entity [[valorant-internal]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `description:gmh5225/vdk`: entity [[vdk]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
