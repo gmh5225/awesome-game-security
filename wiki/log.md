@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/rust-external-1`: entity [[rust-external-1]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked from [[rust-internal]].
+
 - **2026-08-07** — ingest `description:gmh5225/rust-internal`: entity [[rust-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-07** — ingest `description:pandaadir05/ghost`: entity [[ghost]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
