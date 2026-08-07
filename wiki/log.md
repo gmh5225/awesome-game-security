@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gogo9211/Discord-Overlay-Hook`: entity [[discord-overlay-hook]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:goobz22/cat-annihilation`: entity [[cat-annihilation]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]].
 
 - **2026-08-07** — ingest `description:google/android-classyshark`: entity [[android-classyshark]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].

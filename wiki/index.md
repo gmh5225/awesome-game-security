@@ -307,6 +307,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dk](entities/dk.md) — WinDbg extension; refactored tokenext; token/heap pointer SVG overlays (WinDbg Plugins)
 - [DisableParallelLoader](entities/disable-parallel-loader.md) — x64dbg plugin: disable Win10+ parallel DLL loader (`LdrpMapAndSnapWork`; phnt; sequential load order)
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
+- [discord-overlay-hook](entities/discord-overlay-hook.md) — Discord overlay DX11 hook sample (C++; rendering / modding / hooking)
 
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
