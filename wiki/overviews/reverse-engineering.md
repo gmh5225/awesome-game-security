@@ -297,6 +297,7 @@ sources:
   - wiki/sources/descriptions/greyb1t__GreyM.md
   - wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md
   - wiki/sources/descriptions/gregkh__kernel-development.md
+  - wiki/sources/descriptions/google__binexport.md
   - wiki/sources/descriptions/google__grr.md
   - wiki/sources/descriptions/googleprojectzero__TinyInst.md
   - wiki/sources/descriptions/googleprojectzero__winafl.md
@@ -529,7 +530,7 @@ Model Context Protocol servers expose RE tools to LLM agents: [[ida-pro-mcp]] / 
 
 ## Binary diffing
 
-Graph- and structure-based differencing (BinDiff, [[diaphora]], [[turbodiff]], ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes. [[diaphora]] is the leading open-source IDA Pro Python plugin for function-level comparison—CFG matching, basic-block hashes, mnemonics, string refs, call-graph topology—with partial matching, symbol/comment porting between IDB versions, and detailed diff reports for vulnerability and patch analysts. (source: wiki/sources/descriptions/joxeankoret__diaphora.md) [[turbodiff]] (HelpSystems) is another IDA plugin focused on discovering and analyzing function-level differences between two binaries for game-security RE and patch tracking. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
+Graph- and structure-based differencing (BinDiff, [[binexport]], [[diaphora]], [[turbodiff]], ghidriff, DarunGrim) for patch analysis: track anti-cheat driver updates between builds, isolate logic changes in obfuscated clients, and compare patched vulnerability fixes. [[binexport]] is Google's C++ exporter plugin for IDA Pro, Ghidra, and Binary Ninja—serializes functions, basic blocks, instructions, xrefs, and call graphs to Protocol Buffer for BinDiff and other diff pipelines. (source: wiki/sources/descriptions/google__binexport.md) [[diaphora]] is the leading open-source IDA Pro Python plugin for function-level comparison—CFG matching, basic-block hashes, mnemonics, string refs, call-graph topology—with partial matching, symbol/comment porting between IDB versions, and detailed diff reports for vulnerability and patch analysts. (source: wiki/sources/descriptions/joxeankoret__diaphora.md) [[turbodiff]] (HelpSystems) is another IDA plugin focused on discovering and analyzing function-level differences between two binaries for game-security RE and patch tracking. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
 
 ## Key sub-areas
 
