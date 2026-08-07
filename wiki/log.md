@@ -2719,3 +2719,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-07** — ingest `description:gmh5225/zig-mcp-server`: entity [[zig-mcp-server]]; cited on [[overviews/overview]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `description:gmh5225/vscript_lua51`: entity [[vscript-lua51]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
+- **2026-08-07** — ingest `description:gmh5225/veh_hide_memory`: entity [[veh-hide-memory]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
