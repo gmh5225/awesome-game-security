@@ -4387,6 +4387,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/mq1n/DLLThreadInjectionDetector
 - https://github.com/Nou4r/ModFinder [Mapped Dll]
 - https://github.com/svespalec/faultline [Usermode PoC detecting manual-map/shellcode via working-set page-fault monitoring]
+- https://github.com/pandaadir05/ghost [Rust process injection detector for RWX regions, shellcode, API hooks, hollowing, and thread hijacking with CLI/TUI]
 - https://github.com/gmh5225/Driver-WatchOwl [ImageNotify+Stack Trace]
 - https://github.com/xuanxuan0/TiEtwAgent [ETW]
 - https://github.com/JingMatrix/Demo [A demo app to detect (Zygisk) library injections]
