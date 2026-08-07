@@ -205,6 +205,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
 - [ConfuserEx](entities/confuserex.md) — open-source .NET application protector (Confuser successor; AC Binary Packer / CLR protection)
+- [ConfuserEx IDAPython](entities/confuserex-idapython.md) — Python IDAPython deobfuscation script for ConfuserEx (cheat / IDA Plugins)
 - [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
 - [CountHook](entities/count-hook.md) — working-set memory-check bypass (count-oriented; Cheat / Bypass Page Protection)
 
