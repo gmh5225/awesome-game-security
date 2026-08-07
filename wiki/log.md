@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/pubg`: entity [[pubg]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].
+
 - **2026-08-07** — ingest `description:gmh5225/pubg_dump_offset`: entity [[pubg-dump-offset]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `description:gmh5225/pubgm_sdk_and_offsets`: entity [[pubgm-sdk-and-offsets]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
