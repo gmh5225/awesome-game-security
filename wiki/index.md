@@ -1166,6 +1166,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Vook](entities/vook.md) — VAC hook research (explore anticheat:vac)
 - [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
+- [valo-driver](entities/valo-driver.md) — Valorant kernel external memory read (phys translate / CR3 / MDL; bypass Vanguard API monitoring; gmh5225)
 - [vgk-illegal-pf-logger](entities/vgk-illegal-pf-logger.md) — Log intentional illegal page faults from Vanguard `vgk.sys` (integrity-check RE)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [valorant-esp-hack-with-driver](entities/valorant-esp-hack-with-driver.md) — Valorant ESP: Vanguard driver vuln + early load before AC; kernel injector (cheat / game:valorant; gmh5225)

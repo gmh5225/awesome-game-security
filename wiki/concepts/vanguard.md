@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-internal-base.md
   - wiki/sources/descriptions/gmh5225__valorant-externals.md
   - wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md
+  - wiki/sources/descriptions/gmh5225__valo-driver.md
 updated: 2026-08-07
 confidence: medium
 ---
@@ -42,6 +43,8 @@ Page-fault telemetry such as [[vgk-illegal-pf-logger]] (logs intentional illegal
 
 Early-load offensive samples such as [[valorant-esp-hack-with-driver]] (ESP; exploits a Vanguard driver vulnerability to load a companion driver before Vanguard; kernel-injector workflow; gmh5225) illustrate the boot-order race against Vanguard's early visibility rather than in-process SDK or dump-only tooling. (source: wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md)
 
+Kernel external memory-read drivers such as [[valo-driver]] (C; physical translate / CR3 / MDL paths; avoids monitored standard APIs; gmh5225) demonstrate Vanguard-specific cross-process R/W bypass research beside generic CR3/MDL tooling. (source: wiki/sources/descriptions/gmh5225__valo-driver.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]

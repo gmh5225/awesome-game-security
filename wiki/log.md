@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/valo-driver`: entity [[valo-driver]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:gmh5225/valorant-esp-hack-with-driver`: entity [[valorant-esp-hack-with-driver]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `description:gmh5225/valorant-externals`: entity [[valorant-externals]]; cited on [[vanguard]] and [[overviews/game-hacking]].
