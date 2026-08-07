@@ -2665,3 +2665,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-06** — ingest `description:gtworek/VolatileDataCollector`: entity [[volatile-data-collector]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-08-07** — ingest `description:govcert-ch/ConfuserEx_IDAPython`: entity [[confuserex-idapython]]; updated [[confuserex]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
+- **2026-08-07** — ingest `description:gopro2027/ParadiseBO2`: entity [[paradise-bo2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].

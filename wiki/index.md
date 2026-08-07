@@ -851,6 +851,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PANDA](entities/panda.md) — Platform for Architecture-Neutral Dynamic Analysis (QEMU-based; Cheat QEMU/KVM / DBI)
 - [Panda3D](entities/panda3d.md) — Python/C++ 3D engine framework (liberal license; Game Engine / source)
 - [Pandora](entities/pandora.md) — file-suspicion analysis framework (convenient UI; Anti Cheat → Analysis Framework)
+- [ParadiseBO2](entities/paradise-bo2.md) — PS3 Paradise SPRX mod-menu source for Black Ops II (window/UI code; Game Develop / source)
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
 - [patch-finder](entities/patch-finder.md) — IDA plugin: detect in-memory patches/hooks via executable-region vs on-disk PE byte compare (custom PE parser; highlight diffs in disasm; cheat / IDA Plugins)
 - [PatternSleuth](entities/patternsleuth.md) — Rust SIMD pattern/signature scan (file + process; Unreal address scanner)
