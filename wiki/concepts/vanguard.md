@@ -10,8 +10,9 @@ sources:
   - wiki/sources/descriptions/weedeej__ValorantCC.md
   - wiki/sources/descriptions/luavmload__vanguard-update-notifier.md
   - wiki/sources/descriptions/lil-skies__val-exception-handler.md
+  - wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md
   - wiki/sources/descriptions/kali11211__valorant-internal-cheat.md
-updated: 2026-08-02
+updated: 2026-08-07
 confidence: medium
 ---
 
@@ -33,6 +34,8 @@ Update-monitoring tooling such as [[vanguard-update-notifier]] (Discord bot; pol
 
 Exception-dispatch research such as [[val-exception-handler]] (PoC; hardware exceptions / VEH; `ZwRaiseException` dump; potential code-exec or evasion angles in Vanguard's kernel exception flow) complements generic VEH tooling like [[veh-dumper]]. (source: wiki/sources/descriptions/lil-skies__val-exception-handler.md)
 
+Page-fault telemetry such as [[vgk-illegal-pf-logger]] (logs intentional illegal PFs from `vgk.sys`; integrity-check detection mechanism RE) complements exception-dispatch PoCs and usermode working-set monitors like [[faultline]]. (source: wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
