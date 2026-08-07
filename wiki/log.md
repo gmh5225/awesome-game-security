@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:goseungduk/CE_Tracer-IDA`: entity [[ce-tracer-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:gregkh/kernel-development`: entity [[kernel-development]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `description:nulli83/Mj-lnir`: entity [[mj-lnir]]; cited on [[overviews/anti-cheat]].

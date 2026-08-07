@@ -186,6 +186,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
 - [Camera Triggerbot](entities/camera-triggerbot.md) — camera triggerbot (movement/color around crosshair; cheat / triggerbot & aimbot)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
+- [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
 - [Certael](entities/certael.md) — server-authoritative OSS AC (Rust C ABI; Godot/Unity/Unreal; .NET control plane)
 - [CFB](entities/cfb.md) — Canadian Furious Beaver IRP monitor (filter driver hooks dispatch table; C driver + Python client; IOCTL RE / fuzzing)
