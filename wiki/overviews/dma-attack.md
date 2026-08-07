@@ -25,7 +25,7 @@ sources:
   - wiki/sources/descriptions/sercanarga__pcileechgen.md
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
   - wiki/sources/descriptions/paul01784__MeatyEFTRelease.md
-updated: 2026-08-05
+updated: 2026-08-07
 confidence: high
 ---
 
@@ -86,4 +86,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2656) DMA lanes and `Anti Cheat > Detection:DMA` (~646), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. SEWindows local replay and remote attestation). (source: wiki/sources/README-categories.md)
+No top-level DMA section — maps via `Cheat` (~2656) DMA lanes and `Anti Cheat > Detection:DMA` (~647), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. SEWindows local replay and remote attestation). (source: wiki/sources/README-categories.md)
