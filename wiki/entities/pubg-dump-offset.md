@@ -20,4 +20,4 @@ Per-patch files also track encrypted pointer bases (`XenuineDecrypt`), skeletal-
 
 ## Related
 
-[[unreal-object-model]] · [[pubg-internal]] · [[pubgm-sdk-and-offsets]] · [[valorant-externals]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[unreal-object-model]] · [[pubg-dumper]] · [[pubg-internal]] · [[pubgm-sdk-and-offsets]] · [[valorant-externals]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]

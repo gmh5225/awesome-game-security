@@ -17,8 +17,7 @@ Useful for game security researchers and reverse engineers exploring the mobile 
 ## Links
 
 - Repo: https://github.com/gmh5225/pubg
-- Related dump tooling: https://github.com/gmh5225/pubg-dumper
 
 ## Related
 
-[[pubg-dump-offset]] · [[pubgm-sdk-and-offsets]] · [[pubg-mobile-memory-hacking-examples]] · [[bypass-pubg-mobile-imgui]] · [[pubg-internal]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
+[[pubg-dumper]] · [[pubg-dump-offset]] · [[pubgm-sdk-and-offsets]] · [[pubg-mobile-memory-hacking-examples]] · [[bypass-pubg-mobile-imgui]] · [[pubg-internal]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
