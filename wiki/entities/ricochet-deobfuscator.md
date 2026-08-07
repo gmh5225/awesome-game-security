@@ -20,4 +20,4 @@ Companion surface to other AC-explore dump/RE tools (e.g. [[vac3-dumper]]): scop
 
 ## Related
 
-[[vac3-dumper]] · [[deobf]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[ricochet-disabler]] · [[vac3-dumper]] · [[deobf]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
