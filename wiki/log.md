@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/reGS`: entity [[regs]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
+
 - **2026-08-07** — ingest `description:gmh5225/reGTA`: entity [[regta]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
 
 - **2026-08-07** — ingest `description:gmh5225/retdec`: entity [[retdec]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
