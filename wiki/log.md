@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/unispectDMAPlugin`: entity [[unispect-dma-plugin]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `description:lilyco-42/rev-tools-setup`: entity [[rev-tools-setup]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `readme:categories`: bumped Cheat ~2658 (was ~2657; Anti Cheat ~648 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

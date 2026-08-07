@@ -489,6 +489,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-externals.md
   - wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md
   - wiki/sources/descriptions/gmh5225__valo-driver.md
+  - wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md
   - wiki/sources/descriptions/kem0x__FortKit.md
   - wiki/sources/descriptions/kirovgrad__Renamaida.md
   - wiki/sources/descriptions/keowu__sourceengineexplorer.md
@@ -610,7 +611,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 | Unity Mono | `Assembly-CSharp`, JIT hooks | [[il2cpp]] (contrast Mono path) |
 | Source | ClientClass/RecvTable, ConVars | [[source-netvars]] |
 
-C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
+C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) Unispect-style Mono dump over external DMA such as [[unispect-dma-plugin]] (Razchek fork fix; Memory Plugin dispose after dump; cheat / game engine explorer:Unity [DMA]) extends that lane below the OS beside [[cheat-engine-dma-plugin]]. (source: wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
 
 ## Development workflows
 
