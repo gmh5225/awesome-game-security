@@ -1,0 +1,923 @@
+Project Path: arc_cheat-engine_ControllerMode_qjlbljrs
+
+Source Tree:
+
+```txt
+arc_cheat-engine_ControllerMode_qjlbljrs
+├── LICENSE
+├── controllermode.lua
+├── opentabledialog.lua
+└── steamspawnkeyboard.lua
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Dark Byte
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`controllermode.lua`:
+
+```lua
+--todo: situation based controls
+
+function startControllerMode()
+  local laststate
+
+  function startPress()
+    local a=getApplication()
+    if a.ProcessWindow==nil or a.ProcessWindow.Visible==false then
+      MainForm.sbOpenProcess.doClick()
+    end
+  end
+
+  if f then
+    f.destroy()
+    f=nil
+  end
+
+  local dpadrepeater
+
+  function handleDPAD(v,state)
+    if (state==false) then --key got released
+
+      if dpadrepeater then
+        dpadrepeater.destroy()
+        dpadrepeater=nil
+      end
+    end
+
+    if dpadrepeater then
+      dpadrepeater.enabled=false
+      dpadrepeater=nil
+    end
+
+    if state then
+
+      local f=getFocusedForm()
+      
+     
+      
+      if f then
+        
+        local c=f.ActiveControl
+        if c then
+          print("dpad "..v.." f="..f.Name..':'..f.ClassName..' - '..c.Name..':'..c.ClassName)
+
+          dpadrepeater=createTimer(100, function() handleDPAD(v, true) end)
+
+          if v==0 then --up
+            --print("up")
+            if c.ItemIndex then
+              if c.ItemIndex>0 then
+                c.ItemIndex=c.ItemIndex-1
+              end
+            elseif c.CaretY then
+              c.CaretY=c.CaretY-1
+            else
+              if c.inheritsFrom('TCustomTreeView') then
+                --treeview inherited
+                if c.Selected==nil then
+                  c.Selected=c.items.getFirstVisibleNode()                  
+                else
+                  local nextnode=c.Selected.getPrevVisible()
+                  if nextnode then
+                    c.Selected=nextnode
+                  end
+                end
+                
+                if c.Selected then
+                  c.Selected.makeVisible()
+                end
+                
+              elseif c.ClassName=='THexView' then
+                c.Address=c.Address-c.BytesPerLine
+              end
+            end
+
+          elseif v==1 then --down
+            --print("down")
+            if c.ItemIndex then
+              if c.ItemIndex<c.Items.Count-1 then
+                c.ItemIndex=c.ItemIndex+1
+              end
+            elseif c.CaretY then
+              c.CaretY=c.CaretY+1
+            else
+              if c.inheritsFrom('TCustomTreeView') then
+                --treeview inherited
+                if c.Selected==nil then
+                  c.Selected=c.Items.getLastVisibleNode()                 
+                else
+                  local nextnode=c.Selected.getNextVisible()
+                  if nextnode then
+                    c.Selected=nextnode
+                  end
+                end
+                
+                if c.Selected then
+                  c.Selected.makeVisible()
+                end
+                
+              elseif c.ClassName=='THexView' then
+                c.Address=c.Address+c.BytesPerLine
+              end
+            end
+          elseif v==2 then --left
+            if c.inheritsFrom('TCustomTreeView') then
+              --treeview inherited
+              if c.Selected==nil then
+                c.Selected=c.Items.getFirstVisibleNode()    
+              else
+                local nextnode=c.Selected.Parent
+                if nextnode then
+                  c.Selected=nextnode
+                end
+              end
+                
+              if c.Selected then
+                c.Selected.makeVisible()
+              end                
+            elseif c.ClassName=='THexView' then
+              c.Address=c.Address-1
+            end
+          elseif v==3 then --right
+            if c.inheritsFrom('TCustomTreeView') then
+              --treeview inherited
+              if c.Selected==nil then
+                c.Selected=c.Items.getLastVisibleNode()    
+              else
+                if c.Selected.HasChildren then
+                  local nextnode=c.Selected.getFirstVisibleChild()
+                  if nextnode then
+                    c.Selected=nextnode
+                  end
+                end
+              end
+                
+              if c.Selected then
+                c.Selected.makeVisible()
+              end                
+            elseif c.ClassName=='THexView' then
+              c.Address=c.Address+1
+            end
+          end
+        end
+      end
+    end
+  end
+
+  local controllerKeyHandler={}
+  controllerKeyHandler.GAMEPAD_DPAD_UP=function(state) handleDPAD(0,state) end
+  controllerKeyHandler.GAMEPAD_DPAD_DOWN=function(state) handleDPAD(1,state) end
+  controllerKeyHandler.GAMEPAD_DPAD_LEFT=function(state) handleDPAD(2,state) end
+  controllerKeyHandler.GAMEPAD_DPAD_RIGHT=function(state) handleDPAD(3,state) end
+
+  controllerKeyHandler.GAMEPAD_LEFT_SHOULDER=function(state)
+    --send the current form to the back
+    if state then
+      local l={}
+      for i=getFormCount()-1,1,-1 do
+        local f=getForm(i)
+        if f.Visible then
+          table.insert(l,f)
+        end
+      end
+
+      for i=1,#l do
+        if i==#l then
+          l[i].show()
+        else
+          l[i].bringToFront()
+        end
+      end
+
+    end
+  end
+
+  controllerKeyHandler.GAMEPAD_RIGHT_SHOULDER=function(state)
+    if state then
+      for i=getFormCount()-1,1,-1 do
+        local f=getForm(i)
+        if f.Visible then
+          f.show()
+          break
+        end
+      end
+    end
+  end
+
+  controllerKeyHandler.GAMEPAD_A=function(state)
+    if state then
+      --print("A")
+      local f=getFocusedForm()
+      if f then
+        local c=f.ActiveControl
+
+        if c.ClassName=='TEdit' then
+          --todo
+          --spawn a keyboard. On steamdeck use the steamdeck keyboard. todo: create my own keyboard ?
+          showMessage('editing here')
+
+          --if the result doesn't include Enter/Return then
+          return
+        end
+
+        if c.OnClick  then
+          queue(function()
+            c.doClick()
+            if c.ModalResult and c.ModalResult~=0 then
+              f.ModalResult=c.ModalResult
+            end
+          end)
+          return
+        end
+
+        if c.OnDblClick then
+          queue(function()
+            c.OnDblClick(c)
+            if c.ModalResult and c.ModalResult~=0 then
+              f.ModalResult=c.ModalResult
+            end
+          end)
+          return
+        end
+
+        if c.ModalResult and c.ModalResult~=0 then
+          f.ModalResult=c.ModalResult
+          return
+        end
+
+        if f.FormState:find('fsModal') then
+          if f.DefaultControl then
+            f.DefaultControl.doClick()
+            if f.ModalResult==0 then
+              f.ModalResult=f.DefaultControl.ModalResult
+              if f.ModalResult then return end
+            else
+              return
+            end
+          end
+        end
+
+        local c=f.ActiveControl
+        if c then
+          queue(function()
+            c.doClick()
+          end)
+
+        else
+
+        end
+      else
+        --print("no form")
+      end
+    end
+  end
+
+  controllerKeyHandler.GAMEPAD_B=function(state)
+    if state then
+      --print("B")
+      local f=getFocusedForm()
+      c=f.ActiveControl
+
+      if f then
+
+        if f.CancelControl then
+          f.CancelControl.doClick()
+          if f.ModalResult==0 then
+            f.ModalResult=f.CancelControl.ModalResult
+            if f.ModalResult then return end
+          else
+            return
+          end
+        else
+          if f.FormState:find('fsModal') then
+            f.ModalResult=mrCancel
+          end
+        end
+      end
+    end
+  end
+
+  controllerKeyHandler.GAMEPAD_X=function(state)
+    if state then
+      local f=getFocusedForm()
+      if f then
+        local c=f.ActiveControl
+        if c then
+          --c.color=clRed
+          c.performTab(laststate.RightTrigger<127)
+
+          c=f.ActiveControl
+          --c.color=clGreen
+        end
+      end
+    end
+  end
+
+  controllerKeyHandler.GAMEPAD_Y=function(state)
+    if state then
+      if newAddressList then
+        if getFocusedForm()==newAddressList then
+          --pressing Y when already in the addresslist shows the opentable dialog
+          queue(function()
+            local f=createOpenTableDialog()
+            if f then
+              loadTable(f)
+            end
+          end)
+        else            
+          newAddressList.show()
+        end
+      end
+    end
+  end
+
+  --[[
+
+  x=tab
+  y=addresslist
+  left trigger+y=open table
+  --]]
+
+
+  controllerKeyHandler.GAMEPAD_START={function() startPress() end}
+
+
+  f=createThread(function(t)
+    local startwasdown=false
+    local upwasdown=false
+    local lastpacket=0
+    local currentControl, currentControlClass
+    laststate=getXBox360ControllerState()
+
+    t.freeOnTerminate(false)
+    while not t.Terminated do
+      local hasfocus
+      if getOperatingSystem()==0 then
+        hasfocus=getForegroundProcess()==getCheatEngineProcessID()
+      else
+        hasfocus=getForegroundWindow()~=0
+      end
+
+      if hasfocus then
+        local s=getXBox360ControllerState() --todo, add a waitForPacket param so the loop isn't in here
+        if s.PacketNumber~=laststate.PacketNumber then
+
+          for controllerfield,value in pairs(s) do
+            if value~=laststate[controllerfield] then
+
+              --check if there is a handler for this field
+              local handler=controllerKeyHandler[controllerfield]
+              if handler then
+                if type(handler)=='table' then
+                  queue(handler[1])
+                else
+                  synchronize(handler,value)
+                end
+              end
+
+            end
+          end
+
+          laststate=s
+
+        else
+          sleep(16)
+        end
+      else
+        sleep(32)
+      end
+    end
+  end)
+
+  local w=getScreenWidth() / 2
+  if newAddressList then
+    newAddressList.close()
+  end
+  newAddressList=createForm()
+  newAddressList.Name='newAddressList'
+  newAddressList.Caption='Cheat Engine Address List'
+  newAddressList.BorderStyle=bsSizeable
+  newAddressList.Width=w
+  newAddressList.Height=getScreenHeight() / 2
+  newAddressList.Position=poScreenCenter
+  
+
+
+  local al=MainForm.AddressList
+  al.Font.Size=20
+  al.Parent=newAddressList  
+  al.setFocus()
+
+  newAddressList.OnResize=function(c)
+    local w=newAddressList.clientWidth
+    al.Header.Sections[0].Width=w * 0.10
+    al.Header.Sections[1].Width=w * 0.30
+    al.Header.Sections[2].Width=w * 0.20
+    al.Header.Sections[3].Width=w * 0.15 --type
+    al.Header.Sections[4].Width=w * 0.25 --value
+  end
+
+  newAddressList.OnClose=function()
+    local al=MainForm.AddressList
+    local w=MainForm.ClientWidth
+    al.Parent=MainForm.Panel1
+    al.Font.Size=0
+
+    al.Header.Sections[0].Width=w * 0.10
+    al.Header.Sections[1].Width=w * 0.30
+    al.Header.Sections[2].Width=w * 0.20
+    al.Header.Sections[3].Width=w * 0.15 --type
+    al.Header.Sections[4].Width=w * 0.25 --value
+
+    newAddressList=nil
+    return caFree
+  end
+  
+  local oldmfclose=MainForm.OnCloseQuery
+  MainForm.OnCloseQuery=function(...)
+    if newAddressList then
+      newAddressList.close()
+      newAddressList=nil
+    end
+    return oldmfclose(...)
+  end
+
+
+  function getControllerPanelText(f)
+    local s
+    local A,B,X,Y
+    local rest=''
+
+    if f.Name=='newAddressList' then
+      A='Activate/Deactivate'
+      Y='Open Table'
+      rest='Shoulder=switch window'
+    else
+      A='Select/Confirm'
+      B='Cancel/Back'
+      X='Tab'
+      
+      if f.FormState:find('fsModal')==nil then
+        Y='AddressList'
+        rest='Shoulder=switch window'
+      end
+    end
+
+    local c=f.ActiveControl
+    if c then
+      --add extra buttons
+      if c.ClassName=='TEdit' then
+        A='Open editor' --if steamdeck
+      end
+    end
+
+    s=''
+
+    if A then s=s..'A='..A..' ' end
+    if B then s=s..'B='..B..' ' end
+    if X then s=s..'X='..X..' ' end
+    if Y then s=s..'Y='..Y..' ' end
+    if rest then s=s..rest end
+    return s
+  end
+
+
+  registerActiveFormChangeNotification(function(f)
+    if f.ControllerPanel==nil then
+      print(f.Name..':'..f.ClassName)
+      
+      lowest=f.Control[0]
+      for i=1, f.ControlCount-1 do
+        local c=f.Control[i]
+        if lowest.Top+lowest.Height<c.Top+c.Height then
+          lowest=c
+        end
+      end
+
+      if lowest then
+        p=createPanel(f)
+        p.Name='ControllerPanel'
+        p.Caption=getControllerPanelText(f)
+        p.Color=clRed
+
+        if f.ClassName=='TProcessWindow' then
+           --place the panel where it looks best           
+           p.Parent=f.Panel1
+
+           p.AnchorSideTop.Control=f.Panel5
+           p.AnchorSideTop.Side=asrBottom
+           p.BorderSpacing.Top=4
+
+           p.AnchorSideLeft.Control=f.Panel1
+           p.AnchorSideLeft.Side=asrLeft
+
+           p.AnchorSideRight.Control=f.Panel1
+           p.AnchorSideRight.Side=asrRight
+
+           p.Anchors='[akLeft, akRight, akTop]'
+        elseif f.ClassName=='TformSettings' then
+           p.Parent=f.Panel6
+           p.AnchorSideTop.Control=f.Panel9
+           p.AnchorSideTop.Side=asrBottom
+           p.BorderSpacing.Top=4
+
+           p.AnchorSideLeft.Control=f.Panel6
+           p.AnchorSideLeft.Side=asrLeft
+
+           p.AnchorSideRight.Control=f.Panel6
+           p.AnchorSideRight.Side=asrRight
+
+           p.Anchors='[akLeft, akRight, akTop]'
+        elseif f.ClassName=='TformAddressChange' then
+           p.Parent=f
+           p.AnchorSideTop.Control=f.btnOK
+           p.AnchorSideTop.Side=asrBottom
+           p.BorderSpacing.Top=4
+
+           p.AnchorSideLeft.Control=f
+           p.AnchorSideLeft.Side=asrLeft
+
+           p.AnchorSideRight.Control=f
+           p.AnchorSideRight.Side=asrRight
+
+           p.Anchors='[akLeft, akRight, akTop]'  
+           
+           f.Constraints.OnChange=function()
+             --print("poo")
+             local oldf=f.Constraints.OnChange
+             f.Constraints.OnChange=nil
+             f.Constraints.MinHeight=p.Top+p.Height             
+             f.Constraints.OnChange=oldf
+           end
+        elseif f.ClassName=='TPromptDialog' then
+          p.Parent=f
+          p.AnchorSideTop.Control=lowest
+          p.AnchorSideTop.Side=asrBottom
+          p.BorderSpacing.Top=4
+
+          p.AnchorSideLeft.Control=f
+          p.AnchorSideLeft.Side=asrLeft
+
+          p.AnchorSideRight.Control=f
+          p.AnchorSideRight.Side=asrRight
+
+          p.Anchors='[akLeft, akRight, akTop]'  
+          f.Constraints.MinHeight=p.Top+p.Height
+        else
+          --unknown/default works fine
+          if inheritsFromWinControl(lowest) then
+          
+            p.Parent=lowest
+          end
+          p.Align=alBottom
+        end
+        
+        f.Constraints.MinWidth=f.Canvas.getTextWidth(p.Caption)+5
+
+
+      end
+    else
+      f.ControllerPanel.Caption=getControllerPanelText(f)
+    end
+  end)
+
+  registerActiveControlChangeNotification(function(c)
+    local f
+    if c then
+      while c.Parent do
+        c=c.Parent
+      end
+      f=c
+    end
+
+    if f==nil then
+      f=getActiveForm()
+    end
+
+    if f and f.ControllerPanel then
+      f.ControllerPanel.Caption=getControllerPanelText(f)
+    end
+  end)
+
+end
+
+if getControllerState() then
+  if MainForm.miControllerModeBase then
+    MainForm.miControllerModeBase.destroy()
+  end
+
+  if MainForm.tControllerModeLauncherWatcher then
+    MainForm.tControllerModeLauncherWatcher.destroy()
+  end
+
+
+
+  local miControllerModeBase=createMenuItem(MainForm)
+  miControllerModeBase.Name='miControllerModeBase'
+  miControllerModeBase.Caption='Controller Mode (Press A+B)'
+  MainForm.Menu.Items.insert(MainForm.Menu.Items.Count-1, miControllerModeBase)
+
+  local miControllerModeStart=createMenuItem(MainForm)
+  miControllerModeStart.Name='miControllerModeStart'
+  miControllerModeStart.Caption='Start Ctrontroller mode (A+B)'
+  miControllerModeStart.OnClick=function()
+    startControllerMode()
+  end
+
+  miControllerModeBase.add(miControllerModeStart)
+
+  tControllerModeLauncherWatcher=createTimer(MainForm)
+  tControllerModeLauncherWatcher.Name='tControllerModeLauncherWatcher'
+
+  tControllerModeLauncherWatcher.Interval=100
+  tControllerModeLauncherWatcher.OnTimer=function(t)
+    if getForegroundWindow()==MainForm.Handle then
+      local s=getControllerState()
+      if s==nil then
+        print("error:no controllerstate result")
+        t.Enabled=false
+        t.destroy()
+        return
+      end
+
+      if s.GAMEPAD_A and s.GAMEPAD_B then
+        print("launching controllermode")
+        t.Enabled=false
+        t.destroy()
+
+        miControllerModeBase.destroy()
+
+        startControllerMode()
+      end
+    end
+  end
+end
+
+
+--[[
+
+
+--]]
+
+```
+
+`opentabledialog.lua`:
+
+```lua
+local currentPath
+
+local function populateView(listbox)
+  print("populateView for "..currentPath)
+  local dirlist=getDirectoryList(currentPath)
+  local filelist=getFileList(currentPath,'*.CT')
+
+  table.sort(dirlist)
+  table.sort(filelist)
+
+
+  listbox.Items.beginUpdate()
+
+  listbox.Items.clear()
+
+  if dirlist and filelist and currentPath~='/' then
+    listbox.Items.add('..')
+  end
+
+  for i=1,#dirlist do
+    listbox.Items.add(extractFileName(dirlist[i]),1)
+  end
+
+  for i=1,#filelist do
+    listbox.Items.add(extractFileName(filelist[i]),2)
+  end
+
+  if listbox.items.Count>0 then
+    listbox.ItemIndex=0
+  end
+
+  listbox.Items.endUpdate()
+end
+
+function createOpenTableDialog()
+  local frmFilePicker=createForm(false)
+  frmFilePicker.Name='frmFilePicker'
+  frmFilePicker.Caption='Open Cheat Table'
+  frmFilePicker.Width=getScreenWidth() / 2
+  frmFilePicker.Height=getScreenHeight() / 2
+
+  frmFilePicker.Font.Size=22
+  currentPath=MainForm.OpenDialog1.InitialDir
+
+  if dirExists(currentPath)==false then
+    currentPath=os.getenv('HOME')
+    if dirExists(currentPath) then
+      if dirExists(currentPath..'Documents') then
+        currentPath=currentPath..'Documents'
+      elseif dirExists(currentPath..'/Documents') then
+        currentPath=currentPath..'/Documents'
+      end
+    else
+      currentPath='./'
+    end
+  end
+
+  if currentPath:endsWith('/')==false then
+    currentPath=currentPath..'/'
+  end
+
+  frmFilePicker.BorderStyle=bsSizeable
+  frmFilePicker.Position=poScreenCenter
+
+  local pathlabel=createLabel(frmFilePicker)
+  pathlabel.align=alTop
+  pathlabel.Caption=currentPath
+
+
+  local lbFiles=createListBox(frmFilePicker)
+  lbFiles.align=alClient
+
+  populateView(lbFiles)
+
+
+  lbFiles.OnDblClick=function(l)
+    local i=l.ItemIndex
+    print(i)
+    if i~=-1 then
+      local t=l.Items.Data[i]
+      print("t="..t)
+      if t==0 then
+        local s=currentPath
+        if s:endsWith('/') then
+          print("it ends with /")
+          if #s>1 then
+            s=s:sub(1,#s-1)
+          end
+        end
+
+
+        local newpath=extractFilePath(s)
+
+
+        if newpath=='' then
+          print('newpath==nil. doing the .. thing')
+          newpath=currentPath..'/../'
+          print("newpath="..newpath)
+        else
+          print("extracted newpath="..newpath)
+        end
+
+        currentPath=newpath
+        pathlabel.Caption=currentPath
+
+        populateView(l)
+      elseif t==1 then
+        --dir
+        currentPath=currentPath..l.Items[i]..'/'
+        pathlabel.Caption=currentPath
+        populateView(l)
+      elseif t==2 then
+        print("setting modalresult")
+        frmFilePicker.ModalResult=mrOK
+        print("frmFilePicker="..frmFilePicker.Name..':'..frmFilePicker.ClassName)
+        --frmFilePicker.close()
+      end
+    end
+  end
+
+
+  --end
+  if frmFilePicker.showModal()==mrOK then
+    print("returned with mrOK")
+    if lbFiles.ItemIndex~=-1 then
+      return currentPath..lbFiles.Items[lbFiles.ItemIndex]
+    end
+  end
+end
+
+--return createOpenTableDialog()
+
+```
+
+`steamspawnkeyboard.lua`:
+
+```lua
+function spawnSteamKeyboard()
+  return autoAssemble([[
+{$c}
+#include <stdio.h>
+#include <stdint.h>
+
+#define RTLD_LAZY	0x00001	/* Lazy function call binding.  */
+#define RTLD_NOW	0x00002	/* Immediate function call binding.  */
+#define	RTLD_BINDING_MASK   0x3	/* Mask of binding time value.  */
+#define RTLD_NOLOAD	0x00004	/* Do not load the object.  */
+#define RTLD_DEEPBIND	0x00008	/* Use deep binding.  */
+
+void *dlopen(const char *path, int flags);
+void *dlsym(void *handle, const char *symbol);
+
+const int k_cchMaxSteamErrMsg = 1024;
+typedef char SteamErrMsg[1024];
+
+
+typedef int (INIT)(SteamErrMsg *msg);
+typedef void* (STEAMCLIENT)();
+
+typedef void* (STEAMAPI_STEAMUTILS_V011)();
+typedef int (STEAMAPI_ISTEAMUTILS_SHOWGAMEPADTEXTINPUT)( void* self, int eInputMode, int eLineInputMode, const char * pchDescription, uint32_t unCharMax, const char * pchExistingText );
+
+INIT *init;
+STEAMCLIENT *SteamClient;
+
+STEAMAPI_STEAMUTILS_V011 *SteamAPI_SteamUtils_v011;
+STEAMAPI_ISTEAMUTILS_SHOWGAMEPADTEXTINPUT *SteamAPI_ISteamUtils_ShowGamepadTextInput;
+
+
+int xxx;
+void bla(void)
+{
+  xxx++;
+  void *steamapi=dlopen("/home/eric/snap/steam/common/.local/share/Steam/steamrt64/libsteam_api.so", RTLD_NOW);
+
+  if (steamapi)
+  {
+    init=dlsym(steamapi, "SteamAPI_InitFlat");
+
+    if (init)
+    {
+      int r;
+      SteamErrMsg err;
+
+      err[0]=0;
+
+      r=init(&err);
+      printf("r=%d err=%s\n", r,err);
+
+      if (r==0)
+      {
+	      SteamClient=dlsym(steamapi, "SteamClient");
+	      SteamAPI_SteamUtils_v011=dlsym(steamapi, "SteamAPI_SteamUtils_v011");
+	      SteamAPI_ISteamUtils_ShowGamepadTextInput=dlsym(steamapi, "SteamAPI_ISteamUtils_ShowGamepadTextInput");
+	      if (SteamAPI_SteamUtils_v011)
+	      {
+	        void *su=SteamAPI_SteamUtils_v011();
+	        printf("su=%p\n",su);
+	        if (su)
+	        {
+	          char bla[100];
+	          strcpy(bla,"Fuck you!");
+	          r=SteamAPI_ISteamUtils_ShowGamepadTextInput(su,0,0,"fuck you",100, bla);
+
+	          printf("SteamAPI_ISteamUtils_ShowGamepadTextInput returned %d\n",r);
+	        }
+
+	      }
+	      else
+	        printf("Failed finding SteamClient export\n");
+
+      }
+
+    }
+  }
+  else
+  {
+    printf("failed opening steamapi");
+  }
+
+  fflush(0);
+  xxx++;
+
+
+}
+{$asm}
+createthread(bla)
+
+]],true)
+end
+
+```
