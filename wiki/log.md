@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/pubgm_sdk_and_offsets`: entity [[pubgm-sdk-and-offsets]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-07** — ingest `readme:categories`: bumped Cheat ~2660 (was ~2659; Anti Cheat ~651 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-07** — ingest `description:gmh5225/qiling-il2cpp-dump`: entity [[qiling-il2cpp-dump]]; cited on [[il2cpp]] and [[overviews/game-engine]].
