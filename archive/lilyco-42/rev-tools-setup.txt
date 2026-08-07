@@ -1,0 +1,437 @@
+Project Path: arc_lilyco-42_rev-tools-setup_h9nzgf94
+
+Source Tree:
+
+```txt
+arc_lilyco-42_rev-tools-setup_h9nzgf94
+├── AI_GUIDE.md
+├── README.md
+├── opencode.mcp.json
+├── setup.ps1
+└── test-mcp.ps1
+
+```
+
+`AI_GUIDE.md`:
+
+```md
+# AI_GUIDE：给其他 AI 的逐步操作指引
+
+> 你是一个 AI Agent，被要求在 Windows 上搭建逆向工程工具链并接入 MCP。
+> 按本指南逐步执行。每条命令执行后按「判断标准」核对结果，失败则按「避坑」处理。
+
+## 阶段 0：环境检查（必须先做）
+
+```powershell
+scoop --version
+# 判断标准: 输出版本号。若报 command not found → 需先安装 scoop
+where.exe python; where.exe pip
+# 判断标准: 确认 python/pip 指向同一解释器（看第一条路径）
+# ⚠️ 坑: PATH 里可能有多个 python（uv/anaconda/scoop）。用 `python -c "import sys;print(sys.executable)"` 确认
+```
+
+## 阶段 1：scoop 批量安装
+
+```powershell
+scoop install 7zip cheat-engine x64dbg gdb llvm dynamorio sysinternals vmmap procmon ghidra yara wireshark mitmproxy renderdoc prometheus grafana elasticsearch
+```
+
+判断标准：每包出现 `'xxx' (版本) was installed successfully!`。个别失败可单独重装：
+`scoop install <包名>`
+避坑：wireshark 安装后可验证 `tshark --version`；若抓包失败看 Npcap。
+
+## 阶段 2：ReClass.NET（无 scoop 包）
+
+```powershell
+# 需先装 7zip
+Invoke-WebRequest -Uri "https://github.com/ReClassNET/ReClass.NET/releases/download/v1.2/ReClass.NET.rar" -OutFile "$env:TEMP\ReClass.NET.rar"
+New-Item -ItemType Directory -Force -Path "D:\app\scoop\apps\reclass-net\current" | Out-Null
+& "D:\app\scoop\apps\7zip\current\7z.exe" x "$env:TEMP\ReClass.NET.rar" "-oD:\app\scoop\apps\reclass-net\current" -y
+```
+
+判断标准：`Test-Path "D:\app\scoop\apps\reclass-net\current\x64\ReClass.NET.exe"` 为 True
+
+## 阶段 3：Python 生态（用 anaconda python，不要用 uv python！）
+
+```powershell
+$py = "D:\app\scoop\apps\anaconda3\current\App\python.exe"
+& $py -m pip install scapy frida-tools opencv-python-headless
+& $py -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+```
+
+判断标准：`& $py -c "import scapy,frida,cv2,torch;print('OK')"` 无报错
+避坑：若用系统 `python`（uv 托管）会报 `externally-managed-environment`。**一定用 anaconda3 的解释器，或先 `uv venv` 再装。**
+
+## 阶段 4：Cheat Engine MCP 服务器
+
+```powershell
+git clone --depth 1 https://github.com/bethington/cheat-engine-server-python D:\app\scoop\apps\ce-mcp-server
+cd D:\app\scoop\apps\ce-mcp-server
+uv venv .venv
+uv pip install --python .venv\Scripts\python.exe "mcp>=1.0.0,<2.0.0" trio psutil capstone
+```
+
+**避坑（关键）**：
+- `mcp>=1.0.0` 会装成 2.0，但 2.0 移除了 `mcp.server.fastmcp`，启动必崩。**必须锁定 `<2.0.0`**。
+- 该项目 CLI 没有 `--test` 参数（README 有误）。验证用 `test-mcp.ps1`。
+- 该实现只有进程管理 + Cheat Table 解析（约 26 个工具），**无内存读写**。
+
+## 阶段 5：MCP 配置
+
+将 `opencode.mcp.json` 的 `cheat-engine` 段合并进 `~/.config/opencode/opencode.json` 的 `mcp` 对象（若该文件存在 idalib/burp，保留它们）。
+
+```powershell
+# 改完必须重启 opencode，配置不热加载
+```
+
+其他客户端参考：
+- Claude Desktop: `%APPDATA%\Claude\claude_desktop_config.json`（`mcpServers`）
+- Codex: `~/.codex/config.toml`
+
+## 阶段 6：测试每个工具
+
+| 工具 | 命令 | 预期 |
+|---|---|---|
+| Cheat Engine | `.\test-mcp.ps1` | 26 个工具列表 + list_processes 有响应 |
+| YARA | 写规则扫 notepad.exe | 命中 MZ_Header |
+| Ghidra | `support\analyzeHeadless.bat` 导入 exe | 生成 .gpr 项目 |
+| DynamoRIO | `bin64\drrun.exe -c samples\bin64\bbcount.dll -- bin64\dummy.exe` | 输出 "Client bbcount is running" |
+| GDB | `gdb --version` | 17.x |
+| RenderDoc | `renderdoccmd.exe --version` | v1.45 |
+| Prometheus | 启动后 GET `/-/healthy` | "Prometheus Server is Healthy" |
+
+## 常见失败诊断表
+
+| 症状 | 原因 | 处理 |
+|---|---|---|
+| `externally-managed-environment` | 用了 uv 托管 python | 换 anaconda3 python 或 `uv venv` |
+| `No module named 'mcp.server.fastmcp'` | mcp 2.0 | 锁定 `mcp<2.0.0` |
+| `unable to find python311.dll` | lldb-mcp 缺 Python 动态库 | 复制 `python311.dll` 到 LLVM bin，socket 模式接入 |
+| `unable to load Npcap (wpcap.dll)` | 缺 Npcap | 装 Npcap（官网） |
+| `flag provided but not defined: -http-port` | Grafana 参数格式 | 用 `--configOverrides` / `--homepath` |
+| `scoop search` 报 GitHub rate limit | API 限流 | `Get-ChildItem D:\app\scoop\buckets\*\bucket\*<名>*` 或 `scoop config gh_token` |
+
+## 研究边界（务必遵守）
+
+- 本工具链用于安全研究、单机调试、自有私有服务器
+- 遵守软件许可与游戏服务条款；不对他人运营的在线游戏实施外挂
+- CE MCP 保持 `--read-only` 模式
+
+```
+
+`README.md`:
+
+```md
+# RE 工具链一键安装 + MCP 接入（面向 AI Agent）
+>
+> 给其他 AI 的完整操作指引：用 scoop 安装逆向工程工具链、接入 MCP、逐个测试。
+> 本仓库包含一个**一键脚本**和一份**避坑清单**，AI 可直接执行 `setup.ps1` 复现全部操作。
+
+## 适用场景
+
+Windows 10/11 上搭建「MMO 反作弊实验室 / 逆向工程工作台」工具链，供 AI（Claude / Codex / opencode / Cursor 等）通过 **MCP** 直接调用 Cheat Engine 等工具做进程分析、内存研究、Cheat Table 解析。
+
+> ⚠️ 仅限安全研究 / 单机 / 自有私有服务器环境，遵守软件许可与游戏服务条款。
+
+---
+
+## 快速开始（AI 一键执行）
+
+```powershell
+# 以管理员运行 PowerShell
+powershell -ExecutionPolicy Bypass -File setup.ps1
+```
+
+脚本会自动：
+
+1. 检查 scoop（无则自动安装）
+2. 批量安装工具（见下方清单）
+3. 拉取并配置 Cheat Engine MCP 服务器（`cheat-engine`）
+4. 写入 `opencode.json` / `claude_desktop_config.json` 的 MCP 配置段
+5. 输出每个工具的验证命令与结果
+
+---
+
+## 安装的工具清单
+
+| 类别 | 工具 | scoop 包 |
+|---|---|---|
+| 内存分析 | Cheat Engine | `cheat-engine` |
+| 结构还原 | ReClass.NET | 手动部署（GitHub release） |
+| 调试器 | x64dbg / GDB / LLVM(LLDB) | `x64dbg` `gdb` `llvm` |
+| 动态插桩 | DynamoRIO / Frida | `dynamorio` / pip |
+| 系统分析 | Sysinternals / VMMap / Procmon | `sysinternals` `vmmap` `procmon` |
+| 二进制分析 | Ghidra / YARA | `ghidra` `yara` |
+| 网络分析 | Wireshark / mitmproxy / Scapy | `wireshark` `mitmproxy` / pip |
+| 图形分析 | RenderDoc | `renderdoc` |
+| 服务端遥测 | Prometheus / Grafana / Elasticsearch | `prometheus` `grafana` `elasticsearch` |
+| AI 检测 | Python / PyTorch / OpenCV | `anaconda3` / pip |
+
+---
+
+## 避坑清单（实测踩坑记录）
+
+### 1. scoop 的 `main` bucket 可能是国内镜像
+`main` 可能指向 `ScoopInstaller/scoop-cn`（GitHub 代理）。`gh-proxy.org` 前缀出现即说明在用镜像，安装速度更快但要注意 hash 校验依然生效。
+
+### 2. ReClass.NET 无 scoop 包
+- 从 GitHub releases 下载 `ReClass.NET.rar`
+- 需要 `7zip` 解压：`scoop install 7zip`
+- 部署到 `D:\app\scoop\apps\reclass-net\current`
+- x64/x86 两个 `ReClass.NET.exe`
+
+### 3. Python 环境陷阱（最重要的坑）
+系统 `python` 可能是 **uv 托管的 3.11（externally-managed-environment）**，直接 `pip install` 会报错：
+
+```
+error: externally-managed-environment
+```
+
+**解决**：
+- 查 `where.exe python` / `where.exe pip`，确认是哪个解释器
+- 用 `python -m pip` 对齐版本，或直接使用 anaconda3 的 Python：`D:\app\scoop\apps\anaconda3\current\App\python.exe`
+- 独立服务用 `uv venv` 建隔离环境
+
+### 4. CE MCP 必须锁定 mcp <2.0
+`bethington/cheat-engine-server-python` 依赖 `mcp.server.fastmcp`，而 **mcp 2.0 移除了该模块**，启动即崩：
+```
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'
+```
+**解决**：`uv pip install "mcp>=1.0.0,<2.0.0"`
+
+### 5. CE MCP 的 `--test` 参数不存在
+该项目 CLI 只支持 `--config/--debug/--read-only`，README 里的 `--test` 会报 `unrecognized arguments`。
+**验证方式**：用 JSON-RPC stdio 握手测试（见 `test-mcp.ps1`）。
+
+### 6. 这个 CE MCP 是「精简版」
+它只有进程管理 + Cheat Table 解析（26 个工具），**没有内存读写工具**。需要内存读写请找 `tonytranrp/cheat-engine-mcp`（210 工具）或 `sudohakan/cheatengine-mcp-bridge`（Lua 桥接）。
+
+### 7. LLDB MCP 需要 python311.dll
+`lldb-mcp.exe` 报 `unable to find 'python311.dll'`：
+- 从 `D:\app\scoop\apps\python311\3.11.9\python311.dll` 复制到 LLVM bin 目录
+- 但 lldb-mcp 默认走 **socket 模式**（stdio 握手不通），需 `-p <port>` 启动后配成 remote MCP
+
+### 8. Wireshark 抓包需要 Npcap 驱动
+`scoop` 无 npcap 包，安装 Wireshark 安装器时勾选 Npcap，否则 tshark 报：
+```
+unable to load Npcap (wpcap.dll)
+```
+
+### 9. Grafana 直接启动即退出 (exit 1)
+- 参数是 `--configOverrides`（单横杠 `-http-port` 会报 flag not defined）
+- 需要 `--homepath=D:\app\scoop\apps\grafana\current`
+- 实测仍退出，需用 `--config=conf\defaults.ini` + persist 数据目录再查日志
+
+### 10. Elasticsearch 启动后端口无响应
+自带 bundled JDK，需 `-Ehttp.port=<port> -Ediscovery.type=single-node`，仍失败时看 `logs/` 下 Java 日志定位安全初始化问题。
+
+### 11. ClickHouse 无法从 GitHub releases 装
+Windows 二进制在独立 artifacts 服务器，`builds.clickhouse.com` 当前 AccessDenied，GitHub API 限流也阻止版本探测。需官网安装器或等网络恢复。
+
+### 12. GitHub API 限流会干扰 scoop search / 版本探测
+`scoop search` 与 `gh api releases` 会被 rate limit。应对：直接 `Get-ChildItem D:\app\scoop\buckets\*\bucket\*click*` 查本地清单，或配置 `scoop config gh_token <token>`。
+
+### 13. opencode MCP 配置改动需重启
+`opencode.json` 不热加载。改完 `mcp` 段必须重启 opencode 才生效。
+
+---
+
+## 文件说明
+
+| 文件 | 用途 |
+|---|---|
+| `setup.ps1` | 一键安装 + 配置 + 验证 |
+| `test-mcp.ps1` | 通过 stdio JSON-RPC 验证 MCP 服务器连通与工具列表 |
+| `opencode.mcp.json` | 可直接合并进 `~/.config/opencode/opencode.json` 的 MCP 段 |
+| `AI_GUIDE.md` | 给其他 AI 的逐步操作指引（含命令与判断标准） |
+
+## License
+MIT
+
+```
+
+`opencode.mcp.json`:
+
+```json
+{
+  "mcp": {
+    "cheat-engine": {
+      "type": "local",
+      "command": [
+        "D:/app/scoop/apps/ce-mcp-server/.venv/Scripts/python.exe",
+        "D:/app/scoop/apps/ce-mcp-server/server/main.py",
+        "--read-only"
+      ],
+      "enabled": true
+    }
+  }
+}
+
+```
+
+`setup.ps1`:
+
+```ps1
+# RE 工具链一键安装 + MCP 接入
+# 用法（管理员 PowerShell）: powershell -ExecutionPolicy Bypass -File setup.ps1
+$ErrorActionPreference = "Continue"
+$APP_SCOOP = "$env:USERPROFILE\scoop"
+if (Test-Path "D:\app\scoop") { $APP_SCOOP = "D:\app\scoop" }
+$LOG = Join-Path $PSScriptRoot "setup.log"
+function Log($msg) { $t = "[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $msg; Write-Host $t -ForegroundColor Cyan; Add-Content $LOG $t }
+
+# 需要管理员权限（内存工具 + 写 MCP 配置）
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) { Log "WARN: 未以管理员运行，部分工具（Npcap 等）可能受限" }
+
+# ---------- 0. scoop 检查 ----------
+Log "==> 检查 scoop"
+if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+    Log "未检测到 scoop，正在安装..."
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+} else { Log "scoop 已安装: $(scoop --version 2>&1 | Select-Object -First 1)" }
+
+# ---------- 1. scoop 包批量安装 ----------
+$scoopPackages = @("7zip","cheat-engine","x64dbg","gdb","llvm","dynamorio","sysinternals","vmmap","procmon","ghidra","yara","wireshark","mitmproxy","renderdoc","prometheus","grafana","elasticsearch","anaconda3")
+foreach ($p in $scoopPackages) {
+    $installed = scoop list 2>$null | Select-String -Pattern "^$p\s"
+    if ($installed) { Log "SKIP $p (已安装)" } else {
+        Log "安装 $p ..."
+        scoop install $p 2>&1 | Select-String -Pattern "installed successfully|already installed|ERROR" | Select-Object -Last 1 | ForEach-Object { Log "    $_" }
+    }
+}
+
+# ---------- 2. ReClass.NET（手动部署，无 scoop 包） ----------
+Log "==> ReClass.NET"
+$reclassDir = "$APP_SCOOP\apps\reclass-net\current"
+if (Test-Path "$reclassDir\x64\ReClass.NET.exe") { Log "SKIP ReClass.NET (已存在)" }
+else {
+    try {
+        $rar = "$env:TEMP\ReClass.NET.rar"
+        Invoke-WebRequest -Uri "https://github.com/ReClassNET/ReClass.NET/releases/download/v1.2/ReClass.NET.rar" -OutFile $rar -UserAgent "opencode"
+        New-Item -ItemType Directory -Force -Path $reclassDir | Out-Null
+        & "$APP_SCOOP\apps\7zip\current\7z.exe" x $rar "-o$reclassDir" -y | Out-Null
+        Log "ReClass.NET 部署完成"
+    } catch { Log "ERROR ReClass.NET: $($_.Exception.Message)" }
+}
+
+# ---------- 3. Python 生态（anaconda python） ----------
+Log "==> Python 生态"
+$pyExe = "$APP_SCOOP\apps\anaconda3\current\App\python.exe"
+if (Test-Path $pyExe) {
+    & $pyExe -m pip install --upgrade pip 2>&1 | Out-Null
+    & $pyExe -m pip install scapy frida-tools opencv-python-headless 2>&1 | Select-String -Pattern "Successfully installed|error" | ForEach-Object { Log "    $_" }
+    & $pyExe -m pip install torch --index-url https://download.pytorch.org/whl/cpu 2>&1 | Select-String -Pattern "Successfully installed|error" | ForEach-Object { Log "    $_" }
+} else { Log "WARN 未找到 anaconda python, 跳过 pip 安装" }
+
+# ---------- 4. Cheat Engine MCP 服务器 ----------
+Log "==> Cheat Engine MCP 服务器"
+$ceMcpDir = "$APP_SCOOP\apps\ce-mcp-server"
+if (-not (Test-Path "$ceMcpDir\server\main.py")) {
+    git clone --depth 1 https://github.com/bethington/cheat-engine-server-python $ceMcpDir 2>&1 | Out-Null
+    if (Test-Path "$ceMcpDir") {
+        # 重要：mcp 2.0 移除了 fastmcp，必须锁定 1.x
+        uv venv "$ceMcpDir\.venv" 2>&1 | Out-Null
+        uv pip install --python "$ceMcpDir\.venv\Scripts\python.exe" "mcp>=1.0.0,<2.0.0" trio psutil capstone 2>&1 | Out-Null
+        Log "CE MCP 服务器已部署到 $ceMcpDir"
+    } else { Log "ERROR CE MCP clone 失败" }
+} else { Log "SKIP CE MCP (已存在)" }
+
+# ---------- 5. Npcap（Wireshark 抓包依赖，可选） ----------
+Log "==> Npcap"
+if (-not (Get-Service -Name npcap -ErrorAction SilentlyContinue)) {
+    Log "提示: 抓包需要 Npcap。请在 Wireshark 安装器勾选，或从 https://npcap.com 单独安装。scoop 无此包。"
+} else { Log "SKIP Npcap (服务已存在)" }
+
+# ---------- 6. MCP 配置写入 ----------
+Log "==> 写入 MCP 配置"
+$ceCmd = @"
+{
+  "cheat-engine": {
+    "type": "local",
+    "command": [
+      "$($ceMcpDir -replace '\\','/')/.venv/Scripts/python.exe",
+      "$($ceMcpDir -replace '\\','/')/server/main.py",
+      "--read-only"
+    ],
+    "enabled": true
+  }
+}
+"@
+$oc = "$env:USERPROFILE\.config\opencode\opencode.json"
+if (Test-Path $oc) {
+    $cfg = Get-Content $oc -Raw | ConvertFrom-Json
+    if (-not $cfg.mcp."cheat-engine") {
+        $cfg.mcp | Add-Member -NotePropertyName "cheat-engine" -NotePropertyValue @{ type="local"; command=@("$($ceMcpDir -replace '\\','/')/.venv/Scripts/python.exe","$($ceMcpDir -replace '\\','/')/server/main.py","--read-only"); enabled=$true }
+        $cfg | ConvertTo-Json -Depth 10 | Set-Content $oc -Encoding UTF8
+        Log "已写入 opencode.json (需重启 opencode 生效)"
+    } else { Log "SKIP opencode.json (cheat-engine 已配置)" }
+} else { Log "WARN 未找到 opencode.json，跳过（手动配置见 opencode.mcp.json）" }
+
+# ---------- 7. 验证 ----------
+Log "==> 验证工具版本"
+foreach ($v in @(@("yara","--version"), @("gdb","--version"), @("tshark","--version"))) {
+    $cmd = $v[0]; try { $o = & $cmd @($v[1]) 2>&1 | Select-Object -First 1; Log "    $cmd : $o" } catch { Log "    $cmd : FAIL" }
+}
+$pyExe -c "import scapy, frida, cv2, torch; print('scapy',scapy.__version__,'| frida',frida.__version__,'| cv2',cv2.__version__,'| torch',torch.__version__)" 2>&1 | ForEach-Object { Log "    python: $_" }
+
+Log "==> 完成。下一步: 重启 opencode，运行 .\test-mcp.ps1 验证 MCP 连通"
+
+```
+
+`test-mcp.ps1`:
+
+```ps1
+# 通过 stdio JSON-RPC 验证 MCP 服务器连通与工具列表
+# 用法: powershell -ExecutionPolicy Bypass -File test-mcp.ps1 [-Server cheat-engine]
+param(
+    [string]$Server = "cheat-engine",
+    [string]$McpDir = "D:\app\scoop\apps\ce-mcp-server"
+)
+
+$configs = @{
+    "cheat-engine" = @{
+        cmd = "$McpDir\.venv\Scripts\python.exe"
+        args = @("$McpDir\server\main.py", "--read-only")
+    }
+}
+
+$entry = $configs[$Server]
+if (-not $entry) { Write-Error "未知服务器: $Server"; exit 1 }
+if (-not (Test-Path $entry.cmd)) { Write-Error "找不到解释器: $($entry.cmd)"; exit 1 }
+
+# 1. initialize
+$init = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"mcp-test","version":"1.0"}}}'
+# 2. initialized 通知
+$notif = '{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}'
+# 3. tools/list
+$list = '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+# 4. list_processes 真实调用
+$call = '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"list_processes","arguments":{}}}'
+
+$payload = "$init`n$notif`n$list`n$call"
+Write-Host "==> 测试 $Server MCP 服务器 ..." -ForegroundColor Cyan
+$out = $payload | & $entry.cmd @($entry.args) 2>$null
+
+# 提取 JSON-RPC 结果
+$results = $out | Where-Object { $_ -match '"jsonrpc"' }
+if (-not $results) { Write-Error "无响应，服务器可能未启动。加 2>&1 查看 stderr。"; exit 1 }
+
+$initOk = $results | Select-String -Pattern '"id":1.*serverInfo|serverInfo.*"id":1' -Quiet
+$listLine = $results | Select-String -Pattern '"id":2' | Select-Object -First 1
+$callLine = $results | Select-String -Pattern '"id":3' | Select-Object -First 1
+
+Write-Host "初始化握手: $(if($initOk){'OK'}else{'FAIL'})"
+Write-Host "tools/list: $(if($listLine){'OK'}else{'FAIL'})"
+if ($callLine) {
+    $toolNames = ([regex]::Matches($listLine.Line, '"name":"[a-z_]+"') | ForEach-Object { $_.Value.Trim('"').Substring(7) }) -join ", "
+    Write-Host "工具数: $(($toolNames -split ', ').Count)"
+    Write-Host "工具: $toolNames"
+    Write-Host "list_processes 调用:"
+    $callLine.Line | ConvertFrom-Json | ForEach-Object { $_.result.content | ForEach-Object { Write-Host "    $($_.text)" } }
+} else {
+    Write-Error "tools/call 失败"
+}
+
+```
