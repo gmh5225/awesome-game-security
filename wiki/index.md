@@ -464,6 +464,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
 - [godot-sandbox](entities/godot-sandbox.md) — Godot addon: sandboxed mod code for safe player extensions (all platforms; Plugins:Godot)
 - [godot-plush-character](entities/godot-plush-character.md) — Godot 4.x plush/soft-body character rendering (fabric shaders, soft deformation, procedural animation; stylized stuffed-animal aesthetic)
+- [godot](entities/godot.md) — Godot Engine OSS source (GDScript/C#; scene graph, scripting, rendering; Game Engine / source)
 - [godogen](entities/godogen.md) — autonomous Godot/Bevy/Babylon.js game dev with Claude Code and Codex (feature planning, asset gen, screenshot self-repair; Game Develop / AI Agents)
 - [goldberg-emulator](entities/goldberg-emulator.md) — Goldberg Steam Emulator (offline Steamworks API; LAN; preservation / Steam DRM+API RE)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
