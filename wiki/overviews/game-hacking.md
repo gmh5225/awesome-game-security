@@ -484,6 +484,7 @@ sources:
   - wiki/sources/descriptions/kali11211__valorant-internal-cheat.md
   - wiki/sources/descriptions/gmh5225__valorant-internal.md
   - wiki/sources/descriptions/gmh5225__valorant-internal-base.md
+  - wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md
   - wiki/sources/descriptions/kem0x__FortKit.md
   - wiki/sources/descriptions/kirovgrad__Renamaida.md
   - wiki/sources/descriptions/keowu__sourceengineexplorer.md
@@ -901,6 +902,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific R6 chams samples such as [[r6-chams-public]] (Chameleon Models + visual check; educational; cheat / game:r6 [Chams]) illustrate the chams lane beside internals/externals. (source: wiki/sources/descriptions/igromanru__R6-Chams-public.md)
 - Valorant crosshair-setting utilities such as [[valorantcc]] sit in the cheat / game:valorant lane (client config; Riot-owned assets/endpoints). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 - Valorant internal cheat bases such as [[valorant-internal-cheat]] (C/C++; Unreal Engine SDK generation + hooking; Internal tag), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the in-process offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md)
+- Valorant ImGui cheat-menu frameworks such as [[valorant-gui-imgui-remake]] (C++; styled tabs/toggles/sliders for ESP/aimbot/visual mods; UE4 interaction patterns; README `[GUI]`) illustrate cheat UI architecture in the same cheat / game:valorant lane. (source: wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md)
 - Valorant SDK research repos such as [[valorant-sdk-2024]] (C/C++; shader / rendering / audio systems; SDK tag) sit in the same cheat / game:valorant lane under [[vanguard]]. (source: wiki/sources/descriptions/hadevn__Valorant-SDK-2024.md)
 - Title-specific Thetan Arena SDKs such as [[thetan-arenasdk]] (rendering / audio / physics) illustrate the cheat / game:thetan lane. (source: wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md)
 - ASI Loader–based remaster bridges such as [[gta4-rtx]] (GTA IV Complete Edition → RTX Remix; custom runtime / light / wetness) illustrate DirectX compatibility tooling adjacent to graphics-mod research. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md) DX3 subset reimplementations such as [[free-direct]] (C++20; DirectDraw/DirectSound/DirectPlay on SDL3 + ENet for legacy 2D titles) sit in the same DirectX Compatibility lane. (source: wiki/sources/descriptions/openeggbert__free-direct.md) Microsoft's [[d3d9on12]] (D3D9 usermode DDI mapped to D3D12 for legacy D3D9 on modern stacks) extends that lane for D3D9-era titles. (source: wiki/sources/descriptions/microsoft__D3D9On12.md)
