@@ -898,6 +898,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [plthook](entities/plthook.md) — cross-platform PLT/GOT/IAT hook library (ELF/Mach-O/PE; Linux/macOS/Windows; cheat / hook research)
 - [pooldump](entities/pooldump.md) — Windows kernel pool enumerator/dumper (tags, sizes, owning drivers; EAC manual-map DLL extraction)
+- [powervm](entities/powervm.md) — AMD SVM Type-1 HV (NPT hooks, CPUID hypercall reads, shadow DebugPort; CE fork for VMProtect/ACE targets)
 - [processhacker-mcp](entities/processhacker-mcp.md) — Process Hacker MCP for AI agents (runtime process analysis; C/C++; DLL plugins; Game Develop / MCP)
 - [process-cloning](entities/process-cloning.md) — Windows process clone PoC (`NtCreateProcessEx`; VA-space snapshot; hollowing / memory analysis / credential dump)
 - [processor-trace](entities/processor-trace.md) — libipt Intel PT decoder (reference packet/instruction decode; coverage / tracing tools)
