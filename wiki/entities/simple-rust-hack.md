@@ -12,7 +12,7 @@ confidence: medium
 
 Simple Facepunch **Rust** cheat source (C++ / C/C++). Framed for game security researchers and reverse engineers studying offensive techniques in the cheat / game:rust lane. (source: wiki/sources/descriptions/gmh5225__simple-rust-hack.md)
 
-Complements the fuller OOP scaffold in [[simple-rust-base]] and loader-oriented samples such as [[a-pasted-rust-script]] for comparing minimal title-specific cheat layout vs driver/rendering bases and ImGui loaders.
+Complements the fuller OOP scaffold in [[simple-rust-base]], the Horizon-based internal framework [[rust-internal]], and loader-oriented samples such as [[a-pasted-rust-script]] for comparing minimal title-specific cheat layout vs driver/rendering bases and ImGui loaders.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements the fuller OOP scaffold in [[simple-rust-base]] and loader-oriented 
 
 ## Related
 
-[[simple-rust-base]] · [[a-pasted-rust-script]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[simple-rust-base]] · [[rust-internal]] · [[a-pasted-rust-script]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

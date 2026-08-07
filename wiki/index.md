@@ -997,6 +997,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
+- [rust-internal](entities/rust-internal.md) — Facepunch Rust internal cheat framework (C++; Horizon core + DX11/ImGui; memory/map helpers; gmh5225)
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)

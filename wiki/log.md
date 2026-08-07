@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/rust-internal`: entity [[rust-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-07** — ingest `description:pandaadir05/ghost`: entity [[ghost]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-07** — ingest `readme:categories`: bumped Anti Cheat ~651 (was ~650; Cheat ~2659 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
