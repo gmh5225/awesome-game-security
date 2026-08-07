@@ -1055,6 +1055,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
+- [star-rail](entities/star-rail.md) — Honkai: Star Rail cheat: DirectX / hooking (C/C++; cheat / game:honkai star rail; gmh5225)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
 - [Strings x64dbg](entities/stringsx64dbg.md) — x64dbg plugin: dedicated string search/browse tab (C++/Qt; SearchStringsWidget; Cheat x64dbg Plugins)
