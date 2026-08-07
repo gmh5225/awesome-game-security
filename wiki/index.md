@@ -32,7 +32,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md) — VBS VTL0/VTL1 Memory Integrity; W→X kernel code enforcement via hypervisor EPT/SLAT
 - [Hardware Input Injection](concepts/hardware-input-injection.md) — KMBox/Arduino/HID + driver-filter paths for AI visual aim pipelines
-- [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; Il2CppDomain hierarchy; metadata + dumpers
+- [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; Il2CppDomain hierarchy; metadata + dumpers (incl. Qiling emulation)
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
@@ -949,6 +949,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
 - [quickemu](entities/quickemu.md) — optimized QEMU VM create/run (Win/macOS/Linux; Cheat QEMU/KVM lab)
 - [query-gpu-name-rs](entities/query-gpu-name-rs.md) — Rust Windows GPU display-name query (Detection:HWID; gmh5225)
+- [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
 - [QSynthesis](entities/qsynthesis.md) — IDA Pro MBA expression synthesizer (Python; oracle-guided program synthesis + SMT; Hex-Rays; Cheat IDA Plugins)
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
