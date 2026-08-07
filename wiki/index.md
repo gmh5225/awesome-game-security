@@ -1077,6 +1077,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Termux](entities/termux-app.md) — Android terminal / Linux env (no-root; pkg+apt / proot; Cheat Terminal Emulator)
 - [thats_no_pipe](entities/thats-no-pipe.md) — Frida Windows named-pipe interceptor (NtRead/WriteFile; IPC → HTTP/WS proxy)
 - [the-poor-mans-obfuscator](entities/the-poor-mans-obfuscator.md) — lightweight LLVM IR obfuscator (insn sub / CFF / string encrypt; ELF/Mach-O)
+- [teamfortress2-internal](entities/teamfortress2-internal.md) — TF2 internal: modding / hooking (C++; cheat / game:team fortress 2; gmh5225)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
 - [tenet](entities/tenet.md) — IDA Pro plugin: execution-trace timeline (forward/backward stepping; register/memory state; multiple formats; gmh5225)
 - [The-Seed-Link-Future](entities/the-seed-link-future.md) — Unity VR (C#; OpenGL / shader / driver-dev; Game Develop)
