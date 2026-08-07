@@ -1948,6 +1948,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/FreeER/CE-Extensions [Lua Extensions]
 - https://github.com/Skyrimfus/CE-lua-extensions [Lua Extensions]
 - https://github.com/cheat-engine/UnrealEngineTools [Official CE Lua tools to scan Unreal Engine games (UObject/UClass/FProperty)]
+- https://github.com/cheat-engine/ControllerMode [Official CE Lua extension to navigate and operate Cheat Engine with a game controller while attached to a process]
 - https://github.com/palepine/GDDumper [Cheat Engine script to dump/inspect Godot 3.x/4.x runtime SceneTree and GDScript]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
