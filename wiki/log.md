@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:gmh5225/rAthenaCN`: entity [[rathenacn]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[rathena]].
+
 - **2026-08-07** — ingest `description:gmh5225/razer-rzctl`: entity [[razer-rzctl]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-07** — ingest `description:gmh5225/reGS`: entity [[regs]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
