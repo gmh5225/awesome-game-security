@@ -2845,3 +2845,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-07** — ingest `description:gmh5225/sigmakerex`: entity [[sigmakerex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-07** — ingest `description:gmh5225/pubg_mobile_memory_hacking_examples`: entity [[pubg-mobile-memory-hacking-examples]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
+- **2026-08-07** — ingest `description:gmh5225/pdfwkrnl-exploit`: entity [[pdfwkrnl-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].

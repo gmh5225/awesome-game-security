@@ -36,6 +36,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__s4killer.md
   - wiki/sources/descriptions/gmh5225__razer-rzctl.md
   - wiki/sources/descriptions/gmh5225__qiomem.md
+  - wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md
 updated: 2026-08-07
 confidence: high
 ---
@@ -86,6 +87,8 @@ OEM-driver LPE PoCs such as [[lenovo-cve-2025-8061]] target Lenovo `LnvMSRIO.sys
 
 Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) sits in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/shareef12__cpuz.md)
 
+BitLocker **`PdFwKrnl.sys`** IOCTL abuse such as [[pdfwkrnl-exploit]] loads and executes unsigned kernel code via the driver's IOCTL surface → arbitrary kernel code execution. (source: wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md)
+
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
 
 WFP network-blinding abuse such as [[360wfp-exploit]] loads Qihoo 360’s `360netmon_x64.sys_wfp` to block EDR/XDR network connections instead of terminating security processes. (source: wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md)
@@ -106,5 +109,5 @@ Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
