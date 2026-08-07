@@ -933,6 +933,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ps5-linux-loader](entities/ps5-linux-loader.md) — PS5 Linux loader (kernel/HV exploits, IOMMU/GPU/TMR; PlayStation)
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
+- [pubg-dump-offset](entities/pubg-dump-offset.md) — PUBG desktop UE4 offset history (v19.1–24.2; Xenuine keys; GObjects/GWorld; cheat / game:pubg [Offset]; gmh5225)
 - [pubg-internal](entities/pubg-internal.md) — PUBG internal cheat reference (iCollin; learning-oriented RE; cheat / game:pubg)
 - [pubg-mobile-memory-hacking-examples](entities/pubg-mobile-memory-hacking-examples.md) — PUBG Mobile Android memory hacking examples (entity/player/weapon reads; scan + modify; cheat / game:pubgm; gmh5225)
 - [pubg-mobile-pak-extract](entities/pubg-mobile-pak-extract.md) — PUBG Mobile pak extractor (pre–1.1.0; post-update encryption unsupported; cheat / game:pubgm)
