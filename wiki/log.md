@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-07** — ingest `description:talsec/Free-RASP-Cordova`: entity [[free-rasp-cordova]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
+
 - **2026-08-07** — ingest `readme:categories`: bumped Anti Cheat ~650 (was ~648; Cheat ~2659 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-07** — ingest `description:gmh5225/subhook`: entity [[subhook]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
