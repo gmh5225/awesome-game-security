@@ -2887,3 +2887,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-08** — ingest `description:gmh5225/nullmap`: entity [[nullmap]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-08** — ingest `description:gmh5225/ntminhook`: entity [[ntminhook]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
+- **2026-08-08** — ingest `description:gmh5225/mhxy_kernel`: entity [[mhxy-kernel]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].

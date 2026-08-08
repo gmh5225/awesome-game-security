@@ -69,6 +69,7 @@ sources:
   - wiki/sources/descriptions/secrary__idenLib.md
   - wiki/sources/descriptions/push0ebp__sig-database.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
+  - wiki/sources/descriptions/gmh5225__mhxy_kernel.md
   - wiki/sources/descriptions/gmh5225__mnwvs196.md
   - wiki/sources/descriptions/gmh5225__minecpp.md
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
@@ -935,7 +936,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - WIP CS2 cheats such as [[bakaware4]] (release-constrained; debug unload/unhook for `-insecure` iteration) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/nezu-cc__BakaWare4.md)
 - Title-specific Call of Duty 7 tooling such as [[cod7-tools]] (VcPkg; extensible game:cod7 research) sits in the cheat / game:cod7 lane. (source: wiki/sources/descriptions/nice-sprite__COD7-Tools.md)
 - Title-specific T7 engine script / FastFile linker tooling such as [[t7-linker]] (compiled GSC module linking; T7 script bytecode; README also cites Black Ops 2 FastFile accuracy; gmh5225) sits in the cheat / Call of Duty modding lane beside [[cod7-tools]] and [[paradise-bo2]]. (source: wiki/sources/descriptions/gmh5225__t7-linker.md)
-- Title-specific CrossFire (CF) samples such as [[titancf]] (C/C++; driver development / rendering / graphics; cheat / game:crossfire; gmh5225) sit in the cheat / game:crossfire lane for client protection and cheat-detection research. (source: wiki/sources/descriptions/gmh5225__titancf.md)
+- Title-specific CrossFire (CF) samples such as [[titancf]] (C/C++; driver development / rendering / graphics; cheat / game:crossfire; gmh5225) sit in the cheat / game:crossfire lane for client protection and cheat-detection research. (source: wiki/sources/descriptions/gmh5225__titancf.md) Title-specific MHXY (Fantasy Westward Journey / 梦幻西游) kernel samples such as [[mhxy-kernel]] (C/C++; kernel-level work and modding; cheat / game:mhxy; gmh5225) sit in the same title-specific kernel-cheat lane. (source: wiki/sources/descriptions/gmh5225__mhxy_kernel.md)
 - Title-specific Super People client samples such as [[superpeople-client]] (C++; driver development / rendering / modding; cheat / game:super people; gmh5225) sit in the cheat / game:super people lane for client-side offensive research. (source: wiki/sources/descriptions/gmh5225__superpeople-client.md)
 - Title-specific Call of Duty: Black Ops II PS3 SPRX source such as [[paradise-bo2]] (Paradise mod menu; window/UI code; newer snapshot) sits beside that lane in the cheat / console PlayStation / game:bo2 lane. (source: wiki/sources/descriptions/gopro2027__ParadiseBO2.md)
 - Title-specific Battlefield 1 internals such as [[battlefield-1-internal]] (C++; DirectX / SDK generation / hooking) illustrate the cheat / game:battlefield 1 lane. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md)
