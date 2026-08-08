@@ -738,6 +738,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Minecraft AntiCheatAI](entities/minecraft-anticheatai.md) — DeepGuard Paper plugin (ONNX 1D-CNN scaffold detection; BehaviorRecorder + PyTorch training)
 - [mixed-boolean-transform](entities/mixed-boolean-transform.md) — source-to-source C++ MBA obfuscation (Z3-verified; Eigen3 + GMP; Cheat Mixed boolean-arithmetic)
 - [mhynot2](entities/mhynot2.md) — Genshin Impact AC bypass research (experimental `mhyprot2` circumvention; khang06)
+- [mhydeath](entities/mhydeath.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; arbitrary kernel R/W + process kill; gmh5225)
 - [mhyprot2](entities/mhyprot2.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; IOCTL kernel R/W + process kill; gmh5225)
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
