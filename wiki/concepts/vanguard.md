@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md
   - wiki/sources/descriptions/gmh5225__valo-driver.md
   - wiki/sources/descriptions/gmh5225__lol_patcher.md
+  - wiki/sources/descriptions/gmh5225__lol-unpackman.md
 updated: 2026-08-08
 confidence: medium
 ---
@@ -46,8 +47,8 @@ Early-load offensive samples such as [[valorant-esp-hack-with-driver]] (ESP; exp
 
 Kernel external memory-read drivers such as [[valo-driver]] (C; physical translate / CR3 / MDL paths; avoids monitored standard APIs; gmh5225) demonstrate Vanguard-specific cross-process R/W bypass research beside generic CR3/MDL tooling. (source: wiki/sources/descriptions/gmh5225__valo-driver.md)
 
-Historical League of Legends client mod/patcher samples such as [[lol-patcher]] (gmh5225; experimental; frozen Feb 2020) illustrate LoL-side offensive research under the same Vanguard-protected Riot title family as Valorant. (source: wiki/sources/descriptions/gmh5225__lol_patcher.md)
+Historical League of Legends client mod/patcher samples such as [[lol-patcher]] (gmh5225; experimental; frozen Feb 2020) illustrate LoL-side offensive research under the same Vanguard-protected Riot title family as Valorant. (source: wiki/sources/descriptions/gmh5225__lol_patcher.md) LoL client unpacker samples such as [[lol-unpackman]] (C++; gmh5225) complement that lane for client-binary unpacking study. (source: wiki/sources/descriptions/gmh5225__lol-unpackman.md)
 
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[lol-patcher]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[lol-patcher]] · [[lol-unpackman]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]

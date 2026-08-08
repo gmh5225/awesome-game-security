@@ -686,6 +686,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LOLDrivers](entities/loldrivers.md) — comprehensive LOLdriver catalog (YAML metadata, YARA, HVCI tracking; magicsword-io)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)
 - [lol-patcher](entities/lol-patcher.md) — experimental LoL client patcher/mod (gmh5225; frozen Feb 2020; cheat / game:lol)
+- [lol-unpackman](entities/lol-unpackman.md) — C++ LoL client unpacker (gmh5225; cheat / game:lol)
 - [long_night](entities/long-night.md) — IDA Pro dark color theme (syntax-highlighted; cheat / IDA themes)
 - [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
