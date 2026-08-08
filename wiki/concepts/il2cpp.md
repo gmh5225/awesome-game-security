@@ -25,7 +25,8 @@ sources:
   - wiki/sources/descriptions/khang06__Il2CppDumper-YuanShen.md
   - wiki/sources/descriptions/jbro129__android-modding.md
   - wiki/sources/descriptions/gmh5225__qiling-il2cpp-dump.md
-updated: 2026-08-07
+  - wiki/sources/descriptions/gmh5225__il2cpp-finder.md
+updated: 2026-08-08
 confidence: high
 ---
 
@@ -50,7 +51,7 @@ Key native API patterns (names/signatures drift by Unity version):
 
 ## Research workflow
 
-1. Locate binary + metadata (desktop or APK/IPA)
+1. Locate binary + metadata (desktop or APK/IPA); metadata locators such as [[il2cpp-finder]] (gmh5225; scan executables/shared libraries for `global-metadata.dat` signatures plus `CodeRegistration` / `MetadataRegistration` pointers; obfuscated or unfamiliar builds) help find dump entry points before running IL2CPPDumper. (source: wiki/sources/descriptions/gmh5225__il2cpp-finder.md)
 2. Run IL2CPPDumper (desktop or Android-focused [[il2cppdumper]]) → `dump.cs`, headers, `script.json`
 3. Import into IDA/Ghidra; resolve `Il2CppClass` / `MethodInfo` / invoke paths (match layouts to the title’s Unity IL2CPP generation via references such as [[il2cpp-versions]])
 4. Hook via native hooks or [[frida]] on mobile
@@ -61,4 +62,4 @@ Mono builds instead use `Assembly-CSharp.dll` + dnSpy/ILSpy on the embedded [[mo
 
 ## Related
 
-[[unreal-object-model]] · [[source-netvars]] · [[android-modding]] · [[frida]] · [[frida-il2cpp-bridge]] · [[il2cpp-versions]] · [[il2cpp-resolver]] · [[il2cpp-runtime-dumper]] · [[qiling-il2cpp-dump]] · [[il2cpp-assembly-unhollower]] · [[il2cppdumper]] · [[il2cppdumper-yuanshen]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[mono]] · [[mono-external-lib]] · [[unity202x-externalresolve]] · [[escapefromtarkov-trainer]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[unreal-object-model]] · [[source-netvars]] · [[android-modding]] · [[frida]] · [[frida-il2cpp-bridge]] · [[il2cpp-versions]] · [[il2cpp-resolver]] · [[il2cpp-runtime-dumper]] · [[qiling-il2cpp-dump]] · [[il2cpp-finder]] · [[il2cpp-assembly-unhollower]] · [[il2cppdumper]] · [[il2cppdumper-yuanshen]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[mono]] · [[mono-external-lib]] · [[unity202x-externalresolve]] · [[escapefromtarkov-trainer]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]

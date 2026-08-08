@@ -32,7 +32,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Frida](concepts/frida.md)
 - [HVCI](concepts/hvci.md) — VBS VTL0/VTL1 Memory Integrity; W→X kernel code enforcement via hypervisor EPT/SLAT
 - [Hardware Input Injection](concepts/hardware-input-injection.md) — KMBox/Arduino/HID + driver-filter paths for AI visual aim pipelines
-- [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; Il2CppDomain hierarchy; metadata + dumpers (incl. Qiling emulation)
+- [IL2CPP](concepts/il2cpp.md) — Unity AOT backend; Il2CppDomain hierarchy; metadata + dumpers (incl. metadata locator + Qiling emulation)
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
@@ -584,6 +584,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [IL2CPPDumper](entities/il2cppdumper.md) — Android IL2CPP static dump (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
 - [Il2CppDumper-YuanShen](entities/il2cppdumper-yuanshen.md) — Genshin Impact IL2CPP static dump (khang06; cwd output; cheat / game engine explorer:Unity)
+- [il2cpp-finder](entities/il2cpp-finder.md) — Unity IL2CPP metadata locator (global-metadata.dat / CodeRegistration / MetadataRegistration scan; obfuscated binaries; cheat / game engine explorer:Unity)
 - [ilhook-rs](entities/ilhook-rs.md) — Rust x86 HOOK (function intercept → user handlers; cheat / hook)
 - [ILSpy](entities/ilspy.md) — open-source .NET assembly browser/decompiler (C#/VB/IL; .NET Framework/Core/5+; async/LINQ/generics; For Unity)
 - [image-blaster](entities/image-blaster.md) — image→3D mesh/splat/SFX skillset (World Labs+FAL; React/Three.js; AI / 3D Graphics)
