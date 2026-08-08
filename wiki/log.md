@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/ida-nord-theme`: entity [[ida-nord-theme]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[long-night]].
+
 - **2026-08-08** — ingest `description:gmh5225/ida-plugins`: entity [[list-of-ida-plugins]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idaplugins-list]] and [[ida-plugins]].
 
 - **2026-08-08** — ingest `description:gmh5225/ida-sdk`: entity [[ida-sdk]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idasdk-collection]].

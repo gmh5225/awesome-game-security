@@ -576,6 +576,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-medigate](entities/ida-medigate.md) — IDA Pro Python: GCC RTTI hierarchy/vtable recovery from stripped binaries (Hex-Rays union disambiguation; xref tracker; cheat / IDA Plugins)
 - [ida-missinglink](entities/ida-missinglink.md) — IDA plugin: fill missing indirect CALL/JMP targets (C++ OOP RE; cheat / IDA Plugins)
 - [ida-names](entities/ida-names.md) — IDA Pro plugin: batch rename, pattern match, prefix/suffix, import/export for function/symbol names (pseudocode window titles; cheat / IDA Plugins)
+- [ida-nord-theme](entities/ida-nord-theme.md) — IDA Pro Nord-palette dark color theme (disassembly/hex/graph/editor; cheat / Skins)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
 - [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
 - [ida-sdk](entities/ida-sdk.md) — mirrored IDA Pro SDK (headers/libs/docs; plugin + processor-module dev; multi-version; cheat / IDA SDK)
