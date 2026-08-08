@@ -619,6 +619,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [JavaScript Obfuscator](entities/javascript-obfuscator.md) — JS/Node.js source obfuscator (TypeScript; CLI + API; CFF / string arrays / self-defending / domain lock; browser games)
 - [JS Debugger Bypass UserScript](entities/js-debugger-bypass-script.md) — JavaScript UserScript; bypass browser DevTools/debugger/timing/window-size anti-debug (web/JS RE)
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
+- [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
 - [JinYongLegend](entities/jynew.md) — Unity wuxia RPG framework with modding (Game Develop / Unity source)
 - [jwt_tool](entities/jwt-tool.md) — Python JWT toolkit (validate/forge/scan; Game Network / JWT Auth)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
