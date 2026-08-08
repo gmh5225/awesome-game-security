@@ -691,6 +691,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lol-patcher](entities/lol-patcher.md) — experimental LoL client patcher/mod (gmh5225; frozen Feb 2020; cheat / game:lol)
 - [lol-unpackman](entities/lol-unpackman.md) — C++ LoL client unpacker (gmh5225; cheat / game:lol)
 - [long_night](entities/long-night.md) — IDA Pro dark color theme (syntax-highlighted; cheat / IDA themes)
+- [legit-csgo-cheat-menu](entities/legit-csgo-cheat-menu.md) — CS:GO legit-style cheat menu (Windows; cheat / game:csgo [Menu]; gmh5225)
 - [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
