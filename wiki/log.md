@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/ntoskrnl_file_collection`: entity [[ntoskrnl-file-collection]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked from [[ntoskrnlwalker]].
+
 - **2026-08-08** — ingest `description:gmh5225/nv-graphics-mesa`: entity [[nv-graphics-mesa]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
 
 - **2026-08-08** — ingest `description:storycraft/asdf-overlay`: entity [[asdf-overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
