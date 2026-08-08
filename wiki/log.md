@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/lenovo_mapper`: entity [[lenovo-mapper]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-08** — ingest `description:gmh5225/lol-offset-dumper`: entity [[lol-offset-dumper]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-08** — ingest `description:gmh5225/lol-unpackman`: entity [[lol-unpackman]]; cited on [[overviews/game-hacking]] and [[vanguard]].
