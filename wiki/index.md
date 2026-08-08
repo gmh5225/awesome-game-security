@@ -782,6 +782,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NMMP](entities/nmmp.md) — Android DEX bytecode-to-native protector (Nativ Method Map Protector; JNI; Dex)
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
+- [no-access-protection-x86](entities/no-access-protection-x86.md) — x86 PAGE_NOACCESS page guards + VEH on-access decryption (anti-tamper / anti-dump)
 - [NoCheatZ-3](entities/nocheatz-3.md) — Source Engine serverside anti-cheat plugin (CS:S, CS:GO, CS:P, TF2; C/C++; plugin + SDK generation)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
 - [NoahGameFrame](entities/noahgameframe.md) — C++ server engine (OGRE/BigWorld-inspired; Game Network / Server Engine)

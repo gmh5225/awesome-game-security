@@ -12,7 +12,7 @@ confidence: medium
 
 C++/C sample centered on **VEH + `PAGE_NOACCESS`** for memory analysis. Aimed at anti-cheat engineers and defensive security researchers working the page-protection / anti-tamper lane. (source: wiki/sources/descriptions/gmh5225__veh_hide_memory.md)
 
-Pairs with related PAGE_NOACCESS / VEH samples such as [[no-access-protection]] (VEH trampoline + single-step re-protect), [[bincon]] (hardened console), and [[voidmaw]] (`PAGE_GUARD` variant); VEH-chain dump tooling such as [[veh-dumper]].
+Pairs with related PAGE_NOACCESS / VEH samples such as [[no-access-protection]] (VEH trampoline + single-step re-protect), [[no-access-protection-x86]] (x86 on-access decrypt), [[bincon]] (hardened console), and [[voidmaw]] (`PAGE_GUARD` variant); VEH-chain dump tooling such as [[veh-dumper]].
 
 ## Links
 
