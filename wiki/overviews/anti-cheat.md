@@ -273,6 +273,7 @@ sources:
   - wiki/sources/descriptions/guided-hacking__GuidedHacking-Injector.md
   - wiki/sources/descriptions/tingwei1111__maplestory-worlds-automation.md
   - wiki/sources/descriptions/thesecretclub__CVEAC-2020.md
+  - wiki/sources/descriptions/thexin7__kernel-cve-analysis.md
   - wiki/sources/descriptions/vul-os__magnetite.md
   - wiki/sources/descriptions/t0asts__DIE-engine-web.md
   - wiki/sources/descriptions/pandora-analysis__pandora.md
@@ -378,7 +379,7 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 
 Use [[research-rigor]] when turning detector hits into enforcement: define the decision unit (player/session/device/build); label telemetry as server-observed vs client-reported; keep **observation → finding → attribution → action** separate; calibrate thresholds on representative held-out data; report prevalence, FPR/FNR, and review volume; combine causally distinct signals and measure joint error—correlated detectors can fail together. Invariant findings need rollback/reconnect/game-bug exclusions before calling exploitation. (source: wiki/sources/skills/anti-cheat.md)
 
-Structured research indexes such as [[anti-cheat-research-index]] catalog public AC architecture, kernel execution/memory integrity, VT-x/EPT instrumentation, graphics presentation-path integrity, and x86/x64 RE references (shellcode, attach, present-hook, hardware-trace detection) for defensive engineering—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md) Defensive write-ups on publicly disclosed Windows kernel CVEs from anti-cheat/EDR telemetry and mitigation angles (thexin7/kernel-cve-analysis) sit in the same Guide lane. (source: wiki/sources/README-categories.md) Foundational C **linking/loading/executable-format** guide [[underthehoodofexecutables]] supports the same defensive-engineering primer lane. (source: wiki/sources/descriptions/gmh5225__underTheHoodOfExecutables.md)
+Structured research indexes such as [[anti-cheat-research-index]] catalog public AC architecture, kernel execution/memory integrity, VT-x/EPT instrumentation, graphics presentation-path integrity, and x86/x64 RE references (shellcode, attach, present-hook, hardware-trace detection) for defensive engineering—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md) Defensive write-ups on publicly disclosed Windows kernel CVEs from anti-cheat/EDR telemetry and mitigation angles such as [[kernel-cve-analysis]] (thexin7; IOCTL/load/token/crash signals, Sigma sketches, hardening checklists) sit in the same Guide lane. (source: wiki/sources/descriptions/thexin7__kernel-cve-analysis.md) Foundational C **linking/loading/executable-format** guide [[underthehoodofexecutables]] supports the same defensive-engineering primer lane. (source: wiki/sources/descriptions/gmh5225__underTheHoodOfExecutables.md)
 
 ## Major systems
 
