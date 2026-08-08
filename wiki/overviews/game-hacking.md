@@ -530,6 +530,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__hh-lol-prophet.md
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
+  - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
   - wiki/sources/descriptions/gmh5225__frank.md
   - wiki/sources/descriptions/gmh5225__t7-linker.md
   - wiki/sources/descriptions/gmh5225__star_rail.md
@@ -736,6 +737,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)
 - Fortnite camera-cache POV samples such as [[fortnite-camera-cache-pov]] (C++; CameraCache / view POV) sit in the same cheat / game:fortnite Unreal camera-math lane. (source: wiki/sources/descriptions/percpopper__Fortnite-CameraCachePOV.md)
 - Fortnite virtual-table / view offset dumps such as [[fortnite-virtual-offsets]] (text; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; gmh5225; cheat / game:fortnite `[Virtual Table Offsets]`) sit in the same cheat / game:fortnite Unreal vtable-dispatch lane beside camera and name-pool samples. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
+- Fortnite IDA-style byte-pattern signature sets such as [[fortnite-sigs]] (gmh5225; `GObjects`, `GNames`, `ProcessEvent`, player-controller helpers; per-build refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal address-discovery lane beside vtable dumps and offset fetchers. (source: wiki/sources/descriptions/gmh5225__fortnite-sigs.md)
 - Rust Fortnite frameworks such as [[reborn]] (web server + SQLite + Discord bot; modular crates for server/bot/client) illustrate web-controlled cheat architectures in the same game:fortnite lane. (source: wiki/sources/descriptions/realTristan__Reborn.md)
 - Step-by-step Fortnite mechanics tutorials such as [[fortnite]] (loqix; video series + companion code; Game Develop / source) sit in the cheat / game:fortnite guide lane for game developers, reverse engineers, and tooling builders. (source: wiki/sources/descriptions/loqix__Fortnite.md)
 - UE4 SDK View explorers such as [[unrealengine4-swissknife]] (UObjects under `GEngine` World Actors) and [[unrealsharp]] sit in the Cheat / Game Engine Explorer:Unreal lane. (source: wiki/sources/descriptions/spudgy__UnrealEngine4-SwissKnife.md) (source: wiki/sources/descriptions/shalzuth__UnrealSharp.md) UE4 FOV/freecam hook+overlay samples such as [[ue4-freecam]] (C/C++; FOV Changer) sit in the same Unreal explorer / camera-hook lane. (source: wiki/sources/descriptions/percpopper__UE4-Freecam.md) ShooterGame Demo offensive research samples such as [[shootergame-hack]] (C/C++; rendering / debugging; gmh5225) sit in that same Unreal demo / explorer lane. (source: wiki/sources/descriptions/gmh5225__shootergame-Hack.md)

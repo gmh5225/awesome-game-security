@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/fortnite-sigs`: entity [[fortnite-sigs]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]].
+
 - **2026-08-08** — ingest `description:gmh5225/fortnite-triadz`: entity [[fortnite-triadz]]; cited on [[overviews/game-hacking]] and [[easy-anti-cheat]].
 
 - **2026-08-08** — ingest `description:gmh5225/fortnite-virtual-offsets`: entity [[fortnite-virtual-offsets]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]].

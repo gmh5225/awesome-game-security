@@ -444,6 +444,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite-CameraCachePOV](entities/fortnite-camera-cache-pov.md) — Fortnite camera-cache POV sample (C++; cheat / game:fortnite)
 - [Fortnite-FNameEntry](entities/fortnite-fnameentry.md) — Fortnite FName/FNameEntry sample (C++; cheat / game:fortnite)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
+- [fortnite-sigs](entities/fortnite-sigs.md) — Fortnite IDA-style byte-pattern signatures (GObjects/GNames/ProcessEvent; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-triadz](entities/fortnite-triadz.md) — Triadz internal Fortnite cheat (UE4 hooking; ESP/aimbot/exploit; gmh5225; EAC-protected internal architecture reference)
 - [fortnite-virtual-offsets](entities/fortnite-virtual-offsets.md) — Fortnite vtable/view offset dump (text; gmh5225; cheat / game:fortnite [Virtual Table Offsets])
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)

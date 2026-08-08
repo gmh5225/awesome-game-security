@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md
   - wiki/sources/descriptions/gmh5225__ue4_cheat_engine.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
+  - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
 updated: 2026-08-08
 confidence: high
 ---
@@ -45,10 +46,10 @@ Common fields include vtable, flags, internal index, class pointer, name, and ou
 3. Output C++ headers with UObject hierarchy (`UObject`, `FName`, `UClass`, `UFunction`, `UProperty`)
 4. Alternatives: external C++ dumpers such as [[unrealdumper-4-25]] (pattern-scan `GObjects`/`GNames`; no inject), modular Frida dumps such as [[ts-ue4dumper]], live explorers such as [[unrealengine4-swissknife]] (source: wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md) UE4-aware Cheat Engine frameworks such as [[ue4-cheat-engine]] (Android; memory scan, `GObject` enumeration, `UProperty` traversal, SDK generation) sit in the same interactive explorer lane. (source: wiki/sources/descriptions/gmh5225__ue4_cheat_engine.md)
 
-Pattern scanners such as [[patternsleuth]] often precede dumpers for address discovery on protected builds.
+Pattern scanners such as [[patternsleuth]] often precede dumpers for address discovery on protected builds. Per-title IDA-style signature collections such as [[fortnite-sigs]] (Fortnite; `GObjects`, `GNames`, `ProcessEvent`, player-controller entry points; gmh5225; build-specific refresh) document byte patterns for locating globals and dispatch helpers when full SDK dumpers are impractical. (source: wiki/sources/descriptions/gmh5225__fortnite-sigs.md)
 
 Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK workflows for developers building engine literacy before title-specific RE. (source: wiki/sources/descriptions/mikeroyal__Unreal-Engine-Guide.md)
 
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[ue4-cheat-engine]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[ue4-cheat-engine]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
