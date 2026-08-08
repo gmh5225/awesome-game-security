@@ -449,6 +449,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GamesoftACS](entities/gamesoftacs.md) — Knight Online Gamesoft server-side AC (speed/teleport/damage/inventory + client integrity)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
+- [ghidra](entities/ghidra.md) — Full NSA Ghidra RE framework source (Java decompiler, debugger integrations; gmh5225 mirror/fork)
 - [ghidra-bridge](entities/ghidra-bridge.md) — Python 3 bridge to Ghidra scripting (CPython outside Jython; external automation / gpt-wpre)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [GhidrAssist](entities/ghidrassist.md) — Ghidra LLM extension (OpenAI v1-compatible APIs; local/cloud; cheat / Ghidra Plugins)
