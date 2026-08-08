@@ -404,6 +404,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
 - [frida-android-hook](entities/frida-android-hook.md) — Frida class/function trace + return-value modify (cheat / Frida)
+- [frida-boot](entities/frida-boot.md) — Beginner Frida binary instrumentation workshop (YouTube stream; gmh5225; cheat / Frida)
 - [frida-ceserver](entities/frida-ceserver.md) — Frida Cheat Engine ceserver (mobile/desktop remote CE scan/write; non-rooted Android attach; gmh5225)
 - [frida-detection](entities/frida-detection.md) — Java/C++ Frida detection (hooking; Anti Cheat → Detection:Frida)
 - [frida-find-jni-native-methods](entities/frida-find-jni-native-methods.md) — Frida runtime JNI native-method discovery (JavaScript hooking + memory analysis; cheat / Frida)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/frida-boot`: entity [[frida-boot]]; cited on [[frida]] and [[overviews/reverse-engineering]].
+
 - **2026-08-08** — ingest `description:gmh5225/frida-ceserver`: entity [[frida-ceserver]]; cited on [[frida]] and [[overviews/mobile-security]].
 
 - **2026-08-08** — ingest `description:gmh5225/frida-il2cpp-datacollector`: entity [[frida-il2cpp-datacollector]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
