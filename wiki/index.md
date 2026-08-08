@@ -463,6 +463,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [gdrv-loader](entities/gdrv-loader.md) — Gigabyte `gdrv64.sys` unsigned driver mapper (BYOVD; DSE bypass; kernel research)
+- [gdriver-lib](entities/gdriver-lib.md) — C++ library wrapping Gigabyte `gdrv64.sys` (physmem R/W, physical mapping, kernel ops via IOCTLs; BYOVD access primitive)
 - [gdrv-loader-v2](entities/gdrv-loader-v2.md) — Gigabyte `gdrv.sys` loader v2 (C/C++; cheat / vulnerable-driver driver development)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
