@@ -4194,6 +4194,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Lazenca/Lazenca-S [Android Platform]
 - https://github.com/MrDiamond64/Scythe-AntiCheat [Minecraft]
 - https://github.com/GrimAnticheat/Grim [Minecraft]
+- https://github.com/freezato/LocalAnticheat-1.8.9 [Client-side Forge 1.8.9 mod that passively flags local/remote cheat signals from observed packet flow in local chat without server reports]
 - https://github.com/NoCheatPlus/NoCheatPlus [Open-source anti-cheat plugin for Minecraft (Bukkit/Spigot)]
 - https://github.com/Hexze/anticheat [Starfish Minecraft-style cheater detector with NoSlow/scaffold/combat heuristics]
 - https://github.com/PalassCQ/GuardAC [AI-assisted open-source Minecraft anti-cheat plugin for Spigot/Paper/Folia]
