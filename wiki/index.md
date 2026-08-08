@@ -538,6 +538,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida2llvm](entities/ida2llvm.md) — dynamic IDA→LLVM IR binary lifting (cursor-sync liftability viewer; cheat / IDA Plugins)
 - [ida-android-breakpoint](entities/ida-android-breakpoint.md) — IDA plugin: Android native `.so` breakpoint setup (Python; cheat / IDA Plugins)
 - [ida-bochs-windows](entities/ida-bochs-windows.md) — IDA Pro + Bochs debugger backend on Windows (software CPU emulation; full-system + kernel-mode stepping; cheat / guide)
+- [ida_bitfields](entities/ida-bitfields.md) — IDA plugin: bitfield structure visualization (register/structure bit flags; driver IOCTL / flag-heavy RE; Windows Kernel Enhance)
 - [ida-bridge](entities/ida-bridge.md) — agent bridge for IDA Pro 9+ (CLI IDAPython/SQL; UI + headless idalib; macOS; Game Develop / MCP + IDA Plugins)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)
