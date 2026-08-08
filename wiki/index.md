@@ -543,6 +543,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDArling](entities/idarling.md) — collaborative IDA Pro / Hex-Rays plugin (real-time multi-user IDB sync; cheat / IDA Plugins)
 - [ida-efiutils](entities/ida-efiutils.md) — IDA UEFI firmware annotator (GUIDs / Boot·Runtime Services / PEI·DXE; Python)
 - [ida-enums-helper](entities/ida-enums-helper.md) — IDA plugin: Hex-Rays enum rename/add hotkeys (N/A/Shift-A; tinfo_t chooser; cheat / IDA Plugins)
+- [ida-export-functions](entities/ida-export-functions.md) — IDA Pro plugin: export function list to Markdown at a specified path (documentation/reporting; cheat / IDA Plugins)
 - [ida_functioncolor](entities/ida-functioncolor.md) — IDA plugin: colorize function defs in pseudocode (Python; cheat / IDA Plugins)
 - [IDAFuncOutline](entities/ida-func-outline.md) — IDA plugin: function outline / call hierarchy (iOS ARM64 decomp; cheat / IDA Plugins)
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
