@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/mikeroyal__Unreal-Engine-Guide.md
   - wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md
   - wiki/sources/descriptions/gmh5225__ue4_cheat_engine.md
-updated: 2026-08-07
+  - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
+updated: 2026-08-08
 confidence: high
 ---
 
@@ -35,7 +36,7 @@ Reflected property offsets come from version-specific class metadata, not fixed 
 
 ## UObject memory layout (typical)
 
-Common fields include vtable, flags, internal index, class pointer, name, and outer pointers. **Order, packing, and presence are build-specific.** Encrypted or pooled name tables (e.g. Valorant, Fortnite) need per-title decrypt paths—see [[valorant-fnamepool]], [[fortnite-fnameentry]].
+Common fields include vtable, flags, internal index, class pointer, name, and outer pointers. **Order, packing, and presence are build-specific.** Encrypted or pooled name tables (e.g. Valorant, Fortnite) need per-title decrypt paths—see [[valorant-fnamepool]], [[fortnite-fnameentry]]. Title-specific vtable/index offset dumps such as [[fortnite-virtual-offsets]] (Fortnite; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; text-only) document per-build virtual dispatch slots for hook and call-site RE beside full SDK dumpers. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
 
 ## SDK generation workflow
 
@@ -50,4 +51,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[ue4-cheat-engine]] · [[unreal-engine-guide]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[ue4-cheat-engine]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

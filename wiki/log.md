@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/fortnite-virtual-offsets`: entity [[fortnite-virtual-offsets]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]].
+
 - **2026-08-08** — ingest `description:thexin7/kernel-cve-analysis`: entity [[kernel-cve-analysis]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-08** — ingest `readme:categories`: bumped Anti Cheat ~654 (was ~653; Cheat ~2662 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
