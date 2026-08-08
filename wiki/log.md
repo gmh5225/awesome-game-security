@@ -2943,3 +2943,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-08** — ingest `description:gmh5225/manipulating_token`: entity [[manipulating-token]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-08** — ingest `description:gmh5225/magiskboot-linux`: entity [[magiskboot-linux]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[magiskboot]].
+
+- **2026-08-08** — ingest `description:gmh5225/js-debugger-bypass-script`: entity [[js-debugger-bypass-script]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[javascript-obfuscator]].
