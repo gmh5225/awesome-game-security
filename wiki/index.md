@@ -516,6 +516,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
 - [hook-updater](entities/hook-updater.md) — Python auto-update Frida hook scripts (cheat / Frida)
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
+- [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
 - [hypervisor](entities/hypervisor.md) — experimental Intel VT-x Type-2 HV (EPT page hooks, violation watchpoints, per-process cleanup; integrity-check bypass research)
