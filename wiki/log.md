@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/frinet`: entity [[frinet]]; cited on [[frida]] and [[overviews/reverse-engineering]].
+
 - **2026-08-08** — ingest `description:gmh5225/gd-internal`: entity [[gd-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-08** — ingest `description:gmh5225/gdriver-lib`: entity [[gdriver-lib]]; cited on [[byovd]] and [[overviews/windows-kernel]].
