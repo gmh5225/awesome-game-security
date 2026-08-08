@@ -18,4 +18,4 @@ Port of upstream [[detours]] that depends **only on `NTDLL.DLL`**, without modif
 
 ## Related
 
-[[detours]] · [[injdrv]] · [[skiphook]] · [[scfw]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[detours]] · [[ntminhook]] · [[injdrv]] · [[skiphook]] · [[scfw]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
