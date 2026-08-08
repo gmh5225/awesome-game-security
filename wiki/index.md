@@ -568,6 +568,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-missinglink](entities/ida-missinglink.md) — IDA plugin: fill missing indirect CALL/JMP targets (C++ OOP RE; cheat / IDA Plugins)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
 - [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
+- [idasdk-collection](entities/idasdk-collection.md) — archived IDA Pro SDK releases (headers/libs/examples; multi-version plugin dev; cheat / IDA SDK)
 - [ida-plugin-pcodegpt](entities/ida-plugin-pcodegpt.md) — ChatGPT IDA PCode assistant (Chinese UI; cheat / IDA Plugins)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
