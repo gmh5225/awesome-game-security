@@ -843,6 +843,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
 - [OsirisAndExtra](entities/osiris-and-extra.md) — Internal CS:GO: driver / OpenGL / rendering (C/C++; cheat / game:csgo)
+- [osu-aac](entities/osu-aac.md) — osu! anti-cheat analysis/bypass (auto-play bot / input simulation / time manipulation / memory modification; Anti Anti Cheat; gmh5225)
 - [osu!](entities/osu.md) — open-source C# rhythm game (osu!framework; Game Develop / source)
 - [osu!framework](entities/osu-framework.md) — C# 2D game framework (drawable / OpenGL / input·audio·UI; Game Engine)
 - [osx-cpu-temp](entities/osx-cpu-temp.md) — macOS SMC CPU temperature CLI (IOKit AppleSMC; °C/°F; Detection:HWID)
