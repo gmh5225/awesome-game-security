@@ -12,7 +12,7 @@ confidence: medium
 
 Community-maintained catalog of IDA Pro plugins for discovery and comparison—not a single installable plugin pack. Aimed at game-security researchers and reverse engineers in the cheat / IDA Plugins lane studying offensive static RE workflows. Contributors are encouraged to categorize entries by IDA version where possible. (source: wiki/sources/descriptions/gmh5225__idaplugins-list.md)
 
-Complements curated bundles such as [[idaplugins]] (essential deobf / bin-diff / crypto pack), script collections such as [[idawilli]], plugin-development references such as [[idasdk-collection]], and focused single-purpose plugins indexed across this wiki.
+Complements categorized plugin indexes such as [[list-of-ida-plugins]] (language / last-updated / category metadata), curated bundles such as [[idaplugins]] (essential deobf / bin-diff / crypto pack), script collections such as [[idawilli]], plugin-development references such as [[idasdk-collection]], and focused single-purpose plugins indexed across this wiki.
 
 ## Links
 

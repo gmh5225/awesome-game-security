@@ -537,6 +537,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ida-sdk.md
   - wiki/sources/descriptions/gmh5225__idawilli.md
   - wiki/sources/descriptions/gmh5225__idaplugins-list.md
+  - wiki/sources/descriptions/gmh5225__ida-plugins.md
   - wiki/sources/descriptions/gmh5225__idacode.md
   - wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md
   - wiki/sources/descriptions/gmh5225__ida_names.md
@@ -841,6 +842,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Multi-version IDA Pro SDK archive via [[idasdk-collection]] (headers, libs, examples; backward-compatible plugin dev across IDA releases; cheat / IDA SDK) sits in the same Cheat IDA Plugins / plugin-development lane. (source: wiki/sources/descriptions/gmh5225__idasdk-collection.md)
 - Mirrored IDA Pro SDK files via [[ida-sdk]] (C++ headers, libs, documentation for plugins and processor modules across IDA versions; cheat / IDA SDK) sits alongside [[idasdk-collection]] in the same plugin-development lane. (source: wiki/sources/descriptions/gmh5225__ida-sdk.md)
 - Community-maintained IDA Pro plugin catalog via [[idaplugins-list]] (version-aware plugin discovery; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idaplugins-list.md)
+- Categorized IDA Pro plugin list via [[list-of-ida-plugins]] (implementation language, last-updated dates, category grouping; cheat / IDA Plugins) sits in the same discovery lane. (source: wiki/sources/descriptions/gmh5225__ida-plugins.md)
 - Function-level binary diffing via [[turbodiff]] (HelpSystems IDA plugin; compare two binaries' functions; cheat / IDA Plugins / diff) sits in the same static RE / patch-tracking lane. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
 - x86 ROP gadget finder + ROP chainer via [[agafi]] (HelpSystems Advanced Gadget Finder; programs/modules/live processes; cheat / ROP Finder / ROP Generation) sits in the same exploit-chain RE lane beside [[ropgadget-rs]]. (source: wiki/sources/descriptions/helpsystems__Agafi.md)
 - Pseudocode function-definition colorizing via [[ida-functioncolor]] (Python IDA plugin; Hex-Rays view) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sneakyevil__ida_functioncolor.md)
