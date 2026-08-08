@@ -152,6 +152,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
 - [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
+- [Asdf Overlay](entities/asdf-overlay.md) — Rust cross-API overlay library (D3D9/11/12, OpenGL, Vulkan; Detours; named-pipe IPC; Rust/Node.js clients)
 - [AutoAttach](entities/auto-attach.md) — x64dbg plugin: auto-attach to named process with optional delay (`AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; Cheat x64dbg Plugins)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
 - [Auto-generate Frida Bypass Scripts](entities/auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios.md) — static-analysis Frida script generator for Android/iOS SSL pinning and root/jailbreak bypass
