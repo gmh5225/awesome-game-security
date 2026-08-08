@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `readme:categories`: bumped Anti Cheat ~654 (was ~653; Cheat ~2662 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-08** — ingest `description:gmh5225/frank`: entity [[frank]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-08** — ingest `description:gmh5225/freedom`: entity [[freedom]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]].
