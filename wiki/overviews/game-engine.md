@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__vscript_lua51.md
   - wiki/sources/descriptions/gmh5225__zig-mcp-server.md
   - wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md
+  - wiki/sources/descriptions/gmh5225__hex2dec-mcp.md
   - wiki/sources/descriptions/gmh5225__mcpup.md
   - wiki/sources/descriptions/gmh5225__lc0.md
   - wiki/sources/descriptions/gmh5225__unity-vrchat-template.md
@@ -324,6 +325,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Roblox MCP** — [[vibe-blocks-mcp]] exposes Roblox Studio actions as MCP tools over SSE (source: wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md)
 - **Zig MCP Server** — [[zig-mcp-server]] high-performance, memory-efficient MCP protocol implementation in Zig for game developers, reverse engineers, and tooling builders (source: wiki/sources/descriptions/gmh5225__zig-mcp-server.md)
 - **MCPup** — [[mcpup]] discover/install/configure/run MCP server infrastructure for Unity AI-assisted dev workflows (source: wiki/sources/descriptions/gmh5225__mcpup.md)
+- **Hex2Dec MCP** — [[hex2dec-mcp]] hex↔decimal number conversion for AI agents (JavaScript/TypeScript; gmh5225) (source: wiki/sources/descriptions/gmh5225__hex2dec-mcp.md)
 - **Interactive Feedback macOS MCP** — [[interactive-feedback-macos-mcp]] native AppleScript dialog + image HITL prompts; macOS fork of [[interactive-feedback-mcp]] (source: wiki/sources/descriptions/gmh5225__interactive-feedback-macos-mcp.md)
 
 Also: [[unicli]], [[ai-command]] (ChatGPT in-editor; API key in `UserSettings/AICommandSettings.asset` — handle as a secret) (source: wiki/sources/descriptions/keijiro__AICommand.md), [[deepwiki-mcp]], [[interactive-feedback-mcp]]. MCP safety auditing such as [[mcp-safety-scanner]] (agent-driven config audit + remediation; example MCP configs in-repo) sits in the Game Develop → MCP server security lane beside these bridges. (source: wiki/sources/descriptions/johnhalloran321__mcpSafetyScanner.md) Agentic web-game coding stacks such as [[opengame]] (qwen-code CLI; Game Skill + GameCoder-27B + OpenGame-Bench; agent-driven QA / protocol seed evolution) extend the Game Develop → AI Agents lane beyond editor MCP bridges. (source: wiki/sources/skills/game-engine.md) (source: wiki/sources/descriptions/leigest519__OpenGame.md) Multi-engine autonomous authoring such as [[godogen]] (Godot/Bevy/Babylon.js; feature planning, asset generation, screenshot-guided self-repair with Claude Code and Codex) extends that lane along the engine axis. (source: wiki/sources/descriptions/htdt__godogen.md)
