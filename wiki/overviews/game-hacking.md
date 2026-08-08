@@ -357,6 +357,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__gta5view.md
   - wiki/sources/descriptions/gmh5225__gta5cheat_qt.md
   - wiki/sources/descriptions/gmh5225__gta5cheat.md
+  - wiki/sources/descriptions/gmh5225__gd-internal.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
   - wiki/sources/descriptions/veryboreddd__Return-address-spoofer.md
   - wiki/sources/descriptions/susMdT__LoudSunRun.md
@@ -669,7 +670,7 @@ Screen-capture → object detection → coordinate transform → mouse delta →
 
 ## Input simulation
 
-Software: `SendInput`, `mouse_event`, RawInput hooks, MouClass filter drivers ([[kernel-mouse]]). Kernel keyboard injection PoCs such as [[karlann]] (`Kbd.c` simulation + WSK network from ring 0; cheat / Keyboard) sit in the same ring-0 input lane. (source: wiki/sources/descriptions/hkx3upper__Karlann.md) Title-specific rhythm-game anti-cheat bypass samples such as [[osu-aac]] (gmh5225; examines/circumvents osu! client AC for auto-play bots, input simulation, time manipulation, and memory modification; Anti Anti Cheat; cheat / game:osu) sit in the input-simulation / bot-detection evasion lane beside the official [[osu]] client. (source: wiki/sources/descriptions/gmh5225__osu-aac.md) External osu! samples such as [[maniac]] (gmh5225; out-of-process; cheat / game:osu [External]; start osu! before use; avoid `-debug` unless troubleshooting) sit in the same rhythm-game offensive lane. (source: wiki/sources/descriptions/gmh5225__maniac.md) Hardware/filter: KMBox Net/B Pro, Arduino/Teensy HID, Logitech G HUB/LGS internal APIs (version-dependent), interception.sys, HDMI KVM middlemen—see [[hardware-input-injection]] for detection-surface ordering. Parametric smoothing (Bézier, jitter, reaction delay) does not establish human equivalence.
+Software: `SendInput`, `mouse_event`, RawInput hooks, MouClass filter drivers ([[kernel-mouse]]). Kernel keyboard injection PoCs such as [[karlann]] (`Kbd.c` simulation + WSK network from ring 0; cheat / Keyboard) sit in the same ring-0 input lane. (source: wiki/sources/descriptions/hkx3upper__Karlann.md) Title-specific rhythm-game anti-cheat bypass samples such as [[osu-aac]] (gmh5225; examines/circumvents osu! client AC for auto-play bots, input simulation, time manipulation, and memory modification; Anti Anti Cheat; cheat / game:osu) sit in the input-simulation / bot-detection evasion lane beside the official [[osu]] client. (source: wiki/sources/descriptions/gmh5225__osu-aac.md) External osu! samples such as [[maniac]] (gmh5225; out-of-process; cheat / game:osu [External]; start osu! before use; avoid `-debug` unless troubleshooting) sit in the same rhythm-game offensive lane. (source: wiki/sources/descriptions/gmh5225__maniac.md) Geometry Dash internal samples such as [[gd-internal]] (gmh5225; in-process ImGui menu; Comfortaa font from `menu.cpp`; signatures in `hookmgr.cpp`; cheat / game:geometry dash) extend that lane with signature-driven internal hooking. (source: wiki/sources/descriptions/gmh5225__gd-internal.md) Hardware/filter: KMBox Net/B Pro, Arduino/Teensy HID, Logitech G HUB/LGS internal APIs (version-dependent), interception.sys, HDMI KVM middlemen—see [[hardware-input-injection]] for detection-surface ordering. Parametric smoothing (Bézier, jitter, reaction delay) does not establish human equivalence.
 
 ## Overlays & rendering
 
