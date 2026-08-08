@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/maplestory-v83MaplestoryCPP`: entity [[maplestory-v83-maplestory-cpp]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-08** — ingest `description:gmh5225/mcpup`: entity [[mcpup]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-08-08** — ingest `description:gmh5225/memcs`: entity [[memcs]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
