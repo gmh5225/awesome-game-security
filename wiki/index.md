@@ -480,6 +480,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
 - [genshinjumpfixer2](entities/genshinjumpfixer2.md) — Genshin Impact Decode CFG (jump-target calc + code simplify; khang06)
+- [genshin-remove-banner](entities/genshin-remove-banner.md) — C++ Genshin Impact in-game banner removal (cheat / game:genshin impact; gmh5225)
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
 - [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)
