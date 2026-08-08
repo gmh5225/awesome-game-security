@@ -251,6 +251,7 @@ sources:
   - wiki/sources/descriptions/helpsystems__turbodiff.md
   - wiki/sources/descriptions/helloobaby__wow-IAT-fix.md
   - wiki/sources/descriptions/gmh5225__osu-aac.md
+  - wiki/sources/descriptions/gmh5225__nzPerspective.md
   - wiki/sources/descriptions/gmh5225__overwatch-iat-fixer.md
   - wiki/sources/descriptions/seladb__PcapPlusPlus.md
   - wiki/sources/descriptions/nmap__npcap.md
@@ -624,7 +625,7 @@ Software: `SendInput`, `mouse_event`, RawInput hooks, MouClass filter drivers ([
 
 ## Overlays & rendering
 
-Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL `wglSwapBuffers`; alternatives include DWM, transparent external windows, Steam/NVIDIA/Discord overlay hijacks ([[steam-overlay-x64]], [[mwclap]], [[discord-overlay-hook]]). UI substrate: [[imgui]] and extensions ([[imgui-club]]).
+Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL `wglSwapBuffers`; alternatives include DWM, transparent external windows, Steam/NVIDIA/Discord overlay hijacks ([[steam-overlay-x64]], [[mwclap]], [[discord-overlay-hook]]). D3D9 hook samples such as [[nz-perspective]] (C/C++; hooking; cheat / game:tgame; gmh5225) sit in the legacy DirectX Present/EndScene lane. (source: wiki/sources/descriptions/gmh5225__nzPerspective.md) UI substrate: [[imgui]] and extensions ([[imgui-club]]).
 
 ## Stack spoofing & driver I/O
 
