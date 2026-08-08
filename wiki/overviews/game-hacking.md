@@ -515,6 +515,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-externals.md
   - wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md
   - wiki/sources/descriptions/gmh5225__valo-driver.md
+  - wiki/sources/descriptions/gmh5225__lol_patcher.md
   - wiki/sources/descriptions/gmh5225__t7-linker.md
   - wiki/sources/descriptions/gmh5225__star_rail.md
   - wiki/sources/descriptions/gmh5225__titancf.md
@@ -959,6 +960,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Apex Legends externals such as [[apexd3d-external]] (C/C++; driver development / SDK generation / DirectX hooking; cheat / game:apex legends) sit in the cheat / game:apex legends lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/hooksteroid__ApexD3D_External.md)
 - Title-specific Apex Legends full-cheat samples such as [[apex-full-cheat]] (C/C++; rendering / SDK generation / hooking; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/hadevn__apex_full_cheat.md)
 - Title-specific R6 chams samples such as [[r6-chams-public]] (Chameleon Models + visual check; educational; cheat / game:r6 [Chams]) illustrate the chams lane beside internals/externals. (source: wiki/sources/descriptions/igromanru__R6-Chams-public.md)
+- Historical League of Legends client mod/patcher samples such as [[lol-patcher]] (gmh5225; experimental; last updated Feb 2020; cheat / game:lol) sit in the LoL offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__lol_patcher.md)
 - Valorant crosshair-setting utilities such as [[valorantcc]] sit in the cheat / game:valorant lane (client config; Riot-owned assets/endpoints). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 - Valorant internal cheat bases such as [[valorant-internal-cheat]] (C/C++; Unreal Engine SDK generation + hooking; Internal tag), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the in-process offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md)
 - Valorant ImGui cheat-menu frameworks such as [[valorant-gui-imgui-remake]] (C++; styled tabs/toggles/sliders for ESP/aimbot/visual mods; UE4 interaction patterns; README `[GUI]`) illustrate cheat UI architecture in the same cheat / game:valorant lane. (source: wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md)
