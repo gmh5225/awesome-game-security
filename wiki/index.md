@@ -703,6 +703,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
+- [magiskboot-linux](entities/magiskboot-linux.md) — GitHub Actions standalone Linux magiskboot (boot unpack/repack/patch; gmh5225)
 - [magiskboot_build](entities/magiskboot-build.md) — POSIX standalone magiskboot build scripts (Cheat Magisk / Boot Image)
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
 - [mal-unpack-drv](entities/mal-unpack-drv.md) — Experimental test-signed kernel driver for Windows malware sample unpacking (VM-only; Sample Unpacker; hasherezade)
