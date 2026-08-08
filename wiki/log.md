@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/gdrv-loader`: entity [[gdrv-loader]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-08** — ingest `description:gmh5225/genshin-cheat`: entity [[genshin-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-08** — ingest `description:gmh5225/genshin-remove-banner`: entity [[genshin-remove-banner]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].

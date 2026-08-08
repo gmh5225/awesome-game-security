@@ -28,6 +28,7 @@ sources:
   - wiki/sources/descriptions/kkent030315__MsIoExploit.md
   - wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md
   - wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md
+  - wiki/sources/descriptions/gmh5225__gdrv-loader.md
   - wiki/sources/descriptions/holi4m__gdrv-loader-v2.md
   - wiki/sources/descriptions/hfiref0x__KDU.md
   - wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md
@@ -107,7 +108,7 @@ Game-AC driver abuse such as [[mhyprot2]] (gmh5225; IOCTL kernel R/W + process t
 
 Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sits in the same cheat / vulnerable-driver research lane; the anycall project offers fuller client-and-driver-side physmem mapping. (source: wiki/sources/descriptions/kkent030315__MsIoExploit.md)
 
-Gigabyte **`gdrv.sys`** loader research such as [[gdrv-loader-v2]] (C/C++; driver development focused on the canonical Gigabyte vulnerable driver in the cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/holi4m__gdrv-loader-v2.md)
+Gigabyte **`gdrv64.sys`/`gdrv.sys`** loader research such as [[gdrv-loader]] (gmh5225; arbitrary R/W IOCTL → manual map unsigned PE; DSE bypass via BYOVD) and [[gdrv-loader-v2]] (C/C++; alternate `gdrv.sys` loader in the cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/gmh5225__gdrv-loader.md) (source: wiki/sources/descriptions/holi4m__gdrv-loader-v2.md)
 
 Multi-provider unsigned-driver mappers such as [[kdu]] (Kernel Driver Utility; hfiref0x; extensible vulnerable-driver providers across Intel/ASUS/MSI/Gigabyte families; automated DSE bypass, PE map, cleanup) sit in the canonical cheat / driver-mapper research lane. (source: wiki/sources/descriptions/hfiref0x__KDU.md)
 
@@ -123,5 +124,5 @@ C/C++ kernel utility research such as [[kur]] (gmh5225; **`echo_driver.sys`** vu
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kur]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kur]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

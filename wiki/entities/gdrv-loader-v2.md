@@ -20,4 +20,4 @@ C/C++ project centered on loading and working with **`gdrv.sys`** — Gigabyte�
 
 ## Related
 
-[[byovd]] · [[loldrivers]] · [[kdmapper-rs]] · [[saturn-mapper]] · [[known-driver-mappers]] · [[msft-driverblocklist]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[byovd]] · [[gdrv-loader]] · [[loldrivers]] · [[kdmapper-rs]] · [[saturn-mapper]] · [[known-driver-mappers]] · [[msft-driverblocklist]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

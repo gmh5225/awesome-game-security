@@ -462,6 +462,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GuidedHacking Injector](entities/guided-hacking-injector.md) — Qt GUI Windows DLL injector (LoadLibrary/manual map/APC/KM driver; cloaking; Injection Testing)
 - [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
+- [gdrv-loader](entities/gdrv-loader.md) — Gigabyte `gdrv64.sys` unsigned driver mapper (BYOVD; DSE bypass; kernel research)
 - [gdrv-loader-v2](entities/gdrv-loader-v2.md) — Gigabyte `gdrv.sys` loader v2 (C/C++; cheat / vulnerable-driver driver development)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
