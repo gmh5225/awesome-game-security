@@ -603,6 +603,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [intel-pcm](entities/intel-pcm.md) — Intel Performance Counter Monitor (CPU/memory/PCIe/power PMU telemetry; Docker/CXL)
 - [int_fastdiv](entities/int-fastdiv.md) — header-only C++ magic-number integer division (CPU/CUDA; ~2× vs hardware div; Mathematics)
+- [integrity-experiments](entities/integrity-experiments.md) — header-only C/C++ memory-integrity experiment corpus (gmh5225; Anti Cheat → Detection:Memory Integrity)
 - [IPAPatch](entities/ipapatch.md) — patch iOS apps without jailbreak (C/C++/ObjC; cheat / IOS jailbreak)
 - [irql](entities/irql.md) — Rust compile-time IRQL safety / pool Box·Vec (Windows KM drivers)
 
