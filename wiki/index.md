@@ -661,6 +661,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KsDumper-11](entities/ksdumper-11.md) — classic KM process dumper (C# GUI + `KsDumperDriver.sys`; KDU BYOVD; PE32/64; blocklist bypass)
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
+- [kvm-csgo-cheat](entities/kvm-csgo-cheat.md) — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (below-OS VM isolation; gmh5225)
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
