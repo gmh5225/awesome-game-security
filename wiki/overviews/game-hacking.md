@@ -93,6 +93,7 @@ sources:
   - wiki/sources/descriptions/kubo__plthook.md
   - wiki/sources/descriptions/kristofhracza__tim_apple.md
   - wiki/sources/descriptions/kweatherman__yara4ida.md
+  - wiki/sources/descriptions/gmh5225__findyara-ida.md
   - wiki/sources/descriptions/kweatherman__ida_missinglink.md
   - wiki/sources/descriptions/senko37__yarascan-ida.md
   - wiki/sources/descriptions/senator715__IDA-Fusion.md
@@ -879,6 +880,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; PlayStation static RE; cheat / IDA Plugins) sits in the same lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - In-IDA Yara rule file scanning via [[yarascan-ida]] (Python; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senko37__yarascan-ida.md)
 - Unofficial YARA integration for IDA Pro via [[yara4ida]] (default **Alt-Y**; rebind via `plugins.cfg`; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/kweatherman__yara4ida.md)
+- In-IDA YARA rule scanning with match highlighting via [[findyara-ida]] (gmh5225; run custom rules on the loaded binary; disasm navigation to hits; malware/crypto/packer signatures; cheat / Yara) sits in the Cheat Yara / signature-scan lane. (source: wiki/sources/descriptions/gmh5225__findyara-ida.md)
 - Fast IDA signature scanner & creator via [[ida-fusion]] (unique sigs vs duplicated binary / anti-RE parts) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senator715__IDA-Fusion.md)
 - Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
 - Alternate gmh5225 [[ida-sigmaker]] fork (IDA/code-style byte patterns with wildcard bytes; binary-unique sig generation from selected disassembly; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__ida-sigmaker.md)
