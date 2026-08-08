@@ -717,6 +717,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
 - [MapleEzorsia](entities/maple-ezorsia.md) — MapleStory v83 private server (Java; login/map/quest + custom resolution client; Private Server / game:maplestory)
 - [mapleLemon](entities/maple-lemon.md) — MapleStory CMS-027 private server (Java/JavaScript; modding/debugging; Private Server-CMS-027 / game:maplestory)
+- [mnwvs196](entities/mnwvs196.md) — MapleStory TMS-196 private-server research stack (C/C++; boost::asio / Poco·MySQL / WZ; WvsGame·WvsLogin·WvsCenter; Private Server-TMS-196 / game:maplestory)
 - [ms079](entities/ms079.md) — MapleStory v079 private-server study codebase (Java / MySQL / WZ bundle; Private Server-CMS-079)
 - [MappedCallback](entities/mapped-callback.md) — hide kernel callback via APCI codecave JMP (cheat / Hide Callback)
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)
