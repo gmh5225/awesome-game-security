@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/nebulite-external`: entity [[nebulite-external]]; cited on [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/neotty`: entity [[neotty]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/no-access-protection-x86`: entity [[no-access-protection-x86]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
