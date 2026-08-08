@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/immortal-rust`: entity [[immortal-rust]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-08** — ingest `readme:categories`: bumped Anti Cheat ~653 (was ~652; Cheat ~2662 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-08** — ingest `description:gmh5225/imxyviMapper`: entity [[imxyvimapper]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
