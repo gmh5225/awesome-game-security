@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/ida-find-.data-ptr`: entity [[ida-find-.data-ptr]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/ida-function-string-associate`: entity [[ida-function-string-associate]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/ida-nord-theme`: entity [[ida-nord-theme]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[long-night]].
