@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/idawilli`: entity [[idawilli]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/il2cpp-finder`: entity [[il2cpp-finder]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-08-08** — ingest `description:gmh5225/immortal-rust`: entity [[immortal-rust]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].

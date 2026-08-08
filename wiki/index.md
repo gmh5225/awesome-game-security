@@ -572,6 +572,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
 - [IdaRef](entities/idaref.md) — IDA plugin: full x86-64/ARM/MIPS/Xtensa insn docs at cursor (SQLite; cheat / IDA Plugins)
+- [idawilli](entities/idawilli.md) — Willi Ballenthin IDA Pro scripts/plugins/utils (function analysis, string decrypt, struct/xref automation; cheat / IDA Plugins)
 - [idenLib](entities/idenlib.md) — IDA plugin: static library function ID (VC++/STL sigs; FLIRT-adjacent; Cheat IDA Plugins)
 - [idenLibX](entities/idenlibx.md) — x64dbg plugin: static library function ID (signatures → live names; Cheat x64dbg Plugins)
 
