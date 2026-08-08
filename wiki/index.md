@@ -740,6 +740,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mhynot2](entities/mhynot2.md) — Genshin Impact AC bypass research (experimental `mhyprot2` circumvention; khang06)
 - [mhydeath](entities/mhydeath.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; arbitrary kernel R/W + process kill; gmh5225)
 - [mhyprot2](entities/mhyprot2.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; IOCTL kernel R/W + process kill; gmh5225)
+- [mhxy](entities/mhxy.md) — MHXY (Fantasy Westward Journey) Python driver/modding scaffold (cheat / game:mhxy; gmh5225)
 - [mhxy-kernel](entities/mhxy-kernel.md) — MHXY (Fantasy Westward Journey) kernel modding scaffold (C/C++; cheat / game:mhxy; gmh5225)
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
