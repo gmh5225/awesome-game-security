@@ -548,6 +548,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-export-functions](entities/ida-export-functions.md) — IDA Pro plugin: export function list to Markdown at a specified path (documentation/reporting; cheat / IDA Plugins)
 - [ida_functioncolor](entities/ida-functioncolor.md) — IDA plugin: colorize function defs in pseudocode (Python; cheat / IDA Plugins)
 - [IDAFuncOutline](entities/ida-func-outline.md) — IDA plugin: function outline / call hierarchy (iOS ARM64 decomp; cheat / IDA Plugins)
+- [ida-function-string-associate](entities/ida-function-string-associate.md) — IDA Pro 9.X plugin: associate string refs with functions; auto-generate function comments from literals (cheat / IDA Plugins)
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
 - [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
