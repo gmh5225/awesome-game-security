@@ -604,6 +604,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [intel-pcm](entities/intel-pcm.md) — Intel Performance Counter Monitor (CPU/memory/PCIe/power PMU telemetry; Docker/CXL)
 - [int_fastdiv](entities/int-fastdiv.md) — header-only C++ magic-number integer division (CPU/CUDA; ~2× vs hardware div; Mathematics)
 - [integrity-experiments](entities/integrity-experiments.md) — header-only C/C++ memory-integrity experiment corpus (gmh5225; Anti Cheat → Detection:Memory Integrity)
+- [inline-syscall](entities/inline-syscall.md) — C++ direct syscall wrapper x86/x64 (gmh5225; AC Compile Time)
 - [IPAPatch](entities/ipapatch.md) — patch iOS apps without jailbreak (C/C++/ObjC; cheat / IOS jailbreak)
 - [irql](entities/irql.md) — Rust compile-time IRQL safety / pool Box·Vec (Windows KM drivers)
 

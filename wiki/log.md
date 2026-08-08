@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/inline-syscall`: entity [[inline-syscall]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-08** — ingest `description:gmh5225/integrity_experiments`: entity [[integrity-experiments]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-08** — ingest `description:gmh5225/interactive-feedback-macos-mcp`: entity [[interactive-feedback-macos-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked from [[interactive-feedback-mcp]].
