@@ -12,7 +12,7 @@ confidence: medium
 
 **GTA V snapmatic photo and save-game viewer/editor** (gmh5225; Viewer/Editor). Parses Grand Theft Auto V proprietary file formats for in-game **snapmatic photos**, **save files**, and **profile data**, letting players and modders view, export, and manage user-generated content outside the game client. (source: wiki/sources/descriptions/gmh5225__gta5view.md)
 
-Distinct from in-process cheat frameworks such as [[phake]] and [[gta5cheat-qt]], and source-tree build guides such as [[gtav-sourcecode-build-guide]]; this is an **offline file-format utility** lane for studying or editing GTA V save/photo artifacts rather than hooking the live RAGE client.
+Distinct from in-process cheat frameworks such as [[phake]], [[gta5cheat]], and [[gta5cheat-qt]], and source-tree build guides such as [[gtav-sourcecode-build-guide]]; this is an **offline file-format utility** lane for studying or editing GTA V save/photo artifacts rather than hooking the live RAGE client.
 
 ## Links
 
@@ -20,4 +20,4 @@ Distinct from in-process cheat frameworks such as [[phake]] and [[gta5cheat-qt]]
 
 ## Related
 
-[[phake]] · [[gta5cheat-qt]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]
+[[phake]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/gta5cheat`: entity [[gta5cheat]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5cheat-qt]] and [[gta5view]].
+
 - **2026-08-08** — ingest `description:gmh5225/gta5cheat_qt`: entity [[gta5cheat-qt]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5view]].
 
 - **2026-08-08** — ingest `description:gmh5225/gta5view`: entity [[gta5view]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
