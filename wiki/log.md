@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/kernel_payload_comms`: entity [[kernel-payload-comms]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/kli-ex`: entity [[kli-ex]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked from [[kli]].
 
 - **2026-08-08** — ingest `description:gmh5225/kur`: entity [[kur]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
