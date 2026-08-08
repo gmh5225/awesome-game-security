@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
   - wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md
   - wiki/sources/descriptions/libtersafe__KPM-MemReader.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/gmh5225__freedom.md
+updated: 2026-08-08
 confidence: medium
 ---
 
@@ -37,6 +38,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) |
 | Debugger | `TracerPid`, JDWP, ptrace |
 | Hooks | PLT/GOT integrity, `/proc/self/maps` anomalies |
+| IAP / billing | Client-side Play Billing API trust; local purchase-confirmation spoofing such as [[freedom]] (billing-service hook; server receipt validation is the primary defense) (source: wiki/sources/descriptions/gmh5225__freedom.md) |
 | Camera / liveness | Camera1 preview/callback integrity, face/liveness SDK probes; rooted virtual-camera injection such as [[android-virtualcam-manager]] (ArtHook + NV21 frame replace; no LSPosed) (source: wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md) |
 
 Multi-check collections: [[detection]], [[android-native-root-detector]], archived [[magiskdetector]].
@@ -53,4 +55,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

@@ -403,6 +403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
+- [Freedom](entities/freedom.md) — Android Google Play billing IAP bypass (billing-service hook; fake purchase confirmations; gmh5225)
 - [frida-android-hook](entities/frida-android-hook.md) — Frida class/function trace + return-value modify (cheat / Frida)
 - [frida-boot](entities/frida-boot.md) — Beginner Frida binary instrumentation workshop (YouTube stream; gmh5225; cheat / Frida)
 - [frida-ceserver](entities/frida-ceserver.md) — Frida Cheat Engine ceserver (mobile/desktop remote CE scan/write; non-rooted Android attach; gmh5225)

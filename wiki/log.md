@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/freedom`: entity [[freedom]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]].
+
 - **2026-08-08** — ingest `description:gmh5225/frida-boot`: entity [[frida-boot]]; cited on [[frida]] and [[overviews/reverse-engineering]].
 
 - **2026-08-08** — ingest `description:gmh5225/frida-ceserver`: entity [[frida-ceserver]]; cited on [[frida]] and [[overviews/mobile-security]].
