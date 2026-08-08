@@ -540,6 +540,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-bochs-windows](entities/ida-bochs-windows.md) — IDA Pro + Bochs debugger backend on Windows (software CPU emulation; full-system + kernel-mode stepping; cheat / guide)
 - [ida_bitfields](entities/ida-bitfields.md) — IDA plugin: bitfield structure visualization (register/structure bit flags; driver IOCTL / flag-heavy RE; Windows Kernel Enhance)
 - [ida-bridge](entities/ida-bridge.md) — agent bridge for IDA Pro 9+ (CLI IDAPython/SQL; UI + headless idalib; macOS; Game Develop / MCP + IDA Plugins)
+- [ida-dark-plus](entities/ida-dark-plus.md) — IDA Pro Dark+ theme (modern dark palette; disassembly/hex/structures/all windows; cheat / IDA themes)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)
 - [IDArling](entities/idarling.md) — collaborative IDA Pro / Hex-Rays plugin (real-time multi-user IDB sync; cheat / IDA Plugins)

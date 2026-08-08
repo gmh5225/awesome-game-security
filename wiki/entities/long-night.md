@@ -20,4 +20,4 @@ Visual comfort tooling—not an analysis plugin or decompiler extension.
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[ida-nord-theme]] · [[ida-functioncolor]] · [[ida-screenshot]] · [[idaplugins]]
+[[overviews/reverse-engineering]] · [[ida-nord-theme]] · [[ida-dark-plus]] · [[ida-functioncolor]] · [[ida-screenshot]] · [[idaplugins]]
