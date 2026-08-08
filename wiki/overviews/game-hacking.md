@@ -534,6 +534,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
   - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
   - wiki/sources/descriptions/gmh5225__fortnite-offsets.md
+  - wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md
   - wiki/sources/descriptions/gmh5225__frank.md
   - wiki/sources/descriptions/gmh5225__t7-linker.md
   - wiki/sources/descriptions/gmh5225__star_rail.md
@@ -741,6 +742,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fortnite exploit and EAC bypass collections such as [[fortnite-exploits]] (gmh5225; client vulnerabilities; UE4 engine features; cheat injection / memory-access bypass; `[Exploits]`) document Fortnite-specific exploit chains beside runnable internal and external samples. (source: wiki/sources/descriptions/gmh5225__fortnite-exploits.md)
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)
 - Fortnite camera-cache POV samples such as [[fortnite-camera-cache-pov]] (C++; CameraCache / view POV) sit in the same cheat / game:fortnite Unreal camera-math lane. (source: wiki/sources/descriptions/percpopper__Fortnite-CameraCachePOV.md)
+- Fortnite world-to-screen offset collections such as [[fortnite-w2s-offset-fortnite]] (gmh5225; C/C++; view/projection and camera offsets for ESP math; cheat / game:fortnite `[Offset]`) sit in that same cheat / game:fortnite Unreal camera-math / [[world-to-screen]] lane beside camera-cache POV samples. (source: wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md)
 - Fortnite virtual-table / view offset dumps such as [[fortnite-virtual-offsets]] (text; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; gmh5225; cheat / game:fortnite `[Virtual Table Offsets]`) sit in the same cheat / game:fortnite Unreal vtable-dispatch lane beside camera and name-pool samples. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
 - Fortnite IDA-style byte-pattern signature sets such as [[fortnite-sigs]] (gmh5225; `GObjects`, `GNames`, `ProcessEvent`, player-controller helpers; per-build refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal address-discovery lane beside vtable dumps and offset fetchers. (source: wiki/sources/descriptions/gmh5225__fortnite-sigs.md)
 - Fortnite memory offset and UE4 SDK structure tables such as [[fortnite-offsets]] (gmh5225; player entities, camera, bone arrays, weapons, engine globals; per-version refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal memory-layout lane beside signature and vtable dumps. (source: wiki/sources/descriptions/gmh5225__fortnite-offsets.md)

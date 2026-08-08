@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/descriptions/microsoft__DirectXMath.md
   - wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md
-updated: 2026-08-01
+  - wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md
+updated: 2026-08-08
 confidence: high
 ---
 
@@ -25,8 +26,8 @@ Matrix layout and row/column convention vary by engine and hook point—verify a
 
 ## Engine helpers
 
-Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Educational internals with explicit W2S: [[simple-ac-internal-cheat]]. Beginner walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; ESP + aimbot from scratch) teach the same pipeline in a controlled practice environment. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md)
+Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Per-title offset collections such as [[fortnite-w2s-offset-fortnite]] (Fortnite; gmh5225; view/projection and camera offsets for external ESP; cheat / game:fortnite `[Offset]`) document version-specific memory layouts upstream of the projection math. Educational internals with explicit W2S: [[simple-ac-internal-cheat]]. Beginner walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; ESP + aimbot from scratch) teach the same pipeline in a controlled practice environment. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md) (source: wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md)
 
 ## Related
 
-[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[lab-esp-and-aimbot]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[present-hook]] · [[unreal-object-model]] · [[source-netvars]] · [[omath]] · [[directxmath]] · [[fortnite-w2s-offset-fortnite]] · [[lab-esp-and-aimbot]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
