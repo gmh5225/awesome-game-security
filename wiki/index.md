@@ -646,6 +646,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernforge](entities/kernforge.md) — Go AI workbench for Windows/AC project analysis, fuzz reasoning, driver POC scaffolding, verification (MCP skills)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
+- [kernel-callback-functions-list](entities/kernel-callback-functions-list.md) — Ring0 callback registration API reference (gmh5225; anti-cheat / documentation)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
 - [kernel-development](entities/kernel-development.md) — Greg Kroah-Hartman Linux kernel dev docs (patch workflow, drivers, LKM; guide lane)
