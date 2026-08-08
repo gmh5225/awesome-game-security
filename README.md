@@ -853,6 +853,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/g2wfw/qbdi-tracer-android [Android assembly instruction tracing tool]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/WRXinYue/STS2-KitLib [Slay the Spire 2 in-game mod dev toolkit with dev rail, cheat presets, Harmony analysis, hooks, and MCP bridge]
+- https://github.com/PlinKuuu/DanisNightmare [BepInEx Harmony mod for Muck with in-game debug/cheat command suite for player, enemy, item, and powerup manipulation]
 - https://github.com/LLeavesG/eBPFDexDumper [DexDumper based eBPF on Android Platform]
 - https://github.com/un4ckn0wl3z/dioprocess-private [Advanced Windows Internals, Evasion, Rootkit, Hypervisor, SMM & Bootkit Research Framework]
 
@@ -4239,6 +4240,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
 - https://github.com/cs2-server-plugins/cs2-calladmin [ModSharp CS2 server plugin for in-game cheater reports with admin claim/resolve workflow and optional Discord notifications]
 - https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
+- https://github.com/crazythecoder/IW4MAdmin-SebzAntiCheat [IW4X server-side suspicion telemetry, IW4MAdmin review dashboard, GSC aim/visibility checks, and Discord case workflow]
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/gmh5225/anti-cheat)
 - https://github.com/jnastarot/anti-cheat
