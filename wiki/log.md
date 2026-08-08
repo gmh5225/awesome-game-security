@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/nvidia-overlay-hijack`: entity [[nvidia-overlay-hijack]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/osu-aac`: entity [[osu-aac]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked from [[osu]].
 
 - **2026-08-08** — ingest `description:gmh5225/overwatch-iat-fixer`: entity [[overwatch-iat-fixer]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
