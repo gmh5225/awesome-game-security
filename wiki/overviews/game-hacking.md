@@ -529,6 +529,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__league-base.md
   - wiki/sources/descriptions/gmh5225__hh-lol-prophet.md
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
+  - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
   - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
   - wiki/sources/descriptions/gmh5225__fortnite-offsets.md
@@ -733,6 +734,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
 - From-scratch Fortnite internals such as [[ritz-amazing-fortnite-internal]] (simplified hook path; x64-release injector) sit beside them in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md)
+- Updated Ritz-lineage Fortnite internals such as [[fortnite-internal-updated-ritz]] (gmh5225; C++; Ritz fork; UE4 engine hooking; ESP / aimbot / exploits; refreshed offsets + EAC bypass for newer builds; [Internal]) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md)
 - Additional Fortnite internal samples such as [[fortnite-cheat-source-internal]] (C/C++; SDK generation + hooking) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md)
 - Internal Fortnite cheat **Triadz** such as [[fortnite-triadz]] (gmh5225; UE4 engine hooking; ESP / aimbot / exploitation; full in-process game-object + render access; EAC-protected UE4 internal architecture reference) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-triadz.md)
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)
