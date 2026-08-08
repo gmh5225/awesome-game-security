@@ -20,4 +20,4 @@ Companion tooling for the PS4 module loader—not a standalone loader or full PS
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-ios-helper]] · [[ida-android-breakpoint]] · [[cssfontface-exploit]] · [[ps5-linux-loader]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-ps5-elf-plugin]] · [[ida-ios-helper]] · [[ida-android-breakpoint]] · [[cssfontface-exploit]] · [[ps5-linux-loader]]
