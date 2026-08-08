@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/interactive-feedback-macos-mcp`: entity [[interactive-feedback-macos-mcp]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked from [[interactive-feedback-mcp]].
+
 - **2026-08-08** — ingest `description:gmh5225/job_communication`: entity [[job-communication]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/kernel-callback-functions-list`: entity [[kernel-callback-functions-list]]; cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]].
