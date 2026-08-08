@@ -2204,6 +2204,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/SamuelTulach/OverlayCord [Discord]
 - https://github.com/hiitiger/goverlay [DirectX hook game overlay for Electron/Qt/CEF apps injected into games]
 - https://github.com/gameplug-labs/gameplug [Multi-API (D3D9–12/Vulkan) proxy-DLL framework for ImGui overlays and game plugins on Windows]
+- https://github.com/storycraft/asdf-overlay [Rust overlay library with DirectX, OpenGL, and Vulkan hooking for in-game overlays]
 
 > Render/Draw
 - https://github.com/vmcall/dxgkrnl_hook
