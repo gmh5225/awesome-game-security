@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/meowsense`: entity [[meowsense]]; cited on [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/mhydeath`: entity [[mhydeath]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked from [[mhyprot2]].
 
 - **2026-08-08** — ingest `description:gmh5225/mhyprot2`: entity [[mhyprot2]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].

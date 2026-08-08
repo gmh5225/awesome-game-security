@@ -733,6 +733,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
 - [melonJS](entities/melonjs.md) — modern lightweight HTML5 game engine (ES6 classes; esbuild bundling; Game Engine / HTML5)
+- [meowsense](entities/meowsense.md) — free multi-game cheat research sample (Overwatch 2 focus; offensive techniques; gmh5225)
 - [Milfuscator](entities/milfuscator.md) — x32 PE mutator (full rebuild; Zydis + AsmJit; AC Obfuscation Engine)
 - [minecpp](entities/minecpp.md) — C++ Minecraft Java server backend (1.19; protocol/offensive-technique RE; gmh5225)
 - [Minecraft AntiCheatAI](entities/minecraft-anticheatai.md) — DeepGuard Paper plugin (ONNX 1D-CNN scaffold detection; BehaviorRecorder + PyTorch training)
