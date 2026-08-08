@@ -709,6 +709,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
 - [mandibule](entities/mandibule.md) — Linux ptrace ELF injector (icrt; raw syscalls; load/relocate; fake stack; Cheat / injection)
+- [maniac](entities/maniac.md) — external osu!; out-of-process offensive techniques (cheat / game:osu [External]; gmh5225)
 - [manipulating_token](entities/manipulating-token.md) — Windows access-token theft/impersonation LPE samples (SeDebugPrivilege; SYSTEM integrity; gmh5225)
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
 - [MapleStory Build Framework](entities/maplestory-build-framework.md) — MapleStory private-server client build framework (C/C++; individualized distribution + rudimentary anti-cheat; Anti Cheat / game:maplestory)
