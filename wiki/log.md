@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/long_night`: entity [[long-night]]; cited on [[overviews/reverse-engineering]].
+
 - **2026-08-08** — ingest `description:gmh5225/maniac`: entity [[maniac]]; cited on [[overviews/game-hacking]]; cross-linked from [[osu]].
 
 - **2026-08-08** — ingest `description:gmh5225/maplestory-artale-explab`: entity [[maplestory-artale-explab]]; cited on [[overviews/game-hacking]].
