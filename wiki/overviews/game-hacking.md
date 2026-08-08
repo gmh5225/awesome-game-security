@@ -332,6 +332,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__pubg_dump_offset.md
   - wiki/sources/descriptions/gmh5225__pubg-dumper.md
   - wiki/sources/descriptions/gmh5225__pubg-external-cheat.md
+  - wiki/sources/descriptions/gmh5225__pHake.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
   - wiki/sources/descriptions/veryboreddd__Return-address-spoofer.md
   - wiki/sources/descriptions/susMdT__LoudSunRun.md
@@ -579,7 +580,7 @@ sources:
   - wiki/sources/descriptions/katahiromz__RisohEditor.md
   - wiki/sources/descriptions/jmpews__Dobby.md
   - wiki/sources/descriptions/jnastarot__ice9.md
-updated: 2026-08-07
+updated: 2026-08-08
 confidence: high
 ---
 
@@ -945,7 +946,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Valorant kernel external memory-read drivers such as [[valo-driver]] (C; physical translate / CR3 / MDL mapping; avoids monitored APIs under [[vanguard]]; gmh5225) sit in the kernel-mode external cheat / game:valorant lane beside [[ntmemory]]-style CR3/phys-read research. (source: wiki/sources/descriptions/gmh5225__valo-driver.md)
 - Title-specific Thetan Arena SDKs such as [[thetan-arenasdk]] (rendering / audio / physics) illustrate the cheat / game:thetan lane. (source: wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md)
 - Title-specific The Finals internals such as [[the-finals-interior-cheat]] (C/C++; rendering / SDK generation / hooking; gmh5225) illustrate the in-process offensive research lane for cheat / game:the finals. (source: wiki/sources/descriptions/gmh5225__the-finals-interior-cheat.md)
-- ASI Loader–based remaster bridges such as [[gta4-rtx]] (GTA IV Complete Edition → RTX Remix; custom runtime / light / wetness) illustrate DirectX compatibility tooling adjacent to graphics-mod research. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md) DX3 subset reimplementations such as [[free-direct]] (C++20; DirectDraw/DirectSound/DirectPlay on SDL3 + ENet for legacy 2D titles) sit in the same DirectX Compatibility lane. (source: wiki/sources/descriptions/openeggbert__free-direct.md) Microsoft's [[d3d9on12]] (D3D9 usermode DDI mapped to D3D12 for legacy D3D9 on modern stacks) extends that lane for D3D9-era titles. (source: wiki/sources/descriptions/microsoft__D3D9On12.md)
+- ASI Loader–based remaster bridges such as [[gta4-rtx]] (GTA IV Complete Edition → RTX Remix; custom runtime / light / wetness) illustrate DirectX compatibility tooling adjacent to graphics-mod research. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md) GTA V mod-menu / cheat frameworks such as [[phake]] (C++; ScriptHookV or direct memory access; RAGE engine hooks; vehicle spawn / teleport / money / ESP / god mode; cheat / `[Mod Menu]`; gmh5225) illustrate the open-world ScriptHookV mod-menu lane beside [[gta4-rtx]] graphics-mod work. (source: wiki/sources/descriptions/gmh5225__pHake.md) DX3 subset reimplementations such as [[free-direct]] (C++20; DirectDraw/DirectSound/DirectPlay on SDL3 + ENet for legacy 2D titles) sit in the same DirectX Compatibility lane. (source: wiki/sources/descriptions/openeggbert__free-direct.md) Microsoft's [[d3d9on12]] (D3D9 usermode DDI mapped to D3D12 for legacy D3D9 on modern stacks) extends that lane for D3D9-era titles. (source: wiki/sources/descriptions/microsoft__D3D9On12.md)
 - Hidden-PVE / QEMU-KVM anti-detection (e.g. [[proxmox-ve-anti-detection]], [[qemu-anti-detection]] device-string spoof such as QEMU→ASUS keyboard, [[qemu-patched]] CPUID/SMBIOS/ACPI fingerprint masking) sits in the `Cheat > QEMU/KVM/PVE/VBOX` lane. (source: wiki/sources/descriptions/zhaodice__proxmox-ve-anti-detection.md) (source: wiki/sources/descriptions/zhaodice__qemu-anti-detection.md) (source: wiki/sources/descriptions/kila58__qemu-patched.md)
 - VMware Workstation anti-detection hardening via [[vmware-hardened-loader]] (C/C++ hypervisor-level loader; CPUID/SMBIOS/ACPI/registry/MAC spoof; Windows + Linux guests) sits in the same QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/hzqst__VmwareHardenedLoader.md)
 - PVE lab helper scripts such as [[proxmox]] (dialog-driven host/LXC/VM installers) sit in the same QEMU/KVM/PVE research-host lane. (source: wiki/sources/descriptions/tteck__Proxmox.md)

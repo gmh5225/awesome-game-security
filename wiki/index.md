@@ -898,6 +898,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PEzor](entities/pezor.md) — C++/C PE packer (hooking-oriented; Anti Cheat → Binary Packer)
 - [Phantasm x86 Virtualizer](entities/phantasm-x86-virtualizer.md) — x86 code virtualizer (static-link or manual VM-runtime embed; AC Obfuscation Engine `[VM]`)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
+- [phake](entities/phake.md) — GTA V mod menu / cheat framework (ScriptHookV or DMA; RAGE engine hooks; vehicle spawn / ESP / god mode; cheat / `[Mod Menu]`)
 - [physmem_drivers](entities/physmem-drivers.md) — vulnerable physmem driver list (namazso; no PoC; Cheat Vulnerable Driver)
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [Piano Game](entities/pianogame.md) — C/C++ piano game (rendering/graphics focus; Game Develop / source)
