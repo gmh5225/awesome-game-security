@@ -515,6 +515,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HIGU_ntcall](entities/higu-ntcall.md) — direct system calls (jnastarot; Some Tricks / Windows Ring3; Windows/Linux/mobile)
 - [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
 - [hook-updater](entities/hook-updater.md) — Python auto-update Frida hook scripts (cheat / Frida)
+- [hh-lol-prophet](entities/hh-lol-prophet.md) — Go LoL modding sample (hh lol prophet; gmh5225; cheat / game:lol)
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/hh-lol-prophet`: entity [[hh-lol-prophet]]; cited on [[overviews/game-hacking]] and [[vanguard]].
+
 - **2026-08-08** — ingest `description:gmh5225/hpp-hack`: entity [[hpp-hack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-08** — ingest `description:gmh5225/hv-detect`: entity [[hv-detect]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked from [[hypervisor-detection]].
