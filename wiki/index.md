@@ -830,6 +830,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mytechnotalent/Reverse-Engineering](entities/mytechnotalent-reverse-engineering.md) — free multi-arch RE tutorial (x86/x64/ARM/AVR/RISC-V; static+dynamic; cheat / guide)
 - [Hacking-Windows](entities/hacking-windows.md) — C Windows RE/debugging guide (cheat / guide; mytechnotalent)
 - [Go-Hacking](entities/go-hacking.md) — free Go/Golang RE course (PDF + Go source/IDA labs; x64/ARM64/ARM32; cheat / guide)
+- [golang_loader_assist](entities/golang-loader-assist.md) — IDA Pro plugin: Go runtime metadata → function names, source refs, types on stripped Go PE (cheat / GO Reversed)
 - [GoReSym](entities/goresym.md) — Mandiant Go symbol/type recovery (pclntab/moduledata; stripped PE → IDA)
 - [Hacking-Rust](entities/hacking-rust.md) — free Rust RE course (PDF + Cargo labs; x64/ARM64/ARM32; cheat / guide)
 - [Embedded-Hacking](entities/embedded-hacking.md) — free embedded firmware RE course (RP2350/Pico 2; weekly labs; GDB/Ghidra/OpenOCD; ARM Thumb FP patcher; IoT/hardware hacking; cheat / guide)
