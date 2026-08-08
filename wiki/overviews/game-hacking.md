@@ -70,6 +70,7 @@ sources:
   - wiki/sources/descriptions/push0ebp__sig-database.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/gmh5225__mnwvs196.md
+  - wiki/sources/descriptions/gmh5225__minecpp.md
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -895,6 +896,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Unreal decrypt samples for Veiled Experts such as [[vx-it]] (C/C++; `[Decrypt]`) sit in the cheat / game:veiled experts lane. (source: wiki/sources/descriptions/percpopper__VX-It.md)
 - Classic MMORPG server emulators such as [[rathena]] (Ragnarok Online; login/char/map; NPC scripts / WoE / MySQL multi-zone) sit in the same Private Server lane for authoritative MMO server-pattern study. (source: wiki/sources/descriptions/rathena__rathena.md) Chinese-localized rAthena forks such as [[rathenacn]] (gmh5225; C/C++; asset pipelines / plugin development / modding; cheat / game:ro) extend that Ragnarok Online private-server lane for localized server ops and modding research. (source: wiki/sources/descriptions/gmh5225__rAthenaCN.md) FFXIV server emulators such as [[sapphire]] (gmh5225; in development; patch **3.3** branch; protocol/server RE for game security researchers) sit in that same Private Server / game:ffxiv lane. (source: wiki/sources/descriptions/gmh5225__sapphire.md)
 - Knight Online Gamesoft server-side anti-cheat such as [[gamesoftacs]] (speed/teleport/damage/inventory manipulation + client integrity; suspicious-activity review flags) sits in that Private Server lane beside MapleStory [[maplestory143]] CheatTracker stacks. (source: wiki/sources/descriptions/luisfelipe18__GamesoftACS.md)
+- C++ Minecraft Java server backends such as [[minecpp]] (gmh5225; **1.19**; authoritative server implementation for game security researchers studying offensive techniques in cheat / game:minecraft) sit in that Private Server lane beside Java Paper AC plugins such as [[minecraft-anticheatai]] and Bedrock MiTM proxies such as [[oomph]]. (source: wiki/sources/descriptions/gmh5225__minecpp.md)
 - Internal CS:GO baseline [[csgosimple]] (spirthack fork after MarkHC; Internal tag) sits in the cheat / game:csgo lane. (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - Clean internal CS:GO scaffold bases such as [[csgo-internal-base]] (CreateInterface resolution, VMT hooks, netvar dump, pattern scan, ImGui menu; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture. (source: wiki/sources/descriptions/lstrsrt__csgo_internal_base.md)
 - Internal CS:GO samples such as [[csgo-kns]] (C++; VMT hooks + interface pointers; ESP, aimbot, bhop, skin changer; Internal tag) sit in the same cheat / game:csgo lane for studying Source engine SDK hook patterns. (source: wiki/sources/descriptions/kyojig__csgo_kns.md)
