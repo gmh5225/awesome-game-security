@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/memory_server`: entity [[memory-server]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `readme:categories`: bumped Nintendo Switch ~8 (was ~7; OpenSw Android Eden emulator + live cheat); counts stable (Cheat ~2662 / Anti Cheat ~652 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-08** — ingest `description:gmh5225/meowsense`: entity [[meowsense]]; cited on [[overviews/game-hacking]].
