@@ -724,6 +724,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mcp-gdb](entities/mcp-gdb.md) — GDB MCP server (breakpoints / memory / registers / step; AI debug)
 - [mcp-safety-scanner](entities/mcp-safety-scanner.md) — automated MCP safety auditing + remediation via agents (Game Develop / MCP security)
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
+- [mcpup](entities/mcpup.md) — MCP server lifecycle manager (discover/install/configure/run; Unity AI-assisted dev; Game Develop / MCP for unity; gmh5225)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
 - [MobileRE-Skill](entities/mobile-re-skill.md) — AI-agent mobile RE skill set (layered Frida hooks; six-phase anti-detection pipeline; JADX/Ghidra)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
