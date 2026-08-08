@@ -14,7 +14,7 @@ IDA Pro plugin that integrates YARA rule scanning into the disassembly workflow.
 
 In-disassembly YARA scan with match highlighting—not a rule compiler or compiled-rule bytecode analyzer.
 
-Complements other in-IDA YARA tooling such as [[yara4ida]] (Alt-Y scan integration), [[yarascan-ida]] (Python file scan), rule generation via [[hyara]], and compiled-rule analysis via [[yaravm]].
+Complements other in-IDA YARA tooling such as [[findcrypt-yara]] (built-in crypto-constant signatures), [[yara4ida]] (Alt-Y scan integration), [[yarascan-ida]] (Python file scan), rule generation via [[hyara]], and compiled-rule analysis via [[yaravm]].
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements other in-IDA YARA tooling such as [[yara4ida]] (Alt-Y scan integrati
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[yara4ida]] · [[yarascan-ida]] · [[hyara]] · [[yaravm]] · [[idaplugins]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[findcrypt-yara]] · [[yara4ida]] · [[yarascan-ida]] · [[hyara]] · [[yaravm]] · [[idaplugins]]

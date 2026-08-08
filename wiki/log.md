@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/findcrypt-yara`: entity [[findcrypt-yara]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/findyara-ida`: entity [[findyara-ida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/fortnite-W2S-offset-Fortnite`: entity [[fortnite-w2s-offset-fortnite]]; cited on [[overviews/game-hacking]] and [[world-to-screen]].
