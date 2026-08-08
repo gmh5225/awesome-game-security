@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/maplestory-artale-explab`: entity [[maplestory-artale-explab]]; cited on [[overviews/game-hacking]].
+
 - **2026-08-08** — ingest `description:gmh5225/maplestory-packer-ModPacker`: entity [[maplestory-packer-modpacker]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-08** — ingest `description:gmh5225/maplestory-v83MaplestoryCPP`: entity [[maplestory-v83-maplestory-cpp]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
