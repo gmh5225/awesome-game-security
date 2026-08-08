@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/hwid-spoofer`: entity [[hwid-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-08** — ingest `description:gmh5225/ida-dark-plus`: entity [[ida-dark-plus]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[long-night]].
 
 - **2026-08-08** — ingest `description:gmh5225/ida-find-.data-ptr`: entity [[ida-find-.data-ptr]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
