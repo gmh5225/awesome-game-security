@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/ida-sdk`: entity [[ida-sdk]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idasdk-collection]].
+
 - **2026-08-08** — ingest `description:gmh5225/ida-sigmaker`: updated entity [[ida-sigmaker]] (gmh5225 fork alongside mahmoudimus variant); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/ida_bitfields`: entity [[ida-bitfields]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].

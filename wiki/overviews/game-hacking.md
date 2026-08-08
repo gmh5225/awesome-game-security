@@ -534,6 +534,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__simple-rust-hack.md
   - wiki/sources/descriptions/gmh5225__rust-dll-crab.md
   - wiki/sources/descriptions/gmh5225__idasdk-collection.md
+  - wiki/sources/descriptions/gmh5225__ida-sdk.md
   - wiki/sources/descriptions/gmh5225__idawilli.md
   - wiki/sources/descriptions/gmh5225__idaplugins-list.md
   - wiki/sources/descriptions/gmh5225__idacode.md
@@ -838,6 +839,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
 - Willi Ballenthin IDA Pro script/plugin/util collection via [[idawilli]] (Python IDAPython; function analysis, string decryption, struct annotation, xref navigation, workflow automation; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idawilli.md)
 - Multi-version IDA Pro SDK archive via [[idasdk-collection]] (headers, libs, examples; backward-compatible plugin dev across IDA releases; cheat / IDA SDK) sits in the same Cheat IDA Plugins / plugin-development lane. (source: wiki/sources/descriptions/gmh5225__idasdk-collection.md)
+- Mirrored IDA Pro SDK files via [[ida-sdk]] (C++ headers, libs, documentation for plugins and processor modules across IDA versions; cheat / IDA SDK) sits alongside [[idasdk-collection]] in the same plugin-development lane. (source: wiki/sources/descriptions/gmh5225__ida-sdk.md)
 - Community-maintained IDA Pro plugin catalog via [[idaplugins-list]] (version-aware plugin discovery; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idaplugins-list.md)
 - Function-level binary diffing via [[turbodiff]] (HelpSystems IDA plugin; compare two binaries' functions; cheat / IDA Plugins / diff) sits in the same static RE / patch-tracking lane. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
 - x86 ROP gadget finder + ROP chainer via [[agafi]] (HelpSystems Advanced Gadget Finder; programs/modules/live processes; cheat / ROP Finder / ROP Generation) sits in the same exploit-chain RE lane beside [[ropgadget-rs]]. (source: wiki/sources/descriptions/helpsystems__Agafi.md)

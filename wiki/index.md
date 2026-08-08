@@ -577,6 +577,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-names](entities/ida-names.md) — IDA Pro plugin: batch rename, pattern match, prefix/suffix, import/export for function/symbol names (pseudocode window titles; cheat / IDA Plugins)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
 - [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
+- [ida-sdk](entities/ida-sdk.md) — mirrored IDA Pro SDK (headers/libs/docs; plugin + processor-module dev; multi-version; cheat / IDA SDK)
 - [idasdk-collection](entities/idasdk-collection.md) — archived IDA Pro SDK releases (headers/libs/examples; multi-version plugin dev; cheat / IDA SDK)
 - [ida-plugin-pcodegpt](entities/ida-plugin-pcodegpt.md) — ChatGPT IDA PCode assistant (Chinese UI; cheat / IDA Plugins)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
