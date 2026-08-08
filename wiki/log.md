@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/kur`: entity [[kur]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-08** — ingest `description:gmh5225/kvm-csgo-cheat`: entity [[kvm-csgo-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-08** — ingest `description:gmh5225/lc0`: entity [[lc0]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
