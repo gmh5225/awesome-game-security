@@ -671,6 +671,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
+- [lenovo-exec](entities/lenovo-exec.md) — LenovoDiagnosticsDriver.sys BYOVD PoC (insecure IOCTL → arbitrary kernel code execution; gmh5225)
 - [lenovo-mapper](entities/lenovo-mapper.md) — BYOVD driver mapper via LenovoDiagnosticsDriver.sys (memory-access IOCTLs; manual unsigned map; gmh5225)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
 - [libiht](entities/libiht.md) — Intel Hardware Trace Library (Tencent Xuanwu Lab; hardware-assisted execution tracing; Windows kernel explorer)

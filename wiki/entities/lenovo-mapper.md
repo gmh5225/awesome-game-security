@@ -12,7 +12,7 @@ confidence: medium
 
 Driver mapper that loads unsigned kernel drivers via Lenovo's vulnerable **`LenovoDiagnosticsDriver.sys`**. The manual-mapping pipeline abuses the signed driver's memory-access IOCTLs to obtain kernel R/W primitives needed for PE section mapping without the normal signed-driver install path. Aimed at kernel researchers studying [[byovd]]-based driver mapping through Lenovo driver exploitation. (source: wiki/sources/descriptions/gmh5225__lenovo_mapper.md)
 
-Complements other Lenovo OEM-driver research such as [[phantomkiller]] (`BootRepair.sys` process kill) and [[lenovo-cve-2025-8061]] (`LnvMSRIO.sys` LPE); sits in the same driver-mapper lane as [[saturn-mapper]], [[kdu]], and [[nullmap]].
+Complements other Lenovo OEM-driver research such as [[lenovo-exec]] (same **`LenovoDiagnosticsDriver.sys`**; IOCTL → arbitrary kernel code execution), [[phantomkiller]] (`BootRepair.sys` process kill), and [[lenovo-cve-2025-8061]] (`LnvMSRIO.sys` LPE); sits in the same driver-mapper lane as [[saturn-mapper]], [[kdu]], and [[nullmap]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements other Lenovo OEM-driver research such as [[phantomkiller]] (`BootRep
 
 ## Related
 
-[[byovd]] · [[phantomkiller]] · [[lenovo-cve-2025-8061]] · [[saturn-mapper]] · [[kdu]] · [[nullmap]] · [[known-driver-mappers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[lenovo-exec]] · [[phantomkiller]] · [[lenovo-cve-2025-8061]] · [[saturn-mapper]] · [[kdu]] · [[nullmap]] · [[known-driver-mappers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
