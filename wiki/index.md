@@ -554,6 +554,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDAssist](entities/idassist.md) — AI-powered IDA 9.0+ plugin: LLM explain/rename, semantic knowledge graph, RAG, MCP (PySide6; cheat / IDA Plugins)
 - [ida-plugins](entities/ida-plugins.md) — IDA register cross-references (vs Oregami value-use; cheat / IDA Plugins)
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)
+- [idaplugins-list](entities/idaplugins-list.md) — community IDA Pro plugin catalog (version categorization; cheat / IDA Plugins)
 - [IDARustCargo](entities/ida-rust-cargo.md) — IDA plugin: display potentially installed Cargo dependencies (Python; cheat / IDA Plugins)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
 - [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)
