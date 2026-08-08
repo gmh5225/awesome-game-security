@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/frida-il2cpp-datacollector`: entity [[frida-il2cpp-datacollector]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
+
 - **2026-08-08** — ingest `description:gmh5225/frida-ue4dump`: entity [[frida-ue4dump]]; cited on [[frida]] and [[overviews/game-engine]].
 
 - **2026-08-08** — ingest `description:gmh5225/frinet`: entity [[frinet]]; cited on [[frida]] and [[overviews/reverse-engineering]].
