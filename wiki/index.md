@@ -563,6 +563,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-slides](entities/ida-slides.md) — IDA Pro Marp/Slidev live RE presentation plugin (dockable tab; @name/@addr IDB links; embed decompiled lines; cheat / IDA Plugins)
 - [ida-taskr](entities/ida-taskr.md) — IDA Pro parallel computing library (Python; Qt + multiprocessing; cheat / IDA Plugins)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
+- [ida-vmware-windows-gdb](entities/ida-vmware-windows-gdb.md) — IDA Pro + VMware GDB stub Windows kernel debugging guide (live breakpoints/memory/step; cheat / guide)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [IDACode](entities/idacode.md) — IDA Pro ↔ VS Code bridge (execute/debug IDAPython from editor; early alpha; cheat / IDA Plugins)
 - [IdaClu](entities/idaclu.md) — IDA Pro plugin: cluster/group similar functions in large binaries (Qt GUI; i18n; visual navigation; cheat / IDA Plugins)

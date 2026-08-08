@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/ida_vmware_windows_gdb`: entity [[ida-vmware-windows-gdb]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
+
 - **2026-08-08** — ingest `description:gmh5225/idacode`: entity [[idacode]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/idaplugins-list`: entity [[idaplugins-list]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[idaplugins]].
