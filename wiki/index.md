@@ -839,6 +839,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
 - [Orbit](entities/orbit.md) — Google C++ native profiler (dynamic runtime instrumentation; call graphs / threads / memory; Linux remote + Windows UI; Game Testing)
+- [Overwatch IAT Fixer](entities/overwatch-iat-fixer.md) — Overwatch protected-EXE IAT repair (obfuscated/encrypted import reconstruction; disassembler analysis; cheat / game:overwatch)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
 - [OsirisAndExtra](entities/osiris-and-extra.md) — Internal CS:GO: driver / OpenGL / rendering (C/C++; cheat / game:csgo)
