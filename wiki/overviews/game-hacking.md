@@ -530,6 +530,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__hh-lol-prophet.md
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
   - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
+  - wiki/sources/descriptions/gmh5225__fortnite-exploits.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
   - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
   - wiki/sources/descriptions/gmh5225__fortnite-offsets.md
@@ -737,6 +738,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Updated Ritz-lineage Fortnite internals such as [[fortnite-internal-updated-ritz]] (gmh5225; C++; Ritz fork; UE4 engine hooking; ESP / aimbot / exploits; refreshed offsets + EAC bypass for newer builds; [Internal]) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md)
 - Additional Fortnite internal samples such as [[fortnite-cheat-source-internal]] (C/C++; SDK generation + hooking) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md)
 - Internal Fortnite cheat **Triadz** such as [[fortnite-triadz]] (gmh5225; UE4 engine hooking; ESP / aimbot / exploitation; full in-process game-object + render access; EAC-protected UE4 internal architecture reference) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-triadz.md)
+- Fortnite exploit and EAC bypass collections such as [[fortnite-exploits]] (gmh5225; client vulnerabilities; UE4 engine features; cheat injection / memory-access bypass; `[Exploits]`) document Fortnite-specific exploit chains beside runnable internal and external samples. (source: wiki/sources/descriptions/gmh5225__fortnite-exploits.md)
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)
 - Fortnite camera-cache POV samples such as [[fortnite-camera-cache-pov]] (C++; CameraCache / view POV) sit in the same cheat / game:fortnite Unreal camera-math lane. (source: wiki/sources/descriptions/percpopper__Fortnite-CameraCachePOV.md)
 - Fortnite virtual-table / view offset dumps such as [[fortnite-virtual-offsets]] (text; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; gmh5225; cheat / game:fortnite `[Virtual Table Offsets]`) sit in the same cheat / game:fortnite Unreal vtable-dispatch lane beside camera and name-pool samples. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
