@@ -731,6 +731,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
 - [memory-relocalloc](entities/memory-relocalloc.md) — PE `.reloc`-backed allocation hiding (Windows/Android; evade AC heap/VAS memory scanners; gmh5225)
 - [memory-server](entities/memory-server.md) — jailbroken iOS REST memory scanner (Rust HTTP port 3030; process enum/read/pattern scan; Python PC client; cheat / iOS memory explorer; gmh5225)
+- [memcs](entities/memcs.md) — external CS:GO; modding / SDK generation (Rust; cheat / game:csgo; gmh5225)
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)

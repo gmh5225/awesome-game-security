@@ -75,6 +75,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__mnwvs196.md
   - wiki/sources/descriptions/gmh5225__minecpp.md
   - wiki/sources/descriptions/gmh5225__memory_server.md
+  - wiki/sources/descriptions/gmh5225__memcs.md
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -911,6 +912,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - External CS:GO samples such as [[nebulite-external]] (gmh5225; C/C++; memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__nebulite-external.md)
+- External CS:GO samples such as [[memcs]] (gmh5225; Rust; modding / SDK generation; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__memcs.md)
 - Driver-backed external CS:GO samples such as [[csgo-cheat-external]] (C++; driver development; External tag) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - Simple kernel CS:GO cheats with hook-based communication such as [[kernel-csgo]] (C++; driver development / modding) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/nbqofficial__kernel-csgo.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)

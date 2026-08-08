@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/memcs`: entity [[memcs]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-08** — ingest `description:gmh5225/memory-relocalloc`: entity [[memory-relocalloc]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-08** — ingest `description:gmh5225/memory_server`: entity [[memory-server]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
