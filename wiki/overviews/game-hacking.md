@@ -536,6 +536,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__idasdk-collection.md
   - wiki/sources/descriptions/gmh5225__idawilli.md
   - wiki/sources/descriptions/gmh5225__idaplugins-list.md
+  - wiki/sources/descriptions/gmh5225__idacode.md
   - wiki/sources/descriptions/gmh5225__injection.md
   - wiki/sources/descriptions/gmh5225__immortal-rust.md
   - wiki/sources/descriptions/gmh5225__rust-external-1.md
@@ -801,6 +802,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Real-time multi-user IDA database sync via [[idarling]] (connect IDA Pro / Hex-Rays instances; collaborative RE for distributed teams) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/matteyeux__IDArling.md)
 - Offline CPU instruction docs at the cursor via [[idaref]] (Python; SQLite refs for x86-64/ARM/MIPS/Xtensa) sit in the Cheat IDA Plugins / instruction-reference lane. (source: wiki/sources/descriptions/nologic__idaref.md)
 - Agent/human IDA CLI via [[idac]] (Unix socket to live GUI or headless idalib; structured JSON; batch/preview/dry-run; bundled agent skill; not MCP; early alpha) sits in the same IDA-driven RE lane. (source: wiki/sources/descriptions/trailofbits__idac.md)
+- IDA ↔ VS Code IDAPython integration via [[idacode]] (execute/debug scripts from VS Code; early alpha; cheat / IDA Plugins) sits in the same IDAPython workflow lane. (source: wiki/sources/descriptions/gmh5225__idacode.md)
 - MCP bridge into IDA via [[ida-mcp-server-plugin]] (Python plugin; disasm/decompile/xrefs/functions/types for LLM clients) sits in the Cheat IDA Plugins / agent-RE lane. (source: wiki/sources/descriptions/taida957789__ida-mcp-server-plugin.md) Full IDAPython MCP automation via [[ida-pro-mcp]] (mrexodia; installable plugin + IDAPython docs + MCP test harness; rename/annotate/xrefs/decompile/structs) sits in the same agent-RE lane. (source: wiki/sources/descriptions/mrexodia__ida-pro-mcp.md)
 - Also curated as MCP for IDA Pro: [[pcm]] (rand-tech; description summary additionally claims Process Context Monitor scheduling visibility). (source: wiki/sources/descriptions/rand-tech__pcm.md)
 - In-IDA Claude-3 chat assistant via [[ida-assistant]] (interactive Q&A / guidance during RE) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/stuxnet147__IDA-Assistant.md)
