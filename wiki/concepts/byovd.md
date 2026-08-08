@@ -37,7 +37,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__razer-rzctl.md
   - wiki/sources/descriptions/gmh5225__qiomem.md
   - wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md
-updated: 2026-08-07
+  - wiki/sources/descriptions/gmh5225__mhyprot2.md
+updated: 2026-08-08
 confidence: high
 ---
 
@@ -97,7 +98,7 @@ Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primi
 
 Agere Modem driver LPE such as [[cve-2025-24990-poc]] abuses `ltmdm64.sys` `METHOD_NEITHER` IOCTLs (missing user/kernel boundary checks) → 4-byte write via `IOCTL_GET_VERSION` + null-deref fixup via `VirtualAlloc` → arbitrary kernel R/W, with an IoRing LPE variant. (source: wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md)
 
-Game-AC driver abuse such as [[evil-mhyprot-cli]] targets miHoYo **`mhyprot2.sys`** (Genshin Impact) via a CLI PoC for unprivileged kernel/user memory R/W. (source: wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md)
+Game-AC driver abuse such as [[mhyprot2]] (gmh5225; IOCTL kernel R/W + process termination via **`mhyprot2.sys`**) and [[evil-mhyprot-cli]] (CLI PoC for unprivileged kernel/user memory R/W on the same Genshin Impact driver) target miHoYo signed AC drivers in the canonical LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__mhyprot2.md) (source: wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md)
 
 Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sits in the same cheat / vulnerable-driver research lane; the anycall project offers fuller client-and-driver-side physmem mapping. (source: wiki/sources/descriptions/kkent030315__MsIoExploit.md)
 
@@ -109,5 +110,5 @@ Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader-v2]] · [[kdu]] · [[vdk]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
