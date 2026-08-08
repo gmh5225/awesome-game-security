@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/ksoju__Eac-Bypass.md
   - wiki/sources/descriptions/kprprivate__EAC-CR3-BYPASS.md
   - wiki/sources/descriptions/inuNorii__Elden-Ring-CT-TGA.md
-updated: 2026-08-04
+  - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
+updated: 2026-08-08
 confidence: medium
 ---
 
@@ -34,6 +35,8 @@ CR3 / page-table root lane: minimal UM+KM teaching samples such as [[eac-cr3-byp
 
 Linux / Proton lane: Elden Ring CE tables such as [[elden-ring-ct-tga]] document protonhax launch + Wine-hosted Cheat Engine attach against Steam app `1245620`, with optional EAC launcher disable—useful for studying how EAC-protected titles behave under Proton-hosted cheat tooling. (source: wiki/sources/descriptions/inuNorii__Elden-Ring-CT-TGA.md)
 
+Fortnite internal lane: samples such as [[fortnite-triadz]] (Triadz; UE4 engine hooking; ESP / aimbot / exploitation; in-process game-object + render access) illustrate internal cheat architecture and EAC detection surfaces on EAC-protected UE4 titles. (source: wiki/sources/descriptions/gmh5225__fortnite-triadz.md)
+
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[fortnite-triadz]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
