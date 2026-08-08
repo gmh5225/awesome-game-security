@@ -597,6 +597,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImGui-Unity-With-Layout](entities/imgui-unity-with-layout.md) — Android Unity ImGui mod menu + layout tabs/save-load (C++; cheat / render-draw)
 - [ImGUI-Zygisk-Unity](entities/imgui-zygisk-unity.md) — Zygisk Unity ImGui mod menu template (OpenGL ES + render-pipeline hook; cheat / render-draw)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
+- [injection](entities/injection.md) — Windows injection-testing corpus (Conhost/PROPagate/ALPC/KernelCallbackTable/KnownDlls and related PoCs; Injection Testing; gmh5225)
 - [ImpulsiveDLLHijack](entities/impulsive-dll-hijack.md) — automated Windows DLL hijack research workflow (stages orchestration; cheat / DLL Hijack)
 - [Ironwall](entities/ironwall.md) — open-source AC protocol stack (TEE attestation, ZK human-input proofs, Hedera HCS match receipts; Unity/Unreal)
 - [Iris](entities/iris.md) — cross-platform C++ game engine (component-based; multi-backend render; CMake; Game Engine source)
