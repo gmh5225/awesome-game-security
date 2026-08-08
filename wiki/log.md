@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `readme:categories`: bumped Cheat ~2662 (was ~2661; Anti Cheat ~652 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-08** — ingest `description:gmh5225/ntoskrnl_file_collection`: entity [[ntoskrnl-file-collection]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked from [[ntoskrnlwalker]].
 
 - **2026-08-08** — ingest `description:gmh5225/nv-graphics-mesa`: entity [[nv-graphics-mesa]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]].
