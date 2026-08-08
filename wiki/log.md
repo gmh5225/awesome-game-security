@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `readme:categories`: bumped Anti Cheat ~653 (was ~652; Cheat ~2662 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-08** — ingest `description:gmh5225/injection`: entity [[injection]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-08** — ingest `description:gmh5225/inline-syscall`: entity [[inline-syscall]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
