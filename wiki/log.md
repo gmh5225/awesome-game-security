@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/lc0`: entity [[lc0]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
+
 - **2026-08-08** — ingest `description:gmh5225/league-base`: entity [[league-base]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-08** — ingest `description:gmh5225/legit-csgo-cheat-menu`: entity [[legit-csgo-cheat-menu]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].

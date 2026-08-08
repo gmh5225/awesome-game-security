@@ -666,6 +666,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
 - [LazySign](entities/lazy-sign.md) — fake-cert Authenticode signing (Microsoft devkit binaries; zero extra deps; Some Tricks / Ring3)
 - [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
+- [lc0](entities/lc0.md) — Leela Chess Zero neural chess engine (MCTS + self-play RL; CUDA/cuDNN/OpenCL; Chess Engine / game AI)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
