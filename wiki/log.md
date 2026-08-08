@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-08** — ingest `description:gmh5225/ghostbusters`: entity [[ghostbusters]]; cited on [[overviews/anti-cheat]].
+
 - **2026-08-08** — ingest `description:gmh5225/golang_loader_assist`: entity [[golang-loader-assist]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-08** — ingest `description:gmh5225/gta5cheat`: entity [[gta5cheat]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5cheat-qt]] and [[gta5view]].

@@ -480,6 +480,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
 - [genshinjumpfixer2](entities/genshinjumpfixer2.md) — Genshin Impact Decode CFG (jump-target calc + code simplify; khang06)
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
+- [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)
 - [gina_public](entities/gina-public.md) — IRP Null hijack kernel driver (C/C++; cheat / driver communication)
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
