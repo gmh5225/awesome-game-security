@@ -490,6 +490,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [gta-reversed-modern](entities/gta-reversed-modern.md) — GTA:SA 1.0 US binary-compatible C++ reimplementation (decompilation / RenderWare-era engine study)
+- [gtav-sourcecode-build-guide](entities/gtav-sourcecode-build-guide.md) — GTA V source code build tutorial (VM recommended; Game Develop / guide)
 - [regta](entities/regta.md) — Reverse-engineered GTA III & Vice City (Switch / PS Vita / Wii U ports; Game Develop / source)
 - [reGS](entities/regs.md) — reverse-engineered GoldSource engine (HL1; networking / rendering / physics; Game Engine / RE)
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
