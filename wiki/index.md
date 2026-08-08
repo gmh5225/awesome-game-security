@@ -569,6 +569,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDACode](entities/idacode.md) — IDA Pro ↔ VS Code bridge (execute/debug IDAPython from editor; early alpha; cheat / IDA Plugins)
 - [IdaClu](entities/idaclu.md) — IDA Pro plugin: cluster/group similar functions in large binaries (Qt GUI; i18n; visual navigation; cheat / IDA Plugins)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
+- [ida-medigate](entities/ida-medigate.md) — IDA Pro Python: GCC RTTI hierarchy/vtable recovery from stripped binaries (Hex-Rays union disambiguation; xref tracker; cheat / IDA Plugins)
 - [ida-missinglink](entities/ida-missinglink.md) — IDA plugin: fill missing indirect CALL/JMP targets (C++ OOP RE; cheat / IDA Plugins)
 - [ida-names](entities/ida-names.md) — IDA Pro plugin: batch rename, pattern match, prefix/suffix, import/export for function/symbol names (pseudocode window titles; cheat / IDA Plugins)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)

@@ -539,6 +539,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__idacode.md
   - wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md
   - wiki/sources/descriptions/gmh5225__ida_names.md
+  - wiki/sources/descriptions/gmh5225__ida_medigate.md
   - wiki/sources/descriptions/gmh5225__injection.md
   - wiki/sources/descriptions/gmh5225__immortal-rust.md
   - wiki/sources/descriptions/gmh5225__rust-external-1.md
@@ -827,6 +828,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cross-platform Itanium/MSVC (+ D/Rust/Swift) symbol demangling via [[demumble]] (`c++filt` / `undname.exe` replacement) sits in the Cheat RE Tools lane. (source: wiki/sources/descriptions/nico__demumble.md)
 - MSVC/C++ RTTI parse in IDA 9.2 via [[rtti-parser]] (IDA script; type metadata recovery) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/rem0obb__rtti-parser.md)
 - C++ RTTI class hierarchy visualization and RTTI-based rename via [[pyclassinformer]] (IDA Pro plugin; library/method classification, member coloring; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/herosi__PyClassInformer.md)
+- GCC RTTI class hierarchy and vtable reconstruction from stripped binaries via [[ida-medigate]] (IDA Pro Python; Hex-Rays union type disambiguation; bundled xref tracker; IoT/firmware/game-engine polymorphic C++; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/gmh5225__ida_medigate.md)
 - IDA 9.X C++ vtable ops via [[ida-vtable-tools]] (dump `.hpp` interface skeleton / class-prefix rename / `this` type / slot index·offset; Python) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md)
 - Missing indirect CALL/JMP target recovery via [[ida-missinglink]] (C++ OOP-heavy game/client binaries; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/kweatherman__ida_missinglink.md)
 - Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
