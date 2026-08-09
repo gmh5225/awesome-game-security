@@ -668,6 +668,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/justinstenning/Direct3DHook [Direct3D 9/10/11 API hooks for screen capture and in-game overlays]
 - https://github.com/techiew/DirectXHook [DirectX 11/12 Present hook with a simple in-game overlay framework]
 - https://github.com/nefarius/HydraHook [DirectX 9–12 API-hooking and overlay rendering framework for games]
+- https://github.com/aufkrawall/capture-engine [Windows game capture with injected D3D9–D12, Vulkan, OpenGL, and DXVK hooks, custom overlays, and frame pacing]
 - https://github.com/gogo9211/Discord-Overlay-Hook [DX11]
 - https://github.com/ocornut/imgui/commit/923bd2fd217c1dc1e75fa92b0284d3817904988b [DX11/12 ResizeBuffers]
 - https://github.com/marlkiller/d3dhook_imgui [d3d opengl hook imgui x86/x64]
@@ -1846,6 +1847,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/CENSUS/ghidra-frida-hook-gen
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 - https://github.com/CUB3D/ghidra-hexagon-sleigh [Ghidra SLEIGH extension for Qualcomm Hexagon QDSP6 decompilation and analysis]
+- https://github.com/thixotropist/ghidra_decompiler_plugins [Loadable Ghidra decompiler plugins and rules that simplify RISC-V vector-instruction analysis in the decompiler window]
 - https://github.com/fmagin/ghidra-openai [ChatGPT]
 - https://github.com/securityjoes/ThreatResearch [ChatGPT]
 - https://github.com/evyatar9/GptHidra [ChatGPT]
