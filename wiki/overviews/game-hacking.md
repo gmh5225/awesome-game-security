@@ -86,6 +86,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
   - wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md
   - wiki/sources/descriptions/gmh5225__csgo_sdk.md
+  - wiki/sources/descriptions/gmh5225__csgo2-cheat.md
   - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -1025,7 +1026,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS2 samples such as [[cs2-internal]] (C++; SDK generation / hooking / memory analysis; Internal tag) sit in the same cheat / game:cs2 lane. (source: wiki/sources/descriptions/redbg__CS2-Internal.md)
 - Open-source internal CS2 samples such as [[asphyxia-cs2]] (Asphyxia; ESP / aimbot / triggerbot; Source 2 SDK via interface pointers + pattern scan; Internal tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/maecry__asphyxia-cs2.md)
 - CS2 samples such as [[counterstrike2]] (C++; rendering / SDK generation / hooking) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/papstuc__counterstrike2.md)
-- CS2 samples such as [[csgo2-cheat]] (C++; rendering / SDK generation / hooking) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/imnotdatguy__csgo2-cheat.md)
+- CS2 samples such as [[csgo2-cheat]] (imnotdatguy / gmh5225 forks; C++; internal rendering / SDK generation / hooking; gmh5225 variant tagged [Internal]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/imnotdatguy__csgo2-cheat.md) (source: wiki/sources/descriptions/gmh5225__csgo2-cheat.md)
 - WIP CS2 cheats such as [[bakaware4]] (release-constrained; debug unload/unhook for `-insecure` iteration) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/nezu-cc__BakaWare4.md)
 - Title-specific Call of Duty 7 tooling such as [[cod7-tools]] (VcPkg; extensible game:cod7 research) sits in the cheat / game:cod7 lane. (source: wiki/sources/descriptions/nice-sprite__COD7-Tools.md)
 - Title-specific T7 engine script / FastFile linker tooling such as [[t7-linker]] (compiled GSC module linking; T7 script bytecode; README also cites Black Ops 2 FastFile accuracy; gmh5225) sits in the cheat / Call of Duty modding lane beside [[cod7-tools]] and [[paradise-bo2]]. (source: wiki/sources/descriptions/gmh5225__t7-linker.md)
