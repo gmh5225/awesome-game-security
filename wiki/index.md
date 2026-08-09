@@ -325,6 +325,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
+- [cheat-engine-ceserver-pcileech](entities/cheat-engine-ceserver-pcileech.md) — CE ceserver over PCILeech/LeechCore DMA; remote scan/edit invisible to target anti-cheat (gmh5225)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [dma-cheat-base](entities/dma-cheat-base.md) — DMA cheat base scaffold (C/C++; rendering, animation, SDK generation; cheat / DMA)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)

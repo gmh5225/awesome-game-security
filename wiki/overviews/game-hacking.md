@@ -97,6 +97,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
   - wiki/sources/descriptions/gmh5225__cs2-fov-changer.md
   - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
+  - wiki/sources/descriptions/gmh5225__cheat-engine-ceserver-pcileech.md
   - wiki/sources/descriptions/gmh5225__compiler-binary-richprint.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -779,6 +780,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cheat Engine Godot runtime dumpers such as [[gddumper]] (Lua; Godot 3.x/4.x SceneTree / GDScript on Win x86/x64; Address List dump + experimental hot-reload) sit in the Cheat Engine Plugins / game engine explorer:Godot lane. (source: wiki/sources/descriptions/palepine__GDDumper.md)
 - Cheat Engine value tracing in IDA via [[ce-tracer-ida]] (Python; CheatEngine Value Tracer plugin; memory analysis; cheat / IDA Plugins) bridges CE scan workflows into static IDA analysis. (source: wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md)
 - WebAssembly memory analysis via [[wasm-ceserver]] (Python/JavaScript; Cheat Engine ceserver-style remote debug for WASM; Cheat Engine Plugins / Analyzing WebAssembly) extends CE plugin workflows to browser and WASM-hosted game logic. (source: wiki/sources/descriptions/gmh5225__wasm-ceserver.md)
+- DMA-backed Cheat Engine ceserver via [[cheat-engine-ceserver-pcileech]] (ceserver protocol over PCILeech/LeechCore; remote CE scan/edit from a separate machine; cheat / DMA) extends CE workflows below the OS beside [[cheat-engine-dma-plugin]] and [[dma-cheat-engine-loader]]. (source: wiki/sources/descriptions/gmh5225__cheat-engine-ceserver-pcileech.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Non-linear MBA obfuscation via [[mba-obfuscator]] (`mba_obfuscator/` + `samples/`) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/nhpcc502__MBA-Obfuscator.md)
 - MBA expression simplification via [[cobra]] (Trail of Bits CoBRA; C++ coefficient-based reconstruction) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/trailofbits__CoBRA.md)
