@@ -1454,6 +1454,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WindEffects](entities/wind-effects.md) — C++23 Vulkan/DX12 engine (ECS, editor, deferred/PBR; Game Engine)
 - [windbg-decompile-ext](entities/windbg-decompile-ext.md) — WinDbg x64 extension; live disasm + LLM verified pseudocode (WinDbg Plugins)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
+- [windows-10-22h2-vulnerable-driver-communication](entities/windows-10-22h2-vulnerable-driver-communication.md) — ASUS `asromgdrv.sys` BYOVD IOCTL wrapper (contiguous kernel pool + CR R/W; Win10 22H2 / Win11; gmh5225)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)
