@@ -320,6 +320,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
 - [docker-palworld-dedicated-server](entities/docker-palworld-dedicated-server.md) — Palworld UE5 dedicated server (Linux + Docker; cheat / game:palworld [UE5])
 - [docker-win](entities/docker-win.md) — WSL2 networking lab (QEMU/KVM/PVE/VBOX research-host lane)
+- [dolboeb-executor](entities/dolboeb-executor.md) — Capcom.sys BYOVD kernel code executor (IOCTL → shellcode or arbitrary kernel calls; gmh5225)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)

@@ -46,6 +46,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__lenovo_exec.md
   - wiki/sources/descriptions/gmh5225__kur.md
   - wiki/sources/descriptions/gmh5225__imxyviMapper.md
+  - wiki/sources/descriptions/gmh5225__dolboeb-executor.md
 updated: 2026-08-09
 confidence: high
 ---
@@ -126,7 +127,9 @@ Writeup-backed echo.ac **`echo_driver.sys`** LPE PoC such as [[echoac-poc]] (gmh
 
 **`AsUpIO.sys`** manual mapper research such as [[imxyvimapper]] (gmh5225; vulnerable signed-driver kernel access primitive → PE manual map with sections, imports, relocs, and entry invocation) sits in the same BYOVD unsigned-load lane. (source: wiki/sources/descriptions/gmh5225__imxyviMapper.md)
 
+Classic **`Capcom.sys`** arbitrary kernel execution such as [[dolboeb-executor]] (gmh5225; load vulnerable signed driver → IOCTL abuse → custom kernel shellcode or arbitrary kernel function calls from user mode; BYOVD code-execution research) sits in the same historically abused LOLdriver lane referenced in step 1 of the typical chain above. (source: wiki/sources/descriptions/gmh5225__dolboeb-executor.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[dolboeb-executor]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
