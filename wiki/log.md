@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/echoac-poc`: entity [[echoac-poc]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-09** — ingest `description:gmh5225/efiXplorer`: entity [[efixplorer]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/eft-dma-radar-1`: entity [[eft-dma-radar-1]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].

@@ -20,4 +20,4 @@ Sits in the same [[byovd]] access-primitives lane as [[vdk]], [[kdu]], and [[len
 
 ## Related
 
-[[byovd]] · [[vdk]] · [[kdu]] · [[lenovo-mapper]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[byovd]] · [[echoac-poc]] · [[vdk]] · [[kdu]] · [[lenovo-mapper]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
