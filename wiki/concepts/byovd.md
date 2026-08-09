@@ -52,6 +52,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ampa.sys-exp.md
   - wiki/sources/descriptions/gmh5225__amd-ryzen-master-driver-v17-exploit.md
   - wiki/sources/descriptions/gmh5225__Windows-10-22H2-Vulnerable-driver-communication.md
+  - wiki/sources/descriptions/gmh5225__Win-Driver-EXP.md
 updated: 2026-08-09
 confidence: high
 ---
@@ -144,7 +145,9 @@ ASUS **`bsitf.sys`/`AsusBSItf.sys`** contiguous-pool map IOCTL abuse such as [[a
 
 ASUS **`asromgdrv.sys`** IOCTL communication research such as [[windows-10-22h2-vulnerable-driver-communication]] (gmh5225; user-mode wrapper opens `\\.\AsrOmgDrv` and drives vendor IOCTLs via `DeviceIoControl`; contiguous kernel memory alloc/free plus control-register R/W; still loadable on Win10 22H2 / Win11; reversed-interface study for BYOVD tooling) sits in the same OEM signed-driver communication lane. (source: wiki/sources/descriptions/gmh5225__Windows-10-22H2-Vulnerable-driver-communication.md)
 
+Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit code for multiple vulnerable signed drivers via insecure IOCTLs → arbitrary kernel R/W, code execution, process manipulation; README includes **`AsUpIO64.sys`** / CVE-2024-33218) complements single-driver PoCs like [[imxyvimapper]] in the same BYOVD research lane. (source: wiki/sources/descriptions/gmh5225__Win-Driver-EXP.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
