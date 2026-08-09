@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/VulnerablePatchGuardExploit`: entity [[vulnerablepatchguardexploit]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
+
 - **2026-08-09** — ingest `description:gmh5225/WOW-WowAutoFishing`: entity [[wow-wowautofishing]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
 
 - **2026-08-09** — ingest `description:gmh5225/Warzone-internal-Cheat`: entity [[warzone-internal-cheat]]; cited on [[overviews/game-hacking]].

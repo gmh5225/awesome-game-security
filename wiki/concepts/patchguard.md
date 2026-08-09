@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/tandasat__Sushi.md
   - wiki/sources/descriptions/synacktiv__windows_kernel_shadow_stack.md
   - wiki/sources/descriptions/hfiref0x__UPGDSED.md
-updated: 2026-08-05
+  - wiki/sources/descriptions/gmh5225__VulnerablePatchGuardExploit.md
+updated: 2026-08-09
 confidence: high
 ---
 
@@ -37,6 +38,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[upgdsed]] combines runtime PatchGuard and DSE disable across Win7–11 using vulnerable signed drivers, CI.dll global manipulation, and KPP context patching — a multi-technique kernel trust-feature bypass reference for researchers. (source: wiki/sources/descriptions/hfiref0x__UPGDSED.md)
 
+[[vulnerablepatchguardexploit]] (gmh5225; C++) implements a vulnerable PatchGuard exploit to disable KPP at runtime for offensive / RE study in the same cheat / PatchGuard-related lane. (source: wiki/sources/descriptions/gmh5225__VulnerablePatchGuardExploit.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
