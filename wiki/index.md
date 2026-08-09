@@ -1398,6 +1398,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [valorant-esp-hack-with-driver](entities/valorant-esp-hack-with-driver.md) — Valorant ESP: Vanguard driver vuln + early load before AC; kernel injector (cheat / game:valorant; gmh5225)
 - [valorant-external](entities/valorant-external.md) — Valorant external cheat (latest; enhanced security; cheat / game:valorant; gmh5225)
+- [valorant-external-source](entities/valorant-external-source.md) — Valorant external cheat source: ESP/aimbot/player info via kernel driver RPM; overlay window/hijack; no inject (cheat / game:valorant [External]; gmh5225)
 - [valorant-externals](entities/valorant-externals.md) — Valorant external offset feed (incremental refresh; cheat / game:valorant [Offset]; gmh5225)
 - [valorant-gui-imgui-remake](entities/valorant-gui-imgui-remake.md) — Valorant ImGui cheat GUI framework (tabs/toggles/sliders; ESP/aimbot/visual mods; cheat / game:valorant [GUI]; gmh5225)
 - [valorant-internal](entities/valorant-internal.md) — Valorant internal: UE SDK generation + hooking (C/C++; cheat / game:valorant; gmh5225)
