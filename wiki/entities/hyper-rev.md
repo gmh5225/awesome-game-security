@@ -12,7 +12,7 @@ confidence: medium
 
 Memory introspection and reverse-engineering research surface powered by Microsoft Hyper-V: documents Hyper-V internal structures, the hypercall interface, partition management, virtual-processor handling, and memory-virtualization mechanisms recovered through RE. Aimed at hypervisor security researchers and exploit developers studying Hyper-V attack surfaces—not a production anti-cheat component. (source: wiki/sources/descriptions/noahware__hyper-reV.md)
 
-Pairs with Hyper-V stack LPE research such as [[cve-2025-21333]] and Type-2 / detection HV samples such as [[hv]], [[ophion]], and [[hypervisor-detection]].
+Pairs with Hyper-V stack LPE research such as [[cve-2025-21333]], offensive Hyper-V frameworks such as [[voyager]], and Type-2 / detection HV samples such as [[hv]], [[ophion]], and [[hypervisor-detection]].
 
 ## Links
 

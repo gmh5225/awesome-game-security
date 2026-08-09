@@ -1412,6 +1412,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Vk-Engine](entities/vk-engine.md) — WIP Jai Vulkan engine (clustered forward / PBR / ImGui + Jolt; Game Engine)
 - [Volatility](entities/volatility.md) — original Python 2 memory forensics (profiles; pslist/modules/rootkit)
 - [Volatility 3](entities/volatility3.md) — Python 3 memory forensics (RAM images; Win/Linux/macOS plugins)
+- [Voyager](entities/voyager.md) — Hyper-V hacking framework (gmh5225; Win10 x64 AMD & Intel; builds 1507–2004; cheat / windows kernel explorer)
 - [vmem-decrypt](entities/vmem-decrypt.md) — VMware vTPM-encrypted .vmem/.vmsn/.vmss/.nvram decrypt (pure-Python AES-256-CBC; vmem_flatten.py → Volatility 3; Win11 partial VM encryption; AC/IS forensics)
 - [Volatile Data Collector](entities/volatile-data-collector.md) — lightweight Windows C utilities for live volatile IR (handles, kernel modules, sessions, drivers, ICMP, registry)
 - [VolkDMA](entities/volk-dma.md) — C++ LeechCore/MemProcFS DMA library (scatter I/O, module dumps, signature scans, CR3 fix, kernel-derived input state; cheat / DMA)
