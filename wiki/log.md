@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/cerberus`: entity [[cerberus]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/ceserver-ios`: entity [[ceserver-ios]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/cfclap`: entity [[cfclap]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

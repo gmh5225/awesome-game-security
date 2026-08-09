@@ -338,6 +338,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__minecpp.md
   - wiki/sources/descriptions/gmh5225__wasm-ceserver.md
   - wiki/sources/descriptions/gmh5225__compiler-binary-richprint.md
+  - wiki/sources/descriptions/gmh5225__cerberus.md
   - wiki/sources/descriptions/gmh5225__custom-VEH.md
   - wiki/sources/descriptions/gmh5225__veh-printf-hook.md
   - wiki/sources/descriptions/gmh5225__no-access-protection-x86.md
@@ -581,7 +582,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 | MBA | [[mixed-boolean-arithmetic]] | [[cobra]], [[qsynthesis]], [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfuscation-analysis]] |
 | CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[unflat]] (Python unflattener plugins; Fix OLLVM), [[obfuscation-detection]], [[misc]] (Genshin CFG decode), [[genshinjumpfixer2]] (Genshin jump-target CFG simplify) |
 | Opaque predicates | invariant injection | [[opaque-predicates-detective]], Z3/SMT backends ([[stp]]) |
-| VM virtualization | VMProtect / Themida handlers; open x86 VM embed; Quake III `.qvm` bytecode | [[novmpy]], [[tde]], [[magicmida-rs]], [[rumba]], [[vmpimportfixer]], [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[nocturne]], [[q3vm]] (embeddable AC dynamic-script VM; source: wiki/sources/descriptions/jnz__q3vm.md) |
+| VM virtualization | VMProtect / Themida handlers; open x86 VM embed; Quake III `.qvm` bytecode | [[novmpy]], [[tde]], [[magicmida-rs]], [[rumba]], [[vmpimportfixer]], [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[cerberus]] (ChaosVm Win32 PE bytecode VM; Qt GUI; source: wiki/sources/descriptions/gmh5225__cerberus.md), [[nocturne]], [[q3vm]] (embeddable AC dynamic-script VM; source: wiki/sources/descriptions/jnz__q3vm.md) |
 | Binary lifting | machine code → compiler IR | McSema, remill, [[retdec]] (retargetable decompiler; limited maintenance; Cheat → Decompiler); BN MLIL/HLIL (source: wiki/sources/descriptions/gmh5225__retdec.md) |
 
 ## Anti-analysis & debugging
