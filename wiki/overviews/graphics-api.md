@@ -173,7 +173,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 ## Overlay taxonomy
 
 - **Internal (Present hook)** — ImGui or custom draw in `Present` / swap path; highest integration, highest in-process detect surface ([[present-hook]]).
-- **External layered window** — `WS_EX_LAYERED | WS_EX_TRANSPARENT`, GDI+/D2D over game HWND; no game inject, separate window affinity concerns.
+- **External layered window** — `WS_EX_LAYERED | WS_EX_TRANSPARENT`, GDI+/D2D over game HWND; no game inject, separate window affinity concerns. Beginner GDI overlay samples such as [[external-esp-hack-assaultcube]] (AssaultCube; player boxes / names / health via external RPM + GDI draw; README `[GDI overlay]`) illustrate the simplest external overlay lane. (source: wiki/sources/descriptions/gmh5225__external-esp-hack-assaultcube.md)
 - **DWM / kernel draw** — composition or Ring0 GDI/dxgkrnl paths ([[dwm-hook]], [[dwmhook]], [[krnl-gdi-render]], [[dxgkrnl-hook]]); different screenshot and ETW surfaces.
 - **Third-party overlay hijack** — Steam, NVIDIA GeForce Experience, Discord samples ([[steam-overlay-x64]], [[mwclap]], [[nvidia-overlay-hijack]], [[discord-overlay-hook]]); reuse existing overlay infrastructure.
 - **Shader / draw interception** — depth-state or pixel-shader swaps for wallhack/chams without a full menu overlay ([[draw-call-hook]]). Educational R6 chams samples such as [[r6-chams-public]] (Chameleon Models + visual check; cheat / game:r6 [Chams]) illustrate title-specific chams patterns. (source: wiki/sources/descriptions/igromanru__R6-Chams-public.md)

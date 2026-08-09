@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/external-esp-hack-assaultcube`: entity [[external-esp-hack-assaultcube]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-09** — ingest `description:gmh5225/ezDrvBAK`: entity [[ez-drv-bak]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-08** — ingest `description:gmh5225/findcrypt-yara`: entity [[findcrypt-yara]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
