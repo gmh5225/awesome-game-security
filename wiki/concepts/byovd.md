@@ -41,11 +41,12 @@ sources:
   - wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md
   - wiki/sources/descriptions/gmh5225__mhydeath.md
   - wiki/sources/descriptions/gmh5225__mhyprot2.md
+  - wiki/sources/descriptions/gmh5225__evil-mhyprot-cli.md
   - wiki/sources/descriptions/gmh5225__lenovo_mapper.md
   - wiki/sources/descriptions/gmh5225__lenovo_exec.md
   - wiki/sources/descriptions/gmh5225__kur.md
   - wiki/sources/descriptions/gmh5225__imxyviMapper.md
-updated: 2026-08-08
+updated: 2026-08-09
 confidence: high
 ---
 
@@ -105,7 +106,7 @@ Hardware-feature bypass PoCs such as [[smep-bypass]] use vulnerable-driver primi
 
 Agere Modem driver LPE such as [[cve-2025-24990-poc]] abuses `ltmdm64.sys` `METHOD_NEITHER` IOCTLs (missing user/kernel boundary checks) → 4-byte write via `IOCTL_GET_VERSION` + null-deref fixup via `VirtualAlloc` → arbitrary kernel R/W, with an IoRing LPE variant. (source: wiki/sources/descriptions/moiz-2x__CVE-2025-24990_POC.md)
 
-Game-AC driver abuse such as [[mhyprot2]] (gmh5225; IOCTL kernel R/W + process termination via **`mhyprot2.sys`**), [[mhydeath]] (gmh5225; BYOVD arbitrary kernel R/W + process termination via the same signed AC driver), and [[evil-mhyprot-cli]] (CLI PoC for unprivileged kernel/user memory R/W on the same Genshin Impact driver) target miHoYo signed AC drivers in the canonical LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__mhyprot2.md) (source: wiki/sources/descriptions/gmh5225__mhydeath.md) (source: wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md)
+Game-AC driver abuse such as [[mhyprot2]] (gmh5225; IOCTL kernel R/W + process termination via **`mhyprot2.sys`**), [[mhydeath]] (gmh5225; BYOVD arbitrary kernel R/W + process termination via the same signed AC driver), and [[evil-mhyprot-cli]] (CLI PoC for unprivileged kernel/user memory R/W on the same Genshin Impact driver; gmh5225 `mhyprot::init` service front end and kkent030315 fork) target miHoYo signed AC drivers in the canonical LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__mhyprot2.md) (source: wiki/sources/descriptions/gmh5225__mhydeath.md) (source: wiki/sources/descriptions/gmh5225__evil-mhyprot-cli.md) (source: wiki/sources/descriptions/kkent030315__evil-mhyprot-cli.md)
 
 Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sits in the same cheat / vulnerable-driver research lane; the anycall project offers fuller client-and-driver-side physmem mapping. (source: wiki/sources/descriptions/kkent030315__MsIoExploit.md)
 
