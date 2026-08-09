@@ -3171,3 +3171,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-08** — ingest `description:gmh5225/js-debugger-bypass-script`: entity [[js-debugger-bypass-script]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[javascript-obfuscator]].
 
 - **2026-08-08** — ingest `description:gmh5225/hex2dec-mcp`: entity [[hex2dec-mcp]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-08-09** — ingest `description:gmh5225/byfron-bypass`: entity [[byfron-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

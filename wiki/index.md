@@ -188,6 +188,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bytecode-viewer](entities/bytecode-viewer.md) — Java/Android multi-decompiler suite (CFR/Procyon/FernFlower/JD-GUI/Krakatau; bytecode+Smali+source tabs; JAR/DEX/APK)
 - [BytecodeVM](entities/bytecodevm.md) — Java bytecode virtualizing obfuscator (pure-Java VM; mutated opcodes; AC Obfuscation Engine)
 
+- [byfron-bypass](entities/byfron-bypass.md) — Byfron/Roblox client AC bypass research (C++; asset pipelines / editor tooling; explore anticheat:byfron; gmh5225)
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
 - [Camera Triggerbot](entities/camera-triggerbot.md) — camera triggerbot (movement/color around crosshair; cheat / triggerbot & aimbot)
