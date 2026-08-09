@@ -641,6 +641,7 @@ sources:
   - wiki/sources/descriptions/nbqofficial__norsefire.md
   - wiki/sources/descriptions/nbqofficial__kernel-csgo.md
   - wiki/sources/descriptions/narumii__Deobfuscator.md
+  - wiki/sources/descriptions/gmh5225__deobfuscator.md
   - wiki/sources/descriptions/lzghzr__APatch_kpm.md
   - wiki/sources/descriptions/lockedbyte__so_loader.md
   - wiki/sources/descriptions/icculus__mojoelf.md
@@ -806,7 +807,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
 - Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
 - Lightweight Java/JVM attach debugging via [[jdbg]] (JDWP; method hooks / breakpoints / variable inspect / class enum) supports runtime RE of Java game clients and obfuscated JVM apps. (source: wiki/sources/descriptions/roger1337__JDBG.md)
-- Java bytecode deobfuscation via [[deobfuscator]] (narumii; cheat / RE tools) recovers readable class structure from obfuscated JVM clients alongside [[raung]]/[[jdbg]]. (source: wiki/sources/descriptions/narumii__Deobfuscator.md)
+- Java bytecode deobfuscation via [[deobfuscator]] (gmh5225 fork + narumii; ProGuard/Allatori/ZKM passes; cheat / RE tools) recovers readable class structure from obfuscated JVM/Android clients alongside [[raung]]/[[jdbg]]. (source: wiki/sources/descriptions/gmh5225__deobfuscator.md) (source: wiki/sources/descriptions/narumii__Deobfuscator.md)
 - Agent-facing GDB via [[mcp-gdb]] (MCP server; breakpoints / memory / registers / step through GDB MI) sits in the Cheat Debugging / Game Develop MCP lane for AI-assisted live debug. (source: wiki/sources/descriptions/signal-slot__mcp-gdb.md)
 - Legacy Windows GDB RSP stubs such as [[gdbserver9x]] (32-bit Win98SE/XP; VC6; Binary Ninja GDB adapter) sit in the Cheat Debugging / Binary Ninja remote-debug lane. (source: wiki/sources/descriptions/robert-yates__gdbserver9x.md)
 - Portable Windows GDB builds such as [[gdb-windows-binaries]] (mingw-w64 v12.2.0; all arches; TUI + Python; no extra DLL deps) sit in the Cheat Debugging / GDB lane. (source: wiki/sources/descriptions/noword__GDB-Windows-Binaries.md)

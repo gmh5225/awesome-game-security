@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/deobfuscator`: updated entity [[deobfuscator]] (gmh5225 fork alongside narumii variant); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/dolboeb-executor`: entity [[dolboeb-executor]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/dota-cheat`: entity [[dota-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
