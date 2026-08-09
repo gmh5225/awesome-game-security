@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/lehmenkuehler__camera-triggerbot.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
   - wiki/sources/descriptions/jakobfriedl__usb-monitor-bof.md
-updated: 2026-08-04
+  - wiki/sources/descriptions/gmh5225__anti-cheat.md
+updated: 2026-08-09
 confidence: medium
 ---
 
@@ -54,6 +55,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[yolov5-pubg]] — PUBG YOLOv5 object-detection / modding (Python; offensive CV pipeline)
 - [[camera-triggerbot]] — camera triggerbot (movement/color around crosshair; no trained model; cheat / triggerbot & aimbot)
 - [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
+- [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)
 
 ## Related
 
