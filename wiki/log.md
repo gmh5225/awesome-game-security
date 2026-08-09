@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/android_ebpf`: entity [[android-ebpf]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
+
 - **2026-08-09** — ingest `description:gmh5225/android_kernel_huawei_hi6250-8_Exp`: entity [[android-kernel-huawei-hi6250-8-exp]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/android_touch`: entity [[android-touch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
