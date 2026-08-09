@@ -177,6 +177,7 @@ sources:
   - wiki/sources/descriptions/miyakejima__xigncode3-blackdesert.md
   - wiki/sources/descriptions/gmh5225__XignCode3-bypass.md
   - wiki/sources/descriptions/gmh5225__XignCode3-bypass-alternative.md
+  - wiki/sources/descriptions/gmh5225__XignCode-Dump.md
   - wiki/sources/descriptions/mizt0__mixed-boolean-transform.md
   - wiki/sources/descriptions/mojtabafalleh__emulator.md
   - wiki/sources/descriptions/hzqst__unicorn_pe.md
@@ -563,7 +564,7 @@ confidence: high
 
 Workflows for protected game clients and anti-cheat components across user mode, kernel, and hypervisor-aware environments: debug/disassemble, DBI, deobfuscation, dump analysis, and IOCTL/callback mapping. Pair [[research-rigor]] when converting tool claims or detector observations into consequential conclusions—record binary hash, tool version, configuration, environment, and observed evidence. (source: wiki/sources/skills/reverse-engineering.md)
 
-Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdesert]] (Black Desert XIGNCODE3: `xmag`/`xnina` container unpack, Ghidra decompilation of native modules, Lua 5.3 recovery, VMProtect `xhunter1` triage, IPC/detection specs, PowerShell live capture) complement narrower exploit PoCs like [[xign-poc-april-2026]] and hooking/memory-analysis bypass samples such as [[xigncode3-bypass-alternative]] (C++; cheat / explore anticheat:xigncode). (source: wiki/sources/descriptions/miyakejima__xigncode3-blackdesert.md) (source: wiki/sources/descriptions/gmh5225__XignCode3-bypass-alternative.md)
+Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdesert]] (Black Desert XIGNCODE3: `xmag`/`xnina` container unpack, Ghidra decompilation of native modules, Lua 5.3 recovery, VMProtect `xhunter1` triage, IPC/detection specs, PowerShell live capture) complement captured client-module dumps like [[xigncode-dump]] (gmh5225; modding / offline RE; cheat / explore anticheat:xigncode), narrower exploit PoCs like [[xign-poc-april-2026]], and hooking/memory-analysis bypass samples such as [[xigncode3-bypass-alternative]] (C++; cheat / explore anticheat:xigncode). (source: wiki/sources/descriptions/miyakejima__xigncode3-blackdesert.md) (source: wiki/sources/descriptions/gmh5225__XignCode-Dump.md) (source: wiki/sources/descriptions/gmh5225__XignCode3-bypass-alternative.md)
 
 ## Workflow
 

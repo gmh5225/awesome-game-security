@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/XignCode-Dump`: entity [[xigncode-dump]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-09** — ingest `description:gmh5225/XignCode3-bypass-alternative`: entity [[xigncode3-bypass-alternative]]; cross-linked [[xigncode3-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-09** — ingest `description:gmh5225/XignCode3-bypass`: entity [[xigncode3-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
