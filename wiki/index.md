@@ -1457,6 +1457,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WindEffects](entities/wind-effects.md) — C++23 Vulkan/DX12 engine (ECS, editor, deferred/PBR; Game Engine)
 - [windbg-decompile-ext](entities/windbg-decompile-ext.md) — WinDbg x64 extension; live disasm + LLM verified pseudocode (WinDbg Plugins)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
+- [WatchDogKiller](entities/watchdog-killer.md) — WatchDog `amsdk.sys`/`wamsdk.sys` BYOVD EDR/AV terminator (IOCTL register + terminate; Silver Fox tradecraft; gmh5225)
 - [win-driver-exp](entities/win-driver-exp.md) — multi-driver BYOVD exploit collection (IOCTL → kernel R/W, code exec, process manipulation; incl. `AsUpIO64.sys` CVE-2024-33218; gmh5225)
 - [windows-10-22h2-vulnerable-driver-communication](entities/windows-10-22h2-vulnerable-driver-communication.md) — ASUS `asromgdrv.sys` BYOVD IOCTL wrapper (contiguous kernel pool + CR R/W; Win10 22H2 / Win11; gmh5225)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
