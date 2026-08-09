@@ -346,7 +346,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DsArk64](entities/dsark64.md) — BYOVD via Qihoo 360 `DsArk64.sys` (handle donor; ring-0 kill + kernel R/W)
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
 - [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)
-- [dwmhook](entities/dwmhook.md) — DWM DX11 vtable ImGui overlay framework (reflective inject; MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
+- [dwmhook](entities/dwmhook.md) — DWM composition overlay (gmh5225 PoC; inject draw calls without overlay HWND; README `[DWM]`) + mfxiaosheng DX11 vtable ImGui framework (MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
 - [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)

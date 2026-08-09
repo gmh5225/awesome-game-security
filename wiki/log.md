@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/dwmhook`: updated entity [[dwmhook]] (gmh5225 PoC alongside mfxiaosheng variant); cited on [[overviews/graphics-api]] and [[present-hook]].
+
 - **2026-08-09** — ingest `description:gmh5225/eac-bypass-1`: entity [[eac-bypass-1]]; cited on [[easy-anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/echoac-poc`: entity [[echoac-poc]]; cited on [[byovd]] and [[overviews/windows-kernel]].
