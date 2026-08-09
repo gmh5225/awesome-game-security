@@ -4677,6 +4677,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/weak1337/SkipHook [Skip Hook]
 - https://github.com/ekknod/SetWindowHookEx [Using SetWindowHookEx for preinjected DLL's]
 - [A tool for patching authenticode signed PE files (exe, dll, sys ..etc) without invalidating or breaking the existing signature](https://github.com/med0x2e/SigFlip)
+- https://github.com/KriyosArcane/TrustMeBro [Authenticode signature manipulation toolkit: signature stealing, metadata cloning, SIP hijacking (19 file types), WinVerifyTrust FinalPolicy bypass, PKCS#7 payload embedding (SigStash), SIPExec lateral movement, Smart App Control bypass, FormatGhost OID persistence; Python + C++; YARA/Sigma detection rules]
 - [Simple program to stream offsets for your game cheat](https://github.com/gmh5225/OffsetStreaming)
 - https://github.com/jnastarot/HIGU_ntcall [Direct System Calls]
 - https://github.com/SilentisVox/DoomSyscalls [Indirect syscalls: dynamic SSN and syscall-instruction resolve; return-address spoof via ntdll gadgets; userland hook / RIP-return evasion research]
