@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/Valorant-External-P2C-Leaked`: entity [[valorant-external-p2c-leaked]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/Valorant-External-Source`: entity [[valorant-external-source]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `readme:categories`: bumped Some Tricks ~116 (was ~115; Cheat ~2665 / Anti Cheat ~657 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
