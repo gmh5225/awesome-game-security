@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__csgo-sdk-improved.md
   - wiki/sources/descriptions/gmh5225__csgo-offsets.md
   - wiki/sources/descriptions/gmh5225__cs2_webradar.md
+  - wiki/sources/descriptions/gmh5225__cs2_things.md
 updated: 2026-08-09
 confidence: high
 ---
@@ -45,8 +46,8 @@ Interface vtables and netvar tables drift per game build—verify against the ta
 
 ## Ground-truth sources
 
-Open or leaked trees such as [[source-engine]], Orange Box SDK trees such as [[source-sdk-orangebox]] (gmh5225; shader/render/driver-oriented Source 1 SDK) (source: wiki/sources/descriptions/gmh5225__source-sdk-orangebox.md), [[cstrike15-src]], and CS:GO mod source trees such as [[csso-src]] (gmh5225; client/server logic, weapons, movement, engine interfaces; CSGO Mod) (source: wiki/sources/descriptions/gmh5225__csso-src.md) help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] and Dota 2 layout dumps such as [[dota2dumped]] (netvar offsets, interface pointers, class headers after patches) illustrate the Source 2 netvar/entity-layout lane; browser radar clients such as [[cs2-webradar]] (gmh5225; entity positions via memory analysis for web display; cheat / game:cs2) consume the same artifacts as overlay cheats. (source: wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md) (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md)
+Open or leaked trees such as [[source-engine]], Orange Box SDK trees such as [[source-sdk-orangebox]] (gmh5225; shader/render/driver-oriented Source 1 SDK) (source: wiki/sources/descriptions/gmh5225__source-sdk-orangebox.md), [[cstrike15-src]], and CS:GO mod source trees such as [[csso-src]] (gmh5225; client/server logic, weapons, movement, engine interfaces; CSGO Mod) (source: wiki/sources/descriptions/gmh5225__csso-src.md) help validate ClientClass/RecvTable layouts. CS2 offset dumps such as [[cs2-offsets]] and Dota 2 layout dumps such as [[dota2dumped]] (netvar offsets, interface pointers, class headers after patches) illustrate the Source 2 netvar/entity-layout lane; CS2 research collections such as [[cs2-things]] (gmh5225; VScript; RE structures / offset dumps / SDK snippets / entity layouts / netvars / engine interfaces; cheat / game:cs2) document the same layout artifacts for Source 2 RE; browser radar clients such as [[cs2-webradar]] (gmh5225; entity positions via memory analysis for web display; cheat / game:cs2) consume the same artifacts as overlay cheats. (source: wiki/sources/descriptions/ikhsanprasetyo__dota2dumped.md) (source: wiki/sources/descriptions/gmh5225__cs2_things.md) (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md)
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[offsets]] · [[gh-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-webradar]] · [[source-engine]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[offsets]] · [[gh-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-things]] · [[cs2-webradar]] · [[source-engine]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
