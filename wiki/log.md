@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/cfclap`: entity [[cfclap]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/chainoffools`: entity [[chainoffools]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/cheap-engine`: entity [[cheap-engine]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].

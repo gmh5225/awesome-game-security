@@ -199,6 +199,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [CFG-FindHiddenShellcode](entities/cfg-find-hidden-shellcode.md) — CFG bitmap inconsistency shellcode scanner (C; valid call targets outside module code)
+- [cfclap](entities/cfclap.md) — CrossFire (CF) cheat: memory manipulation / ESP / aimbot (cheat / game:crossfire; gmh5225)
 - [cheap-engine](entities/cheap-engine.md) — lightweight Android memory scanner (scan/edit, exact/range/changed search, pointer scan; simplified CE alternative; gmh5225)
 - [ChainOfFools](entities/chainoffools.md) — CVE-2020-0601 Windows CryptoAPI ECC root-spoof PoC (Python + OpenSSL; CurveBall/ChainOfFools; gmh5225)
 - [ChaiScript Plugin](entities/chaiscript-plugin.md) — x64dbg plugin: ChaiScript automation (three commands; thorough API; Cheat x64dbg Plugins)
