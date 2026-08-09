@@ -21,7 +21,7 @@ C++ CS:GO SDK focused on **SDK generation** and **hooking**—headers and scaffo
 
 CS:GO Source engine SDK with reverse-engineered **class definitions**, **interface declarations**, **netvar structures**, and **function signatures**. C++ headers cover entity classes, weapon data, player info structures, and engine interface pointers—the foundational type system for CS:GO cheat development and Source engine research. (source: wiki/sources/descriptions/gmh5225__csgo-sdk.md)
 
-Pair with reverse-engineered header dumps such as [[sdk]], internal scaffolds such as [[csgo-internal-base]], and netvar workflow notes in [[source-netvars]].
+Pair with reverse-engineered header dumps such as [[sdk]], improved header trees such as [[csgo-sdk-improved]], internal scaffolds such as [[csgo-internal-base]], and netvar workflow notes in [[source-netvars]].
 
 ## Links
 
@@ -30,4 +30,4 @@ Pair with reverse-engineered header dumps such as [[sdk]], internal scaffolds su
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[sdk]] · [[csgo-internal-base]] · [[csso-src]] · [[cstrike15-src]] · [[heck-csgo-external]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[sdk]] · [[csgo-sdk-improved]] · [[csgo-internal-base]] · [[csso-src]] · [[cstrike15-src]] · [[heck-csgo-external]]
