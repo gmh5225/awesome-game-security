@@ -916,6 +916,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [mwclap](entities/mwclap.md) — COD Warzone NVIDIA GeForce Experience overlay hijack (cheat / game:cod warzone)
+- [warzone-internal-cheat](entities/warzone-internal-cheat.md) — COD Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [mtasa-blue](entities/mtasa-blue.md) — MTA:SA GTA:SA multiplayer mod (C++/Lua; D3D/DInput hooks; CEF; built-in AC)
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)
 - [mvisor](entities/mvisor.md) — C++ remake (kernel/render/audio; Cheat QEMU/KVM/PVE/VBOX)
