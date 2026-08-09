@@ -166,6 +166,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [avdebugger](entities/avdebugger.md) — AV signature recovery (Cheat → Anti Signature Scanning)
 - [awesome-anti-virtualization](entities/awesome-anti-virtualization.md) — curated anti-virtualization resources (Detection:Virtual Environments)
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
+- [awesome-executable-packing](entities/awesome-executable-packing.md) — curated executable packing/unpacking resources (PE/ELF/Mach-O; packers, protectors, unpackers, analysis tools; Executable File Packing)
 - [awesome-game-engine-dev](entities/awesome-game-engine-dev.md) — curated game-engine-dev resources (DirectX/OpenGL; Game Engine / guide)
 - [awesome-injection](entities/awesome-injection.md) — curated injection resources (Cheat / injection:windows)
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
