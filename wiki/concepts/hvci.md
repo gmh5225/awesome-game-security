@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md
   - wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md
   - wiki/sources/descriptions/mattifestation__WDACTools.md
-updated: 2026-07-30
+  - wiki/sources/descriptions/gmh5225__ZeroHVCI.md
+updated: 2026-08-09
 confidence: high
 ---
 
@@ -38,7 +39,9 @@ LOLdriver / vulnerable-driver inventory checks under HVCI appear in PowerShell r
 
 WDAC policy build/deploy tooling such as [[wdactools]] (PowerShell; base/supplemental CI policies, UMCI/WHQL/audit options, CIPolicyParser, CiTool.exe) helps study the user-mode side of the same code-integrity trust pipeline [[hvci]] enforces at the hypervisor. (source: wiki/sources/descriptions/mattifestation__WDACTools.md)
 
+HVCI bypass PoCs such as [[zero-hvci]] (gmh5225; policy edge cases + vulnerable signed-driver primitives → unsigned kernel code under Memory Integrity) sit in the same kernel trust-feature research lane. (source: wiki/sources/descriptions/gmh5225__ZeroHVCI.md)
+
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 
