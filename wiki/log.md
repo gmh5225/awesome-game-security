@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/eft-internal`: entity [[eft-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-09** — ingest `description:gmh5225/egui-d3d11`: entity [[egui-d3d11]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:talsec/Free-RASP-Android`: entity [[free-rasp-android]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].

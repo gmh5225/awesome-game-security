@@ -358,6 +358,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-cr3-bypass](entities/eac-cr3-bypass.md) — UM+KM EAC CR3 bypass teaching sample (C/C++; driver dev)
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
+- [eft-internal](entities/eft-internal.md) — Escape From Tarkov internal cheat (C++; shader / rendering / asset pipelines; cheat / game:eft; gmh5225)
 - [Elden Ring CT TGA](entities/elden-ring-ct-tga.md) — Elden Ring Cheat Engine table; protonhax + Wine CE on Steam Proton (cheat / game:eldenring [Cheat Engine])
 - [EldenRingMods](entities/eldenringmods.md) — Elden Ring animation/modding (C++ / C/C++; cheat / game:eldenring [Mod])
 - [EasyPixel](entities/easypixel.md) — Magisk module: disguise device as Google Pixel (Cheat Magisk)
