@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `readme:categories`: bumped Anti Cheat ~655 (was ~654; Cheat ~2662 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-09** — ingest `description:gmh5225/ethersplay`: entity [[ethersplay]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/evil-mhyprot-cli`: updated entity [[evil-mhyprot-cli]] (gmh5225 fork; `mhyprot::init` CLI front end); cited on [[byovd]] and [[overviews/windows-kernel]].
