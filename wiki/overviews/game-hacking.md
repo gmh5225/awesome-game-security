@@ -566,6 +566,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ghidra.md
   - wiki/sources/descriptions/gmh5225__injection.md
   - wiki/sources/descriptions/gmh5225__executor.md
+  - wiki/sources/descriptions/gmh5225__ethersplay.md
   - wiki/sources/descriptions/gmh5225__immortal-rust.md
   - wiki/sources/descriptions/gmh5225__rust-external-1.md
   - wiki/sources/descriptions/gmh5225__rust-internal.md
@@ -815,6 +816,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
 - Binary Ninja ↔ Ghidra Server bidirectional analysis sync via [[ghidra-svr-bridge]] (C++/Qt6 sidebar + Java 17 bridge; local TCP JSON; symbols/comments/types/signatures/bookmarks; collaborative Ghidra Server repos) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md)
 - Solana eBPF (SBF) disassembly/decompilation via [[bn-ebpf-solana]] (Binary Ninja plugin; SBF encoding / memory model / calling conventions) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/otter-sec__bn-ebpf-solana.md)
+- Ethereum EVM bytecode disassembly via [[ethersplay]] (Binary Ninja plugin; EVM insn decode, CFG, xrefs for compiled Solidity contracts; blockchain auditor lane) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/gmh5225__ethersplay.md)
 - Process auto-attach via [[auto-attach]] (x64dbg plugin; `AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; target process name + optional delay; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/legendabrn__AutoAttach.md)
 - Collaborative breakpoint management via [[slothbp]] (x64dbg plugin; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__SlothBP.md)
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)

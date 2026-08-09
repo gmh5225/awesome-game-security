@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/ethersplay`: entity [[ethersplay]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/evil-mhyprot-cli`: updated entity [[evil-mhyprot-cli]] (gmh5225 fork; `mhyprot::init` CLI front end); cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/executor`: entity [[executor]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
