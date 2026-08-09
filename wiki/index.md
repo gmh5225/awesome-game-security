@@ -1404,6 +1404,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VALORANT-FNamePool](entities/valorant-fnamepool.md) — iterate/decrypt Valorant FNamePool->Entries (C/C++; cheat / game:valorant)
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
 - [Van1338](entities/van1338.md) — timing-attack handle elevation; Windows object-callback design (AC stress testing)
+- [VanderLeague](entities/vanderleague.md) — hypervisor-assisted LoL offensive stack (C/C++; kernel driver + rendering; gmh5225; cheat / game:lol)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
 - [VDK](entities/vdk.md) — Vulnerable Driver Kit; multi-backend BYOVD (Speedfan.sys; kernel R/W, process manipulation, driver load)
 - [veh](entities/veh.md) — VEH software debugger (no Debug API; CE plugin / manualmap VEH DLL)

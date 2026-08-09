@@ -571,6 +571,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__league-base.md
   - wiki/sources/descriptions/gmh5225__hh-lol-prophet.md
   - wiki/sources/descriptions/gmh5225__ayaya-league-external.md
+  - wiki/sources/descriptions/gmh5225__VanderLeague.md
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
   - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
   - wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md
@@ -1107,6 +1108,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - LoL modding samples such as [[hh-lol-prophet]] (Go; hh lol prophet; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as client modding study rather than dump or base-scaffold tooling. (source: wiki/sources/descriptions/gmh5225__hh-lol-prophet.md)
 - LoL assistant client samples such as [[frank]] (JavaScript; WeGame replacement; rendering, animation, asset pipelines; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as launcher/client-side study rather than cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__frank.md)
 - LoL external script platforms such as [[ayaya-league-external]] (Node.js; AyayaLeague; custom user scripts; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as out-of-process scripting substrates rather than cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__ayaya-league-external.md)
+- LoL hypervisor-assisted samples such as [[vanderleague]] (C/C++; kernel driver development + rendering; hypervisor-assisted offensive stack; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as below-OS / HV-assisted study rather than in-guest cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__VanderLeague.md)
 - Valorant crosshair-setting utilities such as [[valorantcc]] sit in the cheat / game:valorant lane (client config; Riot-owned assets/endpoints). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 - Valorant internal cheat bases such as [[valorant-internal-cheat]] (C/C++; Unreal Engine SDK generation + hooking; Internal tag), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the in-process offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md)
 - Valorant ImGui cheat-menu frameworks such as [[valorant-gui-imgui-remake]] (C++; styled tabs/toggles/sliders for ESP/aimbot/visual mods; UE4 interaction patterns; README `[GUI]`) illustrate cheat UI architecture in the same cheat / game:valorant lane. (source: wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md)

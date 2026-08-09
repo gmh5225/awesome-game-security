@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/VanderLeague`: entity [[vanderleague]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
+
 - **2026-08-09** — ingest `description:gmh5225/VanguardImportResolver`: entity [[vanguard-import-resolver]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
 
 - **2026-08-09** — ingest `description:gmh5225/Vmp3_utils`: entity [[vmp3-utils]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
