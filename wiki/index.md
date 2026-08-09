@@ -137,6 +137,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)
 - [Anti-Cheat-Amateur](entities/anti-cheat-amateur.md) — MemRE memory editor + GothGirlFeet kdmapper KMDF driver (NUL IOCTL; DBVM shims; UE scan; Tencent ACE research)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
+- [Baka (antidbg-Baka)](entities/antidbg-baka.md) — Windows C/C++ anti-debug library (PEB/NtQueryInformationProcess/HWBP/timing/exception/parent; ScyllaHide/HyperHide/TitanHide detection; Anti Debugging)
 - [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
 - [AntiHook](entities/antihook.md) — Windows kernel hook enum + remove (driver / graphics; cheat / RE tools)

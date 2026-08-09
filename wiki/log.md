@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/antidbg-Baka`: entity [[antidbg-baka]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/apex_legends_sdk`: entity [[apex-legends-sdk]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-09** — ingest `description:gmh5225/augur-riot`: entity [[augur-riot]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
