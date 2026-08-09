@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/VanguardImportResolver`: entity [[vanguard-import-resolver]]; cited on [[vanguard]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/Vmp3_utils`: entity [[vmp3-utils]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/Voyager`: entity [[voyager]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked from [[hyper-rev]].

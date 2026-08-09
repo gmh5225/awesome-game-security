@@ -1388,6 +1388,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
 - [VALVeAntiCheat1](entities/valveanticheat1.md) — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode VM rebuild (2002–2004; RE notes + tooling)
 - [Vook](entities/vook.md) — VAC hook research (explore anticheat:vac)
+- [vanguard-import-resolver](entities/vanguard-import-resolver.md) — Resolve Vanguard `vgk.sys` protected kernel imports; document import-resolution mechanism (gmh5225)
 - [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
 - [valo-driver](entities/valo-driver.md) — Valorant kernel external memory read (phys translate / CR3 / MDL; bypass Vanguard API monitoring; gmh5225)

@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__frank.md
   - wiki/sources/descriptions/gmh5225__ayaya-league-external.md
   - wiki/sources/descriptions/gmh5225__augur-riot.md
+  - wiki/sources/descriptions/gmh5225__VanguardImportResolver.md
 updated: 2026-08-09
 confidence: medium
 ---
@@ -49,7 +50,7 @@ Exception-dispatch research such as [[val-exception-handler]] (PoC; hardware exc
 
 Page-fault telemetry such as [[vgk-illegal-pf-logger]] (logs intentional illegal PFs from `vgk.sys`; integrity-check detection mechanism RE) complements exception-dispatch PoCs and usermode working-set monitors like [[faultline]]. (source: wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md)
 
-RITO streamed-module reconstruction such as [[augur-riot]] (hashed import resolve, section rebuild, valid PE/DLL output from Vanguard driver payloads; gmh5225) supports offline static RE of Vanguard kernel modules without live driver telemetry. (source: wiki/sources/descriptions/gmh5225__augur-riot.md)
+RITO streamed-module reconstruction such as [[augur-riot]] (hashed import resolve, section rebuild, valid PE/DLL output from Vanguard driver payloads; gmh5225) supports offline static RE of Vanguard kernel modules without live driver telemetry. (source: wiki/sources/descriptions/gmh5225__augur-riot.md) Protected `vgk.sys` import resolution such as [[vanguard-import-resolver]] (resolve Vanguard kernel import addresses; document import-protection mechanism; gmh5225) complements that lane for analyzing which kernel APIs the driver calls. (source: wiki/sources/descriptions/gmh5225__VanguardImportResolver.md)
 
 Early-load offensive samples such as [[valorant-esp-hack-with-driver]] (ESP; exploits a Vanguard driver vulnerability to load a companion driver before Vanguard; kernel-injector workflow; gmh5225) illustrate the boot-order race against Vanguard's early visibility rather than in-process SDK or dump-only tooling. (source: wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md)
 
@@ -59,4 +60,4 @@ Historical League of Legends client mod/patcher samples such as [[lol-patcher]] 
 
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[augur-riot]] · [[lol-patcher]] · [[lol-offset-dumper]] · [[lol-unpackman]] · [[league-base]] · [[hh-lol-prophet]] · [[frank]] · [[ayaya-league-external]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[augur-riot]] · [[vanguard-import-resolver]] · [[lol-patcher]] · [[lol-offset-dumper]] · [[lol-unpackman]] · [[league-base]] · [[hh-lol-prophet]] · [[frank]] · [[ayaya-league-external]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
