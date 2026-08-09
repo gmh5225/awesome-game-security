@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:thixotropist/ghidra_decompiler_plugins`: entity [[ghidra-decompiler-plugins]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[ghidra]].
+
 - **2026-08-09** — ingest `readme:categories`: bumped Cheat ~2664 (was ~2663) / DirectX ~38 (was ~37; Anti Cheat ~656 stable); refreshed [[overviews/overview]], [[overviews/graphics-api]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-09** — ingest `description:gmh5225/bytecode-viewer`: entity [[bytecode-viewer]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
