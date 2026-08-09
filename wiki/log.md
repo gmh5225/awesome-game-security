@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/cheat-attack-thread-slemu`: entity [[cheat-attack-thread-slemu]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/cheat-engine-ceserver-pcileech`: entity [[cheat-engine-ceserver-pcileech]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/compiler-binary-richprint`: entity [[compiler-binary-richprint]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
