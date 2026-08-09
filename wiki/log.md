@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/dbk64-vulnerability-driver`: entity [[dbk64-vulnerability-driver]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-09** — ingest `description:joeltco/ff3mmo`: entity [[ff3mmo]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:lyk64/VolkDMA`: entity [[volk-dma]]; cited on [[overviews/dma-attack]] and [[dma]].
