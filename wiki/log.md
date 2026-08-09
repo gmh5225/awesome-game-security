@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/cs16-trigger-kvm`: entity [[cs16-trigger-kvm]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/cs2-fov-changer`: entity [[cs2-fov-changer]]; cited on [[overviews/game-hacking]] and [[source-netvars]].
 
 - **2026-08-09** — ingest `readme:categories`: bumped Game Network ~27 (was ~26; Cheat ~2663 / Anti Cheat ~656 stable); ds2os/ds3os Dark Souls private-server note on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).

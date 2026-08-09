@@ -319,6 +319,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__veh-printf-hook.md
   - wiki/sources/descriptions/gmh5225__no-access-protection-x86.md
   - wiki/sources/descriptions/gmh5225__memory-relocalloc.md
+  - wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md
   - wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md
   - wiki/sources/descriptions/gmh5225__veh_hide_memory.md
   - wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md
@@ -416,6 +417,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[csgo-external-ahk-hack]] — AutoHotkey external CS:GO sample (gmh5225; script RPM; triggerbot / bhop / basic ESP; no compiled cheat binary) for studying script-based out-of-process cheat surface and detection characteristics against VAC (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - [[csgo-backtrack-patch]] — CS:GO backtrack patch sample (C/C++; hooking / memory analysis) for studying lag-compensation / tick-history cheat surface against VAC (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - [[kvm-csgo-cheat]] — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (gmh5225) for studying VM-isolated / below-OS cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
+- [[cs16-trigger-kvm]] — KVM/QEMU host-side CS1.6 triggerbot (gmh5225; guest memory read + input injection invisible to in-guest AC) for studying hypervisor-based cheat surface (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[fix-arxan]] — Arxan PE protector: loader info + decrypted working image for research (Dump Fix) (source: wiki/sources/descriptions/pr701__fix-arxan.md)
 - [[android-unpacker]] — Android packed-sample unpack tooling for malware RE (Sample Unpacker; handle samples carefully) (source: wiki/sources/descriptions/strazzere__android-unpacker.md)
