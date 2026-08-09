@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/compiler-binary-richprint`: entity [[compiler-binary-richprint]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/cs16-trigger-kvm`: entity [[cs16-trigger-kvm]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-09** — ingest `description:gmh5225/cs2-fov-changer`: entity [[cs2-fov-changer]]; cited on [[overviews/game-hacking]] and [[source-netvars]].
