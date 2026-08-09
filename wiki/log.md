@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/YaeAchievement`: entity [[yae-achievement]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-09** — ingest `description:gmh5225/ZeroGui-Fortnite-Internal`: entity [[zerogui-fortnite-internal]]; cited on [[overviews/game-hacking]] and [[easy-anti-cheat]].
 
 - **2026-08-09** — ingest `description:gmh5225/ZeroHVCI`: entity [[zero-hvci]]; cited on [[hvci]] and [[overviews/windows-kernel]].
