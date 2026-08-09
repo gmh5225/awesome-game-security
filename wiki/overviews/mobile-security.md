@@ -46,6 +46,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__magiskboot-linux.md
   - wiki/sources/descriptions/gmh5225__frida-il2cpp-datacollector.md
   - wiki/sources/descriptions/gmh5225__frida-ceserver.md
+  - wiki/sources/descriptions/gmh5225__cheap-engine.md
   - wiki/sources/descriptions/gmh5225__freedom.md
 
   - wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md
@@ -237,7 +238,7 @@ Operational pattern: lifecycle `start/stop/restart/status`; analysis mode may di
 
 ## Memory manipulation
 
-Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver remote debug, custom `/dev` drivers ([[root-socket-kit]], [[rwmem]], [[android-mem-edit]]). Loaded native `.so` segment dump + ELF reconstruction without `ptrace` via [[memdumper]] (32/64-bit; bypasses basic anti-debug attach checks). (source: wiki/sources/descriptions/kp7742__MemDumper.md) Zygisk-module variant [[zygisk-memdump]] dumps `.so` from process memory via Magisk specialization hooks (C/C++; modding / hooking / memory analysis). (source: wiki/sources/descriptions/hackcatml__zygisk-memdump.md) iOS jailbroken: H5GG, Flex, ceserver-ios. Frida-backed Cheat Engine servers such as [[frida-ceserver]] expose the ceserver protocol over [[frida]] attach (Android/iOS/desktop; non-rooted Android where attach works) for desktop CE remote scan/write. (source: wiki/sources/descriptions/gmh5225__frida-ceserver.md)
+Root paths: `/proc/<pid>/mem` pread/pwrite, GameGuardian-style editors, ceserver remote debug, custom `/dev` drivers ([[root-socket-kit]], [[rwmem]], [[android-mem-edit]]). Lightweight native Android memory scanners such as [[cheap-engine]] (exact/range/changed-unchanged value search, edit, pointer scan; simplified Cheat Engine alternative; gmh5225) sit in the same GameGuardian-style scan/edit lane. (source: wiki/sources/descriptions/gmh5225__cheap-engine.md) Loaded native `.so` segment dump + ELF reconstruction without `ptrace` via [[memdumper]] (32/64-bit; bypasses basic anti-debug attach checks). (source: wiki/sources/descriptions/kp7742__MemDumper.md) Zygisk-module variant [[zygisk-memdump]] dumps `.so` from process memory via Magisk specialization hooks (C/C++; modding / hooking / memory analysis). (source: wiki/sources/descriptions/hackcatml__zygisk-memdump.md) iOS jailbroken: H5GG, Flex, ceserver-ios. Frida-backed Cheat Engine servers such as [[frida-ceserver]] expose the ceserver protocol over [[frida]] attach (Android/iOS/desktop; non-rooted Android where attach works) for desktop CE remote scan/write. (source: wiki/sources/descriptions/gmh5225__frida-ceserver.md)
 
 ## In-app purchase (IAP) & billing
 
