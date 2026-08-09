@@ -82,6 +82,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__memcs.md
   - wiki/sources/descriptions/gmh5225__job_communication.md
   - wiki/sources/descriptions/gmh5225__custom_data_ptr_swap_sample.md
+  - wiki/sources/descriptions/gmh5225__avhook.md
   - wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md
   - wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
@@ -1017,6 +1018,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS:GO samples such as [[aqhax-csgo]] (AqHax; C++; interface capture + VMT hooks + netvar dump; ESP, aimbot, triggerbot, movement, skin changer) sit in the same cheat / game:csgo lane for studying typical internal cheat feature stacks. (source: wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md)
 - Internal CS:GO samples such as [[osiris-and-extra]] (C/C++; driver development / OpenGL / rendering; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - Simple internal CS:GO RE-training samples such as [[dainsleif]] (s3pt3mb3r) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
+- CS:GO training software such as [[avhook]] (gmh5225; Windows; joke features; cheat / game:csgo) sits in the same RE-training lane. (source: wiki/sources/descriptions/gmh5225__avhook.md)
 - Actively developed Internal CS:GO samples such as [[sensum]] (martinjanas; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/martinjanas__Sensum.md)
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)

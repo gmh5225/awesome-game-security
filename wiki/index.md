@@ -164,6 +164,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)
 - [AvAAntiCheat](entities/avaanticheat.md) — Minecraft Bukkit/Spigot AC (fly/combat/autoclick/packet; Geyser leniency)
 - [avdebugger](entities/avdebugger.md) — AV signature recovery (Cheat → Anti Signature Scanning)
+- [avhook](entities/avhook.md) — CS:GO training software (Windows; joke features; gmh5225; cheat / game:csgo)
 - [awesome-anti-virtualization](entities/awesome-anti-virtualization.md) — curated anti-virtualization resources (Detection:Virtual Environments)
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
 - [awesome-executable-packing](entities/awesome-executable-packing.md) — curated executable packing/unpacking resources (PE/ELF/Mach-O; packers, protectors, unpackers, analysis tools; Executable File Packing)

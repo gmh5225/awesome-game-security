@@ -118,6 +118,7 @@ sources:
   - wiki/sources/descriptions/seksea__gamesneeze.md
   - wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md
   - wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md
+  - wiki/sources/descriptions/gmh5225__avhook.md
   - wiki/sources/descriptions/martinjanas__Sensum.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
@@ -415,6 +416,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[csgosimple]] — spirthack/MarkHC Internal CS:GO baseline for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - [[osiris-and-extra]] — Internal CS:GO sample (C/C++; driver / OpenGL / rendering) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - [[dainsleif]] — simple Internal CS:GO RE-training sample for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
+- [[avhook]] — CS:GO training software (gmh5225; Windows; joke features) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__avhook.md)
 - [[sensum]] — actively developed Internal CS:GO sample for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/martinjanas__Sensum.md)
 - [[gamesneeze]] — Linux CS:GO sample (seksea) for studying non-Windows cheat surface against VAC (source: wiki/sources/descriptions/seksea__gamesneeze.md)
 - [[csgo-linux-cheat-sdk]] — Linux CS:GO cheat SDK (otvv; C++; rendering / networking / modding) for studying non-Windows cheat surface against VAC (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
