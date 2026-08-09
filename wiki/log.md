@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/cs2_webradar`: entity [[cs2-webradar]]; cited on [[overviews/game-hacking]] and [[source-netvars]].
+
 - **2026-08-09** — ingest `description:gmh5225/csgo-offsets`: entity [[csgo-offsets]]; cited on [[overviews/game-hacking]] and [[source-netvars]].
 
 - **2026-08-09** — ingest `description:gmh5225/csgo-sdk-improved`: entity [[csgo-sdk-improved]]; cited on [[overviews/game-hacking]] and [[source-netvars]].

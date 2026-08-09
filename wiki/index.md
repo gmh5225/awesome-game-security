@@ -236,6 +236,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS2-Internal](entities/cs2-internal.md) — internal CS2: SDK generation / hooking / memory analysis (C++)
 - [CS2-OFFSETS](entities/cs2-offsets.md) — CS2 memory offsets / netvars (C++ headers + JSON; Source 2)
 - [CS2-Offsets (ro0ti)](entities/cs2-offsets-ro0ti.md) — CS2 offset dump (C#/C++; `[Offset]`; cheat / game:cs2)
+- [cs2-webradar](entities/cs2-webradar.md) — CS2 browser-based radar cheat (C++/JavaScript; memory analysis / asset pipelines; gmh5225)
 - [CSGO_BacktrackPatch](entities/csgo-backtrack-patch.md) — CS:GO backtrack patch (hooking / memory analysis; cheat / game:csgo)
 - [csgo-bot](entities/csgo-bot.md) — CS:GO bot; driver / OpenGL / shader (C/C++; cheat / game:csgo)
 - [csgo_cheat_external](entities/csgo-cheat-external.md) — external CS:GO; driver development (C++; cheat / game:csgo)
