@@ -1492,6 +1492,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x64dbg](entities/x64dbg.md) — Windows x86/x64 debugger (plugins; Cheat Debugging)
 - [x64dbg Plugin Manager](entities/x64dbg-plugin-manager.md) — x64dbg plugin install/management (C++/C; plugin development / modding; Cheat x64dbg Plugins)
 - [x64dbg Trace Reader](entities/x64dbg-trace-reader.md) — standalone `.trace64` parser (Capstone disasm; register/memory state; regex filter; offline trace analysis)
+- [X64DBG MapLdr](entities/x64dbg-mapldr.md) — x64dbg plugin: load linker/IDA MAP files into symbol database (MSVC/Borland; function/global/segment names; C++; Cheat x64dbg Plugins)
 - [X64DBG ViewDllNotification](entities/x64dbg-view-dll-notification.md) — x64dbg plugin: view DLL load notifications (`LdrRegisterDllNotification`; C++/C++; Cheat x64dbg Plugins)
 - [x64dbg XFG Marker](entities/x64dbg-xfg-marker.md) — x64dbg plugin: mark XFG call signatures as data (8-byte; before target function; Cheat x64dbg Plugins)
 - [x64dbgbinja](entities/x64dbgbinja.md) — Binary Ninja plugin (Python; x64dbg org; BN ↔ x64dbg lane)
