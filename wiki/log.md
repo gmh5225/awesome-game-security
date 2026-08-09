@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `readme:categories`: bumped Cheat ~2663 (was ~2662) / Anti Cheat ~656 (was ~655; Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-09** — ingest `description:gmh5225/deobfuscator`: updated entity [[deobfuscator]] (gmh5225 fork alongside narumii variant); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/dolboeb-executor`: entity [[dolboeb-executor]]; cited on [[byovd]] and [[overviews/windows-kernel]].
