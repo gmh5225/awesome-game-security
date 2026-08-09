@@ -12,7 +12,7 @@ confidence: medium
 
 Cheat Engine server implemented through [[frida]] instrumentation: reads and writes process memory on mobile and desktop targets and exposes the **ceserver network protocol** so a desktop Cheat Engine client can connect, scan, and edit memory remotely. Works on **non-rooted Android** where Frida can attach, plus iOS and desktop platforms—aimed at mobile game-security researchers who want CE workflows without a jailbreak-only ceserver stack. (source: wiki/sources/descriptions/gmh5225__frida-ceserver.md)
 
-Complements jailbroken iOS REST scanners such as [[memory-server]] and WASM-oriented [[wasm-ceserver]] when the workflow is desktop CE over Frida attach rather than root `/proc` paths or browser WASM targets.
+Complements jailbroken iOS native ceserver [[ceserver-ios]], REST scanners such as [[memory-server]], and WASM-oriented [[wasm-ceserver]] when the workflow is desktop CE over Frida attach rather than a jailbreak-only ceserver stack, REST APIs, or browser WASM targets.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements jailbroken iOS REST scanners such as [[memory-server]] and WASM-orie
 
 ## Related
 
-[[frida]] · [[wasm-ceserver]] · [[memory-server]] · [[frida-il2cpp-datacollector]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[frida]] · [[ceserver-ios]] · [[wasm-ceserver]] · [[memory-server]] · [[frida-il2cpp-datacollector]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
