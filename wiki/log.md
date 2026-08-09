@@ -6,6 +6,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-09** — ingest `readme:categories`: bumped Cheat ~2665 (was ~2664) / Some Tricks ~115 (was ~114; Anti Cheat ~656 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
 
+- **2026-08-09** — ingest `description:okhsunrog/vpnhide`: entity [[vpnhide]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/XignCode-Dump`: entity [[xigncode-dump]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-09** — ingest `description:gmh5225/XignCode3-bypass-alternative`: entity [[xigncode3-bypass-alternative]]; cross-linked [[xigncode3-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

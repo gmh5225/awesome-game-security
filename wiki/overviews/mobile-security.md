@@ -202,6 +202,7 @@ sources:
   - wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md
   - wiki/sources/descriptions/index-login__MobileRE-Skill.md
   - wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md
+  - wiki/sources/descriptions/okhsunrog__vpnhide.md
 updated: 2026-08-09
 confidence: high
 ---
@@ -250,7 +251,7 @@ Client-side Play Billing hooks such as [[freedom]] intercept the billing service
 
 ## Mobile anti-cheat
 
-Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family (native Android [[free-rasp-android]]; native iOS [[free-rasp-ios]]; cross-platform [[free-rasp-unity-poc]] / [[free-rasp-reactnative]] / [[free-rasp-capacitor]] / [[free-rasp-cordova]] / [[free-rasp-flutter]]), [[trustdevice-android]] / [[trustdevice-ios]], Android device-lock / HWID research such as [[device-warlock]] (Java/C++; networking, SDK generation, native hooking), and Unity soft-AC [[com-sipvlib-anticheat]]. (source: wiki/sources/descriptions/talsec__Free-RASP-iOS.md) (source: wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md) Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
+Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks, VPN/proxy) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Per-app VPN fingerprint hiding such as [[vpnhide]] (LSPosed `system_server` Binder filters + GKI kretprobe / KernelPatch / Zygisk native ioctl·netlink·`/proc/net` interception; optional localhost ports block for Clash/sing-box probes; no in-process target hooks) sits in the same client-side environment-evasion lane. (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family (native Android [[free-rasp-android]]; native iOS [[free-rasp-ios]]; cross-platform [[free-rasp-unity-poc]] / [[free-rasp-reactnative]] / [[free-rasp-capacitor]] / [[free-rasp-cordova]] / [[free-rasp-flutter]]), [[trustdevice-android]] / [[trustdevice-ios]], Android device-lock / HWID research such as [[device-warlock]] (Java/C++; networking, SDK generation, native hooking), and Unity soft-AC [[com-sipvlib-anticheat]]. (source: wiki/sources/descriptions/talsec__Free-RASP-iOS.md) (source: wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md) Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
 
 ## eBPF tracing
 
