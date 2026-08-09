@@ -566,6 +566,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ghidra.md
   - wiki/sources/descriptions/gmh5225__injection.md
   - wiki/sources/descriptions/gmh5225__executor.md
+  - wiki/sources/descriptions/gmh5225__egui-d3d11.md
   - wiki/sources/descriptions/gmh5225__ethersplay.md
   - wiki/sources/descriptions/gmh5225__immortal-rust.md
   - wiki/sources/descriptions/gmh5225__rust-external-1.md
@@ -686,7 +687,7 @@ Software: `SendInput`, `mouse_event`, RawInput hooks, MouClass filter drivers ([
 
 ## Overlays & rendering
 
-Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL `wglSwapBuffers`; alternatives include DWM, transparent external windows, Steam/NVIDIA/Discord overlay hijacks ([[steam-overlay-x64]], [[mwclap]], [[nvidia-overlay-hijack]], [[discord-overlay-hook]]). D3D9 hook samples such as [[nz-perspective]] (C/C++; hooking; cheat / game:tgame; gmh5225) sit in the legacy DirectX Present/EndScene lane. (source: wiki/sources/descriptions/gmh5225__nzPerspective.md) UI substrate: [[imgui]] and extensions ([[imgui-club]]).
+Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL `wglSwapBuffers`; alternatives include DWM, transparent external windows, Steam/NVIDIA/Discord overlay hijacks ([[steam-overlay-x64]], [[mwclap]], [[nvidia-overlay-hijack]], [[discord-overlay-hook]]). D3D9 hook samples such as [[nz-perspective]] (C/C++; hooking; cheat / game:tgame; gmh5225) sit in the legacy DirectX Present/EndScene lane. (source: wiki/sources/descriptions/gmh5225__nzPerspective.md) UI substrate: [[imgui]] and extensions ([[imgui-club]]); Rust egui-on-D3D11 Present-hook libraries such as [[egui-d3d11]] (gmh5225; HLSL textured triangles + Win32 input; README `[Menu]`) offer an immediate-mode alternative for DX11 internal menus. (source: wiki/sources/descriptions/gmh5225__egui-d3d11.md)
 
 ## Stack spoofing & driver I/O
 

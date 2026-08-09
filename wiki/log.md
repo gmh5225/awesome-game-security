@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/egui-d3d11`: entity [[egui-d3d11]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:talsec/Free-RASP-Android`: entity [[free-rasp-android]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-08-09** — ingest `readme:categories`: bumped Anti Cheat ~655 (was ~654; Cheat ~2662 / Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
