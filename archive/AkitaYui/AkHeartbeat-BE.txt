@@ -1,0 +1,1753 @@
+Project Path: arc_AkitaYui_AkHeartbeat-BE_1f93a0md
+
+Source Tree:
+
+```txt
+arc_AkitaYui_AkHeartbeat-BE_1f93a0md
+├── LICENSE
+├── README.md
+├── include
+│   ├── common.h
+│   ├── game.h
+│   ├── memory.h
+│   ├── menu.h
+│   └── overlay.h
+└── src
+    ├── common.cpp
+    ├── game.cpp
+    ├── main.cpp
+    ├── memory.cpp
+    ├── menu.cpp
+    └── overlay.cpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Meier_Xuezi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# AkHeartbeat‑BattlEye
+```
+┌─────────────────────────────────────────────────────┐
+│                   BE 服务器                           │
+│  (HTTPS + RSA 公钥加密 + Bearer Token)               │
+└──────────────────┬──────────────────────────────────┘
+                   │ libcurl HTTPS
+┌──────────────────▼──────────────────────────────────┐
+│              GTA5.exe 进程空间                        │
+│  ┌──────────────────────────────────────────────┐   │
+│  │  GTA5_Enhanced_BE.dll (用户态BE客户端)         │   │
+│  │  - .text:   检测代码                           │   │
+│  │  - .be0:    加密核心逻辑 (内存运行时解密)        │   │
+│  │  - .be1:    签名数据库 (内存运行时解密)          │   │
+│  │  - curl:    网络通信                            │   │
+│  └──────────────────┬───────────────────────────┘   │
+│                     │ IOCTL/DeviceIoControl         │
+│                     │ 共享内存/NtQuerySystemInformation
+└─────────────────────┼─────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│                Windows 内核驱动空间                  │
+│  ┌──────────────────────────────────────────────┐   │
+│  │  BEDaisy.sys(内核态BE驱动)                     │   │
+│  │  - ObRegisterCallbacks: 句柄操作回调            │   │
+│  │  - PsSetCreateProcessNotifyRoutine: 进程回调    │   │
+│  │  - PsSetLoadImageNotifyRoutine: 模块加载回调    │   │
+│  │  - CmRegisterCallback: 注册表回调               │   │
+│  │  - SSDT 完整性检测                               │   │
+│  │  - 内核模块枚举 (检测黑驱动)                      │   │
+│  │  - DPC 定时扫描                                  │   │
+│  └──────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 虚假战眼的原理
+- 在 Steam 与 Epic 上（微软商店似乎不行，需要手动 Rockstar 启动器关闭）使用 `-noBattleEye` 参数启动 GTA5（禁用 BE 内核驱动 + 用户态 DLL）
+- 验证BE状态：`is_session_started ≠ 0 && character_index ≠ 0`
+- 如BE未被禁用 → 报错 `Pls Ensure Game Running And Disabled BattlEye!`
+
+###AOB扫描 —— `sub_000E09A0`
+- 扫描15个游戏内部地址（`ReadProcessMemory` + 模式匹配）
+- 定位：`world`、`script_global`、`session`、BE标志等
+
+### 打开游戏进程 —— `sub_0006D610`
+- `OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid)`
+- 验证游戏仍在运行
+
+### BE运行时补丁 —— `sub_000E1DC0`
+- `WriteProcessMemory(hGame, BE_Function+5, patch_5bytes, 5)`
+- BE 检测函数 → 始终返回 `"No anomalies"`
+- `ReadProcessMemory`：读取 Stats / Globals / Locals 位置
+- `WriteProcessMemory`：修改 Stats / Globals / Locals 位置
+- D3D11：GUI 渲染
+- 重启监控：检测 `battleye_restart_reason`
+- 回流补丁：如果BE被恢复或者被发现 → 重新执行 `ReadProcessMemory` 与 `WriteProcessMemory`
+
+```
+┌──────────────────┐         RpM/WpM        ┌─────────────────┐
+│   Menu.exe       │ ◄──────────────────────► │   GTA5.exe    │
+│   (独立进程空间)   │   OpenProcess + 句柄   │   (游戏进程空间)   │
+│                   │                         │                   │
+│   代码未被注入     │                         │  BE DLL (用户态)   │
+│  不在 .text 段    │                         │  BEDaisy (内核态) │
+│  D3D11 外部窗口   │                         │                   │
+└──────────────────┘                         └─────────────────┘
+
+```
+
+`include/common.h`:
+
+```h
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include <cmath>
+#include <string>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <algorithm>
+#include <memory>
+
+struct alignas(8) GlobalState {
+
+    int64_t field_00;  
+    int64_t field_08;  
+    int64_t field_10;  
+    int64_t field_18;  
+    int64_t field_20;  
+    int64_t field_28;  
+    int64_t field_30;  
+    int64_t field_38;  
+    int64_t field_40;  
+    int64_t field_48;  
+    int64_t field_50;  
+    int64_t field_58;  
+    int64_t field_60;  
+    int64_t field_68;  
+    int64_t field_70;  
+    int64_t field_78;  
+    int64_t field_80;  
+    int64_t field_88;  
+    int64_t field_90;  
+    int64_t field_98;  
+};
+static_assert(sizeof(GlobalState) == 0xA0, "GlobalState 大小应为 0xA0 字节");
+
+extern GlobalState* g_State;
+
+constexpr uint64_t HOOK_CONST_01 = 0x4ede34fbadd967a6ULL;
+constexpr uint64_t HOOK_CONST_02 = 0xe81651ad79516e48ULL;
+constexpr uint64_t HOOK_CONST_03 = 0xb8ba7f44df1575e1ULL;
+constexpr uint64_t HOOK_CONST_04 = 0xeb1c67c3a5333a92ULL;
+constexpr uint64_t HOOK_CONST_05 = 0xc4bb298bd441be78ULL;
+constexpr uint64_t HOOK_CONST_06 = 0x83666f9fb8febd4bULL;
+constexpr uint64_t HOOK_CONST_07 = 0xc9d9444186b5a374ULL;
+constexpr uint64_t HOOK_CONST_08 = 0xc1b1e9a034a63a62ULL;
+constexpr uint64_t HOOK_CONST_09 = 0x5ae11bc36633de4eULL;
+constexpr uint64_t HOOK_CONST_10 = 0xbadbfa3b172435fULL;
+constexpr uint64_t HOOK_CONST_11 = 0xd0ffb162f40a139cULL;
+constexpr uint64_t HOOK_CONST_12 = 0x71d93b57d07f9804ULL;
+constexpr uint64_t HOOK_CONST_13 = 0xe3621cc40f31fe2eULL;
+constexpr uint64_t HOOK_CONST_14 = 0xe816e655de37fe20ULL;
+constexpr uint64_t HOOK_CONST_15 = 0x652d2eeef1d3e62cULL;
+constexpr uint64_t HOOK_CONST_16 = 0xa8ceacb4f35ae058ULL;
+constexpr uint64_t HOOK_CONST_17 = 0x2a488c176d52cca5ULL;
+constexpr uint64_t HOOK_CONST_18 = 0xb7a628320eff8e47ULL;
+
+constexpr uint32_t HOOK_DWORD_01 = 0x50597ee2U;
+
+void* operator_new(size_t size);
+
+void* operator_new_zeroed(size_t size);
+
+void* stack_alloc_probe(size_t size);
+
+void register_atexit(void* func);
+
+```
+
+`include/game.h`:
+
+```h
+
+
+#pragma once
+#include "common.h"
+#include "memory.h"
+#include <functional>
+#include <unordered_set>
+
+struct GameAddresses {
+
+    uint64_t world_ptr;                
+    uint64_t script_global_ptr;        
+    uint64_t replay_interface_ptr;     
+    uint64_t native_registration_table; 
+    uint64_t game_skeleton_ptr;        
+
+    uint64_t is_session_started;       
+    uint64_t current_character_index;  
+
+    uint64_t battleye_bypass_flag;     
+    uint64_t battleye_restart_reason;  
+    uint64_t battleye_data_ptr;        
+
+    uint64_t native_add_explosion_bypass; 
+
+    bool initialized;
+
+    GameAddresses() : world_ptr(0), script_global_ptr(0),
+        replay_interface_ptr(0), native_registration_table(0),
+        game_skeleton_ptr(0), is_session_started(0),
+        current_character_index(0), battleye_bypass_flag(0),
+        battleye_restart_reason(0), battleye_data_ptr(0),
+        native_add_explosion_bypass(0), initialized(false) {}
+};
+
+class GameInterface {
+public:
+    GameInterface();
+    ~GameInterface();
+
+    bool attach();
+
+    void detach();
+
+    bool is_attached() const { return m_attached && m_hProcess != nullptr; }
+
+    bool scan_signatures();
+
+    uint64_t get_local_ped();
+
+    struct Vector3 { float x, y, z; };
+    Vector3 get_local_position();
+
+    float get_local_heading();
+
+    int64_t read_global(int index);
+
+    void write_global(int index, int64_t value);
+
+    int64_t read_script_local(int script_index, int offset);
+
+    void write_script_local(int script_index, int offset, int64_t value);
+
+    int read_replay_value(int index);
+
+    bool is_session_active();
+
+    int get_current_character();
+
+    enum class StatType {
+        FLOAT,
+        INTEGER,
+        BOOL,
+        STRING,
+        PACKED_INT,
+        PACKED_BOOL,
+        PACKED_BOOL_RANGE,
+        MASKED_INT,
+        BITFIELD,
+        UNKNOWN
+    };
+
+    bool read_stat(const char* stat_name, StatType type, void* out_value, size_t out_size);
+    bool write_stat(const char* stat_name, StatType type, const void* value, size_t value_size);
+
+    bool teleport_to_waypoint();
+
+    void set_local_position(float x, float y, float z);
+
+    bool disable_battleye();
+
+    bool is_battleye_active();
+
+    uint64_t get_game_base() const { return m_gameBase; }
+
+    uint64_t get_game_size() const { return m_gameSize; }
+
+    HANDLE get_handle() const { return m_hProcess; }
+
+private:
+
+    HANDLE m_hProcess;             
+    DWORD  m_pid;                  
+    bool   m_attached;             
+
+    uint64_t m_gameBase;           
+    uint64_t m_gameSize;           
+
+    GameAddresses m_addresses;     
+
+    CRITICAL_SECTION m_cs;
+
+    bool internal_init();
+
+    std::map<std::string, uint64_t> m_stat_name_cache;
+    bool cache_stat_name(const char* name, uint64_t address);
+};
+
+struct NativeRegistration {
+    uint64_t next_registration;   
+    uint64_t handlers[7];         
+    uint32_t num_handlers;        
+    uint64_t hashes[7];           
+};
+
+struct NativeContext {
+    uint64_t return_value;        
+    uint32_t arg_count;           
+    uint64_t args[32];            
+
+    NativeContext() : return_value(0), arg_count(0) {
+        memset(args, 0, sizeof(args));
+    }
+
+    void reset() {
+        return_value = 0;
+        arg_count = 0;
+        memset(args, 0, sizeof(args));
+    }
+
+    void push(int64_t value) {
+        if (arg_count < 32) {
+            args[arg_count++] = value;
+        }
+    }
+};
+
+```
+
+`include/memory.h`:
+
+```h
+
+
+#pragma once
+#include "common.h"
+#include <TlHelp32.h>
+#include <string>
+#include <vector>
+
+struct ProcessInfo {
+    DWORD pid;                    
+    HANDLE handle;                
+    std::wstring name;            
+    uint64_t base_address;       
+    uint64_t module_size;        
+};
+
+bool memory_read(HANDLE hProcess, uint64_t address, void* buffer, size_t size);
+
+bool memory_write(HANDLE hProcess, uint64_t address, const void* buffer, size_t size);
+
+template<typename T>
+std::vector<T> memory_read_array(HANDLE hProcess, uint64_t base_addr, size_t count) {
+    std::vector<T> result(count);
+    SIZE_T bytesRead = 0;
+    if (!ReadProcessMemory(hProcess, (LPCVOID)base_addr, result.data(),
+                           count * sizeof(T), &bytesRead)) {
+        result.clear();
+    }
+    return result;
+}
+
+template<typename T>
+T memory_read_value(HANDLE hProcess, uint64_t address) {
+    T value{};
+    SIZE_T bytesRead = 0;
+    ReadProcessMemory(hProcess, (LPCVOID)address, &value, sizeof(T), &bytesRead);
+    return value;
+}
+
+std::string memory_read_string(HANDLE hProcess, uint64_t address, size_t maxLen = 256);
+
+DWORD get_process_id_by_name(const wchar_t* processName);
+
+uint64_t get_module_base(DWORD pid, const wchar_t* moduleName);
+
+std::vector<std::pair<std::wstring, uint64_t>> enum_process_modules(DWORD pid);
+
+struct ThreadInfo {
+    DWORD tid;
+    DWORD owner_pid;
+};
+std::vector<ThreadInfo> enum_process_threads(DWORD pid);
+
+uint64_t pattern_scan(HANDLE hProcess, uint64_t start, uint64_t size,
+                      const uint8_t* pattern, const char* mask);
+
+uint64_t pattern_scan_str(HANDLE hProcess, uint64_t start, uint64_t size,
+                          const char* patternStr);
+constexpr uint8_t SIG_WORLD[] = {
+    0x48, 0x8B, 0x15, 0x00, 0x00, 0x00, 0x00,
+    0x0F, 0xB7, 0x05, 0x00, 0x00, 0x00, 0x00,
+    0xEB, 0x00, 0x31, 0xFF
+};
+constexpr const char MASK_WORLD[] = "xxx????xxx????x?xx";
+
+constexpr uint8_t SIG_SCRIPT_GLOBAL[] = {
+    0x48, 0x8D, 0x15, 0x00, 0x00, 0x00, 0x00,
+    0x49, 0x89, 0xD8, 0x4D, 0x89, 0xF1
+};
+constexpr const char MASK_SCRIPT_GLOBAL[] = "xxx????xxxxx";
+
+constexpr uint8_t SIG_REPLAY_INTERFACE[] = {
+    0x56, 0x57, 0x48, 0x83, 0xEC, 0x00,
+    0x48, 0x89, 0xCF, 0x48, 0x8D, 0x71, 0x00,
+    0x8B, 0x15
+};
+constexpr const char MASK_REPLAY_INTERFACE[] = "xxxxx?xxxxx?xx";
+
+constexpr uint8_t SIG_IS_SESSION_STARTED[] = {
+    0x8B, 0x0D, 0x00, 0x00, 0x00, 0x00,
+    0xC6, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x89, 0x05
+};
+constexpr const char MASK_IS_SESSION_STARTED[] = "xx????xx?????xx";
+
+constexpr uint8_t SIG_BATTLEYE_BYPASS[] = {
+    0x89, 0x0D, 0x00, 0x00, 0x00, 0x00,
+    0xC7, 0x05, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x85, 0xC9
+};
+constexpr const char MASK_BATTLEYE_BYPASS[] = "xx????xx????xxxxxxxx";
+
+constexpr uint8_t SIG_HANDLE_TO_PTR[] = {
+    0x74, 0x00, 0x48, 0x89, 0xC3,
+    0x48, 0x8B, 0x2D
+};
+constexpr const char MASK_HANDLE_TO_PTR[] = "x?xxxxxx";
+
+constexpr uint8_t SIG_PTR_TO_HANDLE[] = {
+    0x83, 0xF9, 0xFF, 0x74, 0x64,
+    0x41, 0x89, 0xC8
+};
+constexpr const char MASK_PTR_TO_HANDLE[] = "xxxxxxxx";
+
+constexpr uint8_t SIG_NULLSUB[] = {
+    0x90, 0xC3
+};
+constexpr const char MASK_NULLSUB[] = "xx";
+
+```
+
+`include/menu.h`:
+
+```h
+
+
+#pragma once
+#include "common.h"
+#include "game.h"
+
+struct StatEditorState {
+
+    int stat_index_begin;
+    int stat_index_end;
+
+    int stat_type;
+
+    char stat_value[256];
+
+    struct BitField {
+        int index;
+        int size;
+        int start;
+        bool active;
+    } bit_field;
+
+    int64_t packed_int_value;
+
+    struct PackedBool {
+        int index;
+        int range_start;
+        int range_end;
+        bool value;
+    } packed_bool;
+
+    struct MaskedInt {
+        int64_t value;
+        int64_t mask;
+    } masked_int;
+
+    int user_id;
+
+    bool import_file_open;
+    char import_path[512];
+
+    bool write_pending;
+
+    StatEditorState() {
+        memset(this, 0, sizeof(*this));
+    }
+};
+
+struct ScriptGlobalEditorState {
+    int global_index;
+    int64_t global_value;
+    char global_index_str[32];
+    char global_value_str[64];
+
+    ScriptGlobalEditorState() : global_index(0), global_value(0) {
+        memset(global_index_str, 0, sizeof(global_index_str));
+        memset(global_value_str, 0, sizeof(global_value_str));
+    }
+};
+
+struct ScriptLocalEditorState {
+    int script_index;
+    int local_offset;
+    int64_t local_value;
+
+    ScriptLocalEditorState() : script_index(0), local_offset(0), local_value(0) {}
+};
+
+struct TeleportState {
+    bool teleport_to_waypoint;
+    float custom_x, custom_y, custom_z;
+    bool use_custom_coords;
+
+    TeleportState() : teleport_to_waypoint(false),
+        custom_x(0), custom_y(0), custom_z(0), use_custom_coords(false) {}
+};
+
+struct MenuState {
+
+    int active_tab;
+
+    StatEditorState stat_editor;
+    ScriptGlobalEditorState global_editor;
+    ScriptLocalEditorState local_editor;
+    TeleportState teleport;
+
+    bool show_player_info;
+
+    bool show_session_info;
+
+    MenuState() : active_tab(0), show_player_info(true),
+                  show_session_info(true) {}
+};
+
+void render_menu_bar(GameInterface& game, MenuState& state);
+
+void render_stat_editor(GameInterface& game, StatEditorState& state);
+
+void render_script_global_editor(GameInterface& game, ScriptGlobalEditorState& state);
+
+void render_script_local_editor(GameInterface& game, ScriptLocalEditorState& state);
+
+void render_teleport_tab(GameInterface& game, TeleportState& state);
+
+void render_player_info(GameInterface& game, bool& show);
+
+void render_session_info(GameInterface& game, bool& show);
+
+void process_keyboard_input();
+
+void process_mouse_input();
+
+```
+
+`include/overlay.h`:
+
+```h
+
+
+#pragma once
+#include "common.h"
+#include <d3d11.h>
+#include <d3dcompiler.h>
+#include <dxgi.h>
+
+struct D3D11Renderer {
+
+    ID3D11Device*           device;           
+    ID3D11DeviceContext*    context;          
+    IDXGISwapChain*         swapChain;        
+    ID3D11RenderTargetView* renderTargetView; 
+
+    HWND hwnd;              
+    HWND targetHwnd;        
+    int  windowWidth;       
+    int  windowHeight;      
+
+    bool initialized;       
+    bool showMenu;          
+
+    D3D11Renderer() : device(nullptr), context(nullptr),
+        swapChain(nullptr), renderTargetView(nullptr),
+        hwnd(nullptr), targetHwnd(nullptr),
+        windowWidth(0), windowHeight(0),
+        initialized(false), showMenu(true) {}
+};
+
+class OverlayRenderer {
+public:
+    OverlayRenderer();
+    ~OverlayRenderer();
+
+    bool initialize(const wchar_t* targetWindowClass, const wchar_t* targetWindowTitle);
+
+    void render_frame();
+
+    static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+    void run_message_loop();
+
+    bool is_initialized() const { return m_renderer.initialized; }
+
+    ID3D11Device* get_device() { return m_renderer.device; }
+    ID3D11DeviceContext* get_context() { return m_renderer.context; }
+
+    void toggle_menu() { m_renderer.showMenu = !m_renderer.showMenu; }
+
+private:
+    D3D11Renderer m_renderer;
+
+    WNDPROC m_originalWndProc;
+
+    bool create_render_target();
+
+    void cleanup_d3d();
+
+    void update_overlay_position();
+};
+
+struct ImGuiDockNode {
+    int     id;          
+    int     parent;      
+    HWND    window;      
+    int     posX;        
+    int     posY;
+    int     sizeX;       
+    int     sizeY;
+    char    split;       
+    bool    noResize;    
+    bool    centralNode; 
+    bool    noTabBar;    
+    bool    hiddenTabBar;
+    bool    noCloseButton;
+};
+
+enum class MouseButton {
+    Left,
+    Right,
+    Middle
+};
+
+
+```
+
+`src/common.cpp`:
+
+```cpp
+
+
+#include "common.h"
+
+GlobalState* g_State = nullptr;
+
+static CRITICAL_SECTION g_CriticalSection;
+static bool g_CSInitialized = false;
+
+void* operator_new(size_t size) {
+    void* ptr = malloc(size);
+    if (ptr == nullptr) {
+
+        throw std::bad_alloc();
+    }
+    return ptr;
+}
+
+void* operator_new_zeroed(size_t size) {
+    void* ptr = operator_new(size);
+    memset(ptr, 0, size);
+    return ptr;
+}
+
+void* stack_alloc_probe(size_t size) {
+
+    return _alloca(size);
+}
+
+void register_atexit(void* func) {
+    atexit((void(__cdecl*)(void))func);
+}
+
+static void init_global_state() {
+    g_State = (GlobalState*)operator_new_zeroed(sizeof(GlobalState));
+
+}
+
+static void init_critical_section() {
+    if (!g_CSInitialized) {
+        InitializeCriticalSection(&g_CriticalSection);
+        g_CSInitialized = true;
+
+        atexit([]() {
+            if (g_CSInitialized) {
+                DeleteCriticalSection(&g_CriticalSection);
+                g_CSInitialized = false;
+            }
+        });
+    }
+}
+
+#pragma section(".CRT$XCA", read)
+__declspec(allocate(".CRT$XCA"))
+static void (__cdecl* g_init_funcs[])() = {
+    init_global_state,     
+    init_critical_section, 
+};
+
+static void cleanup_global_state() {
+    if (g_State != nullptr) {
+        free(g_State);
+        g_State = nullptr;
+    }
+}
+
+#pragma section(".CRT$XPZ", read)
+__declspec(allocate(".CRT$XPZ"))
+static void (__cdecl* g_term_funcs[])() = {
+    cleanup_global_state,
+};
+
+```
+
+`src/game.cpp`:
+
+```cpp
+
+
+#include "game.h"
+
+GameInterface::GameInterface()
+    : m_hProcess(nullptr), m_pid(0), m_attached(false),
+      m_gameBase(0), m_gameSize(0) {
+    InitializeCriticalSection(&m_cs);
+}
+
+GameInterface::~GameInterface() {
+    detach();
+    DeleteCriticalSection(&m_cs);
+}
+
+bool GameInterface::attach() {
+
+    if (m_attached) {
+        detach();
+    }
+
+    m_pid = get_process_id_by_name(L"GTA5_Enhanced.exe");
+    if (m_pid == 0) {
+        MessageBoxA(nullptr, "GTA5_Enhanced.exe not found!", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    m_hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, m_pid);
+    if (m_hProcess == nullptr) {
+        MessageBoxA(nullptr, "OpenProcess failed! Run as admin.", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    m_gameBase = get_module_base(m_pid, L"GTA5_Enhanced.exe");
+    if (m_gameBase == 0) {
+        CloseHandle(m_hProcess);
+        m_hProcess = nullptr;
+        MessageBoxA(nullptr, "Module base not found!", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    auto modules = enum_process_modules(m_pid);
+    for (const auto& mod : modules) {
+        if (_wcsicmp(mod.first.c_str(), L"GTA5_Enhanced.exe") == 0) {
+            m_gameBase = mod.second;
+
+            MODULEINFO modInfo = {};
+            HANDLE hDummy = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                                        FALSE, m_pid);
+            if (hDummy) {
+                HMODULE hMod = (HMODULE)mod.second;
+                GetModuleInformation(hDummy, hMod, &modInfo, sizeof(modInfo));
+                m_gameSize = (uint64_t)modInfo.SizeOfImage;
+                CloseHandle(hDummy);
+            } else {
+                m_gameSize = 0x40000000; 
+            }
+            break;
+        }
+    }
+
+    if (!scan_signatures()) {
+        detach();
+        MessageBoxA(nullptr, "Signature scan failed!", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    m_attached = true;
+    return true;
+}
+
+void GameInterface::detach() {
+    if (m_hProcess != nullptr) {
+        CloseHandle(m_hProcess);
+        m_hProcess = nullptr;
+    }
+    m_pid = 0;
+    m_attached = false;
+    m_gameBase = 0;
+    m_gameSize = 0;
+    m_addresses = GameAddresses(); 
+    m_stat_name_cache.clear();
+}
+
+bool GameInterface::scan_signatures() {
+    if (m_hProcess == nullptr || m_gameBase == 0) {
+        return false;
+    }
+
+    uint64_t worldAddr = pattern_scan(m_hProcess, m_gameBase, m_gameSize,
+                                      SIG_WORLD, MASK_WORLD);
+    if (worldAddr != 0) {
+
+        int32_t relOffset = memory_read_value<int32_t>(m_hProcess, worldAddr + 3);
+        m_addresses.world_ptr = memory_read_value<uint64_t>(
+            m_hProcess, worldAddr + 7 + relOffset);
+    }
+
+    uint64_t sgAddr = pattern_scan(m_hProcess, m_gameBase, m_gameSize,
+                                    SIG_SCRIPT_GLOBAL, MASK_SCRIPT_GLOBAL);
+    if (sgAddr != 0) {
+        int32_t relOffset = memory_read_value<int32_t>(m_hProcess, sgAddr + 3);
+        m_addresses.script_global_ptr = sgAddr + 7 + relOffset;
+    }
+
+    uint64_t riAddr = pattern_scan(m_hProcess, m_gameBase, m_gameSize,
+                                    SIG_REPLAY_INTERFACE, MASK_REPLAY_INTERFACE);
+    if (riAddr != 0) {
+
+        m_addresses.replay_interface_ptr = riAddr;
+    }
+
+    uint64_t issAddr = pattern_scan(m_hProcess, m_gameBase, m_gameSize,
+                                     SIG_IS_SESSION_STARTED, MASK_IS_SESSION_STARTED);
+    if (issAddr != 0) {
+        int32_t relOffset = memory_read_value<int32_t>(m_hProcess, issAddr + 2);
+        m_addresses.is_session_started = issAddr + 6 + relOffset;
+    }
+
+    uint64_t beAddr = pattern_scan(m_hProcess, m_gameBase, m_gameSize,
+                                    SIG_BATTLEYE_BYPASS, MASK_BATTLEYE_BYPASS);
+    if (beAddr != 0) {
+        int32_t relOffset = memory_read_value<int32_t>(m_hProcess, beAddr + 2);
+        m_addresses.battleye_bypass_flag = beAddr + 6 + relOffset;
+    }
+
+    if (m_addresses.world_ptr != 0 || m_addresses.script_global_ptr != 0) {
+        m_addresses.initialized = true;
+        return true;
+    }
+
+    return false;
+}
+
+uint64_t GameInterface::get_local_ped() {
+    if (!m_attached || m_addresses.world_ptr == 0) return 0;
+    return memory_read_value<uint64_t>(m_hProcess, m_addresses.world_ptr + 0x8);
+}
+
+GameInterface::Vector3 GameInterface::get_local_position() {
+    Vector3 pos = { 0, 0, 0 };
+    uint64_t ped = get_local_ped();
+    if (ped == 0) return pos;
+
+    uint64_t nav = memory_read_value<uint64_t>(m_hProcess, ped + 0x30);
+    if (nav == 0) return pos;
+
+    SIZE_T bytesRead = 0;
+    ReadProcessMemory(m_hProcess, (LPCVOID)(nav + 0x50),
+                      &pos, sizeof(Vector3), &bytesRead);
+    return pos;
+}
+
+float GameInterface::get_local_heading() {
+    uint64_t ped = get_local_ped();
+    if (ped == 0) return 0.0f;
+
+    uint64_t nav = memory_read_value<uint64_t>(m_hProcess, ped + 0x30);
+    if (nav == 0) return 0.0f;
+
+    return memory_read_value<float>(m_hProcess, nav + 0x5C);
+}
+
+int64_t GameInterface::read_global(int index) {
+    if (!m_attached || m_addresses.script_global_ptr == 0) return 0;
+
+    uint64_t addr = m_addresses.script_global_ptr + (index * 8);
+    return memory_read_value<int64_t>(m_hProcess, addr);
+}
+
+void GameInterface::write_global(int index, int64_t value) {
+    if (!m_attached || m_addresses.script_global_ptr == 0) return;
+    uint64_t addr = m_addresses.script_global_ptr + (index * 8);
+    memory_write(m_hProcess, addr, &value, sizeof(value));
+}
+
+int64_t GameInterface::read_script_local(int script_index, int offset) {
+
+    int64_t script_base_global = read_global(script_index);
+    if (script_base_global == 0) return 0;
+    uint64_t addr = script_base_global + (offset * 8);
+    return memory_read_value<int64_t>(m_hProcess, addr);
+}
+
+void GameInterface::write_script_local(int script_index, int offset, int64_t value) {
+    int64_t script_base_global = read_global(script_index);
+    if (script_base_global == 0) return;
+    uint64_t addr = script_base_global + (offset * 8);
+    memory_write(m_hProcess, addr, &value, sizeof(value));
+}
+
+int GameInterface::read_replay_value(int index) {
+    if (!m_attached || m_addresses.replay_interface_ptr == 0) return 0;
+
+    uint64_t addr = m_addresses.replay_interface_ptr + (index * 4);
+    return memory_read_value<int>(m_hProcess, addr);
+}
+
+bool GameInterface::is_session_active() {
+    if (!m_attached || m_addresses.is_session_started == 0) return false;
+    uint8_t flag = memory_read_value<uint8_t>(m_hProcess, m_addresses.is_session_started);
+    return flag != 0;
+}
+
+int GameInterface::get_current_character() {
+    if (!m_attached || m_addresses.current_character_index == 0) return -1;
+    return memory_read_value<int>(m_hProcess, m_addresses.current_character_index);
+}
+
+bool GameInterface::read_stat(const char* stat_name, StatType type,
+                               void* out_value, size_t out_size) {
+
+    if (out_value == nullptr || out_size == 0) return false;
+
+    auto it = m_stat_name_cache.find(stat_name);
+    if (it == m_stat_name_cache.end()) {
+
+        return false;
+    }
+
+    uint64_t stat_addr = it->second;
+    SIZE_T bytesRead = 0;
+    return ReadProcessMemory(m_hProcess, (LPCVOID)stat_addr,
+                             out_value, out_size, &bytesRead) != FALSE;
+}
+
+bool GameInterface::write_stat(const char* stat_name, StatType type,
+                                const void* value, size_t value_size) {
+    auto it = m_stat_name_cache.find(stat_name);
+    if (it == m_stat_name_cache.end()) {
+        return false;
+    }
+
+    uint64_t stat_addr = it->second;
+    return memory_write(m_hProcess, stat_addr, value, value_size);
+}
+
+bool GameInterface::cache_stat_name(const char* name, uint64_t address) {
+    if (name == nullptr || address == 0) return false;
+    m_stat_name_cache[name] = address;
+    return true;
+}
+
+bool GameInterface::teleport_to_waypoint() {
+    if (!m_attached) return false;
+
+    static const int WAYPOINT_X_GLOBAL = 0;  
+    static const int WAYPOINT_Y_GLOBAL = 0;  
+
+    return false; 
+}
+
+void GameInterface::set_local_position(float x, float y, float z) {
+    uint64_t ped = get_local_ped();
+    if (ped == 0) return;
+
+    uint64_t nav = memory_read_value<uint64_t>(m_hProcess, ped + 0x30);
+    if (nav == 0) return;
+
+    float pos[3] = { x, y, z };
+    memory_write(m_hProcess, nav + 0x50, pos, sizeof(pos));
+}
+
+bool GameInterface::disable_battleye() {
+    if (!m_attached || m_addresses.battleye_bypass_flag == 0) return false;
+    uint64_t addr = m_addresses.battleye_bypass_flag;
+
+    int64_t zero = 0;
+    return memory_write(m_hProcess, addr, &zero, sizeof(zero));
+}
+
+bool GameInterface::is_battleye_active() {
+    if (!m_attached || m_addresses.battleye_bypass_flag == 0) return true;
+    int64_t flag = memory_read_value<int64_t>(m_hProcess, m_addresses.battleye_bypass_flag);
+    return flag != 0;
+}
+
+```
+
+`src/main.cpp`:
+
+```cpp
+
+
+#include "common.h"
+#include "memory.h"
+#include "game.h"
+#include "overlay.h"
+#include "menu.h"
+
+static GameInterface*    g_Game = nullptr;
+static OverlayRenderer*  g_Overlay = nullptr;
+static MenuState         g_MenuState;
+
+static void game_loop(GameInterface& game, OverlayRenderer& overlay, MenuState& menu) {
+
+    while (overlay.is_initialized()) {
+
+        DWORD exitCode = 0;
+        if (game.get_handle() != nullptr) {
+            GetExitCodeProcess(game.get_handle(), &exitCode);
+            if (exitCode != STILL_ACTIVE) {
+
+                game.detach();
+            }
+        }
+
+        if (!game.is_attached()) {
+
+            if (game.attach()) {
+
+            } else {
+
+                Sleep(2000);
+                continue;
+            }
+        }
+
+        overlay.render_frame();
+
+        render_menu_bar(game, menu);
+
+        render_player_info(game, menu.show_player_info);
+        render_session_info(game, menu.show_session_info);
+
+        Sleep(1); 
+    }
+}
+
+static int application_main() {
+
+    g_Game = new GameInterface();
+    if (!g_Game->attach()) {
+        MessageBoxA(nullptr,
+            "Failed to attach to GTA5_Enhanced.exe.\n"
+            "Make sure the game is running.",
+            "Error",
+            MB_OK | MB_ICONERROR);
+        delete g_Game;
+        g_Game = nullptr;
+        return 1;
+    }
+
+    g_Overlay = new OverlayRenderer();
+
+        if (!g_Overlay->initialize(nullptr, L"GTA5_Enhanced.exe")) {
+            MessageBoxA(nullptr,
+                "Failed to create overlay.\n"
+                "Could not find game window.",
+                "Error",
+                MB_OK | MB_ICONERROR);
+            delete g_Overlay;
+            g_Overlay = nullptr;
+            delete g_Game;
+            g_Game = nullptr;
+            return 1;
+        }
+    }
+
+ShowWindow(GetForegroundWindow(), SW_SHOW);  
+
+    MSG msg = {};
+
+    while (true) {
+        while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+
+            if (msg.message == WM_QUIT) {
+                goto cleanup;
+            }
+        }
+
+        if (g_Game != nullptr && !g_Game->is_attached()) {
+
+            g_Game->attach();
+        }
+
+        if (g_Overlay != nullptr) {
+            g_Overlay->render_frame();
+
+            if (g_Game != nullptr && g_Game->is_attached()) {
+                render_menu_bar(*g_Game, g_MenuState);
+                render_player_info(*g_Game, g_MenuState.show_player_info);
+                render_session_info(*g_Game, g_MenuState.show_session_info);
+            }
+        }
+
+        Sleep(0);
+    }
+
+cleanup:
+
+    if (g_Overlay != nullptr) {
+        delete g_Overlay;
+        g_Overlay = nullptr;
+    }
+    if (g_Game != nullptr) {
+        delete g_Game;
+        g_Game = nullptr;
+    }
+
+    return 0;
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine, int nCmdShow) {
+    (void)hInstance;
+    (void)hPrevInstance;
+    (void)lpCmdLine;
+    (void)nCmdShow;
+
+    int result = application_main();
+
+    return result;
+}
+
+#ifdef _CONSOLE
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+    return WinMain(GetModuleHandleA(nullptr), nullptr,
+                   GetCommandLineA(), SW_SHOWDEFAULT);
+}
+#endif
+
+```
+
+`src/memory.cpp`:
+
+```cpp
+
+
+#include "memory.h"
+#include <Psapi.h>
+
+bool memory_read(HANDLE hProcess, uint64_t address, void* buffer, size_t size) {
+    if (address == 0 || buffer == nullptr || size == 0) {
+        return false;
+    }
+    SIZE_T bytesRead = 0;
+    BOOL result = ReadProcessMemory(hProcess, (LPCVOID)address,
+                                    buffer, size, &bytesRead);
+    return (result != FALSE && bytesRead == size);
+}
+
+bool memory_write(HANDLE hProcess, uint64_t address, const void* buffer, size_t size) {
+    if (address == 0 || buffer == nullptr || size == 0) {
+        return false;
+    }
+
+    DWORD oldProtect = 0;
+    VirtualProtectEx(hProcess, (LPVOID)address, size,
+                     PAGE_EXECUTE_READWRITE, &oldProtect);
+
+    SIZE_T bytesWritten = 0;
+    BOOL result = WriteProcessMemory(hProcess, (LPVOID)address,
+                                     buffer, size, &bytesWritten);
+
+    VirtualProtectEx(hProcess, (LPVOID)address, size,
+                     oldProtect, &oldProtect);
+
+    return (result != FALSE && bytesWritten == size);
+}
+
+std::string memory_read_string(HANDLE hProcess, uint64_t address, size_t maxLen) {
+    if (address == 0) return "";
+    std::vector<char> buf(maxLen + 1);
+    SIZE_T bytesRead = 0;
+    if (!ReadProcessMemory(hProcess, (LPCVOID)address, buf.data(),
+                           maxLen, &bytesRead)) {
+        return "";
+    }
+    buf[bytesRead] = '\0';
+
+    size_t actualLen = strnlen(buf.data(), maxLen);
+    return std::string(buf.data(), actualLen);
+}
+
+DWORD get_process_id_by_name(const wchar_t* processName) {
+
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    PROCESSENTRY32W pe32 = { sizeof(PROCESSENTRY32W) };
+    DWORD pid = 0;
+
+    if (Process32FirstW(hSnapshot, &pe32)) {
+        do {
+
+            if (_wcsicmp(pe32.szExeFile, processName) == 0) {
+                pid = pe32.th32ProcessID;
+                break;
+            }
+        } while (Process32NextW(hSnapshot, &pe32));
+    }
+
+    CloseHandle(hSnapshot);
+    return pid;
+}
+
+uint64_t get_module_base(DWORD pid, const wchar_t* moduleName) {
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+
+    MODULEENTRY32W me32 = { sizeof(MODULEENTRY32W) };
+    uint64_t base = 0;
+
+    if (Module32FirstW(hSnapshot, &me32)) {
+        do {
+            if (_wcsicmp(me32.szModule, moduleName) == 0) {
+                base = (uint64_t)me32.modBaseAddr;
+                break;
+            }
+        } while (Module32NextW(hSnapshot, &me32));
+    }
+
+    CloseHandle(hSnapshot);
+    return base;
+}
+
+std::vector<std::pair<std::wstring, uint64_t>> enum_process_modules(DWORD pid) {
+    std::vector<std::pair<std::wstring, uint64_t>> modules;
+
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(
+        TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return modules;
+    }
+
+    MODULEENTRY32W me32 = { sizeof(MODULEENTRY32W) };
+
+    if (Module32FirstW(hSnapshot, &me32)) {
+        do {
+            modules.push_back({me32.szModule, (uint64_t)me32.modBaseAddr});
+        } while (Module32NextW(hSnapshot, &me32));
+    }
+
+    CloseHandle(hSnapshot);
+    return modules;
+}
+
+std::vector<ThreadInfo> enum_process_threads(DWORD pid) {
+    std::vector<ThreadInfo> threads;
+
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return threads;
+    }
+
+    THREADENTRY32 te32 = { sizeof(THREADENTRY32) };
+
+    if (Thread32First(hSnapshot, &te32)) {
+        do {
+            if (te32.th32OwnerProcessID == pid) {
+                threads.push_back({te32.th32ThreadID, te32.th32OwnerProcessID});
+            }
+        } while (Thread32Next(hSnapshot, &te32));
+    }
+
+    CloseHandle(hSnapshot);
+    return threads;
+}
+
+uint64_t pattern_scan(HANDLE hProcess, uint64_t start, uint64_t size,
+                      const uint8_t* pattern, const char* mask) {
+    if (size < 0x1000) return 0;
+
+    size_t patternLen = strlen(mask);
+    std::vector<uint8_t> buffer(0x1000); 
+
+    for (uint64_t offset = 0; offset <= size - patternLen; offset += (0x1000 - patternLen)) {
+        SIZE_T bytesRead = 0;
+        uint64_t readAddr = start + offset;
+        size_t readSize = (std::min)((uint64_t)0x1000, size - offset);
+
+        if (!ReadProcessMemory(hProcess, (LPCVOID)readAddr,
+                               buffer.data(), readSize, &bytesRead)) {
+            continue;
+        }
+
+        for (size_t i = 0; i <= bytesRead - patternLen; i++) {
+            bool found = true;
+            for (size_t j = 0; j < patternLen; j++) {
+                if (mask[j] == 'x' && buffer[i + j] != pattern[j]) {
+                    found = false;
+                    break;
+                }
+
+            }
+            if (found) {
+                return readAddr + i;
+            }
+        }
+    }
+
+    return 0;
+}
+
+uint64_t pattern_scan_str(HANDLE hProcess, uint64_t start, uint64_t size,
+                          const char* patternStr) {
+
+    std::vector<uint8_t> pattern;
+    std::string mask;
+
+    const char* p = patternStr;
+    while (*p) {
+
+        while (*p == ' ') p++;
+        if (!*p) break;
+
+        if (*p == '?') {
+            pattern.push_back(0);
+            mask.push_back('?');
+            p++;
+        } else {
+            char hex[3] = { p[0], p[1], '\0' };
+            pattern.push_back((uint8_t)strtoul(hex, nullptr, 16));
+            mask.push_back('x');
+            p += 2;
+        }
+    }
+
+    return pattern_scan(hProcess, start, size, pattern.data(), mask.c_str());
+}
+
+uint64_t dereference_pointer_chain(HANDLE hProcess, uint64_t base,
+                                   const std::vector<uint64_t>& offsets) {
+    uint64_t addr = base;
+    for (size_t i = 0; i < offsets.size(); i++) {
+        addr = memory_read_value<uint64_t>(hProcess, addr);
+        if (addr == 0) return 0;
+        addr += offsets[i];
+    }
+    return addr;
+}
+
+```
+
+`src/menu.cpp`:
+
+```cpp
+
+
+#include "menu.h"
+#include <cstdio>
+
+void render_menu_bar(GameInterface& game, MenuState& state) {
+
+    const char* tab_names[] = {
+        "STAT EDITOR",           
+        "SCRIPT GLOBAL EDITOR",  
+        "SCRIPT LOCAL EDITOR",   
+        "TELEPORT",              
+    };
+    const int tab_count = 4;
+
+    switch (state.active_tab) {
+    case 0:
+        render_stat_editor(game, state.stat_editor);
+        break;
+    case 1:
+        render_script_global_editor(game, state.global_editor);
+        break;
+    case 2:
+        render_script_local_editor(game, state.local_editor);
+        break;
+    case 3:
+        render_teleport_tab(game, state.teleport);
+        break;
+    }
+
+}
+
+void render_stat_editor(GameInterface& game, StatEditorState& state) {
+
+}
+
+void render_script_global_editor(GameInterface& game, ScriptGlobalEditorState& state) {
+
+}
+
+void render_script_local_editor(GameInterface& game, ScriptLocalEditorState& state) {
+
+}
+
+void render_teleport_tab(GameInterface& game, TeleportState& state) {
+
+}
+
+void render_player_info(GameInterface& game, bool& show) {
+    if (!show) return;
+
+    auto ped = game.get_local_ped();
+
+    auto pos = game.get_local_position();
+
+    float heading = game.get_local_heading();
+
+}
+
+void render_session_info(GameInterface& game, bool& show) {
+    if (!show) return;
+
+    bool sessionActive = game.is_session_active();
+
+    int character = game.get_current_character();
+
+}
+
+```
+
+`src/overlay.cpp`:
+
+```cpp
+
+
+#include "overlay.h"
+#include <d3dcompiler.h>  
+
+namespace ImGui {
+
+    struct Context {
+
+    };
+}
+
+OverlayRenderer::OverlayRenderer()
+    : m_originalWndProc(nullptr) {
+
+}
+
+OverlayRenderer::~OverlayRenderer() {
+    cleanup_d3d();
+
+    if (m_renderer.hwnd != nullptr) {
+        DestroyWindow(m_renderer.hwnd);
+        m_renderer.hwnd = nullptr;
+    }
+}
+
+bool OverlayRenderer::initialize(const wchar_t* targetWindowClass,
+                                  const wchar_t* targetWindowTitle) {
+    if (m_renderer.initialized) return true;
+
+    HWND target = FindWindowW(targetWindowClass, targetWindowTitle);
+    if (target == nullptr) {
+
+        target = FindWindowW(nullptr, targetWindowTitle);
+    }
+    if (target == nullptr) {
+        return false;
+    }
+    m_renderer.targetHwnd = target;
+
+    RECT clientRect;
+    GetClientRect(target, &clientRect);
+    m_renderer.windowWidth = clientRect.right - clientRect.left;
+    m_renderer.windowHeight = clientRect.bottom - clientRect.top;
+
+    WNDCLASSEXW wc = {};
+    wc.cbSize = sizeof(WNDCLASSEXW);
+    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc = OverlayRenderer::wnd_proc;
+    wc.hInstance = GetModuleHandleW(nullptr);
+    wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
+    wc.lpszClassName = L"OverlayClass_D3D11";
+
+    RegisterClassExW(&wc);
+
+    m_renderer.hwnd = CreateWindowExW(
+        WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST,
+        L"OverlayClass_D3D11",
+        L"D3D11 Overlay",
+        WS_POPUP,
+        clientRect.left, clientRect.top,
+        m_renderer.windowWidth, m_renderer.windowHeight,
+        target,  
+        nullptr,
+        wc.hInstance,
+        this     
+    );
+
+    if (m_renderer.hwnd == nullptr) {
+        return false;
+    }
+
+    SetLayeredWindowAttributes(m_renderer.hwnd, RGB(0, 0, 0), 0, LWA_COLORKEY);
+
+    DXGI_SWAP_CHAIN_DESC scd = {};
+    scd.BufferCount = 1;
+    scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    scd.BufferDesc.Width = m_renderer.windowWidth;
+    scd.BufferDesc.Height = m_renderer.windowHeight;
+    scd.BufferDesc.RefreshRate.Numerator = 60;
+    scd.BufferDesc.RefreshRate.Denominator = 1;
+    scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    scd.OutputWindow = m_renderer.hwnd;
+    scd.SampleDesc.Count = 1;
+    scd.SampleDesc.Quality = 0;
+    scd.Windowed = TRUE;
+
+    D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
+    HRESULT hr = D3D11CreateDeviceAndSwapChain(
+        nullptr,                    
+        D3D_DRIVER_TYPE_HARDWARE,
+        nullptr,                    
+        0,                          
+        &featureLevel,
+        1,
+        D3D11_SDK_VERSION,
+        &scd,
+        &m_renderer.swapChain,
+        &m_renderer.device,
+        nullptr,
+        &m_renderer.context
+    );
+
+    if (FAILED(hr)) {
+        cleanup_d3d();
+        return false;
+    }
+
+    if (!create_render_target()) {
+        cleanup_d3d();
+        return false;
+    }
+
+    ShowWindow(m_renderer.hwnd, SW_SHOW);
+    UpdateWindow(m_renderer.hwnd);
+
+    m_renderer.initialized = true;
+    return true;
+}
+
+bool OverlayRenderer::create_render_target() {
+    if (m_renderer.device == nullptr || m_renderer.swapChain == nullptr) {
+        return false;
+    }
+
+    if (m_renderer.renderTargetView != nullptr) {
+        m_renderer.renderTargetView->Release();
+        m_renderer.renderTargetView = nullptr;
+    }
+
+    ID3D11Texture2D* backBuffer = nullptr;
+    HRESULT hr = m_renderer.swapChain->GetBuffer(
+        0, __uuidof(ID3D11Texture2D), (void**)&backBuffer);
+    if (FAILED(hr) || backBuffer == nullptr) {
+        return false;
+    }
+
+    hr = m_renderer.device->CreateRenderTargetView(
+        backBuffer, nullptr, &m_renderer.renderTargetView);
+    backBuffer->Release();
+
+    return SUCCEEDED(hr);
+}
+
+void OverlayRenderer::render_frame() {
+    if (!m_renderer.initialized) return;
+
+    float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    m_renderer.context->ClearRenderTargetView(
+        m_renderer.renderTargetView, clearColor);
+
+    D3D11_VIEWPORT viewport = {};
+    viewport.Width = (float)m_renderer.windowWidth;
+    viewport.Height = (float)m_renderer.windowHeight;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    m_renderer.context->RSSetViewports(1, &viewport);
+
+    m_renderer.context->OMSetRenderTargets(
+        1, &m_renderer.renderTargetView, nullptr);
+
+    m_renderer.swapChain->Present(0, 0);
+}
+
+LRESULT CALLBACK OverlayRenderer::wnd_proc(HWND hwnd, UINT msg,
+                                            WPARAM wParam, LPARAM lParam) {
+
+    OverlayRenderer* self = nullptr;
+    if (msg == WM_NCCREATE) {
+        CREATESTRUCTW* cs = (CREATESTRUCTW*)lParam;
+        self = (OverlayRenderer*)cs->lpCreateParams;
+        SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)self);
+    } else {
+        self = (OverlayRenderer*)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
+    }
+
+    switch (msg) {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
+
+    case WM_SIZE:
+        if (self != nullptr && self->m_renderer.swapChain != nullptr) {
+            self->m_renderer.windowWidth = LOWORD(lParam);
+            self->m_renderer.windowHeight = HIWORD(lParam);
+
+            self->m_renderer.context->OMSetRenderTargets(0, nullptr, nullptr);
+            if (self->m_renderer.renderTargetView) {
+                self->m_renderer.renderTargetView->Release();
+                self->m_renderer.renderTargetView = nullptr;
+            }
+            self->m_renderer.swapChain->ResizeBuffers(
+                1, self->m_renderer.windowWidth, self->m_renderer.windowHeight,
+                DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+            self->create_render_target();
+        }
+        return 0;
+
+    case WM_KEYDOWN:
+        if (self != nullptr && wParam == VK_INSERT) {
+            self->toggle_menu();
+        }
+        return 0;
+    }
+
+    return DefWindowProcW(hwnd, msg, wParam, lParam);
+}
+
+void OverlayRenderer::run_message_loop() {
+    MSG msg = {};
+    while (true) {
+
+        while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+
+            if (msg.message == WM_QUIT) {
+                return;
+            }
+        }
+
+        update_overlay_position();
+
+        render_frame();
+    }
+}
+
+void OverlayRenderer::update_overlay_position() {
+    if (m_renderer.targetHwnd == nullptr || m_renderer.hwnd == nullptr) {
+        return;
+    }
+
+    RECT targetRect;
+    if (GetClientRect(m_renderer.targetHwnd, &targetRect)) {
+        POINT pt = { targetRect.left, targetRect.top };
+        ClientToScreen(m_renderer.targetHwnd, &pt);
+
+        int width = targetRect.right - targetRect.left;
+        int height = targetRect.bottom - targetRect.top;
+
+        if (width != m_renderer.windowWidth || height != m_renderer.windowHeight) {
+            SetWindowPos(m_renderer.hwnd, nullptr,
+                         pt.x, pt.y, width, height,
+                         SWP_NOZORDER);
+            m_renderer.windowWidth = width;
+            m_renderer.windowHeight = height;
+        } else {
+            SetWindowPos(m_renderer.hwnd, nullptr,
+                         pt.x, pt.y, 0, 0,
+                         SWP_NOSIZE | SWP_NOZORDER);
+        }
+    }
+}
+
+void OverlayRenderer::cleanup_d3d() {
+
+    if (m_renderer.renderTargetView) {
+        m_renderer.renderTargetView->Release();
+        m_renderer.renderTargetView = nullptr;
+    }
+    if (m_renderer.swapChain) {
+        m_renderer.swapChain->Release();
+        m_renderer.swapChain = nullptr;
+    }
+    if (m_renderer.context) {
+        m_renderer.context->Release();
+        m_renderer.context = nullptr;
+    }
+    if (m_renderer.device) {
+        m_renderer.device->Release();
+        m_renderer.device = nullptr;
+    }
+    m_renderer.initialized = false;
+}
+
+```
