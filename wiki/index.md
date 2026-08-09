@@ -247,7 +247,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-internal-base](entities/csgo-internal-base.md) — CS:GO internal cheat base (CreateInterface, VMT hooks, netvars, pattern scan, ImGui; cheat / game:csgo)
 - [csgo-kns](entities/csgo-kns.md) — CS:GO internal cheat (VMT hooks, interface pointers; ESP/aimbot/bhop/skin changer; cheat / game:csgo)
 - [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)
-- [csgo-sdk](entities/csgo-sdk.md) — CS:GO SDK generation + hooking scaffold (C++; gmh5225; cheat / game:csgo)
+- [csgo-sdk](entities/csgo-sdk.md) — CS:GO Source 1 SDK headers (gmh5225/csgo-sdk + csgo_sdk; classes / netvars / interfaces / hooking; cheat / game:csgo)
 - [csgo2-cheat](entities/csgo2-cheat.md) — CS2 internal cheat: rendering / SDK generation / hooking (imnotdatguy + gmh5225 [Internal]; C++; cheat / game:cs2)
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [csso-src](entities/csso-src.md) — CS:GO mod Source tree (client/server / weapons / movement / engine interfaces; Game Engine)
