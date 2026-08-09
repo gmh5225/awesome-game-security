@@ -2895,6 +2895,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dllcrt0/battleye-decryption
 - https://github.com/dllcrt0/bedaisy-reversal
 - https://github.com/experienceds/battleye-re [BEDaisy.sys RE reference: IOCTL/API/anti-DMA]
+- https://github.com/AkitaYui/AkHeartbeat-BE [GTA5 Enhanced BE heartbeat bypass: client–driver RE notes, AOB scan, external D3D11 overlay menu]
 - https://github.com/experienceds/pubg-p2c-re [PUBG P2C loader RE report: VMProtect, DWM overlay injection, BattlEye bypass, Zakynthos detection]
 - https://github.com/dllcrt0/battleye-shellcode [shellcode]
 - https://github.com/gmh5225/BE-BattlEye_shellcode [shellcode]
@@ -4722,6 +4723,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/LSPosed/AndroidHiddenApiBypass [Bypass hidden api restriction]
 - https://github.com/stars-one/ASCTool [Apk Signature Crack Tool]
 - https://github.com/ekknod/usbsn [USB serial number changer (root only)]
+- https://github.com/okhsunrog/vpnhide [Hide active VPN from selected Android apps via system_server LSPosed hooks and kernel/Zygisk native filtering]
 - https://github.com/gmh5225/Android-privilege-CVE-2022-20452-LeakValue [Privilege Escalation]
 - https://github.com/tiann/KernelSU [A Kernel based root solution for Android GKI]
 - https://github.com/MlgmXyysd/KernelSU_Debug [KernelSU modified for debugging]
