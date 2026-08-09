@@ -342,6 +342,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dotrix](entities/dotrix.md) — open-source Rust 3D engine (dot + matrix; Game Engine / source)
 - [DotX64Dbg](entities/dotx64dbg.md) — .NET 6 / C# x64dbg plugin framework (live edit; custom commands)
 - [DoubleCallBack](entities/double-callback.md) — DWM in kernel (C/C++; cheat render/draw)
+- [dp701](entities/dp701.md) — IDA Pro dark color theme (syntax/UI palette; cheat / IDA themes; gmh5225)
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
 - [dProtect](entities/dprotect.md) — Android/iOS LLVM native obfuscator (CFF / MBA / string encrypt; AC Obfuscation Engine)
 - [DsArk64](entities/dsark64.md) — BYOVD via Qihoo 360 `DsArk64.sys` (handle donor; ring-0 kill + kernel R/W)
