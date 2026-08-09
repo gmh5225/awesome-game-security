@@ -351,6 +351,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
 - [dse_hook](entities/dse-hook.md) — CI.dll hook / `g_CiEnabled` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
+- [ds4-tools](entities/ds4-tools.md) — DualShock 4 HID scripts (input/LED/touchpad/motion/rumble; play + reverse-engineer DS4 on PC; gmh5225)
 - [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)
 - [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
 

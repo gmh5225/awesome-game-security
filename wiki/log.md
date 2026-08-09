@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/ds4-tools`: entity [[ds4-tools]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-09** — ingest `description:gmh5225/dse_hook`: entity [[dse-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-09** — ingest `description:gmh5225/dumpwow`: entity [[dumpwow]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
