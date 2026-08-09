@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/Vmp3_utils`: entity [[vmp3-utils]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/Voyager`: entity [[voyager]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked from [[hyper-rev]].
 
 - **2026-08-09** — ingest `readme:categories`: bumped Anti Cheat ~657 (was ~656; Cheat ~2665 / Some Tricks ~115 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

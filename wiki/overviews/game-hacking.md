@@ -505,6 +505,7 @@ sources:
   - wiki/sources/descriptions/robert-yates__gdbserver9x.md
   - wiki/sources/descriptions/noword__GDB-Windows-Binaries.md
   - wiki/sources/descriptions/notsnakesilent__VMPStatic.md
+  - wiki/sources/descriptions/gmh5225__Vmp3_utils.md
   - wiki/sources/descriptions/rmusser01__Infosec_Reference.md
   - wiki/sources/descriptions/ridpath__gamehacking-cheatsheet.md
   - wiki/sources/descriptions/mytechnotalent__Reverse-Engineering.md
@@ -838,6 +839,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Static Go VMProtect PE unpack/rebuild via [[vmpstatic]] (VMP 1.x–3.x) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/notsnakesilent__VMPStatic.md)
 - Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
 - Live-process VMP 3.x import-protection fix via [[vmpimportfixer]] (Unicorn emulation of near-call stubs in `.vmp0` → real import addresses; Zydis + pepp; x86/x64 including WoW64 fix from x64) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/mike1k__VMPImportFixer.md)
+- Python VMP3 editor tooling via [[vmp3-utils]] (gmh5225; Fix VMP helper utilities) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/gmh5225__Vmp3_utils.md)
 - Themida / WinLicense 3.x virtualization research via [[themida-research]] (`VM_CONTEXT` layout, handler dispatch, de-virtualization / Triton lifting ideas) sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/stuxnet147__Themida-Research.md)
 - Themida IDA plugin / Fix Themida via [[tde]] (devirtualization engine for Themida-protected binaries) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/sodareverse__TDE.md)
 - Automatic Themida v1/v2/v3 unpack via [[magicmida-rs]] (Rust Win32 Debug API debugger; OEP discovery + memory dump + PE IAT/section rebuild; optional ScyllaHide anti-debug bypass; verify mode) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/guoxing2024__magicmida-rs.md)

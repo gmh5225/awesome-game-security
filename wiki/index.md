@@ -1429,6 +1429,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
 - [VMkatz](entities/vmkatz.md) — in-place VM snapshot/VHD cred extract (LSASS/SAM/LSA/NTDS; AC/IS forensics)
 - [VMPImportFixer](entities/vmpimportfixer.md) — VMP 3.x import protection fix via Unicorn emulation (near-call stubs → real imports; Zydis + pepp; x86/x64; Fix VMP)
+- [Vmp3_utils](entities/vmp3-utils.md) — Python VMP3 editor tooling utilities (Fix VMP; gmh5225)
 - [VMPStatic](entities/vmpstatic.md) — static Go VMProtect PE unpacker (VMP 1.x–3.x rebuild; Fix VMP / Unpacker)
 - [VMPUnpacker](entities/vmpunpacker.md) — VMProtect PE unpacker (C++/Python; LZMA → sections/IAT; Fix VMP / Unpacker)
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)
