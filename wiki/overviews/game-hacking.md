@@ -369,6 +369,7 @@ sources:
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/hadevn__apex_full_cheat.md
+  - wiki/sources/descriptions/gmh5225__ayypex.md
   - wiki/sources/descriptions/hadevn__Valorant-SDK-2024.md
   - wiki/sources/descriptions/hooksteroid__ApexD3D_External.md
   - wiki/sources/descriptions/hooksteroid__R6Table_Internal.md
@@ -1069,6 +1070,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific R6 externals such as [[r6-external]] (C/C++; driver development; External tag) also sit in the cheat / game:r6 lane. (source: wiki/sources/descriptions/rushzzz-max__r6-external.md)
 - Title-specific Apex Legends externals such as [[apexd3d-external]] (C/C++; driver development / SDK generation / DirectX hooking; cheat / game:apex legends) sit in the cheat / game:apex legends lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/hooksteroid__ApexD3D_External.md)
 - Title-specific Apex Legends full-cheat samples such as [[apex-full-cheat]] (C/C++; rendering / SDK generation / hooking; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/hadevn__apex_full_cheat.md)
+- Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md)
 - Title-specific Blood Hunt cheat samples such as [[blood-hunt]] (C/C++; driver development / rendering / modding; cheat / game:bloodhunt; gmh5225) sit in the battle-royale offensive lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/gmh5225__blood-hunt.md)
 - Title-specific R6 chams samples such as [[r6-chams-public]] (Chameleon Models + visual check; educational; cheat / game:r6 [Chams]) illustrate the chams lane beside internals/externals. (source: wiki/sources/descriptions/igromanru__R6-Chams-public.md)
 - Historical League of Legends client mod/patcher samples such as [[lol-patcher]] (gmh5225; experimental; last updated Feb 2020; cheat / game:lol) sit in the LoL offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__lol_patcher.md)
