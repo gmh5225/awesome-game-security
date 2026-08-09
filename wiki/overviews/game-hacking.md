@@ -92,6 +92,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__csgo2-cheat.md
   - wiki/sources/descriptions/gmh5225__cs2_webradar.md
   - wiki/sources/descriptions/gmh5225__cs2_things.md
+  - wiki/sources/descriptions/gmh5225__cs2_sdk.md
   - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -1026,6 +1027,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Rust external CS2 cheats such as [[proext]] (ESP / aimbot / triggerbot / radar / RCS; egui UI) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/snipcola__ProExt.md)
 - Browser-based CS2 radar cheats such as [[cs2-webradar]] (C++/JavaScript; asset pipelines / modding / memory analysis; cheat / game:cs2 [Browser based radar cheat]; gmh5225) illustrate external radar UIs that stream entity positions to a web client instead of a native overlay. (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md)
 - CS2 Source 2 research collections such as [[cs2-things]] (VScript; gmh5225; RE structures / offset dumps / SDK snippets / entity layouts / netvars / engine interfaces; cheat / game:cs2) sit in the same cheat / game:cs2 memory-layout and Source 2 RE lane. (source: wiki/sources/descriptions/gmh5225__cs2_things.md)
+- CS2 Source 2 SDK headers such as [[cs2-sdk]] (gmh5225; C/C++; SDK generation; driver development / rendering / networking; cheat / game:cs2 [SDK]) sit in the same cheat / game:cs2 SDK lane beside generated dumps such as [[source2gen]]. (source: wiki/sources/descriptions/gmh5225__cs2_sdk.md)
 - External CS2 samples such as [[cs2-external-cheat]] (C++; D3D11 ImGui overlay / aimbot / memory read / offsets; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/sFIsAnExpert__CS2-External-Cheat.md)
 - External CS2 framework samples such as [[cs2-ext]] (C++17; pluggable kernel driver interface; D3D11/DXGI ImGui overlay; aimbot / ESP / spinbot; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/hendodev__cs2-ext.md)
 - Educational external CS2 ESP samples such as [[cs2-cheat]] (C++; SDL2 + ImGui; cs2-dumper offsets / hourly CI; offline insecure-mode study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/tiansongyu__cs2_cheat.md)
