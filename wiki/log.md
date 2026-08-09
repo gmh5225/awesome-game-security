@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/ayaya-league-external`: entity [[ayaya-league-external]]; cited on [[overviews/game-hacking]] and [[vanguard]].
+
 - **2026-08-09** — ingest `description:gmh5225/ayypex`: entity [[ayypex]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-09** — ingest `description:gmh5225/be_shellcode_dump`: entity [[be-shellcode-dump]]; cited on [[battleye]] and [[overviews/anti-cheat]].

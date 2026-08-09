@@ -91,6 +91,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apex_full_cheat](entities/apex-full-cheat.md) — Apex Legends full cheat: rendering / SDK generation / hooking (C/C++; cheat / game:apex legends)
 - [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])
+- [ayaya-league-external](entities/ayaya-league-external.md) — Node.js LoL external script platform (AyayaLeague; custom user scripts; gmh5225; cheat / game:lol)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
 - [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
