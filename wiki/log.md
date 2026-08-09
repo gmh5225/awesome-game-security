@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/amd-ryzen-master-driver-v17-exploit`: entity [[amd-ryzen-master-driver-v17-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-09** — ingest `description:gmh5225/ampa.sys-exp`: entity [[ampa-sys-exp]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/android-kernel-driver-template`: entity [[android-kernel-driver-template]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
