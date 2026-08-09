@@ -3199,3 +3199,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-08** — ingest `description:gmh5225/hex2dec-mcp`: entity [[hex2dec-mcp]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
 
 - **2026-08-09** — ingest `description:gmh5225/byfron-bypass`: entity [[byfron-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
+- **2026-08-09** — ingest `description:gmh5225/asus-bsitf-0-day-poc`: entity [[asus-bsitf-0-day-poc]]; cited on [[byovd]] and [[overviews/windows-kernel]].
