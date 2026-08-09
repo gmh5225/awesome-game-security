@@ -64,6 +64,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
+- [BEDaisy.sys report bypass](entities/bedaisy-bypass.md) — suppress BEDaisy outbound reports; preserve service responses (gmh5225; cheat / explore anticheat system:be)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
 - [Battleye Shellcode Dumper](entities/battleye-shellcode-dumper.md) — intercept BE server-streamed runtime shellcode + keys pre-execution (BEClient2.dll Dumper)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)

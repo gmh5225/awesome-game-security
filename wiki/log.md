@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/bedaisy-bypass`: entity [[bedaisy-bypass]]; cited on [[battleye]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/binsync`: entity [[binsync]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[ghidra]].
 
 - **2026-08-09** — ingest `description:gmh5225/blood-hunt`: entity [[blood-hunt]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
