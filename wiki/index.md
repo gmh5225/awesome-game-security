@@ -392,6 +392,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
 - [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
+- [ez-drv-bak](entities/ez-drv-bak.md) — Windows kernel driver backup & restore (gmh5225; driver development / AC lab baselines)
 - [FakeEye](entities/fakeeye.md) — BattlEye init emulator (BEService SCM + BE-style game launch; [Emulator])
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
