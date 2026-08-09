@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/autismware`: entity [[autismware]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-09** — ingest `description:gmh5225/avhook`: entity [[avhook]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-09** — ingest `description:gmh5225/awesome-executable-packing`: entity [[awesome-executable-packing]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].

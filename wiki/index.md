@@ -161,6 +161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
 - [Auto-generate Frida Bypass Scripts](entities/auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios.md) — static-analysis Frida script generator for Android/iOS SSL pinning and root/jailbreak bypass
 - [AutomataMP](entities/automatamp.md) — NieR Automata multiplayer / RE tooling (praydog; Game Develop / source)
+- [autismware](entities/autismware.md) — CS:GO internal cheat (C++; interface capture + VMT hooks; ESP/aimbot/backtrack/skin changer + ImGui menu; gmh5225 [HvH])
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)
 - [AvAAntiCheat](entities/avaanticheat.md) — Minecraft Bukkit/Spigot AC (fly/combat/autoclick/packet; Geyser leniency)
 - [avdebugger](entities/avdebugger.md) — AV signature recovery (Cheat → Anti Signature Scanning)
