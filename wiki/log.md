@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/android_touch`: entity [[android-touch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/anti-cheat`: entity [[deep-learning-anti-cheat-csgo]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]].
 
 - **2026-08-09** — ingest `description:gmh5225/antidbg-Baka`: entity [[antidbg-baka]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
