@@ -49,6 +49,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__dolboeb-executor.md
   - wiki/sources/descriptions/gmh5225__dbk64-vulnerability-driver.md
   - wiki/sources/descriptions/gmh5225__asus-bsitf-0-day-poc.md
+  - wiki/sources/descriptions/gmh5225__ampa.sys-exp.md
 updated: 2026-08-09
 confidence: high
 ---
@@ -101,6 +102,8 @@ Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) si
 
 BitLocker **`PdFwKrnl.sys`** IOCTL abuse such as [[pdfwkrnl-exploit]] loads and executes unsigned kernel code via the driver's IOCTL surface → arbitrary kernel code execution. (source: wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md)
 
+**`ampa.sys`** IOCTL abuse such as [[ampa-sys-exp]] (gmh5225; C/C++ automated exploit; insecure IOCTL → arbitrary kernel R/W or code execution; unsigned driver load, privilege escalation, or AC bypass) sits in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/gmh5225__ampa.sys-exp.md)
+
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
 
 WFP network-blinding abuse such as [[360wfp-exploit]] loads Qihoo 360’s `360netmon_x64.sys_wfp` to block EDR/XDR network connections instead of terminating security processes. (source: wiki/sources/descriptions/kyxiaxiang__360WFP_Exploit.md)
@@ -137,5 +140,5 @@ ASUS **`bsitf.sys`/`AsusBSItf.sys`** contiguous-pool map IOCTL abuse such as [[a
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
