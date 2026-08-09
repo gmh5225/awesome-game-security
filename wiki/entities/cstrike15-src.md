@@ -18,4 +18,4 @@ Leaked partial Counter-Strike: Global Offensive (CS:GO) source tree on the Sourc
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/game-hacking]] · [[sdk]] · [[tiny-csgo-client]] · [[regamedll-cs]] · [[source2gen]] · [[csgosimple]]
+[[overviews/game-engine]] · [[overviews/game-hacking]] · [[csso-src]] · [[sdk]] · [[tiny-csgo-client]] · [[regamedll-cs]] · [[source2gen]] · [[csgosimple]]
