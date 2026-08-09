@@ -1489,6 +1489,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
+- [wow-wowautofishing](entities/wow-wowautofishing.md) — WoW auto-fishing automation (C/C++; rendering / audio / memory analysis; cheat / game:wow; gmh5225)
 - [vt-debuger](entities/vt-debuger.md) — Intel VT-x thin-hypervisor stealth debugger (VM-exit breakpoints/single-step/memory watch; anti-debug–invisible RE)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
 - [VTuberWithUE4](entities/vtuber-with-ue4.md) — UE4 VTuber (physics / animation / asset pipelines; Game Develop / Unreal source)
