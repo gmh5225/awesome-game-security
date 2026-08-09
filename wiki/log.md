@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:joeltco/ff3mmo`: entity [[ff3mmo]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:lyk64/VolkDMA`: entity [[volk-dma]]; cited on [[overviews/dma-attack]] and [[dma]].
 
 - **2026-08-09** — ingest `readme:categories`: bumped Cheat ~2663 (was ~2662) / Anti Cheat ~656 (was ~655; Some Tricks ~114 / Game Develop ~183 / Game Engine ~155 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
