@@ -1434,6 +1434,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
 - [vpnhide](entities/vpnhide.md) — Android VPN hide (LSPosed system_server + GKI kretprobe/KernelPatch/Zygisk; ioctl/netlink/`/proc/net`; optional localhost ports block; Cheat Magisk)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
+- [Vulkan-Hook](entities/vulkan-hook.md) — Vulkan API hook framework: `vkQueuePresentKHR` intercept + ImGui overlay menus / ESP (C++; Windows x86/x64; gmh5225)
 - [vulnerablekernel-driver](entities/vulnerablekernel-driver.md) — intentionally vulnerable **`MsIo64.sys`** training driver (IOCTL arbitrary R/W, overflow, UAF, races; kernel exploitation lab; gmh5225)
 - [vulnerablepatchguardexploit](entities/vulnerablepatchguardexploit.md) — runtime vulnerable PatchGuard exploit to disable KPP (C++; cheat / PatchGuard-related; gmh5225)
 - [vibe-blocks-mcp](entities/vibe-blocks-mcp.md) — MCP server for Roblox Studio (SSE; studio actions as agent tools; Game Develop / MCP)
