@@ -179,6 +179,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
+- [bootlicker](entities/bootlicker.md) — UEFI bootkit PoC (Boot Manager / OS loader patch; pre-kernel DSE / PatchGuard / Secure Boot research; gmh5225)
 - [Branch Monitoring Project](entities/branch-monitoring-project.md) — Intel LBR/BTS branch-trace framework (C KM driver + usermode; PMI; control-flow monitoring)
 - [BYOUD](entities/byoud.md) — x64 unwind-metadata stack spoofing framework (klezVirus; Cheat Spoof Stack)
 - [BYPASS-PUBG-MOBILE-IMGUI](entities/bypass-pubg-mobile-imgui.md) — PUBG Mobile AC bypass + ImGui menu (C/C++; hooking / memory; cheat / game:pubgm)
