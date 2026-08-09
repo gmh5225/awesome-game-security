@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/dota-cheat`: entity [[dota-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-09** — ingest `description:gmh5225/dp701`: entity [[dp701]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[long-night]] and [[ida-dark-plus]].
 
 - **2026-08-09** — ingest `description:gmh5225/ds4-tools`: entity [[ds4-tools]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
