@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/WzComparerR2`: entity [[wzcomparerr2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-09** — ingest `description:gmh5225/X64DBG-MapLdr`: entity [[x64dbg-mapldr]]; cited on [[x64dbg]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `readme:categories`: bumped Cheat ~2665 (was ~2664) / Some Tricks ~115 (was ~114; Anti Cheat ~656 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/anti-cheat]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
