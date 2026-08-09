@@ -513,6 +513,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite-FNameEntry](entities/fortnite-fnameentry.md) — Fortnite FName/FNameEntry sample (C++; cheat / game:fortnite)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [fortnite-internal-updated-ritz](entities/fortnite-internal-updated-ritz.md) — Updated Ritz internal Fortnite cheat (UE4 hooking; ESP/aimbot/exploits; refreshed offsets + EAC bypass; gmh5225; [Internal])
+- [zerogui-fortnite-internal](entities/zerogui-fortnite-internal.md) — ZeroGui internal Fortnite cheat (visuals-only ESP enabled; aimbot/exploits disabled; gmh5225; [Internal])
 - [fortnite-offsets](entities/fortnite-offsets.md) — Fortnite memory offset / UE4 SDK structure tables (player/camera/bones/weapons/globals; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-w2s-offset-fortnite](entities/fortnite-w2s-offset-fortnite.md) — Fortnite world-to-screen offset collection (view/projection + camera; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-sigs](entities/fortnite-sigs.md) — Fortnite IDA-style byte-pattern signatures (GObjects/GNames/ProcessEvent; gmh5225; cheat / game:fortnite [Offset])
