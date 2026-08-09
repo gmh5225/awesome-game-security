@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/WindowProtect`: entity [[windowprotect]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/Windows-10-22H2-Vulnerable-driver-communication`: entity [[windows-10-22h2-vulnerable-driver-communication]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/WzComparerR2`: entity [[wzcomparerr2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
