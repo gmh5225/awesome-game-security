@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md
   - wiki/sources/descriptions/huoji120__goodeye.md
   - wiki/sources/descriptions/gmh5225__bedaisy-bypass.md
+  - wiki/sources/descriptions/gmh5225__be_shellcode_dump.md
   - wiki/sources/descriptions/haram__splendid_implanter.md
 updated: 2026-08-09
 confidence: medium
@@ -43,6 +44,8 @@ User-mode shellcode injected into game processes is studied via [[be-shellcode]]
 
 Runtime shellcode streamed from the BE server and executed in-process is intercepted pre-execution by [[battleye-shellcode-dumper]]: saves scanning-module payloads plus decryption keys for offline RE of BE’s dynamic module architecture. (source: wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md)
 
+[[be-shellcode-dump]] (gmh5225) dumps BE runtime shellcode scanning modules from protected game processes—intercepts streamed payloads before offline RE of detection signatures and scanning logic. (source: wiki/sources/descriptions/gmh5225__be_shellcode_dump.md)
+
 VAS region enumeration for injected/shellcode and manual-mapped modules is reconstructed in [[battleye-region-walking]]: VirtualQuery walk plus BE-style filters on protection, size, `MEM_PRIVATE`/`MEM_MAPPED`, and address heuristics. (source: wiki/sources/descriptions/tr1xxx__battleye-region-walking.md)
 
 Title-specific client tooling such as [[arma3beclient]] (C# / PowerShell; Arma 3 / `game:arma3`) sits in the BattlEye Tool lane for modding and BE-protected client debugging. (source: wiki/sources/descriptions/tym32167__arma3beclient.md)
@@ -63,4 +66,4 @@ User-mode-only injection against BE-protected processes is demonstrated by [[spl
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

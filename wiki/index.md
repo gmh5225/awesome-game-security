@@ -63,6 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
+- [BE Shellcode Dump](entities/be-shellcode-dump.md) — dump BE runtime shellcode scanning modules for offline RE (gmh5225; Reversed BE Shellcode)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
 - [BEDaisy.sys report bypass](entities/bedaisy-bypass.md) — suppress BEDaisy outbound reports; preserve service responses (gmh5225; cheat / explore anticheat system:be)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
