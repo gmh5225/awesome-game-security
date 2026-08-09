@@ -3283,3 +3283,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-09** — ingest `description:gmh5225/ValorantCheatExternal`: entity [[valorant-cheat-external]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/Valorant.External`: entity [[valorant-external]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
+- **2026-08-09** — ingest `description:gmh5225/Valorant-cheat-internal`: entity [[valorant-cheat-internal]]; cited on [[vanguard]] and [[overviews/game-hacking]].
