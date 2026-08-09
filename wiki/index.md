@@ -193,6 +193,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cat-annihilation](entities/cat-annihilation.md) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
+- [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
 - [ceserver-ios](entities/ceserver-ios.md) — Cheat Engine ceserver for jailbroken iOS (desktop CE remote scan/edit/pointer scan; dynamic analysis; gmh5225)
 - [Certael](entities/certael.md) — server-authoritative OSS AC (Rust C ABI; Godot/Unity/Unreal; .NET control plane)

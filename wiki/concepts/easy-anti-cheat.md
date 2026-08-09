@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
   - wiki/sources/descriptions/gmh5225__fortnite-exploits.md
   - wiki/sources/descriptions/gmh5225__eac-bypass-1.md
+  - wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md
 updated: 2026-08-09
 confidence: medium
 ---
@@ -32,7 +33,7 @@ Overlay / screenshot monitoring is another research surface: PoCs such as [[eac-
 
 Static RE prep: utilities such as [[eac-extractor-utility]] locate EAC components in game directories and the Windows driver store, decrypt/extract the kernel driver, user-mode modules, and configuration for offline binary analysis. (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
 
-Offensive bypass lane: repos such as [[eac-bypass]] explore kernel driver and shader-based techniques to evade EAC runtime checks. (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md) Win32k syscall channels such as [[eac-bypass-1]] (`NtMapVisualRelativePoints`; C++ driver development; cheat / driver communication) study stealth KM↔UM I/O alongside EAC evasion. (source: wiki/sources/descriptions/gmh5225__eac-bypass-1.md)
+Offensive bypass lane: repos such as [[eac-bypass]] explore kernel driver and shader-based techniques to evade EAC runtime checks. (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md) Win32k syscall channels such as [[eac-bypass-1]] (`NtMapVisualRelativePoints`; C++ driver development; cheat / driver communication) study stealth KM↔UM I/O alongside EAC evasion. (source: wiki/sources/descriptions/gmh5225__eac-bypass-1.md) Cheat Engine tool-detection bypass samples such as [[ce-easyanticheat-bypass]] patch or hide CE process, window class, driver, and memory-access signatures so scan/edit workflows run on EAC-protected games—useful for studying how EAC fingerprints common debugging tools. (source: wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md)
 
 CR3 / page-table root lane: minimal UM+KM teaching samples such as [[eac-cr3-bypass]] demonstrate bypassing EAC checks tied to CR3 via coordinated kernel driver + usermode code. (source: wiki/sources/descriptions/kprprivate__EAC-CR3-BYPASS.md)
 
@@ -42,4 +43,4 @@ Fortnite internal lane: samples such as [[fortnite-triadz]] (Triadz; UE4 engine 
 
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-bypass-1]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[fortnite-triadz]] · [[fortnite-internal-updated-ritz]] · [[fortnite-exploits]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-bypass-1]] · [[ce-easyanticheat-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[fortnite-triadz]] · [[fortnite-internal-updated-ritz]] · [[fortnite-exploits]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

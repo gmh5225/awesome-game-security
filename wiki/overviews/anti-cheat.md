@@ -370,6 +370,7 @@ sources:
   - wiki/sources/descriptions/jnastarot__anti-cheat.md
   - wiki/sources/descriptions/maoabc__nmmp.md
   - wiki/sources/descriptions/nulli83__Mj-lnir.md
+  - wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md
 updated: 2026-08-09
 confidence: high
 ---
@@ -392,7 +393,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 ## Major systems
 
-- [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md)
+- [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md); CE tool-detection bypass [[ce-easyanticheat-bypass]] (CE process/window class/driver/memory-access signature evasion; cheat / UD CE; gmh5225) (source: wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md)
 - [[eac-extractor-utility]] — decrypt/extract EAC kernel driver, UM modules, and config from game dir + driver store for offline static RE (Dump lane) (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
 - [[eac-bypass]] — offensive EAC bypass research (C++; kernel driver + shader work; cheat / explore anticheat:eac) (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md)
 
