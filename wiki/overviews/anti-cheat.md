@@ -122,6 +122,7 @@ sources:
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
+  - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
   - wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md
   - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
   - wiki/sources/descriptions/thewhiteninja__ntfstool.md
@@ -412,6 +413,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[heck-csgo-external]] — External CS:GO sample (C++; SDK generation / memory analysis) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - [[csgo-cheat-external]] — External CS:GO sample (C++; driver development) for studying driver-backed out-of-process cheat surface against VAC (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - [[csgo-external-cheat]] — External CS:GO sample (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
+- [[csgo-external-ahk-hack]] — AutoHotkey external CS:GO sample (gmh5225; script RPM; triggerbot / bhop / basic ESP; no compiled cheat binary) for studying script-based out-of-process cheat surface and detection characteristics against VAC (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - [[csgo-backtrack-patch]] — CS:GO backtrack patch sample (C/C++; hooking / memory analysis) for studying lag-compensation / tick-history cheat surface against VAC (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - [[kvm-csgo-cheat]] — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (gmh5225) for studying VM-isolated / below-OS cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)

@@ -86,6 +86,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
   - wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md
   - wiki/sources/descriptions/gmh5225__csgo_sdk.md
+  - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
   - wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md
@@ -1002,6 +1003,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Driver-backed external CS:GO samples such as [[csgo-cheat-external]] (C++; driver development; External tag) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - Simple kernel CS:GO cheats with hook-based communication such as [[kernel-csgo]] (C++; driver development / modding) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/nbqofficial__kernel-csgo.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
+- Script-based external CS:GO samples such as [[csgo-external-ahk-hack]] (gmh5225; AutoHotkey; RPM for triggerbot, bunny hop, basic ESP; External tag) sit in the same low-barrier cheat / game:csgo lane for studying script-based external detection. (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - Internal Team Fortress 2 samples such as [[teamfortress2-internal]] (C++ / C/C++; modding / hooking; Internal tag; gmh5225) sit in the cheat / game:team fortress 2 lane for studying Source 1 internal hook patterns beside CS:GO internals under VAC. (source: wiki/sources/descriptions/gmh5225__teamfortress2_internal.md)

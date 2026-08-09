@@ -240,6 +240,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-bot](entities/csgo-bot.md) — CS:GO bot; driver / OpenGL / shader (C/C++; cheat / game:csgo)
 - [csgo_cheat_external](entities/csgo-cheat-external.md) — external CS:GO; driver development (C++; cheat / game:csgo)
 
+- [csgo-external-ahk-hack](entities/csgo-external-ahk-hack.md) — external CS:GO; AutoHotkey script RPM; triggerbot / bhop / basic ESP (cheat / game:csgo)
 - [csgo-external-cheat](entities/csgo-external-cheat.md) — external CS:GO; RPM/driver reads; ESP / aimbot / radar (C++; cheat / game:csgo)
 - [csgo-dma-overlay](entities/csgo-dma-overlay.md) — CS:GO DMA + overlay sample (cheat / game:csgo [DMA])
 - [aqhax-csgo](entities/aqhax-csgo.md) — CS:GO internal cheat AqHax (interface capture, VMT hooks, netvar dump; ESP/aimbot/triggerbot/movement/skin changer; cheat / game:csgo)

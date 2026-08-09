@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/csgo_external_ahk_hack`: entity [[csgo-external-ahk-hack]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/csgo_sdk`: entity [[csgo-sdk]]; cited on [[overviews/game-hacking]] and [[source-netvars]].
 
 - **2026-08-09** — ingest `description:gmh5225/csso-src`: entity [[csso-src]]; cited on [[overviews/game-engine]] and [[source-netvars]].
