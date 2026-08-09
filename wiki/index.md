@@ -1443,6 +1443,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [WaryasSWHE](entities/waryasswhe.md) — usermode shatter-attack AC bypass PoC (0day; cheat / RPM; C++)
 - [Wells Anti Cheat](entities/wellsanticheat.md) — Among Us host-side BepInEx AC (RPC abuse / crashers / spam; Harmony)
+- [Weird Anti Cheat Ideas](entities/weird-anti-cheat-ideas.md) — unconventional AC design guide (anti-cheat research, networking, modding; Anti Cheat / guide; gmh5225)
 - [window_hijack](entities/window-hijack.md) — KM window-handle hijack for covert KM↔UM I/O (thread contexts)
 - [WindowProtect](entities/windowprotect.md) — window-hide research (driver / hooking; cheat / hide; gmh5225)
 - [Wazuh](entities/wazuh.md) — open-source XDR / HIDS (agent–manager; FIM / log / vuln; Elasticsearch)

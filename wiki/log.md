@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/WeirdAntiCheatIdeas`: entity [[weird-anti-cheat-ideas]]; cited on [[overviews/anti-cheat]].
+
 - **2026-08-09** — ingest `description:gmh5225/Win-Driver-EXP`: entity [[win-driver-exp]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/WinAPI_MapleStory`: entity [[winapi-maplestory]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
