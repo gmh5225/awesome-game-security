@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/bytecode-viewer`: entity [[bytecode-viewer]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]].
+
 - **2026-08-09** — ingest `description:gmh5225/cartmanv2`: entity [[cartmanv2]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-09** — ingest `description:gmh5225/ce-EasyAntiCheat-Bypass`: entity [[ce-easyanticheat-bypass]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
