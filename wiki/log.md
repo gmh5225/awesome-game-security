@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/eft-dma-radar-1`: entity [[eft-dma-radar-1]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/eft-internal`: entity [[eft-internal]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-09** — ingest `description:gmh5225/egui-d3d11`: entity [[egui-d3d11]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]].
