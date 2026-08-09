@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/custom-VEH`: entity [[custom-veh]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-09** — ingest `description:gmh5225/custom_data_ptr_swap_sample`: entity [[custom-data-ptr-swap-sample]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/dbk64-vulnerability-driver`: entity [[dbk64-vulnerability-driver]]; cited on [[byovd]] and [[overviews/windows-kernel]].

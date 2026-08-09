@@ -269,6 +269,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cve-maker](entities/cve-maker.md) — Python CLI: multi-DB CVE/exploit search (keyword/product/CVE ID; severity + links)
 - [CVEAC-2020](entities/cveac-2020.md) — EAC kernel-module vuln PoC (WDK; Integrity Checks)
 - [custom-data-ptr-swap-sample](entities/custom-data-ptr-swap-sample.md) — NtQueryLicenseValue KM↔UM channel (C++; driver development; cheat / driver communication; gmh5225)
+- [custom-VEH](entities/custom-veh.md) — RtlpCallVectoredHandlers hook for fast pre-vanilla VEH registration (Ring3 callback research; gmh5225)
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
