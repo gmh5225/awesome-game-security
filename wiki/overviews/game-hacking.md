@@ -101,6 +101,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cheat-engine-ceserver-pcileech.md
   - wiki/sources/descriptions/gmh5225__cheap-engine.md
   - wiki/sources/descriptions/gmh5225__cfclap.md
+  - wiki/sources/descriptions/gmh5225__cartmanv2.md
   - wiki/sources/descriptions/gmh5225__compiler-binary-richprint.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
@@ -1005,6 +1006,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Knight Online Gamesoft server-side anti-cheat such as [[gamesoftacs]] (speed/teleport/damage/inventory manipulation + client integrity; suspicious-activity review flags) sits in that Private Server lane beside MapleStory [[maplestory143]] CheatTracker stacks. (source: wiki/sources/descriptions/luisfelipe18__GamesoftACS.md)
 - C++ Minecraft Java server backends such as [[minecpp]] (gmh5225; **1.19**; authoritative server implementation for game security researchers studying offensive techniques in cheat / game:minecraft) sit in that Private Server lane beside Java Paper AC plugins such as [[minecraft-anticheatai]] and Bedrock MiTM proxies such as [[oomph]]. (source: wiki/sources/descriptions/gmh5225__minecpp.md)
 - Internal CS:GO baseline [[csgosimple]] (spirthack fork after MarkHC; Internal tag) sits in the cheat / game:csgo lane. (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
+- Internal CS:GO samples such as [[cartmanv2]] (gmh5225; C/C++; rendering / networking / editor tooling; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture with overlay and menu tooling. (source: wiki/sources/descriptions/gmh5225__cartmanv2.md)
 - Clean internal CS:GO scaffold bases such as [[csgo-internal-base]] (CreateInterface resolution, VMT hooks, netvar dump, pattern scan, ImGui menu; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture. (source: wiki/sources/descriptions/lstrsrt__csgo_internal_base.md)
 - Internal CS:GO samples such as [[csgo-kns]] (C++; VMT hooks + interface pointers; ESP, aimbot, bhop, skin changer; Internal tag) sit in the same cheat / game:csgo lane for studying Source engine SDK hook patterns. (source: wiki/sources/descriptions/kyojig__csgo_kns.md)
 - Internal CS:GO samples such as [[aqhax-csgo]] (AqHax; C++; interface capture + VMT hooks + netvar dump; ESP, aimbot, triggerbot, movement, skin changer) sit in the same cheat / game:csgo lane for studying typical internal cheat feature stacks. (source: wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md)
