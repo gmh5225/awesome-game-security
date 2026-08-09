@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/chainoffools`: entity [[chainoffools]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
+
 - **2026-08-09** — ingest `description:gmh5225/cheap-engine`: entity [[cheap-engine]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]].
 
 - **2026-08-09** — ingest `description:gmh5225/cheat-attack-thread-slemu`: entity [[cheat-attack-thread-slemu]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
