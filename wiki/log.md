@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `description:gmh5225/binsync`: entity [[binsync]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[ghidra]].
+
 - **2026-08-09** — ingest `description:gmh5225/blood-hunt`: entity [[blood-hunt]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
 - **2026-08-09** — ingest `description:gmh5225/bootlicker`: entity [[bootlicker]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].

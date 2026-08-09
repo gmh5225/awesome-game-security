@@ -174,6 +174,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BinExport](entities/binexport.md) — Google C++ disassembly exporter (IDA/Ghidra/BN → Protocol Buffer; BinDiff pipeline)
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
 - [binprotect](entities/binprotect.md) — x64 PE bin2bin obfuscator (no new section; BB rewrite; AC Obfuscation Engine)
+- [binsync](entities/binsync.md) — cross-disassembler collaborative RE sync (IDA/Ghidra/BN/angr; Git-backed names/comments/types; cheat / Sync; gmh5225)
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
 - [blood-hunt](entities/blood-hunt.md) — Blood Hunt cheat (C/C++; driver / rendering / modding; cheat / game:bloodhunt; gmh5225)
 - [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
