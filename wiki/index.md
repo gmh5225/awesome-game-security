@@ -861,6 +861,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStory v83 MaplestoryCPP](entities/maplestory-v83-maplestory-cpp.md) — MapleStory GMS-083 private server (C/C++; editor tooling / modding / SDK generation; Private Server-GMS-083 / game:maplestory; gmh5225)
 - [MapleStory Packer ModPacker](entities/maplestory-packer-modpacker.md) — MapleStory Worlds `.mod` / WZ pack-unpack tool (compression/encryption; client mod asset pipelines; modding / game:maplestory; gmh5225)
 - [WzComparerR2](entities/wzcomparerr2.md) — MapleStory online WZ extractor/viewer (C#/Lua; rendering/graphics/networking; cheat / game:maplestory; gmh5225)
+- [WinAPI MapleStory](entities/winapi-maplestory.md) — WinAPI MapleStory client (C/C++; rendering/animation/asset pipelines; Game Develop / source / game:maplestory; gmh5225)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
 - [MapleEzorsia](entities/maple-ezorsia.md) — MapleStory v83 private server (Java; login/map/quest + custom resolution client; Private Server / game:maplestory)
 - [mapleLemon](entities/maple-lemon.md) — MapleStory CMS-027 private server (Java/JavaScript; modding/debugging; Private Server-CMS-027 / game:maplestory)
