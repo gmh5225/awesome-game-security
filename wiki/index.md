@@ -385,6 +385,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EtwWatcher](entities/etw-watcher.md) — web UI browse/diff ETW provider manifests across Windows builds (ETWInspector-backed)
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
+- [executor](entities/executor.md) — PTE.User page-table injection (C/C++; kernel driver; cheat / injection:windows; gmh5225)
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W)
 - [ms-io-exploit](entities/ms-io-exploit.md) — `msIo64.sys` physmem-mapping BYOVD research (kkent030315; anycall for full client/driver)
 - [MSFT DriverBlockList](entities/msft-driverblocklist.md) — Microsoft Recommended Driver Block Rules mirror (AC / black-signature defensive research)
