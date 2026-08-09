@@ -1434,6 +1434,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
 - [vpnhide](entities/vpnhide.md) — Android VPN hide (LSPosed system_server + GKI kretprobe/KernelPatch/Zygisk; ioctl/netlink/`/proc/net`; optional localhost ports block; Cheat Magisk)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
+- [vulnerablekernel-driver](entities/vulnerablekernel-driver.md) — intentionally vulnerable **`MsIo64.sys`** training driver (IOCTL arbitrary R/W, overflow, UAF, races; kernel exploitation lab; gmh5225)
 - [vulnerablepatchguardexploit](entities/vulnerablepatchguardexploit.md) — runtime vulnerable PatchGuard exploit to disable KPP (C++; cheat / PatchGuard-related; gmh5225)
 - [vibe-blocks-mcp](entities/vibe-blocks-mcp.md) — MCP server for Roblox Studio (SSE; studio actions as agent tools; Game Develop / MCP)
 - [vscript-lua51](entities/vscript-lua51.md) — CS2 VScript Lua 5.1 external module DLL loader (VScript; cheat / game:cs2 scripting)

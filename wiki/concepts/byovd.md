@@ -52,6 +52,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ampa.sys-exp.md
   - wiki/sources/descriptions/gmh5225__amd-ryzen-master-driver-v17-exploit.md
   - wiki/sources/descriptions/gmh5225__Windows-10-22H2-Vulnerable-driver-communication.md
+  - wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md
   - wiki/sources/descriptions/gmh5225__Win-Driver-EXP.md
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
 updated: 2026-08-09
@@ -74,7 +75,7 @@ Microsoft vulnerable-driver blocklist ([[msft-driverblocklist]] mirrors the Reco
 
 Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drivers]] (namazso; list only, no PoC) help catalog signed drivers that expose physmem primitives commonly abused in BYOVD chains. (source: wiki/sources/descriptions/namazso__physmem_drivers.md)
 
-Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) Hands-on vulnerable-driver lab guides such as [[hacksysextremevulnerabledriver]] (HackSys Team; kernel exploitation training in the cheat / vulnerable-driver lane) complement that documentation. (source: wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md)
+Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) Hands-on vulnerable-driver lab guides such as [[hacksysextremevulnerabledriver]] (HackSys Team; kernel exploitation training in the cheat / vulnerable-driver lane) complement that documentation. (source: wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md) Intentionally vulnerable training drivers such as [[vulnerablekernel-driver]] (gmh5225; **`MsIo64.sys`**; IOCTL demos for arbitrary R/W, overflow, UAF, and race conditions) offer another kernel-exploitation lab target beside HackSys-style guides. (source: wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md)
 
 Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDelete.sys` from IObit Malware Fighter (v12.1.0) rather than a classic ZwTerminateProcess-style killer driver. (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md)
 
