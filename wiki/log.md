@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-09** — ingest `readme:categories`: bumped Anti Cheat ~657 (was ~656; Cheat ~2665 / Some Tricks ~115 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-09** — ingest `description:gmh5225/Vulkan-Hook`: entity [[vulkan-hook]]; cited on [[present-hook]] and [[overviews/graphics-api]].
 
 - **2026-08-09** — ingest `description:gmh5225/VulnerableKernel_Driver`: entity [[vulnerablekernel-driver]]; cited on [[byovd]] and [[overviews/windows-kernel]].
