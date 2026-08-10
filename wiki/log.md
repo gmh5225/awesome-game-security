@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `readme:categories`: bumped Cheat ~2666 (was ~2665; Anti Cheat ~658 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-10** — ingest `description:gmh5225/VMP-Vmp3_64bit_disasm-prerelease-`: entity [[vmp-vmp3-64bit-disasm-prerelease-]]; cited on [[vmprotect]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/VMProtect`: entity [[vmprotect]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
