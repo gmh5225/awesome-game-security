@@ -56,6 +56,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md
   - wiki/sources/descriptions/gmh5225__Win-Driver-EXP.md
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
+  - wiki/sources/descriptions/gmh5225__Terminator.md
 updated: 2026-08-10
 confidence: high
 ---
@@ -85,6 +86,8 @@ Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` v
 WatchDog Anti-Malware driver abuse such as [[watchdog-killer]] targets **`amsdk.sys`** / **`wamsdk.sys`** via `\\.\amsdk` (or guard device GUID): optional `IOCTL_REGISTER_PROCESS` (`0x80002010`) self-registration, then `IOCTL_TERMINATE_PROCESS` (`0x80002048`) to terminate protected AV/EDR processes—Silver Fox tradecraft lane; tested build reportedly absent from common LOLdriver/HVCI blocklists at publication. (source: wiki/sources/descriptions/gmh5225__WatchDogKiller.md)
 
 Zemana anti-malware driver abuse such as [[zam64-zemina]] targets **`zam64.sys`** via IOCTLs for process termination and memory access—another security-product driver in the known LOLdriver / process-kill lane. (source: wiki/sources/descriptions/gmh5225__zam64-zemina.md)
+
+Focused AV/EDR/AC terminate tooling such as [[terminator]] (gmh5225; **`zam64.sys`** BYOVD; arbitrary process-termination IOCTL → kill kernel-protected security and anti-cheat processes; red-team / LOLdriver termination research) complements IOCTL-focused [[zam64-zemina]] in the same Zemana backend lane. (source: wiki/sources/descriptions/gmh5225__Terminator.md)
 
 Samsung S4 driver abuse such as [[s4killer]] targets **`probmon.sys`** via crafted IOCTLs for arbitrary physical or virtual kernel read/write—typical BYOVD primitives for unsigned driver load, kernel structure patching, or AC bypass research. (source: wiki/sources/descriptions/gmh5225__s4killer.md)
 
@@ -156,5 +159,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

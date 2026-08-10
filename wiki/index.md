@@ -1290,6 +1290,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
+- [Terminator](entities/terminator.md) — BYOVD AV/EDR/AC process terminator via Zemana `zam64.sys` (arbitrary process-termination IOCTL; gmh5225)
 - [Termux](entities/termux-app.md) — Android terminal / Linux env (no-root; pkg+apt / proot; Cheat Terminal Emulator)
 - [thats_no_pipe](entities/thats-no-pipe.md) — Frida Windows named-pipe interceptor (NtRead/WriteFile; IPC → HTTP/WS proxy)
 - [the-poor-mans-obfuscator](entities/the-poor-mans-obfuscator.md) — lightweight LLVM IR obfuscator (insn sub / CFF / string encrypt; ELF/Mach-O)
