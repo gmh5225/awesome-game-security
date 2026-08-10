@@ -1279,6 +1279,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Ishanoshada/Ultimate-Frida-Bypass [Frida script bypassing Talsec/freeRASP, SSL pinning, root/emulator/Frida detection on Android]
 - https://github.com/infosecrajesh/Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS [Static-analysis Frida script generator for Android/iOS SSL pinning and root/jailbreak bypass]
 - https://github.com/moaaz01/nightowl [Unified Android APK analysis CLI with framework detection (Unity/Flutter/RN), RASP defense profiling, and auto-generated Frida bypass scripts]
+- https://github.com/VarshaWanjari0/Auto-Android-App-Modding-Tool [Termux-based Android APK modding toolkit for Frida Gadget and native .so injection, patching, rebuild, align, and sign workflows]
 - https://github.com/aimardcr/FridaDetectionBypass [Debugger Detection Bypass]
 - https://github.com/gmh5225/FridaScript [Low level scripting app for iOS]
 - https://github.com/AsenOsen/frida-stealth [Stealth patch for Frida, stealth knowledge collection]
@@ -4343,6 +4344,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Detection:Vulnerable Driver
 - https://github.com/Deputation/hygieia
 - https://github.com/FaEryICE/MemScanner
+- https://github.com/Systemhaus-Schulz/DriverRiskScout [Read-only Windows driver inventory and risk scanner correlating installed kernel drivers with LOLDrivers, Microsoft blocklists, and BYOVD profiles]
 
 
 > Detection: Hacked Hypervisor
