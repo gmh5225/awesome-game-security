@@ -1150,6 +1150,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
+- [r6-cheat-dumper](entities/r6-cheat-dumper.md) — R6 external cheat dumper: driver + rendering + animation (C/C++; cheat / game:r6 [External]; gmh5225)
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
 - [r6s-external-v2](entities/r6s-external-v2.md) — R6 external v2: kernel driver/handle elevation ESP + aimbot (C++; cheat / game:r6 [External]; gmh5225)
 - [r6s-internal-cheat](entities/r6s-internal-cheat.md) — R6 internal: modding + overlays + memory analysis (C++; cheat / game:r6; gmh5225)
