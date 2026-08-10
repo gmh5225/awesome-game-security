@@ -437,6 +437,7 @@ sources:
   - wiki/sources/descriptions/icelemon1314__mapleLemon.md
   - wiki/sources/descriptions/izarooni__MapleEzorsia.md
   - wiki/sources/descriptions/kvnxiao__storytime.md
+  - wiki/sources/descriptions/milk-analyzer__vmpunpack.md
   - wiki/sources/descriptions/mike1k__VMPImportFixer.md
   - wiki/sources/descriptions/rathena__rathena.md
   - wiki/sources/descriptions/un4ckn0wl3z__MemMCP.md
@@ -872,6 +873,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - .NET Harmony instrumentation of VMProtect-virtualized methods via [[vmunprotect]] (trace invokes / manipulate params; anti-debug bypass; VMP 3.6.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.md)
 - Dynamic .NET VMProtect unpack/dump via [[vmunprotect-dumper]] (force static ctor restore → AsmResolver PE dump; VMP 3.7.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md)
 - Native PE VMProtect unpack via [[vmpunpacker]] (C++/Python; LZMA decompress → original sections/IAT) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/oureveryday__VMPUnpacker.md)
+- Python emulation-based VMProtect/packer unpack via [[vmpunpack]] (patched sogen emulator to OEP; PE rebuild + IOC extract; stdlib-only; no devirt) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/milk-analyzer__vmpunpack.md)
 - Static Go VMProtect PE unpack/rebuild via [[vmpstatic]] (VMP 1.x–3.x) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/notsnakesilent__VMPStatic.md)
 - Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
 - Live-process VMP 3.x import-protection fix via [[vmpimportfixer]] (Unicorn emulation of near-call stubs in `.vmp0` → real import addresses; Zydis + pepp; x86/x64 including WoW64 fix from x64) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/mike1k__VMPImportFixer.md)

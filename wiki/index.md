@@ -1489,6 +1489,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Vmp3_utils](entities/vmp3-utils.md) — Python VMP3 editor tooling utilities (Fix VMP; gmh5225)
 - [VMProtect](entities/vmprotect.md) — VM-based code obfuscation engine (software CPU + memory/I/O; Fix VMP study; gmh5225)
 - [VMPStatic](entities/vmpstatic.md) — static Go VMProtect PE unpacker (VMP 1.x–3.x rebuild; Fix VMP / Unpacker)
+- [vmpunpack](entities/vmpunpack.md) — Python x64 VMProtect/packer unpacker (sogen emulation to OEP; PE rebuild + IOC extract; no devirt; Fix VMP / Unpacker)
 - [VMPUnpacker](entities/vmpunpacker.md) — VMProtect PE unpacker (C++/Python; LZMA → sections/IAT; Fix VMP / Unpacker)
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
