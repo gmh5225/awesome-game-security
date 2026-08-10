@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Serenity.gg-FN-and-Loader`: entity [[serenity-gg-fn-and-loader]]; cited on [[easy-anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:kernullist/KnWin32ApiMonitor`: entity [[kn-win32-api-monitor]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]].
 
 - **2026-08-10** — ingest `description:milk-analyzer/vmpunpack`: entity [[vmpunpack]]; cited on [[vmprotect]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]].
