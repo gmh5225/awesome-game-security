@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:inpeacedTeams/phantom-client`: entity [[phantom-client]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-10** — ingest `description:rathorekrishna401-NeuroVoid/ApexSU`: entity [[apex-su]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-link from [[kernelsu]].
 
 - **2026-08-10** — ingest `readme:categories`: bumped Cheat ~2670 (was ~2666; Anti Cheat ~658 / Some Tricks ~116 / DirectX ~38 stable); NeverC & NeverD full heading; refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (AI/Game Assets pipeline samples); light `index.md` section notes (no per-category pages).
