@@ -1442,6 +1442,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
 - [VMkatz](entities/vmkatz.md) — in-place VM snapshot/VHD cred extract (LSASS/SAM/LSA/NTDS; AC/IS forensics)
+- [VMP3 x64 Disasm (prerelease)](entities/vmp-vmp3-64bit-disasm-prerelease-.md) — VMProtect 3 x64 bytecode disassembler (custom insn decode, virtual opcode handlers, flow reconstruction; Fix VMP; gmh5225)
 - [VMPImportFixer](entities/vmpimportfixer.md) — VMP 3.x import protection fix via Unicorn emulation (near-call stubs → real imports; Zydis + pepp; x86/x64; Fix VMP)
 - [Vmp3_utils](entities/vmp3-utils.md) — Python VMP3 editor tooling utilities (Fix VMP; gmh5225)
 - [VMProtect](entities/vmprotect.md) — VM-based code obfuscation engine (software CPU + memory/I/O; Fix VMP study; gmh5225)
