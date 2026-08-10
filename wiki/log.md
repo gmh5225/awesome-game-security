@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/VMProtect`: entity [[vmprotect]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/VOLTO-EXTERNAL-SPOWAR-UD-EAC-BE-FORTNITE-EXTERNAL-CHEAT`: entity [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]]; cited on [[easy-anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/Vac-Emulator`: entity [[vac-emulator]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
