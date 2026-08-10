@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/UltraDriver-Game-Cheat`: entity [[ultra-driver-game-cheat]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/Uncloaking-RAID0-HWID-Serials`: entity [[uncloaking-raid0-hwid-serials]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/Unreal-Engine-5-PDB`: entity [[unreal-engine-5-pdb]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-link from [[pdb]].
