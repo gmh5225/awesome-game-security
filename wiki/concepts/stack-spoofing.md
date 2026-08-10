@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/klezVirus__SilentMoonwalk.md
   - wiki/sources/descriptions/klezVirus__BYOUD.md
   - wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md
-updated: 2026-08-07
+  - wiki/sources/descriptions/gmh5225__StackSpoofer_Macro.md
+updated: 2026-08-10
 confidence: medium
 ---
 
@@ -18,7 +19,7 @@ Techniques that **fabricate or rewrite call-stack frames** so thread stack walks
 
 ## Return-address spoofing
 
-Before calling a sensitive API, replace the stack slot that holds the return address with a gadget or module address; restore after return. Evades naive `RtlWalkFrameChain` scans that flag returns outside loaded images. Reusable libraries such as [[spoof-stack-safecall]] (gmh5225/SafeCall) package this pattern for red-team and game-security research. (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md)
+Before calling a sensitive API, replace the stack slot that holds the return address with a gadget or module address; restore after return. Evades naive `RtlWalkFrameChain` scans that flag returns outside loaded images. Reusable libraries such as [[spoof-stack-safecall]] (gmh5225/SafeCall) package this pattern for red-team and game-security research. (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md) Macro-based helpers such as [[stack-spoofer-macro]] (gmh5225; easy-to-use C/C++ preprocessor macros for stack spoofing) offer a lightweight alternative in the same lane. (source: wiki/sources/descriptions/gmh5225__StackSpoofer_Macro.md)
 
 ## Synthetic call stacks
 
@@ -30,7 +31,7 @@ Instead of fabricating return addresses on the stack, some frameworks **tamper w
 
 ## Detection surface
 
-Anti-cheat walks thread stacks for non-module returns, validates unwind records, and correlates with shadow-stack / CET where enabled. Illustrative corpus samples: [[return-address-spoofer]], [[spoof-stack-safecall]] (gmh5225/SafeCall; fake legitimate return addresses before API calls) (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md), [[loudsunrun]], [[thread-stack-spoofer]] (PoC thread call-stack spoof for in-process shellcode hiding; bypass thread-based memory examination) (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md), [[silent-moonwalk]] (klezVirus; TRUE call-stack spoofer from joint stack-spoofing research) (source: wiki/sources/descriptions/klezVirus__SilentMoonwalk.md), [[byoud]] (klezVirus; unwind-metadata manipulation to hide call-chain segments) (source: wiki/sources/descriptions/klezVirus__BYOUD.md), [[nocturneldr]], [[callout-poc]]. Defensive context: [[overviews/anti-cheat]] Detection:Spoof Stack lane.
+Anti-cheat walks thread stacks for non-module returns, validates unwind records, and correlates with shadow-stack / CET where enabled. Illustrative corpus samples: [[return-address-spoofer]], [[spoof-stack-safecall]] (gmh5225/SafeCall; fake legitimate return addresses before API calls) (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md), [[stack-spoofer-macro]] (gmh5225; C/C++ macro for stack spoofing) (source: wiki/sources/descriptions/gmh5225__StackSpoofer_Macro.md), [[loudsunrun]], [[thread-stack-spoofer]] (PoC thread call-stack spoof for in-process shellcode hiding; bypass thread-based memory examination) (source: wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md), [[silent-moonwalk]] (klezVirus; TRUE call-stack spoofer from joint stack-spoofing research) (source: wiki/sources/descriptions/klezVirus__SilentMoonwalk.md), [[byoud]] (klezVirus; unwind-metadata manipulation to hide call-chain segments) (source: wiki/sources/descriptions/klezVirus__BYOUD.md), [[nocturneldr]], [[callout-poc]]. Defensive context: [[overviews/anti-cheat]] Detection:Spoof Stack lane.
 
 ## Related
 
