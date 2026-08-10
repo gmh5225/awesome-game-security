@@ -1205,6 +1205,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [setwindowshookex-injector](entities/setwindowshookex-injector.md) — SetWindowsHookExW injection-testing PoC (C/C++; hooking / modding / Unreal Engine; Injection Testing; gmh5225)
 - [rust-external-1](entities/rust-external-1.md) — Facepunch Rust external cheat (C++; kernel driver/RPM; overlay ESP; EAC Unity; gmh5225)
 - [rust-internal](entities/rust-internal.md) — Facepunch Rust internal cheat framework (C++; Horizon core + DX11/ImGui; memory/map helpers; gmh5225)
+- [rust-rustinternal](entities/rust-rustinternal.md) — Facepunch Rust Unity internal cheat (C++; Mono/IL2CPP hooks + game-object memory; ESP/aimbot/no-recoil; EAC; gmh5225)
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
