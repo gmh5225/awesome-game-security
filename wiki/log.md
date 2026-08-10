@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Rust-ExternaL-and-Driver-AlienCheats`: entity [[rust-external-and-driver-aliencheats]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked from [[rust-external]], [[rust-external-1]], [[rust-external-source]], and [[rust-internal]].
+
 - **2026-08-10** — ingest `description:gmh5225/Rust-External-Source`: entity [[rust-external-source]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked from [[rust-external]], [[rust-external-1]], and [[rust-internal]].
 
 - **2026-08-10** — ingest `description:gmh5225/Rust-External`: entity [[rust-external]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked from [[rust-external-1]] and [[rust-internal]].
