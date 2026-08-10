@@ -1321,6 +1321,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
 - [TrollStore](entities/trollstore.md) — iOS perma-signed jailed IPA installer (CoreTrust/AMFI; arbitrary entitlements)
+- [TS-Fucker](entities/ts-fucker.md) — runtime TestSigning toggle via Dell `dbutil_2_3.sys` BYOVD (kernel live-patch; symbol-assisted offsets; no reboot; gmh5225)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
 - [TWMS Hacking Data](entities/twms-hacking-data.md) — Taiwan MapleStory live-client hacking corpus (offsets, packets, encryption keys, GameGuard bypass; cheat / game:maplestory [TMS CT]; gmh5225)

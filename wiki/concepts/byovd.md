@@ -57,6 +57,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Win-Driver-EXP.md
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
   - wiki/sources/descriptions/gmh5225__Terminator.md
+  - wiki/sources/descriptions/gmh5225__TS-Fucker.md
 updated: 2026-08-10
 confidence: high
 ---
@@ -151,6 +152,8 @@ Classic **`Capcom.sys`** arbitrary kernel execution such as [[dolboeb-executor]]
 
 Cheat Engine **`dbk64.sys`** IOCTL abuse such as [[dbk64-vulnerability-driver]] (gmh5225; signed debugging-tool driver shipped with CE for kernel-mode memory access → arbitrary kernel R/W via vulnerable IOCTLs; BYOVD research on game-debugging driver backends) sits in the same cheat-tool / LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__dbk64-vulnerability-driver.md)
 
+Dell **`dbutil_2_3.sys`** runtime test-signing toggle PoC such as [[ts-fucker]] (gmh5225; kernel R/W via already-loaded vulnerable driver → live-patch TestSigning state without reboot; symbol-assisted offset discovery for current Windows build; focused security-state manipulation, not a generic BYOVD toolkit) sits in the same LOLdriver / trust-state lane. (source: wiki/sources/descriptions/gmh5225__TS-Fucker.md)
+
 ASUS **`bsitf.sys`/`AsusBSItf.sys`** contiguous-pool map IOCTL abuse such as [[asus-bsitf-0-day-poc]] (gmh5225; Rust PoC for CVE-2026-13585; IOCTL `0x222808` allocates physically contiguous NonPagedPool, maps it into the caller with full usermode R/W, and leaks virtual + physical addresses; IOCTL `0x22280C` frees; NonPagedPool exhaustion and physaddr disclosure; executable kernel staging on older builds) sits in the OEM signed-driver BYOVD lane. (source: wiki/sources/descriptions/gmh5225__asus-bsitf-0-day-poc.md)
 
 ASUS **`asromgdrv.sys`** IOCTL communication research such as [[windows-10-22h2-vulnerable-driver-communication]] (gmh5225; user-mode wrapper opens `\\.\AsrOmgDrv` and drives vendor IOCTLs via `DeviceIoControl`; contiguous kernel memory alloc/free plus control-register R/W; still loadable on Win10 22H2 / Win11; reversed-interface study for BYOVD tooling) sits in the same OEM signed-driver communication lane. (source: wiki/sources/descriptions/gmh5225__Windows-10-22H2-Vulnerable-driver-communication.md)
@@ -159,5 +162,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
