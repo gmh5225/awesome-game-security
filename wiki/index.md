@@ -1410,6 +1410,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valorant-externals](entities/valorant-externals.md) — Valorant external offset feed (incremental refresh; cheat / game:valorant [Offset]; gmh5225)
 - [valorant-gui-imgui-remake](entities/valorant-gui-imgui-remake.md) — Valorant ImGui cheat GUI framework (tabs/toggles/sliders; ESP/aimbot/visual mods; cheat / game:valorant [GUI]; gmh5225)
 - [valorant-hack-esp-aimbot-skinchanger](entities/valorant-hack-esp-aimbot-skinchanger.md) — Valorant ESP/aimbot/skin changer via kernel driver; UE4 entity overlays; bypasses Vanguard user-mode protections (cheat / game:valorant; gmh5225)
+- [valorant-hack-esp-aimbot-skinchanger-source](entities/valorant-hack-esp-aimbot-skinchanger-source.md) — Valorant ESP/aimbot/skin changer C++ source; typical cheat architecture; kernel-driver UE4 reads; Vanguard kernel protection bypass (cheat / game:valorant [Internal]; gmh5225)
 - [valorant-internal](entities/valorant-internal.md) — Valorant internal: UE SDK generation + hooking (C/C++; cheat / game:valorant; gmh5225)
 - [valorant-internal-base](entities/valorant-internal-base.md) — Valorant internal base: UE SDK generation + hooking (C/C++; cheat / game:valorant [Internal]; gmh5225)
 - [valorant-internal-cheat](entities/valorant-internal-cheat.md) — Valorant internal: UE SDK generation + hooking (C/C++; cheat / game:valorant [Internal])

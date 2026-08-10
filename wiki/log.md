@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER-SOURCE`: entity [[valorant-hack-esp-aimbot-skinchanger-source]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER`: entity [[valorant-hack-esp-aimbot-skinchanger]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/VMAttack`: entity [[vmattack]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
