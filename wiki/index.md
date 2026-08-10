@@ -1453,6 +1453,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Vulkan-Hook](entities/vulkan-hook.md) — Vulkan API hook framework: `vkQueuePresentKHR` intercept + ImGui overlay menus / ESP (C++; Windows x86/x64; gmh5225)
 - [vulnerablekernel-driver](entities/vulnerablekernel-driver.md) — intentionally vulnerable **`MsIo64.sys`** training driver (IOCTL arbitrary R/W, overflow, UAF, races; kernel exploitation lab; gmh5225)
 - [vulnerablepatchguardexploit](entities/vulnerablepatchguardexploit.md) — runtime vulnerable PatchGuard exploit to disable KPP (C++; cheat / PatchGuard-related; gmh5225)
+- [volto-external-spowar-ud-eac-be-fortnite-external-cheat](entities/volto-external-spowar-ud-eac-be-fortnite-external-cheat.md) — Fortnite external: kernel driver + overlay; HWID-spoof / EAC-evasion naming (C/C++; cheat / game:fortnite [External]; gmh5225)
 - [vibe-blocks-mcp](entities/vibe-blocks-mcp.md) — MCP server for Roblox Studio (SSE; studio actions as agent tools; Game Develop / MCP)
 - [vscript-lua51](entities/vscript-lua51.md) — CS2 VScript Lua 5.1 external module DLL loader (VScript; cheat / game:cs2 scripting)
 - [wasm-ceserver](entities/wasm-ceserver.md) — WebAssembly memory analysis (Python/JavaScript; Cheat Engine ceserver-style remote debug; Analyzing WebAssembly)
