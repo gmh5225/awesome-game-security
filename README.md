@@ -1256,6 +1256,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
 - https://github.com/ChiChou/grapefruit [Runtime mobile instrumentation toolkit for iOS/Android, web UI]
 - https://github.com/firerpa/lamda [Android full-stack device control with built-in Frida, MITM, UI automation, and reverse-engineering APIs]
+- https://github.com/Kakaxh1/RootRaven [Self-hosted Android/iOS pentest dashboard with Frida hooking, SSL pinning bypass, APK decompilation, and Burp proxy setup]
 - https://github.com/index-login/MobileRE-Skill [AI-agent mobile reverse-engineering skill set with layered Frida hooks and a six-stage anti-detection pipeline]
 - https://github.com/ChiChou/vscode-frida [Unofficial Frida extension for VSCode]
 - https://github.com/ChiChou/bagbak [iOS Frida app decrypt / dump to IPA; extensions; jailbreak; bagbak@5 needs frida@17; deprecated]
@@ -1436,6 +1437,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/fynks/awesome-android-root [Awesome Android Root]
 - https://github.com/topjohnwu/Magisk
 - https://github.com/tiann/KernelSU
+- https://github.com/rathorekrishna401-NeuroVoid/ApexSU [Hardened KernelSU fork with Rust userspace, stealth hardening, and reduced attack surface for Android 12+]
 - https://github.com/gmh5225/KernelSU-4.4 [Adapted for Linux Kernel 4.4 + Google GCC 4.9]
 - https://github.com/BuSung-dev/Root-My-Galaxy [One-click KernelSU installer for supported Samsung Galaxy firmware via CVE-2026-43499]
 - https://github.com/bmax121/APatch
@@ -3020,8 +3022,10 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Game:Minecraft
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
 - https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
+- https://github.com/inpeacedTeams/phantom-client [Lunar Client 1.8.9 internal DLL with JNI/JVMTI, wglSwapBuffers OpenGL hook, and ImGui overlay modules]
 - https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
 - https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
+- https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
