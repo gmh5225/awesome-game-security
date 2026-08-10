@@ -1112,6 +1112,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)
 - [ProExt](entities/proext.md) — Rust external CS2 cheat (ESP / aimbot / triggerbot / radar / RCS; egui UI)
 
+- [Process Killer BYOVD](entities/process-killer-byovd.md) — BYOVD process terminator via **`viragt64.sys`** (kernel access → forceful kill of protected AC/EDR/AV; gmh5225)
 - [Proxmox](entities/proxmox.md) — PVE Helper Scripts (dialog installers; Cheat QEMU/KVM/PVE lab)
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [procmap](entities/procmap.md) — C++14 Linux `/proc/pid/maps` parser (`MemorySegment`; layout analysis for forensics / game security)
