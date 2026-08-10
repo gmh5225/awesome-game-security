@@ -1436,6 +1436,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [venom](entities/venom.md) — Linux kernel rootkit hooking (LKM hooks; cheat / linux kernel explorer)
 - [vermagic](entities/vermagic.md) — change Linux LKM vermagic / CRCs (cheat / RE tools)
 - [vmlinux-to-elf](entities/vmlinux-to-elf.md) — raw Linux kernel images → ELF with kallsyms (IDA/Ghidra RE)
+- [VMAttack](entities/vmattack.md) — IDA Pro Python plugin for VM-based obfuscation (dispatcher/handler-table trace, devirt assist; gmh5225)
 - [VMAware](entities/vmaware.md) — cross-platform header-only C++ VM detection (100+ techniques; CPUID/artifacts/timing/fingerprints; confidence scores; Detection:Virtual Environments)
 - [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)

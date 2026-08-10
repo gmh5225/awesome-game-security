@@ -441,6 +441,7 @@ sources:
   - wiki/sources/descriptions/notsnakesilent__VMPStatic.md
   - wiki/sources/descriptions/gmh5225__VMP-Vmp3_64bit_disasm-prerelease-.md
   - wiki/sources/descriptions/gmh5225__Vmp3_utils.md
+  - wiki/sources/descriptions/gmh5225__VMAttack.md
   - wiki/sources/descriptions/rmusser01__Infosec_Reference.md
   - wiki/sources/descriptions/ridpath__gamehacking-cheatsheet.md
   - wiki/sources/descriptions/mytechnotalent__Reverse-Engineering.md
@@ -596,7 +597,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 | MBA | [[mixed-boolean-arithmetic]] | [[cobra]], [[qsynthesis]], [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfuscation-analysis]] |
 | CFF | [[control-flow-flattening]] | [[idadeflat]], [[d810-ng]], [[obpo-plugin]], [[unflat]] (Python unflattener plugins; Fix OLLVM), [[obfuscation-detection]], [[misc]] (Genshin CFG decode), [[genshinjumpfixer2]] (Genshin jump-target CFG simplify) |
 | Opaque predicates | invariant injection | [[opaque-predicates-detective]], Z3/SMT backends ([[stp]]) |
-| VM virtualization | VMProtect / Themida handlers; open x86 VM embed; Quake III `.qvm` bytecode | [[novmpy]], [[tde]], [[magicmida-rs]], [[rumba]], [[vmpimportfixer]], [[vmp-vmp3-64bit-disasm-prerelease-]] (VMP3 x64 bytecode disasm; handler decode; gmh5225; source: wiki/sources/descriptions/gmh5225__VMP-Vmp3_64bit_disasm-prerelease-.md), [[vmp3-utils]] (Python VMP3 editor tooling; gmh5225; source: wiki/sources/descriptions/gmh5225__Vmp3_utils.md), [[vmprotect]] (software CPU VM obfuscation engine; gmh5225; source: wiki/sources/descriptions/gmh5225__VMProtect.md), [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[cerberus]] (ChaosVm Win32 PE bytecode VM; Qt GUI; source: wiki/sources/descriptions/gmh5225__cerberus.md), [[nocturne]], [[q3vm]] (embeddable AC dynamic-script VM; source: wiki/sources/descriptions/jnz__q3vm.md) |
+| VM virtualization | VMProtect / Themida handlers; open x86 VM embed; Quake III `.qvm` bytecode | [[novmpy]], [[tde]], [[vmattack]] (IDA Pro Python plugin; dispatcher/handler-table trace + devirt assist for custom VM obfuscation; gmh5225; source: wiki/sources/descriptions/gmh5225__VMAttack.md), [[magicmida-rs]], [[rumba]], [[vmpimportfixer]], [[vmp-vmp3-64bit-disasm-prerelease-]] (VMP3 x64 bytecode disasm; handler decode; gmh5225; source: wiki/sources/descriptions/gmh5225__VMP-Vmp3_64bit_disasm-prerelease-.md), [[vmp3-utils]] (Python VMP3 editor tooling; gmh5225; source: wiki/sources/descriptions/gmh5225__Vmp3_utils.md), [[vmprotect]] (software CPU VM obfuscation engine; gmh5225; source: wiki/sources/descriptions/gmh5225__VMProtect.md), [[vmpunpacker]], [[themida-research]], [[phantasm-x86-virtualizer]], [[cerberus]] (ChaosVm Win32 PE bytecode VM; Qt GUI; source: wiki/sources/descriptions/gmh5225__cerberus.md), [[nocturne]], [[q3vm]] (embeddable AC dynamic-script VM; source: wiki/sources/descriptions/jnz__q3vm.md) |
 | Binary lifting | machine code → compiler IR | McSema, remill, [[retdec]] (retargetable decompiler; limited maintenance; Cheat → Decompiler); BN MLIL/HLIL (source: wiki/sources/descriptions/gmh5225__retdec.md) |
 
 ## Anti-analysis & debugging

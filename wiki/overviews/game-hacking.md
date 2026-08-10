@@ -508,6 +508,7 @@ sources:
   - wiki/sources/descriptions/notsnakesilent__VMPStatic.md
   - wiki/sources/descriptions/gmh5225__VMP-Vmp3_64bit_disasm-prerelease-.md
   - wiki/sources/descriptions/gmh5225__Vmp3_utils.md
+  - wiki/sources/descriptions/gmh5225__VMAttack.md
   - wiki/sources/descriptions/rmusser01__Infosec_Reference.md
   - wiki/sources/descriptions/ridpath__gamehacking-cheatsheet.md
   - wiki/sources/descriptions/mytechnotalent__Reverse-Engineering.md
@@ -837,6 +838,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fix VMP / VTIL demos such as [[vmdevirt-vtil]] (broken VTIL compile path; multi-`vmenter` → jmp into compiled VTIL for IDA) sit in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md)
 - Python VMProtect deobfuscation via [[novmpy]] (symbolic exec of handler chains; reconstruct original insn sequence; Triton) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/wallds__NoVmpy.md)
 - Multi-engine VM detection/analysis via [[vmdragonslayer]] (DTT / SE / pattern classification / ML) sits in the Cheat RE Tools / Fix VMP-adjacent lane. (source: wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md)
+- IDA Pro VM obfuscation analysis via [[vmattack]] (Python plugin; dispatcher loops, virtual opcode handler tables, execution trace, devirtualization assist for custom VM architectures; gmh5225) also sits in the Cheat Fix VMP / devirt lane. (source: wiki/sources/descriptions/gmh5225__VMAttack.md)
 - Python VMProtect trace/symbolic-exec handler recovery via [[rumba]] (virtual opcode handlers → original CFG/semantics; MBA-tagged README) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/thalium__rumba.md)
 - Execution-trace view/edit/analyze via [[execution-trace-viewer]] (originally for obfuscated-code RE; any-trace analysis) sits in the Cheat Debugging / RE Tools lane. (source: wiki/sources/descriptions/teemu-l__execution-trace-viewer.md)
 - Multi-emulator binary harnessing via [[smallworld]] (angr / Ghidra / PANDA / Unicorn; coverage, crash triage, firmware testing) sits in the Cheat RE Tools / DBI dynamic-analysis lane. (source: wiki/sources/descriptions/smallworld-re__smallworld.md)
