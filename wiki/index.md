@@ -1280,6 +1280,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
 - [Swift-String-Obfuscator](entities/swift-string-obfuscator.md) — Swift string crypter (AC Compile Time / String Crypter)
 - [swiftshield](entities/swiftshield.md) — Swift identifier obfuscator for iOS (SourceKit rename; vs RE/tweaks)
+- [super-people-esp-aimbot-magic-hack](entities/super-people-esp-aimbot-magic-hack.md) — Super People UE4 ESP/aimbot + gameplay mods via SDK entity reads (C++; battle royale; cheat / game:super people; gmh5225)
 - [superpeople-client](entities/superpeople-client.md) — Super People client: driver / rendering / modding (C++; cheat / game:super people; gmh5225)
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
 - [Symless](entities/symless.md) — IDA structure/type recovery on stripped binaries (data-flow; Hex-Rays)
