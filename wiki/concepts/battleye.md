@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/tr1xxx__battleye-region-walking.md
   - wiki/sources/descriptions/steffalon__battleye-rust.md
   - wiki/sources/descriptions/rushzzz-max__r6-external.md
+  - wiki/sources/descriptions/gmh5225__R6S-internal-Cheat.md
   - wiki/sources/descriptions/gmh5225__Rainbow-Six-Siege-Rs6-External-Esp-Aimbot-Hack-Cheat.md
   - wiki/sources/descriptions/gmh5225__Rainbow-6-Siege-Cheat.md
   - wiki/sources/descriptions/mexploitui__FakeEye.md
@@ -57,7 +58,7 @@ Title-specific client tooling such as [[arma3beclient]] (C# / PowerShell; Arma 3
 
 Server-side RCON is covered by [[battleye-rust]]: Rust packet encode/checksum + UDP socket I/O for BattlEye remote-console listen/read/write (admin / protocol research). (source: wiki/sources/descriptions/steffalon__battleye-rust.md)
 
-Title-specific R6 external samples such as [[r6-external]] (C/C++; driver development; External tag) illustrate out-of-process / driver-backed research against BattlEye-protected Siege clients. (source: wiki/sources/descriptions/rushzzz-max__r6-external.md) Leaked R6 external ESP/aimbot source such as [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] (gmh5225; WndProc-only input hooking to limit detectable hook surfaces) complements that lane with minimal user-mode input-path evasion study. (source: wiki/sources/descriptions/gmh5225__Rainbow-Six-Siege-Rs6-External-Esp-Aimbot-Hack-Cheat.md) R6 cheat source such as [[rainbow-6-siege-cheat]] (gmh5225; C/C++; rendering + hooking; cheat / game:r6) adds another user-mode hook/overlay sample in the BattlEye-protected Siege lane. (source: wiki/sources/descriptions/gmh5225__Rainbow-6-Siege-Cheat.md)
+Title-specific R6 external samples such as [[r6-external]] (C/C++; driver development; External tag) illustrate out-of-process / driver-backed research against BattlEye-protected Siege clients. (source: wiki/sources/descriptions/rushzzz-max__r6-external.md) Leaked R6 external ESP/aimbot source such as [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] (gmh5225; WndProc-only input hooking to limit detectable hook surfaces) complements that lane with minimal user-mode input-path evasion study. (source: wiki/sources/descriptions/gmh5225__Rainbow-Six-Siege-Rs6-External-Esp-Aimbot-Hack-Cheat.md) R6 cheat source such as [[rainbow-6-siege-cheat]] (gmh5225; C/C++; rendering + hooking; cheat / game:r6) adds another user-mode hook/overlay sample in the BattlEye-protected Siege lane. (source: wiki/sources/descriptions/gmh5225__Rainbow-6-Siege-Cheat.md) R6 internal cheat source such as [[r6s-internal-cheat]] (gmh5225; C++; modding + overlays + memory analysis; cheat / game:r6) adds an in-process mod/overlay sample in the same lane. (source: wiki/sources/descriptions/gmh5225__R6S-internal-Cheat.md)
 
 Service/install/launch emulation is studied via [[fakeeye]]: SCM-managed `BEService`, external config, and BE-style game process creation without the real AC stack. (source: wiki/sources/descriptions/mexploitui__FakeEye.md)
 
@@ -71,4 +72,4 @@ User-mode-only injection against BE-protected processes is demonstrated by [[spl
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

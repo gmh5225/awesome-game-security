@@ -1151,6 +1151,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
+- [r6s-internal-cheat](entities/r6s-internal-cheat.md) — R6 internal: modding + overlays + memory analysis (C++; cheat / game:r6; gmh5225)
 - [rainbow-6-siege-cheat](entities/rainbow-6-siege-cheat.md) — R6 cheat: rendering + hooking (C/C++; cheat / game:r6; gmh5225)
 - [rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat](entities/rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat.md) — R6 leaked external ESP/aimbot; WndProc-only input hook (cheat / game:r6; gmh5225)
 - [r6table-internal](entities/r6table-internal.md) — R6 internal: UE SDK ESP/aimbot + in-engine overlay (C++; cheat / game:r6)

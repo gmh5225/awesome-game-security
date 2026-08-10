@@ -6,6 +6,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-10** — ingest `description:gmh5225/RTCore64_Vulnerability`: entity [[rtcore64-vulnerability]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
+- **2026-08-10** — ingest `description:gmh5225/R6S-internal-Cheat`: entity [[r6s-internal-cheat]]; cited on [[overviews/game-hacking]] and [[battleye]].
+
 - **2026-08-10** — ingest `description:gmh5225/Rainbow-6-Siege-Cheat`: entity [[rainbow-6-siege-cheat]]; cited on [[overviews/game-hacking]] and [[battleye]].
 
 - **2026-08-10** — ingest `description:gmh5225/Rainbow-Six-Siege-Rs6-External-Esp-Aimbot-Hack-Cheat`: entity [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]]; cited on [[overviews/game-hacking]] and [[battleye]].
