@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/SpookiMystic-GTA-Leak`: entity [[spookimystic-gta-leak]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[phake]].
+
 - **2026-08-10** — ingest `description:gmh5225/StackSpoofer_Macro`: entity [[stack-spoofer-macro]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `readme:categories`: bumped Cheat ~2674 (was ~2672; Anti Cheat ~661 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

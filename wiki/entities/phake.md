@@ -20,4 +20,4 @@ Distinct from GTA:SA binary-compatible reimplementations such as [[gta-reversed-
 
 ## Related
 
-[[gta-reversed-modern]] · [[regta]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[research-rigor]]
+[[spookimystic-gta-leak]] · [[gta-reversed-modern]] · [[regta]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[research-rigor]]
