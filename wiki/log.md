@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Valorant-Dumper-Tool`: entity [[valorant-dumper-tool]]; cited on [[vanguard]] and [[overviews/game-engine]].
+
 - **2026-08-10** — ingest `description:gmh5225/Valorant-Esp-Aimbot-Cheat-Hack`: entity [[valorant-esp-aimbot-cheat-hack]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/Valorant-Esp-Aimbot-Hack`: entity [[valorant-esp-aimbot-hack]]; cited on [[vanguard]] and [[overviews/game-hacking]].
