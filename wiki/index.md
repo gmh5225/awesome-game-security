@@ -716,6 +716,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImGUI-Zygisk-Unity](entities/imgui-zygisk-unity.md) — Zygisk Unity ImGui mod menu template (OpenGL ES + render-pipeline hook; cheat / render-draw)
 - [immortal-rust](entities/immortal-rust.md) — Facepunch Rust OpenGL + SDK generation cheat source (C/C++; cheat / game:rust; gmh5225)
 - [imxyvimapper](entities/imxyvimapper.md) — BYOVD driver mapper via AsUpIO.sys (PE manual map; sections/imports/relocs/entry; gmh5225)
+- [ucfoxi-shared-flushfilebuffers-communication-update](entities/ucfoxi-shared-flushfilebuffers-communication-update.md) — `\Driver\PEAUTH` `IRP_MJ_FLUSH_BUFFERS` hijack + registry-seeded shared buffer KM↔UM comm (gmh5225; cheat / driver communication)
 - [ucmapper](entities/ucmapper.md) — BYOVD kernel driver manual mapper via nvaudio.sys (EncodePayLoad reuse; runtime-list cleanup; gmh5225)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injection](entities/injection.md) — Windows injection-testing corpus (Conhost/PROPagate/ALPC/KernelCallbackTable/KnownDlls and related PoCs; Injection Testing; gmh5225)
