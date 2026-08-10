@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `readme:categories`: bumped Cheat ~2670 (was ~2666; Anti Cheat ~658 / Some Tricks ~116 / DirectX ~38 stable); NeverC & NeverD full heading; refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]] (AI/Game Assets pipeline samples); light `index.md` section notes (no per-category pages).
+
 - **2026-08-10** — ingest `description:gmh5225/UE-Plugin-SCUE4-Plugin`: entity [[ue-plugin-scue4-plugin]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-link from [[unreal-engine-protection]].
 
 - **2026-08-10** — ingest `description:gmh5225/UE-UnrealEngineSDK`: entity [[ue-unreal-engine-sdk]]; cited on [[overviews/game-engine]] and [[unreal-object-model]].
