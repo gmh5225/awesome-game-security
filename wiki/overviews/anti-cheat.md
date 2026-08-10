@@ -110,6 +110,7 @@ sources:
   - wiki/sources/descriptions/ssnob__hidden_syscall_monitoring.md
   - wiki/sources/descriptions/wpdk__wdutf.md
   - wiki/sources/descriptions/kernullist__kernforge.md
+  - wiki/sources/descriptions/kernullist__KnWin32ApiMonitor.md
   - wiki/sources/descriptions/kernelwernel__VMAware.md
   - wiki/sources/descriptions/redecorate__Holodori-Kernel-Bypass.md
   - wiki/sources/descriptions/wietze__windows-dll-hijacking.md
@@ -466,6 +467,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[ricochet-disabler]] — disable/bypass Ricochet kernel driver and user-mode monitoring for COD AC architecture research (source: wiki/sources/descriptions/gmh5225__ricochet-disabler.md)
 - [[hidden-syscall-monitoring]] — C/C++ monitor of hidden syscalls from Call of Duty anticheat (hooking / memory analysis) (source: wiki/sources/descriptions/ssnob__hidden_syscall_monitoring.md)
+- [[kn-win32-api-monitor]] — Tauri 2 Win32 API trace workstation (IAT hooks; ~30k APIs; `.knapm` replay; security/RE/anti-cheat research; kernullist) (source: wiki/sources/descriptions/kernullist__KnWin32ApiMonitor.md)
 - [[syscall-detect]] — C PoC detecting direct/indirect syscalls via Instrumentation Callback or thread stack inspection (flags custom stubs vs ntdll) (source: wiki/sources/descriptions/jackullrich__syscall-detect.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 
