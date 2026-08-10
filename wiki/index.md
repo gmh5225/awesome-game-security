@@ -1291,6 +1291,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [syscall-detect](entities/syscall-detect.md) — detect direct/indirect syscalls via Instrumentation Callback or stack inspection (C; AC / Windows)
 - [syscalls-cpp](entities/syscalls-cpp.md) — C++20 header-only direct syscall invocation (AC Compile Time)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
+- [StealthSytemThreadFinderBE](entities/stealth-sytem-thread-finder-be.md) — find hidden system threads BE misses (PspCidTable; scheduler queue; manual-map)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)

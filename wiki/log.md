@@ -3379,3 +3379,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-09** — ingest `description:gmh5225/Valorant-cheat-internal`: entity [[valorant-cheat-internal]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/UE5-FPS-CryptRaider`: entity [[ue5-fps-crypt-raider]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
+- **2026-08-10** — ingest `description:gmh5225/StealthSytemThreadFinderBE`: entity [[stealth-sytem-thread-finder-be]]; cited on [[battleye]] and [[overviews/windows-kernel]].

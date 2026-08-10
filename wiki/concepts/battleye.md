@@ -20,7 +20,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__bedaisy-bypass.md
   - wiki/sources/descriptions/gmh5225__be_shellcode_dump.md
   - wiki/sources/descriptions/haram__splendid_implanter.md
-updated: 2026-08-09
+  - wiki/sources/descriptions/gmh5225__StealthSytemThreadFinderBE.md
+updated: 2026-08-10
 confidence: medium
 ---
 
@@ -35,6 +36,8 @@ Object callbacks and handle stripping, injected-module detection, pool/driver fo
 [[blindeye]] shows an offensive research angle: hook BE’s imported pool allocators and drop allocations for the kernel “report” path. (source: wiki/sources/descriptions/zouxianyu__BlindEye.md)
 
 Thread-start heuristics (system threads whose start address is outside any loaded driver image) are reconstructed in tools such as [[system-thread-finder]], derived from BE’s thread-detection logic. (source: wiki/sources/descriptions/weak1337__SystemThreadFinder.md)
+
+[[stealth-sytem-thread-finder-be]] (gmh5225) enumerates stealth system threads BE misses via PspCidTable walks, scheduler queue scans, and thread-list cross-reference—beyond standard API calls—for manually mapped driver threads. (source: wiki/sources/descriptions/gmh5225__StealthSytemThreadFinderBE.md)
 
 User-mode prologue hooks (JMP / INT3 on WinAPI and game functions) are a common BE-style control surface; [[skiphook]] studies trampolines that skip the first instruction so those hooks are never hit while return-address checks still look legitimate. (source: wiki/sources/descriptions/weak1337__SkipHook.md)
 
@@ -66,4 +69,4 @@ User-mode-only injection against BE-protected processes is demonstrated by [[spl
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
