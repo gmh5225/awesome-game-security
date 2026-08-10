@@ -1187,6 +1187,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
 - [ricochet-disabler](entities/ricochet-disabler.md) — Ricochet AC disable/bypass (kernel driver + user-mode; COD research)
+- [rico-cheat-rust-external](entities/rico-cheat-rust-external.md) — Facepunch Rust external cheat (C++/C/C++; driver / rendering / Unity; cheat / game:rust [External]; gmh5225)
 - [RiscyWorkshop](entities/riscy-workshop.md) — RISC-V payload obfuscation workshop (riscvm VM + llvm-mingw + insn mutation; red-team exercises)
 - [RisohEditor](entities/risoh-editor.md) — free Win32 PE resource editor (dialogs, menus, icons, RC import/export; 32/64-bit)
 - [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
