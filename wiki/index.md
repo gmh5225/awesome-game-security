@@ -1141,6 +1141,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QuickPGTrigger](entities/quickpgtrigger.md) — PatchGuard stress testing (C/C++; cheat / PatchGuard-related; gmh5225)
 - [quickemu](entities/quickemu.md) — optimized QEMU VM create/run (Win/macOS/Linux; Cheat QEMU/KVM lab)
 - [query-gpu-name-rs](entities/query-gpu-name-rs.md) — Rust Windows GPU display-name query (Detection:HWID; gmh5225)
+- [query-shadow-stack](entities/query-shadow-stack.md) — Windows CET shadow-stack query/mismatch PoC (return-address integrity; gmh5225)
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
 - [QSynthesis](entities/qsynthesis.md) — IDA Pro MBA expression synthesizer (Python; oracle-guided program synthesis + SMT; Hex-Rays; Cheat IDA Plugins)
