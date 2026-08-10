@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Tool-DIYSystemMemoryDump`: entity [[tool-diy-system-memory-dump]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-10** — ingest `description:gmh5225/U3D_MiniDNF`: entity [[u3d-minidnf]]; cited on [[overviews/game-engine]] and [[overviews/overview]].
 
 - **2026-08-10** — ingest `description:gmh5225/UCFoxi-Shared-FlushFileBuffers-Communication-Update`: entity [[ucfoxi-shared-flushfilebuffers-communication-update]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
