@@ -16,6 +16,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-10** — ingest `description:gmh5225/Valorant-Esp-Aimbot-Hack`: entity [[valorant-esp-aimbot-hack]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
+- **2026-08-10** — ingest `description:gmh5225/Valorant-Aimbot-Bypass`: entity [[valorant-aimbot-bypass]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-09** — ingest `description:gmh5225/Valorant-External-1`: entity [[valorant-external-1]]; cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-09** — ingest `description:gmh5225/Valorant-External-P2C-Leaked`: entity [[valorant-external-p2c-leaked]]; cited on [[vanguard]] and [[overviews/game-hacking]].
