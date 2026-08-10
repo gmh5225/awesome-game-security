@@ -3467,3 +3467,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-10** — ingest `description:gmh5225/R6S-External-V2`: entity [[r6s-external-v2]]; cited on [[overviews/game-hacking]] and [[battleye]].
 
 - **2026-08-10** — ingest `description:gmh5225/QueryShadowStack`: entity [[query-shadow-stack]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
+- **2026-08-10** — ingest `description:gmh5225/PsNotifRoutineUnloader`: entity [[ps-notif-routine-unloader]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].

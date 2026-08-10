@@ -1116,6 +1116,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [procmap](entities/procmap.md) — C++14 Linux `/proc/pid/maps` parser (`MemorySegment`; layout analysis for forensics / game security)
 - [ps5-linux-loader](entities/ps5-linux-loader.md) — PS5 Linux loader (kernel/HV exploits, IOMMU/GPU/TMR; PlayStation)
+- [ps-notif-routine-unloader](entities/ps-notif-routine-unloader.md) — remove process/thread/image notify callbacks from AC/security drivers (`PsSetCreateProcessNotifyRoutine` enum; RTCore64.sys; gmh5225)
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
 - [pubg](entities/pubg.md) — PUBG-focused OpenGL hooking/modding sample (C/C++; cheat / game:pubgm; gmh5225)
