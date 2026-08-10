@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/STB`: entity [[stb-gmh5225]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/ScreenShot`: entity [[screenshot]]; cited on [[anti-screenshot-capture]] and [[overviews/graphics-api]].
 
 - **2026-08-10** — ingest `description:gmh5225/SeaOfChoros`: entity [[sea-of-choros]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].

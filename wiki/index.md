@@ -1277,6 +1277,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sogen](entities/sogen.md) — Windows userspace PE emulator (Unicorn + Capstone; minidump / Zstd state; React web UI; FlatBuffers trace IPC; Windows User Space Emulator)
 
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
+- [STB (gmh5225)](entities/stb-gmh5225.md) — compile-time IDA-style string-to-array for stack trace building / spoofing research (gmh5225; Cheat Compile Time)
 - [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
