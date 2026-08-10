@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-internal.md
   - wiki/sources/descriptions/gmh5225__valorant-internal-base.md
   - wiki/sources/descriptions/gmh5225__Valorant-cheat-internal.md
+  - wiki/sources/descriptions/gmh5225__Valorant-Esp-Aimbot-Hack.md
   - wiki/sources/descriptions/gmh5225__valorant-externals.md
   - wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md
   - wiki/sources/descriptions/gmh5225__valo-driver.md
@@ -32,7 +33,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ayaya-league-external.md
   - wiki/sources/descriptions/gmh5225__augur-riot.md
   - wiki/sources/descriptions/gmh5225__VanguardImportResolver.md
-updated: 2026-08-09
+updated: 2026-08-10
 confidence: medium
 ---
 
@@ -48,7 +49,7 @@ EFI manual-map research such as [[xigmapper]] notes a practical consequence of t
 
 Per-title Valorant UE dump tooling such as [[valorant-dumper]] (GObjects/GNames, player/weapon layouts from the live process) is useful when modeling what cheat SDK generators probe under a Vanguard-protected title. (source: wiki/sources/descriptions/xehn1337__valorant-dumper.md) Narrower FNamePool walk/decrypt samples such as [[valorant-fnamepool]] (iterate and decrypt `FNamePool->Entries`) sit in the same Valorant UE name-pool research lane. (source: wiki/sources/descriptions/percpopper__VALORANT-FNamePool.md) External offset feeds such as [[valorant-externals]] (README `[Offset]` tag; incremental refresh; gmh5225) complement dump tooling for out-of-process memory-layout study under Vanguard. (source: wiki/sources/descriptions/gmh5225__valorant-externals.md)
 
-Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md) In-process internal cheat bases such as [[valorant-internal-cheat]] (C/C++; UE SDK generation + hooking), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the offensive in-process lane under Vanguard rather than dump-only or utility tooling. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md) Menu-driven internal samples such as [[valorant-cheat-internal]] (Insert-key menu toggle; rebindable; README `[Internal]`; gmh5225) complement SDK/hook bases for in-process UX study. (source: wiki/sources/descriptions/gmh5225__Valorant-cheat-internal.md)
+Client-side Valorant crosshair config samples such as [[valorantcc]] sit in the adjacent cheat / game:valorant utility lane (Riot-owned assets/endpoints; not an AC product). (source: wiki/sources/descriptions/weedeej__ValorantCC.md) In-process internal cheat bases such as [[valorant-internal-cheat]] (C/C++; UE SDK generation + hooking), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the offensive in-process lane under Vanguard rather than dump-only or utility tooling. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md) Menu-driven internal samples such as [[valorant-cheat-internal]] (Insert-key menu toggle; rebindable; README `[Internal]`; gmh5225) complement SDK/hook bases for in-process UX study. (source: wiki/sources/descriptions/gmh5225__Valorant-cheat-internal.md) Fully featured internal ESP/aimbot samples such as [[valorant-esp-aimbot-hack]] (Eduty; C++; gmh5225) illustrate the in-process offensive feature stack under Vanguard rather than dump-only or external tooling. (source: wiki/sources/descriptions/gmh5225__Valorant-Esp-Aimbot-Hack.md)
 
 Update-monitoring tooling such as [[vanguard-update-notifier]] (Discord bot; polls Riot clientconfig, SHA-256 hashes Vanguard setup archive contents, alerts on version/hash drift) helps researchers track installer changes without manual diffing. (source: wiki/sources/descriptions/luavmload__vanguard-update-notifier.md)
 
@@ -68,4 +69,4 @@ Historical League of Legends client mod/patcher samples such as [[lol-patcher]] 
 
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[augur-riot]] · [[vanguard-import-resolver]] · [[lol-patcher]] · [[lol-offset-dumper]] · [[lol-unpackman]] · [[league-base]] · [[hh-lol-prophet]] · [[frank]] · [[ayaya-league-external]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-cheat-external]] · [[valorant-external]] · [[valorant-external-1]] · [[valorant-external-p2c-leaked]] · [[valorant-external-source]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorant-cheat-internal]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[augur-riot]] · [[vanguard-import-resolver]] · [[lol-patcher]] · [[lol-offset-dumper]] · [[lol-unpackman]] · [[league-base]] · [[hh-lol-prophet]] · [[frank]] · [[ayaya-league-external]] · [[valorant-dumper]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-cheat-external]] · [[valorant-external]] · [[valorant-external-1]] · [[valorant-external-p2c-leaked]] · [[valorant-external-source]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[valorant-cheat-internal]] · [[valorant-esp-aimbot-hack]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]

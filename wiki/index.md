@@ -1396,6 +1396,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valorant-cheat-external](entities/valorant-cheat-external.md) — Valorant external ESP/aimbot via kernel driver RPM; no inject; UE4 entities; bypass Vanguard injection detection (cheat / game:valorant [External]; gmh5225)
 - [valorant-cheat-internal](entities/valorant-cheat-internal.md) — Valorant internal cheat; Insert-key menu toggle (rebindable); cheat / game:valorant [Internal] (gmh5225)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
+- [valorant-esp-aimbot-hack](entities/valorant-esp-aimbot-hack.md) — Eduty: fully featured Valorant internal ESP/aimbot (C++; cheat / game:valorant; gmh5225)
 - [valorant-esp-hack-with-driver](entities/valorant-esp-hack-with-driver.md) — Valorant ESP: Vanguard driver vuln + early load before AC; kernel injector (cheat / game:valorant; gmh5225)
 - [valorant-external](entities/valorant-external.md) — Valorant external cheat (latest; enhanced security; cheat / game:valorant; gmh5225)
 - [valorant-external-1](entities/valorant-external-1.md) — Valorant external cheat (C/C++; OpenGL overlay; cheat / game:valorant; gmh5225)
