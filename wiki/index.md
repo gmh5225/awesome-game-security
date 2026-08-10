@@ -1210,6 +1210,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [s4killer](entities/s4killer.md) — BYOVD via Samsung S4 `probmon.sys` (IOCTL phys/virt kernel R/W; unsigned load / AC bypass research; gmh5225)
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)
+- [sea-of-choros](entities/sea-of-choros.md) — Sea of Thieves modding / SDK generation / hooking scaffold (C/C++; Unreal; cheat / game:sea of thieves; gmh5225)
 - [so_loader](entities/so-loader.md) — C/C++ Android native `.so` memory loading (Cheat / Android memory loading)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
