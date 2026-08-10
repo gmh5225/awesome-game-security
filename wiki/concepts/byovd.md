@@ -46,6 +46,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__lenovo_exec.md
   - wiki/sources/descriptions/gmh5225__kur.md
   - wiki/sources/descriptions/gmh5225__imxyviMapper.md
+  - wiki/sources/descriptions/gmh5225__UCMapper.md
   - wiki/sources/descriptions/gmh5225__dolboeb-executor.md
   - wiki/sources/descriptions/gmh5225__dbk64-vulnerability-driver.md
   - wiki/sources/descriptions/gmh5225__asus-bsitf-0-day-poc.md
@@ -55,7 +56,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md
   - wiki/sources/descriptions/gmh5225__Win-Driver-EXP.md
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
-updated: 2026-08-09
+updated: 2026-08-10
 confidence: high
 ---
 
@@ -141,6 +142,8 @@ Writeup-backed echo.ac **`echo_driver.sys`** LPE PoC such as [[echoac-poc]] (gmh
 
 **`AsUpIO.sys`** manual mapper research such as [[imxyvimapper]] (gmh5225; vulnerable signed-driver kernel access primitive → PE manual map with sections, imports, relocs, and entry invocation) sits in the same BYOVD unsigned-load lane. (source: wiki/sources/descriptions/gmh5225__imxyviMapper.md)
 
+**`nvaudio.sys`** manual mapper research such as [[ucmapper]] (gmh5225; user-mode loader reuses internal **`EncodePayLoad`** after loading the signed driver into user space; full PE relocation/import/image pipeline; runtime-list entry removal for post-load stealth) sits in the same BYOVD unsigned-load lane. (source: wiki/sources/descriptions/gmh5225__UCMapper.md)
+
 Classic **`Capcom.sys`** arbitrary kernel execution such as [[dolboeb-executor]] (gmh5225; load vulnerable signed driver → IOCTL abuse → custom kernel shellcode or arbitrary kernel function calls from user mode; BYOVD code-execution research) sits in the same historically abused LOLdriver lane referenced in step 1 of the typical chain above. (source: wiki/sources/descriptions/gmh5225__dolboeb-executor.md)
 
 Cheat Engine **`dbk64.sys`** IOCTL abuse such as [[dbk64-vulnerability-driver]] (gmh5225; signed debugging-tool driver shipped with CE for kernel-mode memory access → arbitrary kernel R/W via vulnerable IOCTLs; BYOVD research on game-debugging driver backends) sits in the same cheat-tool / LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__dbk64-vulnerability-driver.md)
@@ -153,5 +156,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

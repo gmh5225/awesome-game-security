@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/UCMapper`: entity [[ucmapper]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-10** — ingest `description:inpeacedTeams/phantom-client`: entity [[phantom-client]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-10** — ingest `description:rathorekrishna401-NeuroVoid/ApexSU`: entity [[apex-su]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-link from [[kernelsu]].
