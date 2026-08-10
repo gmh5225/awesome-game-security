@@ -1,0 +1,2227 @@
+Project Path: arc_milk-analyzer_vmpunpack_2pghkt5b
+
+Source Tree:
+
+```txt
+arc_milk-analyzer_vmpunpack_2pghkt5b
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── README.ru.md
+├── README.zh-CN.md
+├── RUN_ME.cmd
+├── SECURITY.md
+├── THIRD_PARTY.md
+├── setup.cmd
+├── tests
+│   ├── launcher.ps1
+│   ├── pebuild.py
+│   ├── run_tests.py
+│   └── run_tests2.py
+└── vmpunpack
+    ├── patch_ordinal.py
+    ├── setup_engine.py
+    ├── vmpunpack.cmd
+    └── vmpunpack.py
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+All notable changes to this project are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Changed
+
+- **The engine and emulation root are no longer committed.** `sogen/` (a patched GPL-2.0 build) and
+  `emu_root/` (a capture of a Windows userland, ~464 MB) are now fetched by `setup.cmd` from their own
+  publishers. The clone drops from ~464 MB to well under a megabyte, Git LFS is no longer needed, and
+  the repository no longer redistributes anything that is not its own. See [THIRD_PARTY.md](THIRD_PARTY.md).
+- `iocs.txt` gained a per-source section for every dump the run produced, not just `unpacked.bin`.
+
+### Added
+
+- MIT licence for the driver, launchers, tests and docs.
+- `setup.cmd` / `vmpunpack/setup_engine.py`, with `--check` to validate an existing install.
+- `tests/` — 86 checks across three suites, run in CI on every push. They need neither the engine nor a
+  sample: every fixture is a synthetic PE built in memory.
+- Russian and Simplified Chinese READMEs.
+- `--version`.
+
+## [0.1.1] - 2026-08-06
+
+Hardening pass over the whole tool. Every byte of a target sample is attacker-controlled and the
+analyst acts on what this prints, so most of these are about never reporting success over output that
+does not correspond to the input.
+
+### Security
+
+- An import DLL name taken verbatim from the sample reached `os.path.join` and then an in-place file
+  rewrite, so a crafted name escaped the emulation root before the emulator started. Names are now
+  constrained to plain filenames and containment-checked with `realpath`/`commonpath`.
+- The import walk was unbounded: a malformed table raised `struct.error`, and a crafted one went
+  quadratic. Descriptors, thunks and their product are now all bounded.
+- `iocs.txt` is written with an explicit encoding and the URL pattern is ASCII-only, so a single high
+  byte in a dump can no longer abort the run.
+
+### Fixed
+
+- **Dumps are now bound to the run that produced them.** `C:\dumps` is a fixed path compiled into
+  `analyzer.exe` and shared by every invocation on the machine; a failed cleanup was swallowed and the
+  acceptance check was existence-and-size, which a previous sample's files pass. Cleanup failure is now
+  fatal, dumps must post-date a timestamp taken before launch, and both the `.meta` and the image's own
+  headers must match the target.
+- `reconstruct_pe` trusted the dumped header. An erased header page produced a non-PE file reported as
+  success, and `SizeOfRawData = VirtualSize` dropped sections whose `VirtualSize` is 0. Signatures and
+  the section-table extent are validated, and raw sizes are clamped to what the dump holds.
+- The IOC extractor discarded real C2 addresses via a prefix filter whose targets never matched the
+  pattern anyway; wide strings fed only the domain pattern; the noise filter was an unanchored
+  substring, so a Microsoft-impersonating hostname was dropped. All three patterns now see single-byte
+  and both UTF-16 alignments, noise is anchored to the registrable host, and the scan is chunked.
+- The analyzer's exit code and stderr were discarded, so the documented Git LFS pointer failure
+  surfaced as advice to spend longer on tuning flags. Both are reported; a timeout is reported without
+  gating publication, since `--run-payload` and `--late` are killed by design after a valid dump.
+- 32-bit targets were misread as 64-bit rather than rejected.
+- Only the successful gap-fill outcome was reported; `oor` — the exact condition the tool later
+  diagnoses as `STATUS_ORDINAL_NOT_FOUND` — printed nothing.
+- Stale artefacts from an earlier run survived in the output directory beside new ones.
+- `patch_ordinal.py` overwrote live export slots with no guard. It now refuses without `--force`, keeps
+  a `.bak`, and exits non-zero on a partial apply.
+- `RUN_ME.cmd`'s Python guard never exited — `^&` escaped the separator, so `exit /b 1` was echoed as
+  text and the script fell through. It now selects an interpreter by running it and reading its output,
+  which also rejects the Windows Store alias stub and Python 2.
+
+## [0.1.0] - 2026-08-05
+
+### Added
+
+- Initial release: drive a packed x64 PE through a patched sogen emulator to its original entry point,
+  dump the unpacked image, reconstruct a loadable PE, grep IOCs, and auto-fill ordinal-import gaps in
+  the emulation root.
+
+[Unreleased]: https://github.com/milk-analyzer/vmpunpack/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/milk-analyzer/vmpunpack/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/milk-analyzer/vmpunpack/releases/tag/v0.1.0
+
+```
+
+`CODE_OF_CONDUCT.md`:
+
+```md
+# Code of conduct
+
+## The short version
+
+Be decent. Assume the other person is competent and acting in good faith. Criticise the code, the
+analysis or the claim — not the person making it.
+
+## Not acceptable
+
+Harassment, personal attacks, or demeaning comments about anyone's background or level of experience.
+Publishing anyone's private information. Deliberately derailing discussions.
+
+## Scope and malware specifics
+
+This applies in issues, pull requests and commit messages.
+
+Two rules particular to this project:
+
+- **Do not attach live samples** to issues, PRs or comments. Reference them by SHA-256.
+- Do not ask for, or offer, help with making malware harder to analyse. This project exists for the
+  other direction.
+
+## Enforcement
+
+Report a problem privately to the maintainer through
+[GitHub's report form](https://github.com/contact/report-abuse) or a private security advisory.
+Reports are handled confidentially. Maintainers may edit, hide or delete contributions that break these
+rules, and may block repeat offenders.
+
+```
+
+`CONTRIBUTING.md`:
+
+```md
+# Contributing
+
+## Getting set up
+
+```bat
+git clone https://github.com/milk-analyzer/vmpunpack.git
+cd vmpunpack
+setup.cmd
+```
+
+Python 3.8+ is the only dependency. The tool is stdlib-only on purpose — it runs on locked-down
+analysis VMs where `pip install` is not an option. **Please do not add third-party packages** without
+opening an issue first.
+
+## Running the tests
+
+```bat
+py -3 tests\run_tests.py
+py -3 tests\run_tests2.py
+powershell -ExecutionPolicy Bypass -File tests\launcher.ps1
+```
+
+They need neither the engine nor a malware sample: every fixture is a synthetic PE built in memory, and
+`analyzer.exe` is stubbed. That is deliberate — CI runs the same suites on every push.
+
+## What a good change looks like
+
+This tool tells an analyst what a piece of malware is. **Silently wrong output is worse than a crash**,
+so the bar is:
+
+- A new parsing path treats sample bytes as hostile: bounded loops, no unchecked index, no
+  sample-derived string used as a path.
+- Anything published to the output directory is provably derived from *this* run's input.
+- A failure says what happened and what to do about it, rather than falling through.
+
+Add a test that fails without your change. If you are fixing a case the suites structurally could not
+reach, say so in the PR — that is the most valuable kind of test here.
+
+## Style
+
+Match the surrounding code. It is deliberately compact: short helpers, few comments, and comments that
+explain *why* rather than what. No formatter is enforced; no type annotations are expected.
+
+## Reporting bugs
+
+Open an issue with the template. For a misidentified OEP or a bad dump, the log output and the sample's
+SHA-256 are worth more than a description — **do not attach the sample itself**, link to VirusTotal or
+Malware Bazaar instead.
+
+Security-relevant bugs go through [SECURITY.md](SECURITY.md), not the issue tracker.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 milk-analyzer
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# vmpunpack
+
+**Generic VMProtect / packer unpacker for x64 PE malware.**
+
+[![CI](https://github.com/milk-analyzer/vmpunpack/actions/workflows/ci.yml/badge.svg)](https://github.com/milk-analyzer/vmpunpack/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-lightgrey.svg)](#requirements)
+
+**English** · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
+
+</div>
+
+---
+
+One command turns a packed x64 PE into a loadable, analysable image.
+
+vmpunpack runs the sample inside a patched [sogen](https://github.com/momo5502/sogen) emulator — which
+walks past the anti-VM and anti-debug checks that make VMProtect bail on any.run, CAPE and bare metal —
+drives the packer stub to the **original entry point (OEP)**, dumps memory there, rebuilds a PE for
+IDA/Ghidra, and greps IOCs.
+
+> **It unpacks. It does not devirtualize.** VMProtect-virtualized functions stay VM bytecode. You get a
+> working image with the VM intact, not the original pre-VMP assembly.
+
+## Install
+
+```bat
+git clone https://github.com/milk-analyzer/vmpunpack.git
+cd vmpunpack
+setup.cmd
+```
+
+`setup.cmd` fetches the two third-party pieces this repository does not redistribute — roughly 500 MB,
+once:
+
+- the **emulation root** from [sogen.dev](https://sogen.dev/root.zip): a captured Windows userland the
+  emulator boots against;
+- the **patched emulator** from [milk-analyzer/sogen](https://github.com/milk-analyzer/sogen/releases/tag/vmpunpack-1.0.0),
+  pinned by SHA-256. Stock upstream sogen will not work — the unpack hooks live in the emulator, not in
+  this Python — and that build is GPL-2.0, so its source is published on the
+  [`vmpunpack` branch](https://github.com/milk-analyzer/sogen/tree/vmpunpack) of that fork.
+
+`setup.cmd --check` verifies an existing install at any time. `--analyzer-url <zip>` substitutes your
+own build. See [THIRD_PARTY.md](THIRD_PARTY.md).
+
+### Requirements
+
+Windows x64, Python 3.8+. Nothing else — the tool is stdlib-only so it runs on locked-down analysis VMs.
+
+## Use
+
+```bat
+RUN_ME.cmd C:\samples\thing.exe
+```
+
+Output lands in `<sample>_unpacked\` next to the sample.
+
+> **Run one sample at a time.** `C:\dumps` is a fixed scratch path compiled into the emulator, so every
+> invocation on the machine shares it. Two concurrent runs are detected and refused, not silently mixed.
+
+### Flags
+
+| flag | meaning |
+|---|---|
+| `-o OUTDIR` | output dir (default `<sample>_unpacked`); cleared of stale artefacts each run, so it must not be `C:\dumps` |
+| `--run-payload` | run past OEP and capture behaviour instead of freezing there |
+| `--nodelay` | neutralize anti-sandbox `NtDelayExecution` sleeps |
+| `--tsc 0x8000` | advance rdtsc by a stride per call, collapsing rdtsc delay loops |
+| `--oep 0xRVA` | force the OEP RVA, overriding the heuristic |
+| `--late N` | also dump `unpacked_late.bin` + `heap.bin` after N post-OEP blocks (runtime-decrypted config) |
+| `--timeout SEC` | run cap, default 300 |
+| `--sogen DIR` / `--emuroot DIR` | engine paths, if you keep them outside the checkout |
+
+### Output
+
+| file | what |
+|---|---|
+| `<name>.unpacked.exe` | reconstructed PE, entry set to the real OEP |
+| `unpacked.bin` / `.meta` | raw memory image + base / SizeOfImage / entry / OEP |
+| `iocs.txt` | domains, URLs and IPs, in a section per dump |
+| `unpacked_late.bin`, `heap.bin` | only with `--late` |
+
+The reconstructed PE is an **analysis** image: its IAT holds emulator addresses, so it is not guaranteed
+to run elsewhere without a Scylla-style IAT rebuild.
+
+IOC extraction reads each dump as single-byte text and as UTF-16 at both alignments, so wide-string URLs
+and IPs are caught. Hosts are filtered against an anchored list of known-noise domains; a C2 that merely
+looks Microsoft-ish, like `windows-defender-update[.]top`, is reported, not suppressed.
+
+## How it works
+
+1. **`unicorn` backend, `--no-inst-precision`.** sogen defaults to per-instruction hooks; letting the
+   TCG JIT run finishes the stub and its decompression in about two minutes instead of never.
+2. **OEP detection.** An execution hook is armed on the target's original code section — the lowest-RVA
+   executable section that does not contain the packer entry point. The first hit there is the OEP.
+   Every address comes from the target's own headers; nothing is hard-coded.
+3. **Ordinal gap-fill.** Imports are scanned for `#ORD` entries; where the emulation root's DLL leaves
+   that ordinal an empty export slot, it is pointed at a `ret` stub so the guest loader can snap it.
+   Without this a fresh sample dies with `STATUS_ORDINAL_NOT_FOUND` (`C0000138`).
+
+## Limits
+
+- Not a devirtualizer.
+- Full-program virtualization, multi-stage loaders and TLS-callback tricks may need `--oep`, `--late`,
+  a larger `--timeout`, or manual work.
+- **Live C2 is usually runtime-only** (resolved via DoH, say) and absent from the dump. `--run-payload`
+  is best-effort — the emulator has no real network.
+- x64 only. 32-bit targets are rejected rather than misparsed.
+- If the packer erases its own header page before jumping to OEP, no loadable PE can be rebuilt; the raw
+  `unpacked.bin` and `.meta` are still written for a manual rebuild.
+
+## Project
+
+[Contributing](CONTRIBUTING.md) · [Security policy](SECURITY.md) · [Changelog](CHANGELOG.md) ·
+[Third-party licences](THIRD_PARTY.md)
+
+Tests need neither the engine nor a sample — every fixture is a synthetic PE built in memory:
+
+```bat
+py -3 tests\run_tests.py
+py -3 tests\run_tests2.py
+powershell -ExecutionPolicy Bypass -File tests\launcher.ps1
+```
+
+MIT, for the driver and launchers in this repository. The emulator and emulation root it downloads carry
+their own licences — [THIRD_PARTY.md](THIRD_PARTY.md).
+
+```
+
+`README.ru.md`:
+
+```md
+<div align="center">
+
+# vmpunpack
+
+**Универсальный распаковщик VMProtect и упаковщиков для x64 PE.**
+
+[![CI](https://github.com/milk-analyzer/vmpunpack/actions/workflows/ci.yml/badge.svg)](https://github.com/milk-analyzer/vmpunpack/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-lightgrey.svg)](#требования)
+
+[English](README.md) · **Русский** · [简体中文](README.zh-CN.md)
+
+</div>
+
+---
+
+Одна команда превращает упакованный x64 PE в загружаемый образ, пригодный для анализа.
+
+vmpunpack запускает сэмпл внутри пропатченного эмулятора [sogen](https://github.com/momo5502/sogen) —
+тот проходит мимо анти-VM и анти-отладочных проверок, из-за которых VMProtect отказывается работать в
+any.run, CAPE и на живом железе, — доводит распаковщик до **оригинальной точки входа (OEP)**, снимает
+там дамп памяти, собирает PE для IDA/Ghidra и вытаскивает индикаторы компрометации.
+
+> **Он распаковывает, но не девиртуализует.** Виртуализованные VMProtect функции остаются байткодом
+> виртуальной машины. На выходе — рабочий образ с нетронутой VM, а не исходный ассемблер до VMP.
+
+## Установка
+
+```bat
+git clone https://github.com/milk-analyzer/vmpunpack.git
+cd vmpunpack
+setup.cmd
+```
+
+`setup.cmd` скачивает две сторонние части, которые этот репозиторий не распространяет, — около 500 МБ,
+один раз:
+
+- **эмуляционный рут** с [sogen.dev](https://sogen.dev/root.zip): снимок пользовательского окружения
+  Windows, на котором стартует эмулятор;
+- **пропатченный эмулятор** из [milk-analyzer/sogen](https://github.com/milk-analyzer/sogen/releases/tag/vmpunpack-1.0.0),
+  зафиксированный по SHA-256. Стоковый sogen не подойдёт — хуки распаковки живут в эмуляторе, а не в
+  этом Python, — и эта сборка под GPL-2.0, поэтому её исходник опубликован в
+  [ветке `vmpunpack`](https://github.com/milk-analyzer/sogen/tree/vmpunpack) того же форка.
+
+`setup.cmd --check` в любой момент проверит уже установленное. `--analyzer-url <zip>` подставит вашу
+собственную сборку. Подробности в [THIRD_PARTY.md](THIRD_PARTY.md).
+
+### Требования
+
+Windows x64, Python 3.8+. Больше ничего: инструмент использует только стандартную библиотеку, чтобы
+работать на закрытых аналитических виртуалках.
+
+## Запуск
+
+```bat
+RUN_ME.cmd C:\samples\thing.exe
+```
+
+Результат появится в `<sample>_unpacked\` рядом с сэмплом.
+
+> **Запускайте по одному сэмплу за раз.** `C:\dumps` — фиксированный путь, вшитый в эмулятор, поэтому
+> его разделяют все запуски на машине. Два одновременных запуска будут обнаружены и отклонены, а не
+> молча перемешаны.
+
+### Флаги
+
+| флаг | смысл |
+|---|---|
+| `-o OUTDIR` | каталог вывода (по умолчанию `<sample>_unpacked`); очищается от старых артефактов при каждом запуске, поэтому не должен быть `C:\dumps` |
+| `--run-payload` | выполнять дальше OEP и фиксировать поведение вместо остановки на ней |
+| `--nodelay` | нейтрализовать анти-песочные задержки `NtDelayExecution` |
+| `--tsc 0x8000` | увеличивать rdtsc на заданный шаг при каждом вызове, схлопывая циклы задержки на rdtsc |
+| `--oep 0xRVA` | задать RVA точки входа вручную, в обход эвристики |
+| `--late N` | дополнительно снять `unpacked_late.bin` и `heap.bin` через N базовых блоков после OEP (конфигурация, расшифрованная во время работы) |
+| `--timeout SEC` | ограничение времени, по умолчанию 300 |
+| `--sogen DIR` / `--emuroot DIR` | пути к движку, если он лежит вне рабочей копии |
+
+### Результат
+
+| файл | что это |
+|---|---|
+| `<name>.unpacked.exe` | восстановленный PE, точка входа выставлена на настоящую OEP |
+| `unpacked.bin` / `.meta` | сырой образ памяти плюс база, SizeOfImage, точка входа и OEP |
+| `iocs.txt` | домены, URL и IP-адреса, отдельным разделом на каждый дамп |
+| `unpacked_late.bin`, `heap.bin` | только с `--late` |
+
+Восстановленный PE — **аналитический** образ: его таблица импорта содержит адреса эмулятора, поэтому без
+восстановления IAT в духе Scylla он не обязан запускаться где-либо ещё.
+
+Поиск индикаторов читает каждый дамп и как однобайтовый текст, и как UTF-16 при обоих выравниваниях,
+так что URL и IP в широких строках тоже находятся. Хосты фильтруются по заякоренному списку заведомо
+шумных доменов: C2 вроде `windows-defender-update[.]top`, лишь похожий на майкрософтовский, попадёт в
+отчёт, а не будет отброшен.
+
+## Как это работает
+
+1. **Бэкенд `unicorn` и `--no-inst-precision`.** По умолчанию sogen ставит хук на каждую инструкцию;
+   если дать работать JIT-компилятору TCG, распаковщик со всей распаковкой отрабатывает примерно за две
+   минуты вместо «никогда».
+2. **Определение OEP.** Хук на исполнение ставится на оригинальную секцию кода — исполняемую секцию с
+   наименьшим RVA, не содержащую точку входа упаковщика. Первое попадание туда и есть OEP. Все адреса
+   берутся из заголовков самого сэмпла, ничего не захардкожено.
+3. **Заполнение пропусков в ординалах.** Импорты просматриваются на записи `#ORD`; если в DLL из
+   эмуляционного рута этому ординалу соответствует пустой слот экспорта, он направляется на заглушку
+   `ret`, чтобы загрузчик гостя смог его разрешить. Без этого свежий сэмпл падает с
+   `STATUS_ORDINAL_NOT_FOUND` (`C0000138`).
+
+## Ограничения
+
+- Это не девиртуализатор.
+- Полная виртуализация программы, многоступенчатые загрузчики и трюки с TLS-колбэками могут потребовать
+  `--oep`, `--late`, увеличенного `--timeout` или ручной работы.
+- **Живой C2 обычно существует только во время выполнения** (например, резолвится через DoH) и в дампе
+  отсутствует. `--run-payload` работает по мере возможности: настоящей сети у эмулятора нет.
+- Только x64. 32-битные цели отклоняются, а не разбираются неверно.
+- Если упаковщик затирает собственную страницу заголовков перед переходом на OEP, собрать загружаемый PE
+  невозможно; сырые `unpacked.bin` и `.meta` при этом всё равно сохраняются для ручной сборки.
+
+## Проект
+
+[Как участвовать](CONTRIBUTING.md) · [Политика безопасности](SECURITY.md) ·
+[История изменений](CHANGELOG.md) · [Сторонние лицензии](THIRD_PARTY.md)
+
+Тестам не нужны ни движок, ни сэмпл — все фикстуры это синтетические PE, собираемые в памяти:
+
+```bat
+py -3 tests\run_tests.py
+py -3 tests\run_tests2.py
+powershell -ExecutionPolicy Bypass -File tests\launcher.ps1
+```
+
+MIT — на драйвер и лаунчеры из этого репозитория. У скачиваемых эмулятора и эмуляционного рута свои
+лицензии, см. [THIRD_PARTY.md](THIRD_PARTY.md).
+
+```
+
+`README.zh-CN.md`:
+
+```md
+<div align="center">
+
+# vmpunpack
+
+**面向 x64 PE 恶意样本的通用 VMProtect / 加壳脱壳工具。**
+
+[![CI](https://github.com/milk-analyzer/vmpunpack/actions/workflows/ci.yml/badge.svg)](https://github.com/milk-analyzer/vmpunpack/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/platform-Windows%20x64-lightgrey.svg)](#运行环境)
+
+[English](README.md) · [Русский](README.ru.md) · **简体中文**
+
+</div>
+
+---
+
+一条命令即可把加壳的 x64 PE 变成可加载、可分析的映像。
+
+vmpunpack 在打过补丁的 [sogen](https://github.com/momo5502/sogen) 模拟器中运行样本——它能绕过那些让
+VMProtect 在 any.run、CAPE 和真实机器上直接退出的反虚拟机与反调试检测——把壳代码驱动到**原始入口点
+（OEP）**，在该处转储内存，重建可供 IDA/Ghidra 加载的 PE，并提取失陷指标（IOC）。
+
+> **它只脱壳，不做反虚拟化。** 被 VMProtect 虚拟化的函数仍然是虚拟机字节码。你得到的是一个虚拟机原封
+> 不动、但可以正常分析的映像，而不是 VMP 处理之前的原始汇编。
+
+## 安装
+
+```bat
+git clone https://github.com/milk-analyzer/vmpunpack.git
+cd vmpunpack
+setup.cmd
+```
+
+`setup.cmd` 会下载本仓库不再分发的两个第三方组件，约 500 MB，只需一次：
+
+- **模拟根环境**，来自 [sogen.dev](https://sogen.dev/root.zip)：模拟器启动时所依托的 Windows 用户态快照；
+- **打过补丁的模拟器**，来自 [milk-analyzer/sogen](https://github.com/milk-analyzer/sogen/releases/tag/vmpunpack-1.0.0)，
+  并以 SHA-256 固定校验。原版 sogen 无法使用——脱壳钩子位于模拟器中，而不在这份 Python 代码里——该构建
+  采用 GPL-2.0，因此其源码已发布在同一 fork 的
+  [`vmpunpack` 分支](https://github.com/milk-analyzer/sogen/tree/vmpunpack)。
+
+随时可用 `setup.cmd --check` 校验已有安装，用 `--analyzer-url <zip>` 替换为你自己的构建。详见
+[THIRD_PARTY.md](THIRD_PARTY.md)。
+
+### 运行环境
+
+Windows x64、Python 3.8+。除此之外别无依赖：本工具只使用标准库，以便在受限的分析虚拟机上直接运行。
+
+## 使用
+
+```bat
+RUN_ME.cmd C:\samples\thing.exe
+```
+
+结果会输出到样本旁边的 `<sample>_unpacked\` 目录。
+
+> **一次只处理一个样本。** `C:\dumps` 是硬编码在模拟器内的固定暂存路径，本机上的每次运行都共用它。
+> 两个并发运行会被检测并拒绝，而不会被悄悄混在一起。
+
+### 命令行参数
+
+| 参数 | 含义 |
+|---|---|
+| `-o OUTDIR` | 输出目录（默认 `<sample>_unpacked`）；每次运行都会清除其中的旧产物，因此不能设为 `C:\dumps` |
+| `--run-payload` | 越过 OEP 继续执行并记录行为，而不是在该处停下 |
+| `--nodelay` | 消除用于对抗沙箱的 `NtDelayExecution` 休眠 |
+| `--tsc 0x8000` | 每次调用按给定步长推进 rdtsc，压缩基于 rdtsc 的延时循环 |
+| `--oep 0xRVA` | 手动指定 OEP 的 RVA，覆盖启发式判断 |
+| `--late N` | 在 OEP 之后的第 N 个基本块再转储 `unpacked_late.bin` 与 `heap.bin`（运行时解密的配置） |
+| `--timeout SEC` | 运行时间上限，默认 300 |
+| `--sogen DIR` / `--emuroot DIR` | 引擎路径，适用于把它们放在工作副本之外的情况 |
+
+### 输出
+
+| 文件 | 内容 |
+|---|---|
+| `<name>.unpacked.exe` | 重建后的 PE，入口点已设为真实的 OEP |
+| `unpacked.bin` / `.meta` | 原始内存映像，以及基址、SizeOfImage、入口点和 OEP |
+| `iocs.txt` | 域名、URL 与 IP，按每个转储分节列出 |
+| `unpacked_late.bin`、`heap.bin` | 仅在使用 `--late` 时生成 |
+
+重建出的 PE 是**用于分析**的映像：它的导入表中保存的是模拟器地址，因此在不做 Scylla 式 IAT 重建的情况
+下，不保证能在别处运行。
+
+IOC 提取会把每个转储分别按单字节文本和两种对齐方式的 UTF-16 各读一遍，因此宽字符串中的 URL 和 IP 同样
+能被找到。主机名会与一份带锚定的已知噪声域名列表比对；像 `windows-defender-update[.]top` 这种只是看着
+像微软的 C2 会被如实报告，而不会被过滤掉。
+
+## 工作原理
+
+1. **`unicorn` 后端配合 `--no-inst-precision`。** sogen 默认为每条指令挂钩；放开 TCG 的 JIT 之后，壳代
+   码连同解压过程大约两分钟即可跑完，而不是永远跑不完。
+2. **OEP 识别。** 在样本的原始代码段上挂执行钩子——即不包含壳入口点、RVA 最小的可执行段。首次命中该段
+   即为 OEP。所有地址都取自样本自身的 PE 头，没有任何硬编码。
+3. **序号导入补洞。** 扫描导入表中的 `#ORD` 条目；如果模拟根环境里的 DLL 对该序号留有空的导出槽位，就
+   把它指向一个 `ret` 桩，使客户机加载器能够解析。否则新样本会以 `STATUS_ORDINAL_NOT_FOUND`
+   （`C0000138`）失败。
+
+## 局限
+
+- 它不是反虚拟化工具。
+- 整程序虚拟化、多阶段加载器以及 TLS 回调技巧，可能需要 `--oep`、`--late`、更大的 `--timeout`，或者手工
+  处理。
+- **实时 C2 通常只在运行期存在**（例如通过 DoH 解析），不会出现在转储里。`--run-payload` 只能尽力而为：
+  模拟器没有真实网络。
+- 仅支持 x64。32 位目标会被直接拒绝，而不是错误解析。
+- 如果壳在跳转到 OEP 之前抹掉了自己的头部页，就无法重建可加载的 PE；此时仍会写出原始的 `unpacked.bin`
+  和 `.meta`，供手工重建使用。
+
+## 项目
+
+[参与贡献](CONTRIBUTING.md) · [安全策略](SECURITY.md) · [更新日志](CHANGELOG.md) ·
+[第三方许可](THIRD_PARTY.md)
+
+测试既不需要引擎也不需要样本——所有测试数据都是在内存中构造的合成 PE：
+
+```bat
+py -3 tests\run_tests.py
+py -3 tests\run_tests2.py
+powershell -ExecutionPolicy Bypass -File tests\launcher.ps1
+```
+
+本仓库中的驱动程序与启动脚本采用 MIT 许可。它所下载的模拟器和模拟根环境各自适用其自身的许可，详见
+[THIRD_PARTY.md](THIRD_PARTY.md)。
+
+```
+
+`RUN_ME.cmd`:
+
+```cmd
+@echo off
+setlocal
+rem Pick an interpreter by RUNNING it and reading what it prints - not by `where python`, which is
+rem satisfied by the Windows Store App Execution Alias stub and by Python 2 alike.
+set "PY="
+set "OK="
+for /f "delims=" %%v in ('py -3 -c "import sys;print(1 if sys.version_info>=(3,8) else 0)" 2^>nul') do set "OK=%%v"
+if "%OK%"=="1" set "PY=py -3"
+if defined PY goto :have
+set "OK="
+for /f "delims=" %%v in ('python -c "import sys;print(1 if sys.version_info>=(3,8) else 0)" 2^>nul') do set "OK=%%v"
+if "%OK%"=="1" set "PY=python"
+:have
+if not defined PY (
+  echo [!] Python 3.8+ not found - install it from python.org, then re-run.
+  echo     A bare "python" that opens the Microsoft Store is the Store alias, not an interpreter;
+  echo     this check runs the interpreter and reads its output, so it sees through that.
+  exit /b 1
+)
+if not exist C:\dumps mkdir C:\dumps >nul 2>&1
+%PY% "%~dp0vmpunpack\vmpunpack.py" %*
+exit /b %ERRORLEVEL%
+
+```
+
+`SECURITY.md`:
+
+```md
+# Security policy
+
+## What this project is
+
+vmpunpack is **defensive tooling**: it recovers an analysable image from a packed binary so malware
+analysts can read it. It does not create, arm or obfuscate anything.
+
+## Run it in a VM
+
+You are pointing this tool at live malware. The emulator is a sandbox, but nothing here is a security
+boundary you should bet a workstation on:
+
+- `--run-payload` deliberately executes the sample past its entry point.
+- The sample is copied into `emu_root/root/filesys/c/sample/` on your disk before the run.
+- The reconstructed `.unpacked.exe` is malware with a rewritten header. It is for a disassembler, not
+  for double-clicking.
+
+Use a disposable analysis VM with no credentials and no network path you care about.
+
+## Reporting a vulnerability
+
+Report privately through GitHub's [security advisory
+form](https://github.com/milk-analyzer/vmpunpack/security/advisories/new) rather than a public issue.
+Please include the vmpunpack commit, your Python version, and a sample or synthetic PE that reproduces
+it. Expect a first response within about a week.
+
+In scope, and taken seriously:
+
+- A crafted PE that makes vmpunpack write outside its output directory or the emulation root.
+- A crafted PE that makes vmpunpack read or transmit anything off the analysis machine.
+- Any path where the tool reports success over output that does not correspond to the input sample.
+
+Out of scope: bugs in [sogen](https://github.com/momo5502/sogen) or its CPU backends — report those
+upstream. A crafted PE that merely makes vmpunpack exit with an error message is working as intended.
+
+## Hardening already in place
+
+The parser treats every byte of a sample as hostile. Import DLL names are constrained to plain
+filenames and containment-checked before any file is touched; the import walk is bounded in both
+dimensions and in total; dumps are bound to the run that produced them before anything is published.
+See [CHANGELOG.md](CHANGELOG.md) for the full list.
+
+```
+
+`THIRD_PARTY.md`:
+
+```md
+# Third-party components
+
+The MIT licence in [LICENSE](LICENSE) covers **only what lives in this repository**: the Python driver
+under `vmpunpack/`, the `.cmd` launchers, the tests and the docs.
+
+vmpunpack drives components it does not contain and does not redistribute. `setup.cmd` fetches them
+onto your machine at install time, directly from their own publishers. Their licences are theirs.
+
+| Component | Fetched from | Licence | Notes |
+|---|---|---|---|
+| **sogen** (`analyzer.exe`) | [milk-analyzer/sogen release `vmpunpack-1.0.0`](https://github.com/milk-analyzer/sogen/releases/tag/vmpunpack-1.0.0), SHA-256 pinned | **GPL-2.0** | Windows/Linux userspace emulator by [momo5502](https://github.com/momo5502/sogen), patched — source on the [`vmpunpack` branch](https://github.com/milk-analyzer/sogen/tree/vmpunpack). |
+| **Unicorn Engine** (`unicorn-emulator.dll`) | bundled in the sogen build | **GPL-2.0** | CPU backend. |
+| **Icicle** (`icicle-emulator.dll`) | bundled in the sogen build | see upstream | Alternative CPU backend. |
+| **Ghidra processor specs** (`sogen/Ghidra/`) | bundled in the sogen build | **Apache-2.0** | Instruction definitions used by the emulator. |
+| **MSVC runtime** (`msvcp140.dll`, `vcruntime140.dll`, …) | bundled in the sogen build | Microsoft VC++ redistributable terms | |
+| **Emulation root** (`emu_root/`) | `https://sogen.dev/root.zip` | **not redistributable** | A capture of a Windows userland: ~310 Microsoft system DLLs plus registry hives. Microsoft does not licence redistribution of these, which is why they are downloaded from sogen's own host rather than shipped here. |
+
+## The patched analyzer, and GPL-2.0
+
+vmpunpack needs a **patched** sogen build — stock upstream will not work, because the unpack hooks, the
+OEP dump and the ordinal gap-fill live in the emulator, not in this Python. sogen is GPL-2.0, so anyone
+distributing that modified binary must also make the corresponding modified source available
+(GPL-2.0 §3).
+
+That obligation is met: the build `setup.cmd` downloads is released from
+[**milk-analyzer/sogen**](https://github.com/milk-analyzer/sogen), a public fork whose
+[`vmpunpack` branch](https://github.com/milk-analyzer/sogen/tree/vmpunpack) carries the corresponding
+source — five reviewable commits on top of upstream `e3a416b`, 8 files, +406 / −10, documented in
+[VMPUNPACK.md](https://github.com/milk-analyzer/sogen/blob/vmpunpack/VMPUNPACK.md). The binary is built
+by CI from that branch and pinned here by SHA-256.
+
+If you build your own, point `setup.cmd --analyzer-url` (or `VMPUNPACK_ANALYZER_URL`) at it; the hash
+pin is only enforced for the build published above. If you then redistribute your binary, publish your
+source alongside it — the same obligation applies to you.
+
+## What is in the emulation root
+
+`root.zip` is built by sogen's own CI on a GitHub Actions Windows runner, so the registry hives inside
+it (`SYSTEM`, `SOFTWARE`, `SAM`, `SECURITY`, `NTUSER.DAT`) describe that ephemeral build VM — the local
+account is `runneradmin`, the machine name is `runnervmhisb5`. They are genuine hives because guest
+`ntdll` and `kernel32` read the registry during process init, but they contain no real person's
+credentials. If you would rather not trust a third-party capture, sogen's
+[`grab-registry.bat`](https://github.com/momo5502/sogen/blob/main/src/tools/grab-registry.bat) builds a
+root from a machine you control.
+
+```
+
+`setup.cmd`:
+
+```cmd
+@echo off
+setlocal
+rem Fetches the third-party engine and emulation root that this repo does not redistribute.
+set "PY="
+set "OK="
+for /f "delims=" %%v in ('py -3 -c "import sys;print(1 if sys.version_info>=(3,8) else 0)" 2^>nul') do set "OK=%%v"
+if "%OK%"=="1" set "PY=py -3"
+if defined PY goto :have
+set "OK="
+for /f "delims=" %%v in ('python -c "import sys;print(1 if sys.version_info>=(3,8) else 0)" 2^>nul') do set "OK=%%v"
+if "%OK%"=="1" set "PY=python"
+:have
+if not defined PY (
+  echo [!] Python 3.8+ not found - install it from python.org, then re-run.
+  exit /b 1
+)
+%PY% "%~dp0vmpunpack\setup_engine.py" %*
+exit /b %ERRORLEVEL%
+
+```
+
+`tests/launcher.ps1`:
+
+```ps1
+$ErrorActionPreference = 'Continue'
+$here = $PSScriptRoot
+$repo = Split-Path -Parent $here
+$work = Join-Path ([IO.Path]::GetTempPath()) 'vmpunpack-tests'
+New-Item -ItemType Directory -Force $work | Out-Null
+$stub = Join-Path $work 'stubdir'
+$pass = 0; $fail = 0
+function Check($name, $cond, $detail) {
+  if ($cond) { $script:pass++; Write-Host "  PASS  $name   $detail" }
+  else { $script:fail++; Write-Host "  FAIL  $name   $detail" }
+}
+
+# A stub that behaves like the worst case: on PATH, exits 0, prints nothing.
+New-Item -ItemType Directory -Force $stub | Out-Null
+Set-Content -Encoding ascii (Join-Path $stub 'py.cmd')     "@echo off`r`nexit /b 0"
+Set-Content -Encoding ascii (Join-Path $stub 'python.cmd') "@echo off`r`nexit /b 0"
+
+# ---- 1. silent exit-0 stub must be rejected
+$probe = Join-Path $work 'probe.cmd'
+Copy-Item (Join-Path $repo 'RUN_ME.cmd') $probe -Force
+$saved = $env:PATH
+$env:PATH = "$stub;$([Environment]::GetFolderPath('System'))"
+$out = & cmd.exe /c "`"$probe`"" 2>&1 | Out-String
+$code = $LASTEXITCODE
+$env:PATH = $saved
+Check 'stub that exits 0 but prints nothing is rejected' ($code -eq 1 -and $out -match 'not found') "code=$code"
+Check 'rejection message mentions the Store alias' ($out -match 'Store alias') ''
+
+# ---- 2. real interpreter is found, and the python exit code propagates
+$out = & cmd.exe /c "`"$repo\RUN_ME.cmd`"" 2>&1 | Out-String
+$code = $LASTEXITCODE
+Check 'real interpreter found (argparse usage reached)' ($out -match 'usage: vmpunpack') "code=$code"
+Check 'argparse exit code 2 propagates through the launcher' ($code -eq 2) "code=$code"
+
+$out = & cmd.exe /c "`"$repo\RUN_ME.cmd`" C:\definitely\missing\sample.exe" 2>&1 | Out-String
+$code = $LASTEXITCODE
+Check 'tool exit code 1 propagates through the launcher' ($code -eq 1 -and $out -match 'target not found') "code=$code"
+
+# ---- 3. inner launcher behaves the same
+$out = & cmd.exe /c "`"$repo\vmpunpack\vmpunpack.cmd`"" 2>&1 | Out-String
+$code = $LASTEXITCODE
+Check 'inner vmpunpack.cmd reaches the tool and propagates' ($code -eq 2 -and $out -match 'usage: vmpunpack') "code=$code"
+
+# ---- 4. path with spaces survives %* forwarding
+$out = & cmd.exe /c "`"$repo\RUN_ME.cmd`" `"C:\some dir\with spaces\s.exe`"" 2>&1 | Out-String
+Check 'quoted path with spaces forwarded intact' ($out -match 'with spaces\\s\.exe') ''
+
+Write-Host ''
+Write-Host "$pass passed, $fail failed"
+# Exit explicitly: this script's last native call is a cmd.exe launcher that returns 1 or 2 by
+# design, and pwsh would otherwise propagate that leftover $LASTEXITCODE as the script's status.
+if ($fail -gt 0) { exit 1 } else { exit 0 }
+
+```
+
+`tests/pebuild.py`:
+
+```py
+import struct
+
+def build_pe(sections, *, is64=True, entry=0x1000, base=0x140000000, size_of_image=0x4000,
+             dirs=None, e_lfanew=0x80, total=None, magic=None, nsec_over=None):
+    """Minimal but loader-plausible PE. sections: list of dict(name,va,vs,rp,rs,ch,data).
+    dirs: {dir_index: (rva, size)}."""
+    optsz = 240 if is64 else 224
+    nsec = len(sections)
+    hdr_end = e_lfanew + 24 + optsz + nsec * 40
+    total = total or max([s["rp"] + len(s["data"]) for s in sections] + [hdr_end, 0x400])
+    b = bytearray(total)
+    b[0:2] = b"MZ"
+    struct.pack_into("<I", b, 0x3c, e_lfanew)
+    b[e_lfanew:e_lfanew+4] = b"PE\0\0"
+    struct.pack_into("<H", b, e_lfanew+4, 0x8664 if is64 else 0x14c)
+    struct.pack_into("<H", b, e_lfanew+6, nsec if nsec_over is None else nsec_over)
+    struct.pack_into("<H", b, e_lfanew+20, optsz)
+    opt = e_lfanew + 24
+    struct.pack_into("<H", b, opt, magic if magic is not None else (0x20b if is64 else 0x10b))
+    struct.pack_into("<I", b, opt+16, entry)
+    if is64: struct.pack_into("<Q", b, opt+24, base)
+    else:    struct.pack_into("<I", b, opt+28, base)
+    struct.pack_into("<I", b, opt+56, size_of_image)
+    dd = opt + (112 if is64 else 96)
+    for idx, (rva, sz) in (dirs or {}).items():
+        struct.pack_into("<II", b, dd + idx*8, rva, sz)
+    so = opt + optsz
+    for i, s in enumerate(sections):
+        o = so + i*40
+        b[o:o+8] = s["name"][:8].ljust(8, b"\0")
+        struct.pack_into("<IIII", b, o+8, s["vs"], s["va"], s["rs"], s["rp"])
+        struct.pack_into("<I", b, o+36, s.get("ch", 0x60000020))
+        b[s["rp"]:s["rp"]+len(s["data"])] = s["data"]
+    return bytes(b)
+
+def import_blob(dll_name, ordinals, *, base_rva, is64=True, terminate_thunks=True, terminate_desc=True):
+    """Returns (blob, size) for one IMAGE_IMPORT_DESCRIPTOR + name + thunk array, laid out at base_rva."""
+    tw = 8 if is64 else 4
+    flag = 0x8000000000000000 if is64 else 0x80000000
+    desc_sz = 20 * (2 if terminate_desc else 1)
+    name_off = desc_sz
+    name = dll_name.encode("latin1") + b"\0"
+    thunk_off = name_off + len(name)
+    thunk_off += (-thunk_off) % 8
+    blob = bytearray(thunk_off)
+    blob[name_off:name_off+len(name)] = name
+    for o in ordinals:
+        blob += struct.pack("<Q" if is64 else "<I", flag | o)
+    if terminate_thunks:
+        blob += b"\0" * tw
+    struct.pack_into("<IIIII", blob, 0,
+                     base_rva + thunk_off, 0, 0, base_rva + name_off, base_rva + thunk_off)
+    return bytes(blob)
+
+def export_blob(*, base_rva, base_ord, func_rvas):
+    """IMAGE_EXPORT_DIRECTORY with an AddressOfFunctions array; 0 entries mean an empty slot."""
+    hdr = 40
+    afo = hdr
+    blob = bytearray(hdr + 4*len(func_rvas))
+    struct.pack_into("<I", blob, 16, base_ord)
+    struct.pack_into("<I", blob, 20, len(func_rvas))
+    struct.pack_into("<I", blob, 28, base_rva + afo)
+    for i, r in enumerate(func_rvas):
+        struct.pack_into("<I", blob, afo + i*4, r)
+    return bytes(blob)
+
+```
+
+`tests/run_tests.py`:
+
+```py
+"""Regression suite for the 12 vmpunpack fixes. Read-only w.r.t. the repo: the module is imported
+from its real path, everything it writes is redirected into a scratch tree."""
+import importlib.util, sys, os, io, time, shutil, struct, contextlib, tempfile, subprocess, re, traceback
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from pebuild import build_pe, import_blob, export_blob
+
+REPO = os.path.dirname(HERE)
+SRC = os.path.join(REPO, "vmpunpack", "vmpunpack.py")
+PATCH_ORD = os.path.join(REPO, "vmpunpack", "patch_ordinal.py")
+LAB = os.path.join(tempfile.gettempdir(), "vmpunpack-tests", "lab")
+
+spec = importlib.util.spec_from_file_location("vmpu", SRC)
+V = importlib.util.module_from_spec(spec); spec.loader.exec_module(V)
+
+RESULTS = []
+def check(name, cond, detail=""):
+    RESULTS.append((name, bool(cond), detail))
+    print(("  PASS  " if cond else "  FAIL  ") + name + (f"   [{detail}]" if detail else ""))
+
+def fresh(sub):
+    p = os.path.join(LAB, sub)
+    shutil.rmtree(p, ignore_errors=True); os.makedirs(p, exist_ok=True)
+    return p
+
+TGT_SOI, TGT_ENTRY, TGT_BASE = 0x4000, 0x1000, 0x140000000
+
+def target_bytes(**kw):
+    kw.setdefault("entry", TGT_ENTRY); kw.setdefault("base", TGT_BASE); kw.setdefault("size_of_image", TGT_SOI)
+    secs = kw.pop("sections", None) or [dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200,
+                                             ch=0x60000020, data=b"\x90" * 0x200)]
+    return build_pe(secs, **kw)
+
+def meta_text(soi=TGT_SOI, entry=TGT_ENTRY, base=TGT_BASE, oep=0x1100):
+    return f"base=0x{base:x}\nsize_of_image=0x{soi:x}\nentry_rva=0x{entry:x}\noep_rva=0x{oep:x}\n"
+
+def dump_image(soi=TGT_SOI, entry=TGT_ENTRY, base=TGT_BASE, secs=None, total=None):
+    secs = secs or [dict(name=b".text", va=0x1000, vs=0x200, rp=0x1000, rs=0x200,
+                         ch=0x60000020, data=b"\xcc" * 0x200)]
+    return build_pe(secs, entry=entry, base=base, size_of_image=soi, total=total or soi)
+
+# ---------------------------------------------------------------- main() harness
+def run_main(argv, writer, *, sogen=None, emuroot=None, dumps=None, rc=0, err="", timeout=False, log=""):
+    """writer(dumps_dir, t0) puts files into the fake C:\\dumps. Returns (exit_code, stdout)."""
+    lab = fresh("main")
+    dumps = dumps or os.path.join(lab, "dumps"); os.makedirs(dumps, exist_ok=True)
+    sogen = sogen or os.path.join(lab, "sogen"); os.makedirs(sogen, exist_ok=True)
+    open(os.path.join(sogen, "analyzer.exe"), "wb").close()
+    emuroot = emuroot or os.path.join(lab, "emu")
+    for sub in ("registry", "filesys"): os.makedirs(os.path.join(emuroot, sub), exist_ok=True)
+    old_dumps, old_run, old_argv = V.DUMPS, V.run_analyzer, sys.argv
+    V.DUMPS = dumps
+    def fake(args):
+        t0 = time.time() - V.MTIME_SLACK
+        writer(dumps, t0)
+        return dict(log=log, err=err, rc=rc, timeout=timeout, t0=t0)
+    V.run_analyzer = fake
+    sys.argv = ["vmpunpack.py"] + argv + ["--sogen", sogen, "--emuroot", emuroot]
+    buf = io.StringIO(); code = 0
+    try:
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf):
+            V.main()
+    except SystemExit as e:
+        code = e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+        if isinstance(e.code, str): buf.write(e.code + "\n")
+    finally:
+        V.DUMPS, V.run_analyzer, sys.argv = old_dumps, old_run, old_argv
+    return code, buf.getvalue()
+
+def std_case(sub, **kw):
+    lab = fresh(sub)
+    tp = os.path.join(lab, "sample_B.exe")
+    with open(tp, "wb") as f: f.write(target_bytes(**kw))
+    return lab, tp
+
+# ================================================================ FIX 1
+print("\n=== FIX 1: dump identity / stale C:\\dumps ===")
+
+lab, tp = std_case("f1a")
+out = os.path.join(lab, "out")
+def w_stale(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+    old = time.time() - 3600
+    for n in ("unpacked.bin", "unpacked.meta"): os.utime(os.path.join(d, n), (old, old))
+code, sout = run_main([tp, "-o", out], w_stale)
+check("1a stale-mtime dump is refused", code != 0 and "predates this run" in sout, f"code={code}")
+check("1a nothing published", not os.path.exists(os.path.join(out, "sample_B.unpacked.exe")))
+
+lab, tp = std_case("f1b")
+out = os.path.join(lab, "out")
+def w_wrongsample(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image(soi=0x9000, entry=0x2000))
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text(soi=0x9000, entry=0x2000))
+code, sout = run_main([tp, "-o", out], w_wrongsample)
+check("1b foreign dump (SizeOfImage/entry mismatch) refused", code != 0 and "does not describe this target" in sout)
+check("1b nothing published", not os.path.exists(os.path.join(out, "sample_B.unpacked.exe")))
+
+lab, tp = std_case("f1c")
+out = os.path.join(lab, "out")
+def w_good(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+code, sout = run_main([tp, "-o", out], w_good)
+check("1c happy path still publishes", code == 0 and "DONE" in sout, f"code={code}")
+check("1c reconstructed exe written", os.path.isfile(os.path.join(out, "sample_B.unpacked.exe")))
+if os.path.isfile(os.path.join(out, "sample_B.unpacked.exe")):
+    with open(os.path.join(out, "sample_B.unpacked.exe"), "rb") as f: rb = f.read()
+    pe = struct.unpack_from("<I", rb, 0x3c)[0]
+    check("1c entry set to OEP 0x1100", struct.unpack_from("<I", rb, pe+24+16)[0] == 0x1100)
+
+lab, tp = std_case("f1d")
+out = os.path.join(lab, "out")
+def w_partialmeta(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write("base=0x140000000\n")
+code, sout = run_main([tp, "-o", out], w_partialmeta)
+check("1d meta missing keys refused", code != 0 and "missing" in sout)
+check("1d nothing copied into out", not os.path.exists(os.path.join(out, "unpacked.bin")))
+
+lab, tp = std_case("f1e")
+out = os.path.join(lab, "out")
+def w_emptymeta(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    open(os.path.join(d, "unpacked.meta"), "wb").close()
+code, sout = run_main([tp, "-o", out], w_emptymeta)
+check("1e zero-byte meta refused (no KeyError)", code != 0 and "no unpacked image produced" in sout)
+
+lab, tp = std_case("f1f")
+out = os.path.join(lab, "out")
+def w_badoep(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text(oep=0x99999))
+code, sout = run_main([tp, "-o", out], w_badoep)
+check("1f oep outside image refused", code != 0 and "outside the image" in sout)
+
+# cleanup loop must be fatal, not silent
+lab = fresh("f1g"); dumps = os.path.join(lab, "dumps"); os.makedirs(dumps)
+stale = os.path.join(dumps, "unpacked.bin")
+with open(stale, "wb") as f: f.write(b"OLD SAMPLE A IMAGE")
+hold = open(stale, "rb")                      # keep a handle open -> os.remove raises PermissionError
+old_dumps = V.DUMPS; V.DUMPS = dumps
+class A: pass
+a = A(); a.target = os.path.join(lab, "s.exe"); a.emuroot = os.path.join(lab, "emu")
+a.sogen = lab; a.run_payload = False; a.nodelay = False; a.tsc = None; a.oep = None
+a.late = None; a.timeout = 5
+with open(a.target, "wb") as f: f.write(target_bytes())
+got = ""
+try:
+    with contextlib.redirect_stdout(io.StringIO()):
+        V.run_analyzer(a)
+    got = "<returned normally>"
+except SystemExit as e:
+    got = str(e.code)
+except Exception as e:
+    got = f"{type(e).__name__}: {e}"
+finally:
+    hold.close(); V.DUMPS = old_dumps
+check("1g undeletable stale dump aborts the run", "cannot clear stale" in got, got[:90])
+
+# ================================================================ FIX 2
+print("\n=== FIX 2: reconstruct_pe header validation ===")
+o2 = fresh("f2")
+try:
+    V.reconstruct_pe(b"\x00" * 0x3000, {"oep_rva": "0x1b3dc"}, os.path.join(o2, "x.exe"))
+    check("2a zeroed header page rejected", False, "no exception")
+except V.BadPE as e:
+    check("2a zeroed header page rejected", True, str(e)[:50])
+except Exception as e:
+    check("2a zeroed header page rejected", False, f"{type(e).__name__}")
+check("2a no file emitted", not os.path.exists(os.path.join(o2, "x.exe")))
+
+img = dump_image(secs=[dict(name=b".data", va=0x1000, vs=0, rp=0x1000, rs=0x1000,
+                            ch=0xC0000040, data=b"S" * 0x1000)])
+V.reconstruct_pe(img, {"oep_rva": "0x1000"}, os.path.join(o2, "vs0.exe"))
+with open(os.path.join(o2, "vs0.exe"), "rb") as f: rb = f.read()
+pe = struct.unpack_from("<I", rb, 0x3c)[0]; so = pe + 24 + struct.unpack_from("<H", rb, pe+20)[0]
+srd, prd = struct.unpack_from("<II", rb, so + 16)
+check("2b VirtualSize==0 section keeps its bytes", srd == 0x1000, f"SizeOfRawData=0x{srd:x}")
+
+img = dump_image(secs=[dict(name=b".text", va=0x1000, vs=0x40000, rp=0x1000, rs=0x200,
+                            ch=0x60000020, data=b"\xcc" * 0x200)], total=0x2000)
+V.reconstruct_pe(img, {"oep_rva": "0x1000"}, os.path.join(o2, "big.exe"))
+with open(os.path.join(o2, "big.exe"), "rb") as f: rb = f.read()
+pe = struct.unpack_from("<I", rb, 0x3c)[0]; so = pe + 24 + struct.unpack_from("<H", rb, pe+20)[0]
+srd, prd = struct.unpack_from("<II", rb, so + 16)
+check("2c inflated VirtualSize clamped to file", prd + srd <= len(rb), f"0x{prd:x}+0x{srd:x} vs 0x{len(rb):x}")
+
+bad = bytearray(dump_image()); bad[0:2] = b"ZM"
+try:
+    V.reconstruct_pe(bytes(bad), {"oep_rva": "0x1000"}, os.path.join(o2, "nomz.exe")); r = False
+except V.BadPE: r = True
+check("2d missing MZ rejected", r)
+
+# ================================================================ FIX 3
+print("\n=== FIX 3: attacker-controlled DLL name ===")
+lab = fresh("f3")
+sys32 = os.path.join(lab, "emu", "filesys", "c", "windows", "system32"); os.makedirs(sys32)
+victim = os.path.join(lab, "victim.dll")
+vic = build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020,
+                     data=b"\xc3" + b"\x90" * 0x1ff),
+                dict(name=b".edata", va=0x2000, vs=0x200, rp=0x600, rs=0x200, ch=0x40000040,
+                     data=export_blob(base_rva=0x2000, base_ord=1, func_rvas=[0x1000, 0, 0]).ljust(0x200, b"\0"))],
+               dirs={0: (0x2000, 0x200)})
+with open(victim, "wb") as f: f.write(vic)
+before = open(victim, "rb").read()
+inside = os.path.join(sys32, "ws2_32.dll")
+with open(inside, "wb") as f: f.write(vic)
+
+class A3: pass
+for nm, label in ((victim, "absolute host path"),
+                  (r"..\..\..\..\..\..\victim.dll", "..\\ escape"),
+                  (r"\\attacker\pub\x.dll", "UNC")):
+    a3 = A3(); a3.emuroot = os.path.join(lab, "emu")
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        V.gap_fill(a3, [(nm, 2)])
+    txt = buf.getvalue()
+    check(f"3 {label} refused", "refusing" in txt or "outside the emulation root" in txt, txt.strip()[:70])
+check("3 victim outside emu_root untouched", open(victim, "rb").read() == before)
+
+a3 = A3(); a3.emuroot = os.path.join(lab, "emu")
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): V.gap_fill(a3, [("ws2_32.dll", 2)])
+check("3 legitimate in-root gap-fill still works", "gap-filled" in buf.getvalue(), buf.getvalue().strip()[:70])
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): V.gap_fill(a3, [("ws2_32.dll", 1)])
+check("3 live slot reported, not overwritten", "already populated" in buf.getvalue())
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): V.gap_fill(a3, [("ws2_32.dll", 900)])
+check("3 out-of-range ordinal explained (fix 11)", "outside this DLL's export range" in buf.getvalue()
+      and "1..3" in buf.getvalue(), buf.getvalue().strip()[:100])
+
+# ================================================================ FIX 4 + 9
+print("\n=== FIX 4/9: IOC extraction ===")
+d, u, i = V.grep_iocs(b"\x00 10.0.0.5 5.2.75.14 6.1.44.9 91.243.59.7 192.168.1.9 \x00")
+check("4a RFC1918/5.x/6.x C2 IPs no longer dropped",
+      {"10.0.0.5", "5.2.75.14", "6.1.44.9", "91.243.59.7", "192.168.1.9"} <= set(i), str(i))
+d, u, i = V.grep_iocs(b"\x00 999.1.1.1 0.0.0.0 127.0.0.1 \x00")
+check("4a invalid/loopback octets still filtered", i == [], str(i))
+
+w = "http://wide-c2.xyz/gate.php 45.66.77.88".encode("utf-16le")
+d, u, i = V.grep_iocs(b"\x00\x00" + w + b"\x00\x00")
+check("4b wide URL extracted", any("wide-c2.xyz/gate.php" in x for x in u), str(u))
+check("4b wide IP extracted", "45.66.77.88" in i, str(i))
+d, u, i = V.grep_iocs(b"\x00" + w + b"\x00\x00")
+check("4b odd-aligned wide string extracted", "wide-c2.xyz" in d and any("gate.php" in x for x in u), f"{d} {u}")
+
+d, u, i = V.grep_iocs(b"http://windows-defender-update.top/gate.php")
+check("4c MS-impersonating host survives NOISE", "windows-defender-update.top" in d and len(u) == 1, f"{d} {u}")
+d, u, i = V.grep_iocs(b"http://evil-plain.top/windows/gate.php")
+check("4c noise word in path no longer kills the URL", len(u) == 1 and "evil-plain.top" in d, f"{d} {u}")
+d, u, i = V.grep_iocs(b"http://schemas.microsoft.com/foo http://crl.digicert.com/x.crl")
+check("4c genuine noise still filtered", d == [] and u == [], f"{d} {u}")
+
+d, u, i = V.grep_iocs(b"http://c2.top/a\x81b and more")
+check("9 high byte no longer captured into the URL", all("\x81" not in x for x in u), str(u))
+o9 = fresh("f9")
+with open(os.path.join(o9, "iocs.txt"), "w", encoding="utf-8", errors="backslashreplace") as f:
+    f.write("urls: " + ", ".join(u) + "\n")
+check("9 iocs.txt writes without UnicodeEncodeError", os.path.getsize(os.path.join(o9, "iocs.txt")) > 0)
+
+big = (b"\x00" * (64 << 20)) + b" http://chunk-edge-c2.top/x "
+t = time.time(); d, u, i = V.grep_iocs(big); dt = time.time() - t
+check("4 chunked scan finds a match past the first chunk", any("chunk-edge-c2.top" in x for x in u), f"{dt:.1f}s")
+
+# ================================================================ FIX 5 + 4d
+print("\n=== FIX 5/4d: output dir hygiene + late dumps ===")
+lab, tp = std_case("f5"); out = os.path.join(lab, "out"); os.makedirs(out)
+with open(os.path.join(out, "heap.bin"), "wb") as f: f.write(b"STALE RUN-1 HEAP evil-old-c2.top")
+def w_nolate(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+code, sout = run_main([tp, "-o", out], w_nolate)
+check("5 stale heap.bin purged from out", code == 0 and not os.path.exists(os.path.join(out, "heap.bin")))
+
+lab, tp = std_case("f5b"); out = os.path.join(lab, "out")
+def w_late(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+    with open(os.path.join(d, "unpacked_late.bin"), "wb") as f: f.write(b"late http://late-only-c2.top/cfg")
+    with open(os.path.join(d, "heap.bin"), "wb") as f: f.write(b"heap 45.11.22.33")
+code, sout = run_main([tp, "-o", out, "--late", "5000"], w_late)
+ioc = open(os.path.join(out, "iocs.txt"), encoding="utf-8").read() if os.path.exists(os.path.join(out, "iocs.txt")) else ""
+check("4d late dump IOCs reach iocs.txt", "late-only-c2.top" in ioc, ioc[:120].replace("\n", " | "))
+check("4d heap IOCs reach iocs.txt", "45.11.22.33" in ioc)
+check("4d iocs.txt is per-source", "[unpacked_late.bin]" in ioc and "[heap.bin]" in ioc)
+
+# ================================================================ FIX 6
+print("\n=== FIX 6: bounded import walk ===")
+imp = import_blob("ws2_32.dll", [7, 9], base_rva=0x2000, terminate_thunks=False)
+pe6 = build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020, data=b"\x90"*0x200),
+                dict(name=b".idata", va=0x2000, vs=len(imp), rp=0x600, rs=len(imp), ch=0xC0000040, data=imp)],
+               dirs={1: (0x2000, 40)})
+try:
+    r = V.ordinal_imports(pe6); ok = True; why = str(r)
+except Exception as e:
+    ok = False; why = f"{type(e).__name__}: {e}"
+check("6a unterminated thunk array does not raise", ok, why[:80])
+
+hostile = bytearray(build_pe([dict(name=b".text", va=0x1000, vs=0x20000, rp=0x400, rs=0x20000,
+                                   ch=0x60000020, data=b"\x11" * 0x20000)],
+                             dirs={1: (0x1000, 0)}, total=0x21000))
+t = time.time()
+try:
+    r = V.ordinal_imports(bytes(hostile)); ok = True; why = f"{len(r)} entries"
+except Exception as e:
+    ok = False; why = f"{type(e).__name__}"
+dt = time.time() - t
+check("6b hostile import dir is bounded (<5s, capped)", ok and dt < 5.0, f"{dt:.2f}s {why}")
+
+lab, tp = std_case("f6c", sections=[dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200,
+                                         ch=0x60000020, data=b"\x90"*0x200)])
+with open(tp, "wb") as f:
+    b = bytearray(target_bytes()); pe = struct.unpack_from("<I", b, 0x3c)[0]
+    dd = pe + 24 + 112; struct.pack_into("<II", b, dd + 8, 0xDEADBEEF, 0x100)   # import dir into nowhere
+    f.write(bytes(b))
+code, sout = run_main([tp, "-o", os.path.join(lab, "out")], w_good)
+check("6c unresolvable import dir does not traceback", "Traceback" not in sout and code == 0, sout[-90:].strip())
+
+# ================================================================ FIX 7
+print("\n=== FIX 7: analyzer rc / stderr / timeout surfaced ===")
+lab, tp = std_case("f7"); out = os.path.join(lab, "out")
+code, sout = run_main([tp, "-o", out], lambda d, t0: None, rc=1,
+                      err="FATAL: Bad hive file 'SOFTWARE' - looks like a Git LFS pointer")
+check("7a stderr surfaced", "Bad hive file" in sout and "analyzer stderr" in sout)
+check("7a exit code surfaced", "analyzer exited 1" in sout)
+lab, tp = std_case("f7b"); out = os.path.join(lab, "out")
+code, sout = run_main([tp, "-o", out], w_good, timeout=True)
+check("7b timeout reported but a valid dump still publishes", "timeout and was killed" in sout and code == 0,
+      f"code={code}")
+
+# ================================================================ FIX 8
+print("\n=== FIX 8: patch_ordinal.py guards ===")
+lab = fresh("f8")
+tgt8 = os.path.join(lab, "cryptbase.dll")
+with open(tgt8, "wb") as f: f.write(vic)          # ordinals 1..3, slot 1 live (0x1000), 2 and 3 empty
+orig = open(tgt8, "rb").read()
+def po(*a):
+    p = subprocess.run([sys.executable, PATCH_ORD] + list(a), capture_output=True, text=True)
+    return p.returncode, (p.stdout or "") + (p.stderr or "")
+rc, o = po(tgt8, "1")
+check("8a live slot refused by default", rc != 0 and "refusing without --force" in o, o.strip()[:80])
+check("8a file untouched", open(tgt8, "rb").read() == orig)
+check("8a no .bak created on refusal", not os.path.exists(tgt8 + ".bak"))
+rc, o = po(tgt8, "900")
+check("8b out-of-range alone exits non-zero", rc != 0 and "nothing changed" in o, o.strip()[:80])
+rc, o = po(tgt8, "2")
+check("8c empty slot still patched", rc == 0 and "ret stub" in o, o.strip()[:80])
+check("8c .bak written", os.path.exists(tgt8 + ".bak"))
+check("8c .bak is the original", open(tgt8 + ".bak", "rb").read() == orig)
+rc, o = po("--force", tgt8, "1")
+check("8d --force overwrites a live slot with a warning", rc == 0 and "WARNING overwriting a LIVE export" in o,
+      o.strip()[:80])
+
+# ================================================================ FIX 10
+print("\n=== FIX 10: 32-bit target ===")
+lab = fresh("f10"); tp = os.path.join(lab, "x86.exe")
+with open(tp, "wb") as f:
+    f.write(build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020,
+                           data=b"\x90"*0x200)], is64=False, base=0x400000))
+code, sout = run_main([tp, "-o", os.path.join(lab, "out")], w_good)
+check("10 32-bit PE rejected cleanly", code != 0 and "32-bit PE" in sout and "Traceback" not in sout)
+
+lab = fresh("f10b"); tp = os.path.join(lab, "junk.exe")
+with open(tp, "wb") as f: f.write(b"not a pe at all" * 10)
+code, sout = run_main([tp, "-o", os.path.join(lab, "out")], w_good)
+check("10b non-PE rejected cleanly", code != 0 and "unparseable PE" in sout and "Traceback" not in sout)
+
+# ================================================================ summary
+print("\n" + "=" * 64)
+bad = [n for n, ok, _ in RESULTS if not ok]
+print(f"{len(RESULTS) - len(bad)}/{len(RESULTS)} passed")
+if bad:
+    print("FAILED:")
+    for n in bad: print("  -", n)
+sys.exit(1 if bad else 0)
+
+```
+
+`tests/run_tests2.py`:
+
+```py
+"""Second suite: the cases the first suite structurally could not reach, per the verification review."""
+import importlib.util, sys, os, io, time, shutil, struct, contextlib, subprocess, tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from pebuild import build_pe, import_blob, export_blob
+
+REPO = os.path.dirname(HERE)
+SRC = os.path.join(REPO, "vmpunpack", "vmpunpack.py")
+PATCH_ORD = os.path.join(REPO, "vmpunpack", "patch_ordinal.py")
+LAB = os.path.join(tempfile.gettempdir(), "vmpunpack-tests", "lab2")
+
+spec = importlib.util.spec_from_file_location("vmpu2", SRC)
+V = importlib.util.module_from_spec(spec); spec.loader.exec_module(V)
+
+R = []
+def check(name, cond, detail=""):
+    R.append((name, bool(cond))); print(("  PASS  " if cond else "  FAIL  ") + name + (f"   [{detail}]" if detail else ""))
+
+def fresh(sub):
+    p = os.path.join(LAB, sub); shutil.rmtree(p, ignore_errors=True); os.makedirs(p, exist_ok=True); return p
+
+TGT_SOI, TGT_ENTRY, TGT_BASE = 0x4000, 0x1000, 0x140000000
+def target_bytes(**kw):
+    kw.setdefault("entry", TGT_ENTRY); kw.setdefault("base", TGT_BASE); kw.setdefault("size_of_image", TGT_SOI)
+    return build_pe(kw.pop("sections", None) or [dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200,
+                                                      ch=0x60000020, data=b"\x90"*0x200)], **kw)
+def meta_text(soi=TGT_SOI, entry=TGT_ENTRY, base=TGT_BASE, oep=0x1100):
+    return f"base=0x{base:x}\nsize_of_image=0x{soi:x}\nentry_rva=0x{entry:x}\noep_rva=0x{oep:x}\n"
+def dump_image(soi=TGT_SOI, entry=TGT_ENTRY, extra_data=b"", total=None):
+    return build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x1000, rs=0x200, ch=0x60000020,
+                          data=(b"\xcc"*0x200 + extra_data)[:0x200] if not extra_data else b"\xcc"*0x100 + extra_data)],
+                    entry=entry, base=TGT_BASE, size_of_image=soi, total=total or soi)
+
+def run_main(argv, writer, *, out_seed=None, rc=0, err="", timeout=False, stdout_cp=None, dumps_as_out=False):
+    lab = fresh("m" + str(len(R)))
+    dumps = os.path.join(lab, "dumps"); os.makedirs(dumps, exist_ok=True)
+    sogen = os.path.join(lab, "sogen"); os.makedirs(sogen, exist_ok=True)
+    open(os.path.join(sogen, "analyzer.exe"), "wb").close()
+    emu = os.path.join(lab, "emu")
+    for sub in ("registry", "filesys"): os.makedirs(os.path.join(emu, sub), exist_ok=True)
+    tp = os.path.join(lab, "sample_B.exe")
+    with open(tp, "wb") as f: f.write(target_bytes())
+    out = dumps if dumps_as_out else os.path.join(lab, "out")
+    if out_seed:
+        os.makedirs(out, exist_ok=True)
+        for n, data in out_seed.items():
+            with open(os.path.join(out, n), "wb") as f: f.write(data)
+    old = (V.DUMPS, V.run_analyzer, sys.argv); V.DUMPS = dumps
+    def fake(args):
+        t0 = time.time() - V.MTIME_SLACK
+        writer(dumps, t0)
+        return dict(log="", err=err, rc=rc, timeout=timeout, t0=t0)
+    V.run_analyzer = fake
+    sys.argv = ["vmpunpack.py", tp, "-o", out, "--sogen", sogen, "--emuroot", emu] + argv
+    raw = io.BytesIO()
+    sink = io.TextIOWrapper(raw, encoding=stdout_cp, newline="") if stdout_cp else io.StringIO()
+    code = 0
+    try:
+        with contextlib.redirect_stdout(sink), contextlib.redirect_stderr(sink):
+            V.main()
+    except SystemExit as e:
+        code = e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+        if isinstance(e.code, str): sink.write(e.code + "\n")
+    finally:
+        V.DUMPS, V.run_analyzer, sys.argv = old
+    if stdout_cp:
+        sink.flush(); txt = raw.getvalue().decode(stdout_cp, "replace")
+    else:
+        txt = sink.getvalue()
+    return code, txt, out
+
+def w_good(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image())
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+
+print("=== 2.1  -o aliasing the dumps dir ===")
+code, txt, out = run_main([], w_good, dumps_as_out=True,
+                          out_seed={"unpacked.bin": b"PRE-EXISTING DUMP FROM AN EARLIER RUN"})
+check("2.1 -o == DUMPS refused up front", code != 0 and "-o must not be" in txt, f"code={code}")
+# the guard must fire before the purge loop, so anything already in that directory is untouched
+survived = os.path.isfile(os.path.join(out, "unpacked.bin")) and \
+           open(os.path.join(out, "unpacked.bin"), "rb").read() == b"PRE-EXISTING DUMP FROM AN EARLIER RUN"
+check("2.1 pre-existing dump in that dir is not destroyed", survived)
+
+print("\n=== 2.2 / 2.11  import walk really is bounded ===")
+th = b"".join(struct.pack("<Q", 0x8000000000000000 | (n & 0xffff)) for n in range(65536)) + b"\0"*8
+name = b"ntdll.dll\0"
+blob = bytearray(20*2); blob += name; blob += b"\0" * ((-len(blob)) % 8)
+toff = len(blob); blob += th
+struct.pack_into("<IIIII", blob, 0, 0x10000 + toff, 0, 0, 0x10000 + 40, 0x10000 + toff)
+pe = build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020, data=b"\x90"*0x200),
+               dict(name=b".idata", va=0x10000, vs=len(blob), rp=0x1000, rs=len(blob), ch=0xC0000040, data=bytes(blob))],
+              dirs={1: (0x10000, 40)}, total=0x1000 + len(blob) + 0x1000)
+t = time.time()
+with contextlib.redirect_stdout(io.StringIO()): r = V.ordinal_imports(pe)
+dt = time.time() - t
+check("2.2 single descriptor cannot exceed MAX_ORDINALS", len(r) <= V.MAX_ORDINALS, f"{len(r)} entries, {dt:.2f}s")
+check("2.2 result is deduplicated", len(r) == len(set(r)))
+
+# 4096 descriptors all pointing at one long non-ordinal thunk array -> product must be budgeted
+th2 = b"".join(struct.pack("<Q", 0x1000 + n) for n in range(65536)) + b"\0"*8
+nm = b"a.dll\0"
+ndesc = 4096
+hdr = bytearray(20 * (ndesc + 1)); base = 0x10000
+noff = len(hdr); hdr += nm; hdr += b"\0" * ((-len(hdr)) % 8)
+toff2 = len(hdr); hdr += th2
+for i in range(ndesc):
+    struct.pack_into("<IIIII", hdr, i*20, base + toff2, 0, 0, base + noff, base + toff2)
+pe2 = build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020, data=b"\x90"*0x200),
+                dict(name=b".idata", va=base, vs=len(hdr), rp=0x1000, rs=len(hdr), ch=0xC0000040, data=bytes(hdr))],
+               dirs={1: (base, 0)}, total=0x1000 + len(hdr) + 0x1000)
+t = time.time()
+with contextlib.redirect_stdout(io.StringIO()): r2 = V.ordinal_imports(pe2)
+dt = time.time() - t
+check("2.11 descriptors x thunks product is budgeted (<15s)", dt < 15.0, f"{dt:.2f}s, {len(r2)} entries")
+
+print("\n=== 2.3  imp_sz must not narrow the walk (regression) ===")
+imp = import_blob("ws2_32.dll", [23, 115, 1234], base_rva=0x2000)
+for size in (0, 19, 20, 55, len(imp)):
+    p = build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020, data=b"\x90"*0x200),
+                  dict(name=b".idata", va=0x2000, vs=len(imp), rp=0x600, rs=len(imp), ch=0xC0000040, data=imp)],
+                 dirs={1: (0x2000, size)})
+    got = V.ordinal_imports(p)
+    check(f"2.3 imp_sz={size:<3} still finds all 3 ordinals", len(got) == 3, str(got))
+
+print("\n=== 2.4  encoding: non-ASCII must not reach the sets, file must survive the console ===")
+d, u, i = V.grep_iocs("abſ-panel.top".encode("utf-16le"))
+check("2.4 re.A keeps U+017F out of domains", all(x.isascii() for x in d), str(d))
+d, u, i = V.grep_iocs("\u0661.2.3.4".encode("utf-16le"))
+check("2.4 re.A keeps Unicode digits out of IPs", all(x.isascii() for x in i), str(i))
+code, txt, out = run_main([], w_good, err="FATAL \x81\x9d bad hive file", stdout_cp="cp1251")
+check("2.4 high-byte analyzer stderr does not kill the run", code == 0 and "DONE" in txt, f"code={code}")
+check("2.4 iocs.txt written despite the cp1251 console", os.path.isfile(os.path.join(out, "iocs.txt")))
+
+print("\n=== 2.5 / 2.6  output-dir hygiene ===")
+def w_nomz(d, t0):
+    b = bytearray(dump_image()); b[0:2] = b"ZZ"
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(bytes(b))
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+code, txt, out = run_main([], w_nomz, out_seed={"sample_B.unpacked.exe": b"RUN-1 STALE EXE"})
+check("2.5 stale .unpacked.exe purged even when reconstruct fails",
+      code != 0 and not os.path.exists(os.path.join(out, "sample_B.unpacked.exe")), f"code={code}")
+
+lab = fresh("lock"); out = os.path.join(lab, "out"); os.makedirs(out)
+locked = os.path.join(out, "heap.bin")
+with open(locked, "wb") as f: f.write(b"RUN-1 HEAP")
+hold = open(locked, "rb")
+try:
+    code, txt, _ = run_main([], w_good, out_seed=None)
+    lab2 = fresh("lock2"); out2 = os.path.join(lab2, "out"); os.makedirs(out2)
+    l2 = os.path.join(out2, "heap.bin")
+    with open(l2, "wb") as f: f.write(b"RUN-1 HEAP")
+    h2 = open(l2, "rb")
+    try:
+        old = (V.DUMPS, V.run_analyzer, sys.argv)
+        dumps = os.path.join(lab2, "dumps"); os.makedirs(dumps)
+        sog = os.path.join(lab2, "sogen"); os.makedirs(sog); open(os.path.join(sog, "analyzer.exe"), "wb").close()
+        for sub in ("registry", "filesys"): os.makedirs(os.path.join(lab2, sub), exist_ok=True)
+        tp = os.path.join(lab2, "s.exe")
+        with open(tp, "wb") as f: f.write(target_bytes())
+        V.DUMPS = dumps
+        V.run_analyzer = lambda a: (w_good(dumps, 0), dict(log="", err="", rc=0, timeout=False,
+                                                           t0=time.time() - V.MTIME_SLACK))[1]
+        sys.argv = ["vmpunpack.py", tp, "-o", out2, "--sogen", sog, "--emuroot", lab2]
+        buf = io.StringIO(); c = 0
+        try:
+            with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf): V.main()
+        except SystemExit as e:
+            c = e.code if isinstance(e.code, int) else 1
+        finally:
+            V.DUMPS, V.run_analyzer, sys.argv = old
+        check("2.6 locked stale artefact in out is reported loudly",
+              "could not be removed" in buf.getvalue(), buf.getvalue().strip()[-90:])
+    finally: h2.close()
+finally: hold.close()
+
+print("\n=== 2.7  _host must not read the userinfo ===")
+check("2.7 userinfo spoof no longer suppresses the URL",
+      V._host("http://update.microsoft.com@185.220.101.5/p.bin") == "185.220.101.5",
+      V._host("http://update.microsoft.com@185.220.101.5/p.bin"))
+d, u, i = V.grep_iocs(b"http://www.microsoft.com@c2host.top/gate.php")
+check("2.7 spoofed URL survives into iocs", len(u) == 1 and "c2host.top" in d, f"{d} {u}")
+check("2.7 genuine CA noise with userinfo still filtered",
+      V.NOISE_HOST.match(V._host("http://ocsp@digicert.com/x.crl")) is not None)
+
+print("\n=== 2.8  torn .bin / .meta pair ===")
+def w_torn(d, t0):
+    with open(os.path.join(d, "unpacked.bin"), "wb") as f: f.write(dump_image(soi=0x9000, total=0x9000))
+    with open(os.path.join(d, "unpacked.meta"), "w") as f: f.write(meta_text())
+code, txt, out = run_main([], w_torn)
+check("2.8 .bin whose headers disagree with .meta is refused",
+      code != 0 and "disagree with unpacked.meta" in txt, f"code={code}")
+check("2.8 nothing published", not os.path.exists(os.path.join(out, "sample_B.unpacked.exe")))
+
+print("\n=== 2.9  patch_ordinal partial refusal ===")
+lab = fresh("po")
+vic = build_pe([dict(name=b".text", va=0x1000, vs=0x200, rp=0x400, rs=0x200, ch=0x60000020,
+                     data=b"\xc3" + b"\x90"*0x1ff),
+                dict(name=b".edata", va=0x2000, vs=0x200, rp=0x600, rs=0x200, ch=0x40000040,
+                     data=export_blob(base_rva=0x2000, base_ord=1, func_rvas=[0x1000, 0, 0]).ljust(0x200, b"\0"))],
+               dirs={0: (0x2000, 0x200)})
+t8 = os.path.join(lab, "t.dll")
+with open(t8, "wb") as f: f.write(vic)
+p = subprocess.run([sys.executable, PATCH_ORD, t8, "1", "2"], capture_output=True, text=True)
+o = (p.stdout or "") + (p.stderr or "")
+check("2.9 partial apply exits non-zero", p.returncode != 0, f"code={p.returncode}")
+check("2.9 the empty slot was still patched", "ord 2: func_rva 0x0 ->" in o, o.strip()[:80])
+check("2.9 the live slot was refused", "refusing without --force" in o)
+
+print("\n=== install check points at setup.cmd ===")
+lab = fresh("noeng")
+tp = os.path.join(lab, "s.exe")
+with open(tp, "wb") as f: f.write(target_bytes())
+sog = os.path.join(lab, "sogen"); os.makedirs(sog)
+old = sys.argv
+sys.argv = ["vmpunpack.py", tp, "-o", os.path.join(lab, "out"), "--sogen", sog, "--emuroot", os.path.join(lab, "emu")]
+buf = io.StringIO(); c = 0
+try:
+    with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf): V.main()
+except SystemExit as e:
+    c = e.code if isinstance(e.code, int) else 1
+    if isinstance(e.code, str): buf.write(e.code)
+finally: sys.argv = old
+t = buf.getvalue()
+check("missing engine names every missing path", "analyzer.exe" in t and "registry" in t and "filesys" in t)
+check("missing engine points at setup.cmd", c != 0 and "setup.cmd" in t, t.strip()[:80])
+
+print("\n=== --version ===")
+p = subprocess.run([sys.executable, SRC, "--version"], capture_output=True, text=True)
+check("--version prints a version", p.returncode == 0 and "vmpunpack" in (p.stdout + p.stderr),
+      (p.stdout + p.stderr).strip()[:40])
+
+print("\n" + "=" * 60)
+bad = [n for n, ok in R if not ok]
+print(f"{len(R)-len(bad)}/{len(R)} passed")
+for n in bad: print("  FAILED:", n)
+sys.exit(1 if bad else 0)
+
+```
+
+`vmpunpack/patch_ordinal.py`:
+
+```py
+#!/usr/bin/env python3
+"""Fill empty ordinal export slots in an emulation-root DLL with a ret-stub, so guest ntdll can resolve
+imports-by-ordinal that this DLL version leaves as holes (fixes VMP loader STATUS_ORDINAL_NOT_FOUND /
+Emulation terminated with status C0000138).
+
+Usage: patch_ordinal.py [--force] <dll> <ordinal> [ordinal...]   (edits in place, keeps a .bak)
+
+Only EMPTY slots are filled. --force also overwrites a live export, which silently breaks that API for
+every future run against this emulation root - in this emu_root ntdll has 0 empty slots out of 2540,
+so an unguarded write almost always clobbers something real."""
+import sys, struct, shutil, os
+
+force = "--force" in sys.argv
+argv = [a for a in sys.argv[1:] if a != "--force"]
+if len(argv) < 2: sys.exit(__doc__)
+p = argv[0]
+try: ords = [int(x, 0) for x in argv[1:]]
+except ValueError as e: sys.exit(f"[!] bad ordinal: {e}")
+
+with open(p, "rb") as fh: f = bytearray(fh.read())
+if len(f) < 0x40 or f[0:2] != b"MZ": sys.exit(f"[!] {p}: no MZ signature")
+pe = struct.unpack_from("<I", f, 0x3c)[0]
+if pe + 24 > len(f) or f[pe:pe+4] != b"PE\0\0": sys.exit(f"[!] {p}: no PE signature")
+optsz = struct.unpack_from("<H", f, pe+20)[0]
+opt = pe+24; is64 = struct.unpack_from("<H", f, opt)[0] == 0x20b; ddoff = opt+(112 if is64 else 96)
+if ddoff + 8 > len(f): sys.exit(f"[!] {p}: truncated optional header")
+exp_rva, = struct.unpack_from("<I", f, ddoff)
+if not exp_rva: sys.exit(f"[!] {p}: no export directory")
+nsec = struct.unpack_from("<H", f, pe+6)[0]; so = pe+24+optsz
+if so + nsec*40 > len(f): sys.exit(f"[!] {p}: section table runs past end of file")
+secs = [struct.unpack_from("<IIII", f, so+i*40+8) for i in range(nsec)]  # vs,va,rs,rp
+
+def r2o(rva, need=1):
+    for vs, va, rs, rp in secs:
+        if va <= rva < va+max(vs, rs):
+            o = rp+(rva-va)
+            return o if o >= 0 and o+need <= len(f) else None
+    return None
+
+# a ret (0xC3) in the first executable section
+ret_rva = None
+for i in range(nsec):
+    o = so+i*40; ch = struct.unpack_from("<I", f, o+36)[0]; vs, va, rs, rp = struct.unpack_from("<IIII", f, o+8)
+    if ch & 0x20000000 and rs and rp+rs <= len(f):
+        k = f.find(b"\xc3", rp, rp+rs)
+        if k != -1: ret_rva = va+(k-rp); break
+if ret_rva is None: sys.exit("[!] no ret byte found")
+eo = r2o(exp_rva, 40)
+if eo is None: sys.exit(f"[!] {p}: export directory outside the file")
+Base, = struct.unpack_from("<I", f, eo+16); nFunc, = struct.unpack_from("<I", f, eo+20)
+aFunc, = struct.unpack_from("<I", f, eo+28); afo = r2o(aFunc, max(nFunc, 1)*4)
+if afo is None: sys.exit(f"[!] {p}: export address table outside the file")
+
+changed = refused = 0
+for ordv in ords:
+    idx = ordv-Base
+    if not (0 <= idx < nFunc):
+        print(f"ord {ordv}: out of range {Base}..{Base+nFunc-1}"); refused += 1; continue
+    old, = struct.unpack_from("<I", f, afo+idx*4)
+    if old != 0 and not force:
+        print(f"ord {ordv}: slot is LIVE (func_rva 0x{old:x}) - refusing without --force"); refused += 1; continue
+    if old != 0: print(f"ord {ordv}: WARNING overwriting a LIVE export (func_rva 0x{old:x})")
+    struct.pack_into("<I", f, afo+idx*4, ret_rva)
+    print(f"ord {ordv}: func_rva 0x{old:x} -> 0x{ret_rva:x} (ret stub)")
+    changed += 1
+
+if not changed: sys.exit("nothing changed")
+bak = p + ".bak"
+if not os.path.exists(bak):
+    shutil.copy(p, bak); print(f"backup -> {bak}")
+with open(p, "wb") as fh: fh.write(f)
+print(f"patched {p} in place ({changed} ordinal(s))")
+# a partial apply must not look like a full one to a caller checking the exit code
+if refused: sys.exit(f"[!] {refused} ordinal(s) were refused - re-run with --force if you really mean it")
+
+```
+
+`vmpunpack/setup_engine.py`:
+
+```py
+"""Fetch the third-party pieces vmpunpack drives but does not redistribute.
+
+`emu_root/` is sogen's emulation root (a capture of a Windows userland, including Microsoft system
+DLLs) and `sogen/` is a patched GPL-2.0 build of the sogen emulator. Neither is ours to ship, so the
+repository carries only the driver and this script pulls the rest on first use. See THIRD_PARTY.md.
+"""
+import argparse, hashlib, os, shutil, sys, tempfile, zipfile
+import urllib.request
+
+ROOT_URL = "https://sogen.dev/root.zip"
+# Patched sogen. Its source is the vmpunpack branch of milk-analyzer/sogen, published so that this
+# GPL-2.0 binary travels with the code it was built from. Pinned by hash: the archive is fetched over
+# the network and executed against live malware, so a silent substitution must not go unnoticed.
+ANALYZER_URL = ("https://github.com/milk-analyzer/sogen/releases/download/"
+                "vmpunpack-1.0.0/sogen-vmpunpack-win-x64.zip")
+ANALYZER_SHA256 = "6d077827cc590d740611cbc5ce1ded3bc9cff9cf0c840275ad744d9fd0d6760b"
+
+_HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EMUROOT = os.path.join(_HERE, "emu_root")
+SOGEN = os.path.join(_HERE, "sogen")
+
+
+def _human(n):
+    for u in ("B", "KB", "MB", "GB"):
+        if n < 1024 or u == "GB": return f"{n:.0f} {u}" if u == "B" else f"{n:.1f} {u}"
+        n /= 1024
+
+
+def download(url, dest):
+    print(f"[*] {url}")
+    h = hashlib.sha256()
+    with urllib.request.urlopen(url) as r, open(dest, "wb") as f:
+        total = int(r.headers.get("Content-Length") or 0)
+        done = 0
+        while True:
+            chunk = r.read(1 << 20)
+            if not chunk: break
+            f.write(chunk); h.update(chunk); done += len(chunk)
+            if total:
+                print(f"\r    {_human(done)} / {_human(total)}  ({done*100//total}%)", end="", flush=True)
+            else:
+                print(f"\r    {_human(done)}", end="", flush=True)
+    print()
+    return h.hexdigest()
+
+
+def unpack_root(zip_path):
+    """root.zip may hold `root/...` or `filesys/...` at the top; normalise to emu_root/root/."""
+    tmp = tempfile.mkdtemp(prefix="vmpunpack-root-", dir=_HERE)
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            for m in z.namelist():                       # refuse absolute / traversing members
+                p = os.path.normpath(m)
+                if os.path.isabs(p) or p.startswith(".."):
+                    sys.exit(f"[!] refusing archive entry {m!r}: it escapes the extraction directory")
+            z.extractall(tmp)
+        top = os.listdir(tmp)
+        src = os.path.join(tmp, "root") if "root" in top else tmp
+        if not os.path.isdir(os.path.join(src, "registry")):
+            sys.exit(f"[!] {ROOT_URL} did not contain a registry/ directory - layout changed upstream?")
+        os.makedirs(EMUROOT, exist_ok=True)
+        dst = os.path.join(EMUROOT, "root")
+        if os.path.isdir(dst): shutil.rmtree(dst)
+        shutil.move(src, dst)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def check(verbose=True):
+    """Report what is present. Returns a list of human-readable problems."""
+    bad = []
+    analyzer = os.path.join(SOGEN, "analyzer.exe")
+    if not os.path.isfile(analyzer):
+        bad.append(f"missing {analyzer}")
+    reg = os.path.join(EMUROOT, "root", "registry")
+    fs = os.path.join(EMUROOT, "root", "filesys")
+    for p in (reg, fs):
+        if not os.path.isdir(p): bad.append(f"missing {p}")
+    hive = os.path.join(reg, "SOFTWARE")
+    if os.path.isfile(hive):
+        with open(hive, "rb") as f: magic = f.read(4)
+        if magic != b"regf":
+            bad.append(f"{hive} is not a registry hive (starts with {magic!r}) - a truncated download?")
+    if verbose:
+        for b in bad: print(f"[!] {b}")
+        if not bad: print("[+] engine and emulation root look complete")
+    return bad
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--check", action="store_true", help="only report what is installed, download nothing")
+    ap.add_argument("--root-url", default=ROOT_URL, help=f"emulation root archive (default {ROOT_URL})")
+    ap.add_argument("--analyzer-url", default=os.environ.get("VMPUNPACK_ANALYZER_URL", ANALYZER_URL),
+                    help="zip holding the patched analyzer.exe and its runtime DLLs")
+    ap.add_argument("--analyzer-sha256", default=None,
+                    help=f"expected sha256 of that zip (default: the pinned {ANALYZER_SHA256[:12]}…)")
+    ap.add_argument("--sha256", default=None, help="expected sha256 of the emulation-root archive")
+    ap.add_argument("--force", action="store_true", help="re-download even if already present")
+    args = ap.parse_args()
+
+    if args.check:
+        sys.exit(1 if check() else 0)
+
+    if args.force or not os.path.isdir(os.path.join(EMUROOT, "root", "registry")):
+        with tempfile.TemporaryDirectory(prefix="vmpunpack-dl-") as td:
+            zp = os.path.join(td, "root.zip")
+            got = download(args.root_url, zp)
+            print(f"[i] sha256 {got}")
+            if args.sha256 and got.lower() != args.sha256.lower():
+                sys.exit(f"[!] sha256 mismatch: expected {args.sha256}")
+            unpack_root(zp)
+        print(f"[+] emulation root -> {os.path.join(EMUROOT, 'root')}")
+    else:
+        print(f"[i] emulation root already present ({os.path.join(EMUROOT, 'root')}); --force to refresh")
+
+    if args.force or not os.path.isfile(os.path.join(SOGEN, "analyzer.exe")):
+        # Only enforce the pin for the build we published; a custom --analyzer-url is the caller's
+        # own build, so demanding our hash would be nonsense.
+        want = args.analyzer_sha256 or (ANALYZER_SHA256 if args.analyzer_url == ANALYZER_URL else None)
+        with tempfile.TemporaryDirectory(prefix="vmpunpack-dl-") as td:
+            zp = os.path.join(td, "sogen.zip")
+            got = download(args.analyzer_url, zp)
+            print(f"[i] sha256 {got}")
+            if want and got.lower() != want.lower():
+                sys.exit(f"[!] sha256 mismatch for the engine archive\n"
+                         f"    expected {want}\n    got      {got}\n"
+                         "    Refusing to install it. This archive is executed against live malware.")
+            os.makedirs(SOGEN, exist_ok=True)
+            with zipfile.ZipFile(zp) as z:
+                for m in z.namelist():
+                    p = os.path.normpath(m)
+                    if os.path.isabs(p) or p.startswith(".."):
+                        sys.exit(f"[!] refusing archive entry {m!r}: it escapes the extraction directory")
+                z.extractall(SOGEN)
+        print(f"[+] engine -> {SOGEN}")
+    else:
+        print(f"[i] engine already present ({SOGEN}); --force to refresh")
+
+    sys.exit(1 if check() else 0)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`vmpunpack/vmpunpack.cmd`:
+
+```cmd
+@echo off
+setlocal
+set "PY="
+set "OK="
+for /f "delims=" %%v in ('py -3 -c "import sys;print(1 if sys.version_info>=(3,8) else 0)" 2^>nul') do set "OK=%%v"
+if "%OK%"=="1" set "PY=py -3"
+if defined PY goto :have
+set "OK="
+for /f "delims=" %%v in ('python -c "import sys;print(1 if sys.version_info>=(3,8) else 0)" 2^>nul') do set "OK=%%v"
+if "%OK%"=="1" set "PY=python"
+:have
+if not defined PY (
+  echo [!] Python 3.8+ not found - install it from python.org, then re-run.
+  exit /b 1
+)
+%PY% "%~dp0vmpunpack.py" %*
+exit /b %ERRORLEVEL%
+
+```
+
+`vmpunpack/vmpunpack.py`:
+
+```py
+import argparse, os, re, struct, subprocess, sys, shutil, time
+
+__version__ = "0.2.0.dev0"
+
+DUMPS = r"C:\dumps"
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DUMP_FILES = ("unpacked.bin", "unpacked.meta", "unpacked_late.bin", "heap.bin")
+META_KEYS = ("base", "size_of_image", "entry_rva", "oep_rva")
+MTIME_SLACK = 2.0          # filesystem timestamp granularity; keeps the staleness floor from false-firing
+MAX_DESCRIPTORS = 4096     # bounds on the import walk: every byte of it is attacker-controlled
+MAX_THUNKS = 65536
+MAX_ORDINALS = 4096
+MAX_THUNK_READS = 1 << 20  # budget across ALL descriptors: the per-dimension caps multiply otherwise
+
+class BadPE(Exception): pass
+
+def u16(b, o): return struct.unpack_from("<H", b, o)[0]
+def u32(b, o): return struct.unpack_from("<I", b, o)[0]
+def u64(b, o): return struct.unpack_from("<Q", b, o)[0]
+
+def pe_at(b):
+    if len(b) < 0x40 or b[0:2] != b"MZ": raise BadPE("no MZ signature")
+    pe = u32(b, 0x3c)
+    if pe + 24 > len(b) or b[pe:pe+4] != b"PE\0\0": raise BadPE(f"no PE signature at e_lfanew 0x{pe:x}")
+    return pe
+
+def sections(b):
+    pe = pe_at(b); nsec = u16(b, pe+6); optsz = u16(b, pe+20); so = pe+24+optsz
+    if so + nsec*40 > len(b): raise BadPE(f"section table ({nsec} sections at 0x{so:x}) runs past end of image")
+    out = []
+    for i in range(nsec):
+        o = so + i*40
+        name = b[o:o+8].split(b"\0")[0].decode("latin1", "replace")
+        vs, va, rs, rp = struct.unpack_from("<IIII", b, o+8)
+        ch = u32(b, o+36)
+        out.append(dict(name=name, va=va, vs=vs, rp=rp, rs=rs, ch=ch, hdr_off=o))
+    return out
+
+def rva_to_off(secs, rva):
+    for s in secs:
+        if s["va"] <= rva < s["va"] + max(s["vs"], s["rs"]):
+            return s["rp"] + (rva - s["va"])
+    return None
+
+def _off(secs, rva, blen, need=1):
+    """rva_to_off, but only if the result is actually readable for `need` bytes."""
+    o = rva_to_off(secs, rva)
+    return o if o is not None and o >= 0 and o + need <= blen else None
+
+def pe_basics(b):
+    pe = pe_at(b); opt = pe+24
+    if opt + 2 > len(b): raise BadPE("truncated optional header")
+    magic = u16(b, opt)
+    if magic not in (0x10b, 0x20b): raise BadPE(f"bad optional-header magic 0x{magic:x}")
+    is64 = magic == 0x20b
+    dd = opt + (112 if is64 else 96)
+    if dd + 16*8 > len(b): raise BadPE("truncated optional header / data directories")
+    return dict(is64=is64, entry_rva=u32(b, opt+16),
+                base=(u64(b, opt+24) if is64 else u32(b, opt+28)),
+                size_of_image=u32(b, opt+56), datadir_off=dd)
+
+def ordinal_imports(b):
+    secs = sections(b); pb = pe_basics(b)
+    tw = 8 if pb["is64"] else 4                                   # thunk width follows the PE class
+    flag = 0x8000000000000000 if pb["is64"] else 0x80000000
+    rd = u64 if pb["is64"] else u32
+    imp_rva, _imp_sz = struct.unpack_from("<II", b, pb["datadir_off"] + 1*8)
+    res = []
+    if not imp_rva: return res
+    io = _off(secs, imp_rva, len(b), 20)
+    if io is None: return res
+    # Deliberately NOT derived from imp_sz: the Windows loader ignores the directory Size and walks to
+    # the null descriptor, and packers routinely ship a stale/short Size. Trusting it loses real imports.
+    budget = MAX_THUNK_READS
+    for i in range(MAX_DESCRIPTORS):
+        d = b[io+i*20: io+i*20+20]
+        if len(d) < 20: break
+        oft, ts, fc, nameRva, fthunk = struct.unpack("<IIIII", d)
+        if oft == 0 and nameRva == 0 and fthunk == 0: break
+        no = _off(secs, nameRva, len(b)) if nameRva else None
+        if no is None: continue
+        e = b.find(b"\0", no, min(no+256, len(b)))
+        if e < 0: continue
+        dll = b[no:e].decode("latin1", "replace")
+        to = _off(secs, oft or fthunk, len(b), tw)
+        if to is None: continue
+        j = 0
+        while j < MAX_THUNKS and budget > 0 and to + (j+1)*tw <= len(b):
+            budget -= 1
+            v = rd(b, to + j*tw)
+            if v == 0: break
+            if v & flag:
+                res.append((dll, v & 0xffff))
+                if len(res) >= MAX_ORDINALS: break        # cap here, not just between descriptors
+            j += 1
+        if len(res) >= MAX_ORDINALS or budget <= 0:
+            print(f"[!] import table exceeds the parse budget - the ordinal list below is truncated")
+            break
+    return sorted(set(res))                               # gap_fill rewrites a DLL per entry; dedup first
+
+def _export_dir(b):
+    secs = sections(b); pb = pe_basics(b)
+    exp_rva, _ = struct.unpack_from("<II", b, pb["datadir_off"] + 0*8)
+    if not exp_rva: return None
+    eo = _off(secs, exp_rva, len(b), 40)
+    if eo is None: return None
+    Base = u32(b, eo+16); nFunc = u32(b, eo+20); aFunc = u32(b, eo+28)
+    if nFunc > 0x10000: return None
+    afo = _off(secs, aFunc, len(b), nFunc*4)
+    if afo is None: return None
+    return dict(secs=secs, Base=Base, nFunc=nFunc, afo=afo)
+
+def export_ordinal_range(b):
+    d = _export_dir(b)
+    return (d["Base"], d["nFunc"]) if d else None
+
+def patch_export_ordinal_to_ret(dll_path, ordinal):
+    with open(dll_path, "rb") as f: b = bytearray(f.read())
+    d = _export_dir(b)
+    if not d: return "oor"
+    idx = ordinal - d["Base"]
+    if not (0 <= idx < d["nFunc"]): return "oor"
+    if u32(b, d["afo"] + idx*4) != 0: return "already"
+    ret_rva = None
+    for s in d["secs"]:
+        if (s["ch"] & 0x20000000) and s["rs"] and s["rp"] + s["rs"] <= len(b):
+            k = b.find(b"\xc3", s["rp"], s["rp"] + s["rs"])
+            if k != -1: ret_rva = s["va"] + (k - s["rp"]); break
+    if ret_rva is None: return "noret"
+    struct.pack_into("<I", b, d["afo"] + idx*4, ret_rva)
+    with open(dll_path, "wb") as f: f.write(b)
+    return "patched"
+
+def reconstruct_pe(img, meta, out_path):
+    b = bytearray(img)
+    pe = pe_at(b)                                    # raises BadPE if the packer erased its own header page
+    optsz = u16(b, pe+20); nsec = u16(b, pe+6); so = pe+24+optsz
+    if so + nsec*40 > len(b): raise BadPE(f"section table ({nsec} sections) runs past end of dump")
+    oep_rva = int(meta["oep_rva"], 16)
+    struct.pack_into("<I", b, pe+24+16, oep_rva)
+    for i in range(nsec):
+        o = so + i*40; vs, va, rs, rp = struct.unpack_from("<IIII", b, o+8)
+        # max(vs, rs) matches rva_to_off's convention: vs==0 with rs>0 is loader-legal and the bytes are
+        # really in the dump. Clamp to what the buffer actually holds so no header points past EOF.
+        size = 0 if va >= len(b) else min(max(vs, rs), len(b) - va)
+        struct.pack_into("<II", b, o+16, size, va)
+    with open(out_path, "wb") as f: f.write(b)
+    return oep_rva
+
+TLD = (r"com|net|org|ru|su|io|xyz|top|info|biz|cc|onion|pw|club|online|site|dev|app|shop|"
+       r"cyou|sbs|store|cfd|icu|monster|quest")
+# re.A everywhere: without it [a-z] under re.I matches U+017F and \d matches any Unicode digit, so
+# binary noise decoded as UTF-16 injects non-ASCII into the IOC sets and breaks the console write.
+RE_DOM = re.compile(r"\b(?:[a-z0-9-]{2,50}\.){1,3}(?:" + TLD + r")\b", re.I | re.A)
+RE_URL = re.compile(r"https?://[A-Za-z0-9._~:/?#\[\]@!$&()*+,;=%-]{6,90}", re.A)
+RE_IP = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])", re.A)
+# Anchored against the registrable host only. A substring match here would drop exactly the
+# Microsoft-impersonating C2 hostnames the tool most needs to surface.
+NOISE_HOST = re.compile(r"^(?:[a-z0-9-]+\.)*(?:" + "|".join((
+    r"microsoft\.com", r"windows\.com", r"windowsupdate\.com", r"msftconnecttest\.com", r"msftncsi\.com",
+    r"live\.com", r"msn\.com", r"bing\.com", r"office\.com", r"azure\.com", r"windows\.net", r"skype\.com",
+    r"w3\.org", r"xmlsoap\.org", r"openxmlformats\.org", r"mozilla\.org", r"apache\.org", r"openssl\.org",
+    r"python\.org", r"letsencrypt\.org", r"nuget\.org", r"chocolatey\.org", r"oasis-open\.org",
+    r"verisign\.com", r"digicert\.com", r"sectigo\.com", r"globalsign\.com", r"godaddy\.com",
+    r"comodoca\.com", r"entrust\.net", r"thawte\.com", r"geotrust\.com", r"symcb\.com", r"symcd\.com",
+    r"amazontrust\.com", r"usertrust\.com", r"trustwave\.com", r"identrust\.com", r"sectigo\.net",
+)) + r")$", re.I)
+
+def _host(u):
+    # take the LAST @-separated part: http://update.microsoft.com@<real-c2>/ must not read as Microsoft
+    m = re.match(r"https?://([^/\s]+)", u, re.I)
+    a = (m.group(1) if m else "").rsplit("@", 1)[-1]
+    return a.split(":")[0].lower().rstrip(".")
+
+def _ok_ip(x):
+    p = x.split(".")
+    if any(not (q.isdigit() and len(q) <= 3 and int(q) <= 255) for q in p): return False
+    return x not in ("0.0.0.0", "127.0.0.1", "255.255.255.255")
+
+def _scan(text, dom, url, ip):
+    for s in RE_DOM.findall(text):
+        s = s.lower()
+        if len(s) > 6 and not NOISE_HOST.match(s): dom.add(s)
+    for x in RE_URL.findall(text):
+        if not NOISE_HOST.match(_host(x)): url.add(x)
+    for x in RE_IP.findall(text):
+        if _ok_ip(x): ip.add(x)
+
+def grep_iocs(b, chunk=64 << 20, overlap=1 << 12):
+    """All three patterns see all three views. Chunked so a several-hundred-MB heap dump cannot
+    blow memory up by decoding the whole buffer twice and concatenating it."""
+    dom, url, ip = set(), set(), set()
+    n = len(b)
+    spans = [(0, n)] if n <= chunk else [(s, min(s + chunk + overlap, n)) for s in range(0, n, chunk)]
+    for s, e in spans:
+        seg = bytes(b[s:e])
+        _scan(seg.decode("latin1", "ignore"), dom, url, ip)         # single-byte
+        _scan(seg.decode("utf-16le", "ignore"), dom, url, ip)       # wide, even-aligned
+        _scan(seg[1:].decode("utf-16le", "ignore"), dom, url, ip)   # wide, odd-aligned
+    return sorted(dom), sorted(url), sorted(ip)
+
+def run_analyzer(args):
+    guest_name = os.path.basename(args.target)
+    guest_dir = os.path.join(args.emuroot, "filesys", "c", "sample")
+    os.makedirs(guest_dir, exist_ok=True)
+    shutil.copy(args.target, os.path.join(guest_dir, guest_name))
+    for f in DUMP_FILES:
+        p = os.path.join(DUMPS, f)
+        try: os.remove(p)
+        except FileNotFoundError: pass
+        except OSError as e:
+            sys.exit(f"[!] cannot clear stale dump {p}: {e}\n"
+                     "    Close whatever holds it open and re-run. Refusing to continue rather than risk\n"
+                     "    publishing a previous sample's image as this one's result.")
+    env = dict(os.environ); env["SOGEN_UNPACK"] = "1"
+    for k in ("SOGEN_STOP_AT_OEP", "SOGEN_NODELAY", "SOGEN_TSC_STRIDE", "SOGEN_OEP_RVA", "SOGEN_LATEDUMP_AT"):
+        env.pop(k, None)
+    if not args.run_payload: env["SOGEN_STOP_AT_OEP"] = "1"
+    if args.nodelay: env["SOGEN_NODELAY"] = "1"
+    if args.tsc: env["SOGEN_TSC_STRIDE"] = args.tsc
+    if args.oep: env["SOGEN_OEP_RVA"] = args.oep
+    if args.late: env["SOGEN_LATEDUMP_AT"] = str(args.late)
+    cmd = [os.path.join(args.sogen, "analyzer.exe"), "--backend", "unicorn", "--no-inst-precision",
+           "-e", args.emuroot, "-r", os.path.join(args.emuroot, "registry"),
+           "--report", os.path.join(DUMPS, "vmp_run.jsonl"), "--stdout", os.path.join(DUMPS, "vmp_guest.txt"),
+           "--first-exec", "-c", "C:\\sample\\" + guest_name]
+    dec = lambda s: s if isinstance(s, str) else (s.decode("latin1", "replace") if s else "")
+    t0 = time.time() - MTIME_SLACK              # captured immediately before launch: the staleness floor
+    try:
+        p = subprocess.run(cmd, cwd=args.sogen, env=env, capture_output=True, text=True,
+                           encoding="latin1", timeout=args.timeout, stdin=subprocess.DEVNULL)
+        return dict(log=p.stdout or "", err=p.stderr or "", rc=p.returncode, timeout=False, t0=t0)
+    except subprocess.TimeoutExpired as e:
+        return dict(log=dec(e.stdout), err=dec(e.stderr), rc=None, timeout=True, t0=t0)
+
+def gap_fill(args, ords):
+    sys32 = os.path.join(args.emuroot, "filesys", "c", "windows", "system32")
+    try: sys32_real = os.path.realpath(sys32)
+    except OSError: return
+    for dll, ordv in ords:
+        # every byte of `dll` came out of the sample: it must be a plain filename, never a path
+        if dll != os.path.basename(dll) or not re.fullmatch(r"[A-Za-z0-9._+-]{1,64}", dll):
+            print(f"[!] refusing import DLL name {dll!r} from the sample (not a plain filename)"); continue
+        dpath = os.path.join(sys32, dll)
+        if not os.path.isfile(dpath) and os.path.isdir(sys32):
+            hit = next((f for f in os.listdir(sys32) if f.lower() == dll.lower()), None)
+            if hit: dpath = os.path.join(sys32, hit)
+        try:
+            if os.path.commonpath([os.path.realpath(dpath), sys32_real]) != sys32_real: raise ValueError
+        except ValueError:
+            print(f"[!] {dll!r} resolves outside the emulation root - skipping"); continue
+        if not os.path.isfile(dpath):
+            print(f"[!] emu-root DLL not found for {dll} (ordinal {ordv}) at {dpath}"); continue
+        try: r = patch_export_ordinal_to_ret(dpath, ordv)
+        except (BadPE, struct.error, OSError) as e:
+            print(f"[!] {dll}: cannot patch the emulation-root copy ({e})"); continue
+        if r == "patched": print(f"[+] gap-filled {dll}#{ordv} (empty export slot -> ret stub)")
+        elif r == "already": print(f"[i] {dll}#{ordv}: export slot already populated - left alone")
+        elif r == "noret": print(f"[!] {dll}#{ordv}: no ret byte to point at - not gap-filled")
+        elif r == "oor":
+            rng = None
+            try:
+                with open(dpath, "rb") as f: rng = export_ordinal_range(bytearray(f.read()))
+            except (BadPE, struct.error, OSError): pass
+            if rng:
+                print(f"[!] {dll}#{ordv}: ordinal is outside this DLL's export range "
+                      f"(it exports {rng[0]}..{rng[0]+rng[1]-1}).")
+                print(f"    Neither the auto gap-fill nor patch_ordinal.py can fix that - the emulation")
+                print(f"    root's {dll} is a different build from the one this sample was linked against.")
+            else:
+                print(f"[!] {dll}#{ordv}: the emulation root's copy has no readable export directory.")
+
+def main():
+    # Sample-derived text (import DLL names) and the analyzer's latin1-decoded stderr both get printed.
+    # Under a redirect stdout uses the ANSI codepage, where 0x80-0x9F is unencodable in every variant.
+    for _s in (sys.stdout, sys.stderr):
+        try: _s.reconfigure(errors="backslashreplace")
+        except Exception: pass
+    ap = argparse.ArgumentParser(description="Self-contained generic VMProtect unpacker (runs locally on the sogen VM).")
+    ap.add_argument("target")
+    ap.add_argument("-o", "--out", default=None)
+    ap.add_argument("--run-payload", action="store_true", help="run past OEP (capture behaviour) instead of freezing at OEP")
+    ap.add_argument("--nodelay", action="store_true", help="neutralize anti-sandbox NtDelayExecution sleeps")
+    ap.add_argument("--tsc", default=None, help="rdtsc stride per call, e.g. 0x8000 (collapse rdtsc delay loops)")
+    ap.add_argument("--oep", default=None, help="force OEP RVA, e.g. 0xb3dc (override the heuristic)")
+    ap.add_argument("--late", type=int, default=None, help="dump image+heap after N post-OEP basic blocks")
+    ap.add_argument("--timeout", type=int, default=300)
+    ap.add_argument("--sogen", default=os.path.join(_ROOT, "sogen"))
+    ap.add_argument("--emuroot", default=os.path.join(_ROOT, "emu_root", "root"))
+    ap.add_argument("--version", action="version", version=f"vmpunpack {__version__}")
+    args = ap.parse_args()
+
+    os.makedirs(DUMPS, exist_ok=True)
+    if not os.path.isfile(args.target): sys.exit(f"[!] target not found: {args.target}")
+    missing = [p for p in (os.path.join(args.sogen, "analyzer.exe"),
+                           os.path.join(args.emuroot, "registry"),
+                           os.path.join(args.emuroot, "filesys")) if not os.path.exists(p)]
+    if missing:
+        sys.exit("[!] the engine or emulation root is not installed:\n"
+                 + "".join(f"    missing {p}\n" for p in missing)
+                 + "    Run setup.cmd to fetch them (they are third-party and not part of this repo),\n"
+                 "    or pass --sogen/--emuroot if you keep them elsewhere. See THIRD_PARTY.md.")
+    for k in ("tsc", "oep"):
+        v = getattr(args, k)
+        if v is not None and not re.fullmatch(r"(?:0[xX])?[0-9a-fA-F]{1,16}", v):
+            sys.exit(f"[!] --{k} must be a hex number, got {v!r}")
+    out = args.out or (os.path.splitext(args.target)[0] + "_unpacked")
+    if os.path.normcase(os.path.realpath(out)) == os.path.normcase(os.path.realpath(DUMPS)):
+        sys.exit(f"[!] -o must not be {DUMPS}: that is the shared scratch dir this run purges and reads back.")
+    os.makedirs(out, exist_ok=True)
+    with open(args.target, "rb") as f: tgt = f.read()
+    try:
+        pb = pe_basics(tgt)
+    except (BadPE, struct.error) as e:
+        sys.exit(f"[!] unparseable PE headers in target: {e}")
+    if not pb["is64"]:
+        sys.exit("[!] target is a 32-bit PE. This tool and the bundled emulation root are x64-only.")
+    print(f"[i] target base=0x{pb['base']:x} entry_rva=0x{pb['entry_rva']:x} size_of_image=0x{pb['size_of_image']:x}")
+
+    try:
+        ords = ordinal_imports(tgt)
+    except (BadPE, struct.error) as e:
+        print(f"[!] import table unparseable ({e}) - skipping the ordinal gap-fill"); ords = []
+    if ords:
+        print("[i] ordinal imports: " + ", ".join(f"{d}#{o}" for d, o in ords))
+        gap_fill(args, ords)
+
+    print(f"[*] running sogen (unicorn+JIT){' [payload]' if args.run_payload else ' [stop@OEP]'} timeout={args.timeout}s")
+    run = run_analyzer(args)
+    log = run["log"]
+    if run["timeout"]: print(f"[!] analyzer hit the {args.timeout}s timeout and was killed - any dump may be partial")
+    if run["rc"]: print(f"[!] analyzer exited {run['rc']}")
+    if run["err"].strip():
+        print("[analyzer stderr]")
+        for ln in run["err"].strip().splitlines()[-20:]: print("    " + ln)
+
+    upath = os.path.join(DUMPS, "unpacked.bin"); mpath = os.path.join(DUMPS, "unpacked.meta")
+    if not (os.path.isfile(upath) and os.path.getsize(upath)
+            and os.path.isfile(mpath) and os.path.getsize(mpath)):
+        for ln in log.splitlines():
+            if any(k in ln for k in ("UNPACK", "terminated", "HardError", "backend")): print("    " + ln)
+        if "C0000138" in log:
+            print("[!] STATUS_ORDINAL_NOT_FOUND: an import-by-ordinal has no emu-root export. Re-check the")
+            print("    ordinal-imports list above; patch its DLL with patch_ordinal.py and retry.")
+        sys.exit("[!] no unpacked image produced. Hints: --nodelay --tsc 0x8000 --timeout 480, or --oep 0xRVA.")
+
+    # Nothing above proves the dump belongs to THIS run: C:\dumps is a fixed path baked into analyzer.exe
+    # and shared by every invocation on the machine. Bind it to the run before publishing anything.
+    if min(os.path.getmtime(upath), os.path.getmtime(mpath)) < run["t0"]:
+        sys.exit(f"[!] the dump in {DUMPS} predates this run - it belongs to an earlier sample.\n"
+                 "    Refusing to publish it. Delete it and re-run.")
+    with open(mpath, encoding="latin1") as f:
+        meta = dict(l.strip().split("=", 1) for l in f if "=" in l)
+    missing = [k for k in META_KEYS if k not in meta]
+    if missing: sys.exit(f"[!] unpacked.meta is missing {', '.join(missing)} - refusing to publish a partial dump.")
+    try:
+        m = {k: int(meta[k], 16) for k in META_KEYS}
+    except ValueError as e:
+        sys.exit(f"[!] unpacked.meta holds a non-hex value ({e}) - refusing to publish.")
+    if m["size_of_image"] != pb["size_of_image"] or m["entry_rva"] != pb["entry_rva"]:
+        sys.exit("[!] the dump does not describe this target - refusing to publish it:\n"
+                 f"    target: size_of_image=0x{pb['size_of_image']:x} entry_rva=0x{pb['entry_rva']:x}\n"
+                 f"    dump  : size_of_image=0x{m['size_of_image']:x} entry_rva=0x{m['entry_rva']:x}\n"
+                 f"    Another vmpunpack run is probably sharing {DUMPS}; run them one at a time.")
+    if m["base"] != pb["base"]:
+        print(f"[i] dump base 0x{m['base']:x} differs from the header's 0x{pb['base']:x} (image was relocated)")
+    if not (0 < m["oep_rva"] < pb["size_of_image"]):
+        sys.exit(f"[!] oep_rva 0x{m['oep_rva']:x} is outside the image (size_of_image="
+                 f"0x{pb['size_of_image']:x}) - refusing to publish a bogus entry point.")
+
+    # a rerun that produces fewer artefacts must not leave the previous run's next to the new ones
+    name = os.path.splitext(os.path.basename(args.target))[0]
+    out_exe = os.path.join(out, name + ".unpacked.exe")
+    for f in DUMP_FILES + ("iocs.txt", name + ".unpacked.exe"):
+        try: os.remove(os.path.join(out, f))
+        except FileNotFoundError: pass
+        except OSError as e:
+            print(f"[!] stale {f} in the output dir could not be removed ({e})")
+            print("    - it is NOT from this run; close whatever holds it open.")
+    shutil.copy(upath, os.path.join(out, "unpacked.bin")); shutil.copy(mpath, os.path.join(out, "unpacked.meta"))
+    extras = []
+    for extra in ("unpacked_late.bin", "heap.bin"):
+        ep = os.path.join(DUMPS, extra)
+        if os.path.isfile(ep) and os.path.getsize(ep) and os.path.getmtime(ep) >= run["t0"]:
+            shutil.copy(ep, os.path.join(out, extra)); extras.append(extra)
+
+    with open(upath, "rb") as f: img = f.read()
+    # the .meta was matched to the target above, but the image published is unpacked.bin - bind it too,
+    # or a torn .bin/.meta pair from a concurrent run still gets through
+    try:
+        ib = pe_basics(img)
+        if ib["size_of_image"] != m["size_of_image"] or ib["entry_rva"] != m["entry_rva"]:
+            sys.exit("[!] unpacked.bin's own headers disagree with unpacked.meta - the two files come from\n"
+                     f"    different runs sharing {DUMPS}. Refusing to publish.")
+    except (BadPE, struct.error):
+        pass                        # erased header page: the reconstruct_pe path below reports it
+    if len(img) != m["size_of_image"]:
+        print(f"[!] dump is 0x{len(img):x} bytes but SizeOfImage is 0x{m['size_of_image']:x} - size mismatch;")
+        print("    section raw sizes are clamped to what is actually present.")
+    try:
+        oep = reconstruct_pe(img, meta, out_exe)
+    except (BadPE, struct.error) as e:
+        print(f"[!] cannot rebuild a loadable PE: {e}")
+        print(f"    The packer most likely erased its own header page before jumping to OEP.")
+        print(f"    unpacked.bin and unpacked.meta are in {out} - rebuild the headers from the")
+        print(f"    target's on-disk ones by hand (base=0x{m['base']:x} oep_rva=0x{m['oep_rva']:x}).")
+        sys.exit(1)
+    print(f"[+] OEP rva 0x{oep:x}; wrote {out_exe}")
+
+    def _sources():                      # one dump resident at a time: heap.bin can be hundreds of MB
+        yield "unpacked.bin", img
+        for extra in extras:
+            with open(os.path.join(out, extra), "rb") as f: yield extra, f.read()
+    blocks, lines = [], []
+    for src, buf in _sources():
+        dom, url, ip = grep_iocs(buf)
+        blocks.append(f"[{src}]\ndomains: {', '.join(dom)}\nurls: {', '.join(url)}\nips: {', '.join(ip)}\n")
+        lines.append(f"[IOC] {src}: domains={dom or '-'}  urls={url or '-'}  ips={ip or '-'}")
+    with open(os.path.join(out, "iocs.txt"), "w", encoding="utf-8", errors="backslashreplace") as f:
+        f.write("\n".join(blocks))       # write before printing: a console failure must not lose the file
+    for ln in lines: print(ln)
+    print(f"[+] DONE -> {out}")
+
+if __name__ == "__main__":
+    main()
+
+```
