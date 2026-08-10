@@ -1271,6 +1271,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [star-rail](entities/star-rail.md) — Honkai: Star Rail cheat: DirectX / hooking (C/C++; cheat / game:honkai star rail; gmh5225)
+- [starrailcopilot](entities/starrailcopilot.md) — Honkai: Star Rail automation copilot (Python; screen recognition + input; daily/stamina/farming; cheat / game:honkai star rail [Script]; gmh5225)
 - [Stockfish](entities/stockfish.md) — open-source chess engine (alpha-beta + NNUE eval; UCI; C++; Chess Engine / game AI)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
