@@ -18,4 +18,4 @@ BYOVD research PoC exploiting the Samsung **S4** vulnerable kernel driver **`pro
 
 ## Related
 
-[[byovd]] · [[vdk]] · [[zam64-zemina]] · [[loldrivers]] · [[physmem-drivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[s4mapper]] · [[vdk]] · [[zam64-zemina]] · [[loldrivers]] · [[physmem-drivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

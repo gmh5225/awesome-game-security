@@ -1208,6 +1208,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
 - [s4killer](entities/s4killer.md) — BYOVD via Samsung S4 `probmon.sys` (IOCTL phys/virt kernel R/W; unsigned load / AC bypass research; gmh5225)
+- [s4mapper](entities/s4mapper.md) — BYOVD driver mapper via Samsung S4 `SignalRgbDriver.sys` (memory-access IOCTLs; manual unsigned map; gmh5225)
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)
 - [sea-of-choros](entities/sea-of-choros.md) — Sea of Thieves modding / SDK generation / hooking scaffold (C/C++; Unreal; cheat / game:sea of thieves; gmh5225)
