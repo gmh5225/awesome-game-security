@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/ScreenShot`: entity [[screenshot]]; cited on [[anti-screenshot-capture]] and [[overviews/graphics-api]].
+
 - **2026-08-10** — ingest `description:gmh5225/SeaOfChoros`: entity [[sea-of-choros]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-10** — ingest `description:gmh5225/Serenity.gg-FN-and-Loader`: entity [[serenity-gg-fn-and-loader]]; cited on [[easy-anti-cheat]] and [[overviews/game-hacking]].

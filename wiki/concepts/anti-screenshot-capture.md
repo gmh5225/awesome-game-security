@@ -7,7 +7,8 @@ sources:
   - wiki/sources/skills/anti-cheat.md
   - wiki/sources/descriptions/lainswork__dwm-screen-shot.md
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
-updated: 2026-08-04
+  - wiki/sources/descriptions/gmh5225__ScreenShot.md
+updated: 2026-08-10
 confidence: medium
 ---
 
@@ -26,6 +27,8 @@ How anti-cheat and platform code **captures visible frames** for overlay/ESP det
 | GPU readback | Copy render target → CPU buffer | Staging texture / Map patterns at frame rate |
 
 Scheduled or random-interval captures aim to catch intermittent overlays. README lanes: **Anti Cheat → Screenshot**, **Detection:Overlay**, **Cheat → Anti Screenshot**.
+
+Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXGI Desktop Duplication, PrintWindow, DWM thumbnail; README `[BitBlt]`) help researchers validate which path an AC module uses and what each method reveals about overlays and hardware-accelerated windows. (source: wiki/sources/descriptions/gmh5225__ScreenShot.md)
 
 ## Cheat-side evasion (collection patterns)
 

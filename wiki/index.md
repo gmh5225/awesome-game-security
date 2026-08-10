@@ -1215,6 +1215,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
+- [screenshot](entities/screenshot.md) — Windows capture-method comparison (BitBlt/DDA/PrintWindow/DWM; AC screenshot research; README `[BitBlt]`; gmh5225)
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
