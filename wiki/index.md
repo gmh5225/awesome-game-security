@@ -1374,6 +1374,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnrealVTDbg](entities/unreal-vtdbg.md) — VT-x/EPT Unreal kernel debugger (Delphi UI + VMX/EPT driver, EPT hooks, Detours breakpoints; Win10/11)
 - [UnrealCLR](entities/unrealclr.md) — UE CoreCLR / .NET 6 C# gameplay plugin (actors/components/Blueprints; Plugins:Unreal)
 - [UnrealImGuiTools](entities/unreal-imgui-tools.md) — UE ImGui tools + game-specific tool-window framework (Plugins:Unreal)
+- [UnrealEngine-Protection](entities/unreal-engine-protection.md) — UE4 SCUE4 Secure-Client plugin (SafeGameInstance + Safe Types + Game-Guard; Game Engine Protection:Unreal)
 - [UnrealEngine4-SwissKnife](entities/unrealengine4-swissknife.md) — UE4 SDK View (UObjects under GEngine World Actors; Game Engine Explorer:Unreal)
 - [Unreal-Binary-Builder](entities/unreal-binary-builder.md) — C# UE source builder (Game Tools; Build UE Source)
 - [UnrealNetworkProfiler](entities/unreal-network-profiler.md) — C# UE network profiler (Game Tools; networking / asset pipeline)
