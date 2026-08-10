@@ -1258,6 +1258,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [spoof-stack-SafeCall](entities/spoof-stack-safecall.md) — Windows return-address spoofing library (SafeCall; fake legitimate stack returns; Cheat Spoof Stack; gmh5225)
 - [SpookiMystic-GTA-Leak](entities/spookimystic-gta-leak.md) — leaked GTA V online mod-menu source (RAGE scripting hooks; money drops / teleport / griefing; cheat / `[Menu]`; gmh5225)
 - [StackSpoofer_Macro](entities/stack-spoofer-macro.md) — easy-to-use C/C++ macro for stack spoofing (gmh5225; Cheat Spoof Stack)
+- [speedfan-exploit](entities/speedfan-exploit.md) — SpeedFan `Speedfan.sys` BYOVD (IOCTL → physmem R/W; legacy monitoring-tool kernel exploitation; gmh5225)
 
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)

@@ -58,6 +58,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
   - wiki/sources/descriptions/gmh5225__Terminator.md
   - wiki/sources/descriptions/gmh5225__TS-Fucker.md
+  - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
 updated: 2026-08-10
 confidence: high
 ---
@@ -140,6 +141,8 @@ Lenovo diagnostics driver arbitrary kernel execution such as [[lenovo-exec]] (gm
 
 Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh5225; unified interface across signed-driver backends including Speedfan.sys; kernel R/W, process manipulation, driver loading) complement single-driver PoCs in the same BYOVD research lane. (source: wiki/sources/descriptions/gmh5225__vdk.md)
 
+Dedicated **`Speedfan.sys`** PoC such as [[speedfan-exploit]] (gmh5225; SpeedFan hardware-monitoring IOCTL abuse → physical memory read/write for arbitrary kernel access; legacy monitoring-tool BYOVD research) sits in the same Speedfan.sys backend lane as [[vdk]]. (source: wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md)
+
 C/C++ kernel utility research such as [[kur]] (gmh5225; **`echo_driver.sys`** vulnerable signed-driver backend; kernel R/W, process manipulation, driver-load primitives) sits in the same access-primitives lane. (source: wiki/sources/descriptions/gmh5225__kur.md)
 
 Writeup-backed echo.ac **`echo_driver.sys`** LPE PoC such as [[echoac-poc]] (gmh5225; read-memory IOCTL → `PsInitialSystemProcess` / `ActiveProcessLinks` token theft → SYSTEM on spawned `cmd.exe`; anti-cheat-adjacent screenshare driver case study) complements utility-focused [[kur]] in the same backend lane. (source: wiki/sources/descriptions/gmh5225__echoac-poc.md)
@@ -162,5 +165,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

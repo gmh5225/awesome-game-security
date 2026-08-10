@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/SpeedFan-Exploit`: entity [[speedfan-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-10** — ingest `description:gmh5225/SpookiMystic-GTA-Leak`: entity [[spookimystic-gta-leak]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[phake]].
 
 - **2026-08-10** — ingest `description:gmh5225/StackSpoofer_Macro`: entity [[stack-spoofer-macro]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].
