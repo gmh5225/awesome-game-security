@@ -808,6 +808,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/x64dbg/x64dbg [A debugger for Windows x86/64]
 - https://github.com/marakew/syser [A debugger for Windows x86/64]
 - https://github.com/keowu/koidbg [A debugger for Windows ARM64]
+- https://github.com/kernullist/KnWin32ApiMonitor [Modern Win32 API monitor with Tauri UI, IAT hooks, durable replay sessions, and generated metadata for security, RE, and anti-cheat research]
 - https://github.com/DoranekoSystems/DynaDbg [A debugger for Android/IOS]
 - https://github.com/Yayoi-cs/fastDbg [x86_64 native/qemu kernel debugger]
 - https://github.com/noword/GDB-Windows-Binaries [GDB]
@@ -1036,6 +1037,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/void-stack/VMUnprotect [Dynamically log/manipulate VMProtect-virtualized .NET methods via Harmony]
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
+- https://github.com/milk-analyzer/vmpunpack [Generic x64 VMProtect/packer unpacker that drives samples through patched sogen emulation to OEP, dumps memory, and rebuilds PEs for IDA/Ghidra]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
@@ -4224,6 +4226,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
 - https://github.com/cklsit/AdvancedAntiCheat [Minecraft Spigot/Paper anti-cheat plugin with flight/speed checks, client inspection, and ban sync]
 - https://github.com/nsharp-collab/AvAAntiCheat [Minecraft Bukkit/Spigot anti-cheat plugin with movement, combat, autoclick, and packet checks]
+- https://github.com/norbertbaricz/DakotaAC [Spigot/Paper Minecraft anti-cheat plugin with combat, movement, and inventory checks using ProtocolLib and Citizens2]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
@@ -4457,6 +4460,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/talsec/Free-RASP-Cordova [Cordova freeRASP plugin for mobile root/jailbreak, Frida, tamper, and integrity detection]
 - https://github.com/talsec/Free-RASP-Flutter [Flutter freeRASP plugin for mobile root/jailbreak, Frida, hook, emulator, tamper, and integrity detection]
 - https://github.com/talsec/Free-RASP-iOS [Native iOS freeRASP SDK for jailbreak, Frida, hook, emulator, tamper, and repackaging detection]
+- https://github.com/talsec/Free-RASP-KMP [Kotlin Multiplatform freeRASP SDK for mobile root/jailbreak, Frida, hook, emulator, tamper, and integrity detection]
 - https://github.com/AfanasievN/react-native-device-risk-signals [React Native device-intel TurboModule: root/jailbreak, emulator, Frida, and tamper signals without vendor backend]
 - https://github.com/Binuka97/cordova-plugin-rootguard [Cordova plugin detecting Android root (Magisk/KernelSU/APatch), Frida, and iOS jailbreak/Frida]
 - https://github.com/LSPosed/DirtySepolicy [Detect userspace su solutions via SELinux access checks from the App Zygote process]
