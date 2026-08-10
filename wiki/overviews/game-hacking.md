@@ -607,6 +607,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ayaya-league-external.md
   - wiki/sources/descriptions/gmh5225__VanderLeague.md
   - wiki/sources/descriptions/gmh5225__TFT-OCR-BOT.md
+  - wiki/sources/descriptions/gmh5225__R3nzSkinTFT.md
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
   - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
   - wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md
@@ -1170,6 +1171,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - LoL external script platforms such as [[ayaya-league-external]] (Node.js; AyayaLeague; custom user scripts; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as out-of-process scripting substrates rather than cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__ayaya-league-external.md)
 - LoL hypervisor-assisted samples such as [[vanderleague]] (C/C++; kernel driver development + rendering; hypervisor-assisted offensive stack; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as below-OS / HV-assisted study rather than in-guest cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__VanderLeague.md)
 - TFT OCR automation bots such as [[tft-ocr-bot]] (Python; asset pipelines + overlay rendering; screen OCR for automated Teamfight Tactics play; gmh5225; cheat / game:lol `[TFT]`) sit in the same LoL offensive research lane under [[vanguard]] as out-of-process visual automation rather than in-guest memory cheats or dump tooling. (source: wiki/sources/descriptions/gmh5225__TFT-OCR-BOT.md)
+- LoL/TFT client-side skin changer samples such as [[r3nzskin-tft]] (C++; champion skin ID memory patch; client-only cosmetic swap; README `[Skin]`; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as in-guest cosmetic manipulation rather than OCR bots or dump tooling. (source: wiki/sources/descriptions/gmh5225__R3nzSkinTFT.md)
 - Valorant crosshair-setting utilities such as [[valorantcc]] sit in the cheat / game:valorant lane (client config; Riot-owned assets/endpoints). (source: wiki/sources/descriptions/weedeej__ValorantCC.md)
 - Valorant internal cheat bases such as [[valorant-internal-cheat]] (C/C++; Unreal Engine SDK generation + hooking; Internal tag), [[valorant-internal]] (C/C++; SDK generation + hooking; gmh5225), and [[valorant-internal-base]] (C/C++; internal base scaffold; gmh5225) illustrate the in-process offensive research lane under [[vanguard]]. (source: wiki/sources/descriptions/kali11211__valorant-internal-cheat.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal.md) (source: wiki/sources/descriptions/gmh5225__valorant-internal-base.md)
 - Valorant internal cheat samples such as [[valorant-cheat-internal]] (in-process menu; Insert-key open/close default with rebind; README `[Internal]`; gmh5225) sit in the same cheat / game:valorant lane for menu-driven internal UX under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__Valorant-cheat-internal.md)

@@ -1148,6 +1148,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rAthenaCN](entities/rathenacn.md) — Chinese-localized rAthena fork (C/C++; asset pipelines / plugins / modding; cheat / game:ro; gmh5225)
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
+- [R3nzSkinTFT](entities/r3nzskin-tft.md) — LoL/TFT skin changer (C++; champion skin ID memory patch; client-only cosmetic swap; Skin; gmh5225; cheat / game:lol)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-cheat-dumper](entities/r6-cheat-dumper.md) — R6 external cheat dumper: driver + rendering + animation (C/C++; cheat / game:r6 [External]; gmh5225)

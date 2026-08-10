@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/R3nzSkinTFT`: entity [[r3nzskin-tft]]; cited on [[overviews/game-hacking]] and [[vanguard]].
+
 - **2026-08-10** — ingest `description:gmh5225/R6-Cheat-Dumper`: entity [[r6-cheat-dumper]]; cited on [[overviews/game-hacking]] and [[battleye]].
 
 - **2026-08-10** — ingest `description:gmh5225/RTCore64_Vulnerability`: entity [[rtcore64-vulnerability]]; cited on [[byovd]] and [[overviews/windows-kernel]].
