@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/UE4Dumper_Emulator`: entity [[ue4dumper-emulator]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-link from [[ue4dumper]].
+
 - **2026-08-10** — ingest `description:gmh5225/UE5MultiplayerProject`: entity [[ue5-multiplayer-project]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
 
 - **2026-08-10** — ingest `description:gmh5225/UltraDriver-Game-Cheat`: entity [[ultra-driver-game-cheat]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].

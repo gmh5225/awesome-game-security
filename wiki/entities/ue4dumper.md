@@ -18,4 +18,4 @@ C/C++ Unreal Engine 4 SDK dumper for **Android**: generates modding-oriented SDK
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[unreal-object-model]] · [[ts-ue4dumper]] · [[game-engine-detector]]
+[[ue4dumper-emulator]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[unreal-object-model]] · [[ts-ue4dumper]] · [[game-engine-detector]]
