@@ -1383,6 +1383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [como-funciona-vac](entities/como-funciona-vac.md) — CS2 VAC usermode architecture write-up (Trusted Launch, scanners, evidence pipeline; forensic RE overview)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
+- [vac-emulator](entities/vac-emulator.md) — VAC module emulator (sandboxed execution + detection/signature logging; gmh5225; explore anticheat:vac)
 - [vacation3-emu](entities/vacation3-emu.md) — VAC3 module emulator (fake game memory + scan logging; explore anticheat:vac)
 - [VAC-ModuleDumper](entities/vac-module-dumper.md) — VAC module dump for offline RE (C/C++; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Vac-Emulator`: entity [[vac-emulator]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `readme:categories`: bumped Anti Cheat ~658 (was ~657; Cheat ~2665 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-10** — ingest `description:gmh5225/Valorant-Cheat`: entity [[valorant-cheat]]; cited on [[vanguard]] and [[overviews/game-hacking]].
