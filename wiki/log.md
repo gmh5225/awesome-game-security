@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/UE4-Apk-Dumper`: entity [[ue4-apk-dumper]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-links from [[ue4dumper]] and [[ue4dumper-emulator]].
+
 - **2026-08-10** — ingest `description:gmh5225/UE4Dumper_Emulator`: entity [[ue4dumper-emulator]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-link from [[ue4dumper]].
 
 - **2026-08-10** — ingest `description:gmh5225/UE5MultiplayerProject`: entity [[ue5-multiplayer-project]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].

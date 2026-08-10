@@ -20,4 +20,4 @@ Use [[game-engine-detector]] to confirm a package is UE4 before launching dump w
 
 ## Related
 
-[[ue4dumper]] · [[ts-ue4dumper]] · [[frida-ue4dump]] · [[ue4-cheat-engine]] · [[pubgm-sdk-and-offsets]] · [[unreal-object-model]] · [[game-engine-detector]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[ue4dumper]] · [[ue4-apk-dumper]] · [[ts-ue4dumper]] · [[frida-ue4dump]] · [[ue4-cheat-engine]] · [[pubgm-sdk-and-offsets]] · [[unreal-object-model]] · [[game-engine-detector]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
