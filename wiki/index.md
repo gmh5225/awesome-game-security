@@ -1201,6 +1201,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
+- [rust-cheat-external](entities/rust-cheat-external.md) — Facepunch Rust external cheat (C/C++; driver / modding / SDK generation; cheat / game:rust [External]; gmh5225)
 - [rust-dll-crab](entities/rust-dll-crab.md) — Rust Windows DLL injector (multiple methods; Injection Testing; gmh5225)
 - [setwindowshookex-injector](entities/setwindowshookex-injector.md) — SetWindowsHookExW injection-testing PoC (C/C++; hooking / modding / Unreal Engine; Injection Testing; gmh5225)
 - [rust-external](entities/rust-external.md) — Facepunch Rust external cheat (C/C++; rendering / networking; cheat / game:rust; gmh5225)
