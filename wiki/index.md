@@ -1271,6 +1271,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [star-rail](entities/star-rail.md) — Honkai: Star Rail cheat: DirectX / hooking (C/C++; cheat / game:honkai star rail; gmh5225)
+- [starrail-ace-b](entities/starrail-ace-b.md) — Honkai: Star Rail Tencent ACE RE (kernel driver, integrity checks, detection/bypass; explore anticheat; gmh5225)
 - [starrail-s-gc](entities/starrail-s-gc.md) — Honkai: Star Rail simple cheat (C/C++; Unity / hooking; cheat / game:honkai star rail; gmh5225)
 - [starrailcopilot](entities/starrailcopilot.md) — Honkai: Star Rail automation copilot (Python; screen recognition + input; daily/stamina/farming; cheat / game:honkai star rail [Script]; gmh5225)
 - [Stockfish](entities/stockfish.md) — open-source chess engine (alpha-beta + NNUE eval; UCI; C++; Chess Engine / game AI)
