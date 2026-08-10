@@ -4118,6 +4118,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/dashingsoft/pyarmor [Python script obfuscator with machine-binding and expiry options]
 - https://github.com/rockbruno/swiftshield [Swift identifier obfuscator for iOS apps against RE]
 - https://github.com/sfr-development/Lua-Obfuscator-Clyde-Protection [Luau/Lua VM-based obfuscator for Roblox script protection]
+- https://github.com/cherriesandmochi/gdmaim [Godot 4.x export plugin that obfuscates GDScript to raise reverse-engineering cost for shipped games]
 - https://github.com/xiaoweime/WProtect
 - https://github.com/DeDf/WProtect
 - https://github.com/jokerNi/WProtectSDK
