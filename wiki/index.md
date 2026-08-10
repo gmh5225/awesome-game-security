@@ -1366,6 +1366,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
 - [USecurity](entities/usecurity.md) — Unity runtime data + PlayerPrefs encryption (Game Engine Protection:Unity)
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
+- [Uncloaking-RAID0-HWID-Serials](entities/uncloaking-raid0-hwid-serials.md) — RAID0 disk-serial uncloaking for HWID detection (gmh5225; Detection:HWID)
 - [underthehoodofexecutables](entities/underthehoodofexecutables.md) — C source→binary guide: linking, loading, executable formats (cheat/guide + AC engineer primer)
 - [unflat](entities/unflat.md) — Python unflattener; plugin development (Fix OLLVM / CFF recovery)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
