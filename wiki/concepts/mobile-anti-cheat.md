@@ -14,7 +14,8 @@ sources:
   - wiki/sources/descriptions/libtersafe__KPM-MemReader.md
   - wiki/sources/descriptions/gmh5225__freedom.md
   - wiki/sources/descriptions/okhsunrog__vpnhide.md
-updated: 2026-08-09
+  - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
+updated: 2026-08-10
 confidence: medium
 ---
 
@@ -49,7 +50,7 @@ Multi-check collections: [[detection]], [[android-native-root-detector]], archiv
 
 1. Static RE of detection routines in DEX/native code.
 2. Hook or patch check functions ([[frida]], [[locusmimic]] for mock-location edge cases).
-3. Reduce injection footprint (stealth Frida [[fridare]], WXSHADOW/RECOMP tiers, root-hide DenyList/Shamiko, KernelSU process isolation).
+3. Reduce injection footprint (stealth Frida [[fridare]], WXSHADOW/RECOMP tiers, root-hide DenyList/Shamiko, KernelSU process isolation). Hardened KernelSU forks such as [[apex-su]] study reduced root artifacts—IOCTL over anonymous `io_uring`-disguised inodes with no proc/sys/dev entries—against FS and process-based root probes. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md)
 4. Timing — checks may run once at launch vs periodically.
 5. Environment emulation — hide emulator props or use physical devices with clean attestation.
 
@@ -57,4 +58,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

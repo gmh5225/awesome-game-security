@@ -205,6 +205,7 @@ sources:
   - wiki/sources/descriptions/index-login__MobileRE-Skill.md
   - wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md
   - wiki/sources/descriptions/okhsunrog__vpnhide.md
+  - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
 updated: 2026-08-10
 confidence: high
 ---
@@ -224,6 +225,7 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 |----------|-------|---------|-----|---------------|
 | [[magisk]] | User/init | Medium | Yes | Mature (DenyList / Shamiko root-hide) |
 | [[kernelsu]] | Kernel | High | Yes | Growing (Magisk-module API compat) |
+| [[apex-su]] | Kernel (KernelSU fork) | High+ | Yes (GKI 2.0) | KernelSU-compatible; Rust userspace + stealth IOCTL |
 | [[apatch-kpm]] | Kernel (KernelPatch boot patch) | High | Yes | Growing (stock GKI without custom kernel source) |
 
 APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)

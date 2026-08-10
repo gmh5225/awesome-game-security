@@ -92,6 +92,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [apex_full_cheat](entities/apex-full-cheat.md) — Apex Legends full cheat: rendering / SDK generation / hooking (C/C++; cheat / game:apex legends)
 - [apex_legends_sdk](entities/apex-legends-sdk.md) — Apex Legends SDK: rendering / SDK generation (C++; gmh5225; cheat / game:apex legends)
+- [ApexSU](entities/apex-su.md) — Hardened KernelSU fork: Rust userspace, stealth IOCTL, GKI 2.0 boot patch (Android 12+; cheat / Android root)
 - [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])
 - [ayaya-league-external](entities/ayaya-league-external.md) — Node.js LoL external script platform (AyayaLeague; custom user scripts; gmh5225; cheat / game:lol)
