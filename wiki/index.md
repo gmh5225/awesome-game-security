@@ -1323,6 +1323,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TrollStore](entities/trollstore.md) — iOS perma-signed jailed IPA installer (CoreTrust/AMFI; arbitrary entitlements)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
+- [TWMS Hacking Data](entities/twms-hacking-data.md) — Taiwan MapleStory live-client hacking corpus (offsets, packets, encryption keys, GameGuard bypass; cheat / game:maplestory [TMS CT]; gmh5225)
 - [TtdAntiDebugging](entities/ttd-anti-debugging.md) — C/C++ TTD debug-testing / hooking anti-debug stress sample (Debug Testing)
 - [ttddbg](entities/ttddbg.md) — IDA Pro plugin: replay WinDbg TTD `.run` traces (forward/backward stepping; Time Travel Debugging)
 - [titancf](entities/titancf.md) — CrossFire (CF) cheat: driver development / rendering / graphics (cheat / game:crossfire; gmh5225)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/TWMS-Hacking-Data`: entity [[twms-hacking-data]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-10** — ingest `description:gmh5225/Tenet-IDA9.0`: entity [[tenet-ida9.0]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[tenet]] and [[execution-trace-viewer]].
 
 - **2026-08-10** — ingest `description:gmh5225/Terminator`: entity [[terminator]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-link from [[zam64-zemina]].
