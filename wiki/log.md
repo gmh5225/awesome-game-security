@@ -14,6 +14,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-10** — ingest `description:gmh5225/Rico-Cheat-rust-external`: entity [[rico-cheat-rust-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
 
+- **2026-08-10** — ingest `description:gmh5225/RToolZ`: entity [[rtoolz]]; cited on [[overviews/windows-kernel]] and [[kernel-callbacks]].
+
 - **2026-08-10** — ingest `description:gmh5225/Rootkit-2`: entity [[rootkit-2]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-10** — ingest `description:gmh5225/Rust-Cheat-External`: entity [[rust-cheat-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]].
