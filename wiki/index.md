@@ -1340,6 +1340,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
 - [unreal-mcp](entities/unreal-mcp.md) — MCP server for Unreal Editor (asset/level/blueprint automation; Game Develop / MCP)
+- [UnrealEngine5-UltimateStreetFighters](entities/unrealengine5-ultimate-streetfighters.md) — UE5 Street Fighters game (audio / physics / animation; C#/C++; Game Develop / Unreal source)
 - [UnrealDumper-4.25](entities/unrealdumper-4-25.md) — external UE4.25+ SDK dumper (C++; GObjects/GNames pattern scan; no inject)
 - [ue5-cardgame](entities/ue5-cardgame.md) — UE5 card game (deck / turn-based / UMG / replication; Game Develop / Unreal source)
 - [ue5-roll-a-ball-game](entities/ue5-roll-a-ball-game.md) — UE5 Roll a Ball tutorial (asset pipelines / editor tooling / modding; Game Develop / Unreal source)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/UnrealEngine5-UltimateStreetFighters`: entity [[unrealengine5-ultimate-streetfighters]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
+
 - **2026-08-10** — ingest `description:gmh5225/VACDumper`: entity [[vac-dumper]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER-SOURCE`: entity [[valorant-hack-esp-aimbot-skinchanger-source]]; cited on [[vanguard]] and [[overviews/game-hacking]].
