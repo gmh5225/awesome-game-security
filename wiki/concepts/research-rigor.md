@@ -8,7 +8,8 @@ sources:
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/xihedun-2026__Ponytail-Risk-.md
-updated: 2026-07-31
+  - wiki/sources/descriptions/thatskriptkid__re-harness.md
+updated: 2026-08-10
 confidence: high
 ---
 
@@ -41,6 +42,8 @@ Engine globals, object layouts, metadata formats, and helper APIs vary by engine
 Mobile root visibility, hook detection, emulator heuristics, and attestation outcomes vary by Android/iOS version, OEM policy, GKI kernel, signing, and entitlement state—verify device/build before generalizing detector or bypass conclusions. (source: wiki/sources/skills/mobile-security.md)
 
 DBI coverage, trap-and-emulate latency, deobfuscation completeness, and anti-debug bypass effectiveness vary by binary build, Windows version, integrity checks, and timing defenses—record hash, tool version, and measured evidence before generalizing stealth or recovery claims. (source: wiki/sources/skills/reverse-engineering.md)
+
+LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs. (source: wiki/sources/descriptions/thatskriptkid__re-harness.md)
 
 ## Related
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:thatskriptkid/re-harness`: entity [[re-harness]]; cited on [[overviews/reverse-engineering]] and [[research-rigor]].
+
 - **2026-08-10** — ingest `readme:categories`: bumped Cheat ~2672 (was ~2670; Anti Cheat ~659 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-10** — ingest `description:gmh5225/TS-Fucker`: entity [[ts-fucker]]; cited on [[byovd]] and [[overviews/windows-kernel]].

@@ -1171,6 +1171,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Renamaida](entities/renamaida.md) — IDA Pro plugin: Jaro-Winkler instruction-signature rename for firmware/static libs (JSON sig DB; cheat / IDA Plugins)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
+- [re-harness](entities/re-harness.md) — OpenCode agent harness for Qwen 27B/35B with read-only IDA 9.3/IDASQL PE static analysis; NeverD/LLVM lift→O3→redecompile fallback; malware/game-security RE
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
 - [retoolkit](entities/retoolkit.md) — Windows Inno Setup bundle (80+ RE tools: debug/decompile/PE/hex/network/YARA)
 - [RetDec](entities/retdec.md) — retargetable machine-code decompiler (binary lifting; limited maintenance; Cheat Decompiler)
