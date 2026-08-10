@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/UE-Plugin-SCUE4-Plugin`: entity [[ue-plugin-scue4-plugin]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-link from [[unreal-engine-protection]].
+
 - **2026-08-10** — ingest `description:gmh5225/UE-UnrealEngineSDK`: entity [[ue-unreal-engine-sdk]]; cited on [[overviews/game-engine]] and [[unreal-object-model]].
 
 - **2026-08-10** — ingest `description:gmh5225/UE4-Apk-Dumper`: entity [[ue4-apk-dumper]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-links from [[ue4dumper]] and [[ue4dumper-emulator]].

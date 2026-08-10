@@ -27,4 +27,4 @@ Packaging for non-Windows targets is not broken, but AC features target Windows 
 
 ## Related
 
-[[static-variables-obfuscator-ue4]] · [[usecurity]] · [[unreal-object-model]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
+[[ue-plugin-scue4-plugin]] · [[static-variables-obfuscator-ue4]] · [[usecurity]] · [[unreal-object-model]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]

@@ -1334,6 +1334,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [umium](entities/umium.md) — C++/CLI NT anti-tamper (undocumented syscalls + runtime mods; Anti Debugging)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-Interview-Cheat-Sheet](entities/ue-interview-cheat-sheet.md) — Unreal Engine interview cheat sheet (Game Engine / Unreal guide)
+- [UE-Plugin-SCUE4-Plugin](entities/ue-plugin-scue4-plugin.md) — UE4 SCUE4 anti-cheat plugin (integrity checks, variable memory protection, packet encryption, binary tamper detection; Game Engine Protection:Unreal; gmh5225)
 - [UE-UnrealEngineSDK](entities/ue-unreal-engine-sdk.md) — reverse-engineered UE4/UE5 SDK headers (UObject/UWorld/ULevel; internal cheat/mod dev; Universal Cheat development kit; gmh5225)
 - [UE4-Freecam](entities/ue4-freecam.md) — UE4 FOV changer (hooking / overlays; Game Engine Explorer:Unreal)
 - [UE4 Cheat Engine](entities/ue4-cheat-engine.md) — Android UE4-aware CE (memory scan / GObject enum / UProperty / SDK gen; Cheat / Game Engine Explorer:Unreal)
