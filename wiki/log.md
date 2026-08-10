@@ -3451,3 +3451,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-10** — ingest `description:gmh5225/Rust-RustInternal`: entity [[rust-rustinternal]]; cited on [[overviews/game-hacking]] and [[il2cpp]].
 
 - **2026-08-10** — ingest `description:gmh5225/ReClass-DMA`: entity [[reclass-dma]]; cited on [[overviews/dma-attack]] and [[overviews/reverse-engineering]].
+
+- **2026-08-10** — ingest `description:gmh5225/R6S-External-V2`: entity [[r6s-external-v2]]; cited on [[overviews/game-hacking]] and [[battleye]].
