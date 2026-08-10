@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/RustMS`: entity [[rustms]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/S4Mapper`: entity [[s4mapper]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-10** — ingest `description:gmh5225/STB`: entity [[stb-gmh5225]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]].
