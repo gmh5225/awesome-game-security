@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Stockfish`: entity [[stockfish]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-link from [[lc0]].
+
 - **2026-08-10** — ingest `description:gmh5225/Super-People-Esp-Aimbot-Magic-Hack`: entity [[super-people-esp-aimbot-magic-hack]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-link from [[superpeople-client]].
 
 - **2026-08-10** — ingest `description:gmh5225/TFT-OCR-BOT`: entity [[tft-ocr-bot]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
