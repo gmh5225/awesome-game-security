@@ -1198,6 +1198,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
 - [rust-dll-crab](entities/rust-dll-crab.md) — Rust Windows DLL injector (multiple methods; Injection Testing; gmh5225)
+- [setwindowshookex-injector](entities/setwindowshookex-injector.md) — SetWindowsHookExW injection-testing PoC (C/C++; hooking / modding / Unreal Engine; Injection Testing; gmh5225)
 - [rust-external-1](entities/rust-external-1.md) — Facepunch Rust external cheat (C++; kernel driver/RPM; overlay ESP; EAC Unity; gmh5225)
 - [rust-internal](entities/rust-internal.md) — Facepunch Rust internal cheat framework (C++; Horizon core + DX11/ImGui; memory/map helpers; gmh5225)
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
