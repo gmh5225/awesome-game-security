@@ -1170,6 +1170,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
 - [Red Alert 2 on Web](entities/redalert2.md) — RA2/YR RTS engine reimplementation (unit AI, buildings, resources, multiplayer, map rendering; Game Engine / source)
 - [Reborn](entities/reborn.md) — Rust Fortnite cheat framework (web server / SQLite / Discord bot; modular crates)
+- [Rebirth](entities/rebirth.md) — MapleStory GMS-095 private-server emulator (C#; login/character/map/monster AI/skills/quests/party-guild; client-server protocol; Private Server-GMS-095 / game:maplestory; gmh5225)
 - [RemnantESP](entities/remnant-esp.md) — Remnant UE ESP cheat (C#; modding / Unreal Engine / memory analysis; cheat / game:remnant; gmh5225)
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
 - [RelocBonus](entities/relocbonus.md) — Attack Reloc (DEF CON 26; AC / Obfuscation Engine)
