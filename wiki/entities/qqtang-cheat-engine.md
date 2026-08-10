@@ -20,4 +20,4 @@ Sits in the Chinese casual-game Cheat Engine lane beside generic memory scanners
 
 ## Related
 
-[[cheap-engine]] · [[intro-to-gamehacking]] · [[overviews/game-hacking]]
+[[qqtang]] · [[cheap-engine]] · [[intro-to-gamehacking]] · [[overviews/game-hacking]]

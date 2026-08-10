@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/QQTang`: entity [[qqtang]]; cited on [[overviews/game-hacking]]; cross-link from [[qqtang-cheat-engine]].
+
 - **2026-08-10** — ingest `description:gmh5225/QQTangCheatEngine`: entity [[qqtang-cheat-engine]]; cited on [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/QuickPGTrigger`: entity [[quickpgtrigger]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
