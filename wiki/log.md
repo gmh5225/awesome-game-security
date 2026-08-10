@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Unreal-Engine-5-PDB`: entity [[unreal-engine-5-pdb]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-link from [[pdb]].
+
 - **2026-08-10** — ingest `description:gmh5225/UnrealEngine-Protection`: entity [[unreal-engine-protection]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]].
 
 - **2026-08-10** — ingest `description:gmh5225/UnrealEngine5-UltimateStreetFighters`: entity [[unrealengine5-ultimate-streetfighters]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]].
