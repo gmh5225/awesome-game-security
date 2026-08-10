@@ -1166,6 +1166,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
 - [readwrite-kernel-stable](entities/readwrite-kernel-stable.md) — stable kernel read/write driver (C/C++; cheat / RPM; driver development / modding)
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
+- [ReClass DMA](entities/reclass-dma.md) — ReClass.NET plugin: DMA-backed structure recon (C/C++; external PCIe FPGA path; cheat / debugging)
 - [ReClass.NET-DriverReader](entities/reclass-net-driverreader.md) — ReClass.NET plugin: kernel-driver mem vs RPM (AC-blocked structure recon; C#/C++)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
 - [Red Alert 2 on Web](entities/redalert2.md) — RA2/YR RTS engine reimplementation (unit AI, buildings, resources, multiplayer, map rendering; Game Engine / source)

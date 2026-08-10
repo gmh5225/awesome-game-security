@@ -3439,3 +3439,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-10** — ingest `description:gmh5225/StealthSytemThreadFinderBE`: entity [[stealth-sytem-thread-finder-be]]; cited on [[battleye]] and [[overviews/windows-kernel]].
 
 - **2026-08-10** — ingest `description:gmh5225/Rust-RustInternal`: entity [[rust-rustinternal]]; cited on [[overviews/game-hacking]] and [[il2cpp]].
+
+- **2026-08-10** — ingest `description:gmh5225/ReClass-DMA`: entity [[reclass-dma]]; cited on [[overviews/dma-attack]] and [[overviews/reverse-engineering]].
