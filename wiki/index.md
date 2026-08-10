@@ -1344,6 +1344,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnrealDumper-4.25](entities/unrealdumper-4-25.md) — external UE4.25+ SDK dumper (C++; GObjects/GNames pattern scan; no inject)
 - [Unreal-Engine-5-PDB](entities/unreal-engine-5-pdb.md) — UE5 PDB symbol mirror (function/type/struct layouts; IDA/x64dbg; RE / Game Engine Explorer:Unreal)
 - [ue5-cardgame](entities/ue5-cardgame.md) — UE5 card game (deck / turn-based / UMG / replication; Game Develop / Unreal source)
+- [ue5-fps-crypt-raider](entities/ue5-fps-crypt-raider.md) — UE5 FPS game (editor tooling / modding; C++/C; Game Develop / Unreal source)
 - [ue5-roll-a-ball-game](entities/ue5-roll-a-ball-game.md) — UE5 Roll a Ball tutorial (asset pipelines / editor tooling / modding; Game Develop / Unreal source)
 - [UE5MultiplayerProject](entities/ue5-multiplayer-project.md) — UE5 horror multiplayer template (replication / sessions / dedicated server / GAS; README anti-cheat tag)
 - [UE5-With-Dear-ImGui](entities/ue5-with-dear-imgui.md) — UE 5.0.1 C++ Dear ImGui sample (Game Engine Plugins:Unreal)
