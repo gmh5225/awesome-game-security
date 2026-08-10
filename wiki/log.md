@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Valorant-Cheat`: entity [[valorant-cheat]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/Valorant-CheatExternal`: updated entity [[valorant-cheat-external]] (Valorant-CheatExternal alongside ValorantCheatExternal variant); cited on [[vanguard]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/Valorant-Dumper-Tool`: entity [[valorant-dumper-tool]]; cited on [[vanguard]] and [[overviews/game-engine]].
