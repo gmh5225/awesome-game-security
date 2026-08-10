@@ -1393,7 +1393,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
 - [valo-driver](entities/valo-driver.md) — Valorant kernel external memory read (phys translate / CR3 / MDL; bypass Vanguard API monitoring; gmh5225)
 - [vgk-illegal-pf-logger](entities/vgk-illegal-pf-logger.md) — Log intentional illegal page faults from Vanguard `vgk.sys` (integrity-check RE)
-- [valorant-cheat-external](entities/valorant-cheat-external.md) — Valorant external ESP/aimbot via kernel driver RPM; no inject; UE4 entities; bypass Vanguard injection detection (cheat / game:valorant [External]; gmh5225)
+- [valorant-cheat-external](entities/valorant-cheat-external.md) — Valorant external cheat (two gmh5225 repos: ValorantCheatExternal ESP/aimbot via kernel RPM; Valorant-CheatExternal driver/shader/rendering scaffold; cheat / game:valorant [External])
 - [valorant-cheat-internal](entities/valorant-cheat-internal.md) — Valorant internal cheat; Insert-key menu toggle (rebindable); cheat / game:valorant [Internal] (gmh5225)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [valorant-dumper-tool](entities/valorant-dumper-tool.md) — Valorant UE dump tooling (C++; `[Dump]`; cheat / game:valorant; gmh5225)
