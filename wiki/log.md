@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/StarRail-S-GC`: entity [[starrail-s-gc]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[star-rail]].
+
 - **2026-08-10** — ingest `description:gmh5225/StarRailCopilot`: entity [[starrailcopilot]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[star-rail]].
 
 - **2026-08-10** — ingest `description:gmh5225/StealthAPCDispatcher`: entity [[stealth-apc-dispatcher]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
