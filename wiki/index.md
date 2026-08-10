@@ -1297,6 +1297,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [teamfortress2-internal](entities/teamfortress2-internal.md) — TF2 internal: modding / hooking (C++; cheat / game:team fortress 2; gmh5225)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
 - [tenet](entities/tenet.md) — IDA Pro plugin: execution-trace timeline (forward/backward stepping; register/memory state; multiple formats; gmh5225)
+- [tenet-ida9.0](entities/tenet-ida9.0.md) — IDA Pro 9.0 port of Tenet: execution-trace timeline (forward/backward stepping; IDA 9.0 SDK; gmh5225)
 - [t7-linker](entities/t7-linker.md) — T7 engine GSC script / FastFile linker (compiled modules; T7 bytecode; cheat / Call of Duty modding; gmh5225)
 - [The-Seed-Link-Future](entities/the-seed-link-future.md) — Unity VR (C#; OpenGL / shader / driver-dev; Game Develop)
 - [Themida-Research](entities/themida-research.md) — Themida/WinLicense 3.x VM research (`VM_CONTEXT` / handlers / Triton; Fix Themida)

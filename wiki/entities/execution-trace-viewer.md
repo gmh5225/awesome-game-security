@@ -10,7 +10,7 @@ confidence: medium
 
 # Execution Trace Viewer
 
-Application for viewing, editing, and analyzing execution traces. Originally built for reverse engineering obfuscated code; usable on any execution-trace format. Aimed at game-security researchers and reverse engineers studying offensive techniques in the cheat / debugging lane. Complements trace-driven deobfuscation workflows such as [[rumba]] / [[novmpy]] (handler recovery) and interactive debuggers such as [[x64dbg]]. (source: wiki/sources/descriptions/teemu-l__execution-trace-viewer.md)
+Application for viewing, editing, and analyzing execution traces. Originally built for reverse engineering obfuscated code; usable on any execution-trace format. Aimed at game-security researchers and reverse engineers studying offensive techniques in the cheat / debugging lane. Complements trace-driven deobfuscation workflows such as [[rumba]] / [[novmpy]] (handler recovery) and interactive debuggers such as [[x64dbg]]. In-IDA trace exploration is covered by [[tenet]] and its IDA 9.0 port [[tenet-ida9.0]]. (source: wiki/sources/descriptions/teemu-l__execution-trace-viewer.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ Application for viewing, editing, and analyzing execution traces. Originally bui
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[rumba]] · [[novmpy]] · [[x64dbg]] · [[x64dbg-trace-reader]] · [[alcatraz]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[tenet]] · [[tenet-ida9.0]] · [[rumba]] · [[novmpy]] · [[x64dbg]] · [[x64dbg-trace-reader]] · [[alcatraz]]
