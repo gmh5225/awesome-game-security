@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/VALORANT-HACK-ESP-AIMBOT-SKINCHANGER`: entity [[valorant-hack-esp-aimbot-skinchanger]]; cited on [[vanguard]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/VMAttack`: entity [[vmattack]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `readme:categories`: bumped Cheat ~2666 (was ~2665; Anti Cheat ~658 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
