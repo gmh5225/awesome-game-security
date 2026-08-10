@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:gmh5225/Rust-External`: entity [[rust-external]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked from [[rust-external-1]] and [[rust-internal]].
+
 - **2026-08-10** — ingest `description:gmh5225/RustMS`: entity [[rustms]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-08-10** — ingest `description:gmh5225/S4Mapper`: entity [[s4mapper]]; cited on [[byovd]] and [[overviews/windows-kernel]].
