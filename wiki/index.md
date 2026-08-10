@@ -1268,6 +1268,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
+- [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
 - [star-rail](entities/star-rail.md) — Honkai: Star Rail cheat: DirectX / hooking (C/C++; cheat / game:honkai star rail; gmh5225)
 - [Stockfish](entities/stockfish.md) — open-source chess engine (alpha-beta + NNUE eval; UCI; C++; Chess Engine / game AI)
