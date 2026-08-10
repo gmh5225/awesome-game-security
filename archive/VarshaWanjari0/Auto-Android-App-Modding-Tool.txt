@@ -1,0 +1,1300 @@
+Project Path: arc_VarshaWanjari0_Auto-Android-App-Modding-Tool_m_mwf164
+
+Source Tree:
+
+```txt
+arc_VarshaWanjari0_Auto-Android-App-Modding-Tool_m_mwf164
+├── README.md
+├── catalog.md
+└── uamt1.3.1.py
+
+```
+
+`README.md`:
+
+```md
+# UAMT – Ultimate Auto Android App Modding Toolkit
+
+NO ROOT NEEDED ✅
+---
+UAMT is a powerful **Termux-based Android modding toolkit** that allows you to inject **Frida Gadget** and **custom native libraries**, patch APKs, rebuild, align, and sign them directly on your Android device.
+
+It is designed to be **fast, stable, and easy to use**, featuring a **full-screen interactive TUI**, smart auto-detection, and **automatic dependency installation**.
+
+📦 Installation
+---
+Install via pip(first install python):
+
+```pip install uamt```
+
+Then run:
+
+```uamt``` to run the tool
+
+---
+Updates are paused until March 2026
+---
+
+
+---
+
+✨ Features
+---
+
+🧩 Injection
+---
+⚡ Inject Frida Gadget
+
+Listen mode
+
+Wait mode
+
+Pre-injected script
+
+
+🧬 Inject any custom .so native library
+---
+
+📥 Download and inject Frida Gadget for multiple ABIs at once
+
+
+
+---
+
+🧠 Smart Detection
+---
+🤖 Automatically detects the best injection method:
+
+🔵 Native injection using patchelf
+
+🟣 Smali injection using APKEditor
+
+
+🔍 Detects main native libraries such as:
+
+libil2cpp.so
+
+libunity.so
+
+and more
+
+
+
+
+---
+
+🛠️ Tools & Build System
+---
+📦 Auto-download and unpack Frida Gadget
+
+🏗️ Full APK rebuild pipeline:
+---
+zipalign
+
+v1 / v2 / v3 signing
+
+
+
+---
+
+🎨 Interface
+---
+🎨 Colorful curses-based full-screen TUI
+
+📂 Built-in file picker
+
+✨ Improved layout and visual polish
+
+
+
+---
+
+🛡️ Safe Modding
+---
+🔐 Automatically adds missing INTERNET permission
+
+🧯 Reduces common APK breaking issues
+
+
+
+---
+
+⚙️ Automation
+---
+🚀 One-time automatic installation of all required dependencies
+
+🔌 One-tap connection to Frida Gadget
+
+📱 Optimized for Termux environments
+
+
+
+---
+
+🆕 What’s New
+---
+Check out our latest updates, features, and full list of items in the catalog!
+
+👉 **[View Full Catalog](catalog.md)**
+
+
+
+
+---
+
+📱 Requirements
+
+📦 Termux (latest version)
+
+
+Run once:
+
+termux-setup-storage
+
+> ℹ️ On first launch, go through the Install / Update option and then the
+Download Frida Gadget option with an active internet connection to automatically set up all dependencies.
+
+
+---
+
+🔍 Use Cases
+---
+🧩 Android APK modding
+
+⚡ Frida Gadget injection
+
+🧬 Native library injection
+
+🔍 Reverse engineering
+
+🛡️ Android security research
+
+📱 Termux-based workflows
+
+
+
+---
+
+⚠️ Disclaimer
+---
+UAMT is intended for educational, research, and authorized testing purposes only.
+Do not use this tool on applications you do not own or have permission to modify.
+
+```
+
+`catalog.md`:
+
+```md
+## ✨ What's New?
+
+## 1.3.1:
+📥 The tool now show device architecture while download in injecting gadget
+
+🚀 Increased smali injection speed
+
+🤖 Smart native injection
+
+🆕and more coming soon 🔜 
+---
+
+## 1.2.1:
+🎨 Improved UI design
+
+📥 Multi-ABI Frida Gadget injection support
+
+📂 File picker added (no manual path input)
+
+💎 Overall performance and stability improvements
+---
+
+```
+
+`uamt1.3.1.py`:
+
+```py
+import os
+import sys
+import subprocess
+import shutil
+import json
+import re
+import time
+import urllib.request
+import zipfile
+import lzma
+import platform
+import random
+
+# --- 1. Aggressive Dependency Auto-Installer ---
+def get_device_abi():
+    """Detects the current device's primary ABI."""
+    try:
+        # standard android property
+        res = subprocess.run(["getprop", "ro.product.cpu.abi"], capture_output=True, text=True)
+        abi = res.stdout.strip()
+        if abi: return abi
+    except: pass
+    
+    # Fallback to python platform check
+    machine = platform.machine().lower()
+    if "aarch64" in machine: return "arm64-v8a"
+    if "armv7" in machine: return "armeabi-v7a"
+    if "x86_64" in machine: return "x86_64"
+    if "i686" in machine or "x86" in machine: return "x86"
+    return "unknown"
+    
+def install_dependencies():
+    required = ["rich", "prompt_toolkit"]
+    missing = []
+    
+    for pkg in required:
+        try:
+            __import__(pkg)
+        except ImportError:
+            missing.append(pkg)
+            
+    if missing:
+        print(f"\033[93m[!] Missing dependencies: {', '.join(missing)}\033[0m")
+        print("\033[92m[+] Installing via pip... Please wait.\033[0m")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing)
+            print("\033[92m[+] Installation successful! Restarting script...\033[0m")
+            time.sleep(1)
+            os.execv(sys.executable, ['python'] + sys.argv)
+        except Exception as e:
+            print(f"\033[91m[E] Install failed: {e}\033[0m")
+            print("Try running manually: pip install rich prompt_toolkit")
+            sys.exit(1)
+
+install_dependencies()
+
+# --- Imports ---
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.align import Align
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+from rich.theme import Theme
+from rich import box
+
+from prompt_toolkit import Application
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.layout.containers import Window, HSplit
+from prompt_toolkit.layout.controls import FormattedTextControl
+from prompt_toolkit.layout.layout import Layout
+from prompt_toolkit.styles import Style as PTStyle
+from prompt_toolkit.formatted_text import ANSI
+
+# --- Configuration & Theme ---
+custom_theme = Theme({
+    "info": "bold bright_green",    
+    "warning": "bold bright_yellow",
+    "error": "bold bright_red",     
+    "input": "bold bright_cyan",
+    "dim": "dim white"
+})
+
+console = Console(theme=custom_theme, force_terminal=True)
+
+HOME_DIR = os.environ.get("HOME", "/data/data/com.termux/files/home")
+UAMT_ROOT = os.path.join(HOME_DIR, "UAMT")
+TOOLS_DIR = os.path.join(UAMT_ROOT, "tools")
+LIB_FRIDA_PATH = os.path.join(UAMT_ROOT, "libfrida.so")
+KEYSTORE_PATH = os.path.join(UAMT_ROOT, "debug.keystore")
+APKEDITOR_JAR = os.path.join(TOOLS_DIR, "apkeditor.jar")
+APKEDITOR_URL = "https://github.com/REAndroid/APKEditor/releases/download/V1.4.3/APKEditor-1.4.3.jar"
+
+if not os.path.exists(TOOLS_DIR): os.makedirs(TOOLS_DIR, exist_ok=True)
+
+# --- Dynamic Path Resolution ---
+def get_aapt2_bin():
+    system_aapt2 = shutil.which("aapt2")
+    return system_aapt2 if system_aapt2 else "aapt2"
+
+# --- UI Functions ---
+
+def get_banner_text():
+    line1 = " █ █ ▄▀█ █▀▄▀█ ▀█▀ "
+    line2 = " █▄█ █▀█ █ ▀ █  █  "
+    full_name = "Ultimate Android Modding Toolkit"
+    version = "V 1.3.1 "
+    
+    colors = ["bright_red", "bright_green", "bright_yellow", "bright_blue", "bright_magenta", "bright_cyan"]
+    
+    # Pick two distinct colors
+    c_text, c_border = random.sample(colors, 2)
+    
+    txt = Text()
+    txt.append(f"{line1}\n", style=f"bold {c_text}")
+    txt.append(f"{line2}\n", style=f"bold {c_text}")
+    txt.append(f"\n{full_name}", style="bold white")
+    
+    return Panel(
+        Align.center(txt), 
+        title=f"[bold {c_border}]{version}[/]",
+        border_style=f"bold {c_border}", 
+        box=box.ROUNDED,
+        padding=(1, 4), # Increased padding for height
+        width=60
+    )
+
+def print_banner():
+    os.system('clear' if os.name == 'posix' else 'cls')
+    console.print(get_banner_text())
+    console.print(Align.center("-" * 60, style="dim"))
+
+def log(msg):
+    console.print(f"[info][I] {msg}[/]")
+
+def log_warn(msg):
+    console.print(f"[warning][W] {msg}[/]")
+
+def log_err(msg):
+    console.print(f"[error][E] {msg}[/]")
+
+def run_with_progress(cmd, description):
+    console.print(f"[input][>] {description}...[/]")
+    try:
+        process = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+        )
+        for line in process.stdout:
+            line = line.strip()
+            if not line: continue
+            if any(x in line for x in ["Build", "Decode", "Writing", "Mergi", "Smaling", "Baksmaling"]):
+                console.print(f"    [dim]{line}[/]")
+            elif any(x in line for x in ["Error", "Exception", "E:", "W:", "SEVERE", "FATAL"]):
+                console.print(f"    [error]{line}[/]")
+        process.wait()
+        return process.returncode == 0
+    except Exception as e:
+        log_err(f"Process error: {e}")
+        return False
+
+# --- Helper Functions (Previously Missing) ---
+
+def download_file(url, dest):
+    try:
+        log(f"Downloading [bold]{os.path.basename(dest)}[/]...")
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response, open(dest, 'wb') as out_file:
+            shutil.copyfileobj(response, out_file)
+        return True
+    except Exception as e:
+        log_err(f"Download failed: {e}")
+        return False
+
+def check_frida_tools():
+    if not shutil.which("frida"):
+        log_warn("Frida tools missing. Please go to 'Install and Update'.")
+
+def install_and_update_script():
+    print_banner()
+    console.print("[warning][!] This will install system dependencies and latest Smali tools.[/]")
+    console.input("[input]Press Enter to continue...[/]")
+    
+    log("Installing root-repo...")
+    subprocess.run(["pkg", "install", "root-repo", "-y"])
+    
+    # 1. Install System Dependencies
+    pkgs = ["openjdk-21", "wget", "git", "aapt2", "patchelf", "apksigner", "zip", "unzip"]
+    log(f"Installing system packages: {', '.join(pkgs)}...")
+    subprocess.run(["pkg", "install"] + pkgs + ["-y"])
+
+    log("Installing frida-python...")
+    subprocess.run(["pkg", "install", "frida-python", "-y"])
+
+    # 2. Install Smali & Baksmali (API Resolved from baksmali/smali)
+    log("Resolving latest Smali/Baksmali assets via API...")
+    
+    # Standard Termux paths
+    prefix = os.environ.get("PREFIX", "/data/data/com.termux/files/usr")
+    bin_dir = os.path.join(prefix, "bin")
+    share_dir = os.path.join(prefix, "share", "java")
+    
+    if not os.path.exists(share_dir): os.makedirs(share_dir, exist_ok=True)
+    if not os.path.exists(bin_dir): os.makedirs(bin_dir, exist_ok=True)
+
+    # We use baksmali/smali as it hosts the v3+ releases now
+    repo = "baksmali/smali" 
+    api_url = f"https://api.github.com/repos/{repo}/releases/latest"
+    assets = []
+    tag_name = "Unknown"
+    
+    try:
+        req = urllib.request.Request(api_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as res:
+            data = json.loads(res.read().decode())
+            tag_name = data.get("tag_name", "Unknown")
+            assets = data.get("assets", [])
+            log(f"Detected latest release: [bold]{tag_name}[/]")
+    except Exception as e:
+        log_err(f"GitHub API failed: {e}")
+        log_warn("Cannot fetch dynamic assets. Please check your internet connection.")
+        return
+
+    tools = ["smali", "baksmali"]
+    for tool in tools:
+        log(f"Searching for [bold]{tool}[/] asset...")
+        
+        # Filter assets for this specific tool
+        candidates = []
+        for asset in assets:
+            name = asset['name'].lower()
+            if not name.endswith(".jar"): continue
+            if "javadoc" in name or "sources" in name: continue
+            
+            # Ensure we don't grab 'baksmali' when looking for 'smali'
+            if tool == "smali" and "baksmali" in name: continue
+            if tool == "baksmali" and "baksmali" not in name: continue
+            
+            candidates.append(asset)
+
+        if not candidates:
+            log_err(f"No suitable JAR found for {tool} in release {tag_name}")
+            continue
+
+        # Priority Selection: 
+        # 1. Look for 'fat' jar (standalone)
+        # 2. If multiple, prefer one without 'release' suffix if standard, or just largest
+        selected_asset = None
+        fat_candidates = [c for c in candidates if "fat" in c['name']]
+        
+        if fat_candidates:
+            selected_asset = fat_candidates[0]
+        else:
+            # Fallback: Pick the largest file (likely the fat jar)
+            candidates.sort(key=lambda x: x.get('size', 0), reverse=True)
+            selected_asset = candidates[0]
+
+        dl_url = selected_asset["browser_download_url"]
+        filename = selected_asset["name"]
+        dest_jar = os.path.join(share_dir, f"{tool}.jar") # Save as generic name
+        
+        log(f"Downloading {filename}...")
+        if download_file(dl_url, dest_jar):
+            # Create Wrapper Script in /bin so you can run 'smali' anywhere
+            wrapper_path = os.path.join(bin_dir, tool)
+            try:
+                with open(wrapper_path, 'w') as f:
+                    f.write('#!/usr/bin/env bash\n')
+                    f.write(f'exec java -jar "{dest_jar}" "$@"\n')
+                
+                os.chmod(wrapper_path, 0o755)
+                log(f"Installed [bold]{tool}[/] wrapper to {wrapper_path}")
+            except Exception as e:
+                log_err(f"Failed to create wrapper for {tool}: {e}")
+        else:
+            log_err(f"Failed to download from {dl_url}")
+
+    log("Installation Complete.")
+    time.sleep(2)
+
+# --- File Picker (TUI) ---
+
+def file_selector(start_path=HOME_DIR, title="Select a File"):
+    if not os.path.exists(start_path):
+        start_path = HOME_DIR
+
+    current_path = os.path.abspath(start_path)
+    selected_index = 0
+    items = []
+
+    def get_items():
+        nonlocal items
+        try:
+            all_items = sorted(os.listdir(current_path))
+            dirs = [d for d in all_items if os.path.isdir(os.path.join(current_path, d))]
+            files = [f for f in all_items if os.path.isfile(os.path.join(current_path, f))]
+            items = [".."] + dirs + files
+        except PermissionError:
+            items = [".."]
+        except OSError:
+            items = [".."]
+
+    get_items()
+
+    bindings = KeyBindings()
+
+    @bindings.add('up')
+    def _(event):
+        nonlocal selected_index
+        selected_index = (selected_index - 1) % len(items)
+
+    @bindings.add('down')
+    def _(event):
+        nonlocal selected_index
+        selected_index = (selected_index + 1) % len(items)
+
+    @bindings.add('enter')
+    def _(event):
+        nonlocal current_path, selected_index
+        selection = items[selected_index]
+        
+        if selection == "..":
+            parent = os.path.dirname(current_path)
+            if parent == current_path: return 
+            current_path = parent
+            selected_index = 0
+            get_items()
+            return
+
+        full_path = os.path.join(current_path, selection)
+        
+        if os.path.isdir(full_path):
+            current_path = full_path
+            selected_index = 0
+            get_items()
+        else:
+            event.app.exit(result=full_path)
+
+    @bindings.add('c-c')
+    def _(event):
+        event.app.exit(result=None)
+
+    def get_content():
+        lines = []
+        lines.append(("class:title", f" {title} \n"))
+        lines.append(("class:path", f" Path: {current_path} \n\n"))
+        
+        max_rows = 15
+        start_idx = 0
+        if selected_index > max_rows // 2:
+            start_idx = selected_index - (max_rows // 2)
+        
+        end_idx = start_idx + max_rows
+        display_items = items[start_idx:end_idx]
+
+        for i, item in enumerate(display_items):
+            actual_idx = start_idx + i
+            full_p = os.path.join(current_path, item)
+            is_dir = os.path.isdir(full_p) or item == ".."
+            
+            prefix = "> " if actual_idx == selected_index else "  "
+            
+            if actual_idx == selected_index: style = "class:selected"
+            elif is_dir: style = "class:dir"
+            else:
+                style = "class:file"
+                if item.endswith(".so"): style = "class:file-so"
+                elif item.endswith(".js"): style = "class:file-js"
+                elif item.endswith(".apk") or item.endswith(".xapk"): style = "class:file-apk"
+            
+            icon = "📁" if is_dir else "📄"
+            if item == "..": icon = "⬆️ "
+            
+            lines.append((style, f"{prefix}{icon} {item}\n"))
+        
+        lines.append(("", "\n [ENTER] Open/Select  [Up/Down] Navigate  [Ctrl+C] Cancel"))
+        return lines
+
+    style = PTStyle.from_dict({
+        'title': '#00ffff underline bold',
+        'path': '#ffff00 bold',
+        'selected': 'reverse #00ff00',
+        'dir': '#ffffff bold',
+        'file': '#dddddd',
+        'file-so': '#00ff00 bold',
+        'file-js': '#ff0000 bold',
+        'file-apk': '#00afff bold',
+    })
+
+    layout = Layout(HSplit([
+        Window(FormattedTextControl(get_content), height=None)
+    ]))
+
+    app = Application(layout=layout, key_bindings=bindings, full_screen=True, style=style)
+    return app.run()
+
+# --- Interactive Menu ---
+
+def hybrid_menu(menu_title, options, show_warning=False):
+    bindings = KeyBindings()
+    selected_index = 0
+
+    banner_obj = get_banner_text()
+    temp_console = Console(width=60, file=open(os.devnull, "w"), force_terminal=True, theme=custom_theme)
+    with temp_console.capture() as capture:
+        temp_console.print(banner_obj)
+        temp_console.print(Align.center("-" * 60, style="dim"))
+    banner_ansi_string = capture.get()
+
+    def get_formatted_text():
+        result = []
+        result.append(("class:title", f" {menu_title} \n\n"))
+        
+        for i, option in enumerate(options):
+            prefix = " > " if i == selected_index else "   "
+            style = "class:selected" if i == selected_index else "class:text"
+            result.append((style, f"{prefix}{i+1}. {option} \n"))
+        
+        if show_warning:
+            result.append(("", "\n"))
+            warn_msg = "Please run 'Install and Update' if running for the first time."
+            result.append(("class:warning", warn_msg))
+            
+        return result
+
+    @bindings.add('up')
+    def _(event):
+        nonlocal selected_index
+        selected_index = (selected_index - 1) % len(options)
+
+    @bindings.add('down')
+    def _(event):
+        nonlocal selected_index
+        selected_index = (selected_index + 1) % len(options)
+
+    @bindings.add('enter')
+    def _(event):
+        event.app.exit(result=selected_index)
+
+    @bindings.add('c-c')
+    def _(event):
+        event.app.exit(result=None)
+
+    body = HSplit([
+        Window(FormattedTextControl(ANSI(banner_ansi_string)), height=12),
+        Window(FormattedTextControl(get_formatted_text)),
+        Window(height=1, char='-'),
+        Window(FormattedTextControl(" Use UP/DOWN to navigate, ENTER to select"))
+    ])
+
+    style = PTStyle.from_dict({
+        'title': '#00ffff bold',
+        'selected': 'reverse #00ff00',
+        'text': '#ffffff',
+        'warning': '#ff0000 bold'
+    })
+
+    layout = Layout(body)
+    app = Application(layout=layout, key_bindings=bindings, full_screen=True, style=style)
+    return app.run()
+
+def select_file_with_source(title="Select File"):
+    """
+    1. Select Storage
+    2. Select File
+    """
+    options = ["Internal Storage (/sdcard)", "Termux Home (Local)"]
+    # We pass the title to the menu so the user knows WHAT they are selecting storage FOR
+    choice = hybrid_menu(f"Location for: {title}", options)
+    
+    if choice is None: return None # User cancelled
+    
+    start_path = "/sdcard" if choice == 0 else HOME_DIR
+    return file_selector(start_path, title)
+
+def download_frida_gadget():
+    print_banner()
+    
+    # 1. Fetch Version with Spinner
+    version = "16.1.4" # Fallback
+    try:
+        with console.status("[bold green]Fetching latest Frida release info...[/]", spinner="dots"):
+            api_url = "https://api.github.com/repos/frida/frida/releases/latest"
+            with urllib.request.urlopen(api_url) as response:
+                version = json.loads(response.read().decode())["tag_name"]
+    except Exception as e:
+        log_warn(f"Failed to fetch latest version ({e}). Using fallback: {version}")
+
+    abis = [
+        ("arm64-v8a", "android-arm64"),
+        ("armeabi-v7a", "android-arm"),
+        ("x86_64", "android-x86_64"),
+        ("x86", "android-x86")
+    ]
+    
+    device_abi = get_device_abi()
+    
+    console.print(f"[info]Frida Version: [bold white]{version}[/]")
+    console.print(f"[dim]Device Architecture: {device_abi}[/]")
+    console.print("[warning]Available Architectures:[/]")
+    
+    for i, (name, tag) in enumerate(abis):
+        marker = " [bold green]◄ YOUR DEVICE[/]" if name == device_abi else ""
+        console.print(f"  [bold cyan]{i+1}.[/] {name} ({tag}){marker}")
+    
+    console.print("\n[dim]Enter numbers separated by comma (e.g. 1,2)[/]")
+    selection = console.input("[input]Select Arch(s): [/]").strip()
+    
+    if not selection: return
+
+    selected_indices = [int(x.strip()) - 1 for x in selection.split(",") if x.strip().isdigit()]
+    
+    for idx in selected_indices:
+        if 0 <= idx < len(abis):
+            name, tag = abis[idx]
+            filename = f"frida-gadget-{version}-{tag}.so.xz"
+            url = f"https://github.com/frida/frida/releases/download/{version}/{filename}"
+            dest_xz = os.path.join(UAMT_ROOT, filename)
+            dest_so = os.path.join(UAMT_ROOT, f"libfrida-{name}.so")
+            
+            # Download with spinner is handled inside download_file usually, 
+            # but since that function is simple, the progress bar in download_file works fine.
+            if download_file(url, dest_xz):
+                log(f"Decompressing {name}...")
+                try:
+                    with lzma.open(dest_xz) as f_in, open(dest_so, 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                    os.remove(dest_xz)
+                    log(f"Saved: {dest_so}")
+                except Exception as e:
+                    log_err(f"Decompression failed: {e}")
+            
+    # Helper to set default libfrida.so
+    default_so = os.path.join(UAMT_ROOT, "libfrida.so")
+    device_specific = os.path.join(UAMT_ROOT, f"libfrida-{device_abi}.so")
+    
+    if os.path.exists(device_specific):
+        shutil.copy(device_specific, default_so)
+    elif not os.path.exists(default_so):
+        fallback = os.path.join(UAMT_ROOT, "libfrida-arm64-v8a.so")
+        if os.path.exists(fallback): shutil.copy(fallback, default_so)
+
+    console.input("[input]Press Enter...[/]")
+
+# --- Injection Strategy ---
+
+def select_architectures():
+    options = ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"]
+    device_abi = get_device_abi()
+    
+    print_banner()
+    console.print("[warning]Select Target Architectures for Injection:[/]")
+    
+    for i, opt in enumerate(options):
+        marker = " [bold green]◄ YOUR DEVICE[/]" if opt == device_abi else ""
+        console.print(f"  [bold cyan]{i+1}.[/] {opt}{marker}")
+        
+    console.print("\n[dim]Enter numbers separated by comma (e.g. 1,2)[/]")
+    console.print(f"[dim]Default (Enter) = {device_abi} & armeabi-v7a[/]")
+    
+    selection = console.input("[input]Selection: [/]").strip()
+    
+    selected_archs = []
+    if not selection:
+        # Default smart selection: Device ABI + 32-bit fallback
+        selected_archs.append(device_abi)
+        if device_abi == "arm64-v8a": selected_archs.append("armeabi-v7a")
+        # Ensure we don't have duplicates if device_abi was already v7a
+        return list(set(selected_archs))
+        
+    indices = [int(x.strip()) - 1 for x in selection.split(",") if x.strip().isdigit()]
+    for idx in indices:
+        if 0 <= idx < len(options):
+            selected_archs.append(options[idx])
+            
+    return selected_archs
+
+def get_major_library(apk_path):
+    # 1. Extract Real App Label using aapt2
+    aapt2 = get_aapt2_bin()
+    app_label = ""
+    
+    try:
+        # Dump badging to get the label
+        res = subprocess.run([aapt2, "dump", "badging", apk_path], capture_output=True, text=True)
+        # Regex to find application-label:'Something'
+        match = re.search(r"application-label:'([^']+)'", res.stdout)
+        if match:
+            app_label = match.group(1)
+    except Exception as e:
+        log_warn(f"Could not extract app label: {e}")
+
+    candidate_libs = []
+    
+    # 2. Generate Candidates if label exists
+    if app_label:
+        # Sanitize: "My Game!" -> "MyGame" (Alphanumeric only)
+        clean_label = "".join(x for x in app_label if x.isalnum())
+        
+        if clean_label:
+            # Case 1: Exact CamelCase (libExample.so)
+            candidate_libs.append(f"lib{clean_label}.so")
+            # Case 2: All Lowercase (libexample.so)
+            candidate_libs.append(f"lib{clean_label.lower()}.so")
+
+    # 3. Standard Major Libs (Fallback)
+    major_libs = [
+        "libil2cpp.so", "libunity.so", "libmain.so", "libmonosgen-2.0.so",
+        "libflutter.so", "libapp.so", "libcocos2dcpp.so", "libcocos2djs.so",
+        "libgUE4.so", "libue4.so", "libgodot_android.so", "libreactnativejni.so", 
+        "libgame.so", "libnative-lib.so", "libgl2jni.so", "libgdx.so"
+    ]
+    
+    try:
+        with zipfile.ZipFile(apk_path, 'r') as z:
+            files = z.namelist()
+            
+            # A. Check for Label-based libs (Priority)
+            if candidate_libs:
+                log(f"App Label: [cyan]{app_label}[/] -> Searching for: [dim]{', '.join(candidate_libs)}[/]")
+                for f in files:
+                    base = os.path.basename(f)
+                    # Check in lib folders
+                    if (f.startswith("lib/") and f.endswith(".so")):
+                        if base in candidate_libs:
+                            log(f"Found app-specific match: [bold green]{base}[/]")
+                            return base
+
+            # B. Fallback to Major Game Engines
+            log("App-specific lib not found. Checking major game engines...")
+            for f in files:
+                base = os.path.basename(f)
+                if (f.startswith("lib/") and f.endswith(".so")):
+                    if base in major_libs:
+                        return base
+            
+    except Exception as e:
+        log_err(f"Library scan failed: {e}")
+        
+    return None
+
+def determine_strategy(apk_path):
+    options = ["Auto (Recommended)", "Patchelf (Native - Fast)", "Smali Patch (Dex - Reliable,slow)"]
+    choice = hybrid_menu("Select Injection Method:", options)
+
+    if choice == 0: 
+        log("Auto-detecting best method...")
+        target_so = get_major_library(apk_path)
+        if target_so:
+            log(f"Major library detected: [input]{target_so}[/]. Using Patchelf.")
+            return "NATIVE", target_so
+        else:
+            log("No major library found. Using Smali Patch.")
+            return "SMALI", None
+    elif choice == 1: 
+        target_so = get_major_library(apk_path)
+        if not target_so:
+            log_warn("No native libraries found. Falling back to Smali.")
+            time.sleep(2)
+            return "SMALI", None
+        return "NATIVE", target_so
+    else:
+        return "SMALI", None
+
+# --- Injection Implementation ---
+
+def force_inject_libs(apk_path, payload_info, selected_archs):
+    log(f"Forcing library injection into: {selected_archs}")
+
+    with zipfile.ZipFile(apk_path, 'a') as zf:
+        for arch in selected_archs:
+            src_file = payload_info['path']
+            
+            if "libfrida" in payload_info['name']:
+                arch_specific_path = os.path.join(UAMT_ROOT, f"libfrida-{arch}.so")
+                if os.path.exists(arch_specific_path):
+                    src_file = arch_specific_path
+                    log(f"  Using specific gadget: libfrida-{arch}.so")
+            
+            dest_path = f"lib/{arch}/{payload_info['name']}"
+            log(f"    Adding [dim]{dest_path}[/]")
+            try:
+                zf.write(src_file, dest_path, compress_type=zipfile.ZIP_STORED)
+            except Exception as e:
+                log_warn(f"Failed to add lib to {arch}: {e}")
+            
+            for extra in payload_info.get('extra_files', []):
+                extra_dest = f"lib/{arch}/{extra['name']}"
+                try:
+                    zf.write(extra["src"], extra_dest, compress_type=zipfile.ZIP_STORED)
+                except: pass
+
+def inject_native(apk_path, target_so, payload_info, selected_archs):
+    log(f"Strategy: Native Injection (Target: [input]{target_so}[/])")
+    
+    work_dir = os.path.join(UAMT_ROOT, "native_work")
+    if os.path.exists(work_dir): shutil.rmtree(work_dir)
+    os.makedirs(work_dir)
+    
+    safe_output_name = "patched_" + os.path.basename(apk_path)
+    temp_output_apk = os.path.join(UAMT_ROOT, safe_output_name)
+    final_output_apk = os.path.join("/sdcard/UAMT", safe_output_name)
+    if os.path.exists(temp_output_apk): os.remove(temp_output_apk)
+
+    log("Locating target libraries...")
+    targets_map = {} 
+    found_archs = set()
+    
+    with zipfile.ZipFile(apk_path, 'r') as zin:
+        for item in zin.infolist():
+            arch_match = False
+            for arch in selected_archs:
+                if item.filename.startswith(f"lib/{arch}/") and item.filename.endswith(f"/{target_so}"):
+                    arch_match = True
+                    # FIX: correctly extract architecture from path (lib/ARCH/file.so)
+                    current_arch = item.filename.split("/")[1]
+                    found_archs.add(current_arch)
+                    break
+            
+            if arch_match:
+                temp_so_path = os.path.join(work_dir, item.filename.replace("/", "_"))
+                with open(temp_so_path, 'wb') as f: f.write(zin.read(item.filename))
+                
+                log(f"Patching [input]{item.filename}[/]")
+                try:
+                    subprocess.run(["patchelf", "--add-needed", payload_info['name'], temp_so_path], check=True, stderr=subprocess.DEVNULL)
+                    targets_map[item.filename] = temp_so_path
+                except: log_warn(f"Failed to patch {item.filename}")
+    
+    # Notify user if selected arch was not found
+    for arch in selected_archs:
+        if arch not in found_archs:
+            log_warn(f"Target library ({target_so}) NOT found in [bold]{arch}[/]. Skipping patch for this arch.")
+
+    if not targets_map:
+        log_err("Target library not found in any selected architectures.")
+        return False
+
+    log("Streaming APK & Injecting...")
+    with zipfile.ZipFile(apk_path, 'r') as zin, zipfile.ZipFile(temp_output_apk, 'w') as zout:
+        for item in zin.infolist():
+            if item.filename.startswith("META-INF/"): continue
+            if item.filename in targets_map:
+                zout.write(targets_map[item.filename], item.filename, compress_type=zipfile.ZIP_STORED)
+            else:
+                compression = zipfile.ZIP_DEFLATED
+                if item.filename == "resources.arsc" or item.filename.endswith(".so"):
+                    compression = zipfile.ZIP_STORED
+                zout.writestr(item.filename, zin.read(item.filename), compress_type=compression)
+
+    force_inject_libs(temp_output_apk, payload_info, selected_archs)
+    finalize_apk(temp_output_apk, final_output_apk)
+    return True
+
+def inject_smali(apk_path, payload_info, selected_archs):
+    log("Strategy: Smali Injection (Reliable/Slow)")
+    
+    # Check for required tools
+    for tool in ["baksmali", "smali", "aapt2", "zip", "unzip"]:
+        if not shutil.which(tool):
+            log_err(f"Tool '{tool}' not found! Run 'Install and Update'.")
+            return False
+
+    aapt2_exe = get_aapt2_bin()
+    
+    # 1. Get Main Activity using aapt2
+    res = subprocess.run([aapt2_exe, "dump", "badging", apk_path], capture_output=True, text=True)
+    match = re.search(r"launchable-activity: name='([^']+)'", res.stdout)
+    if not match: 
+        log_err("Could not find launchable activity.")
+        return False
+    
+    activity_name = match.group(1)
+    # Convert 'com.example.Game' to 'Lcom/example/Game;' for binary search
+    activity_descriptor = "L" + activity_name.replace(".", "/") + ";"
+    log(f"Target Activity: [input]{activity_name}[/]")
+    
+    # 2. Setup Temporary Workspace
+    work_dir = os.path.join(UAMT_ROOT, "smali_work")
+    if os.path.exists(work_dir): shutil.rmtree(work_dir)
+    os.makedirs(work_dir)
+
+    # 3. Extract Dex files
+    log("Extracting Dex files...")
+    dex_files = []
+    try:
+        with zipfile.ZipFile(apk_path, 'r') as z:
+            for name in z.namelist():
+                if name.startswith("classes") and name.endswith(".dex"):
+                    z.extract(name, work_dir)
+                    dex_files.append(name)
+    except Exception as e:
+        log_err(f"Extraction failed: {e}")
+        return False
+
+    # 4. Smart Scan: Find which Dex contains the Activity
+    target_dex = None
+    log("Scanning Dex files for target class...")
+    
+    for dex in dex_files:
+        dex_path = os.path.join(work_dir, dex)
+        try:
+            with open(dex_path, 'rb') as f:
+                content = f.read()
+                # Search for the class descriptor byte signature
+                if activity_descriptor.encode('utf-8') in content:
+                    target_dex = dex
+                    log(f"Found target class in: [bold green]{dex}[/]")
+                    break
+        except: pass
+    
+    if not target_dex:
+        # Fallback: If binary scan fails (rare), default to classes.dex or error
+        log_warn("Could not identify specific Dex. Defaulting to classes.dex")
+        if "classes.dex" in dex_files: target_dex = "classes.dex"
+        else: log_err("Analysis failed."); return False
+
+    # 5. Decompile ONLY the target Dex
+    log(f"Decompiling {target_dex}...")
+    smali_dir = os.path.join(work_dir, "smali_out")
+    dex_path = os.path.join(work_dir, target_dex)
+    
+    cmd = ["baksmali", "d", dex_path, "-o", smali_dir]
+    if not run_with_progress(cmd, f"Processing {target_dex}"): return False
+
+    # 6. Inject Code
+    smali_rel = activity_name.replace(".", "/") + ".smali"
+    target_smali_path = None
+    
+    for root, dirs, files in os.walk(smali_dir):
+        if smali_rel.split("/")[-1] in files:
+            potential = os.path.join(root, smali_rel.split("/")[-1])
+            if activity_name.replace(".", os.sep) in potential:
+                target_smali_path = potential
+                break
+    
+    if target_smali_path:
+        log(f"Injecting into [input]{os.path.basename(target_smali_path)}[/]...")
+        lib_name = payload_info['name'].replace("lib", "").replace(".so", "")
+        
+        try:
+            with open(target_smali_path, 'r') as f: lines = f.readlines()
+            new_lines = []
+            in_on_create = False
+            injected = False
+            
+            payload = [
+                f'\n    const-string v0, "{lib_name}"',
+                '\n    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n'
+            ]
+
+            for line in lines:
+                stripped = line.strip()
+                if ".method" in stripped and "onCreate" in stripped and "Landroid/os/Bundle;" in stripped:
+                    in_on_create = True
+                    new_lines.append(line)
+                    continue
+                
+                if in_on_create and ".end method" in stripped:
+                    in_on_create = False
+
+                if in_on_create and not injected:
+                    if stripped.startswith(".locals"):
+                        parts = stripped.split()
+                        if len(parts) > 1 and int(parts[1]) == 0:
+                            new_lines.append("    .locals 1\n")
+                        else:
+                            new_lines.append(line)
+                        new_lines.extend(payload)
+                        injected = True
+                        continue
+                    elif stripped.startswith(".registers"):
+                        new_lines.append(line)
+                        new_lines.extend(payload)
+                        injected = True
+                        continue
+
+                new_lines.append(line)
+            
+            with open(target_smali_path, 'w') as f: f.writelines(new_lines)
+
+        except Exception as e:
+            log_err(f"Injection error: {e}")
+            return False
+    else:
+        log_err("Activity Smali file not found in decompiled output.")
+        return False
+
+    # 7. Recompile ONLY the target Dex
+    log(f"Recompiling {target_dex}...")
+    cmd = ["smali", "a", smali_dir, "-o", dex_path]
+    if not run_with_progress(cmd, "Building Dex"): return False
+
+    # 8. Update APK
+    log("Updating Target APK...")
+    safe_output_name = "patched_" + os.path.basename(apk_path)
+    temp_output_apk = os.path.join(UAMT_ROOT, safe_output_name)
+    final_output_apk = os.path.join("/sdcard/UAMT", safe_output_name)
+    
+    if os.path.exists(temp_output_apk): os.remove(temp_output_apk)
+    shutil.copy(apk_path, temp_output_apk)
+    
+    try:
+        # Update only the single modified dex file
+        cwd = os.getcwd()
+        os.chdir(work_dir)
+        subprocess.run(["zip", "-u", "-j", temp_output_apk, target_dex], check=True, stdout=subprocess.DEVNULL)
+        os.chdir(cwd)
+    except Exception as e:
+        log_err(f"Failed to update APK zip: {e}")
+        return False
+
+    force_inject_libs(temp_output_apk, payload_info, selected_archs)
+    finalize_apk(temp_output_apk, final_output_apk)
+    return True
+
+def finalize_apk(temp_path, final_path):
+    log("Zipaligning...")
+    aligned = temp_path.replace(".apk", "_aligned.apk")
+    subprocess.run(["zipalign", "-p", "-f", "4", temp_path, aligned], capture_output=True)
+    shutil.move(aligned, temp_path)
+
+    if not os.path.exists(KEYSTORE_PATH):
+        subprocess.run(["keytool", "-genkey", "-v", "-keystore", KEYSTORE_PATH, "-storepass", "android", "-alias", "androiddebugkey", "-keypass", "android", "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000", "-dname", "CN=Android Debug,O=Android,C=US"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    log("Signing...")
+    cmd = ["apksigner", "sign", "--ks", KEYSTORE_PATH, "--ks-pass", "pass:android", temp_path]
+    subprocess.run(cmd, capture_output=True)
+    
+    try:
+        if not os.path.exists(os.path.dirname(final_path)): os.makedirs(os.path.dirname(final_path))
+        shutil.copy(temp_path, final_path)
+        log(f"Done! Saved to: [input]{final_path}[/]")
+    except:
+        log(f"Done! Saved internally: {temp_path}")
+
+# --- Connect Logic ---
+
+def connect_to_gadget():
+    check_frida_tools()
+    print_banner()
+    console.print("[warning][!] Ensure app is running![/]")
+    console.input("[input]Press Enter...[/]")
+    
+    ip = console.input("[input]IP (Default 127.0.0.1): [/]").strip() or "127.0.0.1"
+    port = console.input("[input]Port (Default 27042): [/]").strip() or "27042"
+    host = f"{ip}:{port}"
+    
+    choice = hybrid_menu(f"Connect to {host}", ["Inject Script", "Connect Only"])
+    if choice is None: return
+
+    cmd = ["frida", "-H", host, "gadget"]
+    
+    if choice == 0:
+        sp = select_file_with_source(title="Select JS Script")
+        if sp and os.path.exists(sp): 
+            cmd += ["-l", sp]
+        else: 
+            return
+
+    log(f"Connecting to [bold cyan]{host}[/]...")
+    console.print("[dim]Press Ctrl+C to disconnect/detach.[/]\n")
+    
+    try:
+        # Run Frida and let it take over the terminal
+        result = subprocess.run(cmd)
+        
+        # Check if Frida exited with an error
+        if result.returncode != 0:
+            console.print(f"\n[bold red][!] Frida exited with error code: {result.returncode}[/]")
+        else:
+            console.print("\n[bold green][*] Session ended normally.[/]")
+
+    except KeyboardInterrupt:
+        console.print("\n[bold yellow][!] Interrupted by user.[/]")
+    except Exception as e:
+        console.print(f"\n[bold red][E] Execution error: {e}[/]")
+
+    # CRITICAL: Pause here so user can read the logs before the menu clears the screen
+    console.input("\n[input]Press Enter to return to menu...[/]")
+
+def cleanup_temp():
+    log("Cleaning up temporary files...")
+    dirs_to_remove = ["native_work", "smali_work"]
+    for d in dirs_to_remove:
+        path = os.path.join(UAMT_ROOT, d)
+        if os.path.exists(path): shutil.rmtree(path, ignore_errors=True)
+    
+    for f in os.listdir(UAMT_ROOT):
+        if f.startswith("patched_") or f in ["temp_script.js", "temp_config.json"]:
+            try: os.remove(os.path.join(UAMT_ROOT, f))
+            except: pass
+
+# --- Main ---
+
+def main():
+    if not os.access("/sdcard", os.W_OK):
+        log_warn("No write access to /sdcard. Run 'termux-setup-storage'.")
+    
+    while True:
+        options = ["Inject Frida Gadget", "Inject Custom Library", "Connect to Gadget", "Download Frida Gadget", "Install and Update", "Exit"]
+        choice = hybrid_menu("Main Menu", options, show_warning=True)
+        
+        print_banner()
+
+        if choice == 5: 
+            cleanup_temp()
+            sys.exit(0)
+        if choice == 4: install_and_update_script(); continue
+        if choice == 3: download_frida_gadget(); continue
+        if choice == 2: connect_to_gadget(); continue
+
+        payload_info = {}
+        
+        if choice == 0: # Frida
+            if not os.path.exists(LIB_FRIDA_PATH):
+                found = False
+                for f in os.listdir(UAMT_ROOT):
+                     if f.startswith("libfrida-") and f.endswith(".so"):
+                         found = True
+                         break
+                
+                if not found:
+                    log_err("libfrida.so missing. Download it first."); time.sleep(2); continue
+            
+            payload_info['path'] = LIB_FRIDA_PATH 
+            payload_info['name'] = "libfrida.so"
+            payload_info['extra_files'] = []
+            
+            conf_options = ["Listen", "Pre-injected Script", "Custom Config"]
+            conf_idx = hybrid_menu("Frida Config:", conf_options)
+            
+            config_data = {"interaction": {"type": "listen", "address": "127.0.0.1", "port": 27042, "on_port_conflict": "fail"}}
+            
+            if conf_idx != 2: 
+                onload_idx = hybrid_menu("OnLoad Behavior:", ["Resume", "Wait"])
+                config_data["interaction"]["on_load"] = "resume" if onload_idx == 0 else "wait"
+
+            if conf_idx == 1:
+                sp = select_file_with_source(title="Select .js Script")
+                if not sp: continue
+                with open(sp, 'r') as f: content = f.read()
+                tmp_scr = os.path.join(UAMT_ROOT, "temp_script.js")
+                with open(tmp_scr, 'w') as f: f.write(content)
+                payload_info['extra_files'].append({"src": tmp_scr, "name": "libfscr.so"})
+                config_data["interaction"]["type"] = "script"
+                config_data["interaction"]["path"] = "libfscr.so"
+
+            if conf_idx == 2:
+                console.print("[input]Paste JSON config:[/]")
+                config_data = json.loads(console.input())
+
+            tmp_cfg = os.path.join(UAMT_ROOT, "temp_config.json")
+            with open(tmp_cfg, 'w') as f: json.dump(config_data, f, indent=4)
+            payload_info['extra_files'].append({"src": tmp_cfg, "name": "libfrida.config.so"})
+
+        elif choice == 1: # Custom Lib
+            lib_path = select_file_with_source(title="Select .so Library")
+            if not lib_path: continue
+            lib_name = console.input("[input]Name (e.g. mylib): [/]").strip() or "custom"
+            payload_info['path'] = lib_path
+            payload_info['name'] = f"lib{lib_name}.so"
+            payload_info['extra_files'] = []
+
+        apk_path = select_file_with_source(title="Select Target APK")
+        if not apk_path: continue
+        
+        # New Step: Select Architectures
+        selected_archs = select_architectures()
+        
+        strategy, target = determine_strategy(apk_path)
+        
+        success = False
+        if strategy == "NATIVE": success = inject_native(apk_path, target, payload_info, selected_archs)
+        else:
+            success = inject_smali(apk_path, payload_info, selected_archs)
+            if not success and (t := get_major_library(apk_path)):
+                log("Retrying with Native strategy...")
+                success = inject_native(apk_path, t, payload_info, selected_archs)
+
+        if not success: log_err("Injection Failed.")
+        cleanup_temp()
+        console.input("\n[warning]Press Enter...[/]")
+
+if __name__ == "__main__":
+    try: main()
+    except KeyboardInterrupt: cleanup_temp(); sys.exit(0)
+```
