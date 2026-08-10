@@ -1359,6 +1359,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UEFI-Bootloader](entities/uefi-bootloader.md) — simple UEFI runtime-driver mmapper (C/C++; cheat / EFI driver)
 - [UEVR](entities/uevr.md) — universal UE4/UE5 VR inject mod (stereo / OpenXR·OpenVR; reflection + pattern scan)
 - [U3D](entities/u3d.md) — Unity-centered C++ 2D/3D community tree (Game Engine / source)
+- [U3D MiniDNF](entities/u3d-minidnf.md) — Unity mini Dungeon & Fighter clone (side-scrolling action RPG; combos/skills/monster AI; Game Develop / source; gmh5225)
 
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
 - [UnityAutomatedQAExamples](entities/unity-automated-qa-examples.md) — Unity Automated QA Guidebook (docs/reference; Game Testing)
