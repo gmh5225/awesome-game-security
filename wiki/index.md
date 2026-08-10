@@ -1138,6 +1138,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ispras/qemu](entities/ispras-qemu.md) — ISP RAS QEMU fork (analysis / instrumentation / windbg tree; Cheat QEMU/KVM)
 - [qemu-wasm](entities/qemu-wasm.md) — Emscripten WASM QEMU in browser (x86/arch guests; VirtIO; Cheat QEMU/KVM lab)
 - [QuickAsm](entities/quickasm.md) — x86/x64 assemble-and-run GUI (Keystone)
+- [QuickPGTrigger](entities/quickpgtrigger.md) — PatchGuard stress testing (C/C++; cheat / PatchGuard-related; gmh5225)
 - [quickemu](entities/quickemu.md) — optimized QEMU VM create/run (Win/macOS/Linux; Cheat QEMU/KVM lab)
 - [query-gpu-name-rs](entities/query-gpu-name-rs.md) — Rust Windows GPU display-name query (Detection:HWID; gmh5225)
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)

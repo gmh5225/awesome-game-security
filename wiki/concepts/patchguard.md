@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/synacktiv__windows_kernel_shadow_stack.md
   - wiki/sources/descriptions/hfiref0x__UPGDSED.md
   - wiki/sources/descriptions/gmh5225__VulnerablePatchGuardExploit.md
-updated: 2026-08-09
+  - wiki/sources/descriptions/gmh5225__QuickPGTrigger.md
+updated: 2026-08-10
 confidence: high
 ---
 
@@ -40,6 +41,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[vulnerablepatchguardexploit]] (gmh5225; C++) implements a vulnerable PatchGuard exploit to disable KPP at runtime for offensive / RE study in the same cheat / PatchGuard-related lane. (source: wiki/sources/descriptions/gmh5225__VulnerablePatchGuardExploit.md)
 
+[[quickpgtrigger]] (gmh5225; C/C++) targets **PatchGuard stress testing** — exercising KPP integrity-check paths under load for researchers in the Anti Cheat Stress Testing / cheat PatchGuard-related lane. (source: wiki/sources/descriptions/gmh5225__QuickPGTrigger.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
