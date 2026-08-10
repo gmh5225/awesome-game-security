@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-10** — ingest `description:norbertbaricz/DakotaAC`: entity [[dakotaac]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:talsec/Free-RASP-KMP`: entity [[free-rasp-kmp]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]].
 
 - **2026-08-10** — ingest `description:gmh5225/SetWindowsHookEx-Injector`: entity [[setwindowshookex-injector]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-link from [[injection]].
