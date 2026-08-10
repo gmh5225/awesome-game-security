@@ -1799,6 +1799,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/allthingsida/idacpp [A C++ REPL for IDA Pro / IDA C++ SDK]
 - https://github.com/milankovo/ida-search [An IDA Pro 9.x plugin that brings 010 Editor-style type-aware binary search to IDA]
 - https://github.com/CSIT-SG/AETHER [An AI-powered reverse-engineering copilot for assisting tedious malware analysis in IDA Pro]
+- https://github.com/thatskriptkid/re-harness [OpenCode agent harness for Qwen 27B/35B with read-only IDA 9.3/IDASQL PE static-analysis tools; NeverD/LLVM lift→O3→redecompile fallback for oversized functions; malware analysis; macOS/Linux]
 
 > IDA Signature Database
 - https://github.com/push0ebp/sig-database
