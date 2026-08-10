@@ -884,6 +884,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Zierax/Grafana-Final-Scanner [Grafana scanner with public CVE checks, version fingerprinting, and config analysis for easier Grafana security testing]
 - https://github.com/mentebinaria/retoolkit [Reverse Engineer's Toolkit]
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
+- https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/smallworld-re/smallworld [Environment for streamlined binary harnessing for dynamic analysis]
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
