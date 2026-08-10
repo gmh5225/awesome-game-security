@@ -1193,6 +1193,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
+- [rootkit-2](entities/rootkit-2.md) — CSRSS CSR_PROCESS walk to detect hidden processes (kernel PoC; gmh5225)
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
 - [ropgadget-rs](entities/ropgadget-rs.md) — Rust ROP gadget finder (parallel PE/ELF/Mach-O scan; ret-terminated chains; exploit-chain RE)
 - [rs-native-kit-security](entities/rs-native-kit-security.md) — React Native Nitro RASP SDK (root/jailbreak, Frida/Xposed/Magisk hook, tamper/integrity, VPN/proxy, device risk scoring; Android+iOS)
