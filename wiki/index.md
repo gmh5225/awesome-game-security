@@ -452,6 +452,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [echoac-poc](entities/echoac-poc.md) — echo.ac `echo_driver.sys` LPE PoC (read IOCTL → EPROCESS token theft → SYSTEM; anti-cheat-adjacent screenshare driver; gmh5225)
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W; gmh5225 + kkent030315 forks)
 - [ms-io-exploit](entities/ms-io-exploit.md) — `msIo64.sys` physmem-mapping BYOVD research (kkent030315; anycall for full client/driver)
+- [MS Vulnerable Driver List](entities/ms-vulnerable-driver-list.md) — Microsoft-acknowledged vulnerable kernel drivers; blocklist hash list for BYOVD research (gmh5225)
 - [MSFT DriverBlockList](entities/msft-driverblocklist.md) — Microsoft Recommended Driver Block Rules mirror (AC / black-signature defensive research)
 - [MSSymbolsCollection](entities/mssymbolscollection.md) — pre-downloaded Microsoft kernel debug symbols (PDB; ntoskrnl, CI.dll, kernel-mode binaries; Kernel Symbols; gmh5225)
 - [event_replay](entities/event-replay.md) — Android `/dev/input` touch/key record-replay Magisk module (game input sim)
