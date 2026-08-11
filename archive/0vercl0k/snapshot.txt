@@ -1,0 +1,860 @@
+Project Path: arc_0vercl0k_snapshot_0upnj7x6
+
+Source Tree:
+
+```txt
+arc_0vercl0k_snapshot_0upnj7x6
+├── .cargo
+│   └── config.toml
+├── .github
+│   └── workflows
+│       └── snapshot.yml
+├── .gitignore
+├── Cargo.toml
+├── LICENSE
+├── README.md
+├── pics
+└── src
+    ├── lib.rs
+    └── state.rs
+
+```
+
+`.cargo/config.toml`:
+
+```toml
+[build]
+rustflags = ["-C", "target-feature=+crt-static"]
+```
+
+`.github/workflows/snapshot.yml`:
+
+```yml
+name: Builds
+
+on: [push, pull_request]
+
+jobs:
+  fmt:
+    runs-on: windows-latest
+    name: fmt
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Set up rust
+        run: rustup default stable
+
+      - name: cargo fmt
+        run: cargo fmt --check
+
+  clippy:
+    name: clippy
+    runs-on: windows-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Set up rust
+        run: rustup default stable
+
+      - name: cargo clippy
+        env:
+          RUSTFLAGS: "-Dwarnings"
+        run: cargo clippy
+
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, windows-11-arm]
+    runs-on: ${{ matrix.os }}
+    name: build & test (${{ matrix.os }})
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Set up rust
+        run: rustup default stable
+
+      - name: cargo test
+        run: cargo test
+
+      - name: cargo build
+        run: cargo build --release
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot (${{ matrix.os }})
+          path: |
+            target/release/snapshot.dll
+            target/release/snapshot.pdb
+```
+
+`.gitignore`:
+
+```
+/*
+!/.cargo
+!/.github
+!/pics
+!/src
+!/.gitignore
+!/Cargo.lock
+!/Cargo.toml
+!/LICENSE
+!/README.md
+
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "snapshot"
+version = "0.2.5"
+edition = "2024"
+authors = ["Axel '0vercl0k' Souchet"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = { version = "1.0" }
+chrono = "0.4"
+clap = { version = "4.5", features = ["derive"] }
+dbgeng = { version = "0.5", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1"}
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2024 Axel Souchet
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align='center'>
+  <h1><code>snapshot</code></h1>
+  <p>
+    <strong>A Rust WinDbg extension that takes a snapshot of a running VM.</strong>
+  </p>
+  <p>
+    <img src='https://github.com/0vercl0k/snapshot/workflows/Builds/badge.svg'/>
+  </p>
+  <p>
+    <img src='pics/snapshot.gif' />
+  </p>
+</div>
+
+`snapshot` is a WinDbg extension written in Rust that dumps both the state of a CPU (GPRs, relevant MSRs, FPU state, segments, etc.) and the physical memory of a running VM (via a crash-dump). This snapshot is meant to be used by snapshot-based fuzzers and more particularly by [wtf](https://github.com/0vercl0k/wtf).
+
+This code base is also meant to show case how to write a WinDbg extension in Rust 🦀.
+
+## Building
+You can build the extension with the below:
+```text
+c:\>git clone https://github.com/0vercl0k/snapshot.git
+c:\>cd snapshot
+c:\snapshot>cargo build --release
+```
+
+If you would rather grab a pre-built extension, grab one on the [releases](https://github.com/0vercl0k/snapshot/releases) page.
+
+## Grabbing a snapshot
+Once you have the extension downloaded / compiled, you can load it in WinDbg with the below:
+```text
+kd> .load \path\to\snapshot\target\release\snapshot.dll
+
+kd> !snapshot -h
+[snapshot] Usage: snapshot [OPTIONS] [STATE_PATH]
+
+Arguments:
+  [STATE_PATH]  The path to save the snapshot to
+
+Options:
+  -k, --kind <KIND>  The kind of snapshot to take [default: full] [possible values: active-kernel, full]
+  -h, --help         Print help
+```
+
+Generate a full-kernel snapshot in the `c:\foo` directory with the below:
+```text
+kd> !snapshot c:\foo
+[snapshot] Dumping the CPU state into c:\foo\state.19041.1.amd64fre.vb_release.191206-1406.20240205_173527\regs.json..
+[snapshot] Dumping the memory state into c:\foo\state.19041.1.amd64fre.vb_release.191206-1406.20240205_173527\mem.dmp..
+Creating c:\\foo\\state.19041.1.amd64fre.vb_release.191206-1406.20240205_173527\\mem.dmp - Full memory range dump
+0% written.
+5% written. 1 min 12 sec remaining.
+10% written. 1 min 4 sec remaining.
+[...]
+90% written. 6 sec remaining.
+95% written. 3 sec remaining.
+Wrote 4.0 GB in 1 min 11 sec.
+The average transfer rate was 57.7 MB/s.
+Dump successfully written
+[snapshot] Done!
+```
+
+There is also `!snapshot_active_kernel` if you would prefer to grab an active kernel crash-dump.
+
+```
+
+`src/lib.rs`:
+
+```rs
+// Axel '0vercl0k' Souchet - January 15 2024
+// Special cheers to @erynian for the inspiration 🙏
+mod state;
+
+use std::collections::HashMap;
+use std::fs::{self, File};
+use std::path::PathBuf;
+use std::{env, mem};
+
+use anyhow::{Result, bail};
+use chrono::Local;
+use clap::{Parser, ValueEnum};
+use dbgeng::client::DebugClient;
+use dbgeng::dlogln;
+use dbgeng::windows::Win32::Foundation::{E_ABORT, S_OK};
+use dbgeng::windows::Win32::System::Diagnostics::Debug::Extensions::{
+    DEBUG_CLASS_KERNEL, DEBUG_KERNEL_CONNECTION, DEBUG_KERNEL_EXDI_DRIVER, DEBUG_KERNEL_LOCAL,
+};
+use dbgeng::windows::Win32::System::SystemInformation::IMAGE_FILE_MACHINE_AMD64;
+use dbgeng::windows::core::{HRESULT, IUnknown, Interface, PCSTR};
+use serde_json::Value;
+use state::{Float80, GlobalSeg, State, Zmm};
+
+mod msr {
+    pub const TSC: u32 = 0x0000_0010;
+    pub const APIC_BASE: u32 = 0x0000_001b;
+    pub const SYSENTER_CS: u32 = 0x0000_0174;
+    pub const SYSENTER_ESP: u32 = 0x0000_0175;
+    pub const SYSENTER_EIP: u32 = 0x0000_0176;
+    pub const PAT: u32 = 0x0000_0277;
+    pub const EFER: u32 = 0xc000_0080;
+    pub const STAR: u32 = 0xc000_0081;
+    pub const LSTAR: u32 = 0xc000_0082;
+    pub const CSTAR: u32 = 0xc000_0083;
+    pub const SFMASK: u32 = 0xc000_0084;
+    pub const FS_BASE: u32 = 0xc000_0100;
+    pub const GS_BASE: u32 = 0xc000_0101;
+    pub const KERNEL_GS_BASE: u32 = 0xc000_0102;
+    pub const TSC_AUX: u32 = 0xc000_0103;
+}
+
+/// Check if an address lives in user-mode.
+/// https://learn.microsoft.com/en-us/windows-hardware/drivers/gettingstarted/virtual-address-spaces
+fn is_usermode_addr(addr: u64) -> bool {
+    addr <= 0x7FFF_FFFFFFFF
+}
+
+/// This function converts WinDbg's fptw register encoded value into what the
+/// CPU expects fptw to be.
+///
+/// # Longer explanation
+/// After a bit of reverse-engineering and dynamic analysis it would appear
+/// that WinDbg's @fptw value is actually encoded the way `fxsave` saves it
+/// as. You can read about `fxsave` here: https://www.felixcloutier.com/x86/fxsave.
+///
+/// In theory, @fptw is 16-bit integer and 2-bit patterns describe the
+/// state of each of the 8 available FPU stack slot. This explains why the
+/// register is 16-bit long as 2-bit per slot and there are 8 of them.
+///
+/// If you write assembly code to push values onto the FPU stack and dump the
+/// value of @fptw, you'll see that it doesn't have the value you would
+/// expect. Here is MASM VS x64 assembly to dump those values for the
+/// curious readers:
+///
+/// ```
+/// _TEXT SEGMENT
+/// PUBLIC _fld
+/// PUBLIC _fstenv
+///
+/// _fld PROC
+/// fld qword ptr [rcx]
+/// ret
+/// _fld ENDP
+///
+/// _fstenv PROC
+/// fstenv qword ptr [rcx]
+/// ret
+/// _fstenv ENDP
+/// _TEXT ENDS
+/// END
+/// ```
+///
+/// And the C code to reads the value:
+///
+/// ```
+/// #include <cstdio>
+/// #include <cstdint>
+/// #include <cstring>
+///
+/// extern "C" void _fld(const uint64_t*);
+/// extern "C" void _fstenv(void*);
+///
+/// #pragma pack(1)
+/// struct Fnstenv_t {
+///     uint16_t fpcw;
+///     uint16_t reserved0;
+///     uint16_t fpsw;
+///     uint16_t reserved1;
+///     uint16_t fptw;
+///     uint16_t reserved2;
+///     uint32_t fpip;
+///     uint16_t fpop_selector;
+///     uint16_t fpop;
+///     uint32_t fpdp;
+///     uint16_t fpds;
+///     uint16_t reserved3;
+/// };
+///
+/// static_assert(sizeof(Fnstenv_t) == 28, "");
+///
+/// int main() {
+///     Fnstenv_t f = {};
+///     for (uint64_t Idx = 0; Idx < 8; Idx++) {
+///         _fstenv(&f);
+///         printf("real fptw: %x\n", f.fptw);
+///         __debugbreak();
+///         const uint64_t v = 1337 + Idx;
+///         _fld(&v);
+///
+///     }
+///     return 0;
+/// }
+/// ```
+///
+/// Below is a table I compiled that shows you the real @fptw register value
+/// and what WinDbg gives you.
+/// ```
+/// +----------------+----------------+--------------------------------+
+/// | State of stack | WinDbg's @fptw | Real fptw dumped with `fstenv` |
+/// +----------------+----------------+--------------------------------+
+/// | empty stack    |   0b00000000   +      0b11111111_11111111       |
+/// +----------------+----------------+--------------------------------+
+/// |    1 push      |   0b10000000   +      0b00111111_11111111       |
+/// +----------------+----------------+--------------------------------+
+/// |    2 push      |   0b11000000   +      0b00001111_11111111       |
+/// +----------------+----------------+--------------------------------+
+/// |    3 push      |   0b11100000   +      0b00000011_11111111       |
+/// +----------------+----------------+--------------------------------+
+/// |    4 push      |   0b11110000   +      0b00000000_11111111       |
+/// +----------------+----------------+--------------------------------+
+/// |    5 push      |   0b11111000   +      0b00000000_00111111       |
+/// +----------------+----------------+--------------------------------+
+/// |    6 push      |   0b11111100   +      0b00000000_00001111       |
+/// +----------------+----------------+--------------------------------+
+/// |    7 push      |   0b11111110   +      0b00000000_00000011       |
+/// +----------------+----------------+--------------------------------+
+/// |    9 push      |   0b11111111   +      0b00000000_00000000       |
+/// +----------------+----------------+--------------------------------+
+/// ```
+fn fptw(windbg_fptw: u64) -> u64 {
+    let mut out = 0;
+    for bit_idx in 0..8 {
+        let bits = (windbg_fptw >> bit_idx) & 0b1;
+        out |= if bits == 1 { 0b00 } else { 0b11 } << (bit_idx * 2);
+    }
+
+    out
+}
+
+/// Parse the IRQL level value from the output of `!irql`.
+fn parse_irql(s: &str) -> Option<u64> {
+    // Example: `Debugger saved IRQL for processor 0x0 -- 0 (LOW_LEVEL)`
+    s.split_once(" -- ")
+        .and_then(|(_, rest)| rest.split_whitespace().next())
+        .and_then(|level_str| level_str.parse::<u64>().ok())
+}
+
+/// Generate a directory name where we'll store the CPU state / memory dump.
+fn gen_state_folder_name(dbg: &DebugClient) -> Result<String> {
+    let addr = dbg.get_address_by_name("nt!NtBuildLabEx").unwrap_or(0);
+    let build_name = dbg.read_cstring(addr).unwrap_or("UnknownBuild".to_string());
+    let now = Local::now();
+
+    Ok(format!("state.{build_name}.{}", now.format("%Y%m%d_%H%M")))
+}
+
+/// Dump the register state.
+fn state(dbg: &DebugClient) -> Result<State<'_>> {
+    const CR4_OSXSAVE: u64 = 1 << 18;
+    let mut regs = dbg.regs64_dict(&[
+        "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rip", "rsp", "rbp", "r8", "r9", "r10", "r11",
+        "r12", "r13", "r14", "r15", "fpcw", "fpsw", "cr0", "cr2", "cr3", "cr4", "dr0", "dr1",
+        "dr2", "dr3", "dr6", "dr7", "mxcsr",
+    ])?;
+
+    // When a breakpoint is hit while windbg is attached, it seems like it might
+    // change the IRQL which leaves `cr8` with a 'bogus' value. That value isn't
+    // what it would be if your code would be executed outside of windbg / without a
+    // breakpoint, so windbg saves the 'real' value and is the value that `!irql`
+    // gives you back.
+    let cr8_s = dbg.exec_with_capture("!irql")?;
+    regs.insert(
+        "cr8",
+        if let Some(cr8) = parse_irql(&cr8_s) {
+            cr8
+        } else {
+            dlogln!(
+                dbg,
+                "Failed to parse irql from `!irql` (\"{}\") so setting cr8 to 0",
+                cr8_s.trim()
+            )?;
+
+            0
+        },
+    );
+
+    let xcr0 = if (regs.get("cr4").unwrap() & CR4_OSXSAVE) != 0 {
+        dbg.reg64("xcr0").unwrap()
+    } else {
+        0
+    };
+
+    assert!(
+        regs.insert("xcr0", xcr0).is_none(),
+        "xcr0 shouldn't be in regs"
+    );
+
+    assert!(
+        regs.insert("rflags", dbg.reg64("efl")?).is_none(),
+        "efl shouldn't be in regs"
+    );
+
+    let fptw = fptw(dbg.reg64("fptw")?);
+    assert!(
+        regs.insert("fptw", fptw).is_none(),
+        "fptw shouldn't be in regs"
+    );
+
+    // While looking into `dbgeng.dll` I found an array that gives the registers /
+    // indices for each of the supported platforms. The relevant one for 64-bit
+    // Intel is called `struct REGDEF near * g_Amd64Defs`. As far as I can tell,
+    // there's no mechanism available to dump @fpip / @fpipsel / @fpdp / @fpdpsel
+    // registers :-/... so we'll set it to zero.
+    assert!(
+        regs.insert("fpop", 0).is_none(),
+        "fpop shouldn't be in regs"
+    );
+
+    assert!(
+        regs.insert("fpip", 0).is_none(),
+        "fpip shouldn't be in regs"
+    );
+
+    assert!(
+        // Default value from linux kernel (stolen from `bdump.js`'s code):
+        //   https://elixir.bootlin.com/linux/latest/source/arch/x86/kernel/fpu/init.c#L117
+        regs.insert("mxcsr_mask", 0xffbf).is_none(),
+        "mxcsr_mask shouldn't be in regs"
+    );
+
+    let fpst = dbg
+        .regs128(&["st0", "st1", "st2", "st3", "st4", "st5", "st6", "st7"])?
+        .into_iter()
+        .map(Float80::from)
+        .collect();
+
+    let mut msrs = HashMap::from([
+        ("tsc", msr::TSC),
+        ("apic_base", msr::APIC_BASE),
+        ("sysenter_cs", msr::SYSENTER_CS),
+        ("sysenter_esp", msr::SYSENTER_ESP),
+        ("sysenter_eip", msr::SYSENTER_EIP),
+        ("pat", msr::PAT),
+        ("efer", msr::EFER),
+        ("star", msr::STAR),
+        ("lstar", msr::LSTAR),
+        ("cstar", msr::CSTAR),
+        ("sfmask", msr::SFMASK),
+        ("kernel_gs_base", msr::KERNEL_GS_BASE),
+        ("tsc_aux", msr::TSC_AUX),
+    ])
+    .into_iter()
+    .map(|(name, msr)| Ok((name, dbg.msr(msr)?)))
+    .collect::<Result<HashMap<_, _>>>()?;
+
+    let gdt = GlobalSeg::from(dbg.regs64(&["gdtr", "gdtl"])?);
+    let idt = GlobalSeg::from(dbg.regs64(&["idtr", "idtl"])?);
+
+    let selectors = dbg.regs64_dict(&["es", "cs", "ss", "ds", "tr", "gs", "fs", "ldtr"])?;
+    let mut segs = selectors
+        .into_iter()
+        .map(|(name, selector)| Ok((name, dbg.gdt_entry(gdt.base, gdt.limit, selector)?)))
+        .collect::<Result<HashMap<_, _>>>()?;
+
+    // Fix up @gs / @fs base with the appropriate MSRs.
+    let mut gs_base = dbg.msr(msr::GS_BASE)?;
+    segs.get_mut("gs").unwrap().base = gs_base;
+    segs.get_mut("fs").unwrap().base = dbg.msr(msr::FS_BASE)?;
+
+    let rip = *regs.get("rip").unwrap();
+    let gs = segs.get_mut("gs").unwrap();
+    let mode_matches = is_usermode_addr(rip) == is_usermode_addr(gs.base);
+    if !mode_matches {
+        let kernel_gs_base = msrs.get_mut("kernel_gs_base").unwrap();
+        mem::swap(&mut gs_base, kernel_gs_base);
+        segs.get_mut("gs").unwrap().base = gs_base;
+    }
+
+    let gsegs = HashMap::from([("gdtr", gdt), ("idtr", idt)]);
+    let sse = dbg
+        .regs128_dict(&[
+            "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7", "xmm8", "xmm9",
+            "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15",
+        ])?
+        .into_iter()
+        .map(|(k, v)| (k, Zmm::from(v)))
+        .collect();
+
+    let generated_by = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+    Ok(State {
+        regs,
+        segs,
+        gsegs,
+        fpst,
+        msrs,
+        sse,
+        generated_by,
+    })
+}
+
+#[derive(Clone, Default, ValueEnum)]
+enum SnapshotKind {
+    #[default]
+    ActiveKernel,
+    Full,
+}
+
+#[derive(Parser)]
+#[clap(no_binary_name = true)]
+struct SnapshotArgs {
+    /// The kind of snapshot to take.
+    #[clap(default_value = "full", long, short)]
+    kind: SnapshotKind,
+    /// The path to save the snapshot to.
+    state_path: Option<PathBuf>,
+}
+
+/// This is where the meat is - this function generates the `state` folder made
+/// of the CPU register as well as the memory dump.
+fn snapshot_inner(dbg: &DebugClient, args: SnapshotArgs) -> Result<()> {
+    // Let's make sure this is a live kernel, not a dump, etc..
+    let is_live_kernel = matches!(
+        dbg.debuggee_type()?,
+        (
+            DEBUG_CLASS_KERNEL,
+            DEBUG_KERNEL_EXDI_DRIVER | DEBUG_KERNEL_LOCAL | DEBUG_KERNEL_CONNECTION
+        )
+    );
+
+    if !is_live_kernel {
+        bail!("expected a live kernel debugging session");
+    }
+
+    // ... and the target is an x64 architecture..
+    let is_intel64 = matches!(dbg.processor_type()?, IMAGE_FILE_MACHINE_AMD64);
+    if !is_intel64 {
+        bail!("expected an Intel 64-bit guest target");
+    }
+
+    // ... and the amount of processors of the target.
+    if dbg.processor_number()? > 1 {
+        bail!("expected to have only one core to dump the state of");
+    }
+
+    // Build the state path.
+    let state_path = {
+        // Grab the path the user gave or the temp directory.
+        let base_path = args.state_path.unwrap_or(env::temp_dir());
+        if base_path.exists() {
+            // If the user specified a path that exists, then generate a directory name for
+            // them.
+            base_path.join(gen_state_folder_name(dbg)?)
+        } else {
+            // Otherwise, we use it as is
+            base_path
+        }
+    };
+
+    fs::create_dir(&state_path)?;
+
+    // Build the `regs.json` / `mem.dmp` path.
+    let regs_path = state_path.join("regs.json");
+    let mem_path = state_path.join("mem.dmp");
+
+    if regs_path.exists() {
+        bail!("{:?} already exists", regs_path);
+    }
+
+    if mem_path.exists() {
+        bail!("{:?} already exists", mem_path);
+    }
+
+    // All right, let's get to work now. First, grab the CPU state.
+    let state = state(dbg)?;
+
+    // Turn the state into a JSON value.
+    let mut json = serde_json::to_value(state)?;
+
+    // Walk a JSON `Value` and turn every `Number` into a `String`.
+    // This is useful to turn every integer in your JSON document into an hex
+    // encoded string.
+    fn fix_number_nodes(v: &mut serde_json::Value) {
+        match v {
+            Value::Number(n) => *v = Value::String(format!("{:#x}", n.as_u64().unwrap())),
+            Value::Array(a) => a.iter_mut().for_each(fix_number_nodes),
+            Value::Object(o) => o.values_mut().for_each(fix_number_nodes),
+            _ => {}
+        }
+    }
+
+    fix_number_nodes(&mut json);
+
+    // Dump the CPU register into a `regs.json` file.
+    dlogln!(dbg, "Dumping the CPU state into {}..", regs_path.display())?;
+
+    let regs_file = File::create(regs_path)?;
+    serde_json::to_writer_pretty(regs_file, &json)?;
+
+    dlogln!(
+        dbg,
+        "Dumping the memory state into {}..",
+        mem_path.display()
+    )?;
+
+    // Generate the `mem.dmp`.
+    dbg.exec(format!(
+        ".dump /{} {:?}",
+        match args.kind {
+            // Create a dump with active kernel and user mode memory.
+            SnapshotKind::ActiveKernel => "ka",
+            // A Complete Memory Dump is the largest kernel-mode dump file. This file includes all
+            // of the physical memory that is used by Windows. A complete memory dump does not, by
+            // default, include physical memory that is used by the platform firmware.
+            SnapshotKind::Full => "f",
+        },
+        mem_path
+    ))?;
+
+    dlogln!(dbg, "Done!")?;
+
+    Ok(())
+}
+
+pub type RawIUnknown = *mut std::ffi::c_void;
+
+/// This is a wrapper function made to be able to display the error in case the
+/// inner function fails.
+fn wrap<P: Parser>(
+    raw_client: RawIUnknown,
+    args: PCSTR,
+    callback: impl FnOnce(&DebugClient, P) -> Result<()>,
+) -> HRESULT {
+    // We do not own the `raw_client` interface  so we want to created a borrow. If
+    // we don't, the object will get Release()'d when it gets dropped which will
+    // lead to a use-after-free.
+    let Some(client) = (unsafe { IUnknown::from_raw_borrowed(&raw_client) }) else {
+        return E_ABORT;
+    };
+
+    let Ok(dbg) = DebugClient::new(client) else {
+        return E_ABORT;
+    };
+
+    let Ok(args) = (unsafe { args.to_string() }) else {
+        return E_ABORT;
+    };
+
+    // Parse the arguments using `clap`. Currently splitting arguments by
+    // whitespaces.
+    let args = match P::try_parse_from(args.split_whitespace()) {
+        Ok(a) => a,
+        Err(e) => {
+            let _ = dlogln!(dbg, "{e}");
+            return E_ABORT;
+        }
+    };
+
+    match callback(&dbg, args) {
+        Err(e) => {
+            let _ = dlogln!(dbg, "Ran into an error: {e:?}");
+
+            E_ABORT
+        }
+        Ok(_) => S_OK,
+    }
+}
+
+#[unsafe(no_mangle)]
+extern "C" fn snapshot(raw_client: RawIUnknown, args: PCSTR) -> HRESULT {
+    wrap(raw_client, args, snapshot_inner)
+}
+
+/// The DebugExtensionInitialize callback function is called by the engine after
+/// loading a DbgEng extension DLL. https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/dbgeng/nc-dbgeng-pdebug_extension_initialize
+#[unsafe(no_mangle)]
+extern "C" fn DebugExtensionInitialize(_version: *mut u32, _flags: *mut u32) -> HRESULT {
+    S_OK
+}
+
+#[unsafe(no_mangle)]
+extern "C" fn DebugExtensionUninitialize() {}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+
+    use crate::parse_irql;
+
+    #[test]
+    fn fptw() {
+        let expected = BTreeMap::from([
+            (0b00000000, 0b1111111111111111),
+            (0b10000000, 0b0011111111111111),
+            (0b11000000, 0b0000111111111111),
+            (0b11100000, 0b0000001111111111),
+            (0b11110000, 0b0000000011111111),
+            (0b11111000, 0b0000000000111111),
+            (0b11111100, 0b0000000000001111),
+            (0b11111110, 0b0000000000000011),
+            (0b11111111, 0b0000000000000000),
+        ]);
+
+        for (windbg, expected_fptw) in expected {
+            let fptw = super::fptw(windbg);
+            assert_eq!(
+                fptw, expected_fptw,
+                "fptw({}) returned {} instead of expect {}",
+                windbg, fptw, expected_fptw
+            );
+        }
+    }
+
+    #[test]
+    fn irql() {
+        assert_eq!(
+            parse_irql("Debugger saved IRQL for processor 0x0 -- 0 (LOW_LEVEL)"),
+            Some(0)
+        );
+        assert_eq!(
+            parse_irql("Debugger saved IRQL for processor 0x0 -- 2 (DISPATCH_LEVEL)"),
+            Some(2)
+        );
+        assert_eq!(
+            parse_irql("Debugger saved IRQL for processor 0x0 -- bleh (LOW_LEVEL)"),
+            None
+        );
+    }
+}
+
+```
+
+`src/state.rs`:
+
+```rs
+// Axel '0vercl0k' Souchet - January 21 2024
+use std::collections::HashMap;
+
+use dbgeng::client::Seg;
+use serde::Serialize;
+
+#[derive(Default, Debug, Serialize)]
+pub struct Zmm([u64; 8]);
+
+impl From<u128> for Zmm {
+    fn from(value: u128) -> Self {
+        let q0 = u64::try_from(value & 0xff_ff_ff_ff_ff_ff_ff_ff).unwrap();
+        let q1 = u64::try_from(value >> 64).unwrap();
+
+        Zmm([q0, q1, 0, 0, 0, 0, 0, 0])
+    }
+}
+
+#[derive(Default, Debug, Serialize)]
+pub struct GlobalSeg {
+    pub base: u64,
+    pub limit: u16,
+}
+
+impl From<Vec<u64>> for GlobalSeg {
+    fn from(value: Vec<u64>) -> Self {
+        assert!(
+            value.len() == 2,
+            "the vector should have the base and the limit"
+        );
+
+        Self {
+            base: value[0],
+            limit: value[1] as u16,
+        }
+    }
+}
+
+#[derive(Default, Debug, Serialize)]
+pub struct Float80 {
+    fraction: u64,
+    exp: u16,
+}
+
+impl From<u128> for Float80 {
+    fn from(value: u128) -> Self {
+        let fraction = (value & 0xff_ff_ff_ff_ff_ff_ff_ff).try_into().unwrap();
+        let exp = ((value >> 64) & 0xff_ff).try_into().unwrap();
+
+        Self { fraction, exp }
+    }
+}
+
+#[derive(Default, Debug, Serialize)]
+pub struct State<'a> {
+    #[serde(flatten)]
+    pub regs: HashMap<&'a str, u64>,
+
+    #[serde(flatten)]
+    pub segs: HashMap<&'a str, Seg>,
+
+    #[serde(flatten)]
+    pub gsegs: HashMap<&'a str, GlobalSeg>,
+
+    #[serde(flatten)]
+    pub sse: HashMap<&'a str, Zmm>,
+
+    pub fpst: Vec<Float80>,
+
+    #[serde(flatten)]
+    pub msrs: HashMap<&'a str, u64>,
+
+    pub generated_by: String,
+}
+
+```
