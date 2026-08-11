@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:ianveig29/cs2-internals`: entity [[cs2-internals]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].
+
 - **2026-08-11** — ingest `description:xfi0/Titled-Gui-CS2`: entity [[titled-gui-cs2]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-11** — ingest `readme:categories`: bumped Cheat ~2676 (was ~2674; Anti Cheat ~661 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
