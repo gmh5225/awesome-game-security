@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PreventVAC`: entity [[prevent-vac]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-10** — ingest `description:gmh5225/ProcessKiller-BYOVD`: entity [[process-killer-byovd]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-10** — ingest `description:gmh5225/Pubg-Lite-ESP`: entity [[pubg-lite-esp]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].

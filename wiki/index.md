@@ -1107,6 +1107,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)
 - [Ponytail Risk](entities/ponytail-risk.md) — OSS behavioral risk control + evidence review for private game servers (Rust agent, C ABI SDK, shadow mode)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
+- [prevent-vac](entities/prevent-vac.md) — VAC monitoring inhibition via `steamserver.dll` / WinAPI return spoofing (`vac_monitor_manager`; gmh5225; explore anticheat:vac)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [UPGDSED](entities/upgdsed.md) — runtime PatchGuard + DSE disable (vulnerable drivers, CI.dll, KPP context; Win7–11; hfiref0x)
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)
