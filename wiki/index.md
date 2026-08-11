@@ -1113,6 +1113,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PoCsmith](entities/pocsmith.md) — AI Windows PoC gen (Claude + MCP Hyper-V/kd/Ghidra; patchwatch → verify VMs)
 - [pokemongo-dumper](entities/pokemongo-dumper.md) — Pokemon GO Unity IL2CPP dumper (C#/C++; cheat / game:pokemongo; gmh5225)
 - [pom-pom](entities/pom-pom.md) — Honkai: Star Rail simple cheat (C/C++; hooking / overlays; cheat / game:honkai star rail; gmh5225)
+- [ptfaketouch](entities/ptfaketouch.md) — iOS synthetic touch library (IOKit/UIKit inject; game bot / UI automation; gmh5225)
 - [PTEditor](entities/pteditor.md) — cross-platform page-table editor (PGD/PUD/PMD/PTE R/W; VA→PA; PAT/NX/TLB; Linux LKM + Windows driver; Some Tricks / PTE Hook)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
