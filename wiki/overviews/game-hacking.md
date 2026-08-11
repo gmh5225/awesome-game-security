@@ -648,6 +648,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Valorant-External-P2C-Leaked.md
   - wiki/sources/descriptions/gmh5225__Valorant-External-1.md
   - wiki/sources/descriptions/gmh5225__lol_patcher.md
+  - wiki/sources/descriptions/gmh5225__LoLClient.md
   - wiki/sources/descriptions/gmh5225__lol-offset-dumper.md
   - wiki/sources/descriptions/gmh5225__lol-unpackman.md
   - wiki/sources/descriptions/gmh5225__league-base.md
@@ -1231,6 +1232,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - LoL cheat base frameworks such as [[league-base]] (C++; memory read, object enumeration, champion data, overlay rendering; Packman/Vanguard considerations; gmh5225) sit in the same LoL offensive research lane as full cheat scaffolds rather than dump-only tooling. (source: wiki/sources/descriptions/gmh5225__league-base.md)
 - LoL modding samples such as [[hh-lol-prophet]] (Go; hh lol prophet; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as client modding study rather than dump or base-scaffold tooling. (source: wiki/sources/descriptions/gmh5225__hh-lol-prophet.md)
 - LoL assistant client samples such as [[frank]] (JavaScript; WeGame replacement; rendering, animation, asset pipelines; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as launcher/client-side study rather than cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__frank.md)
+- Custom or modified LoL client implementations such as [[lol-client]] (gmh5225; alternative client/protocol for client-server communication and game-state analysis; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as wire/state study rather than patcher, dump, or cheat-base tooling. (source: wiki/sources/descriptions/gmh5225__LoLClient.md)
 - LoL external script platforms such as [[ayaya-league-external]] (Node.js; AyayaLeague; custom user scripts; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as out-of-process scripting substrates rather than cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__ayaya-league-external.md)
 - LoL hypervisor-assisted samples such as [[vanderleague]] (C/C++; kernel driver development + rendering; hypervisor-assisted offensive stack; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as below-OS / HV-assisted study rather than in-guest cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__VanderLeague.md)
 - TFT OCR automation bots such as [[tft-ocr-bot]] (Python; asset pipelines + overlay rendering; screen OCR for automated Teamfight Tactics play; gmh5225; cheat / game:lol `[TFT]`) sit in the same LoL offensive research lane under [[vanguard]] as out-of-process visual automation rather than in-guest memory cheats or dump tooling. (source: wiki/sources/descriptions/gmh5225__TFT-OCR-BOT.md)
