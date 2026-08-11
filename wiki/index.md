@@ -866,6 +866,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStory Artale Explab](entities/maplestory-artale-explab.md) — MapleStory Worlds Artale experience/HP-MP cost lab (optimal training spots, exp rates, leveling paths; game-mechanics / game:maplestory; gmh5225)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
+- [MapleStory Detection Sample Generator](entities/maplestory-detection-sample-generator.md) — synthetic MapleStory cheat-detection / object-detection training samples (multiple formats; anti-cheat development; game:maplestory; gmh5225)
 - [MapleStory143](entities/maplestory143.md) — MapleStory v143 CMS private server (Java/Kotlin; LoginCrypto / Netty·MINA / CheatTracker; Private Server-CMS-143)
 - [MapleStory v83 MaplestoryCPP](entities/maplestory-v83-maplestory-cpp.md) — MapleStory GMS-083 private server (C/C++; editor tooling / modding / SDK generation; Private Server-GMS-083 / game:maplestory; gmh5225)
 - [RustMS](entities/rustms.md) — MapleStory private-server emulator (Rust; login/character/channel servers; player/NPC/quest/combat; memory-safe server logic; Private Server-Rust / game:maplestory; gmh5225)

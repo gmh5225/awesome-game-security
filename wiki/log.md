@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/MapleStoryDetectionSampleGenerator`: entity [[maplestory-detection-sample-generator]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-11** — ingest `description:gmh5225/MatScan`: entity [[matscan]]; cited on [[il2cpp]] and [[overviews/game-hacking]].
 
 - **2026-08-11** — ingest `description:gmh5225/MemTools`: entity [[memtools]]; cited on [[overviews/dma-attack]] and [[dma]].
