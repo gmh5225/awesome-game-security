@@ -14,7 +14,7 @@ Custom or modified **MapleStory** game client (**HeavenMS Client**, gmh5225): im
 
 Useful for game security researchers and private-server developers studying MapleStory client architecture, protocol handling, and presentation stacks—not live official-client anti-cheat bypass tooling.
 
-Complements HeavenMS server emulators such as [[maplestory-server]], from-scratch client reimplementations such as [[maplestory-heavenclient]], GM/admin clients such as [[maplestory-gm-client]], other client stacks such as [[winapi-maplestory]], and WZ tooling such as [[wzcomparerr2]] and [[maplestory-packer-modpacker]].
+Complements HeavenMS server emulators such as [[maplestory-server]], from-scratch client reimplementations such as [[maplestory-heavenclient]], GM/admin clients such as [[maplestory-gm-client]], CMS v95 client address tables such as [[maplestory-cms95-client-address]], other client stacks such as [[winapi-maplestory]], and WZ tooling such as [[wzcomparerr2]] and [[maplestory-packer-modpacker]].
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements HeavenMS server emulators such as [[maplestory-server]], from-scratc
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/game-hacking]] · [[maplestory-server]] · [[maplestory-heavenclient]] · [[maplestory-gm-client]] · [[winapi-maplestory]] · [[wzcomparerr2]] · [[maplestory-packer-modpacker]]
+[[overviews/game-engine]] · [[overviews/game-hacking]] · [[maplestory-server]] · [[maplestory-heavenclient]] · [[maplestory-gm-client]] · [[maplestory-cms95-client-address]] · [[winapi-maplestory]] · [[wzcomparerr2]] · [[maplestory-packer-modpacker]]

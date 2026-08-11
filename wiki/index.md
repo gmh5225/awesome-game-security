@@ -864,6 +864,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
 - [MapleStory Build Framework](entities/maplestory-build-framework.md) — MapleStory private-server client build framework (C/C++; individualized distribution + rudimentary anti-cheat; Anti Cheat / game:maplestory)
 - [MapleStory Client (HeavenMS)](entities/maplestory-client.md) — MapleStory custom/modified client (rendering / network protocol / UI; private-server connectivity; HeavenMS Client / game:maplestory; gmh5225)
+- [MapleStory CMS95 Client Address](entities/maplestory-cms95-client-address.md) — CMS v95 client memory addresses/offsets (function pointers, structure offsets, hook points; modding / private-server dev; CMS-095 Client Analysis / game:maplestory; gmh5225)
 - [MapleStory Artale Explab](entities/maplestory-artale-explab.md) — MapleStory Worlds Artale experience/HP-MP cost lab (optimal training spots, exp rates, leveling paths; game-mechanics / game:maplestory; gmh5225)
 - [MapleStory Auto Level Up](entities/maplestory-auto-level-up.md) — MapleStory Artale animation-based auto level-up bot (Python; cheat / game:maplestory; gmh5225)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
