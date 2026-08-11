@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Overwatch-2-Cheat-Aimbot-Esp`: entity [[overwatch-2-cheat-aimbot-esp]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-11** — ingest `description:gmh5225/Overwatch2-colorbot-Cheats`: entity [[overwatch2-colorbot-cheats]]; cited on [[overviews/game-hacking]] and [[hardware-input-injection]].
 
 - **2026-08-11** — ingest `readme:categories`: bumped Anti Cheat ~662 (was ~661; Cheat ~2677 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
