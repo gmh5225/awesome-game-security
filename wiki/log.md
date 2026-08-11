@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/OW2-wardenrekter`: entity [[ow2-wardenrekter]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
+
 - **2026-08-11** — ingest `description:gmh5225/OfflineCrashDumpUefi`: entity [[offline-crash-dump-uefi]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-11** — ingest `description:gmh5225/OffsetStreaming`: entity [[offset-streaming]]; cited on [[overviews/game-hacking]] and [[source-netvars]].

@@ -1027,6 +1027,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Overwatch 2 Cheat Aimbot Esp](entities/overwatch-2-cheat-aimbot-esp.md) — Overwatch 2 C/C++ internal aimbot + ESP (rendering / hooking / memory analysis; AHK pairing; cheat / game:overwatch2; gmh5225)
 - [Overwatch IAT Fixer](entities/overwatch-iat-fixer.md) — Overwatch protected-EXE IAT repair (obfuscated/encrypted import reconstruction; disassembler analysis; cheat / game:overwatch)
 - [Overwatch2 Colorbot Cheats](entities/overwatch2-colorbot-cheats.md) — Overwatch 2 Python colorbot + Arduino Leonardo serial HID (purple outline pixel detection; shoot/silent-aim; cheat / game:overwatch2)
+- [OW2 Wardenrekter](entities/ow2-wardenrekter.md) — Overwatch 2 Warden AC disable DLL (VEH/INT3 patch, PEB anti-debug, timing/API stubs, DR0 demo; Emulate OW2 AC; gmh5225)
 - [Ow-Outlines](entities/ow-outlines.md) — Overwatch internal glow/outline ESP (injected DLL; GlowESP offset + VEH; outline rendering memory writes; cheat / game:overwatch)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
