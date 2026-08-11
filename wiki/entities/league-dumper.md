@@ -12,7 +12,7 @@ confidence: medium
 
 **Process memory dumper** adapted for **League of Legends** anti-cheat protections (gmh5225; cheat / game:lol `[Dump]`). Forked from **Process Dump** with modifications for LoL **code encryption**: hidden module discovery, loose code-chunk extraction, and import reconstruction with clean-hash filtering. Aimed at game security researchers and reverse engineers studying offensive dump techniques under [[vanguard]]-protected Riot clients. (source: wiki/sources/descriptions/gmh5225__LeagueDumper.md)
 
-Sits beside [[lol-offset-dumper]] and [[lol-unpackman]] in the LoL dump/unpack lane—full process-memory PE reconstruction rather than live offset feeds or `.text` section decrypt-only tooling.
+Sits beside [[lol-offset-dumper]], [[lol-unpackman]], and [[league-unpacker]] in the LoL dump/unpack lane—full process-memory PE reconstruction rather than live offset feeds or `.text` section decrypt-only tooling.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside [[lol-offset-dumper]] and [[lol-unpackman]] in the LoL dump/unpack l
 
 ## Related
 
-[[vanguard]] · [[lol-offset-dumper]] · [[lol-unpackman]] · [[lol-patcher]] · [[league-base]] · [[ksdumper-11]] · [[nemesis]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[vanguard]] · [[lol-offset-dumper]] · [[lol-unpackman]] · [[league-unpacker]] · [[lol-patcher]] · [[league-base]] · [[ksdumper-11]] · [[nemesis]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

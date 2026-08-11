@@ -838,6 +838,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [league-base](entities/league-base.md) — C++ LoL cheat base framework (memory read, object enum, overlay; Packman/Vanguard; gmh5225; cheat / game:lol)
 - [league-dumper](entities/league-dumper.md) — LoL process memory dumper (Process Dump fork; code encryption, hidden modules, import reconstruction; gmh5225; cheat / game:lol [Dump])
 - [league-skin-changer](entities/league-skin-changer.md) — internal LoL skin changer (DX9/11 hooks + ImGui; champion/minion/jungle skins; auto DB updates; Skin; gmh5225; cheat / game:lol)
+- [league-unpacker](entities/league-unpacker.md) — LoL `.text` decrypt/dump tool (DLL injection; IDA static analysis; manual base input; gmh5225; cheat / game:lol [Dump])
 - [leaguesharp](entities/leaguesharp.md) — LoL scripting/modding platform (JungleTimerHax, SkinHax, champion resize; LoL internal APIs; gmh5225; cheat / game:lol)
 - [leaguesharp-loader](entities/leaguesharp-loader.md) — C# LeagueSharp loader (DirectX + hooking; bootstrap for LeagueSharp modules; gmh5225; cheat / game:lol)
 - [lol-client](entities/lol-client.md) — custom/modified LoL client for protocol and game-state research (gmh5225; cheat / game:lol)

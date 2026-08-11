@@ -18,4 +18,4 @@ C++ **League of Legends** client unpacker sample (gmh5225; cheat / game:lol). Ce
 
 ## Related
 
-[[vanguard]] · [[lol-patcher]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[vanguard]] · [[league-unpacker]] · [[league-dumper]] · [[lol-patcher]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

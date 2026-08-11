@@ -652,6 +652,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__LoLClient.md
   - wiki/sources/descriptions/gmh5225__lol-offset-dumper.md
   - wiki/sources/descriptions/gmh5225__LeagueDumper.md
+  - wiki/sources/descriptions/gmh5225__League-Unpacker.md
   - wiki/sources/descriptions/gmh5225__lol-unpackman.md
   - wiki/sources/descriptions/gmh5225__league-base.md
   - wiki/sources/descriptions/gmh5225__hh-lol-prophet.md
@@ -1235,6 +1236,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - LoL client unpacker samples such as [[lol-unpackman]] (C++; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane beside patcher/mod tooling. (source: wiki/sources/descriptions/gmh5225__lol-unpackman.md)
 - LoL offset dump samples such as [[lol-offset-dumper]] (C/C++; memory analysis; gmh5225; cheat / game:lol `[Dump]`) sit in the same LoL offensive research lane for live client layout dumps. (source: wiki/sources/descriptions/gmh5225__lol-offset-dumper.md)
 - LoL process memory dump samples such as [[league-dumper]] (Process Dump fork; LoL code encryption; hidden modules, loose code chunks, import reconstruction; gmh5225; cheat / game:lol `[Dump]`) sit in the same LoL offensive research lane for full PE reconstruction under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__LeagueDumper.md)
+- LoL `.text` decrypt/dump samples such as [[league-unpacker]] (DLL injection; decrypts protected `.text`; dumps for IDA static analysis with manual base input; gmh5225; cheat / game:lol `[Dump]`) sit in the same LoL offensive research lane for `.text`-focused static RE rather than full PE reconstruction. (source: wiki/sources/descriptions/gmh5225__League-Unpacker.md)
 - LoL cheat base frameworks such as [[league-base]] (C++; memory read, object enumeration, champion data, overlay rendering; Packman/Vanguard considerations; gmh5225) sit in the same LoL offensive research lane as full cheat scaffolds rather than dump-only tooling. (source: wiki/sources/descriptions/gmh5225__league-base.md)
 - LoL modding samples such as [[hh-lol-prophet]] (Go; hh lol prophet; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as client modding study rather than dump or base-scaffold tooling. (source: wiki/sources/descriptions/gmh5225__hh-lol-prophet.md)
 - LoL assistant client samples such as [[frank]] (JavaScript; WeGame replacement; rendering, animation, asset pipelines; gmh5225; cheat / game:lol) sit in the same LoL offensive research lane under [[vanguard]] as launcher/client-side study rather than cheat bases or dump tooling. (source: wiki/sources/descriptions/gmh5225__frank.md)
