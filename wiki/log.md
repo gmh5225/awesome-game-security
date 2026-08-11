@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Nathans-Tarkov-Radar-Public`: entity [[nathans-tarkov-radar-public]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
+
 - **2026-08-11** — ingest `description:gmh5225/NeacSafe-Analysis`: entity [[neacsafe-analysis]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-11** — ingest `description:gmh5225/NlsCodeInjectionThroughRegistry`: entity [[nls-code-injection-through-registry]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
