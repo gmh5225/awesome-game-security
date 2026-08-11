@@ -1627,6 +1627,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Accenture/protobuf-finder [Protobuf]
 - https://github.com/gmh5225/golang_loader_assist [GO Reversed]
 - https://github.com/gmh5225/GhidraDec [Ghidra Decompiler]
+- https://github.com/siesta/mcore-decompiler [IDA Pro 9.4 plugin decompiling Motorola M·CORE firmware into structured C pseudocode with stack-frame and control-flow recovery]
 - https://github.com/gmh5225/EasyRe [Trace Execution]
 - https://github.com/gmh5225/ida_ps5_elf_plugin [PS5 elf loader]
 - https://github.com/gmh5225/tenet [Execution Traces]
@@ -3034,6 +3035,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
 - https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
 - https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
+- https://github.com/nekoyahouse/epsilon [Open-source NeoForge and Fabric Minecraft utility client with modular addon system and custom Lumin/PrismRHI rendering stack]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
