@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/NMI-nmi_callback`: entity [[nmi-nmi-callback]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-11** — ingest `description:gmh5225/NMICallbackBlocker2`: entity [[nmi-callback-blocker2]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-11** — ingest `description:gmh5225/NVDrv`: entity [[nvdrv]]; cited on [[byovd]] and [[overviews/windows-kernel]].

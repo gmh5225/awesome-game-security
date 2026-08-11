@@ -975,6 +975,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nv-graphics-mesa](entities/nv-graphics-mesa.md) — read-only Mesa 3D mirror (OpenGL/Vulkan reference implementation; 3D Graphics; gmh5225)
 - [NMI Callback](entities/nmi-callback.md) — C/C++ kernel NMI callback driver research (Detection: Hacked Hypervisor)
 - [NMICallbackBlocker2](entities/nmi-callback-blocker2.md) — C++ kernel PoC to disable NMI callbacks (cheat / windows kernel explorer; gmh5225)
+- [NMI nmi_callback](entities/nmi-nmi-callback.md) — Windows kernel PoC to register/trigger NMI callbacks and inspect thread contexts (BattlEye-style detection study; gmh5225)
 - [nohv](entities/nohv.md) — C/C++ hypervisor VM-detection benchmark suite (kernel driver; Detection: Hacked Hypervisor)
 - [nokd](entities/nokd.md) — stealth kernel debugger protocol (local KdDebuggerDataBlock decode → WinDbg; no ntoskrnl KD globals)
 - [NTFS-EFI](entities/ntfs-efi.md) — native UEFI x64 NTFS R/W driver (EfiNtfs; EFI Commander pre-boot FM; chkdsk-clean unmount)

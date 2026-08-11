@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ kernel driver research project focused on **NMI (Non-Maskable Interrupt) callbacks** — the `KeRegisterNmiCallback` / per-CPU NMI handler surface used for debugger detection, cross-processor integrity checks, and other Ring0 monitoring that can intersect hacked-hypervisor stress testing. Aimed at anti-cheat engineers and defensive researchers in the `Detection: Hacked Hypervisor` lane. (source: wiki/sources/descriptions/helloobaby__Nmi-Callback.md)
 
-Sits beside broader [[kernel-callbacks]] research (process/image/Ob notify) and complements hacked-hypervisor detectors such as [[hypervisor-detection]], benchmark suites such as [[nohv]], and AMD SVM stress tooling such as [[baresvm]].
+Sits beside broader [[kernel-callbacks]] research (process/image/Ob notify), related gmh5225 NMI PoCs such as [[nmi-nmi-callback]] (register/trigger) and [[nmi-callback-blocker2]] (disable), and complements hacked-hypervisor detectors such as [[hypervisor-detection]], benchmark suites such as [[nohv]], and AMD SVM stress tooling such as [[baresvm]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside broader [[kernel-callbacks]] research (process/image/Ob notify) and 
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[kernel-callbacks]] · [[hypervisor-detection]] · [[nohv]] · [[baresvm]] · [[checkhv-um]] · [[hvci]]
+[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[kernel-callbacks]] · [[nmi-nmi-callback]] · [[nmi-callback-blocker2]] · [[hypervisor-detection]] · [[nohv]] · [[baresvm]] · [[checkhv-um]] · [[hvci]]

@@ -12,7 +12,7 @@ confidence: medium
 
 C++ Windows kernel proof of concept focused on **disabling NMI (Non-Maskable Interrupt) callbacks** — the `KeRegisterNmiCallback` surface anti-cheat and security software use for cross-processor debugger detection, hidden-thread inspection, and other Ring0 integrity checks. Aimed at game-security researchers and reverse engineers studying offensive kernel techniques in the cheat / Windows kernel explorer lane. (source: wiki/sources/descriptions/gmh5225__NMICallbackBlocker2.md)
 
-Complements defensive NMI callback research such as [[nmi-callback]] and sits beside broader [[kernel-callbacks]] manipulation tooling such as [[ps-notif-routine-unloader]] and [[rtoolz]].
+Complements defensive NMI callback research such as [[nmi-callback]], register/trigger PoCs such as [[nmi-nmi-callback]], and sits beside broader [[kernel-callbacks]] manipulation tooling such as [[ps-notif-routine-unloader]] and [[rtoolz]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements defensive NMI callback research such as [[nmi-callback]] and sits be
 
 ## Related
 
-[[nmi-callback]] · [[kernel-callbacks]] · [[ps-notif-routine-unloader]] · [[rtoolz]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[nmi-callback]] · [[nmi-nmi-callback]] · [[kernel-callbacks]] · [[ps-notif-routine-unloader]] · [[rtoolz]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
