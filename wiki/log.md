@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PUBGM-PUBGPatcher`: entity [[pubgm-pubgpatcher]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-11** — ingest `description:gmh5225/PUBGM1.6-DeadGame`: entity [[pubgm1.6-deadgame]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]].
 
 - **2026-08-11** — ingest `description:gmh5225/PUBGSTAR`: entity [[pubgstar]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
