@@ -4,7 +4,8 @@ kind: concept
 topics: [game-hacking, anti-cheat]
 sources:
   - wiki/sources/skills/game-hacking.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/gmh5225__Overwatch2-colorbot-Cheats.md
+updated: 2026-08-11
 confidence: medium
 ---
 
@@ -34,7 +35,7 @@ Not a universal stealth ranking—measure per title and AC generation:
 4. Known filter drivers — driver identity and load path
 5. User-mode injection APIs — direct syscall/API telemetry
 
-Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-signatures, server replay). Offensive smoothing samples: [[human-mouse-movement]], [[pine]].
+Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-signatures, server replay). Offensive smoothing samples: [[human-mouse-movement]], [[pine]]. End-to-end colorbot + Arduino Leonardo serial HID samples such as [[overwatch2-colorbot-cheats]] (Python screen purple-outline detection → aim deltas → 115200-baud serial → chunked `Mouse.move()`; cheat / game:overwatch2) illustrate the Arduino/Teensy class in a zero-memory visual pipeline. (source: wiki/sources/descriptions/gmh5225__Overwatch2-colorbot-Cheats.md)
 
 ## Related
 
