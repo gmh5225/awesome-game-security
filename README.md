@@ -4545,6 +4545,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Fuzzer
 - https://github.com/0vercl0k/wtf
+- https://github.com/0vercl0k/snapshot [Rust WinDbg extension that dumps CPU register state and VM physical memory for snapshot-based kernel fuzzing (companion to wtf)]
 - https://github.com/kernullist/kernforge [Go workbench for Windows/anti-cheat project analysis, fuzzing, and evidence-backed verification]
 
 > OpenCV
