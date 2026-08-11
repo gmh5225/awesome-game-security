@@ -983,6 +983,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ntoskrnlwalker](entities/ntoskrnlwalker.md) — ntoskrnl offset/gadget/symbol resolver (target-build kernel structure navigation)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
 - [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
+- [NtUserInjectMouseInput-syscall](entities/ntuserinjectmouseinput-syscall.md) — win32k NtUserInjectMouseInput syscall path (user-mode mouse injection; triggerbot/aimbot primitives; gmh5225)
 - [nullmap](entities/nullmap.md) — Windows driver mapper with post-map trace cleanup (header zero, pool unlink; Afd.sys; gmh5225)
 - [NullDriverCheat](entities/nulldriver-cheat.md) — Win11 Null-pattern dxgkrnl export hook (`NtOpenCompositionSurfaceSectionInfo`; covert KM↔UM R/W + GDI helpers; gmh5225)
 - [nstool](entities/nstool.md) — general-purpose Switch read/extract tool (console emulator / Switch research)
