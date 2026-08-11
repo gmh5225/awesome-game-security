@@ -870,6 +870,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStory Detection Sample Generator](entities/maplestory-detection-sample-generator.md) — synthetic MapleStory cheat-detection / object-detection training samples (multiple formats; anti-cheat development; game:maplestory; gmh5225)
 - [MapleStory143](entities/maplestory143.md) — MapleStory v143 CMS private server (Java/Kotlin; LoginCrypto / Netty·MINA / CheatTracker; Private Server-CMS-143)
 - [MapleStory v83 MaplestoryCPP](entities/maplestory-v83-maplestory-cpp.md) — MapleStory GMS-083 private server (C/C++; editor tooling / modding / SDK generation; Private Server-GMS-083 / game:maplestory; gmh5225)
+- [MapleStory v113 Server Eimulator](entities/maplestory-v113-server-eimulator.md) — MapleStory TMS-113 private-server emulator (v113 protocol / NPC scripting / mob AI / skills / economy; Private Server-TMS-113 / game:maplestory; gmh5225)
 - [RustMS](entities/rustms.md) — MapleStory private-server emulator (Rust; login/character/channel servers; player/NPC/quest/combat; memory-safe server logic; Private Server-Rust / game:maplestory; gmh5225)
 - [MapleStory Packer ModPacker](entities/maplestory-packer-modpacker.md) — MapleStory Worlds `.mod` / WZ pack-unpack tool (compression/encryption; client mod asset pipelines; modding / game:maplestory; gmh5225)
 - [WzComparerR2](entities/wzcomparerr2.md) — MapleStory online WZ extractor/viewer (C#/Lua; rendering/graphics/networking; cheat / game:maplestory; gmh5225)
