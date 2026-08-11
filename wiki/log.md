@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `readme:categories`: bumped Cheat ~2682 (was ~2680; Anti Cheat ~662 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-11** — ingest `description:gmh5225/MapleStory-GM-Client`: entity [[maplestory-gm-client]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-links from [[maplestory-heavenclient]] and [[maplestory-server]].
 
 - **2026-08-11** — ingest `description:gmh5225/MapleStory-HeavenClient`: entity [[maplestory-heavenclient]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-link from [[maplestory-server]].
