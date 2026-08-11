@@ -12,7 +12,7 @@ confidence: medium
 
 Windows kernel proof of concept for **registering and using Non-Maskable Interrupt (NMI) callbacks** — handlers that run on all CPUs simultaneously and are used by anti-cheat systems such as BattlEye to inspect thread contexts and detect hidden threads or injected code. Demonstrates NMI callback registration and cross-processor context inspection for kernel researchers studying NMI-based detection. (source: wiki/sources/descriptions/gmh5225__NMI-nmi_callback.md)
 
-Complements defensive NMI callback research such as [[nmi-callback]] and offensive disable PoCs such as [[nmi-callback-blocker2]] within the broader [[kernel-callbacks]] lane.
+Complements defensive NMI callback research such as [[nmi-callback]], enumeration PoCs such as [[nmi-enum-nmi-callback]], and offensive disable PoCs such as [[nmi-callback-blocker2]] within the broader [[kernel-callbacks]] lane.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements defensive NMI callback research such as [[nmi-callback]] and offensi
 
 ## Related
 
-[[nmi-callback]] · [[nmi-callback-blocker2]] · [[kernel-callbacks]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[nmi-callback]] · [[nmi-enum-nmi-callback]] · [[nmi-callback-blocker2]] · [[kernel-callbacks]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
