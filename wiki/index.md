@@ -909,6 +909,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [memory-relocalloc](entities/memory-relocalloc.md) — PE `.reloc`-backed allocation hiding (Windows/Android; evade AC heap/VAS memory scanners; gmh5225)
 - [memory-server](entities/memory-server.md) — jailbroken iOS REST memory scanner (Rust HTTP port 3030; process enum/read/pattern scan; Python PC client; cheat / iOS memory explorer; gmh5225)
 - [MemWars](entities/memwars.md) — Windows memory-analysis / process-manipulation C++ library (scan / pattern search / module enum / injection / memory edit; Testing Framework; gmh5225)
+- [MMFCodeInjection](entities/mmf-code-injection.md) — User APC + memory-mapped file code injection (stealthy DLL load via shared file mapping; Injection Testing; gmh5225)
 - [memcs](entities/memcs.md) — external CS:GO; modding / SDK generation (Rust; cheat / game:csgo; gmh5225)
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
