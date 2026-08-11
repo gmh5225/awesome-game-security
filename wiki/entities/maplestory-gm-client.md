@@ -14,7 +14,7 @@ confidence: medium
 
 Useful for private-server operators and game security researchers studying MapleStory client-side admin tooling, world-editing workflows, and GM command surfaces—not live official-client anti-cheat bypass.
 
-Complements general-purpose private-server clients such as [[maplestory-heavenclient]] and server emulators such as [[maplestory-server]], plus other MapleStory client stacks such as [[winapi-maplestory]] and asset tooling such as [[wzcomparerr2]].
+Complements general-purpose private-server clients such as [[maplestory-heavenclient]] and [[maplestory-client]] (rendering / network protocol / UI; HeavenMS Client), server emulators such as [[maplestory-server]], plus other MapleStory client stacks such as [[winapi-maplestory]] and asset tooling such as [[wzcomparerr2]].
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements general-purpose private-server clients such as [[maplestory-heavencl
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/game-hacking]] · [[maplestory-heavenclient]] · [[maplestory-server]] · [[winapi-maplestory]] · [[wzcomparerr2]]
+[[overviews/game-engine]] · [[overviews/game-hacking]] · [[maplestory-heavenclient]] · [[maplestory-client]] · [[maplestory-server]] · [[winapi-maplestory]] · [[wzcomparerr2]]
