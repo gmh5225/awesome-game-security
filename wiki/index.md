@@ -943,6 +943,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
 - [nebulite-external](entities/nebulite-external.md) — external CS:GO; memory analysis (C/C++; cheat / game:csgo; gmh5225)
+- [NeacSafe-Analysis](entities/neacsafe-analysis.md) — NetEase NeacSafe minifilter IPC probe (`\NeacSafePort`, encoded buffers; Pediy writeup reproduction; explore anticheat; gmh5225)
 - [Nemesis](entities/nemesis.md) — kernel-space process dump (cheat / windows kernel explorer)
 - [Nebula](entities/nebula.md) — modular C++ game engine (fips build; Nebula-demo setup.bat; Game Engine / source)
 - [NeoTTY](entities/neotty.md) — experimental Termux fork (Android terminal; full Linux system usage; cheat / Android Terminal Emulator; gmh5225)
