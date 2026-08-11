@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Map-file-in-system-space`: entity [[map-file-in-system-space]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-11** — ingest `description:gmh5225/MapleNecrocer`: entity [[maplenecrocer]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-link from [[maplestory-gm-client]].
 
 - **2026-08-11** — ingest `description:gmh5225/MapleServerAndroid`: entity [[mapleserver-android]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]]; cross-link from [[maplestory-server]].
