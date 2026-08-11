@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PMI-hpc`: entity [[pmi-hpc]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-link from [[pmctrace]].
+
 - **2026-08-11** — ingest `description:gmh5225/POLYGON_UE5`: entity [[polygon-ue5]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-11** — ingest `description:gmh5225/PPLKiller`: entity [[pplkiller]]; cited on [[byovd]] and [[overviews/windows-kernel]].
