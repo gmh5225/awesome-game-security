@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Ow-Outlines`: entity [[ow-outlines]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
+
 - **2026-08-11** — ingest `description:gmh5225/PAGE_NO_ACCESS-not-byfron`: entity [[page-no-access-not-byfron]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-11** — ingest `description:gmh5225/PCIE-Detector`: entity [[pcie-detector]]; cited on [[overviews/dma-attack]] and [[dma]].
