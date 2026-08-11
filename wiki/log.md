@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PalWorld-NetCrack`: entity [[palworld-netcrack]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-11** — ingest `description:gmh5225/PalWorld-ServerInjector`: entity [[palworld-server-injector]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-link from [[palworld-server-modding]].
 
 - **2026-08-11** — ingest `description:gmh5225/Paladins-internal-Cheat`: entity [[paladins-internal-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-link from [[mhyprot2]].
