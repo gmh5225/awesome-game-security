@@ -4,7 +4,7 @@ kind: entity
 topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/gmh5225__mhyprot2.md
-updated: 2026-08-08
+updated: 2026-08-11
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Research tool documenting and exploiting miHoYo **`mhyprot2.sys`** — the signed Genshin Impact anti-cheat kernel driver — as a [[byovd]] primitive. The driver's IOCTL interface exposes kernel read/write and process-termination capabilities abusable from an unprivileged user process for kernel-level operations. Aimed at BYOVD and anti-cheat researchers studying vulnerable game AC driver surfaces. (source: wiki/sources/descriptions/gmh5225__mhyprot2.md)
 
-Complements [[mhydeath]] (same author's BYOVD exploit lane) and [[evil-mhyprot-cli]] (CLI PoC for the same driver family); contrasts with [[mhynot2]], which studies circumvention of the driver's load requirement rather than IOCTL abuse.
+Complements [[mhydeath]] (same author's BYOVD exploit lane) and [[evil-mhyprot-cli]] (CLI PoC for the same driver family); contrasts with [[mhynot2]], which studies circumvention of the driver's load requirement rather than IOCTL abuse. Downstream title-internal samples such as [[paladins-internal-cheat]] wire the same **Mhyprot** backend into Paladins in-process cheat stacks as an alternative to a bespoke kernel driver.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements [[mhydeath]] (same author's BYOVD exploit lane) and [[evil-mhyprot-c
 
 ## Related
 
-[[byovd]] · [[mhydeath]] · [[evil-mhyprot-cli]] · [[mhynot2]] · [[loldrivers]] · [[physmem-drivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[byovd]] · [[mhydeath]] · [[evil-mhyprot-cli]] · [[mhynot2]] · [[paladins-internal-cheat]] · [[loldrivers]] · [[physmem-drivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

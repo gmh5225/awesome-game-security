@@ -1038,6 +1038,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Page Table Injector](entities/page-table-injector.md) — PT-Injector (C/C++; kernel driver; page-table manipulation / injection:windows; AC research)
 - [page_no_access](entities/page-no-access.md) — C++ lazy decrypt-on-first-access page protection (modding; Anti Cheat → Page Protection)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
+- [paladins-internal-cheat](entities/paladins-internal-cheat.md) — Paladins internal: optional Mhyprot backend + borderless overlay (gmh5225; cheat / game:paladins)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
 - [palworld-helper](entities/palworld-helper.md) — Palworld UE5 Python helper (modding; cheat / game:palworld [UE5])
