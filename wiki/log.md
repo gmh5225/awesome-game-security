@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/NullDriverCheat`: entity [[nulldriver-cheat]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-link from [[dxgkrnl-hook]].
+
 - **2026-08-11** — ingest `description:gmh5225/OBS-Hook`: entity [[obs-hook]]; cited on [[obs-game-capture]] and [[present-hook]].
 
 - **2026-08-11** — ingest `description:matheusbranhann/taskbarhero-bot`: entity [[taskbarhero-bot]]; cited on [[overviews/game-hacking]] and [[il2cpp]].
