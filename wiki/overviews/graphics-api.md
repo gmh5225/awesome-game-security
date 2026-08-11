@@ -32,6 +32,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__nzPerspective.md
   - wiki/sources/descriptions/gmh5225__Ow-Outlines.md
   - wiki/sources/descriptions/gmh5225__Overwatch-2-Cheat-Aimbot-Esp.md
+  - wiki/sources/descriptions/gmh5225__Overwatch-1-cheat-source.md
   - wiki/sources/descriptions/gmh5225__pubg-external-cheat.md
   - wiki/sources/descriptions/gmh5225__Pubg-Lite-ESP.md
   - wiki/sources/descriptions/gmh5225__rust-internal.md
@@ -186,7 +187,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 
 ## Overlay taxonomy
 
-- **Internal (Present hook)** — ImGui or custom draw in `Present` / swap path; highest integration, highest in-process detect surface ([[present-hook]]).
+- **Internal (Present hook)** — ImGui or custom draw in `Present` / swap path; highest integration, highest in-process detect surface ([[present-hook]]). Overwatch 1 internal DX11 samples such as [[overwatch-1-cheat-source]] (gmh5225; Detours Present + ImGui ESP/aimbot/skin changer; VMProtect SDK; cheat / game:overwatch) illustrate title-specific internal overlay stacks beside engine-native glow such as [[ow-outlines]]. (source: wiki/sources/descriptions/gmh5225__Overwatch-1-cheat-source.md)
 - **External layered window** — `WS_EX_LAYERED | WS_EX_TRANSPARENT`, GDI+/D2D over game HWND; no game inject, separate window affinity concerns. Beginner GDI overlay samples such as [[external-esp-hack-assaultcube]] (AssaultCube; player boxes / names / health via external RPM + GDI draw; README `[GDI overlay]`) illustrate the simplest external overlay lane. (source: wiki/sources/descriptions/gmh5225__external-esp-hack-assaultcube.md) PUBG Lite Direct2D overlay ESP samples such as [[pubg-lite-esp]] (gmh5225; Coltonon D2DOverlay; transparent HWND over game; RPM + UE4 offset entity read; cheat / game:pubg [External]) extend that lane with D2D instead of GDI. (source: wiki/sources/descriptions/gmh5225__Pubg-Lite-ESP.md)
 - **DWM / kernel draw** — composition or Ring0 GDI/dxgkrnl paths ([[dwm-hook]], [[dwmhook]], [[krnl-gdi-render]], [[dxgkrnl-hook]]); different screenshot and ETW surfaces.
 - **Third-party overlay hijack** — Steam, NVIDIA GeForce Experience, Discord samples ([[steam-overlay-x64]], [[steam-hook-render-poc]], [[mwclap]], [[nvidia-overlay-hijack]], [[discord-overlay-hook]]); reuse existing overlay infrastructure.

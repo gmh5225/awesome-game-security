@@ -1019,6 +1019,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
 - [Orbit](entities/orbit.md) — Google C++ native profiler (dynamic runtime instrumentation; call graphs / threads / memory; Linux remote + Windows UI; Game Testing)
+- [Overwatch 1 Cheat Source](entities/overwatch-1-cheat-source.md) — Overwatch 1 internal DX11 DLL (Detours Present + ImGui ESP/aimbot/skin changer; Warden stack spoof; VMProtect; HWBP hooks; cheat / game:overwatch; gmh5225)
 - [Overwatch 2 Cheat Aimbot Esp](entities/overwatch-2-cheat-aimbot-esp.md) — Overwatch 2 C/C++ internal aimbot + ESP (rendering / hooking / memory analysis; AHK pairing; cheat / game:overwatch2; gmh5225)
 - [Overwatch IAT Fixer](entities/overwatch-iat-fixer.md) — Overwatch protected-EXE IAT repair (obfuscated/encrypted import reconstruction; disassembler analysis; cheat / game:overwatch)
 - [Overwatch2 Colorbot Cheats](entities/overwatch2-colorbot-cheats.md) — Overwatch 2 Python colorbot + Arduino Leonardo serial HID (purple outline pixel detection; shoot/silent-aim; cheat / game:overwatch2)
