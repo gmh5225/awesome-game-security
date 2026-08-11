@@ -896,6 +896,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [MemTools](entities/memtools.md) — Windows/Linux DMA testing toolkit (C++/C; driver/plugin development + memory analysis; gmh5225; cheat / DMA)
+- [MatScan](entities/matscan.md) — multi-threaded Facepunch Rust Unity material scanner (C++; IL2CPP + memory analysis; cheat / game:rust / game engine explorer:Unity; gmh5225)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
 - [melonJS](entities/melonjs.md) — modern lightweight HTML5 game engine (ES6 classes; esbuild bundling; Game Engine / HTML5)
 - [meowsense](entities/meowsense.md) — free multi-game cheat research sample (Overwatch 2 focus; offensive techniques; gmh5225)
