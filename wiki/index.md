@@ -1102,6 +1102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [process-cloning](entities/process-cloning.md) — Windows process clone PoC (`NtCreateProcessEx`; VA-space snapshot; hollowing / memory analysis / credential dump)
 - [processor-trace](entities/processor-trace.md) — libipt Intel PT decoder (reference packet/instruction decode; coverage / tracing tools)
 - [PoCsmith](entities/pocsmith.md) — AI Windows PoC gen (Claude + MCP Hyper-V/kd/Ghidra; patchwatch → verify VMs)
+- [pokemongo-dumper](entities/pokemongo-dumper.md) — Pokemon GO Unity IL2CPP dumper (C#/C++; cheat / game:pokemongo; gmh5225)
 - [pom-pom](entities/pom-pom.md) — Honkai: Star Rail simple cheat (C/C++; hooking / overlays; cheat / game:honkai star rail; gmh5225)
 - [PTEditor](entities/pteditor.md) — cross-platform page-table editor (PGD/PUD/PMD/PTE R/W; VA→PA; PAT/NX/TLB; Linux LKM + Windows driver; Some Tricks / PTE Hook)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
