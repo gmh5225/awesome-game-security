@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/OBS-graphics-hook32-Hook`: entity [[obs-graphics-hook32-hook]]; cited on [[obs-game-capture]] and [[present-hook]].
+
 - **2026-08-11** — ingest `description:gmh5225/OW-Aeternum`: entity [[ow-aeternum]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-11** — ingest `description:gmh5225/OW2-wardenrekter`: entity [[ow2-wardenrekter]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].

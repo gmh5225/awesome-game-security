@@ -998,6 +998,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
+- [obs-graphics-hook32-hook](entities/obs-graphics-hook32-hook.md) — gmh5225 32-bit OBS graphics-hook pointer-replacement sample (Game Capture inject hijack; cheat/overlay research; README [OBS Hook])
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
 - [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
 - [OfflineCrashDumpUefi](entities/offline-crash-dump-uefi.md) — Microsoft EDK2 Offline Crash Dump package (firmware pre-OS memory dump; DXE writer; encryption/redaction; gmh5225)

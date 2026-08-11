@@ -4,7 +4,8 @@ kind: concept
 topics: [graphics-api, game-hacking, anti-cheat]
 sources:
   - wiki/sources/skills/graphics-api.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/gmh5225__OBS-graphics-hook32-Hook.md
+updated: 2026-08-11
 confidence: medium
 ---
 
@@ -38,7 +39,7 @@ Game render → Present/backbuffer copy → shared GPU texture
 
 **Dual-machine** — Game PC OBS → NDI or capture card → cheat PC inference → network to KMBox on game PC; end-to-end latency depends on encode, buffer, and sync—measure percentiles on the deployed setup, not fixed budgets.
 
-Corpus adjacency: [[input-overlay]] (OBS Keyboard Mapper plugin), [[present-hook]] (backbuffer copy alternative to OBS hook).
+Corpus adjacency: [[input-overlay]] (OBS Keyboard Mapper plugin), [[present-hook]] (backbuffer copy alternative to OBS hook). OBS graphics-hook hijack samples such as [[obs-graphics-hook32-hook]] (gmh5225; 32-bit OBS hook inject; pointer-replacement technique) illustrate offensive reuse of the same Game Capture hook surface researchers already monitor for `obs-graphics-hook64.dll`. (source: wiki/sources/descriptions/gmh5225__OBS-graphics-hook32-Hook.md)
 
 ## Detection-relevant signals (non-proof)
 
@@ -52,4 +53,4 @@ Treat as **collection signals** requiring behavioral and contextual corroboratio
 
 ## Related
 
-[[anti-screenshot-capture]] · [[present-hook]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[anti-screenshot-capture]] · [[present-hook]] · [[obs-graphics-hook32-hook]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
