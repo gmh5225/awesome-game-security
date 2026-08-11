@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/NMICallbackBlocker2`: entity [[nmi-callback-blocker2]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-11** — ingest `description:gmh5225/NVDrv`: entity [[nvdrv]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-11** — ingest `description:gmh5225/NVIDIA-OVERLAY`: entity [[nvidia-overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-link from [[nvidia-overlay-hijack]].
