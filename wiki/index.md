@@ -877,6 +877,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RustMS](entities/rustms.md) — MapleStory private-server emulator (Rust; login/character/channel servers; player/NPC/quest/combat; memory-safe server logic; Private Server-Rust / game:maplestory; gmh5225)
 - [MapleStory Packer ModPacker](entities/maplestory-packer-modpacker.md) — MapleStory Worlds `.mod` / WZ pack-unpack tool (compression/encryption; client mod asset pipelines; modding / game:maplestory; gmh5225)
 - [MapleStory HeavenClient](entities/maplestory-heavenclient.md) — MapleStory custom client (HeavenClient; game protocol / rendering / UI; open-source private-server connectivity; Heaven Client / game:maplestory; gmh5225)
+- [MapleNecrocer](entities/maplenecrocer.md) — MapleStory C# GM client emulator (64-bit; _Canvas WZ parsing / skeleton animation / particle systems / WZ region auto-detection; MapleStory Client Emulator / game:maplestory; gmh5225)
 - [MapleStory GM Client](entities/maplestory-gm-client.md) — MapleStory GM/admin client (map editing / NPC spawn / item creation / GM commands; private-server administration; Offline MapleStory Client Emulator / game:maplestory; gmh5225)
 - [MapleStory Server (HeavenMS)](entities/maplestory-server.md) — MapleStory private-server emulator (HeavenMS Server; player auth / character progression / quest / party / world simulation; HeavenMS Server / game:maplestory; gmh5225)
 - [WzComparerR2](entities/wzcomparerr2.md) — MapleStory online WZ extractor/viewer (C#/Lua; rendering/graphics/networking; cheat / game:maplestory; gmh5225)
