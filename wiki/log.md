@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PPLKiller`: entity [[pplkiller]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-11** — ingest `description:gmh5225/PTFakeTouch`: entity [[ptfaketouch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-11** — ingest `description:gmh5225/PUBG-DX`: entity [[pubg-dx]]; cited on [[present-hook]] and [[overviews/game-hacking]]; cross-link from [[pubg-internal]].

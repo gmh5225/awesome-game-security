@@ -60,10 +60,11 @@ sources:
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
   - wiki/sources/descriptions/gmh5225__Terminator.md
   - wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md
+  - wiki/sources/descriptions/gmh5225__PPLKiller.md
   - wiki/sources/descriptions/gmh5225__TS-Fucker.md
   - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
-updated: 2026-08-10
+updated: 2026-08-11
 confidence: high
 ---
 
@@ -108,6 +109,8 @@ Razer peripheral driver abuse such as [[razer-rzctl]] targets **`rzctl.sys`** fo
 Qualcomm QCI0701 ACPI driver abuse such as [[qiomem]] targets **`QIOMem.sys`** by registering a virtual software device and issuing IOCTLs for physical memory read/write—typical BYOVD physmem primitives for unsigned driver load or AC bypass research. (source: wiki/sources/descriptions/gmh5225__qiomem.md)
 
 OEM BootRepair terminate primitives such as [[phantomkiller]] abuse signed Lenovo `BootRepair.sys` via IOCTL `0x222014` → `ZwTerminateProcess` to kill PPL-protected AV/EDR. (source: wiki/sources/descriptions/redteamfortress__PhantomKiller.md)
+
+PPL-strip tooling such as [[pplkiller]] (gmh5225; **`RTCore64.sys`** BYOVD or other kernel R/W primitive → patch `EPROCESS` protection level to downgrade PPL antimalware/AV for debugging or termination; PPL bypass research) complements terminate-first samples such as [[phantomkiller]] and [[process-killer-byovd]]. (source: wiki/sources/descriptions/gmh5225__PPLKiller.md)
 
 DSE-disable controllers such as [[kvc]] use a signed Microsoft driver to patch CI.dll (`g_CiOptions`), plus `skci.dll` hijack / `SeCiCallbacks` redirection loaders and PP/PPL paths for LSASS dumps under HVCI/VBS. (source: wiki/sources/descriptions/wesmar__kvc.md)
 
@@ -177,5 +180,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
