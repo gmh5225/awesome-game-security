@@ -1141,7 +1141,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pubg-dumper](entities/pubg-dumper.md) — PUBG live-process UE4 SDK/offset dumper (GObjects/GNames; class hierarchies; cheat / game:pubg [Dump]; gmh5225)
 - [pubg-external-cheat](entities/pubg-external-cheat.md) — PUBG external cheat sample (C/C++; overlays + memory analysis; cheat / game:pubg; gmh5225)
 - [Pubg-Lite-ESP](entities/pubg-lite-esp.md) — PUBG Lite external ESP (Direct2D overlay; RPM + UE4 offsets; boxes/names/health/distance; cheat / game:pubg; gmh5225)
-- [pubg-internal](entities/pubg-internal.md) — PUBG internal cheat reference (iCollin; learning-oriented RE; cheat / game:pubg)
+- [pubg-internal](entities/pubg-internal.md) — PUBG internal cheat refs (gmh5225 D3D11 Present/MinHook/FW1FontWrapper ESP; iCollin learning RE; cheat / game:pubg)
 - [pubg-mobile-memory-hacking-examples](entities/pubg-mobile-memory-hacking-examples.md) — PUBG Mobile Android memory hacking examples (entity/player/weapon reads; scan + modify; cheat / game:pubgm; gmh5225)
 - [pubg-mobile-pak-extract](entities/pubg-mobile-pak-extract.md) — PUBG Mobile pak extractor (pre–1.1.0; post-update encryption unsupported; cheat / game:pubgm)
 - [pubgm-sdk-and-offsets](entities/pubgm-sdk-and-offsets.md) — PUBG Mobile UE4 SDK + offsets (1.5 / 1.9; ARM32 reflection dump; cheat / game:pubgm [Offset])
