@@ -12,7 +12,7 @@ confidence: low
 
 Modding kit for Palworld with simple example usage. Useful for game security researchers and reverse engineers studying offensive techniques in the cheat / game:palworld [UE5] lane—not a commercial SDK or AC product. (source: wiki/sources/descriptions/localcc__PalworldModdingKit.md)
 
-Complements title-specific Palworld tooling such as [[palworldsaved]] (save/editor), [[palworld-anti-cheat]] (UE5 AC research), and [[palworld-rcon]] (dedicated-server RCON) with a modding-scaffold angle.
+Complements title-specific Palworld tooling such as [[palworld-server-modding]] (dedicated-server mod example), [[palworldsaved]] (save/editor), [[palworld-anti-cheat]] (UE5 AC research), and [[palworld-rcon]] (dedicated-server RCON) with a modding-scaffold angle.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements title-specific Palworld tooling such as [[palworldsaved]] (save/edit
 
 ## Related
 
-[[palworldsaved]] · [[palworld-anti-cheat]] · [[palworld-rcon]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[palworld-server-modding]] · [[palworldsaved]] · [[palworld-anti-cheat]] · [[palworld-rcon]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]

@@ -1042,6 +1042,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
 - [palworld-helper](entities/palworld-helper.md) — Palworld UE5 Python helper (modding; cheat / game:palworld [UE5])
 - [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)
+- [Palworld-Server-Modding](entities/palworld-server-modding.md) — Palworld UE5 dedicated-server mod example (Lua + C++; 100% rare Pal; cheat / game:palworld [UE5])
 - [PalworldSaved](entities/palworldsaved.md) — Palworld UE5 save/editor tooling (cheat / game:palworld [Save])
 - [PaintFE](entities/paintfe.md) — Rust raster image editor (wgpu GPU filters, Rhai scripting, CLI batch, GIF/APNG; Image Codec)
 - [palera1n](entities/palera1n.md) — iOS 15+ checkm8 jailbreak (A8–A11; rootful/rootless; Sileo bootstrap)
