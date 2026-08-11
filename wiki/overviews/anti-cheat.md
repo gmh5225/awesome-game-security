@@ -358,6 +358,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__veh-printf-hook.md
   - wiki/sources/descriptions/gmh5225__no-access-protection-x86.md
   - wiki/sources/descriptions/gmh5225__MemoryGuard.md
+  - wiki/sources/descriptions/gmh5225__Malicious-code-detection-bugu.md
   - wiki/sources/descriptions/gmh5225__Mandragora.md
   - wiki/sources/descriptions/gmh5225__memory-relocalloc.md
   - wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md
@@ -473,6 +474,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[fix-arxan]] — Arxan PE protector: loader info + decrypted working image for research (Dump Fix) (source: wiki/sources/descriptions/pr701__fix-arxan.md)
 - [[android-unpacker]] — Android packed-sample unpack tooling for malware RE (Sample Unpacker; handle samples carefully) (source: wiki/sources/descriptions/strazzere__android-unpacker.md)
 - [[mal-unpack-drv]] — experimental test-signed kernel driver for Windows malware sample unpacking (VM-only; Sample Unpacker) (source: wiki/sources/descriptions/hasherezade__mal_unpack_drv.md)
+- [[malicious-code-detection-bugu]] — Go gRPC microservices malware-scan platform (Bugu; file upload, hash verification, automated analysis; Protobuf gRPC+HTTP API; gmh5225; Malicious code detection and obfuscation) (source: wiki/sources/descriptions/gmh5225__Malicious-code-detection-bugu.md)
 - [[pandora]] — file-suspicion analysis framework with convenient result UI (Analysis Framework; Ubuntu 24.04 recommended) (source: wiki/sources/descriptions/pandora-analysis__pandora.md)
 - [[kiroshi]] — IDA Pro plugin to detect common Anti-Cheat artifacts (RE/academic; cheat / IDA Plugins) (source: wiki/sources/descriptions/not1cyyy__Kiroshi.md)
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)

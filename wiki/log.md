@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Malicious-code-detection-bugu`: entity [[malicious-code-detection-bugu]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-11** — ingest `description:gmh5225/Mandragora`: entity [[mandragora]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-11** — ingest `readme:categories`: bumped Anti Cheat ~663 (was ~662; Cheat ~2682 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
