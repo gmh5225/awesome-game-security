@@ -22,4 +22,4 @@ VMD-class emulation targets **Tier 4–5** firmware sophistication: BAR MMIO, MS
 
 ## Related
 
-[[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[pcileech]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[pcileech-dma-nvme-vmd]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

@@ -1060,6 +1060,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
+- [Pcileech-DMA-NVMe-VMD](entities/pcileech-dma-nvme-vmd.md) — PCILeech DMA firmware: motherboard VMD/NVMe real camouflage; Windows reinstall may be needed for driver init (gmh5225)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
 - [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
 - [PCILeechGen](entities/pcileechgen.md) — Go donor-cloning firmware generator (Linux VFIO → scan/check/build/validate; SystemVerilog/COE → Vivado bitstreams; dynamic BAR, NVMe admin-queue, MMIO traces; PCILeech FPGA)

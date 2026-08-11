@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Pcileech-DMA-NVMe-VMD`: entity [[pcileech-dma-nvme-vmd]]; cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-links from [[pcileech]] and [[pcileech-fpga-dma-vmd]].
+
 - **2026-08-11** — ingest `description:gmh5225/PdFwKrnlMapper`: entity [[pdfwkrnl-mapper]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-11** — ingest `description:gmh5225/PokemonGoDumper`: entity [[pokemongo-dumper]]; cited on [[il2cpp]] and [[overviews/mobile-security]].

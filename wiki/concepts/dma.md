@@ -22,14 +22,15 @@ sources:
   - wiki/sources/descriptions/sercanarga__PCILeechGen.md
   - wiki/sources/descriptions/sercanarga__pcileechgen.md
   - wiki/sources/descriptions/lyk64__VolkDMA.md
-updated: 2026-08-09
+  - wiki/sources/descriptions/gmh5225__Pcileech-DMA-NVMe-VMD.md
+updated: 2026-08-11
 confidence: high
 ---
 
 
 # DMA (Direct Memory Access)
 
-Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs against host RAM via Bus Master, without executing attacker code in the gaming OS. In game security this usually means an FPGA card (often M.2) linked to a separate cheat PC. (source: wiki/sources/skills/dma-attack.md) Host tooling such as [[pcileech]] drives those PCIe devices for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) Device firmware/HDL for those endpoints lives in [[pcileech-fpga]] (Vivado flows, TLP/BAR/config-space shadow across many boards). (source: wiki/sources/descriptions/ufrisk__pcileech-fpga.md) Fullstealth-oriented builds such as [[pcileech-dma-fullstealth]] (Quantumstealth; M2/Squirrel/Captain 75T/Enigma X1) extend that firmware lane for stealth/threat-modeling research. (source: wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md) Class-emulation forks such as [[pcileech-fpga-dma-vmd]] (Intel RST VMD `9A0B`; MSI-X, NVMe command path, configurable BARs, TLP config shadow on XC7A75T) raise PCIe behavioral probes toward storage-controller tiers. (source: wiki/sources/descriptions/mltpig__PCILeech-FPGA-DMA_VMD.md)
+Hardware-level memory access where a PCIe device issues Memory Read/Write TLPs against host RAM via Bus Master, without executing attacker code in the gaming OS. In game security this usually means an FPGA card (often M.2) linked to a separate cheat PC. (source: wiki/sources/skills/dma-attack.md) Host tooling such as [[pcileech]] drives those PCIe devices for target-memory R/W over DMA. (source: wiki/sources/descriptions/ufrisk__pcileech.md) Device firmware/HDL for those endpoints lives in [[pcileech-fpga]] (Vivado flows, TLP/BAR/config-space shadow across many boards). (source: wiki/sources/descriptions/ufrisk__pcileech-fpga.md) Fullstealth-oriented builds such as [[pcileech-dma-fullstealth]] (Quantumstealth; M2/Squirrel/Captain 75T/Enigma X1) extend that firmware lane for stealth/threat-modeling research. (source: wiki/sources/descriptions/realquantumstealth-hub__PCILeech-DMA-Fullstealth.md) Class-emulation forks such as [[pcileech-fpga-dma-vmd]] (Intel RST VMD `9A0B`; MSI-X, NVMe command path, configurable BARs, TLP config shadow on XC7A75T) and [[pcileech-dma-nvme-vmd]] (gmh5225; motherboard VMD/NVMe camouflage for [[pcileech]] DMA) raise PCIe behavioral probes toward storage-controller tiers. (source: wiki/sources/descriptions/mltpig__PCILeech-FPGA-DMA_VMD.md) (source: wiki/sources/descriptions/gmh5225__Pcileech-DMA-NVMe-VMD.md)
 
 ## Why it matters
 
@@ -58,5 +59,5 @@ No single PCIe or IOMMU signal is durable; production AC layers **causally disti
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[pcileech]] · [[volk-dma]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[dma-cheat-base]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[pcileech]] · [[volk-dma]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-dma-nvme-vmd]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[dma-cheat-base]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
 

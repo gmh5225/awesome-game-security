@@ -28,4 +28,4 @@ Unmodified [[pcileech-fpga]] builds commonly expose Tier-0/1 detection signals: 
 
 ## Related
 
-[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
