@@ -852,6 +852,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
 - [Mandragora](entities/mandragora.md) — educational ring-3 usermode anti-cheat for Assault Cube (weak difficulty; unobfuscated source for RE practice; gmh5225)
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
+- [MagiskHide](entities/magiskhide.md) — portable ptrace MagiskHide module for Magisk v24.0+ (DenyList hidelist; no Zygisk; Android 11+; gmh5225)
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
 - [magiskboot-linux](entities/magiskboot-linux.md) — GitHub Actions standalone Linux magiskboot (boot unpack/repack/patch; gmh5225)
 - [magiskboot_build](entities/magiskboot-build.md) — POSIX standalone magiskboot build scripts (Cheat Magisk / Boot Image)
