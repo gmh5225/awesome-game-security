@@ -12,7 +12,7 @@ confidence: medium
 
 Example **Palworld dedicated-server mod** (Lua + C++; gmh5225) centered on **server-side modding** — includes a sample mod that forces **100% rare Pal** spawns. Useful for game security researchers and reverse engineers studying offensive techniques in the cheat / game:palworld [UE5] lane, especially authoritative-server gameplay mutation rather than client-only hooks. (source: wiki/sources/descriptions/gmh5225__Palworld-Server-Modding.md)
 
-Complements title-specific Palworld tooling such as [[palworld-modding-kit]] (client modding scaffold), [[docker-palworld-dedicated-server]] (containerized dedicated server), [[palworld-rcon]] (Source RCON admin), [[palworldsaved]] (save/editor), and [[palworld-anti-cheat]] (UE5 AC research).
+Complements title-specific Palworld tooling such as [[palworld-modding-kit]] (client modding scaffold), [[palworld-sdk-dump]] (UE5 SDK dump), [[docker-palworld-dedicated-server]] (containerized dedicated server), [[palworld-rcon]] (Source RCON admin), [[palworldsaved]] (save/editor), and [[palworld-anti-cheat]] (UE5 AC research).
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements title-specific Palworld tooling such as [[palworld-modding-kit]] (cl
 
 ## Related
 
-[[palworld-modding-kit]] · [[docker-palworld-dedicated-server]] · [[palworld-rcon]] · [[palworldsaved]] · [[palworld-anti-cheat]] · [[palworld-helper]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/game-engine]]
+[[palworld-modding-kit]] · [[palworld-sdk-dump]] · [[docker-palworld-dedicated-server]] · [[palworld-rcon]] · [[palworldsaved]] · [[palworld-anti-cheat]] · [[palworld-helper]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/game-engine]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Palworld-SDK-Dump`: entity [[palworld-sdk-dump]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-links from [[palworld-server-modding]] and [[palworld-modding-kit]].
+
 - **2026-08-11** — ingest `description:gmh5225/Palworld-Server-Modding`: entity [[palworld-server-modding]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-link from [[palworld-modding-kit]].
 
 - **2026-08-11** — ingest `description:gmh5225/Patchguard-2023`: entity [[patchguard-2023]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
