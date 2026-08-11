@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/MSSymbolsCollection`: entity [[mssymbolscollection]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-11** — ingest `description:gmh5225/MagiskHide`: entity [[magiskhide]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[magisk]].
 
 - **2026-08-11** — ingest `description:gmh5225/MagiskOnWSALocal`: entity [[magiskonwsalocal]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-link from [[magisk]].
