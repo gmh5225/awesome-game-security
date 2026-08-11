@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/NVDrv`: entity [[nvdrv]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-11** — ingest `description:gmh5225/NVIDIA-OVERLAY`: entity [[nvidia-overlay]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-link from [[nvidia-overlay-hijack]].
 
 - **2026-08-11** — ingest `description:gmh5225/Nathans-Tarkov-Radar-Public`: entity [[nathans-tarkov-radar-public]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]].
