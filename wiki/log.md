@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `readme:categories`: bumped Cheat ~2677 (was ~2676; Anti Cheat ~661 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-11** — ingest `description:gmh5225/Pcileech-DMA-NVMe-VMD`: entity [[pcileech-dma-nvme-vmd]]; cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-links from [[pcileech]] and [[pcileech-fpga-dma-vmd]].
 
 - **2026-08-11** — ingest `description:gmh5225/PdFwKrnlMapper`: entity [[pdfwkrnl-mapper]]; cited on [[byovd]] and [[overviews/windows-kernel]].
