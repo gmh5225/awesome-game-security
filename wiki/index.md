@@ -1095,6 +1095,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pmctrace](entities/pmctrace.md) — Intel PMC counter collection via ETW (C; cache/branch/instruction micro-arch events; profiling / side-channel RE)
 - [pooldump](entities/pooldump.md) — Windows kernel pool enumerator/dumper (tags, sizes, owning drivers; EAC manual-map DLL extraction)
 - [powervm](entities/powervm.md) — AMD SVM Type-1 HV (NPT hooks, CPUID hypercall reads, shadow DebugPort; CE fork for VMProtect/ACE targets)
+- [Practical Reverse Engineering Solutions](entities/practical-reverse-engineering-solutions.md) — Bruce Dang textbook exercise solutions (x86/x64/ARM disasm, kernel analysis, rootkit challenges; DPC+APC; gmh5225)
 - [PrecisionSpoofer-CPP](entities/precision-spoofer-cpp.md) — C++ kernel-driver HWID spoofer (cheat / HWID; gmh5225)
 - [processhacker-mcp](entities/processhacker-mcp.md) — Process Hacker MCP for AI agents (runtime process analysis; C/C++; DLL plugins; Game Develop / MCP)
 - [process-cloning](entities/process-cloning.md) — Windows process clone PoC (`NtCreateProcessEx`; VA-space snapshot; hollowing / memory analysis / credential dump)
