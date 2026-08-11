@@ -1001,6 +1001,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
 - [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
 - [offsets](entities/offsets.md) — C++ CS:GO offset dump (`[Offset]`; cheat / game:csgo)
+- [OffsetStreaming](entities/offset-streaming.md) — simple C/C++ program to stream game offsets to cheat clients (Some Tricks / Windows Ring3; gmh5225)
 - [Olive.c](entities/olive-c.md) — single-header C 2D soft-raster (lines/tris/circles/text; Image Codec)
 - [OMath](entities/omath.md) — C++23 constexpr math/physics (W2S / projectile / GJK; Mathematics)
 - [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)

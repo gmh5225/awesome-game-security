@@ -20,4 +20,4 @@ README tags it under **`[Offset]`** — treat as a live-service offset feed for 
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[fortnite-fltokens-and-offsets]] · [[tog]] · [[easy-anti-cheat]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[offset-streaming]] · [[fortnite-fltokens-and-offsets]] · [[tog]] · [[easy-anti-cheat]]
