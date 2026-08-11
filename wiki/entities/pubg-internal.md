@@ -27,4 +27,4 @@ Learning-oriented PUBG internal cheat reference (iCollin). Code quality is expli
 
 ## Related
 
-[[present-hook]] · [[ntminhook]] · [[pubg-external-cheat]] · [[pubg-lite-esp]] · [[pubgstar]] · [[pubg-dump-offset]] · [[pubg-dumper]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]] · [[bypass-pubg-mobile-imgui]] · [[yolov5-pubg]]
+[[present-hook]] · [[ntminhook]] · [[pubg-dx]] · [[pubg-external-cheat]] · [[pubg-lite-esp]] · [[pubgstar]] · [[pubg-dump-offset]] · [[pubg-dumper]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]] · [[bypass-pubg-mobile-imgui]] · [[yolov5-pubg]]

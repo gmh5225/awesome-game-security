@@ -1137,6 +1137,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
 - [pubg](entities/pubg.md) — PUBG-focused OpenGL hooking/modding sample (C/C++; cheat / game:pubgm; gmh5225)
+- [PUBG-DX](entities/pubg-dx.md) — PUBG internal DX11 ImGui cheat (ESP/aimbot; kernel-driver reads; Xenuine decrypt; return-address spoofing; VMProtect SDK; cheat / game:pubg; gmh5225)
 - [pubg-dump-offset](entities/pubg-dump-offset.md) — PUBG desktop UE4 offset history (v19.1–24.2; Xenuine keys; GObjects/GWorld; cheat / game:pubg [Offset]; gmh5225)
 - [pubg-dumper](entities/pubg-dumper.md) — PUBG live-process UE4 SDK/offset dumper (GObjects/GNames; class hierarchies; cheat / game:pubg [Dump]; gmh5225)
 - [pubg-external-cheat](entities/pubg-external-cheat.md) — PUBG external cheat sample (C/C++; overlays + memory analysis; cheat / game:pubg; gmh5225)
