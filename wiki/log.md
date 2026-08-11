@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Lazysight`: entity [[lazysight]]; cited on [[overviews/game-hacking]] and [[present-hook]].
+
 - **2026-08-11** — ingest `description:gmh5225/League-DirectX11-Internal`: entity [[league-directx11-internal]]; cited on [[overviews/game-hacking]] and [[present-hook]].
 
 - **2026-08-11** — ingest `description:gmh5225/League-Unpacker`: entity [[league-unpacker]]; cross-links from [[league-dumper]] and [[lol-unpackman]]; cited on [[overviews/game-hacking]] and [[vanguard]].
