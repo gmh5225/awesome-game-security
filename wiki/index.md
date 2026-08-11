@@ -669,6 +669,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)
 - [idaplugins-list](entities/idaplugins-list.md) — community IDA Pro plugin catalog (version categorization; cheat / IDA Plugins)
 - [List of IDA Plugins](entities/list-of-ida-plugins.md) — categorized IDA Pro plugin index (language / last-updated / categories; gmh5225; cheat / IDA Plugins)
+- [Lost Ark Logger](entities/lost-ark-logger.md) — Lost Ark network packet logger/decoder (client–server protocol; events/items/combat; gmh5225)
 - [IDARustCargo](entities/ida-rust-cargo.md) — IDA plugin: display potentially installed Cargo dependencies (Python; cheat / IDA Plugins)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
 - [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)

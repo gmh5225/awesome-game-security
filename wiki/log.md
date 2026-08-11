@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/LostArkLogger`: entity [[lost-ark-logger]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].
+
 - **2026-08-11** — ingest `description:gmh5225/MMFCodeInjection`: entity [[mmf-code-injection]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-11** — ingest `description:gmh5225/MS-Vulnerable-Driver-List`: entity [[ms-vulnerable-driver-list]]; cited on [[byovd]] and [[overviews/windows-kernel]].
