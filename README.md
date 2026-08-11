@@ -961,6 +961,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/uuksu/RPGMakerDecrypter [Tool for extracting RPG Maker XP, VX and VX Ace encrypted archives]
 - https://github.com/VelocityRa/awesome-game-file-format-reversing [Curated docs/tools for reverse engineering video game file formats and assets]
 - https://github.com/jlucaso1/unturned-godot [Godot 4 port that reverse-engineers Unturned Unity serialized formats from a Steam install and renders maps with terrain, objects, lighting, and multiplayer]
+- https://github.com/omochikaeri15/battle-cats-complete [Rust desktop toolkit for The Battle Cats: import .pack/.apk data, view cats/enemies/stages, render animations, and export assets]
 - https://github.com/gmh5225/compiler-binary-richprint [Print compiler information stored in Rich Header of PE executable]
 - https://github.com/mandiant/GoReSym [Go symbol recovery tool]
 - https://github.com/PartialVolume/shredos.x86_64 [Disk Eraser]
