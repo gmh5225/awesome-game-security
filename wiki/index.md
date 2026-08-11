@@ -888,6 +888,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
 - [MQTT.js](entities/mqtt-js.md) — Node.js/browser MQTT client (v3.1/3.1.1/v5; TCP/TLS/WS/WSS; Game Network / mqtt nodejs)
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
+- [MemoryGuard](entities/memory-guard.md) — Windows memory-protection library (`PAGE_GUARD` / VEH / periodic integrity checks; alert or revert tampering; gmh5225; Anti Cheat → Page Protection)
 - [memory-relocalloc](entities/memory-relocalloc.md) — PE `.reloc`-backed allocation hiding (Windows/Android; evade AC heap/VAS memory scanners; gmh5225)
 - [memory-server](entities/memory-server.md) — jailbroken iOS REST memory scanner (Rust HTTP port 3030; process enum/read/pattern scan; Python PC client; cheat / iOS memory explorer; gmh5225)
 - [memcs](entities/memcs.md) — external CS:GO; modding / SDK generation (Rust; cheat / game:csgo; gmh5225)

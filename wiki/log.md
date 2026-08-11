@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/MemoryGuard`: entity [[memory-guard]]; cited on [[overviews/anti-cheat]]; cross-links from [[integrity-experiments]] and [[voidmaw]].
+
 - **2026-08-11** — ingest `description:gmh5225/Mhyprot2DrvControl`: entity [[mhyprot2drvcontrol]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-link from [[mhyprot2]].
 
 - **2026-08-11** — ingest `description:gmh5225/NMI-EnumNmiCallback`: entity [[nmi-enum-nmi-callback]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-links from [[nmi-callback]], [[nmi-nmi-callback]], [[nmi-callback-blocker2]].
