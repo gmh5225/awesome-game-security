@@ -837,6 +837,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)
 - [league-base](entities/league-base.md) — C++ LoL cheat base framework (memory read, object enum, overlay; Packman/Vanguard; gmh5225; cheat / game:lol)
 - [league-skin-changer](entities/league-skin-changer.md) — internal LoL skin changer (DX9/11 hooks + ImGui; champion/minion/jungle skins; auto DB updates; Skin; gmh5225; cheat / game:lol)
+- [leaguesharp](entities/leaguesharp.md) — LoL scripting/modding platform (JungleTimerHax, SkinHax, champion resize; LoL internal APIs; gmh5225; cheat / game:lol)
 - [lol-client](entities/lol-client.md) — custom/modified LoL client for protocol and game-state research (gmh5225; cheat / game:lol)
 - [lol-offset-dumper](entities/lol-offset-dumper.md) — C/C++ LoL live-process offset dumper (memory analysis; gmh5225; cheat / game:lol [Dump])
 - [lol-patcher](entities/lol-patcher.md) — experimental LoL client patcher/mod (gmh5225; frozen Feb 2020; cheat / game:lol)

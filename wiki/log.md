@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/LeagueSharp`: entity [[leaguesharp]]; cited on [[overviews/game-hacking]] and [[vanguard]].
+
 - **2026-08-11** — ingest `description:gmh5225/LeagueSkinChanger`: entity [[league-skin-changer]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-11** — ingest `description:gmh5225/LetMeGG`: entity [[letme-gg]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
