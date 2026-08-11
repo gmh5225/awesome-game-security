@@ -14,7 +14,7 @@ confidence: medium
 
 Useful for game security researchers and private-server developers studying MapleStory server architecture, protocol handling, and authoritative game systems—not client-side cheat tooling.
 
-Complements the from-scratch HeavenClient such as [[maplestory-heavenclient]] (game protocol / rendering / UI; open-source private-server client) and other MapleStory private-server emulators such as [[rebirth]] (GMS-095 C#), [[maplestory143]] (CMS-143 Java/Kotlin), [[maplestory-v83-maplestory-cpp]] (GMS-083 C++), [[maplestory-v113-server-eimulator]] (TMS-113), [[mnwvs196]] (TMS-196 C++ research stack), and [[rustms]] (Rust).
+Complements the from-scratch HeavenClient such as [[maplestory-heavenclient]] (game protocol / rendering / UI; open-source private-server client), GM/admin clients such as [[maplestory-gm-client]] (map editing / NPC spawn / item creation / GM commands), and other MapleStory private-server emulators such as [[rebirth]] (GMS-095 C#), [[maplestory143]] (CMS-143 Java/Kotlin), [[maplestory-v83-maplestory-cpp]] (GMS-083 C++), [[maplestory-v113-server-eimulator]] (TMS-113), [[mnwvs196]] (TMS-196 C++ research stack), and [[rustms]] (Rust).
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements the from-scratch HeavenClient such as [[maplestory-heavenclient]] (g
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[maplestory-heavenclient]] · [[rebirth]] · [[maplestory143]] · [[maplestory-v83-maplestory-cpp]] · [[maplestory-v113-server-eimulator]] · [[mnwvs196]] · [[rustms]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[maplestory-heavenclient]] · [[maplestory-gm-client]] · [[rebirth]] · [[maplestory143]] · [[maplestory-v83-maplestory-cpp]] · [[maplestory-v113-server-eimulator]] · [[mnwvs196]] · [[rustms]]

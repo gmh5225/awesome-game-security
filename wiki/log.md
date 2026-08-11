@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/MapleStory-GM-Client`: entity [[maplestory-gm-client]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-links from [[maplestory-heavenclient]] and [[maplestory-server]].
+
 - **2026-08-11** — ingest `description:gmh5225/MapleStory-HeavenClient`: entity [[maplestory-heavenclient]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-link from [[maplestory-server]].
 
 - **2026-08-11** — ingest `description:gmh5225/MapleStory-Server`: entity [[maplestory-server]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
