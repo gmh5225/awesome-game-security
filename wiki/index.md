@@ -1376,6 +1376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [StealthSytemThreadFinderBE](entities/stealth-sytem-thread-finder-be.md) — find hidden system threads BE misses (PspCidTable; scheduler queue; manual-map)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
+- [taskbarhero-bot](entities/taskbarhero-bot.md) — TaskbarHero Unity IL2CPP external trainer/bot (C#/.NET 10; ACTk bypass, batch-read automations, WPF panel; matheusbranhann)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
 - [Terminator](entities/terminator.md) — BYOVD AV/EDR/AC process terminator via Zemana `zam64.sys` (arbitrary process-termination IOCTL; gmh5225)
 - [Termux](entities/termux-app.md) — Android terminal / Linux env (no-root; pkg+apt / proot; Cheat Terminal Emulator)

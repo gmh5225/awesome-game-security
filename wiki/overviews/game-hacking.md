@@ -230,6 +230,7 @@ sources:
 
   - wiki/sources/descriptions/xsslize__idarem.md
   - wiki/sources/descriptions/matteyeux__IDArling.md
+  - wiki/sources/descriptions/matheusbranhann__taskbarhero-bot.md
   - wiki/sources/descriptions/trailofbits__idac.md
   - wiki/sources/descriptions/taida957789__ida-mcp-server-plugin.md
   - wiki/sources/descriptions/rand-tech__pcm.md
@@ -828,7 +829,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 | Unity Mono | `Assembly-CSharp`, JIT hooks | [[il2cpp]] (contrast Mono path) |
 | Source | ClientClass/RecvTable, ConVars | [[source-netvars]] |
 
-C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) Unispect-style Mono dump over external DMA such as [[unispect-dma-plugin]] (Razchek fork fix; Memory Plugin dispose after dump; cheat / game engine explorer:Unity [DMA]) extends that lane below the OS beside [[cheat-engine-dma-plugin]]. (source: wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
+C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) C# external Unity IL2CPP trainers such as [[taskbarhero-bot]] (TaskbarHero; WPF dashboard; batch memory reads, AOB scan, ACTk bypass, automation bot; cheat / game engine explorer:Unity) sit in the external trainer lane beside [[unity202x-externalresolve]]. (source: wiki/sources/descriptions/matheusbranhann__taskbarhero-bot.md) Unispect-style Mono dump over external DMA such as [[unispect-dma-plugin]] (Razchek fork fix; Memory Plugin dispose after dump; cheat / game engine explorer:Unity [DMA]) extends that lane below the OS beside [[cheat-engine-dma-plugin]]. (source: wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
 
 ## Development workflows
 
