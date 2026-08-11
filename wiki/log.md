@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PCIE-Detector`: entity [[pcie-detector]]; cited on [[overviews/dma-attack]] and [[dma]].
+
 - **2026-08-11** — ingest `description:gmh5225/PDF-PMC-X86`: entity [[pdf-pmc-x86]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-links from [[pmctrace]] and [[pmi-hpc]].
 
 - **2026-08-11** — ingest `description:gmh5225/PMI-hpc`: entity [[pmi-hpc]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-link from [[pmctrace]].

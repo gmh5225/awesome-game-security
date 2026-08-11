@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/sercanarga__pcileechgen.md
   - wiki/sources/descriptions/lyk64__VolkDMA.md
   - wiki/sources/descriptions/gmh5225__Pcileech-DMA-NVMe-VMD.md
+  - wiki/sources/descriptions/gmh5225__PCIE-Detector.md
 updated: 2026-08-11
 confidence: high
 ---
@@ -45,7 +46,7 @@ Cheat app → LeechCore/pcileech/MemProcFS → FPGA firmware → Memory Read TLP
 
 No single PCIe or IOMMU signal is durable; production AC layers **causally distinct** evidence and validates joint false-positive rates. (source: wiki/sources/skills/anti-cheat.md)
 
-**Pre-game / inventory:** IOMMU active, interrupt remapping, Secure Boot, VBS/[[hvci]], TPM provisioned, ACS topology verified; full 4 KB config dump per device cross-checked with SMBIOS slots.
+**Pre-game / inventory:** IOMMU active, interrupt remapping, Secure Boot, VBS/[[hvci]], TPM provisioned, ACS topology verified; full 4 KB config dump per device cross-checked with SMBIOS slots. Kernel config-space drivers such as [[pcie-detector]] (gmh5225) support that inventory lane from ring 0 for Detection:DMA research. (source: wiki/sources/descriptions/gmh5225__PCIE-Detector.md)
 
 **PCIe-layer checks:** VID/DID/SVID/SDID allowlists; capability-chain integrity; Xilinx/signature-residue patterns; BAR mask vs donor model; BAR memory probes (register layouts for NIC/NVMe/XHCI classes); R/W consistency on writable and W1C bits; link-state and AER baselining; completion-latency distribution tests (KS, Anderson–Darling, Hill tail index).
 
@@ -59,5 +60,5 @@ No single PCIe or IOMMU signal is durable; production AC layers **causally disti
 
 ## Related
 
-[[iommu]] · [[hvci]] · [[pcileech]] · [[volk-dma]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-dma-nvme-vmd]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[dma-cheat-base]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[iommu]] · [[hvci]] · [[pcileech]] · [[pcie-detector]] · [[volk-dma]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-dma-nvme-vmd]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[csgo-dma-overlay]] · [[dma-cheat-base]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
 
