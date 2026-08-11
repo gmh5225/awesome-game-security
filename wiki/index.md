@@ -1014,6 +1014,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OpenGame](entities/opengame.md) — agentic web-game testing/debug framework (Game Skill; GameCoder-27B; OpenGame-Bench; Game Testing)
 - [OpenHardwareMonitor](entities/openhardwaremonitor.md) — OSS hardware monitor (C#/JS; sensors/drivers; Detection:HWID)
 - [openhardwaremonitor-poc](entities/openhardwaremonitor-poc.md) — OpenHardwareMonitorLib.sys MSR IOCTL PoC (0x9C402084/0x9C402088 → arbitrary MSR R/W; hardware-monitoring BYOVD; gmh5225)
+- [OpenCV Smart Aimbot](entities/opencv-smart-aimbot.md) — OpenCV + triggerbot (C++; classical CV; cheat / triggerbot & aimbot; gmh5225)
 - [OpenLumina](entities/openlumina.md) — IDA plugin for third-party Lumina servers (Hex-Rays `.crt`; IDA Plugins)
 - [OpenPetya](entities/openpetya.md) — educational Petya-inspired MBR bootkit (NTFS MFT Salsa20; Real→Protected Mode; Assembly/C/C++)
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)

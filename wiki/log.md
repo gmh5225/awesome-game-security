@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/OpenCV-SmartAimBot`: entity [[opencv-smart-aimbot]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]].
+
 - **2026-08-11** — ingest `description:gmh5225/OpenHardwareMonitor-PoC`: entity [[openhardwaremonitor-poc]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-link from [[openhardwaremonitor]].
 
 - **2026-08-11** — ingest `description:gmh5225/Overwatch-1-cheat-source`: entity [[overwatch-1-cheat-source]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
