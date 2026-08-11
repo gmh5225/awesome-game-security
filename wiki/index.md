@@ -850,6 +850,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [magicmida-rs](entities/magicmida-rs.md) — Rust Themida automatic unpacker (Win32 Debug API; OEP + IAT rebuild; ScyllaHide; Fix Themida)
 - [MagicSigner](entities/magic-signer.md) — sign with leaked certs (admin; TLS side effects; AC sign tools)
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
+- [Mandragora](entities/mandragora.md) — educational ring-3 usermode anti-cheat for Assault Cube (weak difficulty; unobfuscated source for RE practice; gmh5225)
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
 - [magiskboot-linux](entities/magiskboot-linux.md) — GitHub Actions standalone Linux magiskboot (boot unpack/repack/patch; gmh5225)

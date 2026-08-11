@@ -358,6 +358,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__veh-printf-hook.md
   - wiki/sources/descriptions/gmh5225__no-access-protection-x86.md
   - wiki/sources/descriptions/gmh5225__MemoryGuard.md
+  - wiki/sources/descriptions/gmh5225__Mandragora.md
   - wiki/sources/descriptions/gmh5225__memory-relocalloc.md
   - wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md
   - wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md
@@ -475,6 +476,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[pandora]] — file-suspicion analysis framework with convenient result UI (Analysis Framework; Ubuntu 24.04 recommended) (source: wiki/sources/descriptions/pandora-analysis__pandora.md)
 - [[kiroshi]] — IDA Pro plugin to detect common Anti-Cheat artifacts (RE/academic; cheat / IDA Plugins) (source: wiki/sources/descriptions/not1cyyy__Kiroshi.md)
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
+- [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[ricochet-disabler]] — disable/bypass Ricochet kernel driver and user-mode monitoring for COD AC architecture research (source: wiki/sources/descriptions/gmh5225__ricochet-disabler.md)
 - [[hidden-syscall-monitoring]] — C/C++ monitor of hidden syscalls from Call of Duty anticheat (hooking / memory analysis) (source: wiki/sources/descriptions/ssnob__hidden_syscall_monitoring.md)
