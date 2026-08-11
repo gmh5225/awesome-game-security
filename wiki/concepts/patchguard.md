@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/hfiref0x__UPGDSED.md
   - wiki/sources/descriptions/gmh5225__VulnerablePatchGuardExploit.md
   - wiki/sources/descriptions/gmh5225__QuickPGTrigger.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/gmh5225__Patchguard-2023.md
+updated: 2026-08-11
 confidence: high
 ---
 
@@ -43,6 +44,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[quickpgtrigger]] (gmh5225; C/C++) targets **PatchGuard stress testing** — exercising KPP integrity-check paths under load for researchers in the Anti Cheat Stress Testing / cheat PatchGuard-related lane. (source: wiki/sources/descriptions/gmh5225__QuickPGTrigger.md)
 
+[[patchguard-2023]] (gmh5225) documents 2023-era KPP internals — timer-based verification, context encryption, protected-structure list, recovery routines, trigger mechanisms, and bypass study — for kernel researchers in the cheat / PatchGuard-related lane. (source: wiki/sources/descriptions/gmh5225__Patchguard-2023.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Patchguard-2023`: entity [[patchguard-2023]]; cited on [[patchguard]] and [[overviews/windows-kernel]].
+
 - **2026-08-11** — ingest `description:omochikaeri15/battle-cats-complete`: entity [[battle-cats-complete]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]].
 
 - **2026-08-11** — ingest `readme:categories`: bumped Cheat ~2677 (was ~2676; Anti Cheat ~661 / Some Tricks ~116 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
