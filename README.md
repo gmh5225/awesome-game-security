@@ -898,6 +898,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Genymobile/scrcpy  [Display and control your Android device]
 - https://github.com/barry-ran/QtScrcpy [Display and control your Android device]
 - https://github.com/guided-hacking/GH-Offset-Dumper [Scans for signatures and netvars and dumps their relative offsets]
+- https://github.com/Elinam03/Signature-Forge [Web-based x86 wildcard byte signature generator for x64dbg, Cheat Engine, and raw hex formats]
 - https://github.com/guided-hacking/GH-Entity-List-Finder [Scans game processes for most likely entity list addresses]
 - https://github.com/rednaga/APKiD [PEiD for Android]
 - https://github.com/Col-E/Recaf [Java]
@@ -1254,6 +1255,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NPC2000/AppPealing-new [An Xposed module that disables Inka AppSealing, a popular anti-cheat and anti-root solution]
 - https://github.com/mabbcoll13/xposed-module-kit [Xposed/LSPosed module scaffold with hook templates and root-detection bypass example]
 - https://github.com/wchunlin1006/LocusMimic [LSPosed/Xposed Android GPS spoof module with map picker, saved locations, and app/system/mock-provider modes]
+- https://github.com/salvogiangri/KnoxPatch [LSPosed module to restore Samsung Knox-gated apps and features on rooted Galaxy devices]
 
 > Frida
 - https://github.com/hackcatml/frida-watchpoint-tutorial [Frida's setHardwareWatchpoint tutorial]
@@ -2818,6 +2820,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ByNameModding/BNM-Android [Modding il2cpp games]
 - https://github.com/SsageParuders/CheatUnityGames [Unity cheat framwork]
 - https://github.com/sanqiuu/AndroidCheatTemplate [Unity cheat framwork]
+- https://github.com/matheusbranhann/taskbarhero-bot [C# Unity IL2CPP memory trainer/bot for TaskbarHero with ACTk bypass, batch-read automations, and WPF control panel]
 
 > Game Engine Explorer:Source
 - https://github.com/anarh1st47/Source2Dumps [Dump]
