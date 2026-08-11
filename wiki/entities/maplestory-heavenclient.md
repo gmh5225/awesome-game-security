@@ -14,7 +14,7 @@ Custom **MapleStory** client (**HeavenClient**, gmh5225) built from scratch for 
 
 Useful for game security researchers and private-server developers studying MapleStory client architecture, protocol handling, and presentation stacks—not live anti-cheat bypass tooling.
 
-Complements HeavenMS server emulators such as [[maplestory-server]], modified HeavenMS client builds such as [[maplestory-client]] (rendering / network protocol / UI; private-server connectivity), GM/admin clients such as [[maplestory-gm-client]] (map editing / NPC spawn / item creation / GM commands), other client reimplementations such as [[winapi-maplestory]], WZ tooling such as [[wzcomparerr2]] and [[maplestory-packer-modpacker]], and private-server stacks such as [[maplestory-v113-server-eimulator]] and [[rebirth]].
+Complements HeavenMS server emulators such as [[maplestory-server]], modified HeavenMS client builds such as [[maplestory-client]] (rendering / network protocol / UI; private-server connectivity), JourneyClient-derived v83 clients such as [[libremaple-client]] (C++17 from-scratch implementation; Roboto fonts; classic protocol/mechanics), GM/admin clients such as [[maplestory-gm-client]] (map editing / NPC spawn / item creation / GM commands), other client reimplementations such as [[winapi-maplestory]], WZ tooling such as [[wzcomparerr2]] and [[maplestory-packer-modpacker]], and private-server stacks such as [[maplestory-v113-server-eimulator]] and [[rebirth]].
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements HeavenMS server emulators such as [[maplestory-server]], modified He
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/game-hacking]] · [[maplestory-server]] · [[maplestory-client]] · [[maplestory-gm-client]] · [[winapi-maplestory]] · [[wzcomparerr2]] · [[maplestory-packer-modpacker]]
+[[overviews/game-engine]] · [[overviews/game-hacking]] · [[maplestory-server]] · [[maplestory-client]] · [[libremaple-client]] · [[maplestory-gm-client]] · [[winapi-maplestory]] · [[wzcomparerr2]] · [[maplestory-packer-modpacker]]

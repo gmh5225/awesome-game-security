@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/LibreMaple-Client`: entity [[libremaple-client]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-links from [[maplestory-heavenclient]] and [[maplestory-client]].
+
 - **2026-08-11** — ingest `description:gmh5225/LoLClient`: entity [[lol-client]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-11** — ingest `description:gmh5225/LostArk`: entity [[lost-ark]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
