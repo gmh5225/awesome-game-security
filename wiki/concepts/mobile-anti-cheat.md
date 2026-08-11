@@ -12,10 +12,11 @@ sources:
   - wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md
   - wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md
   - wiki/sources/descriptions/libtersafe__KPM-MemReader.md
+  - wiki/sources/descriptions/gmh5225__PUBGM1.6-DeadGame.md
   - wiki/sources/descriptions/gmh5225__freedom.md
   - wiki/sources/descriptions/okhsunrog__vpnhide.md
   - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
-updated: 2026-08-10
+updated: 2026-08-11
 confidence: medium
 ---
 
@@ -25,7 +26,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 
 ## Common systems
 
-- **Tencent ACE** — Chinese-market native protector; title RE such as [[honor-of-kings-re-research]] (`libtersafe`, IL2CPP, KernelPatch modules). ARM64 coordinate-decryption emulation via [[dfm-android-unicorn]] (Unicorn replay of protected crypto paths). KernelPatch KPM cross-process memory read via ioctl hook via [[kpm-memreader]]. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md) (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md)
+- **Tencent ACE** — Chinese-market native protector; title RE such as [[honor-of-kings-re-research]] (`libtersafe`, IL2CPP, KernelPatch modules). Historical PUBG Mobile 1.6 decompiled `libtersafe.so` archives such as [[pubgm1.6-deadgame]] preserve ACE native symbols/functions from a dead client build for offline static RE. (source: wiki/sources/descriptions/gmh5225__PUBGM1.6-DeadGame.md) ARM64 coordinate-decryption emulation via [[dfm-android-unicorn]] (Unicorn replay of protected crypto paths). KernelPatch KPM cross-process memory read via ioctl hook via [[kpm-memreader]]. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md) (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md)
 - **NetEase Protection** — NetEase titles; similar native + server mix.
 - **Per-game / SDK RASP** — [[droidshield]], Talsec freeRASP ([[free-rasp-unity-poc]], [[free-rasp-reactnative]], [[free-rasp-capacitor]]), [[rs-native-kit-security]], Unity UPM [[com-sipvlib-anticheat]] (server-verified GameTime + IntegrityChecker).
 - **Commercial packers** — AppSealing, DexGuard/ProGuard, Arxan on APK/DEX/native layers.
@@ -58,4 +59,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
