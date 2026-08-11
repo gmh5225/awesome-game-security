@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/LeagueDumper`: entity [[league-dumper]]; cited on [[overviews/game-hacking]] and [[vanguard]].
+
 - **2026-08-11** — ingest `description:gmh5225/LeagueSharp.Loader`: entity [[leaguesharp-loader]]; cross-link from [[leaguesharp]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-11** — ingest `description:gmh5225/LeagueSharp`: entity [[leaguesharp]]; cited on [[overviews/game-hacking]] and [[vanguard]].
