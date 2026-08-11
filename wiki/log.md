@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/PdFwKrnlMapper`: entity [[pdfwkrnl-mapper]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-11** — ingest `description:gmh5225/PokemonGoDumper`: entity [[pokemongo-dumper]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
 
 - **2026-08-11** — ingest `description:ianveig29/cs2-internals`: entity [[cs2-internals]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]].

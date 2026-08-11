@@ -40,6 +40,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__razer-rzctl.md
   - wiki/sources/descriptions/gmh5225__qiomem.md
   - wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md
+  - wiki/sources/descriptions/gmh5225__PdFwKrnlMapper.md
   - wiki/sources/descriptions/gmh5225__mhydeath.md
   - wiki/sources/descriptions/gmh5225__mhyprot2.md
   - wiki/sources/descriptions/gmh5225__evil-mhyprot-cli.md
@@ -124,6 +125,8 @@ Classic signed-utility driver abuse such as [[cpuz]] (CPU-Z; XP–Win10 1607) si
 
 BitLocker **`PdFwKrnl.sys`** IOCTL abuse such as [[pdfwkrnl-exploit]] loads and executes unsigned kernel code via the driver's IOCTL surface → arbitrary kernel code execution. (source: wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md)
 
+BitLocker **`PdFwKrnl.sys`** DSE-bypass mapper research such as [[pdfwkrnl-mapper]] (gmh5225; same signed driver backend → `SeValidateImageData`/header patching → unsigned PE map into kernel space) complements IOCTL code-exec PoC [[pdfwkrnl-exploit]] in the same BitLocker BYOVD lane. (source: wiki/sources/descriptions/gmh5225__PdFwKrnlMapper.md)
+
 **`ampa.sys`** IOCTL abuse such as [[ampa-sys-exp]] (gmh5225; C/C++ automated exploit; insecure IOCTL → arbitrary kernel R/W or code execution; unsigned driver load, privilege escalation, or AC bypass) sits in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/gmh5225__ampa.sys-exp.md)
 
 AMD Ryzen Master v17 kernel driver abuse such as [[amd-ryzen-master-driver-v17-exploit]] (gmh5225; IOCTL interface → unprivileged physical memory R/W; BYOVD primitive for kernel exploitation, driver mapping, or AC bypass) sits in the OEM utility-driver physmem lane beside [[qiomem]]. (source: wiki/sources/descriptions/gmh5225__amd-ryzen-master-driver-v17-exploit.md)
@@ -174,5 +177,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

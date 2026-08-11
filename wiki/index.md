@@ -1067,6 +1067,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pdb-rs](entities/pdb-rs.md) — Microsoft Rust PDB reader/writer (MSF/CodeView DBI/TPI/IPI; x86/AMD64/ARM64; RE / debugger symbols)
 - [pdblister](entities/pdblister.md) — Rust PDB manifest CLI (PE CodeView GUID/age scan; symchk /om alternative; Symbol Server batch download)
 - [pdfwkrnl-exploit](entities/pdfwkrnl-exploit.md) — PdFwKrnl.sys (BitLocker) IOCTL exploit (unsigned kernel code load/exec; Cheat Vulnerable Driver)
+- [PdFwKrnlMapper](entities/pdfwkrnl-mapper.md) — PdFwKrnl.sys (BitLocker) DSE-bypass driver mapper (SeValidateImageData/header patch; unsigned PE map; gmh5225)
 - [pe-bear](entities/pe-bear.md) — Qt GUI PE viewer/editor (headers, imports/exports, TLS/CLR; hex edit, section manipulation, compare)
 - [pe-sieve](entities/pe-sieve.md) — Lightweight single-process malware/injection scan engine (Detection:hook; hasherezade; lib behind xMalHunter)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
