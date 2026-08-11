@@ -63,6 +63,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__PPLKiller.md
   - wiki/sources/descriptions/gmh5225__TS-Fucker.md
   - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
+  - wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
 updated: 2026-08-11
 confidence: high
@@ -158,6 +159,8 @@ Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh
 
 Dedicated **`Speedfan.sys`** PoC such as [[speedfan-exploit]] (gmh5225; SpeedFan hardware-monitoring IOCTL abuse → physical memory read/write for arbitrary kernel access; legacy monitoring-tool BYOVD research) sits in the same Speedfan.sys backend lane as [[vdk]]. (source: wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md)
 
+OpenHardwareMonitor **`OpenHardwareMonitorLib.sys`** MSR-exposure PoC such as [[openhardwaremonitor-poc]] (gmh5225; minimal demo; IOCTLs `0x9C402084`/`0x9C402088` → arbitrary MSR read/write from user mode via `read_msr`/`write_msr`; hardware-monitoring driver MSR bug research) sits in the same legacy monitoring-tool BYOVD lane beside [[speedfan-exploit]]. (source: wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md)
+
 C/C++ kernel utility research such as [[kur]] (gmh5225; **`echo_driver.sys`** vulnerable signed-driver backend; kernel R/W, process manipulation, driver-load primitives) sits in the same access-primitives lane. (source: wiki/sources/descriptions/gmh5225__kur.md)
 
 Writeup-backed echo.ac **`echo_driver.sys`** LPE PoC such as [[echoac-poc]] (gmh5225; read-memory IOCTL → `PsInitialSystemProcess` / `ActiveProcessLinks` token theft → SYSTEM on spawned `cmd.exe`; anti-cheat-adjacent screenshare driver case study) complements utility-focused [[kur]] in the same backend lane. (source: wiki/sources/descriptions/gmh5225__echoac-poc.md)
@@ -180,5 +183,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

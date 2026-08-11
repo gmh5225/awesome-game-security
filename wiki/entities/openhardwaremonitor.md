@@ -1,16 +1,18 @@
 ---
 title: OpenHardwareMonitor
 kind: entity
-topics: [anti-cheat, game-hacking]
+topics: [anti-cheat, game-hacking, windows-kernel]
 sources:
   - wiki/sources/descriptions/openhardwaremonitor__openhardwaremonitor.md
-updated: 2026-07-26
+updated: 2026-08-11
 confidence: medium
 ---
 
 # OpenHardwareMonitor
 
 Open-source **hardware monitoring** project (primarily C# / JavaScript) listed under Anti Cheat → Detection:HWID. Exposes CPU/GPU/sensor and related machine-identity signals that defensive HWID pipelines inventory; the stack includes kernel/driver paths used to read hardware sensors. Aimed at anti-cheat engineers studying how monitor libraries surface identifiers and telemetry. (source: wiki/sources/descriptions/openhardwaremonitor__openhardwaremonitor.md)
+
+Vulnerable-driver research on its signed **`OpenHardwareMonitorLib.sys`** backend — MSR read/write via IOCTLs from user mode — is demonstrated by [[openhardwaremonitor-poc]] (gmh5225; Cheat Vulnerable Driver lane).
 
 Complements WMI inventory CLIs such as [[windows-hardware-info]], GPU/board fingerprint tooling such as [[nvidiaapi]], and sits opposite offensive HWID spoofers such as [[hwidspoofer]] / [[spoofer-amidewin]].
 
@@ -20,4 +22,4 @@ Complements WMI inventory CLIs such as [[windows-hardware-info]], GPU/board fing
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[windows-hardware-info]] · [[nvidiaapi]] · [[tpm-mmio]] · [[hwidspoofer]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[openhardwaremonitor-poc]] · [[byovd]] · [[windows-hardware-info]] · [[nvidiaapi]] · [[tpm-mmio]] · [[hwidspoofer]]
