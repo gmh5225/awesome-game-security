@@ -969,6 +969,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
+- [NVIDIA Overlay](entities/nvidia-overlay.md) — GeForce Experience overlay DirectX hijack (trusted-process rendering; anti-cheat overlay evasion; gmh5225)
 - [nvidia-overlay-hijack](entities/nvidia-overlay-hijack.md) — GeForce Experience overlay render-context hijack (ESP/menu; no new overlay windows; gmh5225)
 - [nv-graphics-mesa](entities/nv-graphics-mesa.md) — read-only Mesa 3D mirror (OpenGL/Vulkan reference implementation; 3D Graphics; gmh5225)
 - [NMI Callback](entities/nmi-callback.md) — C/C++ kernel NMI callback driver research (Detection: Hacked Hypervisor)
