@@ -364,6 +364,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__memory-relocalloc.md
   - wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md
   - wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md
+  - wiki/sources/descriptions/gmh5225__LostArk.md
   - wiki/sources/descriptions/gmh5225__veh_hide_memory.md
   - wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md
   - wiki/sources/descriptions/gupr0x4__HWID-Spoofer-for-Fortnite-and-Valorant.md
@@ -471,6 +472,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[kvm-csgo-cheat]] — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (gmh5225) for studying VM-isolated / below-OS cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - [[cs16-trigger-kvm]] — KVM/QEMU host-side CS1.6 triggerbot (gmh5225; guest memory read + input injection invisible to in-guest AC) for studying hypervisor-based cheat surface (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)
 - [[cfclap]] — CrossFire (CF) memory-manipulation cheat sample (gmh5225; ESP / aimbot / combat advantages via client memory reads) for studying title-specific client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__cfclap.md)
+- [[lost-ark]] — Lost Ark MMORPG client memory-manipulation cheat sample (gmh5225; ESP / gameplay mods / automation) for studying title-specific UE MMORPG client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__LostArk.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[fix-arxan]] — Arxan PE protector: loader info + decrypted working image for research (Dump Fix) (source: wiki/sources/descriptions/pr701__fix-arxan.md)
 - [[android-unpacker]] — Android packed-sample unpack tooling for malware RE (Sample Unpacker; handle samples carefully) (source: wiki/sources/descriptions/strazzere__android-unpacker.md)

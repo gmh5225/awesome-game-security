@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/LostArk`: entity [[lost-ark]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-11** — ingest `description:gmh5225/LostArkDumper`: entity [[lost-ark-dumper]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]].
 
 - **2026-08-11** — ingest `description:gmh5225/LostArkLogger`: entity [[lost-ark-logger]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]].

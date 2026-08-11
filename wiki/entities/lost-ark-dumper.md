@@ -18,4 +18,4 @@ Memory dumper for the **Lost Ark** game client that extracts Unreal Engine SDK s
 
 ## Related
 
-[[lost-ark-logger]] · [[unreal-object-model]] · [[pubg-dumper]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[lost-ark]] · [[lost-ark-logger]] · [[unreal-object-model]] · [[pubg-dumper]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
