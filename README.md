@@ -3244,6 +3244,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/NotOfficer/cs2-sdk [SDK]
 - https://github.com/a2x/cs2-dumper [Dump]
 - https://github.com/dougwithseismic/dezlock-dump [Runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); no source2gen required]
+- https://github.com/ianveig29/cs2-internals [Educational CS2/Source 2 internals guide covering schemas, offsets, entities, networking, Panorama, and verification labs]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
@@ -3256,6 +3257,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/cs2_things [VScript]
 - https://github.com/IMXNOOBX/cs2-external-esp [External]
 - https://github.com/tiansongyu/cs2_cheat [Educational CS2 external ESP (SDL2 + ImGui) with auto-updating offsets via cs2-dumper]
+- https://github.com/xfi0/Titled-Gui-CS2 [GPLv3 external CS2 cheat in C# with ESP, aimbot, radar, and minimal memory writes]
 - https://github.com/hendodev/cs2-ext [External CS2 cheat with aimbot, ESP, spinbot, and pluggable driver interface]
 - https://github.com/UnnamedZ03/CS2-external-base [External]
 - https://github.com/Tokyodidit/cs2External [External]
