@@ -775,6 +775,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kn-diff-pool](entities/kn-diff-pool.md) — Windows kernel Big Pool snapshot/diff (driver capture + Go TUI; leak / manual-map forensics)
 - [kn-live-dbg](entities/kn-live-dbg.md) — Windows kernel live debugging (driver memory primitives + Zydis disasm; user-mode TUI; LiveKD-style)
 - [kn-win32-api-monitor](entities/kn-win32-api-monitor.md) — Win32 API trace workstation (Tauri 2; IAT hooks; ~30k APIs; `.knapm` replay; security/RE/anti-cheat research; kernullist)
+- [KnoxPatch](entities/knoxpatch.md) — LSPosed module restoring Samsung Knox-gated apps on rooted Galaxy (Knox SDK / attestation hooks + Magisk/KernelSU enhancer; One UI 9–16)
 - [koidbg](entities/koidbg.md) — Windows ARM64 debugger (EN/PT docs; cheat / debugging; game-security RE)
 - [kernforge](entities/kernforge.md) — Go AI workbench for Windows/AC project analysis, fuzz reasoning, driver POC scaffolding, verification (MCP skills)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)

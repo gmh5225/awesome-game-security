@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__freedom.md
   - wiki/sources/descriptions/okhsunrog__vpnhide.md
   - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
+  - wiki/sources/descriptions/salvogiangri__KnoxPatch.md
 updated: 2026-08-11
 confidence: medium
 ---
@@ -51,7 +52,7 @@ Multi-check collections: [[detection]], [[android-native-root-detector]], archiv
 
 1. Static RE of detection routines in DEX/native code.
 2. Hook or patch check functions ([[frida]], [[locusmimic]] for mock-location edge cases).
-3. Reduce injection footprint (stealth Frida [[fridare]], WXSHADOW/RECOMP tiers, root-hide DenyList/Shamiko, KernelSU process isolation). Hardened KernelSU forks such as [[apex-su]] study reduced root artifacts—IOCTL over anonymous `io_uring`-disguised inodes with no proc/sys/dev entries—against FS and process-based root probes. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md)
+3. Reduce injection footprint (stealth Frida [[fridare]], WXSHADOW/RECOMP tiers, root-hide DenyList/Shamiko, KernelSU process isolation). Hardened KernelSU forks such as [[apex-su]] study reduced root artifacts—IOCTL over anonymous `io_uring`-disguised inodes with no proc/sys/dev entries—against FS and process-based root probes. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md) OEM Knox integrity on Samsung Galaxy: [[knoxpatch]] hooks target Samsung apps to bypass root detection and disable Knox SDK / Samsung Attestation Key checks, with companion Magisk/KernelSU system patches for Secure Folder on legacy One UI—useful for studying how Samsung apps gate features on rooted hardware. (source: wiki/sources/descriptions/salvogiangri__KnoxPatch.md)
 4. Timing — checks may run once at launch vs periodically.
 5. Environment emulation — hide emulator props or use physical devices with clean attestation.
 
@@ -59,4 +60,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
