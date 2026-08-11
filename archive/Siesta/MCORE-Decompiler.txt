@@ -1,0 +1,4114 @@
+Project Path: arc_Siesta_MCORE-Decompiler_ulc8wsmh
+
+Source Tree:
+
+```txt
+arc_Siesta_MCORE-Decompiler_ulc8wsmh
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── THIRD_PARTY-NOTICES.md
+├── run_tests.sh
+├── src
+│   ├── emit
+│   │   ├── emit.cpp
+│   │   └── emit.h
+│   ├── ir
+│   │   └── ir.h
+│   ├── lifter
+│   │   ├── lifter.cpp
+│   │   └── lifter.h
+│   ├── opt
+│   │   ├── opt.cpp
+│   │   ├── opt.h
+│   │   └── stackframe.cpp
+│   ├── plugin
+│   │   └── plugin.cpp
+│   └── vars
+│       ├── vars.cpp
+│       └── vars.h
+└── tests
+    ├── integration
+    │   ├── decompile_dump.py
+    │   ├── fixtures
+    │   │   ├── add
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── addi5
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── bgeni
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── frame
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── load
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── loop
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── max
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── return42
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   ├── rsubi
+    │   │   │   ├── README.md
+    │   │   │   └── expected.c
+    │   │   └── store
+    │   │       ├── README.md
+    │   │       └── expected.c
+    │   └── run_integration.sh
+    └── unit
+        ├── test_framework.h
+        └── test_pipeline.cpp
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.25)
+
+# IDA 9.4 publishes its C++ SDK separately from the application install. Use
+# the official SDK's out-of-tree CMake entrypoint (tag v9.4.0-release).
+if(DEFINED IDASDK)
+  set(_idasdk_root "${IDASDK}")
+elseif(DEFINED ENV{IDASDK} AND NOT "$ENV{IDASDK}" STREQUAL "")
+  set(_idasdk_root "$ENV{IDASDK}")
+else()
+  message(FATAL_ERROR
+    "IDASDK is not set. Point it at the HexRaysSA/ida-sdk v9.4.0-release checkout.")
+endif()
+if(EXISTS "${_idasdk_root}/src/include/pro.h")
+  set(_idasdk_source_root "${_idasdk_root}/src")
+elseif(EXISTS "${_idasdk_root}/include/pro.h")
+  set(_idasdk_source_root "${_idasdk_root}")
+else()
+  message(FATAL_ERROR "include/pro.h not found below IDASDK=${_idasdk_root}")
+endif()
+set(IDASDK "${_idasdk_source_root}" CACHE PATH "IDA SDK source root" FORCE)
+set(ENV{IDASDK} "${_idasdk_source_root}")
+set(_idasdk_init "${_idasdk_source_root}/cmake/idasdk_init.cmake")
+include("${_idasdk_init}")
+
+project(mcore_decompiler CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Keep this out-of-tree plugin's output in its own build directory rather than
+# the SDK checkout's bin/plugins directory.
+set(IDA_PLUGIN_DIR "${CMAKE_BINARY_DIR}")
+find_package(idasdk REQUIRED)
+if(NOT IDA_SDK_VERSION_NUM EQUAL 940)
+  message(FATAL_ERROR
+    "IDA SDK 9.4 is required (found ${idasdk_VERSION} at ${IDASDK})")
+endif()
+
+# ---------------------------------------------------------------------------
+# The IDA plugin (.so), linked through the official SDK plugin target.
+# ---------------------------------------------------------------------------
+ida_add_plugin(mcore_decompiler
+  SOURCES
+    src/plugin/plugin.cpp
+    src/lifter/lifter.cpp
+    src/vars/vars.cpp
+    src/opt/opt.cpp
+    src/opt/stackframe.cpp
+    src/emit/emit.cpp
+)
+target_include_directories(mcore_decompiler PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set_target_properties(mcore_decompiler PROPERTIES SKIP_BUILD_RPATH TRUE)
+
+# ---------------------------------------------------------------------------
+# Offline unit tests (no IDA dependency).
+# ---------------------------------------------------------------------------
+enable_testing()
+add_executable(unit_tests
+  tests/unit/test_pipeline.cpp
+  src/vars/vars.cpp
+  src/opt/opt.cpp
+  src/opt/stackframe.cpp
+  src/emit/emit.cpp
+)
+target_include_directories(unit_tests PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests/unit")
+add_test(NAME unit_tests COMMAND unit_tests)
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 the mcore_decompiler authors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------------------------------------------
+
+This license covers the original source and build files in this repository. It
+does NOT cover IDA Pro, its built-in processor modules, or the separately
+downloaded IDA SDK, which remain under their respective terms. See
+THIRD_PARTY-NOTICES.md.
+
+```
+
+`README.md`:
+
+```md
+# mcore_decompiler
+
+A self-contained **decompiler for Motorola M·CORE** binaries, packaged as an
+IDA Pro 9.4 plugin. It lifts the disassembly produced by IDA's built-in MCORE
+processor into its own intermediate representation, optimises and structures it,
+and emits **readable C pseudocode** with recovered local variables and
+arguments — bound to **F5** inside any M·CORE database.
+
+> Hex-Rays does not provide a decompiler back end for M·CORE, so there is no
+> microcode target to plug into. This project takes the other route ("Path B"):
+> a small, independent decompilation pipeline (IR + optimiser + control-flow
+> structuring + C emitter), with no dependency on Hex-Rays decompiler APIs.
+
+```c
+int BAP_AnyStateExit(int a1, int a2)
+{
+  int v3;
+
+  v3 = a1;
+  if (a2 == 0) {
+    a2 = *(int *)(a1 + 28);
+    if (a2 != 0) {
+      UIS_Delete(a2);
+      *(int *)(v3 + 28) = 0;
+    }
+  }
+  return 0;
+}
+```
+
+<sub>Verbatim output for a function from Motorola E1000 firmware — recovered
+arguments, structured `if`s, and struct-field accesses.</sub>
+
+## Why
+
+M·CORE is a 16-bit fixed-width, big-endian RISC ISA Motorola used in embedded
+systems and feature-phone firmware (e.g. the Motorola E1000). IDA Pro 9.4 can
+disassemble it with its built-in processor module, but cannot decompile it. This
+plugin fills that gap with output aimed at **readability** rather than at being
+a drop-in Hex-Rays equivalent.
+
+## Features
+
+- **Readable C** with named recovered variables (`a1..`, `v1..`, `var_<off>`),
+  not raw registers.
+- **Control-flow structuring**: `if/else`, `while`, `do/while`, `while (1)`,
+  `break`/`continue`; a correct `goto` fallback for CFGs that don't structure.
+- **Stack-frame recovery**: sp-relative slots become `var_<off>` locals;
+  prologue/epilogue (sp adjust, `stm`/`ldm`, lr save/restore) is dropped;
+  by-reference stack arguments render as `&var_<off>`.
+- **Call-argument recovery** across basic blocks: arguments set in a predecessor
+  block or on all arms of a branch are recovered; previous-call results are
+  threaded into the next call (`p = alloc(); memset(p, …)`).
+- **Optimisation**: constant/copy propagation and folding, the single M·CORE
+  C bit resolved by reaching-definition analysis, live-range splitting
+  (SSA-lite), liveness-based dead-store elimination, algebraic identities, and
+  collapsing of branches a predecessor already decided.
+- **Near-complete instruction coverage**; the rare control-register ops
+  (`mfcr`/`mtcr`) are emitted as `__asm { … }` inserts rather than dropped.
+- **Interactive**: F5 in a function prints to the Output window and opens a
+  syntax-highlighted pseudocode viewer. The F5 binding is installed **only** on
+  M·CORE databases, so it never shadows the real Hex-Rays F5 elsewhere.
+
+## Requirements
+
+- **IDA Pro 9.4** (64-bit, Linux), including its built-in `procs/mcore.so`.
+- The official [IDA SDK](https://github.com/HexRaysSA/ida-sdk) checkout at tag
+  `v9.4.0-release`.
+- A C++17 compiler and CMake ≥ 3.25.
+
+The IR, optimization, variable-analysis, and emission stages are pure C++ and
+unit-tested offline; only the plugin shell and instruction lifter touch the SDK.
+
+## Building
+
+```sh
+# 1. Clone this project and the matching official SDK
+git clone <your-fork-url> mcore_decompiler
+git clone --depth 1 --branch v9.4.0-release \
+  https://github.com/HexRaysSA/ida-sdk.git /path/to/ida-sdk
+cd mcore_decompiler
+
+# 2. Point the build at the SDK checkout
+export IDASDK=/path/to/ida-sdk
+
+# 3. Configure and build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j"$(nproc)"
+# -> build/mcore_decompiler.so
+```
+
+`IDASDK` may point either at the git checkout root or its `src/` directory.
+
+### Installing
+
+```sh
+cp build/mcore_decompiler.so ~/.idapro/plugins/
+```
+
+## Usage
+
+1. Open an M·CORE database in IDA 9.4 with the built-in processor active; the
+   processor name is `MCORE` (without an asterisk).
+2. Put the cursor in a function and press **F5** (or run the
+   `Decompile (M-CORE)` action).
+3. The pseudocode is printed to the **Output** window and shown in a custom
+   viewer.
+
+Databases created with the former third-party processor are stored as `M*CORE`
+and cannot switch processor modules in place. This plugin keeps compatibility
+with those databases when that processor is already installed, but all new
+databases and integration tests use IDA 9.4's built-in `MCORE` module.
+
+## How it works
+
+The plugin reads IDA's decoded instructions and runs a fixed pipeline:
+
+```
+insn_t  ──lift──▶  IR
+        recover_call_args     (cross-block / merge argument recovery)
+        recover_stack         (sp slots → locals, drop prologue/epilogue)
+        split_ranges          (live-range splitting / SSA-lite)
+        vars::analyze         (name inputs, locals, stack slots)
+        simplify              (const/copy prop, C-bit reaching, identities)
+        fold_implied_branches (drop branches the predecessor already decided)
+        inline_locals         (single-use inlining, dead-store elimination)
+   ──emit──▶  structured C  (or a goto fallback)
+```
+
+The IR (`src/ir/ir.h`) is a CFG of basic blocks with a small expression/statement
+language. See [docs/design.md](docs/design.md) for the design notes (in Russian).
+
+## Tests
+
+Offline unit tests cover the IR pipeline, optimiser, variable recovery and
+emitter (no IDA runtime needed); integration fixtures run the plugin with IDA
+9.4's built-in MCORE module and diff the output against expected C.
+
+```sh
+# unit tests (configuration still uses the official SDK)
+cmake -S . -B build && cmake --build build -j"$(nproc)"
+./build/unit_tests
+
+# everything (unit + headless integration)
+export IDA_DIR=/path/to/ida-pro-9.4
+./run_tests.sh
+```
+
+## Scope & limitations
+
+This is a research-grade decompiler focused on readable output, not a verified
+or complete one. Known limits:
+
+- **No prototype/type recovery**: every value is `int`; return type is `int`,
+  arguments are `a1..`. A directly forwarded, unmodified incoming argument
+  (`g(a1)` with no setup instruction) can be dropped from a call.
+- A minority of complex CFGs (nested loops, multi-block `do/while`) fall back to
+  correct `goto` code rather than fully structured control flow.
+- Jump tables (`jmpi`) are treated as tail calls — the M·CORE module exposes no
+  switch info to recover them.
+- Carry-shift and control-register ops that touch processor state are emitted as
+  `__asm { … }`.
+
+## Acknowledgements
+
+Disassembly is provided by IDA Pro 9.4's built-in MCORE processor. Earlier
+versions of this project used the community
+[M-CORE_IDA-Pro](https://github.com/MotoFanRu/M-CORE_IDA-Pro) module; thanks to
+its original and modern maintainers for enabling the initial implementation.
+
+## License
+
+[MIT](LICENSE) for the code in this repository. IDA Pro and its processor
+modules remain proprietary Hex-Rays software; the separately downloaded IDA SDK
+is distributed under its own license.
+
+```
+
+`THIRD_PARTY-NOTICES.md`:
+
+```md
+# Third-party notices
+
+## IDA Pro and IDA SDK
+
+This plugin targets IDA Pro 9.4 and its built-in Motorola MCORE processor
+module. IDA Pro is proprietary Hex-Rays software and is not redistributed by
+this repository.
+
+Builds use the official [HexRaysSA/ida-sdk](https://github.com/HexRaysSA/ida-sdk)
+at tag `v9.4.0-release`. The SDK is obtained separately and remains under the
+license published in that repository; no SDK files are copied into this tree.
+
+## Historical M·CORE processor module
+
+Earlier revisions used the community
+[M-CORE_IDA-Pro](https://github.com/MotoFanRu/M-CORE_IDA-Pro) processor module
+for instruction identifiers and disassembly. The current code has no required
+build-time or runtime dependency on that module and does not include its headers
+or sources. It accepts the legacy `M*CORE` processor name only so existing IDA
+databases remain usable when their original module is installed separately.
+
+Historical attribution: the original “IDA MCORE Plugin” was written by
+`rshade@hushmail.com` (2004–2005) and later ported to modern IDA by
+[@usernameak](https://github.com/usernameak) and MotoFan.Ru contributors.
+
+```
+
+`run_tests.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Build the plugin with the official IDA 9.4 SDK, run the offline unit suite,
+# then run the built-in-MCORE integration fixtures when IDA_DIR is available.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD="${ROOT}/build"
+
+: "${IDASDK:?set IDASDK to the HexRaysSA/ida-sdk v9.4.0-release checkout}"
+
+cmake -S "${ROOT}" -B "${BUILD}" -DCMAKE_BUILD_TYPE=Debug "$@"
+cmake --build "${BUILD}" -j"$(nproc)"
+
+echo "=== unit tests ==="
+ctest --test-dir "${BUILD}" --output-on-failure
+
+echo "=== integration tests (headless idat) ==="
+if [ -n "${IDA_DIR:-}" ] && [ -x "${IDA_DIR}/idat" ]; then
+  "${ROOT}/tests/integration/run_integration.sh"
+else
+  echo "skipped: idat not found (set IDA_DIR to enable)"
+fi
+
+```
+
+`src/emit/emit.cpp`:
+
+```cpp
+#include "emit/emit.h"
+
+#include "ir/ir.h"
+#include "vars/vars.h"
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <sstream>
+#include <vector>
+
+namespace emit {
+
+namespace {
+
+struct OpInfo { const char *sym; int prec; };
+
+OpInfo binop_info(ir::BinOp op) {
+  switch (op) {
+    case ir::BinOp::Mul:   return {"*", 13};
+    case ir::BinOp::Div:   return {"/", 13};
+    case ir::BinOp::Add:   return {"+", 12};
+    case ir::BinOp::Sub:   return {"-", 12};
+    case ir::BinOp::Shl:   return {"<<", 11};
+    case ir::BinOp::Shr:   return {">>", 11};
+    case ir::BinOp::Sar:   return {">>", 11};
+    case ir::BinOp::CmpLt: return {"<", 10};
+    case ir::BinOp::CmpHs: return {">=", 10};
+    case ir::BinOp::CmpNe: return {"!=", 9};
+    case ir::BinOp::CmpEq: return {"==", 9};
+    case ir::BinOp::And:   return {"&", 8};
+    case ir::BinOp::Xor:   return {"^", 7};
+    case ir::BinOp::Or:    return {"|", 6};
+  }
+  return {"?", 0};
+}
+
+constexpr int kUnPrec = 14;
+
+const char *type_name(int size) {
+  switch (size) {
+    case 1: return "unsigned char";
+    case 2: return "unsigned short";
+    default: return "int";
+  }
+}
+
+std::string cast_type(int size, bool is_signed) {
+  switch (size) {
+    case 1: return is_signed ? "char" : "unsigned char";
+    case 2: return is_signed ? "short" : "unsigned short";
+    default: return is_signed ? "int" : "unsigned int";
+  }
+}
+
+std::string render(const ir::Expr &e, const vars::VarMap &vm, int min_prec);
+
+// If `addr` is `base + index * size` (or `base + index << log2(size)`), return
+// the array form `base[index]`; the scaling proves the element type, so this is
+// a sound, readable rewrite. Returns empty if it does not match.
+std::string array_form(const ir::Expr &addr, int size, const vars::VarMap &vm) {
+  if (addr.kind != ir::ExprKind::BinOp || addr.binop != ir::BinOp::Add || !addr.a || !addr.b)
+    return {};
+  const ir::Expr &base = *addr.a;
+  const ir::Expr &scaled = *addr.b;
+  auto scale_ok = [&](const ir::Expr &s) -> const ir::Expr * {
+    if (s.kind == ir::ExprKind::BinOp && s.binop == ir::BinOp::Mul && s.a && s.b) {
+      if (s.b->kind == ir::ExprKind::Const && s.b->value == size) return s.a.get();
+      if (s.a->kind == ir::ExprKind::Const && s.a->value == size) return s.b.get();
+    }
+    int sh = size == 4 ? 2 : size == 2 ? 1 : -1;
+    if (sh >= 0 && s.kind == ir::ExprKind::BinOp && s.binop == ir::BinOp::Shl && s.b &&
+        s.b->kind == ir::ExprKind::Const && s.b->value == sh)
+      return s.a.get();
+    return nullptr;
+  };
+  const ir::Expr *index = scale_ok(scaled);
+  if (!index) return {};
+  return render(base, vm, kUnPrec) + "[" + render(*index, vm, 0) + "]";
+}
+
+std::string render(const ir::Expr &e, const vars::VarMap &vm, int min_prec) {
+  switch (e.kind) {
+    case ir::ExprKind::Const: {
+      if (!e.name.empty()) return e.name;  // resolved symbol (lrw)
+      std::ostringstream os;
+      if (e.value > 255) os << "0x" << std::hex << e.value;  // masks, shifted consts
+      else os << std::dec << e.value;
+      return os.str();
+    }
+    case ir::ExprKind::Reg: return vm.name_of(e.reg);
+    case ir::ExprKind::Cast: {
+      std::string s = "(" + cast_type(e.size, e.is_signed) + ")" +
+                      (e.a ? render(*e.a, vm, kUnPrec) : "");
+      return kUnPrec < min_prec ? "(" + s + ")" : s;
+    }
+    case ir::ExprKind::UnOp: {
+      const char *op = e.unop == ir::UnOp::Neg ? "-" : e.unop == ir::UnOp::Not ? "~"
+                       : e.unop == ir::UnOp::AddrOf ? "&" : "!";
+      std::string s = std::string(op) + (e.a ? render(*e.a, vm, kUnPrec) : "");
+      return kUnPrec < min_prec ? "(" + s + ")" : s;
+    }
+    case ir::ExprKind::BinOp: {
+      OpInfo oi = binop_info(e.binop);
+      std::string lhs = e.a ? render(*e.a, vm, oi.prec) : "";
+      std::string rhs = e.b ? render(*e.b, vm, oi.prec + 1) : "";
+      std::string s = lhs + " " + oi.sym + " " + rhs;
+      return oi.prec < min_prec ? "(" + s + ")" : s;
+    }
+    case ir::ExprKind::Load: {
+      std::string arr = e.a ? array_form(*e.a, e.size, vm) : std::string();
+      if (!arr.empty()) return arr;  // base[index] — postfix, no wrapping needed
+      std::string s = "*(" + std::string(type_name(e.size)) + " *)(" +
+                      (e.a ? render(*e.a, vm, 0) : "") + ")";
+      return kUnPrec < min_prec ? "(" + s + ")" : s;
+    }
+    case ir::ExprKind::Call: {
+      std::string callee = !e.name.empty() ? e.name
+                           : e.a ? render(*e.a, vm, kUnPrec) : "sub";
+      std::string s = callee + "(";
+      for (size_t i = 0; i < e.args.size(); ++i) {
+        if (i) s += ", ";
+        s += render(*e.args[i], vm, 0);
+      }
+      return s + ")";
+    }
+    case ir::ExprKind::Select: {  // cond ? then : else  (lowest precedence)
+      std::string s = (e.a ? render(*e.a, vm, 4) : "") + " ? " +
+                      (e.b ? render(*e.b, vm, 4) : "") + " : " +
+                      (!e.args.empty() && e.args[0] ? render(*e.args[0], vm, 4) : "");
+      return 3 < min_prec ? "(" + s + ")" : s;
+    }
+  }
+  return "?";
+}
+
+// One statement as C text (no indent, no newline).
+std::string stmt_str(const ir::Stmt &s, const vars::VarMap &vm) {
+  switch (s.kind) {
+    case ir::StmtKind::Assign:
+      if (s.dst_reg == ir::kRegDiscard)  // dead result (void call): expression statement
+        return (s.expr ? render(*s.expr, vm, 0) : "?") + ";";
+      return vm.name_of(s.dst_reg) + " = " + (s.expr ? render(*s.expr, vm, 0) : "?") + ";";
+    case ir::StmtKind::Store: {
+      std::string arr = s.addr ? array_form(*s.addr, s.size, vm) : std::string();
+      std::string lhs = !arr.empty()
+          ? arr
+          : "*(" + std::string(type_name(s.size)) + " *)(" +
+                (s.addr ? render(*s.addr, vm, 0) : "") + ")";
+      return lhs + " = " + (s.expr ? render(*s.expr, vm, 0) : "?") + ";";
+    }
+    case ir::StmtKind::Unknown:  // un-lifted (carry math, control regs, system) -> inline asm
+      return "__asm { " + s.text + " }";
+  }
+  return "";
+}
+
+ir::ExprPtr negate(const ir::ExprPtr &e) {
+  if (e && e->kind == ir::ExprKind::UnOp && e->unop == ir::UnOp::LNot) return e->a;
+  if (e && e->kind == ir::ExprKind::BinOp && e->binop == ir::BinOp::CmpNe)
+    return ir::binop(ir::BinOp::CmpEq, e->a, e->b);
+  if (e && e->kind == ir::ExprKind::BinOp && e->binop == ir::BinOp::CmpEq)
+    return ir::binop(ir::BinOp::CmpNe, e->a, e->b);
+  return ir::unop(ir::UnOp::LNot, e);
+}
+
+std::string ind_s(int n) { return std::string(n * 2, ' '); }
+
+void collect_ids(const ir::ExprPtr &e, std::set<int> &s) {
+  if (!e) return;
+  if (e->kind == ir::ExprKind::Reg) s.insert(e->reg);
+  collect_ids(e->a, s);
+  collect_ids(e->b, s);
+  for (const auto &x : e->args) collect_ids(x, s);
+}
+
+std::string return_stmt(const ir::Terminator &t, const vars::VarMap &vm, bool is_void) {
+  // A void function's bare ABI-return register carries no real value.
+  if (is_void && t.value && t.value->kind == ir::ExprKind::Reg) return "return;";
+  if (t.has_value && t.value) return "return " + render(*t.value, vm, 0) + ";";
+  return "return;";
+}
+
+// --------------------------------------------------------------------------
+
+class Structurer {
+ public:
+  Structurer(const ir::Function &fn, const vars::VarMap &vm, bool is_void)
+      : fn_(fn), vm_(vm), is_void_(is_void) {
+    n_ = (int)fn_.blocks.size();
+    exit_ = n_;
+    for (int i = 0; i < n_; ++i) idx_[fn_.blocks[i].entry] = i;
+    build_succ();
+    compute_doms();
+    compute_postdoms();
+    detect_loops();
+  }
+
+  bool structurable() const { return structurable_; }
+
+  std::string run() {
+    std::ostringstream os;
+    emit_seq(0, exit_, 1, os);
+    return os.str();
+  }
+
+ private:
+  struct Loop { std::set<int> body; int exit = 0; int in_succ = 0; ir::ExprPtr stay; };
+
+  int resolve(uint32_t ea) const {
+    auto it = idx_.find(ea);
+    return it != idx_.end() ? it->second : exit_;
+  }
+
+  void build_succ() {
+    succ_.assign(n_, {});
+    for (int i = 0; i < n_; ++i) {
+      const ir::Terminator &t = fn_.blocks[i].term;
+      switch (t.kind) {
+        case ir::TermKind::Return: succ_[i] = {exit_}; break;
+        case ir::TermKind::Goto:
+        case ir::TermKind::Fallthrough: succ_[i] = {resolve(t.target)}; break;
+        case ir::TermKind::CondBranch:
+          succ_[i] = {resolve(t.target), resolve(t.fallthrough)}; break;
+      }
+    }
+  }
+
+  void compute_doms() {
+    std::vector<std::vector<int>> preds(n_);
+    for (int i = 0; i < n_; ++i)
+      for (int s : succ_[i]) if (s != exit_) preds[s].push_back(i);
+    std::set<int> all;
+    for (int i = 0; i < n_; ++i) all.insert(i);
+    dom_.assign(n_, all);
+    if (n_ > 0) dom_[0] = {0};
+    bool changed = true;
+    while (changed) {
+      changed = false;
+      for (int i = 1; i < n_; ++i) {
+        std::set<int> ns;
+        bool first = true;
+        for (int p : preds[i]) {
+          if (first) { ns = dom_[p]; first = false; }
+          else {
+            std::set<int> tmp;
+            for (int x : ns) if (dom_[p].count(x)) tmp.insert(x);
+            ns = std::move(tmp);
+          }
+        }
+        ns.insert(i);
+        if (ns != dom_[i]) { dom_[i] = std::move(ns); changed = true; }
+      }
+    }
+    preds_ = std::move(preds);
+  }
+
+  void compute_postdoms() {
+    int m = exit_ + 1;
+    pdom_.assign(m, {});
+    std::set<int> all;
+    for (int i = 0; i < m; ++i) all.insert(i);
+    pdom_[exit_] = {exit_};
+    for (int i = 0; i < exit_; ++i) pdom_[i] = all;
+    bool changed = true;
+    while (changed) {
+      changed = false;
+      for (int i = 0; i < exit_; ++i) {
+        // Self-edges (infinite loops) are treated as exits so post-dominators
+        // converge; a block whose only successor is itself post-dominates to exit.
+        std::vector<int> ps;
+        for (int s : succ_[i]) if (s != i) ps.push_back(s);
+        if (ps.empty()) ps.push_back(exit_);
+        std::set<int> inter; bool first = true;
+        for (int s : ps) {
+          if (first) { inter = pdom_[s]; first = false; }
+          else {
+            std::set<int> tmp;
+            for (int x : inter) if (pdom_[s].count(x)) tmp.insert(x);
+            inter = std::move(tmp);
+          }
+        }
+        inter.insert(i);
+        if (inter != pdom_[i]) { pdom_[i] = std::move(inter); changed = true; }
+      }
+    }
+  }
+
+  int ipdom(int i) const {
+    std::vector<int> cand;
+    for (int c : pdom_[i]) if (c != i) cand.push_back(c);
+    for (int c : cand) {
+      bool ok = true;
+      for (int k : cand) if (k != c && !pdom_[c].count(k)) { ok = false; break; }
+      if (ok) return c;
+    }
+    return exit_;
+  }
+
+  void detect_loops() {
+    // Back edges: i -> h where h dominates i.
+    std::map<int, std::vector<int>> latches;  // header -> latches
+    for (int i = 0; i < n_; ++i)
+      for (int s : succ_[i])
+        if (s != exit_ && dom_[i].count(s)) latches[s].push_back(i);
+
+    for (auto &kv : latches) {
+      int h = kv.first;
+      Loop lp;
+      lp.body.insert(h);
+      std::vector<int> stack;
+      for (int u : kv.second) if (lp.body.insert(u).second) stack.push_back(u);
+      while (!stack.empty()) {
+        int u = stack.back(); stack.pop_back();
+        for (int p : preds_[u])
+          if (lp.body.insert(p).second) stack.push_back(p);
+      }
+
+      // A self-loop (infinite `while (1)`) is emitted directly by emit_seq.
+      if (lp.body.size() == 1) continue;
+
+      // Single exit target across the whole loop body.
+      int exit_node = -1;
+      bool multi_exit = false;
+      for (int b : lp.body)
+        for (int s : succ_[b])
+          if (!lp.body.count(s)) {
+            if (exit_node == -1) exit_node = s;
+            else if (exit_node != s) multi_exit = true;
+          }
+
+      const ir::Terminator &th = fn_.blocks[h].term;
+      bool header_ok = th.kind == ir::TermKind::CondBranch;
+      if (multi_exit || exit_node == -1 || !header_ok) { structurable_ = false; return; }
+
+      int taken = succ_[h][0], fth = succ_[h][1];
+      if (lp.body.count(taken) && !lp.body.count(fth)) {
+        lp.in_succ = taken; lp.exit = fth; lp.stay = th.cond;
+      } else if (lp.body.count(fth) && !lp.body.count(taken)) {
+        lp.in_succ = fth; lp.exit = taken; lp.stay = negate(th.cond);
+      } else { structurable_ = false; return; }
+
+      if (lp.exit != exit_node) { structurable_ = false; return; }
+      loops_[h] = std::move(lp);
+    }
+
+    // No nested loops for now (each header's body must not contain another header).
+    for (auto &a : loops_)
+      for (auto &b : loops_)
+        if (a.first != b.first && a.second.body.count(b.first)) { structurable_ = false; return; }
+  }
+
+  void emit_stmts(int bi, int ind, std::ostringstream &os) {
+    for (const auto &s : fn_.blocks[bi].stmts)
+      os << ind_s(ind) << stmt_str(s, vm_) << "\n";
+  }
+
+  void emit_loop(int h, int ind, std::ostringstream &os) {
+    const Loop &lp = loops_[h];
+    visited_.insert(h);
+    loopctx_.push_back({h, lp.exit});
+    if (fn_.blocks[h].stmts.empty()) {
+      // Clean pre-test loop: while (cond) { body }.
+      os << ind_s(ind) << "while (" << render(*lp.stay, vm_, 0) << ") {\n";
+      emit_seq(lp.in_succ, h, ind + 1, os);
+    } else {
+      // Header computes the condition: while (1) { header; if (!cond) break; body }.
+      os << ind_s(ind) << "while (1) {\n";
+      emit_stmts(h, ind + 1, os);
+      os << ind_s(ind + 1) << "if (" << render(*negate(lp.stay), vm_, 0) << ") break;\n";
+      emit_seq(lp.in_succ, h, ind + 1, os);
+    }
+    loopctx_.pop_back();
+    os << ind_s(ind) << "}\n";
+  }
+
+  void emit_seq(int n, int stop, int ind, std::ostringstream &os) {
+    while (n != stop && n != exit_ && !visited_.count(n)) {
+      // Infinite self-loop (loc: goto loc) -> while (1) { stmts }.
+      const ir::Terminator &t0 = fn_.blocks[n].term;
+      if ((t0.kind == ir::TermKind::Goto || t0.kind == ir::TermKind::Fallthrough) &&
+          !succ_[n].empty() && succ_[n][0] == n) {
+        visited_.insert(n);
+        os << ind_s(ind) << "while (1) {\n";
+        emit_stmts(n, ind + 1, os);
+        os << ind_s(ind) << "}\n";
+        return;
+      }
+      // Single-block do-while (loc: body; if (cond) goto loc).
+      if (t0.kind == ir::TermKind::CondBranch && (succ_[n][0] == n || succ_[n][1] == n)) {
+        visited_.insert(n);
+        bool taken_self = succ_[n][0] == n;
+        os << ind_s(ind) << "do {\n";
+        emit_stmts(n, ind + 1, os);
+        ir::ExprPtr stay = taken_self ? t0.cond : negate(t0.cond);
+        os << ind_s(ind) << "} while (" << render(*stay, vm_, 0) << ");\n";
+        n = taken_self ? succ_[n][1] : succ_[n][0];  // continue at the exit
+        continue;
+      }
+      if (loops_.count(n) && (loopctx_.empty() || loopctx_.back().first != n)) {
+        emit_loop(n, ind, os);
+        n = loops_[n].exit;
+        continue;
+      }
+      visited_.insert(n);
+      emit_stmts(n, ind, os);
+      const ir::Terminator &t = fn_.blocks[n].term;
+
+      if (t.kind == ir::TermKind::Return) {
+        os << ind_s(ind) << return_stmt(t, vm_, is_void_) << "\n";
+        return;
+      }
+
+      if (t.kind == ir::TermKind::Goto || t.kind == ir::TermKind::Fallthrough) {
+        int tn = succ_[n][0];
+        if (!loopctx_.empty()) {
+          if (tn == loopctx_.back().second) { os << ind_s(ind) << "break;\n"; return; }
+          if (tn == loopctx_.back().first && tn != stop) { os << ind_s(ind) << "continue;\n"; return; }
+        }
+        n = tn;
+        continue;
+      }
+
+      // CondBranch
+      int taken = succ_[n][0], fth = succ_[n][1];
+      const ir::ExprPtr &cond = t.cond;
+
+      if (!loopctx_.empty()) {
+        int H = loopctx_.back().first, E = loopctx_.back().second;
+        if (taken == E) { os << ind_s(ind) << "if (" << render(*cond, vm_, 0) << ") break;\n"; n = fth; continue; }
+        if (fth == E)   { os << ind_s(ind) << "if (" << render(*negate(cond), vm_, 0) << ") break;\n"; n = taken; continue; }
+        if (taken == H) { os << ind_s(ind) << "if (" << render(*cond, vm_, 0) << ") continue;\n"; n = fth; continue; }
+        if (fth == H)   { os << ind_s(ind) << "if (" << render(*negate(cond), vm_, 0) << ") continue;\n"; n = taken; continue; }
+      }
+
+      int merge = ipdom(n);
+      // Render both arms, then drop/ invert empty ones for readability.
+      std::ostringstream then_ss, else_ss;  // then = cond true (taken), else = cond false (fth)
+      emit_seq(taken, merge, ind + 1, then_ss);
+      emit_seq(fth, merge, ind + 1, else_ss);
+      std::string thn = then_ss.str(), els = else_ss.str();
+      auto blank = [](const std::string &s) {
+        return s.find_first_not_of(" \t\n\r") == std::string::npos;
+      };
+      if (blank(thn) && blank(els)) {
+        // both empty: the condition is pure, so nothing to emit
+      } else if (blank(els)) {
+        os << ind_s(ind) << "if (" << render(*cond, vm_, 0) << ") {\n" << thn << ind_s(ind) << "}\n";
+      } else if (blank(thn)) {
+        os << ind_s(ind) << "if (" << render(*negate(cond), vm_, 0) << ") {\n" << els << ind_s(ind) << "}\n";
+      } else {
+        os << ind_s(ind) << "if (" << render(*cond, vm_, 0) << ") {\n" << thn
+           << ind_s(ind) << "} else {\n" << els << ind_s(ind) << "}\n";
+      }
+      n = merge;
+    }
+  }
+
+  const ir::Function &fn_;
+  const vars::VarMap &vm_;
+  int n_ = 0, exit_ = 0;
+  std::map<uint32_t, int> idx_;
+  std::vector<std::vector<int>> succ_, preds_;
+  std::vector<std::set<int>> dom_, pdom_;
+  std::map<int, Loop> loops_;
+  std::set<int> visited_;
+  std::vector<std::pair<int, int>> loopctx_;  // (header, exit)
+  bool structurable_ = true;
+  bool is_void_ = false;
+};
+
+// Goto-based fallback (always correct).
+std::string emit_goto(const ir::Function &fn, const vars::VarMap &vm, bool is_void) {
+  std::ostringstream os;
+  std::set<uint32_t> targets;
+  for (const auto &b : fn.blocks) {
+    const ir::Terminator &t = b.term;
+    if (t.kind == ir::TermKind::Goto || t.kind == ir::TermKind::Fallthrough) targets.insert(t.target);
+    if (t.kind == ir::TermKind::CondBranch) { targets.insert(t.target); targets.insert(t.fallthrough); }
+  }
+  auto label = [](uint32_t ea) { std::ostringstream l; l << "loc_" << std::hex << ea; return l.str(); };
+  for (size_t i = 0; i < fn.blocks.size(); ++i) {
+    const ir::Block &b = fn.blocks[i];
+    uint32_t next = i + 1 < fn.blocks.size() ? fn.blocks[i + 1].entry : 0xffffffff;
+    if (targets.count(b.entry)) os << label(b.entry) << ":\n";
+    for (const auto &s : b.stmts)
+      os << "  " << stmt_str(s, vm) << "\n";
+    const ir::Terminator &t = b.term;
+    switch (t.kind) {
+      case ir::TermKind::Return:
+        os << "  " << return_stmt(t, vm, is_void) << "\n";
+        break;
+      case ir::TermKind::Goto:
+      case ir::TermKind::Fallthrough:
+        if (t.target != next) os << "  goto " << label(t.target) << ";\n";
+        break;
+      case ir::TermKind::CondBranch:
+        os << "  if (" << render(*t.cond, vm, 0) << ") goto " << label(t.target) << ";\n";
+        if (t.fallthrough != next) os << "  goto " << label(t.fallthrough) << ";\n";
+        break;
+    }
+  }
+  return os.str();
+}
+
+} // namespace
+
+std::string emit_expr(const ir::Expr &e, const vars::VarMap &vm) { return render(e, vm, 0); }
+
+std::string emit_c(const ir::Function &fn, const vars::VarMap &vm) {
+  // Collect referenced register ids (for local declarations). Return-type/void
+  // recovery needs a function prototype we do not have (the synthetic `return r2`
+  // makes an unset r2 indistinguishable from a passed-through parameter), so the
+  // return type stays int.
+  std::set<int> used;
+  for (const auto &b : fn.blocks) {
+    for (const auto &s : b.stmts) {
+      if (s.kind == ir::StmtKind::Assign && s.dst_reg != ir::kRegDiscard)
+        used.insert(s.dst_reg);
+      collect_ids(s.expr, used);
+      collect_ids(s.addr, used);
+    }
+    collect_ids(b.term.cond, used);
+    collect_ids(b.term.value, used);
+  }
+  const bool is_void = false;
+
+  std::ostringstream os;
+  const std::string name = fn.name.empty() ? "sub" : fn.name;
+  os << "int " << name << "(";
+  if (vm.params.empty()) {
+    os << "void";
+  } else {
+    for (size_t i = 0; i < vm.params.size(); ++i) {
+      if (i) os << ", ";
+      os << "int " << vm.name_of(vm.params[i]);
+    }
+  }
+  os << ")\n{\n";
+
+  // Declare locals: used ids that are not parameters, sp/lr, or the C bit.
+  std::set<int> param_set(vm.params.begin(), vm.params.end());
+  bool any_decl = false;
+  for (int id : used) {
+    if (param_set.count(id) || id == ir::kRegSP || id == ir::kRegLR || id == ir::kRegC)
+      continue;
+    os << "  int " << vm.name_of(id) << ";\n";
+    any_decl = true;
+  }
+  if (any_decl) os << "\n";
+
+  if (!fn.blocks.empty()) {
+    Structurer st(fn, vm, is_void);
+    os << (st.structurable() ? st.run() : emit_goto(fn, vm, is_void));
+  }
+  os << "}\n";
+  return os.str();
+}
+
+} // namespace emit
+
+```
+
+`src/emit/emit.h`:
+
+```h
+// C pseudocode emitter: ir::Function + recovered variables -> text.
+// Pure, unit-testable. Precedence-aware (minimal parentheses).
+#pragma once
+
+#include <string>
+
+namespace ir { struct Function; struct Expr; }
+namespace vars { struct VarMap; }
+
+namespace emit {
+
+// Render a whole function as C-like pseudocode.
+std::string emit_c(const ir::Function &fn, const vars::VarMap &vm);
+
+// Render a single expression (exposed for testing).
+std::string emit_expr(const ir::Expr &e, const vars::VarMap &vm);
+
+} // namespace emit
+
+```
+
+`src/ir/ir.h`:
+
+```h
+// Intermediate representation for the M-CORE decompiler (Path B).
+//
+// Pure, no IDA dependency, so vars/opt/emit/structuring can be unit-tested
+// offline. The lifter (IDA-dependent) builds these structures from insn_t.
+//
+// A Function is a CFG of basic Blocks. Each block has a list of Statements and a
+// Terminator (fallthrough / goto / conditional branch / return). Targets are
+// block entry addresses.
+#pragma once
+
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace ir {
+
+// IDA's built-in MCORE module numbers the architectural registers r0..r15 as 0..15.
+inline constexpr int kRegSP = 0;    // r0
+inline constexpr int kRegRet = 2;   // r2 holds the return value (ABI)
+inline constexpr int kRegLR = 15;   // r15 link register
+inline constexpr int kRegC = 100;   // synthetic 1-bit condition (PSR C bit)
+inline constexpr int kRenameBase = 0x10000;  // split live-ranges: fresh local versions
+inline constexpr int kStackBase = 0x40000;   // stack slots: kStackBase + byte offset
+inline constexpr int kRegDiscard = -1;       // Assign dst: evaluate expr only (void call)
+
+enum class ExprKind { Const, Reg, BinOp, UnOp, Load, Call, Cast, Select };
+
+enum class BinOp {
+  Add, Sub, Mul, Div,
+  And, Or, Xor,
+  Shl, Shr, Sar,
+  CmpLt, CmpHs, CmpNe, CmpEq,
+};
+
+enum class UnOp { Neg, Not, LNot, AddrOf };  // -x, ~x, !x, &x
+
+struct Expr;
+using ExprPtr = std::shared_ptr<Expr>;
+
+struct Expr {
+  ExprKind kind;
+  int64_t value = 0;        // Const
+  int reg = 0;              // Reg
+  BinOp binop{};            // BinOp
+  UnOp unop{};              // UnOp
+  ExprPtr a, b;             // operands (Load: a=address; Call: a=indirect target; Cast: a=inner)
+  int size = 0;             // Load/Cast access size in bytes
+  bool is_signed = false;   // Cast signedness
+  std::string name;         // Call target name / named Const (symbol)
+  std::vector<ExprPtr> args;// Call arguments
+};
+
+inline ExprPtr constant(int64_t v) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Const;
+  e->value = v;
+  return e;
+}
+inline ExprPtr const_named(int64_t v, std::string name) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Const;
+  e->value = v;
+  e->name = std::move(name);
+  return e;
+}
+inline ExprPtr cast(int size, bool is_signed, ExprPtr a) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Cast;
+  e->size = size;
+  e->is_signed = is_signed;
+  e->a = std::move(a);
+  return e;
+}
+// Conditional move / ternary: cond ? then_val : else_val.
+inline ExprPtr select(ExprPtr cond, ExprPtr then_val, ExprPtr else_val) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Select;
+  e->a = std::move(cond);
+  e->b = std::move(then_val);
+  e->args.push_back(std::move(else_val));
+  return e;
+}
+inline ExprPtr reg(int r) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Reg;
+  e->reg = r;
+  return e;
+}
+inline ExprPtr binop(BinOp op, ExprPtr a, ExprPtr b) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::BinOp;
+  e->binop = op;
+  e->a = std::move(a);
+  e->b = std::move(b);
+  return e;
+}
+inline ExprPtr unop(UnOp op, ExprPtr a) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::UnOp;
+  e->unop = op;
+  e->a = std::move(a);
+  return e;
+}
+inline ExprPtr load(ExprPtr addr, int size) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Load;
+  e->a = std::move(addr);
+  e->size = size;
+  return e;
+}
+inline ExprPtr call(std::string name, std::vector<ExprPtr> args) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Call;
+  e->name = std::move(name);
+  e->args = std::move(args);
+  return e;
+}
+inline ExprPtr call_indirect(ExprPtr target, std::vector<ExprPtr> args) {
+  auto e = std::make_shared<Expr>();
+  e->kind = ExprKind::Call;
+  e->a = std::move(target);
+  e->args = std::move(args);
+  return e;
+}
+
+enum class StmtKind { Assign, Store, Unknown };
+
+struct Stmt {
+  StmtKind kind;
+  int dst_reg = 0;          // Assign
+  ExprPtr expr;             // Assign rhs / Store value
+  ExprPtr addr;             // Store address
+  int size = 4;             // Store access size in bytes
+  uint32_t ea = 0;          // source address
+  std::string text;         // Unknown: disassembly text
+};
+
+inline Stmt assign(int dst, ExprPtr e, uint32_t ea = 0) {
+  return Stmt{StmtKind::Assign, dst, std::move(e), nullptr, 4, ea, {}};
+}
+inline Stmt store(ExprPtr addr, ExprPtr value, int size, uint32_t ea = 0) {
+  return Stmt{StmtKind::Store, 0, std::move(value), std::move(addr), size, ea, {}};
+}
+inline Stmt unknown(uint32_t ea, std::string text) {
+  return Stmt{StmtKind::Unknown, 0, nullptr, nullptr, 4, ea, std::move(text)};
+}
+
+enum class TermKind {
+  Fallthrough,  // -> target
+  Goto,         // -> target (unconditional branch)
+  CondBranch,   // cond ? taken : fallthrough
+  Return,       // return [value]
+};
+
+struct Terminator {
+  TermKind kind = TermKind::Fallthrough;
+  uint32_t target = 0;       // Fallthrough/Goto/CondBranch taken target
+  uint32_t fallthrough = 0;  // CondBranch not-taken target
+  ExprPtr cond;              // CondBranch condition (taken when true)
+  ExprPtr value;             // Return value (may be null)
+  bool has_value = false;    // Return carries a value?
+  uint32_t ea = 0;
+};
+
+struct Block {
+  uint32_t entry = 0;            // block address (its id)
+  std::vector<Stmt> stmts;
+  Terminator term;
+};
+
+struct Function {
+  uint32_t entry = 0;            // entry block address
+  std::string name;
+  std::vector<Block> blocks;     // blocks[0] is the entry block
+
+  Block *block_at(uint32_t ea) {
+    for (auto &b : blocks)
+      if (b.entry == ea) return &b;
+    return nullptr;
+  }
+  const Block *block_at(uint32_t ea) const {
+    for (const auto &b : blocks)
+      if (b.entry == ea) return &b;
+    return nullptr;
+  }
+};
+
+} // namespace ir
+
+```
+
+`src/lifter/lifter.cpp`:
+
+```cpp
+#include "lifter/lifter.h"
+
+#include "ir/ir.h"
+
+#include <ida.hpp>
+#include <idp.hpp>
+#include <ua.hpp>
+#include <bytes.hpp>
+#include <funcs.hpp>
+#include <gdl.hpp>
+#include <name.hpp>
+#include <lines.hpp>
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+
+namespace mcore {
+
+namespace {
+
+// Processor-module instruction numbers are private implementation details. In
+// particular, IDA 9.4's built-in MCORE module uses a different itype ordering
+// than the former third-party module. Resolve canonical SDK mnemonics to the
+// lifter's stable local identifiers instead.
+enum class McoreInsn {
+  Unknown,
+  Abs, Addc, Addi, Addu, And, Andi, Andn, Asr, Asri,
+  Bclri, Bf, Bgeni, Bgenr, Bmaski, Br, Brev, Bseti, Bsr, Bt, Btsti,
+  Clrf, Clrt, Cmphs, Cmplt, Cmplti, Cmpne, Cmpnei,
+  Decf, Decgt, Declt, Decne, Dect, Divs, Divu,
+  Ff1, Incf, Inct, Ixh, Ixw,
+  Jmp, Jmpi, Jsr, Jsri,
+  Ld, LdB, LdH, Ldq, Lrw, Lsl, Lsli, Lsr, Lsri,
+  Mov, Movf, Movi, Movt, Mult, Mvc, Mvcv,
+  Not, Or, Rotli, Rsub, Rsubi,
+  Sextb, Sexth, St, StB, StH, Stq,
+  Subc, Subi, Subu, Tst, Xor,
+  Xtrb0, Xtrb1, Xtrb2, Xtrb3, Zextb, Zexth,
+};
+
+McoreInsn classify(const insn_t &insn) {
+  static const std::unordered_map<std::string_view, McoreInsn> kinds = {
+      {"abs", McoreInsn::Abs},       {"addc", McoreInsn::Addc},
+      {"addi", McoreInsn::Addi},     {"addu", McoreInsn::Addu},
+      {"and", McoreInsn::And},       {"andi", McoreInsn::Andi},
+      {"andn", McoreInsn::Andn},     {"asr", McoreInsn::Asr},
+      {"asri", McoreInsn::Asri},     {"bclri", McoreInsn::Bclri},
+      {"bf", McoreInsn::Bf},         {"bgeni", McoreInsn::Bgeni},
+      {"bgenr", McoreInsn::Bgenr},   {"bmaski", McoreInsn::Bmaski},
+      {"br", McoreInsn::Br},         {"brev", McoreInsn::Brev},
+      {"bseti", McoreInsn::Bseti},   {"bsr", McoreInsn::Bsr},
+      {"bt", McoreInsn::Bt},         {"btsti", McoreInsn::Btsti},
+      {"clrf", McoreInsn::Clrf},     {"clrt", McoreInsn::Clrt},
+      {"cmphs", McoreInsn::Cmphs},   {"cmplt", McoreInsn::Cmplt},
+      {"cmplti", McoreInsn::Cmplti}, {"cmpne", McoreInsn::Cmpne},
+      {"cmpnei", McoreInsn::Cmpnei}, {"decf", McoreInsn::Decf},
+      {"decgt", McoreInsn::Decgt},   {"declt", McoreInsn::Declt},
+      {"decne", McoreInsn::Decne},   {"dect", McoreInsn::Dect},
+      {"divs", McoreInsn::Divs},     {"divu", McoreInsn::Divu},
+      {"ff1", McoreInsn::Ff1},       {"incf", McoreInsn::Incf},
+      {"inct", McoreInsn::Inct},     {"ixh", McoreInsn::Ixh},
+      {"ixw", McoreInsn::Ixw},       {"jmp", McoreInsn::Jmp},
+      {"jmpi", McoreInsn::Jmpi},     {"jsr", McoreInsn::Jsr},
+      {"jsri", McoreInsn::Jsri},     {"ld", McoreInsn::Ld},
+      {"ld.b", McoreInsn::LdB},      {"ld.h", McoreInsn::LdH},
+      {"ldq", McoreInsn::Ldq},       {"lrw", McoreInsn::Lrw},
+      {"lsl", McoreInsn::Lsl},       {"lsli", McoreInsn::Lsli},
+      {"lsr", McoreInsn::Lsr},       {"lsri", McoreInsn::Lsri},
+      {"mov", McoreInsn::Mov},       {"movf", McoreInsn::Movf},
+      {"movi", McoreInsn::Movi},     {"movt", McoreInsn::Movt},
+      {"mult", McoreInsn::Mult},     {"mvc", McoreInsn::Mvc},
+      {"mvcv", McoreInsn::Mvcv},     {"not", McoreInsn::Not},
+      {"or", McoreInsn::Or},         {"rotli", McoreInsn::Rotli},
+      {"rsub", McoreInsn::Rsub},     {"rsubi", McoreInsn::Rsubi},
+      {"sextb", McoreInsn::Sextb},   {"sexth", McoreInsn::Sexth},
+      {"st", McoreInsn::St},         {"st.b", McoreInsn::StB},
+      {"st.h", McoreInsn::StH},      {"stq", McoreInsn::Stq},
+      {"subc", McoreInsn::Subc},     {"subi", McoreInsn::Subi},
+      {"subu", McoreInsn::Subu},     {"tst", McoreInsn::Tst},
+      {"xor", McoreInsn::Xor},       {"xtrb0", McoreInsn::Xtrb0},
+      {"xtrb1", McoreInsn::Xtrb1},   {"xtrb2", McoreInsn::Xtrb2},
+      {"xtrb3", McoreInsn::Xtrb3},   {"zextb", McoreInsn::Zextb},
+      {"zexth", McoreInsn::Zexth},
+  };
+  const char *mnem = insn.get_canon_mnem(PH);
+  if (mnem == nullptr) return McoreInsn::Unknown;
+  auto it = kinds.find(std::string_view(mnem));
+  return it == kinds.end() ? McoreInsn::Unknown : it->second;
+}
+
+ir::Stmt lift_unknown(ea_t ea) {
+  qstring line;
+  generate_disasm_line(&line, ea, GENDSM_REMOVE_TAGS);
+  line.trim2();  // collapse padding so the __asm text is tidy
+  return ir::unknown((uint32_t)ea, line.c_str());
+}
+
+// Lift a single non-control instruction into `blk` statements. Returns true if
+// handled (incl. as an Unknown placeholder); control-flow is handled separately.
+void lift_insn(const insn_t &insn, ir::Block &blk) {
+  const int d = insn.ops[0].reg;
+  const int s = insn.ops[1].reg;
+  const int64_t imm = (int64_t)insn.ops[1].value;
+  const uint32_t ea = (uint32_t)insn.ea;
+  auto rr = [&](ir::BinOp op) {
+    blk.stmts.push_back(ir::assign(d, ir::binop(op, ir::reg(d), ir::reg(s)), ea));
+  };
+  auto ri = [&](ir::BinOp op) {
+    blk.stmts.push_back(ir::assign(d, ir::binop(op, ir::reg(d), ir::constant(imm)), ea));
+  };
+  auto setc = [&](ir::BinOp cmp, ir::ExprPtr rhs) {
+    blk.stmts.push_back(ir::assign(ir::kRegC, ir::binop(cmp, ir::reg(d), std::move(rhs)), ea));
+  };
+  // Memory operand (ops[1]): base register in .phrase, byte offset in .addr.
+  auto mem_addr = [&]() -> ir::ExprPtr {
+    int base = insn.ops[1].phrase;
+    int64_t off = (int64_t)insn.ops[1].addr;
+    return off ? ir::binop(ir::BinOp::Add, ir::reg(base), ir::constant(off)) : ir::reg(base);
+  };
+  auto load_to = [&](int size) { blk.stmts.push_back(ir::assign(d, ir::load(mem_addr(), size), ea)); };
+  auto store_from = [&](int size) { blk.stmts.push_back(ir::store(mem_addr(), ir::reg(d), size, ea)); };
+  // Heuristic call arguments: contiguous arg regs r2.. set earlier in this block.
+  auto call_args = [&]() -> std::vector<ir::ExprPtr> {
+    std::set<int> defined;
+    for (const auto &st : blk.stmts)
+      if (st.kind == ir::StmtKind::Assign && st.dst_reg >= 2 && st.dst_reg <= 7)
+        defined.insert(st.dst_reg);
+    std::vector<ir::ExprPtr> args;
+    for (int r = 2; r <= 7 && defined.count(r); ++r) args.push_back(ir::reg(r));
+    return args;
+  };
+
+  switch (classify(insn)) {
+    case McoreInsn::Movi: blk.stmts.push_back(ir::assign(d, ir::constant(imm), ea)); break;
+    case McoreInsn::Mov:  blk.stmts.push_back(ir::assign(d, ir::reg(s), ea)); break;
+
+    case McoreInsn::Addu: rr(ir::BinOp::Add); break;
+    case McoreInsn::Subu: rr(ir::BinOp::Sub); break;
+    case McoreInsn::Addc:  // d = d + s + C ; C = carry out  (C is the shared carry/condition bit)
+      blk.stmts.push_back(ir::assign(d,
+          ir::binop(ir::BinOp::Add, ir::binop(ir::BinOp::Add, ir::reg(d), ir::reg(s)), ir::reg(ir::kRegC)), ea));
+      blk.stmts.push_back(ir::assign(ir::kRegC, ir::call("__carry", {ir::reg(d), ir::reg(s)}), ea));
+      break;
+    case McoreInsn::Subc:  // d = d - s - 1 + C ; C = not-borrow out
+      blk.stmts.push_back(ir::assign(d,
+          ir::binop(ir::BinOp::Add,
+              ir::binop(ir::BinOp::Sub, ir::binop(ir::BinOp::Sub, ir::reg(d), ir::reg(s)), ir::constant(1)),
+              ir::reg(ir::kRegC)), ea));
+      blk.stmts.push_back(ir::assign(ir::kRegC, ir::call("__borrow", {ir::reg(d), ir::reg(s)}), ea));
+      break;
+    case McoreInsn::And: rr(ir::BinOp::And); break;
+    case McoreInsn::Or:  rr(ir::BinOp::Or);  break;
+    case McoreInsn::Xor: rr(ir::BinOp::Xor); break;
+    case McoreInsn::Rsub:
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Sub, ir::reg(s), ir::reg(d)), ea));
+      break;
+
+    case McoreInsn::Addi: ri(ir::BinOp::Add); break;
+    case McoreInsn::Subi: ri(ir::BinOp::Sub); break;
+    case McoreInsn::Lsli: ri(ir::BinOp::Shl); break;
+    case McoreInsn::Lsri: ri(ir::BinOp::Shr); break;
+    case McoreInsn::Asri: ri(ir::BinOp::Sar); break;
+
+    // Compares set the condition (C) bit.
+    case McoreInsn::Cmplt: setc(ir::BinOp::CmpLt, ir::reg(s)); break;
+    case McoreInsn::Cmphs: setc(ir::BinOp::CmpHs, ir::reg(s)); break;
+    case McoreInsn::Cmpne: setc(ir::BinOp::CmpNe, ir::reg(s)); break;
+    case McoreInsn::Cmplti: setc(ir::BinOp::CmpLt, ir::constant(imm)); break;
+    case McoreInsn::Cmpnei: setc(ir::BinOp::CmpNe, ir::constant(imm)); break;
+
+    case McoreInsn::Mult: rr(ir::BinOp::Mul); break;
+    case McoreInsn::Andi: ri(ir::BinOp::And); break;
+    case McoreInsn::Rsubi:  // d = imm - d
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Sub, ir::constant(imm), ir::reg(d)), ea));
+      break;
+    case McoreInsn::Decne:  // d = d - 1 ; C = (d != 0)
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Sub, ir::reg(d), ir::constant(1)), ea));
+      blk.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpNe, ir::reg(d), ir::constant(0)), ea));
+      break;
+
+    // bgeni d = 1<<n ; bmaski d = (1<<n)-1 (n==0 means 32 -> all ones).
+    // Read the 5-bit field directly so the result does not depend on how a
+    // processor module chooses to expose edge-case immediates.
+    case McoreInsn::Bgeni: {
+      uint32_t w = ((uint32_t)get_byte((ea_t)ea) << 8) | get_byte((ea_t)ea + 1);
+      int n = (w >> 4) & 0x1f;
+      blk.stmts.push_back(ir::assign(d, ir::constant((int64_t)(uint32_t)(1u << n)), ea));
+      break;
+    }
+    case McoreInsn::Bmaski: {
+      uint32_t w = ((uint32_t)get_byte((ea_t)ea) << 8) | get_byte((ea_t)ea + 1);
+      int n = (w >> 4) & 0x1f;
+      uint32_t mask = (n == 0) ? 0xFFFFFFFFu : ((1u << n) - 1);
+      blk.stmts.push_back(ir::assign(d, ir::constant((int64_t)mask), ea));
+      break;
+    }
+    case McoreInsn::Ixw:  // d = d + s*4
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Add, ir::reg(d),
+          ir::binop(ir::BinOp::Mul, ir::reg(s), ir::constant(4))), ea));
+      break;
+    case McoreInsn::Ixh:  // d = d + s*2
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Add, ir::reg(d),
+          ir::binop(ir::BinOp::Mul, ir::reg(s), ir::constant(2))), ea));
+      break;
+
+    // Bit operations (imm = bit number).
+    case McoreInsn::Bseti:  // d |= 1<<n
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Or, ir::reg(d),
+          ir::constant((int64_t)(1u << imm))), ea));
+      break;
+    case McoreInsn::Bclri:  // d &= ~(1<<n)
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::And, ir::reg(d),
+          ir::constant((int64_t)(uint32_t)~(1u << imm))), ea));
+      break;
+    case McoreInsn::Mvc:   // d = C
+      blk.stmts.push_back(ir::assign(d, ir::reg(ir::kRegC), ea));
+      break;
+    case McoreInsn::Mvcv:  // d = !C
+      blk.stmts.push_back(ir::assign(d, ir::unop(ir::UnOp::LNot, ir::reg(ir::kRegC)), ea));
+      break;
+
+    case McoreInsn::Btsti:  // C = (d >> n) & 1
+      blk.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::And,
+          ir::binop(ir::BinOp::Shr, ir::reg(d), ir::constant(imm)), ir::constant(1)), ea));
+      break;
+
+    // Sign/zero extensions -> readable casts.
+    case McoreInsn::Zextb: blk.stmts.push_back(ir::assign(d, ir::cast(1, false, ir::reg(d)), ea)); break;
+    case McoreInsn::Sextb: blk.stmts.push_back(ir::assign(d, ir::cast(1, true,  ir::reg(d)), ea)); break;
+    case McoreInsn::Zexth: blk.stmts.push_back(ir::assign(d, ir::cast(2, false, ir::reg(d)), ea)); break;
+    case McoreInsn::Sexth: blk.stmts.push_back(ir::assign(d, ir::cast(2, true,  ir::reg(d)), ea)); break;
+
+    // Load relative word: a 32-bit value (constant or resolved symbol) from the
+    // literal pool. IDA puts the loaded value in ops[1].addr.
+    case McoreInsn::Lrw: {
+      int64_t v = (int64_t)insn.ops[1].addr;
+      qstring nm;
+      if (get_name(&nm, (ea_t)v) > 0 && !nm.empty())
+        blk.stmts.push_back(ir::assign(d, ir::const_named(v, nm.c_str()), ea));
+      else
+        blk.stmts.push_back(ir::assign(d, ir::constant((int64_t)(uint32_t)v), ea));
+      break;
+    }
+    // Indirect call via the literal pool; IDA resolves the target in ops[0].addr.
+    case McoreInsn::Jsri: {
+      ea_t tgt = (ea_t)insn.ops[0].addr;
+      qstring nm;
+      if (get_name(&nm, tgt) <= 0 || nm.empty()) nm.sprnt("sub_%X", (unsigned)tgt);
+      blk.stmts.push_back(ir::assign(ir::kRegRet, ir::call(nm.c_str(), call_args()), ea));
+      break;
+    }
+
+    case McoreInsn::Divs:  // M-CORE divides by the implicit divisor register r1
+    case McoreInsn::Divu:
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Div, ir::reg(d), ir::reg(1)), ea));
+      break;
+    case McoreInsn::Lsl:  rr(ir::BinOp::Shl); break;  // variable shifts
+    case McoreInsn::Lsr:  rr(ir::BinOp::Shr); break;
+    case McoreInsn::Asr:  rr(ir::BinOp::Sar); break;
+    case McoreInsn::Bgenr:  // d = 1 << s
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Shl, ir::constant(1), ir::reg(s)), ea));
+      break;
+    case McoreInsn::Tst:    // C = (d & s) != 0
+      blk.stmts.push_back(ir::assign(ir::kRegC,
+          ir::binop(ir::BinOp::CmpNe, ir::binop(ir::BinOp::And, ir::reg(d), ir::reg(s)), ir::constant(0)), ea));
+      break;
+
+    // Conditional moves (read C): d = C ? then : else.
+    case McoreInsn::Movt:  // if C: d = s
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC), ir::reg(s), ir::reg(d)), ea)); break;
+    case McoreInsn::Movf:  // if !C: d = s
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC), ir::reg(d), ir::reg(s)), ea)); break;
+    case McoreInsn::Clrt:  // if C: d = 0
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC), ir::constant(0), ir::reg(d)), ea)); break;
+    case McoreInsn::Clrf:  // if !C: d = 0
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC), ir::reg(d), ir::constant(0)), ea)); break;
+    case McoreInsn::Inct:  // if C: d = d + 1
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC),
+          ir::binop(ir::BinOp::Add, ir::reg(d), ir::constant(1)), ir::reg(d)), ea)); break;
+    case McoreInsn::Decf:  // if !C: d = d - 1
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC), ir::reg(d),
+          ir::binop(ir::BinOp::Sub, ir::reg(d), ir::constant(1))), ea)); break;
+    case McoreInsn::Incf:  // if !C: d = d + 1
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC), ir::reg(d),
+          ir::binop(ir::BinOp::Add, ir::reg(d), ir::constant(1))), ea)); break;
+    case McoreInsn::Dect:  // if C: d = d - 1
+      blk.stmts.push_back(ir::assign(d, ir::select(ir::reg(ir::kRegC),
+          ir::binop(ir::BinOp::Sub, ir::reg(d), ir::constant(1)), ir::reg(d)), ea)); break;
+
+    case McoreInsn::Andn:  // d = d & ~s
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::And, ir::reg(d),
+          ir::unop(ir::UnOp::Not, ir::reg(s))), ea)); break;
+    case McoreInsn::Not:  // d = ~d
+      blk.stmts.push_back(ir::assign(d, ir::unop(ir::UnOp::Not, ir::reg(d)), ea)); break;
+    case McoreInsn::Abs:   // d = d < 0 ? -d : d
+      blk.stmts.push_back(ir::assign(d, ir::select(
+          ir::binop(ir::BinOp::CmpLt, ir::reg(d), ir::constant(0)),
+          ir::unop(ir::UnOp::Neg, ir::reg(d)), ir::reg(d)), ea)); break;
+    case McoreInsn::Rotli: {  // rotate left by imm: (d << n) | (d >> (32 - n))
+      int nn = (int)(imm & 31);
+      ir::ExprPtr e = nn == 0 ? ir::reg(d)
+          : ir::binop(ir::BinOp::Or, ir::binop(ir::BinOp::Shl, ir::reg(d), ir::constant(nn)),
+                                     ir::binop(ir::BinOp::Shr, ir::reg(d), ir::constant(32 - nn)));
+      blk.stmts.push_back(ir::assign(d, e, ea)); break;
+    }
+    case McoreInsn::Ff1:   // find-first-one -> intrinsic
+      blk.stmts.push_back(ir::assign(d, ir::call("__ff1", {ir::reg(d)}), ea)); break;
+    case McoreInsn::Brev:  // bit reverse -> intrinsic
+      blk.stmts.push_back(ir::assign(d, ir::call("__brev", {ir::reg(d)}), ea)); break;
+    case McoreInsn::Declt:  // d = d - 1 ; C = (d < 0)
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Sub, ir::reg(d), ir::constant(1)), ea));
+      blk.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpLt, ir::reg(d), ir::constant(0)), ea));
+      break;
+    case McoreInsn::Decgt:  // d = d - 1 ; C = (d > 0)  (0 < d)
+      blk.stmts.push_back(ir::assign(d, ir::binop(ir::BinOp::Sub, ir::reg(d), ir::constant(1)), ea));
+      blk.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpLt, ir::constant(0), ir::reg(d)), ea));
+      break;
+    // Extract byte N of d into r1.
+    case McoreInsn::Xtrb0: blk.stmts.push_back(ir::assign(1, ir::binop(ir::BinOp::And, ir::reg(d), ir::constant(0xFF)), ea)); break;
+    case McoreInsn::Xtrb1: blk.stmts.push_back(ir::assign(1, ir::binop(ir::BinOp::And, ir::binop(ir::BinOp::Shr, ir::reg(d), ir::constant(8)), ir::constant(0xFF)), ea)); break;
+    case McoreInsn::Xtrb2: blk.stmts.push_back(ir::assign(1, ir::binop(ir::BinOp::And, ir::binop(ir::BinOp::Shr, ir::reg(d), ir::constant(16)), ir::constant(0xFF)), ea)); break;
+    case McoreInsn::Xtrb3: blk.stmts.push_back(ir::assign(1, ir::binop(ir::BinOp::And, ir::binop(ir::BinOp::Shr, ir::reg(d), ir::constant(24)), ir::constant(0xFF)), ea)); break;
+
+    // Memory: ops[0] = value/dest reg, ops[1] = (base, offset).
+    case McoreInsn::Ld:   load_to(4); break;
+    case McoreInsn::LdH: load_to(2); break;
+    case McoreInsn::LdB: load_to(1); break;
+    case McoreInsn::St:   store_from(4); break;
+    case McoreInsn::StH: store_from(2); break;
+    case McoreInsn::StB: store_from(1); break;
+
+    // Load/store quad: transfer r4..r7 to/from [base], [base+4], [base+8], [base+12].
+    case McoreInsn::Ldq:
+      for (int k = 0; k < 4; ++k) {
+        ir::ExprPtr addr = k ? ir::binop(ir::BinOp::Add, ir::reg(d), ir::constant(k * 4)) : ir::reg(d);
+        blk.stmts.push_back(ir::assign(4 + k, ir::load(addr, 4), ea));
+      }
+      break;
+    case McoreInsn::Stq:
+      for (int k = 0; k < 4; ++k) {
+        ir::ExprPtr addr = k ? ir::binop(ir::BinOp::Add, ir::reg(d), ir::constant(k * 4)) : ir::reg(d);
+        blk.stmts.push_back(ir::store(addr, ir::reg(4 + k), 4, ea));
+      }
+      break;
+
+    // Calls: result in r2 (ABI).
+    case McoreInsn::Bsr: {
+      ea_t tgt = (ea_t)insn.ops[0].addr;
+      qstring nm;
+      if (get_name(&nm, tgt) <= 0 || nm.empty()) nm.sprnt("sub_%X", (unsigned)tgt);
+      blk.stmts.push_back(ir::assign(ir::kRegRet, ir::call(nm.c_str(), call_args()), ea));
+      break;
+    }
+    case McoreInsn::Jsr:
+      blk.stmts.push_back(
+          ir::assign(ir::kRegRet, ir::call_indirect(ir::reg(insn.ops[0].reg), call_args()), ea));
+      break;
+
+    default: blk.stmts.push_back(lift_unknown((ea_t)ea)); break;
+  }
+}
+
+// If `insn` is a control-flow instruction, set `blk.term` and return true.
+bool lift_terminator(const insn_t &insn, ir::Block &blk, ea_t fallthrough) {
+  ir::Terminator &t = blk.term;
+  t.ea = (uint32_t)insn.ea;
+  switch (classify(insn)) {
+    case McoreInsn::Bt:
+      t.kind = ir::TermKind::CondBranch;
+      t.cond = ir::reg(ir::kRegC);
+      t.target = (uint32_t)insn.ops[0].addr;
+      t.fallthrough = (uint32_t)fallthrough;
+      return true;
+    case McoreInsn::Bf:
+      t.kind = ir::TermKind::CondBranch;
+      t.cond = ir::unop(ir::UnOp::LNot, ir::reg(ir::kRegC));
+      t.target = (uint32_t)insn.ops[0].addr;
+      t.fallthrough = (uint32_t)fallthrough;
+      return true;
+    case McoreInsn::Br:
+      t.kind = ir::TermKind::Goto;
+      t.target = (uint32_t)insn.ops[0].addr;
+      return true;
+    case McoreInsn::Jmpi: {  // tail jump through the literal pool: a tail call
+      ea_t tgt = (ea_t)insn.ops[1].addr;
+      qstring nm;
+      if (get_name(&nm, tgt) <= 0 || nm.empty()) nm.sprnt("sub_%X", (unsigned)tgt);
+      std::vector<ir::ExprPtr> args;
+      std::set<int> defined;
+      for (const auto &st : blk.stmts)
+        if (st.kind == ir::StmtKind::Assign && st.dst_reg >= 2 && st.dst_reg <= 7)
+          defined.insert(st.dst_reg);
+      for (int r = 2; r <= 7 && defined.count(r); ++r) args.push_back(ir::reg(r));
+      t.kind = ir::TermKind::Return;
+      t.value = ir::call(nm.c_str(), std::move(args));
+      t.has_value = true;
+      return true;
+    }
+    case McoreInsn::Jmp:
+      t.kind = ir::TermKind::Return;
+      if (insn.ops[0].reg == ir::kRegLR) {  // jmp r15 == rts
+        t.value = ir::reg(ir::kRegRet);
+      } else {  // jmp rX: indirect tail call/return
+        std::set<int> defined;
+        for (const auto &st : blk.stmts)
+          if (st.kind == ir::StmtKind::Assign && st.dst_reg >= 2 && st.dst_reg <= 7)
+            defined.insert(st.dst_reg);
+        std::vector<ir::ExprPtr> args;
+        for (int r = 2; r <= 7 && defined.count(r); ++r) args.push_back(ir::reg(r));
+        t.value = ir::call_indirect(ir::reg(insn.ops[0].reg), std::move(args));
+      }
+      t.has_value = true;
+      return true;
+    default:
+      return false;
+  }
+}
+
+} // namespace
+
+bool lift_function(func_t *pfn, ir::Function &out, qstring &err) {
+  out = ir::Function{};
+  err.clear();
+  if (pfn == nullptr) { err = "no function"; return false; }
+
+  out.entry = (uint32_t)pfn->start_ea;
+  qstring nm;
+  get_func_name(&nm, pfn->start_ea);
+  out.name = nm.c_str();
+
+  qflow_chart_t fc;
+  fc.create("mc", pfn, pfn->start_ea, pfn->end_ea, 0);
+
+  for (int i = 0; i < fc.size(); ++i) {
+    ea_t b0 = fc.blocks[i].start_ea;
+    ea_t b1 = fc.blocks[i].end_ea;
+
+    ir::Block blk;
+    blk.entry = (uint32_t)b0;
+    blk.term.kind = ir::TermKind::Fallthrough;
+    blk.term.target = (uint32_t)b1;  // default: fall to the next block
+
+    for (ea_t ea = b0; ea < b1;) {
+      insn_t insn;
+      int len = decode_insn(&insn, ea);
+      if (len <= 0) { err.sprnt("decode failed at %a", ea); return false; }
+      const bool is_last = (ea + len >= b1);
+      if (!(is_last && lift_terminator(insn, blk, ea + len)))
+        lift_insn(insn, blk);
+      ea += len;
+    }
+
+    out.blocks.push_back(std::move(blk));
+  }
+
+  // Entry block first (then ascending), so the structurer starts at index 0.
+  std::sort(out.blocks.begin(), out.blocks.end(),
+            [&](const ir::Block &a, const ir::Block &b) {
+              if (a.entry == out.entry) return true;
+              if (b.entry == out.entry) return false;
+              return a.entry < b.entry;
+            });
+
+  // Drop blocks unreachable from the entry (e.g. trailing self-loop fragments
+  // after a return/tail-call) so they don't force the goto fallback.
+  if (!out.blocks.empty()) {
+    std::map<uint32_t, int> idx;
+    for (size_t i = 0; i < out.blocks.size(); ++i) idx[out.blocks[i].entry] = (int)i;
+    std::vector<bool> reach(out.blocks.size(), false);
+    std::vector<int> stack{0};
+    reach[0] = true;
+    while (!stack.empty()) {
+      int i = stack.back(); stack.pop_back();
+      const ir::Terminator &t = out.blocks[i].term;
+      auto go = [&](uint32_t ea) {
+        auto it = idx.find(ea);
+        if (it != idx.end() && !reach[it->second]) { reach[it->second] = true; stack.push_back(it->second); }
+      };
+      if (t.kind == ir::TermKind::Goto || t.kind == ir::TermKind::Fallthrough) go(t.target);
+      if (t.kind == ir::TermKind::CondBranch) { go(t.target); go(t.fallthrough); }
+    }
+    std::vector<ir::Block> kept;
+    for (size_t i = 0; i < out.blocks.size(); ++i)
+      if (reach[i]) kept.push_back(std::move(out.blocks[i]));
+    out.blocks = std::move(kept);
+  }
+
+  return true;
+}
+
+} // namespace mcore
+
+```
+
+`src/lifter/lifter.h`:
+
+```h
+// Lifter: M-CORE insn_t (decoded by IDA 9.4's built-in MCORE module) -> IR.
+// This is the only IDA-dependent part of the decompiler core.
+#pragma once
+
+#include <pro.h>
+
+struct func_t;
+namespace ir { struct Function; }
+
+namespace mcore {
+
+// Lift one function into IR. Returns false and fills `err` on failure.
+bool lift_function(func_t *pfn, ir::Function &out, qstring &err);
+
+} // namespace mcore
+
+```
+
+`src/opt/opt.cpp`:
+
+```cpp
+#include "opt/opt.h"
+
+#include "ir/ir.h"
+
+#include <algorithm>
+#include <map>
+#include <set>
+#include <vector>
+
+namespace opt {
+
+namespace {
+
+bool is_const(const ir::ExprPtr &e) {
+  return e && e->kind == ir::ExprKind::Const;
+}
+
+ir::ExprPtr fold_binop(ir::BinOp op, int64_t a, int64_t b) {
+  switch (op) {
+    case ir::BinOp::Add: return ir::constant(a + b);
+    case ir::BinOp::Sub: return ir::constant(a - b);
+    case ir::BinOp::Mul: return ir::constant(a * b);
+    case ir::BinOp::Div: return b != 0 ? ir::constant(a / b) : nullptr;
+    case ir::BinOp::And: return ir::constant(a & b);
+    case ir::BinOp::Or:  return ir::constant(a | b);
+    case ir::BinOp::Xor: return ir::constant(a ^ b);
+    case ir::BinOp::Shl: return ir::constant(a << (b & 31));
+    case ir::BinOp::Shr: return ir::constant((int64_t)((uint64_t)(uint32_t)a >> (b & 31)));
+    case ir::BinOp::Sar: return ir::constant((int32_t)a >> (b & 31));
+    case ir::BinOp::CmpLt: return ir::constant(a < b ? 1 : 0);
+    case ir::BinOp::CmpHs: return ir::constant((uint32_t)a >= (uint32_t)b ? 1 : 0);
+    case ir::BinOp::CmpNe: return ir::constant(a != b ? 1 : 0);
+    case ir::BinOp::CmpEq: return ir::constant(a == b ? 1 : 0);
+  }
+  return nullptr;
+}
+
+// Fold pointer arithmetic on a stack-slot address: &var_X + c -> &var_(X+c)
+// (and - c). Stack slots are byte-addressed, so this keeps the byte offset
+// correct (unlike C pointer arithmetic, which would scale by element size).
+ir::ExprPtr fold_addr_offset(ir::BinOp op, const ir::ExprPtr &a, const ir::ExprPtr &b) {
+  auto stack_addr = [](const ir::ExprPtr &e) {
+    return e && e->kind == ir::ExprKind::UnOp && e->unop == ir::UnOp::AddrOf && e->a &&
+           e->a->kind == ir::ExprKind::Reg && e->a->reg >= ir::kStackBase;
+  };
+  if (op == ir::BinOp::Add) {
+    if (stack_addr(a) && is_const(b)) return ir::unop(ir::UnOp::AddrOf, ir::reg((int)(a->a->reg + b->value)));
+    if (stack_addr(b) && is_const(a)) return ir::unop(ir::UnOp::AddrOf, ir::reg((int)(b->a->reg + a->value)));
+  }
+  if (op == ir::BinOp::Sub && stack_addr(a) && is_const(b))
+    return ir::unop(ir::UnOp::AddrOf, ir::reg((int)(a->a->reg - b->value)));
+  return nullptr;
+}
+
+// Replace registers by known constant defs and fold constant operations.
+ir::ExprPtr rewrite(const ir::ExprPtr &e, const std::map<int, ir::ExprPtr> &defs) {
+  if (!e) return e;
+  switch (e->kind) {
+    case ir::ExprKind::Const:
+      return e;
+    case ir::ExprKind::Reg: {
+      auto it = defs.find(e->reg);
+      return it != defs.end() ? it->second : e;
+    }
+    case ir::ExprKind::UnOp: {
+      ir::ExprPtr a = rewrite(e->a, defs);
+      if (is_const(a)) {
+        int64_t v = a->value;
+        switch (e->unop) {
+          case ir::UnOp::Neg: return ir::constant(-v);
+          case ir::UnOp::Not: return ir::constant(~v);
+          case ir::UnOp::LNot: return ir::constant(v == 0 ? 1 : 0);
+        }
+      }
+      return ir::unop(e->unop, a);
+    }
+    case ir::ExprKind::BinOp: {
+      ir::ExprPtr a = rewrite(e->a, defs);
+      ir::ExprPtr b = rewrite(e->b, defs);
+      if (ir::ExprPtr f = fold_addr_offset(e->binop, a, b)) return f;
+      if (is_const(a) && is_const(b))
+        if (ir::ExprPtr f = fold_binop(e->binop, a->value, b->value))
+          return f;
+      // Compare of identical simple operands (e.g. the cmpne r0,r0 carry-clear).
+      bool same = (a->kind == ir::ExprKind::Reg && b->kind == ir::ExprKind::Reg && a->reg == b->reg) ||
+                  (is_const(a) && is_const(b) && a->value == b->value);
+      if (same) {
+        if (e->binop == ir::BinOp::CmpNe || e->binop == ir::BinOp::CmpLt) return ir::constant(0);
+        if (e->binop == ir::BinOp::CmpEq || e->binop == ir::BinOp::CmpHs) return ir::constant(1);
+      }
+      // Algebraic identities (clean up e.g. the '+ 0' from a cleared carry).
+      auto isc = [](const ir::ExprPtr &x, int64_t v) { return is_const(x) && x->value == v; };
+      switch (e->binop) {
+        case ir::BinOp::Add: case ir::BinOp::Or: case ir::BinOp::Xor:
+          if (isc(b, 0)) return a; if (isc(a, 0)) return b; break;
+        case ir::BinOp::Sub: case ir::BinOp::Shl: case ir::BinOp::Shr: case ir::BinOp::Sar:
+          if (isc(b, 0)) return a; break;
+        case ir::BinOp::Mul:
+          if (isc(b, 1)) return a; if (isc(a, 1)) return b;
+          if (isc(a, 0) || isc(b, 0)) return ir::constant(0); break;
+        case ir::BinOp::And:
+          if (isc(a, 0) || isc(b, 0)) return ir::constant(0); break;
+        default: break;
+      }
+      return ir::binop(e->binop, a, b);
+    }
+    case ir::ExprKind::Cast: {
+      ir::ExprPtr a = rewrite(e->a, defs);
+      if (is_const(a)) {
+        int64_t v = a->value;
+        switch (e->size) {
+          case 1: return ir::constant(e->is_signed ? (int8_t)v : (uint8_t)v);
+          case 2: return ir::constant(e->is_signed ? (int16_t)v : (uint16_t)v);
+          default: return ir::constant(e->is_signed ? (int32_t)v : (uint32_t)v);
+        }
+      }
+      return ir::cast(e->size, e->is_signed, a);
+    }
+    case ir::ExprKind::Load:
+      return ir::load(rewrite(e->a, defs), e->size);
+    case ir::ExprKind::Select: {
+      ir::ExprPtr c = rewrite(e->a, defs);
+      ir::ExprPtr t = rewrite(e->b, defs);
+      ir::ExprPtr el = rewrite(e->args.empty() ? nullptr : e->args[0], defs);
+      if (is_const(c)) return c->value ? t : el;
+      return ir::select(c, t, el);
+    }
+    case ir::ExprKind::Call: {
+      std::vector<ir::ExprPtr> args;
+      for (const auto &x : e->args) args.push_back(rewrite(x, defs));
+      return e->a ? ir::call_indirect(rewrite(e->a, defs), std::move(args))
+                  : ir::call(e->name, std::move(args));
+    }
+  }
+  return e;
+}
+
+// '__'-prefixed calls are pure intrinsics (e.g. __carry/__ff1): no side effects.
+bool is_pure_intrinsic(const ir::ExprPtr &e) {
+  return e->kind == ir::ExprKind::Call && !e->name.empty() && e->name.rfind("__", 0) == 0;
+}
+
+bool has_call(const ir::ExprPtr &e) {
+  if (!e) return false;
+  if (e->kind == ir::ExprKind::Call) {
+    if (!is_pure_intrinsic(e)) return true;  // real (or indirect) call: side effect
+    for (const auto &x : e->args) if (has_call(x)) return true;
+    return false;
+  }
+  if (e->kind == ir::ExprKind::Load || e->kind == ir::ExprKind::UnOp ||
+      e->kind == ir::ExprKind::Cast)
+    return has_call(e->a);
+  if (e->kind == ir::ExprKind::BinOp) return has_call(e->a) || has_call(e->b);
+  if (e->kind == ir::ExprKind::Select)
+    return has_call(e->a) || has_call(e->b) || (!e->args.empty() && has_call(e->args[0]));
+  return false;
+}
+
+// Replace Reg(kRegC) with the condition value computed in this block.
+ir::ExprPtr subst_c(const ir::ExprPtr &e, const ir::ExprPtr &c) {
+  if (!e) return e;
+  switch (e->kind) {
+    case ir::ExprKind::Const: return e;
+    case ir::ExprKind::Reg:   return (e->reg == ir::kRegC && c) ? c : e;
+    case ir::ExprKind::UnOp:  return ir::unop(e->unop, subst_c(e->a, c));
+    case ir::ExprKind::BinOp: return ir::binop(e->binop, subst_c(e->a, c), subst_c(e->b, c));
+    case ir::ExprKind::Load:  return ir::load(subst_c(e->a, c), e->size);
+    case ir::ExprKind::Cast:  return ir::cast(e->size, e->is_signed, subst_c(e->a, c));
+    case ir::ExprKind::Select:
+      return ir::select(subst_c(e->a, c), subst_c(e->b, c),
+                        subst_c(e->args.empty() ? nullptr : e->args[0], c));
+    case ir::ExprKind::Call:  return e;  // C-bit never flows into call args here
+  }
+  return e;
+}
+
+// Fold logical-not: !!x -> x, !(a!=b) -> a==b, !(a==b) -> a!=b.
+ir::ExprPtr fold_not(const ir::ExprPtr &e) {
+  if (!e) return e;
+  if (e->kind == ir::ExprKind::UnOp && e->unop == ir::UnOp::LNot) {
+    ir::ExprPtr x = fold_not(e->a);
+    if (x->kind == ir::ExprKind::UnOp && x->unop == ir::UnOp::LNot)
+      return x->a;
+    if (x->kind == ir::ExprKind::BinOp && x->binop == ir::BinOp::CmpNe)
+      return ir::binop(ir::BinOp::CmpEq, x->a, x->b);
+    if (x->kind == ir::ExprKind::BinOp && x->binop == ir::BinOp::CmpEq)
+      return ir::binop(ir::BinOp::CmpNe, x->a, x->b);
+    return ir::unop(ir::UnOp::LNot, x);
+  }
+  if (e->kind == ir::ExprKind::UnOp) return ir::unop(e->unop, fold_not(e->a));
+  if (e->kind == ir::ExprKind::BinOp) return ir::binop(e->binop, fold_not(e->a), fold_not(e->b));
+  return e;
+}
+
+void count_reads(const ir::ExprPtr &e, std::map<int, int> &reads) {
+  if (!e) return;
+  switch (e->kind) {
+    case ir::ExprKind::Const: break;
+    case ir::ExprKind::Reg: reads[e->reg]++; break;
+    case ir::ExprKind::UnOp:
+    case ir::ExprKind::Cast:
+    case ir::ExprKind::Load: count_reads(e->a, reads); break;
+    case ir::ExprKind::BinOp: count_reads(e->a, reads); count_reads(e->b, reads); break;
+    case ir::ExprKind::Select:
+    case ir::ExprKind::Call:
+      count_reads(e->a, reads);
+      count_reads(e->b, reads);
+      for (const auto &x : e->args) count_reads(x, reads);
+      break;
+  }
+}
+
+bool expr_equal(const ir::ExprPtr &a, const ir::ExprPtr &b) {
+  if (!a || !b) return a == b;
+  if (a->kind != b->kind) return false;
+  switch (a->kind) {
+    case ir::ExprKind::Const: return a->value == b->value && a->name == b->name;
+    case ir::ExprKind::Reg: return a->reg == b->reg;
+    case ir::ExprKind::UnOp: return a->unop == b->unop && expr_equal(a->a, b->a);
+    case ir::ExprKind::Cast:
+      return a->size == b->size && a->is_signed == b->is_signed && expr_equal(a->a, b->a);
+    case ir::ExprKind::Load: return a->size == b->size && expr_equal(a->a, b->a);
+    case ir::ExprKind::BinOp:
+      return a->binop == b->binop && expr_equal(a->a, b->a) && expr_equal(a->b, b->b);
+    case ir::ExprKind::Select:
+      return expr_equal(a->a, b->a) && expr_equal(a->b, b->b) &&
+             expr_equal(a->args.empty() ? nullptr : a->args[0],
+                        b->args.empty() ? nullptr : b->args[0]);
+    case ir::ExprKind::Call: return false;  // treat calls as never equal
+  }
+  return false;
+}
+
+// Reaching definition of the single C bit at each block's entry (nullptr = none
+// or conflicting). Lets a compare in one block resolve a branch/mvc in another.
+std::vector<ir::ExprPtr> compute_c_reaching(const ir::Function &fn) {
+  int n = (int)fn.blocks.size();
+  std::map<uint32_t, int> idx;
+  for (int i = 0; i < n; ++i) idx[fn.blocks[i].entry] = i;
+
+  std::vector<std::vector<int>> preds(n);
+  auto succs = [&](int i) {
+    std::vector<int> out;
+    const ir::Terminator &t = fn.blocks[i].term;
+    auto add = [&](uint32_t ea) { auto it = idx.find(ea); if (it != idx.end()) out.push_back(it->second); };
+    if (t.kind == ir::TermKind::Goto || t.kind == ir::TermKind::Fallthrough) add(t.target);
+    if (t.kind == ir::TermKind::CondBranch) { add(t.target); add(t.fallthrough); }
+    return out;
+  };
+  for (int i = 0; i < n; ++i)
+    for (int s : succs(i)) preds[s].push_back(i);
+
+  // Per-block: mode 0 = pass-through, 1 = defines C (def), 2 = kills C.
+  std::vector<int> mode(n, 0);
+  std::vector<ir::ExprPtr> def(n);
+  for (int i = 0; i < n; ++i) {
+    int m = 0; ir::ExprPtr d;
+    for (const auto &s : fn.blocks[i].stmts) {
+      if (s.kind == ir::StmtKind::Assign && s.dst_reg == ir::kRegC) { m = 1; d = s.expr; }
+      else if (s.kind == ir::StmtKind::Unknown) { m = 2; d = nullptr; }
+      else if (s.kind == ir::StmtKind::Assign && has_call(s.expr)) { m = 2; d = nullptr; }
+    }
+    mode[i] = m; def[i] = d;
+  }
+
+  std::vector<ir::ExprPtr> c_in(n), c_out(n);
+  for (int iter = 0; iter < n + 2; ++iter) {
+    for (int i = 0; i < n; ++i)
+      c_out[i] = mode[i] == 1 ? def[i] : mode[i] == 2 ? nullptr : c_in[i];
+    bool changed = false;
+    for (int i = 0; i < n; ++i) {
+      ir::ExprPtr meet; bool first = true, ok = true;
+      for (int p : preds[i]) {
+        if (first) { meet = c_out[p]; first = false; }
+        else if (!expr_equal(meet, c_out[p])) { ok = false; }
+      }
+      ir::ExprPtr nv = (first || !ok) ? nullptr : meet;
+      // At a join, two predecessors' conditions can be structurally identical yet
+      // mean different values (the same register holds different things). Only a
+      // constant condition is safe to merge across multiple predecessors.
+      if (nv && preds[i].size() > 1) {
+        std::map<int, int> r;
+        count_reads(nv, r);
+        if (!r.empty()) nv = nullptr;
+      }
+      if (!expr_equal(nv, c_in[i])) { c_in[i] = nv; changed = true; }
+    }
+    if (!changed) break;
+  }
+  return c_in;
+}
+
+bool uses_reg(const ir::ExprPtr &e, int reg) {
+  if (!e) return false;
+  if (e->kind == ir::ExprKind::Reg) return e->reg == reg;
+  if (uses_reg(e->a, reg) || uses_reg(e->b, reg)) return true;
+  for (const auto &x : e->args) if (uses_reg(x, reg)) return true;
+  return false;
+}
+
+// Replace register `from` with register `to` throughout `e`.
+ir::ExprPtr subst_reg(const ir::ExprPtr &e, int from, int to) {
+  if (!e) return e;
+  switch (e->kind) {
+    case ir::ExprKind::Reg: return e->reg == from ? ir::reg(to) : e;
+    case ir::ExprKind::UnOp: return ir::unop(e->unop, subst_reg(e->a, from, to));
+    case ir::ExprKind::Cast: return ir::cast(e->size, e->is_signed, subst_reg(e->a, from, to));
+    case ir::ExprKind::Load: return ir::load(subst_reg(e->a, from, to), e->size);
+    case ir::ExprKind::BinOp:
+      return ir::binop(e->binop, subst_reg(e->a, from, to), subst_reg(e->b, from, to));
+    case ir::ExprKind::Select:
+      return ir::select(subst_reg(e->a, from, to), subst_reg(e->b, from, to),
+                        subst_reg(e->args.empty() ? nullptr : e->args[0], from, to));
+    case ir::ExprKind::Call: {
+      std::vector<ir::ExprPtr> args;
+      for (const auto &x : e->args) args.push_back(subst_reg(x, from, to));
+      return e->a ? ir::call_indirect(subst_reg(e->a, from, to), std::move(args))
+                  : ir::call(e->name, std::move(args));
+    }
+    default: return e;
+  }
+}
+
+} // namespace
+
+void simplify(ir::Function &fn) {
+  std::vector<ir::ExprPtr> c_in = compute_c_reaching(fn);
+
+  // Pass 1: per-block constant propagation + condition (C-bit) inlining. The C
+  // value (`c_cur`) starts from the cross-block reaching definition and is
+  // substituted into every C read (branches, mvc/mvcv), so the synthetic C
+  // register never reaches the output.
+  for (size_t bi = 0; bi < fn.blocks.size(); ++bi) {
+    ir::Block &b = fn.blocks[bi];
+    std::map<int, ir::ExprPtr> cprop;  // const-only, intra-block
+    ir::ExprPtr c_cur = c_in[bi];
+
+    // Value numbering so the pending C condition can survive a register being
+    // overwritten before the branch: if r is in the condition and is reassigned,
+    // rewrite the condition to an equivalent register that still holds the value
+    // (e.g. a saved copy). vid default = a unique per-register "entry" value.
+    std::map<int, int> vid;
+    int vctr = 0;
+    auto vidof = [&](int r) { auto it = vid.find(r); return it != vid.end() ? it->second : -(r + 1); };
+
+    std::map<int, ir::ExprPtr> none;
+    auto resolve = [&](const ir::ExprPtr &e) {
+      // Re-fold after the C value is substituted in (it may be a constant, e.g.
+      // a cleared carry, leaving 'x + 0' to simplify).
+      return fold_not(rewrite(subst_c(rewrite(e, cprop), c_cur), none));
+    };
+
+    for (auto &s : b.stmts) {
+      if (s.kind == ir::StmtKind::Store) {
+        s.addr = rewrite(s.addr, cprop);
+        s.expr = resolve(s.expr);
+        continue;
+      }
+      if (s.kind != ir::StmtKind::Assign) { cprop.clear(); c_cur = nullptr; continue; }
+      s.expr = resolve(s.expr);
+
+      // Rescue the C condition before this assignment overwrites a register it uses.
+      if (c_cur && s.dst_reg != ir::kRegC && uses_reg(c_cur, s.dst_reg)) {
+        int tv = vidof(s.dst_reg);
+        for (const auto &kv : vid)
+          if (kv.first != s.dst_reg && kv.second == tv) { c_cur = subst_reg(c_cur, s.dst_reg, kv.first); break; }
+      }
+
+      if (has_call(s.expr)) { cprop.clear(); c_cur = nullptr; }  // call clobbers regs + C
+      if (s.dst_reg == ir::kRegC) {
+        c_cur = s.expr;
+      } else {
+        if (is_const(s.expr)) cprop[s.dst_reg] = s.expr;
+        else cprop.erase(s.dst_reg);
+        vid[s.dst_reg] = (s.expr && s.expr->kind == ir::ExprKind::Reg) ? vidof(s.expr->reg) : ++vctr;
+      }
+    }
+
+    b.term.cond = resolve(b.term.cond);
+    b.term.value = resolve(b.term.value);
+  }
+
+  // Pass 2: dead-assignment elimination. Remove an assignment whose destination
+  // is read nowhere in the (post-substitution) function. Sound without liveness
+  // analysis; in particular the inlined C-bit compare becomes unread and drops.
+  std::map<int, int> reads;
+  for (auto &b : fn.blocks) {
+    for (auto &s : b.stmts) {
+      count_reads(s.expr, reads);   // Assign rhs / Store value
+      count_reads(s.addr, reads);   // Store address
+    }
+    count_reads(b.term.cond, reads);
+    count_reads(b.term.value, reads);
+  }
+  for (auto &b : fn.blocks) {
+    std::vector<ir::Stmt> kept;
+    kept.reserve(b.stmts.size());
+    for (auto &s : b.stmts) {
+      // Drop only dead register assignments; keep stores and calls (side effects).
+      if (s.kind == ir::StmtKind::Assign && reads[s.dst_reg] == 0 && !has_call(s.expr))
+        continue;
+      kept.push_back(std::move(s));
+    }
+    b.stmts = std::move(kept);
+  }
+}
+
+void fold_implied_branches(ir::Function &fn) {
+  int n = (int)fn.blocks.size();
+  bool changed = true;
+  while (changed) {
+    changed = false;
+    std::map<uint32_t, int> idx;
+    for (int i = 0; i < n; ++i) idx[fn.blocks[i].entry] = i;
+    std::vector<std::vector<int>> preds(n);
+    for (int i = 0; i < n; ++i) {
+      const ir::Terminator &t = fn.blocks[i].term;
+      auto add = [&](uint32_t ea) {
+        auto it = idx.find(ea);
+        if (it != idx.end()) preds[it->second].push_back(i);
+      };
+      if (t.kind == ir::TermKind::Goto || t.kind == ir::TermKind::Fallthrough) add(t.target);
+      if (t.kind == ir::TermKind::CondBranch) { add(t.target); add(t.fallthrough); }
+    }
+
+    for (int bi = 0; bi < n; ++bi) {
+      ir::Terminator &bt = fn.blocks[bi].term;
+      if (bt.kind != ir::TermKind::CondBranch) continue;
+      if (preds[bi].size() != 1) continue;  // condition's truth must be unique here
+      const ir::Terminator &pt = fn.blocks[preds[bi][0]].term;
+      if (pt.kind != ir::TermKind::CondBranch) continue;
+      if (!expr_equal(bt.cond, pt.cond)) continue;  // same test as the predecessor's
+
+      // The block must not recompute the tested values between entry and branch.
+      std::map<int, int> rd;
+      count_reads(bt.cond, rd);
+      bool rewritten = false;
+      for (const auto &s : fn.blocks[bi].stmts)
+        if (s.kind == ir::StmtKind::Assign && rd.count(s.dst_reg)) rewritten = true;
+      if (rewritten) continue;
+
+      bool via_taken = pt.target == fn.blocks[bi].entry;
+      bool via_fth = pt.fallthrough == fn.blocks[bi].entry;
+      if (via_taken == via_fth) continue;  // ambiguous (both edges, or neither)
+
+      // Reached on the predecessor's taken edge => the same test is true here, so
+      // this branch always goes to its own taken target (and vice versa).
+      ir::Terminator g;
+      g.kind = ir::TermKind::Goto;
+      g.target = via_taken ? bt.target : bt.fallthrough;
+      g.ea = bt.ea;
+      fn.blocks[bi].term = g;
+      changed = true;
+    }
+  }
+}
+
+namespace {
+
+void reads_set(const ir::ExprPtr &e, std::set<int> &s) {
+  if (!e) return;
+  if (e->kind == ir::ExprKind::Reg) s.insert(e->reg);
+  reads_set(e->a, s);
+  reads_set(e->b, s);
+  for (const auto &x : e->args) reads_set(x, s);
+}
+
+// May a definition with `usecount` total uses be substituted into its uses?
+bool propagatable(const ir::ExprPtr &e, int usecount) {
+  if (!e) return false;
+  switch (e->kind) {
+    case ir::ExprKind::Const:
+    case ir::ExprKind::Reg: return true;            // copy/const: any number of uses
+    case ir::ExprKind::Cast: return propagatable(e->a, usecount);
+    case ir::ExprKind::UnOp:
+    case ir::ExprKind::BinOp: return usecount == 1; // pure arithmetic: single use only
+    case ir::ExprKind::Call: return is_pure_intrinsic(e) && usecount == 1;  // __carry etc.
+    case ir::ExprKind::Load: return false;          // side effects / ordering
+  }
+  return false;
+}
+
+ir::ExprPtr subst_inline(const ir::ExprPtr &e, const std::map<int, ir::ExprPtr> &defs) {
+  if (!e) return e;
+  switch (e->kind) {
+    case ir::ExprKind::Reg: {
+      auto it = defs.find(e->reg);
+      return it != defs.end() ? it->second : e;
+    }
+    case ir::ExprKind::BinOp: {
+      ir::ExprPtr a = subst_inline(e->a, defs), b = subst_inline(e->b, defs);
+      if (ir::ExprPtr f = fold_addr_offset(e->binop, a, b)) return f;  // &var_X + c -> &var_(X+c)
+      return ir::binop(e->binop, a, b);
+    }
+    case ir::ExprKind::UnOp:  return ir::unop(e->unop, subst_inline(e->a, defs));
+    case ir::ExprKind::Cast:  return ir::cast(e->size, e->is_signed, subst_inline(e->a, defs));
+    case ir::ExprKind::Load:  return ir::load(subst_inline(e->a, defs), e->size);
+    case ir::ExprKind::Select:
+      return ir::select(subst_inline(e->a, defs), subst_inline(e->b, defs),
+                        subst_inline(e->args.empty() ? nullptr : e->args[0], defs));
+    case ir::ExprKind::Call: {
+      std::vector<ir::ExprPtr> args;
+      for (const auto &x : e->args) args.push_back(subst_inline(x, defs));
+      return e->a ? ir::call_indirect(subst_inline(e->a, defs), std::move(args))
+                  : ir::call(e->name, std::move(args));
+    }
+    default: return e;
+  }
+}
+
+} // namespace
+
+void inline_locals(ir::Function &fn) {
+  // Total use counts (reads) per register across the function.
+  std::map<int, int> uses;
+  for (auto &b : fn.blocks) {
+    for (auto &s : b.stmts) { count_reads(s.expr, uses); count_reads(s.addr, uses); }
+    count_reads(b.term.cond, uses);
+    count_reads(b.term.value, uses);
+  }
+
+  // Forward intra-block propagation / single-use inlining.
+  for (auto &b : fn.blocks) {
+    std::map<int, ir::ExprPtr> defs;
+    for (auto &s : b.stmts) {
+      if (s.kind == ir::StmtKind::Store) {
+        s.addr = subst_inline(s.addr, defs);
+        s.expr = subst_inline(s.expr, defs);
+        continue;
+      }
+      if (s.kind != ir::StmtKind::Assign) { defs.clear(); continue; }
+      s.expr = subst_inline(s.expr, defs);
+      // A redefinition invalidates defs that referenced the old value.
+      for (auto it = defs.begin(); it != defs.end();)
+        it = (it->first == s.dst_reg || uses_reg(it->second, s.dst_reg)) ? defs.erase(it) : ++it;
+      if (s.dst_reg != ir::kRegC && propagatable(s.expr, uses[s.dst_reg]))
+        defs[s.dst_reg] = s.expr;
+    }
+    b.term.cond = subst_inline(b.term.cond, defs);
+    b.term.value = subst_inline(b.term.value, defs);
+  }
+
+  // Liveness-based dead-store elimination. live-out of a block over-approximates
+  // as registers read by any other block's statements/terminator.
+  int n = (int)fn.blocks.size();
+  std::vector<std::set<int>> reads_in(n);
+  for (int i = 0; i < n; ++i) {
+    for (auto &s : fn.blocks[i].stmts) { reads_set(s.expr, reads_in[i]); reads_set(s.addr, reads_in[i]); }
+    reads_set(fn.blocks[i].term.cond, reads_in[i]);
+    reads_set(fn.blocks[i].term.value, reads_in[i]);
+  }
+  for (int i = 0; i < n; ++i) {
+    std::set<int> live;
+    for (int j = 0; j < n; ++j) if (j != i) live.insert(reads_in[j].begin(), reads_in[j].end());
+    reads_set(fn.blocks[i].term.cond, live);
+    reads_set(fn.blocks[i].term.value, live);
+
+    std::vector<ir::Stmt> rev;
+    auto &stmts = fn.blocks[i].stmts;
+    for (auto it = stmts.rbegin(); it != stmts.rend(); ++it) {
+      ir::Stmt &s = *it;
+      if (s.kind == ir::StmtKind::Assign && s.expr &&
+          s.expr->kind == ir::ExprKind::Reg && s.expr->reg == s.dst_reg)
+        continue;                              // identity copy 'x = x'
+      if (s.kind == ir::StmtKind::Assign && s.dst_reg != ir::kRegC &&
+          live.find(s.dst_reg) == live.end()) {
+        if (!has_call(s.expr)) continue;       // dead store: drop
+        s.dst_reg = ir::kRegDiscard;           // dead result of a call: keep the call only
+      }
+      if (s.kind == ir::StmtKind::Assign) live.erase(s.dst_reg);
+      reads_set(s.expr, live);
+      reads_set(s.addr, live);
+      rev.push_back(std::move(s));
+    }
+    std::reverse(rev.begin(), rev.end());
+    stmts = std::move(rev);
+  }
+}
+
+} // namespace opt
+
+```
+
+`src/opt/opt.h`:
+
+```h
+// Dataflow cleanup over a function's (currently linear) statement list:
+// constant/copy propagation, constant folding, and dead-assignment elimination.
+// Pure, unit-testable. Grows into block-level dataflow in later milestones.
+#pragma once
+
+namespace ir { struct Function; }
+
+namespace opt {
+
+// Recover call arguments across basic blocks. The lifter only sees argument
+// registers (r2-r7) set up within the call's own block; this pass walks the
+// single-predecessor dominating chain and recomputes each call's contiguous
+// r2.. argument run, stopping at the previous call (which clobbers the
+// caller-saved arg registers). Fixes both lost args (set in a predecessor) and
+// spurious args (left in a register before an earlier call). Run first, on raw
+// register IR, before recover_stack().
+void recover_call_args(ir::Function &fn);
+
+// Recover the stack frame: turn sp-relative loads/stores into named stack-slot
+// variables and drop prologue/epilogue boilerplate (sp adjustments, lr save/
+// restore, stm/ldm register save/restore). Run before simplify().
+void recover_stack(ir::Function &fn);
+
+// Split intra-block register live ranges: when a register holds several distinct
+// values in a block (reassigned with the old value still used), give each value
+// its own variable. Fixes value confusion (e.g. a compared call result reused
+// before the branch) and improves naming. Run after recover_stack, before vars.
+void split_ranges(ir::Function &fn);
+
+// Simplify `fn` in place.
+void simplify(ir::Function &fn);
+
+// Fold conditional branches whose test is already decided by the (single)
+// predecessor's identical test: `if (C) { if (C) { S } }` -> `if (C) { S }`.
+// Run after simplify() (so the C bit is substituted into the conditions).
+void fold_implied_branches(ir::Function &fn);
+
+// Readability pass: copy/constant propagation, single-use inlining of pure
+// temporaries, and liveness-based dead-store elimination. Run after simplify().
+void inline_locals(ir::Function &fn);
+
+} // namespace opt
+
+```
+
+`src/opt/stackframe.cpp`:
+
+```cpp
+// Stack-frame recovery: sp-relative memory accesses become named stack-slot
+// variables; prologue/epilogue boilerplate is removed. Pure, unit-testable.
+#include "opt/opt.h"
+
+#include "ir/ir.h"
+
+#include <array>
+#include <map>
+#include <set>
+#include <vector>
+
+namespace opt {
+
+namespace {
+
+bool is_sp(const ir::ExprPtr &e) {
+  return e && e->kind == ir::ExprKind::Reg && e->reg == ir::kRegSP;
+}
+
+// If `addr` is `sp` or `sp + const`, return true and set the byte offset.
+bool sp_offset(const ir::ExprPtr &addr, int64_t &off) {
+  if (is_sp(addr)) { off = 0; return true; }
+  if (addr && addr->kind == ir::ExprKind::BinOp && addr->binop == ir::BinOp::Add &&
+      is_sp(addr->a) && addr->b && addr->b->kind == ir::ExprKind::Const) {
+    off = addr->b->value;
+    return true;
+  }
+  return false;
+}
+
+// Replace sp-relative loads with stack-slot register references, and sp-relative
+// address values (sp / sp + off used as a pointer) with &var_off.
+ir::ExprPtr rw(const ir::ExprPtr &e) {
+  if (!e) return e;
+  switch (e->kind) {
+    case ir::ExprKind::Reg:
+      if (e->reg == ir::kRegSP)  // bare sp used as a value -> &var_0
+        return ir::unop(ir::UnOp::AddrOf, ir::reg(ir::kStackBase));
+      return e;
+    case ir::ExprKind::Load: {
+      int64_t off;
+      if (sp_offset(e->a, off)) return ir::reg(ir::kStackBase + (int)off);
+      return ir::load(rw(e->a), e->size);
+    }
+    case ir::ExprKind::BinOp: {
+      int64_t off;
+      if (e->binop == ir::BinOp::Add && sp_offset(e, off))  // (sp + off) value -> &var_off
+        return ir::unop(ir::UnOp::AddrOf, ir::reg(ir::kStackBase + (int)off));
+      return ir::binop(e->binop, rw(e->a), rw(e->b));
+    }
+    case ir::ExprKind::UnOp:  return ir::unop(e->unop, rw(e->a));
+    case ir::ExprKind::Cast:  return ir::cast(e->size, e->is_signed, rw(e->a));
+    case ir::ExprKind::Call: {
+      std::vector<ir::ExprPtr> args;
+      for (const auto &x : e->args) args.push_back(rw(x));
+      return e->a ? ir::call_indirect(rw(e->a), std::move(args))
+                  : ir::call(e->name, std::move(args));
+    }
+    default: return e;
+  }
+}
+
+bool is_lr(const ir::ExprPtr &e) {
+  return e && e->kind == ir::ExprKind::Reg && e->reg == ir::kRegLR;
+}
+
+bool is_frame_multi(const ir::Stmt &s) {
+  if (s.kind != ir::StmtKind::Unknown) return false;
+  return s.text.rfind("stm", 0) == 0 || s.text.rfind("ldm", 0) == 0;
+}
+
+} // namespace
+
+void recover_stack(ir::Function &fn) {
+  for (auto &b : fn.blocks) {
+    std::vector<ir::Stmt> kept;
+    kept.reserve(b.stmts.size());
+    for (auto &s : b.stmts) {
+      // Drop prologue/epilogue register save/restore (stm/ldm at sp).
+      if (is_frame_multi(s)) continue;
+
+      if (s.kind == ir::StmtKind::Store) {
+        int64_t off;
+        if (sp_offset(s.addr, off)) {
+          // *(sp+off) = v   becomes   var_off = v
+          if (is_lr(s.expr)) continue;  // saving lr: drop
+          kept.push_back(ir::assign(ir::kStackBase + (int)off, rw(s.expr), s.ea));
+          continue;
+        }
+        s.addr = rw(s.addr);
+        s.expr = rw(s.expr);
+        kept.push_back(std::move(s));
+        continue;
+      }
+
+      if (s.kind == ir::StmtKind::Assign) {
+        s.expr = rw(s.expr);
+        if (s.dst_reg == ir::kRegSP) continue;   // sp adjustment: drop
+        if (s.dst_reg == ir::kRegLR) continue;   // lr restore: drop
+        if (is_lr(s.expr)) continue;             // saving lr into a slot/reg: drop
+        kept.push_back(std::move(s));
+        continue;
+      }
+
+      kept.push_back(std::move(s));
+    }
+    b.stmts = std::move(kept);
+
+    // Rewrite terminator operands too (e.g. a return value loaded from the frame).
+    b.term.cond = rw(b.term.cond);
+    b.term.value = rw(b.term.value);
+  }
+}
+
+namespace {
+
+bool is_call_expr(const ir::ExprPtr &e) { return e && e->kind == ir::ExprKind::Call; }
+
+// Mark argument registers (r2..r7) read by `e`.
+void collect_arg_reads(const ir::ExprPtr &e, std::array<bool, 8> &rd) {
+  if (!e) return;
+  switch (e->kind) {
+    case ir::ExprKind::Reg:
+      if (e->reg >= 2 && e->reg <= 7) rd[e->reg] = true;
+      return;
+    case ir::ExprKind::BinOp:
+      collect_arg_reads(e->a, rd); collect_arg_reads(e->b, rd); return;
+    case ir::ExprKind::UnOp:
+    case ir::ExprKind::Cast:
+    case ir::ExprKind::Load:
+      collect_arg_reads(e->a, rd); return;
+    case ir::ExprKind::Select:
+      collect_arg_reads(e->a, rd); collect_arg_reads(e->b, rd);
+      if (!e->args.empty()) collect_arg_reads(e->args[0], rd);
+      return;
+    case ir::ExprKind::Call:
+      collect_arg_reads(e->a, rd);
+      for (const auto &x : e->args) collect_arg_reads(x, rd);
+      return;
+    default:
+      return;
+  }
+}
+
+// Argument registers (r2..r7) available at a point, scanning backward. A call
+// clobbers the caller-saved arg registers, so it acts as a barrier; its own
+// result is claimed only if read since (live and threaded on, as in
+// `p = alloc(); ...; memset(p, ..)`). At a control-flow merge the analysis
+// recurses into every predecessor and intersects — a register counts only if it
+// is provided on all incoming paths. `read_seen` (by value) tracks registers
+// read on the continuation; `target_reg` (the callee pointer of an indirect
+// call) is excluded. `budget` bounds total work across branching paths.
+std::array<bool, 8> avail_args(const ir::Function &fn,
+                               const std::vector<std::vector<int>> &preds, int blk,
+                               int from_init, bool first_block,
+                               std::array<bool, 8> read_seen, int target_reg,
+                               std::set<int> visited, int &budget) {
+  std::array<bool, 8> defined{};
+  if (budget <= 0 || visited.count(blk)) return defined;
+  --budget;
+  visited.insert(blk);
+  const auto &b = fn.blocks[blk];
+  int from = first_block ? from_init : (int)b.stmts.size() - 1;
+  for (int i = from; i >= 0; --i) {
+    const ir::Stmt &s = b.stmts[i];
+    if (s.kind == ir::StmtKind::Assign && is_call_expr(s.expr)) {
+      if (s.dst_reg >= 2 && s.dst_reg <= 7 && s.dst_reg != target_reg &&
+          read_seen[s.dst_reg])
+        defined[s.dst_reg] = true;
+      return defined;  // barrier: caller-saved regs before it are clobbered
+    }
+    if (s.kind == ir::StmtKind::Assign && s.dst_reg >= 2 && s.dst_reg <= 7 &&
+        s.dst_reg != target_reg)
+      defined[s.dst_reg] = true;
+    collect_arg_reads(s.expr, read_seen);
+    collect_arg_reads(s.addr, read_seen);
+  }
+  // Reached the top of the block with no barrier: pull in from predecessors.
+  const auto &ps = preds[blk];
+  std::array<bool, 8> from_preds{};
+  if (ps.size() == 1) {
+    from_preds = avail_args(fn, preds, ps[0], 0, false, read_seen, target_reg, visited, budget);
+  } else if (ps.size() > 1) {
+    bool firstp = true;
+    for (int p : ps) {
+      auto pr = avail_args(fn, preds, p, 0, false, read_seen, target_reg, visited, budget);
+      if (firstp) { from_preds = pr; firstp = false; }
+      else for (int r = 2; r <= 7; ++r) from_preds[r] = from_preds[r] && pr[r];  // must hold on all paths
+    }
+  }
+  for (int r = 2; r <= 7; ++r) defined[r] = defined[r] || from_preds[r];
+  return defined;
+}
+
+// Arguments of the call at (blk, stmt_i): the contiguous r2.. run of registers
+// available just before it.
+std::vector<ir::ExprPtr> args_for_call(const ir::Function &fn,
+                                       const std::vector<std::vector<int>> &preds,
+                                       int blk, int stmt_i, int target_reg) {
+  int budget = 400;
+  std::array<bool, 8> defined =
+      avail_args(fn, preds, blk, stmt_i - 1, true, {}, target_reg, {}, budget);
+  std::vector<ir::ExprPtr> args;
+  for (int r = 2; r <= 7 && defined[r]; ++r) args.push_back(ir::reg(r));
+  return args;
+}
+
+}  // namespace
+
+void recover_call_args(ir::Function &fn) {
+  int n = (int)fn.blocks.size();
+  std::map<uint32_t, int> idx;
+  for (int i = 0; i < n; ++i) idx[fn.blocks[i].entry] = i;
+
+  std::vector<std::vector<int>> preds(n);
+  for (int i = 0; i < n; ++i) {
+    const ir::Terminator &t = fn.blocks[i].term;
+    auto add = [&](uint32_t ea) {
+      auto it = idx.find(ea);
+      if (it != idx.end()) preds[it->second].push_back(i);
+    };
+    if (t.kind == ir::TermKind::Goto || t.kind == ir::TermKind::Fallthrough) add(t.target);
+    if (t.kind == ir::TermKind::CondBranch) { add(t.target); add(t.fallthrough); }
+  }
+
+  auto target_of = [](const ir::ExprPtr &call) {
+    return call->a && call->a->kind == ir::ExprKind::Reg ? call->a->reg : -1;
+  };
+  for (int bi = 0; bi < n; ++bi) {
+    auto &b = fn.blocks[bi];
+    for (int i = 0; i < (int)b.stmts.size(); ++i) {
+      ir::Stmt &s = b.stmts[i];
+      if (s.kind == ir::StmtKind::Assign && is_call_expr(s.expr))
+        s.expr->args = args_for_call(fn, preds, bi, i, target_of(s.expr));
+    }
+    if (b.term.value && is_call_expr(b.term.value))  // tail call
+      b.term.value->args =
+          args_for_call(fn, preds, bi, (int)b.stmts.size(), target_of(b.term.value));
+  }
+}
+
+namespace {
+
+// Replace each register read with its current versioned id.
+ir::ExprPtr rename_reads(const ir::ExprPtr &e, const std::map<int, int> &ver) {
+  if (!e) return e;
+  switch (e->kind) {
+    case ir::ExprKind::Reg: {
+      auto it = ver.find(e->reg);
+      return it != ver.end() ? ir::reg(it->second) : e;
+    }
+    case ir::ExprKind::UnOp: return ir::unop(e->unop, rename_reads(e->a, ver));
+    case ir::ExprKind::Cast: return ir::cast(e->size, e->is_signed, rename_reads(e->a, ver));
+    case ir::ExprKind::Load: return ir::load(rename_reads(e->a, ver), e->size);
+    case ir::ExprKind::BinOp:
+      return ir::binop(e->binop, rename_reads(e->a, ver), rename_reads(e->b, ver));
+    case ir::ExprKind::Select:
+      return ir::select(rename_reads(e->a, ver), rename_reads(e->b, ver),
+                        rename_reads(e->args.empty() ? nullptr : e->args[0], ver));
+    case ir::ExprKind::Call: {
+      std::vector<ir::ExprPtr> args;
+      for (const auto &x : e->args) args.push_back(rename_reads(x, ver));
+      return e->a ? ir::call_indirect(rename_reads(e->a, ver), std::move(args))
+                  : ir::call(e->name, std::move(args));
+    }
+    default: return e;
+  }
+}
+
+bool is_gp(int r) { return r >= 0 && r <= 15; }
+
+} // namespace
+
+void split_ranges(ir::Function &fn) {
+  int ctr = 0;
+  for (auto &b : fn.blocks) {
+    // Index of each GP register's last definition in the block.
+    std::map<int, int> last_def;
+    for (size_t i = 0; i < b.stmts.size(); ++i)
+      if (b.stmts[i].kind == ir::StmtKind::Assign && is_gp(b.stmts[i].dst_reg))
+        last_def[b.stmts[i].dst_reg] = (int)i;
+
+    std::map<int, int> ver;  // GP reg -> current versioned id (absent = original)
+    for (size_t i = 0; i < b.stmts.size(); ++i) {
+      ir::Stmt &s = b.stmts[i];
+      s.addr = rename_reads(s.addr, ver);
+      s.expr = rename_reads(s.expr, ver);
+      if (s.kind == ir::StmtKind::Unknown) { ver.clear(); continue; }
+      if (s.kind != ir::StmtKind::Assign) continue;
+      int d = s.dst_reg;
+      if (is_gp(d) && last_def[d] != (int)i) {
+        int t = ir::kRenameBase + ctr++;  // earlier value -> its own variable
+        ver[d] = t;
+        s.dst_reg = t;
+      } else {
+        ver.erase(d);  // last def of d (or non-GP): keep the original id
+      }
+    }
+    b.term.cond = rename_reads(b.term.cond, ver);
+    b.term.value = rename_reads(b.term.value, ver);
+  }
+}
+
+} // namespace opt
+
+```
+
+`src/plugin/plugin.cpp`:
+
+```cpp
+// M-CORE decompiler plugin for IDA Pro 9.4 (self-contained; Path B).
+//
+// Runs on a database analysed by IDA's built-in MCORE processor. The pipeline is:
+// insn_t -> IR (lifter) -> simplify (opt) -> C text (emit). Hex-Rays is not used
+// (no decompiler backend loads for an unsupported processor).
+#include <ida.hpp>
+#include <idp.hpp>
+#include <loader.hpp>
+#include <kernwin.hpp>
+#include <funcs.hpp>
+#include <name.hpp>
+
+#include <cctype>
+#include <set>
+#include <string>
+
+#include "ir/ir.h"
+#include "lifter/lifter.h"
+#include "vars/vars.h"
+#include "opt/opt.h"
+#include "emit/emit.h"
+
+namespace {
+
+// Decompile one function and return the pseudocode text (or an error string).
+qstring decompile_text(func_t *pfn) {
+  ir::Function fn;
+  qstring err;
+  if (!mcore::lift_function(pfn, fn, err)) {
+    qstring r("// decompile failed: ");
+    r += err;
+    return r;
+  }
+  // Recover call arguments across blocks while raw arg registers are still
+  // visible, then the stack frame (sp slots -> locals, drop prologue/epilogue),
+  // then recover variables (before the optimizer rewrites/removes assignments).
+  opt::recover_call_args(fn);
+  opt::recover_stack(fn);
+  opt::split_ranges(fn);  // separate distinct values sharing a register
+  vars::VarMap vm = vars::analyze(fn);
+  opt::simplify(fn);
+  opt::fold_implied_branches(fn);  // drop branches the predecessor already decided
+  opt::inline_locals(fn);
+  std::string c = emit::emit_c(fn, vm);
+  return qstring(c.c_str());
+}
+
+// Wrap a span in an IDA color tag: SCOLOR_ON <tag> text SCOLOR_OFF <tag>.
+std::string col(char tag, const std::string &s) {
+  return std::string(1, '\x01') + tag + s + '\x02' + tag;
+}
+
+// Syntax-highlight one pseudocode line with IDA color tags.
+std::string colorize(const std::string &line) {
+  static const std::set<std::string> kw = {
+      "int", "void", "char", "short", "unsigned", "long", "return", "if", "else",
+      "while", "do", "for", "break", "continue", "switch", "case", "default", "goto"};
+  const char KEYWORD = '\x20', NUMBER = '\x0C', CMT = '\x04', CNAME = '\x25',
+             LOCAL = '\x19', DNAME = '\x07';
+  std::string out;
+  size_t i = 0, n = line.size();
+  while (i < n) {
+    char c = line[i];
+    if (c == '/' && i + 1 < n && line[i + 1] == '/') {  // comment to end of line
+      out += col(CMT, line.substr(i));
+      break;
+    }
+    if (std::isalpha((unsigned char)c) || c == '_') {   // identifier / keyword
+      size_t j = i;
+      while (j < n && (std::isalnum((unsigned char)line[j]) || line[j] == '_')) ++j;
+      std::string id = line.substr(i, j - i);
+      bool is_call = j < n && line[j] == '(';
+      bool is_local = (id.size() >= 2 && (id[0] == 'a' || id[0] == 'v') &&
+                       std::isdigit((unsigned char)id[1])) ||
+                      id.rfind("var_", 0) == 0 || id == "cond";
+      char tag = kw.count(id) ? KEYWORD : is_call ? CNAME : is_local ? LOCAL : DNAME;
+      out += col(tag, id);
+      i = j;
+      continue;
+    }
+    if (std::isdigit((unsigned char)c)) {               // number (dec or 0x..)
+      size_t j = i;
+      if (c == '0' && i + 1 < n && (line[i + 1] == 'x' || line[i + 1] == 'X')) {
+        j = i + 2;
+        while (j < n && std::isxdigit((unsigned char)line[j])) ++j;
+      } else {
+        while (j < n && std::isdigit((unsigned char)line[j])) ++j;
+      }
+      out += col(NUMBER, line.substr(i, j - i));
+      i = j;
+      continue;
+    }
+    out += c;
+    ++i;
+  }
+  return out;
+}
+
+// Show a function's pseudocode: always to the Output window, plus a custom
+// viewer window when running under the GUI.
+void show_pseudocode(func_t *pfn) {
+  qstring text = decompile_text(pfn);
+  qstring fname;
+  get_func_name(&fname, pfn->start_ea);
+
+  msg("/* ---- %s (%a) ---- */\n%s\n", fname.c_str(), pfn->start_ea, text.c_str());
+
+  // Custom viewer (leaks one strvec per open; acceptable for a tool).
+  strvec_t *lines = new strvec_t;
+  std::string s = text.c_str();
+  for (size_t start = 0;;) {
+    size_t nl = s.find('\n', start);
+    std::string ln = s.substr(start, nl == std::string::npos ? nl : nl - start);
+    lines->push_back(simpleline_t(colorize(ln).c_str()));
+    if (nl == std::string::npos) break;
+    start = nl + 1;
+  }
+  qstring title;
+  title.sprnt("Pseudocode: %s", fname.c_str());
+  simpleline_place_t pmin(0);
+  simpleline_place_t pmax((int)(lines->empty() ? 0 : lines->size() - 1));
+  simpleline_place_t pcur(0);
+  TWidget *w = create_custom_viewer(title.c_str(), &pmin, &pmax, &pcur, nullptr,
+                                    lines, nullptr, nullptr);
+  if (w != nullptr)
+    display_widget(w, WOPN_DP_TAB | WOPN_RESTORE);
+  else
+    delete lines;  // no GUI (headless): nothing holds the buffer
+}
+
+const char *const kActionName = "mcore:decompile";
+
+// IDA 9.4's built-in processor is the primary target. Accept the legacy name
+// too so existing databases remain usable; mnemonic-based lifting makes their
+// different private instruction numbers irrelevant. On all other processors
+// we must not touch F5 so Hex-Rays keeps its shortcut.
+bool is_mcore() {
+  return PH.id == PLFM_MCORE || inf_get_procname() == "M*CORE";
+}
+
+// Bind F5 to our action only on MCORE (taking it from the Hex-Rays "dummy"
+// warning action shown for unsupported processors); release it otherwise.
+void update_f5_binding() {
+  if (is_mcore()) {
+    update_action_shortcut("dummy_hexrays:warn", "");  // free F5 from the dummy
+    update_action_shortcut(kActionName, "F5");
+  } else {
+    update_action_shortcut(kActionName, "");           // leave F5 to the real decompiler
+  }
+}
+
+struct decompile_ah_t : public action_handler_t {
+  int idaapi activate(action_activation_ctx_t *) override {
+    if (!is_mcore()) return 0;
+    func_t *pfn = get_func(get_screen_ea());
+    if (pfn == nullptr) { warning("M-CORE: no function under the cursor."); return 0; }
+    show_pseudocode(pfn);
+    return 1;
+  }
+  action_state_t idaapi update(action_update_ctx_t *) override {
+    return is_mcore() ? AST_ENABLE : AST_DISABLE;
+  }
+};
+decompile_ah_t g_decompile_ah;
+
+// Re-evaluate the F5 binding whenever a database finishes loading / the UI is ready
+// (the processor is known by then).
+struct ui_claim_t : public event_listener_t {
+  ssize_t idaapi on_event(ssize_t code, va_list) override {
+    if (code == ui_database_inited || code == ui_ready_to_run) update_f5_binding();
+    return 0;
+  }
+};
+ui_claim_t g_ui_claim;
+
+struct mcore_plugmod_t : public plugmod_t {
+  mcore_plugmod_t() {
+    // Register without a default shortcut so registration never conflicts; F5 is
+    // bound dynamically by update_f5_binding() only on MCORE databases.
+    register_action(ACTION_DESC_LITERAL(kActionName, "Decompile (M-CORE)",
+                                        &g_decompile_ah, nullptr,
+                                        "Decompile the current M-CORE function", -1));
+    hook_event_listener(HT_UI, &g_ui_claim);
+    update_f5_binding();
+    msg("[mcore-decompiler] loaded%s\n", is_mcore() ? " (press F5 in a function)" : "");
+  }
+  ~mcore_plugmod_t() override {
+    unhook_event_listener(HT_UI, &g_ui_claim);
+    unregister_action(kActionName);
+  }
+
+  bool idaapi run(size_t arg) override {
+    // arg == SIZE_MAX: every function, with markers (eval/test harness).
+    // arg != 0: the function at that address, with markers (harness, per-ea).
+    // arg == 0: interactive — the function under the cursor (same as F5).
+    auto dump = [](func_t *p) {
+      msg(">>>MCORE_FUNC %a\n%s<<<MCORE_END\n", p->start_ea, decompile_text(p).c_str());
+    };
+    if (arg == (size_t)-1) {
+      for (size_t i = 0, qty = get_func_qty(); i < qty; ++i) dump(getn_func(i));
+      return true;
+    }
+    if (arg != 0) {
+      if (func_t *pfn = get_func((ea_t)arg)) dump(pfn);
+      return true;
+    }
+    func_t *pfn = get_func(get_screen_ea());
+    if (pfn == nullptr) {
+      msg("[mcore-decompiler] place the cursor inside a function (or press F5).\n");
+      return false;
+    }
+    show_pseudocode(pfn);
+    return true;
+  }
+};
+
+plugmod_t *idaapi init() {
+  return new mcore_plugmod_t();
+}
+
+} // namespace
+
+plugin_t PLUGIN = {
+  IDP_INTERFACE_VERSION,
+  PLUGIN_MULTI | PLUGIN_FIX,     // load at startup so the F5 action is ready
+  init,
+  nullptr,                      // term  (must be null for PLUGIN_MULTI)
+  nullptr,                      // run   (must be null for PLUGIN_MULTI)
+  "Decompile M-CORE functions to C pseudocode",
+  "Self-contained M-CORE decompiler: insn_t -> IR -> C (no Hex-Rays).",
+  "M-CORE Decompiler",
+  "Ctrl-Shift-M",
+};
+
+```
+
+`src/vars/vars.cpp`:
+
+```cpp
+#include "vars/vars.h"
+
+#include "ir/ir.h"
+
+#include <algorithm>
+#include <cstdio>
+#include <set>
+
+namespace vars {
+
+namespace {
+
+constexpr int kArgFirst = 2;  // r2
+constexpr int kArgLast = 7;   // r7
+
+bool is_arg_reg(int r) { return r >= kArgFirst && r <= kArgLast; }
+bool is_gp_reg(int r) { return r >= 0 && r <= 15; }
+
+void collect_regs(const ir::ExprPtr &e, std::vector<int> &out) {
+  if (!e) return;
+  switch (e->kind) {
+    case ir::ExprKind::Const: break;
+    case ir::ExprKind::Reg: out.push_back(e->reg); break;
+    case ir::ExprKind::UnOp:
+    case ir::ExprKind::Cast:
+    case ir::ExprKind::Load: collect_regs(e->a, out); break;
+    case ir::ExprKind::BinOp:
+      collect_regs(e->a, out);
+      collect_regs(e->b, out);
+      break;
+    case ir::ExprKind::Select:
+    case ir::ExprKind::Call:
+      collect_regs(e->a, out);  // cond / indirect target
+      collect_regs(e->b, out);  // then-value (null for Call)
+      for (const auto &arg : e->args) collect_regs(arg, out);
+      break;
+  }
+}
+
+} // namespace
+
+std::string VarMap::name_of(int reg) const {
+  auto it = name.find(reg);
+  if (it != name.end()) return it->second;
+  // Stack slots may be synthesized after analyze() (e.g. &var_0 + 16 folded to
+  // &var_10 during inlining); name them by their byte offset like the rest.
+  if (reg >= ir::kStackBase) {
+    char buf[24];
+    std::snprintf(buf, sizeof(buf), "var_%X", reg - ir::kStackBase);
+    return buf;
+  }
+  return "r" + std::to_string(reg);
+}
+
+VarMap analyze(const ir::Function &fn) {
+  VarMap vm;
+
+  std::set<int> written;
+  std::vector<int> inputs;  // arg regs read before written, first-seen order
+  std::set<int> input_set;
+  std::set<int> used;
+
+  auto note_reads = [&](const ir::ExprPtr &e) {
+    std::vector<int> reads;
+    collect_regs(e, reads);
+    for (int r : reads) {
+      used.insert(r);
+      if (!written.count(r) && is_arg_reg(r) && !input_set.count(r)) {
+        input_set.insert(r);
+        inputs.push_back(r);
+      }
+    }
+  };
+
+  // Address-ordered linear scan (approximates read-before-write across the CFG;
+  // precise liveness comes with a later milestone).
+  for (const auto &b : fn.blocks) {
+    for (const auto &s : b.stmts) {
+      note_reads(s.expr);
+      note_reads(s.addr);  // Store address
+      if (s.kind == ir::StmtKind::Assign) {
+        used.insert(s.dst_reg);
+        written.insert(s.dst_reg);
+      }
+    }
+    note_reads(b.term.cond);
+    note_reads(b.term.value);
+  }
+
+  // Parameters: argument-register inputs, ordered by register number (r2 first).
+  vm.params = inputs;
+  std::sort(vm.params.begin(), vm.params.end());
+  for (size_t i = 0; i < vm.params.size(); ++i)
+    vm.name[vm.params[i]] = "a" + std::to_string(i + 1);
+
+  // Locals: stack slots -> var_<off>; remaining used GP registers -> v1..
+  int local_n = 0;
+  for (int r : used) {  // std::set => ascending, deterministic
+    if (vm.name.count(r)) continue;  // already a param
+    if (r >= ir::kStackBase) {
+      char buf[32];
+      std::snprintf(buf, sizeof(buf), "var_%X", r - ir::kStackBase);
+      vm.name[r] = buf;
+      continue;
+    }
+    if (r == ir::kRegC) { vm.name[r] = "cond"; continue; }  // unresolved C bit
+    if (r == ir::kRegSP) { vm.name[r] = "sp"; continue; }
+    if (r == ir::kRegLR) { vm.name[r] = "lr"; continue; }
+    // GP registers and split live-range temporaries become locals v1..
+    if (!is_gp_reg(r) && !(r >= ir::kRenameBase && r < ir::kStackBase)) continue;
+    vm.name[r] = "v" + std::to_string(++local_n);
+  }
+
+  return vm;
+}
+
+} // namespace vars
+
+```
+
+`src/vars/vars.h`:
+
+```h
+// Variable recovery & naming: map M-CORE registers to readable C variables.
+//
+// Inputs (registers read before being written) that are ABI argument registers
+// (r2..r7) become parameters a1..aN; other used GP registers become locals v1..;
+// r0/r15 render as sp/lr. Pure, unit-testable. Run on the lifted IR BEFORE the
+// optimizer removes assignments (so input detection is accurate).
+#pragma once
+
+#include <map>
+#include <string>
+#include <vector>
+
+namespace ir { struct Function; }
+
+namespace vars {
+
+struct VarMap {
+  std::map<int, std::string> name;  // register number -> C variable name
+  std::vector<int> params;          // argument registers, in signature order
+
+  std::string name_of(int reg) const;
+};
+
+VarMap analyze(const ir::Function &fn);
+
+} // namespace vars
+
+```
+
+`tests/integration/decompile_dump.py`:
+
+```py
+# Headless helper: turn a flat MCORE fixture into code+function(s) and run the
+# decompiler plugin. Pseudocode is printed to the IDA message log between
+# >>>MCORE_FUNC / <<<MCORE_END markers (see run_integration.sh).
+#
+# Assumes a single flat code region starting at min_ea (sufficient for the current
+# fixtures). Multi-segment / data-aware fixtures come with later milestones.
+import ida_auto, ida_bytes, ida_funcs, ida_ida, ida_loader, ida_ua, ida_pro, idc
+
+ida_auto.auto_wait()
+
+start = ida_ida.inf_get_min_ea()
+end = ida_ida.inf_get_max_ea()
+
+# Force the whole range to instructions.
+ea = start
+while ea < end:
+    if ida_bytes.is_code(ida_bytes.get_flags(ea)):
+        sz = idc.get_item_size(ea)
+    else:
+        sz = ida_ua.create_insn(ea)
+    ea += sz if sz > 0 else 2
+
+# Define a function at the entry if none exists yet.
+if ida_funcs.get_func_qty() == 0:
+    ida_funcs.add_func(start, end)
+ida_auto.auto_wait()
+
+# arg = SIZE_MAX -> decompile every function with the >>>MCORE_FUNC markers
+# (works even when a fixture function starts at address 0).
+ida_loader.load_and_run_plugin("mcore_decompiler", 0xFFFFFFFFFFFFFFFF)
+ida_pro.qexit(0)
+
+```
+
+`tests/integration/fixtures/add/README.md`:
+
+```md
+# Fixture: add — `int f(int a, int b){ return a + b; }`
+| addr | bytes | instruction   |
+|------|-------|---------------|
+| 0x00 | 1C 32 | `addu r2, r3` | (r2 = r2 + r3)
+| 0x02 | 00 CF | `jmp r15`     | (rts)
+
+```
+
+`tests/integration/fixtures/add/expected.c`:
+
+```c
+int sub(int a1, int a2)
+{
+  a1 = a1 + a2;
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/addi5/README.md`:
+
+```md
+# Fixture: addi5 — `int f(int a){ return a + 5; }`
+| addr | bytes | instruction  |
+|------|-------|--------------|
+| 0x00 | 20 42 | `addi r2, 5` | (r2 = r2 + 5)
+| 0x02 | 00 CF | `jmp r15`    | (rts)
+
+```
+
+`tests/integration/fixtures/addi5/expected.c`:
+
+```c
+int sub(int a1)
+{
+  a1 = a1 + 5;
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/bgeni/README.md`:
+
+```md
+# Fixture: bgeni — `int f(void){ return 1 << 8; }`
+| addr | bytes | instruction   | n=(word>>4)&0x1f |
+|------|-------|---------------|------------------|
+| 0x00 | 32 82 | `bgeni r2, 8` | r2 = 1<<8 = 0x100 |
+| 0x02 | 00 CF | `jmp r15`     | return r2         |
+
+```
+
+`tests/integration/fixtures/bgeni/expected.c`:
+
+```c
+int sub(void)
+{
+  return 0x100;
+}
+
+```
+
+`tests/integration/fixtures/frame/README.md`:
+
+```md
+# Fixture: frame — prologue/epilogue + stack slot
+| addr | bytes | instruction       | role |
+|------|-------|-------------------|------|
+| 0x00 | 24 70 | `subi r0, 8`      | prologue (sp -= 8) — hidden
+| 0x02 | 9F 10 | `st r15,(r0,4)`   | save lr — hidden
+| 0x04 | 92 00 | `st r2,(r0,0)`    | a1 -> stack slot 0
+| 0x06 | 83 00 | `ld r3,(r0,0)`    | dead (rts returns r2) — eliminated
+| 0x08 | 8F 10 | `ld r15,(r0,4)`   | restore lr — hidden
+| 0x0A | 20 70 | `addi r0, 8`      | epilogue (sp += 8) — hidden
+| 0x0C | 00 CF | `jmp r15` (rts)   | return r2
+
+```
+
+`tests/integration/fixtures/frame/expected.c`:
+
+```c
+int sub(int a1)
+{
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/load/README.md`:
+
+```md
+# Fixture: load — `int f(int *p){ return *p; }`
+| addr | bytes | instruction      |
+|------|-------|------------------|
+| 0x00 | 82 02 | `ld.w r2,(r2,0)` | r2 = *r2
+| 0x02 | 00 CF | `jmp r15` (rts)  | return r2
+
+```
+
+`tests/integration/fixtures/load/expected.c`:
+
+```c
+int sub(int a1)
+{
+  a1 = *(int *)(a1);
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/loop/README.md`:
+
+```md
+# Fixture: loop — `int f(int a, int b){ while (a < b) a = a + 1; return a; }`
+| addr | bytes | instruction     |
+|------|-------|-----------------|
+| 0x00 | 0D 32 | `cmplt r2, r3`  | C = (a < b)
+| 0x02 | E8 02 | `bf 0x08`       | exit loop if !C
+| 0x04 | 20 02 | `addi r2, 1`    | a = a + 1
+| 0x06 | F7 FC | `br 0x00`       | back edge
+| 0x08 | 00 CF | `jmp r15` (rts) | return a
+
+```
+
+`tests/integration/fixtures/loop/expected.c`:
+
+```c
+int sub(int a1, int a2)
+{
+  while (a1 < a2) {
+    a1 = a1 + 1;
+  }
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/max/README.md`:
+
+```md
+# Fixture: max — `int f(int a, int b){ if (a < b) a = b; return a; }`
+| addr | bytes | instruction      |
+|------|-------|------------------|
+| 0x00 | 0D 32 | `cmplt r2, r3`   | C = (a < b)
+| 0x02 | E8 01 | `bf 0x06`        | if !C skip the mov
+| 0x04 | 12 32 | `mov r2, r3`     | a = b
+| 0x06 | 00 CF | `jmp r15` (rts)  | return a
+
+```
+
+`tests/integration/fixtures/max/expected.c`:
+
+```c
+int sub(int a1, int a2)
+{
+  if (a1 < a2) {
+    a1 = a2;
+  }
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/return42/README.md`:
+
+```md
+# Fixture: return42
+
+Smallest end-to-end fixture for the M1 spike.
+
+`prog.bin` (big-endian M-CORE machine code, hand-encoded):
+
+| addr | bytes  | instruction   |
+|------|--------|---------------|
+| 0x00 | 62 A2  | `movi r2, 42` |
+| 0x02 | 00 CF  | `jmp r15`     | (== `rts`)
+
+C equivalent (M-CORE ABI returns in r2):
+
+```c
+int f(void) { return 42; }
+```
+
+Load with IDA Pro 9.4's built-in processor: `idat -A -pMCORE prog.bin`
+(disassembly oracle for crafting/validating fixtures).
+
+**Expected decompiler output (goal of M1):** `return 42;`
+
+```
+
+`tests/integration/fixtures/return42/expected.c`:
+
+```c
+int sub(void)
+{
+  return 42;
+}
+
+```
+
+`tests/integration/fixtures/rsubi/README.md`:
+
+```md
+# Fixture: rsubi — `int f(int a){ return 5 - a; }`
+| addr | bytes | instruction    |
+|------|-------|----------------|
+| 0x00 | 28 52 | `rsubi r2, 5`  | r2 = 5 - r2
+| 0x02 | 00 CF | `jmp r15`(rts) | return r2
+
+```
+
+`tests/integration/fixtures/rsubi/expected.c`:
+
+```c
+int sub(int a1)
+{
+  a1 = 5 - a1;
+  return a1;
+}
+
+```
+
+`tests/integration/fixtures/store/README.md`:
+
+```md
+# Fixture: store — `void f(int *p, int v){ *p = v; }`
+| addr | bytes | instruction      |
+|------|-------|------------------|
+| 0x00 | 93 02 | `st.w r3,(r2,0)` | *r2 = r3
+| 0x02 | 00 CF | `jmp r15` (rts)  | return
+
+```
+
+`tests/integration/fixtures/store/expected.c`:
+
+```c
+int sub(int a1, int a2)
+{
+  *(int *)(a1) = a2;
+  return a1;
+}
+
+```
+
+`tests/integration/run_integration.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Headless integration tests: for each fixture, load the flat MCORE blob, run the
+# decompiler plugin, and diff the pseudocode against expected.c.
+#
+# Requires a built plugin (build/mcore_decompiler.so) and IDA Pro 9.4 with its
+# built-in MCORE processor module (procs/mcore.so).
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+: "${IDA_DIR:?set IDA_DIR to your IDA Pro 9.4 installation}"
+IDAT="${IDA_DIR}/idat"
+PROC="${IDA_DIR}/procs/mcore.so"
+PLUGIN="${ROOT}/build/mcore_decompiler.so"
+SCRIPT="${ROOT}/tests/integration/decompile_dump.py"
+
+[ -x "${IDAT}" ] || { echo "idat not found at ${IDAT} (set IDA_DIR)"; exit 2; }
+[ -f "${PROC}" ] || { echo "built-in MCORE processor not found at ${PROC}"; exit 2; }
+[ -f "${PLUGIN}" ] || { echo "plugin not built: ${PLUGIN} (run ./run_tests.sh)"; exit 2; }
+
+# Install into the selected IDA user profile. For an isolated run, point IDAUSR
+# at a temporary profile containing a valid ida.reg before invoking this script.
+PLUGDIR="${IDAUSR:-${HOME}/.idapro}/plugins"
+mkdir -p "${PLUGDIR}"
+cp "${PLUGIN}" "${PLUGDIR}/"
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "${WORK}"' EXIT
+
+norm() { sed -E 's/sub_[0-9A-Fa-f]+/sub/g'; }
+
+fail=0
+for fx in "${ROOT}"/tests/integration/fixtures/*/; do
+  name="$(basename "${fx}")"
+  bin="${fx}prog.bin"; exp="${fx}expected.c"
+  [ -f "${bin}" ] && [ -f "${exp}" ] || continue
+
+  cp "${bin}" "${WORK}/${name}.bin"; rm -f "${WORK}/${name}.bin".* 2>/dev/null
+  TVHEADLESS=1 "${IDAT}" -A -pMCORE -L"${WORK}/${name}.log" \
+    -S"${SCRIPT}" "${WORK}/${name}.bin" >/dev/null 2>&1
+
+  got="$(awk '/^>>>MCORE_FUNC/{f=1;next} /^<<<MCORE_END/{f=0} f' "${WORK}/${name}.log" | norm)"
+  want="$(norm < "${exp}")"
+
+  if [ "${got}" == "${want}" ]; then
+    echo "PASS ${name}"
+  else
+    echo "FAIL ${name}"
+    diff <(echo "${want}") <(echo "${got}") | sed 's/^/    /'
+    fail=1
+  fi
+done
+
+exit "${fail}"
+
+```
+
+`tests/unit/test_framework.h`:
+
+```h
+// Minimal dependency-free unit-test harness for the offline decoder tests.
+//
+// Usage:
+//   #include "test_framework.h"
+//   TEST(name) { CHECK(expr); CHECK_EQ(a, b); }
+//   ... more TEST blocks ...
+//   TEST_MAIN()
+//
+// Tests self-register at static-init time; TEST_MAIN() runs them all and
+// returns non-zero if any CHECK failed.
+#pragma once
+
+#include <cstdio>
+#include <cstdint>
+#include <vector>
+
+namespace tf {
+
+struct Stats { int checks = 0; int failures = 0; };
+inline Stats &stats() { static Stats s; return s; }
+
+using TestFn = void (*)();
+struct Registry { std::vector<std::pair<const char *, TestFn>> tests; };
+inline Registry &registry() { static Registry r; return r; }
+
+struct Registrar {
+  Registrar(const char *name, TestFn fn) { registry().tests.emplace_back(name, fn); }
+};
+
+inline int run_all() {
+  for (auto &t : registry().tests) {
+    std::fprintf(stderr, "[ RUN  ] %s\n", t.first);
+    t.second();
+  }
+  std::fprintf(stderr, "----\n%d checks, %d failures\n",
+               stats().checks, stats().failures);
+  return stats().failures == 0 ? 0 : 1;
+}
+
+} // namespace tf
+
+#define TF_CAT2(a, b) a##b
+#define TF_CAT(a, b) TF_CAT2(a, b)
+
+#define TEST(name)                                                            \
+  static void TF_CAT(tf_test_, __LINE__)();                                   \
+  static ::tf::Registrar TF_CAT(tf_reg_, __LINE__)(name,                      \
+                                                   TF_CAT(tf_test_, __LINE__)); \
+  static void TF_CAT(tf_test_, __LINE__)()
+
+#define CHECK(cond)                                                           \
+  do {                                                                        \
+    ++::tf::stats().checks;                                                   \
+    if (!(cond)) {                                                            \
+      ++::tf::stats().failures;                                               \
+      std::fprintf(stderr, "  FAIL %s:%d: CHECK(%s)\n", __FILE__, __LINE__,   \
+                   #cond);                                                    \
+    }                                                                         \
+  } while (0)
+
+#define CHECK_EQ(a, b)                                                        \
+  do {                                                                        \
+    ++::tf::stats().checks;                                                   \
+    auto tf_a = (a);                                                          \
+    auto tf_b = (b);                                                          \
+    if (!(tf_a == tf_b)) {                                                    \
+      ++::tf::stats().failures;                                               \
+      std::fprintf(stderr,                                                    \
+                   "  FAIL %s:%d: CHECK_EQ(%s, %s)  (%lld != %lld)\n",        \
+                   __FILE__, __LINE__, #a, #b, (long long)tf_a,              \
+                   (long long)tf_b);                                          \
+    }                                                                         \
+  } while (0)
+
+#define TEST_MAIN()                                                           \
+  int main() { return ::tf::run_all(); }
+
+```
+
+`tests/unit/test_pipeline.cpp`:
+
+```cpp
+// Offline unit tests for the pure decompiler pipeline (IR -> vars -> opt -> emit).
+// No IDA dependency.
+#include "test_framework.h"
+
+#include "ir/ir.h"
+#include "vars/vars.h"
+#include "opt/opt.h"
+#include "emit/emit.h"
+
+#include <string>
+
+namespace {
+
+bool contains(const std::string &hay, const std::string &needle) {
+  return hay.find(needle) != std::string::npos;
+}
+
+std::string decompile(ir::Function fn) {
+  opt::recover_call_args(fn);
+  opt::recover_stack(fn);
+  opt::split_ranges(fn);
+  vars::VarMap vm = vars::analyze(fn);
+  opt::simplify(fn);
+  opt::fold_implied_branches(fn);
+  opt::inline_locals(fn);
+  return emit::emit_c(fn, vm);
+}
+
+// --- IR builder helpers ----------------------------------------------------
+ir::Terminator ret_t(ir::ExprPtr v) {
+  ir::Terminator t;
+  t.kind = ir::TermKind::Return;
+  t.value = v;
+  t.has_value = v != nullptr;
+  return t;
+}
+ir::Terminator fall_t(uint32_t to) {
+  ir::Terminator t;
+  t.kind = ir::TermKind::Fallthrough;
+  t.target = to;
+  return t;
+}
+ir::Terminator goto_t(uint32_t to) {
+  ir::Terminator t;
+  t.kind = ir::TermKind::Goto;
+  t.target = to;
+  return t;
+}
+ir::Terminator cbr_t(ir::ExprPtr cond, uint32_t taken, uint32_t fth) {
+  ir::Terminator t;
+  t.kind = ir::TermKind::CondBranch;
+  t.cond = cond;
+  t.target = taken;
+  t.fallthrough = fth;
+  return t;
+}
+// Single-block function: stmts + return value.
+ir::Function one_block(std::vector<ir::Stmt> stmts, ir::ExprPtr retval,
+                       const char *name = "f") {
+  ir::Function fn;
+  fn.name = name;
+  fn.entry = 0;
+  ir::Block b;
+  b.entry = 0;
+  b.stmts = std::move(stmts);
+  b.term = ret_t(retval);
+  fn.blocks.push_back(std::move(b));
+  return fn;
+}
+
+} // namespace
+
+TEST("emit minimal parentheses by precedence") {
+  vars::VarMap vm;
+  auto add = ir::binop(ir::BinOp::Add, ir::reg(2), ir::reg(3));
+  CHECK(emit::emit_expr(*add, vm) == "r2 + r3");
+  auto e = ir::binop(ir::BinOp::Add, ir::reg(2),
+                     ir::binop(ir::BinOp::Mul, ir::reg(3), ir::reg(4)));
+  CHECK(emit::emit_expr(*e, vm) == "r2 + r3 * r4");
+  auto e2 = ir::binop(ir::BinOp::Mul,
+                      ir::binop(ir::BinOp::Add, ir::reg(2), ir::reg(3)), ir::reg(4));
+  CHECK(emit::emit_expr(*e2, vm) == "(r2 + r3) * r4");
+}
+
+TEST("return42: no params, void signature") {
+  auto fn = one_block({ir::assign(ir::kRegRet, ir::constant(42))}, ir::reg(ir::kRegRet));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "int f(void)"));
+  CHECK(contains(c, "return 42;"));
+}
+
+TEST("const folding collapses arithmetic and drops dead assign") {
+  auto fn = one_block(
+      {ir::assign(2, ir::binop(ir::BinOp::Add, ir::constant(40), ir::constant(2)))},
+      ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "return 42;"));
+  CHECK(!contains(c, "= 42"));
+}
+
+TEST("add(a,b): r2,r3 recovered as parameters a1,a2") {
+  ir::Function fn = one_block(
+      {ir::assign(2, ir::binop(ir::BinOp::Add, ir::reg(2), ir::reg(3)))}, ir::reg(2));
+
+  vars::VarMap vm = vars::analyze(fn);
+  CHECK(vm.params.size() == 2);
+  CHECK(vm.name_of(2) == "a1");
+  CHECK(vm.name_of(3) == "a2");
+
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "int f(int a1, int a2)"));
+  CHECK(contains(c, "a1 = a1 + a2;"));
+  CHECK(contains(c, "return a1;"));
+  CHECK(!contains(c, "r2"));
+}
+
+TEST("local register gets a v-name") {
+  ir::Function fn = one_block({ir::assign(4, ir::reg(2))}, ir::reg(4));
+  vars::VarMap vm = vars::analyze(fn);
+  CHECK(vm.name_of(4) == "v1");
+  CHECK(vm.name_of(2) == "a1");
+}
+
+TEST("if-then structuring (max): cmplt + bf") {
+  // B0: C = r2 < r3 ; bf B2     (bf taken when !C)
+  // B1: r2 = r3 ; fall to B2
+  // B2: return r2
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+
+  ir::Block b0;
+  b0.entry = 0;
+  b0.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpLt, ir::reg(2), ir::reg(3))));
+  b0.term = cbr_t(ir::unop(ir::UnOp::LNot, ir::reg(ir::kRegC)), /*taken=*/4, /*fth=*/2);
+  fn.blocks.push_back(std::move(b0));
+
+  ir::Block b1;
+  b1.entry = 2;
+  b1.stmts.push_back(ir::assign(2, ir::reg(3)));
+  b1.term = fall_t(4);
+  fn.blocks.push_back(std::move(b1));
+
+  ir::Block b2;
+  b2.entry = 4;
+  b2.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b2));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "int f(int a1, int a2)"));
+  CHECK(contains(c, "if (a1 < a2) {"));
+  CHECK(contains(c, "a1 = a2;"));
+  CHECK(contains(c, "return a1;"));
+  CHECK(!contains(c, "goto"));
+  CHECK(!contains(c, "r100"));   // C bit fully inlined away
+}
+
+TEST("load renders as typed pointer dereference") {
+  ir::Function fn = one_block({ir::assign(2, ir::load(ir::reg(2), 4))}, ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "a1 = *(int *)(a1);"));
+  CHECK(contains(c, "return a1;"));
+}
+
+TEST("store renders as typed pointer assignment") {
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+  ir::Block b;
+  b.entry = 0;
+  b.stmts.push_back(ir::store(ir::reg(2), ir::reg(3), 4));
+  b.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "*(int *)(a1) = a2;"));
+}
+
+TEST("redundant nested identical if is collapsed") {
+  // Two blocks test the same condition (v4 == 0) and branch to the same merge;
+  // reaching the second means the first was false, so its branch is dead. The
+  // structurer would otherwise nest if (v4 != 0) { if (v4 != 0) { body } }.
+  auto cond = [] { return ir::binop(ir::BinOp::CmpEq, ir::reg(4), ir::constant(0)); };
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+  ir::Block b0;
+  b0.entry = 0;
+  b0.stmts.push_back(ir::assign(4, ir::load(ir::reg(5), 4)));
+  b0.term = cbr_t(cond(), 3, 1);  // taken -> merge (when v4==0), else B1
+  ir::Block b1;
+  b1.entry = 1;
+  b1.term = cbr_t(cond(), 3, 2);  // identical test
+  ir::Block b2;
+  b2.entry = 2;
+  b2.stmts.push_back(ir::assign(2, ir::constant(7)));
+  b2.term = goto_t(3);
+  ir::Block b3;
+  b3.entry = 3;
+  b3.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b0));
+  fn.blocks.push_back(std::move(b1));
+  fn.blocks.push_back(std::move(b2));
+  fn.blocks.push_back(std::move(b3));
+  std::string c = decompile(std::move(fn));
+  size_t ifs = 0;
+  for (size_t p = c.find("if ("); p != std::string::npos; p = c.find("if (", p + 1)) ++ifs;
+  CHECK(ifs == 1);              // only one guard survives
+  CHECK(contains(c, "= 7"));    // the guarded body is still emitted
+}
+
+TEST("sp-relative address becomes &var_N") {
+  // r2 = sp ; r2 = r2 + 16 ; return r2   ->   return &var_10;  (16 == 0x10)
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(2, ir::reg(0)));  // r0 == sp
+  stmts.push_back(ir::assign(2, ir::binop(ir::BinOp::Add, ir::reg(2), ir::constant(16))));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "&var_10"));
+  CHECK(!contains(c, "sp"));         // no raw stack pointer
+  CHECK(!contains(c, "+ 16"));       // address arithmetic folded into the offset
+}
+
+TEST("scaled load/store render as array indexing") {
+  vars::VarMap vm;
+  // *(int*)(r2 + r3*4)  ->  r2[r3]
+  auto addr = ir::binop(ir::BinOp::Add, ir::reg(2),
+                        ir::binop(ir::BinOp::Mul, ir::reg(3), ir::constant(4)));
+  CHECK(emit::emit_expr(*ir::load(addr, 4), vm) == "r2[r3]");
+  // non-matching scale stays as a typed deref
+  auto addr2 = ir::binop(ir::BinOp::Add, ir::reg(2),
+                         ir::binop(ir::BinOp::Mul, ir::reg(3), ir::constant(2)));
+  CHECK(emit::emit_expr(*ir::load(addr2, 4), vm) == "*(int *)(r2 + r3 * 2)");
+}
+
+TEST("byte load uses unsigned char pointer") {
+  ir::Function fn = one_block({ir::assign(2, ir::load(ir::reg(2), 1))}, ir::reg(2));
+  CHECK(contains(decompile(std::move(fn)), "*(unsigned char *)(a1)"));
+}
+
+TEST("call with set-up arg; result used") {
+  // r2 = 7 ; r2 = g(r2) ; return r2   ->  g(7) called, its result returned
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(2, ir::constant(7)));
+  stmts.push_back(ir::assign(2, ir::call("g", {ir::reg(2)})));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "g(7)"));      // arg recovered and folded
+  CHECK(contains(c, "return"));    // result flows to the return
+}
+
+TEST("call argument set in a predecessor block is recovered") {
+  // B0: r2 = 5 ; goto B1     B1: r2 = g() ; return r2
+  // The arg lives in r2 across the block boundary; g must be called as g(5).
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+  ir::Block b0;
+  b0.entry = 0;
+  b0.stmts.push_back(ir::assign(2, ir::constant(5)));
+  b0.term = goto_t(1);
+  ir::Block b1;
+  b1.entry = 1;
+  b1.stmts.push_back(ir::assign(2, ir::call("g", {})));  // lifter saw no in-block arg
+  b1.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b0));
+  fn.blocks.push_back(std::move(b1));
+  std::string c = decompile(std::move(fn));
+  CHECK(!contains(c, "g()"));   // the cross-block argument is not lost
+  CHECK(contains(c, "g(v"));    // g is called with the recovered local
+}
+
+TEST("argument set on all incoming paths is recovered at a merge") {
+  // B0: if (a1) ; B1: r2 = 10 ; B2: r2 = 20 ; B3: foo()
+  // r2 is set up on both arms, so the merged call is foo(r2); but an arg set on
+  // only one arm must NOT be recovered (handled by the intersection).
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+  ir::Block b0;
+  b0.entry = 0;
+  b0.term = cbr_t(ir::binop(ir::BinOp::CmpNe, ir::reg(4), ir::constant(0)), 1, 2);
+  ir::Block b1;
+  b1.entry = 1;
+  b1.stmts.push_back(ir::assign(2, ir::constant(10)));
+  b1.stmts.push_back(ir::assign(3, ir::constant(99)));  // r3 only on this arm
+  b1.term = goto_t(3);
+  ir::Block b2;
+  b2.entry = 2;
+  b2.stmts.push_back(ir::assign(2, ir::constant(20)));
+  b2.term = goto_t(3);
+  ir::Block b3;
+  b3.entry = 3;
+  b3.stmts.push_back(ir::assign(2, ir::call("foo", {})));
+  b3.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b0));
+  fn.blocks.push_back(std::move(b1));
+  fn.blocks.push_back(std::move(b2));
+  fn.blocks.push_back(std::move(b3));
+  std::string c = decompile(std::move(fn));
+  CHECK(!contains(c, "foo()"));   // r2 reached the call from both arms -> an arg
+  CHECK(!contains(c, "99"));      // r3 (one arm only) is not passed (and dead)
+}
+
+TEST("call result threaded as the next call's argument is recovered") {
+  // r2 = alloc() ; *(r9) = r2 ; r3 = 0 ; r4 = 8 ; memset()   (memset's result dead)
+  // The alloc result is read (stored) before memset, so it is live and passed:
+  // memset(r2, 0, 8) -- the classic p = alloc(); memset(p, 0, n) idiom.
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(2, ir::call("alloc", {})));
+  stmts.push_back(ir::store(ir::reg(9), ir::reg(2), 4));
+  stmts.push_back(ir::assign(3, ir::constant(0)));
+  stmts.push_back(ir::assign(4, ir::constant(8)));
+  stmts.push_back(ir::assign(2, ir::call("memset", {})));
+  ir::Function fn = one_block(std::move(stmts), ir::constant(0));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "memset(") && !contains(c, "memset()"));  // got its arguments
+  CHECK(contains(c, ", 0, 8)"));                              // all three present
+}
+
+TEST("argument clobbered by an earlier call is not passed") {
+  // r3 = 9 ; r2 = foo() ; r2 = 1 ; bar(...)   ->  bar(1), not bar(1, 9):
+  // foo() clobbers the caller-saved r3, so the stale r3 is not bar's argument.
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(3, ir::constant(9)));
+  stmts.push_back(ir::assign(2, ir::call("foo", {})));
+  stmts.push_back(ir::assign(2, ir::constant(1)));
+  stmts.push_back(ir::assign(2, ir::call("bar", {ir::reg(2), ir::reg(3)})));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "bar(1)"));
+  CHECK(!contains(c, "bar(1, 9)"));
+}
+
+TEST("call with unused result is not eliminated") {
+  ir::Function fn = one_block({ir::assign(3, ir::call("g", {}))}, ir::constant(0));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "g()"));     // side effect preserved
+  CHECK(contains(c, "return 0;"));
+}
+
+TEST("dead call result renders as a void-style statement") {
+  // r2 = foo() ; r2 = bar() ; return r2   -> foo();  (its result is dead)
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(2, ir::call("foo", {})));
+  stmts.push_back(ir::assign(2, ir::call("bar", {})));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "foo();"));      // dead result -> bare call
+  CHECK(!contains(c, "= foo("));     // no assignment of the dead result
+}
+
+TEST("compared call result is kept when its register is reused (live-range split)") {
+  // r3 = a1 ; r2 = f() ; C = (r2 != 0) ; r2 = r3 (restore) ; if (C) body
+  // The call result must be kept and drive the condition, not be lost/confused.
+  ir::Function fn; fn.name = "g"; fn.entry = 0;
+  ir::Block b0; b0.entry = 0;
+  b0.stmts.push_back(ir::assign(3, ir::reg(2)));
+  b0.stmts.push_back(ir::assign(2, ir::call("f", {})));
+  b0.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpNe, ir::reg(2), ir::constant(0))));
+  b0.stmts.push_back(ir::assign(2, ir::reg(3)));
+  b0.term = cbr_t(ir::reg(ir::kRegC), /*taken=*/2, /*fth=*/4);
+  fn.blocks.push_back(std::move(b0));
+  ir::Block b1; b1.entry = 2;
+  b1.stmts.push_back(ir::assign(2, ir::constant(7)));
+  b1.term = fall_t(4);
+  fn.blocks.push_back(std::move(b1));
+  ir::Block b2; b2.entry = 4;
+  b2.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b2));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "= f();"));    // call result kept (not discarded as a void call)
+  CHECK(contains(c, "!= 0"));      // a real non-null check on that result
+  CHECK(!contains(c, "0 != 0"));
+}
+
+TEST("C condition survives the compared register being overwritten") {
+  // r2 = *(r5) ; r8 = r2 ; C = (r2 != 0) ; r2 = 0 ; if (C) {body} ; return r2
+  // The condition must use the saved copy (r8), NOT the now-zero r2 -> never '0 != 0'.
+  ir::Function fn; fn.name = "f"; fn.entry = 0;
+  ir::Block b0; b0.entry = 0;
+  b0.stmts.push_back(ir::assign(2, ir::load(ir::reg(5), 4)));
+  b0.stmts.push_back(ir::assign(8, ir::reg(2)));
+  b0.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpNe, ir::reg(2), ir::constant(0))));
+  b0.stmts.push_back(ir::assign(2, ir::constant(0)));
+  b0.term = cbr_t(ir::reg(ir::kRegC), /*taken=*/2, /*fth=*/4);
+  fn.blocks.push_back(std::move(b0));
+  ir::Block b1; b1.entry = 2;
+  b1.stmts.push_back(ir::assign(2, ir::constant(7)));
+  b1.term = fall_t(4);
+  fn.blocks.push_back(std::move(b1));
+  ir::Block b2; b2.entry = 4;
+  b2.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b2));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(!contains(c, "0 != 0"));   // the bug: must not collapse to a constant compare
+  CHECK(contains(c, "!= 0"));      // a real non-null check remains
+}
+
+TEST("bitwise-not and and-not render") {
+  vars::VarMap vm;
+  CHECK(emit::emit_expr(*ir::unop(ir::UnOp::Not, ir::reg(2)), vm) == "~r2");
+  auto andn = ir::binop(ir::BinOp::And, ir::reg(2), ir::unop(ir::UnOp::Not, ir::reg(3)));
+  CHECK(emit::emit_expr(*andn, vm) == "r2 & ~r3");
+}
+
+TEST("algebraic identity x + 0 folds away") {
+  ir::Function fn = one_block({ir::assign(3, ir::binop(ir::BinOp::Add, ir::reg(2), ir::constant(0)))}, ir::reg(3));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "return a1;"));
+  CHECK(!contains(c, "+ 0"));
+}
+
+TEST("add-with-carry: cleared carry folds, then carry flows") {
+  // C = 0 (carry clear) ; r2 = r2 + r3 + C  ->  a1 = a1 + a2;
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(ir::kRegC, ir::constant(0)));
+  stmts.push_back(ir::assign(2, ir::binop(ir::BinOp::Add,
+      ir::binop(ir::BinOp::Add, ir::reg(2), ir::reg(3)), ir::reg(ir::kRegC))));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(2));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "a1 + a2"));
+  CHECK(!contains(c, "+ 0"));
+  CHECK(!contains(c, "cond"));
+}
+
+TEST("un-lifted instruction renders as inline asm") {
+  ir::Function fn = one_block({ir::unknown(0, "addc    r3, r13")}, ir::reg(2));
+  CHECK(contains(decompile(std::move(fn)), "__asm { addc    r3, r13 }"));
+}
+
+TEST("cast renders and folds") {
+  vars::VarMap vm;
+  CHECK(emit::emit_expr(*ir::cast(1, false, ir::reg(2)), vm) == "(unsigned char)r2");
+  CHECK(emit::emit_expr(*ir::cast(1, true, ir::reg(2)), vm) == "(char)r2");
+  // fold cast of a constant: (unsigned char)0x1FF == 0xFF == 255
+  ir::Function fn = one_block({ir::assign(2, ir::cast(1, false, ir::constant(0x1FF)))}, ir::reg(2));
+  CHECK(contains(decompile(std::move(fn)), "return 255;"));
+}
+
+TEST("named constant (lrw symbol) renders as the symbol") {
+  vars::VarMap vm;
+  CHECK(emit::emit_expr(*ir::const_named(0x10040A30, "dword_10040A30"), vm) == "dword_10040A30");
+}
+
+TEST("movi + shift idiom folds to one constant (rendered hex)") {
+  // movi r2,3 ; lsli r2,16  ->  r2 = 0x30000
+  ir::Function fn = one_block(
+      {ir::assign(2, ir::constant(3)),
+       ir::assign(2, ir::binop(ir::BinOp::Shl, ir::reg(2), ir::constant(16)))},
+      ir::reg(2));
+  CHECK(contains(decompile(std::move(fn)), "return 0x30000;"));
+}
+
+TEST("large constant renders hex, small decimal") {
+  vars::VarMap vm;
+  CHECK(emit::emit_expr(*ir::constant(0x1000), vm) == "0x1000");
+  CHECK(emit::emit_expr(*ir::constant(42), vm) == "42");
+  CHECK(emit::emit_expr(*ir::constant(-1), vm) == "-1");
+}
+
+TEST("conditional move renders as a ternary with resolved condition") {
+  // C = r2 < r3 ; movt r4,r5 (r4 = C ? r5 : r4) ; return r4
+  ir::Function fn; fn.name = "f"; fn.entry = 0;
+  ir::Block b; b.entry = 0;
+  b.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpLt, ir::reg(2), ir::reg(3))));
+  b.stmts.push_back(ir::assign(4, ir::select(ir::reg(ir::kRegC), ir::reg(5), ir::reg(4))));
+  b.term = ret_t(ir::reg(4));
+  fn.blocks.push_back(std::move(b));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "a1 < a2 ?"));   // condition resolved into the ternary
+  CHECK(!contains(c, "cond"));
+  CHECK(!contains(c, "r100"));
+}
+
+TEST("locals are declared") {
+  // v = *a1 (load, not inlinable); used twice -> kept as a declared local.
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(4, ir::load(ir::reg(2), 4)));   // v1 = *(int*)a1
+  stmts.push_back(ir::store(ir::reg(3), ir::reg(4), 4));      // *(a2) = v1   (use 1)
+  ir::Function fn = one_block(std::move(stmts), ir::reg(4));   // return v1   (use 2)
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "int v1;"));
+  CHECK(contains(c, "v1 = *(int *)(a1);"));
+  CHECK(contains(c, "int f(int a1, int a2)"));
+}
+
+TEST("single-use temporary is inlined") {
+  // v_tmp = a + b ; return v_tmp   ->   return a1 + a2;
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(4, ir::binop(ir::BinOp::Add, ir::reg(2), ir::reg(3))));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(4));
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "return a1 + a2;"));
+  CHECK(!contains(c, "v1"));   // temporary eliminated
+}
+
+TEST("dead overwriting store is removed") {
+  // r4 = 81 ; r4 = a1 + 1 ; return r4   (first def is dead)
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(4, ir::constant(81)));
+  stmts.push_back(ir::assign(4, ir::binop(ir::BinOp::Add, ir::reg(2), ir::constant(1))));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(4));
+  std::string c = decompile(std::move(fn));
+  CHECK(!contains(c, "81"));            // dead 'r4 = 81' gone
+  CHECK(contains(c, "return a1 + 1;")); // inlined
+}
+
+TEST("multi-use arithmetic is NOT duplicated") {
+  // v = a + b (used twice): keep as a statement, do not inline twice
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(4, ir::binop(ir::BinOp::Add, ir::reg(2), ir::reg(3))));
+  stmts.push_back(ir::store(ir::reg(5), ir::reg(4), 4));  // use 1
+  ir::Function fn = one_block(std::move(stmts), ir::reg(4));  // use 2 (return)
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "v1 = a1 + a2;"));   // kept once
+}
+
+TEST("cross-block C-bit resolves in a later block's branch") {
+  // B0: C = r2 < r3 ; fallthrough B1
+  // B1: bt B3        ; fallthrough B2   (branch reads C set in B0)
+  // B2: r2 = 1       ; fallthrough B3
+  // B3: return r2
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+  ir::Block b0; b0.entry = 0;
+  b0.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpLt, ir::reg(2), ir::reg(3))));
+  b0.term = fall_t(2);
+  fn.blocks.push_back(std::move(b0));
+  ir::Block b1; b1.entry = 2;
+  b1.term = cbr_t(ir::reg(ir::kRegC), /*taken=*/6, /*fth=*/4);
+  fn.blocks.push_back(std::move(b1));
+  ir::Block b2; b2.entry = 4;
+  b2.stmts.push_back(ir::assign(2, ir::constant(1)));
+  b2.term = fall_t(6);
+  fn.blocks.push_back(std::move(b2));
+  ir::Block b3; b3.entry = 6;
+  b3.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b3));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "a1 < a2"));   // condition resolved across blocks
+  CHECK(!contains(c, "cond"));     // C bit fully inlined, not leaked
+  CHECK(!contains(c, "r100"));
+}
+
+TEST("stack frame recovery: prologue/epilogue hidden, slot named") {
+  // sp=sp-16 ; *(sp+12)=lr ; r2=*(sp+20)(incoming stack arg) ; lr=*(sp+12) ; sp=sp+16 ; return r2
+  std::vector<ir::Stmt> stmts;
+  stmts.push_back(ir::assign(0, ir::binop(ir::BinOp::Sub, ir::reg(0), ir::constant(16))));
+  stmts.push_back(ir::store(ir::binop(ir::BinOp::Add, ir::reg(0), ir::constant(12)), ir::reg(15), 4));
+  stmts.push_back(ir::assign(2, ir::load(ir::binop(ir::BinOp::Add, ir::reg(0), ir::constant(20)), 4)));
+  stmts.push_back(ir::assign(15, ir::load(ir::binop(ir::BinOp::Add, ir::reg(0), ir::constant(12)), 4)));
+  stmts.push_back(ir::assign(0, ir::binop(ir::BinOp::Add, ir::reg(0), ir::constant(16))));
+  ir::Function fn = one_block(std::move(stmts), ir::reg(2));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(!contains(c, "sp"));         // no stack-pointer juggling
+  CHECK(!contains(c, "lr"));         // no link-register save/restore
+  CHECK(contains(c, "var_14"));      // stack slot (offset 20) named
+  CHECK(contains(c, "return var_14;"));
+}
+
+TEST("empty then-branch is inverted, no empty else") {
+  // B0: if (a1 != 0) {} else { v=7 }  ->  if (a1 == 0) { v = 7; }
+  ir::Function fn; fn.name = "f"; fn.entry = 0;
+  ir::Block b0; b0.entry = 0;
+  b0.term = cbr_t(ir::binop(ir::BinOp::CmpNe, ir::reg(2), ir::constant(0)), /*taken=*/4, /*fth=*/2);
+  fn.blocks.push_back(std::move(b0));
+  ir::Block b1; b1.entry = 2;
+  b1.stmts.push_back(ir::assign(3, ir::constant(7)));
+  b1.term = fall_t(4);
+  fn.blocks.push_back(std::move(b1));
+  ir::Block b2; b2.entry = 4;
+  b2.term = ret_t(ir::reg(3));
+  fn.blocks.push_back(std::move(b2));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "if (a1 == 0) {"));
+  CHECK(contains(c, "= 7;"));
+  CHECK(!contains(c, "else"));
+  CHECK(!contains(c, "{\n  }"));   // no empty block
+}
+
+TEST("pre-test while loop structuring") {
+  // B0: C = r2 < r3 ; bf B2(exit)    (stay in loop while a<b)
+  // B1: r2 = r2 + 1 ; goto B0        (back edge)
+  // B2: return r2
+  ir::Function fn;
+  fn.name = "f";
+  fn.entry = 0;
+
+  ir::Block b0;
+  b0.entry = 0;
+  b0.stmts.push_back(ir::assign(ir::kRegC, ir::binop(ir::BinOp::CmpLt, ir::reg(2), ir::reg(3))));
+  b0.term = cbr_t(ir::unop(ir::UnOp::LNot, ir::reg(ir::kRegC)), /*taken=*/8, /*fth=*/4);
+  fn.blocks.push_back(std::move(b0));
+
+  ir::Block b1;
+  b1.entry = 4;
+  b1.stmts.push_back(ir::assign(2, ir::binop(ir::BinOp::Add, ir::reg(2), ir::constant(1))));
+  b1.term = goto_t(0);
+  fn.blocks.push_back(std::move(b1));
+
+  ir::Block b2;
+  b2.entry = 8;
+  b2.term = ret_t(ir::reg(2));
+  fn.blocks.push_back(std::move(b2));
+
+  std::string c = decompile(std::move(fn));
+  CHECK(contains(c, "while (a1 < a2) {"));
+  CHECK(contains(c, "a1 = a1 + 1;"));
+  CHECK(contains(c, "return a1;"));
+  CHECK(!contains(c, "goto"));
+  CHECK(!contains(c, "while (1)"));
+}
+
+TEST_MAIN()
+
+```
