@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/MapleStoryAutoLevelUp`: entity [[maplestory-auto-level-up]]; cited on [[overviews/game-hacking]]; cross-link from [[maplestory-artale-explab]].
+
 - **2026-08-11** — ingest `description:gmh5225/MapleStoryDetectionSampleGenerator`: entity [[maplestory-detection-sample-generator]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-11** — ingest `description:gmh5225/MatScan`: entity [[matscan]]; cited on [[il2cpp]] and [[overviews/game-hacking]].

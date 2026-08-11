@@ -864,6 +864,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
 - [MapleStory Build Framework](entities/maplestory-build-framework.md) — MapleStory private-server client build framework (C/C++; individualized distribution + rudimentary anti-cheat; Anti Cheat / game:maplestory)
 - [MapleStory Artale Explab](entities/maplestory-artale-explab.md) — MapleStory Worlds Artale experience/HP-MP cost lab (optimal training spots, exp rates, leveling paths; game-mechanics / game:maplestory; gmh5225)
+- [MapleStory Auto Level Up](entities/maplestory-auto-level-up.md) — MapleStory Artale animation-based auto level-up bot (Python; cheat / game:maplestory; gmh5225)
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
 - [MapleStory Detection Sample Generator](entities/maplestory-detection-sample-generator.md) — synthetic MapleStory cheat-detection / object-detection training samples (multiple formats; anti-cheat development; game:maplestory; gmh5225)
