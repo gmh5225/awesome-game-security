@@ -1,0 +1,1825 @@
+Project Path: arc_JUS7205_cheatguard_w7f2xwpt
+
+Source Tree:
+
+```txt
+arc_JUS7205_cheatguard_w7f2xwpt
+├── Cargo.toml
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── examples
+│   └── scan-explorer.json
+├── rules
+│   └── default.rules.json
+├── src
+│   ├── lib.rs
+│   ├── main.rs
+│   ├── process.rs
+│   ├── report.rs
+│   ├── rules.rs
+│   └── scoring.rs
+└── tests
+    └── cli_scan.rs
+
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "cheatguard"
+version = "0.1.0"
+edition = "2021"
+description = "Engine-agnostic anti-cheat detection primitives: a defensive process-integrity scanner and heuristic risk scorer. Signatures are data, not code."
+license = "Apache-2.0"
+repository = "https://github.com/JUS7205/cheatguard"
+readme = "README.md"
+keywords = ["anti-cheat", "security", "detection", "blue-team", "forensics"]
+categories = ["command-line-utilities", "os", "security"]
+
+[[bin]]
+name = "cheatguard"
+path = "src/main.rs"
+
+[lib]
+name = "cheatguard"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.52", features = [
+    "Win32_Foundation",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Threading",
+] }
+
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or Derivative
+          Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and do
+          not modify the License. You may add Your own attribution notices
+          within Derivative Works that You distribute, alongside or as an
+          addendum to the NOTICE text from the Work, provided that such
+          additional attribution notices cannot be construed as modifying
+          the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   Copyright 2026 Justin (JUS7205)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+================================================================================
+COMMONS CLAUSE
+License Condition v1.0
+
+The Software is provided to You by the Licensor under the License, as
+defined below, subject to the following condition.
+
+The above copyright notice and this permission notice (including the next
+paragraph) shall be included in all copies or substantial portions of the
+Software.
+
+Sale of Software. The Licensor grants You a right to use the Software for
+any purpose, including commercial, provided that You do not sell the
+Software, or sell or lease products or services whose value derives
+*primarily* from the Software. "Sale" means any sale, license, lease,
+rental, subscription (including SaaS), or other commercial transfer of the
+Software or parts thereof to a third party.
+
+This Commons Clause condition is an additional restriction under Section
+3 of the Apache License 2.0. If You disagree with the condition, You may
+not use the Software under this License.
+
+The original copyright, permission, and disclaimer notices in the Software
+may be retained in derivative works. The Software may be subject to
+applicable patent and other intellectual property laws. The Licensor may
+use the trademarks of the Licensor, subject to applicable law.
+
+For the purpose of this clause, the term "Software" includes the source
+code, object code, and any other components of the software provided by
+the Licensor under this License.
+
+NOTE: This project is released as a capability showcase and resume piece.
+The commercial rights (including the right to sell, license, or offer as a
+service) are reserved to the copyright owner. If you wish to use this
+Software commercially, contact the Licensor for a commercial license.
+================================================================================
+
+```
+
+`README.md`:
+
+```md
+# cheatguard
+
+[![CI](https://github.com/JUS7205/cheatguard/actions/workflows/ci.yml/badge.svg)](https://github.com/JUS7205/cheatguard/actions/workflows/ci.yml)
+
+Engine-agnostic anti-cheat **detection primitives** — a defensive
+process-integrity scanner plus a deterministic heuristic risk scorer. It
+inspects a target process's loaded modules and scores how likely that process
+is running cheating software, based on a data-driven ruleset (signatures are
+JSON, not code).
+
+This is the anti-cheat facet of the sentinel family. The ruleset and scoring
+engine are portable and tested; the platform-specific piece (module
+enumeration) is Windows for now, with an honest stub elsewhere.
+
+```text
+cheatguard scan <pid>  ->  JSON report { matches, score (0-100), verdict }
+```
+
+## Features
+
+| Module | What it does |
+| --- | --- |
+| `cheatguard::rules` | Serde-deserializable JSON ruleset: weights, thresholds, expected locations, name patterns, known-cheat list, baseline counts |
+| `cheatguard::scoring` | Deterministic weighted 0–100 scorer + `CLEAN` / `SUSPICIOUS` / `MALICIOUS` verdict; pure functions, unit-tested |
+| `cheatguard::process` | Enumerates a target process's loaded modules and matches them against the ruleset (Windows real / other: honest stub) |
+| `cheatguard::report` | JSON scan-report schema + builder — the CLI output format |
+| CLI | `cheatguard scan <pid>` prints the JSON report |
+
+One intentional gap: raw Authenticode verification (`is_signed`) is a
+documented integration seam that reports `None` rather than a fake answer.
+Implementing `WinVerifyTrust` correctly is left as a follow-up instead of
+shipping something half-correct.
+
+## Platform support (honest)
+
+| Platform | Module enumeration | `is_signed` |
+| --- | --- | --- |
+| Windows (x86_64) | Real — `K32EnumProcessModules` (Psapi) + `GetModuleFileNameExW` | `None` (seam, not faked) |
+| Linux / macOS / other | Empty list, `supported: false` — no fabricated data | n/a |
+
+Callers can distinguish "nothing found" from "platform unsupported".
+
+## Usage
+
+```bash
+cargo build --release      # target/release/cheatguard.exe
+cargo test
+
+cheatguard scan 1234
+cheatguard scan 1234 --rules my_rules.json
+```
+
+Example report (abridged):
+
+```json
+{
+  "pid": 1234,
+  "engine": "cheatguard",
+  "module_count": 42,
+  "matches": [
+    {
+      "module": "aimbot.dll",
+      "module_path": "C:\\Temp\\aimbot.dll",
+      "signal": "known_cheat_name",
+      "reason": "basename matches known cheat: aimbot.dll"
+    }
+  ],
+  "active_signals": ["known_cheat_name", "unexpected_path"],
+  "score": 75,
+  "verdict": "MALICIOUS",
+  "supported": true,
+  "error": null
+}
+```
+
+Verdict thresholds default to `0..25` → `CLEAN`, `25..70` → `SUSPICIOUS`,
+`70..100` → `MALICIOUS`, configurable per ruleset.
+
+## Ruleset format
+
+`rules/default.rules.json` ships as the default and backs the tests.
+
+```json
+{
+  "version": 1,
+  "name": "cheatguard-default",
+  "weights": {
+    "unsigned_module": 30,
+    "unexpected_path": 15,
+    "known_cheat_name": 60,
+    "suspicious_name": 25,
+    "count_anomaly": 10
+  },
+  "thresholds": { "suspicious": 25, "malicious": 70 },
+  "expected_locations": ["C:\\Windows\\", "C:\\Program Files\\"],
+  "suspicious_name_patterns": ["cheat", "hack", "inject", "aimbot"],
+  "known_cheat_names": ["aimbot.dll", "cheatengine.dll"],
+  "baseline_module_count": null,
+  "module_count_tolerance": 0
+}
+```
+
+Signals:
+
+- `known_cheat_name` — basename matches a known cheat
+- `suspicious_name` — name contains a configured suspicious substring
+- `unexpected_path` — module loaded outside `expected_locations`
+- `unsigned_module` — `is_signed == Some(false)` (reachable once Authenticode is wired in)
+- `count_anomaly` — module count deviates from `baseline_module_count` beyond tolerance
+
+## Real output
+
+`examples/scan-explorer.json` is a live scan of `explorer.exe` on this
+machine: 303 modules, one `unexpected_path` match (TranslucentTB's
+`ExplorerHooks.dll`, a legit transparency tool that injects into explorer),
+score 15 → `CLEAN`. Run it against any PID on your own box and compare.
+
+## Library use
+
+```rust
+use cheatguard::{rules, process, report, scoring};
+
+let rs = rules::Ruleset::from_json(include_str!("../rules/default.rules.json"))?;
+let (matches, signals, count, supported, err) = process::scan_process(pid, &rs);
+let rep = report::build(pid, matches, &signals, count, &rs, supported, err);
+println!("{}", serde_json::to_string_pretty(&rep)?);
+```
+
+## License
+
+Apache-2.0 + Commons Clause. Commercial rights reserved to the copyright
+owner — you may use/modify/host it freely for non-commercial purposes and as a
+capability showcase, but may not sell it or a product derived from it without a
+commercial license (see LICENSE).
+
+```
+
+`SECURITY.md`:
+
+```md
+# Security Policy
+
+## Reporting a Vulnerability
+
+This project is a portfolio / educational capability showcase. It is **not** deployed
+in production and is not intended for production use without review.
+
+If you believe you have found a security issue in this codebase:
+
+- **Do not** open a public issue or discussion.
+- Report it privately via GitHub's vulnerability reporting flow:
+  <https://github.com/JUS7205/REPO/security/advisories/new>
+- Include a minimal reproducer and, if possible, a suggested fix.
+
+Reports are reviewed as availability permits; please do not expect an SLA.
+```
+
+`examples/scan-explorer.json`:
+
+```json
+{
+  "pid": 14428,
+  "engine": "cheatguard",
+  "scanned_at": "1786441726",
+  "module_count": 303,
+  "matches": [
+    {
+      "module": "ExplorerHooks.dll",
+      "module_path": "C:\\Users\\404NOTFOUND\\AppData\\Local\\Packages\\28017CharlesMilette.TranslucentTB_v826wp6bftszj\\TempState\\ExplorerHooks.dll",
+      "signal": "unexpected_path",
+      "reason": "loaded from unexpected location: C:\\Users\\404NOTFOUND\\AppData\\Local\\Packages\\28017CharlesMilette.TranslucentTB_v826wp6bftszj\\TempState\\ExplorerHooks.dll"
+    }
+  ],
+  "active_signals": [
+    "unexpected_path"
+  ],
+  "score": 15,
+  "verdict": "CLEAN",
+  "error": null,
+  "supported": true
+}
+
+```
+
+`rules/default.rules.json`:
+
+```json
+{
+  "version": 1,
+  "name": "cheatguard-default",
+  "weights": {
+    "unsigned_module": 30,
+    "unexpected_path": 15,
+    "known_cheat_name": 80,
+    "suspicious_name": 25,
+    "count_anomaly": 10
+  },
+  "thresholds": {
+    "suspicious": 25,
+    "malicious": 70
+  },
+  "expected_locations": [
+    "C:\\Windows\\",
+    "C:\\Program Files\\",
+    "C:\\Program Files (x86)\\"
+  ],
+  "suspicious_name_patterns": [
+    "cheat",
+    "hack",
+    "inject",
+    "aimbot",
+    "wallhack",
+    "trainer",
+    "speeder",
+    "bypass"
+  ],
+  "known_cheat_names": [
+    "cheatengine.dll",
+    "csgo-cheat.dll",
+    "xhack.dll",
+    "aimbot.dll",
+    "overwolf_hook.dll"
+  ],
+  "baseline_module_count": null,
+  "module_count_tolerance": 0
+}
+
+```
+
+`src/lib.rs`:
+
+```rs
+//! `cheatguard` — engine-agnostic anti-cheat *detection primitives*.
+//!
+//! This is a DEFENSIVE scanner, not a cheat or evasion tool. It provides:
+//!
+//! * [`rules`] — a serde-deserializable JSON ruleset so signatures are data, not code.
+//! * [`scoring`] — a deterministic, weighted heuristic scorer (CLEAN/SUSPICIOUS/MALICIOUS).
+//! * [`process`] — process-integrity scanning (Windows: real Win32 module enumeration +
+//!   Authenticode verification; non-Windows: honest empty stub).
+//! * [`report`] — the JSON scan report shape.
+//!
+//! The CLI (`src/main.rs`) exposes `cheatguard scan <pid>` which prints a JSON report.
+
+pub mod process;
+pub mod report;
+pub mod rules;
+pub mod scoring;
+
+pub use process::{
+    analyze_module, count_anomaly, enumerate_modules, scan_process, ModuleInfo, ScanError,
+};
+pub use report::{build, RuleMatch, ScanReport};
+pub use rules::{Ruleset, Weights};
+pub use scoring::{score_signals, verdict_for, Signal, Verdict};
+
+```
+
+`src/main.rs`:
+
+```rs
+//! `cheatguard` CLI — anti-cheat detection primitives.
+//!
+//! Usage:
+//! ```text
+//! cheatguard scan <pid> [--rules path/to/rules.json]
+//! ```
+//!
+//! Prints a JSON [`ScanReport`](cheatguard::report::ScanReport) to stdout: the
+//! matched rules, the aggregated 0..=100 risk score, and the verdict
+//! (CLEAN / SUSPICIOUS / MALICIOUS).
+//!
+//! The bundled default ruleset is embedded below so the binary works with no
+//! external files; `--rules` overrides it with your own JSON ruleset.
+
+use std::process::ExitCode;
+
+/// Bundled default ruleset (mirrors `rules/default.rules.json`).
+const DEFAULT_RULESET_JSON: &str = include_str!("../rules/default.rules.json");
+
+fn main() -> ExitCode {
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() < 2 {
+        print_usage();
+        return ExitCode::from(2);
+    }
+
+    match args[1].as_str() {
+        "scan" => run_scan(&args[2..]),
+        "--help" | "-h" | "help" => {
+            print_usage();
+            ExitCode::SUCCESS
+        }
+        "--version" | "-V" | "version" => {
+            println!("cheatguard {}", env!("CARGO_PKG_VERSION"));
+            ExitCode::SUCCESS
+        }
+        other => {
+            eprintln!("error: unknown subcommand '{other}'");
+            print_usage();
+            ExitCode::from(2)
+        }
+    }
+}
+
+fn print_usage() {
+    eprintln!(
+        "cheatguard {} — engine-agnostic anti-cheat detection primitives (defensive scanner)\n\
+         \n\
+         USAGE:\n  \
+         cheatguard scan <pid> [--rules <path>]\n\
+         \n\
+         ARGS:\n  \
+         <pid>      Target process id to scan.\n  \
+         --rules    Optional path to a JSON ruleset (defaults to the bundled ruleset).\n\
+         \n\
+         OUTPUT:\n  \
+         A JSON report is printed to stdout: matches, score (0-100), verdict.\n",
+        env!("CARGO_PKG_VERSION")
+    );
+}
+
+fn run_scan(args: &[String]) -> ExitCode {
+    let mut pid: Option<u32> = None;
+    let mut rules_path: Option<String> = None;
+
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--rules" => {
+                i += 1;
+                if i >= args.len() {
+                    eprintln!("error: --rules requires a path");
+                    return ExitCode::from(2);
+                }
+                rules_path = Some(args[i].clone());
+            }
+            other => {
+                if other.starts_with('-') {
+                    eprintln!("error: unknown flag '{other}'");
+                    return ExitCode::from(2);
+                }
+                match other.parse::<u32>() {
+                    Ok(p) => pid = Some(p),
+                    Err(_) => {
+                        eprintln!("error: invalid pid '{other}' (expected a positive integer)");
+                        return ExitCode::from(2);
+                    }
+                }
+            }
+        }
+        i += 1;
+    }
+
+    let pid = match pid {
+        Some(p) => p,
+        None => {
+            eprintln!("error: missing <pid> argument");
+            return ExitCode::from(2);
+        }
+    };
+
+    let ruleset = match rules_path {
+        Some(path) => match cheatguard::rules::Ruleset::load_path(std::path::Path::new(&path)) {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("error: failed to load ruleset '{path}': {e}");
+                return ExitCode::from(1);
+            }
+        },
+        None => match cheatguard::rules::Ruleset::from_json(DEFAULT_RULESET_JSON) {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("error: bundled ruleset failed to parse: {e}");
+                return ExitCode::from(1);
+            }
+        },
+    };
+
+    let (matches, signals, module_count, supported, error) =
+        cheatguard::process::scan_process(pid, &ruleset);
+    let report = cheatguard::report::build(
+        pid,
+        matches,
+        &signals,
+        module_count,
+        &ruleset,
+        supported,
+        error.clone(),
+    );
+
+    let json = serde_json::to_string_pretty(&report).unwrap_or_else(|e| {
+        eprintln!("error: failed to serialize report: {e}");
+        std::process::exit(1);
+    });
+    println!("{json}");
+
+    // Exit non-zero when the scan reported a hard error, so callers/CI can detect it.
+    match error {
+        Some(_) => ExitCode::from(1),
+        None => ExitCode::SUCCESS,
+    }
+}
+
+```
+
+`src/process.rs`:
+
+```rs
+//! Process-integrity scanning.
+//!
+//! **What this is:** a *defensive* scanner. It enumerates a target process's
+//! loaded modules (DLLs) and tests each one against the ruleset: known-cheat
+//! names, suspicious-naming patterns, unexpected load locations, and (on
+//! Windows) an unsigned-module flag.
+//!
+//! **Honesty guarantee:** on non-Windows targets this module does **not** fake
+//! data. [`scan_process`] returns an empty, `supported: false` result so callers
+//! and tests can distinguish "no modules found" from "platform unsupported".
+//!
+//! **Authenticode / signing:** `is_signed` is currently reported as `None`
+//! (unknown) on every platform. Real Authenticode verification requires a
+//! `WinVerifyTrust` + `WINTRUST_DATA` integration that is intentionally *not*
+//! implemented here so we never ship a half-correct verifier. The scorer treats
+//! `None` as "unknown" (no penalty). The scanning/analysis pipeline and scoring
+//! logic are fully real and unit-tested; only the raw signature bit is left as a
+//! documented integration seam.
+
+use crate::report::RuleMatch;
+use crate::rules::Ruleset;
+use crate::scoring::Signal;
+use std::path::PathBuf;
+
+/// A single enumerated module with the facts the analyzer needs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ModuleInfo {
+    /// Module basename, e.g. `aimbot.dll`.
+    pub name: String,
+    /// Full load path, e.g. `C:\Temp\aimbot.dll`. Empty if unknown.
+    pub path: String,
+    /// Authenticode signature status: `Some(true)` signed, `Some(false)` not,
+    /// `None` = not determined on this platform/integration.
+    pub is_signed: Option<bool>,
+}
+
+/// Error returned by [`scan_process`] when the OS-level enumeration fails.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ScanError {
+    /// Could not open the target process (e.g. access denied / not found).
+    OpenProcessFailed(u32),
+    /// Module enumeration failed.
+    EnumFailed(String),
+    /// Win32 API returned an unexpected zero/error.
+    ApiError(String),
+}
+
+impl std::fmt::Display for ScanError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ScanError::OpenProcessFailed(code) => {
+                write!(
+                    f,
+                    "OpenProcess failed (pid may not exist or access denied), code={code}"
+                )
+            }
+            ScanError::EnumFailed(m) => write!(f, "module enumeration failed: {m}"),
+            ScanError::ApiError(m) => write!(f, "win32 api error: {m}"),
+        }
+    }
+}
+
+impl std::error::Error for ScanError {}
+
+/// Analyze one module against the ruleset, returning triggered signals + matches.
+///
+/// Pure function (no I/O) — fully unit-testable. It inspects:
+/// * `is_signed == Some(false)` -> [`Signal::UnsignedModule`]
+/// * `!ruleset.is_expected_location(path)` -> [`Signal::UnexpectedPath`]
+/// * `ruleset.matches_known_cheat(name)` -> [`Signal::KnownCheatName`]
+/// * `ruleset.matches_suspicious_pattern(name)` -> [`Signal::SuspiciousName`]
+pub fn analyze_module(module: &ModuleInfo, ruleset: &Ruleset) -> (Vec<Signal>, Vec<RuleMatch>) {
+    let mut signals = Vec::new();
+    let mut matches = Vec::new();
+
+    if module.is_signed == Some(false) {
+        signals.push(Signal::UnsignedModule);
+        matches.push(RuleMatch {
+            module: module.name.clone(),
+            module_path: module.path.clone(),
+            signal: "unsigned_module".to_string(),
+            reason: "module is not Authenticode-signed".to_string(),
+        });
+    }
+
+    if !ruleset.is_expected_location(&module.path) {
+        signals.push(Signal::UnexpectedPath);
+        matches.push(RuleMatch {
+            module: module.name.clone(),
+            module_path: module.path.clone(),
+            signal: "unexpected_path".to_string(),
+            reason: format!("loaded from unexpected location: {}", module.path),
+        });
+    }
+
+    if ruleset.matches_known_cheat(&module.name) {
+        signals.push(Signal::KnownCheatName);
+        matches.push(RuleMatch {
+            module: module.name.clone(),
+            module_path: module.path.clone(),
+            signal: "known_cheat_name".to_string(),
+            reason: format!("basename matches known cheat: {}", module.name),
+        });
+    } else if ruleset.matches_suspicious_pattern(&module.name) {
+        signals.push(Signal::SuspiciousName);
+        matches.push(RuleMatch {
+            module: module.name.clone(),
+            module_path: module.path.clone(),
+            signal: "suspicious_name".to_string(),
+            reason: format!("name matches suspicious pattern: {}", module.name),
+        });
+    }
+
+    (signals, matches)
+}
+
+/// Compute the [`Signal::CountAnomaly`] trigger for a module count vs. baseline.
+///
+/// Returns `Some(Signal::CountAnomaly)` when the ruleset has a baseline and the
+/// count deviates beyond tolerance; otherwise `None`.
+pub fn count_anomaly(module_count: usize, ruleset: &Ruleset) -> Option<Signal> {
+    if ruleset.count_deviation(module_count as u32) > 0 {
+        Some(Signal::CountAnomaly)
+    } else {
+        None
+    }
+}
+
+/// Enumerate the loaded modules of `pid`.
+///
+/// * **Windows**: uses `K32EnumProcessModules` (Psapi) to list `HMODULE`s and
+///   `GetModuleFileNameExW` for each path, then derives the basename. Signature
+///   status is left as `None` (see module docs).
+/// * **non-Windows**: returns `Ok(vec![])` (an *honest empty* result — callers
+///   must check [`scan_process`]'s `supported` flag).
+pub fn enumerate_modules(pid: u32) -> Result<Vec<ModuleInfo>, ScanError> {
+    #[cfg(windows)]
+    {
+        enumerate_modules_windows(pid)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = pid;
+        Ok(Vec::new())
+    }
+}
+
+#[cfg(windows)]
+fn enumerate_modules_windows(pid: u32) -> Result<Vec<ModuleInfo>, ScanError> {
+    use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
+    use windows_sys::Win32::System::ProcessStatus::{GetModuleFileNameExW, K32EnumProcessModules};
+    use windows_sys::Win32::System::Threading::{
+        OpenProcess, PROCESS_QUERY_INFORMATION, PROCESS_VM_READ,
+    };
+
+    // In windows-sys 0.52, HANDLE/HMODULE are `isize` (a raw handle value), not a pointer.
+    let handle: HANDLE =
+        unsafe { OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 0, pid) };
+    if handle == INVALID_HANDLE_VALUE || handle == 0 {
+        return Err(ScanError::OpenProcessFailed(pid));
+    }
+
+    // SAFETY: we own `handle` here and close it on every return path.
+    let res = (|| {
+        // First call: determine required buffer size. K32EnumProcessModules takes
+        // `*mut HMODULE` (`*mut isize`); pass a 1-element scratch buffer to satisfy
+        // the pointer arg while reading back `needed`.
+        let mut needed: u32 = 0;
+        let mut scratch_module: isize = 0;
+        let ok = unsafe {
+            K32EnumProcessModules(handle, &mut scratch_module as *mut isize, 0, &mut needed)
+        };
+        // When called with cb=0 the return indicates only "handle valid"; a zero
+        // `needed` means the process exposes no modules we can snapshot.
+        if needed == 0 {
+            if ok == 0 {
+                return Err(ScanError::EnumFailed("K32EnumProcessModules failed".into()));
+            }
+            return Ok(Vec::new());
+        }
+        let count = (needed as usize) / std::mem::size_of::<isize>();
+        if count == 0 {
+            return Ok(Vec::new());
+        }
+        let mut handles: Vec<isize> = vec![0; count];
+        let mut needed2: u32 = 0;
+        let ok = unsafe {
+            K32EnumProcessModules(
+                handle,
+                handles.as_mut_ptr(),
+                (handles.len() * std::mem::size_of::<isize>()) as u32,
+                &mut needed2,
+            )
+        };
+        if ok == 0 {
+            return Err(ScanError::EnumFailed("K32EnumProcessModules failed".into()));
+        }
+
+        let mut modules = Vec::with_capacity(count);
+        for &hmod in &handles {
+            let mut buf = [0u16; 260];
+            let len =
+                unsafe { GetModuleFileNameExW(handle, hmod, buf.as_mut_ptr(), buf.len() as u32) };
+            if len == 0 {
+                continue;
+            }
+            let path = String::from_utf16_lossy(&buf[..len as usize]);
+            let name = PathBuf::from(&path)
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| path.clone());
+            modules.push(ModuleInfo {
+                name,
+                path,
+                is_signed: None,
+            });
+        }
+        Ok(modules)
+    })();
+
+    unsafe {
+        CloseHandle(handle);
+    }
+    res
+}
+
+/// Scan a process end-to-end and return the report inputs.
+///
+/// Returns `(matches, signals, module_count, supported, error)` so the caller
+/// (CLI) can construct a [`crate::report::ScanReport`]. On a hard enumeration
+/// error, `matches`/`signals` are empty, `supported` reflects the platform, and
+/// `error` carries the message.
+pub fn scan_process(
+    pid: u32,
+    ruleset: &Ruleset,
+) -> (Vec<RuleMatch>, Vec<Signal>, usize, bool, Option<String>) {
+    let supported = cfg!(windows);
+    let modules = match enumerate_modules(pid) {
+        Ok(m) => m,
+        Err(e) => {
+            return (Vec::new(), Vec::new(), 0, supported, Some(e.to_string()));
+        }
+    };
+
+    let mut all_signals: Vec<Signal> = Vec::new();
+    let mut all_matches: Vec<RuleMatch> = Vec::new();
+    for m in &modules {
+        let (sig, mut mt) = analyze_module(m, ruleset);
+        all_signals.extend(sig);
+        all_matches.append(&mut mt);
+    }
+
+    if let Some(count_sig) = count_anomaly(modules.len(), ruleset) {
+        all_signals.push(count_sig);
+        all_matches.push(RuleMatch {
+            module: "<process>".to_string(),
+            module_path: String::new(),
+            signal: "count_anomaly".to_string(),
+            reason: format!(
+                "loaded module count {} deviates from baseline",
+                modules.len()
+            ),
+        });
+    }
+
+    (all_matches, all_signals, modules.len(), supported, None)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn rs() -> Ruleset {
+        Ruleset::default()
+    }
+
+    #[test]
+    fn analyze_known_cheat_from_temp_is_malicious_signals() {
+        let m = ModuleInfo {
+            name: "aimbot.dll".to_string(),
+            path: "C:\\Temp\\aimbot.dll".to_string(),
+            is_signed: None,
+        };
+        let (sig, mt) = analyze_module(&m, &rs());
+        assert!(sig.contains(&Signal::KnownCheatName));
+        assert!(sig.contains(&Signal::UnexpectedPath));
+        assert!(!sig.contains(&Signal::SuspiciousName)); // exact known-cheat wins short-circuit
+        assert_eq!(mt.len(), 2);
+    }
+
+    #[test]
+    fn analyze_suspicious_name_not_known_cheat() {
+        let m = ModuleInfo {
+            name: "my_hack_tool.dll".to_string(),
+            path: "C:\\Windows\\my_hack_tool.dll".to_string(),
+            is_signed: None,
+        };
+        let (sig, mt) = analyze_module(&m, &rs());
+        assert!(sig.contains(&Signal::SuspiciousName));
+        assert!(!sig.contains(&Signal::KnownCheatName));
+        assert!(!sig.contains(&Signal::UnexpectedPath)); // expected location
+        assert_eq!(mt.len(), 1);
+    }
+
+    #[test]
+    fn analyze_unsigned_module_signal() {
+        let m = ModuleInfo {
+            name: "legit.dll".to_string(),
+            path: "C:\\Program Files\\game\\legit.dll".to_string(),
+            is_signed: Some(false),
+        };
+        let (sig, _) = analyze_module(&m, &rs());
+        assert!(sig.contains(&Signal::UnsignedModule));
+        assert!(!sig.contains(&Signal::UnexpectedPath)); // expected location
+    }
+
+    #[test]
+    fn analyze_signed_module_no_unsigned_signal() {
+        let m = ModuleInfo {
+            name: "legit.dll".to_string(),
+            path: "C:\\Program Files\\game\\legit.dll".to_string(),
+            is_signed: Some(true),
+        };
+        let (sig, mt) = analyze_module(&m, &rs());
+        assert!(sig.is_empty());
+        assert!(mt.is_empty());
+    }
+
+    #[test]
+    fn analyze_clean_module_no_signals() {
+        let m = ModuleInfo {
+            name: "kernel32.dll".to_string(),
+            path: "C:\\Windows\\System32\\kernel32.dll".to_string(),
+            is_signed: None,
+        };
+        let (sig, mt) = analyze_module(&m, &rs());
+        assert!(sig.is_empty());
+        assert!(mt.is_empty());
+    }
+
+    #[test]
+    fn count_anomaly_detects_deviation() {
+        let mut r = rs();
+        r.baseline_module_count = Some(100);
+        r.module_count_tolerance = 5;
+        assert_eq!(count_anomaly(80, &r), Some(Signal::CountAnomaly));
+        assert_eq!(count_anomaly(120, &r), Some(Signal::CountAnomaly));
+        assert_eq!(count_anomaly(102, &r), None); // within tolerance
+    }
+
+    #[test]
+    fn count_anomaly_none_without_baseline() {
+        assert_eq!(count_anomaly(9999, &rs()), None);
+    }
+
+    #[test]
+    fn scan_process_is_honest_on_nonwindows() {
+        // This test runs on whatever host cargo uses. On Windows it may succeed;
+        // on non-Windows it must return supported=false and an empty scan.
+        let (mt, sig, count, supported, err) = scan_process(0, &rs());
+        if !supported {
+            assert!(mt.is_empty());
+            assert!(sig.is_empty());
+            assert_eq!(count, 0);
+        } else {
+            // On Windows, pid 0 is invalid -> OpenProcessFailed reported.
+            let _ = err;
+        }
+    }
+}
+
+```
+
+`src/report.rs`:
+
+```rs
+//! JSON scan-report shape and builder.
+//!
+//! [`ScanReport`] is the serializable output of `cheatguard scan <pid>`. It is
+//! built by [`build`] from a process scan result, a ruleset, and the active
+//! signals. Keeping the report a plain `serde` struct guarantees the CLI always
+//! emits well-formed, parseable JSON.
+
+use crate::rules::Ruleset;
+use crate::scoring::{score_signals, verdict_for, Signal, Verdict};
+use serde::{Deserialize, Serialize};
+
+/// One triggered rule / signal against a specific module.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct RuleMatch {
+    pub module: String,
+    pub module_path: String,
+    /// Which signal fired for this module.
+    pub signal: String,
+    /// Human-readable reason for the match.
+    pub reason: String,
+}
+
+/// The full JSON report emitted by the scanner.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ScanReport {
+    pub pid: u32,
+    pub engine: String,
+    pub scanned_at: String,
+    pub module_count: usize,
+    pub matches: Vec<RuleMatch>,
+    pub active_signals: Vec<String>,
+    pub score: u32,
+    pub verdict: String,
+    pub error: Option<String>,
+    /// On non-Windows or unsupported targets, true; signals are honesty markers.
+    pub supported: bool,
+}
+
+/// Build a [`ScanReport`] from scan inputs.
+///
+/// * `matches` — the per-module rule matches (may be empty).
+/// * `signals` — the deduplicated set of active signals driving the score.
+/// * `module_count` — number of modules enumerated (0 when unsupported).
+/// * `supported` — whether real module enumeration ran on this platform.
+pub fn build(
+    pid: u32,
+    matches: Vec<RuleMatch>,
+    signals: &[Signal],
+    module_count: usize,
+    ruleset: &Ruleset,
+    supported: bool,
+    error: Option<String>,
+) -> ScanReport {
+    let score = score_signals(signals, ruleset);
+    let verdict: Verdict = verdict_for(score, &ruleset.thresholds);
+    ScanReport {
+        pid,
+        engine: env!("CARGO_PKG_NAME").to_string(),
+        scanned_at: now_rfc3339(),
+        module_count,
+        matches,
+        active_signals: signals.iter().map(signal_name).collect(),
+        score,
+        verdict: verdict.as_str().to_string(),
+        error,
+        supported,
+    }
+}
+
+/// Stable machine name for a signal (used in the report / CLI).
+pub fn signal_name(s: &Signal) -> String {
+    match s {
+        Signal::UnsignedModule => "unsigned_module".to_string(),
+        Signal::UnexpectedPath => "unexpected_path".to_string(),
+        Signal::KnownCheatName => "known_cheat_name".to_string(),
+        Signal::SuspiciousName => "suspicious_name".to_string(),
+        Signal::CountAnomaly => "count_anomaly".to_string(),
+    }
+}
+
+/// Best-effort UTC timestamp; never fails the scan if the clock misbehaves.
+fn now_rfc3339() -> String {
+    match std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH) {
+        Ok(d) => format!("{}", d.as_secs()),
+        Err(_) => "unknown".to_string(),
+    }
+}
+
+/// Convenience constructor used in tests to avoid depending on the clock format.
+#[cfg(test)]
+pub(crate) fn build_test(
+    pid: u32,
+    matches: Vec<RuleMatch>,
+    signals: &[Signal],
+    module_count: usize,
+    ruleset: &Ruleset,
+    supported: bool,
+) -> ScanReport {
+    let score = score_signals(signals, ruleset);
+    let verdict: Verdict = verdict_for(score, &ruleset.thresholds);
+    ScanReport {
+        pid,
+        engine: "cheatguard".to_string(),
+        scanned_at: "test".to_string(),
+        module_count,
+        matches,
+        active_signals: signals.iter().map(signal_name).collect(),
+        score,
+        verdict: verdict.as_str().to_string(),
+        error: None,
+        supported,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::scoring::Signal;
+
+    #[test]
+    fn report_with_known_cheat_is_malicious() {
+        let rs = Ruleset::default();
+        let m = RuleMatch {
+            module: "aimbot.dll".to_string(),
+            module_path: "C:\\Temp\\aimbot.dll".to_string(),
+            signal: "known_cheat_name".to_string(),
+            reason: "known cheat name".to_string(),
+        };
+        let r = build_test(1234, vec![m], &[Signal::KnownCheatName], 5, &rs, true);
+        assert_eq!(r.score, rs.weights.known_cheat_name);
+        assert_eq!(r.verdict, "MALICIOUS");
+        assert_eq!(r.module_count, 5);
+        assert_eq!(r.active_signals, vec!["known_cheat_name"]);
+    }
+
+    #[test]
+    fn report_with_no_signals_is_clean() {
+        let rs = Ruleset::default();
+        let r = build_test(99, vec![], &[], 3, &rs, true);
+        assert_eq!(r.score, 0);
+        assert_eq!(r.verdict, "CLEAN");
+        assert!(r.matches.is_empty());
+    }
+
+    #[test]
+    fn report_serializes_to_valid_json() {
+        let rs = Ruleset::default();
+        let r = build_test(1234, vec![], &[Signal::UnsignedModule], 2, &rs, true);
+        let json = serde_json::to_string(&r).unwrap();
+        // round-trips back to an equivalent report
+        let back: ScanReport = serde_json::from_str(&json).unwrap();
+        assert_eq!(r, back);
+    }
+
+    #[test]
+    fn unsupported_report_is_honest() {
+        let rs = Ruleset::default();
+        let r = build_test(1, vec![], &[], 0, &rs, false);
+        assert!(!r.supported);
+        assert_eq!(r.module_count, 0);
+    }
+}
+
+```
+
+`src/rules.rs`:
+
+```rs
+//! Data-driven detection ruleset.
+//!
+//! Signatures are **data, not code**. A [`Ruleset`] is a serde-deserializable
+//! JSON document describing:
+//!
+//! * [`Weights`] — how strongly each signal contributes to the risk score.
+//! * [`Thresholds`] — score cut-offs for the SUSPICIOUS / MALICIOUS verdicts.
+//! * `expected_locations` — module path prefixes that are considered normal
+//!   (anything loaded elsewhere, e.g. `%TEMP%` / `%APPDATA%`, is "unexpected").
+//! * `suspicious_name_patterns` — case-insensitive substrings matching known
+//!   cheat-DLL naming conventions.
+//! * `known_cheat_names` — case-insensitive exact module basenames of known cheats.
+//! * `baseline_module_count` / `module_count_tolerance` — for the module-count
+//!   anomaly signal.
+//!
+//! The crate ships a bundled default ruleset (`rules/default.rules.json`) which
+//! is also used by the test-suite and by the CLI when no `--rules` path is given.
+
+use serde::{Deserialize, Serialize};
+use std::path::Path;
+
+/// How strongly each signal contributes to the 0..=100 risk score.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Weights {
+    pub unsigned_module: u32,
+    pub unexpected_path: u32,
+    pub known_cheat_name: u32,
+    pub suspicious_name: u32,
+    pub count_anomaly: u32,
+}
+
+impl Default for Weights {
+    fn default() -> Self {
+        Weights {
+            unsigned_module: 30,
+            unexpected_path: 15,
+            known_cheat_name: 80,
+            suspicious_name: 25,
+            count_anomaly: 10,
+        }
+    }
+}
+
+/// Score cut-offs (inclusive lower bound) for each verdict tier.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Thresholds {
+    pub suspicious: u32,
+    pub malicious: u32,
+}
+
+impl Default for Thresholds {
+    fn default() -> Self {
+        Thresholds {
+            suspicious: 25,
+            malicious: 70,
+        }
+    }
+}
+
+/// A fully-described detection ruleset.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Ruleset {
+    pub version: u32,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default)]
+    pub weights: Weights,
+    #[serde(default)]
+    pub thresholds: Thresholds,
+    /// Module path prefixes considered "expected"/trusted.
+    #[serde(default)]
+    pub expected_locations: Vec<String>,
+    /// Case-insensitive substrings of suspicious module names.
+    #[serde(default)]
+    pub suspicious_name_patterns: Vec<String>,
+    /// Case-insensitive exact module basenames of known cheats.
+    #[serde(default)]
+    pub known_cheat_names: Vec<String>,
+    /// Expected number of loaded modules for a clean process (optional).
+    #[serde(default)]
+    pub baseline_module_count: Option<u32>,
+    /// How many modules above/below baseline are tolerated before scoring.
+    #[serde(default)]
+    pub module_count_tolerance: u32,
+}
+
+impl Default for Ruleset {
+    /// Built-in default ruleset (mirrors `rules/default.rules.json`).
+    fn default() -> Self {
+        Ruleset {
+            version: 1,
+            name: "cheatguard-default".to_string(),
+            weights: Weights::default(),
+            thresholds: Thresholds::default(),
+            expected_locations: vec![
+                "C:\\Windows\\".to_string(),
+                "C:\\Program Files\\".to_string(),
+                "C:\\Program Files (x86)\\".to_string(),
+            ],
+            suspicious_name_patterns: vec![
+                "cheat".to_string(),
+                "hack".to_string(),
+                "inject".to_string(),
+                "aimbot".to_string(),
+                "wallhack".to_string(),
+                "trainer".to_string(),
+                "speeder".to_string(),
+                "bypass".to_string(),
+            ],
+            known_cheat_names: vec![
+                "cheatengine.dll".to_string(),
+                "csgo-cheat.dll".to_string(),
+                "xhack.dll".to_string(),
+                "aimbot.dll".to_string(),
+                "overwolf_hook.dll".to_string(),
+            ],
+            baseline_module_count: None,
+            module_count_tolerance: 0,
+        }
+    }
+}
+
+impl Ruleset {
+    /// Parse a ruleset from a JSON string.
+    pub fn from_json(json: &str) -> Result<Ruleset, serde_json::Error> {
+        serde_json::from_str(json)
+    }
+
+    /// Load and parse a ruleset from a file path.
+    pub fn load_path(path: &Path) -> Result<Ruleset, std::io::Error> {
+        let text = std::fs::read_to_string(path)?;
+        Ruleset::from_json(&text)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+    }
+
+    /// Does `name` match a known-cheat basename (case-insensitive exact match)?
+    pub fn matches_known_cheat(&self, name: &str) -> bool {
+        let lower = name.to_lowercase();
+        self.known_cheat_names
+            .iter()
+            .any(|k| k.to_lowercase() == lower)
+    }
+
+    /// Does `name` contain any suspicious-naming substring (case-insensitive)?
+    pub fn matches_suspicious_pattern(&self, name: &str) -> bool {
+        let lower = name.to_lowercase();
+        self.suspicious_name_patterns
+            .iter()
+            .any(|p| lower.contains(&p.to_lowercase()))
+    }
+
+    /// Is `path` loaded from an expected/trusted location?
+    ///
+    /// Returns `true` when `path` starts with any configured `expected_locations`
+    /// prefix (case-insensitive). An empty `path` is treated as unexpected.
+    pub fn is_expected_location(&self, path: &str) -> bool {
+        if path.is_empty() {
+            return false;
+        }
+        let lower = path.to_lowercase();
+        self.expected_locations
+            .iter()
+            .any(|p| lower.starts_with(&p.to_lowercase()))
+    }
+
+    /// Signed-delta of a module count against the configured baseline.
+    ///
+    /// Returns the absolute deviation beyond `module_count_tolerance`, i.e. the
+    /// number of "anomalous" modules. Returns `0` when no baseline is configured.
+    pub fn count_deviation(&self, module_count: u32) -> u32 {
+        match self.baseline_module_count {
+            None => 0,
+            Some(base) => {
+                let diff = module_count.abs_diff(base);
+                diff.saturating_sub(self.module_count_tolerance)
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_ruleset_is_valid_json_roundtrip() {
+        let rs = Ruleset::default();
+        let json = serde_json::to_string(&rs).unwrap();
+        let parsed = Ruleset::from_json(&json).unwrap();
+        assert_eq!(rs, parsed);
+    }
+
+    #[test]
+    fn known_cheat_match_is_case_insensitive_exact() {
+        let rs = Ruleset::default();
+        assert!(rs.matches_known_cheat("CheatEngine.dll"));
+        assert!(rs.matches_known_cheat("CHEATENGINE.DLL"));
+        assert!(!rs.matches_known_cheat("cheatengine_x64.dll"));
+        assert!(!rs.matches_known_cheat("legit.dll"));
+    }
+
+    #[test]
+    fn suspicious_pattern_is_substring_case_insensitive() {
+        let rs = Ruleset::default();
+        assert!(rs.matches_suspicious_pattern("my_aimbot.dll"));
+        assert!(rs.matches_suspicious_pattern("SuperHack.exe"));
+        assert!(!rs.matches_suspicious_pattern("kernel32.dll"));
+    }
+
+    #[test]
+    fn expected_location_prefix_is_case_insensitive() {
+        let rs = Ruleset::default();
+        assert!(rs.is_expected_location("C:\\Windows\\System32\\ntdll.dll"));
+        assert!(rs.is_expected_location("c:\\program files\\game\\game.exe"));
+        assert!(!rs.is_expected_location("C:\\Users\\me\\AppData\\evil.dll"));
+        assert!(!rs.is_expected_location("C:\\Temp\\loader.dll"));
+        assert!(!rs.is_expected_location("")); // empty path is unexpected
+    }
+
+    #[test]
+    fn count_deviation_respects_baseline_and_tolerance() {
+        let rs = Ruleset {
+            baseline_module_count: Some(100),
+            module_count_tolerance: 10,
+            ..Default::default()
+        };
+        assert_eq!(rs.count_deviation(100), 0); // on baseline
+        assert_eq!(rs.count_deviation(105), 0); // within tolerance
+        assert_eq!(rs.count_deviation(120), 10); // 20 over, tolerance 10
+        assert_eq!(rs.count_deviation(80), 10); // 20 under, tolerance 10
+    }
+
+    #[test]
+    fn count_deviation_is_zero_without_baseline() {
+        let rs = Ruleset::default();
+        assert_eq!(rs.count_deviation(999), 0);
+    }
+
+    #[test]
+    fn bundled_sample_ruleset_file_parses() {
+        // The shipped sample ruleset must both parse and be internally coherent.
+        let path =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("rules/default.rules.json");
+        let rs = Ruleset::load_path(&path).expect("bundled ruleset must parse");
+        assert_eq!(rs.version, 1);
+        assert!(rs.matches_known_cheat("aimbot.dll"));
+        assert!(rs.matches_suspicious_pattern("superhack.dll"));
+        assert!(rs.is_expected_location("C:\\Windows\\System32\\x.dll"));
+        assert!(!rs.is_expected_location("C:\\Users\\x\\AppData\\evil.dll"));
+    }
+
+    #[test]
+    fn from_json_parses_sample_ruleset() {
+        let json = r#"{
+            "version": 1,
+            "name": "demo",
+            "weights": { "unsigned_module": 30, "unexpected_path": 15, "known_cheat_name": 60, "suspicious_name": 25, "count_anomaly": 10 },
+            "thresholds": { "suspicious": 25, "malicious": 70 },
+            "expected_locations": ["C:\\Windows\\"],
+            "suspicious_name_patterns": ["cheat", "hack"],
+            "known_cheat_names": ["aimbot.dll"],
+            "baseline_module_count": 120,
+            "module_count_tolerance": 20
+        }"#;
+        let rs = Ruleset::from_json(json).unwrap();
+        assert_eq!(rs.version, 1);
+        assert!(rs.matches_known_cheat("aimbot.dll"));
+        assert_eq!(rs.count_deviation(150), 10);
+    }
+}
+
+```
+
+`src/scoring.rs`:
+
+```rs
+//! Deterministic, weighted heuristic risk scorer.
+//!
+//! [`score_signals`] combines a set of [`Signal`]s into a 0..=100 risk score using
+//! a [`WeightedRuleset`] (weights + verdict thresholds). It is intentionally a
+//! pure function — no I/O, no randomness — so its behaviour is fully unit-tested.
+//!
+//! Verdict tiers (see [`Verdict`]): `CLEAN` (0 .. suspicious), `SUSPICIOUS`
+//! (`suspicious` .. `malicious`), `MALICIOUS` (`malicious` ..= 100).
+
+use crate::rules::{Ruleset, Thresholds, Weights};
+use serde::{Deserialize, Serialize};
+
+/// A single boolean detection signal produced by the process-integrity scan.
+///
+/// All signals are mutually combinable; the scorer sums the weight of every
+/// *active* signal and clamps the total to `0..=100`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum Signal {
+    /// A loaded module carries no (verified) Authenticode signature.
+    UnsignedModule,
+    /// A module was loaded from an unexpected location (e.g. `%TEMP%`/`%APPDATA%`).
+    UnexpectedPath,
+    /// A module basename exactly matches a known-cheat name.
+    KnownCheatName,
+    /// A module name matches a suspicious-naming pattern.
+    SuspiciousName,
+    /// The process loaded an anomalous number of modules vs. baseline.
+    CountAnomaly,
+}
+
+impl Signal {
+    /// The ruleset weight associated with this signal.
+    pub fn weight(self, w: &Weights) -> u32 {
+        match self {
+            Signal::UnsignedModule => w.unsigned_module,
+            Signal::UnexpectedPath => w.unexpected_path,
+            Signal::KnownCheatName => w.known_cheat_name,
+            Signal::SuspiciousName => w.suspicious_name,
+            Signal::CountAnomaly => w.count_anomaly,
+        }
+    }
+}
+
+/// Verdict tier derived from the final score.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Verdict {
+    Clean,
+    Suspicious,
+    Malicious,
+}
+
+impl Verdict {
+    /// Stable, uppercase machine label (e.g. for JSON/`println!`).
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Verdict::Clean => "CLEAN",
+            Verdict::Suspicious => "SUSPICIOUS",
+            Verdict::Malicious => "MALICIOUS",
+        }
+    }
+}
+
+/// Map a clamped score to a verdict using configured thresholds.
+pub fn verdict_for(score: u32, t: &Thresholds) -> Verdict {
+    if score >= t.malicious {
+        Verdict::Malicious
+    } else if score >= t.suspicious {
+        Verdict::Suspicious
+    } else {
+        Verdict::Clean
+    }
+}
+
+/// Sum the weights of all active signals and clamp to `0..=100`.
+///
+/// `signals` is a slice of active signals (a given signal present multiple times
+/// is only scored once — duplicates are ignored via a `HashSet`).
+pub fn score_signals(signals: &[Signal], ruleset: &Ruleset) -> u32 {
+    use std::collections::HashSet;
+    let mut seen = HashSet::new();
+    let mut raw: u32 = 0;
+    for s in signals {
+        if seen.insert(*s) {
+            raw = raw.saturating_add(s.weight(&ruleset.weights));
+        }
+    }
+    raw.min(100)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ruleset() -> Ruleset {
+        Ruleset::default()
+    }
+
+    #[test]
+    fn empty_signals_score_zero_and_clean() {
+        let s = score_signals(&[], &ruleset());
+        assert_eq!(s, 0);
+        assert_eq!(verdict_for(s, &ruleset().thresholds), Verdict::Clean);
+    }
+
+    #[test]
+    fn unsigned_module_signal_weight() {
+        let rs = ruleset();
+        let s = score_signals(&[Signal::UnsignedModule], &rs);
+        assert_eq!(s, rs.weights.unsigned_module);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Suspicious);
+    }
+
+    #[test]
+    fn unexpected_path_signal_weight() {
+        let rs = ruleset();
+        let s = score_signals(&[Signal::UnexpectedPath], &rs);
+        assert_eq!(s, rs.weights.unexpected_path);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Clean);
+    }
+
+    #[test]
+    fn known_cheat_name_signal_weight() {
+        let rs = ruleset();
+        let s = score_signals(&[Signal::KnownCheatName], &rs);
+        assert_eq!(s, rs.weights.known_cheat_name);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Malicious);
+    }
+
+    #[test]
+    fn suspicious_name_signal_weight() {
+        let rs = ruleset();
+        let s = score_signals(&[Signal::SuspiciousName], &rs);
+        assert_eq!(s, rs.weights.suspicious_name);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Suspicious);
+    }
+
+    #[test]
+    fn count_anomaly_signal_weight() {
+        let rs = ruleset();
+        let s = score_signals(&[Signal::CountAnomaly], &rs);
+        assert_eq!(s, rs.weights.count_anomaly);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Clean);
+    }
+
+    #[test]
+    fn duplicate_signals_deduplicated() {
+        let rs = ruleset();
+        let s = score_signals(
+            &[
+                Signal::UnsignedModule,
+                Signal::UnsignedModule,
+                Signal::UnsignedModule,
+            ],
+            &rs,
+        );
+        assert_eq!(s, rs.weights.unsigned_module);
+    }
+
+    #[test]
+    fn combined_score_sums_and_clamps_to_100() {
+        let rs = ruleset();
+        // All signals sum to 30+15+60+25+10 = 140 -> clamped to 100.
+        let s = score_signals(
+            &[
+                Signal::UnsignedModule,
+                Signal::UnexpectedPath,
+                Signal::KnownCheatName,
+                Signal::SuspiciousName,
+                Signal::CountAnomaly,
+            ],
+            &rs,
+        );
+        assert_eq!(s, 100);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Malicious);
+    }
+
+    #[test]
+    fn combined_score_partial_sum() {
+        let rs = ruleset();
+        // unsigned(30) + suspicious_name(25) = 55 -> SUSPICIOUS
+        let s = score_signals(&[Signal::UnsignedModule, Signal::SuspiciousName], &rs);
+        assert_eq!(s, 55);
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Suspicious);
+    }
+
+    #[test]
+    fn custom_thresholds_change_verdict_boundaries() {
+        let mut rs = ruleset();
+        rs.thresholds = Thresholds {
+            suspicious: 10,
+            malicious: 14,
+        };
+        let s = score_signals(&[Signal::UnexpectedPath], &rs); // 15
+        assert_eq!(verdict_for(s, &rs.thresholds), Verdict::Malicious);
+    }
+
+    #[test]
+    fn verdict_boundaries_inclusive() {
+        let t = Thresholds {
+            suspicious: 25,
+            malicious: 70,
+        };
+        assert_eq!(verdict_for(0, &t), Verdict::Clean);
+        assert_eq!(verdict_for(24, &t), Verdict::Clean);
+        assert_eq!(verdict_for(25, &t), Verdict::Suspicious); // inclusive
+        assert_eq!(verdict_for(69, &t), Verdict::Suspicious);
+        assert_eq!(verdict_for(70, &t), Verdict::Malicious); // inclusive
+        assert_eq!(verdict_for(100, &t), Verdict::Malicious);
+    }
+}
+
+```
+
+`tests/cli_scan.rs`:
+
+```rs
+//! Integration test: the `cheatguard scan <pid>` CLI must produce valid JSON
+//! with the expected schema, regardless of platform support.
+
+use std::process::Command;
+
+fn cli() -> Command {
+    Command::new(env!("CARGO_BIN_EXE_cheatguard"))
+}
+
+#[test]
+fn scan_cli_outputs_valid_json_with_schema() {
+    // Scan our own process — always exists on every platform.
+    let pid = std::process::id();
+    let output = cli()
+        .arg("scan")
+        .arg(pid.to_string())
+        .output()
+        .expect("failed to launch cheatguard binary");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        !stdout.trim().is_empty(),
+        "scan produced no stdout (stderr: {})",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    // Must be parseable JSON.
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("scan stdout is not valid JSON");
+
+    // Required schema fields present.
+    let obj = value.as_object().expect("report is a JSON object");
+    for field in [
+        "pid",
+        "engine",
+        "scanned_at",
+        "module_count",
+        "matches",
+        "active_signals",
+        "score",
+        "verdict",
+        "supported",
+    ] {
+        assert!(obj.contains_key(field), "report missing field '{field}'");
+    }
+
+    // score is an integer 0..=100.
+    let score = value["score"].as_u64().expect("score is integer");
+    assert!(score <= 100, "score out of range: {score}");
+
+    // verdict is one of the known tiers (case-sensitive).
+    let verdict = value["verdict"].as_str().expect("verdict is string");
+    assert!(
+        matches!(verdict, "CLEAN" | "SUSPICIOUS" | "MALICIOUS"),
+        "unexpected verdict: {verdict}"
+    );
+
+    // matches is an array.
+    assert!(value["matches"].is_array(), "matches must be an array");
+    assert!(
+        value["active_signals"].is_array(),
+        "active_signals must be an array"
+    );
+}
+
+#[test]
+fn scan_cli_rejects_missing_pid() {
+    let output = cli().arg("scan").output().expect("launch");
+    assert!(!output.status.success(), "scan with no pid must fail");
+}
+
+#[test]
+fn scan_cli_rejects_invalid_pid() {
+    let output = cli()
+        .arg("scan")
+        .arg("not-a-number")
+        .output()
+        .expect("launch");
+    assert!(!output.status.success(), "scan with bad pid must fail");
+}
+
+```
