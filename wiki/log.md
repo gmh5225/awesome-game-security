@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/Pom-Pom`: entity [[pom-pom]]; cited on [[overviews/game-hacking]]; cross-link from [[star-rail]].
+
 - **2026-08-11** — ingest `description:gmh5225/Ponce`: entity [[ponce]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
 
 - **2026-08-11** — ingest `description:gmh5225/Practical-Reverse-Engineering-Solutions`: entity [[practical-reverse-engineering-solutions]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]].
