@@ -1037,6 +1037,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [Page Table Injector](entities/page-table-injector.md) — PT-Injector (C/C++; kernel driver; page-table manipulation / injection:windows; AC research)
 - [page_no_access](entities/page-no-access.md) — C++ lazy decrypt-on-first-access page protection (modding; Anti Cheat → Page Protection)
+- [PAGE_NO_ACCESS-not-byfron](entities/page-no-access-not-byfron.md) — VEH + PAGE_NOACCESS Byfron/Hyperion anti-tamper PoC (LoadLibrary tester; gmh5225)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [paladins-internal-cheat](entities/paladins-internal-cheat.md) — Paladins internal: optional Mhyprot backend + borderless overlay (gmh5225; cheat / game:paladins)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
