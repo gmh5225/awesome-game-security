@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-11** — ingest `description:gmh5225/MapleStory-Server`: entity [[maplestory-server]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
+
 - **2026-08-11** — ingest `description:gmh5225/MapleStory-v113-Server-Eimulator`: entity [[maplestory-v113-server-eimulator]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
 
 - **2026-08-11** — ingest `description:gmh5225/MapleStoryAutoLevelUp`: entity [[maplestory-auto-level-up]]; cited on [[overviews/game-hacking]]; cross-link from [[maplestory-artale-explab]].
