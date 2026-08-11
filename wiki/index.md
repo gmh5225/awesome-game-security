@@ -981,6 +981,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ntminhook](entities/ntminhook.md) — NTDLL-only MinHook fork (Native API; asset pipelines / modding / hooking; gmh5225)
 - [ntoskrnl-file-collection](entities/ntoskrnl-file-collection.md) — multi-build ntoskrnl binary corpus (version diff / kernel RE reference)
 - [ntoskrnlwalker](entities/ntoskrnlwalker.md) — ntoskrnl offset/gadget/symbol resolver (target-build kernel structure navigation)
+- [NtRays](entities/ntrays.md) — IDA Pro Hex-Rays plugin: NT kernel type/structure enrichment (NTSTATUS, IOCTL, object types, EPROCESS/ETHREAD; Windows Kernel Enhance; gmh5225)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
 - [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
 - [NtUserInjectMouseInput-syscall](entities/ntuserinjectmouseinput-syscall.md) — win32k NtUserInjectMouseInput syscall path (user-mode mouse injection; triggerbot/aimbot primitives; gmh5225)
