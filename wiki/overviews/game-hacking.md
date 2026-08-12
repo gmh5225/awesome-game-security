@@ -1191,6 +1191,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - Internal Team Fortress 2 samples such as [[teamfortress2-internal]] (C++ / C/C++; modding / hooking; Internal tag; gmh5225) sit in the cheat / game:team fortress 2 lane for studying Source 1 internal hook patterns beside CS:GO internals under VAC. (source: wiki/sources/descriptions/gmh5225__teamfortress2_internal.md)
+- Basic Left 4 Dead 2 cheat frameworks such as [[l4d2-basic]] (gmh5225; Source engine hook structures, interface resolution, starter template) sit in the cheat / game:left 4 dead 2 lane for bootstrapping Source 1 internal hook work beside TF2 and CS:GO samples. (source: wiki/sources/descriptions/gmh5225__L4D2Basic.md)
 
 - Internal CS:GO samples such as [[lumina-cheat]] emphasize mutation for a changing signature (Internal tag). (source: wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md)
 - Cheat-compiler research samples such as [[compiled-protection]] (C/C++; [Cheat Compiler] tag) sit adjacent to the cheat / game:csgo offensive-technique lane. (source: wiki/sources/descriptions/razixNew__CompiledProtection.md)
