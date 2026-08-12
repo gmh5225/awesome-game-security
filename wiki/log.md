@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/JMSv186`: entity [[jmsv186]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-links from [[maplestory-server]] and [[maplestory-v113-server-eimulator]].
+
 - **2026-08-12** — ingest `description:gmh5225/KExecDD`: entity [[kexecdd]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-link from [[kexecddplus]].
 
 - **2026-08-12** — ingest `description:gmh5225/KasperskyHook`: entity [[kaspersky-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
