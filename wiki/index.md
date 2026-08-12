@@ -1259,6 +1259,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2ai](entities/r2ai.md) — LLM-based reversing assistant for radare2 (interactive LLM↔r2; Cheat Radare Plugins)
 - [r2garlic](entities/r2garlic.md) — radare2 Garlic DEX/Dalvik decompiler plugin (DEX/APK/ELF/PE/Mach-O; Cheat Radare Plugins)
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
+- [r2smt](entities/r2smt.md) — radare2 SMT opaque-predicate deobfuscator (Rust; Z3/CVC5/Bitwuzla; Cheat Radare Plugins)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
 - [ReadDirectoryChanges](entities/readdirectorychanges.md) — C++ `ReadDirectoryChangesW` wrapper (async recursive directory watch; sync/security monitoring)
