@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/KernelSnippets`: entity [[kernel-snippets]]; cited on [[overviews/windows-kernel]] and [[kernel-callbacks]].
+
 - **2026-08-12** — ingest `description:gmh5225/Kernel_Anti-Cheat`: entity [[kernel-anti-cheat]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-12** — ingest `description:gmh5225/KexecDDPlus`: entity [[kexecddplus]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

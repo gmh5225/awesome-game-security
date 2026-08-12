@@ -12,7 +12,7 @@ confidence: medium
 
 Documentation and reference material cataloging Windows Ring0 **callback registration APIs** for the anti-cheat / kernel-callback research lane—not a standalone runtime codebase. Aimed at anti-cheat engineers and defensive security researchers mapping notify routines, object callbacks, filter callbacks, and related registration surfaces. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md)
 
-Complements live enumeration tools such as [[openark]] and [[winobjex64]], offensive patch/remove research such as [[bustercall]], and the Ring3 counterpart [[function-collections]].
+Complements live enumeration tools such as [[openark]] and [[winobjex64]], offensive patch/remove research such as [[bustercall]], implementation snippets such as [[kernel-snippets]], and the Ring3 counterpart [[function-collections]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements live enumeration tools such as [[openark]] and [[winobjex64]], offen
 
 ## Related
 
-[[kernel-callbacks]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[openark]] · [[winobjex64]] · [[function-collections]] · [[bustercall]]
+[[kernel-callbacks]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[openark]] · [[winobjex64]] · [[function-collections]] · [[kernel-snippets]] · [[bustercall]]

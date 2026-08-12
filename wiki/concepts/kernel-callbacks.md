@@ -17,6 +17,7 @@ sources:
   - wiki/sources/descriptions/kkent030315__Van1338.md
   - wiki/sources/descriptions/hfiref0x__WinObjEx64.md
   - wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md
+  - wiki/sources/descriptions/gmh5225__KernelSnippets.md
   - wiki/sources/descriptions/gmh5225__RToolZ.md
   - wiki/sources/descriptions/gmh5225__PsNotifRoutineUnloader.md
 updated: 2026-08-10
@@ -37,7 +38,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 ## Reference
 
-Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md)
+Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md)
 
 ## Attack / defense
 
@@ -45,4 +46,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[openark]] · [[winobjex64]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[kernel-callback-functions-list]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[openark]] · [[winobjex64]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
