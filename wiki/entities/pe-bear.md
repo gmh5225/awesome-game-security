@@ -20,4 +20,4 @@ Useful for triage and light patching of game/client binaries before deeper IDA/G
 
 ## Related
 
-[[totalpe2]] · [[pe-sieve]] · [[retoolkit]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[totalpe2]] · [[kitsupe]] · [[pe-sieve]] · [[retoolkit]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/KitsuPE`: entity [[kitsupe]]; cited on [[overviews/reverse-engineering]].
+
 - **2026-08-12** — ingest `description:gmh5225/KittyMemory-IOS`: entity [[kittymemory-ios]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-12** — ingest `description:gmh5225/L-Assemblies`: entity [[l-assemblies]]; cross-link from [[leaguesharp]]; cited on [[overviews/game-hacking]] and [[vanguard]].
