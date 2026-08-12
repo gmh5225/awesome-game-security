@@ -767,6 +767,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KawaiiPhysics](entities/kawaii-physics.md) — UE4/UE5 simple fake physics (animation / secondary motion; Game Develop / Unreal)
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
+- [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)
 - [KernelSU](entities/kernelsu.md) — Android kernel su root (Kotlin/Rust; Cheat / Android root)
 - [KernelSU-4.4](entities/kernelsu-4.4.md) — KernelSU backport for Linux kernel 4.4 (su / SELinux / APK sig verify; Google GCC 4.9; cheat / Android root)

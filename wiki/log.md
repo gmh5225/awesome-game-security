@@ -3723,3 +3723,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-10** — ingest `description:gmh5225/PsNotifRoutineUnloader`: entity [[ps-notif-routine-unloader]]; cited on [[kernel-callbacks]] and [[overviews/windows-kernel]].
 
 - **2026-08-12** — ingest `description:seifreed/r2SMT`: entity [[r2smt]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-12** — ingest `description:gmh5225/KDP-compatible-driver-loader`: entity [[kdp-compatible-driver-loader]]; cited on [[byovd]] and [[overviews/windows-kernel]].

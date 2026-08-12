@@ -30,6 +30,7 @@ sources:
   - wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md
   - wiki/sources/descriptions/gmh5225__gdrv-loader.md
   - wiki/sources/descriptions/gmh5225__gdriver-lib.md
+  - wiki/sources/descriptions/gmh5225__KDP-compatible-driver-loader.md
   - wiki/sources/descriptions/holi4m__gdrv-loader-v2.md
   - wiki/sources/descriptions/hfiref0x__KDU.md
   - wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md
@@ -157,7 +158,7 @@ Game-AC driver abuse such as [[mhyprot2]] (gmh5225; IOCTL kernel R/W + process t
 
 Physical-memory mapping abuse via **`msIo64.sys`** such as [[ms-io-exploit]] sits in the same cheat / vulnerable-driver research lane; the anycall project offers fuller client-and-driver-side physmem mapping. (source: wiki/sources/descriptions/kkent030315__MsIoExploit.md)
 
-Gigabyte **`gdrv64.sys`/`gdrv.sys`** loader research such as [[gdrv-loader]] (gmh5225; arbitrary R/W IOCTL → manual map unsigned PE; DSE bypass via BYOVD) and [[gdrv-loader-v2]] (C/C++; alternate `gdrv.sys` loader in the cheat / vulnerable-driver lane), plus reusable access-primitive library [[gdriver-lib]] (gmh5225; C++ wrapper for physmem R/W, physical mapping, and kernel ops via gdrv IOCTLs). (source: wiki/sources/descriptions/gmh5225__gdrv-loader.md) (source: wiki/sources/descriptions/holi4m__gdrv-loader-v2.md) (source: wiki/sources/descriptions/gmh5225__gdriver-lib.md)
+Gigabyte **`gdrv64.sys`/`gdrv.sys`** loader research such as [[gdrv-loader]] (gmh5225; arbitrary R/W IOCTL → manual map unsigned PE; DSE bypass via BYOVD) and [[gdrv-loader-v2]] (C/C++; alternate `gdrv.sys` loader in the cheat / vulnerable-driver lane), plus reusable access-primitive library [[gdriver-lib]] (gmh5225; C++ wrapper for physmem R/W, physical mapping, and kernel ops via gdrv IOCTLs); Win10 KDP-aware unsigned loader [[kdp-compatible-driver-loader]] (gmh5225; `gdrv.sys` write primitives → `SeCiCallbacks` patch for DSE bypass on KDP-enabled builds). (source: wiki/sources/descriptions/gmh5225__gdrv-loader.md) (source: wiki/sources/descriptions/holi4m__gdrv-loader-v2.md) (source: wiki/sources/descriptions/gmh5225__gdriver-lib.md) (source: wiki/sources/descriptions/gmh5225__KDP-compatible-driver-loader.md)
 
 Multi-provider unsigned-driver mappers such as [[kdu]] (Kernel Driver Utility; hfiref0x; extensible vulnerable-driver providers across Intel/ASUS/MSI/Gigabyte families; automated DSE bypass, PE map, cleanup) sit in the canonical cheat / driver-mapper research lane. (source: wiki/sources/descriptions/hfiref0x__KDU.md)
 
