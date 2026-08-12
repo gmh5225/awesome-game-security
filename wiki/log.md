@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/HWID-Kernel-Spoofer`: entity [[hwid-kernel-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
+
 - **2026-08-12** — ingest `description:gmh5225/HWID-Pasted-Hwid-Spoofer`: entity [[hwid-pasted-hwid-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-12** — ingest `description:wesjian/GenericGameDetourAPIHook`: entity [[generic-game-detour-api-hook]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
