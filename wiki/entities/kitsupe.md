@@ -20,4 +20,4 @@ Useful for triage and light patching of game clients, cheat modules, and injecte
 
 ## Related
 
-[[pe-bear]] · [[totalpe2]] · [[compiler-binary-richprint]] · [[patch-finder]] · [[underthehoodofexecutables]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[pe-bear]] · [[totalpe2]] · [[compiler-binary-richprint]] · [[patch-finder]] · [[underthehoodofexecutables]] · [[ida2obj]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

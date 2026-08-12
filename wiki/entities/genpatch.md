@@ -20,4 +20,4 @@ Companion to other IDA-side automation such as [[sark]] and [[luda]]—focused o
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[sark]] · [[luda]] · [[ida-easy-life]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[sark]] · [[luda]] · [[ida-easy-life]] · [[ida2obj]]

@@ -532,6 +532,7 @@ sources:
   - wiki/sources/descriptions/regomne__ilhook-rs.md
   - wiki/sources/descriptions/nelfo__PGHooker.md
   - wiki/sources/descriptions/sterrasec__genpatch.md
+  - wiki/sources/descriptions/gmh5225__IDA2Obj.md
   - wiki/sources/descriptions/patois__genmc.md
   - wiki/sources/descriptions/ssmugabi__IDAPlugins.md
   - wiki/sources/descriptions/st4ckh0und__hook-buster.md
@@ -1059,6 +1060,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA 9.X C++ vtable ops via [[ida-vtable-tools]] (dump `.hpp` interface skeleton / class-prefix rename / `this` type / slot index·offset; Python) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md)
 - Missing indirect CALL/JMP target recovery via [[ida-missinglink]] (C++ OOP-heavy game/client binaries; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/kweatherman__ida_missinglink.md)
 - Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
+- IDA database → linkable COFF/ELF object export via [[ida2obj]] (relocations, symbols, section content; binary patching / recompilation; gmh5225; cheat / COFF Relink) sits in the same Cheat IDA Plugins / binary-patch lane. (source: wiki/sources/descriptions/gmh5225__IDA2Obj.md)
 - Hex-Rays microcode IR display via [[genmc]] (IDAPython; debug microcode plugin / decompiler-extension work) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/patois__genmc.md)
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
 - Willi Ballenthin IDA Pro script/plugin/util collection via [[idawilli]] (Python IDAPython; function analysis, string decryption, struct annotation, xref navigation, workflow automation; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idawilli.md)

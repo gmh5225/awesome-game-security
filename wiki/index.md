@@ -643,6 +643,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
 - [ida2llvm](entities/ida2llvm.md) — dynamic IDA→LLVM IR binary lifting (cursor-sync liftability viewer; cheat / IDA Plugins)
+- [ida2obj](entities/ida2obj.md) — IDA Pro database → linkable COFF/ELF object export (relocations, symbols, sections; binary patching / recompilation; cheat / COFF Relink; gmh5225)
 - [ida-android-breakpoint](entities/ida-android-breakpoint.md) — IDA plugin: Android native `.so` breakpoint setup (Python; cheat / IDA Plugins)
 - [ida-bochs-windows](entities/ida-bochs-windows.md) — IDA Pro + Bochs debugger backend on Windows (software CPU emulation; full-system + kernel-mode stepping; cheat / guide)
 - [ida_bitfields](entities/ida-bitfields.md) — IDA plugin: bitfield structure visualization (register/structure bit flags; driver IOCTL / flag-heavy RE; Windows Kernel Enhance)
