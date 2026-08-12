@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Kernel-Cactus`: entity [[kernel-cactus]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-12** — ingest `description:gmh5225/Kernel-Cheat-for-directx3D`: entity [[kernel-cheat-for-directx3d]]; cited on [[overviews/windows-kernel]] and [[overviews/graphics-api]]; cross-links from [[dxgkrnl-hook]] and [[nulldriver-cheat]].
 
 - **2026-08-12** — ingest `description:gmh5225/Kernel-Special-APC-ReadProcessMemory`: entity [[kernel-special-apc-readprocessmemory]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
