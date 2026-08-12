@@ -768,6 +768,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)
 - [KernelSU](entities/kernelsu.md) — Android kernel su root (Kotlin/Rust; Cheat / Android root)
+- [KernelSU-4.4](entities/kernelsu-4.4.md) — KernelSU backport for Linux kernel 4.4 (su / SELinux / APK sig verify; Google GCC 4.9; cheat / Android root)
 - [KernelSU-Pixel4XL](entities/kernelsu-pixel4xl.md) — Pixel 4 XL (coral) msm-floral kernel + KernelSU (su / SELinux / syscall hook; cheat / Android Kernel Source)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [KexecDDPlus](entities/kexecddplus.md) — LSASS-context KSecDD.sys IOCTL kernel execution (enhanced KExecDD; DSE bypass + arbitrary KM R/W; gmh5225)
