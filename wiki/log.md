@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Hidden-Thread-Finder`: entity [[hidden-thread-finder]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-12** — ingest `description:gmh5225/HideDriverTesting`: entity [[hide-driver-testing]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-12** — ingest `description:gmh5225/Hook-HvlSwitchVirtualAddressSpace`: entity [[hook-hvl-switch-virtual-address-space]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].

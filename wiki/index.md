@@ -607,6 +607,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
 - [HideDriverTesting](entities/hide-driver-testing.md) — multi-artifact driver hide (MmUnloadedDrivers, PsLoadedModuleList, PiDDBCacheTable; Win11 21H2; gmh5225)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
+- [Hidden-Thread-Finder](entities/hidden-thread-finder.md) — KTHREAD field-spoof detector via APC vs NMI callback comparison (Win10 20H2; gmh5225)
 - [DLLThreadInjectionDetector](entities/dll-thread-injection-detector.md) — kernel-level DLL thread injection detector (C/C++; Detection:Injection; mq1n)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
 - [hint-break](entities/hint-break.md) — RE-tool ghost opcodes `0F 1A`/`0F 1B` (Anti Debugging / anti-disasm)
