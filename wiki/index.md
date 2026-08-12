@@ -604,6 +604,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Game-GTA-re3](entities/game-gta-re3.md) — Reverse-engineered GTA III & Vice City engines (re3/reVC; decompiled portable C++; cross-platform incl. PS Vita; CMake; gmh5225)
 - [grand-theft-auto-modding-source](entities/grand-theft-auto-modding-source.md) — GTA modding source collection (re3/reVC; GTA III/Vice City RE; platform ports; DirectX/OpenGL; mod infrastructure; gmh5225)
 - [GrandTheftAutoV-Cheat](entities/grandtheftautov-cheat.md) — GTA V PC mod-menu cheat (money / vehicle spawn / teleport / player mods; scripting + memory manipulation; gmh5225)
+- [gta-5-sigs-1.59](entities/gta-5-sigs-1.59.md) — GTA V v1.59 byte-pattern signatures (World/ReplayInterface/Viewport/Ammo/Clip; gmh5225; cheat / game:gta5 [Offset])
 - [gta5cheat](entities/gta5cheat.md) — GTA V Python cheat (memory analysis; cheat / game:gta5; gmh5225)
 - [gta5cheat-qt](entities/gta5cheat-qt.md) — GTA V Qt cheat (C/C++; memory analysis; cheat / game:gta5)
 - [gta5view](entities/gta5view.md) — GTA V snapmatic photo & save viewer/editor (proprietary format parse; Viewer/Editor)

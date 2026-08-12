@@ -20,4 +20,4 @@ Distinct from ScriptHookV mod-menu frameworks such as [[phake]] and [[grandtheft
 
 ## Related
 
-[[phake]] · [[grandtheftautov-cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]
+[[phake]] · [[grandtheftautov-cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[gta-5-sigs-1.59]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]

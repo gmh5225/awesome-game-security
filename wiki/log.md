@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/GTA-5-SIGS-1.59`: entity [[gta-5-sigs-1.59]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked from [[gta5cheat]].
+
 - **2026-08-12** — ingest `description:gmh5225/GTAIII-DE-GoldHook`: entity [[gtaiii-de-goldhook]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-12** — ingest `description:gmh5225/GTAV_DragResize`: entity [[gtav-dragresize]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5view]].
