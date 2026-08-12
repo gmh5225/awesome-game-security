@@ -485,6 +485,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [frida-il2cpp-datacollector](entities/frida-il2cpp-datacollector.md) — Frida IL2CPP runtime metadata harvester (Android/iOS; CE MonoDataCollector port; SDK generation)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
+- [FridaScript](entities/fridascript.md) — Frida game/app hook scripts (call intercept, API trace, runtime modify; Android/iOS/desktop; gmh5225; iOS low-level scripting)
 - [frida-stack](entities/frida-stack.md) — Frida stack/backtrace helpers (cheat / Frida)
 - [frida-ue4dump](entities/frida-ue4dump.md) — Frida script for Android UE4 SDK dump (reflection hook; UObject / offsets / headers)
 - [frida-watchpoint-tutorial](entities/frida-watchpoint-tutorial.md) — Frida `setHardwareWatchpoint` tutorial (hardware data breakpoints; cheat / Frida)

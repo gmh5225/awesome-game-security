@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/FridaScript`: entity [[fridascript]]; cited on [[frida]] and [[overviews/reverse-engineering]].
+
 - **2026-08-12** — ingest `description:gmh5225/Full-Hwid-Spoofer-V6`: entity [[full-hwid-spoofer-v6]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-permanent-hwid-spoofer]] and [[kdmapper-rs]].
 
 - **2026-08-12** — ingest `description:gmh5225/GTA-5-SIGS-1.59`: entity [[gta-5-sigs-1.59]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked from [[gta5cheat]].
