@@ -3047,6 +3047,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
 - https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
 - https://github.com/nekoyahouse/epsilon [Open-source NeoForge and Fabric Minecraft utility client with modular addon system and custom Lumin/PrismRHI rendering stack]
+- https://github.com/lolizei/Lenrete-Mod [Open-source Fabric utility/cheat client for Minecraft 26.2 with modular combat, movement, render, and HUD modules]
 
 > Game:Sword With Sauce
 - https://github.com/1hAck-0/UE4-Cheat-Source-Code
@@ -4067,6 +4068,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Anti-Cheat Programming
 - https://github.com/m417z/thread-call-stack-scanner [Safely manage the unloading of DLLs that have been hooked into a process. Context]
 - https://github.com/euuuuuuan/gatewarden-public [Godot 4 tower defense prototype with published in-game placement-abuse rejection codes and deterministic 30 Hz sim]
+- https://github.com/Shadow-46/adaptive-boss-arena [Unity 6 boss-arena demo with assembly-enforced anti-cheat firewall that blocks AI from reading player input, plus edit-mode tests]
 
 > Compile Time
 - https://github.com/ManulMap/malstring [Using c++23 compile-time magic to produce obfuscated PIC strings and arrays]
