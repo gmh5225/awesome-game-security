@@ -20,4 +20,4 @@ Distinct from in-process cheat frameworks such as [[phake]], [[gta5cheat]], and 
 
 ## Related
 
-[[phake]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]
+[[phake]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gtav-dragresize]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[gta4-rtx]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]
