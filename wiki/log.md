@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/GrandTheftAutoV-Cheat`: entity [[grandtheftautov-cheat]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5cheat]].
+
 - **2026-08-12** — ingest `description:gmh5225/HI3-ACE-B`: entity [[hi3-ace-b]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-link from [[starrail-ace-b]].
 
 - **2026-08-12** — ingest `description:gmh5225/HITCON-2023-Demo-CVE-2023-20562`: entity [[hitcon-2023-demo-cve-2023-20562]]; cited on [[overviews/windows-kernel]] and [[concepts/byovd]].
