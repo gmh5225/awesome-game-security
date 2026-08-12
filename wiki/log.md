@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/KittyMemory-IOS`: entity [[kittymemory-ios]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-12** — ingest `description:gmh5225/L-Assemblies`: entity [[l-assemblies]]; cross-link from [[leaguesharp]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2689 (was ~2688; Anti Cheat ~663 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
