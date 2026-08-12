@@ -529,6 +529,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-virtual-offsets](entities/fortnite-virtual-offsets.md) — Fortnite vtable/view offset dump (text; gmh5225; cheat / game:fortnite [Virtual Table Offsets])
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
+- [CRYENGINE (GameEngine-CRYENGINE)](entities/gameengine-cryengine.md) — Crytek CRYENGINE source mirror (renderer/physics/audio/AI/animation/editor; AAA; Game Engine / source; gmh5225)
 - [CX3D Framework](entities/gameengine-cx3d.md) — easy-to-use C++ 3D game framework (Game Develop / source; README [3D]; gmh5225)
 - [MapleEngine](entities/gameengine-mapleengine.md) — MapleStory-inspired custom game engine (rendering/networking/game logic; 2D side-scrolling MMORPG; Game Develop / source / game:maplestory; gmh5225)
 - [gamedev_libraries](entities/gamedev-libraries.md) — data-oriented C/C++ gamedev library collection (POD/flat arrays; Game Develop / guide)
