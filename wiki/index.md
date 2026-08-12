@@ -797,6 +797,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernel Anti-Cheat](entities/kernel-anti-cheat.md) — experimental multi-telemetry kernel AC driver (NMI stack walk, thread start scan, big pool, PiDDBCache mapper residue; gmh5225; `[NMI]`)
 - [kernel-callback-functions-list](entities/kernel-callback-functions-list.md) — Ring0 callback registration API reference (gmh5225; anti-cheat / documentation)
 - [kernel-snippets](entities/kernel-snippets.md) — Windows KM code snippets (callback registration, memory/process ops; VGK SwapContextHk; gmh5225)
+- [Kernel-VAD-Injector](entities/kernel-vad-injector.md) — unsigned-driver DLL inject with VAD/PTE concealment (`MiAllocateVad`/`MiInsertVad`; post-map VAD removal; Hide VAD; gmh5225)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
 - [kernel-cve-analysis](entities/kernel-cve-analysis.md) — defensive Windows kernel CVE write-ups (thexin7; AC/EDR telemetry, Sigma rules, hardening; cng/afd/appid)
