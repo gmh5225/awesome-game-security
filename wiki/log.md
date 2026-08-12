@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Killer`: entity [[killer]]; cited on [[byovd]] and [[overviews/windows-kernel]].
+
 - **2026-08-12** — ingest `description:gmh5225/KitsuPE`: entity [[kitsupe]]; cited on [[overviews/reverse-engineering]].
 
 - **2026-08-12** — ingest `description:gmh5225/KittyMemory-IOS`: entity [[kittymemory-ios]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

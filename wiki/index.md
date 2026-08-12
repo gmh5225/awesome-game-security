@@ -774,6 +774,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
 - [Keybuster](entities/keybuster.md) — Samsung TrustZone S-Keymaster TA key extract (CVE-2021-25444/25490; TEE)
+- [Killer](entities/killer.md) — kernel driver process terminator via kernel process-structure manipulation (protected AC/EDR/AV; Killer-Exercice RE lab; gmh5225)
 - [Kiroshi](entities/kiroshi.md) — IDA Pro plugin: detect common Anti-Cheat artifacts (cheat / IDA Plugins)
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
 - [kli](entities/kli.md) — header-only KM lazy import resolver (C++; Anti Cheat / Lazy Importer)

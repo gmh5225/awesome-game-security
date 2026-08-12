@@ -62,13 +62,14 @@ sources:
   - wiki/sources/descriptions/gmh5225__WatchDogKiller.md
   - wiki/sources/descriptions/gmh5225__Terminator.md
   - wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md
+  - wiki/sources/descriptions/gmh5225__Killer.md
   - wiki/sources/descriptions/gmh5225__PPLKiller.md
   - wiki/sources/descriptions/gmh5225__TS-Fucker.md
   - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
   - wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md
   - wiki/sources/descriptions/gmh5225__NVDrv.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
-updated: 2026-08-11
+updated: 2026-08-12
 confidence: high
 ---
 
@@ -101,6 +102,8 @@ Zemana anti-malware driver abuse such as [[zam64-zemina]] targets **`zam64.sys`*
 Focused AV/EDR/AC terminate tooling such as [[terminator]] (gmh5225; **`zam64.sys`** BYOVD; arbitrary process-termination IOCTL → kill kernel-protected security and anti-cheat processes; red-team / LOLdriver termination research) complements IOCTL-focused [[zam64-zemina]] in the same Zemana backend lane. (source: wiki/sources/descriptions/gmh5225__Terminator.md)
 
 **`viragt64.sys`** process-kill tooling such as [[process-killer-byovd]] (gmh5225; load signed vulnerable driver → kernel access → forceful termination of user-mode-protected anti-cheat, EDR, and AV processes; red-team / LOLdriver termination research) sits in the same BYOVD process-terminate lane as [[terminator]] and [[watchdog-killer]]. (source: wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md)
+
+Kernel process-structure manipulation killers such as [[killer]] (gmh5225; kernel driver → forceful termination of protected anti-cheat, EDR, and AV processes that resist standard APIs; companion Killer-Exercice red-team RE/exploit exercise; valid BYOVD killer reportedly not HVCI-blocklisted and not in common LOLdriver catalogs at publication) extend the same process-terminate lane. (source: wiki/sources/descriptions/gmh5225__Killer.md)
 
 Samsung S4 driver abuse such as [[s4killer]] targets **`probmon.sys`** via crafted IOCTLs for arbitrary physical or virtual kernel read/write—typical BYOVD primitives for unsigned driver load, kernel structure patching, or AC bypass research. (source: wiki/sources/descriptions/gmh5225__s4killer.md)
 
@@ -188,5 +191,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[ms-vulnerable-driver-list]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[nvdrv]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[mhyprot2drvcontrol]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[ms-vulnerable-driver-list]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[process-killer-byovd]] · [[killer]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[nvdrv]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[mhyprot2drvcontrol]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 
