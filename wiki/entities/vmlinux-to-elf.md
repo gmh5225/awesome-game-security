@@ -18,4 +18,4 @@ Python tool that converts raw **Linux kernel images** (`vmlinux`, `bzImage`, `zI
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[vermagic]] · [[venom]] · [[wsl2-linux-kernel]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-kallsyms-symbol-renamer]] · [[vermagic]] · [[venom]] · [[wsl2-linux-kernel]]
