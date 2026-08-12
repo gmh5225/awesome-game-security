@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/IDASkins`: entity [[idaskins]]; cited on [[overviews/reverse-engineering]]; cross-linked from [[ida-themer]], [[ida-nord-theme]], and [[ida-dark-plus]].
+
 - **2026-08-12** — ingest `description:gmh5225/IL22CPP`: entity [[il22cpp]]; cited on [[il2cpp]] and [[overviews/game-engine]].
 
 - **2026-08-12** — ingest `description:gmh5225/IOS-jailbreak--Fugu15`: entity [[ios-jailbreak-fugu15]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

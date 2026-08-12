@@ -20,4 +20,4 @@ Useful for game-security researchers and reverse engineers who already standardi
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[long-night]] · [[ida-dark-plus]] · [[ida-nord-theme]] · [[dp701]] · [[idacode]] · [[idaplugins]]
+[[overviews/reverse-engineering]] · [[long-night]] · [[idaskins]] · [[ida-dark-plus]] · [[ida-nord-theme]] · [[dp701]] · [[idacode]] · [[idaplugins]]
