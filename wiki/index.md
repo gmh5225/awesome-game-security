@@ -578,6 +578,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
 - [genshin-cheat](entities/genshin-cheat.md) — Genshin Impact IL2CPP/memory gameplay cheat (god mode, stamina, teleport, speed; gmh5225)
 - [genshin-debugger-bypass](entities/genshin-debugger-bypass.md) — Genshin Impact anti-debug bypass (Detours API hooks + `mhyprot2` unload; gmh5225)
+- [genshin-easy-peasy-bypass](entities/genshin-easy-peasy-bypass.md) — Genshin Impact EasyPeasy/`mhyprot2` AC bypass (circumvent kernel driver checks; modified clients; gmh5225)
 - [genshin-genshin-data](entities/genshin-genshin-data.md) — Genshin Impact live-game data dump (GenshinData client config/content tables; gmh5225)
 - [genshin-impact-base](entities/genshin-impact-base.md) — Genshin Impact cheat/mod base framework (memory access, SDK structures, IL2CPP hooks; gmh5225)
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
