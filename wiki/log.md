@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/IDA-MapSymbolParser`: entity [[ida-map-symbol-parser]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[ida-pro-loadmap]] and [[list-of-ida-plugins]].
+
 - **2026-08-12** — ingest `description:gmh5225/IDA-Pro-SigMaker`: entity [[ida-pro-sigmaker]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[ida-sigmaker]] and [[sigmakerex]].
 
 - **2026-08-12** — ingest `description:gmh5225/IDA2Obj`: entity [[ida2obj]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[genpatch]] and [[kitsupe]].

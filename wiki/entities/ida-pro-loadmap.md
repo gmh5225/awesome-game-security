@@ -20,4 +20,4 @@ Useful when a game or anti-cheat client ships without PDBs but a build-time MAP 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[pdb]] · [[pdblister]] · [[symless]] · [[idenlib]] · [[idaplugins]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-map-symbol-parser]] · [[x64dbg-mapldr]] · [[pdb]] · [[pdblister]] · [[symless]] · [[idenlib]] · [[idaplugins]]

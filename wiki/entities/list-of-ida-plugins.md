@@ -20,4 +20,4 @@ Distinct from [[ida-plugins]] (repnz register cross-references plugin). Compleme
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[lazyida]] · [[idaplugins-list]] · [[idaplugins]] · [[ida-plugins]] · [[retools]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[lazyida]] · [[ida-map-symbol-parser]] · [[idaplugins-list]] · [[idaplugins]] · [[ida-plugins]] · [[retools]]
