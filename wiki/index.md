@@ -707,6 +707,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 
 - [IDADeflat](entities/idadeflat.md) — IDA Pro CFF deflatten (angr; OLLVM-style)
+- [IL22CPP](entities/il22cpp.md) — C++ IL2CPP internal reflection remake (metadata resolution, managed type reconstruction, VM interface; gmh5225)
 - [IL2CPP_Resolver](entities/il2cpp-resolver.md) — C++ Unity IL2CPP resolver (cheat / game engine explorer:Unity)
 - [Il2CppAssemblyUnhollower](entities/il2cpp-assembly-unhollower.md) — IL2CPP metadata → proxy .NET assemblies for C# modding (unhollower; cheat / game engine explorer:Unity)
 - [Il2CppRuntimeDumper](entities/il2cpp-runtime-dumper.md) — IL2CPP runtime dump via reflection (reconstruct DLLs; cheat / game engine explorer:Unity)
