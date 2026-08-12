@@ -576,6 +576,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
+- [genshin-akebi-gc](entities/genshin-akebi-gc.md) — Genshin Impact Akebi-framework cheat client (teleport, god mode, speed, auto-play; Grasscutter server; gmh5225)
 - [genshin-cheat](entities/genshin-cheat.md) — Genshin Impact IL2CPP/memory gameplay cheat (god mode, stamina, teleport, speed; gmh5225)
 - [genshin-cheetos](entities/genshin-cheetos.md) — Genshin Impact menu cheat codename Cheetos (speed, teleport, infinite stamina; client memory; gmh5225)
 - [genshin-debugger-bypass](entities/genshin-debugger-bypass.md) — Genshin Impact anti-debug bypass (Detours API hooks + `mhyprot2` unload; gmh5225)

@@ -12,7 +12,7 @@ confidence: medium
 
 Genshin Impact cheat tool codenamed **Cheetos** with client-side gameplay modifications. Implements speed hacks, teleportation, infinite stamina, and other exploits through **memory manipulation** of the miHoYo **Unity/IL2CPP** game client. (source: wiki/sources/descriptions/gmh5225__Genshin-Cheetos.md)
 
-Sits in the same HoYoverse title lane as sibling gameplay cheats such as [[genshin-cheat]], upstream scaffold [[genshin-impact-base]], and AC-bypass samples ([[genshin-easy-peasy-bypass]], [[genshin-debugger-bypass]]).
+Sits in the same HoYoverse title lane as sibling gameplay cheats such as [[genshin-cheat]] and Akebi-framework client [[genshin-akebi-gc]] (Grasscutter private-server support), upstream scaffold [[genshin-impact-base]], and AC-bypass samples ([[genshin-easy-peasy-bypass]], [[genshin-debugger-bypass]]).
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the same HoYoverse title lane as sibling gameplay cheats such as [[gensh
 
 ## Related
 
-[[overviews/game-hacking]] · [[il2cpp]] · [[genshin-cheat]] · [[genshin-impact-base]] · [[genshin-easy-peasy-bypass]] · [[genshin-debugger-bypass]] · [[genshin-remove-banner]] · [[genshin-genshin-data]]
+[[overviews/game-hacking]] · [[il2cpp]] · [[genshin-cheat]] · [[genshin-akebi-gc]] · [[genshin-impact-base]] · [[genshin-easy-peasy-bypass]] · [[genshin-debugger-bypass]] · [[genshin-remove-banner]] · [[genshin-genshin-data]]

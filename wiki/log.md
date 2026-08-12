@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Genshin-Akebi-GC`: entity [[genshin-akebi-gc]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[genshin-cheat]] and [[genshin-cheetos]].
+
 - **2026-08-12** — ingest `description:gmh5225/Genshin-Cheetos`: entity [[genshin-cheetos]]; cited on [[overviews/game-hacking]]; cross-linked from [[genshin-cheat]].
 
 - **2026-08-12** — ingest `description:gmh5225/Genshin-GenshinData`: entity [[genshin-genshin-data]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[genshin-impact-base]].
