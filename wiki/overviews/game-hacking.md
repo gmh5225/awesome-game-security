@@ -708,6 +708,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__SeaOfChoros.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
   - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
+  - wiki/sources/descriptions/gmh5225__FortniteSigsUpdatedEveryUpdate.md
   - wiki/sources/descriptions/gmh5225__fortnite-offsets.md
   - wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md
   - wiki/sources/descriptions/gmh5225__frank.md
@@ -958,6 +959,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fortnite world-to-screen offset collections such as [[fortnite-w2s-offset-fortnite]] (gmh5225; C/C++; view/projection and camera offsets for ESP math; cheat / game:fortnite `[Offset]`) sit in that same cheat / game:fortnite Unreal camera-math / [[world-to-screen]] lane beside camera-cache POV samples. (source: wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md)
 - Fortnite virtual-table / view offset dumps such as [[fortnite-virtual-offsets]] (text; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; gmh5225; cheat / game:fortnite `[Virtual Table Offsets]`) sit in the same cheat / game:fortnite Unreal vtable-dispatch lane beside camera and name-pool samples. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
 - Fortnite IDA-style byte-pattern signature sets such as [[fortnite-sigs]] (gmh5225; `GObjects`, `GNames`, `ProcessEvent`, player-controller helpers; per-build refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal address-discovery lane beside vtable dumps and offset fetchers. (source: wiki/sources/descriptions/gmh5225__fortnite-sigs.md)
+- Per-patch maintained Fortnite signature repos such as [[fortnite-sigs-updated-every-update]] (gmh5225; `UWorld`, `GObjects`, `FnFree`, `GetNameByIndex`; pattern-mask notation; cheat / game:fortnite `[Offset]`) track UE global churn beside static signature sets. (source: wiki/sources/descriptions/gmh5225__FortniteSigsUpdatedEveryUpdate.md)
 - Fortnite memory offset and UE4 SDK structure tables such as [[fortnite-offsets]] (gmh5225; player entities, camera, bone arrays, weapons, engine globals; per-version refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal memory-layout lane beside signature and vtable dumps. (source: wiki/sources/descriptions/gmh5225__fortnite-offsets.md)
 - Rust Fortnite frameworks such as [[reborn]] (web server + SQLite + Discord bot; modular crates for server/bot/client) illustrate web-controlled cheat architectures in the same game:fortnite lane. (source: wiki/sources/descriptions/realTristan__Reborn.md)
 - Step-by-step Fortnite mechanics tutorials such as [[fortnite]] (loqix; video series + companion code; Game Develop / source) sit in the cheat / game:fortnite guide lane for game developers, reverse engineers, and tooling builders. (source: wiki/sources/descriptions/loqix__Fortnite.md)

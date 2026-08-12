@@ -526,6 +526,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-offsets](entities/fortnite-offsets.md) — Fortnite memory offset / UE4 SDK structure tables (player/camera/bones/weapons/globals; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-w2s-offset-fortnite](entities/fortnite-w2s-offset-fortnite.md) — Fortnite world-to-screen offset collection (view/projection + camera; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-sigs](entities/fortnite-sigs.md) — Fortnite IDA-style byte-pattern signatures (GObjects/GNames/ProcessEvent; gmh5225; cheat / game:fortnite [Offset])
+- [fortnite-sigs-updated-every-update](entities/fortnite-sigs-updated-every-update.md) — Per-patch Fortnite byte-pattern signatures (UWorld/GObjects/FnFree/GetNameByIndex; pattern-mask notation; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-triadz](entities/fortnite-triadz.md) — Triadz internal Fortnite cheat (UE4 hooking; ESP/aimbot/exploit; gmh5225; EAC-protected internal architecture reference)
 - [fortnite-virtual-offsets](entities/fortnite-virtual-offsets.md) — Fortnite vtable/view offset dump (text; gmh5225; cheat / game:fortnite [Virtual Table Offsets])
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)

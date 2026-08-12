@@ -14,8 +14,8 @@ Fortnite **byte-pattern signature collection** (gmh5225; cheat / game:fortnite `
 
 ## Links
 
-- Repo: https://github.com/gmh5225/Fortnite-SigsUpdatedEveryUpdate
+- Repo: https://github.com/gmh5225/fortnite-sigs
 
 ## Related
 
-[[fortnite-virtual-offsets]] · [[fortnite-fltokens-and-offsets]] · [[auto-offsets]] · [[unreal-object-model]] · [[patternsleuth]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[fortnite-sigs-updated-every-update]] · [[fortnite-virtual-offsets]] · [[fortnite-fltokens-and-offsets]] · [[auto-offsets]] · [[unreal-object-model]] · [[patternsleuth]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
