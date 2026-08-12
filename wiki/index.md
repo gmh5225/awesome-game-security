@@ -763,6 +763,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [Karlann](entities/karlann.md) — KM keyboard injection + WSK socket PoC (Kbd.c / Wsk.c; libwsk; cheat / Keyboard)
+- [KasperskyHook](entities/kaspersky-hook.md) — Kaspersky `klhk.sys` hypervisor syscall hook (`IA32_LSTAR` dispatch redirect + custom driver; gmh5225)
 - [KawaiiPhysics](entities/kawaii-physics.md) — UE4/UE5 simple fake physics (animation / secondary motion; Game Develop / Unreal)
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
