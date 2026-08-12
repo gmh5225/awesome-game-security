@@ -2075,6 +2075,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/stars/gmh5225/lists/hook [Lists]
 - https://github.com/microsoft/Detours
 - https://github.com/wbenny/DetoursNT
+- https://github.com/wesjian/GenericGameDetourAPIHook [Modular Microsoft Detours anti-cheat bypass framework with ~130 API hooks across 16 modules, deployed via dinput8.dll proxy]
 - https://github.com/gmh5225/ntminhook [A modified version of MinHook that only uses the Windows Native API]
 - https://github.com/mrexodia/AppInitHook [Global user-mode hooking framework via AppInit_DLLs (MinHook-based)]
 - https://github.com/stevemk14ebr/PolyHook
