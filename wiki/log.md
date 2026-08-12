@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2694 (was ~2693; Anti Cheat ~665 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-12** — ingest `description:gmh5225/HWID-SteamSpywareTerminator`: entity [[hwid-steam-spyware-terminator]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-12** — ingest `description:gmh5225/Handle-Ripper`: entity [[handle-ripper]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
