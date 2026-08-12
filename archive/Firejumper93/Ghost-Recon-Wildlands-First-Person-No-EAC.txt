@@ -1,0 +1,3633 @@
+Project Path: arc_Firejumper93_Ghost-Recon-Wildlands-First-Person-No-EAC_ewdlxp7q
+
+Source Tree:
+
+```txt
+arc_Firejumper93_Ghost-Recon-Wildlands-First-Person-No-EAC_ewdlxp7q
+├── LICENSE
+├── README.md
+├── build.bat
+├── packaging
+│   ├── Collect-Logs.bat
+│   ├── INSTALL.txt
+│   ├── grwfp.cfg
+│   ├── install.bat
+│   └── uninstall.bat
+└── src
+    ├── Crash.cpp
+    ├── Crash.h
+    ├── FpCamera.cpp
+    ├── FpCamera.h
+    ├── FpStub.asm
+    ├── GameBuild.cpp
+    ├── GameBuild.h
+    ├── Log.cpp
+    ├── Log.h
+    ├── Sig.cpp
+    ├── Sig.h
+    ├── ThunkHook.cpp
+    ├── ThunkHook.h
+    ├── dllmain.cpp
+    └── proxy_exports.inc
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Firejumper93
+
+Portions of this project's proxy and hooking infrastructure are shared with
+GhostReconWildlandsVR, which derives design and adapter code from
+anvilengine2vr (https://github.com/mutars/anvilengine2vr),
+Copyright (c) 2024 mutars, MIT License.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Ghost Recon Wildlands: First Person (no anti-cheat tampering)
+
+A native first-person camera mod for Tom Clancy's Ghost Recon Wildlands.
+The camera moves to your character's head. Your mouse keeps full control of
+rotation, exactly as in the unmodded game, so aiming, ballistics, the
+crosshair and every menu behave normally.
+
+**What "no EAC" means here, precisely:** this mod does not touch, replace,
+disable or bypass Easy Anti-Cheat, and it does not roll the game back to an
+older version. Earlier first-person solutions for this game required replacing
+anti-cheat files and pinning an outdated executable. This one is a single
+proxy DLL on the current game version, and the only game-folder change it
+makes is the two files you copy in. Delete them and the game is untouched.
+
+## Honest risk statement, read this first
+
+Easy Anti-Cheat loads into the game process during normal solo play. This mod
+writes game memory (that is what a camera mod is) and does nothing to hide
+that. No ban has been observed in testing, but the risk is yours, and it
+cannot be honestly stated as zero.
+
+**Not tested online yet.** As of the v0.1.0-alpha release (2026-08-11), this
+mod has ONLY been tested in solo singleplayer. Coop and any other connected
+mode have not been run with it even once, so multiplayer compatibility is
+completely unverified: it may work, it may fail to join, it may behave in
+ways I have not seen. Online testing is planned for 2026-08-12, and this
+notice will be updated with the result. Until then, treat online use as
+untested and at your own risk.
+
+**Never use this in Ghost War or any PvP mode.** Singleplayer and coop
+campaign are what it is for. A camera mod in a competitive mode is a fairness
+problem for other players, and it is also the one place anti-cheat
+consequences are most likely.
+
+## What it does
+
+- First person on a toggle: the **`=`** key (next to backspace).
+- The camera rides your character's animated head bone: walking, sprinting,
+  vaulting, cover, driving, everything the third-person camera followed.
+- Your head model is hidden while first person is on (after the first aim of
+  a session, an engine quirk documented in the config file).
+- The close-range camera blur the engine applies near the body is removed.
+- Aim-down-sights hands the camera back to the game's own aim view, so ADS
+  and scopes are exactly native and your shots land where the crosshair says.
+- A position filter takes the animation bob out (tunable, or disable it for
+  the raw bone), a first-person field of view override widens the
+  third-person FOV to first-person norms, and a small forward eye offset
+  puts the viewpoint at the eyes rather than the skull base.
+- Everything is configurable in `GRWFP\grwfp.cfg`, which hot-reloads about a
+  second after you save it, so you can tune while the game runs.
+
+## What it does not do
+
+- No first-person arms or weapon viewmodel. You see what the third-person
+  body offers from the inside, which is honest but imperfect: the weapon sits
+  in its third-person hip pose.
+- No changes to damage, accuracy, recoil, movement or any gameplay value.
+- No online tampering of any kind.
+
+## Install
+
+Grab the latest zip from
+[Releases](https://github.com/Firejumper93/Ghost-Recon-Wildlands-First-Person-No-EAC/releases),
+unzip it anywhere, and run **`install.bat`**. It finds your game install by
+itself (any Steam library on any drive, or Ubisoft Connect), refuses to touch
+a running game, validates that `dxgi_real.dll` is the genuine Windows file
+(and repairs that slot if a wrong file is sitting in it), and keeps your
+existing config on updates while appending any newly added settings. Remove
+everything with `uninstall.bat`.
+
+Building from source instead: run `build.bat` (below), put your built
+`build\dxgi.dll` next to the files from `packaging\` and run `install.bat`
+there, or place things by hand:
+
+1. Copy `build\dxgi.dll` into the game folder (the one containing `GRW.exe`).
+2. Copy `C:\Windows\System32\dxgi.dll` into the same game folder and rename
+   that copy to `dxgi_real.dll`. This must be the genuine Windows file,
+   roughly 1.3 MB. Never put a mod DLL in that slot: the game will fail to
+   start with no error message.
+3. Create a `GRWFP` folder next to `GRW.exe` and put `packaging\grwfp.cfg`
+   in it. The mod writes its log there too (`GRWFP\grwfp.log`).
+
+To disable the mod, rename or delete the game folder's `dxgi.dll`. To remove
+it completely, also delete `dxgi_real.dll` and the `GRWFP` folder.
+
+## Build
+
+Visual Studio 2022 Community (or the Build Tools) with the C++ workload:
+
+```
+build.bat
+```
+
+Output: `build\dxgi.dll`. The script builds Release, x64, `/W4`.
+
+## How it works, in one paragraph
+
+The mod ships as a `dxgi.dll` proxy that forwards every export to the real
+DXGI. At startup it identifies the exact game build and locates a small set of
+engine functions by unique byte signatures; if any signature fails to match
+(for example after a game patch), it installs nothing and the game runs
+unmodified. When first person is on, it overwrites the camera position with
+the head-bone position on the engine's own camera update, leaving rotation to
+the game. Full technical background on the engine lives in the
+[AnvilNext 2.0 documentation](https://github.com/Firejumper93/GhostReconWildlands-AnvilNext2.0-Documentation)
+project.
+
+## Related projects
+
+- [GhostReconWildlandsVR](https://github.com/Firejumper93/GhostReconWildlandsVR):
+  the VR conversion this mod is a sibling of. The camera reverse engineering
+  was done there first.
+
+## Support
+
+If this mod is useful to you and you feel like it, you can
+[buy me a coffee](https://buymeacoffee.com/firejumper93). Optional, never
+required, changes nothing about the mod.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Portions of the proxy and hooking infrastructure
+are shared with the VR sibling project, which derives adapter design from
+[anvilengine2vr](https://github.com/mutars/anvilengine2vr) (MIT, mutars).
+
+```
+
+`build.bat`:
+
+```bat
+@echo off
+REM Build the GRW-FP proxy DLL (Release). The FLAT first-person mod.
+REM
+REM Project rule 3: build Release and stop on any compiler error.
+REM
+REM Usage: flat\build.bat
+REM Output: flat\build\dxgi.dll
+
+setlocal enabledelayedexpansion
+
+REM Toolchain: the game rig has VS 18, the dev machine has VS 2022. Try in
+REM that order so the rig's behavior is unchanged.
+set VCVARS=C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
+if not exist "%VCVARS%" set VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
+if not exist "%VCVARS%" (
+    echo ERROR: vcvars64.bat not found. Looked for VS 18 and VS 2022 Community.
+    exit /b 1
+)
+call "%VCVARS%" >nul
+if errorlevel 1 ( echo ERROR: vcvars64 failed & exit /b 1 )
+
+pushd "%~dp0"
+if not exist build mkdir build
+
+echo.
+echo === GRW-FP: building Release proxy DLL (flat mod) ===
+echo.
+
+REM The argument-observing stub. Phase 2 needs it: the functions we hook have
+REM prototypes we do not know, so the stub saves the ABI argument registers,
+REM calls the recorder and tail-jumps to the real function.
+ml64 /nologo /c /Fo build\FpStub.obj src\FpStub.asm
+if errorlevel 1 (
+    echo.
+    echo *** ASSEMBLE FAILED ^(ml64^). Stopping, per project rule 3. ***
+    popd
+    exit /b 1
+)
+
+REM /EHa, not /EHsc: FpCamera.cpp guards every engine-memory read with SEH
+REM __try/__except, and structured exceptions are only caught with /EHa.
+cl /nologo /std:c++20 /EHa /O2 /W4 /MT /DNDEBUG /LD ^
+   /Fo:build\ /Fd:build\ ^
+   src\dllmain.cpp src\Log.cpp src\Crash.cpp src\GameBuild.cpp ^
+   src\Sig.cpp src\ThunkHook.cpp src\FpCamera.cpp ^
+   /link /DLL /OUT:build\dxgi.dll build\FpStub.obj user32.lib
+
+if errorlevel 1 (
+    echo.
+    echo *** BUILD FAILED. Stopping, per project rule 3. ***
+    popd
+    exit /b 1
+)
+
+echo.
+echo BUILD OK -^> %~dp0build\dxgi.dll
+for %%F in (build\dxgi.dll) do echo    size: %%~zF bytes
+certutil -hashfile build\dxgi.dll SHA256 | findstr /v ":" | findstr /r "[0-9a-f]"
+echo.
+popd
+endlocal
+
+```
+
+`packaging/Collect-Logs.bat`:
+
+```bat
+@echo off
+REM ============================================================================
+REM  GRW-FP log collector. Double-click, then send the ONE zip it puts on your
+REM  Desktop. It collects only this mod's own logs and config, nothing else.
+REM  This script lives in the GRWFP folder, so %~dp0 is that folder.
+REM ============================================================================
+setlocal
+set "OUT=%USERPROFILE%\Desktop\GRWFP-logs.zip"
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$files = Get-ChildItem -Path '%~dp0*' -Include '*.log','grwfp.cfg' -File; if (-not $files) { Write-Host 'No logs found next to this script.'; exit 1 }; Compress-Archive -Path $files.FullName -DestinationPath '%OUT%' -Force; Write-Host ('Wrote ' + '%OUT%' + ' with ' + $files.Count + ' file(s).')"
+
+echo.
+echo If it worked, GRWFP-logs.zip is now on your Desktop. Send that one file.
+echo.
+pause
+
+```
+
+`packaging/INSTALL.txt`:
+
+```txt
+GRW-FP: first person for Ghost Recon Wildlands
+==============================================
+
+INSTALL
+  1. Close the game.
+  2. Run install.bat. It finds your game install by itself (any Steam library,
+     Ubisoft Connect, or you can unzip this whole release straight into the
+     game folder and run it there).
+  3. Launch the game normally.
+
+USE
+  - Press the  =  key (next to backspace) to toggle first person.
+  - KNOWN QUIRK: right after spawning, your head (hair, helmet, night vision)
+    is still visible from inside. AIM ONCE (right mouse) and it disappears for
+    the rest of the session. A proper fix is in progress.
+  - Aiming down sights hands the camera back to the game's own aim view on
+    purpose, so ADS, scopes and shot placement are exactly the unmodded game.
+  - Tuning lives in GRWFP\grwfp.cfg (field of view, eye position, smoothing).
+    The file hot-reloads about a second after you save, even mid-game.
+
+DISABLE / REMOVE
+  - Quick disable: rename dxgi.dll in the game folder (to dxgi.dll.off, say).
+  - Full removal: run uninstall.bat.
+
+ANTIVIRUS, honestly
+  Windows Defender sometimes flags freshly built mod DLLs of this kind with a
+  generic machine-learning verdict (the VR sibling of this mod gets
+  "Program:Win32/Wacapew.A!ml"). It is a shape judgement on an unsigned hook
+  DLL, not a signature match on known malware. The source is public, and you
+  can build the DLL yourself from it. If Defender eats the file, restore it
+  and exclude the GAME FOLDER, not the hash: the hash changes every release.
+
+ANTI-CHEAT, honestly
+  Easy Anti-Cheat loads into the game during normal solo play. This mod writes
+  game memory (that is what a camera mod is) and does nothing to hide that. It
+  does NOT touch, replace or disable any anti-cheat or game file, and it does
+  not roll your game back to an older version. No ban has been observed in
+  testing, but the risk is yours and cannot honestly be called zero.
+
+  NEVER use this in Ghost War or any PvP mode. Singleplayer and co-op
+  campaign only.
+
+REPORTING A BUG
+  Go to the game folder, open GRWFP\, double-click Collect-Logs.bat, and send
+  the single zip it puts on your Desktop. Say what you were doing on screen
+  when it happened: that sentence is usually worth more than the log.
+
+Source and updates:
+  https://github.com/Firejumper93/Ghost-Recon-Wildlands-First-Person-No-EAC
+
+If you like it: https://buymeacoffee.com/firejumper93 (optional, never
+required, changes nothing).
+
+```
+
+`packaging/grwfp.cfg`:
+
+```cfg
+# GRW-FP config. Lines are key=value, # starts a comment.
+#
+# THIS FILE HOT-RELOADS: the mod re-reads it about one second after any save,
+# so you can trim the eye height while standing in game.
+#
+# The only in-game key is  =  (the equals key, next to backspace), which
+# toggles first person on and off. It is deliberately not on the numpad.
+#
+# WHAT THIS MOD DOES: it moves the camera POSITION to your character's head.
+# It never touches where you are AIMING. Your mouse still turns the camera
+# exactly as it does in the unmodded game, so the crosshair, ballistics and
+# every menu behave normally.
+
+# Height from the head JOINT to your eyes, in metres. The joint sits at the
+# base of the skull, so this is a small positive number, not a body height.
+# Raise it if you feel too low in the head, lower it if you can see the inside
+# of the skull.
+fp_head_eye = 0.10
+
+# Sideways trim in metres along the camera's own right axis. Positive is right.
+# Leave at 0 unless the viewpoint feels off-centre.
+fp_side = 0.0
+
+# Forward offset from the head joint toward where the eyes actually are, in
+# metres, applied only in the horizontal plane so looking up or down never
+# shifts the camera. Clears hair and face geometry from the edge of the
+# screen. Clamped to 0..0.20; 0 disables.
+fp_fwd = 0.07
+
+# AIM DOWN SIGHTS. Moving the camera moves the VIEW but never your AIM, so
+# hip fire from the head position diverges from the crosshair. Below this
+# rendered field of view (radians) the mod stops writing and the game's own
+# authored aim camera takes over, which keeps aiming exactly native. Iron
+# sights and red dots render at about 0.49..0.52 and normal play at 0.78 and
+# up, so the default catches every aim and no gameplay. 0 disables the yield
+# (expect hip fire and ADS to misalign with the crosshair).
+fp_ads_fov = 0.60
+
+# The field of view (radians) above which first person resumes after an aim.
+# Kept above fp_ads_fov so the boundary cannot flicker.
+fp_ads_release = 0.68
+
+# POSITION SMOOTHING, milliseconds, horizontal. The head bone bobs several
+# centimetres in locomotion, far more than a native first-person camera
+# would ever move. 0 = raw bone position (useful for comparison).
+fp_smooth = 40
+
+# Vertical smoothing time constant, milliseconds. Heavier than horizontal so
+# stair steps and stance transitions do not pump the view. 0 = raw.
+fp_smooth_z = 120
+
+# Maximum horizontal distance (metres) the viewpoint may stray from the
+# character's origin. Stops animations that whip the head (vaults, melee)
+# from whipping the view with them. 0 disables.
+fp_clamp = 0.20
+
+# FIRST-PERSON FIELD OF VIEW, radians vertical. 1.10 is roughly 95 degrees
+# horizontal at 16:9. The game's third-person fov feels like binoculars at
+# first-person distances. Applied only while first person is on and only in
+# the normal gameplay band, so ADS zoom, magnified optics and the game's
+# internal sky/reflection captures always keep their own values. 0 keeps the
+# game's fov; other values are clamped to 0.60..1.35.
+fp_fov = 1.10
+
+# MAGNIFIED SCOPES. Below this rendered field of view (radians) the mod stands
+# down and lets the game draw its own scope view, because the scope mask and
+# reticle are anchored to the game's aim and any disagreement is magnified by
+# the zoom. Iron sights and red dots render at about 0.49 and are unaffected.
+# Set to 0 to force first person even through magnified optics (expect the
+# scope picture to misregister).
+fp_scope_fov = 0.30
+
+# Remove the close-range camera blur. In first person the character's own body
+# is right against the camera, and without this it smears across the screen.
+# 1 = removed (recommended), 0 = leave the game's blur alone.
+noblur = 1
+
+# Start in first person instead of waiting for the = key. 0 = off.
+fp_on_start = 0
+
+# Hide the player's head while first person is on. INSTALL-TIME ONLY: this
+# key is read once at game start, not hot-reloaded, because turning it off
+# cannot un-patch a live hook. The head stays visible until the first aim of
+# a session (the engine only calls its visibility setter on transitions);
+# after that the toggle is instant. 1 = hide (recommended), 0 = never touch
+# head visibility.
+fp_head_hide = 1
+
+```
+
+`packaging/install.bat`:
+
+```bat
+@echo off
+REM ============================================================================
+REM  GRW-FP installer (the flat first-person mod).
+REM
+REM  This installer FINDS YOUR GAME BY ITSELF. It never scans your drives; it
+REM  asks the launchers, which already know where the game is:
+REM    [1] the folder this script sits in (unzip the release straight into the
+REM        game folder and it installs right there)
+REM    [2] Steam: reads Steam's own library list (libraryfolders.vdf), so every
+REM        Steam library on every drive is checked, however unusual the path
+REM    [3] Ubisoft Connect: reads its per-game install records in the registry
+REM    [4] a few classic default paths
+REM    [5] only if ALL of that fails does it ask you for the folder
+REM
+REM  What it copies (and the ONLY things it copies):
+REM    dxgi.dll           the mod
+REM    dxgi_real.dll      a LOCAL copy of your own C:\Windows\System32\dxgi.dll
+REM                       (made on your machine; the mod forwards everything to
+REM                       it and CANNOT WORK without it). If a WRONG file is
+REM                       already in that slot it is DETECTED and REPLACED,
+REM                       because chaining to it kills the game with no error.
+REM    GRWFP\grwfp.cfg    default config, kept if you already have one (new
+REM                       settings from an update are appended with defaults)
+REM    GRWFP\Collect-Logs.bat  a one-click log collector for bug reports
+REM
+REM  It never modifies any game file. Remove everything with uninstall.bat.
+REM ============================================================================
+setlocal EnableExtensions EnableDelayedExpansion
+
+echo.
+echo === GRW-FP first-person mod installer ===
+echo.
+
+set "GAME="
+
+REM ---- [1] Are we sitting inside the game folder already? -------------------
+if exist "%~dp0GRW.exe" (
+    set "GAME=%~dp0"
+    set "HOW=this folder (the release was unzipped into the game folder)"
+    goto normalize
+)
+
+REM ---- [2] Steam: ask Steam where its libraries are. ------------------------
+set "STEAM="
+for /f "usebackq tokens=2,*" %%A in (`reg query "HKCU\Software\Valve\Steam" /v SteamPath 2^>nul ^| findstr /i "SteamPath"`) do set "STEAM=%%B"
+if not defined STEAM for /f "usebackq tokens=2,*" %%A in (`reg query "HKLM\SOFTWARE\WOW6432Node\Valve\Steam" /v InstallPath 2^>nul ^| findstr /i "InstallPath"`) do set "STEAM=%%B"
+if defined STEAM (
+    set "STEAM=!STEAM:/=\!"
+    if exist "!STEAM!\steamapps\common\Wildlands\GRW.exe" (
+        set "GAME=!STEAM!\steamapps\common\Wildlands"
+        set "HOW=your main Steam library"
+        goto normalize
+    )
+    REM Check every additional Steam library, from Steam's own list. The
+    REM quoted value is token 4 when the line has leading whitespace (Valve's
+    REM format) and token 3 when it does not; take whichever looks like a path.
+    if exist "!STEAM!\steamapps\libraryfolders.vdf" (
+        for /f usebackq^ tokens^=3^,4^ delims^=^" %%P in (`findstr /i /c:"\"path\"" "!STEAM!\steamapps\libraryfolders.vdf"`) do (
+            set "LIB=%%Q"
+            if "!LIB!"=="" set "LIB=%%P"
+            set "LIB=!LIB:\\=\!"
+            if "!LIB:~1,1!"==":" if exist "!LIB!\steamapps\common\Wildlands\GRW.exe" (
+                set "GAME=!LIB!\steamapps\common\Wildlands"
+                set "HOW=a Steam library listed in Steam's libraryfolders.vdf"
+                goto normalize
+            )
+        )
+    )
+)
+
+REM ---- [3] Ubisoft Connect: read its per-game install records. --------------
+for /f "usebackq tokens=2,*" %%A in (`reg query "HKLM\SOFTWARE\WOW6432Node\Ubisoft\Launcher\Installs" /s /v InstallDir 2^>nul ^| findstr /i "InstallDir"`) do (
+    set "UDIR=%%B"
+    set "UDIR=!UDIR:/=\!"
+    if "!UDIR:~-1!"=="\" set "UDIR=!UDIR:~0,-1!"
+    if exist "!UDIR!\GRW.exe" (
+        set "GAME=!UDIR!"
+        set "HOW=Ubisoft Connect's install records"
+        goto normalize
+    )
+)
+
+REM ---- [4] Classic default paths, in case the registry reads failed. --------
+for %%D in (
+    "C:\Steam\steamapps\common\Wildlands"
+    "C:\Program Files (x86)\Steam\steamapps\common\Wildlands"
+    "D:\Steam\steamapps\common\Wildlands"
+    "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\games\Tom Clancy's Ghost Recon Wildlands"
+) do (
+    if not defined GAME if exist "%%~D\GRW.exe" (
+        set "GAME=%%~D"
+        set "HOW=a well-known default path"
+    )
+)
+if defined GAME goto normalize
+
+REM ---- [5] Last resort: ask. -------------------------------------------------
+echo Ghost Recon Wildlands was not found automatically. Checked: this folder,
+echo every Steam library Steam knows about, Ubisoft Connect's records, and the
+echo usual default paths.
+echo.
+echo If the game IS installed, paste the folder that contains GRW.exe below
+echo (tip: you can drag the folder from Explorer onto this window).
+echo.
+set /p GAME=Wildlands folder:
+set "GAME=%GAME:"=%"
+if exist "%GAME%\GRW.exe" (
+    set "HOW=the path you entered"
+    goto normalize
+)
+echo.
+echo ERROR: GRW.exe was not found there either. Nothing was installed.
+pause
+exit /b 1
+
+:normalize
+if "!GAME:~-1!"=="\" set "GAME=!GAME:~0,-1!"
+
+echo Found the game via %HOW%:
+echo   !GAME!
+echo.
+
+REM ---- Refuse to touch a running game. ---------------------------------------
+tasklist /FI "IMAGENAME eq GRW.exe" 2>nul | findstr /I "GRW.exe" >nul
+if errorlevel 1 goto closed
+echo ERROR: the game is running. Close it and run this installer again.
+pause
+exit /b 1
+
+:closed
+echo Installing...
+echo.
+
+REM Detection path [1] means the release was unzipped INTO the game folder.
+REM Source and destination are then the same file, and `copy` refuses that and
+REM returns failure. Detect the case and skip the copy: the file is already
+REM where it belongs. (Lesson inherited from the VR sibling's installer.)
+set "SRCDIR=%~dp0"
+if "!SRCDIR:~-1!"=="\" set "SRCDIR=!SRCDIR:~0,-1!"
+set "INPLACE=0"
+if /i "!SRCDIR!"=="!GAME!" set "INPLACE=1"
+
+REM Labels, not parenthesised if/else blocks: a literal ")" inside an echo
+REM within a block closes the block early. Inherited lesson, same as above.
+if "!INPLACE!"=="1" goto have_dxgi
+copy /y "%~dp0dxgi.dll" "!GAME!\dxgi.dll" >nul
+if errorlevel 1 goto copyfail
+:have_dxgi
+if not exist "!GAME!\dxgi.dll" goto copyfail
+echo   [1/4] dxgi.dll present (the mod)
+
+REM ---- dxgi_real.dll: VALIDATED, not just checked for existence. -------------
+REM A genuine Windows DXGI is well over 1 MB. Both this mod and its VR sibling
+REM are far smaller, so a small file in this slot means a MOD is sitting there,
+REM and chaining to it kills the game in the loader with no error message.
+REM The VR sibling's installer once trusted an existing file blindly and that
+REM made the one unrecoverable install ordering. This one repairs it.
+if not exist "!GAME!\dxgi_real.dll" goto make_real
+set "REALSIZE=0"
+for %%S in ("!GAME!\dxgi_real.dll") do set "REALSIZE=%%~zS"
+if !REALSIZE! GTR 1000000 goto have_real
+echo.
+echo   WARNING: the existing dxgi_real.dll is only !REALSIZE! bytes, which is
+echo   far too small to be the real Windows DXGI. A mod DLL was sitting in that
+echo   slot, which breaks the game with no error message. Replacing it with a
+echo   fresh copy of your own C:\Windows\System32\dxgi.dll.
+echo.
+:make_real
+copy /y "C:\Windows\System32\dxgi.dll" "!GAME!\dxgi_real.dll" >nul
+if errorlevel 1 goto copyfail
+:have_real
+echo   [2/4] dxgi_real.dll present and validated (a local copy of YOUR OWN
+echo         Windows dxgi.dll; the mod cannot work without it)
+
+if exist "!GAME!\GRWFP\grwfp.cfg" goto merge_cfg
+if not exist "!GAME!\GRWFP" mkdir "!GAME!\GRWFP"
+copy /y "%~dp0grwfp.cfg" "!GAME!\GRWFP\grwfp.cfg" >nul
+if errorlevel 1 goto copyfail
+echo   [3/4] GRWFP\grwfp.cfg created with this release's defaults
+goto cfg_done
+
+:merge_cfg
+REM Your existing config is KEPT untouched. Any settings this release ADDED that
+REM your file does not have yet are appended with their default values, so an
+REM update gets new features without a reinstall and without losing your tuning.
+set "USERCFG=!GAME!\GRWFP\grwfp.cfg"
+set "MERGED=0"
+set "HDRDONE="
+for /f "usebackq eol=# tokens=1,* delims==" %%K in ("%~dp0grwfp.cfg") do (
+    set "KEY=%%K"
+    set "KEY=!KEY: =!"
+    if not "!KEY!"=="" (
+        findstr /i /r /c:"^ *!KEY! *=" "!USERCFG!" >nul
+        if errorlevel 1 (
+            set "VAL=%%L"
+            if defined VAL if "!VAL:~0,1!"==" " set "VAL=!VAL:~1!"
+            if not defined HDRDONE (
+                >>"!USERCFG!" echo.
+                >>"!USERCFG!" echo # --- new settings added by this update: defaults, edit as you like ---
+                set "HDRDONE=1"
+            )
+            >>"!USERCFG!" echo !KEY! = !VAL!
+            set /a MERGED+=1
+        )
+    )
+)
+echo   [3/4] GRWFP\grwfp.cfg kept; !MERGED! new setting(s) from this update added
+:cfg_done
+
+REM The log collector. Always overwritten on update so a tester cannot report a
+REM bug with a stale collector.
+if not exist "!GAME!\GRWFP" mkdir "!GAME!\GRWFP"
+copy /y "%~dp0Collect-Logs.bat" "!GAME!\GRWFP\Collect-Logs.bat" >nul
+if errorlevel 1 goto copyfail
+echo   [4/4] GRWFP\Collect-Logs.bat installed (double-click it to report a bug)
+
+echo.
+echo === Installed. How to use: ===
+echo   1. Launch the game normally (Steam or Ubisoft Connect).
+echo   2. In the world, press the  =  key (next to backspace) to toggle
+echo      first person on and off.
+echo   3. KNOWN QUIRK: right after spawning, your head (hair, helmet, night
+echo      vision) is still visible in first person. AIM ONCE (right mouse)
+echo      and it disappears for the rest of the session. A proper fix is in
+echo      progress.
+echo   4. Tuning lives in GRWFP\grwfp.cfg. The file hot-reloads about a second
+echo      after you save it, even while the game is running.
+echo.
+echo   SINGLEPLAYER AND CO-OP CAMPAIGN ONLY. Never use this in Ghost War or
+echo   any PvP mode. Read INSTALL.txt for the honest anti-cheat notes.
+echo.
+echo   Disable the mod any time by renaming dxgi.dll in the game folder.
+echo.
+echo   IF SOMETHING BREAKS: go to !GAME!\GRWFP\ and double-click
+echo   Collect-Logs.bat. It puts a single zip on your Desktop. Send that one
+echo   file and nothing else is needed.
+echo.
+pause
+exit /b 0
+
+:copyfail
+echo.
+echo ERROR: a copy failed. Nothing dangerous happened. If your game lives under
+echo "Program Files" or "Program Files (x86)", Windows silently refuses copies
+echo from a normal window: RIGHT-CLICK install.bat and "Run as administrator".
+echo Otherwise check folder permissions and try again.
+pause
+exit /b 1
+
+```
+
+`packaging/uninstall.bat`:
+
+```bat
+@echo off
+REM ============================================================================
+REM  GRW-FP uninstaller. Removes the mod, leaves the game untouched.
+REM
+REM  What it removes:
+REM    dxgi.dll        the mod itself. Removing this alone fully disables
+REM                    everything; nothing loads without it.
+REM    GRWFP\          your config and logs, ONLY if you say yes.
+REM
+REM  What it deliberately KEEPS:
+REM    dxgi_real.dll   a plain copy of your own Windows dxgi.dll. It is inert
+REM                    without the mod, and another mod of this family may be
+REM                    using it. Delete it by hand if you want it gone.
+REM ============================================================================
+setlocal EnableExtensions EnableDelayedExpansion
+
+echo.
+echo === GRW-FP uninstaller ===
+echo.
+
+set "GAME="
+if exist "%~dp0GRW.exe" set "GAME=%~dp0"
+if defined GAME goto normalize
+
+echo Paste the game folder that contains GRW.exe (tip: drag the folder from
+echo Explorer onto this window).
+echo.
+set /p GAME=Wildlands folder:
+set "GAME=%GAME:"=%"
+if exist "%GAME%\GRW.exe" goto normalize
+echo.
+echo ERROR: GRW.exe was not found there. Nothing was removed.
+pause
+exit /b 1
+
+:normalize
+if "!GAME:~-1!"=="\" set "GAME=!GAME:~0,-1!"
+
+tasklist /FI "IMAGENAME eq GRW.exe" 2>nul | findstr /I "GRW.exe" >nul
+if errorlevel 1 goto closed
+echo ERROR: the game is running. Close it and run this again.
+pause
+exit /b 1
+
+:closed
+if not exist "!GAME!\dxgi.dll" goto no_mod
+del /f "!GAME!\dxgi.dll"
+if exist "!GAME!\dxgi.dll" goto delfail
+echo   dxgi.dll removed. The mod is fully disabled.
+goto ask_data
+
+:no_mod
+echo   dxgi.dll was not present; the mod was already disabled.
+
+:ask_data
+if not exist "!GAME!\GRWFP" goto done
+set /p KILLDATA=Also delete GRWFP\ (your config and logs)? [y/N]:
+if /i "!KILLDATA!"=="y" (
+    rmdir /s /q "!GAME!\GRWFP"
+    echo   GRWFP\ removed.
+) else (
+    echo   GRWFP\ kept.
+)
+
+:done
+echo.
+echo Done. dxgi_real.dll was deliberately kept (it is a plain copy of your own
+echo Windows file and is inert without the mod). Delete it by hand if you want.
+echo.
+pause
+exit /b 0
+
+:delfail
+echo.
+echo ERROR: could not delete dxgi.dll. If the game lives under "Program Files",
+echo RIGHT-CLICK uninstall.bat and "Run as administrator".
+pause
+exit /b 1
+
+```
+
+`src/Crash.cpp`:
+
+```cpp
+// Crash.cpp - turn "it crashed" into "it crashed at X, in module Y, because Z".
+//
+// Rationale: we are hooking a Denuvo-protected game we cannot debug attached,
+// in a process that spawns three times and shows no modules externally. Without
+// this, every crash costs a guess-and-retest cycle, and guesses have already
+// cost real time tonight.
+//
+// A vectored exception handler runs BEFORE SEH unwinding and before any of the
+// game's own handlers, so we see the fault even if the game swallows it. We log
+// and then decline to handle, so the game's normal crash path still runs and we
+// have not changed behaviour, only observed it.
+//
+// Critically, we report whether the faulting address is inside OUR module. That
+// single fact separates "our bug" from "the game's bug that our timing exposed",
+// which are very different investigations.
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <psapi.h>
+
+#include "Log.h"
+
+#pragma comment(lib, "psapi.lib")
+
+namespace grwxr {
+namespace crash {
+namespace {
+
+PVOID g_handler = nullptr;
+HMODULE g_self = nullptr;
+volatile LONG g_reported = 0;
+
+const char* code_name(DWORD c) {
+    switch (c) {
+        case EXCEPTION_ACCESS_VIOLATION:      return "ACCESS_VIOLATION";
+        case EXCEPTION_STACK_OVERFLOW:        return "STACK_OVERFLOW";
+        case EXCEPTION_ILLEGAL_INSTRUCTION:   return "ILLEGAL_INSTRUCTION";
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:    return "INT_DIVIDE_BY_ZERO";
+        case EXCEPTION_PRIV_INSTRUCTION:      return "PRIV_INSTRUCTION";
+        case EXCEPTION_IN_PAGE_ERROR:         return "IN_PAGE_ERROR";
+        case EXCEPTION_DATATYPE_MISALIGNMENT: return "DATATYPE_MISALIGNMENT";
+        case EXCEPTION_BREAKPOINT:            return "BREAKPOINT";
+        case 0xE06D7363:                      return "C++ exception";
+        default:                              return "(other)";
+    }
+}
+
+// Which module owns an address, and the offset within it.
+bool module_for(void* addr, char* out_name, size_t name_len, uintptr_t* out_offset,
+                HMODULE* out_mod) {
+    HMODULE mod = nullptr;
+    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            (LPCSTR)addr, &mod) || !mod) {
+        return false;
+    }
+    char path[MAX_PATH] = {};
+    GetModuleFileNameA(mod, path, MAX_PATH);
+    const char* base = strrchr(path, '\\');
+    strncpy_s(out_name, name_len, base ? base + 1 : path, _TRUNCATE);
+    *out_offset = (uintptr_t)addr - (uintptr_t)mod;
+    *out_mod = mod;
+    return true;
+}
+
+LONG CALLBACK on_exception(PEXCEPTION_POINTERS ep) {
+    const DWORD code = ep->ExceptionRecord->ExceptionCode;
+
+    // WHITELIST, not a blacklist. The first version blacklisted a few known-noisy
+    // codes and still drowned the log in handled COM failures: REGDB_E_IIDNOTREG
+    // (0x80040155) raised as SEH by KERNELBASE and swallowed by combase, coming
+    // from msctfp.dll and the Ubisoft overlay64.dll. Those are normal interface
+    // negotiation, not crashes. Only genuine hardware faults are interesting.
+    switch (code) {
+        case EXCEPTION_ACCESS_VIOLATION:
+        case EXCEPTION_STACK_OVERFLOW:
+        case EXCEPTION_ILLEGAL_INSTRUCTION:
+        case EXCEPTION_PRIV_INSTRUCTION:
+        case EXCEPTION_IN_PAGE_ERROR:
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:
+        case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+        case EXCEPTION_DATATYPE_MISALIGNMENT:
+        case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+        case EXCEPTION_INVALID_HANDLE:
+        case 0xC0000409:   // STATUS_STACK_BUFFER_OVERRUN, also used by __fastfail
+            break;         // interesting, fall through and report
+        default:
+            return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    // Report only the first few, and never re-enter.
+    if (InterlockedIncrement(&g_reported) > 3) return EXCEPTION_CONTINUE_SEARCH;
+
+    void* addr = ep->ExceptionRecord->ExceptionAddress;
+
+    LOG_ERROR("");
+    LOG_ERROR("################ EXCEPTION ################");
+    LOG_ERROR("  code    : 0x%08lX  %s", (unsigned long)code, code_name(code));
+    LOG_ERROR("  address : 0x%p", addr);
+    LOG_ERROR("  thread  : %lu", GetCurrentThreadId());
+
+    char name[MAX_PATH] = "(unknown)";
+    uintptr_t off = 0;
+    HMODULE mod = nullptr;
+    if (module_for(addr, name, sizeof(name), &off, &mod)) {
+        LOG_ERROR("  module  : %s + 0x%llX  (base 0x%p)",
+                  name, (unsigned long long)off, (void*)mod);
+        if (mod == g_self) {
+            LOG_ERROR("  >>> THE FAULT IS INSIDE OUR OWN DLL. This is our bug. <<<");
+        } else {
+            LOG_ERROR("  (fault is not in our module; likely the game, but our");
+            LOG_ERROR("   timing or state may still have caused it)");
+        }
+    } else {
+        LOG_ERROR("  module  : address belongs to no loaded module");
+        LOG_ERROR("  >>> likely a corrupted call target or freed memory <<<");
+    }
+
+    if (code == EXCEPTION_ACCESS_VIOLATION || code == EXCEPTION_IN_PAGE_ERROR) {
+        const ULONG_PTR op = ep->ExceptionRecord->ExceptionInformation[0];
+        const ULONG_PTR at = ep->ExceptionRecord->ExceptionInformation[1];
+        LOG_ERROR("  operation: %s", op == 0 ? "READ" : (op == 1 ? "WRITE" : "EXECUTE"));
+        LOG_ERROR("  bad addr : 0x%p", (void*)at);
+        if (at < 0x10000) LOG_ERROR("  >>> near-null: a null pointer was dereferenced <<<");
+    }
+
+#ifdef _M_X64
+    const CONTEXT* c = ep->ContextRecord;
+    LOG_ERROR("  rip=0x%p rsp=0x%p rbp=0x%p", (void*)c->Rip, (void*)c->Rsp, (void*)c->Rbp);
+    LOG_ERROR("  rcx=0x%p rdx=0x%p r8 =0x%p r9 =0x%p",
+              (void*)c->Rcx, (void*)c->Rdx, (void*)c->R8, (void*)c->R9);
+    LOG_ERROR("  rax=0x%p rbx=0x%p", (void*)c->Rax, (void*)c->Rbx);
+
+    // Walk the return addresses on the stack and name the modules. Not a real
+    // unwind, just a scan, but on a game with no symbols it is usually enough to
+    // say "this went through our DLL" or "it did not".
+    LOG_ERROR("  --- stack scan (return addresses by module) ---");
+    uintptr_t* sp = (uintptr_t*)c->Rsp;
+    int printed = 0;
+    for (int i = 0; i < 256 && printed < 12; ++i) {
+        uintptr_t v = 0;
+        // Guarded read: the stack may be damaged.
+        __try { v = sp[i]; } __except (EXCEPTION_EXECUTE_HANDLER) { break; }
+        if (v < 0x10000) continue;
+        char mn[MAX_PATH] = {};
+        uintptr_t mo = 0;
+        HMODULE mm = nullptr;
+        if (module_for((void*)v, mn, sizeof(mn), &mo, &mm)) {
+            LOG_ERROR("    [%02d] 0x%p  %s + 0x%llX%s", printed, (void*)v, mn,
+                      (unsigned long long)mo, (mm == g_self) ? "   <-- OURS" : "");
+            printed++;
+        }
+    }
+#endif
+    LOG_ERROR("###########################################");
+    LOG_ERROR("");
+
+    // Do not swallow it. Let the game's own handling proceed unchanged.
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+// Second net. A vectored handler sees exceptions as they are raised, but a
+// process can also die by ExitProcess, TerminateProcess or __fastfail, none of
+// which raise anything we would see. This catches the unhandled case, and the
+// atexit hook catches an orderly exit. Between the three, a silent death
+// becomes a logged one.
+LONG WINAPI on_unhandled(PEXCEPTION_POINTERS ep) {
+    LOG_ERROR("!!! UNHANDLED EXCEPTION FILTER: code 0x%08lX at 0x%p",
+              (unsigned long)ep->ExceptionRecord->ExceptionCode,
+              ep->ExceptionRecord->ExceptionAddress);
+    on_exception(ep);
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+void on_exit_hook() {
+    LOG_INFO("process is exiting normally (atexit). Not a crash.");
+}
+
+}  // namespace
+
+void install(HMODULE self) {
+    g_self = self;
+    // 1 = call us first, before anything else gets a look.
+    g_handler = AddVectoredExceptionHandler(1, on_exception);
+    SetUnhandledExceptionFilter(on_unhandled);
+    atexit(on_exit_hook);
+    LOG_INFO("crash reporter installed (%s) + unhandled filter + atexit",
+             g_handler ? "ok" : "FAILED");
+}
+
+void remove() {
+    if (g_handler) { RemoveVectoredExceptionHandler(g_handler); g_handler = nullptr; }
+}
+
+}  // namespace crash
+}  // namespace grwxr
+
+```
+
+`src/Crash.h`:
+
+```h
+#pragma once
+#include <windows.h>
+namespace grwxr { namespace crash {
+// Vectored exception handler: logs fault code, address, owning module, registers
+// and a stack scan, then declines to handle so the game behaves normally.
+void install(HMODULE self);
+void remove();
+}}
+
+```
+
+`src/FpCamera.cpp`:
+
+```cpp
+// FpCamera.cpp - see FpCamera.h for what this is and where every offset came
+// from. Ported from the VR mod's CameraProbe.cpp, which is READ-ONLY reference
+// for this subproject: nothing here writes back into it.
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+#include <atomic>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <string>
+
+#include "FpCamera.h"
+#include "GameBuild.h"
+#include "Log.h"
+#include "Sig.h"
+#include "ThunkHook.h"
+
+namespace grwxr {
+namespace fpcam {
+
+// Provided by FpStub.asm. Keep SavedArgs in sync with the layout there.
+extern "C" {
+void* grwxr_probe_originals[11] = {};
+void  grwxr_probe_entry_0();
+void  grwxr_probe_entry_1();
+void  grwxr_probe_entry_2();
+void  grwxr_probe_entry_3();
+void  grwxr_probe_entry_4();
+void  grwxr_probe_entry_5();
+void  grwxr_probe_entry_6();
+void  grwxr_probe_entry_7();
+void  grwxr_probe_entry_8();
+void  grwxr_probe_entry_9();
+void  grwxr_probe_entry_10();
+
+// HEAD HIDE, ported from the VR mod (build 18 armed it, build 34 made it
+// instant). Written here, read by grwxr_headhide_entry in FpStub.asm on every
+// engine SetHidden call. Plain globals, not std::atomic: the asm reads them
+// with ordinary aligned loads and C++ atomics of the same width are
+// layout-compatible, but keeping them plain is what the VR mod verified.
+uint64_t grwxr_headhide_table = 0;   // 0 until VERIFIED at install: disarms asm
+uint64_t grwxr_headhide_impl  = 0;
+uint32_t grwxr_headhide_on    = 0;
+volatile uint64_t grwxr_headhide_calls  = 0;
+volatile uint64_t grwxr_headhide_forced = 0;
+volatile uint64_t grwxr_headhide_obj    = 0;
+volatile uint64_t grwxr_headhide_direct = 0;
+void  grwxr_headhide_entry();
+}
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// WHICH ROWS WE HOOK
+//
+// Row order is Build::cam's, which the flat mod inherits verbatim so the two
+// projects cannot drift. The flat mod installs FOUR of the eleven; the rest
+// exist in the table but are left alone, because a hook we do not need is
+// engine code running on our account for no reason.
+// ---------------------------------------------------------------------------
+constexpr int kRowProjGameplay = 2;    // publishes the rendered fov
+constexpr int kRowOnCalcMvp    = 6;    // THE WRITE SITE
+constexpr int kRowSkelPost     = 8;    // feeds the skeleton ring
+constexpr int kRowPlayerComp   = 10;   // names the local player's entity
+constexpr int kNumRows         = 11;
+
+const bool kInstallRow[kNumRows] = {
+    false, false, true,  false, false, false,
+    true,  false, true,  false, true,
+};
+const char* const kRowName[kNumRows] = {
+    "proj[0] (anchor)", "proj[1]", "proj[2] (gameplay)", "proj[3] (skew path)",
+    "proj[4]", "proj[5]", "on_calc_mvp", "selector",
+    "SkeletonPostUpdate", "HIK datablock reader", "cPlayerComponent::OnInit callee",
+};
+
+// docs/RE-notes.md: the Odyssey calc_projection signature matches Wildlands
+// byte for byte, one match in the 369 MB image. THE ANCHOR: the one address
+// derived from a signature rather than from the thunk table, and what proves
+// the loaded image really is the binary the table was built for.
+constexpr const char* kProjSig =
+    "48 89 E0 53 48 81 EC 90 00 00 00 0F 29 70 E8 48 89 CB F3";
+
+// NO CAMERA BLUR. One byte: the immediate of `mov sil, 1` forced to 0 inside
+// the function that also compares the uncracked name hash 0x826846F3. This is
+// the community FP mod's whole No Camera Blur mechanism, re-derived in our
+// build by the VR mod (its build 35) and headset-confirmed there. It matters
+// far more in flat first person than in VR: without it the character's own
+// body smears across the lower half of the screen.
+constexpr size_t      kNoBlurImmOff = 5;
+constexpr const char* kNoBlurSig    = "45 89 E6 40 B6 01 E8 ? ? ? ? 3D F3 46 68 82";
+
+// HEAD HIDE, the independent second check. The head object's class method
+// table must have its slot +0x1F0 resolve (through a 5-byte jmp thunk if one
+// is present) to the function this signature finds. Matching the setter alone
+// would not prove we are looking at the right class; this is what does.
+// The setter's OWN body signature is per-build and lives in GameBuild.cpp
+// (head_setter_sig), because the 2026-08 recompile re-registered it.
+constexpr const char* kHeadSlotFnSig =
+    "48 89 5C 24 08 57 48 83 EC 20 48 83 7A 20 00 48 89 D3 48 89 CF 74 ? "
+    "49 89 D0 31 D2 E8";
+
+// Mirrors the block FpStub.asm writes at rsp+40h.
+struct SavedArgs {
+    uint64_t rcx, rdx, r8, r9;
+    float    xmm0[4], xmm1[4], xmm2[4], xmm3[4];
+};
+
+// Camera struct offsets (docs/RE-notes.md). Pose is READ AND WRITTEN (fourth
+// row only); mode is read.
+constexpr size_t kOffPose = 0x000;
+constexpr size_t kOffMode = 0x290;
+
+// Skeleton offsets.
+constexpr size_t kOffOwner  = 0x010;
+constexpr size_t kOffOrigin = 0x120;
+constexpr size_t kOffRig    = 0x220;
+constexpr size_t kOffPoseP  = 0x238;
+
+constexpr uint32_t kHeadHash = 0x07C159A2;   // CRC32("Head")
+
+hook::ThunkHook g_hooks[kNumRows];
+hook::ThunkHook g_headhide_hook;
+uint8_t*        g_noblur_byte = nullptr;
+uintptr_t       g_module      = 0;
+bool            g_installed   = false;
+
+// --- published state, engine thread <-> worker thread ----------------------
+//
+// Plain atomics, no locks. The engine side only ever READS the pinned skeleton
+// and node index; the worker side only ever writes them. A one-tick-stale pin
+// is harmless because the write re-reads the bone position every call.
+std::atomic<uint64_t> g_playercomp{0};
+std::atomic<uint64_t> g_player_entity{0};
+std::atomic<uint64_t> g_player_skel{0};
+std::atomic<uint32_t> g_head_node{0xFFFFu};
+std::atomic<uint32_t> g_fovy_bits{0};
+
+// The SkeletonPostUpdate ring. Every character's skeleton churns through here
+// several times a second; the worker filters it by owner entity.
+constexpr uint32_t kRingSize = 128;
+std::atomic<uint64_t> g_ring[kRingSize];
+std::atomic<uint32_t> g_ring_w{0};
+
+// --- user state ------------------------------------------------------------
+std::atomic<uint32_t> g_fp_want{0};       // the = key
+std::atomic<uint32_t> g_fp_engaged{0};    // the write actually landed
+
+// cfg, all written by the worker thread and read by the engine thread.
+std::atomic<uint32_t> g_head_eye_bits{0};      // metres, joint to eyes
+std::atomic<uint32_t> g_side_bits{0};          // metres along camera right
+std::atomic<uint32_t> g_scope_fov_bits{0};     // radians; below this we stand down
+std::atomic<uint32_t> g_ads_fov_bits{0};       // radians; below this, yield to ADS
+std::atomic<uint32_t> g_ads_release_bits{0};   // radians; above this, FP resumes
+std::atomic<uint32_t> g_smooth_bits{0};        // ms, horizontal EMA time constant
+std::atomic<uint32_t> g_smooth_z_bits{0};      // ms, vertical EMA time constant
+std::atomic<uint32_t> g_clamp_bits{0};         // metres, horizontal anchor clamp
+std::atomic<uint32_t> g_fov_bits{0};           // radians; gameplay-band fov override
+std::atomic<uint32_t> g_fwd_bits{0};           // metres, horizontalized eye-forward
+std::atomic<uint32_t> g_want_noblur{1};
+std::atomic<uint32_t> g_want_headhide{1};
+
+// ADS hysteresis and position-filter state. Engine-thread writer only; the
+// poll thread reads for the status line. The filter holds the smoothed
+// viewpoint between on_calc_mvp calls; validity clears whenever smoothing is
+// disabled so re-enabling starts fresh.
+std::atomic<uint32_t> g_ads_yield{0};
+std::atomic<uint32_t> g_flt_x{0};
+std::atomic<uint32_t> g_flt_y{0};
+std::atomic<uint32_t> g_flt_z{0};
+std::atomic<uint32_t> g_flt_valid{0};
+std::atomic<uint64_t> g_flt_qpc{0};
+LONGLONG g_qpc_freq = 0;   // written once in install(), before any hook exists
+
+// ---------------------------------------------------------------------------
+// THE HEAD-HIDE EDGE, and why a passive detour is not enough on its own.
+//
+// This is the answer to "shouldn't the head just be hidden on frame 1".
+//
+// The engine calls SetHidden on TRANSITIONS, not every frame. The VR mod
+// measured it: zero setter calls across twelve seconds of first-person play,
+// then a burst at the first aim. So a detour that only forces the argument
+// when the engine happens to call leaves the head VISIBLE until the player
+// aims, and leaves it hidden after first person is switched off until the next
+// transition. That is exactly the symptom to expect from the passive half.
+//
+// The fix, verified in the VR mod as build 34: once the asm entry has LATCHED
+// the object pointer, call the engine's own verified setter directly on each
+// toggle edge. It is an idempotent boolean flip with no lock, callee,
+// allocation or global read, so it is safe to call from here, and a concurrent
+// engine burst can only write the same value.
+//
+// The one case that still waits: BEFORE the first latch of a session, the
+// engine has not called the setter yet and no other route to the object is
+// verified, so there is nothing to call. The head then hides at the first
+// transition, which in practice is the first time the player aims. Inventing a
+// second route to that pointer would mean guessing, which rule 2 forbids.
+// ---------------------------------------------------------------------------
+void set_head_hide(bool on) {
+    const uint32_t v = on ? 1u : 0u;
+    const uint32_t prev = grwxr_headhide_on;
+    grwxr_headhide_on = v;
+    if (v == prev) return;
+    const uint64_t obj  = grwxr_headhide_obj;
+    const uint64_t impl = grwxr_headhide_impl;
+    if (obj && impl) {
+        ((void (*)(void*, uint8_t))impl)((void*)obj, (uint8_t)v);
+        grwxr_headhide_direct = grwxr_headhide_direct + 1;
+    }
+}
+
+// --- counters, so a silent failure is never possible ------------------------
+//
+// The VR mod's hardest-won measurement lesson: any gate that can suppress an
+// effect gets its OWN counter, because a single counter behind several early
+// returns cannot answer "why did nothing happen" and costs a test run every
+// time it is read as an answer. Every early return below is counted.
+std::atomic<uint64_t> c_calls{0};        // on_calc_mvp, player camera
+std::atomic<uint64_t> c_writes{0};       // position actually written
+std::atomic<uint64_t> c_no_skel{0};      // no pinned player skeleton
+std::atomic<uint64_t> c_no_node{0};      // head node unresolved
+std::atomic<uint64_t> c_bad_bone{0};     // bone read failed
+std::atomic<uint64_t> c_implausible{0};  // bone read succeeded, position absurd
+std::atomic<uint64_t> c_scope{0};        // stood down for a magnified optic
+std::atomic<uint64_t> c_ads{0};          // yielded to the native ADS camera
+std::atomic<uint64_t> c_fov{0};          // gameplay fov argument overridden
+std::atomic<uint64_t> c_clamp{0};        // target clamped to the anchor radius
+std::atomic<uint64_t> c_fsnap{0};        // filter reset to raw (jump or non-finite)
+std::atomic<uint64_t> c_seh{0};          // an engine read (basis rows) or the write faulted
+
+float f_of(const std::atomic<uint32_t>& a) {
+    const uint32_t b = a.load(std::memory_order_relaxed);
+    float f;
+    memcpy(&f, &b, sizeof(f));
+    return f;
+}
+void set_f(std::atomic<uint32_t>& a, float f) {
+    uint32_t b;
+    memcpy(&b, &f, sizeof(b));
+    a.store(b, std::memory_order_relaxed);
+}
+
+// Separate function so the SEH block contains no C++ object unwinding.
+bool read_block(uint64_t src, void* dst, size_t n) {
+    __try {
+        memcpy(dst, (const void*)src, n);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+// The rig's sorted {u32 CRC32 name hash, u16 node index} map. We walk it
+// ourselves rather than calling the engine's own lookup, so no engine code
+// runs on our thread and no address beyond the verified rig layout is trusted.
+int rig_find_node(uint64_t rig, uint32_t hash) {
+    uint16_t cnt = 0, bones = 0;
+    uint64_t map = 0;
+    if (!read_block(rig + 0x5A, &cnt, sizeof(cnt))) return -1;
+    if (cnt == 0 || cnt >= 2048) return -1;
+    if (!read_block(rig + 0x50, &map, sizeof(map))) return -1;
+    if (map < 0x10000 || (map & 3)) return -1;
+    read_block(rig + 0x8A, &bones, sizeof(bones));
+    int a = 0, b = (int)cnt - 1;
+    while (a <= b) {
+        const int mid = (a + b) / 2;
+        uint32_t h = 0;
+        if (!read_block(map + (uint64_t)mid * 8, &h, sizeof(h))) return -1;
+        if (h == hash) {
+            uint16_t idx = 0xFFFF;
+            if (!read_block(map + (uint64_t)mid * 8 + 4, &idx, sizeof(idx)))
+                return -1;
+            // The index must address a real node. A hit outside the bone count
+            // means the record layout is not what we think, and the caller
+            // must not use it.
+            if (bones && idx >= bones) return -1;
+            return (int)idx;
+        }
+        if (h < hash) a = mid + 1; else b = mid - 1;
+    }
+    return -1;
+}
+
+// THE HEAD BONE READ. Layout verified from the engine's own leaf accessors:
+// the pose at [skel+0x238] is created with bit 26 CLEAR, so its bone buffer is
+// MODEL space and world = rootQ * boneT + rootT. Bit 26 is honoured anyway,
+// because a future engine path handing us a world-space buffer would otherwise
+// be double-transformed, which is a subtle and hard-to-see error.
+bool read_bone_world(uint64_t skel, uint32_t idx, float out[3]) {
+    if (!skel || idx == 0xFFFFu) return false;
+    uint64_t pose = 0, buf = 0;
+    if (!read_block(skel + kOffPoseP, &pose, sizeof(pose))) return false;
+    if (pose < 0x10000 || (pose & 7)) return false;
+    if (!read_block(pose + 0x178, &buf, sizeof(buf))) return false;
+    if (buf < 0x10000 || (buf & 7)) return false;
+
+    float t[4];
+    if (!read_block(buf + (uint64_t)idx * 0x20, t, sizeof(t))) return false;
+    if (!isfinite(t[0]) || !isfinite(t[1]) || !isfinite(t[2])) return false;
+
+    uint32_t flags = 0;
+    read_block(pose + 0x8C, &flags, sizeof(flags));
+    if (flags & 0x04000000u) {            // already world space
+        out[0] = t[0]; out[1] = t[1]; out[2] = t[2];
+        return true;
+    }
+
+    float rt[4], rq[4];
+    if (!read_block(pose + 0x00, rt, sizeof(rt))) return false;
+    if (!read_block(pose + 0x10, rq, sizeof(rq))) return false;
+    for (int i = 0; i < 4; ++i)
+        if (!isfinite(rt[i]) || !isfinite(rq[i])) return false;
+
+    // The root quaternion's w carries a uniform scale as well as the rotation,
+    // so normalise before rotating: an unnormalised quaternion would scale the
+    // bone offset as a side effect.
+    const float n = sqrtf(rq[0] * rq[0] + rq[1] * rq[1] +
+                          rq[2] * rq[2] + rq[3] * rq[3]);
+    if (!(n > 1e-6f)) return false;
+    const float qx = rq[0] / n, qy = rq[1] / n, qz = rq[2] / n, qw = rq[3] / n;
+
+    // v' = v + 2*qw*(q x v) + 2*(q x (q x v))
+    const float cx = qy * t[2] - qz * t[1];
+    const float cy = qz * t[0] - qx * t[2];
+    const float cz = qx * t[1] - qy * t[0];
+    const float dx = qy * cz - qz * cy;
+    const float dy = qz * cx - qx * cz;
+    const float dz = qx * cy - qy * cx;
+    out[0] = t[0] + 2.0f * (qw * cx + dx) + rt[0];
+    out[1] = t[1] + 2.0f * (qw * cy + dy) + rt[1];
+    out[2] = t[2] + 2.0f * (qw * cz + dz) + rt[2];
+    return isfinite(out[0]) && isfinite(out[1]) && isfinite(out[2]);
+}
+
+// ---------------------------------------------------------------------------
+// THE WRITE. Engine thread, inside on_calc_mvp, several times per frame.
+//
+// It is ABSOLUTE and depends on nothing it previously wrote: the viewpoint is
+// recomputed from the head bone every single call. That is what makes it
+// immune to the frame-idempotency problem the VR mod has to solve with a
+// per-frame base capture, and it is why this module needs no Present hook, no
+// frame counter and no D3D11 code at all.
+//
+// Rotation is not touched, so m[0..2] (the camera's own right axis, row-vector
+// convention) is always the engine's current value and can be read freely.
+// ---------------------------------------------------------------------------
+bool write_fp_position(uint64_t cam) {
+    const uint64_t skel = g_player_skel.load(std::memory_order_relaxed);
+    if (!skel) { c_no_skel.fetch_add(1, std::memory_order_relaxed); return false; }
+
+    const uint32_t node = g_head_node.load(std::memory_order_relaxed);
+    if (node == 0xFFFFu) { c_no_node.fetch_add(1, std::memory_order_relaxed); return false; }
+
+    float o[3];
+    if (!read_block(skel + kOffOrigin, o, sizeof(o)) ||
+        !isfinite(o[0]) || !isfinite(o[1]) || !isfinite(o[2])) {
+        c_bad_bone.fetch_add(1, std::memory_order_relaxed);
+        return false;
+    }
+
+    float h[3];
+    if (!read_bone_world(skel, node, h)) {
+        c_bad_bone.fetch_add(1, std::memory_order_relaxed);
+        return false;
+    }
+
+    // Plausibility against the character's OWN origin, never against the
+    // camera: a head is within a metre horizontally of the body centre and
+    // sits between knee height (prone) and full standing height above it. A
+    // recycled or freed object reads as garbage and is rejected here rather
+    // than throwing the viewpoint across the map.
+    const float hdx = h[0] - o[0], hdy = h[1] - o[1], hdz = h[2] - o[2];
+    if (!(hdx * hdx + hdy * hdy < 1.0f && hdz > -0.5f && hdz < 2.2f)) {
+        c_implausible.fetch_add(1, std::memory_order_relaxed);
+        return false;
+    }
+
+    const float rise = f_of(g_head_eye_bits);
+    const float side = f_of(g_side_bits);
+
+    // Camera basis rows 0 and 1, read under SEH like every other engine
+    // pointer. Row 0 is the camera's right axis, row 1 its forward, both
+    // unit length in world space (row-vector convention); 1 world unit =
+    // 1 m and world up is +Z. Rotation is engine-owned, so both rows are
+    // always the engine's current values.
+    float mr[8];
+    if (!read_block(cam + kOffPose, mr, sizeof(mr)) ||
+        !isfinite(mr[0]) || !isfinite(mr[1]) || !isfinite(mr[2]) ||
+        !isfinite(mr[4]) || !isfinite(mr[5])) {
+        c_seh.fetch_add(1, std::memory_order_relaxed);
+        return false;
+    }
+
+    float t[3];
+    t[0] = h[0] + side * mr[0];
+    t[1] = h[1] + side * mr[1];
+    t[2] = h[2] + side * mr[2] + rise;
+
+    // FORWARD EYE OFFSET. The head joint sits at the skull base; the eyes
+    // are forward of it. HORIZONTALIZED so this frame's pitch never
+    // translates this frame's position (pitch-position feedback). Near
+    // straight up or down the horizontal forward degenerates; the term is
+    // skipped deterministically and the write still lands.
+    const float fwd = f_of(g_fwd_bits);
+    if (fwd > 0.0f) {
+        const float l2 = mr[4] * mr[4] + mr[5] * mr[5];
+        if (l2 >= 0.04f) {
+            const float s = fwd / sqrtf(l2);
+            t[0] += mr[4] * s;
+            t[1] += mr[5] * s;
+        }
+    }
+
+    // ANCHOR CLAMP. The target may not stray horizontally beyond fp_clamp
+    // from the character origin, so an animation whipping the head (vault,
+    // melee) cannot whip the view with it.
+    const float cl = f_of(g_clamp_bits);
+    if (cl > 0.0f) {
+        const float dx = t[0] - o[0], dy = t[1] - o[1];
+        const float d2 = dx * dx + dy * dy;
+        if (d2 > cl * cl) {
+            const float s = cl / sqrtf(d2);
+            t[0] = o[0] + dx * s;
+            t[1] = o[1] + dy * s;
+            c_clamp.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
+
+    // POSITION FILTER. Locomotion bobs the head bone several times a native
+    // first-person camera's budget; a per-axis EMA takes it out, with a
+    // heavier vertical time constant (stairs, stance changes). dt comes
+    // from QueryPerformanceCounter, lock-free user-mode code kept outside
+    // the SEH block, clamped so several mvp calls per frame advance the
+    // filter consistently. State more than 2 m from the target (teleport,
+    // fast travel, respawn) or non-finite resets to raw.
+    const float tau_h = f_of(g_smooth_bits);
+    const float tau_z = f_of(g_smooth_z_bits);
+    if (tau_h > 0.0f || tau_z > 0.0f) {
+        LARGE_INTEGER now;
+        QueryPerformanceCounter(&now);
+        const uint64_t prev = g_flt_qpc.exchange((uint64_t)now.QuadPart,
+                                                 std::memory_order_relaxed);
+        float dt = 0.0f;
+        if (prev && g_qpc_freq > 0 && (uint64_t)now.QuadPart > prev)
+            dt = (float)((double)((uint64_t)now.QuadPart - prev) * 1000.0 /
+                         (double)g_qpc_freq);
+        if (dt > 100.0f) dt = 100.0f;
+        if (g_flt_valid.load(std::memory_order_relaxed)) {
+            float fx = f_of(g_flt_x), fy = f_of(g_flt_y), fz = f_of(g_flt_z);
+            const float ex = t[0] - fx, ey = t[1] - fy, ez = t[2] - fz;
+            if (ex * ex + ey * ey + ez * ez > 4.0f) {
+                fx = t[0]; fy = t[1]; fz = t[2];
+                c_fsnap.fetch_add(1, std::memory_order_relaxed);
+            } else {
+                const float ah = tau_h > 0.0f ? dt / (tau_h + dt) : 1.0f;
+                const float az = tau_z > 0.0f ? dt / (tau_z + dt) : 1.0f;
+                fx += ah * ex;
+                fy += ah * ey;
+                fz += az * ez;
+                if (!isfinite(fx) || !isfinite(fy) || !isfinite(fz)) {
+                    fx = t[0]; fy = t[1]; fz = t[2];
+                    c_fsnap.fetch_add(1, std::memory_order_relaxed);
+                }
+            }
+            t[0] = fx; t[1] = fy; t[2] = fz;
+        }
+        set_f(g_flt_x, t[0]);
+        set_f(g_flt_y, t[1]);
+        set_f(g_flt_z, t[2]);
+        g_flt_valid.store(1, std::memory_order_relaxed);
+    } else {
+        g_flt_valid.store(0, std::memory_order_relaxed);
+    }
+
+    __try {
+        float* m = (float*)(cam + kOffPose);
+        m[12] = t[0];
+        m[13] = t[1];
+        m[14] = t[2];
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        c_seh.fetch_add(1, std::memory_order_relaxed);
+        return false;
+    }
+    c_writes.fetch_add(1, std::memory_order_relaxed);
+    return true;
+}
+
+}  // namespace
+
+// ---------------------------------------------------------------------------
+// THE RECORDER. Engine thread, several times per frame. No logging, no
+// allocation, no locks, no file I/O (project rule 8).
+// ---------------------------------------------------------------------------
+extern "C" void grwxr_probe_record(uint64_t index, const void* saved_raw,
+                                   void* /*return_address*/,
+                                   uint64_t* stack_args) {
+    if (index >= (uint64_t)kNumRows) return;
+    const auto* a = (const SavedArgs*)saved_raw;
+
+    if (index == kRowProjGameplay) {
+        // Argument 5 is the vertical fov in radians, on the caller's stack.
+        // ORDER MATTERS: the ORIGINAL incoming value is published first, so
+        // the ADS and scope gates never read this mod's own override back.
+        // The upper bound excludes the pi/2 sky and reflection capture faces
+        // (proj[2] is also called at exactly 1.5708 for those, VR build
+        // 12a.1): a cubemap publish landing mid-ADS would clear the yield
+        // hysteresis for a frame. Every real band stays: scope ~0.2, ADS
+        // 0.49..0.52, world 0.78..1.35.
+        float fovy;
+        memcpy(&fovy, &stack_args[4], sizeof(fovy));
+        if (fovy > 0.01f && fovy < 1.5f) {
+            set_f(g_fovy_bits, fovy);
+            // FIRST-PERSON FOV. The stub tail-jumps with the caller's stack
+            // intact and this recorder runs first, so overwriting the slot
+            // changes the fov the engine actually renders with (the VR
+            // mod's fullscreen mechanism, headset-verified). Only the
+            // 0.60..1.35 world band is overridden, for BOTH the incoming
+            // and the replacement value: that excludes ADS (0.49..0.52),
+            // magnified optics, and the pi/2 cubemap capture faces whose
+            // widening slides the sky against the world.
+            const float fov = f_of(g_fov_bits);
+            if (g_fp_want.load(std::memory_order_relaxed) &&
+                !g_ads_yield.load(std::memory_order_relaxed) &&
+                fov >= 0.60f && fov <= 1.35f &&
+                fovy >= 0.60f && fovy <= 1.35f) {
+                memcpy(&stack_args[4], &fov, sizeof(fov));
+                c_fov.fetch_add(1, std::memory_order_relaxed);
+            }
+        }
+        return;
+    }
+
+    if (index == kRowPlayerComp) {
+        // cPlayerComponent::OnInit runs at spawn. Publish the component; the
+        // worker thread does the guarded [+0x10] read that names the entity.
+        g_playercomp.store(a->rcx, std::memory_order_relaxed);
+        return;
+    }
+
+    if (index == kRowSkelPost) {
+        g_ring[g_ring_w.fetch_add(1, std::memory_order_relaxed) & (kRingSize - 1)]
+            .store(a->rcx, std::memory_order_relaxed);
+        return;
+    }
+
+    if (index == kRowOnCalcMvp) {
+        if (!g_fp_want.load(std::memory_order_relaxed)) return;
+
+        uint32_t mode = 0;
+        if (!read_block(a->rcx + kOffMode, &mode, sizeof(mode))) return;
+        if (mode != 0) return;   // not the player camera (menus, cutscenes)
+
+        c_calls.fetch_add(1, std::memory_order_relaxed);
+
+        // MAGNIFIED OPTICS STAND DOWN. The game anchors a scope's mask and
+        // reticle to its own aim while the scene would follow our moved
+        // viewpoint, and any disagreement is magnified by the zoom. Below the
+        // threshold we write nothing at all and the game renders its own scope
+        // view exactly as the unmodded game does. Plain iron sights and red
+        // dots render at 0.49 rad and up, so the default 0.30 releases them
+        // and catches only true magnification. Checked BEFORE the ADS yield
+        // so a magnified optic counts as scope=, not ads=.
+        const float sf = f_of(g_scope_fov_bits);
+        if (sf > 0.0f && f_of(g_fovy_bits) > 0.0f && f_of(g_fovy_bits) < sf) {
+            c_scope.fetch_add(1, std::memory_order_relaxed);
+            g_fp_engaged.store(0, std::memory_order_relaxed);
+            g_flt_valid.store(0, std::memory_order_relaxed);
+            return;
+        }
+
+        // ADS YIELD. Writing the camera moves the VIEW without moving aim
+        // (build 7), so hip fire while glued to the head diverges from the
+        // crosshair. Below fp_ads_fov the mod stops writing entirely and
+        // the game's own authored aim camera is authoritative, which keeps
+        // ADS exactly native; ceasing the write restores it instantly. The
+        // release threshold sits above the entry threshold and the fovy
+        // publish gate drops the pi/2 capture faces, so the boundary cannot
+        // strobe. g_fovy_bits is one proj[2] call stale, so the first frame
+        // of a transition may still write: the absolute per-call write makes
+        // that a single-frame artifact. Every stand-down invalidates the
+        // position filter, so resuming snaps to the live head instead of
+        // gliding from a stale pre-gap position.
+        const float af = f_of(g_ads_fov_bits);
+        if (af > 0.0f) {
+            const float fovy = f_of(g_fovy_bits);
+            if (fovy > 0.0f) {
+                uint32_t y = g_ads_yield.load(std::memory_order_relaxed);
+                float rel = f_of(g_ads_release_bits);
+                if (rel < af) rel = af;
+                if (!y && fovy < af)      y = 1;
+                else if (y && fovy > rel) y = 0;
+                g_ads_yield.store(y, std::memory_order_relaxed);
+                if (y) {
+                    c_ads.fetch_add(1, std::memory_order_relaxed);
+                    g_fp_engaged.store(0, std::memory_order_relaxed);
+                    g_flt_valid.store(0, std::memory_order_relaxed);
+                    return;
+                }
+            }
+        } else if (g_ads_yield.load(std::memory_order_relaxed)) {
+            g_ads_yield.store(0, std::memory_order_relaxed);
+        }
+
+        g_fp_engaged.store(write_fp_position(a->rcx) ? 1u : 0u,
+                           std::memory_order_relaxed);
+    }
+}
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// CONFIG. GRWFP\grwfp.cfg, re-read about a second after any save so the eye
+// height can be trimmed while standing in game.
+// ---------------------------------------------------------------------------
+void apply_defaults() {
+    set_f(g_head_eye_bits, 0.10f);   // head JOINT is at the skull base
+    set_f(g_side_bits,     0.00f);
+    set_f(g_scope_fov_bits, 0.30f);
+    set_f(g_ads_fov_bits,     0.60f);   // ADS <= 0.52, gameplay >= 0.78
+    set_f(g_ads_release_bits, 0.68f);
+    set_f(g_smooth_bits,      40.0f);   // ms, horizontal
+    set_f(g_smooth_z_bits,   120.0f);   // ms, vertical
+    set_f(g_clamp_bits,       0.20f);   // metres
+    set_f(g_fov_bits,         1.10f);   // radians, ~95 deg horizontal at 16:9
+    set_f(g_fwd_bits,         0.07f);   // metres, eyes forward of the joint
+    g_want_noblur.store(1, std::memory_order_relaxed);
+    g_want_headhide.store(1, std::memory_order_relaxed);
+}
+
+void load_config(bool first) {
+    const std::wstring path = log::data_dir() + L"\\grwfp.cfg";
+    FILE* f = nullptr;
+    if (_wfopen_s(&f, path.c_str(), L"rt") != 0 || !f) {
+        if (first) LOG_INFO("cfg: no grwfp.cfg, using built-in defaults");
+        return;
+    }
+    char line[512];
+    while (fgets(line, sizeof(line), f)) {
+        if (line[0] == '#') continue;
+        float v = 0;
+        int   i = 0;
+        if (sscanf_s(line, " fp_head_eye = %f", &v) == 1)   set_f(g_head_eye_bits, v);
+        if (sscanf_s(line, " fp_side = %f", &v) == 1)       set_f(g_side_bits, v);
+        if (sscanf_s(line, " fp_scope_fov = %f", &v) == 1)  set_f(g_scope_fov_bits, v);
+        if (sscanf_s(line, " fp_ads_fov = %f", &v) == 1)     set_f(g_ads_fov_bits, v);
+        if (sscanf_s(line, " fp_ads_release = %f", &v) == 1) set_f(g_ads_release_bits, v);
+        if (sscanf_s(line, " fp_smooth = %f", &v) == 1)      set_f(g_smooth_bits, v);
+        if (sscanf_s(line, " fp_smooth_z = %f", &v) == 1)    set_f(g_smooth_z_bits, v);
+        if (sscanf_s(line, " fp_clamp = %f", &v) == 1)       set_f(g_clamp_bits, v);
+        // 0 disables; any other value is clamped into the recorder's safety
+        // band, so a typo cannot select the cubemap or ADS ranges.
+        if (sscanf_s(line, " fp_fov = %f", &v) == 1)
+            set_f(g_fov_bits, v <= 0.0f ? 0.0f
+                              : v < 0.60f ? 0.60f : v > 1.35f ? 1.35f : v);
+        if (sscanf_s(line, " fp_fwd = %f", &v) == 1)
+            set_f(g_fwd_bits, v < 0.0f ? 0.0f : v > 0.20f ? 0.20f : v);
+        if (sscanf_s(line, " noblur = %d", &i) == 1)
+            g_want_noblur.store((uint32_t)(i != 0), std::memory_order_relaxed);
+        if (sscanf_s(line, " fp_on_start = %d", &i) == 1 && first && i != 0)
+            g_fp_want.store(1, std::memory_order_relaxed);
+        // Install-time only: hot-reloading this cannot un-patch a live thunk.
+        if (sscanf_s(line, " fp_head_hide = %d", &i) == 1 && first)
+            g_want_headhide.store((uint32_t)(i != 0), std::memory_order_relaxed);
+    }
+    fclose(f);
+    LOG_INFO("cfg: fp_head_eye=%.3f fp_side=%.3f fp_fwd=%.3f fp_scope_fov=%.2f "
+             "noblur=%u head_hide=%u",
+             f_of(g_head_eye_bits), f_of(g_side_bits), f_of(g_fwd_bits),
+             f_of(g_scope_fov_bits),
+             g_want_noblur.load(std::memory_order_relaxed),
+             g_want_headhide.load(std::memory_order_relaxed));
+    LOG_INFO("cfg: fp_ads_fov=%.2f fp_ads_release=%.2f fp_smooth=%.0f "
+             "fp_smooth_z=%.0f fp_clamp=%.2f fp_fov=%.2f",
+             f_of(g_ads_fov_bits), f_of(g_ads_release_bits),
+             f_of(g_smooth_bits), f_of(g_smooth_z_bits),
+             f_of(g_clamp_bits), f_of(g_fov_bits));
+}
+
+// ---------------------------------------------------------------------------
+// THE PLAYER, resolved exactly. [skel+0x10] == the entity cPlayerComponent
+// reported. One character is a cluster of skeletons (body plus gear), so among
+// the cluster take the one whose rig actually carries a Head bone: that is
+// structurally the body rig, and it is the only member the camera can use.
+// ---------------------------------------------------------------------------
+void resolve_player() {
+    if (const uint64_t pc = g_playercomp.load(std::memory_order_relaxed)) {
+        uint64_t ent = 0;
+        if (read_block(pc + 0x10, &ent, sizeof(ent)) && ent > 0x10000 && !(ent & 7)) {
+            const uint64_t was = g_player_entity.exchange(ent, std::memory_order_relaxed);
+            if (was != ent)
+                LOG_INFO("fp: player ENTITY 0x%012llX (from cPlayerComponent "
+                         "0x%012llX)", (unsigned long long)ent,
+                         (unsigned long long)pc);
+        }
+    }
+    const uint64_t ent = g_player_entity.load(std::memory_order_relaxed);
+    if (!ent) return;
+
+    uint64_t best = 0;
+    uint32_t best_node = 0xFFFFu;
+    int members = 0;
+    for (uint32_t i = 0; i < kRingSize; ++i) {
+        const uint64_t p = g_ring[i].load(std::memory_order_relaxed);
+        if (!p) continue;
+        uint64_t own = 0;
+        if (!read_block(p + kOffOwner, &own, sizeof(own))) continue;
+        if (own != ent) continue;
+        ++members;
+        uint64_t rig = 0;
+        if (!read_block(p + kOffRig, &rig, sizeof(rig))) continue;
+        if (rig < 0x10000 || (rig & 7)) continue;
+        const int node = rig_find_node(rig, kHeadHash);
+        if (node < 0) continue;      // gear rig: no Head bone, not the body
+        best = p;
+        best_node = (unsigned)node;
+        break;
+    }
+
+    static uint64_t s_last_skel = 0;
+    static uint32_t s_last_node = 0xFFFEu;
+    if (best) {
+        g_player_skel.store(best, std::memory_order_relaxed);
+        g_head_node.store(best_node, std::memory_order_relaxed);
+        if (best != s_last_skel || best_node != s_last_node) {
+            s_last_skel = best;
+            s_last_node = best_node;
+            LOG_INFO("fp: player BODY skeleton 0x%012llX, Head bone node %u "
+                     "(%d skeleton(s) on this entity)",
+                     (unsigned long long)best, best_node, members);
+        }
+    } else if (s_last_skel && members == 0) {
+        // The entity is known but nothing of its is in the ring right now
+        // (loading, cutscene, fast travel). Hold the last pin rather than
+        // dropping the viewpoint: the write validates it every call anyway.
+    }
+}
+
+}  // namespace
+
+bool active() { return g_fp_engaged.load(std::memory_order_relaxed) != 0; }
+
+bool install() {
+    auto img = sig::main_image();
+    if (!img) {
+        LOG_ERROR("fp: cannot read the GRW.exe image. Nothing installed.");
+        return false;
+    }
+    g_module = (uintptr_t)img->base;
+
+    // The position filter's clock base, taken before any hook exists so the
+    // recorder can never observe it unset. Constant after boot.
+    {
+        LARGE_INTEGER f;
+        if (QueryPerformanceFrequency(&f)) g_qpc_freq = f.QuadPart;
+    }
+
+    const gamebuild::Build* gb = gamebuild::get();
+    if (!gb) {
+        LOG_ERROR("fp: no address table for this GRW.exe build. NOTHING is "
+                  "installed and the game runs unmodified.");
+        return false;
+    }
+
+    // The anchor. Row 0 must be findable by signature AND land exactly where
+    // the selected table says, or this is not the binary we analysed and we
+    // install nothing at all (project rule 7).
+    size_t matches = 0;
+    auto found = sig::find_unique(*img, kProjSig, &matches);
+    if (!found) {
+        LOG_ERROR("fp: anchor signature matched %zu times, expected exactly 1.",
+                  matches);
+        if (matches == 0)
+            LOG_ERROR("fp: 0 matches usually means the game was updated.");
+        LOG_ERROR("fp: NOTHING installed. The game runs unmodified.");
+        return false;
+    }
+    const uintptr_t anchor_rva = (uintptr_t)*found - g_module;
+    if (anchor_rva != gb->cam[0].fn) {
+        LOG_ERROR("fp: anchor is at RVA 0x%08zX but the %s table was built for "
+                  "0x%08zX. This is NOT the binary we analysed. NOTHING "
+                  "installed.", (size_t)anchor_rva, gb->name,
+                  (size_t)gb->cam[0].fn);
+        return false;
+    }
+    LOG_INFO("fp: anchor verified at RVA 0x%08zX (%s)", (size_t)anchor_rva,
+             gb->name);
+
+    void* entries[kNumRows] = {
+        (void*)&grwxr_probe_entry_0, (void*)&grwxr_probe_entry_1,
+        (void*)&grwxr_probe_entry_2, (void*)&grwxr_probe_entry_3,
+        (void*)&grwxr_probe_entry_4, (void*)&grwxr_probe_entry_5,
+        (void*)&grwxr_probe_entry_6, (void*)&grwxr_probe_entry_7,
+        (void*)&grwxr_probe_entry_8, (void*)&grwxr_probe_entry_9,
+        (void*)&grwxr_probe_entry_10,
+    };
+
+    int ok = 0, want = 0;
+    for (int i = 0; i < kNumRows; ++i) {
+        if (!kInstallRow[i]) continue;
+        ++want;
+        uint8_t* fn = img->base + gb->cam[i].fn;
+        grwxr_probe_originals[i] = fn;
+        if (g_hooks[i].install(img->base + gb->cam[i].thunk, fn, entries[i],
+                               kRowName[i]))
+            ++ok;
+    }
+    LOG_INFO("fp: %d of %d camera hooks installed.", ok, want);
+
+    // All four are load-bearing, so a partial install is a refusal rather than
+    // a degraded mode: without the write site there is no first person, and
+    // without the other three the write has no player to anchor to.
+    if (ok != want) {
+        LOG_ERROR("fp: a required hook failed. Rolling back; the game runs "
+                  "unmodified.");
+        for (int i = 0; i < kNumRows; ++i) g_hooks[i].restore();
+        return false;
+    }
+
+    apply_defaults();
+    load_config(true);
+
+    // ---------------------------------------------------------------------
+    // HEAD HIDE. Ported from the VR mod, where it is [VERIFIED, headset] on
+    // this exact 2026-08 binary (docs/CURRENT-STATE.md, "HEAD HIDE WORKS on
+    // build 40930ed1" and "HEAD HIDE IS FULLY WORKING on the update build").
+    //
+    // NOT load-bearing, deliberately. It installs AFTER the camera is already
+    // committed and its failure never rolls anything back: a visible head is a
+    // cosmetic problem, and refusing first person over it would be worse than
+    // the flaw. Every failure path below logs its own reason and leaves the
+    // asm entry disarmed (grwxr_headhide_table stays 0).
+    //
+    // Three independent checks before a byte is patched (project rule 7):
+    //   1. the setter body signature must match UNIQUELY and land exactly at
+    //      the documented impl RVA,
+    //   2. the class method table's slot +0x1F0 must resolve to the function
+    //      found by an independent slot-fn signature, which is what proves
+    //      this is the class we analysed and not a coincidence,
+    //   3. ThunkHook::install verifies the E9 thunk really targets that impl.
+    // ---------------------------------------------------------------------
+    if (g_want_headhide.load(std::memory_order_relaxed)) {
+        bool hh_ok = true;
+        size_t m = 0;
+
+        auto setter = sig::find_unique(*img, gb->head_setter_sig, &m);
+        if (!setter || *setter != img->base + gb->head_setter_impl) {
+            LOG_ERROR("hide: SetHidden signature %s (matches=%zu, expected RVA "
+                      "0x%08zX). Head hide OFF, first person still works.",
+                      setter ? "matched at the WRONG address" : "missed", m,
+                      (size_t)gb->head_setter_impl);
+            hh_ok = false;
+        }
+
+        auto slotfn = hh_ok ? sig::find_unique(*img, kHeadSlotFnSig, &m)
+                            : std::optional<uint8_t*>{};
+        if (hh_ok && !slotfn) {
+            LOG_ERROR("hide: class slot-fn signature missed (matches=%zu). "
+                      "Cannot verify the method table. Head hide OFF.", m);
+            hh_ok = false;
+        }
+
+        if (hh_ok) {
+            uint64_t slotval = 0;
+            memcpy(&slotval, img->base + gb->head_table + 0x1F0,
+                   sizeof(slotval));
+            const uint8_t* p = (const uint8_t*)slotval;
+            const uint8_t* resolved = p;
+            if (p >= img->base && p < img->base + img->size && p[0] == 0xE9) {
+                int32_t rel = 0;
+                memcpy(&rel, p + 1, sizeof(rel));
+                resolved = p + 5 + rel;
+            }
+            if (resolved != *slotfn) {
+                LOG_ERROR("hide: method table slot +0x1F0 resolves to 0x%p, "
+                          "signature found 0x%p. NOT the class we analysed. "
+                          "Head hide OFF.", (const void*)resolved,
+                          (void*)*slotfn);
+                hh_ok = false;
+            }
+        }
+
+        if (hh_ok) {
+            grwxr_headhide_impl = (uint64_t)(img->base + gb->head_setter_impl);
+            if (g_headhide_hook.install(img->base + gb->head_setter_thunk,
+                                        img->base + gb->head_setter_impl,
+                                        (void*)&grwxr_headhide_entry,
+                                        "SetHidden")) {
+                // Published LAST: the asm entry ignores everything until this
+                // pointer is nonzero, so a half-installed hook is inert.
+                grwxr_headhide_table = (uint64_t)(img->base + gb->head_table);
+                LOG_INFO("hide: armed. The head hides whenever first person "
+                         "is on (class table verified via slot fn).");
+            }
+        }
+    } else {
+        LOG_INFO("hide: disabled by cfg (fp_head_hide=0).");
+    }
+
+    if (g_want_noblur.load(std::memory_order_relaxed)) {
+        size_t m = 0;
+        auto hit = sig::find_unique(*img, kNoBlurSig, &m);
+        if (!hit) {
+            LOG_ERROR("blur: no-camera-blur signature %s (matches=%zu). Blur "
+                      "patch OFF; everything else runs.",
+                      m ? "AMBIGUOUS" : "missed", m);
+        } else if (*hit != img->base + gb->noblur_match) {
+            LOG_ERROR("blur: signature matched at RVA 0x%08zX, expected "
+                      "0x%08zX (game updated?). Blur patch OFF.",
+                      (size_t)(*hit - img->base), (size_t)gb->noblur_match);
+        } else if ((*hit)[kNoBlurImmOff] != 0x01) {
+            LOG_ERROR("blur: byte at match+%zu reads 0x%02X, expected 01. "
+                      "Blur patch OFF.", kNoBlurImmOff, (*hit)[kNoBlurImmOff]);
+        } else {
+            uint8_t* b = *hit + kNoBlurImmOff;
+            DWORD prot = 0;
+            if (VirtualProtect(b, 1, PAGE_EXECUTE_READWRITE, &prot)) {
+                *b = 0x00;
+                DWORD dummy = 0;
+                VirtualProtect(b, 1, prot, &dummy);
+                FlushInstructionCache(GetCurrentProcess(), b, 1);
+                g_noblur_byte = b;
+                LOG_INFO("blur: camera blur DISABLED at RVA 0x%08zX",
+                         (size_t)(b - img->base));
+            } else {
+                LOG_ERROR("blur: VirtualProtect failed (err %lu). Blur patch OFF.",
+                          GetLastError());
+            }
+        }
+    }
+
+    g_installed = true;
+    LOG_INFO("");
+    LOG_INFO("fp: READY. Press the = key in game to toggle first person.");
+    LOG_INFO("fp: the mod moves the camera POSITION only; your mouse still");
+    LOG_INFO("fp: aims exactly as it does in the unmodded game.");
+    return true;
+}
+
+void uninstall() {
+    if (g_noblur_byte) {
+        DWORD prot = 0;
+        if (VirtualProtect(g_noblur_byte, 1, PAGE_EXECUTE_READWRITE, &prot)) {
+            *g_noblur_byte = 0x01;
+            DWORD dummy = 0;
+            VirtualProtect(g_noblur_byte, 1, prot, &dummy);
+            FlushInstructionCache(GetCurrentProcess(), g_noblur_byte, 1);
+        }
+        g_noblur_byte = nullptr;
+    }
+    // Disarm the asm entry BEFORE unhooking, then put the head back: leaving a
+    // player's head hidden after an orderly unload would be a nasty parting
+    // gift, and the engine only re-asserts on its next transition.
+    if (grwxr_headhide_table) {
+        grwxr_headhide_table = 0;
+        const uint64_t obj  = grwxr_headhide_obj;
+        const uint64_t impl = grwxr_headhide_impl;
+        if (grwxr_headhide_on && obj && impl)
+            ((void (*)(void*, uint8_t))impl)((void*)obj, (uint8_t)0);
+        grwxr_headhide_on = 0;
+    }
+    g_headhide_hook.restore();
+    for (int i = 0; i < kNumRows; ++i) g_hooks[i].restore();
+    g_installed = false;
+}
+
+void poll() {
+    if (!g_installed) return;
+
+    // THE TOGGLE. GetAsyncKeyState's low bit means "pressed since the last
+    // call" and is CONSUMED by whoever reads it first; the game polls input
+    // every frame, so that bit never survives to us. Read the key-is-down bit
+    // (0x8000) and do our own edge detection, which is what the keys that have
+    // always worked in this project's VR sibling do.
+    //
+    // VK_OEM_PLUS is the main-row "=" / "+" key, documented as the "+" key for
+    // any country or region. It is not on the numpad, deliberately: plenty of
+    // keyboards do not have one.
+    {
+        static bool s_down = false;
+        const bool down = (GetAsyncKeyState(VK_OEM_PLUS) & 0x8000) != 0;
+        if (down && !s_down) {
+            const bool on = !g_fp_want.load(std::memory_order_relaxed);
+            g_fp_want.store(on ? 1u : 0u, std::memory_order_relaxed);
+            // Drive the head on the same edge. Safe from this thread: see the
+            // note on set_head_hide. A no-op when head hide did not install.
+            set_head_hide(on);
+            if (on && !g_player_skel.load(std::memory_order_relaxed)) {
+                LOG_INFO("fp: first person requested, but the player has not "
+                         "been identified yet (are you in the main menu or a "
+                         "lobby?). It will engage by itself once you are in "
+                         "the world.");
+            } else {
+                LOG_INFO("fp: first person %s", on ? "ON" : "OFF");
+            }
+        }
+        s_down = down;
+    }
+
+    // 1 Hz work: re-resolve the player, reload the cfg if it changed, report.
+    static ULONGLONG s_last = 0;
+    const ULONGLONG now = GetTickCount64();
+    if (now - s_last < 1000) return;
+    s_last = now;
+
+    resolve_player();
+
+    // ANTI-CHEAT WATCH, 1 Hz. The startup survey in dllmain only sees the
+    // moment the proxy attached, which is the main menu. EasyAntiCheat can be
+    // loaded LATER, when a mode that needs it is entered, and a one-shot check
+    // would miss exactly that. This logs the transition with a timestamp, so
+    // "which mode loads EAC" becomes an observed fact instead of a guess.
+    //
+    // GetModuleHandleW does not load or reference anything, it only reports
+    // what the loader already mapped, so this is free and cannot perturb the
+    // process. Nothing here gates the camera: the mapping is being MEASURED,
+    // and the PvP (Ghost War) stand-down gets wired once it is known.
+    {
+        static bool s_eac_seen = false;
+        const bool eac = GetModuleHandleW(L"EasyAntiCheat_x64.dll") ||
+                         GetModuleHandleW(L"EasyAntiCheat.dll") ||
+                         GetModuleHandleW(L"EasyAntiCheatEOS.dll");
+        if (eac != s_eac_seen) {
+            s_eac_seen = eac;
+            if (eac) {
+                LOG_INFO("anticheat: EasyAntiCheat HAS NOW LOADED into the "
+                         "process. Note what you were doing at this moment "
+                         "(entering coop, entering Ghost War, matchmaking): "
+                         "that is the mode which brings anti-cheat in.");
+            } else {
+                LOG_INFO("anticheat: EasyAntiCheat is no longer loaded.");
+            }
+        }
+    }
+
+    {
+        static FILETIME s_mtime = {};
+        const std::wstring path = log::data_dir() + L"\\grwfp.cfg";
+        WIN32_FILE_ATTRIBUTE_DATA fad;
+        if (GetFileAttributesExW(path.c_str(), GetFileExInfoStandard, &fad)) {
+            if (CompareFileTime(&fad.ftLastWriteTime, &s_mtime) != 0) {
+                const bool first = (s_mtime.dwLowDateTime == 0 &&
+                                    s_mtime.dwHighDateTime == 0);
+                s_mtime = fad.ftLastWriteTime;
+                if (!first) load_config(false);
+            }
+        }
+    }
+
+    // Status, every 10 s while first person is requested. Every gate has its
+    // own counter, so "I pressed the key and nothing happened" is answerable
+    // from the log without another build.
+    static int ticks = 0;
+    if (g_fp_want.load(std::memory_order_relaxed) && (++ticks % 10) == 0) {
+        LOG_INFO("fp: %s | calls=%llu writes=%llu | no_skel=%llu no_node=%llu "
+                 "bad_bone=%llu implausible=%llu scope=%llu seh=%llu | "
+                 "ads=%llu fov=%llu clamp=%llu fsnap=%llu",
+                 active() ? "ENGAGED"
+                 : g_ads_yield.load(std::memory_order_relaxed)
+                     ? "YIELDED (ads)"
+                     : "requested but NOT engaged",
+                 (unsigned long long)c_calls.load(std::memory_order_relaxed),
+                 (unsigned long long)c_writes.load(std::memory_order_relaxed),
+                 (unsigned long long)c_no_skel.load(std::memory_order_relaxed),
+                 (unsigned long long)c_no_node.load(std::memory_order_relaxed),
+                 (unsigned long long)c_bad_bone.load(std::memory_order_relaxed),
+                 (unsigned long long)c_implausible.load(std::memory_order_relaxed),
+                 (unsigned long long)c_scope.load(std::memory_order_relaxed),
+                 (unsigned long long)c_seh.load(std::memory_order_relaxed),
+                 (unsigned long long)c_ads.load(std::memory_order_relaxed),
+                 (unsigned long long)c_fov.load(std::memory_order_relaxed),
+                 (unsigned long long)c_clamp.load(std::memory_order_relaxed),
+                 (unsigned long long)c_fsnap.load(std::memory_order_relaxed));
+
+        // Head hide reports separately, because "first person works but the
+        // head is still there" needs its own numbers to diagnose. obj=0 means
+        // the engine has not called the setter yet this session, so nothing
+        // has been latched and the head hides at the first transition.
+        if (grwxr_headhide_table) {
+            LOG_INFO("hide: %s | obj=0x%012llX setter_calls=%llu forced=%llu "
+                     "direct=%llu",
+                     grwxr_headhide_obj ? (grwxr_headhide_on ? "FORCING (fp on)"
+                                                             : "idle (fp off)")
+                                        : "NOT LATCHED YET (aim once)",
+                     (unsigned long long)grwxr_headhide_obj,
+                     (unsigned long long)grwxr_headhide_calls,
+                     (unsigned long long)grwxr_headhide_forced,
+                     (unsigned long long)grwxr_headhide_direct);
+        }
+    }
+}
+
+}  // namespace fpcam
+}  // namespace grwxr
+
+```
+
+`src/FpCamera.h`:
+
+```h
+// FpCamera.h - GRW-FP phase 2: the flat first-person camera.
+//
+// WHAT THIS DOES, IN ONE SENTENCE. It moves the game camera's POSITION to the
+// player character's animated Head bone and leaves everything else alone.
+//
+// WHAT IT DELIBERATELY DOES NOT DO. It never touches the camera's ROTATION.
+// The game's own mouse look keeps full authority over where you are pointing,
+// so aiming, the crosshair, ballistics, scope masks and every UI element that
+// is anchored to the aim direction stay exactly as the developers built them.
+// That single restriction is why the flat mod can ship long before the VR mod:
+// almost all of the VR work is rotation work, and none of it is needed here.
+//
+// PROVENANCE. Every address, offset and layout below is inherited from the VR
+// mod's verified reverse engineering (docs/RE-notes.md, docs/CURRENT-STATE.md),
+// not re-derived here:
+//
+//   Camera + 0x000   the authoritative 4x4 pose the view builder consumes,
+//                    refreshed by the engine every frame, row-major, with the
+//                    translation in the fourth row (m[12..14]).
+//   Camera + 0x290   camera mode; 0 is the player camera.
+//   skel   + 0x010   the owning ENTITY. The player's skeletons are exactly
+//                    those whose owner equals the entity cPlayerComponent
+//                    reported at spawn. This is an identity, not a heuristic.
+//   skel   + 0x120   the character's world origin.
+//   skel   + 0x220   the rig; a sorted {u32 CRC32 name hash, u16 node index}
+//                    map at [rig+0x50], count at [rig+0x5A], bones at [rig+0x8A].
+//   skel   + 0x238   the final Pose; bone buffer at [pose+0x178], stride 0x20
+//                    as {float4 translation, float4 quaternion}, MODEL space
+//                    unless bit 26 of [pose+0x8C] says otherwise.
+//
+// THE ONE SIMPLIFICATION OVER THE VR MOD, and it is a large one. The VR mod
+// carries a heuristic pin (framed humanoid, nearest the chase camera, armed by
+// the toggle's rising edge) because it predates the exact predicate, and its
+// ledger records that heuristic re-acquisition kept grabbing teammates. This
+// mod uses ONLY the exact predicate. No alignment scoring, no distance
+// windows, no acquisition arming, and therefore none of the failure modes that
+// cost the VR mod a dozen test runs. If the entity is not known yet, first
+// person simply does not engage and says so in the log.
+//
+// RULE 8. The recorder runs on an engine thread several times per frame and
+// does no logging, no allocation, no locking and no file I/O. Everything that
+// can block lives on the worker thread in poll().
+
+#pragma once
+
+namespace grwxr {
+namespace fpcam {
+
+// Init thread. Verifies the build pin and the anchor signature, installs the
+// four thunk hooks and (if enabled) the no-blur byte. Returns false and logs
+// loudly on any mismatch, leaving the game running completely unmodified
+// (project rule 7). Nothing is first-person until the user presses the key.
+bool install();
+
+// Restores every hook and the no-blur byte.
+void uninstall();
+
+// Worker thread, called about every 50 ms. Polls the toggle key, re-resolves
+// the player skeleton and head bone, reloads grwfp.cfg when it changes, and
+// emits all of this module's log lines.
+void poll();
+
+// Is the first-person camera currently engaged (requested AND anchored)?
+bool active();
+
+}  // namespace fpcam
+}  // namespace grwxr
+
+```
+
+`src/FpStub.asm`:
+
+```asm
+; FpStub.asm - GRW-FP's argument-observing stub.
+;
+; A TRIMMED copy of the VR mod's src/ProbeStub.asm, carrying only the shared
+; body and the eleven entry points. Every weapon, aim, head-hide and raycast
+; stub in the original is deliberately absent: the flat mod hooks four rows of
+; the camera thunk table and nothing else, so importing their EXTERNs would
+; force us to define globals for features this mod does not have.
+;
+; WHY A STUB AT ALL. The functions we hook have prototypes we do not know
+; (on_calc_mvp takes 21 arguments). This saves every register that can carry an
+; argument under the Microsoft x64 ABI, calls a recorder with a pointer to the
+; saved block, restores everything, and TAIL JUMPS to the real function. Because
+; it jumps rather than calls, the stack pointer, the caller's return address and
+; every stack-passed argument are exactly what the real function would have
+; seen. The real function cannot tell the difference.
+;
+; Registers clobbered are r10, r11 and rax, all volatile at function entry.
+;
+; STACK ALIGNMENT, the detail that cost the VR mod a crash: entry via jmp from
+; the thunk leaves rsp congruent to 8 mod 16 (the caller's `call` pushed a
+; return address onto a 16-aligned stack). The ABI requires rsp congruent to
+; 0 mod 16 immediately BEFORE a `call`. The frame reservation must therefore be
+; 8 mod 16 itself: 0B8h. Reserving 0B0h instead is latent until the recorder
+; spills xmm with movaps, and then the first aligned store faults. Do not
+; "tidy" this number.
+
+EXTERN grwxr_probe_record : PROC
+EXTERN grwxr_probe_originals : QWORD
+
+; Head hide, ported from the VR mod's src/ProbeStub.asm (build 18 + build 34).
+; Read and written by FpCamera.cpp; see grwxr_headhide_entry below.
+EXTERN grwxr_headhide_table  : QWORD
+EXTERN grwxr_headhide_impl   : QWORD
+EXTERN grwxr_headhide_on     : DWORD
+EXTERN grwxr_headhide_calls  : QWORD
+EXTERN grwxr_headhide_forced : QWORD
+EXTERN grwxr_headhide_obj    : QWORD
+
+.code
+
+; ---------------------------------------------------------------------------
+; HEAD HIDE. Detours the engine's own visibility setter, SetHidden.
+;
+; Ported verbatim from the VR mod, where it is [VERIFIED, headset] working on
+; this exact 2026-08 binary. Signature: void SetHidden(void* rcx, uint8 dl).
+;
+; What it does, in order:
+;   1. count the call (diagnostics),
+;   2. stand down entirely until FpCamera has published a VERIFIED class table
+;      pointer, so a failed install leaves the engine's own instruction stream,
+;   3. identify the object by its class pointer at [rcx+8] and latch it, which
+;      is the only verified route to the head object's address,
+;   4. while first person is on, force the hide argument to 1.
+;
+; Rule 8 holds: no call, no stack frame, no allocation, no logging. Registers
+; touched are rax and dl, both volatile at function entry.
+;
+; NOTE, and this is the part that matters for "why is my head still there":
+; the engine calls this setter on TRANSITIONS, not every frame. See build 34's
+; note in FpCamera.cpp set_head_hide().
+; ---------------------------------------------------------------------------
+grwxr_headhide_entry PROC
+    lock inc qword ptr [grwxr_headhide_calls]
+    mov     rax, [grwxr_headhide_table]
+    test    rax, rax
+    jz      hh_pass
+    cmp     rax, [rcx+8]
+    jne     hh_pass
+    mov     [grwxr_headhide_obj], rcx      ; latched: the verified route to
+                                           ; the pointer (RE-notes)
+    cmp     dword ptr [grwxr_headhide_on], 0
+    je      hh_pass
+    mov     dl, 1                          ; force HIDE
+    lock inc qword ptr [grwxr_headhide_forced]
+hh_pass:
+    mov     rax, [grwxr_headhide_impl]
+    jmp     rax
+grwxr_headhide_entry ENDP
+
+; ---------------------------------------------------------------------------
+; The shared body. Entered with the probe index in r10.
+; ---------------------------------------------------------------------------
+grwxr_probe_common PROC PRIVATE
+    sub     rsp, 0B8h
+
+    ; Saved argument block starts at rsp+40h. Keep this layout in sync with
+    ; struct SavedArgs in FpCamera.cpp.
+    mov     [rsp+40h], rcx
+    mov     [rsp+48h], rdx
+    mov     [rsp+50h], r8
+    mov     [rsp+58h], r9
+    movups  [rsp+60h], xmm0
+    movups  [rsp+70h], xmm1
+    movups  [rsp+80h], xmm2
+    movups  [rsp+90h], xmm3
+    mov     [rsp+0A0h], r10
+
+    ; grwxr_probe_record(index, &saved, return_address, stack_args)
+    mov     rcx, r10
+    lea     rdx, [rsp+40h]
+    mov     r8,  [rsp+0B8h]         ; the caller's return address
+    lea     r9,  [rsp+0C0h]         ; first stack argument slot (shadow space)
+    call    grwxr_probe_record
+
+    mov     r10, [rsp+0A0h]
+    movups  xmm3, [rsp+90h]
+    movups  xmm2, [rsp+80h]
+    movups  xmm1, [rsp+70h]
+    movups  xmm0, [rsp+60h]
+    mov     r9,  [rsp+58h]
+    mov     r8,  [rsp+50h]
+    mov     rdx, [rsp+48h]
+    mov     rcx, [rsp+40h]
+
+    lea     r11, grwxr_probe_originals
+    mov     r11, [r11 + r10*8]
+
+    add     rsp, 0B8h
+    jmp     r11                     ; tail jump: the real function sees the
+                                    ; original rsp, return address and stack args
+grwxr_probe_common ENDP
+
+; ---------------------------------------------------------------------------
+; One entry point per hookable thunk, so the recorder knows which one fired.
+; All eleven exist so the index space matches Build::cam row order exactly;
+; the flat mod installs only rows 2, 6, 8 and 10. An uninstalled row's entry
+; is simply never reached.
+; ---------------------------------------------------------------------------
+PROBE_ENTRY MACRO n
+grwxr_probe_entry_&n& PROC
+    mov     r10d, n
+    jmp     grwxr_probe_common
+grwxr_probe_entry_&n& ENDP
+ENDM
+
+    PROBE_ENTRY 0
+    PROBE_ENTRY 1
+    PROBE_ENTRY 2
+    PROBE_ENTRY 3
+    PROBE_ENTRY 4
+    PROBE_ENTRY 5
+    PROBE_ENTRY 6
+    PROBE_ENTRY 7
+    PROBE_ENTRY 8
+    PROBE_ENTRY 9
+    PROBE_ENTRY 10
+
+END
+
+```
+
+`src/GameBuild.cpp`:
+
+```cpp
+// GameBuild.cpp - build 46. See GameBuild.h for what this is and why.
+//
+// Every RVA below is [VERIFIED] against its binary:
+//   Steam : docs/RE-notes.md, pinned since session 1, sha 25860653...
+//   Store : tools/store_port.py 2026-08-05 against the tester's exe,
+//           sha 3349b29b..., every row exactly one hit, Steam controls OK.
+//           Full derivation table: docs/ISSUE-foreign-store-builds.md.
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+#include "GameBuild.h"
+#include "Log.h"
+
+namespace grwxr {
+namespace gamebuild {
+namespace {
+
+constexpr Build kSteam = {
+    "Steam", 0x6502AAB6, 0x1633A000,
+    {{0x01347280, 0x0C50C0E0},    // proj[0] anchor
+     {0x01347460, 0x0C50C2E0},    // proj[1]
+     {0x01347530, 0x0C50C420},    // proj[2] gameplay
+     {0x01347840, 0x0C50C7E0},    // proj[3] skew path
+     {0x01345720, 0x0C5094D0},    // proj[4]
+     {0x01345800, 0x0C509720},    // proj[5]
+     {0x0135F720, 0x0C5E47E0},    // on_calc_mvp
+     {0x01349DF0, 0x0C510B20},    // selector
+     {0x01865A10, 0x0DA1A990},    // SkeletonPostUpdate
+     {0x018BE500, 0x0DC4F9B0},    // HIK datablock reader
+     {0x02713160, 0x114A6DE0}},   // cPlayerComponent::OnInit callee
+    0x006777C0, 0x005FA190,       // setyaw, setpitch stubs
+    0x006764B0, 0x00677600,       // getyaw, getpitch stubs
+    0x124B855D, 0x124B85A1,       // per-shot aim read sites (build 50 census)
+    0x029AB510, 0x124B8360,       // weapon per-frame update thunk + impl
+    0x030B08E0, 0x13E68070,       // hknpWorld::castRay thunk + impl
+    0x029A8E80, 0x124B0770,       // GetAimOrientation thunk + impl
+    0x02986B20, 0x12458BD0,       // ballistic projectile spawn thunk + impl
+    0x04A66410, 0x029DC7D0, 0x12582AC0,
+    0x124DE4CC,
+    0x030AC6A0, 0x13E5EA30,
+    0x162AD098, 0x162AD0A0,
+    0x030C9990, 0x13EA3550,       // TtCastRay thunk + impl (build 58)
+    0x03851120,                   // XInputGetState shadow-IAT slot
+    "48 83 EC 08 44 0F B6 DA 49 89 C9 38 51 68 74 ? 44 0F B7 51 4A",
+    0, 0,                         // PublishAttachments NOT derived here
+    0, 0,                         // SetWorldTransform NOT derived here
+};
+
+constexpr Build kStore = {
+    "Ubisoft-Epic", 0x64FACA0E, 0x16F9C000,
+    {{0x01346E30, 0x0DA9BE30},    // proj[0] anchor
+     {0x01347010, 0x0DA9C130},    // proj[1]
+     {0x013470E0, 0x0DA9C330},    // proj[2] gameplay
+     {0x013473F0, 0x0DA9C760},    // proj[3] skew path
+     {0x013452D0, 0x0DA99950},    // proj[4]
+     {0x013453B0, 0x0DA99B30},    // proj[5]
+     {0x0135F270, 0x0DAE6510},    // on_calc_mvp
+     {0x013499A0, 0x0DAA1A70},    // selector
+     {0x018655B0, 0x0F0FCD30},    // SkeletonPostUpdate
+     {0x018BE060, 0x0F3B0DA0},    // HIK datablock reader
+     {0x02712FC0, 0x1310A3A0}},   // cPlayerComponent::OnInit callee
+    0x006772B0, 0x005F9E90,       // setyaw, setpitch stubs
+    0x00675FA0, 0x006770F0,       // getyaw, getpitch stubs
+    0, 0,                         // per-shot aim sites NOT derived here yet
+    0, 0,                         // weapon update routine NOT derived here
+    0, 0,                         // hknpWorld::castRay NOT derived here
+    0, 0,                         // GetAimOrientation NOT derived here
+    0, 0,                         // projectile spawn NOT derived here
+    0x04A66410, 0x029DC5A0, 0x13EA7F80,
+    0x13E464AC,
+    0x030AC4F0, 0x152E3E70,
+    0x16F0F098, 0x16F0F0A0,
+    0, 0,                         // TtCastRay NOT derived here
+    0x03851120,                   // XInputGetState shadow-IAT slot (identical to Steam)
+    "48 83 EC 08 44 0F B6 DA 49 89 C9 38 51 68 74 ? 44 0F B7 51 4A",
+    0, 0,                         // PublishAttachments NOT derived here
+    0, 0,                         // SetWorldTransform NOT derived here
+};
+
+// The 2026-08 "Last Rites" update. Steam and Ubisoft Connect ship the SAME
+// exe (sha 56791ff5..., byte-identical), so one row covers both stores.
+// Derived 2026-08-07 with tools/store_port.py old-Steam -> new exe: every
+// non-zero row hit exactly once with the Steam control OK (output archived
+// at binaries/store_port-2026aug-output.txt). The rows store_port missed
+// (bodies recompiled) were restored 2026-08-08 by the update research
+// campaign: matched on function shape, string xrefs and caller intersection
+// with Steam positive controls, each with a fresh single-hit raw-file AOB.
+// Full evidence chains: docs/UPDATE-CAMPAIGN-2026-08.md.
+constexpr Build kUpdate2026 = {
+    "2026-08-update", 0x6A692948, 0x18502000,
+    {{0x013786F0, 0x0DB26FA0},    // proj[0] anchor
+     {0x013788D0, 0x0DB27220},    // proj[1]
+     {0x013789A0, 0x0DB27300},    // proj[2] gameplay
+     {0x01378CB0, 0x0DB27650},    // proj[3] skew path
+     {0x01376B90, 0x0DB24880},    // proj[4]
+     {0x01376C70, 0x0DB24BF0},    // proj[5]
+     {0x01390570, 0x0DB6FF30},    // on_calc_mvp
+     {0x0137B280, 0x0DB2BEC0},    // selector
+     {0x0189B430, 0x0F085A50},    // SkeletonPostUpdate
+     {0x018F4180, 0x0F1B82F0},    // HIK datablock reader
+     {0x02759D40, 0x13435390}},   // cPlayerComponent::OnInit callee
+    0x004487D0, 0x004477F0,       // setyaw, setpitch stubs
+    0x00447400, 0x00447330,       // getyaw, getpitch stubs (13-byte stub AOB, 1 hit)
+    0x1464DEDB, 0x1464DF1C,       // per-shot aim read sites (caller intersection)
+    0x02A02DC0, 0x1464DCE0,       // weapon per-frame update thunk + impl
+    0x03100590, 0x161AEDE0,       // hknpWorld::castRay thunk + impl
+    0x029F6FB0, 0x14619440,       // GetAimOrientation thunk + impl
+    0x029D7760, 0x145BB050,       // ballistic projectile spawn thunk + impl
+    0x04AFB540, 0x02A2D550, 0x146D7630,  // head_table, setter thunk + impl
+    0x146691CC,                   // no-blur match
+    0x030FC350, 0x161A55E0,       // weapon setterA thunk + impl
+    0x1820C098, 0x1820C0A0,       // ansel IAT slots
+    0x03119640, 0x161E6D60,       // TtCastRay thunk + impl
+    0x038A4138,                   // XInputGetState shadow-IAT slot (moved +0x53018)
+    // Recompiled body: r9->r10 at byte 10 (campaign single-hit AOB, hit = impl).
+    "48 83 EC 08 44 0F B6 DA 49 89 CA 38 51 68 74 ? 0F B7 41 4A 85 C0 74 ?",
+    0x018A03B0, 0x0F090D00,       // Skeleton::PublishAttachments thunk + impl
+    0x017E1770, 0x0EAB1C60,       // TransformNode::SetWorldTransform thunk + impl
+};
+
+const Build* kKnown[] = {&kSteam, &kStore, &kUpdate2026};
+
+// Read once from the loaded module's own headers. No file I/O: the values
+// come from the same mapped image every RVA is applied to.
+bool read_identity(uint32_t* ts, uint32_t* soi) {
+    const uint8_t* base = (const uint8_t*)GetModuleHandleW(nullptr);
+    if (!base) return false;
+    const auto* dos = (const IMAGE_DOS_HEADER*)base;
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE) return false;
+    const auto* nt = (const IMAGE_NT_HEADERS64*)(base + dos->e_lfanew);
+    if (nt->Signature != IMAGE_NT_SIGNATURE) return false;
+    *ts  = nt->FileHeader.TimeDateStamp;
+    *soi = nt->OptionalHeader.SizeOfImage;
+    return true;
+}
+
+const Build* detect() {
+    uint32_t ts = 0, soi = 0;
+    if (!read_identity(&ts, &soi)) return nullptr;
+    for (const Build* b : kKnown)
+        if (b->pe_timestamp == ts && b->pe_size_of_image == soi) return b;
+    return nullptr;
+}
+
+}  // namespace
+
+const Build* get() {
+    static const Build* cached = detect();
+    return cached;
+}
+
+void log_identity() {
+    uint32_t ts = 0, soi = 0;
+    const bool have = read_identity(&ts, &soi);
+    const Build* b = get();
+    if (b) {
+        LOG_INFO("build pin: GRW.exe identified as the %s binary "
+                 "(TimeDateStamp %08X, SizeOfImage %08X). Using its address "
+                 "table; every install still verifies bytes before writing.",
+                 b->name, b->pe_timestamp, b->pe_size_of_image);
+        return;
+    }
+    LOG_ERROR("build pin: UNKNOWN GRW.exe binary (TimeDateStamp %08X, "
+              "SizeOfImage %08X, header read %s). Known: Steam %08X/%08X, "
+              "Ubisoft-Epic %08X/%08X, 2026-08-update %08X/%08X. Nothing "
+              "that depends on analysed addresses will install; the game "
+              "runs unmodified. This usually means a game update or a store "
+              "build we have not analysed yet: please report this log.",
+              ts, soi, have ? "ok" : "FAILED",
+              kSteam.pe_timestamp, kSteam.pe_size_of_image,
+              kStore.pe_timestamp, kStore.pe_size_of_image,
+              kUpdate2026.pe_timestamp, kUpdate2026.pe_size_of_image);
+}
+
+}  // namespace gamebuild
+}  // namespace grwxr
+
+```
+
+`src/GameBuild.h`:
+
+```h
+// GameBuild.h - build 46: the fail-closed module identity pin.
+//
+// Two known GRW.exe builds ship the same engine with every function at a
+// different RVA: the Steam binary (pinned since session 1) and the
+// Ubisoft/Epic store binary (sibling build six days older, derived offline
+// 2026-08-05 with tools/store_port.py: every body, thunk, stub and data
+// target hit exactly once, with the Steam value reproduced as a positive
+// control on every row; full table in the ISSUE-foreign-store-builds doc).
+//
+// detect() reads TimeDateStamp + SizeOfImage from the loaded module's own PE
+// header, the Halo MCC pattern, and returns the matching table, or null for
+// a binary we have never analysed, in which case every consumer logs loudly
+// and installs NOTHING (rule 7).
+//
+// The pin SELECTS values; it never TRUSTS them. Every install site keeps its
+// own runtime verification against the selected value: signature scans with
+// expected-RVA cross-checks, thunk byte verification before any write, and
+// exact byte reads. A wrong table can therefore refuse to install, but it
+// cannot patch the wrong bytes.
+
+#pragma once
+
+#include <cstdint>
+
+namespace grwxr {
+namespace gamebuild {
+
+struct Build {
+    const char* name;
+    uint32_t    pe_timestamp;        // IMAGE_FILE_HEADER.TimeDateStamp
+    uint32_t    pe_size_of_image;    // IMAGE_OPTIONAL_HEADER.SizeOfImage
+
+    // CameraProbe thunk table rows. RVAs only: the per-row metadata
+    // (rcx_is_camera, name) is build-independent and stays in CameraProbe.
+    struct CamTarget { uintptr_t thunk, fn; };
+    CamTarget cam[11];
+
+    // Aim setter virtual-dispatch stubs (the 10 expected bytes, including
+    // the 0x570/0x5D0 dispatch offsets, are identical in both builds:
+    // the store scan matched the full byte sequence exactly once).
+    uintptr_t setyaw_slot;
+    uintptr_t setpitch_slot;
+
+    // Build 50: the matching GETTER stubs (vtable +0x5B0 yaw, +0x5F0 pitch),
+    // for the aim-reader census (AimTrace.h). Derived 2026-08-06 with
+    // tools/sig_scan.py: the 13-byte sequence hits exactly once in each
+    // binary, and the Steam control lands on the RVA RE-notes documents.
+    uintptr_t getyaw_slot;
+    uintptr_t getpitch_slot;
+
+    // Build 51: the PER-SHOT aim reader, found by build 50's census on
+    // 2026-08-06 (ten calls for ten rounds fired, then flat). These are
+    // RETURN addresses: the instruction after `call <getter stub>` inside
+    // the function at 0x124B8360, which computes
+    //     [r15+0xAC] = wrap(perAxisOffset + currentYaw)
+    //     [r15+0xB0] = wrap(perAxisOffset + currentPitch)
+    // 0 = not derived for this binary, and the override refuses to arm.
+    // AimTrace verifies the E8 rel32 in front of each site really resolves
+    // to the matching getter stub before trusting either (rule 7).
+    uintptr_t shot_yaw_site;
+    uintptr_t shot_pitch_site;
+
+    // Build 53: the per-shot weapon routine that owns those two reads, and
+    // its E9 thunk. Found by walking up from the read sites: the function is
+    // virtual (no direct callers, one vtable slot at 0x04A673D0), so the only
+    // way to learn who invokes it is to hook it and let it name its caller.
+    // 0 = not derived for this binary.
+    uintptr_t wfire_thunk;
+    uintptr_t wfire_impl;
+
+    // Build 54: hknpWorld::castRay, the Havok world raycast, and its E9
+    // thunk. Found 2026-08-06 by cross-referencing Havok's own monitor-timer
+    // string literal "TtWorldCastRay" (0x03C737A8), which HK_TIMER_BEGIN
+    // writes into the profiling stream from INSIDE the function it names.
+    // Signature: castRay(hknpWorld* rcx, RayInput* rdx, Collector* r8).
+    // Only EIGHT call sites exist in the image; the shot trace is one.
+    uintptr_t raycast_thunk;
+    uintptr_t raycast_impl;
+
+    // Build 55: GetAimOrientation, the function that turns the aim SCALARS
+    // into a DIRECTION. Verified body: rcx = out quaternion, rdx = aim
+    // sub-object (parent = rdx-0x48), r8 = int* mode; when *mode == -1 and
+    // the dirty byte [parent+0x4B0] is clear it returns the cached quaternion
+    // at [parent+0x420], otherwise it rebuilds base * yaw * pitch * roll.
+    // The recoil node sets that dirty flag, which is the causal link.
+    uintptr_t aimquat_thunk;
+    uintptr_t aimquat_impl;
+
+    // Build 56: THE PROJECTILE SPAWN. 0x12458BD0 allocates a 0x180-byte
+    // cBallisticProjectileComponent and fills it. Verified byte for byte:
+    //   movaps xmm1,[owner+0x150] -> [proj+0x50]   m_vBulletShootOrigin
+    //   movaps xmm0,[owner+0x140] -> [proj+0x100]  m_vBulletSimulationDirection
+    //   mov    [proj+0x20], owner                  back-pointer
+    // So the shot direction is NOT computed here: it is read from
+    // [owner+0x140]. Class name and field names came from CRC32-cracking the
+    // Anvil reflection tables, so they are the engine's own names.
+    uintptr_t spawn_thunk;
+    uintptr_t spawn_impl;
+
+    // Head hide. The method table RVA is identical in both builds (data
+    // layout survived the recompile); kept per-build anyway so an unknown
+    // future build cannot inherit it silently.
+    uintptr_t head_table;
+    uintptr_t head_setter_thunk;
+    uintptr_t head_setter_impl;
+
+    // No-camera-blur match site (patch byte at +5).
+    uintptr_t noblur_match;
+
+    // Pooled placement SetTransform (WeaponProbe).
+    uintptr_t wp_setter_thunk;
+    uintptr_t wp_setter_impl;
+
+    // Ansel IAT slots.
+    uintptr_t ansel_setconfig;
+    uintptr_t ansel_updatecam;
+
+    // Build 58: TtCastRay (HK_TIMER literals "CastRay" 0x03C742E0 and
+    // "TtCastRay" 0x03C742E8 name it from inside), the raycast body the
+    // hknpWorld::castRay wrapper reaches through a runtime-built virtual
+    // table. Three call sites reach it DIRECTLY through this thunk,
+    // bypassing the wrapper, which is why the build 57 shot window saw
+    // only ambient traffic: the wrapper hook was blind to them.
+    uintptr_t raycast2_thunk;
+    uintptr_t raycast2_impl;
+
+    // XInputGetState shadow-IAT slot (XInputMerge). The game resolves XInput by
+    // hand (GetModuleHandle + GetProcAddress) into a fixed data global and calls
+    // through it, bypassing the real IAT, so this data slot is the only pointer
+    // to patch. Its RVA moves on every recompile: the 2023 value 0x03851120
+    // (identical Steam/store) became 0x038A4138 on the 2026-08 update. Pinned
+    // per build so an unknown binary installs nothing (rule 7). Re-derived via
+    // the resolver-anchor AOB, Steam positive control passing.
+    uintptr_t xinput_slot;
+
+    // Head-hide SetHidden body signature. Per build: the 2026-08 recompile
+    // re-registered the body (mov r10 vs r9 at byte 10), so the 2023 bytes
+    // get zero hits there and the install refuses (rule 7). The campaign doc
+    // (UPDATE-CAMPAIGN-2026-08.md section 1) derived both and directed
+    // "keep both signatures build-specific". The verify contract in
+    // CameraProbe is unchanged: the signature must hit uniquely AND at
+    // head_setter_impl, or head hide stays off.
+    const char* head_setter_sig;
+
+    // Skeleton::PublishAttachments. The character's skeleton update composes
+    // each attached object's world transform here, from its own pose bone
+    // buffer, and then places the object. So this is the LAST INSTANT at which
+    // the gun-root bone can be changed and still be the value the engine uses
+    // to place the weapon: writing earlier is overwritten by the animation
+    // solver, writing later is too late. 0 = not derived, and the consumer
+    // installs nothing (rule 7). Chain and evidence: docs/RE-notes.md
+    // "THE HELD-WEAPON ATTACHMENT CHAIN".
+    uintptr_t publish_thunk;
+    uintptr_t publish_impl;
+
+    // TransformNode::SetWorldTransform. THE write target for making the game's
+    // own weapon follow the controller. Signature
+    // __fastcall(TransformNode* rcx, const float4x4* rdx, bool, bool); rows
+    // +0x00/+0x10/+0x20 are the rotation basis, translation is the FOURTH ROW
+    // at +0x30. Substituting rdx here is not a race with the engine, it IS the
+    // engine's own commit, which is why every precedent (FRIK abandoning its
+    // renderer hooks, REFramework hooking named pipeline stages, UEVR's
+    // "Permanent Change") converges on being the last writer. 9 rel32 sites,
+    // so gating on rcx is MANDATORY. 0 = not derived, installs nothing.
+    uintptr_t setworld_thunk;
+    uintptr_t setworld_impl;
+};
+
+// The table for the binary this process actually loaded, detected once from
+// the PE header and cached. nullptr = a binary we have never analysed;
+// callers must log loudly and install nothing. Never returns a partially
+// filled table.
+const Build* get();
+
+// Logs the detected identity (or the mismatch, with both known pins) once.
+// Called from dllmain before any consumer installs.
+void log_identity();
+
+}  // namespace gamebuild
+}  // namespace grwxr
+
+```
+
+`src/Log.cpp`:
+
+```cpp
+#include "Log.h"
+
+#include <bcrypt.h>
+#include <cstdarg>
+#include <vector>
+
+#pragma comment(lib, "bcrypt.lib")
+
+namespace grwxr {
+namespace log {
+namespace {
+
+FILE* g_file = nullptr;
+CRITICAL_SECTION g_lock;
+bool g_lock_ready = false;
+std::wstring g_game_dir;
+std::wstring g_data_dir;
+
+// SHA256 of a file, via CNG so we do not depend on any external library.
+// Returns an empty string on failure rather than throwing.
+std::string sha256_file(const std::wstring& path) {
+    HANDLE h = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (h == INVALID_HANDLE_VALUE) return {};
+
+    BCRYPT_ALG_HANDLE alg = nullptr;
+    BCRYPT_HASH_HANDLE hash = nullptr;
+    std::string out;
+    std::vector<unsigned char> obj;
+    unsigned char digest[32] = {};
+    DWORD cb = 0, objLen = 0;
+
+    if (BCryptOpenAlgorithmProvider(&alg, BCRYPT_SHA256_ALGORITHM, nullptr, 0) != 0) goto done;
+    if (BCryptGetProperty(alg, BCRYPT_OBJECT_LENGTH, (PUCHAR)&objLen, sizeof(objLen), &cb, 0) != 0) goto done;
+    obj.resize(objLen);
+    if (BCryptCreateHash(alg, &hash, obj.data(), objLen, nullptr, 0, 0) != 0) goto done;
+
+    {
+        std::vector<unsigned char> buf(1 << 20);
+        DWORD read = 0;
+        while (ReadFile(h, buf.data(), (DWORD)buf.size(), &read, nullptr) && read > 0) {
+            if (BCryptHashData(hash, buf.data(), read, 0) != 0) goto done;
+        }
+    }
+    if (BCryptFinishHash(hash, digest, sizeof(digest), 0) != 0) goto done;
+
+    {
+        static const char* hex = "0123456789abcdef";
+        out.reserve(64);
+        for (unsigned char b : digest) { out += hex[b >> 4]; out += hex[b & 0xF]; }
+    }
+
+done:
+    if (hash) BCryptDestroyHash(hash);
+    if (alg) BCryptCloseAlgorithmProvider(alg, 0);
+    CloseHandle(h);
+    return out;
+}
+
+std::string narrow(const std::wstring& w) {
+    if (w.empty()) return {};
+    int n = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), nullptr, 0, nullptr, nullptr);
+    std::string s(n, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), s.data(), n, nullptr, nullptr);
+    return s;
+}
+
+}  // namespace
+
+const std::wstring& game_dir() { return g_game_dir; }
+const std::wstring& data_dir() { return g_data_dir; }
+
+void init(HMODULE self) {
+    if (!g_lock_ready) { InitializeCriticalSection(&g_lock); g_lock_ready = true; }
+
+    wchar_t path[MAX_PATH] = {};
+    GetModuleFileNameW(self, path, MAX_PATH);
+    std::wstring dll_path = path;
+
+    size_t slash = dll_path.find_last_of(L"\\/");
+    g_game_dir = (slash == std::wstring::npos) ? L"." : dll_path.substr(0, slash);
+    g_data_dir = g_game_dir + L"\\GRWFP";
+    CreateDirectoryW(g_data_dir.c_str(), nullptr);
+
+    // Open with _SH_DENYWR so the log can be READ while the game is running.
+    // Plain fopen denies all sharing, which makes the log unreadable until the
+    // game exits. That is useless for live debugging.
+    //
+    // GRW.exe can appear more than once (the launcher path re-spawns it), so if
+    // the primary name is already held by another instance, fall back to a
+    // pid-suffixed file rather than silently losing the log.
+    std::wstring log_path = g_data_dir + L"\\grwfp.log";
+    g_file = _wfsopen(log_path.c_str(), L"w", _SH_DENYWR);
+    if (!g_file) {
+        wchar_t alt[MAX_PATH];
+        swprintf_s(alt, L"%s\\grwfp-%lu.log", g_data_dir.c_str(), GetCurrentProcessId());
+        log_path = alt;
+        g_file = _wfsopen(log_path.c_str(), L"w", _SH_DENYWR);
+    }
+    if (!g_file) return;
+
+    // --- Rule 5: identity banner must be the first line. ---
+    std::string hash = sha256_file(dll_path);
+
+    FILETIME ft{};
+    SYSTEMTIME st{};
+    char stamp[64] = "unknown";
+    HANDLE h = CreateFileW(dll_path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (h != INVALID_HANDLE_VALUE) {
+        if (GetFileTime(h, nullptr, nullptr, &ft)) {
+            FILETIME lft{};
+            FileTimeToLocalFileTime(&ft, &lft);
+            FileTimeToSystemTime(&lft, &st);
+            snprintf(stamp, sizeof(stamp), "%04u-%02u-%02u %02u:%02u:%02u",
+                     st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+        }
+        CloseHandle(h);
+    }
+
+    fprintf(g_file, "GRWFP dll=%s sha256=%s mtime=%s\n",
+            narrow(dll_path).c_str(),
+            hash.empty() ? "(hash failed)" : hash.c_str(),
+            stamp);
+    fflush(g_file);
+
+    // Host process identity, so a log can never be misattributed.
+    wchar_t exe[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    write("INFO ", "host process : %s", narrow(exe).c_str());
+    write("INFO ", "pid          : %lu", GetCurrentProcessId());
+    write("INFO ", "log file     : %s", narrow(log_path).c_str());
+
+    // Module base matters: docs/TARGET-INVENTORY.md says ASLR is OFF and the
+    // preferred base is 0x140000000. If the runtime base differs, every
+    // absolute address in our notes is wrong and we need to know immediately.
+    HMODULE base = GetModuleHandleW(nullptr);
+    write("INFO ", "module base  : 0x%p  %s", (void*)base,
+          ((uintptr_t)base == 0x140000000ull)
+              ? "(matches the no-ASLR preferred base, as expected)"
+              : "*** NOT the preferred base 0x140000000: ASLR is in play ***");
+    write("INFO ", "data dir     : %s", narrow(g_data_dir).c_str());
+}
+
+void shutdown() {
+    if (g_lock_ready) EnterCriticalSection(&g_lock);
+    if (g_file) { fflush(g_file); fclose(g_file); g_file = nullptr; }
+    if (g_lock_ready) LeaveCriticalSection(&g_lock);
+}
+
+void write(const char* level, const char* fmt, ...) {
+    if (!g_file || !g_lock_ready) return;
+
+    char msg[2048];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(msg, sizeof(msg), fmt, ap);
+    va_end(ap);
+
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+
+    EnterCriticalSection(&g_lock);
+    fprintf(g_file, "[%02u:%02u:%02u.%03u] [%lu] %s %s\n",
+            st.wHour, st.wMinute, st.wSecond, st.wMilliseconds,
+            GetCurrentThreadId(), level, msg);
+    fflush(g_file);
+    LeaveCriticalSection(&g_lock);
+}
+
+}  // namespace log
+}  // namespace grwxr
+
+```
+
+`src/Log.h`:
+
+```h
+// Log.h - minimal, allocation-light logging for GRW-FP (the flat mod).
+//
+// Copied from the VR mod's src/Log.h with the data directory and file names
+// changed (GRWFP, grwfp.log) so the two mods never fight over a log or a
+// config when a user tries both. Rules enforced are the same:
+//   Rule 5: the FIRST line of grwfp.log must carry the deployed DLL's own
+//           SHA256 and timestamp, so a test result can be matched to the
+//           exact binary that produced it.
+//   Rule 8: keep logging, file I/O, locks, COM and allocation out of any
+//           per-frame or per-draw hook.
+
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+#include <cstdio>
+#include <string>
+
+namespace grwxr {
+namespace log {
+
+// Open the log next to the DLL, in <game>\GRWFP\grwfp.log.
+// Writes the identity banner required by rule 5.
+void init(HMODULE self);
+
+void shutdown();
+
+// printf-style. Thread safe via a critical section.
+void write(const char* level, const char* fmt, ...);
+
+// Absolute path of the directory holding our DLL (the game root).
+const std::wstring& game_dir();
+
+// Absolute path of our GRWFP data directory.
+const std::wstring& data_dir();
+
+}  // namespace log
+}  // namespace grwxr
+
+#define LOG_INFO(...)  ::grwxr::log::write("INFO ", __VA_ARGS__)
+#define LOG_WARN(...)  ::grwxr::log::write("WARN ", __VA_ARGS__)
+#define LOG_ERROR(...) ::grwxr::log::write("ERROR", __VA_ARGS__)
+
+// For hot paths: log the first time only.
+#define LOG_ONCE(...)                                                          \
+    do {                                                                       \
+        static bool _once = false;                                             \
+        if (!_once) { _once = true; LOG_INFO(__VA_ARGS__); }                    \
+    } while (0)
+
+// For hot paths: log every Nth call.
+#define LOG_EVERY_N(n, ...)                                                    \
+    do {                                                                       \
+        static unsigned long long _c = 0;                                      \
+        if ((_c++ % (n)) == 0) { LOG_INFO(__VA_ARGS__); }                       \
+    } while (0)
+
+```
+
+`src/Sig.cpp`:
+
+```cpp
+// Sig.cpp - see Sig.h for the rules this exists to enforce.
+
+#include "Sig.h"
+
+#include "Log.h"
+
+#include <cstring>
+#include <vector>
+
+namespace grwxr {
+namespace sig {
+namespace {
+
+struct Token {
+    uint8_t value;
+    bool    wildcard;
+};
+
+// "48 89 ?? E0" -> tokens. Accepts ? and ?? for a wildcard.
+std::vector<Token> parse(const char* pattern) {
+    std::vector<Token> out;
+    for (const char* p = pattern; *p;) {
+        if (*p == ' ') { ++p; continue; }
+        if (*p == '?') {
+            out.push_back({0, true});
+            while (*p == '?') ++p;
+            continue;
+        }
+        auto nib = [](char c) -> int {
+            if (c >= '0' && c <= '9') return c - '0';
+            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+            return -1;
+        };
+        const int hi = nib(p[0]);
+        const int lo = p[1] ? nib(p[1]) : -1;
+        if (hi < 0 || lo < 0) { out.clear(); return out; }
+        out.push_back({(uint8_t)((hi << 4) | lo), false});
+        p += 2;
+    }
+    return out;
+}
+
+}  // namespace
+
+std::optional<Image> main_image() {
+    auto* base = (uint8_t*)GetModuleHandleW(nullptr);
+    if (!base) return std::nullopt;
+
+    const auto* dos = (const IMAGE_DOS_HEADER*)base;
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE) return std::nullopt;
+    const auto* nt = (const IMAGE_NT_HEADERS64*)(base + dos->e_lfanew);
+    if (nt->Signature != IMAGE_NT_SIGNATURE) return std::nullopt;
+
+    Image img;
+    img.base = base;
+    img.size = nt->OptionalHeader.SizeOfImage;
+    return img;
+}
+
+std::optional<uint8_t*> find_unique(const Image& img, const char* pattern,
+                                    size_t* matches_out) {
+    if (matches_out) *matches_out = 0;
+
+    const std::vector<Token> pat = parse(pattern);
+    if (pat.empty() || img.size < pat.size()) return std::nullopt;
+
+    // Skip any page that is not committed and readable. The image is 369 MB and
+    // parts of it are not backed; touching those would fault.
+    uint8_t* first = nullptr;
+    size_t   count = 0;
+
+    const size_t last = img.size - pat.size();
+    MEMORY_BASIC_INFORMATION mbi{};
+    uint8_t* region_end = img.base;   // forces a query on the first iteration
+
+    for (size_t i = 0; i <= last; ++i) {
+        uint8_t* here = img.base + i;
+        if (here >= region_end) {
+            if (!VirtualQuery(here, &mbi, sizeof(mbi))) break;
+            region_end = (uint8_t*)mbi.BaseAddress + mbi.RegionSize;
+            const bool readable =
+                mbi.State == MEM_COMMIT &&
+                !(mbi.Protect & PAGE_NOACCESS) &&
+                !(mbi.Protect & PAGE_GUARD);
+            if (!readable) {
+                // Jump past the whole unreadable region.
+                i = (size_t)(region_end - img.base) - 1;
+                continue;
+            }
+        }
+        // A match must not straddle the end of the readable region.
+        if (here + pat.size() > region_end) continue;
+
+        size_t k = 0;
+        for (; k < pat.size(); ++k) {
+            if (!pat[k].wildcard && here[k] != pat[k].value) break;
+        }
+        if (k != pat.size()) continue;
+
+        if (count == 0) first = here;
+        ++count;
+    }
+
+    if (matches_out) *matches_out = count;
+    if (count != 1) return std::nullopt;
+    return first;
+}
+
+}  // namespace sig
+}  // namespace grwxr
+
+```
+
+`src/Sig.h`:
+
+```h
+// Sig.h - AOB signature scanning over the live GRW.exe image.
+//
+// project rule 7: locate engine code with unique AOB signatures, never ship a
+// guessed hardcoded address, and fail loudly on a miss while leaving the game
+// running normally. CURRENT-STATE.md standing rules 1 to 3 add three more:
+//
+//   1. Never fall back to a hardcoded address from another build. The reference
+//      implementation's FuncRelocation returns a stale fallback on a miss and
+//      the caller hooks it unchecked. Ours returns std::optional and the caller
+//      must handle a miss.
+//   2. Always compile the scanner in. The reference gates it behind a
+//      SIGNATURE_SCAN macro and compiles it out of Release, which silently ships
+//      a hardcoded-address build.
+//   3. Never filter by section name. Wildlands' section table is scrambled and
+//      the real code lives in a section called .sbss (docs/RE-notes.md).
+//
+// Scanning 369 MB takes a moment, so this runs on the init thread, never on a
+// render thread.
+
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+#include <cstdint>
+#include <optional>
+
+namespace grwxr {
+namespace sig {
+
+// Byte range of the main module, discovered from its PE headers at runtime.
+struct Image {
+    uint8_t*  base = nullptr;
+    size_t    size = 0;
+};
+
+// Reads the headers of GRW.exe as loaded. Fails if the module cannot be read.
+std::optional<Image> main_image();
+
+// Scan for a pattern written as "48 89 E0 53 ?? 81 EC", where ?? (or ?) is a
+// wildcard byte. Returns the address of the FIRST match only if the pattern
+// matches exactly once in the image; ambiguity is treated as a miss, because a
+// signature that matches twice is not a signature.
+//
+// `matches_out` receives the true match count so the caller can log whether it
+// missed (0) or was ambiguous (>1). That distinction matters: 0 usually means
+// the game updated, >1 means our pattern is too short.
+std::optional<uint8_t*> find_unique(const Image& img, const char* pattern,
+                                    size_t* matches_out = nullptr);
+
+}  // namespace sig
+}  // namespace grwxr
+
+```
+
+`src/ThunkHook.cpp`:
+
+```cpp
+// ThunkHook.cpp - see ThunkHook.h for why a thunk rewrite beats a prologue
+// detour on this target.
+
+#include "ThunkHook.h"
+
+#include "Log.h"
+
+#include <cstring>
+
+namespace grwxr {
+namespace hook {
+
+bool ThunkHook::install(uint8_t* thunk, void* expected_target, void* replacement,
+                        const char* name) {
+    name_ = name;
+    if (installed_) {
+        LOG_ERROR("hook(%s): already installed. Refusing to double-install.", name);
+        return false;
+    }
+    if (!thunk || !expected_target || !replacement) {
+        LOG_ERROR("hook(%s): null argument. Not installing.", name);
+        return false;
+    }
+
+    // --- verify the slot really is a padded jump thunk ----------------------
+    if (thunk[0] != 0xE9) {
+        LOG_ERROR("hook(%s): thunk at 0x%p does not start with E9 (found 0x%02X).",
+                  name, (void*)thunk, thunk[0]);
+        return false;
+    }
+    for (int i = 5; i < 14; ++i) {
+        if (thunk[i] != 0xCC) {
+            LOG_ERROR("hook(%s): thunk slot at 0x%p is not int3-padded at +%d "
+                      "(found 0x%02X). Refusing to write past the stub.",
+                      name, (void*)thunk, i, thunk[i]);
+            return false;
+        }
+    }
+
+    int32_t rel = 0;
+    memcpy(&rel, thunk + 1, sizeof(rel));
+    uint8_t* resolved = thunk + 5 + rel;
+    if (resolved != (uint8_t*)expected_target) {
+        LOG_ERROR("hook(%s): thunk at 0x%p jumps to 0x%p but the signature scan "
+                  "found the function at 0x%p. Not installing.",
+                  name, (void*)thunk, (void*)resolved, expected_target);
+        return false;
+    }
+
+    original_ = expected_target;
+    thunk_    = thunk;
+    memcpy(saved_, thunk, sizeof(saved_));
+
+    // --- write jmp qword ptr [rip+0]; <absolute target> ---------------------
+    uint8_t patch[14] = {0xFF, 0x25, 0x00, 0x00, 0x00, 0x00};
+    const uint64_t dest = (uint64_t)replacement;
+    memcpy(patch + 6, &dest, sizeof(dest));
+
+    DWORD old = 0;
+    if (!VirtualProtect(thunk, sizeof(patch), PAGE_EXECUTE_READWRITE, &old)) {
+        LOG_ERROR("hook(%s): VirtualProtect failed on 0x%p (err %lu). Not installing.",
+                  name, (void*)thunk, GetLastError());
+        return false;
+    }
+    memcpy(thunk, patch, sizeof(patch));
+    VirtualProtect(thunk, sizeof(patch), old, &old);
+    FlushInstructionCache(GetCurrentProcess(), thunk, sizeof(patch));
+
+    installed_ = true;
+    LOG_INFO("hook(%s): thunk 0x%p redirected -> 0x%p (original 0x%p)",
+             name, (void*)thunk, replacement, original_);
+    return true;
+}
+
+bool ThunkHook::install_raw(uint8_t* slot, const uint8_t* expected,
+                            size_t expected_len, void* replacement,
+                            const char* name) {
+    name_ = name;
+    if (installed_) {
+        LOG_ERROR("hook(%s): already installed. Refusing to double-install.", name);
+        return false;
+    }
+    if (!slot || !expected || !replacement || expected_len == 0 ||
+        expected_len > 14) {
+        LOG_ERROR("hook(%s): bad argument. Not installing.", name);
+        return false;
+    }
+
+    // --- verify the slot holds exactly the bytes the caller analysed --------
+    for (size_t i = 0; i < expected_len; ++i) {
+        if (slot[i] != expected[i]) {
+            LOG_ERROR("hook(%s): slot at 0x%p byte +%zu is 0x%02X, expected "
+                      "0x%02X. Not installing.",
+                      name, (void*)slot, i, slot[i], expected[i]);
+            return false;
+        }
+    }
+    // The 14-byte patch must not run past the stub into a neighbour.
+    for (size_t i = expected_len; i < 14; ++i) {
+        if (slot[i] != 0xCC) {
+            LOG_ERROR("hook(%s): slot at 0x%p is not int3-padded at +%zu "
+                      "(found 0x%02X). Refusing to write past the stub.",
+                      name, (void*)slot, i, slot[i]);
+            return false;
+        }
+    }
+
+    original_ = nullptr;   // no single target exists; dispatch is per-object
+    thunk_    = slot;
+    memcpy(saved_, slot, sizeof(saved_));
+
+    uint8_t patch[14] = {0xFF, 0x25, 0x00, 0x00, 0x00, 0x00};
+    const uint64_t dest = (uint64_t)replacement;
+    memcpy(patch + 6, &dest, sizeof(dest));
+
+    DWORD old = 0;
+    if (!VirtualProtect(slot, sizeof(patch), PAGE_EXECUTE_READWRITE, &old)) {
+        LOG_ERROR("hook(%s): VirtualProtect failed on 0x%p (err %lu). Not installing.",
+                  name, (void*)slot, GetLastError());
+        return false;
+    }
+    memcpy(slot, patch, sizeof(patch));
+    VirtualProtect(slot, sizeof(patch), old, &old);
+    FlushInstructionCache(GetCurrentProcess(), slot, sizeof(patch));
+
+    installed_ = true;
+    LOG_INFO("hook(%s): dispatch slot 0x%p redirected -> 0x%p",
+             name, (void*)slot, replacement);
+    return true;
+}
+
+void ThunkHook::restore() {
+    if (!installed_) return;
+    DWORD old = 0;
+    if (VirtualProtect(thunk_, sizeof(saved_), PAGE_EXECUTE_READWRITE, &old)) {
+        memcpy(thunk_, saved_, sizeof(saved_));
+        VirtualProtect(thunk_, sizeof(saved_), old, &old);
+        FlushInstructionCache(GetCurrentProcess(), thunk_, sizeof(saved_));
+    }
+    installed_ = false;
+    LOG_INFO("hook(%s): thunk restored", name_);
+}
+
+}  // namespace hook
+}  // namespace grwxr
+
+```
+
+`src/ThunkHook.h`:
+
+```h
+// ThunkHook.h - redirect an engine call by rewriting a jump thunk, not a
+// function prologue.
+//
+// WHY THIS EXISTS, AND WHY IT IS THE SAFEST HOOK AVAILABLE ON THIS TARGET
+//
+// docs/RE-notes.md established that GRW.exe does not call its camera maths
+// functions directly. Every call goes through a 5-byte relative jump thunk in
+// the .edata section:
+//
+//     caller  ->  E9 <rel32>  (thunk, .edata)  ->  real function (.sbss)
+//
+// and each thunk sits alone in a 16-byte slot padded with int3:
+//
+//     E9 5B 4E 1C 0B CC CC CC CC CC CC CC CC CC CC CC
+//
+// That padding is the opportunity. A 14-byte absolute indirect jump
+//
+//     FF 25 00 00 00 00        jmp qword ptr [rip+0]
+//     <8-byte absolute target>
+//
+// fits entirely inside the thunk's own slot, so redirecting a call costs 14
+// bytes written into a table of jump stubs. Compare that with the usual
+// alternative, a detour on the function prologue, which on this target would be
+// materially worse:
+//
+//   1. It writes into real engine code rather than a stub table.
+//   2. Both camera functions we care about begin with rsp-relative instructions
+//      (`mov rax, rsp` / `mov [rsp+8], rbx`), so a copied-prologue trampoline
+//      would execute them at the wrong stack depth and corrupt the frame. It
+//      would need a hand-written assembly stub to be correct.
+//   3. It needs a length disassembler to find a safe instruction boundary.
+//
+// The thunk rewrite needs none of that. Our replacement function is entered by
+// a jump from the caller's `call`, exactly as the real function would be, so it
+// is an ordinary function with the identical signature: same arguments in the
+// same registers and stack slots, same return address on the stack. No
+// trampoline, no stolen instructions, no assembly.
+//
+// HAZARD, HONESTLY STATED. This is still a write into GRW.exe's memory image,
+// and docs/HANDOFF.md records that nothing had written into the image up to this
+// point and that no anti-tamper trigger had fired. This is therefore the first
+// build that could plausibly trip one, and per the standing rule the check for
+// any anomaly is to rename dxgi.dll and see whether the symptom persists.
+// It is not a write to any file: the game install is untouched on disk.
+//
+// Restore() puts the original 16 bytes back, so the change is exactly
+// reversible within the process.
+
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+#include <cstdint>
+
+namespace grwxr {
+namespace hook {
+
+// One redirected thunk slot.
+class ThunkHook {
+public:
+    // `thunk` must point at a 5-byte E9 rel32 followed by at least 9 bytes of
+    // CC padding, and its jump must resolve to `expected_target`. Both are
+    // verified before anything is written; a mismatch installs nothing and
+    // returns false, leaving the game running normally (project rule 7).
+    bool install(uint8_t* thunk, void* expected_target, void* replacement,
+                 const char* name);
+
+    // Build 17 variant for slots that are NOT E9 thunks but still sit alone in
+    // int3-padded 16-byte slots: the virtual-dispatch stubs
+    // (`mov rax,[rcx]; jmp qword ptr [rax+disp]`, 10 bytes + CC padding).
+    // There is no jump target to verify, so the caller supplies the EXACT
+    // expected byte sequence instead; one mismatched byte installs nothing
+    // (project rule 7). The replacement must re-implement the dispatch
+    // itself, because there is no single "original function" to return to.
+    bool install_raw(uint8_t* slot, const uint8_t* expected, size_t expected_len,
+                     void* replacement, const char* name);
+
+    void restore();
+
+    bool installed() const { return installed_; }
+
+    // The real function, for the replacement to call through to.
+    void* original() const { return original_; }
+
+private:
+    uint8_t*    thunk_        = nullptr;
+    void*       original_     = nullptr;
+    uint8_t     saved_[16]    = {};
+    bool        installed_    = false;
+    const char* name_         = "";
+};
+
+}  // namespace hook
+}  // namespace grwxr
+
+```
+
+`src/dllmain.cpp`:
+
+```cpp
+// dllmain.cpp - GRW-FP proxy entry point (the FLAT first-person mod).
+//
+// GRW-FP is the non-VR sibling of GRW-XR: the same first-person camera
+// (viewpoint anchored to the character's animated Head bone, close-range
+// body blur removed) for ordinary flat-screen play. No OpenXR, no stereo,
+// no controller emulation. The game's own mouse camera keeps full control
+// of ROTATION; this mod only moves the camera POSITION.
+//
+// PHASE 1 (shipped): load, prove we are inside GRW.exe, log identity,
+// identify the game build (fail-closed pin), forward every dxgi export.
+//
+// PHASE 2 (this build): the camera. Four hooks off the pinned thunk table
+// move the camera POSITION onto the character's animated Head bone while
+// the game keeps rotation. See FpCamera.h for the whole design, and
+// ../README.md for the port map that says which pieces came from where.
+//
+// Loader-lock discipline: DllMain does the absolute minimum and hands off
+// to a worker thread. No file I/O, no LoadLibrary, no CRT init work inside
+// DllMain itself.
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+
+#include "Log.h"
+#include "Crash.h"
+#include "GameBuild.h"
+#include "FpCamera.h"
+
+// Forward every export of the real dxgi.dll to dxgi_real.dll. The flat mod
+// takes the pure-forwarder variant: unlike the VR mod it does not intercept
+// factory creation (no render-size spoof is needed without a headset).
+#include "proxy_exports.inc"
+
+namespace {
+
+HMODULE g_self = nullptr;
+volatile LONG g_stop = 0;
+
+// Is this the process we are meant to be in? A proxy DLL sitting in a game
+// directory can be picked up by launchers, overlays and helper processes.
+bool host_is_target() {
+    wchar_t exe[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    std::wstring s = exe;
+    for (auto& c : s) c = (wchar_t)towlower(c);
+    return s.find(L"grw.exe") != std::wstring::npos;
+}
+
+DWORD WINAPI init_thread(LPVOID) {
+    grwxr::log::init(g_self);
+    grwxr::crash::install(g_self);
+
+    LOG_INFO("GRW-FP proxy attached. Flat first person, camera position only.");
+
+    if (!host_is_target()) {
+        LOG_WARN("host is not GRW.exe. Standing down, forwarding only.");
+        return 0;
+    }
+    LOG_INFO("host confirmed as GRW.exe");
+
+    // The missing-dxgi_real check, inherited from the VR mod's hardest
+    // tester lesson: every export forwards to that file, and if it is
+    // absent the game dies inside the Windows loader with nothing logged.
+    {
+        wchar_t self_path[MAX_PATH] = {};
+        GetModuleFileNameW(g_self, self_path, MAX_PATH);
+        std::wstring realpath = self_path;
+        const size_t cut = realpath.find_last_of(L'\\');
+        realpath = (cut == std::wstring::npos)
+                       ? std::wstring(L"dxgi_real.dll")
+                       : realpath.substr(0, cut + 1) + L"dxgi_real.dll";
+        if (GetFileAttributesW(realpath.c_str()) == INVALID_FILE_ATTRIBUTES) {
+            char n[MAX_PATH * 2] = {};
+            WideCharToMultiByte(CP_UTF8, 0, realpath.c_str(), -1, n,
+                                (int)sizeof(n), nullptr, nullptr);
+            LOG_ERROR("");
+            LOG_ERROR("################ FATAL: dxgi_real.dll IS MISSING ################");
+            LOG_ERROR("  expected at: %s", n);
+            LOG_ERROR("  Every export of this proxy forwards to that file. The");
+            LOG_ERROR("  game WILL crash on its first graphics call, inside the");
+            LOG_ERROR("  Windows loader, with nothing else logged.");
+            LOG_ERROR("  FIX: copy your own C:\\Windows\\System32\\dxgi.dll into the");
+            LOG_ERROR("  game folder as dxgi_real.dll (the installer does this).");
+            LOG_ERROR("################################################################");
+            LOG_ERROR("");
+        } else {
+            LOG_INFO("dxgi_real.dll present on disk");
+        }
+    }
+
+    // MODULE SURVEY, and the anti-cheat verdict that comes with it.
+    //
+    // This has to run from INSIDE the process. GRW.exe is Denuvo-protected and
+    // an outside observer reads zero modules from it: PowerShell, Process
+    // Explorer and every other external tool come back empty (docs/RE-notes.md
+    // line 1243). So no external watchdog can answer "is EasyAntiCheat in this
+    // process". Our own proxy can, because it IS in the address space, and
+    // GetModuleHandleW neither loads nor references anything: it only reports
+    // what the loader already mapped.
+    //
+    // The VR sibling established the baseline (docs/RE-notes.md line 1252):
+    // EasyAntiCheat_x64.dll is NOT loaded when the game is launched normally
+    // through Steam for solo play. rungame.exe is the EAC launcher and is a
+    // SEPARATE 32-bit process, not a module in here. This block re-proves that
+    // on every single run rather than trusting a one-off observation.
+    {
+        struct Probe { const wchar_t* mod; const char* why; };
+        static const Probe probes[] = {
+            // The anti-cheat question, first and by itself.
+            { L"EasyAntiCheat_x64.dll", "ANTI-CHEAT" },
+            { L"EasyAntiCheat.dll",     "ANTI-CHEAT" },
+            { L"EasyAntiCheatEOS.dll",  "ANTI-CHEAT" },
+            // Session modules, logged for context only. The Wildlands campaign
+            // is ALWAYS-ONLINE, so these being loaded is normal and says
+            // nothing about anti-cheat. Do not read them as a coop tripwire:
+            // coop campaign is a supported way to play this mod.
+            { L"steam_api64.dll",       "online (normal)" },
+            { L"uplay_r1_loader64.dll", "online (normal)" },
+            // Context, and a check that no VR machinery has crept in here.
+            { L"dxgi.dll",              "us" },
+            { L"dxgi_real.dll",         "us" },
+            { L"d3d11.dll",             "graphics" },
+            { L"xinput1_3.dll",         "input" },
+            { L"openxr_loader.dll",     "must NOT be loaded in the flat mod" },
+        };
+
+        int eac_found = 0;
+        LOG_INFO("--- module survey ---");
+        for (const Probe& p : probes) {
+            char nm[64] = {};
+            WideCharToMultiByte(CP_UTF8, 0, p.mod, -1, nm, (int)sizeof(nm),
+                                nullptr, nullptr);
+            HMODULE h = GetModuleHandleW(p.mod);
+            if (!h) {
+                LOG_INFO("  %-24s not loaded            [%s]", nm, p.why);
+                continue;
+            }
+            wchar_t path[MAX_PATH] = {};
+            GetModuleFileNameW(h, path, MAX_PATH);
+            char pn[MAX_PATH * 2] = {};
+            WideCharToMultiByte(CP_UTF8, 0, path, -1, pn, (int)sizeof(pn),
+                                nullptr, nullptr);
+            LOG_INFO("  %-24s 0x%p  %s  [%s]", nm, (void*)h, pn, p.why);
+            if (p.why[0] == 'A') ++eac_found;   // "ANTI-CHEAT"
+        }
+        LOG_INFO("--- end module survey ---");
+
+        // The headline. One line, greppable, printed every run.
+        //
+        // SCOPE, decided 2026-08-11: solo AND COOP CAMPAIGN are both supported
+        // ways to play this mod. Coop is PvE with friends and the mod does not
+        // change behaviour there. The mode this mod must never run in is
+        // COMPETITIVE PvP (Ghost War), where a changed viewpoint is a
+        // competitive question rather than a personal one.
+        //
+        // This block only REPORTS. It does not gate anything, because what EAC
+        // being loaded actually maps to is still [UNKNOWN]: RE-notes line 1252
+        // verified only that a normal solo Steam launch loads no EAC module.
+        // Whether coop campaign loads it, and whether Ghost War is the thing
+        // that loads it, has never been observed. Gating on a guess would
+        // either break coop or fail to protect PvP, so the mapping gets
+        // measured first (see fpcam::poll, which re-checks continuously).
+        if (eac_found == 0) {
+            LOG_INFO("anticheat: no EasyAntiCheat module is loaded in this "
+                     "process at startup.");
+        } else {
+            LOG_INFO("anticheat: EasyAntiCheat IS loaded in this process "
+                     "(%d module(s)). This session is anti-cheat covered.",
+                     eac_found);
+            LOG_INFO("anticheat: the mod is running normally and is NOT "
+                     "changing its behaviour. Memory-modifying mods carry "
+                     "ban risk in covered sessions; that call is yours.");
+        }
+    }
+
+    // Identify the loaded binary against the known address tables
+    // (fail-closed; see GameBuild.h). Phase 2's camera hooks consume this;
+    // in phase 1 it is logged evidence that the pin works from this DLL.
+    LOG_INFO("");
+    grwxr::gamebuild::log_identity();
+
+    LOG_INFO("");
+    if (!grwxr::fpcam::install()) {
+        // install() has already said exactly why and rolled itself back. The
+        // proxy stays loaded and keeps forwarding, so the game plays normally
+        // rather than failing to start (project rule 7).
+        LOG_INFO("fp: standing down. The game runs completely unmodified.");
+        return 0;
+    }
+
+    // The service loop. 50 ms is fast enough that a key tap is never missed
+    // (the game consumes the pressed-since bit every frame, so we watch the
+    // key-is-down bit and do our own edge detection) and slow enough to cost
+    // nothing. All logging, all file I/O and the 1 Hz player resolution live
+    // here, on this thread, never on an engine thread (project rule 8).
+    while (!InterlockedCompareExchange(&g_stop, 0, 0)) {
+        grwxr::fpcam::poll();
+        Sleep(50);
+    }
+    return 0;
+}
+
+}  // namespace
+
+BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
+    switch (reason) {
+        case DLL_PROCESS_ATTACH: {
+            g_self = module;
+            DisableThreadLibraryCalls(module);
+            // Hand off immediately: nothing heavy may run under loader lock.
+            if (HANDLE t = CreateThread(nullptr, 0, init_thread, nullptr, 0, nullptr)) {
+                CloseHandle(t);
+            }
+            break;
+        }
+        case DLL_PROCESS_DETACH:
+            LOG_INFO("DLL_PROCESS_DETACH (orderly unload)");
+            InterlockedExchange(&g_stop, 1);
+            // Hooks are restored, not just abandoned: the thunk rewrite is
+            // exactly reversible within the process, so an orderly unload
+            // leaves GRW.exe's image byte-identical to how we found it.
+            grwxr::fpcam::uninstall();
+            grwxr::log::shutdown();
+            break;
+        default:
+            break;
+    }
+    return TRUE;
+}
+
+```
+
+`src/proxy_exports.inc`:
+
+```inc
+// Auto-generated by tools/gen_proxy_exports.py. Do not edit by hand.
+// source : C:\Windows\System32\dxgi.dll
+// forward: dxgi_real.dll
+//
+// Every export of the real DLL is forwarded so the host process resolves
+// its imports normally and never notices the proxy.
+//
+// Exceptions: exports aliased to grwxr_* below are implemented by the
+// proxy itself (src/FactoryHook.cpp) and call dxgi_real from code.
+
+#pragma comment(linker, "/export:ApplyCompatResolutionQuirking=dxgi_real.ApplyCompatResolutionQuirking,@1")
+#pragma comment(linker, "/export:CompatString=dxgi_real.CompatString,@2")
+#pragma comment(linker, "/export:CompatValue=dxgi_real.CompatValue,@3")
+#pragma comment(linker, "/export:CreateDXGIFactory=dxgi_real.CreateDXGIFactory,@10")
+#pragma comment(linker, "/export:CreateDXGIFactory1=dxgi_real.CreateDXGIFactory1,@11")
+#pragma comment(linker, "/export:CreateDXGIFactory2=dxgi_real.CreateDXGIFactory2,@12")
+#pragma comment(linker, "/export:DXGID3D10CreateDevice=dxgi_real.DXGID3D10CreateDevice,@13")
+#pragma comment(linker, "/export:DXGID3D10CreateLayeredDevice=dxgi_real.DXGID3D10CreateLayeredDevice,@14")
+#pragma comment(linker, "/export:DXGID3D10GetLayeredDeviceSize=dxgi_real.DXGID3D10GetLayeredDeviceSize,@15")
+#pragma comment(linker, "/export:DXGID3D10RegisterLayers=dxgi_real.DXGID3D10RegisterLayers,@16")
+#pragma comment(linker, "/export:DXGIDeclareAdapterRemovalSupport=dxgi_real.DXGIDeclareAdapterRemovalSupport,@17")
+#pragma comment(linker, "/export:DXGIDisableVBlankVirtualization=dxgi_real.DXGIDisableVBlankVirtualization,@18")
+#pragma comment(linker, "/export:DXGIDumpJournal=dxgi_real.DXGIDumpJournal,@4")
+#pragma comment(linker, "/export:DXGIGetDebugInterface1=dxgi_real.DXGIGetDebugInterface1,@19")
+#pragma comment(linker, "/export:DXGIReportAdapterConfiguration=dxgi_real.DXGIReportAdapterConfiguration,@20")
+#pragma comment(linker, "/export:PIXBeginCapture=dxgi_real.PIXBeginCapture,@5")
+#pragma comment(linker, "/export:PIXEndCapture=dxgi_real.PIXEndCapture,@6")
+#pragma comment(linker, "/export:PIXGetCaptureState=dxgi_real.PIXGetCaptureState,@7")
+#pragma comment(linker, "/export:SetAppCompatStringPointer=dxgi_real.SetAppCompatStringPointer,@8")
+#pragma comment(linker, "/export:UpdateHMDEmulationStatus=dxgi_real.UpdateHMDEmulationStatus,@9")
+
+```
