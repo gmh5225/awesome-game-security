@@ -605,6 +605,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
+- [HideDriverTesting](entities/hide-driver-testing.md) — multi-artifact driver hide (MmUnloadedDrivers, PsLoadedModuleList, PiDDBCacheTable; Win11 21H2; gmh5225)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
 - [DLLThreadInjectionDetector](entities/dll-thread-injection-detector.md) — kernel-level DLL thread injection detector (C/C++; Detection:Injection; mq1n)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
