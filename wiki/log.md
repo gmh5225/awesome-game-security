@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2686 (was ~2682) / Some Tricks ~117 (was ~116; Anti Cheat ~663 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-11** — ingest `description:gmh5225/Lazysight`: entity [[lazysight]]; cited on [[overviews/game-hacking]] and [[present-hook]].
 
 - **2026-08-11** — ingest `description:gmh5225/League-DirectX11-Internal`: entity [[league-directx11-internal]]; cited on [[overviews/game-hacking]] and [[present-hook]].
