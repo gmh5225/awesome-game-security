@@ -796,6 +796,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [Kernel Anti-Cheat](entities/kernel-anti-cheat.md) — experimental multi-telemetry kernel AC driver (NMI stack walk, thread start scan, big pool, PiDDBCache mapper residue; gmh5225; `[NMI]`)
 - [kernel-callback-functions-list](entities/kernel-callback-functions-list.md) — Ring0 callback registration API reference (gmh5225; anti-cheat / documentation)
+- [Kernel-Cheat-for-directx3D](entities/kernel-cheat-for-directx3d.md) — dxgkrnl `NtDxgkGetTrackedWorkloadStatistics` export hook; `NULL_MEMORY` KM↔UM comms + win32k GDI draw (gmh5225)
 - [kernel-snippets](entities/kernel-snippets.md) — Windows KM code snippets (callback registration, memory/process ops; VGK SwapContextHk; gmh5225)
 - [Kernel-Special-APC-ReadProcessMemory](entities/kernel-special-apc-readprocessmemory.md) — teaching sample: special kernel APC cross-process read (`KeInitializeApc`/`KeInsertQueueApc`; thread selection; vs RPM; gmh5225)
 - [Kernel-VAD-Injector](entities/kernel-vad-injector.md) — unsigned-driver DLL inject with VAD/PTE concealment (`MiAllocateVad`/`MiInsertVad`; post-map VAD removal; Hide VAD; gmh5225)
