@@ -608,6 +608,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gta5cheat-qt](entities/gta5cheat-qt.md) — GTA V Qt cheat (C/C++; memory analysis; cheat / game:gta5)
 - [gta5view](entities/gta5view.md) — GTA V snapmatic photo & save viewer/editor (proprietary format parse; Viewer/Editor)
 - [gta-reversed-modern](entities/gta-reversed-modern.md) — GTA:SA 1.0 US binary-compatible C++ reimplementation (decompilation / RenderWare-era engine study)
+- [GTAIII-DE-GoldHook](entities/gtaiii-de-goldhook.md) — GTA III Definitive Edition internal hook cheat (ImGui overlay via DirectX hook; gameplay mods / visual enhancements; gmh5225)
 - [GTAV_DragResize](entities/gtav-dragresize.md) — GTA V drag-to-resize mod (in-game UI/HUD overlay resizing; rendering + input hooks; gmh5225)
 - [gtav-sourcecode-build-guide](entities/gtav-sourcecode-build-guide.md) — GTA V source code build tutorial (VM recommended; Game Develop / guide)
 - [regta](entities/regta.md) — Reverse-engineered GTA III & Vice City (Switch / PS Vita / Wii U ports; Game Develop / source)
