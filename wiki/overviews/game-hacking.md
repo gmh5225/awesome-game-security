@@ -639,6 +639,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-internal.md
   - wiki/sources/descriptions/gmh5225__valorant-internal-base.md
   - wiki/sources/descriptions/gmh5225__Interep-Driver-Leak.md
+  - wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md
   - wiki/sources/descriptions/gmh5225__Internal-Valorant-Cheat.md
   - wiki/sources/descriptions/gmh5225__Valorant-cheat-internal.md
   - wiki/sources/descriptions/gmh5225__Valorant-Aimbot-Bypass.md
@@ -1142,6 +1143,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Rooted Android File Explorer [[xfiles]] (prebuilt APKs in Releases) sits in the Cheat Android File Explorer lane. (source: wiki/sources/descriptions/pgp__XFiles.md)
 - Chinese Android File Explorer guide [[note]] (`Guide-zh` documentation/reference) sits in the same Cheat Android File Explorer lane. (source: wiki/sources/descriptions/nzcv__note.md)
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
+- iOS 15 untethered jailbreak implementations such as [[ios-jailbreak-fugu15]] (gmh5225; Fugu15 kernel exploit chain → root, codesign bypass, arbitrary code execution; cheat / iOS jailbreak) sit in the same Cheat / iOS jailbreak privilege lane beside [[dopamine]] and [[palera1n]]. (source: wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
 - Runtime iOS/macOS dylib injectors such as [[opainject]] (`task_for_pid` / Mach remote thread → `dlopen`; jailbreak + tfp0) sit in the Cheat / Injection:IOS lane. (source: wiki/sources/descriptions/opa334__opainject.md)
 - Jailbreak-detection bypass tooling such as [[shadow]] (modern iOS jailbreaks; per-app compatibility varies; cheat / iOS jailbreak research) sits in the offensive iOS lane opposite [[free-rasp-ios]]-class jailbreak probes. (source: wiki/sources/descriptions/jjolano__shadow.md)

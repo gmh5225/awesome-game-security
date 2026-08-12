@@ -722,6 +722,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
+- [iOS Jailbreak — Fugu15](entities/ios-jailbreak-fugu15.md) — iOS 15 untethered jailbreak (Fugu15 kernel exploit chain; root, codesign bypass, full-privilege code execution; gmh5225)
 - [iOS Mod Menu Template for Theos](entities/ios-mod-menu-template-for-theos.md) — Theos tweak mod-menu template (Logos; 50×50 icons; cheat / IOS mod menu)
 - [iOS Location Spoofer](entities/ios-location-spoofer.md) — non-jailbreak iOS network location spoof (MITM Apple map lookups; Surge/Shadowrocket/Loon/Stash/QX modules; motion-state spoof; web UI)
 - [Imgui-Native-ModMenu](entities/imgui-native-modmenu.md) — Android native ImGui mod menu (OpenGL ES + JNI; cheat / Menu for Android)
