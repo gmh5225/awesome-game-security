@@ -696,6 +696,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-nord-theme](entities/ida-nord-theme.md) — IDA Pro Nord-palette dark color theme (disassembly/hex/graph/editor; cheat / Skins)
 - [IDASkins](entities/idaskins.md) — IDA Pro custom theme/skin plugin (CSS-like Qt GUI styling; disassembly/hex/output; cheat / Skins; gmh5225)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
+- [IDA-Pro-SigMaker](entities/ida-pro-sigmaker.md) — IDA Pro plugin: wildcard-masked byte-pattern signatures from selected code for runtime scan (gmh5225; cheat / IDA Plugins)
 - [ida-pro-mcp](entities/ida-pro-mcp.md) — IDA Pro MCP: full IDAPython API for agents (rename/types/xrefs/decompile/structs; plugin + test harness)
 - [ida-sdk](entities/ida-sdk.md) — mirrored IDA Pro SDK (headers/libs/docs; plugin + processor-module dev; multi-version; cheat / IDA SDK)
 - [idasdk-collection](entities/idasdk-collection.md) — archived IDA Pro SDK releases (headers/libs/examples; multi-version plugin dev; cheat / IDA SDK)

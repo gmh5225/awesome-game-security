@@ -28,7 +28,7 @@ Zero-dependency IDA Pro 9.0+ plugin for creating and searching unique byte-patte
 
 IDA Pro plugin for automatically generating byte-pattern signatures from selected disassembly. Creates IDA-style and code-style signature patterns with wildcards for variable bytes, ensuring uniqueness within the binary. Generated signatures support pattern scanning in cheat or mod development workflows. (source: wiki/sources/descriptions/gmh5225__ida-sigmaker.md)
 
-Lighter-weight generation focus—no built-in search/SIMD stack like the mahmoudimus variant. See also [[sigmakerex]] for gmh5225's enhanced multi-format maker.
+Lighter-weight generation focus—no built-in search/SIMD stack like the mahmoudimus variant. See also [[sigmakerex]] for gmh5225's enhanced multi-format maker and [[ida-pro-sigmaker]] for the Signature Maker variant.
 
 ## Links
 
@@ -37,4 +37,4 @@ Lighter-weight generation focus—no built-in search/SIMD stack like the mahmoud
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[sigmakerex]] · [[ida-fusion]] · [[yarascan-ida]] · [[patternsleuth]] · [[sig-database]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-pro-sigmaker]] · [[sigmakerex]] · [[ida-fusion]] · [[yarascan-ida]] · [[patternsleuth]] · [[sig-database]]

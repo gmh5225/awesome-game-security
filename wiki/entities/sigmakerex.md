@@ -27,4 +27,4 @@ Primary audience: reverse engineers who frequently create and manage binary sign
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-sigmaker]] · [[ida-fusion]] · [[yarascan-ida]] · [[x64dbg]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-sigmaker]] · [[ida-pro-sigmaker]] · [[ida-fusion]] · [[yarascan-ida]] · [[x64dbg]]

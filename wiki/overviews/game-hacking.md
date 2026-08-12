@@ -533,6 +533,7 @@ sources:
   - wiki/sources/descriptions/nelfo__PGHooker.md
   - wiki/sources/descriptions/sterrasec__genpatch.md
   - wiki/sources/descriptions/gmh5225__IDA2Obj.md
+  - wiki/sources/descriptions/gmh5225__IDA-Pro-SigMaker.md
   - wiki/sources/descriptions/patois__genmc.md
   - wiki/sources/descriptions/ssmugabi__IDAPlugins.md
   - wiki/sources/descriptions/st4ckh0und__hook-buster.md
@@ -1082,6 +1083,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
 - Alternate gmh5225 [[ida-sigmaker]] fork (IDA/code-style byte patterns with wildcard bytes; binary-unique sig generation from selected disassembly; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__ida-sigmaker.md)
 - Enhanced IDA Pro signature maker via [[sigmakerex]] (code/IDA/x64dbg pattern formats; automatic uniqueness verification; batch generation; clipboard integration; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__sigmakerex.md)
+- gmh5225 [[ida-pro-sigmaker]] (Signature Maker; wildcard-masked byte-pattern signatures from selected code regions for runtime pattern scanning; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__IDA-Pro-SigMaker.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
 - Automatic standard-function enum identification via [[auto-enum]] (Python/C; identifies and applies enums for common API/stdlib calls) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/junron__auto-enum.md)
