@@ -644,6 +644,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
 - [hwid-spoofer](entities/hwid-spoofer.md) — EAC/BattlEye HWID spoofer (C/C++; Cheat HWID; gmh5225)
 - [Hwid-Spoofer-EAC-BE](entities/hwid-spoofer-eac-be.md) — EAC/BE HWID spoofer via kernel driver hooks (disk serial / NIC MAC / SMBIOS; gmh5225)
+- [HWID-SteamSpywareTerminator](entities/hwid-steam-spyware-terminator.md) — block Steam client HWID fingerprinting and telemetry to Valve servers (gmh5225; README [Steam])
 - [HWID-Spoofer-for-Fortnite-and-Valorant](entities/hwid-spoofer-for-fortnite-and-valorant.md) — kernel-level HWID spoof for Fortnite/Valorant (C/C++; Cheat HWID)
 - [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
