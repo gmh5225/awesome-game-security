@@ -855,6 +855,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
+- [Lenrete Mod](entities/lenrete-mod.md) — Fabric Minecraft 26.2 utility/cheat client (Java 25; 43 modules—KillAura/ESP/Reach/Flight/Blinker; Mixins + JSON config; lolizei; cheat / game:minecraft)
 - [lenovo-exec](entities/lenovo-exec.md) — LenovoDiagnosticsDriver.sys BYOVD PoC (insecure IOCTL → arbitrary kernel code execution; gmh5225)
 - [lenovo-mapper](entities/lenovo-mapper.md) — BYOVD driver mapper via LenovoDiagnosticsDriver.sys (memory-access IOCTLs; manual unsigned map; gmh5225)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)

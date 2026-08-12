@@ -494,6 +494,7 @@ sources:
   - wiki/sources/descriptions/inuNorii__Elden-Ring-CT-TGA.md
   - wiki/sources/descriptions/inflation__goldberg_emulator.md
   - wiki/sources/descriptions/inpeacedTeams__phantom-client.md
+  - wiki/sources/descriptions/lolizei__Lenrete-Mod.md
   - wiki/sources/descriptions/icelemon1314__mapleLemon.md
   - wiki/sources/descriptions/izarooni__MapleEzorsia.md
   - wiki/sources/descriptions/kvnxiao__storytime.md
@@ -1183,6 +1184,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Knight Online Gamesoft server-side anti-cheat such as [[gamesoftacs]] (speed/teleport/damage/inventory manipulation + client integrity; suspicious-activity review flags) sits in that Private Server lane beside MapleStory [[maplestory143]] CheatTracker stacks. (source: wiki/sources/descriptions/luisfelipe18__GamesoftACS.md)
 - C++ Minecraft Java server backends such as [[minecpp]] (gmh5225; **1.19**; authoritative server implementation for game security researchers studying offensive techniques in cheat / game:minecraft) sit in that Private Server lane beside Java Spigot/Paper AC plugins such as [[dakotaac]] and [[minecraft-anticheatai]] and Bedrock MiTM proxies such as [[oomph]]. (source: wiki/sources/descriptions/gmh5225__minecpp.md) (source: wiki/sources/descriptions/norbertbaricz__DakotaAC.md)
 - Windows injectable internal DLL cheats for Lunar Client Minecraft **1.8.9** such as [[phantom-client]] (C++20; JNI/JVMTI obfuscated class resolution; MinHook `wglSwapBuffers` + ImGui overlay; combat/movement/visual modules; human-like CPS scheduler + server-specific AC profiles; cheat / game:minecraft) sit in the client-side JVM-injection lane beside those server-side stacks. (source: wiki/sources/descriptions/inpeacedTeams__phantom-client.md)
+- Fabric mod-loader client-side utility/cheat clients for Minecraft **26.2** such as [[lenrete-mod]] (Java 25; Mojang mappings; 43 annotation-discovered modules—KillAura, ESP, Reach, Flight, packet Blinker; fail-soft Mixins + reflection JSON settings + screen-projected overlays; singleplayer/private-server experimentation; cheat / game:minecraft) sit in the Java in-process mod lane beside native JVM-injection stacks such as [[phantom-client]]. (source: wiki/sources/descriptions/lolizei__Lenrete-Mod.md)
 - Internal CS:GO baseline [[csgosimple]] (spirthack fork after MarkHC; Internal tag) sits in the cheat / game:csgo lane. (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - Internal CS:GO samples such as [[cartmanv2]] (gmh5225; C/C++; rendering / networking / editor tooling; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture with overlay and menu tooling. (source: wiki/sources/descriptions/gmh5225__cartmanv2.md)
 - Clean internal CS:GO scaffold bases such as [[csgo-internal-base]] (CreateInterface resolution, VMT hooks, netvar dump, pattern scan, ImGui menu; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture. (source: wiki/sources/descriptions/lstrsrt__csgo_internal_base.md)

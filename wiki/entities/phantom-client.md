@@ -18,7 +18,7 @@ Windows injectable **internal DLL** cheat for **Lunar Client** Minecraft **1.8.9
 - **Render hook** — OpenGL `wglSwapBuffers` + MinHook → ImGui overlay.
 - **Modules** — header-only combat/movement/visual feature set with evasion helpers.
 
-Complements server-side Java AC such as [[avaanticheat]] and [[minecraft-anticheatai]], Bedrock proxy [[oomph]], and server backend [[minecpp]] in the Minecraft game-security lane.
+Complements server-side Java AC such as [[avaanticheat]] and [[minecraft-anticheatai]], Bedrock proxy [[oomph]], server backend [[minecpp]], and Fabric mod-loader clients such as [[lenrete-mod]] in the Minecraft game-security lane.
 
 ## Links
 
@@ -26,4 +26,4 @@ Complements server-side Java AC such as [[avaanticheat]] and [[minecraft-antiche
 
 ## Related
 
-[[minecpp]] · [[minecraft-anticheatai]] · [[avaanticheat]] · [[oomph]] · [[present-hook]] · [[ntminhook]] · [[imgui]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/graphics-api]]
+[[minecpp]] · [[minecraft-anticheatai]] · [[avaanticheat]] · [[oomph]] · [[lenrete-mod]] · [[present-hook]] · [[ntminhook]] · [[imgui]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/graphics-api]]

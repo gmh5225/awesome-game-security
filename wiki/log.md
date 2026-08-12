@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:lolizei/Lenrete-Mod`: entity [[lenrete-mod]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked from [[phantom-client]].
+
 - **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2693 (was ~2692) / Anti Cheat ~665 (was ~664; Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-12** — ingest `description:gmh5225/IDA-KallsymsSymbolRenamer`: entity [[ida-kallsyms-symbol-renamer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[vmlinux-to-elf]] and [[list-of-ida-plugins]].
