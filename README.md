@@ -1296,6 +1296,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TheQmaks/phantom-frida [Build anti-detection Frida server from source]
 - https://github.com/1013503897/Morphida [Polymorphic anti-detection Android arm64 frida-server builds that morph static fingerprints per release]
 - https://github.com/astra1dev/MalumMenu-Android [Among Us Android cheat menu using Frida and frida-il2cpp-bridge]
+- https://github.com/quarkslab/android-hardware-attestation-demo [End-to-end PoC bypassing backend hardware Key Attestation by Frida-hooking KeystoreAttestation.generateAttestedKey and relaying the backend nonce to a clean, bootloader-locked device that returns a genuine TEE/StrongBox chain — no TEE tampering or forged certs]
 
 > Hook ART(android)
 - https://github.com/PAGalaxyLab/YAHFA
@@ -1385,6 +1386,9 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
 - https://github.com/atlas4381/qualcomm_avb_exploit_poc [Unlocking qualcomm bootloader]
 
+> Android Key Attestation
+- https://github.com/quarkslab/android-hardware-attestation-demo [End-to-end PoC bypassing backend hardware Key Attestation by Frida-hooking KeystoreAttestation.generateAttestedKey and relaying the backend nonce to a clean, bootloader-locked device that returns a genuine TEE/StrongBox chain — no TEE tampering or forged certs]
+
 > IoT / Smart devices
 - https://github.com/TaszkSecLabs/xiaomi-c400-pwn [Xiaomi Smart Camera exploits and jailbreak]
 - https://github.com/keowu/sjcam [SJCAM SJ4000 Air (Allwinner V3) firmware reverse engineering, parsers, custom CFW (Lelouch), and CVE-2026-52656 PoC]
@@ -1451,6 +1455,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/abcz316/SKRoot-linuxKernelRoot
 - https://github.com/0x36/Pixel_GPU_Exploit
 - https://github.com/0xCD4/SSL-bypass [Root Detection & SSL Bypass Script]
+- https://github.com/quarkslab/android-hardware-attestation-demo [Bypass backend hardware Key Attestation on rooted/unlocked-bootloader devices by Frida-relaying the backend challenge to a clean attestation oracle — genuine TEE/StrongBox chain, no forgery]
 - https://github.com/eltavine/Duck-Detector-Refactoring [DuckDetector refactor: Android local device-integrity inspector for root tampering, runtime hooking, mount anomalies, attestation trust, and virtualization evidence]
 - https://github.com/systemnb/RootSocketKit [Root privilege IPC via Unix Socket — Magisk/KernelSU/APatch compatible JNI client, reinforcement-proof, low-latency root ops (OpenProcess, ReadMemory)]
 
@@ -4744,6 +4749,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gigbh/d-process [Lightweight Linux tool to spawn decoy processes with arbitrary names to evade process-based anti-cheat and tracker checks]
 
 > Android
+- https://github.com/quarkslab/android-hardware-attestation-demo [Relay hardware Key Attestation from a clean device to defeat backend integrity checks on a rooted analysis phone — Frida hook + attestation oracle, no TEE tampering]
 - https://github.com/WindySha/bypassHiddenApiRestriction [Bypass hidden api restriction]
 - https://github.com/LSPosed/AndroidHiddenApiBypass [Bypass hidden api restriction]
 - https://github.com/stars-one/ASCTool [Apk Signature Crack Tool]
