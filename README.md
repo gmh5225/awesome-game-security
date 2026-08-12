@@ -1974,6 +1974,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/palepine/GDDumper [Cheat Engine script to dump/inspect Godot 3.x/4.x runtime SceneTree and GDScript]
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
+- https://github.com/antaresjay/freeplay [Rust Windows trainer that converts Cheat Engine .CT tables to TOML and runs Auto Assembler scripts]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/gmh5225/CE-remap-plugin [Remap]
 - https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
@@ -3257,6 +3258,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/a2x/cs2-dumper [Dump]
 - https://github.com/dougwithseismic/dezlock-dump [Runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); no source2gen required]
 - https://github.com/ianveig29/cs2-internals [Educational CS2/Source 2 internals guide covering schemas, offsets, entities, networking, Panorama, and verification labs]
+- https://github.com/ianveig29/OverlayAI [External CS2 overlay in C++/DirectX 11 with ESP, aimbot, radar, and inventory/Panorama bridge via cs2-dumper offsets]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
