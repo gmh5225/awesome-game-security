@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/LastIslandOfSurvival-iOSCheat-Source`: entity [[last-island-of-survival-ioscheat-source]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-12** — ingest `description:gmh5225/LazyIDA`: entity [[lazyida]]; cited on [[overviews/reverse-engineering]]; cross-link from [[list-of-ida-plugins]].
 
 - **2026-08-12** — ingest `description:quarkslab/android-hardware-attestation-demo`: entity [[android-hardware-attestation-demo]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-link from [[keyattestation]].

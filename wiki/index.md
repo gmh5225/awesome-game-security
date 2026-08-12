@@ -814,6 +814,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LazySign](entities/lazy-sign.md) — fake-cert Authenticode signing (Microsoft devkit binaries; zero extra deps; Some Tricks / Ring3)
 - [LazyIDA](entities/lazyida.md) — IDA Pro productivity plugin (debug auto-relocation jump, memory dump, ASCII/HEX/BASE64 paste, RVA copy, jump-to-address without rebasing; gmh5225; cheat / IDA Plugins)
 - [lazysight](entities/lazysight.md) — internal Ironsight multihack (DirectX overlay ESP/aimbot; entity lists, weapon managers, W2S SDK reads; Internal; gmh5225; cheat / game:ironsight)
+- [last-island-of-survival-ioscheat-source](entities/last-island-of-survival-ioscheat-source.md) — Last Island of Survival / Last Day Rules iOS cheat source (Objective-C runtime manipulation; gameplay mods; gmh5225; cheat / iOS)
 - [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
 - [lc0](entities/lc0.md) — Leela Chess Zero neural chess engine (MCTS + self-play RL; CUDA/cuDNN/OpenCL; Chess Engine / game AI)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
