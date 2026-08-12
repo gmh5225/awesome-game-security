@@ -579,6 +579,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
 - [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)
+- [Generic Game Detour API Hook](entities/generic-game-detour-api-hook.md) — Modular Microsoft Detours AC-bypass framework (~130 API hooks / 16 modules; dinput8.dll proxy; x86/x64)
 - [gina_public](entities/gina-public.md) — IRP Null hijack kernel driver (C/C++; cheat / driver communication)
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
