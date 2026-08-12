@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Grand-Theft-Auto-Modding-Source`: entity [[grand-theft-auto-modding-source]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked from [[regta]].
+
 - **2026-08-12** — ingest `description:gmh5225/GrandTheftAutoV-Cheat`: entity [[grandtheftautov-cheat]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5cheat]].
 
 - **2026-08-12** — ingest `description:gmh5225/HI3-ACE-B`: entity [[hi3-ace-b]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-link from [[starrail-ace-b]].
