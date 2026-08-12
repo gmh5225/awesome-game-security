@@ -12,7 +12,7 @@ confidence: medium
 
 Android Unity mod-menu template that draws Dear ImGui overlays inside Unity titles via OpenGL ES in a C++ native library. Hooks Unity’s Android render path and uses IL2CPP or Mono method hooks for game-logic controls—aimed at Android Unity modders building ImGui cheat UIs. (source: wiki/sources/descriptions/springmusk026__Imgui-Unity.md)
 
-Complements Android native ImGui apps ([[android-native-app-imgui]]), iOS ImGui mod menus ([[imgui-ios-mod-menu]]), Zygisk Unity templates ([[imgui-zygisk-unity]]), and desktop Present-hook overlays ([[present-hook]]) with a Unity-on-Android GLES surface.
+Complements gmh5225 sibling [[imgui-unity-android]], Android native ImGui apps ([[android-native-app-imgui]]), iOS ImGui mod menus ([[imgui-ios-mod-menu]]), Zygisk Unity templates ([[imgui-zygisk-unity]]), and desktop Present-hook overlays ([[present-hook]]) with a Unity-on-Android GLES surface.
 
 ## Links
 
@@ -21,4 +21,4 @@ Complements Android native ImGui apps ([[android-native-app-imgui]]), iOS ImGui 
 
 ## Related
 
-[[imgui-unity-with-layout]] · [[imgui-zygisk-unity]] · [[android-native-app-imgui]] · [[imgui-ios-mod-menu]] · [[il2cpp]] · [[present-hook]] · [[unityspeedtools]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-engine]]
+[[imgui-unity-with-layout]] · [[imgui-unity-android]] · [[imgui-zygisk-unity]] · [[android-native-app-imgui]] · [[imgui-ios-mod-menu]] · [[il2cpp]] · [[present-hook]] · [[unityspeedtools]] · [[overviews/mobile-security]] · [[overviews/graphics-api]] · [[overviews/game-engine]]

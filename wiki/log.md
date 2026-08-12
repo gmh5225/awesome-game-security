@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/ImGui-Unity-Android`: entity [[imgui-unity-android]]; cited on [[overviews/mobile-security]] and [[overviews/game-engine]]; cross-link from [[imgui-unity]].
+
 - **2026-08-12** — ingest `description:gmh5225/Interep-Driver-Leak`: entity [[interep-driver-leak]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-12** — ingest `description:gmh5225/Internal-Valorant-Cheat`: entity [[internal-valorant-cheat]]; cited on [[overviews/game-hacking]] and [[vanguard]].

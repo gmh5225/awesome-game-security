@@ -725,6 +725,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Imgui-Native-ModMenu](entities/imgui-native-modmenu.md) — Android native ImGui mod menu (OpenGL ES + JNI; cheat / Menu for Android)
 - [Imgui-Unity](entities/imgui-unity.md) — Android Unity ImGui mod menu (OpenGL ES + IL2CPP/Mono; cheat / render-draw)
 - [ImGui-Unity-With-Layout](entities/imgui-unity-with-layout.md) — Android Unity ImGui mod menu + layout tabs/save-load (C++; cheat / render-draw)
+- [ImGui-Unity-Android](entities/imgui-unity-android.md) — gmh5225 Unity Android ImGui overlay (OpenGL ES in render pipeline; mod menus / debug UI)
 - [ImGUI-Zygisk-Unity](entities/imgui-zygisk-unity.md) — Zygisk Unity ImGui mod menu template (OpenGL ES + render-pipeline hook; cheat / render-draw)
 - [immortal-rust](entities/immortal-rust.md) — Facepunch Rust OpenGL + SDK generation cheat source (C/C++; cheat / game:rust; gmh5225)
 - [imxyvimapper](entities/imxyvimapper.md) — BYOVD driver mapper via AsUpIO.sys (PE manual map; sections/imports/relocs/entry; gmh5225)
