@@ -750,6 +750,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [intro-to-gamehacking](entities/intro-to-gamehacking.md) — beginner game-hacking tutorial + lab (CE → C++ external/internal; memory scan / pointer chains / injection / hooks / patterns; cheat / guide)
 - [interactive-feedback-macos-mcp](entities/interactive-feedback-macos-mcp.md) — native macOS HITL feedback MCP (AppleScript dialogs + image support; fork of interactive-feedback-mcp; Game Develop / MCP)
 - [interactive-feedback-mcp](entities/interactive-feedback-mcp.md) — HITL user-feedback MCP (input/confirm/select prompts; Game Develop / MCP)
+- [internal-valorant-cheat](entities/internal-valorant-cheat.md) — Valorant internal: aimbot + ESP via in-process render/game-logic hooks; bypasses Vanguard user-mode protections (gmh5225; cheat / game:valorant [Internal])
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
 - [JADX](entities/jadx.md) — DEX→Java decompiler (APK/DEX/AAR; CLI+GUI; mobile RE)
