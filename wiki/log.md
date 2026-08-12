@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `readme:categories`: bumped Anti Cheat ~664 (was ~663; Cheat ~2692 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-12** — ingest `description:gmh5225/Kernel-VAD-Injector`: entity [[kernel-vad-injector]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-12** — ingest `description:gmh5225/KernelSU-4.4`: entity [[kernelsu-4.4]]; cross-link from [[kernelsu]]; cited on [[overviews/mobile-security]].
