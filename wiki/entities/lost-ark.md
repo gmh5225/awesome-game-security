@@ -12,7 +12,7 @@ confidence: medium
 
 Cheat or modding tool for the **Lost Ark** MMORPG. Provides gameplay modifications, ESP, and automation features through memory manipulation of the UE-based game client. (source: wiki/sources/descriptions/gmh5225__LostArk.md)
 
-Sits beside [[lost-ark-dumper]] (structure/offset RE) and [[lost-ark-logger]] (wire protocol RE) in the gmh5225 Lost Ark research lane, but as an in-process client memory cheat rather than dump or capture tooling.
+Sits beside [[lost-ark-dumper]] (structure/offset RE), [[lost-ark-sdk]] (pre-generated UE header kit), and [[lost-ark-logger]] (wire protocol RE) in the gmh5225 Lost Ark research lane, but as an in-process client memory cheat rather than dump or SDK tooling.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside [[lost-ark-dumper]] (structure/offset RE) and [[lost-ark-logger]] (w
 
 ## Related
 
-[[lost-ark-dumper]] · [[lost-ark-logger]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[lost-ark-dumper]] · [[lost-ark-sdk]] · [[lost-ark-logger]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
