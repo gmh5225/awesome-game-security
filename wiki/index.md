@@ -605,6 +605,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [Herpaderping](entities/herpaderping.md) — process/file obfuscation via write→map→modify→execute (SEC_IMAGE; on-disk decoy vs mapped image; cheat / hide)
 - [hex2dec-mcp](entities/hex2dec-mcp.md) — MCP hex↔decimal conversion for AI agents (JavaScript/TypeScript; Game Develop / MCP; gmh5225)
+- [hi3-ace-b](entities/hi3-ace-b.md) — Honkai Impact 3rd ACE bypass (integrity-check / detection circumvention; modified clients; explore anticheat; gmh5225)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
