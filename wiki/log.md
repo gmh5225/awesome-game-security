@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/GameEngine-CX3D`: entity [[gameengine-cx3d]]; cited on [[overviews/game-engine]].
+
 - **2026-08-12** — ingest `description:gmh5225/GameEngine-MapleEngine`: entity [[gameengine-mapleengine]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked from [[libremaple-client]] and [[winapi-maplestory]].
 
 - **2026-08-12** — ingest `description:gmh5225/Genshin-Akebi-GC`: entity [[genshin-akebi-gc]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[genshin-cheat]] and [[genshin-cheetos]].
