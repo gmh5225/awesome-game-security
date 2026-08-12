@@ -850,6 +850,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lol-offset-dumper](entities/lol-offset-dumper.md) — C/C++ LoL live-process offset dumper (memory analysis; gmh5225; cheat / game:lol [Dump])
 - [lol-patcher](entities/lol-patcher.md) — experimental LoL client patcher/mod (gmh5225; frozen Feb 2020; cheat / game:lol)
 - [lol-unpackman](entities/lol-unpackman.md) — C++ LoL client unpacker (gmh5225; cheat / game:lol)
+- [lviewlol](entities/lviewlol.md) — Python LoL external viewing tool (memory read; minimap/player positions/cooldown overlay; gmh5225; cheat / game:lol)
 - [long_night](entities/long-night.md) — IDA Pro dark color theme (syntax-highlighted; cheat / IDA themes)
 - [legit-csgo-cheat-menu](entities/legit-csgo-cheat-menu.md) — CS:GO legit-style cheat menu (Windows; cheat / game:csgo [Menu]; gmh5225)
 - [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
