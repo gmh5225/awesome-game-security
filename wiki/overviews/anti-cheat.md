@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Rootkit-2.md
   - wiki/sources/descriptions/jackullrich__syscall-detect.md
   - wiki/sources/descriptions/gmh5225__KasperskyHook.md
+  - wiki/sources/descriptions/gmh5225__Hook-HvlSwitchVirtualAddressSpace.md
   - wiki/sources/descriptions/jfmaes__LazySign.md
   - wiki/sources/descriptions/jimbeveridge__readdirectorychanges.md
   - wiki/sources/descriptions/jnz__q3vm.md
@@ -496,6 +497,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[kn-win32-api-monitor]] — Tauri 2 Win32 API trace workstation (IAT hooks; ~30k APIs; `.knapm` replay; security/RE/anti-cheat research; kernullist) (source: wiki/sources/descriptions/kernullist__KnWin32ApiMonitor.md)
 - [[syscall-detect]] — C PoC detecting direct/indirect syscalls via Instrumentation Callback or thread stack inspection (flags custom stubs vs ntdll) (source: wiki/sources/descriptions/jackullrich__syscall-detect.md)
 - [[kaspersky-hook]] — syscall hooking via Kaspersky `klhk.sys` hypervisor (`IA32_LSTAR` dispatch-table redirect + custom driver; gmh5225; README `[Kaspersky]`) (source: wiki/sources/descriptions/gmh5225__KasperskyHook.md)
+- [[hook-hvl-switch-virtual-address-space]] — `HvlSwitchVirtualAddressSpace` hook; CR3 transition manipulation hides pages from process memory scans during address-space context switches (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Hook-HvlSwitchVirtualAddressSpace.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 - [[ow2-wardenrekter]] — Overwatch 2 Warden disable DLL (VEH/INT3 neutralization via `KiUserExceptionDispatcher` RET patch, DbgBreakPoint NOP, PEB debugger hiding, `GetTickCount64` timing stub, `NtQuerySystemInformation` block; DR0 via `SetThreadContext`; README `[Emulate OW2 AC]`; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW2-wardenrekter.md)
 - [[ow-aeternum]] — Overwatch C/C++ POC spanning anti-cheat research, rendering, and hooking (author-flagged rough POC; cheat / game:overwatch; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW-Aeternum.md)

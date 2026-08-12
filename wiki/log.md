@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Hook-HvlSwitchVirtualAddressSpace`: entity [[hook-hvl-switch-virtual-address-space]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
+
 - **2026-08-12** — ingest `description:gmh5225/Hook-KdTrap`: entity [[hook-kdtrap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-12** — ingest `description:gmh5225/Hwid-Spoofer-EAC-BE`: entity [[hwid-spoofer-eac-be]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked from [[hwid-spoofer]].
