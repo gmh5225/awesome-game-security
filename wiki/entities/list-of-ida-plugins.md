@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/gmh5225__ida-plugins.md
-updated: 2026-08-08
+updated: 2026-08-12
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Distinct from [[ida-plugins]] (repnz register cross-references plugin). Compleme
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[idaplugins-list]] · [[idaplugins]] · [[ida-plugins]] · [[retools]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[lazyida]] · [[idaplugins-list]] · [[idaplugins]] · [[ida-plugins]] · [[retools]]

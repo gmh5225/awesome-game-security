@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/LazyIDA`: entity [[lazyida]]; cited on [[overviews/reverse-engineering]]; cross-link from [[list-of-ida-plugins]].
+
 - **2026-08-12** — ingest `description:quarkslab/android-hardware-attestation-demo`: entity [[android-hardware-attestation-demo]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-link from [[keyattestation]].
 
 - **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2686 (was ~2682) / Some Tricks ~117 (was ~116; Anti Cheat ~663 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
