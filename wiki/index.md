@@ -601,6 +601,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
+- [Game-GTA-re3](entities/game-gta-re3.md) — Reverse-engineered GTA III & Vice City engines (re3/reVC; decompiled portable C++; cross-platform incl. PS Vita; CMake; gmh5225)
 - [grand-theft-auto-modding-source](entities/grand-theft-auto-modding-source.md) — GTA modding source collection (re3/reVC; GTA III/Vice City RE; platform ports; DirectX/OpenGL; mod infrastructure; gmh5225)
 - [GrandTheftAutoV-Cheat](entities/grandtheftautov-cheat.md) — GTA V PC mod-menu cheat (money / vehicle spawn / teleport / player mods; scripting + memory manipulation; gmh5225)
 - [gta5cheat](entities/gta5cheat.md) — GTA V Python cheat (memory analysis; cheat / game:gta5; gmh5225)

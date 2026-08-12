@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Game-GTA-re3`: entity [[game-gta-re3]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked from [[regta]] and [[grand-theft-auto-modding-source]].
+
 - **2026-08-12** — ingest `description:gmh5225/GameEngine-CRYENGINE`: entity [[gameengine-cryengine]]; cited on [[overviews/game-engine]].
 
 - **2026-08-12** — ingest `description:gmh5225/GameEngine-CX3D`: entity [[gameengine-cx3d]]; cited on [[overviews/game-engine]].
