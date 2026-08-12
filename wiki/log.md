@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2692 (was ~2689; Anti Cheat ~663 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-12** — ingest `description:gmh5225/Killer-Exercice`: entity [[killer-exercice]]; cross-link from [[killer]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-12** — ingest `description:gmh5225/Killer`: entity [[killer]]; cited on [[byovd]] and [[overviews/windows-kernel]].
