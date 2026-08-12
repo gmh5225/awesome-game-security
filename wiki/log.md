@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Il2Cpp-HookScripts`: entity [[il2cpp-hook-scripts]]; cited on [[il2cpp]] and [[overviews/mobile-security]].
+
 - **2026-08-12** — ingest `description:gmh5225/ImGui-Unity-Android`: entity [[imgui-unity-android]]; cited on [[overviews/mobile-security]] and [[overviews/game-engine]]; cross-link from [[imgui-unity]].
 
 - **2026-08-12** — ingest `description:gmh5225/Interep-Driver-Leak`: entity [[interep-driver-leak]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
