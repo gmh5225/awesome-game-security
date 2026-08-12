@@ -1381,6 +1381,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/x-spy/CVE-2026-43499-popsicle [CVE-2026-43499]
 - https://github.com/Colorful-glassblock/duchamp-root [CVE-2026-43499]
 - https://github.com/BuSung-dev/Root-My-Galaxy [Samsung Galaxy KernelSU installer — CVE-2026-43499]
+- https://github.com/alex193a/Root-My-Pixel [Jailbreak supported Google Pixel phones with CVE-2026-43499]
 
 > Android Bootloader Bypass
 - https://github.com/MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass [Xiaomi HyperOS BootLoader Bypass]
