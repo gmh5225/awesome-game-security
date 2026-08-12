@@ -12,7 +12,7 @@ confidence: medium
 
 Basic **Left 4 Dead 2** cheat framework (gmh5225) providing foundational Source engine hook structures. Implements core hooking mechanisms, engine interface resolution, and basic cheat features as a starting template for Source engine game hacking. (source: wiki/sources/descriptions/gmh5225__L4D2Basic.md)
 
-Sits beside fuller L4D2 internal samples and other Source 1 internal scaffolds such as [[teamfortress2-internal]], [[csgo-internal-base]], and open Source trees such as [[source-engine]].
+Sits beside fuller L4D2 internal samples such as [[l4d2-cheat]] and other Source 1 internal scaffolds such as [[teamfortress2-internal]], [[csgo-internal-base]], and open Source trees such as [[source-engine]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside fuller L4D2 internal samples and other Source 1 internal scaffolds s
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-engine]] · [[teamfortress2-internal]] · [[csgo-internal-base]] · [[present-hook]] · [[sourceengineexplorer]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-engine]] · [[l4d2-cheat]] · [[teamfortress2-internal]] · [[csgo-internal-base]] · [[present-hook]] · [[sourceengineexplorer]]

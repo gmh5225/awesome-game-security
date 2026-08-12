@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/L4D2-Cheat`: entity [[l4d2-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-links from [[l4d2-basic]] and [[source-engine]].
+
 - **2026-08-12** — ingest `description:gmh5225/L4D2Basic`: entity [[l4d2-basic]]; cited on [[overviews/game-hacking]] and [[source-engine]].
 
 - **2026-08-12** — ingest `description:gmh5225/LOST-ARK-SDK`: entity [[lost-ark-sdk]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-links from [[lost-ark]] and [[lost-ark-dumper]].
