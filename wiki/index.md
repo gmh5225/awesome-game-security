@@ -565,6 +565,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [godot-demo-projects](entities/godot-demo-projects.md) — official Godot demos + template projects (GitHub Pages exports; Game Develop / source)
 - [godogen](entities/godogen.md) — autonomous Godot/Bevy/Babylon.js game dev with Claude Code and Codex (feature planning, asset gen, screenshot self-repair; Game Develop / AI Agents)
 - [goldberg-emulator](entities/goldberg-emulator.md) — Goldberg Steam Emulator (offline Steamworks API; LAN; preservation / Steam DRM+API RE)
+- [goose-goose-duck-hack](entities/goose-goose-duck-hack.md) — Goose Goose Duck Unity IL2CPP internal cheat (ImGui overlay; dumped Assembly-CSharp + ACTk bypass; ESP/role reveal; gmh5225)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
 - [GoodEye](entities/goodeye.md) — BEDaisy APC instrumentation kernel driver (BE per-thread APC callback RE; cheat / explore anticheat system:be)
 - [unturned-godot](entities/unturned-godot.md) — Godot 4.7 port: reverse-engineers Unturned Unity formats from Steam install (Game Engine / asset extraction)

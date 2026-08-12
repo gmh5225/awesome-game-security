@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/Goose_Goose_Duck_Hack`: entity [[goose-goose-duck-hack]]; cited on [[overviews/game-hacking]] and [[concepts/il2cpp]].
+
 - **2026-08-12** — ingest `description:gmh5225/Grand-Theft-Auto-Modding-Source`: entity [[grand-theft-auto-modding-source]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked from [[regta]].
 
 - **2026-08-12** — ingest `description:gmh5225/GrandTheftAutoV-Cheat`: entity [[grandtheftautov-cheat]]; cited on [[overviews/game-hacking]]; cross-linked from [[gta5cheat]].

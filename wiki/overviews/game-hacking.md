@@ -456,6 +456,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__gta5view.md
   - wiki/sources/descriptions/gmh5225__gta5cheat_qt.md
   - wiki/sources/descriptions/gmh5225__gta5cheat.md
+  - wiki/sources/descriptions/gmh5225__Goose_Goose_Duck_Hack.md
   - wiki/sources/descriptions/gmh5225__GrandTheftAutoV-Cheat.md
   - wiki/sources/descriptions/gmh5225__alt-V-Anticheat-Guide.md
   - wiki/sources/descriptions/gmh5225__gd-internal.md
@@ -894,7 +895,7 @@ Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL
 | Unity Mono | `Assembly-CSharp`, JIT hooks | [[il2cpp]] (contrast Mono path) |
 | Source | ClientClass/RecvTable, ConVars | [[source-netvars]] |
 
-C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) C# external Unity IL2CPP trainers such as [[taskbarhero-bot]] (TaskbarHero; WPF dashboard; batch memory reads, AOB scan, ACTk bypass, automation bot; cheat / game engine explorer:Unity) sit in the external trainer lane beside [[unity202x-externalresolve]]. (source: wiki/sources/descriptions/matheusbranhann__taskbarhero-bot.md) Unispect-style Mono dump over external DMA such as [[unispect-dma-plugin]] (Razchek fork fix; Memory Plugin dispose after dump; cheat / game engine explorer:Unity [DMA]) extends that lane below the OS beside [[cheat-engine-dma-plugin]]. (source: wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
+C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / modding; cheat / game engine explorer:Unity) sit in the Unity offensive lane beside [[il2cpp]] resolvers and runtime inspectors. (source: wiki/sources/descriptions/issuimo__UnityResolve.hpp.md) C# external Unity IL2CPP trainers such as [[taskbarhero-bot]] (TaskbarHero; WPF dashboard; batch memory reads, AOB scan, ACTk bypass, automation bot; cheat / game engine explorer:Unity) sit in the external trainer lane beside [[unity202x-externalresolve]]. (source: wiki/sources/descriptions/matheusbranhann__taskbarhero-bot.md) Unity IL2CPP internal samples such as [[goose-goose-duck-hack]] (Goose Goose Duck; IL2CPP runtime manipulation + ImGui overlay; dumped Assembly-CSharp + Anti-Cheat Toolkit bypasses for ESP/role reveal; gmh5225) sit in the in-process Unity lane beside [[rust-rustinternal]]. (source: wiki/sources/descriptions/gmh5225__Goose_Goose_Duck_Hack.md) Unispect-style Mono dump over external DMA such as [[unispect-dma-plugin]] (Razchek fork fix; Memory Plugin dispose after dump; cheat / game engine explorer:Unity [DMA]) extends that lane below the OS beside [[cheat-engine-dma-plugin]]. (source: wiki/sources/descriptions/gmh5225__unispectDMAPlugin.md) Compact Unity asset/code extraction guides such as [[unity-game-hacking]] (asset pipelines / modding; cheat / guide) sit in the Unity guide lane beside runtime explorers. (source: wiki/sources/descriptions/imadr__Unity-game-hacking.md)
 
 ## Development workflows
 
