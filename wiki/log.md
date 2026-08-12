@@ -3767,3 +3767,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-12** — ingest `description:gmh5225/KDP-compatible-driver-loader`: entity [[kdp-compatible-driver-loader]]; cited on [[byovd]] and [[overviews/windows-kernel]].
 
 - **2026-08-12** — ingest `description:gmh5225/KBotExt`: entity [[kbotext]]; cited on [[overviews/game-hacking]] and [[vanguard]].
+
+- **2026-08-12** — ingest `description:gmh5225/HappyIDA`: entity [[happyida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
