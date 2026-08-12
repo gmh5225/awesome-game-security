@@ -566,6 +566,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [godogen](entities/godogen.md) — autonomous Godot/Bevy/Babylon.js game dev with Claude Code and Codex (feature planning, asset gen, screenshot self-repair; Game Develop / AI Agents)
 - [goldberg-emulator](entities/goldberg-emulator.md) — Goldberg Steam Emulator (offline Steamworks API; LAN; preservation / Steam DRM+API RE)
 - [GoldSourceRebuild](entities/goldsource-rebuild.md) — decompiled/reconstructed GoldSource engine rebuild (HL1; rendering / networking / game systems; modding / research; Game Engine / RE)
+- [go-detection-hyper-v](entities/go-detection-hyper-v.md) — Go Hyper-V VM detection (CPUID feature checks, timing, hypervisor presence; gmh5225; Hyper-v)
 - [goose-goose-duck-hack](entities/goose-goose-duck-hack.md) — Goose Goose Duck Unity IL2CPP internal cheat (ImGui overlay; dumped Assembly-CSharp + ACTk bypass; ESP/role reveal; gmh5225)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
 - [GoodEye](entities/goodeye.md) — BEDaisy APC instrumentation kernel driver (BE per-thread APC callback RE; cheat / explore anticheat system:be)

@@ -4,7 +4,7 @@ kind: entity
 topics: [anti-cheat, windows-kernel]
 sources:
   - wiki/sources/descriptions/gmh5225__hv-detect.md
-updated: 2026-08-08
+updated: 2026-08-12
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Research project focused on **hypervisor IDT detections** via **SIDT** / **LIDT** — store interrupt-descriptor-table state, run detection checks inside that environment, then restore everything afterward. Aimed at anti-cheat engineers and defensive security researchers working the `Detection: Hacked Hypervisor` lane. (source: wiki/sources/descriptions/gmh5225__hv-detect.md)
 
-Complements multi-technique C++ detectors such as [[hypervisor-detection]], hypervisor VM-detection benchmarking such as [[nohv]], user-mode HV probes such as [[checkhv-um]], and EPT hook detectors such as [[ept-hook-detection]].
+Complements Hyper-V VM environment probes such as [[go-detection-hyper-v]], multi-technique C++ detectors such as [[hypervisor-detection]], hypervisor VM-detection benchmarking such as [[nohv]], user-mode HV probes such as [[checkhv-um]], and EPT hook detectors such as [[ept-hook-detection]].
 
 ## Links
 
