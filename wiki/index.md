@@ -577,6 +577,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
 - [genshin-cheat](entities/genshin-cheat.md) — Genshin Impact IL2CPP/memory gameplay cheat (god mode, stamina, teleport, speed; gmh5225)
+- [genshin-impact-base](entities/genshin-impact-base.md) — Genshin Impact cheat/mod base framework (memory access, SDK structures, IL2CPP hooks; gmh5225)
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
 - [genshinjumpfixer2](entities/genshinjumpfixer2.md) — Genshin Impact Decode CFG (jump-target calc + code simplify; khang06)
 - [genshin-remove-banner](entities/genshin-remove-banner.md) — C++ Genshin Impact in-game banner removal (cheat / game:genshin impact; gmh5225)

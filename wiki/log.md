@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/GenshinImpact-Base`: entity [[genshin-impact-base]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked from [[genshin-cheat]].
+
 - **2026-08-12** — ingest `description:gmh5225/GhidraDec`: entity [[ghiradec]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked from [[ghidra]].
 
 - **2026-08-12** — ingest `description:gmh5225/Go-Detection-Hyper-v`: entity [[go-detection-hyper-v]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked from [[hv-detect]] and [[hypervisor-detection]].
