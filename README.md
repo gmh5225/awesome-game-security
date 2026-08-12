@@ -2097,6 +2097,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/regomne/ilhook-rs [Rust x86]
 - https://github.com/iofomo/abyss [Android system call hook]
 - https://github.com/jsherman212/xnuspy [an iOS kernel function hooking framework for checkra1n'able devices]
+- https://github.com/Firejumper93/Ghost-Recon-Wildlands-First-Person-No-EAC [First-person camera mod for Ghost Recon Wildlands via dxgi proxy DLL, ThunkHook, and in-process memory writes on current EAC builds]
 
 > ROP Finder
 - https://github.com/0vercl0k/rp [rp++ is a fast C++ ROP gadget finder for PE/ELF/Mach-O x86/x64/ARM/ARM64 binaries]
