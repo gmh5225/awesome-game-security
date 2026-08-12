@@ -3785,3 +3785,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-12** — ingest `description:gmh5225/HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base`: entity [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
 
 - **2026-08-12** — ingest `description:gmh5225/HWID-Permanent-HWID-Spoofer`: entity [[hwid-permanent-hwid-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
+
+- **2026-08-12** — ingest `description:gmh5225/HWID-EclipsedSpoofer-EAC-BE`: entity [[hwid-eclipsed-spoofer-eac-be]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
