@@ -648,6 +648,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HWID-SteamSpywareTerminator](entities/hwid-steam-spyware-terminator.md) — block Steam client HWID fingerprinting and telemetry to Valve servers (gmh5225; README [Steam])
 - [HWID-Spoofer-for-Fortnite-and-Valorant](entities/hwid-spoofer-for-fortnite-and-valorant.md) — kernel-level HWID spoof for Fortnite/Valorant (C/C++; Cheat HWID)
 - [HWID-Permanent-HWID-Spoofer](entities/hwid-permanent-hwid-spoofer.md) — permanent reboot-persistent HWID spoofer via kernel driver or registry (firmware-level IDs; gmh5225)
+- [HWID-Pasted-Hwid-Spoofer](entities/hwid-pasted-hwid-spoofer.md) — compiled HWID spoofer from public spoofing snippets (disk serial / NIC MAC; cheat / HWID; gmh5225)
 - [HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base](entities/hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base.md) — universal ImGui-loader HWID spoofer for EAC/BE titles (disk/NIC/SMBIOS/GPU; gmh5225)
 - [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
