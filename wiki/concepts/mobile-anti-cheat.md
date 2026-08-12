@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/okhsunrog__vpnhide.md
   - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
   - wiki/sources/descriptions/salvogiangri__KnoxPatch.md
-updated: 2026-08-11
+  - wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md
+updated: 2026-08-12
 confidence: medium
 ---
 
@@ -39,7 +40,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts |
 | Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]) |
 | Emulator / VM | Build fingerprint, sensors, FS signatures ([[anti-emulator]], [[android-emulator-detection]], [[conbeerlib]]) |
-| Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) |
+| Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
 | Debugger | `TracerPid`, JDWP, ptrace |
 | Hooks | PLT/GOT integrity, `/proc/self/maps` anomalies |
 | IAP / billing | Client-side Play Billing API trust; local purchase-confirmation spoofing such as [[freedom]] (billing-service hook; server receipt validation is the primary defense) (source: wiki/sources/descriptions/gmh5225__freedom.md) |
@@ -54,10 +55,10 @@ Multi-check collections: [[detection]], [[android-native-root-detector]], archiv
 2. Hook or patch check functions ([[frida]], [[locusmimic]] for mock-location edge cases).
 3. Reduce injection footprint (stealth Frida [[fridare]], WXSHADOW/RECOMP tiers, root-hide DenyList/Shamiko, KernelSU process isolation). Hardened KernelSU forks such as [[apex-su]] study reduced root artifacts—IOCTL over anonymous `io_uring`-disguised inodes with no proc/sys/dev entries—against FS and process-based root probes. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md) OEM Knox integrity on Samsung Galaxy: [[knoxpatch]] hooks target Samsung apps to bypass root detection and disable Knox SDK / Samsung Attestation Key checks, with companion Magisk/KernelSU system patches for Secure Folder on legacy One UI—useful for studying how Samsung apps gate features on rooted hardware. (source: wiki/sources/descriptions/salvogiangri__KnoxPatch.md)
 4. Timing — checks may run once at launch vs periodically.
-5. Environment emulation — hide emulator props or use physical devices with clean attestation.
+5. Environment emulation — hide emulator props or use physical devices with clean attestation; attestation relay from a second clean device via [[android-hardware-attestation-demo]] (no crypto forgery; backend nonce forwarded to an oracle) passes hardware-backed checks on rooted analysis hardware. (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md)
 
 Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server policy; README samples are not universal recipes.
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[keyattestation]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

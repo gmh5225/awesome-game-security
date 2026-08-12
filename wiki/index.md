@@ -114,6 +114,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-emulator](entities/android-emulator.md) — Android emulator (emulation focus; mobile-platform / emulator research)
 - [android-emulator-hypervisor-driver](entities/android-emulator-hypervisor-driver.md) — Google KVM-on-Windows hypervisor (Android Studio Emulator acceleration; Win8.1+ x64)
 - [android-ebpf](entities/android-ebpf.md) — Android eBPF tracing examples (syscalls, network, process, perf; cheat / EBPF)
+- [android-hardware-attestation-demo](entities/android-hardware-attestation-demo.md) — Quarkslab attestation relay PoC (Frida Keystore hook + clean-device oracle; genuine TEE/StrongBox chain; no crypto forgery)
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
 - [android-imgui-menu](entities/android-imgui-menu.md) — Rust ARM64 Android ImGui cdylib (EGL/Vulkan hooks; cheat / render-draw)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
