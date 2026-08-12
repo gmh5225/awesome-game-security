@@ -1,0 +1,1944 @@
+Project Path: arc_baldspots440_R6Intel_yeluyysf
+
+Source Tree:
+
+```txt
+arc_baldspots440_R6Intel_yeluyysf
+├── SUPABASE_SCHEMA.sql
+├── V4-CHANGES.md
+├── V4.2-CHANGES.md
+├── V4.3-DESIGN-CHANGES.md
+├── V4.4-CHANGES.md
+├── V4.4.1-CHANGES.md
+├── V4.4.2-CHANGES.md
+├── V4.4.3-CHANGES.md
+├── V4.5-CHANGES.md
+├── V4.5_SUPABASE_MIGRATION.sql
+├── data
+│   ├── runtime.example.json
+│   └── runtime.json
+├── package-lock.json
+├── package.json
+├── public
+│   ├── app.js
+│   ├── index.html
+│   └── styles.css
+└── server.js
+
+```
+
+`SUPABASE_SCHEMA.sql`:
+
+```sql
+-- R6Intel v4.4 durable persistence
+create extension if not exists pgcrypto;
+create table if not exists players (id uuid primary key default gen_random_uuid(),profile_id text unique not null,platform text not null,current_username text not null,first_seen timestamptz default now(),last_seen timestamptz default now(),ever_sanctioned boolean default false,first_sanction_seen timestamptz,latest_response jsonb,last_refreshed_at timestamptz);
+create index if not exists players_username_idx on players(lower(current_username));
+create index if not exists players_platform_idx on players(platform);
+create table if not exists aliases (id bigint generated always as identity primary key,player_id uuid references players(id) on delete cascade,name text not null,first_seen timestamptz default now(),last_seen timestamptz default now());
+create index if not exists aliases_player_idx on aliases(player_id);
+create index if not exists aliases_name_idx on aliases(lower(name));
+create table if not exists snapshots (id bigint generated always as identity primary key,player_id uuid references players(id) on delete cascade,scanned_at timestamptz default now(),kd numeric,hs numeric,wr numeric,kpm numeric,matches integer,wins integer,losses integer,kills integer,deaths integer,rank text,rp integer,peak_rp integer,overall_kd numeric,overall_hs numeric,overall_kpr numeric,banned boolean,statistical_score integer,final_score integer,model_version text);
+create index if not exists snapshots_player_time_idx on snapshots(player_id,scanned_at desc);
+alter table players add column if not exists latest_response jsonb;
+alter table players add column if not exists last_refreshed_at timestamptz;
+alter table snapshots add column if not exists overall_kd numeric;
+alter table snapshots add column if not exists overall_hs numeric;
+alter table snapshots add column if not exists overall_kpr numeric;
+
+```
+
+`V4-CHANGES.md`:
+
+```md
+# R6Intel v4 Public Beta
+
+Implemented in this build:
+- Ubisoft / Xbox / PSN selector and platform-aware backend requests.
+- Refined score bands and natural labels (Moderately Suspicious, Highly Suspicious, Extremely Suspicious).
+- Current Performance: K/D 40%, HSR 30%, KPM 20%, Win Rate 10%.
+- K/D thresholds: 1.70 / 1.90 / 2.10 / 2.40.
+- HSR thresholds: 60 / 70 / 80 / 90.
+- KPM thresholds: 6 / 7 / 8 / 9.
+- Win-rate thresholds: 60 / 70 / 80 / 90.
+- Compound anomaly bonuses at 10+ matches: +5 / +10 / +15 / +20 / +25 / +30 / +35, non-stacking.
+- Perfect-stat anomaly: eligible 100% percentage statistic at 10+ matches = +25, non-stacking.
+- Current Performance / Historical Anomalies combine 50/50 when both are available.
+- Weighted last-five-snapshot historical baseline, including K/D, HSR, KPM and WR changes.
+- RP velocity calculated from the latest stored snapshot.
+- Confirmed current sanction = +50 final-score modifier, capped at 100; statistical score retained separately.
+- Previously confirmed sanction is permanently retained in local history.
+- Confidence: 1–9 Low, 10–24 Medium, 25–49 High, 50+ Very High; 0 = Insufficient.
+- Meaningful-change-only snapshots, retained without the old 50-snapshot cap.
+- Alias first/last-seen tracking keyed by platform + profile UUID when available.
+- Permanent-profile API endpoint by profile ID and browser URL update after search.
+- 24-hour profile-view deduplication using a one-way daily salted IP hash; raw IP is not written by this feature.
+- R6Data retry delays 1s / 3s / 10s plus 12s request timeout and cached-profile fallback.
+- FAQ, Terms, Privacy and Public Beta messaging.
+- Model version stored with snapshots (v4.0-beta.1).
+- SUPABASE_SCHEMA.sql included for the planned production database migration.
+
+Important limitation:
+- The current R6Data normalization still has no reliable HSR source, so HSR remains `null` / `—` until the provider exposes a usable field.
+- Supabase credentials were not supplied, so this ZIP uses the existing local JSON persistence at runtime. The production schema is included, but the live Supabase adapter cannot be safely configured without the project URL/key.
+
+```
+
+`V4.2-CHANGES.md`:
+
+```md
+# R6Intel v4.2
+
+- Adds R6Data `operatorStats` request in `ranked` mode with no seasonYear, which returns `seasonYear: all`.
+- Aggregates all-ranked operator kills, deaths, headshots, rounds, assists, first bloods/deaths, and time.
+- Calculates Overall Ranked K/D, HSR, Kills/Round, Round Win Rate, and other baseline metrics.
+- Does NOT sum operator `matchesPlayed`, because a single match can contain multiple operators and would be double-counted.
+- Keeps latest-season rank/RP/wins/losses/matches/KPM separate from all-ranked baseline data.
+- Adds current-season K/D vs all-ranked K/D as a historical anomaly signal.
+- UI clearly separates All-Ranked Baseline from Most Recent Ranked Season.
+
+```
+
+`V4.3-DESIGN-CHANGES.md`:
+
+```md
+# R6Intel v4.3 Design
+
+- Removed duplicate left sidebar navigation entirely.
+- Added single top navigation/header with R6Intel brand, platform search, and legal links.
+- Suspicion Score removed from player Overview; it now appears only in Analysis.
+- Added current-rank emblem beside Current Rank.
+- Added rank emblems to Ranked RP History rows where R6Data supplies imageUrl.
+- Added rank-name fallback from R6Data numeric rank ID plus R6Data rank-image URL fallback.
+- Refined player header, stat cards, tab navigation, spacing, shadows, typography, and mobile layout.
+
+```
+
+`V4.4-CHANGES.md`:
+
+```md
+# R6Intel v4.4 Backend
+- 10-minute whole-player cache
+- same-player and same-endpoint request deduplication
+- max 3 concurrent R6Data calls by default
+- endpoint-specific cache TTLs
+- Retry-After-aware 429 backoff
+- no retry burn on 400/401/403/404
+- Supabase durable player/alias/snapshot storage
+- local runtime.json remains fallback
+- ?refresh=1 forces a live refresh
+
+```
+
+`V4.4.1-CHANGES.md`:
+
+```md
+# R6Intel v4.4.1 loading fix
+- Supabase REST calls now time out after 4 seconds instead of hanging indefinitely.
+- A Supabase outage/misconfiguration can no longer prevent R6Data lookup from eventually continuing.
+- Supabase persistence runs asynchronously after the player response is ready, so database writes cannot keep the UI stuck on "Building player analysis".
+- Added backend timing logs for player lookups and cache hits.
+
+```
+
+`V4.4.2-CHANGES.md`:
+
+```md
+# R6Intel v4.4.2 Search Pipeline Fix
+
+Root cause addressed:
+- v4.4 held global R6Data concurrency slots while requests were sleeping/retrying.
+- With five endpoints per player, this could make the UI appear frozen and delay later calls before they ever reached R6Data.
+
+Changes:
+- Default R6 concurrency raised to 5 so one player can fetch its five required endpoints together.
+- Queue slots now cover only the actual HTTP request, not retry/backoff sleep.
+- Every R6Data endpoint logs START, HTTP status, timeout and duration in Render.
+- Individual HTTP attempts time out after 8 seconds.
+- Maximum two HTTP attempts per endpoint.
+- Full five-endpoint player lookup has a 20-second hard deadline.
+- Supabase username-cache lookup is capped at 1.5 seconds.
+- Existing endpoint cache and in-flight deduplication remain enabled.
+
+```
+
+`V4.4.3-CHANGES.md`:
+
+```md
+# R6Intel v4.4.3 Rate-Limit Fix
+
+Observed in Render:
+- all five R6Data endpoints were launched together,
+- all five returned HTTP 429,
+- the search then failed because no essential endpoint succeeded.
+
+Changes:
+- R6Data requests are globally paced instead of burst-fired.
+- Default concurrency is 1.
+- Default minimum gap between R6Data request starts is 750 ms.
+- 429 retry uses Retry-After when available; otherwise waits ~2.5 seconds.
+- Full player lookup deadline increased to 30 seconds to allow paced requests.
+- Existing endpoint caching and in-flight deduplication remain enabled.
+
+Optional Render tuning:
+R6_CONCURRENCY=1
+R6_MIN_INTERVAL_MS=750
+
+```
+
+`V4.5-CHANGES.md`:
+
+```md
+# R6Intel v4.5 Model + History
+
+- Suspicion Score is now statistical only. Confirmed sanctions remain a separate status/signal and no longer add +50 to the displayed model score.
+- Uses season HSR when the provider exposes it; otherwise uses All-Ranked HSR in performance scoring instead of treating HSR as missing.
+- Adds sample-size reliability scaling:
+  <5 matches 25%, 5-9 45%, 10-19 70%, 20-29 90%, 30+ 100%.
+- Historical snapshot comparison begins after one prior snapshot rather than requiring two.
+- Historical HSR comparison falls back to Overall HSR when season-specific HSR is unavailable.
+- Saves richer snapshots: season ID, overall kills/deaths/headshots/rounds, performance score, historical score, confidence, model version.
+- Keeps the proven v4.4.3 R6Data pacing/caching path unchanged.
+
+```
+
+`V4.5_SUPABASE_MIGRATION.sql`:
+
+```sql
+-- R6Intel v4.5 snapshot/history migration
+alter table snapshots add column if not exists season_id integer;
+alter table snapshots add column if not exists overall_kills integer;
+alter table snapshots add column if not exists overall_deaths integer;
+alter table snapshots add column if not exists overall_headshots integer;
+alter table snapshots add column if not exists overall_rounds integer;
+alter table snapshots add column if not exists performance_score integer;
+alter table snapshots add column if not exists historical_score integer;
+alter table snapshots add column if not exists confidence text;
+
+```
+
+`data/runtime.example.json`:
+
+```json
+{"profiles":{},"views":{}}
+
+```
+
+`data/runtime.json`:
+
+```json
+{
+  "profiles": {
+    "primex5lc": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:38:38.111Z",
+          "kd": null,
+          "wr": null,
+          "kpm": null,
+          "matches": null,
+          "rank": "Silver 4",
+          "rp": 2147,
+          "peakRp": null
+        }
+      ]
+    },
+    "kezroid": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:40:14.820Z",
+          "kd": 0.6666666666666666,
+          "wr": 55.55555555555556,
+          "kpm": 3.111111111111111,
+          "matches": 9,
+          "rank": "Unknown",
+          "rp": 1220,
+          "peakRp": 1367
+        }
+      ]
+    },
+    "parsec...": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:42:48.743Z",
+          "kd": 0.9375,
+          "wr": 64.28571428571429,
+          "kpm": 4.285714285714286,
+          "matches": 14,
+          "rank": "Platinum 2",
+          "rp": 3375,
+          "peakRp": 3375
+        }
+      ]
+    },
+    "cicinono.rzr": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:43:21.062Z",
+          "kd": 1.3345238095238094,
+          "wr": 63.46153846153846,
+          "kpm": 5.389423076923077,
+          "matches": 208,
+          "rank": "Unknown",
+          "rp": 3960,
+          "peakRp": 4020
+        }
+      ]
+    },
+    "trash_cj": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:43:54.263Z",
+          "kd": 0.8573643410852713,
+          "wr": 53.96419437340153,
+          "kpm": 4.242966751918159,
+          "matches": 391,
+          "rank": "Gold 2",
+          "rp": 2800,
+          "peakRp": 3464
+        }
+      ]
+    },
+    "akolnxwftp7789": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:44:26.420Z",
+          "kd": 1.411764705882353,
+          "wr": 56.98924731182796,
+          "kpm": 6.709677419354839,
+          "matches": 93,
+          "rank": "Platinum 2",
+          "rp": 3349,
+          "peakRp": 3352
+        }
+      ]
+    },
+    "jokskii": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:44:55.500Z",
+          "kd": 1.1097560975609757,
+          "wr": 50.33557046979866,
+          "kpm": 4.275167785234899,
+          "matches": 149,
+          "rank": "Gold 3",
+          "rp": 2749,
+          "peakRp": 2964
+        }
+      ]
+    },
+    "icamewithaura": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:45:15.650Z",
+          "kd": 1.036101083032491,
+          "wr": 51.5625,
+          "kpm": 4.484375,
+          "matches": 64,
+          "rank": "Silver 3",
+          "rp": 2287,
+          "peakRp": 2287
+        }
+      ]
+    },
+    "crxzy-_iast": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:46:04.616Z",
+          "kd": 1.1619909502262444,
+          "wr": 55.51330798479087,
+          "kpm": 4.88212927756654,
+          "matches": 263,
+          "rank": "Unknown",
+          "rp": 4646,
+          "peakRp": 4646
+        }
+      ]
+    },
+    "ricki": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:46:26.537Z",
+          "kd": null,
+          "wr": null,
+          "kpm": null,
+          "matches": null,
+          "rank": "Unknown",
+          "rp": null,
+          "peakRp": null
+        }
+      ]
+    },
+    "deibos": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:46:38.412Z",
+          "kd": null,
+          "wr": null,
+          "kpm": null,
+          "matches": null,
+          "rank": "Unknown",
+          "rp": null,
+          "peakRp": null
+        }
+      ]
+    },
+    "shax": {
+      "snapshots": [
+        {
+          "scannedAt": "2026-08-10T17:46:50.963Z",
+          "kd": 1.4736842105263157,
+          "wr": 75,
+          "kpm": 7,
+          "matches": 4,
+          "rank": "Unknown",
+          "rp": 3943,
+          "peakRp": 3943
+        }
+      ]
+    }
+  },
+  "views": {
+    "primex5lc": 2,
+    "kezroid": 2,
+    "parsec...": 1,
+    "cicinono.rzr": 1,
+    "trash_cj": 1,
+    "akolnxwftp7789": 1,
+    "jokskii": 1,
+    "icamewithaura": 1,
+    "crxzy-_iast": 1,
+    "ricki": 1,
+    "deibos": 1,
+    "shax": 1
+  }
+}
+```
+
+`package-lock.json`:
+
+```json
+{
+  "name": "r6intel",
+  "version": "4.5.0-beta.1",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "r6intel",
+      "version": "4.5.0-beta.1",
+      "dependencies": {
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2"
+      },
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "node_modules/accepts": {
+      "version": "1.3.8",
+      "resolved": "https://registry.npmjs.org/accepts/-/accepts-1.3.8.tgz",
+      "integrity": "sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==",
+      "license": "MIT",
+      "dependencies": {
+        "mime-types": "~2.1.34",
+        "negotiator": "0.6.3"
+      },
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/array-flatten": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/array-flatten/-/array-flatten-1.1.1.tgz",
+      "integrity": "sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==",
+      "license": "MIT"
+    },
+    "node_modules/body-parser": {
+      "version": "1.20.6",
+      "resolved": "https://registry.npmjs.org/body-parser/-/body-parser-1.20.6.tgz",
+      "integrity": "sha512-p5tAzS57i5MV9fZFDj9LeIiTZEufbSe2eDozP+ElheSUq1m74CRq1jI4mYNDdVs9vQztXFLuk/Gd6BWTdwRJ5g==",
+      "license": "MIT",
+      "dependencies": {
+        "bytes": "~3.1.2",
+        "content-type": "~1.0.5",
+        "debug": "2.6.9",
+        "depd": "2.0.0",
+        "destroy": "~1.2.0",
+        "http-errors": "~2.0.1",
+        "iconv-lite": "~0.4.24",
+        "on-finished": "~2.4.1",
+        "qs": "~6.15.1",
+        "raw-body": "~2.5.3",
+        "type-is": "~1.6.18",
+        "unpipe": "~1.0.0"
+      },
+      "engines": {
+        "node": ">= 0.8",
+        "npm": "1.2.8000 || >= 1.4.16"
+      }
+    },
+    "node_modules/bytes": {
+      "version": "3.1.2",
+      "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz",
+      "integrity": "sha512-/Nf7TyzTx6S3yRJObOAV7956r8cr2+Oj8AC5dt8wSP3BQAoeX58NoHyCU8P8zGkNXStjTSi6fzO6F0pBdcYbEg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/call-bind-apply-helpers": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz",
+      "integrity": "sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ==",
+      "license": "MIT",
+      "dependencies": {
+        "es-errors": "^1.3.0",
+        "function-bind": "^1.1.2"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/call-bound": {
+      "version": "1.0.4",
+      "resolved": "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz",
+      "integrity": "sha512-+ys997U96po4Kx/ABpBCqhA9EuxJaQWDQg7295H4hBphv3IZg0boBKuwYpt4YXp6MZ5AmZQnU/tyMTlRpaSejg==",
+      "license": "MIT",
+      "dependencies": {
+        "call-bind-apply-helpers": "^1.0.2",
+        "get-intrinsic": "^1.3.0"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/content-disposition": {
+      "version": "0.5.4",
+      "resolved": "https://registry.npmjs.org/content-disposition/-/content-disposition-0.5.4.tgz",
+      "integrity": "sha512-FveZTNuGw04cxlAiWbzi6zTAL/lhehaWbTtgluJh4/E95DqMwTmha3KZN1aAWA8cFIhHzMZUvLevkw5Rqk+tSQ==",
+      "license": "MIT",
+      "dependencies": {
+        "safe-buffer": "5.2.1"
+      },
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/content-type": {
+      "version": "1.0.5",
+      "resolved": "https://registry.npmjs.org/content-type/-/content-type-1.0.5.tgz",
+      "integrity": "sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/cookie": {
+      "version": "0.7.2",
+      "resolved": "https://registry.npmjs.org/cookie/-/cookie-0.7.2.tgz",
+      "integrity": "sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/cookie-signature": {
+      "version": "1.0.7",
+      "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.7.tgz",
+      "integrity": "sha512-NXdYc3dLr47pBkpUCHtKSwIOQXLVn8dZEuywboCOJY/osA0wFSLlSawr3KN8qXJEyX66FcONTH8EIlVuK0yyFA==",
+      "license": "MIT"
+    },
+    "node_modules/debug": {
+      "version": "2.6.9",
+      "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz",
+      "integrity": "sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==",
+      "license": "MIT",
+      "dependencies": {
+        "ms": "2.0.0"
+      }
+    },
+    "node_modules/depd": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz",
+      "integrity": "sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/destroy": {
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/destroy/-/destroy-1.2.0.tgz",
+      "integrity": "sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8",
+        "npm": "1.2.8000 || >= 1.4.16"
+      }
+    },
+    "node_modules/dotenv": {
+      "version": "16.6.1",
+      "resolved": "https://registry.npmjs.org/dotenv/-/dotenv-16.6.1.tgz",
+      "integrity": "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==",
+      "license": "BSD-2-Clause",
+      "engines": {
+        "node": ">=12"
+      },
+      "funding": {
+        "url": "https://dotenvx.com"
+      }
+    },
+    "node_modules/dunder-proto": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz",
+      "integrity": "sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==",
+      "license": "MIT",
+      "dependencies": {
+        "call-bind-apply-helpers": "^1.0.1",
+        "es-errors": "^1.3.0",
+        "gopd": "^1.2.0"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/ee-first": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/ee-first/-/ee-first-1.1.1.tgz",
+      "integrity": "sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==",
+      "license": "MIT"
+    },
+    "node_modules/encodeurl": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz",
+      "integrity": "sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/es-define-property": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz",
+      "integrity": "sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/es-errors": {
+      "version": "1.3.0",
+      "resolved": "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz",
+      "integrity": "sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/es-object-atoms": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz",
+      "integrity": "sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==",
+      "license": "MIT",
+      "dependencies": {
+        "es-errors": "^1.3.0"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/escape-html": {
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz",
+      "integrity": "sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==",
+      "license": "MIT"
+    },
+    "node_modules/etag": {
+      "version": "1.8.1",
+      "resolved": "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz",
+      "integrity": "sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/express": {
+      "version": "4.22.2",
+      "resolved": "https://registry.npmjs.org/express/-/express-4.22.2.tgz",
+      "integrity": "sha512-IuL+Elrou2ZvCFHs18/CIzy2Nzvo25nZ1/D2eIZlz7c+QUayAcYoiM2BthCjs+EBHVpjYjcuLDAiCWgeIX3X1Q==",
+      "license": "MIT",
+      "dependencies": {
+        "accepts": "~1.3.8",
+        "array-flatten": "1.1.1",
+        "body-parser": "~1.20.5",
+        "content-disposition": "~0.5.4",
+        "content-type": "~1.0.4",
+        "cookie": "~0.7.1",
+        "cookie-signature": "~1.0.6",
+        "debug": "2.6.9",
+        "depd": "2.0.0",
+        "encodeurl": "~2.0.0",
+        "escape-html": "~1.0.3",
+        "etag": "~1.8.1",
+        "finalhandler": "~1.3.1",
+        "fresh": "~0.5.2",
+        "http-errors": "~2.0.0",
+        "merge-descriptors": "1.0.3",
+        "methods": "~1.1.2",
+        "on-finished": "~2.4.1",
+        "parseurl": "~1.3.3",
+        "path-to-regexp": "~0.1.12",
+        "proxy-addr": "~2.0.7",
+        "qs": "~6.15.1",
+        "range-parser": "~1.2.1",
+        "safe-buffer": "5.2.1",
+        "send": "~0.19.0",
+        "serve-static": "~1.16.2",
+        "setprototypeof": "1.2.0",
+        "statuses": "~2.0.1",
+        "type-is": "~1.6.18",
+        "utils-merge": "1.0.1",
+        "vary": "~1.1.2"
+      },
+      "engines": {
+        "node": ">= 0.10.0"
+      },
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/express"
+      }
+    },
+    "node_modules/finalhandler": {
+      "version": "1.3.2",
+      "resolved": "https://registry.npmjs.org/finalhandler/-/finalhandler-1.3.2.tgz",
+      "integrity": "sha512-aA4RyPcd3badbdABGDuTXCMTtOneUCAYH/gxoYRTZlIJdF0YPWuGqiAsIrhNnnqdXGswYk6dGujem4w80UJFhg==",
+      "license": "MIT",
+      "dependencies": {
+        "debug": "2.6.9",
+        "encodeurl": "~2.0.0",
+        "escape-html": "~1.0.3",
+        "on-finished": "~2.4.1",
+        "parseurl": "~1.3.3",
+        "statuses": "~2.0.2",
+        "unpipe": "~1.0.0"
+      },
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/forwarded": {
+      "version": "0.2.0",
+      "resolved": "https://registry.npmjs.org/forwarded/-/forwarded-0.2.0.tgz",
+      "integrity": "sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/fresh": {
+      "version": "0.5.2",
+      "resolved": "https://registry.npmjs.org/fresh/-/fresh-0.5.2.tgz",
+      "integrity": "sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/function-bind": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz",
+      "integrity": "sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==",
+      "license": "MIT",
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/get-intrinsic": {
+      "version": "1.3.0",
+      "resolved": "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz",
+      "integrity": "sha512-9fSjSaos/fRIVIp+xSJlE6lfwhES7LNtKaCBIamHsjr2na1BiABJPo0mOjjz8GJDURarmCPGqaiVg5mfjb98CQ==",
+      "license": "MIT",
+      "dependencies": {
+        "call-bind-apply-helpers": "^1.0.2",
+        "es-define-property": "^1.0.1",
+        "es-errors": "^1.3.0",
+        "es-object-atoms": "^1.1.1",
+        "function-bind": "^1.1.2",
+        "get-proto": "^1.0.1",
+        "gopd": "^1.2.0",
+        "has-symbols": "^1.1.0",
+        "hasown": "^2.0.2",
+        "math-intrinsics": "^1.1.0"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/get-proto": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz",
+      "integrity": "sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==",
+      "license": "MIT",
+      "dependencies": {
+        "dunder-proto": "^1.0.1",
+        "es-object-atoms": "^1.0.0"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/gopd": {
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz",
+      "integrity": "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/has-symbols": {
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz",
+      "integrity": "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/hasown": {
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz",
+      "integrity": "sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==",
+      "license": "MIT",
+      "dependencies": {
+        "function-bind": "^1.1.2"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/http-errors": {
+      "version": "2.0.1",
+      "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+      "integrity": "sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==",
+      "license": "MIT",
+      "dependencies": {
+        "depd": "~2.0.0",
+        "inherits": "~2.0.4",
+        "setprototypeof": "~1.2.0",
+        "statuses": "~2.0.2",
+        "toidentifier": "~1.0.1"
+      },
+      "engines": {
+        "node": ">= 0.8"
+      },
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/express"
+      }
+    },
+    "node_modules/iconv-lite": {
+      "version": "0.4.24",
+      "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz",
+      "integrity": "sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==",
+      "license": "MIT",
+      "dependencies": {
+        "safer-buffer": ">= 2.1.2 < 3"
+      },
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    "node_modules/inherits": {
+      "version": "2.0.4",
+      "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz",
+      "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+      "license": "ISC"
+    },
+    "node_modules/ipaddr.js": {
+      "version": "1.9.1",
+      "resolved": "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.9.1.tgz",
+      "integrity": "sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.10"
+      }
+    },
+    "node_modules/math-intrinsics": {
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz",
+      "integrity": "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4"
+      }
+    },
+    "node_modules/media-typer": {
+      "version": "0.3.0",
+      "resolved": "https://registry.npmjs.org/media-typer/-/media-typer-0.3.0.tgz",
+      "integrity": "sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/merge-descriptors": {
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/merge-descriptors/-/merge-descriptors-1.0.3.tgz",
+      "integrity": "sha512-gaNvAS7TZ897/rVaZ0nMtAyxNyi/pdbjbAwUpFQpN70GqnVfOiXpeUUMKRBmzXaSQ8DdTX4/0ms62r2K+hE6mQ==",
+      "license": "MIT",
+      "funding": {
+        "url": "https://github.com/sponsors/sindresorhus"
+      }
+    },
+    "node_modules/methods": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz",
+      "integrity": "sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/mime": {
+      "version": "1.6.0",
+      "resolved": "https://registry.npmjs.org/mime/-/mime-1.6.0.tgz",
+      "integrity": "sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==",
+      "license": "MIT",
+      "bin": {
+        "mime": "cli.js"
+      },
+      "engines": {
+        "node": ">=4"
+      }
+    },
+    "node_modules/mime-db": {
+      "version": "1.52.0",
+      "resolved": "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz",
+      "integrity": "sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/mime-types": {
+      "version": "2.1.35",
+      "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz",
+      "integrity": "sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==",
+      "license": "MIT",
+      "dependencies": {
+        "mime-db": "1.52.0"
+      },
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/ms": {
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz",
+      "integrity": "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==",
+      "license": "MIT"
+    },
+    "node_modules/negotiator": {
+      "version": "0.6.3",
+      "resolved": "https://registry.npmjs.org/negotiator/-/negotiator-0.6.3.tgz",
+      "integrity": "sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/object-inspect": {
+      "version": "1.13.4",
+      "resolved": "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz",
+      "integrity": "sha512-W67iLl4J2EXEGTbfeHCffrjDfitvLANg0UlX3wFUUSTx92KXRFegMHUVgSqE+wvhAbi4WqjGg9czysTV2Epbew==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/on-finished": {
+      "version": "2.4.1",
+      "resolved": "https://registry.npmjs.org/on-finished/-/on-finished-2.4.1.tgz",
+      "integrity": "sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==",
+      "license": "MIT",
+      "dependencies": {
+        "ee-first": "1.1.1"
+      },
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/parseurl": {
+      "version": "1.3.3",
+      "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz",
+      "integrity": "sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/path-to-regexp": {
+      "version": "0.1.13",
+      "resolved": "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-0.1.13.tgz",
+      "integrity": "sha512-A/AGNMFN3c8bOlvV9RreMdrv7jsmF9XIfDeCd87+I8RNg6s78BhJxMu69NEMHBSJFxKidViTEdruRwEk/WIKqA==",
+      "license": "MIT"
+    },
+    "node_modules/proxy-addr": {
+      "version": "2.0.7",
+      "resolved": "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.7.tgz",
+      "integrity": "sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==",
+      "license": "MIT",
+      "dependencies": {
+        "forwarded": "0.2.0",
+        "ipaddr.js": "1.9.1"
+      },
+      "engines": {
+        "node": ">= 0.10"
+      }
+    },
+    "node_modules/qs": {
+      "version": "6.15.3",
+      "resolved": "https://registry.npmjs.org/qs/-/qs-6.15.3.tgz",
+      "integrity": "sha512-O9gl3zCl5h5blw1KGUzQKhA5oUXSl8rwUIM5o0S3nCXMliSvy5Dzx7/DJcI+SwgICv+IneSZwhBh1oSyEHA71A==",
+      "license": "BSD-3-Clause",
+      "dependencies": {
+        "es-define-property": "^1.0.1",
+        "side-channel": "^1.1.1"
+      },
+      "engines": {
+        "node": ">=0.6"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/range-parser": {
+      "version": "1.2.1",
+      "resolved": "https://registry.npmjs.org/range-parser/-/range-parser-1.2.1.tgz",
+      "integrity": "sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/raw-body": {
+      "version": "2.5.3",
+      "resolved": "https://registry.npmjs.org/raw-body/-/raw-body-2.5.3.tgz",
+      "integrity": "sha512-s4VSOf6yN0rvbRZGxs8Om5CWj6seneMwK3oDb4lWDH0UPhWcxwOWw5+qk24bxq87szX1ydrwylIOp2uG1ojUpA==",
+      "license": "MIT",
+      "dependencies": {
+        "bytes": "~3.1.2",
+        "http-errors": "~2.0.1",
+        "iconv-lite": "~0.4.24",
+        "unpipe": "~1.0.0"
+      },
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/safe-buffer": {
+      "version": "5.2.1",
+      "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz",
+      "integrity": "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==",
+      "funding": [
+        {
+          "type": "github",
+          "url": "https://github.com/sponsors/feross"
+        },
+        {
+          "type": "patreon",
+          "url": "https://www.patreon.com/feross"
+        },
+        {
+          "type": "consulting",
+          "url": "https://feross.org/support"
+        }
+      ],
+      "license": "MIT"
+    },
+    "node_modules/safer-buffer": {
+      "version": "2.1.2",
+      "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz",
+      "integrity": "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==",
+      "license": "MIT"
+    },
+    "node_modules/send": {
+      "version": "0.19.2",
+      "resolved": "https://registry.npmjs.org/send/-/send-0.19.2.tgz",
+      "integrity": "sha512-VMbMxbDeehAxpOtWJXlcUS5E8iXh6QmN+BkRX1GARS3wRaXEEgzCcB10gTQazO42tpNIya8xIyNx8fll1OFPrg==",
+      "license": "MIT",
+      "dependencies": {
+        "debug": "2.6.9",
+        "depd": "2.0.0",
+        "destroy": "1.2.0",
+        "encodeurl": "~2.0.0",
+        "escape-html": "~1.0.3",
+        "etag": "~1.8.1",
+        "fresh": "~0.5.2",
+        "http-errors": "~2.0.1",
+        "mime": "1.6.0",
+        "ms": "2.1.3",
+        "on-finished": "~2.4.1",
+        "range-parser": "~1.2.1",
+        "statuses": "~2.0.2"
+      },
+      "engines": {
+        "node": ">= 0.8.0"
+      }
+    },
+    "node_modules/send/node_modules/ms": {
+      "version": "2.1.3",
+      "resolved": "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz",
+      "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
+      "license": "MIT"
+    },
+    "node_modules/serve-static": {
+      "version": "1.16.3",
+      "resolved": "https://registry.npmjs.org/serve-static/-/serve-static-1.16.3.tgz",
+      "integrity": "sha512-x0RTqQel6g5SY7Lg6ZreMmsOzncHFU7nhnRWkKgWuMTu5NN0DR5oruckMqRvacAN9d5w6ARnRBXl9xhDCgfMeA==",
+      "license": "MIT",
+      "dependencies": {
+        "encodeurl": "~2.0.0",
+        "escape-html": "~1.0.3",
+        "parseurl": "~1.3.3",
+        "send": "~0.19.1"
+      },
+      "engines": {
+        "node": ">= 0.8.0"
+      }
+    },
+    "node_modules/setprototypeof": {
+      "version": "1.2.0",
+      "resolved": "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz",
+      "integrity": "sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==",
+      "license": "ISC"
+    },
+    "node_modules/side-channel": {
+      "version": "1.1.1",
+      "resolved": "https://registry.npmjs.org/side-channel/-/side-channel-1.1.1.tgz",
+      "integrity": "sha512-6x6dK6zJdpTzF4sQeNYxwtvBzf6Eg4GtlesS94HOvTudUeyK2WXAaIfmDgsyslYrRBeFIlsi54AYsFGUuhmvrQ==",
+      "license": "MIT",
+      "dependencies": {
+        "es-errors": "^1.3.0",
+        "object-inspect": "^1.13.4",
+        "side-channel-list": "^1.0.1",
+        "side-channel-map": "^1.0.1",
+        "side-channel-weakmap": "^1.0.2"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/side-channel-list": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/side-channel-list/-/side-channel-list-1.0.1.tgz",
+      "integrity": "sha512-mjn/0bi/oUURjc5Xl7IaWi/OJJJumuoJFQJfDDyO46+hBWsfaVM65TBHq2eoZBhzl9EchxOijpkbRC8SVBQU0w==",
+      "license": "MIT",
+      "dependencies": {
+        "es-errors": "^1.3.0",
+        "object-inspect": "^1.13.4"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/side-channel-map": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/side-channel-map/-/side-channel-map-1.0.1.tgz",
+      "integrity": "sha512-VCjCNfgMsby3tTdo02nbjtM/ewra6jPHmpThenkTYh8pG9ucZ/1P8So4u4FGBek/BjpOVsDCMoLA/iuBKIFXRA==",
+      "license": "MIT",
+      "dependencies": {
+        "call-bound": "^1.0.2",
+        "es-errors": "^1.3.0",
+        "get-intrinsic": "^1.2.5",
+        "object-inspect": "^1.13.3"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/side-channel-weakmap": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz",
+      "integrity": "sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A==",
+      "license": "MIT",
+      "dependencies": {
+        "call-bound": "^1.0.2",
+        "es-errors": "^1.3.0",
+        "get-intrinsic": "^1.2.5",
+        "object-inspect": "^1.13.3",
+        "side-channel-map": "^1.0.1"
+      },
+      "engines": {
+        "node": ">= 0.4"
+      },
+      "funding": {
+        "url": "https://github.com/sponsors/ljharb"
+      }
+    },
+    "node_modules/statuses": {
+      "version": "2.0.2",
+      "resolved": "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz",
+      "integrity": "sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/toidentifier": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/toidentifier/-/toidentifier-1.0.1.tgz",
+      "integrity": "sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==",
+      "license": "MIT",
+      "engines": {
+        "node": ">=0.6"
+      }
+    },
+    "node_modules/type-is": {
+      "version": "1.6.18",
+      "resolved": "https://registry.npmjs.org/type-is/-/type-is-1.6.18.tgz",
+      "integrity": "sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==",
+      "license": "MIT",
+      "dependencies": {
+        "media-typer": "0.3.0",
+        "mime-types": "~2.1.24"
+      },
+      "engines": {
+        "node": ">= 0.6"
+      }
+    },
+    "node_modules/unpipe": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz",
+      "integrity": "sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    },
+    "node_modules/utils-merge": {
+      "version": "1.0.1",
+      "resolved": "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz",
+      "integrity": "sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.4.0"
+      }
+    },
+    "node_modules/vary": {
+      "version": "1.1.2",
+      "resolved": "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz",
+      "integrity": "sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==",
+      "license": "MIT",
+      "engines": {
+        "node": ">= 0.8"
+      }
+    }
+  }
+}
+```
+
+`package.json`:
+
+```json
+{
+  "name": "r6intel",
+  "version": "4.5.0-beta.1",
+  "private": true,
+  "description": "R6Intel production-ready Rainbow Six Siege player analysis prototype",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
+```
+
+`public/app.js`:
+
+```js
+const state={tab:'overview',player:null,countedView:null,platform:'uplay'};const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const fmt=(v,d=2)=>Number.isFinite(v)?Number(v).toFixed(d):'—';
+function severity(score){if(score==null)return['Unavailable','#918ca7','UNAVAILABLE'];if(score<=19)return['Low','#40df87','LOW SUSPICION'];if(score<=39)return['Moderate','#ffd15c','MODERATELY SUSPICIOUS'];if(score<=59)return['Elevated','#ff9a4e','ELEVATED SUSPICION'];if(score<=79)return['High','#ff714e','HIGHLY SUSPICIOUS'];return['Extreme','#ff555f','EXTREMELY SUSPICIOUS']}
+function setTab(name){state.tab=name;render()}$$('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+$$('.platform').forEach(b=>b.addEventListener('click',()=>{state.platform=b.dataset.platform;$$('.platform').forEach(x=>x.classList.toggle('active',x===b));$('#searchInput').placeholder=state.platform==='xbl'?'Search Xbox Gamertag':state.platform==='psn'?'Search PSN ID':'Search Ubisoft username'}));
+function metric(l,v){return `<div class="card"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div></div>`}
+function flags(p){const n=p.data,a=p.analysis,o=[];if(Number.isFinite(n.kd)&&n.kd>=1.7)o.push({kind:n.kd>=2.4?'extreme':n.kd>=2.1?'high':'warn',title:`K/D ${n.kd.toFixed(2)}`,detail:'Elevated ranked K/D under the current model.'});if(Number.isFinite(n.hs)&&n.hs>=60)o.push({kind:n.hs>=90?'extreme':n.hs>=80?'high':'warn',title:`HSR ${n.hs.toFixed(1)}%`,detail:'Elevated headshot rate.'});if(Number.isFinite(n.wr)&&n.wr>=60)o.push({kind:n.wr>=90?'extreme':n.wr>=80?'high':'warn',title:`Win rate ${n.wr.toFixed(1)}%`,detail:'Elevated ranked win rate.'});if(Number.isFinite(n.kpm)&&n.kpm>=6)o.push({kind:n.kpm>=9?'extreme':n.kpm>=8?'high':'warn',title:`Kills / match ${n.kpm.toFixed(2)}`,detail:'Elevated kills-per-match output.'});if(a.compoundBonus)o.push({kind:a.compoundBonus>=25?'extreme':a.compoundBonus>=15?'high':'warn',title:`Compound anomaly +${a.compoundBonus}`,detail:'Multiple elevated performance signals occurred together.'});if(a.perfectStatBonus)o.push({kind:'extreme',title:'Perfect-stat anomaly +25',detail:'An eligible percentage statistic is exactly 100% across at least 10 ranked matches.'});if(n.banned===true)o.push({kind:'extreme',title:'Confirmed sanction +50',detail:'R6Data currently reports a sanction; +50 is applied separately from statistical scoring.'});else if(n.everSanctioned)o.push({kind:'high',title:'Previously confirmed sanctioned',detail:'R6Intel previously recorded a confirmed sanction for this account.'});return o.slice(0,6)}
+function scoreCard(p){const score=p.analysis.suspicionScore,[sv,c,label]=severity(score),fs=flags(p),cats=p.analysis.categories||[];return `<div class="card score-hero"><div class="ring" style="--s:${score??0};--c:${c}"><div class="ring-content"><div class="pct">${score==null?'—':score+'%'}</div><div class="sev" style="color:${c}">${label}</div><div class="confidence">Data Confidence: ${esc(p.analysis.confidence)}</div></div></div><div><div class="section-title">Top signals</div><div class="flag-list">${fs.length?fs.map(f=>`<div class="flag ${f.kind}"><strong>${esc(f.title)}</strong><span>${esc(f.detail)}</span></div>`).join(''):'<div class="callout">No major statistical signals were detected in the currently available data.</div>'}</div><details><summary>Score breakdown</summary>${cats.map(x=>`<div class="contrib"><span>${esc(x.name)}</span><div class="track"><div class="fill" style="width:${x.score}%"></div></div><b>${Math.round(x.score)}%</b></div>`).join('')}${p.analysis.compoundBonus?`<div class="contrib"><span>Compound bonus</span><div></div><b>+${p.analysis.compoundBonus}</b></div>`:''}${p.analysis.perfectStatBonus?'<div class="contrib"><span>Perfect-stat anomaly</span><div></div><b>+25</b></div>':''}${p.analysis.sanctionModifier?'<div class="contrib"><span>Confirmed sanction</span><div></div><b>+50</b></div>':''}<div class="contrib"><span>Statistical score</span><div></div><b>${p.analysis.statisticalScore??'—'}%</b></div></details><p class="score-disclaimer">R6Intel detects statistical anomalies, not cheating. Suspicion Score is not a probability of cheating and is not proof of misconduct.</p></div></div>`}
+function overview(p){const n=p.data,o=n.overallRanked;return `<div class="section-title">ALL-RANKED BASELINE</div><div class="grid metrics">${metric('Overall K/D',fmt(o?.kd))}${metric('Overall HSR',Number.isFinite(o?.hs)?fmt(o.hs,1)+'%':'—')}${metric('Kills / round',fmt(o?.kpr))}${metric('Total kills',o?.kills??'—')}${metric('Total deaths',o?.deaths??'—')}${metric('Rounds',o?.rounds??'—')}</div><div style="height:16px"></div><div class="section-title">MOST RECENT RANKED SEASON${n.seasonId!=null?' · SEASON '+n.seasonId:''}</div><div class="grid metrics">${metric('Season K/D',fmt(n.kd))}${metric('Season win rate',Number.isFinite(n.wr)?fmt(n.wr,1)+'%':'—')}${metric('Kills / match',fmt(n.kpm))}${metric('Matches',n.matches??'—')}${metric('Kills',n.kills??'—')}${metric('Deaths',n.deaths??'—')}</div><div style="height:12px"></div>${p.cached?`<div class="cache-banner">Cached data — last updated ${new Date(p.fetchedAt).toLocaleString()}</div>`:''}`}
+function stats(p){const n=p.data,o=n.overallRanked;return `<div class="grid two"><div class="card"><div class="section-title">All-ranked baseline</div><table>
+<tr><th>Kills</th><td>${o?.kills??'—'}</td></tr><tr><th>Deaths</th><td>${o?.deaths??'—'}</td></tr><tr><th>K/D</th><td>${fmt(o?.kd)}</td></tr>
+<tr><th>Headshots</th><td>${o?.headshots??'—'}</td></tr><tr><th>HSR</th><td>${Number.isFinite(o?.hs)?fmt(o.hs,2)+'%':'—'}</td></tr>
+<tr><th>Rounds</th><td>${o?.rounds??'—'}</td></tr><tr><th>Kills / round</th><td>${fmt(o?.kpr)}</td></tr>
+<tr><th>Round win rate</th><td>${Number.isFinite(o?.roundWinRate)?fmt(o.roundWinRate,2)+'%':'—'}</td></tr>
+<tr><th>First bloods</th><td>${o?.firstBloods??'—'}</td></tr><tr><th>First deaths</th><td>${o?.firstDeaths??'—'}</td></tr>
+</table><p class="score-disclaimer">All-ranked totals are aggregated from R6Data operator stats with seasonYear=all and ranked mode. Match counts are not summed across operators because that would double-count matches.</p></div>
+<div class="card"><div class="section-title">Most recent ranked season${n.seasonId!=null?' · '+n.seasonId:''}</div><table>
+<tr><th>Kills</th><td>${n.kills??'—'}</td></tr><tr><th>Deaths</th><td>${n.deaths??'—'}</td></tr><tr><th>K/D</th><td>${fmt(n.kd)}</td></tr>
+<tr><th>Wins</th><td>${n.wins??'—'}</td></tr><tr><th>Losses</th><td>${n.losses??'—'}</td></tr><tr><th>Matches</th><td>${n.matches??'—'}</td></tr>
+<tr><th>Win rate</th><td>${Number.isFinite(n.wr)?fmt(n.wr,2)+'%':'—'}</td></tr><tr><th>KPM</th><td>${fmt(n.kpm)}</td></tr>
+<tr><th>Rank</th><td>${esc(n.rank)}</td></tr><tr><th>RP</th><td>${n.rp??'—'}</td></tr><tr><th>Peak RP</th><td>${n.peakRp??'—'}</td></tr>
+</table></div></div><div style="height:12px"></div><div class="card"><div class="section-title">Account</div><table>
+<tr><th>Platform</th><td>${n.platformType}</td></tr><tr><th>Level</th><td>${n.level??'—'}</td></tr><tr><th>Sanction</th><td>${n.banned===true?'Confirmed':n.everSanctioned?'Previously confirmed':'None reported'}</td></tr>
+</table></div>`}
+function analysis(p){return `${scoreCard(p)}<div style="height:12px"></div><div class="card"><div class="section-title">Model details</div><p class="callout">${esc(p.analysis.modelVersion)} · Current-season Performance and Historical Anomalies are weighted 50/50 when both exist. Historical analysis can compare the current season with the all-ranked operator-stat baseline and saved R6Intel snapshots. Missing categories are reweighted rather than counted as zero. Compound bonuses require 10+ matches. A 100% eligible percentage statistic at 10+ matches adds +25. A current confirmed sanction adds +50, capped at 100.</p></div>`}
+function historyView(p){const h=p.data.rankHistory||[];return `<div class="card history-card"><div class="section-title">RANKED RP HISTORY</div>${h.length?`<table class="rank-history-table"><thead><tr><th>Time</th><th>Rank</th><th>RP</th></tr></thead><tbody>${h.map(([d,x])=>`<tr><td>${new Date(d).toLocaleString()}</td><td><div class="rank-history-cell">${x?.metadata?.imageUrl?`<img src="${esc(x.metadata.imageUrl)}" class="rank-history-icon" alt="">`:''}<span>${esc(x?.metadata?.rank||'—')}</span></div></td><td><strong>${esc(x?.displayValue??x?.value??'—')}</strong></td></tr>`).join('')}</tbody></table>`:'<div class="empty-state">No ranked RP history is currently available.</div>'}</div>`}
+function render(){$$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===state.tab));if(!state.player)return;$('#content').innerHTML=({overview,stats,analysis,history:historyView}[state.tab]||overview)(state.player)}
+async function countView(p){const key=`${p.data.platformType}:${p.data.profileId||p.data.username}`.toLowerCase();if(state.countedView===key)return;state.countedView=key;try{const r=await fetch('/api/view/'+encodeURIComponent(key),{method:'POST'}),j=await r.json();$('#profileViews').textContent=`${j.views.toLocaleString()} views`}catch{}}
+function updateHeader(p){const n=p.data;$('#playerName').textContent=n.username;$('#playerMeta').textContent=[n.level!=null?`Level ${n.level}`:null,n.profileId,p.partial?'Partial data':null].filter(Boolean).join(' · ');$('#currentRank').textContent=n.rank||'—';$('#currentRp').textContent=n.rp!=null?`${Number(n.rp).toLocaleString()} RP`:'—';$('#peakRp').textContent=n.peakRp!=null?Number(n.peakRp).toLocaleString():'—';const ri=$('#currentRankIcon');if(n.rankImageUrl){ri.src=n.rankImageUrl;ri.classList.remove('hidden')}else{ri.classList.add('hidden');ri.removeAttribute('src')}const av=$('#avatar');if(n.avatar)av.innerHTML=`<img src="${esc(n.avatar)}" alt="">`;else av.textContent='R6'}
+async function search(){const username=$('#searchInput').value.trim();if(!username)return;$('#errorBox').classList.add('hidden');$('#heroEmpty').classList.add('hidden');$('#playerShell').classList.remove('hidden');$('#loading').classList.remove('hidden');$('#content').innerHTML='';try{const r=await fetch(`/api/player/${encodeURIComponent(username)}?platform=${state.platform}`,{cache:'no-store'});
+const raw=await r.text();let j;try{j=raw?JSON.parse(raw):{}}catch{throw new Error(`Search service returned an invalid response (${r.status}).`)}
+if(!r.ok)throw new Error(j.error||`Unable to load player (${r.status}).`);state.player=j;state.tab='overview';updateHeader(j);await countView(j);render();if(j.data.profileId && window.history && typeof window.history.replaceState==='function'){window.history.replaceState({},'',`/player/${encodeURIComponent(j.data.profileId)}`)}}catch(e){$('#playerShell').classList.add('hidden');$('#errorBox').textContent=e.message;$('#errorBox').classList.remove('hidden');$('#heroEmpty').classList.remove('hidden')}finally{$('#loading').classList.add('hidden')}}
+$('#searchBtn').addEventListener('click',search);$('#searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+
+const FAQ=`<div class="legal-hero"><span>HELP CENTER</span><h1>Frequently Asked Questions</h1><p>How R6Intel scoring, confidence, history and sanctions work.</p></div>
+<div class="legal-content">
+<h2>What is R6Intel?</h2><p>R6Intel is an independent Rainbow Six Siege statistical-analysis platform. It is not affiliated with or endorsed by Ubisoft.</p>
+<h2>What does Suspicion Score mean?</h2><p>It is a 0–100 statistical anomaly score. It is <b>not</b> the probability that a player is cheating and is not proof of misconduct.</p>
+<h2>What are the score bands?</h2><p>0–19 Low Suspicion · 20–39 Moderately Suspicious · 40–59 Elevated Suspicion · 60–79 Highly Suspicious · 80–100 Extremely Suspicious.</p>
+<h2>What affects Current Performance?</h2><p>K/D 40%, HSR 30%, KPM 20%, and Win Rate 10%. Missing data is reweighted rather than treated as zero.</p>
+<h2>How does historical detection work?</h2><p>When enough snapshots exist, current performance is compared with a weighted baseline of the previous five snapshots. Current Performance and Historical Anomalies are weighted 50/50 when both are available.</p>
+<h2>What are compound anomalies?</h2><p>At 10+ ranked matches, multiple elevated signals can add +5 to +35. Only the single highest qualifying compound bonus applies.</p>
+<h2>What is the Perfect-Stat Anomaly?</h2><p>An eligible percentage statistic at exactly 100% across at least 10 ranked matches adds +25. The bonus does not stack.</p>
+<h2>Why does a confirmed sanction add +50?</h2><p>A currently confirmed R6Data sanction adds +50 separately from the statistical model, capped at 100. R6Intel retains the underlying statistical score so the model can still be evaluated independently.</p>
+<h2>What is Data Confidence?</h2><p>1–9 matches: Low · 10–24: Medium · 25–49: High · 50+: Very High. Confidence describes sample size and does not reduce the Suspicion Score.</p>
+<h2>Can legitimate players score high?</h2><p>Yes. Exceptional skill, alternate accounts, small samples, matchmaking conditions and upstream-data errors can create anomalies. R6Intel scores should never be treated as proof of cheating.</p>
+<h2>Which platforms are supported?</h2><p>R6Intel v4 supports searches targeting Ubisoft/PC, Xbox and PlayStation where the upstream provider supplies the required data.</p>
+<h2>Why do Overall and Season stats differ?</h2><p>Overall Ranked stats are aggregated from all-season ranked operator data. Rank, RP, match count, win rate and KPM come from the most recent ranked-season profile. This prevents R6Intel from presenting one old season as lifetime data.</p><h2>Why can current-season HSR be missing?</h2><p>The current ranked-season endpoint does not always expose headshots. R6Intel uses the all-ranked operator endpoint for Overall HSR and displays — for a season-specific HSR when it cannot be calculated reliably.</p>
+</div>`;
+
+const TERMS=`<div class="legal-hero"><span>LEGAL</span><h1>Terms of Service</h1><p>Version 1.0 · R6Intel Public Beta</p></div>
+<div class="legal-content">
+<h2>1. Acceptance and Service</h2><p>By using R6Intel you agree to these Terms. R6Intel provides statistical and historical analysis of Rainbow Six Siege player accounts using available third-party data.</p>
+<h2>2. Public Beta</h2><p>Features, algorithms, thresholds, interfaces, data providers and availability may change during testing. Information may be incomplete, delayed or incorrect.</p>
+<h2>3. Suspicion Scores</h2><p>A Suspicion Score represents statistical anomalies detected by the active R6Intel model. It is not an accusation, determination, or probability that a player cheated. Users must not represent a score as definitive proof of misconduct.</p>
+<h2>4. Statistical Limitations</h2><p>False positives and false negatives are possible. Skill, alternate accounts, matchmaking, team composition, sample size, playstyle changes and upstream-data errors can affect results.</p>
+<h2>5. Confidence, Sanctions and History</h2><p>Confidence describes available sample size. Sanctions are reported by third-party providers and may be retained historically after first confirmation. R6Intel may retain historical statistics, aliases, scores and model versions for analysis.</p>
+<h2>6. Acceptable Use</h2><p>Do not use R6Intel to harass, threaten, stalk, dox, impersonate or defame another person; overload the Service; bypass rate limits or security controls; manipulate analytics; submit malicious code; or violate applicable law.</p>
+<h2>7. Third-Party Information</h2><p>R6Intel does not guarantee that third-party information is accurate, complete, current or continuously available. Cached information may be displayed when live data is unavailable.</p>
+<h2>8. Independent Project</h2><p>R6Intel is not affiliated with, sponsored by, endorsed by, approved by, or operated by Ubisoft. Rainbow Six, Rainbow Six Siege, Ubisoft and related marks belong to their respective owners.</p>
+<h2>9. Availability and Warranty</h2><p>The Service is provided “as is” and “as available” to the extent permitted by law. R6Intel may modify, restrict, suspend or discontinue any part of the Service.</p>
+<h2>10. Changes</h2><p>These Terms may be updated as the beta develops. Material revisions will update the displayed version or effective date.</p>
+<h2>11. Governing Law and Contact</h2><p>This section must be completed before full public release with the operator’s jurisdiction and contact email.</p>
+</div>`;
+
+const PRIVACY=`<div class="legal-hero"><span>LEGAL</span><h1>Privacy Policy</h1><p>R6Intel Public Beta</p></div>
+<div class="legal-content">
+<h2>Information R6Intel stores</h2><p>R6Intel may store player identifiers, usernames and aliases, public game statistics, historical snapshots, scoring-model versions, sanction history and aggregate profile views needed to operate the Service.</p>
+<h2>Profile-view deduplication</h2><p>For view deduplication, the server derives a one-way hashed token from the requesting IP address, player identifier, rotating day value and a server-side salt. The view feature does not write the raw IP address to the R6Intel runtime database. Deduplication tokens are pruned after a short window.</p>
+<h2>Historical retention</h2><p>Player history may be retained to provide historical analysis, account timelines and scoring-model validation.</p>
+<h2>Third-party providers</h2><p>R6Intel relies on third-party data providers. Their own privacy practices and terms may apply independently of R6Intel.</p>
+<h2>Future changes</h2><p>This notice will be updated before introducing material new data processing such as user accounts, advertising, additional analytics, cookies, or expanded persistent storage.</p>
+</div>`;
+
+function showHome(push=true){
+  
+  $('#legalPage').classList.add('hidden');
+  $('#playerShell').classList.add('hidden');
+  $('#errorBox').classList.add('hidden');
+  $('#heroEmpty').classList.remove('hidden');
+}
+function showLegal(route,push=true){
+  const map={faq:FAQ,terms:TERMS,privacy:PRIVACY};
+  const key=route.replace(/^\/+/,'').split('/')[0];
+  if(!map[key])return showHome(push);
+  
+  $('#heroEmpty').classList.add('hidden');
+  $('#playerShell').classList.add('hidden');
+  $('#errorBox').classList.add('hidden');
+  $('#legalPage').innerHTML=`<a class="back-link" href="/">← Back to R6Intel</a>${map[key]}`;
+  $('#legalPage').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function bindRoutes(){
+  // Use normal href navigation. Express serves index.html for /faq, /terms and /privacy.
+  // This avoids click-handler/history collisions and makes links work with direct URLs.
+}
+function routeFromLocation(){
+  const path=(location.pathname.replace(/\/+$/,'') || '/');
+  if(['/faq','/terms','/privacy'].includes(path)){
+    showLegal(path,false);
+  } else if(path==='/'){
+    $('#legalPage').classList.add('hidden');
+  }
+}
+window.addEventListener('popstate',routeFromLocation);
+bindRoutes();
+routeFromLocation();
+$('#heroFocus')?.addEventListener('click',()=>{$('#searchInput').focus();window.scrollTo({top:0,behavior:'smooth'})});
+
+```
+
+`public/index.html`:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07060c">
+<title>R6Intel — Public Beta</title>
+<link rel="stylesheet" href="/styles.css?v=430">
+</head>
+<body>
+<div class="app">
+<main>
+    <header class="topbar">
+      <a class="top-brand" href="/">R6<span>INTEL</span><small>PUBLIC BETA</small></a>
+      <div class="search-wrap">
+        <div class="platform-select">
+          <button class="platform active" data-platform="uplay">UBI</button>
+          <button class="platform" data-platform="xbl">XBOX</button>
+          <button class="platform" data-platform="psn">PSN</button>
+        </div>
+        <div class="search">
+          <span class="search-icon">⌕</span>
+          <input id="searchInput" placeholder="Search Ubisoft username" autocomplete="off">
+          <button id="searchBtn">ANALYZE <span>→</span></button>
+        </div>
+      </div>
+      <div class="top-links"><a href="/faq">FAQ</a><a href="/terms">TERMS</a><a href="/privacy">PRIVACY</a></div>
+    </header>
+
+    <section id="heroEmpty" class="landing">
+      <div class="hero-copy">
+        <div class="eyebrow"><span></span> R6INTEL PLAYER ANALYSIS</div>
+        <h1>SEE BEYOND<br><strong>THE STATS.</strong></h1>
+        <p>Analyze Rainbow Six Siege accounts using current performance, historical anomalies, compound signals and confirmed sanction outcomes.</p>
+        <div class="hero-actions">
+          <button id="heroFocus">ANALYZE A PLAYER <span>→</span></button>
+          <a href="/faq">HOW SCORING WORKS</a>
+        </div>
+        <div class="beta-note"><b>PUBLIC BETA</b><span>Scoring models are being evaluated and may change during testing.</span></div>
+      </div>
+
+      <div class="intel-preview">
+        <div class="preview-head"><span>LIVE ANALYSIS MODEL</span><b>v4.1</b></div>
+        <div class="preview-score">
+          <div class="preview-ring"><div><strong>74%</strong><b>HIGHLY<br>SUSPICIOUS</b></div></div>
+          <div class="preview-signals">
+            <span>EXAMPLE PROFILE</span>
+            <div><b>K/D</b><strong>2.18</strong></div>
+            <div><b>WIN RATE</b><strong>87.4%</strong></div>
+            <div><b>KPM</b><strong>7.42</strong></div>
+            <small>Illustrative data — not a real player result.</small>
+          </div>
+        </div>
+        <div class="preview-bars">
+          <div><span>PERFORMANCE</span><i><b style="width:82%"></b></i><em>82</em></div>
+          <div><span>HISTORY</span><i><b style="width:58%"></b></i><em>58</em></div>
+          <div><span>CONFIDENCE</span><i><b style="width:75%"></b></i><em>HIGH</em></div>
+        </div>
+      </div>
+
+      <div class="feature-strip">
+        <article><span>01</span><b>PERFORMANCE</b><p>K/D, HSR, KPM and win-rate anomaly analysis.</p></article>
+        <article><span>02</span><b>HISTORY</b><p>Compare current output against a weighted player baseline.</p></article>
+        <article><span>03</span><b>COMPOUND SIGNALS</b><p>Detect when multiple unusual statistics occur together.</p></article>
+        <article><span>04</span><b>SANCTIONS</b><p>Keep confirmed outcomes separate and auditable.</p></article>
+      </div>
+    </section>
+
+    <section id="playerShell" class="hidden">
+      <section class="profile">
+        <div id="avatar" class="avatar">R6</div>
+        <div class="identity"><span class="profile-kicker">PLAYER PROFILE</span><h1 id="playerName">Player</h1><p id="playerMeta"></p></div>
+        <div class="spacer"></div>
+        <div class="profile-card rank-profile-card"><img id="currentRankIcon" class="rank-icon hidden" alt=""><div><span>Current rank</span><strong id="currentRank">—</strong><b id="currentRp">—</b></div></div>
+        <div class="profile-card"><span>Peak RP</span><strong id="peakRp">—</strong><b id="profileViews">0 views</b></div>
+      </section>
+      <div class="tabs">
+        <button class="active" data-tab="overview">Overview</button><button data-tab="stats">Stats</button>
+        <button data-tab="analysis">Analysis</button><button data-tab="history">History</button>
+      </div>
+      <section id="loading" class="loading hidden"><span class="loader"></span> Building player analysis…</section>
+      <section id="content"></section>
+    </section>
+
+    <section id="legalPage" class="legal-page hidden"></section>
+    <section id="errorBox" class="error hidden"></section>
+
+    <footer class="site-footer">
+      <span>© 2026 R6Intel · Public Beta</span>
+      <div><a href="/faq">FAQ</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a></div>
+      <small>Independent project. Not affiliated with Ubisoft.</small>
+    </footer>
+  </main>
+</div>
+<script src="/app.js?v=430"></script>
+</body>
+</html>
+```
+
+`public/styles.css`:
+
+```css
+
+:root{--bg:#07060c;--panel:#0d0c14;--panel2:#12101b;--line:#29243b;--text:#f7f4ff;--muted:#918aa2;--purple:#7c45ff;--purple2:#a66cff;--green:#40df87;--yellow:#ffd15c;--orange:#ff944d;--red:#ff555f}
+*{box-sizing:border-box}html,body{min-height:100%}body{margin:0;background:radial-gradient(circle at 72% -10%,rgba(124,69,255,.18),transparent 30%),linear-gradient(180deg,#08070e,#050508 65%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}button,input{font:inherit}a{color:inherit;text-decoration:none}.hidden{display:none!important}
+aside{position:fixed;inset:0 auto 0 0;width:220px;background:rgba(7,6,11,.97);border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;z-index:20}.brand{font-weight:950;font-style:italic;font-size:25px;letter-spacing:-1px;margin:0 8px 30px}.brand span{color:var(--purple2)}.brand small{font-style:normal;font-size:7px;letter-spacing:.12em;color:#706883;margin-left:6px}.nav-label{font-size:8px;letter-spacing:.17em;color:#554e64;margin:0 12px 9px;font-weight:800}
+nav{display:grid;gap:6px}nav button{border:0;background:transparent;color:#8e879d;cursor:pointer;padding:12px;text-align:left;border-radius:9px;display:flex;gap:10px;align-items:center}nav button i{font-style:normal;width:16px;color:#665d78}nav button.active{color:#fff;background:linear-gradient(90deg,rgba(124,69,255,.25),rgba(124,69,255,.03));box-shadow:inset 2px 0 var(--purple)}nav button.active i{color:#bda7ff}nav button.disabled{opacity:.48;cursor:default}nav em{margin-left:auto;font-size:7px;font-style:normal;border:1px solid #40384f;border-radius:4px;padding:2px 4px}.side-status{margin-top:auto;border-top:1px solid #1c1926;padding:15px 8px 9px;display:flex;gap:9px;align-items:center}.side-status>span{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 12px rgba(64,223,135,.5)}.side-status b,.side-status small{display:block}.side-status b{font-size:10px}.side-status small,.side-footer{font-size:8px;color:#625b70}.side-footer{padding:0 8px}
+main{margin-left:220px;min-height:100vh;padding:18px 26px 30px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;position:relative;z-index:10}.search-wrap{display:flex;align-items:stretch;flex:1;max-width:830px;height:48px}.platform-select{display:flex;background:#0a0910;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;padding:4px;gap:3px}.platform{border:0;background:transparent;color:#716a7f;border-radius:6px;padding:0 11px;font-size:9px;font-weight:900;letter-spacing:.05em;cursor:pointer}.platform.active{background:linear-gradient(135deg,#6434dc,#8750ff);color:#fff}.search{display:flex;flex:1;border:1px solid var(--line);border-radius:0 10px 10px 0;background:#090810;overflow:hidden}.search-icon{display:grid;place-items:center;padding-left:14px;color:#625a72}.search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#fff;padding:0 12px}.search button,#heroFocus{border:0;background:linear-gradient(135deg,#6634df,#8d53ff);color:#fff;padding:0 22px;font-size:10px;font-weight:900;letter-spacing:.08em;cursor:pointer}.search button span,#heroFocus span{font-size:16px;margin-left:7px}.beta-chip{font-size:8px;font-weight:900;letter-spacing:.12em;border:1px solid rgba(124,69,255,.38);background:rgba(124,69,255,.08);color:#cbb9ff;border-radius:999px;padding:7px 10px}
+.landing{max-width:1180px;margin:auto;padding:88px 20px 28px;display:grid;grid-template-columns:1.05fr .95fr;gap:55px;align-items:center}.eyebrow{font-size:9px;letter-spacing:.18em;color:#9d91b4;font-weight:900}.eyebrow span{display:inline-block;width:22px;height:1px;background:var(--purple2);vertical-align:middle;margin-right:8px}.hero-copy h1{font-size:64px;line-height:.92;letter-spacing:-.055em;margin:17px 0 22px}.hero-copy h1 strong{color:var(--purple2)}.hero-copy>p{font-size:15px;line-height:1.7;color:#aaa2b8;max-width:590px}.hero-actions{display:flex;gap:18px;align-items:center;margin-top:27px}.hero-actions button{height:44px;border-radius:8px}.hero-actions a{font-size:9px;font-weight:900;letter-spacing:.1em;color:#c4b8d7;border-bottom:1px solid #524961;padding-bottom:3px}.beta-note{margin-top:28px;border-left:2px solid var(--purple);padding:3px 0 3px 12px;display:grid;gap:3px}.beta-note b{font-size:9px;color:#c7b4ff;letter-spacing:.12em}.beta-note span{font-size:10px;color:#766f83}
+.intel-preview{border:1px solid #302942;background:linear-gradient(145deg,rgba(19,16,29,.96),rgba(9,8,14,.96));border-radius:14px;padding:17px;box-shadow:0 28px 80px rgba(0,0,0,.32);position:relative;overflow:hidden}.intel-preview:after{content:"";position:absolute;width:240px;height:240px;right:-90px;top:-90px;background:radial-gradient(circle,rgba(124,69,255,.22),transparent 68%)}.preview-head{display:flex;justify-content:space-between;border-bottom:1px solid #242031;padding-bottom:12px;font-size:8px;letter-spacing:.12em;color:#756d85}.preview-head b{color:#bba6ff}.preview-score{display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center;padding:20px 4px}.preview-ring{width:168px;height:168px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--red) 74%,#1a1724 0);position:relative}.preview-ring:after{content:"";position:absolute;inset:11px;background:#0b0a10;border-radius:50%}.preview-ring>div{z-index:1;text-align:center}.preview-ring strong{font-size:39px;display:block}.preview-ring b{font-size:8px;color:var(--red);letter-spacing:.08em}.preview-signals>span{font-size:7px;color:#71697e;letter-spacing:.12em}.preview-signals div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #201c2a;font-size:10px}.preview-signals div b{color:#81798e}.preview-signals small{display:block;color:#5e576a;font-size:7px;margin-top:8px}.preview-bars{display:grid;gap:8px;border-top:1px solid #242031;padding-top:13px}.preview-bars>div{display:grid;grid-template-columns:90px 1fr 38px;gap:8px;align-items:center;font-size:7px;color:#756d84}.preview-bars i{height:5px;background:#191522;border-radius:99px;overflow:hidden}.preview-bars i b{display:block;height:100%;background:linear-gradient(90deg,#6633dc,#a46cff)}.preview-bars em{font-style:normal;text-align:right;color:#bcb1cc}
+.feature-strip{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:25px}.feature-strip article{border-top:1px solid #29243a;padding:15px 8px}.feature-strip article span{font-size:8px;color:#6f657d}.feature-strip article b{display:block;font-size:10px;letter-spacing:.08em;margin:8px 0}.feature-strip article p{font-size:9px;line-height:1.5;color:#777080;margin:0}
+.profile{display:flex;align-items:center;gap:15px;margin:25px 0 12px;border:1px solid var(--line);background:linear-gradient(110deg,#100e18,#0a0910 70%,rgba(124,69,255,.1));border-radius:13px;padding:17px}.avatar{height:76px;width:76px;border-radius:16px;display:grid;place-items:center;border:2px solid var(--purple);overflow:hidden;background:#100c18;font-weight:900}.avatar img{width:100%;height:100%;object-fit:cover}.identity h1{margin:2px 0 3px;font-size:27px}.identity p{margin:0;color:var(--muted);font-size:11px}.profile-kicker{font-size:7px;letter-spacing:.13em;color:#746a85}.spacer{flex:1}.profile-card{min-width:145px;background:rgba(8,7,12,.72);border:1px solid var(--line);border-radius:9px;padding:10px 12px}.profile-card span{display:block;font-size:8px;text-transform:uppercase;color:var(--muted)}.profile-card strong{display:block;font-size:16px;margin-top:3px}.profile-card b{color:#cbb8ff;font-size:10px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:7px 0 14px;overflow:auto}.tabs button{border:0;background:transparent;color:#8d859a;padding:10px 12px;border-bottom:2px solid transparent;cursor:pointer}.tabs button.active{color:#fff;border-bottom-color:var(--purple)}
+.grid{display:grid;gap:11px}.metrics{grid-template-columns:repeat(6,1fr)}.two{grid-template-columns:1.2fr 1fr}.card{background:linear-gradient(180deg,#100f17,#0a0910);border:1px solid var(--line);border-radius:10px;padding:13px}.label,.section-title{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#8a8198}.section-title{font-weight:900;color:#d9d1e9;margin-bottom:10px}.value{font-size:22px;font-weight:900;margin-top:5px}.score-hero{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:center}.ring{width:200px;height:200px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--c) calc(var(--s)*1%),#171522 0)}.ring:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#0b0a11}.ring-content{z-index:1;text-align:center}.pct{font-size:45px;font-weight:950}.sev{font-size:11px;font-weight:950}.confidence{font-size:10px;color:var(--muted);margin-top:5px}.flag-list{display:grid;gap:8px}.flag{border:1px solid var(--line);border-radius:9px;background:#0b0a12;padding:10px}.flag strong{display:block}.flag span{font-size:10px;color:var(--muted)}.flag.warn strong{color:var(--yellow)}.flag.high strong{color:var(--orange)}.flag.extreme strong{color:var(--red)}details{margin-top:12px}summary{cursor:pointer;color:#d9cef5;font-weight:800}.contrib{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;margin:9px 0;font-size:11px}.track{height:8px;background:#171522;border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#6639df,#a36cff)}table{width:100%;border-collapse:collapse;font-size:11px}th,td{text-align:left;padding:8px 7px;border-bottom:1px solid rgba(41,38,58,.75)}th{color:var(--muted);font-weight:600}.callout{border:1px solid rgba(124,77,255,.3);background:rgba(124,77,255,.06);padding:11px;border-radius:9px;color:#ddd4f4}.cache-banner{border:1px solid rgba(255,209,92,.3);background:rgba(255,209,92,.06);padding:9px 11px;border-radius:9px;color:#e6d69b;font-size:10px}.score-disclaimer{color:var(--muted);font-size:9px;line-height:1.5}.loading,.error{padding:14px;border-radius:10px;margin-top:14px}.loading{border:1px solid var(--line);background:var(--panel)}.error{border:1px solid rgba(255,85,95,.35);background:rgba(255,85,95,.08);color:#ffb7bc}.loader{display:inline-block;width:10px;height:10px;border:2px solid #554b68;border-top-color:var(--purple2);border-radius:50%;animation:spin .8s linear infinite;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}
+.site-footer{margin-top:45px;border-top:1px solid #1f1b29;padding:18px 2px;display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;color:#5f586b;font-size:8px}.site-footer div{display:flex;gap:18px}.site-footer a{color:#958aa6}.site-footer small{text-align:right}.legal-page{max-width:900px;margin:50px auto 80px}.back-link{display:inline-block;color:#9e91b1;font-size:10px;margin-bottom:25px}.legal-hero{border-bottom:1px solid var(--line);padding-bottom:25px;margin-bottom:28px}.legal-hero span{font-size:8px;letter-spacing:.16em;color:#9b83d7}.legal-hero h1{font-size:42px;margin:9px 0 7px}.legal-hero p{color:#807789;margin:0}.legal-content{max-width:760px}.legal-content h2{font-size:15px;margin:27px 0 7px}.legal-content p{font-size:12px;color:#aaa2b7;line-height:1.75;margin:0}
+@media(max-width:1050px){.landing{grid-template-columns:1fr;padding-top:65px}.intel-preview{max-width:620px}.feature-strip{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){aside{display:none}main{margin-left:0;padding:calc(10px + env(safe-area-inset-top)) 13px 28px}.beta-chip{display:none}.search-wrap{height:auto;display:grid;gap:7px}.platform-select{border:1px solid var(--line);border-radius:9px;height:35px}.search{height:48px;border-radius:9px}.landing{padding:55px 3px 20px;gap:32px}.hero-copy h1{font-size:48px}.hero-actions{align-items:stretch;flex-direction:column}.hero-actions button{height:46px}.intel-preview{padding:13px}.preview-score{grid-template-columns:145px 1fr;gap:12px}.preview-ring{width:140px;height:140px}.feature-strip{grid-template-columns:1fr 1fr}.profile{display:grid;grid-template-columns:auto 1fr}.profile-card,.spacer{display:none}.metrics{grid-template-columns:repeat(2,1fr)}.two,.score-hero{grid-template-columns:1fr}.ring{margin:auto}.site-footer{grid-template-columns:1fr;text-align:center}.site-footer div{justify-content:center}.site-footer small{text-align:center}.legal-hero h1{font-size:34px}}
+
+
+/* ===== v4.3 dashboard redesign ===== */
+body{
+  background:
+    radial-gradient(circle at 50% -20%,rgba(124,69,255,.18),transparent 34%),
+    radial-gradient(circle at 90% 12%,rgba(78,42,150,.09),transparent 24%),
+    linear-gradient(180deg,#08070d 0%,#050508 72%);
+}
+aside{display:none!important}
+main{margin-left:0!important;max-width:1480px;margin-right:auto!important;margin-left:auto!important;padding:18px 34px 34px!important}
+
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:grid;grid-template-columns:auto minmax(420px,760px) auto;
+  align-items:center;gap:28px;
+  padding:10px 0 16px;
+  background:linear-gradient(180deg,rgba(7,6,12,.96),rgba(7,6,12,.82) 72%,transparent);
+  backdrop-filter:blur(18px);
+}
+.top-brand{display:flex;align-items:baseline;font-style:italic;font-weight:950;font-size:27px;letter-spacing:-1.3px;white-space:nowrap}
+.top-brand span{color:var(--purple2)}
+.top-brand small{font-style:normal;font-size:7px;letter-spacing:.14em;color:#776d89;margin-left:8px}
+.top-links{display:flex;gap:19px;justify-content:flex-end}
+.top-links a{font-size:8px;font-weight:900;letter-spacing:.11em;color:#898096;transition:.2s}
+.top-links a:hover{color:#d0c0ff}
+
+.search-wrap{max-width:none!important;width:100%;height:50px!important}
+.platform-select{border-color:#312a43!important;background:#0b0911!important}
+.search{background:#0a0910!important;border-color:#312a43!important}
+.search:focus-within{border-color:#6f43d8!important;box-shadow:0 0 0 3px rgba(124,69,255,.08)}
+.search input{font-size:12px}
+.search button{min-width:112px}
+
+.landing{padding-top:78px!important;min-height:calc(100vh - 160px)}
+.hero-copy h1{font-size:70px!important}
+.intel-preview{transform:perspective(1200px) rotateY(-2deg);transition:.3s}
+.intel-preview:hover{transform:perspective(1200px) rotateY(0deg) translateY(-2px)}
+
+.profile{
+  margin-top:28px!important;
+  padding:21px!important;
+  border-color:#322a45!important;
+  background:
+    linear-gradient(110deg,rgba(19,16,29,.98),rgba(10,9,15,.98) 65%,rgba(124,69,255,.10))!important;
+  box-shadow:0 18px 60px rgba(0,0,0,.18);
+}
+.avatar{width:84px!important;height:84px!important;border-radius:19px!important}
+.identity h1{font-size:31px!important;letter-spacing:-.025em}
+.profile-card{min-width:175px!important;padding:12px 14px!important}
+.rank-profile-card{display:flex;align-items:center;gap:12px}
+.rank-icon{width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 4px 11px rgba(0,0,0,.35))}
+.rank-profile-card>div{min-width:95px}
+
+.tabs{
+  margin-top:15px!important;
+  gap:20px!important;
+  padding:0 4px;
+}
+.tabs button{
+  padding:11px 3px!important;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.tabs button.active{color:#d8caff!important;border-bottom-color:#8c58ff!important}
+
+.section-title{
+  display:flex;align-items:center;gap:9px;
+  font-size:9px!important;letter-spacing:.14em!important;color:#b7acc8!important;margin-bottom:10px!important
+}
+.section-title:before{content:"";display:block;width:18px;height:1px;background:#7650c7}
+
+.card{
+  border-color:#282239!important;
+  background:linear-gradient(180deg,rgba(16,14,24,.98),rgba(9,8,14,.98))!important;
+  box-shadow:0 8px 30px rgba(0,0,0,.10);
+}
+.metrics .card{min-height:94px;display:flex;flex-direction:column;justify-content:center;padding:15px!important;position:relative;overflow:hidden}
+.metrics .card:after{content:"";position:absolute;inset:auto -30px -55px auto;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(124,69,255,.09),transparent 70%)}
+.metrics .label{font-size:8px!important;letter-spacing:.11em}
+.metrics .value{font-size:25px!important;letter-spacing:-.03em}
+
+.score-hero{
+  grid-template-columns:260px 1fr!important;
+  padding:18px!important;
+}
+.ring{width:218px!important;height:218px!important}
+.pct{font-size:50px!important}
+.flag{padding:12px!important}
+
+.history-card{padding:17px!important}
+.rank-history-table th{font-size:8px;text-transform:uppercase;letter-spacing:.10em}
+.rank-history-table td{height:60px}
+.rank-history-cell{display:flex;align-items:center;gap:11px;font-weight:800}
+.rank-history-icon{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 3px 9px rgba(0,0,0,.32))}
+.empty-state{padding:36px;text-align:center;color:#7f768c;font-size:11px}
+
+.site-footer{margin-top:55px!important}
+
+@media(max-width:1050px){
+  .topbar{grid-template-columns:1fr auto;gap:12px}
+  .top-brand{grid-column:1}.top-links{grid-column:2}
+  .search-wrap{grid-column:1/-1;grid-row:2}
+}
+@media(max-width:760px){
+  main{padding:calc(8px + env(safe-area-inset-top)) 13px 28px!important}
+  .topbar{display:flex;flex-wrap:wrap;gap:9px;padding-bottom:10px}
+  .top-brand{font-size:23px}.top-links{margin-left:auto;gap:11px}.top-links a{font-size:7px}
+  .search-wrap{order:3;width:100%;display:grid!important;height:auto!important}
+  .platform-select{height:36px}
+  .search{height:48px}
+  .hero-copy h1{font-size:49px!important}
+  .profile{grid-template-columns:auto 1fr!important}
+  .rank-profile-card,.profile-card{display:none!important}
+  .score-hero{grid-template-columns:1fr!important}
+  .rank-history-icon{width:31px;height:31px}
+}
+
+```
+
+`server.js`:
+
+```js
+const express=require('express');
+const fs=require('fs');
+const path=require('path');
+const crypto=require('crypto');
+const dotenv=require('dotenv');
+const ROOT=__dirname; dotenv.config({path:path.join(ROOT,'.env.local')}); dotenv.config();
+const app=express(); app.disable('x-powered-by'); app.set('trust proxy',1); app.use(express.json({limit:'256kb'}));
+app.use(express.static(path.join(ROOT,'public'),{
+  etag:true,
+  maxAge:'0',
+  setHeaders:(res,filePath)=>{
+    if(filePath.endsWith('index.html')||filePath.endsWith('app.js')) res.setHeader('Cache-Control','no-store');
+  }
+}));
+const BASE='https://api.r6data.com', DATA_FILE=path.join(ROOT,'data','runtime.json');
+const MODEL='v4.5-beta.1';
+function apiKey(){return String(process.env.R6DATA_API_KEY||'').trim()}
+function readDb(){try{const d=JSON.parse(fs.readFileSync(DATA_FILE,'utf8'));return{profiles:d.profiles||{},views:d.views||{}}}catch{return{profiles:{},views:{}}}}
+function writeDb(db){try{fs.mkdirSync(path.dirname(DATA_FILE),{recursive:true});fs.writeFileSync(DATA_FILE,JSON.stringify(db,null,2))}catch(e){console.error('Persistence:',e.message)}}
+
+const PLAYER_CACHE_TTL_MS=Number(process.env.PLAYER_CACHE_TTL_MS||600000);
+const R6_CONCURRENCY=Math.max(1,Number(process.env.R6_CONCURRENCY||1));
+const R6_MIN_INTERVAL_MS=Math.max(0,Number(process.env.R6_MIN_INTERVAL_MS||750));
+const endpointCache=new Map(),endpointInflight=new Map(),playerInflight=new Map();
+let r6Active=0;const r6Queue=[];
+function supabaseUrl(){return String(process.env.SUPABASE_URL||'').trim().replace(/\/+$/,'')}
+function supabaseKey(){return String(process.env.SUPABASE_SERVICE_ROLE_KEY||'').trim()}
+function supabaseConfigured(){return Boolean(supabaseUrl()&&supabaseKey())}
+async function sb(pathname,{method='GET',body,headers={},timeoutMs=4000}={}){
+  if(!supabaseConfigured())return null;
+  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),timeoutMs);
+  try{
+    const resp=await fetch(`${supabaseUrl()}/rest/v1/${pathname}`,{
+      method,
+      headers:{apikey:supabaseKey(),Authorization:`Bearer ${supabaseKey()}`,'Content-Type':'application/json',...headers},
+      body:body===undefined?undefined:JSON.stringify(body),
+      signal:ctl.signal
+    });
+    const text=await resp.text();let data=null;try{data=text?JSON.parse(text):null}catch{data=text}
+    if(!resp.ok)throw new Error(`Supabase ${resp.status}: ${data?.message||data?.error||text||'request failed'}`);
+    return data;
+  }catch(e){
+    if(e?.name==='AbortError')throw new Error('Supabase request timed out');
+    throw e;
+  }finally{clearTimeout(timer)}
+}
+async function loadSupabaseByUsername(platform,username){
+  if(!supabaseConfigured())return null;
+  try{const rows=await sb(`players?select=latest_response&platform=eq.${encodeURIComponent(platform)}&current_username=ilike.${encodeURIComponent(username)}&limit=1`,{timeoutMs:1500});return rows?.[0]?.latest_response||null}catch(e){console.error('Supabase lookup:',e.message);return null}
+}
+async function loadSupabaseByProfileId(profileId){
+  if(!supabaseConfigured())return null;
+  try{const rows=await sb(`players?select=latest_response&profile_id=eq.${encodeURIComponent(profileId)}&limit=1`);return rows?.[0]?.latest_response||null}catch(e){console.error('Supabase profile:',e.message);return null}
+}
+async function persistSupabase(rec,response,changed,snap){
+  if(!supabaseConfigured()||!response?.data?.profileId)return;
+  try{
+    const rows=await sb('players?on_conflict=profile_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:[{profile_id:response.data.profileId,platform:response.data.platformType,current_username:response.data.username,first_seen:rec.firstSeen,last_seen:rec.lastSeen,ever_sanctioned:Boolean(rec.everSanctioned),first_sanction_seen:rec.firstSanctionSeen||null,latest_response:response,last_refreshed_at:response.fetchedAt}]});
+    const playerId=rows?.[0]?.id;if(!playerId)return;
+    for(const alias of (rec.aliases||[]).slice(0,20)){
+      const found=await sb(`aliases?select=id&player_id=eq.${playerId}&name=eq.${encodeURIComponent(alias.name)}&limit=1`);
+      if(found?.[0]?.id)await sb(`aliases?id=eq.${found[0].id}`,{method:'PATCH',body:{last_seen:alias.lastSeen}});
+      else await sb('aliases',{method:'POST',body:[{player_id:playerId,name:alias.name,first_seen:alias.firstSeen,last_seen:alias.lastSeen}]});
+    }
+    if(changed&&snap)await sb('snapshots',{method:'POST',body:[{
+      player_id:playerId,scanned_at:snap.scannedAt,season_id:snap.seasonId,
+      kd:snap.kd,hs:snap.hs,wr:snap.wr,kpm:snap.kpm,matches:snap.matches,wins:snap.wins,losses:snap.losses,kills:snap.kills,deaths:snap.deaths,
+      rank:snap.rank,rp:snap.rp,peak_rp:snap.peakRp,
+      overall_kd:snap.overallKd,overall_hs:snap.overallHs,overall_kpr:snap.overallKpr,
+      overall_kills:snap.overallKills,overall_deaths:snap.overallDeaths,overall_headshots:snap.overallHeadshots,overall_rounds:snap.overallRounds,
+      banned:snap.banned,statistical_score:snap.statisticalScore,performance_score:snap.performanceScore,historical_score:snap.historicalScore,
+      confidence:snap.confidence,final_score:snap.finalScore,model_version:snap.modelVersion
+    }]});
+  }catch(e){console.error('Supabase persistence:',e.message)}
+}
+function endpointTtl(type){return({accountInfo:86400000,stats:300000,seasonalStats:600000,isBanned:600000,operatorStats:1800000})[type]||300000}
+let r6LastStart=0;
+function queueR6(task){return new Promise((resolve,reject)=>{r6Queue.push({task,resolve,reject});pumpR6()})}
+function pumpR6(){
+  while(r6Active<R6_CONCURRENCY&&r6Queue.length){
+    const x=r6Queue.shift();r6Active++;
+    const wait=Math.max(0,R6_MIN_INTERVAL_MS-(Date.now()-r6LastStart));
+    setTimeout(()=>{
+      r6LastStart=Date.now();
+      Promise.resolve().then(x.task).then(x.resolve,x.reject).finally(()=>{r6Active--;pumpR6()});
+    },wait);
+  }
+}
+function endpointKey(params){return Object.entries(params).filter(([,v])=>v!==undefined&&v!==null&&v!=='').sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>`${k}=${String(v).toLowerCase()}`).join('&')}
+function retryAfterMs(resp){const raw=resp.headers.get('retry-after');if(!raw)return null;const n=Number(raw);if(Number.isFinite(n))return n*1000;const d=Date.parse(raw);return Number.isFinite(d)?Math.max(0,d-Date.now()):null}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function r6Http(params){
+  if(!apiKey())throw Object.assign(new Error('R6Data API key is not configured.'),{status:503});
+  const url=new URL('/api/stats',BASE);
+  Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,String(v))});
+  const label=`${params.type}:${params.platformType||''}:${params.nameOnPlatform||''}`;
+  const started=Date.now();
+  console.log(`[r6] start ${label}`);
+  return queueR6(async()=>{
+    const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),8000);
+    try{
+      const resp=await fetch(url,{headers:{'api-key':apiKey(),accept:'application/json'},signal:ctl.signal});
+      const text=await resp.text();let body;try{body=text?JSON.parse(text):null}catch{body=text}
+      console.log(`[r6] ${resp.status} ${label} ${Date.now()-started}ms`);
+      if(resp.ok)return body;
+      const e=Object.assign(new Error(body?.message||body?.error||`R6Data ${resp.status}`),{status:resp.status,retryAfter:retryAfterMs(resp)});
+      throw e;
+    }catch(e){
+      if(e?.name==='AbortError'){
+        console.log(`[r6] timeout ${label} ${Date.now()-started}ms`);
+        throw Object.assign(new Error(`R6Data timeout for ${params.type}`),{status:504});
+      }
+      throw e;
+    }finally{clearTimeout(timer)}
+  });
+}
+
+async function r6Network(params){
+  let last;
+  // At most two actual HTTP attempts. This prevents a single lookup from hanging for a minute.
+  for(let attempt=0;attempt<2;attempt++){
+    try{return await r6Http(params)}
+    catch(e){
+      last=e;
+      if([400,401,403,404].includes(e.status))throw e;
+      if(attempt===0 && (e.status===429 || e.status>=500 || e.status===504)){
+        const wait=e.status===429?(e.retryAfter??2500):1000;
+        await sleep(Math.min(wait,8000)+Math.floor(Math.random()*250));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw last;
+}
+async function r6(params,{force=false}={}){
+  const key=endpointKey(params),now=Date.now(),cached=endpointCache.get(key);
+  if(!force&&cached&&now-cached.at<endpointTtl(params.type)){console.log(`[r6] endpoint cache hit ${params.type}:${params.nameOnPlatform||''}`);return cached.data}
+  if(!force&&endpointInflight.has(key)){console.log(`[r6] shared inflight ${params.type}:${params.nameOnPlatform||''}`);return endpointInflight.get(key)}
+  const p=r6Network(params).then(data=>{endpointCache.set(key,{at:Date.now(),data});return data}).finally(()=>endpointInflight.delete(key));
+  endpointInflight.set(key,p);return p;
+}
+async function settled(fn){try{return{ok:true,data:await fn()}}catch(e){console.error('R6Data',e.status||'',e.message);return{ok:false,error:e.message,status:e.status||null}}}
+function rankedProfile(data){return data?.platform_families_full_profiles?.[0]?.board_ids_full_profiles?.find(x=>x.board_id==='ranked')?.full_profiles?.[0]??{}}
+function rankNameFromId(id){
+  const ranks={
+    0:'Unranked',
+    1:'Copper 5',2:'Copper 4',3:'Copper 3',4:'Copper 2',5:'Copper 1',
+    6:'Bronze 5',7:'Bronze 4',8:'Bronze 3',9:'Bronze 2',10:'Bronze 1',
+    11:'Silver 5',12:'Silver 4',13:'Silver 3',14:'Silver 2',15:'Silver 1',
+    16:'Gold 5',17:'Gold 4',18:'Gold 3',19:'Gold 2',20:'Gold 1',
+    21:'Platinum 5',22:'Platinum 4',23:'Platinum 3',24:'Platinum 2',25:'Platinum 1',
+    26:'Emerald 5',27:'Emerald 4',28:'Emerald 3',29:'Emerald 2',30:'Emerald 1',
+    31:'Diamond 5',32:'Diamond 4',33:'Diamond 3',34:'Diamond 2',35:'Diamond 1',
+    36:'Champion'
+  };
+  return ranks[id]||'Unknown';
+}
+function rankImageFromName(name){
+  if(!name||name==='Unknown'||name==='Unranked')return null;
+  const slug=String(name).trim().toLowerCase().replace(/\s+/g,'-');
+  return `https://r6data.com/assets/img/r6_ranks_img/${slug}.webp`;
+}
+function aggregateOperatorStats(data){
+  const ops=Array.isArray(data?.operators)?data.operators:[];
+  if(!ops.length)return null;
+  const sum=f=>ops.reduce((a,o)=>a+(Number.isFinite(o?.[f])?o[f]:0),0);
+  const kills=sum('kills'),deaths=sum('deaths'),headshots=sum('headshots'),rounds=sum('roundsPlayed');
+  const roundWins=sum('wins'),roundLosses=sum('losses'),assists=sum('assists'),firstBloods=sum('firstBloods'),firstDeaths=sum('firstDeaths'),teamKills=sum('teamKills'),timePlayedMs=sum('timePlayedMs');
+  return {
+    seasonYear:data?.seasonYear??'all',
+    sessionType:data?.sessionType??'ranked',
+    operatorsCount:ops.length,
+    kills,deaths,headshots,rounds,roundWins,roundLosses,assists,firstBloods,firstDeaths,teamKills,timePlayedMs,
+    kd:deaths===0?(kills||0):kills/deaths,
+    hs:kills>0?headshots/kills*100:null,
+    kpr:rounds>0?kills/rounds:null,
+    roundWinRate:rounds>0?roundWins/rounds*100:null,
+    assistsPerRound:rounds>0?assists/rounds:null,
+    firstBloodRate:rounds>0?firstBloods/rounds*100:null,
+    firstDeathRate:rounds>0?firstDeaths/rounds*100:null
+  };
+}
+function normalize(username,platformType,accountR,statsR,seasonalR,banR,operatorR){const account=accountR?.ok?accountR.data:{},stats=statsR?.ok?statsR.data:{},seasonal=seasonalR?.ok?seasonalR.data:{},ban=banR?.ok?banR.data:{},operatorData=operatorR?.ok?operatorR.data:{};const fp=rankedProfile(stats),p=fp.profile||{},ss=fp.season_statistics||{},mo=ss.match_outcomes||{};const kills=Number.isFinite(ss.kills)?ss.kills:(Number.isFinite(p.kills)?p.kills:null),deaths=Number.isFinite(ss.deaths)?ss.deaths:(Number.isFinite(p.deaths)?p.deaths:null),wins=Number.isFinite(mo.wins)?mo.wins:(Number.isFinite(p.wins)?p.wins:null),losses=Number.isFinite(mo.losses)?mo.losses:(Number.isFinite(p.losses)?p.losses:null),abandons=Number.isFinite(mo.abandons)?mo.abandons:(Number.isFinite(p.abandon)?p.abandon:0),matches=wins!=null&&losses!=null?wins+losses+(abandons||0):null,kd=kills!=null&&deaths!=null?(deaths===0?kills:kills/deaths):null,wr=wins!=null&&matches?wins/matches*100:null,kpm=kills!=null&&matches?kills/matches:null;const history=seasonal?.data?.history?.data??[],latest=history?.[0]?.[1]??null,
+rank=latest?.metadata?.rank||rankNameFromId(p.rank),
+rankImageUrl=latest?.metadata?.imageUrl||rankImageFromName(latest?.metadata?.rank||rankNameFromId(p.rank)),
+rp=Number.isFinite(p.rank_points)?p.rank_points:(Number.isFinite(latest?.value)?latest.value:null),
+peakRp=Number.isFinite(p.max_rank_points)?p.max_rank_points:null;const ad=account?.data??account??{},prof=ad?.profiles?.find(x=>x.platformType===platformType)||ad?.profiles?.[0],user=prof?.nameOnPlatform||username,level=Number.isFinite(ad.level)?ad.level:(Number.isFinite(ad?.profile?.level)?ad.profile.level:null),avatar=ad.profilePicture||null,profileId=stats?.platform_families_full_profiles?.[0]?.profile_id||prof?.profileId||prof?.id||null;const overallRanked=aggregateOperatorStats(operatorData);
+const seasonHeadshots=Number.isFinite(ss.headshots)?ss.headshots:(Number.isFinite(p.headshots)?p.headshots:null);
+const hs=seasonHeadshots!=null&&kills>0?seasonHeadshots/kills*100:null;
+return{username:user,platformType,profileId,level,avatar,rank,rankImageUrl,rp,peakRp,seasonId:fp?.season_id??null,kills,deaths,wins,losses,abandons,matches,kd,wr,kpm,hs,seasonHeadshots,overallRanked,banned:typeof ban?.isBanned==='boolean'?ban.isBanned:null,banAlerts:Array.isArray(ban?.banAlerts)?ban.banAlerts:[],rankHistory:history}}
+function confidence(m){if(!Number.isFinite(m)||m<=0)return'Insufficient';if(m<=9)return'Low';if(m<=24)return'Medium';if(m<=49)return'High';return'Very High'}
+function lvl(v,c){if(!Number.isFinite(v))return null;return v<c[0]?0:v<c[1]?25:v<c[2]?50:v<c[3]?75:100}
+function sampleFactor(matches){
+  if(!Number.isFinite(matches)||matches<=0)return 0;
+  if(matches<5)return .25;
+  if(matches<10)return .45;
+  if(matches<20)return .70;
+  if(matches<30)return .90;
+  return 1;
+}
+function performance(n){
+  const parts=[];
+  const add=(name,v,c,w,source='season')=>{const score=lvl(v,c);if(score!=null)parts.push({name,score,weight:w,value:v,source})};
+  add('K/D',n.kd,[1.70,1.90,2.10,2.40],.40,'season');
+  const hsr=Number.isFinite(n.hs)?n.hs:n.overallRanked?.hs;
+  add(Number.isFinite(n.hs)?'HSR':'Overall HSR',hsr,[60,70,80,90],.30,Number.isFinite(n.hs)?'season':'all-ranked');
+  add('KPM',n.kpm,[6,7,8,9],.20,'season');
+  add('Win Rate',n.wr,[60,70,80,90],.10,'season');
+  const tw=parts.reduce((a,x)=>a+x.weight,0);
+  if(!tw)return{score:null,rawScore:null,baseScore:null,parts:[],compoundBonus:0,sampleFactor:0};
+  const baseScore=Math.round(parts.reduce((a,x)=>a+x.score*(x.weight/tw),0));
+  let compoundBonus=0;
+  if(Number.isFinite(n.matches)&&n.matches>=10){
+    const mild=parts.filter(x=>x.score>=25).length,moderate=parts.filter(x=>x.score>=50).length,high=parts.filter(x=>x.score>=75).length,extreme=parts.filter(x=>x.score>=100).length;
+    if(extreme>=3)compoundBonus=35;else if(extreme>=2)compoundBonus=30;else if(high>=3)compoundBonus=25;else if(high>=2)compoundBonus=20;else if(moderate>=3)compoundBonus=15;else if(moderate>=2)compoundBonus=10;else if(mild>=2)compoundBonus=5
+  }
+  const rawScore=Math.min(100,baseScore+compoundBonus),sf=sampleFactor(n.matches);
+  return{score:Math.round(rawScore*sf),rawScore,baseScore,parts,compoundBonus,sampleFactor:sf};
+}
+function careerBaselineDisc(n){
+  const o=n.overallRanked;
+  if(!o)return{score:null,parts:[]};
+  const parts=[];
+  if(Number.isFinite(n.kd)&&Number.isFinite(o.kd)){
+    const delta=n.kd-o.kd;
+    parts.push({name:'K/D vs all-ranked baseline',score:lvl(delta,[.20,.40,.60,.80])??0,weight:.70,baseline:o.kd,current:n.kd,delta});
+  }
+  if(Number.isFinite(o.hs)){
+    parts.push({name:'All-ranked HSR context',score:lvl(o.hs,[60,70,80,90])??0,weight:.30,baseline:null,current:o.hs,delta:null,contextOnly:true});
+  }
+  const tw=parts.reduce((a,x)=>a+x.weight,0);
+  return {score:tw?Math.round(parts.reduce((a,x)=>a+x.score*(x.weight/tw),0)):null,parts};
+}
+function snapshotDisc(current,old){if(!Array.isArray(old)||old.length<1)return{score:null,parts:[],rpVelocity:null};const prior=old.slice(0,5),ws=[1,.8,.6,.4,.2];const base=f=>{let n=0,d=0;prior.forEach((x,i)=>{if(Number.isFinite(x[f])){const w=ws[i]??.2;n+=x[f]*w;d+=w}});return d?n/d:null};const parts=[];const add=(name,f,c,w)=>{const b=base(f);if(Number.isFinite(current[f])&&Number.isFinite(b))parts.push({name,score:lvl(current[f]-b,c)??0,weight:w,baseline:b,current:current[f]})};add('K/D jump','kd',[.20,.40,.60,.80],.40);if(Number.isFinite(current.hs))add('HSR jump','hs',[5,10,15,20],.30);else add('Overall HSR jump','overallHs',[5,10,15,20],.30);add('KPM jump','kpm',[.5,1,1.5,2],.20);add('Win-rate jump','wr',[10,15,20,25],.10);const tw=parts.reduce((a,x)=>a+x.weight,0);let rpVelocity=null;if(Number.isFinite(current.rp)&&Number.isFinite(prior[0]?.rp)){const days=Math.max(.04,(Date.now()-new Date(prior[0].scannedAt).getTime())/86400000);rpVelocity=(current.rp-prior[0].rp)/days}return{score:tw?Math.round(parts.reduce((a,x)=>a+x.score*(x.weight/tw),0)):null,parts,rpVelocity}}
+function combine(perf,disc,n){
+  const cats=[];
+  if(perf?.score!=null)cats.push({name:'Performance',score:perf.score,weight:.50});
+  if(disc?.score!=null)cats.push({name:'Historical Anomalies',score:disc.score,weight:.50});
+  const tw=cats.reduce((a,x)=>a+x.weight,0);
+  let statisticalScore=tw?Math.round(cats.reduce((a,x)=>a+x.score*(x.weight/tw),0)):null;
+  const perfectStatBonus=Number.isFinite(n.matches)&&n.matches>=10&&[n.wr,n.hs].some(v=>Number.isFinite(v)&&Math.abs(v-100)<1e-9)?25:0;
+  if(statisticalScore!=null)statisticalScore=Math.min(100,statisticalScore+perfectStatBonus);
+  const sanctionModifier=n.banned===true?50:0;
+  // v4.5: suspicionScore is statistical only. Sanctions are displayed separately and never inflate the model score.
+  const score=statisticalScore;
+  return{
+    score,statisticalScore,perfectStatBonus,sanctionModifier,
+    sanctionStatus:n.banned===true?'confirmed':(n.banned===false?'none':'unknown'),
+    categories:tw?cats.map(x=>({...x,effectiveWeight:x.weight/tw,contribution:x.score*(x.weight/tw)})):[]
+  };
+}
+function profileKey(n){return `${n.platformType}:${(n.profileId||n.username).toLowerCase()}`}
+function publicProfile(rec){return rec?.latestResponse||null}
+app.get('/api/status',(req,res)=>res.json({ok:true,configured:Boolean(apiKey()),provider:'R6Data REST',model:MODEL,storage:supabaseConfigured()?'Supabase + local fallback':'Local JSON fallback',cache:{playerTtlMs:PLAYER_CACHE_TTL_MS,r6Concurrency:R6_CONCURRENCY,r6MinIntervalMs:R6_MIN_INTERVAL_MS,endpointEntries:endpointCache.size,inflight:endpointInflight.size}}));
+function localCached(db,platformType,username){return Object.values(db.profiles).find(x=>x.platformType===platformType&&(x.currentUsername||'').toLowerCase()===username.toLowerCase())?.latestResponse||null}
+function freshEnough(r){const age=Date.now()-new Date(r?.fetchedAt||0).getTime();return Number.isFinite(age)&&age>=0&&age<PLAYER_CACHE_TTL_MS}
+function deadline(promise,ms,label='operation'){return Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Object.assign(new Error(`${label} timed out`),{status:504})),ms))])}
+async function buildPlayer(username,platformType,{force=false}={}){
+  const reqKey=`${platformType}:${username.toLowerCase()}`;if(!force&&playerInflight.has(reqKey))return playerInflight.get(reqKey);
+  const job=(async()=>{
+    const started=Date.now();
+    console.log(`[player] lookup start ${platformType}:${username}`);
+    const db=readDb();let cached=localCached(db,platformType,username);
+    if(cached)console.log(`[player] local cache hit ${platformType}:${username}`);
+    if(!cached){
+      cached=await loadSupabaseByUsername(platformType,username);
+      if(cached)console.log(`[player] Supabase cache hit ${platformType}:${username}`);
+    }
+    if(!force&&cached&&freshEnough(cached)){console.log(`[player] served cache ${platformType}:${username} in ${Date.now()-started}ms`);return {...cached,cached:true,cacheAgeMs:Date.now()-new Date(cached.fetchedAt).getTime(),cacheReason:'fresh-player-cache'}};
+    const common={nameOnPlatform:username,platformType},platformFamily=platformType==='uplay'?'pc':'console';
+    const [accountR,statsR,seasonalR,banR,operatorR]=await deadline(Promise.all([
+      settled(()=>r6({type:'accountInfo',...common},{force})),
+      settled(()=>r6({type:'stats',...common,platform_families:platformFamily},{force})),
+      settled(()=>r6({type:'seasonalStats',...common},{force})),
+      settled(()=>r6({type:'isBanned',...common},{force})),
+      settled(()=>r6({type:'operatorStats',...common,modes:'ranked'},{force}))
+    ]),30000,'R6Data player lookup');
+    if(!accountR.ok&&!statsR.ok&&!seasonalR.ok){if(cached)return {...cached,cached:true,stale:true,cacheAgeMs:Date.now()-new Date(cached.fetchedAt).getTime(),cacheReason:'provider-unavailable'};throw Object.assign(new Error('Player data is temporarily unavailable and no cached profile exists.'),{status:502})}
+    const n=normalize(username,platformType,accountR,statsR,seasonalR,banR,operatorR),key=profileKey(n),rec=db.profiles[key]||{snapshots:[],aliases:[],firstSeen:new Date().toISOString(),everSanctioned:false},now=new Date().toISOString();
+    if(!rec.aliases.some(a=>a.name.toLowerCase()===n.username.toLowerCase()))rec.aliases.unshift({name:n.username,firstSeen:now,lastSeen:now});else rec.aliases.find(a=>a.name.toLowerCase()===n.username.toLowerCase()).lastSeen=now;
+    rec.currentUsername=n.username;rec.platformType=platformType;rec.profileId=n.profileId;rec.lastSeen=now;if(n.banned===true){rec.everSanctioned=true;rec.firstSanctionSeen=rec.firstSanctionSeen||now}
+    const old=rec.snapshots||[],perf=performance(n),snapshotHistory=snapshotDisc(n,old),careerHistory=careerBaselineDisc(n),historyParts=[...(snapshotHistory.parts||[]),...(careerHistory.parts||[])],historyScores=[snapshotHistory.score,careerHistory.score].filter(Number.isFinite),disc={score:historyScores.length?Math.round(historyScores.reduce((a,x)=>a+x,0)/historyScores.length):null,parts:historyParts,rpVelocity:snapshotHistory.rpVelocity,careerBaselineScore:careerHistory.score,snapshotScore:snapshotHistory.score},overall=combine(perf,disc,n),prev=old[0]||null,snap={scannedAt:now,seasonId:n.seasonId,kd:n.kd,hs:n.hs,wr:n.wr,kpm:n.kpm,matches:n.matches,wins:n.wins,losses:n.losses,kills:n.kills,deaths:n.deaths,rank:n.rank,rp:n.rp,peakRp:n.peakRp,overallKd:n.overallRanked?.kd??null,overallHs:n.overallRanked?.hs??null,overallKpr:n.overallRanked?.kpr??null,overallKills:n.overallRanked?.kills??null,overallDeaths:n.overallRanked?.deaths??null,overallHeadshots:n.overallRanked?.headshots??null,overallRounds:n.overallRanked?.rounds??null,banned:n.banned,statisticalScore:overall.statisticalScore,performanceScore:perf.score,historicalScore:disc.score,confidence:confidence(n.matches),finalScore:overall.score,modelVersion:MODEL};
+    const changed=!prev||['seasonId','kd','hs','wr','kpm','matches','wins','losses','kills','deaths','rank','rp','peakRp','overallKd','overallHs','overallKpr','overallKills','overallDeaths','overallHeadshots','overallRounds','banned'].some(k=>prev[k]!==snap[k]);if(changed)rec.snapshots=[snap,...old];
+    const response={username:n.username,fetchedAt:now,cached:false,partial:!(accountR.ok&&statsR.ok&&seasonalR.ok&&banR.ok&&operatorR.ok),sources:{account:accountR.ok,stats:statsR.ok,seasonal:seasonalR.ok,ban:banR.ok,operatorStats:operatorR.ok},data:{...n,everSanctioned:rec.everSanctioned,firstSanctionSeen:rec.firstSanctionSeen,aliases:rec.aliases},analysis:{suspicionScore:overall.score,statisticalScore:overall.statisticalScore,perfectStatBonus:overall.perfectStatBonus,sanctionModifier:overall.sanctionModifier,sanctionStatus:overall.sanctionStatus,performanceScore:perf.score,performanceRawScore:perf.rawScore,performanceBaseScore:perf.baseScore,performanceSampleFactor:perf.sampleFactor,performanceParts:perf.parts,compoundBonus:perf.compoundBonus,discontinuityScore:disc.score,discontinuityParts:disc.parts,careerBaselineScore:disc.careerBaselineScore,snapshotHistoryScore:disc.snapshotScore,rpVelocity:disc.rpVelocity,confidence:confidence(n.matches),categories:overall.categories,modelVersion:MODEL},sinceLastScan:prev?{kd:Number.isFinite(n.kd)&&Number.isFinite(prev.kd)?n.kd-prev.kd:null,hs:Number.isFinite(n.hs)&&Number.isFinite(prev.hs)?n.hs-prev.hs:null,wr:Number.isFinite(n.wr)&&Number.isFinite(prev.wr)?n.wr-prev.wr:null,kpm:Number.isFinite(n.kpm)&&Number.isFinite(prev.kpm)?n.kpm-prev.kpm:null,rp:Number.isFinite(n.rp)&&Number.isFinite(prev.rp)?n.rp-prev.rp:null,matches:Number.isFinite(n.matches)&&Number.isFinite(prev.matches)?n.matches-prev.matches:null}:null};
+    rec.latestResponse=response;db.profiles[key]=rec;writeDb(db);persistSupabase(rec,response,changed,snap).catch(e=>console.error('Supabase async persistence:',e.message));console.log(`[player] live lookup complete ${platformType}:${username} in ${Date.now()-started}ms`);return response;
+  })();
+  playerInflight.set(reqKey,job);try{return await job}finally{playerInflight.delete(reqKey)}
+}
+app.get('/api/player/:username',async(req,res)=>{const username=String(req.params.username||'').trim(),platformType=String(req.query.platform||'uplay').toLowerCase();if(!username)return res.status(400).json({error:'Missing username.'});if(!['uplay','xbl','psn'].includes(platformType))return res.status(400).json({error:'Unsupported platform.'});try{res.json(await buildPlayer(username,platformType,{force:String(req.query.refresh||'')==='1'}))}catch(e){console.error(`[player] FAILED ${platformType}:${username}`,e.status||'',e.message);res.status(e.status||500).json({error:e.message||'Player lookup failed.'})}});
+app.get('/api/profile/:id',async(req,res)=>{const id=String(req.params.id||'').toLowerCase(),db=readDb(),rec=Object.values(db.profiles).find(x=>(x.profileId||'').toLowerCase()===id);if(rec?.latestResponse)return res.json({...rec.latestResponse,cached:true});const durable=await loadSupabaseByProfileId(id);if(durable)return res.json({...durable,cached:true,cacheReason:'supabase'});res.status(404).json({error:'Profile not found.'})});
+app.post('/api/view/:key',(req,res)=>{const player=String(req.params.key||'').toLowerCase(),db=readDb(),salt=String(process.env.VIEW_HASH_SALT||'r6intel-beta'),ip=String(req.ip||req.headers['x-forwarded-for']||'unknown'),day=Math.floor(Date.now()/86400000),token=crypto.createHash('sha256').update(`${salt}|${player}|${ip}|${day}`).digest('hex');db.views[player]=db.views[player]||{count:0,tokens:{}};const v=db.views[player];for(const [k,t] of Object.entries(v.tokens))if(Date.now()-t>172800000)delete v.tokens[k];if(!v.tokens[token]){v.tokens[token]=Date.now();v.count++}writeDb(db);res.json({views:v.count})});
+app.get('*',(req,res)=>res.sendFile(path.join(ROOT,'public','index.html')));const PORT=Number(process.env.PORT||3000);
+app.listen(PORT,'0.0.0.0',()=>console.log(`R6Intel ${MODEL} running on port ${PORT}`));
+
+```
