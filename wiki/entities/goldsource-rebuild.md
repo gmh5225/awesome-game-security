@@ -1,0 +1,23 @@
+---
+title: GoldSourceRebuild
+kind: entity
+topics: [game-engine, reverse-engineering]
+sources:
+  - wiki/sources/descriptions/gmh5225__GoldSourceRebuild.md
+updated: 2026-08-12
+confidence: medium
+---
+
+# GoldSourceRebuild
+
+Rebuilt implementation of Valve's **GoldSource engine** (Half-Life 1 engine) by gmh5225. Provides decompiled and reconstructed source for GoldSource rendering, networking, and game systems aimed at modding and research—not a cheat or anti-cheat artifact. (source: wiki/sources/descriptions/gmh5225__GoldSourceRebuild.md)
+
+Complements other GoldSrc study surfaces such as [[regs]] (reverse-engineered engine-component reimplementation), [[regamedll-cs]] (CS1.6 server `mp.dll`), [[cs16-client]], and maintained Source 1 references such as [[source-engine]] and [[source-sdk-orangebox]].
+
+## Links
+
+- Repo: https://github.com/gmh5225/GoldSourceRebuild (README tag: [GoldSource engine rebuild])
+
+## Related
+
+[[regs]] · [[regamedll-cs]] · [[source-engine]] · [[source-sdk-orangebox]] · [[source-engine-2007]] · [[cs16-client]] · [[hl-mods]] · [[xash-rt]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[research-rigor]]

@@ -3799,3 +3799,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-12** — ingest `description:gmh5225/HWID-Permanent-HWID-Spoofer`: entity [[hwid-permanent-hwid-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
 
 - **2026-08-12** — ingest `description:gmh5225/HWID-EclipsedSpoofer-EAC-BE`: entity [[hwid-eclipsed-spoofer-eac-be]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
+
+- **2026-08-12** — ingest `description:gmh5225/GoldSourceRebuild`: entity [[goldsource-rebuild]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[regs]].
