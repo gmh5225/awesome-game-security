@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/KExecDD`: entity [[kexecdd]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-link from [[kexecddplus]].
+
 - **2026-08-12** — ingest `description:gmh5225/KasperskyHook`: entity [[kaspersky-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]].
 
 - **2026-08-12** — ingest `description:gmh5225/Kernel-Cactus`: entity [[kernel-cactus]]; cited on [[byovd]] and [[overviews/windows-kernel]].

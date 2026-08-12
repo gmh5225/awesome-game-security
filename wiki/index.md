@@ -772,6 +772,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KernelSU-4.4](entities/kernelsu-4.4.md) — KernelSU backport for Linux kernel 4.4 (su / SELinux / APK sig verify; Google GCC 4.9; cheat / Android root)
 - [KernelSU-Pixel4XL](entities/kernelsu-pixel4xl.md) — Pixel 4 XL (coral) msm-floral kernel + KernelSU (su / SELinux / syscall hook; cheat / Android Kernel Source)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
+- [KExecDD](entities/kexecdd.md) — KSecDD.sys IOCTL PoC (LSASS inject; arbitrary kernel exec; DSE via ci.dll!g_CiOptions; gmh5225)
 - [KexecDDPlus](entities/kexecddplus.md) — LSASS-context KSecDD.sys IOCTL kernel execution (enhanced KExecDD; DSE bypass + arbitrary KM R/W; gmh5225)
 - [kfd-explorer](entities/kfd-explorer.md) — iOS kernel memory explorer (Python/Swift; kernel memory analysis; cheat / iOS memory explorer)
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
