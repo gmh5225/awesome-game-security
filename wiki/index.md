@@ -627,6 +627,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
 - [Hook KdTrap](entities/hook-kdtrap.md) — KdTrap global exception-handler hook via `HalpStallCounter` hijack (null-deref / reserved CR3-bit fault intercept; gmh5225; Some Tricks Ring0)
 - [Hook HvlSwitchVirtualAddressSpace](entities/hook-hvl-switch-virtual-address-space.md) — `HvlSwitchVirtualAddressSpace` hook; CR3 transition manipulation hides pages from AC process memory scans during address-space switches (gmh5225; HvcallCodeVa)
+- [HP Hardware Diagnostics PoC](entities/hp-hardware-diagnostics-poc.md) — HP `etdsupp.sys` diagnostics driver IOCTL LPE (OEM BYOVD / privilege escalation; gmh5225)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)

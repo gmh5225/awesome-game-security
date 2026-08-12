@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/HPHardwareDiagnostics-PoC`: entity [[hp-hardware-diagnostics-poc]]; cited on [[overviews/windows-kernel]] and [[concepts/byovd]].
+
 - **2026-08-12** — ingest `description:gmh5225/HWID-Kernel-Spoofer`: entity [[hwid-kernel-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
 
 - **2026-08-12** — ingest `description:gmh5225/HWID-Pasted-Hwid-Spoofer`: entity [[hwid-pasted-hwid-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].

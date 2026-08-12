@@ -70,6 +70,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__TS-Fucker.md
   - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
   - wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md
+  - wiki/sources/descriptions/gmh5225__HPHardwareDiagnostics-PoC.md
   - wiki/sources/descriptions/gmh5225__NVDrv.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
 updated: 2026-08-12
@@ -171,6 +172,8 @@ Multi-backend vulnerable-driver kits such as [[vdk]] (Vulnerable Driver Kit; gmh
 Dedicated **`Speedfan.sys`** PoC such as [[speedfan-exploit]] (gmh5225; SpeedFan hardware-monitoring IOCTL abuse → physical memory read/write for arbitrary kernel access; legacy monitoring-tool BYOVD research) sits in the same Speedfan.sys backend lane as [[vdk]]. (source: wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md)
 
 OpenHardwareMonitor **`OpenHardwareMonitorLib.sys`** MSR-exposure PoC such as [[openhardwaremonitor-poc]] (gmh5225; minimal demo; IOCTLs `0x9C402084`/`0x9C402088` → arbitrary MSR read/write from user mode via `read_msr`/`write_msr`; hardware-monitoring driver MSR bug research) sits in the same legacy monitoring-tool BYOVD lane beside [[speedfan-exploit]]. (source: wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md)
+
+HP Hardware Diagnostics **`etdsupp.sys`** IOCTL LPE PoC such as [[hp-hardware-diagnostics-poc]] (gmh5225; HP OEM diagnostics kernel driver IOCTL abuse → elevated privileges on HP systems; preinstalled OEM-driver BYOVD research) complements other vendor diagnostics backends such as [[lenovo-mapper]]. (source: wiki/sources/descriptions/gmh5225__HPHardwareDiagnostics-PoC.md)
 
 C/C++ kernel utility research such as [[kur]] (gmh5225; **`echo_driver.sys`** vulnerable signed-driver backend; kernel R/W, process manipulation, driver-load primitives) sits in the same access-primitives lane. (source: wiki/sources/descriptions/gmh5225__kur.md)
 
