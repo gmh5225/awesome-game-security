@@ -646,6 +646,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Hwid-Spoofer-EAC-BE](entities/hwid-spoofer-eac-be.md) — EAC/BE HWID spoofer via kernel driver hooks (disk serial / NIC MAC / SMBIOS; gmh5225)
 - [HWID-SteamSpywareTerminator](entities/hwid-steam-spyware-terminator.md) — block Steam client HWID fingerprinting and telemetry to Valve servers (gmh5225; README [Steam])
 - [HWID-Spoofer-for-Fortnite-and-Valorant](entities/hwid-spoofer-for-fortnite-and-valorant.md) — kernel-level HWID spoof for Fortnite/Valorant (C/C++; Cheat HWID)
+- [HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base](entities/hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base.md) — universal ImGui-loader HWID spoofer for EAC/BE titles (disk/NIC/SMBIOS/GPU; gmh5225)
 - [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
 - [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)

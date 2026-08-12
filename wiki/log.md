@@ -3773,3 +3773,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-12** — ingest `description:gmh5225/KBotExt`: entity [[kbotext]]; cited on [[overviews/game-hacking]] and [[vanguard]].
 
 - **2026-08-12** — ingest `description:gmh5225/HappyIDA`: entity [[happyida]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
+- **2026-08-12** — ingest `description:gmh5225/HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base`: entity [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
