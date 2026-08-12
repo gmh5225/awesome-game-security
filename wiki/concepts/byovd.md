@@ -71,6 +71,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
   - wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md
   - wiki/sources/descriptions/gmh5225__HPHardwareDiagnostics-PoC.md
+  - wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md
   - wiki/sources/descriptions/gmh5225__NVDrv.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
 updated: 2026-08-12
@@ -146,6 +147,8 @@ BitLocker **`PdFwKrnl.sys`** DSE-bypass mapper research such as [[pdfwkrnl-mappe
 **`ampa.sys`** IOCTL abuse such as [[ampa-sys-exp]] (gmh5225; C/C++ automated exploit; insecure IOCTL → arbitrary kernel R/W or code execution; unsigned driver load, privilege escalation, or AC bypass) sits in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/gmh5225__ampa.sys-exp.md)
 
 AMD Ryzen Master v17 kernel driver abuse such as [[amd-ryzen-master-driver-v17-exploit]] (gmh5225; IOCTL interface → unprivileged physical memory R/W; BYOVD primitive for kernel exploitation, driver mapping, or AC bypass) sits in the OEM utility-driver physmem lane beside [[qiomem]]. (source: wiki/sources/descriptions/gmh5225__amd-ryzen-master-driver-v17-exploit.md)
+
+HITCON 2023 **`AMDCpuProfiler.sys`** demo such as [[hitcon-2023-demo-cve-2023-20562]] (gmh5225; CVE-2023-20562; AMD signed driver exploitation → local privilege escalation or arbitrary kernel code execution; conference PoC in the AMD driver BYOVD lane) complements physmem-focused [[amd-ryzen-master-driver-v17-exploit]]. (source: wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md)
 
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
 

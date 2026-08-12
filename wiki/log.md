@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:gmh5225/HITCON-2023-Demo-CVE-2023-20562`: entity [[hitcon-2023-demo-cve-2023-20562]]; cited on [[overviews/windows-kernel]] and [[concepts/byovd]].
+
 - **2026-08-12** — ingest `description:gmh5225/HPHardwareDiagnostics-PoC`: entity [[hp-hardware-diagnostics-poc]]; cited on [[overviews/windows-kernel]] and [[concepts/byovd]].
 
 - **2026-08-12** — ingest `description:gmh5225/HWID-Kernel-Spoofer`: entity [[hwid-kernel-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac-be]].
