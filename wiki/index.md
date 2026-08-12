@@ -620,6 +620,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hook-updater](entities/hook-updater.md) — Python auto-update Frida hook scripts (cheat / Frida)
 - [hh-lol-prophet](entities/hh-lol-prophet.md) — Go LoL modding sample (hh lol prophet; gmh5225; cheat / game:lol)
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
+- [Hook KdTrap](entities/hook-kdtrap.md) — KdTrap global exception-handler hook via `HalpStallCounter` hijack (null-deref / reserved CR3-bit fault intercept; gmh5225; Some Tricks Ring0)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
