@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-12** — ingest `description:ianveig29/OverlayAI`: entity [[overlayai]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-link from [[cs2-internals]].
+
 - **2026-08-12** — ingest `readme:categories`: bumped Cheat ~2688 (was ~2686; Anti Cheat ~663 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-12** — ingest `description:gmh5225/LViewLoL`: entity [[lviewlol]]; cited on [[overviews/game-hacking]] and [[vanguard]].
