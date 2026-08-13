@@ -517,6 +517,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-exploits](entities/fortnite-exploits.md) — Fortnite exploit collection + EAC bypass techniques (client vulns; UE4 features; cheat injection / memory access; gmh5225; [Exploits])
 - [fortnite-external](entities/fortnite-external.md) — Fortnite external: custom kernel-driver memory access / DX9 overlay / UE offset utilities (gmh5225; [External])
 - [fortnite-external-cheat-winsense-leak](entities/fortnite-external-cheat-winsense-leak.md) — WinSense leaked Fortnite external (kernel driver comm; ImGui DX9; KeyAuth; CryptoPP API encryption; gmh5225; [External])
+- [fortnite-external-cheat-source-code](entities/fortnite-external-cheat-source-code.md) — Fortnite external: Vaselinikives lineage; DX9 ImGui; W2S ESP + aimbot via Win32 RPM (gmh5225)
 - [fortnite-external-evo.gj](entities/fortnite-external-evo-gj.md) — Fortnite external: kernel-driver RPM / ESP / aimbot (C++; [External])
 - [fortnite-external-base-source](entities/fortnite-external-base-source.md) — Fortnite external: IOCTL RPM / CR3 stub / ImGui DX11 Discord Overlay (C++; [External])
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)
