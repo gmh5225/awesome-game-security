@@ -461,6 +461,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
 - [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
+- [External ImGui Android](entities/external-imgui-android.md) — external ImGui mod menu (OpenGL ES 3.0; SurfaceView overlay + NDK JNI; UE memory tools; gmh5225)
 - [External Imgui Cheat Menu Example 2023](entities/external-imgui-cheat-menu-example-2023.md) — external ImGui menu template (SDL+OpenGL; `SDL_GL_SwapWindow` hook; GL context anti-flicker; gmh5225)
 - [external-esp-hack-assaultcube](entities/external-esp-hack-assaultcube.md) — beginner AssaultCube external ESP (GDI overlay; RPM boxes / names / health; gmh5225)
 - [external-r6s-cheat](entities/external-r6s-cheat.md) — R6 external: kernel driver + shared memory section; ESP + aimbot (cheat / game:r6 [External]; gmh5225)
