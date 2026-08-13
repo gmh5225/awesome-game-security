@@ -438,6 +438,7 @@ sources:
   - wiki/sources/descriptions/nulli83__Mj-lnir.md
   - wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md
   - wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md
+  - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheat-Src-1.md
   - wiki/sources/descriptions/gmh5225__EasyAntiCheat-Reversing.md
   - wiki/sources/descriptions/gmh5225__EAC.md
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md
@@ -475,6 +476,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[eac-extractor-utility]] — decrypt/extract EAC kernel driver, UM modules, and config from game dir + driver store for offline static RE (Dump lane) (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
 - [[eac-runtime-extractor]] — MinHook DLL intercepts file I/O + driver load; captures EAC kernel driver from memory before disk write for offline RE (Runtime dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-Runtime-Extractor.md)
 - [[eazy-anti-cheat-src]] — reversed EAC source representation: reimplemented detection routines, driver communication, and integrity validation from binary analysis (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md)
+- [[eac-easyanticheat-src-1]] — reconstructed/leaked EAC source representation: internal detection routines, driver communication protocols, and client-side integrity validation (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheat-Src-1.md)
 - [[easyanticheat-reversing]] — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable C-like driver output with registry strings and policy routines (Decompile dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EasyAntiCheat-Reversing.md)
 - [[eac]] — mixed EAC study pack: reversed `easyanticheat.sys` kernel callback/heuristic logic + EAC/EOS SDK drop with headers and `EOS_FileDecryptionTool` (Study pack lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC.md)
 - [[eac-shellcode-1]] — archived raw EAC shellcode memory dump (~8.5 MB; hook entry points base+0x79204 / base+0x79304) from protected-game dumper ~Mar 2023 for offline shellcode layout / hook-flow RE (Shellcode lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-shellcode-1.md)
