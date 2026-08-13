@@ -18,4 +18,4 @@ System-call hooking framework (gmh5225; README `[Kaspersky]`) that **subverts th
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[etwti-syscall-hook]] · [[syscall-detect]] · [[hypervisor-detection]] · [[kli]]
+[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[evil-kaspersky]] · [[etwti-syscall-hook]] · [[syscall-detect]] · [[hypervisor-detection]] · [[kli]]

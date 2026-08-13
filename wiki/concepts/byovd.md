@@ -74,7 +74,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md
   - wiki/sources/descriptions/gmh5225__NVDrv.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
-updated: 2026-08-12
+  - wiki/sources/descriptions/gmh5225__EvilKaspersky.md
+updated: 2026-08-13
 confidence: high
 ---
 
@@ -105,6 +106,8 @@ WatchDog Anti-Malware driver abuse such as [[watchdog-killer]] targets **`amsdk.
 Zemana anti-malware driver abuse such as [[zam64-zemina]] targets **`zam64.sys`** via IOCTLs for process termination and memory access—another security-product driver in the known LOLdriver / process-kill lane. (source: wiki/sources/descriptions/gmh5225__zam64-zemina.md)
 
 Focused AV/EDR/AC terminate tooling such as [[terminator]] (gmh5225; **`zam64.sys`** BYOVD; arbitrary process-termination IOCTL → kill kernel-protected security and anti-cheat processes; red-team / LOLdriver termination research) complements IOCTL-focused [[zam64-zemina]] in the same Zemana backend lane. (source: wiki/sources/descriptions/gmh5225__Terminator.md)
+
+Kaspersky signed kernel-driver abuse such as [[evil-kaspersky]] (gmh5225; leverage trusted Kaspersky driver capabilities for unauthorized privileged operations and kernel code execution while appearing as legitimate antivirus activity; README `[Kaspersky]`) sits in the same security-product BYOVD lane beside hypervisor syscall redirection in [[kaspersky-hook]]. (source: wiki/sources/descriptions/gmh5225__EvilKaspersky.md)
 
 **`viragt64.sys`** process-kill tooling such as [[process-killer-byovd]] (gmh5225; load signed vulnerable driver → kernel access → forceful termination of user-mode-protected anti-cheat, EDR, and AV processes; red-team / LOLdriver termination research) sits in the same BYOVD process-terminate lane as [[terminator]] and [[watchdog-killer]]. (source: wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md)
 

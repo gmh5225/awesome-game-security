@@ -453,6 +453,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [egui-d3d11](entities/egui-d3d11.md) — Rust egui renderer for D3D11 Present-hook overlay menus (HLSL + Win32 input; gmh5225; README [Menu])
 - [echoac-poc](entities/echoac-poc.md) — echo.ac `echo_driver.sys` LPE PoC (read IOCTL → EPROCESS token theft → SYSTEM; anti-cheat-adjacent screenshare driver; gmh5225)
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W; gmh5225 + kkent030315 forks)
+- [EvilKaspersky](entities/evil-kaspersky.md) — abuse Kaspersky signed kernel-mode drivers for unauthorized privileged ops; kernel code exec masquerading as AV activity (gmh5225)
 - [ms-io-exploit](entities/ms-io-exploit.md) — `msIo64.sys` physmem-mapping BYOVD research (kkent030315; anycall for full client/driver)
 - [MS Vulnerable Driver List](entities/ms-vulnerable-driver-list.md) — Microsoft-acknowledged vulnerable kernel drivers; blocklist hash list for BYOVD research (gmh5225)
 - [MSFT DriverBlockList](entities/msft-driverblocklist.md) — Microsoft Recommended Driver Block Rules mirror (AC / black-signature defensive research)
