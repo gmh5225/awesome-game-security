@@ -770,6 +770,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__injection.md
   - wiki/sources/descriptions/gmh5225__executor.md
   - wiki/sources/descriptions/gmh5225__egui-d3d11.md
+  - wiki/sources/descriptions/gmh5225__External-imgui-Cheat-Menu-Example-2023.md
   - wiki/sources/descriptions/gmh5225__eft-dma-radar-1.md
   - wiki/sources/descriptions/gmh5225__Nathans-Tarkov-Radar-Public.md
   - wiki/sources/descriptions/gmh5225__eft-internal.md
@@ -913,7 +914,7 @@ Software: `SendInput`, `mouse_event`, RawInput hooks, MouClass filter drivers ([
 
 ## Overlays & rendering
 
-Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL `wglSwapBuffers`; alternatives include DWM, transparent external windows, Steam/NVIDIA/Discord overlay hijacks ([[steam-overlay-x64]], [[steam-hook-render-poc]], [[mwclap]], [[nvidia-overlay]], [[nvidia-overlay-hijack]], [[discord-overlay-hook]]). D3D9 hook samples such as [[nz-perspective]] (C/C++; hooking; cheat / game:tgame; gmh5225) sit in the legacy DirectX Present/EndScene lane. (source: wiki/sources/descriptions/gmh5225__nzPerspective.md) UI substrate: [[imgui]] and extensions ([[imgui-club]]); Rust egui-on-D3D11 Present-hook libraries such as [[egui-d3d11]] (gmh5225; HLSL textured triangles + Win32 input; README `[Menu]`) offer an immediate-mode alternative for DX11 internal menus. (source: wiki/sources/descriptions/gmh5225__egui-d3d11.md)
+Present hooks ([[present-hook]]): D3D9/11/12, Vulkan `vkQueuePresentKHR`, OpenGL `wglSwapBuffers`; alternatives include DWM, transparent external windows, Steam/NVIDIA/Discord overlay hijacks ([[steam-overlay-x64]], [[steam-hook-render-poc]], [[mwclap]], [[nvidia-overlay]], [[nvidia-overlay-hijack]], [[discord-overlay-hook]]). D3D9 hook samples such as [[nz-perspective]] (C/C++; hooking; cheat / game:tgame; gmh5225) sit in the legacy DirectX Present/EndScene lane. (source: wiki/sources/descriptions/gmh5225__nzPerspective.md) UI substrate: [[imgui]] and extensions ([[imgui-club]]); Rust egui-on-D3D11 Present-hook libraries such as [[egui-d3d11]] (gmh5225; HLSL textured triangles + Win32 input; README `[Menu]`) offer an immediate-mode alternative for DX11 internal menus. (source: wiki/sources/descriptions/gmh5225__egui-d3d11.md) External SDL/OpenGL ImGui menu templates such as [[external-imgui-cheat-menu-example-2023]] (gmh5225; hooks `SDL_GL_SwapWindow` with SDL+OpenGL ImGui backends; GL context management to avoid flicker; README `[External Imgui Menu]`) illustrate swap-path external overlay menus beside layered-window externals. (source: wiki/sources/descriptions/gmh5225__External-imgui-Cheat-Menu-Example-2023.md)
 
 ## Stack spoofing & driver I/O
 

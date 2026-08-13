@@ -461,6 +461,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
 - [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
+- [External Imgui Cheat Menu Example 2023](entities/external-imgui-cheat-menu-example-2023.md) — external ImGui menu template (SDL+OpenGL; `SDL_GL_SwapWindow` hook; GL context anti-flicker; gmh5225)
 - [external-esp-hack-assaultcube](entities/external-esp-hack-assaultcube.md) — beginner AssaultCube external ESP (GDI overlay; RPM boxes / names / health; gmh5225)
 - [ez-drv-bak](entities/ez-drv-bak.md) — Windows kernel driver backup & restore (gmh5225; driver development / AC lab baselines)
 - [FakeEye](entities/fakeeye.md) — BattlEye init emulator (BEService SCM + BE-style game launch; [Emulator])

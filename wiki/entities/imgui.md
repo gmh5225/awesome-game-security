@@ -4,7 +4,7 @@ kind: entity
 topics: [graphics-api, game-hacking]
 sources:
   - wiki/sources/descriptions/ocornut__imgui.md
-updated: 2026-07-27
+updated: 2026-08-13
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Upstream of Present-hook overlay templates ([[dx11-basehook]], [[directxhook]], 
 
 ## Related
 
-[[overviews/graphics-api]] · [[overviews/game-hacking]] · [[imgui-club]] · [[netimgui]] · [[ue5-with-dear-imgui]] · [[present-hook]] · [[directxhook]] · [[dx11-basehook]]
+[[overviews/graphics-api]] · [[overviews/game-hacking]] · [[imgui-club]] · [[netimgui]] · [[ue5-with-dear-imgui]] · [[external-imgui-cheat-menu-example-2023]] · [[present-hook]] · [[directxhook]] · [[dx11-basehook]]
