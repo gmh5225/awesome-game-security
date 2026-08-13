@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/FallGuys`: entity [[fall-guys]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked from [[flying-guys]] and [[fall-guys-sharp]].
+
 - **2026-08-13** — ingest `description:gmh5225/FallGuysSharp`: entity [[fall-guys-sharp]]; cited on [[overviews/game-hacking]] and [[concepts/il2cpp]]; cross-linked from [[flying-guys]].
 
 - **2026-08-13** — ingest `description:gmh5225/Far-Cry-1-Source-Full`: updated entity [[farcry]] (CryEngine 1 full archive mirror); cited on [[overviews/game-engine]].
