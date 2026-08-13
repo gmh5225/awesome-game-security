@@ -4349,6 +4349,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Oliver-1-1/EtwKeyboardDetection [ETW]
 - https://github.com/wesmar/KeyboardKit [Educational kernel-mode keylogger rootkit — intercepts keyboard IRPs for UDP logging; demonstrates stealth persistence, privilege escalation and IRP hooking for offensive security research and defensive analysis]
 - https://github.com/dungnotnull/game-cheating-exploit-detection-agent-skill [Python anti-cheat detection engine with statistical aimbot, wallhack, macro, memory-tamper, and exploit detectors plus CI-tested harness]
+- https://github.com/rafalimma/ModelAnti-Cheat [DayZ server-side ML anti-cheat: mission telemetry logging, feature extraction, and RandomForest aimbot/movement anomaly detection]
 
 > Detection:Hide
 - https://github.com/KANKOSHEV/Detect-HiddenThread-via-KPRCB
