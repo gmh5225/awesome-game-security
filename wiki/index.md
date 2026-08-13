@@ -465,6 +465,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ez-drv-bak](entities/ez-drv-bak.md) — Windows kernel driver backup & restore (gmh5225; driver development / AC lab baselines)
 - [FakeEye](entities/fakeeye.md) — BattlEye init emulator (BEService SCM + BE-style game launch; [Emulator])
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
+- [Fenrir](entities/fenrir.md) — kernel rootkit/driver framework (process hide, memory access, callbacks; jmp rdi stack spoof; gmh5225; Cheat Spoof Stack / Ring0)
 - [FF3 MMO](entities/ff3mmo.md) — browser NES FF3 MMO (Node.js WebSocket; server arbiters; inventory mirror anti-dup; wire validation)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)

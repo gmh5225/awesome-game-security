@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md
   - wiki/sources/descriptions/gmh5225__StackSpoofer_Macro.md
   - wiki/sources/descriptions/gmh5225__STB.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/gmh5225__Fenrir.md
+updated: 2026-08-13
 confidence: medium
 ---
 
@@ -20,7 +21,7 @@ Techniques that **fabricate or rewrite call-stack frames** so thread stack walks
 
 ## Return-address spoofing
 
-Before calling a sensitive API, replace the stack slot that holds the return address with a gadget or module address; restore after return. Evades naive `RtlWalkFrameChain` scans that flag returns outside loaded images. Reusable libraries such as [[spoof-stack-safecall]] (gmh5225/SafeCall) package this pattern for red-team and game-security research. (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md) Macro-based helpers such as [[stack-spoofer-macro]] (gmh5225; easy-to-use C/C++ preprocessor macros for stack spoofing) offer a lightweight alternative in the same lane. (source: wiki/sources/descriptions/gmh5225__StackSpoofer_Macro.md) Compile-time helpers such as [[stb-gmh5225]] (gmh5225/STB; IDA-style string-to-array conversion for stack-trace building / spoof-stack research) support embedding frame or gadget bytes without static plaintext. (source: wiki/sources/descriptions/gmh5225__STB.md)
+Before calling a sensitive API, replace the stack slot that holds the return address with a gadget or module address; restore after return. Evades naive `RtlWalkFrameChain` scans that flag returns outside loaded images. Reusable libraries such as [[spoof-stack-safecall]] (gmh5225/SafeCall) package this pattern for red-team and game-security research. (source: wiki/sources/descriptions/gmh5225__spoof-stack-SafeCall.md) Macro-based helpers such as [[stack-spoofer-macro]] (gmh5225; easy-to-use C/C++ preprocessor macros for stack spoofing) offer a lightweight alternative in the same lane. (source: wiki/sources/descriptions/gmh5225__StackSpoofer_Macro.md) Kernel/driver-framework samples such as [[fenrir]] (gmh5225; `jmp rdi` gadget dispatch for stack spoofing inside a broader rootkit framework) extend that lane from Ring0. (source: wiki/sources/descriptions/gmh5225__Fenrir.md) Compile-time helpers such as [[stb-gmh5225]] (gmh5225/STB; IDA-style string-to-array conversion for stack-trace building / spoof-stack research) support embedding frame or gadget bytes without static plaintext. (source: wiki/sources/descriptions/gmh5225__STB.md)
 
 ## Synthetic call stacks
 
