@@ -1016,6 +1016,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Milfuscator](entities/milfuscator.md) — x32 PE mutator (full rebuild; Zydis + AsmJit; AC Obfuscation Engine)
 - [minecpp](entities/minecpp.md) — C++ Minecraft Java server backend (1.19; protocol/offensive-technique RE; gmh5225)
 - [Minecraft AntiCheatAI](entities/minecraft-anticheatai.md) — DeepGuard Paper plugin (ONNX 1D-CNN scaffold detection; BehaviorRecorder + PyTorch training)
+- [Model Anti-Cheat](entities/model-anti-cheat.md) — DayZ server-side ML AC (mission telemetry logging, feature extraction, RandomForest aimbot/movement anomaly detection)
 - [mixed-boolean-transform](entities/mixed-boolean-transform.md) — source-to-source C++ MBA obfuscation (Z3-verified; Eigen3 + GMP; Cheat Mixed boolean-arithmetic)
 - [mhynot2](entities/mhynot2.md) — Genshin Impact AC bypass research (experimental `mhyprot2` circumvention; khang06)
 - [mhydeath](entities/mhydeath.md) — BYOVD via miHoYo `mhyprot2.sys` (Genshin Impact; arbitrary kernel R/W + process kill; gmh5225)
