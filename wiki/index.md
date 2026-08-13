@@ -419,6 +419,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [easypeasy-gc](entities/easypeasy-gc.md) — Genshin Impact EasyPeasy-framework cheat client (Grasscutter custom server; client-side gameplay mods; gmh5225)
+- [EasyAntiCheat-Reversing](entities/easyanticheat-reversing.md) — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable driver RE snapshot (gmh5225)
 - [EazyAntiCheatSRC](entities/eazy-anti-cheat-src.md) — reversed EAC source; detection routines, driver comms, integrity validation (Reversed Source; gmh5225)
 - [eft-dma-radar-1](entities/eft-dma-radar-1.md) — Escape From Tarkov DMA radar (PCILeech-compatible hardware; separate-screen overlay; player/loot/map; cheat / game:eft [DMA Radar]; gmh5225)
 - [eft-internal](entities/eft-internal.md) — Escape From Tarkov internal cheat (C++; shader / rendering / asset pipelines; cheat / game:eft; gmh5225)
