@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EloBuddy-Addons`: entity [[elobuddy-addons]]; cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked from [[leaguesharp]] and [[l-assemblies]].
+
 - **2026-08-13** — ingest `readme:categories`: bumped Anti Cheat ~668 (was ~666; Cheat ~2696 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-13** — ingest `description:gmh5225/EntropyReducer`: entity [[entropy-reducer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].

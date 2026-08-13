@@ -20,4 +20,4 @@ Each champion module implements combo logic, spell casting sequences, and target
 
 ## Related
 
-[[leaguesharp]] · [[leaguesharp-loader]] · [[league-base]] · [[lviewlol]] · [[vanguard]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[leaguesharp]] · [[leaguesharp-loader]] · [[elobuddy-addons]] · [[league-base]] · [[lviewlol]] · [[vanguard]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

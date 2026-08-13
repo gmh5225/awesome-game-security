@@ -426,6 +426,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [ELFpacker](entities/elfpacker.md) — ELF32 `.text` XOR packer + prepend decrypt stub (ELF header/PHDR/SHDR inject; Anti Cheat → Binary Packer `[ELF]`)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
+- [elobuddy-addons](entities/elobuddy-addons.md) — EloBuddy LoL addon scripts (champion automation; orbwalker; skill-shot prediction; utility modules; gmh5225; cheat / game:lol)
 - [Embuche](entities/embuche.md) — ELF anti-reversing technique collection (Anti Cheat → Binary Packer `[ELF]`)
 - [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
