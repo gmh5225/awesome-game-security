@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Fortnite-External-5`: entity [[fortnite-external-5]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[fortnite-external]], [[hwid-kernel-spoofer]], and [[fortnite-external-cheat-winsense-leak]].
+
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-External-Cheat-Source-Code`: entity [[fortnite-external-cheat-source-code]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[fortnite-external-p2c]] and [[fortnite-external-cheat-winsense-leak]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-External-Cheat-WinSense-Leak`: entity [[fortnite-external-cheat-winsense-leak]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[fortnite-external]] and [[fortnite-ud-external]].
