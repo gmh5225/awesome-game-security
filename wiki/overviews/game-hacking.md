@@ -770,6 +770,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__injection.md
   - wiki/sources/descriptions/gmh5225__executor.md
   - wiki/sources/descriptions/gmh5225__egui-d3d11.md
+  - wiki/sources/descriptions/gmh5225__ExtendedCameraSettings.md
   - wiki/sources/descriptions/gmh5225__External-Dayz-Cheat.md
   - wiki/sources/descriptions/gmh5225__External-ImGui-Android.md
   - wiki/sources/descriptions/gmh5225__External-imgui-Cheat-Menu-Example-2023.md
@@ -1293,6 +1294,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - CS2 Source 2 research collections such as [[cs2-things]] (VScript; gmh5225; RE structures / offset dumps / SDK snippets / entity layouts / netvars / engine interfaces; cheat / game:cs2) sit in the same cheat / game:cs2 memory-layout and Source 2 RE lane. (source: wiki/sources/descriptions/gmh5225__cs2_things.md)
 - CS2 Source 2 SDK headers such as [[cs2-sdk]] (gmh5225/cs2_sdk and cs2-sdk forks; C/C++; SDK generation / simplified Source 2 layout; driver / rendering / networking; DX11 + Vulkan; cheat / game:cs2 [SDK]) sit in the same cheat / game:cs2 SDK lane beside generated dumps such as [[source2gen]]. (source: wiki/sources/descriptions/gmh5225__cs2_sdk.md) (source: wiki/sources/descriptions/gmh5225__cs2-sdk.md)
 - CS2 FOV changer samples such as [[cs2-fov-changer]] (gmh5225; C/C++; asset pipelines / hooking / memory analysis; cheat / game:cs2 [FOV changer]) sit in the same cheat / game:cs2 camera/visual lane beside [[world-to-screen]] aim math. (source: wiki/sources/descriptions/gmh5225__cs2-fov-changer.md)
+- Engine-agnostic gameplay camera mod samples such as [[extended-camera-settings]] (gmh5225; extends camera control beyond default engine limits—adjustable FOV, distance, rotation freedom, and viewpoint parameters; gameplay or cinematic modding) sit in the cross-engine camera/visual mod lane beside title-specific FOV/freecam hooks. (source: wiki/sources/descriptions/gmh5225__ExtendedCameraSettings.md)
 - External CS2 samples such as [[cs2-external-cheat]] (C++; D3D11 ImGui overlay / aimbot / memory read / offsets; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/sFIsAnExpert__CS2-External-Cheat.md)
 - External CS2 framework samples such as [[cs2-ext]] (C++17; pluggable kernel driver interface; D3D11/DXGI ImGui overlay; aimbot / ESP / spinbot; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/hendodev__cs2-ext.md)
 - External CS2 framework samples such as [[titled-gui-cs2]] (C#; Win32 memory read/write; transparent ImGui overlay; cs2-dumper offset bootstrap; aimbot / RCS / triggerbot; ESP / radar / D3D11 chams with VPK loading and map-geometry visibility; GPLv3; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/xfi0__Titled-Gui-CS2.md)
