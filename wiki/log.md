@@ -3869,3 +3869,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `readme:categories`: bumped Anti Cheat ~666 (was ~665; Cheat ~2694 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Leak5`: entity [[fortnite-leak5]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-cheat-source-internal]] and [[fortnite-internal-updated-ritz]].
+
+- **2026-08-13** — ingest `description:gmh5225/Fortnite-EFI-External`: entity [[fortnite-efi-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[bootlicker]] and [[uefi-bootloader]].
