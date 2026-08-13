@@ -3837,3 +3837,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-12** — ingest `description:gmh5225/Genshin-EasyPeasy-Bypass`: entity [[genshin-easy-peasy-bypass]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[mhyprot2]].
 
 - **2026-08-12** — ingest `description:gmh5225/FortniteSigsUpdatedEveryUpdate`: entity [[fortnite-sigs-updated-every-update]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-sigs]].
+
+- **2026-08-13** — ingest `description:gmh5225/Fortnite-VoyagerTF`: entity [[fortnite-voyagertf]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[voyager]] (Hyper-V framework; distinct name).

@@ -528,6 +528,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-sigs](entities/fortnite-sigs.md) — Fortnite IDA-style byte-pattern signatures (GObjects/GNames/ProcessEvent; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-sigs-updated-every-update](entities/fortnite-sigs-updated-every-update.md) — Per-patch Fortnite byte-pattern signatures (UWorld/GObjects/FnFree/GetNameByIndex; pattern-mask notation; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-triadz](entities/fortnite-triadz.md) — Triadz internal Fortnite cheat (UE4 hooking; ESP/aimbot/exploit; gmh5225; EAC-protected internal architecture reference)
+- [fortnite-voyagertf](entities/fortnite-voyagertf.md) — VoyagerTF external Fortnite cheat (ESP/aimbot/UE game-state reads via out-of-process memory; gmh5225; [External])
 - [fortnite-virtual-offsets](entities/fortnite-virtual-offsets.md) — Fortnite vtable/view offset dump (text; gmh5225; cheat / game:fortnite [Virtual Table Offsets])
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
