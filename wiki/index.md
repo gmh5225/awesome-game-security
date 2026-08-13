@@ -473,6 +473,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FuckCertVerifyTimeValidity](entities/fuck-cert-verify-time-validity.md) — Detours signtool import hook; bypass cert time validity for leaked/expired Authenticode (Sign Leaked Cert)
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [findcrypt-yara](entities/findcrypt-yara.md) — IDA Pro FindCrypt plugin (YARA crypto-constant scan; AES/DES/SHA/CRC signatures; algorithm annotation; gmh5225; cheat / Yara)
+- [findfunc](entities/findfunc.md) — IDA Pro function pattern search (byte patterns, instruction sequences, operand types, xrefs; Recognizing Function By Pattern; gmh5225; cheat / IDA Plugins)
 - [findyara-ida](entities/findyara-ida.md) — IDA Pro YARA scan plugin (match highlight + disasm navigation; custom malware/crypto/packer rules; gmh5225; cheat / Yara)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)

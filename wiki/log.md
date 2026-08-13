@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/FindFunc`: entity [[findfunc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-fusion]], [[ida-sigmaker]], and [[idenlib]].
+
 - **2026-08-13** — ingest `description:gmh5225/Flying-Guys-fully-modified`: entity [[flying-guys-fully-modified]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[flying-guys]], [[kdmapper-rs]], and [[imgui]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-3.5`: entity [[fortnite-3.5]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[zerogui-fortnite-internal]], [[fortnite-internal-cheat-fixed-and-updated]], and [[fortnite-cheat-source-internal]].
