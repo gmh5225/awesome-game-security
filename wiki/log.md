@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EAC-EasyAntiCheatMemorySig`: entity [[eac-easyanticheatmemorysig]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
+
 - **2026-08-13** — ingest `description:gmh5225/EAC-HydraHook`: entity [[eac-hydrahook]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
 
 - **2026-08-13** — ingest `description:gmh5225/EAC-Kernel-Packet-Fucker`: entity [[eac-kernel-packet-fucker]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
