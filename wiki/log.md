@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/FakeSign`: entity [[fakesign]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked from [[lazy-sign]].
+
 - **2026-08-13** — ingest `description:gmh5225/FakerAndroid`: entity [[fakerandroid]]; cited on [[overviews/mobile-security]] and [[concepts/il2cpp]].
 
 - **2026-08-13** — ingest `description:gmh5225/FallGuys`: entity [[fall-guys]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked from [[flying-guys]] and [[fall-guys-sharp]].
