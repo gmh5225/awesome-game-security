@@ -3843,3 +3843,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-UD-External`: entity [[fortnite-ud-external]]; cited on [[overviews/game-hacking]] and [[easy-anti-cheat]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-SigsUpdatedEveryUpdate`: refreshed entity [[fortnite-sigs-updated-every-update]] (Season 2 Chapter 3+; corrected source projection path); cited on [[overviews/game-hacking]] and [[unreal-object-model]].
+
+- **2026-08-13** — ingest `description:gmh5225/Fortnite-Offset-dumper`: entity [[fortnite-offset-dumper]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]] and [[gh-offset-dumper]].
