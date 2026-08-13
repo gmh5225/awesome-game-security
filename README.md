@@ -1864,6 +1864,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Ghidra Plugins
 - https://github.com/AllsafeCyberSecurity/awesome-ghidra [List]
 - https://github.com/CENSUS/ghidra-frida-hook-gen
+- https://github.com/mitros123/DragonHook [Ghidra plugin exposing GhidraDB queries to Frida at runtime for dynamic call-target resolution, backtraces, and live xref/comment updates]
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 - https://github.com/CUB3D/ghidra-hexagon-sleigh [Ghidra SLEIGH extension for Qualcomm Hexagon QDSP6 decompilation and analysis]
 - https://github.com/thixotropist/ghidra_decompiler_plugins [Loadable Ghidra decompiler plugins and rules that simplify RISC-V vector-instruction analysis in the decompiler window]
