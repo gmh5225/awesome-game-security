@@ -387,6 +387,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [driver-efi-bootkit](entities/driver-efi-bootkit.md) — UEFI boot-stage implant: EFI→kernel staged chain; loader hook + pre-OS driver patch; Python BOOTDOOR inject (gmh5225)
 - [Driver-kaldereta](entities/driver-kaldereta.md) — unsigned KM cheat-driver skeleton; `KALDERETA_MEMORY` via hooked Win32 `NtTokenManagerGetAnalogExclusiveTokenEvent`; R/W, input sim, pattern scan, manual DLL map (gmh5225)
 - [Driver-read_write](entities/driver-read-write.md) — manually mapped KM R/W via Beep.sys IRP hijack; PiDDBCache/MmUnloadedDrivers cleanup (gmh5225; Hijack IRP Beep.sys)
+- [Driver-SoulExtraction](entities/driver-soul-extraction.md) — in-kernel PE Authenticode cert extraction; Lib-SoulExtraction PKCS#7/ASN.1/X.509; signer subject + validity window (gmh5225; Extracting cert information)
 - [driver-systemthread-from-pspcidtable-src](entities/driver-systemthread-from-pspcidtable-src.md) — PspCidTable / handle-table hide tutorial; `ExRemoveHandleTable` + CID-field zeroing; build-specific offsets (gmh5225; Hide Process/Thread/Handle)
 - [Driver-WatchOwl](entities/driver-watchowl.md) — defensive KM driver; load-image + thread notify; stack-trace validation of suspicious user-mode mapping (gmh5225; ImageNotify+Stack Trace)
 - [DriverBuddyReloaded](entities/driver-buddy-reloaded.md) — IDA Pro plugin: Windows kernel driver RE (IOCTL dispatch, IRP handlers, vulnerable-driver patterns, WDM structure annotations; gmh5225; Windows Kernel Analysis)
