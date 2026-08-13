@@ -475,6 +475,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [findcrypt-yara](entities/findcrypt-yara.md) — IDA Pro FindCrypt plugin (YARA crypto-constant scan; AES/DES/SHA/CRC signatures; algorithm annotation; gmh5225; cheat / Yara)
 - [findyara-ida](entities/findyara-ida.md) — IDA Pro YARA scan plugin (match highlight + disasm navigation; custom malware/crypto/packer rules; gmh5225; cheat / Yara)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
+- [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)
 - [FlyingGuys](entities/flying-guys.md) — Fall Guys kernel cheat (KdMapper custom driver + ImGui overlay; zlib network manipulation; gmh5225)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
 - [Freedom](entities/freedom.md) — Android Google Play billing IAP bypass (billing-service hook; fake purchase confirmations; gmh5225)
