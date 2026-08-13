@@ -18,4 +18,4 @@ Kernel technique (gmh5225; README `[HvcallCodeVa]`) for **hooking `HvlSwitchVirt
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[hvci]] · [[hook-kdtrap]] · [[eac-cr3-bypass]] · [[windows-kernel-pagehook]] · [[zero-hvci]] · [[hypervisor]]
+[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[driver-hypercall-page-hook]] · [[hvci]] · [[hook-kdtrap]] · [[eac-cr3-bypass]] · [[windows-kernel-pagehook]] · [[zero-hvci]] · [[hypervisor]]

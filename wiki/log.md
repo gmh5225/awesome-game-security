@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Driver-HypercallPageHook`: entity [[driver-hypercall-page-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hook-hvl-switch-virtual-address-space]].
+
 - **2026-08-13** — ingest `description:gmh5225/Driver-KDtour`: entity [[driver-kdtour]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-pagehook]] and [[hook-kdtrap]].
 
 - **2026-08-13** — ingest `description:gmh5225/Driver-RPM-DirectPageManipulation`: entity [[driver-rpm-direct-page-manipulation]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[readphys]] and [[page-table-injector]].
