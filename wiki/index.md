@@ -386,6 +386,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Driver-intel-PEBs-LoopHPCs](entities/driver-intel-pebs-loophpcs.md) — LoopHPCs filter-driver framework; PEBS + LBR loop-centric hot-loop telemetry for unpacking/malware RE (gmh5225; Intel PEBs)
 - [driver-efi-bootkit](entities/driver-efi-bootkit.md) — UEFI boot-stage implant: EFI→kernel staged chain; loader hook + pre-OS driver patch; Python BOOTDOOR inject (gmh5225)
 - [Driver-kaldereta](entities/driver-kaldereta.md) — unsigned KM cheat-driver skeleton; `KALDERETA_MEMORY` via hooked Win32 `NtTokenManagerGetAnalogExclusiveTokenEvent`; R/W, input sim, pattern scan, manual DLL map (gmh5225)
+- [Driver-KDtour](entities/driver-kdtour.md) — compact KM inline detour library; `c_detour` MDL-backed patch + absolute jump stub; sample `KeAttachProcess` hook (gmh5225; Easy Kernel Detour)
 - [Driver-read_write](entities/driver-read-write.md) — manually mapped KM R/W via Beep.sys IRP hijack; PiDDBCache/MmUnloadedDrivers cleanup (gmh5225; Hijack IRP Beep.sys)
 - [Driver-RPM-DirectPageManipulation](entities/driver-rpm-direct-page-manipulation.md) — minimal PTE-PFN rewrite + manual VA→PA cross-process copy; no documented copy helpers (gmh5225; read physical memory)
 - [Driver-SessionMapper](entities/driver-session-mapper.md) — session-space manual driver mapper; `ntoskrnl` callback hook; import/reloc/entry; loader-metadata scrub on unload (gmh5225; Session Driver)
