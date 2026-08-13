@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Far-Cry-1-Source-Full`: updated entity [[farcry]] (CryEngine 1 full archive mirror); cited on [[overviews/game-engine]].
+
 - **2026-08-13** — ingest `description:gmh5225/FarCry`: entity [[farcry]]; cited on [[overviews/game-engine]]; cross-linked from [[gameengine-cryengine]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fedoraware`: entity [[fedoraware]]; cited on [[overviews/game-hacking]]; cross-linked from [[teamfortress2-internal]].
