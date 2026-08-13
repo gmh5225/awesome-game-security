@@ -3847,3 +3847,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Offset-dumper`: entity [[fortnite-offset-dumper]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]] and [[gh-offset-dumper]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Masterpasta-ihack-Source-Leak`: entity [[fortnite-masterpasta-ihack-source-leak]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[detours]] and [[fortnite-internal-updated-ritz]].
+
+- **2026-08-13** — ingest `readme:categories`: bumped Anti Cheat ~666 (was ~665; Cheat ~2694 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
