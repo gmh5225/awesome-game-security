@@ -376,6 +376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [dump-val-exception-handler](entities/dump-val-exception-handler.md) — Valorant exception handler registration + VEH chain dump (`RtlpCallVectoredHandlers`; Vanguard RE; gmh5225)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
+- [DummyDlls NARAKA 1.9.21](entities/dummy-dlls-naraka-1-9-21.md) — NARAKA: BLADEPOINT v1.9.21 IL2CPP dummy DLL stubs (C# class/method metadata; modding/cheat/RE; gmh5225; `[Dump]`)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
 - [dota-cheat](entities/dota-cheat.md) — Dota 2 Source 2 entity overlay cheat (C++; ESP / cooldowns / auto-ability; gmh5225; cheat / game:dota2)

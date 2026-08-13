@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/DummyDlls_NARAKA_1_9_21`: entity [[dummy-dlls-naraka-1-9-21]]; cited on [[il2cpp]] and [[overviews/game-engine]].
+
 - **2026-08-13** — ingest `description:gmh5225/Dump-val-exception-handler`: entity [[dump-val-exception-handler]]; cited on [[vanguard]] and [[overviews/anti-cheat]]; cross-linked from [[val-exception-handler]].
 
 - **2026-08-13** — ingest `description:gmh5225/Dynsec`: entity [[dynsec]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
