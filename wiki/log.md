@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Driver-HideKernelThread-IoCancelIrp`: entity [[driver-hide-kernel-thread-iocancelirp]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[zero-thread-kernel]] and [[system-thread-finder]].
+
 - **2026-08-13** — ingest `description:gmh5225/Driver-HypercallPageHook`: entity [[driver-hypercall-page-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hook-hvl-switch-virtual-address-space]].
 
 - **2026-08-13** — ingest `description:gmh5225/Driver-KDtour`: entity [[driver-kdtour]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-pagehook]] and [[hook-kdtrap]].
