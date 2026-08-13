@@ -479,6 +479,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [findfunc](entities/findfunc.md) — IDA Pro function pattern search (byte patterns, instruction sequences, operand types, xrefs; Recognizing Function By Pattern; gmh5225; cheat / IDA Plugins)
 - [findyara-ida](entities/findyara-ida.md) — IDA Pro YARA scan plugin (match highlight + disasm navigation; custom malware/crypto/packer rules; gmh5225; cheat / Yara)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
+- [FallGuysSharp](entities/fall-guys-sharp.md) — Fall Guys C# IL2CPP cheat (managed injection; movement/gameplay mods; gmh5225)
 - [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)
 - [FlyingGuys](entities/flying-guys.md) — Fall Guys kernel cheat (KdMapper custom driver + ImGui overlay; zlib network manipulation; gmh5225)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
