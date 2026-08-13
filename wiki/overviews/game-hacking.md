@@ -706,6 +706,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__VOLTO-EXTERNAL-SPOWAR-UD-EAC-BE-FORTNITE-EXTERNAL-CHEAT.md
   - wiki/sources/descriptions/gmh5225__Serenity.gg-FN-and-Loader.md
   - wiki/sources/descriptions/gmh5225__Fortnite-VoyagerTF.md
+  - wiki/sources/descriptions/gmh5225__Fortnite-UD-External.md
   - wiki/sources/descriptions/gmh5225__SeaOfChoros.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
   - wiki/sources/descriptions/gmh5225__fortnite-sigs.md
@@ -947,6 +948,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IOCTL / CR3-oriented external Fortnite bases such as [[fortnite-external-base-source]] (C++; kernel phys mem R/W + mouse IOCTL; GWorld decrypt / pattern scan; ImGui Discord Overlay DX11 ESP; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/raivoansa__fortnite-external-base-source.md)
 - Driver + overlay external Fortnite samples such as [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]] (gmh5225; C/C++; kernel driver development + overlay rendering; HWID-spoof / EAC-evasion naming; cheat / game:fortnite [External]) sit in that same external lane beside IOCTL and shader-oriented bases. (source: wiki/sources/descriptions/gmh5225__VOLTO-EXTERNAL-SPOWAR-UD-EAC-BE-FORTNITE-EXTERNAL-CHEAT.md)
 - External Fortnite **VoyagerTF** samples such as [[fortnite-voyagertf]] (gmh5225; ESP / aimbot / UE game-state reads via out-of-process client memory manipulation; cheat / game:fortnite [External]) sit in that same external lane for studying RPM-based Unreal state access without injection. (source: wiki/sources/descriptions/gmh5225__Fortnite-VoyagerTF.md)
+- Undetected external Fortnite samples such as [[fortnite-ud-external]] (gmh5225; stealthy out-of-process memory reads; ESP / aimbot; BattlEye + EAC bypass framing; cheat / game:fortnite [External]) sit in that same external lane for studying low-visibility RPM on AC-protected UE clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-UD-External.md)
 - Serenity.gg Fortnite driver + shader + loader samples such as [[serenity-gg-fn-and-loader]] (gmh5225; C/C++; kernel driver development + shader work + module loader; cheat / game:fortnite) sit in that same external lane beside shader-oriented and driver-backed Fortnite bases. (source: wiki/sources/descriptions/gmh5225__Serenity.gg-FN-and-Loader.md)
 - Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
