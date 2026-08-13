@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[eldenringmods]] · [[eldenringlauncher]] · [[easy-anti-cheat]] · [[overviews/game-hacking]]
+[[eldenringmods]] · [[eldenringlauncher]] · [[elden-ring-debug-tool]] · [[easy-anti-cheat]] · [[overviews/game-hacking]]

@@ -421,6 +421,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eft-dma-radar-1](entities/eft-dma-radar-1.md) — Escape From Tarkov DMA radar (PCILeech-compatible hardware; separate-screen overlay; player/loot/map; cheat / game:eft [DMA Radar]; gmh5225)
 - [eft-internal](entities/eft-internal.md) — Escape From Tarkov internal cheat (C++; shader / rendering / asset pipelines; cheat / game:eft; gmh5225)
 - [Elden Ring CT TGA](entities/elden-ring-ct-tga.md) — Elden Ring Cheat Engine table; protonhax + Wine CE on Steam Proton (cheat / game:eldenring [Cheat Engine])
+- [Elden Ring Debug Tool](entities/elden-ring-debug-tool.md) — Elden Ring debug/cheat tool; hidden parameters, stat edit, item spawn, teleport, no-clip (cheat / game:eldenring [Debug tool])
 - [EldenRingLauncher](entities/eldenringlauncher.md) — Elden Ring ImGui/SDL2 custom launcher; EAC bypass options + mod loading (cheat / game:eldenring [Launcher])
 - [EldenRingMods](entities/eldenringmods.md) — Elden Ring animation/modding (C++ / C/C++; cheat / game:eldenring [Mod])
 - [EasyPixel](entities/easypixel.md) — Magisk module: disguise device as Google Pixel (Cheat Magisk)
