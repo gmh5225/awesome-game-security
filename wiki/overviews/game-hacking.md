@@ -701,6 +701,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Lazysight.md
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
   - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
+  - wiki/sources/descriptions/gmh5225__Fortnite-Leak5.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Masterpasta-ihack-Source-Leak.md
   - wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md
   - wiki/sources/descriptions/gmh5225__fortnite-exploits.md
@@ -959,6 +960,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - ZeroGui-overlay Fortnite internals such as [[zerogui-fortnite-internal]] (gmh5225; visuals-only ESP enabled; aimbot / exploits present but disabled; [Internal]) sit in that same cheat / game:fortnite internal lane for studying in-process Unreal visuals without full combat automation. (source: wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md)
 - Leaked Masterpasta / iHack Fortnite internals such as [[fortnite-masterpasta-ihack-source-leak]] (gmh5225; Microsoft Detours hooking; direct UObject-array access; bone-matrix projection + `GetViewpoint` camera math; engine-rendered visuals; [Internal]) sit in that same cheat / game:fortnite internal lane beside Ritz and ZeroGui lineages. (source: wiki/sources/descriptions/gmh5225__Fortnite-Masterpasta-ihack-Source-Leak.md)
 - Additional Fortnite internal samples such as [[fortnite-cheat-source-internal]] (C/C++; SDK generation + hooking) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md)
+- Leaked INFARCTED.CC base Fortnite internals such as [[fortnite-leak5]] (gmh5225; C/C++; SDK generation + hooking; upstream base for INFARCTED.CC; cheat / game:fortnite) sit in that same cheat / game:fortnite internal lane beside other SDK+hook samples. (source: wiki/sources/descriptions/gmh5225__Fortnite-Leak5.md)
 - Internal Fortnite cheat **Triadz** such as [[fortnite-triadz]] (gmh5225; UE4 engine hooking; ESP / aimbot / exploitation; full in-process game-object + render access; EAC-protected UE4 internal architecture reference) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-triadz.md)
 - Fortnite exploit and EAC bypass collections such as [[fortnite-exploits]] (gmh5225; client vulnerabilities; UE4 engine features; cheat injection / memory-access bypass; `[Exploits]`) document Fortnite-specific exploit chains beside runnable internal and external samples. (source: wiki/sources/descriptions/gmh5225__fortnite-exploits.md)
 - Fortnite FName/FNameEntry samples such as [[fortnite-fnameentry]] (C++; name-pool entry focus) sit beside those internals in the cheat / game:fortnite Unreal name-pool lane. (source: wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md)
