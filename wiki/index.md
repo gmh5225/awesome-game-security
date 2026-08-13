@@ -419,6 +419,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
 - [eac-injector-driver](entities/eac-injector-driver.md) — EAC state toggle via `NtQueryIntervalProfile` + HalDispatchTable (manual-map driver; thread/callback manipulation; gmh5225)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
+- [EAC](entities/eac.md) — mixed EAC study pack: reversed `easyanticheat.sys` callback logic + EAC/EOS SDK drop (gmh5225)
 - [EASY-HWID-SPOOFER](entities/easy-hwid-spoofer.md) — kernel-mode HWID spoofer via driver dispatch hooks + physical-memory patches (disk/NIC/GPU/SMBIOS; Win10; gmh5225)
 - [easypeasy-gc](entities/easypeasy-gc.md) — Genshin Impact EasyPeasy-framework cheat client (Grasscutter custom server; client-side gameplay mods; gmh5225)
 - [EasyAntiCheat-Reversing](entities/easyanticheat-reversing.md) — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable driver RE snapshot (gmh5225)
