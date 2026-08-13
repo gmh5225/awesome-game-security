@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:wh1te4ever/HumptyLock`: entity [[humptylock]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked from [[xnu-1day-practice]].
+
 - **2026-08-13** — ingest `description:gmh5225/FindFunc`: entity [[findfunc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-fusion]], [[ida-sigmaker]], and [[idenlib]].
 
 - **2026-08-13** — ingest `description:gmh5225/Flying-Guys-fully-modified`: entity [[flying-guys-fully-modified]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[flying-guys]], [[kdmapper-rs]], and [[imgui]].

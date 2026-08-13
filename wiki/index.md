@@ -697,6 +697,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HWID-Spoofer-UD-Fortnite-WarZone-Apex-Rust-Escape-From-Tarkov-and-all-EAC-BE-Games-IMGUI-Loader-Base](entities/hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base.md) — universal ImGui-loader HWID spoofer for EAC/BE titles (disk/NIC/SMBIOS/GPU; gmh5225)
 - [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
+- [HumptyLock](entities/humptylock.md) — iOS 14.0–14.4.2 XNU kernel R/W exploit app (Coruna Pendulum PE; lockf/OOL-port/pipe primitives; wh1te4ever)
 - [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
 - [ida2llvm](entities/ida2llvm.md) — dynamic IDA→LLVM IR binary lifting (cursor-sync liftability viewer; cheat / IDA Plugins)
