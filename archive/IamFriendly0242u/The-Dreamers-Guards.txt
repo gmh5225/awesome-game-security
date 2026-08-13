@@ -1,0 +1,2063 @@
+Project Path: arc_IamFriendly0242u_The-Dreamers-Guards_e7q7g4nj
+
+Source Tree:
+
+```txt
+arc_IamFriendly0242u_The-Dreamers-Guards_e7q7g4nj
+├── LICENSE
+├── README.md
+├── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+└── src
+    ├── client
+    │   ├── java
+    │   │   └── net
+    │   │       └── thedreamers
+    │   │           └── guards
+    │   │               └── client
+    │   │                   ├── ModScanner.java
+    │   │                   ├── Thedreamers_guardsClient.java
+    │   │                   └── mixin
+    │   │                       └── GuardsClientNetworkMixin.java
+    │   └── resources
+    │       └── thedreamers_guards.client.mixins.json
+    └── main
+        ├── java
+        │   └── net
+        │       └── thedreamers
+        │           └── guards
+        │               ├── Thedreamers_guards.java
+        │               ├── config
+        │               │   └── AntiCheatConfig.java
+        │               ├── network
+        │               │   ├── AntiCheatAuthPayload.java
+        │               │   └── ServerNetworkHandler.java
+        │               ├── punishment
+        │               │   ├── FlagSession.java
+        │               │   ├── PunishmentExecutor.java
+        │               │   └── SuspensionManager.java
+        │               ├── server
+        │               │   ├── GuardsCommand.java
+        │               │   ├── ServerPlayerListener.java
+        │               │   └── Thedreamers_guardsServer.java
+        │               └── webhook
+        │                   └── DiscordWebhook.java
+        └── resources
+            ├── assets
+            │   └── thedreamers_guards
+            ├── fabric.mod.json
+            └── thedreamers_guards.mixins.json
+
+```
+
+`LICENSE`:
+
+```
+Copyright (c) 2026 IamFriendly0242u. All Rights Reserved.
+
+The Dreamers Guards is a proprietary Minecraft modification.
+
+Permission is hereby GRANTED to:
+1. Download, install, and run this software on Minecraft clients and server environments.
+2. Utilize this software for personal or public multiplayer server administration.
+
+Permission is STRICTLY PROHIBITED to:
+1. Decompile, reverse engineer, re-compile, or modify any part of the source code without explicit written authorization from the copyright holder.
+2. Re-upload, mirror, or redistribute the binary (.jar) files or source code on third-party platforms or websites.
+3. Commercialize, sell, or claim ownership of this software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
+
+`README.md`:
+
+```md
+# The Dreamers Guards
+
+**The Dreamers Guards** is a high-performance, enterprise-grade security suite designed to preserve gameplay integrity on Fabric servers. It functions as a robust client-side and server-side anti-cheat framework, engineered to detect unauthorized modifications, block exploit usage, and enforce strict gameplay standards.
+
+---
+
+## Key Security Features
+
+* **Encrypted Authentication Protocol:** Custom network payloads validate client integrity before gameplay begins, preventing packet tampering.
+* **Signature-Based Mod Scanner:** Performs real-time scans against an extensive blacklist of known cheat clients and exploit utilities.
+* **Progressive Punishment Framework:** Manages infractions through a 4-phase adaptive suspension engine backed by persistent databases.
+* **Anti-Evasion System:** Prevents players from evading flag sessions or active countdowns through logout exploits.
+* **Discord Webhook Integration:** Delivers security alerts, player renders, and enforcement logs directly to central Discord channels.
+
+---
+
+## Administration Commands
+
+Access restricted to server operators:
+
+* `/guards action <target> <kick|ban> [reason]` – Manually execute immediate punishment on a flagged player.
+* `/guards pardon <playerName> <keep|remove>` – Pardon a player and manage their infraction history record.
+* `/guards trust <playerName>` – Grant temporary bypass and halt active monitoring sessions.
+* `/guards reload` – Reload configuration files, language strings, and webhook templates without restarting the server.
+
+---
+
+## Technical Specifications
+
+* **Platform:** Fabric Loader (>= 0.19.3)
+* **Minecraft Version:** 26.1.2
+* **Java Version:** Java 25
+* **Dependencies:** Fabric API, The Dreamers Lib
+
+---
+
+## License
+
+This project is licensed under **All Rights Reserved**. See the [LICENSE](LICENSE) file for complete rights and restrictions.
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+version = "${project.mod_version}+${project.minecraft_version}"
+group = project.maven_group
+
+repositories {
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"thedreamers_guards" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	def libJarVersion = "${project.thedreamers_lib_version}+${project.minecraft_version}"
+	implementation files("../TheDreamersLib/build/libs/thedreamers_lib-${project.thedreamers_lib_version}.jar")
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "lib_version", project.thedreamers_lib_version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version, "lib_version": project.thedreamers_lib_version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+	it.options.encoding = "UTF-8"
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+	def projectName = project.name
+	inputs.property "projectName", projectName
+
+	from("LICENSE") {
+		rename { "${it}_$projectName"}
+	}
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			from components.java
+		}
+	}
+	repositories {
+	}
+}
+```
+
+`gradle.properties`:
+
+```properties
+# Done to increase the memory available to gradle.
+org.gradle.jvmargs=-Xmx3G
+org.gradle.parallel=true
+
+# IntelliJ IDEA is not yet fully compatible with configuration cache, see: https://github.com/FabricMC/fabric-loom/issues/1349
+org.gradle.configuration-cache=false
+
+# Fabric Properties
+# check these on https://fabricmc.net/develop
+minecraft_version=26.1.2
+loader_version=0.19.3
+loom_version=1.17-SNAPSHOT
+
+# Mod Properties
+mod_version=1.0.0-Release
+maven_group=net.thedreamers.guards
+
+# Dependencies
+fabric_api_version=0.153.0+26.1.2
+thedreamers_lib_version=1.0.0-Release+26.1.2
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.6.0-bin.zip
+networkTimeout=10000
+retries=0
+retryBackOffMs=500
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/3d91ce3b8caaf77ad09f381f43615b715b53f72c/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables, and ensure extensions are enabled
+setlocal EnableExtensions
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+"%COMSPEC%" /c exit 1
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+"%COMSPEC%" /c exit 1
+
+:execute
+@rem Setup the command line
+
+
+
+@rem Execute Gradle
+@rem endlocal doesn't take effect until after the line is parsed and variables are expanded
+@rem which allows us to clear the local environment before executing the java command
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel
+
+:exitWithErrorLevel
+@rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
+"%COMSPEC%" /c exit %ERRORLEVEL%
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+// Should match your modid
+rootProject.name = 'thedreamers_guards'
+
+```
+
+`src/client/java/net/thedreamers/guards/client/ModScanner.java`:
+
+```java
+package net.thedreamers.guards.client;
+
+import net.fabricmc.loader.api.FabricLoader;
+import java.util.stream.Collectors;
+
+public class ModScanner {
+
+    private static final String[] BLACKLISTED_MOD_IDS = {
+            "wurst", "meteor", "meteor-client", "liquidbounce", "bleachhack", "aristois",
+            "kami", "rusherhack", "future", "inertia", "phobos",
+            "salhack", "mathax", "vector", "danielfrominternet",
+            "kami-blue", "seppuku", "coffee", "konas", "lambda",
+            "abyss", "w+3", "w+2", "gopro", "earthhack",
+            "bleach", "pixel", "liquid", "ares", "novoline",
+            "flux", "rise", "tenacity", "vape", "astolfo", "zeroday"
+    };
+
+    public static String getInstalledModsString() {
+        return FabricLoader.getInstance().getAllMods().stream()
+                .map(mod -> mod.getMetadata().getId())
+                .sorted()
+                .collect(Collectors.joining(","));
+    }
+
+    public static boolean containsIllegalMod() {
+        for (String illegalId : BLACKLISTED_MOD_IDS) {
+            if (FabricLoader.getInstance().isModLoaded(illegalId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+`src/client/java/net/thedreamers/guards/client/Thedreamers_guardsClient.java`:
+
+```java
+package net.thedreamers.guards.client;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.thedreamers.guards.network.AntiCheatAuthPayload;
+import net.thedreamers.lib.security.SecurityUtils;
+
+public class Thedreamers_guardsClient implements ClientModInitializer {
+
+	@Override
+	public void onInitializeClient() {
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+			String clientVersion = FabricLoader.getInstance()
+					.getModContainer("thedreamers_guards")
+					.map(c -> c.getMetadata().getVersion().getFriendlyString())
+					.orElse("1.0.0");
+			String rawModList = ModScanner.getInstalledModsString();
+			String token = ModScanner.containsIllegalMod() ? "DIRTY_CHEATER" : "SECURE_HANDSHAKE_TOKEN";
+			String encryptedVersion = SecurityUtils.encrypt(clientVersion);
+			String encryptedToken = SecurityUtils.encrypt(token);
+			String encryptedModList = SecurityUtils.encrypt(rawModList);
+			sender.sendPacket(new AntiCheatAuthPayload(encryptedVersion, encryptedToken, encryptedModList));
+		});
+	}
+}
+```
+
+`src/client/java/net/thedreamers/guards/client/mixin/GuardsClientNetworkMixin.java`:
+
+```java
+package net.thedreamers.guards.client.mixin;
+
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ClientPacketListener.class)
+public class GuardsClientNetworkMixin {
+
+    @Inject(method = "handleLogin", at = @At("HEAD"))
+    private void onClientLogin(ClientboundLoginPacket packet, CallbackInfo ci) {
+        System.out.println("[Thedreamers Guards] Client network listener verified.");
+    }
+}
+```
+
+`src/client/resources/thedreamers_guards.client.mixins.json`:
+
+```json
+{
+	"required": true,
+	"package": "net.thedreamers.guards.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"GuardsClientNetworkMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
+```
+
+`src/main/java/net/thedreamers/guards/Thedreamers_guards.java`:
+
+```java
+package net.thedreamers.guards;
+
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.thedreamers.guards.network.AntiCheatAuthPayload;
+import net.thedreamers.guards.network.ServerNetworkHandler;
+import net.thedreamers.guards.server.GuardsCommand;
+import net.thedreamers.guards.server.ServerPlayerListener;
+import net.thedreamers.guards.webhook.DiscordWebhook;
+import net.thedreamers.lib.config.ConfigEngine;
+import net.thedreamers.guards.punishment.FlagSession;
+import net.thedreamers.guards.punishment.SuspensionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+public class Thedreamers_guards implements ModInitializer {
+
+	public static final Set<UUID> PENDING_VERIFICATION = new HashSet<>();
+	public static final Set<String> TRUSTED_PLAYERS = new HashSet<>();
+	public static final ConfigEngine CONFIG_ENGINE = new ConfigEngine("config");
+	private static final Logger LOGGER = LoggerFactory.getLogger("TheDreamersGuards");
+
+	@Override
+	public void onInitialize() {
+		CONFIG_ENGINE.load();
+		SuspensionManager.load();
+		DiscordWebhook.init();
+		PayloadTypeRegistry.serverboundPlay().register(AntiCheatAuthPayload.TYPE, AntiCheatAuthPayload.STREAM_CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(AntiCheatAuthPayload.TYPE, (payload, context) -> {
+			context.server().execute(() -> {
+				if (!PENDING_VERIFICATION.contains(context.player().getUUID())) return;
+				PENDING_VERIFICATION.remove(context.player().getUUID());
+				ServerPlayerListener.clearTimeout(context.player().getUUID());
+				ServerNetworkHandler.processVerification(
+						context.server(),
+						context.player(),
+						payload.version(),
+						payload.token(),
+						payload.modList(),
+						context.player().getScoreboardName(),
+						context.player().getUUID().toString()
+				);
+			});
+		});
+		ServerTickEvents.START_SERVER_TICK.register(FlagSession::tick);
+		ServerTickEvents.START_SERVER_TICK.register(ServerPlayerListener::tick);
+		ServerPlayerListener.registerEvents();
+		CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> GuardsCommand.register(dispatcher));
+
+		String loadSuccessMsg = CONFIG_ENGINE.getLanguageString("system.load_success", "§b[The Dreamers Guards] §aCore security framework initialized successfully and securely!");
+		LOGGER.info(loadSuccessMsg.replaceAll("§[0-9a-fk-or]", ""));
+	}
+}
+```
+
+`src/main/java/net/thedreamers/guards/config/AntiCheatConfig.java`:
+
+```java
+package net.thedreamers.guards.config;
+
+import net.thedreamers.guards.Thedreamers_guards;
+
+public class AntiCheatConfig {
+
+    public static void loadConfig() {
+        Thedreamers_guards.CONFIG_ENGINE.load();
+    }
+
+    public static String getProperty(String key, String defaultValue) {
+        return Thedreamers_guards.CONFIG_ENGINE.getProperty(key, defaultValue);
+    }
+
+    public static String getLanguage(String key, String defaultValue) {
+        return Thedreamers_guards.CONFIG_ENGINE.getLanguageString(key, defaultValue);
+    }
+
+    public static String getKickVersionMismatchMessage() {
+        return getProperty("kick_version_mismatch_message", "§c[The Dreamers Guards]\n§7Whoops! Your mod version doesn't match the server requirement.\n§7Server: §e%s §7| Yours: §c%s");
+    }
+
+    public static String getKickCheaterMessage() {
+        return getProperty("kick_cheater_message", "§c[The Dreamers Guards]\n§7Nice try, but you got caught: §e%s");
+    }
+
+    public static String getBroadcastBanMessage() {
+        return getProperty("broadcast_ban_message", "§3[BANNED] §e%s §7got caught cheating. See ya never!");
+    }
+
+    public static String getBroadcastKickMessage() {
+        return getProperty("broadcast_kick_message", "§a[KICKED] §e%s §7was removed from the game. Trash cleared.");
+    }
+
+    public static String getConsoleLogFailed() {
+        return getLanguage("console_log_failed", "§c[WARN] FAILED! §7Failed to execute action on %s.");
+    }
+
+    public static String[] getModBlacklist() {
+        return getProperty("modBlacklist", "wurst,meteor,meteor-client,liquidbounce,bleachhack,aristois,kami,rusherhack,future,salhack,phobos,kami-blue,konas,inertia,mathax,vector,danielfrominternet,seppuku,coffee,lambda,abyss,w+3,w+2,gopro,earthhack,bleach,pixel,liquid,ares,novoline,flux,rise,tenacity,vape,astolfo,zeroday").split(",");
+    }
+
+    public static int getTotalTimeoutSeconds() {
+        return Integer.parseInt(getProperty("total_timeout_seconds", "30"));
+    }
+
+    public static String getPunishmentMode() {
+        return getProperty("punishment_mode", "KICK");
+    }
+
+    public static String getDiscordWebhookUrl() {
+        return getProperty("webhookUrl", "YOUR_WEBHOOK_URL_HERE");
+    }
+
+    public static String getAvatarServiceUrl() {
+        return getProperty("avatar_service_url", "https://crafthead.net/cube/{name}");
+    }
+
+    public static String getServerName() {
+        return getProperty("serverName", "Change Me!");
+    }
+
+    public static boolean isEnableAdminPing() {
+        return Boolean.parseBoolean(getProperty("enableAdminPing", "false"));
+    }
+
+    public static String getAdminRoleId() {
+        return getProperty("adminRoleId", "Change Me!");
+    }
+
+    public static String getEmbedThumbnailUrl() {
+        return getProperty("thumbnailUrl", "Change Me!");
+    }
+
+    public static boolean isWebhookOnAction() {
+        return Boolean.parseBoolean(getProperty("webhook_on_action", "true"));
+    }
+
+    public static String getActionThumbnailUrl() {
+        return getProperty("thumbnailUrl", "Change Me!");
+    }
+
+    public static boolean isWebhookOnPardon() {
+        return Boolean.parseBoolean(getProperty("webhook_on_pardon", "true"));
+    }
+
+    public static String getPardonThumbnailUrl() {
+        return getProperty("thumbnailUrl", "Change Me!");
+    }
+
+    public static boolean isWebhookOnVerify() {
+        return Boolean.parseBoolean(getProperty("webhook_on_verify", "true"));
+    }
+
+    public static String getVerifyThumbnailUrl() {
+        return getProperty("thumbnailUrl", "Change Me!");
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/network/AntiCheatAuthPayload.java`:
+
+```java
+package net.thedreamers.guards.network;
+
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
+
+public record AntiCheatAuthPayload(String version, String token, String modList) implements CustomPacketPayload {
+
+    public static final CustomPacketPayload.Type<AntiCheatAuthPayload> TYPE =
+            new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("thedreamers_guards", "auth_packet"));
+
+    public static final StreamCodec<FriendlyByteBuf, AntiCheatAuthPayload> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public AntiCheatAuthPayload decode(FriendlyByteBuf buf) {
+            return new AntiCheatAuthPayload(buf.readUtf(32767), buf.readUtf(32767), buf.readUtf(262144));
+        }
+
+        @Override
+        public void encode(FriendlyByteBuf buf, AntiCheatAuthPayload payload) {
+            buf.writeUtf(payload.version(), 32767);
+            buf.writeUtf(payload.token(), 32767);
+            buf.writeUtf(payload.modList(), 262144);
+        }
+    };
+
+    @Override
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/network/ServerNetworkHandler.java`:
+
+```java
+package net.thedreamers.guards.network;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.thedreamers.guards.Thedreamers_guards;
+import net.thedreamers.guards.config.AntiCheatConfig;
+import net.thedreamers.guards.punishment.FlagSession;
+import net.thedreamers.guards.webhook.DiscordWebhook;
+import net.thedreamers.lib.anticheat.AntiCheatCore;
+import net.thedreamers.lib.security.SecurityUtils;
+import net.thedreamers.guards.punishment.SuspensionManager;
+
+public class ServerNetworkHandler {
+
+    private static final AntiCheatCore CORE = new AntiCheatCore(SuspensionManager.getEngine());
+
+    private static String cleanFormatting(String input) {
+        if (input == null) return "";
+        return input.replace("\\u00A7", "§").replace("&", "§").replace("\\n", "\n");
+    }
+
+    public static void processVerification(MinecraftServer server, ServerPlayer player, String clientVer, String token, String mods, String name, String uuid) {
+        if (Thedreamers_guards.TRUSTED_PLAYERS.contains(name.toLowerCase())) {
+            DiscordWebhook.sendVerifyAlert(server, name, uuid, "SAFE", "Bypassed via Trust Protocol");
+            return;
+        }
+
+        String decryptedVersion = SecurityUtils.decrypt(clientVer);
+        String decryptedToken = SecurityUtils.decrypt(token);
+        String decryptedMods = SecurityUtils.decrypt(mods);
+
+        if (decryptedVersion == null) decryptedVersion = "";
+        if (decryptedToken == null) decryptedToken = "";
+        if (decryptedMods == null) decryptedMods = "";
+
+        decryptedVersion = decryptedVersion.trim();
+        decryptedToken = decryptedToken.trim();
+        decryptedMods = decryptedMods.trim();
+
+        String serverVer = Thedreamers_guards.CONFIG_ENGINE.getModVersion().trim();
+        boolean enforceVersion = Boolean.parseBoolean(Thedreamers_guards.CONFIG_ENGINE.getProperty("enforce_version_match", "true"));
+
+        if (enforceVersion && !decryptedVersion.equals(serverVer)) {
+            String rawMismatch = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("kick.version_mismatch", "§c[The Dreamers Guards]\\n\\n§6■ SECURITY NOTICE: VERSION MISMATCH ■\\n§7Your client mod version does not match the server requirements.\\n\\n§7Required Server Version: §e%s\\n§7Your Client Version: §c%s\\n\\n§7Please install the exact matching mod version before trying to reconnect.");
+            String styledMismatchMessage = String.format(rawMismatch, serverVer, decryptedVersion);
+            player.connection.disconnect(Component.literal(cleanFormatting(styledMismatchMessage)));
+            DiscordWebhook.sendVerifyAlert(server, name, uuid, "FAILED", "Version Mismatch");
+            return;
+        }
+
+        if ("DIRTY_CHEATER".equals(decryptedToken)) {
+            FlagSession.start(server, player, "Illegal Modifications");
+            DiscordWebhook.sendVerifyAlert(server, name, uuid, "CHEATER", "Client Scanner Flagged");
+            return;
+        }
+
+        if (CORE.scanModHandshake(decryptedMods, AntiCheatConfig.getModBlacklist())) {
+            FlagSession.start(server, player, "Blacklisted Modification Signature Found");
+            DiscordWebhook.sendVerifyAlert(server, name, uuid, "CHEATER", "Blacklisted Mod Detected");
+            return;
+        }
+
+        DiscordWebhook.sendVerifyAlert(server, name, uuid, "SAFE", "Passed secure authentication");
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/punishment/FlagSession.java`:
+
+```java
+package net.thedreamers.guards.punishment;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.thedreamers.guards.Thedreamers_guards;
+import net.thedreamers.guards.config.AntiCheatConfig;
+import net.thedreamers.guards.webhook.DiscordWebhook;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class FlagSession {
+
+    private static final Map<UUID, SessionInstance> ACTIVE_SESSIONS = new ConcurrentHashMap<>();
+    private static final File HISTORY_FILE = new File("config/TheDreamers_Guards/suspension-history.txt");
+
+    private static String cleanFormatting(String input) {
+        if (input == null) return "";
+        return input.replace("\\u00A7", "§").replace("&", "§").replace("\\n", "\n");
+    }
+
+    public static List<String> getActiveFlaggedNames() {
+        List<String> names = new ArrayList<>();
+        for (SessionInstance session : ACTIVE_SESSIONS.values()) {
+            names.add(session.playerName);
+        }
+        return names;
+    }
+
+    public static void start(MinecraftServer server, ServerPlayer player, String reason) {
+        if (player == null || ACTIVE_SESSIONS.containsKey(player.getUUID())) return;
+        int totalTimeout = AntiCheatConfig.getTotalTimeoutSeconds();
+        ACTIVE_SESSIONS.put(player.getUUID(), new SessionInstance(player.getUUID(), player.getScoreboardName(), player.getIpAddress(), reason, totalTimeout));
+        String rawAlert = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.alert_message", "§d[GUARDS ALERT] §e%s §7flagged for §c%s (Client-Side Checked).\n§8Yo admin, use §7/guards action §8to execute this cheater or §7/guards trust §8to let them stay.");
+        String customAlert = String.format(rawAlert, player.getScoreboardName(), reason);
+        server.getPlayerList().getPlayers().stream()
+                .filter(p -> server.getPlayerList().isOp(new NameAndId(p.getGameProfile().id(), p.getGameProfile().name())))
+                .forEach(admin -> admin.sendSystemMessage(Component.literal(cleanFormatting(customAlert))));
+    }
+
+    public static boolean stopSession(MinecraftServer server, String playerName) {
+        for (UUID uuid : ACTIVE_SESSIONS.keySet()) {
+            SessionInstance session = ACTIVE_SESSIONS.get(uuid);
+            if (session.playerName.equalsIgnoreCase(playerName)) {
+                ACTIVE_SESSIONS.remove(uuid);
+                ServerPlayer player = server.getPlayerList().getPlayer(uuid);
+                if (player != null) {
+                    player.removeEffect(MobEffects.HUNGER);
+                    player.removeEffect(MobEffects.SLOWNESS);
+                    player.removeEffect(MobEffects.DARKNESS);
+                    player.removeEffect(MobEffects.POISON);
+                    String trustPermittedMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.trust_permitted", "§d[The Dreamers Guards] §aYou have been permitted to stay in this server for a while.");
+                    player.sendSystemMessage(Component.literal(cleanFormatting(trustPermittedMsg)));
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void tick(MinecraftServer server) {
+        if (ACTIVE_SESSIONS.isEmpty()) return;
+        for (UUID uuid : ACTIVE_SESSIONS.keySet()) {
+            SessionInstance session = ACTIVE_SESSIONS.get(uuid);
+            ServerPlayer player = server.getPlayerList().getPlayer(uuid);
+            if (player == null) {
+                ACTIVE_SESSIONS.remove(uuid);
+                server.execute(() -> executeProgressivePunishment(server, null, session.playerName, uuid.toString(), session.ipAddress, session.reason));
+                continue;
+            }
+            session.tickCounter++;
+            if (session.tickCounter >= 20) {
+                session.tickCounter = 0;
+                session.remainingSeconds--;
+                int remaining = session.remainingSeconds;
+                if (remaining == 5) {
+                    server.execute(() -> {
+                        player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 200, 255, false, false));
+                        player.addEffect(new MobEffectInstance(MobEffects.POISON, 200, 255, false, false));
+                        player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 200, 255, false, false));
+                        player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 255, false, false));
+                    });
+                }
+                if (remaining == 3 || remaining == 2 || remaining == 1) {
+                    String rawBroadcast = AntiCheatConfig.getProperty("countdown_broadcast_message", "§c§l[WARN] §e%s §cgets dropped in §l%ss!");
+                    String broadcastMsg = String.format(rawBroadcast, session.playerName, remaining);
+                    server.getPlayerList().broadcastSystemMessage(Component.literal(cleanFormatting(broadcastMsg)), false);
+                    server.execute(() -> {
+                        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                            p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ANVIL_DESTROY, SoundSource.BLOCKS, 1.0F, 1.0F);
+                        }
+                    });
+                }
+                if (remaining <= 0) {
+                    ACTIVE_SESSIONS.remove(uuid);
+                    server.execute(() -> executeProgressivePunishment(server, player, session.playerName, uuid.toString(), session.ipAddress, session.reason));
+                }
+            }
+        }
+    }
+
+    private static void executeProgressivePunishment(MinecraftServer server, ServerPlayer player, String name, String uuidStr, String ip, String reason) {
+        int violationCount = getAndUpdateViolationCount(name, uuidStr, ip);
+        String mode = AntiCheatConfig.getPunishmentMode();
+        int durationMinutes;
+        switch (violationCount) {
+            case 1 -> durationMinutes = Integer.parseInt(AntiCheatConfig.getProperty("suspension_phase_1_mins", "20"));
+            case 2 -> durationMinutes = Integer.parseInt(AntiCheatConfig.getProperty("suspension_phase_2_mins", "120"));
+            case 3 -> durationMinutes = Integer.parseInt(AntiCheatConfig.getProperty("suspension_phase_3_mins", "360"));
+            default -> durationMinutes = Integer.parseInt(AntiCheatConfig.getProperty("suspension_phase_4_mins", "-1"));
+        }
+        String phaseName = durationMinutes == -1 ? "PHASE 4 (TERMINATED)" : "PHASE " + violationCount + " / 3";
+        String finalReason = reason + " [" + phaseName + "]";
+        String uniqueBroadcast = "§c[The Dreamers Guards]\n\n§c■ AUTOMATED DETECTOR DROP ■\n§7Player §e" + name + " §7failed security telemetry integrity checks!\n§c» Verdict: §fBanishment Confirmed [" + phaseName + "]";
+        server.getPlayerList().broadcastSystemMessage(Component.literal(cleanFormatting(uniqueBroadcast)), false);
+        SuspensionManager.getEngine().load();
+        SuspensionManager.getEngine().suspend(name, violationCount, durationMinutes, finalReason);
+        SuspensionManager.getEngine().suspend(uuidStr, violationCount, durationMinutes, finalReason);
+        SuspensionManager.getEngine().suspend(ip, violationCount, durationMinutes, finalReason);
+        if (player != null) {
+            String finalAction = (durationMinutes == -1 || "BAN".equalsIgnoreCase(mode)) ? "BAN" : "KICK";
+            player.connection.disconnect(SuspensionManager.getSuspensionComponent(name, uuidStr, ip));
+            DiscordWebhook.sendAlert(server, name, uuidStr, ip, finalReason, violationCount, finalAction);
+        }
+    }
+
+    private static int getAndUpdateViolationCount(String playerName, String uuidStr, String ipAddress) {
+        Properties props = new Properties();
+        if (HISTORY_FILE.exists()) {
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(HISTORY_FILE), java.nio.charset.StandardCharsets.UTF_8)) {
+                props.load(reader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            HISTORY_FILE.getParentFile().mkdirs();
+        }
+        String record = props.getProperty(playerName, "0");
+        int currentCount = 0;
+        if (record.contains(",")) {
+            currentCount = Integer.parseInt(record.split(",")[0]);
+        } else {
+            currentCount = Integer.parseInt(record);
+        }
+        currentCount++;
+        props.setProperty(playerName, currentCount + "," + uuidStr + "," + ipAddress);
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(HISTORY_FILE), java.nio.charset.StandardCharsets.UTF_8)) {
+            props.store(writer, "The Dreamers Guards Infraction Tracking History");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return currentCount;
+    }
+
+    private static class SessionInstance {
+        final UUID playerUuid;
+        final String playerName;
+        final String ipAddress;
+        final String reason;
+        int remainingSeconds;
+        int tickCounter = 0;
+
+        SessionInstance(UUID uuid, String name, String ip, String reason, int timeout) {
+            this.playerUuid = uuid;
+            this.playerName = name;
+            this.ipAddress = ip;
+            this.reason = reason;
+            this.remainingSeconds = timeout;
+        }
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/punishment/PunishmentExecutor.java`:
+
+```java
+package net.thedreamers.guards.punishment;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.UserBanListEntry;
+import net.minecraft.server.players.NameAndId;
+import net.thedreamers.guards.Thedreamers_guards;
+import net.thedreamers.guards.config.AntiCheatConfig;
+import net.thedreamers.guards.webhook.DiscordWebhook;
+import net.thedreamers.lib.anticheat.AdminCommandCore;
+import java.util.UUID;
+
+public class PunishmentExecutor {
+
+    private static final AdminCommandCore ADMIN_CORE = new AdminCommandCore(
+            SuspensionManager.getEngine(),
+            Thedreamers_guards.CONFIG_ENGINE
+    );
+
+    private static String cleanFormatting(String input) {
+        if (input == null) return "";
+        return input.replace("\\u00A7", "§").replace("&", "§").replace("\\n", "\n");
+    }
+
+    public static void execute(MinecraftServer server, ServerPlayer player, String reason, String mode) {
+        if (player == null) return;
+        String name = player.getScoreboardName();
+        String uuid = player.getUUID().toString();
+        String ip = player.getIpAddress();
+
+        String automatedKickMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("kick.caught_message", "Illegal Modifications");
+        boolean isAutomated = reason.equals(automatedKickMsg);
+
+        int phase = SuspensionManager.getPhase(name, uuid, ip);
+        try {
+            SuspensionManager.getEngine().load();
+            if (!isAutomated) {
+                if ("BAN".equalsIgnoreCase(mode)) {
+                    SuspensionManager.getEngine().suspend(name, 4, -1, reason);
+                    SuspensionManager.getEngine().suspend(uuid, 4, -1, reason);
+                    SuspensionManager.getEngine().suspend(ip, 4, -1, reason);
+                    String rawBroadcast = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("broadcast_ban_message", "§3[BANNED] §e%s §7got caught cheating. See ya never!");
+                    server.getPlayerList().broadcastSystemMessage(Component.literal(cleanFormatting(String.format(rawBroadcast, name))), false);
+                    DiscordWebhook.sendAlert(server, name, uuid, ip, reason, 4, "BAN");
+                } else {
+                    int nextPhase = phase == 0 ? 1 : Math.min(phase + 1, 3);
+                    int duration = 20;
+                    if (nextPhase == 2) duration = 120;
+                    if (nextPhase == 3) duration = 360;
+                    SuspensionManager.getEngine().suspend(name, nextPhase, duration, reason);
+                    SuspensionManager.getEngine().suspend(uuid, nextPhase, duration, reason);
+                    SuspensionManager.getEngine().suspend(ip, nextPhase, duration, reason);
+                    String rawBroadcast = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("broadcast_kick_message", "§a[KICKED] §e%s §7was removed from the game. Trash cleared.");
+                    server.getPlayerList().broadcastSystemMessage(Component.literal(cleanFormatting(String.format(rawBroadcast, name))), false);
+                    DiscordWebhook.sendAlert(server, name, uuid, ip, reason, nextPhase, "KICK");
+                }
+            }
+            player.connection.disconnect(SuspensionManager.getSuspensionComponent(name, uuid, ip));
+        } catch (Exception e) {
+            String consoleLogFailed = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("console_log_failed", "§c[WARN] FAILED! §7Failed to execute action on %s.");
+            server.getPlayerList().broadcastSystemMessage(Component.literal(cleanFormatting(String.format(consoleLogFailed, name))), false);
+        }
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/punishment/SuspensionManager.java`:
+
+```java
+package net.thedreamers.guards.punishment;
+
+import net.thedreamers.lib.punishment.SuspensionEngine;
+import net.minecraft.network.chat.Component;
+import net.thedreamers.guards.Thedreamers_guards;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+
+public class SuspensionManager {
+
+    private static SuspensionEngine engine;
+    private static final File FILE = new File("config/TheDreamers_Guards/suspended-list.txt");
+
+    public static void load() {
+        engine = new SuspensionEngine(FILE);
+        engine.load();
+    }
+
+    public static void suspend(String username, String uuid, String ip) {
+        engine.suspend(username, 4, -1, "Repeated or Critical Anti-Cheat Infractions.");
+        engine.suspend(uuid, 4, -1, "Repeated or Critical Anti-Cheat Infractions.");
+        engine.suspend(ip, 4, -1, "Repeated or Critical Anti-Cheat Infractions.");
+    }
+
+    public static void pardon(String target) {
+        engine.pardon(target);
+    }
+
+    public static boolean isSuspended(String username, String uuid, String ip) {
+        return engine.isSuspended(username, uuid, ip);
+    }
+
+    public static Component getSuspensionComponent(String username, String uuid, String ip) {
+        Properties props = new Properties();
+        if (FILE.exists()) {
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(FILE), StandardCharsets.UTF_8)) {
+                props.load(reader);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        String data = props.getProperty(username.toLowerCase());
+        if (data == null) data = props.getProperty(uuid.toLowerCase());
+        if (data == null) data = props.getProperty(ip.toLowerCase());
+        if (data == null) {
+            return Component.literal("§c[The Dreamers Guards]\n§7Connection terminated by security firewall registry configuration.");
+        }
+        String[] parts = data.split(",", 3);
+        int stage = Integer.parseInt(parts[0]);
+        long expiry = Long.parseLong(parts[1]);
+        String reason = parts.length > 2 ? parts[2] : "Repeated or Critical Anti-Cheat Infractions.";
+        if (reason.contains("[")) {
+            reason = reason.substring(0, reason.indexOf("[")).trim();
+        }
+        if (expiry == -1 || stage >= 4) {
+            String appealLink = Thedreamers_guards.CONFIG_ENGINE.getProperty("appeal_link", "No appeal system linked. Please contact the Server Administration directly.");
+            String permanentBanRaw = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("suspension.permanent_ban", "§c[The Dreamers Guards]\n\n§c■ CRITICAL SYSTEM SECURITY BREACH ■\n§fYour client has been §cPERMANENTLY ISOLATED §ffrom the server.\\n\\n§7Reason: §e%1$s\n§7Strikes: §c3 / 3 Exceeded\n§7Status: §cTERMINATED\n\n§fAppeal Resolution:\n§b%2$s");
+            return Component.literal(String.format(permanentBanRaw, reason, appealLink));
+        }
+        long now = System.currentTimeMillis();
+        long diff = expiry - now;
+        if (diff <= 0) {
+            return Component.literal("§a[The Dreamers Guards]\n§7Your security lock suspension has expired. Please reconnect to the server.");
+        }
+        long diffSeconds = (diff / 1000) % 60;
+        long diffMinutes = (diff / (60 * 1000)) % 60;
+        long diffHours = (diff / (60 * 60 * 1000));
+
+        String header = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("suspension.temporary_header", "§c[The Dreamers Guards]\n\n§6■ SECURITY PROTOCOL: CLIENT ISOLATION ■\n§7An infraction was flagged. Access temporarily restricted.\\n\\n");
+        String phaseRaw = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("suspension.temporary_phase", "§7Current Phase: §e%s / 3\n");
+        String penaltyRaw = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("suspension.temporary_penalty", "§7Remaining Penalty: §f%sh %sm %ss\\n\\n");
+        String footer = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("suspension.temporary_footer", "§7Please completely purge any illegal modifications from your game directory before trying to reconnect.");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(header);
+        sb.append("§7Reason: §e").append(reason).append("\n");
+        sb.append(String.format(phaseRaw, stage));
+        sb.append(String.format(penaltyRaw, diffHours, diffMinutes, diffSeconds));
+        sb.append(footer);
+
+        return Component.literal(sb.toString());
+    }
+
+    public static SuspensionEngine getEngine() {
+        if (engine == null) {
+            load();
+        }
+        return engine;
+    }
+
+    public static int getPhase(String username, String uuid, String ip) {
+        if (engine == null) {
+            load();
+        }
+        int stage = engine.getStage(username);
+        if (stage == 0) stage = engine.getStage(uuid);
+        if (stage == 0) stage = engine.getStage(ip);
+        return stage;
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/server/GuardsCommand.java`:
+
+```java
+package net.thedreamers.guards.server;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.server.players.UserBanListEntry;
+import net.thedreamers.guards.Thedreamers_guards;
+import net.thedreamers.guards.config.AntiCheatConfig;
+import net.thedreamers.guards.punishment.PunishmentExecutor;
+import net.thedreamers.guards.punishment.SuspensionManager;
+import net.thedreamers.guards.punishment.FlagSession;
+import net.thedreamers.guards.webhook.DiscordWebhook;
+import net.thedreamers.lib.anticheat.AdminCommandCore;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
+
+public class GuardsCommand {
+
+    private static final AdminCommandCore ADMIN_CORE = new AdminCommandCore(SuspensionManager.getEngine(), Thedreamers_guards.CONFIG_ENGINE);
+
+    private static String cleanFormatting(String input) {
+        if (input == null) return "";
+        return input.replace("\\u00A7", "§").replace("&", "§").replace("\\n", "\n");
+    }
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("guards")
+                .then(Commands.literal("action")
+                        .then(Commands.argument("target", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(FlagSession.getActiveFlaggedNames(), builder))
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(new String[]{"kick", "ban"}, builder))
+                                        .executes(ctx -> {
+                                            CommandSourceStack source = ctx.getSource();
+                                            String adminName = source.getTextName();
+                                            if (source.getEntity() instanceof ServerPlayer sp) {
+                                                NameAndId nameAndId = new NameAndId(sp.getGameProfile().id(), sp.getGameProfile().name());
+                                                if (!source.getServer().getPlayerList().isOp(nameAndId)) {
+                                                    String notOpMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.not_op", "§c[Guards] Nice try, but this command is for admins only!");
+                                                    sp.sendSystemMessage(Component.literal(cleanFormatting(notOpMsg)));
+                                                    return 0;
+                                                }
+                                            }
+                                            String targetName = StringArgumentType.getString(ctx, "target");
+                                            String type = StringArgumentType.getString(ctx, "type").toUpperCase();
+                                            ServerPlayer targetPlayer = null;
+                                            for (ServerPlayer p : source.getServer().getPlayerList().getPlayers()) {
+                                                if (p.getScoreboardName().equalsIgnoreCase(targetName)) {
+                                                    targetPlayer = p;
+                                                    break;
+                                                }
+                                            }
+                                            if (targetPlayer == null) {
+                                                String offlineMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.player_offline", "§c[Guards] Player is not online or active!");
+                                                source.sendFailure(Component.literal(cleanFormatting(offlineMsg)));
+                                                return 0;
+                                            }
+                                            String defaultReason = "KICK".equalsIgnoreCase(type) ?
+                                                    Thedreamers_guards.CONFIG_ENGINE.getLanguageString("kick.action_kick", "§c[The Dreamers Guards]\n\n§6■ PROTECTION SYSTEM ALERT ■\n§7You have been disconnected from the dreamscape realm.\n\n§6» Status: §eAutomated Security Sweep Enforcement") :
+                                                    Thedreamers_guards.CONFIG_ENGINE.getLanguageString("kick.action_ban", "§c[The Dreamers Guards]\n\n§4■ CRITICAL BANISHMENT PROCLAMATION ■\n§7Your access rights to this realm have been permanently severed.\n\n§4» Status: §eThe Core Matrix Integrity Protection Violation");
+                                            PunishmentExecutor.execute(source.getServer(), targetPlayer, defaultReason, type);
+                                            DiscordWebhook.sendActionAlert(source.getServer(), adminName, targetPlayer.getScoreboardName(), type, defaultReason);
+                                            String successMsg = String.format(Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.action_success", "§a[Guards] Guards Action Successfully: %s the %s"), type, targetPlayer.getScoreboardName());
+                                            source.sendSuccess(() -> Component.literal(cleanFormatting(successMsg)), false);
+                                            return 1;
+                                        })
+                                        .then(Commands.argument("reason", StringArgumentType.greedyString())
+                                                .executes(ctx -> {
+                                                    CommandSourceStack source = ctx.getSource();
+                                                    String adminName = source.getTextName();
+                                                    if (source.getEntity() instanceof ServerPlayer sp) {
+                                                        NameAndId nameAndId = new NameAndId(sp.getGameProfile().id(), sp.getGameProfile().name());
+                                                        if (!source.getServer().getPlayerList().isOp(nameAndId)) {
+                                                            String notOpMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.not_op", "§c[Guards] Nice try, but this command is for admins only!");
+                                                            sp.sendSystemMessage(Component.literal(cleanFormatting(notOpMsg)));
+                                                            return 0;
+                                                        }
+                                                    }
+                                                    String targetName = StringArgumentType.getString(ctx, "target");
+                                                    String type = StringArgumentType.getString(ctx, "type").toUpperCase();
+                                                    String customReason = StringArgumentType.getString(ctx, "reason");
+                                                    ServerPlayer targetPlayer = null;
+                                                    for (ServerPlayer p : source.getServer().getPlayerList().getPlayers()) {
+                                                        if (p.getScoreboardName().equalsIgnoreCase(targetName)) {
+                                                            targetPlayer = p;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (targetPlayer == null) {
+                                                        String offlineMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.player_offline", "§c[Guards] Player is not online or active!");
+                                                        source.sendFailure(Component.literal(cleanFormatting(offlineMsg)));
+                                                        return 0;
+                                                    }
+                                                    String formattedReason = "KICK".equalsIgnoreCase(type) ?
+                                                            Thedreamers_guards.CONFIG_ENGINE.getLanguageString("kick.action_kick_reason", "§c[The Dreamers Guards]\n\n§6■ ADMINISTRATIVE KICK DROP ■\n§7Enforced by order of the server security board.\n\n§6» Reason: §f%s") :
+                                                            Thedreamers_guards.CONFIG_ENGINE.getLanguageString("kick.action_ban_reason", "§c[The Dreamers Guards]\n\n§4■ PERMANENT TERMINATION RECORD ■\n§7Enforced by operational command authority staff.\n\n§4» Status: §f%s");
+                                                    String finalReasonText = String.format(formattedReason, customReason);
+                                                    if (formattedReason.contains("%s")) {
+                                                        PunishmentExecutor.execute(source.getServer(), targetPlayer, finalReasonText, type);
+                                                    } else {
+                                                        PunishmentExecutor.execute(source.getServer(), targetPlayer, formattedReason + "\n§c» Reason: §f" + customReason, type);
+                                                    }
+                                                    DiscordWebhook.sendActionAlert(source.getServer(), adminName, targetPlayer.getScoreboardName(), type, customReason);
+                                                    String successMsg = String.format(Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.action_success_reason", "§a[Guards] Guards Action Successfully: %s the %s for %s"), type, targetPlayer.getScoreboardName(), customReason);
+                                                    source.sendSuccess(() -> Component.literal(cleanFormatting(successMsg)), false);
+                                                    return 1;
+                                                })
+                                        )
+                                )
+                        )
+                )
+                .then(Commands.literal("pardon")
+                        .then(Commands.argument("playerName", StringArgumentType.word())
+                                .then(Commands.argument("mode", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(new String[]{"keep", "remove"}, builder))
+                                        .executes(ctx -> {
+                                            CommandSourceStack source = ctx.getSource();
+                                            String adminName = source.getTextName();
+                                            if (source.getEntity() instanceof ServerPlayer sp) {
+                                                NameAndId nameAndId = new NameAndId(sp.getGameProfile().id(), sp.getGameProfile().name());
+                                                if (!source.getServer().getPlayerList().isOp(nameAndId)) {
+                                                    String notOpMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.not_op", "§c[Guards] Nice try, but this command is for admins only!");
+                                                    sp.sendSystemMessage(Component.literal(cleanFormatting(notOpMsg)));
+                                                    return 0;
+                                                }
+                                            }
+                                            String playerName = StringArgumentType.getString(ctx, "playerName");
+                                            String mode = StringArgumentType.getString(ctx, "mode").toLowerCase();
+                                            SuspensionManager.getEngine().load();
+                                            int currentPhase = SuspensionManager.getEngine().getStage(playerName);
+                                            if (currentPhase >= 4 && "keep".equals(mode)) {
+                                                String failedPermanentMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.pardon_failed_permanent", "§c[Guards] Action Failed: Cannot use KEEP mode for a Phase 4 permanently suspended player! Please utilize REMOVE mode to completely purge the record!");
+                                                source.sendFailure(Component.literal(cleanFormatting(failedPermanentMsg)));
+                                                return 0;
+                                            }
+                                            SuspensionManager.getEngine().pardon(playerName);
+                                            for (UserBanListEntry entry : source.getServer().getPlayerList().getBans().getEntries()) {
+                                                NameAndId nid = entry.getUser();
+                                                if (nid.name().equalsIgnoreCase(playerName)) {
+                                                    source.getServer().getPlayerList().getBans().remove(nid);
+                                                    try {
+                                                        source.getServer().getPlayerList().getBans().save();
+                                                    } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    SuspensionManager.getEngine().pardon(nid.id().toString());
+                                                    break;
+                                                }
+                                            }
+                                            File historyFile = new File("config/TheDreamers_Guards/suspension-history.txt");
+                                            if (historyFile.exists()) {
+                                                Properties props = new Properties();
+                                                try (InputStreamReader reader = new InputStreamReader(new FileInputStream(historyFile), StandardCharsets.UTF_8)) {
+                                                    props.load(reader);
+                                                    String matchedKey = null;
+                                                    for (String key : props.stringPropertyNames()) {
+                                                        if (key.equalsIgnoreCase(playerName)) {
+                                                            matchedKey = key;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (matchedKey != null) {
+                                                        String record = props.getProperty(matchedKey);
+                                                        if (record != null && record.contains(",")) {
+                                                            String[] tokens = record.split(",");
+                                                            SuspensionManager.getEngine().pardon(tokens[1]);
+                                                            String savedIp = tokens[2];
+                                                            SuspensionManager.getEngine().pardon(savedIp);
+                                                            source.getServer().getPlayerList().getIpBans().remove(savedIp);
+                                                            try {
+                                                                source.getServer().getPlayerList().getIpBans().save();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                        if ("remove".equals(mode)) {
+                                                            props.remove(matchedKey);
+                                                        }
+                                                    }
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                                if ("remove".equals(mode)) {
+                                                    try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(historyFile), StandardCharsets.UTF_8)) {
+                                                        props.store(writer, "The Dreamers Guards Infraction Tracking History");
+                                                    } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                            DiscordWebhook.sendPardonAlert(source.getServer(), adminName, playerName, mode.toUpperCase());
+                                            String pardonSuccessMsg = String.format(Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.pardon_success", "§a[Guards] Guards Action Successfully: PARDON (%s) the %s"), mode.toUpperCase(), playerName);
+                                            source.sendSuccess(() -> Component.literal(cleanFormatting(pardonSuccessMsg)), false);
+                                            return 1;
+                                        })
+                                )
+                        )
+                )
+                .then(Commands.literal("trust")
+                        .then(Commands.argument("playerName", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(FlagSession.getActiveFlaggedNames(), builder))
+                                .executes(ctx -> {
+                                    CommandSourceStack source = ctx.getSource();
+                                    String adminName = source.getTextName();
+                                    if (source.getEntity() instanceof ServerPlayer sp) {
+                                        NameAndId nameAndId = new NameAndId(sp.getGameProfile().id(), sp.getGameProfile().name());
+                                        if (!source.getServer().getPlayerList().isOp(nameAndId)) {
+                                            String notOpMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.not_op", "§c[Guards] Nice try, but this command is for admins only!");
+                                            sp.sendSystemMessage(Component.literal(cleanFormatting(notOpMsg)));
+                                            return 0;
+                                        }
+                                    }
+                                    String playerName = StringArgumentType.getString(ctx, "playerName");
+                                    Thedreamers_guards.TRUSTED_PLAYERS.add(playerName.toLowerCase());
+                                    FlagSession.stopSession(source.getServer(), playerName);
+                                    DiscordWebhook.sendActionAlert(source.getServer(), adminName, playerName, "TRUST", "Admin granted temporary trust bypass");
+                                    String trustSuccessMsg = String.format(Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.trust_success", "§a[Guards] Countdown halted. %s is permitted to stay temporarily."), playerName);
+                                    source.sendSuccess(() -> Component.literal(cleanFormatting(trustSuccessMsg)), true);
+                                    return 1;
+                                })
+                        )
+                )
+                .then(Commands.literal("reload")
+                        .executes(ctx -> {
+                            CommandSourceStack source = ctx.getSource();
+                            String adminName = source.getTextName();
+                            if (source.getEntity() instanceof ServerPlayer sp) {
+                                NameAndId nameAndId = new NameAndId(sp.getGameProfile().id(), sp.getGameProfile().name());
+                                if (!source.getServer().getPlayerList().isOp(nameAndId)) {
+                                    String notOpMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.not_op", "§c[Guards] Nice try, but this command is for admins only!");
+                                    sp.sendSystemMessage(Component.literal(cleanFormatting(notOpMsg)));
+                                    return 0;
+                                }
+                            }
+                            AntiCheatConfig.loadConfig();
+                            DiscordWebhook.init();
+                            ADMIN_CORE.processReload();
+                            DiscordWebhook.sendReloadAlert(source.getServer(), adminName);
+                            String reloadSuccessMsg = Thedreamers_guards.CONFIG_ENGINE.getLanguageString("admin.reload_success", "§a[TheDreamers Guards] Configuration reloaded successfully!");
+                            source.sendSuccess(() -> Component.literal(cleanFormatting(reloadSuccessMsg)), true);
+                            return 1;
+                        })
+                )
+        );
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/server/ServerPlayerListener.java`:
+
+```java
+package net.thedreamers.guards.server;
+
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.thedreamers.guards.Thedreamers_guards;
+import net.thedreamers.guards.config.AntiCheatConfig;
+import net.thedreamers.guards.punishment.SuspensionManager;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ServerPlayerListener {
+
+    private static final Map<UUID, Long> JOIN_TIMESTAMPS = new ConcurrentHashMap<>();
+
+    public static void registerEvents() {
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            String playerName = handler.player.getScoreboardName();
+            String uuidStr = handler.player.getUUID().toString();
+            String ip = handler.player.getIpAddress();
+            UUID uuid = handler.player.getUUID();
+            SuspensionManager.getEngine().load();
+            if (SuspensionManager.isSuspended(playerName, uuidStr, ip)) {
+                server.execute(() -> handler.disconnect(SuspensionManager.getSuspensionComponent(playerName, uuidStr, ip)));
+                return;
+            }
+            Thedreamers_guards.PENDING_VERIFICATION.add(uuid);
+            JOIN_TIMESTAMPS.put(uuid, System.currentTimeMillis());
+        });
+
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            UUID uuid = handler.player.getUUID();
+            String playerName = handler.player.getScoreboardName().toLowerCase();
+            Thedreamers_guards.TRUSTED_PLAYERS.remove(playerName);
+            Thedreamers_guards.PENDING_VERIFICATION.remove(uuid);
+            JOIN_TIMESTAMPS.remove(uuid);
+        });
+    }
+
+    public static void clearTimeout(UUID uuid) {
+        JOIN_TIMESTAMPS.remove(uuid);
+    }
+
+    public static void tick(MinecraftServer server) {
+        if (JOIN_TIMESTAMPS.isEmpty()) return;
+        long now = System.currentTimeMillis();
+        long delayThreshold = Long.parseLong(AntiCheatConfig.getProperty("validation_delay_ms", "10000"));
+        for (UUID uuid : JOIN_TIMESTAMPS.keySet()) {
+            long joinTime = JOIN_TIMESTAMPS.get(uuid);
+            if (now - joinTime > delayThreshold) {
+                JOIN_TIMESTAMPS.remove(uuid);
+                Thedreamers_guards.PENDING_VERIFICATION.remove(uuid);
+                ServerPlayer player = server.getPlayerList().getPlayer(uuid);
+                if (player != null) {
+                    server.execute(() -> {
+                        String msg = "§c[The Dreamers Guards]\n§7Verification timeout.\n§cRequired mod missing: §bThe Dreamers Guards\n§7Please download and install the mod to connect.";
+                        player.connection.disconnect(Component.literal(msg));
+                    });
+                }
+            }
+        }
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/server/Thedreamers_guardsServer.java`:
+
+```java
+package net.thedreamers.guards.server;
+
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+
+public class Thedreamers_guardsServer implements DedicatedServerModInitializer {
+
+    @Override
+    public void onInitializeServer() {
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+                GuardsCommand.register(dispatcher)
+        );
+    }
+}
+```
+
+`src/main/java/net/thedreamers/guards/webhook/DiscordWebhook.java`:
+
+```java
+package net.thedreamers.guards.webhook;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
+import net.thedreamers.guards.config.AntiCheatConfig;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class DiscordWebhook {
+
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path BASE_DIR = FabricLoader.getInstance().getConfigDir().resolve("TheDreamers_Guards");
+    private static final Path EMBEDS_DIR = BASE_DIR.resolve("embeds");
+
+    private static final Path EMBED_THREAT_FILE = EMBEDS_DIR.resolve("threat_alert.json");
+    private static final Path EMBED_ACTION_FILE = EMBEDS_DIR.resolve("action_alert.json");
+    private static final Path EMBED_PARDON_FILE = EMBEDS_DIR.resolve("pardon_alert.json");
+    private static final Path EMBED_VERIFY_FILE = EMBEDS_DIR.resolve("verify_alert.json");
+    private static final Path EMBED_RELOAD_FILE = EMBEDS_DIR.resolve("reload_alert.json");
+
+    public static void init() {
+        try {
+            if (!Files.exists(EMBEDS_DIR)) {
+                Files.createDirectories(EMBEDS_DIR);
+            }
+            generateDefaults();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void generateDefaults() throws IOException {
+        if (!Files.exists(EMBED_THREAT_FILE)) {
+            String json = "{\n" +
+                    "  \"username\": \"The Dreamers Guards\",\n" +
+                    "  \"avatar_url\": \"DEFAULT\",\n" +
+                    "  \"content\": \"Yo, an illegal modification threat has been flagged! Please check this out ASAP!\",\n" +
+                    "  \"embeds\": [\n" +
+                    "    {\n" +
+                    "      \"title\": \"ANTI-CHEAT THREAT DETECTION\",\n" +
+                    "      \"color\": 16733525,\n" +
+                    "      \"author\": {\n" +
+                    "        \"name\": \"Target Player: %player_name%\",\n" +
+                    "        \"icon_url\": \"%player_avatar%\"\n" +
+                    "      },\n" +
+                    "      \"thumbnail\": {\n" +
+                    "        \"url\": \"Change Me!\"\n" +
+                    "      },\n" +
+                    "      \"footer\": {\n" +
+                    "        \"text\": \"System Integration | %server_name%\"\n" +
+                    "      },\n" +
+                    "      \"fields\": [\n" +
+                    "        { \"name\": \"Target Player:\", \"value\": \"%player_name%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Action Taken:\", \"value\": \"%action_type%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Infraction Stage:\", \"value\": \"%phase_text%\", \"inline\": false },\n" +
+                    "        { \"name\": \"Violation Reason:\", \"value\": \"%violation_reason%\", \"inline\": false },\n" +
+                    "        { \"name\": \"Player UUID:\", \"value\": \"%player_uuid%\", \"inline\": false },\n" +
+                    "        { \"name\": \"Network IP Address:\", \"value\": \"%player_ip%\", \"inline\": false }\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+            try (BufferedWriter writer = Files.newBufferedWriter(EMBED_THREAT_FILE, StandardCharsets.UTF_8)) {
+                writer.write(json);
+            }
+        }
+
+        if (!Files.exists(EMBED_ACTION_FILE)) {
+            String json = "{\n" +
+                    "  \"username\": \"The Dreamers Guards\",\n" +
+                    "  \"avatar_url\": \"DEFAULT\",\n" +
+                    "  \"embeds\": [\n" +
+                    "    {\n" +
+                    "      \"title\": \"ADMIN COMMAND EXECUTION\",\n" +
+                    "      \"description\": \"Admin %admin_name% executed forced punishment action on target player.\",\n" +
+                    "      \"color\": 16755200,\n" +
+                    "      \"thumbnail\": {\n" +
+                    "        \"url\": \"Change Me!\"\n" +
+                    "      },\n" +
+                    "      \"footer\": {\n" +
+                    "        \"text\": \"Admin Enforcement | %server_name%\"\n" +
+                    "      },\n" +
+                    "      \"fields\": [\n" +
+                    "        { \"name\": \"Administrator:\", \"value\": \"%admin_name%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Target Player:\", \"value\": \"%player_name%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Action Type:\", \"value\": \"%action_type%\", \"inline\": false },\n" +
+                    "        { \"name\": \"Enforcement Reason:\", \"value\": \"%reason%\", \"inline\": false }\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+            try (BufferedWriter writer = Files.newBufferedWriter(EMBED_ACTION_FILE, StandardCharsets.UTF_8)) {
+                writer.write(json);
+            }
+        }
+
+        if (!Files.exists(EMBED_PARDON_FILE)) {
+            String json = "{\n" +
+                    "  \"username\": \"The Dreamers Guards\",\n" +
+                    "  \"avatar_url\": \"DEFAULT\",\n" +
+                    "  \"embeds\": [\n" +
+                    "    {\n" +
+                    "      \"title\": \"ADMIN PARDON EXECUTION\",\n" +
+                    "      \"description\": \"Admin %admin_name% pardoned and removed target player from suspension list.\",\n" +
+                    "      \"color\": 5635925,\n" +
+                    "      \"thumbnail\": {\n" +
+                    "        \"url\": \"Change Me!\"\n" +
+                    "      },\n" +
+                    "      \"footer\": {\n" +
+                    "        \"text\": \"Pardon Resolution | %server_name%\"\n" +
+                    "      },\n" +
+                    "      \"fields\": [\n" +
+                    "        { \"name\": \"Administrator:\", \"value\": \"%admin_name%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Target Player:\", \"value\": \"%player_name%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Pardon Mode:\", \"value\": \"%pardon_mode%\", \"inline\": false }\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+            try (BufferedWriter writer = Files.newBufferedWriter(EMBED_PARDON_FILE, StandardCharsets.UTF_8)) {
+                writer.write(json);
+            }
+        }
+
+        if (!Files.exists(EMBED_VERIFY_FILE)) {
+            String json = "{\n" +
+                    "  \"username\": \"The Dreamers Guards\",\n" +
+                    "  \"avatar_url\": \"DEFAULT\",\n" +
+                    "  \"embeds\": [\n" +
+                    "    {\n" +
+                    "      \"title\": \"PLAYER VERIFICATION MONITOR\",\n" +
+                    "      \"description\": \"Join network authentication scanner processed entry details.\",\n" +
+                    "      \"color\": 5592575,\n" +
+                    "      \"author\": {\n" +
+                    "        \"name\": \"Target Player: %player_name%\",\n" +
+                    "        \"icon_url\": \"%player_avatar%\"\n" +
+                    "      },\n" +
+                    "      \"thumbnail\": {\n" +
+                    "        \"url\": \"Change Me!\"\n" +
+                    "      },\n" +
+                    "      \"footer\": {\n" +
+                    "        \"text\": \"Gate Verification | %server_name%\"\n" +
+                    "      },\n" +
+                    "      \"fields\": [\n" +
+                    "        { \"name\": \"Player Name:\", \"value\": \"%player_name%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Player UUID:\", \"value\": \"%player_uuid%\", \"inline\": true },\n" +
+                    "        { \"name\": \"Result Status:\", \"value\": \"%violation_reason%\", \"inline\": false },\n" +
+                    "        { \"name\": \"Detailed Notes:\", \"value\": \"%details%\", \"inline\": false }\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+            try (BufferedWriter writer = Files.newBufferedWriter(EMBED_VERIFY_FILE, StandardCharsets.UTF_8)) {
+                writer.write(json);
+            }
+        }
+
+        if (!Files.exists(EMBED_RELOAD_FILE)) {
+            String json = "{\n" +
+                    "  \"username\": \"The Dreamers Guards\",\n" +
+                    "  \"avatar_url\": \"DEFAULT\",\n" +
+                    "  \"embeds\": [\n" +
+                    "    {\n" +
+                    "      \"title\": \"SYSTEM CONFIGURATION RELOAD\",\n" +
+                    "      \"description\": \"Admin %admin_name% reloaded the anti-cheat core security configuration variables.\",\n" +
+                    "      \"color\": 5636095,\n" +
+                    "      \"thumbnail\": {\n" +
+                    "        \"url\": \"Change Me!\"\n" +
+                    "      },\n" +
+                    "      \"footer\": {\n" +
+                    "        \"text\": \"System Maintenance | %server_name%\"\n" +
+                    "      },\n" +
+                    "      \"fields\": [\n" +
+                    "        { \"name\": \"Administrator:\", \"value\": \"%admin_name%\", \"inline\": true }\n" +
+                    "      ]\n" +
+                    "    }\n" +
+                    "  ]\n" +
+                    "}";
+            try (BufferedWriter writer = Files.newBufferedWriter(EMBED_RELOAD_FILE, StandardCharsets.UTF_8)) {
+                writer.write(json);
+            }
+        }
+    }
+
+    private static void executePipelineSend(String payload) {
+        String urlSetting = AntiCheatConfig.getDiscordWebhookUrl();
+        if (urlSetting == null || urlSetting.trim().isEmpty() || "Change Me!".equals(urlSetting)) {
+            return;
+        }
+        String[] urls = urlSetting.split("\\s*,\\s*");
+        for (String url : urls) {
+            if (url.trim().isEmpty()) continue;
+            net.thedreamers.lib.webhook.DiscordWebhook coreEngine = new net.thedreamers.lib.webhook.DiscordWebhook(url.trim());
+            coreEngine.send(payload);
+        }
+    }
+
+    private static String readTemplate(Path path) {
+        StringBuilder sb = new StringBuilder();
+        if (!Files.exists(path)) return "";
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
+
+    private static String sanitizePayload(String payload) {
+        if (payload.contains("\"url\": \"Change Me!\"")) {
+            payload = payload.replace("\"thumbnail\": {\n        \"url\": \"Change Me!\"\n      },", "")
+                    .replace("\"thumbnail\": {\n        \"url\": \"Change Me!\"\n      }", "")
+                    .replace("\"thumbnail\": {\n      \"url\": \"Change Me!\"\n    },", "")
+                    .replace("\"thumbnail\": {\n      \"url\": \"Change Me!\"\n    }", "")
+                    .replace("\"thumbnail\": {\"url\": \"Change Me!\"},", "")
+                    .replace("\"thumbnail\": {\"url\": \"Change Me!\"}", "");
+        }
+        if (payload.contains("\"avatar_url\": \"DEFAULT\"")) {
+            payload = payload.replace("\"avatar_url\": \"DEFAULT\",", "").replace("\"avatar_url\": \"DEFAULT\"", "");
+        }
+        return payload;
+    }
+
+    public static void sendAlert(MinecraftServer server, String username, String uuid, String ip, String reason, int phase, String action) {
+        String template = readTemplate(EMBED_THREAT_FILE);
+        if (template.isEmpty()) return;
+        String stageText = phase >= 4 ? AntiCheatConfig.getLanguage("webhook.stage.terminated", "PHASE 4 (TERMINATED)") : String.format(AntiCheatConfig.getLanguage("webhook.stage.warn", "PHASE %s / 3"), phase);
+        String playerAvatarUrl = AntiCheatConfig.getAvatarServiceUrl().replace("{uuid}", uuid).replace("{name}", username);
+        String currentServerName = AntiCheatConfig.getServerName();
+        String payload = template.replace("%player_name%", username)
+                .replace("%player_uuid%", uuid)
+                .replace("%player_avatar%", playerAvatarUrl)
+                .replace("%action_type%", action)
+                .replace("%phase_text%", stageText)
+                .replace("%violation_reason%", reason)
+                .replace("%player_ip%", ip)
+                .replace("%server_name%", currentServerName);
+        payload = sanitizePayload(payload);
+        if (AntiCheatConfig.isEnableAdminPing() && !AntiCheatConfig.getAdminRoleId().equals("Change Me!") && !AntiCheatConfig.getAdminRoleId().trim().isEmpty()) {
+            payload = payload.replace("\"content\": \"Yo,", "\"content\": \"Yo <@&" + AntiCheatConfig.getAdminRoleId().trim() + ">,");
+        }
+        executePipelineSend(payload);
+    }
+
+    public static void sendActionAlert(MinecraftServer server, String adminName, String targetName, String actionType, String reason) {
+        String template = readTemplate(EMBED_ACTION_FILE);
+        if (template.isEmpty()) return;
+        String currentServerName = AntiCheatConfig.getServerName();
+        String payload = template.replace("%admin_name%", adminName)
+                .replace("%player_name%", targetName)
+                .replace("%action_type%", actionType)
+                .replace("%reason%", reason)
+                .replace("%server_name%", currentServerName);
+        payload = sanitizePayload(payload);
+        executePipelineSend(payload);
+    }
+
+    public static void sendPardonAlert(MinecraftServer server, String adminName, String targetName, String mode) {
+        String template = readTemplate(EMBED_PARDON_FILE);
+        if (template.isEmpty()) return;
+        String currentServerName = AntiCheatConfig.getServerName();
+        String payload = template.replace("%admin_name%", adminName)
+                .replace("%player_name%", targetName)
+                .replace("%pardon_mode%", mode)
+                .replace("%server_name%", currentServerName);
+        payload = sanitizePayload(payload);
+        executePipelineSend(payload);
+    }
+
+    public static void sendVerifyAlert(MinecraftServer server, String playerName, String playerUuid, String status, String details) {
+        String template = readTemplate(EMBED_VERIFY_FILE);
+        if (template.isEmpty()) return;
+        String currentServerName = AntiCheatConfig.getServerName();
+        String playerAvatarUrl = AntiCheatConfig.getAvatarServiceUrl().replace("{uuid}", playerUuid).replace("{name}", playerName);
+        String payload = template.replace("%player_name%", playerName)
+                .replace("%player_uuid%", playerUuid)
+                .replace("%player_avatar%", playerAvatarUrl)
+                .replace("%violation_reason%", status)
+                .replace("%details%", details)
+                .replace("%server_name%", currentServerName);
+        payload = sanitizePayload(payload);
+        executePipelineSend(payload);
+    }
+
+    public static void sendReloadAlert(MinecraftServer server, String adminName) {
+        String template = readTemplate(EMBED_RELOAD_FILE);
+        if (template.isEmpty()) return;
+        String currentServerName = AntiCheatConfig.getServerName();
+        String payload = template.replace("%admin_name%", adminName)
+                .replace("%server_name%", currentServerName);
+        payload = sanitizePayload(payload);
+        executePipelineSend(payload);
+    }
+}
+```
+
+`src/main/resources/fabric.mod.json`:
+
+```json
+{
+	"schemaVersion": 1,
+	"id": "thedreamers_guards",
+	"version": "${version}",
+	"name": "The Dreamers Guards",
+	"description": "A robust client-side and server-side anti-cheat suite for Fabric servers, featuring encrypted authentication, signature mod scanning, progressive punishments, and Discord webhook integration.",
+	"authors": [
+		"IamFriendly0242u"
+	],
+	"contact": {
+		"homepage": "https://discord.gg/RXUuaqARzU",
+		"sources": "https://github.com/IamFriendly0242u/The-Dreamers-Guards",
+		"issues": "https://github.com/IamFriendly0242u/The-Dreamers-Guards/issues"
+	},
+	"license": "All Rights Reserved",
+	"icon": "assets/thedreamers_guards/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.thedreamers.guards.Thedreamers_guards"
+		],
+		"client": [
+			"net.thedreamers.guards.client.Thedreamers_guardsClient"
+		],
+		"server": [
+			"net.thedreamers.guards.server.Thedreamers_guardsServer"
+		]
+	},
+	"mixins": [
+		"thedreamers_guards.mixins.json",
+		{
+			"config": "thedreamers_guards.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.1.2",
+		"java": ">=25",
+		"fabric-api": "*",
+		"thedreamers_lib": ">=${lib_version}"
+	}
+}
+```
+
+`src/main/resources/thedreamers_guards.mixins.json`:
+
+```json
+{
+	"required": true,
+	"package": "net.thedreamers.guards.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
+```
