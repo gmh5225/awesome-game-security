@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EFT-NewTarkovCheatProject`: entity [[eft-newtarkov-cheatproject]]; cited on [[overviews/game-hacking]]; cross-linked from [[eft-veil-eft]].
+
 - **2026-08-13** — ingest `description:gmh5225/EFT-Veil-EFT`: entity [[eft-veil-eft]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]].
 
 - **2026-08-13** — ingest `description:gmh5225/ETWHOOK-InfinityHookClass`: entity [[etwhook-infinityhookclass]]; cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]].
