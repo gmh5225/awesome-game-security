@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md
   - wiki/sources/descriptions/mattifestation__WDACTools.md
   - wiki/sources/descriptions/gmh5225__ZeroHVCI.md
-updated: 2026-08-09
+  - wiki/sources/descriptions/gmh5225__FakeEnclave.md
+updated: 2026-08-13
 confidence: high
 ---
 
@@ -41,7 +42,9 @@ WDAC policy build/deploy tooling such as [[wdactools]] (PowerShell; base/supplem
 
 HVCI bypass PoCs such as [[zero-hvci]] (gmh5225; policy edge cases + vulnerable signed-driver primitives → unsigned kernel code under Memory Integrity) sit in the same kernel trust-feature research lane. (source: wiki/sources/descriptions/gmh5225__ZeroHVCI.md)
 
+VBS enclave abuse PoCs such as [[fake-enclave]] (gmh5225; proof-of-concept misusing Enclave isolation within the VBS stack) complement HVCI bypass work when studying virtualization-based security limitations. (source: wiki/sources/descriptions/gmh5225__FakeEnclave.md)
+
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

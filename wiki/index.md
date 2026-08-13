@@ -467,6 +467,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FakerAndroid](entities/fakerandroid.md) — APK→Android Studio project translator; javaScaffolding + fakeCpp JNI `.so` hooks + IL2CPP C++ scaffolding (gmh5225; cheat / game engine explorer:Unity)
 - [FakePDB](entities/fakepdb.md) — synthetic PDB generation from IDA analysis (stripped PE symbol recovery; PDB Generation From IDA; gmh5225)
 - [FakeSign](entities/fakesign.md) — fake Authenticode signatures on PE binaries (superficial cert validation bypass; Fake Cert; gmh5225)
+- [FakeEnclave](entities/fake-enclave.md) — VBS enclave abuse PoC (Some Tricks / Windows Ring0; gmh5225)
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
 - [Fedoraware](entities/fedoraware.md) — TF2 training software (SE-Owned lineage; rendering / networking / animation; C/C++; cheat / game:team fortress 2; gmh5225)
 - [Fenrir](entities/fenrir.md) — kernel rootkit/driver framework (process hide, memory access, callbacks; jmp rdi stack spoof; gmh5225; Cheat Spoof Stack / Ring0)
