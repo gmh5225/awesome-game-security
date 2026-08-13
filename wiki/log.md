@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Driver-Communication-List`: entity [[driver-communication-list]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[win32k-file-collection]] and [[ntsleuth]].
+
 - **2026-08-13** — ingest `description:gmh5225/Driver-Detect-nullshit`: entity [[driver-detect-nullshit]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-driver-no-image]] and [[nulldriver-cheat]].
 
 - **2026-08-13** — ingest `description:gmh5225/Driver-DriverNoImage`: entity [[driver-driver-no-image]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-read-write]] and [[kernel-codecave-poc]].
