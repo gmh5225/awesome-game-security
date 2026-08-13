@@ -522,6 +522,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite-FNameEntry](entities/fortnite-fnameentry.md) — Fortnite FName/FNameEntry sample (C++; cheat / game:fortnite)
 - [Fortnite-Fltokens-and-offsets](entities/fortnite-fltokens-and-offsets.md) — Fortnite FLToken/offset grabber (stale / offline)
 - [fortnite-internal-updated-ritz](entities/fortnite-internal-updated-ritz.md) — Updated Ritz internal Fortnite cheat (UE4 hooking; ESP/aimbot/exploits; refreshed offsets + EAC bypass; gmh5225; [Internal])
+- [fortnite-internal-cheat-fixed-and-updated](entities/fortnite-internal-cheat-fixed-and-updated.md) — Fixed/updated Fortnite internal DLL (memory + silent aimbot; box/skeleton/distance/snapline/FOV/chest/ammo ESP; DX11 ImGui overlay; gmh5225; cheat / game:fortnite)
 - [fortnite-leak5](entities/fortnite-leak5.md) — Leaked INFARCTED.CC base Fortnite internal (SDK generation + hooking; gmh5225; cheat / game:fortnite)
 - [fortnite-masterpasta-ihack-source-leak](entities/fortnite-masterpasta-ihack-source-leak.md) — Leaked Masterpasta/iHack Fortnite internal (Detours hooking; UObject array; bone matrix + GetViewpoint; engine-rendered ESP; gmh5225; [Internal])
 - [zerogui-fortnite-internal](entities/zerogui-fortnite-internal.md) — ZeroGui internal Fortnite cheat (visuals-only ESP enabled; aimbot/exploits disabled; gmh5225; [Internal])

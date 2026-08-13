@@ -39,6 +39,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md
   - wiki/sources/descriptions/gmh5225__gd-internal.md
   - wiki/sources/descriptions/gmh5225__GTAIII-DE-GoldHook.md
+  - wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md
   - wiki/sources/descriptions/gmh5225__egui-d3d11.md
   - wiki/sources/descriptions/gmh5225__eft-internal.md
   - wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md
@@ -166,7 +167,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__nv-graphics-mesa.md
   - wiki/sources/descriptions/gmh5225__Vulkan-Hook.md
   - wiki/sources/descriptions/gmh5225__Steam-Hook-Render-PoC.md
-updated: 2026-08-11
+updated: 2026-08-13
 confidence: high
 ---
 
@@ -217,6 +218,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - Title-specific Valorant Dear ImGui cheat-menu samples such as [[valorant-gui-imgui-remake]] (C++; styled tabs/toggles/sliders; ESP/aimbot/visual controls; README `[GUI]`) sit in the same ImGui cheat-menu / game:valorant lane under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__valorant-gui-imgui-remake.md)
 - Title-specific Geometry Dash internal ImGui menu samples such as [[gd-internal]] (gmh5225; Comfortaa font loaded from `menu.cpp`; cheat / game:geometry dash) sit in the same in-process ImGui cheat-menu lane on rhythm titles. (source: wiki/sources/descriptions/gmh5225__gd-internal.md)
 - Title-specific GTA III: The Definitive Edition internal samples such as [[gtaiii-de-goldhook]] (gmh5225; ImGui overlay via DirectX Present hook; gameplay modifications and visual enhancements; cheat / game:gta3) sit in the same in-process ImGui cheat-menu lane on remastered classic titles. (source: wiki/sources/descriptions/gmh5225__GTAIII-DE-GoldHook.md)
+- Title-specific Fortnite internal DX11 ImGui samples such as [[fortnite-internal-cheat-fixed-and-updated]] (gmh5225; box/skeleton/distance/snapline/FOV/chest/ammo ESP + memory/silent aimbot; DirectX 11 ImGui overlay; cheat / game:fortnite) sit in the same in-process ImGui cheat-menu lane on EAC-protected UE clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md)
 - Title-specific CS:GO cheat-menu samples such as [[legit-csgo-cheat-menu]] (gmh5225; Windows-only; README `[Menu]`) sit in the same ImGui cheat-menu / game:csgo lane beside internal ImGui overlays such as [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md)
 - Internal CS:GO samples such as [[cartmanv2]] (gmh5225; C/C++; rendering / networking / editor tooling; cheat / game:csgo [Internal]) sit in the same in-process graphics / cheat-menu lane beside [[csgosimple]] and [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__cartmanv2.md)
 - Internal CS:GO samples such as [[autismware]] (gmh5225; C++; ImGui configuration menu; cheat / game:csgo [HvH]) sit in the same in-process ImGui cheat-menu lane beside [[legit-csgo-cheat-menu]] and [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__autismware.md)
