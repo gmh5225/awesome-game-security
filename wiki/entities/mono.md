@@ -4,7 +4,8 @@ kind: entity
 topics: [game-engine, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/mono__mono.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/gmh5225__EFT-MonoEFT.md
+updated: 2026-08-13
 confidence: medium
 ---
 
@@ -18,6 +19,7 @@ Open-source implementation of the .NET Framework runtime (CLR): JIT/AOT compiler
 - **Embeddable C API** — `MonoDomain`, `MonoClass`, `mono_runtime_invoke`, metadata introspection (basis for tools like [[mono-external-lib]])
 - **P/Invoke / native interop** — boundary between managed game logic and native engine code
 - **Contrast with IL2CPP** — Unity’s AOT path removes JIT/reflection surfaces Mono-era cheats relied on; see [[il2cpp]]
+- **Title-specific internals** — Mono-based EFT samples such as [[eft-monoeft]] hook managed shot/ESP paths (`CreateShot`, `GameWorld.RegisteredPlayers`, OnGUI overlays) for method-hooking and game-object introspection study. (source: wiki/sources/descriptions/gmh5225__EFT-MonoEFT.md)
 
 ## Links
 
@@ -25,4 +27,4 @@ Open-source implementation of the .NET Framework runtime (CLR): JIT/AOT compiler
 
 ## Related
 
-[[il2cpp]] · [[mono-external-lib]] · [[unity-vulnerable-entrypoint]] · [[unityexplorer]] · [[escapefromtarkov-trainer]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[il2cpp]] · [[mono-external-lib]] · [[unity-vulnerable-entrypoint]] · [[unityexplorer]] · [[escapefromtarkov-trainer]] · [[eft-monoeft]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

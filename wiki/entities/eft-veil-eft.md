@@ -12,7 +12,7 @@ confidence: medium
 
 **Veil** is an Escape From Tarkov cheat framework providing comprehensive gameplay modifications—ESP, aimbot, and radar—via memory access to the EFT Unity game client in the cheat / game:eft lane. Aimed at game security researchers studying offensive feature stacks on BattlEye-protected Unity/IL2CPP titles. (source: wiki/sources/descriptions/gmh5225__EFT-Veil-EFT.md)
 
-Complements similar Unity-memory cheat projects such as [[eft-newtarkov-cheatproject]], internal rendering samples such as [[eft-internal]], OOP scaffolds such as [[simple-eft-base]], and external DMA radar stacks such as [[meatyeftrelease]] and [[eft-dma-radar-1]] for comparing in-process Unity memory-read overlays vs driver bases and below-OS externals.
+Complements similar Unity-memory cheat projects such as [[eft-newtarkov-cheatproject]], Mono-era method-hooking internals such as [[eft-monoeft]], internal rendering samples such as [[eft-internal]], OOP scaffolds such as [[simple-eft-base]], and external DMA radar stacks such as [[meatyeftrelease]] and [[eft-dma-radar-1]] for comparing in-process Unity memory-read overlays vs driver bases and below-OS externals.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements similar Unity-memory cheat projects such as [[eft-newtarkov-cheatpro
 
 ## Related
 
-[[eft-newtarkov-cheatproject]] · [[eft-internal]] · [[simple-eft-base]] · [[meatyeftrelease]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[world-to-screen]] · [[il2cpp]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[eft-newtarkov-cheatproject]] · [[eft-monoeft]] · [[eft-internal]] · [[simple-eft-base]] · [[meatyeftrelease]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[world-to-screen]] · [[mono]] · [[il2cpp]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
