@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EfiDump`: entity [[efidump]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[fortnite-efi-external]] and [[uefi-bootloader]].
+
 - **2026-08-13** — ingest `description:gmh5225/Elden-Ring-Debug-Tool`: entity [[elden-ring-debug-tool]]; cited on [[overviews/game-hacking]]; cross-linked from [[eldenringlauncher]] and [[elden-ring-ct-tga]].
 
 - **2026-08-13** — ingest `description:gmh5225/EldenRingLauncher`: entity [[eldenringlauncher]]; cited on [[overviews/game-hacking]] and [[easy-anti-cheat]]; cross-linked from [[elden-ring-ct-tga]].

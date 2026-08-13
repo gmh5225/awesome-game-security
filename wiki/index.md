@@ -433,6 +433,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
 - [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
+- [EfiDump](entities/efidump.md) — EFI runtime driver + Windows client for post-boot process memory R/W (gnu-efi; EDK2 shell load; PoC dumper; gmh5225; [Dump])
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
 - [EntropyReducer](entities/entropy-reducer.md) — PE section padding / data-distribution manipulation to lower Shannon entropy (AV/AC heuristic evasion)
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
