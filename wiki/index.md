@@ -409,6 +409,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dse_hook](entities/dse-hook.md) — CI.dll hook / `g_CiEnabled` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
 - [ds4-tools](entities/ds4-tools.md) — DualShock 4 HID scripts (input/LED/touchpad/motion/rumble; play + reverse-engineer DS4 on PC; gmh5225)
 - [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)
+- [Dynsec](entities/dynsec.md) — dynamic security analysis framework; instrumentation/monitoring for anti-tamper, anti-debug, integrity checks (gmh5225)
 - [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
 
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
