@@ -702,6 +702,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__fortnite-triadz.md
   - wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md
+  - wiki/sources/descriptions/gmh5225__Fortnite-3.5.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Leak5.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Masterpasta-ihack-Source-Leak.md
   - wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md
@@ -974,6 +975,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Updated Ritz-lineage Fortnite internals such as [[fortnite-internal-updated-ritz]] (gmh5225; C++; Ritz fork; UE4 engine hooking; ESP / aimbot / exploits; refreshed offsets + EAC bypass for newer builds; [Internal]) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md)
 - Fixed-and-updated Fortnite internal DLL samples such as [[fortnite-internal-cheat-fixed-and-updated]] (gmh5225; memory + silent aimbot; box/skeleton/distance/snapline/FOV/chest/ammo ESP; DirectX 11 ImGui overlay; cheat / game:fortnite) sit in that same cheat / game:fortnite internal lane beside Ritz and ZeroGui lineages. (source: wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md)
 - ZeroGui-overlay Fortnite internals such as [[zerogui-fortnite-internal]] (gmh5225; visuals-only ESP enabled; aimbot / exploits present but disabled; [Internal]) sit in that same cheat / game:fortnite internal lane for studying in-process Unreal visuals without full combat automation. (source: wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md)
+- Vintage Fortnite 3.50 internal DLL samples such as [[fortnite-3.5]] (gmh5225; injectable DLL; memory aimbot + ESP; zgui in-game menu; requires user-generated Unreal Engine SDK; cheat / game:fortnite [Internal]) sit in that same cheat / game:fortnite internal lane for studying legacy-build UE internals with bring-your-own-SDK workflows. (source: wiki/sources/descriptions/gmh5225__Fortnite-3.5.md)
 - Leaked Masterpasta / iHack Fortnite internals such as [[fortnite-masterpasta-ihack-source-leak]] (gmh5225; Microsoft Detours hooking; direct UObject-array access; bone-matrix projection + `GetViewpoint` camera math; engine-rendered visuals; [Internal]) sit in that same cheat / game:fortnite internal lane beside Ritz and ZeroGui lineages. (source: wiki/sources/descriptions/gmh5225__Fortnite-Masterpasta-ihack-Source-Leak.md)
 - Additional Fortnite internal samples such as [[fortnite-cheat-source-internal]] (C/C++; SDK generation + hooking) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/jooola00__fortnite-cheat-source-internal.md)
 - Leaked INFARCTED.CC base Fortnite internals such as [[fortnite-leak5]] (gmh5225; C/C++; SDK generation + hooking; upstream base for INFARCTED.CC; cheat / game:fortnite) sit in that same cheat / game:fortnite internal lane beside other SDK+hook samples. (source: wiki/sources/descriptions/gmh5225__Fortnite-Leak5.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Fortnite-3.5`: entity [[fortnite-3.5]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[zerogui-fortnite-internal]], [[fortnite-internal-cheat-fixed-and-updated]], and [[fortnite-cheat-source-internal]].
+
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Esp-Aimbot-Exploits-Hwid-Spoofer-Cleaner-Hack-Cheat`: entity [[fortnite-esp-aimbot-exploits-hwid-spoofer-cleaner-hack-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[discord-overlay-hook]], [[fortnite-external-base-source]], and [[fortnite-external-5]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Evo.cc-Source-External-Cheat`: entity [[fortnite-evo-cc-source-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[fortnite-external-evo-gj]], [[fortnite-external-cheat-source-code]], and [[fortnite-external-cheat-winsense-leak]].
