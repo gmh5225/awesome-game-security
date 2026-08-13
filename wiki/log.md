@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Driver-Systemthread-from-PspCidTable-src`: entity [[driver-systemthread-from-pspcidtable-src]]; cited on [[overviews/windows-kernel]] and [[blanket]].
+
 - **2026-08-13** — ingest `description:gmh5225/Driver-WatchOwl`: entity [[driver-watchowl]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kernel-callbacks]] and [[dll-thread-injection-detector]].
 
 - **2026-08-13** — ingest `description:gmh5225/Driver-efi-bootkit`: entity [[driver-efi-bootkit]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[bootlicker]] and [[uefi-bootloader]].
