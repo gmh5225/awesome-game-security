@@ -3873,3 +3873,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Leak5`: entity [[fortnite-leak5]]; cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-cheat-source-internal]] and [[fortnite-internal-updated-ritz]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-EFI-External`: entity [[fortnite-efi-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[bootlicker]] and [[uefi-bootloader]].
+
+- **2026-08-13** — ingest `description:gmh5225/FlyingGuys`: entity [[flying-guys]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper-rs]] and [[imgui]].
