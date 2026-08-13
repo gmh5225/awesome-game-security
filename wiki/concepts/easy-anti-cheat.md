@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Fortnite-UD-External.md
   - wiki/sources/descriptions/gmh5225__eac-bypass-1.md
   - wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md
+  - wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md
 updated: 2026-08-13
 confidence: medium
 ---
@@ -36,7 +37,7 @@ Kernel-module integrity: historical PoC [[cveac-2020]] (WDK driver) targets an E
 
 Overlay / screenshot monitoring is another research surface: PoCs such as [[eac-overlay]] explore alternate rendering surfaces or window manipulation to draw ESP without tripping EAC overlay detection. (source: wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md)
 
-Static RE prep: utilities such as [[eac-extractor-utility]] locate EAC components in game directories and the Windows driver store, decrypt/extract the kernel driver, user-mode modules, and configuration for offline binary analysis. (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
+Static RE prep: utilities such as [[eac-extractor-utility]] locate EAC components in game directories and the Windows driver store, decrypt/extract the kernel driver, user-mode modules, and configuration for offline binary analysis. (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md) Reversed-source archives such as [[eazy-anti-cheat-src]] (gmh5225; reimplemented detection routines, driver communication, and integrity validation from EAC binary analysis; cheat / explore anticheat:eac [Reversed Source]) complement extraction with readable source-level structure for offline study. (source: wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md)
 
 Offensive bypass lane: repos such as [[eac-bypass]] explore kernel driver and shader-based techniques to evade EAC runtime checks. (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md) Win32k syscall channels such as [[eac-bypass-1]] (`NtMapVisualRelativePoints`; C++ driver development; cheat / driver communication) study stealth KM↔UM I/O alongside EAC evasion. (source: wiki/sources/descriptions/gmh5225__eac-bypass-1.md) Cheat Engine tool-detection bypass samples such as [[ce-easyanticheat-bypass]] patch or hide CE process, window class, driver, and memory-access signatures so scan/edit workflows run on EAC-protected games—useful for studying how EAC fingerprints common debugging tools. (source: wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md)
 
@@ -50,4 +51,4 @@ Fortnite internal lane: samples such as [[fortnite-triadz]] (Triadz; UE4 engine 
 
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-bypass]] · [[eac-bypass-1]] · [[ce-easyanticheat-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[eldenringlauncher]] · [[fortnite-triadz]] · [[fortnite-internal-updated-ritz]] · [[zerogui-fortnite-internal]] · [[fortnite-exploits]] · [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]] · [[fortnite-ud-external]] · [[serenity-gg-fn-and-loader]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eazy-anti-cheat-src]] · [[eac-bypass]] · [[eac-bypass-1]] · [[ce-easyanticheat-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[eldenringlauncher]] · [[fortnite-triadz]] · [[fortnite-internal-updated-ritz]] · [[zerogui-fortnite-internal]] · [[fortnite-exploits]] · [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]] · [[fortnite-ud-external]] · [[serenity-gg-fn-and-loader]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
