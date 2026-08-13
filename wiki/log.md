@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EtherealEngine`: entity [[ethereal-engine]]; cited on [[overviews/game-engine]].
+
 - **2026-08-13** — ingest `description:gmh5225/EvilKaspersky`: entity [[evil-kaspersky]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked from [[kaspersky-hook]].
 
 - **2026-08-13** — ingest `description:gmh5225/ExtendedCameraSettings`: entity [[extended-camera-settings]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]].
