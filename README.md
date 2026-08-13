@@ -1529,6 +1529,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jailbreakdotparty/dirtyZero [CVE-2025-24203]
 - https://github.com/wh1te4ever/darksword-kexploit-fun [DarkSword kernel r/w exploit playground; iOS/iPadOS 17.0-26.0.1 except A19/M5; sandbox escape, process control/crash, SSV root FS overwrite, UID/GID/sticky bits, disable ASLR via launchd P_DISABLE_ASLR]
 - https://github.com/wh1te4ever/xnu_1day_practice [XNU 1-day exploit practice collection — PoCs for CVE-2019 through CVE-2025 (e.g. 30883, 24153, 24257, 43510, 43520) plus Coruna/PEGruber research]
+- https://github.com/wh1te4ever/humptylock [iOS 14.0–14.4.2 kernel r/w exploit app from Coruna Pendulum PE; pipe/lockf/OOL-port primitives; tested iPhone 6s–11 Pro]
 - https://github.com/rooootdev/lara [WIP darksword kexploit implementation; iOS 17.1.1-26.0.1 tested; includes font overwrite, app bypass, file manager, and DirtyZero2 experiments]
 - https://github.com/zeroxjf/lightsaber [iOS 18.4-18.6.2 userland exploit chain with JS injection into SpringBoard and other processes. Derived from DarkSword]
 - https://github.com/staturnzz/oob_entry [iOS 3.0-10.3.4 tfp0 kernel exploit]
