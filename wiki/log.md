@@ -3983,3 +3983,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/EasyPeasy-GC`: entity [[easypeasy-gc]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[genshin-akebi-gc]] and [[genshin-easy-peasy-bypass]].
 
 - **2026-08-13** — ingest `description:gmh5225/EAC-Driver-UD-for-now`: entity [[eac-driver-ud-for-now]]; cited on [[easy-anti-cheat]], [[overviews/anti-cheat]], and [[overviews/windows-kernel]]; cross-linked [[eac-bypass-1]] and [[eac-injector-driver]].
+
+- **2026-08-13** — ingest `description:gmh5225/Driver-intel-PEBs-LoopHPCs`: entity [[driver-intel-pebs-loophpcs]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[branch-monitoring-project]], [[pmi-hpc]], and [[pmctrace]].
