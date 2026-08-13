@@ -3879,3 +3879,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-EFI-External`: entity [[fortnite-efi-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[bootlicker]] and [[uefi-bootloader]].
 
 - **2026-08-13** — ingest `description:gmh5225/FlyingGuys`: entity [[flying-guys]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper-rs]] and [[imgui]].
+
+- **2026-08-13** — ingest `readme:categories`: bumped Cheat ~2696 (was ~2694; Anti Cheat ~666 / Some Tricks ~117 / DirectX ~38 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
