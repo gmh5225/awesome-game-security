@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Fedoraware`: entity [[fedoraware]]; cited on [[overviews/game-hacking]]; cross-linked from [[teamfortress2-internal]].
+
 - **2026-08-13** — ingest `description:gmh5225/Fenrir`: entity [[fenrir]]; cited on [[stack-spoofing]] and [[overviews/windows-kernel]]; cross-linked [[rtoolz]] and [[stack-spoofer-macro]].
 
 - **2026-08-13** — ingest `description:mitros123/DragonHook`: entity [[dragonhook]]; cited on [[overviews/reverse-engineering]] and [[frida]]; cross-linked from [[ghidra]].

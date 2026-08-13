@@ -156,6 +156,7 @@ sources:
   - wiki/sources/descriptions/kubo__plthook.md
   - wiki/sources/descriptions/kristofhracza__tim_apple.md
   - wiki/sources/descriptions/kweatherman__yara4ida.md
+  - wiki/sources/descriptions/gmh5225__Fedoraware.md
   - wiki/sources/descriptions/gmh5225__FindFunc.md
   - wiki/sources/descriptions/gmh5225__findyara-ida.md
   - wiki/sources/descriptions/gmh5225__findcrypt-yara.md
@@ -1268,6 +1269,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - Internal Team Fortress 2 samples such as [[teamfortress2-internal]] (C++ / C/C++; modding / hooking; Internal tag; gmh5225) sit in the cheat / game:team fortress 2 lane for studying Source 1 internal hook patterns beside CS:GO internals under VAC. (source: wiki/sources/descriptions/gmh5225__teamfortress2_internal.md)
+- SE-Owned–lineage TF2 training software such as [[fedoraware]] (gmh5225; C/C++; rendering / networking / animation; cheat / game:team fortress 2) sits in the same TF2 internal lane for studying feature-complete Source 1 cheat architecture beside hook-focused starters. (source: wiki/sources/descriptions/gmh5225__Fedoraware.md)
 - Basic Left 4 Dead 2 cheat frameworks such as [[l4d2-basic]] (gmh5225; Source engine hook structures, interface resolution, starter template) sit in the cheat / game:left 4 dead 2 lane for bootstrapping Source 1 internal hook work beside TF2 and CS:GO samples. (source: wiki/sources/descriptions/gmh5225__L4D2Basic.md)
 - Internal Left 4 Dead 2 samples such as [[l4d2-cheat]] (gmh5225; Source engine SDK; VMT hooks + engine interface exploitation; ESP, aimbot, gameplay mods; Linux tag) sit in the same cheat / game:left 4 dead 2 lane beside starter frameworks. (source: wiki/sources/descriptions/gmh5225__L4D2-Cheat.md)
 
