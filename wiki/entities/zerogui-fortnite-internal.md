@@ -18,4 +18,4 @@ Internal Fortnite cheat (gmh5225; cheat / game:fortnite `[Internal]`) built arou
 
 ## Related
 
-[[fortnite-internal-updated-ritz]] · [[fortnite-triadz]] · [[fortnite-cheat-source-internal]] · [[basic-fortnite-cheat-source-internal]] · [[fortnite-offsets]] · [[present-hook]] · [[easy-anti-cheat]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
+[[fortnite-internal-updated-ritz]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-triadz]] · [[fortnite-cheat-source-internal]] · [[basic-fortnite-cheat-source-internal]] · [[fortnite-offsets]] · [[present-hook]] · [[easy-anti-cheat]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/anti-cheat]]
