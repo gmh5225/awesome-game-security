@@ -384,6 +384,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)
 - [Driver-intel-PEBs-LoopHPCs](entities/driver-intel-pebs-loophpcs.md) — LoopHPCs filter-driver framework; PEBS + LBR loop-centric hot-loop telemetry for unpacking/malware RE (gmh5225; Intel PEBs)
+- [driver-efi-bootkit](entities/driver-efi-bootkit.md) — UEFI boot-stage implant: EFI→kernel staged chain; loader hook + pre-OS driver patch; Python BOOTDOOR inject (gmh5225)
 - [Driver-kaldereta](entities/driver-kaldereta.md) — unsigned KM cheat-driver skeleton; `KALDERETA_MEMORY` via hooked Win32 `NtTokenManagerGetAnalogExclusiveTokenEvent`; R/W, input sim, pattern scan, manual DLL map (gmh5225)
 - [Driver-read_write](entities/driver-read-write.md) — manually mapped KM R/W via Beep.sys IRP hijack; PiDDBCache/MmUnloadedDrivers cleanup (gmh5225; Hijack IRP Beep.sys)
 - [DriverBuddyReloaded](entities/driver-buddy-reloaded.md) — IDA Pro plugin: Windows kernel driver RE (IOCTL dispatch, IRP handlers, vulnerable-driver patterns, WDM structure annotations; gmh5225; Windows Kernel Analysis)
