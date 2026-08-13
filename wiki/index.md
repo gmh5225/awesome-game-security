@@ -456,6 +456,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Etw-SyscallMonitor](entities/etw-syscall-monitor.md) — user-mode EtwTi syscall monitor (C; SSN/params/stacks; no hooks/driver)
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [EtwWatcher](entities/etw-watcher.md) — web UI browse/diff ETW provider manifests across Windows builds (ETWInspector-backed)
+- [ETWHOOK-InfinityHookClass](entities/etwhook-infinityhookclass.md) — C++ InfinityHook wrapper; ETW-backed syscall interception without SSDT patches (gmh5225; Some Tricks / ETW Hook Ex)
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
 - [executor](entities/executor.md) — PTE.User page-table injection (C/C++; kernel driver; cheat / injection:windows; gmh5225)

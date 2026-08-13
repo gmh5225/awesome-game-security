@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/zodiacon__EtwExplorer.md
   - wiki/sources/descriptions/jdu2600__EtwTi-FluctuationMonitor.md
   - wiki/sources/descriptions/jdu2600__Etw-SyscallMonitor.md
-updated: 2026-08-03
+  - wiki/sources/descriptions/gmh5225__ETWHOOK-InfinityHookClass.md
+updated: 2026-08-13
 confidence: high
 ---
 
@@ -36,6 +37,7 @@ Key kernel providers include process/thread lifecycle, file I/O, and audit-API c
 - Research consumers without driver/PPL: [[threat-intelligence-consumer]] (Win11 24H2/25H2) (source: wiki/sources/descriptions/preludeorg__ThreatIntelligenceConsumer.md)
 - Syscall-return instrumentation samples such as [[etwti-syscall-hook]] extend the same TI / Instrumentation Callback research surface. (source: wiki/sources/descriptions/paranoidninja__EtwTi-Syscall-Hook.md)
 - User-mode EtwTi syscall monitors such as [[etw-syscall-monitor]] log SSNs, parameters, process/thread context, and stack traces in real time without kernel hooks or drivers — a syscall-behavioral detection reference for AC/EDR research. (source: wiki/sources/descriptions/jdu2600__Etw-SyscallMonitor.md)
+- Offensive ETW infrastructure manipulation for syscall interception — InfinityHook-style techniques packaged as C++ wrappers such as [[etwhook-infinityhookclass]] hook syscalls via ETW tracing paths without SSDT patches. (source: wiki/sources/descriptions/gmh5225__ETWHOOK-InfinityHookClass.md)
 
 ## Common bypass patterns
 
@@ -58,4 +60,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[etwhook-infinityhookclass]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

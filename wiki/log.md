@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/ETWHOOK-InfinityHookClass`: entity [[etwhook-infinityhookclass]]; cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]].
+
 - **2026-08-13** — ingest `description:gmh5225/Eac-Injector-Driver`: entity [[eac-injector-driver]]; cited on [[easy-anti-cheat]] and [[overviews/windows-kernel]].
 
 - **2026-08-13** — ingest `description:gmh5225/EasyAntiCheat-Reversing`: entity [[easyanticheat-reversing]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
