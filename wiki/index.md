@@ -419,6 +419,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
 - [eac-injector-driver](entities/eac-injector-driver.md) — EAC state toggle via `NtQueryIntervalProfile` + HalDispatchTable (manual-map driver; thread/callback manipulation; gmh5225)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
+- [EAC-Runtime-Extractor](entities/eac-runtime-extractor.md) — MinHook DLL; intercepts EAC kernel driver load before disk write for offline RE (gmh5225)
 - [EAC-shellcode-1](entities/eac-shellcode-1.md) — archived raw EAC shellcode memory dump from protected-game dumper (~Mar 2023; hook entry points; offline RE sample; gmh5225)
 - [EAC-VmCheck.asm](entities/eac-vmcheck-asm.md) — recovered `easyanticheat.sys` VM-detection assembly (`CheckVM` / VMREAD probe; VM-found vs VM-not-found paths; gmh5225)
 - [EAC](entities/eac.md) — mixed EAC study pack: reversed `easyanticheat.sys` callback logic + EAC/EOS SDK drop (gmh5225)

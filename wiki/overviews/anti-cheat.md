@@ -442,6 +442,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__EAC.md
   - wiki/sources/descriptions/gmh5225__EAC-shellcode-1.md
   - wiki/sources/descriptions/gmh5225__EAC-VmCheck.asm.md
+  - wiki/sources/descriptions/gmh5225__EAC-Runtime-Extractor.md
   - wiki/sources/descriptions/gmh5225__byfron-bypass.md
   - wiki/sources/descriptions/gmh5225__PAGE_NO_ACCESS-not-byfron.md
   - wiki/sources/descriptions/gmh5225__NeacSafe-Analysis.md
@@ -469,6 +470,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 - [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md); CE tool-detection bypass [[ce-easyanticheat-bypass]] (CE process/window class/driver/memory-access signature evasion; cheat / UD CE; gmh5225) (source: wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md)
 - [[eac-extractor-utility]] — decrypt/extract EAC kernel driver, UM modules, and config from game dir + driver store for offline static RE (Dump lane) (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
+- [[eac-runtime-extractor]] — MinHook DLL intercepts file I/O + driver load; captures EAC kernel driver from memory before disk write for offline RE (Runtime dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-Runtime-Extractor.md)
 - [[eazy-anti-cheat-src]] — reversed EAC source representation: reimplemented detection routines, driver communication, and integrity validation from binary analysis (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md)
 - [[easyanticheat-reversing]] — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable C-like driver output with registry strings and policy routines (Decompile dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EasyAntiCheat-Reversing.md)
 - [[eac]] — mixed EAC study pack: reversed `easyanticheat.sys` kernel callback/heuristic logic + EAC/EOS SDK drop with headers and `EOS_FileDecryptionTool` (Study pack lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC.md)
