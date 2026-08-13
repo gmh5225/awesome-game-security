@@ -515,6 +515,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])
 - [fortnite-exploits](entities/fortnite-exploits.md) — Fortnite exploit collection + EAC bypass techniques (client vulns; UE4 features; cheat injection / memory access; gmh5225; [Exploits])
+- [fortnite-external](entities/fortnite-external.md) — Fortnite external: custom kernel-driver memory access / DX9 overlay / UE offset utilities (gmh5225; [External])
 - [fortnite-external-evo.gj](entities/fortnite-external-evo-gj.md) — Fortnite external: kernel-driver RPM / ESP / aimbot (C++; [External])
 - [fortnite-external-base-source](entities/fortnite-external-base-source.md) — Fortnite external: IOCTL RPM / CR3 stub / ImGui DX11 Discord Overlay (C++; [External])
 - [Fortnite-External-Source](entities/fortnite-external-source.md) — Fortnite external: driver / SDK generation (C++)

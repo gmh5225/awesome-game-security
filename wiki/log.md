@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Fortnite-External`: entity [[fortnite-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[fortnite-ud-external]] and [[fortnite-external-base-source]].
+
 - **2026-08-13** — ingest `description:rafalimma/ModelAnti-Cheat`: entity [[model-anti-cheat]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]].
 
 - **2026-08-13** — ingest `description:gmh5225/Fortnite-Internal-Cheat-Fixed-and-Updated`: entity [[fortnite-internal-cheat-fixed-and-updated]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[fortnite-internal-updated-ritz]] and [[zerogui-fortnite-internal]].
