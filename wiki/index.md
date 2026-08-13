@@ -380,6 +380,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)
 - [dota-cheat](entities/dota-cheat.md) — Dota 2 Source 2 entity overlay cheat (C++; ESP / cooldowns / auto-ability; gmh5225; cheat / game:dota2)
+- [dota2-cheat](entities/dota2-cheat.md) — Dota 2 internal cheat DLL (Source 2 SDK; subhook / VMT hooks / pattern scan; gmh5225; cheat / game:dota2)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)
