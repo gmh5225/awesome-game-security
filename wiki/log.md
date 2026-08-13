@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EasyRe`: entity [[easyre]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]].
+
 - **2026-08-13** — ingest `description:gmh5225/EazyAntiCheatSRC`: entity [[eazy-anti-cheat-src]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
 
 - **2026-08-13** — ingest `description:gmh5225/EfiDump`: entity [[efidump]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[fortnite-efi-external]] and [[uefi-bootloader]].
