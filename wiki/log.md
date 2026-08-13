@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EAC-VmCheck.asm`: entity [[eac-vmcheck-asm]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
+
 - **2026-08-13** — ingest `description:gmh5225/EAC-shellcode-1`: entity [[eac-shellcode-1]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
 
 - **2026-08-13** — ingest `description:gmh5225/EAC`: entity [[eac]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
