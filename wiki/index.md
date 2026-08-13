@@ -526,7 +526,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-offsets](entities/fortnite-offsets.md) — Fortnite memory offset / UE4 SDK structure tables (player/camera/bones/weapons/globals; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-w2s-offset-fortnite](entities/fortnite-w2s-offset-fortnite.md) — Fortnite world-to-screen offset collection (view/projection + camera; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-sigs](entities/fortnite-sigs.md) — Fortnite IDA-style byte-pattern signatures (GObjects/GNames/ProcessEvent; gmh5225; cheat / game:fortnite [Offset])
-- [fortnite-sigs-updated-every-update](entities/fortnite-sigs-updated-every-update.md) — Per-patch Fortnite byte-pattern signatures (UWorld/GObjects/FnFree/GetNameByIndex; pattern-mask notation; gmh5225; cheat / game:fortnite [Offset])
+- [fortnite-sigs-updated-every-update](entities/fortnite-sigs-updated-every-update.md) — Per-patch Fortnite byte-pattern signatures (Season 2 Chapter 3+; UWorld/GObjects/FnFree/GetNameByIndex; pattern-mask notation; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-triadz](entities/fortnite-triadz.md) — Triadz internal Fortnite cheat (UE4 hooking; ESP/aimbot/exploit; gmh5225; EAC-protected internal architecture reference)
 - [fortnite-ud-external](entities/fortnite-ud-external.md) — undetected external Fortnite cheat (stealthy memory reads; ESP/aimbot; BattlEye+EAC bypass framing; gmh5225; [External])
 - [fortnite-voyagertf](entities/fortnite-voyagertf.md) — VoyagerTF external Fortnite cheat (ESP/aimbot/UE game-state reads via out-of-process memory; gmh5225; [External])
