@@ -383,6 +383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)
+- [DriverBuddyReloaded](entities/driver-buddy-reloaded.md) — IDA Pro plugin: Windows kernel driver RE (IOCTL dispatch, IRP handlers, vulnerable-driver patterns, WDM structure annotations; gmh5225; Windows Kernel Analysis)
 - [dragonhook](entities/dragonhook.md) — Ghidra↔Frida static+dynamic bridge (localhost HTTP GhidraDB API; runtime indirect-call resolution, live xref/comment sync, symbol backtraces, call tracing; mitros123; cheat / Ghidra Plugins)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (gmh5225 fork + narumii; ProGuard/Allatori/ZKM passes; cheat / RE tools)
