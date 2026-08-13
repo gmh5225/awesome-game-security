@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EASY-HWID-SPOOFER`: entity [[easy-hwid-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked from [[hwid-kernel-spoofer]].
+
 - **2026-08-13** — ingest `description:gmh5225/EFT-MonoEFT`: entity [[eft-monoeft]]; cited on [[overviews/game-hacking]] and [[mono]]; cross-linked from [[eft-veil-eft]] and [[eft-newtarkov-cheatproject]].
 
 - **2026-08-13** — ingest `description:gmh5225/EFT-NewTarkovCheatProject`: entity [[eft-newtarkov-cheatproject]]; cited on [[overviews/game-hacking]]; cross-linked from [[eft-veil-eft]].
