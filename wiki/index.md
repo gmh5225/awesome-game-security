@@ -514,6 +514,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FortKit](entities/fortkit.md) — Fortnite dump / SDK generation (C++; cheat / game:fortnite [Dump])
 - [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])
+- [fortnite-esp-aimbot-exploits-hwid-spoofer-cleaner-hack-cheat](entities/fortnite-esp-aimbot-exploits-hwid-spoofer-cleaner-hack-cheat.md) — Fortnite external: ESP/aimbot + HWID spoofer; DiscordHook64.dll overlay hijack via pattern scan (gmh5225; [External])
 - [fortnite-exploits](entities/fortnite-exploits.md) — Fortnite exploit collection + EAC bypass techniques (client vulns; UE4 features; cheat injection / memory access; gmh5225; [Exploits])
 - [fortnite-external](entities/fortnite-external.md) — Fortnite external: custom kernel-driver memory access / DX9 overlay / UE offset utilities (gmh5225; [External])
 - [fortnite-external-4](entities/fortnite-external-4.md) — Fortnite external: circa 2019; socket-based kernel driver RPM; Capcom.sys driver mapper; ESP/aimbot (gmh5225; [External])
