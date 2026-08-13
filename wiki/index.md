@@ -390,6 +390,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Driver-HideKernelThread-IoCancelIrp](entities/driver-hide-kernel-thread-iocancelirp.md) — disguise custom kernel thread start as `IoCancelIrp` via IRP cancel routine; context via `UserBuffer`/`MdlAddress`; detection notes (gmh5225; Hide Kernel Thread)
 - [Driver-HypercallPageHook](entities/driver-hypercall-page-hook.md) — `nt!HvcallCodeVa` hypercall-page hook; custom dispatcher + `HvlEnlightenments` flip; assembly callback dispatch with fallback (gmh5225; HvcallCodeVa)
 - [Driver-KDtour](entities/driver-kdtour.md) — compact KM inline detour library; `c_detour` MDL-backed patch + absolute jump stub; sample `KeAttachProcess` hook (gmh5225; Easy Kernel Detour)
+- [Driver-Detect-nullshit](entities/driver-detect-nullshit.md) — kernel export-trampoline detector; mov rax, imm64; jmp rax patches with out-of-image targets in win32k/dxgkrnl/ntoskrnl (gmh5225; Null driver detector)
 - [Driver-DriverNoImage](entities/driver-driver-no-image.md) — no-image driver hijack PoC; shellcode via existing driver dispatch (NTFS handlers); inline hooks + WP disable + trampolines (gmh5225; Hijack Driver)
 - [Driver-read_write](entities/driver-read-write.md) — manually mapped KM R/W via Beep.sys IRP hijack; PiDDBCache/MmUnloadedDrivers cleanup (gmh5225; Hijack IRP Beep.sys)
 - [Driver-RPM-DirectPageManipulation](entities/driver-rpm-direct-page-manipulation.md) — minimal PTE-PFN rewrite + manual VA→PA cross-process copy; no documented copy helpers (gmh5225; read physical memory)
