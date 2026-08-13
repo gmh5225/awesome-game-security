@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/EAC-Kernel-Packet-Fucker`: entity [[eac-kernel-packet-fucker]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
+
 - **2026-08-13** — ingest `description:gmh5225/EAC-Runtime-Extractor`: entity [[eac-runtime-extractor]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
 
 - **2026-08-13** — ingest `description:gmh5225/EAC-VmCheck.asm`: entity [[eac-vmcheck-asm]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].

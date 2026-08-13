@@ -418,6 +418,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-cr3-bypass](entities/eac-cr3-bypass.md) — UM+KM EAC CR3 bypass teaching sample (C/C++; driver dev)
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
 - [eac-injector-driver](entities/eac-injector-driver.md) — EAC state toggle via `NtQueryIntervalProfile` + HalDispatchTable (manual-map driver; thread/callback manipulation; gmh5225)
+- [EAC-Kernel-Packet-Fucker](entities/eac-kernel-packet-fucker.md) — kernel-mode EAC telemetry suppression via `ExAllocatePoolWithTag` hijack; drops ~33 KB violation reports before backend upload (gmh5225)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [EAC-Runtime-Extractor](entities/eac-runtime-extractor.md) — MinHook DLL; intercepts EAC kernel driver load before disk write for offline RE (gmh5225)
 - [EAC-shellcode-1](entities/eac-shellcode-1.md) — archived raw EAC shellcode memory dump from protected-game dumper (~Mar 2023; hook entry points; offline RE sample; gmh5225)
