@@ -374,6 +374,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dbk64-vulnerability-driver](entities/dbk64-vulnerability-driver.md) — Cheat Engine `dbk64.sys` BYOVD PoC (IOCTL → arbitrary kernel R/W; debugging-tool driver; gmh5225)
 - [dolboeb-executor](entities/dolboeb-executor.md) — Capcom.sys BYOVD kernel code executor (IOCTL → shellcode or arbitrary kernel calls; gmh5225)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
+- [dump-val-exception-handler](entities/dump-val-exception-handler.md) — Valorant exception handler registration + VEH chain dump (`RtlpCallVectoredHandlers`; Vanguard RE; gmh5225)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)
 - [Dopamine2-roothide](entities/dopamine2-roothide.md) — iOS 15/16 RootHide Dopamine 2 (C/C++/ObjC; cheat / iOS jailbreak)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Dump-val-exception-handler`: entity [[dump-val-exception-handler]]; cited on [[vanguard]] and [[overviews/anti-cheat]]; cross-linked from [[val-exception-handler]].
+
 - **2026-08-13** — ingest `description:gmh5225/Dynsec`: entity [[dynsec]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-13** — ingest `description:gmh5225/EAC-EasyAntiCheat-Src-1`: entity [[eac-easyanticheat-src-1]]; cited on [[easy-anti-cheat]] and [[overviews/anti-cheat]].
