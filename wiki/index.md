@@ -416,6 +416,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-bypass](entities/eac-bypass.md) — offensive EAC bypass research (C++; kernel driver + shader work)
 - [eac-bypass-1](entities/eac-bypass-1.md) — EAC bypass via `NtMapVisualRelativePoints` KM↔UM channel (C++; driver communication; gmh5225)
 - [eac-cr3-bypass](entities/eac-cr3-bypass.md) — UM+KM EAC CR3 bypass teaching sample (C/C++; driver dev)
+- [eac-driver-ud-for-now](entities/eac-driver-ud-for-now.md) — EAC driver-scan evasion sample; stealth KM↔UM memory R/W channel (gmh5225; [Sample])
 - [EAC-EasyAntiCheatMemorySig](entities/eac-easyanticheatmemorysig.md) — documented EAC in-memory byte-pattern corpus for cheat frameworks, injectors, and hack modules (Memory sig maker; gmh5225)
 - [EAC-EasyAntiCheat-Src-1](entities/eac-easyanticheat-src-1.md) — reconstructed/leaked EAC source; detection routines, driver comms, integrity validation (Reversed Source; gmh5225)
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
