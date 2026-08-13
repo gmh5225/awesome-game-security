@@ -463,6 +463,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
 - [External Imgui Cheat Menu Example 2023](entities/external-imgui-cheat-menu-example-2023.md) — external ImGui menu template (SDL+OpenGL; `SDL_GL_SwapWindow` hook; GL context anti-flicker; gmh5225)
 - [external-esp-hack-assaultcube](entities/external-esp-hack-assaultcube.md) — beginner AssaultCube external ESP (GDI overlay; RPM boxes / names / health; gmh5225)
+- [external-r6s-cheat](entities/external-r6s-cheat.md) — R6 external: kernel driver + shared memory section; ESP + aimbot (cheat / game:r6 [External]; gmh5225)
 - [ez-drv-bak](entities/ez-drv-bak.md) — Windows kernel driver backup & restore (gmh5225; driver development / AC lab baselines)
 - [FakeEye](entities/fakeeye.md) — BattlEye init emulator (BEService SCM + BE-style game launch; [Emulator])
 - [FakerAndroid](entities/fakerandroid.md) — APK→Android Studio project translator; javaScaffolding + fakeCpp JNI `.so` hooks + IL2CPP C++ scaffolding (gmh5225; cheat / game engine explorer:Unity)

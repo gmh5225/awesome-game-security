@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/External-R6S-Cheat`: entity [[external-r6s-cheat]]; cited on [[overviews/game-hacking]] and [[battleye]]; cross-linked [[r6s-external-v2]] and [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]].
+
 - **2026-08-13** — ingest `description:gmh5225/External-imgui-Cheat-Menu-Example-2023`: entity [[external-imgui-cheat-menu-example-2023]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked from [[imgui]].
 
 - **2026-08-13** — ingest `description:gmh5225/FakeEnclave`: entity [[fake-enclave]]; cited on [[overviews/windows-kernel]] and [[hvci]]; cross-linked from [[zero-hvci]].
