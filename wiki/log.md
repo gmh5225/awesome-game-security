@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-13** — ingest `description:gmh5225/Driver-kaldereta`: entity [[driver-kaldereta]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
+
 - **2026-08-13** — ingest `description:gmh5225/Driver-read_write`: entity [[driver-read-write]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]].
 
 - **2026-08-13** — ingest `description:gmh5225/DriverBuddyReloaded`: entity [[driver-buddy-reloaded]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
