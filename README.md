@@ -4224,6 +4224,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
+- https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
 - https://github.com/XX-Batsu/bevy-personal-test [Rust Bevy multiplayer framework with sandboxed Rhai script VM, rollback netcode, and shadow-VM anti-cheat verification]
 - https://github.com/joeltco/ff3mmo [Browser-based NES FF3 MMO with server-authoritative PvE/PvP/economy arbiters, inventory mirror anti-dup, wire validation, and moderation tooling]
 - https://github.com/xihedun-2026/Ponytail-Risk- [Open-source behavior risk-control and evidence-review platform for private game servers (Rust agent, C ABI SDK, read-only DB analysis, rule scoring, plugin events)]
