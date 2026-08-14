@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Dota2-Overlay-OffsetUpdater`: entity [[dota2-overlay-offset-updater]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[dota2-overlay-2-0]] and [[offset-streaming]].
+
 - **2026-08-13** — ingest `description:gmh5225/Driver-Communication-List`: entity [[driver-communication-list]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[win32k-file-collection]] and [[ntsleuth]].
 
 - **2026-08-13** — ingest `description:gmh5225/Driver-Detect-nullshit`: entity [[driver-detect-nullshit]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-driver-no-image]] and [[nulldriver-cheat]].
