@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Basic_Anti-Cheat`: entity [[basic-anti-cheat]]; cited on [[overviews/anti-cheat]]; cross-linked [[anticheat-poc]], [[mandragora]], and [[anti-cheat-testing-framework]].
+
 - **2026-08-14** — ingest `description:gmh5225/BattleriteBot`: entity [[battlerite-bot]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[tft-ocr-bot]], [[taskbarhero-bot]], and [[clickpic]].
 
 - **2026-08-14** — ingest `description:gmh5225/BepInEx-IL2CPPBase`: entity [[bepinex-il2cppbase]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[unityexplorer]], [[devour-menu]], and [[imgui]].

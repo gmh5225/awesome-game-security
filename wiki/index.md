@@ -62,6 +62,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
+- [basic-anti-cheat](entities/basic-anti-cheat.md) — Basic C/C++ AC teaching sample (integrity / signature scan / debugger / modules / memory validation; gmh5225)
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [BE Shellcode Dump](entities/be-shellcode-dump.md) — dump BE runtime shellcode scanning modules for offline RE (gmh5225; Reversed BE Shellcode)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
