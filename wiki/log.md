@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/BT_ModularGameFeatures`: entity [[bt-modular-game-features]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[kawaii-physics]], [[ue4-tutorials]], [[unrealengine5-ultimate-streetfighters]], and [[ue5-roll-a-ball-game]].
+
 - **2026-08-14** — ingest `description:gmh5225/BYOVD`: entity [[entities/byovd|BYOVD Lab]]; cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[process-killer-byovd]] and [[av-edr-killer]].
 
 - **2026-08-14** — ingest `description:gmh5225/BadEye`: entity [[badeye]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[battleye-handler-bypass]], [[libelevate]], and [[goodeye]].

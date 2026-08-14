@@ -219,6 +219,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BYPASS-PUBG-MOBILE-IMGUI](entities/bypass-pubg-mobile-imgui.md) — PUBG Mobile AC bypass + ImGui menu (C/C++; hooking / memory; cheat / game:pubgm)
 - [Bypassing EasyAntiCheat Integrity check](entities/bypassing-easyanticheat-integrity-check.md) — EAC kernel driver self-integrity RE + bypass (CreateProcess/LoadImage notify; Capstone deobfuscator; section-compare C++; gmh5225 [Bypassing integrity check])
 - [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)
+- [bt-modular-game-features](entities/bt-modular-game-features.md) — BTS modular Unreal features (audio / physics / animation; C/C++; Plugins:Unreal; gmh5225)
 - [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
 - [bytecode-viewer](entities/bytecode-viewer.md) — Java/Android multi-decompiler suite (CFR/Procyon/FernFlower/JD-GUI/Krakatau; bytecode+Smali+source tabs; JAR/DEX/APK)
