@@ -268,6 +268,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [compiler-binary-richprint](entities/compiler-binary-richprint.md) — print MSVC Rich Header compiler info from PE (DOS stub→PE gap; cheat / RE tools; gmh5225)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
+- [CReadMemory](entities/creadmemory.md) — user-mode cross-process memory read library; multiple methods beyond ReadProcessMemory; external cheat base (gmh5225)
 - [counterstrike2](entities/counterstrike2.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)

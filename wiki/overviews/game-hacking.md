@@ -775,6 +775,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__StarRailCopilot.md
   - wiki/sources/descriptions/gmh5225__StarRail-S-GC.md
   - wiki/sources/descriptions/gmh5225__POLYGON_UE5.md
+  - wiki/sources/descriptions/gmh5225__CReadMemory.md
   - wiki/sources/descriptions/gmh5225__CheatIt.md
   - wiki/sources/descriptions/gmh5225__Pom-Pom.md
   - wiki/sources/descriptions/gmh5225__titancf.md
@@ -957,7 +958,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 ## Memory access
 
-- **User-mode** — `OpenProcess` + RPM/WPM, `NtReadVirtualMemory`, mapped sections; blocked by handle stripping on protected titles.
+- **User-mode** — `OpenProcess` + RPM/WPM, `NtReadVirtualMemory`, mapped sections; blocked by handle stripping on protected titles. Alternative user-mode cross-process read primitives without conventional `ReadProcessMemory` are collected in libraries such as [[creadmemory]] (gmh5225; multiple UM remote-read methods; base for external cheat memory access; cheat / RPM) (source: wiki/sources/descriptions/gmh5225__CReadMemory.md).
 - **Kernel-mode** — driver RPM/WPM, MDL copy, `KeStackAttachProcess`, physical reads via vulnerable or research drivers ([[byovd]], [[ntmemory]]).
 - **Below OS** — [[dma]] FPGA/PCIe, hypervisor introspection, EFI runtime before DSE, external second machine.
 
