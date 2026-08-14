@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CapcomLib`: entity [[capcomlib]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dolboeb-executor]], [[kdu]], and [[dse-hook]].
+
 - **2026-08-14** — ingest `description:gmh5225/CheatIt`: entity [[cheat-it]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[polygon-ue5]], [[unreal-object-model]], and [[patternsleuth]].
 
 - **2026-08-14** — ingest `description:villager1314/CVE-2026-64560-Analysis`: entity [[cve-2026-64560-analysis]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-vuln]], [[cve-2019-2215]], and [[android-kernel-hacking-toolkit]].
