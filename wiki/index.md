@@ -63,6 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BadEye](entities/badeye.md) — BE handle-access assumption bypass (C++ memory analysis; EPROCESS→MmCopyVirtualMemory; gmh5225; cheat / explore anticheat system:be)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
+- [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
 - [BF4-Internal-overlay](entities/bf4-internal-overlay.md) — BF4 internal overlay: DirectX / rendering / SDK generation (C++; gmh5225; cheat / game:battlefield 4)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [basic-anti-cheat](entities/basic-anti-cheat.md) — Basic C/C++ AC teaching sample (integrity / signature scan / debugger / modules / memory validation; gmh5225)
