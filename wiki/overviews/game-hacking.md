@@ -340,6 +340,7 @@ sources:
   - wiki/sources/descriptions/m417z__thread-call-stack-scanner.md
   - wiki/sources/descriptions/notpidgey__ManyTypes.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
+  - wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md
   - wiki/sources/descriptions/jsirichai__CVE-2019-2215.md
   - wiki/sources/descriptions/j4nn__CVE-2020-0041.md
   - wiki/sources/descriptions/jseclab__obj2shellcode.md
@@ -1233,6 +1234,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Device kernel sources such as [[android-kernel-huawei-hi6250-8-exp]] (Huawei hi6250 + KernelSU) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/gmh5225__android_kernel_huawei_hi6250-8_Exp.md)
 - Android Application CVE PoCs such as [[cve-2024-0044]] (Android 12/13; crafted payload → unauthorized app data-directory access) sit in the Cheat Android Application CVE lane. (source: wiki/sources/descriptions/nahid0x1__CVE-2024-0044.md)
 - Android Kernel CVE PoCs such as [[cve-2026-43499-popsicle]] (Xiaomi popsicle LPE via CVE-2026-43499; LD_PRELOAD; uid 0 + SELinux disabled) sit in the Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md)
+- Linux posix-cpu-timers UAF trigger PoC via [[cve-2026-64560-analysis]] (CVE-2026-64560; non-leader thread `exec()` vs timer-delete race; fork/exec timing; Linux x86_64 + Android GKI arm64; patch verification / KASAN—not LPE) sits in the same Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md)
 - Qualcomm QSEECOM/TrustZone arbitrary kernel R/W via [[cve-2021-1961]] (Widevine DRM TA ION buffer abuse; Pixel 3 / blueline; `/proc/version` + SELinux off) sits in the same Cheat Android Kernel CVE `[CVE RW]` lane. (source: wiki/sources/descriptions/tamirzb__CVE-2021-1961.md)
 - Binder epoll use-after-free temporary root via [[cve-2019-2215]] (Pixel 2/XL; Sep 2019 firmware / kernel 4.4.177; ARM64 NDK binary with hardcoded offsets) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/jsirichai__CVE-2019-2215.md)
 - Binder transaction-buffer bounds-check LPE via [[cve-2020-0041]] (Pixel 3; Feb 2020 firmware QQ1A.200205.002; pending-node reallocation → kernel arbitrary R/W + root) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/j4nn__CVE-2020-0041.md)

@@ -62,6 +62,7 @@ sources:
   - wiki/sources/descriptions/jixiaoyong__ApkSigner.md
   - wiki/sources/descriptions/joeyjurjens__iOS-Mod-Menu-Template-for-Theos.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
+  - wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md
   - wiki/sources/descriptions/wwweeeqqu__honor-of-kings-RE-research.md
   - wiki/sources/descriptions/walzer__game-engine-detector.md
   - wiki/sources/descriptions/kp7742__UE4Dumper.md
@@ -226,7 +227,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__MapleServerAndroid.md
   - wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md
   - wiki/sources/descriptions/gmh5225__KernelSU-4.4.md
-updated: 2026-08-13
+updated: 2026-08-14
 confidence: high
 ---
 
@@ -287,7 +288,7 @@ Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; Frida 
 
 ## Kernel drivers & CVE lanes
 
-LKM / GKI `vendor_dlkm` patterns for process memory R/W, syscall hook, Binder IPC intercept ([[android-kernel-hacking-toolkit]], [[kernel-hack]], [[compile-android-driver]], [[android-kernel-driver-template]] (GKI AArch64 product-kernel scaffold; source: wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md)). Android system-call hook tooling such as [[abyss]] (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools) sits in the same syscall-hook lane. (source: wiki/sources/descriptions/iofomo__abyss.md) KernelPatch/APatch KPM cross-process memory read via ioctl hook such as [[kpm-memreader]] (`libtersafe`; cheat / Android kernel driver). (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md) CVE catalogs [[android-vuln]] and PoC/exploit list [[android-vuln-poc-exp]] (documentation/list; cheat / Android Kernel CVE) (source: wiki/sources/descriptions/jiayy__android_vuln_poc-exp.md); application PoCs [[cve-2024-0044]]; kernel/TEE PoCs [[cve-2019-2215]] (Binder epoll UAF temporary root; Pixel 2/XL; Sep 2019 firmware) (source: wiki/sources/descriptions/jsirichai__CVE-2019-2215.md), [[cve-2020-0041]] (Binder transaction-buffer bounds-check bug; Pixel 3; Feb 2020 firmware; pending-node reallocation → kernel R/W + root) (source: wiki/sources/descriptions/j4nn__CVE-2020-0041.md), [[cve-2021-1961]], [[cve-2026-43499-popsicle]], Dirty Pipe [[dirtypiperoot]] / [[dirtypipe-android]].
+LKM / GKI `vendor_dlkm` patterns for process memory R/W, syscall hook, Binder IPC intercept ([[android-kernel-hacking-toolkit]], [[kernel-hack]], [[compile-android-driver]], [[android-kernel-driver-template]] (GKI AArch64 product-kernel scaffold; source: wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md)). Android system-call hook tooling such as [[abyss]] (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools) sits in the same syscall-hook lane. (source: wiki/sources/descriptions/iofomo__abyss.md) KernelPatch/APatch KPM cross-process memory read via ioctl hook such as [[kpm-memreader]] (`libtersafe`; cheat / Android kernel driver). (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md) CVE catalogs [[android-vuln]] and PoC/exploit list [[android-vuln-poc-exp]] (documentation/list; cheat / Android Kernel CVE) (source: wiki/sources/descriptions/jiayy__android_vuln_poc-exp.md); application PoCs [[cve-2024-0044]]; kernel/TEE PoCs [[cve-2019-2215]] (Binder epoll UAF temporary root; Pixel 2/XL; Sep 2019 firmware) (source: wiki/sources/descriptions/jsirichai__CVE-2019-2215.md), [[cve-2020-0041]] (Binder transaction-buffer bounds-check bug; Pixel 3; Feb 2020 firmware; pending-node reallocation → kernel R/W + root) (source: wiki/sources/descriptions/j4nn__CVE-2020-0041.md), [[cve-2021-1961]], [[cve-2026-43499-popsicle]], [[cve-2026-64560-analysis]] (posix-cpu-timers non-leader `exec()` race UAF trigger PoC; Linux x86_64 + Android arm64; patch verification / KASAN; source: wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md), Dirty Pipe [[dirtypiperoot]] / [[dirtypipe-android]].
 
 ## HarmonyOS / OpenHarmony
 

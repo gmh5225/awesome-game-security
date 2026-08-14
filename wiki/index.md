@@ -318,6 +318,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2025-24990 PoC](entities/cve-2025-24990-poc.md) — Agere Modem `ltmdm64.sys` METHOD_NEITHER IOCTL abuse → kernel R/W (IoRing LPE variant; BYOVD)
 - [CVE-2026-40369-EXPLOIT](entities/cve-2026-40369-exploit.md) — Win11 24H2–25H2 LPE via NtQuerySystemInformation class 253 (Chrome sandbox)
 - [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)
+- [CVE-2026-64560 Analysis](entities/cve-2026-64560-analysis.md) — posix-cpu-timers non-leader exec() race UAF trigger PoC (Linux x86_64 + Android GKI arm64; patch verification)
 - [cve-maker](entities/cve-maker.md) — Python CLI: multi-DB CVE/exploit search (keyword/product/CVE ID; severity + links)
 - [CVEAC-2020](entities/cveac-2020.md) — EAC kernel-module vuln PoC (WDK; Integrity Checks)
 - [custom-data-ptr-swap-sample](entities/custom-data-ptr-swap-sample.md) — NtQueryLicenseValue KM↔UM channel (C++; driver development; cheat / driver communication; gmh5225)
