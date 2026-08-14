@@ -18,4 +18,4 @@ Beginner-oriented **external ESP** sample for AssaultCube from gmh5225. Reads pl
 
 ## Related
 
-[[simple-ac-internal-cheat]] · [[lab-esp-and-aimbot]] · [[world-to-screen]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[assault-cube-cheat]] · [[simple-ac-internal-cheat]] · [[lab-esp-and-aimbot]] · [[world-to-screen]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]

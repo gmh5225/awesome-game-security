@@ -150,6 +150,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__CS2-External-1.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat-Base.md
+  - wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md
   - wiki/sources/descriptions/gmh5225__Astra.md
   - wiki/sources/descriptions/gmh5225__Aurora.md
   - wiki/sources/descriptions/gmh5225__CS2-Dma-Radar.md
@@ -1402,6 +1403,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Battlefield 1 internals such as [[battlefield-1-internal]] (C++; DirectX / SDK generation / hooking) illustrate the cheat / game:battlefield 1 lane. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md) Title-specific BF1 ESP/aimbot samples such as [[bf1-esp-and-aimbot]] (gmh5225; C/C++; DirectX / rendering / hooking; cheat / game:battlefield 1) extend that Frostbite internal lane with ESP and aimbot focus. (source: wiki/sources/descriptions/gmh5225__BF1-ESP-AND-AIMBOT.md) Title-specific Battlefield 4 internal overlay samples such as [[bf4-internal-overlay]] (gmh5225; C++; DirectX / rendering / SDK generation; cheat / game:battlefield 4) extend that Frostbite internal lane. (source: wiki/sources/descriptions/gmh5225__BF4-Internal-overlay.md)
 - Educational AssaultCube internals such as [[simple-ac-internal-cheat]] (C++20; Detours DX hooks / ImGui / ESP / aimbot / offset chains; local learning) illustrate a controlled open-source FPS internal lane. (source: wiki/sources/descriptions/s7shvets7s__simple_ac_internal_cheat.md)
 - Educational AssaultCube externals such as [[external-esp-hack-assaultcube]] (gmh5225; GDI overlay; RPM entity boxes / names / health; beginner external ESP) complement that lane with a no-inject overlay path on the same learning title. (source: wiki/sources/descriptions/gmh5225__external-esp-hack-assaultcube.md)
+- Educational AssaultCube cheat samples such as [[assault-cube-cheat]] (gmh5225; C++; modding / memory analysis; cheat / game:assault cube) extend the same learning-title lane beside internal and external AssaultCube references. (source: wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md)
 - Educational AssaultCube usermode AC such as [[mandragora]] (gmh5225; ring-3 anti-cheat; purposefully weak; unobfuscated source for reversing practice after Assault Cube hacking) complements cheat samples on the same learning title. (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - Beginner ESP/aimbot walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; RPM / [[world-to-screen]] / entity ESP / aim angle + mouse move; cheat / guide) sit in the same controlled learning lane. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md)
 - Title-specific R6 internals such as [[r6-internal-v3]] (C/C++; modding / SDK generation / memory analysis) illustrate the cheat / game:r6 lane. (source: wiki/sources/descriptions/vctr74__R6-Internal-V3.md)

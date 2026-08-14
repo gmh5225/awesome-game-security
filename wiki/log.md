@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/AssaultCubeCheat`: entity [[assault-cube-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[mandragora]].
+
 - **2026-08-14** — ingest `description:gmh5225/Astra`: entity [[astra]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[nebulite-external]], [[heck-csgo-external]], and [[csgo-external-cheat]].
 
 - **2026-08-14** — ingest `description:gmh5225/AsusDrv`: entity [[asusdrv]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[asus-bsitf-0-day-poc]], [[windows-10-22h2-vulnerable-driver-communication]], and [[openhardwaremonitor-poc]].

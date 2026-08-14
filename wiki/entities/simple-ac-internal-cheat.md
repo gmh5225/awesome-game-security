@@ -18,4 +18,4 @@ Educational C++20 AssaultCube internal DLL for studying reverse engineering, run
 
 ## Related
 
-[[external-esp-hack-assaultcube]] · [[present-hook]] · [[dx11-basehook]] · [[detoursnt]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[assault-cube-cheat]] · [[external-esp-hack-assaultcube]] · [[present-hook]] · [[dx11-basehook]] · [[detoursnt]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
