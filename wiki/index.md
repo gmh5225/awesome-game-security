@@ -412,6 +412,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DieDMAProtection](entities/diedmaprotection.md) — Windows PoC kernel driver disabling IOMMU/VT-d DMA remapping (iqrw0; IOMMU bypass research)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
 - [detection-cheat-engine](entities/detection-cheat-engine.md) — user-mode CE artifact detector (ReadDirectoryChangesW; ADDRESSES.FIRST/MEMORY.FIRST table markers; gmh5225; CE)
+- [detection-cheat-engine-ring0](entities/detection-cheat-engine-ring0.md) — kernel CE/DBVM debug-print callback PoC (DbgSetDebugPrintCallback; dbvm-mode string; gmh5225; CE)
 - [detection-hyper-v](entities/detection-hyper-v.md) — kernel-mode Hyper-V guest probe via KPCR/KPRCB PowerState (Win10 17763; KeGetPcr→CurrentPrcb; gmh5225; Hyper-v)
 - [DeviceWarLock](entities/device-warlock.md) — Android device HWID / lock SDK (Java/C++; networking, SDK gen, hooking; Detection:HWID)
 - [Dalvikus](entities/dalvikus.md) — Android smali editor / Dalvik bytecode RE tool (ethical research)

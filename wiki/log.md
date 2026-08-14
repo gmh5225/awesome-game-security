@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Detection-CheatEngine-Ring0`: entity [[detection-cheat-engine-ring0]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[cedetector]], [[detection-cheat-engine]], and [[kernel-callbacks]].
+
 - **2026-08-14** — ingest `description:gmh5225/Detection-CheatEngine`: entity [[detection-cheat-engine]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[cedetector]] and [[readdirectorychanges]].
 
 - **2026-08-14** — ingest `description:gmh5225/Detection-Hyper-v`: entity [[detection-hyper-v]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[go-detection-hyper-v]], [[hv-detect]], and [[hypervisor-detection]].
