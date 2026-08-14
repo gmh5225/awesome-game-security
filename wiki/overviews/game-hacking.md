@@ -123,6 +123,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__DataPtrSwap-driver.md
   - wiki/sources/descriptions/gmh5225__avhook.md
   - wiki/sources/descriptions/gmh5225__autismware.md
+  - wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md
   - wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md
   - wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md
   - wiki/sources/descriptions/gmh5225__nebulite-external.md
@@ -1308,6 +1309,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS:GO samples such as [[csgo-kns]] (C++; VMT hooks + interface pointers; ESP, aimbot, bhop, skin changer; Internal tag) sit in the same cheat / game:csgo lane for studying Source engine SDK hook patterns. (source: wiki/sources/descriptions/kyojig__csgo_kns.md)
 - Internal CS:GO samples such as [[aqhax-csgo]] (AqHax; C++; interface capture + VMT hooks + netvar dump; ESP, aimbot, triggerbot, movement, skin changer) sit in the same cheat / game:csgo lane for studying typical internal cheat feature stacks. (source: wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md)
 - Internal CS:GO samples such as [[autismware]] (gmh5225; C++; interface capture + VMT hooks; ESP, aimbot, backtrack, skin changer, ImGui menu; HvH tag) sit in the same cheat / game:csgo lane for studying standard Source 1 internal cheat feature implementation. (source: wiki/sources/descriptions/gmh5225__autismware.md)
+- Leaked commercial internal CS:GO samples such as [[csgo-aw-v5.1.13]] (gmh5225; AimWare v5.1.13; aimbot, visuals, movement, anti-aim, internal hooking framework; `[aw-v5.1.13]`) sit in the same cheat / game:csgo lane for studying production-grade Source 1 internal architecture beside open-source HvH stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
 - Internal CS:GO samples such as [[osiris-and-extra]] (C/C++; driver development / OpenGL / rendering; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - Simple internal CS:GO RE-training samples such as [[dainsleif]] (s3pt3mb3r) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - CS:GO training software such as [[avhook]] (gmh5225; Windows; joke features; cheat / game:csgo) sits in the same RE-training lane. (source: wiki/sources/descriptions/gmh5225__avhook.md)

@@ -129,6 +129,7 @@ sources:
   - wiki/sources/descriptions/whokilleddb__function-collections.md
   - wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md
   - wiki/sources/descriptions/spirthack__CSGOSimple.md
+  - wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md
   - wiki/sources/descriptions/seksea__gamesneeze.md
   - wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md
   - wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md
@@ -523,6 +524,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[valveanticheat1]] — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode-VM rebuild (2002–2004; RE notes + decrypt/repack tooling) for studying early network-delivered detection architecture (source: wiki/sources/descriptions/shefben__VALVeAntiCheat1.md)
 - [[como-funciona-vac]] — CS2 VAC usermode architecture write-up (Trusted Launch in `cs2.exe`, `client.dll` scanners, `steam.exe` external scanner; PE hashing, interface CRC, thread inspection, VEH hardware-breakpoint checks, protobuf evidence reports; forensic overview, not a bypass) (source: wiki/sources/descriptions/ianveig29__como-funciona-vac.md)
 - [[csgosimple]] — spirthack/MarkHC Internal CS:GO baseline for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
+- [[csgo-aw-v5.1.13]] — leaked AimWare v5.1.13 internal CS:GO source (aimbot, visuals, movement, anti-aim, hooking framework) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
 - [[osiris-and-extra]] — Internal CS:GO sample (C/C++; driver / OpenGL / rendering) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - [[dainsleif]] — simple Internal CS:GO RE-training sample for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - [[avhook]] — CS:GO training software (gmh5225; Windows; joke features) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__avhook.md)

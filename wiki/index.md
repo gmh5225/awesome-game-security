@@ -290,6 +290,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-things](entities/cs2-things.md) — CS2 Source 2 research collection (VScript; RE structures / offsets / SDK / netvars; gmh5225)
 - [cs2-webradar](entities/cs2-webradar.md) — CS2 browser-based radar cheat (C++/JavaScript; memory analysis / asset pipelines; gmh5225)
 - [CSGO_BacktrackPatch](entities/csgo-backtrack-patch.md) — CS:GO backtrack patch (hooking / memory analysis; cheat / game:csgo)
+- [csgo-aw-v5.1.13](entities/csgo-aw-v5.1.13.md) — leaked AimWare v5.1.13 CS:GO internal (aimbot, visuals, movement, anti-aim, hooking framework; gmh5225 [aw-v5.1.13])
 - [csgo-bot](entities/csgo-bot.md) — CS:GO bot; driver / OpenGL / shader (C/C++; cheat / game:csgo)
 - [csgo_cheat_external](entities/csgo-cheat-external.md) — external CS:GO; driver development (C++; cheat / game:csgo)
 
