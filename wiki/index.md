@@ -367,6 +367,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
 - [cheat-engine-ceserver-pcileech](entities/cheat-engine-ceserver-pcileech.md) — CE ceserver over PCILeech/LeechCore DMA; remote scan/edit invisible to target anti-cheat (gmh5225)
 - [cheat-attack-thread-slemu](entities/cheat-attack-thread-slemu.md) — thread sleep emulation / context manipulation to evade AC thread scanning (gmh5225; Heartbeat Testing)
+- [DDMA-1](entities/ddma-1.md) — disk-based DMA cheat framework (ATA/SCSI PCIe camouflage; zero target-OS footprint; gmh5225; cheat / DMA)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [dma-cheat-base](entities/dma-cheat-base.md) — DMA cheat base scaffold (C/C++; rendering, animation, SDK generation; cheat / DMA)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
