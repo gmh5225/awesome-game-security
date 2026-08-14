@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ kernel research sample centered on **`NtSetCompositionSurfaceAnalogExclusive`**—a composition-surface path used to study stealthy cheat / driver communication rather than obvious IOCTL or named-device surfaces. (source: wiki/sources/descriptions/xPasters__.data-ptr-swap.md)
 
-Useful for game-security and reverse-engineering researchers mapping Ring0↔usermode channels that ride Windows composition APIs (adjacent to samples tagged with related composition handles such as [[zero-thread-kernel]]).
+Useful for game-security and reverse-engineering researchers mapping Ring0↔usermode channels that ride Windows composition APIs (adjacent to samples tagged with related composition handles such as [[zero-thread-kernel]] and gmh5225 win32kbase variants such as [[dataptrswap-driver]]).
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for game-security and reverse-engineering researchers mapping Ring0↔use
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[boom]] · [[zero-thread-kernel]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[boom]] · [[zero-thread-kernel]] · [[dataptrswap-driver]]
