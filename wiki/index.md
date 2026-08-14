@@ -182,6 +182,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
 - [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
 - [Asdf Overlay](entities/asdf-overlay.md) — Rust cross-API overlay library (D3D9/11/12, OpenGL, Vulkan; Detours; named-pipe IPC; Rust/Node.js clients)
+- [Aurora](entities/aurora.md) — internal CS2 cheat (ESP / aimbot / visual mods; Source 2 schema + entity enumeration; cheat / game:cs2 [Internal]; gmh5225)
 - [AutoAttach](entities/auto-attach.md) — x64dbg plugin: auto-attach to named process with optional delay (`AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; Cheat x64dbg Plugins)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
 - [AutoOpenCAK](entities/auto-open-cak.md) — CAK compressed-archive open/extract automation (decompression + file organization; modding/asset RE; gmh5225; Bypass tool)

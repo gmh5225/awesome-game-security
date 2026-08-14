@@ -150,6 +150,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__CS2-External-1.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat-Base.md
+  - wiki/sources/descriptions/gmh5225__Aurora.md
   - wiki/sources/descriptions/gmh5225__CS2-Dma-Radar.md
   - wiki/sources/descriptions/gmh5225__cs2-fov-changer.md
   - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
@@ -1384,6 +1385,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 samples such as [[tim-apple]] (`tim_apple.exe`; **External** tag; kristofhracza offset bootstrap via `offset_download.ps1` or manual JSON; gmh5225 fork for Source 2 SDK / pattern-scan / memory-access study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/kristofhracza__tim_apple.md) (source: wiki/sources/descriptions/gmh5225__tim_apple.md)
 - Internal CS2 samples such as [[cs2-internal]] (C++; SDK generation / hooking / memory analysis; Internal tag) sit in the same cheat / game:cs2 lane. (source: wiki/sources/descriptions/redbg__CS2-Internal.md)
 - Open-source internal CS2 samples such as [[asphyxia-cs2]] (Asphyxia; ESP / aimbot / triggerbot; Source 2 SDK via interface pointers + pattern scan; Internal tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/maecry__asphyxia-cs2.md)
+- Internal CS2 samples such as [[aurora]] (gmh5225; ESP / aimbot / visual mods; Source 2 schema system access + entity enumeration for player data + overlay rendering; cheat / game:cs2 [Internal]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/gmh5225__Aurora.md)
 - CS2 samples such as [[counterstrike2]] (C++; rendering / SDK generation / hooking) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/papstuc__counterstrike2.md)
 - CS2 samples such as [[csgo2-cheat]] (imnotdatguy / gmh5225 forks; C++; internal rendering / SDK generation / hooking; gmh5225 variant tagged [Internal]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/imnotdatguy__csgo2-cheat.md) (source: wiki/sources/descriptions/gmh5225__csgo2-cheat.md)
 - WIP CS2 cheats such as [[bakaware4]] (release-constrained; debug unload/unhook for `-insecure` iteration) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/nezu-cc__BakaWare4.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Aurora`: entity [[aurora]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[asphyxia-cs2]], [[cs2-cheat-base]], and [[cs2-internals]].
+
 - **2026-08-14** — ingest `description:gmh5225/AurumRE`: entity [[aurum-re]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[ricochet-deobfuscator]] and [[ricochet-disabler]].
 
 - **2026-08-14** — ingest `description:gmh5225/AutoGunfireReborn`: entity [[autogunfire-reborn]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[bepinex-il2cppbase]], [[fall-guys-sharp]], and [[goose-goose-duck-hack]].
