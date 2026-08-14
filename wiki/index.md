@@ -72,6 +72,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
 - [battle-cats-complete](entities/battle-cats-complete.md) — Battle Cats Rust desktop toolkit (.pack/APK import, decrypt/extract, animation render/export, mod authoring; omochikaeri15)
+- [BattleriteBot](entities/battlerite-bot.md) — Battlerite arena brawler automation bot (memory or screen recognition; ability/targeting/movement; gmh5225)
 - [better-godot-mcp](entities/better-godot-mcp.md) — Godot 4.x composite MCP (TS; scenes/GDScript; Game Develop / MCP)
 - [better-hi3-launcher](entities/better-hi3-launcher.md) — Honkai Impact 3rd enhanced launcher (download/version/server/config; gmh5225)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
