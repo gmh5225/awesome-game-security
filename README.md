@@ -1042,6 +1042,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/poppopjmp/VMDragonSlayer [Advanced Virtual Machine Detection and Analysis Framework]
 - https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
 - https://github.com/milk-analyzer/vmpunpack [Generic x64 VMProtect/packer unpacker that drives samples through patched sogen emulation to OEP, dumps memory, and rebuilds PEs for IDA/Ghidra]
+- https://github.com/Lucyferek-nunu/vmp-unpacker [C++ dynamic VMProtect unpacker with anti-debug bypass, OEP discovery, and IAT repair]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
@@ -1845,6 +1846,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/skr0x1c0/binja_kc [Plugin for loading MachO kernelcache and dSYM files]
 - https://github.com/Vector35/workflow_objc [Objective-C]
 - https://github.com/apekros/binja_sigmaker [Create and find signatures]
+- https://github.com/joren485/bndb2pat [Binary Ninja plugin to generate IDA Pro FLIRT .pat pattern files for signature libraries]
 - https://github.com/dayzerosec/AMD-SP-Loader [AMD-SP or PSP firmware]
 - https://github.com/WhatTheFuzz/binaryninja-openai [Integrates OpenAI]
 - https://github.com/dzervas/frinja [Frida plugin for Binary Ninja]
