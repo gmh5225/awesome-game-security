@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Blackout`: entity [[blackout]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[terminator]], and [[windefctl]].
+
 - **2026-08-14** — ingest `description:gmh5225/Bypassing-EasyAntiCheat-Integrity-check`: entity [[bypassing-easyanticheat-integrity-check]]; cited on [[concepts/easy-anti-cheat]], [[overviews/anti-cheat]], and [[overviews/reverse-engineering]]; cross-linked [[kernel-callbacks]], [[easyanticheat-reversing]], and [[deobfuscator]].
 
 - **2026-08-14** — ingest `description:gmh5225/CE-remap-plugin`: entity [[ce-remap-plugin]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ce-tracer-ida]], [[gddumper]], and [[wasm-ceserver]].

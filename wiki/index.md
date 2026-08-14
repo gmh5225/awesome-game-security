@@ -189,6 +189,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [Blanket](entities/blanket.md) — process hide via ActiveProcessLinks unlink + PspCidTable + NtQuerySystemInformation hook (cheat / hide)
+- [Blackout](entities/blackout.md) — BYOVD EDR/AV killer via GMER **`gmer64.sys`** (IOCTL PID terminate; Defender continuous suppression; gmh5225)
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-division-deoptimization](entities/binja-division-deoptimization.md) — Binary Ninja MLIL division/modulo deoptimizer (architecture-agnostic)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
