@@ -215,6 +215,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [byfron-bypass](entities/byfron-bypass.md) — Byfron/Roblox client AC bypass research (C++; asset pipelines / editor tooling; explore anticheat:byfron; gmh5225)
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
+- [CallStackSpoofer-2](entities/callstackspoofer-2.md) — x64 call-stack spoofing via custom ASM trampolines (gmh5225; Cheat Spoof Stack)
 - [Camera Triggerbot](entities/camera-triggerbot.md) — camera triggerbot (movement/color around crosshair; cheat / triggerbot & aimbot)
 - [cat-annihilation](entities/cat-annihilation.md) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source)
 - [cartmanv2](entities/cartmanv2.md) — internal CS:GO cheat (C/C++; rendering / networking / editor tooling; gmh5225 [Internal])
