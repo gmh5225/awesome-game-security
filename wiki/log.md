@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/AutoGunfireReborn`: entity [[autogunfire-reborn]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[bepinex-il2cppbase]], [[fall-guys-sharp]], and [[goose-goose-duck-hack]].
+
 - **2026-08-14** — ingest `description:gmh5225/AutoOpenCAK`: entity [[auto-open-cak]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[rpgmakerdecrypter]], [[maplestory-packer-modpacker]], and [[pubg-mobile-pak-extract]].
 
 - **2026-08-14** — ingest `description:gmh5225/Auto_Simulated_Universe`: entity [[auto-simulated-universe]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[starrailcopilot]], [[star-rail]], [[battlerite-bot]], and [[tft-ocr-bot]].

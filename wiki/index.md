@@ -185,6 +185,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AutoAttach](entities/auto-attach.md) — x64dbg plugin: auto-attach to named process with optional delay (`AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; Cheat x64dbg Plugins)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)
 - [AutoOpenCAK](entities/auto-open-cak.md) — CAK compressed-archive open/extract automation (decompression + file organization; modding/asset RE; gmh5225; Bypass tool)
+- [AutoGunfireReborn](entities/autogunfire-reborn.md) — Gunfire Reborn Unity IL2CPP runtime module injection (C#; modding / IL2CPP analysis; cheat / game:gunfire reborn; gmh5225)
 - [Auto-generate Frida Bypass Scripts](entities/auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios.md) — static-analysis Frida script generator for Android/iOS SSL pinning and root/jailbreak bypass
 - [AutomataMP](entities/automatamp.md) — NieR Automata multiplayer / RE tooling (praydog; Game Develop / source)
 - [asus-bsitf-0-day-poc](entities/asus-bsitf-0-day-poc.md) — ASUS `bsitf.sys` BYOVD PoC (CVE-2026-13585; IOCTL maps contiguous kernel pool to usermode + physaddr leak; gmh5225)
