@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Auto_Simulated_Universe`: entity [[auto-simulated-universe]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[starrailcopilot]], [[star-rail]], [[battlerite-bot]], and [[tft-ocr-bot]].
+
 - **2026-08-14** — ingest `description:gmh5225/AvastHV`: entity [[avasthv]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[evil-kaspersky]], [[kaspersky-hook]], and [[hvci]].
 
 - **2026-08-14** — ingest `description:gmh5225/AzureV316`: entity [[azurev316]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[maplestory-server]], [[maplestory-v113-server-eimulator]], and [[jmsv186]].
