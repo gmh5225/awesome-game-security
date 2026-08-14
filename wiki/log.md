@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/BE-Emulator`: entity [[be-emulator]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[fakeeye]], [[be-forcer-fortnite]], and [[bedaisy-bypass]].
+
 - **2026-08-14** — ingest `description:gmh5225/BE-Forcer-Fortnite`: entity [[be-forcer-fortnite]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[fakeeye]], [[bedaisy-bypass]], and [[fortnite-exploits]].
 
 - **2026-08-14** — ingest `description:web-coder-lab/chessking`: entity [[chessking]]; cited on [[overviews/anti-cheat]]; cross-linked [[certael]] and [[basic-anti-cheat]].
