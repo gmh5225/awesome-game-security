@@ -14,7 +14,7 @@ confidence: medium
 
 Useful for game security researchers and private-server developers studying authoritative MapleStory server stacks, protocol handling, and scripted game systems—not client-side cheat tooling.
 
-Complements other MapleStory private-server emulators such as [[rebirth]] (GMS-095 C#), [[maplestory143]] (CMS-143 Java/Kotlin), [[maplestory-v83-maplestory-cpp]] (GMS-083 C++), [[maplestory-v113-server-eimulator]] (TMS-113), [[maplestory-server]] (HeavenMS), [[mnwvs196]] (TMS-196 C++ research stack), and [[rustms]] (Rust).
+Complements other MapleStory private-server emulators such as [[rebirth]] (GMS-095 C#), [[maplestory143]] (CMS-143 Java/Kotlin), [[maplestory-v83-maplestory-cpp]] (GMS-083 C++), [[maplestory-v113-server-eimulator]] (TMS-113), [[azurev316]] (KMS-316), [[maplestory-server]] (HeavenMS), [[mnwvs196]] (TMS-196 C++ research stack), and [[rustms]] (Rust).
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements other MapleStory private-server emulators such as [[rebirth]] (GMS-0
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[rebirth]] · [[maplestory143]] · [[maplestory-v83-maplestory-cpp]] · [[maplestory-v113-server-eimulator]] · [[maplestory-server]] · [[mnwvs196]] · [[rustms]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[rebirth]] · [[maplestory143]] · [[maplestory-v83-maplestory-cpp]] · [[maplestory-v113-server-eimulator]] · [[azurev316]] · [[maplestory-server]] · [[mnwvs196]] · [[rustms]]

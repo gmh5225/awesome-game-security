@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/AzureV316`: entity [[azurev316]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[maplestory-server]], [[maplestory-v113-server-eimulator]], and [[jmsv186]].
+
 - **2026-08-14** — ingest `description:gmh5225/BE-BattlEye_shellcode`: entity [[be-battleye-shellcode]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[be-shellcode]], [[be-shellcode-dump]], and [[battleye-shellcode-dumper]].
 
 - **2026-08-14** — ingest `description:gmh5225/BE-Emulator`: entity [[be-emulator]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[fakeeye]], [[be-forcer-fortnite]], and [[bedaisy-bypass]].
