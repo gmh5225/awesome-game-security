@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Call-Of-Duty-Vanguard-Hack-Esp-AImbot-Unlock-All`: entity [[call-of-duty-vanguard-hack-esp-aimbot-unlock-all]]; cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all]], [[warzone-internal-cheat]], and [[mwclap]].
+
 - **2026-08-14** — ingest `description:gmh5225/Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL`: entity [[call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all]]; cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[warzone-internal-cheat]] and [[mwclap]].
 
 - **2026-08-14** — ingest `description:gmh5225/CallMeWin32kDriver`: entity [[callmewin32kdriver]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-session-mapper]], [[win32k-file-collection]], and [[capcomlib]].
