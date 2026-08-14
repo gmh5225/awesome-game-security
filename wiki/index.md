@@ -316,6 +316,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
 - [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)
 - [CVE-2018-19320](entities/cve-2018-19320.md) — Gigabyte `gdrv.sys` CVE-2018-19320 DSE bypass (ring-0 memcpy IOCTL → `CI!g_CiOptions` leak/toggle; gmh5225)
+- [CVE-2018-19320-LPE](entities/cve-2018-19320-lpe.md) — Gigabyte `gdrv.sys` CVE-2018-19320 SYSTEM LPE (arbitrary alloc/write IOCTLs; Win10 x64 21H1; gmh5225)
 - [CVE-2019-2215](entities/cve-2019-2215.md) — Binder epoll UAF temporary root (Pixel 2/XL; Sep 2019 firmware; ARM64 NDK)
 - [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root)
 - [CVE-2020-14974](entities/cve-2020-14974.md) — IObitUnlocker `IObitUnlocker.sys` IOCTL file-manipulation PoC (unlock/delete/rename/copy/move in-use files; low privilege; gmh5225)
