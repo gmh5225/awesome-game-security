@@ -867,6 +867,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImGui-Unity-With-Layout](entities/imgui-unity-with-layout.md) — Android Unity ImGui mod menu + layout tabs/save-load (C++; cheat / render-draw)
 - [ImGui-Unity-Android](entities/imgui-unity-android.md) — gmh5225 Unity Android ImGui overlay (OpenGL ES in render pipeline; mod menus / debug UI)
 - [ImGUI-Zygisk-Unity](entities/imgui-zygisk-unity.md) — Zygisk Unity ImGui mod menu template (OpenGL ES + render-pipeline hook; cheat / render-draw)
+- [ImOverlay-DX11](entities/imoverlay-dx11.md) — C++20 Win32/DX11 transparent multi-window overlay framework (Dear ImGui; smart click-through; parent-child hierarchy)
 - [immortal-rust](entities/immortal-rust.md) — Facepunch Rust OpenGL + SDK generation cheat source (C/C++; cheat / game:rust; gmh5225)
 - [imxyvimapper](entities/imxyvimapper.md) — BYOVD driver mapper via AsUpIO.sys (PE manual map; sections/imports/relocs/entry; gmh5225)
 - [ucfoxi-shared-flushfilebuffers-communication-update](entities/ucfoxi-shared-flushfilebuffers-communication-update.md) — `\Driver\PEAUTH` `IRP_MJ_FLUSH_BUFFERS` hijack + registry-seeded shared buffer KM↔UM comm (gmh5225; cheat / driver communication)

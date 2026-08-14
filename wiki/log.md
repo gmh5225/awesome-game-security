@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:rabbanyhmm/ImOverlay-DX11`: entity [[imoverlay-dx11]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[imgui]] and [[egui-d3d11]].
+
 - **2026-08-14** — ingest `readme:categories`: bumped Cheat ~2698 (was ~2696; DirectX ~39 was ~38 incl. segcap UE4/UE5 object-ID masks / Anti Cheat ~669 / Some Tricks ~117 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/graphics-api]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-14** — ingest `description:gmh5225/Detection-CheatEngine-Ring0`: entity [[detection-cheat-engine-ring0]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[cedetector]], [[detection-cheat-engine]], and [[kernel-callbacks]].
