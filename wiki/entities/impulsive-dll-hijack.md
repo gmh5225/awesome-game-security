@@ -12,7 +12,7 @@ confidence: medium
 
 Windows DLL hijacking research automation: orchestrates the typical stages of DLL hijack workflows so game-security researchers and reverse engineers can study offensive load-path / sideload tradecraft without hand-running each step. (source: wiki/sources/descriptions/knight0x07__ImpulsiveDLLHijack.md)
 
-Sits in the Cheat → DLL Hijack lane beside catalog DBs [[windows-dll-hijacking]] and [[hijacklibs]] and discovery tooling [[dllirant]] (not a game-specific cheat); useful for AC/EDR researchers mapping image-load / search-order abuse.
+Sits in the Cheat → DLL Hijack lane beside catalog DBs [[windows-dll-hijacking]] and [[hijacklibs]] and discovery tooling [[dllirant]] (not a game-specific cheat); useful for AC/EDR researchers mapping image-load / search-order abuse. Export stub generation: [[dll-hijack-export-dumper]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the Cheat → DLL Hijack lane beside catalog DBs [[windows-dll-hijacking
 
 ## Related
 
-[[windows-dll-hijacking]] · [[hijacklibs]] · [[dllirant]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[injectors]]
+[[windows-dll-hijacking]] · [[hijacklibs]] · [[dllirant]] · [[dll-hijack-export-dumper]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[injectors]]

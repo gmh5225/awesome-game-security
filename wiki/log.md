@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/DLL-Hijack-ExportDumper`: entity [[dll-hijack-export-dumper]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-dll-hijacking]], [[dllirant]], and [[impulsive-dll-hijack]].
+
 - **2026-08-14** — ingest `description:gmh5225/DMA-PCIE-BOARD-75T`: entity [[dma-pcie-board-75t]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-fpga]], [[fpga-dma-multi-tool]], and [[dma-tools-rs]].
 
 - **2026-08-14** — ingest `description:gmh5225/DSEDodge-Signed-Kernel-Driver`: entity [[dsedodge-signed-kernel-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dse-hook]], [[dse-patcher-2]], and [[disabledse]].
