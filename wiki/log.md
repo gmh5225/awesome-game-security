@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/DVRT`: entity [[dvrt]]; cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[offset-streaming]] and [[auto-offsets]].
+
 - **2026-08-14** — ingest `description:gmh5225/DWM-DwmDraw`: entity [[dwm-dwmdraw]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[anti-screenshot-capture]].
 
 - **2026-08-14** — ingest `description:gmh5225/DataPtrSwap-driver`: entity [[dataptrswap-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[data-ptr-swap]] and [[custom-data-ptr-swap-sample]].
