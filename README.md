@@ -1380,6 +1380,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/0xbinder/android-kernel-exploitation-lab [CVE-2019-2215]
 - https://github.com/zhuowei/cheese [CVE-2025-21479]
 - https://github.com/farazsth98/poc-CVE-2025-38352 [CVE-2025-38352]
+- https://github.com/villager1314/CVE-2026-64560-Analysis [CVE-2026-64560 — posix-cpu-timers non-leader exec() race UAF; Linux/Android trigger PoC + patch analysis]
 - https://github.com/x-spy/CVE-2026-43499-popsicle [CVE-2026-43499]
 - https://github.com/Colorful-glassblock/duchamp-root [CVE-2026-43499]
 - https://github.com/BuSung-dev/Root-My-Galaxy [Samsung Galaxy KernelSU installer — CVE-2026-43499]
