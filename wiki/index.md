@@ -187,6 +187,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-injection](entities/awesome-injection.md) — curated injection resources (Cheat / injection:windows)
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
+- [BlackSignatureDriver](entities/black-signature-driver.md) — black-signature kernel driver dev + networking (gmh5225; Anti Cheat → Black Signature)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [Blanket](entities/blanket.md) — process hide via ActiveProcessLinks unlink + PspCidTable + NtQuerySystemInformation hook (cheat / hide)
 - [Blackout](entities/blackout.md) — BYOVD EDR/AV killer via GMER **`gmer64.sys`** (IOCTL PID terminate; Defender continuous suppression; gmh5225)
