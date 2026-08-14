@@ -66,6 +66,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BE Shellcode Dump](entities/be-shellcode-dump.md) — dump BE runtime shellcode scanning modules for offline RE (gmh5225; Reversed BE Shellcode)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
 - [BEDaisy.sys report bypass](entities/bedaisy-bypass.md) — suppress BEDaisy outbound reports; preserve service responses (gmh5225; cheat / explore anticheat system:be)
+- [BepInEx-IL2CPPBase](entities/bepinex-il2cppbase.md) — BepInEx Unity IL2CPP mod-menu base (C# rendering/audio/physics hooks; cheat / IL2CPP Menu; gmh5225)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
 - [Battleye Shellcode Dumper](entities/battleye-shellcode-dumper.md) — intercept BE server-streamed runtime shellcode + keys pre-execution (BEClient2.dll Dumper)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
