@@ -251,6 +251,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [Common-Registry-Jmp-RCX](entities/common-registry-jmp-rcx.md) — CmRegisterCallback + JMP RCX gadget in nvraid.sys for covert KM↔UM registry-callback comm (gmh5225; Registry Callback)
+- [comm-data-ptr-driver](entities/comm-data-ptr-driver.md) — shared data-ptr KM↔UM comm via NtGdiPolyPolyDraw; avoids IOCTL telemetry (gmh5225; cheat driver)
 - [comon](entities/comon.md) — WinDbg extension; trace COM class creation + interface querying (WinDbg Plugins)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [compile-time-regular-expressions](entities/compile-time-regular-expressions.md) — C++ CTRE compile-time regex (cmake `ctre`; AC Compile Time)

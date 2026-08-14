@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Comm-data-ptr-driver`: entity [[comm-data-ptr-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[interep-driver-leak]], [[data-ptr-swap]], and [[dataptrswap-driver]].
+
 - **2026-08-14** — ingest `description:gmh5225/Common-Registry-Jmp-RCX`: entity [[common-registry-jmp-rcx]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[boundcallback]], [[mapped-callback]], and [[evcommunication]].
 
 - **2026-08-14** — ingest `description:gmh5225/Cunthook`: entity [[cunthook]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[teamfortress2-internal]], [[fedoraware]], and [[l4d2-cheat]].
