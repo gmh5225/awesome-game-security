@@ -1,0 +1,3364 @@
+Project Path: arc_Lucyferek-nunu_vmp-unpacker_8lzwhqmm
+
+Source Tree:
+
+```txt
+arc_Lucyferek-nunu_vmp-unpacker_8lzwhqmm
+├── antidbg.cpp
+├── antidbg.h
+├── common.h
+├── debugger.cpp
+├── debugger.h
+├── dumper.cpp
+├── dumper.h
+├── iat.cpp
+├── iat.h
+├── iat_mutated.cpp
+├── iat_mutated.h
+├── main.cpp
+├── oep.cpp
+├── oep.h
+├── pe.cpp
+├── pe.h
+├── resolver_runner.cpp
+├── resolver_runner.h
+├── vmp_unhide.cpp
+└── vmp_unhide.h
+
+```
+
+`antidbg.cpp`:
+
+```cpp
+#include "antidbg.h"
+#include <tlhelp32.h>
+
+namespace vmpu::antidbg {
+bool g_freeze_on_clean_exit = false;
+constexpr u32 ProcessDebugPort         = 7;
+constexpr u32 ProcessDebugObjectHandle = 30;
+constexpr u32 ProcessDebugFlags        = 31;
+constexpr u32 ThreadHideFromDebugger   = 0x11;
+constexpr u32 SystemModuleInformation         = 0x0B;
+constexpr u32 SystemKernelDebuggerInformation = 0x23;
+constexpr u32 ProcessInstrumentationCallback  = 0x28;
+
+typedef NTSTATUS (NTAPI* NtQueryInformationProcess_t)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
+
+static u64 get_peb_addr(HANDLE proc) {
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    auto NtQip = (NtQueryInformationProcess_t)GetProcAddress(ntdll, "NtQueryInformationProcess");
+    if (!NtQip) return 0;
+    PROCESS_BASIC_INFORMATION pbi{};
+    ULONG ret = 0;
+    if (NtQip(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &ret) != 0) return 0;
+    return (u64)pbi.PebBaseAddress;
+}
+
+bool patch_peb(HANDLE proc) {
+    u64 peb = get_peb_addr(proc);
+    if (!peb) { VMPU_ERROR("ad", "Cannot locate PEB"); return false; }
+    VMPU_INFO("ad", "PEB at %llx", peb);
+
+    u8 zero8 = 0;
+    if (!write_mem(proc, peb + 0x02, &zero8, 1))
+        VMPU_WARN("ad", "PEB.BeingDebugged write failed");
+
+    u32 ngf = 0;
+    if (read_mem(proc, peb + 0x68, &ngf, 4)) {
+        ngf &= ~0x70u;
+        write_mem(proc, peb + 0x68, &ngf, 4);
+    }
+    u16 fake_build = 65000;
+    if (!write_mem(proc, peb + 0x118, &fake_build, 2))
+        VMPU_WARN("ad", "PEB.OSBuildNumber spoof failed");
+    else
+        VMPU_INFO("ad", "PEB.OSBuildNumber spoofed to %u", fake_build);
+    u32 fake_major = 10;
+    u32 fake_minor = 99;
+    write_mem(proc, peb + 0x110, &fake_major, 4);
+    write_mem(proc, peb + 0x114, &fake_minor, 4);
+    VMPU_INFO("ad", "PEB.OSMajor/Minor spoofed to %u.%u", fake_major, fake_minor);
+
+    u64 heap = 0;
+    if (read_mem(proc, peb + 0x30, &heap, 8) && heap) {
+        u32 flags = 0;
+        if (read_mem(proc, heap + 0x70, &flags, 4)) {
+            constexpr u32 kBad = 0x40000060;
+            flags &= ~kBad;
+            write_mem(proc, heap + 0x70, &flags, 4);
+        }
+        u32 force = 0;
+        if (read_mem(proc, heap + 0x74, &force, 4)) {
+            force = 0;
+            write_mem(proc, heap + 0x74, &force, 4);
+        }
+    }
+    return true;
+}
+
+bool clear_hw_breakpoints(DWORD pid) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) return false;
+    THREADENTRY32 te{}; te.dwSize = sizeof(te);
+    if (!Thread32First(snap, &te)) { CloseHandle(snap); return false; }
+    do {
+        if (te.th32OwnerProcessID != pid) continue;
+        HANDLE th = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, FALSE, te.th32ThreadID);
+        if (!th) continue;
+        CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+        if (GetThreadContext(th, &ctx)) {
+            ctx.Dr0 = ctx.Dr1 = ctx.Dr2 = ctx.Dr3 = 0;
+            ctx.Dr6 = 0; ctx.Dr7 = 0;
+            SetThreadContext(th, &ctx);
+        }
+        CloseHandle(th);
+    } while (Thread32Next(snap, &te));
+    CloseHandle(snap);
+    return true;
+}
+
+static bool install_one(HANDLE proc, const char* name, NtHook& hk) {
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    void* fn = GetProcAddress(ntdll, name);
+    if (!fn) {
+        VMPU_WARN("ad", "Cannot resolve ntdll!%s", name);
+        return false;
+    }
+    hk.hook_addr = (u64)fn;
+    hk.name = name;
+    if (!read_mem(proc, hk.hook_addr, &hk.orig_byte, 1)) return false;
+    u8 cc = 0xCC;
+    if (!write_mem(proc, hk.hook_addr, &cc, 1)) return false;
+    FlushInstructionCache(proc, (LPCVOID)hk.hook_addr, 1);
+    hk.installed = true;
+    VMPU_INFO("ad", "Hooked ntdll!%s at %llx (orig=%02x)", name, hk.hook_addr, hk.orig_byte);
+    return true;
+}
+
+static bool install_one_in(HANDLE proc, const wchar_t* mod_name, const char* fn_name, NtHook& hk) {
+    HMODULE m = GetModuleHandleW(mod_name);
+    if (!m) {
+        m = LoadLibraryW(mod_name);
+        if (!m) { VMPU_WARN("ad", "Cannot load %ls", mod_name); return false; }
+    }
+    void* fn = GetProcAddress(m, fn_name);
+    if (!fn) { VMPU_WARN("ad", "Cannot resolve %ls!%s", mod_name, fn_name); return false; }
+    hk.hook_addr = (u64)fn;
+    hk.name = fn_name;
+    if (!read_mem(proc, hk.hook_addr, &hk.orig_byte, 1)) return false;
+    u8 cc = 0xCC;
+    if (!write_mem(proc, hk.hook_addr, &cc, 1)) return false;
+    FlushInstructionCache(proc, (LPCVOID)hk.hook_addr, 1);
+    hk.installed = true;
+    VMPU_INFO("ad", "Hooked %ls!%s at %llx (orig=%02x)", mod_name, fn_name, hk.hook_addr, hk.orig_byte);
+    return true;
+}
+
+bool install_all(HANDLE proc, HookSet& hs) {
+    install_one(proc, "NtQueryInformationProcess", hs.ntqip);
+    install_one(proc, "NtSetInformationThread",    hs.ntsit);
+    install_one(proc, "NtQuerySystemInformation",  hs.ntqsi);
+    install_one(proc, "NtClose",                   hs.ntclose);
+    install_one(proc, "NtRaiseHardError",          hs.ntrhe);
+    install_one(proc, "NtRaiseException",          hs.ntrex);
+    install_one(proc, "RtlRaiseException",         hs.rtlrex);
+    install_one(proc, "RtlRaiseStatus",            hs.rtlrst);
+    install_one(proc, "RtlExitUserProcess",        hs.rtlexit);
+    install_one(proc, "RtlReportSilentProcessExit", hs.rtlsilex);
+    install_one(proc, "NtTerminateProcess",        hs.ntterm);
+    install_one_in(proc, L"kernel32.dll", "OutputDebugStringA", hs.odsa);
+    install_one_in(proc, L"kernel32.dll", "OutputDebugStringW", hs.odsw);
+    (void)hs.ntsip; // NtSetInformationProcess hook disabled cuz of crashes
+    return hs.ntqip.installed || hs.ntsit.installed || hs.ntqsi.installed
+        || hs.ntclose.installed || hs.ntrhe.installed || hs.ntrex.installed
+        || hs.rtlrex.installed || hs.rtlrst.installed
+        || hs.rtlexit.installed || hs.rtlsilex.installed
+        || hs.ntterm.installed || hs.odsa.installed || hs.odsw.installed
+        || hs.t32f.installed   || hs.t32n.installed;
+}
+
+void register_hidden_tid(HookSet& hs, DWORD tid) {
+    for (DWORD t : hs.hidden_tids) if (t == tid) return;
+    hs.hidden_tids.push_back(tid);
+    VMPU_INFO("ad", "Registered TID %lu as hidden from Toolhelp32", tid);
+}
+
+bool install_thread32_hooks(HANDLE proc, HookSet& hs) {
+    if (hs.t32f.installed && hs.t32n.installed) return true;
+    install_one_in(proc, L"kernel32.dll", "Thread32First", hs.t32f);
+    install_one_in(proc, L"kernel32.dll", "Thread32Next",  hs.t32n);
+    return hs.t32f.installed && hs.t32n.installed;
+}
+
+static void synthesize_ret(HANDLE proc, HANDLE thread, CONTEXT& ctx, u64 status) {
+    u64 ret_addr = 0;
+    if (!read_mem(proc, ctx.Rsp, &ret_addr, 8)) {
+        VMPU_WARN("ad", "synthesize_ret: cannot read [rsp]");
+        return;
+    }
+    ctx.Rip = ret_addr;
+    ctx.Rsp += 8;
+    ctx.Rax = status;
+    SetThreadContext(thread, &ctx);
+}
+
+static bool service_ntqip(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 cls = (u32)ctx.Rdx;
+    u64 buf = ctx.R8;
+    u64 len = ctx.R9;
+    u64 retp = 0;
+    read_mem(proc, ctx.Rsp + 0x28, &retp, 8);
+
+    if (cls > 0x100 || (buf != 0 && buf < 0x10000)) {
+        VMPU_TRACE("ad", "NtQip probe (cls=%u buf=%llx) pass through", cls, buf);
+        return false;
+    }
+
+    if (buf && (buf & 0x7) != 0) {
+        VMPU_TRACE("ad", "NtQip class=%u with unaligned buf=%llx -> DATATYPE_MISALIGNMENT", cls, buf);
+        synthesize_ret(proc, thread, ctx, 0x80000002);
+        return true;
+    }
+
+    u64 fake = 0;
+    u32 fake_len = 0;
+    u64 status = 0;
+    switch (cls) {
+        case ProcessDebugPort:
+            fake = 0; fake_len = 8;
+            status = 0;
+            break;
+        case ProcessDebugObjectHandle:
+            fake_len = 8;
+            status = 0xC0000353;
+            break;
+        case ProcessDebugFlags:
+            fake = 1; fake_len = 4;
+            status = 0;
+            break;
+        default: return false;
+    }
+    if (buf && len >= fake_len && cls != ProcessDebugObjectHandle) {
+        write_mem(proc, buf, &fake, fake_len);
+        if (retp) write_mem(proc, retp, &fake_len, 4);
+    }
+    VMPU_TRACE("ad", "NtQip class=%u -> status=%llx", cls, status);
+    synthesize_ret(proc, thread, ctx, status);
+    return true;
+}
+
+static bool service_ntsit(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 cls = (u32)ctx.Rdx;
+    if (cls > 0x100) {
+        VMPU_TRACE("ad", "NtSetInfoThread probe (cls=%u) pass through", cls);
+        return false;
+    }
+    if (cls == ThreadHideFromDebugger) {
+        VMPU_TRACE("ad", "NtSetInfoThread(ThreadHideFromDebugger) -> swallowed");
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    return false;
+}
+
+static bool service_ntqsi(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 cls = (u32)ctx.Rcx;
+    u64 buf = ctx.Rdx;
+    u64 len = ctx.R8;
+    u64 retp = ctx.R9;
+
+    if (cls > 0x400 || (buf != 0 && buf < 0x10000)) {
+        VMPU_TRACE("ad", "NtQSI probe (cls=%u buf=%llx) pass through", cls, buf);
+        return false;
+    }
+
+    if (cls == SystemKernelDebuggerInformation) {
+        u8 result[2] = { 0, 1 };
+        if (buf && len >= 2) {
+            write_mem(proc, buf, result, 2);
+            u32 wrote = 2;
+            if (retp) write_mem(proc, retp, &wrote, 4);
+        }
+        VMPU_TRACE("ad", "NtQSI(SystemKernelDebuggerInformation) -> faked");
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    if (cls == SystemModuleInformation) {
+        if (retp) {
+            u32 needed = 0;
+            write_mem(proc, retp, &needed, 4);
+        }
+        VMPU_TRACE("ad", "NtQSI(SystemModuleInformation) -> faked LEN_MISMATCH");
+        synthesize_ret(proc, thread, ctx, 0xC0000004);
+        return true;
+    }
+    return false;
+}
+
+static bool service_ntsip(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 cls = (u32)ctx.Rdx;
+    if (cls == ProcessInstrumentationCallback) {
+        VMPU_TRACE("ad", "NtSetInfoProc(ProcessInstrumentationCallback) -> swallowed");
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    return false;
+}
+
+static bool service_ntclose(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u64 h = ctx.Rcx;
+    if (h == 0xDEADC0DEULL) {
+        VMPU_TRACE("ad", "NtClose(deadc0de) -> faked STATUS_INVALID_HANDLE");
+        synthesize_ret(proc, thread, ctx, 0xC0000008);
+        return true;
+    }
+    return false;
+}
+
+static bool service_ntterm(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u64 hproc = ctx.Rcx;
+    u32 exit_code = (u32)ctx.Rdx;
+    bool is_current = (hproc == 0xFFFFFFFFFFFFFFFFULL);
+    bool is_blacklist_code = (exit_code == 0xDEADC0DEu)
+                          || (exit_code == 0xC0000008u)
+                          || (exit_code == 0xC0000005u)
+                          || (exit_code == 0xC0000409u);
+    bool is_vmp_trick = !is_current || is_blacklist_code;
+
+    if (is_vmp_trick) {
+        VMPU_WARN("ad", "Swallowing NtTerminateProcess(h=%llx, code=%x)", hproc, exit_code);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    if (g_freeze_on_clean_exit) {
+        VMPU_INFO("ad", "NtTerminateProcess(self, code=%u) -> OEP signal freezing thread", exit_code);
+        SuspendThread(thread);
+        return true;
+    }
+    VMPU_INFO("ad", "Legit NtTerminateProcess(self, code=%x), uninstalling hook", exit_code);
+    u8 orig = hk.orig_byte;
+    SIZE_T put = 0;
+    WriteProcessMemory(proc, (LPVOID)hk.hook_addr, &orig, 1, &put);
+    FlushInstructionCache(proc, (LPCVOID)hk.hook_addr, 1);
+    hk.installed = false;
+    ctx.Rip = hk.hook_addr;
+    SetThreadContext(thread, &ctx);
+    return true;
+}
+
+static bool is_self_kill_code(u32 code) {
+    return code == 0xC0000008u   // INVALID_HANDLE
+        || code == 0xC0000005u   // ACCESS_VIOLATION
+        || code == 0x80000003u   // BREAKPOINT
+        || code == 0xC0000409u   // FAIL_FAST
+        || code == 0xDEADC0DEu;
+}
+
+static bool service_ntrex(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 ex_code = 0;
+    if (!read_mem(proc, ctx.Rcx, &ex_code, 4)) return false;
+    if (is_self_kill_code(ex_code)) {
+        VMPU_WARN("ad", "Swallowing NtRaiseException(code=%x) VMP trick", ex_code);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    return false;
+}
+
+static bool service_rtlrex(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 ex_code = 0;
+    if (!read_mem(proc, ctx.Rcx, &ex_code, 4)) return false;
+    if (is_self_kill_code(ex_code)) {
+        VMPU_WARN("ad", "Swallowing RtlRaiseException(code=%x) VMP trick", ex_code);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    return false;
+}
+
+static bool service_rtlrst(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 status = (u32)ctx.Rcx;
+    if (is_self_kill_code(status)) {
+        VMPU_WARN("ad", "Swallowing RtlRaiseStatus(status=%x) VMP trick", status);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    return false;
+}
+
+static bool service_rtlexit(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 code = (u32)ctx.Rcx;
+    if (is_self_kill_code(code)) {
+        VMPU_WARN("ad", "Swallowing RtlExitUserProcess(code=%x) VMP trick", code);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    if (g_freeze_on_clean_exit) {
+        VMPU_INFO("ad", "RtlExitUserProcess(code=%u) -> OEP signal freezing thread", code);
+        SuspendThread(thread);
+        return true;
+    }
+    return false;
+}
+
+static bool service_rtlsilex(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 code = (u32)ctx.Rdx;
+    VMPU_WARN("ad", "Swallowing RtlReportSilentProcessExit(code=%x)", code);
+    synthesize_ret(proc, thread, ctx, 0);
+    return true;
+}
+
+static bool service_ntrhe(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx) {
+    u32 error_status = (u32)ctx.Rcx;
+    if (error_status == 0xC0000008u ||         // STATUS_INVALID_HANDLE
+        error_status == 0xC0000005u ||         // STATUS_ACCESS_VIOLATION
+        error_status == 0xC00000FDu ||         // STATUS_STACK_OVERFLOW
+        error_status == 0xDEADC0DEu) {
+        VMPU_WARN("ad", "Swallowing NtRaiseHardError(status=%x) - VMP self-kill", error_status);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    return false;
+}
+
+struct T32IterState {
+    std::vector<THREADENTRY32> entries;
+    size_t pos = 0;
+};
+static std::map<u64, T32IterState>& t32_cache() {
+    static std::map<u64, T32IterState> m;
+    return m;
+}
+
+static void build_t32_cache(const HookSet& hs, u64 vmp_snap) {
+    auto& st = t32_cache()[vmp_snap];
+    st.entries.clear();
+    st.pos = 0;
+    HANDLE local = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (local == INVALID_HANDLE_VALUE) return;
+    THREADENTRY32 te{}; te.dwSize = sizeof(te);
+    if (Thread32First(local, &te)) {
+        do {
+            if (te.th32OwnerProcessID != hs.target_pid) continue;
+            bool hide = false;
+            for (DWORD t : hs.hidden_tids) if (t == te.th32ThreadID) { hide = true; break; }
+            if (hide) continue;
+            st.entries.push_back(te);
+        } while (Thread32Next(local, &te));
+    }
+    CloseHandle(local);
+    VMPU_TRACE("ad", "T32 cache for snap=%llx built: %zu entries (filtered %zu hidden)", vmp_snap, st.entries.size(), hs.hidden_tids.size());
+}
+
+static bool service_t32f(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx, const HookSet& hs) {
+    u64 snap  = ctx.Rcx;
+    u64 lpte  = ctx.Rdx;
+    if (!snap || !lpte) {
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    build_t32_cache(hs, snap);
+    auto& st = t32_cache()[snap];
+    if (st.entries.empty()) {
+        SetLastError(ERROR_NO_MORE_FILES);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    DWORD caller_dwsize = sizeof(THREADENTRY32);
+    read_mem(proc, lpte, &caller_dwsize, 4);
+    THREADENTRY32 te = st.entries[0];
+    if (caller_dwsize < sizeof(te)) caller_dwsize = sizeof(te);
+    write_mem(proc, lpte, &te, sizeof(te));
+    st.pos = 1;
+    synthesize_ret(proc, thread, ctx, 1);
+    return true;
+}
+
+static bool service_t32n(HANDLE proc, HANDLE thread, NtHook& hk, CONTEXT& ctx, const HookSet& hs) {
+    u64 snap = ctx.Rcx;
+    u64 lpte = ctx.Rdx;
+    if (!snap || !lpte) {
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    auto it = t32_cache().find(snap);
+    if (it == t32_cache().end()) {
+        build_t32_cache(hs, snap);
+        it = t32_cache().find(snap);
+    }
+    auto& st = it->second;
+    if (st.pos >= st.entries.size()) {
+        SetLastError(ERROR_NO_MORE_FILES);
+        synthesize_ret(proc, thread, ctx, 0);
+        return true;
+    }
+    THREADENTRY32 te = st.entries[st.pos++];
+    write_mem(proc, lpte, &te, sizeof(te));
+    synthesize_ret(proc, thread, ctx, 1);
+    return true;
+}
+
+static bool service_ods(HANDLE proc, HANDLE thread, const NtHook& hk, CONTEXT& ctx) {
+    VMPU_TRACE("ad", "%s -> swallowed", hk.name);
+    u64 ret_addr = 0;
+    if (read_mem(proc, ctx.Rsp, &ret_addr, 8)) {
+        ctx.Rip = ret_addr;
+        ctx.Rsp += 8;
+        SetThreadContext(thread, &ctx);
+    }
+    return true;
+}
+
+bool service_any(HANDLE proc, HANDLE thread, HookSet& hs, u64 rip_minus_1, bool& handled) {
+    handled = false;
+    NtHook* hk = nullptr;
+    if (hs.ntqip.installed && hs.ntqip.hook_addr == rip_minus_1) hk = &hs.ntqip;
+    else if (hs.ntsit.installed && hs.ntsit.hook_addr == rip_minus_1) hk = &hs.ntsit;
+    else if (hs.ntqsi.installed && hs.ntqsi.hook_addr == rip_minus_1) hk = &hs.ntqsi;
+    else if (hs.ntclose.installed && hs.ntclose.hook_addr == rip_minus_1) hk = &hs.ntclose;
+    else if (hs.ntrhe.installed && hs.ntrhe.hook_addr == rip_minus_1) hk = &hs.ntrhe;
+    else if (hs.ntrex.installed && hs.ntrex.hook_addr == rip_minus_1) hk = &hs.ntrex;
+    else if (hs.rtlrex.installed && hs.rtlrex.hook_addr == rip_minus_1) hk = &hs.rtlrex;
+    else if (hs.rtlrst.installed && hs.rtlrst.hook_addr == rip_minus_1) hk = &hs.rtlrst;
+    else if (hs.rtlexit.installed && hs.rtlexit.hook_addr == rip_minus_1) hk = &hs.rtlexit;
+    else if (hs.rtlsilex.installed && hs.rtlsilex.hook_addr == rip_minus_1) hk = &hs.rtlsilex;
+    else if (hs.ntterm.installed && hs.ntterm.hook_addr == rip_minus_1) hk = &hs.ntterm;
+    else if (hs.odsa.installed && hs.odsa.hook_addr == rip_minus_1) hk = &hs.odsa;
+    else if (hs.odsw.installed && hs.odsw.hook_addr == rip_minus_1) hk = &hs.odsw;
+    else if (hs.t32f.installed && hs.t32f.hook_addr == rip_minus_1) hk = &hs.t32f;
+    else if (hs.t32n.installed && hs.t32n.hook_addr == rip_minus_1) hk = &hs.t32n;
+    if (!hk) return false;
+
+    CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_ALL;
+    if (!GetThreadContext(thread, &ctx)) return false;
+    ctx.Rip -= 1;
+
+    bool serviced = false;
+    if (hk == &hs.ntqip) serviced = service_ntqip(proc, thread, *hk, ctx);
+    else if (hk == &hs.ntsit) serviced = service_ntsit(proc, thread, *hk, ctx);
+    else if (hk == &hs.ntqsi) serviced = service_ntqsi(proc, thread, *hk, ctx);
+    else if (hk == &hs.ntclose) serviced = service_ntclose(proc, thread, *hk, ctx);
+    else if (hk == &hs.ntrhe) serviced = service_ntrhe(proc, thread, *hk, ctx);
+    else if (hk == &hs.ntrex) serviced = service_ntrex(proc, thread, *hk, ctx);
+    else if (hk == &hs.rtlrex) serviced = service_rtlrex(proc, thread, *hk, ctx);
+    else if (hk == &hs.rtlrst) serviced = service_rtlrst(proc, thread, *hk, ctx);
+    else if (hk == &hs.rtlexit) serviced = service_rtlexit(proc, thread, *hk, ctx);
+    else if (hk == &hs.rtlsilex) serviced = service_rtlsilex(proc, thread, *hk, ctx);
+    else if (hk == &hs.ntterm) serviced = service_ntterm(proc, thread, *hk, ctx);
+    else if (hk == &hs.odsa || hk == &hs.odsw)
+        serviced = service_ods(proc, thread, *hk, ctx);
+    else if (hk == &hs.t32f) serviced = service_t32f(proc, thread, *hk, ctx, hs);
+    else if (hk == &hs.t32n) serviced = service_t32n(proc, thread, *hk, ctx, hs);
+
+    if (!serviced) {
+        u8 orig = hk->orig_byte;
+        write_mem(proc, hk->hook_addr, &orig, 1);
+        FlushInstructionCache(proc, (LPCVOID)hk->hook_addr, 1);
+        ctx.EFlags |= 0x100;
+        SetThreadContext(thread, &ctx);
+    }
+    handled = true;
+    return true;
+}
+
+bool install_ntqip_hook(HANDLE proc, NtHook& hk) {
+    return install_one(proc, "NtQueryInformationProcess", hk);
+}
+
+bool service_ntqip_hook(HANDLE proc, HANDLE thread, const NtHook& hk_const, bool& handled) {
+    handled = false;
+    NtHook& hk = const_cast<NtHook&>(hk_const);
+    if (!hk.installed) return false;
+    CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_ALL;
+    if (!GetThreadContext(thread, &ctx)) return false;
+    if (ctx.Rip - 1 != hk.hook_addr) return false;
+    ctx.Rip -= 1;
+    if (service_ntqip(proc, thread, hk, ctx)) {
+        handled = true;
+        return true;
+    }
+    u8 orig = hk.orig_byte;
+    write_mem(proc, hk.hook_addr, &orig, 1);
+    FlushInstructionCache(proc, (LPCVOID)hk.hook_addr, 1);
+    ctx.EFlags |= 0x100;
+    SetThreadContext(thread, &ctx);
+    handled = true;
+    return true;
+}
+
+}
+```
+
+`antidbg.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "debugger.h"
+
+namespace vmpu::antidbg {
+bool patch_peb(HANDLE proc);
+
+bool clear_hw_breakpoints(DWORD pid);
+
+struct NtHook {
+    u64 hook_addr = 0;
+    u8  orig_byte = 0;
+    bool installed = false;
+    const char* name = "";
+};
+
+struct HookSet {
+    NtHook ntqip;    // NtQueryInformationProcess
+    NtHook ntsit;    // NtSetInformationThread
+    NtHook ntqsi;    // NtQuerySystemInformation
+    NtHook ntsip;    // NtSetInformationProcess
+    NtHook ntclose;  // NtClose
+    NtHook ntterm;   // NtTerminateProcess
+    NtHook ntrhe;    // NtRaiseHardError
+    NtHook ntrex;    // NtRaiseException
+    NtHook rtlrex;   // RtlRaiseException
+    NtHook rtlrst;   // RtlRaiseStatus
+    NtHook rtlexit;  // RtlExitUserProcess
+    NtHook rtlsilex; // RtlReportSilentProcessExit
+    NtHook odsa;     // kernel32!OutputDebugStringA
+    NtHook odsw;     // kernel32!OutputDebugStringW
+    NtHook t32f;     // kernel32!Thread32First
+    NtHook t32n;     // kernel32!Thread32Next
+
+    DWORD target_pid = 0;
+    std::vector<DWORD> hidden_tids;
+};
+
+void register_hidden_tid(HookSet& hs, DWORD tid);
+
+bool install_thread32_hooks(HANDLE proc, HookSet& hs);
+
+extern bool g_freeze_on_clean_exit;
+
+bool install_all(HANDLE proc, HookSet& hs);
+bool service_any(HANDLE proc, HANDLE thread, HookSet& hs, u64 rip_minus_1, bool& handled);
+
+using NtQipHook = NtHook;
+bool install_ntqip_hook(HANDLE proc, NtHook& hk);
+bool service_ntqip_hook(HANDLE proc, HANDLE thread, const NtHook& hk, bool& handled);
+
+}
+```
+
+`common.h`:
+
+```h
+#pragma once
+
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <winternl.h>
+#include <cstdint>
+#include <cstdio>
+#include <string>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
+#include <optional>
+
+using u8  = uint8_t;
+using u16 = uint16_t;
+using u32 = uint32_t;
+using u64 = uint64_t;
+using i32 = int32_t;
+using i64 = int64_t;
+
+namespace vmpu {
+enum class LogLevel { Trace, Info, Warn, Error };
+
+inline LogLevel g_log_level = LogLevel::Info;
+
+inline void log_print(LogLevel lvl, const char* tag, const char* fmt, ...) {
+    if ((int)lvl < (int)g_log_level) return;
+    const char* lbl = "?";
+    switch (lvl) {
+        case LogLevel::Trace: lbl = "TRC"; break;
+        case LogLevel::Info:  lbl = "INF"; break;
+        case LogLevel::Warn:  lbl = "WRN"; break;
+        case LogLevel::Error: lbl = "ERR"; break;
+    }
+    fprintf(stderr, "[%s][%s] ", lbl, tag);
+    va_list ap; va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    fputc('\n', stderr);
+}
+
+#define VMPU_TRACE(tag, ...) ::vmpu::log_print(::vmpu::LogLevel::Trace, tag, __VA_ARGS__)
+#define VMPU_INFO(tag, ...)  ::vmpu::log_print(::vmpu::LogLevel::Info,  tag, __VA_ARGS__)
+#define VMPU_WARN(tag, ...)  ::vmpu::log_print(::vmpu::LogLevel::Warn,  tag, __VA_ARGS__)
+#define VMPU_ERROR(tag, ...) ::vmpu::log_print(::vmpu::LogLevel::Error, tag, __VA_ARGS__)
+
+struct Range {
+    u64 base;
+    u64 size;
+    bool contains(u64 a) const { return a >= base && a < base + size; }
+    u64 end() const { return base + size; }
+};
+
+struct ModuleInfo {
+    std::wstring name;
+    u64 base;
+    u64 size;
+    bool is_system;
+};
+
+}
+```
+
+`debugger.cpp`:
+
+```cpp
+#include "debugger.h"
+#include <tlhelp32.h>
+#include <psapi.h>
+
+#pragma comment(lib, "psapi.lib")
+
+namespace vmpu {
+bool read_mem(HANDLE proc, u64 addr, void* buf, size_t sz) {
+    SIZE_T got = 0;
+    return ReadProcessMemory(proc, (LPCVOID)addr, buf, sz, &got) && got == sz;
+}
+bool write_mem(HANDLE proc, u64 addr, const void* buf, size_t sz) {
+    SIZE_T put = 0;
+    return WriteProcessMemory(proc, (LPVOID)addr, buf, sz, &put) && put == sz;
+}
+
+bool Debugger::launch(const std::wstring& exe_path, const std::wstring& cmdline) {
+    STARTUPINFOW si{}; si.cb = sizeof(si);
+    PROCESS_INFORMATION pi{};
+
+    std::wstring cmd = L"\"" + exe_path + L"\"";
+    if (!cmdline.empty()) cmd += L" " + cmdline;
+
+    std::vector<wchar_t> cmdbuf(cmd.begin(), cmd.end());
+    cmdbuf.push_back(0);
+
+    DWORD flags = DEBUG_PROCESS | DEBUG_ONLY_THIS_PROCESS;
+    if (!CreateProcessW(exe_path.c_str(), cmdbuf.data(), nullptr, nullptr, FALSE, flags, nullptr, nullptr, &si, &pi)) {
+        VMPU_ERROR("dbg", "CreateProcessW failed: %lu", GetLastError());
+        return false;
+    }
+    st_.pid = pi.dwProcessId;
+    st_.main_tid = pi.dwThreadId;
+    st_.proc = pi.hProcess;
+    st_.main_thread = pi.hThread;
+    VMPU_INFO("dbg", "Launched pid=%lu tid=%lu", pi.dwProcessId, pi.dwThreadId);
+    return true;
+}
+
+bool Debugger::attach(DWORD pid) {
+    if (!DebugActiveProcess(pid)) {
+        VMPU_ERROR("dbg", "DebugActiveProcess %lu failed: %lu", pid, GetLastError());
+        return false;
+    }
+    attached_ = true;
+    st_.pid = pid;
+    st_.proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+    if (!st_.proc) {
+        VMPU_ERROR("dbg", "OpenProcess failed: %lu", GetLastError());
+        return false;
+    }
+    return true;
+}
+
+void Debugger::detach() {
+    if (attached_ && st_.pid) {
+        DebugActiveProcessStop(st_.pid);
+    }
+    if (st_.main_thread) CloseHandle(st_.main_thread);
+    if (st_.proc) CloseHandle(st_.proc);
+    st_ = {};
+}
+
+void Debugger::refresh_modules() {
+    st_.modules.clear();
+    HMODULE mods[1024];
+    DWORD needed = 0;
+    if (!EnumProcessModulesEx(st_.proc, mods, sizeof(mods), &needed, LIST_MODULES_ALL))
+        return;
+    u32 n = needed / sizeof(HMODULE);
+    wchar_t sysdir[MAX_PATH] = {0};
+    GetSystemDirectoryW(sysdir, MAX_PATH);
+    std::wstring sd = sysdir;
+    for (u32 i = 0; i < n; ++i) {
+        wchar_t path[MAX_PATH] = {0};
+        MODULEINFO mi{};
+        if (!GetModuleFileNameExW(st_.proc, mods[i], path, MAX_PATH)) continue;
+        if (!GetModuleInformation(st_.proc, mods[i], &mi, sizeof(mi))) continue;
+        ModuleInfo m;
+        m.name = path;
+        m.base = (u64)mi.lpBaseOfDll;
+        m.size = mi.SizeOfImage;
+        m.is_system = (_wcsnicmp(path, sd.c_str(), sd.size()) == 0);
+        st_.modules.push_back(m);
+    }
+}
+
+const ModuleInfo* Debugger::module_containing(u64 addr) const {
+    for (auto& m : st_.modules) {
+        if (addr >= m.base && addr < m.base + m.size) return &m;
+    }
+    return nullptr;
+}
+
+bool Debugger::break_in() {
+    HANDLE proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, st_.pid);
+    if (!proc) return false;
+    BOOL ok = DebugBreakProcess(proc);
+    CloseHandle(proc);
+    return ok != 0;
+}
+
+static int for_each_thread(DWORD pid, void(*fn)(DWORD tid, void*), void* ctx) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (snap == INVALID_HANDLE_VALUE) return 0;
+    int n = 0;
+    THREADENTRY32 te{}; te.dwSize = sizeof(te);
+    if (Thread32First(snap, &te)) {
+        do {
+            if (te.th32OwnerProcessID != pid) continue;
+            fn(te.th32ThreadID, ctx);
+            ++n;
+        } while (Thread32Next(snap, &te));
+    }
+    CloseHandle(snap);
+    return n;
+}
+
+int Debugger::suspend_all_threads() {
+    return for_each_thread(st_.pid, [](DWORD tid, void*) {
+        HANDLE th = OpenThread(THREAD_SUSPEND_RESUME, FALSE, tid);
+        if (th) { SuspendThread(th); CloseHandle(th); }
+    }, nullptr);
+}
+
+int Debugger::resume_all_threads() {
+    return for_each_thread(st_.pid, [](DWORD tid, void*) {
+        HANDLE th = OpenThread(THREAD_SUSPEND_RESUME, FALSE, tid);
+        if (th) { ResumeThread(th); CloseHandle(th); }
+    }, nullptr);
+}
+
+bool Debugger::run_until_timed(EventHandler h, TimeoutCb tcb, DWORD poll_ms, void* ctx) {
+    DEBUG_EVENT ev{};
+    while (true) {
+        if (!WaitForDebugEvent(&ev, poll_ms)) {
+            if (GetLastError() == ERROR_SEM_TIMEOUT) {
+                if (tcb && !tcb(ctx, /*forced=*/false)) return true;
+                continue;
+            }
+            VMPU_ERROR("dbg", "WaitForDebugEvent failed: %lu", GetLastError());
+            return false;
+        }
+        DWORD status = DBG_CONTINUE;
+        switch (ev.dwDebugEventCode) {
+        case CREATE_PROCESS_DEBUG_EVENT:
+            st_.image_base = (u64)ev.u.CreateProcessInfo.lpBaseOfImage;
+            st_.entry_point = (u64)ev.u.CreateProcessInfo.lpStartAddress;
+            if (ev.u.CreateProcessInfo.hFile) CloseHandle(ev.u.CreateProcessInfo.hFile);
+            VMPU_INFO("dbg", "CREATE_PROCESS base=%llx ep=%llx", st_.image_base, st_.entry_point);
+            break;
+        case LOAD_DLL_DEBUG_EVENT:
+            if (ev.u.LoadDll.hFile) CloseHandle(ev.u.LoadDll.hFile);
+            VMPU_TRACE("dbg", "LOAD_DLL base=%p", ev.u.LoadDll.lpBaseOfDll);
+            break;
+        case EXIT_PROCESS_DEBUG_EVENT:
+            VMPU_INFO("dbg", "EXIT_PROCESS code=%lu", ev.u.ExitProcess.dwExitCode);
+            if (tcb) {
+                VMPU_INFO("dbg", "EXIT_PROCESS: triggering snapshot fallback");
+                bool keep_running = tcb(ctx, /*forced=*/true);
+                if (!keep_running) {
+                    return true;
+                }
+            }
+            ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, status);
+            return false;
+        default: break;
+        }
+        bool keep = h(ev, status, ctx);
+        if (!ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, status)) {
+            VMPU_ERROR("dbg", "ContinueDebugEvent failed: %lu", GetLastError());
+            return false;
+        }
+        if (!keep) return true;
+    }
+}
+
+bool Debugger::run_until(EventHandler h, void* ctx) {
+    DEBUG_EVENT ev{};
+    while (true) {
+        if (!WaitForDebugEvent(&ev, INFINITE)) {
+            VMPU_ERROR("dbg", "WaitForDebugEvent failed: %lu", GetLastError());
+            return false;
+        }
+
+        DWORD status = DBG_CONTINUE;
+
+        switch (ev.dwDebugEventCode) {
+        case CREATE_PROCESS_DEBUG_EVENT: {
+            st_.image_base = (u64)ev.u.CreateProcessInfo.lpBaseOfImage;
+            st_.entry_point = (u64)ev.u.CreateProcessInfo.lpStartAddress;
+            if (ev.u.CreateProcessInfo.hFile)
+                CloseHandle(ev.u.CreateProcessInfo.hFile);
+            VMPU_INFO("dbg", "CREATE_PROCESS base=%llx ep=%llx", st_.image_base, st_.entry_point);
+        } break;
+
+        case LOAD_DLL_DEBUG_EVENT: {
+            if (ev.u.LoadDll.hFile) CloseHandle(ev.u.LoadDll.hFile);
+            VMPU_TRACE("dbg", "LOAD_DLL base=%p", ev.u.LoadDll.lpBaseOfDll);
+        } break;
+
+        case EXIT_PROCESS_DEBUG_EVENT:
+            VMPU_INFO("dbg", "EXIT_PROCESS code=%lu", ev.u.ExitProcess.dwExitCode);
+            ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, status);
+            return false;
+
+        default: break;
+        }
+
+        bool keep = h(ev, status, ctx);
+        if (!ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, status)) {
+            VMPU_ERROR("dbg", "ContinueDebugEvent failed: %lu", GetLastError());
+            return false;
+        }
+        if (!keep) return true;
+    }
+}
+
+}
+```
+
+`debugger.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+namespace vmpu {
+struct DebuggeeState {
+    DWORD pid = 0;
+    DWORD main_tid = 0;
+    HANDLE proc = nullptr;
+    HANDLE main_thread = nullptr;
+    u64 image_base = 0;
+    u64 entry_point = 0;
+    std::vector<ModuleInfo> modules;
+};
+
+class Debugger {
+public:
+    bool launch(const std::wstring& exe_path, const std::wstring& cmdline);
+    bool attach(DWORD pid);
+
+    using EventHandler = bool(*)(const DEBUG_EVENT& ev, DWORD& out_status, void* ctx);
+    bool run_until(EventHandler h, void* ctx);
+
+    using TimeoutCb = bool(*)(void* ctx, bool forced);
+    bool run_until_timed(EventHandler h, TimeoutCb tcb, DWORD poll_ms, void* ctx);
+
+    bool break_in();
+
+    int  suspend_all_threads();
+    int  resume_all_threads();
+
+    void detach();
+    DebuggeeState& state() { return st_; }
+    const DebuggeeState& state() const { return st_; }
+
+    void refresh_modules();
+    const ModuleInfo* module_containing(u64 addr) const;
+
+private:
+    DebuggeeState st_;
+    bool attached_ = false;
+};
+
+bool read_mem(HANDLE proc, u64 addr, void* buf, size_t sz);
+bool write_mem(HANDLE proc, u64 addr, const void* buf, size_t sz);
+
+}
+```
+
+`dumper.cpp`:
+
+```cpp
+#include "dumper.h"
+
+namespace vmpu::dumper {
+static void clear_data_dir(std::vector<u8>& bytes, u32 idx) {
+    auto* dos = (IMAGE_DOS_HEADER*)bytes.data();
+    auto* nt = (IMAGE_NT_HEADERS64*)(bytes.data() + dos->e_lfanew);
+    if (idx >= nt->OptionalHeader.NumberOfRvaAndSizes) return;
+    nt->OptionalHeader.DataDirectory[idx].VirtualAddress = 0;
+    nt->OptionalHeader.DataDirectory[idx].Size = 0;
+}
+
+bool dump_to_file(HANDLE proc, const pe::PeImage& img, const std::wstring& out_path, const DumpOptions& opt, std::vector<u8>& out_bytes) {
+    if (!pe::dump_full_image(proc, img, out_bytes)) return false;
+
+    if (opt.fix_section_sizes) {
+        pe::patch_section_raw_sizes(out_bytes);
+    }
+
+    auto* dos = (IMAGE_DOS_HEADER*)out_bytes.data();
+    auto* nt = (IMAGE_NT_HEADERS64*)(out_bytes.data() + dos->e_lfanew);
+
+    if (opt.oep_va) {
+        u64 lo = img.image_base;
+        u64 hi = img.image_base + img.size_of_image;
+        if (opt.oep_va >= lo && opt.oep_va < hi) {
+            u32 rva = (u32)(opt.oep_va - img.image_base);
+            nt->OptionalHeader.AddressOfEntryPoint = rva;
+            VMPU_INFO("dump", "Set EP RVA = %x", rva);
+        } else {
+            VMPU_WARN("dump", "OEP %llx is outside image range [%llx, %llx) " "keeping original EP RVA=%x", opt.oep_va, lo, hi, nt->OptionalHeader.AddressOfEntryPoint);
+        }
+    }
+
+    if (opt.clear_bound_imports) {
+        clear_data_dir(out_bytes, IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT);
+    }
+
+    if (opt.is_dll) {
+        nt->OptionalHeader.ImageBase = img.image_base;
+        if (nt->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
+            nt->FileHeader.Characteristics &= ~IMAGE_FILE_RELOCS_STRIPPED;
+            VMPU_INFO("dump", "Cleared IMAGE_FILE_RELOCS_STRIPPED for DLL");
+        }
+        nt->FileHeader.Characteristics |= IMAGE_FILE_DLL;
+        VMPU_INFO("dump", "DLL fixup: ImageBase=%llx", img.image_base);
+    }
+
+    if (!pe::write_pe_file(out_path, out_bytes)) {
+        VMPU_ERROR("dump", "write_pe_file failed");
+        return false;
+    }
+    VMPU_INFO("dump", "Wrote %zu bytes to %ls", out_bytes.size(), out_path.c_str());
+    return true;
+}
+
+}
+```
+
+`dumper.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "pe.h"
+
+namespace vmpu::dumper {
+struct DumpOptions {
+    u64 oep_va = 0;
+    bool fix_section_sizes = true;
+    bool clear_bound_imports = true;
+    bool is_dll = false;
+};
+
+bool dump_to_file(HANDLE proc, const pe::PeImage& img, const std::wstring& out_path, const DumpOptions& opt, std::vector<u8>& out_bytes);
+
+}
+```
+
+`iat.cpp`:
+
+```cpp
+#include "iat.h"
+#include "antidbg.h"
+#include <algorithm>
+#include <cstring>
+
+namespace vmpu::iat {
+static bool is_in_any_module(const std::vector<ModuleInfo>& mods, u64 a, const ModuleInfo** out = nullptr) {
+    for (auto& m : mods) {
+        if (a >= m.base && a < m.base + m.size) {
+            if (out) *out = &m;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool resolve_api_name(const ModuleInfo& mod, u64 va, std::string& name) {
+    HMODULE h = LoadLibraryExW(mod.name.c_str(), nullptr, DONT_RESOLVE_DLL_REFERENCES);
+    if (!h) return false;
+    auto* dos = (IMAGE_DOS_HEADER*)h;
+    auto* nt  = (IMAGE_NT_HEADERS*)((u8*)h + dos->e_lfanew);
+    auto& exp_dir = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+    if (!exp_dir.VirtualAddress) { FreeLibrary(h); return false; }
+    auto* exp = (IMAGE_EXPORT_DIRECTORY*)((u8*)h + exp_dir.VirtualAddress);
+    auto* funcs = (DWORD*)((u8*)h + exp->AddressOfFunctions);
+    auto* names = (DWORD*)((u8*)h + exp->AddressOfNames);
+    auto* ords  = (WORD*) ((u8*)h + exp->AddressOfNameOrdinals);
+
+    u64 target_rva = va - mod.base;
+    u32 idx = (u32)-1;
+    u32 best_diff = (u32)-1;
+    for (u32 i = 0; i < exp->NumberOfFunctions; ++i) {
+        if (funcs[i] == 0) continue;
+        if (funcs[i] == (u32)target_rva) { idx = i; best_diff = 0; break; }
+        if (funcs[i] < (u32)target_rva) {
+            u32 d = (u32)target_rva - funcs[i];
+            if (d < best_diff) { best_diff = d; idx = i; }
+        }
+    }
+    if (idx == (u32)-1 || best_diff > 64) {
+        FreeLibrary(h);
+        return false;
+    }
+    for (u32 i = 0; i < exp->NumberOfNames; ++i) {
+        if (ords[i] == idx) {
+            const char* nm = (const char*)((u8*)h + names[i]);
+            name = nm;
+            FreeLibrary(h);
+            return true;
+        }
+    }
+    char buf[32];
+    sprintf_s(buf, "#%u", exp->Base + idx);
+    name = buf;
+    FreeLibrary(h);
+    return true;
+}
+
+bool IatFixer::scan_section(HANDLE proc, u64 va, u32 size, const std::vector<Range>& code_ranges, const std::vector<ModuleInfo>& mods) {
+    std::vector<u8> buf(size);
+    SIZE_T got = 0;
+    if (!ReadProcessMemory(proc, (LPCVOID)va, buf.data(), size, &got)) return false;
+
+    for (size_t i = 0; i + 6 <= got; ++i) {
+        // FF 15 disp32 = call qword ptr [rip+disp32]
+        // FF 25 disp32 = jmp  qword ptr [rip+disp32]
+        if (buf[i] != 0xFF) continue;
+        u8 mod = buf[i + 1];
+        if (mod != 0x15 && mod != 0x25) continue;
+        i32 disp = *(i32*)&buf[i + 2];
+        u64 instr_va = va + i;
+        u64 next_rip = instr_va + 6;
+        u64 ptr_va = next_rip + (i64)disp;
+        u64 target = 0;
+        SIZE_T tgot = 0;
+        if (!ReadProcessMemory(proc, (LPCVOID)ptr_va, &target, 8, &tgot) ||
+            tgot != 8 || target == 0) continue;
+
+        const ModuleInfo* in_mod = nullptr;
+        if (is_in_any_module(mods, target, &in_mod)) {
+            ApiRef r;
+            r.instr_va = instr_va;
+            r.opcode = mod;
+            r.ptr_va = ptr_va;
+            r.raw_value = target;
+            r.resolved_api = target;
+            r.module_name = in_mod->name;
+            refs_.push_back(r);
+            i += 5;
+            continue;
+        }
+        ApiRef r;
+        r.instr_va = instr_va;
+        r.opcode = mod;
+        r.ptr_va = ptr_va;
+        r.raw_value = target;
+        r.resolved_api = 0;
+        refs_.push_back(r);
+        i += 5;
+    }
+    return true;
+}
+
+bool IatFixer::scan(Debugger& dbg, const pe::PeImage& img) {
+    refs_.clear();
+    std::vector<Range> code_ranges;
+    for (auto& s : img.sections) {
+        if (s.characteristics & IMAGE_SCN_MEM_EXECUTE) {
+            code_ranges.push_back({img.image_base + s.rva, s.vsize});
+        }
+    }
+    for (auto& s : img.sections) {
+        if (!(s.characteristics & IMAGE_SCN_MEM_EXECUTE)) continue;
+        u64 va = img.image_base + s.rva;
+        scan_section(dbg.state().proc, va, s.vsize, code_ranges, dbg.state().modules);
+    }
+    VMPU_INFO("iat", "Scan found %zu indirect refs", refs_.size());
+    return true;
+}
+
+static bool execute_thunk(Debugger& dbg, u64 thunk_va, u32 max_steps, u64& resolved) {
+    HANDLE proc = dbg.state().proc;
+    HANDLE thread = dbg.state().main_thread;
+
+    CONTEXT save{}; save.ContextFlags = CONTEXT_ALL;
+    if (!GetThreadContext(thread, &save)) {
+        VMPU_ERROR("iat", "GetThreadContext failed: %lu", GetLastError());
+        return false;
+    }
+    CONTEXT ctx = save;
+    ctx.Rip = thunk_va;
+    ctx.EFlags |= 0x100;
+    if (!SetThreadContext(thread, &ctx)) return false;
+
+    u32 steps = 0;
+    DEBUG_EVENT ev{};
+    while (steps < max_steps) {
+        ContinueDebugEvent(dbg.state().pid, GetThreadId(thread), DBG_CONTINUE);
+        if (!WaitForDebugEvent(&ev, 2000)) {
+            VMPU_WARN("iat", "thunk step timeout at step=%u", steps);
+            break;
+        }
+        if (ev.dwDebugEventCode == EXCEPTION_DEBUG_EVENT &&
+            ev.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP) {
+            CONTEXT now{}; now.ContextFlags = CONTEXT_ALL;
+            GetThreadContext(thread, &now);
+            if (dbg.module_containing(now.Rip)) {
+                resolved = now.Rip;
+                SetThreadContext(thread, &save);
+                ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, DBG_CONTINUE);
+                return true;
+            }
+            now.EFlags |= 0x100;
+            SetThreadContext(thread, &now);
+            ++steps;
+            continue;
+        }
+        VMPU_WARN("iat", "unexpected event %lu during thunk step", ev.dwDebugEventCode);
+        break;
+    }
+    SetThreadContext(thread, &save);
+    return false;
+}
+
+static bool follow_thunk_static(HANDLE proc, const std::vector<ModuleInfo>& mods, u64 addr, u64& out) {
+    auto in_mod = [&](u64 a) -> const ModuleInfo* {
+        for (auto& m : mods) if (a >= m.base && a < m.base + m.size) return &m;
+        return nullptr;
+    };
+    for (int hops = 0; hops < 16; ++hops) {
+        if (in_mod(addr)) { out = addr; return true; }
+        u8 b[64] = {0};
+        SIZE_T got = 0;
+        if (!ReadProcessMemory(proc, (LPCVOID)addr, b, sizeof(b), &got) || got < 6)
+            return false;
+
+        // jmp rel32: E9 dd dd dd dd
+        if (b[0] == 0xE9) {
+            i32 d = *(i32*)(b + 1);
+            addr = addr + 5 + (i64)d;
+            continue;
+        }
+        // jmp qword ptr [rip+disp32]: FF 25 dd dd dd dd
+        if (b[0] == 0xFF && b[1] == 0x25) {
+            i32 d = *(i32*)(b + 2);
+            u64 ind = addr + 6 + (i64)d;
+            u64 next = 0;
+            if (!ReadProcessMemory(proc, (LPCVOID)ind, &next, 8, &got) || got != 8)
+                return false;
+            addr = next;
+            continue;
+        }
+        // mov rax, imm64; jmp rax: 48 B8 ii ii ii ii ii ii ii ii FF E0
+        if (b[0] == 0x48 && b[1] == 0xB8 &&
+            b[10] == 0xFF && b[11] == 0xE0) {
+            addr = *(u64*)(b + 2);
+            continue;
+        }
+        // push imm32; ret: 68 ii ii ii ii C3   (32-bit jump table style)
+        if (b[0] == 0x68 && b[5] == 0xC3) {
+            addr = (u64)(u32)*(u32*)(b + 1);
+            continue;
+        }
+        // jmp short rel8: EB dd
+        if (b[0] == 0xEB) {
+            int8_t d = (int8_t)b[1];
+            addr = addr + 2 + (i64)d;
+            continue;
+        }
+        // push imm64-ish then ret  -- 48 B8 imm64, 50, C3 (mov rax,imm; push rax; ret)
+        if (b[0] == 0x48 && b[1] == 0xB8 &&
+            b[10] == 0x50 && b[11] == 0xC3) {
+            addr = *(u64*)(b + 2);
+            continue;
+        }
+        if (b[0] == 0x50 && b[1] == 0xC3) return false;
+        return false;
+    }
+    return false;
+}
+
+bool IatFixer::resolve(Debugger& dbg, const ScanOptions& opt) {
+    std::unordered_map<u64, u64> cache;
+    size_t solved = 0;
+    HANDLE proc = dbg.state().proc;
+    const auto& mods = dbg.state().modules;
+
+    for (auto& r : refs_) {
+        if (r.resolved_api) {
+            if (r.api_name.empty()) {
+                const ModuleInfo* m = dbg.module_containing(r.resolved_api);
+                if (m) {
+                    r.module_name = m->name;
+                    resolve_api_name(*m, r.resolved_api, r.api_name);
+                }
+            }
+            VMPU_TRACE("iat", "direct %llx -> %llx %s", r.instr_va, r.resolved_api, r.api_name.c_str());
+            ++solved;
+            continue;
+        }
+        auto it = cache.find(r.raw_value);
+        u64 api = 0;
+        if (it != cache.end()) {
+            api = it->second;
+        } else {
+            bool ok = false;
+            if (opt.resolve_static) {
+                ok = follow_thunk_static(proc, mods, r.raw_value, api);
+            }
+            if (!ok && opt.resolve_via_debuggee) {
+                ok = execute_thunk(dbg, r.raw_value, opt.max_single_step, api);
+            }
+            if (!ok) {
+                VMPU_TRACE("iat", "FAIL  %llx thunk=%llx",
+                           r.instr_va, r.raw_value);
+                continue;
+            }
+            cache[r.raw_value] = api;
+        }
+        const ModuleInfo* m = dbg.module_containing(api);
+        if (!m) {
+            VMPU_TRACE("iat", "FAIL  %llx api=%llx (no module)", r.instr_va, api);
+            continue;
+        }
+        r.resolved_api = api;
+        r.module_name = m->name;
+        resolve_api_name(*m, api, r.api_name);
+        VMPU_TRACE("iat", "thunk %llx -> %llx %s", r.instr_va, api, r.api_name.c_str());
+        ++solved;
+    }
+    VMPU_INFO("iat", "Resolved %zu / %zu refs (%s)", solved, refs_.size(), opt.resolve_static ? "static+dyn" : "dynamic");
+    return true;
+}
+
+size_t IatFixer::resolved_count() const {
+    size_t n = 0;
+    for (auto& r : refs_) if (r.resolved_api) ++n;
+    return n;
+}
+
+void IatFixer::add_mutated(u64 instr_va, u8 reg, bool has_rex_b, u8 variant, u64 api, const std::wstring& mod_name, const std::string& api_name) {
+    ApiRef r{};
+    r.instr_va = instr_va;
+    r.opcode = 0xFF;
+    r.ptr_va = 0;
+    r.raw_value = 0;
+    r.resolved_api = api;
+    r.module_name = mod_name;
+    r.api_name = api_name;
+    r.is_mutated = true;
+    r.mutated_reg = reg;
+    r.has_rex_b = has_rex_b;
+    r.variant = variant;
+    refs_.push_back(r);
+}
+
+struct IatLayout {
+    u32 desc_rva;
+    u32 ilt_rva;
+    u32 iat_rva;
+    u32 name_rva;
+    u32 dll_rva;
+    u32 total_size;
+};
+
+static std::wstring basename_w(const std::wstring& p) {
+    auto pos = p.find_last_of(L"/\\");
+    return (pos == std::wstring::npos) ? p : p.substr(pos + 1);
+}
+
+static std::string wto8(const std::wstring& w) {
+    std::string s(w.size(), 0);
+    for (size_t i = 0; i < w.size(); ++i) s[i] = (char)w[i];
+    return s;
+}
+
+bool IatFixer::rebuild(std::vector<u8>& image_bytes, const pe::PeImage& img) {
+    std::map<std::wstring, std::vector<ApiRef*>> by_mod;
+    for (auto& r : refs_) {
+        if (!r.resolved_api || r.api_name.empty()) continue;
+        by_mod[basename_w(r.module_name)].push_back(&r);
+    }
+    if (by_mod.empty()) {
+        VMPU_WARN("iat", "Nothing resolved to rebuild");
+        return false;
+    }
+
+    size_t num_dlls = by_mod.size();
+    size_t num_apis = 0;
+    for (auto& kv : by_mod) num_apis += kv.second.size();
+
+    size_t desc_size = (num_dlls + 1) * sizeof(IMAGE_IMPORT_DESCRIPTOR);
+    size_t ilt_size  = (num_apis + num_dlls) * 8;
+    size_t iat_size  = ilt_size;
+    size_t name_size = 0;
+    for (auto& kv : by_mod) {
+        for (auto* r : kv.second) {
+            name_size += 2 + r->api_name.size() + 1;
+        }
+    }
+    size_t dll_size = 0;
+    for (auto& kv : by_mod) {
+        dll_size += wto8(kv.first).size() + 1;
+    }
+
+    size_t total = desc_size + ilt_size + iat_size + name_size + dll_size;
+    total = (total + 0xFFF) & ~size_t(0xFFF);
+
+    auto* dos = (IMAGE_DOS_HEADER*)image_bytes.data();
+    auto* nt = (IMAGE_NT_HEADERS64*)(image_bytes.data() + dos->e_lfanew);
+    auto* secs = IMAGE_FIRST_SECTION(nt);
+    u16 nsec = nt->FileHeader.NumberOfSections;
+
+    u32 new_rva = nt->OptionalHeader.SizeOfImage;
+    u32 new_size = (u32)total;
+    size_t old_sz = image_bytes.size();
+    image_bytes.resize(old_sz + new_size, 0);
+
+    dos  = (IMAGE_DOS_HEADER*)image_bytes.data();
+    nt   = (IMAGE_NT_HEADERS64*)(image_bytes.data() + dos->e_lfanew);
+    secs = IMAGE_FIRST_SECTION(nt);
+
+    IMAGE_SECTION_HEADER& nh = secs[nsec];
+    memset(&nh, 0, sizeof(nh));
+    memcpy(nh.Name, ".vmpu", 5);
+    nh.VirtualAddress = new_rva;
+    nh.Misc.VirtualSize = new_size;
+    nh.PointerToRawData = new_rva;
+    nh.SizeOfRawData = new_size;
+    nh.Characteristics = IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
+    nt->FileHeader.NumberOfSections = nsec + 1;
+    nt->OptionalHeader.SizeOfImage = new_rva + new_size;
+
+    IatLayout L{};
+    L.desc_rva = new_rva;
+    L.ilt_rva  = L.desc_rva + (u32)desc_size;
+    L.iat_rva  = L.ilt_rva  + (u32)ilt_size;
+    L.name_rva = L.iat_rva  + (u32)iat_size;
+    L.dll_rva  = L.name_rva + (u32)name_size;
+
+    u8* base = image_bytes.data();
+    auto put_u32 = [&](u32 rva, u32 v) { *(u32*)(base + rva) = v; };
+    auto put_u64 = [&](u32 rva, u64 v) { *(u64*)(base + rva) = v; };
+
+    u32 ilt_cursor = L.ilt_rva;
+    u32 iat_cursor = L.iat_rva;
+    u32 name_cursor = L.name_rva;
+    u32 dll_cursor = L.dll_rva;
+    u32 desc_cursor = L.desc_rva;
+
+    std::unordered_map<ApiRef*, u32> iat_rva_of;
+
+    for (auto& kv : by_mod) {
+        u32 this_ilt = ilt_cursor;
+        u32 this_iat = iat_cursor;
+        u32 this_dll = dll_cursor;
+
+        std::string dllname = wto8(kv.first);
+        memcpy(base + dll_cursor, dllname.c_str(), dllname.size() + 1);
+        dll_cursor += (u32)dllname.size() + 1;
+
+        for (auto* r : kv.second) {
+            *(u16*)(base + name_cursor) = 0;
+            memcpy(base + name_cursor + 2, r->api_name.c_str(),
+                   r->api_name.size() + 1);
+            u32 hint_rva = name_cursor;
+            name_cursor += 2 + (u32)r->api_name.size() + 1;
+
+            put_u64(ilt_cursor, hint_rva);
+            put_u64(iat_cursor, hint_rva);
+            iat_rva_of[r] = iat_cursor;
+            ilt_cursor += 8;
+            iat_cursor += 8;
+        }
+        put_u64(ilt_cursor, 0); ilt_cursor += 8;
+        put_u64(iat_cursor, 0); iat_cursor += 8;
+
+        IMAGE_IMPORT_DESCRIPTOR d{};
+        d.OriginalFirstThunk = this_ilt;
+        d.TimeDateStamp = 0;
+        d.ForwarderChain = 0;
+        d.Name = this_dll;
+        d.FirstThunk = this_iat;
+        memcpy(base + desc_cursor, &d, sizeof(d));
+        desc_cursor += sizeof(d);
+    }
+    IMAGE_IMPORT_DESCRIPTOR z{};
+    memcpy(base + desc_cursor, &z, sizeof(z));
+
+    nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]
+        .VirtualAddress = L.desc_rva;
+    nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT]
+        .Size = (u32)desc_size;
+    nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT]
+        .VirtualAddress = L.iat_rva;
+    nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IAT]
+        .Size = (u32)iat_size;
+
+    u32 patched = 0;
+    u32 patched_mut = 0;
+    for (auto& kv : by_mod) {
+        for (auto* r : kv.second) {
+            u32 instr_rva = (u32)(r->instr_va - img.image_base);
+            auto it = iat_rva_of.find(r);
+            if (it == iat_rva_of.end()) continue;
+
+            if (r->is_mutated) {
+                u32 ff15_next_rva = instr_rva + 6;
+                i64 disp = (i64)it->second - (i64)ff15_next_rva;
+                if (disp < INT32_MIN || disp > INT32_MAX) {
+                    VMPU_WARN("iat", "mut disp overflow @ %llx", r->instr_va);
+                    continue;
+                }
+                base[instr_rva + 0] = 0xFF;
+                base[instr_rva + 1] = 0x15;
+                *(i32*)(base + instr_rva + 2) = (i32)disp;
+                if (r->variant == 0 && r->has_rex_b) {
+                    base[instr_rva + 6] = 0x90;
+                }
+                ++patched_mut;
+            } else {
+                u32 next_rip_rva = instr_rva + 6;
+                i64 disp = (i64)it->second - (i64)next_rip_rva;
+                if (disp < INT32_MIN || disp > INT32_MAX) {
+                    VMPU_WARN("iat", "disp overflow @ %llx", r->instr_va);
+                    continue;
+                }
+                *(i32*)(base + instr_rva + 2) = (i32)disp;
+                ++patched;
+            }
+        }
+    }
+    VMPU_INFO("iat", "Rebuild: %zu DLLs, %zu APIs, patched %u FF15/25 + " "%u mutated call sites", num_dlls, num_apis, patched, patched_mut);
+    return true;
+}
+
+}
+```
+
+`iat.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "pe.h"
+#include "debugger.h"
+
+namespace vmpu::iat {
+struct ApiRef {
+    u64 instr_va;
+    u8  opcode;
+    u64 ptr_va;
+    u64 raw_value;
+    u64 resolved_api; 
+    std::wstring module_name;
+    std::string  api_name;
+    bool is_mutated = false;
+    u8   mutated_reg = 0;
+    bool has_rex_b = false;
+    u8   variant = 0;   // 0 = push_call 1 = call_ret
+};
+
+struct ScanOptions {
+    u32 max_single_step = 4096;
+    bool resolve_via_debuggee = true;
+    bool resolve_static = false;
+};
+
+class IatFixer {
+public:
+    bool scan(Debugger& dbg, const pe::PeImage& img);
+    bool resolve(Debugger& dbg, const ScanOptions& opt);
+    bool rebuild(std::vector<u8>& image_bytes, const pe::PeImage& img);
+
+    void add_mutated(u64 instr_va, u8 reg, bool has_rex_b, u8 variant, u64 api, const std::wstring& mod_name, const std::string& api_name);
+
+    const std::vector<ApiRef>& refs() const { return refs_; }
+    size_t resolved_count() const;
+
+private:
+    std::vector<ApiRef> refs_;
+
+    bool scan_section(HANDLE proc, u64 va, u32 size, const std::vector<Range>& code_ranges, const std::vector<ModuleInfo>& mods);
+};
+
+bool resolve_api_name(const ModuleInfo& mod, u64 va, std::string& name);
+
+}
+```
+
+`iat_mutated.cpp`:
+
+```cpp
+#include "iat_mutated.h"
+#include <cstring>
+
+namespace vmpu::iat_mut {
+bool scan(HANDLE proc, const pe::PeImage& img, std::vector<MutatedCall>& out) {
+    out.clear();
+    for (auto& s : img.sections) {
+        if (!(s.characteristics & IMAGE_SCN_MEM_EXECUTE)) continue;
+
+        std::vector<u8> buf(s.vsize);
+        SIZE_T got = 0;
+        u64 secva = img.image_base + s.rva;
+        if (!ReadProcessMemory(proc, (LPCVOID)secva, buf.data(), s.vsize, &got))
+            continue;
+
+        for (size_t i = 0; i + 6 <= got; ++i) {
+            bool matched = false;
+            MutatedCall mc{};
+            size_t advance = 0;
+            {
+                bool rex = false;
+                size_t p = i;
+                if (buf[p] == 0x41) {
+                    if (i + 7 > got) goto try_v2;
+                    rex = true;
+                    p = i + 1;
+                }
+                u8 op = buf[p];
+                if (op < 0x50 || op > 0x57) goto try_v2;
+                if (op == 0x54) goto try_v2;
+                if (buf[p + 1] != 0xE8) goto try_v2;
+
+                i32 disp = *(i32*)&buf[p + 2];
+                u64 call_site = secva + p;
+                u64 next_rip  = secva + p + 6;
+                u64 resolver  = next_rip + (i64)disp;
+
+                if (resolver < img.image_base ||
+                    resolver >= img.image_base + img.size_of_image) goto try_v2;
+                u32 r_rva = (u32)(resolver - img.image_base);
+                const auto* rs = pe::section_for_rva(img, r_rva);
+                if (!rs) goto try_v2;
+                if (!pe::is_packer_section(proc, img.image_base, *rs)) goto try_v2;
+
+                mc.instr_va    = call_site;
+                mc.pushed_reg  = (u8)((op - 0x50) + (rex ? 8 : 0));
+                mc.rex_b       = rex;
+                mc.variant     = VARIANT_PUSH_CALL;
+                mc.resolver_va = resolver;
+                matched = true;
+                advance = p + 5 - i;
+                goto done;
+            }
+
+            try_v2:
+            if (buf[i] == 0xE8 && i + 6 <= got) {
+                u8 tail = buf[i + 5];
+                if (tail != 0xC3 && tail != 0xCC) continue;
+
+                i32 disp = *(i32*)&buf[i + 1];
+                u64 call_site = secva + i;
+                u64 next_rip  = secva + i + 5;
+                u64 resolver  = next_rip + (i64)disp;
+
+                if (resolver < img.image_base ||
+                    resolver >= img.image_base + img.size_of_image) continue;
+                u32 r_rva = (u32)(resolver - img.image_base);
+                const auto* rs = pe::section_for_rva(img, r_rva);
+                if (!rs) continue;
+                if (!pe::is_packer_section(proc, img.image_base, *rs)) continue;
+                if (i > 0) {
+                    u8 prev = buf[i - 1];
+                    if (prev >= 0x50 && prev <= 0x57) continue;
+                }
+
+                mc.instr_va    = call_site;
+                mc.pushed_reg  = 0;
+                mc.rex_b       = false;
+                mc.tail_byte   = tail;
+                mc.variant     = VARIANT_CALL_RET;
+                mc.resolver_va = resolver;
+                matched = true;
+                advance = 5;
+                goto done;
+            }
+
+            done:
+            if (matched) {
+                out.push_back(mc);
+                i += advance;
+            }
+        }
+    }
+    return true;
+}
+
+//   pop reg                 (58..5F or 41 58..5F)
+//   xchg [rsp], reg         (48 87 ../  87 ../  ...)
+//   push reg                (50..57 / 41 50..57)
+//   mov reg, imm64          (48 B8..BF ii ii ii ii ii ii ii ii)
+//   mov reg, [reg+disp32]   (48 8B ...)
+//   lea reg, [reg+disp32]   (48 8D ...)
+//   add/sub/xor reg,imm32   (48 81/83 ...)
+//   jmp rel32 / short
+//   ret                     (C3)
+// Anything unknown abort
+bool emulate_resolver(HANDLE proc, u64 resolver_va,
+                      const std::vector<ModuleInfo>& mods, u64& out_api) {
+    (void)proc; (void)resolver_va; (void)mods; (void)out_api;
+    return false; // TODO: implement
+}
+
+}
+```
+
+`iat_mutated.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "pe.h"
+#include "debugger.h"
+
+namespace vmpu::iat_mut {
+enum MutatedVariant : u8 {
+    VARIANT_PUSH_CALL = 0,
+    VARIANT_CALL_RET  = 1,
+};
+
+struct MutatedCall {
+    u64 instr_va;
+    u8  pushed_reg;
+    bool rex_b;
+    u8  tail_byte;
+    MutatedVariant variant;
+    u64 resolver_va;
+    u64 resolved_api;
+    std::wstring module_name;
+    std::string  api_name;
+};
+
+bool scan(HANDLE proc, const pe::PeImage& img, std::vector<MutatedCall>& out);
+
+bool emulate_resolver(HANDLE proc, u64 resolver_va,const std::vector<ModuleInfo>& mods, u64& out_api);
+}
+```
+
+`main.cpp`:
+
+```cpp
+#include "common.h"
+#include <psapi.h>
+#include <tlhelp32.h>
+#include "debugger.h"
+#include "antidbg.h"
+#include "oep.h"
+#include "dumper.h"
+#include "iat.h"
+#include "iat_mutated.h"
+#include "resolver_runner.h"
+#include "pe.h"
+#include "vmp_unhide.h"
+#include <chrono>
+
+using namespace vmpu;
+enum class OepMode {
+    TextGuard,
+    Snapshot,
+    KeyTrigger,
+};
+
+struct Pipeline {
+    Debugger* dbg = nullptr;
+    pe::PeImage img;
+    oep::OepFinder oep_finder;
+    antidbg::HookSet hooks;
+    unhide::ThreadHideBypass unhider;
+
+    u64 last_av_addr = 0;
+    u32 av_repeat_count = 0;
+
+    OepMode mode = OepMode::TextGuard;
+    DWORD snapshot_ms = 0;
+    std::chrono::steady_clock::time_point deadline;
+    bool break_requested = false;
+    bool do_unhide = true;
+
+    enum LastOff { NoHook, AntidbgHook, UnhideHook };
+    LastOff last_off = NoHook;
+    u64 last_off_addr = 0;
+
+    enum Stage { WaitInitBp, WaitOep };
+    Stage stage = WaitInitBp;
+    bool oep_found = false;
+    u64 oep_va = 0;
+};
+
+static bool on_event(const DEBUG_EVENT& ev, DWORD& status, void* ctx) {
+    auto* p = (Pipeline*)ctx;
+    HANDLE proc = p->dbg->state().proc;
+
+    if (ev.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) {
+        const auto& er = ev.u.Exception.ExceptionRecord;
+
+        if (p->stage == Pipeline::WaitInitBp &&
+            er.ExceptionCode == EXCEPTION_BREAKPOINT) {
+            VMPU_INFO("main", "Initial bp hit, patching PEB + installing hooks");
+            antidbg::patch_peb(proc);
+            antidbg::clear_hw_breakpoints(p->dbg->state().pid);
+            p->hooks.target_pid = p->dbg->state().pid;
+            antidbg::install_all(proc, p->hooks);
+
+            p->dbg->refresh_modules();
+            if (!pe::read_image_from_process(proc, p->dbg->state().image_base, p->img)) {
+                VMPU_ERROR("main", "read_image_from_process failed");
+                return false;
+            }
+            VMPU_INFO("main", "Image: base=%llx size=%x EP_rva=%x sections=%zu", p->img.image_base, p->img.size_of_image, p->img.entry_point_rva, p->img.sections.size());
+
+            if (p->do_unhide) {
+                p->unhider.install(proc, p->img.image_base, p->img);
+            }
+
+            if (p->mode == OepMode::TextGuard) {
+                p->oep_finder.arm(proc, p->img);
+            } else if (p->mode == OepMode::Snapshot) {
+                VMPU_INFO("main", "Snapshot mode: waiting %lu ms then breaking in", p->snapshot_ms);
+                VMPU_WARN("main", "Do NOT type into the target's console - " "it will exit before our break lands");
+                p->deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(p->snapshot_ms);
+            } else {
+                VMPU_INFO("main", "Key-trigger mode: press F12 to break and dump");
+            }
+            p->stage = Pipeline::WaitOep;
+            status = DBG_CONTINUE;
+            return true;
+        }
+
+        if (p->stage == Pipeline::WaitOep &&
+            p->mode == OepMode::TextGuard &&
+            er.ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
+            u64 oep = 0;
+            if (p->oep_finder.service_av(proc, p->dbg->state().main_thread, er, oep)) {
+                p->oep_found = true;
+                p->oep_va = oep;
+                VMPU_INFO("main", "OEP HIT at VA %llx (rva %x)", oep, (u32)(oep - p->img.image_base));
+                status = DBG_CONTINUE;
+                return false;
+            }
+            status = DBG_EXCEPTION_NOT_HANDLED;
+            return true;
+        }
+
+        if (er.ExceptionCode == EXCEPTION_BREAKPOINT) {
+            HANDLE thread = p->dbg->state().main_thread;
+            u64 rip_m1 = (u64)er.ExceptionAddress;
+            u64 hk_addr = 0; bool bypassed = false;
+            if (p->unhider.service(proc, thread, rip_m1, hk_addr, bypassed)) {
+                p->last_off = Pipeline::UnhideHook;
+                p->last_off_addr = hk_addr;
+                status = DBG_CONTINUE;
+                return true;
+            }
+            bool handled = false;
+            if (antidbg::service_any(proc, thread, p->hooks, rip_m1, handled)) {
+                CONTEXT cur{}; cur.ContextFlags = CONTEXT_CONTROL;
+                GetThreadContext(thread, &cur);
+                if (cur.EFlags & 0x100) {
+                    p->last_off = Pipeline::AntidbgHook;
+                    p->last_off_addr = rip_m1;
+                }
+                status = DBG_CONTINUE;
+                return true;
+            }
+            status = DBG_EXCEPTION_NOT_HANDLED;
+            return true;
+        }
+
+        if (er.ExceptionCode == 0x40010006 || er.ExceptionCode == 0x4001000A) {
+            VMPU_TRACE("main", "DBG_PRINTEXCEPTION %lx -> NOT_HANDLED",
+                       er.ExceptionCode);
+            status = DBG_EXCEPTION_NOT_HANDLED;
+            return true;
+        }
+
+        if (er.ExceptionCode == 0xC0000008) {
+            VMPU_TRACE("main", "STATUS_INVALID_HANDLE -> NOT_HANDLED");
+            status = DBG_EXCEPTION_NOT_HANDLED;
+            return true;
+        }
+
+        if (p->mode != OepMode::TextGuard &&
+            er.ExceptionCode == EXCEPTION_ACCESS_VIOLATION &&
+            (u64)er.ExceptionAddress != 0) {
+            u64 fault_va = (u64)er.ExceptionAddress;
+            u64 image_lo = p->img.image_base;
+            u64 image_hi = image_lo + p->img.size_of_image;
+            bool in_image = (fault_va >= image_lo && fault_va < image_hi);
+            bool in_vmp_section = false;
+            bool in_real_text = false;
+            if (in_image) {
+                u32 rva = (u32)(fault_va - image_lo);
+                const auto* s = pe::section_for_rva(p->img, rva);
+                if (s) {
+                    in_vmp_section = pe::is_packer_section(proc, image_lo, *s);
+                    if (strncmp(s->name, ".text", 5) == 0) {
+                        in_real_text = true;
+                    }
+                }
+            }
+            bool is_vmp_av = !in_image || in_vmp_section;
+            if (is_vmp_av && !in_real_text) {
+                if (fault_va == p->last_av_addr) {
+                    p->av_repeat_count++;
+                } else {
+                    p->last_av_addr = fault_va;
+                    p->av_repeat_count = 1;
+                }
+                if (p->av_repeat_count <= 1) {
+                    VMPU_TRACE("main", "VMP AV at %llx -> let SEH handle", fault_va);
+                    status = DBG_EXCEPTION_NOT_HANDLED;
+                    return true;
+                }
+                if (p->av_repeat_count > 4) {
+                    VMPU_ERROR("main", "AV at %llx repeated %u times VMP detection loop " "aborting try -snapshot <sec>", fault_va, p->av_repeat_count);
+                    status = DBG_EXCEPTION_NOT_HANDLED;
+                    return false;
+                }
+                HANDLE th = p->dbg->state().main_thread;
+                CONTEXT c{}; c.ContextFlags = CONTEXT_FULL;
+                if (GetThreadContext(th, &c)) {
+                    u64 ret_addr = 0;
+                    if (read_mem(proc, c.Rsp, &ret_addr, 8) && ret_addr) {
+                        VMPU_WARN("main", "VMP AV at %llx (attempt %u) -> SEH failed " "fallback ret to %llx", fault_va, p->av_repeat_count, ret_addr);
+                        c.Rip = ret_addr;
+                        c.Rsp += 8;
+                        c.Rax = 0;
+                        SetThreadContext(th, &c);
+                        status = DBG_CONTINUE;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (er.ExceptionCode == EXCEPTION_SINGLE_STEP) {
+            if (p->last_off == Pipeline::AntidbgHook && p->last_off_addr) {
+                u8 cc = 0xCC;
+                write_mem(proc, p->last_off_addr, &cc, 1);
+                FlushInstructionCache(proc, (LPCVOID)p->last_off_addr, 1);
+            } else if (p->last_off == Pipeline::UnhideHook) {
+                p->unhider.rearm(proc, p->last_off_addr);
+            }
+            p->last_off = Pipeline::NoHook;
+            p->last_off_addr = 0;
+            HANDLE th = p->dbg->state().main_thread;
+            CONTEXT dctx{}; dctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+            if (GetThreadContext(th, &dctx)) {
+                dctx.Dr0 = dctx.Dr1 = dctx.Dr2 = dctx.Dr3 = 0;
+                dctx.Dr6 = 0; dctx.Dr7 = 0;
+                SetThreadContext(th, &dctx);
+            }
+            status = DBG_CONTINUE;
+            return true;
+        }
+
+        status = DBG_EXCEPTION_NOT_HANDLED;
+        return true;
+    }
+
+    if (ev.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT) {
+        p->dbg->refresh_modules();
+    }
+    status = DBG_CONTINUE;
+    return true;
+}
+
+static bool on_timeout(void* ctx, bool forced) {
+    auto* p = (Pipeline*)ctx;
+    if (p->stage != Pipeline::WaitOep) return true;
+    if (p->break_requested) return true;
+
+    bool trigger = forced;
+    if (!trigger) {
+        if (p->mode == OepMode::Snapshot) {
+            trigger = std::chrono::steady_clock::now() >= p->deadline;
+        } else if (p->mode == OepMode::KeyTrigger) {
+            SHORT s = GetAsyncKeyState(0x7B);
+            trigger = (s & 0x8000) != 0;
+        }
+    }
+    if (!trigger) return true;
+    if (forced) {
+        VMPU_WARN("main", "EXIT_PROCESS arrived early - dumping with current memory");
+    }
+
+    int n = p->dbg->suspend_all_threads();
+    VMPU_INFO("main", "%s trigger - suspended %d threads", p->mode == OepMode::Snapshot ? "Deadline" : "F12", n);
+
+    HANDLE proc = p->dbg->state().proc;
+    HANDLE thread = p->dbg->state().main_thread;
+    CONTEXT c{}; c.ContextFlags = CONTEXT_FULL;
+    u64 chosen_rip = 0;
+    bool in_image = false;
+    u64 lo = p->img.image_base, hi = lo + p->img.size_of_image;
+
+    if (GetThreadContext(thread, &c)) {
+        VMPU_INFO("main", "Main thread RIP=%llx", c.Rip);
+        auto in_exec_section = [&](u64 v) -> bool {
+            if (v < lo || v >= hi) return false;
+            u32 rva = (u32)(v - lo);
+            const auto* s = pe::section_for_rva(p->img, rva);
+            return s && (s->characteristics & IMAGE_SCN_MEM_EXECUTE);
+        };
+
+        if (in_exec_section(c.Rip)) {
+            chosen_rip = c.Rip;
+            in_image = true;
+        } else {
+            u64 rsp = c.Rsp;
+            for (int i = 0; i < 512; ++i) {
+                u64 v = 0; SIZE_T got = 0;
+                if (!ReadProcessMemory(proc, (LPCVOID)(rsp + i * 8),
+                                       &v, 8, &got) || got != 8) break;
+                if (in_exec_section(v)) {
+                    chosen_rip = v;
+                    in_image = true;
+                    VMPU_INFO("main", "Found exec-section frame at stack[%d]=%llx", i, v);
+                    break;
+                }
+            }
+        }
+    }
+    if (!chosen_rip) {
+        chosen_rip = p->img.image_base + p->img.entry_point_rva;
+        VMPU_WARN("main", "No user-code RIP found, using original EP RVA=%x", p->img.entry_point_rva);
+    }
+    p->oep_va = chosen_rip;
+    if (in_image) {
+        VMPU_INFO("main", "OEP guess = %llx (rva %x)", chosen_rip, (u32)(chosen_rip - p->img.image_base));
+    }
+    p->oep_found = true;
+    p->break_requested = true;
+    return false;
+}
+
+static int usage() {
+    fprintf(stderr,
+        "vmpunpack VMProtect unpacker + IAT fixer\n"
+        "\n"
+        "Usage:\n"
+        "  vmpunpack.exe <packed.exe> [options]\n"
+        "  vmpunpack.exe -attach <pid> [options]\n"
+        "\n"
+        "Modes (choose one):\n"
+        "  (default)        wait for execute on original .text\n"
+        "  -snapshot SEC    let it run SEC seconds then break in and dump\n"
+        "  -snap-key        let it run you press F12 to trigger break+dump\n"
+        "\n"
+        "Options:\n"
+        "  -o PATH          output file\n"
+        "  -v               verbose (trace)\n"
+        "  -no-iat          skip IAT reconstruction (dump only)\n"
+        "  -no-ad           skip anti-debug patches\n"
+        "  -no-unhide       skip VMP ThreadHideFromDebugger bypass\n"
+        "  -dump-iat-list PATH  write CSV of mutated call sites for IDA helper\n"
+        "  -resolve-mutated     run dynamic resolver on mutated API calls\n"
+        "                       (only valid with -snapshot/-snap-key)\n"
+        "  -attach PID          attach to a running process via DebugActiveProcess\n"
+        "                       (VMP may still detect this)\n"
+        "  -passive-attach PID  OpenProcess + SuspendThread only no debugger\n"
+        "                       Bypasses all VMP anti-debug since no debug api\n"
+        "                       is involved dump only can't single-step\n"
+        "                       resolvers pair with vmprotect imports deobfuscator\n"
+        "  -module NAME.dll     For DLL targets in passive-attach pick this\n"
+        "                       module instead of the main exe substring,\n"
+        "                       case-insensitive (for dlls we auto-detect the\n"
+        "                       PE characteristics and apply DLL-specific\n"
+        "                       fixups ImageBase=runtime VA clear RELOCS_\n"
+        "                       STRIPPED ensure FILE_DLL flag is set)\n");
+    return 1;
+}
+
+int wmain(int argc, wchar_t** argv) {
+    if (argc < 2) return usage();
+    std::wstring in_path;
+    std::wstring out_path;
+    bool do_iat = true;
+    bool do_ad = true;
+    bool do_unhide = true;
+    bool do_resolve_mut = false;
+    OepMode mode = OepMode::TextGuard;
+    DWORD snap_ms = 0;
+    std::wstring dump_iat_list;
+    std::wstring target_module;
+    DWORD attach_pid = 0;
+
+    int first_opt = 1;
+    if (argv[1][0] != L'-') {
+        in_path = argv[1];
+        first_opt = 2;
+    }
+
+    for (int i = first_opt; i < argc; ++i) {
+        std::wstring a = argv[i];
+        if (a == L"-o" && i + 1 < argc) { out_path = argv[++i]; }
+        else if (a == L"-v") { g_log_level = LogLevel::Trace; }
+        else if (a == L"-no-iat") { do_iat = false; }
+        else if (a == L"-no-ad")  { do_ad = false; }
+        else if (a == L"-no-unhide") { do_unhide = false; }
+        else if (a == L"-snapshot" && i + 1 < argc) {
+            mode = OepMode::Snapshot;
+            snap_ms = (DWORD)(_wtof(argv[++i]) * 1000.0);
+        }
+        else if (a == L"-snap-key") { mode = OepMode::KeyTrigger; }
+        else if (a == L"-dump-iat-list" && i + 1 < argc) {
+            dump_iat_list = argv[++i];
+        }
+        else if (a == L"-resolve-mutated") { do_resolve_mut = true; }
+        else if (a == L"-module" && i + 1 < argc) { target_module = argv[++i]; }
+        else if (a == L"-attach" && i + 1 < argc) {
+            attach_pid = (DWORD)_wtoi(argv[++i]);
+        }
+        else if (a == L"-passive-attach" && i + 1 < argc) {
+            attach_pid = (DWORD)_wtoi(argv[++i]);
+            mode = OepMode::Snapshot;
+            do_resolve_mut = false;
+            snap_ms = 0xFFFFFFFFu;
+        }
+        else return usage();
+    }
+    if (attach_pid == 0 && in_path.empty()) {
+        VMPU_ERROR("main", "Missing input path (or use -attach <pid>)");
+        return usage();
+    }
+    if (out_path.empty()) {
+        std::wstring base = !in_path.empty() ? in_path : L"vmpunpack_pid" + std::to_wstring(attach_pid);
+        out_path = base;
+        auto p = out_path.find_last_of(L'.');
+        if (p != std::wstring::npos) out_path.insert(p, L"_unpacked");
+        else out_path += L"_unpacked.exe";
+    }
+
+    bool passive = (attach_pid != 0 && snap_ms == 0xFFFFFFFFu);
+    if (passive) {
+        VMPU_INFO("main", "Passive attach to pid %lu (no debugger)", attach_pid);
+        HANDLE proc = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION | PROCESS_SUSPEND_RESUME, FALSE, attach_pid);
+        if (!proc) {
+            VMPU_ERROR("main", "OpenProcess failed: %lu", GetLastError());
+            return 2;
+        }
+        HMODULE mods[1024]; DWORD needed = 0;
+        if (!EnumProcessModulesEx(proc, mods, sizeof(mods), &needed, LIST_MODULES_ALL) || needed == 0) {
+            VMPU_ERROR("main", "EnumProcessModulesEx failed: %lu", GetLastError());
+            CloseHandle(proc);
+            return 2;
+        }
+        u64 image_base = 0;
+        u32 num_mods = needed / sizeof(HMODULE);
+        if (!target_module.empty()) {
+            for (u32 mi = 0; mi < num_mods; ++mi) {
+                wchar_t mpath[MAX_PATH] = {0};
+                if (!GetModuleFileNameExW(proc, mods[mi], mpath, MAX_PATH))
+                    continue;
+                std::wstring sp = mpath;
+                auto bs = sp.find_last_of(L"\\/");
+                std::wstring bn = (bs == std::wstring::npos) ? sp : sp.substr(bs + 1);
+                std::wstring tl = target_module, bl = bn;
+                for (auto& c : tl) c = (wchar_t)towlower(c);
+                for (auto& c : bl) c = (wchar_t)towlower(c);
+                if (bl.find(tl) != std::wstring::npos) {
+                    image_base = (u64)mods[mi];
+                    VMPU_INFO("main", "Selected module %ls @ %llx", bn.c_str(),
+                              image_base);
+                    break;
+                }
+            }
+            if (!image_base) {
+                VMPU_ERROR("main", "Module '%ls' not found in target process", target_module.c_str());
+                CloseHandle(proc);
+                return 2;
+            }
+        } else {
+            image_base = (u64)mods[0];
+            VMPU_INFO("main", "Image base: %llx (main module)", image_base);
+        }
+
+        pe::PeImage img{};
+        if (!pe::read_image_from_process(proc, image_base, img)) {
+            VMPU_ERROR("main", "read_image_from_process failed");
+            CloseHandle(proc);
+            return 3;
+        }
+        VMPU_INFO("main", "Image: size=%x EP_rva=%x sections=%zu", img.size_of_image, img.entry_point_rva, img.sections.size());
+
+        HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        int n_sus = 0;
+        if (snap != INVALID_HANDLE_VALUE) {
+            THREADENTRY32 te{}; te.dwSize = sizeof(te);
+            if (Thread32First(snap, &te)) {
+                do {
+                    if (te.th32OwnerProcessID != attach_pid) continue;
+                    HANDLE th = OpenThread(THREAD_SUSPEND_RESUME, FALSE, te.th32ThreadID);
+                    if (th) { SuspendThread(th); CloseHandle(th); ++n_sus; }
+                } while (Thread32Next(snap, &te));
+            }
+            CloseHandle(snap);
+        }
+        VMPU_INFO("main", "Suspended %d threads", n_sus);
+
+        bool dll_flag = false;
+        if (img.headers_bytes.size() >= 0x200) {
+            auto* dos = (IMAGE_DOS_HEADER*)img.headers_bytes.data();
+            auto* nt  = (IMAGE_NT_HEADERS64*)(img.headers_bytes.data() + dos->e_lfanew);
+            dll_flag = (nt->FileHeader.Characteristics & IMAGE_FILE_DLL) != 0;
+            if (dll_flag) VMPU_INFO("main", "Target is a DLL - applying DLL fixups");
+        }
+
+        std::vector<u8> dumped;
+        dumper::DumpOptions dopt;
+        dopt.oep_va = 0;
+        dopt.is_dll = dll_flag;
+        if (!dumper::dump_to_file(proc, img, out_path, dopt, dumped)) {
+            VMPU_ERROR("main", "Dump failed");
+            CloseHandle(proc);
+            return 5;
+        }
+        std::vector<iat_mut::MutatedCall> muts;
+        iat_mut::scan(proc, img, muts);
+        VMPU_INFO("iat-mut", "Found %zu mutated call sites " " t", muts.size());
+        if (!dump_iat_list.empty() && !muts.empty()) {
+            FILE* f = nullptr;
+            _wfopen_s(&f, dump_iat_list.c_str(), L"w");
+            if (f) {
+                fprintf(f, "# vmpunpack passive-attach dump\n");
+                fprintf(f, "# image_base=0x%llx size=0x%x\n", img.image_base, img.size_of_image);
+                fprintf(f, "# format: site_va,site_rva,pushed_reg,resolver_va," "resolver_rva\n");
+                for (auto& m : muts) {
+                    u32 site_rva = (u32)(m.instr_va - img.image_base);
+                    u32 rslv_rva = (u32)(m.resolver_va - img.image_base);
+                    fprintf(f, "0x%llx,0x%x,R%u,0x%llx,0x%x\n", m.instr_va, site_rva, m.pushed_reg, m.resolver_va, rslv_rva);
+                }
+                fclose(f);
+                VMPU_INFO("iat-mut", "Wrote %zu entries to %ls", muts.size(), dump_iat_list.c_str());
+            }
+        }
+        HANDLE snap2 = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        if (snap2 != INVALID_HANDLE_VALUE) {
+            THREADENTRY32 te{}; te.dwSize = sizeof(te);
+            if (Thread32First(snap2, &te)) {
+                do {
+                    if (te.th32OwnerProcessID != attach_pid) continue;
+                    HANDLE th = OpenThread(THREAD_SUSPEND_RESUME, FALSE, te.th32ThreadID);
+                    if (th) { ResumeThread(th); CloseHandle(th); }
+                } while (Thread32Next(snap2, &te));
+            }
+            CloseHandle(snap2);
+        }
+        CloseHandle(proc);
+        VMPU_INFO("main", "Passive dump complete");
+        VMPU_INFO("main", "%ls", out_path.c_str());
+        return 0;
+    }
+
+    Debugger dbg;
+    if (attach_pid != 0) {
+        VMPU_INFO("main", "Attaching to pid %lu", attach_pid);
+        if (!dbg.attach(attach_pid)) return 2;
+        antidbg::patch_peb(dbg.state().proc);
+        antidbg::clear_hw_breakpoints(dbg.state().pid);
+    } else {
+        if (!dbg.launch(in_path, L"")) return 2;
+    }
+
+    Pipeline pipe;
+    pipe.dbg = &dbg;
+    pipe.mode = mode;
+    pipe.snapshot_ms = snap_ms;
+    pipe.do_unhide = do_unhide;
+
+    if (!do_ad) VMPU_WARN("main", "Anti-debug bypass disabled");
+
+    const char* mode_name = "text-guard";
+    if (mode == OepMode::Snapshot) mode_name = "snapshot";
+    else if (mode == OepMode::KeyTrigger) mode_name = "key-trigger";
+
+    if (mode != OepMode::TextGuard) {
+        antidbg::g_freeze_on_clean_exit = true;
+    }
+    if (attach_pid != 0) {
+        VMPU_INFO("main", "Tracing attached pid %lu -> mode=%s",
+                  attach_pid, mode_name);
+    } else {
+        VMPU_INFO("main", "Tracing %ls -> mode=%s", in_path.c_str(), mode_name);
+    }
+
+    bool ok;
+    if (mode == OepMode::TextGuard) {
+        ok = dbg.run_until(&on_event, &pipe);
+    } else {
+        ok = dbg.run_until_timed(&on_event, &on_timeout, 20, &pipe);
+    }
+
+    if (!pipe.oep_found) {
+        VMPU_ERROR("main", "OEP not detected (debug loop ended)");
+        if (mode == OepMode::TextGuard) {
+            VMPU_ERROR("main", "Original .text was never executed VMP likely fully " "virtualized the code. Try: -snapshot <seconds>");
+        }
+        dbg.detach();
+        return 3;
+    }
+
+    HANDLE proc = dbg.state().proc;
+    dbg.refresh_modules();
+
+    std::vector<u8> dumped;
+    dumper::DumpOptions dopt;
+    dopt.oep_va = pipe.oep_va;
+    if (!dumper::dump_to_file(proc, pipe.img, out_path, dopt, dumped)) {
+        VMPU_ERROR("main", "Dump failed");
+        return 5;
+    }
+
+    std::vector<iat_mut::MutatedCall> muts;
+    {
+        iat_mut::scan(proc, pipe.img, muts);
+        VMPU_INFO("iat-mut", "Found %zu mutated call sites (push reg; call rel32 " "into .vmp*) - these hide API calls if IAT obfuscation is ON", muts.size());
+        for (size_t k = 0; k < muts.size() && k < 12; ++k) {
+            auto& m = muts[k];
+            if (m.variant == iat_mut::VARIANT_PUSH_CALL) {
+                VMPU_TRACE("iat-mut", "  site %llx push R%u; call -> %llx", m.instr_va, m.pushed_reg, m.resolver_va);
+            } else {
+                VMPU_TRACE("iat-mut", "  site %llx call -> %llx; %s", m.instr_va, m.resolver_va, m.tail_byte == 0xC3 ? "ret" : "int3");
+            }
+        }
+        if (muts.size() > 12)
+            VMPU_TRACE("iat-mut", "  ... (%zu more)", muts.size() - 12);
+
+        if (do_resolve_mut && !muts.empty() && mode != OepMode::TextGuard) {
+            VMPU_INFO("main", "Starting dynamic resolver on %zu sites " "(this may take a minute)...", muts.size());
+            resolver::ResolverRunner runner;
+            if (runner.init(dbg, pipe.img)) {
+                antidbg::register_hidden_tid(pipe.hooks, runner.worker_tid());
+                antidbg::install_thread32_hooks(proc, pipe.hooks);
+                size_t solved = runner.resolve_all(muts);
+                VMPU_INFO("main", "Dynamic resolver: %zu / %zu sites recovered",
+                          solved, muts.size());
+                for (auto& mc : muts) {
+                    if (!mc.resolved_api) continue;
+                    const ModuleInfo* m = dbg.module_containing(mc.resolved_api);
+                    if (m) {
+                        mc.module_name = m->name;
+                        iat::resolve_api_name(*m, mc.resolved_api, mc.api_name);
+                    }
+                    VMPU_TRACE("iat-mut", "  RESOLVED %llx -> %llx %s", mc.instr_va, mc.resolved_api, mc.api_name.c_str());
+                }
+                runner.cleanup();
+            } else {
+                VMPU_ERROR("main", "ResolverRunner init failed");
+            }
+        } else if (do_resolve_mut && mode == OepMode::TextGuard) {
+            VMPU_WARN("main", "-resolve-mutated requires -snapshot or -snap-key");
+        }
+
+        if (!dump_iat_list.empty() && !muts.empty()) {
+            FILE* f = nullptr;
+            _wfopen_s(&f, dump_iat_list.c_str(), L"w");
+            if (f) {
+                fprintf(f, "# vmpunpack mutated IAT call sites\n");
+                fprintf(f, "# image_base=0x%llx size=0x%x\n", pipe.img.image_base, pipe.img.size_of_image);
+                fprintf(f, "# format: site_va,site_rva,pushed_reg,resolver_va," "resolver_rva,api_va,module,api_name\n");
+                for (auto& m : muts) {
+                    u32 site_rva = (u32)(m.instr_va - pipe.img.image_base);
+                    u32 rslv_rva = (u32)(m.resolver_va - pipe.img.image_base);
+                    fprintf(f, "0x%llx,0x%x,R%u,0x%llx,0x%x,0x%llx,", m.instr_va, site_rva, m.pushed_reg, m.resolver_va, rslv_rva, m.resolved_api);
+                    std::string mod_short;
+                    if (!m.module_name.empty()) {
+                        auto pos = m.module_name.find_last_of(L"/\\");
+                        std::wstring w = (pos == std::wstring::npos) ? m.module_name : m.module_name.substr(pos + 1);
+                        for (auto c : w) mod_short.push_back((char)c);
+                    }
+                    fprintf(f, "%s,%s\n",
+                            mod_short.c_str(), m.api_name.c_str());
+                }
+                fclose(f);
+                VMPU_INFO("iat-mut", "Wrote %zu entries to %ls", muts.size(), dump_iat_list.c_str());
+            } else {
+                VMPU_ERROR("iat-mut", "Cannot open %ls for writing", dump_iat_list.c_str());
+            }
+        }
+    }
+
+    if (do_iat) {
+        iat::IatFixer fixer;
+        fixer.scan(dbg, pipe.img);
+        size_t injected = 0;
+        for (auto& mc : muts) {
+            if (!mc.resolved_api || mc.api_name.empty()) continue;
+            fixer.add_mutated(mc.instr_va, mc.pushed_reg, mc.rex_b, (u8)mc.variant, mc.resolved_api, mc.module_name, mc.api_name);
+            ++injected;
+        }
+        if (injected) {
+            VMPU_INFO("iat", "Injected %zu mutated sites into IAT rebuild", injected);
+        }
+
+        iat::ScanOptions sopt;
+        if (mode != OepMode::TextGuard) {
+            sopt.resolve_static = true;
+            sopt.resolve_via_debuggee = false;
+        }
+        fixer.resolve(dbg, sopt);
+        VMPU_INFO("main", "IAT: %zu / %zu refs resolved", fixer.resolved_count(), fixer.refs().size());
+        if (fixer.resolved_count() &&
+            fixer.rebuild(dumped, pipe.img)) {
+            pe::write_pe_file(out_path, dumped);
+            VMPU_INFO("main", "Wrote IAT-fixed image to %ls", out_path.c_str());
+        }
+    }
+
+    if (mode != OepMode::TextGuard) {
+        TerminateProcess(proc, 0);
+    }
+
+    dbg.detach();
+    VMPU_INFO("main", "Done.");
+    return 0;
+}
+```
+
+`oep.cpp`:
+
+```cpp
+#include "oep.h"
+#include <cstring>
+
+namespace vmpu::oep {
+bool OepFinder::is_vmp_section_name(const char* n) const {
+    return pe::name_matches_vmp(n);
+}
+
+bool OepFinder::arm(HANDLE proc, const pe::PeImage& img) {
+    regions_.clear();
+    for (auto& s : img.sections) {
+        bool exec = (s.characteristics & IMAGE_SCN_MEM_EXECUTE) != 0;
+        if (!exec) continue;
+        if (pe::is_packer_section(proc, img.image_base, s)) {
+            VMPU_INFO("oep", "skip packer-like section %s rva=%x", s.name, s.rva);
+            continue;
+        }
+        if (!s.vsize) continue;
+        u64 va = img.image_base + s.rva;
+        DWORD old = 0;
+        if (!VirtualProtectEx(proc, (LPVOID)va, s.vsize, PAGE_NOACCESS, &old)) {
+            VMPU_WARN("oep", "VirtualProtectEx(%s,%llx,%x) failed: %lu", s.name, va, s.vsize, GetLastError());
+            continue;
+        }
+        regions_.push_back({va, s.vsize, old});
+        VMPU_INFO("oep", "armed section %s va=%llx size=%x (was %lx)", s.name, va, s.vsize, old);
+    }
+    return !regions_.empty();
+}
+
+bool OepFinder::service_av(HANDLE proc, HANDLE thread, const EXCEPTION_RECORD& er, u64& oep_va) {
+    if (er.ExceptionCode != EXCEPTION_ACCESS_VIOLATION) return false;
+    if (er.NumberParameters < 2) return false;
+    ULONG_PTR kind = er.ExceptionInformation[0];
+    ULONG_PTR addr = er.ExceptionInformation[1];
+    if (kind != 8) return false;
+    for (auto& r : regions_) {
+        if (addr >= r.base && addr < r.base + r.size) {
+            DWORD old = 0;
+            VirtualProtectEx(proc, (LPVOID)r.base, r.size, r.orig_prot, &old);
+            oep_va = (u64)addr;
+            r.size = 0;
+            return true;
+        }
+    }
+    return false;
+}
+
+void OepFinder::unguard_all(HANDLE proc) {
+    for (auto& r : regions_) {
+        if (!r.size) continue;
+        DWORD old = 0;
+        VirtualProtectEx(proc, (LPVOID)r.base, r.size, r.orig_prot, &old);
+    }
+    regions_.clear();
+}
+
+}
+```
+
+`oep.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "debugger.h"
+#include "pe.h"
+
+namespace vmpu::oep {
+struct GuardedRegion {
+    u64 base;
+    u32 size;
+    DWORD orig_prot;
+};
+
+class OepFinder {
+public:
+    bool arm(HANDLE proc, const pe::PeImage& img);
+
+    bool service_av(HANDLE proc, HANDLE thread, const EXCEPTION_RECORD& er, u64& oep_va);
+
+    void unguard_all(HANDLE proc);
+
+    const std::vector<GuardedRegion>& regions() const { return regions_; }
+
+private:
+    std::vector<GuardedRegion> regions_;
+    bool is_vmp_section_name(const char* n) const;
+};
+
+}
+```
+
+`pe.cpp`:
+
+```cpp
+#include "pe.h"
+#include <fstream>
+#include <cmath>
+#include <cstring>
+
+namespace vmpu::pe {
+static bool rpm(HANDLE proc, u64 addr, void* buf, size_t sz) {
+    SIZE_T got = 0;
+    if (!ReadProcessMemory(proc, (LPCVOID)addr, buf, sz, &got)) return false;
+    return got == sz;
+}
+
+bool read_image_from_process(HANDLE proc, u64 image_base, PeImage& out) {
+    out.image_base = image_base;
+
+    IMAGE_DOS_HEADER dos{};
+    if (!rpm(proc, image_base, &dos, sizeof(dos))) {
+        VMPU_ERROR("pe", "RPM DOS header failed: %lu", GetLastError());
+        return false;
+    }
+    if (dos.e_magic != IMAGE_DOS_SIGNATURE) {
+        VMPU_ERROR("pe", "Bad DOS magic at %llx", image_base);
+        return false;
+    }
+
+    IMAGE_NT_HEADERS64 nt{};
+    if (!rpm(proc, image_base + dos.e_lfanew, &nt, sizeof(nt))) {
+        VMPU_ERROR("pe", "RPM NT header failed");
+        return false;
+    }
+    if (nt.Signature != IMAGE_NT_SIGNATURE) {
+        VMPU_ERROR("pe", "Bad NT signature");
+        return false;
+    }
+
+    out.machine = nt.FileHeader.Machine;
+    out.size_of_image = nt.OptionalHeader.SizeOfImage;
+    out.size_of_headers = nt.OptionalHeader.SizeOfHeaders;
+    out.entry_point_rva = nt.OptionalHeader.AddressOfEntryPoint;
+
+    out.headers_bytes.resize(out.size_of_headers);
+    if (!rpm(proc, image_base, out.headers_bytes.data(), out.size_of_headers)) {
+        VMPU_ERROR("pe", "RPM headers (%u bytes) failed", out.size_of_headers);
+        return false;
+    }
+
+    u32 num_sections = nt.FileHeader.NumberOfSections;
+    u64 sect_off = dos.e_lfanew + sizeof(nt);
+    out.sections.clear();
+    out.sections.reserve(num_sections);
+    for (u32 i = 0; i < num_sections; ++i) {
+        IMAGE_SECTION_HEADER sh{};
+        if (!rpm(proc, image_base + sect_off + (u64)i * sizeof(sh), &sh, sizeof(sh))) {
+            VMPU_ERROR("pe", "RPM section %u failed", i);
+            return false;
+        }
+        SectionView sv{};
+        memcpy(sv.name, sh.Name, 8);
+        sv.name[8] = 0;
+        sv.rva = sh.VirtualAddress;
+        sv.vsize = sh.Misc.VirtualSize;
+        sv.raw_ptr = sh.PointerToRawData;
+        sv.raw_size = sh.SizeOfRawData;
+        sv.characteristics = sh.Characteristics;
+        out.sections.push_back(sv);
+    }
+    return true;
+}
+
+bool read_image_from_file(const std::wstring& path, std::vector<u8>& out_bytes, PeImage& out_meta) {
+    std::ifstream f(path, std::ios::binary | std::ios::ate);
+    if (!f) return false;
+    auto sz = f.tellg();
+    f.seekg(0);
+    out_bytes.resize((size_t)sz);
+    f.read((char*)out_bytes.data(), sz);
+
+    auto* dos = (IMAGE_DOS_HEADER*)out_bytes.data();
+    if (dos->e_magic != IMAGE_DOS_SIGNATURE) return false;
+    auto* nt = (IMAGE_NT_HEADERS64*)(out_bytes.data() + dos->e_lfanew);
+    if (nt->Signature != IMAGE_NT_SIGNATURE) return false;
+
+    out_meta.image_base = nt->OptionalHeader.ImageBase;
+    out_meta.size_of_image = nt->OptionalHeader.SizeOfImage;
+    out_meta.size_of_headers = nt->OptionalHeader.SizeOfHeaders;
+    out_meta.entry_point_rva = nt->OptionalHeader.AddressOfEntryPoint;
+    out_meta.machine = nt->FileHeader.Machine;
+    return true;
+}
+
+const SectionView* section_for_rva(const PeImage& img, u32 rva) {
+    for (auto& s : img.sections) {
+        if (rva >= s.rva && rva < s.rva + s.vsize) return &s;
+    }
+    return nullptr;
+}
+
+bool name_matches_vmp(const char* n) {
+    char b[9] = {0};
+    for (int i = 0; i < 8 && n[i]; ++i) b[i] = (char)tolower((u8)n[i]);
+    if (b[0] == '.' || b[0] == '_')
+        return strncmp(b + 1, "vmp", 3) == 0;
+    return strncmp(b, "vmp", 3) == 0;
+}
+
+static double sample_entropy(HANDLE proc, u64 base, u32 size) {
+    if (size < 0x400) return 0.0;
+    u32 n = (size > 0x8000) ? 0x8000 : size;
+    std::vector<u8> buf(n);
+    SIZE_T got = 0;
+    if (!ReadProcessMemory(proc, (LPCVOID)base, buf.data(), n, &got) || got == 0)
+        return 0.0;
+    u32 freq[256] = {0};
+    for (SIZE_T i = 0; i < got; ++i) freq[buf[i]]++;
+    double h = 0.0;
+    for (int i = 0; i < 256; ++i) {
+        if (!freq[i]) continue;
+        double p = (double)freq[i] / (double)got;
+        h -= p * (log(p) / log(2.0));
+    }
+    return h;
+}
+
+bool is_packer_section(HANDLE proc, u64 image_base, const SectionView& s) {
+    if (name_matches_vmp(s.name)) return true;
+    if (strncmp(s.name, ".text", 5) == 0) return false;
+    static const char* k_known_safe[] = {
+        ".rdata", ".data", ".pdata", ".rsrc", ".reloc",
+        ".idata", ".edata", ".tls",   ".gfids", ".CRT",
+        ".xdata", ".bss"
+    };
+    for (auto* sn : k_known_safe) {
+        if (strncmp(s.name, sn, strlen(sn)) == 0) return false;
+    }
+    bool exec = (s.characteristics & IMAGE_SCN_MEM_EXECUTE) != 0;
+    if (!exec) return false;
+    if (s.vsize < 0x1000) return false;
+
+    double h = sample_entropy(proc, image_base + s.rva, s.vsize);
+    VMPU_INFO("pe", "section %s flagged as packer (entropy=%.2f, size=%x)", s.name, h, s.vsize);
+    return true;
+}
+
+bool dump_full_image(HANDLE proc, const PeImage& img, std::vector<u8>& out_bytes) {
+    out_bytes.assign(img.size_of_image, 0);
+    memcpy(out_bytes.data(), img.headers_bytes.data(), img.size_of_headers);
+
+    for (auto& s : img.sections) {
+        if (!s.vsize) continue;
+        u64 va = img.image_base + s.rva;
+        u32 sz = s.vsize;
+        SIZE_T got = 0;
+        if (!ReadProcessMemory(proc, (LPCVOID)va, out_bytes.data() + s.rva, sz, &got)) {
+            VMPU_WARN("pe", "RPM section %s (rva=%x size=%x) failed: %lu", s.name, s.rva, sz, GetLastError());
+        } else if (got != sz) {
+            VMPU_WARN("pe", "Section %s short read %zu/%u", s.name, got, sz);
+        }
+    }
+    return true;
+}
+
+void patch_section_raw_sizes(std::vector<u8>& image_bytes) {
+    auto* dos = (IMAGE_DOS_HEADER*)image_bytes.data();
+    auto* nt = (IMAGE_NT_HEADERS64*)(image_bytes.data() + dos->e_lfanew);
+    auto* sec = IMAGE_FIRST_SECTION(nt);
+    for (u32 i = 0; i < nt->FileHeader.NumberOfSections; ++i) {
+        sec[i].PointerToRawData = sec[i].VirtualAddress;
+        sec[i].SizeOfRawData = sec[i].Misc.VirtualSize;
+    }
+}
+
+bool write_pe_file(const std::wstring& path, const std::vector<u8>& bytes) {
+    std::ofstream f(path, std::ios::binary);
+    if (!f) return false;
+    f.write((const char*)bytes.data(), bytes.size());
+    return f.good();
+}
+
+}
+```
+
+`pe.h`:
+
+```h
+#pragma once
+#include "common.h"
+
+namespace vmpu::pe {
+struct SectionView {
+    char name[9];
+    u32 rva;
+    u32 vsize;
+    u32 raw_ptr;
+    u32 raw_size;
+    u32 characteristics;
+};
+
+struct PeImage {
+    u64 image_base = 0;
+    u32 size_of_image = 0;
+    u32 size_of_headers = 0;
+    u32 entry_point_rva = 0;
+    u16 machine = 0;
+    std::vector<SectionView> sections;
+    std::vector<u8> headers_bytes;
+};
+
+bool read_image_from_process(HANDLE proc, u64 image_base, PeImage& out);
+
+bool read_image_from_file(const std::wstring& path, std::vector<u8>& out_bytes, PeImage& out_meta);
+
+const SectionView* section_for_rva(const PeImage& img, u32 rva);
+
+bool is_packer_section(HANDLE proc, u64 image_base, const SectionView& s);
+
+bool name_matches_vmp(const char* name);
+
+bool dump_full_image(HANDLE proc, const PeImage& img, std::vector<u8>& out_bytes);
+
+bool write_pe_file(const std::wstring& path, const std::vector<u8>& bytes);
+
+void patch_section_raw_sizes(std::vector<u8>& image_bytes);
+
+}
+```
+
+`resolver_runner.cpp`:
+
+```cpp
+#include "resolver_runner.h"
+#include <cstring>
+
+namespace vmpu::resolver {
+static const u8 kInfiniteLoop[] = { 0xEB, 0xFE }; // jmp short -2
+
+using PFN_NtCreateThreadEx = LONG (NTAPI*)(
+    PHANDLE ThreadHandle,
+    ACCESS_MASK DesiredAccess,
+    PVOID ObjectAttributes,
+    HANDLE ProcessHandle,
+    PVOID StartRoutine,
+    PVOID Argument,
+    ULONG CreateFlags,
+    SIZE_T ZeroBits,
+    SIZE_T StackSize,
+    SIZE_T MaximumStackSize,
+    PVOID AttributeList
+);
+
+#ifndef THREAD_CREATE_FLAGS_CREATE_SUSPENDED
+#define THREAD_CREATE_FLAGS_CREATE_SUSPENDED   0x00000001
+#endif
+#ifndef THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER
+#define THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER 0x00000004
+#endif
+
+static HANDLE create_hidden_thread(HANDLE proc, u64 start_va, DWORD& tid) {
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    auto fn = (PFN_NtCreateThreadEx)GetProcAddress(ntdll, "NtCreateThreadEx");
+    if (!fn) return nullptr;
+
+    HANDLE h = nullptr;
+    LONG st = fn(&h, THREAD_ALL_ACCESS, nullptr, proc, (PVOID)start_va, nullptr, THREAD_CREATE_FLAGS_CREATE_SUSPENDED | THREAD_CREATE_FLAGS_HIDE_FROM_DEBUGGER, 0, 0, 0, nullptr);
+    if (st < 0 || !h) return nullptr;
+    tid = GetThreadId(h);
+    return h;
+}
+
+static u64* reg_ptr(CONTEXT& ctx, u8 reg) {
+    switch (reg) {
+        case 0:  return &ctx.Rax;
+        case 1:  return &ctx.Rcx;
+        case 2:  return &ctx.Rdx;
+        case 3:  return &ctx.Rbx;
+        case 4:  return &ctx.Rsp;
+        case 5:  return &ctx.Rbp;
+        case 6:  return &ctx.Rsi;
+        case 7:  return &ctx.Rdi;
+        case 8:  return &ctx.R8;
+        case 9:  return &ctx.R9;
+        case 10: return &ctx.R10;
+        case 11: return &ctx.R11;
+        case 12: return &ctx.R12;
+        case 13: return &ctx.R13;
+        case 14: return &ctx.R14;
+        case 15: return &ctx.R15;
+    }
+    return nullptr;
+}
+
+bool ResolverRunner::init(Debugger& dbg, const pe::PeImage& img) {
+    dbg_ = &dbg;
+    img_ = &img;
+    HANDLE proc = dbg.state().proc;
+
+    scratch_code_ = (u64)VirtualAllocEx(proc, NULL, 0x1000, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if (!scratch_code_) {
+        VMPU_ERROR("rr", "VirtualAllocEx code failed: %lu", GetLastError());
+        return false;
+    }
+    SIZE_T put = 0;
+    WriteProcessMemory(proc, (LPVOID)scratch_code_, kInfiniteLoop, sizeof(kInfiniteLoop), &put);
+    FlushInstructionCache(proc, (LPCVOID)scratch_code_, sizeof(kInfiniteLoop));
+
+    scratch_stack_ = (u64)VirtualAllocEx(proc, NULL, kStackSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (!scratch_stack_) {
+        VMPU_ERROR("rr", "VirtualAllocEx stack failed: %lu", GetLastError());
+        cleanup();
+        return false;
+    }
+
+    worker_ = create_hidden_thread(proc, scratch_code_, worker_tid_);
+    bool hidden = (worker_ != nullptr);
+    if (!worker_) {
+        worker_ = CreateRemoteThread(proc, NULL, 0, (LPTHREAD_START_ROUTINE)scratch_code_, NULL, CREATE_SUSPENDED, &worker_tid_);
+    }
+    if (!worker_) {
+        VMPU_ERROR("rr", "create thread failed: %lu", GetLastError());
+        cleanup();
+        return false;
+    }
+    VMPU_INFO("rr", "worker_tid=%lu code=%llx stack=%llx hidden=%d", worker_tid_, scratch_code_, scratch_stack_, hidden ? 1 : 0);
+
+    DEBUG_EVENT ev{};
+    for (int i = 0; i < 16; ++i) {
+        if (!WaitForDebugEvent(&ev, hidden ? 50 : 200)) break;
+        ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, DBG_CONTINUE);
+        if (ev.dwDebugEventCode == CREATE_THREAD_DEBUG_EVENT &&
+            ev.dwThreadId == worker_tid_) {
+            drained_create_event_ = true;
+            break;
+        }
+    }
+    return true;
+}
+
+bool ResolverRunner::try_find_preload(u64 site_va, u8 pushed_reg, u64& imm_value) {
+    HANDLE proc = dbg_->state().proc;
+    u8 buf[32] = {0};
+    SIZE_T got = 0;
+    if (!ReadProcessMemory(proc, (LPCVOID)(site_va - 32), buf, 32, &got) || got != 32) return false;
+
+    u8 low_reg = pushed_reg & 7;
+    bool rex_b = pushed_reg >= 8;
+
+    // mov reg32, imm32  (B8+reg ii ii ii ii)  — 5 bytes
+    // mov reg64, imm64  (48 B8+reg ii*8)      — 10 bytes
+    // mov r8d..r15d, imm32  (41 B8+reg ii*4)  — 6 bytes
+    // mov r8..r15, imm64    (49 B8+reg ii*8)  — 10 bytes
+    for (int off = 27; off >= 0; --off) {
+        if (!rex_b && buf[off] == (0xB8 + low_reg)) {
+            imm_value = (u64)(*(u32*)&buf[off + 1]);
+            return true;
+        }
+        if (!rex_b && off + 9 < 32 &&
+            buf[off] == 0x48 && buf[off + 1] == (0xB8 + low_reg)) {
+            imm_value = *(u64*)&buf[off + 2];
+            return true;
+        }
+        if (rex_b && off + 5 < 32 &&
+            buf[off] == 0x41 && buf[off + 1] == (0xB8 + low_reg)) {
+            imm_value = (u64)(*(u32*)&buf[off + 2]);
+            return true;
+        }
+        if (rex_b && off + 9 < 32 &&
+            buf[off] == 0x49 && buf[off + 1] == (0xB8 + low_reg)) {
+            imm_value = *(u64*)&buf[off + 2];
+            return true;
+        }
+    }
+    return false;
+}
+
+void ResolverRunner::park_worker() {
+    HANDLE th = OpenThread(THREAD_ALL_ACCESS, FALSE, worker_tid_);
+    if (!th) return;
+    SuspendThread(th);
+    CONTEXT c{}; c.ContextFlags = CONTEXT_FULL;
+    GetThreadContext(th, &c);
+    c.Rip = scratch_code_;
+    c.EFlags &= ~0x100u;
+    SetThreadContext(th, &c);
+    CloseHandle(th);
+}
+
+bool ResolverRunner::single_step_until_outside_image(u32 max_steps, u64& out_api) {
+    u64 lo = img_->image_base;
+    u64 hi = lo + img_->size_of_image;
+
+    DEBUG_EVENT ev{};
+    for (u32 i = 0; i < max_steps; ++i) {
+        if (!WaitForDebugEvent(&ev, 3000)) {
+            VMPU_TRACE("rr", "ss timeout @ step %u", i);
+            return false;
+        }
+        DWORD status = DBG_CONTINUE;
+        bool is_worker = (ev.dwThreadId == worker_tid_);
+
+        if (ev.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) {
+            auto& er = ev.u.Exception.ExceptionRecord;
+            if (is_worker && er.ExceptionCode == EXCEPTION_SINGLE_STEP) {
+                HANDLE th = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT,
+                                       FALSE, worker_tid_);
+                CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_CONTROL;
+                GetThreadContext(th, &ctx);
+                if (ctx.Rip < lo || ctx.Rip >= hi) {
+                    out_api = ctx.Rip;
+                    ctx.Rip = scratch_code_;
+                    ctx.EFlags &= ~0x100u;
+                    SetThreadContext(th, &ctx);
+                    CloseHandle(th);
+                    ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, status);
+                    return true;
+                }
+                ctx.ContextFlags = CONTEXT_CONTROL;
+                ctx.EFlags |= 0x100;
+                SetThreadContext(th, &ctx);
+                CloseHandle(th);
+            } else if (is_worker) {
+                VMPU_TRACE("rr", "worker exception %lx @ step %u", er.ExceptionCode, i);
+                HANDLE th = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, FALSE, worker_tid_);
+                CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_CONTROL;
+                GetThreadContext(th, &ctx);
+                ctx.Rip = scratch_code_;
+                ctx.EFlags &= ~0x100u;
+                SetThreadContext(th, &ctx);
+                CloseHandle(th);
+                ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, DBG_CONTINUE);
+                return false;
+            }
+        }
+        ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, status);
+    }
+    HANDLE th = OpenThread(THREAD_ALL_ACCESS, FALSE, worker_tid_);
+    if (th) {
+        CONTEXT c{}; c.ContextFlags = CONTEXT_CONTROL;
+        GetThreadContext(th, &c);
+        c.Rip = scratch_code_;
+        c.EFlags &= ~0x100u;
+        SetThreadContext(th, &c);
+        CloseHandle(th);
+    }
+    return false;
+}
+
+static void drain_pending_events(DWORD timeout_ms) {
+    DEBUG_EVENT drain{};
+    for (int i = 0; i < 64; ++i) {
+        if (!WaitForDebugEvent(&drain, timeout_ms)) break;
+        ContinueDebugEvent(drain.dwProcessId, drain.dwThreadId, DBG_CONTINUE);
+    }
+}
+
+bool ResolverRunner::resolve_one(iat_mut::MutatedCall& mc) {
+    DWORD ec = 0;
+    if (worker_ && (!GetExitCodeThread(worker_, &ec) || ec != STILL_ACTIVE)) {
+        VMPU_WARN("rr", "worker thread dead (ec=%lx), recreating", ec);
+        CloseHandle(worker_);
+        worker_ = CreateRemoteThread(dbg_->state().proc, NULL, 0, (LPTHREAD_START_ROUTINE)scratch_code_, NULL, CREATE_SUSPENDED, &worker_tid_);
+        if (!worker_) return false;
+        DEBUG_EVENT cev{};
+        for (int i = 0; i < 8; ++i) {
+            if (!WaitForDebugEvent(&cev, 200)) break;
+            ContinueDebugEvent(cev.dwProcessId, cev.dwThreadId, DBG_CONTINUE);
+            if (cev.dwDebugEventCode == CREATE_THREAD_DEBUG_EVENT && cev.dwThreadId == worker_tid_) break;
+        }
+    }
+
+    HANDLE th = OpenThread(THREAD_ALL_ACCESS, FALSE, worker_tid_);
+    if (!th) return false;
+
+    u64 preload = 0;
+    bool have_preload = try_find_preload(mc.instr_va, mc.pushed_reg, preload);
+
+    CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_FULL;
+    GetThreadContext(th, &ctx);
+    ctx.Rip = mc.instr_va;
+    ctx.Rsp = scratch_stack_ + kStackSize - 0x200;
+    ctx.Rbp = ctx.Rsp;
+    ctx.Rax = ctx.Rcx = ctx.Rdx = 0;
+    ctx.R8 = ctx.R9 = ctx.R10 = ctx.R11 = 0;
+    if (have_preload) {
+        if (auto* p = reg_ptr(ctx, mc.pushed_reg)) *p = preload;
+    }
+    ctx.EFlags = (ctx.EFlags & ~0xFFFFu) | 0x202u | 0x100u; // TF on
+    SetThreadContext(th, &ctx);
+
+    while (true) {
+        DWORD prev = ResumeThread(th);
+        if (prev == (DWORD)-1) { CloseHandle(th); return false; }
+        if (prev <= 1) break;
+    }
+    CloseHandle(th);
+
+    u64 api = 0;
+    bool ok = single_step_until_outside_image(8192, api);
+
+    drain_pending_events(20);
+
+    if (ok) mc.resolved_api = api;
+    return ok;
+}
+
+size_t ResolverRunner::resolve_all(std::vector<iat_mut::MutatedCall>& muts) {
+    size_t solved = 0;
+    for (size_t i = 0; i < muts.size(); ++i) {
+        if (resolve_one(muts[i])) ++solved;
+        if ((i + 1) % 20 == 0 || i + 1 == muts.size()) {
+            VMPU_INFO("rr", "progress %zu/%zu, %zu solved", i + 1, muts.size(), solved);
+        }
+    }
+    return solved;
+}
+
+void ResolverRunner::cleanup() {
+    HANDLE proc = dbg_ ? dbg_->state().proc : nullptr;
+    if (worker_) {
+        TerminateThread(worker_, 0);
+        CloseHandle(worker_);
+        worker_ = nullptr;
+    }
+    if (proc) {
+        if (scratch_code_) {
+            VirtualFreeEx(proc, (LPVOID)scratch_code_, 0, MEM_RELEASE);
+        }
+        if (scratch_stack_) {
+            VirtualFreeEx(proc, (LPVOID)scratch_stack_, 0, MEM_RELEASE);
+        }
+    }
+    scratch_code_ = scratch_stack_ = 0;
+    worker_tid_ = 0;
+}
+
+}
+```
+
+`resolver_runner.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "debugger.h"
+#include "pe.h"
+#include "iat_mutated.h"
+
+namespace vmpu::resolver {
+class ResolverRunner {
+public:
+    bool init(Debugger& dbg, const pe::PeImage& img);
+    bool resolve_one(iat_mut::MutatedCall& mc);
+    size_t resolve_all(std::vector<iat_mut::MutatedCall>& muts);
+    void cleanup();
+
+    DWORD worker_tid() const { return worker_tid_; }
+
+private:
+    Debugger* dbg_ = nullptr;
+    const pe::PeImage* img_ = nullptr;
+    HANDLE worker_ = nullptr;
+    DWORD worker_tid_ = 0;
+    u64 scratch_code_ = 0;
+    u64 scratch_stack_ = 0;
+    bool drained_create_event_ = false;
+    static constexpr size_t kStackSize = 0x10000;
+
+    bool try_find_preload(u64 site_va, u8 pushed_reg, u64& imm_value);
+    bool single_step_until_outside_image(u32 max_steps, u64& out_api);
+    void park_worker();
+};
+
+}
+```
+
+`vmp_unhide.cpp`:
+
+```cpp
+#include "vmp_unhide.h"
+#include "debugger.h"
+#include <cstring>
+
+namespace vmpu::unhide {
+u32 get_syscall_ssn(const char* fname) {
+    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    if (!ntdll) return 0;
+    void* fn = (void*)GetProcAddress(ntdll, fname);
+    if (!fn) return 0;
+    u8 b[32] = {0};
+    memcpy(b, fn, sizeof(b));
+    for (int i = 0; i < 16; ++i) {
+        if (b[i] == 0xB8) return *(u32*)(b + i + 1);
+    }
+    return 0;
+}
+
+
+bool ThreadHideBypass::install(HANDLE proc, u64 image_base, const pe::PeImage& img) {
+    ssn_ntclose_ = get_syscall_ssn("NtClose");
+    ssn_ntqip_   = get_syscall_ssn("NtQueryInformationProcess");
+    ssn_ntsit_   = get_syscall_ssn("NtSetInformationThread");
+    ssn_ntqsi_   = get_syscall_ssn("NtQuerySystemInformation");
+    VMPU_INFO("unhide", "SSNs: NtClose=%x NtQip=%x NtSIT=%x NtQSI=%x", ssn_ntclose_, ssn_ntqip_, ssn_ntsit_, ssn_ntqsi_);
+
+    auto kind_of_ssn = [&](u32 ssn) -> SyscallKind {
+        if (ssn == ssn_ntclose_) return SC_NtClose;
+        if (ssn == ssn_ntqip_)   return SC_NtQueryInformationProcess;
+        if (ssn == ssn_ntsit_)   return SC_NtSetInformationThread;
+        if (ssn == ssn_ntqsi_)   return SC_NtQuerySystemInformation;
+        return SC_OTHER;
+    };
+
+    hooks_.clear();
+    for (auto& s : img.sections) {
+        if (!(s.characteristics & IMAGE_SCN_MEM_EXECUTE)) continue;
+        if (!pe::is_packer_section(proc, image_base, s)) continue;
+
+        std::vector<u8> buf(s.vsize);
+        SIZE_T got = 0;
+        u64 secva = image_base + s.rva;
+        if (!ReadProcessMemory(proc, (LPCVOID)secva, buf.data(), s.vsize, &got))
+            continue;
+
+        constexpr size_t kWindow = 24;
+        for (size_t i = 0; i + 5 < got; ++i) {
+            if (buf[i] != 0xB8) continue;
+            u32 imm = *(u32*)&buf[i + 1];
+            SyscallKind kind = kind_of_ssn(imm);
+            if (kind == SC_OTHER) continue;
+
+            size_t end = i + 5 + kWindow;
+            if (end > got - 1) end = got - 1;
+            for (size_t j = i + 5; j < end; ++j) {
+                if (buf[j] != 0x0F || buf[j + 1] != 0x05) continue;
+                u64 addr = secva + j;
+                u8 cc = 0xCC;
+                SIZE_T put = 0;
+                if (!WriteProcessMemory(proc, (LPVOID)addr, &cc, 1, &put))
+                    break;
+                hooks_.push_back({addr, 0x0F, true, kind, imm});
+                VMPU_TRACE("unhide", "syscall kind=%d ssn=%x @ %llx (mov @ %llx)", (int)kind, imm, addr, secva + i);
+                i = j + 1;
+                break;
+            }
+        }
+        FlushInstructionCache(proc, (LPCVOID)secva, s.vsize);
+    }
+    VMPU_INFO("unhide", "Installed %zu direct-syscall hooks in VMP sections", hooks_.size());
+    return !hooks_.empty();
+}
+
+bool ThreadHideBypass::owns(u64 addr) const {
+    for (auto& h : hooks_) if (h.addr == addr) return true;
+    return false;
+}
+
+bool ThreadHideBypass::service(HANDLE proc, HANDLE thread, u64 rip_minus_1, u64& out_addr, bool& bypassed) {
+    bypassed = false;
+    SyscallHook* hk = nullptr;
+    for (auto& h : hooks_) {
+        if (h.addr == rip_minus_1 && h.active) { hk = &h; break; }
+    }
+    if (!hk) return false;
+    out_addr = hk->addr;
+
+    CONTEXT ctx{}; ctx.ContextFlags = CONTEXT_ALL;
+    if (!GetThreadContext(thread, &ctx)) return false;
+
+    u32 cls = (u32)ctx.Rdx;
+    bool faked = false;
+    u64 fake_status = 0;
+
+    switch (hk->kind) {
+        case SC_NtClose: {
+            u64 h = ctx.R10;
+            if (h == 0xDEADC0DEULL) {
+                fake_status = 0xC0000008;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtClose(deadc0de) -> faked");
+            }
+            break;
+        }
+        case SC_NtQueryInformationProcess: {
+            // R10=hProc, RDX=class, R8=buf, R9=len
+            if (cls == 7) { // ProcessDebugPort
+                u64 zero = 0;
+                if (ctx.R8) write_mem(proc, ctx.R8, &zero, 8);
+                fake_status = 0;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtQip(ProcessDebugPort) -> faked");
+            } else if (cls == 30) { // ProcessDebugObjectHandle
+                fake_status = 0xC0000353;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtQip(DebugObjectHandle) -> PORT_NOT_SET");
+            } else if (cls == 31) { // ProcessDebugFlags
+                u32 one = 1;
+                if (ctx.R8) write_mem(proc, ctx.R8, &one, 4);
+                fake_status = 0;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtQip(DebugFlags) -> faked");
+            }
+            break;
+        }
+        case SC_NtSetInformationThread: {
+            if (cls == 0x11) { // ThreadHideFromDebugger
+                fake_status = 0;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtSIT(HideFromDebugger) -> swallowed");
+            }
+            break;
+        }
+        case SC_NtQuerySystemInformation: {
+            u32 qcls = (u32)ctx.R10;
+            if (qcls == 0x23) { // SystemKernelDebuggerInformation
+                u8 result[2] = { 0, 1 };
+                if (ctx.Rdx) write_mem(proc, ctx.Rdx, result, 2);
+                fake_status = 0;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtQSI(KernelDebuggerInfo) -> faked");
+            } else if (qcls == 0x0B) { // SystemModuleInformation
+                fake_status = 0xC0000004;
+                faked = true;
+                bypassed = true;
+                VMPU_TRACE("unhide", "direct NtQSI(ModuleInfo) -> LEN_MISMATCH");
+            }
+            break;
+        }
+        default: break;
+    }
+
+    if (faked) {
+        // `0F 05` (2 bytes), RAX = NTSTATUS.
+        ctx.Rax = fake_status;
+        ctx.Rip = hk->addr + 2;
+        SetThreadContext(thread, &ctx);
+        u8 cc = 0xCC;
+        WriteProcessMemory(proc, (LPVOID)hk->addr, &cc, 1, nullptr);
+        FlushInstructionCache(proc, (LPCVOID)hk->addr, 1);
+        return true;
+    }
+
+    u8 orig = hk->orig_byte;
+    WriteProcessMemory(proc, (LPVOID)hk->addr, &orig, 1, nullptr);
+    FlushInstructionCache(proc, (LPCVOID)hk->addr, 1);
+    ctx.Rip -= 1;
+    ctx.EFlags |= 0x100;
+    SetThreadContext(thread, &ctx);
+    hk->active = false;
+    return true;
+}
+
+void ThreadHideBypass::rearm(HANDLE proc, u64 addr) {
+    for (auto& h : hooks_) {
+        if (h.addr == addr && !h.active) {
+            u8 cc = 0xCC;
+            SIZE_T put = 0;
+            WriteProcessMemory(proc, (LPVOID)addr, &cc, 1, &put);
+            FlushInstructionCache(proc, (LPCVOID)addr, 1);
+            h.active = true;
+            return;
+        }
+    }
+}
+
+void ThreadHideBypass::uninstall(HANDLE proc) {
+    for (auto& h : hooks_) {
+        if (!h.active) continue;
+        u8 orig = h.orig_byte;
+        SIZE_T put = 0;
+        WriteProcessMemory(proc, (LPVOID)h.addr, &orig, 1, &put);
+        FlushInstructionCache(proc, (LPCVOID)h.addr, 1);
+    }
+    hooks_.clear();
+}
+
+}
+```
+
+`vmp_unhide.h`:
+
+```h
+#pragma once
+#include "common.h"
+#include "pe.h"
+
+namespace vmpu::unhide {
+enum SyscallKind {
+    SC_OTHER = 0,
+    SC_NtClose,
+    SC_NtQueryInformationProcess,
+    SC_NtSetInformationThread,
+    SC_NtQuerySystemInformation,
+};
+
+struct SyscallHook {
+    u64 addr;
+    u8  orig_byte;
+    bool active;
+    SyscallKind kind;
+    u32 ssn;
+};
+
+class ThreadHideBypass {
+public:
+    bool install(HANDLE proc, u64 image_base, const pe::PeImage& img);
+    bool service(HANDLE proc, HANDLE thread, u64 rip_minus_1, u64& out_addr, bool& bypassed);
+    void rearm(HANDLE proc, u64 addr);
+    void uninstall(HANDLE proc);
+
+    size_t count() const { return hooks_.size(); }
+    bool owns(u64 addr) const;
+
+private:
+    std::vector<SyscallHook> hooks_;
+    u32 ssn_ntclose_ = 0;
+    u32 ssn_ntqip_   = 0;
+    u32 ssn_ntsit_   = 0;
+    u32 ssn_ntqsi_   = 0;
+};
+
+u32 get_syscall_ssn(const char* fname);
+
+}
+```
