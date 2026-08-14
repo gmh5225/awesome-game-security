@@ -429,6 +429,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
 - [Disable NMI callbacks](entities/disable-nmi-callbacks.md) — kernel driver; KiNmiInterruptStart pattern scan + affinity/NMI-state patch vs NMI stack-walk AC (gmh5225)
+- [Disable Windows Defender](entities/disable-windows-defender-.md) — UAC bypass + SYSTEM token escalation → real-time / Tamper Protection disable (gmh5225)
 - [DisableDSE](entities/disabledse.md) — kernel validation-chain DSE bypass (`SeValidateImageHeader` / `MiValidateSectionCreate` / `MiValidateSectionSigningPolicy`; unsigned driver load; gmh5225; kernel research)
 - [dse_hook](entities/dse-hook.md) — CI.dll hook / `g_CiEnabled` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
 - [Dse-Patcher-2](entities/dse-patcher-2.md) — CI.dll `g_CiOptions` patch DSE bypass for unsigned driver load (gmh5225; kernel research)

@@ -20,4 +20,4 @@ Useful research reference for the AV/EDR-control and platform-trust lane when st
 
 ## Related
 
-[[byovd]] · [[kvc]] · [[av-edr-killer]] · [[ven0m-ransomware]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[byovd]] · [[kvc]] · [[av-edr-killer]] · [[defender-control]] · [[disable-windows-defender-]] · [[ven0m-ransomware]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
