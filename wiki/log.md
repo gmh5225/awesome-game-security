@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:joren485/bndb2pat`: entity [[bndb2pat]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-sigmaker]], [[sigmakerex]], [[ida-pro-sigmaker]], and [[sig-database]].
+
 - **2026-08-14** — ingest `readme:categories`: bumped Cheat ~2701 (was ~2699; Anti Cheat ~670 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-14** — ingest `description:gmh5225/CVE-2025-21333-POC`: entity [[cve-2025-21333-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[cve-2025-21333]].
