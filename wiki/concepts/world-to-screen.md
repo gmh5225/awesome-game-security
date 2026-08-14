@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/microsoft__DirectXMath.md
   - wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md
   - wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md
-updated: 2026-08-08
+  - wiki/sources/descriptions/gmh5225__Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL.md
+updated: 2026-08-14
 confidence: high
 ---
 
@@ -26,7 +27,7 @@ Matrix layout and row/column convention vary by engine and hook point—verify a
 
 ## Engine helpers
 
-Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Per-title offset collections such as [[fortnite-w2s-offset-fortnite]] (Fortnite; gmh5225; view/projection and camera offsets for external ESP; cheat / game:fortnite `[Offset]`) document version-specific memory layouts upstream of the projection math. Educational internals with explicit W2S: [[simple-ac-internal-cheat]]. Beginner walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; ESP + aimbot from scratch) teach the same pipeline in a controlled practice environment. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md) (source: wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md)
+Cross-engine constexpr libraries such as [[omath]] ship W2S, projectile prediction, and engine-specific camera helpers (Source, Unity, Unreal, Frostbite, etc.). Microsoft's [[directxmath]] supplies SIMD matrix/vector inlines and frustum helpers for DirectX-facing Windows/Xbox code paths. Per-title offset collections such as [[fortnite-w2s-offset-fortnite]] (Fortnite; gmh5225; view/projection and camera offsets for external ESP; cheat / game:fortnite `[Offset]`) document version-specific memory layouts upstream of the projection math. External title samples such as [[call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all]] (COD Warzone; C# Win32 RPM + user32 overlay ESP; gmh5225) apply the same projection math through out-of-process memory reads rather than in-engine hooks. Educational internals with explicit W2S: [[simple-ac-internal-cheat]]. Beginner walkthrough labs such as [[lab-esp-and-aimbot]] (custom 3D target app + external cheat; ESP + aimbot from scratch) teach the same pipeline in a controlled practice environment. (source: wiki/sources/descriptions/kotae4__lab-esp-and-aimbot.md) (source: wiki/sources/descriptions/gmh5225__fortnite-W2S-offset-Fortnite.md) (source: wiki/sources/descriptions/gmh5225__Call-Of-Duty-Warzone-Hack-Esp-Slient-Aimbot-Internal-Unlock-ALL.md)
 
 ## Related
 
