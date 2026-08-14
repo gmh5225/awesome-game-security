@@ -193,6 +193,8 @@ NVIDIA kernel-driver physmem library such as [[nvdrv]] (gmh5225; C++ wrapper; cr
 
 Classic **`Capcom.sys`** arbitrary kernel execution such as [[dolboeb-executor]] (gmh5225; load vulnerable signed driver → IOCTL abuse → custom kernel shellcode or arbitrary kernel function calls from user mode; BYOVD code-execution research) sits in the same historically abused LOLdriver lane referenced in step 1 of the typical chain above. (source: wiki/sources/descriptions/gmh5225__dolboeb-executor.md)
 
+**`Capcom.sys`** DKOM tooling such as [[capcom-dkom]] (gmh5225; IOCTL `0xAA013044` ring-0 shellcode; `MmGetSystemRoutineAddress` for kernel API resolution; Direct Kernel Object Manipulation) extends that lane toward kernel object hiding/manipulation rather than generic code exec alone. (source: wiki/sources/descriptions/gmh5225__CapcomDKOM.md)
+
 Cheat Engine **`dbk64.sys`** IOCTL abuse such as [[dbk64-vulnerability-driver]] (gmh5225; signed debugging-tool driver shipped with CE for kernel-mode memory access → arbitrary kernel R/W via vulnerable IOCTLs; BYOVD research on game-debugging driver backends) sits in the same cheat-tool / LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__dbk64-vulnerability-driver.md)
 
 Dell **`dbutil_2_3.sys`** runtime test-signing toggle PoC such as [[ts-fucker]] (gmh5225; kernel R/W via already-loaded vulnerable driver → live-patch TestSigning state without reboot; symbol-assisted offset discovery for current Windows build; focused security-state manipulation, not a generic BYOVD toolkit) sits in the same LOLdriver / trust-state lane. (source: wiki/sources/descriptions/gmh5225__TS-Fucker.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CapcomDKOM`: entity [[capcom-dkom]]; cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[dolboeb-executor]] and [[capcomlib]].
+
 - **2026-08-14** — ingest `description:gmh5225/CapcomLib`: entity [[capcomlib]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dolboeb-executor]], [[kdu]], and [[dse-hook]].
 
 - **2026-08-14** — ingest `description:gmh5225/CheatIt`: entity [[cheat-it]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[polygon-ue5]], [[unreal-object-model]], and [[patternsleuth]].
