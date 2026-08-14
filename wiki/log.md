@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CSGO-Alphen`: entity [[csgo-alphen]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-internal-base]], [[csgo-nixware-csgo]], [[csgo-aw-v5.1.13]], and [[csgo-sdk]].
+
 - **2026-08-14** — ingest `description:gmh5225/CSGO-Loader`: entity [[csgo-loader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[cyber-ant-loader]], [[wizard-loader]], [[csgo-nixware-csgo]], and [[csgo-internal-base]].
 
 - **2026-08-14** — ingest `description:gmh5225/CSGO-NIXWARE-CSGO`: entity [[csgo-nixware-csgo]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-aw-v5.1.13]], [[aqhax-csgo]], [[csgo-internal-base]], and [[csgo-kns]].

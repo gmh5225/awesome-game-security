@@ -130,6 +130,7 @@ sources:
   - wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md
   - wiki/sources/descriptions/spirthack__CSGOSimple.md
   - wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md
+  - wiki/sources/descriptions/gmh5225__CSGO-Alphen.md
   - wiki/sources/descriptions/gmh5225__CSGO-Loader.md
   - wiki/sources/descriptions/gmh5225__CSGO-NIXWARE-CSGO.md
   - wiki/sources/descriptions/seksea__gamesneeze.md
@@ -528,6 +529,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[csgosimple]] — spirthack/MarkHC Internal CS:GO baseline for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - [[csgo-aw-v5.1.13]] — leaked AimWare v5.1.13 internal CS:GO source (aimbot, visuals, movement, anti-aim, hooking framework) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
 - [[csgo-nixware-csgo]] — leaked Nixware internal CS:GO source (aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-NIXWARE-CSGO.md)
+- [[csgo-alphen]] — internal CS:GO source (full SDK with entity/weapon structures and rendering primitives; ImGui menu; ESP, aimbot, visual mods) for studying SDK-backed injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-Alphen.md)
 - [[osiris-and-extra]] — Internal CS:GO sample (C/C++; driver / OpenGL / rendering) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - [[dainsleif]] — simple Internal CS:GO RE-training sample for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - [[avhook]] — CS:GO training software (gmh5225; Windows; joke features) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__avhook.md)
