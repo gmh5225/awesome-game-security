@@ -26,7 +26,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__be_shellcode_dump.md
   - wiki/sources/descriptions/haram__splendid_implanter.md
   - wiki/sources/descriptions/gmh5225__StealthSytemThreadFinderBE.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/gmh5225__BadEye.md
+updated: 2026-08-14
 confidence: medium
 ---
 
@@ -66,6 +67,8 @@ Service/install/launch emulation is studied via [[fakeeye]]: SCM-managed `BEServ
 
 Handle-stripping bypass via periodic handle re-creation is implemented in [[battleye-handler-bypass]]: a KMDF driver that re-opens process handles before BE’s ~5-second cleanup cycle strips them, with IOCTL paths for usermode control. (source: wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md)
 
+[[badeye]] (gmh5225) studies a complementary handle lane: BE assumes surviving handles already grant needed access and uses them only to resolve **EPROCESS** before **`MmCopyVirtualMemory`** cross-process reads—C++ memory-analysis research on that trust gap. (source: wiki/sources/descriptions/gmh5225__BadEye.md)
+
 BEDaisy APC instrumentation is studied via [[goodeye]]: a kernel callback runs in each thread where the BE driver registers an APC, exposing BE’s kernel APC inspection surface for RE. (source: wiki/sources/descriptions/huoji120__goodeye.md)
 
 [[bedaisy-bypass]] targets **BEDaisy.sys** report delivery: suppress outbound detection reports to the BE service while preserving inbound response traffic—useful for studying the kernel-to-service report channel without server-side ban telemetry. (source: wiki/sources/descriptions/gmh5225__bedaisy-bypass.md)
@@ -74,4 +77,4 @@ User-mode-only injection against BE-protected processes is demonstrated by [[spl
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
