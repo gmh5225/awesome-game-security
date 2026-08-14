@@ -319,6 +319,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
 - [CVE-2024-0044](entities/cve-2024-0044.md) — Android 12/13 app data-directory access via crafted payload (Application CVE)
 - [CVE-2025-21333](entities/cve-2025-21333.md) — Hyper-V `vskrnlintvsp.sys` heap overflow LPE (IoRing pool spray / pipe attr R/W)
+- [CVE-2025-21333 PoC](entities/cve-2025-21333-poc.md) — gmh5225 Win11 23H2 LPE PoC for Hyper-V `vkrnlintvsp.sys` heap overflow (ITW-exploited CVE)
 - [CVE-2025-24990 PoC](entities/cve-2025-24990-poc.md) — Agere Modem `ltmdm64.sys` METHOD_NEITHER IOCTL abuse → kernel R/W (IoRing LPE variant; BYOVD)
 - [CVE-2026-40369-EXPLOIT](entities/cve-2026-40369-exploit.md) — Win11 24H2–25H2 LPE via NtQuerySystemInformation class 253 (Chrome sandbox)
 - [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)

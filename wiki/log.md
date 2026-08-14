@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CVE-2025-21333-POC`: entity [[cve-2025-21333-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[cve-2025-21333]].
+
 - **2026-08-14** — ingest `description:gmh5225/CYBERSEC2023-BYOVD-Demo`: entity [[cybersec2023-byovd-demo]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[rtcore64-vulnerability]] and [[ps-notif-routine-unloader]].
 
 - **2026-08-14** — ingest `description:gmh5225/Call-Of-Duty-Vanguard-Hack-Esp-AImbot-Unlock-All`: entity [[call-of-duty-vanguard-hack-esp-aimbot-unlock-all]]; cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all]], [[warzone-internal-cheat]], and [[mwclap]].
