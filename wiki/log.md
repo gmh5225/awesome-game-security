@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/BF4-Internal-overlay`: entity [[bf4-internal-overlay]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[battlefield-1-internal]] and [[present-hook]].
+
 - **2026-08-14** — ingest `description:gmh5225/BLOCKPOST-Cheat`: entity [[blockpost-cheat]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[bepinex-il2cppbase]], [[devour-menu]], and [[goose-goose-duck-hack]].
 
 - **2026-08-14** — ingest `description:gmh5225/BT_ModularGameFeatures`: entity [[bt-modular-game-features]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[kawaii-physics]], [[ue4-tutorials]], [[unrealengine5-ultimate-streetfighters]], and [[ue5-roll-a-ball-game]].
