@@ -150,6 +150,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__CS2-External-1.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat-Base.md
+  - wiki/sources/descriptions/gmh5225__Astra.md
   - wiki/sources/descriptions/gmh5225__Aurora.md
   - wiki/sources/descriptions/gmh5225__CS2-Dma-Radar.md
   - wiki/sources/descriptions/gmh5225__cs2-fov-changer.md
@@ -1343,6 +1344,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - External CS:GO samples such as [[nebulite-external]] (gmh5225; C/C++; memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__nebulite-external.md)
+- External CS:GO samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__Astra.md)
 - KVM/QEMU-hosted CS:GO samples such as [[kvm-csgo-cheat]] (gmh5225; Rust; cheat / QEMU/KVM/PVE/VBox) sit in the below-OS / VM-isolated offensive research lane beside in-guest CS:GO cheats. (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - Menu-focused CS:GO samples such as [[legit-csgo-cheat-menu]] (gmh5225; Windows-only; README `[Menu]`) sit in the same cheat / game:csgo lane for studying in-game cheat UI/menu architecture. (source: wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md)
 - External CS:GO samples such as [[memcs]] (gmh5225; Rust; modding / SDK generation; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__memcs.md)
