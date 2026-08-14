@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/DisableDSE`: entity [[disabledse]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dse-hook]], [[dse-patcher-2]], and [[pdfwkrnl-mapper]].
+
 - **2026-08-14** — ingest `description:gmh5225/Disabling-Hyper-V`: entity [[disabling-hyper-v]]; cited on [[overviews/windows-kernel]] and [[hvci]]; cross-linked [[zero-hvci]] and [[voyager]].
 
 - **2026-08-14** — ingest `description:gmh5225/Dota2-Overlay-OffsetUpdater`: entity [[dota2-overlay-offset-updater]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[dota2-overlay-2-0]] and [[offset-streaming]].
