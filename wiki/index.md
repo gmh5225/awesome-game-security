@@ -321,6 +321,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2024-0044](entities/cve-2024-0044.md) — Android 12/13 app data-directory access via crafted payload (Application CVE)
 - [CVE-2024-35250](entities/cve-2024-35250.md) — `ks.sys` untrusted pointer dereference LPE via KSPROPERTY (Win10/11; gmh5225)
 - [CVE-2024-26229](entities/cve-2024-26229.md) — `csc.sys` improper address validation LPE via METHOD_NEITHER IOCTL (Win11 22H2; gmh5225)
+- [CVE-2024-21338](entities/cve-2024-21338.md) — `appid.sys` kernel IOCTL LPE (Win11 22H2 Build 22621; XSS PWN-Day; gmh5225)
 - [CVE-2025-21333](entities/cve-2025-21333.md) — Hyper-V `vskrnlintvsp.sys` heap overflow LPE (IoRing pool spray / pipe attr R/W)
 - [CVE-2025-21333 PoC](entities/cve-2025-21333-poc.md) — gmh5225 Win11 23H2 LPE PoC for Hyper-V `vkrnlintvsp.sys` heap overflow (ITW-exploited CVE)
 - [CVE-2025-24990 PoC](entities/cve-2025-24990-poc.md) — Agere Modem `ltmdm64.sys` METHOD_NEITHER IOCTL abuse → kernel R/W (IoRing LPE variant; BYOVD)

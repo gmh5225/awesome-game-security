@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CVE-2024-21338`: entity [[cve-2024-21338]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-exploits]] and [[kernel-cve-analysis]].
+
 - **2026-08-14** — ingest `description:gmh5225/CVE-2024-26229`: entity [[cve-2024-26229]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-exploits]] and [[kernel-cve-analysis]].
 
 - **2026-08-14** — ingest `description:gmh5225/CVE-2024-35250`: entity [[cve-2024-35250]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-exploits]] and [[kernel-cve-analysis]].
