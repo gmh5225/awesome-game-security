@@ -18,4 +18,4 @@ BYOVD and ring-0 input research PoC abusing Razer’s signed peripheral driver *
 
 ## Related
 
-[[byovd]] · [[kernel-mouse]] · [[karlann]] · [[hardware-input-injection]] · [[loldrivers]] · [[vdk]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[byovd]] · [[cve-2017-9769]] · [[kernel-mouse]] · [[karlann]] · [[hardware-input-injection]] · [[loldrivers]] · [[vdk]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

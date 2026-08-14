@@ -315,6 +315,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
 - [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)
+- [CVE-2017-9769](entities/cve-2017-9769.md) — Razer Synapse `rzpnk.sys` IOCTL → ZwOpenProcess PoC (arbitrary process handle; unprivileged; v2.20.15.1104; gmh5225)
 - [CVE-2018-19320](entities/cve-2018-19320.md) — Gigabyte `gdrv.sys` CVE-2018-19320 DSE bypass (ring-0 memcpy IOCTL → `CI!g_CiOptions` leak/toggle; gmh5225)
 - [CVE-2018-19320-LPE](entities/cve-2018-19320-lpe.md) — Gigabyte `gdrv.sys` CVE-2018-19320 SYSTEM LPE (arbitrary alloc/write IOCTLs; Win10 x64 21H1; gmh5225)
 - [CVE-2019-2215](entities/cve-2019-2215.md) — Binder epoll UAF temporary root (Pixel 2/XL; Sep 2019 firmware; ARM64 NDK)

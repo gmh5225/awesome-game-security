@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CVE-2017-9769`: entity [[cve-2017-9769]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[razer-rzctl]].
+
 - **2026-08-14** — ingest `description:gmh5225/CVE-2018-19320-LPE`: entity [[cve-2018-19320-lpe]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[cve-2018-19320]].
 
 - **2026-08-14** — ingest `description:gmh5225/CVE-2018-19320`: entity [[cve-2018-19320]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[gdrv-loader]], [[dse-patcher-2]], and [[kdp-compatible-driver-loader]].
