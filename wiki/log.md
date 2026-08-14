@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CVE-2018-19320`: entity [[cve-2018-19320]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[gdrv-loader]], [[dse-patcher-2]], and [[kdp-compatible-driver-loader]].
+
 - **2026-08-14** — ingest `description:gmh5225/CVE-2020-14974`: entity [[cve-2020-14974]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[ven0m-ransomware]].
 
 - **2026-08-14** — ingest `description:gmh5225/CVE-2020-36603`: entity [[cve-2020-36603]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[mhyprot2]].
