@@ -18,4 +18,4 @@ External Counter-Strike 2 cheat (C++) with a D3D11 ImGui overlay. Modules cover 
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/game-engine]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[proext]] · [[counterstrike2-linux-cheat]] · [[cs2-offsets]] · [[present-hook]]
+[[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/game-engine]] · [[cs2-external-1]] · [[cs2-cheat-cpp]] · [[cs-2-glow]] · [[proext]] · [[counterstrike2-linux-cheat]] · [[cs2-offsets]] · [[present-hook]]

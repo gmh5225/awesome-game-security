@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CS2-External-1`: entity [[cs2-external-1]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-cheat]], [[cs2-ext]], [[titled-gui-cs2]], and [[overlayai]].
+
 - **2026-08-14** — ingest `description:gmh5225/CS2-SDK-Source2Gen`: entity [[cs2-sdk-source2gen]]; updated [[source2gen]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[source2sdk]], [[cs2-sdk]], and [[cs2-offsets]].
 
 - **2026-08-14** — ingest `description:gmh5225/CSGO-Alphen`: entity [[csgo-alphen]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-internal-base]], [[csgo-nixware-csgo]], [[csgo-aw-v5.1.13]], and [[csgo-sdk]].
