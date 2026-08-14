@@ -43,6 +43,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__pdfwkrnl-exploit.md
   - wiki/sources/descriptions/gmh5225__PdFwKrnlMapper.md
   - wiki/sources/descriptions/gmh5225__mhydeath.md
+  - wiki/sources/descriptions/gmh5225__CVE-2020-14974.md
   - wiki/sources/descriptions/gmh5225__CVE-2020-36603.md
   - wiki/sources/descriptions/gmh5225__mhyprot2.md
   - wiki/sources/descriptions/gmh5225__Mhyprot2DrvControl.md
@@ -100,7 +101,7 @@ Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drive
 
 Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) Hands-on vulnerable-driver lab guides such as [[hacksysextremevulnerabledriver]] (HackSys Team; kernel exploitation training in the cheat / vulnerable-driver lane) complement that documentation. (source: wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md) Intentionally vulnerable training drivers such as [[vulnerablekernel-driver]] (gmh5225; **`MsIo64.sys`**; IOCTL demos for arbitrary R/W, overflow, UAF, and race conditions) offer another kernel-exploitation lab target beside HackSys-style guides. (source: wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md)
 
-Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDelete.sys` from IObit Malware Fighter (v12.1.0) rather than a classic ZwTerminateProcess-style killer driver. (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md)
+Concrete AV/EDR-evasion research such as [[ven0m-ransomware]] abuses `iMFForceDelete.sys` from IObit Malware Fighter (v12.1.0) rather than a classic ZwTerminateProcess-style killer driver. (source: wiki/sources/descriptions/xM0kht4r__VEN0m-Ransomware.md) IObitUnlocker **`IObitUnlocker.sys`** IOCTL abuse such as [[cve-2020-14974]] (gmh5225; CVE-2020-14974; unlock/delete/rename/copy/move locked files from low privilege; file-utility signed-driver research) sits in the same IObit vendor driver lane. (source: wiki/sources/descriptions/gmh5225__CVE-2020-14974.md)
 
 Process-terminate style killers such as [[av-edr-killer]] target `wsftprm.sys` via IOCTL `0x22201C` (1036-byte buffer; first DWORD = target PID). (source: wiki/sources/descriptions/xM0kht4r__AV-EDR-Killer.md)
 
