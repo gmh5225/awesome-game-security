@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/BadRentdrv2`: entity [[badrentdrv2]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[physmem-drivers]], [[qiomem]], and [[amd-ryzen-master-driver-v17-exploit]].
+
 - **2026-08-14** — ingest `description:gmh5225/Basic_Anti-Cheat`: entity [[basic-anti-cheat]]; cited on [[overviews/anti-cheat]]; cross-linked [[anticheat-poc]], [[mandragora]], and [[anti-cheat-testing-framework]].
 
 - **2026-08-14** — ingest `description:gmh5225/BattleriteBot`: entity [[battlerite-bot]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[tft-ocr-bot]], [[taskbarhero-bot]], and [[clickpic]].
