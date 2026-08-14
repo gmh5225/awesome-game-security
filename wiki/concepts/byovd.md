@@ -85,6 +85,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__NVDrv.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
   - wiki/sources/descriptions/gmh5225__EvilKaspersky.md
+  - wiki/sources/descriptions/gmh5225__BYOVD.md
 updated: 2026-08-14
 confidence: high
 ---
@@ -120,6 +121,8 @@ Focused AV/EDR/AC terminate tooling such as [[terminator]] (gmh5225; **`zam64.sy
 GMER anti-rootkit driver abuse such as [[blackout]] (gmh5225; **`gmer64.sys`** from [[loldrivers]]; BYOVD load → IOCTL terminate EDR/AV by PID; continuous Windows Defender suppression to block service restart) sits in the same process-kill BYOVD lane beside [[terminator]] and [[watchdog-killer]]. (source: wiki/sources/descriptions/gmh5225__Blackout.md)
 
 Kaspersky signed kernel-driver abuse such as [[evil-kaspersky]] (gmh5225; leverage trusted Kaspersky driver capabilities for unauthorized privileged operations and kernel code execution while appearing as legitimate antivirus activity; README `[Kaspersky]`) sits in the same security-product BYOVD lane beside hypervisor syscall redirection in [[kaspersky-hook]]. (source: wiki/sources/descriptions/gmh5225__EvilKaspersky.md)
+
+Curated educational BYOVD lab [[entities/byovd|BYOVD Lab]] (gmh5225; multi-driver PoC collection for AV/EDR termination—`viragt64.sys`, TfSysMon, ksapi64, BdApiUtil, `wsftprm.sys`; Viragt64 branch notes real-world campaign overlap after publication) complements single-driver kill samples in the same lane. (source: wiki/sources/descriptions/gmh5225__BYOVD.md)
 
 **`viragt64.sys`** process-kill tooling such as [[process-killer-byovd]] (gmh5225; load signed vulnerable driver → kernel access → forceful termination of user-mode-protected anti-cheat, EDR, and AV processes; red-team / LOLdriver termination research) sits in the same BYOVD process-terminate lane as [[terminator]] and [[watchdog-killer]]. (source: wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md)
 
