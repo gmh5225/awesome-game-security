@@ -222,6 +222,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cat-annihilation](entities/cat-annihilation.md) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source)
 - [cartmanv2](entities/cartmanv2.md) — internal CS:GO cheat (C/C++; rendering / networking / editor tooling; gmh5225 [Internal])
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
+- [CE Remap Plugin](entities/ce-remap-plugin.md) — Delphi CE plugin: remap disassembler memory pages for hidden/obfuscated code (CE plugin SDK; tested CE 7.4; cheat / Remap; gmh5225)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
 - [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)

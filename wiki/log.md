@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CE-remap-plugin`: entity [[ce-remap-plugin]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ce-tracer-ida]], [[gddumper]], and [[wasm-ceserver]].
+
 - **2026-08-14** — ingest `description:gmh5225/CET-win10`: entity [[cet-win10]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[cet-research]], [[windows-kernel-shadow-stack]], and [[query-shadow-stack]].
 
 - **2026-08-14** — ingest `description:gmh5225/COD-boiii`: entity [[cod-boiii]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[t7-linker]] and [[cod7-tools]].
