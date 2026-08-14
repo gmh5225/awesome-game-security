@@ -12,7 +12,7 @@ confidence: medium
 
 Research project focused on **hypervisor IDT detections** via **SIDT** / **LIDT** — store interrupt-descriptor-table state, run detection checks inside that environment, then restore everything afterward. Aimed at anti-cheat engineers and defensive security researchers working the `Detection: Hacked Hypervisor` lane. (source: wiki/sources/descriptions/gmh5225__hv-detect.md)
 
-Complements Hyper-V VM environment probes such as [[go-detection-hyper-v]], kernel-mode KPCR/KPRCB Hyper-V guest probes such as [[detection-hyper-v]], multi-technique C++ detectors such as [[hypervisor-detection]], hypervisor VM-detection benchmarking such as [[nohv]], user-mode HV probes such as [[checkhv-um]], and EPT hook detectors such as [[ept-hook-detection]].
+Complements Hyper-V VM environment probes such as [[go-detection-hyper-v]], kernel-mode KPCR/KPRCB Hyper-V guest probes such as [[detection-hyper-v]], ring-0 multi-heuristic test drivers such as [[detect-hypervisor-detect-ring-0]], multi-technique C++ detectors such as [[hypervisor-detection]], hypervisor VM-detection benchmarking such as [[nohv]], user-mode HV probes such as [[checkhv-um]], and EPT hook detectors such as [[ept-hook-detection]].
 
 ## Links
 

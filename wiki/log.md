@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Detect-Hypervisor_detect_ring_0`: entity [[detect-hypervisor-detect-ring-0]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hv-detect]], [[detection-hyper-v]], [[go-detection-hyper-v]], and [[hypervisor-detection]].
+
 - **2026-08-14** — ingest `description:namazso/PawnIO`: entity [[pawnio]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[physmem-drivers]], [[readphys]], and [[ntmemory]].
 
 - **2026-08-14** — ingest `description:rabbanyhmm/ImOverlay-DX11`: entity [[imoverlay-dx11]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[imgui]] and [[egui-d3d11]].
