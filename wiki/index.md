@@ -324,6 +324,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
 - [dayu](entities/dayu.md) — Open/HarmonyOS `.abc` parser and decompiler (mobile RE; maintenance not guaranteed)
 
+- [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
 - [D3D9On12](entities/d3d9on12.md) — Microsoft D3D9 usermode DDI → D3D12 mapping layer (DirectX Compatibility)

@@ -18,4 +18,4 @@ DayZ-oriented cheat / modding research repo (C/C++) focused on SDK generation an
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[present-hook]] · [[external-dayz-cheat]] · [[battleye]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[present-hook]] · [[dayz-cheat]] · [[external-dayz-cheat]] · [[battleye]]
