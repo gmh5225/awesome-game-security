@@ -317,6 +317,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)
 - [CVE-2019-2215](entities/cve-2019-2215.md) — Binder epoll UAF temporary root (Pixel 2/XL; Sep 2019 firmware; ARM64 NDK)
 - [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root)
+- [CVE-2020-36603](entities/cve-2020-36603.md) — HoYoVerse `mhyprot2.sys` Genshin Impact AC driver LPE (unprivileged calls → SYSTEM; CVE tracking; gmh5225)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
 - [CVE-2021-21551](entities/cve-2021-21551.md) — Dell `dbutil_2_3.sys` signed-driver LPE (IOCTL kernel R/W → SYSTEM token theft; gmh5225)
 - [CVE-2021-21551 PoC](entities/cve-2021-21551-poc.md) — Dell `dbutil_2_3.sys` reusable kernel-memory toolkit (virtual/phys R/W IOCTLs; EPROCESS/page-table demos; gmh5225)
