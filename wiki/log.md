@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/BE-Forcer-Fortnite`: entity [[be-forcer-fortnite]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[fakeeye]], [[bedaisy-bypass]], and [[fortnite-exploits]].
+
 - **2026-08-14** — ingest `description:web-coder-lab/chessking`: entity [[chessking]]; cited on [[overviews/anti-cheat]]; cross-linked [[certael]] and [[basic-anti-cheat]].
 
 - **2026-08-14** — ingest `readme:categories`: bumped Anti Cheat ~671 (was ~670; Cheat ~2701 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; fixed stale Cheat (~2699) cross-ref on [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).

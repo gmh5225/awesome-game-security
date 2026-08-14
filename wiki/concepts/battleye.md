@@ -27,6 +27,7 @@ sources:
   - wiki/sources/descriptions/haram__splendid_implanter.md
   - wiki/sources/descriptions/gmh5225__StealthSytemThreadFinderBE.md
   - wiki/sources/descriptions/gmh5225__BadEye.md
+  - wiki/sources/descriptions/gmh5225__BE-Forcer-Fortnite.md
 updated: 2026-08-14
 confidence: medium
 ---
@@ -73,8 +74,10 @@ BEDaisy APC instrumentation is studied via [[goodeye]]: a kernel callback runs i
 
 [[bedaisy-bypass]] targets **BEDaisy.sys** report delivery: suppress outbound detection reports to the BE service while preserving inbound response traffic—useful for studying the kernel-to-service report channel without server-side ban telemetry. (source: wiki/sources/descriptions/gmh5225__bedaisy-bypass.md)
 
+[[be-forcer-fortnite]] (gmh5225) targets Fortnite's BattlEye integration: forces or manipulates BE initialization to disable title-specific detection checks, enabling cheat injection or memory access normally blocked—offensive research on Fortnite-specific BE protection and bypass techniques. (source: wiki/sources/descriptions/gmh5225__BE-Forcer-Fortnite.md)
+
 User-mode-only injection against BE-protected processes is demonstrated by [[splendid-implanter]] (secret.club): a Ring-3 injector that abuses a flaw in BattlEye's user-mode component to achieve BE-compatible DLL injection without a kernel driver. (source: wiki/sources/descriptions/haram__splendid_implanter.md)
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[blindeye]] · [[be-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
