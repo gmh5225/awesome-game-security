@@ -12,7 +12,7 @@ confidence: medium
 
 C++ **OpenCV + triggerbot** sample (gmh5225) in the cheat / triggerbot & aimbot lane. Useful for game security researchers and reverse engineers studying zero-memory visual offensive pipelines that use classical computer vision rather than trained object-detection models or in-process memory reads. (source: wiki/sources/descriptions/gmh5225__OpenCV-SmartAimBot.md)
 
-Sits beside heuristic CV triggerbots such as [[camera-triggerbot]] and colorbot samples such as [[overwatch2-colorbot-cheats]], and ML-heavy pipelines such as [[yolov5-pubg]] and [[pine]]; defensive counterparts include [[waldo]] and [[aimbot-detection-prototype]] via [[ai-aimbot-detection]].
+Sits beside heuristic CV triggerbots such as [[camera-triggerbot]], pixel-color auto-click samples such as [[clickpic]], and colorbot samples such as [[overwatch2-colorbot-cheats]], and ML-heavy pipelines such as [[yolov5-pubg]] and [[pine]]; defensive counterparts include [[waldo]] and [[aimbot-detection-prototype]] via [[ai-aimbot-detection]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside heuristic CV triggerbots such as [[camera-triggerbot]] and colorbot 
 
 ## Related
 
-[[overviews/game-hacking]] · [[ai-aimbot-detection]] · [[camera-triggerbot]] · [[yolov5-pubg]] · [[pine]] · [[human-mouse-movement]] · [[hardware-input-injection]]
+[[overviews/game-hacking]] · [[ai-aimbot-detection]] · [[camera-triggerbot]] · [[clickpic]] · [[yolov5-pubg]] · [[pine]] · [[human-mouse-movement]] · [[hardware-input-injection]]

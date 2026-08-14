@@ -239,6 +239,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [CirSAT](entities/cirsat.md) — circuit-based AIG SAT (DAG/AIGER; verification / equivalence; MBA constraint lane)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
+- [ClickPic](entities/clickpic.md) — screen pixel color detection + auto-click (OpenCV + triggerbot; gmh5225)
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
 - [COD7-Tools](entities/cod7-tools.md) — COD7 (Black Ops) research tooling (VcPkg; cheat / game:cod7)
