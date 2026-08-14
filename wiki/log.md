@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `readme:categories`: bumped Cheat ~2699 (was ~2698) / Anti Cheat ~670 (was ~669; DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-14** — ingest `description:gmh5225/Classy`: entity [[classy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-vtable-tools]] and [[ida-medigate]].
 
 - **2026-08-14** — ingest `description:gmh5225/ClickPic`: entity [[clickpic]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[opencv-smart-aimbot]], [[camera-triggerbot]], and [[overwatch2-colorbot-cheats]].
