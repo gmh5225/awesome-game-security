@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Disable-nmi-callbacks`: entity [[disable-nmi-callbacks]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback-blocker2]], [[nmi-nmi-callback]], [[nmi-enum-nmi-callback]], and [[nmi-callback]].
+
 - **2026-08-14** — ingest `description:gmh5225/DisableDSE`: entity [[disabledse]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dse-hook]], [[dse-patcher-2]], and [[pdfwkrnl-mapper]].
 
 - **2026-08-14** — ingest `description:gmh5225/Disabling-Hyper-V`: entity [[disabling-hyper-v]]; cited on [[overviews/windows-kernel]] and [[hvci]]; cross-linked [[zero-hvci]] and [[voyager]].

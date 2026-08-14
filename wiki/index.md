@@ -428,6 +428,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dwmhook](entities/dwmhook.md) — DWM composition overlay (gmh5225 PoC; inject draw calls without overlay HWND; README `[DWM]`) + mfxiaosheng DX11 vtable ImGui framework (MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
+- [Disable NMI callbacks](entities/disable-nmi-callbacks.md) — kernel driver; KiNmiInterruptStart pattern scan + affinity/NMI-state patch vs NMI stack-walk AC (gmh5225)
 - [DisableDSE](entities/disabledse.md) — kernel validation-chain DSE bypass (`SeValidateImageHeader` / `MiValidateSectionCreate` / `MiValidateSectionSigningPolicy`; unsigned driver load; gmh5225; kernel research)
 - [dse_hook](entities/dse-hook.md) — CI.dll hook / `g_CiEnabled` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
 - [Dse-Patcher-2](entities/dse-patcher-2.md) — CI.dll `g_CiOptions` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
