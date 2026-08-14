@@ -248,6 +248,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ClickPic](entities/clickpic.md) — screen pixel color detection + auto-click (OpenCV + triggerbot; gmh5225)
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
+- [COD-boiii](entities/cod-boiii.md) — BOIII client modification/research: patches, SDK structures, runtime engine tooling (gmh5225; Reverse engineering and analysis)
 - [COD7-Tools](entities/cod7-tools.md) — COD7 (Black Ops) research tooling (VcPkg; cheat / game:cod7)
 - [CODM-ESP-Aimbot-Mod-Menu](entities/codm-esp-aimbot-mod-menu.md) — Call of Duty Mobile internal mod menu: injectable library + overlay; ESP / aimbot / gameplay mods (gmh5225; cheat / game:codm [ESP])
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
