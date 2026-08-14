@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Detection-Hyper-v`: entity [[detection-hyper-v]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[go-detection-hyper-v]], [[hv-detect]], and [[hypervisor-detection]].
+
 - **2026-08-14** — ingest `description:gmh5225/DevourClient`: entity [[devour-client]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[devour-menu]] and [[goose-goose-duck-hack]].
 
 - **2026-08-14** — ingest `description:gmh5225/DevourMenu`: entity [[devour-menu]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[goose-goose-duck-hack]] and [[imgui]].
