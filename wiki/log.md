@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CS2-Cheat`: updated [[cs2-cheat]] (gmh5225 internal section); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[asphyxia-cs2]], [[cs2-internal]], and [[cs2-sdk]].
+
 - **2026-08-14** — ingest `description:gmh5225/CS2-Dma-Radar`: entity [[cs2-dma-radar]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-webradar]], [[eft-dma-radar-1]], and [[proext]].
 
 - **2026-08-14** — ingest `description:gmh5225/CS2-External-1`: entity [[cs2-external-1]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-cheat]], [[cs2-ext]], [[titled-gui-cs2]], and [[overlayai]].

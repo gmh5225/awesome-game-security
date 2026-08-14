@@ -274,7 +274,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client (Game Develop / Source; Android ADB)
 - [cs16-trigger-kvm](entities/cs16-trigger-kvm.md) — KVM/QEMU host-side CS1.6 triggerbot (guest memory read + input injection; cheat / game:cs1.6; gmh5225)
 - [CSHackCreator-2-Demo](entities/cshackcreator-2-demo.md) — no-code CS1.6 cheat generator (C/C++; OpenGL + Vulkan + rendering; user-input custom output; cheat / game:cs1.6; gmh5225)
-- [cs2_cheat](entities/cs2-cheat.md) — educational CS2 external ESP (C++; SDL2 + ImGui; cs2-dumper offsets)
+- [cs2-cheat](entities/cs2-cheat.md) — CS2 cheat samples: tiansongyu external ESP (SDL2 + ImGui; cs2-dumper) and gmh5225 internal (Source 2 SDK; ESP / aimbot / misc)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
 - [CS2-Dma-Radar](entities/cs2-dma-radar.md) — CS2 DMA radar (PCIe hardware; player positions + game state; real-time overlay; zero target-OS software; cheat / game:cs2 [DMA]; gmh5225)
 - [cs2-ext](entities/cs2-ext.md) — external CS2 cheat framework (C++17; kernel driver interface; D3D11/DXGI ImGui; aimbot / ESP / spinbot)

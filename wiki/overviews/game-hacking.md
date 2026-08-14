@@ -145,6 +145,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
   - wiki/sources/descriptions/gmh5225__CS2-SDK-Source2Gen.md
   - wiki/sources/descriptions/gmh5225__CS2-External-1.md
+  - wiki/sources/descriptions/gmh5225__CS2-Cheat.md
   - wiki/sources/descriptions/gmh5225__CS2-Dma-Radar.md
   - wiki/sources/descriptions/gmh5225__cs2-fov-changer.md
   - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
@@ -1362,7 +1363,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 framework samples such as [[cs2-ext]] (C++17; pluggable kernel driver interface; D3D11/DXGI ImGui overlay; aimbot / ESP / spinbot; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/hendodev__cs2-ext.md)
 - External CS2 framework samples such as [[titled-gui-cs2]] (C#; Win32 memory read/write; transparent ImGui overlay; cs2-dumper offset bootstrap; aimbot / RCS / triggerbot; ESP / radar / D3D11 chams with VPK loading and map-geometry visibility; GPLv3; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/xfi0__Titled-Gui-CS2.md)
 - External CS2 overlay samples such as [[overlayai]] (C++; D3D11 ImGui overlay; out-of-process memory R/W; ESP / aim assist / triggerbot / glow / movement; modular inventory changer via bridge DLL + named-pipe IPC + Panorama UI / SOCache; cs2-dumper schema offsets; ianveig29; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/ianveig29__OverlayAI.md)
-- Educational external CS2 ESP samples such as [[cs2-cheat]] (C++; SDL2 + ImGui; cs2-dumper offsets / hourly CI; offline insecure-mode study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/tiansongyu__cs2_cheat.md)
+- CS2 samples under [[cs2-cheat]] include tiansongyu/cs2_cheat (external; C++; SDL2 + ImGui; cs2-dumper offsets / hourly CI; offline insecure-mode study) and gmh5225/CS2-Cheat (internal; Source 2 engine SDK; ESP / aimbot / misc gameplay mods). (source: wiki/sources/descriptions/tiansongyu__cs2_cheat.md) (source: wiki/sources/descriptions/gmh5225__CS2-Cheat.md)
 - External CS2 samples such as [[tim-apple]] (`tim_apple.exe`; **External** tag; kristofhracza offset bootstrap via `offset_download.ps1` or manual JSON; gmh5225 fork for Source 2 SDK / pattern-scan / memory-access study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/kristofhracza__tim_apple.md) (source: wiki/sources/descriptions/gmh5225__tim_apple.md)
 - Internal CS2 samples such as [[cs2-internal]] (C++; SDK generation / hooking / memory analysis; Internal tag) sit in the same cheat / game:cs2 lane. (source: wiki/sources/descriptions/redbg__CS2-Internal.md)
 - Open-source internal CS2 samples such as [[asphyxia-cs2]] (Asphyxia; ESP / aimbot / triggerbot; Source 2 SDK via interface pointers + pattern scan; Internal tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/maecry__asphyxia-cs2.md)
