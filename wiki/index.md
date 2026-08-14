@@ -106,6 +106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apple-lite-fortnite-cheat](entities/apple-lite-fortnite-cheat.md) — Apple Lite Fortnite Cheat leak + Police remake (C/C++; kernel + shader + modding; gmh5225; cheat / game:fortnite)
 - [apex_full_cheat](entities/apex-full-cheat.md) — Apex Legends full cheat: rendering / SDK generation / hooking (C/C++; cheat / game:apex legends)
 - [apex_legends_sdk](entities/apex-legends-sdk.md) — Apex Legends SDK: rendering / SDK generation (C++; gmh5225; cheat / game:apex legends)
+- [Apex_ESP_Old_Project](entities/apex-esp-old-project.md) — Legacy Apex Legends ESP: rendering / SDK generation / overlays (C/C++; gmh5225; cheat / game:apex legends)
 - [ApexSU](entities/apex-su.md) — Hardened KernelSU fork: Rust userspace, stealth IOCTL, GKI 2.0 boot patch (Android 12+; cheat / Android root)
 - [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])
