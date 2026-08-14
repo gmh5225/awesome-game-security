@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/DSEDodge-Signed-Kernel-Driver`: entity [[dsedodge-signed-kernel-driver]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dse-hook]], [[dse-patcher-2]], and [[disabledse]].
+
 - **2026-08-14** — ingest `description:gmh5225/DVRT`: entity [[dvrt]]; cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[offset-streaming]] and [[auto-offsets]].
 
 - **2026-08-14** — ingest `description:gmh5225/DWM-DwmDraw`: entity [[dwm-dwmdraw]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[anti-screenshot-capture]].
