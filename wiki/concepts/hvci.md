@@ -14,7 +14,8 @@ sources:
   - wiki/sources/descriptions/mattifestation__WDACTools.md
   - wiki/sources/descriptions/gmh5225__ZeroHVCI.md
   - wiki/sources/descriptions/gmh5225__FakeEnclave.md
-updated: 2026-08-13
+  - wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md
+updated: 2026-08-14
 confidence: high
 ---
 
@@ -44,7 +45,9 @@ HVCI bypass PoCs such as [[zero-hvci]] (gmh5225; policy edge cases + vulnerable 
 
 VBS enclave abuse PoCs such as [[fake-enclave]] (gmh5225; proof-of-concept misusing Enclave isolation within the VBS stack) complement HVCI bypass work when studying virtualization-based security limitations. (source: wiki/sources/descriptions/gmh5225__FakeEnclave.md)
 
+Lab teardown guides such as [[disabling-hyper-v]] (gmh5225; Win10; Microsoft's Device Guard and Credential Guard hardware readiness tool → disable HVCI, Device Guard, Credential Guard, and related VBS so Hyper-V can be fully removed—not an in-place bypass) document the configuration side of turning Memory Integrity off for research hosts. (source: wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md)
+
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 
