@@ -233,6 +233,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CFB](entities/cfb.md) — Canadian Furious Beaver IRP monitor (filter driver hooks dispatch table; C driver + Python client; IOCTL RE / fuzzing)
 
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
+- [cet-win10](entities/cet-win10.md) — Windows 10 Intel CET research (shadow stack + IBT; kernel forward/backward-edge CFI; gmh5225)
 - [CFG-FindHiddenShellcode](entities/cfg-find-hidden-shellcode.md) — CFG bitmap inconsistency shellcode scanner (C; valid call targets outside module code)
 - [cfclap](entities/cfclap.md) — CrossFire (CF) cheat: memory manipulation / ESP / aimbot (cheat / game:crossfire; gmh5225)
 - [cheap-engine](entities/cheap-engine.md) — lightweight Android memory scanner (scan/edit, exact/range/changed search, pointer scan; simplified CE alternative; gmh5225)
