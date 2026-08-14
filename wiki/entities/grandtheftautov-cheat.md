@@ -20,4 +20,4 @@ Distinct from ScriptHookV mod-menu frameworks such as [[phake]], Python memory-a
 
 ## Related
 
-[[phake]] · [[spookimystic-gta-leak]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[gta-reversed-modern]] · [[regta]] · [[overviews/game-hacking]] · [[research-rigor]]
+[[phake]] · [[bigbasev2]] · [[spookimystic-gta-leak]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[gta-reversed-modern]] · [[regta]] · [[overviews/game-hacking]] · [[research-rigor]]

@@ -73,6 +73,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [battle-cats-complete](entities/battle-cats-complete.md) — Battle Cats Rust desktop toolkit (.pack/APK import, decrypt/extract, animation render/export, mod authoring; omochikaeri15)
 - [better-godot-mcp](entities/better-godot-mcp.md) — Godot 4.x composite MCP (TS; scenes/GDScript; Game Develop / MCP)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
+- [BigBaseV2](entities/bigbasev2.md) — GTA V C++/Lua mod-menu base (rendering / modding / hooking; cheat / game:gta5; gmh5225)
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
 - [adbg](entities/adbg.md) — Linux anti-debugging techniques (C/C++; Anti Debugging)
 - [aho-corasick](entities/aho-corasick.md) — Aho-Corasick multi-pattern string matcher (ISM; mmap automata; C API; signature/YARA-style scan backend)
