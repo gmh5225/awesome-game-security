@@ -12,7 +12,7 @@ confidence: medium
 
 **Honkai Impact 3rd** ACE (Anti-Cheat Engine) **bypass tool** (gmh5225; explore anticheat). Circumvents the PC client's integrity checks and detection mechanisms so researchers can run modified clients or third-party tooling against HoYoverse protection — an offensive sample for studying Tencent ACE deployment on an older miHoYo title. (source: wiki/sources/descriptions/gmh5225__HI3-ACE-B.md)
 
-Complements defensive-oriented ACE documentation such as [[starrail-ace-b]] (Honkai: Star Rail kernel-driver RE) and Android ACE work such as [[honor-of-kings-re-research]] (`libtersafe`). Sits beside other HoYoverse bypass research such as [[mhynot2]] (`mhyprot2` circumvention on Genshin Impact) and kernel-driver analysis tooling such as [[kace]] and [[readphys]].
+Complements defensive-oriented ACE documentation such as [[starrail-ace-b]] (Honkai: Star Rail kernel-driver RE) and Android ACE work such as [[honor-of-kings-re-research]] (`libtersafe`). Sits beside other HoYoverse bypass research such as [[mhynot2]] (`mhyprot2` circumvention on Genshin Impact) and kernel-driver analysis tooling such as [[kace]] and [[readphys]]. Adjacent client-side launcher tooling for the same title is documented in [[better-hi3-launcher]] (enhanced download/version/server management; not an ACE bypass).
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements defensive-oriented ACE documentation such as [[starrail-ace-b]] (Hon
 
 ## Related
 
-[[starrail-ace-b]] · [[honor-of-kings-re-research]] · [[mhynot2]] · [[kace]] · [[readphys]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[starrail-ace-b]] · [[better-hi3-launcher]] · [[honor-of-kings-re-research]] · [[mhynot2]] · [[kace]] · [[readphys]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]

@@ -72,6 +72,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
 - [battle-cats-complete](entities/battle-cats-complete.md) — Battle Cats Rust desktop toolkit (.pack/APK import, decrypt/extract, animation render/export, mod authoring; omochikaeri15)
 - [better-godot-mcp](entities/better-godot-mcp.md) — Godot 4.x composite MCP (TS; scenes/GDScript; Game Develop / MCP)
+- [better-hi3-launcher](entities/better-hi3-launcher.md) — Honkai Impact 3rd enhanced launcher (download/version/server/config; gmh5225)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [BigBaseV2](entities/bigbasev2.md) — GTA V C++/Lua mod-menu base (rendering / modding / hooking; cheat / game:gta5; gmh5225)
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
