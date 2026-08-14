@@ -1399,6 +1399,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pe-bear](entities/pe-bear.md) — Qt GUI PE viewer/editor (headers, imports/exports, TLS/CLR; hex edit, section manipulation, compare)
 - [pe-sieve](entities/pe-sieve.md) — Lightweight single-process malware/injection scan engine (Detection:hook; hasherezade; lib behind xMalHunter)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
+- [AtomPePacker](entities/atom-pe-packer.md) — Windows PE X64 compress+encrypt packer (runtime stub; import/relocation/TLS restore; Anti Cheat → Binary Packer `[PE X64]`; gmh5225)
 - [PEPacker](entities/pepacker.md) — C++ PE X64 packer (asset pipeline; Anti Cheat → Binary Packer `[PE X64]`)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
