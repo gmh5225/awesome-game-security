@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `readme:categories`: bumped Game Engine ~156 (was ~155; Cheat ~2698 / Anti Cheat ~669 / DirectX ~39 / Some Tricks ~117 stable); refreshed [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-14** — ingest `description:gmh5225/DLL-Hijack-ExportDumper`: entity [[dll-hijack-export-dumper]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-dll-hijacking]], [[dllirant]], and [[impulsive-dll-hijack]].
 
 - **2026-08-14** — ingest `description:gmh5225/DMA-PCIE-BOARD-75T`: entity [[dma-pcie-board-75t]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-fpga]], [[fpga-dma-multi-tool]], and [[dma-tools-rs]].
