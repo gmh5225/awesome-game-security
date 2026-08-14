@@ -560,6 +560,7 @@ sources:
   - wiki/sources/descriptions/ndrewh__pyda.md
   - wiki/sources/descriptions/narumii__Deobfuscator.md
   - wiki/sources/descriptions/gmh5225__deobfuscator.md
+  - wiki/sources/descriptions/gmh5225__Bypassing-EasyAntiCheat-Integrity-check.md
   - wiki/sources/descriptions/microsoft__Detours.md
   - wiki/sources/descriptions/microsoft__pdblister.md
   - wiki/sources/descriptions/microsoft__pdb-rs.md
@@ -636,7 +637,7 @@ Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdes
 
 **Initial analysis:** identify protections (packer, obfuscator, anti-cheat), game engine and version, available symbols, and key modules with their callbacks and trust boundaries.
 
-**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks. Scriptable kernel drivers such as [[pawnio]] (namazso; Pawn AMX VM in a WDK `.sys`; signed module load + IOCTL dispatch; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM natives) support iterative low-level hardware and driver probing without per-experiment driver rebuilds. (source: wiki/sources/descriptions/namazso__PawnIO.md)
+**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks. EAC driver integrity-check deobfuscation such as [[bypassing-easyanticheat-integrity-check]] (gmh5225; Capstone-based garbage-instruction stripper reveals obfuscated EAC `.sys` integrity logic; reconstructed C++ for section-by-section driver-copy compare; CreateProcess/LoadImage notify hooks) complements reversed-source and decompile dumps when mapping AC self-protection routines. (source: wiki/sources/descriptions/gmh5225__Bypassing-EasyAntiCheat-Integrity-check.md) Scriptable kernel drivers such as [[pawnio]] (namazso; Pawn AMX VM in a WDK `.sys`; signed module load + IOCTL dispatch; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM natives) support iterative low-level hardware and driver probing without per-experiment driver rebuilds. (source: wiki/sources/descriptions/namazso__PawnIO.md)
 
 Engine-specific paths: Unity ([[il2cpp]] / Mono via dnSpy), Unreal (SDK generators, UObject/UFunction hooks), native PE (imports, pattern scan, runtime memory).
 

@@ -32,7 +32,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheat-Src-1.md
   - wiki/sources/descriptions/gmh5225__EAC-Driver-UD-for-now.md
-updated: 2026-08-13
+  - wiki/sources/descriptions/gmh5225__Bypassing-EasyAntiCheat-Integrity-check.md
+updated: 2026-08-14
 confidence: medium
 ---
 
@@ -44,7 +45,7 @@ Epic’s Easy Anti-Cheat (EAC): multi-component architecture with service, kerne
 
 Callback/handle surfaces ([[kernel-callbacks]]), memory/manual-map detection, driver trust and [[byovd]] blocklists, interaction with [[hvci]]/DSE, and DMA detection pipelines shared with other modern ACs.
 
-Kernel-module integrity: historical PoC [[cveac-2020]] (WDK driver) targets an EAC kernel vulnerability with module enum, PE parse, hooks, and runtime code manipulation—Integrity Checks research lane. (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md)
+Kernel-module integrity: historical PoC [[cveac-2020]] (WDK driver) targets an EAC kernel vulnerability with module enum, PE parse, hooks, and runtime code manipulation—Integrity Checks research lane. (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md) Driver self-integrity analysis such as [[bypassing-easyanticheat-integrity-check]] (gmh5225; CreateProcess/LoadImage notify validation of EAC driver sections; Capstone garbage-instruction deobfuscator; reconstructed C++ section-by-section compare against stored driver copy; Bypassing integrity check lane) documents how EAC protects its own `.sys` image from tamper. (source: wiki/sources/descriptions/gmh5225__Bypassing-EasyAntiCheat-Integrity-check.md)
 
 Overlay / screenshot monitoring is another research surface: PoCs such as [[eac-overlay]] explore alternate rendering surfaces or window manipulation to draw ESP without tripping EAC overlay detection. (source: wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md)
 
@@ -62,4 +63,4 @@ Fortnite internal lane: samples such as [[fortnite-triadz]] (Triadz; UE4 engine 
 
 ## Related
 
-[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-runtime-extractor]] · [[eazy-anti-cheat-src]] · [[eac-easyanticheat-src-1]] · [[easyanticheat-reversing]] · [[eac]] · [[eac-shellcode-1]] · [[eac-vmcheck-asm]] · [[eac-easyanticheatmemorysig]] · [[eac-bypass]] · [[eac-bypass-1]] · [[eac-driver-ud-for-now]] · [[eac-injector-driver]] · [[eac-kernel-packet-fucker]] · [[eac-hydrahook]] · [[ce-easyanticheat-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[eldenringlauncher]] · [[fortnite-triadz]] · [[fortnite-internal-updated-ritz]] · [[zerogui-fortnite-internal]] · [[fortnite-exploits]] · [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]] · [[fortnite-ud-external]] · [[serenity-gg-fn-and-loader]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[battleye]] · [[vanguard]] · [[cveac-2020]] · [[bypassing-easyanticheat-integrity-check]] · [[eac-overlay]] · [[eac-extractor-utility]] · [[eac-runtime-extractor]] · [[eazy-anti-cheat-src]] · [[eac-easyanticheat-src-1]] · [[easyanticheat-reversing]] · [[eac]] · [[eac-shellcode-1]] · [[eac-vmcheck-asm]] · [[eac-easyanticheatmemorysig]] · [[eac-bypass]] · [[eac-bypass-1]] · [[eac-driver-ud-for-now]] · [[eac-injector-driver]] · [[eac-kernel-packet-fucker]] · [[eac-hydrahook]] · [[ce-easyanticheat-bypass]] · [[eac-cr3-bypass]] · [[elden-ring-ct-tga]] · [[eldenringlauncher]] · [[fortnite-triadz]] · [[fortnite-internal-updated-ritz]] · [[zerogui-fortnite-internal]] · [[fortnite-exploits]] · [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]] · [[fortnite-ud-external]] · [[serenity-gg-fn-and-loader]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
