@@ -30,4 +30,4 @@ Sits beside generated SDK tooling such as [[source2gen]] and [[source2sdk]], mai
 
 ## Related
 
-[[cs2-things]] · [[cs2-offsets]] · [[cs2-offsets-ro0ti]] · [[source2gen]] · [[source2sdk]] · [[csgo-sdk]] · [[source-netvars]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]
+[[cs2-cheat-base]] · [[cs2-things]] · [[cs2-offsets]] · [[cs2-offsets-ro0ti]] · [[source2gen]] · [[source2sdk]] · [[csgo-sdk]] · [[source-netvars]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]

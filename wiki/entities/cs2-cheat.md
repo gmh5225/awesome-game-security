@@ -28,4 +28,4 @@ Internal Counter-Strike 2 cheat implementation (gmh5225) with gameplay modificat
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/graphics-api]] · [[cs2-cheat-cpp]] · [[cs2-external-cheat]] · [[cs2-internal]] · [[asphyxia-cs2]] · [[cs2-sdk]] · [[cs-2-glow]] · [[proext]] · [[counterstrike2-linux-cheat]] · [[cs2-offsets]] · [[present-hook]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/graphics-api]] · [[cs2-cheat-base]] · [[cs2-cheat-cpp]] · [[cs2-external-cheat]] · [[cs2-internal]] · [[asphyxia-cs2]] · [[cs2-sdk]] · [[cs-2-glow]] · [[proext]] · [[counterstrike2-linux-cheat]] · [[cs2-offsets]] · [[present-hook]]

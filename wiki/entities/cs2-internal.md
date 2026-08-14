@@ -18,4 +18,4 @@ Internal Counter-Strike 2 cheat research repo (C++ / C/C++) focused on SDK gener
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[cs2-cheat]] · [[cs2-cheat-cpp]] · [[cs2-external-cheat]] · [[cs-2-glow]] · [[proext]] · [[counterstrike2-linux-cheat]] · [[cs2-offsets]] · [[csgosimple]] · [[present-hook]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[cs2-cheat-base]] · [[cs2-cheat]] · [[cs2-cheat-cpp]] · [[cs2-external-cheat]] · [[cs-2-glow]] · [[proext]] · [[counterstrike2-linux-cheat]] · [[cs2-offsets]] · [[csgosimple]] · [[present-hook]]
