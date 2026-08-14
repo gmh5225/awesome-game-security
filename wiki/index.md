@@ -369,6 +369,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [dma-cheat-base](entities/dma-cheat-base.md) — DMA cheat base scaffold (C/C++; rendering, animation, SDK generation; cheat / DMA)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
+- [DMA-PCIE-BOARD-75T](entities/dma-pcie-board-75t.md) — Artix-7 75T PCIe DMA board design (firmware + HDL; hardware-level host memory R/W; gmh5225; cheat / DMA)
 - [dma-speedtest-memflow-rs](entities/dma-speedtest-memflow-rs.md) — Windows DMA R/W speedtest via memflow (Rust CLI/GUI; pcileech/native)
 - [dma-tools-rs](entities/dma-tools-rs.md) — Rust Windows GUI for Artix-7 JTAG bitstream flash, device DNA, PCILeech/memflow sanity check (CH347/FTDI RS232)
 - [Document](entities/document.md) — Windows Driver Development guide (Cheat / Windows kernel explorer)
