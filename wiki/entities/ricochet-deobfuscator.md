@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ Ricochet deobfuscator under the cheat / explore anticheat system:ricochet lane. Centers on driver development and memory analysis for researchers studying Activision Ricochet-protected titles. (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 
-Companion surface to other AC-explore dump/RE tools (e.g. [[vac3-dumper]]): scoped to Ricochet deobfuscation rather than a general unpacker.
+Companion surface to other AC-explore dump/RE tools (e.g. [[vac3-dumper]], [[aurum-re]]): scoped to Ricochet deobfuscation rather than a general unpacker.
 
 ## Links
 
@@ -20,4 +20,4 @@ Companion surface to other AC-explore dump/RE tools (e.g. [[vac3-dumper]]): scop
 
 ## Related
 
-[[ricochet-disabler]] · [[vac3-dumper]] · [[deobf]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[ricochet-disabler]] · [[aurum-re]] · [[vac3-dumper]] · [[deobf]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

@@ -12,7 +12,7 @@ confidence: medium
 
 Tool for disabling or bypassing **Ricochet**, Activision's anti-cheat used in Call of Duty titles. Targets Ricochet's kernel driver and user-mode components to prevent cheat detection or disable monitoring—aimed at anti-cheat researchers studying Ricochet protection architecture and bypass techniques. (source: wiki/sources/descriptions/gmh5225__ricochet-disabler.md)
 
-Complements Ricochet RE surfaces such as [[ricochet-deobfuscator]] (driver deobfuscation) and [[hidden-syscall-monitoring]] (hidden-syscall tracing from COD anticheat).
+Complements Ricochet RE surfaces such as [[ricochet-deobfuscator]] (driver deobfuscation), [[aurum-re]] (Aurum RE research), and [[hidden-syscall-monitoring]] (hidden-syscall tracing from COD anticheat).
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements Ricochet RE surfaces such as [[ricochet-deobfuscator]] (driver deobf
 
 ## Related
 
-[[ricochet-deobfuscator]] · [[hidden-syscall-monitoring]] · [[cod7-tools]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[ricochet-deobfuscator]] · [[aurum-re]] · [[hidden-syscall-monitoring]] · [[cod7-tools]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

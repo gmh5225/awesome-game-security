@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/AurumRE`: entity [[aurum-re]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[ricochet-deobfuscator]] and [[ricochet-disabler]].
+
 - **2026-08-14** — ingest `description:gmh5225/AutoGunfireReborn`: entity [[autogunfire-reborn]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[bepinex-il2cppbase]], [[fall-guys-sharp]], and [[goose-goose-duck-hack]].
 
 - **2026-08-14** — ingest `description:gmh5225/AutoOpenCAK`: entity [[auto-open-cak]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[rpgmakerdecrypter]], [[maplestory-packer-modpacker]], and [[pubg-mobile-pak-extract]].
