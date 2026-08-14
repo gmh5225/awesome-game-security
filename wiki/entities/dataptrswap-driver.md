@@ -12,7 +12,7 @@ confidence: medium
 
 Older cheat-driver example using a **data-pointer swap in win32kbase** for KM↔UM communication instead of a conventional device interface. The driver scans win32kbase for the target pointer, attaches to `explorer.exe`, swaps it with a custom `NtSetCompositionSurfaceAnalogExclusive` handler via `InterlockedExchangePointer`, and routes requests through usermode-supplied structures. Also bundles cleanup utilities for `MmUnloadedDrivers` and related loader residue — part comms demo, part anti-forensics helper. (source: wiki/sources/descriptions/gmh5225__DataPtrSwap-driver.md)
 
-Mainly useful for Windows kernel researchers studying data-pointer-swap communication, win32k-based hook placement, and cleanup logic alongside manually mapped cheat drivers — adjacent to [[data-ptr-swap]] (xPasters; same composition-surface syscall), [[custom-data-ptr-swap-sample]], [[driver-read-write]], and [[hide-driver-testing]].
+Mainly useful for Windows kernel researchers studying data-pointer-swap communication, win32k-based hook placement, and cleanup logic alongside manually mapped cheat drivers — adjacent to [[data-ptr-swap]] (xPasters; same composition-surface syscall), [[comm-data-pointer-swap]] (`NtDCompositionSetChildRootVisual` GUI-syscall variant), [[custom-data-ptr-swap-sample]], [[driver-read-write]], and [[hide-driver-testing]].
 
 ## Links
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Comm-Data-Pointer-Swap`: entity [[comm-data-pointer-swap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[dataptrswap-driver]], [[comm-data-ptr-driver]], and [[comm-neko-swap]].
+
 - **2026-08-14** — ingest `description:gmh5225/Comm-ImMiraclela`: entity [[comm-im-miraclela]]; cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[kernel-cheat-for-directx3d]], [[nulldriver-cheat]], and [[eft-internal]].
 
 - **2026-08-14** — ingest `description:gmh5225/Comm-NekoSwap`: entity [[comm-neko-swap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[comm-data-ptr-driver]], [[data-ptr-swap]], and [[dataptrswap-driver]].

@@ -12,7 +12,7 @@ confidence: medium
 
 Kernel driver implementing **data-pointer-based communication** for stealthy user↔kernel interaction. Exchanges memory read/write requests through **shared data pointers** rather than traditional IOCTLs, aiming to evade IOCTL-based anti-cheat telemetry. The README tags the sample under **`[NtGdiPolyPolyDraw]`**, placing it in the win32k GDI syscall covert-comms lane. (source: wiki/sources/descriptions/gmh5225__Comm-data-ptr-driver.md)
 
-Mainly useful for Windows kernel researchers studying data-pointer swap channels, non-IOCTL KM↔UM memory R/W, and win32k GDI syscall abuse — adjacent to [[interep-driver-leak]] (same `NtGdiPolyPolyDraw` tag), [[data-ptr-swap]], [[dataptrswap-driver]], and [[custom-data-ptr-swap-sample]].
+Mainly useful for Windows kernel researchers studying data-pointer swap channels, non-IOCTL KM↔UM memory R/W, and win32k GDI syscall abuse — adjacent to [[interep-driver-leak]] (same `NtGdiPolyPolyDraw` tag), [[comm-data-pointer-swap]] (`NtDCompositionSetChildRootVisual` variant), [[data-ptr-swap]], [[dataptrswap-driver]], and [[custom-data-ptr-swap-sample]].
 
 ## Links
 

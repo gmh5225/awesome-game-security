@@ -252,6 +252,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [Common-Registry-Jmp-RCX](entities/common-registry-jmp-rcx.md) — CmRegisterCallback + JMP RCX gadget in nvraid.sys for covert KM↔UM registry-callback comm (gmh5225; Registry Callback)
 - [comm-data-ptr-driver](entities/comm-data-ptr-driver.md) — shared data-ptr KM↔UM comm via NtGdiPolyPolyDraw; avoids IOCTL telemetry (gmh5225; cheat driver)
+- [comm-data-pointer-swap](entities/comm-data-pointer-swap.md) — win32kbase data-ptr swap via NtDCompositionSetChildRootVisual; GUI-syscall covert KM↔UM PoC (gmh5225; cheat driver)
 - [comm-im-miraclela](entities/comm-im-miraclela.md) — EFT UM+KM overlay via `NtDxgkGetTrackedWorkloadStatistics` dxgkrnl hook; win32k draw + ImGui comms (gmh5225; cheat / game:eft)
 - [comm-neko-swap](entities/comm-neko-swap.md) — swap-based memory page KM↔UM covert channel via Win32kApiSetTable; avoids IOCTL telemetry (gmh5225; cheat driver)
 - [comon](entities/comon.md) — WinDbg extension; trace COM class creation + interface querying (WinDbg Plugins)
