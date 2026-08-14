@@ -163,6 +163,7 @@ sources:
   - wiki/sources/descriptions/kristofhracza__tim_apple.md
   - wiki/sources/descriptions/kweatherman__yara4ida.md
   - wiki/sources/descriptions/gmh5225__Fedoraware.md
+  - wiki/sources/descriptions/gmh5225__Classy.md
   - wiki/sources/descriptions/gmh5225__FindFunc.md
   - wiki/sources/descriptions/gmh5225__findyara-ida.md
   - wiki/sources/descriptions/gmh5225__findcrypt-yara.md
@@ -1158,6 +1159,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C++ RTTI class hierarchy visualization and RTTI-based rename via [[pyclassinformer]] (IDA Pro plugin; library/method classification, member coloring; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/herosi__PyClassInformer.md)
 - GCC RTTI class hierarchy and vtable reconstruction from stripped binaries via [[ida-medigate]] (IDA Pro Python; Hex-Rays union type disambiguation; bundled xref tracker; IoT/firmware/game-engine polymorphic C++; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/gmh5225__ida_medigate.md)
 - IDA 9.X C++ vtable ops via [[ida-vtable-tools]] (dump `.hpp` interface skeleton / class-prefix rename / `this` type / slot index·offset; Python) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md)
+- C++ class/vtable/signature management via [[classy]] (gmh5225; PyQt5 GUI; vtable generation, function-to-class assignment, Itanium mangling, struct mapping, C header export; cheat / IDA Plugins) sits in the same C++ static-RE lane beside [[ida-vtable-tools]] and [[ida-medigate]]. (source: wiki/sources/descriptions/gmh5225__Classy.md)
 - Missing indirect CALL/JMP target recovery via [[ida-missinglink]] (C++ OOP-heavy game/client binaries; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/kweatherman__ida_missinglink.md)
 - Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
 - IDA database → linkable COFF/ELF object export via [[ida2obj]] (relocations, symbols, section content; binary patching / recompilation; gmh5225; cheat / COFF Relink) sits in the same Cheat IDA Plugins / binary-patch lane. (source: wiki/sources/descriptions/gmh5225__IDA2Obj.md)

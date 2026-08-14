@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Classy`: entity [[classy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-vtable-tools]] and [[ida-medigate]].
+
 - **2026-08-14** — ingest `description:gmh5225/ClickPic`: entity [[clickpic]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[opencv-smart-aimbot]], [[camera-triggerbot]], and [[overwatch2-colorbot-cheats]].
 
 - **2026-08-14** — ingest `description:gmh5225/Comm-Data-Pointer-Swap`: entity [[comm-data-pointer-swap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[dataptrswap-driver]], [[comm-data-ptr-driver]], and [[comm-neko-swap]].
