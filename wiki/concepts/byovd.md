@@ -66,6 +66,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Killer.md
   - wiki/sources/descriptions/gmh5225__Killer-Exercice.md
   - wiki/sources/descriptions/gmh5225__Kernel-Cactus.md
+  - wiki/sources/descriptions/gmh5225__CVE-2021-21551-POC.md
   - wiki/sources/descriptions/gmh5225__PPLKiller.md
   - wiki/sources/descriptions/gmh5225__TS-Fucker.md
   - wiki/sources/descriptions/gmh5225__SpeedFan-Exploit.md
@@ -203,6 +204,8 @@ Cheat Engine **`dbk64.sys`** IOCTL abuse such as [[dbk64-vulnerability-driver]] 
 Dell **`dbutil_2_3.sys`** runtime test-signing toggle PoC such as [[ts-fucker]] (gmh5225; kernel R/W via already-loaded vulnerable driver → live-patch TestSigning state without reboot; symbol-assisted offset discovery for current Windows build; focused security-state manipulation, not a generic BYOVD toolkit) sits in the same LOLdriver / trust-state lane. (source: wiki/sources/descriptions/gmh5225__TS-Fucker.md)
 
 Dell **`dbutil_2_3.sys`** multifunction post-exploitation console such as [[kernel-cactus]] (gmh5225; user-mode toolkit; `\\.\DBUtil_2_3` IOCTLs `0x9B0C1EC4`/`0x9B0C1EC8` → ETW disable, PPL toggle, protected-process kill, token copy, file delete, shellcode injection/thread hijack; broader BYOVD console than single-purpose [[ts-fucker]]) complements the same LOLdriver backend lane. (source: wiki/sources/descriptions/gmh5225__Kernel-Cactus.md)
+
+Reusable CVE-2021-21551 memory scaffold such as [[cve-2021-21551-poc]] (gmh5225; `Memory` class; virtual/physical R/W IOCTLs `0x9B0C1EC4`/`0x9B0C1EC8`/`0x9B0C1F40`/`0x9B0C1F44`; `ntoskrnl`/`EPROCESS`/`DirectoryTableBase` demos; cleaner post-exploitation primitive layer than token-theft-only [[cve-2021-21551]]) sits in the same Dell LOLdriver lane. (source: wiki/sources/descriptions/gmh5225__CVE-2021-21551-POC.md)
 
 ASUS **`bsitf.sys`/`AsusBSItf.sys`** contiguous-pool map IOCTL abuse such as [[asus-bsitf-0-day-poc]] (gmh5225; Rust PoC for CVE-2026-13585; IOCTL `0x222808` allocates physically contiguous NonPagedPool, maps it into the caller with full usermode R/W, and leaks virtual + physical addresses; IOCTL `0x22280C` frees; NonPagedPool exhaustion and physaddr disclosure; executable kernel staging on older builds) sits in the OEM signed-driver BYOVD lane. (source: wiki/sources/descriptions/gmh5225__asus-bsitf-0-day-poc.md)
 

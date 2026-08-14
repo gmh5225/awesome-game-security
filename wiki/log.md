@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CVE-2021-21551-POC`: entity [[cve-2021-21551-poc]]; cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[cve-2021-21551]] and [[kernel-cactus]].
+
 - **2026-08-14** — ingest `description:gmh5225/CVE-2021-21551`: entity [[cve-2021-21551]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-cactus]], [[ts-fucker]], [[windows-kernel-exploits]], and [[kernel-cve-analysis]].
 
 - **2026-08-14** — ingest `description:gmh5225/CVE-2022-3699`: entity [[cve-2022-3699]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[lenovo-exec]], [[lenovo-mapper]], [[windows-kernel-exploits]], and [[kernel-cve-analysis]].

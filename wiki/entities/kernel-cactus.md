@@ -10,7 +10,7 @@ confidence: medium
 
 # Kernel Cactus
 
-User-mode offensive toolkit that uses Dell's vulnerable **`dbutil_2_3.sys`** driver as its kernel read/write backend. `KernelOps.cpp` opens `\\.\DBUtil_2_3` and builds primitives on IOCTLs `0x9B0C1EC4` and `0x9B0C1EC8`, then layers higher-level post-exploitation actions: ETW disabling, PPL toggling, protected-process termination, token copying, and file deletion. The command set also includes shellcode-based remote thread injection and thread hijacking aimed at processes that resist ordinary user-mode tooling. Better described as a multifunction BYOVD post-exploitation console than a simple note about loading **`dbutil_2_3.sys`**. Builds on the same IOCTL primitives documented in canonical LPE PoC [[cve-2021-21551]]. (source: wiki/sources/descriptions/gmh5225__Kernel-Cactus.md)
+User-mode offensive toolkit that uses Dell's vulnerable **`dbutil_2_3.sys`** driver as its kernel read/write backend. `KernelOps.cpp` opens `\\.\DBUtil_2_3` and builds primitives on IOCTLs `0x9B0C1EC4` and `0x9B0C1EC8`, then layers higher-level post-exploitation actions: ETW disabling, PPL toggling, protected-process termination, token copying, and file deletion. The command set also includes shellcode-based remote thread injection and thread hijacking aimed at processes that resist ordinary user-mode tooling. Better described as a multifunction BYOVD post-exploitation console than a simple note about loading **`dbutil_2_3.sys`**. Builds on the same IOCTL primitives documented in canonical LPE PoC [[cve-2021-21551]] and reusable memory scaffold [[cve-2021-21551-poc]]. (source: wiki/sources/descriptions/gmh5225__Kernel-Cactus.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ User-mode offensive toolkit that uses Dell's vulnerable **`dbutil_2_3.sys`** dri
 
 ## Related
 
-[[byovd]] · [[cve-2021-21551]] · [[ts-fucker]] · [[pplkiller]] · [[killer]] · [[process-killer-byovd]] · [[edrsandblast]] · [[etw-threat-intelligence]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[cve-2021-21551]] · [[cve-2021-21551-poc]] · [[ts-fucker]] · [[pplkiller]] · [[killer]] · [[process-killer-byovd]] · [[edrsandblast]] · [[etw-threat-intelligence]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

@@ -319,6 +319,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
 - [CVE-2021-21551](entities/cve-2021-21551.md) — Dell `dbutil_2_3.sys` signed-driver LPE (IOCTL kernel R/W → SYSTEM token theft; gmh5225)
+- [CVE-2021-21551 PoC](entities/cve-2021-21551-poc.md) — Dell `dbutil_2_3.sys` reusable kernel-memory toolkit (virtual/phys R/W IOCTLs; EPROCESS/page-table demos; gmh5225)
 - [CVE-2022-3699](entities/cve-2022-3699.md) — Lenovo `LenovoDiagnosticsDriver.sys` IOCTL validation LPE (arbitrary kernel memory access; gmh5225)
 - [CVE-2022-42045](entities/cve-2022-42045.md) — Zemana `amsdk.sys` in-driver `.hook` section code injection (IOCTL stub plant + trigger; gmh5225)
 - [CVE-2022-42046](entities/cve-2022-42046.md) — `wfshbr64.sys` IOCTL improper access control LPE (SYSTEM; gmh5225)
