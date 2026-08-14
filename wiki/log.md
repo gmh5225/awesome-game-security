@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Apex-Spoofer`: entity [[apex-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[easy-anti-cheat]], [[hwid-spoofer-eac-be]], [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]], [[apex-legends-sdk]], and [[apex-esp-old-project]].
+
 - **2026-08-14** — ingest `description:gmh5225/Apex_ESP_Old_Project`: entity [[apex-esp-old-project]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-legends-sdk]], [[apex-full-cheat]], and [[apexd3d-external]].
 
 - **2026-08-14** — ingest `description:gmh5225/Apple-Lite-Fortnite-Cheat`: entity [[apple-lite-fortnite-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[serenity-gg-fn-and-loader]], [[fortnite-internal-cheat-fixed-and-updated]], and [[fortnite-exploits]].
