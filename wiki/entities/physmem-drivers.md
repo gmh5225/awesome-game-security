@@ -18,4 +18,4 @@ Curated **vulnerable driver list** focused on physical-memory–capable signed d
 
 ## Related
 
-[[byovd]] · [[loldrivers-client]] · [[hvci-loldrivers-check]] · [[windows-kernel-exploits]] · [[readphys]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[loldrivers-client]] · [[hvci-loldrivers-check]] · [[windows-kernel-exploits]] · [[readphys]] · [[pawnio]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

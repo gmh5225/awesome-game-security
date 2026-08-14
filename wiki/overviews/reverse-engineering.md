@@ -631,7 +631,7 @@ Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdes
 
 **Initial analysis:** identify protections (packer, obfuscator, anti-cheat), game engine and version, available symbols, and key modules with their callbacks and trust boundaries.
 
-**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks.
+**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks. Scriptable kernel drivers such as [[pawnio]] (namazso; Pawn AMX VM in a WDK `.sys`; signed module load + IOCTL dispatch; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM natives) support iterative low-level hardware and driver probing without per-experiment driver rebuilds. (source: wiki/sources/descriptions/namazso__PawnIO.md)
 
 Engine-specific paths: Unity ([[il2cpp]] / Mono via dnSpy), Unreal (SDK generators, UObject/UFunction hooks), native PE (imports, pattern scan, runtime memory).
 
