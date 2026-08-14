@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Apple-Lite-Fortnite-Cheat`: entity [[apple-lite-fortnite-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[serenity-gg-fn-and-loader]], [[fortnite-internal-cheat-fixed-and-updated]], and [[fortnite-exploits]].
+
 - **2026-08-14** — ingest `description:gmh5225/Ark`: entity [[ark]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[yolov5-pubg]], [[maplestory-yolov8-training]], and [[waldo]].
 
 - **2026-08-14** — ingest `description:gmh5225/AsIO-Exploit`: entity [[asio-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[asusdrv]], [[windows-10-22h2-vulnerable-driver-communication]], and [[openhardwaremonitor-poc]].

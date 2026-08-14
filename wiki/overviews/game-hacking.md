@@ -761,6 +761,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md
   - wiki/sources/descriptions/gmh5225__fortnite-exploits.md
   - wiki/sources/descriptions/gmh5225__VOLTO-EXTERNAL-SPOWAR-UD-EAC-BE-FORTNITE-EXTERNAL-CHEAT.md
+  - wiki/sources/descriptions/gmh5225__Apple-Lite-Fortnite-Cheat.md
   - wiki/sources/descriptions/gmh5225__Serenity.gg-FN-and-Loader.md
   - wiki/sources/descriptions/gmh5225__Fortnite-VoyagerTF.md
   - wiki/sources/descriptions/gmh5225__Fortnite-EFI-External.md
@@ -1053,6 +1054,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Integrated HWID-spoof external Fortnite samples such as [[fortnite-external-5]] (gmh5225; kernel driver disk-serial spoofer + ImGui overlay + FNV-1a string obfuscation; out-of-process ESP/aimbot RPM; cheat / game:fortnite [External]) sit in that same external lane for studying bundled cheat + HWID-ban evasion on EAC-protected clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-External-5.md)
 - Discord-overlay-hijack external Fortnite samples such as [[fortnite-esp-aimbot-exploits-hwid-spoofer-cleaner-hack-cheat]] (gmh5225; ESP/aimbot + HWID spoofer; pattern-scans `DiscordHook64.dll` hook-creation exports to render via Discord overlay pipeline; cheat / game:fortnite [External]) sit in that same external lane for studying bundled cheat features + third-party overlay hijack on EAC-protected clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-Esp-Aimbot-Exploits-Hwid-Spoofer-Cleaner-Hack-Cheat.md)
 - Serenity.gg Fortnite driver + shader + loader samples such as [[serenity-gg-fn-and-loader]] (gmh5225; C/C++; kernel driver development + shader work + module loader; cheat / game:fortnite) sit in that same external lane beside shader-oriented and driver-backed Fortnite bases. (source: wiki/sources/descriptions/gmh5225__Serenity.gg-FN-and-Loader.md)
+- Leaked Apple Lite Fortnite cheat remakes such as [[apple-lite-fortnite-cheat]] (gmh5225; Police remake of Apple Lite; C/C++; kernel-level work + shader work + modding; cheat / game:fortnite) sit in that same driver/shader Fortnite lane beside [[serenity-gg-fn-and-loader]]. (source: wiki/sources/descriptions/gmh5225__Apple-Lite-Fortnite-Cheat.md)
 - Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
 - From-scratch Fortnite internals such as [[ritz-amazing-fortnite-internal]] (simplified hook path; x64-release injector) sit beside them in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md)
