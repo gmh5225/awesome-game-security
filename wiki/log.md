@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Ark`: entity [[ark]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[yolov5-pubg]], [[maplestory-yolov8-training]], and [[waldo]].
+
 - **2026-08-14** — ingest `description:gmh5225/AsIO-Exploit`: entity [[asio-exploit]]; cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[asusdrv]], [[windows-10-22h2-vulnerable-driver-communication]], and [[openhardwaremonitor-poc]].
 
 - **2026-08-14** — ingest `description:gmh5225/AssaultCubeCheat`: entity [[assault-cube-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[mandragora]].

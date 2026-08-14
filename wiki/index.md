@@ -176,6 +176,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apksigner](entities/apksigner.md) — standalone Android APK signing tool (re-sign after mod/repack)
 - [apktool](entities/apktool.md) — Java APK decode/rebuild (smali, resources, manifest; `[Apk]`)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
+- [Ark](entities/ark.md) — distributed-GPU deep learning framework (game security / cheat ML training; gmh5225)
 - [arkdecompiler](entities/arkdecompiler.md) — HarmonyOS NEXT ArkCompiler `.abc` decompiler (ArkTS/ArkJS → JS/TS; mobile RE)
 - [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
