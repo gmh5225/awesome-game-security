@@ -329,6 +329,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [custom-VEH](entities/custom-veh.md) — RtlpCallVectoredHandlers hook for fast pre-vanilla VEH registration (Ring3 callback research; gmh5225)
 - [cunthook](entities/cunthook.md) — TF2/Source open hacking framework (full SDK; hooks / ESP / aimbot / gameplay mods; internal interfaces + Boost; Linux; gmh5225)
 - [CyberAntLoader](entities/cyber-ant-loader.md) — cheat loader with auth, HWID binding, license verification, and anti-detection inject pipeline (gmh5225)
+- [CYBERSEC 2023 BYOVD Demo](entities/cybersec2023-byovd-demo.md) — CYBERSEC 2023 Taiwan RTCore64.sys BYOVD chain (DSE nullify → unsigned driver load; blind 360 Total Security ObRegisterCallbacks + notify callbacks; gmh5225)
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [dataptrswap-driver](entities/dataptrswap-driver.md) — win32kbase data-ptr swap on NtSetCompositionSurfaceAnalogExclusive; MmUnloadedDrivers cleanup (gmh5225; cheat driver)
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)

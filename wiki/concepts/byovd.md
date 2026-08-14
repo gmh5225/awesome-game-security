@@ -72,10 +72,11 @@ sources:
   - wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md
   - wiki/sources/descriptions/gmh5225__HPHardwareDiagnostics-PoC.md
   - wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md
+  - wiki/sources/descriptions/gmh5225__CYBERSEC2023-BYOVD-Demo.md
   - wiki/sources/descriptions/gmh5225__NVDrv.md
   - wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md
   - wiki/sources/descriptions/gmh5225__EvilKaspersky.md
-updated: 2026-08-13
+updated: 2026-08-14
 confidence: high
 ---
 
@@ -120,6 +121,8 @@ Samsung S4 driver abuse such as [[s4killer]] targets **`probmon.sys`** via craft
 Samsung S4 driver manual mapper research such as [[s4mapper]] (gmh5225; **`SignalRgbDriver.sys`** memory-access IOCTLs → pool alloc, section copy, relocs, imports, entry invocation; unsigned driver map via Samsung BYOVD primitives) complements access-primitive PoC [[s4killer]] in the same Samsung S4 backend lane. (source: wiki/sources/descriptions/gmh5225__S4Mapper.md)
 
 MSI Afterburner **`RTCore64.sys`** manual mapper research such as [[rtcore64-vulnerability]] (gmh5225; white-signed RTCore64 read/write primitives + data-pointer hook dispatch → kernel routine search incl. `MmAllocateIndependentPagesEx` and full unsigned PE map; MSI Afterburner tooling lane) sits in the same BYOVD unsigned-load lane beside other mapper-focused PoCs. (source: wiki/sources/descriptions/gmh5225__RTCore64_Vulnerability.md)
+
+CYBERSEC 2023 Taiwan **`RTCore64.sys`** BYOVD demo such as [[cybersec2023-byovd-demo]] (gmh5225; nullifies DSE flag → loads unsigned malicious driver; disables 360 Total Security `ObRegisterCallbacks` + process notify callbacks for arbitrary process manipulation; conference PoC chaining DSE bypass + AC callback blind) complements mapper-focused [[rtcore64-vulnerability]] and callback-removal samples such as [[ps-notif-routine-unloader]]. (source: wiki/sources/descriptions/gmh5225__CYBERSEC2023-BYOVD-Demo.md)
 
 Razer peripheral driver abuse such as [[razer-rzctl]] targets **`rzctl.sys`** for privileged I/O that can simulate mouse/keyboard input at kernel level or yield kernel memory access via vulnerable IOCTLs—overlapping BYOVD and ring-0 input-evasion research. (source: wiki/sources/descriptions/gmh5225__razer-rzctl.md)
 
