@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CyberAntLoader`: entity [[cyber-ant-loader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[wizard-loader]], [[a-pasted-rust-script]], and [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]].
+
 - **2026-08-14** — ingest `description:gmh5225/DDMA-1`: entity [[ddma-1]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-dma-nvme-vmd]] and [[pcileech-fpga-dma-vmd]].
 
 - **2026-08-14** — ingest `readme:categories`: bumped Game Engine ~156 (was ~155; Cheat ~2698 / Anti Cheat ~669 / DirectX ~39 / Some Tricks ~117 stable); refreshed [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
