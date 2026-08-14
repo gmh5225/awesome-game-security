@@ -384,6 +384,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dota2-cheat](entities/dota2-cheat.md) — Dota 2 internal cheat DLL (Source 2 SDK; subhook / VMT hooks / pattern scan; gmh5225; cheat / game:dota2)
 - [Dota2-Overlay-2.0](entities/dota2-overlay-2-0.md) — Dota 2 overlay sample (C/C++; cheat / game:dota2)
 - [Dota2-Overlay-OffsetUpdater](entities/dota2-overlay-offset-updater.md) — Dota 2 overlay remote offset fetch/apply utility (gmh5225; keeps overlay functional across patches; cheat / game:dota2)
+- [devour-client](entities/devour-client.md) — Devour co-op horror Unity IL2CPP client mod (QoL/cheat via in-process memory manipulation; gmh5225; cheat)
 - [devour-menu](entities/devour-menu.md) — Devour co-op horror Unity IL2CPP mod menu (ImGui overlay; toggleable gameplay mods; gmh5225; cheat / [Menu])
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)

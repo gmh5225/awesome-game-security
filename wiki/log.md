@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/DevourClient`: entity [[devour-client]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[devour-menu]] and [[goose-goose-duck-hack]].
+
 - **2026-08-14** — ingest `description:gmh5225/DevourMenu`: entity [[devour-menu]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[goose-goose-duck-hack]] and [[imgui]].
 
 - **2026-08-14** — ingest `description:gmh5225/Disable-Windows-Defender-`: entity [[disable-windows-defender-]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[defender-control]] and [[windefctl]].
