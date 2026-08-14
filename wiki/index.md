@@ -249,6 +249,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
 - [COD7-Tools](entities/cod7-tools.md) — COD7 (Black Ops) research tooling (VcPkg; cheat / game:cod7)
+- [CODM-ESP-Aimbot-Mod-Menu](entities/codm-esp-aimbot-mod-menu.md) — Call of Duty Mobile internal mod menu: injectable library + overlay; ESP / aimbot / gameplay mods (gmh5225; cheat / game:codm [ESP])
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
 - [ConfuserEx](entities/confuserex.md) — open-source .NET application protector (Confuser successor; AC Binary Packer / CLR protection)

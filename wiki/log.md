@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/CODM-ESP-Aimbot-Mod-Menu`: entity [[codm-esp-aimbot-mod-menu]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]]; cross-linked [[bypass-pubg-mobile-imgui]], [[call-of-duty-vanguard-hack-esp-aimbot-unlock-all]], and [[external-imgui-android]].
+
 - **2026-08-14** — ingest `description:gmh5225/CReadMemory`: entity [[creadmemory]]; cited on [[overviews/game-hacking]]; cross-linked [[umpmlib]], [[libmem]], and [[memwars]].
 
 - **2026-08-14** — ingest `description:gmh5225/CS2-Cheat-Base`: entity [[cs2-cheat-base]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[cs2-cheat]], [[cs2-sdk]], and [[cs2-internal]].
