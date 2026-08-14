@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/DevourMenu`: entity [[devour-menu]]; cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[goose-goose-duck-hack]] and [[imgui]].
+
 - **2026-08-14** — ingest `description:gmh5225/Disable-Windows-Defender-`: entity [[disable-windows-defender-]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[defender-control]] and [[windefctl]].
 
 - **2026-08-14** — ingest `description:gmh5225/Disable-nmi-callbacks`: entity [[disable-nmi-callbacks]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback-blocker2]], [[nmi-nmi-callback]], [[nmi-enum-nmi-callback]], and [[nmi-callback]].
