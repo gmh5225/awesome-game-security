@@ -301,6 +301,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-internal-base](entities/csgo-internal-base.md) — CS:GO internal cheat base (CreateInterface, VMT hooks, netvars, pattern scan, ImGui; cheat / game:csgo)
 - [csgo-kns](entities/csgo-kns.md) — CS:GO internal cheat (VMT hooks, interface pointers; ESP/aimbot/bhop/skin changer; cheat / game:csgo)
 - [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)
+- [CSGO-Loader](entities/csgo-loader.md) — CS:GO C++ cheat loader with PHP auth backend (HWID check, time-based license, web panel for injected DLL access; gmh5225 [Loader])
 - [csgo-nixware-csgo](entities/csgo-nixware-csgo.md) — leaked Nixware CS:GO internal (aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay; gmh5225 [Nixware])
 - [csgo-offsets](entities/csgo-offsets.md) — CS:GO memory offsets (gmh5225; netvars / interfaces / signatures; patch-updated; cheat / game:csgo [Offset])
 - [csgo-sdk](entities/csgo-sdk.md) — CS:GO Source 1 SDK headers (gmh5225/csgo-sdk + csgo_sdk; classes / netvars / interfaces / hooking; cheat / game:csgo)
