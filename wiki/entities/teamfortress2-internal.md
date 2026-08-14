@@ -4,7 +4,7 @@ kind: entity
 topics: [game-hacking, game-engine]
 sources:
   - wiki/sources/descriptions/gmh5225__teamfortress2_internal.md
-updated: 2026-08-13
+updated: 2026-08-14
 confidence: medium
 ---
 
@@ -18,4 +18,4 @@ Team Fortress 2 **internal** research repo (C++ / C/C++) centered on modding and
 
 ## Related
 
-[[fedoraware]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/anti-cheat]] · [[source-engine]] · [[csgo-internal-base]] · [[csgosimple]] · [[present-hook]] · [[sourceengineexplorer]]
+[[cunthook]] · [[fedoraware]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/anti-cheat]] · [[source-engine]] · [[csgo-internal-base]] · [[csgosimple]] · [[present-hook]] · [[sourceengineexplorer]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-14** — ingest `description:gmh5225/Cunthook`: entity [[cunthook]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[teamfortress2-internal]], [[fedoraware]], and [[l4d2-cheat]].
+
 - **2026-08-14** — ingest `description:gmh5225/CyberAntLoader`: entity [[cyber-ant-loader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[wizard-loader]], [[a-pasted-rust-script]], and [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]].
 
 - **2026-08-14** — ingest `description:gmh5225/DDMA-1`: entity [[ddma-1]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-dma-nvme-vmd]] and [[pcileech-fpga-dma-vmd]].

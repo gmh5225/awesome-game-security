@@ -901,6 +901,7 @@ sources:
   - wiki/sources/descriptions/jmpews__Dobby.md
   - wiki/sources/descriptions/jnastarot__ice9.md
   - wiki/sources/descriptions/gmh5225__L4D2-Cheat.md
+  - wiki/sources/descriptions/gmh5225__Cunthook.md
   - wiki/sources/descriptions/gmh5225__CyberAntLoader.md
 updated: 2026-08-14
 confidence: high
@@ -1302,6 +1303,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - Internal Team Fortress 2 samples such as [[teamfortress2-internal]] (C++ / C/C++; modding / hooking; Internal tag; gmh5225) sit in the cheat / game:team fortress 2 lane for studying Source 1 internal hook patterns beside CS:GO internals under VAC. (source: wiki/sources/descriptions/gmh5225__teamfortress2_internal.md)
+- Open-source TF2/Source hacking frameworks such as [[cunthook]] (gmh5225; full SDK with hooks, ESP, aimbot, gameplay mods via Source internal interfaces + Boost; Linux tag) sit in the same cheat / game:team fortress 2 lane beside hook-focused starters and feature-complete samples. (source: wiki/sources/descriptions/gmh5225__Cunthook.md)
 - SE-Owned–lineage TF2 training software such as [[fedoraware]] (gmh5225; C/C++; rendering / networking / animation; cheat / game:team fortress 2) sits in the same TF2 internal lane for studying feature-complete Source 1 cheat architecture beside hook-focused starters. (source: wiki/sources/descriptions/gmh5225__Fedoraware.md)
 - Basic Left 4 Dead 2 cheat frameworks such as [[l4d2-basic]] (gmh5225; Source engine hook structures, interface resolution, starter template) sit in the cheat / game:left 4 dead 2 lane for bootstrapping Source 1 internal hook work beside TF2 and CS:GO samples. (source: wiki/sources/descriptions/gmh5225__L4D2Basic.md)
 - Internal Left 4 Dead 2 samples such as [[l4d2-cheat]] (gmh5225; Source engine SDK; VMT hooks + engine interface exploitation; ESP, aimbot, gameplay mods; Linux tag) sit in the same cheat / game:left 4 dead 2 lane beside starter frameworks. (source: wiki/sources/descriptions/gmh5225__L4D2-Cheat.md)
