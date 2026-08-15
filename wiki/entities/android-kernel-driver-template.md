@@ -20,4 +20,4 @@ Starter scaffold for GKI `vendor_dlkm` / LKM workflows; complements [[compile-an
 
 ## Related
 
-[[compile-android-driver]] · [[android-kernel-hacking-toolkit]] · [[android-touch]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[compile-android-driver]] · [[android-drivesignity]] · [[android-kernel-hacking-toolkit]] · [[android-touch]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

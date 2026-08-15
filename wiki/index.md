@@ -120,6 +120,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
 - [auto-simulated-universe](entities/auto-simulated-universe.md) — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; cheat / game:honkai star rail [Script]; gmh5225)
 - [android-kernel-driver-template](entities/android-kernel-driver-template.md) — GKI AArch64 Android kernel driver template (product/OEM kernel; cheat / Android kernel driver development; gmh5225)
+- [android-drivesignity](entities/android-drivesignity.md) — Android kernel ARMv8.3 driver signature verification bypass (unofficial/modified LKM load; cheat / Android kernel driver development; gmh5225)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
 - [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-huawei-hi6250-8-exp](entities/android-kernel-huawei-hi6250-8-exp.md) — Huawei hi6250 Android kernel + KernelSU (cheat / Android Kernel Source)
