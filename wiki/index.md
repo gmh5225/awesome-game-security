@@ -2128,6 +2128,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xorlit](entities/xorlit.md) — string crypter (single-arg default key `xorlit::seed`; AC Compile Time / String Crypter)
 - [xorPacker](entities/xorpacker.md) — C# PE XOR cipher packer (all PE; Anti Cheat → Binary Packer)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
+- [xv](entities/xv.md) — C++ single-header pointer/value encryption (`xval<T>`; Anti Cheat → Encrypt Variable)
 - [XVolkolak](entities/xvolkolak.md) — emulation-based PE unpacker (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; UPX/ASPack/MPRESS + 18 packers; Fix VMP / Unpacker)
 - [XrefsExt](entities/xrefsext.md) — IDA Pro extended-xrefs plugin (cheat / IDA Plugins)
 - [yae-achievement](entities/yae-achievement.md) — Genshin Impact yae achievement mod (C#/C++; Unity/IL2CPP; gmh5225)
