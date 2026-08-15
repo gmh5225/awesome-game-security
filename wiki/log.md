@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fiqri19102002/android_kernel_xiaomi_sweet`: entity [[android-kernel-xiaomi-sweet]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[android-kernel-xiaomi-pipa]], and [[pc-ginkgo]].
+
 - **2026-08-15** — ingest `description:firerpa/lamda`: entity [[lamda]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[android-proxy-mcp]], and [[delamain]].
 
 - **2026-08-15** — ingest `readme:categories`: bumped Cheat ~2703 (was ~2702; Anti Cheat ~674 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
