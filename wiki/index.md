@@ -1658,6 +1658,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Serenity.gg-FN-and-Loader](entities/serenity-gg-fn-and-loader.md) — Fortnite: kernel driver + shader work + module loader (C/C++; cheat / game:fortnite; gmh5225)
 - [shibari](entities/shibari.md) — C++/C PE/PE+ multi-file linker (merge into one; modding; Anti Cheat → Binary Packer)
 - [Shadow](entities/shadow.md) — iOS jailbreak detection bypass for modern jailbreaks (cheat / iOS jailbreak; per-app success not guaranteed)
+- [shadow-stack-walk](entities/shadow-stack-walk.md) — CET/HSP shadow-stack stack walk to catch thread stack spoofing (`CaptureStackBackTrace` / `StackWalk64`; gabriellandau; Detection:Spoof Stack)
 - [shprotect-ac](entities/shprotect-ac.md) — server-first Roblox Luau AC (movement/remote spam/fly/noclip; heartbeat/watchdog; scoring/rollback/kick)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
 - [shootergame-hack](entities/shootergame-hack.md) — Unreal ShooterGame Demo offensive research (C/C++; rendering / debugging; Cheat / Game Engine Explorer:Unreal; gmh5225)
