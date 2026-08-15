@@ -1257,6 +1257,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MapleStory Worlds Automation](entities/maplestory-worlds-automation.md) — YOLO automation for MapleStory Worlds / Artale (Python; cheat / game:maplestory)
 - [MapleStory-YOLOv8-Training](entities/maplestory-yolov8-training.md) — YOLOv8 MapleStory object-detection training (Apple MPS; Python; cheat / game:maplestory)
 - [MapleStory Detection Sample Generator](entities/maplestory-detection-sample-generator.md) — synthetic MapleStory cheat-detection / object-detection training samples (multiple formats; anti-cheat development; game:maplestory; gmh5225)
+- [MapleStory (ellermister)](entities/maplestory.md) — MapleStory CMS-079 private-server emulator (login/channel/world servers; character/map/monster/skill/party/guild/item systems; network protocol emulation; Private Server-CMS-079 / game:maplestory)
 - [MapleStory143](entities/maplestory143.md) — MapleStory v143 CMS private server (Java/Kotlin; LoginCrypto / Netty·MINA / CheatTracker; Private Server-CMS-143)
 - [MapleStory v83 MaplestoryCPP](entities/maplestory-v83-maplestory-cpp.md) — MapleStory GMS-083 private server (C/C++; editor tooling / modding / SDK generation; Private Server-GMS-083 / game:maplestory; gmh5225)
 - [MapleStory v113 Server Eimulator](entities/maplestory-v113-server-eimulator.md) — MapleStory TMS-113 private-server emulator (v113 protocol / NPC scripting / mob AI / skills / economy; Private Server-TMS-113 / game:maplestory; gmh5225)
