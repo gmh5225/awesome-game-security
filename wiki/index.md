@@ -102,6 +102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
+- [Allocating individual pages](entities/allocating-individual-pages.md) — `MmAllocateIndependentPagesEx` isolated kernel page alloc (stealth manual-map; pool-tag evasion; gmh5225)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [apple-lite-fortnite-cheat](entities/apple-lite-fortnite-cheat.md) — Apple Lite Fortnite Cheat leak + Police remake (C/C++; kernel + shader + modding; gmh5225; cheat / game:fortnite)
 - [apex_full_cheat](entities/apex-full-cheat.md) — Apex Legends full cheat: rendering / SDK generation / hooking (C/C++; cheat / game:apex legends)

@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/kernullist__kn-diff-pool.md
   - wiki/sources/descriptions/ioncodes__pooldump.md
   - wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md
-updated: 2026-08-06
+  - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
+updated: 2026-08-15
 confidence: high
 ---
 
@@ -66,6 +67,10 @@ Before/after **Big Pool snapshots** compared via driver-backed tooling such as [
 
 Tools such as [[pooldump]] scan kernel pool pages to list allocation blocks (tags, sizes, owning drivers) and dump specific pool contents — useful when recovering manually mapped images (e.g. EAC manual-map DLL extraction) or inspecting driver/rootkit pool artifacts without a full live debugger session. (source: wiki/sources/descriptions/ioncodes__pooldump.md)
 
+## Non-pool allocation evasion
+
+Offensive research such as [[allocating-individual-pages]] allocates isolated kernel pages via `MmAllocateIndependentPagesEx` and related non-standard paths to avoid pool-tag tracking and BigPool walks — a complementary hide technique to [[nullmap]] pool cleanup and [[revert-mapper]] post-map scrubbing. (source: wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md)
+
 ## Related
 
-[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[byovd]] · [[hvci]] · [[etw-threat-intelligence]] · [[kernel-codecave-poc]] · [[revert-mapper]] · [[allocating-individual-pages]] · [[kn-diff-pool]] · [[pooldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

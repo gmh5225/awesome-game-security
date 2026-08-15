@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Allocating-individual-pages`: entity [[allocating-individual-pages]]; cited on [[overviews/windows-kernel]] and [[concepts/kernel-pool-scanning]]; cross-linked [[map-file-in-system-space]], [[nullmap]], and [[rtcore64-vulnerability]].
+
 - **2026-08-15** — ingest `description:gmh5225/Android-DLL-Injector`: entity [[android-dll-injector]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-mod-games-by-inject-zygote]], and [[so-loader]].
 
 - **2026-08-15** — ingest `description:gmh5225/Android-Emulator-Detection`: updated entity [[android-emulator-detection]] (gmh5225 Java/Kotlin scoring library; reveny fork retained); cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[anti-emulator]], [[conbeerlib]], and [[mobile-anti-cheat]].
