@@ -1,0 +1,2953 @@
+Project Path: arc_LyeDevGit_WonTree-RBLX-Dumper_eogh9fz0
+
+Source Tree:
+
+```txt
+arc_LyeDevGit_WonTree-RBLX-Dumper_eogh9fz0
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── WonTree-RBLX-Dumper.lua
+└── docs
+    ├── DEVELOPMENT.md
+    ├── EXECUTOR-SUPPORT.md
+    └── OUTPUT.md
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+All notable changes to WonTree RBLX Dumper.
+
+## 1.0.2 — 2026-08-15 (bugfix)
+
+### Fixed
+- **Dump folder overwrite** — the *Dump folder name* input was flagged for persistence, so Rayfield restored a stale folder name from a previous game and the new dump silently overwrote the old one (observed: folder `9940812243_dump` reused while the new game's real GameId was `10209534490`). The flag is removed (folder resets to the current game every session) and a collision guard now reads the folder's `README.txt`: if it belongs to a different place, the dump redirects to `{gameId}_{placeId}_dump` with a notification.
+- `readfile` is now used (when available) for the collision check; everything degrades gracefully on executors without it.
+
+## 1.0.1 — 2026-08-15 (hardening for massive / protected games)
+
+### Added
+- **Self-capture filter** — the dumper no longer analyzes its own injected code: scripts named `loadstring_*` or bare numbers are dropped by name, and any decompiled source containing WonTree / Rayfield markers (GitHub URL, `sirius.menu`) is excluded too. Framework & anti-cheat reports stay clean of executor noise.
+- **Protected-script triage** — failed decompiles are now recorded per-script (class + path) and listed in `directory.md` and a new `protected.txt`; previously only a bare count.
+- **Server-side roots fallback** — when an executor's `getinstances()` parent chain doesn't reach `game` (Xeno observed), the direct parent is still rendered as a root, and truly rootless instances are listed, instead of the false "No server-only containers detected".
+- **Massive-game support** — analysis sources are memory-capped when sources aren't being saved; max-scripts slider raised to 10,000 (default 2,500); live `script i/N` progress while decompiling.
+- Ships the **game-logic-analyzer** agent skill (`.agents/skills/game-logic-analyzer/SKILL.md`) for mapping a finished dump into game architecture.
+
+### Changed
+- Anti-cheat keyword scan now uses word-boundary matching and dropped generic gameplay words (`wave`, `kick`, `ban`, `exploit`, `moderation`) that caused false positives in wave-based games.
+- `getscripts()` results now pass the injected-script filter (previously only name-filtered for noise).
+- UI: new "Workflow" and "v1.0.1 hardening" sections in the Info tab; summary notes injected scripts skipped.
+
+### Fixed
+- `addedRemote` scoping crash on protected scripts (`attempt to perform arithmetic (add) on number and nil`) — verified against a real Xeno dump.
+
+## 1.0 — 2026-08-15 (initial public release)
+
+First open-source release. Built for any UNC-compatible executor (Xeno, Wave,
+Solara, Delta, Codex, …) with a Rayfield Gen2 UI and a zero-dependency native
+fallback.
+
+### Features
+- 4-layer decompile stack: `decompile` → `getscriptbytecode`+`dumpstring` → direct `Source` read → raw bytecode hex dump.
+- Full instance scan: client tree + server-side via `getinstances`/`getnilinstances`/`getscripts`, deduped, core + injected-script filtered.
+- Remote call graph: who fires / who listens to every remote, with line numbers; variable resolution for `GetServerEvent`, `WaitForChild`, `Instance.new` + `Name`.
+- Live Remote Logger (toggle or **K** keybind): hook-based capture of `FireServer`/`InvokeServer` with serialized args — `newcclosure`-wrapped and `checkcaller`-guarded.
+- Framework detection (Knit, ProfileService, Net, DataStore2, Promise, Maid, Signal libraries, remote wrappers, Controller/Service).
+- Anti-cheat / security keyword scan; asset ID scan (`rbxassetid://`); place info fetch (name, creator, universe id).
+- Machine-readable `remotes.csv` export; `directory.md` / `functions.md` / `remotes.md` / `extras.md` reports.
+- Executor capability report (console, Info tab, `directory.md`).
+- Reinjection safe: re-running the script reloads the UI instead of duplicating it.
+- Smooth worker: yields between batches, cancel anytime, `pcall` everywhere.
+
+### Fixed
+- Listen sites now match `event.OnServerEvent:Connect` (dot access) — previously never resolved.
+- Framework scan no longer creates empty entries for unmatched frameworks.
+- Module-export line numbers were off by one — corrected.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 WonTree
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# 🧠 WonTree RBLX Dumper
+
+> **Universal Roblox game analysis dumper** — decompile every reachable script, map the entire remote (client ↔ server) surface with a live logger + call graph, detect frameworks, and get clean, readable markdown reports you can actually work with.
+
+![Version](https://img.shields.io/badge/version-1.0.2-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Language](https://img.shields.io/badge/language-Luau-blueviolet) ![Executors](https://img.shields.io/badge/executors-Xeno%20·%20Wave%20·%20Solara%20·%20Delta%20·%20Codex-orange)
+
+WonTree RBLX Dumper turns any Roblox game into a reverse-engineering reference: full asset tree, every function and module export, every remote name fired in code with exactly which script fires/listens to it (line numbers included), plus bindables, values, services, anti-cheat hits, loaded assets and detected frameworks. It runs on **any UNC-compatible executor** — Xeno, Wave, Solara, Delta, Codex and more — with a Rayfield Gen2 UI (and a zero-dependency native fallback).
+
+---
+
+## ✨ Features
+
+- **4-layer decompile stack** — tries `decompile()`, then `getscriptbytecode()` + `dumpstring()`, then a direct `Source` read, then saves raw bytecode (hex) as a last resort. Works on executors with and without a built-in decompiler.
+- **Full instance scan** — client tree + server-side via `getinstances()` / `getnilinstances()` / `getscripts()`, deduped and filtered (Roblox core + injected executor scripts).
+- **Self-capture filter (v1.0.1)** — the dumper never analyzes its own injected code: `loadstring_*` / numeric-named chunks are dropped by name, and any script whose source contains WonTree / Rayfield markers is excluded too. No more polluted framework & anti-cheat sections.
+- **Protected-script handling (v1.0.1)** — scripts that fail to decompile are listed **by path** in `directory.md` and `protected.txt` (plus bytecode hex if enabled), so massive protected games still give you a usable map of what couldn't be read.
+- **Server-side roots fix (v1.0.1)** — server-only containers now render even when an executor's `getinstances()` parent chain doesn't reach `game` (Xeno included).
+- **Remote call graph** — every remote mapped to the scripts that **fire** it and **listen** to it, with line numbers. Resolves variables (`event = Remotes:GetServerEvent("Start")`, `WaitForChild`, `Instance.new` + `Name`).
+- **Live Remote Logger** — optional namecall hook that captures every `FireServer`/`InvokeServer` while playing, with serialized args. Toggle it in the UI or press **K**. Anti-detection: `newcclosure`-wrapped, `checkcaller`-guarded, never touches your own calls.
+- **Framework detection** — Knit, ProfileService, Net, DataStore2, Promise, Maid, Signal libraries, remote wrappers, Controller/Service patterns.
+- **Asset ID scanner** — every `rbxassetid://` referenced in code, deduped and ranked.
+- **Anti-cheat & security scan** — keyword groups with word-boundary matching (exploit detection, teleports, data systems, messaging, network ownership, HTTP usage); generic gameplay words like *wave/kick/ban* no longer cause false positives.
+- **CSV export** — `{game_id}_remotes.csv` for machine-readable analysis.
+- **Place info** — fetches real place name, creator and universe id for report headers.
+- **Reinjection safe** — inject it again and it **reloads** instead of duplicating; the live logger and its captured calls survive reinjection.
+- **Dump folder safety (v1.0.2)** — the folder name never persists across sessions, and if a folder already holds a dump of a *different place*, the dump redirects to `{gameId}_{placeId}_dump` instead of silently overwriting it.
+- **Smooth** — runs in its own thread, yields between batches, live `script i/N` progress, cancel anytime, `pcall` everywhere.
+- **Massive-game ready (v1.0.1)** — analysis sources are memory-capped, the script cap now goes up to **10,000**, and failed scripts never stall the dump.
+
+## 📦 Output
+
+```
+{game_id}_dump/
+├── {game_id}_directory.md      # asset tree: services, folders, models, scripts, values, attributes
+├── {game_id}_functions.md      # every function + module export, with line numbers
+├── {game_id}_remotes.md        # remote instances, referenced names, call graph, live captures
+├── {game_id}_extras.md         # bindables, services, values, anti-cheat, frameworks, assets
+├── {game_id}_remotes.csv       # machine-readable call graph
+├── {game_id}_live_remotes.log  # live FireServer/InvokeServer capture (when enabled)
+├── protected.txt               # protected/failed scripts, listed by path
+└── README.txt                  # run summary
+```
+
+Optional: save full decompiled sources to `scripts/` and raw bytecode to `bytecode/`.
+
+## 🚀 Quick start
+
+1. Join any Roblox game with an executor (Xeno, Wave, Solara, Delta, Codex, …).
+2. Load the script — either of these works:
+
+   **One-click (recommended)** — paste this into your executor's execute box:
+
+   ```lua
+   loadstring(game:HttpGet("https://raw.githubusercontent.com/LyeDevGit/WonTree-RBLX-Dumper/refs/heads/main/WonTree-RBLX-Dumper.lua"))()
+   ```
+
+   **Manual** — copy the contents of [`WonTree-RBLX-Dumper.lua`](WonTree-RBLX-Dumper.lua) and execute it. Loaded again later? It reloads instead of duplicating.
+
+3. Press **Start Smart Dump** in the UI.
+4. Open the dump folder (button in the UI, or your executor's workspace) and read the reports.
+
+> Requires internet once for the Rayfield UI; if the UI can't load, the script automatically falls back to a native UI.
+
+## 🔬 Analyze the dump (agent skill)
+
+WonTree produces the *raw material* — the **game-logic-analyzer** skill turns it into understanding. After a dump, point any agent/assistant at the dump folder with this skill and it will map the game's architecture, systems, remote flows and open questions.
+
+The skill ships in this repo at [`.agents/skills/game-logic-analyzer/SKILL.md`](.agents/skills/game-logic-analyzer/SKILL.md) — copy it into your own agent's skills folder. It expects the dump folder as input and produces:
+
+- **System overview** — what the game is and its core loops
+- **Architecture diagram** — hierarchy, modules, dependencies, framework used
+- **Remote catalog** — every remote: direction, args, call sites, listeners
+- **Key flows** — step-by-step for important player actions
+- **Open questions** — what the dump cannot reveal (e.g., missing server-side scripts)
+
+> **Best used after** a dump exists: `{game_id}_dump/` with the four `.md` reports (and `scripts/` when saved). The analyzer reads the reports, and digs into `scripts/` for specifics.
+
+## 🎮 Usage tips
+
+- **Call graph** — the fastest way to understand a game: pick a remote in `remotes.md`, see exactly which script fires it and which script handles it.
+- **Live logger** — enable it, play (buy items, open menus, start rounds), then Start/Stop a dump to flush captures into `remotes.md` and the `.log` file.
+- **Frameworks** — if a game uses Knit/ProfileService/etc., `extras.md` tells you and points at the scripts.
+- **Anti-cheat** — the security section lists scripts matching exploit-detection keywords; check them before writing anything that might get detected.
+- **Massive / protected games** — the script cap now goes up to 10,000; failed scripts are listed in `protected.txt` and `directory.md` instead of stalling the dump. Lower *Max scripts* if it still feels slow.
+- **After the dump** — hand the folder to the **game-logic-analyzer** skill (see below) to get systems, flows and architecture mapped out.
+
+## 🔌 Executor support
+
+WonTree targets the **UNC (Unified Naming Convention)** executor API — the de-facto standard that modern executors implement. It adapts automatically:
+
+| Requirement | Needed for | Fallback if missing |
+|---|---|---|
+| `writefile` / `makefolder` / `isfolder` (file API) | writing reports | — (executor can't save files) |
+| `decompile` | full source | `getscriptbytecode`+`dumpstring`, then `Source`, then bytecode hex |
+| `getinstances` / `getnilinstances` | server-side scan | client-only dump |
+| `hookmetamethod` / `getrawmetatable` | live logger | live logging disabled, everything else works |
+
+**Verified:** Xeno (full support — decompile, dumpstring, file API, hook).  
+**Expected (UNC-compliant):** Wave, Delta, Fluxus, Codex, Hydrogen, Celery, Nihon, Oxygen U, Solara (decompile falls back to bytecode/source), Arceus X.  
+**Retired but historically compatible:** KRNL, Synapse X, Script-Ware.
+
+Full matrix, per-executor notes and citations: **[docs/EXECUTOR-SUPPORT.md](docs/EXECUTOR-SUPPORT.md)**.
+
+## 📚 Documentation
+
+- [**Output reference**](docs/OUTPUT.md) — what every report contains, with examples.
+- [**Executor support**](docs/EXECUTOR-SUPPORT.md) — the compatibility matrix and how the script adapts.
+- [**Development**](docs/DEVELOPMENT.md) — code layout, testing, how to add patterns, release checklist.
+- [**Analyzer skill**](.agents/skills/game-logic-analyzer/SKILL.md) — the companion agent skill that maps a finished dump into a readable game architecture.
+
+## 🛠 Contributing
+
+Issues, pull requests and executor field-test reports are welcome. If your executor misbehaves, open an issue with the **Executor capabilities** output from the Info tab — it tells us exactly what your environment supports. See [CONTRIBUTING](docs/DEVELOPMENT.md) for details.
+
+## ⚠️ Disclaimer
+
+For **educational and research purposes only**. Reverse-engineering third-party games may violate their Terms of Service and Roblox's Terms of Use. You are responsible for how you use this tool. The project is provided as-is, without warranty.
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 WonTree
+
+```
+
+`WonTree-RBLX-Dumper.lua`:
+
+```lua
+-- ============================================================
+--  WonTree RBLX Dumper  v1.0.2
+--  Universal Roblox game analysis dumper (open source)
+--  Target: Xeno / Wave / Solara / Delta / Codex / any UNC executor
+--  UI:     Rayfield Gen2  (https://docs.sirius.menu/rayfield-gen2)
+--
+--  What it does:
+--    Scans the whole game (client tree + server-side via
+--    getinstances when available), decompiles every script it
+--    can reach, then writes clean markdown reports:
+--
+--      {game_id}_dump/
+--        {game_id}_directory.md   file / asset structure tree
+--        {game_id}_functions.md   functions & game logic entry points
+--        {game_id}_remotes.md     RemoteEvents / RemoteFunctions
+--        {game_id}_extras.md      bindables, services, values,
+--                                 anti-cheat, network, config data
+--        {game_id}_remotes.csv    machine-readable call graph
+--        {game_id}_live_remotes.log  live remote call capture
+--
+--  v1.0.2 (bugfix):
+--      - Dump folder no longer persists across sessions (Rayfield flag
+--        removal) and a folder collision guard redirects to
+--        {gameId}_{placeId}_dump when the folder already holds a dump of
+--        a different place - dumps are never silently overwritten
+--
+--  v1.0.1 (hardening for massive/protected games):
+--      - Self-capture filter: drops loadstring_* / numeric-named scripts
+--        and content markers (GitHub / sirius.menu URLs) so the dumper
+--        never analyzes its own injected code (kept reports clean)
+--      - Failed/protected scripts are now listed by path in the report
+--        instead of a bare count
+--      - Memory-capped analysis sources; script cap raised to 2500
+--      - Server-side roots: renders containers even when the executor's
+--        getinstances() parent chain does not reach game (fixes Xeno)
+--      - Anti-cheat scan: word-boundary matching, dropped noisy words
+--        (wave/kick/ban) that matched normal gameplay text
+--      - Progress shows live script i/N counts while decompiling
+--
+--  v1.0 (initial public release):
+--      - Reinjection-safe: reloads instead of duplicating the UI
+--      - Live Remote Logger with keybind (newcclosure + checkcaller)
+--      - Remote call graph: who fires / who listens, with line numbers
+--      - Framework detection: Knit / ProfileService / Net / DataStore2
+--        / Promise / Maid / Signal / remote wrappers
+--      - Asset ID scanner (rbxassetid://), place info fetch, CSV export
+--      - Executor capability report (works on every UNC executor)
+--      - Anti-detection: skips injected/executor scripts by name,
+--        filters Roblox core, hook only installs on user request
+--
+--    Optionally also saves full decompiled sources to scripts/
+--    and raw bytecode (hex) to bytecode/ when decompiling fails.
+--
+--  Runs in its own thread and yields between batches so the
+--  game stays smooth even on huge places.
+-- ============================================================
+
+local HttpService = game:GetService("HttpService")
+
+-- ------------------------------------------------------------
+--  Executor environment (works on Xeno, Wave, Synapse, ...)
+-- ------------------------------------------------------------
+local getgenvFn = getgenv
+local genv = type(getgenvFn) == "function" and getgenvFn() or {}
+
+local function ExecFn(name)
+	if genv and genv[name] ~= nil then return genv[name] end
+	local ok, v = pcall(rawget, _G, name)
+	if ok then return v end
+	return nil
+end
+
+local writefileFn   = ExecFn("writefile")
+local readfileFn    = ExecFn("readfile")
+local isfileFn      = ExecFn("isfile")
+local makefolderFn  = ExecFn("makefolder")
+local isfolderFn    = ExecFn("isfolder")
+local openfolderFn  = ExecFn("openfolder")
+local decompileFn   = ExecFn("decompile")
+local gscFn         = ExecFn("getscriptbytecode")
+local dumpstringFn  = ExecFn("dumpstring")
+local getinstancesFn   = ExecFn("getinstances")
+local getnilinstancesFn = ExecFn("getnilinstances")
+local getscriptsFn  = ExecFn("getscripts")
+local isprotectedFn = ExecFn("isprotectedscript")
+local getnetworkownerFn = ExecFn("getnetworkowner")
+local identifyExec  = ExecFn("identifyexecutor")
+local hookmetamethodFn   = ExecFn("hookmetamethod")
+local getnamecallmethodFn = ExecFn("getnamecallmethod")
+local checkcallerFn      = ExecFn("checkcaller")
+local newcclosureFn      = ExecFn("newcclosure")
+local isourclosureFn     = ExecFn("isourclosure")
+local getrawmetatableFn  = ExecFn("getrawmetatable")
+local setreadonlyFn      = ExecFn("setreadonly")
+local setclipboardFn     = ExecFn("setclipboard")
+local toclipboardFn      = ExecFn("toclipboard")
+
+-- ------------------------------------------------------------
+--  Config / state
+-- ------------------------------------------------------------
+local Config = {
+	includeServerSide = true,   -- use getinstances() for server-only scripts
+	saveSources       = false,  -- write decompiled sources to scripts/
+	saveBytecode      = false,  -- write raw bytecode (hex) when decompile fails
+	maxScripts        = 2500,   -- cap on scripts we decompile
+	treeDepth         = 10,     -- directory tree depth cap
+	treeMaxChildren   = 150,    -- directory tree children cap per folder
+	showAttrs         = true,   -- show attributes in the tree
+	scanAnticheat     = true,   -- extras: anti-cheat / security scan
+	scanConfig        = true,   -- extras: detect config/data modules
+	skipInjected      = true,   -- filter scripts that look like injected executor libs
+	debugPrints       = false,
+	yieldEvery        = 20,     -- yield the worker every N items (smoothness)
+}
+
+local State = {
+	running   = false,
+	cancel    = false,
+	folder    = nil,      -- dump folder name
+	processed = 0,
+	remotes   = 0,
+	funcs     = 0,
+	lastStatus = "Idle",
+}
+
+-- Persistent state shared across reinjections:
+-- reinjecting just reloads the UI instead of duplicating it.
+local P = _G.WonTreeRBLX or {}
+_G.WonTreeRBLX = P
+P.version = "1.0.2"
+P.live = P.live or { enabled = false, installed = false, buffer = {}, total = 0, flushed = 0, perRemote = {} }
+P.gameInfo = P.gameInfo or nil
+
+-- UI hooks (registered by whichever UI is built)
+local UI = {
+	status  = function(text, color) end,
+	stats   = function(processed, remotes, funcs) end,
+	notify  = function(title, content, duration) end,
+	live    = function(count) end,   -- live remote call counter
+	summary = function(title, content) end, -- end-of-dump popup
+}
+
+local function dbg(...)
+	if Config.debugPrints then
+		print("[WonTree] ", ...)
+	end
+end
+
+local function setStatus(text)
+	State.lastStatus = text
+	UI.status(text)
+	dbg(text)
+end
+
+local function Notify(title, content, duration)
+	UI.notify(title, content, duration or 6)
+end
+
+-- Executor capability report (helps debugging across executors)
+local function CapabilityReport()
+	return {
+		{ name = "File API (writefile/readfile)",      ok = type(writefileFn) == "function" },
+		{ name = "Folder API (makefolder/isfolder)",   ok = type(makefolderFn) == "function" and type(isfolderFn) == "function" },
+		{ name = "decompile",                          ok = type(decompileFn) == "function" },
+		{ name = "getscriptbytecode",                  ok = type(gscFn) == "function" },
+		{ name = "dumpstring (bytecode -> source)",    ok = type(dumpstringFn) == "function" },
+		{ name = "getinstances (server-side scan)",    ok = type(getinstancesFn) == "function" },
+		{ name = "getnilinstances",                    ok = type(getnilinstancesFn) == "function" },
+		{ name = "hookmetamethod (live logger)",       ok = type(hookmetamethodFn) == "function" or type(getrawmetatableFn) == "function" },
+		{ name = "checkcaller (hook safety)",          ok = type(checkcallerFn) == "function" },
+		{ name = "openfolder",                         ok = type(openfolderFn) == "function" },
+		{ name = "identifyexecutor",                   ok = type(identifyExec) == "function" },
+	}
+end
+
+local function CapabilitySummary()
+	local parts = {}
+	for _, c in ipairs(CapabilityReport()) do
+		parts[#parts + 1] = (c.ok and "✔" or "✘") .. " " .. c.name
+	end
+	return table.concat(parts, "\n")
+end
+
+-- Fetch public place info (name / creator / created / universe) once, async
+local function fetchGameInfo()
+	if P.gameInfo then return end
+	task.spawn(function()
+		local info = nil
+		pcall(function()
+			local res = game:HttpGet("https://api.roblox.com/marketplace/productinfo?assetId=" .. tostring(game.PlaceId), true)
+			if type(res) == "string" and #res > 10 then
+				info = HttpService:JSONDecode(res)
+			end
+		end)
+		if type(info) == "table" then
+			pcall(function()
+				local res2 = game:HttpGet("https://apis.roblox.com/universes/v1/places/" .. tostring(game.PlaceId) .. "/universe", true)
+				if type(res2) == "string" and #res2 > 10 then
+					local uni = HttpService:JSONDecode(res2)
+					if type(uni) == "table" and uni.universeId then
+						info.universeId = uni.universeId
+					end
+				end
+			end)
+			P.gameInfo = info
+			dbg("game info fetched:", info.Name)
+		end
+	end)
+end
+
+local function CopyToClipboard(text)
+	local ok = false
+	if type(setclipboardFn) == "function" then
+		ok = pcall(setclipboardFn, text)
+	elseif type(toclipboardFn) == "function" then
+		ok = pcall(toclipboardFn, text)
+	end
+	return ok
+end
+
+local function ExecutorName()
+	if type(identifyExec) ~= "function" then return "Unknown" end
+	local ok, res = pcall(identifyExec)
+	if not ok then return "Unknown" end
+	if type(res) == "table" then
+		local parts = {}
+		for _, v in ipairs(res) do parts[#parts + 1] = tostring(v) end
+		if #parts > 0 then return table.concat(parts, " ") end
+	end
+	return tostring(res)
+end
+
+-- ------------------------------------------------------------
+--  File helpers
+-- ------------------------------------------------------------
+local function Sanitize(str)
+	return tostring(str):gsub("[^%w%._%-]", "_")
+end
+
+local function EnsureFolder(name)
+	if type(makefolderFn) ~= "function" then return false end
+	local ok, exists = pcall(isfolderFn or function() return false end, name)
+	if ok and not exists then
+		pcall(makefolderFn, name)
+	end
+	return true
+end
+
+local function WriteFile(path, content)
+	if type(writefileFn) ~= "function" then return false end
+	local ok = pcall(writefileFn, path, tostring(content))
+	return ok
+end
+
+local function AppendLine(list, line)
+	list[#list + 1] = line
+end
+
+local function shorten(v, n)
+	v = tostring(v)
+	if #v > n then return v:sub(1, n) .. "…" end
+	return v
+end
+
+-- ------------------------------------------------------------
+--  Misc helpers
+-- ------------------------------------------------------------
+local function listContains(t, v)
+	for _, x in ipairs(t) do
+		if x == v then return true end
+	end
+	return false
+end
+
+local function getPath(inst)
+	local parts = {}
+	local p = inst
+	while p and p ~= game do
+		parts[#parts + 1] = p.Name
+		p = p.Parent
+		if #parts > 40 then break end
+	end
+	local rev = {}
+	for i = #parts, 1, -1 do rev[#rev + 1] = parts[i] end
+	return table.concat(rev, " > ")
+end
+
+-- Skip Roblox core (CoreGui / CorePackages / RobloxGui) - huge noise
+local function isNoise(inst)
+	local p = inst
+	local depth = 0
+	while p do
+		local n = p.Name
+		if n == "CoreGui" or n == "CorePackages" or n == "RobloxGui" then
+			return true
+		end
+		if p == game then break end
+		p = p.Parent
+		depth = depth + 1
+		if depth > 50 then break end
+	end
+	return false
+end
+
+local function safeIsA(inst, class)
+	local ok, res = pcall(function() return inst:IsA(class) end)
+	if ok then return res end
+	return false
+end
+
+local function lineIndex(src)
+	local starts = { 1 }
+	for m in src:gmatch("\n()") do starts[#starts + 1] = m end
+	return starts
+end
+
+local function lineAt(starts, pos)
+	local lo, hi = 1, #starts
+	while lo < hi do
+		local mid = math.floor((lo + hi + 1) / 2)
+		if starts[mid] <= pos then lo = mid else hi = mid - 1 end
+	end
+	return lo
+end
+
+local function countOccurrences(src, sub)
+	local _, n = src:gsub(sub, "")
+	return n
+end
+
+-- ------------------------------------------------------------
+--  Instance collection (multi-source, deduped)
+-- ------------------------------------------------------------
+local function collectInstances()
+	local visible = {}      -- everything the client can see
+	local serverOnly = {}   -- extra instances found via getinstances/getnilinstances
+	local seen = {}
+	local function tryAdd(t, inst)
+		if seen[inst] then return end
+		seen[inst] = true
+		t[#t + 1] = inst
+	end
+
+	pcall(function()
+		local vis = game:GetDescendants()
+		for i = 1, #vis do
+			tryAdd(visible, vis[i])
+			if i % 20000 == 0 then task.wait() end
+		end
+	end)
+
+	if Config.includeServerSide then
+		pcall(function()
+			if type(getinstancesFn) == "function" then
+				local all = getinstancesFn()
+				for i = 1, #all do
+					if not seen[all[i]] then
+						seen[all[i]] = true
+						serverOnly[#serverOnly + 1] = all[i]
+					end
+					if i % 20000 == 0 then task.wait() end
+				end
+			end
+		end)
+		pcall(function()
+			if type(getnilinstancesFn) == "function" then
+				local all = getnilinstancesFn()
+				for i = 1, #all do
+					if not seen[all[i]] then
+						seen[all[i]] = true
+						serverOnly[#serverOnly + 1] = all[i]
+					end
+					if i % 20000 == 0 then task.wait() end
+				end
+			end
+		end)
+	end
+
+	return visible, serverOnly
+end
+
+-- Names unlikely to appear in legit game content (executor libraries / tools)
+local INJECTED_SUBSTR = { "rayfield", "sirius", "synapse", "krnl", "fluxus", "scriptware", "wontree", "smartdumper", "loadstring" }
+local INJECTED_WORDS = { "wave", "delta", "xeno", "solara", "codex", "hydrogen", "arceus", "evon", "celery", "oxygen", "elysian", "jjsploit", "nihon" }
+
+-- Content markers that only appear inside injected executor scripts / libraries.
+-- If a decompiled script contains any of these, it is almost certainly the
+-- dumper itself, a UI library it loaded, or another injected tool.
+local INJECTED_CONTENT = {
+	"raw.githubusercontent.com/lyedevgit", -- the WonTree loader URL (lowercase)
+	"wontree-rblx-dumper",                 -- our repo path (lowercase)
+	"sirius.menu/gen2",                    -- Rayfield Gen2 library URL
+	"docs.sirius.menu",                    -- Rayfield docs
+}
+
+local function isInjected(inst)
+	if not Config.skipInjected then return false end
+	local name = string.lower(inst.Name)
+	for _, m in ipairs(INJECTED_SUBSTR) do
+		if string.find(name, m, 1, true) then return true end
+	end
+	for _, m in ipairs(INJECTED_WORDS) do
+		-- word-boundary match so e.g. "Wave" is caught but "WaveHandler" is not
+		if string.find(name, "%f[%a]" .. m .. "%f[%A]") then return true end
+	end
+	-- executors name their loadstring'd chunks "loadstring_NNN" and the
+	-- dumper's own loader chunk had a bare numeric name (e.g. 7688753)
+	if string.find(name, "loadstring", 1, true) == 1 or name:match("^%d+$") then
+		return true
+	end
+	local path = string.lower(getPath(inst))
+	if string.find(path, "rayfield", 1, true) or string.find(path, "sirius", 1, true)
+		or string.find(path, "wontree", 1, true) or string.find(path, "smartdumper", 1, true)
+		or string.find(path, "loadstring", 1, true) then
+		return true
+	end
+	return false
+end
+
+-- Second layer: a script with an innocent name whose *source* is injected code.
+local function isInjectedContent(src)
+	if not Config.skipInjected or not src then return false end
+	local low = string.lower(src)
+	for _, m in ipairs(INJECTED_CONTENT) do
+		if string.find(low, m, 1, true) then return true end
+	end
+	return false
+end
+
+local function collectScripts(visible, serverOnly)
+	local scripts = {}
+	local seen = {}
+	local function add(inst)
+		if seen[inst] then return end
+		if isNoise(inst) then return end
+		if isInjected(inst) then return end
+		if not (safeIsA(inst, "BaseScript") or safeIsA(inst, "ModuleScript")) then return end
+		seen[inst] = true
+		scripts[#scripts + 1] = inst
+	end
+	for _, inst in ipairs(visible) do add(inst) end
+	for _, inst in ipairs(serverOnly) do add(inst) end
+	pcall(function()
+		if type(getscriptsFn) == "function" then
+			for _, inst in ipairs(getscriptsFn()) do
+				if not seen[inst] then
+					seen[inst] = true
+					if not isNoise(inst) and not isInjected(inst) then
+						scripts[#scripts + 1] = inst
+					end
+				end
+			end
+		end
+	end)
+	table.sort(scripts, function(a, b)
+		local pa, pb = getPath(a), getPath(b)
+		if pa == pb then return a.Name < b.Name end
+		return pa < pb
+	end)
+	return scripts
+end
+
+-- ------------------------------------------------------------
+--  Decompile stack (4 methods, defensive)
+-- ------------------------------------------------------------
+local function TryDecompile(script)
+	-- 1) decompile()
+	if type(decompileFn) == "function" then
+		local ok, src = pcall(decompileFn, script)
+		if ok and type(src) == "string" and #src > 10 then
+			return src, "decompile"
+		end
+	end
+	-- 2) getscriptbytecode() + dumpstring() (Xeno / others)
+	if type(gscFn) == "function" then
+		local ok2, bc = pcall(gscFn, script)
+		if ok2 and type(bc) == "string" and #bc > 0 then
+			if type(dumpstringFn) == "function" then
+				local ok3, out = pcall(dumpstringFn, bc)
+				if ok3 and type(out) == "string" and #out > 10 then
+					return out, "dumpstring"
+				end
+			end
+			if Config.saveBytecode then
+				return nil, "bytecode", bc
+			end
+		end
+	end
+	-- 3) direct Source read (works for client-replicated scripts)
+	local ok4, src4 = pcall(function() return script.Source end)
+	if ok4 and type(src4) == "string" and #src4 > 0 then
+		return src4, "Source"
+	end
+	return nil, "failed"
+end
+
+-- ------------------------------------------------------------
+--  Code analysis: functions
+-- ------------------------------------------------------------
+local LUA_KEYWORDS = {
+	"and", "or", "not", "if", "then", "else", "elseif", "end",
+	"while", "do", "for", "in", "repeat", "until", "return",
+	"local", "function", "nil", "true", "false", "break",
+}
+
+local function extractFunctions(src, starts)
+	local funcs = {}
+	local seenF = {}
+	local patterns = {
+		"local%s+function%s+([%w_%.%:]+)",
+		"function%s+([%w_%.%:]+)",
+		"([%w_%.%:]+)%s*=%s*function",
+		"local%s+([%w_]+)%s*=%s*function",
+	}
+	for _, pat in ipairs(patterns) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, name = string.find(src, pat, pos)
+			if not s then break end
+			pos = e + 1
+			if name and not listContains(LUA_KEYWORDS, name) then
+				local line = lineAt(starts, s)
+				local key = name .. "|" .. line
+				if not seenF[key] then
+					seenF[key] = true
+					funcs[#funcs + 1] = { name = name, line = line }
+				end
+			end
+			if #funcs >= 80 then break end
+		end
+		if #funcs >= 80 then break end
+	end
+	return funcs
+end
+
+-- Module exports ("return { ... }") + config/data detection
+local function extractModuleInfo(src, starts)
+	local s = string.find(src, "return%s*{", 1)
+	if s then
+		local segStart = s + 8 -- first char after "return {"
+		local seg = src:sub(segStart, math.min(#src, segStart + 20000))
+		local keys = {}
+		local seenK = {}
+		local pos = 1
+		local funcKeys = 0
+		local scalarAssigns = 0
+		while pos <= #seg do
+			local a, b, k = string.find(seg, "([%w_]+)%s*=%s*function", pos)
+			if not a then
+				local a2, b2, k2 = string.find(seg, "%[%s*[\"']([^\"']+)[\"']%s*%]%s*=%s*function", pos)
+				if not a2 then break end
+				k, a, b = k2, a2, b2
+			end
+			pos = b + 1
+			if k and not seenK[k] then
+				seenK[k] = true
+				keys[#keys + 1] = { name = k, line = lineAt(starts, segStart + a - 1) }
+				funcKeys = funcKeys + 1
+			end
+			if #keys >= 60 then break end
+		end
+		scalarAssigns = countOccurrences(seg:sub(1, math.min(#seg, 8000)), "%s*[%w_]+%s*=%s*[\"']")
+		local isConfig = funcKeys == 0 and scalarAssigns >= 5
+		return keys, isConfig and "config" or "module"
+	end
+	if string.find(src, "return%s+function", 1) then
+		return { { name = "(module function)", line = 1 } }, "module"
+	end
+	return nil, nil
+end
+
+-- ------------------------------------------------------------
+--  Code analysis: remotes
+-- ------------------------------------------------------------
+local REMOTE_PATTERNS = {
+	{ "RemoteEvent%.new%s*%(%s*[\"']([^\"']+)[\"']",       "created" },
+	{ "RemoteFunction%.new%s*%(%s*[\"']([^\"']+)[\"']",    "created" },
+	{ ":FireServer%s*%(%s*[\"']([^\"']+)[\"']",            "FireServer" },
+	{ ":InvokeServer%s*%(%s*[\"']([^\"']+)[\"']",          "InvokeServer" },
+	{ ":FireAllClients%s*%(%s*[\"']([^\"']+)[\"']",        "FireAllClients" },
+	{ ":FireClient%s*%([^\"']*[\"']([^\"']+)[\"']",        "FireClient" },
+	{ "GetServerEvent%s*%(%s*[\"']([^\"']+)[\"']",         "framework" },
+	{ "GetClientEvent%s*%(%s*[\"']([^\"']+)[\"']",         "framework" },
+}
+
+local function scanRemotes(src, path, out)
+	-- out: map name -> { count, kinds = {kind=count}, scripts = {path...} }
+	-- returns the number of new remote references found (for progress)
+	local added = 0
+	local function add(name, kind)
+		local entry = out[name]
+		if not entry then
+			entry = { count = 0, kinds = {}, scripts = {} }
+			out[name] = entry
+		end
+		entry.count = entry.count + 1
+		entry.kinds[kind] = (entry.kinds[kind] or 0) + 1
+		if not listContains(entry.scripts, path) then
+			entry.scripts[#entry.scripts + 1] = path
+		end
+		added = added + 1
+	end
+	for _, pat in ipairs(REMOTE_PATTERNS) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, name = string.find(src, pat[1], pos)
+			if not s then break end
+			pos = e + 1
+			add(name, pat[2])
+		end
+	end
+	-- variable endpoints:  Remotes.Events.Start:FireServer(...)
+	local varPats = { ":FireServer", ":InvokeServer", ":FireAllClients", ":FireClient" }
+	for _, vp in ipairs(varPats) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, var = string.find(src, "([%w_%.]+)" .. vp, pos)
+			if not s then break end
+			pos = e + 1
+			if var then
+				add("(var) " .. var, "variable")
+			end
+		end
+	end
+	return added
+end
+
+-- ------------------------------------------------------------
+--  Code analysis: keyword groups (extras)
+-- ------------------------------------------------------------
+local KEYWORD_GROUPS = {
+	{
+		name = "Anti-cheat / exploit detection",
+		-- NOTE: generic words like wave/kick/ban were removed - they matched
+		-- normal gameplay text (wave-based games, enemy abilities).
+		words = { "anticheat", "anti-cheat", "antiexploit", "checkcaller",
+			"getrawmetatable", "hookmetamethod", "newcclosure", "byfron",
+			"hyperion", "synapse", "krnl", "fluxus", "solara", "xeno",
+			"permaban", "tamper", "guard", "heuristics" },
+	},
+	{
+		name = "Teleport / place switching",
+		words = { "teleportservice", "teleporttoplaceinstance", "teleportasync", "jobid" },
+	},
+	{
+		name = "Data / save systems",
+		words = { "datastoreservice", "getdatastore", "updateasync", "incrementasync", "leaderstats" },
+	},
+	{
+		name = "Messaging",
+		words = { "messagingservice", "publishasync", "subscribeasync" },
+	},
+	{
+		name = "Network ownership / replication",
+		words = { "setnetworkowner", "setnetworkownership", "replicateinstance" },
+	},
+	{
+		name = "Client-side HTTP / requests",
+		words = { "httpget", "httpservice", "http_request", "request" },
+	},
+}
+
+local function keywordPattern(word)
+	-- word-boundary for plain words so "wave" doesn't match "Waves" inside
+	-- gameplay text, while hyphen/underscore words stay exact-ish substrings.
+	if word:match("^[%a%d_]+$") then
+		return "%f[%a%d_]" .. word .. "%f[^%a%d_]"
+	end
+	return word:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0")
+end
+
+local function scanKeywords(src, path, out)
+	-- out: map groupName -> list of { path, word, count }
+	local low = src:lower()
+	for _, group in ipairs(KEYWORD_GROUPS) do
+		local hits = out[group.name]
+		if not hits then
+			hits = {}
+			out[group.name] = hits
+		end
+		for _, word in ipairs(group.words) do
+			local c = countOccurrences(low, keywordPattern(word))
+			if c > 0 then
+				hits[#hits + 1] = { path = path, word = word, count = c }
+			end
+		end
+	end
+end
+
+-- ------------------------------------------------------------
+--  Code analysis: remote call graph (who fires / who listens)
+--  Resolves variables like event = Remotes:GetServerEvent("Name")
+--  so listen/fire sites can be linked to the real remote name.
+-- ------------------------------------------------------------
+local function scanCallGraph(src, path, out)
+	-- out: map name -> { fire = {{path,line,kind}}, listen = {{path,line}}, uses = n }
+	local starts = lineIndex(src)
+	local varMap = {}  -- variable name -> remote name
+
+	local function addMap(var, name)
+		if var and name and not varMap[var] then varMap[var] = name end
+	end
+
+	-- pass 1: variable -> remote name mappings
+	local mapPats = {
+		"local%s+([%w_]+)%s*=%s*[%w_%.]+:%s*GetServerEvent%s*%(%s*[\"']([^\"']+)",
+		"local%s+([%w_]+)%s*=%s*[%w_%.]+:%s*GetClientEvent%s*%(%s*[\"']([^\"']+)",
+		"local%s+([%w_]+)%s*=%s*[%w_%.]+:WaitForChild%s*%(%s*[\"']([^\"']+)",
+	}
+	for _, pat in ipairs(mapPats) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, var, name = string.find(src, pat, pos)
+			if not s then break end
+			pos = e + 1
+			addMap(var, name)
+		end
+	end
+
+	-- pass 1b:  local e = Instance.new("RemoteEvent")  ...  e.Name = "StartRound"
+	local posN = 1
+	while posN <= #src do
+		local sn, en, varN = string.find(src, "local%s+([%w_]+)%s*=%s*Instance%.new%s*%(%s*[\"']RemoteEvent[\"']%s*%)", posN)
+		if not sn then break end
+		posN = en + 1
+		if not varMap[varN] then
+			local sN2, eN2, nameN = string.find(src, varN .. "%.Name%s*=%s*[\"']([^\"']+)[\"']", en)
+			if nameN and (sN2 - en) <= 500 then
+				varMap[varN] = nameN
+			end
+		end
+	end
+
+	local function addSite(name, kind, line)
+		if not name then return end
+		local entry = out[name]
+		if not entry then
+			entry = { fire = {}, listen = {}, fireSeen = {}, listenSeen = {}, uses = 0 }
+			out[name] = entry
+		end
+		entry.uses = entry.uses + 1
+		if kind == "listen" then
+			local key = path .. "|" .. line
+			if not entry.listenSeen[key] then
+				entry.listenSeen[key] = true
+				entry.listen[#entry.listen + 1] = { path = path, line = line }
+			end
+		else
+			local key = path .. "|" .. line
+			if not entry.fireSeen[key] then
+				entry.fireSeen[key] = true
+				entry.fire[#entry.fire + 1] = { path = path, line = line, kind = kind }
+			end
+		end
+	end
+
+	-- pass 2: literal-name fire sites
+	local litPats = {
+		{ pat = ":FireServer%s*%(%s*[\"']([^\"']+)",      kind = "FireServer" },
+		{ pat = ":InvokeServer%s*%(%s*[\"']([^\"']+)",    kind = "InvokeServer" },
+		{ pat = ":FireAllClients%s*%(%s*[\"']([^\"']+)",  kind = "FireAllClients" },
+		{ pat = ":FireClient%s*%([^\"']*[\"']([^\"']+)", kind = "FireClient" },
+	}
+	for _, p in ipairs(litPats) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, name = string.find(src, p.pat, pos)
+			if not s then break end
+			pos = e + 1
+			addSite(name, p.kind, lineAt(starts, s))
+		end
+	end
+
+	-- pass 3: variable fire/listen sites, resolved via varMap
+	-- note: OnServerEvent/OnClientEvent are read with a DOT, then :Connect
+	local varPats = {
+		{ pat = "([%w_]+):FireServer%s*%(",     kind = "FireServer" },
+		{ pat = "([%w_]+):InvokeServer%s*%(",   kind = "InvokeServer" },
+		{ pat = "([%w_]+):FireAllClients%s*%(", kind = "FireAllClients" },
+		{ pat = "([%w_]+)%.OnServerEvent%s*:%s*Connect", kind = "listen" },
+		{ pat = "([%w_]+)%.OnClientEvent%s*:%s*Connect", kind = "listen" },
+	}
+	for _, p in ipairs(varPats) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, var = string.find(src, p.pat, pos)
+			if not s then break end
+			pos = e + 1
+			local name = varMap[var]
+			if name then
+				addSite(name, p.kind, lineAt(starts, s))
+			end
+		end
+	end
+
+	-- pass 3b: inline chained listen, e.g. Remotes:GetServerEvent("X").OnServerEvent:Connect
+	local inlinePats = {
+		":GetServerEvent%s*%(%s*[\"']([^\"']+)[\"']%s*%)%.OnServerEvent%s*:%s*Connect",
+		":GetClientEvent%s*%(%s*[\"']([^\"']+)[\"']%s*%)%.OnClientEvent%s*:%s*Connect",
+	}
+	for _, pat in ipairs(inlinePats) do
+		local pos = 1
+		while pos <= #src do
+			local s, e, name = string.find(src, pat, pos)
+			if not s then break end
+			pos = e + 1
+			addSite(name, "listen", lineAt(starts, s))
+		end
+	end
+end
+
+-- ------------------------------------------------------------
+--  Code analysis: framework detection
+-- ------------------------------------------------------------
+local FRAMEWORKS = {
+	{ name = "Knit",       pats = { "Knit%.CreateService", "Knit%.CreateController", "Knit%.Start" } },
+	{ name = "ProfileService", pats = { "ProfileService", "ProfileTemplate", ":Profile%(" } },
+	{ name = "Net (sleitnick)", pats = { "Net%:Create", "Net%:RemoteEvent", "Net%:RemoteFunction" } },
+	{ name = "DataStore2", pats = { "DataStore2" } },
+	{ name = "Promise (roblox-lua-promise)", pats = { "Promise%.new", "Promise:andThen", "Promise%.resolve" } },
+	{ name = "Maid",       pats = { "Maid%.new", ":GiveTask" } },
+	{ name = "Signal library", pats = { "Signal%.new", "RbxSignal", "GoodSignal" } },
+	{ name = "Remote wrapper (GetServerEvent/GetClientEvent)", pats = { "GetServerEvent", "GetClientEvent" } },
+	{ name = "Controller/Service pattern", pats = { "CreateController", "GetController" } },
+}
+
+local function scanFrameworks(src, path, out)
+	-- out: map frameworkName -> list of { path, count } (only matched frameworks)
+	for _, fw in ipairs(FRAMEWORKS) do
+		local total = 0
+		for _, pat in ipairs(fw.pats) do
+			total = total + countOccurrences(src, pat)
+		end
+		if total > 0 then
+			local hits = out[fw.name]
+			if not hits then
+				hits = {}
+				out[fw.name] = hits
+			end
+			hits[#hits + 1] = { path = path, count = total }
+		end
+	end
+end
+
+-- ------------------------------------------------------------
+--  Code analysis: asset IDs (rbxassetid://)
+-- ------------------------------------------------------------
+local function scanAssetIds(src, out)
+	-- out: map assetId -> reference count
+	for aid in string.gmatch(src, "rbxassetid://(%d+)") do
+		out[aid] = (out[aid] or 0) + 1
+	end
+end
+
+-- ------------------------------------------------------------
+--  Live remote logger (optional namecall hook)
+--  Anti-detection: newcclosure-wrapped, checkcaller-guarded,
+--  everything in pcall, only installed when the user enables it.
+-- ------------------------------------------------------------
+-- persistent across reinjections so an old hook keeps working
+local LiveLogger = P.live
+
+local TypeOf = typeof or function(v) return type(v) end
+
+local function SerializeValue(v, depth, seen)
+	depth = depth or 0
+	if depth > 3 then return "<max depth>" end
+	seen = seen or {}
+	local t = type(v)
+	if t == "table" then
+		if seen[v] then return "<recursive>" end
+		seen[v] = true
+		local parts = {}
+		local n = 0
+		for k, val in pairs(v) do
+			if n >= 10 then
+				parts[#parts + 1] = "..."
+				break
+			end
+			parts[#parts + 1] = tostring(k) .. "=" .. SerializeValue(val, depth + 1, seen)
+			n = n + 1
+		end
+		seen[v] = nil
+		return "{" .. table.concat(parts, ", ") .. "}"
+	elseif t == "userdata" then
+		local w = TypeOf(v)
+		if w == "Instance" then
+			return "[Instance " .. tostring(v.ClassName) .. ":" .. tostring(v.Name) .. "]"
+		end
+		return "[" .. tostring(w) .. "]"
+	elseif t == "string" then
+		if #v > 60 then v = v:sub(1, 60) .. "..." end
+		return string.format("%q", v)
+	elseif t == "function" then
+		return "<function>"
+	else
+		return tostring(v)
+	end
+end
+
+local function LiveLogLine(remote, method, args)
+	local parts = {}
+	for i = 1, math.min(#args, 8) do
+		parts[#parts + 1] = SerializeValue(args[i], 0, {})
+	end
+	local name = ""
+	pcall(function() name = remote:GetFullName() end)
+	return string.format("[%s] %s.%s(%s)", os.date("%H:%M:%S"), name, method, table.concat(parts, ", "))
+end
+
+local function FlushLiveLog()
+	if #LiveLogger.buffer == 0 then return end
+	local folder = State.folder or (tostring(game.GameId) .. "_dump")
+	local ok = WriteFile(folder .. "/" .. tostring(game.GameId) .. "_live_remotes.log", table.concat(LiveLogger.buffer, "\n"))
+	if ok then LiveLogger.flushed = #LiveLogger.buffer end
+end
+
+local function InstallLiveHook()
+	if LiveLogger.installed then return true end
+	local closure = newcclosureFn or function(f) return f end
+	local namecallFn = getnamecallmethodFn or function() return "" end
+
+	local oldNamecall = nil
+	local function handler(self, ...)
+		if not LiveLogger.enabled then
+			return oldNamecall(self, ...)
+		end
+		local args = { ... }
+		local ok, err = pcall(function()
+			if checkcallerFn then
+				local ours = false
+				pcall(function() ours = checkcallerFn() end)
+				if ours then return end  -- calls from our own code: never log, never recurse
+			end
+			local method = namecallFn()
+			if method ~= "FireServer" and method ~= "InvokeServer" then return end
+			if TypeOf(self) ~= "Instance" then return end
+			if not (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then return end
+
+			local line = LiveLogLine(self, method, args)
+			LiveLogger.buffer[#LiveLogger.buffer + 1] = line
+			LiveLogger.total = LiveLogger.total + 1
+			local key = self.Name or "?"
+			LiveLogger.perRemote[key] = (LiveLogger.perRemote[key] or 0) + 1
+			if #LiveLogger.buffer > 5000 then
+				for i = 1, 1000 do table.remove(LiveLogger.buffer, 1) end
+				LiveLogger.flushed = 0
+			end
+			if #LiveLogger.buffer - LiveLogger.flushed >= 50 then
+				FlushLiveLog()
+			end
+			if LiveLogger.total % 25 == 0 then
+				UI.live(LiveLogger.total)
+			end
+		end)
+		return oldNamecall(self, ...)
+	end
+
+	if type(hookmetamethodFn) == "function" then
+		local ok, res = pcall(hookmetamethodFn, game, "__namecall", closure(handler))
+		if ok and res then
+			oldNamecall = res
+			LiveLogger.installed = true
+			print("[WonTree] Live remote logger hook installed")
+			return true
+		end
+	end
+
+	-- fallback: raw metatable swap
+	local mt = getrawmetatableFn and getrawmetatableFn(game)
+	if not mt then return false end
+	oldNamecall = mt.__namecall
+	pcall(function()
+		if setreadonlyFn then setreadonlyFn(mt, false) end
+		mt.__namecall = closure(handler)
+		if setreadonlyFn then setreadonlyFn(mt, true) end
+	end)
+	LiveLogger.installed = true
+	print("[WonTree] Live remote logger hook installed (metatable fallback)")
+	return true
+end
+
+-- ------------------------------------------------------------
+--  Directory tree builder
+-- ------------------------------------------------------------
+local ICONS = {
+	Script = "⚙", LocalScript = "⚙", ModuleScript = "📦",
+	RemoteEvent = "📡", RemoteFunction = "📡",
+	BindableEvent = "🔔", BindableFunction = "🔔",
+	Folder = "📁", Model = "🧱", BasePart = "🧱", Part = "🧱",
+	MeshPart = "🧱", UnionOperation = "🧱",
+	IntValue = "🔢", NumberValue = "🔢", StringValue = "🔢",
+	BoolValue = "🔢", Vector3Value = "🔢", CFrameValue = "🔢",
+	Color3Value = "🔢", ObjectValue = "🔢",
+	ScreenGui = "🖥", Frame = "🖼", TextLabel = "🖼", TextButton = "🖼",
+	ImageLabel = "🖼", ScrollingFrame = "🖼", SurfaceGui = "🖼",
+	Tool = "🔧", Sound = "🎵", Animation = "🎞",
+	LocalizationTable = "🗂", Configuration = "🗂", BillboardGui = "🖼",
+	ProximityPrompt = "✋", ClickDetector = "✋",
+}
+
+local function getAttrBrief(inst)
+	local ok, attrs = pcall(function() return inst:GetAttributes() end)
+	if not ok or not attrs then return nil end
+	local parts = {}
+	local n = 0
+	for k, v in pairs(attrs) do
+		if n >= 4 then break end
+		parts[#parts + 1] = k .. "=" .. shorten(v, 24)
+		n = n + 1
+	end
+	if next(parts) then return table.concat(parts, ", ") end
+	return nil
+end
+
+local function nodeLabel(inst, opts)
+	local icon = ICONS[inst.ClassName] or "▸"
+	local lbl = icon .. " " .. inst.ClassName .. " \"" .. inst.Name .. "\""
+	if safeIsA(inst, "ValueBase") then
+		local ok, v = pcall(function() return tostring(inst.Value) end)
+		if ok then lbl = lbl .. " = " .. shorten(v, 40) end
+	end
+	if opts.showAttrs then
+		local brief = getAttrBrief(inst)
+		if brief then lbl = lbl .. "  [" .. brief .. "]" end
+	end
+	return lbl
+end
+
+local function childrenOf(inst)
+	local out = {}
+	local ok, kids = pcall(function() return inst:GetChildren() end)
+	if not ok or not kids then return out end
+	for _, c in ipairs(kids) do
+		if not isNoise(c) then out[#out + 1] = c end
+	end
+	table.sort(out, function(a, b) return a.Name < b.Name end)
+	return out
+end
+
+local function buildTreeLines(root, opts)
+	local lines = {}
+	local budget = opts.budget or 4000
+	lines[#lines + 1] = "```"
+	lines[#lines + 1] = nodeLabel(root, opts) .. "  (root)"
+	local function walk(inst, prefix, depth)
+		if #lines >= budget then return end
+		if depth >= opts.treeDepth then
+			lines[#lines + 1] = prefix .. "└─ … (truncated at depth " .. opts.treeDepth .. ")"
+			return
+		end
+		local kids = childrenOf(inst)
+		if #kids == 0 then return end
+		local shown = math.min(#kids, opts.treeMaxChildren)
+		for i = 1, shown do
+			if #lines >= budget then return end
+			local c = kids[i]
+			local last = (i == shown)
+			lines[#lines + 1] = prefix .. (last and "└─ " or "├─ ") .. nodeLabel(c, opts)
+			if #childrenOf(c) > 0 then
+				walk(c, prefix .. (last and "   " or "│  "), depth + 1)
+			end
+		end
+		if #kids > shown then
+			lines[#lines + 1] = prefix .. "   └─ … (+" .. (#kids - shown) .. " more)"
+		end
+	end
+	local kids = childrenOf(root)
+	for i, c in ipairs(kids) do
+		if #lines >= budget then break end
+		local last = (i == #kids)
+		lines[#lines + 1] = (last and "└─ " or "├─ ") .. nodeLabel(c, opts)
+		if #childrenOf(c) > 0 then
+			walk(c, (last and "   " or "│  "), 1)
+		end
+	end
+	lines[#lines + 1] = "```"
+	return lines
+end
+
+-- ------------------------------------------------------------
+--  Services / extras collection
+-- ------------------------------------------------------------
+local SERVICES = {
+	"Players", "Workspace", "Lighting", "ReplicatedStorage", "ReplicatedFirst",
+	"ServerStorage", "ServerScriptService", "StarterGui", "StarterPlayer",
+	"StarterPack", "HttpService", "TeleportService", "MessagingService",
+	"DataStoreService", "NetworkClient", "SoundService", "TextChatService",
+	"CollectionService", "MarketplaceService", "Chat", "TweenService",
+	"RunService", "UserInputService", "GuiService", "BadgeService",
+	"GamePassService", "Teams", "ProximityPromptService", "MaterialService",
+}
+
+local function serviceStatus(name)
+	local ok, svc = pcall(function() return game:GetService(name) end)
+	if ok and svc then
+		local ok2, exists = pcall(function() return svc ~= nil and svc.Parent ~= nil end)
+		if ok2 and exists then return "yes" end
+		return "yes (empty)"
+	end
+	local ok3, found = pcall(function() return game:FindFirstChild(name) ~= nil end)
+	if ok3 and found then return "yes (instance)" end
+	return "no"
+end
+
+-- ------------------------------------------------------------
+--  Markdown file builders
+-- ------------------------------------------------------------
+local function headerLines(gameId, section)
+	local lines = {}
+	AppendLine(lines, "# " .. tostring(game.Name) .. " — " .. section)
+	AppendLine(lines, "")
+	local gi = P.gameInfo
+	if gi and gi.Name then
+		local creator = (type(gi.Creator) == "table" and gi.Creator.Name) or "?"
+		AppendLine(lines, "> **Place:** " .. tostring(gi.Name) .. "  ·  **Creator:** " .. tostring(creator) .. (gi.Created and ("  ·  Created " .. tostring(gi.Created):sub(1, 10)) or ""))
+	end
+	AppendLine(lines, "> **PlaceId** `" .. tostring(game.PlaceId) .. "`  ·  **GameId** `" .. tostring(game.GameId) .. "`" .. ((gi and gi.universeId) and ("  ·  **UniverseId** `" .. tostring(gi.universeId) .. "`") or "") .. "  ·  **Executor** " .. ExecutorName())
+	AppendLine(lines, "> Generated " .. os.date("%Y-%m-%d %H:%M:%S") .. " by WonTree RBLX Dumper v1.0.2 (Rayfield Gen2 UI)")
+	AppendLine(lines, "")
+	return lines
+end
+
+local function writeMd(folder, gameId, suffix, content)
+	local path = folder .. "/" .. gameId .. "_" .. suffix .. ".md"
+	local ok = WriteFile(path, content)
+	return ok, path
+end
+
+local function csvEscape(s)
+	s = tostring(s)
+	if string.find(s, '[,"\n]') then
+		s = '"' .. s:gsub('"', '""') .. '"'
+	end
+	return s
+end
+
+local function writeRemotesCsv(folder, gameId, callGraph, remoteRefs)
+	local rows = { "remote,uses,fired_by,listened_by" }
+	local names, seen = {}, {}
+	for name in pairs(callGraph) do
+		if not seen[name] then
+			seen[name] = true
+			names[#names + 1] = name
+		end
+	end
+	for name in pairs(remoteRefs) do
+		if not seen[name] then
+			seen[name] = true
+			names[#names + 1] = name
+		end
+	end
+	table.sort(names)
+	for _, name in ipairs(names) do
+		local entry = callGraph[name]
+		local fire, listen = {}, {}
+		if entry then
+			for _, f in ipairs(entry.fire) do fire[#fire + 1] = f.path .. ":" .. f.line end
+			for _, l in ipairs(entry.listen) do listen[#listen + 1] = l.path .. ":" .. l.line end
+		end
+		local uses = (entry and entry.uses) or (remoteRefs[name] and remoteRefs[name].count) or 0
+		rows[#rows + 1] = csvEscape(name) .. "," .. uses .. "," .. csvEscape(table.concat(fire, " | ")) .. "," .. csvEscape(table.concat(listen, " | "))
+	end
+	WriteFile(folder .. "/" .. gameId .. "_remotes.csv", table.concat(rows, "\n"))
+end
+
+-- ============================================================
+--  The dump pipeline
+-- ============================================================
+local function doDump()
+	local gameId = tostring(game.GameId)
+	local folder = State.folder or (gameId .. "_dump")
+	State.cancel = false
+
+	setStatus("Scanning instances…")
+	local visible, serverOnly = collectInstances()
+	dbg("visible:", #visible, "server-only:", #serverOnly)
+
+	-- scripts
+	setStatus("Collecting scripts…")
+	local scripts = collectScripts(visible, serverOnly)
+	setStatus("Collected " .. #visible .. " visible instances · " .. #scripts .. " scripts")
+	local totalScripts = #scripts
+	if totalScripts > Config.maxScripts then
+		dbg("truncating scripts:", totalScripts, "->", Config.maxScripts)
+		for i = Config.maxScripts + 1, totalScripts do scripts[i] = nil end
+		totalScripts = #scripts
+	end
+
+	-- remotes / bindables / values instances
+	local remoteInsts, bindInsts, valueInsts = {}, {}, {}
+	local seenR = {}
+	local function classify(inst)
+		if isNoise(inst) then return end
+		if safeIsA(inst, "RemoteEvent") or safeIsA(inst, "RemoteFunction") then
+			if not seenR[inst] then
+				seenR[inst] = true
+				remoteInsts[#remoteInsts + 1] = inst
+			end
+		elseif safeIsA(inst, "BindableEvent") or safeIsA(inst, "BindableFunction") then
+			bindInsts[#bindInsts + 1] = inst
+		elseif safeIsA(inst, "ValueBase") and #valueInsts < 150 then
+			valueInsts[#valueInsts + 1] = inst
+		end
+	end
+	for _, inst in ipairs(visible) do classify(inst) end
+	for _, inst in ipairs(serverOnly) do classify(inst) end
+	table.sort(remoteInsts, function(a, b) return getPath(a) < getPath(b) end)
+	table.sort(bindInsts, function(a, b) return getPath(a) < getPath(b) end)
+	table.sort(valueInsts, function(a, b) return getPath(a) < getPath(b) end)
+
+	-- decompile + analyze
+	setStatus("Decompiling " .. totalScripts .. " scripts…")
+	local analyzed = {}
+	local remoteRefs = {}
+	local callGraph = {}
+	local keywordHits = {}
+	local frameworkHits = {}
+	local assetIds = {}
+	local sourceCount = { ok = 0, failed = 0 }
+	local failedScripts = {}
+	local injectedSkipped = 0
+	local unnamedCalls = {}
+
+	EnsureFolder(folder)
+	if Config.saveSources then EnsureFolder(folder .. "/scripts") end
+	if Config.saveBytecode then EnsureFolder(folder .. "/bytecode") end
+	FlushLiveLog() -- pick up any calls captured before this dump
+
+	local step = 0
+	local wasCancelled = false
+	for i, script in ipairs(scripts) do
+		if State.cancel then
+			wasCancelled = true
+			setStatus("Cancelled by user")
+			break
+		end
+		step = step + 1
+		if step % Config.yieldEvery == 0 then task.wait() end
+
+		local path = getPath(script)
+		local className = script.ClassName
+		local src, method, bytecode = TryDecompile(script)
+		local addedRemote = 0
+
+		if Config.skipInjected and src and isInjectedContent(src) then
+			-- self-capture: this is the dumper's own injected code (or a
+			-- library it loaded, e.g. Rayfield). Skip it entirely so the
+			-- reports stay clean of executor noise.
+			injectedSkipped = injectedSkipped + 1
+		elseif src then
+			sourceCount.ok = sourceCount.ok + 1
+			-- cap analysis source size for performance
+			local anSrc = src
+			local truncated = false
+			if #src > 300000 then
+				anSrc = src:sub(1, 300000)
+				truncated = true
+			end
+			local starts = lineIndex(anSrc)
+
+			local funcs = extractFunctions(anSrc, starts)
+			State.funcs = State.funcs + #funcs
+			local info = {
+				script = script, path = path, className = className,
+				method = method, src = (Config.saveSources and src or anSrc), truncated = truncated,
+				funcs = funcs, module = nil,
+			}
+			analyzed[#analyzed + 1] = info
+
+			if className == "ModuleScript" then
+				local keys, kind = extractModuleInfo(anSrc, starts)
+				if keys then
+					info.module = { keys = keys, kind = kind }
+				end
+			end
+
+			addedRemote = scanRemotes(anSrc, path, remoteRefs)
+			scanCallGraph(anSrc, path, callGraph)
+			scanFrameworks(anSrc, path, frameworkHits)
+			scanAssetIds(anSrc, assetIds)
+			if Config.scanAnticheat then
+				scanKeywords(anSrc, path, keywordHits)
+			end
+
+			-- unnamed FireServer/InvokeServer call counts (games that pass tables)
+			local fs = countOccurrences(anSrc, ":FireServer%s*%(") + countOccurrences(anSrc, ":InvokeServer%s*%(")
+			if fs > 0 then unnamedCalls[path] = fs end
+
+			if Config.saveSources then
+				local safePath = Sanitize(path):gsub(">", "/")
+				if #safePath > 120 then safePath = safePath:sub(1, 120) end
+				WriteFile(folder .. "/scripts/" .. safePath .. ".lua", src .. (truncated and "\n-- [TRUNCATED BY SMARTDUMPER]" or ""))
+			end
+		else
+			sourceCount.failed = sourceCount.failed + 1
+			failedScripts[#failedScripts + 1] = { path = path, className = className, method = method or "failed" }
+			if bytecode and Config.saveBytecode then
+				local safePath = Sanitize(path):gsub(">", "/")
+				if #safePath > 120 then safePath = safePath:sub(1, 120) end
+				local hex = {}
+				for j = 1, math.min(#bytecode, 200000), 16 do
+					local chunk = bytecode:sub(j, j + 15)
+					local bytes = {}
+					for k = 1, #chunk do bytes[#bytes + 1] = string.format("%02X", chunk:byte(k)) end
+					hex[#hex + 1] = string.format("%08X: %s", j - 1, table.concat(bytes, " "))
+				end
+				WriteFile(folder .. "/bytecode/" .. safePath .. ".luac.hex", table.concat(hex, "\n"))
+			end
+		end
+
+		State.processed = i
+		State.remotes = State.remotes + addedRemote
+		if step % (Config.yieldEvery * 2) == 0 then
+			UI.stats(State.processed, State.remotes, State.funcs)
+			setStatus("Decompiling " .. i .. "/" .. totalScripts .. "…")
+		end
+	end
+
+	UI.stats(State.processed, State.remotes, State.funcs)
+	FlushLiveLog()
+	UI.live(LiveLogger.total)
+
+	-- ================= directory.md =================
+	setStatus("Writing directory.md…")
+	local dLines = headerLines(gameId, "Directory & Asset Structure")
+	AppendLine(dLines, "## Summary")
+	AppendLine(dLines, "")
+	AppendLine(dLines, "- Visible instances scanned: **" .. #visible .. "**")
+	AppendLine(dLines, "- Server-only instances (getinstances): **" .. #serverOnly .. "**")		AppendLine(dLines, "- Scripts found: **" .. totalScripts .. "**  (decompiled: " .. sourceCount.ok .. " · failed/protected: " .. sourceCount.failed .. (injectedSkipped > 0 and (" · injected/executor skipped: " .. injectedSkipped) or "") .. ")")
+		AppendLine(dLines, "- RemoteEvents/RemoteFunctions found: **" .. #remoteInsts .. "**")
+		AppendLine(dLines, "- BindableEvents/BindableFunctions found: **" .. #bindInsts .. "**")
+		AppendLine(dLines, "- rbxassetid assets referenced: **" .. (next(assetIds) and #assetIds or 0) .. "**")
+		AppendLine(dLines, "")
+	AppendLine(dLines, "Legend: ⚙ Script · 📦 ModuleScript · 📡 Remote · 🔔 Bindable · 🔢 Value · 🖥 GUI · 🧱 Model/Part · 🔧 Tool")
+	AppendLine(dLines, "")
+	AppendLine(dLines, "## Client tree (game)")
+	AppendLine(dLines, "")
+	local treeOpts = {
+		treeDepth = Config.treeDepth,
+		treeMaxChildren = Config.treeMaxChildren,
+		showAttrs = Config.showAttrs,
+		budget = 4000,
+	}
+	local treeLines = buildTreeLines(game, treeOpts)
+	for _, l in ipairs(treeLines) do AppendLine(dLines, l) end
+	AppendLine(dLines, "")
+
+	if Config.includeServerSide then
+		AppendLine(dLines, "## Server-side only (via getinstances)")
+		AppendLine(dLines, "")
+		local roots = {}
+		local seenRoot = {}
+		local brokenPaths = {}
+		for _, inst in ipairs(serverOnly) do
+			local top = inst
+			local ok = true
+			local guard = 0
+			while top.Parent and top.Parent ~= game and guard < 30 do
+				top = top.Parent
+				guard = guard + 1
+				if guard >= 30 then ok = false end
+			end
+			if ok and top.Parent == game then
+				if not seenRoot[top] then
+					seenRoot[top] = true
+					roots[#roots + 1] = top
+				end
+			else
+				-- Some executors (Xeno) return instances whose parent chain
+				-- never reaches game (the container's Parent reads as nil).
+				-- Fall back: treat the direct parent as the root container so
+				-- server-only trees still render.
+				local parent = inst.Parent
+				if parent and parent ~= game and not seenRoot[parent] then
+					seenRoot[parent] = true
+					roots[#roots + 1] = parent
+				elseif not parent then
+					if #brokenPaths < 200 then
+						brokenPaths[#brokenPaths + 1] = getPath(inst)
+					end
+				end
+			end
+		end
+		if #roots == 0 and #brokenPaths == 0 then
+			AppendLine(dLines, "No server-only containers detected (getinstances unavailable or game fully visible).")
+		else
+			if #roots > 0 then
+				table.sort(roots, function(a, b) return (a.Name or "?") < (b.Name or "?") end)
+				for _, r in ipairs(roots) do
+					local sub = buildTreeLines(r, treeOpts)
+					for _, sl in ipairs(sub) do AppendLine(dLines, sl) end
+					AppendLine(dLines, "")
+				end
+			end
+			if #brokenPaths > 0 then
+				AppendLine(dLines, "### Server-only instances without a reachable parent chain")
+				AppendLine(dLines, "")
+				AppendLine(dLines, "The executor's getinstances() returned these, but their parent chain could not be walked back to game. Sample paths:")
+				for _, p in ipairs(brokenPaths) do
+					AppendLine(dLines, "- `" .. p .. "`")
+				end
+				AppendLine(dLines, "")
+			end
+		end
+		AppendLine(dLines, "")
+	end
+
+	AppendLine(dLines, "## Script inventory")
+	AppendLine(dLines, "")
+	AppendLine(dLines, "| # | Class | Source | Path |")
+	AppendLine(dLines, "|---|-------|--------|------|")
+	local shownScripts = math.min(#analyzed + sourceCount.failed, 500)
+	local invCount = 0
+	for _, info in ipairs(analyzed) do
+		if invCount < shownScripts then
+			AppendLine(dLines, "| " .. (invCount + 1) .. " | " .. info.className .. " | " .. info.method .. " | `" .. info.path .. "` |")
+			invCount = invCount + 1
+		end
+	end
+	if #failedScripts > 0 then
+		local shownFailed = math.min(#failedScripts, math.max(500 - invCount, 0))
+		for j = 1, shownFailed do
+			local f = failedScripts[j]
+			AppendLine(dLines, "| — | " .. f.className .. " | 🔒 " .. f.method .. " | `" .. f.path .. "` |")
+		end
+		if #failedScripts > shownFailed then
+			AppendLine(dLines, "| — | *+" .. (#failedScripts - shownFailed) .. " more protected/failed scripts* | — | — |")
+		end
+	end
+	if totalScripts > shownScripts then
+		AppendLine(dLines, "")
+		AppendLine(dLines, "_Showing first " .. shownScripts .. " of " .. totalScripts .. " scripts._")
+	end
+	AppendLine(dLines, "## Executor environment")
+	AppendLine(dLines, "")
+	AppendLine(dLines, "```")
+	for _, c in ipairs(CapabilityReport()) do
+		AppendLine(dLines, (c.ok and "  [OK]" or "  [NO]") .. " " .. c.name)
+	end
+	AppendLine(dLines, "```")
+	AppendLine(dLines, "")
+	writeMd(folder, gameId, "directory", table.concat(dLines, "\n"))
+
+	-- ================= functions.md =================
+	setStatus("Writing functions.md…")
+	local fLines = headerLines(gameId, "Functions & Game Logic Entry Points")
+	AppendLine(fLines, "**Total functions found:** " .. State.funcs)
+	AppendLine(fLines, "")
+	AppendLine(fLines, "## Modules (ModuleScripts)")
+	AppendLine(fLines, "")
+	local modCount = 0
+	local configMods = {}
+	for _, info in ipairs(analyzed) do
+		if info.className == "ModuleScript" and info.module then
+			modCount = modCount + 1
+			if modCount > 150 then break end
+			local kind = info.module.kind
+			AppendLine(fLines, "### `" .. info.path .. "`  (" .. kind .. ")")
+			AppendLine(fLines, "")
+			for _, k in ipairs(info.module.keys) do
+				AppendLine(fLines, "- `" .. k.name .. "` (line " .. k.line .. ")")
+			end
+			if info.module.kind == "config" then
+				configMods[#configMods + 1] = info.path
+			end
+			AppendLine(fLines, "")
+		end
+	end
+	if modCount == 0 then
+		AppendLine(fLines, "No module exports detected.")
+		AppendLine(fLines, "")
+	end
+
+	AppendLine(fLines, "## Scripts (Script / LocalScript)")
+	AppendLine(fLines, "")
+	local scrCount = 0
+	for _, info in ipairs(analyzed) do
+		if info.className ~= "ModuleScript" then
+			scrCount = scrCount + 1
+			if scrCount > 250 then break end
+			AppendLine(fLines, "### `" .. info.path .. "`  [" .. info.className .. "]")
+			AppendLine(fLines, "")
+			if #info.funcs == 0 then
+				AppendLine(fLines, "- _(no function definitions detected)_")
+			else
+				for _, fn in ipairs(info.funcs) do
+					AppendLine(fLines, "- `" .. fn.name .. "` (line " .. fn.line .. ")")
+				end
+			end
+			if info.truncated then
+				AppendLine(fLines, "- _source truncated for analysis (see saved .lua for full source)_")
+			end
+			AppendLine(fLines, "")
+		end
+	end
+	if scrCount == 0 then
+		AppendLine(fLines, "No standalone scripts analyzed.")
+	end
+	writeMd(folder, gameId, "functions", table.concat(fLines, "\n"))
+
+	-- ================= remotes.md =================
+	setStatus("Writing remotes.md…")
+	local rLines = headerLines(gameId, "Remotes — client ↔ server communication")
+	AppendLine(rLines, "**Remote instances:** " .. #remoteInsts .. "  ·  **Named remotes referenced in code:** " .. (next(remoteRefs) and "yes" or "none"))
+	AppendLine(rLines, "")
+	AppendLine(rLines, "## Remote instances found")
+	AppendLine(rLines, "")
+	if #remoteInsts == 0 then
+		AppendLine(rLines, "No RemoteEvent / RemoteFunction instances visible to the client.")
+		AppendLine(rLines, "")
+	else
+		AppendLine(rLines, "| Class | Name | Path |")
+		AppendLine(rLines, "|-------|------|------|")
+		local shown = math.min(#remoteInsts, 300)
+		for i = 1, shown do
+			AppendLine(rLines, "| " .. remoteInsts[i].ClassName .. " | `" .. remoteInsts[i].Name .. "` | `" .. getPath(remoteInsts[i]) .. "` |")
+		end
+		if #remoteInsts > shown then
+			AppendLine(rLines, "| … | _(+" .. (#remoteInsts - shown) .. " more)_ | |")
+		end
+		AppendLine(rLines, "")
+	end
+
+	AppendLine(rLines, "## Remote names referenced in decompiled code")
+	AppendLine(rLines, "")
+	AppendLine(rLines, "Sorted by use count. `(var)` entries are remotes reached through variables (e.g. `Remotes.Events.Start:FireServer`).")
+	AppendLine(rLines, "")
+	local sortedRefs = {}
+	for name, entry in pairs(remoteRefs) do
+		sortedRefs[#sortedRefs + 1] = { name = name, entry = entry }
+	end
+	table.sort(sortedRefs, function(a, b) return a.entry.count > b.entry.count end)
+	if #sortedRefs == 0 then
+		AppendLine(rLines, "No string-literal remote names found in decompiled code (game may pass tables/variables).")
+		AppendLine(rLines, "")
+	else
+		AppendLine(rLines, "| Remote | Uses | Kinds | Referenced in (up to 6) |")
+		AppendLine(rLines, "|--------|------|-------|--------------------------|")
+		local shown = math.min(#sortedRefs, 250)
+		for i = 1, shown do
+			local ref = sortedRefs[i]
+			local kinds = {}
+			for k, c in pairs(ref.entry.kinds) do kinds[#kinds + 1] = k .. ":" .. c end
+			table.sort(kinds)
+			local scriptsStr = {}
+			for j = 1, math.min(#ref.entry.scripts, 6) do
+				scriptsStr[#scriptsStr + 1] = "`" .. ref.entry.scripts[j] .. "`"
+			end
+			local more = #ref.entry.scripts > 6 and " (+" .. (#ref.entry.scripts - 6) .. ")" or ""
+			AppendLine(rLines, "| `" .. ref.name .. "` | " .. ref.entry.count .. " | " .. table.concat(kinds, ", ") .. " | " .. table.concat(scriptsStr, "<br>") .. more .. " |")
+		end
+		if #sortedRefs > shown then
+			AppendLine(rLines, "| … | _(+" .. (#sortedRefs - shown) .. " more remotes)_ | | |")
+		end
+		AppendLine(rLines, "")
+	end
+
+	AppendLine(rLines, "## Call graph — who fires / who listens")
+	AppendLine(rLines, "")
+	local graphNames = {}
+	for name, entry in pairs(callGraph) do
+		graphNames[#graphNames + 1] = { name = name, uses = entry.uses }
+	end
+	table.sort(graphNames, function(a, b) return a.uses > b.uses end)
+	if #graphNames == 0 then
+		AppendLine(rLines, "No fire/listen relationships could be resolved (remotes passed through variables only, or obfuscated code).")
+		AppendLine(rLines, "")
+	else
+		AppendLine(rLines, "| Remote | Fired by (script:line) | Listened by (script:line) |")
+		AppendLine(rLines, "|--------|------------------------|---------------------------|")
+		local shown = math.min(#graphNames, 200)
+		for i = 1, shown do
+			local g = graphNames[i]
+			local entry = callGraph[g.name]
+			local fireParts, listenParts = {}, {}
+			for j = 1, math.min(#entry.fire, 5) do
+				fireParts[#fireParts + 1] = "`" .. entry.fire[j].path .. ":" .. entry.fire[j].line .. "`"
+			end
+			local fireMore = #entry.fire > 5 and " (+" .. (#entry.fire - 5) .. ")" or ""
+			for j = 1, math.min(#entry.listen, 5) do
+				listenParts[#listenParts + 1] = "`" .. entry.listen[j].path .. ":" .. entry.listen[j].line .. "`"
+			end
+			local listenMore = #entry.listen > 5 and " (+" .. (#entry.listen - 5) .. ")" or ""
+			AppendLine(rLines, "| `" .. g.name .. "` | "
+				.. (next(fireParts) and table.concat(fireParts, "<br>") .. fireMore or "_— (server-side only?)_")
+				.. " | "
+				.. (next(listenParts) and table.concat(listenParts, "<br>") .. listenMore or "_— (client-side only?)_")
+				.. " |")
+		end
+		if #graphNames > shown then
+			AppendLine(rLines, "| … | _(+" .. (#graphNames - shown) .. " more remotes)_ | |")
+		end
+		AppendLine(rLines, "")
+	end
+
+	local unnamedSorted = {}
+	for path, c in pairs(unnamedCalls) do
+		unnamedSorted[#unnamedSorted + 1] = { path = path, count = c }
+	end
+	table.sort(unnamedSorted, function(a, b) return a.count > b.count end)
+	if #unnamedSorted > 0 then
+		AppendLine(rLines, "## Scripts with FireServer/InvokeServer calls (unnamed / table args)")
+		AppendLine(rLines, "")
+		AppendLine(rLines, "These scripts fire remotes without a string literal (or the name was obfuscated) — inspect the saved sources directly.")
+		AppendLine(rLines, "")
+		AppendLine(rLines, "| Calls | Script |")
+		AppendLine(rLines, "|-------|--------|")
+		local shown = math.min(#unnamedSorted, 50)
+		for i = 1, shown do
+			AppendLine(rLines, "| " .. unnamedSorted[i].count .. " | `" .. unnamedSorted[i].path .. "` |")
+		end
+		AppendLine(rLines, "")
+	end
+
+	AppendLine(rLines, "## Live remote calls captured (this session)")
+	AppendLine(rLines, "")
+	if LiveLogger.total > 0 then
+		AppendLine(rLines, "**" .. LiveLogger.total .. " calls captured** while the Live Remote Logger was enabled. Full log: `" .. tostring(game.GameId) .. "_live_remotes.log`")
+		AppendLine(rLines, "")
+		local liveSorted = {}
+		for name, c in pairs(LiveLogger.perRemote) do
+			liveSorted[#liveSorted + 1] = { name = name, count = c }
+		end
+		table.sort(liveSorted, function(a, b) return a.count > b.count end)
+		AppendLine(rLines, "| Remote | Calls |")
+		AppendLine(rLines, "|--------|-------|")
+		local shown = math.min(#liveSorted, 100)
+		for i = 1, shown do
+			AppendLine(rLines, "| `" .. liveSorted[i].name .. "` | " .. liveSorted[i].count .. " |")
+		end
+		if #liveSorted > shown then
+			AppendLine(rLines, "| … | _(+" .. (#liveSorted - shown) .. " more)_ |")
+		end
+		AppendLine(rLines, "")
+	else
+		AppendLine(rLines, "The Live Remote Logger was not enabled during this session. Enable it in the Dump tab, play for a bit, then Start a dump (or Stop) to flush captures.")
+		AppendLine(rLines, "")
+	end
+	writeMd(folder, gameId, "remotes", table.concat(rLines, "\n"))
+	writeRemotesCsv(folder, gameId, callGraph, remoteRefs)
+
+	-- ================= extras.md =================
+	setStatus("Writing extras.md…")
+	local eLines = headerLines(gameId, "Extras — services, bindables, values, security, configs")
+	AppendLine(eLines, "## Key services present")
+	AppendLine(eLines, "")
+	AppendLine(eLines, "| Service | Present |")
+	AppendLine(eLines, "|---------|---------|")
+	for _, name in ipairs(SERVICES) do
+		AppendLine(eLines, "| " .. name .. " | " .. serviceStatus(name) .. " |")
+	end
+	AppendLine(eLines, "")
+
+	AppendLine(eLines, "## BindableEvents / BindableFunctions")
+	AppendLine(eLines, "")
+	if #bindInsts == 0 then
+		AppendLine(eLines, "None visible.")
+		AppendLine(eLines, "")
+	else
+		local shown = math.min(#bindInsts, 200)
+		for i = 1, shown do
+			AppendLine(eLines, "- " .. bindInsts[i].ClassName .. " `" .. getPath(bindInsts[i]) .. "`")
+		end
+		if #bindInsts > shown then
+			AppendLine(eLines, "- _(+" .. (#bindInsts - shown) .. " more)_")
+		end
+		AppendLine(eLines, "")
+	end
+
+	AppendLine(eLines, "## Values (sample)")
+	AppendLine(eLines, "")
+	if #valueInsts == 0 then
+		AppendLine(eLines, "No ValueBase instances found in the scanned tree.")
+		AppendLine(eLines, "")
+	else
+		local shown = math.min(#valueInsts, 120)
+		for i = 1, shown do
+			local v = valueInsts[i]
+			local val = ""
+			pcall(function() val = tostring(v.Value) end)
+			AppendLine(eLines, "- " .. v.ClassName .. " `" .. getPath(v) .. "` = " .. shorten(val, 60))
+		end
+		if #valueInsts > shown then
+			AppendLine(eLines, "- _(+" .. (#valueInsts - shown) .. " more values)_")
+		end
+		AppendLine(eLines, "")
+	end
+
+	AppendLine(eLines, "## Attributes (sample from visible tree)")
+	AppendLine(eLines, "")
+	local attrLines = 0
+	pcall(function()
+		for i = 1, #visible do
+			if attrLines >= 80 then break end
+			local inst = visible[i]
+			local ok, attrs = pcall(function() return inst:GetAttributes() end)
+			if ok and attrs and next(attrs) then
+				local parts = {}
+				for k, v in pairs(attrs) do parts[#parts + 1] = k .. "=" .. shorten(v, 24) end
+				table.sort(parts)
+				AppendLine(eLines, "- `" .. getPath(inst) .. "` → " .. table.concat(parts, ", "))
+				attrLines = attrLines + 1
+			end
+			if i % 5000 == 0 then task.wait() end
+		end
+	end)
+	if attrLines == 0 then
+		AppendLine(eLines, "No attributes found.")
+	end
+	AppendLine(eLines, "")
+
+	AppendLine(eLines, "## Character / tool / inventory related")
+	AppendLine(eLines, "")
+	pcall(function()
+		local starterPack = game:GetService("StarterPack")
+		local tools = 0
+		for _, c in ipairs(starterPack:GetChildren()) do
+			if safeIsA(c, "Tool") then tools = tools + 1 end
+		end
+		AppendLine(eLines, "- StarterPack tools: **" .. tools .. "**")
+	end)
+	pcall(function()
+		local sp = game:GetService("StarterPlayer")
+		AppendLine(eLines, "- StarterPlayer scripts: **" .. #sp:GetChildren() .. "** (see scripts in directory.md)")
+	end)
+	pcall(function()
+		local player = game:GetService("Players").LocalPlayer
+		if player and player.PlayerGui then
+			local inv = {}
+			for _, c in ipairs(player.PlayerGui:GetDescendants()) do
+				local n = string.lower(c.Name)
+				if string.find(n, "inventory", 1, true) or string.find(n, "backpack", 1, true) or string.find(n, "shop", 1, true) then
+					inv[#inv + 1] = c.ClassName .. " `" .. getPath(c) .. "`"
+					if #inv >= 25 then break end
+				end
+			end
+			if #inv > 0 then
+				AppendLine(eLines, "- Inventory/backpack/shop UI objects:")
+				for _, l in ipairs(inv) do AppendLine(eLines, "  - " .. l) end
+			else
+				AppendLine(eLines, "- No inventory/backpack/shop-named UI found in PlayerGui.")
+			end
+		end
+	end)
+	AppendLine(eLines, "")
+
+	AppendLine(eLines, "## Network ownership / replication")
+	AppendLine(eLines, "")
+	AppendLine(eLines, "- `getnetworkowner` available: **" .. (type(getnetworkownerFn) == "function" and "yes" or "no") .. "**")
+	local netHits = 0
+	for _, info in ipairs(analyzed) do
+		local n = countOccurrences(info.src, "SetNetworkOwner") + countOccurrences(info.src, "SetNetworkOwnership")
+		if n > 0 then
+			AppendLine(eLines, "- `" .. info.path .. "` → SetNetworkOwner/SetNetworkOwnership ×" .. n)
+			netHits = netHits + 1
+			if netHits >= 20 then break end
+		end
+	end
+	if netHits == 0 then AppendLine(eLines, "- No SetNetworkOwner usage found in decompiled code.") end
+	AppendLine(eLines, "")
+
+	if Config.scanAnticheat then
+		AppendLine(eLines, "## Anti-cheat / security checks")
+		AppendLine(eLines, "")
+		local anyGroup = false
+		for _, group in ipairs(KEYWORD_GROUPS) do
+			local hits = keywordHits[group.name]
+			if hits and #hits > 0 then
+				anyGroup = true
+				AppendLine(eLines, "### " .. group.name)
+				AppendLine(eLines, "")
+				local byPath = {}
+				for _, h in ipairs(hits) do
+					byPath[h.path] = (byPath[h.path] or 0) + h.count
+				end
+				local sorted = {}
+				for path, c in pairs(byPath) do sorted[#sorted + 1] = { path = path, count = c } end
+				table.sort(sorted, function(a, b) return a.count > b.count end)
+				local shown = math.min(#sorted, 15)
+				for i = 1, shown do
+					AppendLine(eLines, "- `" .. sorted[i].path .. "` → " .. sorted[i].count .. " hits")
+				end
+				if #sorted > shown then
+					AppendLine(eLines, "- _(+" .. (#sorted - shown) .. " more scripts)_")
+				end
+				AppendLine(eLines, "")
+			end
+		end
+		if not anyGroup then
+			AppendLine(eLines, "No anti-cheat / security related keywords matched in decompiled scripts.")
+			AppendLine(eLines, "")
+		end
+	end
+
+	if Config.scanConfig then
+		AppendLine(eLines, "## Config / data modules (auto-detected)")
+		AppendLine(eLines, "")
+		if #configMods == 0 then
+			AppendLine(eLines, "None detected (modules returning mostly scalar values).")
+			AppendLine(eLines, "")
+		else
+			for _, p in ipairs(configMods) do
+				AppendLine(eLines, "- `" .. p .. "`")
+			end
+			AppendLine(eLines, "")
+		end
+	end
+
+	AppendLine(eLines, "## Detected frameworks / patterns")
+	AppendLine(eLines, "")
+	local fwNames = {}
+	for name, hits in pairs(frameworkHits) do
+		local total = 0
+		for _, h in ipairs(hits) do total = total + h.count end
+		fwNames[#fwNames + 1] = { name = name, total = total }
+	end
+	table.sort(fwNames, function(a, b) return a.total > b.total end)
+	if #fwNames == 0 then
+		AppendLine(eLines, "No known frameworks detected — the game likely uses custom/vanilla remote patterns (see the call graph in remotes.md).")
+		AppendLine(eLines, "")
+	else
+		for _, fw in ipairs(fwNames) do
+			AppendLine(eLines, "### " .. fw.name .. "  (" .. fw.total .. " hits)")
+			AppendLine(eLines, "")
+			local hits = frameworkHits[fw.name]
+			table.sort(hits, function(a, b) return a.count > b.count end)
+			local shown = math.min(#hits, 10)
+			for i = 1, shown do
+				AppendLine(eLines, "- `" .. hits[i].path .. "` → " .. hits[i].count .. " hits")
+			end
+			if #hits > shown then
+				AppendLine(eLines, "- _(+" .. (#hits - shown) .. " more scripts)_")
+			end
+			AppendLine(eLines, "")
+		end
+	end
+
+	AppendLine(eLines, "## Assets loaded (rbxassetid://)")
+	AppendLine(eLines, "")
+	if next(assetIds) then
+		AppendLine(eLines, "Asset IDs referenced in decompiled code. Resolve them at `https://assetdelivery.roblox.com/v1/asset/?id=<id>`.")
+		AppendLine(eLines, "")
+		local assetSorted = {}
+		for aid, c in pairs(assetIds) do assetSorted[#assetSorted + 1] = { id = aid, count = c } end
+		table.sort(assetSorted, function(a, b) return a.count > b.count end)
+		AppendLine(eLines, "| Asset ID | References |")
+		AppendLine(eLines, "|----------|------------|")
+		local shown = math.min(#assetSorted, 150)
+		for i = 1, shown do
+			AppendLine(eLines, "| `" .. assetSorted[i].id .. "` | " .. assetSorted[i].count .. " |")
+		end
+		if #assetSorted > shown then
+			AppendLine(eLines, "| … | _(+" .. (#assetSorted - shown) .. " more)_ |")
+		end
+		AppendLine(eLines, "")
+	else
+		AppendLine(eLines, "No rbxassetid:// references found in decompiled code.")
+		AppendLine(eLines, "")
+	end
+
+	AppendLine(eLines, "## Offsets / addresses / patterns")
+	AppendLine(eLines, "")
+	AppendLine(eLines, "This is a **source-level** dumper — it does not perform memory dumps, so real offsets/addresses are not produced.")
+	AppendLine(eLines, "As a hint, scripts containing hex constants (`0x…`) are listed below — they sometimes hide encoded data or checksums:")
+	local hexHits = {}
+	for _, info in ipairs(analyzed) do
+		local c = countOccurrences(info.src, "0[xX][%x]+")
+		if c > 0 then hexHits[#hexHits + 1] = { path = info.path, count = c } end
+	end
+	table.sort(hexHits, function(a, b) return a.count > b.count end)
+	local shownHex = math.min(#hexHits, 10)
+	for i = 1, shownHex do
+		AppendLine(eLines, "- `" .. hexHits[i].path .. "` → " .. hexHits[i].count .. " hex constants")
+	end
+	if #hexHits == 0 then AppendLine(eLines, "- None found.") end
+	AppendLine(eLines, "")
+
+	writeMd(folder, gameId, "extras", table.concat(eLines, "\n"))
+
+	-- list protected/failed scripts for quick triage on massive protected games
+	if #failedScripts > 0 then
+		local pl = { "Protected / failed scripts (" .. #failedScripts .. ") - decompilation failed; bytecode hex saved if enabled.", "" }
+		for _, f in ipairs(failedScripts) do pl[#pl + 1] = f.className .. "\t" .. f.path end
+		WriteFile(folder .. "/protected.txt", table.concat(pl, "\n"))
+	end
+
+	-- done
+	local okDir = WriteFile(folder .. "/README.txt",
+		"WonTree RBLX Dumper v1.0.2\nGame: " .. tostring(game.Name) .. "\nPlaceId: " .. tostring(game.PlaceId) .. "\nGameId: " .. gameId .. "\nGenerated: " .. os.date("%Y-%m-%d %H:%M:%S") .. "\n")
+	State.running = false
+	local graphCount = 0
+	for _ in pairs(callGraph) do graphCount = graphCount + 1 end
+	if wasCancelled then
+		setStatus("Cancelled - partial dump written")
+		Notify("Dump cancelled", "Partial results saved to " .. folder, 7)
+	else
+		setStatus("Done ✔")
+		Notify("Dump complete", "Saved to " .. folder .. "\nScripts: " .. sourceCount.ok .. " decompiled · " .. sourceCount.failed .. " failed\nRemotes: " .. #remoteInsts .. " instances · " .. graphCount .. " mapped", 8)
+		UI.summary("Dump complete", "Saved to **" .. folder .. "**\n\n▪ " .. sourceCount.ok .. " scripts decompiled\n▪ " .. #remoteInsts .. " remote instances\n▪ " .. graphCount .. " remotes in the call graph\n▪ " .. (next(assetIds) and #assetIds or 0) .. " asset IDs\n▪ Live logger: " .. LiveLogger.total .. " calls")
+	end
+	dbg("wrote", folder, okDir)
+end
+
+-- Resolve the folder a dump will be written to. Defaults to the current
+-- game's id, but if that folder already holds a dump of a DIFFERENT place
+-- (same GameId is shared across places in a universe, and a stale folder
+-- name can persist from a previous session), it redirects to a unique
+-- {gameId}_{placeId}_dump so the other dump is never overwritten.
+local function resolveDumpFolder()
+	local gameId = tostring(game.GameId)
+	local placeId = tostring(game.PlaceId)
+	local target = State.folder or (gameId .. "_dump")
+	local existingPlace = nil
+	if isfileFn and readfileFn then
+		local ok1, exists = pcall(isfileFn, target .. "/README.txt")
+		if ok1 and exists then
+			local ok2, txt = pcall(readfileFn, target .. "/README.txt")
+			if ok2 and type(txt) == "string" then
+				existingPlace = txt:match("PlaceId: (%d+)")
+			end
+		end
+	end
+	if existingPlace and existingPlace ~= placeId then
+		local alt = gameId .. "_" .. placeId .. "_dump"
+		Notify("Folder in use", target .. " holds a dump of another place (" .. existingPlace .. "). Saving to " .. alt .. " instead.", 8)
+		State.folder = alt
+	else
+		State.folder = target
+	end
+end
+
+local function runDump()
+	if State.running then
+		Notify("Already running", "A dump is in progress - wait or press Stop.")
+		return
+	end
+	resolveDumpFolder()
+	State.running = true
+	State.cancel = false
+	State.processed = 0
+	State.remotes = 0
+	State.funcs = 0
+	task.spawn(function()
+		local ok, err = pcall(doDump)
+		if not ok then
+			State.running = false
+			setStatus("ERROR: " .. tostring(err))
+			Notify("Dump failed", tostring(err), 8)
+			warn("[WonTree] " .. tostring(err))
+		end
+	end)
+end
+
+local function openDumpFolder()
+	local folder = State.folder or (tostring(game.GameId) .. "_dump")
+	if type(openfolderFn) ~= "function" then
+		Notify("Not supported", "This executor has no openfolder. Files were saved to: " .. folder)
+		return
+	end
+	local ok = pcall(openfolderFn, folder)
+	if ok then
+		Notify("Opened", folder)
+	else
+		Notify("Folder missing", "Run a dump first, then open the folder.", 5)
+	end
+end
+
+-- ============================================================
+--  Rayfield Gen2 UI
+-- ============================================================
+local RAYFIELD_URL = "https://sirius.menu/gen2"
+
+local function BuildRayfieldUI()
+	local okLoad, rayfield = pcall(function()
+		local src = game:HttpGet(RAYFIELD_URL)
+		if type(src) ~= "string" or #src < 100 then return nil end
+		local fn = loadstring(src)
+		if type(fn) ~= "function" then return nil end
+		return fn()
+	end)
+	if not okLoad or type(rayfield) ~= "table" or type(rayfield.CreateWindow) ~= "function" then
+		print("[WonTree] Rayfield failed to load, using native UI")
+		return false
+	end
+
+	local okWin, window = pcall(rayfield.CreateWindow, rayfield, {
+		name = "WonTree RBLX Dumper",
+		subtitle = "WonTree RBLX Dumper v1.0.2 · " .. tostring(game.Name),
+		theme = "cobalt",
+		icon = 93364949241311,
+		configuration = {
+			autoSave = true,
+			autoLoad = true,
+			fileName = "SmartGameDumper",
+			customFolder = "SmartGameDumper",
+		},
+	})
+	if not okWin or type(window) ~= "table" then
+		print("[WonTree] Rayfield window failed:", okWin, window)
+		return false
+	end
+
+	local function safe(fn, ...)
+		local ok, res = pcall(fn, ...)
+		if not ok then dbg("UI element error:", res) end
+		return res
+	end
+
+	-- tabs
+	local dumpTab = safe(function() return window:CreateTab({ name = "Dump", icon = 93364949241311 }) end)
+	local optTab = safe(function() return window:CreateTab({ name = "Options" }) end)
+	local infoTab = safe(function() return window:CreateTab({ name = "Info" }) end)
+
+	local statusTag = safe(function()
+		return window:CreateTag({ text = "Idle" })
+	end)
+
+	-- status + notification hooks
+	UI.status = function(text)
+		if statusTag then
+			pcall(function()
+				local color = Color3.fromRGB(150, 150, 160)
+				if string.find(text, "ERROR", 1, true) then color = Color3.fromRGB(255, 110, 110) end
+				if string.find(text, "Done", 1, true) then color = Color3.fromRGB(120, 220, 150) end
+				statusTag:SetColor(color)
+				statusTag:SetText(text)
+			end)
+		end
+	end
+	UI.notify = function(title, content, duration)
+		if window then
+			pcall(function() window:Notify({ title = title, content = content, duration = duration or 6 }) end)
+		end
+	end
+
+	-- ---------------- Dump tab ----------------
+	if dumpTab then
+		safe(function() dumpTab:CreateSection({ name = "Target" }) end)
+		local folderInput = safe(function()
+			return dumpTab:CreateInput({
+				name = "Dump folder name",
+				placeholder = tostring(game.GameId) .. "_dump",
+				value = tostring(game.GameId) .. "_dump",
+				-- NOTE: no `flag` here on purpose - Rayfield persists flagged
+				-- values across sessions, which caused a stale folder name from
+				-- a previous game to be reused (overwriting that dump).
+			})
+		end)
+		safe(function()
+			dumpTab:CreateButton({
+				name = "Start Smart Dump",
+				icon = 93364949241311,
+				description = "Scan + decompile + write the 4 markdown files.",
+				callback = function()
+					if folderInput and folderInput.value and folderInput.value ~= "" then
+						State.folder = Sanitize(folderInput.value)
+					else
+						State.folder = tostring(game.GameId) .. "_dump"
+					end
+					runDump()
+				end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateButton({
+				name = "Stop / Cancel",
+				description = "Gracefully stop the running dump.",
+				callback = function()
+					State.cancel = true
+					Notify("Stopping…", "Will stop after the current batch.")
+				end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateToggle({
+				name = "Live Remote Logger (capture calls while playing)",
+				value = LiveLogger.enabled,
+				flag = "liveLogger",
+				description = "Hooks FireServer/InvokeServer while ON. Also toggled by the keybind below. Never touches your own calls.",
+				callback = function(v)
+					LiveLogger.enabled = v
+					if v then
+						if InstallLiveHook() then
+							Notify("Live logger ON", "Remote calls are being recorded. They flush into the dump on Start/Stop.")
+						else
+							LiveLogger.enabled = false
+							Notify("Hook unavailable", "This executor has no hookmetamethod - live logging is not possible.")
+						end
+					else
+						FlushLiveLog()
+					end
+				end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateKeybind({
+				name = "Toggle live logger (keybind)",
+				value = Enum.KeyCode.K,
+				flag = "liveKey",
+				callback = function()
+					LiveLogger.enabled = not LiveLogger.enabled
+					if LiveLogger.enabled then
+						if not InstallLiveHook() then
+							LiveLogger.enabled = false
+							Notify("Hook unavailable", "This executor has no hookmetamethod.")
+							return
+						end
+					else
+						FlushLiveLog()
+					end
+					Notify("Live logger " .. (LiveLogger.enabled and "ON" or "OFF"), "Captured so far: " .. LiveLogger.total)
+				end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateToggle({
+				name = "Include server-side (getinstances)",
+				value = Config.includeServerSide,
+				flag = "serverSide",
+				callback = function(v) Config.includeServerSide = v end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateToggle({
+				name = "Save full decompiled sources (scripts/)",
+				value = Config.saveSources,
+				flag = "saveSources",
+				callback = function(v) Config.saveSources = v end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateToggle({
+				name = "Save raw bytecode (.luac.hex) on failure",
+				value = Config.saveBytecode,
+				flag = "saveBytecode",
+				callback = function(v) Config.saveBytecode = v end,
+			})
+		end)			safe(function()
+			dumpTab:CreateSlider({
+				name = "Max scripts to analyze",
+				range = { 100, 10000 },
+				increment = 100,
+				value = Config.maxScripts,
+				suffix = " scripts",
+				flag = "maxScripts",
+				callback = function(v) Config.maxScripts = v end,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateButton({
+				name = "Open dump folder",
+				description = "Opens the executor workspace folder in Explorer (if supported).",
+				callback = openDumpFolder,
+			})
+		end)
+		safe(function()
+			dumpTab:CreateButton({
+				name = "Copy dump path to clipboard",
+				description = "Copies the dump folder path so you can paste it anywhere.",
+				callback = function()
+					local folder = State.folder or (tostring(game.GameId) .. "_dump")
+					if CopyToClipboard(folder) then
+						Notify("Copied", folder)
+					else
+						Notify("Not supported", "This executor has no clipboard function.", 5)
+					end
+				end,
+			})
+		end)
+
+		safe(function() dumpTab:CreateSection({ name = "Progress" }) end)
+		local statScripts = safe(function() return dumpTab:CreateStat({ name = "Scripts analyzed", value = 0 }) end)
+		local statRemotes = safe(function() return dumpTab:CreateStat({ name = "Remotes found", value = 0 }) end)
+		local statFuncs = safe(function() return dumpTab:CreateStat({ name = "Functions found", value = 0 }) end)
+		local statLive = safe(function() return dumpTab:CreateStat({ name = "Live remote calls", value = LiveLogger.total }) end)
+
+		UI.stats = function(processed, remotes, funcs)
+			pcall(function()
+				if statScripts then statScripts:Set(processed) end
+				if statRemotes then statRemotes:Set(remotes) end
+				if statFuncs then statFuncs:Set(funcs) end
+			end)
+		end
+		UI.live = function(count)
+			pcall(function()
+				if statLive then statLive:Set(count) end
+			end)
+		end
+	end
+
+	UI.summary = function(title, content)
+		if window then
+			pcall(function()
+				window:Popup({
+					title = title,
+					content = content,
+					options = {
+						{ text = "Open dump folder", callback = openDumpFolder },
+						{ text = "Close" },
+					},
+				})
+			end)
+		end
+	end
+
+	-- ---------------- Options tab ----------------
+	if optTab then
+		safe(function()
+			optTab:CreateSlider({
+				name = "Directory tree depth",
+				range = { 2, 20 },
+				increment = 1,
+				value = Config.treeDepth,
+				suffix = " levels",
+				flag = "treeDepth",
+				callback = function(v) Config.treeDepth = v end,
+			})
+		end)
+		safe(function()
+			optTab:CreateSlider({
+				name = "Tree children per folder",
+				range = { 10, 500 },
+				increment = 10,
+				value = Config.treeMaxChildren,
+				suffix = " items",
+				flag = "treeChildren",
+				callback = function(v) Config.treeMaxChildren = v end,
+			})
+		end)
+		safe(function()
+			optTab:CreateToggle({
+				name = "Show attributes in tree",
+				value = Config.showAttrs,
+				flag = "showAttrs",
+				callback = function(v) Config.showAttrs = v end,
+			})
+		end)
+		safe(function()
+			optTab:CreateToggle({
+				name = "Anti-cheat / security scan",
+				value = Config.scanAnticheat,
+				flag = "scanAnticheat",
+				callback = function(v) Config.scanAnticheat = v end,
+			})
+		end)
+		safe(function()
+			optTab:CreateToggle({
+				name = "Detect config / data modules",
+				value = Config.scanConfig,
+				flag = "scanConfig",
+				callback = function(v) Config.scanConfig = v end,
+			})
+		end)
+		safe(function()
+			optTab:CreateToggle({
+				name = "Debug prints (console)",
+				value = Config.debugPrints,
+				flag = "debugPrints",
+				callback = function(v) Config.debugPrints = v end,
+			})
+		end)
+		safe(function()
+			optTab:CreateToggle({
+				name = "Skip injected / executor scripts",
+				value = Config.skipInjected,
+				flag = "skipInjected",
+				description = "Filters scripts whose names/paths match known executor libraries (Rayfield, Synapse, Wave, ...).",
+				callback = function(v) Config.skipInjected = v end,
+			})
+		end)
+	end
+
+	-- ---------------- Info tab ----------------
+	if infoTab then
+		local function infoRow(title, body)
+			safe(function()
+				infoTab:CreateButton({
+					name = title,
+					description = body,
+					callback = function() end,
+				})
+			end)
+		end
+		safe(function() infoTab:CreateSection({ name = "Workflow (recommended)" }) end)
+		infoRow("1 · Dump", "Press Start Smart Dump and wait for 'Done'. Optionally enable Live Remote Logger (or press K) and play for a bit first.")
+		infoRow("2 · Find", "Press Open dump folder or copy the path. Files land in your executor's workspace as <gameId>_dump/.")
+		infoRow("3 · Read", "Start with remotes.md (what the game says to the server), then extras.md (frameworks/services), then directory.md and functions.md.")
+		infoRow("4 · Deep-dive", "Use the game-logic-analyzer agent skill (ships in this repo) on the dump folder to map systems, flows and architecture.")
+		safe(function() infoTab:CreateSection({ name = "Output files" }) end)
+		infoRow("directory.md", "Full asset tree: services, folders, models, scripts, modules, configs - with icons, values and attributes.")
+		infoRow("functions.md", "Every function definition and module export, with line numbers, plus config/data module detection.")
+		infoRow("remotes.md", "RemoteEvent/RemoteFunction instances plus every remote name fired in decompiled code, with reference counts.")
+		infoRow("extras.md", "Bindables, key services, values, attributes, anti-cheat hits, network ownership and hex-pattern hints.")
+		safe(function() infoTab:CreateSection({ name = "Notes" }) end)
+		infoRow("Universal", "Works in any game. Scans the full client tree and, when available, server-side instances via getinstances/getnilinstances.")
+		infoRow("Decompiling", "Uses decompile(), then getscriptbytecode + dumpstring(), then a direct Source read. Handles protected scripts gracefully.")
+		infoRow("Performance", "Runs in its own thread and yields between batches so the game stays smooth. Lower Max scripts on huge places.")
+		infoRow("Saving", "Files are written to your executor's workspace, e.g. " .. tostring(game.GameId) .. "_dump/. Use Open dump folder to find them.")
+		safe(function() infoTab:CreateSection({ name = "v1.0.2 (bugfix)" }) end)
+		infoRow("Dump folder safety", "The folder name no longer persists across sessions, and if the folder already holds a dump of a different place the dump redirects to {gameId}_{placeId}_dump instead of overwriting.")
+		safe(function() infoTab:CreateSection({ name = "v1.0.1 (hardening)" }) end)
+		infoRow("Self-capture filter", "Scripts the dumper itself injected (loadstring_*, numeric names, GitHub/sirius URLs in source) are excluded from analysis so reports stay clean.")
+		infoRow("Protected scripts", "Failed/protected scripts are listed by path in directory.md (plus bytecode hex if enabled) instead of a bare count.")
+		infoRow("Server-side roots", "Server-only containers render even when an executor's getinstances() parent chain doesn't reach game (Xeno included).")
+		infoRow("Massive games", "Analysis sources are memory-capped; Max scripts slider now goes up to 10,000.")
+		safe(function() infoTab:CreateSection({ name = "v1.0 (release)" }) end)
+		infoRow("Reinjection safe", "Reinjecting the script reloads the UI instead of duplicating it - the live logger and its captured calls survive reinjection.")
+		infoRow("Live Remote Logger", "Hook-based capture of every FireServer/InvokeServer call (toggle or press K). Saved to <gameId>_live_remotes.log + remotes.md summary.")
+		infoRow("Remote call graph", "remotes.md maps each remote to the exact scripts (with line numbers) that fire it and listen to it. Also exported to <gameId>_remotes.csv.")
+		infoRow("Framework detection", "extras.md flags known frameworks: Knit, ProfileService, Net, DataStore2, Promise, Maid, Signal libraries, remote wrappers.")
+		infoRow("Asset IDs + game info", "extras.md lists every rbxassetid:// referenced; report headers include the real place name, creator and universe id.")
+		infoRow("Anti-detection", "The logger hook is newcclosure-wrapped and checkcaller-guarded, injected scripts are filtered out, and the hook only installs when you enable it.")
+		safe(function() infoTab:CreateSection({ name = "Executor capabilities" }) end)
+		infoRow("Capability report", CapabilitySummary():gsub("\n", " · "))
+	end
+
+	P.unload = function()
+		State.cancel = true
+		FlushLiveLog()
+		pcall(function()
+			if window and not window.unloaded then
+				window:Unload()
+			end
+		end)
+	end
+
+	return true
+end
+
+-- ============================================================
+--  Native fallback UI (zero dependencies)
+-- ============================================================
+local function BuildNativeUI()
+	local CoreGui = game:GetService("CoreGui")
+	local existing = CoreGui:FindFirstChild("WonTreeRBLXNative")
+	if existing then existing:Destroy() end
+
+	local sg = Instance.new("ScreenGui")
+	sg.Name = "WonTreeRBLXNative"
+	sg.ResetOnSpawn = false
+	sg.Parent = CoreGui
+
+	local main = Instance.new("Frame")
+	main.Size = UDim2.new(0, 320, 0, 420)
+	main.Position = UDim2.new(0.5, -160, 0.2, 0)
+	main.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+	main.BorderSizePixel = 0
+	main.Active = true
+	main.Draggable = true
+	main.Parent = sg
+	Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, -24, 0, 30)
+	title.Position = UDim2.new(0, 12, 0, 10)
+	title.BackgroundTransparency = 1
+	title.Text = "WonTree RBLX Dumper (native fallback)"
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.TextSize = 15
+	title.Font = Enum.Font.GothamBold
+	title.Parent = main
+
+	local status = Instance.new("TextLabel")
+	status.Size = UDim2.new(1, -24, 0, 22)
+	status.Position = UDim2.new(0, 12, 0, 44)
+	status.BackgroundTransparency = 1
+	status.Text = "Status: Idle"
+	status.TextColor3 = Color3.fromRGB(150, 150, 160)
+	status.TextSize = 12
+	status.Font = Enum.Font.Gotham
+	status.TextXAlignment = Enum.TextXAlignment.Left
+	status.Parent = main
+
+	local stats = Instance.new("TextLabel")
+	stats.Size = UDim2.new(1, -24, 0, 18)
+	stats.Position = UDim2.new(0, 12, 0, 68)
+	stats.BackgroundTransparency = 1
+	stats.Text = "Scripts: 0 · Remotes: 0 · Functions: 0"
+	stats.TextColor3 = Color3.fromRGB(120, 200, 255)
+	stats.TextSize = 11
+	stats.Font = Enum.Font.Gotham
+	stats.TextXAlignment = Enum.TextXAlignment.Left
+	stats.Parent = main
+
+	local function makeButton(name, y, color)
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(1, -24, 0, 36)
+		btn.Position = UDim2.new(0, 12, 0, y)
+		btn.BackgroundColor3 = color
+		btn.Text = name
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextSize = 13
+		btn.Font = Enum.Font.GothamBold
+		btn.Parent = main
+		Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+		return btn
+	end
+
+	local startBtn = makeButton("Start Smart Dump", 100, Color3.fromRGB(56, 66, 110))
+	startBtn.MouseButton1Click:Connect(function()
+		State.folder = tostring(game.GameId) .. "_dump"
+		runDump()
+	end)
+
+	local stopBtn = makeButton("Stop / Cancel", 144, Color3.fromRGB(110, 56, 56))
+	stopBtn.MouseButton1Click:Connect(function()
+		State.cancel = true
+	end)
+
+	local openBtn = makeButton("Open Dump Folder", 188, Color3.fromRGB(60, 60, 68))
+	openBtn.MouseButton1Click:Connect(openDumpFolder)
+
+	UI.status = function(text)
+		pcall(function() status.Text = "Status: " .. text end)
+	end
+	UI.stats = function(p, r, f)
+		pcall(function() stats.Text = "Scripts: " .. p .. " · Remotes: " .. r .. " · Functions: " .. f end)
+	end
+	UI.notify = function(title, content, duration)
+		print("[WonTree] " .. title .. " — " .. content)
+	end
+
+	P.unload = function()
+		State.cancel = true
+		FlushLiveLog()
+		pcall(function()
+			if sg and sg.Parent then sg:Destroy() end
+		end)
+	end
+
+	return true
+end
+
+-- ============================================================
+--  Boot
+-- ============================================================
+print("WonTree RBLX Dumper v1.0.2 (open source) — reinjection safe")
+
+-- If a previous copy is running, reload it instead of duplicating
+if type(P.unload) == "function" then
+	pcall(P.unload)
+	print("[WonTree] Previous instance unloaded — reloading fresh")
+end
+
+local bootOk, bootErr = pcall(function()
+	State.folder = tostring(game.GameId) .. "_dump"
+	fetchGameInfo()
+	print("[WonTree] Executor capabilities:")
+	for _, c in ipairs(CapabilityReport()) do
+		print("[WonTree]   " .. (c.ok and "✔" or "✘") .. " " .. c.name)
+	end
+	local built = BuildRayfieldUI()
+	if not built then
+		BuildNativeUI()
+	end
+end)
+
+if not bootOk then
+	print("[WonTree] UI error, using native: " .. tostring(bootErr))
+	pcall(BuildNativeUI)
+end
+
+```
+
+`docs/DEVELOPMENT.md`:
+
+```md
+# Development
+
+Guide for contributors: code layout, how to test without an executor, how to add patterns, and the release checklist.
+
+## Code layout (`WonTree-RBLX-Dumper.lua`)
+
+The script is one self-contained Lua file (no dependencies besides the Rayfield Gen2 UI, which is fetched at runtime with a native fallback). Sections, top to bottom:
+
+| Section | What it does |
+|---|---|
+| Executor environment | `ExecFn()` grabs executor functions from `getgenv()`/globals with `pcall` — never crashes on missing APIs |
+| Persistent state | `_G.WonTreeRBLX` survives reinjection (UI unload + shared live-logger state) |
+| Config / State / UI hooks | tunables + the `UI` hook table the worker reports into |
+| Capability report | which executor functions exist (✔/✘), printed at boot + written into `directory.md` |
+| File helpers | `Sanitize`, `EnsureFolder`, `WriteFile` (all `pcall`-safe) |
+| Instance collection | multi-source (`GetDescendants`, `getinstances`, `getnilinstances`, `getscripts`), deduped, noise-filtered |
+| Decompile stack | `decompile` → `getscriptbytecode`+`dumpstring` → `Source` → bytecode hex |
+| Analysis engines | `extractFunctions`, `extractModuleInfo`, `scanRemotes`, `scanCallGraph`, `scanKeywords`, `scanFrameworks`, `scanAssetIds` — all pure string analysis |
+| Live logger | namecall hook (anti-detection), arg serialization, file flushing |
+| Directory tree | box-drawing tree renderer with icons/caps/attributes |
+| MD builders | header + the four report writers + CSV export |
+| Dump pipeline | `doDump()` worker thread (yields, cancel, progress) |
+| UI | Rayfield Gen2 + native fallback |
+| Boot | reinjection guard, capability print, game-info fetch |
+
+**Conventions:** every external call is `pcall`-wrapped; the worker never blocks the game (yields every `Config.yieldEvery` items); no Luau-only syntax (the file parses as plain Lua 5.1, which widens executor compatibility).
+
+## Testing without an executor
+
+The analysis engines are pure Lua — you can run them on any machine:
+
+```bash
+# install a Lua VM + parser (once, in a scratch folder)
+npm install luaparse fengari
+
+node -e "
+const fs = require('fs');
+const luaparse = require('luaparse');
+const src = fs.readFileSync('WonTree-RBLX-Dumper.lua', 'utf8');
+try { luaparse.parse(src, { luaVersion: '5.1' }); console.log('SYNTAX OK'); }
+catch (e) { console.log('PARSE ERROR:', e.message, e.line, e.column); }
+"
+```
+
+For functional tests, load the analysis section into [fengari](https://github.com/fengari-lua/fengari) (a Lua VM in JS), stub `P`/`WriteFile`, and call `scanCallGraph`, `scanFrameworks`, `scanAssetIds`, `extractModuleInfo`, `buildTreeLines` against sample sources — this is how the project's own verification works and it catches real bugs (it has: a dot-vs-colon listen pattern bug and an empty-framework-entry bug).
+
+## Adding a remote pattern
+
+`scanCallGraph`/`scanRemotes` are pattern tables. To recognize a new convention, add a pattern to the right pass:
+
+- literal name capture → `REMOTE_PATTERNS` (aggregate) and `litPats` in `scanCallGraph` (graph)
+- variable → remote-name mapping → `mapPats` in `scanCallGraph` (e.g. a new wrapper like `GetRemote("Name")`)
+- fire/listen through a variable → `varPats`
+
+Patterns are Lua patterns (not regex); remember to escape `%` and that `OnServerEvent` is accessed with a dot before `:Connect`.
+
+## Adding a framework
+
+Append to `FRAMEWORKS`:
+
+```lua
+{ name = "YourFramework", pats = { "YourFramework%.new", ":YourMethod" } },
+```
+
+Patterns are counted per script; hits render in `extras.md` under *Detected frameworks*.
+
+## Adding a keyword group
+
+Append to `KEYWORD_GROUPS` with a `name` and `words` list. The scan lowercases the source and, for plain alphanumeric words, matches with word boundaries (`keywordPattern`) so generic gameplay words don't false-positive — keep words like `wave`/`kick`/`ban` out of the anti-cheat group.
+
+## Companion skill
+
+The repo ships a `game-logic-analyzer` agent skill at `.agents/skills/game-logic-analyzer/SKILL.md`. It is meant to be used **after** a dump exists: it reads the four `.md` reports (and `scripts/` when saved) and maps the game's systems, remote flows, and architecture. Keep the skill file in sync with what the dumper outputs (report names, section titles, file layout).
+
+## Release checklist
+
+1. Bump the version in: the header comment, `P.version`, `headerLines()` footer, window subtitle, `README.txt`, boot print, and `README.md` badge.
+2. Run the syntax + fengari functional tests (above) — all green.
+3. Field-test in-game on at least one executor (ideally Xeno + one more).
+4. Capture the console capability report and confirm `directory.md` shows the same.
+5. Verify reinjection: execute the script twice — the second run must unload the first UI, not duplicate it.
+6. Verify the live logger: toggle ON, play, dump, check `remotes.md` live section + `.log`.
+7. Update `docs/EXECUTOR-SUPPORT.md` if anything changed.
+
+```
+
+`docs/EXECUTOR-SUPPORT.md`:
+
+```md
+# Executor Support
+
+WonTree RBLX Dumper is designed around the **UNC (Unified Naming Convention)** — the standard executor API that modern Roblox executors implement. If an executor can run a normal script with `writefile`, WonTree runs on it. This page documents what the script needs, how it degrades gracefully, and the per-executor status.
+
+## What the script needs (and what happens without it)
+
+| Capability | Used for | If missing |
+|---|---|---|
+| `writefile`, `makefolder`, `isfolder` | writing the dump | nothing can be saved — executor can't write files |
+| `decompile` | full script source | falls back to the layers below |
+| `getscriptbytecode` (+ `dumpstring`) | source from bytecode | falls through to the next layer |
+| read of `script.Source` | client-replicated scripts | last resort: raw bytecode hex (if enabled) |
+| `getinstances` / `getnilinstances` | server-side instance scan | client-only dump (still fully useful) |
+| `hookmetamethod` / `getrawmetatable` | live remote logger | live logging disabled; everything else works |
+| `checkcaller` | hook safety (never log own calls) | hook still works, slightly less strict |
+| `openfolder` | "Open dump folder" button | copy the path instead |
+| `game:HttpGet` | loading Rayfield Gen2 UI | automatic **native UI** fallback |
+
+The script prints a **capability report** at startup, shows it in the Info tab, and writes it into `directory.md` — so any executor problem is trivially diagnosable.
+
+## Decompile layers (the important one)
+
+Not every executor ships a built-in decompiler. WonTree handles all cases:
+
+1. **`decompile(script)`** — Xeno, Wave, Delta, Fluxus, Hydrogen, Celery, Nihon, Oxygen U, Arceus X (and historically KRNL/Synapse X/Script-Ware).
+2. **`getscriptbytecode(script)` + `dumpstring(bytecode)`** — executors that expose bytecode + a bytecode-to-source converter (Xeno, Codex, Wave, …).
+3. **`script.Source` read** — works on the client for replicated LocalScripts/ModuleScripts on many executors.
+4. **Raw bytecode hex dump** (optional toggle) — `getscriptbytecode` output saved as `.luac.hex` so you can decompile offline with a Luau decompiler (e.g. [Unluau](https://github.com/axstin/rbxfpsunlocker) forks, [Ririchi's Luau-Decompiler](https://wearedevs.net/forum/t/37988)).
+
+Protected/server scripts (`isprotectedscript`, obfuscated) are reported as *failed* and skipped — never a crash.
+
+## Support matrix
+
+> **Verified** = tested by the project maintainers. **Expected** = executor is UNC-compliant and community-documented as providing the listed functions. Executor APIs change constantly; open an issue if something on your setup differs.
+
+| Executor | File API | decompile | getscriptbytecode | dumpstring | Hook (live logger) | Status |
+|---|---|---|---|---|---|---|
+| **Xeno** | ✔ | ✔ | ✔ | ✔ | ✔ | **Verified** (primary target) |
+| **Wave** | ✔ | ✔ | ✔ | ✔ | ✔ | Expected |
+| **Delta** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **Fluxus** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **Codex** | ✔ | ~ | ✔ | ✔ | ✔ | Expected |
+| **Solara** | ✔ | ✘ (uses bytecode) | ✔ | ~ | ✔ | Expected (fallback layers cover it) |
+| **Hydrogen** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **Celery** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **Nihon** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **Oxygen U** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **Arceus X** | ✔ | ✔ | ✔ | ~ | ✔ | Expected |
+| **KRNL** | ✔ | ✔ | ✔ | ~ | ✔ | Retired (still works) |
+| **Synapse X** | ✔ | ✔ | ✔ | ~ | ✔ | Defunct (archived) |
+| **Script-Ware** | ✔ | ✔ | ✔ | ~ | ✔ | Defunct (archived) |
+
+`✔` = documented/provided · `~` = may vary by version · `✘` = not provided (fallback used)
+
+## Research sources
+
+- **UNC / Unified Naming Convention** — the executor API standard this project targets: [unified-naming-convention/NamingStandard](https://github.com/unified-naming-convention/NamingStandard)
+- **Community executor API docs archive** (KRNL, Synapse X, Script-Ware, Oxygen U, Celery, ProtoSmasher, …): [luau/Executor-API-Docs](https://github.com/luau/Executor-API-Docs)
+- **Celery docs**: [celeryrblx.github.io](https://celeryrblx.github.io/) · **Oxygen U docs** (oxydoc): [github.com/bruvzz/oxydoc](https://github.com/bruvzz/oxydoc) · **KRNL docs** (krnldoc): [github.com/bruvzz/krnldoc](https://github.com/bruvzz/krnldoc)
+- **Synapse X file API docs**: [synapsexdocs.github.io](https://synapsexdocs.github.io/custom-lua-functions/file-functions/)
+
+## Reporting a problem
+
+If WonTree misbehaves on your executor:
+
+1. Run the script and copy the console output — it prints the **executor capabilities** at startup.
+2. Check the Info tab → *Executor capabilities* row (same report).
+3. Open an issue with: executor name + version, the capability lines (✔/✘), and what failed (no UI / no files / no decompiled source / logger off).
+
+That report tells us exactly which layer to improve for your environment.
+
+```
+
+`docs/OUTPUT.md`:
+
+```md
+# Output Reference
+
+All files are written to your executor's workspace folder (the same place `writefile` writes). The folder is named `{game_id}_dump` by default — you can rename it in the UI's *Dump folder name* field.
+
+## Folder layout
+
+```
+{game_id}_dump/
+├── {game_id}_directory.md
+├── {game_id}_functions.md
+├── {game_id}_remotes.md
+├── {game_id}_extras.md
+├── {game_id}_remotes.csv
+├── {game_id}_live_remotes.log      (only if the live logger ran)
+├── protected.txt                   (only if any script failed to decompile — paths listed)
+├── README.txt
+├── scripts/                        (optional: full decompiled sources)
+└── bytecode/                       (optional: raw bytecode hex dumps)
+```
+
+`{game_id}` is `game.GameId`. `README.txt` records the game, place, time and tool version.
+
+`protected.txt` (v1.0.1) is written only when decompilation failed for at least one script — it lists every protected/failed script by class and path so you can triage what couldn't be read (bytecode hex, when enabled, lives in `bytecode/`).
+
+## `{game_id}_directory.md` — file / asset structure
+
+- **Summary** — instance counts, scripts found/decompiled/failed, remotes, bindables, asset IDs.
+- **Client tree** — a box-drawing tree of the whole client-visible hierarchy with icons:
+
+  ```
+  ▸ DataModel "game"  (root)
+  ├─ 📦 ModuleScript "Config"
+  ├─ 📡 RemoteEvent "Start"
+  ├─ 🔢 IntValue "Gold" = 100
+  ```
+
+  Icons: `⚙` Script · `📦` ModuleScript · `📡` Remote · `🔔` Bindable · `🔢` Value · `🖥` GUI · `🧱` Model/Part · `🔧` Tool. Value children show their value; instances with attributes show them inline `[attr=value]`. Depth and children-per-folder are capped (tunable in Options) with explicit truncation markers.
+- **Server-side only** — containers found via `getinstances()` that the client can't see (ServerStorage, ServerScriptService …).
+- **Script inventory** — table of every script with class, decompile method used and path.
+- **Executor environment** — the capability report (which executor functions are available), invaluable when debugging support on a new executor.
+
+## `{game_id}_functions.md` — functions & game logic
+
+- **Modules** — every ModuleScript's exported table keys (`return { Init = function ... }`), with line numbers, tagged `module` or `config` (config = module returning mostly scalar values — i.e. data/balance configs).
+- **Scripts** — every `local function`, `function X.Y` and `X = function` definition with line numbers, per script.
+
+## `{game_id}_remotes.md` — client ↔ server communication
+
+- **Remote instances found** — every `RemoteEvent`/`RemoteFunction` instance visible (and server-side, when available).
+- **Remote names referenced in code** — every string-literal remote name (`:FireServer("Name")`, `:InvokeServer("Name")`, `RemoteEvent.new("Name")`, `GetServerEvent("Name")` …), ranked by use count, with the kinds of use and the scripts that reference them. `(var)` entries are remotes reached through variables (e.g. `Remotes.Events.Start:FireServer`).
+- **Call graph — who fires / who listens** — per remote: the exact `script:line` of every fire site and listen site. Variable resolution handles the common patterns:
+
+  ```lua
+  local event = Remotes:GetServerEvent("StartRound")   -- maps event -> "StartRound"
+  event:FireServer("StartRound")                        -- fire at script.lua:4
+  event.OnServerEvent:Connect(function(p) end)          -- listen at script.lua:5
+  ```
+
+  Also resolved: `X = Folder:WaitForChild("Name")`, `local X = Instance.new("RemoteEvent"); X.Name = "Name"`, and inline chains (`Remotes:GetServerEvent("X").OnServerEvent:Connect`).
+- **Unnamed FireServer/InvokeServer calls** — scripts that fire remotes without string literals (table args / obfuscated names) — inspect their saved sources.
+- **Live remote calls captured** — per-remote counts from the live logger, plus a pointer to the full `.log`.
+
+## `{game_id}_extras.md` — everything else
+
+- **Key services present** — Players, ReplicatedStorage, ServerStorage, TeleportService, MessagingService, DataStoreService … ✔/✘ as seen from the client.
+- **BindableEvents / BindableFunctions** — instances with paths.
+- **Values (sample)** — `ValueBase` instances with their current values.
+- **Attributes (sample)** — instance attributes across the visible tree.
+- **Character / tool / inventory** — StarterPack tools, StarterPlayer contents, inventory/backpack/shop-named UI in PlayerGui.
+- **Network ownership / replication** — `getnetworkowner` availability and `SetNetworkOwner` usage in code.
+- **Anti-cheat / security checks** — scripts matching exploit-detection keyword groups (anti-cheat, checkcaller, byfron/hyperion, teleports, data stores, messaging, HTTP, kick/ban …), ranked by hit count.
+- **Detected frameworks / patterns** — Knit, ProfileService, Net, DataStore2, Promise, Maid, Signal libraries, remote wrappers, Controller/Service — with the scripts that use them.
+- **Config / data modules (auto-detected)** — modules that look like data tables rather than logic.
+- **Assets loaded (rbxassetid://)** — deduped asset IDs referenced in code, ranked by reference count.
+- **Offsets / addresses / patterns** — a source-level dumper doesn't produce memory offsets; as a hint it lists scripts containing hex constants (`0x…`).
+
+## `{game_id}_remotes.csv`
+
+One row per remote: `remote,uses,fired_by,listened_by`. Fire/listen cells contain `script:line` entries separated by ` | `. Import into any spreadsheet for filtering/sorting.
+
+## `{game_id}_live_remotes.log`
+
+Timestamps + full remote path + method + serialized arguments, e.g.:
+
+```
+[14:03:22] ReplicatedStorage.Remotes.Buy.InvokeServer("Sword", 1, {x=1})
+```
+
+Arguments are serialized to depth 3 (tables, instances as `[Instance Class:Name]`), capped at 8 args and 60 chars per string. The buffer keeps the last 5000 calls.
+
+```
