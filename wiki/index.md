@@ -71,6 +71,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [basic-anti-cheat](entities/basic-anti-cheat.md) — Basic C/C++ AC teaching sample (integrity / signature scan / debugger / modules / memory validation; gmh5225)
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [BE Shellcode Dump](entities/be-shellcode-dump.md) — dump BE runtime shellcode scanning modules for offline RE (gmh5225; Reversed BE Shellcode)
+- [BE Shellcode Tester](entities/be-shellcode-tester.md) — C++ sandbox to execute/analyze dumped BE scanning modules; logs memory scans, hash checks, detection routines (es3n1n)
 - [BE BattlEye Shellcode](entities/be-battleye-shellcode.md) — reimplement recent BE UM shellcode scan stages as DLL study scaffold (hidden threads, KiUserExceptionDispatcher hooks, integrity/signature/thread scans, VEH-guarded calls; gmh5225; [shellcode])
 - [BE Emulator](entities/be-emulator.md) — BattlEye client-side protocol emulator (heartbeat, module load, comm; gmh5225; explore anticheat system:be)
 - [BE Forcer Fortnite](entities/be-forcer-fortnite.md) — Fortnite BattlEye init forcer; disables title-specific detection checks for injection/memory access (gmh5225; cheat / explore anticheat system:be / game:fortnite)

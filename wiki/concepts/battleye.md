@@ -32,6 +32,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__BE-BattlEye_shellcode.md
   - wiki/sources/descriptions/experienceds__pubg-p2c-re.md
   - wiki/sources/descriptions/experienceds__battleye-re.md
+  - wiki/sources/descriptions/es3n1n__be-shellcode-tester.md
 updated: 2026-08-15
 confidence: medium
 ---
@@ -61,6 +62,8 @@ Runtime shellcode streamed from the BE server and executed in-process is interce
 [[be-shellcode-dump]] (gmh5225) dumps BE runtime shellcode scanning modules from protected game processes—intercepts streamed payloads before offline RE of detection signatures and scanning logic. (source: wiki/sources/descriptions/gmh5225__be_shellcode_dump.md)
 
 [[be-battleye-shellcode]] (gmh5225) reimplements recent BE user-mode shellcode as a DLL study scaffold: worker-thread scan stages (hidden system threads, `KiUserExceptionDispatcher` hook detection, module/function integrity, signature scan, thread scan) plus VEH-guarded Win32/CRT targets for shellcode-style control-flow recovery. (source: wiki/sources/descriptions/gmh5225__BE-BattlEye_shellcode.md)
+
+[[be-shellcode-tester]] (es3n1n) is a C++ sandbox that loads dumped BE scanning modules, emulates their expected runtime, and logs memory scans, hash checks, and detection routines—useful for measuring BE shellcode detection coverage without a live protected game. (source: wiki/sources/descriptions/es3n1n__be-shellcode-tester.md)
 
 VAS region enumeration for injected/shellcode and manual-mapped modules is reconstructed in [[battleye-region-walking]]: VirtualQuery walk plus BE-style filters on protection, size, `MEM_PRIVATE`/`MEM_MAPPED`, and address heuristics. (source: wiki/sources/descriptions/tr1xxx__battleye-region-walking.md)
 
@@ -92,4 +95,4 @@ PUBG commercial P2C loader RE such as [[pubg-p2c-re]] (experienceds) documents i
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
