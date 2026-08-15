@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:geeksonsecurity/android-overlay-malware-example`: entity [[android-overlay-malware-example]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-overlay-protection]], [[android-native-surface]], and [[external-imgui-android]].
+
 - **2026-08-15** — ingest `description:geeksonsecurity/android-overlay-protection`: entity [[android-overlay-protection]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-native-surface]], [[external-imgui-android]], and [[droidshield]].
 
 - **2026-08-15** — ingest `description:gheja/game-design-documents`: entity [[game-design-documents]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[learn-awesome-gamedev]] and [[anything-about-game]].

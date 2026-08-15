@@ -12,7 +12,7 @@ confidence: medium
 
 Java library for detecting and mitigating **overlay attacks (tapjacking)** on Android. It scans for visible overlay windows drawn above the app that could intercept touches or obscure sensitive UI, implements `TYPE_APPLICATION_OVERLAY` detection, and handles `filterTouchesWhenObscured` so obscured views reject input. Callback-based notifications alert the app when overlays are present—aimed at developers and security engineers hardening login, payment, and permission flows. (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md)
 
-Defensive counterpart to offensive floating-overlay cheat menus such as [[android-native-surface]] and [[external-imgui-android]]; complements broader RASP samples ([[droidshield]], freeRASP) that may include screen-capture or overlay-adjacent signals.
+Defensive counterpart to offensive overlay PoCs such as [[android-overlay-malware-example]] (banking-trojan credential phishing) and cheat-side floating menus such as [[android-native-surface]] and [[external-imgui-android]]; complements broader RASP samples ([[droidshield]], freeRASP) that may include screen-capture or overlay-adjacent signals.
 
 ## Links
 
@@ -20,4 +20,4 @@ Defensive counterpart to offensive floating-overlay cheat menus such as [[androi
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[mobile-anti-cheat]] · [[android-native-surface]] · [[external-imgui-android]] · [[droidshield]] · [[free-rasp-android]]
+[[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[mobile-anti-cheat]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[external-imgui-android]] · [[droidshield]] · [[free-rasp-android]]
