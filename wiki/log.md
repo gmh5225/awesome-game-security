@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:eversinc33/drvtrace`: entity [[drvtrace]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfb]], [[cognitor]], and [[driver-buddy-reloaded]].
+
 - **2026-08-15** — ingest `description:eversinc33/unKover`: entity [[unkover]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[system-thread-finder]], [[stealth-sytem-thread-finder-be]], and [[hidden-thread-finder]].
 
 - **2026-08-15** — ingest `description:repinek/fallguys-frida-modmenu`: entity [[fallguys-frida-modmenu]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[frida-il2cpp-bridge]], [[fall-guys-sharp]], and [[fall-guys]].
