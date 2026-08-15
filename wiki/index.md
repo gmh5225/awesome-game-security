@@ -1583,6 +1583,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [r2smt](entities/r2smt.md) — radare2 SMT opaque-predicate deobfuscator (Rust; Z3/CVC5/Bitwuzla; Cheat Radare Plugins)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
+- [rnidbg](entities/rnidbg.md) — Android ARM64 kernel emulator (Rust rewrite of unidbg; kernel-level work, graphics, animation; cheat / Android kernel explorer)
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
 - [ReadDirectoryChanges](entities/readdirectorychanges.md) — C++ `ReadDirectoryChangesW` wrapper (async recursive directory watch; sync/security monitoring)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
