@@ -157,6 +157,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-rom-list](entities/android-rom-list.md) — curated Android custom ROM reference list (cheat / Android ROM)
 - [Android Terminal Emulator](entities/android-terminal-emulator.md) — VT-100 terminal emulator for built-in Android shell (jackpal; Cheat Terminal Emulator)
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
+- [Android-DLL-Injector](entities/android-dll-injector.md) — Android native `.so` injector (Android Studio build; arch-matched payload; cheat / injection:android; gmh5225)
 - [Android-LD-Preload-Injector](entities/android-ld-preload-injector.md) — Android LD_PRELOAD inject (dead; cheat / injection:android)
 - [Android-Mem-Edit](entities/android-mem-edit.md) — C++ Android process memory editor (cheat / Android Memory Explorer)
 - [Android-MemoryTool](entities/android-memory-tool.md) — single-header C/C++ `/proc/pid/mem` read/write library (minimal API; no ptrace attach; cheat / RPM; gmh5225)
