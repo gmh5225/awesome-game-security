@@ -1830,6 +1830,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [t7-linker](entities/t7-linker.md) — T7 engine GSC script / FastFile linker (compiled modules; T7 bytecode; cheat / Call of Duty modding; gmh5225)
 - [The-Seed-Link-Future](entities/the-seed-link-future.md) — Unity VR (C#; OpenGL / shader / driver-dev; Game Develop)
 - [Themida-Research](entities/themida-research.md) — Themida/WinLicense 3.x VM research (`VM_CONTEXT` / handlers / Triton; Fix Themida)
+- [themida-spotter-bn](entities/themida-spotter-bn.md) — Binary Ninja plugin to detect Themida/WinLicense/Code Virtualizer obfuscated code regions (x86/x64; Oreans ≤3.1.9; Fix Themida)
 - [themida-unmutate](entities/themida-unmutate.md) — Python 3 static mutation deobfuscator for Themida/WinLicense/Code Virtualizer 3.x (Fix Themida)
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)
 - [Three.js](entities/three-js.md) — JavaScript 3D library (WebGL/WebGPU; scene graph / PBR / glTF / XR; Game Engine / HTML5)

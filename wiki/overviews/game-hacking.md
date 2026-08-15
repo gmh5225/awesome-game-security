@@ -365,6 +365,7 @@ sources:
   - wiki/sources/descriptions/rexdex__recompiler.md
   - wiki/sources/descriptions/exploits-forsale__collateral-damage.md
   - wiki/sources/descriptions/eset__DelphiHelper.md
+  - wiki/sources/descriptions/ergrelet__themida-spotter-bn.md
   - wiki/sources/descriptions/ergrelet__themida-unmutate.md
   - wiki/sources/descriptions/ergrelet__unlicense.md
   - wiki/sources/descriptions/eteran__edb-debugger.md
@@ -1201,6 +1202,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Automatic Themida v1/v2/v3 unpack via [[magicmida-rs]] (Rust Win32 Debug API debugger; OEP discovery + memory dump + PE IAT/section rebuild; optional ScyllaHide anti-debug bypass; verify mode) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/guoxing2024__magicmida-rs.md)
 - Dynamic Themida/WinLicense 2.x/3.x unpack via [[unlicense]] (Python 3; Frida instrumentation; OEP recovery + obfuscated IAT rebuild; x86/x64 native PE/DLL + .NET EXE; LIEF/Capstone) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__unlicense.md)
 - Static mutation deobfuscation via [[themida-unmutate]] (Python 3; Themida/WinLicense/Code Virtualizer 3.x insn mutation on selected functions; tested to Themida 3.1.9) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__themida-unmutate.md)
+- Obfuscated-region detection via [[themida-spotter-bn]] (Binary Ninja plugin; Themida/WinLicense/Code Virtualizer obfuscated code locations; x86/x64; Oreans ≤3.1.9; Cheat Binary Ninja Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/ergrelet__themida-spotter-bn.md)
 
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - SMT-assisted opaque-predicate deobfuscation via [[r2smt]] (Rust; radare2 integration; Z3/CVC5/Bitwuzla; IR lift + SSA + backward slice; batch JSON/MD reports; reversible patches) sits in the Cheat Radare Plugins lane. (source: wiki/sources/descriptions/seifreed__r2SMT.md)

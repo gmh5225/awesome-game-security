@@ -20,4 +20,4 @@ Companion surface to Cheat → Fix Themida work ([[unlicense]] Frida dynamic unp
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unlicense]] · [[themida-research]] · [[tde]] · [[magicmida-rs]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[themida-spotter-bn]] · [[unlicense]] · [[themida-research]] · [[tde]] · [[magicmida-rs]]
