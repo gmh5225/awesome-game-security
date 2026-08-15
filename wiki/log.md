@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fredakilla/GPlayEngine`: entity [[gplayengine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[gameplay]] and [[kotek]].
+
 - **2026-08-15** — ingest `description:lauralex/OAC`: entity [[oac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-anti-cheat]], [[cs2kac]], and [[kernel-callbacks]].
 
 - **2026-08-15** — ingest `readme:categories`: bumped Anti Cheat ~674 (was ~673; Cheat ~2702 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
