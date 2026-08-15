@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Android-Emulator-Detection`: updated entity [[android-emulator-detection]] (gmh5225 Java/Kotlin scoring library; reveny fork retained); cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[anti-emulator]], [[conbeerlib]], and [[mobile-anti-cheat]].
+
 - **2026-08-15** — ingest `description:gmh5225/Android-MemoryTool`: entity [[android-memory-tool]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-mem-edit]], [[cheap-engine]], [[root-socket-kit]], and [[rwmem]].
 
 - **2026-08-15** — ingest `description:gmh5225/Android-Mod-Menu-ImGui`: entity [[android-mod-menu-imgui]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[imgui-native-modmenu]], [[imgui-unity-android]], and [[external-imgui-android]].
