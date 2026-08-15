@@ -170,6 +170,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
 - [AntiDebugandMemoryDump](entities/antidebugandmemorydump.md) — Android anti-debug + memory analysis / emulation / debugging (Java + C/C++; gmh5225)
 - [AntiDebug-AntiVM](entities/antidebug-antivm.md) — anti-debug + VirtualBox anti-VM technique examples (reference snippets; Vbox; gmh5225)
+- [AntiDbg-AmogusPlugin](entities/antidbg-amogus-plugin.md) — Windows C/C++ anti-debug plugin (hooking / plugin development / debugging integration; Anti Debugging; gmh5225)
 - [AntiKernelDebug-POC](entities/anti-kernel-debug-poc.md) — C driver PoC; detect/prevent kernel-mode debugging (debug port / KdDebuggerEnabled / KUSER_SHARED_DATA / interrupt checks; Windows Kernel; gmh5225)
 - [Baka (antidbg-Baka)](entities/antidbg-baka.md) — Windows C/C++ anti-debug library (PEB/NtQueryInformationProcess/HWBP/timing/exception/parent; ScyllaHide/HyperHide/TitanHide detection; Anti Debugging)
 - [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
