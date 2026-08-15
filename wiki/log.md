@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:farazsth98/poc-CVE-2025-38352`: entity [[poc-cve-2025-38352]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[cve-2026-64560-analysis]] and [[android-vuln]].
+
 - **2026-08-15** — ingest `description:fatalSec/DaliVM`: entity [[dalivm]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dalvikus]], [[jadx]], and [[rnidbg]].
 
 - **2026-08-15** — ingest `description:fcancelog/EftStreamedCheat`: entity [[eft-streamed-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-external]], [[meatyeftrelease]], [[eft-dma-radar-1]], and [[nathans-tarkov-radar-public]].
