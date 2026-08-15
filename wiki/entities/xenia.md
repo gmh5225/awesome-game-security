@@ -20,4 +20,4 @@ Useful for emulation developers and researchers studying console hardware abstra
 
 ## Related
 
-[[xenia-mac]] · [[xqemu]] · [[kevboy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]
+[[xenia-mac]] · [[xbox360-emu]] · [[xqemu]] · [[kevboy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]]

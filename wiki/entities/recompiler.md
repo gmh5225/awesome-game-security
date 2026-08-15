@@ -20,4 +20,4 @@ Sits in the README `Xbox` lane beside HLE playback via [[xenia]] / [[xenia-mac]]
 
 ## Related
 
-[[xenia]] · [[xenia-mac]] · [[xemu]] · [[xqemu]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[xenia]] · [[xenia-mac]] · [[xbox360-emu]] · [[xemu]] · [[xqemu]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
