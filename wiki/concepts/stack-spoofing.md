@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__CallStackSpoofer-2.md
   - wiki/sources/descriptions/gabriellandau__ShadowStackWalk.md
   - wiki/sources/descriptions/frkngksl__NimicStack.md
+  - wiki/sources/descriptions/fortra__hw-call-stack.md
 updated: 2026-08-15
 confidence: medium
 ---
@@ -29,6 +30,10 @@ Before calling a sensitive API, replace the stack slot that holds the return add
 ## Synthetic call stacks
 
 Build multi-frame stacks whose return PCs land in legitimate modules with plausible offsets. Must satisfy **`RtlVirtualUnwind`** and **`.pdata` / UNWIND_INFO`** consistency—spoofed frames that violate unwind metadata fail deeper validation.
+
+## Hardware-breakpoint stack spoofing
+
+Some Windows implementations use **x86 debug registers (DR0–DR7)** to intercept execution and **forge visible call stacks** during syscalls and API calls without classic return-address patching. [[hw-call-stack]] (fortra; C/C++; `Cheat > Spoof Stack` / `[HWBP]`) illustrates this lane for game-security researchers studying HWBP-driven stack presentation. (source: wiki/sources/descriptions/fortra__hw-call-stack.md)
 
 ## Unwind-metadata manipulation
 

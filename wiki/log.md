@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fortra/hw-call-stack`: entity [[hw-call-stack]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[spoof-stack-safecall]] and [[shadow-stack-walk]].
+
 - **2026-08-15** — ingest `description:fosdickio/binary_ninja_mcp`: entity [[binary-ninja-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ghidra-headless-mcp]], and [[binaryninja-pcode]].
 
 - **2026-08-15** — ingest `description:fr0gger/awesome-ida-x64-olly-plugin`: entity [[awesome-ida-x64-olly-plugin]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[x64dbg]], [[idaplugins-list]], and [[retoolkit]].
