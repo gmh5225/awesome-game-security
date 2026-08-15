@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/nv_v2`: entity [[nv-v2]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-external-esp]], [[solace-csgo]], and [[present-hook]].
+
 - **2026-08-15** — ingest `description:ekknod/pcileech-wifi`: entity [[pcileech-wifi]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-fpga]] and [[vm]].
 
 - **2026-08-15** — ingest `description:ekknod/smm`: entity [[smm]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[sumap]], [[vm]], and [[pawnio]].

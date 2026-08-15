@@ -103,6 +103,7 @@ sources:
   - wiki/sources/descriptions/emlinhax__blitz.md
   - wiki/sources/descriptions/emlinhax__xv.md
   - wiki/sources/descriptions/eksses__EAFE.md
+  - wiki/sources/descriptions/ekknod__nv_v2.md
   - wiki/sources/descriptions/emilyinure__solace-csgo.md
   - wiki/sources/descriptions/seifreed__r2morph.md
   - wiki/sources/descriptions/secrary__makin.md
@@ -587,6 +588,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[csgo-cheat-external]] — External CS:GO sample (C++; driver development) for studying driver-backed out-of-process cheat surface against VAC (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - [[csgo-external-cheat]] — External CS:GO sample (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - [[csgo-external-ahk-hack]] — AutoHotkey external CS:GO sample (gmh5225; script RPM; triggerbot / bhop / basic ESP; no compiled cheat binary) for studying script-based out-of-process cheat surface and detection characteristics against VAC (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
+- [[nv-v2]] — CS:GO sound ESP sample (ekknod; C/C++; hooking; audio-derived positional awareness without visual overlay; cheat / game:csgo [Sound ESP]) for studying non-visual ESP cheat surface against VAC (source: wiki/sources/descriptions/ekknod__nv_v2.md)
 - [[csgo-backtrack-patch]] — CS:GO backtrack patch sample (C/C++; hooking / memory analysis) for studying lag-compensation / tick-history cheat surface against VAC (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
 - [[kvm-csgo-cheat]] — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (gmh5225) for studying VM-isolated / below-OS cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - [[cs16-trigger-kvm]] — KVM/QEMU host-side CS1.6 triggerbot (gmh5225; guest memory read + input injection invisible to in-guest AC) for studying hypervisor-based cheat surface (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)

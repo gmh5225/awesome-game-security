@@ -76,6 +76,7 @@ sources:
   - wiki/sources/descriptions/ekknod__usbsn.md
   - wiki/sources/descriptions/ekknod__sumap.md
   - wiki/sources/descriptions/ekknod__smm.md
+  - wiki/sources/descriptions/ekknod__nv_v2.md
   - wiki/sources/descriptions/enis1enis2__Windfall-AntiCheat.md
   - wiki/sources/descriptions/frasten__ida-genpatch.md
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
@@ -1051,7 +1052,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 | Category | Examples | Notes |
 |----------|----------|-------|
-| Visual (ESP) | Box/skeleton ESP, radar, item highlight | Needs [[world-to-screen]] + entity lists or vision models |
+| Visual (ESP) | Box/skeleton ESP, radar, item highlight | Needs [[world-to-screen]] + entity lists or vision models; audio-derived **sound ESP** such as [[nv-v2]] (ekknod; C/C++; hooking; cheat / game:csgo [Sound ESP]) uses hooked game audio instead of overlay draw paths (source: wiki/sources/descriptions/ekknod__nv_v2.md) |
 | Aim assistance | Memory aimbot, triggerbot, silent aim, no-recoil, physics-derived shot guides | Server-side replay targets memory-based paths; see [[ai-aimbot-detection]] for CV pipelines; billiard titles may expose trajectory from physics reads such as [[alaa-8ball-pool-source-exposed]] (source: wiki/sources/descriptions/gmh5225__Alaa-8ball-pool-source-exposed.md) |
 | AI visual | OBS/YOLO capture → HID output | May avoid process attach; capture, model, and input artifacts remain |
 | Movement | Speedhack, fly, noclip, bhop scripts | Often server-authoritative or physics-constrained |
@@ -1472,6 +1473,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Simple kernel CS:GO cheats with hook-based communication such as [[kernel-csgo]] (C++; driver development / modding) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/nbqofficial__kernel-csgo.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
+- CS:GO **sound ESP** samples such as [[nv-v2]] (ekknod; C/C++; hooking; audio-derived positional awareness; README `[Sound ESP]`) sit in the same cheat / game:csgo lane as an alternative to visual overlay ESP. (source: wiki/sources/descriptions/ekknod__nv_v2.md)
 - Script-based external CS:GO samples such as [[csgo-external-ahk-hack]] (gmh5225; AutoHotkey; RPM for triggerbot, bunny hop, basic ESP; External tag) sit in the same low-barrier cheat / game:csgo lane for studying script-based external detection. (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
