@@ -429,6 +429,7 @@ sources:
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
   - wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md
   - wiki/sources/descriptions/fdrechsler__mcp-server-idapro.md
+  - wiki/sources/descriptions/facebookresearch__CUTracer.md
   - wiki/sources/descriptions/fail46__OHack.md
   - wiki/sources/descriptions/fksvs__inject.md
   - wiki/sources/descriptions/firerpa__lamda.md
@@ -679,7 +680,7 @@ Engine-specific paths: Unity ([[il2cpp]] / Mono via dnSpy), Unreal (SDK generato
 
 ## Dynamic binary instrumentation
 
-Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy. Android ARM64 per-instruction native tracing via [[qbdi-tracer-android]] (QBDI + [[dobby]]; linker SO-load intercept, backtrace + memory/pattern utilities; CMake Android/iOS/ARM64; cheat / assembly instruction tracing). (source: wiki/sources/descriptions/g2wfw__qbdi-tracer-android.md) Google Project Zero **TinyInst** (C/C++; lightweight module-selective DBI; hooking / debugging) sits in that lightweight instrumentation lane. (source: wiki/sources/descriptions/googleprojectzero__TinyInst.md)
+Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy. Android ARM64 per-instruction native tracing via [[qbdi-tracer-android]] (QBDI + [[dobby]]; linker SO-load intercept, backtrace + memory/pattern utilities; CMake Android/iOS/ARM64; cheat / assembly instruction tracing). (source: wiki/sources/descriptions/g2wfw__qbdi-tracer-android.md) Google Project Zero **TinyInst** (C/C++; lightweight module-selective DBI; hooking / debugging) sits in that lightweight instrumentation lane. (source: wiki/sources/descriptions/googleprojectzero__TinyInst.md) CUDA kernel instruction tracing via [[cutracer]] (facebookresearch; lightweight GPU-side instrumentation vs host-side analysis) complements static PTX tooling such as [[ptxninja]]. (source: wiki/sources/descriptions/facebookresearch__CUTracer.md)
 
 **Trap-and-emulate control-flow tracing (CFT):** patch branch sites with fault-generating sentinels (e.g. HLT/SALC, avoiding INT3 integrity scans), catch exceptions, emulate the original branch, log context, restore, and continue. Strategies range from bounded bulk patching (simple, integrity-detectable) through branch chasing and CFG-guided patching (better coverage/safety tradeoff). PAGE_GUARD + trap-flag single-steping avoids direct `.text` patches but remains timing- and guard-state detectable. Illustrative corpus: [[cpp-veh-dbi]], [[w1tn3ss]].
 

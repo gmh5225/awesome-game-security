@@ -436,6 +436,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [custom-data-ptr-swap-sample](entities/custom-data-ptr-swap-sample.md) — NtQueryLicenseValue KM↔UM channel (C++; driver development; cheat / driver communication; gmh5225)
 - [custom-VEH](entities/custom-veh.md) — RtlpCallVectoredHandlers hook for fast pre-vanilla VEH registration (Ring3 callback research; gmh5225)
 - [cunthook](entities/cunthook.md) — TF2/Source open hacking framework (full SDK; hooks / ESP / aimbot / gameplay mods; internal interfaces + Boost; Linux; gmh5225)
+- [CUTracer](entities/cutracer.md) — CUDA kernel instruction DBI (GPU-side trace + host-side analysis; Cheat / DBI)
 - [CyberAntLoader](entities/cyber-ant-loader.md) — cheat loader with auth, HWID binding, license verification, and anti-detection inject pipeline (gmh5225)
 - [CYBERSEC 2023 BYOVD Demo](entities/cybersec2023-byovd-demo.md) — CYBERSEC 2023 Taiwan RTCore64.sys BYOVD chain (DSE nullify → unsigned driver load; blind 360 Total Security ObRegisterCallbacks + notify callbacks; gmh5225)
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)

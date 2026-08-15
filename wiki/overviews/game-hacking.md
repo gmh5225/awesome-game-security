@@ -75,6 +75,7 @@ sources:
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
   - wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md
   - wiki/sources/descriptions/fdrechsler__mcp-server-idapro.md
+  - wiki/sources/descriptions/facebookresearch__CUTracer.md
   - wiki/sources/descriptions/fail46__OHack.md
   - wiki/sources/descriptions/fksvs__inject.md
   - wiki/sources/descriptions/fmagin__ghidra-openai.md
@@ -1205,6 +1206,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - MachO kernelcache / KDK dSYM loading via [[binja-kc]] (Binary Ninja plugin; symbols + types) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/skr0x1c0__binja_kc.md)
 - MLIL division/modulo deoptimization via [[binja-division-deoptimization]] (Binary Ninja plugin; architecture-agnostic strength-reduction recovery) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/jmprdi__binja-division-deoptimization.md)
 - PTX / CUDA GPU virtual ISA reverse engineering via [[ptxninja]] (Binary Ninja plugin; plugin manager) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seekbytes__ptxNinja.md)
+- Dynamic CUDA kernel instruction DBI via [[cutracer]] (facebookresearch; runtime trace with host-side analysis split; cheat / DBI) complements static PTX RE via [[ptxninja]]. (source: wiki/sources/descriptions/facebookresearch__CUTracer.md)
 - Call-graph / coverage-assisted graph analysis via [[ariadne]] (Binary Ninja plugin; static analysis + block coverage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seeinglogic__ariadne.md)
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
 - Binary Ninja MCP server via [[binary-ninja-mcp]] (Python; disasm/decompile/xrefs/functions/types for LLM clients; MCP for Binary_Ninja) sits in the Cheat Binary Ninja Plugins / agent-RE lane. (source: wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md)
