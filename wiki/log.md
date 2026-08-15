@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/efi-monitor`: entity [[efi-monitor]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[sumap]], [[smm]], [[patchguard]], and [[callmewin32kdriver]].
+
 - **2026-08-15** — ingest `description:ekknod/logitech-cve`: entity [[logitech-cve]]; cited on [[overviews/game-hacking]] and [[hardware-input-injection]]; cross-linked [[kernel-mouse]] and [[ntuserinjectmouseinput-syscall]].
 
 - **2026-08-15** — ingest `description:ekknod/nv_v2`: entity [[nv-v2]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-external-esp]], [[solace-csgo]], and [[present-hook]].
