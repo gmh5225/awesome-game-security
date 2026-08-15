@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/AntiCheat-chrysalis`: entity [[anti-cheat-chrysalis]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[anticheat]], [[basic-anti-cheat]], and [[darken-anticheat]].
+
 - **2026-08-15** — ingest `description:gmh5225/AntiCheat`: entity [[anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[basic-anti-cheat]], [[anticheat-poc]], [[darken-anticheat]], and [[anti-cheat]].
 
 - **2026-08-15** — ingest `description:gmh5225/AntiDbg-AmogusPlugin`: entity [[antidbg-amogus-plugin]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[antidbg-baka]] and [[anti-debugging]].
