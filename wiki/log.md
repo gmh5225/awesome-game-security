@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:frankie-11/eft-external`: entity [[eft-external]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[meatyeftrelease]], [[eft-dma-radar-1]], [[eft-internal]], and [[simple-eft-base]].
+
 - **2026-08-15** — ingest `description:frasten/ida-genpatch`: entity [[ida-genpatch]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[genpatch]] and [[ida2obj]].
 
 - **2026-08-15** — ingest `description:fredakilla/GPlayEngine`: entity [[gplayengine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[gameplay]] and [[kotek]].
