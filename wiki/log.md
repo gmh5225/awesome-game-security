@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `readme:categories`: bumped Anti Cheat ~672 (was ~671; Cheat ~2702 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-15** — ingest `description:gmh5225/AndroidCheatTemplate`: updated entity [[android-cheat-template]] (gmh5225 kernel/OpenGL/memory-analysis fork; cheat / game:sausage man); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-15** — ingest `description:gmh5225/AndroidDriveSignity`: entity [[android-drivesignity]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-kernel-driver-template]] and [[compile-android-driver]].
