@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:experienceds/pubg-p2c-re`: entity [[pubg-p2c-re]]; cited on [[overviews/game-hacking]] and [[battleye]]; cross-linked [[pubg-external-cheat]], [[dwm-dwmdraw]], and [[vmprotect]].
+
 - **2026-08-15** — ingest `description:exploits-forsale/collateral-damage`: entity [[collateral-damage]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[xenia]], [[xemu]], [[xqemu]], and [[recompiler]].
 
 - **2026-08-15** — ingest `description:extremeblackliu/IL2CPP_Resolver_External`: entity [[il2cpp-resolver-external]]; cited on [[il2cpp]] and [[overviews/game-hacking]]; cross-linked [[il2cpp-resolver]], [[unity202x-externalresolve]], and [[mono-external-lib]].
