@@ -4,7 +4,7 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
-- **2026-08-15** — ingest `description:es3n1n/be-shellcode-tester`: entity [[be-shellcode-tester]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[be-shellcode-dump]], [[be-battleye-shellcode]], and [[battleye-shellcode-dumper]].
+- **2026-08-15** — ingest `description:erkkah/tigr`: entity [[tigr]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[olive-c]], [[kit]], [[paintfe]], and [[stb]].
 
 - **2026-08-15** — ingest `description:es3n1n/ida-wakatime-py`: entity [[ida-wakatime-py]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[lazyida]] and [[list-of-ida-plugins]].
 
