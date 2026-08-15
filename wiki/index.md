@@ -897,6 +897,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
 - [Huan](entities/huan.md) — encrypted PE loader generator (per-run keys; payload in new loader section; PE structure/loading study; Anti Cheat → Binary Packer; frkngksl)
 - [HydraHook](entities/hydrahook.md) — DX9–12 API-hook + overlay framework (Detours; ImGui/DirectXTK/OpenCV samples)
+- [HybridCLR](entities/hybridclr.md) — Unity IL2CPP hot-update runtime (C/C++; live-update / game hot-patch; modding + IL2CPP analysis; focus-creative-games)
 - [Hyara](entities/hyara.md) — multi-platform YARA rule generation (IDA Pro, Ghidra, Binary Ninja, Cutter; cheat / Yara)
 - [HumanMouseMovement](entities/human-mouse-movement.md) — human-like mouse movement (C/C++; cheat / triggerbot & aimbot)
 - [hv-detect](entities/hv-detect.md) — hypervisor IDT detections SIDT/LIDT (gmh5225; controlled context + restore; Detection: Hacked Hypervisor)
