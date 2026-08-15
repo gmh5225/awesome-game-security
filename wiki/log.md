@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `readme:categories`: bumped Anti Cheat ~675 (was ~674; Cheat ~2705 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-15** — ingest `description:enjoy-digital/litepcie`: entity [[litepcie]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-fpga]], [[dma-pcie-board-75t]], and [[fpga-dma-multi-tool]].
 
 - **2026-08-15** — ingest `description:erfur/linjector-rs`: entity [[linjector-rs]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-virtual-inject]], and [[yaui]].
