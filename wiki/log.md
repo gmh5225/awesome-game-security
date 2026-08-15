@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fuqiuluo/ovo`: entity [[ovo]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[rnidbg]].
+
 - **2026-08-15** — ingest `description:fuqiuluo/rnidbg`: entity [[rnidbg]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[op7t]].
 
 - **2026-08-15** — ingest `description:fuzzypickles14/BetterStringAnalyzer`: entity [[better-string-analyzer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]] and [[ghidra-scripts]].

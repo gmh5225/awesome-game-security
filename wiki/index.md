@@ -1375,6 +1375,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Oomph](entities/oomph.md) — Minecraft Bedrock MiTM AC proxy (Go; server-auth movement/combat; Dragonfly/PocketMine)
 - [opaque-predicates-detective](entities/opaque-predicates-detective.md) — Binary Ninja opaque-predicate detection (invariant / BB-local)
 - [op7t](entities/op7t.md) — DIY Android kernel (cheat / Android kernel explorer)
+- [ovo](entities/ovo.md) — Android ARM64 kernel driver module (process R/W, mmuhack, touch simulation, kernel TCP IPC; C++/Rust SDKs; cheat / Android kernel driver)
 - [opainject](entities/opainject.md) — iOS/macOS runtime dylib inject (task_for_pid / Mach; jailbreak + tfp0)
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
