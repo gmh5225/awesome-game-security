@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `readme:categories`: bumped Cheat ~2705 (was ~2703; Anti Cheat ~674 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-15** — ingest `description:evilashz/ProxyAPICall`: entity [[proxy-api-call]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[spoof-stack-safecall]] and [[hw-call-stack]].
 
 - **2026-08-15** — ingest `description:evild3ad/MemProcFS-Analyzer`: entity [[memprocfs-analyzer]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pcileech]], [[volatility3]], and [[volatility]].
