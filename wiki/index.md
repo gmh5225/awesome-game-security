@@ -149,6 +149,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-mod-games-by-inject-zygote](entities/android-mod-games-by-inject-zygote.md) — Android game modding via zygote injection (C/C++; kernel/OpenGL/networking; cheat / injection:android; gmh5225)
 - [android-modmenu-semijni](entities/android-modmenu-semijni.md) — Android Java WindowManager + semi-JNI mod menu (native hooks; cheat / Menu for imgui)
 - [Android-Mod-Menu-Kotlin](entities/android-mod-menu-kotlin.md) — Android Kotlin floating-view + C++/JNI IL2CPP mod menu (cheat / IL2CPP Menu)
+- [Android-Mod-Menu-ImGui](entities/android-mod-menu-imgui.md) — Android native C++ ImGui mod-menu template (OpenGL ES + touch/JNI hooks; configurable layouts; README `[Imgui For Unity]`; gmh5225)
 - [AndroidCheatTemplate](entities/android-cheat-template.md) — Android cheat template (Unity/OpenGL/hooking + kernel/memory-analysis forks; sanqiuu + gmh5225)
 - [android-il2cpp-modspeed](entities/android-il2cpp-modspeed.md) — Android IL2CPP Unity Time speed hack (deltaTime/timeScale; C++)
 - [android-modding](entities/android-modding.md) — curated Android game modding repo collection (IL2CPP YuanShen dump fork; cheat/guide RE)
