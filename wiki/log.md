@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:g91/PalAntiCheat-poc`: entity [[palanticheat-poc]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[palworld-anti-cheat]] and [[palworld-sdk-dump]].
+
 - **2026-08-15** — ingest `description:gaasedelen/microavx`: entity [[microavx]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[genmc]] and [[happyida]].
 
 - **2026-08-15** — ingest `description:gabriellandau/ShadowStackWalk`: entity [[shadow-stack-walk]]; cited on [[stack-spoofing]] and [[overviews/anti-cheat]]; cross-linked [[query-shadow-stack]] and [[cet-research]].

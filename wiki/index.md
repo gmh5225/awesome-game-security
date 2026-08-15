@@ -1413,6 +1413,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PAGE_NO_ACCESS-not-byfron](entities/page-no-access-not-byfron.md) — VEH + PAGE_NOACCESS Byfron/Hyperion anti-tamper PoC (LoadLibrary tester; gmh5225)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [paladins-internal-cheat](entities/paladins-internal-cheat.md) — Paladins internal: optional Mhyprot backend + borderless overlay (gmh5225; cheat / game:paladins)
+- [PalAntiCheat-poc](entities/palanticheat-poc.md) — Palworld UE5 AC PoC (dumped SDK + UObject/UProperty fixup; Anti Cheat)
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
 - [palworld-helper](entities/palworld-helper.md) — Palworld UE5 Python helper (modding; cheat / game:palworld [UE5])
