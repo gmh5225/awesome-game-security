@@ -159,6 +159,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
 - [Android-LD-Preload-Injector](entities/android-ld-preload-injector.md) — Android LD_PRELOAD inject (dead; cheat / injection:android)
 - [Android-Mem-Edit](entities/android-mem-edit.md) — C++ Android process memory editor (cheat / Android Memory Explorer)
+- [Android-MemoryTool](entities/android-memory-tool.md) — single-header C/C++ `/proc/pid/mem` read/write library (minimal API; no ptrace attach; cheat / RPM; gmh5225)
 - [Android-Ptrace-Injector](entities/android-ptrace-injector.md) — Android ptrace injector (C/C++; cheat / injection:android)
 - [Android-Virtual-Inject](entities/android-virtual-inject.md) — no-root Virtual Space inject (not for AC games; cheat / injection:android)
 - [Android-VirtualCam-Manager](entities/android-virtualcam-manager.md) — Magisk/Zygisk virtual camera (ArtHook Camera1 NV21/surface injection; no LSPosed; camera spoofing / liveness AC research)

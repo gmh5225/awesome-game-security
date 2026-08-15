@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Android-MemoryTool`: entity [[android-memory-tool]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-mem-edit]], [[cheap-engine]], [[root-socket-kit]], and [[rwmem]].
+
 - **2026-08-15** — ingest `description:gmh5225/Android-Mod-Menu-ImGui`: entity [[android-mod-menu-imgui]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[imgui-native-modmenu]], [[imgui-unity-android]], and [[external-imgui-android]].
 
 - **2026-08-15** — ingest `description:gmh5225/Android-ModGamesByInjectZygote`: entity [[android-mod-games-by-inject-zygote]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[zygisk]], [[zygisk-myinjector]], and [[android-cheat-template]].
