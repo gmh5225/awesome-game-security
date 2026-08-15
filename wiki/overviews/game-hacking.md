@@ -73,6 +73,7 @@ sources:
   - wiki/sources/descriptions/freezato__LocalAnticheat-1.8.9.md
   - wiki/sources/descriptions/frasten__ida-genpatch.md
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
+  - wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md
   - wiki/sources/descriptions/frkngksl__NimicStack.md
   - wiki/sources/descriptions/gcarmix__HexWalk.md
   - wiki/sources/descriptions/gigbh__d-process.md
@@ -1193,6 +1194,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - PTX / CUDA GPU virtual ISA reverse engineering via [[ptxninja]] (Binary Ninja plugin; plugin manager) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seekbytes__ptxNinja.md)
 - Call-graph / coverage-assisted graph analysis via [[ariadne]] (Binary Ninja plugin; static analysis + block coverage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seeinglogic__ariadne.md)
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
+- Binary Ninja MCP server via [[binary-ninja-mcp]] (Python; disasm/decompile/xrefs/functions/types for LLM clients; MCP for Binary_Ninja) sits in the Cheat Binary Ninja Plugins / agent-RE lane. (source: wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md)
 - Binary Ninja ↔ Ghidra Server bidirectional analysis sync via [[ghidra-svr-bridge]] (C++/Qt6 sidebar + Java 17 bridge; local TCP JSON; symbols/comments/types/signatures/bookmarks; collaborative Ghidra Server repos) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md)
 - Solana eBPF (SBF) disassembly/decompilation via [[bn-ebpf-solana]] (Binary Ninja plugin; SBF encoding / memory model / calling conventions) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/otter-sec__bn-ebpf-solana.md)
 - Ethereum EVM bytecode disassembly via [[ethersplay]] (Binary Ninja plugin; EVM insn decode, CFG, xrefs for compiled Solidity contracts; blockchain auditor lane) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/gmh5225__ethersplay.md)

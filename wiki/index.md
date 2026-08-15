@@ -254,6 +254,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
 - [Blanket](entities/blanket.md) — process hide via ActiveProcessLinks unlink + PspCidTable + NtQuerySystemInformation hook (cheat / hide)
 - [Blackout](entities/blackout.md) — BYOVD EDR/AV killer via GMER **`gmer64.sys`** (IOCTL PID terminate; Defender continuous suppression; gmh5225)
+- [binary-ninja-mcp](entities/binary-ninja-mcp.md) — Binary Ninja MCP server (Python; disasm/decompile/xrefs/functions/types for LLM agents; MCP for Binary_Ninja)
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-division-deoptimization](entities/binja-division-deoptimization.md) — Binary Ninja MLIL division/modulo deoptimizer (architecture-agnostic)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
