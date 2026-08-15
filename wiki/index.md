@@ -1081,6 +1081,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [KExecDD](entities/kexecdd.md) — KSecDD.sys IOCTL PoC (LSASS inject; arbitrary kernel exec; DSE via ci.dll!g_CiOptions; gmh5225)
 - [KexecDDPlus](entities/kexecddplus.md) — LSASS-context KSecDD.sys IOCTL kernel execution (enhanced KExecDD; DSE bypass + arbitrary KM R/W; gmh5225)
+- [kfd](entities/kfd.md) — iOS/macOS kernel file-descriptor exploit framework (XNU KRW; iOS 15/16; jailbreak/sandbox-escape research; felix-pb)
 - [kfd-explorer](entities/kfd-explorer.md) — iOS kernel memory explorer (Python/Swift; kernel memory analysis; cheat / iOS memory explorer)
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
