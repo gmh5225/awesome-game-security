@@ -51,6 +51,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 ## Entities
 
+- [1.6 C2](entities/1-6-c2.md) — CS1.6 cheat (C++; HL1 client DLL; ESP/aimbot/movement; GoldSrc hook patterns; cheat / game:cs1.6; eversinc33)
 - [2048.cpp](entities/2048-cpp.md) — terminal C++ 2048 (console board / merge scoring; Game Develop / source)
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
 - [360WFP Exploit](entities/360wfp-exploit.md) — BYOVD via Qihoo 360 `360netmon_x64.sys_wfp` (WFP; block EDR/XDR network)

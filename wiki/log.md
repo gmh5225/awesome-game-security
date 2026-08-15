@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:eversinc33/1.6_C2`: entity [[1-6-c2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[oxware]], [[hpp-hack]], [[simple-cs-16-multihack]], [[cs16-client]], and [[regamedll-cs]].
+
 - **2026-08-15** — ingest `description:eversinc33/drvtrace`: entity [[drvtrace]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfb]], [[cognitor]], and [[driver-buddy-reloaded]].
 
 - **2026-08-15** — ingest `description:eversinc33/unKover`: entity [[unkover]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[system-thread-finder]], [[stealth-sytem-thread-finder-be]], and [[hidden-thread-finder]].
