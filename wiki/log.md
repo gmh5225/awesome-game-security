@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/AcDrv`: entity [[acdrv]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[etwhook-infinityhookclass]], [[kernel-anti-cheat]], and [[etw-threat-intelligence]].
+
 - **2026-08-15** — ingest `description:gmh5225/AdbFileManager`: entity [[adb-file-manager]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xfiles]], [[note]], and [[termux-app]].
 
 - **2026-08-15** — ingest `description:gmh5225/AetherVisor`: entity [[aether-visor]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[baresvm]], [[vt-debuuger]], and [[hypervisor-detection]].
