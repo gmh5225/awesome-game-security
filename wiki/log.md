@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fuqiuluo/android-wuwa`: entity [[android-wuwa]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ovo]].
+
 - **2026-08-15** — ingest `description:fuqiuluo/ovo`: entity [[ovo]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[rnidbg]].
 
 - **2026-08-15** — ingest `description:fuqiuluo/rnidbg`: entity [[rnidbg]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[op7t]].

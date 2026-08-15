@@ -181,6 +181,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [android-vuln-poc-exp](entities/android-vuln-poc-exp.md) — Android kernel CVE PoC/exploit reference list (cheat / Android Kernel CVE)
+- [android-wuwa](entities/android-wuwa.md) — Android ARM64 LKM rootkit (stealthy process memory; CFI/kprobe bypass, PTE injection, phys R/W, IOCTL/socket IPC; cheat / Android aarch64 rootkit)
 - [android-vulkan-tutorials](entities/android-vulkan-tutorials.md) — Google Android Vulkan tutorial samples (Vulkan / guide; NDK/mobile fundamentals)
 - [AntiCheat-chrysalis](entities/anti-cheat-chrysalis.md) — C/C++ reference AC / chrysalis guide (kernel driver comm, OpenGL; process integrity, module scan, debugger/overlay detection; gmh5225; Anti Cheat / guide)
 - [AntiCheat](entities/anticheat.md) — C/C++ reference AC implementation (process integrity, module scan, memory patterns, debugger/overlay detection, driver comm; gmh5225; alias of anti-cheat-chrysalis)
