@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gamozolabs/mempeek`: entity [[mempeek]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[pince]], [[procmap]], and [[mypower]].
+
 - **2026-08-15** — ingest `description:gatling/gatling`: entity [[gatling]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[tracy]], [[orbit]], and [[unreal-network-profiler]].
 
 - **2026-08-15** — ingest `description:gavz/Jektor`: entity [[jektor]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]] and [[injectors]].
