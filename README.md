@@ -3653,6 +3653,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Game:Rust
 - https://github.com/Akandesh/rust-auto-dumper [Auto Dump]
 - https://github.com/LabGuy94/OxideDumper [Auto Dump]
+- https://github.com/Leeksov/rustsecure-re [Static RE of RustSecure client anti-cheat with loader/core analysis, detection-module docs, and bypass notes]
 - https://github.com/NMan1/OverflowRust
 - https://github.com/gmh5225/simple-rust-hack
 - https://github.com/gmh5225/rust-internal
