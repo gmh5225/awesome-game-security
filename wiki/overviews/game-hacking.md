@@ -360,6 +360,7 @@ sources:
   - wiki/sources/descriptions/xenia-project__xenia.md
   - wiki/sources/descriptions/wmarti__xenia-mac.md
   - wiki/sources/descriptions/rexdex__recompiler.md
+  - wiki/sources/descriptions/exploits-forsale__collateral-damage.md
   - wiki/sources/descriptions/momo5502__levo.md
   - wiki/sources/descriptions/xemu-project__xemu.md
   - wiki/sources/descriptions/xan105__Mini-Launcher.md
@@ -1574,6 +1575,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Xbox 360 emulation via [[xenia]] (C++; PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) sits in the console `Xbox` lane for hardware-abstraction / binary-translation research. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 - macOS port [[xenia-mac]] extends that Xbox 360 HLE stack to Apple hosts for emulator / Xbox research. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)
 - Xbox360→Windows executable porting via [[recompiler]] supports console-emulator / Xbox research without full HLE. (source: wiki/sources/descriptions/rexdex__recompiler.md)
+- Xbox One/Series SystemOS kernel exploit via [[collateral-damage]] (CVE-2024-30088; kernel 25398.4478, 25398.4908, 25398.4909) sits in the console `Xbox` lane for emulator developers and Xbox researchers. (source: wiki/sources/descriptions/exploits-forsale__collateral-damage.md)
 - x86/x64 PE AOT binary translation via [[levo]] (Ghidra CFG recovery → LLVM lift/recompile; `kernel32` API-intercept runtime) supports Windows game-client binary-translation study without full emulation. (source: wiki/sources/descriptions/momo5502__levo.md)
 - Nintendo Switch homebrew memory/cheat tooling such as [[se-tools]] (scanner / pointer search / cheat manager / live viewer via Atmosphere `dmnt:cht`) sits in the console `Nintendo Switch` lane. (source: wiki/sources/descriptions/tomvita__SE-tools.md)
 - Raw Luma3DS `.3gx` overlay/cheat engine template [[ctr-composer]] (self-rendered UI; no CTRPluginFramework; any-Title-ID starter / revive old `.plg`/`.3gx`) sits in the console `Nintendo 3DS` lane. (source: wiki/sources/descriptions/samaBR85__CTRComposer.md)
