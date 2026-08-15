@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Android-ModGamesByInjectZygote`: entity [[android-mod-games-by-inject-zygote]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[zygisk]], [[zygisk-myinjector]], and [[android-cheat-template]].
+
 - **2026-08-15** — ingest `description:gmh5225/Android-OpenGL-ES-Chams`: entity [[android-opengl-es-chams]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]]; cross-linked [[draw-call-hook]], [[android-cheat-template]], and [[r6-chams-public]].
 
 - **2026-08-15** — ingest `description:gmh5225/Android-privilege-CVE-2022-20452-LeakValue`: entity [[android-privilege-cve-2022-20452-leakvalue]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-vuln]] and [[cve-2024-0044]].

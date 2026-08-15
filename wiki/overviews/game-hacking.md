@@ -245,6 +245,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md
   - wiki/sources/descriptions/gmh5225__AndroidDriveSignity.md
   - wiki/sources/descriptions/gmh5225__AndroidCheatTemplate.md
+  - wiki/sources/descriptions/gmh5225__Android-ModGamesByInjectZygote.md
   - wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md
   - wiki/sources/descriptions/systemnb__RootSocketKit.md
   - wiki/sources/descriptions/rogxo__kernel_hack.md
@@ -1263,7 +1264,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - No-root Virtual Space injectors such as [[android-virtual-inject]] (inject through Virtual Space without root; not for AC-protected games) sit in the Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-Virtual-Inject.md)
 - Ptrace-based Android injectors such as [[android-ptrace-injector]] (C/C++; attach-and-inject) sit in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-Ptrace-Injector.md)
 - Historical LD_PRELOAD Android injectors such as [[android-ld-preload-injector]] (any version/arch; dead / not working) sit in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-LD-Preload-Injector.md)
-- Zygisk-based Android injectors such as [[zygisk-myinjector]] (C/C++/Java; Magisk specialization-path injection; kernel-level asset/modding pipeline) sit in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/jiqiu2022__Zygisk-MyInjector.md)
+- Zygisk-based Android injectors such as [[zygisk-myinjector]] (C/C++/Java; Magisk specialization-path injection; kernel-level asset/modding pipeline) sit in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/jiqiu2022__Zygisk-MyInjector.md) Zygote-injection game-mod samples such as [[android-mod-games-by-inject-zygote]] (gmh5225; C/C++; kernel-level work, OpenGL, networking; cheat / injection:android) sit beside them. (source: wiki/sources/descriptions/gmh5225__Android-ModGamesByInjectZygote.md)
 - Rust emulation-centered Android inject research such as [[yaui]] sits in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/ohchase__yaui.md)
 - Android library remap-hide samples such as [[android-library-remap-hide]] (two-lib remap; cheat / hide) sit in the Detection:Hide-adjacent Android stealth lane. (source: wiki/sources/descriptions/reveny__Android-Library-Remap-Hide.md)
 - Kernel-level Android root via [[kernelsu]] (kernel su; Kotlin/Rust) sits in the Cheat / Android root lane alongside Magisk/APatch. APatch **KPM** module collections such as [[apatch-kpm]] (C/C++; kernel modding/debug for the APatch/KernelPatch lane) extend that root framework at kernel scope. (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md) (source: wiki/sources/descriptions/tiann__KernelSU.md)
