@@ -4255,6 +4255,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/KaelusAI/Shard [AI-powered open-source Minecraft Paper/Folia anti-cheat plugin]
 - https://github.com/TheMille-Dev/AntiGuard [Self-contained Paper/Purpur Minecraft anti-cheat plugin with Fly/Speed/Reach/KillAura checks, embedded SQLite storage, and built-in web dashboard plus REST API]
 - https://github.com/llsgllsg/Minecraft_AntiCheatAI [DeepGuard: Paper Minecraft anti-cheat with ONNX scaffold AI detection, behavior recorder, and training pipeline]
+- https://github.com/RiseShieldDev/AntiXrayViewer [Paper Minecraft plugin that detects X-Ray ore mining, records player sessions, and lets admins replay suspicious activity]
 - https://github.com/enis1enis2/WindfallAntiCheatF [Minecraft Fabric packet-based anti-cheat with combat/movement checks and Geyser/Bedrock compatibility]
 - https://github.com/IamFriendly0242u/The-Dreamers-Guards [Fabric server/client anti-cheat suite with mod blacklist scanning, encrypted auth, progressive punishments, and Discord alerts]
 - https://github.com/EliGamer154/CheatCheck [Fabric server-side Minecraft mod with player reporting, /cheatcheck spectate moderation, safemode, and tempban toolkit for vanilla clients]
