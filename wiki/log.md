@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/drvscan`: entity [[drvscan]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech]], [[pcie-detector]], and [[pcileech-wifi]].
+
 - **2026-08-15** — ingest `description:ekknod/efi-monitor`: entity [[efi-monitor]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[sumap]], [[smm]], [[patchguard]], and [[callmewin32kdriver]].
 
 - **2026-08-15** — ingest `description:ekknod/logitech-cve`: entity [[logitech-cve]]; cited on [[overviews/game-hacking]] and [[hardware-input-injection]]; cross-linked [[kernel-mouse]] and [[ntuserinjectmouseinput-syscall]].

@@ -42,6 +42,7 @@ sources:
   - wiki/sources/descriptions/enjoy-digital__litepcie.md
   - wiki/sources/descriptions/ekknod__vm.md
   - wiki/sources/descriptions/ekknod__pcileech-wifi.md
+  - wiki/sources/descriptions/ekknod__drvscan.md
 updated: 2026-08-15
 confidence: high
 ---
@@ -69,7 +70,7 @@ Hypervisor containment ([[hvci]], EPT traps, honeypot pages) and firmware policy
 ## PCIe stack (detection-relevant)
 
 - **TLPs:** Memory Read/Write, Config R/W, Completions; Requester ID (BDF) drives IOMMU lookup; completion splitting (MRRS/RCB/MPS) and tag turnover are donor-class fingerprints.
-- **Config Space:** 256-byte legacy header + extended capabilities (AER, DSN, ATS, ACS, SR-IOV); capability-chain walk, BAR mask probe, R/W consistency on Command/Device Control and W1C bits. Kernel config-space tooling such as [[pcie-detector]] (gmh5225; C++ driver) supports defensive inventory beyond user-mode dumps for anti-cheat engineers in the Detection:DMA lane. (source: wiki/sources/descriptions/gmh5225__PCIE-Detector.md)
+- **Config Space:** 256-byte legacy header + extended capabilities (AER, DSN, ATS, ACS, SR-IOV); capability-chain walk, BAR mask probe, R/W consistency on Command/Device Control and W1C bits. Kernel config-space tooling such as [[pcie-detector]] (gmh5225; C++ driver) supports defensive inventory beyond user-mode dumps for anti-cheat engineers in the Detection:DMA lane. (source: wiki/sources/descriptions/gmh5225__PCIE-Detector.md) User-mode scanner/forensics tooling such as [[drvscan]] (ekknod; C; PCIe enumeration plus pcileech-style physical-memory signature scans for cheat/rootkit residue) complements that inventory lane. (source: wiki/sources/descriptions/ekknod__drvscan.md)
 - **Behavioral:** LTSSM/link width, ASPM transitions, AER correctable-error baselines, MSI/MSI-X interrupt distribution, completion-latency distribution (KS / Anderson–Darling vs donor reference).
 
 Stock [[pcileech-fpga]] builds expose trivial Tier-0/1 signals (placeholder `10EE:0666`, zerowrite4k BAR, missing AER). Sophisticated firmware climbs tiers 2–6 (shadow config → overlay RAM → BAR MMIO + MSI → behavioral emulation → private randomized layouts). (source: wiki/sources/skills/dma-attack.md) Donor-cloning generators such as [[pcileechgen]] automate scan/check/build/validate workflows: Linux VFIO donor capture → SystemVerilog/COE → Vivado bitstreams with dynamic BAR emulation, NVMe admin-queue/DMA bridge, offline MMIO trace import, and TLP latency tuning across many PCILeech-compatible boards. (source: wiki/sources/descriptions/sercanarga__PCILeechGen.md)
@@ -99,7 +100,7 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[helloiommupkg]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[volk-dma]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[ddma-1]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[memtools]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheat-engine-ceserver-pcileech]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[gta5-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[helloiommupkg]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[volk-dma]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[ddma-1]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[memtools]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheat-engine-ceserver-pcileech]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[gta5-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
 
 ## README map
 

@@ -552,6 +552,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DriverBuddyReloaded](entities/driver-buddy-reloaded.md) — IDA Pro plugin: Windows kernel driver RE (IOCTL dispatch, IRP handlers, vulnerable-driver patterns, WDM structure annotations; gmh5225; Windows Kernel Analysis)
 - [dragonhook](entities/dragonhook.md) — Ghidra↔Frida static+dynamic bridge (localhost HTTP GhidraDB API; runtime indirect-call resolution, live xref/comment sync, symbol backtraces, call tracing; mitros123; cheat / Ghidra Plugins)
 - [drvtrace](entities/drvtrace.md) — Windows kernel IRP filter tracer (major/minor codes, buffers, completion status; IOCTL/device-protocol RE; eversinc33)
+- [drvscan (ekknod)](entities/drvscan.md) — Windows DMA/PCIe device scanner and memory forensics (C; PCIe enumeration, pcileech-style acquisition, cheat/rootkit signature scans; Anti Cheat / Detection:DMA [Scanner])
 - [DrillAndJoin](entities/drill-and-join.md) — C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla
 - [Duck-Detector-Refactoring](entities/duck-detector-refactoring.md) — Android local device-integrity inspector (Jetpack Compose + Kotlin + native C++/assembly; root/hook/mount/attestation/virtualization cards; eltavine; cheat / Android root)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
