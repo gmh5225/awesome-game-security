@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fksvs/inject`: entity [[inject]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[packet-sniffer]], [[pcapplusplus]], and [[npcap]].
+
 - **2026-08-15** — ingest `description:flakeforever/device_xiaomi_mondrian`: entity [[device-xiaomi-mondrian]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ofrp-device-xiaomi-mondrian]] and [[android-rom-list]].
 
 - **2026-08-15** — ingest `description:flowxrc/csgo-xenforo-loader`: entity [[csgo-xenforo-loader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-loader]], [[cyber-ant-loader]], and [[wizard-loader]].
