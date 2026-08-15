@@ -152,6 +152,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
 - [Android Native Surface](entities/android-native-surface.md) — native C/C++ overlay surface (ANativeWindow / SurfaceFlinger; transparent ESP/mod menu; gmh5225)
 - [Android OpenGL ES Chams](entities/android-opengl-es-chams.md) — OpenGL ES chams sample (GLES draw/shader hooks; annotated headers; cheat / render-draw [Chams]; gmh5225)
+- [Android Overlay Protection](entities/android-overlay-protection.md) — Java overlay/tapjacking detection library (`TYPE_APPLICATION_OVERLAY`; `filterTouchesWhenObscured`; callback alerts; geeksonsecurity)
 - [Android-Native-Root-Detector](entities/android-native-root-detector.md) — Kotlin Android root detector (Detection:Android root)
 - [Android-Native-Import-Hide](entities/android-native-import-hide.md) — ELF import hide/retrieve lib (C++; AC Compile Time)
 - [android-privilege-cve-2022-20452-leakvalue](entities/android-privilege-cve-2022-20452-leakvalue.md) — CVE-2022-20452 LazyValue deserialization LPE (unprivileged app → system; Java/Kotlin PoC; gmh5225)

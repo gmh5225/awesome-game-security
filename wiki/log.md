@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:geeksonsecurity/android-overlay-protection`: entity [[android-overlay-protection]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-native-surface]], [[external-imgui-android]], and [[droidshield]].
+
 - **2026-08-15** — ingest `description:gheja/game-design-documents`: entity [[game-design-documents]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[learn-awesome-gamedev]] and [[anything-about-game]].
 
 - **2026-08-15** — ingest `description:ghidragolf/ghidra_scripts`: entity [[ghidra-scripts]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]].

@@ -18,7 +18,8 @@ sources:
   - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
   - wiki/sources/descriptions/salvogiangri__KnoxPatch.md
   - wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md
-updated: 2026-08-12
+  - wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md
+updated: 2026-08-15
 confidence: medium
 ---
 
@@ -46,6 +47,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | IAP / billing | Client-side Play Billing API trust; local purchase-confirmation spoofing such as [[freedom]] (billing-service hook; server receipt validation is the primary defense) (source: wiki/sources/descriptions/gmh5225__freedom.md) |
 | Camera / liveness | Camera1 preview/callback integrity, face/liveness SDK probes; rooted virtual-camera injection such as [[android-virtualcam-manager]] (ArtHook + NV21 frame replace; no LSPosed) (source: wiki/sources/descriptions/smithluke874__Android-VirtualCam-Manager.md) |
 | VPN / proxy | `ConnectivityManager`/`NetworkCapabilities`, `/proc/net`, ioctl/netlink routes, localhost daemon port scans (Clash/sing-box); RASP SDKs such as [[rs-native-kit-security]]; per-app hide tooling such as [[vpnhide]] (Binder + kernel/Zygisk path filtering; no target-process hooks) (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) |
+| Overlay / tapjacking | `TYPE_APPLICATION_OVERLAY` windows above sensitive views; `filterTouchesWhenObscured` input blocking; callback alerts via [[android-overlay-protection]] (Java library for overlay detection on login/payment flows) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md) |
 
 Multi-check collections: [[detection]], [[android-native-root-detector]], archived [[magiskdetector]].
 
@@ -61,4 +63,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
