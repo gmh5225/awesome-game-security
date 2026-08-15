@@ -1,0 +1,2581 @@
+Project Path: arc_rollingrock_bethesda-modding-starter_fqylzp97
+
+Source Tree:
+
+```txt
+arc_rollingrock_bethesda-modding-starter_fqylzp97
+├── CLAUDE.md
+├── New-Plugin.ps1
+├── README.md
+├── docs
+│   ├── DEVBENCH.md
+│   ├── GAME_MATRIX.md
+│   └── GHIDRA_WORKFLOW.md
+├── ghidra-scripts
+│   ├── ImportAddressLibrary.py
+│   └── README.md
+├── mcp
+│   └── mcp.template.json
+├── setup
+│   ├── 00-prereqs.ps1
+│   ├── 10-vcpkg.ps1
+│   ├── 20-repos.ps1
+│   ├── 30-ghidra.ps1
+│   ├── 40-x64dbg.ps1
+│   └── 90-verify.ps1
+└── templates
+    └── f4sevr-plugin
+        ├── CMakeLists.txt
+        ├── CMakePresets.json
+        ├── CMakeUserPresets.json.template
+        ├── Data
+        │   └── F4SE
+        │       └── Plugins
+        │           └── starterplugin.toml
+        ├── README.md
+        ├── cmake
+        │   ├── Version.h.in
+        │   ├── headerlist.cmake
+        │   ├── sourcelist.cmake
+        │   └── version.rc.in
+        ├── src
+        │   ├── PCH.cpp
+        │   ├── PCH.h
+        │   ├── Settings
+        │   │   └── Settings.h
+        │   └── main.cpp
+        └── vcpkg.json
+
+```
+
+`CLAUDE.md`:
+
+```md
+# Agent bootstrap runbook
+
+You are setting up (or working inside) a Bethesda modding + reverse-engineering environment.
+This file is written for you, the agent. Execute phases in order; each has a **gate** — do not
+advance past a failing gate, fix it. Everything is idempotent; re-running a phase is safe.
+
+Conventions on this machine after setup: source repos under `C:\repos`, tools under
+`C:\tools`. Both are parameters of the scripts if the user wants different roots — ask before
+diverging from the defaults.
+
+## Phase 0 — orient
+
+1. Ask the user which layers they want now: **dev** (build plugins), **RE** (Ghidra/x64dbg),
+   **devbench** (in-game instrumentation). Dev alone is fine; RE can come later.
+2. Ask which game(s) they target first (F4VR / F4 / Skyrim / Starfield) and whether they use
+   MO2 (and its path) — you need this for deploy wiring.
+3. `winget --version` must work. If not, stop and have the user install "App Installer".
+
+## Phase 1 — toolchain
+
+```powershell
+.\setup\00-prereqs.ps1          # needs elevation if anything is missing
+.\setup\10-vcpkg.ps1
+```
+
+**Gate:** `.\setup\00-prereqs.ps1 -CheckOnly` all present, and `10-vcpkg.ps1 -CheckOnly`
+passes. Freshly installed tools need a **new terminal** for PATH — if a command is missing
+right after install, restart the shell before debugging anything else.
+
+Known trap this phase exists for: `VCPKG_ROOT` **and** `VCPKG_INSTALLATION_ROOT` must both be
+set (different files in the build chain read different names).
+
+## Phase 2 — repos
+
+```powershell
+.\setup\20-repos.ps1            # add -SkipAddressTools to defer the ~300 MB CSV clone
+```
+
+**Gate:** `C:\repos\CommonLibF4\.git` exists.
+
+## Phase 3 — first plugin build (the real proof)
+
+```powershell
+.\New-Plugin.ps1 -Name <name> -Game F4VR [-Mo2Path <mo2 mod folder>]
+cd C:\repos\<name>
+cmake --preset vs2022-windows-vcpkg-vr    # or vr-mo2 if -Mo2Path was given
+cmake --build buildvr --config Release
+```
+
+First configure restores ~13 vcpkg ports and compiles CommonLibF4 — several minutes; that is
+normal. **Gate:** `buildvr/Release/<name>.dll` exists. This gate proves VS2022+C++23, CMake,
+vcpkg, git submodules and the whole chain at once — everything after it is additive.
+
+To test in game: the DLL+PDB go in the mod's `F4SE/Plugins/` (automatic with the `vr-mo2`
+preset); copy the TOML from `Data/F4SE/Plugins/` next to it by hand. The game needs F4SEVR
+and the [VR Address Library](https://www.nexusmods.com/fallout4/mods/64879) installed. Check
+`Documents\My Games\Fallout4VR\F4SE\<name>.log` for the load banner.
+
+## Phase 4 — Ghidra: analysis database + MCP (RE layer)
+
+Two halves. First the **enriched analysis database** via BethesdaGhidraScripts (types,
+vtables, signatures, address-library names — automated; this is what makes decompiles
+readable), then the **MCP bridge** so you can drive Ghidra from sessions.
+
+1. Ask the user which game EXE(s) to analyze and stage them:
+   `C:\repos\BethesdaGhidraScripts\exes\<game>\<ver>\<Game>.exe` (paths in its README —
+   the EXEs come from the user's game installs; you cannot download them).
+2. ```powershell
+   cd C:\repos\BethesdaGhidraScripts
+   python run.py    # menu option 1 (prereqs incl. its own pinned Ghidra), then 2, then 7
+   ```
+   Option 7's auto-analysis takes **hours per binary** — schedule it (e.g. overnight) and do
+   not interrupt it. The menu's status panel shows what's detected.
+3. ```powershell
+   .\setup\30-ghidra.ps1   # builds the MCP extension against BGS's managed Ghidra
+   ```
+4. Manual once-per-machine (the script prints it): open Ghidra (BGS menu 6), confirm the
+   GhidraMCP extension is enabled, `Tools > GhidraMCP > Start MCP Server`.
+
+Give the project's Claude sessions access by copying `mcp\mcp.template.json` to the project as
+`.mcp.json` (the scaffolder already does this for new plugins).
+
+**Gate:** with Ghidra running + server started, an MCP session can `list_instances()` →
+`connect_instance(...)` → `decompile_function` on a function **and see CommonLib names/types
+in the output** (not just `FUN_*`). **Read `docs/GHIDRA_WORKFLOW.md` before real RE work —
+especially the connect ritual; skipping it makes the toolset look broken or, worse, reads the
+wrong binary.**
+
+Bonus once analysis is done: BGS menu option 10 exports symbols for **x64dbg** (live
+debugging with real names) and can build a synthetic PDB.
+
+## Phase 5 — x64dbg + MCP (live debugging)
+
+```powershell
+.\setup\40-x64dbg.ps1
+```
+
+**Gate:** launching `C:\tools\x64dbg\x96dbg.exe` → x64 → log shows
+`[MCP] x64dbg MCP Server started on 127.0.0.1:27042`. For MO2-managed games: launch the game
+through MO2 first, then **attach** x64dbg to the process.
+
+## Phase 6 — devbench (in-game instrumentation)
+
+Read `docs/DEVBENCH.md`, build the `fallout4` preset from `C:\repos\devbench`, deploy via
+`FalloutPluginTargets`, load a save, then:
+
+```powershell
+irm http://127.0.0.1:8930/api/health     # 8931 for VR
+```
+
+**Gate:** health answers with the right game identity. NOTE (2026-08-15): this is a young
+fork — the Fallout target has never been live-tested; a failure here is findings, not user
+error. Report what happened to the user (and ideally upstream as an issue on
+rollingrock/devbench).
+
+## Final verification
+
+```powershell
+.\setup\90-verify.ps1 -BuildTest
+```
+
+All PASS (vr_address_tools may be an intentional skip) = the machine is at parity.
+
+## Standing rules for work in this environment
+
+- **Trampoline:** one `F4SE::AllocTrampoline(N)` per plugin, in `F4SEPlugin_Load`, before any
+  hook; never per-hook (per-hook allocation frees earlier stubs on F4SEVR and crashes). 14
+  bytes per `write_call<5>` hook.
+- **New source files must be added to `cmake/sourcelist.cmake`** (headers to
+  `headerlist.cmake`) — the lists are manual; forgetting is a silent no-build.
+- **Settings over constants:** expose tunables via the template's TOML settings framework
+  rather than hardcoding, so users (and you, live) can tune without a rebuild.
+- **Ghidra sessions start with the connect ritual** (`docs/GHIDRA_WORKFLOW.md`). Labels are
+  hints; code bytes are ground truth.
+- **Instrumentation must represent failure states** — NaN/Inf as explicit values, never
+  silently coerced (see `docs/DEVBENCH.md` for why this rule exists).
+- Prefer building against the pinned/vendored versions in this pack; upgrade deliberately,
+  one component at a time, with the verifier run after.
+
+```
+
+`New-Plugin.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Scaffold a new script-extender plugin repo from the starter pack's templates.
+
+.DESCRIPTION
+    Creates a fresh git repo for a new plugin, wired to the same build chain used by
+    rollingrock's mods (CMake + vcpkg + CommonLib submodule).
+
+    Games:
+      F4VR / F4  -> vendored templates/f4sevr-plugin (CommonLibF4 is NG-style: the same
+                    template builds for flat and VR; the preset defines FALLOUTVR)
+      SF         -> clones rollingrock/sfse-template (raw SFSE hello-world, CMake)
+      SkyrimNG   -> not scaffolded here; prints pointers (most Skyrim devs already have a
+                    CommonLibSSE-NG flow; see docs/GAME_MATRIX.md)
+
+.EXAMPLE
+    .\New-Plugin.ps1 -Name my-cool-mod -Game F4VR -Mo2Path "C:\MO2\Fallout4VR\mods\my-cool-mod"
+#>
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [ValidatePattern('^[a-zA-Z][a-zA-Z0-9_-]*$')]
+    [string]$Name,
+
+    [ValidateSet('F4VR', 'F4', 'SF', 'SkyrimNG')]
+    [string]$Game = 'F4VR',
+
+    # Parent directory the new repo is created in.
+    [string]$Dir = 'C:\repos',
+
+    # Optional: MO2 mod folder; wires up auto-deploy via CMakeUserPresets.json.
+    [string]$Mo2Path = ''
+)
+
+$ErrorActionPreference = 'Stop'
+$packRoot = $PSScriptRoot
+$target = Join-Path $Dir $Name
+
+if (Test-Path $target) { throw "Target already exists: $target" }
+if ($Game -eq 'SkyrimNG') {
+    Write-Host 'Skyrim scaffolding is intentionally not duplicated here.'
+    Write-Host 'Use your existing CommonLibSSE-NG template, or start from:'
+    Write-Host '  https://github.com/epinter/skse-clibng-template'
+    Write-Host 'See docs/GAME_MATRIX.md for the per-game stack (address libraries, registries).'
+    return
+}
+
+# The identifier used inside source/config files. Keep it C-identifier-ish so it works
+# as a project name, log name and TOML group. vcpkg manifest names are the one exception:
+# they forbid underscores, so the manifest gets a hyphenated variant.
+$token = ($Name -replace '-', '_').ToLowerInvariant()
+$vcpkgName = ($Name -replace '_', '-').ToLowerInvariant()
+
+if ($Game -in 'F4VR', 'F4') {
+    Write-Host "Scaffolding $Name from templates/f4sevr-plugin ..."
+    Copy-Item -Recurse (Join-Path $packRoot 'templates\f4sevr-plugin') $target
+    # Never carry a test build over into a new project.
+    Get-ChildItem $target -Directory -Filter 'build*' | Remove-Item -Recurse -Force
+
+    # Rename the placeholder project. File contents first...
+    $files = Get-ChildItem $target -Recurse -File | Where-Object { $_.Extension -in '.txt', '.json', '.cmake', '.cpp', '.h', '.in', '.md', '.toml', '.template' }
+    foreach ($f in $files) {
+        $c = Get-Content $f.FullName -Raw
+        if ($c -match 'starterplugin') {
+            Set-Content $f.FullName ($c -replace 'starterplugin', $token) -NoNewline
+        }
+    }
+    # ...then the config file that carries the name.
+    Rename-Item (Join-Path $target 'Data\F4SE\Plugins\starterplugin.toml') "$token.toml"
+
+    # vcpkg manifest names must be lowercase-hyphenated (no underscores).
+    $vcpkgManifest = Join-Path $target 'vcpkg.json'
+    (Get-Content $vcpkgManifest -Raw) -replace "`"name`": `"$token`"", "`"name`": `"$vcpkgName`"" |
+        Set-Content $vcpkgManifest -NoNewline
+
+    Push-Location $target
+    try {
+        git init --initial-branch=main | Out-Null
+        git submodule add https://github.com/rollingrock/CommonLibF4.git external/CommonLibF4
+        git submodule update --init --recursive
+
+        if ($Mo2Path) {
+            $mo2 = ($Mo2Path -replace '\\', '/').TrimEnd('/')
+            if ($mo2 -notmatch '/F4SE/Plugins$') { $mo2 = "$mo2/F4SE/Plugins" }
+            $userPresets = [ordered]@{
+                version          = 3
+                configurePresets = @(
+                    [ordered]@{
+                        name           = 'vr-mo2'
+                        inherits       = 'vs2022-windows-vcpkg-vr'
+                        cacheVariables = [ordered]@{ MO2_INSTALL_PATH = $mo2 }
+                    }
+                )
+            }
+            $userPresets | ConvertTo-Json -Depth 5 | Set-Content 'CMakeUserPresets.json'
+            Write-Host "MO2 auto-deploy preset written (deploys to $mo2)."
+        }
+
+        # Per-project MCP config so Claude Code sessions in the new repo get Ghidra + x64dbg.
+        Copy-Item (Join-Path $packRoot 'mcp\mcp.template.json') '.mcp.json'
+
+        git add -A
+        git commit -m "chore: scaffold $Name from bethesda-modding-starter" | Out-Null
+    }
+    finally { Pop-Location }
+
+    $preset = if ($Mo2Path) { 'vr-mo2' } else { 'vs2022-windows-vcpkg-vr' }
+    Write-Host ''
+    Write-Host "Done: $target"
+    Write-Host 'Build it:'
+    Write-Host "  cd $target"
+    Write-Host "  cmake --preset $preset"
+    Write-Host '  cmake --build buildvr --config Release'
+    if ($Game -eq 'F4') {
+        Write-Host ''
+        Write-Host 'NOTE (flat F4): the vs2022 preset defines FALLOUTVR. For a flat-runtime build,'
+        Write-Host 'configure without the vr preset inheritance or ask your agent to add a flat preset;'
+        Write-Host 'rollingrock/CommonLibF4 itself builds both (NG-style).'
+    }
+}
+elseif ($Game -eq 'SF') {
+    Write-Host "Scaffolding $Name from rollingrock/sfse-template ..."
+    git clone --depth 1 https://github.com/rollingrock/sfse-template.git $target
+    Remove-Item -Recurse -Force (Join-Path $target '.git')
+
+    $files = Get-ChildItem $target -Recurse -File | Where-Object { $_.Extension -in '.txt', '.json', '.cpp', '.h', '.md', '.cmake' }
+    foreach ($f in $files) {
+        $c = Get-Content $f.FullName -Raw
+        if ($c -match 'sfse-template-plugin') {
+            $replacement = if ($f.Name -eq 'vcpkg.json') { $vcpkgName } else { $Name }
+            Set-Content $f.FullName ($c -replace 'sfse-template-plugin', $replacement) -NoNewline
+        }
+    }
+
+    Push-Location $target
+    try {
+        git init --initial-branch=main | Out-Null
+        Copy-Item (Join-Path $packRoot 'mcp\mcp.template.json') '.mcp.json'
+        git add -A
+        git commit -m "chore: scaffold $Name from sfse-template" | Out-Null
+    }
+    finally { Pop-Location }
+
+    Write-Host ''
+    Write-Host "Done: $target — see its README for build presets."
+    Write-Host 'NOTE: the template''s `default` preset uses the VS2026 generator. On a VS2022-only'
+    Write-Host 'machine use:  cmake --preset default -G "Visual Studio 17 2022"   (or the ninja preset).'
+}
+
+```
+
+`README.md`:
+
+```md
+# bethesda-modding-starter
+
+A one-stop bootstrap for Bethesda script-extender plugin development (Fallout 4 flat/VR,
+Skyrim, Starfield) **plus** the reverse-engineering tooling to work at the engine level
+(Ghidra + MCP, x64dbg + MCP, in-game devbench) — the environment behind rollingrock's
+FO4VR mods, packaged so a new machine gets there in about an hour instead of months.
+
+Built to be driven by a coding agent: clone this repo, open
+[Claude Code](https://claude.com/claude-code) in it, and say **"read CLAUDE.md and set this
+machine up"**. Everything also works by hand — the setup scripts are ordinary PowerShell.
+
+## What you get
+
+- **`setup/`** — numbered, idempotent install scripts: toolchain (VS2022/CMake/vcpkg/JDK/
+  Node), source repos, Ghidra + [GhidraMCP](https://github.com/bethington/ghidra-mcp),
+  x64dbg + [MCP plugin](https://github.com/bromoket/x64dbg_mcp), and an end-to-end verifier.
+- **`New-Plugin.ps1`** — scaffold a ready-to-build plugin repo in one command:
+  ```powershell
+  .\New-Plugin.ps1 -Name my-cool-mod -Game F4VR -Mo2Path "C:\MO2\Fallout4VR\mods\my-cool-mod"
+  cd C:\repos\my-cool-mod
+  cmake --preset vr-mo2
+  cmake --build buildvr --config Release   # DLL+PDB auto-deploy into the MO2 folder
+  ```
+  The F4VR template carries the fixes that cost real crashes to learn (single trampoline
+  allocation, MO2 deploy, TOML settings framework) and builds clean at `/W4 /WX`.
+- **`docs/`** — the per-game stack matrix (which CommonLib/address library per game), the
+  Ghidra MCP workflow, and the devbench guide.
+- **`mcp/mcp.template.json`** — drop-in `.mcp.json` giving any project's Claude sessions
+  Ghidra + x64dbg access (the scaffolder installs it automatically).
+- **`ghidra-scripts/`** — bulk address-library name import for Ghidra.
+
+## Quick start (fresh machine)
+
+```powershell
+git clone https://github.com/rollingrock/bethesda-modding-starter.git C:\repos\bethesda-modding-starter
+cd C:\repos\bethesda-modding-starter
+# elevated PowerShell for installs:
+.\setup\00-prereqs.ps1        # toolchain via winget
+.\setup\10-vcpkg.ps1          # vcpkg + BOTH env vars the chain reads
+.\setup\20-repos.ps1          # CommonLibs, devbench, ghidra-mcp, address libraries
+.\setup\30-ghidra.ps1         # Ghidra + MCP extension + bridge (version-matched)
+.\setup\40-x64dbg.ps1         # x64dbg + MCP plugin (version-pinned)
+.\setup\90-verify.ps1 -BuildTest   # proves it: scaffolds and builds a real plugin
+```
+
+Games/dev only? `00`, `10`, `20 -SkipAddressTools`, then `New-Plugin.ps1`. The RE layer
+(`30`, `40`) is independent and can come later.
+
+## Credits
+
+This is community-built infrastructure all the way down: alandtse (CommonLib VR forks,
+address libraries, devbench), the F4SE/SKSE/SFSE teams, Ryan-rsm-McKenzie and the CommonLib
+lineage, meh321 (address libraries), bethington (ghidra-mcp), bromoket (x64dbg_mcp),
+powerof3, shad0wshayd3, and many more.
+
+```
+
+`docs/DEVBENCH.md`:
+
+```md
+# devbench — look inside the running game without a debugger
+
+[rollingrock/devbench](https://github.com/rollingrock/devbench) (branch `feat/multigame-core`,
+a fork of [alandtse/devbench](https://github.com/alandtse/devbench) being prepared for
+upstreaming) is a script-extender plugin that opens an MCP + REST server **on loopback only**
+inside the game process. Your agent can then read memory, tail logs, list/dump render targets
+and measure frame times **live**, with no rebuild and no debugger attach.
+
+Why you want this: the single most expensive failure mode in game-plugin debugging is an
+instrument that can't represent the failure state (e.g. a "is this pixel dark?" probe that
+can't see NaN). devbench's tools were built after paying that cost — NaN/Inf are reported as
+strings, never null; render-target dumps paint NaN pixels magenta.
+
+## Ports (per game, per runtime)
+
+| Game | Flat | VR |
+|---|---|---|
+| Skyrim | 8920 | 8921 |
+| Fallout 4 | 8930 | 8931 |
+
+If a default port is busy the server walks up and writes the bound port to
+`Data/<extender>/Plugins/devbench/runtime.json`.
+
+## Build + deploy (Fallout 4 / FO4VR — CMake side)
+
+```powershell
+cd C:\repos\devbench
+cmake --preset fallout4          # needs VCPKG_ROOT; VS2022; x64-windows-static
+cmake --build build --config Release --target devbench
+```
+
+Auto-deploy: set `FalloutPluginTargets` (`;`-separated game `Data` dirs — an MO2 mod folder's
+`Data` works) and the DLL+PDB land in `<dir>/F4SE/Plugins/` post-build.
+
+The Skyrim side builds with **xmake** (because CommonLibSSE-NG ships an xmake package):
+`xmake build devbench`. Requires `git submodule update --init lib/commonlibsse-ng`.
+
+## First-contact ritual (in game)
+
+The server starts at **kGameDataReady** — load a save first, not just the main menu.
+
+```powershell
+irm http://127.0.0.1:8930/api/health      # 8931 for VR — proves load, identity, frame counter
+irm http://127.0.0.1:8930/api/tool/rendertarget -Method Post -ContentType application/json -Body '{"action":"list"}'
+```
+
+## Registering your own tools from your mod
+
+`include/DevBenchAPI.h` is a cross-plugin C-ABI (MIT-licensed so closed-source mods can use
+it): after `kPostLoad`, `GetDevBenchInterface001()->RegisterTool("yourmod.dothing", schema,
+handler, ctx)`. Ships as a vcpkg overlay port in `cmake/ports/devbench-api/`.
+
+## Honest current state (2026-08-15)
+
+- Fallout 4 target: **builds and links; unit-tested; never yet loaded in a live game.** The
+  first `/api/health` + `rendertarget list` on a real machine is the acceptance test (it
+  validates the renderer struct offsets, derived statically from two directions).
+- `DevBenchAPI.h` is still **Skyrim-typed** (includes `<RE/Skyrim.h>`) — a Fallout mod cannot
+  register its own tools until the discovery handshake is made game-neutral.
+- The pytest suite (`tests/http/`) auto-discovers **Skyrim ports only** — for Fallout set
+  `$env:DEVBENCH_URL = "http://127.0.0.1:8930"` explicitly; expect Skyrim-only tools to skip.
+- Not yet ported from the older in-plugin bench: `/config` live get/set/reload, `/dump/now`,
+  GPU stage timers.
+
+## Security model
+
+Bound to `127.0.0.1`, deliberately not configurable — it reads (and can write) arbitrary
+process memory. Never ship it enabled in a released mod; it is a dev tool.
+
+```
+
+`docs/GAME_MATRIX.md`:
+
+```md
+# The per-game stack
+
+What to build against for each game, as actually used by rollingrock's projects. One row per
+game; the pack's defaults are **bold**.
+
+| Game | Script extender | CommonLib | Address library | Build system |
+|---|---|---|---|---|
+| Fallout 4 (flat) | F4SE | **[rollingrock/CommonLibF4](https://github.com/rollingrock/CommonLibF4)** (NG-style: one lib builds pre-NG, NG *and* VR) | meh321 "Address Library for F4SE Plugins" (1.10.163 + 1.10.984 NG) | CMake + vcpkg |
+| Fallout 4 VR | F4SEVR (runtime 1.2.72) | **rollingrock/CommonLibF4** — same checkout as flat | [VR Address Library for F4SEVR](https://www.nexusmods.com/fallout4/mods/64879) (alandtse, generated from [fallout_vr_address_library](https://github.com/alandtse/fallout_vr_address_library) CSVs) | CMake + vcpkg (this pack's `templates/f4sevr-plugin`) |
+| Skyrim SE/AE/VR | SKSE64 / SKSEVR | **CommonLibSSE-NG lineage** — one DLL runtime-detects SE/AE/VR. NOTE: the canonical fork is contested (CharmedBaryon's original slowed; alandtse/CommonLibVR@vr and other forks are active). If you already have a working NG flow, keep it. | meh321 "Address Library for SKSE Plugins" (SE/AE); alandtse "VR Address Library for SKSEVR" | vcpkg registry (`commonlibsse-ng` via the [Colorglass registry](https://gitlab.com/colorglass/vcpkg-colorglass)) or xmake, per your template |
+| Starfield | SFSE (ianpatt) | [libxse/commonlibsf](https://github.com/libxse/commonlibsf) (moved from the Starfield-Reverse-Engineering org) — or raw SFSE via **[rollingrock/sfse-template](https://github.com/rollingrock/sfse-template)** (what `New-Plugin.ps1 -Game SF` uses) | "Address Library for SFSE Plugins" (Nexus) | sfse-template: CMake. CommonLibSF itself: xmake only |
+
+## Notes and traps
+
+- **One CommonLibF4 for flat and VR.** Don't go hunting for a separate VR lib — the fork is
+  NG-style. The template's `vs2022-windows-vcpkg-vr` preset defines `FALLOUTVR`; a flat build
+  is the same tree without it. VR/NG-specific structs are still early-stage in that fork; verify
+  offsets against the actual binary before trusting a struct layout.
+- **F4VR never updates.** Runtime is 1.2.72 forever, which is why RE work there ages well.
+- **Address libraries let one DLL survive game patches** (flat games) by resolving IDs → offsets
+  at runtime. On VR runtimes they are effectively a names database for RE plus a REL::ID source.
+- **vcpkg registries only cover Skyrim.** CommonLibF4 and CommonLibSF are consumed as a git
+  submodule / path (`external/CommonLibF4`), not as vcpkg ports. The template handles this.
+- **`vr_address_tools`** (alandtse) also contains Python tooling for porting flat mods to VR
+  (offset conversion, struct extraction) — not just the CSVs.
+- **For RE name/type databases, BethesdaGhidraScripts bundles its own address libraries** for
+  every game it supports — including Starfield versionlibs, which `vr_address_tools` lacks.
+  See `GHIDRA_WORKFLOW.md`.
+
+```
+
+`docs/GHIDRA_WORKFLOW.md`:
+
+```md
+# Ghidra MCP workflow
+
+How to drive Ghidra from a Claude Code session via the `ghidra` MCP entry
+([bethington/ghidra-mcp](https://github.com/bethington/ghidra-mcp)). Distilled from months of
+Skyrim VR + Fallout 4 VR reverse-engineering; every rule below was earned the hard way.
+
+## Architecture
+
+```
+Claude Code ── stdio ──> bridge-mcp-ghidra.exe ── HTTP :8089 ──> GhidraMCP extension (in the Ghidra GUI)
+```
+
+- **The Ghidra GUI must be running** with your program open and `Tools > GhidraMCP > Start MCP
+  Server` clicked. No GUI = no analysis tools.
+- The bridge discovers running Ghidra instances via socket files in
+  `%TEMP%\ghidra-mcp-<user>\` — stale files from crashed sessions show up as dead entries in
+  `list_instances()`; ignore or delete them.
+
+## The connect ritual (every session, no exceptions)
+
+```
+list_instances()                 # ALWAYS first
+connect_instance("<your project>")
+list_open_programs()
+```
+
+Before `connect_instance`, only ~30 static tools exist. The ~200 analysis tools
+(`decompile_function`, `search_functions`, …) register only after connecting. **If
+`decompile_function` "doesn't exist", you skipped the connect.** And if more than one Ghidra
+runs on the machine, an un-connected bridge can silently read the WRONG binary and return
+confident nonsense. If one instance has multiple programs open, pass `program=` on every call
+(or set `GHIDRA_MCP_REQUIRE_PROGRAM_SELECTORS=1` for the bridge).
+
+## The version gate
+
+The GhidraMCP extension only loads in the exact Ghidra version it was built for
+(`extension.properties` version == Ghidra's `application.version`). `setup/30-ghidra.ps1`
+enforces this by downloading the stock Ghidra release matching ghidra-mcp's `pom.xml`. If you
+upgrade Ghidra, rebuild + redeploy the extension (`python -m tools.setup build` / `deploy`).
+Also: **never let a newer Ghidra upgrade an existing project unattended** — project upgrades
+are one-way and analysis databases for game binaries are hours of work to rebuild.
+
+## Working rules
+
+1. **Writes are part of the work.** The bridge has `rename_function`, `rename_symbol`,
+   `set_comment`, `create_struct`, `create_enum`, `set_function_prototype`, `save_program`.
+   Record findings in the project as you make them — a read-only workflow re-derives the same
+   layouts every session.
+2. **Anything shaped "for each X tell me Y" is ONE `run_script_inline` call**, not N
+   round-trips. It takes full Ghidra Java and runs in-process. Requires the user env var
+   `GHIDRA_MCP_ALLOW_SCRIPTS=1` **on the machine** (it's read by the Ghidra JVM — putting it
+   in `.mcp.json`'s `env` block does nothing).
+3. **Code bytes are ground truth; labels are hints.** Auto-analysis can mislabel high `.data`
+   addresses (section shifting) — before coding against a `DAT_*` global, re-derive it from the
+   call sites that access it.
+4. **The bridge's `debugger_*` tools are WinDbg/dbgeng proxies** (a separate server, usually not
+   running). For live game debugging use the **`x64dbg` MCP entry** instead.
+5. **Build the analysis database with BethesdaGhidraScripts, not by hand** (next section) —
+   types, vtables, signatures and thousands of names make every later decompile readable.
+6. Cross-binary signature matching (e.g. Skyrim ↔ Fallout, flat ↔ VR) = two Ghidra GUIs, one per
+   binary, `connect_instance` to switch: `get_function_bytes` on the known side → wildcard the
+   rel32 offsets → `search_byte_patterns` on the unknown side → `decompile_function` to confirm
+   logic.
+
+## For a new game binary: BethesdaGhidraScripts
+
+Do NOT build the analysis database by hand.
+[1001Bits/BethesdaGhidraScripts](https://github.com/1001Bits/BethesdaGhidraScripts) (cloned by
+`setup/20-repos.ps1`) automates the whole thing for Skyrim SE/AE/VR, Fallout 4 (OG/NG/AE/VR),
+Starfield and FNV: it clang-parses the CommonLib headers and imports **type definitions, vtable
+layouts, function signatures and address-library names** — for the VR binaries it parses
+CommonLibVR/CommonLibF4VR with the VR defines set, giving true VR struct layouts.
+
+```powershell
+cd C:\repos\BethesdaGhidraScripts
+# drop your game EXE(s) into exes\<game>\<ver>\ (see its README for the exact paths)
+python run.py     # menu: 1 (install prereqs incl. its own pinned Ghidra), 2 (submodules),
+                  #       7 (full rebuild — generates importers + headless imports everything)
+```
+
+Auto-analysis takes hours per Bethesda binary; let it finish. Afterwards:
+
+- Menu **6** opens Ghidra with the enriched project.
+- Menu **9** improves an EXISTING project of yours (exact CommonLib importer → generic
+  RTTI-walk vtable naming → name reconciler) — it only renames `FUN_*` placeholders and
+  leaves hand-typed names alone.
+- Menu **10** exports symbols as JSON / .map / **x64dbg database** / a synthetic **PDB** —
+  feed the x64dbg export to the x64dbg MCP setup so live debugging shows real names.
+
+`setup/30-ghidra.ps1` builds the GhidraMCP extension **against BGS's managed Ghidra**
+(`tools/ghidra` inside the repo) when present, so one Ghidra serves both the pipeline and the
+MCP bridge. Back up the project directory before any mass-modifying script.
+
+**Fork note (2026-08):** `alandtse/BethesdaGhidraScripts` is an actively developed sibling
+fork (rules-format + enrichment refactors); the 1001Bits fork uniquely carries the true-VR
+importers, the option-10 export suite, TTD dispatch xrefs and IDA name-ports. They have
+diverged — the pack defaults to 1001Bits for the VR features; check both before deep work.
+
+The single-file `../ghidra-scripts/ImportAddressLibrary.py` remains as a minimal fallback
+(names only, needs the Jython extension) for when you don't want the full pipeline.
+
+```
+
+`ghidra-scripts/ImportAddressLibrary.py`:
+
+```py
+# Import Skyrim Address Library into Ghidra
+# Applies function names and labels from the VR Address Library database
+#
+# @author ghidra_tool_dev
+# @category SkyrimVR
+# @menupath Tools.Skyrim VR.Import Address Library
+# @runtime Jython
+
+"""
+Skyrim VR Address Library Importer for Ghidra
+
+This script imports function names and symbols from the Skyrim VR Address Library
+(database.csv) into the current Ghidra program.
+
+Usage:
+1. Open SkyrimVR.exe in Ghidra and run auto-analysis
+2. Run this script from the Script Manager (Window -> Script Manager)
+3. Select the database.csv file when prompted (or use default)
+4. Wait for import to complete
+
+The script will:
+- Create labels at known addresses
+- Create function definitions where appropriate
+- Apply namespaces based on class names (e.g., Actor::StealAlarm -> Actor namespace)
+- Track statistics on successful/failed imports
+"""
+
+import csv
+import re
+import os
+
+from ghidra.program.model.symbol import SourceType, SymbolType, Namespace
+from ghidra.program.model.listing import Function
+from ghidra.app.cmd.function import CreateFunctionCmd
+
+
+def parse_address(program, addr_str):
+    """Convert hex string to Ghidra Address"""
+    try:
+        if addr_str.startswith('0x') or addr_str.startswith('0X'):
+            addr_str = addr_str[2:]
+        addr_long = long(addr_str, 16)
+        return program.getAddressFactory().getDefaultAddressSpace().getAddress(addr_long)
+    except:
+        return None
+
+
+def sanitize_symbol_name(name):
+    """
+    Sanitize a symbol name for Ghidra.
+    Removes/replaces invalid characters.
+    Called AFTER namespace splitting, so no :: expected.
+    """
+    if not name:
+        return None
+
+    # Strip any file reference metadata (e.g., "FuncName src/file.h:99")
+    # These appear after a space followed by what looks like a path
+    space_idx = name.find(' ')
+    if space_idx > 0:
+        remainder = name[space_idx+1:]
+        # Check if remainder looks like a file path or source reference
+        if '/' in remainder or '\\' in remainder or '.h' in remainder or '.cpp' in remainder:
+            name = name[:space_idx]
+
+    # Strip trailing line number references like ":99"
+    colon_idx = name.rfind(':')
+    if colon_idx > 0:
+        after_colon = name[colon_idx+1:]
+        if after_colon.isdigit():
+            name = name[:colon_idx]
+
+    # Replace characters invalid in Ghidra symbols
+    # Valid: letters, digits, underscore
+    # Invalid: spaces, slashes, colons, etc.
+    invalid_chars = ' /\\:;,<>[]{}()!@#$%^&*+=|\'"`~-'
+    for ch in invalid_chars:
+        if ch in name:
+            name = name.replace(ch, '_')
+
+    # Clean up any double underscores
+    while '__' in name:
+        name = name.replace('__', '_')
+
+    # Strip leading/trailing underscores
+    name = name.strip('_')
+
+    # Ensure name starts with letter or underscore
+    if name and not (name[0].isalpha() or name[0] == '_'):
+        name = '_' + name
+
+    return name if name else None
+
+
+def parse_name(raw_name):
+    """
+    Parse a function name like:
+      'RE::TESForm::GetFormEditorID'
+      'void Actor::StealAlarm(TESObjectREFR* a_ref, ...)'
+      'BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()'
+
+    Returns: (namespace_parts, function_name, is_function)
+    """
+    name = raw_name.strip()
+
+    # First, strip any trailing file reference metadata
+    # e.g., "AttackDistanceBase src/Hook_AttackStart.h:99"
+    space_parts = name.split(' ')
+    if len(space_parts) > 1:
+        # Check if last part looks like a file reference
+        last = space_parts[-1]
+        if '/' in last or '\\' in last or '.h:' in last or '.cpp:' in last:
+            # Remove the file reference part
+            name = ' '.join(space_parts[:-1])
+
+    # Remove RE:: prefix if present (CommonLib convention)
+    if name.startswith('RE::'):
+        name = name[4:]
+
+    # Check if this looks like a function signature (has parentheses)
+    is_function = '(' in name
+
+    # Extract just the name part, handling return types
+    # Pattern: "ReturnType ClassName::FuncName(...)" or just "ClassName::FuncName(...)"
+    func_match = re.match(r'^(?:[^(]+?\s+)?([A-Za-z_][\w:]*)\s*\(', name)
+    if func_match:
+        name = func_match.group(1)
+    else:
+        # No parentheses, just take the whole thing
+        paren_idx = name.find('(')
+        if paren_idx > 0:
+            name = name[:paren_idx].strip()
+
+    # Split by :: to get namespace and function name
+    parts = name.split('::')
+    if len(parts) >= 2:
+        namespace_parts = parts[:-1]
+        func_name = parts[-1]
+    else:
+        namespace_parts = []
+        func_name = parts[0] if parts else name
+
+    func_name = func_name.strip()
+
+    return namespace_parts, func_name, is_function
+
+
+def get_or_create_namespace(program, namespace_parts):
+    """Get or create nested namespace/class"""
+    if not namespace_parts:
+        return program.getGlobalNamespace()
+
+    symbol_table = program.getSymbolTable()
+    current_ns = program.getGlobalNamespace()
+
+    for part in namespace_parts:
+        # Look for existing namespace
+        existing = symbol_table.getNamespace(part, current_ns)
+        if existing:
+            current_ns = existing
+        else:
+            # Create new class namespace (most Skyrim symbols are class members)
+            try:
+                current_ns = symbol_table.createClass(
+                    current_ns, part, SourceType.IMPORTED)
+            except:
+                try:
+                    current_ns = symbol_table.createNameSpace(
+                        current_ns, part, SourceType.IMPORTED)
+                except:
+                    pass  # Keep current if we can't create
+
+    return current_ns
+
+
+def import_entry(program, address, namespace_parts, label_name, is_function, stats, create_funcs=True, overwrite=False):
+    """Import a single address library entry"""
+    symbol_table = program.getSymbolTable()
+    function_manager = program.getFunctionManager()
+
+    try:
+        namespace = get_or_create_namespace(program, namespace_parts)
+
+        # Check for existing non-default symbol (preserve USER_DEFINED and ANALYSIS)
+        existing_symbols = list(symbol_table.getSymbols(address))
+        for sym in existing_symbols:
+            src = sym.getSource()
+            if (src == SourceType.USER_DEFINED or src == SourceType.ANALYSIS) and not overwrite:
+                stats['skipped'] += 1
+                return
+
+        # Check for existing function
+        existing_func = function_manager.getFunctionAt(address)
+
+        if is_function and create_funcs:
+            if existing_func:
+                # Update existing function name if different
+                if existing_func.getName() != label_name or existing_func.getParentNamespace() != namespace:
+                    existing_func.setName(label_name, SourceType.IMPORTED)
+                    try:
+                        existing_func.setParentNamespace(namespace)
+                    except:
+                        pass
+                    stats['updated'] += 1
+                else:
+                    stats['skipped'] += 1
+            else:
+                # Try to create function
+                cmd = CreateFunctionCmd(address)
+                if cmd.applyTo(program):
+                    new_func = function_manager.getFunctionAt(address)
+                    if new_func:
+                        new_func.setName(label_name, SourceType.IMPORTED)
+                        try:
+                            new_func.setParentNamespace(namespace)
+                        except:
+                            pass
+                        stats['functions'] += 1
+                    else:
+                        # Fallback to label
+                        symbol_table.createLabel(address, label_name, namespace, SourceType.IMPORTED)
+                        stats['labels'] += 1
+                else:
+                    # Couldn't create function, make label
+                    symbol_table.createLabel(address, label_name, namespace, SourceType.IMPORTED)
+                    stats['labels'] += 1
+        else:
+            # Just create label
+            primary = symbol_table.getPrimarySymbol(address)
+            if primary and primary.getSource() != SourceType.DEFAULT:
+                if overwrite:
+                    primary.setName(label_name, SourceType.IMPORTED)
+                    try:
+                        primary.setNamespace(namespace)
+                    except:
+                        pass
+                    stats['updated'] += 1
+                else:
+                    stats['skipped'] += 1
+            else:
+                symbol_table.createLabel(address, label_name, namespace, SourceType.IMPORTED)
+                stats['labels'] += 1
+
+    except Exception as e:
+        stats['errors'] += 1
+
+
+def run():
+    """Main script entry point"""
+
+    # Check program is open
+    if currentProgram is None:
+        popup("No program is open. Please open SkyrimVR.exe first.")
+        return
+
+    # Default CSV path
+    default_path = r"C:\repos\vr_address_tools\skyrim_vr_address_library\database.csv"
+
+    # Get CSV file path
+    if os.path.exists(default_path):
+        use_default = askYesNo("Address Library",
+            "Use default database.csv?\n\n" + default_path)
+        if use_default:
+            csv_path = default_path
+        else:
+            csv_file = askFile("Select Address Library CSV", "Import")
+            if csv_file is None:
+                return
+            csv_path = csv_file.getAbsolutePath()
+    else:
+        csv_file = askFile("Select Address Library CSV", "Import")
+        if csv_file is None:
+            return
+        csv_path = csv_file.getAbsolutePath()
+
+    # Options
+    create_functions = askYesNo("Import Options",
+        "Create function definitions?\n\n(Recommended: Yes)")
+
+    overwrite = askYesNo("Import Options",
+        "Overwrite existing labels?\n\n(Recommended: No)")
+
+    # Count lines for progress
+    with open(csv_path, 'r') as f:
+        total_lines = sum(1 for _ in f) - 1
+
+    println("Importing {} entries from Address Library...".format(total_lines))
+    monitor.setMaximum(total_lines)
+    monitor.setProgress(0)
+
+    # Statistics
+    stats = {
+        'total': 0,
+        'labels': 0,
+        'functions': 0,
+        'updated': 0,
+        'skipped': 0,
+        'invalid': 0,
+        'errors': 0
+    }
+
+    # Start transaction
+    tx = currentProgram.startTransaction("Import Address Library")
+    commit_interval = 500  # Commit every 500 entries to avoid huge transactions
+
+    try:
+        with open(csv_path, 'r') as f:
+            reader = csv.DictReader(f)
+            processed = 0
+
+            for i, row in enumerate(reader):
+                if monitor.isCancelled():
+                    println("Import cancelled by user")
+                    break
+
+                monitor.setProgress(i)
+
+                # Parse row
+                try:
+                    vr_addr = row.get('vr', '')
+                    status = int(row.get('status', '0'))
+                    name = row.get('name', '')
+                except:
+                    stats['errors'] += 1
+                    continue
+
+                # Skip low confidence or empty entries
+                if status < 3 or not vr_addr or not name:
+                    continue
+
+                stats['total'] += 1
+
+                # Parse address
+                address = parse_address(currentProgram, vr_addr)
+                if address is None:
+                    stats['invalid'] += 1
+                    continue
+
+                # Parse name
+                namespace_parts, label_name, is_function = parse_name(name)
+                if not label_name:
+                    stats['errors'] += 1
+                    continue
+
+                # Sanitize the label name for Ghidra
+                label_name = sanitize_symbol_name(label_name)
+                if not label_name:
+                    stats['errors'] += 1
+                    continue
+
+                # Also sanitize namespace parts
+                namespace_parts = [sanitize_symbol_name(p) for p in namespace_parts]
+                namespace_parts = [p for p in namespace_parts if p]  # Remove None/empty
+
+                # Import
+                import_entry(currentProgram, address, namespace_parts, label_name,
+                            is_function, stats, create_functions, overwrite)
+
+                processed += 1
+
+                # Periodic transaction commit to avoid memory issues
+                if processed % commit_interval == 0:
+                    currentProgram.endTransaction(tx, True)
+                    println("Committed {} entries (Labels: {}, Functions: {}, Errors: {})".format(
+                        processed, stats['labels'], stats['functions'], stats['errors']))
+                    tx = currentProgram.startTransaction("Import Address Library (batch {})".format(processed))
+
+                # Progress update
+                if i % 100 == 0:
+                    monitor.setMessage("Processed {} entries...".format(i))
+
+        currentProgram.endTransaction(tx, True)
+
+        # Summary
+        println("")
+        println("=" * 50)
+        println("Address Library Import Complete")
+        println("=" * 50)
+        println("Total entries: {}".format(stats['total']))
+        println("Labels created: {}".format(stats['labels']))
+        println("Functions created: {}".format(stats['functions']))
+        println("Updated: {}".format(stats['updated']))
+        println("Skipped (existing): {}".format(stats['skipped']))
+        println("Invalid addresses: {}".format(stats['invalid']))
+        println("Errors: {}".format(stats['errors']))
+        println("=" * 50)
+
+        popup("Import Complete!\n\n" +
+              "Labels: {}\nFunctions: {}\n\nSee console for details.".format(
+                  stats['labels'], stats['functions']))
+
+    except Exception as e:
+        currentProgram.endTransaction(tx, False)
+        printerr("Import failed: " + str(e))
+        import traceback
+        traceback.print_exc()
+
+
+# Run the script
+run()
+
+```
+
+`ghidra-scripts/README.md`:
+
+```md
+# Ghidra scripts
+
+> **Superseded for real work by [BethesdaGhidraScripts](https://github.com/1001Bits/BethesdaGhidraScripts)**
+> (cloned by `setup/20-repos.ps1`), which automates types + vtable layouts + function
+> signatures + address-library names for every supported game, headlessly — see
+> `../docs/GHIDRA_WORKFLOW.md`. The script below remains as a minimal names-only fallback.
+
+## ImportAddressLibrary.py (fallback)
+
+Bulk-imports function names/labels from a VR Address Library CSV into the current Ghidra
+program. Works on **both** games' CSVs — the script reads the `vr`, `status` and `name`
+columns, which are common to:
+
+- Skyrim VR: `vr_address_tools/skyrim_vr_address_library/database.csv` (~17K names)
+- Fallout 4 VR: `vr_address_tools/fallout_vr_address_library/fo4_database.csv`
+  (much smaller coverage)
+
+It prompts for the CSV (the built-in default points at the Skyrim path under `C:\repos`).
+Only entries with `status >= 3` (high confidence) are applied.
+
+### Requirements
+
+- **The Jython extension.** Ghidra 12.x ships Jython as an *optional* extension and this
+  script declares `@runtime Jython`. Install it once via `File > Install Extensions`
+  (it's bundled with the Ghidra distribution) and restart — otherwise the Script Manager
+  refuses to run the script.
+- Run it from the Script Manager (`Window > Script Manager`) with your game program open
+  **after auto-analysis has completed**.
+
+### Tip for agents
+
+Anything shaped "for each X in the program, tell me Y" should be a single
+`run_script_inline` call through the Ghidra MCP bridge (full Ghidra Java, runs
+in-process) rather than N round-trip tool calls. See `docs/GHIDRA_WORKFLOW.md`.
+
+```
+
+`mcp/mcp.template.json`:
+
+```json
+{
+  "mcpServers": {
+    "ghidra": {
+      "type": "stdio",
+      "command": "C:/repos/ghidra-mcp/.venv/Scripts/bridge-mcp-ghidra.exe",
+      "args": [],
+      "env": {
+        "PYTHONIOENCODING": "utf-8"
+      }
+    },
+    "x64dbg": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "x64dbg-mcp-server@2.3.0"]
+    }
+  }
+}
+
+```
+
+`setup/00-prereqs.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Install (or verify) the base toolchain for Bethesda script-extender plugin dev + RE.
+
+.DESCRIPTION
+    Idempotent: checks first, installs only what is missing, prints a summary table.
+    Run from an elevated PowerShell if you expect installs (winget machine-scope installs
+    and VS need it); -CheckOnly never needs elevation.
+
+    Installs via winget:
+      Git, CMake, Visual Studio 2022 Community (+ Desktop C++ workload), Python 3.12,
+      Temurin JDK 21 (Ghidra), Apache Maven (builds the GhidraMCP extension),
+      Node.js LTS (x64dbg MCP server), PowerShell 7, GitHub CLI.
+#>
+[CmdletBinding()]
+param(
+    [switch]$CheckOnly
+)
+
+$results = [System.Collections.Generic.List[object]]::new()
+
+function Test-Cmd([string]$name) {
+    try { $null = Get-Command $name -ErrorAction Stop; $true } catch { $false }
+}
+
+function Ensure-Winget([string]$display, [string]$id, [scriptblock]$check, [string]$override = '') {
+    $present = & $check
+    if ($present) {
+        $results.Add([pscustomobject]@{ Component = $display; Status = 'present'; Action = '-' })
+        return
+    }
+    if ($CheckOnly) {
+        $results.Add([pscustomobject]@{ Component = $display; Status = 'MISSING'; Action = "winget install $id" })
+        return
+    }
+    Write-Host "Installing $display ..."
+    $wingetArgs = @('install', '--id', $id, '-e', '--accept-source-agreements', '--accept-package-agreements')
+    if ($override) { $wingetArgs += @('--override', $override) }
+    & winget @wingetArgs
+    $ok = ($LASTEXITCODE -eq 0)
+    $results.Add([pscustomobject]@{ Component = $display; Status = ($ok ? 'installed' : 'FAILED'); Action = "winget $id" })
+}
+
+if (-not (Test-Cmd 'winget')) {
+    throw 'winget is not available. Install "App Installer" from the Microsoft Store first.'
+}
+
+Ensure-Winget 'Git' 'Git.Git' { Test-Cmd 'git' }
+Ensure-Winget 'CMake' 'Kitware.CMake' { Test-Cmd 'cmake' }
+Ensure-Winget 'Python 3.12' 'Python.Python.3.12' { Test-Cmd 'python' }
+Ensure-Winget 'Temurin JDK 21' 'EclipseAdoptium.Temurin.21.JDK' {
+    try { (& java -version 2>&1 | Out-String) -match 'version "(21|2[2-9])' } catch { $false }
+}
+Ensure-Winget 'Apache Maven' 'Apache.Maven' { Test-Cmd 'mvn' }
+Ensure-Winget 'Node.js LTS' 'OpenJS.NodeJS.LTS' { Test-Cmd 'node' }
+Ensure-Winget 'PowerShell 7' 'Microsoft.PowerShell' { Test-Cmd 'pwsh' }
+Ensure-Winget 'GitHub CLI' 'GitHub.cli' { Test-Cmd 'gh' }
+
+# Visual Studio 2022 with the C++ workload. Detection via vswhere.
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$hasVs = (Test-Path $vswhere) -and
+    [bool](@(& $vswhere -products '*' -requires Microsoft.VisualStudio.Workload.NativeDesktop -property installationVersion) |
+        Where-Object { [int]($_ -split '\.')[0] -ge 17 })
+Ensure-Winget 'VS2022 + C++ workload' 'Microsoft.VisualStudio.2022.Community' { $hasVs } `
+    '--passive --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended'
+if (-not $hasVs -and -not $CheckOnly) {
+    Write-Host ''
+    Write-Host 'If VS2022 was already installed WITHOUT the C++ workload, winget will not add it.'
+    Write-Host 'Open "Visual Studio Installer" -> Modify -> check "Desktop development with C++".'
+}
+
+Write-Host ''
+$results | Format-Table -AutoSize
+if ($results | Where-Object Status -in 'MISSING', 'FAILED') {
+    Write-Host 'Some components are missing/failed. New installs may need a NEW terminal (PATH refresh).'
+    exit 1
+}
+Write-Host 'All prerequisites present.'
+
+```
+
+`setup/10-vcpkg.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Clone + bootstrap vcpkg and set the environment variables the build chain reads.
+
+.DESCRIPTION
+    THE TRAP THIS SCRIPT EXISTS FOR: the plugin templates read TWO different names for
+    the same thing — CMakeLists.txt reads VCPKG_ROOT, CMakePresets.json reads
+    VCPKG_INSTALLATION_ROOT. Both must be set or configure fails confusingly.
+    Idempotent; safe to re-run.
+#>
+[CmdletBinding()]
+param(
+    [string]$VcpkgDir = 'C:\repos\vcpkg',
+    [switch]$CheckOnly,
+    # Clone + bootstrap only; do not write persistent env vars (sandbox/CI runs).
+    [switch]$NoEnv
+)
+
+$ErrorActionPreference = 'Stop'
+
+$ok = $true
+if (-not (Test-Path (Join-Path $VcpkgDir '.git'))) {
+    if ($CheckOnly) { Write-Host "MISSING: vcpkg clone at $VcpkgDir"; $ok = $false }
+    else {
+        git clone https://github.com/microsoft/vcpkg.git $VcpkgDir
+    }
+}
+if ((Test-Path $VcpkgDir) -and -not (Test-Path (Join-Path $VcpkgDir 'vcpkg.exe'))) {
+    if ($CheckOnly) { Write-Host 'MISSING: vcpkg.exe (bootstrap not run)'; $ok = $false }
+    else { & (Join-Path $VcpkgDir 'bootstrap-vcpkg.bat') -disableMetrics }
+}
+
+if ($NoEnv) {
+    Write-Host 'NoEnv: skipping persistent env var setup.'
+    return
+}
+
+foreach ($name in 'VCPKG_ROOT', 'VCPKG_INSTALLATION_ROOT') {
+    # Accept an existing value at either persisted scope (some machines set these Machine-wide).
+    $current = [Environment]::GetEnvironmentVariable($name, 'User') ??
+        [Environment]::GetEnvironmentVariable($name, 'Machine')
+    if ($current -ne $VcpkgDir) {
+        if ($CheckOnly) { Write-Host "MISSING/WRONG: user env $name (is: '$current', want: '$VcpkgDir')"; $ok = $false }
+        else {
+            [Environment]::SetEnvironmentVariable($name, $VcpkgDir, 'User')
+            Set-Item "env:$name" $VcpkgDir
+            Write-Host "Set user env $name = $VcpkgDir"
+        }
+    }
+    else { Write-Host "OK: $name = $current" }
+}
+
+# Manifest-mode projects pick their own triplet; this is just a sane default.
+$trip = [Environment]::GetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', 'User')
+if (-not $trip) {
+    if (-not $CheckOnly) {
+        [Environment]::SetEnvironmentVariable('VCPKG_DEFAULT_TRIPLET', 'x64-windows', 'User')
+        Write-Host 'Set user env VCPKG_DEFAULT_TRIPLET = x64-windows'
+    }
+}
+
+if ($CheckOnly -and -not $ok) { exit 1 }
+Write-Host 'vcpkg ready. NOTE: env vars set at User scope — new terminals see them; this one was updated in-place.'
+
+```
+
+`setup/20-repos.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Clone the source repos the modding + RE workflow builds on.
+
+.DESCRIPTION
+    Everything is cloned over HTTPS (no SSH key setup required). Idempotent — existing
+    clones are left alone (a message notes they exist; no pull is forced).
+
+    What and why:
+      CommonLibF4        rollingrock/CommonLibF4 — NG-style: one lib builds flat F4 AND F4VR.
+                         Plugin repos consume it as a submodule; this standalone clone is for
+                         reading/searching the headers and for the CommonLibF4Path fallback.
+      commonlibsf        libxse/commonlibsf — Starfield CommonLib (xmake-based).
+      vr_address_tools   alandtse/vr_address_tools + the two VR address-library submodules
+                         (Skyrim VR + Fallout 4 VR offset CSVs). LARGE (~1.1 GB cloned).
+      devbench           rollingrock/devbench, branch feat/multigame-core — in-game query
+                         server (MCP+REST on loopback) for Skyrim (SKSE/xmake) and
+                         Fallout 4 / FO4VR (F4SE/CMake). See docs/DEVBENCH.md.
+      ghidra-mcp         bethington/ghidra-mcp — Ghidra MCP bridge + extension source.
+                         Installed by setup/30-ghidra.ps1.
+      BethesdaGhidraScripts
+                         1001Bits/BethesdaGhidraScripts — THE Ghidra enrichment pipeline:
+                         auto-imports CommonLib types, vtable layouts, function signatures
+                         and address-library names for Skyrim SE/AE/VR, Fallout 4 (all
+                         builds + VR), Starfield and FNV; true-VR struct layouts; symbol
+                         export to JSON/.map/x64dbg/synthetic PDB. Manages its own pinned
+                         Ghidra under tools/ghidra. Cloned WITHOUT submodules — its own
+                         menu option 2 restores the reviewed submodule revisions.
+                         (alandtse/BethesdaGhidraScripts is an actively developed sibling
+                         fork; the two have diverged — see docs/GHIDRA_WORKFLOW.md.)
+#>
+[CmdletBinding()]
+param(
+    [string]$Root = 'C:\repos',
+    [switch]$SkipAddressTools   # skip the ~1.1 GB vr_address_tools clone
+)
+
+$ErrorActionPreference = 'Stop'
+if (-not (Test-Path $Root)) { New-Item -ItemType Directory -Force $Root | Out-Null }
+
+$repos = @(
+    @{ Name = 'CommonLibF4';  Url = 'https://github.com/rollingrock/CommonLibF4.git';   Args = @() }
+    @{ Name = 'commonlibsf';  Url = 'https://github.com/libxse/commonlibsf.git';        Args = @('--recurse-submodules') }
+    @{ Name = 'devbench';     Url = 'https://github.com/rollingrock/devbench.git';      Args = @('--branch', 'feat/multigame-core', '--recurse-submodules') }
+    @{ Name = 'ghidra-mcp';   Url = 'https://github.com/bethington/ghidra-mcp.git';     Args = @() }
+    @{ Name = 'BethesdaGhidraScripts'; Url = 'https://github.com/1001Bits/BethesdaGhidraScripts.git'; Args = @() }
+)
+if (-not $SkipAddressTools) {
+    $repos += @{ Name = 'vr_address_tools'; Url = 'https://github.com/alandtse/vr_address_tools.git'; Args = @('--recurse-submodules') }
+}
+
+$failed = @()
+foreach ($r in $repos) {
+    $dest = Join-Path $Root $r.Name
+    if (Test-Path (Join-Path $dest '.git')) {
+        Write-Host "exists: $dest"
+        continue
+    }
+    Write-Host "cloning $($r.Url) -> $dest"
+    git clone @($r.Args) $r.Url $dest
+    if ($LASTEXITCODE -ne 0) {
+        # Remove the partial clone: a half-cloned repo would pass the exists-check on
+        # re-run and hide the failure. Keep going — one bad repo must not block the rest.
+        if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
+        $failed += $r.Url
+        Write-Warning "clone failed (cleaned up partial dir): $($r.Url)"
+    }
+}
+if ($failed) {
+    Write-Host ''
+    Write-Warning "FAILED clones: $($failed -join ', ') — re-run this script after fixing connectivity/URLs."
+    exit 1
+}
+
+Write-Host ''
+Write-Host 'Done. Plugin projects get CommonLib as a submodule automatically via New-Plugin.ps1;'
+Write-Host 'these clones are for browsing, devbench, and the RE tooling.'
+
+```
+
+`setup/30-ghidra.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Install Ghidra + the GhidraMCP extension + the MCP bridge (bethington/ghidra-mcp).
+
+.DESCRIPTION
+    THE VERSION GATE: the GhidraMCP extension only loads in the exact Ghidra version it was
+    built for (extension.properties version == Ghidra's application.version). This script
+    builds the extension AGAINST the chosen install's version (mvn -Dghidra.version=...),
+    so bridge, extension and Ghidra always agree.
+
+    Which Ghidra? In order:
+      1. -GhidraPath, if given.
+      2. BethesdaGhidraScripts' managed install (<Root>\BethesdaGhidraScripts\tools\ghidra) —
+         preferred, so ONE Ghidra serves both the enrichment pipeline and the MCP bridge.
+         (Run its `python run.py` menu option 1 first to install it.)
+      3. An existing <ToolsDir>\ghidra_<pom-version>_* install.
+      4. Download the stock release matching ghidra-mcp's pom from the NSA GitHub.
+
+    Also (idempotent): creates ghidra-mcp's .venv (pip install -e . -> bridge exe), installs
+    the Ghidra jars into ~/.m2, builds the extension with Maven (JDK 21 + Maven from
+    00-prereqs), unzips it into the per-version user Extensions dir (never restarts Ghidra),
+    and sets user env GHIDRA_MCP_ALLOW_SCRIPTS=1 (read by the Ghidra JVM, NOT the bridge —
+    putting it in .mcp.json env would be inert; it gates run_script_inline).
+#>
+[CmdletBinding()]
+param(
+    [string]$GhidraMcpDir = 'C:\repos\ghidra-mcp',
+    [string]$ToolsDir = 'C:\tools',
+    [string]$Root = 'C:\repos',
+    # Explicit Ghidra install to build the extension for (overrides auto-detection).
+    [string]$GhidraPath = ''
+)
+
+$ErrorActionPreference = 'Stop'
+
+if (-not (Test-Path (Join-Path $GhidraMcpDir 'pom.xml'))) {
+    throw "ghidra-mcp not found at $GhidraMcpDir — run setup/20-repos.ps1 first."
+}
+
+[xml]$pom = Get-Content (Join-Path $GhidraMcpDir 'pom.xml')
+$pomVer = $pom.project.properties.'ghidra.version'
+if (-not $pomVer) { throw 'Could not read <ghidra.version> from pom.xml' }
+Write-Host "ghidra-mcp's pom targets Ghidra $pomVer (used only if no local install is found)"
+
+function Get-GhidraProps([string]$installDir) {
+    $propFile = Join-Path $installDir 'Ghidra\application.properties'
+    if (-not (Test-Path $propFile)) { return $null }
+    $props = @{}
+    Get-Content $propFile | ForEach-Object { if ($_ -match '^([^=#]+)=(.*)$') { $props[$Matches[1].Trim()] = $Matches[2].Trim() } }
+    $props
+}
+
+# pick the install
+$ghidraHome = $null
+if ($GhidraPath) {
+    if (-not (Get-GhidraProps $GhidraPath)) { throw "-GhidraPath $GhidraPath is not a Ghidra install (no Ghidra\application.properties)" }
+    $ghidraHome = Get-Item $GhidraPath
+}
+if (-not $ghidraHome) {
+    $bgs = Join-Path $Root 'BethesdaGhidraScripts\tools\ghidra'
+    if (Get-GhidraProps $bgs) {
+        $ghidraHome = Get-Item $bgs
+        Write-Host 'Using BethesdaGhidraScripts'' managed Ghidra (one Ghidra for pipeline + MCP).'
+    }
+}
+if (-not $ghidraHome) {
+    $ghidraHome = Get-ChildItem $ToolsDir -Directory -Filter "ghidra_${pomVer}_*" -ErrorAction SilentlyContinue | Select-Object -First 1
+}
+if (-not $ghidraHome) {
+    Write-Host "Fetching Ghidra $pomVer release info from GitHub ..."
+    $releases = Invoke-RestMethod 'https://api.github.com/repos/NationalSecurityAgency/ghidra/releases?per_page=100'
+    $rel = $releases | Where-Object { $_.tag_name -like "Ghidra_${pomVer}_*" } | Select-Object -First 1
+    if (-not $rel) { throw "No NSA Ghidra release found for version $pomVer. Check https://github.com/NationalSecurityAgency/ghidra/releases" }
+    $asset = $rel.assets | Where-Object name -like '*.zip' | Select-Object -First 1
+    $zip = Join-Path $env:TEMP $asset.name
+    Write-Host "Downloading $($asset.name) ($([math]::Round($asset.size/1MB)) MB) ..."
+    Invoke-WebRequest $asset.browser_download_url -OutFile $zip
+    if (-not (Test-Path $ToolsDir)) { New-Item -ItemType Directory -Force $ToolsDir | Out-Null }
+    Write-Host "Extracting to $ToolsDir ..."
+    Expand-Archive $zip -DestinationPath $ToolsDir
+    Remove-Item $zip
+    $ghidraHome = Get-ChildItem $ToolsDir -Directory -Filter "ghidra_${pomVer}_*" | Select-Object -First 1
+    if (-not $ghidraHome) { throw 'Extraction did not produce the expected ghidra_* folder.' }
+}
+
+# the REAL version + user-profile dir name come from the install itself, not its folder name
+$props = Get-GhidraProps $ghidraHome.FullName
+$ver = $props['application.version']
+$profileName = "ghidra_$($ver)_$($props['application.release.name'])"
+Write-Host "Ghidra install: $($ghidraHome.FullName)  (version $ver, profile $profileName)"
+
+# 3. bridge venv (console script bridge-mcp-ghidra.exe; runtime dep is just `mcp`)
+$venvExe = Join-Path $GhidraMcpDir '.venv\Scripts\bridge-mcp-ghidra.exe'
+if (-not (Test-Path $venvExe)) {
+    Write-Host 'Creating ghidra-mcp .venv and installing the bridge (pip install -e .) ...'
+    Push-Location $GhidraMcpDir
+    try {
+        python -m venv .venv
+        & .\.venv\Scripts\python.exe -m pip install --quiet --upgrade pip
+        & .\.venv\Scripts\pip.exe install --quiet -e .
+    }
+    finally { Pop-Location }
+    if (-not (Test-Path $venvExe)) { throw 'bridge-mcp-ghidra.exe did not appear — pip install failed?' }
+}
+Write-Host "Bridge: $venvExe"
+
+# 4. install the Ghidra jars into ~/.m2, then build the extension with Maven directly.
+# We deliberately do NOT use ghidra-mcp's `tools.setup` here: it hard-requires `uv` and its
+# deploy step restarts Ghidra (dangerous under a running instance with unsaved analysis).
+# Everything it does for us is three plain steps: install-file the jars, mvn package, unzip.
+$extZip = Get-ChildItem (Join-Path $GhidraMcpDir 'target') -Filter 'GhidraMCP-*.zip' -ErrorAction SilentlyContinue | Select-Object -First 1
+# A zip built for a DIFFERENT Ghidra version fails the load gate — force a rebuild then.
+$builtProps = Join-Path $GhidraMcpDir 'target\classes\extension.properties'
+if ($extZip -and (Test-Path $builtProps) -and -not ((Get-Content $builtProps) -contains "version=$ver")) {
+    Write-Host "Existing build targets a different Ghidra version — rebuilding for $ver."
+    $extZip = $null
+}
+if (-not $extZip) {
+    # The pom depends on ghidra:* artifacts that only exist inside a Ghidra install.
+    # Derive the list from the pom itself so upstream changes don't strand us.
+    $ghidraDeps = @($pom.project.dependencies.dependency | Where-Object groupId -eq 'ghidra')
+    Write-Host "Installing $($ghidraDeps.Count) Ghidra jars into the local Maven repo (version $ver) ..."
+    foreach ($dep in $ghidraDeps) {
+        $m2jar = Join-Path $env:USERPROFILE ".m2\repository\ghidra\$($dep.artifactId)\$ver\$($dep.artifactId)-$ver.jar"
+        if (Test-Path $m2jar) { continue }
+        $jar = Get-ChildItem $ghidraHome.FullName -Recurse -Filter "$($dep.artifactId).jar" -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $jar) { throw "Could not find $($dep.artifactId).jar inside $($ghidraHome.FullName)" }
+        & mvn --quiet install:install-file "-Dfile=$($jar.FullName)" '-DgroupId=ghidra' `
+            "-DartifactId=$($dep.artifactId)" "-Dversion=$ver" '-Dpackaging=jar'
+        if ($LASTEXITCODE -ne 0) { throw "mvn install:install-file failed for $($dep.artifactId)" }
+    }
+    # Clear failed-download markers a previous broken attempt may have left; they make
+    # Maven ignore the jars we just installed.
+    Get-ChildItem (Join-Path $env:USERPROFILE '.m2\repository\ghidra') -Recurse -Filter '*.lastUpdated' -ErrorAction SilentlyContinue | Remove-Item -Force
+
+    Write-Host "Building the GhidraMCP extension for Ghidra $ver (first run takes a few minutes) ..."
+    Push-Location $GhidraMcpDir
+    try {
+        # -Dghidra.version overrides the pom property, so the extension's version gate
+        # matches whatever install we resolved above (verified: CLI -D wins over the pom).
+        & mvn clean package assembly:single -DskipTests "-Dghidra.version=$ver" --quiet
+        if ($LASTEXITCODE -ne 0) { throw 'Maven build of the GhidraMCP extension failed.' }
+    }
+    finally { Pop-Location }
+    $extZip = Get-ChildItem (Join-Path $GhidraMcpDir 'target') -Filter 'GhidraMCP-*.zip' | Select-Object -First 1
+    if (-not $extZip) { throw 'Build reported success but no GhidraMCP-*.zip in target/.' }
+}
+
+# Deploy = unzip into the per-version user Extensions dir (the same thing Ghidra's
+# File > Install Extensions does). No Ghidra restart is ever triggered from here.
+# NOTE: the profile dir is named from application.properties, NOT the install folder —
+# BethesdaGhidraScripts' install lives in a folder called just "ghidra".
+$userExt = Join-Path $env:APPDATA "ghidra\$profileName\Extensions"
+New-Item -ItemType Directory -Force $userExt | Out-Null
+Expand-Archive $extZip.FullName -DestinationPath $userExt -Force
+Write-Host "Extension deployed to $userExt"
+
+# 5. script-execution gate for run_script_inline (JVM-side env var)
+if ([Environment]::GetEnvironmentVariable('GHIDRA_MCP_ALLOW_SCRIPTS', 'User') -ne '1') {
+    [Environment]::SetEnvironmentVariable('GHIDRA_MCP_ALLOW_SCRIPTS', '1', 'User')
+    Write-Host 'Set user env GHIDRA_MCP_ALLOW_SCRIPTS=1 (enables run_script_inline; restart Ghidra to pick it up).'
+}
+
+Write-Host ''
+Write-Host '=== Once-per-machine manual steps ==='
+Write-Host '1. Build the analysis database with BethesdaGhidraScripts (types + vtables + names):'
+Write-Host "   cd $(Join-Path $Root 'BethesdaGhidraScripts'); drop game EXEs into exes\<game>\<ver>\; python run.py"
+Write-Host '   -> menu 1 (prereqs), 2 (submodules), 7 (full rebuild; auto-analysis takes hours - let it finish).'
+Write-Host "2. Start Ghidra: $($ghidraHome.FullName)\ghidraRun.bat (or BGS menu option 6)."
+Write-Host '3. File > Install Extensions -> verify GhidraMCP is listed and checked; restart Ghidra if it was not.'
+Write-Host '4. In the CodeBrowser: Tools > GhidraMCP > Start MCP Server (listens on 127.0.0.1:8089).'
+Write-Host '5. In every Claude session: list_instances() -> connect_instance(...) FIRST, or analysis tools do not exist.'
+
+```
+
+`setup/40-x64dbg.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Install x64dbg + the x64dbg MCP plugin (bromoket/x64dbg_mcp).
+
+.DESCRIPTION
+    Downloads the latest x64dbg snapshot and the PINNED MCP plugin release, and installs
+    the plugin into both the x64 and x32 plugin folders. The npm-side MCP server is run
+    via npx pinned to the SAME version in .mcp.json (see mcp/mcp.template.json) — plugin
+    and server versions must match, and an unpinned npx would drift.
+#>
+[CmdletBinding()]
+param(
+    [string]$InstallDir = 'C:\tools\x64dbg',
+    # Keep in sync with the x64dbg-mcp-server@<ver> pin in mcp/mcp.template.json.
+    [string]$McpVersion = 'v2.3.0'
+)
+
+$ErrorActionPreference = 'Stop'
+
+# 1. x64dbg snapshot
+if (-not (Test-Path (Join-Path $InstallDir 'x96dbg.exe'))) {
+    Write-Host 'Downloading the latest x64dbg snapshot ...'
+    $rel = Invoke-RestMethod 'https://api.github.com/repos/x64dbg/x64dbg/releases/latest'
+    $asset = $rel.assets | Where-Object name -like 'snapshot_*.zip' | Select-Object -First 1
+    if (-not $asset) { $asset = $rel.assets | Where-Object name -like '*.zip' | Select-Object -First 1 }
+    $zip = Join-Path $env:TEMP $asset.name
+    Invoke-WebRequest $asset.browser_download_url -OutFile $zip
+    New-Item -ItemType Directory -Force $InstallDir | Out-Null
+    Expand-Archive $zip -DestinationPath $InstallDir -Force
+    Remove-Item $zip
+    # Snapshots wrap everything in a release\ folder — flatten it.
+    $inner = Join-Path $InstallDir 'release'
+    if (Test-Path (Join-Path $inner 'x96dbg.exe')) {
+        Get-ChildItem $inner | Move-Item -Destination $InstallDir -Force
+        Remove-Item $inner -Recurse -Force
+    }
+}
+if (-not (Test-Path (Join-Path $InstallDir 'x96dbg.exe'))) { throw "x64dbg layout unexpected under $InstallDir" }
+Write-Host "x64dbg: $InstallDir"
+
+# 2. MCP plugin (pinned release; local build only needed to match a custom commit)
+$relUrl = "https://api.github.com/repos/bromoket/x64dbg_mcp/releases/tags/$McpVersion"
+$rel = Invoke-RestMethod $relUrl
+foreach ($pair in @(@{ Ext = '.dp64'; Dir = 'x64' }, @{ Ext = '.dp32'; Dir = 'x32' })) {
+    $asset = $rel.assets | Where-Object name -like "*$($pair.Ext)" | Select-Object -First 1
+    if (-not $asset) { Write-Warning "No $($pair.Ext) asset in $McpVersion — skipping $($pair.Dir)."; continue }
+    $plugDir = Join-Path $InstallDir "$($pair.Dir)\plugins"
+    New-Item -ItemType Directory -Force $plugDir | Out-Null
+    $dest = Join-Path $plugDir $asset.name
+    if (-not (Test-Path $dest)) {
+        Write-Host "Installing $($asset.name) -> $plugDir"
+        Invoke-WebRequest $asset.browser_download_url -OutFile $dest
+    }
+}
+
+Write-Host ''
+Write-Host 'Done. Runtime contract:'
+Write-Host " - Launch $InstallDir\x96dbg.exe (picks x32/x64), attach or open a target."
+Write-Host ' - The plugin logs: [MCP] x64dbg MCP Server started on 127.0.0.1:27042'
+Write-Host ' - Claude reaches it via the "x64dbg" entry in .mcp.json (npx x64dbg-mcp-server, pinned).'
+Write-Host ' - Debugging a game under MO2: launch the game through MO2, then ATTACH x64dbg to the process.'
+
+```
+
+`setup/90-verify.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+    Verify the whole environment; optionally prove it by building a scaffolded plugin.
+
+.DESCRIPTION
+    Read-only checks by default (fast). -BuildTest scaffolds a throwaway F4VR plugin into
+    %TEMP% via New-Plugin.ps1 and builds it end-to-end — the single strongest signal that
+    the machine is actually ready (VS, CMake, vcpkg restore, CommonLibF4 submodule, C++23).
+#>
+[CmdletBinding()]
+param(
+    [string]$Root = 'C:\repos',
+    [string]$ToolsDir = 'C:\tools',
+    [switch]$BuildTest
+)
+
+$rows = [System.Collections.Generic.List[object]]::new()
+function Check([string]$area, [string]$name, [bool]$ok, [string]$detail = '') {
+    $rows.Add([pscustomobject]@{ Area = $area; Check = $name; OK = ($ok ? 'PASS' : 'FAIL'); Detail = $detail })
+}
+
+# toolchain
+foreach ($c in 'git', 'cmake', 'python', 'java', 'mvn', 'node', 'gh') {
+    $cmd = Get-Command $c -ErrorAction SilentlyContinue
+    Check 'toolchain' $c ($null -ne $cmd) ($cmd ? $cmd.Source : 'not on PATH')
+}
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+$vsVersions = @((Test-Path $vswhere) ? (& $vswhere -products '*' -requires Microsoft.VisualStudio.Workload.NativeDesktop -property installationVersion) : @())
+$vsOk = [bool]($vsVersions | Where-Object { [int]($_ -split '\.')[0] -ge 17 })
+$vsDetail = $vsVersions -join ', '
+if ($vsOk -and -not ($vsVersions | Where-Object { $_ -like '17.*' })) {
+    $vsDetail += ' (no 17.x: templates use the "Visual Studio 17 2022" generator — adjust the preset generator)'
+}
+Check 'toolchain' 'VS C++ workload (17+)' $vsOk $vsDetail
+
+# env vars — persisted at User or Machine scope (what NEW terminals will see)
+function Get-PersistedEnv([string]$name) {
+    $u = [Environment]::GetEnvironmentVariable($name, 'User')
+    if ($u) { return "$u (User)" }
+    $m = [Environment]::GetEnvironmentVariable($name, 'Machine')
+    if ($m) { return "$m (Machine)" }
+    return $null
+}
+foreach ($v in 'VCPKG_ROOT', 'VCPKG_INSTALLATION_ROOT', 'GHIDRA_MCP_ALLOW_SCRIPTS') {
+    $val = Get-PersistedEnv $v
+    Check 'env' $v ([bool]$val) "$val"
+}
+$vcpkgRoot = [Environment]::GetEnvironmentVariable('VCPKG_ROOT', 'User') ??
+    [Environment]::GetEnvironmentVariable('VCPKG_ROOT', 'Machine')
+if ($vcpkgRoot) { Check 'env' 'vcpkg bootstrapped' (Test-Path (Join-Path $vcpkgRoot 'vcpkg.exe')) }
+
+# repos
+foreach ($r in 'CommonLibF4', 'commonlibsf', 'devbench', 'ghidra-mcp') {
+    Check 'repos' $r (Test-Path (Join-Path $Root "$r\.git"))
+}
+Check 'repos' 'vr_address_tools (optional)' (Test-Path (Join-Path $Root 'vr_address_tools\.git'))
+
+# ghidra (a machine may carry several installs; any one with the extension counts).
+# BethesdaGhidraScripts manages its own install under <Root>\BethesdaGhidraScripts\tools\ghidra.
+$ghidras = @(Get-ChildItem $ToolsDir -Directory -Filter 'ghidra_*' -ErrorAction SilentlyContinue)
+$bgsGhidra = Join-Path $Root 'BethesdaGhidraScripts\tools\ghidra'
+if (Test-Path (Join-Path $bgsGhidra 'Ghidra\application.properties')) { $ghidras += Get-Item $bgsGhidra }
+Check 'ghidra' 'install' ($ghidras.Count -gt 0) (($ghidras | Select-Object -ExpandProperty FullName) -join ', ')
+Check 'ghidra' 'bridge exe' (Test-Path (Join-Path $Root 'ghidra-mcp\.venv\Scripts\bridge-mcp-ghidra.exe'))
+if ($ghidras.Count) {
+    $ext = @(Get-ChildItem (Join-Path $env:APPDATA 'ghidra') -Directory -ErrorAction SilentlyContinue |
+        Where-Object { Test-Path (Join-Path $_.FullName 'Extensions\GhidraMCP') })
+    Check 'ghidra' 'extension deployed' ($ext.Count -gt 0) (($ext | Select-Object -ExpandProperty Name) -join ', ')
+}
+
+# x64dbg
+Check 'x64dbg' 'install' (Test-Path (Join-Path $ToolsDir 'x64dbg\x96dbg.exe'))
+Check 'x64dbg' 'MCP plugin x64' ([bool](Get-ChildItem (Join-Path $ToolsDir 'x64dbg\x64\plugins') -Filter '*.dp64' -ErrorAction SilentlyContinue))
+
+# end-to-end build test
+if ($BuildTest) {
+    $name = "smoketest$(Get-Random -Maximum 9999)"
+    $tmp = Join-Path $env:TEMP 'starter-verify'
+    New-Item -ItemType Directory -Force $tmp | Out-Null
+    Write-Host "Scaffolding + building $name (this takes a few minutes on first vcpkg restore) ..."
+    try {
+        & (Join-Path $PSScriptRoot '..\New-Plugin.ps1') -Name $name -Game F4VR -Dir $tmp
+        Push-Location (Join-Path $tmp $name)
+        try {
+            cmake --preset vs2022-windows-vcpkg-vr | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw 'configure failed' }
+            cmake --build buildvr --config Release | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw 'build failed' }
+            $dll = Test-Path "buildvr\Release\$(($name -replace '-','_').ToLower()).dll"
+            Check 'e2e' 'scaffold+build DLL' $dll
+        }
+        finally { Pop-Location }
+    }
+    catch {
+        Check 'e2e' 'scaffold+build DLL' $false "$_"
+    }
+}
+
+$rows | Format-Table -AutoSize
+$failed = @($rows | Where-Object OK -eq 'FAIL')
+if ($failed.Count) {
+    Write-Host "$($failed.Count) check(s) failed. Optional items (vr_address_tools) may be intentional skips."
+    exit 1
+}
+Write-Host 'Environment verified.'
+
+```
+
+`templates/f4sevr-plugin/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.23)
+set(NAME "starterplugin")
+set(VERSION 0.1.0)
+
+# ---- Options ----
+option(COPY_BUILD "Copy the build output to the Fallout directory." FALSE)
+
+# ---- Cache build vars ----
+macro(set_from_environment VARIABLE)
+	if(NOT DEFINED ${VARIABLE} AND DEFINED ENV{${VARIABLE}})
+		set(${VARIABLE} $ENV{${VARIABLE}})
+	endif()
+endmacro()
+
+macro(find_commonlib_path)
+	if(CommonLibName AND NOT ${CommonLibName} STREQUAL "")
+		# Check extern
+		find_path(CommonLibPath
+			CommonLibF4/include/REL/Relocation.h
+			PATHS external/${CommonLibName}
+			extern/${CommonLibName})
+
+		if(${CommonLibPath} STREQUAL "CommonLibPath-NOTFOUND")
+			# Check path
+			set_from_environment(${CommonLibName}Path)
+			set(CommonLibPath ${${CommonLibName}Path})
+		endif()
+	endif()
+endmacro()
+
+set_from_environment(VCPKG_ROOT)
+
+add_compile_definitions(FALLOUTVR)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+set(CommonLibName "CommonLibF4")
+set_from_environment(FalloutVRPath)
+set(FalloutPath ${FalloutVRPath})
+set(FalloutVersion "Fallout VR")
+
+if(BACKWARDS_COMPATIBLE)
+	add_compile_definitions(BACKWARDS_COMPATIBLE)
+endif()
+
+find_commonlib_path()
+message(
+	STATUS
+	"Building ${NAME} ${VERSION} for ${FalloutVersion} at ${FalloutPath} with ${CommonLibName} at ${CommonLibPath}."
+)
+
+if(DEFINED VCPKG_ROOT)
+	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+	set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
+else()
+	message(
+		WARNING
+		"Variable VCPKG_ROOT is not set. Continuing without vcpkg."
+	)
+endif()
+
+set(Boost_USE_STATIC_RUNTIME OFF CACHE BOOL "")
+
+# ---- Project ----
+project(
+	${NAME}
+	VERSION ${VERSION}
+	LANGUAGES CXX
+)
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/Version.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	@ONLY
+)
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	@ONLY
+)
+
+# ---- Include guards ----
+if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+	message(
+		FATAL_ERROR
+		"In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there."
+	)
+endif()
+
+# ---- Globals ----
+add_compile_definitions(
+	F4SE_SUPPORT_XBYAK
+)
+
+if(MSVC)
+	if(NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
+		add_compile_options(
+			/MP # Build with Multiple Processes
+		)
+	endif()
+endif()
+
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
+
+set(Boost_USE_STATIC_LIBS ON)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "")
+
+# ---- Dependencies ----
+if(DEFINED CommonLibPath AND NOT ${CommonLibPath} STREQUAL "" AND IS_DIRECTORY ${CommonLibPath})
+	add_subdirectory(${CommonLibPath} ${CommonLibName})
+else()
+	message(
+		FATAL_ERROR
+		"Variable ${CommonLibName}Path is not set."
+	)
+endif()
+
+find_package(robin_hood CONFIG REQUIRED)
+
+# ---- Add source files ----
+include(cmake/headerlist.cmake)
+include(cmake/sourcelist.cmake)
+
+source_group(
+	TREE
+	${CMAKE_CURRENT_SOURCE_DIR}
+	FILES
+	${headers}
+	${sources}
+)
+
+source_group(
+	TREE
+	${CMAKE_CURRENT_BINARY_DIR}
+	FILES
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+)
+
+# ---- Create DLL ----
+add_library(
+	${PROJECT_NAME}
+	SHARED
+	${headers}
+	${sources}
+	${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
+	${CMAKE_CURRENT_BINARY_DIR}/version.rc
+	.clang-format
+)
+
+target_compile_features(
+	${PROJECT_NAME}
+	PRIVATE
+	cxx_std_23
+)
+
+target_compile_definitions(
+	${PROJECT_NAME}
+	PRIVATE
+	_UNICODE
+)
+
+target_include_directories(
+	${PROJECT_NAME}
+	PRIVATE
+	${CMAKE_CURRENT_BINARY_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(
+	${PROJECT_NAME}
+	PRIVATE
+	${CommonLibName}::${CommonLibName}
+	robin_hood::robin_hood
+)
+
+target_precompile_headers(
+	${PROJECT_NAME}
+	PRIVATE
+	src/PCH.h
+)
+
+if(MSVC)
+	target_compile_options(
+		${PROJECT_NAME}
+		PRIVATE
+		/sdl # Enable Additional Security Checks
+		/utf-8 # Set Source and Executable character sets to UTF-8
+		/Zi # Debug Information Format
+
+		/permissive- # Standards conformance
+
+		/Zc:alignedNew # C++17 over-aligned allocation
+		/Zc:auto # Deduce Variable Type
+		/Zc:char8_t
+		/Zc:__cplusplus # Enable updated __cplusplus macro
+		/Zc:externC
+		/Zc:externConstexpr # Enable extern constexpr variables
+		/Zc:forScope # Force Conformance in for Loop Scope
+		/Zc:hiddenFriend
+		/Zc:implicitNoexcept # Implicit Exception Specifiers
+		/Zc:lambda
+		/Zc:noexceptTypes # C++17 noexcept rules
+		/Zc:preprocessor # Enable preprocessor conformance mode
+		/Zc:referenceBinding # Enforce reference binding rules
+		/Zc:rvalueCast # Enforce type conversion rules
+		/Zc:sizedDealloc # Enable Global Sized Deallocation Functions
+		/Zc:strictStrings # Disable string literal type conversion
+		/Zc:ternary # Enforce conditional operator rules
+		/Zc:threadSafeInit # Thread-safe Local Static Initialization
+		/Zc:tlsGuards
+		/Zc:trigraphs # Trigraphs Substitution
+		/Zc:wchar_t # wchar_t Is Native Type
+
+		/external:anglebrackets
+		/external:W0
+
+		/W4 # Warning level
+		/WX # Warning level (warnings are errors)
+
+		/wd4702
+		/wd4267
+		/wd4456
+		/wd4189
+		/wd4244
+		/wd4834
+		/wd4189
+		/wd4505
+
+		"$<$<CONFIG:DEBUG>:>"
+		"$<$<CONFIG:RELEASE>:/Zc:inline;/JMC-;/Ob3>"
+	)
+
+	target_link_options(
+		${PROJECT_NAME}
+		PRIVATE
+		/WX # Treat Linker Warnings as Errors
+
+		"$<$<CONFIG:DEBUG>:/INCREMENTAL;/OPT:NOREF;/OPT:NOICF>"
+		"$<$<CONFIG:RELEASE>:/INCREMENTAL:NO;/OPT:REF;/OPT:ICF;/DEBUG:FULL>"
+	)
+
+	# fix a warning with /Ob2 being overridden with /Ob3
+	string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+endif()
+
+# ---- Post build ----
+if(COPY_BUILD)
+	if(DEFINED FalloutPath)
+		string(REGEX REPLACE "[/\\][Dd][Aa][Tt][Aa][/\\]?$" "" FalloutPath "${FalloutPath}") # remove " /data " if exists; cmake regex doesn't have /i
+		add_custom_command(
+			TARGET ${PROJECT_NAME}
+			POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${FalloutPath}/Data/F4SE/Plugins/
+			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> ${FalloutPath}/Data/F4SE/Plugins/
+		)
+	else()
+		message(
+			WARNING
+			"Variable ${FalloutPath} is not defined. Skipping post-build copy command."
+		)
+	endif()
+endif()
+
+# Deploy straight into an MO2 mod folder (point MO2_INSTALL_PATH at
+# <mo2>/mods/<yourmod>/F4SE/Plugins — see CMakeUserPresets.json.template).
+# Preferred over COPY_BUILD for MO2 users: the real game Data dir stays clean.
+# Only the DLL/PDB are copied; config files are deployed by hand so a rebuild
+# never clobbers values you are live-tuning in the mod folder.
+if(DEFINED MO2_INSTALL_PATH AND NOT "${MO2_INSTALL_PATH}" STREQUAL "")
+	add_custom_command(
+		TARGET ${PROJECT_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${MO2_INSTALL_PATH}"
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${MO2_INSTALL_PATH}"
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> "${MO2_INSTALL_PATH}"
+	)
+endif()
+
+# ---- Create Package ----
+if(PACKAGE)
+	set(ZIP_DIR "${CMAKE_CURRENT_BINARY_DIR}/zip")
+	add_custom_target(build-time-make-directory ALL
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${ZIP_DIR}"
+		"${ZIP_DIR}/F4SE/Plugins/"
+	)
+
+	message("Will copy mod into ${ZIP_DIR}.")
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> "${ZIP_DIR}/F4SE/Plugins/"
+	)
+
+	if(${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo OR ${CMAKE_BUILD_TYPE} STREQUAL Release)
+		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> "${ZIP_DIR}/F4SE/Plugins/")
+	endif()
+
+	set(TARGET_ZIP "${PROJECT_NAME}_${PROJECT_VERSION}.7z")
+	message("Will zip ${ZIP_DIR} to ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ZIP}.")
+	ADD_CUSTOM_COMMAND(
+		TARGET ${PROJECT_NAME}
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E tar cf ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_ZIP} --format=7zip -- .
+		WORKING_DIRECTORY ${ZIP_DIR}
+	)
+endif()
+
+```
+
+`templates/f4sevr-plugin/CMakePresets.json`:
+
+```json
+{
+  "configurePresets": [
+    {
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": {
+          "type": "STRING",
+          "value": "Release"
+        }
+      },
+      "errors": {
+        "deprecated": true
+      },
+      "hidden": true,
+      "name": "cmake-dev",
+      "warnings": {
+        "deprecated": true,
+        "dev": true
+      }
+    },
+    {
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "STRING",
+          "value": "$env{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        }
+      },
+      "hidden": true,
+      "name": "vcpkg"
+    },
+    {
+      "cacheVariables": {
+        "CMAKE_MSVC_RUNTIME_LIBRARY": {
+          "type": "STRING",
+          "value": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+        },
+        "VCPKG_TARGET_TRIPLET": {
+          "type": "STRING",
+          "value": "x64-windows-static"
+        }
+      },
+      "hidden": true,
+      "name": "windows"
+    },
+    {
+      "binaryDir": "${sourceDir}/buildvr",
+      "cacheVariables": {
+        "BUILD_FALLOUTVR": true
+      },
+      "hidden": true,
+      "name": "vr"
+    },
+    {
+      "cacheVariables": {
+        "PACKAGE": true
+      },
+      "hidden": true,
+      "name": "package"
+    },
+    {
+      "cacheVariables": {
+        "COPY_BUILD": true
+      },
+      "hidden": true,
+      "name": "copy-build"
+    },
+    {
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /external:anglebrackets /external:W0 $penv{CXXFLAGS}"
+      },
+      "generator": "Visual Studio 16 2019",
+      "inherits": ["vr", "cmake-dev", "vcpkg", "windows"],
+      "name": "vs2019-windows-vcpkg-vr"
+    },
+    {
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /external:anglebrackets /external:W0 $penv{CXXFLAGS}"
+      },
+      "generator": "Visual Studio 17 2022",
+      "inherits": ["vr", "cmake-dev", "vcpkg", "windows"],
+      "name": "vs2022-windows-vcpkg-vr",
+      "toolset": "v143"
+    },
+    {
+      "name": "vs2022-windows-vcpkg-vr-package",
+      "inherits": ["vs2022-windows-vcpkg-vr", "package"]
+    }
+  ],
+  "version": 3
+}
+
+```
+
+`templates/f4sevr-plugin/CMakeUserPresets.json.template`:
+
+```template
+{
+	"version": 3,
+	"configurePresets": [
+		{
+			"name": "vr-mo2",
+			"displayName": "VR — deploy DLL/PDB into an MO2 mod folder (recommended for MO2 users)",
+			"inherits": "vs2022-windows-vcpkg-vr",
+			"cacheVariables": {
+				"MO2_INSTALL_PATH": "C:/MO2/Fallout4VR/mods/starterplugin/F4SE/Plugins"
+			}
+		},
+		{
+			"name": "vr-copy",
+			"displayName": "VR — copy into the game's real Data/F4SE/Plugins (non-MO2 installs)",
+			"inherits": "vs2022-windows-vcpkg-vr",
+			"cacheVariables": {
+				"COPY_BUILD": true
+			},
+			"environment": {
+				"FalloutVRPath": "C:/Steam/steamapps/common/Fallout 4 VR"
+			}
+		}
+	]
+}
+
+```
+
+`templates/f4sevr-plugin/Data/F4SE/Plugins/starterplugin.toml`:
+
+```toml
+# starterplugin configuration.
+# Deploy this file next to the DLL (Data/F4SE/Plugins/ in your mod folder).
+# Missing file or missing keys = plugin uses its built-in defaults.
+
+[starterplugin]
+enableExampleFeature = true
+exampleNumber = 42
+exampleName = "hello"
+
+```
+
+`templates/f4sevr-plugin/README.md`:
+
+```md
+# starterplugin
+
+F4SEVR plugin scaffolded from [bethesda-modding-starter](https://github.com/rollingrock/bethesda-modding-starter).
+Build chain: CMake + vcpkg + [rollingrock/CommonLibF4](https://github.com/rollingrock/CommonLibF4) (NG-style — one lib for flat and VR) as the `external/CommonLibF4` submodule.
+
+## Building
+
+```powershell
+git submodule update --init --recursive
+cmake --preset vs2022-windows-vcpkg-vr
+cmake --build buildvr --config Release
+```
+
+DLL lands in `buildvr/Release/`. To auto-deploy every build into an MO2 mod folder, copy
+`CMakeUserPresets.json.template` to `CMakeUserPresets.json`, edit `MO2_INSTALL_PATH`, and configure
+with `cmake --preset vr-mo2` instead.
+
+Prerequisites (see the starter pack's `setup/` scripts): VS2022 + C++ workload, CMake, vcpkg with
+**both** `VCPKG_ROOT` and `VCPKG_INSTALLATION_ROOT` set.
+
+## Layout
+
+- `src/main.cpp` — plugin entry; logging, config load, the single `F4SE::AllocTrampoline(256)` call, hook install point.
+- `src/PCH.h` — precompiled header + hook helpers. Read the `write_thunk_call` comment before touching trampoline code.
+- `src/Settings/Settings.h` — TOML-backed settings. One `MAKE_SETTING` line + one `LOAD` line per tunable; prefer a setting over a hardcoded constant.
+- `Data/F4SE/Plugins/starterplugin.toml` — shipped config. Deployed by hand, not by the build, so a rebuild never clobbers values you are live-tuning.
+- `cmake/sourcelist.cmake` / `cmake/headerlist.cmake` — **file lists are manual.** A new `.cpp` that is not added to `sourcelist.cmake` silently does not build; this is the classic mistake in this chain.
+
+## Rules that keep you out of known crashes
+
+1. **One `AllocTrampoline` for the whole plugin.** On F4SEVR, per-hook `AllocTrampoline` frees every previously written stub (no branch-pool interface, so it falls back to `Trampoline::create`, which releases the old buffer). The second hook crashes the game.
+2. **14 bytes of trampoline per `write_call<5>` hook.** 256 covers ~18 hooks; raise it in `main.cpp` if you install more.
+3. New source files go in `cmake/sourcelist.cmake` (and headers in `headerlist.cmake`).
+
+```
+
+`templates/f4sevr-plugin/cmake/Version.h.in`:
+
+```in
+#pragma once
+
+namespace Version
+{
+	inline constexpr std::size_t MAJOR = @PROJECT_VERSION_MAJOR@;
+	inline constexpr std::size_t MINOR = @PROJECT_VERSION_MINOR@;
+	inline constexpr std::size_t PATCH = @PROJECT_VERSION_PATCH@;
+	inline constexpr auto NAME = "@PROJECT_VERSION@"sv;
+	inline constexpr auto PROJECT = "@PROJECT_NAME@"sv;
+}
+
+```
+
+`templates/f4sevr-plugin/cmake/headerlist.cmake`:
+
+```cmake
+set(headers ${headers}
+	src/PCH.h
+	src/Settings/Settings.h
+)
+
+```
+
+`templates/f4sevr-plugin/cmake/sourcelist.cmake`:
+
+```cmake
+set(sources ${sources}
+	src/main.cpp
+	src/PCH.cpp
+)
+
+```
+
+`templates/f4sevr-plugin/cmake/version.rc.in`:
+
+```in
+#include <winres.h>
+
+1 VERSIONINFO
+	FILEVERSION @PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@, 0
+	PRODUCTVERSION @PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@, 0
+	FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+	FILEFLAGS 0x1L
+#else
+	FILEFLAGS 0x0L
+#endif
+	FILEOS 0x4L
+	FILETYPE 0x1L
+	FILESUBTYPE 0x0L
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
+		BEGIN
+			VALUE "FileDescription", "@PROJECT_NAME@"
+			VALUE "FileVersion", "@PROJECT_VERSION@.0"
+			VALUE "InternalName", "@PROJECT_NAME@"
+			VALUE "LegalCopyright", "MIT License"
+			VALUE "ProductName", "@PROJECT_NAME@"
+			VALUE "ProductVersion", "@PROJECT_VERSION@.0"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1200
+	END
+END
+
+```
+
+`templates/f4sevr-plugin/src/PCH.cpp`:
+
+```cpp
+namespace pstl
+{
+	namespace detail
+	{
+		struct asm_patch :
+			Xbyak::CodeGenerator
+		{
+			asm_patch(std::uintptr_t a_dst)
+			{
+				Xbyak::Label dst;
+
+				mov(rax, a_dst);
+				jmp(rax);
+			}
+		};
+	}
+
+	void asm_jump(std::uintptr_t a_from, [[maybe_unused]] std::size_t a_size, std::uintptr_t a_to)
+	{
+		detail::asm_patch p{ a_to };
+		p.ready();
+		assert(p.getSize() <= a_size);
+		REL::safe_write(
+			a_from,
+			std::span{ p.getCode<const std::byte*>(), p.getSize() });
+	}
+
+	void asm_replace(std::uintptr_t a_from, std::size_t a_size, std::uintptr_t a_to)
+	{
+		REL::safe_fill(a_from, REL::INT3, a_size);
+		asm_jump(a_from, a_size, a_to);
+	}
+}
+
+```
+
+`templates/f4sevr-plugin/src/PCH.h`:
+
+```h
+#pragma once
+
+#define NOMMNOSOUND
+
+#include "RE/Fallout.h"
+#include "F4SE/F4SE.h"
+
+#pragma warning(disable: 4100)
+
+#pragma warning(push)
+#include <robin_hood.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <xbyak/xbyak.h>
+#include <toml++/toml.h>
+#pragma warning(pop)
+
+namespace logger = F4SE::log;
+
+using namespace std::literals;
+
+namespace pstl
+{
+	using namespace F4SE::stl;
+
+	void asm_replace(std::uintptr_t a_from, std::size_t a_size, std::uintptr_t a_to);
+
+	template <class T>
+	void asm_replace(std::uintptr_t a_from)
+	{
+		asm_replace(a_from, T::size, reinterpret_cast<std::uintptr_t>(T::func));
+	}
+
+	// NOTE: this deliberately does NOT call F4SE::AllocTrampoline per hook. On F4SEVR
+	// (no branch-pool interface) AllocTrampoline falls back to Trampoline::create, and
+	// create/set_trampoline release() the PREVIOUS buffer — VirtualFreeing every
+	// previously written stub. With more than one hook that orphans earlier call sites
+	// into freed memory and crashes. Allocate the trampoline ONCE in F4SEPlugin_Load
+	// with capacity for all hooks (14 bytes per write_call<5>) before calling this.
+	template <class T>
+	void write_thunk_call(std::uintptr_t a_src)
+	{
+		auto& trampoline = F4SE::GetTrampoline();
+		T::func = trampoline.write_call<5>(a_src, T::thunk);
+	}
+
+	template <class F, size_t offset, class T>
+	void write_vfunc()
+	{
+		REL::Relocation<std::uintptr_t> vtbl{ F::VTABLE[offset] };
+		T::func = vtbl.write_vfunc(T::idx, T::thunk);
+	}
+
+	template <class F, class T>
+	void write_vfunc()
+	{
+		write_vfunc<F, 0, T>();
+	}
+
+	inline std::string as_string(std::string_view a_view)
+	{
+		return { a_view.data(), a_view.size() };
+	}
+}
+
+#ifdef SKYRIM_AE
+#	define REL_ID(se, ae) REL::ID(ae)
+#	define OFFSET(se, ae) ae
+#	define OFFSET_3(se, ae, vr) ae
+#elif SKYRIMVR
+#	define REL_ID(se, ae) REL::ID(se)
+#	define OFFSET(se, ae) se
+#	define OFFSET_3(se, ae, vr) vr
+#else
+#	define REL_ID(se, ae) REL::ID(se)
+#	define OFFSET(se, ae) se
+#	define OFFSET_3(se, ae, vr) se
+#endif
+
+#define DLLEXPORT __declspec(dllexport)
+
+#include "Version.h"
+
+```
+
+`templates/f4sevr-plugin/src/Settings/Settings.h`:
+
+```h
+#pragma once
+
+namespace Settings
+{
+	template <class T>
+	class Setting
+	{
+	public:
+		using value_type = T;
+
+		Setting(
+			std::string_view a_group,
+			std::string_view a_key,
+			value_type a_default) noexcept :
+			_group(a_group),
+			_key(a_key),
+			_value(a_default)
+		{}
+
+		[[nodiscard]] auto group() const noexcept -> std::string_view { return this->_group; }
+		[[nodiscard]] auto key() const noexcept -> std::string_view { return this->_key; }
+
+		template <class Self>
+		[[nodiscard]] auto&& get(this Self&& a_self) noexcept
+		{
+			return std::forward<Self>(a_self)._value;
+		}
+
+		template <class Self>
+		[[nodiscard]] auto&& operator*(this Self&& a_self) noexcept
+		{
+			return std::forward<Self>(a_self).get();
+		}
+
+	private:
+		std::string_view _group;
+		std::string_view _key;
+		value_type _value;
+	};
+
+	using bSetting = Setting<bool>;
+	using iSetting = Setting<std::int64_t>;
+	using sSetting = Setting<std::string>;
+
+#define MAKE_SETTING(a_type, a_group, a_key, a_default) \
+	inline auto a_key = a_type(a_group##sv, #a_key##sv, a_default)
+
+	// Add one line per setting; expose tunables here instead of hardcoding them.
+	MAKE_SETTING(bSetting, "starterplugin", enableExampleFeature, true);
+	MAKE_SETTING(iSetting, "starterplugin", exampleNumber, std::int64_t(42));
+	MAKE_SETTING(sSetting, "starterplugin", exampleName, std::string("hello"));
+
+#undef MAKE_SETTING
+
+	inline std::vector<
+		std::variant<
+			std::reference_wrapper<bSetting>,
+			std::reference_wrapper<iSetting>,
+			std::reference_wrapper<sSetting>>>
+		settings;
+
+	inline void load()
+	{
+		// A missing or malformed TOML is never fatal — the plugin runs on defaults.
+		toml::table config;
+		try {
+			config = toml::parse_file("Data/F4SE/Plugins/starterplugin.toml"sv);
+		} catch (const std::exception& e) {
+			logger::warn("config not loaded ({}); using defaults"sv, e.what());
+			return;
+		}
+
+#define LOAD(a_setting)                                                              \
+	settings.push_back(std::ref(a_setting));                                         \
+	if (const auto tweak = config[a_setting.group()][a_setting.key()]; tweak) {      \
+		if (const auto value = tweak.as<decltype(a_setting)::value_type>(); value) { \
+			*a_setting = value->get();                                               \
+		} else {                                                                     \
+			logger::warn(                                                            \
+				"setting '{}.{}' is not of the correct type; keeping default"sv,     \
+				a_setting.group(),                                                   \
+				a_setting.key());                                                    \
+		}                                                                            \
+	}
+
+		LOAD(enableExampleFeature);
+		LOAD(exampleNumber);
+		LOAD(exampleName);
+
+#undef LOAD
+	}
+}
+
+```
+
+`templates/f4sevr-plugin/src/main.cpp`:
+
+```cpp
+#include "Settings/Settings.h"
+
+void InitializeLog()
+{
+	auto path = logger::log_directory();
+	const auto gamepath = REL::Module::IsVR() ? "Fallout4VR/F4SE" : "Fallout4/F4SE";
+	if (!path.value().generic_string().ends_with(gamepath)) {
+		// handle bug where game directory is missing
+		path = path.value().parent_path().append(gamepath);
+	}
+
+	*path /= fmt::format("{}.log"sv, "starterplugin"sv);
+	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+
+	const auto level = spdlog::level::trace;
+
+	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+	log->set_level(level);
+	log->flush_on(level);
+
+	spdlog::set_default_logger(std::move(log));
+	spdlog::set_pattern("[%Y-%m-%d %T.%e][%-16s:%-4#][%L]: %v"s);
+}
+
+extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a_f4se, F4SE::PluginInfo* a_info)
+{
+	a_info->infoVersion = F4SE::PluginInfo::kVersion;
+	a_info->name = Version::PROJECT.data();
+	a_info->version = Version::MAJOR;
+
+	if (a_f4se->IsEditor()) {
+		logger::critical("Loaded in editor, marking as incompatible"sv);
+		return false;
+	}
+
+	const auto ver = a_f4se->RuntimeVersion();
+	if (ver < (REL::Module::IsF4() ? F4SE::RUNTIME_LATEST : F4SE::RUNTIME_LATEST_VR)) {
+		logger::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
+		return false;
+	}
+
+	return true;
+}
+
+extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
+{
+	InitializeLog();
+	Settings::load();
+	F4SE::Init(a_f4se, false);
+
+	// One allocation for ALL hook stubs (14 bytes each) — never per-hook, see the
+	// write_thunk_call note in PCH.h. Raise if you add more than ~18 hooks.
+	F4SE::AllocTrampoline(256);
+
+	logger::info("{} v{}.{}.{} {} {} is loading"sv, Version::PROJECT, Version::MAJOR, Version::MINOR, Version::PATCH, __DATE__, __TIME__);
+	const auto runtimeVer = REL::Module::get().version();
+	logger::info("Fallout 4 v{}.{}.{}"sv, runtimeVer[0], runtimeVer[1], runtimeVer[2]);
+	logger::info("enableExampleFeature = {}"sv, *Settings::enableExampleFeature);
+
+	// Install hooks here, AFTER the AllocTrampoline call above. Pattern:
+	//
+	//   struct MyHook
+	//   {
+	//       static void thunk(RE::SomeType* a_this)
+	//       {
+	//           // ... your code ...
+	//           func(a_this);  // call the original
+	//       }
+	//       static inline REL::Relocation<decltype(thunk)> func;
+	//   };
+	//
+	//   pstl::write_thunk_call<MyHook>(REL::Offset(0x140XXXXXX - 0x140000000).address());
+
+	logger::info("{} loaded"sv, Version::PROJECT);
+	return true;
+}
+
+```
+
+`templates/f4sevr-plugin/vcpkg.json`:
+
+```json
+{
+  "name": "starterplugin",
+  "version-string": "0.1.0",
+  "description": "F4SEVR plugin scaffolded from bethesda-modding-starter",
+  "homepage": "https://github.com/rollingrock/bethesda-modding-starter",
+  "license": "MIT",
+  "dependencies": [
+    "boost-stl-interfaces",
+    "robin-hood-hashing",
+    "rsm-binary-io",
+    "rsm-mmio",
+    "srell",
+    "spdlog",
+    "xbyak",
+    "args",
+    "frozen",
+    "tomlplusplus",
+    "nowide",
+    "catch2",
+    "rapidcsv"
+  ],
+  "builtin-baseline": "b4a3d89125e45bc8f80fb94bef9761d4f4e14fb9"
+}
+
+```
