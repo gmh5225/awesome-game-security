@@ -1850,6 +1850,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
 - [TPM-SPOOFER](entities/tpm-spoofer.md) — KM TPM serial spoof via IOCTL hook (Cheat [TPM])
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
+- [triton-bn](entities/triton-bn.md) — Binary Ninja Triton DBA plugin scaffold (symbolic exec / lifting base; ergrelet; Cheat Binary Ninja Plugins)
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
 - [TrollStore](entities/trollstore.md) — iOS perma-signed jailed IPA installer (CoreTrust/AMFI; arbitrary entitlements)
 - [TS-Fucker](entities/ts-fucker.md) — runtime TestSigning toggle via Dell `dbutil_2_3.sys` BYOVD (kernel live-patch; symbol-assisted offsets; no reboot; gmh5225)
