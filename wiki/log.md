@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:galaxyhaxz/devilution`: entity [[devilution]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[zelda3]] and [[gta-reversed-modern]].
+
 - **2026-08-15** — ingest `readme:categories`: bumped Anti Cheat ~673 (was ~672; Cheat ~2702 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-15** — ingest `description:gamedev-skills/awesome-gamedev-agent-skills`: entity [[awesome-gamedev-agent-skills]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[learn-awesome-gamedev]] and [[game-design-documents]].
