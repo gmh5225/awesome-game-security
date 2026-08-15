@@ -2007,6 +2007,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vmem-decrypt](entities/vmem-decrypt.md) — VMware vTPM-encrypted .vmem/.vmsn/.vmss/.nvram decrypt (pure-Python AES-256-CBC; vmem_flatten.py → Volatility 3; Win11 partial VM encryption; AC/IS forensics)
 - [Volatile Data Collector](entities/volatile-data-collector.md) — lightweight Windows C utilities for live volatile IR (handles, kernel modules, sessions, drivers, ICMP, registry)
 - [VolkDMA](entities/volk-dma.md) — C++ LeechCore/MemProcFS DMA library (scatter I/O, module dumps, signature scans, CR3 fix, kernel-derived input state; cheat / DMA)
+- [vm (ekknod)](entities/vm.md) — cross-platform C/C++ memory library (unified `vm.h`; kernel/RPM/DMA/KVM/Proton/EFI backends; CR3 walk, PEB/LDR, pattern scan)
 
 - [Voidmaw](entities/voidmaw.md) — VEH + PAGE_GUARD code-hiding (AV/AC page-protection research)
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)

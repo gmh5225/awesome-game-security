@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/vm`: entity [[vm]]; cited on [[overviews/game-hacking]] and [[overviews/dma-attack]]; cross-linked [[pcileech]] and [[volk-dma]].
+
 - **2026-08-15** — ingest `description:electronicarts/CnC_Red_Alert`: entity [[cnc-red-alert]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[redalert2]] and [[storm-engine]].
 
 - **2026-08-15** — ingest `description:elishacloud/dxwrapper`: entity [[dxwrapper]]; cited on [[overviews/graphics-api]] and [[overviews/reverse-engineering]]; cross-linked [[detours]], [[directxhook]], [[d3d9on12]], and [[free-direct]].
