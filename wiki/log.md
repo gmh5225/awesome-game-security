@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:emlinhax/DbgViewEx`: entity [[dbgviewex]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[etw-explorer]], [[etw-watcher]], [[fibratus]], and [[openprocmon]].
+
 - **2026-08-15** — ingest `description:emlinhax/blitz`: entity [[blitz]]; cited on [[overviews/anti-cheat]]; cross-linked [[kli]], [[kli-ex]], [[syscalls-cpp]], and [[xv]].
 
 - **2026-08-15** — ingest `description:emlinhax/tableflipper`: entity [[tableflipper]]; cited on [[patchguard]] and [[overviews/windows-kernel]]; cross-linked [[upgdsed]], [[vulnerablepatchguardexploit]], and [[pg1903]].

@@ -459,6 +459,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
+- [DbgViewEx](entities/dbgviewex.md) — ETW event + system debug-log capture (emlinhax; early-stage; cheat / RE telemetry)
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
 - [D3D9On12](entities/d3d9on12.md) — Microsoft D3D9 usermode DDI → D3D12 mapping layer (DirectX Compatibility)
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
