@@ -448,6 +448,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)
 - [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
 - [debug-remover](entities/debug-remover.md) — C/C++ strip debug info from binaries (Anti Cheat → Binary Packer; anti-RE hardening)
+- [deadlock-anti-cheat](entities/deadlock-anti-cheat.md) — UrnIt user-mode Deadlock session AC (process/screenshot/key/HWID logging; Discord webhook; tournament review)
 - [Deep Learning Anti-Cheat For CSGO](entities/deep-learning-anti-cheat-csgo.md) — CS:GO OSS AC pipeline (memory/code-integrity/process/debugger checks + network packet validation; detection-to-response; gmh5225; Open Source Anti Cheat System)
 - [deepwiki-mcp](entities/deepwiki-mcp.md) — DeepWiki docs MCP server (query/retrieve wikis for AI agents; Game Develop / MCP)
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)

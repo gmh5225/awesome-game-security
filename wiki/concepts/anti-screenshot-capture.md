@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/lainswork__dwm-screen-shot.md
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
   - wiki/sources/descriptions/gmh5225__ScreenShot.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md
+updated: 2026-08-15
 confidence: medium
 ---
 
@@ -28,7 +29,7 @@ How anti-cheat and platform code **captures visible frames** for overlay/ESP det
 
 Scheduled or random-interval captures aim to catch intermittent overlays. README lanes: **Anti Cheat → Screenshot**, **Detection:Overlay**, **Cheat → Anti Screenshot**.
 
-Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXGI Desktop Duplication, PrintWindow, DWM thumbnail; README `[BitBlt]`) help researchers validate which path an AC module uses and what each method reveals about overlays and hardware-accelerated windows. (source: wiki/sources/descriptions/gmh5225__ScreenShot.md)
+Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXGI Desktop Duplication, PrintWindow, DWM thumbnail; README `[BitBlt]`) help researchers validate which path an AC module uses and what each method reveals about overlays and hardware-accelerated windows. (source: wiki/sources/descriptions/gmh5225__ScreenShot.md) Title-specific session AC such as [[deadlock-anti-cheat]] (UrnIt; periodic PNG captures of the game window bundled with process/key/hardware telemetry for staff review; Anti Cheat → Screenshot) illustrates scheduled client-side evidence collection rather than hook-based Present interception. (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)
 
 ## Cheat-side evasion (collection patterns)
 
