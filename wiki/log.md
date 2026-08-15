@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fishfolk/jumpy`: entity [[jumpy]]; cited on [[overviews/game-engine]]; cross-linked [[macroquad]], [[nightshade]], and [[dotrix]].
+
 - **2026-08-15** — ingest `description:fjqisba/VmpHelper`: entity [[vmp-helper]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[novmpy]], [[vmp3-utils]], and [[vmprotect]].
 
 - **2026-08-15** — ingest `description:fksvs/inject`: entity [[inject]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[packet-sniffer]], [[pcapplusplus]], and [[npcap]].

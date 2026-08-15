@@ -1060,6 +1060,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
 - [JinYongLegend](entities/jynew.md) — Unity wuxia RPG framework with modding (Game Develop / Unity source)
+- [jumpy](entities/jumpy.md) — Rust tactical 2D multiplayer shooter (asset-driven maps/characters/items; cross-platform; Pixels style; Game Engine / source)
 - [jwt_tool](entities/jwt-tool.md) — Python JWT toolkit (validate/forge/scan; Game Network / JWT Auth)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
