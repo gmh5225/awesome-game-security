@@ -246,6 +246,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-executable-packing](entities/awesome-executable-packing.md) — curated executable packing/unpacking resources (PE/ELF/Mach-O; packers, protectors, unpackers, analysis tools; Executable File Packing)
 - [awesome-gamedev-agent-skills](entities/awesome-gamedev-agent-skills.md) — ~66 version-pinned game-dev Agent Skills + engine router (Godot/Unity/Unreal/Phaser/Bevy/etc.; Game Develop / AI Agents)
 - [awesome-game-engine-dev](entities/awesome-game-engine-dev.md) — curated game-engine-dev resources (DirectX/OpenGL; Game Engine / guide)
+- [awesome-ida-x64-olly-plugin](entities/awesome-ida-x64-olly-plugin.md) — curated IDA/Ghidra/x64dbg/OllyDbg/GDB plugin index (patching, diffing, deobfuscation, emulation, YARA, anti-anti-debug; fr0gger)
 - [awesome-injection](entities/awesome-injection.md) — curated injection resources (Cheat / injection:windows)
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)

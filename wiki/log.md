@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fr0gger/awesome-ida-x64-olly-plugin`: entity [[awesome-ida-x64-olly-plugin]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[x64dbg]], [[idaplugins-list]], and [[retoolkit]].
+
 - **2026-08-15** — ingest `description:frank2/oxide`: entity [[oxide]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[2pack]], [[atom-pe-packer]], and [[packer-tutorial]].
 
 - **2026-08-15** — ingest `description:frankelitoc/UE4-c-`: entity [[ue4-c-]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[valorant-external-source]], [[valo-driver]], [[vanguard]], and [[unreal-object-model]].
