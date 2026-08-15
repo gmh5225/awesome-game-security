@@ -1511,6 +1511,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [payload-dumper-go](entities/payload-dumper-go.md) — Android OTA payload.bin dumper (Go; parallel xz / checksum / zip)
 - [Packet-Sniffer](entities/packet-sniffer.md) — C/C++ packet logger/decryptor (networking + debugging; cheat / Packet Sniffer&Filter)
 - [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
+- [PCAPdroid](entities/pcapdroid.md) — privacy-friendly Android network monitor (track/analyze/block app connections; PCAP export; HTTP/TLS decrypt; cheat / Android Network Explorer)
 - [pawnio](entities/pawnio.md) — WDK kernel driver with embedded Pawn AMX VM (signed bytecode modules via IOCTL; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM; namazso)
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
 - [PCIE-Detector](entities/pcie-detector.md) — Kernel PCIe Config Space inspection driver (C++; defensive DMA detection research; gmh5225)

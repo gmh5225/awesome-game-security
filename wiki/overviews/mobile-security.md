@@ -173,6 +173,7 @@ sources:
   - wiki/sources/descriptions/jiqiu2022__Zygisk-MyInjector.md
   - wiki/sources/descriptions/hackcatml__zygisk-memdump.md
   - wiki/sources/descriptions/ohchase__yaui.md
+  - wiki/sources/descriptions/emanuele-f__PCAPdroid.md
   - wiki/sources/descriptions/erfur__linjector-rs.md
   - wiki/sources/descriptions/reveny__Android-Native-Root-Detector.md
   - wiki/sources/descriptions/reveny__Android-Native-Import-Hide.md
@@ -321,7 +322,7 @@ User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown,
 
 ## Network & SSL pinning
 
-Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; all-in-one Android device control via [[lamda]] (FIRERPA; on-device server + Python API; UI automation, WebRTC mirror, one-click MITM, built-in [[frida]], network proxy, MCP agents; root/non-root; virtual-display background automation; frida-tools/tcpdump on-device) consolidates Appium/mitmproxy/frida-server/adb stacks for mobile security testing and protocol RE. (source: wiki/sources/descriptions/firerpa__lamda.md) Frida universal TrustManager hooks for pinning bypass. Static-analysis script generator [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]] scans APK/IPA binaries for known SSL stacks (OkHttp, TrustKit, Flutter, gRPC) and root/jailbreak SDKs (RootBeer, Play Integrity, commercial protectors), then emits targeted [[frida]] hooks via a three-layer injection design (Android 12+). (source: wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md) Certificate user→system modules such as [[move-certificate]] support MITM on rooted devices.
+Traffic capture via mitmproxy / Charles; agent MCP [[android-proxy-mcp]]; all-in-one Android device control via [[lamda]] (FIRERPA; on-device server + Python API; UI automation, WebRTC mirror, one-click MITM, built-in [[frida]], network proxy, MCP agents; root/non-root; virtual-display background automation; frida-tools/tcpdump on-device) consolidates Appium/mitmproxy/frida-server/adb stacks for mobile security testing and protocol RE. (source: wiki/sources/descriptions/firerpa__lamda.md) VPN-based on-device capture such as [[pcapdroid]] (open-source; track/analyze/block per-app connections; PCAP export; HTTP inspect + TLS decrypt; cheat / Android Network Explorer) complements MITM stacks for mobile game wire RE. (source: wiki/sources/descriptions/emanuele-f__PCAPdroid.md) Frida universal TrustManager hooks for pinning bypass. Static-analysis script generator [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]] scans APK/IPA binaries for known SSL stacks (OkHttp, TrustKit, Flutter, gRPC) and root/jailbreak SDKs (RootBeer, Play Integrity, commercial protectors), then emits targeted [[frida]] hooks via a three-layer injection design (Android 12+). (source: wiki/sources/descriptions/infosecrajesh__Auto-generate-Frida-bypass-scripts-for-SSL-pinning-root-detection-on-Android-iOS.md) Certificate user→system modules such as [[move-certificate]] support MITM on rooted devices.
 
 ## Kernel drivers & CVE lanes
 
