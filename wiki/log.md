@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ergrelet/themida-unmutate`: entity [[themida-unmutate]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[unlicense]], [[themida-research]], [[tde]], and [[magicmida-rs]].
+
 - **2026-08-15** — ingest `description:ergrelet/triton-bn`: entity [[triton-bn]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ponce]], [[novmpy]], [[binary-ninja-mcp]], and [[unlicense]].
 
 - **2026-08-15** — ingest `description:ergrelet/unlicense`: entity [[unlicense]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[magicmida-rs]], [[tde]], [[themida-research]], and [[frida]].

@@ -20,4 +20,4 @@ Companion surface to Cheat → Fix Themida work ([[magicmida-rs]] debugger-drive
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[themida-research]] · [[tde]] · [[magicmida-rs]] · [[frida]] · [[dynamic-binary-instrumentation]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[themida-unmutate]] · [[themida-research]] · [[tde]] · [[magicmida-rs]] · [[frida]] · [[dynamic-binary-instrumentation]]
