@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/pcileech-wifi`: entity [[pcileech-wifi]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-fpga]] and [[vm]].
+
 - **2026-08-15** — ingest `description:ekknod/smm`: entity [[smm]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[sumap]], [[vm]], and [[pawnio]].
 
 - **2026-08-15** — ingest `description:ekknod/sumap`: entity [[sumap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[xigmapper]], [[ue4-c-]], and [[vm]].
