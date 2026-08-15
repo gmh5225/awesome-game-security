@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `readme:categories`: bumped Cheat ~2703 (was ~2702; Anti Cheat ~674 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-15** — ingest `description:fishfolk/jumpy`: entity [[jumpy]]; cited on [[overviews/game-engine]]; cross-linked [[macroquad]], [[nightshade]], and [[dotrix]].
 
 - **2026-08-15** — ingest `description:fjqisba/VmpHelper`: entity [[vmp-helper]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[novmpy]], [[vmp3-utils]], and [[vmprotect]].
