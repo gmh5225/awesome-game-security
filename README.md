@@ -4223,6 +4223,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Rycooop/Bloom-Anticheat
 - https://github.com/Vasieco/Kernel-Anticheat [Kernel Anticheat]
 - https://github.com/PatchRequest/PeregrineAntiCheat [Educational Windows anti-cheat: kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, Tauri GUI, cheat test suite]
+- https://github.com/lauralex/OAC [Open Anti-Cheat: x64 Windows kernel driver plus user-mode scanner reference implementation with ObCallbacks handle filtering and cross-view integrity checks]
 - https://github.com/violetweather/Certael [Server-authoritative open-source anti-cheat framework with Godot/Unity/Unreal adapters]
 - https://github.com/vul-os/magnetite [Rust self-hostable game platform with magnetite-anticheat: server-authoritative deterministic replay verification and composable cheat validators]
 - https://github.com/web-coder-lab/chessking [Rust server-side anti-cheat for multiplayer chess: risk scoring, device fingerprinting, match integrity, captcha, and ban escalation]
