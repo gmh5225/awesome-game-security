@@ -861,6 +861,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Hidden-Thread-Finder](entities/hidden-thread-finder.md) — KTHREAD field-spoof detector via APC vs NMI callback comparison (Win10 20H2; gmh5225)
 - [DLLThreadInjectionDetector](entities/dll-thread-injection-detector.md) — kernel-level DLL thread injection detector (C/C++; Detection:Injection; mq1n)
 - [HijackLibs](entities/hijacklibs.md) — disclosed Windows DLL hijack DB (YAML + web UI; exports / conditions)
+- [HintInject](entities/hintinject.md) — PE import-table shellcode staging (Hint/Name Table chunks; loader IAT resolution; Hint/Name Table; frkngksl)
 - [hint-break](entities/hint-break.md) — RE-tool ghost opcodes `0F 1A`/`0F 1B` (Anti Debugging / anti-disasm)
 - [Hooking-via-InstrumentationCallback](entities/hooking-via-instrumentation-callback.md) — Ring3 Instrumentation Callback hook (NtSetInformationProcess; no ntdll patch)
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
