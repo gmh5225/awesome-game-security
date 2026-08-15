@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/sumap`: entity [[sumap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[xigmapper]], [[ue4-c-]], and [[vm]].
+
 - **2026-08-15** — ingest `description:ekknod/usbsn`: entity [[usbsn]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]]; cross-linked [[easy-hwid-spoofer]] and [[hdd-serial-spoofer]].
 
 - **2026-08-15** — ingest `description:ekknod/vm`: entity [[vm]]; cited on [[overviews/game-hacking]] and [[overviews/dma-attack]]; cross-linked [[pcileech]] and [[volk-dma]].

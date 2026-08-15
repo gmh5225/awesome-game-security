@@ -74,6 +74,7 @@ sources:
   - wiki/sources/descriptions/eksses__EAFE.md
   - wiki/sources/descriptions/ekknod__vm.md
   - wiki/sources/descriptions/ekknod__usbsn.md
+  - wiki/sources/descriptions/ekknod__sumap.md
   - wiki/sources/descriptions/enis1enis2__Windfall-AntiCheat.md
   - wiki/sources/descriptions/frasten__ida-genpatch.md
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
@@ -1581,6 +1582,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Valorant external cheat source such as [[valorant-external-source]] (ESP/aimbot/player info; kernel driver RPM; separate-window or hijacked overlay; README `[External]`; gmh5225) sits in the same out-of-process cheat / game:valorant lane for studying external architecture and [[vanguard]] kernel protection effectiveness. (source: wiki/sources/descriptions/gmh5225__Valorant-External-Source.md)
 - Leaked Valorant external P2C source such as [[valorant-external-p2c-leaked]] (ESP/aimbot/triggerbot; kernel driver RPM; UE state reads under [[vanguard]]; typical commercial external architecture; README `[External]`; gmh5225) sits in the same out-of-process cheat / game:valorant lane for studying P2C design patterns and bypass techniques. (source: wiki/sources/descriptions/gmh5225__Valorant-External-P2C-Leaked.md)
 - Valorant external cheat samples such as [[valorant-external-1]] (C/C++; OpenGL overlay rendering; out-of-process cheat / game:valorant; gmh5225) sit in the same out-of-process cheat / game:valorant lane for studying non-DX overlay paths under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__Valorant-External-1.md)
+- EFI manual-map loader research such as [[sumap]] (ekknod; C/C++; pre-boot unsigned driver PE mapping; driver development / memory analysis; cheat / EFI Manual Map) complements [[xigmapper]] and cheat stacks that consume EFI-loaded kernel drivers. (source: wiki/sources/descriptions/ekknod__sumap.md)
 - Valorant external UE4 cheat samples such as [[ue4-c-]] (frankelitoc; EFI manual-mapped kernel driver + IOCTL dispatch-hook comm; ToolHelp32 process enum; driver-backed UE4 actor/player reads; DirectX 9 ImGui overlay; README `[External]`) sit in the same out-of-process cheat / game:valorant lane for studying EFI-loaded external stacks under [[vanguard]]. (source: wiki/sources/descriptions/frankelitoc__UE4-c-.md)
 - Title-specific Thetan Arena SDKs such as [[thetan-arenasdk]] (rendering / audio / physics) illustrate the cheat / game:thetan lane. (source: wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md)
 - Title-specific The Finals internals such as [[the-finals-interior-cheat]] (C/C++; rendering / SDK generation / hooking; gmh5225) illustrate the in-process offensive research lane for cheat / game:the finals. (source: wiki/sources/descriptions/gmh5225__the-finals-interior-cheat.md)
