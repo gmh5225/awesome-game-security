@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ergrelet/unlicense`: entity [[unlicense]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[magicmida-rs]], [[tde]], [[themida-research]], and [[frida]].
+
 - **2026-08-15** — ingest `description:ergrelet/windiff`: entity [[windiff]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[diaphora]], [[binexport]], [[mssymbolscollection]], [[pdblister]], and [[ntsleuth]].
 
 - **2026-08-15** — ingest `description:erkkah/tigr`: entity [[tigr]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[olive-c]], [[kit]], [[paintfe]], and [[stb]].
