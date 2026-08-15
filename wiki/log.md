@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:repinek/fallguys-frida-modmenu`: entity [[fallguys-frida-modmenu]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[frida-il2cpp-bridge]], [[fall-guys-sharp]], and [[fall-guys]].
+
 - **2026-08-15** — ingest `description:rollingrock/bethesda-modding-starter`: entity [[bethesda-modding-starter]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[x64dbg]], and [[ghidra-headless-mcp]].
 
 - **2026-08-15** — ingest `readme:categories`: bumped Cheat ~2705 (was ~2703; Anti Cheat ~674 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).

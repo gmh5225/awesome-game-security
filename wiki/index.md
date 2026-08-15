@@ -693,6 +693,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FallGuys](entities/fall-guys.md) — Fall Guys kernel cheat (driver communication + memory manipulation; speed/fly/physics exploits; Unity; gmh5225)
 - [FallGuysSharp](entities/fall-guys-sharp.md) — Fall Guys C# IL2CPP cheat (managed injection; movement/gameplay mods; gmh5225)
+- [fallguys-frida-modmenu](entities/fallguys-frida-modmenu.md) — Fall Guys Android Frida mod menu (TypeScript; frida-il2cpp-bridge + frida-java-menu; Objection/APKEditor; repinek)
 - [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)
 - [FlyingGuys](entities/flying-guys.md) — Fall Guys kernel cheat (KdMapper custom driver + ImGui overlay; zlib network manipulation; gmh5225)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
