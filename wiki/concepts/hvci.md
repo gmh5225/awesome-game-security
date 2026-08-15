@@ -15,7 +15,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__ZeroHVCI.md
   - wiki/sources/descriptions/gmh5225__FakeEnclave.md
   - wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md
-updated: 2026-08-14
+  - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
+updated: 2026-08-15
 confidence: high
 ---
 
@@ -37,7 +38,7 @@ Early-boot / native-subsystem research such as [[bootbypass]] targets DSE and Me
 
 Operator tooling such as [[solemn]] automates adding drivers to the HVCI `HvciDisallowedImages` custom blocklist (Windows Security Features / Ring3 research lane). (source: wiki/sources/descriptions/unkvolism__Solemn.md)
 
-LOLdriver / vulnerable-driver inventory checks under HVCI appear in PowerShell research such as [[hvci-loldrivers-check]] (Trail of Bits; cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) General LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) cover the same inventory lane without an HVCI-specific framing. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
+LOLdriver / vulnerable-driver inventory checks under HVCI appear in PowerShell research such as [[hvci-loldrivers-check]] (Trail of Bits; cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) [[byovdfinder]] (ghostbyt3; identifies LOLdrivers not blocked by the active HVCI policy—BYOVD attack-path research under Memory Integrity) targets the same policy-gap inventory lane. (source: wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md) General LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) cover the same inventory lane without an HVCI-specific framing. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
 
 WDAC policy build/deploy tooling such as [[wdactools]] (PowerShell; base/supplemental CI policies, UMCI/WHQL/audit options, CIPolicyParser, CiTool.exe) helps study the user-mode side of the same code-integrity trust pipeline [[hvci]] enforces at the hypervisor. (source: wiki/sources/descriptions/mattifestation__WDACTools.md)
 
@@ -49,5 +50,5 @@ Lab teardown guides such as [[disabling-hyper-v]] (gmh5225; Win10; Microsoft's D
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 
