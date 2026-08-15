@@ -244,6 +244,7 @@ sources:
   - wiki/sources/descriptions/systemnb__compile_android_driver.md
   - wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md
   - wiki/sources/descriptions/gmh5225__AndroidDriveSignity.md
+  - wiki/sources/descriptions/gmh5225__AndroidCheatTemplate.md
   - wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md
   - wiki/sources/descriptions/systemnb__RootSocketKit.md
   - wiki/sources/descriptions/rogxo__kernel_hack.md
@@ -1273,6 +1274,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Out-of-tree Android kernel driver build/ABI automation such as [[compile-android-driver]] (kade / Kadeflow; GKI and non-GKI via `kadeflow.yaml`) sits in the Cheat Android kernel / driver lane. (source: wiki/sources/descriptions/systemnb__compile_android_driver.md)
 - GKI AArch64 Android kernel driver starter template such as [[android-kernel-driver-template]] (product/OEM kernel scaffold; cheat / Android kernel driver development) sits in the same Cheat Android kernel / driver lane. (source: wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md)
 - Android kernel driver signature bypass such as [[android-drivesignity]] (ARMv8.3; bypass built-in verification so unofficial/modified drivers can load for dev/test; cheat / Android kernel driver development) sits in that same lane. (source: wiki/sources/descriptions/gmh5225__AndroidDriveSignity.md)
+- Android cheat templates such as [[android-cheat-template]] (gmh5225 fork; C/C++; kernel-level work / OpenGL / memory analysis; cheat / game:sausage man) sit in the Cheat Android offensive scaffold lane beside Unity/OpenGL menu frameworks. (source: wiki/sources/descriptions/gmh5225__AndroidCheatTemplate.md)
 - Android aarch64 LKM research toolkits such as [[android-kernel-hacking-toolkit]] (filecopy / hideproc / propedit / syscall_hijack; CFI bypass, kprobes, mmuhack for `sys_call_table`) sit in the Cheat Android kernel / LKM lane. (source: wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md)
 - Android/Linux game-memory LKMs such as [[kernel-hack]] (kernel-mode R/W, process management, verification; Kconfig) sit in the same Cheat Android / Linux kernel memory-ops lane. (source: wiki/sources/descriptions/rogxo__kernel_hack.md)
 - Device kernel sources such as [[android-kernel-xiaomi-pipa]] (Xiaomi Pad 6 / pipa) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_xiaomi_pipa.md)

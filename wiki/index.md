@@ -146,7 +146,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [android-modmenu-semijni](entities/android-modmenu-semijni.md) — Android Java WindowManager + semi-JNI mod menu (native hooks; cheat / Menu for imgui)
 - [Android-Mod-Menu-Kotlin](entities/android-mod-menu-kotlin.md) — Android Kotlin floating-view + C++/JNI IL2CPP mod menu (cheat / IL2CPP Menu)
-- [AndroidCheatTemplate](entities/android-cheat-template.md) — Android Unity cheat framework (C/C++; OpenGL / Unity / hooking)
+- [AndroidCheatTemplate](entities/android-cheat-template.md) — Android cheat template (Unity/OpenGL/hooking + kernel/memory-analysis forks; sanqiuu + gmh5225)
 - [android-il2cpp-modspeed](entities/android-il2cpp-modspeed.md) — Android IL2CPP Unity Time speed hack (deltaTime/timeScale; C++)
 - [android-modding](entities/android-modding.md) — curated Android game modding repo collection (IL2CPP YuanShen dump fork; cheat/guide RE)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
