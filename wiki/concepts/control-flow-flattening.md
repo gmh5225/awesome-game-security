@@ -5,13 +5,14 @@ topics: [reverse-engineering, anti-cheat]
 sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/guheng-re__unflat.md
-updated: 2026-08-06
+  - wiki/sources/descriptions/es3n1n__obfuscator.md
+updated: 2026-08-15
 confidence: high
 ---
 
 # Control Flow Flattening
 
-**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[obscura]]). Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md)
+**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[obscura]]). Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md)
 
 ## Recovery approaches
 
@@ -26,4 +27,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[idadeflat]] · [[d810-ng]] · [[obpo-plugin]] · [[unflat]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[idadeflat]] · [[d810-ng]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
