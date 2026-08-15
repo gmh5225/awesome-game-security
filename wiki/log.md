@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:execnone/simple-cs-16-multihack`: entity [[simple-cs-16-multihack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[oxware]], [[hpp-hack]], [[cs16-client]], and [[regamedll-cs]].
+
 - **2026-08-15** — ingest `description:exjam/xbox360-emu`: entity [[xbox360-emu]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[xenia]], [[xenia-mac]], and [[recompiler]].
 
 - **2026-08-15** — ingest `description:experienceds/battleye-re`: entity [[battleye-re]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[bedaisy-bypass]], [[goodeye]], and [[battleye-region-walking]].

@@ -1755,6 +1755,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [StackSpoofer_Macro](entities/stack-spoofer-macro.md) — easy-to-use C/C++ macro for stack spoofing (gmh5225; Cheat Spoof Stack)
 - [speedfan-exploit](entities/speedfan-exploit.md) — SpeedFan `Speedfan.sys` BYOVD (IOCTL → physmem R/W; legacy monitoring-tool kernel exploitation; gmh5225)
 
+- [simple-cs-16-multihack](entities/simple-cs-16-multihack.md) — CS1.6 multihack (C/C++; asset pipelines + Unity + hooking; cheat / game:cs1.6; execnone)
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)
 - [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)
