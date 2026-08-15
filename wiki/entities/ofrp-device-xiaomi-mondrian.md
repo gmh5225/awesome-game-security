@@ -20,4 +20,4 @@ Relevant to Android game-security research on custom recovery / bootloader / ROM
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[cheese]] · [[move-certificate]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[device-xiaomi-mondrian]] · [[cheese]] · [[move-certificate]]
