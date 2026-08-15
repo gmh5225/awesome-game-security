@@ -4481,6 +4481,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 > Detection:Obfuscation
 - https://github.com/mrphrazer/obfuscation_detection
+- https://github.com/cognis-digital/packpeek [Static C CLI packer/loader fingerprinter for UPX, ASPack, Themida, VMProtect, and others; entropy scoring with YARA and SARIF output]
 
 > Detection:Android root
 - https://github.com/rushiranpise/detection [Collection of Various Root Detection Apps for Android]
