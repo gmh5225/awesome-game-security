@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Apex-ApexCheat`: entity [[apex-apex-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[apex-cheat-fixed]], [[apex-simple-aimbot-glow-apex]], [[apex-legends-sdk]], and [[apex-apex-cheese-test]].
+
 - **2026-08-15** — ingest `description:gmh5225/Apex-ApexCheeseTest`: entity [[apex-apex-cheese-test]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[apex-cheat-fixed]], [[apex-simple-aimbot-glow-apex]], [[apex-legends-sdk]], and [[kernel-csgo]].
 
 - **2026-08-15** — ingest `description:gmh5225/Apex-CHEAT-FIXED`: entity [[apex-cheat-fixed]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[apex-simple-aimbot-glow-apex]], [[apex-legends-sdk]], [[apex-esp-old-project]], [[apex-full-cheat]], and [[apexd3d-external]].

@@ -476,6 +476,7 @@ sources:
   - wiki/sources/descriptions/hadevn__apex_full_cheat.md
   - wiki/sources/descriptions/gmh5225__ayypex.md
   - wiki/sources/descriptions/gmh5225__apex_legends_sdk.md
+  - wiki/sources/descriptions/gmh5225__Apex-ApexCheat.md
   - wiki/sources/descriptions/gmh5225__Apex-ApexCheeseTest.md
   - wiki/sources/descriptions/gmh5225__Apex-CHEAT-FIXED.md
   - wiki/sources/descriptions/gmh5225__Apex_ESP_Old_Project.md
@@ -1428,6 +1429,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Apex Legends fixed-cheat samples such as [[apex-cheat-fixed]] (gmh5225; C/C++; driver development / modding / hooking; cheat / game:apex legends) sit in the same lane beside [[apex-simple-aimbot-glow-apex]] and [[apex-full-cheat]]. (source: wiki/sources/descriptions/gmh5225__Apex-CHEAT-FIXED.md)
 - Title-specific Apex Legends external ESP/aimbot/skinchanger samples such as [[apex-legends-external-esp-aimbot-skinchanger]] (gmh5225; C/C++; rendering / SDK generation / overlays; cheat / game:apex legends [External]) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex-Legends-External-Esp-Aimbot-Skinchanger.md)
 - Title-specific Apex Legends HWID spoofer samples such as [[apex-spoofer]] (gmh5225; kernel-level HWID-ban evasion; anti-cheat research / modding; cheat / HWID; game:apex legends under [[easy-anti-cheat]]) sit beside universal EAC spoofers such as [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]]. (source: wiki/sources/descriptions/gmh5225__Apex-Spoofer.md)
+- Title-specific Apex Legends hooking + memory-analysis samples such as [[apex-apex-cheat]] (gmh5225; C/C++; hooking / memory analysis; cheat / game:apex legends) sit in the same lane beside [[apex-cheat-fixed]] and [[apex-simple-aimbot-glow-apex]]. (source: wiki/sources/descriptions/gmh5225__Apex-ApexCheat.md)
 - Title-specific Apex Legends kernel–usermode communication samples such as [[apex-apex-cheese-test]] (gmh5225; C/C++; KM↔UM channel copied from UnknownCheats; anti-cheat research / driver development; cheat / game:apex legends) sit in the same lane beside [[apex-cheat-fixed]] and [[apex-simple-aimbot-glow-apex]]. (source: wiki/sources/descriptions/gmh5225__Apex-ApexCheeseTest.md)
 - Title-specific Blood Hunt cheat samples such as [[blood-hunt]] (C/C++; driver development / rendering / modding; cheat / game:bloodhunt; gmh5225) sit in the battle-royale offensive lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/gmh5225__blood-hunt.md)
 - Title-specific R6 chams samples such as [[r6-chams-public]] (Chameleon Models + visual check; educational; cheat / game:r6 [Chams]) illustrate the chams lane beside internals/externals. (source: wiki/sources/descriptions/igromanru__R6-Chams-public.md)
