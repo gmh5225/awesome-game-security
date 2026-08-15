@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ghidragolf/ghidra_scripts`: entity [[ghidra-scripts]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]].
+
 - **2026-08-15** — ingest `description:ghostbyt3/BYOVDFinder`: entity [[byovdfinder]]; cited on [[byovd]] and [[hvci]]; cross-linked [[loldrivers]], [[hvci-loldrivers-check]], and [[loldrivers-client]].
 
 - **2026-08-15** — ingest `description:gigbh/d-process`: entity [[d-process]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[anticheat-poc]], [[basic-anti-cheat]], [[mandibule]], and [[procmap]].

@@ -759,6 +759,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-bridge](entities/ghidra-bridge.md) — Python 3 bridge to Ghidra scripting (CPython outside Jython; external automation / gpt-wpre)
 - [ghidra-decompiler-plugins](entities/ghidra-decompiler-plugins.md) — runtime-loadable Ghidra decompiler plugins (Bazel; RISC-V vector Rules/Actions; datatest; embedded/firmware RE)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
+- [ghidra-scripts](entities/ghidra-scripts.md) — CTF-oriented GhidraScript collection (automated common RE challenge patterns; cheat / Scripts)
 - [ghiradec](entities/ghiradec.md) — programmatic Ghidra decompiler (integration or standalone; Ghidra analysis engine; automated binary analysis; Cheat Ghidra Decompiler)
 - [GhidrAssist](entities/ghidrassist.md) — Ghidra LLM extension (OpenAI v1-compatible APIs; local/cloud; cheat / Ghidra Plugins)
 - [ghidrassist-mcp](entities/ghidrassist-mcp.md) — Ghidra MCP extension (AI assistants / automation / scripts → Ghidra analysis APIs)
