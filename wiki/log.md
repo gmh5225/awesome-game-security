@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:enjoy-digital/litepcie`: entity [[litepcie]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech-fpga]], [[dma-pcie-board-75t]], and [[fpga-dma-multi-tool]].
+
 - **2026-08-15** — ingest `description:erfur/linjector-rs`: entity [[linjector-rs]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-virtual-inject]], and [[yaui]].
 
 - **2026-08-15** — ingest `description:ergrelet/dll-hot-reload`: entity [[dll-hot-reload]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[injectors]], [[positron]], and [[awesome-injection]].

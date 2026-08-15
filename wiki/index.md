@@ -1185,6 +1185,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [libmdmp](entities/libmdmp.md) — C/C++ minidump format library (memory analysis / debugging; AC / Windows kernel dump analysis)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
+- [LitePCIe](entities/litepcie.md) — Python/Migen PCIe endpoint core (DMA engines, LTSSM trace, user-space drivers; KC705/KCU105/XCU1525/Acorn; enjoy-digital; DMA / FPGA research)
 - [Lina Engine](entities/lina-engine.md) — cross-platform lightweight OSS 3D engine (LinaVG GUI; LinaGX Vulkan/DX12/Metal; Game Engine source)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
 - [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
