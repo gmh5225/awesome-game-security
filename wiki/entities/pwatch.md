@@ -12,7 +12,7 @@ confidence: medium
 
 Linux/Android **hardware breakpoint (HWBP)** tooling for watching a process without attaching a conventional debugger. Useful for game-security researchers and reverse engineers studying offensive techniques in the Cheat / debugging lane. (source: wiki/sources/descriptions/ri-char__pwatch.md)
 
-Complements Android memory-explorer work such as [[rwmem]] and non-attach Windows debug patterns such as [[veh]].
+Complements the C/C++ variant [[pwatch-c]] (enenH), Android memory-explorer work such as [[rwmem]], and non-attach Windows debug patterns such as [[veh]].
 
 ## Links
 
