@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `readme:categories`: bumped Cheat ~2702 (was ~2701; Anti Cheat ~671 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-15** — ingest `description:gmh5225/Apex-ApexCheat`: entity [[apex-apex-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[apex-cheat-fixed]], [[apex-simple-aimbot-glow-apex]], [[apex-legends-sdk]], and [[apex-apex-cheese-test]].
 
 - **2026-08-15** — ingest `description:gmh5225/Apex-ApexCheeseTest`: entity [[apex-apex-cheese-test]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[apex-cheat-fixed]], [[apex-simple-aimbot-glow-apex]], [[apex-legends-sdk]], and [[kernel-csgo]].
