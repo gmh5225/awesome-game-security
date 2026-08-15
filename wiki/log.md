@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:focus-creative-games/obfuz`: entity [[obfuz]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[obfuscar]], [[confuserex]], and [[usecurity]].
+
 - **2026-08-15** — ingest `description:forceinline/csgo-external-esp`: entity [[csgo-external-esp]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-external-cheat]], [[heck-csgo-external]], and [[astra]].
 
 - **2026-08-15** — ingest `description:forcequitOS/bad_query`: entity [[bad-query]]; cited on [[overviews/mobile-security]]; cross-linked [[darksword-kexploit-fun]], [[lara]], and [[lightsaber]].

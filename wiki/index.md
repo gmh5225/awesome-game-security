@@ -1370,6 +1370,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OAC](entities/oac.md) — Open Anti-Cheat demand-start framework (x64 kernel driver + user-mode client; ObCallbacks handle filtering, cross-view integrity checks, PiDDB/MmUnloadedDrivers forensics; lauralex)
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])
+- [Obfuz](entities/obfuz.md) — open-source Unity C# code obfuscation and protection (commercial game projects; Game Engine Protection:Unity)
 - [obfCoder](entities/obfcoder.md) — C++ source/binary obfuscation tool (CMake / OpenSSL demos; AC Obfuscation Engine)
 - [Obfuscar](entities/obfuscar.md) — open-source .NET assembly obfuscator (rename/string hide; AC Obfuscation Engine)
 - [obfuscation-analysis](entities/obfuscation-analysis.md) — Binary Ninja obfuscation analyze/simplify (MBA msynth / opaque-predicate dataflow / Z3 BNIL verify; Cheat Binary Ninja Plugins)
