@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gaasedelen/microavx`: entity [[microavx]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[genmc]] and [[happyida]].
+
 - **2026-08-15** — ingest `description:gabriellandau/ShadowStackWalk`: entity [[shadow-stack-walk]]; cited on [[stack-spoofing]] and [[overviews/anti-cheat]]; cross-linked [[query-shadow-stack]] and [[cet-research]].
 
 - **2026-08-15** — ingest `description:galaxyhaxz/devilution`: entity [[devilution]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[zelda3]] and [[gta-reversed-modern]].

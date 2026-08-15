@@ -1239,6 +1239,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [melonJS](entities/melonjs.md) — modern lightweight HTML5 game engine (ES6 classes; esbuild bundling; Game Engine / HTML5)
 - [meowsense](entities/meowsense.md) — free multi-game cheat research sample (Overwatch 2 focus; offensive techniques; gmh5225)
 - [Milfuscator](entities/milfuscator.md) — x32 PE mutator (full rebuild; Zydis + AsmJit; AC Obfuscation Engine)
+- [microavx](entities/microavx.md) — IDA Pro Hex-Rays AVX lifter (`m_ext`→microcode; AVX coverage scraper; cheat / IDA Plugins / AVX Lifter)
 - [minecpp](entities/minecpp.md) — C++ Minecraft Java server backend (1.19; protocol/offensive-technique RE; gmh5225)
 - [Minecraft AntiCheatAI](entities/minecraft-anticheatai.md) — DeepGuard Paper plugin (ONNX 1D-CNN scaffold detection; BehaviorRecorder + PyTorch training)
 - [Model Anti-Cheat](entities/model-anti-cheat.md) — DayZ server-side ML AC (mission telemetry logging, feature extraction, RandomForest aimbot/movement anomaly detection)

@@ -622,6 +622,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__IDA-MapSymbolParser.md
   - wiki/sources/descriptions/gmh5225__IDA-Pro-SigMaker.md
   - wiki/sources/descriptions/patois__genmc.md
+  - wiki/sources/descriptions/gaasedelen__microavx.md
   - wiki/sources/descriptions/ssmugabi__IDAPlugins.md
   - wiki/sources/descriptions/st4ckh0und__hook-buster.md
   - wiki/sources/descriptions/mike1k__HookHunter.md
@@ -1240,6 +1241,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
 - IDA database → linkable COFF/ELF object export via [[ida2obj]] (relocations, symbols, section content; binary patching / recompilation; gmh5225; cheat / COFF Relink) sits in the same Cheat IDA Plugins / binary-patch lane. (source: wiki/sources/descriptions/gmh5225__IDA2Obj.md)
 - Hex-Rays microcode IR display via [[genmc]] (IDAPython; debug microcode plugin / decompiler-extension work) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/patois__genmc.md)
+- Intel AVX→Hex-Rays microcode lifting via [[microavx]] (IDA Pro plugin; `m_ext` opcode visitor; decompiles AVX-heavy functions that otherwise show opaque ext nodes; companion scraper for coverage gaps; cheat / IDA Plugins / AVX Lifter) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gaasedelen__microavx.md)
 - Hex-Rays decompiler convenience utilities via [[happyida]] (IDAPython; Swift-style parameter labels, SEH try/catch reconstruction, vtable navigation, Rust string prettification; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gmh5225__HappyIDA.md)
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
 - Willi Ballenthin IDA Pro script/plugin/util collection via [[idawilli]] (Python IDAPython; function analysis, string decryption, struct annotation, xref navigation, workflow automation; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idawilli.md)
