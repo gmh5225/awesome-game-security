@@ -283,6 +283,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__neotty.md
   - wiki/sources/descriptions/termux__termux-app.md
   - wiki/sources/descriptions/jackpal__Android-Terminal-Emulator.md
+  - wiki/sources/descriptions/gmh5225__AdbFileManager.md
   - wiki/sources/descriptions/pgp__XFiles.md
   - wiki/sources/descriptions/nzcv__note.md
   - wiki/sources/descriptions/tangsilian__android-vuln.md
@@ -1315,6 +1316,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android native `.so` memory-loading tooling such as [[so-loader]] (C/C++; load/inject shared libs) sits in the Cheat Android memory loading lane beside ptrace/virtual injectors. (source: wiki/sources/descriptions/lockedbyte__so_loader.md) In-process ELF loaders such as [[mojoelf]] (load ELF from non-filesystem sources; alternative to `dlopen()`) sit in the same memory-loading lane. (source: wiki/sources/descriptions/icculus__mojoelf.md)
 - Android Terminal Emulator lane: [[termux-app]] (Termux; no-root Linux env / pkg+apt / proot), experimental Termux fork [[neotty]] (full Linux system usage; cheat / Android Terminal Emulator), and [[android-terminal-emulator]] (jackpal; VT-100 codes; built-in Android shell) for on-device CLI research. (source: wiki/sources/descriptions/termux__termux-app.md) (source: wiki/sources/descriptions/gmh5225__neotty.md) (source: wiki/sources/descriptions/jackpal__Android-Terminal-Emulator.md)
 - Rooted Android File Explorer [[xfiles]] (prebuilt APKs in Releases) sits in the Cheat Android File Explorer lane. (source: wiki/sources/descriptions/pgp__XFiles.md)
+- Windows ADB file manager [[adb-file-manager]] (gmh5225; C#/.NET dual-pane Explorer UI; faster transfers than MTP; multi-language) sits in the same Cheat Android File Explorer lane for PC-side pull/push over ADB. (source: wiki/sources/descriptions/gmh5225__AdbFileManager.md)
 - Chinese Android File Explorer guide [[note]] (`Guide-zh` documentation/reference) sits in the same Cheat Android File Explorer lane. (source: wiki/sources/descriptions/nzcv__note.md)
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
 - iOS 15 untethered jailbreak implementations such as [[ios-jailbreak-fugu15]] (gmh5225; Fugu15 kernel exploit chain → root, codesign bypass, arbitrary code execution; cheat / iOS jailbreak) sit in the same Cheat / iOS jailbreak privilege lane beside [[dopamine]] and [[palera1n]]. (source: wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md)
