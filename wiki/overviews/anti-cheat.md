@@ -410,6 +410,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Malicious-code-detection-bugu.md
   - wiki/sources/descriptions/gmh5225__Mandragora.md
   - wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md
+  - wiki/sources/descriptions/gmh5225__AntiCheat.md
   - wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md
   - wiki/sources/descriptions/gmh5225__memory-relocalloc.md
   - wiki/sources/descriptions/gmh5225__Kernel-VAD-Injector.md
@@ -568,6 +569,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
+- [[anticheat]] — C/C++ reference AC implementation (process integrity, module scan, memory pattern detection, debugger detection, overlay monitoring, driver comm for kernel checks; gmh5225; Open Source Anti Cheat System) (source: wiki/sources/descriptions/gmh5225__AntiCheat.md)
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
 - [[antidebugandmemorydump]] — Android anti-debug + memory analysis / emulation / debugging reference (Java + C/C++; Anti Debugging lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebugandMemoryDump.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
