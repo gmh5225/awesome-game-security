@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:everdox/InfinityHook`: entity [[infinityhook]]; cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[etwhook-infinityhookclass]], [[etw-syscall]], [[etw-syscall-monitor]], and [[patchguard]].
+
 - **2026-08-15** — ingest `description:everdox/ermsb-meme`: entity [[ermsb-meme]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[ept-hook-detection]], [[hypervisor-detection]], [[ophion]], and [[hypervisor]].
 
 - **2026-08-15** — ingest `description:eversinc33/1.6_C2`: entity [[1-6-c2]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[oxware]], [[hpp-hack]], [[simple-cs-16-multihack]], [[cs16-client]], and [[regamedll-cs]].
