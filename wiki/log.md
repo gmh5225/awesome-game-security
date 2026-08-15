@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Alcatraz`: updated entity [[alcatraz]] (gmh5225 listing alongside weak1337); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
+
 - **2026-08-15** — ingest `description:gmh5225/Allocating-individual-pages`: entity [[allocating-individual-pages]]; cited on [[overviews/windows-kernel]] and [[concepts/kernel-pool-scanning]]; cross-linked [[map-file-in-system-space]], [[nullmap]], and [[rtcore64-vulnerability]].
 
 - **2026-08-15** — ingest `description:gmh5225/Android-DLL-Injector`: entity [[android-dll-injector]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-mod-games-by-inject-zygote]], and [[so-loader]].

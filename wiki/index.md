@@ -101,7 +101,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [amd-ryzen-master-driver-v17-exploit](entities/amd-ryzen-master-driver-v17-exploit.md) — AMD Ryzen Master v17 driver BYOVD (IOCTL → physmem R/W; kernel exploitation / driver map / AC bypass; gmh5225)
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
-- [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui)
+- [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui; AC/obfuscation-engine research)
 - [Allocating individual pages](entities/allocating-individual-pages.md) — `MmAllocateIndependentPagesEx` isolated kernel page alloc (stealth manual-map; pool-tag evasion; gmh5225)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [apple-lite-fortnite-cheat](entities/apple-lite-fortnite-cheat.md) — Apple Lite Fortnite Cheat leak + Police remake (C/C++; kernel + shader + modding; gmh5225; cheat / game:fortnite)
