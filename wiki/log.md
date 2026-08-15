@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:experienceds/battleye-re`: entity [[battleye-re]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[bedaisy-bypass]], [[goodeye]], and [[battleye-region-walking]].
+
 - **2026-08-15** — ingest `description:experienceds/pubg-p2c-re`: entity [[pubg-p2c-re]]; cited on [[overviews/game-hacking]] and [[battleye]]; cross-linked [[pubg-external-cheat]], [[dwm-dwmdraw]], and [[vmprotect]].
 
 - **2026-08-15** — ingest `description:exploits-forsale/collateral-damage`: entity [[collateral-damage]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[xenia]], [[xemu]], [[xqemu]], and [[recompiler]].

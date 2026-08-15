@@ -78,6 +78,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BepInEx-IL2CPPBase](entities/bepinex-il2cppbase.md) — BepInEx Unity IL2CPP mod-menu base (C# rendering/audio/physics hooks; cheat / IL2CPP Menu; gmh5225)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
 - [Battleye Shellcode Dumper](entities/battleye-shellcode-dumper.md) — intercept BE server-streamed runtime shellcode + keys pre-execution (BEClient2.dll Dumper)
+- [battleye-re](entities/battleye-re.md) — BEDaisy.sys RE reference (IOCTL/API/anti-DMA; PE layout, HAL verify, VM obfuscation; experienceds)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
 - [battle-cats-complete](entities/battle-cats-complete.md) — Battle Cats Rust desktop toolkit (.pack/APK import, decrypt/extract, animation render/export, mod authoring; omochikaeri15)
