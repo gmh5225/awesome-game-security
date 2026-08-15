@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/-Modern-Warfare-Warzone-Cheat`: entity [[modern-warfare-warzone-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-internal-cheat]], [[mwclap]], and [[ricochet-disabler]].
+
 - **2026-08-15** — ingest `description:gmh5225/-Rainbow---EFI`: entity [[rainbow-efi]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[driver-efi-bootkit]], [[bootlicker]], and [[hwid-kernel-spoofer]].
 
 - **2026-08-15** — ingest `description:gmh5225/A146B-KSU`: entity [[a146b-ksu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[android-kernel-samsung-sm7150]], and [[knoxpatch]].

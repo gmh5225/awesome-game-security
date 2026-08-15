@@ -1255,6 +1255,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mwclap](entities/mwclap.md) — COD Warzone NVIDIA GeForce Experience overlay hijack (cheat / game:cod warzone)
 - [call-of-duty-vanguard-hack-esp-aimbot-unlock-all](entities/call-of-duty-vanguard-hack-esp-aimbot-unlock-all.md) — COD Vanguard/Warzone external: Win32 RPM + DirectX overlay; ESP / aimbot / unlock-all (gmh5225; cheat / game:cod vanguard [External])
 - [call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all](entities/call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all.md) — COD Warzone external: C# Win32 RPM + overlay; ESP / silent aimbot / unlock-all (gmh5225; cheat / game:cod warzone [External])
+- [modern-warfare-warzone-cheat](entities/modern-warfare-warzone-cheat.md) — COD Modern Warfare/Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [warzone-internal-cheat](entities/warzone-internal-cheat.md) — COD Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [mtasa-blue](entities/mtasa-blue.md) — MTA:SA GTA:SA multiplayer mod (C++/Lua; D3D/DInput hooks; CEF; built-in AC)
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)

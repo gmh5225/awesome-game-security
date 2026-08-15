@@ -12,7 +12,7 @@ confidence: medium
 
 COD Warzone **internal** cheat research repo (C/C++) centered on rendering, modding, and hooking. Framed for game security researchers and reverse engineers studying in-process offensive techniques in the cheat / game:cod warzone lane. (source: wiki/sources/descriptions/gmh5225__Warzone-internal-Cheat.md)
 
-Sits beside [[mwclap]] and [[nvidia-overlay-hijack]] in the per-title COD Warzone research lane, but as an in-process internal scaffold (rendering / hooking) rather than third-party NVIDIA overlay hijack samples.
+Sits beside [[modern-warfare-warzone-cheat]], [[mwclap]], and [[nvidia-overlay-hijack]] in the per-title COD Warzone research lane, but as an in-process internal scaffold (rendering / hooking) rather than third-party NVIDIA overlay hijack samples.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside [[mwclap]] and [[nvidia-overlay-hijack]] in the per-title COD Warzon
 
 ## Related
 
-[[mwclap]] · [[nvidia-overlay-hijack]] · [[present-hook]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[modern-warfare-warzone-cheat]] · [[mwclap]] · [[nvidia-overlay-hijack]] · [[present-hook]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
