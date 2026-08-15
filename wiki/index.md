@@ -1403,6 +1403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
 - [OfflineCrashDumpUefi](entities/offline-crash-dump-uefi.md) — Microsoft EDK2 Offline Crash Dump package (firmware pre-OS memory dump; DXE writer; encryption/redaction; gmh5225)
 - [offsets](entities/offsets.md) — C++ CS:GO offset dump (`[Offset]`; cheat / game:csgo)
+- [ohack](entities/ohack.md) — open-source WoW hack (fail46; C++; memory analysis; cheat / game:wow)
 - [OffsetStreaming](entities/offset-streaming.md) — simple C/C++ program to stream game offsets to cheat clients (Some Tricks / Windows Ring3; gmh5225)
 - [Olive.c](entities/olive-c.md) — single-header C 2D soft-raster (lines/tris/circles/text; Image Codec)
 - [OMath](entities/omath.md) — C++23 constexpr math/physics (W2S / projectile / GJK; Mathematics)

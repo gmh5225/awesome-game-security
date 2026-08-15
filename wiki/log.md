@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fail46/OHack`: entity [[ohack]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[dumpwow]], [[wow-iat-fix]], and [[x14-08-coverstory-blizzard]].
+
 - **2026-08-15** — ingest `description:farazsth98/poc-CVE-2025-38352`: entity [[poc-cve-2025-38352]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[cve-2026-64560-analysis]] and [[android-vuln]].
 
 - **2026-08-15** — ingest `description:fatalSec/DaliVM`: entity [[dalivm]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dalvikus]], [[jadx]], and [[rnidbg]].
