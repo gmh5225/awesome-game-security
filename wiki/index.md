@@ -1248,6 +1248,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)
 - [mcp-gdb](entities/mcp-gdb.md) — GDB MCP server (breakpoints / memory / registers / step; AI debug)
 - [mcp-safety-scanner](entities/mcp-safety-scanner.md) — automated MCP safety auditing + remediation via agents (Game Develop / MCP security)
+- [mcp-server-idapro](entities/mcp-server-idapro.md) — MCP for IDA Pro (AI-assistant bridge to disassembler/debugger; Game Develop / MCP)
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
 - [mcpup](entities/mcpup.md) — MCP server lifecycle manager (discover/install/configure/run; Unity AI-assisted dev; Game Develop / MCP for unity; gmh5225)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)

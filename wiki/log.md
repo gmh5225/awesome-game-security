@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fdrechsler/mcp-server-idapro`: entity [[mcp-server-idapro]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ida-mcp-server-plugin]], and [[iida-mcp]].
+
 - **2026-08-15** — ingest `description:fedes1to/Zygisk-ImGui-Menu`: entity [[zygisk-imgui-menu]]; cited on [[zygisk]] and [[overviews/mobile-security]]; cross-linked [[zygisk-imgui-mod-menu]] and [[zygisk-imgui-modmenu]].
 
 - **2026-08-15** — ingest `description:felix-pb/kfd`: entity [[kfd]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[kfd-explorer]].
