@@ -992,6 +992,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IdaThemer](entities/ida-themer.md) — VS Code theme JSON → IDA Pro color theme converter (Long Night/Celestial base; cheat / IDA themes; gmh5225)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [ida-vmware-windows-gdb](entities/ida-vmware-windows-gdb.md) — IDA Pro + VMware GDB stub Windows kernel debugging guide (live breakpoints/memory/step; cheat / guide)
+- [ida-wakatime-py](entities/ida-wakatime-py.md) — IDA Pro WakaTime plugin (Python; background heartbeats; tracks analyzed binaries and RE session time; es3n1n; cheat / IDA Plugins)
 - [idac](entities/idac.md) — Trail of Bits IDA Pro CLI/client (Unix socket → GUI/idalib; JSON; agents; not MCP)
 - [IDACode](entities/idacode.md) — IDA Pro ↔ VS Code bridge (execute/debug IDAPython from editor; early alpha; cheat / IDA Plugins)
 - [IdaClu](entities/idaclu.md) — IDA Pro plugin: cluster/group similar functions in large binaries (Qt GUI; i18n; visual navigation; cheat / IDA Plugins)

@@ -703,6 +703,7 @@ sources:
   - wiki/sources/descriptions/signal-slot__mcp-gdb.md
   - wiki/sources/descriptions/sevaa__dwex.md
   - wiki/sources/descriptions/serjam__mwclap.md
+  - wiki/sources/descriptions/es3n1n__ida-wakatime-py.md
   - wiki/sources/descriptions/es3n1n__nvidia-overlay-renderer.md
   - wiki/sources/descriptions/gmh5225__NVIDIA-OVERLAY.md
   - wiki/sources/descriptions/gmh5225__nvidia-overlay-hijack.md
@@ -1272,6 +1273,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Third-party Lumina server connectivity via [[openlumina]] (IDA plugin; Hex-Rays `.crt` into IDA install dir) sits in the Cheat IDA Plugins / Lumina lane. (source: wiki/sources/descriptions/tomrus88__OpenLumina.md)
 - IDAPython convenience via [[sark]] (“IDAPython Made Easy”; older-IDA support on IDA-6.x) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/tmr232__Sark.md)
 - Parallel IDA worker offload via [[ida-taskr]] (Python; Qt + multiprocessing; keeps UI responsive during heavy IDAPython jobs; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/mahmoudimus__ida-taskr.md)
+- WakaTime RE session tracking in IDA via [[ida-wakatime-py]] (Python; background heartbeats report analyzed binaries and time-on-task to WakaTime; es3n1n; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / productivity lane. (source: wiki/sources/descriptions/es3n1n__ida-wakatime-py.md)
 - Rust symbol demangle/normalize in IDA via [[ida-rust-demangler]] (`rs-dml`-backed) also sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/timetravelthree__IDARustDemangler.md)
 - Rust Cargo dependency display in IDA via [[ida-rust-cargo]] (Python plugin; cheat / IDA Plugins) sits in the same lane. (source: wiki/sources/descriptions/kkent030315__IDARustCargo.md)
 - Cross-platform Itanium/MSVC (+ D/Rust/Swift) symbol demangling via [[demumble]] (`c++filt` / `undname.exe` replacement) sits in the Cheat RE Tools lane. (source: wiki/sources/descriptions/nico__demumble.md)
