@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Alaa-8ball-pool-source-exposed`: entity [[alaa-8ball-pool-source-exposed]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-mod-menu-imgui]], [[external-imgui-android]], and [[world-to-screen]].
+
 - **2026-08-15** — ingest `description:gmh5225/Alcatraz`: updated entity [[alcatraz]] (gmh5225 listing alongside weak1337); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]].
 
 - **2026-08-15** — ingest `description:gmh5225/Allocating-individual-pages`: entity [[allocating-individual-pages]]; cited on [[overviews/windows-kernel]] and [[concepts/kernel-pool-scanning]]; cross-linked [[map-file-in-system-space]], [[nullmap]], and [[rtcore64-vulnerability]].

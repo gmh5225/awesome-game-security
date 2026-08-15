@@ -150,6 +150,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__CS2-External-1.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat.md
   - wiki/sources/descriptions/gmh5225__CS2-Cheat-Base.md
+  - wiki/sources/descriptions/gmh5225__Alaa-8ball-pool-source-exposed.md
   - wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md
   - wiki/sources/descriptions/gmh5225__Astra.md
   - wiki/sources/descriptions/gmh5225__Ark.md
@@ -983,7 +984,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 | Category | Examples | Notes |
 |----------|----------|-------|
 | Visual (ESP) | Box/skeleton ESP, radar, item highlight | Needs [[world-to-screen]] + entity lists or vision models |
-| Aim assistance | Memory aimbot, triggerbot, silent aim, no-recoil | Server-side replay targets memory-based paths; see [[ai-aimbot-detection]] for CV pipelines |
+| Aim assistance | Memory aimbot, triggerbot, silent aim, no-recoil, physics-derived shot guides | Server-side replay targets memory-based paths; see [[ai-aimbot-detection]] for CV pipelines; billiard titles may expose trajectory from physics reads such as [[alaa-8ball-pool-source-exposed]] (source: wiki/sources/descriptions/gmh5225__Alaa-8ball-pool-source-exposed.md) |
 | AI visual | OBS/YOLO capture → HID output | May avoid process attach; capture, model, and input artifacts remain |
 | Movement | Speedhack, fly, noclip, bhop scripts | Often server-authoritative or physics-constrained |
 | Misc | Wallhack, skin changer, economy edits | Mix of client-only and networked state |
