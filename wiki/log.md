@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:eltavine/Duck-Detector-Refactoring`: entity [[duck-detector-refactoring]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[detection]], [[android-native-root-detector]], and [[keyattestation]].
+
 - **2026-08-15** — ingest `description:emanuele-f/PCAPdroid`: entity [[pcapdroid]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[peetch]], [[lamda]], and [[android-proxy-mcp]].
 
 - **2026-08-15** — ingest `description:emilyinure/solace-csgo`: entity [[solace-csgo]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-internal-base]], [[aqhax-csgo]], and [[csgo-alphen]].
