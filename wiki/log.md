@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/AntiDebug-AntiVM`: entity [[antidebug-antivm]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[vmaware]], [[makin]], and [[blackhat2012]].
+
 - **2026-08-15** — ingest `description:gmh5225/AntiDebugandMemoryDump`: entity [[antidebugandmemorydump]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[anticheat-android-cheap-engine]], [[memdumper]], and [[mobile-anti-cheat]].
 
 - **2026-08-15** — ingest `description:gmh5225/AntiKernelDebug-POC`: entity [[anti-kernel-debug-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[letme-gg]], [[nokd]], and [[windows-kernel-debugging-guide]].
