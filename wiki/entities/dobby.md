@@ -18,4 +18,4 @@ Lightweight, multi-platform, multi-architecture hook framework in C/C++. Centers
 
 ## Related
 
-[[polyhook]] · [[polyhook-2-0]] · [[plthook]] · [[detoursnt]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/mobile-security]]
+[[polyhook]] · [[polyhook-2-0]] · [[plthook]] · [[detoursnt]] · [[qbdi-tracer-android]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/mobile-security]]

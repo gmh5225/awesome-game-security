@@ -637,6 +637,7 @@ sources:
   - wiki/sources/descriptions/index-login__MobileRE-Skill.md
   - wiki/sources/descriptions/google__android-classyshark.md
   - wiki/sources/descriptions/gmh5225__PUBGSTAR.md
+  - wiki/sources/descriptions/g2wfw__qbdi-tracer-android.md
 updated: 2026-08-15
 confidence: high
 ---
@@ -661,7 +662,7 @@ Engine-specific paths: Unity ([[il2cpp]] / Mono via dnSpy), Unreal (SDK generato
 
 ## Dynamic binary instrumentation
 
-Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy. Google Project Zero **TinyInst** (C/C++; lightweight module-selective DBI; hooking / debugging) sits in that lightweight instrumentation lane. (source: wiki/sources/descriptions/googleprojectzero__TinyInst.md)
+Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — support API hooking, coverage, fuzz harnesses, and driver IOCTL/callback tracing. See [[dynamic-binary-instrumentation]] for the full taxonomy. Android ARM64 per-instruction native tracing via [[qbdi-tracer-android]] (QBDI + [[dobby]]; linker SO-load intercept, backtrace + memory/pattern utilities; CMake Android/iOS/ARM64; cheat / assembly instruction tracing). (source: wiki/sources/descriptions/g2wfw__qbdi-tracer-android.md) Google Project Zero **TinyInst** (C/C++; lightweight module-selective DBI; hooking / debugging) sits in that lightweight instrumentation lane. (source: wiki/sources/descriptions/googleprojectzero__TinyInst.md)
 
 **Trap-and-emulate control-flow tracing (CFT):** patch branch sites with fault-generating sentinels (e.g. HLT/SALC, avoiding INT3 integrity scans), catch exceptions, emulate the original branch, log context, restore, and continue. Strategies range from bounded bulk patching (simple, integrity-detectable) through branch chasing and CFG-guided patching (better coverage/safety tradeoff). PAGE_GUARD + trap-flag single-steping avoids direct `.text` patches but remains timing- and guard-state detectable. Illustrative corpus: [[cpp-veh-dbi]], [[w1tn3ss]].
 

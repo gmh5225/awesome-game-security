@@ -1538,6 +1538,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
 - [q3vm](entities/q3vm.md) — Quake III embeddable `.qvm` bytecode VM + LCC compiler (AC dynamic-script prototyping)
+- [qbdi-tracer-android](entities/qbdi-tracer-android.md) — Android QBDI + Dobby per-instruction native tracer (linker SO-load hooks, backtrace, memory/pattern scan; ARM64 Android/iOS)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
 - [qemu-patched](entities/qemu-patched.md) — Hidden QEMU fork (CPUID / SMBIOS / ACPI anti-VM spoof)
 - [qemu-gvm](entities/qemu-gvm.md) — QEMU (AMD/Intel; Android emulator research)
