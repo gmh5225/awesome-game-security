@@ -885,6 +885,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [Horizon Engine](entities/horizon-engine.md) — Windows 3D rendering engine (D3D12 / Vulkan / Metal; Game Engine source)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
+- [Huan](entities/huan.md) — encrypted PE loader generator (per-run keys; payload in new loader section; PE structure/loading study; Anti Cheat → Binary Packer; frkngksl)
 - [HydraHook](entities/hydrahook.md) — DX9–12 API-hook + overlay framework (Detours; ImGui/DirectXTK/OpenCV samples)
 - [Hyara](entities/hyara.md) — multi-platform YARA rule generation (IDA Pro, Ghidra, Binary Ninja, Cutter; cheat / Yara)
 - [HumanMouseMovement](entities/human-mouse-movement.md) — human-like mouse movement (C/C++; cheat / triggerbot & aimbot)

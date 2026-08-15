@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:frkngksl/Huan`: entity [[huan]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[packer-tutorial]], [[atom-pe-packer]], and [[tinyload]].
+
 - **2026-08-15** — ingest `description:frkngksl/NimicStack`: entity [[nimic-stack]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[silent-moonwalk]] and [[callstackspoofer-2]].
 
 - **2026-08-15** — ingest `description:frkngksl/Shoggoth`: entity [[shoggoth]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[shellcode-factory]], [[shellcode-entropyfix]], and [[byvalver]].
