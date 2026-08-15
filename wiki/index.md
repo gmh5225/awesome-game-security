@@ -100,6 +100,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AMD IBS Toolkit](entities/amd-ibs-toolkit.md) — AMD Instruction-Based Sampling toolkit (hardware instruction subset sampling; cheat / Windows kernel explorer / AMD Sampling)
 - [amd-ryzen-master-driver-v17-exploit](entities/amd-ryzen-master-driver-v17-exploit.md) — AMD Ryzen Master v17 driver BYOVD (IOCTL → physmem R/W; kernel exploitation / driver map / AC bypass; gmh5225)
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
+- [AetherVisor](entities/aether-visor.md) — AMD SVM hacked-hypervisor testing (feature implementation walkthrough; Detection: Hacked Hypervisor Testing AMD; gmh5225)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
 - [Akebi Cheat 3.3](entities/akebi-cheat-3.3.md) — Akebi-framework Genshin Impact cheat (3.3 branch; cheat / game:genshin impact; gmh5225)
 - [Akebi Packet Sniffer](entities/akebi-packet-sniffer.md) — Akebi-framework packet sniffer (C++/C; driver development; DirectX/OpenGL; cheat / Packet Sniffer&Filter; gmh5225)

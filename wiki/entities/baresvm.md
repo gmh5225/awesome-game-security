@@ -12,7 +12,7 @@ confidence: medium
 
 Rust research project for hacked hypervisor testing on AMD (AMD-V / SVM). Aimed at anti-cheat engineers and defensive researchers stressing virtualization-abuse surfaces under `Detection: Hacked Hypervisor`—not a production AC component. (source: wiki/sources/descriptions/valium007__BareSVM.md)
 
-Complements Intel VT-x construction / stealth stacks such as [[hv]] and [[ophion]], hacked-hypervisor stress tooling such as [[vt-debuuger]], and detectors such as [[hypervisor-detection]] / [[checkhv-um]].
+Complements sibling AMD SVM stress tooling such as [[aether-visor]], Intel VT-x construction / stealth stacks such as [[hv]] and [[ophion]], hacked-hypervisor stress tooling such as [[vt-debuuger]], and detectors such as [[hypervisor-detection]] / [[checkhv-um]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements Intel VT-x construction / stealth stacks such as [[hv]] and [[ophion
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[hv]] · [[ophion]] · [[vt-debuuger]] · [[hypervisor-detection]] · [[checkhv-um]] · [[hvci]]
+[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[hv]] · [[ophion]] · [[aether-visor]] · [[vt-debuuger]] · [[hypervisor-detection]] · [[checkhv-um]] · [[hvci]]
