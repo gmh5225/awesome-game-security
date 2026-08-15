@@ -1907,6 +1907,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [underthehoodofexecutables](entities/underthehoodofexecutables.md) — C source→binary guide: linking, loading, executable formats (cheat/guide + AC engineer primer)
 - [unflat](entities/unflat.md) — Python unflattener; plugin development (Fix OLLVM / CFF recovery)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
+- [unkover](entities/unkover.md) — hidden kernel-thread/rootkit scanner (scheduler/PspCidTable/stack cross-ref; NMI/APC mapped-driver detection; eversinc33)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
