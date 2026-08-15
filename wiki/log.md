@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:erfur/linjector-rs`: entity [[linjector-rs]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-virtual-inject]], and [[yaui]].
+
 - **2026-08-15** — ingest `description:ergrelet/dll-hot-reload`: entity [[dll-hot-reload]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[injectors]], [[positron]], and [[awesome-injection]].
 
 - **2026-08-15** — ingest `description:ergrelet/themida-spotter-bn`: entity [[themida-spotter-bn]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[themida-unmutate]], [[unlicense]], [[triton-bn]], [[themida-research]], and [[tde]].
