@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fvrmatteo/DrillAndJoin`: entity [[drill-and-join]]; cited on [[overviews/reverse-engineering]] and [[mixed-boolean-arithmetic]]; cross-linked [[cobra]], [[qsynthesis]], and [[r2smt]].
+
 - **2026-08-15** — ingest `description:fynks/awesome-android-root`: entity [[awesome-android-root]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magisk]], [[kernelsu]], and [[android-rom-list]].
 
 - **2026-08-15** — ingest `description:g2wfw/qbdi-tracer-android`: entity [[qbdi-tracer-android]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dobby]] and [[dynamic-binary-instrumentation]].

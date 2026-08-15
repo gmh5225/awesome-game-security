@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/QSynthesis/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -528,6 +528,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Driver-WatchOwl](entities/driver-watchowl.md) — defensive KM driver; load-image + thread notify; stack-trace validation of suspicious user-mode mapping (gmh5225; ImageNotify+Stack Trace)
 - [DriverBuddyReloaded](entities/driver-buddy-reloaded.md) — IDA Pro plugin: Windows kernel driver RE (IOCTL dispatch, IRP handlers, vulnerable-driver patterns, WDM structure annotations; gmh5225; Windows Kernel Analysis)
 - [dragonhook](entities/dragonhook.md) — Ghidra↔Frida static+dynamic bridge (localhost HTTP GhidraDB API; runtime indirect-call resolution, live xref/comment sync, symbol backtraces, call tracing; mitros123; cheat / Ghidra Plugins)
+- [DrillAndJoin](entities/drill-and-join.md) — C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (gmh5225 fork + narumii; ProGuard/Allatori/ZKM passes; cheat / RE tools)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
