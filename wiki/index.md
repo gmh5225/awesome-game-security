@@ -272,6 +272,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
 - [BLOCKPOST-Cheat](entities/blockpost-cheat.md) — BLOCKPOST Unity IL2CPP cheat (C/C++; IL2CPP analysis + native hooking; cheat / game:blockpost; gmh5225)
 - [blood-hunt](entities/blood-hunt.md) — Blood Hunt cheat (C/C++; driver / rendering / modding; cheat / game:bloodhunt; gmh5225)
+- [blitz](entities/blitz.md) — header-only UM lazy import resolver with direct calls (C++; Anti Cheat / Lazy Importer; emlinhax)
 - [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
 - [bndb2pat](entities/bndb2pat.md) — Binary Ninja plugin: IDA FLIRT `.pat` patterns from LLIL (wildcard masks, CRC16; sigmake → `.sig`; joren485)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
