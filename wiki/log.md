@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:evild3ad/MemProcFS-Analyzer`: entity [[memprocfs-analyzer]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pcileech]], [[volatility3]], and [[volatility]].
+
 - **2026-08-15** — ingest `description:evyatar9/GptHidra`: entity [[gpthidra]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidrassist]], [[ghidra-openai]], and [[research-rigor]].
 
 - **2026-08-15** — ingest `description:ex0dus-0x/fuzzable`: entity [[fuzzable]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[winafl]], [[qemu-nyx]], and [[binary-ninja-mcp]].

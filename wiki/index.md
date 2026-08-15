@@ -1269,6 +1269,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
 - [mempeek](entities/mempeek.md) — Linux CLI live memory inspector (`/proc/pid/mem`; CE-style scan filters; libprocmem maps; rustyline REPL; cheat / Linux memory explorer)
 - [MemoryGuard](entities/memory-guard.md) — Windows memory-protection library (`PAGE_GUARD` / VEH / periodic integrity checks; alert or revert tampering; gmh5225; Anti Cheat → Page Protection)
+- [MemProcFS-Analyzer](entities/memprocfs-analyzer.md) — PowerShell MemProcFS forensic framework (processes/network/registry/event logs/browser/malware; HTML reports; VirusTotal TI; IS forensics)
 - [memory-relocalloc](entities/memory-relocalloc.md) — PE `.reloc`-backed allocation hiding (Windows/Android; evade AC heap/VAS memory scanners; gmh5225)
 - [memory-server](entities/memory-server.md) — jailbroken iOS REST memory scanner (Rust HTTP port 3030; process enum/read/pattern scan; Python PC client; cheat / iOS memory explorer; gmh5225)
 - [MemWars](entities/memwars.md) — Windows memory-analysis / process-manipulation C++ library (scan / pattern search / module enum / injection / memory edit; Testing Framework; gmh5225)
