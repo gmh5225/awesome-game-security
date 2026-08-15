@@ -79,6 +79,7 @@ sources:
   - wiki/sources/descriptions/fail46__OHack.md
   - wiki/sources/descriptions/fksvs__inject.md
   - wiki/sources/descriptions/fmagin__ghidra-openai.md
+  - wiki/sources/descriptions/evyatar9__GptHidra.md
   - wiki/sources/descriptions/fortra__hw-call-stack.md
   - wiki/sources/descriptions/frkngksl__NimicStack.md
   - wiki/sources/descriptions/gcarmix__HexWalk.md
@@ -1258,6 +1259,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Dynamic IDA→LLVM IR binary lifting via [[ida2llvm]] (cursor-sync liftability viewer in the disassembly window; cheat / IDA Plugins) sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
+- ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)
 - LLM-based reversing for radare2 via [[r2ai]] (interactive LLM↔r2 sessions for game/security binaries) sits in the Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2ai.md)
 - Retired radare2 local-LLM catalog pointer [[r2a]] (GitHub URL gone; successor [[r2ai]]) sits in the same Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2a.md)
 - Lua IDA SDK scripting via [[luda]] (direct SDK access from Lua; rapid RE automation) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/stolevchristian__LUDA.md)
