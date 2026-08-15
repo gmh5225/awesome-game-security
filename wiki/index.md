@@ -1374,6 +1374,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nvidia-GPU-Spoof](entities/nvidia-gpu-spoof.md) — NVIDIA GPU UUID spoof via `nvlddmkm.sys` (Cheat HWID)
 - [NVIDIA Overlay](entities/nvidia-overlay.md) — GeForce Experience overlay DirectX hijack (trusted-process rendering; anti-cheat overlay evasion; gmh5225)
 - [nvidia-overlay-hijack](entities/nvidia-overlay-hijack.md) — GeForce Experience overlay render-context hijack (ESP/menu; no new overlay windows; gmh5225)
+- [nvidia-overlay-renderer](entities/nvidia-overlay-renderer.md) — GeForce Experience overlay ImGui/ESP renderer (trusted overlay surface hijack; no new overlay HWNDs; es3n1n; README [Nvidia])
 - [nvdrv](entities/nvdrv.md) — NVIDIA kernel-driver physmem BYOVD library (IOCTL → physical R/W; driver map / kernel patch / AC bypass; nvaudio.sys; gmh5225)
 - [nv-graphics-mesa](entities/nv-graphics-mesa.md) — read-only Mesa 3D mirror (OpenGL/Vulkan reference implementation; 3D Graphics; gmh5225)
 - [NMI Callback](entities/nmi-callback.md) — C/C++ kernel NMI callback driver research (Detection: Hacked Hypervisor)
