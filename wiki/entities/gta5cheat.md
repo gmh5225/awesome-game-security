@@ -12,7 +12,7 @@ confidence: medium
 
 **GTA V Python memory-analysis cheat** (gmh5225; cheat / game:gta5). Python codebase centered on **memory analysis** for studying Grand Theft Auto V client-side state from an offensive research perspective. Aimed at game security researchers and reverse engineers working in the cheat / game:gta5 lane. (source: wiki/sources/descriptions/gmh5225__gta5cheat.md)
 
-Distinct from ScriptHookV mod-menu frameworks such as [[phake]] and [[grandtheftautov-cheat]], the C/C++ Qt variant [[gta5cheat-qt]], and offline save/photo utilities such as [[gta5view]]; this is a **Python memory-analysis cheat sample** for studying GTA V live-process manipulation rather than RAGE script hooks or proprietary file-format parsing.
+Distinct from ScriptHookV mod-menu frameworks such as [[phake]] and [[grandtheftautov-cheat]], the C/C++ Qt variant [[gta5cheat-qt]], DMA-based external tools such as [[gta5-dma-cheat]], and offline save/photo utilities such as [[gta5view]]; this is a **Python memory-analysis cheat sample** for studying GTA V live-process manipulation rather than RAGE script hooks, below-OS PCIe DMA, or proprietary file-format parsing.
 
 ## Links
 
@@ -20,4 +20,4 @@ Distinct from ScriptHookV mod-menu frameworks such as [[phake]] and [[grandtheft
 
 ## Related
 
-[[phake]] · [[grandtheftautov-cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[gta-5-sigs-1.59]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]
+[[phake]] · [[grandtheftautov-cheat]] · [[gta5cheat-qt]] · [[gta5-dma-cheat]] · [[gta5view]] · [[gta-5-sigs-1.59]] · [[gtav-sourcecode-build-guide]] · [[gta-reversed-modern]] · [[regta]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[research-rigor]]

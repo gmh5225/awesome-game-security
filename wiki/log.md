@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fmc999/GTA5-DMA-CHEAT`: entity [[gta5-dma-cheat]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[gta5cheat]], [[cs2-dma-radar]], and [[battleye]].
+
 - **2026-08-15** — ingest `description:focus-creative-games/hybridclr`: entity [[hybridclr]]; cited on [[il2cpp]] and [[overviews/game-engine]]; cross-linked [[obfuz]].
 
 - **2026-08-15** — ingest `description:focus-creative-games/obfuz`: entity [[obfuz]]; cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[obfuscar]], [[confuserex]], and [[usecurity]].

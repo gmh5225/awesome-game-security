@@ -842,6 +842,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gta-5-sigs-1.59](entities/gta-5-sigs-1.59.md) — GTA V v1.59 byte-pattern signatures (World/ReplayInterface/Viewport/Ammo/Clip; gmh5225; cheat / game:gta5 [Offset])
 - [gta5cheat](entities/gta5cheat.md) — GTA V Python cheat (memory analysis; cheat / game:gta5; gmh5225)
 - [gta5cheat-qt](entities/gta5cheat-qt.md) — GTA V Qt cheat (C/C++; memory analysis; cheat / game:gta5)
+- [GTA5-DMA-CHEAT](entities/gta5-dma-cheat.md) — GTA V DMA cheat (MemProcFS/VMMDLL + ImGui/DX11; god mode / teleport / vehicle edits; Legacy + Enhanced; CE offset tables incl. BattlEye patches; cheat / game:gta5 [DMA]; fmc999)
 - [gta5view](entities/gta5view.md) — GTA V snapmatic photo & save viewer/editor (proprietary format parse; Viewer/Editor)
 - [gta-reversed-modern](entities/gta-reversed-modern.md) — GTA:SA 1.0 US binary-compatible C++ reimplementation (decompilation / RenderWare-era engine study)
 - [GTAIII-DE-GoldHook](entities/gtaiii-de-goldhook.md) — GTA III Definitive Edition internal hook cheat (ImGui overlay via DirectX hook; gameplay mods / visual enhancements; gmh5225)
