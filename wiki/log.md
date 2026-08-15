@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Apex-SIMPLE-AIMBOT-GLOW-APEX`: entity [[apex-simple-aimbot-glow-apex]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-legends-sdk]], [[apex-esp-old-project]], [[apex-full-cheat]], and [[apexd3d-external]].
+
 - **2026-08-14** — ingest `description:gmh5225/Apex-Spoofer`: entity [[apex-spoofer]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[easy-anti-cheat]], [[hwid-spoofer-eac-be]], [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]], [[apex-legends-sdk]], and [[apex-esp-old-project]].
 
 - **2026-08-14** — ingest `description:gmh5225/Apex_ESP_Old_Project`: entity [[apex-esp-old-project]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-legends-sdk]], [[apex-full-cheat]], and [[apexd3d-external]].

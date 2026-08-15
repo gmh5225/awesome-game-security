@@ -12,7 +12,7 @@ confidence: low
 
 Legacy Apex Legends **ESP** research repo (gmh5225; C/C++) centered on rendering, SDK generation, and overlays. Useful as a title-specific sample for game-security researchers and reverse engineers studying offensive techniques in the cheat / game:apex legends lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/gmh5225__Apex_ESP_Old_Project.md)
 
-Sits beside [[apex-legends-sdk]], [[apex-full-cheat]], and [[apexd3d-external]] as another gmh5225 Apex Legends sample with overlapping SDK / rendering / overlay focus.
+Sits beside [[apex-legends-sdk]], [[apex-full-cheat]], [[apexd3d-external]], and [[apex-simple-aimbot-glow-apex]] as another gmh5225 Apex Legends sample with overlapping SDK / rendering / overlay focus.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside [[apex-legends-sdk]], [[apex-full-cheat]], and [[apexd3d-external]] 
 
 ## Related
 
-[[easy-anti-cheat]] · [[present-hook]] · [[world-to-screen]] · [[apex-legends-sdk]] · [[apex-full-cheat]] · [[apexd3d-external]] · [[ayypex]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[present-hook]] · [[world-to-screen]] · [[apex-legends-sdk]] · [[apex-full-cheat]] · [[apexd3d-external]] · [[apex-simple-aimbot-glow-apex]] · [[ayypex]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]]

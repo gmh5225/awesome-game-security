@@ -12,7 +12,7 @@ confidence: medium
 
 Apex Legends **SDK** research repo (gmh5225; C++) centered on rendering and SDK generation. Useful as a title-specific sample for game-security researchers and reverse engineers studying offensive techniques in the cheat / game:apex legends lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/gmh5225__apex_legends_sdk.md)
 
-Sits beside [[apex-esp-old-project]], [[apex-full-cheat]], [[apexd3d-external]], and [[ayypex]] as another Apex Legends research sample with overlapping SDK / rendering focus.
+Sits beside [[apex-esp-old-project]], [[apex-full-cheat]], [[apexd3d-external]], [[apex-simple-aimbot-glow-apex]], and [[ayypex]] as another Apex Legends research sample with overlapping SDK / rendering focus.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside [[apex-esp-old-project]], [[apex-full-cheat]], [[apexd3d-external]],
 
 ## Related
 
-[[easy-anti-cheat]] · [[present-hook]] · [[apex-esp-old-project]] · [[apex-full-cheat]] · [[apexd3d-external]] · [[ayypex]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[present-hook]] · [[apex-esp-old-project]] · [[apex-full-cheat]] · [[apexd3d-external]] · [[apex-simple-aimbot-glow-apex]] · [[ayypex]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]]
