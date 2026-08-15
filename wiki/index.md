@@ -14,7 +14,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; Vulkan (~11) vocem Linux layers; DirectX (~39) shader inject/segcap; Renderer (~17 ReShade) + AI mesh/splat adjacency
 - [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE workflow + [[research-rigor]]; [[dynamic-binary-instrumentation]] trap-and-emulate/WHP tracing; [[mixed-boolean-arithmetic]] / [[control-flow-flattening]] deobfuscation; MCP-assisted RE; binary diffing; anti-debug catalog; tools (Ghidra managers, MBA/DBI, packers); Windows Emulator KDemu + console/Switch~8 OpenSw / Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2702 Cheat / ~673 AC lanes)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; SEWindows PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~117); Windows Emulator (~7) + WSL (~4; [[wsl]] / [[wsl2-linux-kernel]] / [[windows-subsystem-linux]] / [[docker-win]])
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; [[sewindows]] PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~117); Windows Emulator (~7) + WSL (~4; [[wsl]] / [[wsl2-linux-kernel]] / [[windows-subsystem-linux]] / [[docker-win]])
 
 ## Concepts
 
@@ -1663,6 +1663,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
+- [SEWindows](entities/sewindows.md) — Windows TPM measured-boot verifier (TCG event log, PCR replay, WBCL policy, EK/AK remote attestation; CPU virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist; fsquirt)
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
 - [Sensum](entities/sensum.md) — internal CS:GO cheat (actively developed; cheat / game:csgo)
 - [Serenity.gg-FN-and-Loader](entities/serenity-gg-fn-and-loader.md) — Fortnite: kernel driver + shader work + module loader (C/C++; cheat / game:fortnite; gmh5225)
