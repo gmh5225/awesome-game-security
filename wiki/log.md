@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:frkngksl/Shoggoth`: entity [[shoggoth]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[shellcode-factory]], [[shellcode-entropyfix]], and [[byvalver]].
+
 - **2026-08-15** — ingest `description:frostbone25/ShaderInjector`: entity [[shader-injector]]; cited on [[overviews/graphics-api]] and [[draw-call-hook]].
 
 - **2026-08-15** — ingest `description:fsquirt/SEWindows`: entity [[sewindows]]; cited on [[overviews/windows-kernel]] and [[overviews/dma-attack]]; cross-linked [[detect-tpm-spoofing]], [[tpm-mmio]], and [[tpm-spoofer]].
