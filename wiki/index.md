@@ -595,6 +595,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DVRT](entities/dvrt.md) — dynamic value resolution table for runtime address resolution (gmh5225; maintains/updates memory offsets on module load/relocation; cheat [Offset])
 - [Dynsec](entities/dynsec.md) — dynamic security analysis framework; instrumentation/monitoring for anti-tamper, anti-debug, integrity checks (gmh5225)
 - [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
+- [DxWrapper](entities/dxwrapper.md) — DirectX compatibility proxy DLL (DDraw/D3D8–9/DInput; DDrawCompat/d3d8to9/Dd7to9; DirectX Compatibility)
 
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [e3](entities/e3.md) — C++ homomorphic encryption framework (MoMA Lab; FHE backends; encrypted compute; AC Encrypt Variable research)

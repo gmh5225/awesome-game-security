@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:elishacloud/dxwrapper`: entity [[dxwrapper]]; cited on [[overviews/graphics-api]] and [[overviews/reverse-engineering]]; cross-linked [[detours]], [[directxhook]], [[d3d9on12]], and [[free-direct]].
+
 - **2026-08-15** — ingest `description:ellermister/MapleStory`: entity [[maplestory]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ms079]], [[maplestoryex]], and [[maplestory143]].
 
 - **2026-08-15** — ingest `description:eltavine/Duck-Detector-Refactoring`: entity [[duck-detector-refactoring]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[detection]], [[android-native-root-detector]], and [[keyattestation]].
