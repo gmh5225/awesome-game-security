@@ -293,6 +293,7 @@ sources:
   - wiki/sources/descriptions/smallworld-re__smallworld.md
   - wiki/sources/descriptions/panda-re__panda.md
   - wiki/sources/descriptions/nyx-fuzz__QEMU-Nyx.md
+  - wiki/sources/descriptions/ex0dus-0x__fuzzable.md
   - wiki/sources/descriptions/googleprojectzero__winafl.md
   - wiki/sources/descriptions/ispras__qemu.md
   - wiki/sources/descriptions/sefcom__oxidizer.md
@@ -1567,6 +1568,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Architecture-neutral dynamic analysis via [[panda]] (QEMU-based PANDA; full-machine software emulation without hardware VT) sits in the same QEMU/KVM research / DBI lane. (source: wiki/sources/descriptions/panda-re__panda.md)
 - Intel-PT hypervisor fuzzing via [[qemu-nyx]] (fast memory/device reset, PT decode, breakpoint hooks + fuzzing frontend) also sits in that QEMU/KVM research / DBI lane. (source: wiki/sources/descriptions/nyx-fuzz__QEMU-Nyx.md)
 - Windows coverage-guided fuzzing via [[winafl]] (AFL port; DynamoRIO/Intel PT; persistent mode; closed-source hook + mutate; corpus minimize + crash triage) sits in the Anti Cheat > Fuzzer / DBI research lane. (source: wiki/sources/descriptions/googleprojectzero__winafl.md)
+- Fuzz target identification via [[fuzzable]] (C/C++ source + binary integration; viable function targets for harness setup; Anti Cheat > Fuzzer / Binary Ninja plugins lane) sits beside that coverage-guided fuzzing workflow. (source: wiki/sources/descriptions/ex0dus-0x__fuzzable.md)
 - ISP RAS analysis/instrumentation QEMU fork [[ispras-qemu]] (coverage / taint / symbolic-exec support; README `windbg` tree) also sits in that QEMU/KVM research / DBI lane. (source: wiki/sources/descriptions/ispras__qemu.md)
 - Original Xbox LLE via [[xemu]] (QEMU fork; NV2A/MCPX/NForce/Pentium III; OpenGL + SDL2; ISO/XISO) sits in the console `Xbox` lane for hardware-internals / preservation study. (source: wiki/sources/descriptions/xemu-project__xemu.md)
 

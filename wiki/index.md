@@ -733,6 +733,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-cheat-source-internal](entities/fortnite-cheat-source-internal.md) — Fortnite internal: SDK generation + hooking (C++; cheat / game:fortnite)
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
 - [furikuri](entities/furikuri.md) — C/C++ obfuscation engine (jnastarot; AC Obfuscation Engine)
+- [fuzzable](entities/fuzzable.md) — C/C++ source + binary fuzz-target discovery framework (Binary Ninja plugins lane; ex0dus-0x; Anti Cheat > Fuzzer)
 - [FortKit](entities/fortkit.md) — Fortnite dump / SDK generation (C++; cheat / game:fortnite [Dump])
 - [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])
