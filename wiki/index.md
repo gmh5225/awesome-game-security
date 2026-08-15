@@ -494,6 +494,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
 - [discord-overlay-hook](entities/discord-overlay-hook.md) — Discord overlay DX11 hook sample (C++; rendering / modding / hooking)
 
+- [dll-hot-reload](entities/dll-hot-reload.md) — injectable DLL hot-reload wrapper (ergrelet; reload payload on disk change; cheat / injection:windows)
 - [DLL-Hijack-ExportDumper](entities/dll-hijack-export-dumper.md) — PE export-table dump → proxy-DLL forwarding stubs for search-order sideload (gmh5225; Cheat / DLL Hijack)
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)

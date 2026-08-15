@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ergrelet/dll-hot-reload`: entity [[dll-hot-reload]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[injectors]], [[positron]], and [[awesome-injection]].
+
 - **2026-08-15** — ingest `description:ergrelet/themida-spotter-bn`: entity [[themida-spotter-bn]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[themida-unmutate]], [[unlicense]], [[triton-bn]], [[themida-research]], and [[tde]].
 
 - **2026-08-15** — ingest `description:ergrelet/themida-unmutate`: entity [[themida-unmutate]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[unlicense]], [[themida-research]], [[tde]], and [[magicmida-rs]].
