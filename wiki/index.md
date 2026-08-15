@@ -910,6 +910,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-function-string-associate](entities/ida-function-string-associate.md) — IDA Pro 9.X plugin: associate string refs with functions; auto-generate function comments from literals (cheat / IDA Plugins)
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
+- [ida-kernelcache-ng](entities/ida-kernelcache-ng.md) — IDA plugin: iOS kernelcache analysis (pip + cli.py; cheat / IDA Plugins)
 - [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
 - [ida-ps5-elf-plugin](entities/ida-ps5-elf-plugin.md) — IDA Pro PS5 ELF loader (PS5 ELF extensions, segments, dynamic linking; console security RE)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)

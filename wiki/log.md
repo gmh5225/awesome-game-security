@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gilboz/ida_kernelcache_ng`: entity [[ida-kernelcache-ng]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[aimachdec]], [[binja-kc]], and [[ida-ios-helper]].
+
 - **2026-08-15** — ingest `description:glmcdona/strings2`: entity [[strings2]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[stringsx64dbg]] and [[ida-function-string-associate]].
 
 - **2026-08-15** — ingest `description:gmh5225/-Modern-Warfare-Warzone-Cheat`: entity [[modern-warfare-warzone-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-internal-cheat]], [[mwclap]], and [[ricochet-disabler]].
