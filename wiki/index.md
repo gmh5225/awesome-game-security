@@ -549,6 +549,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [detection-hyper-v](entities/detection-hyper-v.md) — kernel-mode Hyper-V guest probe via KPCR/KPRCB PowerState (Win10 17763; KeGetPcr→CurrentPrcb; gmh5225; Hyper-v)
 - [DeviceWarLock](entities/device-warlock.md) — Android device HWID / lock SDK (Java/C++; networking, SDK gen, hooking; Detection:HWID)
 - [device_xiaomi_mondrian](entities/device-xiaomi-mondrian.md) — Pixel Experience Plus device tree for Redmi K60 / POCO F5 Pro (mondrian; Waipio / SM8475)
+- [DaliVM](entities/dalivm.md) — Python Dalvik VM emulator (DEX execution, Android API mocking, static analysis, string decryption, Multi-DEX; no Android runtime)
 - [Dalvikus](entities/dalvikus.md) — Android smali editor / Dalvik bytecode RE tool (ethical research)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
 - [dfm-android-unicorn](entities/dfm-android-unicorn.md) — DFM Android ARM64 coordinate decryption via Unicorn emulation (C/C++; ACE/libtersafe; cheat / explore anticheat system:ACE)

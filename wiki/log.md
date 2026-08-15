@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fatalSec/DaliVM`: entity [[dalivm]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dalvikus]], [[jadx]], and [[rnidbg]].
+
 - **2026-08-15** — ingest `description:fcancelog/EftStreamedCheat`: entity [[eft-streamed-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-external]], [[meatyeftrelease]], [[eft-dma-radar-1]], and [[nathans-tarkov-radar-public]].
 
 - **2026-08-15** — ingest `description:fdrechsler/mcp-server-idapro`: entity [[mcp-server-idapro]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ida-mcp-server-plugin]], and [[iida-mcp]].
