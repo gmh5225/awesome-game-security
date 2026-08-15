@@ -20,4 +20,4 @@ It sits in the Source 1 SDK lane beside header dumps such as [[csgo-sdk]] and in
 
 ## Related
 
-[[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-internal-base]] · [[csgo-offsets]] · [[nv-v2]] · [[vm]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]]
+[[csf]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-internal-base]] · [[csgo-offsets]] · [[nv-v2]] · [[vm]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]]
