@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Android_Native_Surface`: entity [[android-native-surface]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]]; cross-linked [[external-imgui-android]], [[android-imgui-menu]], and [[imgui-native-modmenu]].
+
 - **2026-08-15** — ingest `description:gmh5225/AntiCheat-chrysalis`: entity [[anti-cheat-chrysalis]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[anticheat]], [[basic-anti-cheat]], and [[darken-anticheat]].
 
 - **2026-08-15** — ingest `description:gmh5225/AntiCheat`: entity [[anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[basic-anti-cheat]], [[anticheat-poc]], [[darken-anticheat]], and [[anti-cheat]].
