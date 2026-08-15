@@ -327,6 +327,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
 - [Classy](entities/classy.md) — IDA Pro C++ class/vtable/signature manager (PyQt5 GUI; vtable gen, Itanium mangling, struct mapping, C headers; gmh5225)
 - [ClickPic](entities/clickpic.md) — screen pixel color detection + auto-click (OpenCV + triggerbot; gmh5225)
+- [ClrGuard](entities/clrguard.md) — Windows defensive CLR assembly-load monitor/blocker (ClrHook DLL hooks; PE metadata/hash logging; optional Windows service; endgameinc; Anti Cheat → CLR Protection)
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
 - [COD-boiii](entities/cod-boiii.md) — BOIII client modification/research: patches, SDK structures, runtime engine tooling (gmh5225; Reverse engineering and analysis)
