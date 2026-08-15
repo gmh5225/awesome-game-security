@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/usbsn`: entity [[usbsn]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]]; cross-linked [[easy-hwid-spoofer]] and [[hdd-serial-spoofer]].
+
 - **2026-08-15** — ingest `description:ekknod/vm`: entity [[vm]]; cited on [[overviews/game-hacking]] and [[overviews/dma-attack]]; cross-linked [[pcileech]] and [[volk-dma]].
 
 - **2026-08-15** — ingest `description:electronicarts/CnC_Red_Alert`: entity [[cnc-red-alert]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[redalert2]] and [[storm-engine]].
