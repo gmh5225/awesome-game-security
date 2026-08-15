@@ -887,6 +887,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
 - [Holodori-Kernel-Bypass](entities/holodori-kernel-bypass.md) — userspace emu of Hololive Dreams usrdrv017964.sys (Wine/Proton; MinHook)
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
+- [hlmaster](entities/hlmaster.md) — reverse-engineered Half-Life Master Server (closed master-server protocol RE; Game Engine / source; ezhangle)
 - [hLunaaa.github.io](entities/hlunaaa-github-io.md) — Driver Trace Cleaner blog (CI.dll + BigPool cache; CR3 abuse + physical R/W; cheat / hide)
 - [hidden_syscall_monitoring](entities/hidden-syscall-monitoring.md) — monitor hidden syscalls from COD anticheat (C/C++; hooking / memory)
 - [HIGU_ntcall](entities/higu-ntcall.md) — direct system calls (jnastarot; Some Tricks / Windows Ring3; Windows/Linux/mobile)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ezhangle/hlmaster`: entity [[hlmaster]]; cited on [[overviews/game-engine]] and [[goldsource-rebuild]]; cross-linked [[regs]], [[source-engine]], and [[hl-mods]].
+
 - **2026-08-15** — ingest `description:facebookresearch/CUTracer`: entity [[cutracer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ptxninja]] and [[dynamic-binary-instrumentation]].
 
 - **2026-08-15** — ingest `description:fail46/OHack`: entity [[ohack]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[dumpwow]], [[wow-iat-fix]], and [[x14-08-coverstory-blizzard]].
