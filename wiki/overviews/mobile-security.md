@@ -51,6 +51,7 @@ sources:
   - wiki/sources/descriptions/omochikaeri15__battle-cats-complete.md
   - wiki/sources/descriptions/gmh5225__frida-ceserver.md
   - wiki/sources/descriptions/gmh5225__bytecode-viewer.md
+  - wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md
   - wiki/sources/descriptions/gmh5225__cheap-engine.md
   - wiki/sources/descriptions/gmh5225__ceserver-ios.md
   - wiki/sources/descriptions/gmh5225__CODM-ESP-Aimbot-Mod-Menu.md
@@ -228,7 +229,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__MapleServerAndroid.md
   - wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md
   - wiki/sources/descriptions/gmh5225__KernelSU-4.4.md
-updated: 2026-08-14
+updated: 2026-08-15
 confidence: high
 ---
 
@@ -277,7 +278,7 @@ Client-side Play Billing hooks such as [[freedom]] intercept the billing service
 
 ## Mobile anti-cheat
 
-Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks, VPN/proxy) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. End-to-end attestation relay PoC [[android-hardware-attestation-demo]] (Quarkslab; Frida `KeystoreAttestation.generateAttestedKey` hook + clean-device oracle; genuine TEE/StrongBox chain substitution, no crypto forgery) illustrates how backend hardware Key Attestation can pass on rooted analysis phones when validation binds only to the attestation nonce. (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) Per-app VPN fingerprint hiding such as [[vpnhide]] (LSPosed `system_server` Binder filters + GKI kretprobe / KernelPatch / Zygisk native ioctl·netlink·`/proc/net` interception; optional localhost ports block for Clash/sing-box probes; no in-process target hooks) sits in the same client-side environment-evasion lane. (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family (native Android [[free-rasp-android]]; native iOS [[free-rasp-ios]]; cross-platform [[free-rasp-unity-poc]] / [[free-rasp-reactnative]] / [[free-rasp-capacitor]] / [[free-rasp-cordova]] / [[free-rasp-flutter]] / [[free-rasp-kmp]]), [[trustdevice-android]] / [[trustdevice-ios]], Android device-lock / HWID research such as [[device-warlock]] (Java/C++; networking, SDK generation, native hooking), and Unity soft-AC [[com-sipvlib-anticheat]]. (source: wiki/sources/descriptions/talsec__Free-RASP-iOS.md) (source: wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md) Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
+Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger, hooks, VPN/proxy) plus regional stacks (Tencent ACE, NetEase, per-title SDKs)—see [[mobile-anti-cheat]]. Open-source Android AC sample [[anticheat-android-cheap-engine]] (gmh5225; C/C++; sample client-side anti-cheat implementation for defensive researchers) complements commercial RASP SDKs in the same lane. (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md) End-to-end attestation relay PoC [[android-hardware-attestation-demo]] (Quarkslab; Frida `KeystoreAttestation.generateAttestedKey` hook + clean-device oracle; genuine TEE/StrongBox chain substitution, no crypto forgery) illustrates how backend hardware Key Attestation can pass on rooted analysis phones when validation binds only to the attestation nonce. (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) Per-app VPN fingerprint hiding such as [[vpnhide]] (LSPosed `system_server` Binder filters + GKI kretprobe / KernelPatch / Zygisk native ioctl·netlink·`/proc/net` interception; optional localhost ports block for Clash/sing-box probes; no in-process target hooks) sits in the same client-side environment-evasion lane. (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) Client RASP/fingerprint SDKs include [[droidshield]], freeRASP family (native Android [[free-rasp-android]]; native iOS [[free-rasp-ios]]; cross-platform [[free-rasp-unity-poc]] / [[free-rasp-reactnative]] / [[free-rasp-capacitor]] / [[free-rasp-cordova]] / [[free-rasp-flutter]] / [[free-rasp-kmp]]), [[trustdevice-android]] / [[trustdevice-ios]], Android device-lock / HWID research such as [[device-warlock]] (Java/C++; networking, SDK generation, native hooking), and Unity soft-AC [[com-sipvlib-anticheat]]. (source: wiki/sources/descriptions/talsec__Free-RASP-iOS.md) (source: wiki/sources/descriptions/imxiaoc996__DeviceWarLock.md) Title research such as [[honor-of-kings-re-research]] pairs IL2CPP/`libtersafe` with ACE surfaces; [[dfm-android-unicorn]] emulates ARM64 coordinate-decryption for ACE/`libtersafe` titles via Unicorn. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md)
 
 ## eBPF tracing
 

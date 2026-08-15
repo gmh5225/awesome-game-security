@@ -161,6 +161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
 - [android-vuln-poc-exp](entities/android-vuln-poc-exp.md) — Android kernel CVE PoC/exploit reference list (cheat / Android Kernel CVE)
 - [android-vulkan-tutorials](entities/android-vulkan-tutorials.md) — Google Android Vulkan tutorial samples (Vulkan / guide; NDK/mobile fundamentals)
+- [anticheat-android-cheap-engine](entities/anticheat-android-cheap-engine.md) — Sample Android anti-cheat implementation (C/C++; open-source AC system; gmh5225)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
 - [anti-cheat-research-index](entities/anti-cheat-research-index.md) — structured AC/kernel/VT-x/graphics/RE research index (defensive engineering map; guide lane)
 - [anti-cheat](entities/anti-cheat.md) — C/C++ open-source anti-cheat system (jnastarot; Anti Cheat → Open Source Anti Cheat System)
