@@ -1965,6 +1965,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMP3 x64 Disasm (prerelease)](entities/vmp-vmp3-64bit-disasm-prerelease-.md) — VMProtect 3 x64 bytecode disassembler (custom insn decode, virtual opcode handlers, flow reconstruction; Fix VMP; gmh5225)
 - [VMPImportFixer](entities/vmpimportfixer.md) — VMP 3.x import protection fix via Unicorn emulation (near-call stubs → real imports; Zydis + pepp; x86/x64; Fix VMP)
 - [Vmp3_utils](entities/vmp3-utils.md) — Python VMP3 editor tooling utilities (Fix VMP; gmh5225)
+- [VmpHelper](entities/vmp-helper.md) — C++ VMProtect helper (networking / plugin / modding; Fix VMP; fjqisba)
 - [VMProtect](entities/vmprotect.md) — VM-based code obfuscation engine (software CPU + memory/I/O; Fix VMP study; gmh5225)
 - [VMPStatic](entities/vmpstatic.md) — static Go VMProtect PE unpacker (VMP 1.x–3.x rebuild; Fix VMP / Unpacker)
 - [vmpunpack](entities/vmpunpack.md) — Python x64 VMProtect/packer unpacker (sogen emulation to OEP; PE rebuild + IOC extract; no devirt; Fix VMP / Unpacker)
