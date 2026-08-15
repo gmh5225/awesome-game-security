@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:glmcdona/strings2`: entity [[strings2]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[stringsx64dbg]] and [[ida-function-string-associate]].
+
 - **2026-08-15** — ingest `description:gmh5225/-Modern-Warfare-Warzone-Cheat`: entity [[modern-warfare-warzone-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-internal-cheat]], [[mwclap]], and [[ricochet-disabler]].
 
 - **2026-08-15** — ingest `description:gmh5225/-Rainbow---EFI`: entity [[rainbow-efi]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[driver-efi-bootkit]], [[bootlicker]], and [[hwid-kernel-spoofer]].

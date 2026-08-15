@@ -355,6 +355,7 @@ sources:
   - wiki/sources/descriptions/herosi__PyClassInformer.md
   - wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md
   - wiki/sources/descriptions/horsicq__stringsx64dbg.md
+  - wiki/sources/descriptions/glmcdona__strings2.md
   - wiki/sources/descriptions/horsicq__nfdx64dbg.md
   - wiki/sources/descriptions/horsicq__Nauz-File-Detector.md
   - wiki/sources/descriptions/horsicq__XVolkolak.md
@@ -1185,6 +1186,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - ChaiScript scripting via [[chaiscript-plugin]] (x64dbg plugin; three commands; thorough API vs rapid prototyping; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/jdavidberger__chaiScriptPlugin.md)
 - x64dbg plugin install/management via [[x64dbg-plugin-manager]] (C++/C; plugin development / modding; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md)
 - In-process string search/browse via [[stringsx64dbg]] (C++/Qt x64dbg plugin; dedicated SearchStringsWidget tab; 32/64-bit; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__stringsx64dbg.md)
+- Standalone binary/process string extraction via [[strings2]] (C/C++; extract strings from binary files and live process memory; modding / memory analysis; cheat / RE tools lane) (source: wiki/sources/descriptions/glmcdona__strings2.md)
 - In-debugger static compiler/packer/protector identification via [[nfdx64dbg]] (Nauz File Detector / NFD tab; C++/Qt x64dbg plugin; 32/64-bit; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__nfdx64dbg.md)
 - DLL load-notification callback inspection via [[x64dbg-view-dll-notification]] (C++/C++ x64dbg plugin; view `LdrRegisterDllNotification` activity; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/gmh5225__X64DBG-ViewDllNotification.md)
 - Standalone signature-based linker/compiler/packer/protector triage via [[nauz-file-detector]] (NFD; PE/ELF/Mach-O+; C++/Qt GUI+CLI; horsicq; Cheat Linker/Compiler/Tool detector lane) (source: wiki/sources/descriptions/horsicq__Nauz-File-Detector.md)
