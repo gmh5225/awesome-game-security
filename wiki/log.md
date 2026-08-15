@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Android-OpenGL-ES-Chams`: entity [[android-opengl-es-chams]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]]; cross-linked [[draw-call-hook]], [[android-cheat-template]], and [[r6-chams-public]].
+
 - **2026-08-15** — ingest `description:gmh5225/Android-privilege-CVE-2022-20452-LeakValue`: entity [[android-privilege-cve-2022-20452-leakvalue]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-vuln]] and [[cve-2024-0044]].
 
 - **2026-08-15** — ingest `readme:categories`: bumped Anti Cheat ~672 (was ~671; Cheat ~2702 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
