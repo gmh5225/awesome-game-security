@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:flowxrc/csgo-xenforo-loader`: entity [[csgo-xenforo-loader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-loader]], [[cyber-ant-loader]], and [[wizard-loader]].
+
 - **2026-08-15** — ingest `description:fmagin/ghidra-openai`: entity [[ghidra-openai]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidrassist]], and [[gpt-wpre]].
 
 - **2026-08-15** — ingest `description:fmc999/GTA5-DMA-CHEAT`: entity [[gta5-dma-cheat]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[gta5cheat]], [[cs2-dma-radar]], and [[battleye]].

@@ -387,6 +387,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)
 - [CSGO-Loader](entities/csgo-loader.md) — CS:GO C++ cheat loader with PHP auth backend (HWID check, time-based license, web panel for injected DLL access; gmh5225 [Loader])
 - [csgo-nixware-csgo](entities/csgo-nixware-csgo.md) — leaked Nixware CS:GO internal (aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay; gmh5225 [Nixware])
+- [csgo-xenforo-loader](entities/csgo-xenforo-loader.md) — CS:GO C++ cheat loader with XenForo forum auth (license verification, subscription check, DLL download + injection; P2C distribution research; flowxrc [Loader])
 - [csgo-offsets](entities/csgo-offsets.md) — CS:GO memory offsets (gmh5225; netvars / interfaces / signatures; patch-updated; cheat / game:csgo [Offset])
 - [csgo-sdk](entities/csgo-sdk.md) — CS:GO Source 1 SDK headers (gmh5225/csgo-sdk + csgo_sdk; classes / netvars / interfaces / hooking; cheat / game:csgo)
 - [csgo-sdk-improved](entities/csgo-sdk-improved.md) — improved CS:GO Source 1 SDK (corrected classes, extra interfaces, fuller netvars; cheat / game:csgo [Internal])
