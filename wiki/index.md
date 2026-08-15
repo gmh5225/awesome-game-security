@@ -143,6 +143,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android Native Surface](entities/android-native-surface.md) — native C/C++ overlay surface (ANativeWindow / SurfaceFlinger; transparent ESP/mod menu; gmh5225)
 - [Android-Native-Root-Detector](entities/android-native-root-detector.md) — Kotlin Android root detector (Detection:Android root)
 - [Android-Native-Import-Hide](entities/android-native-import-hide.md) — ELF import hide/retrieve lib (C++; AC Compile Time)
+- [android-privilege-cve-2022-20452-leakvalue](entities/android-privilege-cve-2022-20452-leakvalue.md) — CVE-2022-20452 LazyValue deserialization LPE (unprivileged app → system; Java/Kotlin PoC; gmh5225)
 
 - [android-modmenu-semijni](entities/android-modmenu-semijni.md) — Android Java WindowManager + semi-JNI mod menu (native hooks; cheat / Menu for imgui)
 - [Android-Mod-Menu-Kotlin](entities/android-mod-menu-kotlin.md) — Android Kotlin floating-view + C++/JNI IL2CPP mod menu (cheat / IL2CPP Menu)

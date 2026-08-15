@@ -287,6 +287,7 @@ sources:
   - wiki/sources/descriptions/musabcel__android_rom_list.md
   - wiki/sources/descriptions/tamirzb__CVE-2021-1961.md
   - wiki/sources/descriptions/nahid0x1__CVE-2024-0044.md
+  - wiki/sources/descriptions/gmh5225__Android-privilege-CVE-2022-20452-LeakValue.md
 
   - wiki/sources/descriptions/xsslize__idarem.md
   - wiki/sources/descriptions/matteyeux__IDArling.md
@@ -1288,6 +1289,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Device kernel sources such as [[android-kernel-huawei-mt6761]] (Huawei MT6761 / Helio P22) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/huawei-mediatek-devs__android_kernel_huawei_mt6761.md)
 - Device kernel sources such as [[android-kernel-huawei-hi6250-8-exp]] (Huawei hi6250 + KernelSU) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/gmh5225__android_kernel_huawei_hi6250-8_Exp.md)
 - Android Application CVE PoCs such as [[cve-2024-0044]] (Android 12/13; crafted payload → unauthorized app data-directory access) sit in the Cheat Android Application CVE lane. (source: wiki/sources/descriptions/nahid0x1__CVE-2024-0044.md)
+- Framework LazyValue deserialization LPE via [[android-privilege-cve-2022-20452-leakvalue]] (CVE-2022-20452; unprivileged app → system-level access; Java/Kotlin PoC; gmh5225) sits in the same Cheat Android Application CVE / Privilege Escalation lane. (source: wiki/sources/descriptions/gmh5225__Android-privilege-CVE-2022-20452-LeakValue.md)
 - Android Kernel CVE PoCs such as [[cve-2026-43499-popsicle]] (Xiaomi popsicle LPE via CVE-2026-43499; LD_PRELOAD; uid 0 + SELinux disabled) sit in the Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md)
 - Linux posix-cpu-timers UAF trigger PoC via [[cve-2026-64560-analysis]] (CVE-2026-64560; non-leader thread `exec()` vs timer-delete race; fork/exec timing; Linux x86_64 + Android GKI arm64; patch verification / KASAN—not LPE) sits in the same Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md)
 - Qualcomm QSEECOM/TrustZone arbitrary kernel R/W via [[cve-2021-1961]] (Widevine DRM TA ION buffer abuse; Pixel 3 / blueline; `/proc/version` + SELinux off) sits in the same Cheat Android Kernel CVE `[CVE RW]` lane. (source: wiki/sources/descriptions/tamirzb__CVE-2021-1961.md)
