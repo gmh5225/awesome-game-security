@@ -1060,6 +1060,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kitsupe](entities/kitsupe.md) — PE parser/editor (headers, sections, imports/exports, relocations, resources; binary patching; cheat / PE; gmh5225)
 - [kittymemory-ios](entities/kittymemory-ios.md) — iOS runtime memory library (patch/hook/pattern scan; jailbreak-independent code patching; cheat / iOS memory explorer; gmh5225)
 - [kiero2](entities/kiero2.md) — kiero v2 runtime D3D9–12/GL/Vulkan API locator (BYO hooking; CMake FetchContent; cross-platform GL/VK)
+- [Killing Floor Bot Client](entities/killingfloor-bot-client.md) — UE2.5 headless Killing Floor client (native UDP protocol; Steam auth RE; Ghidra scripts; UDP MITM; protocol docs)
 - [kn-diff-pool](entities/kn-diff-pool.md) — Windows kernel Big Pool snapshot/diff (driver capture + Go TUI; leak / manual-map forensics)
 - [kn-live-dbg](entities/kn-live-dbg.md) — Windows kernel live debugging (driver memory primitives + Zydis disasm; user-mode TUI; LiveKD-style)
 - [kn-win32-api-monitor](entities/kn-win32-api-monitor.md) — Win32 API trace workstation (Tauri 2; IAT hooks; ~30k APIs; `.knapm` replay; security/RE/anti-cheat research; kernullist)

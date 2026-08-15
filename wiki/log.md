@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:geekrainian/killingfloor-bot-client`: entity [[killingfloor-bot-client]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[goldberg-emulator]], [[ghidra-scripts]], [[packet-sniffer]], and [[unreal-network-profiler]].
+
 - **2026-08-15** — ingest `description:geeksonsecurity/android-overlay-malware-example`: entity [[android-overlay-malware-example]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-overlay-protection]], [[android-native-surface]], and [[external-imgui-android]].
 
 - **2026-08-15** — ingest `description:geeksonsecurity/android-overlay-protection`: entity [[android-overlay-protection]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-native-surface]], [[external-imgui-android]], and [[droidshield]].
