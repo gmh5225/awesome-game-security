@@ -1545,6 +1545,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
 - [r6s-external-v2](entities/r6s-external-v2.md) — R6 external v2: kernel driver/handle elevation ESP + aimbot (C++; cheat / game:r6 [External]; gmh5225)
 - [r6s-internal-cheat](entities/r6s-internal-cheat.md) — R6 internal: modding + overlays + memory analysis (C++; cheat / game:r6; gmh5225)
+- [rainbow-efi](entities/rainbow-efi.md) — UEFI boot-stage HWID spoof: EDK II + `rainbow.efi`; ExitBootServices → OslLoaderBlock → IopLoadDriver hook (gmh5225; [HWID])
 - [rainbow-6-siege-cheat](entities/rainbow-6-siege-cheat.md) — R6 cheat: rendering + hooking (C/C++; cheat / game:r6; gmh5225)
 - [rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat](entities/rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat.md) — R6 leaked external ESP/aimbot; WndProc-only input hook (cheat / game:r6; gmh5225)
 - [r6table-internal](entities/r6table-internal.md) — R6 internal: UE SDK ESP/aimbot + in-engine overlay (C++; cheat / game:r6)
