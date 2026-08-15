@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:emoose/idaxex`: entity [[idaxex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xenia]], [[xenia-mac]], [[xbox360-emu]], and [[recompiler]].
+
 - **2026-08-15** — ingest `description:endgameinc/ClrGuard`: entity [[clrguard]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[confuserex]] and [[netcrypt]].
 
 - **2026-08-15** — ingest `description:enenH/pwatch-c`: entity [[pwatch-c]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[pwatch]].

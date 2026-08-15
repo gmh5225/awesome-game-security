@@ -949,6 +949,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HumptyLock](entities/humptylock.md) — iOS 14.0–14.4.2 XNU kernel R/W exploit app (Coruna Pendulum PE; lockf/OOL-port/pipe primitives; wh1te4ever)
 - [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
+- [idaxex](entities/idaxex.md) — IDA Pro 9 XEX/Xenon loader (XEX parse, PE extraction, import/export + kernel naming; Xbox 360 RE)
 - [ida2llvm](entities/ida2llvm.md) — dynamic IDA→LLVM IR binary lifting (cursor-sync liftability viewer; cheat / IDA Plugins)
 - [ida2obj](entities/ida2obj.md) — IDA Pro database → linkable COFF/ELF object export (relocations, symbols, sections; binary patching / recompilation; cheat / COFF Relink; gmh5225)
 - [ida-android-breakpoint](entities/ida-android-breakpoint.md) — IDA plugin: Android native `.so` breakpoint setup (Python; cheat / IDA Plugins)
