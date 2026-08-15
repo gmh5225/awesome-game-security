@@ -1560,6 +1560,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UPGDSED](entities/upgdsed.md) — runtime PatchGuard + DSE disable (vulnerable drivers, CI.dll, KPP context; Win7–11; hfiref0x)
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)
 - [ProExt](entities/proext.md) — Rust external CS2 cheat (ESP / aimbot / triggerbot / radar / RCS; egui UI)
+- [ProxyAPICall](entities/proxy-api-call.md) — custom stack call for proxying API calls through fabricated stacks (C/C++; Cheat Spoof Stack / Custom stack call; evilashz)
 
 - [PPLKiller](entities/pplkiller.md) — BYOVD PPL strip via **`RTCore64.sys`** (patch `EPROCESS` protection level; downgrade antimalware for debug/terminate; gmh5225)
 - [Process Killer BYOVD](entities/process-killer-byovd.md) — BYOVD process terminator via **`viragt64.sys`** (kernel access → forceful kill of protected AC/EDR/AV; gmh5225)
