@@ -20,4 +20,4 @@ Sits in the same HoYoverse title lane as sibling Grasscutter clients ([[easypeas
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[il2cpp]] · [[easypeasy-gc]] · [[genshin-cheat]] · [[genshin-cheetos]] · [[genshin-impact-base]] · [[genshin-genshin-data]] · [[genshin-easy-peasy-bypass]] · [[genshin-debugger-bypass]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[il2cpp]] · [[akebi-packet-sniffer]] · [[easypeasy-gc]] · [[genshin-cheat]] · [[genshin-cheetos]] · [[genshin-impact-base]] · [[genshin-genshin-data]] · [[genshin-easy-peasy-bypass]] · [[genshin-debugger-bypass]]
