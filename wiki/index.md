@@ -1827,6 +1827,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UE-Plugin-SCUE4-Plugin](entities/ue-plugin-scue4-plugin.md) — UE4 SCUE4 anti-cheat plugin (integrity checks, variable memory protection, packet encryption, binary tamper detection; Game Engine Protection:Unreal; gmh5225)
 - [UE-UnrealEngineSDK](entities/ue-unreal-engine-sdk.md) — reverse-engineered UE4/UE5 SDK headers (UObject/UWorld/ULevel; internal cheat/mod dev; Universal Cheat development kit; gmh5225)
 - [UE4-Freecam](entities/ue4-freecam.md) — UE4 FOV changer (hooking / overlays; Game Engine Explorer:Unreal)
+- [UE4-c-](entities/ue4-c-.md) — Valorant external UE4 cheat (EFI manual-mapped kernel driver + IOCTL dispatch hooks; DirectX 9 ImGui overlay; UE4 actor/player reads; cheat / game:valorant [External]; frankelitoc)
 - [UE4 Cheat Engine](entities/ue4-cheat-engine.md) — Android UE4-aware CE (memory scan / GObject enum / UProperty / SDK gen; Cheat / Game Engine Explorer:Unreal)
 - [ue4-apk-dumper](entities/ue4-apk-dumper.md) — Android APK UE4 SDK dumper (UObject/property/offset extraction; modding / SDK generation; gmh5225)
 - [ue4dumper](entities/ue4dumper.md) — Android UE4 SDK dumper (C/C++; modding / SDK generation)
