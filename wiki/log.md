@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Akebi-Cheat-3.3`: entity [[akebi-cheat-3.3]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[genshin-akebi-gc]] and [[akebi-packet-sniffer]].
+
 - **2026-08-15** — ingest `description:gmh5225/Akebi-PacketSniffer`: entity [[akebi-packet-sniffer]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[genshin-akebi-gc]].
 
 - **2026-08-15** — ingest `description:gmh5225/Alaa-8ball-pool-source-exposed`: entity [[alaa-8ball-pool-source-exposed]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-mod-menu-imgui]], [[external-imgui-android]], and [[world-to-screen]].

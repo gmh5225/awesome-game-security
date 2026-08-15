@@ -12,7 +12,7 @@ confidence: medium
 
 **Akebi**-framework **packet sniffer** in C++/C centered on **driver development** with **DirectX** and **OpenGL** integration. Aimed at game-security researchers and reverse engineers studying offensive techniques in the Cheat → Packet Sniffer&Filter lane—capturing and filtering game network traffic for protocol analysis. (source: wiki/sources/descriptions/gmh5225__Akebi-PacketSniffer.md)
 
-Shares the gmh5225 **Akebi** tooling family with title-specific cheat clients such as [[genshin-akebi-gc]]; complements generic capture stacks like [[packet-sniffer]], [[ndisapi]], and title-specific loggers such as [[lost-ark-logger]].
+Shares the gmh5225 **Akebi** tooling family with title-specific cheat clients such as [[genshin-akebi-gc]] and version-pinned cheat references such as [[akebi-cheat-3.3]]; complements generic capture stacks like [[packet-sniffer]], [[ndisapi]], and title-specific loggers such as [[lost-ark-logger]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Shares the gmh5225 **Akebi** tooling family with title-specific cheat clients su
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[genshin-akebi-gc]] · [[packet-sniffer]] · [[ndisapi]] · [[lost-ark-logger]] · [[pcapplusplus]]
+[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[genshin-akebi-gc]] · [[akebi-cheat-3.3]] · [[packet-sniffer]] · [[ndisapi]] · [[lost-ark-logger]] · [[pcapplusplus]]
