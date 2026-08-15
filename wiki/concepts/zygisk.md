@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/mobile-security.md
   - wiki/sources/descriptions/ri-char__zygisk-dump-dex.md
   - wiki/sources/descriptions/reveny__Zygisk-ImGui-Mod-Menu.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/fedes1to__Zygisk-ImGui-Menu.md
+updated: 2026-08-15
 confidence: medium
 ---
 
@@ -25,11 +26,11 @@ Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList /
 ## Game-security uses
 
 - **DEX/metadata extraction** — [[zygisk-dump-dex]] hooks `libdexfile.so` on Android 14/15.
-- **Overlay menus** — in-dev [[zygisk-imgui-mod-menu]]; complements non-Zygisk GLES templates ([[imgui-native-modmenu]], [[imgui-unity]]).
+- **Overlay menus** — [[zygisk-imgui-menu]] (fedes1to; ImGui + cURL; `hook.cpp`; cheat / render-draw) (source: wiki/sources/descriptions/fedes1to__Zygisk-ImGui-Menu.md); in-dev [[zygisk-imgui-mod-menu]] and hobby [[zygisk-imgui-modmenu]]; complements non-Zygisk GLES templates ([[imgui-native-modmenu]], [[imgui-unity]]).
 - **Conflict management** — managed-instrumentation workflows may disable conflicting Zygisk modules, reboot for analysis, then restore (source: wiki/sources/skills/mobile-security.md).
 
 Pair with [[research-rigor]] when generalizing injection timing across OEM/Android versions.
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[frida]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-mod-menu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[frida]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

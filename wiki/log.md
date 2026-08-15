@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fedes1to/Zygisk-ImGui-Menu`: entity [[zygisk-imgui-menu]]; cited on [[zygisk]] and [[overviews/mobile-security]]; cross-linked [[zygisk-imgui-mod-menu]] and [[zygisk-imgui-modmenu]].
+
 - **2026-08-15** — ingest `description:felix-pb/kfd`: entity [[kfd]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[kfd-explorer]].
 
 - **2026-08-15** — ingest `description:felix-rs/guardian-rs`: entity [[guardian-rs]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[nocturne]], [[phantasm-x86-virtualizer]], and [[cerberus]].
