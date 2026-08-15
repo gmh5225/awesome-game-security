@@ -793,6 +793,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GH Entity List Finder](entities/gh-entity-list-finder.md) — Guided Hacking entity-list discovery (x64/x86 live-process scan for likely list addresses; cheat / RE tools)
 - [GH Offset Dumper](entities/gh-offset-dumper.md) — Windows signature/netvar offset dumper (C++; live process scan → headers/JSON; Source engine; `[Offset dumper]`)
 - [GuidedHacking Injector](entities/guided-hacking-injector.md) — Qt GUI Windows DLL injector (LoadLibrary/manual map/APC/KM driver; cloaking; Injection Testing)
+- [guardian-rs](entities/guardian-rs.md) — Rust x86-64 code/PE virtualizer (three-component VM obfuscation; AC Obfuscation Engine `[VM]`)
 - [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [gdrv-loader](entities/gdrv-loader.md) — Gigabyte `gdrv64.sys` unsigned driver mapper (BYOVD; DSE bypass; kernel research)

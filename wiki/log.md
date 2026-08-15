@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:felix-rs/guardian-rs`: entity [[guardian-rs]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[nocturne]], [[phantasm-x86-virtualizer]], and [[cerberus]].
+
 - **2026-08-15** — ingest `description:fiqri19102002/android_kernel_xiaomi_sweet`: entity [[android-kernel-xiaomi-sweet]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[android-kernel-xiaomi-pipa]], and [[pc-ginkgo]].
 
 - **2026-08-15** — ingest `description:firerpa/lamda`: entity [[lamda]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[android-proxy-mcp]], and [[delamain]].
