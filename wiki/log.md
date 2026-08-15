@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/Apex-CHEAT-FIXED`: entity [[apex-cheat-fixed]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[apex-simple-aimbot-glow-apex]], [[apex-legends-sdk]], [[apex-esp-old-project]], [[apex-full-cheat]], and [[apexd3d-external]].
+
 - **2026-08-15** — ingest `description:gmh5225/Apex-Legends-External-Esp-Aimbot-Skinchanger`: entity [[apex-legends-external-esp-aimbot-skinchanger]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-legends-sdk]], [[apex-esp-old-project]], and [[apex-simple-aimbot-glow-apex]].
 
 - **2026-08-15** — ingest `description:gmh5225/Apex-SIMPLE-AIMBOT-GLOW-APEX`: entity [[apex-simple-aimbot-glow-apex]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-legends-sdk]], [[apex-esp-old-project]], [[apex-full-cheat]], and [[apexd3d-external]].
