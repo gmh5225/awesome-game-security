@@ -381,6 +381,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-sdk-source2gen](entities/cs2-sdk-source2gen.md) — CS2 Source 2 SDK dump from source2gen (gmh5225; auto-generated C++ headers; animation/client/engine2/network/scene/schema; cheat / game:cs2 [SDK])
 - [cs2-things](entities/cs2-things.md) — CS2 Source 2 research collection (VScript; RE structures / offsets / SDK / netvars; gmh5225)
 - [cs2-webradar](entities/cs2-webradar.md) — CS2 browser-based radar cheat (C++/JavaScript; memory analysis / asset pipelines; gmh5225)
+- [csf-w (ekknod)](entities/csf-w.md) — CS:GO Win SDK generation (C/C++; Windows SDK scaffold; cheat / game:csgo [Win SDK])
 - [CSGO_BacktrackPatch](entities/csgo-backtrack-patch.md) — CS:GO backtrack patch (hooking / memory analysis; cheat / game:csgo)
 - [csgo-aw-v5.1.13](entities/csgo-aw-v5.1.13.md) — leaked AimWare v5.1.13 CS:GO internal (aimbot, visuals, movement, anti-aim, hooking framework; gmh5225 [aw-v5.1.13])
 - [csgo-alphen](entities/csgo-alphen.md) — CS:GO internal (full SDK with entity/weapon structures and rendering primitives; ImGui menu; ESP, aimbot, visual mods; gmh5225)

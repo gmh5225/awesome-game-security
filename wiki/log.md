@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:ekknod/csf_w`: entity [[csf-w]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[csgo-sdk]], [[csgo-internal-base]], and [[nv-v2]].
+
 - **2026-08-15** — ingest `description:ekknod/drvscan`: entity [[drvscan]]; cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech]], [[pcie-detector]], and [[pcileech-wifi]].
 
 - **2026-08-15** — ingest `description:ekknod/efi-monitor`: entity [[efi-monitor]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[sumap]], [[smm]], [[patchguard]], and [[callmewin32kdriver]].
