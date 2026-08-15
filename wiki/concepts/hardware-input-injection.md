@@ -5,7 +5,8 @@ topics: [game-hacking, anti-cheat]
 sources:
   - wiki/sources/skills/game-hacking.md
   - wiki/sources/descriptions/gmh5225__Overwatch2-colorbot-Cheats.md
-updated: 2026-08-11
+  - wiki/sources/descriptions/ekknod__logitech-cve.md
+updated: 2026-08-15
 confidence: medium
 ---
 
@@ -20,6 +21,8 @@ Input paths that emit **protocol-conformant HID reports** (USB keyboard/mouse) o
 | KMBox Net/B Pro | TCP/UDP or serial → USB HID | Dual-PC friendly; Net uses MAC/index/CMD framing (verify per firmware) |
 | Arduino / Teensy | Serial commands → ATmega32U4 HID | Low cost; custom firmware |
 | Logitech driver abuse | Inject into G HUB/LGS; internal move APIs | No extra hardware; version-patched |
+
+Logitech-focused driver/CVE research such as [[logitech-cve]] (ekknod; C/C++; driver development; cheat / triggerbot & aimbot) complements G HUB/LGS abuse PoCs when studying vendor-driver mouse input paths. (source: wiki/sources/descriptions/ekknod__logitech-cve.md)
 | interception.sys | Filter driver inject | Known signature; widely flagged |
 | KVM middleman | Hardware between mouse and host | Complex setup; limited host software |
 
@@ -39,4 +42,4 @@ Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-si
 
 ## Related
 
-[[kernel-mouse]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[logitech-cve]] · [[kernel-mouse]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
