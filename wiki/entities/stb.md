@@ -20,4 +20,4 @@ Sits in the README Image Codec lane as the canonical single-header codec/font/au
 
 ## Related
 
-[[overviews/graphics-api]] · [[overviews/game-engine]] · [[libjpeg-turbo]] · [[olive-c]] · [[kit]] · [[tinygltf]] · [[present-hook]]
+[[overviews/graphics-api]] · [[overviews/game-engine]] · [[freetype]] · [[libjpeg-turbo]] · [[olive-c]] · [[kit]] · [[tinygltf]] · [[present-hook]]
