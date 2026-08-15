@@ -364,6 +364,7 @@ sources:
   - wiki/sources/descriptions/wmarti__xenia-mac.md
   - wiki/sources/descriptions/rexdex__recompiler.md
   - wiki/sources/descriptions/exploits-forsale__collateral-damage.md
+  - wiki/sources/descriptions/eset__DelphiHelper.md
   - wiki/sources/descriptions/eteran__edb-debugger.md
   - wiki/sources/descriptions/execnone__simple-cs-16-multihack.md
   - wiki/sources/descriptions/eversinc33__1.6_C2.md
@@ -1149,6 +1150,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cheat Engine Godot runtime dumpers such as [[gddumper]] (Lua; Godot 3.x/4.x SceneTree / GDScript on Win x86/x64; Address List dump + experimental hot-reload) sit in the Cheat Engine Plugins / game engine explorer:Godot lane. (source: wiki/sources/descriptions/palepine__GDDumper.md)
 - Cheat Engine value tracing in IDA via [[ce-tracer-ida]] (Python; CheatEngine Value Tracer plugin; memory analysis; cheat / IDA Plugins) bridges CE scan workflows into static IDA analysis. (source: wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md)
 - Disassembler page remapping via [[ce-remap-plugin]] (Delphi CE plugin; hooks CE plugin SDK to remap disassembler memory pages so hidden or obfuscated code is visible in the disassembler view; tested on CE 7.4; cheat / Remap; gmh5225) extends CE static-analysis workflows when targets remap or conceal executable pages from the debugger UI. (source: wiki/sources/descriptions/gmh5225__CE-remap-plugin.md)
+- Delphi x86/x86_64 binary analysis via [[delphi-helper]] (eset; IDA/static-analysis helper for Object Pascal targets; setup requires `pip install py7zr`; cheat / IDA Plugins) supports RE when game clients or cheat tooling ship as Delphi PEs. (source: wiki/sources/descriptions/eset__DelphiHelper.md)
 - WebAssembly memory analysis via [[wasm-ceserver]] (Python/JavaScript; Cheat Engine ceserver-style remote debug for WASM; Cheat Engine Plugins / Analyzing WebAssembly) extends CE plugin workflows to browser and WASM-hosted game logic. (source: wiki/sources/descriptions/gmh5225__wasm-ceserver.md)
 - DMA-backed Cheat Engine ceserver via [[cheat-engine-ceserver-pcileech]] (ceserver protocol over PCILeech/LeechCore; remote CE scan/edit from a separate machine; cheat / DMA) extends CE workflows below the OS beside [[cheat-engine-dma-plugin]] and [[dma-cheat-engine-loader]]. (source: wiki/sources/descriptions/gmh5225__cheat-engine-ceserver-pcileech.md)
 - Jailbroken iOS Cheat Engine ceserver via [[ceserver-ios]] (native ceserver port; desktop CE remote memory search, edit, pointer scan on iOS game processes; cheat / iOS dynamic analysis; gmh5225) extends CE plugin workflows to jailbroken iOS beside [[frida-ceserver]] and REST scanners such as [[memory-server]]. (source: wiki/sources/descriptions/gmh5225__ceserver-ios.md) iOS runtime memory libraries such as [[kittymemory-ios]] (patch/hook/pattern-scan APIs; jailbreak-independent runtime code patching; cheat / iOS memory explorer; gmh5225) sit in the same Cheat / iOS Memory Explorer lane for in-process modification. (source: wiki/sources/descriptions/gmh5225__KittyMemory-IOS.md)

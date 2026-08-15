@@ -470,6 +470,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
 - [Delamain](entities/delamain.md) — headless JADX MCP server (APK/DEX/AAB; Frida hooks; AI agents)
+- [DelphiHelper](entities/delphi-helper.md) — x86/x86_64 Delphi binary analysis tooling (eset; cheat / IDA Plugins; py7zr setup)
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [Detours](entities/detours.md) — Microsoft Windows API monitoring/instrumentation (inline hook/trampoline; cheat / hook research)

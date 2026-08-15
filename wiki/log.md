@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:eset/DelphiHelper`: entity [[delphi-helper]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ce-remap-plugin]], [[magicmida-rs]], and [[ida-pro-mcp]].
+
 - **2026-08-15** — ingest `description:eteran/edb-debugger`: entity [[edb-debugger]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pince]], [[x64dbg]], and [[mempeek]].
 
 - **2026-08-15** — ingest `description:euuuuuuan/gatewarden-public`: entity [[gatewarden-public]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[godot]], [[godot-sandbox]], [[chessking]], and [[zombies-vs-plants]].
