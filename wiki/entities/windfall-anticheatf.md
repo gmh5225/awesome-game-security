@@ -10,7 +10,7 @@ confidence: medium
 
 # Windfall AntiCheat F
 
-Server-side Fabric mod for Minecraft **1.21.5+** that detects cheating on Fabric multiplayer servers. Written in Java with Fabric Loader, Fabric API, Mixins, and Brigadier commands; intercepts packets and runs dozens of combat, movement, packet, and inventory checks. Ported one-to-one from the Spigot/Paper [Windfall Anti-Cheat](https://github.com/enis1enis2/Windfall-AntiCheat). (source: wiki/sources/descriptions/enis1enis2__WindfallAntiCheatF.md)
+Server-side Fabric mod for Minecraft **1.21.5+** that detects cheating on Fabric multiplayer servers. Written in Java with Fabric Loader, Fabric API, Mixins, and Brigadier commands; intercepts packets and runs dozens of combat, movement, packet, and inventory checks. Ported one-to-one from the Spigot/Paper upstream [[windfall-anticheat]]. (source: wiki/sources/descriptions/enis1enis2__WindfallAntiCheatF.md)
 
 ## Detection stack
 
@@ -23,4 +23,4 @@ Vanilla-accurate physics prediction engine with latency compensation and simulat
 
 ## Related
 
-[[dakotaac]] · [[avaanticheat]] · [[minecraft-anticheatai]] · [[lenrete-mod]] · [[phantom-client]] · [[local-anticheat-1-8-9]] · [[oomph]] · [[minecpp]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[windfall-anticheat]] · [[dakotaac]] · [[avaanticheat]] · [[minecraft-anticheatai]] · [[lenrete-mod]] · [[phantom-client]] · [[local-anticheat-1-8-9]] · [[oomph]] · [[minecpp]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
