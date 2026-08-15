@@ -75,6 +75,7 @@ sources:
   - wiki/sources/descriptions/ekknod__vm.md
   - wiki/sources/descriptions/ekknod__usbsn.md
   - wiki/sources/descriptions/ekknod__sumap.md
+  - wiki/sources/descriptions/ekknod__smm.md
   - wiki/sources/descriptions/enis1enis2__Windfall-AntiCheat.md
   - wiki/sources/descriptions/frasten__ida-genpatch.md
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
@@ -1060,7 +1061,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 
 - **User-mode** — `OpenProcess` + RPM/WPM, `NtReadVirtualMemory`, mapped sections; blocked by handle stripping on protected titles. Alternative user-mode cross-process read primitives without conventional `ReadProcessMemory` are collected in libraries such as [[creadmemory]] (gmh5225; multiple UM remote-read methods; base for external cheat memory access; cheat / RPM) (source: wiki/sources/descriptions/gmh5225__CReadMemory.md).
 - **Kernel-mode** — driver RPM/WPM, MDL copy, `KeStackAttachProcess`, physical reads via vulnerable or research drivers ([[byovd]], [[ntmemory]]).
-- **Below OS** — [[dma]] FPGA/PCIe, hypervisor introspection, EFI runtime before DSE, external second machine.
+- **Below OS** — [[dma]] FPGA/PCIe, hypervisor introspection, EFI runtime before DSE, SMM cheat research such as [[smm]] (ekknod; C/C++; driver development / graphics / networking; cheat / EFI driver area) (source: wiki/sources/descriptions/ekknod__smm.md), external second machine.
 - **Unified transport libraries** — [[vm]] (ekknod; C/C++ `vm.h`; swap kernel EPROCESS walks, RPM/WPM, Linux `/proc/pid/mem`, [[pcileech]] VMMDLL/LeechCore DMA, KVM guest introspection, Proton, or EFI-variable kernel comms without changing game-facing logic; CR3 translation, PEB/LDR module walk, pattern scan) (source: wiki/sources/descriptions/ekknod__vm.md).
 
 Pattern scan → pointer chains → structure reconstruction is the usual external workflow; internals read game objects directly after injection.
