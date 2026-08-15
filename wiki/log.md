@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:frk1/hazedumper`: entity [[hazedumper]]; cited on [[source-netvars]] and [[overviews/game-hacking]]; cross-linked [[csgo-offsets]] and [[gh-offset-dumper]].
+
 - **2026-08-15** — ingest `description:frkngksl/HintInject`: entity [[hintinject]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[modexmap]], and [[shoggoth]].
 
 - **2026-08-15** — ingest `description:frkngksl/Huan`: entity [[huan]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[packer-tutorial]], [[atom-pe-packer]], and [[tinyload]].

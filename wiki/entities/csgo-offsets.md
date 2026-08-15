@@ -20,4 +20,4 @@ Complements SDK header trees such as [[csgo-sdk]] and [[csgo-sdk-improved]], gen
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[offsets]] · [[sdk]] · [[gh-offset-dumper]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[offsets]] · [[hazedumper]] · [[sdk]] · [[gh-offset-dumper]]

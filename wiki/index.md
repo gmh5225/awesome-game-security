@@ -848,6 +848,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Handle-Ripper](entities/handle-ripper.md) — user-mode handle hijack via SystemHandleInformation + DuplicateHandle (gmh5225; DuplicateHandle)
 - [HappyIDA](entities/happyida.md) — IDAPython Hex-Rays decompiler utilities (parameter labels, SEH, Rust strings; cheat / IDA Plugins)
 - [hARMless](entities/harmless.md) — ARM64 Linux ELF packer/loader (encrypt; custom stub; fileless `memfd_create`; Anti Cheat → Binary Packer `[ELF]`)
+- [hazedumper](entities/hazedumper.md) — auto-updating CS:GO offset/netvar repository (frk1; signatures for engine.dll/client.dll; JSON/TOML/YAML/C++/C#/VB; cheat / game:csgo [Offset])
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [Herpaderping](entities/herpaderping.md) — process/file obfuscation via write→map→modify→execute (SEC_IMAGE; on-disk decoy vs mapped image; cheat / hide)
 - [hex2dec-mcp](entities/hex2dec-mcp.md) — MCP hex↔decimal conversion for AI agents (JavaScript/TypeScript; Game Develop / MCP; gmh5225)
