@@ -14,7 +14,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__VulnerablePatchGuardExploit.md
   - wiki/sources/descriptions/gmh5225__QuickPGTrigger.md
   - wiki/sources/descriptions/gmh5225__Patchguard-2023.md
-updated: 2026-08-11
+  - wiki/sources/descriptions/emlinhax__tableflipper.md
+updated: 2026-08-15
 confidence: high
 ---
 
@@ -46,6 +47,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[patchguard-2023]] (gmh5225) documents 2023-era KPP internals — timer-based verification, context encryption, protected-structure list, recovery routines, trigger mechanisms, and bypass study — for kernel researchers in the cheat / PatchGuard-related lane. (source: wiki/sources/descriptions/gmh5225__Patchguard-2023.md)
 
+[[tableflipper]] (emlinhax; C++) partially disables KPP on builds up to Windows 11 21H2 for offensive / RE study in the same cheat / PatchGuard-related lane. (source: wiki/sources/descriptions/emlinhax__tableflipper.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:emlinhax/tableflipper`: entity [[tableflipper]]; cited on [[patchguard]] and [[overviews/windows-kernel]]; cross-linked [[upgdsed]], [[vulnerablepatchguardexploit]], and [[pg1903]].
+
 - **2026-08-15** — ingest `description:emlinhax/xv`: entity [[xv]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[encrypted-value]], [[xor-float]], and [[obfuscxx]].
 
 - **2026-08-15** — ingest `description:emoose/idaxex`: entity [[idaxex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xenia]], [[xenia-mac]], [[xbox360-emu]], and [[recompiler]].
