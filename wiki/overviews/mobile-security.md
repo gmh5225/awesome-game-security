@@ -245,6 +245,7 @@ sources:
   - wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md
   - wiki/sources/descriptions/geeksonsecurity__android-overlay-malware-example.md
   - wiki/sources/descriptions/g2wfw__qbdi-tracer-android.md
+  - wiki/sources/descriptions/fynks__awesome-android-root.md
 updated: 2026-08-15
 confidence: high
 ---
@@ -268,6 +269,8 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 | [[apatch-kpm]] | Kernel (KernelPatch boot patch) | High | Yes | Growing (stock GKI without custom kernel source) |
 
 APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
+
+Curated Android root resource index [[awesome-android-root]] (fynks; documentation/list; cheat / Android root) aggregates frameworks, modules, and bypass references; flags stricter **Play Integrity** on Android 14/15 when pairing root with game integrity checks. (source: wiki/sources/descriptions/fynks__awesome-android-root.md)
 
 Kernel-level roots avoid a filesystem `su` binary and can hide from mount-namespace / package-manager probes that target classic Magisk artifacts—detectors such as [[magiskdetector]], [[detection]], and [[keyattestation]] still combine FS, process, property, attestation, and behavioral checks. (source: wiki/sources/skills/mobile-security.md) Offensive root-hide samples such as [[hideroot]] (C/C++; Cheat / Magisk) study the same hide surface from the attacker side. (source: wiki/sources/descriptions/longpoxin__hideroot.md) Portable ptrace MagiskHide module [[magiskhide]] (Magisk v24.0+ DenyList hidelist without Zygisk; root-detection bypass via ptrace interception; Android 11+) restores post-removal hide for researchers. (source: wiki/sources/descriptions/gmh5225__MagiskHide.md) Boot-loop auto-rescue module [[rescuex]] (Magisk/KernelSU/APatch; boot watchdog, tiered module disable, snapshots/rollback, safe mode, WebUI; offline recovery when faulty modules block boot) sits in the same module-ecosystem lane for developers testing experimental root modules. (source: wiki/sources/descriptions/jiayuxuan123__RescueX.md) Samsung Knox-gated app restoration on rooted Galaxy hardware via [[knoxpatch]] (LSPosed Xposed hooks plus optional KnoxPatch Enhancer Magisk/KernelSU module; root-detection bypass, property spoofing, Knox SDK / Samsung Attestation Key / Keystore / Knox Matrix API patches; One UI Android 9–16) studies OEM integrity checks on modified Samsung devices. (source: wiki/sources/descriptions/salvogiangri__KnoxPatch.md) [[flagsecurepatcher]] (disable `FLAG_SECURE` + screenshot listeners; Cheat / Magisk documentation) sits in the adjacent Android screen-capture bypass lane. (source: wiki/sources/descriptions/j-hc__FlagSecurePatcher.md)
 

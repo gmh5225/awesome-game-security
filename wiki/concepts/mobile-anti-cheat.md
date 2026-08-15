@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md
   - wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md
   - wiki/sources/descriptions/geeksonsecurity__android-overlay-malware-example.md
+  - wiki/sources/descriptions/fynks__awesome-android-root.md
 updated: 2026-08-15
 confidence: medium
 ---
@@ -42,7 +43,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts |
 | Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]) |
 | Emulator / VM | Build fingerprint, sensors, FS signatures ([[anti-emulator]], [[android-emulator-detection]], [[conbeerlib]]) |
-| Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
+| Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) — stricter on Android 14/15 per curated root research notes [[awesome-android-root]] (source: wiki/sources/descriptions/fynks__awesome-android-root.md); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
 | Debugger | `TracerPid`, JDWP, ptrace |
 | Hooks | PLT/GOT integrity, `/proc/self/maps` anomalies |
 | IAP / billing | Client-side Play Billing API trust; local purchase-confirmation spoofing such as [[freedom]] (billing-service hook; server receipt validation is the primary defense) (source: wiki/sources/descriptions/gmh5225__freedom.md) |

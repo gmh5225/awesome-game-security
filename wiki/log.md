@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:fynks/awesome-android-root`: entity [[awesome-android-root]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magisk]], [[kernelsu]], and [[android-rom-list]].
+
 - **2026-08-15** — ingest `description:g2wfw/qbdi-tracer-android`: entity [[qbdi-tracer-android]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dobby]] and [[dynamic-binary-instrumentation]].
 
 - **2026-08-15** — ingest `description:g8tsz/deadlock-anti-cheat`: entity [[deadlock-anti-cheat]]; cited on [[overviews/anti-cheat]] and [[concepts/anti-screenshot-capture]]; cross-linked [[basic-anti-cheat]], [[screenshot]], and [[research-rigor]].
