@@ -4,7 +4,8 @@ kind: concept
 topics: [graphics-api, game-hacking]
 sources:
   - wiki/sources/skills/graphics-api.md
-updated: 2026-07-29
+  - wiki/sources/descriptions/frostbone25__ShaderInjector.md
+updated: 2026-08-15
 confidence: medium
 ---
 
@@ -27,6 +28,7 @@ Present-only overlays ([[present-hook]]) draw on top of the finished frame; draw
 
 - **Depth disable** — `OMSetDepthStencilState` with depth test off so geometry draws through walls.
 - **Shader replacement** — pixel shader returns flat team colors (chams) or semi-transparent tint.
+- **D3D12 runtime pixel-shader inject/replace** — title-targeted interceptors such as [[shader-injector]] (FF7 Rebirth PC; MinHook + ImGui live edit; DX12 API hook adaptable to other D3D12 games) modify bound shaders without a Present-only overlay. (source: wiki/sources/descriptions/frostbone25__ShaderInjector.md)
 - **Cross-API shader tooling** — README DirectX lane includes D3D12 injectors and cross-API runtime shader capture/flatten/replace for research on live pipelines.
 
 Engine-specific samples often combine draw hooks with SDK offsets ([[battlefield-1-internal]], [[csgo-bot]] OpenGL/shader lane).
@@ -37,4 +39,4 @@ Modified pipeline state, unexpected shader bytecode, draw-count anomalies, and i
 
 ## Related
 
-[[present-hook]] · [[world-to-screen]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[present-hook]] · [[shader-injector]] · [[world-to-screen]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
