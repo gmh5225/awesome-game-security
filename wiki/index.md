@@ -744,6 +744,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-design-documents](entities/game-design-documents.md) — curated classic game design docs and PDFs (Doom, GTA, Fallout, Planescape: Torment, etc.; Game Develop / guide)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
+- [Gameplay](entities/gameplay.md) — cross-platform C++ 3D game framework (OpenGL ES 2.0/3.0, Bullet, OpenAL, Lua; CMake; Win/macOS/Linux/iOS/Android; FBX/Collada→.gpb encoder; Game Engine / source [2D/3D])
 - [CRYENGINE (GameEngine-CRYENGINE)](entities/gameengine-cryengine.md) — Crytek CRYENGINE source mirror (renderer/physics/audio/AI/animation/editor; AAA; Game Engine / source; gmh5225)
 - [Far Cry (leaked source)](entities/farcry.md) — Far Cry 1 leaked CryEngine 1 full archive (renderer/physics/AI/game logic/editor; Game Engine / source; gmh5225; FarCry + Far-Cry-1-Source-Full)
 - [CX3D Framework](entities/gameengine-cx3d.md) — easy-to-use C++ 3D game framework (Game Develop / source; README [3D]; gmh5225)
