@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:emilyinure/solace-csgo`: entity [[solace-csgo]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-internal-base]], [[aqhax-csgo]], and [[csgo-alphen]].
+
 - **2026-08-15** — ingest `description:emlinhax/DbgViewEx`: entity [[dbgviewex]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[etw-explorer]], [[etw-watcher]], [[fibratus]], and [[openprocmon]].
 
 - **2026-08-15** — ingest `description:emlinhax/blitz`: entity [[blitz]]; cited on [[overviews/anti-cheat]]; cross-linked [[kli]], [[kli-ex]], [[syscalls-cpp]], and [[xv]].

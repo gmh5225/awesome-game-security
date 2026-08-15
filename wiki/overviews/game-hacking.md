@@ -711,6 +711,7 @@ sources:
   - wiki/sources/descriptions/serjam__mwclap.md
   - wiki/sources/descriptions/es3n1n__ida-wakatime-py.md
   - wiki/sources/descriptions/es3n1n__nvidia-overlay-renderer.md
+  - wiki/sources/descriptions/emilyinure__solace-csgo.md
   - wiki/sources/descriptions/gmh5225__NVIDIA-OVERLAY.md
   - wiki/sources/descriptions/gmh5225__nvidia-overlay-hijack.md
   - wiki/sources/descriptions/gmh5225__Steam-Hook-Render-PoC.md
@@ -1446,6 +1447,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Leaked commercial internal CS:GO samples such as [[csgo-aw-v5.1.13]] (gmh5225; AimWare v5.1.13; aimbot, visuals, movement, anti-aim, internal hooking framework; `[aw-v5.1.13]`) sit in the same cheat / game:csgo lane for studying production-grade Source 1 internal architecture beside open-source HvH stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
 - Leaked commercial internal CS:GO samples such as [[csgo-nixware-csgo]] (gmh5225; Nixware; aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay; `[Nixware]`) sit in the same cheat / game:csgo lane for studying production-grade Source 1 internal architecture beside open-source stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-NIXWARE-CSGO.md)
 - Internal CS:GO samples such as [[csgo-alphen]] (gmh5225; full SDK with entity structures, weapon data, and rendering primitives; ImGui menu; ESP, aimbot, and visual mods) sit in the same cheat / game:csgo lane for studying SDK-backed internal feature stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-Alphen.md)
+- Internal CS:GO samples such as [[solace-csgo]] (emilyinure; modern C++; polished ImGui menu; ESP, aimbot, triggerbot, movement assistance, skin changer, and visual mods via Source SDK hooking; modular internal architecture; Internal tag) sit in the same cheat / game:csgo lane for studying well-structured internal cheat design patterns. (source: wiki/sources/descriptions/emilyinure__solace-csgo.md)
 - Internal CS:GO samples such as [[osiris-and-extra]] (C/C++; driver development / OpenGL / rendering; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - Simple internal CS:GO RE-training samples such as [[dainsleif]] (s3pt3mb3r) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - CS:GO training software such as [[avhook]] (gmh5225; Windows; joke features; cheat / game:csgo) sits in the same RE-training lane. (source: wiki/sources/descriptions/gmh5225__avhook.md)

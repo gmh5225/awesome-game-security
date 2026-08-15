@@ -401,6 +401,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-sdk](entities/csgo-sdk.md) — CS:GO Source 1 SDK headers (gmh5225/csgo-sdk + csgo_sdk; classes / netvars / interfaces / hooking; cheat / game:csgo)
 - [csgo-sdk-improved](entities/csgo-sdk-improved.md) — improved CS:GO Source 1 SDK (corrected classes, extra interfaces, fuller netvars; cheat / game:csgo [Internal])
 - [csgo2-cheat](entities/csgo2-cheat.md) — CS2 internal cheat: rendering / SDK generation / hooking (imnotdatguy + gmh5225 [Internal]; C++; cheat / game:cs2)
+- [solace-csgo](entities/solace-csgo.md) — CS:GO internal cheat (modern C++; ImGui menu; ESP, aimbot, triggerbot, movement, skin changer; Source SDK hooking; emilyinure [Internal])
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [csso-src](entities/csso-src.md) — CS:GO mod Source tree (client/server / weapons / movement / engine interfaces; Game Engine)
 - [CSSFontFace-Exploit](entities/cssfontface-exploit.md) — WebKit CSSFontFace UAF (PS4/PS5 browser; jailbreak / PlayStation)

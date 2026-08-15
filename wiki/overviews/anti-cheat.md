@@ -102,6 +102,7 @@ sources:
   - wiki/sources/descriptions/obama-gaming__xor-float.md
   - wiki/sources/descriptions/emlinhax__blitz.md
   - wiki/sources/descriptions/emlinhax__xv.md
+  - wiki/sources/descriptions/emilyinure__solace-csgo.md
   - wiki/sources/descriptions/seifreed__r2morph.md
   - wiki/sources/descriptions/secrary__makin.md
   - wiki/sources/descriptions/revsic__AntiDebugging.md
@@ -574,6 +575,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[csgo-aw-v5.1.13]] — leaked AimWare v5.1.13 internal CS:GO source (aimbot, visuals, movement, anti-aim, hooking framework) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
 - [[csgo-nixware-csgo]] — leaked Nixware internal CS:GO source (aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-NIXWARE-CSGO.md)
 - [[csgo-alphen]] — internal CS:GO source (full SDK with entity/weapon structures and rendering primitives; ImGui menu; ESP, aimbot, visual mods) for studying SDK-backed injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-Alphen.md)
+- [[solace-csgo]] — internal CS:GO source (emilyinure; modern C++; polished ImGui menu; ESP, aimbot, triggerbot, movement assistance, skin changer, visual mods via Source SDK hooking; modular architecture) for studying injected-cheat surface and detection characteristics against VAC (source: wiki/sources/descriptions/emilyinure__solace-csgo.md)
 - [[osiris-and-extra]] — Internal CS:GO sample (C/C++; driver / OpenGL / rendering) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - [[dainsleif]] — simple Internal CS:GO RE-training sample for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - [[avhook]] — CS:GO training software (gmh5225; Windows; joke features) for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__avhook.md)
