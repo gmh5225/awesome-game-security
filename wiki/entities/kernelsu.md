@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md
   - wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md
   - wiki/sources/descriptions/gmh5225__KernelSU-4.4.md
-updated: 2026-08-12
+  - wiki/sources/descriptions/gmh5225__A146B-KSU.md
+updated: 2026-08-15
 confidence: medium
 ---
 
@@ -15,7 +16,7 @@ confidence: medium
 
 Kernel-based Android root solution (**kernel su**) listed under Cheat / Android root. Implemented primarily in Kotlin and Rust; grants elevated privileges via kernel-level integration rather than Magisk-style systemless userspace alone. Canonical reference for researchers studying Android root frameworks, module ecosystems (alongside Magisk / APatch), and mobile anti-cheat root-detection tradeoffs. (source: wiki/sources/descriptions/tiann__KernelSU.md)
 
-Adjacent tooling: Magisk modules that also target KernelSU such as [[move-certificate]]; systemless Magisk itself [[magisk]]; Magisk-install paths such as [[cheese]]. Hardened fork [[apex-su]] rewrites userspace in Rust and adds stealth IOCTL over an anonymous `io_uring`-disguised inode (no proc/sys/dev entries) for root-hide research. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md) Device-specific KernelSU kernel trees such as [[kernelsu-pixel4xl]] (Pixel 4 XL / coral / msm-floral) integrate the same syscall-hook and credential-override model into vendor BSP sources. (source: wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md) Legacy **Linux 4.4** backport [[kernelsu-4.4]] (SELinux policy + APK signature verification; Google GCC 4.9) targets pre-GKI OEM kernels where upstream KernelSU does not ship. (source: wiki/sources/descriptions/gmh5225__KernelSU-4.4.md)
+Adjacent tooling: Magisk modules that also target KernelSU such as [[move-certificate]]; systemless Magisk itself [[magisk]]; Magisk-install paths such as [[cheese]]. Hardened fork [[apex-su]] rewrites userspace in Rust and adds stealth IOCTL over an anonymous `io_uring`-disguised inode (no proc/sys/dev entries) for root-hide research. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md) Device-specific KernelSU kernel trees such as [[kernelsu-pixel4xl]] (Pixel 4 XL / coral / msm-floral) integrate the same syscall-hook and credential-override model into vendor BSP sources. (source: wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md) Samsung Galaxy A14 5G (A146B / a14x) KernelSU kernel sources such as [[a146b-ksu]] (gmh5225; modified Samsung kernel tree for custom ROM builders) extend that model to mid-range Exynos/MediTek Samsung BSPs. (source: wiki/sources/descriptions/gmh5225__A146B-KSU.md) Legacy **Linux 4.4** backport [[kernelsu-4.4]] (SELinux policy + APK signature verification; Google GCC 4.9) targets pre-GKI OEM kernels where upstream KernelSU does not ship. (source: wiki/sources/descriptions/gmh5225__KernelSU-4.4.md)
 
 ## Links
 
@@ -23,4 +24,4 @@ Adjacent tooling: Magisk modules that also target KernelSU such as [[move-certif
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[magisk]] · [[apex-su]] · [[move-certificate]] · [[kernelsu-pixel4xl]] · [[kernelsu-4.4]] · [[magiskdetector]] · [[frida]] · [[keyattestation]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[magisk]] · [[apex-su]] · [[move-certificate]] · [[kernelsu-pixel4xl]] · [[a146b-ksu]] · [[kernelsu-4.4]] · [[magiskdetector]] · [[frida]] · [[keyattestation]]

@@ -138,6 +138,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [android-kernel-samsung-universal5433](entities/android-kernel-samsung-universal5433.md) — Samsung Exynos 5433 Android kernel (Note 4 / Alpha; cheat / Android Kernel Source)
 - [android-kernel-samsung-sm7150](entities/android-kernel-samsung-sm7150.md) — Samsung SM7150 Android kernel source (cheat / Android Kernel Source)
+- [A146B-KSU](entities/a146b-ksu.md) — Samsung Galaxy A14 5G (A146B / a14x) Android kernel + KernelSU (cheat / Android Kernel Source; gmh5225)
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (gmh5225 Java/Kotlin scoring library; reveny Java/C++ fork; Detection:Virtual Environments)

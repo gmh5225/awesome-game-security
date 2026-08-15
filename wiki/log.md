@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gmh5225/A146B-KSU`: entity [[a146b-ksu]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[android-kernel-samsung-sm7150]], and [[knoxpatch]].
+
 - **2026-08-15** — ingest `description:gmh5225/ANGRYORCHARD`: entity [[angryorchard]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[win32k-file-collection]], [[callmewin32kdriver]], and [[windows-kernel-exploits]].
 
 - **2026-08-15** — ingest `description:gmh5225/AcDrv`: entity [[acdrv]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[etwhook-infinityhookclass]], [[kernel-anti-cheat]], and [[etw-threat-intelligence]].

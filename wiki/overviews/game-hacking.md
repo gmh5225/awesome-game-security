@@ -224,6 +224,7 @@ sources:
   - wiki/sources/descriptions/msd0pe-1__cve-maker.md
   - wiki/sources/descriptions/universal5433__android_kernel_samsung_universal5433.md
   - wiki/sources/descriptions/pascua28__android_kernel_samsung_sm7150.md
+  - wiki/sources/descriptions/gmh5225__A146B-KSU.md
   - wiki/sources/descriptions/yabinc__simpleperf_demo.md
   - wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md
   - wiki/sources/descriptions/yaxinsn__vermagic.md
@@ -1294,6 +1295,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Device kernel sources such as [[kernelsu-pixel4xl]] (Pixel 4 XL / coral / msm-floral + KernelSU; su injection / SELinux / syscall hook) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md)
 - Device kernel sources such as [[android-kernel-samsung-universal5433]] (Samsung Exynos 5433 / Note 4 / Alpha) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/universal5433__android_kernel_samsung_universal5433.md)
 - Device kernel sources such as [[android-kernel-samsung-sm7150]] (Samsung SM7150) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/pascua28__android_kernel_samsung_sm7150.md)
+- Device kernel sources such as [[a146b-ksu]] (Samsung Galaxy A14 5G / A146B / a14x + KernelSU; gmh5225) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/gmh5225__A146B-KSU.md)
 - Device kernel sources such as [[android-kernel-huawei-mt6761]] (Huawei MT6761 / Helio P22) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/huawei-mediatek-devs__android_kernel_huawei_mt6761.md)
 - Device kernel sources such as [[android-kernel-huawei-hi6250-8-exp]] (Huawei hi6250 + KernelSU) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/gmh5225__android_kernel_huawei_hi6250-8_Exp.md)
 - Android Application CVE PoCs such as [[cve-2024-0044]] (Android 12/13; crafted payload → unauthorized app data-directory access) sit in the Cheat Android Application CVE lane. (source: wiki/sources/descriptions/nahid0x1__CVE-2024-0044.md)
