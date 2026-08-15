@@ -298,6 +298,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Android-privilege-CVE-2022-20452-LeakValue.md
 
   - wiki/sources/descriptions/xsslize__idarem.md
+  - wiki/sources/descriptions/giladreich__ida_migrator.md
   - wiki/sources/descriptions/matteyeux__IDArling.md
   - wiki/sources/descriptions/matheusbranhann__taskbarhero-bot.md
   - wiki/sources/descriptions/trailofbits__idac.md
@@ -1199,6 +1200,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Automated structure/type recovery on stripped binaries via [[symless]] (data-flow + memory-access patterns; improves Hex-Rays output) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/thalium__symless.md)
 - Remote browser review of a live IDA database via [[idarem]] (Flask REST/SSE + React client; live follow / optional write-back; tunnel-friendly) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/xsslize__idarem.md)
 - Real-time multi-user IDA database sync via [[idarling]] (connect IDA Pro / Hex-Rays instances; collaborative RE for distributed teams) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/matteyeux__IDArling.md)
+- IDA database migration via [[ida-migrator]] (Python plugin; migrate IDB between IDA versions or environments; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / IDB workflow lane beside [[idarling]] and [[idarem]]. (source: wiki/sources/descriptions/giladreich__ida_migrator.md)
 - Offline CPU instruction docs at the cursor via [[idaref]] (Python; SQLite refs for x86-64/ARM/MIPS/Xtensa) sit in the Cheat IDA Plugins / instruction-reference lane. (source: wiki/sources/descriptions/nologic__idaref.md)
 - Agent/human IDA CLI via [[idac]] (Unix socket to live GUI or headless idalib; structured JSON; batch/preview/dry-run; bundled agent skill; not MCP; early alpha) sits in the same IDA-driven RE lane. (source: wiki/sources/descriptions/trailofbits__idac.md)
 - IDA ↔ VS Code IDAPython integration via [[idacode]] (execute/debug scripts from VS Code; early alpha; cheat / IDA Plugins) sits in the same IDAPython workflow lane. (source: wiki/sources/descriptions/gmh5225__idacode.md)
