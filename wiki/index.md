@@ -816,6 +816,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
 - [Gatling](entities/gatling.md) — Scala/JVM load-testing framework (Akka/Netty async; HTTP/WebSocket/gRPC/MQTT scenarios; percentile HTML reports; Game Testing / Server Testing)
 - [gd-internal](entities/gd-internal.md) — Geometry Dash internal cheat (ImGui menu; Comfortaa font; signatures in hookmgr.cpp; gmh5225)
+- [gatewarden-public](entities/gatewarden-public.md) — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes and deterministic 30 Hz sim (Game Develop / source)
 - [godot-sandbox](entities/godot-sandbox.md) — Godot addon: sandboxed mod code for safe player extensions (all platforms; Plugins:Godot)
 - [godot-plush-character](entities/godot-plush-character.md) — Godot 4.x plush/soft-body character rendering (fabric shaders, soft deformation, procedural animation; stylized stuffed-animal aesthetic)
 - [godot](entities/godot.md) — Godot Engine OSS source (GDScript/C#; scene graph, scripting, rendering; Game Engine / source)

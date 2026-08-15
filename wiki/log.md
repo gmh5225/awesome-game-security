@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:euuuuuuan/gatewarden-public`: entity [[gatewarden-public]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[godot]], [[godot-sandbox]], [[chessking]], and [[zombies-vs-plants]].
+
 - **2026-08-15** — ingest `description:everdox/InfinityHook`: entity [[infinityhook]]; cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[etwhook-infinityhookclass]], [[etw-syscall]], [[etw-syscall-monitor]], and [[patchguard]].
 
 - **2026-08-15** — ingest `description:everdox/ermsb-meme`: entity [[ermsb-meme]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[ept-hook-detection]], [[hypervisor-detection]], [[ophion]], and [[hypervisor]].
