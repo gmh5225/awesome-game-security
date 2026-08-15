@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `readme:categories`: bumped Anti Cheat ~674 (was ~673; Cheat ~2702 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-15** — ingest `description:freemint/fdlibm`: entity [[fdlibm]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[rtm]], [[directxmath]], and [[omath]].
 
 - **2026-08-15** — ingest `description:freetype/freetype`: entity [[freetype]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[stb]] and [[imgui]].
