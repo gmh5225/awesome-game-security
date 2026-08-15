@@ -426,6 +426,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [dataptrswap-driver](entities/dataptrswap-driver.md) — win32kbase data-ptr swap on NtSetCompositionSurfaceAnalogExclusive; MmUnloadedDrivers cleanup (gmh5225; cheat driver)
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
+- [d-process](entities/d-process.md) — Linux decoy process generator (on-demand C compile + nohup; arbitrary process names; anti-cheat / tracker enumeration research)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
 - [DakotaAC](entities/dakotaac.md) — Spigot/Paper Minecraft AC (ProtocolLib + Citizens2; combat/movement/inventory modules; YAML kick/ban)
 - [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:gigbh/d-process`: entity [[d-process]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[anticheat-poc]], [[basic-anti-cheat]], [[mandibule]], and [[procmap]].
+
 - **2026-08-15** — ingest `description:giladreich/ida_migrator`: entity [[ida-migrator]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idarling]], [[idarem]], and [[diaphora]].
 
 - **2026-08-15** — ingest `description:gilboz/ida_kernelcache_ng`: entity [[ida-kernelcache-ng]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[aimachdec]], [[binja-kc]], and [[ida-ios-helper]].
