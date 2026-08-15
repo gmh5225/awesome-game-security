@@ -107,6 +107,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AcDrv](entities/acdrv.md) — Windows kernel AC research driver (process/module callbacks, memory intercept, syscall monitoring; ETW Hook; gmh5225)
 - [AetherVisor](entities/aether-visor.md) — AMD SVM hacked-hypervisor testing (feature implementation walkthrough; Detection: Hacked Hypervisor Testing AMD; gmh5225)
 - [AdbFileManager](entities/adb-file-manager.md) — Windows ADB file manager (C#/.NET dual-pane Explorer UI; faster than MTP; Cheat Android File Explorer; gmh5225)
+- [ADB Debug Detect Checker](entities/adb-debug-detect-checker.md) — Android Java ADB/debug-state detection app (reference for ADB debugging probes; Anti Debugging; fiord)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
 - [Akebi Cheat 3.3](entities/akebi-cheat-3.3.md) — Akebi-framework Genshin Impact cheat (3.3 branch; cheat / game:genshin impact; gmh5225)
 - [Akebi Packet Sniffer](entities/akebi-packet-sniffer.md) — Akebi-framework packet sniffer (C++/C; driver development; DirectX/OpenGL; cheat / Packet Sniffer&Filter; gmh5225)

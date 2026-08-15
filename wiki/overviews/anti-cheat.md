@@ -505,6 +505,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__NeacSafe-Analysis.md
   - wiki/sources/descriptions/gmh5225__CapcomLib.md
   - wiki/sources/descriptions/gmh5225__CyberAntLoader.md
+  - wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md
 updated: 2026-08-15
 confidence: high
 ---
@@ -593,6 +594,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anti-cheat-chrysalis]] — C/C++ reference AC / chrysalis guide (process integrity, module scan, memory pattern detection, debugger detection, overlay monitoring, kernel driver comm, OpenGL; gmh5225; Anti Cheat / guide; alias [[anticheat]]) (source: wiki/sources/descriptions/gmh5225__AntiCheat-chrysalis.md) (source: wiki/sources/descriptions/gmh5225__AntiCheat.md)
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
 - [[antidebugandmemorydump]] — Android anti-debug + memory analysis / emulation / debugging reference (Java + C/C++; Anti Debugging lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebugandMemoryDump.md)
+- [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
 - [[chessking]] — Rust Axum multiplayer chess platform with layered server-side AC (risk scoring, device fingerprinting, match integrity, IP reputation, chess-themed CAPTCHA step-up, ban escalation; shakmaty move validation; admin dashboard; educational reference; web-coder-lab) (source: wiki/sources/descriptions/web-coder-lab__chessking.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)

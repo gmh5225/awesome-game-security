@@ -178,6 +178,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-15** — ingest `description:gmh5225/AndroidCheatTemplate`: updated entity [[android-cheat-template]] (gmh5225 kernel/OpenGL/memory-analysis fork; cheat / game:sausage man); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
+- **2026-08-15** — ingest `description:fiord/ADB-Debug-Detect-Checker`: entity [[adb-debug-detect-checker]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[antidebugandmemorydump]] and [[mobile-anti-cheat]].
+
 - **2026-08-15** — ingest `description:gmh5225/AndroidDriveSignity`: entity [[android-drivesignity]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-kernel-driver-template]] and [[compile-android-driver]].
 
 - **2026-08-15** — ingest `description:gmh5225/Android_Native_Surface`: entity [[android-native-surface]]; cited on [[overviews/mobile-security]] and [[overviews/graphics-api]]; cross-linked [[external-imgui-android]], [[android-imgui-menu]], and [[imgui-native-modmenu]].
