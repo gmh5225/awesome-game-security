@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:forceinline/csgo-external-esp`: entity [[csgo-external-esp]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-external-cheat]], [[heck-csgo-external]], and [[astra]].
+
 - **2026-08-15** — ingest `description:forcequitOS/bad_query`: entity [[bad-query]]; cited on [[overviews/mobile-security]]; cross-linked [[darksword-kexploit-fun]], [[lara]], and [[lightsaber]].
 
 - **2026-08-15** — ingest `description:fortra/hw-call-stack`: entity [[hw-call-stack]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[spoof-stack-safecall]] and [[shadow-stack-walk]].

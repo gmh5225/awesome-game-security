@@ -192,6 +192,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__compiler-binary-richprint.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
+  - wiki/sources/descriptions/forceinline__csgo-external-esp.md
   - wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md
   - wiki/sources/descriptions/sneakyevil__ida_functioncolor.md
   - wiki/sources/descriptions/richor1042__IDAFuncOutline.md
@@ -1416,6 +1417,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Driver-backed external CS:GO samples such as [[csgo-cheat-external]] (C++; driver development; External tag) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - Simple kernel CS:GO cheats with hook-based communication such as [[kernel-csgo]] (C++; driver development / modding) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/nbqofficial__kernel-csgo.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
+- External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - Script-based external CS:GO samples such as [[csgo-external-ahk-hack]] (gmh5225; AutoHotkey; RPM for triggerbot, bunny hop, basic ESP; External tag) sit in the same low-barrier cheat / game:csgo lane for studying script-based external detection. (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
