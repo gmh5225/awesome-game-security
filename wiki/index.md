@@ -701,6 +701,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [flare-vm](entities/flare-vm.md) — Mandiant Windows analysis VM (Chocolatey/Boxstarter; malware/IR/RE lab provisioning)
 
 
+- [fdlibm](entities/fdlibm.md) — portable C libm (Sun fdlibm transcendental/elementary math; Mathematics)
 - [FreeDirect](entities/free-direct.md) — DX3 DirectDraw/DirectSound/DirectPlay subset on SDL3 (legacy 2D; DirectX Compatibility)
 - [FreeType](entities/freetype.md) — portable C font rasterization (TrueType/OpenType/CFF/Type 1/bitmap; hinting, anti-aliasing, subpixel; pluggable drivers; Render fonts)
 - [Free-RASP-Android](entities/free-rasp-android.md) — Native Android freeRASP sample (Talsec; Kotlin; root/Magisk/Frida/emulator/tamper/integrity)

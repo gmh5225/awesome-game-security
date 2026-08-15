@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-15** — ingest `description:freemint/fdlibm`: entity [[fdlibm]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[rtm]], [[directxmath]], and [[omath]].
+
 - **2026-08-15** — ingest `description:freetype/freetype`: entity [[freetype]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[stb]] and [[imgui]].
 
 - **2026-08-15** — ingest `description:freezato/LocalAnticheat-1.8.9`: entity [[local-anticheat-1-8-9]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[phantom-client]], [[avaanticheat]], and [[minecraft-anticheatai]].
