@@ -1130,6 +1130,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kur](entities/kur.md) — C/C++ kernel utility via echo_driver.sys BYOVD (kernel R/W, process manipulation, driver load; gmh5225)
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
+- [lamda](entities/lamda.md) — FIRERPA all-in-one Android control (Python API; UI automation, WebRTC mirror, MITM, built-in Frida, MCP; root/non-root; firerpa)
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
 - [LazySign](entities/lazy-sign.md) — fake-cert Authenticode signing (Microsoft devkit binaries; zero extra deps; Some Tricks / Ring3)
 - [LazyIDA](entities/lazyida.md) — IDA Pro productivity plugin (debug auto-relocation jump, memory dump, ASCII/HEX/BASE64 paste, RVA copy, jump-to-address without rebasing; gmh5225; cheat / IDA Plugins)
