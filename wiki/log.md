@@ -168,6 +168,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-15** — ingest `description:enis1enis2/Windfall-AntiCheat`: entity [[windfall-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheatf]], [[dakotaac]], and [[avaanticheat]].
 
+- **2026-08-15** — ingest `description:eksses/EAFE`: entity [[eafe]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[phantom-client]], [[lenrete-mod]], and [[windfall-anticheat]].
+
 - **2026-08-15** — ingest `description:enis1enis2/WindfallAntiCheatF`: entity [[windfall-anticheatf]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[dakotaac]], [[avaanticheat]], and [[lenrete-mod]].
 
 - **2026-08-15** — ingest `description:lauralex/OAC`: entity [[oac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-anti-cheat]], [[cs2kac]], and [[kernel-callbacks]].

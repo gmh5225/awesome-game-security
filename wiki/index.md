@@ -615,6 +615,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EAC-shellcode-1](entities/eac-shellcode-1.md) — archived raw EAC shellcode memory dump from protected-game dumper (~Mar 2023; hook entry points; offline RE sample; gmh5225)
 - [EAC-VmCheck.asm](entities/eac-vmcheck-asm.md) — recovered `easyanticheat.sys` VM-detection assembly (`CheckVM` / VMREAD probe; VM-found vs VM-not-found paths; gmh5225)
 - [EAC](entities/eac.md) — mixed EAC study pack: reversed `easyanticheat.sys` callback logic + EAC/EOS SDK drop (gmh5225)
+- [EAFE](entities/eafe.md) — Mineflayer elytra autopilot (vanilla physics FSM; Bézier look-vector AC evasion; cheat / game:minecraft)
 - [EASY-HWID-SPOOFER](entities/easy-hwid-spoofer.md) — kernel-mode HWID spoofer via driver dispatch hooks + physical-memory patches (disk/NIC/GPU/SMBIOS; Win10; gmh5225)
 - [easypeasy-gc](entities/easypeasy-gc.md) — Genshin Impact EasyPeasy-framework cheat client (Grasscutter custom server; client-side gameplay mods; gmh5225)
 - [EasyAntiCheat-Reversing](entities/easyanticheat-reversing.md) — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable driver RE snapshot (gmh5225)
