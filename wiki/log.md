@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:d3dcoder/d3d12book`: entity [[d3d12book]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[learning-directx12]].
+
 - **2026-08-16** — ingest `description:d4em0n/exrop`: entity [[exrop]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ropgadget-rs]] and [[agafi]].
 
 - **2026-08-16** — ingest `description:d4rksystem/VMwareCloak`: entity [[vmware-cloak]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmware-hardened-loader]] and [[vmaware]].
