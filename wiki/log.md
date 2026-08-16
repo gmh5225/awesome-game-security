@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cristeigabriela/bb`: entity [[bb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntoskrnlwalker]], [[ntkernelwalkerlib]], and [[windiff]].
+
 - **2026-08-16** — ingest `description:crmulliner/adbi`: entity [[adbi]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[frida]], [[dobby]], [[qbdi-tracer-android]], and [[dynamic-binary-instrumentation]].
 
 - **2026-08-16** — ingest `description:crosire/reshade`: entity [[reshade]]; cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[shader-injector]] and [[swapchain-bottleneck]].
