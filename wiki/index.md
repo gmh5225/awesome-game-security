@@ -819,6 +819,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GameAI-paper-list](entities/gameai-paper-list.md) — zh curated game-AI research papers (modding / tooling; AI category)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
 - [GamesoftACS](entities/gamesoftacs.md) — Knight Online Gamesoft server-side AC (speed/teleport/damage/inventory + client integrity)
+- [GarHal CSGO](entities/garhal-csgo.md) — CS:GO kernel cheat driver + IOCTL usermode controller (KM entity R/W; planned kernel DirectX overlay; dretax; cheat / game:csgo)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [ghidra](entities/ghidra.md) — Full NSA Ghidra RE framework source (Java decompiler, debugger integrations; gmh5225 mirror/fork)

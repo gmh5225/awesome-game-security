@@ -465,6 +465,7 @@ sources:
   - wiki/sources/descriptions/dword64__Ow-FOV.md
   - wiki/sources/descriptions/dword64__Ow-Anti-Flag.md
   - wiki/sources/descriptions/dufernst__LegionCore-7.3.5.md
+  - wiki/sources/descriptions/dretax__GarHal_CSGO.md
   - wiki/sources/descriptions/dslee2022__SignatureKid.md
   - wiki/sources/descriptions/dsasmblr__game-hacking.md
   - wiki/sources/descriptions/dsasmblr__hacking-online-games.md
@@ -1497,6 +1498,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS:GO samples such as [[memcs]] (gmh5225; Rust; modding / SDK generation; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__memcs.md)
 - Driver-backed external CS:GO samples such as [[csgo-cheat-external]] (C++; driver development; External tag) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - Simple kernel CS:GO cheats with hook-based communication such as [[kernel-csgo]] (C++; driver development / modding) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/nbqofficial__kernel-csgo.md)
+- CS:GO kernel driver + IOCTL usermode controller samples such as [[garhal-csgo]] (dretax; KM entity R/W; planned kernel DirectX overlay; cheat / game:csgo) sit in the same ring-0 cheat / game:csgo lane. (source: wiki/sources/descriptions/dretax__GarHal_CSGO.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - CS:GO **sound ESP** samples such as [[nv-v2]] (ekknod; C/C++; hooking; audio-derived positional awareness; README `[Sound ESP]`) sit in the same cheat / game:csgo lane as an alternative to visual overlay ESP. (source: wiki/sources/descriptions/ekknod__nv_v2.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dretax/GarHal_CSGO`: entity [[garhal-csgo]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-csgo]], [[kernel-cheat-for-directx3d]], and [[csgo-ac]].
+
 - **2026-08-16** — ingest `description:droberson/ELFcrypt`: entity [[elfcrypt]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[elfpacker]], [[elfuck]], and [[harmless]].
 
 - **2026-08-16** — ingest `description:droidrun/droidrun`: entity [[droidrun]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[lamda]], [[delamain]], and [[apktool-mcp-server]].
