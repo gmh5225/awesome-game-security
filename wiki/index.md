@@ -310,6 +310,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
 - [CallMeWin32kDriver](entities/callmewin32kdriver.md) — win32k.sys session-driver unsigned loader; anti-rootkit dump resistance + MmCopyMemory-detection bypass (gmh5225; PUBG cheat-driver lineage)
 - [CallStackSpoofer-2](entities/callstackspoofer-2.md) — x64 call-stack spoofing via custom ASM trampolines (gmh5225; Cheat Spoof Stack)
+- [Call Obfuscator](entities/call-obfuscator.md) — PE post-processor: decoy IAT + load-time shellcode resolver (PEB→Ldr export walk; INI-mapped API misdirection; Call Obfuscation; d35ha)
 - [Camera Triggerbot](entities/camera-triggerbot.md) — camera triggerbot (movement/color around crosshair; cheat / triggerbot & aimbot)
 - [Campfire](entities/campfire.md) — in-progress OpenGL/Vulkan game engine (Vulkan migration; features on OpenGL branch; Game Engine / source)
 - [cat-annihilation](entities/cat-annihilation.md) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source) — C++20/Vulkan/CUDA wave-survival engine (render graph, clustered deferred PBR, ECS, behavior-tree AI; React Three Fiber browser demo; Game Engine / source)
