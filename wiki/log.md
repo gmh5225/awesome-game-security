@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cocos2d/cocos2d-x`: entity [[cocos2d-x]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[libgdx]], [[love]], and [[game-engine-detector]].
+
 - **2026-08-16** — ingest `description:code-tom-code/Software_D3D9`: entity [[software-d3d9]]; cited on [[overviews/graphics-api]]; cross-linked [[d3d9on12]], [[dxwrapper]], and [[free-direct]].
 
 - **2026-08-16** — ingest `description:codecat/ClawSearch`: entity [[clawsearch]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]] and [[xfindout]].

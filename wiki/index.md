@@ -381,6 +381,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [comon](entities/comon.md) — WinDbg extension; trace COM class creation + interface querying (WinDbg Plugins)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [compile-time-regular-expressions](entities/compile-time-regular-expressions.md) — C++ CTRE compile-time regex (cmake `ctre`; AC Compile Time)
+- [cocos2d-x](entities/cocos2d-x.md) — cross-platform C++ 2D framework (cocos2d-iphone lineage; Game Engine / source)
 - [compiler-binary-richprint](entities/compiler-binary-richprint.md) — print MSVC Rich Header compiler info from PE (DOS stub→PE gap; cheat / RE tools; gmh5225)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
