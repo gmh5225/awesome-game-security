@@ -2008,6 +2008,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4-apk-dumper](entities/ue4-apk-dumper.md) — Android APK UE4 SDK dumper (UObject/property/offset extraction; modding / SDK generation; gmh5225)
 - [ue4dumper](entities/ue4dumper.md) — Android UE4 SDK dumper (C/C++; modding / SDK generation)
 - [ue4dumper-emulator](entities/ue4dumper-emulator.md) — Android emulator UE4 SDK dumper (C/C++; modding / SDK generation / memory analysis; gmh5225)
+- [ue4genny](entities/ue4genny.md) — runtime UE4 reflection SDK generator (C++; UObject/UClass/UStruct/UEnum/UFunction → C++ headers; SDK Generator; cursey)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
 - [unreal-source-explained](entities/unreal-source-explained.md) — profiler-driven UE4 source analysis (init / game loop / task graph / RHI / Metal·D3D11; Game Engine / Unreal guide; donaldwuid)
