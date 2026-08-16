@@ -1210,6 +1210,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
+- [lilypublic](entities/lilypublic.md) — KM+UM cheat framework (DBVM hypervisor; physical mem R/W, pattern scan, object callbacks; DirectComposition/DirectDraw/DX9/11 ImGui overlays; dot1991)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
 - [Lenrete Mod](entities/lenrete-mod.md) — Fabric Minecraft 26.2 utility/cheat client (Java 25; 43 modules—KillAura/ESP/Reach/Flight/Blinker; Mixins + JSON config; lolizei; cheat / game:minecraft)
 - [lenovo-exec](entities/lenovo-exec.md) — LenovoDiagnosticsDriver.sys BYOVD PoC (insecure IOCTL → arbitrary kernel code execution; gmh5225)

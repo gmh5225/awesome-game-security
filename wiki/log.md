@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dot1991/lilypublic`: entity [[lilypublic]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[anti-cheat-amateur]], [[ultra-driver-game-cheat]], and [[detection-cheat-engine-ring0]].
+
 - **2026-08-16** — ingest `description:dougwithseismic/dezlock-dump`: entity [[dezlock-dump]]; cited on [[overviews/game-engine]] and [[source-netvars]]; cross-linked [[source2gen]], [[source2sdk]], [[cs2-offsets]], and [[dota2dumped]].
 
 - **2026-08-16** — ingest `description:dqforgive-sudo/pubg-ai-yolov4`: entity [[pubg-ai-yolov4]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[yolov5-pubg]], [[ai-fps-b00m-h3adsh0t]], and [[opencv-smart-aimbot]].
