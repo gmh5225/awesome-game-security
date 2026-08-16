@@ -798,6 +798,7 @@ sources:
   - wiki/sources/descriptions/realTristan__Reborn.md
   - wiki/sources/descriptions/rdbo__libmem.md
   - wiki/sources/descriptions/razixNew__CompiledProtection.md
+  - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
   - wiki/sources/descriptions/dnakov__radare2-mcp.md
   - wiki/sources/descriptions/radareorg__radius2.md
   - wiki/sources/descriptions/radareorg__r2ai.md
@@ -1257,6 +1258,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Obfuscated-region pinpointing via [[obfuscation-detection]] (CFF / insn-complexity / n-gram BB outliers; batch scripts) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_detection.md)
 - Obfuscated-code analysis and simplification via [[obfuscation-analysis]] (MBA backward-slice + msynth oracle; opaque-predicate dataflow; Z3-verified BNIL deobfuscation) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md)
 - Windows x86/x64 debugging via [[x64dbg]] (feature-rich debugger + plugin system) is a core Cheat Debugging lane tool for offensive RE. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
+- AI reverse engineering assistant for x64dbg via [[x64dbg-rippy]] (WebView2 in-debugger chat; LLM tool-use for memory/disasm/breakpoints/single-step; Anthropic/OpenAI APIs; Cheat x64dbg Plugins / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-rippy.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
 - Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
 - Lightweight Java/JVM attach debugging via [[jdbg]] (JDWP; method hooks / breakpoints / variable inspect / class enum) supports runtime RE of Java game clients and obfuscated JVM apps. (source: wiki/sources/descriptions/roger1337__JDBG.md)
