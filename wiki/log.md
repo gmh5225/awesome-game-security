@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:codetronik/AndroidAntiCheat`: entity [[android-anti-cheat]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[anticheat-android-cheap-engine]], [[basic-anti-cheat]], and [[mobile-anti-cheat]].
+
 - **2026-08-16** — ingest `description:codingben/maple-fighters`: entity [[maple-fighters]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[storytime]], [[gameengine-mapleengine]], and [[winapi-maplestory]].
 
 - **2026-08-16** — ingest `description:cognis-digital/packpeek`: entity [[packpeek]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[die-engine-web]], [[apkid]], [[hyara]], and [[findyara-ida]].
