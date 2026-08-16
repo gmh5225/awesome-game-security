@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cqcallaw/shootergame`: entity [[shootergame]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[shootergame-hack]] and [[unreal-object-model]].
+
 - **2026-08-16** — ingest `description:cra0/UE426_ABInfinite-Win64-Shipping`: entity [[ue426-abinfinite-win64-shipping]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[ue4genny]], [[ue-unreal-engine-sdk]], and [[unreal-object-model]].
 
 - **2026-08-16** — ingest `description:cragson/a53-code-exec`: entity [[a53-code-exec]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ps5-linux-loader]], [[ida-ps5-elf-plugin]], and [[elfloader]].
