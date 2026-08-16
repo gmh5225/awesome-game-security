@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:ekknod/apex_linux`: entity [[apex-linux]]; cited on [[overviews/game-hacking]]; cross-linked [[ayypex]], [[apex-full-cheat]], and [[easy-anti-cheat]].
+
 - **2026-08-15** — ingest `description:ekknod/csf`: entity [[csf]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[csf-w]], [[csgo-sdk]], and [[csgo-internal-base]].
 
 - **2026-08-15** — ingest `description:ekknod/csf_w`: entity [[csf-w]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[csgo-sdk]], [[csgo-internal-base]], and [[nv-v2]].

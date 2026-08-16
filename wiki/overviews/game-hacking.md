@@ -72,6 +72,7 @@ sources:
   - wiki/sources/descriptions/fuzzypickles14__BetterStringAnalyzer.md
   - wiki/sources/descriptions/freezato__LocalAnticheat-1.8.9.md
   - wiki/sources/descriptions/eksses__EAFE.md
+  - wiki/sources/descriptions/ekknod__apex_linux.md
   - wiki/sources/descriptions/ekknod__vm.md
   - wiki/sources/descriptions/ekknod__usbsn.md
   - wiki/sources/descriptions/ekknod__sumap.md
@@ -541,6 +542,7 @@ sources:
   - wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/hadevn__apex_full_cheat.md
+  - wiki/sources/descriptions/ekknod__apex_linux.md
   - wiki/sources/descriptions/gmh5225__ayypex.md
   - wiki/sources/descriptions/gmh5225__apex_legends_sdk.md
   - wiki/sources/descriptions/gmh5225__Apex-ApexCheat.md
@@ -1038,7 +1040,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Cunthook.md
   - wiki/sources/descriptions/gmh5225__CyberAntLoader.md
   - wiki/sources/descriptions/frk1__hazedumper.md
-updated: 2026-08-15
+updated: 2026-08-16
 confidence: high
 ---
 
@@ -1539,6 +1541,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Apex Legends externals such as [[apexd3d-external]] (C/C++; driver development / SDK generation / DirectX hooking; cheat / game:apex legends) sit in the cheat / game:apex legends lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/hooksteroid__ApexD3D_External.md)
 - Title-specific Apex Legends full-cheat samples such as [[apex-full-cheat]] (C/C++; rendering / SDK generation / hooking; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/hadevn__apex_full_cheat.md)
 - Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md)
+- Linux-native Apex Legends cheat research such as [[apex-linux]] (ekknod; C++; cheat / game:apex legends [Linux]) complements [[ayypex]] on non-Windows Apex clients under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/ekknod__apex_linux.md)
 - Title-specific Apex Legends SDK samples such as [[apex-legends-sdk]] (gmh5225; C++; rendering / SDK generation; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__apex_legends_sdk.md)
 - Legacy Apex Legends ESP samples such as [[apex-esp-old-project]] (gmh5225; C/C++; rendering / SDK generation / overlays; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex_ESP_Old_Project.md)
 - Title-specific Apex Legends aimbot + glow samples such as [[apex-simple-aimbot-glow-apex]] (gmh5225; C/C++; driver development / hooking / memory analysis; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex-SIMPLE-AIMBOT-GLOW-APEX.md)
