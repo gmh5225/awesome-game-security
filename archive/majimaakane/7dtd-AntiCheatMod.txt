@@ -1,0 +1,1498 @@
+Project Path: arc_majimaakane_7dtd-AntiCheatMod_e3n47jq9
+
+Source Tree:
+
+```txt
+arc_majimaakane_7dtd-AntiCheatMod_e3n47jq9
+├── AntiCheatMod
+│   ├── Config
+│   │   └── AntiCheatConfig.xml
+│   └── ModInfo.xml
+├── README.md
+├── Source
+│   ├── AdminChecker.cs
+│   ├── AntiCheatConfig.cs
+│   ├── AntiCheatMod.csproj
+│   ├── Api.cs
+│   ├── CommandInterceptor.cs
+│   ├── Logger.cs
+│   ├── PlayerMonitor.cs
+│   └── ViolationHandler.cs
+└── build.bat
+
+```
+
+`AntiCheatMod/Config/AntiCheatConfig.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<AntiCheatConfig>
+    <!-- 管理者として扱うパーミッションレベルの上限（この値以下は管理者として扱う） -->
+    <!-- パーミッションレベル: 0=最高権限, 1=管理者, 1000=一般 -->
+    <AdminPermissionLevel>1</AdminPermissionLevel>
+
+    <!-- 各検出機能の有効/無効 (true/false) -->
+    <Detection>
+        <!-- チャット経由のチートコマンドブロック (/give, /fly, /god 等) -->
+        <BlockConsoleCommands>true</BlockConsoleCommands>
+        <!-- 飛行検出 -->
+        <DetectFlying>true</DetectFlying>
+        <!-- テレポート検出 -->
+        <DetectTeleport>true</DetectTeleport>
+        <!-- スピードハック検出 -->
+        <DetectSpeedHack>true</DetectSpeedHack>
+        <!-- ゴッドモード検出 -->
+        <DetectGodMode>true</DetectGodMode>
+    </Detection>
+
+    <!-- 検出閾値 -->
+    <Thresholds>
+        <!-- テレポート検出: 1フレームでこの距離(m)以上移動した場合に検出 -->
+        <TeleportDistance>80</TeleportDistance>
+        <!-- スピードハック検出: 通常の最大速度の何倍を超えたら検出するか -->
+        <SpeedMultiplier>2.5</SpeedMultiplier>
+        <!-- 飛行検出: 地面から離れている連続時間(秒)がこの値を超えたら検出 -->
+        <FlyingDuration>5.0</FlyingDuration>
+        <!-- 監視間隔(秒) -->
+        <MonitorInterval>2.0</MonitorInterval>
+    </Thresholds>
+
+    <!-- 違反時のアクション -->
+    <Violation>
+        <!-- 警告メッセージをプレイヤーに表示 -->
+        <WarnPlayer>true</WarnPlayer>
+        <!-- 管理者にチャットで通知 -->
+        <NotifyAdmins>true</NotifyAdmins>
+        <!-- キックまでの違反回数 -->
+        <MaxWarnings>3</MaxWarnings>
+        <!-- BANまでのキック回数 (0=BANしない) -->
+        <KicksBeforeBan>0</KicksBeforeBan>
+        <!-- 違反カウントのリセット時間(分) (0=リセットしない) -->
+        <ViolationResetMinutes>30</ViolationResetMinutes>
+        <!-- キック後に違反カウントをリセットするか (true=リセット/false=引き継ぐ) -->
+        <ResetOnKick>true</ResetOnKick>
+    </Violation>
+
+    <!-- ログ設定 -->
+    <Logging>
+        <!-- 専用ログファイルに記録 -->
+        <EnableFileLog>true</EnableFileLog>
+        <!-- ログファイル名 -->
+        <LogFileName>AntiCheat.log</LogFileName>
+    </Logging>
+</AntiCheatConfig>
+
+```
+
+`AntiCheatMod/ModInfo.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<xml>
+  <Name value="AntiCheatMod" />
+  <DisplayName value="Anti-Cheat Mod" />
+  <Version value="1.0.8" />
+  <Description value="7DTD マルチサーバー用チーター防止Mod。非管理者のチート行為を検出・防止します。" />
+  <Author value="AKANE" />
+  <Website value="" />
+</xml>
+```
+
+`README.md`:
+
+```md
+# AntiCheatMod - 7DTD チーター防止Mod
+
+マルチサーバー向けのサーバーサイドチーター防止Modです。  
+非管理者によるチートコマンド実行・飛行・テレポート・スピードハック・ゴッドモードを検出し、警告・キック・BANを自動で行います。
+
+## 機能
+
+- **コンソールコマンドブロック**: `cm`, `dm`, `give`, `tp` などの不正コマンドを非管理者から遮断
+- **チャットコマンドブロック**: チャットから `/give`, `/fly`, `/god` 等を送信しても無効化
+- **飛行検出**: 一定秒数以上の空中滞在を検出（はしご・水中・乗り物は除外）
+- **テレポート検出**: 異常な瞬間移動を検出（ベッドロール等の正常なテレポートは許容）
+- **スピードハック検出**: 通常の最大速度を大幅に超える移動速度を検出
+- **ゴッドモード検出**: `god` バフの付与を検出
+- **管理者免除**: パーミッションレベルが設定値以下の管理者は全検出をバイパス
+- **段階的ペナルティ**: 違反ごとに警告 → キック → BAN（各閾値は設定可能）
+- **管理者通知**: 検出時にオンライン管理者全員にチャットで通知
+- **ファイルログ**: チート検出の詳細をログファイルに記録
+
+## 前提条件
+
+- .NET SDK（.NET Framework 4.8 対応）
+- 7 Days to Die Dedicated Server
+- **EAC（Easy Anti-Cheat）を無効にする必要があります**
+
+## ビルド方法
+
+### 1. サーバーパスの設定
+
+`Source\AntiCheatMod.csproj` 内の `<HintPath>` を、お使いの7DTDサーバーのパスに変更してください：
+
+```xml
+<HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\...</HintPath>
+```
+
+### 2. ビルド
+
+`build.bat` を実行するか、以下のコマンドを実行してください：
+
+```
+dotnet build Source\AntiCheatMod.csproj -c Release
+```
+
+### 3. インストール
+
+`AntiCheatMod` フォルダ（`ModInfo.xml`・`AntiCheatMod.dll`・`Config\AntiCheatConfig.xml` 含む）を  
+サーバーの `Mods` フォルダにコピーしてください。
+
+```
+7 Days to Die Dedicated Server/
+  └── Mods/
+      └── AntiCheatMod/
+          ├── ModInfo.xml
+          ├── AntiCheatMod.dll
+          └── Config/
+              └── AntiCheatConfig.xml
+```
+
+## 設定
+
+`AntiCheatMod\Config\AntiCheatConfig.xml` で動作を調整できます：
+
+```xml
+<AntiCheatConfig>
+    <!-- 管理者として扱うパーミッションレベル上限（この値以下は管理者として免除） -->
+    <!-- 0=最高権限, 1=管理者, 1000=一般 -->
+    <AdminPermissionLevel>1</AdminPermissionLevel>
+
+    <Detection>
+        <BlockConsoleCommands>true</BlockConsoleCommands>
+        <DetectFlying>true</DetectFlying>
+        <DetectTeleport>true</DetectTeleport>
+        <DetectSpeedHack>true</DetectSpeedHack>
+        <DetectGodMode>true</DetectGodMode>
+    </Detection>
+
+    <Thresholds>
+        <TeleportDistance>80</TeleportDistance>      <!-- テレポート検出距離(m) -->
+        <SpeedMultiplier>2.5</SpeedMultiplier>        <!-- 通常最大速度の何倍を超えたら検出 -->
+        <FlyingDuration>5.0</FlyingDuration>          <!-- 空中滞在検出時間(秒) -->
+        <MonitorInterval>2.0</MonitorInterval>        <!-- 監視間隔(秒) -->
+    </Thresholds>
+
+    <Violation>
+        <WarnPlayer>true</WarnPlayer>                  <!-- プレイヤーに警告メッセージ -->
+        <NotifyAdmins>true</NotifyAdmins>              <!-- 管理者に通知 -->
+        <MaxWarnings>3</MaxWarnings>                   <!-- キックまでの違反回数 -->
+        <KicksBeforeBan>0</KicksBeforeBan>             <!-- BANまでのキック回数 (0=BANしない) -->
+        <ViolationResetMinutes>30</ViolationResetMinutes> <!-- 違反カウントリセット時間(分) -->
+        <ResetOnKick>true</ResetOnKick>                <!-- キック後に違反カウントをリセット -->
+    </Violation>
+
+    <Logging>
+        <EnableFileLog>true</EnableFileLog>
+        <LogFileName>AntiCheat.log</LogFileName>
+    </Logging>
+</AntiCheatConfig>
+```
+
+### 主な設定項目
+
+| 項目 | デフォルト | 説明 |
+|------|-----------|------|
+| `AdminPermissionLevel` | `1` | この値以下のパーミッションレベルを管理者として免除 |
+| `TeleportDistance` | `80` | 1チェック間隔でこの距離(m)以上移動したらテレポート疑惑 |
+| `SpeedMultiplier` | `2.5` | 通常最大速度の何倍を超えたらスピードハック疑惑 |
+| `FlyingDuration` | `5.0` | 地面から離れたまま何秒経過したら飛行疑惑 |
+| `MaxWarnings` | `3` | 何回違反でキック |
+| `KicksBeforeBan` | `0` | 何回キックでBAN（0=BANしない、有効にする場合はResetOnKick=falseも推奨） |
+
+## ログ確認
+
+サーバーコンソールおよび `Mods/AntiCheatMod/AntiCheat.log` にログが出力されます：
+
+```
+[2026-06-13 12:00:00] [INFO] [AntiCheatMod] Mod初期化開始...
+[2026-06-13 12:00:00] [INFO] [AntiCheatMod] プレイヤー参加: PlayerName (ID: ..., 権限: 1000, 管理者: False)
+[2026-06-13 12:05:30] [CHEAT] プレイヤー: PlayerName (ID: ...) | 種類: Flying | 詳細: 空中滞在時間: 6.2秒
+[2026-06-13 12:05:30] [INFO] [ViolationHandler] PlayerName に警告送信: [AntiCheat] 警告: 飛行チートが検出されました。 (残り2回でキックされます)
+```
+
+```
+
+`Source/AdminChecker.cs`:
+
+```cs
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// プレイヤーの管理者権限をチェックするクラス。
+    /// パーミッションレベルが設定値以下の場合、管理者として扱いチェックを免除する。
+    /// </summary>
+    public static class AdminChecker
+    {
+        /// <summary>
+        /// 指定プレイヤーが管理者かどうかを判定する。
+        /// パーミッションレベル0=最高権限、1=管理者。
+        /// 設定のAdminPermissionLevel以下であれば管理者として扱う。
+        /// </summary>
+        public static bool IsAdmin(ClientInfo clientInfo, AntiCheatConfig config)
+        {
+            if (clientInfo == null) return false;
+
+            try
+            {
+                // AdminToolsからプレイヤーのパーミッションレベルを取得
+                AdminTools adminTools = GameManager.Instance.adminTools;
+                if (adminTools == null) return false;
+
+                // プレイヤーのパーミッションレベルを取得
+                // GetUserPermissionLevel はプレイヤーが登録されていない場合1000を返す
+                int permissionLevel = adminTools.Users.GetUserPermissionLevel(clientInfo.PlatformId);
+
+                // CrossplatformIdでも確認（EOS対応）
+                if (permissionLevel > config.AdminPermissionLevel && clientInfo.CrossplatformId != null)
+                {
+                    int crossPermLevel = adminTools.Users.GetUserPermissionLevel(clientInfo.CrossplatformId);
+                    if (crossPermLevel < permissionLevel)
+                        permissionLevel = crossPermLevel;
+                }
+
+                return permissionLevel <= config.AdminPermissionLevel;
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogError($"[AdminChecker] 管理者チェックでエラー: {ex.Message}");
+                // エラーの場合は安全側（管理者として扱う）
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// プレイヤーのパーミッションレベルを取得する。
+        /// </summary>
+        public static int GetPermissionLevel(ClientInfo clientInfo)
+        {
+            if (clientInfo == null) return 1000;
+
+            try
+            {
+                AdminTools adminTools = GameManager.Instance.adminTools;
+                if (adminTools == null) return 1000;
+
+                int permissionLevel = adminTools.Users.GetUserPermissionLevel(clientInfo.PlatformId);
+
+                if (clientInfo.CrossplatformId != null)
+                {
+                    int crossPermLevel = adminTools.Users.GetUserPermissionLevel(clientInfo.CrossplatformId);
+                    if (crossPermLevel < permissionLevel)
+                        permissionLevel = crossPermLevel;
+                }
+
+                return permissionLevel;
+            }
+            catch
+            {
+                return 1000;
+            }
+        }
+    }
+}
+
+```
+
+`Source/AntiCheatConfig.cs`:
+
+```cs
+using System;
+using System.IO;
+using System.Xml;
+
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// AntiCheatModの設定管理クラス。
+    /// Config/AntiCheatConfig.xml から設定を読み込む。
+    /// </summary>
+    public class AntiCheatConfig
+    {
+        // --- 管理者設定 ---
+        /// <summary>管理者として扱うパーミッションレベル上限（この値以下は管理者）</summary>
+        public int AdminPermissionLevel { get; set; } = 1;
+
+        // --- 検出設定 ---
+        /// <summary>チャット経由のチートコマンド（/give, /fly 等）をブロック</summary>
+        public bool BlockConsoleCommands { get; set; } = true;
+        public bool DetectFlying { get; set; } = true;
+        public bool DetectTeleport { get; set; } = true;
+        public bool DetectSpeedHack { get; set; } = true;
+        public bool DetectGodMode { get; set; } = true;
+
+        // --- 閾値設定 ---
+        /// <summary>テレポート検出距離(m)</summary>
+        public float TeleportDistance { get; set; } = 80f;
+        /// <summary>スピードハック判定倍率</summary>
+        public float SpeedMultiplier { get; set; } = 2.5f;
+        /// <summary>飛行検出連続秒数</summary>
+        public float FlyingDuration { get; set; } = 5.0f;
+        /// <summary>監視間隔(秒)</summary>
+        public float MonitorInterval { get; set; } = 2.0f;
+
+        // --- 違反設定 ---
+        public bool WarnPlayer { get; set; } = true;
+        public bool NotifyAdmins { get; set; } = true;
+        /// <summary>キックまでの警告回数</summary>
+        public int MaxWarnings { get; set; } = 3;
+        /// <summary>BANまでのキック回数 (0=BANしない)</summary>
+        public int KicksBeforeBan { get; set; } = 0;
+        /// <summary>違反カウントリセット時間(分) (0=リセットなし)</summary>
+        public int ViolationResetMinutes { get; set; } = 30;
+        /// <summary>キック後に違反カウントをリセットするか</summary>
+        public bool ResetOnKick { get; set; } = true;
+
+        // --- ログ設定 ---
+        public bool EnableFileLog { get; set; } = true;
+        public string LogFileName { get; set; } = "AntiCheat.log";
+
+        /// <summary>設定ファイルから読み込み。存在しない場合はデフォルト設定ファイルを生成。</summary>
+        public static AntiCheatConfig Load(string modPath)
+        {
+            var config = new AntiCheatConfig();
+            string configDir = Path.Combine(modPath, "Config");
+            string configPath = Path.Combine(configDir, "AntiCheatConfig.xml");
+
+            if (!File.Exists(configPath))
+            {
+                Logger.LogWarning("[AntiCheatMod] 設定ファイルが見つかりません。デフォルト設定を使用します。");
+                if (!Directory.Exists(configDir))
+                    Directory.CreateDirectory(configDir);
+                config.Save(configPath);
+                return config;
+            }
+
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(configPath);
+                XmlElement root = doc.DocumentElement;
+
+                config.AdminPermissionLevel = ReadInt(root, "AdminPermissionLevel", 1);
+
+                XmlNode detection = root.SelectSingleNode("Detection");
+                if (detection != null)
+                {
+                    config.BlockConsoleCommands = ReadBool(detection, "BlockConsoleCommands", true);
+                    config.DetectFlying = ReadBool(detection, "DetectFlying", true);
+                    config.DetectTeleport = ReadBool(detection, "DetectTeleport", true);
+                    config.DetectSpeedHack = ReadBool(detection, "DetectSpeedHack", true);
+                    config.DetectGodMode = ReadBool(detection, "DetectGodMode", true);
+                }
+
+                XmlNode thresholds = root.SelectSingleNode("Thresholds");
+                if (thresholds != null)
+                {
+                    config.TeleportDistance = ReadFloat(thresholds, "TeleportDistance", 80f);
+                    config.SpeedMultiplier = ReadFloat(thresholds, "SpeedMultiplier", 2.5f);
+                    config.FlyingDuration = ReadFloat(thresholds, "FlyingDuration", 5.0f);
+                    config.MonitorInterval = ReadFloat(thresholds, "MonitorInterval", 2.0f);
+                }
+
+                XmlNode violation = root.SelectSingleNode("Violation");
+                if (violation != null)
+                {
+                    config.WarnPlayer = ReadBool(violation, "WarnPlayer", true);
+                    config.NotifyAdmins = ReadBool(violation, "NotifyAdmins", true);
+                    config.MaxWarnings = ReadInt(violation, "MaxWarnings", 3);
+                    config.KicksBeforeBan = ReadInt(violation, "KicksBeforeBan", 0);
+                    config.ViolationResetMinutes = ReadInt(violation, "ViolationResetMinutes", 30);
+                    config.ResetOnKick = ReadBool(violation, "ResetOnKick", true);
+                }
+
+                XmlNode logging = root.SelectSingleNode("Logging");
+                if (logging != null)
+                {
+                    config.EnableFileLog = ReadBool(logging, "EnableFileLog", true);
+                    config.LogFileName = ReadString(logging, "LogFileName", "AntiCheat.log");
+                }
+
+                Logger.Log("[AntiCheatMod] 設定ファイルを読み込みました。");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[AntiCheatMod] 設定ファイルの読み込みに失敗しました: {ex.Message}");
+            }
+
+            return config;
+        }
+
+        /// <summary>現在の設定をXMLファイルに保存</summary>
+        public void Save(string path)
+        {
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                XmlDeclaration decl = doc.CreateXmlDeclaration("1.0", "utf-8", null);
+                doc.AppendChild(decl);
+
+                XmlElement root = doc.CreateElement("AntiCheatConfig");
+                doc.AppendChild(root);
+
+                AddElement(doc, root, "AdminPermissionLevel", AdminPermissionLevel.ToString());
+
+                XmlElement detection = doc.CreateElement("Detection");
+                root.AppendChild(detection);
+                AddElement(doc, detection, "BlockConsoleCommands", BlockConsoleCommands.ToString().ToLower());
+                AddElement(doc, detection, "DetectFlying", DetectFlying.ToString().ToLower());
+                AddElement(doc, detection, "DetectTeleport", DetectTeleport.ToString().ToLower());
+                AddElement(doc, detection, "DetectSpeedHack", DetectSpeedHack.ToString().ToLower());
+                AddElement(doc, detection, "DetectGodMode", DetectGodMode.ToString().ToLower());
+
+                XmlElement thresholds = doc.CreateElement("Thresholds");
+                root.AppendChild(thresholds);
+                AddElement(doc, thresholds, "TeleportDistance", TeleportDistance.ToString());
+                AddElement(doc, thresholds, "SpeedMultiplier", SpeedMultiplier.ToString());
+                AddElement(doc, thresholds, "FlyingDuration", FlyingDuration.ToString());
+                AddElement(doc, thresholds, "MonitorInterval", MonitorInterval.ToString());
+
+                XmlElement violation = doc.CreateElement("Violation");
+                root.AppendChild(violation);
+                AddElement(doc, violation, "WarnPlayer", WarnPlayer.ToString().ToLower());
+                AddElement(doc, violation, "NotifyAdmins", NotifyAdmins.ToString().ToLower());
+                AddElement(doc, violation, "MaxWarnings", MaxWarnings.ToString());
+                AddElement(doc, violation, "KicksBeforeBan", KicksBeforeBan.ToString());
+                AddElement(doc, violation, "ViolationResetMinutes", ViolationResetMinutes.ToString());
+                AddElement(doc, violation, "ResetOnKick", ResetOnKick.ToString().ToLower());
+
+                XmlElement logging = doc.CreateElement("Logging");
+                root.AppendChild(logging);
+                AddElement(doc, logging, "EnableFileLog", EnableFileLog.ToString().ToLower());
+                AddElement(doc, logging, "LogFileName", LogFileName);
+
+                doc.Save(path);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[AntiCheatMod] 設定ファイルの保存に失敗しました: {ex.Message}");
+            }
+        }
+
+        // --- ヘルパーメソッド ---
+        private static int ReadInt(XmlNode parent, string name, int defaultValue)
+        {
+            XmlNode node = parent.SelectSingleNode(name);
+            if (node != null && int.TryParse(node.InnerText.Trim(), out int val)) return val;
+            return defaultValue;
+        }
+
+        private static float ReadFloat(XmlNode parent, string name, float defaultValue)
+        {
+            XmlNode node = parent.SelectSingleNode(name);
+            if (node != null && float.TryParse(node.InnerText.Trim(), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out float val)) return val;
+            return defaultValue;
+        }
+
+        private static bool ReadBool(XmlNode parent, string name, bool defaultValue)
+        {
+            XmlNode node = parent.SelectSingleNode(name);
+            if (node != null && bool.TryParse(node.InnerText.Trim(), out bool val)) return val;
+            return defaultValue;
+        }
+
+        private static string ReadString(XmlNode parent, string name, string defaultValue)
+        {
+            XmlNode node = parent.SelectSingleNode(name);
+            if (node != null && !string.IsNullOrEmpty(node.InnerText.Trim())) return node.InnerText.Trim();
+            return defaultValue;
+        }
+
+        private static void AddElement(XmlDocument doc, XmlElement parent, string name, string value)
+        {
+            XmlElement elem = doc.CreateElement(name);
+            elem.InnerText = value;
+            parent.AppendChild(elem);
+        }
+    }
+}
+
+```
+
+`Source/AntiCheatMod.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>AntiCheatMod</AssemblyName>
+    <RootNamespace>AntiCheatMod</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\AntiCheatMod\</OutputPath>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="LogLibrary">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\LogLibrary.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
+
+```
+
+`Source/Api.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// AntiCheatMod エントリポイント。
+    /// IModApi インターフェースを実装し、ModEventsにハンドラを登録する。
+    /// </summary>
+    public class Api : IModApi
+    {
+        private static AntiCheatConfig _config;
+        private static ViolationHandler _violationHandler;
+        private static CommandInterceptor _commandInterceptor;
+        private static PlayerMonitor _playerMonitor;
+        private static string _modPath;
+        private static bool _initialized = false;
+
+        /// <summary>Mod初期化メソッド（エントリポイント）</summary>
+        public void InitMod(Mod _modInstance)
+        {
+            try
+            {
+                // Modのパスを取得
+                _modPath = _modInstance.Path;
+
+                // ログシステムの仮初期化
+                Logger.Init(_modPath, new AntiCheatConfig());
+
+                Logger.Log("===================================");
+                Logger.Log("[AntiCheatMod] Mod初期化開始...");
+                Logger.Log("===================================");
+
+                // 設定読み込み
+                _config = AntiCheatConfig.Load(_modPath);
+
+                // ログシステムを正式設定で再初期化
+                Logger.Init(_modPath, _config);
+
+                // コンポーネント初期化
+                _violationHandler = new ViolationHandler(_config);
+                _commandInterceptor = new CommandInterceptor(_config, _violationHandler);
+                _playerMonitor = new PlayerMonitor(_config, _violationHandler);
+
+                // イベント登録
+                ModEvents.GameStartDone.RegisterHandler(OnGameStartDone);
+                ModEvents.GameShutdown.RegisterHandler(OnGameShutdown);
+                ModEvents.PlayerSpawnedInWorld.RegisterHandler(OnPlayerSpawnedInWorld);
+                ModEvents.PlayerDisconnected.RegisterHandler(OnPlayerDisconnected);
+                ModEvents.ChatMessage.RegisterHandler(OnChatMessage);
+                ModEvents.GameUpdate.RegisterHandler(OnGameUpdate);
+
+                Logger.Log("[AntiCheatMod] イベントハンドラ登録完了");
+                Logger.Log($"[AntiCheatMod] 管理者レベル: {_config.AdminPermissionLevel} 以下は免除");
+                Logger.Log($"[AntiCheatMod] コマンドブロック: {_config.BlockConsoleCommands}");
+                Logger.Log($"[AntiCheatMod] 飛行検出: {_config.DetectFlying}");
+                Logger.Log($"[AntiCheatMod] テレポート検出: {_config.DetectTeleport}");
+                Logger.Log($"[AntiCheatMod] スピードハック検出: {_config.DetectSpeedHack}");
+                Logger.Log($"[AntiCheatMod] ゴッドモード検出: {_config.DetectGodMode}");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[AntiCheatMod] 初期化エラー: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        /// <summary>ゲーム開始完了時のハンドラ</summary>
+        private void OnGameStartDone(ref ModEvents.SGameStartDoneData data)
+        {
+            _initialized = true;
+            Logger.Log("[AntiCheatMod] ゲーム開始完了 - チーター監視を開始します");
+        }
+
+        /// <summary>ゲーム終了時のハンドラ</summary>
+        private void OnGameShutdown(ref ModEvents.SGameShutdownData data)
+        {
+            _initialized = false;
+            Logger.Log("[AntiCheatMod] ゲーム終了 - チーター監視を停止します");
+        }
+
+        /// <summary>プレイヤーがワールドにスポーンした時のハンドラ</summary>
+        private void OnPlayerSpawnedInWorld(ref ModEvents.SPlayerSpawnedInWorldData data)
+        {
+            if (!_initialized || data.ClientInfo == null) return;
+
+            try
+            {
+                bool isAdmin = AdminChecker.IsAdmin(data.ClientInfo, _config);
+                int permLevel = AdminChecker.GetPermissionLevel(data.ClientInfo);
+                string platformId = data.ClientInfo.PlatformId?.ReadablePlatformUserIdentifier ?? "Unknown";
+
+                Logger.Log($"[AntiCheatMod] プレイヤー参加: {data.ClientInfo.playerName} " +
+                          $"(ID: {platformId}, 権限: {permLevel}, 管理者: {isAdmin})");
+
+                // 管理者でない場合のみ監視開始
+                if (!isAdmin)
+                {
+                    _playerMonitor.StartTracking(data.EntityId);
+                    Logger.Log($"[AntiCheatMod] {data.ClientInfo.playerName} の監視を開始");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[AntiCheatMod] PlayerSpawnedInWorld エラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>プレイヤー切断時のハンドラ</summary>
+        private void OnPlayerDisconnected(ref ModEvents.SPlayerDisconnectedData data)
+        {
+            if (data.ClientInfo == null) return;
+
+            try
+            {
+                _playerMonitor.StopTracking(data.ClientInfo.entityId);
+                _violationHandler.ClearPlayer(data.ClientInfo.entityId);
+                Logger.Log($"[AntiCheatMod] {data.ClientInfo.playerName} が切断 - 監視終了");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[AntiCheatMod] PlayerDisconnected エラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>チャットメッセージハンドラ</summary>
+        private ModEvents.EModEventResult OnChatMessage(ref ModEvents.SChatMessageData data)
+        {
+            if (!_initialized || data.ClientInfo == null) return ModEvents.EModEventResult.Continue;
+            if (string.IsNullOrEmpty(data.Message)) return ModEvents.EModEventResult.Continue;
+
+            try
+            {
+                // チャットコマンドのチェック
+                if (_commandInterceptor.CheckChatMessage(data.ClientInfo, data.Message))
+                {
+                    return ModEvents.EModEventResult.StopHandlersAndVanilla; // メッセージをブロック
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[AntiCheatMod] ChatMessage エラー: {ex.Message}");
+            }
+
+            return ModEvents.EModEventResult.Continue; // メッセージを許可
+        }
+
+        /// <summary>ゲーム更新ハンドラ（毎フレーム呼ばれる）</summary>
+        private void OnGameUpdate(ref ModEvents.SGameUpdateData data)
+        {
+            if (!_initialized) return;
+
+            try
+            {
+                // プレイヤー監視の更新（内部で間隔制御済み）
+                _playerMonitor.Update();
+            }
+            catch (Exception)
+            {
+                // GameUpdateのエラーは頻発する可能性があるので、ログを抑制
+            }
+        }
+    }
+}
+
+```
+
+`Source/CommandInterceptor.cs`:
+
+```cs
+using System;
+
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// チャット経由のチートコマンドを傍受し、非管理者による不正操作を防止する。
+    /// 注: 7DTD ModAPI にはサーバーコンソールコマンドを傍受するイベントが存在しないため、
+    ///     非管理者プレイヤーがチャットから送信するコマンド形式のメッセージのみ対象。
+    /// </summary>
+    public class CommandInterceptor
+    {
+        private readonly AntiCheatConfig _config;
+        private readonly ViolationHandler _violationHandler;
+
+        /// <summary>チャットコマンドとしてブロックするプレフィックス</summary>
+        private static readonly string[] BlockedChatPrefixes = new string[]
+        {
+            "/give",
+            "/tp",
+            "/teleport",
+            "/god",
+            "/fly",
+            "/creative",
+            "/debug",
+            "/spawn",
+        };
+
+        public CommandInterceptor(AntiCheatConfig config, ViolationHandler violationHandler)
+        {
+            _config = config;
+            _violationHandler = violationHandler;
+        }
+
+        /// <summary>
+        /// チャットメッセージを監視し、チートコマンドのプレフィックスをチェック。
+        /// </summary>
+        public bool CheckChatMessage(ClientInfo clientInfo, string message)
+        {
+            if (!_config.BlockConsoleCommands) return false;
+            if (clientInfo == null || string.IsNullOrEmpty(message)) return false;
+
+            // 管理者はすべて許可
+            if (AdminChecker.IsAdmin(clientInfo, _config)) return false;
+
+            string lowerMsg = message.ToLower().Trim();
+
+            foreach (string prefix in BlockedChatPrefixes)
+            {
+                if (lowerMsg == prefix || lowerMsg.StartsWith(prefix + " "))
+                {
+                    Logger.Log($"[CommandInterceptor] チャットコマンドブロック: {clientInfo.playerName} が '{message}' を送信");
+                    _violationHandler.HandleViolation(clientInfo, ViolationType.ConsoleCommand,
+                        $"チャットコマンド: {message}");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
+    }
+}
+
+```
+
+`Source/Logger.cs`:
+
+```cs
+using System;
+using System.IO;
+
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// ログ出力管理クラス。サーバーコンソールと専用ログファイルの両方に記録する。
+    /// </summary>
+    public static class Logger
+    {
+        private static string _logFilePath;
+        private static bool _enableFileLog = true;
+        private static readonly object _lock = new object();
+
+        /// <summary>ログシステムを初期化</summary>
+        public static void Init(string modPath, AntiCheatConfig config)
+        {
+            _enableFileLog = config.EnableFileLog;
+            _logFilePath = Path.Combine(modPath, config.LogFileName);
+
+            Log("[AntiCheatMod] ログシステム初期化完了");
+        }
+
+        /// <summary>情報ログ</summary>
+        public static void Log(string message)
+        {
+            string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [INFO] {message}";
+            UnityEngine.Debug.Log(formatted);
+            WriteToFile(formatted);
+        }
+
+        /// <summary>警告ログ</summary>
+        public static void LogWarning(string message)
+        {
+            string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [WARN] {message}";
+            UnityEngine.Debug.LogWarning(formatted);
+            WriteToFile(formatted);
+        }
+
+        /// <summary>エラーログ</summary>
+        public static void LogError(string message)
+        {
+            string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [ERROR] {message}";
+            UnityEngine.Debug.LogError(formatted);
+            WriteToFile(formatted);
+        }
+
+        /// <summary>チート検出ログ（特別なフォーマット）</summary>
+        public static void LogCheatDetected(string playerName, string platformId, string cheatType, string details)
+        {
+            string message = $"[CHEAT] プレイヤー: {playerName} (ID: {platformId}) | 種類: {cheatType} | 詳細: {details}";
+            string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
+            UnityEngine.Debug.LogWarning(formatted);
+            WriteToFile(formatted);
+        }
+
+        private static void WriteToFile(string message)
+        {
+            if (!_enableFileLog || string.IsNullOrEmpty(_logFilePath)) return;
+
+            lock (_lock)
+            {
+                try
+                {
+                    File.AppendAllText(_logFilePath, message + Environment.NewLine);
+                }
+                catch
+                {
+                    // ファイル書き込みエラーはスキップ
+                }
+            }
+        }
+    }
+}
+
+```
+
+`Source/PlayerMonitor.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// プレイヤーの行動を監視し、不正な移動や無敵状態を検出する。
+    /// </summary>
+    public class PlayerMonitor
+    {
+        private readonly AntiCheatConfig _config;
+        private readonly ViolationHandler _violationHandler;
+
+        /// <summary>プレイヤーごとの監視データ</summary>
+        private readonly Dictionary<int, PlayerTrackingData> _tracking = new Dictionary<int, PlayerTrackingData>();
+
+        private float _lastCheckTime = 0f;
+
+        public PlayerMonitor(AntiCheatConfig config, ViolationHandler violationHandler)
+        {
+            _config = config;
+            _violationHandler = violationHandler;
+        }
+
+        /// <summary>
+        /// プレイヤーの監視を開始する。
+        /// </summary>
+        public void StartTracking(int entityId)
+        {
+            if (!_tracking.ContainsKey(entityId))
+            {
+                _tracking[entityId] = new PlayerTrackingData();
+            }
+        }
+
+        /// <summary>
+        /// プレイヤーの監視を停止する。
+        /// </summary>
+        public void StopTracking(int entityId)
+        {
+            _tracking.Remove(entityId);
+        }
+
+        /// <summary>
+        /// GameUpdateごとに呼ばれる定期監視メソッド。
+        /// </summary>
+        public void Update()
+        {
+            float currentTime = Time.time;
+
+            // 監視間隔チェック
+            if (currentTime - _lastCheckTime < _config.MonitorInterval) return;
+            _lastCheckTime = currentTime;
+
+            World world = GameManager.Instance.World;
+            if (world == null) return;
+
+            var clients = ConnectionManager.Instance.Clients.List;
+            if (clients == null) return;
+
+            foreach (var clientInfo in clients)
+            {
+                if (clientInfo == null) continue;
+
+                // 管理者は監視対象外
+                if (AdminChecker.IsAdmin(clientInfo, _config)) continue;
+
+                int entityId = clientInfo.entityId;
+                if (entityId == -1) continue;
+
+                EntityPlayer player = world.GetEntity(entityId) as EntityPlayer;
+                if (player == null) continue;
+
+                // トラッキングデータ取得
+                if (!_tracking.TryGetValue(entityId, out PlayerTrackingData data))
+                {
+                    data = new PlayerTrackingData();
+                    _tracking[entityId] = data;
+                }
+
+                Vector3 currentPos = player.GetPosition();
+                float deltaTime = currentTime - data.LastCheckTime;
+
+                // 初回は位置を記録するだけ
+                if (!data.HasPreviousPosition)
+                {
+                    data.PreviousPosition = currentPos;
+                    data.HasPreviousPosition = true;
+                    data.LastCheckTime = currentTime;
+                    continue;
+                }
+
+                // --- テレポート検出 ---
+                if (_config.DetectTeleport)
+                {
+                    CheckTeleport(clientInfo, data, currentPos, deltaTime);
+                }
+
+                // --- スピードハック検出 ---
+                if (_config.DetectSpeedHack)
+                {
+                    CheckSpeedHack(clientInfo, data, currentPos, deltaTime);
+                }
+
+                // --- 飛行検出 ---
+                if (_config.DetectFlying)
+                {
+                    CheckFlying(clientInfo, player, data, currentTime);
+                }
+
+                // --- ゴッドモード検出 ---
+                if (_config.DetectGodMode)
+                {
+                    CheckGodMode(clientInfo, player);
+                }
+
+                // 位置を更新
+                data.PreviousPosition = currentPos;
+                data.LastCheckTime = currentTime;
+            }
+        }
+
+        /// <summary>テレポート検出</summary>
+        private void CheckTeleport(ClientInfo clientInfo, PlayerTrackingData data, Vector3 currentPos, float deltaTime)
+        {
+            if (deltaTime <= 0) return;
+
+            float distance = Vector3.Distance(data.PreviousPosition, currentPos);
+
+            // 閾値を超える距離の瞬間移動を検出
+            // ただし、ゲーム内の正常なテレポート（ベッドロール等）を考慮して、
+            // 一定時間内に複数回発生した場合のみ違反とする
+            if (distance > _config.TeleportDistance)
+            {
+                // 落下による高低差を除外（Y方向の大きな変化のみは許可）
+                float horizontalDist = new Vector2(
+                    currentPos.x - data.PreviousPosition.x,
+                    currentPos.z - data.PreviousPosition.z).magnitude;
+
+                if (horizontalDist > _config.TeleportDistance * 0.5f)
+                {
+                    data.TeleportCount++;
+                    if (data.TeleportCount >= 2) // 2回以上で違反
+                    {
+                        _violationHandler.HandleViolation(clientInfo, ViolationType.Teleport,
+                            $"異常な移動検出 距離: {distance:F1}m ({data.PreviousPosition} → {currentPos})");
+                        data.TeleportCount = 0;
+                    }
+                }
+            }
+            else
+            {
+                // 正常な移動ならカウントを徐々にリセット
+                if (data.TeleportCount > 0)
+                    data.TeleportCount--;
+            }
+        }
+
+        /// <summary>スピードハック検出</summary>
+        private void CheckSpeedHack(ClientInfo clientInfo, PlayerTrackingData data, Vector3 currentPos, float deltaTime)
+        {
+            if (deltaTime <= 0.1f) return; // 非常に短い間隔は無視
+
+            // 水平方向の移動速度を計算
+            float horizontalDist = new Vector2(
+                currentPos.x - data.PreviousPosition.x,
+                currentPos.z - data.PreviousPosition.z).magnitude;
+
+            float speed = horizontalDist / deltaTime;
+
+            // 7DTDの通常の最大走行速度は約6-7 m/s（ミニバイクなどの乗り物除く）
+            // 乗り物を考慮して基準速度を高めに設定
+            float maxNormalSpeed = 25f; // 乗り物考慮
+            float threshold = maxNormalSpeed * _config.SpeedMultiplier;
+
+            if (speed > threshold)
+            {
+                data.SpeedViolationCount++;
+                if (data.SpeedViolationCount >= 3) // 3回連続で違反
+                {
+                    _violationHandler.HandleViolation(clientInfo, ViolationType.SpeedHack,
+                        $"異常な移動速度: {speed:F1} m/s (閾値: {threshold:F1} m/s)");
+                    data.SpeedViolationCount = 0;
+                }
+            }
+            else
+            {
+                data.SpeedViolationCount = Math.Max(0, data.SpeedViolationCount - 1);
+            }
+        }
+
+        /// <summary>飛行検出</summary>
+        private void CheckFlying(ClientInfo clientInfo, EntityPlayer player, PlayerTrackingData data, float currentTime)
+        {
+            // プレイヤーが地面に接地しているかチェック
+            bool isGrounded = player.onGround;
+
+            // 水中・はしご付近は除外
+            bool isInWater = player.IsInWater();
+
+            // ワールドのブロックを確認してはしご判定（一つ飛ばし設置にも対応するため上下2ブロック範囲）
+            World world = GameManager.Instance.World;
+            bool isNearLadder = world != null && IsNearLadder(world, player);
+
+            // 足元5ブロック以内に固体ブロックがある場合はジャンプしながらブロック設置中とみなす
+            bool isNearGround = world != null && IsNearGround(world, player);
+
+            if (!isGrounded && !isInWater && !isNearLadder && !isNearGround)
+            {
+                if (data.AirborneStartTime <= 0)
+                {
+                    data.AirborneStartTime = currentTime;
+                }
+                else
+                {
+                    float airborneTime = currentTime - data.AirborneStartTime;
+
+                    // 落下は通常数秒以内に着地する
+                    // ジャイロコプター等の乗り物飛行は考慮が必要
+                    if (airborneTime > _config.FlyingDuration)
+                    {
+                        // 乗り物に乗っているかチェック
+                        bool isOnVehicle = player.AttachedToEntity != null;
+
+                        if (!isOnVehicle)
+                        {
+                            data.FlyViolationCount++;
+                            if (data.FlyViolationCount >= 2)
+                            {
+                                _violationHandler.HandleViolation(clientInfo, ViolationType.Flying,
+                                    $"空中滞在時間: {airborneTime:F1}秒");
+                                data.FlyViolationCount = 0;
+                                data.AirborneStartTime = currentTime; // リセットして再監視
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                data.AirborneStartTime = 0;
+                data.FlyViolationCount = Math.Max(0, data.FlyViolationCount - 1);
+            }
+        }
+
+        /// <summary>足元5ブロック以内に非エアブロックがあるか確認する（ジャンプしながらブロック設置の誤検出対策）</summary>
+        private bool IsNearGround(World world, EntityPlayer player)
+        {
+            Vector3 pos = player.GetPosition();
+            int px = Mathf.FloorToInt(pos.x);
+            int py = Mathf.FloorToInt(pos.y);
+            int pz = Mathf.FloorToInt(pos.z);
+
+            // IsSolidCubeは土・石等の通常ブロックでfalseになる場合があるため使わない
+            // 5ブロックまで拡張してジャンプ頂点でも確実に検出できるようにする
+            for (int dy = 1; dy <= 5; dy++)
+            {
+                BlockValue bv = world.GetBlock(new Vector3i(px, py - dy, pz));
+                if (!bv.isair && bv.Block != null)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>プレイヤーの周囲にはしごブロックがあるか確認する</summary>
+        /// <remarks>
+        /// 梯子はブロックの面に設置されるため水平方向にずれる場合がある。
+        /// また一つ飛ばし設置に対応するため垂直方向を広めにチェックする。
+        /// </remarks>
+        private bool IsNearLadder(World world, EntityPlayer player)
+        {
+            Vector3 pos = player.GetPosition();
+            int px = Mathf.FloorToInt(pos.x);
+            int py = Mathf.FloorToInt(pos.y);
+            int pz = Mathf.FloorToInt(pos.z);
+
+            // 水平方向：プレイヤー足元ブロック＋東西南北1ブロック隣
+            var horizontalOffsets = new (int dx, int dz)[]
+            {
+                (0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)
+            };
+
+            // 垂直方向：足元-1 〜 頭上+2（2ブロック飛ばし設置を考慮して広めに）
+            for (int dy = -1; dy <= 3; dy++)
+            {
+                foreach (var (dx, dz) in horizontalOffsets)
+                {
+                    BlockValue bv = world.GetBlock(new Vector3i(px + dx, py + dy, pz + dz));
+                    if (IsLadderBlock(bv))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>ブロックがはしご系かどうか判定する</summary>
+        private static bool IsLadderBlock(BlockValue bv)
+        {
+            if (bv.isair || bv.Block == null) return false;
+            string name = bv.Block.GetBlockName().ToLower();
+            return name.Contains("ladder") || name.Contains("railing");
+        }
+
+        /// <summary>ゴッドモード検出</summary>
+        private void CheckGodMode(ClientInfo clientInfo, EntityPlayer player)
+        {
+            // EntityPlayerのIsFlyMode（デバッグモードの飛行/無敵）をチェック
+            // 注: この値はサーバーサイドで取得可能 
+            try
+            {
+                // プレイヤーのバフにgodmodeがあるかチェック
+                if (player.Buffs != null && player.Buffs.HasBuff("god"))
+                {
+                    _violationHandler.HandleViolation(clientInfo, ViolationType.GodMode,
+                        "ゴッドモードバフ検出");
+                }
+            }
+            catch
+            {
+                // バフチェックでエラーが出ても無視
+            }
+        }
+
+        /// <summary>プレイヤーの追跡データ</summary>
+        private class PlayerTrackingData
+        {
+            public Vector3 PreviousPosition { get; set; }
+            public bool HasPreviousPosition { get; set; } = false;
+            public float LastCheckTime { get; set; } = 0f;
+
+            // テレポート検出用
+            public int TeleportCount { get; set; } = 0;
+
+            // スピードハック検出用
+            public int SpeedViolationCount { get; set; } = 0;
+
+            // 飛行検出用
+            public float AirborneStartTime { get; set; } = 0f;
+            public int FlyViolationCount { get; set; } = 0;
+        }
+    }
+}
+
+```
+
+`Source/ViolationHandler.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+
+namespace AntiCheatMod
+{
+    /// <summary>
+    /// 違反の種類
+    /// </summary>
+    public enum ViolationType
+    {
+        ConsoleCommand,
+        Flying,
+        Teleport,
+        SpeedHack,
+        GodMode
+    }
+
+    /// <summary>
+    /// 違反処理クラス。警告・キック・BANを管理する。
+    /// </summary>
+    public class ViolationHandler
+    {
+        private readonly AntiCheatConfig _config;
+
+        /// <summary>プレイヤーごとの違反カウント</summary>
+        private readonly Dictionary<int, PlayerViolationData> _violations = new Dictionary<int, PlayerViolationData>();
+
+        public ViolationHandler(AntiCheatConfig config)
+        {
+            _config = config;
+        }
+
+        /// <summary>
+        /// 違反を記録し、適切なアクションを実行する。
+        /// </summary>
+        public void HandleViolation(ClientInfo clientInfo, ViolationType type, string details)
+        {
+            if (clientInfo == null) return;
+
+            int entityId = clientInfo.entityId;
+            string playerName = clientInfo.playerName;
+            string platformId = clientInfo.PlatformId?.ReadablePlatformUserIdentifier ?? "Unknown";
+
+            // ログに記録
+            Logger.LogCheatDetected(playerName, platformId, type.ToString(), details);
+
+            // 違反データ取得・作成
+            if (!_violations.TryGetValue(entityId, out PlayerViolationData data))
+            {
+                data = new PlayerViolationData();
+                _violations[entityId] = data;
+            }
+
+            // リセット時間が設定されている場合、古い違反をリセット
+            if (_config.ViolationResetMinutes > 0)
+            {
+                TimeSpan elapsed = DateTime.Now - data.LastViolationTime;
+                if (elapsed.TotalMinutes >= _config.ViolationResetMinutes)
+                {
+                    data.WarningCount = 0;
+                    data.KickCount = 0;
+                }
+            }
+
+            data.WarningCount++;
+            data.LastViolationTime = DateTime.Now;
+
+            // 警告メッセージ
+            string violationName = GetViolationName(type);
+
+            // BANチェック
+            if (_config.KicksBeforeBan > 0 && data.KickCount >= _config.KicksBeforeBan)
+            {
+                BanPlayer(clientInfo, violationName);
+                return;
+            }
+
+            // キックチェック
+            if (data.WarningCount >= _config.MaxWarnings)
+            {
+                KickPlayer(clientInfo, violationName);
+                data.WarningCount = 0;
+                if (_config.ResetOnKick)
+                {
+                    data.KickCount = 0; // 完全リセット：BANカウントも含め初期化
+                }
+                else
+                {
+                    data.KickCount++; // BANに向けて累積
+                }
+                return;
+            }
+
+            // 警告
+            if (_config.WarnPlayer)
+            {
+                WarnPlayer(clientInfo, violationName, data.WarningCount);
+            }
+
+            // 管理者通知
+            if (_config.NotifyAdmins)
+            {
+                NotifyAdmins(playerName, violationName, details);
+            }
+        }
+
+        /// <summary>プレイヤーに警告メッセージを送信</summary>
+        private void WarnPlayer(ClientInfo clientInfo, string violationName, int warningCount)
+        {
+            int remaining = _config.MaxWarnings - warningCount;
+            string message = $"[AntiCheat] 警告: {violationName}が検出されました。 (残り{remaining}回でキックされます)";
+
+            // プレイヤーにチャットメッセージを送信
+            clientInfo.SendPackage(NetPackageManager.GetPackage<NetPackageChat>().Setup(
+                EChatType.Whisper, -1, message, null, EMessageSender.Server, GeneratedTextManager.BbCodeSupportMode.Supported));
+
+            Logger.Log($"[ViolationHandler] {clientInfo.playerName} に警告送信: {message}");
+        }
+
+        /// <summary>プレイヤーをキック</summary>
+        private void KickPlayer(ClientInfo clientInfo, string violationName)
+        {
+            string reason = $"[AntiCheat] チート行為を検出: {violationName}";
+            Logger.Log($"[ViolationHandler] {clientInfo.playerName} をキックしました: {reason}");
+
+            // 管理者に通知
+            if (_config.NotifyAdmins)
+            {
+                NotifyAdmins(clientInfo.playerName, violationName, "プレイヤーをキックしました");
+            }
+
+            // キック実行
+            GameUtils.KickPlayerForClientInfo(clientInfo, new GameUtils.KickPlayerData(GameUtils.EKickReason.ManualKick, 0, default, reason));
+        }
+
+        /// <summary>プレイヤーをBAN</summary>
+        private void BanPlayer(ClientInfo clientInfo, string violationName)
+        {
+            string reason = $"[AntiCheat] 繰り返しのチート行為: {violationName}";
+            Logger.Log($"[ViolationHandler] {clientInfo.playerName} をBANしました: {reason}");
+
+            // 管理者に通知
+            if (_config.NotifyAdmins)
+            {
+                NotifyAdmins(clientInfo.playerName, violationName, "プレイヤーをBANしました");
+            }
+
+            // BAN実行（バニラのbanコマンド相当）
+            GameManager.Instance.adminTools.Blacklist.AddBan(
+                clientInfo.playerName,
+                clientInfo.PlatformId,
+                new DateTime(2099, 12, 31),
+                reason);
+
+            // キック
+            GameUtils.KickPlayerForClientInfo(clientInfo, new GameUtils.KickPlayerData(GameUtils.EKickReason.Banned, 0, default, reason));
+        }
+
+        /// <summary>オンラインの管理者全員にチャット通知</summary>
+        private void NotifyAdmins(string playerName, string violationType, string details)
+        {
+            string message = $"[AntiCheat] {playerName} : {violationType} ({details})";
+
+            var clients = ConnectionManager.Instance.Clients.List;
+            foreach (var admin in clients)
+            {
+                if (AdminChecker.IsAdmin(admin, _config))
+                {
+                    admin.SendPackage(NetPackageManager.GetPackage<NetPackageChat>().Setup(
+                        EChatType.Whisper, -1, message, null, EMessageSender.Server, GeneratedTextManager.BbCodeSupportMode.Supported));
+                }
+            }
+        }
+
+        /// <summary>プレイヤーの違反データをクリア（切断時等）</summary>
+        public void ClearPlayer(int entityId)
+        {
+            _violations.Remove(entityId);
+        }
+
+        /// <summary>違反種類の日本語名を取得</summary>
+        private string GetViolationName(ViolationType type)
+        {
+            switch (type)
+            {
+                case ViolationType.ConsoleCommand: return "不正コマンド使用";
+                case ViolationType.Flying: return "飛行チート";
+                case ViolationType.Teleport: return "テレポート";
+                case ViolationType.SpeedHack: return "スピードハック";
+                case ViolationType.GodMode: return "ゴッドモード";
+                default: return "不明な違反";
+            }
+        }
+
+        /// <summary>プレイヤーの違反追跡データ</summary>
+        private class PlayerViolationData
+        {
+            public int WarningCount { get; set; } = 0;
+            public int KickCount { get; set; } = 0;
+            public DateTime LastViolationTime { get; set; } = DateTime.Now;
+        }
+    }
+}
+
+```
+
+`build.bat`:
+
+```bat
+@echo off
+echo ==========================================
+echo  AntiCheatMod ビルドスクリプト
+echo ==========================================
+echo.
+
+REM --- バージョンインクリメント ---
+echo バージョンを更新中...
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$xml = [xml](Get-Content 'AntiCheatMod\ModInfo.xml' -Encoding UTF8);" ^
+  "$ver = $xml.xml.Version.value;" ^
+  "$parts = $ver -split '\.';" ^
+  "$parts[2] = [int]$parts[2] + 1;" ^
+  "$newVer = $parts -join '.';" ^
+  "$xml.xml.Version.SetAttribute('value', $newVer);" ^
+  "$xml.Save((Resolve-Path 'AntiCheatMod\ModInfo.xml'));" ^
+  "Write-Host ('  ' + $ver + ' -> ' + $newVer)"
+
+if %ERRORLEVEL% NEQ 0 (
+    echo ★ バージョン更新に失敗しました。
+    pause
+    exit /b 1
+)
+
+echo.
+
+REM --- ビルド実行 ---
+echo ビルド中...
+dotnet build Source\AntiCheatMod.csproj -c Release
+
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo ★ ビルドに失敗しました。
+    echo   Source\AntiCheatMod.csproj のHintPathが正しいか確認してください。
+    pause
+    exit /b 1
+)
+
+echo.
+echo ==========================================
+echo  ビルド完了！
+echo  AntiCheatMod フォルダを
+echo  サーバーの Mods フォルダにコピーしてください。
+echo.
+echo  設定変更: AntiCheatMod\Config\AntiCheatConfig.xml
+echo ==========================================
+pause
+
+```
