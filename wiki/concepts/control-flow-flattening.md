@@ -6,13 +6,14 @@ sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/guheng-re__unflat.md
   - wiki/sources/descriptions/es3n1n__obfuscator.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md
+updated: 2026-08-16
 confidence: high
 ---
 
 # Control Flow Flattening
 
-**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[obscura]]). Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md)
+**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[obscura]]). Source-level Rust CFF via proc macros such as [[rust-obfuscator]] (`labyrinth_macros`; automatic project-wide insertion) complements IR and binary flattening. Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md) (source: wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md)
 
 ## Recovery approaches
 
@@ -27,4 +28,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[idadeflat]] · [[d810-ng]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[idadeflat]] · [[d810-ng]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]

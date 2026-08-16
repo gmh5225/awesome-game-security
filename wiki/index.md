@@ -1750,6 +1750,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-external-and-driver-aliencheats](entities/rust-external-and-driver-aliencheats.md) — Facepunch Rust external cheat (C++/C/C++; driver / overlays / memory analysis; cheat / game:rust [External]; gmh5225)
 - [rust-external-source](entities/rust-external-source.md) — Facepunch Rust external cheat source (C/C++; driver / shader / audio; cheat / game:rust [External]; gmh5225)
 - [rust-internal](entities/rust-internal.md) — Facepunch Rust internal cheat framework (C++; Horizon core + DX11/ImGui; memory/map helpers; gmh5225)
+- [rust-obfuscator](entities/rust-obfuscator.md) — Rust source obfuscator (proc macros; `cryptify` string encrypt / `labyrinth_macros` CFF / symbol rename; AC Obfuscation Engine)
 - [rust-rustinternal](entities/rust-rustinternal.md) — Facepunch Rust Unity internal cheat (C++; Mono/IL2CPP hooks + game-object memory; ESP/aimbot/no-recoil; EAC; gmh5225)
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
