@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:csgohacks/master-guide`: entity [[master-guide]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[osiris]], and [[intro-to-gamehacking]].
+
 - **2026-08-16** — ingest `description:ctxis/DLLHSC`: entity [[dllhsc]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-dll-hijacking]], [[hijacklibs]], [[dllirant]], [[impulsive-dll-hijack]], and [[dllspy]].
 
 - **2026-08-16** — ingest `description:tomhamidi97-arch/vmp-devirtualization-lab`: entity [[vmp-devirtualization-lab]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmprotect]], [[novmpy]], and [[control-flow-flattening]].
