@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:david942j/kvm-kernel-example`: entity [[kvm-kernel-example]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[memflow-kvm]], [[ntoseye]], and [[kernel-development]].
+
 - **2026-08-16** — ingest `description:dayzerosec/AMD-SP-Loader`: entity [[amd-sp-loader]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[efixplorer]], [[fiano]], and [[binary-ninja-mcp]].
 
 - **2026-08-16** — ingest `description:dazi2011/crossover-patcher`: entity [[crossover-patcher]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[holodori-kernel-bypass]], [[elden-ring-ct-tga]], and [[ptrace-read-teb]].

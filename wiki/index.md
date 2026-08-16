@@ -1212,6 +1212,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
 - [kvm-csgo-cheat](entities/kvm-csgo-cheat.md) — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (below-OS VM isolation; gmh5225)
+- [kvm-kernel-example](entities/kvm-kernel-example.md) — minimal KVM VMM + guest kernel tutorial (hypercalls, mmap, syscalls, ELF load; Guide)
 - [kur](entities/kur.md) — C/C++ kernel utility via echo_driver.sys BYOVD (kernel R/W, process manipulation, driver load; gmh5225)
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
