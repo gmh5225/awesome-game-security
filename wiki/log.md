@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dsasmblr/game-hacking`: entity [[game-hacking]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[hacking-online-games]], [[retools]], [[game-reversing]], and [[gamehacking-cheatsheet]].
+
 - **2026-08-16** — ingest `description:dsasmblr/hacking-online-games`: entity [[hacking-online-games]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[packet-sniffer]], [[goldberg-emulator]], [[twms-hacking-data]], and [[game-reversing]].
 
 - **2026-08-16** — ingest `description:dslee2022/SignatureKid`: entity [[signature-kid]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[sigthief]], [[sigflip]], and [[fakesign]].
