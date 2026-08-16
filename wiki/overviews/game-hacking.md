@@ -207,6 +207,7 @@ sources:
   - wiki/sources/descriptions/cragson__a53-code-exec.md
   - wiki/sources/descriptions/cragson__osmium.md
   - wiki/sources/descriptions/crifan__AutoRename.md
+  - wiki/sources/descriptions/cpkt9762__solana-sbpf-rlib.md
   - wiki/sources/descriptions/crmulliner__adbi.md
   - wiki/sources/descriptions/cs1ime__AndroidSuperInject.md
   - wiki/sources/descriptions/cs1ime__ceserver-rawmem.md
@@ -1325,6 +1326,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Triton DBA scaffolding in Binary Ninja via [[triton-bn]] (plugin base for symbolic-exec / lifting experiments inside BN; Cheat Binary Ninja Plugins) sits in the same Triton / symbolic-exec lane as [[ponce]] (IDA). (source: wiki/sources/descriptions/ergrelet__triton-bn.md)
 - Binary Ninja ↔ Ghidra Server bidirectional analysis sync via [[ghidra-svr-bridge]] (C++/Qt6 sidebar + Java 17 bridge; local TCP JSON; symbols/comments/types/signatures/bookmarks; collaborative Ghidra Server repos) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md)
 - Solana eBPF (SBF) disassembly/decompilation via [[bn-ebpf-solana]] (Binary Ninja plugin; SBF encoding / memory model / calling conventions) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/otter-sec__bn-ebpf-solana.md)
+- Solana sBPF rlib signature generation for IDA Pro / Ghidra / Binary Ninja via [[solana-sbpf-rlib]] (Python; rlib signature packs; cheat / IDA signature database lane) complements [[bn-ebpf-solana]] for Solana BPF static analysis. (source: wiki/sources/descriptions/cpkt9762__solana-sbpf-rlib.md)
 - Ethereum EVM bytecode disassembly via [[ethersplay]] (Binary Ninja plugin; EVM insn decode, CFG, xrefs for compiled Solidity contracts; blockchain auditor lane) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/gmh5225__ethersplay.md)
 - IDA Pro EVM bytecode via [[ida-evm]] (Crytic processor module; PUSH/POP/SLOAD/SSTORE/CALL/JUMPI decode; operand formatting + xrefs; Python plugin; smart-contract bytecode RE; blockchain auditor lane) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/crytic__ida-evm.md)
 - Process auto-attach via [[auto-attach]] (x64dbg plugin; `AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; target process name + optional delay; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/legendabrn__AutoAttach.md)

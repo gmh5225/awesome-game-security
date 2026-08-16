@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cpkt9762/solana-sbpf-rlib`: entity [[solana-sbpf-rlib]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[bn-ebpf-solana]].
+
 - **2026-08-16** — ingest `description:cpz/trinity`: entity [[trinity]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[windows-kernel-exploits]], [[byovd]], and [[windefctl]].
 
 - **2026-08-16** — ingest `description:cqcallaw/shootergame`: entity [[shootergame]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[shootergame-hack]] and [[unreal-object-model]].
