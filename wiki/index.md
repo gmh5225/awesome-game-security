@@ -2184,6 +2184,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
 - [yuzu-android](entities/yuzu-android.md) — yuzu Switch emulator Android port (ARM64 JIT; Vulkan/OpenGL; Nintendo Switch lane)
+- [yourgamelib](entities/yourgamelib.md) — cross-platform C++11 OpenGL/OpenGL ES game framework (CMake; GLFW/GLM/ImGui/Lua/Box2D/Bullet/miniaudio; desktop/Android/web; Game Engine)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [zam64-zemina](entities/zam64-zemina.md) — BYOVD via Zemana zam64.sys (IOCTL process kill + memory access)
 - [ZeroHVCI](entities/zero-hvci.md) — HVCI bypass PoC for unsigned kernel code (gmh5225; policy edge cases / vulnerable signed drivers; VBS research)
