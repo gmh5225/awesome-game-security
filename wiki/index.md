@@ -365,6 +365,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
 - [covirt](entities/covirt.md) — x86-64 stack-VM code virtualizer (PE MinGW + ELF; MBA + self-modifying code; marker regions; AC Obfuscation Engine `[VM]`; dmaivel)
+- [crossover-patcher](entities/crossover-patcher.md) — experimental macOS CrossOver patcher for anti-cheat-protected Windows games (Apple Silicon; Wine/graphics runtime patches; rollback; dazi2011)
 - [CReadMemory](entities/creadmemory.md) — user-mode cross-process memory read library; multiple methods beyond ReadProcessMemory; external cheat base (gmh5225)
 - [counterstrike2](entities/counterstrike2.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
