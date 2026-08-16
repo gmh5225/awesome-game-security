@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cryonumb/elfloader`: entity [[elfloader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[ida-ps5-elf-plugin]], [[ps5-linux-loader]], and [[elfuck]].
+
 - **2026-08-16** — ingest `description:cryotb/RASD`: entity [[rasd]]; cited on [[stack-spoofing]] and [[overviews/anti-cheat]]; cross-linked [[shadow-stack-walk]], [[return-address-spoofer]], and [[callstackspoofer-2]].
 
 - **2026-08-16** — ingest `description:cryotb/VmdtStr`: entity [[vmdtstr]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hv-detect]], [[hypervisor-detection]], [[detect-hypervisor-detect-ring-0]], and [[ermsb-meme]].

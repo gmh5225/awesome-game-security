@@ -684,6 +684,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ELFpacker](entities/elfpacker.md) — ELF32 `.text` XOR packer + prepend decrypt stub (ELF header/PHDR/SHDR inject; Anti Cheat → Binary Packer `[ELF]`)
 - [ELFcrypt](entities/elfcrypt.md) — ELF `.text` RC4 encrypt + self-decrypt stub (`mprotect`; mmap/section headers; runtime unpack; Anti Cheat → Binary Packer `[ELF]` RC4)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
+- [elfloader](entities/elfloader.md) — Java ELF loader for ps5-jar-loader (PS5 kernel/modding/SDK gen; Anti Cheat → Binary Packer)
 - [elobuddy-addons](entities/elobuddy-addons.md) — EloBuddy LoL addon scripts (champion automation; orbwalker; skill-shot prediction; utility modules; gmh5225; cheat / game:lol)
 - [Embuche](entities/embuche.md) — ELF anti-reversing technique collection (Anti Cheat → Binary Packer `[ELF]`)
 - [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)

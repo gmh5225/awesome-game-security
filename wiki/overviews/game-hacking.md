@@ -842,6 +842,7 @@ sources:
   - wiki/sources/descriptions/muchenspace__android_virtualTouch.md
   - wiki/sources/descriptions/qiufuyu123__Positron.md
   - wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md
+  - wiki/sources/descriptions/cryonumb__elfloader.md
   - wiki/sources/descriptions/cursey__regenny.md
   - wiki/sources/descriptions/cursey__sdkgenny.md
   - wiki/sources/descriptions/praydog__luagenny.md
@@ -1721,6 +1722,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - WebKit CSSFontFace UAF chain via [[cssfontface-exploit]] (PS4/PS5 browser userland R/W; PS4 6.00–11.02, kernel chain 7.00–11.02; PS5 needs separate ASLR/vtable defeat) sits in the same `PlayStation` jailbreak / WebKit research lane. (source: wiki/sources/descriptions/ntfargo__CSSFontFace-Exploit.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - PS5 ELF loader/analysis in IDA via [[ida-ps5-elf-plugin]] (PS5-specific ELF extensions, segment types, dynamic linking; game/system binaries; console security RE) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md)
+- PS5 ELF loader for ps5-jar-loader via [[elfloader]] (Java; kernel-level modding / SDK generation; console PlayStation ELF load path; Anti Cheat → Binary Packer) sits in the same `PlayStation` lane beside static IDA loaders. (source: wiki/sources/descriptions/cryonumb__elfloader.md)
 - PS3 SPRX mod-menu source trees such as [[paradise-bo2]] (Paradise BO2; window/UI code) sit in the same `PlayStation` / console injected-menu lane for BO2 menu-architecture study. (source: wiki/sources/descriptions/gopro2027__ParadiseBO2.md)
 
 ## Related concepts
