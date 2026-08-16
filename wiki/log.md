@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cs1ime/AndroidSuperInject`: entity [[android-super-inject]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-mod-games-by-inject-zygote]], and [[linjector-rs]].
+
 - **2026-08-16** — ingest `description:cs1ime/KernelDwm`: entity [[kernel-dwm]]; cited on [[overviews/graphics-api]] and [[overviews/windows-kernel]]; cross-linked [[double-callback]], [[dwm-dwmdraw]], and [[krnl-gdi-render]].
 
 - **2026-08-16** — ingest `description:cs1ime/blacksun-framework`: entity [[blacksun-framework]]; cited on [[overviews/game-hacking]] and [[overviews/dma-attack]]; cross-linked [[lilypublic]], [[cs2-ext]], and [[vm]].
