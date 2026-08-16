@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dom0ng/pcileech-wifi-v2`: entity [[pcileech-wifi-v2]]; cited on [[overviews/dma-attack]]; cross-linked [[pcileech-wifi]] and [[pcileech-fpga]].
+
 - **2026-08-16** — ingest `description:xscope0/xkvm-ios-injector`: entity [[xkvm-ios-injector]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ipapatch]], [[trollstore]], and [[kittymemory-ios]].
 
 - **2026-08-16** — ingest `readme:categories`: Cheat ~2707 (+1; Anti Cheat ~675 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

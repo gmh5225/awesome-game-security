@@ -1570,6 +1570,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
 - [PCILeechGen](entities/pcileechgen.md) — Go donor-cloning firmware generator (Linux VFIO → scan/check/build/validate; SystemVerilog/COE → Vivado bitstreams; dynamic BAR, NVMe admin-queue, MMIO traces; PCILeech FPGA)
 - [pcileech-wifi](entities/pcileech-wifi.md) — PCILeech-FPGA wireless NIC class emulation (ekknod; anti-cheat / DMA research)
+- [pcileech-wifi-v2](entities/pcileech-wifi-v2.md) — PCILeech-FPGA WiFi NIC emulation fork (dom0ng; Verilog PCIe 7x IP, customizable device-ID scripts; ekknod baseline)
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pdb-rs](entities/pdb-rs.md) — Microsoft Rust PDB reader/writer (MSF/CodeView DBI/TPI/IPI; x86/AMD64/ARM64; RE / debugger symbols)
 - [pdblister](entities/pdblister.md) — Rust PDB manifest CLI (PE CodeView GUID/age scan; symchk /om alternative; Symbol Server batch download)
