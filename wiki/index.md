@@ -1687,6 +1687,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pubgm1.6-deadgame](entities/pubgm1.6-deadgame.md) — PUBG Mobile 1.6 decompiled dump archive (`libtersafe.so` + `libUE4.so`; historical ACE/UE4 native RE; cheat / game:pubgm; gmh5225)
 - [pwatch](entities/pwatch.md) — Linux/Android HWBP process watch (debug without attach; cheat / debugging)
 - [pwatch-c](entities/pwatch-c.md) — C/C++ HWBP on Linux/Android (process watch without attach; cheat / debugging; enenH)
+- [Pyarmor](entities/pyarmor.md) — Python CLI script obfuscator (rename / C-convert functions; machine bind + expiry; optional Themida; Python 2/3; AC Obfuscation Engine)
 - [PyClassInformer](entities/pyclassinformer.md) — IDA Pro C++ RTTI plugin: hierarchy viz, auto-rename, method/library classification (cheat / IDA Plugins)
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
