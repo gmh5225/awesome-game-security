@@ -2184,6 +2184,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vibe-blocks-mcp](entities/vibe-blocks-mcp.md) — MCP server for Roblox Studio (SSE; studio actions as agent tools; Game Develop / MCP)
 - [vscript-lua51](entities/vscript-lua51.md) — CS2 VScript Lua 5.1 external module DLL loader (VScript; cheat / game:cs2 scripting)
 - [wasm-ceserver](entities/wasm-ceserver.md) — WebAssembly memory analysis (Python/JavaScript; Cheat Engine ceserver-style remote debug; Analyzing WebAssembly)
+- [webcheat](entities/webcheat.md) — Chrome extension CE-style WASM memory scan/edit/freeze + game speed control (Manifest V3; Unity/Godot/Emscripten WebGL)
 
 - [w1tn3ss](entities/w1tn3ss.md) — C++/C DBI / analysis / patching framework (modding / hooking / memory; Cheat DBI)
 - [Waldo](entities/waldo.md) — CS2 deep-learning triggerbot/aimbot detection (user-trained model; Detection:Aimbot)

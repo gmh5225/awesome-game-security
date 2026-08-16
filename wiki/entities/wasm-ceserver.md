@@ -20,4 +20,4 @@ Bridges Cheat Engine–style live memory introspection to WASM targets—useful 
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[cheatengine-mcp-bridge]] · [[gddumper]] · [[ce-tracer-ida]] · [[die-engine-web]]
+[[webcheat]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[cheatengine-mcp-bridge]] · [[gddumper]] · [[ce-tracer-ida]] · [[die-engine-web]]
