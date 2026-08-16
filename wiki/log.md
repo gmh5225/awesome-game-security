@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cs1ime/ceserver-rawmem`: entity [[ceserver-rawmem]]; cited on [[overviews/game-hacking]] and [[overviews/dma-attack]]; cross-linked [[cheat-engine-ceserver-pcileech]], [[cheat-engine-dma-plugin]], and [[dma-cheat-engine-loader]].
+
 - **2026-08-16** — ingest `description:cs2-server-plugins/cs2-calladmin`: entity [[cs2-calladmin]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[cs2ac]] and [[7dtd-anticheatmod]].
 
 - **2026-08-16** — ingest `description:cseagle/blc`: entity [[blc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghiradec]], and [[ida2llvm]].

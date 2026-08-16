@@ -204,6 +204,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cs2_things.md
   - wiki/sources/descriptions/gmh5225__cs2_sdk.md
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
+  - wiki/sources/descriptions/cs1ime__ceserver-rawmem.md
   - wiki/sources/descriptions/cs2-server-plugins__cs2-calladmin.md
   - wiki/sources/descriptions/gmh5225__CS2-SDK-Source2Gen.md
   - wiki/sources/descriptions/gmh5225__CS2-External-1.md
@@ -1231,6 +1232,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Delphi x86/x86_64 binary analysis via [[delphi-helper]] (eset; IDA/static-analysis helper for Object Pascal targets; setup requires `pip install py7zr`; cheat / IDA Plugins) supports RE when game clients or cheat tooling ship as Delphi PEs. (source: wiki/sources/descriptions/eset__DelphiHelper.md)
 - WebAssembly memory analysis via [[wasm-ceserver]] (Python/JavaScript; Cheat Engine ceserver-style remote debug for WASM; Cheat Engine Plugins / Analyzing WebAssembly) extends CE plugin workflows to browser and WASM-hosted game logic. (source: wiki/sources/descriptions/gmh5225__wasm-ceserver.md)
 - DMA-backed Cheat Engine ceserver via [[cheat-engine-ceserver-pcileech]] (ceserver protocol over PCILeech/LeechCore; remote CE scan/edit from a separate machine; cheat / DMA) extends CE workflows below the OS beside [[cheat-engine-dma-plugin]] and [[dma-cheat-engine-loader]]. (source: wiki/sources/descriptions/gmh5225__cheat-engine-ceserver-pcileech.md)
+- Raw physical-memory Cheat Engine ceserver via [[ceserver-rawmem]] (cs1ime; ceserver protocol over `/dev/mem` or DMA instead of process APIs; bypasses OS memory protections and anti-cheat monitoring; cheat / CE) extends the same below-OS CE lane when the backend is generic physical RAM rather than PCILeech/LeechCore. (source: wiki/sources/descriptions/cs1ime__ceserver-rawmem.md)
 - Jailbroken iOS Cheat Engine ceserver via [[ceserver-ios]] (native ceserver port; desktop CE remote memory search, edit, pointer scan on iOS game processes; cheat / iOS dynamic analysis; gmh5225) extends CE plugin workflows to jailbroken iOS beside [[frida-ceserver]] and REST scanners such as [[memory-server]]. (source: wiki/sources/descriptions/gmh5225__ceserver-ios.md) iOS runtime memory libraries such as [[kittymemory-ios]] (patch/hook/pattern-scan APIs; jailbreak-independent runtime code patching; cheat / iOS memory explorer; gmh5225) sit in the same Cheat / iOS Memory Explorer lane for in-process modification. (source: wiki/sources/descriptions/gmh5225__KittyMemory-IOS.md)
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Non-linear MBA obfuscation via [[mba-obfuscator]] (`mba_obfuscator/` + `samples/`) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/nhpcc502__MBA-Obfuscator.md)
