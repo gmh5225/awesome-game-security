@@ -1,0 +1,369 @@
+Project Path: arc_tomhamidi97-arch_vmp-devirtualization-lab_oqh8di5s
+
+Source Tree:
+
+```txt
+arc_tomhamidi97-arch_vmp-devirtualization-lab_oqh8di5s
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# VMP on Android Native Libraries: Internals, Tooling, and a Devirtualization Lab
+
+> Updated: 2026-07-30
+> **Disclaimer**: This document is intended solely for authorized security research, CTF challenges, academic study, and security testing of apps you own or are licensed to test. It describes protection mechanisms and analysis methodology at an educational level and provides no tools for unauthorized access. **Do not apply any of this to software you are not authorized to examine.**
+> *Original source: derived and rewritten from `goldenfish689/android-reverse` `OLLVM/readme.pdf`.*
+
+---
+
+## TL;DR
+
+**Virtual Machine Protection (VMP)** replaces a function's native machine code with a custom, private bytecode executed by an embedded interpreter. The original control-flow graph is destroyed, so static analysis returns nothing but an opaque dispatch loop. The reverse-engineering loop, however, is constant:
+
+> **Locate the dispatcher → enumerate handlers → recover opcode semantics → trace a real run → lift to C → differential-test.**
+
+In 2026 the winning stack is **QBDI/Unicorn traces + Triton symbolic lifting + LLM-assisted annotation + SMT verification** — not pure static symbolic execution. This guide walks the full cycle, including a reproducible lab where you build a miniature VM by hand and then write the lifter that recovers its source.
+
+---
+
+## 1. What VMP Actually Does
+
+A VMP protector performs three transformations on a function:
+
+| Stage | Input | Output |
+|------|-------|--------|
+| **Lifting** | Native IR / machine code (e.g. ARM64) | Custom bytecode for a private ISA |
+| **Embedding** | The bytecode | A data blob + a dispatcher routine linked into the binary |
+| **Dispatching** | A call to the protected function | Runtime interpretation of the bytecode by the VM loop |
+
+At runtime, the original function is gone. In its place is a stub that pushes a *virtual context* (virtual registers, virtual instruction pointer, virtual flags) onto the stack and enters a **dispatcher** — a loop that fetches the next opcode, decodes it, and jumps to the matching **handler**. Each handler mutates the virtual context, just as real CPU instructions mutate real registers.
+
+The defender's win is asymmetry: the analyst must reconstruct both the ISA (what each opcode means) and the program (the sequence of opcodes) before the original logic is recoverable. A well-designed VM can take days or weeks of effort per protected function.
+
+### 1.1 Dispatcher patterns
+
+Three dispatch strategies dominate in the wild:
+
+- **`switch`-dispatch** — a single `while(1) { switch(op) { case ... } }` loop. Easiest to spot in a disassembler (one large jump table), easiest to trace.
+- **`if/else` chain** — functionally identical to a switch but harder to pattern-match; common in hand-rolled VMs.
+- **Threaded dispatch** (direct threading, Duff's-device style, or computed `jmp`/`br`) — each handler ends by tail-calling or jumping directly to the next. No central loop exists, so the CFG appears as a tangled web. This is the hardest variant and is what separates toy VMs from commercial protectors.
+
+### 1.2 Why static analysis collapses
+
+A protected function usually has **no recoverable control-flow graph**. There are no conditional branches in the original sense — the `CMP/JE` of the source becomes two VM opcodes whose control-flow effect is hidden inside a handler. IDA, Ghidra, and Binary Ninja will produce a single huge basic block or a flat, degenerate CFG. The analyst's structural cues (loops, branches, calls) are deliberately destroyed.
+
+---
+
+## 2. The Protection Landscape (2026)
+
+VMP rarely travels alone. A serious native target stacks multiple transforms — know the stack before choosing a strategy.
+
+### 2.1 Protectors observed on Android
+
+- **VMProtect / Themida** — desktop lineage, occasionally ported into cross-platform SDKs; mature VM with multiple dispatch modes and mutation.
+- **Tigress** — academic, source-to-source; produces diverse, configurable VMs. Frequent in research and CTF.
+- **OLLVM lineage** — `ollvm`, **Hikari**, **Arkari**, **goron**, **pluto**, and the active forks used in mobile SDKs. They provide control-flow flattening, bogus control flow, instruction substitution, and string encryption. Many "VMP" samples in the Android ecosystem are actually *OLLVM control-flow flattening plus a partial interpreter*, not a full VM.
+- **Mobile-first protectors** — Promon SHIELD, DexGuard / Guardsquare, Arxan, Bangcle, Ijiami, Tencent Legu, Alibaba Jiagu, Qihoo 360 Jiagu. These wrap DEX and native layers; their native VMP is the hardest tier.
+
+### 2.2 Companion obfuscations you will find alongside VMP
+
+- **Opaque predicates** — always-true/false conditions inserted to create infeasible edges that defeat CFG reconstruction.
+- **Control-flow flattening (CFF)** — destroys the call/loop structure by routing everything through a state-variable dispatcher. Often the *precursor* to full virtualization.
+- **Instruction substitution / MBA** — replaces `a + b` with mixed boolean-arithmetic equivalents (`(a ^ b) + 2*(a & b)`), complicating both human and symbolic reading.
+- **String & constant encryption** — runtime-decrypted, so static string xrefs vanish.
+- **Anti-debug / anti-Frida** — `ptrace` self-attach, `TracerPid` checks, inotify on `/maps`, timing checks, syscall-level detection. Expect these *before* you reach the VM.
+- **Anti-emulation** — checks that distinguish real silicon from Unicorn/QEMU (cache behavior, errata, NEON quirks, TLB semantics).
+
+---
+
+## 3. Analysis & Devirtualization Toolkit
+
+Choose tools by *phase*.
+
+| Phase | Goal | Tools (2026) |
+|------|------|--------------|
+| **Triage** | Identify the VM, dispatcher, handlers | IDA Pro 9.x, **Ghidra** (free), **Binary Ninja**, **JEB Native** |
+| **Static lifting** | Recover opcode semantics symbolically | **Triton**, **MAAT**, **angr**, **Miasm** |
+| **Trace / emulation** | Execute the VM under instrumentation | **QBDI** (AArch64-ready), **Unicorn**, **Qiling**, **Frida + Stalker** |
+| **Trace mining** | Reconstruct data flow from traces | Custom lifters, vmtrace-style scripts, PIN/DynamoRIO (desktop) |
+| **Native debugging** | Step the dispatcher on-device | **LLDB** (NDK), **GDB** + gdbserver, IDA/Ghidra debuggers |
+| **Hooking / bypass** | Skip anti-analysis, snapshot context | **Frida**, **Xposed/LSPosed**, **objection** |
+| **AI-assisted** | Annotate handlers, suggest ISA | LLM-assisted lifting (see §6.4) |
+
+### 3.1 Recommended workflow
+
+1. **Find the dispatcher.** Look for a tight loop reading a byte/halfword from a buffer indexed by a virtual IP, followed by a computed jump (switch table, `br x-reg` on AArch64, or a chain of tail calls).
+2. **Enumerate handlers.** Each handler begins where a dispatch target lands. Map every dispatch target → handler entry. The handler count ≈ the ISA width.
+3. **Symbolize one handler at a time.** Use Triton or angr to compute the handler's effect on the virtual context as a symbolic transfer function. This is the *semantics* of one opcode.
+4. **Trace a real execution.** Drive the VM with known inputs under QBDI/Unicorn/Frida and record the opcode sequence. This gives you *a program in the private ISA*.
+5. **Lift to a readable IR** (VEX, BNIL, or your own), then to C. Re-run the recovered C against the original to prove equivalence.
+
+---
+
+## 4. Lab: Build a Mini-VMP, Then Break It
+
+The fastest way to understand VMP is to build one. We translate a trivial C function into a private bytecode, implement an interpreter, and then in §5 write the lifter that recovers the original logic.
+
+### 4.1 The target function
+
+```c
+int logic(int x, int y) {
+    int z = x * 2 + y;
+    if (z == 10) return 1;
+    else         return 0;
+}
+```
+
+### 4.2 Design the private ISA
+
+Four virtual registers `r0–r3` (`r3` doubles as the comparison flag), six opcodes:
+
+| Opcode | Mnemonic | Encoding (bytes) | Semantics |
+|--------|----------|------------------|-----------|
+| `0x01` | `LOAD`  | `01 reg imm`     | `r[reg] = imm` (magic imms `0xFF`=arg0, `0xFE`=arg1) |
+| `0x02` | `ADD`   | `02 dst src`     | `r[dst] += r[src]` |
+| `0x03` | `MUL`   | `03 dst imm`     | `r[dst] *= imm` |
+| `0x04` | `CMP`   | `04 reg imm`     | `r[3] = (r[reg] == imm)` |
+| `0x05` | `JE`    | `05 off`         | `if (r[3]) ip = off` |
+| `0x06` | `RET`   | `06 reg`         | `return r[reg]` |
+
+### 4.3 Hand-compile to bytecode
+
+```text
+LOAD r0, x        ; 01 00 FF
+LOAD r1, y        ; 01 01 FE
+MUL  r0, 2        ; 03 00 02
+ADD  r0, r1       ; 02 00 01
+CMP  r0, 10       ; 04 00 0A
+JE   0x0D         ; 05 0D   -> jump to "return 1" if equal
+LOAD r2, 0        ; 01 02 00
+RET  r2           ; 06 02   (false branch)
+LOAD r2, 1        ; 01 02 01  (at offset 0x0D)
+RET  r2           ; 06 02   (true branch)
+```
+
+As a C array:
+
+```c
+unsigned char bytecode[] = {
+    0x01, 0x00, 0xFF, // LOAD r0, arg0
+    0x01, 0x01, 0xFE, // LOAD r1, arg1
+    0x03, 0x00, 0x02, // MUL  r0, 2
+    0x02, 0x00, 0x01, // ADD  r0, r1
+    0x04, 0x00, 0x0A, // CMP  r0, 10
+    0x05, 0x0D,       // JE   0x0D
+    0x01, 0x02, 0x00, // LOAD r2, 0
+    0x06, 0x02,       // RET  r2      (false)
+    0x01, 0x02, 0x01, // LOAD r2, 1   (offset 0x0D)
+    0x06, 0x02,       // RET  r2      (true)
+};
+```
+
+### 4.4 The interpreter (dispatcher)
+
+```c
+#include <stdio.h>
+
+int run_vm(unsigned char *code, int arg0, int arg1) {
+    int r[4] = {0};   // virtual register file (r3 = flag)
+    int ip    = 0;    // virtual instruction pointer
+
+    for (;;) {
+        unsigned char op = code[ip++];
+        switch (op) {
+            case 0x01: {                            // LOAD
+                int reg = code[ip++];
+                int val = code[ip++];
+                if (val == 0xFF) val = arg0;
+                if (val == 0xFE) val = arg1;
+                r[reg] = val;
+                break;
+            }
+            case 0x02: {                            // ADD
+                int dst = code[ip++], src = code[ip++];
+                r[dst] += r[src];
+                break;
+            }
+            case 0x03: {                            // MUL
+                int dst = code[ip++], imm = code[ip++];
+                r[dst] *= imm;
+                break;
+            }
+            case 0x04: {                            // CMP
+                int reg = code[ip++], imm = code[ip++];
+                r[3] = (r[reg] == imm);             // flag
+                break;
+            }
+            case 0x05: {                            // JE
+                int off = code[ip++];
+                if (r[3]) ip = off;
+                break;
+            }
+            case 0x06: {                            // RET
+                int reg = code[ip++];
+                return r[reg];
+            }
+            default:
+                return -1;                          // illegal opcode
+        }
+    }
+}
+```
+
+### 4.5 Project layout & build
+
+```
+mini_vmp/
+├── src/
+│   ├── main.c        # harness: calls run_vm(bytecode, x, y)
+│   ├── vm.c          # run_vm() dispatcher
+│   └── disasm.py     # bytecode -> mnemonic lifter (see §5)
+└── README.md
+```
+
+```bash
+cd mini_vmp/src
+gcc -O2 main.c vm.c -o vmtest
+./vmtest          # Result = 0   (try varying x, y)
+```
+
+> **AArch64 note.** To target Android directly, cross-compile with the NDK:
+> ```bash
+> $NDK/toolchains/llvm/prebuilt/<host>/bin/aarch64-linux-android24-clang \
+>     -O2 -shared -fPIC main.c vm.c -o libvmtest.so
+> ```
+> Push to `/data/local/tmp` and run under `lldb-server` / Frida on-device.
+
+---
+
+## 5. Breaking the VM: Writing the Lifter
+
+The interpreter in §4.4 is what you *find* inside a protected `.so`. The reverse engineer's job is to recover §4.1 from the dispatcher plus the bytecode blob. Two sub-problems: (a) recover the **opcode table**, and (b) write a **disassembler**.
+
+### 5.1 Recover the opcode table
+
+From the dispatcher's `switch`, every `case` reveals one opcode's intent:
+
+```python
+INSTR_TABLE = {
+    0x01: "LOAD",
+    0x02: "ADD",
+    0x03: "MUL",
+    0x04: "CMP",
+    0x05: "JE",
+    0x06: "RET",
+}
+```
+
+In a real target you recover this table by symbolically executing each handler in Triton/angr and naming the opcode after its symbolic effect — not by reading mnemonics off the page.
+
+### 5.2 The disassembler (bytecode → assembly)
+
+```python
+def disasm(bytecode):
+    i = 0
+    while i < len(bytecode):
+        op = bytecode[i]
+        if   op == 0x01:
+            print(f"{i:02X}: LOAD r{bytecode[i+1]}, {bytecode[i+2]}"); i += 3
+        elif op == 0x02:
+            print(f"{i:02X}: ADD  r{bytecode[i+1]}, r{bytecode[i+2]}"); i += 3
+        elif op == 0x03:
+            print(f"{i:02X}: MUL  r{bytecode[i+1]}, {bytecode[i+2]}"); i += 3
+        elif op == 0x04:
+            print(f"{i:02X}: CMP  r{bytecode[i+1]}, {bytecode[i+2]}"); i += 3
+        elif op == 0x05:
+            print(f"{i:02X}: JE   {bytecode[i+1]}");                 i += 2
+        elif op == 0x06:
+            print(f"{i:02X}: RET  r{bytecode[i+1]}");                i += 2
+        else:
+            print(f"{i:02X}: ???  0x{op:02X}");                      i += 1
+```
+
+Running it on §4.3 reproduces the assembly listing verbatim. From there, the `LOAD/MUL/ADD/CMP/JE` sequence collapses back to `if (x*2 + y == 10) return 1; else return 0;`. **That final collapse — from VM assembly to C — is the whole game at scale.**
+
+### 5.3 From manual to automatic: symbolic lifting
+
+A hand-written disassembler does not scale to a 200-opcode commercial VM. The production approach:
+
+1. **Instrument the dispatcher** with QBDI or Frida-Stalker to log `(ip, opcode, virtual_context_before, virtual_context_after)` for every executed instruction across many inputs.
+2. **Cluster handlers by effect.** Handlers that produce identical symbolic transfer functions are the same opcode in disguise (commercial VMs replicate handlers to defeat counting).
+3. **Synthesize semantics** with Triton: for each handler, concretize inputs, lift to AST, simplify with MBA-aware rewriting, emit a single C statement.
+4. **Emit recovered C** and **differential-test** it: run the recovered function and the protected `.so` on the same fuzz corpus; assert equality.
+
+---
+
+## 6. State of the Art (2026)
+
+### 6.1 Trace-driven devirtualization is now standard
+
+The "trace, cluster, lift" pipeline (QBDI trace → handler clustering → Triton lift) has overtaken pure static symbolic execution for large VMs, because angr-style paths explode on threaded dispatchers. The key idea is *partial-order* trace reduction: many handler instances collapse to a handful of canonical semantics.
+
+### 6.2 AArch64 is the default battlefield
+
+`arm64-v8a` is now the primary ABI; `armeabi-v7a` is legacy. Practical consequences:
+
+- Dispatchers use `br xN` / `blr xN` (indirect branch via register) rather than jump tables — pattern-match on the register-loaded target, not on `.rodata` tables.
+- PAC (Pointer Authentication) and BTI (Branch Target Identification) on modern SoCs constrain where handlers can live and how you redirect them.
+- MTE (Memory Tagging Extension) can detect corrupted virtual contexts — useful for *you* when fuzzing handler semantics.
+
+### 6.3 OLLVM descendants blur the line between CFF and VMP
+
+Modern forks (Arkari, goron, pluto) implement *partial virtualization*: only selected basic blocks are lifted to a private ISA, while the rest remain native but flattened. Treat each function independently — a single binary may contain native-CFF, MBA-only, and fully-virtualized regions side by side.
+
+### 6.4 LLM-assisted reverse engineering
+
+By 2026, LLMs are a genuine force multiplier *within* the pipeline — not a replacement for it:
+
+- **Handler annotation.** Feed a single decompiled handler to a capable model with a fixed prompt; it reliably names the opcode (`ADD`, `ROL`, `XOR-key`) and proposes the transfer function, which you then verify symbolically.
+- **MBA de-obfuscation.** Mixed boolean-arithmetic expressions that defeat simplifiers are routinely collapsed by models, then confirmed with Triton's `simplify()`.
+- **ISA schema inference.** Given a corpus of `(opcode, effect)` pairs, models propose a coherent register/flag model faster than manual analysis.
+- **Caveat.** Never trust an LLM-emitted transfer function without symbolic or differential verification. Models hallucinate side effects and miss flags. The correct pattern is *LLM proposes, SMT disposes*.
+
+### 6.5 Open-source lifters & references
+
+- **vmtrace / unvmp** — community trace-based lifters; search GitHub.
+- **Triton** — symbolic + taint, the workhorse for handler semantics.
+- **QBDI** — production-grade DBI for AArch64, the cleanest way to trace a VM without anti-debug friction.
+- **angr** — symbolic execution and CFG recovery on stubborn binaries.
+- Foundational reading: *Mavroudakis et al., "Virtualization Obfuscators: A Threat for Reverse Engineering"* and subsequent devirtualization literature.
+
+---
+
+## 7. Advanced Exercises (Bonus)
+
+Extend the mini-VM to reproduce the hard problems of commercial protectors:
+
+1. **Stack & calls.** Add `PUSH`/`POP`, a virtual stack pointer, and `CALL`/`RET` with a virtual return address. Now the VM can host nested functions — and your lifter must reconstruct a call graph.
+2. **Threaded dispatch.** Replace the `switch` with direct threaded code (each handler tail-jumps to the next via a function pointer). Re-run your static tools and observe the CFG dissolve.
+3. **Handler replication & randomization.** Emit each opcode's handler N times with MBA-equivalent bodies and a per-build opcode shuffle. Rebuild your disassembler to *cluster* rather than *enumerate* — exactly what defeats naïve analysis on real protectors.
+4. **Opaque predicates inside handlers.** Insert always-true guards that branch into junk handlers. Confirm that symbolic execution now needs predicate resolution before it can cluster.
+5. **Anti-emulation.** Add a handler that reads a system register (`cntvct_el0`) or checks a cache-line property, returning different results under Unicorn vs. real silicon. Then write the Frida shim that pins the value so emulation succeeds.
+
+Completing these five turns the toy in §4 into a faithful miniature of a commercial protector — and the lifter in §5 into a genuine devirtualization toolchain.
+
+---
+
+## 8. Conclusion
+
+VMP replaces native code with a private bytecode run by an embedded interpreter; the original CFG is destroyed. But the recovery loop is constant and learnable: **locate dispatcher → enumerate handlers → recover opcode semantics → trace a real run → lift to C → differential-test.** Build the lab in §4, break it in §5, harden it in §7. If you can lift your own hardened VM, you can lift most of what you will meet in the field.
+
+---
+
+*Document version: 2.0 — international edition. Originally derived from `goldenfish689/android-reverse` `OLLVM/readme.pdf`; rewritten for clarity, correctness, and currency.*
+
+---
+
+## 📬 Need Custom Reverse Engineering Work?
+
+I take **authorized engagements** — protocol analysis, packer/RASP research, native algorithm restoration, and app security audits. Bilingual delivery (English / 中文).
+
+- **Telegram**: [@pidanfuzi](https://t.me/pidanfuzi)
+- **More research**: [android-reverse collection](https://github.com/tomhamidi97-arch/android-reverse)
+
+*All work requires written authorization. I do not accept requests involving unauthorized cracking, payment bypass, or gambling-related systems.*
+
+```
