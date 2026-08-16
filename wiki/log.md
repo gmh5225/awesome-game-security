@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:diabloidyobane/PEReconstruct`: entity [[pereconstruct]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-sieve]], [[league-dumper]], and [[patch-finder]].
+
 - **2026-08-16** — ingest `description:dimkr/papaw`: entity [[papaw]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[elfuck]], [[elfpacker]], and [[elfcrypt]].
 
 - **2026-08-16** — ingest `description:dis0rder0x00/DbgNexum`: entity [[dbgnexum]]; cited on [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[jektor]], and [[mmf-code-injection]].
