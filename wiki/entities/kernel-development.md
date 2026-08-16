@@ -20,4 +20,4 @@ In the game-security corpus this is foundational **guide** material for research
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[venom]] · [[vermagic]] · [[vmlinux-to-elf]] · [[modreveal]] · [[kernel-hack]] · [[memflow-kvm]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[klldb]] · [[venom]] · [[vermagic]] · [[vmlinux-to-elf]] · [[modreveal]] · [[kernel-hack]] · [[memflow-kvm]]

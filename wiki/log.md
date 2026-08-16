@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:djolertrk/kLLDB`: entity [[klldb]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[kernel-development]], [[vmlinux-to-elf]], and [[lldbext-dump]].
+
 - **2026-08-16** — ingest `description:dllcrt0/battleye-decryption`: entity [[battleye-decryption]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[bedaisy-reversal]], [[battleye-shellcode]], and [[be-emulator]].
 
 - **2026-08-16** — ingest `description:dllcrt0/battleye-shellcode`: entity [[battleye-shellcode]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[bedaisy-reversal]], [[be-battleye-shellcode]], and [[present-hook]].
