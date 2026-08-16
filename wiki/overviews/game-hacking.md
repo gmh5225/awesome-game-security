@@ -434,6 +434,7 @@ sources:
   - wiki/sources/descriptions/m417z__thread-call-stack-scanner.md
   - wiki/sources/descriptions/notpidgey__ManyTypes.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
+  - wiki/sources/descriptions/xscope0__xkvm-ios-injector.md
   - wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md
   - wiki/sources/descriptions/farazsth98__poc-CVE-2025-38352.md
   - wiki/sources/descriptions/jsirichai__CVE-2019-2215.md
@@ -1437,6 +1438,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Windows ADB file manager [[adb-file-manager]] (gmh5225; C#/.NET dual-pane Explorer UI; faster transfers than MTP; multi-language) sits in the same Cheat Android File Explorer lane for PC-side pull/push over ADB. (source: wiki/sources/descriptions/gmh5225__AdbFileManager.md)
 - Chinese Android File Explorer guide [[note]] (`Guide-zh` documentation/reference) sits in the same Cheat Android File Explorer lane. (source: wiki/sources/descriptions/nzcv__note.md)
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
+- Pure-Go sideload tweak injectors such as [[xkvm-ios-injector]] (xscope0; CLI/TUI; IPA/TIPA/`.app` dylib and `.deb` injection, rootful/rootless/roothide package conversion, App Store IPA decryption, hook-runtime embedding, Mach-O repack + ad-hoc signing; cheat / iOS sideload) sit beside [[ipapatch]] in the same sideload lane. (source: wiki/sources/descriptions/xscope0__xkvm-ios-injector.md)
 - iOS 15 untethered jailbreak implementations such as [[ios-jailbreak-fugu15]] (gmh5225; Fugu15 kernel exploit chain → root, codesign bypass, arbitrary code execution; cheat / iOS jailbreak) sit in the same Cheat / iOS jailbreak privilege lane beside [[dopamine]] and [[palera1n]]. (source: wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
 - Runtime iOS/macOS dylib injectors such as [[opainject]] (`task_for_pid` / Mach remote thread → `dlopen`; jailbreak + tfp0) sit in the Cheat / Injection:IOS lane. (source: wiki/sources/descriptions/opa334__opainject.md)
