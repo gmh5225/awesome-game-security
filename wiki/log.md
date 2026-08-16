@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:danielkrupinski/Osiris`: entity [[osiris]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[source-netvars]], [[csgo-internal-base]], [[csgo-cheat-base]], and [[osiris-and-extra]].
+
 - **2026-08-16** — ingest `description:danielkrupinski/VAC-Bypass-Loader`: entity [[vac-bypass-loader]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vac-bypass]], [[vac-hooks]], and [[prevent-vac]].
 
 - **2026-08-16** — ingest `description:danielkrupinski/VAC-Bypass`: entity [[vac-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vac]], [[vac-hooks]], and [[prevent-vac]].

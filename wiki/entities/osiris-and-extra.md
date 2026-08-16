@@ -20,4 +20,4 @@ README tags it `[Internal]`. Treat as an Internal injected-cheat / render-surfac
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[csgosimple]] · [[dainsleif]] · [[lumina-cheat]] · [[csgo-bot]] · [[vac3-inhibitor]]
+[[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[osiris]] · [[csgosimple]] · [[dainsleif]] · [[lumina-cheat]] · [[csgo-bot]] · [[vac3-inhibitor]]
