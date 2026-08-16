@@ -1865,6 +1865,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Strings x64dbg](entities/stringsx64dbg.md) — x64dbg plugin: dedicated string search/browse tab (C++/Qt; SearchStringsWidget; Cheat x64dbg Plugins)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
 - [STP](entities/stp.md) — Simple Theorem Prover (bitvector/array SMT; MiniSat/CryptoMiniSat; MBA lane)
+- [SuperMega](entities/super-mega.md) — PE infection shellcode loader (Cordyceps parasitic injection; web UI; anti-emulation; static-analysis evasion; dobin)
 - [SuperSplat](entities/supersplat.md) — PlayCanvas web 3D Gaussian Splat editor (PLY/splat export; 3D Graphics / AI splat)
 - [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
