@@ -514,6 +514,7 @@ sources:
   - wiki/sources/descriptions/knight0x07__ImpulsiveDLLHijack.md
   - wiki/sources/descriptions/gmh5225__DLL-Hijack-ExportDumper.md
   - wiki/sources/descriptions/csgohacks__master-guide.md
+  - wiki/sources/descriptions/cseagle__blc.md
   - wiki/sources/descriptions/ctxis__DLLHSC.md
   - wiki/sources/descriptions/westfox-5__GhidraMetrics.md
   - wiki/sources/descriptions/securityjoes__ThreatResearch.md
@@ -1345,6 +1346,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - ChatGPT PCode assistant via [[ida-plugin-pcodegpt]] (Chinese UI only; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant / microcode lane. (source: wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md)
 - Multi-provider IDA vulnerability analysis via [[vulchatgpt]] (BinAIVulHunter; OpenAI/Gemini/Ollama; decompiled-function vuln analysis + code explanation; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/ke0z__VulChatGPT.md)
 - Dynamic IDA→LLVM IR binary lifting via [[ida2llvm]] (cursor-sync liftability viewer in the disassembly window; cheat / IDA Plugins) sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md)
+- Ghidra decompiler integration in IDA Pro via [[blc]] (Binary Lifting Contraption; cseagle; cheat / IDA Plugins) sits beside [[ida2llvm]] and [[ghiradec]] for alternate pseudocode when Hex-Rays is unavailable or for cross-decompiler comparison. (source: wiki/sources/descriptions/cseagle__blc.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
 - ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)
