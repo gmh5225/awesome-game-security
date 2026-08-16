@@ -12,7 +12,7 @@ confidence: medium
 
 **Page Table Injector (PT-Injector)** — Windows kernel-mode project in C/C++ centered on **page-table manipulation**, **driver development**, and **anti-cheat research** for offensive injection techniques in the cheat / injection:windows lane. (source: wiki/sources/descriptions/isiddique2024__Page-Table-Injector.md)
 
-Useful for game-security researchers and reverse engineers studying kernel-level injection beside page-table tooling such as [[pteditor]], [[windows-kernel-pagehook]], and cross-process R/W helpers like [[ntmemory]].
+Useful for game-security researchers and reverse engineers studying kernel-level injection beside page-table tooling such as [[fumo-loader]], [[executor]], [[pteditor]], [[windows-kernel-pagehook]], and cross-process R/W helpers like [[ntmemory]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for game-security researchers and reverse engineers studying kernel-level
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[pteditor]] · [[windows-kernel-pagehook]] · [[ntmemory]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[fumo-loader]] · [[executor]] · [[pteditor]] · [[windows-kernel-pagehook]] · [[ntmemory]]

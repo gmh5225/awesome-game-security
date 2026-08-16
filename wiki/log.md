@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dumbasPL/fumo_loader`: entity [[fumo-loader]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[executor]] and [[page-table-injector]].
+
 - **2026-08-16** — ingest `description:dungnotnull/game-cheating-exploit-detection-agent-skill`: entity [[game-cheating-exploit-detection-agent-skill]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]]; cross-linked [[anti-cheat-testing-framework]], [[anti-cheat-testbench]], and [[research-rigor]].
 
 - **2026-08-16** — ingest `description:dword64/Apex-Legends-SDK-Remaster`: entity [[apex-legends-sdk-remaster]]; cited on [[overviews/game-hacking]]; cross-linked [[apex-legends-sdk]] and [[apex-full-cheat]].
