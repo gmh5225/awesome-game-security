@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dllcrt0/bedaisy-reversal`: entity [[bedaisy-reversal]]; cited on [[battleye]] and [[overviews/anti-cheat]]; cross-linked [[battleye-re]], [[bedaisy-bypass]], and [[goodeye]].
+
 - **2026-08-16** — ingest `description:dmaivel/covirt`: entity [[covirt]]; cited on [[overviews/reverse-engineering]], [[overviews/anti-cheat]], and [[mixed-boolean-arithmetic]]; cross-linked [[phantasm-x86-virtualizer]], [[guardian-rs]], and [[nocturne]].
 
 - **2026-08-16** — ingest `description:dmaivel/ntoseye`: entity [[ntoseye]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[windows-kernel-debugging-guide]], [[ida-vmware-windows-gdb]], [[memflow-kvm]], and [[nokd]].
