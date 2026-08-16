@@ -2039,6 +2039,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4dumper-emulator](entities/ue4dumper-emulator.md) — Android emulator UE4 SDK dumper (C/C++; modding / SDK generation / memory analysis; gmh5225)
 - [ue4genny](entities/ue4genny.md) — runtime UE4 reflection SDK generator (C++; UObject/UClass/UStruct/UEnum/UFunction → C++ headers; SDK Generator; cursey)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
+- [UE426 ABInfinite Win64 Shipping](entities/ue426-abinfinite-win64-shipping.md) — Arena Breakout Infinite UE4.26 SDK dump (C/C++; SDK generation; cheat / game:arena breakout infinite; cra0)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
 - [unreal-source-explained](entities/unreal-source-explained.md) — profiler-driven UE4 source analysis (init / game loop / task graph / RHI / Metal·D3D11; Game Engine / Unreal guide; donaldwuid)
 - [unreal-mcp](entities/unreal-mcp.md) — MCP server for Unreal Editor (asset/level/blueprint automation; Game Develop / MCP)
