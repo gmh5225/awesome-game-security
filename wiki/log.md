@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dbcyyds/MemDbg`: entity [[memdbg]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[cheap-engine]], [[mypower]], and [[termux-app]].
+
 - **2026-08-16** — ingest `readme:categories`: Cheat ~2709 (+2; Anti Cheat ~675 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-16** — ingest `description:deadeert/EWS`: entity [[ews]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[sk3wldbg]], [[ripr]], and [[unicorn-pe]].
