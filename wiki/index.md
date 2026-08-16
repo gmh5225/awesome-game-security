@@ -1376,6 +1376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinAPI MapleStory](entities/winapi-maplestory.md) — WinAPI MapleStory client (C/C++; rendering/animation/asset pipelines; Game Develop / source / game:maplestory; gmh5225)
 - [MapleStoryEx](entities/maplestoryex.md) — MapleStory private server (CMS-079; custom content / server logic)
 - [MapleEzorsia](entities/maple-ezorsia.md) — MapleStory v83 private server (Java; login/map/quest + custom resolution client; Private Server / game:maplestory)
+- [Maple Fighters](entities/maple-fighters.md) — MapleStory-inspired online multiplayer game (real-time co-op monster combat; Game Develop / source; codingben)
 - [mapleLemon](entities/maple-lemon.md) — MapleStory CMS-027 private server (Java/JavaScript; modding/debugging; Private Server-CMS-027 / game:maplestory)
 - [mnwvs196](entities/mnwvs196.md) — MapleStory TMS-196 private-server research stack (C/C++; boost::asio / Poco·MySQL / WZ; WvsGame·WvsLogin·WvsCenter; Private Server-TMS-196 / game:maplestory)
 - [ms079](entities/ms079.md) — MapleStory v079 private-server study codebase (Java / MySQL / WZ bundle; Private Server-CMS-079)
