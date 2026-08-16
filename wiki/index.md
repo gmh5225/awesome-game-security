@@ -83,6 +83,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
 - [Battleye Shellcode Dumper](entities/battleye-shellcode-dumper.md) — intercept BE server-streamed runtime shellcode + keys pre-execution (BEClient2.dll Dumper)
 - [battleye-re](entities/battleye-re.md) — BEDaisy.sys RE reference (IOCTL/API/anti-DMA; PE layout, HAL verify, VM obfuscation; experienceds)
+- [battleye-decryption](entities/battleye-decryption.md) — BEService↔BEDaisy named-pipe packet decrypt (XOR multi-layer, hardware-info crypto, key-derived routines; dllcrt0)
 - [battleye-region-walking](entities/battleye-region-walking.md) — BE VirtualQuery region walk (MEM_PRIVATE/MAPPED; shellcode/manual-map)
 - [battleye-rust](entities/battleye-rust.md) — BattlEye RCON UDP (Rust; packet checksum + socket I/O)
 - [battleye-shellcode](entities/battleye-shellcode.md) — decompiled BE UM shellcode modules (AutoHotKey detection, Present hook scan, stack-walking; dllcrt0; [shellcode])
