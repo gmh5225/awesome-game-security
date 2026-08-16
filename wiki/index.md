@@ -2130,6 +2130,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)
+- [virtualbox-kvm](entities/virtualbox-kvm.md) — VirtualBox with KVM backend (manual GPU accel; cheat / QEMU/KVM/PVE/VBOX research-host lane; cyberus-technology)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
 - [VMkatz](entities/vmkatz.md) — in-place VM snapshot/VHD cred extract (LSASS/SAM/LSA/NTDS; AC/IS forensics)
 - [VMP3 x64 Disasm (prerelease)](entities/vmp-vmp3-64bit-disasm-prerelease-.md) — VMProtect 3 x64 bytecode disassembler (custom insn decode, virtual opcode handlers, flow reconstruction; Fix VMP; gmh5225)
