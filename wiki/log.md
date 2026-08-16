@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cycraft-corp/BinaryAnalysisMCPs`: entity [[binary-analysis-mcps]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[mcp-server-idapro]], and [[binary-ninja-mcp]].
+
 - **2026-08-16** — ingest `description:czs108/PE-Packer`: entity [[pe-packer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[packer]], [[pe32-password]], and [[pepacker]].
 
 - **2026-08-16** — ingest `description:d1skq/vgk-dma-bypass`: entity [[vgk-dma-bypass]]; cited on [[concepts/vanguard]] and [[overviews/dma-attack]]; cross-linked [[pcileech-fpga]] and [[pcileech-fpga-dma-vmd]].
