@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:donnaskiez/ac`: entity [[ac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[nmi-callback-handler]], [[kernel-anti-cheat]], and [[kernel-callbacks]].
+
 - **2026-08-16** — ingest `description:donnaskiez/nmi-callback-handler`: entity [[nmi-callback-handler]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback]], [[nmi-nmi-callback]], and [[kernel-anti-cheat]].
 
 - **2026-08-16** — ingest `description:doomedraven/Tools`: entity [[tools]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[flare-vm]], [[retoolkit]], [[volatility3]], and [[anticuckoo]].

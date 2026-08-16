@@ -109,6 +109,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [amd-ryzen-master-driver-v17-exploit](entities/amd-ryzen-master-driver-v17-exploit.md) — AMD Ryzen Master v17 driver BYOVD (IOCTL → physmem R/W; kernel exploitation / driver map / AC bypass; gmh5225)
 - [ANGRYORCHARD](entities/angryorchard.md) — win32k NtUserHardErrorControl kernel exploit (thread→KernelMode elevation; arbitrary kernel R/W; Some Tricks; gmh5225)
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
+- [ac](entities/ac.md) — open-source Windows kernel AC driver (NMI/APC/DPC stack walks, `.text` integrity, ObCallbacks handle strip, chained data-ptr detect; donnaskiez)
 - [AcDrv](entities/acdrv.md) — Windows kernel AC research driver (process/module callbacks, memory intercept, syscall monitoring; ETW Hook; gmh5225)
 - [AetherVisor](entities/aether-visor.md) — AMD SVM hacked-hypervisor testing (feature implementation walkthrough; Detection: Hacked Hypervisor Testing AMD; gmh5225)
 - [AdbFileManager](entities/adb-file-manager.md) — Windows ADB file manager (C#/.NET dual-pane Explorer UI; faster than MTP; Cheat Android File Explorer; gmh5225)
