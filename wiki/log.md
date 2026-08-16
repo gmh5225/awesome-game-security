@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `readme:categories`: Cheat ~2711 (+1; Anti Cheat ~677 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-16** — ingest `description:crazyshader/GameDev`: entity [[gamedev]]; cited on [[overviews/game-engine]]; cross-linked [[learn-awesome-gamedev]] and [[unity-script-collection]].
 
 - **2026-08-16** — ingest `description:crazythecoder/IW4MAdmin-SebzAntiCheat`: entity [[iw4madmin-sebzanticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[cs2-calladmin]], [[7dtd-anticheatmod]], and [[aimbot-detection-prototype]].
