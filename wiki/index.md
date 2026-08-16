@@ -556,6 +556,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [devilution](entities/devilution.md) — Diablo 1 retail Windows binary reverse engineering (drlg/render/tables/multiplayer/save/Storm MPQ; MSVC 4.20; Game Develop / source)
 - [devour-client](entities/devour-client.md) — Devour co-op horror Unity IL2CPP client mod (QoL/cheat via in-process memory manipulation; gmh5225; cheat)
 - [devour-menu](entities/devour-menu.md) — Devour co-op horror Unity IL2CPP mod menu (ImGui overlay; toggleable gameplay mods; gmh5225; cheat / [Menu])
+- [dOffset](entities/doffset.md) — IDA Pro + Cheat Engine current-module offset sync (multi-tool static+dynamic RE; cheat / IDA Plugins; dNop90)
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)
 - [Driver-intel-PEBs-LoopHPCs](entities/driver-intel-pebs-loophpcs.md) — LoopHPCs filter-driver framework; PEBS + LBR loop-centric hot-loop telemetry for unpacking/malware RE (gmh5225; Intel PEBs)
