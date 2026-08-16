@@ -12,7 +12,7 @@ confidence: medium
 
 **Benowin Blanc** parses Windows SDK and community **PHNT** (Process Hacker NT headers) via **libclang** to expose struct layouts, enums, and constants—WinDbg `dt`-like introspection without attaching a debugger. Ships CLI + TUI interfaces and JSON export for scripting. (source: wiki/sources/descriptions/cristeigabriela__bb.md)
 
-PHNT documents internal NT structures Microsoft does not publish; this tool makes those headers queryable offline for game-security researchers and reverse engineers working in cheat / Windows kernel explorer workflows.
+PHNT documents internal NT structures Microsoft does not publish; this tool makes those headers queryable offline for game-security researchers and reverse engineers working in cheat / Windows kernel explorer workflows. Web UI companion: [[bb-viewer]].
 
 ## Links
 
@@ -20,4 +20,4 @@ PHNT documents internal NT structures Microsoft does not publish; this tool make
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[ntoskrnlwalker]] · [[ntkernelwalkerlib]] · [[windiff]] · [[windbg-scripts]] · [[systeminformer]]
+[[bb-viewer]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[ntoskrnlwalker]] · [[ntkernelwalkerlib]] · [[windiff]] · [[windbg-scripts]] · [[systeminformer]]

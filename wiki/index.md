@@ -79,6 +79,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BE Forcer Fortnite](entities/be-forcer-fortnite.md) — Fortnite BattlEye init forcer; disables title-specific detection checks for injection/memory access (gmh5225; cheat / explore anticheat system:be / game:fortnite)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
 - [Benowin Blanc (bb)](entities/bb.md) — parse Windows SDK/PHNT via libclang; struct layouts, enums, constants (`dt`-like) without WinDbg; CLI + TUI, JSON export (cristeigabriela)
+- [bb-viewer](entities/bb-viewer.md) — web explorer for bb output: Windows SDK/PHNT functions, types, constants, IRQL annotations, type graphs; search/filter; user/kernel; amd64/x86/arm/arm64 (cristeigabriela)
 - [BEDaisy.sys report bypass](entities/bedaisy-bypass.md) — suppress BEDaisy outbound reports; preserve service responses (gmh5225; cheat / explore anticheat system:be)
 - [bedaisy-reversal](entities/bedaisy-reversal.md) — BEDaisy.sys comprehensive RE (integrity/callback/HAL/manual-map checks, handle protection, minifilter, physmem scan, CSRSS/graphics verify, thread/image notify; dllcrt0)
 - [BepInEx-IL2CPPBase](entities/bepinex-il2cppbase.md) — BepInEx Unity IL2CPP mod-menu base (C# rendering/audio/physics hooks; cheat / IL2CPP Menu; gmh5225)
