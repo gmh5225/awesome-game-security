@@ -45,7 +45,8 @@ sources:
   - wiki/sources/descriptions/focus-creative-games__hybridclr.md
   - wiki/sources/descriptions/extremeblackliu__IL2CPP_Resolver_External.md
   - wiki/sources/descriptions/repinek__fallguys-frida-modmenu.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/djkaty__Il2CppInspector.md
+updated: 2026-08-16
 confidence: high
 ---
 
@@ -71,7 +72,7 @@ Key native API patterns (names/signatures drift by Unity version):
 ## Research workflow
 
 1. Locate binary + metadata (desktop or APK/IPA); metadata locators such as [[il2cpp-finder]] (gmh5225; scan executables/shared libraries for `global-metadata.dat` signatures plus `CodeRegistration` / `MetadataRegistration` pointers; obfuscated or unfamiliar builds) help find dump entry points before running IL2CPPDumper. (source: wiki/sources/descriptions/gmh5225__il2cpp-finder.md)
-2. Run IL2CPPDumper (desktop or Android-focused [[il2cppdumper]]) → `dump.cs`, headers, `script.json`
+2. Run IL2CPPDumper (desktop or Android-focused [[il2cppdumper]]) or cross-platform C# [[il2cpp-inspector]] (djkaty; `global-metadata.dat` + IL2CPP binaries → type/method metadata, IDA/Ghidra/Binary Ninja scripts, C++ headers, DLL injection scaffolds; all IL2CPP versions/platforms; [Il2Cpp Dump]) (source: wiki/sources/descriptions/djkaty__Il2CppInspector.md) → `dump.cs`, headers, `script.json`
 3. Import into IDA/Ghidra; resolve `Il2CppClass` / `MethodInfo` / invoke paths (match layouts to the title’s Unity IL2CPP generation via references such as [[il2cpp-versions]])
 4. Hook via native hooks or [[frida]] on mobile; Android IL2CPP/Mono hook script templates such as [[il2cpp-hook-scripts]] (gmh5225; Frida + native templates for method intercept, logic patches, runtime data extraction) complement dump/harvest tooling when analysts need reusable hook scaffolds. (source: wiki/sources/descriptions/gmh5225__Il2Cpp-HookScripts.md) APK-to-Android-Studio rebuild tooling such as [[fakerandroid]] (gmh5225; IL2CPP C++ scaffolding + fakeCpp JNI `.so` hooks; javaScaffolding for package/class-matched Java extensions) offers a Gradle-project modding path beside Frida when analysts want smali-aware rebuilds. (source: wiki/sources/descriptions/gmh5225__FakerAndroid.md)
 
@@ -81,4 +82,4 @@ Mono builds instead use `Assembly-CSharp.dll` + dnSpy/ILSpy on the embedded [[mo
 
 ## Related
 
-[[unreal-object-model]] · [[source-netvars]] · [[android-modding]] · [[hybridclr]] · [[fakerandroid]] · [[frida]] · [[frida-il2cpp-bridge]] · [[frida-il2cpp-datacollector]] · [[il2cpp-hook-scripts]] · [[il2cpp-versions]] · [[il22cpp]] · [[il2cpp-resolver]] · [[il2cpp-resolver-external]] · [[il2cpp-runtime-dumper]] · [[qiling-il2cpp-dump]] · [[il2cpp-finder]] · [[il2cpp-assembly-unhollower]] · [[il2cppdumper]] · [[il2cppdumper-yuanshen]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[mono]] · [[mono-external-lib]] · [[unity202x-externalresolve]] · [[escapefromtarkov-trainer]] · [[taskbarhero-bot]] · [[rust-rustinternal]] · [[goose-goose-duck-hack]] · [[bepinex-il2cppbase]] · [[autogunfire-reborn]] · [[blockpost-cheat]] · [[devour-menu]] · [[devour-client]] · [[fall-guys-sharp]] · [[fallguys-frida-modmenu]] · [[matscan]] · [[pokemongo-dumper]] · [[dummy-dlls-naraka-1-9-21]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[unreal-object-model]] · [[source-netvars]] · [[android-modding]] · [[hybridclr]] · [[fakerandroid]] · [[frida]] · [[frida-il2cpp-bridge]] · [[frida-il2cpp-datacollector]] · [[il2cpp-hook-scripts]] · [[il2cpp-versions]] · [[il22cpp]] · [[il2cpp-resolver]] · [[il2cpp-resolver-external]] · [[il2cpp-runtime-dumper]] · [[qiling-il2cpp-dump]] · [[il2cpp-finder]] · [[il2cpp-assembly-unhollower]] · [[il2cpp-inspector]] · [[il2cppdumper]] · [[il2cppdumper-yuanshen]] · [[il2cpp-spy]] · [[unityexplorer]] · [[unityspeedtools]] · [[android-il2cpp-modspeed]] · [[unity-vulnerable-entrypoint]] · [[mono]] · [[mono-external-lib]] · [[unity202x-externalresolve]] · [[escapefromtarkov-trainer]] · [[taskbarhero-bot]] · [[rust-rustinternal]] · [[goose-goose-duck-hack]] · [[bepinex-il2cppbase]] · [[autogunfire-reborn]] · [[blockpost-cheat]] · [[devour-menu]] · [[devour-client]] · [[fall-guys-sharp]] · [[fallguys-frida-modmenu]] · [[matscan]] · [[pokemongo-dumper]] · [[dummy-dlls-naraka-1-9-21]] · [[honor-of-kings-re-research]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
