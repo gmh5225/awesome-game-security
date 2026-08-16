@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cragson/osmium`: entity [[osmium]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-ext]], [[blacksun-framework]], and [[intro-to-gamehacking]].
+
 - **2026-08-16** — ingest `description:craids/AresFramework`: entity [[ares-framework]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[packer-tutorial]], [[2pack]], and [[blacksun-framework]].
 
 - **2026-08-16** — ingest `description:crazymind90/CVE-2026-XNU-AIO-KEVENT-UAF`: entity [[cve-2026-xnu-aio-kevent-uaf]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xnu-1day-practice]], [[kfd]], and [[dirty-zero]].

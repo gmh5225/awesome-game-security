@@ -204,6 +204,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cs2_things.md
   - wiki/sources/descriptions/gmh5225__cs2_sdk.md
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
+  - wiki/sources/descriptions/cragson__osmium.md
   - wiki/sources/descriptions/crifan__AutoRename.md
   - wiki/sources/descriptions/crmulliner__adbi.md
   - wiki/sources/descriptions/cs1ime__AndroidSuperInject.md
@@ -1168,7 +1169,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 ## Development workflows
 
-**External** — pattern scan → RPM in separate process → overlay or input inject. **Internal** — inject → hook render path → direct object access in-process. Pair either with SDK codegen ([[luagenny]], [[source2gen]]) and offset dumps that rot per patch.
+**External** — pattern scan → RPM in separate process → overlay or input inject. General-purpose C++ external cheat scaffolds such as [[osmium]] (cragson; cheat / guide; offensive technique study—not a best-practices reference) illustrate that workflow for researchers. (source: wiki/sources/descriptions/cragson__osmium.md) **Internal** — inject → hook render path → direct object access in-process. Pair either with SDK codegen ([[luagenny]], [[source2gen]]) and offset dumps that rot per patch.
 
 ## Escalation model
 
