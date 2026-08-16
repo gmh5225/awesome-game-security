@@ -20,4 +20,4 @@ Sits under README `Game Network` / `[mqtt nodejs]` as a study surface for lightw
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[mqtt]] · [[socket-io]] · [[uwebsockets]] · [[kcp]] · [[pitaya]] · [[jwt-tool]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[mqtt]] · [[paho-mqtt-cpp]] · [[socket-io]] · [[uwebsockets]] · [[kcp]] · [[pitaya]] · [[jwt-tool]]

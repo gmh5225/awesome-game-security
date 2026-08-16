@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:eclipse/paho.mqtt.cpp`: entity [[paho-mqtt-cpp]]; cited on [[overviews/overview]] and [[overviews/game-engine]]; cross-linked [[mqtt]] and [[mqtt-js]].
+
 - **2026-08-16** — ingest `description:xgl34222220-ops/BaiZe`: entity [[baize]]; cited on [[overviews/mobile-security]] and [[magisk]]; cross-linked [[kernelsu]] and [[rescuex]].
 
 - **2026-08-16** — ingest `description:eddeeh/kdmapper`: entity [[kdmapper]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper-rs]], [[cve-2015-2291]], and [[saturn-mapper]].
