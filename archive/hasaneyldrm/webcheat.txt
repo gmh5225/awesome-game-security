@@ -1,0 +1,3093 @@
+Project Path: arc_hasaneyldrm_webcheat_mosov518
+
+Source Tree:
+
+```txt
+arc_hasaneyldrm_webcheat_mosov518
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── README.tr.md
+├── docs
+├── manifest.json
+├── package.json
+├── src
+│   ├── agent
+│   │   └── agent.js
+│   ├── bg
+│   │   └── service-worker.js
+│   ├── bridge
+│   │   └── bridge.js
+│   └── ui
+│       ├── panel.css
+│       ├── panel.html
+│       └── panel.js
+└── test
+    └── engine.test.mjs
+
+```
+
+`CHANGELOG.md`:
+
+```md
+# Changelog
+
+## 0.1.0 — 2026-08-16
+
+First public release.
+
+### Scanning
+- WebAssembly memory capture via hooks on `instantiate`, `instantiateStreaming`,
+  `new Instance` and `new Memory`, plus a throttled global sweep for Emscripten
+  modules created before the hooks landed.
+- Exact / greater / less / between / unknown-initial-value first scans.
+- Narrowing: changed, unchanged, increased, decreased, increased by N, decreased by N.
+- All-types scan across `i8 · i16 · i32 · i64 · f32 · f64`, each result carrying its
+  own type; lanes that cannot represent the value are pruned.
+- Aligned fast path over typed arrays, unaligned byte-by-byte path via `DataView`.
+- Chunked and cancellable, with progress reporting.
+- Aborts loudly if WASM memory grows mid-scan instead of returning a partial result.
+- Result cap of 4,000,000 addresses, reported rather than silently truncated.
+
+### Editing
+- Read, write and 60 Hz freeze on any address.
+- Address list with per-row type, description and live values.
+
+### Time control
+- Virtual clock rescaling `performance.now`, `Date.now`, `requestAnimationFrame`
+  timestamps and timer delays.
+- 0.25x-8x presets, free slider, pause and single-frame step.
+- Pure pass-through until the speed is changed, so normal browsing is unaffected.
+
+### Targeting
+- Frame-level target selection for games embedded in cross-origin iframes.
+- Live region polling with automatic fallback to whichever frame holds the memory.
+- Every tab is listed and labelled, including tabs with no agent or discarded by Chrome.
+- 1.5s probe timeout so one hung tab can no longer block target discovery.
+
+### Diagnostics
+- Live panel readout of engine, fps, clock reads, shared memory and timer activity,
+  explaining why time control is or is not taking effect.
+
+### Testing
+- 33 assertions running the scan engine against a synthetic 4 MB `WebAssembly.Memory`.
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Hasan Emir Yıldırım
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# WebCheat
+
+**A Cheat Engine for browser games — as a Chrome extension.**
+
+Scan the game's WebAssembly memory, find the address behind a value, edit it, freeze it,
+and speed up or slow down time. No local server, no debug flags, no attaching a debugger.
+
+[![test](https://github.com/hasaneyldrm/webcheat/actions/workflows/test.yml/badge.svg)](https://github.com/hasaneyldrm/webcheat/actions/workflows/test.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![manifest](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](manifest.json)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
+
+[Install](#install) · [Quick start](#quick-start) · [How it works](#how-it-works) · [Türkçe](README.tr.md)
+
+<br>
+
+<img src="docs/panel.png" alt="WebCheat panel: tab and frame picker, scan controls, results table, address list with freeze, and time control with live diagnostics" width="900">
+
+<sub>Pick a tab, scan, narrow, edit, freeze — and drive the clock. The diagnostics box tells you what the target frame is actually doing.</sub>
+
+</div>
+
+---
+
+## What it is
+
+Unity, Godot and Emscripten WebGL games keep their entire game state inside a single
+`WebAssembly.Memory` — one flat `ArrayBuffer`. That buffer is the exact browser equivalent
+of the process RAM that Cheat Engine scans.
+
+WebCheat hooks WebAssembly before the game instantiates, keeps a reference to that memory,
+and gives you the classic scan → narrow → edit → freeze workflow against it.
+
+**Zero dependencies. Zero build step. Nothing runs outside the browser.**
+
+## Features
+
+| | |
+|---|---|
+| **Value scanning** | Exact, greater, less, between, unknown-initial-value |
+| **Narrowing** | Changed, unchanged, increased, decreased, increased by N, decreased by N |
+| **All-types scan** | Scan `i8 · i16 · i32 · i64 · f32 · f64` simultaneously; each result carries its own type |
+| **Smart lane pruning** | Type lanes that cannot represent your value are skipped — typing `300` never scans `i8` |
+| **Aligned + unaligned** | Fast typed-array path, or byte-by-byte for packed structs |
+| **Write & freeze** | Edit any address; freeze rewrites it at 60 Hz so the game can't take it back |
+| **Time control** | 0.25×–8× speed, pause, single-frame step — via a virtual clock |
+| **iframe aware** | Targets individual frames, so games embedded cross-origin work |
+| **Live diagnostics** | Tells you *why* something isn't working instead of failing silently |
+
+## Install
+
+Not on the Chrome Web Store — load it unpacked:
+
+```bash
+git clone https://github.com/hasaneyldrm/webcheat.git
+```
+
+1. Open `chrome://extensions`
+2. Enable **Developer mode** (top right)
+3. Click **Load unpacked** → select the cloned folder
+4. Pin the extension to your toolbar
+
+> **Then reload the game tab once.** WebAssembly hooks must be installed *before* the game
+> creates its memory, so the agent runs at `document_start`. Tabs that were already open have
+> no agent yet. The panel's **Reload tab** button does this for you.
+
+## Quick start
+
+Find and lock a coin counter in about a minute:
+
+1. Click the **WebCheat** icon — a panel window opens
+2. Pick your tab from the dropdown (`[WASM]` means memory was found)
+3. Read the value off the screen — say coins = `100`. Type it, hit **First Scan**
+4. Play until the value changes — say coins = `250`. Type it, hit **Next Scan**
+5. Repeat until one address remains
+6. **Double-click** the row → it drops into the Address List
+7. Type a new value in its **Value** cell → written straight to memory
+8. Tick **Freeze** → the game can no longer change it
+
+**Don't know the value?** (a health bar with no number, a hidden timer)
+
+1. Value type **All**, scan type **Unknown initial value** → **First Scan** (takes a snapshot)
+2. Let the value change in game
+3. **Next Scan** → **Increased** / **Decreased** / **Changed**
+4. Repeat 3–4 times
+
+### Picking a value type
+
+| Looking for | Try |
+|---|---|
+| Score, coins, level, ammo, lives | `i32` |
+| Health bar, speed, timers, positions | `f32` |
+| No idea | **All (every type)** |
+| Found nothing at all | Turn **Aligned scan** off — slower, but catches packed structs |
+
+> In **All** mode the same address can appear under several types. The low two bytes of an
+> `i32` holding `4242` also read as `i16` `4242`. Cheat Engine behaves identically — narrowing
+> clears the duplicates.
+
+### Time control
+
+A virtual clock rescales `performance.now`, `Date.now`, `requestAnimationFrame` timestamps
+and `setTimeout`/`setInterval` delays.
+
+- **0.25×–8×** presets or a free slider
+- **Pause** — speed 0, delta time 0, the game freezes
+- **Frame step** — while paused, advance the clock by exactly one frame (16.67 ms)
+
+Games that derive movement from delta time genuinely run faster. Fixed-timestep loops respond
+less, since their simulation step is constant by design.
+
+> While the speed has **never been changed**, the clock is a pure pass-through. This is
+> deliberate: the extension injects into `<all_urls>`, and normal browsing must be untouched.
+
+## How it works
+
+```mermaid
+flowchart TD
+    P["Panel — the Cheat Engine window<br/>(extension page)"]
+    SW["Service worker<br/>routing + target discovery"]
+    B["bridge — ISOLATED world<br/>content script"]
+    A["agent — MAIN world<br/>WASM hooks · scanner · freezer · clock"]
+    M[("WebAssembly.Memory<br/>the game's RAM")]
+
+    P <-->|chrome.runtime| SW
+    SW <-->|"tabs.sendMessage(tabId, frameId)"| B
+    B <-->|window.postMessage| A
+    A <-->|read / write| M
+```
+
+**Why the two content-script worlds:** patching `WebAssembly.instantiate` requires running in
+the page's own JS realm (`MAIN`), but that realm has no access to `chrome.*` APIs. A second
+script in the `ISOLATED` world relays messages between them.
+
+**Why scanning happens in the page:** a Unity heap is routinely 256 MB–1 GB. Shipping that
+across the message channel every scan would be absurd. The agent scans in place and returns
+only matching offsets plus one page of results.
+
+**What gets hooked:** `WebAssembly.instantiate`, `instantiateStreaming`, `new WebAssembly.Instance`,
+`new WebAssembly.Memory`, plus a throttled sweep of globals to catch Emscripten modules
+(`Module.HEAPU8`, `unityInstance.Module.wasmMemory`) that were created before the hooks landed.
+
+**Growth safety:** WASM memory can grow mid-scan, which detaches the old `ArrayBuffer`.
+The scanner re-acquires the live buffer every chunk and aborts loudly rather than silently
+returning a half-scanned result.
+
+## WebCheat vs Cheat Engine
+
+| | WebCheat | Cheat Engine |
+|---|---|---|
+| Target | Browser tabs / iframes | Native OS processes |
+| Attach | Pick a tab, no debugger | Pick a process |
+| Memory model | `WebAssembly.Memory` buffer | Process virtual memory |
+| Value scan + narrowing | ✅ | ✅ |
+| All-types scan | ✅ | ✅ |
+| Write / freeze | ✅ | ✅ |
+| Speedhack | ✅ virtual clock | ✅ |
+| Pointer scan | ❌ *(planned)* | ✅ |
+| AOB / string scan | ❌ *(planned)* | ✅ |
+| Disassembler / debugger | ❌ | ✅ |
+| Lua scripting | ❌ | ✅ |
+
+WebCheat is deliberately the small end of that table: the scan-and-edit loop, done well, for
+the web.
+
+## Troubleshooting
+
+The tab dropdown labels every tab so you always know where you stand:
+
+| Label | Meaning | Fix |
+|---|---|---|
+| `[WASM]` | Agent present, memory found | Ready — scan away |
+| *(none)* | Agent present, no memory yet | Game is still loading; the panel keeps polling |
+| `[agent yok]` | Content script never injected | Hit **Reload tab** |
+| `[askıda]` | Chrome discarded the tab | Visit the tab once, then **Refresh** |
+
+The **diagnostics line** under Time Control explains speed problems directly:
+
+| It says | Meaning |
+|---|---|
+| `render döngüsü: 60 fps · saat okuma: 14.203` | Healthy — speed control will work |
+| `bu frame'de çalışan bir oyun döngüsü yok` | Wrong frame selected |
+| `oyun saati hiç okumuyor` | Fixed-timestep game; speed can't affect it |
+| `paylaşımlı bellek (pthread)` | Game loop lives in a Worker — scanning works, time control can't reach it |
+
+## Development
+
+```bash
+node test/engine.test.mjs     # or: npm test
+```
+
+33 assertions run the scan engine against a synthetic 4 MB `WebAssembly.Memory` in Node:
+region discovery, i32/f32 exact scans, narrowing, the unknown-value snapshot flow, all-types
+multi-lane scanning, lane pruning, write, freeze, error propagation, virtual clock and diagnostics.
+
+```
+manifest.json           MV3 manifest
+src/agent/agent.js      MAIN world — hooks, scanner, freezer, virtual clock
+src/bridge/bridge.js    ISOLATED world — message relay
+src/bg/service-worker.js  routing, target discovery, panel window
+src/ui/                 the panel (HTML/CSS/JS, no framework)
+test/engine.test.mjs    engine tests
+```
+
+## Limitations & roadmap
+
+- **No pointer scan.** Addresses shift on every page load, so you rescan each session. This is
+  the single biggest gap versus Cheat Engine and the top roadmap item.
+- **No AOB / string scan.** Numeric types only.
+- **Pure-JS games aren't scannable.** Phaser, PixiJS and plain-canvas games keep state on the JS
+  heap, not in WASM linear memory. A JS object scanner is planned. If the panel reports no
+  memory, the game is probably pure JS.
+- **Result cap: 4,000,000 addresses.** Exceeding it stops the scan and warns you — it never
+  truncates silently.
+- **Mixed 64-bit precision.** Single-type `i64`/`u64` scans keep full BigInt precision. In
+  **All** mode, mixed lanes share one numeric table, so `i64` values above 2⁵³ lose precision.
+  Pick a single type if that matters.
+- **Workers are out of reach.** Content scripts don't run in Web Workers, so pthread-based
+  builds that drive their loop from a worker won't respond to time control.
+
+## Contributing
+
+Issues and pull requests are welcome. There is no build step and no dependency to install —
+clone, edit, reload the extension. Please keep `node test/engine.test.mjs` green, and add
+assertions for anything you change in the scan engine.
+
+## Responsible use
+
+WebCheat is a development and analysis tool: for testing your own games, balancing them
+quickly, and inspecting client-side state.
+
+Using it to gain an advantage in someone else's multiplayer game or on a leaderboard breaks
+that platform's terms of service. That's on you, and it's not what this is for.
+
+## License
+
+[MIT](LICENSE) © Hasan Emir Yıldırım
+
+```
+
+`README.tr.md`:
+
+```md
+<div align="center">
+
+# WebCheat
+
+**Tarayıcı oyunları için Cheat Engine — Chrome uzantısı olarak.**
+
+Oyunun WebAssembly belleğini tara, bir değerin arkasındaki adresi bul, değiştir, dondur;
+zamanı hızlandır ya da yavaşlat. Local sunucu yok, debug bayrağı yok, debugger bağlama yok.
+
+[![test](https://github.com/hasaneyldrm/webcheat/actions/workflows/test.yml/badge.svg)](https://github.com/hasaneyldrm/webcheat/actions/workflows/test.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![manifest](https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4.svg)](manifest.json)
+[![dependencies](https://img.shields.io/badge/ba%C4%9F%C4%B1ml%C4%B1l%C4%B1k-0-brightgreen.svg)](package.json)
+
+[Kurulum](#kurulum) · [Hızlı başlangıç](#hızlı-başlangıç) · [Nasıl çalışıyor](#nasıl-çalışıyor) · [English](README.md)
+
+<br>
+
+<img src="docs/panel.png" alt="WebCheat paneli: sekme ve frame seçici, tarama kontrolleri, sonuç tablosu, dondurmalı adres listesi ve canlı teşhisli zaman kontrolü" width="900">
+
+<sub>Sekmeyi seç, tara, daralt, değiştir, dondur — ve saati sür. Teşhis kutusu hedef frame'in gerçekte ne yaptığını söyler.</sub>
+
+</div>
+
+---
+
+## Bu nedir
+
+Unity, Godot ve Emscripten WebGL oyunları bütün oyun durumunu tek bir `WebAssembly.Memory`
+içinde tutar — düz bir `ArrayBuffer`. O buffer, Cheat Engine'in taradığı process RAM'inin
+tarayıcıdaki birebir karşılığıdır.
+
+WebCheat, oyun instantiate etmeden önce WebAssembly'yi hook'lar, o belleğe referans tutar ve
+sana klasik tara → daralt → değiştir → dondur akışını verir.
+
+**Sıfır bağımlılık. Sıfır build adımı. Tarayıcı dışında hiçbir şey çalışmıyor.**
+
+## Özellikler
+
+| | |
+|---|---|
+| **Değer tarama** | Tam değer, büyüktür, küçüktür, arasında, bilinmeyen başlangıç değeri |
+| **Daraltma** | Değişti, değişmedi, arttı, azaldı, şu kadar arttı, şu kadar azaldı |
+| **Tüm tipler** | `i8 · i16 · i32 · i64 · f32 · f64` aynı anda; her sonuç kendi tipini taşır |
+| **Akıllı şerit eleme** | Değeri temsil edemeyen tipler atlanır — `300` yazınca `i8` hiç taranmaz |
+| **Hizalı + hizasız** | Hızlı typed-array yolu, ya da paketlenmiş struct'lar için bayt bayt |
+| **Yazma ve dondurma** | Herhangi bir adresi düzenle; dondurma 60 Hz'de geri yazar, oyun geri alamaz |
+| **Zaman kontrolü** | 0.25×–8× hız, duraklat, kare kare ilerlet — sanal saat üzerinden |
+| **iframe farkında** | Frame bazında hedefleme; cross-origin gömülü oyunlar çalışır |
+| **Canlı teşhis** | Sessizce başarısız olmak yerine *neden* çalışmadığını söyler |
+
+## Kurulum
+
+Chrome Web Store'da değil — paketlenmemiş yükle:
+
+```bash
+git clone https://github.com/hasaneyldrm/webcheat.git
+```
+
+1. `chrome://extensions` aç
+2. Sağ üstten **Geliştirici modu**'nu aç
+3. **Paketlenmemiş öğe yükle** → klonladığın klasörü seç
+4. Uzantıyı araç çubuğuna sabitle
+
+> **Sonra oyun sekmesini bir kez yenile.** WebAssembly hook'ları oyun belleğini oluşturmadan
+> *önce* takılmak zorunda, o yüzden agent `document_start`'ta çalışıyor. Zaten açık olan
+> sekmelerde henüz agent yok. Paneldeki **Sekmeyi Yenile** düğmesi bunu senin için yapar.
+
+## Hızlı başlangıç
+
+Bir coin sayacını bulup kilitlemek yaklaşık bir dakika:
+
+1. **WebCheat** ikonuna bas — panel penceresi açılır
+2. Açılır listeden sekmeni seç (`[WASM]` = bellek bulundu demek)
+3. Değeri ekrandan oku — diyelim coin = `100`. Yaz, **İlk Tarama**'ya bas
+4. Değer değişene kadar oyna — diyelim coin = `250`. Yaz, **Sonraki Tarama**
+5. Tek adres kalana kadar tekrarla
+6. Satıra **çift tıkla** → Adres Listesi'ne düşer
+7. **Değer** hücresine yeni sayıyı yaz → doğrudan belleğe yazılır
+8. **Dondur**'u işaretle → oyun artık değiştiremez
+
+**Değeri bilmiyorsan?** (sayısı olmayan can barı, gizli sayaç)
+
+1. Değer tipi **Hepsi**, tarama tipi **Bilinmeyen başlangıç değeri** → **İlk Tarama** (snapshot alır)
+2. Oyunda değerin değişmesini sağla
+3. **Sonraki Tarama** → **Arttı** / **Azaldı** / **Değişti**
+4. 3–4 kez tekrarla
+
+### Tip seçimi
+
+| Aradığın | Dene |
+|---|---|
+| Skor, coin, level, mermi, can sayısı | `i32` |
+| Can barı, hız, süre, pozisyon | `f32` |
+| Hiçbir fikrin yok | **Hepsi (tüm tipler)** |
+| Hiçbir şey bulamadın | **Hizalı tarama**'yı kapat — yavaş ama paketlenmiş struct'ları yakalar |
+
+> **Hepsi** modunda aynı adres birden fazla tiple çıkabilir. `4242` tutan bir `i32`'nin alt iki
+> baytı `i16` olarak da `4242` eder. Cheat Engine de aynen böyle davranır — daraltma tekrarları eler.
+
+### Zaman kontrolü
+
+Sanal saat `performance.now`, `Date.now`, `requestAnimationFrame` timestamp'lerini ve
+`setTimeout`/`setInterval` gecikmelerini ölçekler.
+
+- **0.25×–8×** hazır kademeler veya serbest slider
+- **Duraklat** — hız 0, delta time 0, oyun donar
+- **Kare İlerlet** — duraklatılmışken saati tam bir kare (16.67 ms) iter
+
+Hareketi delta time'dan türeten oyunlar gerçekten hızlanır. Sabit adımlı döngüler daha az
+tepki verir, çünkü simülasyon adımları tasarım gereği sabittir.
+
+> Hız **hiç değiştirilmediği sürece** saat tamamen pass-through kalır. Bu bilinçli: uzantı
+> `<all_urls>`'e enjekte oluyor ve normal gezinmenin etkilenmemesi gerekiyor.
+
+## Nasıl çalışıyor
+
+```mermaid
+flowchart TD
+    P["Panel — Cheat Engine penceresi<br/>(uzantı sayfası)"]
+    SW["Service worker<br/>yönlendirme + hedef keşfi"]
+    B["bridge — ISOLATED world<br/>content script"]
+    A["agent — MAIN world<br/>WASM hook · tarayıcı · dondurucu · saat"]
+    M[("WebAssembly.Memory<br/>oyunun RAM'i")]
+
+    P <-->|chrome.runtime| SW
+    SW <-->|"tabs.sendMessage(tabId, frameId)"| B
+    B <-->|window.postMessage| A
+    A <-->|oku / yaz| M
+```
+
+**Neden iki content-script dünyası:** `WebAssembly.instantiate`'i yamalamak sayfanın kendi JS
+realm'inde (`MAIN`) çalışmayı gerektirir, ama o realm `chrome.*` API'lerine erişemez.
+`ISOLATED` dünyadaki ikinci script ikisi arasında mesaj taşır.
+
+**Neden tarama sayfanın içinde:** bir Unity heap'i rutin olarak 256 MB–1 GB'tır. Bunu her
+taramada mesaj kanalından geçirmek saçma olurdu. Agent yerinde tarar, sadece eşleşen
+offsetleri ve bir sayfa dolusu sonucu döner.
+
+**Neler hook'lanıyor:** `WebAssembly.instantiate`, `instantiateStreaming`,
+`new WebAssembly.Instance`, `new WebAssembly.Memory`; ayrıca hook'lardan önce oluşmuş
+Emscripten modüllerini (`Module.HEAPU8`, `unityInstance.Module.wasmMemory`) yakalamak için
+kısıtlanmış bir global taraması.
+
+**Büyüme güvenliği:** WASM belleği tarama ortasında büyüyebilir ve eski `ArrayBuffer` detach
+olur. Tarayıcı her parçada canlı buffer'ı yeniden alır ve yarım sonuç dönmektense açıkça hata verir.
+
+## WebCheat ile Cheat Engine
+
+| | WebCheat | Cheat Engine |
+|---|---|---|
+| Hedef | Tarayıcı sekmeleri / iframe'ler | Yerel işletim sistemi süreçleri |
+| Bağlanma | Sekme seç, debugger yok | Process seç |
+| Bellek modeli | `WebAssembly.Memory` buffer | Process sanal belleği |
+| Değer tarama + daraltma | ✅ | ✅ |
+| Tüm tipler taraması | ✅ | ✅ |
+| Yazma / dondurma | ✅ | ✅ |
+| Speedhack | ✅ sanal saat | ✅ |
+| Pointer scan | ❌ *(planlanıyor)* | ✅ |
+| AOB / string tarama | ❌ *(planlanıyor)* | ✅ |
+| Disassembler / debugger | ❌ | ✅ |
+| Lua betikleme | ❌ | ✅ |
+
+WebCheat bilinçli olarak bu tablonun küçük ucu: tara-ve-düzenle döngüsünü, web için, düzgün yapmak.
+
+## Sorun giderme
+
+Sekme listesi her sekmeyi etiketler, nerede durduğunu hep bilirsin:
+
+| Etiket | Anlamı | Çözüm |
+|---|---|---|
+| `[WASM]` | Agent var, bellek bulundu | Hazır — tara |
+| *(etiketsiz)* | Agent var, henüz bellek yok | Oyun yükleniyor; panel yoklamaya devam eder |
+| `[agent yok]` | Content script hiç enjekte olmamış | **Sekmeyi Yenile**'ye bas |
+| `[askıda]` | Chrome sekmeyi uykuya almış | Sekmeye bir uğra, sonra **Yenile** |
+
+Zaman Kontrolü altındaki **teşhis satırı** hız sorunlarını doğrudan açıklar:
+
+| Yazan | Anlamı |
+|---|---|
+| `render döngüsü: 60 fps · saat okuma: 14.203` | Sağlıklı — hız kontrolü çalışır |
+| `bu frame'de çalışan bir oyun döngüsü yok` | Yanlış frame seçili |
+| `oyun saati hiç okumuyor` | Sabit adımlı oyun; hız etki edemez |
+| `paylaşımlı bellek (pthread)` | Oyun döngüsü bir Worker'da — tarama çalışır, zaman kontrolü ulaşamaz |
+
+## Geliştirme
+
+```bash
+node test/engine.test.mjs     # ya da: npm test
+```
+
+33 assertion, tarama motorunu Node'da sahte bir 4 MB `WebAssembly.Memory` üzerinde koşturur:
+bölge keşfi, i32/f32 tam değer taraması, daraltma, bilinmeyen-değer snapshot akışı, çok
+şeritli "hepsi" taraması, şerit eleme, yazma, dondurma, hata bildirimi, sanal saat ve teşhis.
+
+```
+manifest.json           MV3 manifest
+src/agent/agent.js      MAIN world — hook'lar, tarayıcı, dondurucu, sanal saat
+src/bridge/bridge.js    ISOLATED world — mesaj rölesi
+src/bg/service-worker.js  yönlendirme, hedef keşfi, panel penceresi
+src/ui/                 panel (HTML/CSS/JS, framework yok)
+test/engine.test.mjs    motor testleri
+```
+
+## Sınırlar ve yol haritası
+
+- **Pointer scan yok.** Adresler her sayfa yüklemesinde kayar, her seansta yeniden tararsın.
+  Cheat Engine'e göre en büyük eksik ve yol haritasının ilk maddesi.
+- **AOB / string taraması yok.** Sadece sayısal tipler.
+- **Saf JS oyunlar taranamıyor.** Phaser, PixiJS ve düz canvas oyunları durumu WASM lineer
+  belleğinde değil JS heap'inde tutar. JS obje tarayıcısı planlanıyor. Panel "bellek yok"
+  diyorsa oyun muhtemelen saf JS.
+- **Sonuç tavanı: 4.000.000 adres.** Aşılırsa tarama durur ve uyarır — asla sessizce kırpmaz.
+- **Karışık 64-bit hassasiyeti.** Tek tipli `i64`/`u64` taramaları tam BigInt hassasiyetini
+  korur. **Hepsi** modunda karışık şeritler tek bir sayısal tabloyu paylaşır, bu yüzden 2⁵³
+  üstündeki `i64` değerleri hassasiyet kaybeder. Önemliyse tek tip seç.
+- **Worker'lara ulaşılamıyor.** Content script'ler Web Worker'da çalışmaz; döngüsünü worker'dan
+  süren pthread build'leri zaman kontrolüne tepki vermez.
+
+## Katkı
+
+Issue ve pull request'ler açıktır. Build adımı ve kurulacak bağımlılık yok — klonla, düzenle,
+uzantıyı yenile. Lütfen `node test/engine.test.mjs`'i yeşil tut ve tarama motorunda
+değiştirdiğin her şey için assertion ekle.
+
+## Sorumlu kullanım
+
+WebCheat bir geliştirme ve analiz aracıdır: kendi oyunlarını test etmek, hızlıca dengelemek
+ve client-side durumu incelemek için.
+
+Başkasının çok oyunculu oyununda veya bir skor tablosunda avantaj sağlamak için kullanmak o
+platformun kullanım şartlarını ihlal eder. Sorumluluğu sana ait ve bu araç bunun için değil.
+
+## Lisans
+
+[MIT](LICENSE) © Hasan Emir Yıldırım
+
+```
+
+`manifest.json`:
+
+```json
+{
+  "manifest_version": 3,
+  "name": "WebCheat",
+  "version": "0.1.0",
+  "description": "Tarayici oyunlari icin bellek tarayici ve zaman kontrolu. Sekmeyi sec, degeri bul, degistir.",
+
+  "permissions": ["tabs", "webNavigation", "storage"],
+  "host_permissions": ["<all_urls>"],
+
+  "background": {
+    "service_worker": "src/bg/service-worker.js"
+  },
+
+  "action": {
+    "default_title": "WebCheat"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/agent/agent.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/bridge/bridge.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "match_origin_as_fallback": true,
+      "world": "ISOLATED"
+    }
+  ]
+}
+
+```
+
+`package.json`:
+
+```json
+{
+  "name": "webcheat",
+  "version": "0.1.0",
+  "description": "Cheat Engine style memory scanner and time control for browser games, as a Chrome extension.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node test/engine.test.mjs"
+  },
+  "keywords": [
+    "cheat-engine",
+    "memory-scanner",
+    "webassembly",
+    "wasm",
+    "chrome-extension",
+    "game-hacking",
+    "reverse-engineering",
+    "browser-games",
+    "speedhack",
+    "game-development"
+  ],
+  "license": "MIT"
+}
+
+```
+
+`src/agent/agent.js`:
+
+```js
+/**
+ * WebCheat agent — MAIN world.
+ *
+ * Sayfanin kendi JS realm'inde calisir. Uc isi var:
+ *   1. WebAssembly.Memory nesnelerini yakalamak (oyunun "RAM"i)
+ *   2. O bellek uzerinde Cheat Engine tarzi tarama / yazma / dondurma
+ *   3. Sanal saat ile oyunu hizlandirmak / yavaslatmak / duraklatmak
+ *
+ * document_start'ta yuklenmesi sart: WebAssembly hook'lari oyun instantiate
+ * etmeden once takilmali. Sayfa zaten acikken uzanti kurulduysa bir kez
+ * reload gerekir.
+ */
+(function () {
+  'use strict';
+
+  if (window.__WCE__) return;
+
+  /* --------------------------------------------------------------------- *
+   * Orijinal referanslar — kendi hook'larimizdan etkilenmemek icin
+   * --------------------------------------------------------------------- */
+  var O = {
+    now: performance.now.bind(performance),
+    dateNow: Date.now.bind(Date),
+    raf: window.requestAnimationFrame && window.requestAnimationFrame.bind(window),
+    caf: window.cancelAnimationFrame && window.cancelAnimationFrame.bind(window),
+    setTimeout: window.setTimeout.bind(window),
+    clearTimeout: window.clearTimeout.bind(window),
+    setInterval: window.setInterval.bind(window),
+    clearInterval: window.clearInterval.bind(window)
+  };
+
+  /* --------------------------------------------------------------------- *
+   * Deger tipleri
+   * --------------------------------------------------------------------- */
+  var TYPES = {
+    i8:  { size: 1, arr: Int8Array,    big: false, get: function (d, o) { return d.getInt8(o); },        set: function (d, o, v) { d.setInt8(o, v); } },
+    u8:  { size: 1, arr: Uint8Array,   big: false, get: function (d, o) { return d.getUint8(o); },       set: function (d, o, v) { d.setUint8(o, v); } },
+    i16: { size: 2, arr: Int16Array,   big: false, get: function (d, o) { return d.getInt16(o, true); }, set: function (d, o, v) { d.setInt16(o, v, true); } },
+    u16: { size: 2, arr: Uint16Array,  big: false, get: function (d, o) { return d.getUint16(o, true); },set: function (d, o, v) { d.setUint16(o, v, true); } },
+    i32: { size: 4, arr: Int32Array,   big: false, get: function (d, o) { return d.getInt32(o, true); }, set: function (d, o, v) { d.setInt32(o, v, true); } },
+    u32: { size: 4, arr: Uint32Array,  big: false, get: function (d, o) { return d.getUint32(o, true); },set: function (d, o, v) { d.setUint32(o, v, true); } },
+    f32: { size: 4, arr: Float32Array, big: false, get: function (d, o) { return d.getFloat32(o, true); },set: function (d, o, v) { d.setFloat32(o, v, true); } },
+    f64: { size: 8, arr: Float64Array, big: false, get: function (d, o) { return d.getFloat64(o, true); },set: function (d, o, v) { d.setFloat64(o, v, true); } },
+    i64: { size: 8, arr: BigInt64Array,  big: true, get: function (d, o) { return d.getBigInt64(o, true); }, set: function (d, o, v) { d.setBigInt64(o, v, true); } },
+    u64: { size: 8, arr: BigUint64Array, big: true, get: function (d, o) { return d.getBigUint64(o, true); },set: function (d, o, v) { d.setBigUint64(o, v, true); } }
+  };
+
+  function parseValue(type, raw) {
+    var t = TYPES[type];
+    if (!t) throw new Error('bilinmeyen tip: ' + type);
+    if (t.big) return BigInt(String(raw).trim());
+    var n = Number(raw);
+    if (!isFinite(n)) throw new Error('gecersiz sayi: ' + raw);
+    return n;
+  }
+
+  // JSON'a BigInt gonderemiyoruz — string'e ceviriyoruz.
+  function outValue(v) { return typeof v === 'bigint' ? v.toString() : v; }
+
+  /* --------------------------------------------------------------------- *
+   * Bolgeler (regions) — taranabilir bellek alanlari
+   * --------------------------------------------------------------------- */
+  var regions = [];
+  var regionSeq = 0;
+  var OrigMemory = window.WebAssembly && window.WebAssembly.Memory;
+
+  function addWasmMemory(mem, label) {
+    if (!OrigMemory || !(mem instanceof OrigMemory)) return;
+    for (var i = 0; i < regions.length; i++) if (regions[i].memory === mem) return;
+    regions.push({
+      id: 'wasm:' + (regionSeq++),
+      kind: 'wasm',
+      label: label || 'WebAssembly.Memory',
+      memory: mem,
+      buffer: function () { return mem.buffer; }
+    });
+  }
+
+  function addBufferRegion(buf, label) {
+    if (!(buf instanceof ArrayBuffer)) return;
+    for (var i = 0; i < regions.length; i++) if (regions[i].kind === 'buffer' && regions[i].buffer() === buf) return;
+    regions.push({
+      id: 'buf:' + (regionSeq++),
+      kind: 'buffer',
+      label: label || 'ArrayBuffer',
+      memory: null,
+      buffer: function () { return buf; }
+    });
+  }
+
+  function getRegion(id) {
+    for (var i = 0; i < regions.length; i++) if (regions[i].id === id) return regions[i];
+    throw new Error('bolge bulunamadi: ' + id);
+  }
+
+  /* --------------------------------------------------------------------- *
+   * WebAssembly hook'lari
+   * --------------------------------------------------------------------- */
+  (function hookWasm() {
+    var WA = window.WebAssembly;
+    if (!WA) return;
+
+    function harvest(result, importObject) {
+      try {
+        var im = importObject && importObject.env && importObject.env.memory;
+        if (im) addWasmMemory(im, 'imports.env.memory');
+      } catch (e) { /* import objesi exotic olabilir */ }
+      try {
+        var inst = result && result.instance ? result.instance : result;
+        var ex = inst && inst.exports;
+        if (ex) {
+          for (var k in ex) {
+            try { if (ex[k] instanceof OrigMemory) addWasmMemory(ex[k], 'exports.' + k); } catch (e2) {}
+          }
+        }
+      } catch (e3) {}
+    }
+
+    try {
+      WA.Memory = new Proxy(OrigMemory, {
+        construct: function (target, args) {
+          var m = Reflect.construct(target, args);
+          addWasmMemory(m, 'new WebAssembly.Memory');
+          return m;
+        }
+      });
+    } catch (e) {}
+
+    try {
+      var OrigInstance = WA.Instance;
+      WA.Instance = new Proxy(OrigInstance, {
+        construct: function (target, args) {
+          var i = Reflect.construct(target, args);
+          harvest(i, args[1]);
+          return i;
+        }
+      });
+    } catch (e) {}
+
+    ['instantiate', 'instantiateStreaming'].forEach(function (name) {
+      var orig = WA[name];
+      if (typeof orig !== 'function') return;
+      WA[name] = function () {
+        var args = arguments;
+        var p = orig.apply(this, args);
+        if (p && typeof p.then === 'function') {
+          return p.then(function (r) { harvest(r, args[1]); return r; });
+        }
+        return p;
+      };
+    });
+  })();
+
+  /**
+   * Gec kesif: hook'lardan kacan Emscripten/Unity modullerini yakala.
+   * (uzanti sayfa yuklendikten sonra kurulduysa bu devreye girer)
+   */
+  var lastSweep = 0;
+  function sweepGlobals() {
+    // Her "hello"da global gezmek pahali: sekme listesi tum frame'leri
+    // yokluyor ve YouTube gibi sayfalarda binlerce global var.
+    var t0 = O.now();
+    if (t0 - lastSweep < 1500) return;
+    lastSweep = t0;
+
+    var seen = 0;
+    var names;
+    try { names = Object.getOwnPropertyNames(window); } catch (e) { return; }
+    for (var i = 0; i < names.length && seen < 4000; i++) {
+      seen++;
+      var v;
+      try { v = window[names[i]]; } catch (e) { continue; }
+      if (!v || typeof v !== 'object') continue;
+      try {
+        if (v.wasmMemory instanceof OrigMemory) addWasmMemory(v.wasmMemory, names[i] + '.wasmMemory');
+        if (v.HEAPU8 && v.HEAPU8.buffer instanceof ArrayBuffer) addBufferRegion(v.HEAPU8.buffer, names[i] + '.HEAPU8');
+        if (v.Module) {
+          if (v.Module.wasmMemory instanceof OrigMemory) addWasmMemory(v.Module.wasmMemory, names[i] + '.Module.wasmMemory');
+          if (v.Module.HEAPU8 && v.Module.HEAPU8.buffer instanceof ArrayBuffer) addBufferRegion(v.Module.HEAPU8.buffer, names[i] + '.Module.HEAPU8');
+        }
+      } catch (e) { /* getter patlayabilir */ }
+    }
+  }
+
+  function listRegions() {
+    sweepGlobals();
+    return regions.map(function (r) {
+      var size = 0, shared = false;
+      try {
+        var b = r.buffer();
+        size = b.byteLength;
+        shared = typeof SharedArrayBuffer !== 'undefined' && b instanceof SharedArrayBuffer;
+      } catch (e) {}
+      return { id: r.id, kind: r.kind, label: r.label, size: size, shared: shared };
+    });
+  }
+
+  /** Sayfada hangi oyun motoru var — teshis icin. */
+  function detectEngine() {
+    var hits = [];
+    var probes = [
+      ['Unity', 'unityInstance'], ['Unity', 'UnityLoader'], ['Unity', 'createUnityInstance'],
+      ['Emscripten', 'Module'], ['Godot', 'Godot'], ['Godot', 'Engine'],
+      ['Cocos', 'cc'], ['Phaser', 'Phaser'], ['PixiJS', 'PIXI'],
+      ['Construct', 'C3'], ['Three.js', 'THREE'], ['PlayCanvas', 'pc']
+    ];
+    for (var i = 0; i < probes.length; i++) {
+      try { if (window[probes[i][1]] != null && hits.indexOf(probes[i][0]) < 0) hits.push(probes[i][0]); } catch (e) {}
+    }
+    return hits;
+  }
+
+  /* --------------------------------------------------------------------- *
+   * Tarama motoru
+   * --------------------------------------------------------------------- */
+  var MAX_RESULTS = 4000000;   // ~16 MB offset tablosu
+  var SLICE = 4000000;         // tik basina islenecek slot sayisi
+
+  var scan = null;   // aktif tarama state'i
+  var job = null;    // calisan tarama isi
+
+  /**
+   * "Hepsi" taramasinda denenen tipler — CE'nin "All" deger tipinin karsiligi.
+   * u8/u16/u32 bilerek yok: ayni bit deseni zaten i8/i16/i32 ile yakalanir,
+   * sadece isaret yorumu degisir. Lane sayisini iki katina cikarmaya degmez.
+   */
+  var MULTI_TYPES = ['i8', 'i16', 'i32', 'i64', 'f32', 'f64'];
+
+  var INT_RANGE = {
+    i8: [-128, 127], u8: [0, 255],
+    i16: [-32768, 32767], u16: [0, 65535],
+    i32: [-2147483648, 2147483647], u32: [0, 4294967295]
+  };
+
+  /** Deger bu tipte temsil edilebilir mi? "Hepsi" modunda bos lane elemek icin. */
+  function fitsType(typeName, raw) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (s === '') return false;
+    if (typeName === 'f32' || typeName === 'f64') return isFinite(Number(s));
+    if (!/^-?\d+$/.test(s)) return false;           // ondalik sayi tam sayi tipine girmez
+    var t = TYPES[typeName];
+    if (t.big) {
+      try {
+        var bv = BigInt(s);
+        return typeName === 'u64'
+          ? (bv >= BigInt(0) && bv < (BigInt(1) << BigInt(64)))
+          : (bv >= -(BigInt(1) << BigInt(63)) && bv < (BigInt(1) << BigInt(63)));
+      } catch (e) { return false; }
+    }
+    var r = INT_RANGE[typeName];
+    var n = Number(s);
+    return !r || (n >= r[0] && n <= r[1]);
+  }
+
+  /**
+   * Tarama state'i. Sonuclar "lane"lere bolunur: lane i'nin sonuclari
+   * offs[laneEnd[i-1] .. laneEnd[i]) araligindadir ve types[i] tipindedir.
+   * Tek tipli taramada tek lane var; "Hepsi"nde tip basina bir lane.
+   */
+  function freshScan(regionId, types, aligned, multi) {
+    return {
+      region: regionId,
+      types: types,        // lane tip adlari
+      multi: !!multi,
+      aligned: aligned !== false,
+      mode: 'none',        // 'none' | 'all' | 'list'
+      offs: null,          // Uint32Array — eslesen byte offsetleri
+      laneEnd: [],         // her lane'in offs icindeki bitis indeksi
+      count: 0,
+      prevNum: null,       // Float64Array — onceki degerler
+      prevBig: null,       // tek tipli 64-bit taramada tam hassasiyet
+      snap: null,          // 'all' modunda tam bellek kopyasi
+      truncated: false
+    };
+  }
+
+  function typeAt(i) {
+    for (var L = 0; L < scan.laneEnd.length; L++) if (i < scan.laneEnd[L]) return scan.types[L];
+    return scan.types[scan.types.length - 1];
+  }
+
+  function prevAt(i) {
+    if (scan.prevBig) return scan.prevBig[i];
+    return scan.prevNum ? scan.prevNum[i] : undefined;
+  }
+
+  /** BigInt ile Number'i karsilastiramayiz; karisik lane'lerde sayiya indir. */
+  function cmpVal(v) { return typeof v === 'bigint' ? Number(v) : v; }
+
+  function storePrev(values, n) {
+    var src = values.slice(0, n);
+    var single = scan.types.length === 1 ? TYPES[scan.types[0]] : null;
+    if (single && single.big) {
+      scan.prevBig = scan.types[0] === 'u64' ? BigUint64Array.from(src) : BigInt64Array.from(src);
+      scan.prevNum = null;
+    } else {
+      scan.prevBig = null;
+      scan.prevNum = Float64Array.from(src.map(Number));
+    }
+  }
+
+  // Buyuyebilen Uint32Array
+  function Grow() {
+    this.buf = new Uint32Array(1 << 16);
+    this.n = 0;
+  }
+  Grow.prototype.push = function (v) {
+    if (this.n === this.buf.length) {
+      if (this.n >= MAX_RESULTS) return false;
+      var next = new Uint32Array(Math.min(this.buf.length * 2, MAX_RESULTS));
+      next.set(this.buf);
+      this.buf = next;
+    }
+    this.buf[this.n++] = v;
+    return true;
+  };
+  Grow.prototype.done = function () { return this.buf.subarray(0, this.n); };
+
+  function yieldTick() {
+    return new Promise(function (res) { O.setTimeout(res, 0); });
+  }
+
+  function makePredicate(op, a, b) {
+    switch (op) {
+      case 'eq':        return function (c) { return c === a; };
+      case 'ne':        return function (c) { return c !== a; };
+      case 'gt':        return function (c) { return c > a; };
+      case 'lt':        return function (c) { return c < a; };
+      case 'gte':       return function (c) { return c >= a; };
+      case 'lte':       return function (c) { return c <= a; };
+      case 'between':   return function (c) { return c >= a && c <= b; };
+      case 'changed':   return function (c, p) { return c !== p; };
+      case 'unchanged': return function (c, p) { return c === p; };
+      case 'inc':       return function (c, p) { return c > p; };
+      case 'dec':       return function (c, p) { return c < p; };
+      case 'incBy':     return function (c, p) { return c - p === a; };
+      case 'decBy':     return function (c, p) { return p - c === a; };
+      default: throw new Error('bilinmeyen karsilastirma: ' + op);
+    }
+  }
+
+  var NEEDS_PREV = { changed: 1, unchanged: 1, inc: 1, dec: 1, incBy: 1, decBy: 1 };
+
+  function startJob(total) {
+    job = { total: total, done: 0, found: 0, running: true, error: null, cancel: false };
+    return job;
+  }
+
+  function slotCount(byteLen, typeName, aligned) {
+    var t = TYPES[typeName];
+    var step = aligned ? t.size : 1;
+    return Math.max(0, Math.floor((byteLen - t.size) / step) + 1);
+  }
+
+  /** Ilk tarama. type='all' ise tum tipler ayri lane olarak taranir. */
+  async function firstScan(opts) {
+    var region = getRegion(opts.region);
+    var aligned = opts.aligned !== false;
+    var multi = opts.type === 'all';
+    var types = multi ? MULTI_TYPES.slice() : [opts.type];
+    for (var ti = 0; ti < types.length; ti++) {
+      if (!TYPES[types[ti]]) throw new Error('bilinmeyen tip: ' + types[ti]);
+    }
+
+    scan = freshScan(opts.region, types, aligned, multi);
+    var byteLen = region.buffer().byteLength;
+
+    // --- Bilinmeyen deger: adres listesi tutmak yerine tam kopya al ---
+    if (opts.cmp === 'unknown') {
+      var j0 = startJob(byteLen);
+      var snap = new Uint8Array(byteLen);
+      var CH = 8 << 20;
+      for (var off = 0; off < byteLen; off += CH) {
+        if (j0.cancel) { j0.running = false; return; }
+        // WASM bellegi tarama sirasinda buyurse eski ArrayBuffer detach olur.
+        // Sessizce yarim snapshot almaktansa acikca patla.
+        var live = region.buffer();
+        if (live.byteLength < byteLen) throw new Error('bellek tarama sirasinda yeniden boyutlandi — tekrar tara');
+        var end0 = Math.min(off + CH, byteLen);
+        snap.set(new Uint8Array(live, off, end0 - off), off);
+        j0.done = end0;
+        await yieldTick();
+      }
+      scan.mode = 'all';
+      scan.snap = snap;
+      scan.count = types.reduce(function (s, tn) { return s + slotCount(byteLen, tn, aligned); }, 0);
+      j0.found = scan.count;
+      j0.running = false;
+      return;
+    }
+
+    // --- Degerli ilk tarama ---
+    var cmp = opts.cmp || 'eq';
+    // Degeri temsil edemeyen tipleri lane listesinden dusur: 300 yazdiysan
+    // i8'i taramanin anlami yok, 57.5 yazdiysan tam sayi tiplerinin.
+    var lanes = types.filter(function (tn) {
+      if (!fitsType(tn, opts.value)) return false;
+      if (cmp === 'between' && !fitsType(tn, opts.value2)) return false;
+      return true;
+    });
+    if (!lanes.length) throw new Error('"' + opts.value + '" secili tip(ler)de temsil edilemiyor');
+    scan.types = lanes;
+
+    var totalSlots = lanes.reduce(function (s, tn) { return s + slotCount(byteLen, tn, aligned); }, 0);
+    var j = startJob(totalSlots);
+    var out = new Grow();
+    var prev = [];
+    var base = 0;
+
+    for (var li = 0; li < lanes.length; li++) {
+      if (j.cancel || scan.truncated) { scan.laneEnd.push(out.n); continue; }
+
+      var tn = lanes[li];
+      var t = TYPES[tn];
+      var a = parseValue(tn, opts.value);
+      var b = cmp === 'between' ? parseValue(tn, opts.value2) : null;
+      var pred = makePredicate(cmp, a, b);
+      var slots = slotCount(byteLen, tn, aligned);
+
+      if (aligned) {
+        // Hizli yol: dogrudan typed array uzerinde gez
+        var i = 0;
+        while (i < slots) {
+          if (j.cancel) break;
+          var view = new t.arr(region.buffer());
+          var end2 = Math.min(i + SLICE, Math.min(slots, view.length));
+          for (; i < end2; i++) {
+            if (pred(view[i])) {
+              if (!out.push(i * t.size)) { scan.truncated = true; break; }
+              prev.push(view[i]);
+            }
+          }
+          j.done = base + i;
+          j.found = out.n;
+          if (scan.truncated) break;
+          await yieldTick();
+        }
+      } else {
+        // Hizalanmamis yol: DataView, byte byte
+        var k = 0;
+        while (k < slots) {
+          if (j.cancel) break;
+          var dv = new DataView(region.buffer());
+          var end3 = Math.min(k + SLICE, slots);
+          for (; k < end3; k++) {
+            var v2 = t.get(dv, k);
+            if (pred(v2)) {
+              if (!out.push(k)) { scan.truncated = true; break; }
+              prev.push(v2);
+            }
+          }
+          j.done = base + k;
+          j.found = out.n;
+          if (scan.truncated) break;
+          await yieldTick();
+        }
+      }
+
+      scan.laneEnd.push(out.n);
+      base += slots;
+    }
+
+    scan.mode = 'list';
+    scan.offs = out.done();
+    scan.count = out.n;
+    storePrev(prev, out.n);
+    j.done = j.total;
+    j.found = scan.count;
+    j.running = false;
+  }
+
+  /** Sonraki tarama — mevcut sonuc kumesini daraltir, lane yapisini korur. */
+  async function nextScan(opts) {
+    if (!scan || scan.mode === 'none') throw new Error('once ilk taramayi yap');
+    var region = getRegion(scan.region);
+    var cmp = opts.cmp || 'eq';
+    var usesPrev = !!NEEDS_PREV[cmp];
+    var wantsValue = !usesPrev || cmp === 'incBy' || cmp === 'decBy';
+    var hasValue = opts.value != null && opts.value !== '';
+    if (wantsValue && !hasValue) throw new Error('bu karsilastirma icin deger gerekli');
+
+    var lanes = scan.types;
+    var out = new Grow();
+    var prev = [];
+    var laneEnd = [];
+    var exactPrev = !!scan.prevBig;   // tek tipli 64-bit: BigInt karsilastirmasi
+
+    /** Lane bu degeri temsil edemiyorsa hic taramaya girme. */
+    function laneUsable(tn) {
+      if (!hasValue) return true;
+      if (!wantsValue) return true;
+      if (!fitsType(tn, opts.value)) return false;
+      if (cmp === 'between' && !fitsType(tn, opts.value2)) return false;
+      return true;
+    }
+
+    function laneCmp(tn) {
+      var a = hasValue && wantsValue ? parseValue(tn, opts.value) : null;
+      var b = cmp === 'between' && opts.value2 ? parseValue(tn, opts.value2) : null;
+      return makePredicate(cmp, a, b);
+    }
+
+    if (scan.mode === 'all') {
+      // Snapshot'a karsi tam tarama — sonuc artik seyrek bir liste olur
+      var byteLen = region.buffer().byteLength;
+      var snapView = new DataView(scan.snap.buffer);
+      var totalSlots = lanes.reduce(function (s, tn) { return s + slotCount(byteLen, tn, scan.aligned); }, 0);
+      var j = startJob(totalSlots);
+      var base = 0;
+
+      for (var li = 0; li < lanes.length; li++) {
+        var tn = lanes[li];
+        var t = TYPES[tn];
+        var slots = slotCount(byteLen, tn, scan.aligned);
+
+        if (j.cancel || scan.truncated || !laneUsable(tn)) {
+          laneEnd.push(out.n);
+          base += slots;
+          continue;
+        }
+
+        var pred = laneCmp(tn);
+        var step = scan.aligned ? t.size : 1;
+        var i = 0;
+        while (i < slots) {
+          if (j.cancel) break;
+          var dv = new DataView(region.buffer());
+          var end = Math.min(i + SLICE, slots);
+          for (; i < end; i++) {
+            var off = i * step;
+            if (off + t.size > scan.snap.length || off + t.size > dv.byteLength) continue;
+            var cur = t.get(dv, off);
+            var old = t.get(snapView, off);
+            if (pred(cur, old)) {
+              if (!out.push(off)) { scan.truncated = true; break; }
+              prev.push(cur);
+            }
+          }
+          j.done = base + i;
+          j.found = out.n;
+          if (scan.truncated) break;
+          await yieldTick();
+        }
+        laneEnd.push(out.n);
+        base += slots;
+      }
+
+      scan.snap = null; // artik gerek yok, RAM'i birak
+      j.done = j.total;
+      j.found = out.n;
+      j.running = false;
+    } else {
+      // Liste modu — sadece mevcut adresleri, kendi lane tipiyle kontrol et
+      var j2 = startJob(scan.count);
+      var start = 0;
+
+      for (var li2 = 0; li2 < lanes.length; li2++) {
+        var tn2 = lanes[li2];
+        var t2 = TYPES[tn2];
+        var laneStop = scan.laneEnd[li2] != null ? scan.laneEnd[li2] : scan.count;
+
+        if (j2.cancel || !laneUsable(tn2)) {
+          j2.done = laneStop;
+          laneEnd.push(out.n);
+          start = laneStop;
+          continue;
+        }
+
+        var pred2 = laneCmp(tn2);
+        var n = start;
+        while (n < laneStop) {
+          if (j2.cancel) break;
+          var dv2 = new DataView(region.buffer());
+          var lim = dv2.byteLength;
+          var end2 = Math.min(n + SLICE, laneStop);
+          for (; n < end2; n++) {
+            var off2 = scan.offs[n];
+            if (off2 + t2.size > lim) continue;
+            var cur2 = t2.get(dv2, off2);
+            var p = usesPrev ? prevAt(n) : undefined;
+            // prev sayisal tutuluyorsa BigInt tarafi da sayiya indirilmeli
+            var c2 = exactPrev ? cur2 : cmpVal(cur2);
+            if (pred2(c2, p)) {
+              out.push(off2);
+              prev.push(cur2);
+            }
+          }
+          j2.done = n;
+          j2.found = out.n;
+          await yieldTick();
+        }
+        laneEnd.push(out.n);
+        start = laneStop;
+      }
+
+      j2.done = j2.total;
+      j2.found = out.n;
+      j2.running = false;
+    }
+
+    scan.mode = 'list';
+    scan.offs = out.done();
+    scan.laneEnd = laneEnd;
+    scan.count = out.n;
+    storePrev(prev, out.n);
+  }
+
+  /** Lane basina sonuc sayisi — "hangi tipte kac tane" ozeti icin. */
+  function laneCounts() {
+    var out = {};
+    var start = 0;
+    for (var i = 0; i < scan.types.length; i++) {
+      var stop = scan.laneEnd[i] != null ? scan.laneEnd[i] : start;
+      if (stop > start) out[scan.types[i]] = stop - start;
+      start = stop;
+    }
+    return out;
+  }
+
+  function scanResults(offset, limit) {
+    if (!scan || scan.mode !== 'list') {
+      return {
+        total: scan ? scan.count : 0, rows: [], mode: scan ? scan.mode : 'none',
+        multi: scan ? scan.multi : false, byType: {}
+      };
+    }
+    var region = getRegion(scan.region);
+    var dv = new DataView(region.buffer());
+    var rows = [];
+    var end = Math.min(offset + limit, scan.count);
+    for (var i = offset; i < end; i++) {
+      var tn = typeAt(i);
+      var t = TYPES[tn];
+      var off = scan.offs[i];
+      var cur = null;
+      try { if (off + t.size <= dv.byteLength) cur = t.get(dv, off); } catch (e) {}
+      rows.push({
+        addr: off,
+        type: tn,
+        value: outValue(cur),
+        prev: outValue(prevAt(i))
+      });
+    }
+    return {
+      total: scan.count, rows: rows, mode: scan.mode, truncated: scan.truncated,
+      multi: scan.multi, types: scan.types, byType: laneCounts(), region: scan.region
+    };
+  }
+
+  /* --------------------------------------------------------------------- *
+   * Okuma / yazma / dondurma
+   * --------------------------------------------------------------------- */
+  function readAddr(regionId, addr, type) {
+    var region = getRegion(regionId);
+    var t = TYPES[type];
+    var dv = new DataView(region.buffer());
+    if (addr < 0 || addr + t.size > dv.byteLength) return null;
+    return t.get(dv, addr);
+  }
+
+  function writeAddr(regionId, addr, type, value) {
+    var region = getRegion(regionId);
+    var t = TYPES[type];
+    var dv = new DataView(region.buffer());
+    if (addr < 0 || addr + t.size > dv.byteLength) throw new Error('adres bellek disinda');
+    t.set(dv, addr, parseValue(type, value));
+    return true;
+  }
+
+  // Dondurulan adresler
+  var frozen = Object.create(null);
+  var freezeSeq = 0;
+  var freezeTimer = null;
+
+  function freezeTick() {
+    for (var k in frozen) {
+      var f = frozen[k];
+      try { writeAddr(f.region, f.addr, f.type, f.value); } catch (e) { /* bellek buyumus/kucumus olabilir */ }
+    }
+  }
+
+  function setFreeze(entry) {
+    var id = entry.id || ('f' + (freezeSeq++));
+    frozen[id] = { id: id, region: entry.region, addr: entry.addr, type: entry.type, value: entry.value };
+    if (!freezeTimer) freezeTimer = O.setInterval(freezeTick, 16);
+    return id;
+  }
+
+  function clearFreeze(id) {
+    delete frozen[id];
+    var any = false;
+    for (var k in frozen) { any = true; break; }
+    if (!any && freezeTimer) { O.clearInterval(freezeTimer); freezeTimer = null; }
+    return true;
+  }
+
+  /* --------------------------------------------------------------------- *
+   * Sanal saat — hizlandirma / yavaslatma / duraklatma
+   * --------------------------------------------------------------------- *
+   * Oyunlar delta time'i performance.now()/rAF timestamp'inden hesaplar.
+   * Sanal saati hizli akitirsak simulasyon da hizlanir. Kod tarafinda
+   * "1 kare = 1 kare" kaldigi icin fizik bozulmaz, sadece dt buyur.
+   */
+  var Clock = {
+    speed: 1,
+    // Uzanti <all_urls>'e enjekte oluyor. Hiz hic degistirilmediyse saat
+    // TAMAMEN pass-through kalir — gezdigin hicbir sayfa etkilenmez.
+    dirty: false,
+    _rBase: O.now(),
+    _vBase: O.now(),
+    _dBase: O.dateNow(),
+    _at: function (real) { return this._vBase + (real - this._rBase) * this.speed; },
+    now: function () { return this.dirty ? this._at(O.now()) : O.now(); },
+    dateNow: function () {
+      return this.dirty ? this._dBase + (O.now() - this._rBase) * this.speed : O.dateNow();
+    },
+    setSpeed: function (s) {
+      var real = O.now();
+      // Ilk sapmada sanal saati o anki gercek zamandan baslat
+      var v = this.dirty ? this._at(real) : real;
+      var d = this.dirty ? this._dBase + (real - this._rBase) * this.speed : O.dateNow();
+      this._vBase = v;
+      this._dBase = d;
+      this._rBase = real;
+      this.speed = Math.max(0, Number(s) || 0);
+      if (this.speed !== 1) this.dirty = true;
+    },
+    step: function (ms) {
+      if (!this.dirty) return;
+      this._vBase += ms;
+      this._dBase += ms;
+    }
+  };
+
+  /**
+   * Teshis sayaclari. "Hiz calismiyor" dedigimizde sebebi bunlar soyler:
+   * oyun dongusu bu frame'de mi, saati kimden okuyor, kac fps.
+   */
+  var stats = { now: 0, dateNow: 0, raf: 0, timeout: 0, interval: 0, rafWindow: [] };
+
+  (function hookClock() {
+    try {
+      Object.defineProperty(performance, 'now', {
+        configurable: true, writable: true,
+        value: function now() { stats.now++; return Clock.now(); }
+      });
+    } catch (e) {}
+
+    try {
+      Date.now = function now() { stats.dateNow++; return Math.floor(Clock.dateNow()); };
+    } catch (e) {}
+
+    if (O.raf) {
+      window.requestAnimationFrame = function (cb) {
+        return O.raf(function (ts) {
+          stats.raf++;
+          var real = O.now();
+          stats.rafWindow.push(real);
+          while (stats.rafWindow.length && real - stats.rafWindow[0] > 1000) stats.rafWindow.shift();
+          cb(Clock.dirty ? Clock.now() : ts);
+        });
+      };
+    }
+
+    // Zamanlayicilari hiza gore olcekle: 2x hizda 1000ms -> 500ms
+    function scale(delay) {
+      var d = Number(delay) || 0;
+      if (!Clock.dirty || Clock.speed <= 0) return d;
+      return d / Clock.speed;
+    }
+    window.setTimeout = function (fn, delay) {
+      stats.timeout++;
+      var rest = Array.prototype.slice.call(arguments, 2);
+      return O.setTimeout.apply(window, [fn, scale(delay)].concat(rest));
+    };
+    window.setInterval = function (fn, delay) {
+      stats.interval++;
+      var rest = Array.prototype.slice.call(arguments, 2);
+      return O.setInterval.apply(window, [fn, scale(delay)].concat(rest));
+    };
+  })();
+
+  /* --------------------------------------------------------------------- *
+   * RPC
+   * --------------------------------------------------------------------- */
+  /**
+   * Taramayi arka planda baslatir; hata progress() uzerinden geri doner.
+   *
+   * Onceden .catch icinde "if (job)" vardi: ilk taramada henuz job olmadigi
+   * icin (orn. "deger bu tipte temsil edilemiyor") hata hicbir yere yazilmadan
+   * kayboluyor, panel sonsuza kadar bos sonuc gosteriyordu. Simdi cagriyla
+   * birlikte bir job olusuyor, hata her durumda bir yere dusuyor.
+   */
+  function launch(fn, args) {
+    if (job && job.running) throw new Error('tarama zaten calisiyor');
+    job = { total: 0, done: 0, found: 0, running: true, error: null, cancel: false };
+    Promise.resolve()
+      .then(function () { return fn(args); })
+      .catch(function (e) {
+        if (!job) job = { total: 0, done: 0, found: 0, running: false, error: null, cancel: false };
+        job.error = String(e && e.message || e);
+        job.running = false;
+      });
+    return { started: true };
+  }
+
+  var HANDLERS = {
+    hello: function () {
+      return {
+        ok: true,
+        url: location.href,
+        title: document.title || '',
+        top: window.top === window,
+        regions: listRegions(),
+        speed: Clock.speed
+      };
+    },
+    regions: function () { return listRegions(); },
+
+    firstScan: function (a) { return launch(firstScan, a); },
+    nextScan: function (a) { return launch(nextScan, a); },
+    cancelScan: function () { if (job) job.cancel = true; return { ok: true }; },
+    progress: function () {
+      return job
+        ? { running: job.running, done: job.done, total: job.total, found: job.found, error: job.error }
+        : { running: false, done: 0, total: 0, found: 0, error: null };
+    },
+    reset: function () { scan = null; job = null; return { ok: true }; },
+    results: function (a) { return scanResults(a.offset || 0, Math.min(a.limit || 200, 1000)); },
+
+    read: function (a) { return { value: outValue(readAddr(a.region, a.addr, a.type)) }; },
+    readMany: function (a) {
+      return (a.items || []).map(function (it) {
+        var v = null;
+        try { v = readAddr(it.region, it.addr, it.type); } catch (e) {}
+        return { key: it.key, value: outValue(v) };
+      });
+    },
+    write: function (a) { return { ok: writeAddr(a.region, a.addr, a.type, a.value) }; },
+
+    freeze: function (a) { return { id: setFreeze(a) }; },
+    unfreeze: function (a) { return { ok: clearFreeze(a.id) }; },
+
+    setSpeed: function (a) { Clock.setSpeed(a.speed); return { speed: Clock.speed }; },
+    step: function (a) { Clock.step(Number(a.ms) || 16.6667); return { ok: true }; },
+    clock: function () { return { speed: Clock.speed, now: Clock.now() }; },
+
+    diag: function () {
+      var regs = listRegions();
+      return {
+        speed: Clock.speed,
+        dirty: Clock.dirty,
+        fps: stats.rafWindow.length,
+        raf: stats.raf,
+        nowReads: stats.now,
+        dateReads: stats.dateNow,
+        timers: stats.timeout + stats.interval,
+        engines: detectEngine(),
+        regions: regs.length,
+        shared: regs.some(function (r) { return r.shared; }),
+        crossOriginIsolated: !!window.crossOriginIsolated,
+        workers: typeof Worker !== 'undefined'
+      };
+    }
+  };
+
+  function rpc(payloadJson) {
+    var req;
+    try { req = JSON.parse(payloadJson); } catch (e) { return { error: 'gecersiz istek' }; }
+    var h = HANDLERS[req.cmd];
+    if (!h) return { error: 'bilinmeyen komut: ' + req.cmd };
+    try {
+      return { result: h(req.args || {}) };
+    } catch (e) {
+      return { error: String(e && e.message || e) };
+    }
+  }
+
+  window.__WCE__ = { rpc: rpc, version: 1 };
+
+  /* --------------------------------------------------------------------- *
+   * Bridge (ISOLATED world) ile kopru
+   * --------------------------------------------------------------------- */
+  window.addEventListener('message', function (ev) {
+    if (ev.source !== window) return;
+    var d = ev.data;
+    if (!d || d.__wce !== 'req') return;
+    var res = rpc(d.payload);
+    window.postMessage({ __wce: 'res', id: d.id, response: res }, '*');
+  });
+})();
+
+```
+
+`src/bg/service-worker.js`:
+
+```js
+/**
+ * WebCheat service worker.
+ *
+ * Iki isi var:
+ *   1. Uzanti ikonuna basilinca CE penceresini acmak
+ *   2. Panel ile hedef frame'ler arasinda RPC trafigini yonlendirmek
+ */
+
+const PANEL_URL = 'src/ui/panel.html';
+let panelWindowId = null;
+
+chrome.action.onClicked.addListener(async () => {
+  if (panelWindowId !== null) {
+    try {
+      await chrome.windows.update(panelWindowId, { focused: true });
+      return;
+    } catch (e) {
+      panelWindowId = null;
+    }
+  }
+  const win = await chrome.windows.create({
+    url: chrome.runtime.getURL(PANEL_URL),
+    type: 'popup',
+    width: 1180,
+    height: 820
+  });
+  panelWindowId = win.id;
+});
+
+chrome.windows.onRemoved.addListener((id) => {
+  if (id === panelWindowId) panelWindowId = null;
+});
+
+/**
+ * Tek bir frame'e RPC gonder.
+ *
+ * timeoutMs sart: askiya alinmis / donmus / servis worker'i olmeyen sekmelerde
+ * sendMessage ne yanit doner ne de lastError set eder — sonsuza kadar asili
+ * kalir. Tek bir bozuk sekme butun sekme listesini kilitliyordu.
+ */
+function rpc(tabId, frameId, payload, timeoutMs = 0) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (v) => { if (!settled) { settled = true; resolve(v); } };
+
+    if (timeoutMs > 0) setTimeout(() => done({ error: 'zaman asimi' }), timeoutMs);
+
+    try {
+      chrome.tabs.sendMessage(tabId, { __wce: 'rpc', payload }, { frameId }, (res) => {
+        if (chrome.runtime.lastError) done({ error: chrome.runtime.lastError.message });
+        else done(res || { error: 'bos yanit' });
+      });
+    } catch (e) {
+      done({ error: String(e && e.message || e) });
+    }
+  });
+}
+
+const PROBE_TIMEOUT = 1500;
+
+/**
+ * Taranabilir hedefleri listele.
+ *
+ * Agent'i OLMAYAN sekmeleri de listeye koyuyoruz. Sebep: kullanicinin oyun
+ * sekmesi cogu zaman uzanti kurulmadan/yenilenmeden once acilmis oluyor, o
+ * sekmede content script yok. Onceden bu sekmeler listeden tamamen dusuyor ve
+ * "sekmeyi bulamiyor" gibi gorunuyordu. Simdi gorunuyorlar, "agent yok"
+ * isaretiyle — panel de yanina "Sekmeyi Yenile" diyor.
+ */
+async function listTargets() {
+  const tabs = await chrome.tabs.query({});
+
+  const results = await Promise.all(tabs.map(async (tab) => {
+    if (!tab.id || !tab.url || !/^https?:/.test(tab.url)) return null;
+
+    const base = {
+      tabId: tab.id,
+      title: tab.title || tab.url,
+      url: tab.url,
+      discarded: !!tab.discarded,
+      frames: [],
+      hasAgent: false,
+      hasMemory: false
+    };
+
+    // Uykuya alinmis sekmeyi uyandirmayalim — listede "askida" olarak gecsin
+    if (tab.discarded) return base;
+
+    let frames = [];
+    try {
+      frames = (await chrome.webNavigation.getAllFrames({ tabId: tab.id })) || [];
+    } catch (e) {
+      frames = [{ frameId: 0, url: tab.url }];
+    }
+
+    const live = (await Promise.all(frames.map(async (fr) => {
+      const res = await rpc(tab.id, fr.frameId, { cmd: 'hello' }, PROBE_TIMEOUT);
+      if (!res || res.error || !res.result) return null;
+      return {
+        frameId: fr.frameId,
+        url: res.result.url || fr.url,
+        top: !!res.result.top,
+        regions: res.result.regions || [],
+        speed: res.result.speed
+      };
+    }))).filter(Boolean);
+
+    live.sort((a, b) => (b.regions.length - a.regions.length) || (a.frameId - b.frameId));
+    base.frames = live;
+    base.hasAgent = live.length > 0;
+    base.hasMemory = live.some((f) => f.regions.length > 0);
+    return base;
+  }));
+
+  const out = results.filter(Boolean);
+  // WASM'li sekmeler once, sonra agent'i olanlar, en sona olmayanlar
+  out.sort((a, b) =>
+    (b.hasMemory - a.hasMemory) ||
+    (b.hasAgent - a.hasAgent) ||
+    (a.tabId - b.tabId)
+  );
+  return out;
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (!msg || msg.__wcePanel !== true) return;
+
+  (async () => {
+    try {
+      switch (msg.op) {
+        case 'listTargets':
+          sendResponse({ result: await listTargets() });
+          break;
+        case 'rpc':
+          // Panel hicbir zaman sonsuza kadar beklemesin
+          sendResponse(await rpc(msg.tabId, msg.frameId, msg.payload, 20000));
+          break;
+        case 'reload':
+          await chrome.tabs.reload(msg.tabId);
+          sendResponse({ result: { ok: true } });
+          break;
+        default:
+          sendResponse({ error: 'bilinmeyen op: ' + msg.op });
+      }
+    } catch (e) {
+      sendResponse({ error: String(e && e.message || e) });
+    }
+  })();
+
+  return true; // async
+});
+
+```
+
+`src/bridge/bridge.js`:
+
+```js
+/**
+ * WebCheat bridge — ISOLATED world.
+ *
+ * MAIN world'deki agent chrome.* API'lerine erisemez, uzanti sayfasi da
+ * sayfanin JS realm'ine giremez. Bu dosya ikisini birbirine baglar:
+ *
+ *   panel --(chrome.runtime)--> service worker --(tabs.sendMessage)--> bridge
+ *   bridge --(window.postMessage)--> agent --(window.postMessage)--> bridge
+ */
+(function () {
+  'use strict';
+
+  var pending = Object.create(null);
+  var seq = 0;
+
+  window.addEventListener('message', function (ev) {
+    if (ev.source !== window) return;
+    var d = ev.data;
+    if (!d || d.__wce !== 'res') return;
+    var p = pending[d.id];
+    if (!p) return;
+    delete pending[d.id];
+    clearTimeout(p.timer);
+    p.resolve(d.response);
+  });
+
+  function callAgent(payload) {
+    return new Promise(function (resolve) {
+      var id = ++seq;
+      pending[id] = {
+        resolve: resolve,
+        timer: setTimeout(function () {
+          delete pending[id];
+          resolve({ error: 'agent yanit vermedi (sayfayi yenile)' });
+        }, 15000)
+      };
+      window.postMessage({ __wce: 'req', id: id, payload: JSON.stringify(payload) }, '*');
+    });
+  }
+
+  chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
+    if (!msg || msg.__wce !== 'rpc') return;
+    callAgent(msg.payload).then(sendResponse);
+    return true; // async yanit
+  });
+})();
+
+```
+
+`src/ui/panel.css`:
+
+```css
+:root {
+  --bg: #0f1115;
+  --panel: #161a21;
+  --panel-2: #1b2029;
+  --line: #262c37;
+  --text: #dfe4ec;
+  --muted: #8792a4;
+  --accent: #ff5c4d;
+  --accent-dim: #3a2320;
+  --ok: #46c98b;
+  --warn: #e6b455;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* ---------------- Ust bar ---------------- */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 650;
+  letter-spacing: .2px;
+  color: var(--accent);
+  flex: none;
+}
+
+.target {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.target select { min-width: 0; }
+#tabSel { flex: 2 1 0; }
+#frameSel { flex: 3 1 0; }
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  flex: none;
+  font-size: 12px;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #4a5262;
+}
+.dot.on { background: var(--ok); box-shadow: 0 0 8px rgba(70,201,139,.6); }
+.dot.busy { background: var(--warn); }
+
+/* ---------------- Yerlesim ---------------- */
+main {
+  display: grid;
+  grid-template-columns: minmax(400px, 1fr) minmax(420px, 1.15fr);
+  gap: 1px;
+  background: var(--line);
+  height: calc(100% - 45px);
+}
+
+.col {
+  background: var(--bg);
+  padding: 12px 14px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--muted);
+  font-weight: 650;
+}
+h2.mt { margin-top: 16px; }
+
+/* ---------------- Formlar ---------------- */
+.row { margin-bottom: 9px; }
+.row.two { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.row.two > div { min-width: 0; }
+
+label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+select, input[type="text"] {
+  width: 100%;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 5px;
+  padding: 5px 7px;
+  font-size: 12.5px;
+  font-family: inherit;
+}
+select:focus, input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+input[type="text"] { font-family: var(--mono); }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 4px 0 10px;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.check input { accent-color: var(--accent); margin: 0; }
+.check em { color: var(--muted); font-style: normal; font-size: 11px; }
+
+.btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+
+button {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 5px;
+  padding: 6px 11px;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: #3a4252; background: #212734; }
+button:disabled { opacity: .4; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.primary:hover:not(:disabled) { background: #ff6f61; border-color: #ff6f61; }
+button.ghost { background: transparent; }
+button.on { background: var(--accent-dim); border-color: var(--accent); color: #ffb3aa; }
+
+/* ---------------- Ilerleme ---------------- */
+.progress {
+  height: 3px;
+  background: var(--panel-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+#progBar { height: 100%; width: 0; background: var(--accent); transition: width .12s linear; }
+
+.found { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-family: var(--mono); }
+.found b { color: var(--text); }
+
+/* ---------------- Tablolar ---------------- */
+.results, .table-wrap {
+  flex: 1;
+  min-height: 120px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+}
+
+table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel-2);
+  text-align: left;
+  padding: 5px 8px;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  font-family: -apple-system, system-ui, sans-serif;
+  z-index: 1;
+}
+
+tbody td { padding: 3px 8px; border-bottom: 1px solid rgba(38,44,55,.5); white-space: nowrap; }
+tbody tr:hover { background: rgba(255,92,77,.07); }
+tbody tr.dbl { cursor: pointer; }
+
+.w-frz { width: 52px; }
+.w-typ { width: 74px; }
+.w-act { width: 30px; }
+
+td input[type="text"] { padding: 2px 5px; font-size: 12px; }
+td input[type="checkbox"] { accent-color: var(--accent); }
+td select { padding: 2px 4px; font-size: 11.5px; }
+
+.cell-x {
+  background: none;
+  border: none;
+  color: var(--muted);
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1;
+}
+.cell-x:hover { color: var(--accent); background: none; }
+
+.hint {
+  padding: 9px 10px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.55;
+  font-family: -apple-system, system-ui, sans-serif;
+}
+.hint b { color: var(--text); font-weight: 600; }
+.hint code {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--panel-2);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* ---------------- Zaman ---------------- */
+.speed .presets { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+.speed .presets button { padding: 4px 9px; font-family: var(--mono); font-size: 12px; }
+.speed .row { display: flex; align-items: center; gap: 9px; }
+#speedRange { flex: 1; accent-color: var(--accent); }
+#speedOut { font-family: var(--mono); font-size: 12.5px; min-width: 54px; text-align: right; }
+.speed .hint { padding: 6px 0 0; }
+
+.diag {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 9px;
+  margin-top: 2px;
+}
+.diag b { color: var(--text); font-weight: 600; }
+.diag .bad { color: var(--accent); }
+.diag .good { color: var(--ok); }
+.diag .warn { color: var(--warn); }
+
+/* ---------------- Toast ---------------- */
+.toast {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  padding: 8px 14px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  max-width: 70%;
+  z-index: 10;
+}
+
+.hidden { display: none !important; }
+
+```
+
+`src/ui/panel.html`:
+
+```html
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>WebCheat</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+
+  <header class="bar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M7 6V4M12 6V4M17 6V4M7 20v-2M12 20v-2M17 20v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M9 12h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span>WebCheat</span>
+    </div>
+
+    <div class="target">
+      <select id="tabSel" title="Hedef sekme"></select>
+      <select id="frameSel" title="Hedef frame (oyun genelde iframe icinde)"></select>
+      <button id="refreshBtn" class="ghost" title="Sekmeleri tara">Yenile</button>
+      <button id="reloadBtn" class="ghost" title="Hook'lar oyundan once takilsin diye sekmeyi yeniler">Sekmeyi Yenile</button>
+    </div>
+
+    <div class="status">
+      <span id="dot" class="dot"></span>
+      <span id="statusText">bagli degil</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- ---------------- Sol: tarama ---------------- -->
+    <section class="col scan">
+      <h2>Tarama</h2>
+
+      <div class="row">
+        <label for="regionSel">Bellek</label>
+        <select id="regionSel"></select>
+      </div>
+
+      <div class="row two">
+        <div>
+          <label for="typeSel">Deger tipi</label>
+          <select id="typeSel">
+            <option value="all">Hepsi (tum tipler)</option>
+            <option value="i32" selected>4 Byte (i32)</option>
+            <option value="f32">Float (f32)</option>
+            <option value="f64">Double (f64)</option>
+            <option value="i16">2 Byte (i16)</option>
+            <option value="i8">1 Byte (i8)</option>
+            <option value="u8">1 Byte isaretsiz (u8)</option>
+            <option value="u16">2 Byte isaretsiz (u16)</option>
+            <option value="u32">4 Byte isaretsiz (u32)</option>
+            <option value="i64">8 Byte (i64)</option>
+            <option value="u64">8 Byte isaretsiz (u64)</option>
+          </select>
+        </div>
+        <div>
+          <label for="cmpSel">Tarama tipi</label>
+          <select id="cmpSel"></select>
+        </div>
+      </div>
+
+      <div class="row two">
+        <div>
+          <label for="valInput">Deger</label>
+          <input id="valInput" type="text" placeholder="orn. 100" autocomplete="off">
+        </div>
+        <div id="val2Wrap" class="hidden">
+          <label for="val2Input">ve</label>
+          <input id="val2Input" type="text" placeholder="ust sinir" autocomplete="off">
+        </div>
+      </div>
+
+      <label class="check">
+        <input id="alignedChk" type="checkbox" checked>
+        <span>Hizali tarama <em>(hizli — kapatirsan cok yavas ama daha kapsamli)</em></span>
+      </label>
+
+      <div class="btns">
+        <button id="firstBtn" class="primary">Ilk Tarama</button>
+        <button id="nextBtn" disabled>Sonraki Tarama</button>
+        <button id="newBtn" class="ghost">Yeni Tarama</button>
+        <button id="cancelBtn" class="ghost hidden">Iptal</button>
+      </div>
+
+      <div class="progress"><div id="progBar"></div></div>
+      <div class="found"><span id="foundText">Sonuc yok</span></div>
+
+      <div class="results">
+        <table>
+          <thead><tr><th>Adres</th><th class="w-typ">Tip</th><th>Deger</th><th>Onceki</th></tr></thead>
+          <tbody id="resBody"></tbody>
+        </table>
+        <div id="resHint" class="hint">Degeri oyunda gordugun gibi gir, <b>Ilk Tarama</b>'ya bas.
+          Sonra oyunda degeri degistir, <b>Sonraki Tarama</b> ile daralt. Satira cift tikla &rarr; listeye ekle.</div>
+      </div>
+    </section>
+
+    <!-- ---------------- Sag: adres listesi + zaman ---------------- -->
+    <section class="col list">
+      <h2>Adres Listesi</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th class="w-frz">Dondur</th><th>Aciklama</th><th>Adres</th><th class="w-typ">Tip</th><th>Deger</th><th class="w-act"></th></tr>
+          </thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+      <div class="btns">
+        <button id="addManualBtn" class="ghost">Elle Adres Ekle</button>
+        <button id="clearListBtn" class="ghost">Listeyi Temizle</button>
+      </div>
+
+      <h2 class="mt">Zaman Kontrolu</h2>
+      <div class="speed">
+        <div class="presets" id="presets"></div>
+        <div class="row">
+          <input id="speedRange" type="range" min="0" max="800" value="100" step="5">
+          <output id="speedOut">1.00x</output>
+        </div>
+        <div class="btns">
+          <button id="pauseBtn" class="ghost">Duraklat</button>
+          <button id="stepBtn" class="ghost">Kare Ilerlet</button>
+        </div>
+        <div id="diag" class="diag">teshis bekleniyor…</div>
+        <p class="hint">Sanal saat <code>performance.now</code>, <code>Date.now</code>,
+          <code>requestAnimationFrame</code> ve zamanlayicilari olcekler. Oyun delta-time
+          kullaniyorsa simulasyon hizlanir; sabit adimli dongulerde etki daha az olur.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="panel.js"></script>
+</body>
+</html>
+
+```
+
+`src/ui/panel.js`:
+
+```js
+/**
+ * WebCheat panel — CE penceresi.
+ * Hedef sekmeyi/frame'i secer, agent'a RPC atar, sonuclari gosterir.
+ */
+'use strict';
+
+const $ = (id) => document.getElementById(id);
+
+/* ------------------------------------------------------------------ *
+ * Durum
+ * ------------------------------------------------------------------ */
+const state = {
+  targets: [],
+  tabId: null,
+  frameId: null,
+  regionId: null,
+  scanning: false,
+  hasResults: false,
+  speed: 1,
+  prevSpeed: 1,
+  regionPoll: null,
+  list: [],        // adres listesi: {key, desc, region, addr, type, value, frozen, freezeId}
+  keySeq: 0
+};
+
+const FIRST_CMPS = [
+  ['eq', 'Tam deger'],
+  ['unknown', 'Bilinmeyen baslangic degeri'],
+  ['gt', 'Buyuktur'],
+  ['lt', 'Kucuktur'],
+  ['between', 'Arasinda']
+];
+
+const NEXT_CMPS = [
+  ['eq', 'Tam deger'],
+  ['changed', 'Degisti'],
+  ['unchanged', 'Degismedi'],
+  ['inc', 'Artti'],
+  ['dec', 'Azaldi'],
+  ['incBy', 'Su kadar artti'],
+  ['decBy', 'Su kadar azaldi'],
+  ['gt', 'Buyuktur'],
+  ['lt', 'Kucuktur'],
+  ['between', 'Arasinda']
+];
+
+const NO_VALUE = new Set(['unknown', 'changed', 'unchanged', 'inc', 'dec']);
+
+/* ------------------------------------------------------------------ *
+ * Mesajlasma
+ * ------------------------------------------------------------------ */
+function bg(msg) {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage({ __wcePanel: true, ...msg }, (res) => {
+      if (chrome.runtime.lastError) resolve({ error: chrome.runtime.lastError.message });
+      else resolve(res || { error: 'bos yanit' });
+    });
+  });
+}
+
+async function rpc(cmd, args = {}) {
+  if (state.tabId === null || state.frameId === null) return { error: 'hedef secilmedi' };
+  return bg({ op: 'rpc', tabId: state.tabId, frameId: state.frameId, payload: { cmd, args } });
+}
+
+/** Secili frame'i degil, belirtilen frame'i sorgular. */
+async function rpcFrame(frameId, cmd, args = {}) {
+  if (state.tabId === null) return { error: 'sekme secilmedi' };
+  return bg({ op: 'rpc', tabId: state.tabId, frameId, payload: { cmd, args } });
+}
+
+function toast(msg, ms = 3200) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.add('hidden'), ms);
+}
+
+function setStatus(text, cls) {
+  $('statusText').textContent = text;
+  const dot = $('dot');
+  dot.className = 'dot' + (cls ? ' ' + cls : '');
+}
+
+/* ------------------------------------------------------------------ *
+ * Hedef secimi
+ * ------------------------------------------------------------------ */
+async function refreshTargets() {
+  setStatus('sekmeler taraniyor...', 'busy');
+  const res = await bg({ op: 'listTargets' });
+  if (res.error) { setStatus('hata: ' + res.error); return; }
+
+  state.targets = res.result || [];
+  const tabSel = $('tabSel');
+  const keepTab = state.tabId;
+  tabSel.textContent = '';
+
+  if (!state.targets.length) {
+    tabSel.append(new Option('— agent yuklu sekme yok —', ''));
+    $('frameSel').textContent = '';
+    setStatus('sekme bulunamadi');
+    toast('Oyunun sekmesini bir kez yenile (uzanti kurulmadan once acilmis sayfalarda agent yok).', 6000);
+    return;
+  }
+
+  for (const t of state.targets) {
+    const mark = t.hasMemory ? '[WASM] '
+      : t.discarded ? '[askida] '
+      : t.hasAgent ? ''
+      : '[agent yok] ';
+    const label = mark + (t.title.length > 54 ? t.title.slice(0, 54) + '…' : t.title);
+    tabSel.append(new Option(label, String(t.tabId)));
+  }
+
+  const found = state.targets.find((t) => t.tabId === keepTab);
+  const pick = found || state.targets[0];
+  tabSel.value = String(pick.tabId);
+  selectTab(pick.tabId);
+}
+
+function selectTab(tabId) {
+  state.tabId = tabId;
+  clearTimeout(state.regionPoll);
+  const tab = state.targets.find((t) => t.tabId === tabId);
+  const frameSel = $('frameSel');
+  const regionSel = $('regionSel');
+  frameSel.textContent = '';
+  if (!tab) return;
+
+  // Agent yok: content script bu sekmeye hic enjekte olmamis (sekme uzanti
+  // kurulmadan/yenilenmeden once acilmis). Kullaniciya ne yapacagini soyle.
+  if (!tab.frames.length) {
+    state.frameId = null;
+    state.regionId = null;
+    frameSel.append(new Option(tab.discarded ? '— sekme askida —' : '— agent yok —', ''));
+    regionSel.textContent = '';
+    regionSel.append(new Option('— agent yok —', ''));
+    setStatus(tab.discarded ? 'sekme askida' : 'agent yok', '');
+    toast(tab.discarded
+      ? 'Bu sekme Chrome tarafindan uykuya alinmis. Sekmeye bir gecip geri gel, sonra Yenile.'
+      : 'Bu sekmede agent yok. "Sekmeyi Yenile"ye bas — hook\'lar oyun yuklenmeden once takilmali.', 6000);
+    return;
+  }
+
+  for (const f of tab.frames) {
+    const n = f.regions.length;
+    const where = f.top ? 'ana sayfa' : 'iframe #' + f.frameId;
+    const url = f.url.length > 52 ? f.url.slice(0, 52) + '…' : f.url;
+    frameSel.append(new Option(`${where} — ${url}${n ? `  (${n} bellek)` : ''}`, String(f.frameId)));
+  }
+
+  const best = tab.frames[0];
+  frameSel.value = String(best.frameId);
+  selectFrame(best.frameId);
+}
+
+/**
+ * Frame secildiginde bolgeleri CANLI sorar — listTargets sirasindaki
+ * onbellege guvenmez. Oyun WASM'ini gec olusturdugunda (Playables'ta
+ * normal) onbellek "bellek yok" der ve panel bir daha kendine gelmez.
+ */
+async function selectFrame(frameId) {
+  state.frameId = frameId;
+  state.regionId = null;
+  clearTimeout(state.regionPoll);
+
+  const regionSel = $('regionSel');
+  regionSel.textContent = '';
+  regionSel.append(new Option('— sorgulaniyor… —', ''));
+  setStatus('bellek araniyor…', 'busy');
+
+  await pollRegions(0);
+}
+
+/** Bellek cikana kadar birkac saniye yeniden dener (oyun yukleniyor olabilir). */
+async function pollRegions(attempt) {
+  const askedFrame = state.frameId;
+  const res = await rpc('regions');
+  if (state.frameId !== askedFrame) return;   // kullanici arada frame degistirdi
+
+  const regionSel = $('regionSel');
+  const regions = (!res.error && res.result) || [];
+
+  if (!regions.length) {
+    regionSel.textContent = '';
+    regionSel.append(new Option('— bellek bulunamadi —', ''));
+    state.regionId = null;
+    // 3 denemede cikmadiysa: diger frame'leri canli yokla, WASM'i olana atla.
+    // Playables'ta oyun ic iframe'de calisiyor; kullaniciyi elle aratmayalim.
+    if (attempt === 3) {
+      const better = await findFrameWithMemory();
+      if (better !== null && better !== state.frameId) {
+        $('frameSel').value = String(better);
+        toast('Oyun ' + (better === 0 ? 'ana sayfada' : 'iframe #' + better + '\'de') + ' bulundu, oraya gecildi.', 3500);
+        selectFrame(better);
+        return;
+      }
+    }
+
+    if (attempt < 20) {
+      setStatus(`bellek araniyor… (${attempt + 1})`, 'busy');
+      state.regionPoll = setTimeout(() => pollRegions(attempt + 1), 1000);
+    } else {
+      setStatus('bellek yok', '');
+      toast('Bu frame\'de WASM bellegi yok. Oyun saf JS olabilir ya da baska bir iframe\'de.', 5000);
+    }
+    return;
+  }
+
+  const keep = state.regionId;
+  regionSel.textContent = '';
+  for (const r of regions) {
+    const tag = r.shared ? ' [paylasimli]' : '';
+    regionSel.append(new Option(`${r.label} — ${fmtBytes(r.size)}${tag}`, r.id));
+  }
+  regionSel.value = regions.some((r) => r.id === keep) ? keep : regions[0].id;
+  state.regionId = regionSel.value;
+  setStatus(`bagli — ${regions.length} bellek`, 'on');
+
+  if (regions.some((r) => r.shared)) {
+    toast('Bellek paylasimli (pthread). Oyun dongusu bir Worker\'da calisiyor olabilir — ' +
+          'tarama calisir ama zaman kontrolu etkisiz kalabilir.', 7000);
+  }
+}
+
+/** Sekmenin tum frame'lerini canli yoklar, WASM bellegi olan ilkini doner. */
+async function findFrameWithMemory() {
+  const tab = state.targets.find((t) => t.tabId === state.tabId);
+  if (!tab) return null;
+
+  const probes = await Promise.all(tab.frames.map(async (f) => {
+    const res = await rpcFrame(f.frameId, 'regions');
+    const n = (!res.error && res.result) ? res.result.length : 0;
+    return { frameId: f.frameId, n };
+  }));
+
+  const hit = probes.filter((p) => p.n > 0).sort((a, b) => b.n - a.n)[0];
+  return hit ? hit.frameId : null;
+}
+
+function fmtBytes(n) {
+  if (!n) return '0 B';
+  const u = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.min(Math.floor(Math.log(n) / Math.log(1024)), u.length - 1);
+  return (n / Math.pow(1024, i)).toFixed(i ? 1 : 0) + ' ' + u[i];
+}
+
+/* ------------------------------------------------------------------ *
+ * Tarama
+ * ------------------------------------------------------------------ */
+function fillCmp(list) {
+  const sel = $('cmpSel');
+  const keep = sel.value;
+  sel.textContent = '';
+  for (const [v, label] of list) sel.append(new Option(label, v));
+  if (list.some(([v]) => v === keep)) sel.value = keep;
+  onCmpChange();
+}
+
+function onCmpChange() {
+  const cmp = $('cmpSel').value;
+  $('valInput').disabled = NO_VALUE.has(cmp);
+  $('val2Wrap').classList.toggle('hidden', cmp !== 'between');
+}
+
+async function doScan(kind) {
+  if (!state.regionId) { toast('Once taranacak bir bellek sec.'); return; }
+  const cmp = $('cmpSel').value;
+  const args = {
+    region: state.regionId,
+    type: $('typeSel').value,
+    aligned: $('alignedChk').checked,
+    cmp,
+    value: $('valInput').value,
+    value2: $('val2Input').value
+  };
+
+  if (!NO_VALUE.has(cmp) && args.value.trim() === '') { toast('Deger gir.'); return; }
+
+  const res = await rpc(kind, args);
+  if (res.error) { toast('Hata: ' + res.error); return; }
+
+  state.scanning = true;
+  setScanUI(true);
+  pollProgress();
+}
+
+function setScanUI(busy) {
+  $('firstBtn').disabled = busy;
+  $('nextBtn').disabled = busy || !state.hasResults;
+  $('newBtn').disabled = busy;
+  $('cancelBtn').classList.toggle('hidden', !busy);
+  setStatus(busy ? 'taraniyor...' : 'bagli', busy ? 'busy' : 'on');
+}
+
+async function pollProgress() {
+  const res = await rpc('progress');
+  if (res.error) { state.scanning = false; setScanUI(false); toast('Hata: ' + res.error); return; }
+  const p = res.result;
+
+  const pct = p.total ? Math.min(100, (p.done / p.total) * 100) : 0;
+  $('progBar').style.width = pct + '%';
+  $('foundText').innerHTML = `Bulunan: <b>${p.found.toLocaleString('tr-TR')}</b>` +
+    (p.running ? ` — %${pct.toFixed(0)}` : '');
+
+  if (p.error) {
+    state.scanning = false;
+    setScanUI(false);
+    toast('Tarama hatasi: ' + p.error);
+    return;
+  }
+
+  if (p.running) { setTimeout(pollProgress, 150); return; }
+
+  state.scanning = false;
+  $('progBar').style.width = '100%';
+  await loadResults();
+  setScanUI(false);
+}
+
+async function loadResults() {
+  const res = await rpc('results', { offset: 0, limit: 300 });
+  if (res.error) { toast('Hata: ' + res.error); return; }
+  const r = res.result;
+
+  state.hasResults = r.total > 0 || r.mode === 'all';
+  $('nextBtn').disabled = !state.hasResults;
+  fillCmp(state.hasResults ? NEXT_CMPS : FIRST_CMPS);
+
+  const body = $('resBody');
+  body.textContent = '';
+
+  if (r.mode === 'all') {
+    $('resHint').classList.remove('hidden');
+    $('resHint').innerHTML = '<b>Snapshot alindi.</b> Simdi oyunda degeri degistir, sonra ' +
+      '<b>Sonraki Tarama</b>\'da <b>Artti / Azaldi / Degisti</b> sec. Klasik "degerini bilmiyorum" akisi.';
+    $('foundText').innerHTML = `Snapshot: <b>${r.total.toLocaleString('tr-TR')}</b> aday adres`;
+    return;
+  }
+
+  $('resHint').classList.toggle('hidden', r.rows.length > 0);
+  if (r.truncated) toast(`Sonuc ${(4000000).toLocaleString('tr-TR')} adreste kesildi — daha dar bir deger ile tara.`, 5000);
+
+  // "Hepsi" taramasinda hangi tipte kac eslesme var, ozet olarak goster
+  if (r.multi && r.byType && Object.keys(r.byType).length) {
+    const parts = Object.entries(r.byType).map(([t, n]) => `${t}:${n.toLocaleString('tr-TR')}`);
+    $('foundText').innerHTML = `Bulunan: <b>${r.total.toLocaleString('tr-TR')}</b> — ${parts.join(' · ')}`;
+  }
+
+  for (const row of r.rows) {
+    const tr = document.createElement('tr');
+    tr.className = 'dbl';
+    tr.title = 'Cift tikla → adres listesine ekle';
+    tr.append(
+      td('0x' + row.addr.toString(16).toUpperCase()),
+      td(row.type || ''),
+      td(String(row.value)),
+      td(row.prev == null ? '' : String(row.prev))
+    );
+    tr.addEventListener('dblclick', () => addToList(row.addr, row.type, row.value));
+    body.append(tr);
+  }
+
+  if (r.total > r.rows.length) {
+    const tr = document.createElement('tr');
+    const cell = td(`… ${(r.total - r.rows.length).toLocaleString('tr-TR')} sonuc daha (daralt)`);
+    cell.colSpan = 4;
+    cell.style.color = 'var(--muted)';
+    tr.append(cell);
+    body.append(tr);
+  }
+}
+
+function td(text) {
+  const c = document.createElement('td');
+  c.textContent = text;
+  return c;
+}
+
+/* ------------------------------------------------------------------ *
+ * Adres listesi
+ * ------------------------------------------------------------------ */
+/** Adres listesi somut bir tip ister — "all" oraya gecemez. */
+function concreteType(t) {
+  return t && t !== 'all' ? t : (($('typeSel').value !== 'all' && $('typeSel').value) || 'i32');
+}
+
+function addToList(addr, type, value) {
+  const entry = {
+    key: 'k' + (state.keySeq++),
+    desc: '',
+    region: state.regionId,
+    addr,
+    type: concreteType(type),
+    value: value == null ? '' : String(value),
+    frozen: false,
+    freezeId: null
+  };
+  state.list.push(entry);
+  renderList();
+}
+
+function renderList() {
+  const body = $('listBody');
+  body.textContent = '';
+
+  for (const e of state.list) {
+    const tr = document.createElement('tr');
+
+    // dondur
+    const frz = document.createElement('td');
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = e.frozen;
+    chk.addEventListener('change', () => toggleFreeze(e, chk.checked));
+    frz.append(chk);
+
+    // aciklama
+    const desc = document.createElement('td');
+    const dIn = document.createElement('input');
+    dIn.type = 'text';
+    dIn.value = e.desc;
+    dIn.placeholder = 'coin, can...';
+    dIn.addEventListener('change', () => { e.desc = dIn.value; });
+    desc.append(dIn);
+
+    // adres + tip
+    const addr = td('0x' + e.addr.toString(16).toUpperCase());
+
+    const typ = document.createElement('td');
+    const tSel = document.createElement('select');
+    for (const opt of $('typeSel').options) {
+      if (opt.value === 'all') continue;   // liste satiri somut tip ister
+      tSel.append(new Option(opt.value, opt.value));
+    }
+    tSel.value = e.type;
+    tSel.addEventListener('change', () => { e.type = tSel.value; if (e.frozen) toggleFreeze(e, true); });
+    typ.append(tSel);
+
+    // deger
+    const val = document.createElement('td');
+    const vIn = document.createElement('input');
+    vIn.type = 'text';
+    vIn.value = e.value;
+    vIn.dataset.key = e.key;
+    vIn.addEventListener('change', async () => {
+      const res = await rpc('write', { region: e.region, addr: e.addr, type: e.type, value: vIn.value });
+      if (res.error) { toast('Yazilamadi: ' + res.error); return; }
+      e.value = vIn.value;
+      if (e.frozen) toggleFreeze(e, true);   // dondurma degerini tazele
+      toast('Yazildi: 0x' + e.addr.toString(16).toUpperCase() + ' = ' + vIn.value, 1400);
+    });
+    val.append(vIn);
+
+    // sil
+    const act = document.createElement('td');
+    const x = document.createElement('button');
+    x.className = 'cell-x';
+    x.textContent = '×';
+    x.title = 'Kaldir';
+    x.addEventListener('click', async () => {
+      if (e.freezeId) await rpc('unfreeze', { id: e.freezeId });
+      state.list = state.list.filter((o) => o !== e);
+      renderList();
+    });
+    act.append(x);
+
+    tr.append(frz, desc, addr, typ, val, act);
+    body.append(tr);
+  }
+}
+
+async function toggleFreeze(e, on) {
+  if (on) {
+    const res = await rpc('freeze', { id: e.freezeId, region: e.region, addr: e.addr, type: e.type, value: e.value });
+    if (res.error) { toast('Dondurulamadi: ' + res.error); return; }
+    e.freezeId = res.result.id;
+    e.frozen = true;
+  } else {
+    if (e.freezeId) await rpc('unfreeze', { id: e.freezeId });
+    e.frozen = false;
+    e.freezeId = null;
+  }
+}
+
+/** Listedeki adreslerin canli degerlerini tazele (dondurulmayanlar). */
+async function refreshListValues() {
+  if (!state.list.length || state.tabId === null) return;
+  const items = state.list
+    .filter((e) => !e.frozen)
+    .map((e) => ({ key: e.key, region: e.region, addr: e.addr, type: e.type }));
+  if (!items.length) return;
+
+  const res = await rpc('readMany', { items });
+  if (res.error || !res.result) return;
+
+  const focused = document.activeElement;
+  for (const row of res.result) {
+    if (row.value == null) continue;
+    const e = state.list.find((o) => o.key === row.key);
+    if (!e) continue;
+    e.value = String(row.value);
+    const input = document.querySelector(`#listBody input[data-key="${row.key}"]`);
+    if (input && input !== focused) input.value = e.value;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Zaman kontrolu
+ * ------------------------------------------------------------------ */
+const PRESETS = [0.25, 0.5, 1, 2, 4, 8];
+
+function buildPresets() {
+  const box = $('presets');
+  for (const s of PRESETS) {
+    const b = document.createElement('button');
+    b.textContent = s + 'x';
+    b.dataset.speed = String(s);
+    b.addEventListener('click', () => setSpeed(s));
+    box.append(b);
+  }
+}
+
+function applySpeedUI(s) {
+  state.speed = s;
+  $('speedRange').value = String(Math.round(s * 100));
+  $('speedOut').textContent = s.toFixed(2) + 'x';
+  for (const b of $('presets').children) {
+    b.classList.toggle('on', Number(b.dataset.speed) === s);
+  }
+  $('pauseBtn').textContent = s === 0 ? 'Devam Et' : 'Duraklat';
+  $('pauseBtn').classList.toggle('on', s === 0);
+  $('stepBtn').disabled = s !== 0;
+}
+
+async function setSpeed(s) {
+  const res = await rpc('setSpeed', { speed: s });
+  if (res.error) { toast('Hiz ayarlanamadi: ' + res.error); return; }
+  applySpeedUI(res.result.speed);
+}
+
+/**
+ * Teshis satiri. "Hiz calismiyor" sikayetinin sebebini dogrudan gosterir:
+ * oyun dongusu bu frame'de mi, saati okuyor mu, kac fps.
+ */
+async function refreshDiag() {
+  const el = $('diag');
+  if (state.tabId === null || state.frameId === null) { el.textContent = 'hedef secilmedi'; return; }
+
+  const res = await rpc('diag');
+  if (res.error || !res.result) { el.textContent = 'teshis alinamadi: ' + (res.error || '?'); return; }
+  const d = res.result;
+
+  const lines = [];
+  const engines = d.engines.length ? d.engines.join(', ') : 'bilinmiyor';
+  lines.push(`motor: <b>${engines}</b> · bellek: <b>${d.regions}</b>`);
+
+  if (d.fps > 0) {
+    lines.push(`render dongusu: <span class="good">${d.fps} fps</span> · saat okuma: <b>${d.nowReads.toLocaleString('tr-TR')}</b>`);
+  } else if (d.timers > 0) {
+    lines.push(`<span class="warn">rAF yok</span> · zamanlayici ile suruluyor (${d.timers}) · saat okuma: <b>${d.nowReads.toLocaleString('tr-TR')}</b>`);
+  } else {
+    lines.push('<span class="bad">bu frame\'de calisan bir oyun dongusu yok</span>');
+  }
+
+  if (d.nowReads === 0 && d.dateReads === 0 && d.fps > 0) {
+    lines.push('<span class="bad">oyun saati hic okumuyor → hiz degisimi etki etmez</span>');
+  }
+  if (d.shared) {
+    lines.push('<span class="bad">paylasimli bellek (pthread)</span> — dongu Worker\'da olabilir, zaman kontrolu ulasamaz');
+  }
+  if (!d.dirty) {
+    lines.push('saat: <b>pass-through</b> (hiz henuz degistirilmedi)');
+  } else {
+    lines.push(`saat: <b>aktif ${d.speed}x</b>`);
+  }
+
+  el.innerHTML = lines.join('<br>');
+}
+
+/* ------------------------------------------------------------------ *
+ * Baglama
+ * ------------------------------------------------------------------ */
+function wire() {
+  $('refreshBtn').addEventListener('click', refreshTargets);
+  $('reloadBtn').addEventListener('click', async () => {
+    if (state.tabId === null) return;
+    const keep = state.tabId;
+    await bg({ op: 'reload', tabId: keep });
+    setStatus('sekme yenileniyor…', 'busy');
+    // Sayfa acilsin, agent enjekte olsun, sonra kendiliginden tazele
+    setTimeout(async () => {
+      state.tabId = keep;
+      await refreshTargets();
+    }, 1800);
+  });
+
+  $('tabSel').addEventListener('change', (e) => selectTab(Number(e.target.value)));
+  $('frameSel').addEventListener('change', (e) => selectFrame(Number(e.target.value)));
+  $('regionSel').addEventListener('change', (e) => { state.regionId = e.target.value || null; });
+  $('cmpSel').addEventListener('change', onCmpChange);
+
+  $('firstBtn').addEventListener('click', () => doScan('firstScan'));
+  $('nextBtn').addEventListener('click', () => doScan('nextScan'));
+  $('cancelBtn').addEventListener('click', () => rpc('cancelScan'));
+  $('newBtn').addEventListener('click', async () => {
+    await rpc('reset');
+    state.hasResults = false;
+    fillCmp(FIRST_CMPS);
+    $('resBody').textContent = '';
+    $('progBar').style.width = '0';
+    $('foundText').textContent = 'Sonuc yok';
+    $('resHint').classList.remove('hidden');
+    $('resHint').innerHTML = 'Degeri oyunda gordugun gibi gir, <b>Ilk Tarama</b>\'ya bas. ' +
+      'Sonra oyunda degeri degistir, <b>Sonraki Tarama</b> ile daralt. Satira cift tikla &rarr; listeye ekle.';
+    setScanUI(false);
+  });
+
+  $('addManualBtn').addEventListener('click', () => {
+    const raw = prompt('Adres (0x... veya ondalik):');
+    if (!raw) return;
+    const addr = raw.trim().toLowerCase().startsWith('0x') ? parseInt(raw.trim(), 16) : parseInt(raw.trim(), 10);
+    if (!Number.isFinite(addr) || addr < 0) { toast('Gecersiz adres.'); return; }
+    addToList(addr, concreteType(null), '');
+  });
+
+  $('clearListBtn').addEventListener('click', async () => {
+    for (const e of state.list) if (e.freezeId) await rpc('unfreeze', { id: e.freezeId });
+    state.list = [];
+    renderList();
+  });
+
+  $('speedRange').addEventListener('input', (e) => {
+    const s = Number(e.target.value) / 100;
+    $('speedOut').textContent = s.toFixed(2) + 'x';
+  });
+  $('speedRange').addEventListener('change', (e) => setSpeed(Number(e.target.value) / 100));
+
+  $('pauseBtn').addEventListener('click', () => {
+    if (state.speed === 0) setSpeed(state.prevSpeed || 1);
+    else { state.prevSpeed = state.speed || 1; setSpeed(0); }
+  });
+  $('stepBtn').addEventListener('click', () => rpc('step', { ms: 1000 / 60 }));
+}
+
+/* ------------------------------------------------------------------ *
+ * Baslangic
+ * ------------------------------------------------------------------ */
+buildPresets();
+fillCmp(FIRST_CMPS);
+applySpeedUI(1);
+wire();
+refreshTargets();
+
+setInterval(() => { if (!state.scanning) refreshListValues(); }, 400);
+setInterval(() => { if (!state.scanning) refreshDiag(); }, 1000);
+
+```
+
+`test/engine.test.mjs`:
+
+```mjs
+/**
+ * agent.js'i sahte bir DOM/oyun ortaminda kosturur.
+ * Amac: tarama motoru gercekten dogru adresi buluyor mu?
+ */
+import fs from 'node:fs';
+import vm from 'node:vm';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const src = fs.readFileSync(path.join(ROOT, 'src/agent/agent.js'), 'utf8');
+
+// --- sahte sayfa ortami ---
+const listeners = [];
+const win = {
+  WebAssembly,
+  performance: { now: () => Number(process.hrtime.bigint() / 1000n) / 1000 },
+  Date,
+  requestAnimationFrame: (cb) => setTimeout(() => cb(0), 16),
+  cancelAnimationFrame: clearTimeout,
+  setTimeout, clearTimeout, setInterval, clearInterval,
+  location: { href: 'https://test.local/game' },
+  addEventListener: (t, f) => listeners.push(f),
+  postMessage: () => {},
+  ArrayBuffer, Uint8Array, DataView, Proxy, Reflect, Promise, Object, Math, JSON, Error, BigInt,
+  Int8Array, Uint16Array, Int16Array, Int32Array, Uint32Array, Float32Array, Float64Array,
+  BigInt64Array, BigUint64Array, isFinite, Number, String, Array, console
+};
+win.window = win;
+win.self = win;
+win.top = win;
+win.globalThis = win;
+win.document = { title: 'Test Game' };
+
+const ctx = vm.createContext(win);
+vm.runInContext(src, ctx);
+
+const A = win.__WCE__;
+const call = (cmd, args = {}) => {
+  const r = A.rpc(JSON.stringify({ cmd, args }));
+  if (r.error) throw new Error(cmd + ': ' + r.error);
+  return r.result;
+};
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function waitScan() {
+  for (let i = 0; i < 400; i++) {
+    const p = call('progress');
+    if (p.error) throw new Error('tarama hatasi: ' + p.error);
+    if (!p.running) return p;
+    await sleep(10);
+  }
+  throw new Error('tarama bitmedi');
+}
+
+let pass = 0, fail = 0;
+const ok = (name, cond, extra = '') => {
+  if (cond) { pass++; console.log('  ok   ' + name); }
+  else { fail++; console.log('  FAIL ' + name + (extra ? '  → ' + extra : '')); }
+};
+
+// --- oyunun "RAM"i: 4 MB WASM bellegi ---
+const mem = new win.WebAssembly.Memory({ initial: 64 }); // 64 * 64KB = 4MB
+const heap = () => new DataView(mem.buffer);
+
+// Rastgele gurultu + bilinen bir "coin" degiskeni
+const noise = new Uint32Array(mem.buffer);
+let seed = 12345;
+for (let i = 0; i < noise.length; i++) { seed = (Math.imul(seed, 1103515245) + 12345) >>> 0; noise[i] = seed % 300; }
+
+const COIN_ADDR = 0x2ABC0;      // hizali (4'un kati)
+const HP_ADDR   = 0x11150;
+heap().setInt32(COIN_ADDR, 100, true);
+heap().setFloat32(HP_ADDR, 57.5, true);
+
+console.log('\n== bolge kesfi ==');
+const regions = call('regions');
+ok('WASM bellegi yakalandi', regions.length >= 1, JSON.stringify(regions));
+const REG = regions[0].id;
+ok('boyut 4MB', regions[0].size === 4 * 1024 * 1024, String(regions[0].size));
+
+console.log('\n== i32 tam deger taramasi + daraltma ==');
+call('firstScan', { region: REG, type: 'i32', cmp: 'eq', value: '100', aligned: true });
+let p = await waitScan();
+console.log(`  ilk tarama: ${p.found} aday`);
+ok('coin adayi bulundu', p.found > 0);
+
+// oyunda coin 100 -> 250 oldu
+heap().setInt32(COIN_ADDR, 250, true);
+call('nextScan', { cmp: 'eq', value: '250' });
+p = await waitScan();
+let res = call('results', { offset: 0, limit: 50 });
+ok('daraltma sonrasi tek adres kaldi', res.total === 1, `total=${res.total}`);
+ok('adres dogru', res.rows[0] && res.rows[0].addr === COIN_ADDR,
+   res.rows[0] ? '0x' + res.rows[0].addr.toString(16) : 'yok');
+ok('deger dogru okundu', res.rows[0] && res.rows[0].value === 250);
+
+console.log('\n== yazma ==');
+call('write', { region: REG, addr: COIN_ADDR, type: 'i32', value: '999999' });
+ok('bellege yazildi', heap().getInt32(COIN_ADDR, true) === 999999, String(heap().getInt32(COIN_ADDR, true)));
+
+console.log('\n== dondurma ==');
+const fz = call('freeze', { region: REG, addr: COIN_ADDR, type: 'i32', value: '777' });
+await sleep(60);
+heap().setInt32(COIN_ADDR, 5, true);   // oyun degeri dusurdu
+await sleep(80);
+ok('dondurulan deger geri yazildi', heap().getInt32(COIN_ADDR, true) === 777, String(heap().getInt32(COIN_ADDR, true)));
+call('unfreeze', { id: fz.id });
+await sleep(60);
+heap().setInt32(COIN_ADDR, 5, true);
+await sleep(80);
+ok('cozulunce artik yazilmiyor', heap().getInt32(COIN_ADDR, true) === 5, String(heap().getInt32(COIN_ADDR, true)));
+
+console.log('\n== float taramasi ==');
+call('reset');
+call('firstScan', { region: REG, type: 'f32', cmp: 'eq', value: '57.5', aligned: true });
+p = await waitScan();
+res = call('results', { offset: 0, limit: 50 });
+ok('f32 degeri bulundu', res.rows.some((r) => r.addr === HP_ADDR), `total=${res.total}`);
+
+console.log('\n== bilinmeyen deger akisi (snapshot -> azaldi) ==');
+call('reset');
+const SECRET = 0x30000;
+heap().setInt32(SECRET, 1234, true);
+call('firstScan', { region: REG, type: 'i32', cmp: 'unknown', aligned: true });
+p = await waitScan();
+ok('snapshot alindi', p.found === 1024 * 1024, String(p.found));
+
+heap().setInt32(SECRET, 1200, true);   // sadece bu adres azaldi
+call('nextScan', { cmp: 'dec' });
+p = await waitScan();
+res = call('results', { offset: 0, limit: 50 });
+ok('azalan tek adres yakalandi', res.total === 1 && res.rows[0].addr === SECRET,
+   `total=${res.total} addr=${res.rows[0] ? '0x' + res.rows[0].addr.toString(16) : '-'}`);
+
+console.log('\n== degismedi filtresi ==');
+call('reset');
+call('firstScan', { region: REG, type: 'i32', cmp: 'eq', value: '1200', aligned: true });
+await waitScan();
+const beforeCount = call('results', { offset: 0, limit: 1 }).total;
+call('nextScan', { cmp: 'unchanged' });
+await waitScan();
+ok('unchanged sayiyi korudu', call('results', { offset: 0, limit: 1 }).total === beforeCount);
+
+console.log('\n== zaman kontrolu ==');
+const realBefore = win.performance.now();
+ok('varsayilan pass-through', Math.abs(call('clock').now - realBefore) < 50);
+call('setSpeed', { speed: 4 });
+const t0 = call('clock').now;
+await sleep(100);
+const t1 = call('clock').now;
+const elapsed = t1 - t0;
+ok('4x hizda sanal saat ~4 kat akti', elapsed > 250 && elapsed < 600, elapsed.toFixed(1) + 'ms');
+call('setSpeed', { speed: 0 });
+const p0 = call('clock').now;
+await sleep(80);
+ok('duraklatinca saat durdu', Math.abs(call('clock').now - p0) < 1);
+call('step', { ms: 16.67 });
+ok('kare ilerletme saati 16.67ms itti', Math.abs(call('clock').now - p0 - 16.67) < 1);
+
+console.log('\n== "hepsi" (tum tipler) taramasi ==');
+call('reset');
+const I32_ADDR = 0x40000, F32_ADDR = 0x40100, F64_ADDR = 0x40200;
+heap().setInt32(I32_ADDR, 4242, true);
+heap().setFloat32(F32_ADDR, 4242, true);
+heap().setFloat64(F64_ADDR, 4242, true);
+
+call('firstScan', { region: REG, type: 'all', cmp: 'eq', value: '4242', aligned: true });
+p = await waitScan();
+res = call('results', { offset: 0, limit: 1000 });
+ok('multi bayragi set', res.multi === true);
+const found = (addr) => res.rows.some((r) => r.addr === addr);
+ok('i32 kopyasi bulundu', found(I32_ADDR), JSON.stringify(res.byType));
+ok('f32 kopyasi bulundu', found(F32_ADDR));
+ok('f64 kopyasi bulundu', found(F64_ADDR));
+// Ayni adres birden fazla lane'de cikabilir — i32 4242'nin alt 2 bayti
+// i16 olarak da 4242 eder. CE de aynen boyle davranir.
+const hasRow = (addr, type) => res.rows.some((r) => r.addr === addr && r.type === type);
+ok('satirlar kendi tipini tasiyor',
+   hasRow(I32_ADDR, 'i32') && hasRow(F32_ADDR, 'f32') && hasRow(F64_ADDR, 'f64'),
+   JSON.stringify(res.rows.filter((r) => r.addr === I32_ADDR)));
+ok('i8 lane\'i elendi (4242 sigmaz)', !res.byType.i8, JSON.stringify(res.byType));
+ok('i16 lane\'i tarandi (4242 sigar)', res.byType.i16 > 0, JSON.stringify(res.byType));
+
+// hepsi modunda daraltma: her satir kendi tipiyle yeniden okunmali
+heap().setInt32(I32_ADDR, 5000, true);
+heap().setFloat32(F32_ADDR, 5000, true);
+heap().setFloat64(F64_ADDR, 5000, true);
+call('nextScan', { cmp: 'eq', value: '5000' });
+await waitScan();
+res = call('results', { offset: 0, limit: 1000 });
+ok('daraltma uc tipi de korudu', found(I32_ADDR) && found(F32_ADDR) && found(F64_ADDR),
+   `total=${res.total} ${JSON.stringify(res.byType)}`);
+
+console.log('\n== ondalik deger sadece float lane\'lerine gider ==');
+call('reset');
+heap().setFloat32(0x41000, 12.5, true);
+call('firstScan', { region: REG, type: 'all', cmp: 'eq', value: '12.5', aligned: true });
+await waitScan();
+res = call('results', { offset: 0, limit: 500 });
+ok('f32 bulundu', res.rows.some((r) => r.addr === 0x41000 && r.type === 'f32'));
+ok('tam sayi lane\'i hic taranmadi',
+   !res.byType.i8 && !res.byType.i16 && !res.byType.i32 && !res.byType.i64,
+   JSON.stringify(res.byType));
+
+console.log('\n== temsil edilemeyen deger sessizce yutulmaz ==');
+// Tarama fire-and-forget: hata progress() uzerinden gelmeli, kaybolmamali
+call('reset');
+call('firstScan', { region: REG, type: 'i8', cmp: 'eq', value: '99999' });
+await sleep(30);
+const prog = A.rpc(JSON.stringify({ cmd: 'progress', args: {} })).result;
+ok('i8\'e sigmayan deger hata olarak bildirildi',
+   !prog.running && /temsil edilemiyor/.test(prog.error || ''), prog.error || '(hata yok)');
+
+console.log('\n== teshis ==');
+call('setSpeed', { speed: 1 });
+const d = call('diag');
+ok('diag patlamadan dondu', typeof d === 'object' && d !== null);
+ok('bellek sayisi raporlaniyor', d.regions >= 1, String(d.regions));
+ok('saat okumalari sayiliyor', d.nowReads > 0, String(d.nowReads));
+ok('paylasimli bellek dogru raporlandi', d.shared === false);
+ok('rAF olmayan ortamda fps 0', d.fps === 0, String(d.fps));
+
+console.log(`\n${fail === 0 ? 'TUM TESTLER GECTI' : 'BASARISIZ'} — ${pass} gecti, ${fail} kaldi\n`);
+process.exit(fail ? 1 : 0);
+
+```
