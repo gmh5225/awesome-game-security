@@ -20,4 +20,4 @@ Sits in the vendor-driver **HID input** lane catalogued under [[hardware-input-i
 
 ## Related
 
-[[hardware-input-injection]] · [[kernel-mouse]] · [[ntuserinjectmouseinput-syscall]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[hardware-input-injection]] · [[kernel-mouse]] · [[mouseclassservicecallbacktrick]] · [[ntuserinjectmouseinput-syscall]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

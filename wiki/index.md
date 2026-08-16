@@ -1341,6 +1341,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [modly](entities/modly.md) — local image→3D mesh desktop app (open-source GPU AI; TypeScript/Python; Windows/Linux; AI category)
 - [modreveal](entities/modreveal.md) — find hidden Linux kernel modules (C; Detection:Hide; AC / rootkit RE)
 - [mojoelf](entities/mojoelf.md) — in-process ELF loader from non-filesystem sources (alternative to `dlopen()`; Cheat / Android memory loading)
+- [MouseClassServiceCallbackTrick (ekknod)](entities/mouseclassservicecallbacktrick.md) — MouClass ServiceCallback kernel mouse injection (C; cheat / triggerbot & aimbot)
 - [Mono](entities/mono.md) — open-source .NET CLR (JIT/SGen/P/Invoke); Unity Mono scripting backend; game modding / RE target
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
