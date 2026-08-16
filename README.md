@@ -4277,6 +4277,8 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/norbertbaricz/DakotaAC [Spigot/Paper Minecraft anti-cheat plugin with combat, movement, and inventory checks using ProtocolLib and Citizens2]
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
+- https://github.com/GhostNgEnd/Ghost-AntiCheat [Prediction-based movement anti-cheat for Minecraft Bedrock Edition with packet, offset, and ping checks]
+- https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
 - https://github.com/GiannBart/BanMod [Among Us BepInEx mod with host-side AntiCheat module for RPC/task abuse, crashers, and lobby integrity]
 - https://github.com/Longno242/Encryptic-Roblox-Anti-Cheat [Server-authoritative Luau anti-cheat for Roblox with movement, remote, fly/noclip, fire-rate, and combat guards plus Studio demo]
