@@ -368,6 +368,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-cheat-base](entities/cs2-cheat-base.md) — CS2 internal cheat base framework (gmh5225; SDK structures, hooks, offsets, entity wrappers, rendering; [Internal])
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
 - [CS2-Dma-Radar](entities/cs2-dma-radar.md) — CS2 DMA radar (PCIe hardware; player positions + game state; real-time overlay; zero target-OS software; cheat / game:cs2 [DMA]; gmh5225)
+- [CS2-DMA-Cheat](entities/cs2-dma-cheat.md) — CS2 DMA cheat (C/C++; shader/rendering/audio; PCIe DMA; zero target-OS software; cheat / game:cs2 [DMA]; eden13378)
 - [cs2-ext](entities/cs2-ext.md) — external CS2 cheat framework (C++17; kernel driver interface; D3D11/DXGI ImGui; aimbot / ESP / spinbot)
 - [cs2-fov-changer](entities/cs2-fov-changer.md) — CS2 FOV changer (C/C++; hooking / memory analysis; gmh5225)
 - [CS2-External-Cheat](entities/cs2-external-cheat.md) — external CS2 cheat (C++; D3D11 ImGui overlay / aimbot / memory)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:eden13378/CS2-DMA-Cheat`: entity [[cs2-dma-cheat]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-dma-radar]], [[gta5-dma-cheat]], and [[proext]].
+
 - **2026-08-16** — ingest `description:egret-labs/egret-core`: entity [[egret-core]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[melonjs]], [[turbulenz-engine]], [[pixijs]], and [[three-js]].
 
 - **2026-08-16** — ingest `description:ekknod/Anti-Cheat-TestBench`: entity [[anti-cheat-testbench]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[csgo-ac]], [[anti-cheat-testing-framework]], and [[anticheat-poc]].
