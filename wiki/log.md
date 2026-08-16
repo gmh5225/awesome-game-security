@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:egret-labs/egret-core`: entity [[egret-core]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[melonjs]], [[turbulenz-engine]], [[pixijs]], and [[three-js]].
+
 - **2026-08-16** — ingest `description:ekknod/Anti-Cheat-TestBench`: entity [[anti-cheat-testbench]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[csgo-ac]], [[anti-cheat-testing-framework]], and [[anticheat-poc]].
 
 - **2026-08-16** — ingest `readme:categories`: bumped Cheat ~2706 (was ~2705; Anti Cheat ~675 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
