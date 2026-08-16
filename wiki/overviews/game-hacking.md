@@ -519,6 +519,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__DLL-Hijack-ExportDumper.md
   - wiki/sources/descriptions/csgohacks__master-guide.md
   - wiki/sources/descriptions/cseagle__blc.md
+  - wiki/sources/descriptions/crytic__ida-evm.md
   - wiki/sources/descriptions/ctxis__DLLHSC.md
   - wiki/sources/descriptions/westfox-5__GhidraMetrics.md
   - wiki/sources/descriptions/securityjoes__ThreatResearch.md
@@ -1312,6 +1313,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Binary Ninja ↔ Ghidra Server bidirectional analysis sync via [[ghidra-svr-bridge]] (C++/Qt6 sidebar + Java 17 bridge; local TCP JSON; symbols/comments/types/signatures/bookmarks; collaborative Ghidra Server repos) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md)
 - Solana eBPF (SBF) disassembly/decompilation via [[bn-ebpf-solana]] (Binary Ninja plugin; SBF encoding / memory model / calling conventions) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/otter-sec__bn-ebpf-solana.md)
 - Ethereum EVM bytecode disassembly via [[ethersplay]] (Binary Ninja plugin; EVM insn decode, CFG, xrefs for compiled Solidity contracts; blockchain auditor lane) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/gmh5225__ethersplay.md)
+- IDA Pro EVM bytecode via [[ida-evm]] (Crytic processor module; PUSH/POP/SLOAD/SSTORE/CALL/JUMPI decode; operand formatting + xrefs; Python plugin; smart-contract bytecode RE; blockchain auditor lane) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/crytic__ida-evm.md)
 - Process auto-attach via [[auto-attach]] (x64dbg plugin; `AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; target process name + optional delay; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/legendabrn__AutoAttach.md)
 - Collaborative breakpoint management via [[slothbp]] (x64dbg plugin; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__SlothBP.md)
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)

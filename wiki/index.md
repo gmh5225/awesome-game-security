@@ -1033,6 +1033,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-efiutils](entities/ida-efiutils.md) — IDA UEFI firmware annotator (GUIDs / Boot·Runtime Services / PEI·DXE; Python)
 - [ida-enums-helper](entities/ida-enums-helper.md) — IDA plugin: Hex-Rays enum rename/add hotkeys (N/A/Shift-A; tinfo_t chooser; cheat / IDA Plugins)
 - [ida-export-functions](entities/ida-export-functions.md) — IDA Pro plugin: export function list to Markdown at a specified path (documentation/reporting; cheat / IDA Plugins)
+- [ida-evm](entities/ida-evm.md) — IDA Pro EVM processor module (Crytic; PUSH/POP/SLOAD/SSTORE/CALL/JUMPI decode; operand formatting + xrefs; Python plugin; smart-contract bytecode RE)
 - [ida-find-.data-ptr](entities/ida-find-.data-ptr.md) — IDAPython `.data` pointer lookup script (locate/xref globals; cheat / IDA Plugins)
 - [ida_functioncolor](entities/ida-functioncolor.md) — IDA plugin: colorize function defs in pseudocode (Python; cheat / IDA Plugins)
 - [IDAFuncOutline](entities/ida-func-outline.md) — IDA plugin: function outline / call hierarchy (iOS ARM64 decomp; cheat / IDA Plugins)
