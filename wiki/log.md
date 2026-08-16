@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:darvincisec/DetectFrida`: entity [[detect-frida]]; cited on [[frida]] and [[overviews/mobile-security]]; cross-linked [[antifrida]] and [[frida-detection]].
+
 - **2026-08-16** — ingest `description:dashingsoft/pyarmor`: entity [[pyarmor]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[javascript-obfuscator]] and [[rust-obfuscator]].
 
 - **2026-08-16** — ingest `description:daswareinfach/Battleye-VAC-EAC-Kernel-Bypass`: entity [[battleye-vac-eac-kernel-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[battleye]], [[easy-anti-cheat]], [[blanket]], and [[fenrir]].

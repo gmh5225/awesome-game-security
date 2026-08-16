@@ -582,6 +582,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [DieDMAProtection](entities/diedmaprotection.md) — Windows PoC kernel driver disabling IOMMU/VT-d DMA remapping (iqrw0; IOMMU bypass research)
 - [detect-hypervisor-detect-ring-0](entities/detect-hypervisor-detect-ring-0.md) — ring-0 hypervisor detection test driver (CPUID leaves, TSC/APERF/MPERF VM-exit timing, LBR/DEBUGCTL; manual-map print harness; Secret Club lineage; gmh5225; Detection: Hacked Hypervisor)
+- [DetectFrida](entities/detect-frida.md) — Android native Frida detector (named-pipe scan, thread-name checks, `.text` memory-vs-disk ELF integrity; syscall libc + O-LLVM hardening; darvincisec; Detection:Frida)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
 - [detection-cheat-engine](entities/detection-cheat-engine.md) — user-mode CE artifact detector (ReadDirectoryChangesW; ADDRESSES.FIRST/MEMORY.FIRST table markers; gmh5225; CE)
 - [detection-cheat-engine-ring0](entities/detection-cheat-engine-ring0.md) — kernel CE/DBVM debug-print callback PoC (DbgSetDebugPrintCallback; dbvm-mode string; gmh5225; CE)
