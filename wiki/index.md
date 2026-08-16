@@ -2204,6 +2204,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x64dbg XFG Marker](entities/x64dbg-xfg-marker.md) — x64dbg plugin: mark XFG call signatures as data (8-byte; before target function; Cheat x64dbg Plugins)
 - [x64dbg-rippy](entities/x64dbg-rippy.md) — AI reverse engineering assistant for x64dbg (WebView2 chat; LLM tool-use; memory/disasm/breakpoints/step; Anthropic/OpenAI APIs)
 - [x64dbgbinja](entities/x64dbgbinja.md) — Binary Ninja plugin (Python; x64dbg org; BN ↔ x64dbg lane)
+- [x86RetSpoof](entities/x86-ret-spoof.md) — x86 (32-bit) return-address spoofing header-only library (`JMP DWORD PTR [EBX]` gadget; stdcall/cdecl/fastcall/thiscall; danielkrupinski; Cheat Spoof Stack)
 - [xash-rt](entities/xash-rt.md) — Xash3D FWGS realtime path tracing (C/C++; OpenGL; Renderer)
 
 - [x670e-tomahawk-anticheat-update](entities/x670e-tomahawk-anticheat-update.md) — MSI X670E Tomahawk BIOS v1KB DXE anti-cheat (option-ROM strip / NX)
