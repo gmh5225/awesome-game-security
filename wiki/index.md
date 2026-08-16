@@ -2136,6 +2136,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMwareCloak](entities/vmware-cloak.md) — PowerShell VMware Windows VM cloak (hide guest from VM-evasive malware; analyst / virtual-environments research)
 - [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
+- [vmp-devirtualization-lab](entities/vmp-devirtualization-lab.md) — Android native VMP devirt educational lab (mini-VM, dispatcher/handler recovery, symbolic lifting; QBDI/Unicorn/Triton/Frida; tomhamidi97-arch)
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)
 - [virtualbox-kvm](entities/virtualbox-kvm.md) — VirtualBox with KVM backend (manual GPU accel; cheat / QEMU/KVM/PVE/VBOX research-host lane; cyberus-technology)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)

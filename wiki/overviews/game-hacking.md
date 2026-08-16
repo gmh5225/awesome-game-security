@@ -682,6 +682,7 @@ sources:
   - wiki/sources/descriptions/un4ckn0wl3z__MemMCP.md
   - wiki/sources/descriptions/toneillcodes__windows-process-injection.md
   - wiki/sources/descriptions/nettitude__Tartarus-TpAllocInject.md
+  - wiki/sources/descriptions/tomhamidi97-arch__vmp-devirtualization-lab.md
   - wiki/sources/descriptions/tomvita__SE-tools.md
   - wiki/sources/descriptions/tomrus88__OpenLumina.md
   - wiki/sources/descriptions/tomasz-lisowski__swsim.md
@@ -1239,6 +1240,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA client + Go backend for OBPO deobfuscation via [[obpo-plugin]] (closed core; open plugin) also sits in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/obpo-project__obpo-plugin.md)
 - Fix VMP / VTIL demos such as [[vmdevirt-vtil]] (broken VTIL compile path; multi-`vmenter` → jmp into compiled VTIL for IDA) sit in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md)
 - Python VMProtect deobfuscation via [[novmpy]] (symbolic exec of handler chains; reconstruct original insn sequence; Triton) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/wallds__NoVmpy.md)
+- Android native-library VMP devirtualization educational lab via [[vmp-devirtualization-lab]] (mini-VM + switch dispatcher; Python bytecode disasm/lifting; dispatcher/handler recovery, symbolic lifting, trace-driven analysis, differential testing; QBDI/Unicorn/Triton/Frida/IDA/Ghidra/angr; tomhamidi97-arch) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/tomhamidi97-arch__vmp-devirtualization-lab.md)
 - Multi-engine VM detection/analysis via [[vmdragonslayer]] (DTT / SE / pattern classification / ML) sits in the Cheat RE Tools / Fix VMP-adjacent lane. (source: wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md)
 - IDA Pro VM obfuscation analysis via [[vmattack]] (Python plugin; dispatcher loops, virtual opcode handler tables, execution trace, devirtualization assist for custom VM architectures; gmh5225) also sits in the Cheat Fix VMP / devirt lane. (source: wiki/sources/descriptions/gmh5225__VMAttack.md)
 - Python VMProtect trace/symbolic-exec handler recovery via [[rumba]] (virtual opcode handlers → original CFG/semantics; MBA-tagged README) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/thalium__rumba.md)

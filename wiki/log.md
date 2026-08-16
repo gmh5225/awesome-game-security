@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:tomhamidi97-arch/vmp-devirtualization-lab`: entity [[vmp-devirtualization-lab]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmprotect]], [[novmpy]], and [[control-flow-flattening]].
+
 - **2026-08-16** — ingest `readme:categories`: Cheat ~2710 (+1; Anti Cheat ~677 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-16** — ingest `description:cursey/regenny`: entity [[regenny]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[sdkgenny]], [[ue4genny]], and [[reclass-dma]].
