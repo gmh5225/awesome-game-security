@@ -109,6 +109,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
 - [alt-V Anticheat Guide](entities/alt-v-anticheat-guide.md) — alt:V Multiplayer server AC guide (cheat detection, client integrity, behavior monitoring, server-side logic; Anti Cheat / guide; gmh5225; GTA5 MP servers)
 - [AMD IBS Toolkit](entities/amd-ibs-toolkit.md) — AMD Instruction-Based Sampling toolkit (hardware instruction subset sampling; cheat / Windows kernel explorer / AMD Sampling)
+- [AMD-SP-Loader](entities/amd-sp-loader.md) — Binary Ninja loader for AMD SP/PSP firmware (ABL + PSP bootloader load addresses; PSP syscall annotation; PSPTool workflow; dayzerosec; AMD-SP or PSP firmware)
 - [amd-ryzen-master-driver-v17-exploit](entities/amd-ryzen-master-driver-v17-exploit.md) — AMD Ryzen Master v17 driver BYOVD (IOCTL → physmem R/W; kernel exploitation / driver map / AC bypass; gmh5225)
 - [ANGRYORCHARD](entities/angryorchard.md) — win32k NtUserHardErrorControl kernel exploit (thread→KernelMode elevation; arbitrary kernel R/W; Some Tricks; gmh5225)
 - [Advanced-Anticheat](entities/advanced-anticheat.md) — open-source Roblox Luau client-server AC (movement/executor/GUI/ESP; ProfileStore flags/bans; honeypots)
