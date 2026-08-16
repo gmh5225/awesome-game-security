@@ -528,6 +528,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [discord-overlay-hook](entities/discord-overlay-hook.md) — Discord overlay DX11 hook sample (C++; rendering / modding / hooking)
 
 - [dll-hot-reload](entities/dll-hot-reload.md) — injectable DLL hot-reload wrapper (ergrelet; reload payload on disk change; cheat / injection:windows)
+- [DLLHSC](entities/dllhsc.md) — Windows DLL hijack scanner (ctxis; Visual Studio 2019; cheat / DLL Hijack research)
 - [DLLSpy](entities/dllspy.md) — CyberArk Windows DLL hijack vulnerability scanner (missing deps, writable dirs, unsafe search paths; audit reports)
 - [DLL-Hijack-ExportDumper](entities/dll-hijack-export-dumper.md) — PE export-table dump → proxy-DLL forwarding stubs for search-order sideload (gmh5225; Cheat / DLL Hijack)
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
