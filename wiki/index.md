@@ -586,6 +586,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
 - [dfm-android-unicorn](entities/dfm-android-unicorn.md) — DFM Android ARM64 coordinate decryption via Unicorn emulation (C/C++; ACE/libtersafe; cheat / explore anticheat system:ACE)
 - [Diaphora](entities/diaphora.md) — open-source IDA Pro binary diffing plugin (CFG/BB-hash/mnemonics/strings/call-graph; symbol porting; patch analysis)
+- [DiaSymbolView](entities/diasymbolview.md) — Delphi GUI PDB symbol inspector (MSDIA; navigable hierarchy; 200+ symbol properties; register-name resolution; RE / debugger symbols)
 - [dncil](entities/dncil.md) — Python CIL disassembly for .NET PE (Mandiant; metadata + operands; Unity Mono / YARA pipelines)
 - [dnSpy](entities/dnspy.md) — .NET assembly debugger/decompiler/editor (C#/VB/IL; live edit + breakpoints; Unity Mono via patched runtimes; For Unity)
 - [dnSpy-Unity-mono](entities/dnspy-unity-mono.md) — patched Unity Mono sources + build tooling for dnSpy soft-debugger `mono.dll` / `mono-2.0-bdwgc.dll`; umpatcher; [mono]
