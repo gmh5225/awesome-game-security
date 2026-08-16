@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cursey/regenny`: entity [[regenny]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[sdkgenny]], [[ue4genny]], and [[reclass-dma]].
+
 - **2026-08-16** — ingest `description:cursey/sdkgenny`: entity [[sdkgenny]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ue4genny]] and [[luagenny]].
 
 - **2026-08-16** — ingest `description:cursey/ue4genny`: entity [[ue4genny]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unreal-object-model]], [[unrealdumper-4-25]], and [[luagenny]].
