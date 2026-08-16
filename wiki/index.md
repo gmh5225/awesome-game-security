@@ -990,6 +990,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hypervisor](entities/hypervisor.md) — experimental Intel VT-x Type-2 HV (EPT page hooks, violation watchpoints, per-process cleanup; integrity-check bypass research)
 - [ept-hook-detection](entities/ept-hook-detection.md) — usermode EPT hook detector (timing / write-compare / cross-core consistency; Detect EPT)
 - [ermsb-meme](entities/ermsb-meme.md) — REP MOV / ERMSB side-channel EPT hook detector (C; everdox; Detection: Hacked Hypervisor)
+- [vmdtstr](entities/vmdtstr.md) — STR-exit VMM fault detector (cryotb; nested HVPP test harness; Detection: Hacked Hypervisor)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [Horizon Engine](entities/horizon-engine.md) — Windows 3D rendering engine (D3D12 / Vulkan / Metal; Game Engine source)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)

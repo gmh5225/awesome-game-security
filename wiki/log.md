@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cryotb/VmdtStr`: entity [[vmdtstr]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hv-detect]], [[hypervisor-detection]], [[detect-hypervisor-detect-ring-0]], and [[ermsb-meme]].
+
 - **2026-08-16** — ingest `description:crytic/ida-evm`: entity [[ida-evm]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ethersplay]], [[ida-sdk]], and [[yaravm]].
 
 - **2026-08-16** — ingest `description:cs1ime/AndroidSuperInject`: entity [[android-super-inject]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-ptrace-injector]], [[android-mod-games-by-inject-zygote]], and [[linjector-rs]].
