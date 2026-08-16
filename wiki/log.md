@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dnSpy/dnSpy-Unity-mono`: entity [[dnspy-unity-mono]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dnspy]] and [[mono]].
+
 - **2026-08-16** — ingest `description:dnSpy/dnSpy`: entity [[dnspy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[ilspy]], [[dncil]], [[mono]], and [[il2cpp]].
 
 - **2026-08-16** — ingest `description:dnakov/radare2-mcp`: entity [[radare2-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[r2ai]], [[iaito]], [[binary-ninja-mcp]], and [[ida-pro-mcp]].
