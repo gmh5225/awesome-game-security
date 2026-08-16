@@ -33,6 +33,7 @@ sources:
   - wiki/sources/descriptions/experienceds__pubg-p2c-re.md
   - wiki/sources/descriptions/experienceds__battleye-re.md
   - wiki/sources/descriptions/dllcrt0__bedaisy-reversal.md
+  - wiki/sources/descriptions/dllcrt0__battleye-shellcode.md
   - wiki/sources/descriptions/es3n1n__be-shellcode-tester.md
 updated: 2026-08-16
 confidence: medium
@@ -90,6 +91,8 @@ BEDaisy APC instrumentation is studied via [[goodeye]]: a kernel callback runs i
 
 [[bedaisy-reversal]] (dllcrt0) documents the full scope of BEDaisy kernel checks and reporting: integrity validation, callback enumeration, HAL table verification, manual-mapped driver detection, object handle protection, filesystem minifilter checks, physical memory scanning, CSRSS integrity validation, graphics component verification, and thread/image notification callbacks. (source: wiki/sources/descriptions/dllcrt0__bedaisy-reversal.md)
 
+[[battleye-shellcode]] (dllcrt0) publishes decompiled BE user-mode shellcode modules for runtime integrity checks: AutoHotKey detection, swap-chain [[present-hook]] scanning, and stack-walking return-address validation—complementing dump/reimplement samples such as [[be-battleye-shellcode]] with readable scan-stage source. (source: wiki/sources/descriptions/dllcrt0__battleye-shellcode.md)
+
 [[be-forcer-fortnite]] (gmh5225) targets Fortnite's BattlEye integration: forces or manipulates BE initialization to disable title-specific detection checks, enabling cheat injection or memory access normally blocked—offensive research on Fortnite-specific BE protection and bypass techniques. (source: wiki/sources/descriptions/gmh5225__BE-Forcer-Fortnite.md)
 
 User-mode-only injection against BE-protected processes is demonstrated by [[splendid-implanter]] (secret.club): a Ring-3 injector that abuses a flaw in BattlEye's user-mode component to achieve BE-compatible DLL injection without a kernel driver. (source: wiki/sources/descriptions/haram__splendid_implanter.md)
@@ -98,4 +101,4 @@ PUBG commercial P2C loader RE such as [[pubg-p2c-re]] (experienceds) documents i
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[bedaisy-reversal]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
