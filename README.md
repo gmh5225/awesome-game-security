@@ -1467,6 +1467,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/quarkslab/android-hardware-attestation-demo [Bypass backend hardware Key Attestation on rooted/unlocked-bootloader devices by Frida-relaying the backend challenge to a clean attestation oracle — genuine TEE/StrongBox chain, no forgery]
 - https://github.com/eltavine/Duck-Detector-Refactoring [DuckDetector refactor: Android local device-integrity inspector for root tampering, runtime hooking, mount anomalies, attestation trust, and virtualization evidence]
 - https://github.com/systemnb/RootSocketKit [Root privilege IPC via Unix Socket — Magisk/KernelSU/APatch compatible JNI client, reinforcement-proof, low-latency root ops (OpenProcess, ReadMemory)]
+- https://github.com/AtawurRahmanTanvir/NEXUS [Root-required Kotlin/Compose Android utility for device identity spoofing, environment sanitization, kernel memory purge, and telemetry/log cleanup]
 
 > Android Kernel driver development
 - https://github.com/gmh5225/AndroidDriveSignity [Bypass driver signature verification in Android kernel(ARMv8.3)]
@@ -1996,6 +1997,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [Porting ce's monodatacollector to android/ios](https://github.com/gmh5225/frida-il2cpp-datacollector)
 - https://github.com/gmh5225/wasm-ceserver [Analyzing WebAssembly]
 - https://github.com/Eruditi/CE-MCP-Plugin [MCP for Cheat Engine]
+- https://github.com/TindalosKorone/dsh-cheatengine [DSH agent plugin bridging DeepSeek Harness to Cheat Engine via ce_* tools for memory scan, breakpoints, pointer analysis, and Lua/AA scripting]
 
 > Injection:Windows
 - https://github.com/itaymigdal/awesome-injection [awesome injection]
