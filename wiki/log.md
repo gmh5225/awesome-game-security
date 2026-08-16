@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:ekknod/SetWindowHookEx`: entity [[setwindowhookex]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[setwindowshookex-injector]] and [[overlay]].
+
 - **2026-08-16** — ingest `description:ekknod/SubGetVariable`: entity [[sub-get-variable]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[vm]], [[sumap]], and [[efi-monitor]].
 
 - **2026-08-16** — ingest `description:ekknod/apex_linux`: entity [[apex-linux]]; cited on [[overviews/game-hacking]]; cross-linked [[ayypex]], [[apex-full-cheat]], and [[easy-anti-cheat]].

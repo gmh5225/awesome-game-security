@@ -1719,6 +1719,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
 - [rust-cheat-external](entities/rust-cheat-external.md) — Facepunch Rust external cheat (C/C++; driver / modding / SDK generation; cheat / game:rust [External]; gmh5225)
 - [rust-dll-crab](entities/rust-dll-crab.md) — Rust Windows DLL injector (multiple methods; Injection Testing; gmh5225)
+- [SetWindowHookEx (ekknod)](entities/setwindowhookex.md) — SetWindowHookEx preinjected DLL research (C; hooking; Some Tricks / Windows Ring3; ekknod)
 - [setwindowshookex-injector](entities/setwindowshookex-injector.md) — SetWindowsHookExW injection-testing PoC (C/C++; hooking / modding / Unreal Engine; Injection Testing; gmh5225)
 - [rust-external](entities/rust-external.md) — Facepunch Rust external cheat (C/C++; rendering / networking; cheat / game:rust; gmh5225)
 - [rust-external-1](entities/rust-external-1.md) — Facepunch Rust external cheat (C++; kernel driver/RPM; overlay ESP; EAC Unity; gmh5225)
