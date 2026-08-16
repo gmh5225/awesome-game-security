@@ -509,6 +509,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
 - [dirty-zero](entities/dirty-zero.md) — iOS XNU kernel KRW exploit (CVE-2025-24203; jailbreak-chain primitive)
+- [dirty-vanity](entities/dirty-vanity.md) — RtlCreateProcessReflection process-fork injection PoC; fork inherits shellcode without WPM (deepinstinct; EDR-evasion research)
 - [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)
 - [disabling-hyper-v](entities/disabling-hyper-v.md) — Win10 Hyper-V / Device Guard / Credential Guard teardown guide (Microsoft hardware readiness tool → disable HVCI + VBS; gmh5225; Disable Hyper-V)
 - [dk](entities/dk.md) — WinDbg extension; refactored tokenext; token/heap pointer SVG overlays (WinDbg Plugins)
