@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:divodeuxsevres/gvmp-anticheat`: entity [[gvmp-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[alt-v-anticheat-guide]], [[present-hook]], and [[ntminhook]].
+
 - **2026-08-16** — ingest `description:djkaty/Il2CppInspector`: entity [[il2cpp-inspector]]; cited on [[il2cpp]], [[overviews/reverse-engineering]], and [[overviews/game-engine]]; cross-linked [[il2cppdumper]], [[il2cpp-finder]], and [[frida-il2cpp-bridge]].
 
 - **2026-08-16** — ingest `description:djolertrk/kLLDB`: entity [[klldb]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[kernel-development]], [[vmlinux-to-elf]], and [[lldbext-dump]].
