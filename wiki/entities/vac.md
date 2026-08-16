@@ -12,7 +12,7 @@ confidence: medium
 
 Reverse-engineering analysis of **Valve Anti-Cheat (VAC)** (danielkrupinski): decompiled and annotated VAC modules documenting internal detection modules, scanning techniques, and integrity verification mechanisms. Shows how VAC scans for cheat signatures, checks process memory, verifies loaded module integrity, and communicates with Steam servers. Aimed at anti-cheat researchers and game-security analysts studying commercial anti-cheat implementation and detection strategies. (source: wiki/sources/descriptions/danielkrupinski__VAC.md)
 
-Complements forensic CS2 architecture notes ([[como-funciona-vac]]) and in-binary CS2 anticheat RE ([[cs2-anticheat]]) with **annotated VAC module internals**. Same author's WinAPI hook telemetry lives in [[vac-hooks]]; module dump/emulation lanes include [[vac3-dumper]], [[vac-module-dumper]], and [[vac-emulator]].
+Complements forensic CS2 architecture notes ([[como-funciona-vac]]) and in-binary CS2 anticheat RE ([[cs2-anticheat]]) with **annotated VAC module internals**. Same author's WinAPI hook telemetry lives in [[vac-hooks]] and Steam-client VAC scan inhibition in [[vac-bypass]]; module dump/emulation lanes include [[vac3-dumper]], [[vac-module-dumper]], and [[vac-emulator]].
 
 ## Links
 
@@ -21,4 +21,4 @@ Complements forensic CS2 architecture notes ([[como-funciona-vac]]) and in-binar
 
 ## Related
 
-[[como-funciona-vac]] · [[cs2-anticheat]] · [[vac-hooks]] · [[vac3-dumper]] · [[vac-module-dumper]] · [[vac-emulator]] · [[valveanticheat1]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[como-funciona-vac]] · [[cs2-anticheat]] · [[vac-hooks]] · [[vac-bypass]] · [[vac3-dumper]] · [[vac-module-dumper]] · [[vac-emulator]] · [[valveanticheat1]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]

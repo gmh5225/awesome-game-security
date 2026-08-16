@@ -2046,6 +2046,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SearchEx](entities/searchex.md) — SearchEx IS forensics (C++; hooking / memory analysis; AC)
 - [como-funciona-vac](entities/como-funciona-vac.md) — CS2 VAC usermode architecture write-up (Trusted Launch, scanners, evidence pipeline; forensic RE overview)
 - [vac](entities/vac.md) — VAC module RE corpus: decompiled detection modules, signature/memory/integrity scanning, Steam comms (danielkrupinski; explore anticheat:vac)
+- [vac-bypass](entities/vac-bypass.md) — Steam-client VAC scan inhibition via `Steam.exe` injection and `steamservice.dll` patching (C DLL; danielkrupinski; explore anticheat:vac)
 - [vac3_inhibitor](entities/vac3-inhibitor.md) — VAC3 exploration via hooking / memory analysis (C++)
 - [vac3-dumper](entities/vac3-dumper.md) — VAC3 multi-module dumper (timed loads; explore anticheat:vac)
 - [vac-emulator](entities/vac-emulator.md) — VAC module emulator (sandboxed execution + detection/signature logging; gmh5225; explore anticheat:vac)

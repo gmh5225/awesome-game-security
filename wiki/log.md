@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:danielkrupinski/VAC-Bypass`: entity [[vac-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vac]], [[vac-hooks]], and [[prevent-vac]].
+
 - **2026-08-16** — ingest `description:danielkrupinski/VAC`: entity [[vac]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[como-funciona-vac]], [[cs2-anticheat]], and [[vac-hooks]].
 
 - **2026-08-16** — ingest `description:danielkrupinski/cs2-anticheat`: entity [[cs2-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[como-funciona-vac]], [[cs2-internals]], and [[vac-hooks]].
