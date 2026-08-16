@@ -428,6 +428,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Driver-HideKernelThread-IoCancelIrp.md
   - wiki/sources/descriptions/gmh5225__osu-aac.md
   - wiki/sources/descriptions/gmh5225__OW2-wardenrekter.md
+  - wiki/sources/descriptions/dword64__Ow-Anti-Flag.md
   - wiki/sources/descriptions/gmh5225__OW-Aeternum.md
   - wiki/sources/descriptions/gmh5225__packer-tutorial.md
   - wiki/sources/descriptions/gmh5225__awesome-executable-packing.md
@@ -629,7 +630,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 - [[ow2-wardenrekter]] — Overwatch 2 Warden disable DLL (VEH/INT3 neutralization via `KiUserExceptionDispatcher` RET patch, DbgBreakPoint NOP, PEB debugger hiding, `GetTickCount64` timing stub, `NtQuerySystemInformation` block; DR0 via `SetThreadContext`; README `[Emulate OW2 AC]`; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW2-wardenrekter.md)
 - [[ow-aeternum]] — Overwatch C/C++ POC spanning anti-cheat research, rendering, and hooking (author-flagged rough POC; cheat / game:overwatch; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW-Aeternum.md)
-
+- [[ow-anti-flag]] — Overwatch chainban anti-flag console tool (dword64; modern C++; clears directories/registry keys Blizzard and cheat malware use to flag devices; cheat / HWID) (source: wiki/sources/descriptions/dword64__Ow-Anti-Flag.md)
 
 
 ## Key sub-areas

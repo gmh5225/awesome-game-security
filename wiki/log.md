@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dword64/Ow-Anti-Flag`: entity [[ow-anti-flag]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[ow-fov]] and [[hwid-steam-spyware-terminator]].
+
 - **2026-08-16** — ingest `description:dword64/Ow-FOV`: entity [[ow-fov]]; cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[ow-outlines]] and [[cs2-fov-changer]].
 
 - **2026-08-16** — ingest `description:dyussekeyev/ida-spotlight`: entity [[ida-spotlight]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idaclu]] and [[ida-func-outline]].
