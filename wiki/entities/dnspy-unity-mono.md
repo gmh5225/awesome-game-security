@@ -18,4 +18,4 @@ Patched Unity Mono sources and build tooling used by [[dnspy]] to produce `mono.
 
 ## Related
 
-[[dnspy]] · [[mono]] · [[dncil]] · [[ilspy]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[dnspy]] · [[mono-debugger-soft]] · [[mono]] · [[dncil]] · [[ilspy]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]

@@ -585,6 +585,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dncil](entities/dncil.md) — Python CIL disassembly for .NET PE (Mandiant; metadata + operands; Unity Mono / YARA pipelines)
 - [dnSpy](entities/dnspy.md) — .NET assembly debugger/decompiler/editor (C#/VB/IL; live edit + breakpoints; Unity Mono via patched runtimes; For Unity)
 - [dnSpy-Unity-mono](entities/dnspy-unity-mono.md) — patched Unity Mono sources + build tooling for dnSpy soft-debugger `mono.dll` / `mono-2.0-bdwgc.dll`; umpatcher; [mono]
+- [Mono.Debugger.Soft](entities/mono-debugger-soft.md) — dnSpy fork of Mono soft-debugger client (wire protocol + mirror API; breakpoints/stepping/object inspection; Unity/Mono RE; [Mono Debugger])
 - [Doriax](entities/doriax.md) — cross-platform C++ ECS game engine with ImGui editor (Lua/C++ scripting; Sokol OpenGL; DirectX/OpenGL/Metal/Vulkan; desktop/mobile/web)
 - [dotNIET](entities/dotniet.md) — IDA plugin: .NET NativeAOT type/method symbol recovery (Import .NET Symbol)
 - [dotrix](entities/dotrix.md) — open-source Rust 3D engine (dot + matrix; Game Engine / source)

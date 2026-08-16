@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dnSpy/Mono.Debugger.Soft`: entity [[mono-debugger-soft]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dnspy]] and [[dnspy-unity-mono]].
+
 - **2026-08-16** — ingest `description:dnSpy/dnSpy-Unity-mono`: entity [[dnspy-unity-mono]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dnspy]] and [[mono]].
 
 - **2026-08-16** — ingest `description:dnSpy/dnSpy`: entity [[dnspy]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[ilspy]], [[dncil]], [[mono]], and [[il2cpp]].
