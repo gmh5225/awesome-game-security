@@ -33,6 +33,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md
   - wiki/sources/descriptions/danielkrupinski__MemJect.md
   - wiki/sources/descriptions/danielkrupinski__GOESP.md
+  - wiki/sources/descriptions/danielkrupinski__Anubis.md
   - wiki/sources/descriptions/zodiacon__TotalPE2.md
   - wiki/sources/descriptions/zodiacon__QuickAsm.md
   - wiki/sources/descriptions/skylot__raung.md
@@ -1514,6 +1515,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - CS:GO training software such as [[avhook]] (gmh5225; Windows; joke features; cheat / game:csgo) sits in the same RE-training lane. (source: wiki/sources/descriptions/gmh5225__avhook.md)
 - Actively developed Internal CS:GO samples such as [[sensum]] (martinjanas; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/martinjanas__Sensum.md)
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
+- Linux-native internal CS:GO samples such as [[anubis]] (danielkrupinski; C++; process injection; ESP, aimbot, and related features via Source SDK hooks on client rendering and game events; complements [[osiris]] on non-Windows hosts) sit in the same cheat / game:csgo lane for studying Linux internal hook surfaces beside external cross-platform samples like [[goesp]]. (source: wiki/sources/descriptions/danielkrupinski__Anubis.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - External CS:GO samples such as [[nebulite-external]] (gmh5225; C/C++; memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__nebulite-external.md)
 - External CS:GO samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__Astra.md)

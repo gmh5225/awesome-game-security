@@ -222,6 +222,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anti-xorstr](entities/anti-xorstr.md) — Python IDA anti-Xorstr plugin (cheat / IDA Plugins)
 
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
+- [anubis](entities/anubis.md) — Linux CS:GO internal cheat (danielkrupinski; C++; process injection; ESP/aimbot via Source SDK hooks on client rendering and game events; cheat / game:csgo [Linux])
 - [anything-about-game](entities/anything-about-game.md) — curated game-development resources (engine/rendering/physics/networking/AI; Game Development resources)
 - [ampa-sys-exp](entities/ampa-sys-exp.md) — ampa.sys BYOVD exploit (IOCTL → kernel R/W or code exec; unsigned load / LPE / AC bypass; gmh5225)
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)

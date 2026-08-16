@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:danielkrupinski/Anubis`: entity [[anubis]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[osiris]], [[goesp]], [[gamesneeze]], and [[csgo-linux-cheat-sdk]].
+
 - **2026-08-16** — ingest `description:danielkrupinski/GOESP`: entity [[goesp]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[osiris]], [[csgo-external-esp]], and [[csgo-external-cheat]].
 
 - **2026-08-16** — ingest `description:danielkrupinski/MemJect`: entity [[memject]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[modexmap]], [[shtreeba]], and [[wizard-loader]].
