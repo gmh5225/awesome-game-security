@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dufernst/LegionCore-7.3.5`: entity [[legioncore-7-3-5]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[sapphire]], [[rathena]], [[dumpwow]], and [[x14-08-coverstory-blizzard]].
+
 - **2026-08-16** — ingest `description:dumbasPL/fumo_loader`: entity [[fumo-loader]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[executor]] and [[page-table-injector]].
 
 - **2026-08-16** — ingest `description:dungnotnull/game-cheating-exploit-detection-agent-skill`: entity [[game-cheating-exploit-detection-agent-skill]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]]; cross-linked [[anti-cheat-testing-framework]], [[anti-cheat-testbench]], and [[research-rigor]].

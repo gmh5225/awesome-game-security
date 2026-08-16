@@ -1237,6 +1237,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lviewlol](entities/lviewlol.md) — Python LoL external viewing tool (memory read; minimap/player positions/cooldown overlay; gmh5225; cheat / game:lol)
 - [long_night](entities/long-night.md) — IDA Pro dark color theme (syntax-highlighted; cheat / IDA themes)
 - [legit-csgo-cheat-menu](entities/legit-csgo-cheat-menu.md) — CS:GO legit-style cheat menu (Windows; cheat / game:csgo [Menu]; gmh5225)
+- [LegionCore 7.3.5](entities/legioncore-7-3-5.md) — WoW Legion private-server emulator (TrinityCore fork; 7.3.5 client; world simulation / dungeons / artifact weapons / class halls / world quests; cheat / game:wow)
 - [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
