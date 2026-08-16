@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:coltonon/D2DOverlay`: entity [[d2d-overlay]]; cited on [[overviews/graphics-api]]; cross-linked [[pubg-lite-esp]], [[external-esp-hack-assaultcube]], and [[imoverlay-dx11]].
+
 - **2026-08-16** — ingest `description:comaeio/SwishDbgExt`: entity [[swishdbgext]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[comon]], [[mcp-windbg]], and [[dumpit-mirror]].
 
 - **2026-08-16** — ingest `description:connorjaydunn/BinaryShield`: entity [[binary-shield]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[nocturne]], [[covirt]], [[guardian-rs]], and [[x64-virtualizer-rs]].
