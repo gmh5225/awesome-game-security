@@ -32,7 +32,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__OBS-Hook.md
   - wiki/sources/descriptions/gmh5225__League-DirectX11-Internal.md
   - wiki/sources/descriptions/gmh5225__Lazysight.md
-updated: 2026-08-11
+  - wiki/sources/descriptions/dantebuilds__swapchain-bottleneck.md
+updated: 2026-08-16
 confidence: high
 ---
 
@@ -63,7 +64,11 @@ User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / over
 
 DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md)
 
+## Platform constraints
+
+Windows provides no first-class API for third-party overlays to compose beside a game's DXGI swapchain; Steam, Discord, FPS counters, and cheat overlays converge on in-process `Present` hooks and DLL injection, creating race conditions and driver-level cascades (TDR/BSOD) when multiple presenters contend outside DWM coordination. Architecture analysis such as [[swapchain-bottleneck]] documents this systemic bottleneck and anti-cheat whitelist friction with legitimate injectors. (source: wiki/sources/descriptions/dantebuilds__swapchain-bottleneck.md)
+
 ## Related
 
-[[overviews/graphics-api]] · [[obs-game-capture]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[kiero2]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[gh-d3d11-hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[vulkan-hook]] · [[pubg-dx]] · [[lazysight]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[direct3d-hook]] · [[goverlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[overviews/graphics-api]] · [[swapchain-bottleneck]] · [[obs-game-capture]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[draw-call-hook]] · [[anti-screenshot-capture]] · [[kiero2]] · [[directxhook]] · [[dx11-basehook]] · [[directx11hook]] · [[gh-d3d11-hook]] · [[hydrahook]] · [[d3dhook-imgui]] · [[vulkan-hook]] · [[pubg-dx]] · [[lazysight]] · [[present-hook-detection]] · [[winbo]] · [[wda-monitor-trick]] · [[eac-overlay]] · [[dwm-hook]] · [[dwmhook]] · [[dwm-screen-shot]] · [[disablenvidiascreenshot]] · [[dxgkrnl-hook]] · [[krnl-gdi-render]] · [[3d9]] · [[direct3d-hook]] · [[goverlay]] · [[battleye]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
 

@@ -40,7 +40,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
-- [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; links [[obs-game-capture]], [[draw-call-hook]]
+- [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; platform constraints ([[swapchain-bottleneck]]); links [[obs-game-capture]], [[draw-call-hook]]
 - [Research Rigor](concepts/research-rigor.md) — evidence discipline; pair with domain overviews; engine/mobile offset verification
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2)
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
@@ -1901,6 +1901,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
 - [Swift-String-Obfuscator](entities/swift-string-obfuscator.md) — Swift string crypter (AC Compile Time / String Crypter)
 - [swiftshield](entities/swiftshield.md) — Swift identifier obfuscator for iOS (SourceKit rename; vs RE/tweaks)
+- [swapchain-bottleneck](entities/swapchain-bottleneck.md) — DXGI swapchain/MPO overlay injection architecture analysis (Present-hook collisions, TDR cascades, AC whitelist friction; dantebuilds)
 - [super-people-esp-aimbot-magic-hack](entities/super-people-esp-aimbot-magic-hack.md) — Super People UE4 ESP/aimbot + gameplay mods via SDK entity reads (C++; battle royale; cheat / game:super people; gmh5225)
 - [superpeople-client](entities/superpeople-client.md) — Super People client: driver / rendering / modding (C++; cheat / game:super people; gmh5225)
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
