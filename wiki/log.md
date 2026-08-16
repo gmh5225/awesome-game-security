@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:ekknod/EC_PRO-LAN`: entity [[ec-pro-lan]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[logitech-cve]], [[kernel-mouse]], and [[present-hook]].
+
 - **2026-08-16** — ingest `description:ekknod/G37OBS`: entity [[g37obs]]; cited on [[concepts/obs-game-capture]] and [[overviews/game-hacking]]; cross-linked [[nv-v2]], [[csf]], and [[obs-hook]].
 
 - **2026-08-16** — ingest `description:ekknod/KiSystemStartupMeme`: entity [[ki-system-startup-meme]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[efi-monitor]], [[sumap]], [[sub-get-variable]], and [[smm]].

@@ -672,6 +672,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [executor](entities/executor.md) — PTE.User page-table injection (C/C++; kernel driver; cheat / injection:windows; gmh5225)
 - [ethersplay](entities/ethersplay.md) — Binary Ninja EVM bytecode disassembler (Solidity smart-contract CFG/xrefs; blockchain auditor lane; gmh5225)
 - [egui-d3d11](entities/egui-d3d11.md) — Rust egui renderer for D3D11 Present-hook overlay menus (HLSL + Win32 input; gmh5225; README [Menu])
+- [EC_PRO-LAN (ekknod)](entities/ec-pro-lan.md) — FACEIT AC exploration (C++/C; driver development / OpenGL; Win10 1607 LTSB + Ryzen B350–B450 + Logitech G HUB)
 - [echoac-poc](entities/echoac-poc.md) — echo.ac `echo_driver.sys` LPE PoC (read IOCTL → EPROCESS token theft → SYSTEM; anti-cheat-adjacent screenshare driver; gmh5225)
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W; gmh5225 + kkent030315 forks)
 - [EvilKaspersky](entities/evil-kaspersky.md) — abuse Kaspersky signed kernel-mode drivers for unauthorized privileged ops; kernel code exec masquerading as AV activity (gmh5225)
