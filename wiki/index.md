@@ -148,6 +148,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])
 - [ayaya-league-external](entities/ayaya-league-external.md) — Node.js LoL external script platform (AyayaLeague; custom user scripts; gmh5225; cheat / game:lol)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
+- [AutoRename](entities/autorename.md) — Python IDA plugin: auto rename symbol (crifan; cheat / IDA Plugins)
 - [auto-simulated-universe](entities/auto-simulated-universe.md) — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; cheat / game:honkai star rail [Script]; gmh5225)
 - [android-kernel-driver-template](entities/android-kernel-driver-template.md) — GKI AArch64 Android kernel driver template (product/OEM kernel; cheat / Android kernel driver development; gmh5225)
 - [android-drivesignity](entities/android-drivesignity.md) — Android kernel ARMv8.3 driver signature verification bypass (unofficial/modified LKM load; cheat / Android kernel driver development; gmh5225)

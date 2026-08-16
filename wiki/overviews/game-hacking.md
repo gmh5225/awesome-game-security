@@ -204,6 +204,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cs2_things.md
   - wiki/sources/descriptions/gmh5225__cs2_sdk.md
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
+  - wiki/sources/descriptions/crifan__AutoRename.md
   - wiki/sources/descriptions/crmulliner__adbi.md
   - wiki/sources/descriptions/cs1ime__AndroidSuperInject.md
   - wiki/sources/descriptions/cs1ime__ceserver-rawmem.md
@@ -1428,6 +1429,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Function–string association and auto-comments from literals via [[ida-function-string-associate]] (IDA 9.X; scan function bodies for string refs; navigable per-function summary; cheat / IDA Plugins) sits in the same string-triage lane beside [[ida-names]] and [[idawilli]]. (source: wiki/sources/descriptions/gmh5225__ida-function-string-associate.md)
 - `.data`-section pointer lookup via [[ida-find-.data-ptr]] (Python IDAPython; locate/xref global `.data` pointers during static RE; cheat / IDA Plugins) sits in the same data/xref triage lane beside [[ida-plugins]] and [[ida-missinglink]]. (source: wiki/sources/descriptions/gmh5225__ida-find-.data-ptr.md)
 - Hex-Rays pseudocode Ctrl+F search via [[idafind]] (IDA Pro plugin; find-in-text for Pseudocode windows; cheat / IDA Plugins) sits in the Hex-Rays/pseudocode UX lane beside [[ida-search]] and [[ida-names]]. (source: wiki/sources/descriptions/cristeigabriela__IDAFind.md)
+- Automatic symbol renaming via [[autorename]] (Python IDA Pro plugin; auto rename symbol; asset pipelines and plugin development; cheat / IDA Plugins) sits in the same symbol-recovery lane beside [[renamaida]], [[ida-names]], and [[pyclassinformer]]. (source: wiki/sources/descriptions/crifan__AutoRename.md)
 - Magisk-style root on Android VR (Quest 3/3S) via [[cheese]] (Adreno CVE-2025-21479; temporary root, no boot rewrite) sits in the Cheat Magisk lane. (source: wiki/sources/descriptions/zhuowei__cheese.md)
 - No-root Virtual Space injectors such as [[android-virtual-inject]] (inject through Virtual Space without root; not for AC-protected games) sit in the Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-Virtual-Inject.md)
 - Ptrace-based Android injectors such as [[android-ptrace-injector]] (C/C++; attach-and-inject) sit in the same Cheat / injection:android lane. (source: wiki/sources/descriptions/reveny__Android-Ptrace-Injector.md) Android Studio–built native `.so` injectors such as [[android-dll-injector]] (gmh5225; payload must match target process arch; cheat / injection:android) sit beside them. (source: wiki/sources/descriptions/gmh5225__Android-DLL-Injector.md)
