@@ -20,4 +20,4 @@ Useful threat-model reference for kernel mouse-class / MouClass surfaces that si
 
 ## Related
 
-[[mouseclassservicecallbacktrick]] · [[keyboardkit]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[mouseclassservicecallbacktrick]] · [[mouseclassservicecallbackmeme]] · [[keyboardkit]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

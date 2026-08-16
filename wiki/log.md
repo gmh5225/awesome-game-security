@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:ekknod/MouseClassServiceCallbackMeme`: entity [[mouseclassservicecallbackmeme]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[mouseclassservicecallbacktrick]], [[kernel-mouse]], and [[ntuserinjectmouseinput-syscall]].
+
 - **2026-08-16** — ingest `description:ekknod/MouseClassServiceCallbackTrick`: entity [[mouseclassservicecallbacktrick]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-mouse]], [[logitech-cve]], and [[ntuserinjectmouseinput-syscall]].
 
 - **2026-08-16** — ingest `description:ekknod/Nmi`: entity [[nmi]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback-blocker2]], [[disable-nmi-callbacks]], and [[nmi-nmi-callback]].
