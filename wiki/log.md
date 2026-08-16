@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dqforgive-sudo/pubg-ai-yolov4`: entity [[pubg-ai-yolov4]]; cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[yolov5-pubg]], [[ai-fps-b00m-h3adsh0t]], and [[opencv-smart-aimbot]].
+
 - **2026-08-16** — ingest `description:dr4k0nia/Origami`: entity [[origami]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[netcrypt]], [[confuserex]], and [[packer-tutorial]].
 
 - **2026-08-16** — ingest `description:dreamland-blog/KSU-Rust-Frida`: entity [[ksu-rust-frida]]; cited on [[overviews/mobile-security]] and [[kernelsu]]; cross-linked [[frida]], [[rust-frida]], and [[zygisk-frida]].

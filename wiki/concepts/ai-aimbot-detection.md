@@ -19,6 +19,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Ark.md
   - wiki/sources/descriptions/gmh5225__AI-FPS-b00m-h3adsh0t.md
   - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
+  - wiki/sources/descriptions/dqforgive-sudo__pubg-ai-yolov4.md
 updated: 2026-08-16
 confidence: medium
 ---
@@ -61,6 +62,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[human-mouse-movement]] — offensive human-like movement (informs baseline design)
 - [[maplestory-worlds-automation]] — title-specific YOLO automation
 - [[yolov5-pubg]] — PUBG YOLOv5 object-detection / modding (Python; offensive CV pipeline)
+- [[pubg-ai-yolov4]] — PUBG YOLOv4/Darknet object detection (Darknet; screenshot-trained; YOLOv4-tiny/YOLOv7 configs; label tools; image/video scripts; dqforgive-sudo)
 - [[camera-triggerbot]] — camera triggerbot (movement/color around crosshair; no trained model; cheat / triggerbot & aimbot)
 - [[opencv-smart-aimbot]] — OpenCV + triggerbot (C++; classical CV; cheat / triggerbot & aimbot; gmh5225)
 - [[ai-fps-b00m-h3adsh0t]] — external FPS aimbot (Python/C++; screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
