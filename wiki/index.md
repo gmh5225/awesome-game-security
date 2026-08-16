@@ -1206,6 +1206,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
 - [kernel-cve-analysis](entities/kernel-cve-analysis.md) — defensive Windows kernel CVE write-ups (thexin7; AC/EDR telemetry, Sigma rules, hardening; cng/afd/appid)
 - [kernel-development](entities/kernel-development.md) — Greg Kroah-Hartman Linux kernel dev docs (patch workflow, drivers, LKM; guide lane)
+- [kernel_build_action](entities/kernel-build-action.md) — GitHub Actions automated kernel build (TypeScript/Python; Android kernel driver CI; dabao1955)
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [kernel_payload_comms](entities/kernel-payload-comms.md) — shared-memory KM↔UM payload channel (gmh5225; cheat / driver communication)

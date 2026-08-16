@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dabao1955/kernel_build_action`: entity [[kernel-build-action]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[compile-android-driver]] and [[android-kernel-hacking-toolkit]].
+
 - **2026-08-16** — ingest `description:danbrodsky/GFred`: entity [[gfred]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidrassist]], and [[gpthidra]].
 
 - **2026-08-16** — ingest `description:danhuynh0803/Campfire`: entity [[campfire]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[exengine]], [[liblava]], and [[raylib]].
