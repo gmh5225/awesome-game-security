@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:danielplohmann/gui-plugin-template`: entity [[gui-plugin-template]]; cited on [[overviews/reverse-engineering]]; cross-linked [[binsync]], [[hyara]], [[mcrit-plugin]], and [[classy]].
+
 - **2026-08-16** — ingest `description:danielplohmann/mcrit-plugin`: entity [[mcrit-plugin]]; cited on [[overviews/reverse-engineering]]; cross-linked [[diaphora]], [[binexport]], [[windiff]], and [[ida-pro-mcp]].
 
 - **2026-08-16** — ingest `description:dantebuilds/swapchain-bottleneck`: entity [[swapchain-bottleneck]]; cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; cross-linked [[winbo]] and [[steam-overlay-x64]].
