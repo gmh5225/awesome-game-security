@@ -1286,6 +1286,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [liblava](entities/liblava.md) — modern C++23 Vulkan library (lean modular framework; rolling releases; Vulkan / Guide)
 - [libgdx](entities/libgdx.md) — cross-platform Java game framework (2D/3D; Android/desktop/iOS/WebGL; Game Engine)
 - [libmdmp](entities/libmdmp.md) — C/C++ minidump format library (memory analysis / debugging; AC / Windows kernel dump analysis)
+- [lightweightvk](entities/lightweightvk.md) — bindless-only Vulkan 1.3 IGL fork (optional mesh shaders + ray tracing; Vulkan / Guide)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
 - [LitePCIe](entities/litepcie.md) — Python/Migen PCIe endpoint core (DMA engines, LTSSM trace, user-space drivers; KC705/KCU105/XCU1525/Acorn; enjoy-digital; DMA / FPGA research)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:corporateshark/lightweightvk`: entity [[lightweightvk]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[liblava]].
+
 - **2026-08-16** — ingest `description:cpkt9762/ida-cli`: entity [[ida-cli]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[idac]], and [[ida-bridge]].
 
 - **2026-08-16** — ingest `description:cpkt9762/solana-sbpf-rlib`: entity [[solana-sbpf-rlib]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[bn-ebpf-solana]].
