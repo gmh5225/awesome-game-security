@@ -31,4 +31,4 @@ Targets community and dedicated CS2 server operators who want behavioral anti-ch
 
 ## Related
 
-[[overviews/anti-cheat]] · [[ai-aimbot-detection]] · [[cs2kac]] · [[cs2-hybrid-anticheat-proposal]] · [[gamesoftacs]] · [[open.mp-anticheat]]
+[[overviews/anti-cheat]] · [[ai-aimbot-detection]] · [[cs2-calladmin]] · [[cs2kac]] · [[cs2-hybrid-anticheat-proposal]] · [[gamesoftacs]] · [[open.mp-anticheat]]
