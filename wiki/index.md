@@ -1132,6 +1132,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Jektor](entities/jektor.md) — Windows shellcode injection toolkit (CreateThread/CreateRemoteThread/APC/EnumTimeFormatsEx/CreateFiber; GetProcAddress resolve; XOR msfvenom + NOP sled; Injection/Shellcode Testing; gavz)
 - [JavaScript Obfuscator](entities/javascript-obfuscator.md) — JS/Node.js source obfuscator (TypeScript; CLI + API; CFF / string arrays / self-defending / domain lock; browser games)
 - [JS Debugger Bypass UserScript](entities/js-debugger-bypass-script.md) — JavaScript UserScript; bypass browser DevTools/debugger/timing/window-size anti-debug (web/JS RE)
+- [jazz2-native](entities/jazz2-native.md) — C++ Jazz Jackrabbit 2 remake (custom engine; OpenGL ES; cross-platform; actors/levels/tilesets/mechanics; Game Engine / source)
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
 - [JinYongLegend](entities/jynew.md) — Unity wuxia RPG framework with modding (Game Develop / Unity source)

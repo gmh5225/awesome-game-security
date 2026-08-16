@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:deathkiller/jazz2-native`: entity [[jazz2-native]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[openclaw]], [[yourgamelib]], and [[mojoc]].
+
 - **2026-08-16** — ingest `description:deepinstinct/Dirty-Vanity`: entity [[dirty-vanity]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windows-process-injection]] and [[process-cloning]].
 
 - **2026-08-16** — ingest `description:dendibakh/perf-ninja`: entity [[perf-ninja]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tracy]] and [[rprof]].
