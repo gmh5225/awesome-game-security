@@ -1563,6 +1563,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pandora](entities/pandora.md) — file-suspicion analysis framework (convenient UI; Anti Cheat → Analysis Framework)
 - [ParadiseBO2](entities/paradise-bo2.md) — PS3 Paradise SPRX mod-menu source for Black Ops II (window/UI code; Game Develop / source)
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
+- [papaw](entities/papaw.md) — Linux ELF packer (LZMA/zstd/miniz; statically-linked; self-replacement on disk; optional anti-debug; papawify/unpapawify; Anti Cheat → Binary Packer `[ELF]` LZMA)
 - [patch-finder](entities/patch-finder.md) — IDA plugin: detect in-memory patches/hooks via executable-region vs on-disk PE byte compare (custom PE parser; highlight diffs in disasm; cheat / IDA Plugins)
 - [patchguard-2023](entities/patchguard-2023.md) — 2023 PatchGuard internals research (timer verification, context encryption, protected-structure list, recovery routines; gmh5225; cheat / PatchGuard-related)
 - [PatternSleuth](entities/patternsleuth.md) — Rust SIMD pattern/signature scan (file + process; Unreal address scanner)
