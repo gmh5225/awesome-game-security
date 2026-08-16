@@ -1705,6 +1705,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r2garlic](entities/r2garlic.md) — radare2 Garlic DEX/Dalvik decompiler plugin (DEX/APK/ELF/PE/Mach-O; Cheat Radare Plugins)
 - [r2morph](entities/r2morph.md) — radare2/r2pipe metamorphic binary transform (Python+C; Cheat Radare Plugins)
 - [r2smt](entities/r2smt.md) — radare2 SMT opaque-predicate deobfuscator (Rust; Z3/CVC5/Bitwuzla; Cheat Radare Plugins)
+- [radare2-mcp](entities/radare2-mcp.md) — radare2 MCP server (C; r2pipe disasm/decompile/xrefs; CLI/plugin modes; sandbox/readonly; MCP for radare2)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
 - [rnidbg](entities/rnidbg.md) — Android ARM64 kernel emulator (Rust rewrite of unidbg; kernel-level work, graphics, animation; cheat / Android kernel explorer)
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dnakov/radare2-mcp`: entity [[radare2-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[r2ai]], [[iaito]], [[binary-ninja-mcp]], and [[ida-pro-mcp]].
+
 - **2026-08-16** — ingest `description:dobin/SuperMega`: entity [[super-mega]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[hintinject]], [[shoggoth]], [[2pack]], and [[shellcode-factory]].
 
 - **2026-08-16** — ingest `description:dom0ng/pcileech-wifi-v2`: entity [[pcileech-wifi-v2]]; cited on [[overviews/dma-attack]]; cross-linked [[pcileech-wifi]] and [[pcileech-fpga]].

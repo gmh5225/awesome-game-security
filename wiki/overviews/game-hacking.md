@@ -792,6 +792,7 @@ sources:
   - wiki/sources/descriptions/realTristan__Reborn.md
   - wiki/sources/descriptions/rdbo__libmem.md
   - wiki/sources/descriptions/razixNew__CompiledProtection.md
+  - wiki/sources/descriptions/dnakov__radare2-mcp.md
   - wiki/sources/descriptions/radareorg__radius2.md
   - wiki/sources/descriptions/radareorg__r2ai.md
   - wiki/sources/descriptions/radareorg__r2a.md
@@ -1316,6 +1317,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
 - ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)
 - LLM-based reversing for radare2 via [[r2ai]] (interactive LLM↔r2 sessions for game/security binaries) sits in the Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2ai.md)
+- radare2 MCP server via [[radare2-mcp]] (C; r2pipe disasm/decompile/xrefs; CLI/plugin modes; sandboxing + readonly + tool restrictions; MCP for radare2) sits in the Cheat Radare Plugins / agent-RE lane. (source: wiki/sources/descriptions/dnakov__radare2-mcp.md)
 - Retired radare2 local-LLM catalog pointer [[r2a]] (GitHub URL gone; successor [[r2ai]]) sits in the same Cheat Radare Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/radareorg__r2a.md)
 - Lua IDA SDK scripting via [[luda]] (direct SDK access from Lua; rapid RE automation) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/stolevchristian__LUDA.md)
 - Third-party Lumina server connectivity via [[openlumina]] (IDA plugin; Hex-Rays `.crt` into IDA install dir) sits in the Cheat IDA Plugins / Lumina lane. (source: wiki/sources/descriptions/tomrus88__OpenLumina.md)
