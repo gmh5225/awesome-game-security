@@ -204,6 +204,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cs2_things.md
   - wiki/sources/descriptions/gmh5225__cs2_sdk.md
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
+  - wiki/sources/descriptions/cragson__a53-code-exec.md
   - wiki/sources/descriptions/cragson__osmium.md
   - wiki/sources/descriptions/crifan__AutoRename.md
   - wiki/sources/descriptions/crmulliner__adbi.md
@@ -1737,6 +1738,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - PS5 ELF loader/analysis in IDA via [[ida-ps5-elf-plugin]] (PS5-specific ELF extensions, segment types, dynamic linking; game/system binaries; console security RE) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md)
 - PS5 ELF loader for ps5-jar-loader via [[elfloader]] (Java; kernel-level modding / SDK generation; console PlayStation ELF load path; Anti Cheat → Binary Packer) sits in the same `PlayStation` lane beside static IDA loaders. (source: wiki/sources/descriptions/cryonumb__elfloader.md)
+- PS5 Cortex-A53 code-execution PoC via [[a53-code-exec]] (fw 02.00; kernel-level work / SDK generation; console emulator + PlayStation research) sits in the same `PlayStation` low-level CPU exploit lane. (source: wiki/sources/descriptions/cragson__a53-code-exec.md)
 - PS3 SPRX mod-menu source trees such as [[paradise-bo2]] (Paradise BO2; window/UI code) sit in the same `PlayStation` / console injected-menu lane for BO2 menu-architecture study. (source: wiki/sources/descriptions/gopro2027__ParadiseBO2.md)
 
 ## Related concepts

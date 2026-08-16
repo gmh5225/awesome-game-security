@@ -104,6 +104,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [adbi](entities/adbi.md) — Android Dynamic Binary Instrumentation (library injection + inline entry hooking; cheat / DBI / Android RE; crmulliner)
 - [aho-corasick](entities/aho-corasick.md) — Aho-Corasick multi-pattern string matcher (ISM; mmap automata; C API; signature/YARA-style scan backend)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
+- [a53-code-exec](entities/a53-code-exec.md) — PS5 Cortex-A53 code-execution PoC (fw 02.00; kernel / SDK generation; PlayStation)
 - [AfdIrpCallDispatch](entities/afd-irp-call-dispatch.md) — Afd.sys .data pointer hook on AfdIrpCallDispatch (driver communication)
 - [ActionRoguelike](entities/action-roguelike.md) — UE Roguelike sample (gameplay systems; Game Develop / Unreal source)
 - [AERoot](entities/aeroot.md) — Quarkslab Android Emulator runtime root (debug pipe/ADB; custom su; no system-image rewrite)

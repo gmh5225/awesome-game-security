@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cragson/a53-code-exec`: entity [[a53-code-exec]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ps5-linux-loader]], [[ida-ps5-elf-plugin]], and [[elfloader]].
+
 - **2026-08-16** — ingest `description:cragson/osmium`: entity [[osmium]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-ext]], [[blacksun-framework]], and [[intro-to-gamehacking]].
 
 - **2026-08-16** — ingest `description:craids/AresFramework`: entity [[ares-framework]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[packer-tutorial]], [[2pack]], and [[blacksun-framework]].
