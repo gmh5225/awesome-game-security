@@ -2222,6 +2222,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x14.08-coverstory-blizzard](entities/x14-08-coverstory-blizzard.md) — WoW cheat / Warden bypass (loader hooks / RunScript; C++)
 - [x260-lenovo-opencore](entities/x260-lenovo-opencore.md) — ThinkPad X260 Hackintosh OpenCore EFI (macOS research host)
 - [x64-EXE-Packer](entities/x64-exe-packer.md) — PE X64 binary packer (Anti Cheat → Binary Packer)
+- [x64-virtualizer-rs](entities/x64-virtualizer-rs.md) — Rust toy x86-64 stack-VM obfuscator (iced-x86 lift; JIT vmenter/vmexit; VM internals study; AC Obfuscation Engine `[VM]`; cursey)
 - [x64dbg](entities/x64dbg.md) — Windows x86/x64 debugger (plugins; Cheat Debugging)
 - [x64dbg-automate-pyclient](entities/x64dbg-automate-pyclient.md) — Python x64dbg Automate RPC client (ZeroMQ/msgpack; breakpoints/memory/registers/disasm/session/GUI; optional MCP server; scriptable debug sessions)
 - [x64dbg Plugin Manager](entities/x64dbg-plugin-manager.md) — x64dbg plugin install/management (C++/C; plugin development / modding; Cheat x64dbg Plugins)
