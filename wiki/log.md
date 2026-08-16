@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:daswareinfach/Battleye-VAC-EAC-Kernel-Bypass`: entity [[battleye-vac-eac-kernel-bypass]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[battleye]], [[easy-anti-cheat]], [[blanket]], and [[fenrir]].
+
 - **2026-08-16** — ingest `description:datalayer/jupyter-mcp-server`: entity [[jupyter-mcp-server]]; cited on [[overviews/overview]] and [[overviews/game-engine]]; cross-linked [[zig-mcp-server]] and [[deepwiki-mcp]].
 
 - **2026-08-16** — ingest `description:david942j/kvm-kernel-example`: entity [[kvm-kernel-example]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[memflow-kvm]], [[ntoseye]], and [[kernel-development]].
