@@ -1623,6 +1623,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pe-sieve](entities/pe-sieve.md) — Lightweight single-process malware/injection scan engine (Detection:hook; hasherezade; lib behind xMalHunter)
 - [PEReconstruct](entities/pereconstruct.md) — Python headerless PE rebuild from process memory (manual-map scan/dump, hook analysis, export resolution; no driver/debugger)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
+- [PE-Packer](entities/pe-packer.md) — C/C++ PE X86 binary packer (Anti Cheat → Binary Packer `[X86]`; czs108)
 - [AtomPePacker](entities/atom-pe-packer.md) — Windows PE X64 compress+encrypt packer (runtime stub; import/relocation/TLS restore; Anti Cheat → Binary Packer `[PE X64]`; gmh5225)
 - [PEPacker](entities/pepacker.md) — C++ PE X64 packer (asset pipeline; Anti Cheat → Binary Packer `[PE X64]`)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:czs108/PE-Packer`: entity [[pe-packer]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[packer]], [[pe32-password]], and [[pepacker]].
+
 - **2026-08-16** — ingest `description:d1skq/vgk-dma-bypass`: entity [[vgk-dma-bypass]]; cited on [[concepts/vanguard]] and [[overviews/dma-attack]]; cross-linked [[pcileech-fpga]] and [[pcileech-fpga-dma-vmd]].
 
 - **2026-08-16** — ingest `description:d35ha/CallObfuscator`: entity [[call-obfuscator]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[alcatraz]], [[blitz]], and [[dumpepe]].
