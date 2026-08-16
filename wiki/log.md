@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:xgl34222220-ops/BaiZe`: entity [[baize]]; cited on [[overviews/mobile-security]] and [[magisk]]; cross-linked [[kernelsu]] and [[rescuex]].
+
 - **2026-08-16** — ingest `description:eddeeh/kdmapper`: entity [[kdmapper]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper-rs]], [[cve-2015-2291]], and [[saturn-mapper]].
 
 - **2026-08-16** — ingest `description:eden13378/CS2-DMA-Cheat`: entity [[cs2-dma-cheat]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-dma-radar]], [[gta5-dma-cheat]], and [[proext]].

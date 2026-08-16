@@ -63,6 +63,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BadRentdrv2](entities/badrentdrv2.md) — Rentdrv2.sys BYOVD (IOCTL → physmem R/W; driver map / kernel patch / AC bypass; gmh5225)
 - [BadEye](entities/badeye.md) — BE handle-access assumption bypass (C++ memory analysis; EPROCESS→MmCopyVirtualMemory; gmh5225; cheat / explore anticheat system:be)
 - [bad-query](entities/bad-query.md) — iOS 26–27 sandbox-escape PoC (Xcode; app/daemon/App Group/system-container path access; container isolation research; forcequitOS)
+- [BaiZe](entities/baize.md) — Magisk/KernelSU/APatch graded cache, log, APK-residue, and deep junk cleanup (Kotlin/C; risk tiers, quarantine)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
