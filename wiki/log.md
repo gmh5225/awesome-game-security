@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dis0rder0x00/DbgNexum`: entity [[dbgnexum]]; cited on [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[jektor]], and [[mmf-code-injection]].
+
 - **2026-08-16** — ingest `description:diversenok/DiaSymbolView`: entity [[diasymbolview]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pdb]], [[pdb-rs]], and [[pdblister]].
 
 - **2026-08-16** — ingest `description:divodeuxsevres/gvmp-anticheat`: entity [[gvmp-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[alt-v-anticheat-guide]], [[present-hook]], and [[ntminhook]].
