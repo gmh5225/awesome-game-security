@@ -4,7 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
-- **2026-08-16** — ingest `description:ekknod/EC`: entity [[ec]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ec-pro-lan]], [[nv-v2]], and [[csf]].
+- **2026-08-16** — ingest `readme:categories`: bumped Cheat ~2706 (was ~2705; Anti Cheat ~675 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+ entity [[ec]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ec-pro-lan]], [[nv-v2]], and [[csf]].
 
 - **2026-08-16** — ingest `description:ekknod/EC_PRO-LAN`: entity [[ec-pro-lan]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[logitech-cve]], [[kernel-mouse]], and [[present-hook]].
 

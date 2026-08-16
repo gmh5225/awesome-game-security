@@ -43,7 +43,7 @@ sources:
   - wiki/sources/descriptions/ekknod__vm.md
   - wiki/sources/descriptions/ekknod__pcileech-wifi.md
   - wiki/sources/descriptions/ekknod__drvscan.md
-updated: 2026-08-15
+updated: 2026-08-16
 confidence: high
 ---
 
@@ -104,4 +104,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2705) DMA lanes and `Anti Cheat > Detection:DMA` (~675), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
+No top-level DMA section — maps via `Cheat` (~2706) DMA lanes and `Anti Cheat > Detection:DMA` (~675), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
