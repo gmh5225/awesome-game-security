@@ -797,6 +797,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-ud-external](entities/fortnite-ud-external.md) — undetected external Fortnite cheat (stealthy memory reads; ESP/aimbot; BattlEye+EAC bypass framing; gmh5225; [External])
 - [fortnite-voyagertf](entities/fortnite-voyagertf.md) — VoyagerTF external Fortnite cheat (ESP/aimbot/UE game-state reads via out-of-process memory; gmh5225; [External])
 - [fortnite-virtual-offsets](entities/fortnite-virtual-offsets.md) — Fortnite vtable/view offset dump (text; gmh5225; cheat / game:fortnite [Virtual Table Offsets])
+- [game-cheating-exploit-detection-agent-skill (dungnotnull)](entities/game-cheating-exploit-detection-agent-skill.md) — Claude Code skill + Python engine; six-step statistical/invariant aimbot, wallhack, macro, memory-tamper, and exploit detectors with CI-tested harness (Anti Cheat → Detection)
 - [game-design-documents](entities/game-design-documents.md) — curated classic game design docs and PDFs (Doom, GTA, Fallout, Planescape: Torment, etc.; Game Develop / guide)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [GPlayEngine](entities/gplayengine.md) — GamePlay 3D v3.0 fork (BGFX replaces OpenGL 2.x; SDL2 + deferred pipeline + Bullet + ImGui editor; DirectX/Vulkan/Metal/OpenGL; Game Engine / source [C++ 2D/3D])

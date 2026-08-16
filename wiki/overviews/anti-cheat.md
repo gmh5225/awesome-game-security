@@ -108,6 +108,7 @@ sources:
   - wiki/sources/descriptions/ekknod__EC_PRO-LAN.md
   - wiki/sources/descriptions/ekknod__CSGO-AC.md
   - wiki/sources/descriptions/ekknod__Anti-Cheat-TestBench.md
+  - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
   - wiki/sources/descriptions/emilyinure__solace-csgo.md
   - wiki/sources/descriptions/seifreed__r2morph.md
   - wiki/sources/descriptions/secrary__makin.md
@@ -541,6 +542,8 @@ Layered game protection across kernel drivers, privileged services, in-game modu
 ## Detection methodology
 
 Use [[research-rigor]] when turning detector hits into enforcement: define the decision unit (player/session/device/build); label telemetry as server-observed vs client-reported; keep **observation → finding → attribution → action** separate; calibrate thresholds on representative held-out data; report prevalence, FPR/FNR, and review volume; combine causally distinct signals and measure joint error—correlated detectors can fail together. Invariant findings need rollback/reconnect/game-bug exclusions before calling exploitation. (source: wiki/sources/skills/anti-cheat.md)
+
+[[game-cheating-exploit-detection-agent-skill]] (dungnotnull; Python) pairs a Claude Code skill with a six-step executable engine—statistical and invariant detectors for aimbots, wallhacks, macros, memory tampering, and economy/duplication exploits—plus CI-verifiable harnesses, telemetry ingestion, quality gates, and a self-updating knowledge base from academic/domain crawls for structured decision support. (source: wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md)
 
 Structured research indexes such as [[anti-cheat-research-index]] catalog public AC architecture, kernel execution/memory integrity, VT-x/EPT instrumentation, graphics presentation-path integrity, and x86/x64 RE references (shellcode, attach, present-hook, hardware-trace detection) for defensive engineering—not a standalone codebase. (source: wiki/sources/descriptions/xhscfq__anti-cheat-research-index.md) Defensive write-ups on publicly disclosed Windows kernel CVEs from anti-cheat/EDR telemetry and mitigation angles such as [[kernel-cve-analysis]] (thexin7; IOCTL/load/token/crash signals, Sigma sketches, hardening checklists) sit in the same Guide lane. (source: wiki/sources/descriptions/thexin7__kernel-cve-analysis.md) Foundational C **linking/loading/executable-format** guide [[underthehoodofexecutables]] supports the same defensive-engineering primer lane. (source: wiki/sources/descriptions/gmh5225__underTheHoodOfExecutables.md) Unconventional AC design notes such as [[weird-anti-cheat-ideas]] (gmh5225; anti-cheat research, networking, and modding surfaces) collect offbeat defensive ideas for AC engineers. (source: wiki/sources/descriptions/gmh5225__WeirdAntiCheatIdeas.md)
 

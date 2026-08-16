@@ -18,7 +18,8 @@ sources:
   - wiki/sources/descriptions/rafalimma__ModelAnti-Cheat.md
   - wiki/sources/descriptions/gmh5225__Ark.md
   - wiki/sources/descriptions/gmh5225__AI-FPS-b00m-h3adsh0t.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
+updated: 2026-08-16
 confidence: medium
 ---
 
@@ -70,6 +71,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
 - [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)
 - [[ark]] — distributed-GPU deep learning framework for scaled offensive/defensive ML training (gmh5225; cheat / Tool)
+- [[game-cheating-exploit-detection-agent-skill]] — Claude Code skill + Python engine; statistical/invariant aimbot, wallhack, macro, memory-tamper, and exploit detectors with evidence-chain verdicts and CI-tested harness (dungnotnull)
 
 ## Related
 
