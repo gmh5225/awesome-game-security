@@ -1045,6 +1045,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
 - https://github.com/milk-analyzer/vmpunpack [Generic x64 VMProtect/packer unpacker that drives samples through patched sogen emulation to OEP, dumps memory, and rebuilds PEs for IDA/Ghidra]
 - https://github.com/Lucyferek-nunu/vmp-unpacker [C++ dynamic VMProtect unpacker with anti-debug bypass, OEP discovery, and IAT repair]
+- https://github.com/tomhamidi97-arch/vmp-devirtualization-lab [Educational guide and lab notes on Android native-library VMProtect internals, dispatcher/handler recovery, and devirtualization workflows]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
