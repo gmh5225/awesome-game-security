@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/mizt0__mixed-boolean-transform.md
   - wiki/sources/descriptions/gmh5225__qsynthesis.md
   - wiki/sources/descriptions/fvrmatteo__DrillAndJoin.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/dmaivel__covirt.md
+updated: 2026-08-16
 confidence: high
 ---
 
@@ -26,7 +27,7 @@ confidence: high
 2. **Program synthesis** — oracle-guided expression search with SMT equivalence checks in IDA via [[qsynthesis]] (Python; Hex-Rays integration) (source: wiki/sources/descriptions/gmh5225__qsynthesis.md); exact finite-domain Drill & Join synthesis plus Bitwuzla equivalence proofs for 64-bit opaque predicates and MBA-style expressions via [[drill-and-join]] (C++17 header-only; SMT-guided bit dependency reduction) (source: wiki/sources/descriptions/fvrmatteo__DrillAndJoin.md).
 3. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
 4. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
-5. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md).
+5. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md). VM-based protectors such as [[covirt]] embed MBA transforms inside stack-VM obfuscation passes for protected regions (source: wiki/sources/descriptions/dmaivel__covirt.md).
 
 ## Detection context
 
@@ -34,4 +35,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

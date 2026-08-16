@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dmaivel/covirt`: entity [[covirt]]; cited on [[overviews/reverse-engineering]], [[overviews/anti-cheat]], and [[mixed-boolean-arithmetic]]; cross-linked [[phantasm-x86-virtualizer]], [[guardian-rs]], and [[nocturne]].
+
 - **2026-08-16** — ingest `description:dmaivel/ntoseye`: entity [[ntoseye]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[windows-kernel-debugging-guide]], [[ida-vmware-windows-gdb]], [[memflow-kvm]], and [[nokd]].
 
 - **2026-08-16** — ingest `description:dnSpy/Mono.Debugger.Soft`: entity [[mono-debugger-soft]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dnspy]] and [[dnspy-unity-mono]].
