@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cutecatsandvirtualmachines/DmaProtect`: entity [[dmaprotect]]; cited on [[iommu]] and [[overviews/dma-attack]]; cross-linked [[diedmaprotection]] and [[helloiommupkg]].
+
 - **2026-08-16** — ingest `description:cxxrev0to1dev/nb_obfuscator`: entity [[nb-obfuscator]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[alcatraz]], [[call-obfuscator]], [[wprotect]], and [[obfuscator]].
 
 - **2026-08-16** — ingest `description:cyberark/DLLSpy`: entity [[dllspy]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-dll-hijacking]], [[hijacklibs]], [[dllirant]], and [[impulsive-dll-hijack]].

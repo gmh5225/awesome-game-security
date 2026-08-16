@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/sercanarga__PCILeechGen.md
   - wiki/sources/descriptions/sercanarga__pcileechgen.md
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
+  - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
   - wiki/sources/descriptions/paul01784__MeatyEFTRelease.md
   - wiki/sources/descriptions/gmh5225__eft-dma-radar-1.md
   - wiki/sources/descriptions/gmh5225__Nathans-Tarkov-Radar-Public.md
@@ -80,7 +81,7 @@ Stock [[pcileech-fpga]] builds expose trivial Tier-0/1 signals (placeholder `10E
 
 ## IOMMU and bypass surface
 
-Legitimate drivers map only explicit IOVAs; game memory should stay outside device domains. Active cheat paths include IOMMU disabled, pre-boot DMA, identity/passthrough domains, driver page over-allocation (Thunderclap class), **legitimate-path exfil** (spoofed NIC reading its own RX ring), and kernel reprogramming of IOMMU tables via [[byovd]]. Windows PoC [[diedmaprotection]] demonstrates runtime disable of DMA remapping (IOMMU/VT-d) from a kernel driver to re-enable FPGA [[pcileech]]-class physical reads. (source: wiki/sources/descriptions/iqrw0__DieDMAProtection.md) ACS Source Validation + P2P redirect and ATS-untrusted policy for untrusted endpoints are mandatory in threat models. See [[iommu]] for the condensed bypass catalog.
+Legitimate drivers map only explicit IOVAs; game memory should stay outside device domains. Active cheat paths include IOMMU disabled, pre-boot DMA, identity/passthrough domains, driver page over-allocation (Thunderclap class), **legitimate-path exfil** (spoofed NIC reading its own RX ring), and kernel reprogramming of IOMMU tables via [[byovd]]. Windows PoC [[diedmaprotection]] demonstrates runtime disable of DMA remapping (IOMMU/VT-d) from a kernel driver to re-enable FPGA [[pcileech]]-class physical reads. (source: wiki/sources/descriptions/iqrw0__DieDMAProtection.md) Defensive sample [[dmaprotect]] programs VT-d/AMD-Vi remapping tables from kernel mode to block unauthorized PCIe DMA while allowing legitimate devices—illustrating the mitigation side of the same remapping surface. (source: wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md) ACS Source Validation + P2P redirect and ATS-untrusted policy for untrusted endpoints are mandatory in threat models. See [[iommu]] for the condensed bypass catalog.
 
 ## Layered detection pipeline
 
@@ -103,7 +104,7 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## Related concepts
 
-[[dma]] · [[iommu]] · [[helloiommupkg]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[volk-dma]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[vgk-dma-bypass]] · [[ddma-1]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[memtools]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheat-engine-ceserver-pcileech]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[cs2-dma-cheat]] · [[gta5-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
+[[dma]] · [[iommu]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[hvci]] · [[byovd]] · [[research-rigor]] · [[pcileech]] · [[pcie-detector]] · [[drvscan]] · [[volk-dma]] · [[vm]] · [[pcileech-fpga]] · [[pcileechgen]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[vgk-dma-bypass]] · [[ddma-1]] · [[fpga-dma-multi-tool]] · [[dma-tools-rs]] · [[memtools]] · [[dma-pcie-board-75t]] · [[litepcie]] · [[physpatch]] · [[x670e-tomahawk-anticheat-update]] · [[dma-invoker]] · [[dma-speedtest-memflow-rs]] · [[dma-cheat-engine-loader]] · [[cheat-engine-dma-plugin]] · [[cheat-engine-ceserver-pcileech]] · [[csgo-dma-overlay]] · [[fn-dma-cheat]] · [[meatyeftrelease]] · [[eft-dma-radar-1]] · [[nathans-tarkov-radar-public]] · [[cs2-dma-radar]] · [[cs2-dma-cheat]] · [[gta5-dma-cheat]] · [[dma-cheat-base]] · [[unispect-dma-plugin]] · [[reclass-dma]] · [[overviews/anti-cheat]]
 
 ## README map
 

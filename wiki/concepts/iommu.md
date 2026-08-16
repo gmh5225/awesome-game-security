@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
-updated: 2026-08-04
+  - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
+updated: 2026-08-16
 confidence: high
 ---
 
@@ -61,6 +62,7 @@ Full 16-entry catalog in skill source; techniques 7–16 are mostly academic, AP
 
 ## Defense uses
 
+- Windows kernel driver [[dmaprotect]] programs VT-d/AMD-Vi remapping tables to block unauthorized PCIe DMA while permitting legitimate device domains—defensive runtime counterpart to [[diedmaprotection]]. (source: wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md)
 - Strict domains instead of identity/passthrough mappings
 - Fault-rate monitoring (VT-d Fault Recording, AMD-Vi Event Log, WHEA)
 - Live containment: sandbox domain remapping, Bus Master Enable clear, Downstream Port Containment (DPC)
@@ -72,4 +74,4 @@ Misconfigured BIOS, pre-boot DMA, ACS holes, ATS abuse, over-mapped pages, legit
 
 ## Related
 
-[[dma]] · [[helloiommupkg]] · [[diedmaprotection]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[dma]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]

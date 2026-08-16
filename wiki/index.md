@@ -590,6 +590,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (gmh5225 fork + narumii; ProGuard/Allatori/ZKM passes; cheat / RE tools)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
+- [DmaProtect](entities/dmaprotect.md) — Windows kernel driver configuring VT-d/AMD-Vi IOMMU remapping to block unauthorized PCIe DMA (cutecatsandvirtualmachines; DMA mitigation research)
 - [DieDMAProtection](entities/diedmaprotection.md) — Windows PoC kernel driver disabling IOMMU/VT-d DMA remapping (iqrw0; IOMMU bypass research)
 - [detect-hypervisor-detect-ring-0](entities/detect-hypervisor-detect-ring-0.md) — ring-0 hypervisor detection test driver (CPUID leaves, TSC/APERF/MPERF VM-exit timing, LBR/DEBUGCTL; manual-map print harness; Secret Club lineage; gmh5225; Detection: Hacked Hypervisor)
 - [DetectFrida](entities/detect-frida.md) — Android native Frida detector (named-pipe scan, thread-name checks, `.text` memory-vs-disk ELF integrity; syscall libc + O-LLVM hardening; darvincisec; Detection:Frida)
