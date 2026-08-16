@@ -4,6 +4,7 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
+  - wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md
 updated: 2026-08-16
 confidence: medium
 ---
@@ -12,7 +13,7 @@ confidence: medium
 
 AI-powered reverse engineering assistant plugin for [[x64dbg]] that embeds a WebView2 chat panel directly in the debugger. Connects to Anthropic or OpenAI-compatible LLM APIs and exposes tool-use so the agent can read memory, disassemble code, set breakpoints, single-step, and drive the debugger programmatically through a conversational interface — aimed at interactive AI-assisted debugging and automated analysis inside x64dbg. (source: wiki/sources/descriptions/dariushoule__x64dbg-rippy.md)
 
-In-debugger LLM panel rather than an external MCP server: complements MCP bridges such as [[ida-pro-mcp]], [[binary-ninja-mcp]], and [[radare2-mcp]] by keeping live Windows user-mode attach workflows inside the x64dbg UI.
+In-debugger LLM panel rather than an external automation client: complements [[x64dbg-automate-pyclient]] (Python Automate RPC + optional MCP server for scripted/agent workflows outside the UI) and MCP bridges such as [[ida-pro-mcp]], [[binary-ninja-mcp]], and [[radare2-mcp]] by keeping interactive live Windows user-mode attach workflows inside the x64dbg UI.
 
 ## Links
 
@@ -20,4 +21,4 @@ In-debugger LLM panel rather than an external MCP server: complements MCP bridge
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbg]] · [[ida-pro-mcp]] · [[binary-ninja-mcp]] · [[radare2-mcp]] · [[rev-tools-setup]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[x64dbg]] · [[x64dbg-automate-pyclient]] · [[ida-pro-mcp]] · [[binary-ninja-mcp]] · [[radare2-mcp]] · [[rev-tools-setup]]
