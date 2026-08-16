@@ -1115,6 +1115,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
 - [kavanoz](entities/kavanoz.md) — Python automated Android DEX/resource unpacker (Bangcle/Ijiami/Qihoo 360+ packer ID + decrypt; banker malware; static APK analysis; eybisi)
 - [kbotext](entities/kbotext.md) — LoL LCU bot extension framework (automated scripting and client control; README `[LCU]`; gmh5225; cheat / game:lol)
+- [kdmapper](entities/kdmapper.md) — C++ kernel driver mapper via Intel `iqvw64e.sys` BYOVD (manual PE map; DSE bypass research; eddeeh)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
 - [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)

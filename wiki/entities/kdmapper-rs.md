@@ -4,7 +4,7 @@ kind: entity
 topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/rmccrystal__kdmapper-rs.md
-updated: 2026-07-24
+updated: 2026-08-16
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Rust library wrapping **kdmapper**-style unsigned kernel-driver mapping. Primarily C/C++ with a Rust-facing surface; centered on driver development, modding, and debugging for researchers studying vulnerable-driver / manual-map load paths in the cheat lane. (source: wiki/sources/descriptions/rmccrystal__kdmapper-rs.md)
 
-Companion research lane to mapper catalogs such as [[known-driver-mappers]], trusted-process hosts such as [[lsass-extend-mapper]], and post-map cleanup such as [[revert-mapper]].
+Rust-facing port of the canonical C++ mapper [[kdmapper]] (eddeeh). Companion research lane to mapper catalogs such as [[known-driver-mappers]], trusted-process hosts such as [[lsass-extend-mapper]], and post-map cleanup such as [[revert-mapper]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Companion research lane to mapper catalogs such as [[known-driver-mappers]], tru
 
 ## Related
 
-[[known-driver-mappers]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[byovd]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[kdmapper]] · [[known-driver-mappers]] · [[lsass-extend-mapper]] · [[revert-mapper]] · [[byovd]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
