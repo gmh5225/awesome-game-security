@@ -1491,6 +1491,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OverlayAI](entities/overlayai.md) — external CS2 cheat (C++; D3D11 ImGui overlay; ESP / aim assist / triggerbot; Panorama inventory bridge via DLL + named-pipe IPC / SOCache; cs2-dumper offsets; ianveig29; cheat / game:cs2)
 - [OW-Aeternum](entities/ow-aeternum.md) — Overwatch C/C++ POC (anti-cheat research + rendering + hooking; author-flagged rough POC; cheat / game:overwatch; gmh5225)
 - [OW2 Wardenrekter](entities/ow2-wardenrekter.md) — Overwatch 2 Warden AC disable DLL (VEH/INT3 patch, PEB anti-debug, timing/API stubs, DR0 demo; Emulate OW2 AC; gmh5225)
+- [Ow-FOV](entities/ow-fov.md) — Overwatch FOV changer (injected DLL; batch-file injector pairing recommended; cheat / game:overwatch [FOV]; dword64)
 - [Ow-Outlines](entities/ow-outlines.md) — Overwatch internal glow/outline ESP (injected DLL; GlowESP offset + VEH; outline rendering memory writes; cheat / game:overwatch)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
