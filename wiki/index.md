@@ -1342,6 +1342,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mcp-server-idapro](entities/mcp-server-idapro.md) — MCP for IDA Pro (AI-assistant bridge to disassembler/debugger; Game Develop / MCP)
 - [mcp-windbg](entities/mcp-windbg.md) — CDB/WinDbg MCP server (dump triage + remote debug; Python)
 - [mcpup](entities/mcpup.md) — MCP server lifecycle manager (discover/install/configure/run; Unity AI-assisted dev; Game Develop / MCP for unity; gmh5225)
+- [mcrit-plugin](entities/mcrit-plugin.md) — IDA Pro plugin for MCRIT MinHash function similarity (upload samples, query matches, manage MCRIT server from disassembler)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
 - [MobileRE-Skill](entities/mobile-re-skill.md) — AI-agent mobile RE skill set (layered Frida hooks; six-phase anti-detection pipeline; JADX/Ghidra)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
