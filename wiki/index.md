@@ -1431,6 +1431,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nv-v2 (ekknod)](entities/nv-v2.md) — CS:GO sound ESP (C/C++; hooking; audio-derived positional awareness; cheat / game:csgo [Sound ESP])
 - [Nmi (ekknod)](entities/nmi.md) — block NMI interrupts (C/C++; cheat / windows kernel explorer; README [Blocking NMI interrupts])
 - [NMI Callback](entities/nmi-callback.md) — C/C++ kernel NMI callback driver research (Detection: Hacked Hypervisor)
+- [NMI Callback Handler](entities/nmi-callback-handler.md) — Windows kernel driver; NMI callback interrupted-RIP stack walk for mapped-driver detection (donnaskiez; README Mapped Driver by NMI Callback)
 - [NMICallbackBlocker2](entities/nmi-callback-blocker2.md) — C++ kernel PoC to disable NMI callbacks (cheat / windows kernel explorer; gmh5225)
 - [NMI EnumNmiCallback](entities/nmi-enum-nmi-callback.md) — C/C++ kernel PoC to enumerate registered NMI callbacks (cheat / windows kernel explorer; gmh5225)
 - [NMI nmi_callback](entities/nmi-nmi-callback.md) — Windows kernel PoC to register/trigger NMI callbacks and inspect thread contexts (BattlEye-style detection study; gmh5225)
