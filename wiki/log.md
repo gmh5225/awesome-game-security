@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:deadeert/EWS`: entity [[ews]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[sk3wldbg]], [[ripr]], and [[unicorn-pe]].
+
 - **2026-08-16** — ingest `description:deathkiller/jazz2-native`: entity [[jazz2-native]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[openclaw]], [[yourgamelib]], and [[mojoc]].
 
 - **2026-08-16** — ingest `description:deepinstinct/Dirty-Vanity`: entity [[dirty-vanity]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windows-process-injection]] and [[process-cloning]].

@@ -705,6 +705,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MSFT DriverBlockList](entities/msft-driverblocklist.md) — Microsoft Recommended Driver Block Rules mirror (AC / black-signature defensive research)
 - [MSSymbolsCollection](entities/mssymbolscollection.md) — pre-downloaded Microsoft kernel debug symbols (PDB; ntoskrnl, CI.dll, kernel-mode binaries; Kernel Symbols; gmh5225)
 - [event_replay](entities/event-replay.md) — Android `/dev/input` touch/key record-replay Magisk module (game input sim)
+- [EWS (Emulator Wrapper Solution)](entities/ews.md) — IDA Pro Unicorn emulation plugin (ARM/x86/x64; Keystone/Capstone trace + asm/disasm; embedded/Android/automotive firmware; cheat / Emulation)
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
 - [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
