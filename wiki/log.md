@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dreiachse-cyber/image-cockpit-for-codex-workflows`: entity [[image-cockpit-for-codex-workflows]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[awesome-gamedev-agent-skills]], [[image-blaster]], and [[interactive-feedback-mcp]].
+
 - **2026-08-16** — ingest `description:dretax/GarHal_CSGO`: entity [[garhal-csgo]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-csgo]], [[kernel-cheat-for-directx3d]], and [[csgo-ac]].
 
 - **2026-08-16** — ingest `description:droberson/ELFcrypt`: entity [[elfcrypt]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[elfpacker]], [[elfuck]], and [[harmless]].
