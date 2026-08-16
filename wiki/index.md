@@ -902,6 +902,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gtav-sourcecode-build-guide](entities/gtav-sourcecode-build-guide.md) — GTA V source code build tutorial (VM recommended; Game Develop / guide)
 - [regta](entities/regta.md) — Reverse-engineered GTA III & Vice City (Switch / PS Vita / Wii U ports; Game Develop / source)
 - [reGS](entities/regs.md) — reverse-engineered GoldSource engine (HL1; networking / rendering / physics; Game Engine / RE)
+- [rehlds](entities/rehlds.md) — reverse-engineered HLDS dedicated server (builds 6152/6153; DWARF-guided Linux RE; GoldSource protocol / HLTV / mod compatibility; Game Engine / RE)
 - [gunyah-hypervisor](entities/gunyah-hypervisor.md) — Qualcomm Type-1 ARM64 HV (trusted/dependent VMs; Cheat QEMU/KVM + Android Emulator)
 - [HelloIommuPkg](entities/helloiommupkg.md) — sample DXE DMA-remapping (IOMMU) driver (tandasat; Detection:DMA)
 - [hdd_serial_spoofer](entities/hdd-serial-spoofer.md) — HDD serial spoof (C/C++; cheat / HWID; namazso)
