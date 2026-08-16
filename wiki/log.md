@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:crazymind90/CVE-2026-XNU-AIO-KEVENT-UAF`: entity [[cve-2026-xnu-aio-kevent-uaf]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xnu-1day-practice]], [[kfd]], and [[dirty-zero]].
+
 - **2026-08-16** — ingest `description:hasaneyldrm/webcheat`: entity [[webcheat]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[wasm-ceserver]].
 
 - **2026-08-16** — ingest `readme:categories`: Cheat ~2711 (+1; Anti Cheat ~677 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

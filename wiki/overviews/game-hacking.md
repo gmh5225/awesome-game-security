@@ -461,6 +461,7 @@ sources:
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
   - wiki/sources/descriptions/xscope0__xkvm-ios-injector.md
   - wiki/sources/descriptions/villager1314__CVE-2026-64560-Analysis.md
+  - wiki/sources/descriptions/crazymind90__CVE-2026-XNU-AIO-KEVENT-UAF.md
   - wiki/sources/descriptions/farazsth98__poc-CVE-2025-38352.md
   - wiki/sources/descriptions/jsirichai__CVE-2019-2215.md
   - wiki/sources/descriptions/j4nn__CVE-2020-0041.md
@@ -1496,6 +1497,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
 - Pure-Go sideload tweak injectors such as [[xkvm-ios-injector]] (xscope0; CLI/TUI; IPA/TIPA/`.app` dylib and `.deb` injection, rootful/rootless/roothide package conversion, App Store IPA decryption, hook-runtime embedding, Mach-O repack + ad-hoc signing; cheat / iOS sideload) sit beside [[ipapatch]] in the same sideload lane. (source: wiki/sources/descriptions/xscope0__xkvm-ios-injector.md)
 - iOS 15 untethered jailbreak implementations such as [[ios-jailbreak-fugu15]] (gmh5225; Fugu15 kernel exploit chain → root, codesign bypass, arbitrary code execution; cheat / iOS jailbreak) sit in the same Cheat / iOS jailbreak privilege lane beside [[dopamine]] and [[palera1n]]. (source: wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md)
+- XNU `kern_aio.c` AIO+kevent UAF PoC via [[cve-2026-xnu-aio-kevent-uaf]] (crazymind90; sandbox app without entitlements; AIO completion frees object before kevent registration → panic/double-free; iOS 26.2, patched 26.3; cheat / iOS jailbreak kernel research—not stable LPE) sits in the same Cheat / iOS jailbreak kernel lane beside [[kfd]] and [[xnu-1day-practice]]. (source: wiki/sources/descriptions/crazymind90__CVE-2026-XNU-AIO-KEVENT-UAF.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
 - Runtime iOS/macOS dylib injectors such as [[opainject]] (`task_for_pid` / Mach remote thread → `dlopen`; jailbreak + tfp0) sit in the Cheat / Injection:IOS lane. (source: wiki/sources/descriptions/opa334__opainject.md)
 - Jailbreak-detection bypass tooling such as [[shadow]] (modern iOS jailbreaks; per-app compatibility varies; cheat / iOS jailbreak research) sits in the offensive iOS lane opposite [[free-rasp-ios]]-class jailbreak probes. (source: wiki/sources/descriptions/jjolano__shadow.md)
