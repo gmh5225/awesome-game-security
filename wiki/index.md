@@ -1140,6 +1140,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
 - [JinYongLegend](entities/jynew.md) — Unity wuxia RPG framework with modding (Game Develop / Unity source)
 - [jumpy](entities/jumpy.md) — Rust tactical 2D multiplayer shooter (asset-driven maps/characters/items; cross-platform; Pixels style; Game Engine / source)
+- [jupyter-mcp-server](entities/jupyter-mcp-server.md) — MCP server for Jupyter notebooks (create/read/edit/execute; stdio/streamable HTTP; local Jupyter/JupyterHub/Colab; Game Develop / MCP for Jupyter)
 - [jwt_tool](entities/jwt-tool.md) — Python JWT toolkit (validate/forge/scan; Game Network / JWT Auth)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)

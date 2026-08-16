@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Dota2Cheat.md
   - wiki/sources/descriptions/gmh5225__vscript_lua51.md
   - wiki/sources/descriptions/gmh5225__zig-mcp-server.md
+  - wiki/sources/descriptions/datalayer__jupyter-mcp-server.md
   - wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md
   - wiki/sources/descriptions/gmh5225__hex2dec-mcp.md
   - wiki/sources/descriptions/gmh5225__mcpup.md
@@ -427,6 +428,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
 - **Roblox MCP** — [[vibe-blocks-mcp]] exposes Roblox Studio actions as MCP tools over SSE (source: wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md)
 - **Zig MCP Server** — [[zig-mcp-server]] high-performance, memory-efficient MCP protocol implementation in Zig for game developers, reverse engineers, and tooling builders (source: wiki/sources/descriptions/gmh5225__zig-mcp-server.md)
+- **Jupyter MCP Server** — [[jupyter-mcp-server]] exposes notebook create/read/edit/execute as MCP tools (stdio/streamable HTTP; local Jupyter/JupyterHub/Colab; AI-assisted data analysis) (source: wiki/sources/descriptions/datalayer__jupyter-mcp-server.md)
 - **MCPup** — [[mcpup]] discover/install/configure/run MCP server infrastructure for Unity AI-assisted dev workflows (source: wiki/sources/descriptions/gmh5225__mcpup.md)
 - **Hex2Dec MCP** — [[hex2dec-mcp]] hex↔decimal number conversion for AI agents (JavaScript/TypeScript; gmh5225) (source: wiki/sources/descriptions/gmh5225__hex2dec-mcp.md)
 - **Interactive Feedback macOS MCP** — [[interactive-feedback-macos-mcp]] native AppleScript dialog + image HITL prompts; macOS fork of [[interactive-feedback-mcp]] (source: wiki/sources/descriptions/gmh5225__interactive-feedback-macos-mcp.md)
