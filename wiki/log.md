@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:danielkrupinski/MemJect`: entity [[memject]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[modexmap]], [[shtreeba]], and [[wizard-loader]].
+
 - **2026-08-16** — ingest `description:majimaakane/7dtd-AntiCheatMod`: entity [[7dtd-anticheatmod]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]].
 
 - **2026-08-16** — ingest `readme:categories`: Anti Cheat ~677 (+2; Cheat ~2709 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
