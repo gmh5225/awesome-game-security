@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cristeigabriela/IDAFind`: entity [[idafind]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-search]], [[ida-names]], and [[happyida]].
+
 - **2026-08-16** — ingest `description:cristeigabriela/bb-viewer`: entity [[bb-viewer]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[bb]], [[ntoskrnlwalker]], and [[ntkernelwalkerlib]].
 
 - **2026-08-16** — ingest `description:cristeigabriela/bb`: entity [[bb]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntoskrnlwalker]], [[ntkernelwalkerlib]], and [[windiff]].
