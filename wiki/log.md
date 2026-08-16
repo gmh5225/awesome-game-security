@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dhanax26/Apex-Legends-Offset-Dumper`: entity [[apex-legends-offset-dumper]]; cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[gh-offset-dumper]], [[apex-legends-sdk]], and [[apex-legends-sdk-remaster]].
+
 - **2026-08-16** — ingest `description:diabloidyobane/PEReconstruct`: entity [[pereconstruct]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-sieve]], [[league-dumper]], and [[patch-finder]].
 
 - **2026-08-16** — ingest `description:dimkr/papaw`: entity [[papaw]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[elfuck]], [[elfpacker]], and [[elfcrypt]].

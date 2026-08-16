@@ -462,6 +462,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__nzPerspective.md
   - wiki/sources/descriptions/gmh5225__overwatch-iat-fixer.md
   - wiki/sources/descriptions/gmh5225__Ow-Outlines.md
+  - wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md
   - wiki/sources/descriptions/dword64__Apex-Legends-SDK-Remaster.md
   - wiki/sources/descriptions/dword64__Ow-FOV.md
   - wiki/sources/descriptions/dword64__Ow-Anti-Flag.md
@@ -1575,6 +1576,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Linux-native Apex Legends cheat research such as [[apex-linux]] (ekknod; C++; cheat / game:apex legends [Linux]) complements [[ayypex]] on non-Windows Apex clients under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/ekknod__apex_linux.md)
 - Title-specific Apex Legends SDK samples such as [[apex-legends-sdk]] (gmh5225; C++; rendering / SDK generation; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__apex_legends_sdk.md)
 - Simplified Apex Legends SDK remaster samples such as [[apex-legends-sdk-remaster]] (dword64; open-source cheat designed for ease of use; avoids Python-binding friction; cheat / game:apex legends) sit beside [[apex-legends-sdk]] in the same lane. (source: wiki/sources/descriptions/dword64__Apex-Legends-SDK-Remaster.md)
+- Apex Legends live-process offset dumpers such as [[apex-legends-offset-dumper]] (dhanax26; pattern scan + netvar enumeration from running process; interfaces, netvars, SwapChain pointers; cheat / game:apex legends `[Offset]`) automate per-patch layout refresh beside static SDK trees and full cheat samples. (source: wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md)
 - Legacy Apex Legends ESP samples such as [[apex-esp-old-project]] (gmh5225; C/C++; rendering / SDK generation / overlays; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex_ESP_Old_Project.md)
 - Title-specific Apex Legends aimbot + glow samples such as [[apex-simple-aimbot-glow-apex]] (gmh5225; C/C++; driver development / hooking / memory analysis; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex-SIMPLE-AIMBOT-GLOW-APEX.md)
 - Title-specific Apex Legends fixed-cheat samples such as [[apex-cheat-fixed]] (gmh5225; C/C++; driver development / modding / hooking; cheat / game:apex legends) sit in the same lane beside [[apex-simple-aimbot-glow-apex]] and [[apex-full-cheat]]. (source: wiki/sources/descriptions/gmh5225__Apex-CHEAT-FIXED.md)
