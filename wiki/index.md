@@ -58,6 +58,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
 - [3d-game-shaders-for-beginners](entities/3d-game-shaders-for-beginners.md) — GLSL shader tutorial (Panda3D; SSAO/bloom/post-processing; Shader)
 - [3d9](entities/3d9.md) — DX11 stereoscopic-fix tooling (developer-oriented; DirectX Tools)
+- [7DTD AntiCheatMod](entities/7dtd-anticheatmod.md) — server-side 7 Days to Die mod (C# .NET 4.8; cheat command block + fly/teleport/speed/godmode thresholds; admin exemption; warning→kick→ban; non-EAC dedicated hosts; majimaakane)
 - [BakaWare4](entities/bakaware4.md) — WIP CS2 cheat (debug unload/unhook; `-insecure`; cheat / game:cs2)
 - [BamboozlEDR](entities/bamboozledr.md) — ETW event generator TUI (multi-provider; EDR/detection lab; AC/IS forensics)
 - [BadRentdrv2](entities/badrentdrv2.md) — Rentdrv2.sys BYOVD (IOCTL → physmem R/W; driver map / kernel patch / AC bypass; gmh5225)

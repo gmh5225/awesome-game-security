@@ -293,6 +293,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Genshin-EasyPeasy-Bypass.md
   - wiki/sources/descriptions/kanekikun420__NoCheatZ-3.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
+  - wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md
   - wiki/sources/descriptions/void-stack__Hypervisor-Detection.md
   - wiki/sources/descriptions/hypervisor__kli.md
   - wiki/sources/descriptions/gmh5225__integrity_experiments.md
@@ -649,6 +650,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
 - [[chessking]] — Rust Axum multiplayer chess platform with layered server-side AC (risk scoring, device fingerprinting, match integrity, IP reputation, chess-themed CAPTCHA step-up, ban escalation; shakmaty move validation; admin dashboard; educational reference; web-coder-lab) (source: wiki/sources/descriptions/web-coder-lab__chessking.md)
+- [[7dtd-anticheatmod]] — C# .NET 4.8 server mod for 7 Days to Die dedicated hosts without EAC; blocks cheat console/chat commands; movement thresholds for fly/teleport/speed/godmode; admin exemption; warning→kick→ban escalation; admin alerts + detection log (majimaakane) (source: wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md)
 - [[gatewarden-public]] — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes (flow-field softlock/maze checks; 30 Hz deterministic sim; 59 GUT tests + headless bot; test-driven validation reference; euuuuuuan) (source: wiki/sources/descriptions/euuuuuuan__gatewarden-public.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[aurum-re]] — Aurum RE Ricochet anti-cheat research (reverse engineering + driver development; explore anticheat:ricochet) (source: wiki/sources/descriptions/gmh5225__AurumRE.md)
