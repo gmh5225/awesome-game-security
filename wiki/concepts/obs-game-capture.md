@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/graphics-api.md
   - wiki/sources/descriptions/gmh5225__OBS-graphics-hook32-Hook.md
   - wiki/sources/descriptions/gmh5225__OBS-Hook.md
-updated: 2026-08-11
+  - wiki/sources/descriptions/ekknod__G37OBS.md
+updated: 2026-08-16
 confidence: medium
 ---
 
@@ -36,7 +37,7 @@ Game render → Present/backbuffer copy → shared GPU texture
 → mouse command → [[hardware-input-injection]]
 ```
 
-**OBS plugin form factor** — AI as an OBS video filter (`obs_source_frame` callback) runs inference in-process and may emit HID via hardware devices; appears as “OBS running a filter.”
+**OBS plugin form factor** — AI as an OBS video filter (`obs_source_frame` callback) runs inference in-process and may emit HID via hardware devices; appears as “OBS running a filter.” Title-specific Lua OBS plugins such as [[g37obs]] (ekknod; CS:GO; plugin development; cheat / game:csgo) illustrate game-facing OBS plugin research beside generic AI-filter pipelines. (source: wiki/sources/descriptions/ekknod__G37OBS.md)
 
 **Dual-machine** — Game PC OBS → NDI or capture card → cheat PC inference → network to KMBox on game PC; end-to-end latency depends on encode, buffer, and sync—measure percentiles on the deployed setup, not fixed budgets.
 
@@ -54,4 +55,4 @@ Treat as **collection signals** requiring behavioral and contextual corroboratio
 
 ## Related
 
-[[anti-screenshot-capture]] · [[present-hook]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[anti-screenshot-capture]] · [[present-hook]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[g37obs]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

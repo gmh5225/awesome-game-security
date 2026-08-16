@@ -1401,6 +1401,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nvidia-overlay-renderer](entities/nvidia-overlay-renderer.md) — GeForce Experience overlay ImGui/ESP renderer (trusted overlay surface hijack; no new overlay HWNDs; es3n1n; README [Nvidia])
 - [nvdrv](entities/nvdrv.md) — NVIDIA kernel-driver physmem BYOVD library (IOCTL → physical R/W; driver map / kernel patch / AC bypass; nvaudio.sys; gmh5225)
 - [nv-graphics-mesa](entities/nv-graphics-mesa.md) — read-only Mesa 3D mirror (OpenGL/Vulkan reference implementation; 3D Graphics; gmh5225)
+- [G37OBS (ekknod)](entities/g37obs.md) — CS:GO OBS Studio Lua plugin (plugin development; capture-based cheat / game:csgo research)
 - [nv-v2 (ekknod)](entities/nv-v2.md) — CS:GO sound ESP (C/C++; hooking; audio-derived positional awareness; cheat / game:csgo [Sound ESP])
 - [Nmi (ekknod)](entities/nmi.md) — block NMI interrupts (C/C++; cheat / windows kernel explorer; README [Blocking NMI interrupts])
 - [NMI Callback](entities/nmi-callback.md) — C/C++ kernel NMI callback driver research (Detection: Hacked Hypervisor)

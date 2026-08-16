@@ -85,6 +85,7 @@ sources:
   - wiki/sources/descriptions/ekknod__MouseClassServiceCallbackTrick.md
   - wiki/sources/descriptions/ekknod__MouseClassServiceCallbackMeme.md
   - wiki/sources/descriptions/ekknod__nv_v2.md
+  - wiki/sources/descriptions/ekknod__G37OBS.md
   - wiki/sources/descriptions/ekknod__csf_w.md
   - wiki/sources/descriptions/ekknod__csf.md
   - wiki/sources/descriptions/enis1enis2__Windfall-AntiCheat.md
@@ -1065,7 +1066,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 |----------|----------|-------|
 | Visual (ESP) | Box/skeleton ESP, radar, item highlight | Needs [[world-to-screen]] + entity lists or vision models; audio-derived **sound ESP** such as [[nv-v2]] (ekknod; C/C++; hooking; cheat / game:csgo [Sound ESP]) uses hooked game audio instead of overlay draw paths (source: wiki/sources/descriptions/ekknod__nv_v2.md) |
 | Aim assistance | Memory aimbot, triggerbot, silent aim, no-recoil, physics-derived shot guides | Server-side replay targets memory-based paths; see [[ai-aimbot-detection]] for CV pipelines; billiard titles may expose trajectory from physics reads such as [[alaa-8ball-pool-source-exposed]] (source: wiki/sources/descriptions/gmh5225__Alaa-8ball-pool-source-exposed.md) |
-| AI visual | OBS/YOLO capture → HID output | May avoid process attach; capture, model, and input artifacts remain |
+| AI visual | OBS/YOLO capture → HID output | May avoid process attach; capture, model, and input artifacts remain; CS:GO Lua OBS plugins such as [[g37obs]] (ekknod; OBS Studio plugin; cheat / game:csgo) sit in the same capture-based lane (source: wiki/sources/descriptions/ekknod__G37OBS.md) |
 | Movement | Speedhack, fly, noclip, bhop scripts | Often server-authoritative or physics-constrained |
 | Misc | Wallhack, skin changer, economy edits | Mix of client-only and networked state |
 
