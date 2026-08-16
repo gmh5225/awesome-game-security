@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dslee2022/SignatureKid`: entity [[signature-kid]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[sigthief]], [[sigflip]], and [[fakesign]].
+
 - **2026-08-16** — ingest `description:duddel/yourgamelib`: entity [[yourgamelib]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[raylib]], [[exengine]], and [[gameplay]].
 
 - **2026-08-16** — ingest `description:dufernst/LegionCore-7.3.5`: entity [[legioncore-7-3-5]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[sapphire]], [[rathena]], [[dumpwow]], and [[x14-08-coverstory-blizzard]].
