@@ -846,6 +846,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://ioninja.com/downloads.html [Protocol Analyzer]
 - https://github.com/wilszdev/SteamAntiAntiDebug [Steam]
 - https://github.com/H5GG/H5GG [IOS cheat engine]
+- https://github.com/hasaneyldrm/webcheat [Chrome extension Cheat Engine for browser/WebAssembly games — scan, edit, freeze memory and control game speed]
 - https://github.com/ri-char/pwatch [HWBP on linux/android]
 - https://github.com/enenH/pwatch-c [HWBP on linux/android]
 - https://github.com/Ylarod/hardware-breakpoint [HWBP on linux/android]
