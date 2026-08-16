@@ -1012,6 +1012,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-screenshot](entities/ida-screenshot.md) — IDA Pro high-resolution screenshot capture plugin (Python; macOS/Linux install; cheat / IDA Plugins)
 - [ida-sigmaker](entities/ida-sigmaker.md) — IDA Pro signature maker plugins (mahmoudimus: 9+ maker/searcher + SIMD; gmh5225: IDA/code-style pattern generation; cheat / IDA Plugins)
 - [ida-slides](entities/ida-slides.md) — IDA Pro Marp/Slidev live RE presentation plugin (dockable tab; @name/@addr IDB links; embed decompiled lines; cheat / IDA Plugins)
+- [ida-spotlight](entities/ida-spotlight.md) — IDA Pro workflow-centric function triage and prioritization plugin (large-binary RE; cheat / IDA Plugins)
 - [ida-taskr](entities/ida-taskr.md) — IDA Pro parallel computing library (Python; Qt + multiprocessing; cheat / IDA Plugins)
 - [IdaThemer](entities/ida-themer.md) — VS Code theme JSON → IDA Pro color theme converter (Long Night/Celestial base; cheat / IDA themes; gmh5225)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)

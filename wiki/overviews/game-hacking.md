@@ -616,6 +616,7 @@ sources:
   - wiki/sources/descriptions/idkhidden__DrawIDA.md
   - wiki/sources/descriptions/hyuunnn__Hyara.md
   - wiki/sources/descriptions/hyuunnn__ida-slides.md
+  - wiki/sources/descriptions/dyussekeyev__ida-spotlight.md
   - wiki/sources/descriptions/mdilai__Shtreeba.md
   - wiki/sources/descriptions/med0x2e__SigFlip.md
   - wiki/sources/descriptions/medievalghoul__hwid-checker-mg.md
@@ -1337,6 +1338,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Pseudocode function-definition colorizing via [[ida-functioncolor]] (Python IDA plugin; Hex-Rays view) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sneakyevil__ida_functioncolor.md)
 - Function outline / call-hierarchy trees via [[ida-func-outline]] (callers/callees + depth; iOS ARM64 decomp readability) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/richor1042__IDAFuncOutline.md)
 - Function clustering and organization for large binaries via [[idaclu]] (Qt GUI; i18n; group similar functions by criteria; visual navigation; cheat / IDA Plugins) sits in the same large-binary navigation lane. (source: wiki/sources/descriptions/harlamism__IdaClu.md)
+- Workflow-centric function triage and prioritization via [[ida-spotlight]] (IDA Pro plugin; prioritize which functions to analyze first; large-binary triage bottleneck; cheat / IDA Plugins) sits beside [[idaclu]] and [[ida-func-outline]] in that navigation lane. (source: wiki/sources/descriptions/dyussekeyev__ida-spotlight.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; PlayStation static RE; cheat / IDA Plugins) sits in the same lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - In-IDA Yara rule file scanning via [[yarascan-ida]] (Python; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senko37__yarascan-ida.md)
 - Unofficial YARA integration for IDA Pro via [[yara4ida]] (default **Alt-Y**; rebind via `plugins.cfg`; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/kweatherman__yara4ida.md)
