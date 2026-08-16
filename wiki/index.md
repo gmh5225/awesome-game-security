@@ -1655,6 +1655,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pdfwkrnl-exploit](entities/pdfwkrnl-exploit.md) — PdFwKrnl.sys (BitLocker) IOCTL exploit (unsigned kernel code load/exec; Cheat Vulnerable Driver)
 - [PdFwKrnlMapper](entities/pdfwkrnl-mapper.md) — PdFwKrnl.sys (BitLocker) DSE-bypass driver mapper (SeValidateImageData/header patch; unsigned PE map; gmh5225)
 - [pe-bear](entities/pe-bear.md) — Qt GUI PE viewer/editor (headers, imports/exports, TLS/CLR; hex edit, section manipulation, compare)
+- [pecleaner](entities/pecleaner.md) — C# strip Rich header, debug dir, PDB path, and timestamp metadata from x86/x64 PE (cheat / RE tools)
 - [pe-sieve](entities/pe-sieve.md) — Lightweight single-process malware/injection scan engine (Detection:hook; hasherezade; lib behind xMalHunter)
 - [PEReconstruct](entities/pereconstruct.md) — Python headerless PE rebuild from process memory (manual-map scan/dump, hook analysis, export resolution; no driver/debugger)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)

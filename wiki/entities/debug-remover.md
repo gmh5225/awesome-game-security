@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ utility focused on **stripping debug information** from compiled binaries—removing debug sections and symbol metadata that would otherwise aid disassemblers and debuggers. README lane: **Strip Debug Info** under Anti Cheat → Binary Packer; aimed at anti-cheat engineers and defensive security researchers hardening shipped clients or studying how debug-info presence affects RE workflows. (source: wiki/sources/descriptions/iArtorias__debug_remover.md)
 
-Complements symbol-recovery tooling ([[symless]], [[idenlib]], [[goresym]]) and debug-info browsers ([[dwex]], [[pdb]]) from the opposite direction: shrink attack surface by shipping stripped images rather than restoring names on stripped builds.
+Complements symbol-recovery tooling ([[symless]], [[idenlib]], [[goresym]]) and debug-info browsers ([[dwex]], [[pdb]]) from the opposite direction: shrink attack surface by shipping stripped images rather than restoring names on stripped builds. Broader PE metadata cleanup—including Rich header and timestamp fields—via [[pecleaner]] extends that lane on Windows x86/x64 images.
 
 ## Links
 

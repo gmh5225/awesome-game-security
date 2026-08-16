@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:colinsenner/PECleaner`: entity [[pecleaner]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[compiler-binary-richprint]] and [[debug-remover]].
+
 - **2026-08-16** — ingest `description:coltonon/D2DOverlay`: entity [[d2d-overlay]]; cited on [[overviews/graphics-api]]; cross-linked [[pubg-lite-esp]], [[external-esp-hack-assaultcube]], and [[imoverlay-dx11]].
 
 - **2026-08-16** — ingest `description:comaeio/SwishDbgExt`: entity [[swishdbgext]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[comon]], [[mcp-windbg]], and [[dumpit-mirror]].
