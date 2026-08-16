@@ -104,6 +104,7 @@ sources:
   - wiki/sources/descriptions/cristeigabriela__IDAFind.md
   - wiki/sources/descriptions/cpkt9762__ida-cli.md
   - wiki/sources/descriptions/cpkt9762__solana-sbpf-rlib.md
+  - wiki/sources/descriptions/connormcgarr__EATGuard.md
   - wiki/sources/descriptions/ytk2128__pe32-password.md
   - wiki/sources/descriptions/yoavst__ida-ios-helper.md
   - wiki/sources/descriptions/lj94093__IDAAndroidBreakpoint.md
@@ -757,7 +758,7 @@ Full-pipeline commercial AC reconstruction archives such as [[xigncode3-blackdes
 
 **Initial analysis:** identify protections (packer, obfuscator, anti-cheat), game engine and version, available symbols, and key modules with their callbacks and trust boundaries.
 
-**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks. EAC driver integrity-check deobfuscation such as [[bypassing-easyanticheat-integrity-check]] (gmh5225; Capstone-based garbage-instruction stripper reveals obfuscated EAC `.sys` integrity logic; reconstructed C++ for section-by-section driver-copy compare; CreateProcess/LoadImage notify hooks) complements reversed-source and decompile dumps when mapping AC self-protection routines. (source: wiki/sources/descriptions/gmh5225__Bypassing-EasyAntiCheat-Integrity-check.md) Scriptable kernel drivers such as [[pawnio]] (namazso; Pawn AMX VM in a WDK `.sys`; signed module load + IOCTL dispatch; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM natives) support iterative low-level hardware and driver probing without per-experiment driver rebuilds. (source: wiki/sources/descriptions/namazso__PawnIO.md)
+**Deep analysis:** locate target functionality, trace execution flow, document structures and memory artifacts, and correlate IOCTLs, kernel callbacks, and runtime integrity checks. EAC driver integrity-check deobfuscation such as [[bypassing-easyanticheat-integrity-check]] (gmh5225; Capstone-based garbage-instruction stripper reveals obfuscated EAC `.sys` integrity logic; reconstructed C++ for section-by-section driver-copy compare; CreateProcess/LoadImage notify hooks) complements reversed-source and decompile dumps when mapping AC self-protection routines. (source: wiki/sources/descriptions/gmh5225__Bypassing-EasyAntiCheat-Integrity-check.md) Scriptable kernel drivers such as [[pawnio]] (namazso; Pawn AMX VM in a WDK `.sys`; signed module load + IOCTL dispatch; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM natives) support iterative low-level hardware and driver probing without per-experiment driver rebuilds. (source: wiki/sources/descriptions/namazso__PawnIO.md) Defensive EAT hook detection such as [[eat-guard]] (connormcgarr; VEH + PAGE_GUARD monitors Export Address Table pages of loaded modules; logs overwrite attempts on exported pointers) illustrates runtime export-table integrity research beside IAT/EAT hook tradecraft. (source: wiki/sources/descriptions/connormcgarr__EATGuard.md)
 
 Engine-specific paths: Unity ([[il2cpp]] / Mono via [[dnspy]]; soft-debugger runtimes from [[dnspy-unity-mono]]; wire-protocol client [[mono-debugger-soft]]), Unreal (SDK generators, UObject/UFunction hooks), native PE (imports, pattern scan, runtime memory). (source: wiki/sources/descriptions/dnSpy__Mono.Debugger.Soft.md)
 
