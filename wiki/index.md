@@ -2119,6 +2119,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vmlinux-to-elf](entities/vmlinux-to-elf.md) — raw Linux kernel images → ELF with kallsyms (IDA/Ghidra RE)
 - [VMAttack](entities/vmattack.md) — IDA Pro Python plugin for VM-based obfuscation (dispatcher/handler-table trace, devirt assist; gmh5225)
 - [VMAware](entities/vmaware.md) — cross-platform header-only C++ VM detection (100+ techniques; CPUID/artifacts/timing/fingerprints; confidence scores; Detection:Virtual Environments)
+- [VMwareCloak](entities/vmware-cloak.md) — PowerShell VMware Windows VM cloak (hide guest from VM-evasive malware; analyst / virtual-environments research)
 - [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)

@@ -48,6 +48,7 @@ sources:
   - wiki/sources/descriptions/zhaodice__qemu-anti-detection.md
   - wiki/sources/descriptions/kila58__qemu-patched.md
   - wiki/sources/descriptions/hzqst__VmwareHardenedLoader.md
+  - wiki/sources/descriptions/d4rksystem__VMwareCloak.md
   - wiki/sources/descriptions/k3v1n1990s__docker-win.md
   - wiki/sources/descriptions/tteck__Proxmox.md
   - wiki/sources/descriptions/tenclass__mvisor.md
@@ -1660,6 +1661,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific CS:GO cheats hosted inside KVM/QEMU guests such as [[kvm-csgo-cheat]] (Rust; gmh5225) also sit in that QEMU/KVM/PVE/VBOX research lane for below-OS isolation study. (source: wiki/sources/descriptions/gmh5225__kvm-csgo-cheat.md)
 - Host-side KVM/QEMU CS1.6 triggerbots such as [[cs16-trigger-kvm]] (gmh5225; guest memory APIs + input injection from the hypervisor host) also sit in that below-OS isolation lane. (source: wiki/sources/descriptions/gmh5225__cs16-trigger-kvm.md)
 - VMware Workstation anti-detection hardening via [[vmware-hardened-loader]] (C/C++ hypervisor-level loader; CPUID/SMBIOS/ACPI/registry/MAC spoof; Windows + Linux guests) sits in the same QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/hzqst__VmwareHardenedLoader.md)
+- VMware guest VM-evasion helper [[vmware-cloak]] (PowerShell; cloak VMware Windows VMs from malware anti-VM checks; lighter analyst workflow vs [[vmware-hardened-loader]]) sits in the same QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/d4rksystem__VMwareCloak.md)
 - PVE lab helper scripts such as [[proxmox]] (dialog-driven host/LXC/VM installers) sit in the same QEMU/KVM/PVE research-host lane. (source: wiki/sources/descriptions/tteck__Proxmox.md)
 - Quick guest create/run via [[quickemu]] (optimized QEMU VMs for Windows/macOS/Linux; portable configs, no elevated perms) also sits in that QEMU/KVM research-host lane. (source: wiki/sources/descriptions/quickemu-project__quickemu.md)
 - Browser-tab full-system emulation via [[qemu-wasm]] (Emscripten WASM port of QEMU; x86 and other arch guests; VirtIO/network/storage through browser APIs; no server-side VM host) also sits in that QEMU/KVM research-host lane. (source: wiki/sources/descriptions/ktock__qemu-wasm.md)
