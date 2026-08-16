@@ -487,6 +487,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DelphiHelper](entities/delphi-helper.md) — x86/x86_64 Delphi binary analysis tooling (eset; cheat / IDA Plugins; py7zr setup)
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
+- [dezlock-dump](entities/dezlock-dump.md) — runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); live-process dump; WebSocket bridge + schema browser; no source2gen required
 - [Detours](entities/detours.md) — Microsoft Windows API monitoring/instrumentation (inline hook/trampoline; cheat / hook research)
 - [DetoursNT](entities/detoursnt.md) — NTDLL-only Microsoft Detours (no Win32; cheat / hook research)
 - [Dobby](entities/dobby.md) — lightweight multi-platform hook framework (C/C++; DirectX / Windows game tooling; cheat / hook research)
