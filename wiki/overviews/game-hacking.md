@@ -32,6 +32,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md
   - wiki/sources/descriptions/danielkrupinski__MemJect.md
+  - wiki/sources/descriptions/danielkrupinski__GOESP.md
   - wiki/sources/descriptions/zodiacon__TotalPE2.md
   - wiki/sources/descriptions/zodiacon__QuickAsm.md
   - wiki/sources/descriptions/skylot__raung.md
@@ -1524,6 +1525,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - CS:GO kernel driver + IOCTL usermode controller samples such as [[garhal-csgo]] (dretax; KM entity R/W; planned kernel DirectX overlay; cheat / game:csgo) sit in the same ring-0 cheat / game:csgo lane. (source: wiki/sources/descriptions/dretax__GarHal_CSGO.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
+- Cross-platform external CS:GO ESP samples such as [[goesp]] (danielkrupinski; modern C++; Dear ImGui overlay; memory-read entity ESP—boxes, names, health, weapons—drawn via the game's rendering pipeline; Windows and Linux; README `[Cross-platform]`) sit in the same cheat / game:csgo lane for studying external overlay ESP and detection surfaces beside internal references like [[osiris]]. (source: wiki/sources/descriptions/danielkrupinski__GOESP.md)
 - CS:GO **sound ESP** samples such as [[nv-v2]] (ekknod; C/C++; hooking; audio-derived positional awareness; README `[Sound ESP]`) sit in the same cheat / game:csgo lane as an alternative to visual overlay ESP. (source: wiki/sources/descriptions/ekknod__nv_v2.md)
 - Kernel/driver CS:GO samples such as [[ec]] (ekknod; C/C++; kernel-level work / driver development / OpenGL; cheat / game:csgo) sit in the same lane beside the related [[ec-pro-lan]] FACEIT variant. (source: wiki/sources/descriptions/ekknod__EC.md)
 - Script-based external CS:GO samples such as [[csgo-external-ahk-hack]] (gmh5225; AutoHotkey; RPM for triggerbot, bunny hop, basic ESP; External tag) sit in the same low-barrier cheat / game:csgo lane for studying script-based external detection. (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)

@@ -879,6 +879,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [goldberg-emulator](entities/goldberg-emulator.md) — Goldberg Steam Emulator (offline Steamworks API; LAN; preservation / Steam DRM+API RE)
 - [GoldSourceRebuild](entities/goldsource-rebuild.md) — decompiled/reconstructed GoldSource engine rebuild (HL1; rendering / networking / game systems; modding / research; Game Engine / RE)
 - [go-detection-hyper-v](entities/go-detection-hyper-v.md) — Go Hyper-V VM detection (CPUID feature checks, timing, hypervisor presence; gmh5225; Hyper-v)
+- [goesp](entities/goesp.md) — cross-platform CS:GO ESP (danielkrupinski; modern C++; Dear ImGui overlay; memory-read entity ESP via game render path; Windows/Linux; cheat / game:csgo [Cross-platform])
 - [goose-goose-duck-hack](entities/goose-goose-duck-hack.md) — Goose Goose Duck Unity IL2CPP internal cheat (ImGui overlay; dumped Assembly-CSharp + ACTk bypass; ESP/role reveal; gmh5225)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
 - [GamePlug](entities/gameplug.md) — Multi-API (D3D9–12/Vulkan) proxy-DLL framework for ImGui overlays and game plugins on Windows (C++23; plugin API; x86/x64)

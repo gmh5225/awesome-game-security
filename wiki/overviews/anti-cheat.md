@@ -25,6 +25,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md
   - wiki/sources/descriptions/danielkrupinski__MemJect.md
+  - wiki/sources/descriptions/danielkrupinski__GOESP.md
   - wiki/sources/descriptions/kkent030315__Van1338.md
   - wiki/sources/descriptions/kkent030315__EQU8-PoC.md
   - wiki/sources/descriptions/hotline1337__equ8_bypass.md
@@ -627,6 +628,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[heck-csgo-external]] — External CS:GO sample (C++; SDK generation / memory analysis) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - [[csgo-cheat-external]] — External CS:GO sample (C++; driver development) for studying driver-backed out-of-process cheat surface against VAC (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - [[csgo-external-cheat]] — External CS:GO sample (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
+- [[goesp]] — cross-platform external CS:GO ESP (danielkrupinski; Dear ImGui overlay; memory-read boxes/names/health/weapons via game render path; Windows and Linux) for studying external overlay ESP and overlay-based detection against VAC (source: wiki/sources/descriptions/danielkrupinski__GOESP.md)
 - [[csgo-external-ahk-hack]] — AutoHotkey external CS:GO sample (gmh5225; script RPM; triggerbot / bhop / basic ESP; no compiled cheat binary) for studying script-based out-of-process cheat surface and detection characteristics against VAC (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - [[nv-v2]] — CS:GO sound ESP sample (ekknod; C/C++; hooking; audio-derived positional awareness without visual overlay; cheat / game:csgo [Sound ESP]) for studying non-visual ESP cheat surface against VAC (source: wiki/sources/descriptions/ekknod__nv_v2.md)
 - [[csgo-backtrack-patch]] — CS:GO backtrack patch sample (C/C++; hooking / memory analysis) for studying lag-compensation / tick-history cheat surface against VAC (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
