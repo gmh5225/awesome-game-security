@@ -1563,6 +1563,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > IOS App Packaging
 - https://github.com/addrianyy/ios_packager [Package and sign iOS applications]
+- https://github.com/xscope0/xkvm-ios-injector [Go CLI toolbox to inject, extract, and convert iOS tweak packages for sideloaded IPAs]
 
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
