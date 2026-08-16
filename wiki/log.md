@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:codecat/ClawSearch`: entity [[clawsearch]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]] and [[xfindout]].
+
 - **2026-08-16** — ingest `description:codereversing/hl2aimbot`: entity [[hl2aimbot]]; cited on [[overviews/game-hacking]]; cross-linked [[hl2esp]], [[l4d2-basic]], [[l4d2-cheat]], [[teamfortress2-internal]], and [[1-6-c2]].
 
 - **2026-08-16** — ingest `description:codereversing/hl2esp`: entity [[hl2esp]]; cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[l4d2-basic]], [[l4d2-cheat]], [[teamfortress2-internal]], and [[1-6-c2]].
