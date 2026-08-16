@@ -741,6 +741,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
 - [frank](entities/frank.md) — JavaScript LoL assistant / WeGame replacement (rendering, animation, asset pipelines; gmh5225; cheat / game:lol)
+- [frinja](entities/frinja.md) — Binary Ninja Frida plugin (BinRida continuation; static+dynamic RE bridge; dzervas; cheat / Binary Ninja plugins)
 - [frinet](entities/frinet.md) — IDA Pro plugin: Frida dynamic instrumentation ↔ static analysis sync (memory/args/returns; cheat / Frida-based tracer)
 - [flare-vm](entities/flare-vm.md) — Mandiant Windows analysis VM (Chocolatey/Boxstarter; malware/IR/RE lab provisioning)
 
