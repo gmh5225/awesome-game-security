@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:dreamland-blog/KSU-Rust-Frida`: entity [[ksu-rust-frida]]; cited on [[overviews/mobile-security]] and [[kernelsu]]; cross-linked [[frida]], [[rust-frida]], and [[zygisk-frida]].
+
 - **2026-08-16** — ingest `description:dreamstalker/rehlds`: entity [[rehlds]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[regs]], [[goldsource-rebuild]], and [[hlmaster]].
 
 - **2026-08-16** — ingest `description:dreiachse-cyber/image-cockpit-for-codex-workflows`: entity [[image-cockpit-for-codex-workflows]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[awesome-gamedev-agent-skills]], [[image-blaster]], and [[interactive-feedback-mcp]].
