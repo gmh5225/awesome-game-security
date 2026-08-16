@@ -718,6 +718,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Execution Trace Viewer](entities/execution-trace-viewer.md) — view/edit/analyze execution traces (obfuscated-code RE; cheat / debugging)
 - [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
+- [exrop](entities/exrop.md) — Python automatic ROP chain generator (constraint-driven gadget synthesis from binary; Cheat / ROP Generation)
 - [EtherealEngine](entities/ethereal-engine.md) — cross-platform C++ engine (ECS + PBR + asset pipeline + editor; gmh5225; Game Engine source)
 - [ExtendedCameraSettings](entities/extended-camera-settings.md) — gameplay camera mod (FOV / distance / rotation / viewpoint params beyond engine defaults; gmh5225)
 - [External ImGui Android](entities/external-imgui-android.md) — external ImGui mod menu (OpenGL ES 3.0; SurfaceView overlay + NDK JNI; UE memory tools; gmh5225)

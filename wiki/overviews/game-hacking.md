@@ -48,6 +48,7 @@ sources:
   - wiki/sources/descriptions/zhaodice__qemu-anti-detection.md
   - wiki/sources/descriptions/kila58__qemu-patched.md
   - wiki/sources/descriptions/hzqst__VmwareHardenedLoader.md
+  - wiki/sources/descriptions/d4em0n__exrop.md
   - wiki/sources/descriptions/d4rksystem__VMwareCloak.md
   - wiki/sources/descriptions/k3v1n1990s__docker-win.md
   - wiki/sources/descriptions/tteck__Proxmox.md
@@ -1369,7 +1370,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cross-tool disassembler/debugger plugin index via [[awesome-ida-x64-olly-plugin]] (curated IDA Pro, Ghidra, x64dbg, OllyDbg, GDB plugins/scripts; patching, diffing, deobfuscation, emulation, YARA, anti-anti-debug; fr0gger) complements [[idaplugins-list]] in the Cheat IDA Plugins / x64dbg Plugins lane. (source: wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md)
 - Categorized IDA Pro plugin list via [[list-of-ida-plugins]] (implementation language, last-updated dates, category grouping; cheat / IDA Plugins) sits in the same discovery lane. (source: wiki/sources/descriptions/gmh5225__ida-plugins.md)
 - Function-level binary diffing via [[turbodiff]] (HelpSystems IDA plugin; compare two binaries' functions; cheat / IDA Plugins / diff) sits in the same static RE / patch-tracking lane. (source: wiki/sources/descriptions/helpsystems__turbodiff.md)
-- x86 ROP gadget finder + ROP chainer via [[agafi]] (HelpSystems Advanced Gadget Finder; programs/modules/live processes; cheat / ROP Finder / ROP Generation) sits in the same exploit-chain RE lane beside [[ropgadget-rs]]. (source: wiki/sources/descriptions/helpsystems__Agafi.md)
+- x86 ROP gadget finder + ROP chainer via [[agafi]] (HelpSystems Advanced Gadget Finder; programs/modules/live processes; cheat / ROP Finder / ROP Generation) sits in the same exploit-chain RE lane beside [[ropgadget-rs]] and Python automatic ROP chain builder [[exrop]] (constraint-driven synthesis from binary; cheat / ROP Generation). (source: wiki/sources/descriptions/helpsystems__Agafi.md) (source: wiki/sources/descriptions/d4em0n__exrop.md)
 - Pseudocode function-definition colorizing via [[ida-functioncolor]] (Python IDA plugin; Hex-Rays view) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sneakyevil__ida_functioncolor.md)
 - Function outline / call-hierarchy trees via [[ida-func-outline]] (callers/callees + depth; iOS ARM64 decomp readability) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/richor1042__IDAFuncOutline.md)
 - Function clustering and organization for large binaries via [[idaclu]] (Qt GUI; i18n; group similar functions by criteria; visual navigation; cheat / IDA Plugins) sits in the same large-binary navigation lane. (source: wiki/sources/descriptions/harlamism__IdaClu.md)
