@@ -87,6 +87,7 @@ sources:
   - wiki/sources/descriptions/ekknod__nv_v2.md
   - wiki/sources/descriptions/ekknod__G37OBS.md
   - wiki/sources/descriptions/ekknod__EC_PRO-LAN.md
+  - wiki/sources/descriptions/ekknod__EC.md
   - wiki/sources/descriptions/ekknod__csf_w.md
   - wiki/sources/descriptions/ekknod__csf.md
   - wiki/sources/descriptions/enis1enis2__Windfall-AntiCheat.md
@@ -1487,6 +1488,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - CS:GO **sound ESP** samples such as [[nv-v2]] (ekknod; C/C++; hooking; audio-derived positional awareness; README `[Sound ESP]`) sit in the same cheat / game:csgo lane as an alternative to visual overlay ESP. (source: wiki/sources/descriptions/ekknod__nv_v2.md)
+- Kernel/driver CS:GO samples such as [[ec]] (ekknod; C/C++; kernel-level work / driver development / OpenGL; cheat / game:csgo) sit in the same lane beside the related [[ec-pro-lan]] FACEIT variant. (source: wiki/sources/descriptions/ekknod__EC.md)
 - Script-based external CS:GO samples such as [[csgo-external-ahk-hack]] (gmh5225; AutoHotkey; RPM for triggerbot, bunny hop, basic ESP; External tag) sit in the same low-barrier cheat / game:csgo lane for studying script-based external detection. (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - CS:GO bot samples such as [[csgo-bot]] (C/C++; driver development / OpenGL / shader) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/ricencheese__csgo-bot.md)
 - CS:GO backtrack patch samples such as [[csgo-backtrack-patch]] (C/C++; hooking / memory analysis; Backtrack Patch tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)

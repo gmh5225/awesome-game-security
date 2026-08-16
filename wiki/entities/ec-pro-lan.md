@@ -20,4 +20,4 @@ Documented lab requirements emphasize a constrained host profile: **Windows 10 E
 
 ## Related
 
-[[logitech-cve]] · [[kernel-mouse]] · [[mouseclassservicecallbacktrick]] · [[present-hook]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[ec]] · [[logitech-cve]] · [[kernel-mouse]] · [[mouseclassservicecallbacktrick]] · [[present-hook]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
