@@ -24,7 +24,7 @@ README tags it `[Internal]`. Treat as a teaching-oriented internal base rather t
 | Pattern scanning | Locate signatures when interfaces or offsets drift |
 | ImGui menu | Basic in-game overlay for toggles and debug UI |
 
-See [[source-netvars]] for the netvar workflow and [[csgosimple]] for a comparable Internal CS:GO baseline.
+See [[source-netvars]] for the netvar workflow, [[csgo-cheat-base]] for a MinHook-based internal base with engine prediction and glow ESP, and [[csgosimple]] for a comparable Internal CS:GO baseline.
 
 ## Links
 
@@ -32,4 +32,4 @@ See [[source-netvars]] for the netvar workflow and [[csgosimple]] for a comparab
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[csgosimple]] · [[csgo-linux-cheat-sdk]] · [[tiny-csgo-client]] · [[vac3-inhibitor]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-netvars]] · [[csgo-cheat-base]] · [[csgosimple]] · [[csgo-linux-cheat-sdk]] · [[tiny-csgo-client]] · [[vac3-inhibitor]]

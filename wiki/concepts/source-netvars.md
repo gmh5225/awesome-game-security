@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/frk1__hazedumper.md
   - wiki/sources/descriptions/dougwithseismic__dezlock-dump.md
   - wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md
+  - wiki/sources/descriptions/designer1337__csgo-cheat-base.md
 updated: 2026-08-16
 confidence: high
 ---
@@ -48,7 +49,7 @@ Source 2 extends the model with schema-driven layouts; generators such as [[sour
 | `IClientEntityList` | `GetClientEntity(index)` entity list; live-process entity-list discovery tools such as [[gh-entity-list-finder]] (x64/x86 scan for likely list addresses) complement signature dumpers (source: wiki/sources/descriptions/guided-hacking__GH-Entity-List-Finder.md) |
 | `IEngineTrace` | Ray/world traces |
 | `ICvar` | `FindVar("sv_cheats")` and console variables |
-| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane) |
+| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane); internal bases such as [[csgo-cheat-base]] wrap these interfaces for DirectX surface drawing and glow ESP (source: wiki/sources/descriptions/designer1337__csgo-cheat-base.md) |
 
 Interface vtables and netvar tables drift per game build—verify against the target binary. Pair with [[research-rigor]] when porting offsets across patches.
 
@@ -58,4 +59,4 @@ Open or leaked trees such as [[source-engine]], Orange Box SDK trees such as [[s
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[hazedumper]] · [[offsets]] · [[offset-streaming]] · [[dvrt]] · [[gh-offset-dumper]] · [[apex-legends-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dezlock-dump]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-sdk]] · [[cs2-things]] · [[cs2-webradar]] · [[cs2-fov-changer]] · [[source-engine]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[hazedumper]] · [[offsets]] · [[offset-streaming]] · [[dvrt]] · [[gh-offset-dumper]] · [[apex-legends-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[dezlock-dump]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-sdk]] · [[cs2-things]] · [[cs2-webradar]] · [[cs2-fov-changer]] · [[source-engine]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[csgo-cheat-base]] · [[csgo-internal-base]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

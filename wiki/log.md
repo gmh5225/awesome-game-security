@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:designer1337/csgo-cheat-base`: entity [[csgo-cheat-base]]; cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-internal-base]], [[csgosimple]], and [[ntminhook]].
+
 - **2026-08-16** — ingest `description:dhanax26/Apex-Legends-Offset-Dumper`: entity [[apex-legends-offset-dumper]]; cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[gh-offset-dumper]], [[apex-legends-sdk]], and [[apex-legends-sdk-remaster]].
 
 - **2026-08-16** — ingest `description:diabloidyobane/PEReconstruct`: entity [[pereconstruct]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-sieve]], [[league-dumper]], and [[patch-finder]].
