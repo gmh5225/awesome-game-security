@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:codereversing/hl2esp`: entity [[hl2esp]]; cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[l4d2-basic]], [[l4d2-cheat]], [[teamfortress2-internal]], and [[1-6-c2]].
+
 - **2026-08-16** — ingest `description:codetronik/AndroidAntiCheat`: entity [[android-anti-cheat]]; cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[anticheat-android-cheap-engine]], [[basic-anti-cheat]], and [[mobile-anti-cheat]].
 
 - **2026-08-16** — ingest `description:codingben/maple-fighters`: entity [[maple-fighters]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[storytime]], [[gameengine-mapleengine]], and [[winapi-maplestory]].
