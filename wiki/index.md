@@ -1781,6 +1781,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SoftGLRender](entities/softglrender.md) — tiny C++ software rasterizer + OpenGL/Vulkan comparison backends (Renderer)
 - [Socket.IO](entities/socket-io.md) — Node.js/browser real-time event I/O (WS + long-poll; Game Network)
 - [Splitgate-Internal](entities/splitgate-internal.md) — Splitgate internal (C/C++; cheat / game:splitgate)
+- [SubGetVariable (ekknod)](entities/sub-get-variable.md) — EFI GetVariable RPM (C/C++; kernel-level driver development / graphics; cheat / EFI RPM)
 - [subhook](entities/subhook.md) — super-simple C/C++ inline hook lib (Win/Linux/macOS; x86 32/64; cheat / hook research)
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
 - [source-engine](entities/source-engine.md) — open TF2-era Source Engine tree (CI / cross-platform; Game Engine / source)
