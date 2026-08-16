@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:droidrun/droidrun`: entity [[droidrun]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[lamda]], [[delamain]], and [[apktool-mcp-server]].
+
 - **2026-08-16** — ingest `description:dronavallipranav/rust-obfuscator`: entity [[rust-obfuscator]]; cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[javascript-obfuscator]], [[the-poor-mans-obfuscator]], and [[obfuscator]].
 
 - **2026-08-16** — ingest `description:dsasmblr/game-hacking`: entity [[game-hacking]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[hacking-online-games]], [[retools]], [[game-reversing]], and [[gamehacking-cheatsheet]].
