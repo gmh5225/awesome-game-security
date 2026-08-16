@@ -19,6 +19,7 @@ sources:
   - wiki/sources/descriptions/dashingsoft__pyarmor.md
   - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
   - wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md
+  - wiki/sources/descriptions/danbrodsky__GFred.md
   - wiki/sources/descriptions/danielplohmann__mcrit-plugin.md
   - wiki/sources/descriptions/danielplohmann__gui-plugin-template.md
   - wiki/sources/descriptions/deadeert__EWS.md
@@ -771,7 +772,7 @@ Graph- and structure-based differencing (BinDiff, [[binexport]], [[diaphora]], [
 
 ## Cross-platform plugin development
 
-Portable PyQt/PySide GUI scaffolding via [[gui-plugin-template]] (Python; harmonized API across IDA Pro, Ghidra, Binary Ninja, and Cutter; single GUI codebase for multi-host plugins) reduces per-disassembler UI duplication when shipping analysis tooling—complementary to Git-backed annotation sync via [[binsync]] and multi-host YARA generation via [[hyara]]. (source: wiki/sources/descriptions/danielplohmann__gui-plugin-template.md)
+Portable PyQt/PySide GUI scaffolding via [[gui-plugin-template]] (Python; harmonized API across IDA Pro, Ghidra, Binary Ninja, and Cutter; single GUI codebase for multi-host plugins) reduces per-disassembler UI duplication when shipping analysis tooling—complementary to Git-backed annotation sync via [[binsync]] and multi-host YARA generation via [[hyara]]. (source: wiki/sources/descriptions/danielplohmann__gui-plugin-template.md) Ghidra Command Palette navigation via [[gfred]] (keyboard-driven action search; prebuilt Ghidra 9.2.0 extension in `dist/`; cheat / Ghidra Plugins / `[Command Palette]`) speeds manual and scripted RE workflows inside Ghidra. (source: wiki/sources/descriptions/danbrodsky__GFred.md)
 
 ## Key sub-areas
 
