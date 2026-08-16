@@ -1253,6 +1253,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/MhmRdd/NoHello [A Zygisk module to hide root]
 - https://github.com/ys1231/MoveCertificate [A Magisk/KernelSU/APatch module for moving user certificates to system certificates. Supports Android 7-15]
 - https://github.com/jiayuxuan123/RescueX [Magisk/KernelSU/APatch auto-rescue module with boot watchdog, module snapshots, and WebUI recovery]
+- https://github.com/xgl34222220-ops/BaiZe [Magisk/KernelSU/APatch module for graded cache, log, APK residue, and deep junk cleanup on rooted Android]
 - https://github.com/ri-char/zygisk-dump-dex [A zygisk module that hooks `libdexfile.so` to dump dex]
 - https://github.com/smithluke874/Android-VirtualCam-Manager [Magisk/Zygisk virtual camera module with ArtHook-based Camera1 surface and NV21 frame injection (no LSPosed)]
 
