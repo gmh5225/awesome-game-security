@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:crvvdev/vac-bypass-kernel`: entity [[vac-bypass-kernel]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[vac-bypass]], [[vac-bypass-loader]], [[como-funciona-vac]], and [[battleye-vac-eac-kernel-bypass]].
+
 - **2026-08-16** — ingest `description:cryonumb/elfloader`: entity [[elfloader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[ida-ps5-elf-plugin]], [[ps5-linux-loader]], and [[elfuck]].
 
 - **2026-08-16** — ingest `description:cryotb/RASD`: entity [[rasd]]; cited on [[stack-spoofing]] and [[overviews/anti-cheat]]; cross-linked [[shadow-stack-walk]], [[return-address-spoofer]], and [[callstackspoofer-2]].

@@ -21,6 +21,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__Osiris.md
   - wiki/sources/descriptions/danielkrupinski__cs2-anticheat.md
   - wiki/sources/descriptions/cs2-server-plugins__cs2-calladmin.md
+  - wiki/sources/descriptions/crvvdev__vac-bypass-kernel.md
   - wiki/sources/descriptions/danielkrupinski__vac-hooks.md
   - wiki/sources/descriptions/danielkrupinski__VAC.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
@@ -617,6 +618,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[vac-hooks]] — C DLL hooks WinAPI functions used by VAC; log calls and intercept arguments/return values (danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__vac-hooks.md)
 - [[vac-bypass]] — C DLL disables VAC scanning in Steam client; injects into `Steam.exe`, patches `steamservice.dll`, hooks `LoadLibraryExW`/`GetProcAddress`/`GetSystemInfo` so VAC modules abort scans (danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md)
 - [[vac-bypass-loader]] — C loader/injector for [[vac-bypass]] into Steam (VS 2019 / v142; danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md)
+- [[vac-bypass-kernel]] — kernel-mode VAC bypass against external scanner memory reads via syscalls such as `NtReadVirtualMemory` (crvvdev; explore anticheat:vac) (source: wiki/sources/descriptions/crvvdev__vac-bypass-kernel.md)
 - [[vac]] — decompiled/annotated VAC module RE corpus (detection modules, signature scanning, process memory checks, module integrity verification, Steam server comms; danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__VAC.md)
 - [[valveanticheat1]] — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode-VM rebuild (2002–2004; RE notes + decrypt/repack tooling) for studying early network-delivered detection architecture (source: wiki/sources/descriptions/shefben__VALVeAntiCheat1.md)
 - [[como-funciona-vac]] — CS2 VAC usermode architecture write-up (Trusted Launch in `cs2.exe`, `client.dll` scanners, `steam.exe` external scanner; PE hashing, interface CRC, thread inspection, VEH hardware-breakpoint checks, protobuf evidence reports; forensic overview, not a bypass) (source: wiki/sources/descriptions/ianveig29__como-funciona-vac.md)
