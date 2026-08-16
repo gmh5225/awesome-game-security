@@ -99,6 +99,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BigBaseV2](entities/bigbasev2.md) — GTA V C++/Lua mod-menu base (rendering / modding / hooking; cheat / game:gta5; gmh5225)
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
 - [adbg](entities/adbg.md) — Linux anti-debugging techniques (C/C++; Anti Debugging)
+- [adbi](entities/adbi.md) — Android Dynamic Binary Instrumentation (library injection + inline entry hooking; cheat / DBI / Android RE; crmulliner)
 - [aho-corasick](entities/aho-corasick.md) — Aho-Corasick multi-pattern string matcher (ISM; mmap automata; C API; signature/YARA-style scan backend)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
 - [AfdIrpCallDispatch](entities/afd-irp-call-dispatch.md) — Afd.sys .data pointer hook on AfdIrpCallDispatch (driver communication)
