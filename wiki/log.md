@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:crazythecoder/IW4MAdmin-SebzAntiCheat`: entity [[iw4madmin-sebzanticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[cs2-calladmin]], [[7dtd-anticheatmod]], and [[aimbot-detection-prototype]].
+
 - **2026-08-16** — ingest `description:crifan/AutoRename`: entity [[autorename]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[renamaida]], [[ida-names]], and [[pyclassinformer]].
 
 - **2026-08-16** — ingest `description:cristeigabriela/IDAFind`: entity [[idafind]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-search]], [[ida-names]], and [[happyida]].

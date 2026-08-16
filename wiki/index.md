@@ -1142,6 +1142,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [injection](entities/injection.md) — Windows injection-testing corpus (Conhost/PROPagate/ALPC/KernelCallbackTable/KnownDlls and related PoCs; Injection Testing; gmh5225)
 - [ImpulsiveDLLHijack](entities/impulsive-dll-hijack.md) — automated Windows DLL hijack research workflow (stages orchestration; cheat / DLL Hijack)
 - [Ironwall](entities/ironwall.md) — open-source AC protocol stack (TEE attestation, ZK human-input proofs, Hedera HCS match receipts; Unity/Unreal)
+- [IW4MAdmin SebzAntiCheat](entities/iw4madmin-sebzanticheat.md) — IW4X server-side suspicion telemetry + IW4MAdmin review dashboard; GSC aim/visibility checks; Discord case workflow; no auto-ban (crazythecoder)
 - [Iris](entities/iris.md) — cross-platform C++ game engine (component-based; multi-backend render; CMake; Game Engine source)
 - [injdrv](entities/injdrv.md) — kernel APC DLL injector (process notify → LdrLoadDll; C)
 - [intel-pcm](entities/intel-pcm.md) — Intel Performance Counter Monitor (CPU/memory/PCIe/power PMU telemetry; Docker/CXL)
