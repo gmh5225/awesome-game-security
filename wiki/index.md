@@ -384,6 +384,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-webradar](entities/cs2-webradar.md) — CS2 browser-based radar cheat (C++/JavaScript; memory analysis / asset pipelines; gmh5225)
 - [csf (ekknod)](entities/csf.md) — CS:GO Linux SDK generation (C/C++; Linux SDK scaffold; cheat / game:csgo [Linux SDK])
 - [csf-w (ekknod)](entities/csf-w.md) — CS:GO Win SDK generation (C/C++; Windows SDK scaffold; cheat / game:csgo [Win SDK])
+- [CSGO-AC](entities/csgo-ac.md) — ekknod CS:GO proof-of-concept anti-cheat plugin (C++/C; AC research + plugin development; Open Source Anti Cheat System)
 - [CSGO_BacktrackPatch](entities/csgo-backtrack-patch.md) — CS:GO backtrack patch (hooking / memory analysis; cheat / game:csgo)
 - [csgo-aw-v5.1.13](entities/csgo-aw-v5.1.13.md) — leaked AimWare v5.1.13 CS:GO internal (aimbot, visuals, movement, anti-aim, hooking framework; gmh5225 [aw-v5.1.13])
 - [csgo-alphen](entities/csgo-alphen.md) — CS:GO internal (full SDK with entity/weapon structures and rendering primitives; ImGui menu; ESP, aimbot, visual mods; gmh5225)
