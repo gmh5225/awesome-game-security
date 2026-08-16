@@ -2052,6 +2052,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VAC-ModuleDumper](entities/vac-module-dumper.md) — VAC module dump for offline RE (C/C++; explore anticheat:vac)
 - [VACKeyRetrieval](entities/vackeyretrieval.md) — VAC module ICE encryption key retrieval (C++; explore anticheat:vac)
 - [VALVeAntiCheat1](entities/valveanticheat1.md) — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode VM rebuild (2002–2004; RE notes + tooling)
+- [vac-hooks](entities/vac-hooks.md) — WinAPI hook/logging on VAC-used APIs (C DLL; danielkrupinski; explore anticheat:vac)
 - [Vook](entities/vook.md) — VAC hook research (explore anticheat:vac)
 - [vanguard-import-resolver](entities/vanguard-import-resolver.md) — Resolve Vanguard `vgk.sys` protected kernel imports; document import-resolution mechanism (gmh5225)
 - [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
