@@ -52,7 +52,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__L-Assemblies.md
   - wiki/sources/descriptions/gmh5225__EloBuddy-Addons.md
   - wiki/sources/descriptions/gmh5225__LViewLoL.md
-updated: 2026-08-13
+  - wiki/sources/descriptions/d1skq__vgk-dma-bypass.md
+updated: 2026-08-16
 confidence: medium
 ---
 
@@ -76,6 +77,8 @@ Exception-dispatch research such as [[val-exception-handler]] (PoC; hardware exc
 
 Page-fault telemetry such as [[vgk-illegal-pf-logger]] (logs intentional illegal PFs from `vgk.sys`; integrity-check detection mechanism RE) complements exception-dispatch PoCs and usermode working-set monitors like [[faultline]]. (source: wiki/sources/descriptions/gmh5225__vgk-illegal-pf-logger.md)
 
+DMA firmware research such as [[vgk-dma-bypass]] (modified [[pcileech-fpga]] Artix-7 `pcileech_pcie_cfg_a7.sv`; CFG-space and MSI-X-oriented changes for Vanguard DMA threat-model study) complements kernel-side telemetry and offline `vgk.sys` RE by probing PCIe config/interrupt fingerprints against Vanguard-class inventory checks. (source: wiki/sources/descriptions/d1skq__vgk-dma-bypass.md)
+
 RITO streamed-module reconstruction such as [[augur-riot]] (hashed import resolve, section rebuild, valid PE/DLL output from Vanguard driver payloads; gmh5225) supports offline static RE of Vanguard kernel modules without live driver telemetry. (source: wiki/sources/descriptions/gmh5225__augur-riot.md) Protected `vgk.sys` import resolution such as [[vanguard-import-resolver]] (resolve Vanguard kernel import addresses; document import-protection mechanism; gmh5225) complements that lane for analyzing which kernel APIs the driver calls. (source: wiki/sources/descriptions/gmh5225__VanguardImportResolver.md)
 
 Early-load offensive samples such as [[valorant-esp-hack-with-driver]] (ESP; exploits a Vanguard driver vulnerability to load a companion driver before Vanguard; kernel-injector workflow; gmh5225) illustrate the boot-order race against Vanguard's early visibility rather than in-process SDK or dump-only tooling. (source: wiki/sources/descriptions/gmh5225__valorant-esp-hack-with-driver.md)
@@ -88,4 +91,4 @@ Historical League of Legends client mod/patcher samples such as [[lol-patcher]] 
 
 ## Related
 
-[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[augur-riot]] · [[vanguard-import-resolver]] · [[lol-patcher]] · [[lol-client]] · [[lol-offset-dumper]] · [[league-dumper]] · [[league-unpacker]] · [[lol-unpackman]] · [[league-base]] · [[r3nzskin-tft]] · [[league-skin-changer]] · [[leaguesharp]] · [[leaguesharp-loader]] · [[l-assemblies]] · [[elobuddy-addons]] · [[hh-lol-prophet]] · [[frank]] · [[ayaya-league-external]] · [[lviewlol]] · [[valorant-dumper]] · [[valorant-dumper-tool]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-cheat-external]] · [[valorant-external]] · [[valorant-external-1]] · [[valorant-external-p2c-leaked]] · [[valorant-external-source]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[internal-valorant-cheat]] · [[valorant-cheat]] · [[valorant-cheat-internal]] · [[valorant-aimbot-bypass]] · [[valorant-esp-aimbot-hack]] · [[valorant-esp-aimbot-cheat-hack]] · [[valorant-hack-esp-aimbot-skinchanger]] · [[valorant-hack-esp-aimbot-skinchanger-source]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[dump-val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[overviews/anti-cheat]]
+[[easy-anti-cheat]] · [[battleye]] · [[hvci]] · [[byovd]] · [[xigmapper]] · [[augur-riot]] · [[vanguard-import-resolver]] · [[lol-patcher]] · [[lol-client]] · [[lol-offset-dumper]] · [[league-dumper]] · [[league-unpacker]] · [[lol-unpackman]] · [[league-base]] · [[r3nzskin-tft]] · [[league-skin-changer]] · [[leaguesharp]] · [[leaguesharp-loader]] · [[l-assemblies]] · [[elobuddy-addons]] · [[hh-lol-prophet]] · [[frank]] · [[ayaya-league-external]] · [[lviewlol]] · [[valorant-dumper]] · [[valorant-dumper-tool]] · [[valorant-fnamepool]] · [[valorant-externals]] · [[valorant-esp-hack-with-driver]] · [[valo-driver]] · [[valorant-cheat-external]] · [[valorant-external]] · [[valorant-external-1]] · [[valorant-external-p2c-leaked]] · [[valorant-external-source]] · [[valorant-internal]] · [[valorant-internal-base]] · [[valorant-internal-cheat]] · [[internal-valorant-cheat]] · [[valorant-cheat]] · [[valorant-cheat-internal]] · [[valorant-aimbot-bypass]] · [[valorant-esp-aimbot-hack]] · [[valorant-esp-aimbot-cheat-hack]] · [[valorant-hack-esp-aimbot-skinchanger]] · [[valorant-hack-esp-aimbot-skinchanger-source]] · [[valorantcc]] · [[vanguard-update-notifier]] · [[val-exception-handler]] · [[dump-val-exception-handler]] · [[vgk-illegal-pf-logger]] · [[vgk-dma-bypass]] · [[overviews/anti-cheat]]
