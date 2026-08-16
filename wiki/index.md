@@ -1838,6 +1838,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
+- [sdkgenny](entities/sdkgenny.md) — general C++ SDK generation library (cursey; PEGTL optional parser; cheat / sdk codegen)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
 - [SEWindows](entities/sewindows.md) — Windows TPM measured-boot verifier (TCG event log, PCR replay, WBCL policy, EK/AK remote attestation; CPU virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist; fsquirt)
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
