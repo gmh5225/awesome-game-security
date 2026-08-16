@@ -1955,6 +1955,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4dumper-emulator](entities/ue4dumper-emulator.md) — Android emulator UE4 SDK dumper (C/C++; modding / SDK generation / memory analysis; gmh5225)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
+- [unreal-source-explained](entities/unreal-source-explained.md) — profiler-driven UE4 source analysis (init / game loop / task graph / RHI / Metal·D3D11; Game Engine / Unreal guide; donaldwuid)
 - [unreal-mcp](entities/unreal-mcp.md) — MCP server for Unreal Editor (asset/level/blueprint automation; Game Develop / MCP)
 - [UnrealEngine5-UltimateStreetFighters](entities/unrealengine5-ultimate-streetfighters.md) — UE5 Street Fighters game (audio / physics / animation; C#/C++; Game Develop / Unreal source)
 - [UnrealDumper-4.25](entities/unrealdumper-4-25.md) — external UE4.25+ SDK dumper (C++; GObjects/GNames pattern scan; no inject)

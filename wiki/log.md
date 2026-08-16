@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:donaldwuid/unreal_source_explained`: entity [[unreal-source-explained]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unreal-object-model]], [[unreal-engine-guide]], [[ue4-tutorials]], and [[unreal-network-profiler]].
+
 - **2026-08-16** — ingest `description:donnaskiez/ac`: entity [[ac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[nmi-callback-handler]], [[kernel-anti-cheat]], and [[kernel-callbacks]].
 
 - **2026-08-16** — ingest `description:donnaskiez/nmi-callback-handler`: entity [[nmi-callback-handler]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback]], [[nmi-nmi-callback]], and [[kernel-anti-cheat]].
