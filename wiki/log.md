@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:crownengine/crown`: entity [[crown]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[gplayengine]], [[lumos]], and [[campfire]].
+
 - **2026-08-16** — ingest `description:crtdll/ida-gameguard-str-dec`: entity [[ida-gameguard-str-dec]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-jm-xorstr-decrypt-plugin]], [[twms-hacking-data]], and [[hacking-online-games]].
 
 - **2026-08-16** — ingest `description:crvvdev/intraceptor`: entity [[intraceptor]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[libelevate]], [[battleye-handler-bypass]], and [[vac-bypass-kernel]].
