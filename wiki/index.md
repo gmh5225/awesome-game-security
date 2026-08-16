@@ -1643,6 +1643,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Piano Game](entities/pianogame.md) — C/C++ piano game (rendering/graphics focus; Game Develop / source)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
+- [pipeviewer](entities/pipeviewer.md) — Windows GUI named-pipe enumerator (security descriptors, clients, access modes, owning process; filter/search; real-time create/delete monitor; CyberArk; Windows IPC RE)
 - [PINCE](entities/pince.md) — Linux GDB front-end (Qt; memory scan/edit, pointer chains, CE tables; Python + GDB)
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
 - [Pine](entities/pine.md) — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch; cheat / triggerbot & aimbot)

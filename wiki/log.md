@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:cyberark/PipeViewer`: entity [[pipeviewer]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[thats-no-pipe]] and [[battleye-decryption]].
+
 - **2026-08-16** — ingest `description:cyberus-technology/virtualbox-kvm`: entity [[virtualbox-kvm]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[qemu-anti-detection]], [[kvm-csgo-cheat]], and [[mvisor]].
 
 - **2026-08-16** — ingest `description:cycraft-corp/BinaryAnalysisMCPs`: entity [[binary-analysis-mcps]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[mcp-server-idapro]], and [[binary-ninja-mcp]].
