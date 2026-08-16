@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-16** — ingest `description:connorjaydunn/BinaryShield`: entity [[binary-shield]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[nocturne]], [[covirt]], [[guardian-rs]], and [[x64-virtualizer-rs]].
+
 - **2026-08-16** — ingest `description:connormcgarr/EATGuard`: entity [[eat-guard]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[memory-guard]] and [[pghooker]].
 
 - **2026-08-16** — ingest `description:corporateshark/lightweightvk`: entity [[lightweightvk]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[liblava]].
