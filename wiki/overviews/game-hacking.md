@@ -250,6 +250,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__compiler-binary-richprint.md
   - wiki/sources/descriptions/colinsenner__PECleaner.md
   - wiki/sources/descriptions/codereversing__hl2esp.md
+  - wiki/sources/descriptions/codereversing__hl2aimbot.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
   - wiki/sources/descriptions/forceinline__csgo-external-esp.md
@@ -1588,6 +1589,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Basic Left 4 Dead 2 cheat frameworks such as [[l4d2-basic]] (gmh5225; Source engine hook structures, interface resolution, starter template) sit in the cheat / game:left 4 dead 2 lane for bootstrapping Source 1 internal hook work beside TF2 and CS:GO samples. (source: wiki/sources/descriptions/gmh5225__L4D2Basic.md)
 - Internal Left 4 Dead 2 samples such as [[l4d2-cheat]] (gmh5225; Source engine SDK; VMT hooks + engine interface exploitation; ESP, aimbot, gameplay mods; Linux tag) sit in the same cheat / game:left 4 dead 2 lane beside starter frameworks. (source: wiki/sources/descriptions/gmh5225__L4D2-Cheat.md)
 - Half-Life 2 ESP samples such as [[hl2esp]] (codereversing; C/C++; hooking-centered ESP; cheat / game:half-life 2) sit in the same Source 1 internal lane beside L4D2 and TF2 samples for studying HL2-specific hook and ESP patterns. (source: wiki/sources/descriptions/codereversing__hl2esp.md)
+- Half-Life 2 aimbot samples such as [[hl2aimbot]] (codereversing; C/C++; aimbot-focused internal hooking; cheat / game:half-life 2) sit beside [[hl2esp]] in the same HL2 Source 1 lane for comparing ESP vs aimbot hook patterns. (source: wiki/sources/descriptions/codereversing__hl2aimbot.md)
 
 - Internal CS:GO samples such as [[lumina-cheat]] emphasize mutation for a changing signature (Internal tag). (source: wiki/sources/descriptions/whereisr0da__Lumina-Cheat.md)
 - Cheat-compiler research samples such as [[compiled-protection]] (C/C++; [Cheat Compiler] tag) sit adjacent to the cheat / game:csgo offensive-technique lane. (source: wiki/sources/descriptions/razixNew__CompiledProtection.md)

@@ -12,7 +12,7 @@ confidence: medium
 
 **Half-Life 2** ESP research sample (codereversing). C/C++ codebase centered on **hooking** to implement player/world ESP for the Source 1 HL2 client—aimed at game-security researchers and reverse engineers studying offensive techniques in the cheat / game:half-life 2 lane. (source: wiki/sources/descriptions/codereversing__hl2esp.md)
 
-Sits beside other Source 1 internal samples such as [[l4d2-basic]], [[l4d2-cheat]], [[teamfortress2-internal]], and GoldSrc-era [[1-6-c2]] for comparing hook and ESP patterns across Valve engine generations.
+Sits beside the companion [[hl2aimbot]] sample and other Source 1 internal references such as [[l4d2-basic]], [[l4d2-cheat]], [[teamfortress2-internal]], and GoldSrc-era [[1-6-c2]] for comparing hook, aim, and ESP patterns across Valve engine generations.
 
 ## Architecture highlights
 
@@ -28,4 +28,4 @@ Sits beside other Source 1 internal samples such as [[l4d2-basic]], [[l4d2-cheat
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[world-to-screen]] · [[present-hook]] · [[source-engine]] · [[l4d2-basic]] · [[l4d2-cheat]] · [[teamfortress2-internal]] · [[1-6-c2]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[world-to-screen]] · [[present-hook]] · [[source-engine]] · [[hl2aimbot]] · [[l4d2-basic]] · [[l4d2-cheat]] · [[teamfortress2-internal]] · [[1-6-c2]]
