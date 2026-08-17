@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:byPreaZy/.palmods`: entity [[palmods]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworld-modding-kit]], [[palworld-helper]], [[palworld-netcrack]], and [[palworld-sdk-dump]].
+
 - **2026-08-17** — ingest `description:bytemyass/EFTLeecher`: entity [[eftleecher]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[meatyeftrelease]], [[eft-dma-radar-1]], [[nathans-tarkov-radar-public]], and [[eft-external]].
 
 - **2026-08-17** — ingest `description:c3rb3ru5d3d53c/binlex`: entity [[binlex]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[hyara]], [[bndb2pat]], [[packpeek]], [[mcrit-plugin]], and [[aho-corasick]].
