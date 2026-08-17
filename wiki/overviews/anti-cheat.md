@@ -122,6 +122,7 @@ sources:
   - wiki/sources/descriptions/llxiaoyuan__oxorany.md
   - wiki/sources/descriptions/llsgllsg__Minecraft_AntiCheatAI.md
   - wiki/sources/descriptions/blaquee__dllnotif.md
+  - wiki/sources/descriptions/blackhades00__PareidoliaTriggerbot.md
   - wiki/sources/descriptions/brew02__KiUserExceptionDispatcherHook.md
   - wiki/sources/descriptions/brew02__CovertThread.md
   - wiki/sources/descriptions/bluecapesecurity__PWF.md
@@ -713,6 +714,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 - [[ow2-wardenrekter]] — Overwatch 2 Warden disable DLL (VEH/INT3 neutralization via `KiUserExceptionDispatcher` RET patch, DbgBreakPoint NOP, PEB debugger hiding, `GetTickCount64` timing stub, `NtQuerySystemInformation` block; DR0 via `SetThreadContext`; README `[Emulate OW2 AC]`; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW2-wardenrekter.md)
 - [[ow-aeternum]] — Overwatch C/C++ POC spanning anti-cheat research, rendering, and hooking (author-flagged rough POC; cheat / game:overwatch; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW-Aeternum.md)
+- [[pareidolia-triggerbot]] — hypervisor-based external Overwatch Widowmaker triggerbot (blackhades00; VivienneVMM + MouClassInputInjection; bypasses Overwatch Anti-Cheat) for studying below-OS external triggerbot surface against Blizzard Warden (source: wiki/sources/descriptions/blackhades00__PareidoliaTriggerbot.md)
 - [[ow-anti-flag]] — Overwatch chainban anti-flag console tool (dword64; modern C++; clears directories/registry keys Blizzard and cheat malware use to flag devices; cheat / HWID) (source: wiki/sources/descriptions/dword64__Ow-Anti-Flag.md)
 
 

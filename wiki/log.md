@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:blackhades00/PareidoliaTriggerbot`: entity [[pareidolia-triggerbot]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[cs16-trigger-kvm]], [[kernel-mouse]], [[overwatch-2-cheat-aimbot-esp]], and [[hardware-input-injection]].
+
 - **2026-08-17** — ingest `description:blacktop/ida-mcp-rs`: entity [[ida-mcp-rs]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[headless-ida-mcp-server]], [[ida-cli]], [[ida-pro-mcp]], and [[mcp-server-idapro]].
 
 - **2026-08-17** — ingest `description:blaquee/dllnotif`: entity [[dllnotif]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[x64dbg-view-dll-notification]] and [[kernel-callbacks]].

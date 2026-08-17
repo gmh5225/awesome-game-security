@@ -1719,6 +1719,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Panda3D](entities/panda3d.md) — Python/C++ 3D engine framework (liberal license; Game Engine / source)
 - [Pandora](entities/pandora.md) — file-suspicion analysis framework (convenient UI; Anti Cheat → Analysis Framework)
 - [ParadiseBO2](entities/paradise-bo2.md) — PS3 Paradise SPRX mod-menu source for Black Ops II (window/UI code; Game Develop / source)
+- [Pareidolia Triggerbot](entities/pareidolia-triggerbot.md) — hypervisor-based external Overwatch Widowmaker triggerbot (VivienneVMM + MouClassInputInjection; bypasses Overwatch AC; cheat / triggerbot & aimbot / game:overwatch; blackhades00)
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
 - [papaw](entities/papaw.md) — Linux ELF packer (LZMA/zstd/miniz; statically-linked; self-replacement on disk; optional anti-debug; papawify/unpapawify; Anti Cheat → Binary Packer `[ELF]` LZMA)
 - [pawtrace](entities/pawtrace.md) — Linux x86-64 ptrace syscall tracer (attach/spawn; decodes args, socket addresses, W^X memory, /proc/maps snapshots, JSONL; remote TCP; C + assembly; cocomelonc)
