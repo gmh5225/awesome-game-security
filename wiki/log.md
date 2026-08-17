@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bit-paper/sakura`: entity [[sakura]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[oxware]], [[hpp-hack]], [[simple-cs-16-multihack]], and [[1-6-c2]].
+
 - **2026-08-17** — ingest `description:bitdefender/river`: entity [[river]]; cited on [[overviews/reverse-engineering]] and [[dynamic-binary-instrumentation]]; cross-linked [[tinyinst]], [[pyda]], and [[winafl]].
 
 - **2026-08-17** — ingest `description:bkaradzic/bgfx`: entity [[bgfx]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[gplayengine]] and [[kotek]].
