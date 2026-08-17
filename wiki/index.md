@@ -1856,6 +1856,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Rebirth](entities/rebirth.md) — MapleStory GMS-095 private-server emulator (C#; login/character/map/monster AI/skills/quests/party-guild; client-server protocol; Private Server-GMS-095 / game:maplestory; gmh5225)
 - [RemnantESP](entities/remnant-esp.md) — Remnant UE ESP cheat (C#; modding / Unreal Engine / memory analysis; cheat / game:remnant; gmh5225)
 - [ReGameDLL_CS](entities/regamedll-cs.md) — reversed CS1.6 server `mp.dll` (GoldSrc; plugin API; Game Engine / RE)
+- [rel-fuscate](entities/rel-fuscate.md) — ELF JMPREL/GOT relocation obfuscation (jmprel `r_offset` misdirection; partial RELRO; Python patch toolchain; caprinux)
 - [RelocBonus](entities/relocbonus.md) — Attack Reloc (DEF CON 26; AC / Obfuscation Engine)
 - [Renamaida](entities/renamaida.md) — IDA Pro plugin: Jaro-Winkler instruction-signature rename for firmware/static libs (JSON sig DB; cheat / IDA Plugins)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
