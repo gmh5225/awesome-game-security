@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:c4kef/UAC`: entity [[uac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[anti-cheat-testing-framework]], [[anti-cheat-testbench]], [[basic-anti-cheat]], and [[anticheat-poc]].
+
 - **2026-08-17** — ingest `description:cakehonolulu/pciem`: entity [[pciem]]; cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[litepcie]], [[pcileech-fpga]], and [[pcileechgen]].
 
 - **2026-08-17** — ingest `description:can1357/NoVmp`: entity [[novmp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[novmpy]], [[vmdevirt-vtil]], and [[vmprotect]].

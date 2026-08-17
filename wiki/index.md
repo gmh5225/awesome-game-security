@@ -220,6 +220,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [anti-cheat](entities/anti-cheat.md) — C/C++ open-source anti-cheat system (jnastarot; Anti Cheat → Open Source Anti Cheat System)
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)
 - [Anti-Cheat-TestBench (ekknod)](entities/anti-cheat-testbench.md) — AC testBench harness (C++/C; AC research + driver development + hooking; Open Source Anti Cheat System; README [TestBench])
+- [UAC (c4kef)](entities/uac.md) — anti-cheat development platform (Visual Studio kernel driver; common cheat-technique detection; C++ kernel detection test framework; Cheat developer platform)
 - [Anti-Cheat-Amateur](entities/anti-cheat-amateur.md) — MemRE memory editor + GothGirlFeet kdmapper KMDF driver (NUL IOCTL; DBVM shims; UE scan; Tencent ACE research)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
 - [AntiDebugandMemoryDump](entities/antidebugandmemorydump.md) — Android anti-debug + memory analysis / emulation / debugging (Java + C/C++; gmh5225)

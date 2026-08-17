@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/krispybyte__Vook.md
   - wiki/sources/descriptions/danielkrupinski__Osiris.md
   - wiki/sources/descriptions/danielkrupinski__cs2-anticheat.md
+  - wiki/sources/descriptions/c4kef__UAC.md
   - wiki/sources/descriptions/cocomelonc__tabby.md
   - wiki/sources/descriptions/cocomelonc__peekaboo.md
   - wiki/sources/descriptions/codetronik__AndroidAntiCheat.md
@@ -679,6 +680,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
+- [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)
 - [[deadlock-anti-cheat]] — UrnIt user-mode Deadlock session AC (process list, game-window PNG screenshots, focused-window key input, CPU/GPU HWID, cheat-process signatures with optional forum scrape, macro/bot key-timing variance; Discord webhook on exit/F12; tournament/session logging vs kernel enforcement; g8tsz) (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)
 - [[anti-cheat-chrysalis]] — C/C++ reference AC / chrysalis guide (process integrity, module scan, memory pattern detection, debugger detection, overlay monitoring, kernel driver comm, OpenGL; gmh5225; Anti Cheat / guide; alias [[anticheat]]) (source: wiki/sources/descriptions/gmh5225__AntiCheat-chrysalis.md) (source: wiki/sources/descriptions/gmh5225__AntiCheat.md)
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
