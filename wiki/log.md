@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:brew02/MountSystemPartition`: entity [[mount-system-partition]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntfs-efi]], [[uefi-bootloader]], and [[efidump]].
+
 - **2026-08-17** — ingest `description:bromoket/access_updated`: entity [[access-updated]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[access]], [[intraceptor]], [[libelevate]], and [[wpp]].
 
 - **2026-08-17** — ingest `description:bruce30262/TWindbg`: entity [[twindbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[swishdbgext]], [[windbg-decompile-ext]], [[mcp-windbg]], and [[windbg-extensions]].
