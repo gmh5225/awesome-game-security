@@ -377,6 +377,7 @@ sources:
   - wiki/sources/descriptions/stijnherfst__HiveWE.md
 
   - wiki/sources/descriptions/wallds__NoVmpy.md
+  - wiki/sources/descriptions/can1357__NoVmp.md
   - wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md
@@ -1295,6 +1296,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA client + Go backend for OBPO deobfuscation via [[obpo-plugin]] (closed core; open plugin) also sits in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/obpo-project__obpo-plugin.md)
 - Fix VMP / VTIL demos such as [[vmdevirt-vtil]] (broken VTIL compile path; multi-`vmenter` → jmp into compiled VTIL for IDA) sit in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/xtremegamer1__vmdevirt-vtil.md)
 - Python VMProtect deobfuscation via [[novmpy]] (symbolic exec of handler chains; reconstruct original insn sequence; Triton) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/wallds__NoVmpy.md)
+- Static VMProtect x64 3.x devirtualization via [[novmp]] (C++; VMENTER scan → VTIL lift/optimize; Capstone/Keystone; optional recompile; can1357) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/can1357__NoVmp.md)
 - Android native-library VMP devirtualization educational lab via [[vmp-devirtualization-lab]] (mini-VM + switch dispatcher; Python bytecode disasm/lifting; dispatcher/handler recovery, symbolic lifting, trace-driven analysis, differential testing; QBDI/Unicorn/Triton/Frida/IDA/Ghidra/angr; tomhamidi97-arch) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/tomhamidi97-arch__vmp-devirtualization-lab.md)
 - Multi-engine VM detection/analysis via [[vmdragonslayer]] (DTT / SE / pattern classification / ML) sits in the Cheat RE Tools / Fix VMP-adjacent lane. (source: wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md)
 - IDA Pro VM obfuscation analysis via [[vmattack]] (Python plugin; dispatcher loops, virtual opcode handler tables, execution trace, devirtualization assist for custom VM architectures; gmh5225) also sits in the Cheat Fix VMP / devirt lane. (source: wiki/sources/descriptions/gmh5225__VMAttack.md)

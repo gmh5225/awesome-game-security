@@ -12,7 +12,7 @@ confidence: medium
 
 Python tool for deobfuscating VMProtect-virtualized code via symbolic execution. Traces VMProtect VM handler chains, symbolically executes each handler to extract semantics, and reconstructs the original instruction sequence from virtualized bytecode. Uses Triton (or similar) for analysis. Aimed at reverse engineers and malware analysts recovering code from VMProtect-protected binaries. (source: wiki/sources/descriptions/wallds__NoVmpy.md)
 
-Companion surface to other Cheat → Fix VMP research (e.g. [[vmdevirt-vtil]]): symbolic-exec handler recovery rather than a VTIL compile/display demo.
+Companion surface to other Cheat → Fix VMP research (e.g. [[novmp]], [[vmdevirt-vtil]]): symbolic-exec handler recovery rather than VTIL static lift or compile/display demos.
 
 ## Links
 
@@ -20,4 +20,4 @@ Companion surface to other Cheat → Fix VMP research (e.g. [[vmdevirt-vtil]]): 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[vmdevirt-vtil]] · [[idadeflat]] · [[deobf]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[novmp]] · [[vmdevirt-vtil]] · [[idadeflat]] · [[deobf]]
