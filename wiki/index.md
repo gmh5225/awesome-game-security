@@ -594,6 +594,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [docker-win](entities/docker-win.md) — WSL2 networking lab (QEMU/KVM/PVE/VBOX research-host lane)
 - [dbk64-vulnerability-driver](entities/dbk64-vulnerability-driver.md) — Cheat Engine `dbk64.sys` BYOVD PoC (IOCTL → arbitrary kernel R/W; debugging-tool driver; gmh5225)
 - [dolboeb-executor](entities/dolboeb-executor.md) — Capcom.sys BYOVD kernel code executor (IOCTL → shellcode or arbitrary kernel calls; gmh5225)
+- [doomretro](entities/doomretro.md) — DOOM Retro idTech 1 source port (C/SDL2; widescreen/uncapped FPS/lighting/filtering; WAD/DeHackEd/BOOM; Game Engine / source)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [dump-val-exception-handler](entities/dump-val-exception-handler.md) — Valorant exception handler registration + VEH chain dump (`RtlpCallVectoredHandlers`; Vanguard RE; gmh5225)
 - [DumpPE](entities/dumpepe.md) — lightweight CLI PE dumper (OpenProcess/RPM; SizeOfImage mapped-image dump; x86/x64; packed/protected EXE post-unpack RE; d35ha)
