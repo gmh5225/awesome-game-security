@@ -1073,6 +1073,7 @@ sources:
   - wiki/sources/descriptions/jtang613__GhidrAssistMCP.md
   - wiki/sources/descriptions/jtang613__GhidrAssist.md
   - wiki/sources/descriptions/jtang613__IDAssist.md
+  - wiki/sources/descriptions/buzzer-re__Rikugan.md
   - wiki/sources/descriptions/percpopper__VX-It.md
   - wiki/sources/descriptions/percpopper__UE4-Freecam.md
   - wiki/sources/descriptions/percpopper__Splitgate-Internal.md
@@ -1405,6 +1406,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - AI-powered IDA 9.0+ assistant for C++ game RE via [[aida]] sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/sigwl__AiDA.md)
 - Local llama.cpp IDA LLM Explainer via [[ida-llm-explainer]] (function explain/rename/struct inference; human-in-the-loop accept; CFG recovery) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/pgarba__ida-llm-explainer.md)
 - AI-powered IDA 9.0+ dockable panel via [[idassist]] (Python/PySide6; multi-provider LLM function explain/rename, semantic knowledge graph, RAG, MCP; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/jtang613__IDAssist.md)
+- Embedded RE agent for IDA Pro / Binary Ninja via [[rikugan]] (Python; multi-provider LLM chat in disassembler UI; agentic tool loop, plan mode, Ollama; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/buzzer-re__Rikugan.md)
 - Decompiler ChatGPT assistant via [[daila]] (cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/mahaloz__DAILA.md)
 - ChatGPT PCode assistant via [[ida-plugin-pcodegpt]] (Chinese UI only; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant / microcode lane. (source: wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md)
 - Multi-provider IDA vulnerability analysis via [[vulchatgpt]] (BinAIVulHunter; OpenAI/Gemini/Ollama; decompiled-function vuln analysis + code explanation; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/ke0z__VulChatGPT.md)
