@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:chaeyk/eac-leak`: entity [[eac-leak]]; cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[eac]], [[eac-easyanticheat-src-1]], and [[easy-anti-cheat]].
+
 - **2026-08-17** — ingest `description:changeofpace/Force-Page-Protection`: entity [[force-page-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[x64dbg]], [[self-remapping-code]], [[no-access-protection]], and [[memory-guard]].
 
 - **2026-08-17** — ingest `description:changeofpace/MouHidInputHook`: entity [[mouhid-input-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[mouseclassservicecallbacktrick]], [[kernel-mouse]], and [[hardware-input-injection]].

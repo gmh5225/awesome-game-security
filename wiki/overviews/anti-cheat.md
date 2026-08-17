@@ -560,6 +560,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheat-Src-1.md
   - wiki/sources/descriptions/gmh5225__EasyAntiCheat-Reversing.md
   - wiki/sources/descriptions/gmh5225__EAC.md
+  - wiki/sources/descriptions/chaeyk__eac-leak.md
   - wiki/sources/descriptions/gmh5225__EAC-Driver-UD-for-now.md
   - wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md
   - wiki/sources/descriptions/gmh5225__EAC-shellcode-1.md
@@ -604,6 +605,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[eac-easyanticheat-src-1]] — reconstructed/leaked EAC source representation: internal detection routines, driver communication protocols, and client-side integrity validation (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheat-Src-1.md)
 - [[easyanticheat-reversing]] — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable C-like driver output with registry strings and policy routines (Decompile dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EasyAntiCheat-Reversing.md)
 - [[eac]] — mixed EAC study pack: reversed `easyanticheat.sys` kernel callback/heuristic logic + EAC/EOS SDK drop with headers and `EOS_FileDecryptionTool` (Study pack lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC.md)
+- [[eac-leak]] — leaked EAC server implementation with EOS SDK anti-cheat session handling; game-server ↔ EAC cloud validation protocol RE (Server-side lane; chaeyk) (source: wiki/sources/descriptions/chaeyk__eac-leak.md)
 - [[eac-shellcode-1]] — archived raw EAC shellcode memory dump (~8.5 MB; hook entry points base+0x79204 / base+0x79304) from protected-game dumper ~Mar 2023 for offline shellcode layout / hook-flow RE (Shellcode lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-shellcode-1.md)
 - [[eac-vmcheck-asm]] — recovered `easyanticheat.sys` VM-detection assembly (`CheckVM` → `ExecVMREAD`; VMREAD probe; VM-found / VM-not-found branches) from driver `vm` directory for offline virtualization-check RE (Virtual machine checking lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-VmCheck.asm.md)
 - [[eac-easyanticheatmemorysig]] — documented EAC in-memory byte-pattern corpus for known cheat frameworks, injectors, and hack modules (Memory sig maker lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md)

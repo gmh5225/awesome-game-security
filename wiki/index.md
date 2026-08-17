@@ -684,6 +684,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EAC-HydraHook](entities/eac-hydrahook.md) — Hydra KM↔UM channel hooking; intercepts/suppresses EAC detection reports before backend upload (Packet Fucker; gmh5225)
 - [eac-injector-driver](entities/eac-injector-driver.md) — EAC state toggle via `NtQueryIntervalProfile` + HalDispatchTable (manual-map driver; thread/callback manipulation; gmh5225)
 - [EAC-Kernel-Packet-Fucker](entities/eac-kernel-packet-fucker.md) — kernel-mode EAC telemetry suppression via `ExAllocatePoolWithTag` hijack; drops ~33 KB violation reports before backend upload (gmh5225)
+- [eac-leak](entities/eac-leak.md) — leaked EAC server + EOS SDK anti-cheat session handling; game-server ↔ cloud validation protocol RE (chaeyk)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [EAC-Runtime-Extractor](entities/eac-runtime-extractor.md) — MinHook DLL; intercepts EAC kernel driver load before disk write for offline RE (gmh5225)
 - [EAC-shellcode-1](entities/eac-shellcode-1.md) — archived raw EAC shellcode memory dump from protected-game dumper (~Mar 2023; hook entry points; offline RE sample; gmh5225)
