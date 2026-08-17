@@ -1917,6 +1917,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sk3wldbg](entities/sk3wldbg.md) — IDA Pro Unicorn in-IDA emulation (x86/ARM/MIPS; register/memory setup; step without live target; Cheat Unicorn)
 - [skCrypter](entities/skcrypter.md) — C++ header-only compile-time XOR string crypter (constexpr; AC Compile Time / String Crypter)
 - [Skylicht Engine](entities/skylicht-engine.md) — lightweight Irrlicht-evolved engine (Android/iOS; Game Engine source)
+- [Skynet](entities/skynet.md) — multi-user Lua actor-model game server framework (Chinese industry staple; Game Network / source)
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)

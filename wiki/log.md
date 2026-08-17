@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cloudwu/skynet`: entity [[skynet]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[pitaya]], [[noahgameframe]], and [[kcp]].
+
 - **2026-08-17** — ingest `description:zodiacon/ObjectExplorer`: entity [[object-explorer]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[winobjex64]] and [[openark]].
 
 - **2026-08-17** — ingest `readme:categories`: Cheat ~2713 (+2; Anti Cheat ~677 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
