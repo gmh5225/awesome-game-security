@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cfig/Android_boot_image_editor`: entity [[android-boot-image-editor]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magiskboot]], [[magiskboot-linux]], [[magiskboot-ndk-on-linux]], [[magiskboot-build]], [[payload-dumper]], and [[payload-dumper-go]].
+
 - **2026-08-17** — ingest `description:winzysss/JarAnalyzer`: entity [[jaranalyzer]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[local-anticheat-1-8-9]], [[phantom-client]], [[lenrete-mod]], [[dakotaac]], [[minecraft-anticheatai]], [[bytecode-viewer]], and [[echoac-poc]].
 
 - **2026-08-17** — ingest `readme:categories`: Anti Cheat ~679 (+1; Cheat ~2713 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
