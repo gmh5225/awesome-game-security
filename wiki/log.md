@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:canyie/pine`: entity [[canyie-pine]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xposed-module-kit]], [[locusmimic]], [[frida]], and [[pine]] (petercunha; disambiguated).
+
 - **2026-08-17** — ingest `description:caprinux/rel-fuscate`: entity [[rel-fuscate]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[relocbonus]], [[call-obfuscator]], and [[covirt]].
 
 - **2026-08-17** — ingest `description:cazzwastaken/kakhack`: entity [[kakhack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-internal-base]], [[csgo-cheat-base]], [[csgo-sdk-improved]], and [[present-hook]].

@@ -1729,6 +1729,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pipeviewer](entities/pipeviewer.md) — Windows GUI named-pipe enumerator (security descriptors, clients, access modes, owning process; filter/search; real-time create/delete monitor; CyberArk; Windows IPC RE)
 - [PINCE](entities/pince.md) — Linux GDB front-end (Qt; memory scan/edit, pointer chains, CE tables; Python + GDB)
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
+- [Pine (canyie)](entities/canyie-pine.md) — Android ART Java method hooking (inline + replacement; Xposed-compatible API; Android 7.0+; no root; Android RE / app modification)
 - [Pine](entities/pine.md) — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch; cheat / triggerbot & aimbot)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
