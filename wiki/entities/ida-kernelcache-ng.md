@@ -12,7 +12,7 @@ confidence: medium
 
 IDA plugin for analyzing iOS kernelcaches. Prefer installing as a pip package and running `cli.py`. Targets game-security researchers and reverse engineers studying offensive techniques in the cheat / IDA Plugins lane. (source: wiki/sources/descriptions/gilboz__ida_kernelcache_ng.md)
 
-Complements other iOS kernelcache tooling such as [[binja-kc]] (Binary Ninja MachO kernelcache / KDK dSYM loader), LLM-assisted Mach-O decompilation via [[aimachdec]], and C++ virtual-call resolution via [[ida-kcpp]] (leverages this plugin's class hierarchy)—this project focuses on IDA-centric kernelcache analysis workflows.
+Complements other iOS kernelcache tooling such as [[binja-kc]] (Binary Ninja MachO kernelcache / KDK dSYM loader), LLM-assisted Mach-O decompilation via [[aimachdec]], C++ virtual-call resolution via [[ida-kcpp]] (leverages this plugin's class hierarchy), and PPL gate-call resolution via [[pplorer]]—this project focuses on IDA-centric kernelcache analysis workflows.
 
 ## Links
 

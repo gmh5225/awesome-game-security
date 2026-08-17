@@ -1090,6 +1090,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
 - [ida-kcpp](entities/ida-kcpp.md) — IDAPython: C++ virtual-call resolution for iOS kernelcaches (ida_kernelcache hierarchy; vcall xrefs; cheat / IDA Plugins)
 - [ida-kernelcache-ng](entities/ida-kernelcache-ng.md) — IDA plugin: iOS kernelcache analysis (pip + cli.py; cheat / IDA Plugins)
+- [pplorer](entities/pplorer.md) — IDA Pro plugin: resolve PPL gate calls to underlying PPL functions in iOS/macOS kernelcaches (Ctrl-Shift-X navigation; ida-netnode; cheat / IDA Plugins)
 - [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
 - [ida-ps5-elf-plugin](entities/ida-ps5-elf-plugin.md) — IDA Pro PS5 ELF loader (PS5 ELF extensions, segments, dynamic linking; console security RE)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
