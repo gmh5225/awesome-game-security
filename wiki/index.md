@@ -1291,6 +1291,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernelmode Manual Mapping through IAT](entities/kernelmode-manual-mapping-through-iat.md) — kernel-mode IAT manual-map injector (process handle or KM driver; IAT Manual Map)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
+- [Krunker Loader](entities/krunker-loader.md) — keyless Tampermonkey userscript stack for Krunker.io (aimbot, ESP, Quirify license-emulation loader)
 - [KPDB](entities/kpdb.md) — parse PDB in driver (C++; Some Tricks / Windows Ring0)
 - [KPM-MemReader](entities/kpm-memreader.md) — KernelPatch/APatch KPM cross-process memory read via ioctl hook (C/C++; libtersafe; cheat / Android kernel driver)
 - [kptnhook](entities/kptnhook.md) — system-wide KM DLL inject + function hook (every process; cheat / injection:windows)
