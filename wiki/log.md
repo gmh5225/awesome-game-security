@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cnitlrt/headless-ida-mcp-server`: entity [[headless-ida-mcp-server]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-cli]], [[ida-pro-mcp]], [[mcp-server-idapro]], and [[ida-mcp-server-plugin]].
+
 - **2026-08-17** — ingest `description:cocomelonc/pawtrace`: entity [[pawtrace]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[edb-debugger]], [[mandibule]], [[mempeek]], [[procmap]], [[ptrace-read-teb]], and [[peekaboo]].
 
 - **2026-08-17** — ingest `description:cocomelonc/peekaboo`: entity [[peekaboo]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[tabby]], [[scfw]], [[shellcode-factory]], [[packpeek]], [[hyara]], [[xmalhunter]], and [[anti-cheat-testing-framework]].
