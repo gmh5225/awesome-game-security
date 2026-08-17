@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bromoket/access_updated`: entity [[access-updated]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[access]], [[intraceptor]], [[libelevate]], and [[wpp]].
+
 - **2026-08-17** — ingest `description:bruce30262/TWindbg`: entity [[twindbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[swishdbgext]], [[windbg-decompile-ext]], [[mcp-windbg]], and [[windbg-extensions]].
 
 - **2026-08-17** — ingest `description:bruhmoment21/UniversalHookX`: entity [[universalhookx]]; cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[d3dhook-imgui]], [[kiero2]], [[hydrahook]], and [[gameplug]].
