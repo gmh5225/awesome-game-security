@@ -230,6 +230,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
 - [AntiHook](entities/antihook.md) — Windows kernel hook enum + remove (driver / graphics; cheat / RE tools)
 - [Anti-xorstr](entities/anti-xorstr.md) — Python IDA anti-Xorstr plugin (cheat / IDA Plugins)
+- [ANTfs](entities/antfs.md) — NTFS anti-forensics (user-mode MFT recovery + WDK kernel secure wipe; Delete File)
 
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
 - [anubis](entities/anubis.md) — Linux CS:GO internal cheat (danielkrupinski; C++; process injection; ESP/aimbot via Source SDK hooks on client rendering and game events; cheat / game:csgo [Linux])
