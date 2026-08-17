@@ -12,7 +12,7 @@ confidence: medium
 
 Collaborative reverse engineering platform that synchronizes analysis data—function names, comments, types, and structs—across multiple users and disassemblers. Supports IDA Pro, Ghidra, Binary Ninja, and angr; stores shared annotations in a Git repository so teams can push and pull analysis, merge contributions, and track change history. Aimed at reverse engineering teams collaborating on large binary analysis projects across different tools. (source: wiki/sources/descriptions/gmh5225__binsync.md)
 
-Complements single-tool live co-editing via [[idarling]] and BN↔Ghidra Server bridging via [[ghidra-svr-bridge]]—BinSync targets Git-backed, cross-disassembler annotation sync rather than real-time IDB sharing or Ghidra Server RMI alone.
+Complements single-tool live co-editing via [[idarling]], IDA-only Git-backed partial IDB sync via [[labsync]], and BN↔Ghidra Server bridging via [[ghidra-svr-bridge]]—BinSync targets Git-backed, cross-disassembler annotation sync rather than real-time IDB sharing or Ghidra Server RMI alone.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements single-tool live co-editing via [[idarling]] and BN↔Ghidra Server 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[idarling]] · [[ghidra-svr-bridge]] · [[binexport]] · [[smallworld]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[idarling]] · [[labsync]] · [[ghidra-svr-bridge]] · [[binexport]] · [[smallworld]]

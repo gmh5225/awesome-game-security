@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cellebrite-labs/LabSync`: entity [[labsync]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idarling]], [[binsync]], [[ida-migrator]], and [[idarem]].
+
 - **2026-08-17** — ingest `description:cellebrite-labs/PPLorer`: entity [[pplorer]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[ida-kernelcache-ng]], [[ida-kcpp]], and [[ida-bridge]].
 
 - **2026-08-17** — ingest `description:cellebrite-labs/ida-bridge`: entity [[ida-bridge]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-cli]], [[headless-ida-mcp-server]], and [[idac]].

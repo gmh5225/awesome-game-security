@@ -1306,6 +1306,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lazysight](entities/lazysight.md) — internal Ironsight multihack (DirectX overlay ESP/aimbot; entity lists, weapon managers, W2S SDK reads; Internal; gmh5225; cheat / game:ironsight)
 - [last-island-of-survival-ioscheat-source](entities/last-island-of-survival-ioscheat-source.md) — Last Island of Survival / Last Day Rules iOS cheat source (Objective-C runtime manipulation; gameplay mods; gmh5225; cheat / iOS)
 - [lab-esp-and-aimbot](entities/lab-esp-and-aimbot.md) — educational ESP/aimbot lab (3D target app + external cheat; W2S / RPM; cheat / guide)
+- [LabSync](entities/labsync.md) — IDA Pro plugin: Git-backed partial IDB sync (YAML export on save; mergetool merge; MD5 input-file identity; Cellebrite Labs; cheat / IDA Plugins)
 - [lc0](entities/lc0.md) — Leela Chess Zero neural chess engine (MCTS + self-play RL; CUDA/cuDNN/OpenCL; Chess Engine / game AI)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
