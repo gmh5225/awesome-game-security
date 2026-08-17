@@ -201,6 +201,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__csgo-offsets.md
   - wiki/sources/descriptions/gmh5225__csgo2-cheat.md
   - wiki/sources/descriptions/gmh5225__cs2_webradar.md
+  - wiki/sources/descriptions/clauadv__cs2_webradar.md
   - wiki/sources/descriptions/gmh5225__cs2_things.md
   - wiki/sources/descriptions/gmh5225__cs2_sdk.md
   - wiki/sources/descriptions/gmh5225__cs2-sdk.md
@@ -1613,7 +1614,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 glow ESP such as [[cs-2-glow]] (C++; entity parse / offsets / external memory glow) sits in the same cheat / game:cs2 visual lane. (source: wiki/sources/descriptions/xvorost__CS-2-Glow.md)
 - Maintained CS2 offset/netvar dumps such as [[cs2-offsets]] (C++ headers + JSON; client/server layout after patches) and [[cs2-offsets-ro0ti]] (C#/C++; `[Offset]` tag) feed that same cheat / game:cs2 memory-layout lane. (source: wiki/sources/descriptions/sezzyaep__CS2-OFFSETS.md) (source: wiki/sources/descriptions/ro0ti__CS2-Offsets.md)
 - Rust external CS2 cheats such as [[proext]] (ESP / aimbot / triggerbot / radar / RCS; egui UI) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/snipcola__ProExt.md)
-- Browser-based CS2 radar cheats such as [[cs2-webradar]] (C++/JavaScript; asset pipelines / modding / memory analysis; cheat / game:cs2 [Browser based radar cheat]; gmh5225) illustrate external radar UIs that stream entity positions to a web client instead of a native overlay. (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md)
+- Browser-based CS2 radar cheats such as [[cs2-webradar]] (gmh5225 and clauadv forks; C++/JavaScript; asset pipelines / modding / memory analysis; cheat / game:cs2 [Browser based radar cheat]) illustrate external radar UIs that stream entity positions to a web client instead of a native overlay. (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md) (source: wiki/sources/descriptions/clauadv__cs2_webradar.md)
 - CS2 DMA radar samples such as [[cs2-dma-radar]] (gmh5225; PCIe DMA hardware; player positions + game state via direct memory access; real-time radar overlay; zero target-OS software; cheat / game:cs2 [DMA]) sit in the below-OS external radar lane beside [[eft-dma-radar-1]] and native overlays such as [[proext]]. (source: wiki/sources/descriptions/gmh5225__CS2-Dma-Radar.md)
 - CS2 DMA cheat samples such as [[cs2-dma-cheat]] (eden13378; C/C++; shader/rendering/audio systems; PCIe DMA; zero target-OS software; cheat / game:cs2 [DMA]) sit in the below-OS full-feature DMA lane beside [[cs2-dma-radar]] and [[gta5-dma-cheat]]. (source: wiki/sources/descriptions/eden13378__CS2-DMA-Cheat.md)
 - CS2 Source 2 research collections such as [[cs2-things]] (VScript; gmh5225; RE structures / offset dumps / SDK snippets / entity layouts / netvars / engine interfaces; cheat / game:cs2) sit in the same cheat / game:cs2 memory-layout and Source 2 RE lane. (source: wiki/sources/descriptions/gmh5225__cs2_things.md)
