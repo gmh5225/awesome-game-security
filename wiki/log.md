@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bmax121/APatch`: entity [[apatch]]; cited on [[overviews/mobile-security]]; cross-linked [[kernelpatch]], [[apatch-kpm]], [[kernelsu]], and [[magisk]].
+
 - **2026-08-17** — ingest `description:bmax121/KernelPatch`: entity [[kernelpatch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[apatch-kpm]], [[kpm-memreader]], [[mkpms]], and [[honor-of-kings-re-research]].
 
 - **2026-08-17** — ingest `description:bmharper/WindowsDesktopDuplicationSample`: entity [[windows-desktop-duplication-sample]]; cited on [[overviews/graphics-api]] and [[anti-screenshot-capture]]; cross-linked [[screencapture]] and [[screenshot]].

@@ -289,6 +289,7 @@ sources:
   - wiki/sources/descriptions/dreamland-blog__KSU-Rust-Frida.md
   - wiki/sources/descriptions/cfig__Android_boot_image_editor.md
   - wiki/sources/descriptions/bmax121__KernelPatch.md
+  - wiki/sources/descriptions/bmax121__APatch.md
   - wiki/sources/descriptions/brunodev85__winlator.md
 updated: 2026-08-17
 confidence: high
@@ -310,9 +311,10 @@ Android and iOS game security: APK/IPA analysis, native/IL2CPP reversing, root/j
 | [[magisk]] | User/init | Medium | Yes | Mature (DenyList / Shamiko root-hide) |
 | [[kernelsu]] | Kernel | High | Yes | Growing (Magisk-module API compat) |
 | [[apex-su]] | Kernel (KernelSU fork) | High+ | Yes (GKI 2.0) | KernelSU-compatible; Rust userspace + stealth IOCTL |
-| [[apatch-kpm]] | Kernel (KernelPatch boot patch) | High | Yes | Growing (stock GKI without custom kernel source) |
+| [[apatch]] | Kernel (KernelPatch boot patch) | High | Yes | KPM modules; SuperKey above root (stock GKI) |
+| [[apatch-kpm]] | Kernel (KPM collection) | High | Yes | Example KPM module pack for [[apatch]] |
 
-[[kernelpatch]] (bmax121; C/C++; hooking the Linux kernel; kernel modding/hooking framework) underpins APatch boot-image patching on stock GKI Android. APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/bmax121__KernelPatch.md) (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
+[[apatch]] (bmax121; Android kernel + system patch; SuperKey above root; cheat / Android root) applies [[kernelpatch]] boot-image patching on stock GKI Android without custom kernel sources. APatch **KPM** (KernelPatch Module) collections such as [[apatch-kpm]] (C/C++; kernel modding/debug extensions for the APatch module lane) extend root at kernel scope — same KPM class as ACE title RE (`acepeek` in [[honor-of-kings-re-research]]). (source: wiki/sources/descriptions/bmax121__APatch.md) (source: wiki/sources/descriptions/bmax121__KernelPatch.md) (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
 
 Curated Android root resource index [[awesome-android-root]] (fynks; documentation/list; cheat / Android root) aggregates frameworks, modules, and bypass references; flags stricter **Play Integrity** on Android 14/15 when pairing root with game integrity checks. (source: wiki/sources/descriptions/fynks__awesome-android-root.md) Root-only USB serial number spoofing such as [[usbsn]] (ekknod; C++/Java; peripheral HWID surface; Some Tricks / Android) sits in the same root-dependent device-identity lane beside mount/prop hide work. (source: wiki/sources/descriptions/ekknod__usbsn.md)
 

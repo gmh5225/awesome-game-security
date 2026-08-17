@@ -10,7 +10,7 @@ confidence: medium
 
 # APatch KPM
 
-Collection of **APatch modules** (KernelPatch Module / KPM) for the APatch root framework. Written primarily in C/C++; focuses on kernel-level modding, debugging, and extension hooks loaded through APatch's KernelPatch boot-image patch path on stock GKI devices. Listed under Cheat / Android root for game-security researchers and reverse engineers studying offensive Android root techniques alongside [[magisk]] and [[kernelsu]]. (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
+Collection of **APatch modules** (KernelPatch Module / KPM) for the [[apatch]] root framework. Written primarily in C/C++; focuses on kernel-level modding, debugging, and extension hooks loaded through APatch's KernelPatch boot-image patch path on stock GKI devices. Listed under Cheat / Android root for game-security researchers and reverse engineers studying offensive Android root techniques alongside [[magisk]] and [[kernelsu]]. (source: wiki/sources/descriptions/lzghzr__APatch_kpm.md)
 
 KPMs extend APatch at kernel scope — same module class referenced in title RE such as [[honor-of-kings-re-research]] (`acepeek` KernelPatch modules vs Tencent ACE). Complements Magisk/KernelSU/APatch userland modules such as [[move-certificate]], [[florida-zygisk]], and [[root-socket-kit]].
 
@@ -20,4 +20,4 @@ KPMs extend APatch at kernel scope — same module class referenced in title RE 
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[magisk]] · [[kernelsu]] · [[move-certificate]] · [[florida-zygisk]] · [[root-socket-kit]] · [[honor-of-kings-re-research]] · [[mobile-anti-cheat]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[apatch]] · [[kernelpatch]] · [[magisk]] · [[kernelsu]] · [[move-certificate]] · [[florida-zygisk]] · [[root-socket-kit]] · [[honor-of-kings-re-research]] · [[mobile-anti-cheat]]
