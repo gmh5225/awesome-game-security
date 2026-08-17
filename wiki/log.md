@@ -5101,3 +5101,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:canyie/Riru-MomoHider`: entity [[riru-momo-hider]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-linked [[magisk]], [[magiskdetector]], [[hideroot]], and [[magiskhide]].
 
 - **2026-08-17** — ingest `description:bulletphysics/bullet3`: entity [[bullet3]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[gameplay]], [[gplayengine]], [[lumos]], [[stride]], and [[yourgamelib]].
+
+- **2026-08-17** — ingest `description:bromoket/x64dbg_mcp`: entity [[x64dbg-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-automate-pyclient]], and [[x64dbg-rippy]].

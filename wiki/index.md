@@ -2357,6 +2357,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x64-virtualizer-rs](entities/x64-virtualizer-rs.md) — Rust toy x86-64 stack-VM obfuscator (iced-x86 lift; JIT vmenter/vmexit; VM internals study; AC Obfuscation Engine `[VM]`; cursey)
 - [x64dbg](entities/x64dbg.md) — Windows x86/x64 debugger (plugins; Cheat Debugging)
 - [x64dbg-automate-pyclient](entities/x64dbg-automate-pyclient.md) — Python x64dbg Automate RPC client (ZeroMQ/msgpack; breakpoints/memory/registers/disasm/session/GUI; optional MCP server; scriptable debug sessions)
+- [x64dbg-mcp](entities/x64dbg-mcp.md) — MCP server for x64dbg (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf)
 - [x64dbg Plugin Manager](entities/x64dbg-plugin-manager.md) — x64dbg plugin install/management (C++/C; plugin development / modding; Cheat x64dbg Plugins)
 - [x64dbg Trace Reader](entities/x64dbg-trace-reader.md) — standalone `.trace64` parser (Capstone disasm; register/memory state; regex filter; offline trace analysis)
 - [X64DBG MapLdr](entities/x64dbg-mapldr.md) — x64dbg plugin: load linker/IDA MAP files into symbol database (MSVC/Borland; function/global/segment names; C++; Cheat x64dbg Plugins)
