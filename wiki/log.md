@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:block/stoic`: entity [[stoic]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[canyie-pine]], [[frida]], [[xposed-module-kit]], and [[phantom-client]].
+
 - **2026-08-17** — ingest `description:bloesway/csgo_sdk`: updated entity [[csgo-sdk]] (bloesway/csgo_sdk alongside gmh5225 forks); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-animation-code-reversed]], [[csgo-sdk-improved]], and [[csgo-internal-base]].
 
 - **2026-08-17** — ingest `description:bluefrostsecurity/CVE-2020-0041`: updated [[cve-2020-0041]] (Blue Frost Security full Chrome→kernel exploit chain); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].

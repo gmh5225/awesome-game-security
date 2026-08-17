@@ -2054,6 +2054,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [starrail-ace-b](entities/starrail-ace-b.md) — Honkai: Star Rail Tencent ACE RE (kernel driver, integrity checks, detection/bypass; explore anticheat; gmh5225)
 - [starrail-s-gc](entities/starrail-s-gc.md) — Honkai: Star Rail simple cheat (C/C++; Unity / hooking; cheat / game:honkai star rail; gmh5225)
 - [starrailcopilot](entities/starrailcopilot.md) — Honkai: Star Rail automation copilot (Python; screen recognition + input; daily/stamina/farming; cheat / game:honkai star rail [Script]; gmh5225)
+- [Stoic](entities/stoic.md) — Block JVMTI Android attach tooling (debuggable API 26+; no APK mod; live Java/Kotlin hooks, heap inspection, plugin system; Android RE / developer tooling)
 - [Stockfish](entities/stockfish.md) — open-source chess engine (alpha-beta + NNUE eval; UCI; C++; Chess Engine / game AI)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
