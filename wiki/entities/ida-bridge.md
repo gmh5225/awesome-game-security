@@ -3,16 +3,16 @@ title: ida-bridge
 kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
-  - https://github.com/cellebrite-labs/ida-bridge
-updated: 2026-08-04
+  - wiki/sources/descriptions/cellebrite-labs__ida-bridge.md
+updated: 2026-08-17
 confidence: medium
 ---
 
 # ida-bridge
 
-**Agent bridge for IDA Pro 9+** (Cellebrite Labs): a CLI + plugin + headless `idalib` runner that lets AI agents execute **IDAPython** and **SQL** queries against live IDA databases. UI IDA instances connect to a local bridge server over WebSocket; agents use `ida-bridge list`, `exec`, and `supervisor` to discover targets, run stateless or stateful sessions, launch/stop/save instances, and fire one-shot `exec-idb` probes.
+**Agent bridge for IDA Pro 9+** (Cellebrite Labs): a Python framework with CLI, IDA UI plugin, and headless **idalib** runner that connects AI agents to live IDA databases over a WebSocket bridge server. Agents execute **IDAPython** and **SQL** without fragile API knowledge — the SQL layer exposes functions, disassembly, decompiler output, types, cross-references, and other IDB data. Supports stateful/stateless exec sessions, one-shot `exec-idb` headless runs, dyld shared-cache single-module extraction, and reusable analysis snippets; bundled `skills/ida-bridge/` agent skill. Targets reverse engineers and game security researchers for AI-assisted binary analysis, annotation, and exploration. (source: wiki/sources/descriptions/cellebrite-labs__ida-bridge.md)
 
-The SQL layer sidesteps stale IDAPython knowledge by translating standard queries (e.g. `SELECT name, start_ea FROM funcs WHERE name LIKE '%auth%'`) into correct IDA 9.x API calls internally (IDA-over-SQL lineage from idasql/libxsql). When SQL is insufficient, the bundled `skills/ida-bridge/` skill directs agents to pair with **ida-docs** for verified IDAPython. Supports dyld shared-cache single-module IDB creation on macOS. Prerequisites: IDA Pro ≥ 9.0, macOS, optional `ida-setup` for unified `~/.idapro/venv`.
+UI IDA instances connect to a local bridge; agents use `ida-bridge list`, `exec`, and `supervisor` to discover targets, run sessions, and manage IDA lifecycle. When SQL is insufficient, the bundled skill directs agents to pair with **ida-docs** for verified IDAPython. Prerequisites: IDA Pro ≥ 9.0, macOS, optional `ida-setup` for unified `~/.idapro/venv`.
 
 ## Links
 
@@ -21,4 +21,4 @@ The SQL layer sidesteps stale IDAPython knowledge by translating standard querie
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[idac]] · [[ida-pro-mcp]] · [[ida-mcp-server-plugin]] · [[iida-mcp]] · [[ida-assistant]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[idac]] · [[ida-cli]] · [[headless-ida-mcp-server]] · [[ida-pro-mcp]] · [[ida-mcp-server-plugin]] · [[iida-mcp]] · [[ida-assistant]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cellebrite-labs/ida-bridge`: entity [[ida-bridge]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-cli]], [[headless-ida-mcp-server]], and [[idac]].
+
 - **2026-08-17** — ingest `description:cfig/Android_boot_image_editor`: entity [[android-boot-image-editor]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magiskboot]], [[magiskboot-linux]], [[magiskboot-ndk-on-linux]], [[magiskboot-build]], [[payload-dumper]], and [[payload-dumper-go]].
 
 - **2026-08-17** — ingest `description:winzysss/JarAnalyzer`: entity [[jaranalyzer]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[local-anticheat-1-8-9]], [[phantom-client]], [[lenrete-mod]], [[dakotaac]], [[minecraft-anticheatai]], [[bytecode-viewer]], and [[echoac-poc]].
