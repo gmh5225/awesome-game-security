@@ -18,7 +18,7 @@ The README lists two independent implementations under the same label:
 - **justinpbarnett/unity-mcp** — C# and Python; shader, rendering, and graphics-oriented MCP surface (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **wondeks/unity-mcp** — editor + C# scripting interaction (source: wiki/sources/descriptions/wondeks__unity-mcp.md)
 
-Complements editor-side Unity automation such as [[unicli]] (terminal CLI) by exposing Unity via MCP instead of a command-line surface.
+Complements editor-side Unity automation such as [[unicli]] (terminal CLI) and [[com-unity-ide-cursor]] (Cursor external editor integration) by exposing Unity via MCP instead of a command-line or IDE-launch surface.
 
 ## Links
 
@@ -27,4 +27,4 @@ Complements editor-side Unity automation such as [[unicli]] (terminal CLI) by ex
 
 ## Related
 
-[[unicli]] · [[il2cpp]] · [[overviews/game-engine]] · [[overviews/overview]]
+[[unicli]] · [[com-unity-ide-cursor]] · [[il2cpp]] · [[overviews/game-engine]] · [[overviews/overview]]

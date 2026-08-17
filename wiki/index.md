@@ -387,6 +387,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CountHook](entities/count-hook.md) — working-set memory-check bypass (count-oriented; Cheat / Bypass Page Protection)
 - [CppServer](entities/cppserver.md) — C++ server framework with Fast Binary Encoding message protocols (Game Network / source; modding + memory analysis)
 
+- [com.unity.ide.cursor](entities/com-unity-ide-cursor.md) — Unity package: Cursor as external code editor (Plugins:Unity; C#/C++)
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [Common-Registry-Jmp-RCX](entities/common-registry-jmp-rcx.md) — CmRegisterCallback + JMP RCX gadget in nvraid.sys for covert KM↔UM registry-callback comm (gmh5225; Registry Callback)
 - [comm-data-ptr-driver](entities/comm-data-ptr-driver.md) — shared data-ptr KM↔UM comm via NtGdiPolyPolyDraw; avoids IOCTL telemetry (gmh5225; cheat driver)

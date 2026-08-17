@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:boxqkrtm/com.unity.ide.cursor`: entity [[com-unity-ide-cursor]]; cited on [[overviews/game-engine]]; cross-linked [[unicli]], [[unity-mcp]], and [[unity-script-collection]].
+
 - **2026-08-17** — ingest `description:boylin0/AVA-Hack`: entity [[ava-hack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[d3dhook-imgui]], [[universalhookx]], [[kiero2]], [[present-hook]], and [[vulkan-hook]].
 
 - **2026-08-17** — ingest `description:brackeen/glfm`: entity [[glfm]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[yourgamelib]], [[mojoc]], [[gameplay]], and [[android-opengl-es-chams]].

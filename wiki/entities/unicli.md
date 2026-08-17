@@ -20,4 +20,4 @@ Fits the Game Engine Plugins:Unity and Game Develop (AI Agents) lanes—useful w
 
 ## Related
 
-[[il2cpp]] · [[overviews/game-engine]] · [[overviews/overview]]
+[[com-unity-ide-cursor]] · [[unity-mcp]] · [[il2cpp]] · [[overviews/game-engine]] · [[overviews/overview]]
