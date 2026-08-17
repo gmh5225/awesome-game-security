@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:buzzer-re/ToCode`: entity [[tocode]]; cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[radare2-mcp]], [[gpt-wpre]], [[binlex]], [[mcrit-plugin]], and [[idaclu]].
+
 - **2026-08-17** — ingest `description:byPreaZy/.palmods`: entity [[palmods]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworld-modding-kit]], [[palworld-helper]], [[palworld-netcrack]], and [[palworld-sdk-dump]].
 
 - **2026-08-17** — ingest `description:bytemyass/EFTLeecher`: entity [[eftleecher]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[meatyeftrelease]], [[eft-dma-radar-1]], [[nathans-tarkov-radar-public]], and [[eft-external]].
