@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:binsnake/KUBERA`: entity [[kubera]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[winvisor]], [[kace]], [[emulator]], and [[dynamic-binary-instrumentation]].
+
 - **2026-08-17** — ingest `description:binsnake/fARM64`: entity [[farm64]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[koidbg]], [[qbdi-tracer-android]], and [[quickasm]].
 
 - **2026-08-17** — ingest `description:bit-paper/sakura`: entity [[sakura]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[oxware]], [[hpp-hack]], [[simple-cs-16-multihack]], and [[1-6-c2]].

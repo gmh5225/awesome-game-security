@@ -1255,6 +1255,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [jupyter-mcp-server](entities/jupyter-mcp-server.md) — MCP server for Jupyter notebooks (create/read/edit/execute; stdio/streamable HTTP; local Jupyter/JupyterHub/Colab; Game Develop / MCP for Jupyter)
 - [jwt_tool](entities/jwt-tool.md) — Python JWT toolkit (validate/forge/scan; Game Network / JWT Auth)
 - [KACE](entities/kace.md) — RING3 Windows kernel-driver emulator (self context / Unicorn; AC analysis)
+- [KUBERA](entities/kubera.md) — platform-independent x86 Windows user+kernel emulator (research; cheat / DBI; binsnake)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [Karlann](entities/karlann.md) — KM keyboard injection + WSK socket PoC (Kbd.c / Wsk.c; libwsk; cheat / Keyboard)
 - [KasperskyHook](entities/kaspersky-hook.md) — Kaspersky `klhk.sys` hypervisor syscall hook (`IA32_LSTAR` dispatch redirect + custom driver; gmh5225)
