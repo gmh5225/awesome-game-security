@@ -1672,6 +1672,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AtomPePacker](entities/atom-pe-packer.md) — Windows PE X64 compress+encrypt packer (runtime stub; import/relocation/TLS restore; Anti Cheat → Binary Packer `[PE X64]`; gmh5225)
 - [PEPacker](entities/pepacker.md) — C++ PE X64 packer (asset pipeline; Anti Cheat → Binary Packer `[PE X64]`)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
+- [peekaboo](entities/peekaboo.md) — modular malware-behavior emulator (safe C2/persistence/lateral-movement; Python CLI/TUI/Flask + C/C++ modules; MITRE ATT&CK + Sigma/YARA + VT; purple-team / detection engineering; cocomelonc)
 - [perf-ninja](entities/perf-ninja.md) — C++ CPU performance optimization labs (cache/branch/vectorization; Alder Lake/Zen 3/M1 CI; Performance Analysis)
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
 - [PESignAnalyzer](entities/pesign-analyzer.md) — Windows PE embedded Authenticode signature metadata extractor (Anti Cheat → Sign Tools)

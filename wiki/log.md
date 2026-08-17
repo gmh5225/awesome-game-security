@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cocomelonc/peekaboo`: entity [[peekaboo]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[tabby]], [[scfw]], [[shellcode-factory]], [[packpeek]], [[hyara]], [[xmalhunter]], and [[anti-cheat-testing-framework]].
+
 - **2026-08-17** — ingest `description:cocomelonc/tabby`: entity [[tabby]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[scfw]], [[shellcode-factory]], [[obj2shellcode]], [[tartarus-tp-alloc-inject]], [[stack-spoofing]], and [[windows-process-injection]].
 
 - **2026-08-17** — ingest `description:cocos/cocos-engine`: entity [[cocos-engine]]; cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[cocos4]], [[cocos2d-x]], and [[game-engine-detector]].
