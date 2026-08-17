@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:clearbluejar/ghidriff`: entity [[ghidriff]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[diaphora]], and [[turbodiff]].
+
 - **2026-08-17** — ingest `description:clibequilibrium/EquilibriumEngine`: entity [[equilibrium-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[ethereal-engine]], [[oxylus]], [[nightshade]], [[island]], and [[orkige]].
 
 - **2026-08-17** — ingest `description:click4dylan/CSGO_AnimationCode_Reversed`: entity [[csgo-animation-code-reversed]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[csgo-sdk]], [[csso-src]], and [[master-guide]].

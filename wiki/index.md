@@ -891,6 +891,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GptHidra](entities/gpthidra.md) — Ghidra ChatGPT plugin (selected-function explanation to console; cheat / Ghidra Plugins)
 - [ghidra-openai](entities/ghidra-openai.md) — Ghidra OpenAI GPT plugin (decompiled-function explain/rename/vuln hints; ChatGPT lane)
 - [ghidra-scripts](entities/ghidra-scripts.md) — CTF-oriented GhidraScript collection (automated common RE challenge patterns; cheat / Scripts)
+- [ghidriff](entities/ghidriff.md) — Python CLI Ghidra binary diffing engine (headless two-binary analysis; graph/BSim matching; Markdown decomp/call-graph reports; PE/Mach-O/ELF; Docker CI; clearbluejar)
 - [ghiradec](entities/ghiradec.md) — programmatic Ghidra decompiler (integration or standalone; Ghidra analysis engine; automated binary analysis; Cheat Ghidra Decompiler)
 - [GhidrAssist](entities/ghidrassist.md) — Ghidra LLM extension (OpenAI v1-compatible APIs; local/cloud; cheat / Ghidra Plugins)
 - [ghidrassist-mcp](entities/ghidrassist-mcp.md) — Ghidra MCP extension (AI assistants / automation / scripts → Ghidra analysis APIs)
