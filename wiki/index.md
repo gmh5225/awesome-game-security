@@ -1984,6 +1984,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [StealthAPCDispatcher](entities/stealth-apc-dispatcher.md) — stealth kernel APC dispatch with encrypted shellcode (non-standard queue paths; AC APC monitoring bypass research; gmh5225)
 - [StealthSytemThreadFinderBE](entities/stealth-sytem-thread-finder-be.md) — find hidden system threads BE misses (PspCidTable; scheduler queue; manual-map)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
+- [tabby](entities/tabby.md) — minimal PIC C shellcode micro-framework (PEB/EAT + FNV-1a API hashing; indirect NT syscalls; Linux mingw-w64/nasm → flat `.bin`; cocomelonc; AC shellcode engine & tricks)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
 - [tableflipper](entities/tableflipper.md) — partial PatchGuard disable up to Win11 21H2 (C++; cheat / PatchGuard-related; emlinhax)
 - [taskbarhero-bot](entities/taskbarhero-bot.md) — TaskbarHero Unity IL2CPP external trainer/bot (C#/.NET 10; ACTk bypass, batch-read automations, WPF panel; matheusbranhann)
