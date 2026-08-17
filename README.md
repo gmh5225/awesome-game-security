@@ -4583,6 +4583,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/artmih24/TeleParser [Simple parser for Telegram chats and channels with lemmatizer. Writes data in JSON, CSV and MongoDB]
 - https://github.com/Sutaigne/alibi [Read-only Windows forensic kit for game-cheat/DMA/BYOVD and console-rig aimbot evidence]
 - https://github.com/PickAngE/AntiCheat-Scanner [Windows forensic scanner for ACE, EAC, BattlEye, EA AC, and HoYoProtect via drivers, services, BAM, Prefetch, and PE metadata]
+- https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
 
 > Dynamic Script
 - https://github.com/can1357/NtLua
