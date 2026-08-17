@@ -5077,3 +5077,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:cellebrite-labs/FunctionInliner`: entity [[function-inliner]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-func-outline]], [[genmc]], [[happyida]], [[ida-kcpp]], [[labsync]], and [[ida-bridge]].
 
 - **2026-08-17** — ingest `description:canyie/Riru-MomoHider`: entity [[riru-momo-hider]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-linked [[magisk]], [[magiskdetector]], [[hideroot]], and [[magiskhide]].
+
+- **2026-08-17** — ingest `description:bulletphysics/bullet3`: entity [[bullet3]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[gameplay]], [[gplayengine]], [[lumos]], [[stride]], and [[yourgamelib]].
