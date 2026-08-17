@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cheatingwitdacode/apex-cheating`: entity [[apex-cheating]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[apex-spoofer]], [[apex-legends-offset-dumper]], [[easy-anti-cheat]], and [[hwid-spoofer-eac-be]].
+
 - **2026-08-17** — ingest `description:cherriesandmochi/gdmaim`: entity [[gdmaim]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[gddumper]], [[godot]], [[obfuz]], and [[static-variables-obfuscator-ue4]].
 
 - **2026-08-17** — ingest `description:chongdashu/unreal-mcp`: updated [[unreal-mcp]] (chongdashu fork section); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[unity-mcp]] and [[better-godot-mcp]].
