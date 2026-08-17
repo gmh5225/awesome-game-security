@@ -1046,6 +1046,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Hyara](entities/hyara.md) — multi-platform YARA rule generation (IDA Pro, Ghidra, Binary Ninja, Cutter; cheat / Yara)
 - [HumanMouseMovement](entities/human-mouse-movement.md) — human-like mouse movement (C/C++; cheat / triggerbot & aimbot)
 - [hv-detect](entities/hv-detect.md) — hypervisor IDT detections SIDT/LIDT (gmh5225; controlled context + restore; Detection: Hacked Hypervisor)
+- [hvdetecc](entities/hvdetecc.md) — x86-64 HV/VMM detection collection (can1357; PMC/TLB/timing/MSR/interrupt; VMX/SVM + Type-1 SMBIOS/ACPI/PCI; Detection: Hacked Hypervisor)
 - [hv](entities/hv.md) — minimal Intel VT-x Type-2 hypervisor (VMX/VMCS learning)
 - [HVCI-loldrivers-check](entities/hvci-loldrivers-check.md) — PowerShell HVCI LOLdrivers check (Trail of Bits; vulnerable-driver lane)
 - [hw3d](entities/hw3d.md) — C++ 3D DirectX tutorial (Planet Chili; DirectX / guide)

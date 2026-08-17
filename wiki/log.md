@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:can1357/hvdetecc`: entity [[hvdetecc]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hypervisor-detection]], [[hv-detect]], [[vmdtstr]], and [[detect-hypervisor-detect-ring-0]].
+
 - **2026-08-17** — ingest `description:cansarigol/pdbr`: entity [[pdbr]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pdb]], [[pdb-rs]], [[pdblister]], and [[diasymbolview]].
 
 - **2026-08-17** — ingest `description:canyie/MagiskEoP`: entity [[magisk-eop]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magisk]], [[magisk-killer]], [[magiskdetector]], and [[riru-momo-hider]].
