@@ -413,6 +413,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS2AC](entities/cs2ac.md) — open-source server-side CS2 anti-cheat Metamod:Source plugin (aim/movement/input; ~17 modules; kick/ban; Discord webhooks)
 - [CS2KAC](entities/cs2kac.md) — open-source CS2 kernel-mode AC companion (KMDF driver + usermode service; client integrity signals for CS2AC/CS2FOW)
 - [CS2-Internal](entities/cs2-internal.md) — internal CS2: SDK generation / hooking / memory analysis (C++)
+- [cs2-internal-sdk](entities/cs2-internal-sdk.md) — reverse-engineered CS2 internal SDK (clouddss; C++; Source 2 class defs, interface pointers, netvar offsets, schema structures; entity/player/weapon/rendering types; cheat / game:cs2 [Internal])
 - [cs2-internals](entities/cs2-internals.md) — educational CS2/Source 2 internals guide (MkDocs; Schema/Entity, offsets, networking, verification labs; excludes cheat/AC evasion; ianveig29)
 - [CS2-OFFSETS](entities/cs2-offsets.md) — CS2 memory offsets / netvars (C++ headers + JSON; Source 2)
 - [CS2-Offsets (ro0ti)](entities/cs2-offsets-ro0ti.md) — CS2 offset dump (C#/C++; `[Offset]`; cheat / game:cs2)
