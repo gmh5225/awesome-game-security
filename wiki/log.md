@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:buzzer-re/NineS`: entity [[nines]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ps5-linux-loader]], [[ida-ps5-elf-plugin]], and [[a53-code-exec]].
+
 - **2026-08-17** — ingest `description:buzzer-re/Rikugan`: entity [[rikugan]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idassist]], [[aida]], [[ida-pro-mcp]], [[binary-ninja-mcp]], and [[tocode]].
 
 - **2026-08-17** — ingest `description:buzzer-re/ToCode`: entity [[tocode]]; cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[radare2-mcp]], [[gpt-wpre]], [[binlex]], [[mcrit-plugin]], and [[idaclu]].

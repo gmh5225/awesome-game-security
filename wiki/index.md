@@ -1514,6 +1514,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
 - [nathans-tarkov-radar-public](entities/nathans-tarkov-radar-public.md) — public EFT radar (Vmread external or DMA; secondary-display top-down player/scav/loot/extraction; Unity memory; cheat / game:eft [Vmread + Radar]; gmh5225)
+- [NineS](entities/nines.md) — PS5 ELF injector (TCP :9033; remote manual map + thread; section load/relocs; PlayStation process injection)
 - [nb_obfuscator](entities/nb-obfuscator.md) — Win32/x64 PE obfuscation framework (Capstone/udis86; polymorphic stub/dead-code; PSC-Engine; AC Obfuscation Engine)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
 - [nebulite-external](entities/nebulite-external.md) — external CS:GO; memory analysis (C/C++; cheat / game:csgo; gmh5225)
