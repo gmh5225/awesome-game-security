@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cklsit/AdvancedAntiCheat`: entity [[cklsit-advanced-anticheat]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[dakotaac]], [[windfall-anticheat]], [[avaanticheat]], [[minecraft-anticheatai]], and [[advanced-anticheat]] (Roblox).
+
 - **2026-08-17** — ingest `description:clauadv/cs2_webradar`: updated [[cs2-webradar]] (clauadv fork section); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[cs2-ext]], [[proext]], and [[cs2-dma-radar]].
 
 - **2026-08-17** — ingest `description:clearbluejar/ghidriff`: entity [[ghidriff]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[diaphora]], and [[turbodiff]].
