@@ -1615,6 +1615,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
 - [Obfu-DE-Scate](entities/obfu-de-scate.md) — Python APK ProGuard/R8 deobf (name maps + HTML hierarchy; [Apk])
 - [Obfuz](entities/obfuz.md) — open-source Unity C# code obfuscation and protection (commercial game projects; Game Engine Protection:Unity)
+- [Unity3D Obfuscator](entities/unity3d-obfuscator.md) — C# Unity obfuscator (Unity/debugging-oriented managed protection; Game Engine Protection:Unity; bmjoy)
 - [obfCoder](entities/obfcoder.md) — C++ source/binary obfuscation tool (CMake / OpenSSL demos; AC Obfuscation Engine)
 - [Obfuscar](entities/obfuscar.md) — open-source .NET assembly obfuscator (rename/string hide; AC Obfuscation Engine)
 - [obfuscation-analysis](entities/obfuscation-analysis.md) — Binary Ninja obfuscation analyze/simplify (MBA msynth / opaque-predicate dataflow / Z3 BNIL verify; Cheat Binary Ninja Plugins)

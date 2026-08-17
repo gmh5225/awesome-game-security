@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bmjoy/Unity3D_Obfuscator`: entity [[unity3d-obfuscator]]; cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[obfuz]], [[obfuscar]], [[confuserex]], and [[usecurity]].
+
 - **2026-08-17** — ingest `description:bobalkkagi/bobalkkagi`: entity [[bobalkkagi]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[unlicense]], [[magicmida-rs]], [[themida-unmutate]], and [[themida-research]].
 
 - **2026-08-17** — ingest `description:bobeff/open-source-engines`: entity [[open-source-engines]]; cited on [[overviews/game-engine]]; cross-linked [[raylib]], [[custom-game-engines]], and [[awesome-game-engine-dev]].
