@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:canyie/MagiskEoP`: entity [[magisk-eop]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magisk]], [[magisk-killer]], [[magiskdetector]], and [[riru-momo-hider]].
+
 - **2026-08-17** — ingest `description:canyie/MagiskKiller`: entity [[magisk-killer]]; cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magiskdetector]], [[magiskhide]], [[riru-momo-hider]], and [[android-native-root-detector]].
 
 - **2026-08-17** — ingest `description:canyie/pine`: entity [[canyie-pine]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xposed-module-kit]], [[locusmimic]], [[frida]], and [[pine]] (petercunha; disambiguated).

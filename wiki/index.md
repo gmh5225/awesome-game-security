@@ -1376,6 +1376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Magisk](entities/magisk.md) — Android systemless root (su daemon / modules / DenyList·Shamiko / Zygisk)
 - [MagiskHide](entities/magiskhide.md) — portable ptrace MagiskHide module for Magisk v24.0+ (DenyList hidelist; no Zygisk; Android 11+; gmh5225)
 - [MagiskKiller](entities/magisk-killer.md) — Android Magisk/MagiskHide detector (fork subprocess + pipe IPC; tracer/bootloader/property/PTS; canyie; Detection:Magisk)
+- [MagiskEoP](entities/magisk-eop.md) — Magisk su-daemon privilege-escalation PoC (race/logic flaw; unprivileged app → root without approval; canyie; exploit)
 - [magiskboot](entities/magiskboot.md) — Boot Image Modification Tool (C/C++; Cheat Magisk)
 - [magiskboot-linux](entities/magiskboot-linux.md) — GitHub Actions standalone Linux magiskboot (boot unpack/repack/patch; gmh5225)
 - [magiskboot_build](entities/magiskboot-build.md) — POSIX standalone magiskboot build scripts (Cheat Magisk / Boot Image)

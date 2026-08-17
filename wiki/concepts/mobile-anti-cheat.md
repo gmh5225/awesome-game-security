@@ -24,6 +24,7 @@ sources:
   - wiki/sources/descriptions/eltavine__Duck-Detector-Refactoring.md
   - wiki/sources/descriptions/canyie__Riru-MomoHider.md
   - wiki/sources/descriptions/canyie__MagiskKiller.md
+  - wiki/sources/descriptions/canyie__MagiskEoP.md
 updated: 2026-08-17
 confidence: medium
 ---
@@ -43,7 +44,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 
 | Signal | Examples |
 |--------|----------|
-| Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts |
+| Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts; Magisk `su`-daemon flaws such as [[magisk-eop]] (unprivileged app → root without grant UI; source: wiki/sources/descriptions/canyie__MagiskEoP.md) show root frameworks can fail closed on authorization |
 | Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]) |
 | Emulator / VM | Build fingerprint, sensors, FS signatures ([[anti-emulator]], [[android-emulator-detection]], [[conbeerlib]]) |
 | Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) — stricter on Android 14/15 per curated root research notes [[awesome-android-root]] (source: wiki/sources/descriptions/fynks__awesome-android-root.md); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
@@ -68,4 +69,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
