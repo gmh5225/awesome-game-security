@@ -143,6 +143,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Apex-ApexCheeseTest](entities/apex-apex-cheese-test.md) — Apex Legends KM↔UM communication: kernel–usermode channel (C/C++; gmh5225; cheat / game:apex legends)
 - [Apex-CHEAT-FIXED](entities/apex-cheat-fixed.md) — Apex Legends fixed cheat: driver development / modding / hooking (C/C++; gmh5225; cheat / game:apex legends)
 - [apex-cheating](entities/apex-cheating.md) — Apex Legends bundled cheat resources: C# HWID spoofer, seasonal offset dumps, EAC bypass scripts, SVG asset extraction (cheatingwitdacode; cheat / game:apex legends)
+- [apex-external-cheat](entities/apex-external-cheat.md) — Apex Legends external (Echo_Apex): kernel-driver memory reads + DX11 ImGui overlay; offsets/hitboxes/string encryption (C++17; bootmgfw; cheat / game:apex legends [External])
 - [Apex-Legends-External-Esp-Aimbot-Skinchanger](entities/apex-legends-external-esp-aimbot-skinchanger.md) — Apex Legends external ESP/aimbot/skinchanger: rendering / SDK generation / overlays (C/C++; gmh5225; cheat / game:apex legends [External])
 - [apex_linux](entities/apex-linux.md) — Linux-native Apex Legends cheat research (C++; ekknod; cheat / game:apex legends [Linux])
 - [Apex-SIMPLE-AIMBOT-GLOW-APEX](entities/apex-simple-aimbot-glow-apex.md) — Apex Legends aimbot + glow: driver development / hooking / memory analysis (C/C++; gmh5225; cheat / game:apex legends)
