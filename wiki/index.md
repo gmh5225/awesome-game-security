@@ -560,6 +560,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DLLSpy](entities/dllspy.md) — CyberArk Windows DLL hijack vulnerability scanner (missing deps, writable dirs, unsafe search paths; audit reports)
 - [DLL-Hijack-ExportDumper](entities/dll-hijack-export-dumper.md) — PE export-table dump → proxy-DLL forwarding stubs for search-order sideload (gmh5225; Cheat / DLL Hijack)
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor)
+- [Cheat Engine](entities/cheat-engine.md) — open-source memory scan/debug/disasm IDE (Lua, speedhack, code injection, cheat tables, trainer maker; user-mode + DBVM kernel driver; Delphi/Pascal + C)
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
 - [cheat-engine-ceserver-pcileech](entities/cheat-engine-ceserver-pcileech.md) — CE ceserver over PCILeech/LeechCore DMA; remote scan/edit invisible to target anti-cheat (gmh5225)
 - [cheat-it](entities/cheat-it.md) — UE multi-title internal cheat (Witch It + POLYGON; signature scan for UObject arrays / engine structures; configurable pattern matching; gmh5225)
