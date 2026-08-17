@@ -5039,3 +5039,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:cellebrite-labs/ida_kcpp`: entity [[ida-kcpp]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[ida-kernelcache-ng]], [[ida-medigate]], [[aimachdec]], and [[binja-kc]].
 
 - **2026-08-17** — ingest `description:cellebrite-labs/FunctionInliner`: entity [[function-inliner]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-func-outline]], [[genmc]], [[happyida]], [[ida-kcpp]], [[labsync]], and [[ida-bridge]].
+
+- **2026-08-17** — ingest `description:canyie/Riru-MomoHider`: entity [[riru-momo-hider]]; cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-linked [[magisk]], [[magiskdetector]], [[hideroot]], and [[magiskhide]].

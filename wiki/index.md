@@ -1880,6 +1880,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RiscyWorkshop](entities/riscy-workshop.md) — RISC-V payload obfuscation workshop (riscvm VM + llvm-mingw + insn mutation; red-team exercises)
 - [RisohEditor](entities/risoh-editor.md) — free Win32 PE resource editor (dialogs, menus, icons, RC import/export; 32/64-bit)
 - [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
+- [Riru-MomoHider](entities/riru-momo-hider.md) — Riru Zygote-injection Magisk root-hide module (syscall + Java API hooks; mount spoof, file hide, property-query block; canyie; Cheat / Magisk)
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
