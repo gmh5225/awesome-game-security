@@ -105,6 +105,7 @@ sources:
   - wiki/sources/descriptions/weizhking__PalworldSaved.md
   - wiki/sources/descriptions/localcc__PalworldModdingKit.md
   - wiki/sources/descriptions/kvick-games__UnrealMCP.md
+  - wiki/sources/descriptions/chongdashu__unreal-mcp.md
   - wiki/sources/descriptions/kp7742__UE4Dumper.md
   - wiki/sources/descriptions/gmh5225__UE4Dumper_Emulator.md
   - wiki/sources/descriptions/gmh5225__UE4-Apk-Dumper.md
@@ -439,7 +440,7 @@ Engine internals, plugins, detectors, and SDK workflows that underpin modding, r
 
 Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agents drive engine authoring—complementing RE-focused MCP tools in [[overviews/reverse-engineering]]:
 
-- **Unreal MCP** — [[unreal-mcp]] editor integration (asset management, level editing, blueprints, project config) (source: wiki/sources/descriptions/kvick-games__UnrealMCP.md)
+- **Unreal MCP** — [[unreal-mcp]] editor integration (kvick-games: asset management, level editing, blueprints, project config; chongdashu: experimental UE MCP) (source: wiki/sources/descriptions/kvick-games__UnrealMCP.md) (source: wiki/sources/descriptions/chongdashu__unreal-mcp.md)
 - **Unity MCP** — [[unity-mcp]] editor + C# scripting interaction; the justinpbarnett tree adds C#/Python shader/rendering MCP tooling (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
 - **Roblox MCP** — [[vibe-blocks-mcp]] exposes Roblox Studio actions as MCP tools over SSE (source: wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md)
