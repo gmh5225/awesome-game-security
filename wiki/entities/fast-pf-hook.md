@@ -12,7 +12,7 @@ confidence: medium
 
 **FastPFHook** (brew02/FastPFHook) implements **page-fault (#PF) hooking**: it parses and translates assembly instructions from the page containing a target function, relocates them to a separate shadow page, and dispatches execution through a **#PF exception handler** when the guarded page is accessed. The technique avoids conventional inline patches on the original code page while still intercepting control flow at the hook site. Aimed at low-level Windows, Linux, and mobile researchers in the **Some Tricks / Windows Ring0** lane studying exception-driven and page-table hook tradecraft. (source: wiki/sources/descriptions/brew02__FastPFHook.md)
 
-Complements per-process **PTE hooks** such as [[windows-kernel-pagehook]], KdTrap exception-path hooks such as [[hook-kdtrap]], and brew02's ntdll **KiUserExceptionDispatcher** pointer hook in [[ki-user-exception-dispatcher-hook]].
+Complements per-process **PTE hooks** such as [[windows-kernel-pagehook]], brew02 **SMAP/SMEP EPT-like inline hooks** in [[budget-ept]], KdTrap exception-path hooks such as [[hook-kdtrap]], and brew02's ntdll **KiUserExceptionDispatcher** pointer hook in [[ki-user-exception-dispatcher-hook]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements per-process **PTE hooks** such as [[windows-kernel-pagehook]], KdTra
 
 ## Related
 
-[[windows-kernel-pagehook]] · [[hook-kdtrap]] · [[ki-user-exception-dispatcher-hook]] · [[pghooker]] · [[mount-system-partition]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[windows-kernel-pagehook]] · [[budget-ept]] · [[hook-kdtrap]] · [[ki-user-exception-dispatcher-hook]] · [[pghooker]] · [[mount-system-partition]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

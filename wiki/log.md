@@ -5113,3 +5113,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:bulletphysics/bullet3`: entity [[bullet3]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[gameplay]], [[gplayengine]], [[lumos]], [[stride]], and [[yourgamelib]].
 
 - **2026-08-17** — ingest `description:bromoket/x64dbg_mcp`: entity [[x64dbg-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-automate-pyclient]], and [[x64dbg-rippy]].
+
+- **2026-08-17** — ingest `description:brew02/BudgetEPT`: entity [[budget-ept]]; cited on [[overviews/windows-kernel]]; cross-linked [[fast-pf-hook]], [[windows-kernel-pagehook]], and [[ept-hook-detection]].
