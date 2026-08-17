@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:can1357/ThePerfectInjector`: entity [[the-perfect-injector]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[guided-hacking-injector]], [[tartarus-tp-alloc-inject]], and [[injectors]].
+
 - **2026-08-17** — ingest `description:can1357/hvdetecc`: entity [[hvdetecc]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hypervisor-detection]], [[hv-detect]], [[vmdtstr]], and [[detect-hypervisor-detect-ring-0]].
 
 - **2026-08-17** — ingest `description:cansarigol/pdbr`: entity [[pdbr]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pdb]], [[pdb-rs]], [[pdblister]], and [[diasymbolview]].

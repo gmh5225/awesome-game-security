@@ -2043,6 +2043,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Termux](entities/termux-app.md) — Android terminal / Linux env (no-root; pkg+apt / proot; Cheat Terminal Emulator)
 - [thats_no_pipe](entities/thats-no-pipe.md) — Frida Windows named-pipe interceptor (NtRead/WriteFile; IPC → HTTP/WS proxy)
 - [the-poor-mans-obfuscator](entities/the-poor-mans-obfuscator.md) — lightweight LLVM IR obfuscator (insn sub / CFF / string encrypt; ELF/Mach-O)
+- [ThePerfectInjector](entities/the-perfect-injector.md) — NtCreateThreadEx + runtime LdrLoadDll-resolving PIC shellcode DLL injector (can1357; WoW64; cheat / injection:windows)
 - [teamfortress2-internal](entities/teamfortress2-internal.md) — TF2 internal: modding / hooking (C++; cheat / game:team fortress 2; gmh5225)
 - [tft-ocr-bot](entities/tft-ocr-bot.md) — TFT OCR automation bot (Python; asset pipelines / overlay; screen OCR; cheat / game:lol [TFT]; gmh5225)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
