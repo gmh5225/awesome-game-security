@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cheahjs/palworld-save-tools`: entity [[palworld-save-tools]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworldsaved]].
+
 - **2026-08-17** — ingest `description:cheat-engine/ControllerMode`: entity [[controller-mode]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]].
 
 - **2026-08-17** — ingest `description:cheat-engine/UnrealEngineTools`: entity [[unreal-engine-tools]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; updated [[unreal-object-model]] and [[cheat-engine]] cross-links.
