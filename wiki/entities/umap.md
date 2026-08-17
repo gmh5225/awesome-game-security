@@ -12,7 +12,7 @@ confidence: medium
 
 **umap** (btbd/umap) is a minimalist **Windows kernel driver mapper** in C that manually maps an unsigned driver into kernel memory from user mode. It uses a **vulnerable signed driver** for physical memory access to allocate kernel pool space, copy PE sections, process relocations, resolve imports, and invoke the mapped driver's entry point — all without creating registry traces or loading through standard driver-loading paths. Aimed at kernel researchers studying stealthy driver mapping techniques and their detection vectors. (source: wiki/sources/descriptions/btbd__umap.md)
 
-Sits in the kdmapper-family manual-map lane beside [[kdmapper]], [[known-driver-mappers]], and other BTBD research such as [[wpp]] and [[driver-hwid-btbd-modified]].
+Sits in the kdmapper-family manual-map lane beside [[kdmapper]], [[known-driver-mappers]], and other BTBD research such as [[smap]] (raw shellcode map), [[wpp]], and [[driver-hwid-btbd-modified]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the kdmapper-family manual-map lane beside [[kdmapper]], [[known-driver-
 
 ## Related
 
-[[kdmapper]] · [[known-driver-mappers]] · [[byovd]] · [[wpp]] · [[driver-hwid-btbd-modified]] · [[revert-mapper]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[kernel-pool-scanning]]
+[[smap]] · [[kdmapper]] · [[known-driver-mappers]] · [[byovd]] · [[wpp]] · [[driver-hwid-btbd-modified]] · [[revert-mapper]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[kernel-pool-scanning]]

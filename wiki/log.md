@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:btbd/smap`: entity [[smap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[umap]], [[known-driver-mappers]], [[kdmapper]], and [[wpp]].
+
 - **2026-08-17** — ingest `description:btbd/umap`: entity [[umap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[known-driver-mappers]], [[kdmapper]], [[wpp]], and [[driver-hwid-btbd-modified]].
 
 - **2026-08-17** — ingest `description:btbd/wpp`: entity [[wpp]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[driver-hwid-btbd-modified]], [[afd-irp-call-dispatch]], and [[driver-read-write]].

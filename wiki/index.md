@@ -1977,6 +1977,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
+- [smap](entities/smap.md) — Windows kernel shellcode mapper (BYOVD PIC shellcode → kernel pool + exec primitive; no PE image; btbd; Scatter Manual Map)
 - [smm (ekknod)](entities/smm.md) — SMM cheat (C/C++; driver development / graphics / networking; cheat / SMM; Ring -2 below-OS research)
 - [SoftGLRender](entities/softglrender.md) — tiny C++ software rasterizer + OpenGL/Vulkan comparison backends (Renderer)
 - [Software D3D9](entities/software-d3d9.md) — software Direct3D 9 implementation targeting real games/programs (DirectX Emulation / Compatibility; code-tom-code)
