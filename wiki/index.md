@@ -1056,6 +1056,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HVCI-loldrivers-check](entities/hvci-loldrivers-check.md) — PowerShell HVCI LOLdrivers check (Trail of Bits; vulnerable-driver lane)
 - [hw3d](entities/hw3d.md) — C++ 3D DirectX tutorial (Planet Chili; DirectX / guide)
 - [hw-call-stack](entities/hw-call-stack.md) — Fortra HWBP call-stack spoofer for syscalls/API calls (C/C++; Cheat Spoof Stack / HWBP)
+- [hwid](entities/hwid.md) — BTBD kernel HWID spoofer (IOCTL hooks for disk/volume/NIC/ARP/SMBIOS/boot/GPU; usermode registry/tracking cleanup; Win10 1507–1903 x64)
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
 - [Full-Hwid-Spoofer-V6](entities/full-hwid-spoofer-v6.md) — comprehensive HWID spoofer v6 via KdMapper kernel driver + ImGui (disk/NIC/GPU/SMBIOS/registry; AMD/Intel Win10/11; gmh5225)
 - [hwid-spoofer](entities/hwid-spoofer.md) — EAC/BattlEye HWID spoofer (C/C++; Cheat HWID; gmh5225)

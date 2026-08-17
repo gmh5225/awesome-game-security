@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:btbd/hwid`: entity [[hwid]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[driver-hwid-btbd-modified]], [[wpp]], and [[easy-hwid-spoofer]].
+
 - **2026-08-17** — ingest `description:btbd/modmap`: entity [[modmap]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[modexmap]], [[kernel-vad-injector]], [[umap]], and [[wpp]].
 
 - **2026-08-17** — ingest `description:btbd/smap`: entity [[smap]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[umap]], [[known-driver-mappers]], [[kdmapper]], and [[wpp]].
