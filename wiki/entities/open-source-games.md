@@ -20,4 +20,4 @@ Listed under README **Game Develop → Guide** alongside [[awesome-open-source-g
 
 ## Related
 
-[[overviews/overview]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[awesome-open-source-games]] · [[learn-awesome-gamedev]]
+[[overviews/overview]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[awesome-open-source-games]] · [[open-source-engines]] · [[learn-awesome-gamedev]]
