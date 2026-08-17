@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bobalkkagi/bobalkkagi`: entity [[bobalkkagi]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[unlicense]], [[magicmida-rs]], [[themida-unmutate]], and [[themida-research]].
+
 - **2026-08-17** — ingest `description:bobeff/open-source-engines`: entity [[open-source-engines]]; cited on [[overviews/game-engine]]; cross-linked [[raylib]], [[custom-game-engines]], and [[awesome-game-engine-dev]].
 
 - **2026-08-17** — ingest `description:bobeff/open-source-games`: entity [[open-source-games]]; cited on [[overviews/overview]] and [[overviews/game-engine]]; cross-linked [[awesome-open-source-games]] and [[learn-awesome-gamedev]].

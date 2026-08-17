@@ -207,6 +207,7 @@ sources:
   - wiki/sources/descriptions/charliewolfe__Stealthy-Kernelmode-Injector.md
   - wiki/sources/descriptions/chaycee__CS2Internal.md
   - wiki/sources/descriptions/cazzwastaken__kakhack.md
+  - wiki/sources/descriptions/bobalkkagi__bobalkkagi.md
   - wiki/sources/descriptions/boylin0__AVA-Hack.md
   - wiki/sources/descriptions/boltgolt__boltobserv.md
   - wiki/sources/descriptions/boowampp__ApexDmaCheatUpdated.md
@@ -1356,6 +1357,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Themida / WinLicense 3.x virtualization research via [[themida-research]] (`VM_CONTEXT` layout, handler dispatch, de-virtualization / Triton lifting ideas) sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/stuxnet147__Themida-Research.md)
 - Themida IDA plugin / Fix Themida via [[tde]] (devirtualization engine for Themida-protected binaries) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/sodareverse__TDE.md)
 - Automatic Themida v1/v2/v3 unpack via [[magicmida-rs]] (Rust Win32 Debug API debugger; OEP discovery + memory dump + PE IAT/section rebuild; optional ScyllaHide anti-debug bypass; verify mode) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/guoxing2024__magicmida-rs.md)
+- Themida 3.1.3 Tiger red64 unpack/unwrap via [[bobalkkagi]] (Python; Unicorn emulation + win10_v1903 API hooks; fast/hook_block/hook_code modes; optional OEP; planned devirt; Capstone/distorm3) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/bobalkkagi__bobalkkagi.md)
 - Dynamic Themida/WinLicense 2.x/3.x unpack via [[unlicense]] (Python 3; Frida instrumentation; OEP recovery + obfuscated IAT rebuild; x86/x64 native PE/DLL + .NET EXE; LIEF/Capstone) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__unlicense.md)
 - Static mutation deobfuscation via [[themida-unmutate]] (Python 3; Themida/WinLicense/Code Virtualizer 3.x insn mutation on selected functions; tested to Themida 3.1.9) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__themida-unmutate.md)
 - Obfuscated-region detection via [[themida-spotter-bn]] (Binary Ninja plugin; Themida/WinLicense/Code Virtualizer obfuscated code locations; x86/x64; Oreans ≤3.1.9; Cheat Binary Ninja Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/ergrelet__themida-spotter-bn.md)

@@ -313,6 +313,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [blc](entities/blc.md) — IDA Pro plugin integrating Ghidra decompiler (Binary Lifting Contraption; cheat / IDA Plugins; cseagle)
 - [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
 - [bndb2pat](entities/bndb2pat.md) — Binary Ninja plugin: IDA FLIRT `.pat` patterns from LLIL (wildcard masks, CRC16; sigmake → `.sig`; joren485)
+- [bobalkkagi](entities/bobalkkagi.md) — Python Themida 3.1.3 Tiger red64 unpack via Unicorn API-hook emulation (win10_v1903 DLL set; fast/hook_block/hook_code; optional OEP; planned devirt; Fix Themida)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
