@@ -421,6 +421,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-cheat-base](entities/cs2-cheat-base.md) — CS2 internal cheat base framework (gmh5225; SDK structures, hooks, offsets, entity wrappers, rendering; [Internal])
 - [cs2-calladmin](entities/cs2-calladmin.md) — ModSharp CS2 in-game player report system (C#; admin claim/resolve workflow; LiteDB/MySQL/PostgreSQL; optional Discord webhooks; Anti Cheat / Server)
 - [cs2-cheat-cpp](entities/cs2-cheat-cpp.md) — external CS2 cheat (C++; rendering / SDK generation)
+- [cs2-cheat-source](entities/cs2-cheat-source.md) — internal CS2 cosmetic cheat (bootmgfw; skin/glove/knife changers; Source 2 interfaces/schema/protobuf; MinHook + VMT + DX11 Present ImGui; cheat / game:cs2 [Internal])
 - [CS2-Dma-Radar](entities/cs2-dma-radar.md) — CS2 DMA radar (PCIe hardware; player positions + game state; real-time overlay; zero target-OS software; cheat / game:cs2 [DMA]; gmh5225)
 - [CS2-DMA-Cheat](entities/cs2-dma-cheat.md) — CS2 DMA cheat (C/C++; shader/rendering/audio; PCIe DMA; zero target-OS software; cheat / game:cs2 [DMA]; eden13378)
 - [CS2-DMA](entities/cs2-dma.md) — open-source CS2 DMA external (C++; FPGA/LeechCore; read-only ESP, web radar, grenade helper; MemProcFS scatter reads; cs2-dumper offsets; zero target-OS software; cheat / game:cs2 [DMA]; chao-shushu)

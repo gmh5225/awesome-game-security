@@ -724,6 +724,7 @@ sources:
   - wiki/sources/descriptions/bootmgfw__Valorant-External-Cheat.md
   - wiki/sources/descriptions/bootmgfw__Rust-External-Cheat.md
   - wiki/sources/descriptions/bootmgfw__Fortnite-External-Cheat-Base.md
+  - wiki/sources/descriptions/bootmgfw__CS2-Cheat-Source.md
   - wiki/sources/descriptions/bromoket__access_updated.md
   - wiki/sources/descriptions/boratanrikulu__gecit.md
   - wiki/sources/descriptions/btbd__umap.md
@@ -1695,6 +1696,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS2 samples such as [[cs2internal]] (chaycee; C#; SDK generation / hooking / overlays; cheat / game:cs2 [Internal]) extend that lane with a managed-language in-process path beside C++ samples such as [[cs2-cheat-base]]. (source: wiki/sources/descriptions/chaycee__CS2Internal.md)
 - CS2 P2C security-research templates such as [[cs2-p2c-templates]] (ccsimplyspolit; VMProtect FVA reconstruction; `VacLiveBypass` MinHook detours on CreateMove/LevelInit/protobuf paths; kernel server-flag/rank spoof drivers; multi-method injectors; depot-aware offset manifests; VAC Live / CS2 client RE for insecure local or CTF study; cheat / game:cs2) sit in the same offensive P2C template lane beside CS:GO P2C forensics via [[csgo-p2c-dumper]]. (source: wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md)
 - Open-source internal CS2 samples such as [[asphyxia-cs2]] (Asphyxia; ESP / aimbot / triggerbot; Source 2 SDK via interface pointers + pattern scan; Internal tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/maecry__asphyxia-cs2.md)
+- Internal CS2 cosmetic samples such as [[cs2-cheat-source]] (bootmgfw; C++; weapon/glove/knife skin changers via reverse-engineered Source 2 interfaces, schema data, and protobuf network messages; MinHook + VMT detours on game and DX11 Present/swap-chain for ImGui menu + config; cheat / game:cs2 [Internal]) sit in the same cosmetic/internal lane beside [[cs2-cheat-base]] and [[asphyxia-cs2]]. (source: wiki/sources/descriptions/bootmgfw__CS2-Cheat-Source.md)
 - Internal CS2 samples such as [[aurora]] (gmh5225; ESP / aimbot / visual mods; Source 2 schema system access + entity enumeration for player data + overlay rendering; cheat / game:cs2 [Internal]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/gmh5225__Aurora.md)
 - CS2 samples such as [[counterstrike2]] (C++; rendering / SDK generation / hooking) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/papstuc__counterstrike2.md)
 - CS2 samples such as [[csgo2-cheat]] (imnotdatguy / gmh5225 forks; C++; internal rendering / SDK generation / hooking; gmh5225 variant tagged [Internal]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/imnotdatguy__csgo2-cheat.md) (source: wiki/sources/descriptions/gmh5225__csgo2-cheat.md)
