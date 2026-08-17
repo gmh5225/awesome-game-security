@@ -272,6 +272,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [augur-riot](entities/augur-riot.md) — Vanguard RITO streamed-module → PE converter (hashed imports, section rebuild; kernel RE; gmh5225)
 - [aurum-re](entities/aurum-re.md) — Aurum RE Ricochet anti-cheat research (RE + driver development; explore anticheat:ricochet; gmh5225)
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)
+- [AVA-Hack](entities/ava-hack.md) — AVA (Alliance of Valiant Arms) C/C++ cheat (DirectX/OpenGL/Vulkan; cheat / game:ava; boylin0)
 - [AvAAntiCheat](entities/avaanticheat.md) — Minecraft Bukkit/Spigot AC (fly/combat/autoclick/packet; Geyser leniency)
 - [AvastHV](entities/avasthv.md) — Avast signed hypervisor driver abuse for kernel-level ops; hypervisor-context code exec; DSE/AC bypass via trusted AV driver (gmh5225; README `[Avast]`)
 - [avdebugger](entities/avdebugger.md) — AV signature recovery (Cheat → Anti Signature Scanning)

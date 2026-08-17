@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:boylin0/AVA-Hack`: entity [[ava-hack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[d3dhook-imgui]], [[universalhookx]], [[kiero2]], [[present-hook]], and [[vulkan-hook]].
+
 - **2026-08-17** — ingest `description:brackeen/glfm`: entity [[glfm]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[yourgamelib]], [[mojoc]], [[gameplay]], and [[android-opengl-es-chams]].
 
 - **2026-08-17** — ingest `description:bradharding/doomretro`: entity [[doomretro]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[devilution]] and [[game-design-documents]].

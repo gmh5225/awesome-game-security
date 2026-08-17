@@ -207,6 +207,7 @@ sources:
   - wiki/sources/descriptions/charliewolfe__Stealthy-Kernelmode-Injector.md
   - wiki/sources/descriptions/chaycee__CS2Internal.md
   - wiki/sources/descriptions/cazzwastaken__kakhack.md
+  - wiki/sources/descriptions/boylin0__AVA-Hack.md
   - wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md
   - wiki/sources/descriptions/chztbby__RebirthGuard.md
   - wiki/sources/descriptions/gmh5225__cs2_things.md
@@ -1623,6 +1624,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS:GO samples such as [[osiris-and-extra]] (C/C++; driver development / OpenGL / rendering; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - Simple internal CS:GO RE-training samples such as [[dainsleif]] (s3pt3mb3r) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)
 - CS:GO training software such as [[avhook]] (gmh5225; Windows; joke features; cheat / game:csgo) sits in the same RE-training lane. (source: wiki/sources/descriptions/gmh5225__avhook.md)
+- Title-specific AVA (Alliance of Valiant Arms) samples such as [[ava-hack]] (boylin0; C/C++; DirectX / OpenGL / Vulkan graphics paths; cheat / game:ava) sit in the Korean-FPS offensive lane beside other title-specific FPS internals such as [[titancf]] and [[lazysight]]. (source: wiki/sources/descriptions/boylin0__AVA-Hack.md)
 - Actively developed Internal CS:GO samples such as [[sensum]] (martinjanas; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/martinjanas__Sensum.md)
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
 - Linux-native internal CS:GO samples such as [[anubis]] (danielkrupinski; C++; process injection; ESP, aimbot, and related features via Source SDK hooks on client rendering and game events; complements [[osiris]] on non-Windows hosts) sit in the same cheat / game:csgo lane for studying Linux internal hook surfaces beside external cross-platform samples like [[goesp]]. (source: wiki/sources/descriptions/danielkrupinski__Anubis.md)
