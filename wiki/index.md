@@ -1488,6 +1488,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MultiplayerBlasterGame](entities/multiplayer-blaster-game.md) — UE5 multiplayer FPS Blaster (network replication / aim offsets / weapons; Game Develop / Unreal source)
 - [Murder Engine](entities/murder.md) — C# MonoGame pixel-art 2D engine (ECS, Aseprite, dialogue editor; Game Engine / [pixel])
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
+- [modmap](entities/modmap.md) — kernel-assisted extend-manual-map DLL injector (MiAllocateVad + LDR SizeOfImage extension; blends with host module list; btbd; Extend Manual Map)
 - [modly](entities/modly.md) — local image→3D mesh desktop app (open-source GPU AI; TypeScript/Python; Windows/Linux; AI category)
 - [modreveal](entities/modreveal.md) — find hidden Linux kernel modules (C; Detection:Hide; AC / rootkit RE)
 - [mojoelf](entities/mojoelf.md) — in-process ELF loader from non-filesystem sources (alternative to `dlopen()`; Cheat / Android memory loading)
