@@ -530,6 +530,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [D2D Overlay](entities/d2d-overlay.md) — header-only Direct2D external overlay library (`DirectOverlay.h`; simple API + performance; coltonon)
 - [d3d12book](entities/d3d12book.md) — DX12 educational sample (shader/rendering/animation; DirectX / guide)
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
+- [UniversalHookX](entities/universalhookx.md) — universal DX9–12/OpenGL/Vulkan ImGui hook library (dummy-device vtable bootstrap; compile-time backend selection; bruhmoment21)
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
 - [daila](entities/daila.md) — ChatGPT decompiler AI assistant (DAILA; cheat / IDA Plugins; human–LLM RE research)
 - [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)

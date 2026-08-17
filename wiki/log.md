@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bruhmoment21/UniversalHookX`: entity [[universalhookx]]; cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[d3dhook-imgui]], [[kiero2]], [[hydrahook]], and [[gameplug]].
+
 - **2026-08-17** — ingest `description:bruhmoment21/cs2-sdk`: updated [[cs2-sdk]] (bruhmoment21 cross-platform fork); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[source2gen]], [[source2sdk]], [[cs2-offsets]], and [[cs2-things]].
 
 - **2026-08-17** — ingest `description:brunodev85/winlator`: entity [[winlator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[winvisor]], [[levo]], [[termux-app]], and [[yuzu-android]].
