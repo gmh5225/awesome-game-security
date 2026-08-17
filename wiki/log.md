@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:brunodev85/winlator`: entity [[winlator]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[winvisor]], [[levo]], [[termux-app]], and [[yuzu-android]].
+
 - **2026-08-17** — ingest `description:btbd/access`: entity [[access]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[intraceptor]], [[libelevate]], [[umap]], and [[wpp]].
 
 - **2026-08-17** — ingest `description:btbd/ddma`: entity [[ddma]]; cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[ddma-1]], [[pcileech]], and [[iommu]].

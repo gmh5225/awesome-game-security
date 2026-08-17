@@ -2332,6 +2332,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinObjEx64](entities/winobjex64.md) — Windows Object Manager namespace explorer + callback enum (admin; AC / Ring0 callback research)
 - [WinDefCtl](entities/windefctl.md) — Defender / Tamper Protection control via kernel priv-esc (Win11 26H1)
 - [WinVisor](entities/winvisor.md) — WHP hypervisor emulator for Windows x64 user-mode PE (Windows Emulator)
+- [Winlator](entities/winlator.md) — Android app: Windows x86/x64 via Box86/Box64 + Wine + PRoot (Mesa Turnip/VirGL; touch desktop; Windows Emulator)
 - [WinAFL](entities/winafl.md) — Windows AFL coverage-guided fuzzer (DynamoRIO/Intel PT; persistent mode; closed-source hook; corpus minimize + crash triage; Anti Cheat > Fuzzer)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
 - [win32k-file-collection](entities/win32k-file-collection.md) — win32k.sys and related GUI-subsystem binaries across Windows builds (patch diff / vuln research)
