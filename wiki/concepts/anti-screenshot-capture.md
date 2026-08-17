@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/j-hc__FlagSecurePatcher.md
   - wiki/sources/descriptions/gmh5225__ScreenShot.md
   - wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/bmharper__WindowsDesktopDuplicationSample.md
+updated: 2026-08-17
 confidence: medium
 ---
 
@@ -29,7 +30,7 @@ How anti-cheat and platform code **captures visible frames** for overlay/ESP det
 
 Scheduled or random-interval captures aim to catch intermittent overlays. README lanes: **Anti Cheat → Screenshot**, **Detection:Overlay**, **Cheat → Anti Screenshot**.
 
-Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXGI Desktop Duplication, PrintWindow, DWM thumbnail; README `[BitBlt]`) help researchers validate which path an AC module uses and what each method reveals about overlays and hardware-accelerated windows. (source: wiki/sources/descriptions/gmh5225__ScreenShot.md) Title-specific session AC such as [[deadlock-anti-cheat]] (UrnIt; periodic PNG captures of the game window bundled with process/key/hardware telemetry for staff review; Anti Cheat → Screenshot) illustrates scheduled client-side evidence collection rather than hook-based Present interception. (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)
+Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXGI Desktop Duplication, PrintWindow, DWM thumbnail; README `[BitBlt]`) help researchers validate which path an AC module uses and what each method reveals about overlays and hardware-accelerated windows. (source: wiki/sources/descriptions/gmh5225__ScreenShot.md) Educational DXGI Output Duplication samples such as [[windows-desktop-duplication-sample]] (bmharper; C++; frame acquire, cursor overlay, dirty/moved regions; README `[DXGI]`) document compositor-side DDA capture for screenshot and remote-desktop tooling developers. (source: wiki/sources/descriptions/bmharper__WindowsDesktopDuplicationSample.md) Title-specific session AC such as [[deadlock-anti-cheat]] (UrnIt; periodic PNG captures of the game window bundled with process/key/hardware telemetry for staff review; Anti Cheat → Screenshot) illustrates scheduled client-side evidence collection rather than hook-based Present interception. (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)
 
 ## Cheat-side evasion (collection patterns)
 

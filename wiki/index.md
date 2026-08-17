@@ -2341,6 +2341,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WatchDogKiller](entities/watchdog-killer.md) — WatchDog `amsdk.sys`/`wamsdk.sys` BYOVD EDR/AV terminator (IOCTL register + terminate; Silver Fox tradecraft; gmh5225)
 - [win-driver-exp](entities/win-driver-exp.md) — multi-driver BYOVD exploit collection (IOCTL → kernel R/W, code exec, process manipulation; incl. `AsUpIO64.sys` CVE-2024-33218; gmh5225)
 - [windows-10-22h2-vulnerable-driver-communication](entities/windows-10-22h2-vulnerable-driver-communication.md) — ASUS `asromgdrv.sys` BYOVD IOCTL wrapper (contiguous kernel pool + CR R/W; Win10 22H2 / Win11; gmh5225)
+- [windows-desktop-duplication-sample](entities/windows-desktop-duplication-sample.md) — DXGI Output Duplication desktop capture sample (C++; cursor + dirty/moved regions; `[DXGI]`)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)
