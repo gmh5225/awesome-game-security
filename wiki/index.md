@@ -279,6 +279,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-game-engine-dev](entities/awesome-game-engine-dev.md) — curated game-engine-dev resources (DirectX/OpenGL; Game Engine / guide)
 - [awesome-ida-x64-olly-plugin](entities/awesome-ida-x64-olly-plugin.md) — curated IDA/Ghidra/x64dbg/OllyDbg/GDB plugin index (patching, diffing, deobfuscation, emulation, YARA, anti-anti-debug; fr0gger)
 - [awesome-injection](entities/awesome-injection.md) — curated injection resources (Cheat / injection:windows)
+- [awesome-obfuscations](entities/awesome-obfuscations.md) — curated binary, compile-time, and LLVM/GCC obfuscation tools (C/C++/Go/Rust/x86 assembly + VM protectors; anti-RE / native binary protection; killvxk)
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
 - [blacksun-framework](entities/blacksun-framework.md) — modular C++ game cheat framework (user-mode/kernel/DMA access backends; pattern scan, hooking, overlays, comm layers; cs1ime)
