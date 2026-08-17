@@ -2005,6 +2005,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
 - [StealthAPCDispatcher](entities/stealth-apc-dispatcher.md) — stealth kernel APC dispatch with encrypted shellcode (non-standard queue paths; AC APC monitoring bypass research; gmh5225)
 - [StealthSytemThreadFinderBE](entities/stealth-sytem-thread-finder-be.md) — find hidden system threads BE misses (PspCidTable; scheduler queue; manual-map)
+- [Stealthy-Kernelmode-Injector](entities/stealthy-kernelmode-injector.md) — kernel-mode stealth DLL injector (APC/thread hijack/image-load callbacks; PEB unlink + metadata cleanup; PTE/VAD manual map; charliewolfe)
 - [SystemThreadFinder](entities/system-thread-finder.md) — detect hidden/manual-map system threads (NtQuerySystemInformation; BE-style)
 - [tabby](entities/tabby.md) — minimal PIC C shellcode micro-framework (PEB/EAT + FNV-1a API hashing; indirect NT syscalls; Linux mingw-w64/nasm → flat `.bin`; cocomelonc; AC shellcode engine & tricks)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)

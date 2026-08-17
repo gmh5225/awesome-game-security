@@ -4985,3 +4985,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/Driver-intel-PEBs-LoopHPCs`: entity [[driver-intel-pebs-loophpcs]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[branch-monitoring-project]], [[pmi-hpc]], and [[pmctrace]].
 
 - **2026-08-13** — ingest `description:gmh5225/Dota2Cheat`: entity [[dota2-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[dota-cheat]] and [[dota2dumped]].
+
+- **2026-08-17** — ingest `description:charliewolfe/Stealthy-Kernelmode-Injector`: entity [[stealthy-kernelmode-injector]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-vad-injector]] and [[kinject]].
