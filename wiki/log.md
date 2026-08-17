@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:boowampp/ApexDmaCheatUpdated`: entity [[apex-dma-cheat-updated]]; cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[pcileech]], [[cs2-dma]], [[cs2-dma-cheat]], and [[apexd3d-external]].
+
 - **2026-08-17** — ingest `description:boratanrikulu/gecit`: entity [[gecit]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[peetch]], [[pcapdroid]], and [[ndisapi]].
 
 - **2026-08-17** — ingest `description:borzacchiello/seninja`: entity [[seninja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[triton-bn]], [[ponce]], [[radius2]], and [[ripr]].

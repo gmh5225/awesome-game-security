@@ -150,6 +150,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Apex-Spoofer](entities/apex-spoofer.md) — Apex Legends HWID spoofer: kernel-level ban evasion (gmh5225; cheat / HWID; game:apex legends under EAC)
 - [ApexSU](entities/apex-su.md) — Hardened KernelSU fork: Rust userspace, stealth IOCTL, GKI 2.0 boot patch (Android 12+; cheat / Android root)
 - [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
+- [ApexDmaCheatUpdated](entities/apex-dma-cheat-updated.md) — Apex Legends DMA external: PCILeech/MemProcFS FPGA reads; aimbot/recoil/ESP/camera math (C++; cheat / game:apex legends [DMA]; boowampp)
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])
 - [ayaya-league-external](entities/ayaya-league-external.md) — Node.js LoL external script platform (AyayaLeague; custom user scripts; gmh5225; cheat / game:lol)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
