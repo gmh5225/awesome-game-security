@@ -2266,6 +2266,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Windfall Anti-Cheat](entities/windfall-anticheat.md) — Spigot/Paper/Folia/Purpur packet AC (PacketEvents 2; combat/movement/inventory; lag compensation + prediction; Geyser/Bedrock; enis1enis2)
 - [Windfall AntiCheat F](entities/windfall-anticheatf.md) — Fabric **1.21.5+** server-side packet AC (combat/movement/inventory checks; physics prediction + latency compensation; Geyser/Bedrock; enis1enis2)
 - [windbg-decompile-ext](entities/windbg-decompile-ext.md) — WinDbg x64 extension; live disasm + LLM verified pseudocode (WinDbg Plugins)
+- [WinDbg-Extensions](entities/windbg-extensions.md) — WinDbg extension; enumerate process/thread/image notify callbacks + driver modules (Callback Extension)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
 - [WinDiff](entities/windiff.md) — web/CLI cross-build Windows PE symbol, type, and syscall browser/differ (Winbindex + Symbol Server → JSON; Next.js UI)
 - [WatchDogKiller](entities/watchdog-killer.md) — WatchDog `amsdk.sys`/`wamsdk.sys` BYOVD EDR/AV terminator (IOCTL register + terminate; Silver Fox tradecraft; gmh5225)

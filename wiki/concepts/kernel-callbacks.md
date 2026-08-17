@@ -20,7 +20,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__KernelSnippets.md
   - wiki/sources/descriptions/gmh5225__RToolZ.md
   - wiki/sources/descriptions/gmh5225__PsNotifRoutineUnloader.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md
+updated: 2026-08-17
 confidence: high
 ---
 
@@ -38,7 +39,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 ## Reference
 
-Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md)
+Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Live attach enumeration during kernel debugging via [[windbg-extensions]] walks `PspCreateProcessNotifyRoutine`, `PspCreateThreadNotifyRoutine`, and `PspLoadImageNotifyRoutine` with per-type filters (process/thread/image/all) and resolving driver modules—useful for rootkit and AC driver inspection. (source: wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md)
 
 ## Attack / defense
 
@@ -46,4 +47,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[openark]] · [[winobjex64]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
