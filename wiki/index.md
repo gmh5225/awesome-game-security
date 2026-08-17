@@ -2032,6 +2032,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 - [spoof-stack-SafeCall](entities/spoof-stack-safecall.md) — Windows return-address spoofing library (SafeCall; fake legitimate stack returns; Cheat Spoof Stack; gmh5225)
+- [sprite-sheet-creator](entities/sprite-sheet-creator.md) — AI 2D pixel-art sprite sheets & parallax backgrounds (fal.ai; Next.js; walk/jump/attack/idle, sandbox; AI category)
 - [SpookiMystic-GTA-Leak](entities/spookimystic-gta-leak.md) — leaked GTA V online mod-menu source (RAGE scripting hooks; money drops / teleport / griefing; cheat / `[Menu]`; gmh5225)
 - [StackSpoofer_Macro](entities/stack-spoofer-macro.md) — easy-to-use C/C++ macro for stack spoofing (gmh5225; Cheat Spoof Stack)
 - [speedfan-exploit](entities/speedfan-exploit.md) — SpeedFan `Speedfan.sys` BYOVD (IOCTL → physmem R/W; legacy monitoring-tool kernel exploitation; gmh5225)
