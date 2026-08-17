@@ -722,6 +722,7 @@ sources:
   - wiki/sources/descriptions/bootmgfw__lithium-kernel.md
   - wiki/sources/descriptions/bootmgfw__Valorant-External-Cheat.md
   - wiki/sources/descriptions/bootmgfw__Rust-External-Cheat.md
+  - wiki/sources/descriptions/bootmgfw__Fortnite-External-Cheat-Base.md
   - wiki/sources/descriptions/bromoket__access_updated.md
   - wiki/sources/descriptions/boratanrikulu__gecit.md
   - wiki/sources/descriptions/btbd__umap.md
@@ -1258,6 +1259,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Shader-oriented external Fortnite samples such as [[fortnite-external-p2c]] (C++; shader work; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/simply-codes__Fortnite-External-P2C.md)
 - Driver-backed external Fortnite samples such as [[fortnite-external-evo-gj]] (C++; kernel-driver RPM; ESP / aimbot / loot ESP; UE4 state; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/ritz-1337__fortnite-external-evo.gj.md)
 - IOCTL / CR3-oriented external Fortnite bases such as [[fortnite-external-base-source]] (C++; kernel phys mem R/W + mouse IOCTL; GWorld decrypt / pattern scan; ImGui Discord Overlay DX11 ESP; [External]) sit in the same cheat / game:fortnite external lane. (source: wiki/sources/descriptions/raivoansa__fortnite-external-base-source.md)
+- Open-source Fortnite external starter templates such as [[fortnite-external-cheat-base]] (bootmgfw; C++; kernel-driver IOCTL phys mem R/W + CR3 bypass + synthetic mouse input; UE SDK + encrypted UWorld decode; bone W2S ESP with visibility-colored 2D boxes; DX11 ImGui overlay + window hijack; attaches to `FortniteClient-Win64-Shipping.exe`; cheat / game:fortnite [External]) sit in that same lane beside [[lithium-kernel]] from the same author for studying EAC-protected UE external architecture. (source: wiki/sources/descriptions/bootmgfw__Fortnite-External-Cheat-Base.md)
 - Driver + overlay external Fortnite samples such as [[volto-external-spowar-ud-eac-be-fortnite-external-cheat]] (gmh5225; C/C++; kernel driver development + overlay rendering; HWID-spoof / EAC-evasion naming; cheat / game:fortnite [External]) sit in that same external lane beside IOCTL and shader-oriented bases. (source: wiki/sources/descriptions/gmh5225__VOLTO-EXTERNAL-SPOWAR-UD-EAC-BE-FORTNITE-EXTERNAL-CHEAT.md)
 - External Fortnite **VoyagerTF** samples such as [[fortnite-voyagertf]] (gmh5225; ESP / aimbot / UE game-state reads via out-of-process client memory manipulation; cheat / game:fortnite [External]) sit in that same external lane for studying RPM-based Unreal state access without injection. (source: wiki/sources/descriptions/gmh5225__Fortnite-VoyagerTF.md)
 - Undetected external Fortnite samples such as [[fortnite-ud-external]] (gmh5225; stealthy out-of-process memory reads; ESP / aimbot; BattlEye + EAC bypass framing; cheat / game:fortnite [External]) sit in that same external lane for studying low-visibility RPM on AC-protected UE clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-UD-External.md)

@@ -871,6 +871,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-external](entities/fortnite-external.md) — Fortnite external: custom kernel-driver memory access / DX9 overlay / UE offset utilities (gmh5225; [External])
 - [fortnite-external-4](entities/fortnite-external-4.md) — Fortnite external: circa 2019; socket-based kernel driver RPM; Capcom.sys driver mapper; ESP/aimbot (gmh5225; [External])
 - [fortnite-external-5](entities/fortnite-external-5.md) — Fortnite external: integrated HWID spoofer (kernel disk serial) + ImGui overlay + FNV-1a obfuscation; ESP/aimbot RPM (gmh5225; [External])
+- [fortnite-external-cheat-base](entities/fortnite-external-cheat-base.md) — Fortnite external starter template (bootmgfw): kernel-driver IOCTL phys mem R/W + CR3 bypass + mouse input; UE SDK + UWorld decrypt; bone W2S ESP; DX11 ImGui overlay (C++; cheat / game:fortnite [External])
 - [fortnite-external-cheat-winsense-leak](entities/fortnite-external-cheat-winsense-leak.md) — WinSense leaked Fortnite external (kernel driver comm; ImGui DX9; KeyAuth; CryptoPP API encryption; gmh5225; [External])
 - [fortnite-external-cheat-source-code](entities/fortnite-external-cheat-source-code.md) — Fortnite external: Vaselinikives lineage; DX9 ImGui; W2S ESP + aimbot via Win32 RPM (gmh5225)
 - [fortnite-evo-cc-source-external-cheat](entities/fortnite-evo-cc-source-external-cheat.md) — Fortnite external: leaked Evo.cc source; DX9 overlay; W2S ESP + aimbot via Win32 RPM (gmh5225; [External])
