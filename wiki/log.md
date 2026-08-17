@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:changeofpace/Force-Page-Protection`: entity [[force-page-protection]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[x64dbg]], [[self-remapping-code]], [[no-access-protection]], and [[memory-guard]].
+
 - **2026-08-17** — ingest `description:changeofpace/MouHidInputHook`: entity [[mouhid-input-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[mouseclassservicecallbacktrick]], [[kernel-mouse]], and [[hardware-input-injection]].
 
 - **2026-08-17** — ingest `description:changeofpace/Self-Remapping-Code`: entity [[self-remapping-code]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[memory-guard]], [[pointer-guard]], and [[no-access-protection]].

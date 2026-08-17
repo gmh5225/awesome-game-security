@@ -18,4 +18,4 @@ Windows proof-of-concept demonstrating **self-remapping code** as an **anti-tamp
 
 ## Related
 
-[[memory-guard]] · [[pointer-guard]] · [[no-access-protection]] · [[voidmaw]] · [[integrity-experiments]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]]
+[[force-page-protection]] · [[memory-guard]] · [[pointer-guard]] · [[no-access-protection]] · [[voidmaw]] · [[integrity-experiments]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[overviews/windows-kernel]]
