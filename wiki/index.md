@@ -1700,6 +1700,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pdb](entities/pdb.md) — Windows PDB parse/merge (C++ DIA SDK; old formats + pdb.cfg; RE / debugger symbols)
 - [pdb-rs](entities/pdb-rs.md) — Microsoft Rust PDB reader/writer (MSF/CodeView DBI/TPI/IPI; x86/AMD64/ARM64; RE / debugger symbols)
 - [pdblister](entities/pdblister.md) — Rust PDB manifest CLI (PE CodeView GUID/age scan; symchk /om alternative; Symbol Server batch download)
+- [pdbr](entities/pdbr.md) — standalone PDB symbol extractor (Python + Rich; functions, types, globals, source refs; no VS/DIA SDK; RE / debugger symbols)
 - [pdf-pmc-x86](entities/pdf-pmc-x86.md) — PDF study on x86 PMC/PMI (documentation archive; counter-based monitoring, telemetry, Windows security research background)
 - [pdfwkrnl-exploit](entities/pdfwkrnl-exploit.md) — PdFwKrnl.sys (BitLocker) IOCTL exploit (unsigned kernel code load/exec; Cheat Vulnerable Driver)
 - [PdFwKrnlMapper](entities/pdfwkrnl-mapper.md) — PdFwKrnl.sys (BitLocker) DSE-bypass driver mapper (SeValidateImageData/header patch; unsigned PE map; gmh5225)
