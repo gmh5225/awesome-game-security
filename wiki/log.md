@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:click4dylan/CSGO_AnimationCode_Reversed`: entity [[csgo-animation-code-reversed]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[csgo-sdk]], [[csso-src]], and [[master-guide]].
+
 - **2026-08-17** — ingest `description:clouddss/cs2-internal-sdk`: entity [[cs2-internal-sdk]]; cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[cs2-sdk]], [[cs2-sdk-source2gen]], [[cs2-offsets]], [[cs2-internal]], and [[cs2-cheat-base]].
 
 - **2026-08-17** — ingest `description:cloudfuzz/android-kernel-exploitation`: entity [[android-kernel-exploitation]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-vuln]], [[android-vuln-poc-exp]], and [[android-kernel-hacking-toolkit]].
