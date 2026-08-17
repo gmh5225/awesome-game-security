@@ -215,6 +215,7 @@ sources:
   - wiki/sources/descriptions/cragson__a53-code-exec.md
   - wiki/sources/descriptions/cragson__osmium.md
   - wiki/sources/descriptions/crifan__AutoRename.md
+  - wiki/sources/descriptions/cellebrite-labs__FunctionInliner.md
   - wiki/sources/descriptions/cpkt9762__ida-cli.md
   - wiki/sources/descriptions/cpkt9762__solana-sbpf-rlib.md
   - wiki/sources/descriptions/crmulliner__adbi.md
@@ -1439,6 +1440,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - x86 ROP gadget finder + ROP chainer via [[agafi]] (HelpSystems Advanced Gadget Finder; programs/modules/live processes; cheat / ROP Finder / ROP Generation) sits in the same exploit-chain RE lane beside [[ropgadget-rs]] and Python automatic ROP chain builder [[exrop]] (constraint-driven synthesis from binary; cheat / ROP Generation). (source: wiki/sources/descriptions/helpsystems__Agafi.md) (source: wiki/sources/descriptions/d4em0n__exrop.md)
 - Pseudocode function-definition colorizing via [[ida-functioncolor]] (Python IDA plugin; Hex-Rays view) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sneakyevil__ida_functioncolor.md)
 - Function outline / call-hierarchy trees via [[ida-func-outline]] (callers/callees + depth; iOS ARM64 decomp readability) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/richor1042__IDAFuncOutline.md)
+- Compiler function-outlining reversal via [[function-inliner]] (Cellebrite Labs; IDA Pro plugin; inlines clang `--moutline` outlined helpers back into callers to restore Hex-Rays decompilation on space-optimized ARM binaries; manual + batch; cheat / IDA Plugins) sits beside [[ida-func-outline]]—UI call trees vs compiler outlining undo. (source: wiki/sources/descriptions/cellebrite-labs__FunctionInliner.md)
 - Function clustering and organization for large binaries via [[idaclu]] (Qt GUI; i18n; group similar functions by criteria; visual navigation; cheat / IDA Plugins) sits in the same large-binary navigation lane. (source: wiki/sources/descriptions/harlamism__IdaClu.md)
 - Workflow-centric function triage and prioritization via [[ida-spotlight]] (IDA Pro plugin; prioritize which functions to analyze first; large-binary triage bottleneck; cheat / IDA Plugins) sits beside [[idaclu]] and [[ida-func-outline]] in that navigation lane. (source: wiki/sources/descriptions/dyussekeyev__ida-spotlight.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; PlayStation static RE; cheat / IDA Plugins) sits in the same lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)

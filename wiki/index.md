@@ -840,6 +840,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-3.5](entities/fortnite-3.5.md) — Fortnite 3.50 internal DLL (memory aimbot + ESP; zgui menu; user-generated UE SDK; gmh5225; [Internal])
 - [fortnite-cheat-source-internal](entities/fortnite-cheat-source-internal.md) — Fortnite internal: SDK generation + hooking (C++; cheat / game:fortnite)
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
+- [FunctionInliner](entities/function-inliner.md) — IDA Pro plugin: reverse clang function outlining (`--moutline`); inline outlined helpers per caller; restore Hex-Rays on ARM size-optimized binaries (Cellebrite Labs; cheat / IDA Plugins)
 - [fumo-loader](entities/fumo-loader.md) — PTE.User page-table injection loader (C/C++; kernel driver; anti-cheat research; cheat / injection:windows; dumbasPL)
 - [furikuri](entities/furikuri.md) — C/C++ obfuscation engine (jnastarot; AC Obfuscation Engine)
 - [fuzzable](entities/fuzzable.md) — C/C++ source + binary fuzz-target discovery framework (Binary Ninja plugins lane; ex0dus-0x; Anti Cheat > Fuzzer)
