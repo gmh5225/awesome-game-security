@@ -706,6 +706,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eft-external](entities/eft-external.md) — Escape From Tarkov external cheat (C/C++; kernel-level work + overlays + modding; cheat / game:eft [External]; frankie-11)
 - [eft-streamed-cheat](entities/eft-streamed-cheat.md) — Escape From Tarkov streaming/external cheat (driver memory reads; separate-display radar/ESP; avoids injection; cheat / game:eft [External/Streaming]; fcancelog)
 - [eft-internal](entities/eft-internal.md) — Escape From Tarkov internal cheat (C++; shader / rendering / asset pipelines; cheat / game:eft; gmh5225)
+- [eftleecher](entities/eftleecher.md) — Escape From Tarkov DMA cheat toolbox (MemProcFS/FPGA; visor/night/thermal/recoil/stamina/weight mods; INI config; map files; auto-disconnect OPSEC; cheat / game:eft [DMA]; bytemyass)
 - [eft-monoeft](entities/eft-monoeft.md) — Escape From Tarkov Mono internal cheat (C#; Unity/Mono method hooks; ESP/silent aim/no-recoil/speed/stamina/loot; cheat / game:eft; gmh5225)
 - [eft-newtarkov-cheatproject](entities/eft-newtarkov-cheatproject.md) — Escape From Tarkov cheat (ESP, aimbot, loot visualization; Unity memory reads for overlay; cheat / game:eft; gmh5225)
 - [eft-veil-eft](entities/eft-veil-eft.md) — Escape From Tarkov Veil cheat framework (ESP, aimbot, radar; Unity client memory access; cheat / game:eft; gmh5225)
