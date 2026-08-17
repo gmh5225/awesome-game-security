@@ -5167,3 +5167,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:br-sn/CheekyBlinder`: entity [[cheeky-blinder]]; cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[byovd]], [[bustercall]], and [[ps-notif-routine-unloader]].
 
 - **2026-08-17** — ingest `description:bootmgfw/Valorant-External-Cheat`: entity [[valorant-external-cheat]]; cited on [[overviews/game-hacking]] and [[concepts/vanguard]]; cross-linked [[lithium-kernel]] and [[valorant-external-source]].
+
+- **2026-08-17** — ingest `description:bluecapesecurity/PWF`: entity [[pwf]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[dfirtriage]] and [[shimcacheparser]].
