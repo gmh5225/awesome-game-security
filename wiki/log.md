@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:winzysss/JarAnalyzer`: entity [[jaranalyzer]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[local-anticheat-1-8-9]], [[phantom-client]], [[lenrete-mod]], [[dakotaac]], [[minecraft-anticheatai]], [[bytecode-viewer]], and [[echoac-poc]].
+
 - **2026-08-17** — ingest `readme:categories`: Anti Cheat ~679 (+1; Cheat ~2713 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-17** — ingest `description:ch3rn0byl/ANTfs`: entity [[antfs]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[file-recovery-tool]], [[ntfstool]], [[ntfs-linker]], and [[ntfs-journal-viewer]].

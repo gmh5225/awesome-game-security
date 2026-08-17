@@ -1204,6 +1204,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
 - [JADX](entities/jadx.md) — DEX→Java decompiler (APK/DEX/AAR; CLI+GUI; mobile RE)
 - [JDBG](entities/jdbg.md) — Java/JVM attach debugger (JDWP; method hooks / breakpoints; cheat RE)
+- [JarAnalyzer](entities/jaranalyzer.md) — Windows Minecraft screenshare cheat forensics (NTFS MFT JAR scan; constant-pool blacklist; obfuscation flags; recycle-bin + Java process probes; nested JAR unpack; GUI/CLI text/JSON/HTML reports; winzysss)
 - [Jektor](entities/jektor.md) — Windows shellcode injection toolkit (CreateThread/CreateRemoteThread/APC/EnumTimeFormatsEx/CreateFiber; GetProcAddress resolve; XOR msfvenom + NOP sled; Injection/Shellcode Testing; gavz)
 - [JavaScript Obfuscator](entities/javascript-obfuscator.md) — JS/Node.js source obfuscator (TypeScript; CLI + API; CFF / string arrays / self-defending / domain lock; browser games)
 - [JS Debugger Bypass UserScript](entities/js-debugger-bypass-script.md) — JavaScript UserScript; bypass browser DevTools/debugger/timing/window-size anti-debug (web/JS RE)
