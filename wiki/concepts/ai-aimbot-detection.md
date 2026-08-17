@@ -20,7 +20,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__AI-FPS-b00m-h3adsh0t.md
   - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
   - wiki/sources/descriptions/dqforgive-sudo__pubg-ai-yolov4.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/chrisgdt__DELBOT-Mouse.md
+updated: 2026-08-17
 confidence: medium
 ---
 
@@ -58,6 +59,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[waldo]] — CS2 deep-learning triggerbot/aimbot detection (user-trained model)
 - [[cs2-hybrid-anticheat-proposal]] — CS2 hybrid AC proposal (ML + Glicko-2 Overwatch judges, honeypot entities, shadow monitoring; Python PoC)
 - [[aimbot-detection-prototype]] — clip + live-window prototype
+- [[delbot-mouse]] — deep learning human-vs-bot mouse movement classifier (Bureau404 internship; University of Mons; Detection:triggerbot & aimbot; chrisgdt)
 - [[pine]] — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch)
 - [[human-mouse-movement]] — offensive human-like movement (informs baseline design)
 - [[maplestory-worlds-automation]] — title-specific YOLO automation

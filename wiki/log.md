@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:chrisgdt/DELBOT-Mouse`: entity [[delbot-mouse]]; cited on [[overviews/anti-cheat]] and [[ai-aimbot-detection]]; cross-linked [[human-mouse-movement]] and [[aimbot-detection-prototype]].
+
 - **2026-08-17** — ingest `description:chrismaltby/gb-studio`: entity [[gb-studio]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[kevboy]], [[feather-gb]], and [[gba-ghidra-loader]].
 
 - **2026-08-17** — ingest `description:chronoxor/CppServer`: entity [[cppserver]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[skynet]], [[noahgameframe]], [[pitaya]], and [[kcp]].
