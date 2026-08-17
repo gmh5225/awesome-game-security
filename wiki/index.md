@@ -2102,6 +2102,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TWMS Hacking Data](entities/twms-hacking-data.md) — Taiwan MapleStory live-client hacking corpus (offsets, packets, encryption keys, GameGuard bypass; cheat / game:maplestory [TMS CT]; gmh5225)
 - [TtdAntiDebugging](entities/ttd-anti-debugging.md) — C/C++ TTD debug-testing / hooking anti-debug stress sample (Debug Testing)
 - [ttddbg](entities/ttddbg.md) — IDA Pro plugin: replay WinDbg TTD `.run` traces (forward/backward stepping; Time Travel Debugging)
+- [TWindbg](entities/twindbg.md) — pykd PEDA-like WinDbg UI; registers, disasm, stack smart-deref, memory/symbol commands (WinDbg Plugins)
 - [titancf](entities/titancf.md) — CrossFire (CF) cheat: driver development / rendering / graphics (cheat / game:crossfire; gmh5225)
 - [tiny-csgo-client](entities/tiny-csgo-client.md) — minimal CS:GO client for dedicated servers (modding / SDK)
 - [tinygltf](entities/tinygltf.md) — header-only C++11 glTF 2.0 loader/saver (JSON/GLB; Game Assets)

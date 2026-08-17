@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bruce30262/TWindbg`: entity [[twindbg]]; cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[swishdbgext]], [[windbg-decompile-ext]], [[mcp-windbg]], and [[windbg-extensions]].
+
 - **2026-08-17** — ingest `description:bruhmoment21/UniversalHookX`: entity [[universalhookx]]; cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[d3dhook-imgui]], [[kiero2]], [[hydrahook]], and [[gameplug]].
 
 - **2026-08-17** — ingest `description:bruhmoment21/cs2-sdk`: updated [[cs2-sdk]] (bruhmoment21 cross-platform fork); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[source2gen]], [[source2sdk]], [[cs2-offsets]], and [[cs2-things]].
