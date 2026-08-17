@@ -5119,3 +5119,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:bromoket/x64dbg_mcp`: entity [[x64dbg-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-automate-pyclient]], and [[x64dbg-rippy]].
 
 - **2026-08-17** — ingest `description:brew02/BudgetEPT`: entity [[budget-ept]]; cited on [[overviews/windows-kernel]]; cross-linked [[fast-pf-hook]], [[windows-kernel-pagehook]], and [[ept-hook-detection]].
+
+- **2026-08-17** — ingest `description:br-sn/CheekyBlinder`: entity [[cheeky-blinder]]; cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[byovd]], [[bustercall]], and [[ps-notif-routine-unloader]].
