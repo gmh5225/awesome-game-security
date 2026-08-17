@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `readme:categories`: Cheat ~2714 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-17** — ingest `description:burrowers/garble`: entity [[garble]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[obfuscatxor]], [[rust-obfuscator]], and [[awesome-obfuscations]].
 
 - **2026-08-17** — ingest `description:buzzer-re/NineS`: entity [[nines]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ps5-linux-loader]], [[ida-ps5-elf-plugin]], and [[a53-code-exec]].
