@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:charliewolfe/PointerGuard`: entity [[pointer-guard]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[memory-guard]], [[eat-guard]], and [[pghooker]].
+
 - **2026-08-17** — ingest `description:chaycee/CS2Internal`: entity [[cs2internal]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[cs2-internal]], [[cs2-cheat-base]], [[cs2-internal-sdk]], and [[asphyxia-cs2]].
 
 - **2026-08-17** — ingest `description:cheahjs/palworld-save-tools`: entity [[palworld-save-tools]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworldsaved]].
