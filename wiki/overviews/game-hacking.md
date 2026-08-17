@@ -213,6 +213,7 @@ sources:
   - wiki/sources/descriptions/boltgolt__boltobserv.md
   - wiki/sources/descriptions/bliutech__mbased.md
   - wiki/sources/descriptions/blacktop__ida-mcp-rs.md
+  - wiki/sources/descriptions/bkerler__ida_rpc.md
   - wiki/sources/descriptions/blackhades00__PareidoliaTriggerbot.md
   - wiki/sources/descriptions/block__stoic.md
   - wiki/sources/descriptions/bloesway__csgo_sdk.md
@@ -1437,6 +1438,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Headless IDA Pro MCP via [[ida-cli]] (cpkt9762; idalib-powered; AI-assisted binary analysis; Rust/C++; cheat / IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cpkt9762__ida-cli.md)
 - Headless IDA Pro MCP via [[headless-ida-mcp-server]] (cnitlrt; IDA Pro headless binary analysis; MCP tools for functions/variables; Game Develop / MCP server) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cnitlrt__headless-ida-mcp-server.md)
 - Headless IDA Pro MCP via [[ida-mcp-rs]] (blacktop; Rust; RE/modding/memory analysis; Game Develop / MCP server) sits in the same agent-RE lane. (source: wiki/sources/descriptions/blacktop__ida-mcp-rs.md)
+- IDA Pro JSON-RPC daemon via [[ida-rpc]] (bkerler; decompile/xrefs/types/patches over network protocol; headless & GUI; ghidra-rpc-compatible CLI; LLM/agent-assisted RE) sits in the same agent-RE lane. (source: wiki/sources/descriptions/bkerler__ida_rpc.md)
 - Agent bridge for IDA Pro 9+ via [[ida-bridge]] (Cellebrite Labs; Python WebSocket bridge; IDAPython/SQL on live UI or headless idalib; supervisor lifecycle; bundled agent skill; macOS; Game Develop / MCP + IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cellebrite-labs__ida-bridge.md)
 - IDA ↔ VS Code IDAPython integration via [[idacode]] (execute/debug scripts from VS Code; early alpha; cheat / IDA Plugins) sits in the same IDAPython workflow lane. (source: wiki/sources/descriptions/gmh5225__idacode.md)
 - MCP bridge into IDA via [[ida-mcp-server-plugin]] (Python plugin; disasm/decompile/xrefs/functions/types for LLM clients) sits in the Cheat IDA Plugins / agent-RE lane. (source: wiki/sources/descriptions/taida957789__ida-mcp-server-plugin.md) Full IDAPython MCP automation via [[ida-pro-mcp]] (mrexodia; installable plugin + IDAPython docs + MCP test harness; rename/annotate/xrefs/decompile/structs) sits in the same agent-RE lane. (source: wiki/sources/descriptions/mrexodia__ida-pro-mcp.md) AI-assistant bridge via [[mcp-server-idapro]] (fdrechsler; MCP for IDA Pro; Game Develop / MCP) sits in the same agent-RE lane. (source: wiki/sources/descriptions/fdrechsler__mcp-server-idapro.md) Binary analysis MCP collection via [[binary-analysis-mcps]] (cycraft-corp; Python; IDA Pro function/xref/variable tools + utilities for LLM agents; Binary analysis MCPs collections) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cycraft-corp__BinaryAnalysisMCPs.md)
