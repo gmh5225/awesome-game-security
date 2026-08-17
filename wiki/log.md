@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:btbd/wpp`: entity [[wpp]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[driver-hwid-btbd-modified]], [[afd-irp-call-dispatch]], and [[driver-read-write]].
+
 - **2026-08-17** — ingest `description:levifrsn63/krunker-loader`: entity [[krunker-loader]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[webcheat]], [[js-debugger-bypass-script]], [[javascript-obfuscator]], and [[ff3mmo]].
 
 - **2026-08-17** — ingest `readme:categories`: Cheat ~2714 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
