@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bobeff/open-source-games`: entity [[open-source-games]]; cited on [[overviews/overview]] and [[overviews/game-engine]]; cross-linked [[awesome-open-source-games]] and [[learn-awesome-gamedev]].
+
 - **2026-08-17** — ingest `description:boltgolt/boltobserv`: entity [[boltobserv]]; cited on [[overviews/game-hacking]]; cross-linked [[csgo-external-cheat]], [[csgo-dma-overlay]], and [[cs2-webradar]].
 
 - **2026-08-17** — ingest `description:bombaris34/il2cpp-pdb`: entity [[il2cpp-pdb]]; cited on [[il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cpp-inspector]], [[il2cppdumper]], [[fakepdb]], [[pdb]], and [[pdb-rs]].
