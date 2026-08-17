@@ -473,6 +473,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [custom-game-engines](entities/custom-game-engines.md) — curated custom game engines list (2020 study; Game Engine / guide)
 
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
+- [CovertThread (brew02)](entities/covert-thread.md) — covert system threads via page-table module removal, custom IDT address space, NMI-blocked inspection; direct kernel fn exec (Windows Ring0 / anti-forensic research)
 - [cpp-android-basic-samples](entities/cpp-android-basic-samples.md) — Google Play Games C++ SDK sample games (Game Develop / Android source)
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
