@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:burrowers/garble`: entity [[garble]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[obfuscatxor]], [[rust-obfuscator]], and [[awesome-obfuscations]].
+
 - **2026-08-17** — ingest `description:buzzer-re/NineS`: entity [[nines]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ps5-linux-loader]], [[ida-ps5-elf-plugin]], and [[a53-code-exec]].
 
 - **2026-08-17** — ingest `description:buzzer-re/Rikugan`: entity [[rikugan]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idassist]], [[aida]], [[ida-pro-mcp]], [[binary-ninja-mcp]], and [[tocode]].

@@ -901,6 +901,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
 - [GamesoftACS](entities/gamesoftacs.md) — Knight Online Gamesoft server-side AC (speed/teleport/damage/inventory + client integrity)
 - [GarHal CSGO](entities/garhal-csgo.md) — CS:GO kernel cheat driver + IOCTL usermode controller (KM entity R/W; planned kernel DirectX overlay; dretax; cheat / game:csgo)
+- [garble](entities/garble.md) — Go build-time obfuscator (wraps `cmd/go`; identifier/path hash rename, metadata strip, optional literals, tiny mode, experimental CFF; `garble reverse`; AC Obfuscation Engine)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [gb-studio](entities/gb-studio.md) — Game Boy adventure game creator (TypeScript/JS; driver/render/animation; Mac/Linux/Windows; GameBoy)
