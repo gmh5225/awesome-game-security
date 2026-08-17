@@ -980,6 +980,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [GreyM](entities/greym.md) — PE-focused C/C++ debugging/packing (Anti Cheat → Binary Packer `[PE]`)
+- [glfm](entities/glfm.md) — GLFW-inspired single-header C API for OpenGL ES/Metal mobile windowing (iOS/tvOS/Android/Emscripten; touch/keyboard/sensors; Write OpenGL ES code in C/C++)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:brackeen/glfm`: entity [[glfm]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[yourgamelib]], [[mojoc]], [[gameplay]], and [[android-opengl-es-chams]].
+
 - **2026-08-17** — ingest `description:bradharding/doomretro`: entity [[doomretro]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[devilution]] and [[game-design-documents]].
 
 - **2026-08-17** — ingest `description:brew02/CovertThread`: entity [[covert-thread]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[zero-thread-kernel]], [[page-table-injector]], [[hidden-thread-finder]], and [[fast-pf-hook]].
