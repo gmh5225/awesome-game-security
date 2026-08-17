@@ -1088,6 +1088,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-genpatch](entities/ida-genpatch.md) — IDA PatchGen: export grouped patched bytes, disassembly, C# SinglePatchHunk (Alt-F8; cheat / IDA Plugins)
 - [IDA-Assistant](entities/ida-assistant.md) — IDA Pro Claude-3 chat assistant (cheat / IDA Plugins)
 - [ida-ios-helper](entities/ida-ios-helper.md) — IDA plugin for iOS reversing (vtable symbols required)
+- [ida-kcpp](entities/ida-kcpp.md) — IDAPython: C++ virtual-call resolution for iOS kernelcaches (ida_kernelcache hierarchy; vcall xrefs; cheat / IDA Plugins)
 - [ida-kernelcache-ng](entities/ida-kernelcache-ng.md) — IDA plugin: iOS kernelcache analysis (pip + cli.py; cheat / IDA Plugins)
 - [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
 - [ida-ps5-elf-plugin](entities/ida-ps5-elf-plugin.md) — IDA Pro PS5 ELF loader (PS5 ELF extensions, segments, dynamic linking; console security RE)

@@ -5017,3 +5017,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-13** — ingest `description:gmh5225/Dota2Cheat`: entity [[dota2-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[dota-cheat]] and [[dota2dumped]].
 
 - **2026-08-17** — ingest `description:charliewolfe/Stealthy-Kernelmode-Injector`: entity [[stealthy-kernelmode-injector]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-vad-injector]] and [[kinject]].
+
+- **2026-08-17** — ingest `description:cellebrite-labs/ida_kcpp`: entity [[ida-kcpp]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[ida-kernelcache-ng]], [[ida-medigate]], [[aimachdec]], and [[binja-kc]].
