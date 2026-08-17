@@ -2112,6 +2112,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
 - [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)
 - [umium](entities/umium.md) — C++/CLI NT anti-tamper (undocumented syscalls + runtime mods; Anti Debugging)
+- [umap](entities/umap.md) — minimalist Windows kernel driver mapper (BYOVD physmem → pool alloc, sections, relocs, imports, entry from user mode; no registry/standard load traces; btbd; cheat / EFI Manual Map)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-Interview-Cheat-Sheet](entities/ue-interview-cheat-sheet.md) — Unreal Engine interview cheat sheet (Game Engine / Unreal guide)
 - [UE-Plugin-SCUE4-Plugin](entities/ue-plugin-scue4-plugin.md) — UE4 SCUE4 anti-cheat plugin (integrity checks, variable memory protection, packet encryption, binary tamper detection; Game Engine Protection:Unreal; gmh5225)

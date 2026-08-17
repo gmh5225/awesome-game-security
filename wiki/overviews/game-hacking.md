@@ -714,6 +714,7 @@ sources:
   - wiki/sources/descriptions/inuNorii__Elden-Ring-CT-TGA.md
   - wiki/sources/descriptions/gmh5225__EASY-HWID-SPOOFER.md
   - wiki/sources/descriptions/gmh5225__Driver-HWID-btbd-modified.md
+  - wiki/sources/descriptions/btbd__umap.md
   - wiki/sources/descriptions/btbd__wpp.md
   - wiki/sources/descriptions/gmh5225__EfiDump.md
   - wiki/sources/descriptions/gmh5225__Elden-Ring-Debug-Tool.md
@@ -1174,7 +1175,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 ## Memory access
 
 - **User-mode** — `OpenProcess` + RPM/WPM, `NtReadVirtualMemory`, mapped sections; blocked by handle stripping on protected titles. Alternative user-mode cross-process read primitives without conventional `ReadProcessMemory` are collected in libraries such as [[creadmemory]] (gmh5225; multiple UM remote-read methods; base for external cheat memory access; cheat / RPM) (source: wiki/sources/descriptions/gmh5225__CReadMemory.md). Lightweight usermode PE dumpers such as [[dumpepe]] (OpenProcess/ReadProcessMemory; mapped-image `SizeOfImage` reconstruction; x86/x64; packed/protected EXE post-unpack dump; d35ha) sit in the same RPM lane for static RE after runtime unpack. (source: wiki/sources/descriptions/d35ha__DumpPE.md) NT syscall interception redirected to a kernel driver for handle-protection bypass such as [[intraceptor]] (crvvdev; C/C++; kernel driver + hooking; cheat / access) complements usermode elevation libs such as [[libelevate]]. (source: wiki/sources/descriptions/crvvdev__intraceptor.md)
-- **Kernel-mode** — driver RPM/WPM, MDL copy, `KeStackAttachProcess`, physical reads via vulnerable or research drivers ([[byovd]], [[ntmemory]]).
+- **Kernel-mode** — driver RPM/WPM, MDL copy, `KeStackAttachProcess`, physical reads via vulnerable or research drivers ([[byovd]], [[ntmemory]]). Minimalist usermode BYOVD kernel driver mappers such as [[umap]] (btbd; C; physmem primitive → pool alloc, sections, relocs, imports, entry; no registry / standard load-path traces; stealthy manual-map detection research; cheat / EFI Manual Map) extend that lane. (source: wiki/sources/descriptions/btbd__umap.md)
 - **Below OS** — [[dma]] FPGA/PCIe, hypervisor introspection, EFI runtime before DSE, SMM cheat research such as [[smm]] (ekknod; C/C++; driver development / graphics / networking; cheat / EFI driver area) (source: wiki/sources/descriptions/ekknod__smm.md), external second machine.
 - **Unified transport libraries** — [[vm]] (ekknod; C/C++ `vm.h`; swap kernel EPROCESS walks, RPM/WPM, Linux `/proc/pid/mem`, [[pcileech]] VMMDLL/LeechCore DMA, KVM guest introspection, Proton, or EFI-variable kernel comms without changing game-facing logic; CR3 translation, PEB/LDR module walk, pattern scan) (source: wiki/sources/descriptions/ekknod__vm.md). Focused EFI **GetVariable** RPM research such as [[sub-get-variable]] (ekknod; C/C++; kernel-level driver development / graphics; cheat / EFI RPM; README `[EFI RPM]`) sits in the same below-OS RPM lane beside [[efi-monitor]] and [[sumap]]. (source: wiki/sources/descriptions/ekknod__SubGetVariable.md)
 
