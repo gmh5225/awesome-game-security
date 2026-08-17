@@ -1568,6 +1568,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ntoskrnlwalker](entities/ntoskrnlwalker.md) — ntoskrnl offset/gadget/symbol resolver (target-build kernel structure navigation)
 - [NtRays](entities/ntrays.md) — IDA Pro Hex-Rays plugin: NT kernel type/structure enrichment (NTSTATUS, IOCTL, object types, EPROCESS/ETHREAD; Windows Kernel Enhance; gmh5225)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
+- [NtLua](entities/ntlua.md) — Lua 5.4 interpreter embedded in WDK kernel driver (UM script dispatch; phys/virt memory, process enum, MSR R/W; can1357)
 - [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
 - [NlsCodeInjectionThroughRegistry](entities/nls-code-injection-through-registry.md) — NLS registry code-page redirection for early DLL load / persistence (injection research; gmh5225)
 - [NtUserInjectMouseInput-syscall](entities/ntuserinjectmouseinput-syscall.md) — win32k NtUserInjectMouseInput syscall path (user-mode mouse injection; triggerbot/aimbot primitives; gmh5225)
