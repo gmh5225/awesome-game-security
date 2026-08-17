@@ -20,4 +20,4 @@ Complements CS2 DMA radar samples such as [[cs2-dma-radar]] by illustrating a fu
 
 ## Related
 
-[[cs2-dma-radar]] · [[cs2-cheat-cpp]] · [[proext]] · [[cs2-webradar]] · [[gta5-dma-cheat]] · [[fn-dma-cheat]] · [[csgo-dma-overlay]] · [[dma]] · [[pcileech]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[cs2-dma]] · [[cs2-dma-radar]] · [[cs2-cheat-cpp]] · [[proext]] · [[cs2-webradar]] · [[gta5-dma-cheat]] · [[fn-dma-cheat]] · [[csgo-dma-overlay]] · [[dma]] · [[pcileech]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]

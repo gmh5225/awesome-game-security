@@ -20,4 +20,4 @@ Complements external CS2 radar samples such as [[cs2-webradar]] (browser-streame
 
 ## Related
 
-[[cs2-webradar]] · [[proext]] · [[titled-gui-cs2]] · [[cs2-offsets]] · [[cs2-external-1]] · [[eft-dma-radar-1]] · [[csgo-dma-overlay]] · [[dma]] · [[pcileech]] · [[overviews/dma-attack]] · [[overviews/game-hacking]]
+[[cs2-dma]] · [[cs2-dma-cheat]] · [[cs2-webradar]] · [[proext]] · [[titled-gui-cs2]] · [[cs2-offsets]] · [[cs2-external-1]] · [[eft-dma-radar-1]] · [[csgo-dma-overlay]] · [[dma]] · [[pcileech]] · [[overviews/dma-attack]] · [[overviews/game-hacking]]
