@@ -33,6 +33,7 @@ sources:
   - wiki/sources/descriptions/connorjaydunn__BinaryShield.md
   - wiki/sources/descriptions/cpz__trinity.md
   - wiki/sources/descriptions/crvvdev__vac-bypass-kernel.md
+  - wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md
   - wiki/sources/descriptions/danielkrupinski__vac-hooks.md
   - wiki/sources/descriptions/danielkrupinski__VAC.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
@@ -641,6 +642,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[valveanticheat1]] — GoldSrc/WON-era VAC1 ModuleC/ModuleS bytecode-VM rebuild (2002–2004; RE notes + decrypt/repack tooling) for studying early network-delivered detection architecture (source: wiki/sources/descriptions/shefben__VALVeAntiCheat1.md)
 - [[como-funciona-vac]] — CS2 VAC usermode architecture write-up (Trusted Launch in `cs2.exe`, `client.dll` scanners, `steam.exe` external scanner; PE hashing, interface CRC, thread inspection, VEH hardware-breakpoint checks, protobuf evidence reports; forensic overview, not a bypass) (source: wiki/sources/descriptions/ianveig29__como-funciona-vac.md)
 - [[cs2-anticheat]] — CS2 in-binary anticheat code documentation (danielkrupinski; June 2023 update snapshot; modding/debugging; explore anticheat:cs2) (source: wiki/sources/descriptions/danielkrupinski__cs2-anticheat.md)
+- [[cs2-p2c-templates]] — CS2 VAC Live P2C research templates (ccsimplyspolit; VMProtect-protected anti-VAC helper RE port; `VacLiveBypass` input-history/view-angle protobuf mutation; kernel spoof drivers; explore anticheat:vac / cs2; insecure local or CTF study) (source: wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md)
 - [[csgosimple]] — spirthack/MarkHC Internal CS:GO baseline for studying injected-cheat surface against VAC (source: wiki/sources/descriptions/spirthack__CSGOSimple.md)
 - [[csgo-aw-v5.1.13]] — leaked AimWare v5.1.13 internal CS:GO source (aimbot, visuals, movement, anti-aim, hooking framework) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
 - [[csgo-nixware-csgo]] — leaked Nixware internal CS:GO source (aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay) for studying commercial injected-cheat surface against VAC (source: wiki/sources/descriptions/gmh5225__CSGO-NIXWARE-CSGO.md)

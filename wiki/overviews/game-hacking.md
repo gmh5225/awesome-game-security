@@ -206,6 +206,7 @@ sources:
   - wiki/sources/descriptions/ch4ncellor__CSGO-P2C-Dumper.md
   - wiki/sources/descriptions/charliewolfe__Stealthy-Kernelmode-Injector.md
   - wiki/sources/descriptions/chaycee__CS2Internal.md
+  - wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md
   - wiki/sources/descriptions/chztbby__RebirthGuard.md
   - wiki/sources/descriptions/gmh5225__cs2_things.md
   - wiki/sources/descriptions/gmh5225__cs2_sdk.md
@@ -1656,6 +1657,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 samples such as [[tim-apple]] (`tim_apple.exe`; **External** tag; kristofhracza offset bootstrap via `offset_download.ps1` or manual JSON; gmh5225 fork for Source 2 SDK / pattern-scan / memory-access study) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/kristofhracza__tim_apple.md) (source: wiki/sources/descriptions/gmh5225__tim_apple.md)
 - Internal CS2 samples such as [[cs2-internal]] (C++; SDK generation / hooking / memory analysis; Internal tag) sit in the same cheat / game:cs2 lane. (source: wiki/sources/descriptions/redbg__CS2-Internal.md)
 - Internal CS2 samples such as [[cs2internal]] (chaycee; C#; SDK generation / hooking / overlays; cheat / game:cs2 [Internal]) extend that lane with a managed-language in-process path beside C++ samples such as [[cs2-cheat-base]]. (source: wiki/sources/descriptions/chaycee__CS2Internal.md)
+- CS2 P2C security-research templates such as [[cs2-p2c-templates]] (ccsimplyspolit; VMProtect FVA reconstruction; `VacLiveBypass` MinHook detours on CreateMove/LevelInit/protobuf paths; kernel server-flag/rank spoof drivers; multi-method injectors; depot-aware offset manifests; VAC Live / CS2 client RE for insecure local or CTF study; cheat / game:cs2) sit in the same offensive P2C template lane beside CS:GO P2C forensics via [[csgo-p2c-dumper]]. (source: wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md)
 - Open-source internal CS2 samples such as [[asphyxia-cs2]] (Asphyxia; ESP / aimbot / triggerbot; Source 2 SDK via interface pointers + pattern scan; Internal tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/maecry__asphyxia-cs2.md)
 - Internal CS2 samples such as [[aurora]] (gmh5225; ESP / aimbot / visual mods; Source 2 schema system access + entity enumeration for player data + overlay rendering; cheat / game:cs2 [Internal]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/gmh5225__Aurora.md)
 - CS2 samples such as [[counterstrike2]] (C++; rendering / SDK generation / hooking) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/papstuc__counterstrike2.md)

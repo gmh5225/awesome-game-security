@@ -426,6 +426,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2internal](entities/cs2internal.md) — internal CS2 cheat (C#; SDK generation / hooking / overlays; chaycee; cheat / game:cs2 [Internal])
 - [CS2-OFFSETS](entities/cs2-offsets.md) — CS2 memory offsets / netvars (C++ headers + JSON; Source 2)
 - [CS2-Offsets (ro0ti)](entities/cs2-offsets-ro0ti.md) — CS2 offset dump (C#/C++; `[Offset]`; cheat / game:cs2)
+- [cs2-p2c-templates](entities/cs2-p2c-templates.md) — CS2 VAC Live P2C research templates (ccsimplyspolit; VMProtect FVA reconstruction; VacLiveBypass MinHook; kernel spoof drivers; multi-method injectors; cheat / game:cs2)
 - [cs2-sdk](entities/cs2-sdk.md) — CS2 Source 2 SDK headers (gmh5225/cs2_sdk + cs2-sdk; C/C++; SDK generation / simplified Source 2 layout; driver / rendering / networking; DX11 + Vulkan; cheat / game:cs2 [SDK])
 - [cs2-sdk-source2gen](entities/cs2-sdk-source2gen.md) — CS2 Source 2 SDK dump from source2gen (gmh5225; auto-generated C++ headers; animation/client/engine2/network/scene/schema; cheat / game:cs2 [SDK])
 - [cs2-things](entities/cs2-things.md) — CS2 Source 2 research collection (VScript; RE structures / offsets / SDK / netvars; gmh5225)
