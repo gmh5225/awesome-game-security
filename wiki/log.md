@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:boratanrikulu/gecit`: entity [[gecit]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[peetch]], [[pcapdroid]], and [[ndisapi]].
+
 - **2026-08-17** — ingest `description:borzacchiello/seninja`: entity [[seninja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[triton-bn]], [[ponce]], [[radius2]], and [[ripr]].
 
 - **2026-08-17** — ingest `description:boxqkrtm/com.unity.ide.cursor`: entity [[com-unity-ide-cursor]]; cited on [[overviews/game-engine]]; cross-linked [[unicli]], [[unity-mcp]], and [[unity-script-collection]].
