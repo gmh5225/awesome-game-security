@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:ch4ncellor/CSGO-P2C-Dumper`: entity [[csgo-p2c-dumper]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[csgo-ac]], [[csgo-cheat-base]], [[csgo-internal-base]], and [[gh-offset-dumper]].
+
 - **2026-08-17** — ingest `description:ch4ncellor/EAC-Reversal`: entity [[eac-reversal]]; cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[easyanticheat-reversing]], [[eac]], and [[easy-anti-cheat]].
 
 - **2026-08-17** — ingest `description:chaeyk/eac-leak`: entity [[eac-leak]]; cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[eac]], [[eac-easyanticheat-src-1]], and [[easy-anti-cheat]].
