@@ -1947,6 +1947,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sumap (ekknod)](entities/sumap.md) — EFI manual map (C/C++; pre-boot unsigned driver PE mapping; driver development / memory analysis; cheat / EFI Manual Map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)
 - [sea-of-choros](entities/sea-of-choros.md) — Sea of Thieves modding / SDK generation / hooking scaffold (C/C++; Unreal; cheat / game:sea of thieves; gmh5225)
+- [SENinja](entities/seninja.md) — Binary Ninja symbolic execution plugin (Python; BN IL path exploration; constraint tracking, unreachable-code detection, interactive UI; Cheat Symbolic Execution; borzacchiello)
 - [so_loader](entities/so-loader.md) — C/C++ Android native `.so` memory loading (Cheat / Android memory loading)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)

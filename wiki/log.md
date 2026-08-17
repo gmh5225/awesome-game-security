@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:borzacchiello/seninja`: entity [[seninja]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[triton-bn]], [[ponce]], [[radius2]], and [[ripr]].
+
 - **2026-08-17** — ingest `description:boxqkrtm/com.unity.ide.cursor`: entity [[com-unity-ide-cursor]]; cited on [[overviews/game-engine]]; cross-linked [[unicli]], [[unity-mcp]], and [[unity-script-collection]].
 
 - **2026-08-17** — ingest `description:boylin0/AVA-Hack`: entity [[ava-hack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[d3dhook-imgui]], [[universalhookx]], [[kiero2]], [[present-hook]], and [[vulkan-hook]].
