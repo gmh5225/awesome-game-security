@@ -1572,6 +1572,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ovo](entities/ovo.md) — Android ARM64 kernel driver module (process R/W, mmuhack, touch simulation, kernel TCP IPC; C++/Rust SDKs; cheat / Android kernel driver)
 - [opainject](entities/opainject.md) — iOS/macOS runtime dylib inject (task_for_pid / Mach; jailbreak + tfp0)
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
+- [Object Explorer](entities/object-explorer.md) — GUI Object Manager namespace/handles/types browser (driver + PDB/DIA decode)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [OpenClaw](entities/openclaw.md) — C++ Captain Claw reimplementation (Box2D; CMake/Android; Game Develop / source)
 - [OpenGame](entities/opengame.md) — agentic web-game testing/debug framework (Game Skill; GameCoder-27B; OpenGame-Bench; Game Testing)

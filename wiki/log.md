@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:zodiacon/ObjectExplorer`: entity [[object-explorer]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[winobjex64]] and [[openark]].
+
 - **2026-08-17** — ingest `readme:categories`: Cheat ~2713 (+2; Anti Cheat ~677 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/game-hacking]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-17** — ingest `description:cnitlrt/headless-ida-mcp-server`: entity [[headless-ida-mcp-server]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-cli]], [[ida-pro-mcp]], [[mcp-server-idapro]], and [[ida-mcp-server-plugin]].
