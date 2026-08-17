@@ -1156,6 +1156,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDA Kallsyms Symbol Renamer](entities/ida-kallsyms-symbol-renamer.md) — IDA Pro plugin: import `/proc/kallsyms` Linux kernel symbols; auto-rename functions/data in kernel/LKM IDBs (IDA kallsyms Renamer; gmh5225; cheat / IDA Plugins)
 - [IDA Map Symbol Parser](entities/ida-map-symbol-parser.md) — IDA Pro plugin: parse linker MAP files; apply function/global/segment names to stripped IDB (IDA Map File Symbol Renamer; gmh5225; cheat / IDA Plugins)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
+- [ida-mcp-rs](entities/ida-mcp-rs.md) — Headless IDA Pro MCP server (Rust; RE/modding/memory analysis; Game Develop / MCP server; blacktop)
 - [ida-medigate](entities/ida-medigate.md) — IDA Pro Python: GCC RTTI hierarchy/vtable recovery from stripped binaries (Hex-Rays union disambiguation; xref tracker; cheat / IDA Plugins)
 - [ida-missinglink](entities/ida-missinglink.md) — IDA plugin: fill missing indirect CALL/JMP targets (C++ OOP RE; cheat / IDA Plugins)
 - [ida-migrator](entities/ida-migrator.md) — Python IDA plugin: migrate IDB/database between IDA versions or environments (cheat / IDA Plugins)
