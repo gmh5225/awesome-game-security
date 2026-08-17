@@ -2236,6 +2236,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valorant-esp-hack-with-driver](entities/valorant-esp-hack-with-driver.md) — Valorant ESP: Vanguard driver vuln + early load before AC; kernel injector (cheat / game:valorant; gmh5225)
 - [valorant-external](entities/valorant-external.md) — Valorant external cheat (latest; enhanced security; cheat / game:valorant; gmh5225)
 - [valorant-external-1](entities/valorant-external-1.md) — Valorant external cheat (C/C++; OpenGL overlay; cheat / game:valorant; gmh5225)
+- [valorant-external-cheat](entities/valorant-external-cheat.md) — VEX: open-source Valorant external (C++20; UE5 SDK + kernel driver; aimbot/triggerbot/lineups; DX11 ImGui; VGK decrypt; LLVM obfuscation; bootmgfw; cheat / game:valorant [External])
 - [valorant-external-p2c-leaked](entities/valorant-external-p2c-leaked.md) — Leaked Valorant external P2C: ESP/aimbot/triggerbot via kernel driver RPM; UE state reads under Vanguard (cheat / game:valorant [External]; gmh5225)
 - [valorant-external-source](entities/valorant-external-source.md) — Valorant external cheat source: ESP/aimbot/player info via kernel driver RPM; overlay window/hijack; no inject (cheat / game:valorant [External]; gmh5225)
 - [valorant-externals](entities/valorant-externals.md) — Valorant external offset feed (incremental refresh; cheat / game:valorant [Offset]; gmh5225)
