@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bluefrostsecurity/CVE-2020-0041`: updated [[cve-2020-0041]] (Blue Frost Security full Chrome→kernel exploit chain); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-17** — ingest `description:bmax121/APatch`: entity [[apatch]]; cited on [[overviews/mobile-security]]; cross-linked [[kernelpatch]], [[apatch-kpm]], [[kernelsu]], and [[magisk]].
 
 - **2026-08-17** — ingest `description:bmax121/KernelPatch`: entity [[kernelpatch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[apatch-kpm]], [[kpm-memreader]], [[mkpms]], and [[honor-of-kings-re-research]].

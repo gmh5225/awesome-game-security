@@ -493,7 +493,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2018-19320](entities/cve-2018-19320.md) — Gigabyte `gdrv.sys` CVE-2018-19320 DSE bypass (ring-0 memcpy IOCTL → `CI!g_CiOptions` leak/toggle; gmh5225)
 - [CVE-2018-19320-LPE](entities/cve-2018-19320-lpe.md) — Gigabyte `gdrv.sys` CVE-2018-19320 SYSTEM LPE (arbitrary alloc/write IOCTLs; Win10 x64 21H1; gmh5225)
 - [CVE-2019-2215](entities/cve-2019-2215.md) — Binder epoll UAF temporary root (Pixel 2/XL; Sep 2019 firmware; ARM64 NDK)
-- [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root)
+- [CVE-2020-0041](entities/cve-2020-0041.md) — Binder transaction-buffer bounds-check LPE (Pixel 3; Feb 2020 firmware; kernel R/W + root; Blue Frost Security full Chrome→kernel chain)
 - [CVE-2020-14974](entities/cve-2020-14974.md) — IObitUnlocker `IObitUnlocker.sys` IOCTL file-manipulation PoC (unlock/delete/rename/copy/move in-use files; low privilege; gmh5225)
 - [CVE-2020-36603](entities/cve-2020-36603.md) — HoYoVerse `mhyprot2.sys` Genshin Impact AC driver LPE (unprivileged calls → SYSTEM; CVE tracking; gmh5225)
 - [CVE-2021-1961](entities/cve-2021-1961.md) — Qualcomm QSEECOM/TrustZone kernel R/W (Widevine ION; Pixel 3; SELinux off)
