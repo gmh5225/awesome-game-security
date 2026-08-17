@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/guheng-re__unflat.md
   - wiki/sources/descriptions/es3n1n__obfuscator.md
   - wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/cdong1012__ollvm-unflattener.md
+updated: 2026-08-17
 confidence: high
 ---
 
@@ -17,7 +18,7 @@ confidence: high
 
 ## Recovery approaches
 
-1. **Symbolic execution + pattern matching** — identify dispatcher, recover real edges ([[idadeflat]] with angr).
+1. **Symbolic execution** — identify dispatcher, recover real edges ([[idadeflat]] with angr; [[ollvm-unflattener]] with Miasm — BFS call following, deobfuscated binary output for Win/Linux x86/x64). (source: wiki/sources/descriptions/cdong1012__ollvm-unflattener.md)
 2. **Decompiler-time deflattening** — Hex-Rays passes at lift time ([[d810-ng]]).
 3. **External OBPO backends** — closed-core simplification with open IDA client ([[obpo-plugin]]).
 4. **Python unflattener plugins** — extensible Fix OLLVM unflatten hooks ([[unflat]]; plugin development focus). (source: wiki/sources/descriptions/guheng-re__unflat.md)
@@ -28,4 +29,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[idadeflat]] · [[d810-ng]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[idadeflat]] · [[ollvm-unflattener]] · [[d810-ng]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]

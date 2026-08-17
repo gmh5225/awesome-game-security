@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cdong1012/ollvm-unflattener`: entity [[ollvm-unflattener]]; cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[idadeflat]], [[unflat]], and [[d810-ng]].
+
 - **2026-08-17** — ingest `description:cdpred/RedTalaria`: entity [[red-talaria]]; cited on [[overviews/game-engine]]; cross-linked [[unreal-mcp]], [[generic-graph]], and [[houdini-engine-for-unreal]].
 
 - **2026-08-17** — ingest `description:cellebrite-labs/LabSync`: entity [[labsync]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idarling]], [[binsync]], [[ida-migrator]], and [[idarem]].

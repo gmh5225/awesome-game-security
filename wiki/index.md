@@ -23,7 +23,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye](concepts/battleye.md)
 - [BYOVD](concepts/byovd.md)
 - [Compiled Wiki](concepts/compiled-wiki.md)
-- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec, d810, OBPO; pairs MBA recovery
+- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec ([[ollvm-unflattener]], [[idadeflat]]), d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
 - [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
@@ -1586,6 +1586,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
 - [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
+- [ollvm-unflattener](entities/ollvm-unflattener.md) — Python OLLVM CFF deobfuscator (Miasm symbolic exec; BFS call following; Win/Linux x86/x64 binary output; Fix OLLVM)
 - [obs-graphics-hook32-hook](entities/obs-graphics-hook32-hook.md) — gmh5225 32-bit OBS graphics-hook pointer-replacement sample (Game Capture inject hijack; cheat/overlay research; README [OBS Hook])
 - [obs-hook](entities/obs-hook.md) — gmh5225 OBS Game Capture hook DLL hijack for in-frame custom overlays via OBS trusted pipeline (no overlay HWND; AC whitelist research; README [OBS Hook])
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
