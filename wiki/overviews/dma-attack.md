@@ -49,7 +49,7 @@ sources:
   - wiki/sources/descriptions/dom0ng__pcileech-wifi-v2.md
   - wiki/sources/descriptions/ekknod__drvscan.md
   - wiki/sources/descriptions/d1skq__vgk-dma-bypass.md
-updated: 2026-08-16
+updated: 2026-08-17
 confidence: high
 ---
 
@@ -112,4 +112,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2711) DMA lanes and `Anti Cheat > Detection:DMA` (~677), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
+No top-level DMA section — maps via `Cheat` (~2713) DMA lanes and `Anti Cheat > Detection:DMA` (~677), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
