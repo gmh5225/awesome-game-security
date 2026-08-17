@@ -26,7 +26,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec ([[ollvm-unflattener]], [[idadeflat]]), d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
-- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
+- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]/[[river]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening; [[etwti-fluctuation-monitor]] tamper alerts
 - [Frida](concepts/frida.md)
@@ -1937,6 +1937,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Rikugan](entities/rikugan.md) — in-IDA/BN RE AI agent (multi-provider LLM chat; agentic tool loop, plan mode, Ollama; buzzer-re)
 - [Riru-MomoHider](entities/riru-momo-hider.md) — Riru Zygote-injection Magisk root-hide module (syscall + Java API hooks; mount spoof, file hide, property-query block; canyie; Cheat / Magisk)
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
+- [RIVER](entities/river.md) — Bitdefender dynamic binary analysis framework (ELF/PE loader; external mapping; native import resolution; x86 runtime instrumentation; cheat / DBI)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [rootkit-2](entities/rootkit-2.md) — CSRSS CSR_PROCESS walk to detect hidden processes (kernel PoC; gmh5225)
