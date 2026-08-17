@@ -18,4 +18,4 @@ Curated documentation/reference list for Android kernel CVEs in the cheat / Andr
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[android-vuln-poc-exp]] · [[android-privilege-cve-2022-20452-leakvalue]] · [[cve-2026-43499-popsicle]] · [[dirtypiperoot]] · [[dpatch]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[android-kernel-exploitation]] · [[android-vuln-poc-exp]] · [[android-privilege-cve-2022-20452-leakvalue]] · [[cve-2026-43499-popsicle]] · [[dirtypiperoot]] · [[dpatch]]

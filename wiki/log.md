@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cloudfuzz/android-kernel-exploitation`: entity [[android-kernel-exploitation]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-vuln]], [[android-vuln-poc-exp]], and [[android-kernel-hacking-toolkit]].
+
 - **2026-08-17** — ingest `description:cloudwu/skynet`: entity [[skynet]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[pitaya]], [[noahgameframe]], and [[kcp]].
 
 - **2026-08-17** — ingest `description:zodiacon/ObjectExplorer`: entity [[object-explorer]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[winobjex64]] and [[openark]].
