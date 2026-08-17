@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bombaris34/il2cpp-pdb`: entity [[il2cpp-pdb]]; cited on [[il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cpp-inspector]], [[il2cppdumper]], [[fakepdb]], [[pdb]], and [[pdb-rs]].
+
 - **2026-08-17** — ingest `description:bombomby/optick`: entity [[optick]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tracy]], [[orbit]], and [[rprof]].
 
 - **2026-08-17** — ingest `description:bootmgfw/CS2-Cheat-Source`: entity [[cs2-cheat-source]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-cheat-base]], [[asphyxia-cs2]], [[cs2-sdk]], and [[present-hook]].

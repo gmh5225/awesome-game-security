@@ -1183,6 +1183,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IL2CPPDumper](entities/il2cppdumper.md) — Android IL2CPP static dump (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
 - [Il2CppDumper-YuanShen](entities/il2cppdumper-yuanshen.md) — Genshin Impact IL2CPP static dump (khang06; cwd output; cheat / game engine explorer:Unity)
 - [il2cpp-finder](entities/il2cpp-finder.md) — Unity IL2CPP metadata locator (global-metadata.dat / CodeRegistration / MetadataRegistration scan; obfuscated binaries; cheat / game engine explorer:Unity)
+- [il2cpp-pdb](entities/il2cpp-pdb.md) — Il2CppDumper fork with Rust PDB generator for x64 PE GameAssembly.dll (function names, struct types, typed prototypes; IDA auto-load; [Il2Cpp Dump])
 - [Il2Cpp-HookScripts](entities/il2cpp-hook-scripts.md) — Android Unity IL2CPP/Mono hook script templates (Frida + native; method intercept / logic patch / runtime data)
 - [Il2CppInspector](entities/il2cpp-inspector.md) — C# IL2CPP RE tool/library (`global-metadata.dat` + IL2CPP binaries → IDA/Ghidra/BN scripts, C++ headers, DLL injection scaffolds; all versions/platforms; [Il2Cpp Dump])
 - [ilhook-rs](entities/ilhook-rs.md) — Rust x86 HOOK (function intercept → user handlers; cheat / hook)
