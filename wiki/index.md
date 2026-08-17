@@ -1847,6 +1847,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [regenny](entities/regenny.md) — interactive live-memory struct reconstruction (cursey; C++; nested structs/arrays/pointers/enums/bitfields; header export; cheat / sdk codegen)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
 - [Red Alert 2 on Web](entities/redalert2.md) — RA2/YR RTS engine reimplementation (unit AI, buildings, resources, multiplayer, map rendering; Game Engine / source)
+- [RedTalaria](entities/red-talaria.md) — UE Hermes deep-link plugin (Blueprint nodes/assets/editor URLs; UE 5.3/4.27; team collaboration; Plugins:Unreal; cdpred)
 - [Reborn](entities/reborn.md) — Rust Fortnite cheat framework (web server / SQLite / Discord bot; modular crates)
 - [RebirthGuard](entities/rebirth-guard.md) — Windows C++ open-source anti-cheat library (modding / SDK generation; Open Source Anti Cheat System; chztbby)
 - [Rebirth](entities/rebirth.md) — MapleStory GMS-095 private-server emulator (C#; login/character/map/monster AI/skills/quests/party-guild; client-server protocol; Private Server-GMS-095 / game:maplestory; gmh5225)
