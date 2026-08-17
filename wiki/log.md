@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:chrismaltby/gb-studio`: entity [[gb-studio]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[kevboy]], [[feather-gb]], and [[gba-ghidra-loader]].
+
 - **2026-08-17** — ingest `description:chronoxor/CppServer`: entity [[cppserver]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[skynet]], [[noahgameframe]], [[pitaya]], and [[kcp]].
 
 - **2026-08-17** — ingest `description:chztbby/RebirthGuard`: entity [[rebirth-guard]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[no-mercy]], [[sentinelac]], [[basic-anti-cheat]], and [[anti-cheat]].
