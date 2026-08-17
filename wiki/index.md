@@ -1226,6 +1226,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KasperskyHook](entities/kaspersky-hook.md) — Kaspersky `klhk.sys` hypervisor syscall hook (`IA32_LSTAR` dispatch redirect + custom driver; gmh5225)
 - [KawaiiPhysics](entities/kawaii-physics.md) — UE4/UE5 simple fake physics (animation / secondary motion; Game Develop / Unreal)
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
+- [kakhack](entities/kakhack.md) — CS:GO internal cheat (reversed SDK, multi-hook, ImGui+FreeType menu, JSON config, visuals; x86 VS2022 DLL; cazzwastaken [Internal])
 - [kavanoz](entities/kavanoz.md) — Python automated Android DEX/resource unpacker (Bangcle/Ijiami/Qihoo 360+ packer ID + decrypt; banker malware; static APK analysis; eybisi)
 - [kbotext](entities/kbotext.md) — LoL LCU bot extension framework (automated scripting and client control; README `[LCU]`; gmh5225; cheat / game:lol)
 - [kdmapper](entities/kdmapper.md) — C++ kernel driver mapper via Intel `iqvw64e.sys` BYOVD (manual PE map; DSE bypass research; eddeeh)

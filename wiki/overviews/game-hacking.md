@@ -206,6 +206,7 @@ sources:
   - wiki/sources/descriptions/ch4ncellor__CSGO-P2C-Dumper.md
   - wiki/sources/descriptions/charliewolfe__Stealthy-Kernelmode-Injector.md
   - wiki/sources/descriptions/chaycee__CS2Internal.md
+  - wiki/sources/descriptions/cazzwastaken__kakhack.md
   - wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md
   - wiki/sources/descriptions/chztbby__RebirthGuard.md
   - wiki/sources/descriptions/gmh5225__cs2_things.md
@@ -1588,6 +1589,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS:GO samples such as [[cartmanv2]] (gmh5225; C/C++; rendering / networking / editor tooling; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture with overlay and menu tooling. (source: wiki/sources/descriptions/gmh5225__cartmanv2.md)
 - Clean internal CS:GO scaffold bases such as [[csgo-internal-base]] (CreateInterface resolution, VMT hooks, netvar dump, pattern scan, ImGui menu; Internal tag) sit in the same cheat / game:csgo lane for studying Source 1 internal architecture. (source: wiki/sources/descriptions/lstrsrt__csgo_internal_base.md)
 - Internal CS:GO cheat bases such as [[csgo-cheat-base]] (designer1337; MinHook hooks, ImGui menu, engine prediction, glow ESP, client/engine interface wrappers, DirectX surface rendering, game-event management; Internal tag) sit in the same cheat / game:csgo lane for studying MinHook-based Source 1 internal hook surfaces beside VMT-hook scaffolds. (source: wiki/sources/descriptions/designer1337__csgo-cheat-base.md)
+- Internal CS:GO samples such as [[kakhack]] (cazzwastaken; reversed SDK + multiple graphics/game hooks; ImGui menu with FreeType fonts, JSON config, extensive visuals; x86 VS2022 DLL; Internal tag) sit in the same cheat / game:csgo lane for studying full-feature internal architecture beside scaffold bases. (source: wiki/sources/descriptions/cazzwastaken__kakhack.md)
 - Internal CS:GO samples such as [[csgo-kns]] (C++; VMT hooks + interface pointers; ESP, aimbot, bhop, skin changer; Internal tag) sit in the same cheat / game:csgo lane for studying Source engine SDK hook patterns. (source: wiki/sources/descriptions/kyojig__csgo_kns.md)
 - Internal CS:GO samples such as [[aqhax-csgo]] (AqHax; C++; interface capture + VMT hooks + netvar dump; ESP, aimbot, triggerbot, movement, skin changer) sit in the same cheat / game:csgo lane for studying typical internal cheat feature stacks. (source: wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md)
 - Internal CS:GO samples such as [[autismware]] (gmh5225; C++; interface capture + VMT hooks; ESP, aimbot, backtrack, skin changer, ImGui menu; HvH tag) sit in the same cheat / game:csgo lane for studying standard Source 1 internal cheat feature implementation. (source: wiki/sources/descriptions/gmh5225__autismware.md)

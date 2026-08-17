@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cazzwastaken/kakhack`: entity [[kakhack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-internal-base]], [[csgo-cheat-base]], [[csgo-sdk-improved]], and [[present-hook]].
+
 - **2026-08-17** — ingest `description:ccsimplyspolit/CS2-P2C-TEMPLATES`: entity [[cs2-p2c-templates]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-p2c-dumper]], [[como-funciona-vac]], [[vac-bypass-kernel]], and [[vmprotect]].
 
 - **2026-08-17** — ingest `description:cdong1012/ollvm-unflattener`: entity [[ollvm-unflattener]]; cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[idadeflat]], [[unflat]], and [[d810-ng]].
