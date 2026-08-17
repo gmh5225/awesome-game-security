@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:chztbby/RebirthGuard`: entity [[rebirth-guard]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[no-mercy]], [[sentinelac]], [[basic-anti-cheat]], and [[anti-cheat]].
+
 - **2026-08-17** — ingest `description:cinit/WSAPatch`: entity [[wsapatch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[win11-apk-installer]] and [[magiskonwsalocal]].
 
 - **2026-08-17** — ingest `description:ck0i/Kernelcloak`: entity [[kernelcloak]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kli]], [[obfuscxx]], [[wprotect]], and [[encrypted-value]].

@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/cocomelonc__tabby.md
   - wiki/sources/descriptions/cocomelonc__peekaboo.md
   - wiki/sources/descriptions/codetronik__AndroidAntiCheat.md
+  - wiki/sources/descriptions/chztbby__RebirthGuard.md
   - wiki/sources/descriptions/crazythecoder__IW4MAdmin-SebzAntiCheat.md
   - wiki/sources/descriptions/cs2-server-plugins__cs2-calladmin.md
   - wiki/sources/descriptions/cognis-digital__packpeek.md
@@ -671,6 +672,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anti-cheat-chrysalis]] — C/C++ reference AC / chrysalis guide (process integrity, module scan, memory pattern detection, debugger detection, overlay monitoring, kernel driver comm, OpenGL; gmh5225; Anti Cheat / guide; alias [[anticheat]]) (source: wiki/sources/descriptions/gmh5225__AntiCheat-chrysalis.md) (source: wiki/sources/descriptions/gmh5225__AntiCheat.md)
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
 - [[android-anti-cheat]] — open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; open-source AC system lane; defensive researchers) (source: wiki/sources/descriptions/codetronik__AndroidAntiCheat.md)
+- [[rebirth-guard]] — Windows C++ open-source anti-cheat library (chztbby; modding / SDK generation; Open Source Anti Cheat System lane; defensive researchers) (source: wiki/sources/descriptions/chztbby__RebirthGuard.md)
 - [[antidebugandmemorydump]] — Android anti-debug + memory analysis / emulation / debugging reference (Java + C/C++; Anti Debugging lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebugandMemoryDump.md)
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
