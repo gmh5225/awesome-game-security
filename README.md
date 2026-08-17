@@ -908,6 +908,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
+- https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
 - https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
 - https://github.com/hasherezade/pe-bear [PE Viewer]
