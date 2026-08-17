@@ -1938,6 +1938,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-external](entities/rust-external.md) — Facepunch Rust external cheat (C/C++; rendering / networking; cheat / game:rust; gmh5225)
 - [rust-external-1](entities/rust-external-1.md) — Facepunch Rust external cheat (C++; kernel driver/RPM; overlay ESP; EAC Unity; gmh5225)
 - [rust-external-and-driver-aliencheats](entities/rust-external-and-driver-aliencheats.md) — Facepunch Rust external cheat (C++/C/C++; driver / overlays / memory analysis; cheat / game:rust [External]; gmh5225)
+- [rust-external-cheat](entities/rust-external-cheat.md) — Facepunch Rust external (bootmgfw): WDM DriverRW IOCTL R/W + usermode Rust SDK; ESP/aimbot; DX9 ImGui overlay (C++; cheat / game:rust [External])
 - [rust-external-source](entities/rust-external-source.md) — Facepunch Rust external cheat source (C/C++; driver / shader / audio; cheat / game:rust [External]; gmh5225)
 - [rust-internal](entities/rust-internal.md) — Facepunch Rust internal cheat framework (C++; Horizon core + DX11/ImGui; memory/map helpers; gmh5225)
 - [rust-obfuscator](entities/rust-obfuscator.md) — Rust source obfuscator (proc macros; `cryptify` string encrypt / `labyrinth_macros` CFF / symbol rename; AC Obfuscation Engine)

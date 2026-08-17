@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bootmgfw/Rust-External-Cheat`: entity [[rust-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[lithium-kernel]], [[rust-external-1]], [[rust-external-source]], and [[easy-anti-cheat]].
+
 - **2026-08-17** — ingest `description:bootmgfw/apex-external-cheat`: entity [[apex-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[lithium-kernel]], [[apexd3d-external]], [[apex-dma-cheat-updated]], and [[easy-anti-cheat]].
 
 - **2026-08-17** — ingest `description:bootmgfw/lithium-kernel`: entity [[lithium-kernel]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ntmemory]], [[kernel-mouse]], [[covert-thread]], [[nmi]], and [[kernel-pool-scanning]].
