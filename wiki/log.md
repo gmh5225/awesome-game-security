@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:c3rb3ru5d3d53c/binlex`: entity [[binlex]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[hyara]], [[bndb2pat]], [[packpeek]], [[mcrit-plugin]], and [[aho-corasick]].
+
 - **2026-08-17** — ingest `description:c4kef/UAC`: entity [[uac]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[anti-cheat-testing-framework]], [[anti-cheat-testbench]], [[basic-anti-cheat]], and [[anticheat-poc]].
 
 - **2026-08-17** — ingest `description:cakehonolulu/pciem`: entity [[pciem]]; cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[litepcie]], [[pcileech-fpga]], and [[pcileechgen]].

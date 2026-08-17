@@ -297,6 +297,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [BinExport](entities/binexport.md) — Google C++ disassembly exporter (IDA/Ghidra/BN → Protocol Buffer; BinDiff pipeline)
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
+- [binlex](entities/binlex.md) — binary pattern extraction + genetic trait analysis (C++/Rust; PE/ELF/raw; function-level patterns; JSON/YARA/threat-intel pipelines; c3rb3ru5d3d53c)
 - [binprotect](entities/binprotect.md) — x64 PE bin2bin obfuscator (no new section; BB rewrite; AC Obfuscation Engine)
 - [BinaryShield](entities/binary-shield.md) — open-source bin2bin x86-64 code virtualizer (custom bytecode + purpose-built VM; AC Obfuscation Engine `[VM]`; connorjaydunn)
 - [binsync](entities/binsync.md) — cross-disassembler collaborative RE sync (IDA/Ghidra/BN/angr; Git-backed names/comments/types; cheat / Sync; gmh5225)
