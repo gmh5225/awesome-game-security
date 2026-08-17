@@ -317,6 +317,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
 - [bootlicker](entities/bootlicker.md) — UEFI bootkit PoC (Boot Manager / OS loader patch; pre-kernel DSE / PatchGuard / Secure Boot research; gmh5225)
+- [boltgolt/boltobserv](entities/boltobserv.md) — CS:GO radar (player slot numbers on map dots; cheat / game:csgo [Radar])
 - [Branch Monitoring Project](entities/branch-monitoring-project.md) — Intel LBR/BTS branch-trace framework (C KM driver + usermode; PMI; control-flow monitoring)
 - [BYOUD](entities/byoud.md) — x64 unwind-metadata stack spoofing framework (klezVirus; Cheat Spoof Stack)
 - [BYOVD Lab](entities/byovd.md) — educational multi-driver AV/EDR kill PoCs (`viragt64.sys`, TfSysMon, ksapi64, BdApiUtil, `wsftprm.sys`; gmh5225)
