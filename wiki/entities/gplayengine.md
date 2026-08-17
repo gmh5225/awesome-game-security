@@ -20,4 +20,4 @@ Sits in the Game Engine / source lane — a BGFX-modernized [[gameplay]] fork fo
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/graphics-api]] · [[gameplay]] · [[kotek]] · [[wickedengine]]
+[[overviews/game-engine]] · [[overviews/graphics-api]] · [[bgfx]] · [[gameplay]] · [[kotek]] · [[wickedengine]]

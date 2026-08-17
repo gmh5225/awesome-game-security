@@ -20,4 +20,4 @@ Sits in the Game Engine / multi-API source lane (OpenGL ES, Vulkan, DirectX, BGF
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/graphics-api]] · [[wind-effects]] · [[wickedengine]] · [[urho3d]] · [[island]]
+[[overviews/game-engine]] · [[overviews/graphics-api]] · [[bgfx]] · [[wind-effects]] · [[wickedengine]] · [[urho3d]] · [[island]]

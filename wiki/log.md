@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bkaradzic/bgfx`: entity [[bgfx]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[gplayengine]] and [[kotek]].
+
 - **2026-08-17** — ingest `description:bkerler/ida_rpc`: entity [[ida-rpc]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-mcp-rs]], [[headless-ida-mcp-server]], [[ida-pro-mcp]], and [[ghidra-headless-mcp]].
 
 - **2026-08-17** — ingest `description:blackhades00/PareidoliaTriggerbot`: entity [[pareidolia-triggerbot]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[cs16-trigger-kvm]], [[kernel-mouse]], [[overwatch-2-cheat-aimbot-esp]], and [[hardware-input-injection]].

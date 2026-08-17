@@ -905,6 +905,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-design-documents](entities/game-design-documents.md) — curated classic game design docs and PDFs (Doom, GTA, Fallout, Planescape: Torment, etc.; Game Develop / guide)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [gamedev](entities/gamedev.md) — Chinese-language curated gamedev resource index (tools, mixed reality, engine frameworks, learning; README [Unity]; Game Develop / guide)
+- [bgfx](entities/bgfx.md) — cross-platform rendering library (D3D9/11/12, Metal, OpenGL/ES, Vulkan, WebGPU; shaderc GLSL cross-compiler; Rendering library)
 - [GPlayEngine](entities/gplayengine.md) — GamePlay 3D v3.0 fork (BGFX replaces OpenGL 2.x; SDL2 + deferred pipeline + Bullet + ImGui editor; DirectX/Vulkan/Metal/OpenGL; Game Engine / source [C++ 2D/3D])
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
 - [Gameplay](entities/gameplay.md) — cross-platform C++ 3D game framework (OpenGL ES 2.0/3.0, Bullet, OpenAL, Lua; CMake; Win/macOS/Linux/iOS/Android; FBX/Collada→.gpb encoder; Game Engine / source [2D/3D])
