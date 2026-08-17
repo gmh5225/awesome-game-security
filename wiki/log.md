@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:cakehonolulu/pciem`: entity [[pciem]]; cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[litepcie]], [[pcileech-fpga]], and [[pcileechgen]].
+
 - **2026-08-17** — ingest `description:can1357/NoVmp`: entity [[novmp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[novmpy]], [[vmdevirt-vtil]], and [[vmprotect]].
 
 - **2026-08-17** — ingest `description:can1357/NtLua`: entity [[ntlua]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[pawnio]], [[ntphp]], [[hvdetecc]], and [[the-perfect-injector]].

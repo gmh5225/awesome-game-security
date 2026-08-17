@@ -1692,6 +1692,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pawnio](entities/pawnio.md) — WDK kernel driver with embedded Pawn AMX VM (signed bytecode modules via IOCTL; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM; namazso)
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
 - [PCIE-Detector](entities/pcie-detector.md) — Kernel PCIe Config Space inspection driver (C++; defensive DMA detection research; gmh5225)
+- [PCIeM](entities/pciem.md) — Linux kernel synthetic userspace PCIe device emulation (bare-metal virtual PCI endpoints; no FPGA/VM/QEMU; DMA / PCIe security research; cakehonolulu)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
 - [Pcileech-DMA-NVMe-VMD](entities/pcileech-dma-nvme-vmd.md) — PCILeech DMA firmware: motherboard VMD/NVMe real camouflage; Windows reinstall may be needed for driver init (gmh5225)
