@@ -1256,6 +1256,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
 - [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
 - [Keybuster](entities/keybuster.md) — Samsung TrustZone S-Keymaster TA key extract (CVE-2021-25444/25490; TEE)
+- [KiUserExceptionDispatcher Hook (brew02)](entities/ki-user-exception-dispatcher-hook.md) — ntdll `.mrdata` Wow64PrepareForException pointer hook for KiUserExceptionDispatcher (LdrProtectMrdata + Zydis; avoids VEH chain; UM exception-dispatch / stealth hook research)
 - [KiSystemStartupMeme (ekknod)](entities/ki-system-startup-meme.md) — custom KiSystemStartup hook (C/C++; kernel-level / driver development / graphics; cheat / EFI driver area)
 - [Killer](entities/killer.md) — kernel driver process terminator via kernel process-structure manipulation (protected AC/EDR/AV; gmh5225)
 - [Killer-Exercice](entities/killer-exercice.md) — red-team RE/exploit lab for protected-process kill (handle table, APC injection, EPROCESS; valid BYOVD; not HVCI-blocklisted / not LOLBIN; gmh5225)

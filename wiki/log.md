@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:brew02/KiUserExceptionDispatcherHook`: entity [[ki-user-exception-dispatcher-hook]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[custom-veh]], [[be-battleye-shellcode]], and [[ow2-wardenrekter]].
+
 - **2026-08-17** — ingest `description:brew02/MountSystemPartition`: entity [[mount-system-partition]]; cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntfs-efi]], [[uefi-bootloader]], and [[efidump]].
 
 - **2026-08-17** — ingest `description:bromoket/access_updated`: entity [[access-updated]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[access]], [[intraceptor]], [[libelevate]], and [[wpp]].
