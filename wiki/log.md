@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:chronoxor/CppServer`: entity [[cppserver]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[skynet]], [[noahgameframe]], [[pitaya]], and [[kcp]].
+
 - **2026-08-17** — ingest `description:chztbby/RebirthGuard`: entity [[rebirth-guard]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[no-mercy]], [[sentinelac]], [[basic-anti-cheat]], and [[anti-cheat]].
 
 - **2026-08-17** — ingest `description:cinit/WSAPatch`: entity [[wsapatch]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[win11-apk-installer]] and [[magiskonwsalocal]].

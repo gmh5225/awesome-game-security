@@ -372,6 +372,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ConfuserEx IDAPython](entities/confuserex-idapython.md) — Python IDAPython deobfuscation script for ConfuserEx (cheat / IDA Plugins)
 - [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
 - [CountHook](entities/count-hook.md) — working-set memory-check bypass (count-oriented; Cheat / Bypass Page Protection)
+- [CppServer](entities/cppserver.md) — C++ server framework with Fast Binary Encoding message protocols (Game Network / source; modding + memory analysis)
 
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [Common-Registry-Jmp-RCX](entities/common-registry-jmp-rcx.md) — CmRegisterCallback + JMP RCX gadget in nvraid.sys for covert KM↔UM registry-callback comm (gmh5225; Registry Callback)
