@@ -12,7 +12,7 @@ confidence: medium
 
 C++ **internal** cheat for **Escape From Tarkov** (EFT), centered on shader work, rendering, and asset pipelines in the cheat / game:eft lane. Aimed at game security researchers and reverse engineers studying offensive techniques on BattlEye-protected Unity titles. (source: wiki/sources/descriptions/gmh5225__eft-internal.md)
 
-Complements discontinued Mono-era trainers such as [[escapefromtarkov-trainer]], OOP scaffold references such as [[simple-eft-base]], and external DMA radar stacks such as [[meatyeftrelease]] for comparing in-process Unity/IL2CPP internal rendering paths vs driver bases and below-OS externals.
+Complements discontinued Mono-era trainers such as [[escapefromtarkov-trainer]], OOP scaffold references such as [[simple-eft-base]], modular bootmgfw internals such as [[eft-tarkov-internal-cheat]], and external DMA radar stacks such as [[meatyeftrelease]] for comparing in-process Unity/IL2CPP internal rendering paths vs driver bases and below-OS externals.
 
 ## Links
 

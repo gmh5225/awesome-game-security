@@ -718,6 +718,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eft-dma-radar-1](entities/eft-dma-radar-1.md) — Escape From Tarkov DMA radar (PCILeech-compatible hardware; separate-screen overlay; player/loot/map; cheat / game:eft [DMA Radar]; gmh5225)
 - [eft-external](entities/eft-external.md) — Escape From Tarkov external cheat (C/C++; kernel-level work + overlays + modding; cheat / game:eft [External]; frankie-11)
 - [eft-streamed-cheat](entities/eft-streamed-cheat.md) — Escape From Tarkov streaming/external cheat (driver memory reads; separate-display radar/ESP; avoids injection; cheat / game:eft [External/Streaming]; fcancelog)
+- [eft-tarkov-internal-cheat](entities/eft-tarkov-internal-cheat.md) — Escape From Tarkov internal (bootmgfw): C++ DLL; Unity/Mono SDK; pattern scan + direct syscalls; DX11 ImGui Kiero/MinHook; ESP/aimbot/radar; cheat / game:eft [Internal]
 - [eft-internal](entities/eft-internal.md) — Escape From Tarkov internal cheat (C++; shader / rendering / asset pipelines; cheat / game:eft; gmh5225)
 - [eftleecher](entities/eftleecher.md) — Escape From Tarkov DMA cheat toolbox (MemProcFS/FPGA; visor/night/thermal/recoil/stamina/weight mods; INI config; map files; auto-disconnect OPSEC; cheat / game:eft [DMA]; bytemyass)
 - [eft-monoeft](entities/eft-monoeft.md) — Escape From Tarkov Mono internal cheat (C#; Unity/Mono method hooks; ESP/silent aim/no-recoil/speed/stamina/loot; cheat / game:eft; gmh5225)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bootmgfw/EFT-Tarkov-Internal-Cheat`: entity [[eft-tarkov-internal-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[eft-internal]], [[eft-monoeft]], [[simple-eft-base]], and [[battleye]].
+
 - **2026-08-17** — ingest `description:bootmgfw/Fortnite-External-Cheat-Base`: entity [[fortnite-external-cheat-base]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[lithium-kernel]], [[fortnite-external-base-source]], [[fortnite-external]], and [[easy-anti-cheat]].
 
 - **2026-08-17** — ingest `description:bootmgfw/Rust-External-Cheat`: entity [[rust-external-cheat]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[lithium-kernel]], [[rust-external-1]], [[rust-external-source]], and [[easy-anti-cheat]].
