@@ -1261,6 +1261,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
 - [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)
+- [KernelPatch](entities/kernelpatch.md) — Linux kernel hook/modding framework (C/C++; APatch boot patch + KPM lane; Cheat / Hooking the Linux kernel)
 - [KernelSU](entities/kernelsu.md) — Android kernel su root (Kotlin/Rust; Cheat / Android root)
 - [KernelSU-4.4](entities/kernelsu-4.4.md) — KernelSU backport for Linux kernel 4.4 (su / SELinux / APK sig verify; Google GCC 4.9; cheat / Android root)
 - [KernelSU-Pixel4XL](entities/kernelsu-pixel4xl.md) — Pixel 4 XL (coral) msm-floral kernel + KernelSU (su / SELinux / syscall hook; cheat / Android Kernel Source)
