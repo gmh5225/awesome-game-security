@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:blaquee/dllnotif`: entity [[dllnotif]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[x64dbg-view-dll-notification]] and [[kernel-callbacks]].
+
 - **2026-08-17** — ingest `description:blendi-remade/sprite-sheet-creator`: entity [[sprite-sheet-creator]]; cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[modly]], [[image-blaster]], [[image-cockpit-for-codex-workflows]], and [[gameai-paper-list]].
 
 - **2026-08-17** — ingest `description:bliutech/mbased`: entity [[mbased]]; cited on [[mixed-boolean-arithmetic]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; cross-linked [[cobra]], [[mutaben]], [[mba-obfuscator]], and [[obfuscation-analysis]].
