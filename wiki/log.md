@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-17** — ingest `description:bliutech/mbased`: entity [[mbased]]; cited on [[mixed-boolean-arithmetic]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; cross-linked [[cobra]], [[mutaben]], [[mba-obfuscator]], and [[obfuscation-analysis]].
+
 - **2026-08-17** — ingest `description:block/stoic`: entity [[stoic]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[canyie-pine]], [[frida]], [[xposed-module-kit]], and [[phantom-client]].
 
 - **2026-08-17** — ingest `description:bloesway/csgo_sdk`: updated entity [[csgo-sdk]] (bloesway/csgo_sdk alongside gmh5225 forks); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-animation-code-reversed]], [[csgo-sdk-improved]], and [[csgo-internal-base]].

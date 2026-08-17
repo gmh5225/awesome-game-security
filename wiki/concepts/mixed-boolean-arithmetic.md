@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__qsynthesis.md
   - wiki/sources/descriptions/fvrmatteo__DrillAndJoin.md
   - wiki/sources/descriptions/dmaivel__covirt.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/bliutech__mbased.md
+updated: 2026-08-17
 confidence: high
 ---
 
@@ -23,7 +24,7 @@ confidence: high
 
 ## Recovery approaches
 
-1. **Algebraic simplification** — coefficient reconstruction and term cancellation ([[cobra]]; SSPAM, MBA-Blast, SiMBA in the broader corpus).
+1. **Algebraic simplification** — coefficient reconstruction and term cancellation ([[cobra]]; SSPAM, MBA-Blast, SiMBA in the broader corpus); practical MBA expression reduction via [[mbased]] (source: wiki/sources/descriptions/bliutech__mbased.md).
 2. **Program synthesis** — oracle-guided expression search with SMT equivalence checks in IDA via [[qsynthesis]] (Python; Hex-Rays integration) (source: wiki/sources/descriptions/gmh5225__qsynthesis.md); exact finite-domain Drill & Join synthesis plus Bitwuzla equivalence proofs for 64-bit opaque predicates and MBA-style expressions via [[drill-and-join]] (C++17 header-only; SMT-guided bit dependency reduction) (source: wiki/sources/descriptions/fvrmatteo__DrillAndJoin.md).
 3. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
 4. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
@@ -35,4 +36,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[mbased]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

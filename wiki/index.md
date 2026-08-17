@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -1456,6 +1456,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [master-guide](entities/master-guide.md) — CS:GO five-part offensive-technique guide (csgohacks; cheat / guide)
 - [MappedCallback](entities/mapped-callback.md) — hide kernel callback via APCI codecave JMP (cheat / Hide Callback)
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)
+- [mbased](entities/mbased.md) — practical MBA simplification (bliutech; Cheat Mixed boolean-arithmetic)
 - [mcp-gdb](entities/mcp-gdb.md) — GDB MCP server (breakpoints / memory / registers / step; AI debug)
 - [mcp-safety-scanner](entities/mcp-safety-scanner.md) — automated MCP safety auditing + remediation via agents (Game Develop / MCP security)
 - [mcp-server-idapro](entities/mcp-server-idapro.md) — MCP for IDA Pro (AI-assistant bridge to disassembler/debugger; Game Develop / MCP)

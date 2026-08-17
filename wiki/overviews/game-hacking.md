@@ -211,6 +211,7 @@ sources:
   - wiki/sources/descriptions/bobalkkagi__bobalkkagi.md
   - wiki/sources/descriptions/boylin0__AVA-Hack.md
   - wiki/sources/descriptions/boltgolt__boltobserv.md
+  - wiki/sources/descriptions/bliutech__mbased.md
   - wiki/sources/descriptions/block__stoic.md
   - wiki/sources/descriptions/bloesway__csgo_sdk.md
   - wiki/sources/descriptions/boowampp__ApexDmaCheatUpdated.md
@@ -1321,6 +1322,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - MBA expression generators such as [[mutaben]] (Python) sit in the Cheat Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/z1ko__mutaben.md)
 - Non-linear MBA obfuscation via [[mba-obfuscator]] (`mba_obfuscator/` + `samples/`) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/nhpcc502__MBA-Obfuscator.md)
 - MBA expression simplification via [[cobra]] (Trail of Bits CoBRA; C++ coefficient-based reconstruction) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/trailofbits__CoBRA.md)
+- Practical MBA simplification via [[mbased]] (bliutech; reduces mixed boolean-arithmetic obfuscation for analysis) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/bliutech__mbased.md)
 - Bitvector/array SMT solving via [[stp]] (Simple Theorem Prover; MiniSat/CryptoMiniSat; SMT-LIB 2) sits in the same Mixed boolean-arithmetic / constraint-solver lane. (source: wiki/sources/descriptions/stp__stp.md)
 - Circuit-based AIG SAT via [[cirsat]] (DAG logic networks / AIGER; hardware verification & combinational equivalence) sits in the same constraint-solver lane. (source: wiki/sources/descriptions/nbulsi__cirsat.md)
 - Fix OLLVM / deobfuscation plugins targeting `libtprt.so` (e.g. [[deobf]]) sit in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
