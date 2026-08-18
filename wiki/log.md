@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:asc-community/MxEngine`: entity [[mxengine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[lumos]], [[exengine]], [[campfire]], and [[gltut]].
+
 - **2026-08-18** — ingest `description:ashawkey/raytracing`: entity [[raytracing]]; cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[tinyraytracer]], [[tinyrenderer]], and [[d3d12renderer]].
 
 - **2026-08-18** — ingest `description:ashemery/Anti-Forensics`: entity [[anti-forensics]]; cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[antfs]], [[file-recovery-tool]], [[ntfstool]], [[dfirtriage]], and [[pwf]].

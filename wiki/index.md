@@ -1563,6 +1563,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [mwclap](entities/mwclap.md) — COD Warzone NVIDIA GeForce Experience overlay hijack (cheat / game:cod warzone)
+- [MxEngine](entities/mxengine.md) — modern C++ OpenGL 3D engine (PBR, screen-space FX, ECS, editor; educational desktop 3D; Game Engine / source)
 - [call-of-duty-vanguard-hack-esp-aimbot-unlock-all](entities/call-of-duty-vanguard-hack-esp-aimbot-unlock-all.md) — COD Vanguard/Warzone external: Win32 RPM + DirectX overlay; ESP / aimbot / unlock-all (gmh5225; cheat / game:cod vanguard [External])
 - [call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all](entities/call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all.md) — COD Warzone external: C# Win32 RPM + overlay; ESP / silent aimbot / unlock-all (gmh5225; cheat / game:cod warzone [External])
 - [modern-warfare-warzone-cheat](entities/modern-warfare-warzone-cheat.md) — COD Modern Warfare/Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
