@@ -685,6 +685,7 @@ sources:
   - wiki/sources/descriptions/vctr74__R6-Internal-V3.md
   - wiki/sources/descriptions/hadevn__apex_full_cheat.md
   - wiki/sources/descriptions/ekknod__apex_linux.md
+  - wiki/sources/descriptions/ales-drnz__vocem-overlay.md
   - wiki/sources/descriptions/gmh5225__ayypex.md
   - wiki/sources/descriptions/gmh5225__apex_legends_sdk.md
   - wiki/sources/descriptions/gmh5225__Apex-ApexCheat.md
@@ -1818,7 +1819,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Apex Legends kernel-assisted externals such as [[apex-external-cheat]] (bootmgfw; Echo_Apex; C++17; driver-backed cross-process reads + DX11 ImGui overlay; offset/hitbox modules + string encryption; admin-required release; cheat / game:apex legends [External]) sit in the same lane beside [[lithium-kernel]] from the same author. (source: wiki/sources/descriptions/bootmgfw__apex-external-cheat.md)
 - Apex Legends DMA externals such as [[apex-dma-cheat-updated]] (boowampp; C++; PCILeech/MemProcFS FPGA remote memory access; aimbot with FOV/smoothing, recoil compensation, ESP, camera calculations, DMA memory library with input/registry/shellcode injection; cheat / game:apex legends [DMA]) sit in the below-OS external lane beside [[cs2-dma]] and [[cs2-dma-cheat]] under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/boowampp__ApexDmaCheatUpdated.md)
 - Title-specific Apex Legends full-cheat samples such as [[apex-full-cheat]] (C/C++; rendering / SDK generation / hooking; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/hadevn__apex_full_cheat.md)
-- Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md)
+- Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md) Linux Discord in-game overlays such as [[vocem-overlay]] (ales-drnz; Vulkan implicit layer + OpenGL interposer; daemon-isolated Discord I/O; in-process graphics hooking / overlay injection study surface—not commercial-AC tested) extend that lane with a non-cheat overlay reference beside MangoHud-style cheat samples. (source: wiki/sources/descriptions/ales-drnz__vocem-overlay.md)
 - Linux-native Apex Legends cheat research such as [[apex-linux]] (ekknod; C++; cheat / game:apex legends [Linux]) complements [[ayypex]] on non-Windows Apex clients under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/ekknod__apex_linux.md)
 - Title-specific Apex Legends SDK samples such as [[apex-legends-sdk]] (gmh5225; C++; rendering / SDK generation; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__apex_legends_sdk.md)
 - Simplified Apex Legends SDK remaster samples such as [[apex-legends-sdk-remaster]] (dword64; open-source cheat designed for ease of use; avoids Python-binding friction; cheat / game:apex legends) sit beside [[apex-legends-sdk]] in the same lane. (source: wiki/sources/descriptions/dword64__Apex-Legends-SDK-Remaster.md)
