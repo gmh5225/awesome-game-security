@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:android1337/brkida`: entity [[brkida]] (header-only C++ `BRKIDA` macro; MSVC x64 compile-time stubs + crafted stack-access patterns break IDA Hex-Rays decompilation on protected functions; software protection / anti-tamper research); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[crystr]], [[crycall]], [[d810-ng]], [[genmc]], and [[obpo-plugin]].
+
 - **2026-08-18** — ingest `description:android1337/crycall`: entity [[crycall]] (C++14+ compile-time call obfuscation; lambda/virtual-dispatch wrappers; normal and virtual call macros; hides callee/argument flow; AC Compile Time); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[crystr]] and [[call-obfuscator]].
 
 - **2026-08-18** — ingest `description:android1337/crystr`: entity [[crystr]] (C++20 compile-time string/number obfuscation; XOR keys from compile-time math/timestamps/counters; inline or virtual decrypt; per-char/per-value key variation; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[skcrypter]], [[mystic-xorstr]], [[obfuscxx]], and [[xorlit]].
