@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `readme:categories`: Cheat ~2726 (+2; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-18** — ingest `description:allenwp/godot-resource-remaps`: entity [[godot-resource-remaps]] (Godot editor export plugin; platform-specific resource remapping via feature tags; swap textures/audio/scenes/assets per Windows/Android/iOS/Web during export; Plugins:Godot); cited on [[overviews/game-engine]]; cross-linked [[godot]], [[godot-demo-projects]], [[gddumper]], [[godot-sandbox]], and [[better-godot-mcp]].
 
 - **2026-08-18** — ingest `description:alliedmodders/hl2sdk`: entity [[hl2sdk]] (AlliedModders Half-Life 2 Source SDK; C/C++; client/server/game logic + mod/plugin build infrastructure; Half-Life 2 era Source 1 SDK; Game Engine / source); cited on [[overviews/game-engine]] and [[source-netvars]]; cross-linked [[source-engine]], [[source-engine-2007]], [[source-sdk-orangebox]], [[hl2esp]], and [[hl2aimbot]].
