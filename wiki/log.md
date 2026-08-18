@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:april-ivy/Apwil`: entity [[apwil]] (Rust Windows game-hacking library; inline/IAT/VMT/VEH/HWBP hooks; PE/PEB; process/thread hijack; DirectX overlay; internal & external); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[libmem]], [[polyhook]], [[plthook]], and [[present-hook]].
+
 - **2026-08-18** — ingest `description:aqilc/chasm`: entity [[chasm]] (high-performance runtime x86-64 assembler library; C; instruction IR, relative reference linking, AVX-256; JIT/emulator/runtime optimization); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[quickasm]], [[farm64]], and [[shoggoth]].
 
 - **2026-08-18** — ingest `description:aquasecurity/tracee`: entity [[tracee]] (Linux runtime security + forensics via eBPF; Go; kernel telemetry + behavioral detections; K8s/container deployment); cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[btrace]], [[peetch]], [[android-ebpf]], and [[wazuh]].
