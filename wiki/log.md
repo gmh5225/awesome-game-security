@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `readme:categories`: Cheat ~2721 (+5; Game Develop ~185 +2; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-18** — ingest `description:aoharudesu/Clipboard_Tools-UE4`: entity [[clipboard-tools-ue4]] (UE4 plugin; C++ module; copies supplied string arguments to system clipboard; UE4.27 packaged binaries; in-engine debug/scripting text transfer; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[luamachine]], and [[ue4-tutorials]].
 
 - **2026-08-18** — ingest `description:aosp-mirror/kernel_common`: entity [[kernel-common]] (official AOSP GKI common kernel mirror; vendor-shared upstream; Android patches, Bazel, Rust; kernel attack-surface / defense study; `[GKI]`); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[compile-android-driver]], [[android-kernel-driver-template]], [[kernelsu]], and [[kernelpatch]].
@@ -11,8 +13,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:apekros/binja_sigmaker`: entity [[binja-sigmaker]] (Binary Ninja plugin; IDA-style wildcard byte-pattern sigs from disassembled functions; function-start fallback; Python; plugin-manager compatible); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-sigmaker]], [[sigmakerex]], [[ida-pro-sigmaker]], and [[bndb2pat]].
 
 - **2026-08-18** — ingest `description:apekros/valorant_offsets`: entity [[valorant-offsets]] (minimal C++ header offset dump; address/structure constants for external tooling; README `[Offset]`); cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked [[valorant-externals]], [[valorant-dumper]], and [[valorant-dumper-tool]].
-
-- **2026-08-18** — ingest `readme:categories`: Cheat ~2716 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-18** — ingest `description:apkunpacker/Anti-Frida`: entity [[anti-frida]] (write-up collection; libc prologue hook detection; JS Frida script examples; commonly hooked function checks); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[antifrida]], [[frida-detection]], [[detect-frida]], and [[anti-frida-bypass]].
 
