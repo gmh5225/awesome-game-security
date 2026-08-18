@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:ajkhoury/UEFI-Bootkit`: entity [[uefi-bootkit]] (ajkhoury compact UEFI boot-chain PoC; mostly C; UEFI application + runtime driver; persists past ExitBootServices into OS boot; EFI build/image load/runtime protocol handling; pre-OS persistence + detection research); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[bootlicker]], [[driver-efi-bootkit]], [[uefi-bootloader]], and [[pubg-internal]].
+
 - **2026-08-18** — ingest `description:ajkhoury/pubg_internal`: updated entity [[pubg-internal]] (ajkhoury archived internal cheat research; C/C++; user-mode + kernel-mode; protected-process-mapping driver; game SDK generator; basic internal ESP; memory access + structure extraction + in-process feature logic; historical cheat architecture / AC threat-model study; cheat / game:pubg); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[pubg-dx]], [[pubg-dumper]], [[pubg-dump-offset]], and [[present-hook]].
 
 - **2026-08-18** — ingest `description:akawashiro/sloader`: entity [[sloader]] (alternative Linux ELF dynamic loader; modern C++; aims to replace glibc ld-linux.so; readable library loading + symbol resolution; build/test + custom glibc workflows; loader design trade-offs; systems/security research on program loading and linker internals; Anti Cheat → Binary Packer `[ELF]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfloader]], [[rudroid]], [[mojoelf]], [[harmless]], and [[river]].
