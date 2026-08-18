@@ -1915,6 +1915,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
 - [rnidbg](entities/rnidbg.md) — Android ARM64 kernel emulator (Rust rewrite of unidbg; kernel-level work, graphics, animation; cheat / Android kernel explorer)
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
+- [RCE Shield](entities/rce-shield.md) — RCE hardening toolkit for PC gamers (detect/prevent/remediate RCE in launchers, mod loaders, overlays, voice chat, peripherals; bad-antics; Game Tools)
 - [ReadDirectoryChanges](entities/readdirectorychanges.md) — C++ `ReadDirectoryChangesW` wrapper (async recursive directory watch; sync/security monitoring)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
