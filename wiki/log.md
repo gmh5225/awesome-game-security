@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:arlyon/azerust`: entity [[azerust]] (experimental Rust WoW 3.3.5 server emulator; auth server; TrinityCore-style DB; async Rust + SQL + containers); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[azerothcore-wotlk]] and [[legioncore-7-3-5]].
+
 - **2026-08-18** — ingest `description:armasm/EasyAntiPatchGuard`: entity [[easy-anti-patchguard]]; cited on [[patchguard]] and [[overviews/windows-kernel]]; cross-linked [[tableflipper]], [[vulnerablepatchguardexploit]], [[demystifying-patchguard]], and [[sushi]].
 
 - **2026-08-18** — ingest `description:armvirus/CosMapper`: entity [[cos-mapper]] (signed-helper driver mapper; user+kernel flow; kernel hooks transfer unsigned payload; unloaded-driver/cache trace cleanup; armvirus `[Signed Driver Map]`); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[sinmapper]], [[kdmapper]], and [[nullmap]].
