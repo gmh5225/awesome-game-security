@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:amosshi/binaryinternals`: entity [[binaryinternals]] (Java interactive binary format inspector; field/bit-level BMP/class/JPEG/PNG/ZIP; OpenJDK/Maven; reusable standalone format libraries; RE education / parser dev); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hexwalk]], [[totalpe2]], and [[retoolkit]].
+
 - **2026-08-18** — ingest `description:anarh1st47/Source2Dumps`: entity [[source2dumps]] (aggregated Source 2 netvars, interfaces, class IDs; C++ headers + text listings for Dota 2, Artifact, Half-Life: Alyx, Sandbox; offset tracking / Source 2 RE; `[Dump]`); cited on [[overviews/game-engine]] and [[source-netvars]]; cross-linked [[source2gen]], [[source2sdk]], [[dezlock-dump]], and [[dota2dumped]].
 
 - **2026-08-18** — ingest `description:anasfanani/Magisk-Tailscaled`: entity [[magisk-tailscaled]] (Magisk module running Tailscale daemon on rooted Android; userspace networking for VPN coexistence; service scripts + tunnel helpers; CLI login/remote SSH/ADB-over-tailnet on arm/arm64; mobile lab connectivity); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[termux-app]], and [[adb-file-manager]].

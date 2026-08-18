@@ -319,6 +319,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
 - [binlex](entities/binlex.md) — binary pattern extraction + genetic trait analysis (C++/Rust; PE/ELF/raw; function-level patterns; JSON/YARA/threat-intel pipelines; c3rb3ru5d3d53c)
 - [binprotect](entities/binprotect.md) — x64 PE bin2bin obfuscator (no new section; BB rewrite; AC Obfuscation Engine)
+- [Binary Internals Viewer](entities/binaryinternals.md) — Java interactive binary format inspector (field/bit-level BMP/class/JPEG/PNG/ZIP; OpenJDK/Maven; reusable format libs; RE education / parser dev)
 - [BinaryShield](entities/binary-shield.md) — open-source bin2bin x86-64 code virtualizer (custom bytecode + purpose-built VM; AC Obfuscation Engine `[VM]`; connorjaydunn)
 - [binsync](entities/binsync.md) — cross-disassembler collaborative RE sync (IDA/Ghidra/BN/angr; Git-backed names/comments/types; cheat / Sync; gmh5225)
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
