@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:ait-aecid/rootkit-detection-ebpf-time-trace`: entity [[rootkit-detection-ebpf-time-trace]] (Linux eBPF getdents-flow timing-anomaly research; file-hiding rootkit detection; Python experiment orchestration + semi-supervised statistical anomaly detection; kernel security / anti-stealth telemetry); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[rootkit-2]], [[modreveal]], [[tracee]], and [[blanket]].
+
 - **2026-08-18** — ingest `description:ajkhoury/UEFI-Bootkit`: entity [[uefi-bootkit]] (ajkhoury compact UEFI boot-chain PoC; mostly C; UEFI application + runtime driver; persists past ExitBootServices into OS boot; EFI build/image load/runtime protocol handling; pre-OS persistence + detection research); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[bootlicker]], [[driver-efi-bootkit]], [[uefi-bootloader]], and [[pubg-internal]].
 
 - **2026-08-18** — ingest `description:ajkhoury/pubg_internal`: updated entity [[pubg-internal]] (ajkhoury archived internal cheat research; C/C++; user-mode + kernel-mode; protected-process-mapping driver; game SDK generator; basic internal ESP; memory access + structure extraction + in-process feature logic; historical cheat architecture / AC threat-model study; cheat / game:pubg); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[pubg-dx]], [[pubg-dumper]], [[pubg-dump-offset]], and [[present-hook]].
