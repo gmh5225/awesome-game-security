@@ -979,6 +979,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-cpp-class-analyzer](entities/ghidra-cpp-class-analyzer.md) — Ghidra C++ class/RTTI analyzer (GCC/Clang/MSVC RTTI, vtables, ctors/dtors, inheritance; class hierarchy views; Java/Gradle; astrelsky)
 - [ghidra-decompiler-plugins](entities/ghidra-decompiler-plugins.md) — runtime-loadable Ghidra decompiler plugins (Bazel; RISC-V vector Rules/Actions; datatest; embedded/firmware RE)
 - [ghidra-gradle-plugin](entities/ghidra-gradle-plugin.md) — archived Gradle plugin for Ghidra extension builds (classpath wiring, IDE setup; Java/Groovy; astrelsky)
+- [ghidra-manager](entities/ghidra-manager.md) — cross-platform Python CLI Ghidra toolchain manager (release-pinned install, SHA-256 verify, curated extensions incl. GhidraMCP, project launch, MCP bridge, binary compare, rollback; alexbevi)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [ghidra-mcp](entities/ghidra-mcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; 200+ AI-assisted RE tools; GUI/headless; BSim; HTTP/stdio; Docker; bethington)
 - [GptHidra](entities/gpthidra.md) — Ghidra ChatGPT plugin (selected-function explanation to console; cheat / Ghidra Plugins)

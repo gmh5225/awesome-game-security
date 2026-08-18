@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:alexbevi/ghidra-manager`: entity [[ghidra-manager]] (cross-platform Python CLI; release-pinned Ghidra install, SHA-256-verified downloads, curated extension sets incl. GhidraMCP, project launch, MCP bridge, multi-instance launch, doctor checks, binary compare, rollback pair; Windows/Linux/macOS); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-mcp]], [[ghidra-headless-mcp]], [[ghidriff]], and [[ghidra-bridge]].
+
 - **2026-08-18** — ingest `description:alexhude/FRIEND`: entity [[friend]] (IDA plugin; register/instruction documentation in disasm + decompiler; Capstone processor extensions; contextual hints, external doc links, function summaries; C++/CMake; IDA + optional Hex-Rays SDK; Windows/Linux/macOS; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idaref]], [[idarem]], and [[idaplugins]].
 
 - **2026-08-18** — ingest `description:alexkrnl/Kernel-dll-injector`: entity [[kernel-dll-injector]] (kernel-mode DLL injector; inject chosen DLL when kernel32 loads in newly created processes; Sirifef/Max++ rootkit technique; driver + sample DLL; x86; Visual Studio/WDK; APC; kernel-assisted injection / defensive detection research); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[injdrv]], [[kinject]], [[apc-research]], [[stealthy-kernelmode-injector]], and [[windows-process-injection]].
