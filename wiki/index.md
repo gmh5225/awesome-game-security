@@ -1093,6 +1093,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Holodori-Kernel-Bypass](entities/holodori-kernel-bypass.md) — userspace emu of Hololive Dreams usrdrv017964.sys (Wine/Proton; MinHook)
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
 - [hlmaster](entities/hlmaster.md) — reverse-engineered Half-Life Master Server (closed master-server protocol RE; Game Engine / source; ezhangle)
+- [hl2sdk](entities/hl2sdk.md) — AlliedModders Half-Life 2 Source SDK (C/C++; client/server/game logic + mod/plugin build infra; Game Engine / source)
 - [hl2aimbot](entities/hl2aimbot.md) — Half-Life 2 aimbot cheat sample (C/C++; internal hooking; codereversing; cheat / game:half-life 2)
 - [hl2esp](entities/hl2esp.md) — Half-Life 2 ESP cheat sample (C/C++; hooking; codereversing; cheat / game:half-life 2)
 - [hLunaaa.github.io](entities/hlunaaa-github-io.md) — Driver Trace Cleaner blog (CI.dll + BigPool cache; CR3 abuse + physical R/W; cheat / hide)
