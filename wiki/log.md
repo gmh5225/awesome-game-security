@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:bethington/ghidra-mcp`: entity [[ghidra-mcp]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-headless-mcp]], [[ghidrassist-mcp]], and [[ghidrassist]].
+
 - **2026-08-18** — ingest `description:bevyengine/bevy`: entity [[bevy]]; cited on [[overviews/game-engine]]; cross-linked [[godogen]], [[awesome-gamedev-agent-skills]], [[raylib]], and [[bgfx]].
 
 - **2026-08-18** — ingest `description:binarly-io/idapcode`: entity [[idapcode]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[genmc]], [[ida-plugin-pcodegpt]], and [[microavx]].
