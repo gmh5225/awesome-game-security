@@ -1548,6 +1548,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Paho MQTT C++](entities/paho-mqtt-cpp.md) — Eclipse C++ MQTT client (v3.1/3.1.1/v5; QoS 0–2; TLS; RAII; Game Network / mqtt cpp)
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
 - [memdbg](entities/memdbg.md) — Android CE-style memory debugger (Vulkan+ImGui overlay, root engine, Lua 5.4, pointer scan, breakpoints, speedhack, trainer tables; aarch64 root/Termux ELF; dbcyyds)
+- [memfilter-fn-driver](entities/memfilter-fn-driver.md) — minifilter stealth + MDL cross-process memory (Flt/Cm/Ob hide + handle VM-access strip; Filter Manager port comm; zensenzay; cheat / hide + RPM)
 - [mempeek](entities/mempeek.md) — Linux CLI live memory inspector (`/proc/pid/mem`; CE-style scan filters; libprocmem maps; rustyline REPL; cheat / Linux memory explorer)
 - [MemoryGuard](entities/memory-guard.md) — Windows memory-protection library (`PAGE_GUARD` / VEH / periodic integrity checks; alert or revert tampering; gmh5225; Anti Cheat → Page Protection)
 - [PointerGuard](entities/pointer-guard.md) — Windows PoC: HWBP or PAGE_GUARD protects function pointers / vtable entries against runtime tampering (charliewolfe; VEH + PAGE_GUARD)
