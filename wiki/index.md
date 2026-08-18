@@ -1380,6 +1380,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lenovo-mapper](entities/lenovo-mapper.md) — BYOVD driver mapper via LenovoDiagnosticsDriver.sys (memory-access IOCTLs; manual unsigned map; gmh5225)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
 - [libiht](entities/libiht.md) — Intel Hardware Trace Library (Tencent Xuanwu Lab; hardware-assisted execution tracing; Windows kernel explorer)
+- [libipt-rs](entities/libipt-rs.md) — Rust user-mode `ipt.sys` wrapper (DeviceIoControl start/stop/retrieve IPT traces; RE-derived interface; no decode/coverage)
 - [libjpeg-turbo](entities/libjpeg-turbo.md) — IJG JPEG codec (reference listing; engine asset-pipeline / Image Codec)
 - [liblava](entities/liblava.md) — modern C++23 Vulkan library (lean modular framework; rolling releases; Vulkan / Guide)
 - [libgdx](entities/libgdx.md) — cross-platform Java game framework (2D/3D; Android/desktop/iOS/WebGL; Game Engine)

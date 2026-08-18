@@ -12,7 +12,7 @@ confidence: medium
 
 **WinIPT** is a C library and companion tools for controlling **Intel Processor Trace (IPT)** on Windows. It wraps the Windows IPT driver interfaces (`ipt.sys`) to configure trace buffers and collect IPT data from user-mode and kernel-mode code, supporting per-process and per-CPU tracing modes. Aimed at security researchers and performance analysts using Intel PT for code coverage, fuzzing, and execution tracing on Windows. (source: wiki/sources/descriptions/intelpt__winipt.md)
 
-Sits beside own-driver IPT stacks such as [[windows-intel-pt]], LBR/BTS branch-recording drivers such as [[branch-monitoring-project]], Intel hardware-trace libraries such as [[libiht]], and Intel-PT hypervisor fuzzing stacks such as [[qemu-nyx]] as a native Windows IPT capture option (`ipt.sys` wrapper). Decode captured buffers with [[processor-trace]] (libipt).
+Sits beside own-driver IPT stacks such as [[windows-intel-pt]], Rust `ipt.sys` interaction libraries such as [[libipt-rs]], LBR/BTS branch-recording drivers such as [[branch-monitoring-project]], Intel hardware-trace libraries such as [[libiht]], and Intel-PT hypervisor fuzzing stacks such as [[qemu-nyx]] as a native Windows IPT capture option (`ipt.sys` wrapper). Decode captured buffers with [[processor-trace]] (libipt).
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside own-driver IPT stacks such as [[windows-intel-pt]], LBR/BTS branch-r
 
 ## Related
 
-[[windows-intel-pt]] · [[processor-trace]] · [[libiht]] · [[branch-monitoring-project]] · [[qemu-nyx]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
+[[libipt-rs]] · [[windows-intel-pt]] · [[processor-trace]] · [[libiht]] · [[branch-monitoring-project]] · [[qemu-nyx]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
