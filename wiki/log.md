@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:andrew9382/exe_packer`: entity [[exe-packer]] (C/C++ x86/x64 PE rebuild packer; Huffman-compressed payload section; custom stub resolves NTDLL/KERNEL32 APIs, decrypts import names, maps sections/relocs/imports, OEP jump; Visual Studio; packer-analysis / anti-analysis loader study); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[x64-exe-packer]], [[pepacker]], [[atom-pe-packer]], [[packer-tutorial]], and [[unpacker]].
+
 - **2026-08-18** — ingest `description:android1337/brkida`: entity [[brkida]] (header-only C++ `BRKIDA` macro; MSVC x64 compile-time stubs + crafted stack-access patterns break IDA Hex-Rays decompilation on protected functions; software protection / anti-tamper research); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[crystr]], [[crycall]], [[d810-ng]], [[genmc]], and [[obpo-plugin]].
 
 - **2026-08-18** — ingest `description:android1337/crycall`: entity [[crycall]] (C++14+ compile-time call obfuscation; lambda/virtual-dispatch wrappers; normal and virtual call macros; hides callee/argument flow; AC Compile Time); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[crystr]] and [[call-obfuscator]].
