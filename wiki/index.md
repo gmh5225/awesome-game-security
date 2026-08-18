@@ -71,6 +71,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BF4-Internal-overlay](entities/bf4-internal-overlay.md) — BF4 internal overlay: DirectX / rendering / SDK generation (C++; gmh5225; cheat / game:battlefield 4)
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [basic-anti-cheat](entities/basic-anti-cheat.md) — Basic C/C++ AC teaching sample (integrity / signature scan / debugger / modules / memory validation; gmh5225)
+- [BatteryShark Writeup Archive](entities/batteryshark-github-io.md) — Jekyll GitHub Pages RE writeups (game hacking / classic PC patching / Windows internals / arcade hardware; IDA + Python; Masterpiece consolizing series; QEMU-GDB; cheat / guide)
 - [BE-Shellcode](entities/be-shellcode.md) — BattlEye UM shellcode dump/disasm (thread scan / VEH / modules)
 - [BE Shellcode Dump](entities/be-shellcode-dump.md) — dump BE runtime shellcode scanning modules for offline RE (gmh5225; Reversed BE Shellcode)
 - [BE Shellcode Tester](entities/be-shellcode-tester.md) — C++ sandbox to execute/analyze dumped BE scanning modules; logs memory scans, hash checks, detection routines (es3n1n)
