@@ -2555,6 +2555,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xigncode3-bypass](entities/xigncode3-bypass.md) — XIGNCODE3 bypass research (C++; hooking / emulation; cheat / explore anticheat:xigncode)
 - [xign_poc_april_2026](entities/xign-poc-april-2026.md) — XIGNCODE3/xhunter64.sys IRP_MJ_WRITE vuln PoC (phys R/W / leak / kill)
 - [xnu_1day_practice](entities/xnu-1day-practice.md) — XNU (macOS/iOS) 1-day kernel exploit practice (Mach/IOSurface/KRW; C/ObjC)
+- [xnu-qemu-arm64](entities/xnu-qemu-arm64.md) — QEMU ARM64 fork booting functional iOS/XNU (launchd, bash, SSH; kernel exploit lab; `[xnu]`)
 - [xnuspy](entities/xnuspy.md) — iOS XNU kernel function hooking for checkra1n A8–A11 devices (no 4K; cheat / iOS memory explorer)
 - [xor-float](entities/xor-float.md) — C++ XOR float/value encrypt (Anti Cheat → Encrypt Variable)
 - [xorlit](entities/xorlit.md) — string crypter (single-arg default key `xorlit::seed`; AC Compile Time / String Crypter)
