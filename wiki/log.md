@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `readme:categories`: Cheat ~2724 (+3; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]] (fixed stale Cheat ~2713 cross-link); light `index.md` section notes (no per-category pages).
+
 - **2026-08-18** — ingest `description:anhkgg/SuperDllHijack`: entity [[super-dll-hijack]] (generic Windows proxy-DLL hijack helper; C/C++; renamed original module + replacement DLL; DllMain export passthrough; loader/sideload research; Cheat / DLL Hijack); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-dll-hijacking]], [[hijacklibs]], [[dllirant]], [[impulsive-dll-hijack]], and [[dll-hijack-export-dumper]].
 
 - **2026-08-18** — ingest `description:anhkgg/awesome-windbg-extensions`: entity [[awesome-windbg-extensions]] (curated WinDbg extension index; kernel analysis, IR, rootkit hunting, memory inspection, debugger workflow automation; Markdown reference catalog; WinDbg); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[swishdbgext]], [[twindbg]], [[mcp-windbg]], [[windbg-decompile-ext]], and [[windbg-extensions]].
