@@ -1241,6 +1241,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/canyie/Riru-MomoHider
 - https://github.com/newbit1/rootAVD [root AVD]
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
+- https://github.com/MMRLApp/WebUI-X-Portable [Portable Android app providing the MMRL WebUI X interface for browsing, installing, and managing Magisk/APatch/KernelSU modules]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
@@ -3295,6 +3296,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/dougwithseismic/dezlock-dump [Runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); no source2gen required]
 - https://github.com/ianveig29/cs2-internals [Educational CS2/Source 2 internals guide covering schemas, offsets, entities, networking, Panorama, and verification labs]
 - https://github.com/ianveig29/OverlayAI [External CS2 overlay in C++/DirectX 11 with ESP, aimbot, radar, and inventory/Panorama bridge via cs2-dumper offsets]
+- https://github.com/Read1dno/vesta [Open-source external CS2 cheat in C++23 with DX11 overlay ESP/chams, aim/trigger tools, grenade helper, Lua API, and optional Web Radar]
 - https://github.com/imnotdatguy/csgo2-cheat
 - https://github.com/papstuc/counterstrike2
 - https://github.com/nezu-cc/BakaWare4
