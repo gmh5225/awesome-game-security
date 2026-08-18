@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:armvirus/SinMapper`: entity [[sinmapper]] (user-mode signed-driver section mapper; physmem R/W + PTE permission changes + trace cleanup; armvirus `[Manual Map In Signed Driver]`); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper]], [[nullmap]], and [[revert-mapper]].
+
 - **2026-08-18** — ingest `description:armvirus/VanguardTrace`: entity [[vanguardtrace]]; cited on [[vanguard]] and [[overviews/anti-cheat]]; cross-linked [[vanguard-import-resolver]], [[augur-riot]], and [[vgk-illegal-pf-logger]].
 
 - **2026-08-18** — ingest `description:artmih24/TeleParser`: entity [[teleparser]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pillager]], [[grr]], and [[dfirtriage]].
