@@ -386,6 +386,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
 - [Cognitor](entities/cognitor.md) — Go Windows kernel driver static analysis (IDA/Ghidra exports; IOCTL/access-check/ALPC/COM rules; Patch Tuesday diff)
 - [COD-boiii](entities/cod-boiii.md) — BOIII client modification/research: patches, SDK structures, runtime engine tooling (gmh5225; Reverse engineering and analysis)
+- [CoD_Hacks](entities/cod-hacks.md) — Call of Duty v1.5 educational hack collection: Desk.dll multi-hack, internal W2S ESP, OpenGL `glDrawElements` wallhack, syscall wallhack, pattern-scan trainer (attilathedud; cheat / game:cod)
 - [COD7-Tools](entities/cod7-tools.md) — COD7 (Black Ops) research tooling (VcPkg; cheat / game:cod7)
 - [CODM-ESP-Aimbot-Mod-Menu](entities/codm-esp-aimbot-mod-menu.md) — Call of Duty Mobile internal mod menu: injectable library + overlay; ESP / aimbot / gameplay mods (gmh5225; cheat / game:codm [ESP])
 - [Command and Conquer: Red Alert](entities/cnc-red-alert.md) — EA open-source C&C: Red Alert + Steam Workshop (Westwood RTS; Game Develop / source)

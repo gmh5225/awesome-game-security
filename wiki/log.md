@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:attilathedud/CoD_Hacks`: entity [[cod-hacks]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[world-to-screen]], [[draw-call-hook]], and [[intro-to-gamehacking]].
+
 - **2026-08-18** — ingest `description:atulkunal999/pubg_mobile_memory_hacking`: entity [[pubg-mobile-memory-hacking]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pubg-mobile-memory-hacking-examples]], [[pubg-dx]], and [[bypass-pubg-mobile-imgui]].
 
 - **2026-08-18** — ingest `description:aufkrawall/capture-engine`: entity [[capture-engine]]; cited on [[overviews/graphics-api]] and [[obs-game-capture]]; cross-linked [[present-hook]], [[reshade]], [[screencapture]], and [[dxgicaptureapplication]].
