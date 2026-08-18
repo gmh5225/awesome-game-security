@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:benanil/Castle-Engine`: entity [[castle-engine]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[crown]], [[wickedengine]], [[intro-to-dx11-revisited]], and [[campfire]].
+
 - **2026-08-18** — ingest `description:benjinx/Toon`: entity [[toon]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[campfire]], [[nebula]], [[lumos]], [[raylib]], and [[bgfx]].
 
 - **2026-08-18** — ingest `description:unleg1t/Yuri`: entity [[yuri]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[phantom-client]], [[local-anticheat-1-8-9]], [[lenrete-mod]], [[windfall-anticheat]], and [[minecraft-anticheatai]].
