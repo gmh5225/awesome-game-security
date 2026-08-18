@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/ProMBA/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -1351,6 +1351,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kn-live-dbg](entities/kn-live-dbg.md) — Windows kernel live debugging (driver memory primitives + Zydis disasm; user-mode TUI; LiveKD-style)
 - [kn-win32-api-monitor](entities/kn-win32-api-monitor.md) — Win32 API trace workstation (Tauri 2; IAT hooks; ~30k APIs; `.knapm` replay; security/RE/anti-cheat research; kernullist)
 - [KnoxPatch](entities/knoxpatch.md) — LSPosed module restoring Samsung Knox-gated apps on rooted Galaxy (Knox SDK / attestation hooks + Magisk/KernelSU enhancer; One UI 9–16)
+- [Kong](entities/kong.md) — agentic reverse engineer; LLM-orchestrated binary RE via in-process Ghidra, call-graph analysis, agentic MBA deobfuscation (amruth-sn)
 - [koidbg](entities/koidbg.md) — Windows ARM64 debugger (EN/PT docs; cheat / debugging; game-security RE)
 - [kernforge](entities/kernforge.md) — Go AI workbench for Windows/AC project analysis, fuzz reasoning, driver POC scaffolding, verification (MCP skills)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)

@@ -5415,3 +5415,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:zer0condition/gexec`: entity [[gexec]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[pawnio]], [[ntlua]], and [[ntmemory]].
 
 - **2026-08-18** — ingest `description:andrew9382/manual_mapping_dll_injector`: entity [[manual-mapping-dll-injector]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[modexmap]], [[guided-hacking-injector]], and [[faultline]].
+
+- **2026-08-18** — ingest `description:amruth-sn/kong`: entity [[kong]]; cited on [[overviews/reverse-engineering]] and [[mixed-boolean-arithmetic]]; cross-linked [[ghidra]], [[ghidra-mcp]], [[ghidrassist]], [[rikugan]], [[promba]], [[cobra]], [[mbased]], and [[qsynthesis]].
