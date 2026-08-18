@@ -744,6 +744,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EAC-Kernel-Packet-Fucker](entities/eac-kernel-packet-fucker.md) — kernel-mode EAC telemetry suppression via `ExAllocatePoolWithTag` hijack; drops ~33 KB violation reports before backend upload (gmh5225)
 - [eac-leak](entities/eac-leak.md) — leaked EAC server + EOS SDK anti-cheat session handling; game-server ↔ cloud validation protocol RE (chaeyk)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
+- [eac-spoofer-meme](entities/eac-spoofer-meme.md) — open-source kernel HWID spoofer for EAC fingerprinting; C driver + C++ IOCTL controller; SMBIOS/disk/NVMe/MAC/GPU/PCI/CPUID/EFI/ACPI/registry; VT-x/SVM CPUID hooks (zensenzay; cheat / HWID)
 - [EAC-Reversal](entities/eac-reversal.md) — devirtualized EAC driver internals; callback/dispatch/certificate/code-integrity RE as C++ pseudocode (ch4ncellor; [Reversed EAC])
 - [EAC-Runtime-Extractor](entities/eac-runtime-extractor.md) — MinHook DLL; intercepts EAC kernel driver load before disk write for offline RE (gmh5225)
 - [EAC-shellcode-1](entities/eac-shellcode-1.md) — archived raw EAC shellcode memory dump from protected-game dumper (~Mar 2023; hook entry points; offline RE sample; gmh5225)

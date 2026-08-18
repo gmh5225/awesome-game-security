@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:zensenzay/eac-spoofer-meme`: entity [[eac-spoofer-meme]] (open-source kernel HWID spoofer for EAC fingerprinting; C driver + C++ IOCTL controller; SMBIOS/disk/NVMe/MAC/GPU/PCI/CPUID/EFI/ACPI/registry; disk I/O completion hooks; registry PCI/USB alias callbacks; VT-x/SVM CPUID mini-hypervisors; artifact cleanup; cheat / HWID); cited on [[concepts/easy-anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[hwid-kernel-spoofer]], [[easy-hwid-spoofer]], [[hwid-spoofer-eac-be]], [[full-hwid-spoofer-v6]], [[hwid]], and [[driver-hwid-btbd-modified]].
+
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2726 (+2; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-18** — ingest `description:allenwp/godot-resource-remaps`: entity [[godot-resource-remaps]] (Godot editor export plugin; platform-specific resource remapping via feature tags; swap textures/audio/scenes/assets per Windows/Android/iOS/Web during export; Plugins:Godot); cited on [[overviews/game-engine]]; cross-linked [[godot]], [[godot-demo-projects]], [[gddumper]], [[godot-sandbox]], and [[better-godot-mcp]].
