@@ -336,6 +336,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Bypassing EasyAntiCheat Integrity check](entities/bypassing-easyanticheat-integrity-check.md) — EAC kernel driver self-integrity RE + bypass (CreateProcess/LoadImage notify; Capstone deobfuscator; section-compare C++; gmh5225 [Bypassing integrity check])
 - [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)
 - [bt-modular-game-features](entities/bt-modular-game-features.md) — BTS modular Unreal features (audio / physics / animation; C/C++; Plugins:Unreal; gmh5225)
+- [btop](entities/btop.md) — cross-platform C++ terminal resource monitor (CPU/memory/disk/network/process/GPU TUI; Performance Monitor)
 - [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
 - [BudgetEPT (brew02)](entities/budget-ept.md) — SMAP/SMEP inline hooks emulating EPT split-page semantics without a hypervisor; limited software-virtualization concealment (Some Tricks / Windows Ring0)
 - [Bullet3](entities/bullet3.md) — Bullet Physics SDK (C++ collision + multi-physics; rigid/soft body, vehicles, character controllers, OpenCL broadphase; PhysX SDK / Game Engine)
