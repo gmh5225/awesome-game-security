@@ -2146,6 +2146,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Strings x64dbg](entities/stringsx64dbg.md) — x64dbg plugin: dedicated string search/browse tab (C++/Qt; SearchStringsWidget; Cheat x64dbg Plugins)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
 - [STP](entities/stp.md) — Simple Theorem Prover (bitvector/array SMT; MiniSat/CryptoMiniSat; MBA lane)
+- [SuperDllHijack](entities/super-dll-hijack.md) — generic Windows proxy-DLL hijack helper (C/C++; renamed original + replacement DLL; DllMain export passthrough; loader/sideload research; anhkgg; Cheat / DLL Hijack)
 - [SuperMega](entities/super-mega.md) — PE infection shellcode loader (Cordyceps parasitic injection; web UI; anti-emulation; static-analysis evasion; dobin)
 - [SuperSplat](entities/supersplat.md) — PlayCanvas web 3D Gaussian Splat editor (PLY/splat export; 3D Graphics / AI splat)
 - [SwishDbgExt](entities/swishdbgext.md) — WinDbg extension; expand/fix built-in commands (Matt Suiche / Comae; WinDbg Plugins)
