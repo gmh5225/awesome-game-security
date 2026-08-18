@@ -2074,6 +2074,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [STB (gmh5225)](entities/stb-gmh5225.md) — compile-time IDA-style string-to-array for stack trace building / spoofing research (gmh5225; Cheat Compile Time)
 - [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
+- [stitch](entities/stitch.md) — x86 binary rewriting / obfuscation framework (function relocation, global ref patching, branch handling; CMake examples; badhive)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
