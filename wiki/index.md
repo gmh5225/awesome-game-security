@@ -262,6 +262,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
 - [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
 - [Asdf Overlay](entities/asdf-overlay.md) — Rust cross-API overlay library (D3D9/11/12, OpenGL, Vulkan; Detours; named-pipe IPC; Rust/Node.js clients)
+- [AssaultCube](entities/assaultcube.md) — open-source CUBE-engine multiplayer FPS (C/C++; maps, bots, demos; engine study / modding / AC experimentation; assaultcube/AC)
 - [Assault Cube Cheat](entities/assault-cube-cheat.md) — C++ AssaultCube cheat (modding / memory analysis; cheat / game:assault cube; gmh5225)
 - [Astra](entities/astra.md) — external CS:GO cheat (C/C++; rendering / modding / overlays; cheat / game:csgo [External]; gmh5225)
 - [Aurora](entities/aurora.md) — internal CS2 cheat (ESP / aimbot / visual mods; Source 2 schema + entity enumeration; cheat / game:cs2 [Internal]; gmh5225)

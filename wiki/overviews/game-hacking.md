@@ -1203,6 +1203,7 @@ sources:
   - wiki/sources/descriptions/frk1__hazedumper.md
   - wiki/sources/descriptions/clearbluejar__ghidriff.md
   - wiki/sources/descriptions/changeofpace__MouHidInputHook.md
+  - wiki/sources/descriptions/assaultcube__AC.md
 updated: 2026-08-18
 confidence: high
 ---
@@ -1760,6 +1761,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Remnant ESP samples such as [[remnant-esp]] (gmh5225; C#; modding / Unreal Engine / memory analysis; cheat / game:remnant) sit in the cheat / game:remnant lane for UE co-op shooter visual-cheat research. (source: wiki/sources/descriptions/gmh5225__RemnantESP.md)
 - Title-specific Call of Duty: Black Ops II PS3 SPRX source such as [[paradise-bo2]] (Paradise mod menu; window/UI code; newer snapshot) sits beside that lane in the cheat / console PlayStation / game:bo2 lane. (source: wiki/sources/descriptions/gopro2027__ParadiseBO2.md)
 - Title-specific Battlefield 1 internals such as [[battlefield-1-internal]] (C++; DirectX / SDK generation / hooking) illustrate the cheat / game:battlefield 1 lane. (source: wiki/sources/descriptions/younasiqw__BattleField-1-Internal.md) Title-specific BF1 ESP/aimbot samples such as [[bf1-esp-and-aimbot]] (gmh5225; C/C++; DirectX / rendering / hooking; cheat / game:battlefield 1) extend that Frostbite internal lane with ESP and aimbot focus. (source: wiki/sources/descriptions/gmh5225__BF1-ESP-AND-AIMBOT.md) Title-specific Battlefield 4 internal overlay samples such as [[bf4-internal-overlay]] (gmh5225; C++; DirectX / rendering / SDK generation; cheat / game:battlefield 4) extend that Frostbite internal lane. (source: wiki/sources/descriptions/gmh5225__BF4-Internal-overlay.md)
+- The upstream open-source AssaultCube client [[assaultcube]] (assaultcube/AC; CUBE engine; full FPS codebase with assets, maps, scripts, cross-platform tooling; FPS Game) is the common learning title behind educational cheat and AC samples in this lane. (source: wiki/sources/descriptions/assaultcube__AC.md)
 - Educational AssaultCube internals such as [[simple-ac-internal-cheat]] (C++20; Detours DX hooks / ImGui / ESP / aimbot / offset chains; local learning) illustrate a controlled open-source FPS internal lane. (source: wiki/sources/descriptions/s7shvets7s__simple_ac_internal_cheat.md)
 - Educational AssaultCube externals such as [[external-esp-hack-assaultcube]] (gmh5225; GDI overlay; RPM entity boxes / names / health; beginner external ESP) complement that lane with a no-inject overlay path on the same learning title. (source: wiki/sources/descriptions/gmh5225__external-esp-hack-assaultcube.md)
 - Educational AssaultCube cheat samples such as [[assault-cube-cheat]] (gmh5225; C++; modding / memory analysis; cheat / game:assault cube) extend the same learning-title lane beside internal and external AssaultCube references. (source: wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md)

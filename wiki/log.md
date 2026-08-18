@@ -5301,3 +5301,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:b4rtik/ATPMiniDump`: entity [[atpminidump]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[minidump]].
 
 - **2026-08-18** — ingest `description:atombottle/cs2_kvm_dma`: entity [[cs2-kvm-dma]]; cited on [[overviews/game-hacking]] and [[overviews/dma-attack]]; cross-linked [[cs2-dma]], [[cs16-trigger-kvm]], and [[kvm-csgo-cheat]].
+
+- **2026-08-18** — ingest `description:assaultcube/AC`: entity [[assaultcube]]; cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], [[assault-cube-cheat]], and [[mandragora]].
