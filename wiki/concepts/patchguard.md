@@ -15,7 +15,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__QuickPGTrigger.md
   - wiki/sources/descriptions/gmh5225__Patchguard-2023.md
   - wiki/sources/descriptions/emlinhax__tableflipper.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/armasm__EasyAntiPatchGuard.md
+updated: 2026-08-18
 confidence: high
 ---
 
@@ -49,6 +50,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[tableflipper]] (emlinhax; C++) partially disables KPP on builds up to Windows 11 21H2 for offensive / RE study in the same cheat / PatchGuard-related lane. (source: wiki/sources/descriptions/emlinhax__tableflipper.md)
 
+[[easy-anti-patchguard]] (armasm) is a Win8–Win10-era kernel PoC that uses a driver plus assembly hooks to observe or short-circuit PatchGuard dispatch paths in protected routines, with call-chain analysis from kernel debugging sessions. (source: wiki/sources/descriptions/armasm__EasyAntiPatchGuard.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
