@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:arizvisa/ida-minsc`: entity [[ida-minsc]] (IDAPython namespace replacement; DWIM interface; tagging/filtering; database/function automation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[sark]], [[idaclu]], [[idawilli]], [[ida-taskr]], and [[idac]].
+
 - **2026-08-18** — ingest `description:arlyon/awesome-wow-rust`: entity [[awesome-wow-rust]] (curated Rust WoW private-server index; server implementations / protocol + file-format libraries / renderers + asset viewers; auth / networking / data formats); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[azerust]], [[azerothcore-wotlk]], and [[legioncore-7-3-5]].
 
 - **2026-08-18** — ingest `description:arlyon/azerust`: entity [[azerust]] (experimental Rust WoW 3.3.5 server emulator; auth server; TrinityCore-style DB; async Rust + SQL + containers); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[azerothcore-wotlk]] and [[legioncore-7-3-5]].
