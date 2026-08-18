@@ -5423,3 +5423,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:andrew9382/manual_mapping_dll_injector`: entity [[manual-mapping-dll-injector]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[modexmap]], [[guided-hacking-injector]], and [[faultline]].
 
 - **2026-08-18** — ingest `description:amruth-sn/kong`: entity [[kong]]; cited on [[overviews/reverse-engineering]] and [[mixed-boolean-arithmetic]]; cross-linked [[ghidra]], [[ghidra-mcp]], [[ghidrassist]], [[rikugan]], [[promba]], [[cobra]], [[mbased]], and [[qsynthesis]].
+
+- **2026-08-18** — ingest `description:allthingsida/idacpp`: entity [[idacpp]]; cited on [[overviews/reverse-engineering]] and [[ida-sdk]]; cross-linked [[idasdk-collection]], [[idacode]], [[idasql]], [[sark]], and [[idawilli]].
