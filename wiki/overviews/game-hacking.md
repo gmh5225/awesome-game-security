@@ -1224,6 +1224,7 @@ sources:
   - wiki/sources/descriptions/clearbluejar__ghidriff.md
   - wiki/sources/descriptions/changeofpace__MouHidInputHook.md
   - wiki/sources/descriptions/assaultcube__AC.md
+  - wiki/sources/descriptions/allthingsida__idasql.md
 updated: 2026-08-18
 confidence: high
 ---
@@ -1489,6 +1490,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Offline CPU instruction docs at the cursor via [[idaref]] (Python; SQLite refs for x86-64/ARM/MIPS/Xtensa) sit in the Cheat IDA Plugins / instruction-reference lane. (source: wiki/sources/descriptions/nologic__idaref.md)
 - Agent/human IDA CLI via [[idac]] (Unix socket to live GUI or headless idalib; structured JSON; batch/preview/dry-run; bundled agent skill; not MCP; early alpha) sits in the same IDA-driven RE lane. (source: wiki/sources/descriptions/trailofbits__idac.md)
 - Headless IDA Pro MCP via [[ida-cli]] (cpkt9762; idalib-powered; AI-assisted binary analysis; Rust/C++; cheat / IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cpkt9762__ida-cli.md)
+- SQL-backed IDA query interface via [[idasql]] (allthingsida; virtual SQL tables + AI natural-language RE queries; CLI on `.i64` or in-IDA plugin; remote query; cheat / IDA Plugins) sits beside [[ida-bridge]] and [[idac]] in the agent-RE lane. (source: wiki/sources/descriptions/allthingsida__idasql.md)
 - Headless IDA Pro MCP via [[headless-ida-mcp-server]] (cnitlrt; IDA Pro headless binary analysis; MCP tools for functions/variables; Game Develop / MCP server) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cnitlrt__headless-ida-mcp-server.md)
 - Headless IDA Pro MCP via [[ida-mcp-rs]] (blacktop; Rust; RE/modding/memory analysis; Game Develop / MCP server) sits in the same agent-RE lane. (source: wiki/sources/descriptions/blacktop__ida-mcp-rs.md)
 - IDA Pro JSON-RPC daemon via [[ida-rpc]] (bkerler; decompile/xrefs/types/patches over network protocol; headless & GUI; ghidra-rpc-compatible CLI; LLM/agent-assisted RE) sits in the same agent-RE lane. (source: wiki/sources/descriptions/bkerler__ida_rpc.md)

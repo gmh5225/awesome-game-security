@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:allthingsida/idasql`: entity [[idasql]] (IDA database SQL virtual tables + AI natural-language RE queries; CLI on `.i64` or in-IDA plugin; functions/strings/xrefs/types without IDAPython; remote query for external agents; query-driven binary analysis); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-bridge]], [[ida-cli]], [[idac]], [[ida-pro-mcp]], and [[re-harness]].
+
 - **2026-08-18** — ingest `description:am0nsec/wkpe`: entity [[wkpe]] (Windows kernel programming experiments; PoC drivers + user-mode tools; memory-manager internals incl. process VAD enumeration; C/C++ Visual Studio/WDK; build/symbol coupling; educational kernel RE; Enumerate VAD); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kernel-vad-injector]], [[modmap]], [[stealthy-kernelmode-injector]], and [[document]].
 
 - **2026-08-18** — ingest `description:amosshi/binaryinternals`: entity [[binaryinternals]] (Java interactive binary format inspector; field/bit-level BMP/class/JPEG/PNG/ZIP; OpenJDK/Maven; reusable standalone format libraries; RE education / parser dev); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hexwalk]], [[totalpe2]], and [[retoolkit]].
