@@ -54,7 +54,7 @@ sources:
   - wiki/sources/descriptions/ekknod__drvscan.md
   - wiki/sources/descriptions/d1skq__vgk-dma-bypass.md
   - wiki/sources/descriptions/cakehonolulu__pciem.md
-updated: 2026-08-17
+updated: 2026-08-18
 confidence: high
 ---
 
@@ -117,4 +117,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2714) DMA lanes and `Anti Cheat > Detection:DMA` (~679), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
+No top-level DMA section — maps via `Cheat` (~2715) DMA lanes and `Anti Cheat > Detection:DMA` (~679), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
