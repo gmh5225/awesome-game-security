@@ -2298,6 +2298,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unkover](entities/unkover.md) — hidden kernel-thread/rootkit scanner (scheduler/PspCidTable/stack cross-ref; NMI/APC mapped-driver detection; eversinc33)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
 - [unlicense](entities/unlicense.md) — Python 3 Frida dynamic unpacker for Themida/WinLicense 2.x/3.x (OEP + IAT rebuild; native PE + .NET; Fix Themida)
+- [Unpacker](entities/unpacker.md) — modular Python PE/ELF packer detection + unpack pipeline (UPX, ASPack, Themida, VMProtect; Unicorn/Qiling emulation; Fix VMP / Unpacker)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
 - [usbsn (ekknod)](entities/usbsn.md) — root-only USB serial number changer (C++/Java; Windows/Linux/mobile; Some Tricks / Android; peripheral HWID spoof)

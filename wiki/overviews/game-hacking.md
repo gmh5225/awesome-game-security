@@ -407,6 +407,7 @@ sources:
 
   - wiki/sources/descriptions/wallds__NoVmpy.md
   - wiki/sources/descriptions/can1357__NoVmp.md
+  - wiki/sources/descriptions/anpa1200__Unpacker.md
   - wiki/sources/descriptions/antaresjay__freeplay.md
   - wiki/sources/descriptions/april-ivy__Apwil.md
   - wiki/sources/descriptions/apekros__valorant_offsets.md
@@ -1402,6 +1403,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Python emulation-based VMProtect/packer unpack via [[vmpunpack]] (patched sogen emulator to OEP; PE rebuild + IOC extract; stdlib-only; no devirt) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/milk-analyzer__vmpunpack.md)
 - Static Go VMProtect PE unpack/rebuild via [[vmpstatic]] (VMP 1.x–3.x) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/notsnakesilent__VMPStatic.md)
 - Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
+- Modular Python PE/ELF packer detection + unpack pipeline via [[unpacker]] (anpa1200; section/entropy/heuristic/signature ID; UPX native + Unicorn/Unipacker for 32-bit ASPack/Themida/VMProtect + Qiling for 64-bit VMProtect; multi-layer re-detect + PE rebuild; CLI detect→unpack→validate) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/anpa1200__Unpacker.md)
 - Live-process VMP 3.x import-protection fix via [[vmpimportfixer]] (Unicorn emulation of near-call stubs in `.vmp0` → real import addresses; Zydis + pepp; x86/x64 including WoW64 fix from x64) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/mike1k__VMPImportFixer.md)
 - VMP3 x64 bytecode disassembly via [[vmp-vmp3-64bit-disasm-prerelease-]] (decode custom insn set, map virtual opcode handlers, reconstruct original flow from virtualized code; gmh5225; prerelease) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/gmh5225__VMP-Vmp3_64bit_disasm-prerelease-.md)
 - Python VMP3 editor tooling via [[vmp3-utils]] (gmh5225; Fix VMP helper utilities) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/gmh5225__Vmp3_utils.md)
