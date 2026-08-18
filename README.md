@@ -797,6 +797,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Debugging
 - https://github.com/stars/gmh5225/lists/debugger [List]
 - https://github.com/cheat-engine/cheat-engine
+- https://github.com/L-Spiro/MhsX [64-bit from-scratch MHS successor: memory searcher/debugger with expression scans, regex/string search, floating-point studio, hex editor, and scripting]
 - https://github.com/NulledNah/cheat-engine-undetectable [Modified Cheat Engine with user-mode evasion, direct syscalls, and BYOVD kernel bridge for AC research]
 - https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
 - https://github.com/TASEmulators/BizHawk [Multi-system C# emulator with memory inspection, rerecording, and per-core debugging tools for retro game analysis]
