@@ -1320,6 +1320,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kbotext](entities/kbotext.md) — LoL LCU bot extension framework (automated scripting and client control; README `[LCU]`; gmh5225; cheat / game:lol)
 - [kdmapper](entities/kdmapper.md) — C++ kernel driver mapper via Intel `iqvw64e.sys` BYOVD (manual PE map; DSE bypass research; eddeeh)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
+- [KDBG](entities/kdbg.md) — Windows kernel debugging toolkit (driver backend + CLI; user/kernel memory R/W, module/thread enum, tracing; x64; driver-signing setup; cheat / Tool; allogic)
 - [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)
 - [KernelPatch](entities/kernelpatch.md) — Linux kernel hook/modding framework (C/C++; APatch boot patch + KPM lane; Cheat / Hooking the Linux kernel)
