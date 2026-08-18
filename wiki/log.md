@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:alexhude/FRIEND`: entity [[friend]] (IDA plugin; register/instruction documentation in disasm + decompiler; Capstone processor extensions; contextual hints, external doc links, function summaries; C++/CMake; IDA + optional Hex-Rays SDK; Windows/Linux/macOS; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[idaref]], [[idarem]], and [[idaplugins]].
+
 - **2026-08-18** — ingest `description:alexkrnl/Kernel-dll-injector`: entity [[kernel-dll-injector]] (kernel-mode DLL injector; inject chosen DLL when kernel32 loads in newly created processes; Sirifef/Max++ rootkit technique; driver + sample DLL; x86; Visual Studio/WDK; APC; kernel-assisted injection / defensive detection research); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[injdrv]], [[kinject]], [[apc-research]], [[stealthy-kernelmode-injector]], and [[windows-process-injection]].
 
 - **2026-08-18** — ingest `description:alfarom256/drivers_and_shit`: entity [[drivers-and-shit]] (categorized Windows kernel `.sys` binary corpus from OEM/utility/security products; reference for vulnerable-driver research, exploit reproduction, and AC bypass/hardening—binaries only, no PoC); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[ms-vulnerable-driver-list]], and [[physmem-drivers]].
