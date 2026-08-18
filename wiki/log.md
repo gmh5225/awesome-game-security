@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:andreisss/KslDump`: entity [[ksldump]] (PPL LSASS dump via legacy on-disk Defender `KslD.sys`; IOCTL `0x222044` + `MmCopyMemory` kernel read + KASLR CR leak; no external driver load; vendor BYOVD / PPL bypass research); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[kslkatz]], [[pplkiller]], and [[kvc]].
+
 - **2026-08-18** — ingest `description:andrew-hoffman/ghidra-vxd-tools`: entity [[ghidra-vxd-tools]] (Ghidra Jython Windows 9x VxD INT 20h annotator; VxDCall struct + VMDisp9x vmm.h service decode; VMM debug-string/flag-word comments; legacy kernel-mode driver RE including historical game protection; Windows9x script category); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ghidra]] and [[ghidra-scripts]].
 
 - **2026-08-18** — ingest `description:andrew9382/exe_packer`: entity [[exe-packer]] (C/C++ x86/x64 PE rebuild packer; Huffman-compressed payload section; custom stub resolves NTDLL/KERNEL32 APIs, decrypts import names, maps sections/relocs/imports, OEP jump; Visual Studio; packer-analysis / anti-analysis loader study); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[x64-exe-packer]], [[pepacker]], [[atom-pe-packer]], [[packer-tutorial]], and [[unpacker]].

@@ -20,4 +20,4 @@ Illustrates the [[byovd]] credential-extraction lane: a signed OS-component driv
 
 ## Related
 
-[[byovd]] · [[kvc]] · [[kvcforensic]] · [[lsass-extend-mapper]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
+[[byovd]] · [[ksldump]] · [[kvc]] · [[kvcforensic]] · [[lsass-extend-mapper]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]

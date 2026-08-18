@@ -1382,6 +1382,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KSOCKET](entities/ksocket.md) — kernel WSK BSD-socket lib (TCP/UDP from ring 0; no UM)
 - [KsDumper-11](entities/ksdumper-11.md) — classic KM process dumper (C# GUI + `KsDumperDriver.sys`; KDU BYOVD; PE32/64; blocklist bypass)
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
+- [KslDump](entities/ksldump.md) — PPL LSASS dump via legacy on-disk Defender `KslD.sys` (IOCTL 0x222044 + MmCopyMemory; no external driver load; andreisss)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
 - [kvm-csgo-cheat](entities/kvm-csgo-cheat.md) — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (below-OS VM isolation; gmh5225)
 - [kvm-kernel-example](entities/kvm-kernel-example.md) — minimal KVM VMM + guest kernel tutorial (hypercalls, mmap, syscalls, ELF load; Guide)
