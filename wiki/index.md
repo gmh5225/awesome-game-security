@@ -1445,6 +1445,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [magicmida-rs](entities/magicmida-rs.md) — Rust Themida automatic unpacker (Win32 Debug API; OEP + IAT rebuild; ScyllaHide; Fix Themida)
+- [midgetpack](entities/midgetpack.md) — ELF binary packer (password + Curve25519 challenge-response; AES-128/HMAC-SHA256; Linux/FreeBSD x86/x86-64/ARM cross-arch; Anti Cheat → Binary Packer `[ELF]`; arisada)
 - [MagicSigner](entities/magic-signer.md) — sign with leaked certs (admin; TLS side effects; AC sign tools)
 - [Magnetite](entities/magnetite.md) — Rust self-hostable Wasm game platform (deterministic replay AC / magnetite-anticheat)
 - [Mandragora](entities/mandragora.md) — educational ring-3 usermode anti-cheat for Assault Cube (weak difficulty; unobfuscated source for RE practice; gmh5225)
