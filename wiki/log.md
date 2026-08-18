@@ -5391,3 +5391,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:ant4g0nist/rudroid`: entity [[rudroid]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[ews]], [[rnidbg]], and [[dfm-android-unicorn]].
 
 - **2026-08-18** — ingest `description:ant4g0nist/pyre`: entity [[pyre]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghiradec]], [[viv-ghidra-decompiler]], and [[retdec]].
+
+- **2026-08-18** — ingest `description:zer0condition/gexec`: entity [[gexec]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[pawnio]], [[ntlua]], and [[ntmemory]].

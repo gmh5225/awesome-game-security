@@ -1015,6 +1015,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
 - [gecit](entities/gecit.md) — cross-platform transparent proxy (Go; eBPF sock_ops on Linux; TUN + DNS on macOS/Windows; fake TLS ClientHello desync + DoH; DPI bypass research)
+- [gexec](entities/gexec.md) — register-machine bytecode VM for Windows kernel drivers (gasm, gvmlift PE lifter, host API for kernel memory/MSR/physical access; zer0condition)
 - [genshin-akebi-gc](entities/genshin-akebi-gc.md) — Genshin Impact Akebi-framework cheat client (teleport, god mode, speed, auto-play; Grasscutter server; gmh5225)
 - [genshin-cheat](entities/genshin-cheat.md) — Genshin Impact IL2CPP/memory gameplay cheat (god mode, stamina, teleport, speed; gmh5225)
 - [genshin-cheetos](entities/genshin-cheetos.md) — Genshin Impact menu cheat codename Cheetos (speed, teleport, infinite stamina; client memory; gmh5225)
