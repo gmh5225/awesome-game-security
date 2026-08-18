@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:ajkhoury/pubg_internal`: updated entity [[pubg-internal]] (ajkhoury archived internal cheat research; C/C++; user-mode + kernel-mode; protected-process-mapping driver; game SDK generator; basic internal ESP; memory access + structure extraction + in-process feature logic; historical cheat architecture / AC threat-model study; cheat / game:pubg); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[pubg-dx]], [[pubg-dumper]], [[pubg-dump-offset]], and [[present-hook]].
+
 - **2026-08-18** — ingest `description:akawashiro/sloader`: entity [[sloader]] (alternative Linux ELF dynamic loader; modern C++; aims to replace glibc ld-linux.so; readable library loading + symbol resolution; build/test + custom glibc workflows; loader design trade-offs; systems/security research on program loading and linker internals; Anti Cheat → Binary Packer `[ELF]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfloader]], [[rudroid]], [[mojoelf]], [[harmless]], and [[river]].
 
 - **2026-08-18** — ingest `description:akuafif/hXOR-Packer`: entity [[hxor-packer]] (C++ Windows PE packer/unpacker; Huffman compression + XOR encryption; compression-only/encryption-only/both CLI; self-unpacking stub executes payload from memory without disk drop; PE internals / runtime loading / packer behavior study; Anti Cheat → Binary Packer `[PE XOR]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[exe-packer]], [[xorpacker]], [[x64-exe-packer]], [[pe-packer]], [[unpacker]], and [[awesome-executable-packing]].
