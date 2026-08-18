@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:anarh1st47/Source2Dumps`: entity [[source2dumps]] (aggregated Source 2 netvars, interfaces, class IDs; C++ headers + text listings for Dota 2, Artifact, Half-Life: Alyx, Sandbox; offset tracking / Source 2 RE; `[Dump]`); cited on [[overviews/game-engine]] and [[source-netvars]]; cross-linked [[source2gen]], [[source2sdk]], [[dezlock-dump]], and [[dota2dumped]].
+
 - **2026-08-18** — ingest `description:anasfanani/Magisk-Tailscaled`: entity [[magisk-tailscaled]] (Magisk module running Tailscale daemon on rooted Android; userspace networking for VPN coexistence; service scripts + tunnel helpers; CLI login/remote SSH/ADB-over-tailnet on arm/arm64; mobile lab connectivity); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[termux-app]], and [[adb-file-manager]].
 
 - **2026-08-18** — ingest `description:anbox/anbox`: entity [[anbox]] (container-based full Android on Linux via LXC + host daemon; OpenGL ES from emulator components; C++/CMake/D-Bus/protobuf; desktop/cloud APK workloads; archived reference; Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-emulator]], [[aeroot]], [[rootavd]], [[conbeerlib]], [[anti-emulator]], and [[android-emulator-detection]].

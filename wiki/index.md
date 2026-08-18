@@ -2119,6 +2119,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sourceengineexplorer](entities/sourceengineexplorer.md) — Source Engine² explorer (cheat/debug, exploit dev, network emulator, cloud decompiler; Explorer)
 - [Source2Gen](entities/source2gen.md) — Source 2 SDK generator (neverlosecc/praydog; C++ class/enum headers; game engine explorer:source)
 - [source2sdk](entities/source2sdk.md) — generated Source 2 SDKs for multiple games (C++; game engine explorer:source)
+- [source2dumps](entities/source2dumps.md) — aggregated Source 2 netvars/interfaces/class IDs (Dota 2, Artifact, HL:Alyx, Sandbox; C++ headers; [Dump])
 - [Splendid Implanter](entities/splendid-implanter.md) — BattlEye-compatible user-mode injector (secret.club; exploits UM BE flaw; Injector)
 - [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
