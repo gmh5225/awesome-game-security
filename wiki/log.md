@@ -5260,4 +5260,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 - **2026-08-17** — ingest `description:bluecapesecurity/PWF`: entity [[pwf]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[dfirtriage]] and [[shimcacheparser]].
 
+- **2026-08-18** — ingest `description:azerothcore/azerothcore-wotlk`: entity [[azerothcore-wotlk]]; cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[legioncore-7-3-5]], [[sapphire]], [[rathena]], [[dumpwow]], and [[x14-08-coverstory-blizzard]].
+
 - **2026-08-18** — ingest `description:b4rtik/ATPMiniDump`: entity [[atpminidump]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[minidump]].
