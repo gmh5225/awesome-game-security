@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:apekros/valorant_offsets`: entity [[valorant-offsets]] (minimal C++ header offset dump; address/structure constants for external tooling; README `[Offset]`); cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked [[valorant-externals]], [[valorant-dumper]], and [[valorant-dumper-tool]].
+
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2716 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-18** — ingest `description:apkunpacker/Anti-Frida`: entity [[anti-frida]] (write-up collection; libc prologue hook detection; JS Frida script examples; commonly hooked function checks); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[antifrida]], [[frida-detection]], [[detect-frida]], and [[anti-frida-bypass]].

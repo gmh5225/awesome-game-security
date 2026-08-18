@@ -2339,6 +2339,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valorant-external-p2c-leaked](entities/valorant-external-p2c-leaked.md) — Leaked Valorant external P2C: ESP/aimbot/triggerbot via kernel driver RPM; UE state reads under Vanguard (cheat / game:valorant [External]; gmh5225)
 - [valorant-external-source](entities/valorant-external-source.md) — Valorant external cheat source: ESP/aimbot/player info via kernel driver RPM; overlay window/hijack; no inject (cheat / game:valorant [External]; gmh5225)
 - [valorant-externals](entities/valorant-externals.md) — Valorant external offset feed (incremental refresh; cheat / game:valorant [Offset]; gmh5225)
+- [valorant-offsets](entities/valorant-offsets.md) — Valorant memory offset dump (C++ header; address/structure constants; cheat / game:valorant [Offset]; apekros)
 - [valorant-gui-imgui-remake](entities/valorant-gui-imgui-remake.md) — Valorant ImGui cheat GUI framework (tabs/toggles/sliders; ESP/aimbot/visual mods; cheat / game:valorant [GUI]; gmh5225)
 - [valorant-hack-esp-aimbot-skinchanger](entities/valorant-hack-esp-aimbot-skinchanger.md) — Valorant ESP/aimbot/skin changer via kernel driver; UE4 entity overlays; bypasses Vanguard user-mode protections (cheat / game:valorant; gmh5225)
 - [valorant-hack-esp-aimbot-skinchanger-source](entities/valorant-hack-esp-aimbot-skinchanger-source.md) — Valorant ESP/aimbot/skin changer C++ source; typical cheat architecture; kernel-driver UE4 reads; Vanguard kernel protection bypass (cheat / game:valorant [Internal]; gmh5225)
