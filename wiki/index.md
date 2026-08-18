@@ -881,6 +881,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [fdlibm](entities/fdlibm.md) — portable C libm (Sun fdlibm transcendental/elementary math; Mathematics)
 - [FreeDirect](entities/free-direct.md) — DX3 DirectDraw/DirectSound/DirectPlay subset on SDL3 (legacy 2D; DirectX Compatibility)
+- [Freeplay](entities/freeplay.md) — Rust Windows trainer (TOML configs; CE `.CT` import + Auto Assembler; Tauri overlay + CLI; Steam/Epic/GOG; refuses EAC/BE/Vanguard; offline single-player)
 - [FreeType](entities/freetype.md) — portable C font rasterization (TrueType/OpenType/CFF/Type 1/bitmap; hinting, anti-aliasing, subpixel; pluggable drivers; Render fonts)
 - [Free-RASP-Android](entities/free-rasp-android.md) — Native Android freeRASP sample (Talsec; Kotlin; root/Magisk/Frida/emulator/tamper/integrity)
 - [Free-RASP-Capacitor](entities/free-rasp-capacitor.md) — Capacitor freeRASP plugin (Talsec; root/jailbreak/Frida/Shadow/tamper/integrity; Android+iOS)
