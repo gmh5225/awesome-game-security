@@ -682,6 +682,7 @@ sources:
   - wiki/sources/descriptions/atulkunal999__pubg_mobile_memory_hacking.md
   - wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md
   - wiki/sources/descriptions/atlas4381__qualcomm_avb_exploit_poc.md
+  - wiki/sources/descriptions/astrelsky__Ghidra-Cpp-Class-Analyzer.md
   - wiki/sources/descriptions/astrelsky__GhidraOrbis.md
   - wiki/sources/descriptions/gmh5225__PUBGM-PUBGPatcher.md
   - wiki/sources/descriptions/gmh5225__PTFakeTouch.md
@@ -1498,6 +1499,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - MSVC/C++ RTTI parse in IDA 9.2 via [[rtti-parser]] (IDA script; type metadata recovery) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/rem0obb__rtti-parser.md)
 - C++ RTTI class hierarchy visualization and RTTI-based rename via [[pyclassinformer]] (IDA Pro plugin; library/method classification, member coloring; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/herosi__PyClassInformer.md)
 - GCC RTTI class hierarchy and vtable reconstruction from stripped binaries via [[ida-medigate]] (IDA Pro Python; Hex-Rays union type disambiguation; bundled xref tracker; IoT/firmware/game-engine polymorphic C++; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/gmh5225__ida_medigate.md)
+- C++ RTTI/class metadata recovery in Ghidra via [[ghidra-cpp-class-analyzer]] (Java extension; GCC/Clang/MSVC RTTI models, vtables, ctors/dtors, inheritance reconstruction, class hierarchy views; cheat / Ghidra Plugins) sits in the same C++ static-RE lane beside [[rtti-parser]] and [[pyclassinformer]]. (source: wiki/sources/descriptions/astrelsky__Ghidra-Cpp-Class-Analyzer.md)
 - IDA 9.X C++ vtable ops via [[ida-vtable-tools]] (dump `.hpp` interface skeleton / class-prefix rename / `this` type / slot index·offset; Python) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md)
 - C++ class/vtable/signature management via [[classy]] (gmh5225; PyQt5 GUI; vtable generation, function-to-class assignment, Itanium mangling, struct mapping, C header export; cheat / IDA Plugins) sits in the same C++ static-RE lane beside [[ida-vtable-tools]] and [[ida-medigate]]. (source: wiki/sources/descriptions/gmh5225__Classy.md)
 - Missing indirect CALL/JMP target recovery via [[ida-missinglink]] (C++ OOP-heavy game/client binaries; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/kweatherman__ida_missinglink.md)

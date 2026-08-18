@@ -948,6 +948,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gfred](entities/gfred.md) — Ghidra Command Palette extension (keyboard action search; prebuilt Ghidra 9.2.0 dist; cheat / Ghidra Plugins)
 - [ghidra](entities/ghidra.md) — Full NSA Ghidra RE framework source (Java decompiler, debugger integrations; gmh5225 mirror/fork)
 - [ghidra-bridge](entities/ghidra-bridge.md) — Python 3 bridge to Ghidra scripting (CPython outside Jython; external automation / gpt-wpre)
+- [ghidra-cpp-class-analyzer](entities/ghidra-cpp-class-analyzer.md) — Ghidra C++ class/RTTI analyzer (GCC/Clang/MSVC RTTI, vtables, ctors/dtors, inheritance; class hierarchy views; Java/Gradle; astrelsky)
 - [ghidra-decompiler-plugins](entities/ghidra-decompiler-plugins.md) — runtime-loadable Ghidra decompiler plugins (Bazel; RISC-V vector Rules/Actions; datatest; embedded/firmware RE)
 - [ghidra-gradle-plugin](entities/ghidra-gradle-plugin.md) — archived Gradle plugin for Ghidra extension builds (classpath wiring, IDE setup; Java/Groovy; astrelsky)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)

@@ -10,7 +10,7 @@ confidence: medium
 
 # ghidra-orbis
 
-Ghidra extension for **PlayStation 4 Orbis** binaries and related firmware artifacts. Provides loaders, analyzers, scripts, syscall data, and NID mapping resources to improve symbol recovery and platform-specific analysis. Java/Gradle-based; integrates with Ghidra's extension model and can pair with optional C++ class-analysis tooling. Primary use case is console reverse engineering and game-security research on PS4 software. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
+Ghidra extension for **PlayStation 4 Orbis** binaries and related firmware artifacts. Provides loaders, analyzers, scripts, syscall data, and NID mapping resources to improve symbol recovery and platform-specific analysis. Java/Gradle-based; integrates with Ghidra's extension model and can pair with [[ghidra-cpp-class-analyzer]] for C++ RTTI and class-hierarchy recovery on native Orbis binaries. Primary use case is console reverse engineering and game-security research on PS4 software. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
 
 Ghidra-side peer to IDA's [[ida-ps4-helper]] for PlayStation static RE; complements platform-specific Ghidra loaders such as [[gba-ghidra-loader]]. Gradle-based builds may use the archived [[ghidra-gradle-plugin]] from the same maintainer for extension packaging.
 
@@ -20,4 +20,4 @@ Ghidra-side peer to IDA's [[ida-ps4-helper]] for PlayStation static RE; compleme
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[ida-ps4-helper]] · [[ida-ps5-elf-plugin]] · [[cssfontface-exploit]] · [[gba-ghidra-loader]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[ghidra-cpp-class-analyzer]] · [[ida-ps4-helper]] · [[ida-ps5-elf-plugin]] · [[cssfontface-exploit]] · [[gba-ghidra-loader]]

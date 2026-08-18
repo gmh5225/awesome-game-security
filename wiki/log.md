@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:astrelsky/Ghidra-Cpp-Class-Analyzer`: entity [[ghidra-cpp-class-analyzer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-gradle-plugin]], and [[ghidra-orbis]].
+
 - **2026-08-18** — ingest `description:astrelsky/GhidraGradlePlugin`: entity [[ghidra-gradle-plugin]]; cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]] and [[ghidra-orbis]].
 
 - **2026-08-18** — ingest `description:astrelsky/GhidraOrbis`: entity [[ghidra-orbis]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ida-ps4-helper]], and [[gba-ghidra-loader]].
