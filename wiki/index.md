@@ -1894,6 +1894,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-cheat-dumper](entities/r6-cheat-dumper.md) — R6 external cheat dumper: driver + rendering + animation (C/C++; cheat / game:r6 [External]; gmh5225)
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
+- [r6-intel](entities/r6-intel.md) — R6 ranked-stat suspicion scorer: R6Data API heuristics (Node.js; integrity / moderation research; baldspots440)
 - [r6s-external-v2](entities/r6s-external-v2.md) — R6 external v2: kernel driver/handle elevation ESP + aimbot (C++; cheat / game:r6 [External]; gmh5225)
 - [r6s-internal-cheat](entities/r6s-internal-cheat.md) — R6 internal: modding + overlays + memory analysis (C++; cheat / game:r6; gmh5225)
 - [rainbow-efi](entities/rainbow-efi.md) — UEFI boot-stage HWID spoof: EDK II + `rainbow.efi`; ExitBootServices → OslLoaderBlock → IopLoadDriver hook (gmh5225; [HWID])
