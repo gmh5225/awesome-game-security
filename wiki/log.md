@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:basil00/Divert`: entity [[divert]]; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ndisapi]], [[npcap]], [[packet-sniffer]], and [[inject]].
+
 - **2026-08-18** — ingest `description:batteryshark/batteryshark.github.io`: entity [[batteryshark-github-io]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[game-reversing]], [[gamehacking-cheatsheet]], [[mytechnotalent-reverse-engineering]], and [[windows-kernel-debugging-guide]].
 
 - **2026-08-18** — ingest `description:batusan/Hardened-qemu`: entity [[hardened-qemu]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[qemu-patched]], [[qemu-anti-detection]], and [[proxmox-ve-anti-detection]].
