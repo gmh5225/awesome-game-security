@@ -1878,6 +1878,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [query-shadow-stack](entities/query-shadow-stack.md) — Windows CET shadow-stack query/mismatch PoC (return-address integrity; gmh5225)
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
+- [QtScrcpy](entities/qtscrcpy.md) — Qt GUI scrcpy client (USB/TCP Android mirror; keyboard/mouse, drag-and-drop, recording, multi-device; no root; barry-ran)
 - [QQTang](entities/qqtang.md) — QQ Tang (QQ堂) client/protocol/memory/AC research (Tencent casual game; gmh5225)
 - [QQTang Cheat Engine](entities/qqtang-cheat-engine.md) — QQ Tang (QQ堂) title-specific cheat engine (C++/C; memory scan/edit; cheat / game:qqtang [Cheat Engine]; gmh5225)
 - [QSynthesis](entities/qsynthesis.md) — IDA Pro MBA expression synthesizer (Python; oracle-guided program synthesis + SMT; Hex-Rays; Cheat IDA Plugins)
