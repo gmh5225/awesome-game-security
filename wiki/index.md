@@ -1947,6 +1947,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [qbdi-tracer-android](entities/qbdi-tracer-android.md) — Android QBDI + Dobby per-instruction native tracer (linker SO-load hooks, backtrace, memory/pattern scan; ARM64 Android/iOS)
 - [Hardened-qemu](entities/hardened-qemu.md) — stealth QEMU/KVM build hiding VirtualBox/VMware/Bochs/QEMU artifacts (anti-VM analysis VMs; Hidden QEMU)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
+- [qemu_blog](entities/qemu-blog.md) — Airbus SecLab QEMU internals guide (machine/device, memory regions, interrupts, timers, PCI, TCG; Markdown + source refs; Guide)
 - [qemu-patched](entities/qemu-patched.md) — Hidden QEMU fork (CPUID / SMBIOS / ACPI anti-VM spoof)
 - [qemu-gvm](entities/qemu-gvm.md) — QEMU (AMD/Intel; Android emulator research)
 - [QEMU-Nyx](entities/qemu-nyx.md) — Intel-PT QEMU fuzzing (fast reset / PT decode / breakpoint hooks; Cheat QEMU/KVM)

@@ -5477,3 +5477,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:allthingsida/idacpp`: entity [[idacpp]]; cited on [[overviews/reverse-engineering]] and [[ida-sdk]]; cross-linked [[idasdk-collection]], [[idacode]], [[idasql]], [[sark]], and [[idawilli]].
 
 - **2026-08-18** — ingest `description:ajkhoury/ReClassEx`: entity [[reclass-ex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[reclass-net-driverreader]], [[reclass-dma]], and [[regenny]].
+
+- **2026-08-18** — ingest `description:airbus-seclab/qemu_blog`: entity [[qemu-blog]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ispras-qemu]], [[qemu-nyx]], and [[panda]].
