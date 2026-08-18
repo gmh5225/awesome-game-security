@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:aleko2144/KoTR_Modern_Patch`: entity [[kotr-modern-patch]] (C++ King of the Road / Hard Truck 2 ASI patch; collision/camera/physics/AI traffic/trailer/UI fixes; ModUtils + Ultimate ASI Loader; complements D2GI; legacy DirectX plugin modding); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[dxwrapper]], [[gta4-rtx]], and [[storm-engine]].
+
 - **2026-08-18** — ingest `description:alekzandren/in-memory-mutation-demo`: entity [[in-memory-mutation-demo]] (C++23 educational in-memory polymorphic data mutation; ProtectedData decrypt/use/re-encrypt; VirtualProtect/mprotect page alignment; std::span/std::expected; position-dependent XOR + dynamic key rotation; permission restore + zeroize; CMake; binary mechanics / defense-in-depth); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[shellcode-fluctuation]], [[shredder-rs]], and [[memory-guard]].
 
 - **2026-08-18** — ingest `description:ales-drnz/vocem-overlay`: entity [[vocem-overlay]] (Linux Discord in-game overlay; C++/Qt/QML; Vulkan implicit layer + OpenGL LD_PRELOAD interposer; daemon-side Discord RPC + shared-memory voice state; HDR/Flatpak/launcher auto-detect; overlay-injection research—not stealthy); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[ayypex]], [[vulkan-hook]], and [[discord-overlay-hook]].
