@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `readme:categories`: Cheat ~2716 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-18** — ingest `description:apkunpacker/AntiFrida_Bypass`: entity [[anti-frida-bypass]] (Frida JS scripts; libc/process-introspection hooks; procfs string masking; multiple app-protection variants); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[antifrida]], [[frida-detection]], and [[detect-frida]].
 
 - **2026-08-18** — ingest `description:apkunpacker/DetectZygisk`: entity [[detect-zygisk]] (Android Zygisk-style injection POC; C++/JNI; fork child + ptrace attach + PTRACE_GETEVENTMSG; sample APK/logs across Zygisk forks); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magisk-detection]], [[root-app-detector]], and [[zygisk]].
