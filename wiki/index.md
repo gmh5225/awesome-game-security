@@ -1006,6 +1006,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gatewarden-public](entities/gatewarden-public.md) — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes and deterministic 30 Hz sim (Game Develop / source)
 - [godot-sandbox](entities/godot-sandbox.md) — Godot addon: sandboxed mod code for safe player extensions (all platforms; Plugins:Godot)
 - [godot-plush-character](entities/godot-plush-character.md) — Godot 4.x plush/soft-body character rendering (fabric shaders, soft deformation, procedural animation; stylized stuffed-animal aesthetic)
+- [godot-resource-remaps](entities/godot-resource-remaps.md) — Godot editor export plugin: platform-specific resource remapping via feature tags (textures/audio/scenes; Windows/Android/iOS/Web; Plugins:Godot)
 - [godot](entities/godot.md) — Godot Engine OSS source (GDScript/C#; scene graph, scripting, rendering; Game Engine / source)
 - [godot-demo-projects](entities/godot-demo-projects.md) — official Godot demos + template projects (GitHub Pages exports; Game Develop / source)
 - [godogen](entities/godogen.md) — autonomous Godot/Bevy/Babylon.js game dev with Claude Code and Codex (feature planning, asset gen, screenshot self-repair; Game Develop / AI Agents)
