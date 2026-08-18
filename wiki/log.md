@@ -5345,3 +5345,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:asamy/NastyAlignment`: entity [[nasty-alignment]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hooking-via-instrumentation-callback]], [[instrumentation-callback-syscall-logger]], [[syscall-detect]], and [[anticheat-poc]].
 
 - **2026-08-18** — ingest `description:aroxby/dynre-x86`: entity [[dynre-x86]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[levo]], [[recompiler]], and [[ispras-qemu]].
+
+- **2026-08-18** — ingest `description:appsecco/vulnerable-mcp-servers-lab`: entity [[vulnerable-mcp-servers-lab]]; cited on [[overviews/overview]] and [[overviews/game-engine]]; cross-linked [[mcp-safety-scanner]].
