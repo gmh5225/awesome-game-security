@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:anasfanani/Magisk-Tailscaled`: entity [[magisk-tailscaled]] (Magisk module running Tailscale daemon on rooted Android; userspace networking for VPN coexistence; service scripts + tunnel helpers; CLI login/remote SSH/ADB-over-tailnet on arm/arm64; mobile lab connectivity); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[termux-app]], and [[adb-file-manager]].
+
 - **2026-08-18** — ingest `description:anbox/anbox`: entity [[anbox]] (container-based full Android on Linux via LXC + host daemon; OpenGL ES from emulator components; C++/CMake/D-Bus/protobuf; desktop/cloud APK workloads; archived reference; Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-emulator]], [[aeroot]], [[rootavd]], [[conbeerlib]], [[anti-emulator]], and [[android-emulator-detection]].
 
 - **2026-08-18** — ingest `description:andreisss/KslDump`: entity [[ksldump]] (PPL LSASS dump via legacy on-disk Defender `KslD.sys`; IOCTL `0x222044` + `MmCopyMemory` kernel read + KASLR CR leak; no external driver load; vendor BYOVD / PPL bypass research); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[kslkatz]], [[pplkiller]], and [[kvc]].
