@@ -1,0 +1,948 @@
+Project Path: arc_zensenzay_memfilter-fn-driver-_3mk_on7s
+
+Source Tree:
+
+```txt
+arc_zensenzay_memfilter-fn-driver-_3mk_on7s
+├── README.md
+├── client
+│   ├── main.cpp
+│   ├── setup.cpp
+│   └── setup.h
+├── common
+│   └── shared_defs.h
+└── filter
+    ├── filter_hide.c
+    ├── filter_main.c
+    ├── filter_memory.c
+    ├── filter_ops.c
+    ├── filter_protect.c
+    └── filter_reg.c
+
+```
+
+`README.md`:
+
+```md
+# memfilter
+Join discord for full files: https://discord.gg/GSFE2xpRtU
+
+## About
+
+windows kernel driver built on fltmgr.
+
+- file/directory hiding (scrubs directory query buffers)
+- registry key hiding via cm callbacks
+- process handle protection via ob callbacks (strips vm read/write access)
+- cross-process memory r/w using mdl mapping
+- fltmgr communication port (no `\Device\` path, no ioctl)
+
+```
+
+`client/main.cpp`:
+
+```cpp
+#include "comms.h"
+#include "setup.h"
+#include <stdio.h>
+#include <string.h>
+#include <tlhelp32.h>
+
+#pragma comment(lib, "advapi32.lib")
+
+static void EnableColor(void) {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD  mode = 0;
+    if (GetConsoleMode(h, &mode))
+        SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+
+static void Banner(void) {
+    printf(CC "\n  memfilter\n" C0 "\n");
+}
+
+static void Section(const char* title) {
+    printf("\n" CB "  --------  " CW "%s" CB "  --------" C0 "\n\n", title);
+}
+
+static void PrintLoadInstructions(void) {
+    Section("driver not loaded");
+    printf(CD "  1. " CY "kdmapper.exe filter.sys\n" C0);
+    printf(CD "  2. run this client again\n\n" C0);
+    printf(CD "  port:     " CY FILTER_PORT_NAME_A "\n" C0);
+    printf(CD "  unload:   " CY "fltmc unload MemFilter\n\n" C0);
+}
+
+static ULONG64 FindPidByName(const WCHAR* name) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return 0;
+    PROCESSENTRY32W pe = { sizeof(pe) };
+    ULONG64 pid = 0;
+    if (Process32FirstW(snap, &pe)) {
+        do {
+            if (_wcsicmp(pe.szExeFile, name) == 0) { pid = pe.th32ProcessID; break; }
+        } while (Process32NextW(snap, &pe));
+    }
+    CloseHandle(snap);
+    return pid;
+}
+
+static void RunDemo(void) {
+    Section("file hide");
+
+    const WCHAR* hideTarget = L"filter.sys";
+    if (HidePath(hideTarget))
+        LOG_OK("filter.sys hidden");
+    else
+        LOG_WARN("HidePath failed");
+
+    Section("reg hide");
+
+    const WCHAR* hideKey = L"\\REGISTRY\\MACHINE\\SOFTWARE\\MemFilter";
+    if (HideRegKey(hideKey))
+        LOG_OK("key hidden: %ls", hideKey);
+    else
+        LOG_WARN("HideRegKey failed");
+
+    Section("protect");
+
+    ULONG64 selfPid = GetCurrentProcessId();
+    if (ProtectPid(selfPid))
+        LOG_OK("PID %llu protected", selfPid);
+    else
+        LOG_WARN("ProtectPid failed");
+
+    Section("rw mem");
+
+    ULONG64 fnPid = FindPidByName(L"FortniteClient-Win64-Shipping.exe");
+    if (!fnPid) {
+        LOG_WARN("Fortnite is not running -- skipping memory demo");
+        LOG_INFO("Call ReadMem(pid, address, buffer, size) when the game is open");
+    } else {
+        LOG_OK("pid %llu", fnPid);
+
+        ULONG64 base = 0;
+        MODULEENTRY32W me = { sizeof(me) };
+        HANDLE msnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, (DWORD)fnPid);
+        if (msnap != INVALID_HANDLE_VALUE) {
+            if (Module32FirstW(msnap, &me)) base = (ULONG64)(ULONG_PTR)me.modBaseAddr;
+            CloseHandle(msnap);
+        }
+
+        if (base) {
+            BYTE buf[8] = {0};
+            if (ReadMem(fnPid, base, buf, sizeof(buf)))
+                LOG_OK("0x%llX  ->  %02X %02X %02X %02X %02X %02X %02X %02X",
+                       base, buf[0],buf[1],buf[2],buf[3],buf[4],buf[5],buf[6],buf[7]);
+            else
+                LOG_WARN("ReadMem failed");
+        }
+    }
+}
+
+int main(void) {
+    EnableColor();
+    Banner();
+
+    if (!IsElevated()) {
+        LOG_ERR("Run as Administrator");
+        printf(CD "\n  Press Enter to exit..." C0);
+        getchar();
+        return 1;
+    }
+
+    Section("service key");
+
+    WCHAR driverPath[MAX_PATH] = {0};
+    GetFullPathNameW(L"filter.sys", MAX_PATH, driverPath, NULL);
+
+    if (CreateServiceKey(driverPath))
+        LOG_OK("Service key ready");
+    else
+        LOG_WARN("Service key creation failed -- may already exist, continuing");
+
+    Section("connect");
+
+    if (!FilterConnect()) {
+        LOG_WARN("Driver is not loaded yet");
+        printf("\n");
+        PrintLoadInstructions();
+        printf(CD "  Press Enter to exit..." C0);
+        getchar();
+        return 0;
+    }
+
+    LOG_OK("connected");
+
+    RunDemo();
+
+    FilterDisconnect();
+
+    printf(CG "\n  Done.\n\n" C0);
+    printf(CD "  Press Enter to exit..." C0);
+    getchar();
+    return 0;
+}
+
+```
+
+`client/setup.cpp`:
+
+```cpp
+#include "setup.h"
+#include <stdio.h>
+
+#define SVC_ROOT  L"SYSTEM\\CurrentControlSet\\Services\\MemFilter"
+#define INST_ROOT SVC_ROOT L"\\Instances"
+#define INST_KEY  SVC_ROOT L"\\Instances\\MemFilter Instance"
+
+BOOL IsElevated(void) {
+    BOOL elevated = FALSE;
+    HANDLE token  = NULL;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) return FALSE;
+    TOKEN_ELEVATION te;
+    DWORD len = 0;
+    if (GetTokenInformation(token, TokenElevation, &te, sizeof(te), &len))
+        elevated = te.TokenIsElevated;
+    CloseHandle(token);
+    return elevated;
+}
+
+static BOOL SetDword(HKEY hKey, const WCHAR* name, DWORD value) {
+    return RegSetValueExW(hKey, name, 0, REG_DWORD, (BYTE*)&value, sizeof(DWORD)) == ERROR_SUCCESS;
+}
+
+static BOOL SetStr(HKEY hKey, const WCHAR* name, const WCHAR* value) {
+    return RegSetValueExW(hKey, name, 0, REG_SZ, (BYTE*)value,
+                          (DWORD)((wcslen(value) + 1) * sizeof(WCHAR))) == ERROR_SUCCESS;
+}
+
+BOOL CreateServiceKey(const WCHAR* driverPath) {
+    HKEY hSvc = NULL, hInst = NULL, hDef = NULL;
+    DWORD disp = 0;
+    BOOL ok = FALSE;
+
+    if (RegCreateKeyExW(HKEY_LOCAL_MACHINE, SVC_ROOT, 0, NULL,
+                        REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hSvc, &disp) != ERROR_SUCCESS)
+        goto done;
+
+    SetDword(hSvc, L"Type",         2);
+    SetDword(hSvc, L"Start",        3);
+    SetDword(hSvc, L"ErrorControl", 1);
+    SetStr  (hSvc, L"Group",        L"FSFilter Activity Monitor");
+    if (driverPath && driverPath[0])
+        SetStr(hSvc, L"ImagePath", driverPath);
+
+    if (RegCreateKeyExW(HKEY_LOCAL_MACHINE, INST_ROOT, 0, NULL,
+                        REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hInst, &disp) != ERROR_SUCCESS)
+        goto done;
+
+    SetStr(hInst, L"DefaultInstance", L"MemFilter Instance");
+
+    if (RegCreateKeyExW(HKEY_LOCAL_MACHINE, INST_KEY, 0, NULL,
+                        REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hDef, &disp) != ERROR_SUCCESS)
+        goto done;
+
+    SetStr  (hDef, L"Altitude", L"326000");
+    SetDword(hDef, L"Flags",    0);
+    ok = TRUE;
+
+done:
+    if (hDef)  RegCloseKey(hDef);
+    if (hInst) RegCloseKey(hInst);
+    if (hSvc)  RegCloseKey(hSvc);
+    return ok;
+}
+
+void RemoveServiceKey(void) {
+    RegDeleteTreeW(HKEY_LOCAL_MACHINE, INST_KEY);
+    RegDeleteTreeW(HKEY_LOCAL_MACHINE, INST_ROOT);
+    RegDeleteTreeW(HKEY_LOCAL_MACHINE, SVC_ROOT);
+}
+
+```
+
+`client/setup.h`:
+
+```h
+#pragma once
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+
+BOOL IsElevated(void);
+BOOL CreateServiceKey(const WCHAR* driverPath);
+void RemoveServiceKey(void);
+
+```
+
+`common/shared_defs.h`:
+
+```h
+#pragma once
+
+#define FILTER_PORT_NAME    L"\\FilterPort\\MemFilter"
+#define FILTER_PORT_NAME_A   "\\FilterPort\\MemFilter"
+#define FILTER_MAX_PATHS    64
+#define FILTER_MAX_REG      32
+#define FILTER_BUF_SIZE     4096
+
+typedef enum _FILTER_CMD {
+    CMD_HIDE_PATH       = 1,
+    CMD_UNHIDE_PATH     = 2,
+    CMD_READ_MEM        = 3,
+    CMD_WRITE_MEM       = 4,
+    CMD_PROTECT_PID     = 5,
+    CMD_UNPROTECT_PID   = 6,
+    CMD_HIDE_REG        = 7,
+    CMD_UNHIDE_REG      = 8,
+    CMD_GET_STATUS      = 9,
+} FILTER_CMD;
+
+#pragma pack(push, 1)
+
+typedef struct _REQ_PATH {
+    WCHAR Path[520];
+} REQ_PATH;
+
+typedef struct _REQ_MEM {
+    ULONG64 Pid;
+    ULONG64 Address;
+    ULONG64 Size;
+    UCHAR   Buffer[FILTER_BUF_SIZE];
+} REQ_MEM;
+
+typedef struct _REQ_PID {
+    ULONG64 Pid;
+} REQ_PID;
+
+typedef struct _REQ_REG {
+    WCHAR KeyPath[512];
+} REQ_REG;
+
+#pragma warning(push)
+#pragma warning(disable: 4201)
+
+typedef struct _FILTER_REQUEST {
+    FILTER_CMD Command;
+    union {
+        REQ_PATH  Path;
+        REQ_MEM   Memory;
+        REQ_PID   Pid;
+        REQ_REG   Reg;
+    };
+} FILTER_REQUEST, *PFILTER_REQUEST;
+
+typedef struct _FILTER_REPLY {
+    LONG   Status;
+    union {
+        UCHAR  Buffer[FILTER_BUF_SIZE];
+        struct {
+            ULONG HiddenPaths;
+            ULONG HiddenKeys;
+            ULONG ProtectedPids;
+            ULONG FilterActive;
+        } StatusInfo;
+    };
+} FILTER_REPLY, *PFILTER_REPLY;
+
+#pragma warning(pop)
+
+#pragma pack(pop)
+
+```
+
+`filter/filter_hide.c`:
+
+```c
+#include "filter.h"
+
+typedef struct _HIDDEN_PATH {
+    UNICODE_STRING Name;
+    WCHAR          Buf[520];
+} HIDDEN_PATH;
+
+static HIDDEN_PATH  g_Paths[FILTER_MAX_PATHS];
+static ULONG        g_PathCount   = 0;
+static KSPIN_LOCK   g_PathLock;
+static BOOLEAN      g_PathLockInit = FALSE;
+
+static void EnsureLock(void) {
+    if (!g_PathLockInit) { KeInitializeSpinLock(&g_PathLock); g_PathLockInit = TRUE; }
+}
+
+NTSTATUS AddHiddenPath(PCWSTR path, USHORT byteLen) {
+    EnsureLock();
+    KIRQL irql;
+    KeAcquireSpinLock(&g_PathLock, &irql);
+
+    if (g_PathCount >= FILTER_MAX_PATHS) {
+        KeReleaseSpinLock(&g_PathLock, irql);
+        return STATUS_QUOTA_EXCEEDED;
+    }
+
+    HIDDEN_PATH* slot = &g_Paths[g_PathCount];
+    RtlZeroMemory(slot, sizeof(*slot));
+    RtlCopyMemory(slot->Buf, path, min(byteLen, sizeof(slot->Buf) - sizeof(WCHAR)));
+    slot->Name.Buffer        = slot->Buf;
+    slot->Name.Length        = (USHORT)min(byteLen, sizeof(slot->Buf) - sizeof(WCHAR));
+    slot->Name.MaximumLength = sizeof(slot->Buf);
+    g_PathCount++;
+
+    KeReleaseSpinLock(&g_PathLock, irql);
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS RemoveHiddenPath(PCWSTR path, USHORT byteLen) {
+    EnsureLock();
+    KIRQL irql;
+    KeAcquireSpinLock(&g_PathLock, &irql);
+
+    UNICODE_STRING target = { byteLen, byteLen, (PWSTR)path };
+    for (ULONG i = 0; i < g_PathCount; i++) {
+        if (RtlEqualUnicodeString(&g_Paths[i].Name, &target, TRUE)) {
+            g_Paths[i] = g_Paths[--g_PathCount];
+            KeReleaseSpinLock(&g_PathLock, irql);
+            return STATUS_SUCCESS;
+        }
+    }
+
+    KeReleaseSpinLock(&g_PathLock, irql);
+    return STATUS_NOT_FOUND;
+}
+
+static BOOLEAN IsNameHidden(PUNICODE_STRING name) {
+    for (ULONG i = 0; i < g_PathCount; i++) {
+        if (RtlEqualUnicodeString(&g_Paths[i].Name, name, TRUE)) return TRUE;
+    }
+    return FALSE;
+}
+
+void ScrubDirBuffer(PFLT_CALLBACK_DATA Data) {
+    if (!g_PathLockInit || g_PathCount == 0) return;
+
+    PVOID buf = Data->Iopb->Parameters.DirectoryControl.QueryDirectory.DirectoryBuffer;
+    if (!buf) return;
+
+    ULONG bufLen = (ULONG)Data->IoStatus.Information;
+    if (bufLen == 0) return;
+
+    FILE_INFORMATION_CLASS cls = Data->Iopb->Parameters.DirectoryControl.QueryDirectory.FileInformationClass;
+
+    ULONG nameOff, nextOff;
+    switch (cls) {
+        case FileDirectoryInformation:
+            nameOff = FIELD_OFFSET(FILE_DIRECTORY_INFORMATION,   FileName);
+            nextOff = FIELD_OFFSET(FILE_DIRECTORY_INFORMATION,   NextEntryOffset);
+            break;
+        case FileBothDirectoryInformation:
+            nameOff = FIELD_OFFSET(FILE_BOTH_DIR_INFORMATION,    FileName);
+            nextOff = FIELD_OFFSET(FILE_BOTH_DIR_INFORMATION,    NextEntryOffset);
+            break;
+        case FileFullDirectoryInformation:
+            nameOff = FIELD_OFFSET(FILE_FULL_DIR_INFORMATION,    FileName);
+            nextOff = FIELD_OFFSET(FILE_FULL_DIR_INFORMATION,    NextEntryOffset);
+            break;
+        case FileIdBothDirectoryInformation:
+            nameOff = FIELD_OFFSET(FILE_ID_BOTH_DIR_INFORMATION, FileName);
+            nextOff = FIELD_OFFSET(FILE_ID_BOTH_DIR_INFORMATION, NextEntryOffset);
+            break;
+        case FileNamesInformation:
+            nameOff = FIELD_OFFSET(FILE_NAMES_INFORMATION,       FileName);
+            nextOff = FIELD_OFFSET(FILE_NAMES_INFORMATION,       NextEntryOffset);
+            break;
+        default:
+            return;
+    }
+
+    KIRQL irql;
+    KeAcquireSpinLock(&g_PathLock, &irql);
+
+    PUCHAR cur  = (PUCHAR)buf;
+    PUCHAR prev = NULL;
+
+    for (;;) {
+        PULONG pNext = (PULONG)(cur + nextOff);
+        PULONG pNameLen;
+
+        switch (cls) {
+            case FileDirectoryInformation:
+                pNameLen = &((PFILE_DIRECTORY_INFORMATION)cur)->FileNameLength;   break;
+            case FileBothDirectoryInformation:
+                pNameLen = &((PFILE_BOTH_DIR_INFORMATION)cur)->FileNameLength;    break;
+            case FileFullDirectoryInformation:
+                pNameLen = &((PFILE_FULL_DIR_INFORMATION)cur)->FileNameLength;    break;
+            case FileIdBothDirectoryInformation:
+                pNameLen = &((PFILE_ID_BOTH_DIR_INFORMATION)cur)->FileNameLength; break;
+            default:
+                pNameLen = &((PFILE_NAMES_INFORMATION)cur)->FileNameLength;       break;
+        }
+
+        UNICODE_STRING entryName = {
+            (USHORT)*pNameLen, (USHORT)*pNameLen, (PWSTR)(cur + nameOff)
+        };
+
+        if (IsNameHidden(&entryName)) {
+            if (*pNext == 0) {
+                if (prev) *(PULONG)(prev + nextOff) = 0;
+                else      RtlZeroMemory(cur, nameOff);
+                break;
+            } else {
+                if (prev) {
+                    *(PULONG)(prev + nextOff) += *pNext;
+                } else {
+                    PUCHAR next = cur + *pNext;
+                    ULONG  remaining = bufLen - (ULONG)(next - (PUCHAR)buf);
+                    if (remaining > 0) RtlMoveMemory(cur, next, remaining);
+                    continue;
+                }
+            }
+        } else {
+            prev = cur;
+        }
+
+        if (*pNext == 0) break;
+        cur += *pNext;
+    }
+
+    KeReleaseSpinLock(&g_PathLock, irql);
+}
+
+```
+
+`filter/filter_main.c`:
+
+```c
+#include "filter.h"
+
+PFLT_FILTER  g_Filter     = NULL;
+PFLT_PORT    g_ServerPort = NULL;
+PFLT_PORT    g_ClientPort = NULL;
+
+static const FLT_OPERATION_REGISTRATION g_Callbacks[] = {
+    {
+        IRP_MJ_DIRECTORY_CONTROL,
+        0,
+        PreDirControl,
+        PostDirControl
+    },
+    { IRP_MJ_OPERATION_END }
+};
+
+static NTSTATUS FilterUnload(FLT_FILTER_UNLOAD_FLAGS Flags) {
+    UNREFERENCED_PARAMETER(Flags);
+    DestroyCommPort();
+    RemoveObCallbacks();
+    RemoveRegCallback();
+    if (g_Filter) FltUnregisterFilter(g_Filter);
+    return STATUS_SUCCESS;
+}
+
+static NTSTATUS InstanceSetup(PCFLT_RELATED_OBJECTS FltObjects, FLT_INSTANCE_SETUP_FLAGS Flags,
+                               DEVICE_TYPE VolumeDeviceType, FLT_FILESYSTEM_TYPE VolumeFilesystemType) {
+    UNREFERENCED_PARAMETER(FltObjects);
+    UNREFERENCED_PARAMETER(Flags);
+    UNREFERENCED_PARAMETER(VolumeDeviceType);
+    if (VolumeFilesystemType == FLT_FSTYPE_RAW) return STATUS_FLT_DO_NOT_ATTACH;
+    return STATUS_SUCCESS;
+}
+
+static NTSTATUS InstanceQueryTeardown(PCFLT_RELATED_OBJECTS FltObjects, FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags) {
+    UNREFERENCED_PARAMETER(FltObjects);
+    UNREFERENCED_PARAMETER(Flags);
+    return STATUS_SUCCESS;
+}
+
+static const FLT_REGISTRATION g_FilterReg = {
+    sizeof(FLT_REGISTRATION),
+    FLT_REGISTRATION_VERSION,
+    0,
+    NULL,
+    g_Callbacks,
+    FilterUnload,
+    InstanceSetup,
+    InstanceQueryTeardown,
+    NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+    UNREFERENCED_PARAMETER(RegistryPath);
+    NTSTATUS status;
+
+    status = FltRegisterFilter(DriverObject, &g_FilterReg, &g_Filter);
+    if (!NT_SUCCESS(status)) return status;
+
+    status = CreateCommPort();
+    if (!NT_SUCCESS(status)) {
+        FltUnregisterFilter(g_Filter);
+        return status;
+    }
+
+    InitObCallbacks();
+    InitRegCallback();
+
+    status = FltStartFiltering(g_Filter);
+    if (!NT_SUCCESS(status)) {
+        RemoveRegCallback();
+        RemoveObCallbacks();
+        DestroyCommPort();
+        FltUnregisterFilter(g_Filter);
+    }
+
+    return status;
+}
+
+```
+
+`filter/filter_memory.c`:
+
+```c
+#include "filter.h"
+
+NTSTATUS ReadProcessMem(ULONG64 pid, ULONG64 addr, PVOID out, ULONG size) {
+    if (!out || size == 0 || size > FILTER_BUF_SIZE) return STATUS_INVALID_PARAMETER;
+
+    PEPROCESS proc = NULL;
+    NTSTATUS  status = PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &proc);
+    if (!NT_SUCCESS(status)) return status;
+
+    PMDL  mdl    = NULL;
+    PVOID mapped = NULL;
+
+    KAPC_STATE apc;
+    KeStackAttachProcess(proc, &apc);
+
+    __try {
+        ProbeForRead((PVOID)(ULONG_PTR)addr, size, 1);
+
+        mdl = IoAllocateMdl((PVOID)(ULONG_PTR)addr, size, FALSE, FALSE, NULL);
+        if (!mdl) { status = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        MmProbeAndLockPages(mdl, UserMode, IoReadAccess);
+
+        mapped = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached,
+                                              NULL, FALSE, NormalPagePriority | MdlMappingNoExecute);
+        if (!mapped) { MmUnlockPages(mdl); IoFreeMdl(mdl); mdl = NULL; status = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        RtlCopyMemory(out, mapped, size);
+        status = STATUS_SUCCESS;
+
+        MmUnmapLockedPages(mapped, mdl);
+        MmUnlockPages(mdl);
+        IoFreeMdl(mdl);
+        mdl = NULL;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        if (mapped && mdl) MmUnmapLockedPages(mapped, mdl);
+        if (mdl)           { MmUnlockPages(mdl); IoFreeMdl(mdl); }
+        status = GetExceptionCode();
+    }
+
+    KeUnstackDetachProcess(&apc);
+    ObDereferenceObject(proc);
+    return status;
+}
+
+NTSTATUS WriteProcessMem(ULONG64 pid, ULONG64 addr, PVOID in, ULONG size) {
+    if (!in || size == 0 || size > FILTER_BUF_SIZE) return STATUS_INVALID_PARAMETER;
+
+    PEPROCESS proc = NULL;
+    NTSTATUS  status = PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &proc);
+    if (!NT_SUCCESS(status)) return status;
+
+    PMDL  mdl    = NULL;
+    PVOID mapped = NULL;
+
+    KAPC_STATE apc;
+    KeStackAttachProcess(proc, &apc);
+
+    __try {
+        ProbeForWrite((PVOID)(ULONG_PTR)addr, size, 1);
+
+        mdl = IoAllocateMdl((PVOID)(ULONG_PTR)addr, size, FALSE, FALSE, NULL);
+        if (!mdl) { status = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        MmProbeAndLockPages(mdl, UserMode, IoWriteAccess);
+
+        mapped = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached,
+                                              NULL, FALSE, NormalPagePriority);
+        if (!mapped) { MmUnlockPages(mdl); IoFreeMdl(mdl); mdl = NULL; status = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        RtlCopyMemory(mapped, in, size);
+        status = STATUS_SUCCESS;
+
+        MmUnmapLockedPages(mapped, mdl);
+        MmUnlockPages(mdl);
+        IoFreeMdl(mdl);
+        mdl = NULL;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        if (mapped && mdl) MmUnmapLockedPages(mapped, mdl);
+        if (mdl)           { MmUnlockPages(mdl); IoFreeMdl(mdl); }
+        status = GetExceptionCode();
+    }
+
+    KeUnstackDetachProcess(&apc);
+    ObDereferenceObject(proc);
+    return status;
+}
+
+```
+
+`filter/filter_ops.c`:
+
+```c
+#include "filter.h"
+
+FLT_PREOP_CALLBACK_STATUS PreDirControl(PFLT_CALLBACK_DATA Data, PCFLT_RELATED_OBJECTS Flt,
+                                         PVOID* CompletionCtx) {
+    UNREFERENCED_PARAMETER(Flt);
+    UNREFERENCED_PARAMETER(CompletionCtx);
+
+    if (Data->Iopb->MinorFunction != IRP_MN_QUERY_DIRECTORY)
+        return FLT_PREOP_SUCCESS_NO_CALLBACK;
+
+    return FLT_PREOP_SUCCESS_WITH_CALLBACK;
+}
+
+FLT_POSTOP_CALLBACK_STATUS PostDirControl(PFLT_CALLBACK_DATA Data, PCFLT_RELATED_OBJECTS Flt,
+                                           PVOID CompletionCtx, FLT_POST_OPERATION_FLAGS Flags) {
+    UNREFERENCED_PARAMETER(Flt);
+    UNREFERENCED_PARAMETER(CompletionCtx);
+
+    if (FlagOn(Flags, FLTFL_POST_OPERATION_DRAINING))   return FLT_POSTOP_FINISHED_PROCESSING;
+    if (Data->Iopb->MinorFunction != IRP_MN_QUERY_DIRECTORY) return FLT_POSTOP_FINISHED_PROCESSING;
+    if (!NT_SUCCESS(Data->IoStatus.Status))              return FLT_POSTOP_FINISHED_PROCESSING;
+
+    ScrubDirBuffer(Data);
+
+    return FLT_POSTOP_FINISHED_PROCESSING;
+}
+
+```
+
+`filter/filter_protect.c`:
+
+```c
+#include "filter.h"
+
+#ifndef PROCESS_VM_OPERATION
+#define PROCESS_VM_OPERATION    0x0008
+#endif
+#ifndef PROCESS_VM_READ
+#define PROCESS_VM_READ         0x0010
+#endif
+#ifndef PROCESS_VM_WRITE
+#define PROCESS_VM_WRITE        0x0020
+#endif
+#ifndef PROCESS_SUSPEND_RESUME
+#define PROCESS_SUSPEND_RESUME  0x0800
+#endif
+
+static ULONG64      g_ProtectedPids[32];
+static ULONG        g_PidCount  = 0;
+static KSPIN_LOCK   g_PidLock;
+static BOOLEAN      g_PidLockInit  = FALSE;
+static PVOID        g_ObHandle     = NULL;
+
+static BOOLEAN IsPidProtected(ULONG64 pid) {
+    for (ULONG i = 0; i < g_PidCount; i++)
+        if (g_ProtectedPids[i] == pid) return TRUE;
+    return FALSE;
+}
+
+NTSTATUS AddProtectedPid(ULONG64 pid) {
+    if (!g_PidLockInit) { KeInitializeSpinLock(&g_PidLock); g_PidLockInit = TRUE; }
+    KIRQL irql;
+    KeAcquireSpinLock(&g_PidLock, &irql);
+    if (g_PidCount >= 32) { KeReleaseSpinLock(&g_PidLock, irql); return STATUS_QUOTA_EXCEEDED; }
+    g_ProtectedPids[g_PidCount++] = pid;
+    KeReleaseSpinLock(&g_PidLock, irql);
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS RemoveProtectedPid(ULONG64 pid) {
+    if (!g_PidLockInit) return STATUS_NOT_FOUND;
+    KIRQL irql;
+    KeAcquireSpinLock(&g_PidLock, &irql);
+    for (ULONG i = 0; i < g_PidCount; i++) {
+        if (g_ProtectedPids[i] == pid) {
+            g_ProtectedPids[i] = g_ProtectedPids[--g_PidCount];
+            KeReleaseSpinLock(&g_PidLock, irql);
+            return STATUS_SUCCESS;
+        }
+    }
+    KeReleaseSpinLock(&g_PidLock, irql);
+    return STATUS_NOT_FOUND;
+}
+
+static OB_PREOP_CALLBACK_STATUS ObPreCallback(PVOID Context, POB_PRE_OPERATION_INFORMATION Info) {
+    UNREFERENCED_PARAMETER(Context);
+
+    if (Info->KernelHandle) return OB_PREOP_SUCCESS;
+    if (Info->ObjectType != *PsProcessType) return OB_PREOP_SUCCESS;
+
+    PEPROCESS target = (PEPROCESS)Info->Object;
+    ULONG64   pid    = (ULONG64)(ULONG_PTR)PsGetProcessId(target);
+
+    if (!IsPidProtected(pid)) return OB_PREOP_SUCCESS;
+
+    ACCESS_MASK strip = PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION |
+                        PROCESS_DUP_HANDLE | PROCESS_SUSPEND_RESUME;
+
+    if (Info->Operation == OB_OPERATION_HANDLE_CREATE)
+        Info->Parameters->CreateHandleInformation.DesiredAccess  &= ~strip;
+    else
+        Info->Parameters->DuplicateHandleInformation.DesiredAccess &= ~strip;
+
+    return OB_PREOP_SUCCESS;
+}
+
+NTSTATUS InitObCallbacks(void) {
+    if (!g_PidLockInit) { KeInitializeSpinLock(&g_PidLock); g_PidLockInit = TRUE; }
+
+    OB_CALLBACK_REGISTRATION reg;
+    OB_OPERATION_REGISTRATION op;
+
+    RtlZeroMemory(&reg, sizeof(reg));
+    RtlZeroMemory(&op,  sizeof(op));
+
+    UNICODE_STRING altitude = RTL_CONSTANT_STRING(L"326001");
+
+    op.ObjectType           = PsProcessType;
+    op.Operations           = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    op.PreOperation         = ObPreCallback;
+    op.PostOperation        = NULL;
+
+    reg.Version             = OB_FLT_REGISTRATION_VERSION;
+    reg.OperationRegistrationCount = 1;
+    reg.Altitude            = altitude;
+    reg.RegistrationContext = NULL;
+    reg.OperationRegistration = &op;
+
+    return ObRegisterCallbacks(&reg, &g_ObHandle);
+}
+
+void RemoveObCallbacks(void) {
+    if (g_ObHandle) { ObUnRegisterCallbacks(g_ObHandle); g_ObHandle = NULL; }
+}
+
+```
+
+`filter/filter_reg.c`:
+
+```c
+#include "filter.h"
+
+typedef struct _HIDDEN_KEY {
+    UNICODE_STRING Path;
+    WCHAR          Buf[512];
+} HIDDEN_KEY;
+
+static HIDDEN_KEY    g_Keys[FILTER_MAX_REG];
+static ULONG         g_KeyCount   = 0;
+static KSPIN_LOCK    g_KeyLock;
+static BOOLEAN       g_KeyLockInit = FALSE;
+static LARGE_INTEGER g_CmCookie   = {0};
+
+static void EnsureLock(void) {
+    if (!g_KeyLockInit) { KeInitializeSpinLock(&g_KeyLock); g_KeyLockInit = TRUE; }
+}
+
+NTSTATUS AddHiddenKey(PCWSTR path, USHORT byteLen) {
+    EnsureLock();
+    KIRQL irql;
+    KeAcquireSpinLock(&g_KeyLock, &irql);
+    if (g_KeyCount >= FILTER_MAX_REG) { KeReleaseSpinLock(&g_KeyLock, irql); return STATUS_QUOTA_EXCEEDED; }
+    HIDDEN_KEY* slot = &g_Keys[g_KeyCount];
+    RtlCopyMemory(slot->Buf, path, min(byteLen, sizeof(slot->Buf) - sizeof(WCHAR)));
+    slot->Path.Buffer        = slot->Buf;
+    slot->Path.Length        = (USHORT)min(byteLen, sizeof(slot->Buf) - sizeof(WCHAR));
+    slot->Path.MaximumLength = sizeof(slot->Buf);
+    g_KeyCount++;
+    KeReleaseSpinLock(&g_KeyLock, irql);
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS RemoveHiddenKey(PCWSTR path, USHORT byteLen) {
+    EnsureLock();
+    KIRQL irql;
+    KeAcquireSpinLock(&g_KeyLock, &irql);
+    UNICODE_STRING target = { byteLen, byteLen, (PWSTR)path };
+    for (ULONG i = 0; i < g_KeyCount; i++) {
+        if (RtlEqualUnicodeString(&g_Keys[i].Path, &target, TRUE)) {
+            g_Keys[i] = g_Keys[--g_KeyCount];
+            KeReleaseSpinLock(&g_KeyLock, irql);
+            return STATUS_SUCCESS;
+        }
+    }
+    KeReleaseSpinLock(&g_KeyLock, irql);
+    return STATUS_NOT_FOUND;
+}
+
+static BOOLEAN IsKeyHidden(PUNICODE_STRING path) {
+    for (ULONG i = 0; i < g_KeyCount; i++) {
+        if (RtlPrefixUnicodeString(&g_Keys[i].Path, path, TRUE)) return TRUE;
+    }
+    return FALSE;
+}
+
+static NTSTATUS GetKeyPath(PVOID Object, PUNICODE_STRING* out) {
+    return CmCallbackGetKeyObjectIDEx(&g_CmCookie, Object, NULL, out, 0);
+}
+
+static NTSTATUS RegCallback(PVOID Ctx, PVOID Arg1, PVOID Arg2) {
+    UNREFERENCED_PARAMETER(Ctx);
+
+    if (!g_KeyLockInit || g_KeyCount == 0) return STATUS_SUCCESS;
+
+    REG_NOTIFY_CLASS cls = (REG_NOTIFY_CLASS)(ULONG_PTR)Arg1;
+
+    PVOID keyObj = NULL;
+    switch (cls) {
+        case RegNtPreOpenKeyEx:
+        case RegNtPreOpenKey: {
+            PREG_OPEN_KEY_INFORMATION info = (PREG_OPEN_KEY_INFORMATION)Arg2;
+            if (!info || !info->CompleteName) return STATUS_SUCCESS;
+            if (IsKeyHidden(info->CompleteName)) return STATUS_OBJECT_NAME_NOT_FOUND;
+            return STATUS_SUCCESS;
+        }
+        case RegNtPreQueryKey:
+        case RegNtPreEnumerateKey:
+        case RegNtPreEnumerateValueKey:
+        case RegNtPreQueryValueKey: {
+            PREG_QUERY_KEY_INFORMATION info = (PREG_QUERY_KEY_INFORMATION)Arg2;
+            if (!info) return STATUS_SUCCESS;
+            keyObj = info->Object;
+            break;
+        }
+        default:
+            return STATUS_SUCCESS;
+    }
+
+    if (!keyObj) return STATUS_SUCCESS;
+
+    PUNICODE_STRING keyPath = NULL;
+    if (!NT_SUCCESS(GetKeyPath(keyObj, &keyPath)) || !keyPath) return STATUS_SUCCESS;
+
+    BOOLEAN hidden = IsKeyHidden(keyPath);
+    CmCallbackReleaseKeyObjectIDEx(keyPath);
+
+    return hidden ? STATUS_OBJECT_NAME_NOT_FOUND : STATUS_SUCCESS;
+}
+
+NTSTATUS InitRegCallback(void) {
+    EnsureLock();
+    UNICODE_STRING altitude = RTL_CONSTANT_STRING(L"326000");
+    return CmRegisterCallbackEx(RegCallback, &altitude, NULL, NULL, &g_CmCookie, NULL);
+}
+
+void RemoveRegCallback(void) {
+    if (g_CmCookie.QuadPart) {
+        CmUnRegisterCallback(g_CmCookie);
+        g_CmCookie.QuadPart = 0;
+    }
+}
+
+```
