@@ -1801,6 +1801,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pine](entities/pine.md) — neural-network aim/trigger research (CS:GO / Fortnite / Overwatch; cheat / triggerbot & aimbot)
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
+- [PixelFlasher](entities/pixel-flasher.md) — cross-platform Pixel flashing GUI (bootloader unlock, OTA/factory flash, Magisk/KernelSU/APatch root, boot-image patch, backup; cheat / Android ROM tool for Pixel)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [plthook](entities/plthook.md) — cross-platform PLT/GOT/IAT hook library (ELF/Mach-O/PE; Linux/macOS/Windows; cheat / hook research)
 - [PMI-hpc](entities/pmi-hpc.md) — PMI + hardware performance counters for Windows security monitoring (branch misprediction / cache miss interrupts; code injection / ROP anomaly detection)

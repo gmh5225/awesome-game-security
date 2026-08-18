@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:badabing2005/PixelFlasher`: entity [[pixel-flasher]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[kernelsu]], [[apatch]], [[android-boot-image-editor]], and [[kernelsu-pixel4xl]].
+
 - **2026-08-18** — ingest `description:badhive/stitch`: entity [[stitch]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[alcatraz]], [[binprotect]], and [[call-obfuscator]].
 
 - **2026-08-18** — ingest `description:baldspots440/R6Intel`: entity [[r6-intel]]; cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[battleye]] and R6 offensive samples.
