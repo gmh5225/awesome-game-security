@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:alfarom256/rs-ldr`: entity [[rs-ldr]] (Rust no_std hash-based dynamic WinAPI resolution; PEB module walk + export parse + LdrLoadDll via DynApi; compile-time XOR string obfuscation; optional Hell's Gate-style SSN resolver; NODEFAULTLIB; red-team / game-security stealth API resolution); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[tabby]], [[blitz]], [[crystr]], [[syscalls-cpp]], [[syscall-detect]], and [[windows-process-injection]].
+
 - **2026-08-18** — ingest `description:aliyunav/Finger`: entity [[finger]] (cloud function symbol recognition; Python SDK + IDA 7+ plugin; extract function features → recognition backend → rename/highlight matches; Recognizing Function By Cloud; malware/game binary triage; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[renamaida]], [[ida-pro-loadmap]], [[findfunc]], and [[ida-map-symbol-parser]].
 
 - **2026-08-18** — ingest `description:zensenzay/memfilter-fn-driver-`: entity [[memfilter-fn-driver]] (Windows minifilter driver + C++ client; Flt directory scrub + Cm registry hide + Ob handle VM-access strip + MDL cross-process R/W; Filter Manager communication port instead of IOCTL; game AC evasion / kernel RE demo); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[hide-file]], [[vaultguard]], [[neacsafe-analysis]], [[eac-spoofer-meme]], and [[kernel-callbacks]].
