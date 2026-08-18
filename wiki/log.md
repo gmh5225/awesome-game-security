@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:armvirus/CosMapper`: entity [[cos-mapper]] (signed-helper driver mapper; user+kernel flow; kernel hooks transfer unsigned payload; unloaded-driver/cache trace cleanup; armvirus `[Signed Driver Map]`); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[sinmapper]], [[kdmapper]], and [[nullmap]].
+
 - **2026-08-18** — ingest `description:armvirus/DriverDllFInder`: entity [[driver-dll-finder]] (System32/drivers PE section scanner; oversized-section hosts for section-overlay mapping; skip loaded drivers; armvirus `[Find Driver Useless Memory]`); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[sinmapper]].
 
 - **2026-08-18** — ingest `description:armvirus/SinMapper`: entity [[sinmapper]] (user-mode signed-driver section mapper; physmem R/W + PTE permission changes + trace cleanup; armvirus `[Manual Map In Signed Driver]`); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper]], [[nullmap]], and [[revert-mapper]].

@@ -416,6 +416,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cocos4](entities/cocos4.md) — COCOS 4 cross-platform C++ engine (script bindings; write-once-run-anywhere; Game Engine / source)
 - [cocos-engine](entities/cocos-engine.md) — Cocos Creator runtime framework (3D/2D; editor-backed; Game Engine / source)
 - [compiler-binary-richprint](entities/compiler-binary-richprint.md) — print MSVC Rich Header compiler info from PE (DOS stub→PE gap; cheat / RE tools; gmh5225)
+- [cos-mapper](entities/cos-mapper.md) — signed-helper driver mapper; kernel hooks transfer unsigned payload; unloaded-driver/cache cleanup (armvirus; Signed Driver Map)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
 - [covirt](entities/covirt.md) — x86-64 stack-VM code virtualizer (PE MinGW + ELF; MBA + self-modifying code; marker regions; AC Obfuscation Engine `[VM]`; dmaivel)
