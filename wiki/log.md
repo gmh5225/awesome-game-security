@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:airbus-cert/comida`: entity [[comida]] (IDA Pro plugin; Windows COM GUID scan + registry metadata correlation; Hex-Rays type inference on CoCreateInstance/CoGetCallContext/QueryInterface; malware/game COM triage; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[comon]], [[classy]], [[autoresolv]], and [[cognitor]].
+
 - **2026-08-18** — ingest `description:airbus-seclab/AutoResolv`: entity [[autoresolv]] (IDA plugin; IDAPython; PyQt5 + pyelftools; resolve ELF external library calls; wrapper→implementation mapping; call-site annotation; signature import from related binaries; multi-arch; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmlinux-to-elf]], [[ida-ps5-elf-plugin]], [[ida-kallsyms-symbol-renamer]], and [[idaplugins]].
 
 - **2026-08-18** — ingest `description:airvzxf/sniparinject`: entity [[sniparinject]] (Python Scapy game packet sniffer/parser; YAML opcode→field maps without code changes; IP/port filter; binary struct decode for host/node traffic; inject lane planned; Mana Plus demo; cheat / Packet Sniffer&Filter); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[packet-sniffer]], [[inject]], [[pcapplusplus]], and [[peetch]].

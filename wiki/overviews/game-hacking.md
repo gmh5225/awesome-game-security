@@ -71,6 +71,7 @@ sources:
   - wiki/sources/descriptions/alexbevi__ghidra-manager.md
   - wiki/sources/descriptions/alexhude__FRIEND.md
   - wiki/sources/descriptions/airbus-seclab__AutoResolv.md
+  - wiki/sources/descriptions/airbus-cert__comida.md
   - wiki/sources/descriptions/alexkrnl__Kernel-dll-injector.md
   - wiki/sources/descriptions/ktock__qemu-wasm.md
   - wiki/sources/descriptions/xqemu__xqemu.md
@@ -1503,6 +1504,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Offline CPU instruction docs at the cursor via [[idaref]] (Python; SQLite refs for x86-64/ARM/MIPS/Xtensa) sit in the Cheat IDA Plugins / instruction-reference lane. (source: wiki/sources/descriptions/nologic__idaref.md)
 - In-IDA register/instruction documentation via [[friend]] (C++; Capstone-backed processor extensions; contextual hints, external doc links, function summaries in disasm + Hex-Rays; Windows/Linux/macOS; cheat / IDA Plugins) sits beside [[idaref]] in the same instruction-reference lane. (source: wiki/sources/descriptions/alexhude__FRIEND.md)
 - ELF external library resolution in IDA via [[autoresolv]] (airbus-seclab; IDAPython; PyQt5 + pyelftools; resolve imported calls, wrapper→implementation mapping, call-site annotation, signature import from related binaries; multi-arch dynamically linked ELF; cheat / IDA Plugins) sits in the same symbol-recovery lane beside [[vmlinux-to-elf]] and [[ida-ps5-elf-plugin]]. (source: wiki/sources/descriptions/airbus-seclab__AutoResolv.md)
+- Windows COM analysis in IDA via [[comida]] (airbus-cert; COM GUID scan + registry correlation; Hex-Rays inference on `CoCreateInstance` / `CoGetCallContext` / `QueryInterface`; malware/game COM triage; cheat / IDA Plugins) sits beside [[comon]] and [[classy]] in the Windows internals / COM RE lane. (source: wiki/sources/descriptions/airbus-cert__comida.md)
 - Agent/human IDA CLI via [[idac]] (Unix socket to live GUI or headless idalib; structured JSON; batch/preview/dry-run; bundled agent skill; not MCP; early alpha) sits in the same IDA-driven RE lane. (source: wiki/sources/descriptions/trailofbits__idac.md)
 - Headless IDA Pro MCP via [[ida-cli]] (cpkt9762; idalib-powered; AI-assisted binary analysis; Rust/C++; cheat / IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cpkt9762__ida-cli.md)
 - SQL-backed IDA query interface via [[idasql]] (allthingsida; virtual SQL tables + AI natural-language RE queries; CLI on `.i64` or in-IDA plugin; remote query; cheat / IDA Plugins) sits beside [[ida-bridge]] and [[idac]] in the agent-RE lane. (source: wiki/sources/descriptions/allthingsida__idasql.md)

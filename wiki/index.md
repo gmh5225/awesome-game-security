@@ -422,6 +422,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [comm-im-miraclela](entities/comm-im-miraclela.md) — EFT UM+KM overlay via `NtDxgkGetTrackedWorkloadStatistics` dxgkrnl hook; win32k draw + ImGui comms (gmh5225; cheat / game:eft)
 - [comm-neko-swap](entities/comm-neko-swap.md) — swap-based memory page KM↔UM covert channel via Win32kApiSetTable; avoids IOCTL telemetry (gmh5225; cheat driver)
 - [collateral-damage](entities/collateral-damage.md) — Xbox One/Series SystemOS kernel exploit (CVE-2024-30088; kernel 25398.4478/4908/4909; console emulator / Xbox RE)
+- [comida](entities/comida.md) — IDA Pro COM analysis plugin (GUID scan + registry correlation; Hex-Rays type inference on CoCreateInstance/QueryInterface; airbus-cert; cheat / IDA Plugins)
 - [comon](entities/comon.md) — WinDbg extension; trace COM class creation + interface querying (WinDbg Plugins)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [compile-time-regular-expressions](entities/compile-time-regular-expressions.md) — C++ CTRE compile-time regex (cmake `ctre`; AC Compile Time)
