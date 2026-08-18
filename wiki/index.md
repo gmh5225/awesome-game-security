@@ -2433,6 +2433,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
 - [win32k-file-collection](entities/win32k-file-collection.md) — win32k.sys and related GUI-subsystem binaries across Windows builds (patch diff / vuln research)
 - [win32k-file-collection2](entities/win32k-file-collection2.md) — versioned win32k.sys binary corpus (Win10/11; offline diff / syscall & input-path RE)
+- [WinRing0](entities/winring0.md) — WinRing0 driver/API CPU temperature sample (CPUID + MSR per-core temps; admin; hardware monitoring; ashleyhung)
 - [Wizard-Loader](entities/wizard-loader.md) — Windows PE manual-map loader/injector (PE header erasure, thread hiding; Xwizard.exe side-load; gmh5225)
 - [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
 - [ward](entities/ward.md) — simple ELF runtime packer for stealthy droppers (Go/C; Anti Cheat → Binary Packer `[ELF]`)
