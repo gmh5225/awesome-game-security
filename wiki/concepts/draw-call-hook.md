@@ -5,7 +5,8 @@ topics: [graphics-api, game-hacking]
 sources:
   - wiki/sources/skills/graphics-api.md
   - wiki/sources/descriptions/frostbone25__ShaderInjector.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/baobao1044__GameLagReducer.md
+updated: 2026-08-18
 confidence: medium
 ---
 
@@ -29,7 +30,7 @@ Present-only overlays ([[present-hook]]) draw on top of the finished frame; draw
 - **Depth disable** — `OMSetDepthStencilState` with depth test off so geometry draws through walls.
 - **Shader replacement** — pixel shader returns flat team colors (chams) or semi-transparent tint.
 - **D3D12 runtime pixel-shader inject/replace** — title-targeted interceptors such as [[shader-injector]] (FF7 Rebirth PC; MinHook + ImGui live edit; DX12 API hook adaptable to other D3D12 games) modify bound shaders without a Present-only overlay. (source: wiki/sources/descriptions/frostbone25__ShaderInjector.md)
-- **Cross-API shader tooling** — README DirectX lane includes D3D12 injectors and cross-API runtime shader capture/flatten/replace for research on live pipelines.
+- **Cross-API shader tooling** — README DirectX lane includes D3D12 injectors and cross-API runtime shader capture/flatten/replace for research on live pipelines; [[game-lag-reducer]] (D3D11 vtable + GL/Vulkan IAT hooks; flat/no-op shader substitution, tessellation/MSAA disable) targets user-consented FPS gains rather than cheat overlays. (source: wiki/sources/descriptions/baobao1044__GameLagReducer.md)
 
 Engine-specific samples often combine draw hooks with SDK offsets ([[battlefield-1-internal]], [[csgo-bot]] OpenGL/shader lane).
 
@@ -39,4 +40,4 @@ Modified pipeline state, unexpected shader bytecode, draw-count anomalies, and i
 
 ## Related
 
-[[present-hook]] · [[shader-injector]] · [[world-to-screen]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[present-hook]] · [[shader-injector]] · [[game-lag-reducer]] · [[world-to-screen]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]

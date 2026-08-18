@@ -926,6 +926,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-reversing](entities/game-reversing.md) — curated game RE learning materials (Windows PC; x86-first; cheat / guide)
 - [game-reversed-study](entities/game-reversed-study.md) — Chinese CE guide documentation (cheat / guide; reference, not runtime)
 - [game-hacking](entities/game-hacking.md) — curated game hacking tool index by type (disassemblers/debuggers/hex/memory/.NET/graphics debuggers/RE tutorials; CE/x64dbg/IDA/Ghidra/dnSpy/RenderDoc; dsasmblr; cheat / guide)
+- [game-lag-reducer](entities/game-lag-reducer.md) — cross-API D3D11/GL/Vulkan shader capture/flatten/replace for FPS (WPF launcher + C++ HookDll; user-consented GPU visual reduction; DirectX / hook)
 - [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
 - [GameAI-paper-list](entities/gameai-paper-list.md) — zh curated game-AI research papers (modding / tooling; AI category)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
