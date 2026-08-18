@@ -2192,6 +2192,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
 - [TPM-SPOOFER](entities/tpm-spoofer.md) — KM TPM serial spoof via IOCTL hook (Cheat [TPM])
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
+- [tracee](entities/tracee.md) — Linux/Android runtime security + forensics via eBPF (Go; kernel telemetry + behavioral detections; K8s/container paths; Aqua Security)
 - [TrickyStore](entities/trickystore.md) — Android Keystore trick rewrite (Android 10+; cheat / HWID / keystore research; beakthoven)
 - [triton-bn](entities/triton-bn.md) — Binary Ninja Triton DBA plugin scaffold (symbolic exec / lifting base; ergrelet; Cheat Binary Ninja Plugins)
 - [Trinity](entities/trinity.md) — Windows kernel exploitation framework (modular driver/memory/priv-esc chain → arbitrary kernel code execution; disables & removes Defender; cpz)
