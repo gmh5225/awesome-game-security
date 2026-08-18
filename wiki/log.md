@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:ilia810/MapleUnity`: entity [[maple-unity]] (Unity MapleStory v83 client reimplementation; C#; reNX/NXWrapper NX parse; foothold collision / attachment-point sprite rendering / physics·inventory·skills / AES packet serialization matching legacy protocols; Unity Editor NX diagnostics; TDD + clean architecture); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unistory]], [[maplenecrocer]], [[maplestory-v83-maplestory-cpp]], [[libremaple-client]], and [[maplestory-heavenclient]].
+
 - **2026-08-18** — ingest `description:ppodds/UniStory`: entity [[unistory]] (Unity MapleStory client reimplementation; WIP TMS v245; C#; WzComparerR2.WzLib KMS/TMS WZ parse; Unity 2D map layers/foothold physics/portals/sprite animation/BGM via NAudio; modular Character/Map/Mob/Npc/Skill loaders; no server yet); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[wzcomparerr2]], [[maplenecrocer]], [[maplestory-packer-modpacker]], [[mnwvs196]], and [[maplestory-heavenclient]].
 
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2721 (+5; Game Develop ~185 +2; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
