@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:aosp-mirror/kernel_common`: entity [[kernel-common]] (official AOSP GKI common kernel mirror; vendor-shared upstream; Android patches, Bazel, Rust; kernel attack-surface / defense study; `[GKI]`); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[compile-android-driver]], [[android-kernel-driver-template]], [[kernelsu]], and [[kernelpatch]].
+
 - **2026-08-18** — ingest `description:apekros/binja_sigmaker`: entity [[binja-sigmaker]] (Binary Ninja plugin; IDA-style wildcard byte-pattern sigs from disassembled functions; function-start fallback; Python; plugin-manager compatible); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-sigmaker]], [[sigmakerex]], [[ida-pro-sigmaker]], and [[bndb2pat]].
 
 - **2026-08-18** — ingest `description:apekros/valorant_offsets`: entity [[valorant-offsets]] (minimal C++ header offset dump; address/structure constants for external tooling; README `[Offset]`); cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked [[valorant-externals]], [[valorant-dumper]], and [[valorant-dumper-tool]].
