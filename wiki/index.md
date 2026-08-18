@@ -1447,6 +1447,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [magiskboot_build](entities/magiskboot-build.md) — POSIX standalone magiskboot build scripts (Cheat Magisk / Boot Image)
 - [magiskboot_ndk_on_linux](entities/magiskboot-ndk-on-linux.md) — NDK-on-Linux magiskboot (boot unpack/repack/ramdisk)
 - [mal-unpack-drv](entities/mal-unpack-drv.md) — Experimental test-signed kernel driver for Windows malware sample unpacking (VM-only; Sample Unpacker; hasherezade)
+- [malum-menu-android](entities/malum-menu-android.md) — Among Us Android Frida mod menu (TypeScript; frida-il2cpp-bridge + frida-java-menu; Objection gadget; non-root; astra1dev)
 - [Malicious Code Detection Bugu](entities/malicious-code-detection-bugu.md) — Go gRPC microservices malware-scan platform (Bugu; file upload, hash verify, automated analysis; Protobuf gRPC+HTTP API; gmh5225; Malicious code detection and obfuscation)
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
 - [MagiskOnWSALocal](entities/magiskonwsalocal.md) — local Magisk + GApps integration for WSA (rooted Android + Play Store on Win11; gmh5225)

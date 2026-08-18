@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:astra1dev/MalumMenu-Android`: entity [[malum-menu-android]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[frida-il2cpp-bridge]], [[fallguys-frida-modmenu]], and [[wellsanticheat]].
+
 - **2026-08-18** — ingest `description:astrelsky/Ghidra-Cpp-Class-Analyzer`: entity [[ghidra-cpp-class-analyzer]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-gradle-plugin]], and [[ghidra-orbis]].
 
 - **2026-08-18** — ingest `description:astrelsky/GhidraGradlePlugin`: entity [[ghidra-gradle-plugin]]; cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]] and [[ghidra-orbis]].
