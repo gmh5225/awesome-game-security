@@ -1228,6 +1228,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/synacktiv/windows_kernel_shadow_stack [Shadow Stack]
 - https://github.com/noahware/apic [C++ library for sending processor interrupts via x2apic & xapic]
 - https://github.com/zer0condition/NTMemory [Usermode NT Explorer - Query kernel addresses, translate virtual to physical addresses, inspect the PFN database, and more.]
+- https://github.com/zer0condition/gexec [Register-machine bytecode interpreter for Windows kernel drivers with gasm assembler, gvmlift PE lifter, and embeddable host API for kernel memory/MSR/physical access]
 
 > Linux Kernel Explorer
 - https://github.com/MatheuZSecurity/Rootkit [Collection of codes focused on Linux rootkits]
