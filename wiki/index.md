@@ -2492,6 +2492,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [win11_apk_installer](entities/win11-apk-installer.md) — Win11 APK installer (Python; WSA / Android-on-Windows)
 - [WSAPatch](entities/wsapatch.md) — WSA MSIX patcher for Win10/older Win11 (version-check + Hyper-V bypass; sideload; cinit)
+- [WSA PacMan](entities/wsa-pacman.md) — Flutter/Dart GUI WSA package manager (APK/XAPK sideload, metadata, upgrade/downgrade; alesimula)
 - [winbo](entities/winbo.md) — overlay hijack detect via dxgkrnl ETW Present + GDI table (Detection:Overlay)
 - [WinNT5_src_20201004](entities/winnt5-src-20201004.md) — leaked Windows NT 5.x source tree (2000/XP/Server 2003; kernel/Win32 RE reference)
 - [WinObjEx64](entities/winobjex64.md) — Windows Object Manager namespace explorer + callback enum (admin; AC / Ring0 callback research)

@@ -18,4 +18,4 @@ C++ patcher for **Windows Subsystem for Android (WSA)** MSIX packages that enabl
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[win11-apk-installer]] · [[magiskonwsalocal]] · [[magisk]] · [[android-emulator]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[win11-apk-installer]] · [[wsa-pacman]] · [[magiskonwsalocal]] · [[magisk]] · [[android-emulator]]

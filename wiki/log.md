@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:alesimula/wsa_pacman`: entity [[wsa-pacman]] (Flutter/Dart GUI WSA package manager; APK/XAPK double-click install; version/permission metadata; upgrade/downgrade; Android settings shortcuts; sideload/test workflows); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[wsapatch]], [[win11-apk-installer]], and [[magiskonwsalocal]].
+
 - **2026-08-18** — ingest `description:alex193a/Root-My-Pixel`: entity [[root-my-pixel]] (Kotlin/JNI Android app; one-tap temporary Pixel root via NebuSec IonStack CVE-2026-43499 + ReSukiSU/KernelSU late-load; Shizuku-elevated shell; device profiling; Pixel 7–10; exploit logging; mobile AC/root-detection research); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[cve-2026-43499-popsicle]], and [[pixel-flasher]].
 
 - **2026-08-18** — ingest `description:alexbevi/ghidra-manager`: entity [[ghidra-manager]] (cross-platform Python CLI; release-pinned Ghidra install, SHA-256-verified downloads, curated extension sets incl. GhidraMCP, project launch, MCP bridge, multi-instance launch, doctor checks, binary compare, rollback pair; Windows/Linux/macOS); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-mcp]], [[ghidra-headless-mcp]], [[ghidriff]], and [[ghidra-bridge]].
