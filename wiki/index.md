@@ -1546,6 +1546,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [warzone-internal-cheat](entities/warzone-internal-cheat.md) — COD Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [mtasa-blue](entities/mtasa-blue.md) — MTA:SA GTA:SA multiplayer mod (C++/Lua; D3D/DInput hooks; CEF; built-in AC)
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)
+- [Mydev Cheat Engine Tables](entities/mydev-cheat-engine-tables.md) — multi-game Cheat Engine `.CT` collection (pointer chains, script cheats, hotkeys; single-player modding; cheat / [Cheat Engine]; bbfox0703)
 - [mvisor](entities/mvisor.md) — C++ remake (kernel/render/audio; Cheat QEMU/KVM/PVE/VBOX)
 - [mypower](entities/mypower.md) — Android/Linux CLI memory scanner (SLJIT / pointer chains / Unity U3D)
 - [mytechnotalent/Reverse-Engineering](entities/mytechnotalent-reverse-engineering.md) — free multi-arch RE tutorial (x86/x64/ARM/AVR/RISC-V; static+dynamic; cheat / guide)
