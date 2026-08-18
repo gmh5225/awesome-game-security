@@ -757,6 +757,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EquilibriumEngine](entities/equilibrium-engine.md) — data-oriented C11 ECS game engine (multi-threaded; hot-reload libraries/shaders; clang; Game Engine / source)
 - [equ8_bypass](entities/equ8-bypass.md) — simple EQU8 user-mode bypass (registry driver path + IOCTL handle close; explore anticheat:equ8)
 - [EQU8-PoC](entities/equ8-poc.md) — full C++ EQU8 kernel driver reimplementation (explore anticheat:equ8; driver development)
+- [epic-r6-v9](entities/epic-r6-v9.md) — R6 internal: DirectX rendering + SDK generation (C++; cheat / game:r6; beans42)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
 - [ErisDbg](entities/erisdbg.md) — VT debugger (C/C++; kernel drivers / modding; cheat / debugging)
 - [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
