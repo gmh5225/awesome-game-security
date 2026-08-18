@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:aoharudesu/Clipboard_Tools-UE4`: entity [[clipboard-tools-ue4]] (UE4 plugin; C++ module; copies supplied string arguments to system clipboard; UE4.27 packaged binaries; in-engine debug/scripting text transfer; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[luamachine]], and [[ue4-tutorials]].
+
 - **2026-08-18** — ingest `description:aosp-mirror/kernel_common`: entity [[kernel-common]] (official AOSP GKI common kernel mirror; vendor-shared upstream; Android patches, Bazel, Rust; kernel attack-surface / defense study; `[GKI]`); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[compile-android-driver]], [[android-kernel-driver-template]], [[kernelsu]], and [[kernelpatch]].
 
 - **2026-08-18** — ingest `description:apekros/binja_sigmaker`: entity [[binja-sigmaker]] (Binary Ninja plugin; IDA-style wildcard byte-pattern sigs from disassembled functions; function-start fallback; Python; plugin-manager compatible); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-sigmaker]], [[sigmakerex]], [[ida-pro-sigmaker]], and [[bndb2pat]].
