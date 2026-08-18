@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:atenfyr/UAssetGUI`: entity [[uassetgui]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[jmap]], [[paksmith]], and [[rust-u4pak]].
+
 - **2026-08-18** — ingest `description:atlas0fd00m/viv-ghidra-decompiler`: entity [[viv-ghidra-decompiler]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[blc]], and [[ghiradec]].
 
 - **2026-08-18** — ingest `description:atlas4381/qualcomm_avb_exploit_poc`: entity [[qualcomm-avb-exploit-poc]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-boot-image-editor]], [[magiskboot]], and [[keyattestation]].
