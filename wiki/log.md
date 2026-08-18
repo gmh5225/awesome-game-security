@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:apkunpacker/DetectZygisk`: entity [[detect-zygisk]] (Android Zygisk-style injection POC; C++/JNI; fork child + ptrace attach + PTRACE_GETEVENTMSG; sample APK/logs across Zygisk forks); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magisk-detection]], [[root-app-detector]], and [[zygisk]].
+
 - **2026-08-18** — ingest `description:apkunpacker/IDA-Gepetto`: entity [[ida-gepetto]] (local LLM IDA plugin; IDAPython; explain decompiled functions + variable rename suggestions; pseudocode context-menu + hotkeys; configurable backends + localization); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-llm-explainer]], [[idassist]], [[rikugan]], and [[ida-assistant]].
 
 - **2026-08-18** — ingest `description:apkunpacker/MagiskDetection`: entity [[magisk-detection]] (archive of Android root/Magisk POC APKs; Zygisk/hook/bootloader/root-app checks; sample hashes for cross-tool comparison); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magiskdetector]], [[magisk-killer]], [[root-app-detector]], and [[detection]].
