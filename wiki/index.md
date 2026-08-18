@@ -1546,6 +1546,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MMFCodeInjection](entities/mmf-code-injection.md) — User APC + memory-mapped file code injection (stealthy DLL load via shared file mapping; Injection Testing; gmh5225)
 - [memcs](entities/memcs.md) — external CS:GO; modding / SDK generation (Rust; cheat / game:csgo; gmh5225)
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
+- [Manual Mapping DLL Injector](entities/manual-mapping-dll-injector.md) — Windows manual-map DLL injector (injector + loader; thread hijack / NtCreateThreadEx; import/reloc/TLS/exception; header wipe, PEB unlink, handle hijack; Manual Map; andrew9382)
 - [MemJect](entities/memject.md) — minimal Windows manual-map DLL injector (embedded raw byte-array payload; VirtualAllocEx/WPM; optional PE header/entry erase; csgo.exe demo; danielkrupinski; Manual Map)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [MemTools](entities/memtools.md) — Windows/Linux DMA testing toolkit (C++/C; driver/plugin development + memory analysis; gmh5225; cheat / DMA)
