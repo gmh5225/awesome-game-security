@@ -680,6 +680,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__pubgm_sdk_and_offsets.md
   - wiki/sources/descriptions/gmh5225__pubg_mobile_memory_hacking_examples.md
   - wiki/sources/descriptions/atulkunal999__pubg_mobile_memory_hacking.md
+  - wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md
   - wiki/sources/descriptions/atlas4381__qualcomm_avb_exploit_poc.md
   - wiki/sources/descriptions/gmh5225__PUBGM-PUBGPatcher.md
   - wiki/sources/descriptions/gmh5225__PTFakeTouch.md
@@ -1478,6 +1479,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Multi-provider IDA vulnerability analysis via [[vulchatgpt]] (BinAIVulHunter; OpenAI/Gemini/Ollama; decompiled-function vuln analysis + code explanation; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/ke0z__VulChatGPT.md)
 - Dynamic IDA→LLVM IR binary lifting via [[ida2llvm]] (cursor-sync liftability viewer in the disassembly window; cheat / IDA Plugins) sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md)
 - Ghidra decompiler integration in IDA Pro via [[blc]] (Binary Lifting Contraption; cseagle; cheat / IDA Plugins) sits beside [[ida2llvm]] and [[ghiradec]] for alternate pseudocode when Hex-Rays is unavailable or for cross-decompiler comparison. (source: wiki/sources/descriptions/cseagle__blc.md)
+- Vivisect↔Ghidra symbolic decompilation bridge via [[viv-ghidra-decompiler]] (Python/Java; symbolik effects → Ghidra p-code; headless JSON-RPC backend; Qt dock widget; cheat / Ghidra Plugins) sits beside [[blc]] and [[ghiradec]] when Vivisect symbolic analysis disagrees with Ghidra Sleigh lifting. (source: wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
 - ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)

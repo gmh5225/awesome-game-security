@@ -2365,6 +2365,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vulnerablepatchguardexploit](entities/vulnerablepatchguardexploit.md) — runtime vulnerable PatchGuard exploit to disable KPP (C++; cheat / PatchGuard-related; gmh5225)
 - [volto-external-spowar-ud-eac-be-fortnite-external-cheat](entities/volto-external-spowar-ud-eac-be-fortnite-external-cheat.md) — Fortnite external: kernel driver + overlay; HWID-spoof / EAC-evasion naming (C/C++; cheat / game:fortnite [External]; gmh5225)
 - [vibe-blocks-mcp](entities/vibe-blocks-mcp.md) — MCP server for Roblox Studio (SSE; studio actions as agent tools; Game Develop / MCP)
+- [viv-ghidra-decompiler](entities/viv-ghidra-decompiler.md) — Vivisect↔Ghidra bridge (symbolik → p-code; headless JSON-RPC; Qt dock decompiled C; atlas0fd00m)
 - [vscript-lua51](entities/vscript-lua51.md) — CS2 VScript Lua 5.1 external module DLL loader (VScript; cheat / game:cs2 scripting)
 - [wasm-ceserver](entities/wasm-ceserver.md) — WebAssembly memory analysis (Python/JavaScript; Cheat Engine ceserver-style remote debug; Analyzing WebAssembly)
 - [webcheat](entities/webcheat.md) — Chrome extension CE-style WASM memory scan/edit/freeze + game speed control (Manifest V3; Unity/Godot/Emscripten WebGL)

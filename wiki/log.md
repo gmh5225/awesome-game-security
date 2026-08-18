@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:atlas0fd00m/viv-ghidra-decompiler`: entity [[viv-ghidra-decompiler]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[blc]], and [[ghiradec]].
+
 - **2026-08-18** — ingest `description:atlas4381/qualcomm_avb_exploit_poc`: entity [[qualcomm-avb-exploit-poc]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-boot-image-editor]], [[magiskboot]], and [[keyattestation]].
 
 - **2026-08-18** — ingest `description:atrexus/vulkan`: entity [[vulkan]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[dumpepe]], [[page-no-access-not-byfron]], [[no-access-protection]], and [[byfron-bypass]].
