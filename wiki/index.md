@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/ProMBA/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -1846,6 +1846,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ponytail Risk](entities/ponytail-risk.md) — OSS behavioral risk control + evidence review for private game servers (Rust agent, C ABI SDK, shadow mode)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
 - [prevent-vac](entities/prevent-vac.md) — VAC monitoring inhibition via `steamserver.dll` / WinAPI return spoofing (`vac_monitor_manager`; gmh5225; explore anticheat:vac)
+- [ProMBA](entities/promba.md) — MBA deobfuscator via program synthesis and term rewriting (linear/polynomial MBA; VM-protector contexts; astean1001; Cheat Mixed boolean-arithmetic)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
 - [UPGDSED](entities/upgdsed.md) — runtime PatchGuard + DSE disable (vulnerable drivers, CI.dll, KPP context; Win7–11; hfiref0x)
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)
