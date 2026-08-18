@@ -273,6 +273,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [asus-bsitf-0-day-poc](entities/asus-bsitf-0-day-poc.md) — ASUS `bsitf.sys` BYOVD PoC (CVE-2026-13585; IOCTL maps contiguous kernel pool to usermode + physaddr leak; gmh5225)
 - [AsIO-Exploit](entities/asio-exploit.md) — ASUS `AsIO3.sys` LPE PoC (MSR IOCTLs + `ASIO_ADDPID` parent-PID trust bypass; native-syscall shellcode; gmh5225)
 - [AsusDrv](entities/asusdrv.md) — ASUS `AsusBiosIoDrv64.sys` physmem IOCTL wrapper (hardware-monitoring BYOVD; kernel exploitation research; gmh5225)
+- [ATPMiniDump](entities/atpminidump.md) — C/C++ aTPMiniDump callback (Ring3 minidump instrumentation; memory analysis; AC / Windows callback lane; b4rtik)
 - [autismware](entities/autismware.md) — CS:GO internal cheat (C++; interface capture + VMT hooks; ESP/aimbot/backtrack/skin changer + ImGui menu; gmh5225 [HvH])
 - [augur-riot](entities/augur-riot.md) — Vanguard RITO streamed-module → PE converter (hashed imports, section rebuild; kernel RE; gmh5225)
 - [aurum-re](entities/aurum-re.md) — Aurum RE Ricochet anti-cheat research (RE + driver development; explore anticheat:ricochet; gmh5225)

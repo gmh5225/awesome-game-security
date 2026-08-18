@@ -5255,3 +5255,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-17** — ingest `description:bootmgfw/Valorant-External-Cheat`: entity [[valorant-external-cheat]]; cited on [[overviews/game-hacking]] and [[concepts/vanguard]]; cross-linked [[lithium-kernel]] and [[valorant-external-source]].
 
 - **2026-08-17** — ingest `description:bluecapesecurity/PWF`: entity [[pwf]]; cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[dfirtriage]] and [[shimcacheparser]].
+
+- **2026-08-18** — ingest `description:b4rtik/ATPMiniDump`: entity [[atpminidump]]; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[minidump]].
