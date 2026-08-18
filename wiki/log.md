@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:alexkrnl/Kernel-dll-injector`: entity [[kernel-dll-injector]] (kernel-mode DLL injector; inject chosen DLL when kernel32 loads in newly created processes; Sirifef/Max++ rootkit technique; driver + sample DLL; x86; Visual Studio/WDK; APC; kernel-assisted injection / defensive detection research); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[injdrv]], [[kinject]], [[apc-research]], [[stealthy-kernelmode-injector]], and [[windows-process-injection]].
+
 - **2026-08-18** — ingest `description:alfarom256/drivers_and_shit`: entity [[drivers-and-shit]] (categorized Windows kernel `.sys` binary corpus from OEM/utility/security products; reference for vulnerable-driver research, exploit reproduction, and AC bypass/hardening—binaries only, no PoC); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[ms-vulnerable-driver-list]], and [[physmem-drivers]].
 
 - **2026-08-18** — ingest `description:alfarom256/rs-ldr`: entity [[rs-ldr]] (Rust no_std hash-based dynamic WinAPI resolution; PEB module walk + export parse + LdrLoadDll via DynApi; compile-time XOR string obfuscation; optional Hell's Gate-style SSN resolver; NODEFAULTLIB; red-team / game-security stealth API resolution); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[tabby]], [[blitz]], [[crystr]], [[syscalls-cpp]], [[syscall-detect]], and [[windows-process-injection]].
