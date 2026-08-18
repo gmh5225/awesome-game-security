@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:archercreat/titan`: entity [[titan]] (VMProtect devirtualizer; Triton emulation/symbolic exec; AST handler matching; LLVM-oriented lift + CFG recovery; archercreat); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[novmp]], [[novmpy]], [[vmprotect]], and [[vmp-devirtualization-lab]].
+
 - **2026-08-18** — ingest `description:arisada/midgetpack`: entity [[midgetpack]] (ELF packer; password + Curve25519 challenge-response; AES-128/HMAC-SHA256; Linux/FreeBSD x86/x86-64/ARM); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[elfpacker]], [[elfuck]], [[papaw]], and [[pe32-password]].
 
 - **2026-08-18** — ingest `description:aristocratos/btop`: entity [[btop]] (cross-platform C++ terminal resource monitor; CPU/memory/disk/network/process/GPU TUI; mouse + filtering; Performance Monitor); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tracy]], [[optick]], [[openprocmon]], and [[systeminformer]].
