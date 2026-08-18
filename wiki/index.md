@@ -1413,6 +1413,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lightweightvk](entities/lightweightvk.md) — bindless-only Vulkan 1.3 IGL fork (optional mesh shaders + ray tracing; Vulkan / Guide)
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
+- [lisa-py](entities/lisa-py.md) — LLDB MCP server (Python plugin + MCP bridge; breakpoints, backtraces, disasm, memory reads; ant4g0nist; MCP for LLDB)
 - [LitePCIe](entities/litepcie.md) — Python/Migen PCIe endpoint core (DMA engines, LTSSM trace, user-space drivers; KC705/KCU105/XCU1525/Acorn; enjoy-digital; DMA / FPGA research)
 - [Lina Engine](entities/lina-engine.md) — cross-platform lightweight OSS 3D engine (LinaVG GUI; LinaGX Vulkan/DX12/Metal; Game Engine source)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
