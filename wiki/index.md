@@ -430,6 +430,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
 - [covirt](entities/covirt.md) — x86-64 stack-VM code virtualizer (PE MinGW + ELF; MBA + self-modifying code; marker regions; AC Obfuscation Engine `[VM]`; dmaivel)
+- [crystr](entities/crystr.md) — C++20 compile-time string/number obfuscation (XOR keys from compile-time math/timestamps/counters; inline/virtual decrypt; per-char/per-value key variation; AC String Crypter; android1337)
 - [crossover-patcher](entities/crossover-patcher.md) — experimental macOS CrossOver patcher for anti-cheat-protected Windows games (Apple Silicon; Wine/graphics runtime patches; rollback; dazi2011)
 - [castle-engine](entities/castle-engine.md) — DX11 C/C++ engine (DirectX/shader/rendering; benanil; Game Engine / source)
 - [crown](entities/crown.md) — C++ 2D/3D engine (DirectX/Vulkan + shader work; Game Engine / source)
