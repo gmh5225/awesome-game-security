@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:angr/angrop`: entity [[angrop]] (automatic ROP gadget finder + chain builder on angr; symbolic execution, constraint solving, graph search; Python CLI + API; architecture-agnostic; exploit dev / binary RE / game client vuln analysis); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ropgadget-rs]], [[agafi]], [[exrop]], [[idadeflat]], and [[oxidizer]].
+
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2724 (+3; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]] (fixed stale Cheat ~2713 cross-link); light `index.md` section notes (no per-category pages).
 
 - **2026-08-18** — ingest `description:anhkgg/SuperDllHijack`: entity [[super-dll-hijack]] (generic Windows proxy-DLL hijack helper; C/C++; renamed original module + replacement DLL; DllMain export passthrough; loader/sideload research; Cheat / DLL Hijack); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-dll-hijacking]], [[hijacklibs]], [[dllirant]], [[impulsive-dll-hijack]], and [[dll-hijack-export-dumper]].

@@ -130,6 +130,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AdbFileManager](entities/adb-file-manager.md) — Windows ADB file manager (C#/.NET dual-pane Explorer UI; faster than MTP; Cheat Android File Explorer; gmh5225)
 - [ADB Debug Detect Checker](entities/adb-debug-detect-checker.md) — Android Java ADB/debug-state detection app (reference for ADB debugging probes; Anti Debugging; fiord)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
+- [angrop](entities/angrop.md) — automatic angr ROP gadget finder + chain builder (symbolic execution, constraint solving; CLI + API; architecture-agnostic; Cheat / ROP Generation)
 - [Akebi Cheat 3.3](entities/akebi-cheat-3.3.md) — Akebi-framework Genshin Impact cheat (3.3 branch; cheat / game:genshin impact; gmh5225)
 - [Akebi Packet Sniffer](entities/akebi-packet-sniffer.md) — Akebi-framework packet sniffer (C++/C; driver development; DirectX/OpenGL; cheat / Packet Sniffer&Filter; gmh5225)
 - [Alaa-8ball-pool-source-exposed](entities/alaa-8ball-pool-source-exposed.md) — exposed 8 Ball Pool mobile cheat source (physics reads; aim assist / trajectory / shot power; guideline overlay; gmh5225)
