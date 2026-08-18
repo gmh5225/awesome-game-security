@@ -3064,6 +3064,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - [A minecraft server backend written in c++](https://github.com/gmh5225/minecpp)
 - https://github.com/AnarchDevelopment/aegledll [Internal Minecraft DX11 DLL client with ImGui overlay and MinHook hooks]
 - https://github.com/inpeacedTeams/phantom-client [Lunar Client 1.8.9 internal DLL with JNI/JVMTI, wglSwapBuffers OpenGL hook, and ImGui overlay modules]
+- https://github.com/unleg1t/Yuri [Open-source 1.8.9 MCP hacked client with Watchdog/Polar/Grim bypass modules and bundled Java 8 runtime]
 - https://github.com/adanainv3-creator/OxClient [Minecraft Bedrock/PE MITM cheat client with protocol relay, combat/movement modules, and ESP]
 - https://github.com/eksses/EAFE [Mineflayer elytra autopilot with vanilla physics, FSM navigation, and anti-cheat-aware Bézier flight paths]
 - https://github.com/WeiNaYongQ/OmniClutch [Fabric mod for automated elytra/fall clutch saves with configurable anti-cheat-aware timing]
