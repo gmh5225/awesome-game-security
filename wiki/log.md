@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:anbox/anbox`: entity [[anbox]] (container-based full Android on Linux via LXC + host daemon; OpenGL ES from emulator components; C++/CMake/D-Bus/protobuf; desktop/cloud APK workloads; archived reference; Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-emulator]], [[aeroot]], [[rootavd]], [[conbeerlib]], [[anti-emulator]], and [[android-emulator-detection]].
+
 - **2026-08-18** — ingest `description:andreisss/KslDump`: entity [[ksldump]] (PPL LSASS dump via legacy on-disk Defender `KslD.sys`; IOCTL `0x222044` + `MmCopyMemory` kernel read + KASLR CR leak; no external driver load; vendor BYOVD / PPL bypass research); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[kslkatz]], [[pplkiller]], and [[kvc]].
 
 - **2026-08-18** — ingest `description:andrew-hoffman/ghidra-vxd-tools`: entity [[ghidra-vxd-tools]] (Ghidra Jython Windows 9x VxD INT 20h annotator; VxDCall struct + VMDisp9x vmm.h service decode; VMM debug-string/flag-word comments; legacy kernel-mode driver RE including historical game protection; Windows9x script category); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ghidra]] and [[ghidra-scripts]].
