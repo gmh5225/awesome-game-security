@@ -20,4 +20,4 @@ Static/offline `.so` patching lane — complements runtime inject/hook stacks su
 
 ## Related
 
-[[il2cpp]] · [[farm64]] · [[adbi]] · [[frida]] · [[il2cpp-hook-scripts]] · [[fakerandroid]] · [[overviews/mobile-security]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[il2cpp]] · [[farm64]] · [[adbi]] · [[frida]] · [[il2cpp-hook-scripts]] · [[il2cpp-hookscripts]] · [[fakerandroid]] · [[overviews/mobile-security]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]

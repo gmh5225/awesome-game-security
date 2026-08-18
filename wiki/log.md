@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:axhlzy/Il2CppHookScripts`: entity [[il2cpp-hookscripts]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[il2cpp-hook-scripts]], [[frida-il2cpp-bridge]], [[pyasm-patch]], and [[qbdi-tracer-android]].
+
 - **2026-08-18** — ingest `description:axhlzy/PyAsmPatch`: entity [[pyasm-patch]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[farm64]], [[adbi]], [[frida]], and [[il2cpp-hook-scripts]].
 
 - **2026-08-18** — ingest `description:azw413/Glass`: entity [[glass]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool-mcp-server]], [[delamain]], [[garlic]], and [[farm64]].

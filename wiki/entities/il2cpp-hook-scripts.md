@@ -12,7 +12,7 @@ confidence: medium
 
 Collection of hooking scripts targeting Unity [[il2cpp]] (and Mono) game runtimes on **Android**. Provides Frida and native hook templates for intercepting IL2CPP method calls, modifying game logic, and extracting runtime data from IL2CPP-compiled Unity games. (source: wiki/sources/descriptions/gmh5225__Il2Cpp-HookScripts.md)
 
-Complements metadata harvesters such as [[frida-il2cpp-datacollector]] and dump bridges like [[frida-il2cpp-bridge]] when the goal is reusable hook scaffolds rather than one-off SDK dumps alone.
+Complements metadata harvesters such as [[frida-il2cpp-datacollector]] and dump bridges like [[frida-il2cpp-bridge]] when the goal is reusable hook scaffolds rather than one-off SDK dumps alone. Distinct from axhlzy's [[il2cpp-hookscripts]] (TypeScript **il2cpp-hooker** npm framework with runtime IL2CPP parsing, batch hooks, and QBDI emulation).
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements metadata harvesters such as [[frida-il2cpp-datacollector]] and dump 
 
 ## Related
 
-[[il2cpp]] · [[frida]] · [[frida-il2cpp-bridge]] · [[frida-il2cpp-datacollector]] · [[android-il2cpp-modspeed]] · [[frida-android-hook]] · [[overviews/mobile-security]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[il2cpp]] · [[frida]] · [[frida-il2cpp-bridge]] · [[frida-il2cpp-datacollector]] · [[il2cpp-hookscripts]] · [[android-il2cpp-modspeed]] · [[frida-android-hook]] · [[overviews/mobile-security]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
