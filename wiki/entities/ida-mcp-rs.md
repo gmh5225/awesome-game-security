@@ -12,7 +12,7 @@ confidence: medium
 
 **Headless IDA Pro MCP server** implemented primarily in **Rust**, targeting reverse engineering, modding, and memory analysis workflows where LLM agents drive static analysis without a live IDA GUI session. Useful for game developers, reverse engineers, and tooling builders in the Game Develop / MCP server lane. (source: wiki/sources/descriptions/blacktop__ida-mcp-rs.md)
 
-Sits in the same headless IDA MCP lane as [[headless-ida-mcp-server]], [[ida-cli]] (idalib; Rust/C++), JSON-RPC daemon [[ida-rpc]] (bkerler; decompile/xrefs/types/patches; ghidra-rpc-compatible CLI), and plugin-based bridges such as [[ida-pro-mcp]], [[mcp-server-idapro]], and [[ida-mcp-server-plugin]].
+Sits in the same headless IDA MCP lane as [[tenrec]] (multi-session ida-domain + FastMCP; axelmierczuk), [[headless-ida-mcp-server]], [[ida-cli]] (idalib; Rust/C++), JSON-RPC daemon [[ida-rpc]] (bkerler; decompile/xrefs/types/patches; ghidra-rpc-compatible CLI), and plugin-based bridges such as [[ida-pro-mcp]], [[mcp-server-idapro]], and [[ida-mcp-server-plugin]].
 
 ## Links
 

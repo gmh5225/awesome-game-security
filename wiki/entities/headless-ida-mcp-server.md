@@ -12,7 +12,7 @@ confidence: medium
 
 **MCP for IDA Pro (headless)** — uses IDA Pro's headless mode to analyze binary files and exposes MCP tools to manage and manipulate functions, variables, and related database artifacts for LLM-driven workflows. Targets game developers, reverse engineers, and tooling builders in the Game Develop / MCP server lane. (source: wiki/sources/descriptions/cnitlrt__headless-ida-mcp-server.md)
 
-Peers with other headless or agent-facing IDA bridges such as [[ida-mcp-rs]] (Rust headless MCP; blacktop), [[ida-rpc]] (JSON-RPC daemon; decompile/xrefs/types/patches; ghidra-rpc-compatible CLI; bkerler), [[ida-cli]] (idalib MCP; Rust/C++), [[ida-pro-mcp]] (full IDAPython MCP), [[mcp-server-idapro]] (AI-assistant bridge), and [[ida-mcp-server-plugin]] (disasm/decompile/xrefs MCP plugin).
+Peers with other headless or agent-facing IDA bridges such as [[tenrec]] (multi-session ida-domain + FastMCP; axelmierczuk), [[ida-mcp-rs]] (Rust headless MCP; blacktop), [[ida-rpc]] (JSON-RPC daemon; decompile/xrefs/types/patches; ghidra-rpc-compatible CLI; bkerler), [[ida-cli]] (idalib MCP; Rust/C++), [[ida-pro-mcp]] (full IDAPython MCP), [[mcp-server-idapro]] (AI-assistant bridge), and [[ida-mcp-server-plugin]] (disasm/decompile/xrefs MCP plugin).
 
 ## Links
 

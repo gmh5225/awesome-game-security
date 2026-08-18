@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:axelmierczuk/tenrec`: entity [[tenrec]]; cited on [[overviews/reverse-engineering]]; cross-linked [[headless-ida-mcp-server]], [[ida-mcp-rs]], [[ida-cli]], and [[binary-analysis-mcps]].
+
 - **2026-08-18** — ingest `description:axhlzy/Il2CppHookScripts`: entity [[il2cpp-hookscripts]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[il2cpp-hook-scripts]], [[frida-il2cpp-bridge]], [[pyasm-patch]], and [[qbdi-tracer-android]].
 
 - **2026-08-18** — ingest `description:axhlzy/PyAsmPatch`: entity [[pyasm-patch]]; cited on [[il2cpp]] and [[overviews/mobile-security]]; cross-linked [[farm64]], [[adbi]], [[frida]], and [[il2cpp-hook-scripts]].
