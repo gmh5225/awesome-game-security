@@ -17,6 +17,7 @@ sources:
   - wiki/sources/descriptions/azw413__Glass.md
   - wiki/sources/descriptions/ax__apk.sh.md
   - wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md
+  - wiki/sources/descriptions/astrelsky__GhidraGradlePlugin.md
   - wiki/sources/descriptions/astrelsky__GhidraOrbis.md
   - wiki/sources/descriptions/atrexus__vulkan.md
   - wiki/sources/descriptions/d35ha__CallObfuscator.md
@@ -862,7 +863,7 @@ Graph- and structure-based differencing (BinDiff, [[binexport]], [[diaphora]], [
 
 ## Cross-platform plugin development
 
-Portable PyQt/PySide GUI scaffolding via [[gui-plugin-template]] (Python; harmonized API across IDA Pro, Ghidra, Binary Ninja, and Cutter; single GUI codebase for multi-host plugins) reduces per-disassembler UI duplication when shipping analysis tooling—complementary to Git-backed annotation sync via [[binsync]], IDA-only partial IDB sync via [[labsync]] (Cellebrite Labs; YAML export on save; git push/pull with mergetool merge; MD5 input-file identity; lightweight team IDB sync without full database sharing) (source: wiki/sources/descriptions/cellebrite-labs__LabSync.md), and multi-host YARA generation via [[hyara]]. (source: wiki/sources/descriptions/danielplohmann__gui-plugin-template.md) Ghidra Command Palette navigation via [[gfred]] (keyboard-driven action search; prebuilt Ghidra 9.2.0 extension in `dist/`; cheat / Ghidra Plugins / `[Command Palette]`) speeds manual and scripted RE workflows inside Ghidra. (source: wiki/sources/descriptions/danbrodsky__GFred.md)
+Portable PyQt/PySide GUI scaffolding via [[gui-plugin-template]] (Python; harmonized API across IDA Pro, Ghidra, Binary Ninja, and Cutter; single GUI codebase for multi-host plugins) reduces per-disassembler UI duplication when shipping analysis tooling—complementary to Git-backed annotation sync via [[binsync]], IDA-only partial IDB sync via [[labsync]] (Cellebrite Labs; YAML export on save; git push/pull with mergetool merge; MD5 input-file identity; lightweight team IDB sync without full database sharing) (source: wiki/sources/descriptions/cellebrite-labs__LabSync.md), and multi-host YARA generation via [[hyara]]. (source: wiki/sources/descriptions/danielplohmann__gui-plugin-template.md) Ghidra Command Palette navigation via [[gfred]] (keyboard-driven action search; prebuilt Ghidra 9.2.0 extension in `dist/`; cheat / Ghidra Plugins / `[Command Palette]`) speeds manual and scripted RE workflows inside Ghidra. (source: wiki/sources/descriptions/danbrodsky__GFred.md) Archived [[ghidra-gradle-plugin]] (Java/Groovy Gradle plugin; local Ghidra classpath wiring, extension build scripts, IDE setup tasks; astrelsky; `[Gradle]`) streamlines packaging custom Ghidra extensions for plugin authors. (source: wiki/sources/descriptions/astrelsky__GhidraGradlePlugin.md)
 
 ## Key sub-areas
 
