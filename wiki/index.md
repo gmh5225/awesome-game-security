@@ -789,6 +789,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W; gmh5225 + kkent030315 forks)
 - [EvilKaspersky](entities/evil-kaspersky.md) — abuse Kaspersky signed kernel-mode drivers for unauthorized privileged ops; kernel code exec masquerading as AV activity (gmh5225)
 - [ms-io-exploit](entities/ms-io-exploit.md) — `msIo64.sys` physmem-mapping BYOVD research (kkent030315; anycall for full client/driver)
+- [msrexec](entities/msrexec.md) — C++ MSR write→kernel-exec library (`IA32_LSTAR` syscall redirect; VDM/bluepill backends; backengineering)
 - [MS Vulnerable Driver List](entities/ms-vulnerable-driver-list.md) — Microsoft-acknowledged vulnerable kernel drivers; blocklist hash list for BYOVD research (gmh5225)
 - [MSFT DriverBlockList](entities/msft-driverblocklist.md) — Microsoft Recommended Driver Block Rules mirror (AC / black-signature defensive research)
 - [MSSymbolsCollection](entities/mssymbolscollection.md) — pre-downloaded Microsoft kernel debug symbols (PDB; ntoskrnl, CI.dll, kernel-mode binaries; Kernel Symbols; gmh5225)

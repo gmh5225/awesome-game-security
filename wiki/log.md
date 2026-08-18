@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:backengineering/msrexec`: entity [[msrexec]]; cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[openhardwaremonitor-poc]], [[kaspersky-hook]], and [[kdmapper]].
+
 - **2026-08-18** — ingest `description:bad-antics/rce-shield`: entity [[rce-shield]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[mini-launcher]], [[goldberg-emulator]], [[logitech-cve]], and [[razer-rzctl]].
 
 - **2026-08-18** — ingest `description:badApple001/Il2cppEncrtypt`: entity [[il2cpp-encrtypt]]; cited on [[il2cpp]] and [[overviews/game-engine]]; cross-linked [[obfuz]], [[unity3d-obfuscator]], [[usecurity]], [[il2cpp-finder]], and [[qiling-il2cpp-dump]].
