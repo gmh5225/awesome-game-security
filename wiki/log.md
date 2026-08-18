@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:atulkunal999/pubg_mobile_memory_hacking`: entity [[pubg-mobile-memory-hacking]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pubg-mobile-memory-hacking-examples]], [[pubg-dx]], and [[bypass-pubg-mobile-imgui]].
+
 - **2026-08-18** — ingest `description:aufkrawall/capture-engine`: entity [[capture-engine]]; cited on [[overviews/graphics-api]] and [[obs-game-capture]]; cross-linked [[present-hook]], [[reshade]], [[screencapture]], and [[dxgicaptureapplication]].
 
 - **2026-08-18** — ingest `description:ax/apk.sh`: entity [[apk-sh]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apksigner]], [[frida]], [[jadx]], and [[apktool-mcp-server]].

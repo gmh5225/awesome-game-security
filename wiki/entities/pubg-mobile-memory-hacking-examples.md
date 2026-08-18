@@ -12,7 +12,7 @@ confidence: medium
 
 Example collection for **PUBG Mobile memory hacking on Android** (gmh5225). Demonstrates reading game entity data, player coordinates, weapon information, and game state from the PUBG Mobile process using Android memory access methods. Covers basic memory scanning and value modification for mobile game hacking. (source: wiki/sources/descriptions/gmh5225__pubg_mobile_memory_hacking_examples.md)
 
-Useful for mobile game security researchers studying PUBG Mobile memory layout and protection mechanisms. Complements static layout artifacts such as [[pubgm-sdk-and-offsets]] and offensive samples such as [[bypass-pubg-mobile-imgui]].
+Useful for mobile game security researchers studying PUBG Mobile memory layout and protection mechanisms. Complements static layout artifacts such as [[pubgm-sdk-and-offsets]], Gameloop emulator PC samples such as [[pubg-mobile-memory-hacking]], and offensive samples such as [[bypass-pubg-mobile-imgui]].
 
 ## Links
 
