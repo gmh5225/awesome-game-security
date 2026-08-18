@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:atlas4381/qualcomm_avb_exploit_poc`: entity [[qualcomm-avb-exploit-poc]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-boot-image-editor]], [[magiskboot]], and [[keyattestation]].
+
 - **2026-08-18** — ingest `description:atrexus/vulkan`: entity [[vulkan]]; cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[dumpepe]], [[page-no-access-not-byfron]], [[no-access-protection]], and [[byfron-bypass]].
 
 - **2026-08-18** — ingest `description:attilathedud/CoD_Hacks`: entity [[cod-hacks]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[world-to-screen]], [[draw-call-hook]], and [[intro-to-gamehacking]].
