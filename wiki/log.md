@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:anhkgg/awesome-windbg-extensions`: entity [[awesome-windbg-extensions]] (curated WinDbg extension index; kernel analysis, IR, rootkit hunting, memory inspection, debugger workflow automation; Markdown reference catalog; WinDbg); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[swishdbgext]], [[twindbg]], [[mcp-windbg]], [[windbg-decompile-ext]], and [[windbg-extensions]].
+
 - **2026-08-18** — ingest `description:anpa1200/Unpacker`: entity [[unpacker]] (modular Python PE/ELF packer detection + unpack pipeline; section/entropy/heuristic/signature ID; UPX native + Unicorn/Unipacker for 32-bit ASPack/Themida/VMProtect + Qiling for 64-bit VMProtect; multi-layer re-detect + PE rebuild; CLI detect→unpack→validate); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xvolkolak]], [[vmpunpacker]], [[vmpunpack]], [[unlicense]], [[magicmida-rs]], and [[unicorn-pe]].
 
 - **2026-08-18** — ingest `description:ant4g0nist/lisa.py`: entity [[lisa-py]] (LLDB plugin + MCP bridge; target creation, breakpoints, backtraces, disasm, memory reads, expression eval; RE/vuln-research automation; Game Develop / MCP for LLDB); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[gdb-mcp]], [[mcp-gdb]], [[mcp-windbg]], [[klldb]], [[lldbext-dump]], and [[pyre]].
