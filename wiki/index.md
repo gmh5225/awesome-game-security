@@ -1463,6 +1463,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [malum-menu-android](entities/malum-menu-android.md) — Among Us Android Frida mod menu (TypeScript; frida-il2cpp-bridge + frida-java-menu; Objection gadget; non-root; astra1dev)
 - [Malicious Code Detection Bugu](entities/malicious-code-detection-bugu.md) — Go gRPC microservices malware-scan platform (Bugu; file upload, hash verify, automated analysis; Protobuf gRPC+HTTP API; gmh5225; Malicious code detection and obfuscation)
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
+- [MagiskDetection](entities/magisk-detection.md) — archive of Android root/Magisk detection POC APKs (Zygisk/hook/bootloader/root-app checks; sample hashes; apkunpacker)
 - [MagiskOnWSALocal](entities/magiskonwsalocal.md) — local Magisk + GApps integration for WSA (rooted Android + Play Store on Win11; gmh5225)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
 - [MAMBO](entities/mambo.md) — ARM/AArch64 Linux DBI (software code cache; instruction/block/function hooks; analysis plugins; beehive-lab; cheat / DBI / ARM)
