@@ -1871,6 +1871,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pyarmor](entities/pyarmor.md) — Python CLI script obfuscator (rename / C-convert functions; machine bind + expiry; optional Themida; Python 2/3; AC Obfuscation Engine)
 - [PyClassInformer](entities/pyclassinformer.md) — IDA Pro C++ RTTI plugin: hierarchy viz, auto-rename, method/library classification (cheat / IDA Plugins)
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
+- [PyAsmPatch](entities/pyasm-patch.md) — Python ARM ELF inline hooking for Unity IL2CPP `libil2cpp.so` (LIEF + Keystone + Capstone; static section merge, GOT patch, LDR fixup; InitArray hooks; axhlzy)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
 - [q3vm](entities/q3vm.md) — Quake III embeddable `.qvm` bytecode VM + LCC compiler (AC dynamic-script prototyping)
 - [qbdi-tracer-android](entities/qbdi-tracer-android.md) — Android QBDI + Dobby per-instruction native tracer (linker SO-load hooks, backtrace, memory/pattern scan; ARM64 Android/iOS)
