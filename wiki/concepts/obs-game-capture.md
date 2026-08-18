@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__OBS-graphics-hook32-Hook.md
   - wiki/sources/descriptions/gmh5225__OBS-Hook.md
   - wiki/sources/descriptions/ekknod__G37OBS.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/aufkrawall__capture-engine.md
+updated: 2026-08-18
 confidence: medium
 ---
 
@@ -24,7 +25,7 @@ OBS Studio frame-acquisition modes and their **security-research relevance**: le
 | **Display Capture** | Desktop Duplication or WGC on monitor output | No | Full monitor; no per-process hook |
 | **Virtual Camera** | Exports captured frames as a camera device | Depends on upstream source | Downstream AI, streaming, or second process |
 
-Game Capture hook modules and shared-handle traffic are **observable** but also normal for streamers—correlate with plugin provenance, inference load, and input behavior ([[ai-aimbot-detection]]).
+Game Capture hook modules and shared-handle traffic are **observable** but also normal for streamers—correlate with plugin provenance, inference load, and input behavior ([[ai-aimbot-detection]]). [[capture-engine]] (aufkrawall) bundles WGC, DXGI DDA, and optional injected API hooks (D3D9–D3D12, Vulkan, OpenGL, DXVK) in one tool; its documentation separates non-injected capture from hook features for anti-cheat safety—useful when comparing inject footprint against OBS Game Capture. (source: wiki/sources/descriptions/aufkrawall__capture-engine.md)
 
 ## AI visual pipeline (latency-critical)
 
@@ -55,4 +56,4 @@ Treat as **collection signals** requiring behavioral and contextual corroboratio
 
 ## Related
 
-[[anti-screenshot-capture]] · [[present-hook]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[g37obs]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[anti-screenshot-capture]] · [[present-hook]] · [[capture-engine]] · [[obs-graphics-hook32-hook]] · [[obs-hook]] · [[g37obs]] · [[ai-aimbot-detection]] · [[hardware-input-injection]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]

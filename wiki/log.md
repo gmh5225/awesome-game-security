@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:aufkrawall/capture-engine`: entity [[capture-engine]]; cited on [[overviews/graphics-api]] and [[obs-game-capture]]; cross-linked [[present-hook]], [[reshade]], [[screencapture]], and [[dxgicaptureapplication]].
+
 - **2026-08-18** — ingest `description:ax/apk.sh`: entity [[apk-sh]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apksigner]], [[frida]], [[jadx]], and [[apktool-mcp-server]].
 
 - **2026-08-18** — ingest `description:axelmierczuk/tenrec`: entity [[tenrec]]; cited on [[overviews/reverse-engineering]]; cross-linked [[headless-ida-mcp-server]], [[ida-mcp-rs]], [[ida-cli]], and [[binary-analysis-mcps]].
