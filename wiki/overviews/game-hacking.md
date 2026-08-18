@@ -466,6 +466,7 @@ sources:
   - wiki/sources/descriptions/xenia-project__xenia.md
   - wiki/sources/descriptions/wmarti__xenia-mac.md
   - wiki/sources/descriptions/rexdex__recompiler.md
+  - wiki/sources/descriptions/aroxby__dynre-x86.md
   - wiki/sources/descriptions/exploits-forsale__collateral-damage.md
   - wiki/sources/descriptions/eset__DelphiHelper.md
   - wiki/sources/descriptions/ergrelet__dll-hot-reload.md
@@ -1872,6 +1873,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Xbox 360 XEX static analysis in IDA Pro via [[idaxex]] (C++ loader; XEX format parse, PE extraction, import/export + kernel symbol naming; IDA 9) sits in the console `Xbox` lane for reverse engineers and console security researchers. (source: wiki/sources/descriptions/emoose__idaxex.md)
 - Xbox One/Series SystemOS kernel exploit via [[collateral-damage]] (CVE-2024-30088; kernel 25398.4478, 25398.4908, 25398.4909) sits in the console `Xbox` lane for emulator developers and Xbox researchers. (source: wiki/sources/descriptions/exploits-forsale__collateral-damage.md)
 - x86/x64 PE AOT binary translation via [[levo]] (Ghidra CFG recovery → LLVM lift/recompile; `kernel32` API-intercept runtime) supports Windows game-client binary-translation study without full emulation. (source: wiki/sources/descriptions/momo5502__levo.md)
+- Educational x86 dynamic-recompilation practice via [[dynre-x86]] (Zydis instruction decode + operand inspect; register tables; early pipeline study) complements [[levo]] as a decode-first learning baseline in the binary-translation lane. (source: wiki/sources/descriptions/aroxby__dynre-x86.md)
 - Android Windows compatibility via [[winlator]] (Box86/Box64 x86→ARM translation + Wine + PRoot container; Mesa Turnip/VirGL GPU; virtual desktop + touch; runs Windows x86/x64 apps/games on ARM Android; cheat / `Windows Emulator`) sits in the cross-architecture binary-translation lane beside [[levo]] and WHP guests such as [[winvisor]]. (source: wiki/sources/descriptions/brunodev85__winlator.md)
 - Nintendo Switch homebrew memory/cheat tooling such as [[se-tools]] (scanner / pointer search / cheat manager / live viewer via Atmosphere `dmnt:cht`) sits in the console `Nintendo Switch` lane. (source: wiki/sources/descriptions/tomvita__SE-tools.md)
 - Raw Luma3DS `.3gx` overlay/cheat engine template [[ctr-composer]] (self-rendered UI; no CTRPluginFramework; any-Title-ID starter / revive old `.plg`/`.3gx`) sits in the console `Nintendo 3DS` lane. (source: wiki/sources/descriptions/samaBR85__CTRComposer.md)
