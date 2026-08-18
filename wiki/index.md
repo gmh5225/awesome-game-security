@@ -478,6 +478,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CSGOSimple](entities/csgosimple.md) — spirthack Internal CS:GO baseline (MarkHC fork; cheat / game:csgo)
 - [csso-src](entities/csso-src.md) — CS:GO mod Source tree (client/server / weapons / movement / engine interfaces; Game Engine)
 - [CSSFontFace-Exploit](entities/cssfontface-exploit.md) — WebKit CSSFontFace UAF (PS4/PS5 browser; jailbreak / PlayStation)
+- [cstrike-hack](entities/cstrike-hack.md) — internal CS:GO hack (binkynz; C/C++; rendering / networking / animation; cheat / game:csgo)
 - [cstrike15_src](entities/cstrike15-src.md) — leaked partial CS:GO Source tree (client/server / weapons / net; Game Engine)
 - [CTRComposer](entities/ctr-composer.md) — raw Luma3DS .3gx overlay/cheat engine (self-rendered UI; any Title ID template)
 - [custom-game-engines](entities/custom-game-engines.md) — curated custom game engines list (2020 study; Game Engine / guide)

@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/xBrunoMedeiros__eac-overlay.md
   - wiki/sources/descriptions/wongfei__wda_monitor_trick.md
   - wiki/sources/descriptions/wolfpld__tracy.md
+  - wiki/sources/descriptions/binkynz__cstrike-hack.md
   - wiki/sources/descriptions/bkaradzic__bgfx.md
   - wiki/sources/descriptions/bombomby__optick.md
   - wiki/sources/descriptions/bmharper__WindowsDesktopDuplicationSample.md
@@ -221,7 +222,7 @@ sources:
   - wiki/sources/descriptions/dantebuilds__swapchain-bottleneck.md
   - wiki/sources/descriptions/brackeen__glfm.md
   - wiki/sources/descriptions/bruhmoment21__UniversalHookX.md
-updated: 2026-08-17
+updated: 2026-08-18
 confidence: high
 ---
 
@@ -280,6 +281,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - Internal CS:GO ImGui menu samples such as [[kakhack]] (cazzwastaken; FreeType font rendering + JSON config + multiple graphics hooks; cheat / game:csgo [Internal]) extend that in-process ImGui overlay lane beside [[autismware]] and [[csgo-cheat-base]]. (source: wiki/sources/descriptions/cazzwastaken__kakhack.md)
 - Title-specific AVA samples such as [[ava-hack]] (boylin0; C/C++; DirectX / OpenGL / Vulkan hook surfaces; cheat / game:ava) extend the multi-API in-process graphics lane beside universal hook bases such as [[d3dhook-imgui]] and [[universalhookx]]. (source: wiki/sources/descriptions/boylin0__AVA-Hack.md)
 - Internal CS:GO samples such as [[cartmanv2]] (gmh5225; C/C++; rendering / networking / editor tooling; cheat / game:csgo [Internal]) sit in the same in-process graphics / cheat-menu lane beside [[csgosimple]] and [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__cartmanv2.md)
+- Internal CS:GO samples such as [[cstrike-hack]] (binkynz; C/C++; rendering / networking / animation; cheat / game:csgo) sit in the same in-process graphics lane for studying Source 1 overlay and animation draw paths beside [[csgo-cheat-base]] and [[kakhack]]. (source: wiki/sources/descriptions/binkynz__cstrike-hack.md)
 - Internal CS:GO samples such as [[autismware]] (gmh5225; C++; ImGui configuration menu; cheat / game:csgo [HvH]) sit in the same in-process ImGui cheat-menu lane beside [[legit-csgo-cheat-menu]] and [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__autismware.md)
 - DirectX remaster / compatibility mods such as [[gta4-rtx]] (GTA IV → NVIDIA RTX Remix path-traced pipeline; custom Remix runtime + ASI Loader) sit in the DirectX Compatibility lane. (source: wiki/sources/descriptions/xoxor4d__gta4-rtx.md) DirectInput↔XInput controller proxy DLLs such as [[xidi]] (C++; virtual mapping / deadzone / force-feedback translation) extend the same Compatibility lane. (source: wiki/sources/descriptions/samuelgr__Xidi.md) DX3 (DirectDraw/DirectSound/DirectPlay) subset reimplementations such as [[free-direct]] (C++20; SDL3 backends + ENet DirectPlay transport for legacy 2D titles) deepen that Compatibility / Emulation surface. (source: wiki/sources/descriptions/openeggbert__free-direct.md) Microsoft's [[d3d9on12]] (Direct3D9-On-12 mapping layer; D3D9 usermode DDI → D3D12) extends that lane for legacy D3D9 titles on modern D3D12-only stacks. (source: wiki/sources/descriptions/microsoft__D3D9On12.md) DirectX proxy wrapper DLLs such as [[dxwrapper]] (C++; DDraw/D3D8–9/DInput/DirectSound; DDrawCompat + d3d8to9 + Dd7to9; Detours/pattern hooks; INI config; logging/overlays/resource dump; DirectX Compatibility / ASI loader) extend that lane for legacy titles on Win10/11. (source: wiki/sources/descriptions/elishacloud__dxwrapper.md) Software D3D9 reimplementations such as [[software-d3d9]] (code-tom-code; DX9 focus; real-game/program targets; broad D3D9 compatibility goal; DirectX / emulation) deepen that Compatibility / Emulation surface beside [[d3d9on12]] and [[dxwrapper]]. (source: wiki/sources/descriptions/code-tom-code__Software_D3D9.md)
 - DX11 stereoscopic-fix tooling such as [[3d9]] (developer-oriented; broken stereo effects in DX11 games) sits in the DirectX Tools lane. (source: wiki/sources/descriptions/visotw__3d9.md) Universal UE4/UE5 VR inject mods such as [[uevr]] (stereo render pipeline + OpenXR/OpenVR; C++) extend that stereo / engine-render surface without per-title patches. (source: wiki/sources/descriptions/praydog__UEVR.md)

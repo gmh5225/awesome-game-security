@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:binkynz/cstrike-hack`: entity [[cstrike-hack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-animation-code-reversed]], [[csgo-cheat-base]], and [[present-hook]].
+
 - **2026-08-17** — ingest `description:binsnake/KUBERA`: entity [[kubera]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[winvisor]], [[kace]], [[emulator]], and [[dynamic-binary-instrumentation]].
 
 - **2026-08-17** — ingest `description:binsnake/fARM64`: entity [[farm64]]; cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[koidbg]], [[qbdi-tracer-android]], and [[quickasm]].
