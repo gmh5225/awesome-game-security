@@ -237,6 +237,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Baka (antidbg-Baka)](entities/antidbg-baka.md) — Windows C/C++ anti-debug library (PEB/NtQueryInformationProcess/HWBP/timing/exception/parent; ScyllaHide/HyperHide/TitanHide detection; Anti Debugging)
 - [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
 - [AntiFrida Bypass](entities/anti-frida-bypass.md) — Frida JS scripts to bypass common anti-Frida checks (libc/procfs hooks; multiple variants; apkunpacker)
+- [Anti-Frida](entities/anti-frida.md) — Android Frida detection write-ups (libc prologue hook checks; JS examples; apkunpacker)
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
 - [AntiHook](entities/antihook.md) — Windows kernel hook enum + remove (driver / graphics; cheat / RE tools)
 - [Anti-xorstr](entities/anti-xorstr.md) — Python IDA anti-Xorstr plugin (cheat / IDA Plugins)
