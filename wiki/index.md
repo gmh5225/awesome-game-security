@@ -1816,6 +1816,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [process-cloning](entities/process-cloning.md) — Windows process clone PoC (`NtCreateProcessEx`; VA-space snapshot; hollowing / memory analysis / credential dump)
 - [processor-trace](entities/processor-trace.md) — libipt Intel PT decoder (reference packet/instruction decode; coverage / tracing tools)
 - [PoCsmith](entities/pocsmith.md) — AI Windows PoC gen (Claude + MCP Hyper-V/kd/Ghidra; patchwatch → verify VMs)
+- [poc-exflushtb](entities/poc-exflushtb.md) — C++ Tb-monitoring PoC (backengineering; Some Tricks / Windows Ring0; asset-pipeline oriented)
 - [PWF](entities/pwf.md) — Personal Windows Forensics training toolkit (artifact collection, timeline, registry analysis, IR evidence preservation; AC / Windows Forensics Training)
 - [pokemongo-dumper](entities/pokemongo-dumper.md) — Pokemon GO Unity IL2CPP dumper (C#/C++; cheat / game:pokemongo; gmh5225)
 - [polygon-ue5](entities/polygon-ue5.md) — POLYGON UE5 offensive research (C/C++; graphics / Unreal Engine / hooking; cheat / game:polygon [UE5]; gmh5225)

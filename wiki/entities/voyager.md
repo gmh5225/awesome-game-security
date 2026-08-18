@@ -13,7 +13,7 @@ confidence: medium
 
 **Hyper-V hacking framework** for Windows 10 x64 on **AMD and Intel** hosts, supporting builds from **1507 through 2004**. Aimed at game-security researchers and reverse engineers studying offensive Hyper-V techniques in the cheat / Windows kernel explorer lane—not a production anti-cheat component. (source: wiki/sources/descriptions/backengineering__Voyager.md)
 
-Upstream maintained by **backengineering**; the same framework appears in the list under gmh5225 as a mirror/fork entry. Ecosystem siblings include [[vdm]] (Voyager Driver Manager; BYOVD physmem/kernel-exec backend) and [[msrexec]] (MSR write→kernel-exec via `IA32_LSTAR` redirect; VDM backend). Distinct from unrelated cheat samples such as [[fortnite-voyagertf]] (VoyagerTF name only).
+Upstream maintained by **backengineering**; the same framework appears in the list under gmh5225 as a mirror/fork entry. Ecosystem siblings include [[vdm]] (Voyager Driver Manager; BYOVD physmem/kernel-exec backend), [[msrexec]] (MSR write→kernel-exec via `IA32_LSTAR` redirect; VDM backend), and [[poc-exflushtb]] (Tb-monitoring PoC; Some Tricks / Windows Ring0). Distinct from unrelated cheat samples such as [[fortnite-voyagertf]] (VoyagerTF name only).
 
 Complements Microsoft Hyper-V introspection such as [[hyper-rev]], Type-2 VT-x learning stacks such as [[hv]], hacked-hypervisor detection such as [[hypervisor-detection]] and [[hv-detect]], and Hyper-V stack LPE research such as [[cve-2025-21333]].
 
