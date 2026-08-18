@@ -370,7 +370,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
 - [cheese](entities/cheese.md) — Quest 3/3S root via Adreno CVE-2025-21479 (Magisk, no boot rewrite)
 - [Chess King](entities/chessking.md) — Rust Axum multiplayer chess platform (server-side AC: risk scoring, device fingerprint, match integrity, CAPTCHA step-up, ban escalation; shakmaty; admin dashboard; Anti Cheat / educational)
-- [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms
+- [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms; miscusi-peek / beamstar forks
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [CirSAT](entities/cirsat.md) — circuit-based AIG SAT (DAG/AIGER; verification / equivalence; MBA constraint lane)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)

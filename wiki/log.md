@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:beamstar/cheatengine-mcp-bridge`: updated entity [[cheatengine-mcp-bridge]] (beamstar fork section); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[memmcp]] and [[gddumper]].
+
 - **2026-08-18** — ingest `description:beans42/epic-r6-v9`: entity [[epic-r6-v9]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[r6-internal-v3]], [[r6table-internal]], and [[r6s-internal-cheat]].
 
 - **2026-08-18** — ingest `description:beehive-lab/mambo`: entity [[mambo]]; cited on [[overviews/reverse-engineering]] and [[dynamic-binary-instrumentation]]; cross-linked [[adbi]], [[qbdi-tracer-android]], and [[farm64]].
