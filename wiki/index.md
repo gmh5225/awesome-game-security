@@ -2171,6 +2171,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TinyInst](entities/tinyinst.md) — Google Project Zero lightweight DBI (C/C++; module-selective hooking / debugging; Cheat / DBI)
 - [TinyLoad](entities/tinyload.md) — minimal Windows PE manual-map loader + packer/crypter (custom VM stub; Binary Packer)
 - [TelemetrySourcerer](entities/telemetry-sourcerer.md) — kernel driver: enumerate/disable callbacks & ETW (unsigned; test signing / DSE)
+- [TeleParser](entities/teleparser.md) — Python Telegram chat/channel parser (Telethon; JSON/CSV/MongoDB; NLTK lemmatizer; IS forensics / OSINT)
 - [tim_apple](entities/tim-apple.md) — external CS2 cheat (Source 2 SDK / pattern scan; offset JSON bootstrap; kristofhracza + gmh5225 forks; cheat / game:cs2)
 - [Titled Gui CS2](entities/titled-gui-cs2.md) — external CS2 cheat framework (C#; ImGui overlay; Win32 memory; cs2-dumper offsets; ESP / aimbot / D3D11 chams; GPLv3; cheat / game:cs2)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
