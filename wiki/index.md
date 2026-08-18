@@ -2491,6 +2491,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WinRing0](entities/winring0.md) — WinRing0 driver/API CPU temperature sample (CPUID + MSR per-core temps; admin; hardware monitoring; ashleyhung)
 - [Wizard-Loader](entities/wizard-loader.md) — Windows PE manual-map loader/injector (PE header erasure, thread hiding; Xwizard.exe side-load; gmh5225)
 - [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
+- [wkpe](entities/wkpe.md) — Windows kernel programming experiments; PoC drivers + user tools; process VAD enumeration; WDK/VS; build/symbol coupling (am0nsec; Enumerate VAD)
 - [ward](entities/ward.md) — simple ELF runtime packer for stealthy droppers (Go/C; Anti Cheat → Binary Packer `[ELF]`)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
