@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:backengineering/VDM`: entity [[vdm]] (Voyager Driver Manager; multi-backend BYOVD physmem/kernel-exec); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[voyager]], [[msrexec]], and [[kdmapper]].
+
 - **2026-08-18** — ingest `description:backengineering/Voyager`: updated entity [[voyager]] (backengineering upstream + gmh5225 mirror); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[msrexec]] and [[fortnite-voyagertf]] (distinct name).
 
 - **2026-08-18** — ingest `description:backengineering/msrexec`: entity [[msrexec]]; cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[openhardwaremonitor-poc]], [[kaspersky-hook]], and [[kdmapper]].

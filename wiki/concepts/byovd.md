@@ -91,6 +91,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__BYOVD.md
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
   - wiki/sources/descriptions/backengineering__msrexec.md
+  - wiki/sources/descriptions/backengineering__VDM.md
 updated: 2026-08-18
 confidence: high
 ---
@@ -209,7 +210,9 @@ Dedicated **`Speedfan.sys`** PoC such as [[speedfan-exploit]] (gmh5225; SpeedFan
 
 OpenHardwareMonitor **`OpenHardwareMonitorLib.sys`** MSR-exposure PoC such as [[openhardwaremonitor-poc]] (gmh5225; minimal demo; IOCTLs `0x9C402084`/`0x9C402088` → arbitrary MSR read/write from user mode via `read_msr`/`write_msr`; hardware-monitoring driver MSR bug research) sits in the same legacy monitoring-tool BYOVD lane beside [[speedfan-exploit]]. (source: wiki/sources/descriptions/gmh5225__OpenHardwareMonitor-PoC.md)
 
-MSR write→kernel-exec escalation library such as [[msrexec]] (backengineering; C++; arbitrary MSR write primitive → full kernel code execution via **`IA32_LSTAR`** syscall-handler redirect; VDM (Voyager) and bluepill backends for initial MSR capability; MSR-based kernel exploitation research) complements raw MSR-exposure PoCs such as [[openhardwaremonitor-poc]]. (source: wiki/sources/descriptions/backengineering__msrexec.md)
+Modular BYOVD primitive library such as [[vdm]] (Voyager Driver Manager; backengineering; C++; multi-backend vulnerable signed-driver API—gdrv, cpuz, etc.—→ physical memory R/W, virtual-address translation, kernel shellcode execution; modular backend for [[kdmapper]], [[msrexec]], and bluepill; BYOVD attack-primitive research) complements multi-backend kits such as [[vdk]]. (source: wiki/sources/descriptions/backengineering__VDM.md)
+
+MSR write→kernel-exec escalation library such as [[msrexec]] (backengineering; C++; arbitrary MSR write primitive → full kernel code execution via **`IA32_LSTAR`** syscall-handler redirect; [[vdm]] and bluepill backends for initial MSR capability; MSR-based kernel exploitation research) complements raw MSR-exposure PoCs such as [[openhardwaremonitor-poc]]. (source: wiki/sources/descriptions/backengineering__msrexec.md)
 
 HP Hardware Diagnostics **`etdsupp.sys`** IOCTL LPE PoC such as [[hp-hardware-diagnostics-poc]] (gmh5225; HP OEM diagnostics kernel driver IOCTL abuse → elevated privileges on HP systems; preinstalled OEM-driver BYOVD research) complements other vendor diagnostics backends such as [[lenovo-mapper]]. (source: wiki/sources/descriptions/gmh5225__HPHardwareDiagnostics-PoC.md)
 
