@@ -646,6 +646,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Driver-KDtour](entities/driver-kdtour.md) — compact KM inline detour library; `c_detour` MDL-backed patch + absolute jump stub; sample `KeAttachProcess` hook (gmh5225; Easy Kernel Detour)
 - [Driver-Communication-List](entities/driver-communication-list.md) — user→kernel call-path mapping notebook; win32u.dll through win32k/win32base to dxgkrnl.sys breadcrumbs for debugger/disassembler tracing (gmh5225)
 - [Driver-Detect-nullshit](entities/driver-detect-nullshit.md) — kernel export-trampoline detector; mov rax, imm64; jmp rax patches with out-of-image targets in win32k/dxgkrnl/ntoskrnl (gmh5225; Null driver detector)
+- [driver-dll-finder](entities/driver-dll-finder.md) — System32/drivers PE section scanner; find oversized sections for section-overlay mapping; skip loaded drivers (armvirus; Find Driver Useless Memory)
 - [Driver-DriverNoImage](entities/driver-driver-no-image.md) — no-image driver hijack PoC; shellcode via existing driver dispatch (NTFS handlers); inline hooks + WP disable + trampolines (gmh5225; Hijack Driver)
 - [Driver-read_write](entities/driver-read-write.md) — manually mapped KM R/W via Beep.sys IRP hijack; PiDDBCache/MmUnloadedDrivers cleanup (gmh5225; Hijack IRP Beep.sys)
 - [Driver-RPM-DirectPageManipulation](entities/driver-rpm-direct-page-manipulation.md) — minimal PTE-PFN rewrite + manual VA→PA cross-process copy; no documented copy helpers (gmh5225; read physical memory)
