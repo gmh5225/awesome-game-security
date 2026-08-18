@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:azw413/Glass`: entity [[glass]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool-mcp-server]], [[delamain]], [[garlic]], and [[farm64]].
+
 - **2026-08-18** — ingest `description:b1scoito/cozinha_loader`: entity [[cozinha-loader]] (CS:GO C++ remote-download inject loader; process hollowing/manual map; anti-debug + string encryption + import obfuscation; b1scoito `[Injector]`); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-loader]], [[memject]], and [[wizard-loader]].
 
 - **2026-08-18** — ingest `description:backengineering/POC-ExFlushTb`: entity [[poc-exflushtb]] (C++ Tb-monitoring PoC; Some Tricks / Windows Ring0); cited on [[overviews/windows-kernel]]; cross-linked [[voyager]], [[vdm]], and [[msrexec]].
