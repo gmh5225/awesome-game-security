@@ -5377,3 +5377,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:appsecco/vulnerable-mcp-servers-lab`: entity [[vulnerable-mcp-servers-lab]]; cited on [[overviews/overview]] and [[overviews/game-engine]]; cross-linked [[mcp-safety-scanner]].
 
 - **2026-08-18** — ingest `description:staturnzz/momentarius`: entity [[momentarius]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[pplorer]] and [[oob-entry]].
+
+- **2026-08-18** — ingest `description:ant4g0nist/rudroid`: entity [[rudroid]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[ews]], [[rnidbg]], and [[dfm-android-unicorn]].

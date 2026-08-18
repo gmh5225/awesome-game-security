@@ -1961,6 +1961,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [radare2-mcp](entities/radare2-mcp.md) — radare2 MCP server (C; r2pipe disasm/decompile/xrefs; CLI/plugin modes; sandbox/readonly; MCP for radare2)
 - [radius2](entities/radius2.md) — radare2 fast binary emulation + symbolic execution (Rust/C; Cheat Radare Plugins)
 - [rnidbg](entities/rnidbg.md) — Android ARM64 kernel emulator (Rust rewrite of unidbg; kernel-level work, graphics, animation; cheat / Android kernel explorer)
+- [rudroid](entities/rudroid.md) — Educational Rust Android ELF emulator (ELF loader, memory management, syscalls, filesystem abstractions, ARM64 Unicorn scaffolding; walkthrough docs + sample binaries)
 - [rprof](entities/rprof.md) — lightweight CPU scope profiler (TLS timing; ImGui/ImPlot flame graphs; LZ4 captures; Game Testing)
 - [RCE Shield](entities/rce-shield.md) — RCE hardening toolkit for PC gamers (detect/prevent/remediate RCE in launchers, mod loaders, overlays, voice chat, peripherals; bad-antics; Game Tools)
 - [ReadDirectoryChanges](entities/readdirectorychanges.md) — C++ `ReadDirectoryChangesW` wrapper (async recursive directory watch; sync/security monitoring)
