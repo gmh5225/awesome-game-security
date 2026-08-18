@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:binarly-io/idapcode`: entity [[idapcode]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[genmc]], [[ida-plugin-pcodegpt]], and [[microavx]].
+
 - **2026-08-18** — ingest `description:binkynz/cstrike-hack`: entity [[cstrike-hack]]; cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-animation-code-reversed]], [[csgo-cheat-base]], and [[present-hook]].
 
 - **2026-08-17** — ingest `description:binsnake/KUBERA`: entity [[kubera]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[winvisor]], [[kace]], [[emulator]], and [[dynamic-binary-instrumentation]].

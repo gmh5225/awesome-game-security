@@ -217,6 +217,7 @@ sources:
   - wiki/sources/descriptions/blackhades00__PareidoliaTriggerbot.md
   - wiki/sources/descriptions/block__stoic.md
   - wiki/sources/descriptions/binkynz__cstrike-hack.md
+  - wiki/sources/descriptions/binarly-io__idapcode.md
   - wiki/sources/descriptions/bloesway__csgo_sdk.md
   - wiki/sources/descriptions/boowampp__ApexDmaCheatUpdated.md
   - wiki/sources/descriptions/ccsimplyspolit__CS2-P2C-TEMPLATES.md
@@ -1481,6 +1482,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA PatchGen patched-byte export via [[ida-genpatch]] (IDAPython; Alt-F8; grouped file offsets, disassembly context, C# `SinglePatchHunk`; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / binary-patch lane. (source: wiki/sources/descriptions/frasten__ida-genpatch.md)
 - IDA database → linkable COFF/ELF object export via [[ida2obj]] (relocations, symbols, section content; binary patching / recompilation; gmh5225; cheat / COFF Relink) sits in the same Cheat IDA Plugins / binary-patch lane. (source: wiki/sources/descriptions/gmh5225__IDA2Obj.md)
 - Hex-Rays microcode IR display via [[genmc]] (IDAPython; debug microcode plugin / decompiler-extension work) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/patois__genmc.md)
+- Hex-Rays P-Code display for the current function via [[idapcode]] (Python IDA plugin; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/binarly-io__idapcode.md)
 - Intel AVX→Hex-Rays microcode lifting via [[microavx]] (IDA Pro plugin; `m_ext` opcode visitor; decompiles AVX-heavy functions that otherwise show opaque ext nodes; companion scraper for coverage gaps; cheat / IDA Plugins / AVX Lifter) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gaasedelen__microavx.md)
 - Hex-Rays decompiler convenience utilities via [[happyida]] (IDAPython; Swift-style parameter labels, SEH try/catch reconstruction, vtable navigation, Rust string prettification; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gmh5225__HappyIDA.md)
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
