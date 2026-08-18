@@ -5471,3 +5471,5 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-18** — ingest `description:alephsecurity/xnu-qemu-arm64`: entity [[xnu-qemu-arm64]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[xnu-1day-practice]].
 
 - **2026-08-18** — ingest `description:allthingsida/idacpp`: entity [[idacpp]]; cited on [[overviews/reverse-engineering]] and [[ida-sdk]]; cross-linked [[idasdk-collection]], [[idacode]], [[idasql]], [[sark]], and [[idawilli]].
+
+- **2026-08-18** — ingest `description:ajkhoury/ReClassEx`: entity [[reclass-ex]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[reclass-net-driverreader]], [[reclass-dma]], and [[regenny]].
