@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:unleg1t/Yuri`: entity [[yuri]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[phantom-client]], [[local-anticheat-1-8-9]], [[lenrete-mod]], [[windfall-anticheat]], and [[minecraft-anticheatai]].
+
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2715 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-18** — ingest `description:benui-dev/UE-BUIValidator`: entity [[ue-buivalidator]]; cited on [[overviews/game-engine]]; cross-linked [[ue5-with-dear-imgui]], [[unreal-imgui-tools]], and [[unreal-engine-guide]].
