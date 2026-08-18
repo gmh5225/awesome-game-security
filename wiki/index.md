@@ -1997,6 +1997,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RIVER](entities/river.md) — Bitdefender dynamic binary analysis framework (ELF/PE loader; external mapping; native import resolution; x86 runtime instrumentation; cheat / DBI)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
+- [RootAppDetector](entities/root-app-detector.md) — Java Android POC: detect installed root-manager apps via package/activity launch + SecurityException (Detection:Android root; apkunpacker)
 - [rootkit-2](entities/rootkit-2.md) — CSRSS CSR_PROCESS walk to detect hidden processes (kernel PoC; gmh5225)
 - [rtcore64-vulnerability](entities/rtcore64-vulnerability.md) — BYOVD driver mapper via MSI Afterburner `RTCore64.sys` (R/W primitives + data-ptr hook; `MmAllocateIndependentPagesEx` search; manual unsigned map; gmh5225)
 - [RToolZ](entities/rtoolz.md) — rootkit-like process/callback utility (hide/unhide, callback enum/remove, protection-level control; ProcExp152.sys; gmh5225)

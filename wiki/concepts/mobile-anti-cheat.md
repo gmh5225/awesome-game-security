@@ -25,7 +25,8 @@ sources:
   - wiki/sources/descriptions/canyie__Riru-MomoHider.md
   - wiki/sources/descriptions/canyie__MagiskKiller.md
   - wiki/sources/descriptions/canyie__MagiskEoP.md
-updated: 2026-08-17
+  - wiki/sources/descriptions/apkunpacker__RootAppDetector.md
+updated: 2026-08-18
 confidence: medium
 ---
 
@@ -44,7 +45,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 
 | Signal | Examples |
 |--------|----------|
-| Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts; Magisk `su`-daemon flaws such as [[magisk-eop]] (unprivileged app → root without grant UI; source: wiki/sources/descriptions/canyie__MagiskEoP.md) show root frameworks can fail closed on authorization |
+| Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts, installed root-manager apps (launch probes such as [[root-app-detector]]; source: wiki/sources/descriptions/apkunpacker__RootAppDetector.md); Magisk `su`-daemon flaws such as [[magisk-eop]] (unprivileged app → root without grant UI; source: wiki/sources/descriptions/canyie__MagiskEoP.md) show root frameworks can fail closed on authorization |
 | Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]) |
 | Emulator / VM | Build fingerprint, sensors, FS signatures ([[anti-emulator]], [[android-emulator-detection]], [[conbeerlib]]) |
 | Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) — stricter on Android 14/15 per curated root research notes [[awesome-android-root]] (source: wiki/sources/descriptions/fynks__awesome-android-root.md); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
@@ -55,7 +56,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | VPN / proxy | `ConnectivityManager`/`NetworkCapabilities`, `/proc/net`, ioctl/netlink routes, localhost daemon port scans (Clash/sing-box); RASP SDKs such as [[rs-native-kit-security]]; per-app hide tooling such as [[vpnhide]] (Binder + kernel/Zygisk path filtering; no target-process hooks) (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) |
 | Overlay / tapjacking | `TYPE_APPLICATION_OVERLAY` windows above sensitive views; `filterTouchesWhenObscured` input blocking; callback alerts via [[android-overlay-protection]] (Java library for overlay detection on login/payment flows) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md); offensive PoC [[android-overlay-malware-example]] (foreground-app monitor + credential-phishing overlay mimicking banking/social apps) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-malware-example.md) |
 
-Multi-check collections: [[detection]], [[android-native-root-detector]], [[duck-detector-refactoring]] (local Compose inspector with native probe cards for root/hook/mount/attestation/VM evidence; source: wiki/sources/descriptions/eltavine__Duck-Detector-Refactoring.md), [[magisk-killer]] (canyie; forked subprocess + pipe IPC; Magisk/MagiskHide tracer, bootloader, property-area, and PTS probes outside caller trace scope; source: wiki/sources/descriptions/canyie__MagiskKiller.md), archived [[magiskdetector]].
+Multi-check collections: [[detection]], [[android-native-root-detector]], [[root-app-detector]], [[duck-detector-refactoring]] (local Compose inspector with native probe cards for root/hook/mount/attestation/VM evidence; source: wiki/sources/descriptions/eltavine__Duck-Detector-Refactoring.md), [[magisk-killer]] (canyie; forked subprocess + pipe IPC; Magisk/MagiskHide tracer, bootloader, property-area, and PTS probes outside caller trace scope; source: wiki/sources/descriptions/canyie__MagiskKiller.md), archived [[magiskdetector]].
 
 ## Bypass strategies (research framing)
 
