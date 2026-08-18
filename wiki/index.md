@@ -1912,6 +1912,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [rAthenaCN](entities/rathenacn.md) — Chinese-localized rAthena fork (C/C++; asset pipelines / plugins / modding; cheat / game:ro; gmh5225)
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
+- [raytracing](entities/raytracing.md) — CUDA mesh ray tracing with BVH + PyTorch bindings (ashawkey; RayTracer)
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
 - [R3nzSkinTFT](entities/r3nzskin-tft.md) — LoL/TFT skin changer (C++; champion skin ID memory patch; client-only cosmetic swap; Skin; gmh5225; cheat / game:lol)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
