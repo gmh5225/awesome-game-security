@@ -1161,6 +1161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-gameguard-str-dec](entities/ida-gameguard-str-dec.md) — IDA Pro nProtect GameGuard string decrypt (Python; modding; cheat / IDA Plugins; crtdll)
 - [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)
 - [ida-llm-explainer](entities/ida-llm-explainer.md) — local llama.cpp IDA plugin: explain/rename/struct inference + HITL accept (cheat / IDA Plugins)
+- [IDA Gepetto](entities/ida-gepetto.md) — local LLM IDA plugin: explain decompiled functions + variable rename suggestions (IDAPython; pseudocode UI; cheat / IDA Plugins)
 - [IDAssist](entities/idassist.md) — AI-powered IDA 9.0+ plugin: LLM explain/rename, semantic knowledge graph, RAG, MCP (PySide6; cheat / IDA Plugins)
 - [ida-plugins](entities/ida-plugins.md) — IDA register cross-references (vs Oregami value-use; cheat / IDA Plugins)
 - [IDAPlugins](entities/idaplugins.md) — curated IDA Pro plugin pack (deobf / bin-diff / crypto; cheat / IDA Plugins)

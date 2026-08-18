@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:apkunpacker/IDA-Gepetto`: entity [[ida-gepetto]] (local LLM IDA plugin; IDAPython; explain decompiled functions + variable rename suggestions; pseudocode context-menu + hotkeys; configurable backends + localization); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-llm-explainer]], [[idassist]], [[rikugan]], and [[ida-assistant]].
+
 - **2026-08-18** — ingest `description:apkunpacker/MagiskDetection`: entity [[magisk-detection]] (archive of Android root/Magisk POC APKs; Zygisk/hook/bootloader/root-app checks; sample hashes for cross-tool comparison); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[magiskdetector]], [[magisk-killer]], [[root-app-detector]], and [[detection]].
 
 - **2026-08-18** — ingest `description:apkunpacker/RootAppDetector`: entity [[root-app-detector]] (Java Android POC; launch known root-manager package/activity pairs; interpret SecurityException; Gradle rescan UI; Detection:Android root); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-native-root-detector]], [[magiskdetector]], and [[detection]].
