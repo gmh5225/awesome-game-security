@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:bavulapati/DXGICaptureApplication`: entity [[dxgicaptureapplication]]; cited on [[overviews/graphics-api]] and [[anti-screenshot-capture]]; cross-linked [[screencapture]], [[windows-desktop-duplication-sample]], and [[screenshot]].
+
 - **2026-08-18** — ingest `description:bbfox0703/Mydev-Cheat-Engine-Tables`: entity [[mydev-cheat-engine-tables]]; cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[dark-souls-iii-cheat-engine-guide]], [[elden-ring-ct-tga]], and [[intro-to-gamehacking]].
 
 - **2026-08-18** — ingest `description:beakthoven/TrickyStore`: entity [[trickystore]]; cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[keyattestation]], [[android-hardware-attestation-demo]], and [[spoofing-collection]].
