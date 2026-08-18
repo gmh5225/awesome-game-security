@@ -26,7 +26,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec ([[ollvm-unflattener]], [[idadeflat]]), d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
-- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]/[[river]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
+- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]/[[river]]/[[mambo]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening; [[etwti-fluctuation-monitor]] tamper alerts
 - [Frida](concepts/frida.md)
@@ -1430,6 +1430,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MagiskDetector](entities/magiskdetector.md) — archived Android Magisk detector (AppZygote/AIDL; Detection:Magisk)
 - [MagiskOnWSALocal](entities/magiskonwsalocal.md) — local Magisk + GApps integration for WSA (rooted Android + Play Store on Win11; gmh5225)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
+- [MAMBO](entities/mambo.md) — ARM/AArch64 Linux DBI (software code cache; instruction/block/function hooks; analysis plugins; beehive-lab; cheat / DBI / ARM)
 - [mandibule](entities/mandibule.md) — Linux ptrace ELF injector (icrt; raw syscalls; load/relocate; fake stack; Cheat / injection)
 - [maniac](entities/maniac.md) — external osu!; out-of-process offensive techniques (cheat / game:osu [External]; gmh5225)
 - [manipulating_token](entities/manipulating-token.md) — Windows access-token theft/impersonation LPE samples (SeDebugPrivilege; SYSTEM integrity; gmh5225)
