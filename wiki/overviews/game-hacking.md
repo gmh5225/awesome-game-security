@@ -1225,6 +1225,7 @@ sources:
   - wiki/sources/descriptions/clearbluejar__ghidriff.md
   - wiki/sources/descriptions/changeofpace__MouHidInputHook.md
   - wiki/sources/descriptions/assaultcube__AC.md
+  - wiki/sources/descriptions/aliyunav__Finger.md
   - wiki/sources/descriptions/allthingsida__idasql.md
 updated: 2026-08-18
 confidence: high
@@ -1580,6 +1581,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - High-resolution IDA screenshot capture via [[ida-screenshot]] (Python plugin; macOS/Linux `make install` or manual `screenshot.py` drop; cheat / IDA Plugins) sits in the documentation/reporting lane. (source: wiki/sources/descriptions/jonpalmisc__ida_screenshot.md)
 - Lightweight in-IDA whiteboard sketching via [[draw-ida]] (MIT; reverse engineers sketch and brainstorm inside IDA; cheat / IDA Plugins) sits in the annotation/ideation lane beside [[ida-screenshot]]. (source: wiki/sources/descriptions/idkhidden__DrawIDA.md)
 - Live Marp/Slidev RE presentation decks docked in IDA via [[ida-slides]] (IDA 9.2+ Python; `@name`/`@0xADDR` tokens jump disasm/pseudocode; embed decompiled lines on save; hover previews; unresolved-ref lint; native webview + file-watcher reload; cheat / IDA Plugins) sits in the presentation/documentation lane beside [[ida-screenshot]] and [[draw-ida]]. (source: wiki/sources/descriptions/hyuunnn__ida-slides.md)
+- Cloud function symbol recognition via [[finger]] (aliyunav; Python SDK + IDA 7+ plugin; extract function features, submit to recognition backend, rename/highlight matches; Recognizing Function By Cloud; malware/game binary triage; cheat / IDA Plugins) sits in the same symbol-recovery lane beside [[renamaida]] and [[ida-pro-loadmap]]. (source: wiki/sources/descriptions/aliyunav__Finger.md)
 - Instruction-signature library function renaming via [[renamaida]] (Python; Jaro-Winkler on arch-specific insn tokens; custom JSON sig DB; ≥0.83 / ≥10 insns; firmware/static-link RE; cheat / IDA Plugins) sits in the same symbol-recovery lane. (source: wiki/sources/descriptions/kirovgrad__Renamaida.md)
 - Batch function/symbol name management via [[ida-names]] (Python; batch rename, pattern match, prefix/suffix, import/export; renames pseudocode window titles with current function name; cheat / IDA Plugins) sits in the same symbol-naming lane. (source: wiki/sources/descriptions/gmh5225__ida_names.md)
 - IDA function-list Markdown export via [[ida-export-functions]] (Python; dump DB function index to a specified path for notes/reporting; cheat / IDA Plugins) sits in the same documentation/reporting lane beside [[ida-slides]] and [[ida-screenshot]]. (source: wiki/sources/descriptions/gmh5225__ida_export_functions.md)

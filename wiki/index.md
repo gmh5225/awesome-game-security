@@ -858,6 +858,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [findcrypt-yara](entities/findcrypt-yara.md) — IDA Pro FindCrypt plugin (YARA crypto-constant scan; AES/DES/SHA/CRC signatures; algorithm annotation; gmh5225; cheat / Yara)
 - [findfunc](entities/findfunc.md) — IDA Pro function pattern search (byte patterns, instruction sequences, operand types, xrefs; Recognizing Function By Pattern; gmh5225; cheat / IDA Plugins)
 - [findyara-ida](entities/findyara-ida.md) — IDA Pro YARA scan plugin (match highlight + disasm navigation; custom malware/crypto/packer rules; gmh5225; cheat / Yara)
+- [Finger](entities/finger.md) — cloud function symbol recognition (Python SDK + IDA 7+ plugin; feature extraction → recognition backend → rename/highlight; Recognizing Function By Cloud; aliyunav; cheat / IDA Plugins)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FallGuys](entities/fall-guys.md) — Fall Guys kernel cheat (driver communication + memory manipulation; speed/fly/physics exploits; Unity; gmh5225)
 - [FallGuysSharp](entities/fall-guys-sharp.md) — Fall Guys C# IL2CPP cheat (managed injection; movement/gameplay mods; gmh5225)

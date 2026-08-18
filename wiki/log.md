@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:aliyunav/Finger`: entity [[finger]] (cloud function symbol recognition; Python SDK + IDA 7+ plugin; extract function features → recognition backend → rename/highlight matches; Recognizing Function By Cloud; malware/game binary triage; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[renamaida]], [[ida-pro-loadmap]], [[findfunc]], and [[ida-map-symbol-parser]].
+
 - **2026-08-18** — ingest `description:zensenzay/memfilter-fn-driver-`: entity [[memfilter-fn-driver]] (Windows minifilter driver + C++ client; Flt directory scrub + Cm registry hide + Ob handle VM-access strip + MDL cross-process R/W; Filter Manager communication port instead of IOCTL; game AC evasion / kernel RE demo); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[hide-file]], [[vaultguard]], [[neacsafe-analysis]], [[eac-spoofer-meme]], and [[kernel-callbacks]].
 
 - **2026-08-18** — ingest `description:zensenzay/eac-spoofer-meme`: entity [[eac-spoofer-meme]] (open-source kernel HWID spoofer for EAC fingerprinting; C driver + C++ IOCTL controller; SMBIOS/disk/NVMe/MAC/GPU/PCI/CPUID/EFI/ACPI/registry; disk I/O completion hooks; registry PCI/USB alias callbacks; VT-x/SVM CPUID mini-hypervisors; artifact cleanup; cheat / HWID); cited on [[concepts/easy-anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[hwid-kernel-spoofer]], [[easy-hwid-spoofer]], [[hwid-spoofer-eac-be]], [[full-hwid-spoofer-v6]], [[hwid]], and [[driver-hwid-btbd-modified]].
