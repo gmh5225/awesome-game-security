@@ -952,6 +952,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [ghidra-mcp](entities/ghidra-mcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; 200+ AI-assisted RE tools; GUI/headless; BSim; HTTP/stdio; Docker; bethington)
 - [GptHidra](entities/gpthidra.md) — Ghidra ChatGPT plugin (selected-function explanation to console; cheat / Ghidra Plugins)
+- [ghidra-orbis](entities/ghidra-orbis.md) — Ghidra PS4 Orbis extension (loaders, analyzers, syscall/NID data; Java/Gradle; astrelsky)
 - [ghidra-openai](entities/ghidra-openai.md) — Ghidra OpenAI GPT plugin (decompiled-function explain/rename/vuln hints; ChatGPT lane)
 - [ghidra-scripts](entities/ghidra-scripts.md) — CTF-oriented GhidraScript collection (automated common RE challenge patterns; cheat / Scripts)
 - [ghidriff](entities/ghidriff.md) — Python CLI Ghidra binary diffing engine (headless two-binary analysis; graph/BSim matching; Markdown decomp/call-graph reports; PE/Mach-O/ELF; Docker CI; clearbluejar)

@@ -682,6 +682,7 @@ sources:
   - wiki/sources/descriptions/atulkunal999__pubg_mobile_memory_hacking.md
   - wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md
   - wiki/sources/descriptions/atlas4381__qualcomm_avb_exploit_poc.md
+  - wiki/sources/descriptions/astrelsky__GhidraOrbis.md
   - wiki/sources/descriptions/gmh5225__PUBGM-PUBGPatcher.md
   - wiki/sources/descriptions/gmh5225__PTFakeTouch.md
   - wiki/sources/descriptions/gmh5225__LastIslandOfSurvival-iOSCheat-Source.md
@@ -1878,6 +1879,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - PS5 Linux boot via [[ps5-linux-loader]] (kernel/HV exploits, IOMMU setup, GPU init, TMR handling; custom bootloader payload) sits in the console `PlayStation` HV research lane. (source: wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md)
 - WebKit CSSFontFace UAF chain via [[cssfontface-exploit]] (PS4/PS5 browser userland R/W; PS4 6.00–11.02, kernel chain 7.00–11.02; PS5 needs separate ASLR/vtable defeat) sits in the same `PlayStation` jailbreak / WebKit research lane. (source: wiki/sources/descriptions/ntfargo__CSSFontFace-Exploit.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
+- PS4 Orbis Ghidra extension via [[ghidra-orbis]] (loaders, analyzers, scripts, syscall/NID mapping; symbol recovery; Java/Gradle; Orbis OS file formats) sits in the same `PlayStation` / Cheat Ghidra Plugins lane beside [[ida-ps4-helper]]. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
 - PS5 ELF loader/analysis in IDA via [[ida-ps5-elf-plugin]] (PS5-specific ELF extensions, segment types, dynamic linking; game/system binaries; console security RE) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md)
 - PS5 ELF loader for ps5-jar-loader via [[elfloader]] (Java; kernel-level modding / SDK generation; console PlayStation ELF load path; Anti Cheat → Binary Packer) sits in the same `PlayStation` lane beside static IDA loaders. (source: wiki/sources/descriptions/cryonumb__elfloader.md)
 - PS5 Cortex-A53 code-execution PoC via [[a53-code-exec]] (fw 02.00; kernel-level work / SDK generation; console emulator + PlayStation research) sits in the same `PlayStation` low-level CPU exploit lane. (source: wiki/sources/descriptions/cragson__a53-code-exec.md)

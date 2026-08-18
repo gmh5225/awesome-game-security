@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/janisslsm__ida-ps4-helper.md
-updated: 2026-08-03
+updated: 2026-08-18
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Companion tooling for the PS4 module loader—not a standalone loader or full PS
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-ps5-elf-plugin]] · [[ida-ios-helper]] · [[ida-android-breakpoint]] · [[cssfontface-exploit]] · [[ps5-linux-loader]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra-orbis]] · [[ida-ps5-elf-plugin]] · [[ida-ios-helper]] · [[ida-android-breakpoint]] · [[cssfontface-exploit]] · [[ps5-linux-loader]]

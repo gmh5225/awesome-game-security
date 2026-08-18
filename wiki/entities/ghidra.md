@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/gmh5225__ghidra.md
-updated: 2026-08-17
+updated: 2026-08-18
 confidence: medium
 ---
 
@@ -12,7 +12,7 @@ confidence: medium
 
 Full Ghidra reverse-engineering framework source tree (NSA Ghidra mirror/fork). Includes the Java-based decompiler, debugger integrations, and supporting modules—the standard Ghidra codebase for binary analysis, disassembly, and decompilation workflows. Listed for reverse engineers and game security researchers analyzing protected game and anti-cheat binaries. (source: wiki/sources/descriptions/gmh5225__ghidra.md)
 
-Upstream base for the Ghidra plugin and automation ecosystem in this catalog: [[ghidra-bridge]], [[dragonhook]], [[ghidra-decompiler-plugins]], [[ghiradec]], [[ghidra-headless-mcp]], [[ghidrassist]], [[ghidra-openai]], [[ghidrametrics]], [[ghidriff]], [[ghidra-scripts]], [[gpt-wpre]], [[binsync]], and related loaders/bridges.
+Upstream base for the Ghidra plugin and automation ecosystem in this catalog: [[ghidra-bridge]], [[dragonhook]], [[ghidra-decompiler-plugins]], [[ghiradec]], [[ghidra-headless-mcp]], [[ghidrassist]], [[ghidra-openai]], [[ghidrametrics]], [[ghidriff]], [[ghidra-scripts]], [[ghidra-orbis]], [[gpt-wpre]], [[binsync]], and related loaders/bridges.
 
 ## Links
 

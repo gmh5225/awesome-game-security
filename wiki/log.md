@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:astrelsky/GhidraOrbis`: entity [[ghidra-orbis]]; cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ida-ps4-helper]], and [[gba-ghidra-loader]].
+
 - **2026-08-18** — ingest `description:atenfyr/UAssetAPI`: entity [[uassetapi]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uassetgui]], [[jmap]], [[paksmith]], and [[rust-u4pak]].
 
 - **2026-08-18** — ingest `description:atenfyr/UAssetGUI`: entity [[uassetgui]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[jmap]], [[paksmith]], and [[rust-u4pak]].
