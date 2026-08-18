@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:android1337/crycall`: entity [[crycall]] (C++14+ compile-time call obfuscation; lambda/virtual-dispatch wrappers; normal and virtual call macros; hides callee/argument flow; AC Compile Time); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[crystr]] and [[call-obfuscator]].
+
 - **2026-08-18** — ingest `description:android1337/crystr`: entity [[crystr]] (C++20 compile-time string/number obfuscation; XOR keys from compile-time math/timestamps/counters; inline or virtual decrypt; per-char/per-value key variation; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[skcrypter]], [[mystic-xorstr]], [[obfuscxx]], and [[xorlit]].
 
 - **2026-08-18** — ingest `description:angr/angrop`: entity [[angrop]] (automatic ROP gadget finder + chain builder on angr; symbolic execution, constraint solving, graph search; Python CLI + API; architecture-agnostic; exploit dev / binary RE / game client vuln analysis); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ropgadget-rs]], [[agafi]], [[exrop]], [[idadeflat]], and [[oxidizer]].
