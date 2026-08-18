@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:backengineering/Voyager`: updated entity [[voyager]] (backengineering upstream + gmh5225 mirror); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[msrexec]] and [[fortnite-voyagertf]] (distinct name).
+
 - **2026-08-18** — ingest `description:backengineering/msrexec`: entity [[msrexec]]; cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[openhardwaremonitor-poc]], [[kaspersky-hook]], and [[kdmapper]].
 
 - **2026-08-18** — ingest `description:bad-antics/rce-shield`: entity [[rce-shield]]; cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[mini-launcher]], [[goldberg-emulator]], [[logitech-cve]], and [[razer-rzctl]].
