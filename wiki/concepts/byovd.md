@@ -93,6 +93,7 @@ sources:
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
   - wiki/sources/descriptions/backengineering__msrexec.md
   - wiki/sources/descriptions/backengineering__VDM.md
+  - wiki/sources/descriptions/alfarom256__drivers_and_shit.md
 updated: 2026-08-18
 confidence: high
 ---
@@ -112,6 +113,8 @@ Bring Your Own Vulnerable Driver: load a legitimately signed but vulnerable driv
 Microsoft vulnerable-driver blocklist ([[msft-driverblocklist]] mirrors the Recommended Driver Block Rules for defensive / AC research) (source: wiki/sources/descriptions/jsecurity101__MSFT_DriverBlockList.md); blocklist-derived hash inventories such as [[ms-vulnerable-driver-list]] (gmh5225; Microsoft-acknowledged signed drivers with known IOCTL-exploitable flaws for BYOVD research) (source: wiki/sources/descriptions/gmh5225__MS-Vulnerable-Driver-List.md); [[hvci]], AC driver allowlists ([[vanguard]]-style), PiDDBCache/MmUnloadedDrivers forensics, EPT-protected callback lists. The canonical LOLdriver catalog [[loldrivers]] (magicsword-io; YAML metadata, YARA enrichment, HVCI tracking, validation tooling) is the upstream reference for known-abused signed drivers. (source: wiki/sources/descriptions/magicsword-io__LOLDrivers.md) HVCI-oriented LOLdriver checks such as [[hvci-loldrivers-check]] help inventory those drivers against Memory Integrity constraints. (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) [[byovdfinder]] (ghostbyt3; identifies LOLdrivers not blocked by the active HVCI policy—BYOVD paths that remain loadable under Memory Integrity) complements that inventory lane. (source: wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md) Broader LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) sit in the same cheat / vulnerable-driver research lane. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
 
 Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drivers]] (namazso; list only, no PoC) help catalog signed drivers that expose physmem primitives commonly abused in BYOVD chains. (source: wiki/sources/descriptions/namazso__physmem_drivers.md)
+
+Categorized third-party driver binary corpora such as [[drivers-and-shit]] (alfarom256; large `.sys` collection from OEM tools, utilities, and security products; reference corpus for vulnerable-driver research and exploit reproduction—binaries only, no PoC) complement hash-list inventories in the same lane. (source: wiki/sources/descriptions/alfarom256__drivers_and_shit.md)
 
 Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) Hands-on vulnerable-driver lab guides such as [[hacksysextremevulnerabledriver]] (HackSys Team; kernel exploitation training in the cheat / vulnerable-driver lane) complement that documentation. (source: wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md) Intentionally vulnerable training drivers such as [[vulnerablekernel-driver]] (gmh5225; **`MsIo64.sys`**; IOCTL demos for arbitrary R/W, overflow, UAF, and race conditions) offer another kernel-exploitation lab target beside HackSys-style guides. (source: wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md)
 
