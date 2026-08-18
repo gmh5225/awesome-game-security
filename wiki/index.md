@@ -1387,6 +1387,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [kernel_payload_comms](entities/kernel-payload-comms.md) — shared-memory KM↔UM payload channel (gmh5225; cheat / driver communication)
 - [Kernelmode Manual Mapping through IAT](entities/kernelmode-manual-mapping-through-iat.md) — kernel-mode IAT manual-map injector (process handle or KM driver; IAT Manual Map)
+- [KernelMon](entities/kernelmon.md) — virtualization-based ProcMon-style kernel monitor (VMX/EPT interception; file/registry/process/thread; usermode GUI; AC/malware research in VMs)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
 - [KoTR Modern Patch](entities/kotr-modern-patch.md) — King of the Road / Hard Truck 2 ASI patch (collision, camera, physics, AI traffic, trailer, UI; ModUtils + Ultimate ASI Loader; complements D2GI; DirectX Compatibility)
