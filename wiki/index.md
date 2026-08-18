@@ -2129,6 +2129,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
 - [smap](entities/smap.md) — Windows kernel shellcode mapper (BYOVD PIC shellcode → kernel pool + exec primitive; no PE image; btbd; Scatter Manual Map)
 - [smm (ekknod)](entities/smm.md) — SMM cheat (C/C++; driver development / graphics / networking; cheat / SMM; Ring -2 below-OS research)
+- [SniParInject](entities/sniparinject.md) — Python Scapy game packet sniffer/parser (YAML opcode→field maps; IP/port filter; inject planned; Mana Plus demo; cheat / Packet Sniffer&Filter; airvzxf)
 - [SoftGLRender](entities/softglrender.md) — tiny C++ software rasterizer + OpenGL/Vulkan comparison backends (Renderer)
 - [Software D3D9](entities/software-d3d9.md) — software Direct3D 9 implementation targeting real games/programs (DirectX Emulation / Compatibility; code-tom-code)
 - [Socket.IO](entities/socket-io.md) — Node.js/browser real-time event I/O (WS + long-poll; Game Network)
