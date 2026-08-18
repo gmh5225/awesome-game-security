@@ -1275,6 +1275,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [imxyvimapper](entities/imxyvimapper.md) — BYOVD driver mapper via AsUpIO.sys (PE manual map; sections/imports/relocs/entry; gmh5225)
 - [ucfoxi-shared-flushfilebuffers-communication-update](entities/ucfoxi-shared-flushfilebuffers-communication-update.md) — `\Driver\PEAUTH` `IRP_MJ_FLUSH_BUFFERS` hijack + registry-seeded shared buffer KM↔UM comm (gmh5225; cheat / driver communication)
 - [ucmapper](entities/ucmapper.md) — BYOVD kernel driver manual mapper via nvaudio.sys (EncodePayLoad reuse; runtime-list cleanup; gmh5225)
+- [in-memory-mutation-demo](entities/in-memory-mutation-demo.md) — C++23 in-memory polymorphic payload mutation demo (VirtualProtect/mprotect; ProtectedData XOR + key rotation; secure wipe; alekzandren)
 - [inject](entities/inject.md) — CLI network protocol craft/inject/sniff tool (wide protocol range; cheat / Packet Sniffer&Filter; fksvs)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)
 - [injection](entities/injection.md) — Windows injection-testing corpus (Conhost/PROPagate/ALPC/KernelCallbackTable/KnownDlls and related PoCs; Injection Testing; gmh5225)

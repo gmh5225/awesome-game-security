@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:alekzandren/in-memory-mutation-demo`: entity [[in-memory-mutation-demo]] (C++23 educational in-memory polymorphic data mutation; ProtectedData decrypt/use/re-encrypt; VirtualProtect/mprotect page alignment; std::span/std::expected; position-dependent XOR + dynamic key rotation; permission restore + zeroize; CMake; binary mechanics / defense-in-depth); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[shellcode-fluctuation]], [[shredder-rs]], and [[memory-guard]].
+
 - **2026-08-18** — ingest `description:ales-drnz/vocem-overlay`: entity [[vocem-overlay]] (Linux Discord in-game overlay; C++/Qt/QML; Vulkan implicit layer + OpenGL LD_PRELOAD interposer; daemon-side Discord RPC + shared-memory voice state; HDR/Flatpak/launcher auto-detect; overlay-injection research—not stealthy); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[ayypex]], [[vulkan-hook]], and [[discord-overlay-hook]].
 
 - **2026-08-18** — ingest `description:alesimula/wsa_pacman`: entity [[wsa-pacman]] (Flutter/Dart GUI WSA package manager; APK/XAPK double-click install; version/permission metadata; upgrade/downgrade; Android settings shortcuts; sideload/test workflows); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[wsapatch]], [[win11-apk-installer]], and [[magiskonwsalocal]].
