@@ -314,6 +314,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [blood-hunt](entities/blood-hunt.md) — Blood Hunt cheat (C/C++; driver / rendering / modding; cheat / game:bloodhunt; gmh5225)
 - [blitz](entities/blitz.md) — header-only UM lazy import resolver with direct calls (C++; Anti Cheat / Lazy Importer; emlinhax)
 - [blc](entities/blc.md) — IDA Pro plugin integrating Ghidra decompiler (Binary Lifting Contraption; cheat / IDA Plugins; cseagle)
+- [bn](entities/bn.md) — Binary Ninja CLI for agents (Python; agent-facing CLI; plugin development; Cheat Binary Ninja Plugins)
 - [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
 - [bndb2pat](entities/bndb2pat.md) — Binary Ninja plugin: IDA FLIRT `.pat` patterns from LLIL (wildcard masks, CRC16; sigmake → `.sig`; joren485)
 - [bobalkkagi](entities/bobalkkagi.md) — Python Themida 3.1.3 Tiger red64 unpack via Unicorn API-hook emulation (win10_v1903 DLL set; fast/hook_block/hook_code; optional OEP; planned devirt; Fix Themida)
