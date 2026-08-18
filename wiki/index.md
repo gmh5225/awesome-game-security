@@ -311,6 +311,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-division-deoptimization](entities/binja-division-deoptimization.md) — Binary Ninja MLIL division/modulo deoptimizer (architecture-agnostic)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
+- [binja-sigmaker](entities/binja-sigmaker.md) — Binary Ninja plugin: IDA-style wildcard byte-pattern signatures from disassembled functions (apekros)
 - [BinExport](entities/binexport.md) — Google C++ disassembly exporter (IDA/Ghidra/BN → Protocol Buffer; BinDiff pipeline)
 - [BinCon](entities/bincon.md) — VEH + PAGE_NOACCESS hardened console sample (AC page protection)
 - [binlex](entities/binlex.md) — binary pattern extraction + genetic trait analysis (C++/Rust; PE/ELF/raw; function-level patterns; JSON/YARA/threat-intel pipelines; c3rb3ru5d3d53c)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:apekros/binja_sigmaker`: entity [[binja-sigmaker]] (Binary Ninja plugin; IDA-style wildcard byte-pattern sigs from disassembled functions; function-start fallback; Python; plugin-manager compatible); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-sigmaker]], [[sigmakerex]], [[ida-pro-sigmaker]], and [[bndb2pat]].
+
 - **2026-08-18** — ingest `description:apekros/valorant_offsets`: entity [[valorant-offsets]] (minimal C++ header offset dump; address/structure constants for external tooling; README `[Offset]`); cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked [[valorant-externals]], [[valorant-dumper]], and [[valorant-dumper-tool]].
 
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2716 (+1; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
