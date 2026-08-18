@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:airbus-seclab/AutoResolv`: entity [[autoresolv]] (IDA plugin; IDAPython; PyQt5 + pyelftools; resolve ELF external library calls; wrapper→implementation mapping; call-site annotation; signature import from related binaries; multi-arch; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmlinux-to-elf]], [[ida-ps5-elf-plugin]], [[ida-kallsyms-symbol-renamer]], and [[idaplugins]].
+
 - **2026-08-18** — ingest `description:airvzxf/sniparinject`: entity [[sniparinject]] (Python Scapy game packet sniffer/parser; YAML opcode→field maps without code changes; IP/port filter; binary struct decode for host/node traffic; inject lane planned; Mana Plus demo; cheat / Packet Sniffer&Filter); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[packet-sniffer]], [[inject]], [[pcapplusplus]], and [[peetch]].
 
 - **2026-08-18** — ingest `description:ait-aecid/rootkit-detection-ebpf-time-trace`: entity [[rootkit-detection-ebpf-time-trace]] (Linux eBPF getdents-flow timing-anomaly research; file-hiding rootkit detection; Python experiment orchestration + semi-supervised statistical anomaly detection; kernel security / anti-stealth telemetry); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[rootkit-2]], [[modreveal]], [[tracee]], and [[blanket]].
