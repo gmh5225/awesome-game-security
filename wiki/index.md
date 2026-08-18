@@ -2269,6 +2269,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UAssetGUI](entities/uassetgui.md) — C# GUI for UE4–UE5 `.uasset`/`.umap` view/edit (exports/imports/properties; Game Assets)
 
 - [UniCli](entities/unicli.md) — Unity Editor terminal CLI (compile/test/build/inspect; AI-agent ready)
+- [UniStory](entities/unistory.md) — Unity MapleStory client reimplementation (WIP TMS v245; C#; WzComparerR2.WzLib WZ parse; map layers/foothold physics/portals/sprite animation/BGM; no server yet; Game Develop / source / game:maplestory; ppodds)
 - [UnityAutomatedQAExamples](entities/unity-automated-qa-examples.md) — Unity Automated QA Guidebook (docs/reference; Game Testing)
 - [Unity-GameCI-Sample](entities/unity-gameci-sample.md) — Unity Game CI sample (C#; build/release automation; Game CI)
 - [Unity202x-eXternalrEsolve](entities/unity202x-externalresolve.md) — header-only C++17 Unity 2020–2023 external runtime introspection (Mono/IL2CPP GOM scan, IL2CPP metadata, W2S, DumpSDK)

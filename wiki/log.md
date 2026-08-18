@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-18** — ingest `description:ppodds/UniStory`: entity [[unistory]] (Unity MapleStory client reimplementation; WIP TMS v245; C#; WzComparerR2.WzLib KMS/TMS WZ parse; Unity 2D map layers/foothold physics/portals/sprite animation/BGM via NAudio; modular Character/Map/Mob/Npc/Skill loaders; no server yet); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[wzcomparerr2]], [[maplenecrocer]], [[maplestory-packer-modpacker]], [[mnwvs196]], and [[maplestory-heavenclient]].
+
 - **2026-08-18** — ingest `readme:categories`: Cheat ~2721 (+5; Game Develop ~185 +2; Anti Cheat ~679 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-18** — ingest `description:aoharudesu/Clipboard_Tools-UE4`: entity [[clipboard-tools-ue4]] (UE4 plugin; C++ module; copies supplied string arguments to system clipboard; UE4.27 packaged binaries; in-engine debug/scripting text transfer; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[luamachine]], and [[ue4-tutorials]].
