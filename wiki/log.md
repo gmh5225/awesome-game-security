@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ac3ss0r/obfusheader.h`: entity [[obfusheader-h]] (header-only C++14 compile-time obfuscation; string/constant encryption, import/call hiding, control-flow mutation, anti-decompiler; Windows/Unix; software protection / game security); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscate]], [[crycall]], and [[obfusk8]].
+
 - **2026-08-19** — ingest `description:acageduser/DMA-Attack-Firmware-Customization`: entity [[dma-attack-firmware-customization]] (Screamer Squirrel 35T [[pcileech-fpga]] manual RTL8111 NIC disguise guide; MindShare Arbor donor PCI config harvest; SystemVerilog/Vivado patch for VID/DID, BAR, DSN, capabilities; DMA validation + BattlEye/EAC evasion testing; acageduser); cited on [[overviews/dma-attack]] and [[pcileech-fpga]]; cross-linked [[pcileechgen]], [[pcileech-wifi]], [[easy-anti-cheat]], and [[battleye-re]].
 
 - **2026-08-19** — ingest `description:aclist/aclist.github.io`: entity [[aclist-github-io]] (static site; anti-cheat compatibility list + Linux gaming docs; HTML/CSS/JS; conservative manual verification; curated list + companion-tool guides; Anti-cheat compatibility list); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[crossover-patcher]] and [[holodori-kernel-bypass]].
