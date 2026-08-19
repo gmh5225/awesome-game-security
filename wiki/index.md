@@ -709,6 +709,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [detection-cheat-engine](entities/detection-cheat-engine.md) — user-mode CE artifact detector (ReadDirectoryChangesW; ADDRESSES.FIRST/MEMORY.FIRST table markers; gmh5225; CE)
 - [detection-cheat-engine-ring0](entities/detection-cheat-engine-ring0.md) — kernel CE/DBVM debug-print callback PoC (DbgSetDebugPrintCallback; dbvm-mode string; gmh5225; CE)
 - [detection-hyper-v](entities/detection-hyper-v.md) — kernel-mode Hyper-V guest probe via KPCR/KPRCB PowerState (Win10 17763; KeGetPcr→CurrentPrcb; gmh5225; Hyper-v)
+- [DeviceTrust](entities/device-trust.md) — Kotlin + NDK Android integrity library (root/emulator/hook/custom ROM/bootloader checks; weighted risk scoring; Xheghun)
 - [DeviceWarLock](entities/device-warlock.md) — Android device HWID / lock SDK (Java/C++; networking, SDK gen, hooking; Detection:HWID)
 - [device_xiaomi_mondrian](entities/device-xiaomi-mondrian.md) — Pixel Experience Plus device tree for Redmi K60 / POCO F5 Pro (mondrian; Waipio / SM8475)
 - [DaliVM](entities/dalivm.md) — Python Dalvik VM emulator (DEX execution, Android API mocking, static analysis, string decryption, Multi-DEX; no Android runtime)

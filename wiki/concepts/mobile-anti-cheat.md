@@ -28,7 +28,8 @@ sources:
   - wiki/sources/descriptions/apkunpacker__RootAppDetector.md
   - wiki/sources/descriptions/apkunpacker__MagiskDetection.md
   - wiki/sources/descriptions/apkunpacker__DetectZygisk.md
-updated: 2026-08-18
+  - wiki/sources/descriptions/Xheghun__DeviceTrust.md
+updated: 2026-08-19
 confidence: medium
 ---
 
@@ -58,7 +59,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | VPN / proxy | `ConnectivityManager`/`NetworkCapabilities`, `/proc/net`, ioctl/netlink routes, localhost daemon port scans (Clash/sing-box); RASP SDKs such as [[rs-native-kit-security]]; per-app hide tooling such as [[vpnhide]] (Binder + kernel/Zygisk path filtering; no target-process hooks) (source: wiki/sources/descriptions/okhsunrog__vpnhide.md) |
 | Overlay / tapjacking | `TYPE_APPLICATION_OVERLAY` windows above sensitive views; `filterTouchesWhenObscured` input blocking; callback alerts via [[android-overlay-protection]] (Java library for overlay detection on login/payment flows) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-protection.md); offensive PoC [[android-overlay-malware-example]] (foreground-app monitor + credential-phishing overlay mimicking banking/social apps) (source: wiki/sources/descriptions/geeksonsecurity__android-overlay-malware-example.md) |
 
-Multi-check collections: [[detection]], [[android-native-root-detector]], [[root-app-detector]], [[magisk-detection]] (apkunpacker; archive of root/Magisk POC APKs with Zygisk, hook, bootloader, and root-app checks plus sample hashes; source: wiki/sources/descriptions/apkunpacker__MagiskDetection.md), [[detect-zygisk]] (apkunpacker; C++/JNI Zygisk-style injection POC via ptrace event messages; source: wiki/sources/descriptions/apkunpacker__DetectZygisk.md), [[duck-detector-refactoring]] (local Compose inspector with native probe cards for root/hook/mount/attestation/VM evidence; source: wiki/sources/descriptions/eltavine__Duck-Detector-Refactoring.md), [[magisk-killer]] (canyie; forked subprocess + pipe IPC; Magisk/MagiskHide tracer, bootloader, property-area, and PTS probes outside caller trace scope; source: wiki/sources/descriptions/canyie__MagiskKiller.md), archived [[magiskdetector]].
+Multi-check collections: [[detection]], [[android-native-root-detector]], [[root-app-detector]], [[magisk-detection]] (apkunpacker; archive of root/Magisk POC APKs with Zygisk, hook, bootloader, and root-app checks plus sample hashes; source: wiki/sources/descriptions/apkunpacker__MagiskDetection.md), [[detect-zygisk]] (apkunpacker; C++/JNI Zygisk-style injection POC via ptrace event messages; source: wiki/sources/descriptions/apkunpacker__DetectZygisk.md), [[duck-detector-refactoring]] (local Compose inspector with native probe cards for root/hook/mount/attestation/VM evidence; source: wiki/sources/descriptions/eltavine__Duck-Detector-Refactoring.md), [[device-trust]] (Xheghun; Kotlin coroutine API + NDK C++ root/hook/emulator/bootloader/SELinux probes; weighted risk score + categorized evidence; configurable thresholds or raw signal export for server-side scoring; source: wiki/sources/descriptions/Xheghun__DeviceTrust.md), [[magisk-killer]] (canyie; forked subprocess + pipe IPC; Magisk/MagiskHide tracer, bootloader, property-area, and PTS probes outside caller trace scope; source: wiki/sources/descriptions/canyie__MagiskKiller.md), archived [[magiskdetector]].
 
 ## Bypass strategies (research framing)
 
