@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:aclist/aclist.github.io`: entity [[aclist-github-io]] (static site; anti-cheat compatibility list + Linux gaming docs; HTML/CSS/JS; conservative manual verification; curated list + companion-tool guides; Anti-cheat compatibility list); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[crossover-patcher]] and [[holodori-kernel-bypass]].
+
 - **2026-08-19** — ingest `description:adam-040/Enigma`: entity [[enigma]] (standalone native C++ Ghidra SLEIGH/Pcode decompiler; SoftwareModeling + Utility reimplementation; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agent RE; adam-040; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghiradec]], [[pyre]], and [[viv-ghidra-decompiler]].
 
 - **2026-08-19** — ingest `description:adamhlt/ImGui-Standalone`: entity [[imgui-standalone]] (D3D11 external ImGui framework; EXE/DLL; own Win32 render window; VS x86/x64; game tooling / external menu prototyping); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[imgui]], [[d3dhook-imgui]], and [[external-imgui-cheat-menu-example-2023]].

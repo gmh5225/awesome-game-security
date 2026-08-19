@@ -126,6 +126,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [access](entities/access.md) — BTBD kernel syscall wrapper (`.data` hook; handleless `PROCESS_ALL_ACCESS` on protected processes; usermode DLL redirect; no SEH; Fortnite-tested; cheat / access)
 - [access-updated](entities/access-updated.md) — bromoket fork of btbd/access (Zydis pattern scan; `xKdEnumerateDebuggingDevices` `.data` hook; handleless KM process ops; Win10 1607+–Win11 24H2; cheat / access)
 - [AcDrv](entities/acdrv.md) — Windows kernel AC research driver (process/module callbacks, memory intercept, syscall monitoring; ETW Hook; gmh5225)
+- [aclist.github.io](entities/aclist-github-io.md) — static site: anti-cheat compatibility list + Linux gaming docs (HTML/CSS/JS; conservative manual verification; Anti-cheat compatibility list)
 - [AetherVisor](entities/aether-visor.md) — AMD SVM hacked-hypervisor testing (feature implementation walkthrough; Detection: Hacked Hypervisor Testing AMD; gmh5225)
 - [AdbFileManager](entities/adb-file-manager.md) — Windows ADB file manager (C#/.NET dual-pane Explorer UI; faster than MTP; Cheat Android File Explorer; gmh5225)
 - [ADB Debug Detect Checker](entities/adb-debug-detect-checker.md) — Android Java ADB/debug-state detection app (reference for ADB debugging probes; Anti Debugging; fiord)

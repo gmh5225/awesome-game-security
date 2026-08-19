@@ -295,6 +295,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cheap-engine.md
   - wiki/sources/descriptions/dbcyyds__MemDbg.md
   - wiki/sources/descriptions/danielkrupinski__x86RetSpoof.md
+  - wiki/sources/descriptions/aclist__aclist.github.io.md
   - wiki/sources/descriptions/dazi2011__crossover-patcher.md
   - wiki/sources/descriptions/gmh5225__cfclap.md
   - wiki/sources/descriptions/gmh5225__blood-hunt.md
@@ -1789,6 +1790,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Linux external CS2 cheats such as [[counterstrike2-linux-cheat]] (C++; memory analysis) sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yoshisaac__CounterStrike2-Linux-Cheat.md)
 - Linux ptrace TEB readers such as [[ptrace-read-teb]] (C++; read a process TEB under Linux for Wine/cheat research) sit in the Cheat > Wine lane. (source: wiki/sources/descriptions/pgarba__ptrace_read_teb.md)
 - macOS CrossOver patchers such as [[crossover-patcher]] (experimental; patches official CrossOver Wine/graphics runtimes for anti-cheat-protected Windows games on Apple Silicon; GUI or PatchCore CLI; verified CrossOver builds only) sit in the Cheat > Wine / macOS compatibility lane beside Linux Proton workflows. (source: wiki/sources/descriptions/dazi2011__crossover-patcher.md)
+- GNU/Linux anti-cheat compatibility references such as [[aclist-github-io]] (static site; curated Proton/Wine game compatibility plus Linux gaming guides; conservative manual verification; Anti-cheat compatibility list) support the same Cheat > Wine / Linux Proton lane for platform-support research. (source: wiki/sources/descriptions/aclist__aclist.github.io.md)
 - External CS2 samples such as [[cs2-cheat-cpp]] (C++; rendering / asset pipelines / SDK generation) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md)
 - External CS2 glow ESP such as [[cs-2-glow]] (C++; entity parse / offsets / external memory glow) sits in the same cheat / game:cs2 visual lane. (source: wiki/sources/descriptions/xvorost__CS-2-Glow.md)
 - Maintained CS2 offset/netvar dumps such as [[cs2-offsets]] (C++ headers + JSON; client/server layout after patches) and [[cs2-offsets-ro0ti]] (C#/C++; `[Offset]` tag) feed that same cheat / game:cs2 memory-layout lane. (source: wiki/sources/descriptions/sezzyaep__CS2-OFFSETS.md) (source: wiki/sources/descriptions/ro0ti__CS2-Offsets.md)
