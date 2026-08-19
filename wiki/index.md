@@ -1021,6 +1021,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [gb-studio](entities/gb-studio.md) — Game Boy adventure game creator (TypeScript/JS; driver/render/animation; Mac/Linux/Windows; GameBoy)
 - [gfred](entities/gfred.md) — Ghidra Command Palette extension (keyboard action search; prebuilt Ghidra 9.2.0 dist; cheat / Ghidra Plugins)
+- [ghinterfacescsgo](entities/ghinterfacescsgo.md) — Linux CS:GO interface/hook scaffold (C++; shared-object loader; minimal interface interaction; educational Linux hook base; VitorMob; cheat / game:csgo [Internal])
 - [ghidra](entities/ghidra.md) — Full NSA Ghidra RE framework source (Java decompiler, debugger integrations; gmh5225 mirror/fork)
 - [ghidra-bridge](entities/ghidra-bridge.md) — Python 3 bridge to Ghidra scripting (CPython outside Jython; external automation / gpt-wpre)
 - [ghidra-cpp-class-analyzer](entities/ghidra-cpp-class-analyzer.md) — Ghidra C++ class/RTTI analyzer (GCC/Clang/MSVC RTTI, vtables, ctors/dtors, inheritance; class hierarchy views; Java/Gradle; astrelsky)

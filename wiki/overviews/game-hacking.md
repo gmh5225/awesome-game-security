@@ -1292,6 +1292,7 @@ sources:
   - wiki/sources/descriptions/ZehMatt__zyemu.md
   - wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
+  - wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md
   - wiki/sources/descriptions/Vu1nT0tal__firmeye.md
   - wiki/sources/descriptions/WerWolv__ImHex.md
   - wiki/sources/descriptions/Washi1337__ghidra-nativeaot.md
@@ -1836,6 +1837,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific AVA (Alliance of Valiant Arms) samples such as [[ava-hack]] (boylin0; C/C++; DirectX / OpenGL / Vulkan graphics paths; cheat / game:ava) sit in the Korean-FPS offensive lane beside other title-specific FPS internals such as [[titancf]] and [[lazysight]]. (source: wiki/sources/descriptions/boylin0__AVA-Hack.md)
 - Actively developed Internal CS:GO samples such as [[sensum]] (martinjanas; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/martinjanas__Sensum.md)
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
+- Minimal Linux CS:GO interface/hook scaffolds such as [[ghinterfacescsgo]] (VitorMob; C++; shared-object loader + interface interaction; structure/setup focus rather than bundled gameplay features; educational Linux hook development; Internal tag) sit beside fuller Linux SDKs like [[csgo-linux-cheat-sdk]] for studying Source 1 interface wiring on non-Windows hosts. (source: wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md)
 - Linux-native internal CS:GO samples such as [[anubis]] (danielkrupinski; C++; process injection; ESP, aimbot, and related features via Source SDK hooks on client rendering and game events; complements [[osiris]] on non-Windows hosts) sit in the same cheat / game:csgo lane for studying Linux internal hook surfaces beside external cross-platform samples like [[goesp]]. (source: wiki/sources/descriptions/danielkrupinski__Anubis.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - External CS:GO samples such as [[nebulite-external]] (gmh5225; C/C++; memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__nebulite-external.md)

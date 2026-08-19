@@ -20,4 +20,4 @@ README tags it `[Linux]`. Treat as a Linux CS:GO SDK/sample for VAC-facing / non
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[gamesneeze]] · [[csgosimple]] · [[counterstrike2-linux-cheat]] · [[counterstrikesource-linux-trainer]] · [[vac3-inhibitor]]
+[[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[ghinterfacescsgo]] · [[gamesneeze]] · [[csgosimple]] · [[counterstrike2-linux-cheat]] · [[counterstrikesource-linux-trainer]] · [[vac3-inhibitor]]
