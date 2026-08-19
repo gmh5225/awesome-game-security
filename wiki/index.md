@@ -2536,6 +2536,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [vmp-devirtualization-lab](entities/vmp-devirtualization-lab.md) — Android native VMP devirt educational lab (mini-VM, dispatcher/handler recovery, symbolic lifting; QBDI/Unicorn/Triton/Frida; tomhamidi97-arch)
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)
+- [VirtualBox](entities/virtualbox.md) — Oracle open-source x86_64 VMM (CPU/memory virtualization, device emulation, guest additions, COM/IOCTL; hypervisor-internals and VM security research)
 - [virtualbox-kvm](entities/virtualbox-kvm.md) — VirtualBox with KVM backend (manual GPU accel; cheat / QEMU/KVM/PVE/VBOX research-host lane; cyberus-technology)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
 - [VMkatz](entities/vmkatz.md) — in-place VM snapshot/VHD cred extract (LSASS/SAM/LSA/NTDS; AC/IS forensics)
