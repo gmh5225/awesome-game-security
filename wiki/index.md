@@ -1623,6 +1623,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Milfuscator](entities/milfuscator.md) — x32 PE mutator (full rebuild; Zydis + AsmJit; AC Obfuscation Engine)
 - [microavx](entities/microavx.md) — IDA Pro Hex-Rays AVX lifter (`m_ext`→microcode; AVX coverage scraper; cheat / IDA Plugins / AVX Lifter)
 - [minecpp](entities/minecpp.md) — C++ Minecraft Java server backend (1.19; protocol/offensive-technique RE; gmh5225)
+- [Minecraft Anti-Cheat (UltraAntiCheat)](entities/minecraft-anti-cheat.md) — Spigot/Paper **1.13+** AC plugin (Java 17+ Maven; 13 movement/combat/block/packet modules; GCD rotation analysis; physics simulation + confidence scoring; ProtocolLib; AC bridges; web dashboard; XuanXuan-ZhengGui; Anti Cheat / game:minecraft)
 - [Minecraft AntiCheatAI](entities/minecraft-anticheatai.md) — DeepGuard Paper plugin (ONNX 1D-CNN scaffold detection; BehaviorRecorder + PyTorch training)
 - [Model Anti-Cheat](entities/model-anti-cheat.md) — DayZ server-side ML AC (mission telemetry logging, feature extraction, RandomForest aimbot/movement anomaly detection)
 - [mixed-boolean-transform](entities/mixed-boolean-transform.md) — source-to-source C++ MBA obfuscation (Z3-verified; Eigen3 + GMP; Cheat Mixed boolean-arithmetic)
