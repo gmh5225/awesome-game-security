@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:a0yark/ArcRaidersRadar-dma-Radar`: entity [[arc-raiders-radar-dma-radar]] (Arc Raiders DMA radar/ESP; C++; FPGA + MemProcFS external reads; Unicorn Engine emulates game decryption for GWorld/GameInstance/CameraManager/BoneBase; player/actor iteration; a0yark; cheat / game:arc raiders [DMA]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-dma-radar]], [[eft-dma-radar-1]], [[pubg-demo]], and [[unreal-object-model]].
+
 - **2026-08-19** — ingest `description:a0yark/DXInject-UC`: entity [[dxinject-uc]] (D3D11 shared-buffer GPU payload transport + HLSL compute-shader decode; Injector/Target split; named events + DXGI shared handles + shared memory; GPU-assisted process hollowing PoC; a0yark; injection:windows research); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[windows-process-injection]], [[dirty-vanity]], [[game-lag-reducer]], and sibling a0yark samples [[pubg-demo]] / [[duckov-marketmod]].
 
 - **2026-08-19** — ingest `description:a0yark/Duckov_marketmod`: entity [[duckov-marketmod]] (C# Duckov flea-market mod; UI + Steam-auth network API + WebSocket + Harmony patches + mod loader with version check/auto-update; RE-derived internals; a0yark; modding / online marketplace research); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[pubg-demo]], [[wellsanticheat]], [[goldberg-emulator]], and [[rce-shield]].
