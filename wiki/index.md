@@ -99,6 +99,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [better-string-analyzer](entities/better-string-analyzer.md) — Ghidra string analyzer plugin (Java; modding / Ghidra Plugins; fuzzypickles14)
 - [bethesda-modding-starter](entities/bethesda-modding-starter.md) — Bethesda F4SE/SFSE plugin bootstrap + Ghidra/x64dbg MCP RE (Fallout 4/Skyrim/Starfield; CommonLib; CMake/vcpkg; rollingrock)
 - [bevy](entities/bevy.md) — Rust data-driven ECS game engine (free OSS; Game Engine / source)
+- [bevy-personal-test](entities/bevy-personal-test.md) — Rust/Bevy multiplayer security testbed (rollback netcode, shadow-VM Wasm checks, Rhai sandbox VM, server replay validation; XX-Batsu)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [BigBaseV2](entities/bigbasev2.md) — GTA V C++/Lua mod-menu base (rendering / modding / hooking; cheat / game:gta5; gmh5225)
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
