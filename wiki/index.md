@@ -351,6 +351,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BYOUD](entities/byoud.md) — x64 unwind-metadata stack spoofing framework (klezVirus; Cheat Spoof Stack)
 - [BYOVD Lab](entities/byovd.md) — educational multi-driver AV/EDR kill PoCs (`viragt64.sys`, TfSysMon, ksapi64, BdApiUtil, `wsftprm.sys`; gmh5225)
 - [BYOVDFinder](entities/byovdfinder.md) — identify LOLdrivers not blocked by active HVCI policy (BYOVD path research under Memory Integrity; ghostbyt3)
+- [bypassHiddenApiRestriction](entities/bypass-hidden-api-restriction.md) — Android hidden non-SDK API bypass library (Java/Kotlin + JNI/CMake; Android 9–12; startup init; RE / compatibility / security research; WindySha)
 - [BYPASS-PUBG-MOBILE-IMGUI](entities/bypass-pubg-mobile-imgui.md) — PUBG Mobile AC bypass + ImGui menu (C/C++; hooking / memory; cheat / game:pubgm)
 - [Bypassing EasyAntiCheat Integrity check](entities/bypassing-easyanticheat-integrity-check.md) — EAC kernel driver self-integrity RE + bypass (CreateProcess/LoadImage notify; Capstone deobfuscator; section-compare C++; gmh5225 [Bypassing integrity check])
 - [boundcallback](entities/boundcallback.md) — KeRegisterBoundCallback research (C++; cheat / driver communication)

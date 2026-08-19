@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WindySha/bypassHiddenApiRestriction`: entity [[bypass-hidden-api-restriction]] (Android hidden non-SDK API bypass library; Java/Kotlin + JNI/CMake native; packaged dependency + startup init; Android 9–12; RE / compatibility / security research; WindySha); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[canyie-pine]], [[stoic]], [[frida]], and [[adbi]].
+
 - **2026-08-19** — ingest `description:WistfulHopes/NightSkyEngine`: entity [[nightsky-engine]] (open-source UE5 fighting-game framework; 2D/2.5D competitive fighters; C++ modules/plugins; GGPO rollback networking; collision editor; WistfulHopes; Game Engine); cited on [[overviews/game-engine]]; cross-linked [[fightinggame-ue5]], [[unrealengine5-ultimate-streetfighters]], and [[bevy-personal-test]].
 
 - **2026-08-19** — ingest `description:WithSecureLabs/CallStackSpoofer`: entity [[callstackspoofer]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[nimic-stack]], [[callstackspoofer-2]], and [[silent-moonwalk]].
