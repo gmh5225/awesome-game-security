@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `readme:categories`: Cheat ~2729 (+1; Anti Cheat ~682 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-19** — ingest `description:VitorMob/GHInterfacesCSGO`: entity [[ghinterfacescsgo]] (lightweight Linux CS:GO interface/hook base; C++; shared-object loader + minimal interface interaction; structure/setup focus rather than feature-heavy cheat framework; educational Linux game internals + hook development; VitorMob; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]]; cross-linked [[csgo-linux-cheat-sdk]], [[csgo-internal-base]], [[anubis]], [[gamesneeze]], and [[source-netvars]].
 
 - **2026-08-19** — ingest `description:VoidSec/ioctlpus`: entity [[ioctlpus]] (Windows DeviceIoControl repeater; C# WinForms GUI + CLI; craft/replay/save/edit arbitrary input/output buffers; repeater-style driver interface auditing and fuzzing prep; driver security research; VoidSec); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfb]], [[drvtrace]], [[cognitor]], and [[driver-buddy-reloaded]].
