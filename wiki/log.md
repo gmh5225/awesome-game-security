@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:acageduser/DMA-Attack-Firmware-Customization`: entity [[dma-attack-firmware-customization]] (Screamer Squirrel 35T [[pcileech-fpga]] manual RTL8111 NIC disguise guide; MindShare Arbor donor PCI config harvest; SystemVerilog/Vivado patch for VID/DID, BAR, DSN, capabilities; DMA validation + BattlEye/EAC evasion testing; acageduser); cited on [[overviews/dma-attack]] and [[pcileech-fpga]]; cross-linked [[pcileechgen]], [[pcileech-wifi]], [[easy-anti-cheat]], and [[battleye-re]].
+
 - **2026-08-19** — ingest `description:aclist/aclist.github.io`: entity [[aclist-github-io]] (static site; anti-cheat compatibility list + Linux gaming docs; HTML/CSS/JS; conservative manual verification; curated list + companion-tool guides; Anti-cheat compatibility list); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[crossover-patcher]] and [[holodori-kernel-bypass]].
 
 - **2026-08-19** — ingest `description:adam-040/Enigma`: entity [[enigma]] (standalone native C++ Ghidra SLEIGH/Pcode decompiler; SoftwareModeling + Utility reimplementation; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agent RE; adam-040; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghiradec]], [[pyre]], and [[viv-ghidra-decompiler]].
