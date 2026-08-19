@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Fortnite-Leak5.md
   - wiki/sources/descriptions/gmh5225__UE-UnrealEngineSDK.md
   - wiki/sources/descriptions/cheat-engine__UnrealEngineTools.md
+  - wiki/sources/descriptions/Zebratic__UE4Injector.md
 updated: 2026-08-19
 confidence: high
 ---
@@ -51,7 +52,7 @@ Common fields include vtable, flags, internal index, class pointer, name, and ou
 ## SDK generation workflow
 
 1. Identify UE version from binary signatures or strings
-2. Inject Dumper-7 (or live-script via UE4SS) into the running process
+2. Inject Dumper-7 (or live-script via UE4SS) into the running process — UE4-specific injection PoCs such as [[ue4-injector]] (Zebratic; C++; legacy UE4 vulnerability for shellcode/DLL load into target game processes; security research into UE4 process-injection vectors and AC implications) document engine-specific inject paths beside generic dumper workflows. (source: wiki/sources/descriptions/Zebratic__UE4Injector.md)
 3. Output C++ headers with UObject hierarchy (`UObject`, `FName`, `UClass`, `UFunction`, `UProperty`)
 4. Alternatives: external C++ dumpers such as [[unrealdumper-4-25]] (pattern-scan `GObjects`/`GNames`; no inject), modular Frida dumps such as [[ts-ue4dumper]], live explorers such as [[unrealengine4-swissknife]] (source: wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md) official Cheat Engine Lua scripts such as [[unreal-engine-tools]] (UEInfoScanner + UEInfoStructureDissect; auto-discovers `GNames`/`GObjects`/`UObject`/`UClass`/`FProperty` across UE4/UE5 via memory scan, vtable checks, and signature probing without injection; Structure Dissect with FName-to-string custom type) sit in the same no-inject interactive explorer lane. (source: wiki/sources/descriptions/cheat-engine__UnrealEngineTools.md) UE4-aware Cheat Engine frameworks such as [[ue4-cheat-engine]] (Android; memory scan, `GObject` enumeration, `UProperty` traversal, SDK generation) sit in the same interactive explorer lane. (source: wiki/sources/descriptions/gmh5225__ue4_cheat_engine.md) Pre-collected UE4/UE5 SDK header kits such as [[ue-unreal-engine-sdk]] (gmh5225; class/struct layouts + function signatures for injected internal cheats/mods) complement live dumpers when a title-specific regen is unnecessary. (source: wiki/sources/descriptions/gmh5225__UE-UnrealEngineSDK.md)
 
@@ -61,4 +62,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

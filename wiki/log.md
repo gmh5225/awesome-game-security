@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Zebratic/UE4Injector`: entity [[ue4-injector]] (UE4 process-injection PoC; C++; legacy UE4 vulnerability for shellcode/DLL payloads; Visual Studio CLI; privilege requirements; may affect unpatched UE4 titles; Zebratic; Inject); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[windows-process-injection]], [[guided-hacking-injector]], [[injectors]], and [[the-perfect-injector]].
+
 - **2026-08-19** — ingest `description:ZehMatt/CovCane`: entity [[covcane]] (experimental Windows x86-64 DBI framework; C++; loader + instrumentation runtime; translation/rewriting/memory/exception handling; Zydis + AsmJIT; RE / runtime analysis; ZehMatt); cited on [[overviews/reverse-engineering]] and [[dynamic-binary-instrumentation]]; cross-linked [[zyemu]], [[x64dbg-playtime]], [[dynre-x86]], [[cpp-veh-dbi]], and [[tinyinst]].
 
 - **2026-08-19** — ingest `description:ZehMatt/SnakeRoyal`: entity [[snake-royal]] (C++ lightweight multiplayer Snake prototype; custom networking; serialization/sockets; CLI host/join; optional headless server; real-time multiplayer learning; ZehMatt; Game Develop / Mini Game With Server); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[2048-cpp]], [[jumpy]], [[x64dbg-playtime]], and [[zyemu]].
