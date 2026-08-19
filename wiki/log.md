@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:adspro15/km-um-communication`: entity [[km-um-communication]] (learning-focused C/C++ KM↔UM IPC examples; request dispatch, event coordination, cross-boundary data exchange; RE / game-security); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[driver-communication-list]], [[kernel-payload-comms]], [[cfb]], and [[drvtrace]].
+
 - **2026-08-19** — ingest `readme:categories`: Cheat ~2727 (+1; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-19** — ingest `description:advanced-threat-research/GhidraScripts`: entity [[ghidrascripts]] (maintained Java GhidraScript collection; AI-assisted renaming, complexity visualization, Golang support, BSim matching, FunctionID DB generation, SHAREM/Malpedia enrichment; scalable static analysis for malware/RE including game security; cheat / Some scripts); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-scripts]], [[ghidrametrics]], [[ghidriff]], and [[ghidrassist]].

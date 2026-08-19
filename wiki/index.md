@@ -1362,6 +1362,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kinject](entities/kinject.md) — kernel map + APC inject (C/C++; cheat / injection:windows)
 - [kli](entities/kli.md) — header-only KM lazy import resolver (C++; Anti Cheat / Lazy Importer)
 - [kli-ex](entities/kli-ex.md) — extended KM lazy import fork (random seeds, caching, hidden globals; gmh5225)
+- [km-um-communication](entities/km-um-communication.md) — Windows KM↔UM IPC learning examples (C/C++; request dispatch, event coordination, cross-boundary exchange; adspro15)
 - [kit](entities/kit.md) — C/C++ pixels tooling + asset pipelines (Game Engine / Image Codec)
 - [kitsupe](entities/kitsupe.md) — PE parser/editor (headers, sections, imports/exports, relocations, resources; binary patching; cheat / PE; gmh5225)
 - [kittymemory-ios](entities/kittymemory-ios.md) — iOS runtime memory library (patch/hook/pattern scan; jailbreak-independent code patching; cheat / iOS memory explorer; gmh5225)
