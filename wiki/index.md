@@ -2169,6 +2169,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [source2dumps](entities/source2dumps.md) — aggregated Source 2 netvars/interfaces/class IDs (Dota 2, Artifact, HL:Alyx, Sandbox; C++ headers; [Dump])
 - [Splendid Implanter](entities/splendid-implanter.md) — BattlEye-compatible user-mode injector (secret.club; exploits UM BE flaw; Injector)
 - [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)
+- [Speedhack](entities/speedhack.md) — Lightweight Windows Detours timing-API hook DLL (accelerate/slow/pause perceived runtime; cheat / SpeedHack; time-tampering research)
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 - [spoof-stack-SafeCall](entities/spoof-stack-safecall.md) — Windows return-address spoofing library (SafeCall; fake legitimate stack returns; Cheat Spoof Stack; gmh5225)
 - [sprite-sheet-creator](entities/sprite-sheet-creator.md) — AI 2D pixel-art sprite sheets & parallax backgrounds (fal.ai; Next.js; walk/jump/attack/idle, sandbox; AI category)
