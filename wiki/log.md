@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Zetolac/FortniteExternalExploits`: entity [[fortnite-external-exploits]] (external Fortnite exploit PoC snippets; C++ direct memory writes for position manipulation and spin-style logic; raw external memory manipulation fragments; Zetolac; cheat / game:fortnite [External Exploits]); cited on [[overviews/game-hacking]]; cross-linked [[fortnite-external-w2s]], [[fortnite-offsets-and-sigs]], and [[fortnite-exploits]].
+
 - **2026-08-19** — ingest `description:Zetolac/FortniteExternalW2S`: entity [[fortnite-external-w2s]] (C++ external W2S PoC; camera/viewpoint memory read + decrypt; matrix construction + perspective projection for ESP overlays; Zetolac; cheat / game:fortnite); cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[fortnite-w2s-offset-fortnite]], [[fortnite-camera-cache-pov]], and [[fortnite-offsets-and-sigs]].
 
 - **2026-08-19** — ingest `description:Zetolac/FortniteOffsetsAndSigs`: entity [[fortnite-offsets-and-sigs]] (compact Fortnite offsets + signatures reference; C++ pattern-scan examples, key global offset notes, address derivation and string-decryption helpers; signature-based relocation after patches; Zetolac; cheat / game:fortnite [Offset]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]], [[fortnite-sigs]], [[fortnite-sigs-updated-every-update]], and [[gh-offset-dumper]].
