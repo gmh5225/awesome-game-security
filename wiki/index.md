@@ -464,7 +464,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cozinha-loader](entities/cozinha-loader.md) — CS:GO C++ remote-download inject loader (process hollowing/manual map; anti-debug + string encryption + import obfuscation; b1scoito [Injector])
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)
-- [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client (Game Develop / Source; Android ADB)
+- [cs16-client](entities/cs16-client.md) — rewrote CS1.6 client forks (thomaseichhorn Game Develop / Source; Velaron Xash3D FWGS cross-platform/mobile; preservation + RE)
 - [cs16-trigger-kvm](entities/cs16-trigger-kvm.md) — KVM/QEMU host-side CS1.6 triggerbot (guest memory read + input injection; cheat / game:cs1.6; gmh5225)
 - [CSHackCreator-2-Demo](entities/cshackcreator-2-demo.md) — no-code CS1.6 cheat generator (C/C++; OpenGL + Vulkan + rendering; user-input custom output; cheat / game:cs1.6; gmh5225)
 - [cs2-anticheat](entities/cs2-anticheat.md) — CS2 in-binary anticheat code documentation (danielkrupinski; June 2023 update; modding/debugging; explore anticheat:cs2)
