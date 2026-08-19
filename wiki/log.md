@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZehMatt/zyemu`: entity [[zyemu]] (WIP x86-64 user-mode emulator; JIT handler codegen + code cache; Zydis decode/encode; CPU/memory core; C++; low-level emulation / binary analysis; ZehMatt); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[emulator]], [[dynre-x86]], [[chasm]], and [[kubera]].
+
 - **2026-08-19** — ingest `description:clementine44613/seiun-ac`: entity [[seiun-ac]] (Fabric **1.21.11** client-integrity AC; hash whitelists/blacklists/gray lists for installed mods and resource packs on join; Mixins + custom client-server packets; mid-session resource-pack change detection; kick/warn; Discord webhook alerts; in-game list reload commands; complements Discord-based whitelisting in the same project family; clementine44613; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheatf]], [[windfall-anticheat]], [[local-anticheat-1-8-9]], [[jaranalyzer]], and [[lenrete-mod]].
 
 - **2026-08-19** — ingest `description:poli0981/wardsweep`: entity [[wardsweep]] (Windows Rust/WPF tool to audit installed kernel anti-cheats (EAC, BE, Vanguard, ACE), export reports, uninstall orphaned drivers/services, and sweep leftover registry and filesystem residue; signed TOML catalog; quarantine/rollback; split-privilege IPC; legitimate cleanup—not ban evasion or runtime AC tampering; poli0981); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[easy-anti-cheat]], [[battleye]], [[vanguard]], and [[openark]].
