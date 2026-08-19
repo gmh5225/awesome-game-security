@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZDoom/gzdoom`: entity [[gzdoom]] (modder-friendly Doom source port; C/C++; OpenGL/Vulkan rendering; ZScript/mod scripting; gameplay extensions; cross-platform engine development; GPLv3; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[doomretro]], [[devilution]], and [[game-design-documents]].
+
 - **2026-08-19** — ingest `description:ZEROWyt/Overwatch-2-TOPE-EXTERNAL-CHEAT`: entity [[overwatch-2-tope-external-cheat]] (C++ external Overwatch 2 cheat framework; Visual Studio; configurable aimbot + ImGui visual overlay helpers; memory-access utilities / pattern-scan / offsets / Windows input handling; external cheat design + RE workflows; ZEROWyt; cheat / game:overwatch2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[overwatch-2-cheat-aimbot-esp]], [[overwatch2-colorbot-cheats]], [[ow-outlines]], and [[meowsense]].
 
 - **2026-08-19** — ingest `description:ZZZ-Monster/bloodhunt_External`: entity [[bloodhunt-external]] (C++ external Blood Hunt cheat; Visual Studio solution; ImGui DirectX 9 overlay + memory-access helpers / offsets / config headers; mhyprot-related driver utilities for low-level process interaction; external cheat architecture + AC evasion research; ZZZ-Monster; cheat / game:bloodhunt [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[blood-hunt]], [[mhyprot2]], [[easy-anti-cheat]], and [[fortnite-external-cheat-source-code]].
