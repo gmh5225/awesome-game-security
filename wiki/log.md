@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:adem-hosni/AtomicShieldClient`: entity [[atomicshieldclient]] (Windows FiveM AC client; C#/.NET tray agent + WebView2 dashboard; native C++ engine with process/module/heuristic/manual-mapping guards, anti-debug, HWID, screenshots; EngineLoader/RuntimeLoader manual-map + named pipes; encrypted HTTP/WebSocket server backend; adem-hosni); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[certael]], [[sentinelac]], [[windfall-anticheat]], and [[faultline]].
+
 - **2026-08-19** — ingest `readme:categories`: Cheat ~2728 (+1; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-19** — ingest `description:adrianyy/rw_socket_driver`: entity [[rw-socket-driver]] (Windows KM driver; C/C++; protected-process memory R/W over kernel sockets; manual-map oriented; external cheat comm without in-process hooks; cheat development / AC robustness research; cheat / Socket); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ksocket]], [[kernel-payload-comms]], [[km-um-communication]], [[ntmemory]], and [[read-write-driver]].

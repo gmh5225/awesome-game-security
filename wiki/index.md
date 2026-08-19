@@ -1860,6 +1860,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [PE-Packer](entities/pe-packer.md) — C/C++ PE X86 binary packer (Anti Cheat → Binary Packer `[X86]`; czs108)
 - [AtomPePacker](entities/atom-pe-packer.md) — Windows PE X64 compress+encrypt packer (runtime stub; import/relocation/TLS restore; Anti Cheat → Binary Packer `[PE X64]`; gmh5225)
+- [AtomicShield Client](entities/atomicshieldclient.md) — FiveM Windows AC client (C#/.NET tray agent + WebView2; native C++ engine; manual-map loaders; process/module/heuristic guards; server-backed enforcement; adem-hosni)
 - [PEPacker](entities/pepacker.md) — C++ PE X64 packer (asset pipeline; Anti Cheat → Binary Packer `[PE X64]`)
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [peekaboo](entities/peekaboo.md) — modular malware-behavior emulator (safe C2/persistence/lateral-movement; Python CLI/TUI/Flask + C/C++ modules; MITRE ATT&CK + Sigma/YARA + VT; purple-team / detection engineering; cocomelonc)
