@@ -20,4 +20,4 @@ Distinct from ScriptHookV cheat frameworks such as [[phake]], Python memory-anal
 
 ## Related
 
-[[phake]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[alt-v-anticheat-guide]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[research-rigor]]
+[[phake]] · [[yimmenu]] · [[gta5cheat]] · [[gta5cheat-qt]] · [[gta5view]] · [[alt-v-anticheat-guide]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[research-rigor]]

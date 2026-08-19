@@ -2644,6 +2644,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [YaraVM](entities/yaravm.md) — IDA processor/loader for compiled YARA (`.yar.bin` bytecode/regex disasm; `libyara.til`; cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
+- [YimMenu](entities/yimmenu.md) — GTA menu-ecosystem Lua API/command docs (documentation-only after source removal; LibreTranslate chat-translation setup; script developers; YimMenu)
 - [Yuri](entities/yuri.md) — Minecraft 1.8.9 MCP Java hack client (Gradle; bundled Java 8 + full assets; Watchdog/Polar/Grim bypass modules; unleg1t; cheat / game:minecraft)
 - [yuzu-android](entities/yuzu-android.md) — yuzu Switch emulator Android port (ARM64 JIT; Vulkan/OpenGL; Nintendo Switch lane)
 - [yourgamelib](entities/yourgamelib.md) — cross-platform C++11 OpenGL/OpenGL ES game framework (CMake; GLFW/GLM/ImGui/Lua/Box2D/Bullet/miniaudio; desktop/Android/web; Game Engine)
