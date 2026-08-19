@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Zenlua/Tool-Tree`: entity [[tool-tree]] (Android ROM/APK unpack-repack toolkit; Kotlin/Java + Bash; boot/dtbo/ext4/erofs/f2fs/payload/super/APK/APKS/APEX/CAPEX; apktool-style decode/build, signing, BusyBox; root or non-root; Addon/Apkon modules; Zenlua); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apk-sh]], [[android-modding]], and [[termux-app]].
+
 - **2026-08-19** — ingest `description:ZentifyZ/CRC32`: entity [[crc32]] (C++ Facepunch Rust internal cheat framework; visuals/hooks/math/weapon-logic modules; Unity/IL2CPP data access + ImGui menu; detours/pattern-scan/spoofcall bypass utilities; cheat development + AC bypass experimentation; ZentifyZ; cheat / game:rust); cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[kors-lol]], [[rust-rustinternal]], [[rust-internal]], [[simple-rust-base]], and [[simple-rust-hack]].
 
 - **2026-08-19** — ingest `description:ZentifyZ/Kors_lol`: entity [[kors-lol]] (C++ Facepunch Rust internal cheat source; rendering/hook-management/gameplay modules; ESP visuals, Unity/IL2CPP structure access, ImGui menu; detours/import-scan/spoofcall utilities; cheat prototyping + RE practice; ZentifyZ; cheat / game:rust [Internal]); cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[rust-rustinternal]], [[rust-internal]], [[simple-rust-base]], and [[simple-rust-hack]].
