@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:VeroFess/PalWorld-Server-Unoffical-Fix`: entity [[palworld-server-unoffical-fix]] (unofficial Palworld dedicated-server binary patches; Linux + Windows assets, batch scripts, hash verification; memory-leak / CPU mitigation on older builds; prebuilt binaries + patching infrastructure; server stability + early server-side AC experimentation; VeroFess; Server patch); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[docker-palworld-dedicated-server]], [[palworld-server-modding]], [[palworld-rcon]], and [[palworld-anti-cheat]].
+
 - **2026-08-19** — ingest `description:Veuqx0/ImGui-Spoofer-Leaked`: entity [[imgui-spoofer-leaked]] (leaked Windows HWID spoofer; C++; ImGui GUI + loader/mapper kernel components + WinAPI routines; debugger/process anti-analysis; ban-evasion spoofer structure study; Veuqx0; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[imgui]], [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]], [[full-hwid-spoofer-v6]], [[hwid-spoofer-eac-be]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
 
 - **2026-08-19** — ingest `description:ViRb3/swift-ida`: entity [[swift-ida]] (IDA Pro plugin; Python; context-menu retag for Swift/Golang/fastcall calling conventions; tuple-like multi-return struct generation for clearer decompilation; modern language runtime/ABI RE; ViRb3; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[happyida]], [[golang-loader-assist]], [[goresym]], and [[demumble]].
