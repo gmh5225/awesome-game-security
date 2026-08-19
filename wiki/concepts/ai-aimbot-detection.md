@@ -21,7 +21,8 @@ sources:
   - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
   - wiki/sources/descriptions/dqforgive-sudo__pubg-ai-yolov4.md
   - wiki/sources/descriptions/chrisgdt__DELBOT-Mouse.md
-updated: 2026-08-17
+  - wiki/sources/descriptions/Zurek0x__NuremX.md
+updated: 2026-08-19
 confidence: medium
 ---
 
@@ -68,6 +69,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[camera-triggerbot]] — camera triggerbot (movement/color around crosshair; no trained model; cheat / triggerbot & aimbot)
 - [[opencv-smart-aimbot]] — OpenCV + triggerbot (C++; classical CV; cheat / triggerbot & aimbot; gmh5225)
 - [[ai-fps-b00m-h3adsh0t]] — external FPS aimbot (Python/C++; screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
+- [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[battlerite-bot]] — Battlerite arena brawler automation bot (memory or screen recognition; ability casting, targeting, movement; gmh5225)
 - [[auto-simulated-universe]] — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; gmh5225)

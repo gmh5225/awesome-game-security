@@ -1725,6 +1725,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nullmap](entities/nullmap.md) — Windows driver mapper with post-map trace cleanup (header zero, pool unlink; Afd.sys; gmh5225)
 - [NullDriverCheat](entities/nulldriver-cheat.md) — Win11 Null-pattern dxgkrnl export hook (`NtOpenCompositionSurfaceSectionInfo`; covert KM↔UM R/W + GDI helpers; gmh5225)
 - [nstool](entities/nstool.md) — general-purpose Switch read/extract tool (console emulator / Switch research)
+- [NuremX](entities/nuremx.md) — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; Windows/Linux; no memory hooking; cheat / [AI]; Zurek0x)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
 - [nzPerspective](entities/nz-perspective.md) — D3D9 hooking sample (C/C++; cheat / game:tgame; gmh5225)
 - [OAC](entities/oac.md) — Open Anti-Cheat demand-start framework (x64 kernel driver + user-mode client; ObCallbacks handle filtering, cross-view integrity checks, PiDDB/MmUnloadedDrivers forensics; lauralex)
