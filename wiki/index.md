@@ -1068,6 +1068,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [glfm](entities/glfm.md) — GLFW-inspired single-header C API for OpenGL ES/Metal mobile windowing (iOS/tvOS/Android/Emscripten; touch/keyboard/sensors; Write OpenGL ES code in C/C++)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
+- [grafana-final-scanner](entities/grafana-final-scanner.md) — Grafana CVE scanner (path traversal/SSRF/auth bypass/info disclosure; version fingerprinting + config analysis; HTML/CSV/JSON reports; Cheat / RE Tools)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [Game-GTA-re3](entities/game-gta-re3.md) — Reverse-engineered GTA III & Vice City engines (re3/reVC; decompiled portable C++; cross-platform incl. PS Vita; CMake; gmh5225)

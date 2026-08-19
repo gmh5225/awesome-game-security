@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Zierax/Grafana-Final-Scanner`: entity [[grafana-final-scanner]] (Grafana vulnerability scanner; public CVE checks incl. path traversal/SSRF/auth bypass/info disclosure; version fingerprinting + config analysis; parallel scan + auth; HTML/CSV/JSON reports; Cheat / RE Tools; Zierax); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[cve-maker]] and [[retools]].
+
 - **2026-08-19** — ingest `description:ZoondEngine/NoBastian_v2`: entity [[nobastian-v2]] (Windows C++ named-pipe client/server memory toolkit; handle inspection + elevated-handle acquisition; remote RPM/WPM/protect/alloc/module-base; low-level game-hacking and handle-based AC evasion research; Elevating Handle By LSASS; ZoondEngine); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[libelevate]], [[handle-ripper]], [[lsass-dump-that-lsass]], and [[km-um-communication]].
 
 - **2026-08-19** — ingest `description:Zpes/mouse-input-injection`: entity [[mouse-input-injection]] (C++ PoC; undocumented **NtUserInjectMouseInput** syscall with custom input structures + movement/click interface; alternative to `SendInput`; automation / input emulation / cheat-adjacent research; Zpes); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ntuserinjectmouseinput-syscall]], [[kernel-mouse]], [[hardware-input-injection]], and [[mouseclassservicecallbacktrick]].
