@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:aahmad097/AlternativeShellcodeExec`: entity [[alternative-shellcode-exec]] (Windows callback-API shellcode execution PoCs; C++ Visual Studio samples; position-independent shellcode without CreateThread; API abuse / injection-path evasion; aahmad097); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[jektor]], [[obj2shellcode]], [[scfw]], and [[windows-process-injection]].
+
 - **2026-08-19** — ingest `description:abcz316/SKRoot-linuxKernelRoot`: entity [[skroot-linux-kernel-root]] (Android Linux kernel root patch toolkit; C/C++ + Java/JNI; deeply hidden root, su install/inject, multi-kernel without rebuild; abcz316); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[apatch]], [[kernelpatch]], and [[rw-proc-mem33]].
 
 - **2026-08-19** — ingest `description:abcz316/rwProcMem33`: entity [[rw-proc-mem33]] (ARM64 Linux kernel driver suite; process memory R/W, HW breakpoints, CE-style server demos, privilege elevation, module hiding; C/C++ KM + UM demos; abcz316); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[rwmem]], [[root-socket-kit]], and [[kernel-hack]].

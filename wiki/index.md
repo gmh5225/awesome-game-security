@@ -138,6 +138,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Alaa-8ball-pool-source-exposed](entities/alaa-8ball-pool-source-exposed.md) — exposed 8 Ball Pool mobile cheat source (physics reads; aim assist / trajectory / shot power; guideline overlay; gmh5225)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui; AC/obfuscation-engine research)
 - [Allocating individual pages](entities/allocating-individual-pages.md) — `MmAllocateIndependentPagesEx` isolated kernel page alloc (stealth manual-map; pool-tag evasion; gmh5225)
+- [Alternative Shellcode Exec](entities/alternative-shellcode-exec.md) — Windows callback-API shellcode execution PoCs (Visual Studio samples; position-independent code without CreateThread; user-mode evasion / shellcode engine & tricks; aahmad097)
 - [APatch](entities/apatch.md) — Android kernel/system patch root (KernelPatch boot.img; SuperKey above root; stock GKI; Cheat / Android root)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
 - [apple-lite-fortnite-cheat](entities/apple-lite-fortnite-cheat.md) — Apple Lite Fortnite Cheat leak + Police remake (C/C++; kernel + shader + modding; gmh5225; cheat / game:fortnite)
