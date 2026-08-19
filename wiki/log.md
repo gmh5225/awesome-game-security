@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:YMY1666527646/Phoenix-Valorant-Cheat`: entity [[phoenix-valorant-cheat]] (Valorant external cheat; C++; Visual Studio; ESP/aimbot/rage-mode; OpenGL/GLFW + ImGui menu/overlay; offset defs + vector math + external memory-interaction helpers; game security research / external cheat architecture; YMY1666527646; cheat / game:valorant [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[valorant-external-1]], [[valorant-external-cheat]], [[valorant-external-source]], [[ue4-base]], [[nigusfn]], and [[vanguard]].
+
 - **2026-08-19** — ingest `description:YMY1666527646/nigusFN`: entity [[nigusfn]] (Fortnite external cheat source; C++; recreates nigusFN-style interface/feature set; DirectX 9 ImGui menu + driver/utility components; item definitions + config headers + menu logic; external cheat UI design + EAC-oriented tooling workflows; YMY1666527646; cheat / game:fortnite [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[fortnite-external-cheat-source-code]], [[fortnite-external-cheat-base]], [[ue4-base]], and [[easy-anti-cheat]].
 
 - **2026-08-19** — ingest `description:YMY1666527646/ue4_base`: entity [[ue4-base]] (C++ UE4 cheat base; reusable SDK wrappers + MinHook PostRender hook infrastructure; world/actor/canvas helpers; lazy_importer/xorstr; W2S in-game actor drawing; game security research / rapid UE4 analysis prototyping; YMY1666527646; SDK Template); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[ue4genny]], [[ue4-injector]], [[ue4-freecam]], [[shootergame-hack]], [[unreal-object-model]], and [[world-to-screen]].

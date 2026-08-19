@@ -1913,6 +1913,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
 - [phantom-client](entities/phantom-client.md) — Lunar Client 1.8.9 internal DLL (JNI/JVMTI; wglSwapBuffers/MinHook ImGui; evasion profiles; cheat / game:minecraft)
 - [phake](entities/phake.md) — GTA V mod menu / cheat framework (ScriptHookV or DMA; RAGE engine hooks; vehicle spawn / ESP / god mode; cheat / `[Mod Menu]`)
+- [Phoenix-Valorant-Cheat](entities/phoenix-valorant-cheat.md) — Valorant external cheat (C++; ESP/aimbot/rage-mode; OpenGL/GLFW + ImGui menu/overlay; offset defs + vector math + external memory helpers; YMY1666527646; cheat / game:valorant [External])
 - [physmem_drivers](entities/physmem-drivers.md) — vulnerable physmem driver list (namazso; no PoC; Cheat Vulnerable Driver)
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [Piano Game](entities/pianogame.md) — C/C++ piano game (rendering/graphics focus; Game Develop / source)

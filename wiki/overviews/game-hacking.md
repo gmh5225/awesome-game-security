@@ -1287,6 +1287,7 @@ sources:
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
   - wiki/sources/descriptions/YMY1666527646__ue4_base.md
   - wiki/sources/descriptions/YMY1666527646__nigusFN.md
+  - wiki/sources/descriptions/YMY1666527646__Phoenix-Valorant-Cheat.md
 updated: 2026-08-19
 confidence: high
 ---
@@ -1951,6 +1952,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Open-source Valorant external cheat **VEX** such as [[valorant-external-cheat]] (bootmgfw; C++20; modular UE5 SDK + kernel driver abstraction; aimbot/triggerbot/lineups; DX11 ImGui overlay; VGK offset/decrypt subsystem; LLVM obfuscation in release; cheat / game:valorant [External]) sits in the same lane beside [[lithium-kernel]] from the same author for studying modular external architecture under [[vanguard]]. (source: wiki/sources/descriptions/bootmgfw__Valorant-External-Cheat.md)
 - Leaked Valorant external P2C source such as [[valorant-external-p2c-leaked]] (ESP/aimbot/triggerbot; kernel driver RPM; UE state reads under [[vanguard]]; typical commercial external architecture; README `[External]`; gmh5225) sits in the same out-of-process cheat / game:valorant lane for studying P2C design patterns and bypass techniques. (source: wiki/sources/descriptions/gmh5225__Valorant-External-P2C-Leaked.md)
 - Valorant external cheat samples such as [[valorant-external-1]] (C/C++; OpenGL overlay rendering; out-of-process cheat / game:valorant; gmh5225) sit in the same out-of-process cheat / game:valorant lane for studying non-DX overlay paths under [[vanguard]]. (source: wiki/sources/descriptions/gmh5225__Valorant-External-1.md)
+- Valorant external cheat samples such as [[phoenix-valorant-cheat]] (YMY1666527646; C++; Visual Studio; ESP/aimbot/rage-mode; OpenGL/GLFW + ImGui menu/overlay; offset defs + vector math + external memory-interaction helpers; cheat / game:valorant [External]) sit in that same user-mode external lane for studying OpenGL external architecture under [[vanguard]]. (source: wiki/sources/descriptions/YMY1666527646__Phoenix-Valorant-Cheat.md)
 - EFI manual-map loader research such as [[sumap]] (ekknod; C/C++; pre-boot unsigned driver PE mapping; driver development / memory analysis; cheat / EFI Manual Map) complements [[xigmapper]] and cheat stacks that consume EFI-loaded kernel drivers. (source: wiki/sources/descriptions/ekknod__sumap.md)
 - EFI runtime **`MmCopyMemory`** hook samples such as [[efi-monitor]] (ekknod; C/C++; PatchGuard-safe hooking; driver development / graphics / networking; cheat / EFI driver area; README `[Hooking MmCopyMemory PG safe]`) complement [[sumap]] for below-OS kernel memory-access paths. (source: wiki/sources/descriptions/ekknod__efi-monitor.md)
 - Custom **`KiSystemStartup`** research such as [[ki-system-startup-meme]] (ekknod; C/C++; kernel-level work / driver development / graphics; cheat / EFI driver area; README `[Custom KiSystemStartup]`) complements [[efi-monitor]] and [[sumap]] for early kernel-init hook paths loaded from below OS. (source: wiki/sources/descriptions/ekknod__KiSystemStartupMeme.md)
