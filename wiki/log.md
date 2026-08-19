@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WPO-Foundation/win-shaper`: entity [[win-shaper]] (Windows WFP callout traffic shaper; kernel driver + CLI/GUI; inject latency, bandwidth limits, packet loss, queue sizing on inbound/outbound traffic; Game Testing / adverse network emulation for games and network-sensitive software; WPO-Foundation); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[divert]], [[ndisapi]], [[packet-sniffer]], and [[gatling]].
+
 - **2026-08-19** — ingest `description:WPeace-HcH/WPeChatGPT`: entity [[wpechatgpt]] (OpenAI-compatible IDA Pro plugin; Python IDAPython; explain function behavior, rename variables, Python routine reconstruction, vulnerability checks from decompiled views; automated function-tree traversal + summarization; reverse engineers / game-security AI triage; WPeace-HcH; cheat / IDA Plugins / `[ChatGPT]`); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vulchatgpt]], [[daila]], [[ida-plugin-pcodegpt]], [[ida-llm-explainer]], and [[ida-gepetto]].
 
 - **2026-08-19** — ingest `description:WRXinYue/STS2-KitLib`: entity [[sts2-kitlib]] (Slay the Spire 2 modular in-game mod dev toolkit; C# Harmony IL patching; core host + satellite modules; browser dev console, cheat presets, Harmony patch analysis, MCP bridge for game-state queries/scripted actions, diagnostic ZIP export; Python build + TypeScript/Vue dev viewer; mod authors / RE / stress-test automation; WRXinYue; cheat / Game Develop); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheatengine-mcp-bridge]], [[duckov-marketmod]], [[wellsanticheat]], and [[positron]].
