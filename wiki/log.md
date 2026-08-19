@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vector35/tanto`: entity [[tanto]] (Binary Ninja program-slicing plugin; Python; HLIL variable/block relationship slices for faster code comprehension; Vector35; Cheat / [Slices Functions]); cited on [[overviews/reverse-engineering]]; cross-linked [[workflow-objc]], [[obfuscation-analysis]], [[binary-ninja-mcp]], [[bn]], [[triton-bn]], and [[seninja]].
+
 - **2026-08-19** — ingest `description:Vector35/workflow_objc`: entity [[workflow-objc]] (Binary Ninja Objective-C analysis workflow plugin; C++; rewrites objc_msgSend-style dynamic dispatch into inferred direct-call HLIL; macOS/iOS ObjC-heavy binaries; migrated into main BN API; Vector35; Cheat / [Objective-C]); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[aimachdec]], [[binja-kc]], and [[binary-ninja-mcp]].
 
 - **2026-08-19** — ingest `description:VedantRGosavi/UE5-MCP`: entity [[ue5-mcp]] (documentation-first Blender↔UE5 MCP pipeline concept; Markdown design/workflows; text-driven scene generation, asset transfer, level automation, Blueprint assistance; development paused; game pipeline + AI tooling reference; Game Develop / MCP); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[unreal-mcp]] and [[blender-mcp]].

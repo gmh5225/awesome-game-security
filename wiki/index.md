@@ -2316,6 +2316,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tabby](entities/tabby.md) — minimal PIC C shellcode micro-framework (PEB/EAT + FNV-1a API hashing; indirect NT syscalls; Linux mingw-w64/nasm → flat `.bin`; cocomelonc; AC shellcode engine & tricks)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
 - [tableflipper](entities/tableflipper.md) — partial PatchGuard disable up to Win11 21H2 (C++; cheat / PatchGuard-related; emlinhax)
+- [tanto](entities/tanto.md) — Binary Ninja program-slicing plugin (Vector35; Python; HLIL variable/block slices for faster comprehension; Cheat / [Slices Functions])
 - [taskbarhero-bot](entities/taskbarhero-bot.md) — TaskbarHero Unity IL2CPP external trainer/bot (C#/.NET 10; ACTk bypass, batch-read automations, WPF panel; matheusbranhann)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)
 - [Terminator](entities/terminator.md) — BYOVD AV/EDR/AC process terminator via Zemana `zam64.sys` (arbitrary process-termination IOCTL; gmh5225)
