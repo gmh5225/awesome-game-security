@@ -2540,6 +2540,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
 - [vpnhide](entities/vpnhide.md) — Android VPN hide (LSPosed system_server + GKI kretprobe/KernelPatch/Zygisk; ioctl/netlink/`/proc/net`; optional localhost ports block; Cheat Magisk)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
+- [WPeChatGPT](entities/wpechatgpt.md) — OpenAI-compatible IDA plugin: explain/rename, Python routine reconstruction, vuln checks, automated function-tree summarization (IDAPython; cheat / IDA Plugins / `[ChatGPT]`)
 - [vulkan](entities/vulkan.md) — PE dumper for Hyperion/Theia dynamic code encryption (NOACCESS page resolve; import fixup; Roblox/The Finals; atrexus; Dump lane)
 - [Vulkan-Hook](entities/vulkan-hook.md) — Vulkan API hook framework: `vkQueuePresentKHR` intercept + ImGui overlay menus / ESP (C++; Windows x86/x64; gmh5225)
 - [Vocem Overlay](entities/vocem-overlay.md) — Linux Discord in-game overlay (Vulkan implicit layer + OpenGL LD_PRELOAD interposer; daemon RPC/shared memory; HDR/Flatpak; overlay-injection research; ales-drnz)
