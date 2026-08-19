@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `readme:categories`: Cheat ~2728 (+1; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-19** — ingest `description:adrianyy/rw_socket_driver`: entity [[rw-socket-driver]] (Windows KM driver; C/C++; protected-process memory R/W over kernel sockets; manual-map oriented; external cheat comm without in-process hooks; cheat development / AC robustness research; cheat / Socket); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ksocket]], [[kernel-payload-comms]], [[km-um-communication]], [[ntmemory]], and [[read-write-driver]].
 
 - **2026-08-19** — ingest `description:adriengivry/Overload`: entity [[overload]] (open-source C++ 3D engine + integrated editor; Lua scripting; rendering, physics, audio, profiling, material tooling; runtime + editor; sample projects; engine attack-surface / tooling-internals research; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[lumixengine]], [[crown]], [[exengine]], [[optick]], and [[custom-game-engines]].
