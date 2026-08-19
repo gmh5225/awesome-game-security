@@ -943,6 +943,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [fn-dma-cheat](entities/fn-dma-cheat.md) — Fortnite DMA cheat sample (C++; Unreal Engine; cheat / game:fortnite [DMA])
 - [fortnite-3.5](entities/fortnite-3.5.md) — Fortnite 3.50 internal DLL (memory aimbot + ESP; zgui menu; user-generated UE SDK; gmh5225; [Internal])
+- [fortnite-cheat-leak](entities/fortnite-cheat-leak.md) — Leaked Fortnite internal cheat source (C++; MinHook + Detours hooks; gameplay/render/utility modules; no-spread / movement / vehicle / teleport; cheat architecture RE; Waihbe; cheat / game:fortnite [Internal])
 - [fortnite-cheat-source-internal](entities/fortnite-cheat-source-internal.md) — Fortnite internal: SDK generation + hooking (C++; cheat / game:fortnite)
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
 - [FunctionInliner](entities/function-inliner.md) — IDA Pro plugin: reverse clang function outlining (`--moutline`); inline outlined helpers per caller; restore Hex-Rays on ARM size-optimized binaries (Cellebrite Labs; cheat / IDA Plugins)
