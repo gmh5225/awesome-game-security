@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:YMY1666527646/nigusFN`: entity [[nigusfn]] (Fortnite external cheat source; C++; recreates nigusFN-style interface/feature set; DirectX 9 ImGui menu + driver/utility components; item definitions + config headers + menu logic; external cheat UI design + EAC-oriented tooling workflows; YMY1666527646; cheat / game:fortnite [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[fortnite-external-cheat-source-code]], [[fortnite-external-cheat-base]], [[ue4-base]], and [[easy-anti-cheat]].
+
 - **2026-08-19** — ingest `description:YMY1666527646/ue4_base`: entity [[ue4-base]] (C++ UE4 cheat base; reusable SDK wrappers + MinHook PostRender hook infrastructure; world/actor/canvas helpers; lazy_importer/xorstr; W2S in-game actor drawing; game security research / rapid UE4 analysis prototyping; YMY1666527646; SDK Template); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[ue4genny]], [[ue4-injector]], [[ue4-freecam]], [[shootergame-hack]], [[unreal-object-model]], and [[world-to-screen]].
 
 - **2026-08-19** — ingest `description:Yayoi-cs/fastDbg`: entity [[fastdbg]] (Go x64 ELF Linux debugger; ptrace breakpoints/memory/registers/disasm; CLI command interface; eBPF tracing + QEMU kernel-debug modules; lightweight RE/security toolchain; Yayoi-cs; x86_64 native/qemu kernel debugger); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[edb-debugger]], [[pince]], [[pawtrace]], [[klldb]], [[android-ebpf]], and [[qemu-blog]].
