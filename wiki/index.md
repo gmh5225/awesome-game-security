@@ -888,6 +888,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FallGuysSharp](entities/fall-guys-sharp.md) — Fall Guys C# IL2CPP cheat (managed injection; movement/gameplay mods; gmh5225)
 - [fallguys-frida-modmenu](entities/fallguys-frida-modmenu.md) — Fall Guys Android Frida mod menu (TypeScript; frida-il2cpp-bridge + frida-java-menu; Objection/APKEditor; repinek)
 - [fARM64](entities/farm64.md) — pure-Rust no_std AArch64 disassembler/encoder (iced-x86-shaped API; zero-heap decode; SVE/SME/SIMD/FP; semantic round-trip encode; wasm/bare-metal friendly; binsnake; cheat / RE tools)
+- [fastDbg](entities/fastdbg.md) — Go x64 ELF Linux debugger (ptrace breakpoints/memory/registers/disasm; CLI; eBPF tracing + QEMU kernel-debug modules; Yayoi-cs; x86_64 native/qemu kernel debugger)
 - [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)
 - [FlyingGuys](entities/flying-guys.md) — Fall Guys kernel cheat (KdMapper custom driver + ImGui overlay; zlib network manipulation; gmh5225)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)

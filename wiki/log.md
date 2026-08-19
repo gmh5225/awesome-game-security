@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Yayoi-cs/fastDbg`: entity [[fastdbg]] (Go x64 ELF Linux debugger; ptrace breakpoints/memory/registers/disasm; CLI command interface; eBPF tracing + QEMU kernel-debug modules; lightweight RE/security toolchain; Yayoi-cs; x86_64 native/qemu kernel debugger); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[edb-debugger]], [[pince]], [[pawtrace]], [[klldb]], [[android-ebpf]], and [[qemu-blog]].
+
 - **2026-08-19** — ingest `description:YcbrYL1/YCBR-AntiCheat`: entity [[ycbr-anticheat]] (Paper/Spigot **1.8.9** Minecraft AC plugin; Java 8 Maven; ProtocolLib async→main packet pipeline; 19 combat/movement/protocol checks; optional Grim-style physics prediction; offline auth, temp bans, DDoS connection guard, strict-mode thresholds, admin GUI; YcbrYL1; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[dakotaac]], [[windfall-anticheat]], [[local-anticheat-1-8-9]], [[phantom-client]], and [[yuri]].
 
 - **2026-08-19** — ingest `description:YimMenu/YimMenu`: entity [[yimmenu]] (documentation-only GTA menu-ecosystem repo; Lua API references, command docs, utility guides incl. LibreTranslate chat-translation setup; original source removed; script developers / Lua extension maintainers; YimMenu); cited on [[overviews/game-hacking]]; cross-linked [[spookimystic-gta-leak]], [[phake]], [[bigbasev2]], [[grandtheftautov-cheat]], and [[x64dbg-playtime]].
