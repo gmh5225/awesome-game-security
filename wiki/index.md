@@ -2035,6 +2035,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pyda](entities/pyda.md) — Python QEMU user-mode DBI (hook / mem / syscall / insn; Cheat DBI)
 - [PyAsmPatch](entities/pyasm-patch.md) — Python ARM ELF inline hooking for Unity IL2CPP `libil2cpp.so` (LIEF + Keystone + Capstone; static section merge, GOT patch, LDR fixup; InitArray hooks; axhlzy)
 - [PythonPlantsVsZombies](entities/python-plants-vs-zombies.md) — Python PvZ clone (graphics-focused; Game Develop / source)
+- [pythoncs2](entities/pythoncs2.md) — external CS2 cheat study (Python; PyMeow memory + overlay; DearPyGui config; ESP / recoil control; educational; Vekor64; cheat / game:cs2 [Python External])
 - [q3vm](entities/q3vm.md) — Quake III embeddable `.qvm` bytecode VM + LCC compiler (AC dynamic-script prototyping)
 - [qbdi-tracer-android](entities/qbdi-tracer-android.md) — Android QBDI + Dobby per-instruction native tracer (linker SO-load hooks, backtrace, memory/pattern scan; ARM64 Android/iOS)
 - [Hardened-qemu](entities/hardened-qemu.md) — stealth QEMU/KVM build hiding VirtualBox/VMware/Bochs/QEMU artifacts (anti-VM analysis VMs; Hidden QEMU)

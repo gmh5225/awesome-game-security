@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vekor64/PythonCS2`: entity [[pythoncs2]] (Python external CS2 cheat study; PyMeow memory access + overlay rendering; DearPyGui runtime config; ESP boxes/health/weapon/distance/lines + recoil control; educational external workflow reference; Vekor64; cheat / game:cs2 [Python External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[titled-gui-cs2]], [[cs2-external-cheat]], [[proext]], and [[meowsense]].
+
 - **2026-08-19** — ingest `description:Velaron/cs16-client`: updated entity [[cs16-client]] (Velaron fork; reverse-engineered CS1.6 client; C/C++; Xash3D FWGS; cross-platform/mobile; preservation + engine RE); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[xash-rt]], [[regamedll-cs]], and thomaseichhorn [[cs16-client]].
 
 - **2026-08-19** — ingest `description:VelocityRa/awesome-game-file-format-reversing`: entity [[awesome-game-file-format-reversing]] (curated game file-format/asset reversing resources; models/textures/animations/audio/archives/scripts/level data; general tools + Unity/Unreal/Source/CryEngine sections; modders/RE audience; VelocityRa); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[paksmith]], [[uassetgui]], [[uassetapi]], [[imhex]], and [[hexwalk]].
