@@ -40,6 +40,7 @@ sources:
   - wiki/sources/descriptions/skylot__raung.md
   - wiki/sources/descriptions/zoand__Injectors.md
   - wiki/sources/descriptions/zoand__BOOM.md
+  - wiki/sources/descriptions/Zetolac__FortniteOffsetsAndSigs.md
   - wiki/sources/descriptions/zinx-YT__Fortnite-Fltokens-and-offsets.md
   - wiki/sources/descriptions/zhuzhu-Top__deobf.md
   - wiki/sources/descriptions/zhuowei__cheese.md
@@ -1393,6 +1394,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Fortnite IDA-style byte-pattern signature sets such as [[fortnite-sigs]] (gmh5225; `GObjects`, `GNames`, `ProcessEvent`, player-controller helpers; per-build refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal address-discovery lane beside vtable dumps and offset fetchers. (source: wiki/sources/descriptions/gmh5225__fortnite-sigs.md)
 - Per-patch maintained Fortnite signature repos such as [[fortnite-sigs-updated-every-update]] (gmh5225; Season 2 Chapter 3+; `UWorld`, `GObjects`, `FnFree`, `GetNameByIndex`; pattern-mask notation; cheat / game:fortnite `[Offset]`) track UE global churn beside static signature sets. (source: wiki/sources/descriptions/gmh5225__Fortnite-SigsUpdatedEveryUpdate.md)
 - Fortnite memory offset and UE4 SDK structure tables such as [[fortnite-offsets]] (gmh5225; player entities, camera, bone arrays, weapons, engine globals; per-version refresh; cheat / game:fortnite `[Offset]`) sit in the same cheat / game:fortnite Unreal memory-layout lane beside signature and vtable dumps. (source: wiki/sources/descriptions/gmh5225__fortnite-offsets.md)
+- Compact Fortnite offset + signature maintenance repos such as [[fortnite-offsets-and-sigs]] (Zetolac; C++ pattern-scan examples, key global offset notes, address-derivation and string-decryption helpers; signature-based relocation after patches; cheat / game:fortnite `[Offset]`) combine static offset tables with runnable signature workflows beside standalone sig/offset feeds. (source: wiki/sources/descriptions/Zetolac__FortniteOffsetsAndSigs.md)
 - Fortnite live-process offset dumpers such as [[fortnite-offset-dumper]] (gmh5225; extracts current memory offsets and class layouts from the running game; regex-cleaned class names; hierarchical offset definitions; cheat / game:fortnite `[Offset & Dump]`) automate per-patch layout refresh beside static offset tables and signature sets. (source: wiki/sources/descriptions/gmh5225__Fortnite-Offset-dumper.md)
 - Rust Fortnite frameworks such as [[reborn]] (web server + SQLite + Discord bot; modular crates for server/bot/client) illustrate web-controlled cheat architectures in the same game:fortnite lane. (source: wiki/sources/descriptions/realTristan__Reborn.md)
 - Step-by-step Fortnite mechanics tutorials such as [[fortnite]] (loqix; video series + companion code; Game Develop / source) sit in the cheat / game:fortnite guide lane for game developers, reverse engineers, and tooling builders. (source: wiki/sources/descriptions/loqix__Fortnite.md)
