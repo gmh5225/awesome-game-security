@@ -2639,6 +2639,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [wizard101-spoofer](entities/wizard101-spoofer.md) — Wizard101 HWID spoofer (disk/MAC/motherboard UUID; Cheat HWID)
 - [wkpe](entities/wkpe.md) — Windows kernel programming experiments; PoC drivers + user tools; process VAD enumeration; WDK/VS; build/symbol coupling (am0nsec; Enumerate VAD)
 - [ward](entities/ward.md) — simple ELF runtime packer for stealthy droppers (Go/C; Anti Cheat → Binary Packer `[ELF]`)
+- [workflow-objc](entities/workflow-objc.md) — Binary Ninja Objective-C analysis workflow (Vector35; C++; objc_msgSend→direct-call HLIL cleanup; macOS/iOS; Cheat / [Objective-C])
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
 - [WoWDumpFix](entities/wowdumpfix.md) — x64dbg plugin; removes anti-dump obstacles from protected Blizzard/WoW processes; Scylla import/dump repair; attach-time breakpoint restore (C/C++; cheat / game:wow / Dump Fix)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)

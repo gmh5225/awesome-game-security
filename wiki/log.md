@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vector35/workflow_objc`: entity [[workflow-objc]] (Binary Ninja Objective-C analysis workflow plugin; C++; rewrites objc_msgSend-style dynamic dispatch into inferred direct-call HLIL; macOS/iOS ObjC-heavy binaries; migrated into main BN API; Vector35; Cheat / [Objective-C]); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[aimachdec]], [[binja-kc]], and [[binary-ninja-mcp]].
+
 - **2026-08-19** — ingest `description:VedantRGosavi/UE5-MCP`: entity [[ue5-mcp]] (documentation-first Blender↔UE5 MCP pipeline concept; Markdown design/workflows; text-driven scene generation, asset transfer, level automation, Blueprint assistance; development paused; game pipeline + AI tooling reference; Game Develop / MCP); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[unreal-mcp]] and [[blender-mcp]].
 
 - **2026-08-19** — ingest `description:Vekor64/Driver-physical-rw`: entity [[driver-physical-rw]] (Windows C++ kernel driver; IOCTL phys/virt memory R/W, alloc/protect, module-base lookup, process helpers; DeviceIoControl request structs; low-level security experimentation / cheat driver-comm study; Vekor64; Kernel-mode W/RPM for Windows); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ntmemory]], [[driver-rpm-direct-page-manipulation]], [[readwrite-kernel-stable]], [[readphys]], and [[pythoncs2]].
