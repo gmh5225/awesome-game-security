@@ -4,7 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
-- **2026-08-19** — ingest `description:Zetolac/FortniteExternalExploits`: entity [[fortnite-external-exploits]] (external Fortnite exploit PoC snippets; C++ direct memory writes for position manipulation and spin-style logic; raw external memory manipulation fragments; Zetolac; cheat / game:fortnite [External Exploits]); cited on [[overviews/game-hacking]]; cross-linked [[fortnite-external-w2s]], [[fortnite-offsets-and-sigs]], and [[fortnite-exploits]].
+- **2026-08-19** — ingest `description:ZeromaXHe/MapleStoryCopy`: entity [[maplestory-copy]] (Godot .NET MapleStory-style client recreation; C#; scene/sprite/audio assets; learning-oriented 2D MMORPG client architecture; ZeromaXHe; Game Engine / Godot MapleStory); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[maple-unity]], [[maplestory-client]], [[maplestory-heavenclient]], [[maplenecrocer]], and [[unturned-godot]].
+ entity [[fortnite-external-exploits]] (external Fortnite exploit PoC snippets; C++ direct memory writes for position manipulation and spin-style logic; raw external memory manipulation fragments; Zetolac; cheat / game:fortnite [External Exploits]); cited on [[overviews/game-hacking]]; cross-linked [[fortnite-external-w2s]], [[fortnite-offsets-and-sigs]], and [[fortnite-exploits]].
 
 - **2026-08-19** — ingest `description:Zetolac/FortniteExternalW2S`: entity [[fortnite-external-w2s]] (C++ external W2S PoC; camera/viewpoint memory read + decrypt; matrix construction + perspective projection for ESP overlays; Zetolac; cheat / game:fortnite); cited on [[overviews/game-hacking]] and [[world-to-screen]]; cross-linked [[fortnite-w2s-offset-fortnite]], [[fortnite-camera-cache-pov]], and [[fortnite-offsets-and-sigs]].
 
