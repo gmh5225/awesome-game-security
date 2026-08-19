@@ -1631,6 +1631,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mojoelf](entities/mojoelf.md) — in-process ELF loader from non-filesystem sources (alternative to `dlopen()`; Cheat / Android memory loading)
 - [Mount System Partition (brew02)](entities/mount-system-partition.md) — user-mode Windows API ESP mount (C++; partition enumeration; UEFI security / firmware RE)
 - [MouHidInputHook (changeofpace)](entities/mouhid-input-hook.md) — MouHid CONNECT_DATA ClassService hook; filter/modify/inject mouse packets without filter devices (PatchGuard-safe; input simulation / AC research)
+- [mouse-input-injection](entities/mouse-input-injection.md) — C++ NtUserInjectMouseInput syscall PoC (custom input structures + movement/click interface; alternative to SendInput; automation / input emulation / cheat-adjacent research; Zpes)
 - [MouseClassServiceCallbackMeme (ekknod)](entities/mouseclassservicecallbackmeme.md) — MouClass ServiceCallback meme variant (C; cheat / triggerbot & aimbot)
 - [MouseClassServiceCallbackTrick (ekknod)](entities/mouseclassservicecallbacktrick.md) — MouClass ServiceCallback kernel mouse injection (C; cheat / triggerbot & aimbot)
 - [Mono](entities/mono.md) — open-source .NET CLR (JIT/SGen/P/Invoke); Unity Mono scripting backend; game modding / RE target

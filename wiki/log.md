@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Zpes/mouse-input-injection`: entity [[mouse-input-injection]] (C++ PoC; undocumented **NtUserInjectMouseInput** syscall with custom input structures + movement/click interface; alternative to `SendInput`; automation / input emulation / cheat-adjacent research; Zpes); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ntuserinjectmouseinput-syscall]], [[kernel-mouse]], [[hardware-input-injection]], and [[mouseclassservicecallbacktrick]].
+
 - **2026-08-19** — ingest `description:Zurek0x/NuremX`: entity [[nuremx]] (Apex Legends Python YOLOv5 screen-capture cheat; enemy detection, overlay, aiming; trained weights; configurable runtime; update/version control; no process memory hooking; Windows/Linux workflows; cheat / [AI]; Zurek0x); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[ai-fps-b00m-h3adsh0t]], [[yolov5-pubg]], [[apex-legends-sdk]], [[apex-linux]], and [[easy-anti-cheat]].
 
 - **2026-08-19** — ingest `description:a0rtega/pafish`: entity [[pafish]] (open-source C anti-analysis testing tool; modular VM/sandbox/debugger/hook/environment checks for VMware, VirtualBox, QEMU, Wine; MinGW-w64; reproducible malware-style evasion testing; a0rtega); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[anticuckoo]], [[makin]], [[vmaware]], and [[hypervisor-detection]].
