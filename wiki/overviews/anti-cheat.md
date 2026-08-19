@@ -33,6 +33,7 @@ sources:
   - wiki/sources/descriptions/akawashiro__sloader.md
   - wiki/sources/descriptions/ait-aecid__rootkit-detection-ebpf-time-trace.md
   - wiki/sources/descriptions/adem-hosni__AtomicShieldClient.md
+  - wiki/sources/descriptions/adde88__SkyEngine.md
   - wiki/sources/descriptions/afulsamet__integrity.md
   - wiki/sources/descriptions/alal4465__KernelMon.md
   - wiki/sources/descriptions/alekzandren__in-memory-mutation-demo.md
@@ -745,6 +746,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[hook-hvl-switch-virtual-address-space]] — `HvlSwitchVirtualAddressSpace` hook; CR3 transition manipulation hides pages from process memory scans during address-space context switches (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Hook-HvlSwitchVirtualAddressSpace.md)
 - [[driver-hypercall-page-hook]] — `nt!HvcallCodeVa` hypercall-page hook; custom dispatcher + `HvlEnlightenments` flip routes context-switch hypercalls through callbacks (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Driver-HypercallPageHook.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
+- [[sky-engine]] — WoW protected-Lua unlocker via taint-state reset (adde88; C++; cheat prototyping and client-script detection research; cheat / game:wow [Wow Lua Unlocker]) (source: wiki/sources/descriptions/adde88__SkyEngine.md)
 - [[ow2-wardenrekter]] — Overwatch 2 Warden disable DLL (VEH/INT3 neutralization via `KiUserExceptionDispatcher` RET patch, DbgBreakPoint NOP, PEB debugger hiding, `GetTickCount64` timing stub, `NtQuerySystemInformation` block; DR0 via `SetThreadContext`; README `[Emulate OW2 AC]`; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW2-wardenrekter.md)
 - [[ow-aeternum]] — Overwatch C/C++ POC spanning anti-cheat research, rendering, and hooking (author-flagged rough POC; cheat / game:overwatch; gmh5225) (source: wiki/sources/descriptions/gmh5225__OW-Aeternum.md)
 - [[pareidolia-triggerbot]] — hypervisor-based external Overwatch Widowmaker triggerbot (blackhades00; VivienneVMM + MouClassInputInjection; bypasses Overwatch Anti-Cheat) for studying below-OS external triggerbot surface against Blizzard Warden (source: wiki/sources/descriptions/blackhades00__PareidoliaTriggerbot.md)
