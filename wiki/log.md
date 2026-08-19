@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZentifyZ/CRC32`: entity [[crc32]] (C++ Facepunch Rust internal cheat framework; visuals/hooks/math/weapon-logic modules; Unity/IL2CPP data access + ImGui menu; detours/pattern-scan/spoofcall bypass utilities; cheat development + AC bypass experimentation; ZentifyZ; cheat / game:rust); cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[kors-lol]], [[rust-rustinternal]], [[rust-internal]], [[simple-rust-base]], and [[simple-rust-hack]].
+
 - **2026-08-19** — ingest `description:ZentifyZ/Kors_lol`: entity [[kors-lol]] (C++ Facepunch Rust internal cheat source; rendering/hook-management/gameplay modules; ESP visuals, Unity/IL2CPP structure access, ImGui menu; detours/import-scan/spoofcall utilities; cheat prototyping + RE practice; ZentifyZ; cheat / game:rust [Internal]); cited on [[overviews/game-hacking]] and [[il2cpp]]; cross-linked [[rust-rustinternal]], [[rust-internal]], [[simple-rust-base]], and [[simple-rust-hack]].
 
 - **2026-08-19** — ingest `description:ZeroMemoryEx/CVE-2025-26125`: entity [[cve-2025-26125]] (C++ PoC for CVE-2025-26125; IObit **`IMFForceDelete.sys`** MSI-based file/folder deletion abuse → SYSTEM; NT API + resource manipulation; ZeroMemoryEx); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[ven0m-ransomware]], [[windows-kernel-exploits]], and [[cve-2020-14974]].

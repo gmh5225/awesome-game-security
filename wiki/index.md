@@ -444,6 +444,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [crycall](entities/crycall.md) — C++14+ compile-time call obfuscation (lambda/virtual-dispatch wrappers; normal and virtual call macros; hides callee/argument flow; AC Compile Time; android1337)
 - [crystr](entities/crystr.md) — C++20 compile-time string/number obfuscation (XOR keys from compile-time math/timestamps/counters; inline/virtual decrypt; per-char/per-value key variation; AC String Crypter; android1337)
 - [crossover-patcher](entities/crossover-patcher.md) — experimental macOS CrossOver patcher for anti-cheat-protected Windows games (Apple Silicon; Wine/graphics runtime patches; rollback; dazi2011)
+- [crc32](entities/crc32.md) — Facepunch Rust internal cheat framework (C++; visuals/hooks/math/weapon logic + Unity IL2CPP + ImGui menu; detours/pattern-scan/spoofcall utilities; ZentifyZ)
 - [castle-engine](entities/castle-engine.md) — DX11 C/C++ engine (DirectX/shader/rendering; benanil; Game Engine / source)
 - [crown](entities/crown.md) — C++ 2D/3D engine (DirectX/Vulkan + shader work; Game Engine / source)
 - [CReadMemory](entities/creadmemory.md) — user-mode cross-process memory read library; multiple methods beyond ReadProcessMemory; external cheat base (gmh5225)
