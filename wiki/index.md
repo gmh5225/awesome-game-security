@@ -2292,6 +2292,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [swsim](entities/swsim.md) — pure-software USIM/UICC SIM simulator (APDU/MILENAGE; SIMtrace2; Cellular/SIM)
 - [Sushi](entities/sushi.md) — PatchGuard (PG) monitoring (tandasat; cheat / PatchGuard-related)
 - [Swift-String-Obfuscator](entities/swift-string-obfuscator.md) — Swift string crypter (AC Compile Time / String Crypter)
+- [swift-ida](entities/swift-ida.md) — IDA Pro plugin: retag Swift/Golang/fastcall conventions + tuple-like multi-return structs (Python; cheat / IDA Plugins)
 - [swiftshield](entities/swiftshield.md) — Swift identifier obfuscator for iOS (SourceKit rename; vs RE/tweaks)
 - [swapchain-bottleneck](entities/swapchain-bottleneck.md) — DXGI swapchain/MPO overlay injection architecture analysis (Present-hook collisions, TDR cascades, AC whitelist friction; dantebuilds)
 - [super-people-esp-aimbot-magic-hack](entities/super-people-esp-aimbot-magic-hack.md) — Super People UE4 ESP/aimbot + gameplay mods via SDK entity reads (C++; battle royale; cheat / game:super people; gmh5225)

@@ -1294,6 +1294,7 @@ sources:
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
   - wiki/sources/descriptions/Vis-Wing__Binoculars.md
   - wiki/sources/descriptions/VirusTotal__vt-ida-plugin.md
+  - wiki/sources/descriptions/ViRb3__swift-ida.md
   - wiki/sources/descriptions/Visual1mpact__Paradox_AntiCheat.md
   - wiki/sources/descriptions/ViddeBoiiii__CSGO-Ormbunke-x86.md
   - wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md
@@ -1653,6 +1654,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Hex-Rays P-Code display for the current function via [[idapcode]] (Python IDA plugin; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/binarly-io__idapcode.md)
 - Intel AVX→Hex-Rays microcode lifting via [[microavx]] (IDA Pro plugin; `m_ext` opcode visitor; decompiles AVX-heavy functions that otherwise show opaque ext nodes; companion scraper for coverage gaps; cheat / IDA Plugins / AVX Lifter) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gaasedelen__microavx.md)
 - Hex-Rays decompiler convenience utilities via [[happyida]] (IDAPython; Swift-style parameter labels, SEH try/catch reconstruction, vtable navigation, Rust string prettification; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gmh5225__HappyIDA.md)
+- Nonstandard calling-convention retagging and tuple-like multi-return struct generation for Swift/Golang/fastcall via [[swift-ida]] (Python IDA plugin; context-menu actions; modern language runtime/ABI RE; ViRb3; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / language-ABI lane beside [[happyida]], [[golang-loader-assist]], and [[goresym]]. (source: wiki/sources/descriptions/ViRb3__swift-ida.md)
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
 - Willi Ballenthin IDA Pro script/plugin/util collection via [[idawilli]] (Python IDAPython; function analysis, string decryption, struct annotation, xref navigation, workflow automation; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idawilli.md)
 - Multi-version IDA Pro SDK archive via [[idasdk-collection]] (headers, libs, examples; backward-compatible plugin dev across IDA releases; cheat / IDA SDK) sits in the same Cheat IDA Plugins / plugin-development lane. (source: wiki/sources/descriptions/gmh5225__idasdk-collection.md)
