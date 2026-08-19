@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ahaggard2013/binaryninja-ollama`: entity [[binaryninja-ollama]] (Binary Ninja plugin; local Ollama LLM-assisted HLIL function/variable rename; bulk and targeted actions; configurable server/port/model; offline semantic labeling; Cheat Binary Ninja Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binary-ninja-mcp]], [[bn]], [[rikugan]], [[ida-gepetto]], and [[ida-llm-explainer]].
+
 - **2026-08-19** — ingest `description:ahujasid/blender-mcp`: entity [[blender-mcp]] (Blender addon + Python MCP server; socket JSON protocol; object/material manipulation, scene queries, scripted execution; optional external/generated 3D assets; AI-assisted 3D content creation; Game Develop / MCP); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[unity-mcp]], [[unreal-mcp]], and [[better-godot-mcp]].
 
 - **2026-08-19** — ingest `description:aimardcr/FridaDetectionBypass`: entity [[frida-detection-bypass]] (Android Frida detection bypass techniques; debugger checks, default-port/protocol fingerprinting, memory artifact scans; JS hooks + CLI configs + native JNI; non-gadget-only injection workflows; mobile RE / anti-tamper research; Debugger Detection Bypass); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[anti-frida-bypass]], [[antifrida]], [[frida-detection]], and [[detect-frida]].
