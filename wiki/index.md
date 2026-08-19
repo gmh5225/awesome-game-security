@@ -2164,6 +2164,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SkipHook](entities/skiphook.md) — trampoline skips first insn (bypass JMP/INT3 AC hooks; HDE)
 - [sk3wldbg](entities/sk3wldbg.md) — IDA Pro Unicorn in-IDA emulation (x86/ARM/MIPS; register/memory setup; step without live target; Cheat Unicorn)
 - [skCrypter](entities/skcrypter.md) — C++ header-only compile-time XOR string crypter (constexpr; AC Compile Time / String Crypter)
+- [SnakeRoyal](entities/snake-royal.md) — C++ lightweight multiplayer Snake prototype (custom networking; serialization/sockets; CLI host/join; optional headless server; real-time multiplayer learning; Game Develop / Mini Game With Server; ZehMatt)
 - [SkyEngine](entities/sky-engine.md) — WoW Lua unlocker (adde88; C++; protected Lua / taint-state reset; scripting research / cheat prototyping / AC detection study; cheat / game:wow [Wow Lua Unlocker])
 - [Skylicht Engine](entities/skylicht-engine.md) — lightweight Irrlicht-evolved engine (Android/iOS; Game Engine source)
 - [Skynet](entities/skynet.md) — multi-user Lua actor-model game server framework (Chinese industry staple; Game Network / source)

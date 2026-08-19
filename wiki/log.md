@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZehMatt/SnakeRoyal`: entity [[snake-royal]] (C++ lightweight multiplayer Snake prototype; custom networking; serialization/sockets; CLI host/join; optional headless server; real-time multiplayer learning; ZehMatt; Game Develop / Mini Game With Server); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[2048-cpp]], [[jumpy]], [[x64dbg-playtime]], and [[zyemu]].
+
 - **2026-08-19** — ingest `description:ZehMatt/x64dbgPlaytime`: entity [[x64dbg-playtime]] (x64dbg plugin; embedded Lua runtime + bundled libraries; memory/registers/breakpoints/labels/modules/assembler automation; autorun scripts; ZehMatt; Lua script / Cheat x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[chaiscript-plugin]], and [[dotx64dbg]].
 
 - **2026-08-19** — ingest `description:ZehMatt/zyemu`: entity [[zyemu]] (WIP x86-64 user-mode emulator; JIT handler codegen + code cache; Zydis decode/encode; CPU/memory core; C++; low-level emulation / binary analysis; ZehMatt); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[emulator]], [[dynre-x86]], [[chasm]], and [[kubera]].
