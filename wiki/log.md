@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:XaFF-XaFF/BugcheckSuppressor`: entity [[bugcheck-suppressor]] (Windows kernel driver; hooks bugcheck callbacks; data-only HAL dispatch hook + SEH RtlUnwindEx recovery under HVCI; CET-compatible assembly stubs; BSOD suppression PoC; XaFF-XaFF); cited on [[overviews/windows-kernel]] and [[hvci]]; cross-linked [[windows-kernel-shadow-stack]], [[cet-research]], and [[patchguard]].
+
 - **2026-08-19** — ingest `description:Xacone/Eneio64-Driver-Exploit`: entity [[eneio64-driver-exploit]] (C++ educational PoC; signed **`eneio64.sys`** → physical memory R/W; virtual-to-physical translation for virtual kernel access; modern Windows offset notes; token-theft LPE path; kernel security / vulnerable-driver analysis training; Xacone); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[badrentdrv2]], [[physmem-drivers]], [[windows-kernel-exploits]], [[echoac-poc]], and [[ntmemory]].
 
 - **2026-08-19** — ingest `description:Xheghun/DeviceTrust`: entity [[device-trust]] (Kotlin coroutine API + NDK C++ Android integrity library; root/Frida/Xposed/emulator/bootloader/SELinux probes; weighted risk score + categorized evidence; configurable review/high-risk thresholds or raw signal export; ARM64/ARMv7/x86/x86_64; fraud prevention / auth hardening / game anti-cheat; Xheghun); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[duck-detector-refactoring]], [[android-native-root-detector]], [[droidshield]], [[trustdevice-android]], and [[frida-detection]].

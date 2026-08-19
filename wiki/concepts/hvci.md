@@ -17,6 +17,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__FakeEnclave.md
   - wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
+  - wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md
 updated: 2026-08-19
 confidence: high
 ---
@@ -49,7 +50,9 @@ VBS enclave abuse PoCs such as [[fake-enclave]] (gmh5225; proof-of-concept misus
 
 Lab teardown guides such as [[disabling-hyper-v]] (gmh5225; Win10; Microsoft's Device Guard and Credential Guard hardware readiness tool → disable HVCI, Device Guard, Credential Guard, and related VBS so Hyper-V can be fully removed—not an in-place bypass) document the configuration side of turning Memory Integrity off for research hosts. (source: wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md)
 
+HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-XaFF; data-only HAL dispatch hook + bugcheck-callback interception + SEH `RtlUnwindEx` recovery; CET-compatible assembly stubs; BSOD suppression PoC) probes how Memory Integrity and shadow-stack enforcement interact with bugcheck handling—not a bypass of W→X policy itself. (source: wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md)
+
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

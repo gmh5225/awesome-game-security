@@ -355,7 +355,8 @@ Compiled knowledge catalog for awesome-game-security.
 - [bt-modular-game-features](entities/bt-modular-game-features.md) — BTS modular Unreal features (audio / physics / animation; C/C++; Plugins:Unreal; gmh5225)
 - [btop](entities/btop.md) — cross-platform C++ terminal resource monitor (CPU/memory/disk/network/process/GPU TUI; Performance Monitor)
 - [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
-- [BudgetEPT (brew02)](entities/budget-ept.md) — SMAP/SMEP inline hooks emulating EPT split-page semantics without a hypervisor; limited software-virtualization concealment (Some Tricks / Windows Ring0)
+- [Bugcheck Suppressor](entities/bugcheck-suppressor.md) — HVCI/kCET-aware BSOD suppression PoC (data-only HAL dispatch hook + RtlUnwindEx SEH recovery; XaFF-XaFF)
+- [BudgetEPT (brew02)](entities/budget-ept.md) — SMAP/SMEP inline hooks emulating EPT split-page semantics without a hypervisor; limited software-virtualization concealment (Some Tricks / Windows Ring0) — SMAP/SMEP inline hooks emulating EPT split-page semantics without a hypervisor; limited software-virtualization concealment (Some Tricks / Windows Ring0)
 - [Bullet3](entities/bullet3.md) — Bullet Physics SDK (C++ collision + multi-physics; rigid/soft body, vehicles, character controllers, OpenCL broadphase; PhysX SDK / Game Engine)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
 - [bytecode-viewer](entities/bytecode-viewer.md) — Java/Android multi-decompiler suite (CFR/Procyon/FernFlower/JD-GUI/Krakatau; bytecode+Smali+source tabs; JAR/DEX/APK)
