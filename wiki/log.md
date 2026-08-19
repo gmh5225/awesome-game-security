@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:W1lliam1337/cstrike2-hack`: entity [[cstrike2-hack]] (Rust internal CS2 cheat base; modular crates for interfaces/hooks/settings/rendering; macro-assisted interfaces + pattern scanning; DirectX 11 + egui overlay menu; MinHook interception; game-hacking research + internal CS2 tooling scaffold; W1lliam1337; cheat / game:cs2 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[digital-sdk]], [[cs2-cheat-base]], [[cs2-internal-sdk]], [[asphyxia-cs2]], [[present-hook]], [[ntminhook]], and [[egui-d3d11]].
+
 - **2026-08-19** — ingest `description:W1lliam1337/digital-sdk`: entity [[digital-sdk]] (C++ internal CS:GO cheat base; MinHook + ImGui; ESP, bunnyhop, engine prediction, autowall, chams; CreateMove + Direct3D reset hooks; interfaces/netvars/rendering/utility modules; cheat development + Source-engine RE practice; W1lliam1337); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[present-hook]], and [[ntminhook]].
 
 - **2026-08-19** — ingest `description:WCharacter/RDTSC-KVM-Handler`: entity [[rdtsc-kvm-handler]] (modified Linux KVM handler sources; intercept/alter guest RDTSC on Intel VMX and AMD SVM; fake timestamp deltas + QEMU CPU flags such as disabling RDTSCP; low-level hypervisor timing control; virtualization and timing-based anti-cheat / VM-evasion research; WCharacter; cheat / Bypass RDTSC); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[checkhv-um]], [[ophion]], [[qemu-patched]], [[hardened-qemu]], and [[vmaware]].
