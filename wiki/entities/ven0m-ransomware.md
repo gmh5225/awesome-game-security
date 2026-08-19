@@ -18,4 +18,4 @@ BYOVD research focused on `iMFForceDelete.sys` (IMFForceDelete.sys) from IObit M
 
 ## Related
 
-[[byovd]] · [[windows-kernel-exploits]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[byovd]] · [[cve-2025-26125]] · [[windows-kernel-exploits]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

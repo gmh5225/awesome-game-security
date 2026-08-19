@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZeroMemoryEx/CVE-2025-26125`: entity [[cve-2025-26125]] (C++ PoC for CVE-2025-26125; IObit **`IMFForceDelete.sys`** MSI-based file/folder deletion abuse → SYSTEM; NT API + resource manipulation; ZeroMemoryEx); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[ven0m-ransomware]], [[windows-kernel-exploits]], and [[cve-2020-14974]].
+
 - **2026-08-19** — ingest `description:ZeromaXHe/MapleStoryCopy`: entity [[maplestory-copy]] (Godot .NET MapleStory-style client recreation; C#; scene/sprite/audio assets; learning-oriented 2D MMORPG client architecture; ZeromaXHe; Game Engine / Godot MapleStory); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[maple-unity]], [[maplestory-client]], [[maplestory-heavenclient]], [[maplenecrocer]], and [[unturned-godot]].
  entity [[fortnite-external-exploits]] (external Fortnite exploit PoC snippets; C++ direct memory writes for position manipulation and spin-style logic; raw external memory manipulation fragments; Zetolac; cheat / game:fortnite [External Exploits]); cited on [[overviews/game-hacking]]; cross-linked [[fortnite-external-w2s]], [[fortnite-offsets-and-sigs]], and [[fortnite-exploits]].
 

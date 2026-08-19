@@ -547,6 +547,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2025-21333](entities/cve-2025-21333.md) — Hyper-V `vskrnlintvsp.sys` heap overflow LPE (IoRing pool spray / pipe attr R/W)
 - [CVE-2025-21333 PoC](entities/cve-2025-21333-poc.md) — gmh5225 Win11 23H2 LPE PoC for Hyper-V `vkrnlintvsp.sys` heap overflow (ITW-exploited CVE)
 - [CVE-2025-24990 PoC](entities/cve-2025-24990-poc.md) — Agere Modem `ltmdm64.sys` METHOD_NEITHER IOCTL abuse → kernel R/W (IoRing LPE variant; BYOVD)
+- [CVE-2025-26125](entities/cve-2025-26125.md) — IObit `IMFForceDelete.sys` MSI-based file/folder deletion LPE → SYSTEM (ZeroMemoryEx)
 - [PoC CVE-2025-38352](entities/poc-cve-2025-38352.md) — posix-cpu-timers thread-group-exit vs timer-fire race UAF (LTS 6.12.33; Sep 2025 Android bulletin ITW)
 - [CVE-2026-40369-EXPLOIT](entities/cve-2026-40369-exploit.md) — Win11 24H2–25H2 LPE via NtQuerySystemInformation class 253 (Chrome sandbox)
 - [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)
