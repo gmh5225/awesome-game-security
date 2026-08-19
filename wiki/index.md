@@ -2077,6 +2077,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rtti-parser](entities/rtti-parser.md) — IDA script: parse RTTI (IDA 9.2; cheat / IDA Plugins)
 - [RTM](entities/rtm.md) — realtime 3D/4D math lib (fast arithmetic; Mathematics)
 - [rwProcMem33](entities/rw-proc-mem33.md) — ARM64 Linux KM suite; process R/W, HW breakpoints, CE-style server demos, module hiding (Cheat Memory Explorer; abcz316)
+- [SKRoot-linuxKernelRoot](entities/skroot-linux-kernel-root.md) — Android Linux kernel root patch toolkit (deeply hidden root; su install/inject; C/C++ + Java/JNI; multi-kernel without rebuild; abcz316; cheat / Android root)
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
