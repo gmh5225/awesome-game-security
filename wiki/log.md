@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:a0yark/DXInject-UC`: entity [[dxinject-uc]] (D3D11 shared-buffer GPU payload transport + HLSL compute-shader decode; Injector/Target split; named events + DXGI shared handles + shared memory; GPU-assisted process hollowing PoC; a0yark; injection:windows research); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[windows-process-injection]], [[dirty-vanity]], [[game-lag-reducer]], and sibling a0yark samples [[pubg-demo]] / [[duckov-marketmod]].
+
 - **2026-08-19** — ingest `description:a0yark/Duckov_marketmod`: entity [[duckov-marketmod]] (C# Duckov flea-market mod; UI + Steam-auth network API + WebSocket + Harmony patches + mod loader with version check/auto-update; RE-derived internals; a0yark; modding / online marketplace research); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[pubg-demo]], [[wellsanticheat]], [[goldberg-emulator]], and [[rce-shield]].
 
 - **2026-08-19** — ingest `description:a0yark/Pubg-demo`: entity [[pubg-demo]] (PUBG external cheat demo; C++; dumped UE CppSDK + bone helpers; ESP/aimbot framework; DLL inject + separate ImGui D3D11 overlay pipeline; a0yark; cheat / game:pubg [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[pubg-external-cheat]], [[pubg-internal]], [[pubg-dumper]], and [[unreal-object-model]].
