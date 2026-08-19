@@ -30,6 +30,7 @@ sources:
   - wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md
   - wiki/sources/descriptions/a2x__cs2-dumper.md
   - wiki/sources/descriptions/designer1337__csgo-cheat-base.md
+  - wiki/sources/descriptions/W1lliam1337__digital-sdk.md
 updated: 2026-08-19
 confidence: high
 ---
@@ -55,7 +56,7 @@ Source 2 extends the model with schema-driven layouts; generators such as [[sour
 | `IClientEntityList` | `GetClientEntity(index)` entity list; live-process entity-list discovery tools such as [[gh-entity-list-finder]] (x64/x86 scan for likely list addresses) complement signature dumpers (source: wiki/sources/descriptions/guided-hacking__GH-Entity-List-Finder.md) |
 | `IEngineTrace` | Ray/world traces |
 | `ICvar` | `FindVar("sv_cheats")` and console variables |
-| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane); internal bases such as [[csgo-cheat-base]] wrap these interfaces for DirectX surface drawing and glow ESP (source: wiki/sources/descriptions/designer1337__csgo-cheat-base.md) |
+| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane); internal bases such as [[csgo-cheat-base]] wrap these interfaces for DirectX surface drawing and glow ESP (source: wiki/sources/descriptions/designer1337__csgo-cheat-base.md); modular scaffolds such as [[digital-sdk]] pair dedicated netvars/rendering modules with CreateMove and Direct3D reset hooks for ESP, chams, and autowall features (source: wiki/sources/descriptions/W1lliam1337__digital-sdk.md) |
 
 Interface vtables and netvar tables drift per game build—verify against the target binary. Pair with [[research-rigor]] when porting offsets across patches.
 

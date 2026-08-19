@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:W1lliam1337/digital-sdk`: entity [[digital-sdk]] (C++ internal CS:GO cheat base; MinHook + ImGui; ESP, bunnyhop, engine prediction, autowall, chams; CreateMove + Direct3D reset hooks; interfaces/netvars/rendering/utility modules; cheat development + Source-engine RE practice; W1lliam1337); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[present-hook]], and [[ntminhook]].
+
 - **2026-08-19** — ingest `description:WCharacter/RDTSC-KVM-Handler`: entity [[rdtsc-kvm-handler]] (modified Linux KVM handler sources; intercept/alter guest RDTSC on Intel VMX and AMD SVM; fake timestamp deltas + QEMU CPU flags such as disabling RDTSCP; low-level hypervisor timing control; virtualization and timing-based anti-cheat / VM-evasion research; WCharacter; cheat / Bypass RDTSC); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[checkhv-um]], [[ophion]], [[qemu-patched]], [[hardened-qemu]], and [[vmaware]].
 
 - **2026-08-19** — ingest `description:WPO-Foundation/win-shaper`: entity [[win-shaper]] (Windows WFP callout traffic shaper; kernel driver + CLI/GUI; inject latency, bandwidth limits, packet loss, queue sizing on inbound/outbound traffic; Game Testing / adverse network emulation for games and network-sensitive software; WPO-Foundation); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[divert]], [[ndisapi]], [[packet-sniffer]], and [[gatling]].
