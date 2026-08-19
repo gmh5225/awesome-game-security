@@ -1292,6 +1292,7 @@ sources:
   - wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
   - wiki/sources/descriptions/WerWolv__ImHex.md
+  - wiki/sources/descriptions/WenzWenzWenz__DelphiReSym.md
   - wiki/sources/descriptions/WopsS__RenHook.md
   - wiki/sources/descriptions/Wra7h__FlavorTown.md
   - wiki/sources/descriptions/Wunkolo__UWPDumper.md
@@ -1447,6 +1448,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA Pro + Cheat Engine current-module offset sync via [[doffset]] (dNop90; resolves module RVAs while static IDA analysis runs alongside live debugging in Cheat Engine, x64dbg, and similar tools; cheat / IDA Plugins) bridges multi-tool RE when correlating static addresses with runtime module bases. (source: wiki/sources/descriptions/dNop90__dOffset.md)
 - Disassembler page remapping via [[ce-remap-plugin]] (Delphi CE plugin; hooks CE plugin SDK to remap disassembler memory pages so hidden or obfuscated code is visible in the disassembler view; tested on CE 7.4; cheat / Remap; gmh5225) extends CE static-analysis workflows when targets remap or conceal executable pages from the debugger UI. (source: wiki/sources/descriptions/gmh5225__CE-remap-plugin.md)
 - Delphi x86/x86_64 binary analysis via [[delphi-helper]] (eset; IDA/static-analysis helper for Object Pascal targets; setup requires `pip install py7zr`; cheat / IDA Plugins) supports RE when game clients or cheat tooling ship as Delphi PEs. (source: wiki/sources/descriptions/eset__DelphiHelper.md)
+- Delphi symbol name recovery for Ghidra via [[delphiresym]] (WenzWenzWenz; pyghidra Python script; reconstructs function signatures, parameter metadata, and vtable context from embedded compiler metadata; maps into Ghidra data types; modern Delphi versions; malware/legacy software RE; cheat / Ghidra Plugins) complements [[delphi-helper]] on the Ghidra side. (source: wiki/sources/descriptions/WenzWenzWenz__DelphiReSym.md)
 - WebAssembly memory analysis via [[wasm-ceserver]] (Python/JavaScript; Cheat Engine ceserver-style remote debug for WASM; Cheat Engine Plugins / Analyzing WebAssembly) extends CE plugin workflows to browser and WASM-hosted game logic. (source: wiki/sources/descriptions/gmh5225__wasm-ceserver.md)
 - Browser-native WASM memory tooling via [[webcheat]] (Chrome MV3 extension; hooks `WebAssembly` instantiation for linear memory; CE-style scan/narrow/freeze + virtual clock speed/pause/step; cross-origin iframe targets; Unity/Godot/Emscripten WebGL; no external server) sits beside [[wasm-ceserver]] in the Analyzing WebAssembly / browser CE lane. (source: wiki/sources/descriptions/hasaneyldrm__webcheat.md)
 - Keyless Tampermonkey/Violentmonkey userscript stacks such as [[krunker-loader]] (JavaScript; Krunker.io; document-start inject; local anti-tamper token bypass; aimbot/ESP/wallhack/chams/FOV/skin/bhop + ImGui mod menu; optional Quirify-style license/heartbeat emulation loader; browser client-manipulation study) sit in the browser userscript cheat lane beside [[webcheat]] and [[ff3mmo]]. (source: wiki/sources/descriptions/levifrsn63__krunker-loader.md)

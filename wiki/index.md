@@ -605,6 +605,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
 - [Delamain](entities/delamain.md) — headless JADX MCP server (APK/DEX/AAB; Frida hooks; AI agents)
 - [DelphiHelper](entities/delphi-helper.md) — x86/x86_64 Delphi binary analysis tooling (eset; cheat / IDA Plugins; py7zr setup)
+- [DelphiReSym](entities/delphiresym.md) — Ghidra/pyghidra Delphi symbol recovery (function signatures, params, vtables from compiler metadata; modern Delphi; malware/legacy RE; WenzWenzWenz)
 - [DELBOT-Mouse](entities/delbot-mouse.md) — deep learning human-vs-bot mouse movement classifier (Bureau404 internship; University of Mons; Detection:triggerbot & aimbot)
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
