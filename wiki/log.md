@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:YuKongA/ghostlock-app`: entity [[ghostlock-app]] (Android one-tap root; kernel pselect race CVE-2026-43499; NDK C exploit + Java UI; Rust boot/OTA offset extractor; per-kernel JSON import; KernelSU/ReSukiSU post-exploit; mobile AC/root-detection research; YuKongA); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[cve-2026-43499-popsicle]], [[root-my-pixel]], and [[kernelsu]].
+
 - **2026-08-19** — ingest `description:Yukin02/Dwm-Overlay`: entity [[dwm-overlay]] (Windows C++ DWM/DirectX ImGui overlay framework; assembly stubs for dispatch interception and present-path handling; minimal base for external overlay drawing, UI widgets, and runtime hook integration; graphics-hooking research; README `[DWM Overlay without modify .text]`; Yukin02); cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[dwm-dwmdraw]].
 
 - **2026-08-19** — ingest `description:ZDoom/gzdoom`: entity [[gzdoom]] (modder-friendly Doom source port; C/C++; OpenGL/Vulkan rendering; ZScript/mod scripting; gameplay extensions; cross-platform engine development; GPLv3; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[doomretro]], [[devilution]], and [[game-design-documents]].
