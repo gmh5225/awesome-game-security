@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WithSecureLabs/CallStackSpoofer`: entity [[callstackspoofer]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[nimic-stack]], [[callstackspoofer-2]], and [[silent-moonwalk]].
+
 - **2026-08-19** — ingest `description:WolfireGames/overgrowth`: entity [[overgrowth]] (open-source Wolfire Games action game + custom engine; complete game source with rendering, physics, animation, AI, level editor, and scripting; commercial engine internals study for researchers and modders; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[overload]], [[wickedengine]], [[lumos]], [[custom-game-engines]], and [[open-source-engines]].
 
 - **2026-08-19** — ingest `description:WopsS/RenHook`: entity [[renhook]] (open-source Windows x86/x86-64 hooking library; modern C++; Zydis-based disassembly for reliable inline hooks/trampolines; safe APIs + practical examples; RE/instrumentation/game-security research; WopsS); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[polyhook]], [[polyhook-2-0]], [[subhook]], [[detoursnt]], and [[covcane]].
