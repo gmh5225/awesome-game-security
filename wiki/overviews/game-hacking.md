@@ -1305,6 +1305,7 @@ sources:
   - wiki/sources/descriptions/Vector35__scc.md
   - wiki/sources/descriptions/Vector35__official-plugins.md
   - wiki/sources/descriptions/Vector35__community-plugins.md
+  - wiki/sources/descriptions/Vector35__OpaquePredicatePatcher.md
   - wiki/sources/descriptions/Vu1nT0tal__firmeye.md
   - wiki/sources/descriptions/WerWolv__ImHex.md
   - wiki/sources/descriptions/Washi1337__ghidra-nativeaot.md
@@ -1534,6 +1535,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Themida attach-and-debug via [[themidie]] (x64dbg plugin; C++ MinHook; neutralizes anti-debug/anti-VM/monitoring; practical debugger attach workflow vs full unpack automation; x64 Windows; VenTaz; Cheat x64dbg Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/VenTaz__Themidie.md)
 
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
+- Opaque-predicate removal via [[opaque-predicate-patcher]] (Vector35 Binary Ninja plugin; Python; MLIL branch-condition analysis; patch always/never branch; iterative re-analysis; Cheat Binary Ninja Plugins lane) complements detection tooling. (source: wiki/sources/descriptions/Vector35__OpaquePredicatePatcher.md)
 - SMT-assisted opaque-predicate deobfuscation via [[r2smt]] (Rust; radare2 integration; Z3/CVC5/Bitwuzla; IR lift + SSA + backward slice; batch JSON/MD reports; reversible patches) sits in the Cheat Radare Plugins lane. (source: wiki/sources/descriptions/seifreed__r2SMT.md)
 - Obfuscated-region pinpointing via [[obfuscation-detection]] (CFF / insn-complexity / n-gram BB outliers; batch scripts) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_detection.md)
 - Obfuscated-code analysis and simplification via [[obfuscation-analysis]] (MBA backward-slice + msynth oracle; opaque-predicate dataflow; Z3-verified BNIL deobfuscation) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md)

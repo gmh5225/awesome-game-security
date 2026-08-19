@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vector35/OpaquePredicatePatcher`: entity [[opaque-predicate-patcher]] (Binary Ninja plugin; Python; MLIL branch-condition analysis; detect constant true/false paths; patch always/never branch; iterative re-analysis; Vector35; opaque-predicate deobfuscation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[opaque-predicates-detective]], [[obfuscation-analysis]], [[drill-and-join]], [[r2smt]], [[tanto]], [[official-plugins]], and [[community-plugins]].
+
 - **2026-08-19** — ingest `description:Vector35/community-plugins`: entity [[community-plugins]] (Vector35 community Binary Ninja plugin index; Python manifest validation + index generation; third-party licensing, compatibility, and update metadata; discover/install community extensions); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[official-plugins]], [[tanto]], [[workflow-objc]], [[scc]], [[binary-ninja-mcp]], and [[bn]].
 
 - **2026-08-19** — ingest `description:Vector35/official-plugins`: entity [[official-plugins]] (Vector35 curated official Binary Ninja plugin index; Python indexing scripts; structured metadata for descriptions, plugin types, API targets, licenses; plugin-management catalog; trusted first-party/endorsed integrations); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[tanto]], [[workflow-objc]], [[scc]], [[binary-ninja-mcp]], and [[bn]].

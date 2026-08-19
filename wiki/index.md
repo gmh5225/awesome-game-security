@@ -1819,6 +1819,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)
 - [Oomph](entities/oomph.md) — Minecraft Bedrock MiTM AC proxy (Go; server-auth movement/combat; Dragonfly/PocketMine)
 - [OxClient](entities/oxclient.md) — Android Minecraft Bedrock MITM cheat client (Kotlin; local packet relay; CloudburstMC codecs; combat/movement/ESP modules; adanainv3-creator)
+- [opaque-predicate-patcher](entities/opaque-predicate-patcher.md) — Binary Ninja opaque-predicate remover (Vector35; Python; MLIL branch analysis; iterative branch patching)
 - [opaque-predicates-detective](entities/opaque-predicates-detective.md) — Binary Ninja opaque-predicate detection (invariant / BB-local)
 - [op7t](entities/op7t.md) — DIY Android kernel (cheat / Android kernel explorer)
 - [ovo](entities/ovo.md) — Android ARM64 kernel driver module (process R/W, mmuhack, touch simulation, kernel TCP IPC; C++/Rust SDKs; cheat / Android kernel driver)
