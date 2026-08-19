@@ -2076,6 +2076,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rs-ldr](entities/rs-ldr.md) — Rust no_std hash-based WinAPI resolution (PEB walk, LdrLoadDll, XOR strings, Hell's Gate-style SSN resolver; stealth API resolution)
 - [rtti-parser](entities/rtti-parser.md) — IDA script: parse RTTI (IDA 9.2; cheat / IDA Plugins)
 - [RTM](entities/rtm.md) — realtime 3D/4D math lib (fast arithmetic; Mathematics)
+- [rwProcMem33](entities/rw-proc-mem33.md) — ARM64 Linux KM suite; process R/W, HW breakpoints, CE-style server demos, module hiding (Cheat Memory Explorer; abcz316)
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
