@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vector35/community-plugins`: entity [[community-plugins]] (Vector35 community Binary Ninja plugin index; Python manifest validation + index generation; third-party licensing, compatibility, and update metadata; discover/install community extensions); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[official-plugins]], [[tanto]], [[workflow-objc]], [[scc]], [[binary-ninja-mcp]], and [[bn]].
+
 - **2026-08-19** — ingest `description:Vector35/official-plugins`: entity [[official-plugins]] (Vector35 curated official Binary Ninja plugin index; Python indexing scripts; structured metadata for descriptions, plugin types, API targets, licenses; plugin-management catalog; trusted first-party/endorsed integrations); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[tanto]], [[workflow-objc]], [[scc]], [[binary-ninja-mcp]], and [[bn]].
 
 - **2026-08-19** — ingest `description:Vector35/scc`: entity [[scc]] (open-source shellcode compiler; C/C++ CMake; compact shellcode-oriented output; internal CTF origin, integrated into Binary Ninja; Vector35; shellcode compiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[quickasm]], [[scfw]], [[shellcode-factory]], [[obj2shellcode]], [[binary-ninja-mcp]], [[bn]], and [[tanto]].

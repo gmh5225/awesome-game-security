@@ -12,7 +12,7 @@ confidence: medium
 
 Curated **official Binary Ninja plugin index** maintained by Vector35’s core team. Stores structured metadata for supported extensions—descriptions, plugin types, API targets, and license details—and uses Python-based indexing scripts to generate and refresh catalog outputs consumed by plugin-management workflows. Primary audience: Binary Ninja users seeking trusted first-party or endorsed plugin integrations rather than ad-hoc community discovery. (source: wiki/sources/descriptions/Vector35__official-plugins.md)
 
-Complements first-party analysis plugins such as [[tanto]], [[workflow-objc]], and [[scc]], plus community transports like [[binary-ninja-mcp]] and [[bn]].
+Complements the broader community catalog [[community-plugins]], first-party analysis plugins such as [[tanto]], [[workflow-objc]], and [[scc]], plus agent transports like [[binary-ninja-mcp]] and [[bn]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements first-party analysis plugins such as [[tanto]], [[workflow-objc]], a
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[tanto]] · [[workflow-objc]] · [[scc]] · [[binary-ninja-mcp]] · [[bn]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[community-plugins]] · [[tanto]] · [[workflow-objc]] · [[scc]] · [[binary-ninja-mcp]] · [[bn]]
