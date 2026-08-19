@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ViddeBoiiii/CSGO-Ormbunke-x86`: entity [[csgo-ormbunke-x86]] (simple x86 internal CS:GO cheat base; C/C++; DirectX 9 + Kiero + MinHook; ImGui menu; ESP, aimbot, movement assists, trigger behavior; educational menu-framework scaffold; ViddeBoiiii; cheat / game:csgo [Imgui Menu]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[digital-sdk]], [[present-hook]], [[ntminhook]], and [[kiero2]].
+
 - **2026-08-19** — ingest `description:VirtualBox/virtualbox`: entity [[virtualbox]] (Oracle open-source x86_64 VMM; CPU/memory virtualization, device emulation, guest additions, networking/storage/RDP, COM/IOCTL interfaces; kBuild modular architecture; hypervisor-internals and VM-based security research baseline; VirtualBox); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[virtualbox-kvm]], [[kernelmon]], [[pafish]], [[vmaware]], and [[kvm-kernel-example]].
 
 - **2026-08-19** — ingest `description:VirusTotal/vt-ida-plugin`: entity [[vt-ida-plugin]] (official VirusTotal IDA Pro plugin; Python IDAPython; cloud malware intelligence + byte/string/function code-similarity search from disassembly; notebook panel with AI function summaries, editable notes, exportable collaboration artifacts; malware/unknown-binary RE triage; VirusTotal; cheat / IDA Plugins / VirusTotal plugin); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[mcrit-plugin]], [[wpechatgpt]], [[vulchatgpt]], [[idassist]], [[memprocfs-analyzer]], and [[list-of-ida-plugins]].

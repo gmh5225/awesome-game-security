@@ -519,6 +519,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-nixware-csgo](entities/csgo-nixware-csgo.md) — leaked Nixware CS:GO internal (aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay; gmh5225 [Nixware])
 - [csgo-xenforo-loader](entities/csgo-xenforo-loader.md) — CS:GO C++ cheat loader with XenForo forum auth (license verification, subscription check, DLL download + injection; P2C distribution research; flowxrc [Loader])
 - [csgo-offsets](entities/csgo-offsets.md) — CS:GO memory offsets (gmh5225; netvars / interfaces / signatures; patch-updated; cheat / game:csgo [Offset])
+- [csgo-ormbunke-x86](entities/csgo-ormbunke-x86.md) — CS:GO internal cheat base (x86; DirectX 9 + Kiero + MinHook; ImGui menu; ESP/aimbot/movement/trigger; educational scaffold; ViddeBoiiii [Imgui Menu])
 - [csgo-p2c-dumper](entities/csgo-p2c-dumper.md) — CS:GO internal P2C process memory dumper (signature / hook-JMP / allocation diff; decoded assembly + handler offsets; Dump lane; ch4ncellor)
 - [csgo-sdk](entities/csgo-sdk.md) — CS:GO Source 1 SDK headers (gmh5225 + bloesway/csgo_sdk; classes / netvars / interfaces / rendering / networking / animation; cheat / game:csgo [SDK])
 - [csgo-sdk-improved](entities/csgo-sdk-improved.md) — improved CS:GO Source 1 SDK (corrected classes, extra interfaces, fuller netvars; cheat / game:csgo [Internal])
