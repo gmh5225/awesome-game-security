@@ -688,6 +688,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [drvscan (ekknod)](entities/drvscan.md) — Windows DMA/PCIe device scanner and memory forensics (C; PCIe enumeration, pcileech-style acquisition, cheat/rootkit signature scans; Anti Cheat / Detection:DMA [Scanner])
 - [DrillAndJoin](entities/drill-and-join.md) — C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla
 - [Duck-Detector-Refactoring](entities/duck-detector-refactoring.md) — Android local device-integrity inspector (Jetpack Compose + Kotlin + native C++/assembly; root/hook/mount/attestation/virtualization cards; eltavine; cheat / Android root)
+- [Duckov Market Mod](entities/duckov-marketmod.md) — Duckov flea-market C# mod (Harmony patches; Steam-auth API + WebSocket; mod loader with auto-update; RE-derived internals; a0yark; modding / online marketplace research)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
 - [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (gmh5225 fork + narumii; ProGuard/Allatori/ZKM passes; cheat / RE tools)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:a0yark/Duckov_marketmod`: entity [[duckov-marketmod]] (C# Duckov flea-market mod; UI + Steam-auth network API + WebSocket + Harmony patches + mod loader with version check/auto-update; RE-derived internals; a0yark; modding / online marketplace research); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[pubg-demo]], [[wellsanticheat]], [[goldberg-emulator]], and [[rce-shield]].
+
 - **2026-08-19** — ingest `description:a0yark/Pubg-demo`: entity [[pubg-demo]] (PUBG external cheat demo; C++; dumped UE CppSDK + bone helpers; ESP/aimbot framework; DLL inject + separate ImGui D3D11 overlay pipeline; a0yark; cheat / game:pubg [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[pubg-external-cheat]], [[pubg-internal]], [[pubg-dumper]], and [[unreal-object-model]].
 
 - **2026-08-19** — ingest `description:a1ext/auto_re`: entity [[auto-re]] (Python IDA Pro plugin; auto-rename dummy functions from imported APIs and jump targets; behavioral tags for networking, injection, crypto, file activity; dedicated tag view; a1ext; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[autorename]], [[renamaida]], [[ida-names]], and [[list-of-ida-plugins]].
