@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial`: entity [[xilinx-fpga-pcie-xdma-tutorial]] (Vivado XDMA hands-on tutorial; BRAM R/W, AXI integration, Linux host C, MPEG2 acceleration; driver load + test procedures; FPGA/hardware-security + DMA game-security research; WangXuan95; cheat / DMA Tutorial); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[litepcie]], and [[dma-pcie-board-75t]].
+
 - **2026-08-19** — ingest `description:Washi1337/AwaitFuscator`: entity [[awaitfuscator]] (.NET bin2bin obfuscator; rewrites method bodies into long await chains via custom awaiters and GetAwaiter/GetResult transforms; decompiler-resistant control-flow PoC CLI; C#/.NET; Washi1337); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[control-flow-flattening]], [[obfuscation-methods]], [[confuserex]], [[obfuscar]], [[dnspy]], and [[ghidra-nativeaot]].
 
 - **2026-08-19** — ingest `description:Washi1337/ghidra-nativeaot`: entity [[ghidra-nativeaot]] (Ghidra Java analyzer/UI plugin; .NET Native AOT binary RE for .NET 8+; type hierarchy from method tables, frozen-object annotation, vtable redirection detection, ReadyToRun metadata via symbols/heuristic scan, metadata browser + virtual-method rename refactor; stripped-symbol malware/CTF/security RE; Washi1337); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[dotniet]], [[delphiresym]], [[ghidra-cpp-class-analyzer]], and [[research-rigor]].
