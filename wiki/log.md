@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WistfulHopes/NightSkyEngine`: entity [[nightsky-engine]] (open-source UE5 fighting-game framework; 2D/2.5D competitive fighters; C++ modules/plugins; GGPO rollback networking; collision editor; WistfulHopes; Game Engine); cited on [[overviews/game-engine]]; cross-linked [[fightinggame-ue5]], [[unrealengine5-ultimate-streetfighters]], and [[bevy-personal-test]].
+
 - **2026-08-19** — ingest `description:WithSecureLabs/CallStackSpoofer`: entity [[callstackspoofer]]; cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[nimic-stack]], [[callstackspoofer-2]], and [[silent-moonwalk]].
 
 - **2026-08-19** — ingest `description:WolfireGames/overgrowth`: entity [[overgrowth]] (open-source Wolfire Games action game + custom engine; complete game source with rendering, physics, animation, AI, level editor, and scripting; commercial engine internals study for researchers and modders; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[overload]], [[wickedengine]], [[lumos]], [[custom-game-engines]], and [[open-source-engines]].

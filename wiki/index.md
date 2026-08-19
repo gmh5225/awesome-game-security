@@ -1707,6 +1707,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NFD x64dbg](entities/nfdx64dbg.md) — x64dbg plugin: Nauz File Detector static scan tab (compiler/packer/protector ID; C++/Qt; Cheat x64dbg Plugins)
 - [Nauz File Detector](entities/nauz-file-detector.md) — standalone NFD: signature-based packer/compiler/protector/linker ID for PE/ELF/Mach-O+; C++/Qt GUI+CLI; binary triage
 - [NimicStack](entities/nimic-stack.md) — pure Nim call-stack spoofing (WithSecure Labs PoC lineage; mimic legitimate program stacks; Cheat Spoof Stack)
+- [NightSkyEngine](entities/nightsky-engine.md) — open-source UE5 fighting-game framework (2D/2.5D; C++ modules/plugins; GGPO rollback; collision editor; WistfulHopes; Game Engine)
 - [Nightshade](entities/nightshade.md) — Rust data-oriented game engine (custom ECS; wgpu PBR; native/web/VR; Game Engine / source)
 - [NightOwl](entities/nightowl.md) — unified Android APK security CLI (framework/RASP detection; auto Frida bypass scripts; MASTG Semgrep)
 - [NMMP](entities/nmmp.md) — Android DEX bytecode-to-native protector (Nativ Method Map Protector; JNI; Dex)
