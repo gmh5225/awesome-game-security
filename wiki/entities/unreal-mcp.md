@@ -5,7 +5,7 @@ topics: [game-engine]
 sources:
   - wiki/sources/descriptions/kvick-games__UnrealMCP.md
   - wiki/sources/descriptions/chongdashu__unreal-mcp.md
-updated: 2026-08-17
+updated: 2026-08-19
 confidence: medium
 ---
 
@@ -18,7 +18,7 @@ The README lists two independent implementations under the same label:
 - **kvick-games/UnrealMCP** — editor integration for asset management, level editing, blueprint manipulation, and project configuration (source: wiki/sources/descriptions/kvick-games__UnrealMCP.md)
 - **chongdashu/unreal-mcp** — experimental MCP for Unreal Engine; currently in an experimental state (source: wiki/sources/descriptions/chongdashu__unreal-mcp.md)
 
-Complements editor-side Unity MCP [[unity-mcp]] and Godot MCP [[better-godot-mcp]] on the Game Develop → MCP server lane; sits opposite Unreal SDK/explorer tooling such as [[unrealengine4-swissknife]] and [[ts-ue4dumper]] when the goal is authoring automation rather than live-process RE.
+Complements editor-side Unity MCP [[unity-mcp]] and Godot MCP [[better-godot-mcp]] on the Game Develop → MCP server lane; the paused Blender↔UE5 pipeline design [[ue5-mcp]] documents cross-DCC automation goals without runnable server code. Sits opposite Unreal SDK/explorer tooling such as [[unrealengine4-swissknife]] and [[ts-ue4dumper]] when the goal is authoring automation rather than live-process RE.
 
 ## Links
 
@@ -27,4 +27,4 @@ Complements editor-side Unity MCP [[unity-mcp]] and Godot MCP [[better-godot-mcp
 
 ## Related
 
-[[unity-mcp]] · [[better-godot-mcp]] · [[unicli]] · [[unreal-object-model]] · [[overviews/game-engine]] · [[overviews/overview]]
+[[unity-mcp]] · [[better-godot-mcp]] · [[ue5-mcp]] · [[blender-mcp]] · [[unicli]] · [[unreal-object-model]] · [[overviews/game-engine]] · [[overviews/overview]]
