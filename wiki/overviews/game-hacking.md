@@ -1117,6 +1117,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__External-ImGui-Android.md
   - wiki/sources/descriptions/gmh5225__Android-Mod-Menu-ImGui.md
   - wiki/sources/descriptions/gmh5225__External-imgui-Cheat-Menu-Example-2023.md
+  - wiki/sources/descriptions/adam-040__Enigma.md
   - wiki/sources/descriptions/adamhlt__ImGui-Standalone.md
   - wiki/sources/descriptions/gmh5225__eft-dma-radar-1.md
   - wiki/sources/descriptions/bytemyass__EFTLeecher.md
@@ -1540,6 +1541,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Ghidra decompiler integration in IDA Pro via [[blc]] (Binary Lifting Contraption; cseagle; cheat / IDA Plugins) sits beside [[ida2llvm]] and [[ghiradec]] for alternate pseudocode when Hex-Rays is unavailable or for cross-decompiler comparison. (source: wiki/sources/descriptions/cseagle__blc.md)
 - Vivisect↔Ghidra symbolic decompilation bridge via [[viv-ghidra-decompiler]] (Python/Java; symbolik effects → Ghidra p-code; headless JSON-RPC backend; Qt dock widget; cheat / Ghidra Plugins) sits beside [[blc]] and [[ghiradec]] when Vivisect symbolic analysis disagrees with Ghidra Sleigh lifting. (source: wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md)
 - Browser-based Ghidra decompilation via [[pyre]] (WASM-compiled SLEIGH; multi-arch pseudocode entirely in-browser; no server-side processing; cheat / Decompiler) sits beside [[ghiradec]] for portable Ghidra-quality decomp without a local Ghidra install. (source: wiki/sources/descriptions/ant4g0nist__pyre.md)
+- Native standalone Ghidra decompiler via [[enigma]] (C++; SLEIGH/Pcode extracted from Ghidra analytical core; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agent RE; cheat / Decompiler) sits beside [[ghiradec]] and [[pyre]] when a full Ghidra install is impractical. (source: wiki/sources/descriptions/adam-040__Enigma.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
 - ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)
