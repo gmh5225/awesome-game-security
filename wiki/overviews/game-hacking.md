@@ -1292,6 +1292,7 @@ sources:
   - wiki/sources/descriptions/ZehMatt__zyemu.md
   - wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
+  - wiki/sources/descriptions/Vu1nT0tal__firmeye.md
   - wiki/sources/descriptions/WerWolv__ImHex.md
   - wiki/sources/descriptions/Washi1337__ghidra-nativeaot.md
   - wiki/sources/descriptions/WenzWenzWenz__DelphiReSym.md
@@ -1686,6 +1687,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Live Marp/Slidev RE presentation decks docked in IDA via [[ida-slides]] (IDA 9.2+ Python; `@name`/`@0xADDR` tokens jump disasm/pseudocode; embed decompiled lines on save; hover previews; unresolved-ref lint; native webview + file-watcher reload; cheat / IDA Plugins) sits in the presentation/documentation lane beside [[ida-screenshot]] and [[draw-ida]]. (source: wiki/sources/descriptions/hyuunnn__ida-slides.md)
 - Cloud function symbol recognition via [[finger]] (aliyunav; Python SDK + IDA 7+ plugin; extract function features, submit to recognition backend, rename/highlight matches; Recognizing Function By Cloud; malware/game binary triage; cheat / IDA Plugins) sits in the same symbol-recovery lane beside [[renamaida]] and [[ida-pro-loadmap]]. (source: wiki/sources/descriptions/aliyunav__Finger.md)
 - Instruction-signature library function renaming via [[renamaida]] (Python; Jaro-Winkler on arch-specific insn tokens; custom JSON sig DB; ≥0.83 / ≥10 insns; firmware/static-link RE; cheat / IDA Plugins) sits in the same symbol-recovery lane. (source: wiki/sources/descriptions/kirovgrad__Renamaida.md)
+- IoT firmware vulnerability hunting via [[firmeye]] (Python IDA plugin; argument tracing into sensitive functions; static + debugger-assisted dynamic checks; overflow / command-exec / format-string rules; CLI batch workflows; firmware audit + embedded RE; Vu1nT0tal; cheat / IoT / IDA Plugins) sits in the firmware/IoT IDA Plugins lane beside [[renamaida]], [[efixplorer]], and [[embedded-hacking]]. (source: wiki/sources/descriptions/Vu1nT0tal__firmeye.md)
 - Batch function/symbol name management via [[ida-names]] (Python; batch rename, pattern match, prefix/suffix, import/export; renames pseudocode window titles with current function name; cheat / IDA Plugins) sits in the same symbol-naming lane. (source: wiki/sources/descriptions/gmh5225__ida_names.md)
 - IDA function-list Markdown export via [[ida-export-functions]] (Python; dump DB function index to a specified path for notes/reporting; cheat / IDA Plugins) sits in the same documentation/reporting lane beside [[ida-slides]] and [[ida-screenshot]]. (source: wiki/sources/descriptions/gmh5225__ida_export_functions.md)
 - Function–string association and auto-comments from literals via [[ida-function-string-associate]] (IDA 9.X; scan function bodies for string refs; navigable per-function summary; cheat / IDA Plugins) sits in the same string-triage lane beside [[ida-names]] and [[idawilli]]. (source: wiki/sources/descriptions/gmh5225__ida-function-string-associate.md)

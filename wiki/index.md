@@ -895,6 +895,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [findfunc](entities/findfunc.md) — IDA Pro function pattern search (byte patterns, instruction sequences, operand types, xrefs; Recognizing Function By Pattern; gmh5225; cheat / IDA Plugins)
 - [findyara-ida](entities/findyara-ida.md) — IDA Pro YARA scan plugin (match highlight + disasm navigation; custom malware/crypto/packer rules; gmh5225; cheat / Yara)
 - [Finger](entities/finger.md) — cloud function symbol recognition (Python SDK + IDA 7+ plugin; feature extraction → recognition backend → rename/highlight; Recognizing Function By Cloud; aliyunav; cheat / IDA Plugins)
+- [firmeye](entities/firmeye.md) — IDA Pro IoT firmware vuln hunter (Python; argument tracing into sensitive functions; static + debugger-assisted dynamic checks; overflow/command-exec/format-string rules; CLI batch; Vu1nT0tal; cheat / IoT / IDA Plugins)
 - [FRIEND](entities/friend.md) — IDA plugin: register/instruction docs in disasm + Hex-Rays (Capstone extensions; contextual hints; external links; function summaries; C++/CMake; cheat / IDA Plugins)
 - [FlatRedBall](entities/flatredball.md) — C# / .NET 2D engine (editor + runtime; Game Engine)
 - [FallGuys](entities/fall-guys.md) — Fall Guys kernel cheat (driver communication + memory manipulation; speed/fly/physics exploits; Unity; gmh5225)
