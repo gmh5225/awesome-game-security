@@ -1303,6 +1303,7 @@ sources:
   - wiki/sources/descriptions/Vekor64__PythonCS2.md
   - wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md
   - wiki/sources/descriptions/Vector35__scc.md
+  - wiki/sources/descriptions/Vector35__official-plugins.md
   - wiki/sources/descriptions/Vu1nT0tal__firmeye.md
   - wiki/sources/descriptions/WerWolv__ImHex.md
   - wiki/sources/descriptions/Washi1337__ghidra-nativeaot.md
@@ -1560,6 +1561,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
 - Binary Ninja MCP server via [[binary-ninja-mcp]] (Python; disasm/decompile/xrefs/functions/types for LLM clients; MCP for Binary_Ninja) sits in the Cheat Binary Ninja Plugins / agent-RE lane. (source: wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md)
 - Binary Ninja CLI for agents via [[bn]] (banteg; Python; headless/agent-facing CLI over BN APIs; plugin development; Cheat Binary Ninja Plugins / agent-RE lane) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/banteg__bn.md)
+- Vector35 curated official Binary Ninja plugin index via [[official-plugins]] (structured plugin metadata catalog; Python indexing; trusted first-party/endorsed integrations; Cheat Binary Ninja Plugins lane) complements community plugin discovery. (source: wiki/sources/descriptions/Vector35__official-plugins.md)
 - Triton DBA scaffolding in Binary Ninja via [[triton-bn]] (plugin base for symbolic-exec / lifting experiments inside BN; Cheat Binary Ninja Plugins) sits in the same Triton / symbolic-exec lane as [[ponce]] (IDA). (source: wiki/sources/descriptions/ergrelet__triton-bn.md)
 - Binary Ninja symbolic execution via [[seninja]] (Python plugin; BN IL path exploration; constraint tracking, unreachable-code detection, reachability conditions; interactive UI; Cheat Symbolic Execution / Binary Ninja Plugins) sits in the same symbolic-exec lane as [[triton-bn]] and [[ponce]]. (source: wiki/sources/descriptions/borzacchiello__seninja.md)
 - Binary Ninja ↔ Ghidra Server bidirectional analysis sync via [[ghidra-svr-bridge]] (C++/Qt6 sidebar + Java 17 bridge; local TCP JSON; symbols/comments/types/signatures/bookmarks; collaborative Ghidra Server repos) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md)
