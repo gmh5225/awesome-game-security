@@ -12,7 +12,7 @@ confidence: medium
 
 Windows kernel research sample focused on PTE (page-table entry) hooks. Kernel virtual addresses are shared across processes, but each process has a distinct CR3 (page-table root), so PTE-level hooks can be scoped per address space rather than globally. (source: wiki/sources/descriptions/stdhu__windows-kernel-pagehook.md)
 
-Useful for low-level Windows / Linux / mobile researchers in the Some Tricks / Windows Ring0 lane—studying page-table manipulation beside kernel memory and hook research.
+Useful for low-level Windows / Linux / mobile researchers in the Some Tricks / Windows Ring0 lane—studying page-table manipulation beside kernel memory and hook research. Hidden/shadowed memory region PoCs such as [[yumekage]] extend the same PTE Hook lane with guarded-region concealment tied to context switches.
 
 ## Links
 
@@ -20,4 +20,5 @@ Useful for low-level Windows / Linux / mobile researchers in the Some Tricks / W
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[ntmemory]] · [[pteditor]] · [[pg1903]]
+[[yumekage]] · [[fast-pf-hook]] · [[pteditor]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[ntmemory]] · [[pg1903]]
+
