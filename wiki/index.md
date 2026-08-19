@@ -235,6 +235,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anti-Cheat-TestBench (ekknod)](entities/anti-cheat-testbench.md) — AC testBench harness (C++/C; AC research + driver development + hooking; Open Source Anti Cheat System; README [TestBench])
 - [UAC (c4kef)](entities/uac.md) — anti-cheat development platform (Visual Studio kernel driver; common cheat-technique detection; C++ kernel detection test framework; Cheat developer platform)
 - [Anti-Cheat-Amateur](entities/anti-cheat-amateur.md) — MemRE memory editor + GothGirlFeet kdmapper KMDF driver (NUL IOCTL; DBVM shims; UE scan; Tencent ACE research)
+- [Anti-Debugger-Protector-Loader](entities/anti-debugger-protector-loader.md) — Windows C++ anti-debug protector/loader (debugger process/window/driver scans; optional termination; VMProtect SDK; YouNeverKnow00)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
 - [AntiDebugandMemoryDump](entities/antidebugandmemorydump.md) — Android anti-debug + memory analysis / emulation / debugging (Java + C/C++; gmh5225)
 - [AntiDebug-AntiVM](entities/antidebug-antivm.md) — anti-debug + VirtualBox anti-VM technique examples (reference snippets; Vbox; gmh5225)
