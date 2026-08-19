@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vekor64/Driver-physical-rw`: entity [[driver-physical-rw]] (Windows C++ kernel driver; IOCTL phys/virt memory R/W, alloc/protect, module-base lookup, process helpers; DeviceIoControl request structs; low-level security experimentation / cheat driver-comm study; Vekor64; Kernel-mode W/RPM for Windows); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ntmemory]], [[driver-rpm-direct-page-manipulation]], [[readwrite-kernel-stable]], [[readphys]], and [[pythoncs2]].
+
 - **2026-08-19** — ingest `description:Vekor64/PythonCS2`: entity [[pythoncs2]] (Python external CS2 cheat study; PyMeow memory access + overlay rendering; DearPyGui runtime config; ESP boxes/health/weapon/distance/lines + recoil control; educational external workflow reference; Vekor64; cheat / game:cs2 [Python External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[titled-gui-cs2]], [[cs2-external-cheat]], [[proext]], and [[meowsense]].
 
 - **2026-08-19** — ingest `description:Velaron/cs16-client`: updated entity [[cs16-client]] (Velaron fork; reverse-engineered CS1.6 client; C/C++; Xash3D FWGS; cross-platform/mobile; preservation + engine RE); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[xash-rt]], [[regamedll-cs]], and thomaseichhorn [[cs16-client]].
