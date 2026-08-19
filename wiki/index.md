@@ -2399,6 +2399,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Urho3D](entities/urho3d.md) — lightweight cross-platform 2D/3D engine (Game Engine source)
 - [USN](entities/usn.md) — NTFS USN / change-journal tooling (C++; AC / IS forensics)
 - [SearchEx](entities/searchex.md) — SearchEx IS forensics (C++; hooking / memory analysis; AC)
+- [Seiun AC](entities/seiun-ac.md) — Fabric **1.21.11** client-integrity AC (mod/resource-pack hash whitelists/blacklists/gray lists; mid-session pack-change detection; Discord alerts; clementine44613; Anti Cheat / game:minecraft)
 - [como-funciona-vac](entities/como-funciona-vac.md) — CS2 VAC usermode architecture write-up (Trusted Launch, scanners, evidence pipeline; forensic RE overview)
 - [vac](entities/vac.md) — VAC module RE corpus: decompiled detection modules, signature/memory/integrity scanning, Steam comms (danielkrupinski; explore anticheat:vac)
 - [vac-bypass](entities/vac-bypass.md) — Steam-client VAC scan inhibition via `Steam.exe` injection and `steamservice.dll` patching (C DLL; danielkrupinski; explore anticheat:vac)
