@@ -154,6 +154,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apex-external-cheat](entities/apex-external-cheat.md) — Apex Legends external (Echo_Apex): kernel-driver memory reads + DX11 ImGui overlay; offsets/hitboxes/string encryption (C++17; bootmgfw; cheat / game:apex legends [External])
 - [Apex-Legends-External-Esp-Aimbot-Skinchanger](entities/apex-legends-external-esp-aimbot-skinchanger.md) — Apex Legends external ESP/aimbot/skinchanger: rendering / SDK generation / overlays (C/C++; gmh5225; cheat / game:apex legends [External])
 - [apex_linux](entities/apex-linux.md) — Linux-native Apex Legends cheat research (C++; ekknod; cheat / game:apex legends [Linux])
+- [project-tanya](entities/project-tanya.md) — Apex Legends service-oriented external automation: C#/.NET modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; Linux daemon build/install; process isolation + ptrace hardening (XRadius; cheat / game:apex legends [Linux])
 - [Apex-SIMPLE-AIMBOT-GLOW-APEX](entities/apex-simple-aimbot-glow-apex.md) — Apex Legends aimbot + glow: driver development / hooking / memory analysis (C/C++; gmh5225; cheat / game:apex legends)
 - [Apex_ESP_Old_Project](entities/apex-esp-old-project.md) — Legacy Apex Legends ESP: rendering / SDK generation / overlays (C/C++; gmh5225; cheat / game:apex legends)
 - [Apex-Spoofer](entities/apex-spoofer.md) — Apex Legends HWID spoofer: kernel-level ban evasion (gmh5225; cheat / HWID; game:apex legends under EAC)

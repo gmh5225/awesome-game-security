@@ -58,6 +58,7 @@ sources:
   - wiki/sources/descriptions/alex193a__Root-My-Pixel.md
   - wiki/sources/descriptions/Y33Tcoder__EzApexDMAAimbot.md
   - wiki/sources/descriptions/Yayoi-cs__fastDbg.md
+  - wiki/sources/descriptions/XRadius__project-tanya.md
   - wiki/sources/descriptions/XuanXuan-ZhengGui__Minecraft-Anti-Cheat.md
   - wiki/sources/descriptions/YcbrYL1__YCBR-AntiCheat.md
   - wiki/sources/descriptions/YimMenu__YimMenu.md
@@ -1905,6 +1906,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Apex Legends full-cheat samples such as [[apex-full-cheat]] (C/C++; rendering / SDK generation / hooking; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/hadevn__apex_full_cheat.md)
 - Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md) Linux Discord in-game overlays such as [[vocem-overlay]] (ales-drnz; Vulkan implicit layer + OpenGL interposer; daemon-isolated Discord I/O; in-process graphics hooking / overlay injection study surface—not commercial-AC tested) extend that lane with a non-cheat overlay reference beside MangoHud-style cheat samples. (source: wiki/sources/descriptions/ales-drnz__vocem-overlay.md)
 - Linux-native Apex Legends cheat research such as [[apex-linux]] (ekknod; C++; cheat / game:apex legends [Linux]) complements [[ayypex]] on non-Windows Apex clients under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/ekknod__apex_linux.md)
+- Linux service-oriented Apex Legends external automation such as [[project-tanya]] (XRadius; C# / .NET; modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; daemon build/install scripts; process isolation + ptrace hardening; long-running stealth-conscious memory-driven workflows; cheat / game:apex legends [Linux]) extends that lane beside KVM/DMA samples such as [[ez-apex-dma-aimbot]]. (source: wiki/sources/descriptions/XRadius__project-tanya.md)
 - Title-specific Apex Legends SDK samples such as [[apex-legends-sdk]] (gmh5225; C++; rendering / SDK generation; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__apex_legends_sdk.md)
 - Simplified Apex Legends SDK remaster samples such as [[apex-legends-sdk-remaster]] (dword64; open-source cheat designed for ease of use; avoids Python-binding friction; cheat / game:apex legends) sit beside [[apex-legends-sdk]] in the same lane. (source: wiki/sources/descriptions/dword64__Apex-Legends-SDK-Remaster.md)
 - Apex Legends live-process offset dumpers such as [[apex-legends-offset-dumper]] (dhanax26; pattern scan + netvar enumeration from running process; interfaces, netvars, SwapChain pointers; cheat / game:apex legends `[Offset]`) automate per-patch layout refresh beside static SDK trees and full cheat samples. (source: wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md)
