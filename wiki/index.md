@@ -1305,6 +1305,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ILSpy](entities/ilspy.md) — open-source .NET assembly browser/decompiler (C#/VB/IL; .NET Framework/Core/5+; async/LINQ/generics; For Unity)
 - [image-blaster](entities/image-blaster.md) — image→3D mesh/splat/SFX skillset (World Labs+FAL; React/Three.js; AI / 3D Graphics)
 - [image-cockpit-for-codex-workflows](entities/image-cockpit-for-codex-workflows.md) — local Codex imagegen cockpit (pixel art, region edit, animation frames/sprite sheets; codex-handoff inbox/outbox; Game Develop / AI Agents)
+- [ImHex](entities/imhex.md) — C++ cross-platform hex editor / binary analysis platform (pattern-language parsing, disassembly, diff/hash, plugins; firmware/file/memory/game binary RE)
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [ImGui Standalone](entities/imgui-standalone.md) — D3D11 external ImGui framework (EXE/DLL; own render window; VS x86/x64; game tooling / menu prototyping; adamhlt)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
