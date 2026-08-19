@@ -331,6 +331,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
 - [BLOCKPOST-Cheat](entities/blockpost-cheat.md) — BLOCKPOST Unity IL2CPP cheat (C/C++; IL2CPP analysis + native hooking; cheat / game:blockpost; gmh5225)
 - [blood-hunt](entities/blood-hunt.md) — Blood Hunt cheat (C/C++; driver / rendering / modding; cheat / game:bloodhunt; gmh5225)
+- [bloodhunt-external](entities/bloodhunt-external.md) — Blood Hunt external cheat (C++; ImGui DX9 overlay + memory/offset helpers; mhyprot driver utilities; ZZZ-Monster; cheat / game:bloodhunt [External])
 - [blitz](entities/blitz.md) — header-only UM lazy import resolver with direct calls (C++; Anti Cheat / Lazy Importer; emlinhax)
 - [blc](entities/blc.md) — IDA Pro plugin integrating Ghidra decompiler (Binary Lifting Contraption; cheat / IDA Plugins; cseagle)
 - [blender-mcp](entities/blender-mcp.md) — Blender MCP bridge (addon + Python server; scene/object/material edit; AI-assisted 3D prototyping; Game Develop / MCP)

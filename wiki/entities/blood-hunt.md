@@ -12,7 +12,7 @@ confidence: medium
 
 Blood Hunt cheat research repo (C/C++) centered on kernel driver development, rendering, and modding for the battle-royale title. Useful as a title-specific sample of offensive technique study in the cheat / game:bloodhunt lane (EAC-facing; driver-backed memory/render path). (source: wiki/sources/descriptions/gmh5225__blood-hunt.md)
 
-Sits beside [[apexd3d-external]] and [[pubg-external-cheat]] as a battle-royale external with kernel/driver and rendering components.
+Sits beside [[bloodhunt-external]] (ZZZ-Monster; C++ external; ImGui DX9 overlay + offsets/config headers + mhyprot driver utilities), [[apexd3d-external]], and [[pubg-external-cheat]] as battle-royale externals with kernel/driver and rendering components.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside [[apexd3d-external]] and [[pubg-external-cheat]] as a battle-royale 
 
 ## Related
 
-[[easy-anti-cheat]] · [[apexd3d-external]] · [[pubg-external-cheat]] · [[fortnite-external-source]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]]
+[[bloodhunt-external]] · [[easy-anti-cheat]] · [[apexd3d-external]] · [[pubg-external-cheat]] · [[fortnite-external-source]] · [[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]]
