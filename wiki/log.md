@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Wunkolo/UWPDumper`: entity [[uwp-dumper]] (C++ Windows DLL + injector; CLI; Windows 10 SDK; inject into UWP target process to dump package files gated by the UWP file-system model; Microsoft Store / protected game-build RE; Wunkolo; Cheat / Explore UWP); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[ue4-injector]], [[unmapper]], and [[guided-hacking-injector]].
+
 - **2026-08-19** — ingest `description:XMCVE/import-kallsyms`: entity [[import-kallsyms]] (IDA Pro Python plugin; import kallsyms dump → symbol names/addresses in kernel IDBs; faster stripped/partially symbolized Linux kernel static RE; XMCVE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-kallsyms-symbol-renamer]], [[vmlinux-to-elf]], and [[idaplugins]].
 
 - **2026-08-19** — ingest `description:XRadius/project-tanya`: entity [[project-tanya]] (Apex Legends service-oriented external automation; C#/.NET; modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; Linux service build/install scripts; process isolation + ptrace hardening; long-running stealth-conscious memory-driven workflows; XRadius; cheat / game:apex legends [Linux]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[apex-linux]], [[ayypex]], [[ez-apex-dma-aimbot]], [[apex-dma-cheat-updated]], [[cs2-external]], and [[easy-anti-cheat]].
