@@ -1149,6 +1149,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HP Hardware Diagnostics PoC](entities/hp-hardware-diagnostics-poc.md) — HP `etdsupp.sys` diagnostics driver IOCTL LPE (OEM BYOVD / privilege escalation; gmh5225)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
+- [HyperDeceit](entities/hyperdeceit.md) — C++ Hyper-V impersonation library; intercepts selected kernel hypercalls (TLB flush, sleep/shutdown, address-space switch, spinlock; reusable hooks; Xyrem; HvcallCodeVa)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
 - [hypervisor](entities/hypervisor.md) — experimental Intel VT-x Type-2 HV (EPT page hooks, violation watchpoints, per-process cleanup; integrity-check bypass research)
 - [ept-hook-detection](entities/ept-hook-detection.md) — usermode EPT hook detector (timing / write-compare / cross-core consistency; Detect EPT)
