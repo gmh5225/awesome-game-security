@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Xxmmy/vulnerable-driver-scanner`: entity [[vulnerable-driver-scanner]] (C++ CLI; scans directories for vulnerable Windows drivers in common system paths; BYOVD exposure triage; anti-cheat bypass research, IR, defensive audits; Xxmmy); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[ms-vulnerable-driver-list]], [[loldrivers-client]], and [[byovdfinder]].
+
 - **2026-08-19** — ingest `description:Xyrem/HyperDeceit`: entity [[hyperdeceit]] (C++ Hyper-V impersonation library; intercepts selected kernel hypercalls with ready-to-hook TLB flush, sleep/shutdown, address-space switch, and spinlock paths; virtualization internals + kernel compatibility; hypervisor-layer interception and stealth research; Xyrem; Some Tricks / HvcallCodeVa); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-hypercall-page-hook]], [[hook-hvl-switch-virtual-address-space]], [[hyper-rev]], [[voyager]], and [[yumekage]].
 
 - **2026-08-19** — ingest `description:Xyrem/Yumekage`: entity [[yumekage]] (hidden/shadowed memory region PoC; C++; guarded-region techniques tied to context-switch behavior and low-level memory semantics; demo code/media for runtime inspection evasion; reverse engineering and anti-cheat bypass research; Xyrem; Some Tricks / PTE Hook); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-pagehook]], [[fast-pf-hook]], [[pteditor]], and [[page-table-injector]].
