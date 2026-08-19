@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WopsS/RenHook`: entity [[renhook]] (open-source Windows x86/x86-64 hooking library; modern C++; Zydis-based disassembly for reliable inline hooks/trampolines; safe APIs + practical examples; RE/instrumentation/game-security research; WopsS); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[polyhook]], [[polyhook-2-0]], [[subhook]], [[detoursnt]], and [[covcane]].
+
 - **2026-08-19** — ingest `description:Wra7h/FlavorTown`: entity [[flavortown]] (multi-language shellcode execution technique collection; C/C#/MATLAB samples; diverse process and memory execution paths with embedded usage guidance; evasion tradecraft study; Wra7h; Shellcode Engine & Tricks); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[alternative-shellcode-exec]], [[jektor]], [[scfw]], [[shellcode-factory]], and [[windows-process-injection]].
 
 - **2026-08-19** — ingest `description:Wunkolo/UWPDumper`: entity [[uwp-dumper]] (C++ Windows DLL + injector; CLI; Windows 10 SDK; inject into UWP target process to dump package files gated by the UWP file-system model; Microsoft Store / protected game-build RE; Wunkolo; Cheat / Explore UWP); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[ue4-injector]], [[unmapper]], and [[guided-hacking-injector]].

@@ -2083,6 +2083,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rel-fuscate](entities/rel-fuscate.md) — ELF JMPREL/GOT relocation obfuscation (jmprel `r_offset` misdirection; partial RELRO; Python patch toolchain; caprinux)
 - [RelocBonus](entities/relocbonus.md) — Attack Reloc (DEF CON 26; AC / Obfuscation Engine)
 - [Renamaida](entities/renamaida.md) — IDA Pro plugin: Jaro-Winkler instruction-signature rename for firmware/static libs (JSON sig DB; cheat / IDA Plugins)
+- [RenHook](entities/renhook.md) — Windows x86/x86-64 inline hooking library (modern C++; Zydis disassembly; safe APIs + trampolines; RE/instrumentation; WopsS)
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
 - [re-harness](entities/re-harness.md) — OpenCode agent harness for Qwen 27B/35B with read-only IDA 9.3/IDASQL PE static analysis; NeverD/LLVM lift→O3→redecompile fallback; malware/game-security RE
