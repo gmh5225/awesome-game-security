@@ -1975,6 +1975,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pom-pom](entities/pom-pom.md) — Honkai: Star Rail simple cheat (C/C++; hooking / overlays; cheat / game:honkai star rail; gmh5225)
 - [ptfaketouch](entities/ptfaketouch.md) — iOS synthetic touch library (IOKit/UIKit inject; game bot / UI automation; gmh5225)
 - [PTEditor](entities/pteditor.md) — cross-platform page-table editor (PGD/PUD/PMD/PTE R/W; VA→PA; PAT/NX/TLB; Linux LKM + Windows driver; Some Tricks / PTE Hook)
+- [PTView](entities/ptview.md) — live Windows process page-table browser (C++ driver + C# GUI; PTE browse/dump, VA→PA, large pages; OS memory research / AC kernel investigations; VollRagm; Browse Page Tables on Windows)
 - [PolyHook](entities/polyhook.md) — x86/x64 C++11 multi-method hooking lib (cheat / hook research)
 - [PolyHook 2.0](entities/polyhook-2-0.md) — C++ PolyHook2 hooking lib (vcpkg; cheat / hook research)
 - [Ponce](entities/ponce.md) — IDA Pro symbolic + taint execution plugin (Triton; path constraints, tainted data flow, input generation; Cheat Symbolic Execution; gmh5225)

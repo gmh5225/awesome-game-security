@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:VollRagm/PTView`: entity [[ptview]] (Windows live process page-table browser; C++ kernel driver + C# GUI; browse entries, dump physical pages, inspect PTE metadata, VA→PA translation, large-page awareness; OS memory research / debugging / AC kernel investigations; VollRagm; Browse Page Tables on Windows); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[pteditor]], [[page-table-injector]], [[readphys]], [[ntmemory]], and [[lpmapper]].
+
 - **2026-08-19** — ingest `description:VollRagm/lpmapper`: entity [[lpmapper]] (C++ Windows kernel mapper; shellcode into already-loaded large-page drivers without fresh pool allocation; registry config for large-page drivers; manual-map workflow; reduces visibility to common kernel AC detection paths; advanced kernel security + anti-cheat bypass research; VollRagm; cheat / Manual Map To Large Page Driver); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[sinmapper]], [[kdmapper]], [[umap]], [[known-driver-mappers]], and [[kernel-pool-scanning]].
 
 - **2026-08-19** — ingest `description:Vu1nT0tal/firmeye`: entity [[firmeye]] (Python IDA Pro IoT firmware vulnerability hunter; trace arguments into sensitive functions; static checks + debugger-assisted dynamic analysis; buffer overflow / command execution / format-string rules; CLI batch workflows; firmware security auditing + embedded RE; Vu1nT0tal; cheat / IoT / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[efixplorer]], [[ida-efiutils]], [[renamaida]], [[embedded-hacking]], and [[smallworld]].
