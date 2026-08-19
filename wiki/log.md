@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:poli0981/wardsweep`: entity [[wardsweep]] (Windows Rust/WPF tool to audit installed kernel anti-cheats (EAC, BE, Vanguard, ACE), export reports, uninstall orphaned drivers/services, and sweep leftover registry and filesystem residue; signed TOML catalog; quarantine/rollback; split-privilege IPC; legitimate cleanup—not ban evasion or runtime AC tampering; poli0981); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[easy-anti-cheat]], [[battleye]], [[vanguard]], and [[openark]].
+
 - **2026-08-19** — ingest `readme:categories`: Anti Cheat ~681 (+2; Cheat ~2728 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-19** — ingest `description:Zenlua/Tool-Tree`: entity [[tool-tree]] (Android ROM/APK unpack-repack toolkit; Kotlin/Java + Bash; boot/dtbo/ext4/erofs/f2fs/payload/super/APK/APKS/APEX/CAPEX; apktool-style decode/build, signing, BusyBox; root or non-root; Addon/Apkon modules; Zenlua); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apk-sh]], [[android-modding]], and [[termux-app]].
