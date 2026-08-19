@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vis-Wing/Binoculars`: entity [[binoculars]] (IDA Pro plugin; Python; configurable model backends, command prompts, UI actions; function explain/rename + Go pclntab reconstruction helpers; speeds repetitive RE for security researchers; Vis-Wing; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[wpechatgpt]], [[idassist]], [[ida-gepetto]], [[ida-llm-explainer]], [[goresym]], and [[golang-loader-assist]].
+
 - **2026-08-19** — ingest `description:VisionR1/KeyAttestation`: updated entity [[keyattestation]] (VisionR1 fork; Java/Kotlin generate/parse/verify attestation evidence; certificate-chain persistence; local/remote revocation lists; RSA attestation + privacy-oriented display; mobile integrity / bootloader research); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-hardware-attestation-demo]], [[trickystore]], and [[magiskdetector]].
 
 - **2026-08-19** — ingest `readme:categories`: Cheat ~2729 (+1; Anti Cheat ~682 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).

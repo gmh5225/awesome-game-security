@@ -1292,6 +1292,7 @@ sources:
   - wiki/sources/descriptions/ZehMatt__zyemu.md
   - wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
+  - wiki/sources/descriptions/Vis-Wing__Binoculars.md
   - wiki/sources/descriptions/Visual1mpact__Paradox_AntiCheat.md
   - wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md
   - wiki/sources/descriptions/Vu1nT0tal__firmeye.md
@@ -1614,6 +1615,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - ChatGPT PCode assistant via [[ida-plugin-pcodegpt]] (Chinese UI only; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant / microcode lane. (source: wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md)
 - Multi-provider IDA vulnerability analysis via [[vulchatgpt]] (BinAIVulHunter; OpenAI/Gemini/Ollama; decompiled-function vuln analysis + code explanation; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/ke0z__VulChatGPT.md)
 - OpenAI-compatible IDA analysis assistant via [[wpechatgpt]] (Python IDAPython; explain function behavior, rename variables, Python routine reconstruction, vulnerability checks from decompiled views; automated function-tree traversal + summarization; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/WPeace-HcH__WPeChatGPT.md)
+- Integrated AI assistant via [[binoculars]] (Python; configurable model backends, command prompts, UI actions; function explain/rename + Go pclntab reconstruction helpers; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/Vis-Wing__Binoculars.md)
 - Dynamic IDA→LLVM IR binary lifting via [[ida2llvm]] (cursor-sync liftability viewer in the disassembly window; cheat / IDA Plugins) sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md)
 - Ghidra decompiler integration in IDA Pro via [[blc]] (Binary Lifting Contraption; cseagle; cheat / IDA Plugins) sits beside [[ida2llvm]] and [[ghiradec]] for alternate pseudocode when Hex-Rays is unavailable or for cross-decompiler comparison. (source: wiki/sources/descriptions/cseagle__blc.md)
 - Vivisect↔Ghidra symbolic decompilation bridge via [[viv-ghidra-decompiler]] (Python/Java; symbolik effects → Ghidra p-code; headless JSON-RPC backend; Qt dock widget; cheat / Ghidra Plugins) sits beside [[blc]] and [[ghiradec]] when Vivisect symbolic analysis disagrees with Ghidra Sleigh lifting. (source: wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md)
