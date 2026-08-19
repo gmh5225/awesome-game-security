@@ -1164,6 +1164,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hv](entities/hv.md) — minimal Intel VT-x Type-2 hypervisor (VMX/VMCS learning)
 - [HVCI-loldrivers-check](entities/hvci-loldrivers-check.md) — PowerShell HVCI LOLdrivers check (Trail of Bits; vulnerable-driver lane)
 - [hw3d](entities/hw3d.md) — C++ 3D DirectX tutorial (Planet Chili; DirectX / guide)
+- [hardware-breakpoint](entities/hardware-breakpoint.md) — ARM64 Linux kernel HWBP module (APIs + proc; exec/watch breakpoints; trigger stats; Android/embedded debugging; Ylarod; HWBP on linux/android)
 - [hw-call-stack](entities/hw-call-stack.md) — Fortra HWBP call-stack spoofer for syscalls/API calls (C/C++; Cheat Spoof Stack / HWBP)
 - [hwid](entities/hwid.md) — BTBD kernel HWID spoofer (IOCTL hooks for disk/volume/NIC/ARP/SMBIOS/boot/GPU; usermode registry/tracking cleanup; Win10 1507–1903 x64)
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
