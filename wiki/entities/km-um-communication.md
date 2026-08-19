@@ -20,4 +20,4 @@ Aimed at reverse engineering and game-security researchers who need practical KM
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[driver-communication-list]] · [[kernel-payload-comms]] · [[cfb]] · [[drvtrace]] · [[kernel-snippets]]
+[[directinput]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[driver-communication-list]] · [[kernel-payload-comms]] · [[cfb]] · [[drvtrace]] · [[kernel-snippets]]

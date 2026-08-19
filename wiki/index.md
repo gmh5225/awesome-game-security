@@ -609,6 +609,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dirty-vanity](entities/dirty-vanity.md) — RtlCreateProcessReflection process-fork injection PoC; fork inherits shellcode without WPM (deepinstinct; EDR-evasion research)
 - [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)
 - [disabling-hyper-v](entities/disabling-hyper-v.md) — Win10 Hyper-V / Device Guard / Credential Guard teardown guide (Microsoft hardware readiness tool → disable HVCI + VBS; gmh5225; Disable Hyper-V)
+- [DirectInput (adspro15)](entities/directinput.md) — kbd/mou class-service input injection (WDK driver + UM; bypass SendInput; game automation / AC input-path research)
 - [dk](entities/dk.md) — WinDbg extension; refactored tokenext; token/heap pointer SVG overlays (WinDbg Plugins)
 - [DisableParallelLoader](entities/disable-parallel-loader.md) — x64dbg plugin: disable Win10+ parallel DLL loader (`LdrpMapAndSnapWork`; phnt; sequential load order)
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
