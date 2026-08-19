@@ -991,6 +991,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-orbis](entities/ghidra-orbis.md) — Ghidra PS4 Orbis extension (loaders, analyzers, syscall/NID data; Java/Gradle; astrelsky)
 - [ghidra-openai](entities/ghidra-openai.md) — Ghidra OpenAI GPT plugin (decompiled-function explain/rename/vuln hints; ChatGPT lane)
 - [ghidra-scripts](entities/ghidra-scripts.md) — CTF-oriented GhidraScript collection (automated common RE challenge patterns; cheat / Scripts)
+- [ghidrascripts](entities/ghidrascripts.md) — Maintained ATR GhidraScript automation (Java; AI rename, complexity viz, Golang, BSim/FunctionID, SHAREM/Malpedia; advanced-threat-research; cheat / Some scripts)
 - [ghidra-vxd-tools](entities/ghidra-vxd-tools.md) — Ghidra Jython Windows 9x VxD INT 20h annotator (VxDCall struct + VMDisp9x service decode; legacy kernel driver / historical game-protection RE; andrew-hoffman)
 - [ghidriff](entities/ghidriff.md) — Python CLI Ghidra binary diffing engine (headless two-binary analysis; graph/BSim matching; Markdown decomp/call-graph reports; PE/Mach-O/ELF; Docker CI; clearbluejar)
 - [ghiradec](entities/ghiradec.md) — programmatic Ghidra decompiler (integration or standalone; Ghidra analysis engine; automated binary analysis; Cheat Ghidra Decompiler)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:advanced-threat-research/GhidraScripts`: entity [[ghidrascripts]] (maintained Java GhidraScript collection; AI-assisted renaming, complexity visualization, Golang support, BSim matching, FunctionID DB generation, SHAREM/Malpedia enrichment; scalable static analysis for malware/RE including game security; cheat / Some scripts); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-scripts]], [[ghidrametrics]], [[ghidriff]], and [[ghidrassist]].
+
 - **2026-08-19** — ingest `description:afulsamet/integrity`: entity [[integrity]] (header-only C library; Windows PE non-writable section baseline checksums + periodic re-check; SSE4.2 CRC32; compile-time algorithm config; tamper detection / AC hardening / runtime self-protection; Detection:Memory Integrity); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[integrity-experiments]], [[memory-guard]], [[patch-finder]], and [[anticheat-poc]].
 
 - **2026-08-19** — ingest `description:ahaggard2013/binaryninja-ollama`: entity [[binaryninja-ollama]] (Binary Ninja plugin; local Ollama LLM-assisted HLIL function/variable rename; bulk and targeted actions; configurable server/port/model; offline semantic labeling; Cheat Binary Ninja Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binary-ninja-mcp]], [[bn]], [[rikugan]], [[ida-gepetto]], and [[ida-llm-explainer]].
