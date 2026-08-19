@@ -18,4 +18,4 @@ IDA Pro Python plugin for deobfuscating .NET Native (NativeAOT) binaries. Recons
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[totalpe2]] · [[vmunprotect]] · [[ida-easy-life]] · [[symless]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra-nativeaot]] · [[totalpe2]] · [[vmunprotect]] · [[ida-easy-life]] · [[symless]]

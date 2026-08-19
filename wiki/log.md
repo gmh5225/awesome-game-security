@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Washi1337/ghidra-nativeaot`: entity [[ghidra-nativeaot]] (Ghidra Java analyzer/UI plugin; .NET Native AOT binary RE for .NET 8+; type hierarchy from method tables, frozen-object annotation, vtable redirection detection, ReadyToRun metadata via symbols/heuristic scan, metadata browser + virtual-method rename refactor; stripped-symbol malware/CTF/security RE; Washi1337); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[dotniet]], [[delphiresym]], [[ghidra-cpp-class-analyzer]], and [[research-rigor]].
+
 - **2026-08-19** — ingest `description:WaterlooBridge/adbi`: updated entity [[adbi]] (Android ARM/Thumb DBI toolkit; hijack injector + base hooking library; inline entry hooks; NDK C/C++ + sample runtime instruments; mobile RE / runtime analysis / security research; WaterlooBridge fork; crmulliner lineage); cited on [[overviews/mobile-security]] and [[dynamic-binary-instrumentation]]; cross-linked [[frida]], [[dobby]], [[qbdi-tracer-android]], and [[android-super-inject]].
 
 - **2026-08-19** — ingest `description:WeiJiLab/kernel-hook-framework`: entity [[kernel-hook-framework]] (Linux kernel inline-hook framework; core + sample LKM modules; trampoline patching + extended kallsyms resolution; proc runtime control; x86/x86_64/ARM/ARM64/riscv64; kernel debug + anti-cheat kernel research; WeiJiLab); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[kernelpatch]], [[venom]], [[hardware-breakpoint]], [[vmlinux-to-elf]], and [[import-kallsyms]].
