@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Yu9191/wloc`: entity [[wloc]] (non-jailbreak iOS gs-loc WLOC network location spoof; MITM protobuf patch via Surge/QX/Loon/Stash/Shadowrocket; online picker + Shortcuts; GCJ-02→WGS84; indoor/WiFi positioning; JavaScript; Yu9191); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ios-location-spoofer]] and [[locusmimic]].
+
 - **2026-08-19** — ingest `description:YuKongA/ghostlock-app`: entity [[ghostlock-app]] (Android one-tap root; kernel pselect race CVE-2026-43499; NDK C exploit + Java UI; Rust boot/OTA offset extractor; per-kernel JSON import; KernelSU/ReSukiSU post-exploit; mobile AC/root-detection research; YuKongA); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[cve-2026-43499-popsicle]], [[root-my-pixel]], and [[kernelsu]].
 
 - **2026-08-19** — ingest `description:Yukin02/Dwm-Overlay`: entity [[dwm-overlay]] (Windows C++ DWM/DirectX ImGui overlay framework; assembly stubs for dispatch interception and present-path handling; minimal base for external overlay drawing, UI widgets, and runtime hook integration; graphics-hooking research; README `[DWM Overlay without modify .text]`; Yukin02); cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[dwm-dwmdraw]].

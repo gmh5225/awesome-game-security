@@ -22,4 +22,4 @@ Contrasts with rooted Android GPS injectors such as [[locusmimic]]: this lane st
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[locusmimic]] · [[trustdevice-ios]] · [[move-certificate]]
+[[wloc]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[locusmimic]] · [[trustdevice-ios]] · [[move-certificate]]
