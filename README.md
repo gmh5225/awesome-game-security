@@ -2142,6 +2142,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Anti Signature Scanning
 - https://github.com/scrt/avdebugger
+- https://github.com/R7flex/dll-ollvm [LLVM 18 pass plugin (sub/bcf/fla/trim) for manually mapped Windows DLLs to evade anti-cheat allocation/table pattern scans]
 
 > RPM
 - https://github.com/btbd/access
