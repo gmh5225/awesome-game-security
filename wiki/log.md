@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WaterlooBridge/adbi`: updated entity [[adbi]] (Android ARM/Thumb DBI toolkit; hijack injector + base hooking library; inline entry hooks; NDK C/C++ + sample runtime instruments; mobile RE / runtime analysis / security research; WaterlooBridge fork; crmulliner lineage); cited on [[overviews/mobile-security]] and [[dynamic-binary-instrumentation]]; cross-linked [[frida]], [[dobby]], [[qbdi-tracer-android]], and [[android-super-inject]].
+
 - **2026-08-19** — ingest `description:WeiJiLab/kernel-hook-framework`: entity [[kernel-hook-framework]] (Linux kernel inline-hook framework; core + sample LKM modules; trampoline patching + extended kallsyms resolution; proc runtime control; x86/x86_64/ARM/ARM64/riscv64; kernel debug + anti-cheat kernel research; WeiJiLab); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[kernelpatch]], [[venom]], [[hardware-breakpoint]], [[vmlinux-to-elf]], and [[import-kallsyms]].
 
 - **2026-08-19** — ingest `description:WeiNaYongQ/OmniClutch`: entity [[omniclutch]] (Fabric **1.21+** Minecraft Java fall-clutch automation mod; Java; free-fall monitoring + downward raycasts; hotbar clutch items—water buckets, boats, hay bales, slime blocks; client-side FSM with configurable Gaussian reaction delays + smooth camera rotation interpolation; survival/PvP fall recovery; WeiNaYongQ; cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[lenrete-mod]], [[eafe]], [[windfall-anticheatf]], [[seiun-ac]], and [[local-anticheat-1-8-9]].
