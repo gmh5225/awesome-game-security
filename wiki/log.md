@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ValveSoftware/source-sdk-2013`: entity [[source-sdk-2013]] (official Valve Source SDK 2013; C++; HL2/HL2DM/TF2 game+engine code; Visual Studio + Steam Runtime Linux builds; non-commercial mod distribution; Game Engine / source; ValveSoftware); cited on [[overviews/game-engine]] and [[source-netvars]]; cross-linked [[hl2sdk]], [[source-engine]], [[source-engine-2007]], and [[source-sdk-orangebox]].
+
 - **2026-08-19** — ingest `description:VarshaWanjari0/Auto-Android-App-Modding-Tool`: entity [[auto-android-app-modding-tool]] (UAMT; Termux Python TUI; Frida Gadget + custom `.so` inject; patchelf vs APKEditor smali auto-select for libil2cpp.so/libunity.so; multi-ABI gadget, zipalign, v1/v2/v3 sign; no root; VarshaWanjari0); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[apk-sh]], [[tool-tree]], and [[termux-app]].
 
 - **2026-08-19** — ingest `description:Vasieco/Kernel-Anticheat`: entity [[kernel-anticheat]] (Windows kernel AC prototype driver; C/C++ Visual Studio; host-integrity scans for unsigned/abnormal drivers, physical-memory handle abuse, hypervisor traces, big-pool artifacts, mapper traces, suspicious system threads; anti-cheat research; Vasieco); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-anti-cheat]], [[ac]], [[acdrv]], [[kernel-pool-scanning]], and [[known-driver-mappers]].
