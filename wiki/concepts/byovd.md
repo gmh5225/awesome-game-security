@@ -94,6 +94,7 @@ sources:
   - wiki/sources/descriptions/backengineering__msrexec.md
   - wiki/sources/descriptions/backengineering__VDM.md
   - wiki/sources/descriptions/alfarom256__drivers_and_shit.md
+  - wiki/sources/descriptions/Xacone__Eneio64-Driver-Exploit.md
   - wiki/sources/descriptions/Xxmmy__vulnerable-driver-scanner.md
 updated: 2026-08-19
 confidence: high
@@ -186,6 +187,8 @@ BitLocker **`PdFwKrnl.sys`** DSE-bypass mapper research such as [[pdfwkrnl-mappe
 AMD Ryzen Master v17 kernel driver abuse such as [[amd-ryzen-master-driver-v17-exploit]] (gmh5225; IOCTL interface → unprivileged physical memory R/W; BYOVD primitive for kernel exploitation, driver mapping, or AC bypass) sits in the OEM utility-driver physmem lane beside [[qiomem]]. (source: wiki/sources/descriptions/gmh5225__amd-ryzen-master-driver-v17-exploit.md)
 
 Rentdrv2 **`Rentdrv2.sys`** exploitation such as [[badrentdrv2]] (gmh5225; insecure IOCTL interface → arbitrary physical memory R/W; unsigned driver mapping, kernel patching, or AC bypass; Rentdrv2 BYOVD research) sits in the same physmem-primitive lane beside [[qiomem]] and [[amd-ryzen-master-driver-v17-exploit]]. (source: wiki/sources/descriptions/gmh5225__BadRentdrv2.md)
+
+Educational **`eneio64.sys`** physmem exploit PoC such as [[eneio64-driver-exploit]] (Xacone; C++; signed-driver physical memory R/W → virtual-to-physical translation for effective virtual memory access; modern Windows offset notes; token-theft LPE path; kernel security / vulnerable-driver analysis training) complements physmem-focused samples in the same lane. (source: wiki/sources/descriptions/Xacone__Eneio64-Driver-Exploit.md)
 
 HITCON 2023 **`AMDCpuProfiler.sys`** demo such as [[hitcon-2023-demo-cve-2023-20562]] (gmh5225; CVE-2023-20562; AMD signed driver exploitation → local privilege escalation or arbitrary kernel code execution; conference PoC in the AMD driver BYOVD lane) complements physmem-focused [[amd-ryzen-master-driver-v17-exploit]]. (source: wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md)
 

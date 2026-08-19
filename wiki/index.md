@@ -805,6 +805,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Embuche](entities/embuche.md) — ELF anti-reversing technique collection (Anti Cheat → Binary Packer `[ELF]`)
 - [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
+- [eneio64-driver-exploit](entities/eneio64-driver-exploit.md) — `eneio64.sys` educational physmem BYOVD PoC (VA translation + token-theft LPE; modern Windows offsets; Xacone)
 - [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [EfiDump](entities/efidump.md) — EFI runtime driver + Windows client for post-boot process memory R/W (gnu-efi; EDK2 shell load; PoC dumper; gmh5225; [Dump])
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
