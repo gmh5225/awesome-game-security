@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Vasieco/Kernel-Anticheat`: entity [[kernel-anticheat]] (Windows kernel AC prototype driver; C/C++ Visual Studio; host-integrity scans for unsigned/abnormal drivers, physical-memory handle abuse, hypervisor traces, big-pool artifacts, mapper traces, suspicious system threads; anti-cheat research; Vasieco); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-anti-cheat]], [[ac]], [[acdrv]], [[kernel-pool-scanning]], and [[known-driver-mappers]].
+
 - **2026-08-19** — ingest `description:Vatrials/League-of-Legends-Visuals-Cheat`: entity [[league-of-legends-visuals-cheat]] (internal LoL cheat; C++; Visual Studio injector + C++/CLI UI; R3nzSkin-style DLL load; skin changer/DB, orbwalker, spell prediction, champion scripts, zoom hack; ImGui + DirectX 9; hardcoded offsets + Detours + VMT hooks; LoL client RE + injection study; Vatrials; cheat / game:lol); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[vanguard]], [[r3nzskin-tft]], [[league-skin-changer]], [[league-base]], [[league-directx11-internal]], [[leaguesharp]], and [[elobuddy-addons]].
 
 - **2026-08-19** — ingest `description:Vector35/OpaquePredicatePatcher`: entity [[opaque-predicate-patcher]] (Binary Ninja plugin; Python; MLIL branch-condition analysis; detect constant true/false paths; patch always/never branch; iterative re-analysis; Vector35; opaque-predicate deobfuscation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[opaque-predicates-detective]], [[obfuscation-analysis]], [[drill-and-join]], [[r2smt]], [[tanto]], [[official-plugins]], and [[community-plugins]].

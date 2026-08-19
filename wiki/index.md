@@ -1438,6 +1438,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [Kernel Anti-Cheat](entities/kernel-anti-cheat.md) — experimental multi-telemetry kernel AC driver (NMI stack walk, thread start scan, big pool, PiDDBCache mapper residue; gmh5225; `[NMI]`)
+- [Kernel Anticheat](entities/kernel-anticheat.md) — Vasieco Windows kernel AC prototype (unsigned/abnormal drivers, physmem-handle abuse, hypervisor traces, big pool, mapper residue, suspicious system threads; C/C++ Visual Studio driver; anti-cheat research)
 - [kernel-callback-functions-list](entities/kernel-callback-functions-list.md) — Ring0 callback registration API reference (gmh5225; anti-cheat / documentation)
 - [Kernelcloak](entities/kernelcloak.md) — C++17 kernel driver protect/obfuscate library (driver development / modding; AC Encrypt Variable / obfuscation-engine research; ck0i)
 - [Kernel Cactus](entities/kernel-cactus.md) — Dell `dbutil_2_3.sys` BYOVD post-exploitation console (ETW/PPL/kill/token/file ops; shellcode inject; gmh5225)
