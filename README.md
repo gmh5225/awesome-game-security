@@ -4291,6 +4291,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/EliGamer154/CheatCheck [Fabric server-side Minecraft mod with player reporting, /cheatcheck spectate moderation, safemode, and tempban toolkit for vanilla clients]
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/Gitex68/Katapult-AntiCheat [NeoForge 1.21.1 client/server Minecraft mod enforcing SHA-256 checksums on client mods and resource packs with live whitelist management]
+- https://github.com/clementine44613/seiun-ac [Fabric server/client mod that hashes and whitelists client mods and resource packs, with gray-list warnings, Discord alerts, and mid-session pack-change detection for Minecraft 1.21.11]
 - https://github.com/Lazyzouo/ICUAC [Open-source bilingual Paper/Folia server-side rule enforcement for commands, items/NBT, effects, and end-crystal combat]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
@@ -4600,6 +4601,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/artmih24/TeleParser [Simple parser for Telegram chats and channels with lemmatizer. Writes data in JSON, CSV and MongoDB]
 - https://github.com/Sutaigne/alibi [Read-only Windows forensic kit for game-cheat/DMA/BYOVD and console-rig aimbot evidence]
 - https://github.com/PickAngE/AntiCheat-Scanner [Windows forensic scanner for ACE, EAC, BattlEye, EA AC, and HoYoProtect via drivers, services, BAM, Prefetch, and PE metadata]
+- https://github.com/poli0981/wardsweep [Windows Rust/WPF tool to audit installed kernel anti-cheats (EAC, BE, Vanguard, ACE), export reports, uninstall orphaned drivers/services, and sweep leftover registry and filesystem residue]
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
 
 > Dynamic Script
