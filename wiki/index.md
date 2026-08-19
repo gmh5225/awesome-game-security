@@ -1322,6 +1322,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImGui Standalone](entities/imgui-standalone.md) — D3D11 external ImGui framework (EXE/DLL; own render window; VS x86/x64; game tooling / menu prototyping; adamhlt)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
+- [ImGui-Spoofer-Leaked](entities/imgui-spoofer-leaked.md) — leaked Windows HWID spoofer with ImGui GUI; C++ loader/mapper kernel components + WinAPI routines; debugger/process anti-analysis (Veuqx0; cheat / HWID)
 - [iOS Jailbreak — Fugu15](entities/ios-jailbreak-fugu15.md) — iOS 15 untethered jailbreak (Fugu15 kernel exploit chain; root, codesign bypass, full-privilege code execution; gmh5225)
 - [iOS Mod Menu Template for Theos](entities/ios-mod-menu-template-for-theos.md) — Theos tweak mod-menu template (Logos; 50×50 icons; cheat / IOS mod menu)
 - [iOS Packager](entities/ios-packager.md) — Python CLI for repackaging/signing iOS app bundles (Info.plist/entitlements, provisioning profiles, codesign; mobile game security testing)

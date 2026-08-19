@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Veuqx0/ImGui-Spoofer-Leaked`: entity [[imgui-spoofer-leaked]] (leaked Windows HWID spoofer; C++; ImGui GUI + loader/mapper kernel components + WinAPI routines; debugger/process anti-analysis; ban-evasion spoofer structure study; Veuqx0; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[imgui]], [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]], [[full-hwid-spoofer-v6]], [[hwid-spoofer-eac-be]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
+
 - **2026-08-19** — ingest `description:ViRb3/swift-ida`: entity [[swift-ida]] (IDA Pro plugin; Python; context-menu retag for Swift/Golang/fastcall calling conventions; tuple-like multi-return struct generation for clearer decompilation; modern language runtime/ABI RE; ViRb3; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[happyida]], [[golang-loader-assist]], [[goresym]], and [[demumble]].
 
 - **2026-08-19** — ingest `description:ViddeBoiiii/CSGO-Ormbunke-x86`: entity [[csgo-ormbunke-x86]] (simple x86 internal CS:GO cheat base; C/C++; DirectX 9 + Kiero + MinHook; ImGui menu; ESP, aimbot, movement assists, trigger behavior; educational menu-framework scaffold; ViddeBoiiii; cheat / game:csgo [Imgui Menu]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[digital-sdk]], [[present-hook]], [[ntminhook]], and [[kiero2]].
