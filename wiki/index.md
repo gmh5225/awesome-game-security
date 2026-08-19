@@ -2350,6 +2350,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UE4-c-](entities/ue4-c-.md) — Valorant external UE4 cheat (EFI manual-mapped kernel driver + IOCTL dispatch hooks; DirectX 9 ImGui overlay; UE4 actor/player reads; cheat / game:valorant [External]; frankelitoc)
 - [UE4 Cheat Engine](entities/ue4-cheat-engine.md) — Android UE4-aware CE (memory scan / GObject enum / UProperty / SDK gen; Cheat / Game Engine Explorer:Unreal)
 - [ue4-apk-dumper](entities/ue4-apk-dumper.md) — Android APK UE4 SDK dumper (UObject/property/offset extraction; modding / SDK generation; gmh5225)
+- [ue4_base](entities/ue4-base.md) — C++ UE4 cheat base (SDK wrappers + MinHook PostRender hooks; world/actor/canvas helpers; lazy_importer/xorstr; W2S actor drawing; game security research / rapid UE4 tool prototyping; YMY1666527646; SDK Template)
 - [ue4dumper](entities/ue4dumper.md) — Android UE4 SDK dumper (C/C++; modding / SDK generation)
 - [ue4dumper-emulator](entities/ue4dumper-emulator.md) — Android emulator UE4 SDK dumper (C/C++; modding / SDK generation / memory analysis; gmh5225)
 - [ue4genny](entities/ue4genny.md) — runtime UE4 reflection SDK generator (C++; UObject/UClass/UStruct/UEnum/UFunction → C++ headers; SDK Generator; cursey)
