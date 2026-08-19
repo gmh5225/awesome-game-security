@@ -2185,6 +2185,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SENinja](entities/seninja.md) — Binary Ninja symbolic execution plugin (Python; BN IL path exploration; constraint tracking, unreachable-code detection, interactive UI; Cheat Symbolic Execution; borzacchiello)
 - [so_loader](entities/so-loader.md) — C/C++ Android native `.so` memory loading (Cheat / Android memory loading)
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
+- [scc](entities/scc.md) — open-source shellcode compiler (Vector35; C/C++ CMake; compact PIC output; Binary Ninja integration; internal CTF origin; shellcode compiler / exploit-dev codegen)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
 - [screenshot](entities/screenshot.md) — Windows capture-method comparison (BitBlt/DDA/PrintWindow/DWM; AC screenshot research; README `[BitBlt]`; gmh5225)
