@@ -1405,7 +1405,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kfd](entities/kfd.md) — iOS/macOS kernel file-descriptor exploit framework (XNU KRW; iOS 15/16; jailbreak/sandbox-escape research; felix-pb)
 - [kfd-explorer](entities/kfd-explorer.md) — iOS kernel memory explorer (Python/Swift; kernel memory analysis; cheat / iOS memory explorer)
 - [feather-gb](entities/feather-gb.md) — Rust Game Boy emulator (retro handheld / GB RE)
-- [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot)
+- [KeyAttestation](entities/keyattestation.md) — Android HW key attestation (Keymaster/KeyMint; bootloader / verified boot; VisionR1 fork: RSA + revocation lists)
 - [Keybuster](entities/keybuster.md) — Samsung TrustZone S-Keymaster TA key extract (CVE-2021-25444/25490; TEE)
 - [KiUserExceptionDispatcher Hook (brew02)](entities/ki-user-exception-dispatcher-hook.md) — ntdll `.mrdata` Wow64PrepareForException pointer hook for KiUserExceptionDispatcher (LdrProtectMrdata + Zydis; avoids VEH chain; UM exception-dispatch / stealth hook research)
 - [KiSystemStartupMeme (ekknod)](entities/ki-system-startup-meme.md) — custom KiSystemStartup hook (C/C++; kernel-level / driver development / graphics; cheat / EFI driver area)

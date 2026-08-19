@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:VisionR1/KeyAttestation`: updated entity [[keyattestation]] (VisionR1 fork; Java/Kotlin generate/parse/verify attestation evidence; certificate-chain persistence; local/remote revocation lists; RSA attestation + privacy-oriented display; mobile integrity / bootloader research); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-hardware-attestation-demo]], [[trickystore]], and [[magiskdetector]].
+
 - **2026-08-19** — ingest `readme:categories`: Cheat ~2729 (+1; Anti Cheat ~682 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-19** — ingest `description:Visual1mpact/Paradox_AntiCheat`: entity [[paradox-anticheat]] (Minecraft Bedrock Realms/BDS behavior-pack AC; TypeScript Script API; modular fly/killaura/reach/autoclicker/scaffold/noclip/xray detection; staff ban/kick/mute/freeze/whitelist/lockdown + GUI tools; no external client install; Visual1mpact; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[oomph]], [[oxclient]], [[dakotaac]], [[windfall-anticheat]], and [[minecraft-anti-cheat]].

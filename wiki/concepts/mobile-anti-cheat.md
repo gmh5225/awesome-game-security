@@ -30,6 +30,7 @@ sources:
   - wiki/sources/descriptions/apkunpacker__DetectZygisk.md
   - wiki/sources/descriptions/Xheghun__DeviceTrust.md
   - wiki/sources/descriptions/WsttXm__RiskEngine.md
+  - wiki/sources/descriptions/VisionR1__KeyAttestation.md
 updated: 2026-08-19
 confidence: medium
 ---
@@ -52,7 +53,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts, installed root-manager apps (launch probes such as [[root-app-detector]]; source: wiki/sources/descriptions/apkunpacker__RootAppDetector.md); Magisk `su`-daemon flaws such as [[magisk-eop]] (unprivileged app → root without grant UI; source: wiki/sources/descriptions/canyie__MagiskEoP.md) show root frameworks can fail closed on authorization |
 | Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]); ptrace-based Zygisk-style injection probes such as [[detect-zygisk]] (fork + `PTRACE_GETEVENTMSG`; source: wiki/sources/descriptions/apkunpacker__DetectZygisk.md) |
 | Emulator / VM | Build fingerprint, sensors, FS signatures ([[anti-emulator]], [[android-emulator-detection]], [[conbeerlib]]) |
-| Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]) — stricter on Android 14/15 per curated root research notes [[awesome-android-root]] (source: wiki/sources/descriptions/fynks__awesome-android-root.md); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
+| Integrity | APK/signature hash, native `.so` checksums, Play Integrity / Key Attestation ([[keyattestation]]; VisionR1 fork adds RSA attestation, certificate-chain persistence, and local/remote revocation-list checks — source: wiki/sources/descriptions/VisionR1__KeyAttestation.md) — stricter on Android 14/15 per curated root research notes [[awesome-android-root]] (source: wiki/sources/descriptions/fynks__awesome-android-root.md); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
 | Debugger | `TracerPid`, JDWP, ptrace |
 | Hooks | PLT/GOT integrity, `/proc/self/maps` anomalies |
 | IAP / billing | Client-side Play Billing API trust; local purchase-confirmation spoofing such as [[freedom]] (billing-service hook; server receipt validation is the primary defense) (source: wiki/sources/descriptions/gmh5225__freedom.md) |
