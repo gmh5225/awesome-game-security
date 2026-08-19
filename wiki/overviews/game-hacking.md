@@ -1273,6 +1273,7 @@ sources:
   - wiki/sources/descriptions/ZentifyZ__Kors_lol.md
   - wiki/sources/descriptions/ZentifyZ__CRC32.md
   - wiki/sources/descriptions/ZehMatt__zyemu.md
+  - wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md
 updated: 2026-08-19
 confidence: high
 ---
@@ -1522,6 +1523,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - XFG call-signature marking via [[x64dbg-xfg-marker]] (x64dbg plugin; 8-byte signatures as data before target functions; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/m417z__x64dbg-xfg-marker.md)
 - Multiline assemble/disassemble via [[multiline-ultimate-assembler]] (x64dbg/OllyDbg plugin; C/C++; plugin SDK / modding; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/m417z__Multiline-Ultimate-Assembler.md)
 - ChaiScript scripting via [[chaiscript-plugin]] (x64dbg plugin; three commands; thorough API vs rapid prototyping; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/jdavidberger__chaiScriptPlugin.md)
+- Lua scripting via [[x64dbg-playtime]] (x64dbg plugin; embedded Lua runtime + bundled libraries; memory/registers/breakpoints/labels/modules/assembler; autorun scripts; ZehMatt; Cheat x64dbg Plugins / Lua script lane) (source: wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md)
 - x64dbg plugin install/management via [[x64dbg-plugin-manager]] (C++/C; plugin development / modding; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md)
 - In-process string search/browse via [[stringsx64dbg]] (C++/Qt x64dbg plugin; dedicated SearchStringsWidget tab; 32/64-bit; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__stringsx64dbg.md)
 - Standalone binary/process string extraction via [[strings2]] (C/C++; extract strings from binary files and live process memory; modding / memory analysis; cheat / RE tools lane) (source: wiki/sources/descriptions/glmcdona__strings2.md)

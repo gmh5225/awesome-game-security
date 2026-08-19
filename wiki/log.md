@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZehMatt/x64dbgPlaytime`: entity [[x64dbg-playtime]] (x64dbg plugin; embedded Lua runtime + bundled libraries; memory/registers/breakpoints/labels/modules/assembler automation; autorun scripts; ZehMatt; Lua script / Cheat x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[chaiscript-plugin]], and [[dotx64dbg]].
+
 - **2026-08-19** — ingest `description:ZehMatt/zyemu`: entity [[zyemu]] (WIP x86-64 user-mode emulator; JIT handler codegen + code cache; Zydis decode/encode; CPU/memory core; C++; low-level emulation / binary analysis; ZehMatt); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[emulator]], [[dynre-x86]], [[chasm]], and [[kubera]].
 
 - **2026-08-19** — ingest `description:clementine44613/seiun-ac`: entity [[seiun-ac]] (Fabric **1.21.11** client-integrity AC; hash whitelists/blacklists/gray lists for installed mods and resource packs on join; Mixins + custom client-server packets; mid-session resource-pack change detection; kick/warn; Discord webhook alerts; in-game list reload commands; complements Discord-based whitelisting in the same project family; clementine44613; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheatf]], [[windfall-anticheat]], [[local-anticheat-1-8-9]], [[jaranalyzer]], and [[lenrete-mod]].
