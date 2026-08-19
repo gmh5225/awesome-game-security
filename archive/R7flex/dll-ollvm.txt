@@ -1,0 +1,1852 @@
+Project Path: arc_R7flex_dll-ollvm_r6torbzk
+
+Source Tree:
+
+```txt
+arc_R7flex_dll-ollvm_r6torbzk
+├── README.md
+├── plugin
+│   ├── CMakeLists.txt
+│   ├── LLVMObfuscationx.def
+│   └── src
+│       ├── Passes.h
+│       ├── Plugin.cpp
+│       ├── PluginAnchors.cpp
+│       ├── Utils.cpp
+│       ├── Utils.h
+│       └── stubs
+│           ├── BogusCF.cpp
+│           ├── Flattening.cpp
+│           ├── SizeTrim.cpp
+│           └── Substitution.cpp
+├── samples
+│   ├── include
+│   │   └── tess_markers.h
+│   └── payload_dll
+│       ├── payload.def
+│       └── src
+│           └── dllmain.cpp
+└── scripts
+    ├── build-payload.ps1
+    ├── build-plugin.ps1
+    ├── common.ps1
+    └── setup-llvm.ps1
+
+```
+
+`README.md`:
+
+```md
+# LLVMObfuscationx
+
+LLVM 18 New Pass Manager plugin for Windows.
+
+Tested on **manually mapped DLLs** (injectors that only do reloc / optional IAT / `DllMain` — no CRT startup).
+
+## How it works
+
+1. `clang` emits LLVM bitcode
+2. `opt` loads `LLVMObfuscationx.dll` and rewrites the IR
+3. `llc` → `.obj` → link
+
+Passes run on IR before codegen. The PE itself is not patched afterward.
+
+Preset `tess-obf` runs them in order: **sub → bcf → fla → trim**.
+
+## Passes
+
+### `tess-sub` — instruction substitution
+
+Rewrites integer `add` / `sub` / `xor` / `and` / `or` into equivalent MBA-style forms, e.g. `a+b` → `(a^b)+2*(a&b)` or `a-(~b)-1`. Same result, uglier IR/asm. Skips vectors, floats, and non-binops. Probability / budget knobs: `tess-sub-prob` (default ~55%), capped ops per function.
+
+### `tess-bcf` — bogus control flow
+
+Splits real blocks and inserts an opaque predicate that is always true (`x*(x+1)` even → dead false edge). False edge goes into a junk loop that never runs. Graph looks branched; real path is still linear. Skips `DllMain` / protected entries, EH, tiny blocks. Knobs: `tess-bcf-prob`, `tess-bcf-max`.
+
+### `tess-fla` — control-flow flattening
+
+Turns the function into a state-machine dispatcher: each original block gets a random state id, terminators store the next state and jump to a central switch loop. Switches are lowered to icmp chains first; PHIs / escaping regs are demoted to stack so the rewrite stays valid. Skips EH, naked, tiny functions, and (by default) `DllMain`. Very large functions (>~4000 inst) are skipped. Opt-in: `tess-fla-entry` to also flatten protected entries.
+
+### `tess-trim` — size / map helpers
+
+1. Deletes `llvm.global_ctors` and `llvm.global_dtors` so the PE does not expect loader CRT init (manual map).
+2. Drops unused `internal` functions / globals.
+
+Does **not** encrypt strings. Does **not** shrink by rewriting algorithms — it only removes ctor lists and dead locals.
+
+### Markers (all passes)
+
+| annotate | effect |
+|----------|--------|
+| `tess_skip` | Never touch this function |
+| `tess_protect` | Treat like entry (stronger prefs; fla still off unless `tess-fla-entry`) |
+| `tess_obf` | Force when using annotated-only mode |
+
+### Example (decompiled)
+
+What a small helper can look like after the passes (IDA, x64):
+
+```c
+// local variable allocation has failed, the output may be wrong!
+__int64 __fastcall sub_180011D60(_QWORD *_RCX, _WORD *a2, double _XMM2_8)
+{
+  __int64 v8; // rcx
+  __int64 v12; // rax
+  __int64 result; // rax
+  __int128 v17; // [rsp+70h] [rbp-78h] BYREF
+  _QWORD v18[2]; // [rsp+80h] [rbp-68h] BYREF
+  __int128 v19; // [rsp+90h] [rbp-58h] BYREF
+  __int128 v20; // [rsp+A0h] [rbp-48h] BYREF
+  __int128 v21; // [rsp+B0h] [rbp-38h] BYREF
+  __int128 v22; // [rsp+C0h] [rbp-28h] BYREF
+  __int128 v23; // [rsp+D0h] [rbp-18h] BYREF
+
+  _RSI = _RCX;
+  __asm
+  {
+    vmovsd  xmm0, qword ptr [rcx+30h]
+    vaddsd  xmm0, xmm0, cs:qword_180028040
+    vaddsd  xmm0, xmm0, cs:qword_1800280F8
+    vmovsd  xmm1, qword ptr [rcx+38h]
+  }
+  v8 = *_RCX;
+  __asm
+  {
+    vxorps  xmm2, xmm2, xmm2
+    vmovaps [rsp+0E8h+var_18], xmm2
+    vmovaps [rsp+0E8h+var_28], xmm2
+    vmovaps [rsp+0E8h+var_38], xmm2
+    vmovaps xmm3, cs:xmmword_1800281D0
+    vmovaps [rsp+0E8h+var_48], xmm3
+    vmovddup xmm3, cs:qword_180028280
+    vmovaps [rsp+0E8h+var_58], xmm3
+    vmovsd  [rsp+0E8h+var_68], xmm0
+    vmovsd  [rsp+0E8h+var_60], xmm1
+    vmovaps [rsp+0E8h+var_78], xmm2
+  }
+  if ( *a2 )
+  {
+    v12 = 1;
+    while ( a2[v12++] != 0 )
+      ;
+    DWORD2(v17) = v12;
+    HIDWORD(v17) = v12;
+    *(_QWORD *)&v17 = a2;
+  }
+  sub_180011EB0(
+    v8,
+    _RSI[1],
+    (unsigned int)&v17,
+    (unsigned int)v18,
+    (__int64)&v19,
+    (__int64)&v20,
+    0,
+    (__int64)&v21,
+    (__int64)&v22,
+    0,
+    0,
+    0,
+    (__int64)&v23);
+  __asm
+  {
+    vmovsd  xmm0, qword ptr [rsi+38h]
+    vaddsd  xmm0, xmm0, cs:qword_180028000
+    vmovsd  qword ptr [rsi+38h], xmm0
+  }
+  result = *((int *)_RSI + 33);
+  __asm { vmovsd  qword ptr [rsi+rax*8+0C8h], xmm0 }
+  return result;
+}
+```
+
+## Usage
+
+LLVM **18.1.5** with plugin support. Drop `LLVMObfuscationx.dll` next to `opt.exe`.
+
+```bat
+clang -c -emit-llvm -O1 --target=x86_64-pc-windows-msvc -o in.bc file.cpp
+opt -passes="default<O2>" in.bc -o mid.bc
+opt -load-pass-plugin=LLVMObfuscationx.dll -passes=tess-obf mid.bc -o out.bc
+llc -filetype=obj -mtriple=x86_64-pc-windows-msvc -O2 out.bc -o out.obj
+```
+
+Skip a function:
+
+```cpp
+__attribute__((annotate("tess_skip")))
+void keep_plain() {}
+```
+
+See `samples/include/tess_markers.h`.
+
+## Manual map + clang — watch out
+
+Manual mappers usually **do not** run `.CRT` / `llvm.global_ctors`. If you leave dynamic C++ global constructors in the binary, they never run after map → zeros / wrong state / crash.
+
+This plugin’s `tess-trim` **deletes** `llvm.global_ctors` / `dtors` on purpose so the PE matches freestanding `/NODEFAULTLIB` mapping. That means:
+
+- Globals with non-trivial constructors stay uninitialized unless you construct them at runtime
+- Prefer POD (`float r,g,b,a`) or functions that return colors/values on the stack
+- `inline const SomeType x = {...}` is unsafe if `SomeType` has a constructor
+- No exceptions / no reliance on CRT init, TLS callbacks, or atexit
+- Do not flatten `DllMain` unless you know what you are doing (`tess-fla-entry` is off by default)
+- Keep stack-heavy / UI / hook paths on `tess_skip` if they misbehave under `fla`/`bcf`
+
+Also: plugin and `opt.exe` must come from the **same** LLVM build. Mixing the official tools-only installer with a random plugin DLL will crash on load.
+
+## UI note (tested)
+
+Not a mapper overflow. Root cause is **shared exclusive UI state**: a single “active overlay” slot, one input path, one draw-on-top popup. Two widgets that both claim that slot on the same page corrupt open-id / hit-testing / overlay pointers. Obfuscated CFG just makes the bad path crash immediately when the page opens.
+
+One exclusive popup-style control per page, or give each overlay its own state. Heavy menu/input code can also take `tess_skip`.
+
+## Build plugin
+
+```bat
+cmake -S plugin -B build -G "Visual Studio 17 2022" -A x64 -DLT_LLVM_INSTALL_DIR=C:\path\to\LLVM-18.1.5-dev
+cmake --build build --config Release
+```
+
+---
+
+SDK needs `LLVM_EXPORT_SYMBOLS_FOR_PLUGINS=ON`. On Windows link the plugin against `opt.lib`.
+
+`scripts/` is optional local tooling.
+
+```
+
+`plugin/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.20)
+project(LLVMObfuscationx LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM install prefix (contains lib/cmake/llvm)")
+set(LT_OPT_IMPLIB "" CACHE FILEPATH "Import lib for opt.exe (opt.lib)")
+
+if(LT_LLVM_INSTALL_DIR)
+  list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm")
+endif()
+
+find_package(LLVM REQUIRED CONFIG)
+if(LLVM_VERSION_MAJOR VERSION_LESS 18)
+  message(FATAL_ERROR "Found LLVM ${LLVM_PACKAGE_VERSION}, need 18.x (prefer 18.1.5)")
+endif()
+
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+include(AddLLVM)
+
+separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+add_definitions(${LLVM_DEFINITIONS_LIST})
+include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
+
+if(NOT LLVM_ENABLE_RTTI)
+  if(MSVC)
+    string(REGEX REPLACE "/GR" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR-")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+  endif()
+endif()
+
+set(TESS_PLUGIN_SOURCES
+  src/Plugin.cpp
+  src/PluginAnchors.cpp
+  src/Utils.cpp
+  src/stubs/Flattening.cpp
+  src/stubs/BogusCF.cpp
+  src/stubs/Substitution.cpp
+  src/stubs/SizeTrim.cpp
+)
+
+if(WIN32)
+  if(NOT LT_OPT_IMPLIB)
+    if(EXISTS "${LT_LLVM_INSTALL_DIR}/lib/opt.lib")
+      set(LT_OPT_IMPLIB "${LT_LLVM_INSTALL_DIR}/lib/opt.lib")
+    endif()
+  endif()
+  if(NOT LT_OPT_IMPLIB OR NOT EXISTS "${LT_OPT_IMPLIB}")
+    message(FATAL_ERROR
+      "Windows plugin build needs opt.lib (import library for opt.exe).\n"
+      "Pass -DLT_OPT_IMPLIB=... or run scripts/setup-llvm.ps1")
+  endif()
+  message(STATUS "Linking plugin against opt import lib: ${LT_OPT_IMPLIB}")
+
+  add_library(LLVMObfuscationx MODULE
+    ${TESS_PLUGIN_SOURCES}
+    LLVMObfuscationx.def
+  )
+  target_link_libraries(LLVMObfuscationx PRIVATE "${LT_OPT_IMPLIB}")
+else()
+  add_library(LLVMObfuscationx MODULE ${TESS_PLUGIN_SOURCES})
+  llvm_map_components_to_libnames(llvm_libs
+    core support transformutils analysis passes)
+  target_link_libraries(LLVMObfuscationx PRIVATE ${llvm_libs})
+endif()
+
+target_include_directories(LLVMObfuscationx PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+if(MSVC)
+  target_compile_options(LLVMObfuscationx PRIVATE /utf-8 /W3)
+endif()
+
+set_target_properties(LLVMObfuscationx PROPERTIES
+  OUTPUT_NAME "LLVMObfuscationx"
+  PREFIX ""
+)
+
+add_custom_command(TARGET LLVMObfuscationx POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:LLVMObfuscationx>
+    ${CMAKE_BINARY_DIR}/LLVMObfuscationx.dll
+  COMMENT "Copy LLVMObfuscationx.dll to build root"
+)
+
+```
+
+`plugin/LLVMObfuscationx.def`:
+
+```def
+LIBRARY LLVMObfuscationx
+EXPORTS
+llvmGetPassPluginInfo
+
+```
+
+`plugin/src/Passes.h`:
+
+```h
+#pragma once
+
+#include "llvm/IR/PassManager.h"
+
+namespace llvm {
+class PassBuilder;
+}
+
+namespace tess {
+
+struct FlatteningPass : public llvm::PassInfoMixin<FlatteningPass> {
+  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
+  static bool isRequired() { return true; }
+};
+
+struct BogusCFPass : public llvm::PassInfoMixin<BogusCFPass> {
+  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
+  static bool isRequired() { return true; }
+};
+
+struct SubstitutionPass : public llvm::PassInfoMixin<SubstitutionPass> {
+  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
+  static bool isRequired() { return true; }
+};
+
+struct SizeTrimPass : public llvm::PassInfoMixin<SizeTrimPass> {
+  llvm::PreservedAnalyses run(llvm::Module &M, llvm::ModuleAnalysisManager &AM);
+  static bool isRequired() { return true; }
+};
+
+void registerTessPasses(llvm::PassBuilder &PB);
+
+} // namespace tess
+
+```
+
+`plugin/src/Plugin.cpp`:
+
+```cpp
+#include "Passes.h"
+#include "Utils.h"
+
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
+#include "llvm/Support/CommandLine.h"
+
+using namespace llvm;
+
+static cl::opt<bool> EnableFla(
+    "tess-fla", cl::init(false), cl::Hidden,
+    cl::desc("Enable control-flow flattening"));
+
+static cl::opt<bool> EnableBcf(
+    "tess-bcf", cl::init(false), cl::Hidden,
+    cl::desc("Enable bogus control flow"));
+
+static cl::opt<bool> EnableSub(
+    "tess-sub", cl::init(false), cl::Hidden,
+    cl::desc("Enable instruction substitution"));
+
+static cl::opt<bool> EnableTrim(
+    "tess-trim", cl::init(false), cl::Hidden,
+    cl::desc("Enable IR size-trim helpers"));
+
+namespace tess {
+namespace {
+
+void addEnabledPasses(ModulePassManager &MPM) {
+  if (EnableSub)
+    MPM.addPass(SubstitutionPass());
+  if (EnableBcf)
+    MPM.addPass(BogusCFPass());
+  if (EnableFla)
+    MPM.addPass(FlatteningPass());
+  if (EnableTrim)
+    MPM.addPass(SizeTrimPass());
+}
+
+}
+
+void registerTessPasses(PassBuilder &PB) {
+  PB.registerPipelineParsingCallback(
+      [](StringRef Name, ModulePassManager &MPM,
+         ArrayRef<PassBuilder::PipelineElement>) {
+        if (Name == "tess-obf") {
+          if (!EnableFla && !EnableBcf && !EnableSub && !EnableTrim) {
+            EnableSub = true;
+            EnableBcf = true;
+            EnableFla = true;
+            EnableTrim = true;
+          }
+          addEnabledPasses(MPM);
+          return true;
+        }
+        if (Name == "tess-fla") {
+          EnableFla = true;
+          MPM.addPass(FlatteningPass());
+          return true;
+        }
+        if (Name == "tess-bcf") {
+          EnableBcf = true;
+          MPM.addPass(BogusCFPass());
+          return true;
+        }
+        if (Name == "tess-sub") {
+          EnableSub = true;
+          MPM.addPass(SubstitutionPass());
+          return true;
+        }
+        if (Name == "tess-trim") {
+          EnableTrim = true;
+          MPM.addPass(SizeTrimPass());
+          return true;
+        }
+        return false;
+      });
+
+  PB.registerPipelineEarlySimplificationEPCallback(
+      [](ModulePassManager &MPM, OptimizationLevel) {
+        if (!EnableFla && !EnableBcf && !EnableSub && !EnableTrim)
+          return;
+        addEnabledPasses(MPM);
+      });
+}
+
+}
+
+llvm::PassPluginLibraryInfo getTessObfPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "LLVMObfuscationx", "0.2.0",
+          [](PassBuilder &PB) { tess::registerTessPasses(PB); }};
+}
+
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
+llvmGetPassPluginInfo() {
+  return getTessObfPluginInfo();
+}
+
+```
+
+`plugin/src/PluginAnchors.cpp`:
+
+```cpp
+#include "llvm/IR/PassManager.h"
+
+using namespace llvm;
+
+AnalysisSetKey PreservedAnalyses::AllAnalysesKey;
+
+```
+
+`plugin/src/Utils.cpp`:
+
+```cpp
+#include "Utils.h"
+
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/InstIterator.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/Metadata.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Transforms/Utils/Local.h"
+
+#include <cstdlib>
+#include <ctime>
+
+using namespace llvm;
+
+static cl::opt<bool> TessVerbose(
+    "tess-verbose", cl::init(false), cl::Hidden,
+    cl::desc("Log pass visits (or set TESS_VERBOSE=1)"));
+
+static cl::opt<bool> TessOnlyAnnotated(
+    "tess-only-annotated", cl::init(false), cl::Hidden,
+    cl::desc("Only obfuscate functions with tess_obf / tess_protect"));
+
+static cl::opt<bool> TessProtectEntry(
+    "tess-protect-entry", cl::init(true), cl::Hidden,
+    cl::desc("Always obfuscate DllMain / tess_protect entries"));
+
+static cl::opt<unsigned> TessMinInst(
+    "tess-min-inst", cl::init(3), cl::Hidden,
+    cl::desc("Skip functions smaller than this (unless protected)"));
+
+static cl::opt<unsigned> TessBcfProb(
+    "tess-bcf-prob", cl::init(20), cl::Hidden,
+    cl::desc("Bogus CF insertion probability percent (0-100)"));
+
+static cl::opt<unsigned> TessSubProb(
+    "tess-sub-prob", cl::init(55), cl::Hidden,
+    cl::desc("Instruction substitution probability percent (0-100)"));
+
+static cl::opt<unsigned> TessBcfMax(
+    "tess-bcf-max", cl::init(8), cl::Hidden,
+    cl::desc("Max bogus CF insertions per function"));
+
+namespace tess {
+namespace {
+
+ObfConfig GConfig;
+
+bool hasStringAttribute(const Function &F, StringRef Key) {
+  return F.hasFnAttribute(Key);
+}
+
+bool annotationStringContains(const Constant *C, StringRef Needle) {
+  if (!C)
+    return false;
+  if (auto *GV = dyn_cast<GlobalVariable>(C->stripPointerCasts())) {
+    if (auto *CDS = dyn_cast_or_null<ConstantDataSequential>(GV->getInitializer())) {
+      if (CDS->isString() && CDS->getAsString().contains(Needle))
+        return true;
+    }
+  }
+  return false;
+}
+
+bool hasAnnotation(const Function &F, StringRef Needle) {
+  if (auto *MD = F.getMetadata("annotation")) {
+    for (unsigned I = 0, E = MD->getNumOperands(); I != E; ++I) {
+      if (auto *S = dyn_cast<MDString>(MD->getOperand(I))) {
+        if (S->getString().contains(Needle))
+          return true;
+      } else if (auto *Tup = dyn_cast<MDNode>(MD->getOperand(I))) {
+        for (unsigned J = 0, JE = Tup->getNumOperands(); J != JE; ++J) {
+          if (auto *S2 = dyn_cast<MDString>(Tup->getOperand(J))) {
+            if (S2->getString().contains(Needle))
+              return true;
+          }
+        }
+      }
+    }
+  }
+
+  const Module *M = F.getParent();
+  if (!M)
+    return false;
+  const GlobalVariable *GA = M->getGlobalVariable("llvm.global.annotations");
+  if (!GA || !GA->hasInitializer())
+    return false;
+  const auto *CA = dyn_cast<ConstantArray>(GA->getInitializer());
+  if (!CA)
+    return false;
+  for (unsigned I = 0, E = CA->getNumOperands(); I != E; ++I) {
+    const auto *Struct = dyn_cast<ConstantStruct>(CA->getOperand(I));
+    if (!Struct || Struct->getNumOperands() < 2)
+      continue;
+    const Value *Annotated =
+        Struct->getOperand(0)->stripPointerCasts();
+    if (Annotated != &F)
+      continue;
+    if (annotationStringContains(dyn_cast<Constant>(Struct->getOperand(1)),
+                                 Needle))
+      return true;
+  }
+  return false;
+}
+
+bool valueEscapes(const Instruction &Inst) {
+  const BasicBlock *BB = Inst.getParent();
+  for (const User *U : Inst.users()) {
+    const Instruction *UI = cast<Instruction>(U);
+    if (UI->getParent() != BB || isa<PHINode>(UI))
+      return true;
+  }
+  return false;
+}
+
+}
+
+Random::Random(uint64_t Seed) { reseed(Seed ? Seed : 0xC0FFEEULL ^ (uint64_t)std::time(nullptr)); }
+
+void Random::reseed(uint64_t Seed) {
+  State = Seed ? Seed : 0xDEADBEEFCAFEBABEULL;
+}
+
+uint32_t Random::next() {
+  State ^= State >> 12;
+  State ^= State << 25;
+  State ^= State >> 27;
+  return (uint32_t)((State * 0x2545F4914F6CDD1DULL) >> 32);
+}
+
+uint32_t Random::nextRange(uint32_t MinIncl, uint32_t MaxIncl) {
+  if (MaxIncl <= MinIncl)
+    return MinIncl;
+  return MinIncl + (next() % (MaxIncl - MinIncl + 1));
+}
+
+bool Random::chance(unsigned Percent) {
+  if (Percent >= 100)
+    return true;
+  if (Percent == 0)
+    return false;
+  return (next() % 100) < Percent;
+}
+
+ObfConfig &config() {
+  GConfig.MinInstructions = TessMinInst;
+  GConfig.BcfProbability = TessBcfProb;
+  GConfig.SubProbability = TessSubProb;
+  GConfig.BcfMaxPerFunction = TessBcfMax;
+  GConfig.ProtectEntry = TessProtectEntry;
+  GConfig.OnlyAnnotated = TessOnlyAnnotated;
+  return GConfig;
+}
+
+bool verboseEnabled() {
+  if (TessVerbose)
+    return true;
+  if (const char *Env = std::getenv("TESS_VERBOSE"))
+    return Env[0] == '1' || Env[0] == 'y' || Env[0] == 'Y';
+  return false;
+}
+
+bool isRuntimeHelperName(StringRef N) {
+  static constexpr const char *KDeny[] = {
+      "memcpy",         "memmove",        "memset",           "memcmp",
+      "memchr",         "strlen",         "wcslen",           "atexit",
+      "_fltused",       "__chkstk",       "__alloca_probe",   "__C_specific_handler",
+      "_CxxThrowException", "__std_terminate", "_purecall",
+  };
+  for (const char *D : KDeny) {
+    if (N == D)
+      return true;
+  }
+  if (N.starts_with("__tess") || N.starts_with("tess."))
+    return true;
+  if (N.starts_with("__security_") || N.starts_with("_RTC_") ||
+      N.starts_with("__GS") || N.starts_with("_chkstk") || N.starts_with("__chkstk"))
+    return true;
+  return false;
+}
+
+bool shouldSkipFunction(const Function &F) {
+  if (F.isDeclaration() || F.isIntrinsic())
+    return true;
+  if (F.hasFnAttribute(Attribute::OptimizeNone))
+    return true;
+  if (hasStringAttribute(F, "tess_skip") || hasAnnotation(F, "tess_skip")) {
+    if (verboseEnabled())
+      errs() << "[tess:skip] " << F.getName() << "\n";
+    return true;
+  }
+  if (isRuntimeHelperName(F.getName()))
+    return true;
+  return false;
+}
+
+bool isProtectedEntry(const Function &F) {
+  if (hasStringAttribute(F, "tess_protect") || hasAnnotation(F, "tess_protect"))
+    return true;
+  StringRef N = F.getName();
+  if (N == "DllMain" || N == "DllEntryPoint" || N == "DriverEntry")
+    return true;
+  if (N.contains("DllMain"))
+    return true;
+  return false;
+}
+
+bool wantsObfuscation(const Function &F) {
+  if (shouldSkipFunction(F))
+    return false;
+
+  const ObfConfig &C = config();
+  const bool Protected = isProtectedEntry(F);
+  if (Protected && C.ProtectEntry)
+    return true;
+
+  if (C.OnlyAnnotated)
+    return hasStringAttribute(F, "tess_obf") || hasAnnotation(F, "tess_obf") ||
+           Protected;
+
+  if (hasStringAttribute(F, "tess_obf") || hasAnnotation(F, "tess_obf"))
+    return true;
+
+  if (!Protected && countInstructions(F) < C.MinInstructions)
+    return false;
+
+  return true;
+}
+
+bool hasExceptionHandling(const Function &F) {
+  if (F.hasPersonalityFn())
+    return true;
+  for (const BasicBlock &BB : F) {
+    if (BB.isEHPad())
+      return true;
+    for (const Instruction &I : BB) {
+      if (isa<InvokeInst>(I) || isa<ResumeInst>(I) || isa<CatchReturnInst>(I) ||
+          isa<CleanupReturnInst>(I) || isa<LandingPadInst>(I) ||
+          isa<CatchPadInst>(I) || isa<CleanupPadInst>(I))
+        return true;
+    }
+  }
+  return false;
+}
+
+bool isFlattenable(const Function &F) {
+  if (shouldSkipFunction(F))
+    return false;
+  if (hasExceptionHandling(F))
+    return false;
+  if (F.size() < 2)
+    return false;
+  if (F.hasFnAttribute(Attribute::Naked))
+    return false;
+  return true;
+}
+
+unsigned countInstructions(const Function &F) {
+  unsigned N = 0;
+  for (const Instruction &I : instructions(F)) {
+    (void)I;
+    ++N;
+  }
+  return N;
+}
+
+void demoteRegisters(Function &F) {
+  SmallVector<PHINode *, 16> Phis;
+  for (BasicBlock &BB : F)
+    for (Instruction &I : BB)
+      if (auto *PN = dyn_cast<PHINode>(&I))
+        Phis.push_back(PN);
+  for (PHINode *PN : Phis)
+    DemotePHIToStack(PN);
+
+  SmallVector<Instruction *, 32> Escaped;
+  for (BasicBlock &BB : F) {
+    for (Instruction &I : BB) {
+      if (isa<AllocaInst>(I) || isa<PHINode>(I))
+        continue;
+      if (I.getType()->isVoidTy())
+        continue;
+      if (valueEscapes(I))
+        Escaped.push_back(&I);
+    }
+  }
+  for (Instruction *I : Escaped)
+    DemoteRegToStack(*I, false);
+}
+
+void verboseLog(StringRef passName, const Function &F) {
+  if (!verboseEnabled())
+    return;
+  errs() << "[tess:" << passName << "] " << F.getName()
+         << (isProtectedEntry(F) ? " (protected)" : "") << "\n";
+}
+
+}
+
+```
+
+`plugin/src/Utils.h`:
+
+```h
+#pragma once
+
+#include "llvm/IR/Function.h"
+#include "llvm/IR/Module.h"
+
+#include <cstdint>
+
+namespace llvm {
+class BasicBlock;
+class Instruction;
+class Value;
+}
+
+namespace tess {
+
+class Random {
+public:
+  explicit Random(uint64_t Seed = 0);
+  void reseed(uint64_t Seed);
+  uint32_t next();
+  uint32_t nextRange(uint32_t MinIncl, uint32_t MaxIncl);
+  bool chance(unsigned Percent);
+
+private:
+  uint64_t State;
+};
+
+bool shouldSkipFunction(const llvm::Function &F);
+bool wantsObfuscation(const llvm::Function &F);
+bool isProtectedEntry(const llvm::Function &F);
+bool hasExceptionHandling(const llvm::Function &F);
+bool isFlattenable(const llvm::Function &F);
+unsigned countInstructions(const llvm::Function &F);
+void demoteRegisters(llvm::Function &F);
+void verboseLog(llvm::StringRef passName, const llvm::Function &F);
+bool verboseEnabled();
+
+struct ObfConfig {
+  unsigned MinInstructions = 3;
+  unsigned BcfProbability = 35;
+  unsigned SubProbability = 55;
+  unsigned BcfMaxPerFunction = 8;
+  bool ProtectEntry = true;
+  bool OnlyAnnotated = false;
+};
+
+ObfConfig &config();
+
+}
+
+```
+
+`plugin/src/stubs/BogusCF.cpp`:
+
+```cpp
+#include "Passes.h"
+#include "Utils.h"
+
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Instructions.h"
+
+#include <algorithm>
+
+using namespace llvm;
+
+namespace tess {
+namespace {
+
+Value *buildAlwaysTrue(IRBuilder<> &B, Random &R) {
+  Type *I32 = Type::getInt32Ty(B.getContext());
+  AllocaInst *A = B.CreateAlloca(I32, nullptr, "tess.op.x");
+  B.CreateStore(ConstantInt::get(I32, (R.next() | 1u)), A);
+  Value *XV = B.CreateLoad(I32, A);
+  Value *Xp1 = B.CreateAdd(XV, ConstantInt::get(I32, 1));
+  Value *Mul = B.CreateMul(XV, Xp1);
+  Value *And = B.CreateAnd(Mul, ConstantInt::get(I32, 1));
+  return B.CreateICmpEQ(And, ConstantInt::get(I32, 0), "tess.op.t");
+}
+
+BasicBlock *createJunkBlock(Function &F, BasicBlock *InsertBefore, Random &R) {
+  BasicBlock *Junk =
+      BasicBlock::Create(F.getContext(), "tess.bcf.junk", &F, InsertBefore);
+  IRBuilder<> B(Junk);
+  Type *I32 = Type::getInt32Ty(F.getContext());
+  AllocaInst *Tmp = B.CreateAlloca(I32);
+  B.CreateStore(ConstantInt::get(I32, R.next()), Tmp);
+  Value *V = B.CreateLoad(I32, Tmp);
+  V = B.CreateXor(V, ConstantInt::get(I32, R.next()));
+  V = B.CreateAdd(V, ConstantInt::get(I32, 1));
+  B.CreateStore(V, Tmp);
+  B.CreateBr(Junk);
+  return Junk;
+}
+
+bool bogusOnBlock(BasicBlock *BB, Function &F, Random &R) {
+  Instruction *Term = BB->getTerminator();
+  if (!Term || !isa<BranchInst>(Term))
+    return false;
+  if (BB->isEHPad())
+    return false;
+  if (std::distance(BB->begin(), BB->end()) < 3)
+    return false;
+  if (BB->getName().starts_with("tess."))
+    return false;
+
+  BasicBlock *Cont = BB->splitBasicBlock(Term, "tess.bcf.cont");
+  Instruction *AutoBr = BB->getTerminator();
+  IRBuilder<> B(AutoBr);
+  Value *Cond = buildAlwaysTrue(B, R);
+  BasicBlock *Junk = createJunkBlock(F, Cont, R);
+  AutoBr->eraseFromParent();
+  IRBuilder<> B2(BB);
+  B2.CreateCondBr(Cond, Cont, Junk);
+  return true;
+}
+
+bool runBogus(Function &F, Random &R) {
+  if (shouldSkipFunction(F) || hasExceptionHandling(F))
+    return false;
+  if (isProtectedEntry(F))
+    return false;
+
+  ObfConfig &C = config();
+  unsigned Prob = C.BcfProbability;
+  unsigned MaxIns = C.BcfMaxPerFunction;
+  if (F.size() < 3)
+    return false;
+
+  SmallVector<BasicBlock *, 32> Blocks;
+  for (BasicBlock &BB : F) {
+    if (&BB == &F.getEntryBlock())
+      continue;
+    Blocks.push_back(&BB);
+  }
+
+  bool Changed = false;
+  unsigned Inserted = 0;
+  for (BasicBlock *BB : Blocks) {
+    if (Inserted >= MaxIns)
+      break;
+    if (!R.chance(Prob))
+      continue;
+    if (bogusOnBlock(BB, F, R)) {
+      Changed = true;
+      ++Inserted;
+    }
+  }
+  return Changed;
+}
+
+}
+
+PreservedAnalyses BogusCFPass::run(Module &M, ModuleAnalysisManager &) {
+  bool Changed = false;
+  Random R;
+  for (Function &F : M) {
+    if (!wantsObfuscation(F))
+      continue;
+    verboseLog("bcf", F);
+    if (runBogus(F, R))
+      Changed = true;
+  }
+  return Changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
+}
+
+}
+
+```
+
+`plugin/src/stubs/Flattening.cpp`:
+
+```cpp
+#include "Passes.h"
+#include "Utils.h"
+
+#include "llvm/ADT/DenseMap.h"
+#include "llvm/ADT/DenseSet.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/Support/CommandLine.h"
+
+using namespace llvm;
+
+static cl::opt<bool> FlaEntry(
+    "tess-fla-entry", cl::init(false), cl::Hidden,
+    cl::desc("Also flatten DllMain / protected entries (risky for manual-map)"));
+
+namespace tess {
+namespace {
+
+void expandOneSwitch(SwitchInst *SI) {
+  Function *F = SI->getFunction();
+  BasicBlock *BB = SI->getParent();
+  Value *Cond = SI->getCondition();
+  BasicBlock *Default = SI->getDefaultDest();
+
+  struct CaseRec {
+    ConstantInt *Val;
+    BasicBlock *Succ;
+  };
+  SmallVector<CaseRec, 16> Cases;
+  for (auto &C : SI->cases())
+    Cases.push_back({C.getCaseValue(), C.getCaseSuccessor()});
+
+  SI->eraseFromParent();
+
+  if (Cases.empty()) {
+    IRBuilder<> B(BB);
+    B.CreateBr(Default);
+    return;
+  }
+
+  BasicBlock *Fail = Default;
+  for (int I = (int)Cases.size() - 1; I >= 0; --I) {
+    BasicBlock *CmpBB =
+        (I == 0) ? BB
+                 : BasicBlock::Create(F->getContext(), "tess.sw", F, Fail);
+    IRBuilder<> B(CmpBB);
+    Value *Eq = B.CreateICmpEQ(Cond, Cases[I].Val);
+    B.CreateCondBr(Eq, Cases[I].Succ, Fail);
+    Fail = CmpBB;
+  }
+}
+
+void expandSwitches(Function &F) {
+  SmallVector<SwitchInst *, 8> Work;
+  for (BasicBlock &BB : F)
+    if (auto *SI = dyn_cast<SwitchInst>(BB.getTerminator()))
+      Work.push_back(SI);
+  for (SwitchInst *SI : Work)
+    expandOneSwitch(SI);
+}
+
+bool flattenFunction(Function &F, Random &R) {
+  if (!isFlattenable(F))
+    return false;
+
+  expandSwitches(F);
+  demoteRegisters(F);
+
+  BasicBlock *Entry = &F.getEntryBlock();
+  auto It = Entry->begin();
+  while (It != Entry->end() && isa<AllocaInst>(&*It))
+    ++It;
+  if (It == Entry->end())
+    return false;
+
+  BasicBlock *First = Entry->splitBasicBlock(It, "tess.fla.first");
+
+  SmallVector<BasicBlock *, 32> OrigBBs;
+  for (BasicBlock &BB : F)
+    if (&BB != Entry)
+      OrigBBs.push_back(&BB);
+
+  if (OrigBBs.size() < 2)
+    return false;
+
+  DenseMap<BasicBlock *, uint32_t> CaseMap;
+  DenseSet<uint32_t> Used;
+  for (BasicBlock *BB : OrigBBs) {
+    uint32_t C;
+    do {
+      C = R.next();
+    } while (!Used.insert(C).second);
+    CaseMap[BB] = C;
+  }
+
+  Instruction *EntryTerm = Entry->getTerminator();
+  IRBuilder<> EntryB(EntryTerm);
+  AllocaInst *SwVar = EntryB.CreateAlloca(EntryB.getInt32Ty(), nullptr, "tess.fla.sw");
+  EntryB.CreateStore(EntryB.getInt32(CaseMap[First]), SwVar);
+  EntryTerm->eraseFromParent();
+
+  BasicBlock *LoopHdr =
+      BasicBlock::Create(F.getContext(), "tess.fla.hdr", &F, First);
+  BasicBlock *LoopEnd =
+      BasicBlock::Create(F.getContext(), "tess.fla.end", &F, First);
+  IRBuilder<>(Entry).CreateBr(LoopHdr);
+
+  IRBuilder<> HdrB(LoopHdr);
+  LoadInst *Ld = HdrB.CreateLoad(HdrB.getInt32Ty(), SwVar);
+  SwitchInst *Disp = HdrB.CreateSwitch(Ld, LoopEnd, OrigBBs.size());
+
+  for (BasicBlock *BB : OrigBBs) {
+    BB->moveBefore(LoopEnd);
+    Disp->addCase(HdrB.getInt32(CaseMap[BB]), BB);
+
+    Instruction *Term = BB->getTerminator();
+    if (!Term)
+      continue;
+
+    if (auto *Br = dyn_cast<BranchInst>(Term)) {
+      IRBuilder<> TB(Term);
+      if (Br->isUnconditional()) {
+        BasicBlock *Succ = Br->getSuccessor(0);
+        auto Found = CaseMap.find(Succ);
+        if (Found == CaseMap.end())
+          continue;
+        TB.CreateStore(TB.getInt32(Found->second), SwVar);
+        TB.CreateBr(LoopEnd);
+        Term->eraseFromParent();
+      } else {
+        BasicBlock *TSucc = Br->getSuccessor(0);
+        BasicBlock *FSucc = Br->getSuccessor(1);
+        if (!CaseMap.count(TSucc) || !CaseMap.count(FSucc))
+          continue;
+        Value *Sel = TB.CreateSelect(Br->getCondition(),
+                                     TB.getInt32(CaseMap[TSucc]),
+                                     TB.getInt32(CaseMap[FSucc]));
+        TB.CreateStore(Sel, SwVar);
+        TB.CreateBr(LoopEnd);
+        Term->eraseFromParent();
+      }
+    }
+  }
+
+  IRBuilder<>(LoopEnd).CreateBr(LoopHdr);
+  return true;
+}
+
+}
+
+PreservedAnalyses FlatteningPass::run(Module &M, ModuleAnalysisManager &) {
+  bool Changed = false;
+  Random R;
+  for (Function &F : M) {
+    if (!wantsObfuscation(F) || !isFlattenable(F))
+      continue;
+    if (isProtectedEntry(F) && !FlaEntry)
+      continue;
+    if (!isProtectedEntry(F) && countInstructions(F) > 4000)
+      continue;
+    verboseLog("fla", F);
+    if (flattenFunction(F, R))
+      Changed = true;
+  }
+  return Changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
+}
+
+}
+
+```
+
+`plugin/src/stubs/SizeTrim.cpp`:
+
+```cpp
+#include "Passes.h"
+#include "Utils.h"
+
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/Support/raw_ostream.h"
+
+using namespace llvm;
+
+namespace tess {
+namespace {
+
+bool stripGlobalCtors(Module &M) {
+  bool Changed = false;
+  for (const char *Name : {"llvm.global_ctors", "llvm.global_dtors"}) {
+    if (GlobalVariable *GV = M.getGlobalVariable(Name)) {
+      GV->eraseFromParent();
+      Changed = true;
+      if (verboseEnabled())
+        errs() << "[tess:trim] stripped " << Name << "\n";
+    }
+  }
+  return Changed;
+}
+
+bool removeDeadInternals(Module &M, unsigned &RemovedFns, unsigned &RemovedGVs) {
+  bool Changed = false;
+
+  SmallVector<Function *, 16> DeadFns;
+  for (Function &F : M) {
+    if (F.isDeclaration() || !F.hasLocalLinkage())
+      continue;
+    if (isProtectedEntry(F))
+      continue;
+    if (F.use_empty())
+      DeadFns.push_back(&F);
+  }
+  for (Function *F : DeadFns) {
+    F->eraseFromParent();
+    ++RemovedFns;
+    Changed = true;
+  }
+
+  SmallVector<GlobalVariable *, 32> DeadGVs;
+  for (GlobalVariable &GV : M.globals()) {
+    if (!GV.hasLocalLinkage() || GV.isDeclaration())
+      continue;
+    if (!GV.use_empty())
+      continue;
+    if (GV.getName().starts_with("llvm."))
+      continue;
+    DeadGVs.push_back(&GV);
+  }
+  for (GlobalVariable *GV : DeadGVs) {
+    GV->eraseFromParent();
+    ++RemovedGVs;
+    Changed = true;
+  }
+
+  return Changed;
+}
+
+}
+
+PreservedAnalyses SizeTrimPass::run(Module &M, ModuleAnalysisManager &) {
+  unsigned RemovedFns = 0, RemovedGVs = 0;
+  bool Changed = false;
+  Changed |= stripGlobalCtors(M);
+  Changed |= removeDeadInternals(M, RemovedFns, RemovedGVs);
+
+  unsigned InternalFns = 0;
+  for (Function &F : M)
+    if (F.hasInternalLinkage() && !F.isDeclaration())
+      ++InternalFns;
+
+  if (verboseEnabled() || Changed) {
+    errs() << "[tess:trim] module=" << M.getName()
+           << " internal_fns=" << InternalFns
+           << " removed_fns=" << RemovedFns
+           << " removed_gvs=" << RemovedGVs << "\n";
+  }
+
+  return Changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
+}
+
+}
+
+```
+
+`plugin/src/stubs/Substitution.cpp`:
+
+```cpp
+#include "Passes.h"
+#include "Utils.h"
+
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Instructions.h"
+
+#include <algorithm>
+
+using namespace llvm;
+
+namespace tess {
+namespace {
+
+bool substituteInst(Instruction *I, Random &R) {
+  auto *Bin = dyn_cast<BinaryOperator>(I);
+  if (!Bin)
+    return false;
+  if (!Bin->getType()->isIntegerTy())
+    return false;
+
+  IRBuilder<> B(Bin);
+  Value *A = Bin->getOperand(0);
+  Value *BOp = Bin->getOperand(1);
+  Value *Res = nullptr;
+
+  switch (Bin->getOpcode()) {
+  case Instruction::Add: {
+    if (R.chance(50)) {
+      Value *Nb = B.CreateNot(BOp);
+      Value *T = B.CreateSub(A, Nb);
+      Res = B.CreateSub(T, ConstantInt::get(Bin->getType(), 1));
+    } else {
+      Value *X = B.CreateXor(A, BOp);
+      Value *An = B.CreateAnd(A, BOp);
+      Value *Sh = B.CreateShl(An, ConstantInt::get(Bin->getType(), 1));
+      Res = B.CreateAdd(X, Sh);
+    }
+    break;
+  }
+  case Instruction::Sub: {
+    Value *Nb = B.CreateNot(BOp);
+    Value *T = B.CreateAdd(A, Nb);
+    Res = B.CreateAdd(T, ConstantInt::get(Bin->getType(), 1));
+    break;
+  }
+  case Instruction::Xor: {
+    Value *O = B.CreateOr(A, BOp);
+    Value *An = B.CreateAnd(A, BOp);
+    Res = B.CreateSub(O, An);
+    break;
+  }
+  case Instruction::And: {
+    Value *Na = B.CreateNot(A);
+    Value *Nb = B.CreateNot(BOp);
+    Value *O = B.CreateOr(Na, Nb);
+    Res = B.CreateNot(O);
+    break;
+  }
+  case Instruction::Or: {
+    Value *X = B.CreateXor(A, BOp);
+    Value *An = B.CreateAnd(A, BOp);
+    Res = B.CreateXor(X, An);
+    break;
+  }
+  default:
+    return false;
+  }
+
+  if (!Res)
+    return false;
+  Bin->replaceAllUsesWith(Res);
+  Bin->eraseFromParent();
+  return true;
+}
+
+bool runSub(Function &F, Random &R) {
+  if (shouldSkipFunction(F))
+    return false;
+
+  unsigned Prob = config().SubProbability;
+  if (isProtectedEntry(F))
+    Prob = std::min(95u, Prob + 20);
+
+  SmallVector<Instruction *, 64> Work;
+  for (BasicBlock &BB : F)
+    for (Instruction &I : BB)
+      if (auto *BO = dyn_cast<BinaryOperator>(&I))
+        if (BO->getType()->isIntegerTy())
+          Work.push_back(BO);
+
+  bool Changed = false;
+  unsigned Budget = isProtectedEntry(F) ? 64 : 32;
+  unsigned Done = 0;
+  for (Instruction *I : Work) {
+    if (Done >= Budget)
+      break;
+    if (!R.chance(Prob))
+      continue;
+    if (substituteInst(I, R)) {
+      Changed = true;
+      ++Done;
+    }
+  }
+  return Changed;
+}
+
+}
+
+PreservedAnalyses SubstitutionPass::run(Module &M, ModuleAnalysisManager &) {
+  bool Changed = false;
+  Random R;
+  for (Function &F : M) {
+    if (!wantsObfuscation(F))
+      continue;
+    verboseLog("sub", F);
+    if (runSub(F, R))
+      Changed = true;
+  }
+  return Changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
+}
+
+}
+
+```
+
+`samples/include/tess_markers.h`:
+
+```h
+#pragma once
+
+#if defined(__clang__)
+#  define TESS_SKIP \
+    __attribute__((annotate("tess_skip")))
+#  define TESS_SKIP_BEGIN \
+    _Pragma("clang attribute push (__attribute__((annotate(\"tess_skip\"))), apply_to = function)")
+#  define TESS_SKIP_END \
+    _Pragma("clang attribute pop")
+#  define TESS_PROTECT \
+    __attribute__((annotate("tess_protect")))
+#  define TESS_OBF \
+    __attribute__((annotate("tess_obf")))
+#else
+#  define TESS_SKIP
+#  define TESS_SKIP_BEGIN
+#  define TESS_SKIP_END
+#  define TESS_PROTECT
+#  define TESS_OBF
+#endif
+
+```
+
+`samples/payload_dll/payload.def`:
+
+```def
+LIBRARY payload
+EXPORTS
+payload_entry
+
+```
+
+`samples/payload_dll/src/dllmain.cpp`:
+
+```cpp
+#include <stdint.h>
+
+#if defined(_WIN32)
+#  define PAYLOAD_EXPORT __declspec(dllexport)
+#else
+#  define PAYLOAD_EXPORT
+#endif
+
+static uint32_t mix(uint32_t x) {
+  x ^= x << 13;
+  x ^= x >> 17;
+  x ^= x << 5;
+  return x;
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+PAYLOAD_EXPORT int payload_entry(int seed) {
+  uint32_t v = (uint32_t)seed;
+  for (int i = 0; i < 8; ++i)
+    v = mix(v + (uint32_t)i);
+  return (int)(v & 0xffff);
+}
+
+#if defined(_WIN32)
+#  include <windows.h>
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID reserved) {
+  (void)hModule;
+  (void)reserved;
+  switch (reason) {
+  case DLL_PROCESS_ATTACH:
+  case DLL_THREAD_ATTACH:
+  case DLL_THREAD_DETACH:
+  case DLL_PROCESS_DETACH:
+    break;
+  }
+  return TRUE;
+}
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+```
+
+`scripts/build-payload.ps1`:
+
+```ps1
+param(
+    [string]$LLVMDir = "",
+    [string]$PluginDll = "",
+    [switch]$EnableFla,
+    [switch]$EnableBcf,
+    [switch]$EnableSub,
+    [switch]$EnableTrim,
+    [switch]$Smoke,
+    [switch]$VerboseTess
+)
+
+. "$PSScriptRoot\common.ps1"
+
+$SdkDir = Get-TessLlvmDir
+$ClangDir = Get-TessClangDir
+if ($LLVMDir) {
+    if (Test-LlvmSdk $LLVMDir) { $SdkDir = $LLVMDir }
+    if (Test-ClangTools $LLVMDir) { $ClangDir = $LLVMDir }
+}
+if (-not $SdkDir) {
+    throw "LLVM SDK (opt + cmake) not found. Run scripts\setup-llvm.ps1 (from-source SDK)."
+}
+if (-not $ClangDir) {
+    throw "clang/clang-cl not found. Run scripts\setup-llvm.ps1 (tools installer)."
+}
+
+$clang = Join-Path $ClangDir "bin\clang.exe"
+$clangCl = Join-Path $ClangDir "bin\clang-cl.exe"
+$opt = Join-Path $SdkDir "bin\opt.exe"
+$llc = Join-Path $SdkDir "bin\llc.exe"
+
+foreach ($t in @($clang, $clangCl, $opt, $llc)) {
+    if (-not (Test-Path $t)) { throw "Missing tool: $t" }
+}
+Write-Host "SDK:   $SdkDir"
+Write-Host "Clang: $ClangDir"
+
+if (-not $PluginDll) {
+    $candidates = @(
+        (Join-Path $PluginBuildDir "LLVMObfuscationx.dll"),
+        (Join-Path $PluginBuildDir "bin\Release\LLVMObfuscationx.dll"),
+        (Join-Path $PluginBuildDir "Release\LLVMObfuscationx.dll"),
+        (Join-Path $PluginBuildDir "bin\LLVMObfuscationx.dll")
+    )
+    $PluginDll = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+}
+if (-not $PluginDll -or -not (Test-Path $PluginDll)) {
+    throw "Plugin DLL not found. Run scripts\build-plugin.ps1 first."
+}
+$PluginDll = (Resolve-Path $PluginDll).Path
+
+$src = Join-Path $RepoRoot "samples\payload_dll\src\dllmain.cpp"
+$def = Join-Path $RepoRoot "samples\payload_dll\payload.def"
+$outDir = $PayloadOutDir
+New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+
+$bc = Join-Path $outDir "payload.bc"
+$obfBc = Join-Path $outDir "payload.obf.bc"
+$obj = Join-Path $outDir "payload.obj"
+$dll = Join-Path $outDir "payload.dll"
+
+Write-Host "Plugin: $PluginDll"
+Write-Host "Out:    $dll"
+
+Invoke-InVsDevShell -Command "`"$clang`" -c -emit-llvm -O2 -Xclang -disable-llvm-passes --target=x86_64-pc-windows-msvc -o `"$bc`" `"$src`""
+
+$passList = @()
+if ($Smoke) {
+    $passList = @("tess-obf")
+} else {
+    if ($EnableFla)  { $passList += "tess-fla" }
+    if ($EnableBcf)  { $passList += "tess-bcf" }
+    if ($EnableSub)  { $passList += "tess-sub" }
+    if ($EnableTrim) { $passList += "tess-trim" }
+}
+
+if ($passList.Count -eq 0) {
+    Write-Host "No Tess passes enabled; copying bitcode through."
+    Copy-Item -Force $bc $obfBc
+} else {
+    $passes = ($passList -join ",")
+    if ($VerboseTess) { $env:TESS_VERBOSE = "1" }
+    Write-Host "opt passes: $passes"
+    Invoke-InVsDevShell -Command "`"$opt`" `"-load-pass-plugin=$PluginDll`" `"-passes=$passes`" `"$bc`" -o `"$obfBc`""
+}
+
+Invoke-InVsDevShell -Command "`"$llc`" -filetype=obj -mtriple=x86_64-pc-windows-msvc -O2 `"$obfBc`" -o `"$obj`""
+Remove-Item -Force -ErrorAction SilentlyContinue @(
+    (Join-Path $outDir "payload.exp"),
+    (Join-Path $outDir "payload.lib"),
+    $dll
+)
+Invoke-InVsDevShell -Command "link /nologo /dll /machine:x64 /out:`"$dll`" /def:`"$def`" `"$obj`" /defaultlib:libcmt /defaultlib:libvcruntime /defaultlib:libucrt"
+
+if (-not (Test-Path $dll)) {
+    throw "payload.dll was not produced"
+}
+
+$size = (Get-Item $dll).Length
+Write-Host ("OK: {0} ({1} bytes)" -f $dll, $size)
+$dll
+
+```
+
+`scripts/build-plugin.ps1`:
+
+```ps1
+param(
+    [string]$LLVMDir = "",
+    [ValidateSet("Release", "Debug", "RelWithDebInfo")]
+    [string]$Config = "Release",
+    [switch]$Clean
+)
+
+. "$PSScriptRoot\common.ps1"
+
+if (-not $LLVMDir) {
+    $LLVMDir = Get-TessLlvmDir
+}
+if (-not $LLVMDir) {
+    throw "LLVM not found. Run scripts\setup-llvm.ps1 first (or set TESS_LLVM_DIR)."
+}
+
+$cmake = Get-CMake
+$src = Join-Path $RepoRoot "plugin"
+$build = $PluginBuildDir
+
+if ($Clean -and (Test-Path $build)) {
+    Remove-Item -Recurse -Force $build
+}
+New-Item -ItemType Directory -Force -Path $build | Out-Null
+
+Write-Host "LLVM:  $LLVMDir"
+Write-Host "Build: $build ($Config)"
+
+$cmakeCfg = "`"$cmake`" -S `"$src`" -B `"$build`" -G `"Visual Studio 17 2022`" -A x64 `"-DLT_LLVM_INSTALL_DIR=$LLVMDir`""
+Invoke-InVsDevShell -Command $cmakeCfg
+
+$cmakeBuild = "`"$cmake`" --build `"$build`" --config $Config --parallel"
+Invoke-InVsDevShell -Command $cmakeBuild
+
+$dllCandidates = @(
+    (Join-Path $build "LLVMObfuscationx.dll"),
+    (Join-Path $build "bin\$Config\LLVMObfuscationx.dll"),
+    (Join-Path $build "$Config\LLVMObfuscationx.dll"),
+    (Join-Path $build "bin\LLVMObfuscationx.dll")
+)
+
+$dll = $dllCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $dll) {
+    throw "Build finished but LLVMObfuscationx.dll not found under $build"
+}
+
+Write-Host "OK: $dll"
+$dll
+
+```
+
+`scripts/common.ps1`:
+
+```ps1
+$ErrorActionPreference = "Stop"
+
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$DefaultToolsDir = Join-Path $RepoRoot "third_party\LLVM-18.1.5"
+$DefaultSdkDir = Join-Path $RepoRoot "third_party\LLVM-18.1.5-dev"
+$PluginBuildDir = Join-Path $RepoRoot "build\plugin"
+$PayloadOutDir = Join-Path $RepoRoot "out\payload"
+
+function Test-LlvmSdk([string]$Dir) {
+    if (-not $Dir) { return $false }
+    return (Test-Path (Join-Path $Dir "bin\opt.exe")) -and
+           (Test-Path (Join-Path $Dir "lib\cmake\llvm\LLVMConfig.cmake"))
+}
+
+function Test-ClangTools([string]$Dir) {
+    if (-not $Dir) { return $false }
+    return (Test-Path (Join-Path $Dir "bin\clang.exe")) -and
+           (Test-Path (Join-Path $Dir "bin\clang-cl.exe"))
+}
+
+function Get-TessLlvmDir {
+    if ($env:TESS_LLVM_DIR -and (Test-LlvmSdk $env:TESS_LLVM_DIR)) {
+        return (Resolve-Path $env:TESS_LLVM_DIR).Path
+    }
+    if (Test-LlvmSdk $DefaultSdkDir) {
+        return (Resolve-Path $DefaultSdkDir).Path
+    }
+    if (Test-LlvmSdk $DefaultToolsDir) {
+        return (Resolve-Path $DefaultToolsDir).Path
+    }
+    if (Test-LlvmSdk "C:\LLVM-18.1.5-dev") { return "C:\LLVM-18.1.5-dev" }
+    return $null
+}
+
+function Get-TessClangDir {
+    if ($env:TESS_CLANG_DIR -and (Test-ClangTools $env:TESS_CLANG_DIR)) {
+        return (Resolve-Path $env:TESS_CLANG_DIR).Path
+    }
+    $sdk = Get-TessLlvmDir
+    if ($sdk -and (Test-ClangTools $sdk)) { return $sdk }
+    if (Test-ClangTools $DefaultToolsDir) {
+        return (Resolve-Path $DefaultToolsDir).Path
+    }
+    if (Test-ClangTools "C:\Program Files\LLVM") { return "C:\Program Files\LLVM" }
+    if ($sdk) { return $sdk }
+    return $null
+}
+
+function Get-VsDevCmd {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+    if (-not (Test-Path $vswhere)) {
+        throw "vswhere.exe not found. Install Visual Studio 2022."
+    }
+    $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+    if (-not $vsPath) {
+        throw "VS2022 with C++ toolset not found."
+    }
+    $devCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
+    if (-not (Test-Path $devCmd)) {
+        throw "VsDevCmd.bat not found at $devCmd"
+    }
+    return $devCmd
+}
+
+function Get-CMake {
+    $candidates = @(
+        (Get-Command cmake -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
+        "C:\Program Files\CMake\bin\cmake.exe",
+        "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe",
+        "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe",
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe"
+    )
+    foreach ($c in $candidates) {
+        if ($c -and (Test-Path $c)) { return $c }
+    }
+    throw "cmake.exe not found. Install CMake or VS2022 CMake tools."
+}
+
+function Invoke-InVsDevShell {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command
+    )
+    $devCmd = Get-VsDevCmd
+    $bat = Join-Path $env:TEMP "tess-vsdev-$([guid]::NewGuid().ToString('N')).bat"
+    @"
+@echo off
+call "$devCmd" -arch=x64 -host_arch=x64 >nul
+$Command
+exit /b %ERRORLEVEL%
+"@ | Set-Content -Path $bat -Encoding ASCII
+    try {
+        & cmd.exe /c $bat
+        if ($LASTEXITCODE -ne 0) {
+            throw "Command failed with exit code $LASTEXITCODE"
+        }
+    }
+    finally {
+        Remove-Item -Force $bat -ErrorAction SilentlyContinue
+    }
+}
+
+```
+
+`scripts/setup-llvm.ps1`:
+
+```ps1
+param(
+    [switch]$ToolsOnly,
+    [switch]$SkipTools,
+    [string]$Jobs = ""
+)
+
+. "$PSScriptRoot\common.ps1"
+
+$Version = "18.1.5"
+$Tag = "llvmorg-$Version"
+$ToolsUrl = "https://github.com/llvm/llvm-project/releases/download/$Tag/LLVM-$Version-win64.exe"
+$ToolsDir = Join-Path $RepoRoot "third_party\LLVM-$Version"
+$SdkDir = Join-Path $RepoRoot "third_party\LLVM-$Version-dev"
+$SrcDir = Join-Path $RepoRoot "third_party\llvm-project"
+$BuildDir = Join-Path $RepoRoot "third_party\llvm-build"
+$DlDir = Join-Path $RepoRoot "third_party\download"
+
+function Test-ClangTools([string]$Dir) {
+    return (Test-Path (Join-Path $Dir "bin\clang-cl.exe")) -and
+           (Test-Path (Join-Path $Dir "bin\clang.exe"))
+}
+
+function Test-LlvmSdk([string]$Dir) {
+    return (Test-Path (Join-Path $Dir "bin\opt.exe")) -and
+           (Test-Path (Join-Path $Dir "lib\cmake\llvm\LLVMConfig.cmake")) -and
+           (Test-Path (Join-Path $Dir "include\llvm\Passes\PassPlugin.h"))
+}
+
+New-Item -ItemType Directory -Force -Path $DlDir | Out-Null
+
+Write-Host "=== LLVM $Version setup ==="
+
+if (-not $SkipTools) {
+    if (Test-ClangTools $ToolsDir) {
+        Write-Host "Clang tools OK: $ToolsDir"
+    } else {
+        $installer = Join-Path $DlDir "LLVM-$Version-win64.exe"
+        if (-not (Test-Path $installer)) {
+            Write-Host "Downloading tools installer..."
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Invoke-WebRequest -Uri $ToolsUrl -OutFile $installer -UseBasicParsing
+        }
+        Write-Host "Installing tools -> $ToolsDir"
+        if (Test-Path $ToolsDir) {
+            Remove-Item -Recurse -Force $ToolsDir -ErrorAction SilentlyContinue
+        }
+        $proc = Start-Process -FilePath $installer -ArgumentList "/S", "/D=$ToolsDir" -Wait -PassThru
+        if (-not (Test-ClangTools $ToolsDir)) {
+            Write-Warning "Tools install incomplete (exit $($proc.ExitCode)). You can still build the SDK."
+        } else {
+            Write-Host "Clang tools OK: $ToolsDir"
+        }
+    }
+}
+
+if ($ToolsOnly) {
+    Write-Host "ToolsOnly done. For plugin builds run without -ToolsOnly."
+    exit 0
+}
+
+if (Test-LlvmSdk $SdkDir) {
+    Write-Host "LLVM SDK already OK: $SdkDir"
+    $env:TESS_LLVM_DIR = $SdkDir
+    if (Test-ClangTools $ToolsDir) { $env:TESS_CLANG_DIR = $ToolsDir }
+    Write-Host "TESS_LLVM_DIR=$SdkDir"
+    & (Join-Path $SdkDir "bin\opt.exe") --version
+    exit 0
+}
+
+$cmake = Get-CMake
+
+$ninja = $null
+foreach ($c in @(
+    (Get-Command ninja -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
+    "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe",
+    "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
+)) {
+    if ($c -and (Test-Path $c)) { $ninja = $c; break }
+}
+
+if (-not (Test-Path (Join-Path $SrcDir "llvm\CMakeLists.txt"))) {
+    Write-Host "Cloning $Tag (shallow)..."
+    if (Test-Path $SrcDir) { Remove-Item -Recurse -Force $SrcDir }
+    New-Item -ItemType Directory -Force -Path (Split-Path $SrcDir) | Out-Null
+    & git clone --depth 1 --branch $Tag https://github.com/llvm/llvm-project.git $SrcDir
+    if ($LASTEXITCODE -ne 0) { throw "git clone failed" }
+} else {
+    Write-Host "Source present: $SrcDir"
+}
+
+New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+
+$parallel = $Jobs
+if (-not $parallel) { $parallel = [Environment]::ProcessorCount }
+
+Write-Host "Configuring LLVM SDK build..."
+$llvmSrc = Join-Path $SrcDir "llvm"
+
+$cfg = "`"$cmake`" -S `"$llvmSrc`" -B `"$BuildDir`""
+if ($ninja) {
+    $cfg += " -G Ninja `"-DCMAKE_MAKE_PROGRAM=$ninja`""
+} else {
+    $cfg += " -G `"Visual Studio 17 2022`" -A x64"
+}
+$cfg += " -DCMAKE_BUILD_TYPE=Release"
+$cfg += " `"-DCMAKE_INSTALL_PREFIX=$SdkDir`""
+$cfg += " -DLLVM_TARGETS_TO_BUILD=X86"
+$cfg += " -DLLVM_ENABLE_PROJECTS=llvm"
+$cfg += " -DLLVM_INCLUDE_TESTS=OFF -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_BENCHMARKS=OFF"
+$cfg += " -DLLVM_BUILD_TESTS=OFF"
+$cfg += " -DLLVM_ENABLE_PLUGINS=ON -DLLVM_EXPORT_SYMBOLS_FOR_PLUGINS=ON"
+$cfg += " -DLLVM_OPTIMIZED_TABLEGEN=ON"
+
+Invoke-InVsDevShell -Command $cfg
+
+Write-Host "Building + installing LLVM SDK..."
+if ($ninja) {
+    Invoke-InVsDevShell -Command "`"$cmake`" --build `"$BuildDir`" --target install --parallel $parallel"
+} else {
+    Invoke-InVsDevShell -Command "`"$cmake`" --build `"$BuildDir`" --config Release --target install --parallel $parallel"
+}
+
+if (-not (Test-LlvmSdk $SdkDir)) {
+    throw "LLVM SDK install failed verification at $SdkDir"
+}
+
+$optImplibSrc = Join-Path $BuildDir "lib\opt.lib"
+$optImplibDst = Join-Path $SdkDir "lib\opt.lib"
+if (Test-Path $optImplibSrc) {
+    Copy-Item -Force $optImplibSrc $optImplibDst
+    Write-Host "Copied opt.lib -> $optImplibDst"
+} else {
+    Write-Warning "opt.lib not found at $optImplibSrc (Windows plugin link may fail)"
+}
+
+$env:TESS_LLVM_DIR = $SdkDir
+if (Test-ClangTools $ToolsDir) { $env:TESS_CLANG_DIR = $ToolsDir }
+
+Write-Host "OK. TESS_LLVM_DIR=$SdkDir"
+if ($env:TESS_CLANG_DIR) { Write-Host "TESS_CLANG_DIR=$($env:TESS_CLANG_DIR)" }
+& (Join-Path $SdkDir "bin\opt.exe") --version
+Write-Host ""
+Write-Host "Next: .\scripts\build-plugin.ps1"
+
+```
