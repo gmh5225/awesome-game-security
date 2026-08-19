@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:a0yark/Pubg-demo`: entity [[pubg-demo]] (PUBG external cheat demo; C++; dumped UE CppSDK + bone helpers; ESP/aimbot framework; DLL inject + separate ImGui D3D11 overlay pipeline; a0yark; cheat / game:pubg [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[pubg-external-cheat]], [[pubg-internal]], [[pubg-dumper]], and [[unreal-object-model]].
+
 - **2026-08-19** — ingest `description:a1ext/auto_re`: entity [[auto-re]] (Python IDA Pro plugin; auto-rename dummy functions from imported APIs and jump targets; behavioral tags for networking, injection, crypto, file activity; dedicated tag view; a1ext; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[autorename]], [[renamaida]], [[ida-names]], and [[list-of-ida-plugins]].
 
 - **2026-08-19** — ingest `description:a2x/cs2-dumper`: entity [[cs2-dumper]] (CS2 external offset/interface dumper; Rust; memflow memory access on Windows/Linux; C#/C++/Rust/JSON codegen; cheat / game:cs2 [Dump]; a2x); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[cs2-offsets]], [[cs2-dma]], [[titled-gui-cs2]], and [[gh-offset-dumper]].

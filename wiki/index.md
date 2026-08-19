@@ -1946,6 +1946,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pubg-ai-yolov4](entities/pubg-ai-yolov4.md) — PUBG YOLOv4/Darknet object detection (screenshot-trained; YOLOv4-tiny/YOLOv7 configs; label tools; image/video scripts; cheat / triggerbot & aimbot; dqforgive-sudo)
 - [PUBG-DX](entities/pubg-dx.md) — PUBG internal DX11 ImGui cheat (ESP/aimbot; kernel-driver reads; Xenuine decrypt; return-address spoofing; VMProtect SDK; cheat / game:pubg; gmh5225)
 - [pubg-dump-offset](entities/pubg-dump-offset.md) — PUBG desktop UE4 offset history (v19.1–24.2; Xenuine keys; GObjects/GWorld; cheat / game:pubg [Offset]; gmh5225)
+- [Pubg-demo](entities/pubg-demo.md) — PUBG external cheat demo (C++; UE CppSDK; ESP/aimbot; ImGui D3D11 overlay; DLL inject + separate render pipeline; a0yark)
 - [pubg-dumper](entities/pubg-dumper.md) — PUBG live-process UE4 SDK/offset dumper (GObjects/GNames; class hierarchies; cheat / game:pubg [Dump]; gmh5225)
 - [pubg-external-cheat](entities/pubg-external-cheat.md) — PUBG external cheat sample (C/C++; overlays + memory analysis; cheat / game:pubg; gmh5225)
 - [Pubg-Lite-ESP](entities/pubg-lite-esp.md) — PUBG Lite external ESP (Direct2D overlay; RPM + UE4 offsets; boxes/names/health/distance; cheat / game:pubg; gmh5225)
