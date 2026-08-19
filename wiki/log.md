@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:XMCVE/import-kallsyms`: entity [[import-kallsyms]] (IDA Pro Python plugin; import kallsyms dump → symbol names/addresses in kernel IDBs; faster stripped/partially symbolized Linux kernel static RE; XMCVE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-kallsyms-symbol-renamer]], [[vmlinux-to-elf]], and [[idaplugins]].
+
 - **2026-08-19** — ingest `description:XRadius/project-tanya`: entity [[project-tanya]] (Apex Legends service-oriented external automation; C#/.NET; modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; Linux service build/install scripts; process isolation + ptrace hardening; long-running stealth-conscious memory-driven workflows; XRadius; cheat / game:apex legends [Linux]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[apex-linux]], [[ayypex]], [[ez-apex-dma-aimbot]], [[apex-dma-cheat-updated]], [[cs2-external]], and [[easy-anti-cheat]].
 
 - **2026-08-19** — ingest `description:XX-Batsu/bevy-personal-test`: entity [[bevy-personal-test]] (Rust/Bevy tamper-resistant multiplayer testbed; deterministic simulation, rollback netcode, state hashing, server-side replay validation; shadow-VM Wasm worker parallel logic checks; encrypted assets, ECDH, Rhai sandbox bytecode VM, memory guards, server anti-cheat/validator services; fuzz targets + browser JS loaders; XX-Batsu); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[bevy]], [[anti-cheat-testbench]], [[anti-cheat-testing-framework]], [[magnetite]], and [[certael]].
