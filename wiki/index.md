@@ -293,6 +293,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [autismware](entities/autismware.md) — CS:GO internal cheat (C++; interface capture + VMT hooks; ESP/aimbot/backtrack/skin changer + ImGui menu; gmh5225 [HvH])
 - [augur-riot](entities/augur-riot.md) — Vanguard RITO streamed-module → PE converter (hashed imports, section rebuild; kernel RE; gmh5225)
 - [aurum-re](entities/aurum-re.md) — Aurum RE Ricochet anti-cheat research (RE + driver development; explore anticheat:ricochet; gmh5225)
+- [AwaitFuscator](entities/awaitfuscator.md) — .NET bin2bin obfuscator; rewrites method bodies into long await chains via custom awaiters (GetAwaiter/GetResult); decompiler-resistant control-flow PoC CLI (Washi1337; Obfuscation Engine / `.NET`)
 - [AV-EDR-Killer](entities/av-edr-killer.md) — BYOVD via wsftprm.sys (IOCTL 0x22201C; PID kill)
 - [AVA-Hack](entities/ava-hack.md) — AVA (Alliance of Valiant Arms) C/C++ cheat (DirectX/OpenGL/Vulkan; cheat / game:ava; boylin0)
 - [AvAAntiCheat](entities/avaanticheat.md) — Minecraft Bukkit/Spigot AC (fly/combat/autoclick/packet; Geyser leniency)
