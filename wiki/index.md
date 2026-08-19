@@ -2101,6 +2101,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rico-cheat-rust-external](entities/rico-cheat-rust-external.md) — Facepunch Rust external cheat (C++/C/C++; driver / rendering / Unity; cheat / game:rust [External]; gmh5225)
 - [RiscyWorkshop](entities/riscy-workshop.md) — RISC-V payload obfuscation workshop (riscvm VM + llvm-mingw + insn mutation; red-team exercises)
 - [RisohEditor](entities/risoh-editor.md) — free Win32 PE resource editor (dialogs, menus, icons, RC import/export; 32/64-bit)
+- [RiskEngine](entities/risk-engine.md) — Android risk-control SDK + management platform (device fingerprinting; JNI root/hook/emulator/debug/VPN/sandbox detection; WsttXm)
 - [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
 - [Rikugan](entities/rikugan.md) — in-IDA/BN RE AI agent (multi-provider LLM chat; agentic tool loop, plan mode, Ollama; buzzer-re)
 - [Riru-MomoHider](entities/riru-momo-hider.md) — Riru Zygote-injection Magisk root-hide module (syscall + Java API hooks; mount spoof, file hide, property-query block; canyie; Cheat / Magisk)
