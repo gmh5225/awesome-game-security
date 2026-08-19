@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:adanainv3-creator/OxClient`: entity [[oxclient]]; cited on [[overviews/game-hacking]] and [[overviews/mobile-security]]; cross-linked [[oomph]], [[phantom-client]], [[lenrete-mod]], and [[windfall-anticheat]].
+
 - **2026-08-19** — ingest `description:adde88/SkyEngine`: entity [[sky-engine]] (WoW Lua unlocker; C++; protected Lua / taint-state reset; scripting research / cheat prototyping / AC detection risk study; cheat / game:wow [Wow Lua Unlocker]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[x14-08-coverstory-blizzard]] and [[wowdumpfix]].
 
 - **2026-08-19** — ingest `description:adde88/WoWDumpFix`: entity [[wowdumpfix]] (x64dbg plugin; C/C++; removes anti-dumping obstacles from protected Blizzard game processes; Scylla import reconstruction and dump fixing; debugger attach breakpoint restore; reverse engineering / static analysis); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[x64dbg]], [[dumpwow]], and [[wow-iat-fix]].
