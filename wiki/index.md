@@ -2635,6 +2635,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [wow-wowautofishing](entities/wow-wowautofishing.md) — WoW auto-fishing automation (C/C++; rendering / audio / memory analysis; cheat / game:wow; gmh5225)
 - [vt-debuger](entities/vt-debuger.md) — Intel VT-x thin-hypervisor stealth debugger (VM-exit breakpoints/single-step/memory watch; anti-debug–invisible RE)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
+- [vt-ida-plugin](entities/vt-ida-plugin.md) — VirusTotal official IDA plugin: cloud malware intelligence, byte/string/function code similarity, AI function-summary notebook (Python; cheat / IDA Plugins)
 - [VTuberWithUE4](entities/vtuber-with-ue4.md) — UE4 VTuber (physics / animation / asset pipelines; Game Develop / Unreal source)
 - [VX-It](entities/vx-it.md) — Unreal decrypt for Veiled Experts (C/C++; cheat / game:veiled experts `[Decrypt]`)
 - [VxLang](entities/vxlang-page.md) — Windows x86-64/.NET binary protector (virtualization / flatten / anti-tamper; PE/DLL/SYS)

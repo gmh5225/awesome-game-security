@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:VirusTotal/vt-ida-plugin`: entity [[vt-ida-plugin]] (official VirusTotal IDA Pro plugin; Python IDAPython; cloud malware intelligence + byte/string/function code-similarity search from disassembly; notebook panel with AI function summaries, editable notes, exportable collaboration artifacts; malware/unknown-binary RE triage; VirusTotal; cheat / IDA Plugins / VirusTotal plugin); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[mcrit-plugin]], [[wpechatgpt]], [[vulchatgpt]], [[idassist]], [[memprocfs-analyzer]], and [[list-of-ida-plugins]].
+
 - **2026-08-19** — ingest `description:Vis-Wing/Binoculars`: entity [[binoculars]] (IDA Pro plugin; Python; configurable model backends, command prompts, UI actions; function explain/rename + Go pclntab reconstruction helpers; speeds repetitive RE for security researchers; Vis-Wing; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[wpechatgpt]], [[idassist]], [[ida-gepetto]], [[ida-llm-explainer]], [[goresym]], and [[golang-loader-assist]].
 
 - **2026-08-19** — ingest `description:VisionR1/KeyAttestation`: updated entity [[keyattestation]] (VisionR1 fork; Java/Kotlin generate/parse/verify attestation evidence; certificate-chain persistence; local/remote revocation lists; RSA attestation + privacy-oriented display; mobile integrity / bootloader research); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-hardware-attestation-demo]], [[trickystore]], and [[magiskdetector]].
