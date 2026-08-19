@@ -12,7 +12,7 @@ confidence: medium
 
 Header-only C/C++ experiment corpus from gmh5225 under Anti Cheat → `Detection:Memory Integrity`. Intended for anti-cheat engineers and defensive researchers prototyping or studying in-process memory-integrity checks—not a turnkey detector product. (source: wiki/sources/descriptions/gmh5225__integrity_experiments.md)
 
-Complements live-vs-disk patch discovery such as [[patch-finder]], runtime injection scanners such as [[pe-sieve]] / [[xmalhunter]], reusable page-guard libraries such as [[memory-guard]], and educational AC PoCs such as [[anticheat-poc]] that demonstrate code-integrity verification patterns.
+Complements live-vs-disk patch discovery such as [[patch-finder]], PE section checksum library [[integrity]] (afulsamet; SSE4.2 CRC32 baseline + re-check), runtime injection scanners such as [[pe-sieve]] / [[xmalhunter]], reusable page-guard libraries such as [[memory-guard]], and educational AC PoCs such as [[anticheat-poc]] that demonstrate code-integrity verification patterns.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements live-vs-disk patch discovery such as [[patch-finder]], runtime injec
 
 ## Related
 
-[[patch-finder]] · [[anticheat-poc]] · [[hook-buster]] · [[pe-sieve]] · [[xmalhunter]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[patch-finder]] · [[integrity]] · [[anticheat-poc]] · [[hook-buster]] · [[pe-sieve]] · [[xmalhunter]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
