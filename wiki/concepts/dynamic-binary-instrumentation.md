@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/bitdefender__river.md
   - wiki/sources/descriptions/googleprojectzero__TinyInst.md
   - wiki/sources/descriptions/momo5502__vmtrace.md
-updated: 2026-08-18
+  - wiki/sources/descriptions/ZehMatt__CovCane.md
+updated: 2026-08-19
 confidence: high
 ---
 
@@ -27,6 +28,7 @@ confidence: high
 | [[mambo]] | ARM/AArch64 Linux DBI; software code cache; instruction/block/function hooks |
 | [[pyda]] | QEMU user-mode Python DBI |
 | [[panda]] | Whole-system QEMU DBI |
+| [[covcane]] | Experimental Windows x86-64 DBI; loader + runtime; Zydis + AsmJIT |
 
 Corpus frameworks: [[w1tn3ss]], [[smallworld]] (multi-emulator harness).
 
@@ -48,4 +50,4 @@ WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID i
 
 ## Related
 
-[[frida]] · [[tinyinst]] · [[river]] · [[mambo]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[frida]] · [[tinyinst]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

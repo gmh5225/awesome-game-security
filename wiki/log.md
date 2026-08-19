@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:ZehMatt/CovCane`: entity [[covcane]] (experimental Windows x86-64 DBI framework; C++; loader + instrumentation runtime; translation/rewriting/memory/exception handling; Zydis + AsmJIT; RE / runtime analysis; ZehMatt); cited on [[overviews/reverse-engineering]] and [[dynamic-binary-instrumentation]]; cross-linked [[zyemu]], [[x64dbg-playtime]], [[dynre-x86]], [[cpp-veh-dbi]], and [[tinyinst]].
+
 - **2026-08-19** — ingest `description:ZehMatt/SnakeRoyal`: entity [[snake-royal]] (C++ lightweight multiplayer Snake prototype; custom networking; serialization/sockets; CLI host/join; optional headless server; real-time multiplayer learning; ZehMatt; Game Develop / Mini Game With Server); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[2048-cpp]], [[jumpy]], [[x64dbg-playtime]], and [[zyemu]].
 
 - **2026-08-19** — ingest `description:ZehMatt/x64dbgPlaytime`: entity [[x64dbg-playtime]] (x64dbg plugin; embedded Lua runtime + bundled libraries; memory/registers/breakpoints/labels/modules/assembler automation; autorun scripts; ZehMatt; Lua script / Cheat x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[chaiscript-plugin]], and [[dotx64dbg]].

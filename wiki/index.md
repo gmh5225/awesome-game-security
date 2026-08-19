@@ -439,6 +439,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cos-mapper](entities/cos-mapper.md) — signed-helper driver mapper; kernel hooks transfer unsigned payload; unloaded-driver/cache cleanup (armvirus; Signed Driver Map)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
+- [covcane](entities/covcane.md) — experimental Windows x86-64 DBI framework (C++; loader + instrumentation runtime; translation/rewriting/memory/exception handling; Zydis + AsmJIT; RE / runtime analysis; ZehMatt)
 - [covirt](entities/covirt.md) — x86-64 stack-VM code virtualizer (PE MinGW + ELF; MBA + self-modifying code; marker regions; AC Obfuscation Engine `[VM]`; dmaivel)
 - [brkida](entities/brkida.md) — header-only C++ `BRKIDA` macro; MSVC x64 compile-time stubs + crafted stack-access patterns break IDA Hex-Rays decompilation on protected functions (anti-tamper / software protection; android1337)
 - [crycall](entities/crycall.md) — C++14+ compile-time call obfuscation (lambda/virtual-dispatch wrappers; normal and virtual call macros; hides callee/argument flow; AC Compile Time; android1337)
