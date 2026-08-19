@@ -2534,6 +2534,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [wkpe](entities/wkpe.md) — Windows kernel programming experiments; PoC drivers + user tools; process VAD enumeration; WDK/VS; build/symbol coupling (am0nsec; Enumerate VAD)
 - [ward](entities/ward.md) — simple ELF runtime packer for stealthy droppers (Go/C; Anti Cheat → Binary Packer `[ELF]`)
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
+- [WoWDumpFix](entities/wowdumpfix.md) — x64dbg plugin; removes anti-dump obstacles from protected Blizzard/WoW processes; Scylla import/dump repair; attach-time breakpoint restore (C/C++; cheat / game:wow / Dump Fix)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
 - [wow-wowautofishing](entities/wow-wowautofishing.md) — WoW auto-fishing automation (C/C++; rendering / audio / memory analysis; cheat / game:wow; gmh5225)
 - [vt-debuger](entities/vt-debuger.md) — Intel VT-x thin-hypervisor stealth debugger (VM-exit breakpoints/single-step/memory watch; anti-debug–invisible RE)

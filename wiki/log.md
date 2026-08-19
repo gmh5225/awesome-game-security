@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:adde88/WoWDumpFix`: entity [[wowdumpfix]] (x64dbg plugin; C/C++; removes anti-dumping obstacles from protected Blizzard game processes; Scylla import reconstruction and dump fixing; debugger attach breakpoint restore; reverse engineering / static analysis); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[x64dbg]], [[dumpwow]], and [[wow-iat-fix]].
+
 - **2026-08-19** — ingest `description:addrianyy/ios_packager`: entity [[ios-packager]] (Python CLI; repackage/sign iOS app bundles—certificate metadata, Info.plist/entitlements, provisioning profiles, codesign; template-driven packaging; mobile app/game security testing); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ipapatch]], [[xkvm-ios-injector]], and [[trollstore]].
 
 - **2026-08-19** — ingest `description:adem-hosni/AtomicShieldClient`: entity [[atomicshieldclient]] (Windows FiveM AC client; C#/.NET tray agent + WebView2 dashboard; native C++ engine with process/module/heuristic/manual-mapping guards, anti-debug, HWID, screenshots; EngineLoader/RuntimeLoader manual-map + named pipes; encrypted HTTP/WebSocket server backend; adem-hosni); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[certael]], [[sentinelac]], [[windfall-anticheat]], and [[faultline]].

@@ -12,7 +12,7 @@ confidence: medium
 
 **World of Warcraft client module unpacker** (gmh5225 fork; C++ and Python; cheat / `game:wow`). Restores unpacked WoW client binaries for disassembler and plugin/SDK workflows—useful for game security researchers and reverse engineers studying offensive techniques on Blizzard's protected client modules. Lineage traces to namreeb's original **dumpwow** unpacker project. (source: wiki/sources/descriptions/gmh5225__dumpwow.md)
 
-Pairs with WoW import-table repair tooling such as [[wow-iat-fix]] and Warden research samples such as [[x14-08-coverstory-blizzard]] in the same Blizzard client lane.
+Pairs with WoW import-table repair tooling such as [[wow-iat-fix]], live-process anti-dump [[x64dbg]] plugin [[wowdumpfix]], and Warden research samples such as [[x14-08-coverstory-blizzard]] in the same Blizzard client lane.
 
 ## Links
 
@@ -20,4 +20,4 @@ Pairs with WoW import-table repair tooling such as [[wow-iat-fix]] and Warden re
 
 ## Related
 
-[[wow-iat-fix]] · [[x14-08-coverstory-blizzard]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[wow-iat-fix]] · [[wowdumpfix]] · [[x64dbg]] · [[x14-08-coverstory-blizzard]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
