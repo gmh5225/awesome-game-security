@@ -1661,6 +1661,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MxEngine](entities/mxengine.md) — modern C++ OpenGL 3D engine (PBR, screen-space FX, ECS, editor; educational desktop 3D; Game Engine / source)
 - [call-of-duty-vanguard-hack-esp-aimbot-unlock-all](entities/call-of-duty-vanguard-hack-esp-aimbot-unlock-all.md) — COD Vanguard/Warzone external: Win32 RPM + DirectX overlay; ESP / aimbot / unlock-all (gmh5225; cheat / game:cod vanguard [External])
 - [call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all](entities/call-of-duty-warzone-hack-esp-slient-aimbot-internal-unlock-all.md) — COD Warzone external: C# Win32 RPM + overlay; ESP / silent aimbot / unlock-all (gmh5225; cheat / game:cod warzone [External])
+- [call-of-duty-warzone-mw-hack-esp-aimbot](entities/call-of-duty-warzone-mw-hack-esp-aimbot.md) — COD Warzone/MW external cheat source (C++; Direct3D9 + ImGui overlay/menu; driver-backed memory reads + entity handling; ESP/aimbot RE practice; YMY1666527646; cheat / game:cod warzone [External])
 - [modern-warfare-warzone-cheat](entities/modern-warfare-warzone-cheat.md) — COD Modern Warfare/Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [warzone-internal-cheat](entities/warzone-internal-cheat.md) — COD Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [mtasa-blue](entities/mtasa-blue.md) — MTA:SA GTA:SA multiplayer mod (C++/Lua; D3D/DInput hooks; CEF; built-in AC)
