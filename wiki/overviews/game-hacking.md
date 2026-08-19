@@ -1288,6 +1288,7 @@ sources:
   - wiki/sources/descriptions/YMY1666527646__ue4_base.md
   - wiki/sources/descriptions/YMY1666527646__nigusFN.md
   - wiki/sources/descriptions/YMY1666527646__Phoenix-Valorant-Cheat.md
+  - wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md
 updated: 2026-08-19
 confidence: high
 ---
@@ -1398,6 +1399,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Leaked Apple Lite Fortnite cheat remakes such as [[apple-lite-fortnite-cheat]] (gmh5225; Police remake of Apple Lite; C/C++; kernel-level work + shader work + modding; cheat / game:fortnite) sit in that same driver/shader Fortnite lane beside [[serenity-gg-fn-and-loader]]. (source: wiki/sources/descriptions/gmh5225__Apple-Lite-Fortnite-Cheat.md)
 - Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
+- Menu-driven internal Fortnite samples such as [[fortnite-hack-esp-exploits-with-menu]] (YMY1666527646; C++; DirectX 9 ImGui menu; box/line ESP + silent aim + FOV/teleport exploits + panic key; injection/hooking/overlay RE practice; cheat / game:fortnite [Internal]) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md)
 - From-scratch Fortnite internals such as [[ritz-amazing-fortnite-internal]] (simplified hook path; x64-release injector) sit beside them in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md)
 - Updated Ritz-lineage Fortnite internals such as [[fortnite-internal-updated-ritz]] (gmh5225; C++; Ritz fork; UE4 engine hooking; ESP / aimbot / exploits; refreshed offsets + EAC bypass for newer builds; [Internal]) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/gmh5225__fortnite-internal-updated-ritz.md)
 - Fixed-and-updated Fortnite internal DLL samples such as [[fortnite-internal-cheat-fixed-and-updated]] (gmh5225; memory + silent aimbot; box/skeleton/distance/snapline/FOV/chest/ammo ESP; DirectX 11 ImGui overlay; cheat / game:fortnite) sit in that same cheat / game:fortnite internal lane beside Ritz and ZeroGui lineages. (source: wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md)
