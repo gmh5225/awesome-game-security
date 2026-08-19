@@ -1492,6 +1492,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lenrete Mod](entities/lenrete-mod.md) — Fabric Minecraft 26.2 utility/cheat client (Java 25; 43 modules—KillAura/ESP/Reach/Flight/Blinker; Mixins + JSON config; lolizei; cheat / game:minecraft)
 - [lenovo-exec](entities/lenovo-exec.md) — LenovoDiagnosticsDriver.sys BYOVD PoC (insecure IOCTL → arbitrary kernel code execution; gmh5225)
 - [lenovo-mapper](entities/lenovo-mapper.md) — BYOVD driver mapper via LenovoDiagnosticsDriver.sys (memory-access IOCTLs; manual unsigned map; gmh5225)
+- [lpmapper](entities/lpmapper.md) — C++ large-page driver manual mapper (shellcode into loaded large-page drivers; no fresh pool alloc; registry config; AC evasion research; VollRagm)
 - [libelevate](entities/libelevate.md) — C++ elevating-handle lib (KM/driver primitives → full-access process handles; AC handle protection)
 - [libiht](entities/libiht.md) — Intel Hardware Trace Library (Tencent Xuanwu Lab; hardware-assisted execution tracing; Windows kernel explorer)
 - [libipt-rs](entities/libipt-rs.md) — Rust user-mode `ipt.sys` wrapper (DeviceIoControl start/stop/retrieve IPT traces; RE-derived interface; no decode/coverage)
