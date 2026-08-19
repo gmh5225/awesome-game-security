@@ -153,6 +153,7 @@ sources:
   - wiki/sources/descriptions/YMY1666527646__Phoenix-Valorant-Cheat.md
   - wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md
   - wiki/sources/descriptions/YMY1666527646__Call-of-Duty-Warzone-MW-HACK-ESP-AIMBOT.md
+  - wiki/sources/descriptions/Waihbe__Fortnite-External-Cheat-Leak.md
   - wiki/sources/descriptions/tiansongyu__cs2_cheat.md
   - wiki/sources/descriptions/rlybasic__DWM_Hook.md
   - wiki/sources/descriptions/Yukin02__Dwm-Overlay.md
@@ -299,6 +300,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - Title-specific GTA V C++/Lua hook-and-render bases such as [[bigbasev2]] (gmh5225; rendering / modding / hooking scaffold; cheat / game:gta5) sit in the same in-process mod-menu / Present-hook lane beside [[phake]] and [[gtav-dragresize]]. (source: wiki/sources/descriptions/gmh5225__BigBaseV2.md)
 - Title-specific Fortnite internal DX11 ImGui samples such as [[fortnite-internal-cheat-fixed-and-updated]] (gmh5225; box/skeleton/distance/snapline/FOV/chest/ammo ESP + memory/silent aimbot; DirectX 11 ImGui overlay; cheat / game:fortnite) sit in the same in-process ImGui cheat-menu lane on EAC-protected UE clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md)
 - Title-specific Fortnite internal DX9 ImGui samples such as [[fortnite-hack-esp-exploits-with-menu]] (YMY1666527646; box/line ESP + menu-driven aim/exploit toggles; DirectX 9 ImGui overlay; cheat / game:fortnite [Internal]) sit in that same in-process ImGui cheat-menu lane beside DX11 internals. (source: wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md)
+- Title-specific Fortnite external DX9 ImGui samples such as [[fortnite-external-cheat-leak]] (Waihbe; leaked external source; DirectX 9 ImGui overlay + in-game feature menu; ESP/aim visualization over driver-assisted out-of-process reads; cheat / game:fortnite [External]) sit in the external layered-window / DX9 ImGui overlay lane beside [[fortnite-external-cheat-source-code]] and [[nigusfn]]. (source: wiki/sources/descriptions/Waihbe__Fortnite-External-Cheat-Leak.md)
 - External CS:GO overlay samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; cheat / game:csgo [External]) sit in the external overlay lane beside [[nebulite-external]] and [[csgo-external-cheat]]. (source: wiki/sources/descriptions/gmh5225__Astra.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same external overlay lane beside [[csgo-external-cheat]] and [[astra]]. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - Title-specific CS:GO cheat-menu samples such as [[legit-csgo-cheat-menu]] (gmh5225; Windows-only; README `[Menu]`) sit in the same ImGui cheat-menu / game:csgo lane beside internal ImGui overlays such as [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md)

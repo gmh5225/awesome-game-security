@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Waihbe/Fortnite-External-Cheat-Leak`: entity [[fortnite-external-cheat-leak]] (leaked Fortnite external cheat source; C++; DirectX 9 ImGui overlay; driver-assisted out-of-process memory reads; camera/bone math + W2S projection; configurable aim + ESP menu toggles; external cheat design RE; Waihbe; cheat / game:fortnite [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[fortnite-external-cheat-winsense-leak]], [[fortnite-external-cheat-source-code]], [[nigusfn]], [[world-to-screen]], and [[easy-anti-cheat]].
+
 - **2026-08-19** — ingest `description:WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial`: entity [[xilinx-fpga-pcie-xdma-tutorial]] (Vivado XDMA hands-on tutorial; BRAM R/W, AXI integration, Linux host C, MPEG2 acceleration; driver load + test procedures; FPGA/hardware-security + DMA game-security research; WangXuan95; cheat / DMA Tutorial); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[litepcie]], and [[dma-pcie-board-75t]].
 
 - **2026-08-19** — ingest `description:Washi1337/AwaitFuscator`: entity [[awaitfuscator]] (.NET bin2bin obfuscator; rewrites method bodies into long await chains via custom awaiters and GetAwaiter/GetResult transforms; decompiler-resistant control-flow PoC CLI; C#/.NET; Washi1337); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[control-flow-flattening]], [[obfuscation-methods]], [[confuserex]], [[obfuscar]], [[dnspy]], and [[ghidra-nativeaot]].
