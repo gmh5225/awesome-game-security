@@ -859,6 +859,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [external-dayz-cheat](entities/external-dayz-cheat.md) — DayZ external ESP (D3D9 transparent overlay; kernel driver entity reads; Enfusion SDK offsets; gmh5225)
 - [external-esp-hack-assaultcube](entities/external-esp-hack-assaultcube.md) — beginner AssaultCube external ESP (GDI overlay; RPM boxes / names / health; gmh5225)
 - [external-r6s-cheat](entities/external-r6s-cheat.md) — R6 external: kernel driver + shared memory section; ESP + aimbot (cheat / game:r6 [External]; gmh5225)
+- [EzApexDMAAimbot](entities/ez-apex-dma-aimbot.md) — Apex Legends KVM/DMA aimbot + glow: KVM memory reader; Linux host reads game state; guest-side control; recoil randomization, smoothing, bone randomization, team-aware glow (C/C++; cheat / game:apex legends [KVM]; Y33Tcoder)
 - [ez-drv-bak](entities/ez-drv-bak.md) — Windows kernel driver backup & restore (gmh5225; driver development / AC lab baselines)
 - [FakeEye](entities/fakeeye.md) — BattlEye init emulator (BEService SCM + BE-style game launch; [Emulator])
 - [FakerAndroid](entities/fakerandroid.md) — APK→Android Studio project translator; javaScaffolding + fakeCpp JNI `.so` hooks + IL2CPP C++ scaffolding (gmh5225; cheat / game engine explorer:Unity)
