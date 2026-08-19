@@ -876,6 +876,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida-boot](entities/frida-boot.md) — Beginner Frida binary instrumentation workshop (YouTube stream; gmh5225; cheat / Frida)
 - [frida-ceserver](entities/frida-ceserver.md) — Frida Cheat Engine ceserver (mobile/desktop remote CE scan/write; non-rooted Android attach; gmh5225)
 - [frida-detection](entities/frida-detection.md) — Java/C++ Frida detection (hooking; Anti Cheat → Detection:Frida)
+- [FridaDetectionBypass](entities/frida-detection-bypass.md) — Android Frida detection bypass techniques (debugger/port/protocol/memory checks; JS + CLI + native JNI; aimardcr; Debugger Detection Bypass)
 - [frida-find-jni-native-methods](entities/frida-find-jni-native-methods.md) — Frida runtime JNI native-method discovery (JavaScript hooking + memory analysis; cheat / Frida)
 - [frida-il2cpp-bridge](entities/frida-il2cpp-bridge.md) — Frida dump Il2Cpp (Unity 5.3–6000.1.x; game engine explorer:Unity)
 - [frida-il2cpp-datacollector](entities/frida-il2cpp-datacollector.md) — Frida IL2CPP runtime metadata harvester (Android/iOS; CE MonoDataCollector port; SDK generation)

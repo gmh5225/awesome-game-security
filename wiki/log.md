@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:aimardcr/FridaDetectionBypass`: entity [[frida-detection-bypass]] (Android Frida detection bypass techniques; debugger checks, default-port/protocol fingerprinting, memory artifact scans; JS hooks + CLI configs + native JNI; non-gadget-only injection workflows; mobile RE / anti-tamper research; Debugger Detection Bypass); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[anti-frida-bypass]], [[antifrida]], [[frida-detection]], and [[detect-frida]].
+
 - **2026-08-18** — ingest `description:airbus-cert/comida`: entity [[comida]] (IDA Pro plugin; Windows COM GUID scan + registry metadata correlation; Hex-Rays type inference on CoCreateInstance/CoGetCallContext/QueryInterface; malware/game COM triage; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[comon]], [[classy]], [[autoresolv]], and [[cognitor]].
 
 - **2026-08-18** — ingest `description:airbus-seclab/AutoResolv`: entity [[autoresolv]] (IDA plugin; IDAPython; PyQt5 + pyelftools; resolve ELF external library calls; wrapper→implementation mapping; call-site annotation; signature import from related binaries; multi-arch; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmlinux-to-elf]], [[ida-ps5-elf-plugin]], [[ida-kallsyms-symbol-renamer]], and [[idaplugins]].
