@@ -164,6 +164,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ArcRaidersRadar-dma-Radar](entities/arc-raiders-radar-dma-radar.md) — Arc Raiders DMA radar/ESP: FPGA + MemProcFS; Unicorn Engine pointer-decryption emulation; player/actor iteration (C++; cheat / game:arc raiders [DMA]; a0yark)
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])
 - [ayaya-league-external](entities/ayaya-league-external.md) — Node.js LoL external script platform (AyayaLeague; custom user scripts; gmh5225; cheat / game:lol)
+- [Auto-Android App Modding Tool](entities/auto-android-app-modding-tool.md) — Termux Python TUI for APK patch/rebuild/sign; Frida Gadget + native `.so` inject; patchelf/APKEditor auto-select; no root (UAMT; VarshaWanjari0)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
 - [AutoRE](entities/auto-re.md) — Python IDA Pro plugin: auto-rename dummy functions from API imports/jump targets; behavioral tagging (networking, injection, crypto, file I/O) with tag view (a1ext; cheat / IDA Plugins)
 - [AutoRename](entities/autorename.md) — Python IDA plugin: auto rename symbol (crifan; cheat / IDA Plugins)
