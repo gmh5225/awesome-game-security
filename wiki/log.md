@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `readme:categories`: Anti Cheat ~682 (+1; Cheat ~2728 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-19** — ingest `description:XaFF-XaFF/BugcheckSuppressor`: entity [[bugcheck-suppressor]] (Windows kernel driver; hooks bugcheck callbacks; data-only HAL dispatch hook + SEH RtlUnwindEx recovery under HVCI; CET-compatible assembly stubs; BSOD suppression PoC; XaFF-XaFF); cited on [[overviews/windows-kernel]] and [[hvci]]; cross-linked [[windows-kernel-shadow-stack]], [[cet-research]], and [[patchguard]].
 
 - **2026-08-19** — ingest `description:Xacone/Eneio64-Driver-Exploit`: entity [[eneio64-driver-exploit]] (C++ educational PoC; signed **`eneio64.sys`** → physical memory R/W; virtual-to-physical translation for virtual kernel access; modern Windows offset notes; token-theft LPE path; kernel security / vulnerable-driver analysis training; Xacone); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[badrentdrv2]], [[physmem-drivers]], [[windows-kernel-exploits]], [[echoac-poc]], and [[ntmemory]].
