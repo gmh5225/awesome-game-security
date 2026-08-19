@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:a2x/cs2-dumper`: entity [[cs2-dumper]] (CS2 external offset/interface dumper; Rust; memflow memory access on Windows/Linux; C#/C++/Rust/JSON codegen; cheat / game:cs2 [Dump]; a2x); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[cs2-offsets]], [[cs2-dma]], [[titled-gui-cs2]], and [[gh-offset-dumper]].
+
 - **2026-08-19** — ingest `description:aahmad097/AlternativeShellcodeExec`: entity [[alternative-shellcode-exec]] (Windows callback-API shellcode execution PoCs; C++ Visual Studio samples; position-independent shellcode without CreateThread; API abuse / injection-path evasion; aahmad097); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[jektor]], [[obj2shellcode]], [[scfw]], and [[windows-process-injection]].
 
 - **2026-08-19** — ingest `description:abcz316/SKRoot-linuxKernelRoot`: entity [[skroot-linux-kernel-root]] (Android Linux kernel root patch toolkit; C/C++ + Java/JNI; deeply hidden root, su install/inject, multi-kernel without rebuild; abcz316); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[apatch]], [[kernelpatch]], and [[rw-proc-mem33]].

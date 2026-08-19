@@ -461,6 +461,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS2-Dma-Radar](entities/cs2-dma-radar.md) — CS2 DMA radar (PCIe hardware; player positions + game state; real-time overlay; zero target-OS software; cheat / game:cs2 [DMA]; gmh5225)
 - [CS2-DMA-Cheat](entities/cs2-dma-cheat.md) — CS2 DMA cheat (C/C++; shader/rendering/audio; PCIe DMA; zero target-OS software; cheat / game:cs2 [DMA]; eden13378)
 - [CS2-DMA](entities/cs2-dma.md) — open-source CS2 DMA external (C++; FPGA/LeechCore; read-only ESP, web radar, grenade helper; MemProcFS scatter reads; cs2-dumper offsets; zero target-OS software; cheat / game:cs2 [DMA]; chao-shushu)
+- [cs2-dumper](entities/cs2-dumper.md) — CS2 external offset/interface dumper (Rust; memflow; Windows/Linux; C#/C++/Rust/JSON output; cheat / game:cs2 [Dump]; a2x)
 - [cs2-kvm-dma](entities/cs2-kvm-dma.md) — CS2 KVM/DMA cheat (radar/ESP from separate VM; DMA hardware or KVM memory mapping; zero guest-OS footprint; cheat / game:cs2 [KVM/DMA]; atombottle)
 - [cs2-ext](entities/cs2-ext.md) — external CS2 cheat framework (C++17; kernel driver interface; D3D11/DXGI ImGui; aimbot / ESP / spinbot)
 - [cs2-fov-changer](entities/cs2-fov-changer.md) — CS2 FOV changer (C/C++; hooking / memory analysis; gmh5225)
