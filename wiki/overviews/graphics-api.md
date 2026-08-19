@@ -31,6 +31,7 @@ sources:
   - wiki/sources/descriptions/aristocratos__btop.md
   - wiki/sources/descriptions/Vekor64__PythonCS2.md
   - wiki/sources/descriptions/ViddeBoiiii__CSGO-Ormbunke-x86.md
+  - wiki/sources/descriptions/Vatrials__League-of-Legends-Visuals-Cheat.md
   - wiki/sources/descriptions/Volkanite__Push.md
   - wiki/sources/descriptions/whx-prog__The-Seed-Link-Future.md
   - wiki/sources/descriptions/wbaby__DoubleCallBack.md
@@ -311,6 +312,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - Title-specific CS:GO cheat-menu samples such as [[legit-csgo-cheat-menu]] (gmh5225; Windows-only; README `[Menu]`) sit in the same ImGui cheat-menu / game:csgo lane beside internal ImGui overlays such as [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md)
 - Internal CS:GO ImGui menu samples such as [[kakhack]] (cazzwastaken; FreeType font rendering + JSON config + multiple graphics hooks; cheat / game:csgo [Internal]) extend that in-process ImGui overlay lane beside [[autismware]] and [[csgo-cheat-base]]. (source: wiki/sources/descriptions/cazzwastaken__kakhack.md)
 - Internal CS:GO x86 ImGui menu samples such as [[csgo-ormbunke-x86]] (ViddeBoiiii; DirectX 9 + Kiero + MinHook; ESP, aimbot, movement assists, trigger behavior; educational menu-framework scaffold; cheat / game:csgo `[Imgui Menu]`) extend that in-process D3D9 ImGui overlay lane beside [[csgo-internal-base]] and [[digital-sdk]]. (source: wiki/sources/descriptions/ViddeBoiiii__CSGO-Ormbunke-x86.md)
+- Internal LoL DirectX 9 ImGui samples such as [[league-of-legends-visuals-cheat]] (Vatrials; ImGui + DirectX 9 overlay; skin changer, orbwalker, spell prediction; Detours + VMT hooks; cheat / game:lol) extend that in-process D3D9 ImGui overlay lane beside [[league-skin-changer]] and [[league-directx11-internal]]. (source: wiki/sources/descriptions/Vatrials__League-of-Legends-Visuals-Cheat.md)
 - Title-specific AVA samples such as [[ava-hack]] (boylin0; C/C++; DirectX / OpenGL / Vulkan hook surfaces; cheat / game:ava) extend the multi-API in-process graphics lane beside universal hook bases such as [[d3dhook-imgui]] and [[universalhookx]]. (source: wiki/sources/descriptions/boylin0__AVA-Hack.md)
 - Internal CS:GO samples such as [[cartmanv2]] (gmh5225; C/C++; rendering / networking / editor tooling; cheat / game:csgo [Internal]) sit in the same in-process graphics / cheat-menu lane beside [[csgosimple]] and [[csgo-internal-base]]. (source: wiki/sources/descriptions/gmh5225__cartmanv2.md)
 - Internal CS:GO samples such as [[cstrike-hack]] (binkynz; C/C++; rendering / networking / animation; cheat / game:csgo) sit in the same in-process graphics lane for studying Source 1 overlay and animation draw paths beside [[csgo-cheat-base]] and [[kakhack]]. (source: wiki/sources/descriptions/binkynz__cstrike-hack.md)
