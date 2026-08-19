@@ -2331,6 +2331,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Themida-Research](entities/themida-research.md) — Themida/WinLicense 3.x VM research (`VM_CONTEXT` / handlers / Triton; Fix Themida)
 - [themida-spotter-bn](entities/themida-spotter-bn.md) — Binary Ninja plugin to detect Themida/WinLicense/Code Virtualizer obfuscated code regions (x86/x64; Oreans ≤3.1.9; Fix Themida)
 - [themida-unmutate](entities/themida-unmutate.md) — Python 3 static mutation deobfuscator for Themida/WinLicense/Code Virtualizer 3.x (Fix Themida)
+- [Themidie](entities/themidie.md) — x64dbg plugin: C++ MinHook hooks neutralize Themida anti-debug/anti-VM/monitoring on x64 Windows; attach-and-debug (not full unpack); VenTaz; Fix Themida / x64dbg Plugins
 - [Thetan_ArenaSDK](entities/thetan-arenasdk.md) — Thetan Arena SDK (rendering / audio / physics; cheat lane)
 - [Three.js](entities/three-js.md) — JavaScript 3D library (WebGL/WebGPU; scene graph / PBR / glTF / XR; Game Engine / HTML5)
 - [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)

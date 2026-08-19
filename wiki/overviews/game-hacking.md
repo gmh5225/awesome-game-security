@@ -1296,6 +1296,7 @@ sources:
   - wiki/sources/descriptions/VirusTotal__vt-ida-plugin.md
   - wiki/sources/descriptions/Veuqx0__ImGui-Spoofer-Leaked.md
   - wiki/sources/descriptions/ViRb3__swift-ida.md
+  - wiki/sources/descriptions/VenTaz__Themidie.md
   - wiki/sources/descriptions/VeroFess__PalWorld-Server-Unoffical-Fix.md
   - wiki/sources/descriptions/Visual1mpact__Paradox_AntiCheat.md
   - wiki/sources/descriptions/ViddeBoiiii__CSGO-Ormbunke-x86.md
@@ -1526,6 +1527,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Dynamic Themida/WinLicense 2.x/3.x unpack via [[unlicense]] (Python 3; Frida instrumentation; OEP recovery + obfuscated IAT rebuild; x86/x64 native PE/DLL + .NET EXE; LIEF/Capstone) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__unlicense.md)
 - Static mutation deobfuscation via [[themida-unmutate]] (Python 3; Themida/WinLicense/Code Virtualizer 3.x insn mutation on selected functions; tested to Themida 3.1.9) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__themida-unmutate.md)
 - Obfuscated-region detection via [[themida-spotter-bn]] (Binary Ninja plugin; Themida/WinLicense/Code Virtualizer obfuscated code locations; x86/x64; Oreans ≤3.1.9; Cheat Binary Ninja Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/ergrelet__themida-spotter-bn.md)
+- Themida attach-and-debug via [[themidie]] (x64dbg plugin; C++ MinHook; neutralizes anti-debug/anti-VM/monitoring; practical debugger attach workflow vs full unpack automation; x64 Windows; VenTaz; Cheat x64dbg Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/VenTaz__Themidie.md)
 
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - SMT-assisted opaque-predicate deobfuscation via [[r2smt]] (Rust; radare2 integration; Z3/CVC5/Bitwuzla; IR lift + SSA + backward slice; batch JSON/MD reports; reversible patches) sits in the Cheat Radare Plugins lane. (source: wiki/sources/descriptions/seifreed__r2SMT.md)
