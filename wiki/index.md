@@ -915,6 +915,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida_usb_dump](entities/frida-usb-dump.md) — Frida macOS USB traffic sniff/dump (Big Sur offsets; cheat / Frida)
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
 - [Florida](entities/florida.md) — Ylarod Frida patch/build automation; anti-detection Android frida-server (string/symbol/artifact renaming)
+- [FlavorTown](entities/flavortown.md) — multi-language shellcode execution techniques (C/C#/MATLAB; process/memory execution paths; evasion tradecraft; Wra7h; Shellcode Engine & Tricks)
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
 - [frank](entities/frank.md) — JavaScript LoL assistant / WeGame replacement (rendering, animation, asset pipelines; gmh5225; cheat / game:lol)
 - [frinja](entities/frinja.md) — Binary Ninja Frida plugin (BinRida continuation; static+dynamic RE bridge; dzervas; cheat / Binary Ninja plugins)
