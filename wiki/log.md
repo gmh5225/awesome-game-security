@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:VoidSec/ioctlpus`: entity [[ioctlpus]] (Windows DeviceIoControl repeater; C# WinForms GUI + CLI; craft/replay/save/edit arbitrary input/output buffers; repeater-style driver interface auditing and fuzzing prep; driver security research; VoidSec); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfb]], [[drvtrace]], [[cognitor]], and [[driver-buddy-reloaded]].
+
 - **2026-08-19** — ingest `description:Volkanite/Push`: entity [[push]] (in-game overlay + system tuning toolkit; C/C++; D3D8–11/DXGI hook modules; CPU/GPU/RAM/storage OSD metrics, frame limiting, sync control; real-time performance monitoring + overlay experimentation; Volkanite; Monitor GPU/CPU/RAM performance); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[present-hook]], [[tracy]], [[optick]], [[btop]], and [[goverlay]].
 
 - **2026-08-19** — ingest `description:VollRagm/PTView`: entity [[ptview]] (Windows live process page-table browser; C++ kernel driver + C# GUI; browse entries, dump physical pages, inspect PTE metadata, VA→PA translation, large-page awareness; OS memory research / debugging / AC kernel investigations; VollRagm; Browse Page Tables on Windows); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[pteditor]], [[page-table-injector]], [[readphys]], [[ntmemory]], and [[lpmapper]].
