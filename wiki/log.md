@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:Zckyy/CS2-External`: entity [[cs2-external]] (C# external CS2 cheat; read-only memory + overlay drawing; entity/offset/view-matrix helpers + runtime cheat logic; authentication/subscription handling; educational external memory analysis; Zckyy; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-cheat]], [[cs2-external-1]], [[titled-gui-cs2]], and [[cs2-offsets]].
+
 - **2026-08-19** — ingest `description:Zebratic/UE4Injector`: entity [[ue4-injector]] (UE4 process-injection PoC; C++; legacy UE4 vulnerability for shellcode/DLL payloads; Visual Studio CLI; privilege requirements; may affect unpatched UE4 titles; Zebratic; Inject); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[windows-process-injection]], [[guided-hacking-injector]], [[injectors]], and [[the-perfect-injector]].
 
 - **2026-08-19** — ingest `description:ZehMatt/CovCane`: entity [[covcane]] (experimental Windows x86-64 DBI framework; C++; loader + instrumentation runtime; translation/rewriting/memory/exception handling; Zydis + AsmJIT; RE / runtime analysis; ZehMatt); cited on [[overviews/reverse-engineering]] and [[dynamic-binary-instrumentation]]; cross-linked [[zyemu]], [[x64dbg-playtime]], [[dynre-x86]], [[cpp-veh-dbi]], and [[tinyinst]].

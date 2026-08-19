@@ -470,6 +470,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-ext](entities/cs2-ext.md) — external CS2 cheat framework (C++17; kernel driver interface; D3D11/DXGI ImGui; aimbot / ESP / spinbot)
 - [cs2-fov-changer](entities/cs2-fov-changer.md) — CS2 FOV changer (C/C++; hooking / memory analysis; gmh5225)
 - [CS2-External-Cheat](entities/cs2-external-cheat.md) — external CS2 cheat (C++; D3D11 ImGui overlay / aimbot / memory)
+- [CS2-External](entities/cs2-external.md) — external CS2 cheat (Zckyy; C#; read-only memory + overlay; entity/offset/view-matrix helpers; auth/subscription; cheat / game:cs2 [External])
 - [cs2-external-1](entities/cs2-external-1.md) — external CS2 cheat (gmh5225; ImGui + DirectX 11 overlay; aimbot / ESP / skeleton / snaplines; cheat / game:cs2 [External])
 - [CS2 Hybrid Anti-Cheat Proposal](entities/cs2-hybrid-anticheat-proposal.md) — CS2 hybrid AC proposal (Glicko-2 judges, honeypot entities, shadow monitoring; Python PoC)
 - [CS2AC](entities/cs2ac.md) — open-source server-side CS2 anti-cheat Metamod:Source plugin (aim/movement/input; ~17 modules; kick/ban; Discord webhooks)
