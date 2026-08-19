@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:addrianyy/ios_packager`: entity [[ios-packager]] (Python CLI; repackage/sign iOS app bundles—certificate metadata, Info.plist/entitlements, provisioning profiles, codesign; template-driven packaging; mobile app/game security testing); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ipapatch]], [[xkvm-ios-injector]], and [[trollstore]].
+
 - **2026-08-19** — ingest `description:adem-hosni/AtomicShieldClient`: entity [[atomicshieldclient]] (Windows FiveM AC client; C#/.NET tray agent + WebView2 dashboard; native C++ engine with process/module/heuristic/manual-mapping guards, anti-debug, HWID, screenshots; EngineLoader/RuntimeLoader manual-map + named pipes; encrypted HTTP/WebSocket server backend; adem-hosni); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[certael]], [[sentinelac]], [[windfall-anticheat]], and [[faultline]].
 
 - **2026-08-19** — ingest `readme:categories`: Cheat ~2728 (+1; Anti Cheat ~679 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).

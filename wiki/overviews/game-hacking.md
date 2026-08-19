@@ -114,6 +114,7 @@ sources:
   - wiki/sources/descriptions/ekknod__MouseClassServiceCallbackMeme.md
   - wiki/sources/descriptions/adem-hosni__AtomicShieldClient.md
   - wiki/sources/descriptions/adrianyy__rw_socket_driver.md
+  - wiki/sources/descriptions/addrianyy__ios_packager.md
   - wiki/sources/descriptions/adspro15__DirectInput.md
   - wiki/sources/descriptions/ekknod__nv_v2.md
   - wiki/sources/descriptions/ekknod__G37OBS.md
@@ -1677,6 +1678,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Chinese Android File Explorer guide [[note]] (`Guide-zh` documentation/reference) sits in the same Cheat Android File Explorer lane. (source: wiki/sources/descriptions/nzcv__note.md)
 - Non-jailbreak iOS IPA patch tooling such as [[ipapatch]] (C/C++/ObjC; Patch iOS Apps without Jailbreak) sits in the Cheat / IOS jailbreak sideload lane. (source: wiki/sources/descriptions/paradiseduo__IPAPatch.md)
 - Pure-Go sideload tweak injectors such as [[xkvm-ios-injector]] (xscope0; CLI/TUI; IPA/TIPA/`.app` dylib and `.deb` injection, rootful/rootless/roothide package conversion, App Store IPA decryption, hook-runtime embedding, Mach-O repack + ad-hoc signing; cheat / iOS sideload) sit beside [[ipapatch]] in the same sideload lane. (source: wiki/sources/descriptions/xscope0__xkvm-ios-injector.md)
+- Python iOS repackaging/signing CLI utilities such as [[ios-packager]] (addrianyy; certificate metadata parse, Info.plist/entitlements update, provisioning profile fetch, codesign; provisioning-request/cache/template helpers; repeated resign/deploy during mobile game security testing) sit in the same sideload/repack lane beside [[ipapatch]] and [[xkvm-ios-injector]]. (source: wiki/sources/descriptions/addrianyy__ios_packager.md)
 - iOS 15 untethered jailbreak implementations such as [[ios-jailbreak-fugu15]] (gmh5225; Fugu15 kernel exploit chain → root, codesign bypass, arbitrary code execution; cheat / iOS jailbreak) sit in the same Cheat / iOS jailbreak privilege lane beside [[dopamine]] and [[palera1n]]. (source: wiki/sources/descriptions/gmh5225__IOS-jailbreak--Fugu15.md)
 - XNU `kern_aio.c` AIO+kevent UAF PoC via [[cve-2026-xnu-aio-kevent-uaf]] (crazymind90; sandbox app without entitlements; AIO completion frees object before kevent registration → panic/double-free; iOS 26.2, patched 26.3; cheat / iOS jailbreak kernel research—not stable LPE) sits in the same Cheat / iOS jailbreak kernel lane beside [[kfd]] and [[xnu-1day-practice]]. (source: wiki/sources/descriptions/crazymind90__CVE-2026-XNU-AIO-KEVENT-UAF.md)
 - Perma-signed jailed IPA installers such as [[trollstore]] (CoreTrust/AMFI bugs; arbitrary entitlements; persist across reboot) sit in the same Cheat / jailed-app sideload lane. (source: wiki/sources/descriptions/opa334__TrollStore.md)
