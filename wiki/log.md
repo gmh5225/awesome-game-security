@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:adriengivry/Overload`: entity [[overload]] (open-source C++ 3D engine + integrated editor; Lua scripting; rendering, physics, audio, profiling, material tooling; runtime + editor; sample projects; engine attack-surface / tooling-internals research; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[lumixengine]], [[crown]], [[exengine]], [[optick]], and [[custom-game-engines]].
+
 - **2026-08-19** — ingest `description:adspro15/DirectInput`: entity [[directinput]] (adspro15; C/C++ WDK driver + UM module; keyboard/mouse class-service callback injection bypassing `SendInput`; stack discovery + low-level kbd/mou paths; game automation / AC input-path research); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[mouseclassservicecallbacktrick]], [[karlann]], [[km-um-communication]], and [[hardware-input-injection]].
 
 - **2026-08-19** — ingest `description:adspro15/km-um-communication`: entity [[km-um-communication]] (learning-focused C/C++ KM↔UM IPC examples; request dispatch, event coordination, cross-boundary data exchange; RE / game-security); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[driver-communication-list]], [[kernel-payload-comms]], [[cfb]], and [[drvtrace]].

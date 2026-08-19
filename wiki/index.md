@@ -1764,6 +1764,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [Optick](entities/optick.md) — C++ game performance profiler (in-game SDK + WPF viewer; CPU/GPU D3D12/Vulkan timing, ETW threads/context switches; UE4/5/Unity; flame graphs; Game Testing)
+- [overload](entities/overload.md) — open-source C++ 3D engine + integrated editor (Lua scripting; render/physics/audio/profiling/material tooling; Game Engine / source)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
 - [Orbit](entities/orbit.md) — Google C++ native profiler (dynamic runtime instrumentation; call graphs / threads / memory; Linux remote + Windows UI; Game Testing)
 - [Origami](entities/origami.md) — .NET assembly packer (compressed payload in PE debug directory or `.origami` section; RelocLoader; PE format abuse; Anti Cheat → Binary Packer / `.NET`)
