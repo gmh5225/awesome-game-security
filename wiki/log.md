@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:VelocityRa/awesome-game-file-format-reversing`: entity [[awesome-game-file-format-reversing]] (curated game file-format/asset reversing resources; models/textures/animations/audio/archives/scripts/level data; general tools + Unity/Unreal/Source/CryEngine sections; modders/RE audience; VelocityRa); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[paksmith]], [[uassetgui]], [[uassetapi]], [[imhex]], and [[hexwalk]].
+
 - **2026-08-19** — ingest `description:VenTaz/Themidie`: entity [[themidie]] (x64dbg plugin; C++ MinHook; neutralize Themida anti-debug/anti-VM/monitoring on x64 Windows; attach-and-debug workflow; VenTaz); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[themida-unmutate]], and [[themida-research]].
 
 - **2026-08-19** — ingest `description:VeroFess/PalWorld-Server-Unoffical-Fix`: entity [[palworld-server-unoffical-fix]] (unofficial Palworld dedicated-server binary patches; Linux + Windows assets, batch scripts, hash verification; memory-leak / CPU mitigation on older builds; prebuilt binaries + patching infrastructure; server stability + early server-side AC experimentation; VeroFess; Server patch); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[docker-palworld-dedicated-server]], [[palworld-server-modding]], [[palworld-rcon]], and [[palworld-anti-cheat]].
