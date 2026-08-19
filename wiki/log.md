@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WeiNaYongQ/OmniClutch`: entity [[omniclutch]] (Fabric **1.21+** Minecraft Java fall-clutch automation mod; Java; free-fall monitoring + downward raycasts; hotbar clutch items—water buckets, boats, hay bales, slime blocks; client-side FSM with configurable Gaussian reaction delays + smooth camera rotation interpolation; survival/PvP fall recovery; WeiNaYongQ; cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[lenrete-mod]], [[eafe]], [[windfall-anticheatf]], [[seiun-ac]], and [[local-anticheat-1-8-9]].
+
 - **2026-08-19** — ingest `description:WenzWenzWenz/DelphiReSym`: entity [[delphiresym]] (Ghidra/pyghidra Python script; recovers qualified function signatures, parameter metadata, and vtable context from embedded Delphi compiler metadata → Ghidra data types; modern Delphi versions; malware/legacy RE; WenzWenzWenz); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[delphi-helper]], [[ce-remap-plugin]], [[magicmida-rs]], and [[research-rigor]].
 
 - **2026-08-19** — ingest `description:WerWolv/ImHex`: entity [[imhex]] (C++ cross-platform hex editor / binary analysis platform; pattern-language parsing/visualization, integrated disassembly, diff/hash, plugin extensibility; firmware/file/memory/game binary RE; WerWolv); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hexwalk]], [[pe-bear]], [[totalpe2]], [[retoolkit]], and [[strings2]].
