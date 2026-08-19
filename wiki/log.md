@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-19** — ingest `description:WhatTheFuzz/binaryninja-openai`: entity [[binaryninja-openai]] (Binary Ninja plugin; OpenAI cloud-assisted HLIL/pseudo-C function summarize + variable rename proposals; Python; BN plugin settings/API key management; Integrates OpenAI); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binaryninja-ollama]], [[ghidra-openai]], [[binary-ninja-mcp]], [[bn]], [[rikugan]], and [[research-rigor]].
+
 - **2026-08-19** — ingest `description:WindySha/bypassHiddenApiRestriction`: entity [[bypass-hidden-api-restriction]] (Android hidden non-SDK API bypass library; Java/Kotlin + JNI/CMake native; packaged dependency + startup init; Android 9–12; RE / compatibility / security research; WindySha); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[canyie-pine]], [[stoic]], [[frida]], and [[adbi]].
 
 - **2026-08-19** — ingest `description:WistfulHopes/NightSkyEngine`: entity [[nightsky-engine]] (open-source UE5 fighting-game framework; 2D/2.5D competitive fighters; C++ modules/plugins; GGPO rollback networking; collision editor; WistfulHopes; Game Engine); cited on [[overviews/game-engine]]; cross-linked [[fightinggame-ue5]], [[unrealengine5-ultimate-streetfighters]], and [[bevy-personal-test]].

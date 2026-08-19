@@ -320,6 +320,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [binary-analysis-mcps](entities/binary-analysis-mcps.md) — Binary analysis MCP collection (Python; IDA Pro function/xref/variable tools for LLM agents; Binary analysis MCPs collections)
 - [binary-ninja-mcp](entities/binary-ninja-mcp.md) — Binary Ninja MCP server (Python; disasm/decompile/xrefs/functions/types for LLM agents; MCP for Binary_Ninja)
 - [binaryninja-ollama](entities/binaryninja-ollama.md) — Binary Ninja plugin: local Ollama LLM-assisted HLIL function/variable rename (ahaggard2013; offline models)
+- [binaryninja-openai](entities/binaryninja-openai.md) — Binary Ninja plugin: OpenAI-assisted HLIL/pseudo-C function summarize + variable rename (WhatTheFuzz; Integrates OpenAI)
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
 - [binja-division-deoptimization](entities/binja-division-deoptimization.md) — Binary Ninja MLIL division/modulo deoptimizer (architecture-agnostic)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
