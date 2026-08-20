@@ -493,6 +493,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-kvm-dma](entities/cs2-kvm-dma.md) — CS2 KVM/DMA cheat (radar/ESP from separate VM; DMA hardware or KVM memory mapping; zero guest-OS footprint; cheat / game:cs2 [KVM/DMA]; atombottle)
 - [cs2-ext](entities/cs2-ext.md) — external CS2 cheat framework (C++17; kernel driver interface; D3D11/DXGI ImGui; aimbot / ESP / spinbot)
 - [cs2-fov-changer](entities/cs2-fov-changer.md) — CS2 FOV changer (C/C++; hooking / memory analysis; gmh5225)
+- [cs2fixes](entities/cs2fixes.md) — Metamod CS2 server plugin: gameplay fixes + zombie-escape features (Source2ZE; hook-driven logic, config/admin tooling, bundled assets; Source 2 mod boilerplate; CS2 mod / game:cs2)
 - [CS2-External-Cheat](entities/cs2-external-cheat.md) — external CS2 cheat (C++; D3D11 ImGui overlay / aimbot / memory)
 - [CS2-External](entities/cs2-external.md) — external CS2 cheat (Zckyy; C#; read-only memory + overlay; entity/offset/view-matrix helpers; auth/subscription; cheat / game:cs2 [External])
 - [cs2-external-1](entities/cs2-external-1.md) — external CS2 cheat (gmh5225; ImGui + DirectX 11 overlay; aimbot / ESP / skeleton / snaplines; cheat / game:cs2 [External])
