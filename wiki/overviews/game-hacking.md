@@ -756,6 +756,7 @@ sources:
   - wiki/sources/descriptions/a0yark__DXInject-UC.md
   - wiki/sources/descriptions/a0yark__ArcRaidersRadar-dma-Radar.md
   - wiki/sources/descriptions/a0yark__Pubg-demo.md
+  - wiki/sources/descriptions/Valthrun__Valthrun.md
   - wiki/sources/descriptions/Valthrun__Valthrun_PUBG.md
   - wiki/sources/descriptions/gmh5225__Pubg-Lite-ESP.md
   - wiki/sources/descriptions/gmh5225__pHake.md
@@ -1917,6 +1918,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 samples such as [[cs2-external-1]] (gmh5225; out-of-process memory reads; ImGui + DirectX 11 overlay; aimbot / box ESP / skeleton / snaplines / misc; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/gmh5225__CS2-External-1.md)
 - External CS2 samples such as [[cs2-external]] (Zckyy; C#; read-only out-of-process memory; overlay drawing; entity / offset / view-matrix helpers + runtime cheat logic; authentication and subscription handling; educational external memory analysis; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/Zckyy__CS2-External.md)
 - External CS2 framework samples such as [[cs2-ext]] (C++17; pluggable kernel driver interface; D3D11/DXGI ImGui overlay; aimbot / ESP / spinbot; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/hendodev__cs2-ext.md)
+- Rust external read-only CS2 kernel frameworks such as [[valthrun]] (Valthrun; kernel driver + overlay renderer + radar without in-process DLL injection; configurable player ESP, bomb/spectator info, trigger features, stream-proof overlay; low-level game security and anti-detection research; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/Valthrun__Valthrun.md)
 - External CS2 framework samples such as [[titled-gui-cs2]] (C#; Win32 memory read/write; transparent ImGui overlay; cs2-dumper offset bootstrap; aimbot / RCS / triggerbot; ESP / radar / D3D11 chams with VPK loading and map-geometry visibility; GPLv3; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/xfi0__Titled-Gui-CS2.md)
 - External CS2 Python samples such as [[pythoncs2]] (Vekor64; PyMeow memory access + overlay rendering; DearPyGui runtime config; ESP boxes / health / weapon / distance / lines + recoil control; educational external workflow study; cheat / game:cs2 [Python External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/Vekor64__PythonCS2.md)
 - External CS2 overlay samples such as [[overlayai]] (C++; D3D11 ImGui overlay; out-of-process memory R/W; ESP / aim assist / triggerbot / glow / movement; modular inventory changer via bridge DLL + named-pipe IPC + Panorama UI / SOCache; cs2-dumper schema offsets; ianveig29; External tag) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/ianveig29__OverlayAI.md)
