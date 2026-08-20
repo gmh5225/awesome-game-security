@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Twinklebear/tobj`: entity [[tobj]] (Twinklebear; lightweight Rust Wavefront OBJ/MTL loader; fast mesh/material vectors; optional triangulation; normals/UVs/vertex colors; feature flags for vertex merging, index reordering, async backends; rendering-engine model import; README [Rust]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tinyobjloader]], [[tinygltf]], and [[olive-c]].
+
 - **2026-08-20** — ingest `description:Twobot7/advanced-efi-driver-with-gdi-and-kernel-mouse-input`: entity [[advanced-efi-driver-with-gdi-and-kernel-mouse-input]] (Twobot7; C/C++ UEFI memory access + process manipulation; GDI overlay renderer + high-frequency kernel mouse input; encrypted command channels + anti-detection validation; game security experimentation; cheat / EFI driver); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[krnl-gdi-render]], [[kernel-mouse]], [[valthrun-uefi-mapper]], [[fortnite-efi-external]], [[efi-monitor]], and [[sumap]].
 
 - **2026-08-20** — ingest `description:Tylous/Limelighter`: entity [[limelighter]] (Tylous; Go CLI; domain-metadata spoofed cert material → PFX; external signing utilities for PE/DLL; optional valid cert signing; red-team trust/EDR detection research; README [Fake Cert]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[lazy-sign]], [[fakesign]], [[sigthief]], [[sigflip]], [[osslsigncode]], and [[magic-signer]].

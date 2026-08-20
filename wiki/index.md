@@ -2404,6 +2404,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tinyraytracer](entities/tinyraytracer.md) — brief CG/ray-tracing course (ssloy; Renderer)
 - [pbrtbook](entities/pbrtbook.md) — Physically Based Rendering: From Theory To Implementation (kanition; Renderer / PBR)
 - [tinyobjloader](entities/tinyobjloader.md) — single-header C++ Wavefront OBJ loader (verts/MTL; Wavefront Obj)
+- [tobj](entities/tobj.md) — lightweight Rust Wavefront OBJ/MTL loader (mesh/material vectors; triangulation; feature flags; Twinklebear; Wavefront Obj)
 - [tocode](entities/tocode.md) — binary-to-source export for coding agents (IDA Pro/radare2; decompile, similarity clustering, naming, Semgrep; buzzer-re)
 - [toon](entities/toon.md) — modular C++ graphics-demo engine (driver dev + OpenGL/Vulkan; benjinx; Game Engine / source)
 - [tool-diy-system-memory-dump](entities/tool-diy-system-memory-dump.md) — DIY live Windows system memory dump (crash-dump format; WinDbg / Volatility; gmh5225)
