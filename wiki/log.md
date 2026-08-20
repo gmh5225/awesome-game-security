@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TaszkSecLabs/xiaomi-c400-pwn`: entity [[xiaomi-c400-pwn]] (TaszkSecLabs; Xiaomi Smart Camera C400 exploit/jailbreak research; Python RNG-prediction exploit; Tamarin formal handshake models; handshake docs; persistent jailbreak; IoT firmware exploitation); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[firmeye]], [[embedded-hacking]], and [[sjcam]].
+
 - **2026-08-20** — ingest `description:Teach2Breach/moonwalk`: entity [[moonwalk]] (Teach2Breach; Rust PEB-less DLL base resolution via TEB/stack walk; VirtualQuery or API-free stealth variants; CLI + library; offensive security / low-level tooling where module enumeration may be monitored); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nt-unhooker]], [[rs-ldr]], [[tabby]], [[modmap]], and [[vm]].
 
 - **2026-08-20** — ingest `description:Teach2Breach/nt_unhooker`: entity [[nt-unhooker]] (Teach2Breach; Rust NTDLL inline/IAT hook detect + restore; in-memory vs clean reference PE; symbol-based clean DLL; CLI + library; malware analysis / red team / defender hook-tampering study); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[edrsandblast]], [[detoursnt]], [[ntminhook]], [[syscall-detect]], and [[antihook]].
