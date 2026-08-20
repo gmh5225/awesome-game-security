@@ -32,6 +32,7 @@ sources:
   - wiki/sources/descriptions/WsttXm__RiskEngine.md
   - wiki/sources/descriptions/VisionR1__KeyAttestation.md
   - wiki/sources/descriptions/cognis-digital__rootsentry.md
+  - wiki/sources/descriptions/Solaree__pairipcore.md
 updated: 2026-08-20
 confidence: medium
 ---
@@ -45,7 +46,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 - **Tencent ACE** — Chinese-market native protector; title RE such as [[honor-of-kings-re-research]] (`libtersafe`, IL2CPP, KernelPatch modules). Historical PUBG Mobile 1.6 decompiled `libtersafe.so` archives such as [[pubgm1.6-deadgame]] preserve ACE native symbols/functions from a dead client build for offline static RE. (source: wiki/sources/descriptions/gmh5225__PUBGM1.6-DeadGame.md) ARM64 coordinate-decryption emulation via [[dfm-android-unicorn]] (Unicorn replay of protected crypto paths). KernelPatch KPM cross-process memory read via ioctl hook via [[kpm-memreader]]. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md) (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md)
 - **NetEase Protection** — NetEase titles; similar native + server mix.
 - **Per-game / SDK RASP** — [[droidshield]], Talsec freeRASP ([[free-rasp-unity-poc]], [[free-rasp-reactnative]], [[free-rasp-capacitor]]), [[rs-native-kit-security]], [[rootsentry]] (Python CLI/library; root/jailbreak, emulator, hook, tamper scoring → TRUSTED→CRITICAL; fleet analysis + MITRE ATT&CK for Mobile; source: wiki/sources/descriptions/cognis-digital__rootsentry.md), Unity UPM [[com-sipvlib-anticheat]] (server-verified GameTime + IntegrityChecker).
-- **Commercial packers** — AppSealing, DexGuard/ProGuard, Arxan on APK/DEX/native layers.
+- **Commercial packers** — AppSealing, DexGuard/ProGuard, Arxan on APK/DEX/native layers; Google's **pairipcore** on first-party and Play-distributed apps (integrity checks, pseudo-VM native injection, control-flow obfuscation, dynamic symbol resolution, anti-debug, optional root gates)—documented for researchers via [[pairipcore]] (source: wiki/sources/descriptions/Solaree__pairipcore.md).
 
 ## Detection methods
 
@@ -76,4 +77,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[pairipcore]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

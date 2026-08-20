@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Solaree/pairipcore`: entity [[pairipcore]] (Solaree; research documentation on Google's pairipcore Android app protection—integrity checks, pseudo-VM injection, control-flow obfuscation, dynamic symbol resolution, anti-debug, optional root gates; educational RE notes, not a bypass tool); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[jadx]], [[apkid]], [[android-unpacker]], and [[frida]].
+
 - **2026-08-20** — ingest `description:Source2ZE/CS2Fixes`: entity [[cs2fixes]] (Source2ZE; C++ Metamod:Source CS2 server plugin; gameplay fixes + zombie-escape server features; hook-driven logic, config/admin tooling, bundled particle/sound assets; practical Source 2 mod integration boilerplate; community CS2 server ops; CS2 mod / game:cs2); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[cs2ac]], [[cs2-calladmin]], [[source2gen]], [[cs2-internals]], and [[cs2-sdk]].
 
 - **2026-08-20** — ingest `description:Speedi13/ROP-COMPILER`: entity [[rop-compiler]] (Speedi13; C++ x86 ROP compiler; assembly-like scripts → ROP chains; gadget scanning + offset handling; CS:GO/BF3/BF4 cheat payloads—triggerbot, glow ESP, minimap spotting; exploit-style cheat execution + AC evasion research; cheat / ROP Generation); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[angrop]], [[exrop]], [[ropgadget-rs]], [[agafi]], [[csgo-internal]], and [[osiris]].

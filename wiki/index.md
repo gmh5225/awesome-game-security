@@ -1942,6 +1942,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [packpeek](entities/packpeek.md) — static C CLI packer/protector fingerprinter (UPX, ASPack, Themida, VMProtect, MPRESS; Shannon entropy; PE/ELF/Mach-O/firmware; JSON + YARA/SARIF; defensive triage; cognis-digital)
 - [pafish](entities/pafish.md) — open-source C anti-analysis testing tool; VM/sandbox/debugger/hook/environment checks (VMware, VirtualBox, QEMU, Wine); reproducible evasion testing (a0rtega)
+- [pairipcore](entities/pairipcore.md) — Solaree RE notes on Google's pairipcore Android app protection (integrity checks, pseudo-VM injection, CFI obfuscation, dynamic symbol resolution, anti-debug, optional root gates; educational documentation)
 - [Page Table Injector](entities/page-table-injector.md) — PT-Injector (C/C++; kernel driver; page-table manipulation / injection:windows; AC research)
 - [page_no_access](entities/page-no-access.md) — C++ lazy decrypt-on-first-access page protection (modding; Anti Cheat → Page Protection)
 - [PAGE_NO_ACCESS-not-byfron](entities/page-no-access-not-byfron.md) — VEH + PAGE_NOACCESS Byfron/Hyperion anti-tamper PoC (LoadLibrary tester; gmh5225)
