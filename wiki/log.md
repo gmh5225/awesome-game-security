@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Trydos/fortnite-offsets`: entity [[trydos-fortnite-offsets]] (Trydos; lightweight JSON Fortnite offset database; engine pointers, entity structures, camera and weapon fields; data-only feed for external cheat/research tooling sync; cheat / game:fortnite [Offset]; slug disambiguated from [[fortnite-offsets]]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]], [[fortnite-offsets-and-sigs]], [[fortnite-sigs]], and [[fortnite-offset-dumper]].
+
 - **2026-08-20** — ingest `description:TuncorReUnion/TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED`: entity [[tlac-modern-local-anti-cheat-reunioned]] (TuncorReUnion; lightweight MIT-licensed Linux local anti-cheat; Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; Steam Deck; Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[proton]], [[aclist-github-io]], [[tracee]], [[rootkit-detection-ebpf-time-trace]], [[fastdbg]], and [[rebirth-guard]].
 
 - **2026-08-20** — ingest `description:Twinklebear/tobj`: entity [[tobj]] (Twinklebear; lightweight Rust Wavefront OBJ/MTL loader; fast mesh/material vectors; optional triangulation; normals/UVs/vertex colors; feature flags for vertex merging, index reordering, async backends; rendering-engine model import; README [Rust]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tinyobjloader]], [[tinygltf]], and [[olive-c]].

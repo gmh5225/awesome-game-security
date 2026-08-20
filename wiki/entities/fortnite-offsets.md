@@ -18,4 +18,4 @@ Fortnite **memory offset and UE4 SDK structure address collection** (gmh5225; ch
 
 ## Related
 
-[[fortnite-sigs]] · [[fortnite-virtual-offsets]] · [[fortnite-fltokens-and-offsets]] · [[auto-offsets]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]
+[[trydos-fortnite-offsets]] · [[fortnite-sigs]] · [[fortnite-virtual-offsets]] · [[fortnite-fltokens-and-offsets]] · [[auto-offsets]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]]

@@ -994,6 +994,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zerogui-fortnite-internal](entities/zerogui-fortnite-internal.md) — ZeroGui internal Fortnite cheat (visuals-only ESP enabled; aimbot/exploits disabled; gmh5225; [Internal])
 - [Fortnite Offset Dumper](entities/fortnite-offset-dumper.md) — Fortnite live-process offset dumper (class layouts; regex-cleaned names; hierarchical offsets; gmh5225; cheat / game:fortnite [Offset & Dump])
 - [fortnite-offsets](entities/fortnite-offsets.md) — Fortnite memory offset / UE4 SDK structure tables (player/camera/bones/weapons/globals; gmh5225; cheat / game:fortnite [Offset])
+- [fortnite-offsets (Trydos)](entities/trydos-fortnite-offsets.md) — Lightweight JSON Fortnite offset database (engine pointers, entity/camera/weapon fields; data-only feed; Trydos; cheat / game:fortnite [Offset])
 - [fortnite-offsets-and-sigs](entities/fortnite-offsets-and-sigs.md) — Compact Fortnite offsets + signatures reference with C++ pattern-scan examples, global offset notes, address derivation and string-decryption helpers (Zetolac; cheat / game:fortnite [Offset])
 - [fortnite-w2s-offset-fortnite](entities/fortnite-w2s-offset-fortnite.md) — Fortnite world-to-screen offset collection (view/projection + camera; gmh5225; cheat / game:fortnite [Offset])
 - [fortnite-sigs](entities/fortnite-sigs.md) — Fortnite IDA-style byte-pattern signatures (GObjects/GNames/ProcessEvent; gmh5225; cheat / game:fortnite [Offset])
