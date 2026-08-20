@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:jxy-s/vfdynf`: entity [[vfdynf]] (Application Verifier DynFault provider; stack-hash low-resource fault injection; wait/heap/VM/registry/file/OLE API hooks; optional buffer fuzzing for TOCTOU; PCRE2 exclusions; `vfdynf.dll`; jxy-s); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[winafl]], [[fuzzable]], [[ioctlpus]], [[cfb]], and [[herpaderping]].
+
 - **2026-08-20** — ingest `readme:categories`: Cheat ~2730 (+1) / Anti Cheat ~683 (+1; Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-20** — ingest `description:Valthrun/Valthrun_PUBG`: entity [[valthrun-pubg]] (Rust PUBG external cheat framework; Zenith kernel-driver memory R/W; ESP/radar/health/distance; CR3 process-protection bypass + keyboard/mouse input injection; cheat / game:pubg [External]; Valthrun); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[valthrun-uefi-mapper]], [[pubg-external-cheat]], [[pubg-demo]], [[pubg-internal]], [[eac-cr3-bypass]], and [[ntmemory]].
