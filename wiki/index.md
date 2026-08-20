@@ -1293,6 +1293,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
 - [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)
 - [ida-screenshot](entities/ida-screenshot.md) — IDA Pro high-resolution screenshot capture plugin (Python; macOS/Linux install; cheat / IDA Plugins)
+- [ida-security-scanner](entities/ida-security-scanner.md) — IDA Pro SAST plugin: semgrep-style YAML rules on decompiled pseudocode; interactive findings; optional AI triage (SymbioticSec; cheat / IDA Plugins)
 - [ida-sigmaker](entities/ida-sigmaker.md) — IDA Pro signature maker plugins (mahmoudimus: 9+ maker/searcher + SIMD; gmh5225: IDA/code-style pattern generation; cheat / IDA Plugins)
 - [ida-slides](entities/ida-slides.md) — IDA Pro Marp/Slidev live RE presentation plugin (dockable tab; @name/@addr IDB links; embed decompiled lines; cheat / IDA Plugins)
 - [ida-spotlight](entities/ida-spotlight.md) — IDA Pro workflow-centric function triage and prioritization plugin (large-binary RE; cheat / IDA Plugins)

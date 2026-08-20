@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SymbioticSec/ida-security-scanner`: entity [[ida-security-scanner]] (SymbioticSec; Python IDA Pro plugin; rule-based SAST on decompiled pseudocode; opengrep/semgrep-style YAML patterns; interactive findings UI; optional AI triage; reverse engineers / CTF / security auditors; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]]; cross-linked [[firmeye]], [[yarascan-ida]], [[wpechatgpt]], [[idassist]], and [[list-of-ida-plugins]].
+
 - **2026-08-20** — ingest `description:SynthesisLab/MBA`: entity [[mba]] (SynthesisLab; GPU-accelerated CUDA MBA expression simplification toolkit; multiple CUDA kernels; JSON I/O; cooperative groups / memory / hashing helpers; deobfuscation research; Cheat Mixed boolean-arithmetic); cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[cobra]], [[mbased]], [[promba]], [[qsynthesis]], [[drill-and-join]], [[mutaben]], and [[mba-obfuscator]].
 
 - **2026-08-20** — ingest `description:SysAdminDoc/FileExplorer`: entity [[file-explorer]] (SysAdminDoc; Kotlin/Compose Material 3 Android file manager; libsu/Shizuku protected-path access; dual-pane, SAF, USB OTG; APK analyzer, hex editor, app manager; Magisk/KernelSU/APatch module browser; AES vaults, secure delete, checksum/SHA-256 integrity; SMB/SFTP/FTP/WebDAV; Cheat Android File Explorer); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xfiles]], [[adb-file-manager]], [[magisk]], [[kernelsu]], and [[apatch]].
