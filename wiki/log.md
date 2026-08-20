@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SsageParuders/CheatUnityGames`: entity [[cheat-unity-games]] (SsageParuders; Android NDK Unity cheat template; C/C++ VSCode build scripts; Il2CppResolver + Dobby runtime hooking; shared-object/native-binary builds; Android injection / native-layer Unity manipulation study; README Unity cheat framwork); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[il2cpp-resolver]], [[dobby]], [[android-cheat-template]], and [[imgui-unity-android]].
+
 - **2026-08-20** — ingest `description:Staatsgeheim/PsImageNotifyRoutineSpamFilter`: entity [[ps-image-notify-routine-spam-filter]] (Staatsgeheim; Windows kernel utility; filters noisy PsImageNotifyRoutine callbacks via RtlWalkFrameChain stack walking; C x64 driver; callback hygiene for kernel monitoring, AC telemetry, and cleaner driver-side event analysis; README ImageNotify Callback With RtlWalkFrameChain); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[driver-watchowl]], [[windbg-extensions]], [[ps-notif-routine-unloader]], and [[stack-spoofing]].
 
 - **2026-08-20** — ingest `description:Static-Analyzer-Factory/static-analyzer-factory`: entity [[static-analyzer-factory]] (Static-Analyzer-Factory; Rust LLVM IR static analysis framework; C/C++ pointer/value-flow/taint/IFDS; abstract interpretation, points-to, call graphs; Python SDK, CLI, SARIF/HTML export; compiled-binary vulnerability detection); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-security-scanner]], [[cognitor]], [[retract]], and [[packpeek]].

@@ -111,6 +111,7 @@ sources:
   - wiki/sources/descriptions/Sutaigne__alibi.md
   - wiki/sources/descriptions/StelGR__ArrowAntiCheat.md
   - wiki/sources/descriptions/SurgeGotTappedAgain__Window-Hijack.md
+  - wiki/sources/descriptions/SsageParuders__CheatUnityGames.md
   - wiki/sources/descriptions/Super-Cssdiv__ChinaPubg.md
   - wiki/sources/descriptions/Suprcode__mir2.md
   - wiki/sources/descriptions/eksses__EAFE.md
@@ -1784,7 +1785,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - GKI AArch64 Android kernel driver starter template such as [[android-kernel-driver-template]] (product/OEM kernel scaffold; cheat / Android kernel driver development) sits in the same Cheat Android kernel / driver lane. (source: wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md)
 - Official AOSP GKI common kernel upstream mirror [[kernel-common]] (aosp-mirror; vendor-shared base; Android patches, Bazel, Rust; cheat `[GKI]` / Android Kernel Source) sits upstream of per-device OEM kernel trees in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/aosp-mirror__kernel_common.md)
 - Android kernel driver signature bypass such as [[android-drivesignity]] (ARMv8.3; bypass built-in verification so unofficial/modified drivers can load for dev/test; cheat / Android kernel driver development) sits in that same lane. (source: wiki/sources/descriptions/gmh5225__AndroidDriveSignity.md)
-- Android cheat templates such as [[android-cheat-template]] (gmh5225 fork; C/C++; kernel-level work / OpenGL / memory analysis; cheat / game:sausage man) sit in the Cheat Android offensive scaffold lane beside Unity/OpenGL menu frameworks. (source: wiki/sources/descriptions/gmh5225__AndroidCheatTemplate.md)
+- Android cheat templates such as [[android-cheat-template]] (gmh5225 fork; C/C++; kernel-level work / OpenGL / memory analysis; cheat / game:sausage man) sit in the Cheat Android offensive scaffold lane beside Unity/OpenGL menu frameworks. (source: wiki/sources/descriptions/gmh5225__AndroidCheatTemplate.md) NDK Unity scaffolds such as [[cheat-unity-games]] (SsageParuders; C/C++ VSCode/NDK; Il2CppResolver + [[dobby]]; shared-object build scripts; Android injection / native-layer Unity manipulation study; cheat / game engine explorer:Unity) extend that lane. (source: wiki/sources/descriptions/SsageParuders__CheatUnityGames.md)
 - Android aarch64 LKM research toolkits such as [[android-kernel-hacking-toolkit]] (filecopy / hideproc / propedit / syscall_hijack; CFI bypass, kprobes, mmuhack for `sys_call_table`) sit in the Cheat Android kernel / LKM lane. (source: wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md)
 - Android/Linux game-memory LKMs such as [[kernel-hack]] (kernel-mode R/W, process management, verification; Kconfig) sit in the same Cheat Android / Linux kernel memory-ops lane. (source: wiki/sources/descriptions/rogxo__kernel_hack.md)
 - Device kernel sources such as [[android-kernel-xiaomi-pipa]] (Xiaomi Pad 6 / pipa) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_xiaomi_pipa.md)

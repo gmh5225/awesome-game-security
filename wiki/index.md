@@ -667,6 +667,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
 - [cheat-engine-ceserver-pcileech](entities/cheat-engine-ceserver-pcileech.md) — CE ceserver over PCILeech/LeechCore DMA; remote scan/edit invisible to target anti-cheat (gmh5225)
 - [cheat-it](entities/cheat-it.md) — UE multi-title internal cheat (Witch It + POLYGON; signature scan for UObject arrays / engine structures; configurable pattern matching; gmh5225)
+- [CheatUnityGames](entities/cheat-unity-games.md) — Android NDK Unity cheat template (C/C++; Il2CppResolver + Dobby hooks; VSCode build scripts; injection/native-layer study; SsageParuders; cheat / game engine explorer:Unity)
 - [cheat-attack-thread-slemu](entities/cheat-attack-thread-slemu.md) — thread sleep emulation / context manipulation to evade AC thread scanning (gmh5225; Heartbeat Testing)
 - [ddma](entities/ddma.md) — disk HBA ATA DMA PoC (SLAT/EPT bypass via unvirtualized storage; Hyper-V runtime modification; kernel/hypervisor research; btbd)
 - [DDMA-1](entities/ddma-1.md) — disk-based DMA cheat framework (ATA/SCSI PCIe camouflage; zero target-OS footprint; gmh5225; cheat / DMA)
