@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `readme:categories`: Anti Cheat ~685 (+1; Cheat ~2732 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-20** — ingest `description:TKazer/ScyllaHide-For-IDA9.0RC`: entity [[scyllahide-for-ida9.0rc]] (TKazer; IDA 9.0 SDK ScyllaHide anti-anti-debug build; C/C++ hook libs, injector, debugger plugins; masks debugger artifacts vs common anti-debug; reverse engineering / malware analysis); cited on [[overviews/reverse-engineering]]; cross-linked [[scyllahidedetector2]], [[titanhide]], [[makin]], and [[magicmida-rs]].
 
 - **2026-08-20** — ingest `description:TLeonardUK/ds2os`: entity [[ds2os]] (deprecated Dark Souls 2 online-service placeholder; README-only migration pointer; no implementation; historical reference to [[ds3os]]; Game Network / game:dark souls; TLeonardUK); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[ds3os]] and [[dark-souls-iii-cheat-engine-guide]].
