@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:StelGR/ArrowAntiCheat`: entity [[arrow-anticheat]] (StelGR; Java Bukkit/Spigot packet AC; PacketEvents; combat/movement/misc checks—aim assist, kill aura, reach, fly, scaffold, timer; statistical analysis + movement prediction; alerts/verbose/logging; Java + Bedrock; AGPLv3; smaller-server OSS AC); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheat]], [[dakotaac]], [[minecraft-anti-cheat]], [[ycbr-anticheat]], [[avaanticheat]], and [[oomph]].
+
 - **2026-08-20** — ingest `description:StephanvanSchaik/windows-kernel-rs`: entity [[windows-kernel-rs]] (StephanvanSchaik; Rust Windows kernel driver framework; generated bindings + safer abstractions for IRPs, device I/O, sync primitives, process attach; staged examples + build scaffolding; researchers / systems dev; Writing Windows kernel drivers in Rust); cited on [[overviews/windows-kernel]]; cross-linked [[wkpe]], [[document]], [[windows-kernel-debugging-guide]], and [[kli]].
 
 - **2026-08-20** — ingest `description:StudentBlake/XCI-Explorer`: entity [[xci-explorer]] (StudentBlake; Windows C# WinForms Switch XCI/NSP inspector; XCI/NCA/HFS0/PFS0 parsers; metadata, partition browse, hash check, extract, certificate edit; Switch modding / cartridge image RE; README [XCI Explorer]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[nstool]], [[nuzu]], and [[se-tools]].
