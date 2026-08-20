@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Trustings/DMA_PE_Dumper`: entity [[dma-pe-dumper]] (Trustings; C++ DMA PE dumper via LeechCore/VMMDLL; PCIe FPGA physical memory; CR3 shuffle + DTB patching for EXE/DLL extraction; memory forensics / AC research); cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech]], [[volk-dma]], and [[dumpepe]].
+
 - **2026-08-20** — ingest `description:Trydos/fortnite-offsets`: entity [[trydos-fortnite-offsets]] (Trydos; lightweight JSON Fortnite offset database; engine pointers, entity structures, camera and weapon fields; data-only feed for external cheat/research tooling sync; cheat / game:fortnite [Offset]; slug disambiguated from [[fortnite-offsets]]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]], [[fortnite-offsets-and-sigs]], [[fortnite-sigs]], and [[fortnite-offset-dumper]].
 
 - **2026-08-20** — ingest `description:TuncorReUnion/TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED`: entity [[tlac-modern-local-anti-cheat-reunioned]] (TuncorReUnion; lightweight MIT-licensed Linux local anti-cheat; Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; Steam Deck; Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[proton]], [[aclist-github-io]], [[tracee]], [[rootkit-detection-ebpf-time-trace]], [[fastdbg]], and [[rebirth-guard]].
