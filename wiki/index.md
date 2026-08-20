@@ -530,6 +530,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [aqhax-csgo](entities/aqhax-csgo.md) — CS:GO internal cheat AqHax (interface capture, VMT hooks, netvar dump; ESP/aimbot/triggerbot/movement/skin changer; cheat / game:csgo)
 - [csgo-cheat-base](entities/csgo-cheat-base.md) — CS:GO internal cheat base (MinHook, ImGui, engine prediction, glow ESP, interface wrappers; designer1337 [Internal])
 - [csgo-internal-base](entities/csgo-internal-base.md) — CS:GO internal cheat base (CreateInterface, VMT hooks, netvars, pattern scan, ImGui; cheat / game:csgo)
+- [csgo-internal](entities/csgo-internal.md) — CS:GO internal multi-feature cheat (Spelchure; C++17; aimbot, ESP/snaplines, bunnyhop, anti-flash; injected internal; cheat / game:csgo [Internal])
 - [csgo-kns](entities/csgo-kns.md) — CS:GO internal cheat (VMT hooks, interface pointers; ESP/aimbot/bhop/skin changer; cheat / game:csgo)
 - [csgo-linux-cheat-sdk](entities/csgo-linux-cheat-sdk.md) — Linux CS:GO cheat SDK (C++; render/net/mod; cheat / game:csgo)
 - [CSGO-Loader](entities/csgo-loader.md) — CS:GO C++ cheat loader with PHP auth backend (HWID check, time-based license, web panel for injected DLL access; gmh5225 [Loader])

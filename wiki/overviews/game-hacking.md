@@ -125,6 +125,7 @@ sources:
   - wiki/sources/descriptions/Spuckwaffel__Simple-MmcopyMemory-Hook.md
   - wiki/sources/descriptions/Spuckwaffel__Kernel-Thread-Driver.md
   - wiki/sources/descriptions/SpiroHappy__Warzone-MW-Internal.md
+  - wiki/sources/descriptions/Spelchure__CSGO-Internal.md
   - wiki/sources/descriptions/Splitx12__eft.md
   - wiki/sources/descriptions/Splitx12__StrongSteam.md
   - wiki/sources/descriptions/ekknod__KiSystemStartupMeme.md
@@ -1908,6 +1909,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Leaked commercial internal CS:GO samples such as [[csgo-nixware-csgo]] (gmh5225; Nixware; aimbot, ESP, movement hacks, skin changer; full CS:GO SDK + ImGui overlay; `[Nixware]`) sit in the same cheat / game:csgo lane for studying production-grade Source 1 internal architecture beside open-source stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-NIXWARE-CSGO.md)
 - Internal CS:GO samples such as [[csgo-alphen]] (gmh5225; full SDK with entity structures, weapon data, and rendering primitives; ImGui menu; ESP, aimbot, and visual mods) sit in the same cheat / game:csgo lane for studying SDK-backed internal feature stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-Alphen.md)
 - Internal CS:GO samples such as [[solace-csgo]] (emilyinure; modern C++; polished ImGui menu; ESP, aimbot, triggerbot, movement assistance, skin changer, and visual mods via Source SDK hooking; modular internal architecture; Internal tag) sit in the same cheat / game:csgo lane for studying well-structured internal cheat design patterns. (source: wiki/sources/descriptions/emilyinure__solace-csgo.md)
+- Internal CS:GO samples such as [[csgo-internal]] (Spelchure; C++17; injected internal multi-feature cheat—aimbot, ESP/snaplines, bunnyhop, anti-flash; cheat development and RE practice in competitive shooters; Internal tag) sit in the same cheat / game:csgo lane for studying typical Source 1 internal feature stacks beside scaffold bases. (source: wiki/sources/descriptions/Spelchure__CSGO-Internal.md)
 - Open-source internal CS:GO reference [[osiris]] (danielkrupinski; modern C++; ESP, glow, aimbot, triggerbot, backtrack, skin/inventory manipulation; interface pointers, pattern scanning, and VMT hooking; feature-complete Source 1 cheat architecture) sits in the cheat / game:csgo lane for studying internal hook surfaces and detection characteristics. (source: wiki/sources/descriptions/danielkrupinski__Osiris.md)
 - Internal CS:GO samples such as [[osiris-and-extra]] (C/C++; driver development / OpenGL / rendering; Internal tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md)
 - Simple internal CS:GO RE-training samples such as [[dainsleif]] (s3pt3mb3r) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md)

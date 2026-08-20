@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Spelchure/CSGO-Internal`: entity [[csgo-internal]] (Spelchure; C++17 internal CS:GO multi-feature cheat; aimbot, ESP/snaplines, bunnyhop, anti-flash; injected in-process tool; cheat development + competitive-shooter RE practice; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-internal-base]], [[aqhax-csgo]], [[csgo-kns]], [[solace-csgo]], [[world-to-screen]], and [[present-hook]].
+
 - **2026-08-20** — ingest `description:SpiroHappy/Warzone-MW-Internal`: entity [[warzone-mw-internal]] (SpiroHappy; outdated C++ internal COD MW/Warzone framework; ESP / bone rendering / aimbot / recoil reduction / FOV / UAV; ImGui menu; internal cheat architecture + FPS feature-module integration reference); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-internal-cheat]], [[modern-warfare-warzone-cheat]], [[mwclap]], [[present-hook]], and [[world-to-screen]].
 
 - **2026-08-20** — ingest `description:Splitx12/StrongSteam`: entity [[strongsteam]] (Splitx12; kernel-assisted Steam overlay GDI renderer; C++/ASM; Steam-overlay-style in-game visual demo; overlay / cheat UI rendering research; README [GDI + Steam]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[steam-hook-render-poc]], [[game-overlay-ui-hook]], [[steam-overlay-x64]], [[krnl-gdi-render]], and [[eft]].
