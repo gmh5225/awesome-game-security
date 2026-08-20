@@ -1525,6 +1525,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
 - [lisa-py](entities/lisa-py.md) — LLDB MCP server (Python plugin + MCP bridge; breakpoints, backtraces, disasm, memory reads; ant4g0nist; MCP for LLDB)
 - [LitePCIe](entities/litepcie.md) — Python/Migen PCIe endpoint core (DMA engines, LTSSM trace, user-space drivers; KC705/KCU105/XCU1525/Acorn; enjoy-digital; DMA / FPGA research)
+- [Limelighter](entities/limelighter.md) — Go CLI fake-cert generator/signer (domain-metadata spoofed certs → PFX; external signing utilities; red-team trust/EDR research; Fake Cert; Tylous)
 - [Lina Engine](entities/lina-engine.md) — cross-platform lightweight OSS 3D engine (LinaVG GUI; LinaGX Vulkan/DX12/Metal; Game Engine source)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
 - [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)

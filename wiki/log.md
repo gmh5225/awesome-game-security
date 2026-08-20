@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Tylous/Limelighter`: entity [[limelighter]] (Tylous; Go CLI; domain-metadata spoofed cert material → PFX; external signing utilities for PE/DLL; optional valid cert signing; red-team trust/EDR detection research; README [Fake Cert]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[lazy-sign]], [[fakesign]], [[sigthief]], [[sigflip]], [[osslsigncode]], and [[magic-signer]].
+
 - **2026-08-20** — ingest `description:U65535F/ThrottleStopPoC`: entity [[throttlestop-poc]] (U65535F; C; CVE-2025-7771 PoC for **`ThrottleStop.sys`**; IOCTL physmem R/W + I/O port R/W from user mode; virtual-to-physical translation + basic EPROCESS checks; kernel security / vulnerable-driver / AC threat-modeling research; Cheat Vulnerable Driver); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[eneio64-driver-exploit]], [[badrentdrv2]], [[speedfan-exploit]], [[physmem-drivers]], and [[ntmemory]].
 
 - **2026-08-20** — ingest `description:UCFoxi/NotifyRoutineHijackThread`: entity [[notify-routine-hijack-thread]] (UCFoxi; compact Visual Studio C++ KM PoC; dedicated-thread hijack of `PspCreateThreadNotifyRoutine`; minimal driver + technique showcase; anti-cheat / EDR callback evasion research; README [Hijack PspCreateThreadNotifyRoutine]); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[ps-notif-routine-unloader]], [[mapped-callback]], [[bustercall]], [[rtoolz]], and [[shared-flushfilebuffers-communication]].
