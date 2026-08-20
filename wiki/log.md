@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Super-Cssdiv/ChinaPubg`: entity [[china-pubg]] (Super-Cssdiv; Android native NDK PUBG RE/manipulation toolkit; C/C++ inline hooks, ptrace injectors, memory tooling, ImGui rendering, offset/map/patch helpers; mobile anti-cheat, cheat architecture, detection-surface research; cheat / game:pubgm); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[bypass-pubg-mobile-imgui]], [[pubg-mobile-memory-hacking-examples]], [[pubgm-sdk-and-offsets]], [[android-ptrace-injector]], and [[adbi]].
+
 - **2026-08-20** — ingest `description:Suprcode/mir2`: entity [[mir2]] (Suprcode; C# open-source Legend of Mir 2 client/server stack; client/server/launcher/admin tools + data utilities; modular managed architecture; private-server developers / preservation communities; Game Engine / source; README `[MIR2]`); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[mir3-zircon]], [[maplestory-copy]], [[maple-unity]], and [[game-networking-sockets]].
 
 - **2026-08-20** — ingest `readme:categories`: Anti Cheat ~687 (+2; Cheat ~2732 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
