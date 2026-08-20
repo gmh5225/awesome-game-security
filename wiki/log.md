@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheHeadphonesAreNeeded/VoltClient`: entity [[voltclient]] (TheHeadphonesAreNeeded; educational AssaultCube external C++ client; DX11 Dear ImGui transparent overlay; RPM/WPM on `ac_client.exe` v1.3.0.2; ESP / tracers / FOV aimbot); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[assaultcube]], [[external-esp-hack-assaultcube]], [[simple-ac-internal-cheat]], and [[assault-cube-cheat]].
+
 - **2026-08-20** — ingest `description:TheHive-Project/TheHive`: entity [[the-hive]] (TheHive-Project; archived Scala + web SOC incident-response case-management platform; alert triage and analyst workflows; historical snapshot for legacy IR architecture study; README [EDR]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[wazuh]], [[bamboozledr]], and [[kernel-cve-analysis]].
 
 - **2026-08-20** — ingest `description:TheMille-Dev/AntiGuard`: entity [[antiguard]] (TheMille-Dev; Paper/Purpur Minecraft AC plugin; Java; single drop-in JAR; physics-based fly/speed/reach/kill aura/auto-click/no-swing/no-fall/fast-break checks; research-backed low-FP thresholds; embedded SQLite or LuckPerms DB; built-in web dashboard + REST API; legacy FastAPI reporting server + reference agent; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[dakotaac]], [[minecraft-anti-cheat]], [[cklsit-advanced-anticheat]], and [[windfall-anticheat]].

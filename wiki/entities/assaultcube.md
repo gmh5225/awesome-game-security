@@ -18,4 +18,4 @@ Open-source multiplayer first-person shooter built on the **CUBE engine** (assau
 
 ## Related
 
-[[simple-ac-internal-cheat]] · [[external-esp-hack-assaultcube]] · [[assault-cube-cheat]] · [[mandragora]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[simple-ac-internal-cheat]] · [[external-esp-hack-assaultcube]] · [[voltclient]] · [[assault-cube-cheat]] · [[mandragora]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
