@@ -2452,6 +2452,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity Markdown Viewer](entities/unity-markdown-viewer.md) — zero-setup Unity Editor markdown viewer (Plugins:Unity)
 - [Unity Script Collection](entities/unity-script-collection.md) — maintained free Unity scripts/libraries/plugins/extensions catalog (Game Engine / Plugins:Unity)
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
+- [Unity C# Reference](entities/unity-cs-reference.md) — official Unity engine/editor managed C# reference source (reference-only license; Game Engine / [C# reference]; Unity-Technologies)
 - [UnityExplorer](entities/unityexplorer.md) — runtime Unity inspector (BepInEx/MelonLoader; hierarchy/REPL; Mono+IL2CPP)
 - [unispect-dma-plugin](entities/unispect-dma-plugin.md) — Unispect Mono dump + DMA (Razchek fork fix; Memory Plugin dispose; cheat / game engine explorer:Unity [DMA])
 - [unity-vrchat-template](entities/unity-vrchat-template.md) — Unity VRChat starter template (graphics / audio / physics; Game Develop / source)
