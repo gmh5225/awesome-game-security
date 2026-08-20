@@ -1980,6 +1980,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Phantasm x86 Virtualizer](entities/phantasm-x86-virtualizer.md) — x86 code virtualizer (static-link or manual VM-runtime embed; AC Obfuscation Engine `[VM]`)
 - [PhantomKiller](entities/phantomkiller.md) — BYOVD via Lenovo BootRepair.sys (IOCTL 0x222014 ZwTerminateProcess; PPL AV/EDR)
 - [phantom-client](entities/phantom-client.md) — Lunar Client 1.8.9 internal DLL (JNI/JVMTI; wglSwapBuffers/MinHook ImGui; evasion profiles; cheat / game:minecraft)
+- [phantom-frida](entities/phantom-frida.md) — Build anti-detection Frida server from source (Python patch scripts; string/symbol/artifact randomization; WSL build; JS tests; TheQmaks)
 - [phake](entities/phake.md) — GTA V mod menu / cheat framework (ScriptHookV or DMA; RAGE engine hooks; vehicle spawn / ESP / god mode; cheat / `[Mod Menu]`)
 - [Phoenix-Valorant-Cheat](entities/phoenix-valorant-cheat.md) — Valorant external cheat (C++; ESP/aimbot/rage-mode; OpenGL/GLFW + ImGui menu/overlay; offset defs + vector math + external memory helpers; YMY1666527646; cheat / game:valorant [External])
 - [physmem_drivers](entities/physmem-drivers.md) — vulnerable physmem driver list (namazso; no PoC; Cheat Vulnerable Driver)

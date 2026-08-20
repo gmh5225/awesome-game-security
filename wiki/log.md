@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheQmaks/phantom-frida`: entity [[phantom-frida]] (TheQmaks; build system patching Frida to evade anti-instrumentation detection; Python patch scripts + name generators; randomized strings/symbols/artifacts; WSL build; JavaScript tests; mobile RE / stealth Frida); cited on [[overviews/mobile-security]] and [[frida]]; cross-linked [[florida]], [[fridare]], [[antifrida]], and [[frida-detection]].
+
 - **2026-08-20** — ingest `description:TheWildJames/kernel_build_scripts`: entity [[kernel-build-scripts]] (TheWildJames; Bash GKI/non-GKI Android kernel build automation; repo sync, patch/defconfig, packaging, release; KernelSU/SUSFS integration; Pixel/OnePlus/Xiaomi variants; mobile kernel modding; some scripts may be outdated; cheat / kernel build scripts); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[kernel-build-action]], and [[compile-android-driver]].
 
 - **2026-08-20** — ingest `description:TheZong/Game-Hacking`: entity [[thezong-game-hacking]] (TheZong; curated Markdown link list of game hacking/cracking learning resources—tutorials, forums, RE refs, dumpers/mappers; CS:GO/GTA V/RDR2 starter bases; cheat / guide; slug disambiguated from [[game-hacking]]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[game-reversing]], [[gamehacking-cheatsheet]], and [[intro-to-gamehacking]].
