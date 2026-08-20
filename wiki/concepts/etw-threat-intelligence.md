@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/jdu2600__Etw-SyscallMonitor.md
   - wiki/sources/descriptions/gmh5225__ETWHOOK-InfinityHookClass.md
   - wiki/sources/descriptions/everdox__InfinityHook.md
-updated: 2026-08-15
+  - wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md
+updated: 2026-08-20
 confidence: high
 ---
 
@@ -51,7 +52,7 @@ Attackers with sufficient privilege may attempt to blind TI telemetry: (source: 
 | `EtwThreatIntProvRegHandle` / registration list walks | Remove or redirect provider registration |
 | `NtSetInformationThread(ThreadHideFromDebugger)` | Hide thread from some ETW consumers |
 
-Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/blind side of this lane. (source: wiki/sources/descriptions/muturikaranja__disable-threat-tracing.md)
+Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/blind side of this lane. (source: wiki/sources/descriptions/muturikaranja__disable-threat-tracing.md) Kernel-memory ETW-TI provider state toggling such as [[kernel-callback-removal]] (V-i-x-x; C++; locate kernel structures/offsets and patch enable flags via an existing R/W primitive; WinDbg/IDA RE notes; educational EDR bypass research) documents the same registration/enable-flag blind surface from the offensive side. (source: wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md)
 
 ## Defensive countermeasures
 
@@ -61,4 +62,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

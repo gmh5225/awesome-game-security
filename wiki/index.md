@@ -1443,6 +1443,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernel Anti-Cheat](entities/kernel-anti-cheat.md) — experimental multi-telemetry kernel AC driver (NMI stack walk, thread start scan, big pool, PiDDBCache mapper residue; gmh5225; `[NMI]`)
 - [Kernel Anticheat](entities/kernel-anticheat.md) — Vasieco Windows kernel AC prototype (unsigned/abnormal drivers, physmem-handle abuse, hypervisor traces, big pool, mapper residue, suspicious system threads; C/C++ Visual Studio driver; anti-cheat research)
 - [kernel-callback-functions-list](entities/kernel-callback-functions-list.md) — Ring0 callback registration API reference (gmh5225; anti-cheat / documentation)
+- [kernel-callback-removal](entities/kernel-callback-removal.md) — ETW-TI kernel bypass; toggle provider enable flags from kernel memory via R/W primitive; WinDbg/IDA RE notes (V-i-x-x; Some Tricks / Removing kernel callbacks)
 - [Kernelcloak](entities/kernelcloak.md) — C++17 kernel driver protect/obfuscate library (driver development / modding; AC Encrypt Variable / obfuscation-engine research; ck0i)
 - [Kernel Cactus](entities/kernel-cactus.md) — Dell `dbutil_2_3.sys` BYOVD post-exploitation console (ETW/PPL/kill/token/file ops; shellcode inject; gmh5225)
 - [Kernel-Cheat-for-directx3D](entities/kernel-cheat-for-directx3d.md) — dxgkrnl `NtDxgkGetTrackedWorkloadStatistics` export hook; `NULL_MEMORY` KM↔UM comms + win32k GDI draw (gmh5225)
