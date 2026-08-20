@@ -122,6 +122,7 @@ sources:
   - wiki/sources/descriptions/ekknod__usbsn.md
   - wiki/sources/descriptions/ekknod__sumap.md
   - wiki/sources/descriptions/ekknod__efi-monitor.md
+  - wiki/sources/descriptions/Spuckwaffel__Simple-MmcopyMemory-Hook.md
   - wiki/sources/descriptions/ekknod__KiSystemStartupMeme.md
   - wiki/sources/descriptions/ekknod__SubGetVariable.md
   - wiki/sources/descriptions/ekknod__SetWindowHookEx.md
@@ -2081,6 +2082,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - EFI boot-time privileged memory access such as [[efi-driver-access]] (TheCruZ; GNU-EFI runtime driver loaded at boot + Visual Studio usermode client for read/write/process-base; build/boot workflow docs; kernel + AC bypass pre-OS path research; cheat / EFI RPM) complements [[efidump]] and [[sub-get-variable]] in the below-OS RPM lane. (source: wiki/sources/descriptions/TheCruZ__EFI_Driver_Access.md)
 - Title-integrated EFI Apex Legends cheat such as [[direct-efi-apex-cheat]] (TheCruZ; user-mode client + UEFI runtime component; command-based memory ops, process-base resolution, glow/aim logic; runtime variable hooks + kernel function pointers from EFI; firmware-assisted cheat/AC bypass experimentation; cheat / game:apex legends) sits in the below-OS external lane beside [[fortnite-efi-external]] and [[efi-driver-access]]. (source: wiki/sources/descriptions/TheCruZ__Direct-EFI-Apex-Cheat.md)
 - EFI runtime **`MmCopyMemory`** hook samples such as [[efi-monitor]] (ekknod; C/C++; PatchGuard-safe hooking; driver development / graphics / networking; cheat / EFI driver area; README `[Hooking MmCopyMemory PG safe]`) complement [[sumap]] for below-OS kernel memory-access paths. (source: wiki/sources/descriptions/ekknod__efi-monitor.md)
+- Educational in-kernel **`MmCopyMemory`** hook sample such as [[simple-mmcopymemory-hook]] (Spuckwaffel; documented learning driver; observe anti-cheat scanner memory-copy behavior; explicitly unstable/detectable; complements [[efi-monitor]] and [[driver-kdtour]] for hook-mechanics study; README `[Hook MmcopyMemory]`) (source: wiki/sources/descriptions/Spuckwaffel__Simple-MmcopyMemory-Hook.md)
 - Custom **`KiSystemStartup`** research such as [[ki-system-startup-meme]] (ekknod; C/C++; kernel-level work / driver development / graphics; cheat / EFI driver area; README `[Custom KiSystemStartup]`) complements [[efi-monitor]] and [[sumap]] for early kernel-init hook paths loaded from below OS. (source: wiki/sources/descriptions/ekknod__KiSystemStartupMeme.md)
 - Valorant external UE4 cheat samples such as [[ue4-c-]] (frankelitoc; EFI manual-mapped kernel driver + IOCTL dispatch-hook comm; ToolHelp32 process enum; driver-backed UE4 actor/player reads; DirectX 9 ImGui overlay; README `[External]`) sit in the same out-of-process cheat / game:valorant lane for studying EFI-loaded external stacks under [[vanguard]]. (source: wiki/sources/descriptions/frankelitoc__UE4-c-.md)
 - Title-specific Thetan Arena SDKs such as [[thetan-arenasdk]] (rendering / audio / physics) illustrate the cheat / game:thetan lane. (source: wiki/sources/descriptions/xkp95175333__Thetan_ArenaSDK.md)
