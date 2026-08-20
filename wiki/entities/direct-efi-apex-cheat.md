@@ -20,4 +20,4 @@ Same author as generic EFI RPM sample [[efi-driver-access]] and BYOVD mapper [[k
 
 ## Related
 
-[[efi-driver-access]] · [[kdmapper]] · [[fortnite-efi-external]] · [[sub-get-variable]] · [[efi-monitor]] · [[sumap]] · [[easy-anti-cheat]] · [[apex-external-cheat]] · [[apex-dma-cheat-updated]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[efi-driver-access]] · [[kdmapper]] · [[apex-legends-driver-cheat]] · [[fortnite-efi-external]] · [[sub-get-variable]] · [[efi-monitor]] · [[sumap]] · [[easy-anti-cheat]] · [[apex-external-cheat]] · [[apex-dma-cheat-updated]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

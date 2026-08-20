@@ -154,6 +154,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Apex-CHEAT-FIXED](entities/apex-cheat-fixed.md) — Apex Legends fixed cheat: driver development / modding / hooking (C/C++; gmh5225; cheat / game:apex legends)
 - [apex-cheating](entities/apex-cheating.md) — Apex Legends bundled cheat resources: C# HWID spoofer, seasonal offset dumps, EAC bypass scripts, SVG asset extraction (cheatingwitdacode; cheat / game:apex legends)
 - [apex-external-cheat](entities/apex-external-cheat.md) — Apex Legends external (Echo_Apex): kernel-driver memory reads + DX11 ImGui overlay; offsets/hitboxes/string encryption (C++17; bootmgfw; cheat / game:apex legends [External])
+- [apex-legends-driver-cheat](entities/apex-legends-driver-cheat.md) — Apex Legends kernel-assisted external: BYOVD-mapped driver R/W + C++ usermode + transparent ESP/aim overlay (TheCruZ; cheat / game:apex legends [External])
 - [Apex-Legends-External-Esp-Aimbot-Skinchanger](entities/apex-legends-external-esp-aimbot-skinchanger.md) — Apex Legends external ESP/aimbot/skinchanger: rendering / SDK generation / overlays (C/C++; gmh5225; cheat / game:apex legends [External])
 - [apex_linux](entities/apex-linux.md) — Linux-native Apex Legends cheat research (C++; ekknod; cheat / game:apex legends [Linux])
 - [project-tanya](entities/project-tanya.md) — Apex Legends service-oriented external automation: C#/.NET modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; Linux daemon build/install; process isolation + ptrace hardening (XRadius; cheat / game:apex legends [Linux])
