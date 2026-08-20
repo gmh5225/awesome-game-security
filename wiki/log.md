@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:StephanvanSchaik/windows-kernel-rs`: entity [[windows-kernel-rs]] (StephanvanSchaik; Rust Windows kernel driver framework; generated bindings + safer abstractions for IRPs, device I/O, sync primitives, process attach; staged examples + build scaffolding; researchers / systems dev; Writing Windows kernel drivers in Rust); cited on [[overviews/windows-kernel]]; cross-linked [[wkpe]], [[document]], [[windows-kernel-debugging-guide]], and [[kli]].
+
 - **2026-08-20** — ingest `description:StudentBlake/XCI-Explorer`: entity [[xci-explorer]] (StudentBlake; Windows C# WinForms Switch XCI/NSP inspector; XCI/NCA/HFS0/PFS0 parsers; metadata, partition browse, hash check, extract, certificate edit; Switch modding / cartridge image RE; README [XCI Explorer]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[nstool]], [[nuzu]], and [[se-tools]].
 
 - **2026-08-20** — ingest `description:Super-Cssdiv/ChinaPubg`: entity [[china-pubg]] (Super-Cssdiv; Android native NDK PUBG RE/manipulation toolkit; C/C++ inline hooks, ptrace injectors, memory tooling, ImGui rendering, offset/map/patch helpers; mobile anti-cheat, cheat architecture, detection-surface research; cheat / game:pubgm); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[bypass-pubg-mobile-imgui]], [[pubg-mobile-memory-hacking-examples]], [[pubgm-sdk-and-offsets]], [[android-ptrace-injector]], and [[adbi]].
