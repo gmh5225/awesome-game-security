@@ -2507,6 +2507,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/oakboat/DataPtrHookWin11 [NtUserSetGestureConfig]
 - https://github.com/GetRektBoy724/Win32kHooker [.data ptr swapper for newer win32k versions]
 - https://github.com/bootmgfw/lithium-kernel [Windows kernel driver + usermode client: physical/virtual memory R/W, page-table walk, pattern scan, MouClass mouse IOCTL]
+- https://github.com/zensenzay/wnf-driver-meme [Kernel driver and usermode client using Windows Notification Facility state names for covert UM/KM comm, plus process memory R/W and ObRegisterCallbacks handle stripping]
 
 > EFI Driver
 - https://github.com/mrexodia/EfiCMake
@@ -4161,6 +4162,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/a0yark/DXInject-UC [D3D11 GPU payload transport + compute shader decode, GPU-assisted process hollowing (research)]
 - https://github.com/Schich/Lucky-Spark [A stealthy loader for shellcode staged over HTTP/HTTPS, similar to Sliver]
 - https://github.com/Lavender-exe/Shellcrypt [A QoL tool to obfuscate shellcode. In the future will be able to chain encoding/encryption/compression methods]
+- https://github.com/n1h-nb/Shellcode-Obfuscation [Academic lab project with Caesar-cipher and encoding-based shellcode obfuscation (C loader + Python tooling) and AV bypass rate measurements]
 - https://github.com/dobin/SuperMega [Stealthily inject shellcode into an executable]
 - https://github.com/mrexodia/RiscyWorkshop [Payload Obfuscation for Red Teams workshop materials]
 - https://github.com/umpolungfish/byvalver [Shellcode bad-byte banisher with preserved functionalities]
