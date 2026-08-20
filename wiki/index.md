@@ -2312,6 +2312,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Simple Manual Map Injector](entities/simple-manual-map-injector.md) — compact Windows manual-map DLL injector (x86/x64; optional PE header/section strip; configurable protections; x64 exception handling; sample loader + test DLLs; Manual Map; TheCruZ)
 - [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)
 - [simple-rust-hack](entities/simple-rust-hack.md) — Facepunch Rust simple cheat source (C/C++; cheat / game:rust; gmh5225)
+- [SimpleUEFI](entities/simpleuefi.md) — Visual Studio + EDK-II UEFI app dev framework (MSVC templates, property sheets, Python setup; bootkit / UEFI security research; Th3Spl)
 - [simple_ac_internal_cheat](entities/simple-ac-internal-cheat.md) — educational C++20 AssaultCube internal (Detours DX / ImGui / ESP / aimbot)
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [sinmapper](entities/sinmapper.md) — user-mode mapper into signed-driver section via physmem + PTE flip; trace cleanup; stealthy kernel load (armvirus; Manual Map In Signed Driver)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Th3Spl/SimpleUEFI`: entity [[simpleuefi]] (Th3Spl; simplified UEFI application dev framework; Visual Studio + EDK-II toolchain; MSVC project templates, property sheets, Python setup script; bootstrap UEFI apps without full EDK-II build complexity; UEFI security / bootkit developers); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[eficmake]], [[uefi-bootkit]], [[uefi-bootloader]], [[bootlicker]], [[luaboot]], and [[efixplorer]].
+
 - **2026-08-20** — ingest `description:ThatLing/limba`: entity [[limba]] (ThatLing; compile-time MBA control-flow obfuscation PoC; C++20 Clang/clang-cl; randomized jump-target encoding + per-build rewrite rules; premake integration examples; RE resistance / binary obfuscation research; Cheat Mixed boolean-arithmetic); cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfusheader-h]], [[promba]], and [[cobra]].
 
 - **2026-08-20** — ingest `description:TheAenema/hm-pe-packer`: entity [[hm-pe-packer]] (TheAenema; tutorial-oriented C++ x64 PE packer/protector; Visual Studio; load-time wrap/protect; PE structures, packing stubs, protection mechanics; security learners / RE practitioners; Anti Cheat → Binary Packer `[PE X64]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[packer-tutorial]], [[x64-exe-packer]], [[atom-pe-packer]], [[pepacker]], and [[exe-packer]].
