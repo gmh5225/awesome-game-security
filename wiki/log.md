@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TKazer/CS2_External`: entity [[tkazer-cs2-external]] (TKazer; C++ external CS2 cheat framework; ESP variants, aimbot+RCS, triggerbot, radar, bunnyhop, visibility checks, offset management; external ImGui UI + process memory utilities; educational external cheat design and anti-cheat response research; cheat / game:cs2 [External]; slug disambiguated from [[cs2-external]]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-cheat]], [[cs2-external-1]], [[cs2external]], [[titled-gui-cs2]], [[cs2-offsets]], and [[world-to-screen]].
+
 - **2026-08-20** — ingest `description:cognis-digital/rootsentry`: entity [[rootsentry]] (cognis-digital; zero-dependency Python mobile runtime-integrity framework; root/jailbreak, emulator, Frida/Xposed hook, tamper evidence → TRUSTED→CRITICAL posture verdicts; CLI/library + fleet cohort analysis + MITRE ATT&CK for Mobile; Kotlin/Swift reference collectors; RASP / attestation pipelines); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[device-trust]], [[risk-engine]], [[droidshield]], and [[frida-detection]].
 
 - **2026-08-20** — ingest `readme:categories`: Anti Cheat ~685 (+1; Cheat ~2732 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
