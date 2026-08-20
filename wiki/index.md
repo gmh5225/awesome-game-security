@@ -1476,6 +1476,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-development](entities/kernel-development.md) — Greg Kroah-Hartman Linux kernel dev docs (patch workflow, drivers, LKM; guide lane)
 - [kernel-hook-framework](entities/kernel-hook-framework.md) — Linux kernel inline-hook framework (trampoline patching + kallsyms resolution; proc control; x86/ARM/RISC-V; kernel debug + anti-cheat research; WeiJiLab)
 - [kernel_build_action](entities/kernel-build-action.md) — GitHub Actions automated kernel build (TypeScript/Python; Android kernel driver CI; dabao1955)
+- [kernel build scripts](entities/kernel-build-scripts.md) — Bash Android GKI/non-GKI kernel build automation (repo sync, patches, defconfig, packaging; KernelSU/SUSFS; Pixel/OnePlus/Xiaomi; TheWildJames)
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [kernel_payload_comms](entities/kernel-payload-comms.md) — shared-memory KM↔UM payload channel (gmh5225; cheat / driver communication)

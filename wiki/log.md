@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheWildJames/kernel_build_scripts`: entity [[kernel-build-scripts]] (TheWildJames; Bash GKI/non-GKI Android kernel build automation; repo sync, patch/defconfig, packaging, release; KernelSU/SUSFS integration; Pixel/OnePlus/Xiaomi variants; mobile kernel modding; some scripts may be outdated; cheat / kernel build scripts); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[kernel-build-action]], and [[compile-android-driver]].
+
 - **2026-08-20** — ingest `description:TheZong/Game-Hacking`: entity [[thezong-game-hacking]] (TheZong; curated Markdown link list of game hacking/cracking learning resources—tutorials, forums, RE refs, dumpers/mappers; CS:GO/GTA V/RDR2 starter bases; cheat / guide; slug disambiguated from [[game-hacking]]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[game-reversing]], [[gamehacking-cheatsheet]], and [[intro-to-gamehacking]].
 
 - **2026-08-20** — ingest `description:Theordernarkoz/Hwid--Spoofer`: entity [[hwid--spoofer]] (Theordernarkoz; Windows KMDF kernel-mode HWID spoofer driver; disk/mount/network control-path hooks; disk/NIC/SMBIOS/GPU identifier rewrite; anti-cheat evasion; cheat / HWID; slug disambiguated from [[hwid-spoofer]] and [[theordernarkoz-hwid-spoofer]]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[easy-hwid-spoofer]], [[hwid-kernel-spoofer]], [[driver-hwid-btbd-modified]], and [[hwid-checker-mg]].
