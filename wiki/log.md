@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TimMisiak/WinDbgCookbook`: entity [[windbg-cookbook]] (TimMisiak; JS WinDbg data-model automation scripts + debugger queries; dependency inspection, stack collection/corruption detection, time-travel debugging analysis; ready-to-run `dx` examples for module/thread/environment inspection; WinDbg); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[ttddbg]], [[awesome-windbg-extensions]], and [[mcp-windbg]].
+
 - **2026-08-20** — ingest `description:TimmHess/UnrealImageCapture`: entity [[unreal-image-capture]] (TimmHess; UE C++ high-FPS RGB + synchronized segmentation masks + depth capture to disk without blocking render/game threads; synthetic annotated datasets for ML/CV; Game Engine / Unreal guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unreal-source-explained]], [[unreal-engine-guide]], [[obs-game-capture]], and [[present-hook]].
 
 - **2026-08-20** — ingest `description:TindalosKorone/dsh-cheatengine`: entity [[dsh-cheatengine]] (TindalosKorone; DeepSeek Harness TypeScript Node.js plugin; local TCP bridge to Cheat Engine; on-demand `ce_*` attach/scan/RW/disasm/breakpoints/pointers/AOB/Lua-AA; anti-cheat detection, module dump, speedhack, cheat-table I/O; session hypothesis/evidence/audit/undo/snapshot; gated write/script unlock; authorized game-security RE and dynamic memory analysis; Game Develop / MCP); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]] and [[cheatengine-mcp-bridge]].
