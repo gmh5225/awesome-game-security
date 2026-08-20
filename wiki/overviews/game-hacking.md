@@ -315,6 +315,7 @@ sources:
   - wiki/sources/descriptions/dazi2011__crossover-patcher.md
   - wiki/sources/descriptions/ValveSoftware__Proton.md
   - wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md
+  - wiki/sources/descriptions/TOSTcRa__vigil.md
   - wiki/sources/descriptions/gmh5225__cfclap.md
   - wiki/sources/descriptions/gmh5225__blood-hunt.md
   - wiki/sources/descriptions/gmh5225__bootlicker.md
@@ -1926,6 +1927,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - GNU/Linux anti-cheat compatibility references such as [[aclist-github-io]] (static site; curated Proton/Wine game compatibility plus Linux gaming guides; conservative manual verification; Anti-cheat compatibility list) support the same Cheat > Wine / Linux Proton lane for platform-support research. (source: wiki/sources/descriptions/aclist__aclist.github.io.md)
 - Official Valve [[proton]] (Wine-based Steam Play layer; Docker build infra, prefix defaults, Steam integration manifests, per-title fixups; Linux gaming / Windows-to-Linux translation research; README [Steam]) is the upstream runtime that community GNU/Linux compatibility and anti-cheat interoperability lists target. (source: wiki/sources/descriptions/ValveSoftware__Proton.md)
 - Native Linux open-source local anti-cheat such as [[tlac-modern-local-anti-cheat-reunioned]] (TuncorReUnion; Rust; user-space memory signature scan + optional eBPF behavioral probes + ONNX anomaly model; HWID bans and on-device Tokio IPC; MIT-licensed transparent AC for Linux/Steam Deck hosts beside Proton/Wine compatibility research) sits in the Cheat > Linux / Open Source Anti Cheat System lane. (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
+- Rust eBPF Linux-native anti-cheat such as [[vigil]] (TOSTcRa; modular BPF ELF loading, perf event handling, CLI, and client–server distributed monitoring; kernel-level event tracing for runtime threat detection on native Linux game hosts) complements that lane beside [[tracee]] and [[rootkit-detection-ebpf-time-trace]]. (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - External CS2 samples such as [[cs2-cheat-cpp]] (C++; rendering / asset pipelines / SDK generation) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/yinleiCoder__cs2-cheat-cpp.md)
 - External CS2 glow ESP such as [[cs-2-glow]] (C++; entity parse / offsets / external memory glow) sits in the same cheat / game:cs2 visual lane. (source: wiki/sources/descriptions/xvorost__CS-2-Glow.md)
 - Maintained CS2 offset/netvar dumps such as [[cs2-offsets]] (C++ headers + JSON; client/server layout after patches) and [[cs2-offsets-ro0ti]] (C#/C++; `[Offset]` tag) feed that same cheat / game:cs2 memory-layout lane. (source: wiki/sources/descriptions/sezzyaep__CS2-OFFSETS.md) (source: wiki/sources/descriptions/ro0ti__CS2-Offsets.md)

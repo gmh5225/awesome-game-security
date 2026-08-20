@@ -221,6 +221,7 @@ sources:
   - wiki/sources/descriptions/dazi2011__crossover-patcher.md
   - wiki/sources/descriptions/ValveSoftware__Proton.md
   - wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md
+  - wiki/sources/descriptions/TOSTcRa__vigil.md
   - wiki/sources/descriptions/daswareinfach__Battleye-VAC-EAC-Kernel-Bypass.md
   - wiki/sources/descriptions/dashingsoft__pyarmor.md
   - wiki/sources/descriptions/wietze__windows-dll-hijacking.md
@@ -759,6 +760,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[android-anti-cheat]] — open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; open-source AC system lane; defensive researchers) (source: wiki/sources/descriptions/codetronik__AndroidAntiCheat.md)
 - [[rebirth-guard]] — Windows C++ open-source anti-cheat library (chztbby; modding / SDK generation; Open Source Anti Cheat System lane; defensive researchers) (source: wiki/sources/descriptions/chztbby__RebirthGuard.md)
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
+- [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - [[gexec]] — register-machine bytecode interpreter for Windows kernel drivers (gasm, gvmlift PE lifter, embeddable host API; updatable portable logic without native recompile; zer0condition; kernel AC development research) (source: wiki/sources/descriptions/zer0condition__gexec.md)
 - [[antidebugandmemorydump]] — Android anti-debug + memory analysis / emulation / debugging reference (Java + C/C++; Anti Debugging lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebugandMemoryDump.md)
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)

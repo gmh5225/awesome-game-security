@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TOSTcRa/vigil`: entity [[vigil]] (TOSTcRa; Rust eBPF Linux-native anti-cheat; modular BPF ELF loading, perf event handling, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[tlac-modern-local-anti-cheat-reunioned]], [[tracee]], [[rootkit-detection-ebpf-time-trace]], [[proton]], and [[aclist-github-io]].
+
 - **2026-08-20** — ingest `description:TastSong/GameProgrammerStudyNotes`: entity [[game-programmer-study-notes]] (TastSong; large Unity C# study notes + sample projects; Markdown modules for design patterns, rendering, networking, AI, engine architecture; screenshots, snippets, hands-on exercises; Game Development notes / guide); cited on [[overviews/game-engine]]; cross-linked [[cpp-game-engine-book]], [[learn-awesome-gamedev]], [[gamedevguide]], and [[unity-script-collection]].
 
 - **2026-08-20** — ingest `description:TaszkSecLabs/xiaomi-c400-pwn`: entity [[xiaomi-c400-pwn]] (TaszkSecLabs; Xiaomi Smart Camera C400 exploit/jailbreak research; Python RNG-prediction exploit; Tamarin formal handshake models; handshake docs; persistent jailbreak; IoT firmware exploitation); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[firmeye]], [[embedded-hacking]], and [[sjcam]].

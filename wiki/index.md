@@ -2558,6 +2558,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vanguardtrace](entities/vanguardtrace.md) — Decrypt/intercept Vanguard `vgk.sys` encrypted imports; signature-scan table, hook with re-encrypt (armvirus)
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
 - [valo-driver](entities/valo-driver.md) — Valorant kernel external memory read (phys translate / CR3 / MDL; bypass Vanguard API monitoring; gmh5225)
+- [vigil](entities/vigil.md) — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel event tracing; TOSTcRa; Open Source Anti Cheat System)
 - [vgk-illegal-pf-logger](entities/vgk-illegal-pf-logger.md) — Log intentional illegal page faults from Vanguard `vgk.sys` (integrity-check RE)
 - [VGK DMA bypass](entities/vgk-dma-bypass.md) — Modified PCILeech Artix-7 CFG-space/MSI-X SystemVerilog for Vanguard DMA threat-model research (d1skq)
 - [valorant-aimbot-bypass](entities/valorant-aimbot-bypass.md) — Valorant aimbot with human-like aim smoothing (cheat / game:valorant; gmh5225)
