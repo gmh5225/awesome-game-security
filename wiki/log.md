@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Tencent/InjectFix`: entity [[injectfix]] (Tencent; Unity C# logic hotfix; IL inject/route patched gameplay at runtime; broad Unity version/platform; legacy-project friendly; Game Hot Patch / live bugfix); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[xlua]], [[hybridclr]], [[mono]], and [[il2cpp]].
+
 - **2026-08-20** — ingest `description:Tencent/xLua`: entity [[xlua]] (Tencent; Lua↔C# bridge for Unity/.NET/Mono; two-way interop, runtime hotfix, generated bindings + GC opts; multi-platform game clients; Game Hot Patch / flexible scripting); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[hybridclr]], [[luamachine]], [[mono]], and [[il2cpp]].
 
 - **2026-08-20** — ingest `description:TensorBlock/awesome-mcp-servers`: entity [[awesome-mcp-servers]] (TensorBlock; large curated MCP server index; Markdown category pages across AI, data, infrastructure, security, gaming; discovery/cataloging for AI workflow tool backends; Awesome MCP); cited on [[overviews/overview]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-gamedev-agent-skills]], [[ida-pro-mcp]], [[cheatengine-mcp-bridge]], [[unity-mcp]], [[mcp-safety-scanner]], and [[vulnerable-mcp-servers-lab]].
