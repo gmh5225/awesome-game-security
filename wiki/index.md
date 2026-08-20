@@ -1808,6 +1808,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
 - [ntkernelwalkerlib](entities/ntkernelwalkerlib.md) — user-mode ntoskrnl symbol/struct offset + ROP gadget library (dbghelp + section scan)
 - [ntminhook](entities/ntminhook.md) — NTDLL-only MinHook fork (Native API; asset pipelines / modding / hooking; gmh5225)
+- [nt_unhooker](entities/nt-unhooker.md) — Rust NTDLL inline/IAT hook detect + restore (clean reference PE; CLI + library; Teach2Breach)
 - [ntoseye](entities/ntoseye.md) — Linux-host KVM/QEMU WinDbg-style Windows kernel debugger (GDB stub; PDB symbols; breakpoints; Kernel Debugger)
 - [ntoskrnl-file-collection](entities/ntoskrnl-file-collection.md) — multi-build ntoskrnl binary corpus (version diff / kernel RE reference)
 - [ntoskrnlwalker](entities/ntoskrnlwalker.md) — ntoskrnl offset/gadget/symbol resolver (target-build kernel structure navigation)
