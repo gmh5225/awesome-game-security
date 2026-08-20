@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheCherno/Hazel`: entity [[hazel]] (TheCherno; early-stage C++ interactive app + rendering engine; engine/editor/sandbox; Vulkan SDK dependency setup; educational engine design + real-time rendering/game-framework prototyping; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[lumos]], [[game-engine-from-scratch]], and [[vk-engine]].
+
 - **2026-08-20** — ingest `description:TheCruZ/Apex_Legends_Driver_Cheat`: entity [[apex-legends-driver-cheat]] (TheCruZ; kernel-assisted external; BYOVD-mapped driver R/W + C++ usermode + transparent ESP/aim overlay; cheat development / AC bypass research; cheat / game:apex legends [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[direct-efi-apex-cheat]], [[apex-external-cheat]], and [[byovd]].
 
 - **2026-08-20** — ingest `description:TheCruZ/Direct-EFI-Apex-Cheat`: entity [[direct-efi-apex-cheat]] (TheCruZ; user-mode Apex client + UEFI runtime component; command-based memory ops + process-base resolution; glow/aim logic; runtime variable hooks + EFI-bridged kernel function pointers; firmware-assisted cheat/AC bypass experimentation; cheat / game:apex legends); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[efi-driver-access]], [[fortnite-efi-external]], [[sub-get-variable]], [[efi-monitor]], and [[kdmapper]].
