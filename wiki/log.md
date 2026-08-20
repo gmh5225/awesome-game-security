@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TastSong/GameProgrammerStudyNotes`: entity [[game-programmer-study-notes]] (TastSong; large Unity C# study notes + sample projects; Markdown modules for design patterns, rendering, networking, AI, engine architecture; screenshots, snippets, hands-on exercises; Game Development notes / guide); cited on [[overviews/game-engine]]; cross-linked [[cpp-game-engine-book]], [[learn-awesome-gamedev]], [[gamedevguide]], and [[unity-script-collection]].
+
 - **2026-08-20** — ingest `description:TaszkSecLabs/xiaomi-c400-pwn`: entity [[xiaomi-c400-pwn]] (TaszkSecLabs; Xiaomi Smart Camera C400 exploit/jailbreak research; Python RNG-prediction exploit; Tamarin formal handshake models; handshake docs; persistent jailbreak; IoT firmware exploitation); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[firmeye]], [[embedded-hacking]], and [[sjcam]].
 
 - **2026-08-20** — ingest `description:Teach2Breach/moonwalk`: entity [[moonwalk]] (Teach2Breach; Rust PEB-less DLL base resolution via TEB/stack walk; VirtualQuery or API-free stealth variants; CLI + library; offensive security / low-level tooling where module enumeration may be monitored); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nt-unhooker]], [[rs-ldr]], [[tabby]], [[modmap]], and [[vm]].
