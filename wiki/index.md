@@ -2074,6 +2074,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [proton](entities/proton.md) — Valve Steam Play compatibility layer (Wine-based; Docker build infra, prefix config, Steam manifests, per-title fixups; Linux gaming / Windows-to-Linux translation; ValveSoftware; [Steam])
 - [protobufs](entities/protobufs.md) — SteamDatabase tracked Steam/Valve protobuf schema dumps (`.proto` files from update pipelines and automated dumpers; CS:GO/Steam client message schemas; protocol analysis and tooling maintenance; README [Protobuf])
 - [ps5-linux-loader](entities/ps5-linux-loader.md) — PS5 Linux loader (kernel/HV exploits, IOMMU/GPU/TMR; PlayStation)
+- [ps-image-notify-routine-spam-filter](entities/ps-image-notify-routine-spam-filter.md) — filter noisy PsImageNotifyRoutine callbacks via RtlWalkFrameChain stack walking (Staatsgeheim; C x64 driver; kernel monitoring / AC telemetry / callback hygiene; ImageNotify Callback With RtlWalkFrameChain)
 - [ps-notif-routine-unloader](entities/ps-notif-routine-unloader.md) — remove process/thread/image notify callbacks from AC/security drivers (`PsSetCreateProcessNotifyRoutine` enum; RTCore64.sys; gmh5225)
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)

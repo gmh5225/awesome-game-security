@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Staatsgeheim/PsImageNotifyRoutineSpamFilter`: entity [[ps-image-notify-routine-spam-filter]] (Staatsgeheim; Windows kernel utility; filters noisy PsImageNotifyRoutine callbacks via RtlWalkFrameChain stack walking; C x64 driver; callback hygiene for kernel monitoring, AC telemetry, and cleaner driver-side event analysis; README ImageNotify Callback With RtlWalkFrameChain); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[driver-watchowl]], [[windbg-extensions]], [[ps-notif-routine-unloader]], and [[stack-spoofing]].
+
 - **2026-08-20** — ingest `description:Static-Analyzer-Factory/static-analyzer-factory`: entity [[static-analyzer-factory]] (Static-Analyzer-Factory; Rust LLVM IR static analysis framework; C/C++ pointer/value-flow/taint/IFDS; abstract interpretation, points-to, call graphs; Python SDK, CLI, SARIF/HTML export; compiled-binary vulnerability detection); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-security-scanner]], [[cognitor]], [[retract]], and [[packpeek]].
 
 - **2026-08-20** — ingest `description:SteamDatabase/Protobufs`: entity [[protobufs]] (SteamDatabase; continuously tracked Steam/Valve protobuf `.proto` schemas from update pipelines and automated dumpers; CS:GO/Steam client message definitions; protocol analysis, tooling maintenance, and game network RE; README [Protobuf]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[game-networking-sockets]], [[packet-sniffer]], [[ds3os]], [[source-sdk-2013]], [[proton]], and [[vac]].

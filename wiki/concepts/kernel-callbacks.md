@@ -26,6 +26,7 @@ sources:
   - wiki/sources/descriptions/zensenzay__wnf-driver-meme.md
   - wiki/sources/descriptions/UCFoxi__NotifyRoutineHijackThread.md
   - wiki/sources/descriptions/SurgeGotTappedAgain__Pink-Eye.md
+  - wiki/sources/descriptions/Staatsgeheim__PsImageNotifyRoutineSpamFilter.md
 updated: 2026-08-20
 confidence: high
 ---
@@ -44,7 +45,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 ## Reference
 
-Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Live attach enumeration during kernel debugging via [[windbg-extensions]] walks `PspCreateProcessNotifyRoutine`, `PspCreateThreadNotifyRoutine`, and `PspLoadImageNotifyRoutine` with per-type filters (process/thread/image/all) and resolving driver modules—useful for rootkit and AC driver inspection. (source: wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md)
+Documentation catalogs such as [[kernel-callback-functions-list]] list Windows Ring0 callback registration APIs for anti-cheat engineers and defensive researchers—not a live enumeration or patch tool. (source: wiki/sources/descriptions/gmh5225__kernel-callback-functions-list.md) Live attach enumeration during kernel debugging via [[windbg-extensions]] walks `PspCreateProcessNotifyRoutine`, `PspCreateThreadNotifyRoutine`, and `PspLoadImageNotifyRoutine` with per-type filters (process/thread/image/all) and resolving driver modules—useful for rootkit and AC driver inspection. (source: wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md) Reusable kernel-mode code patterns such as [[kernel-snippets]] collect copy-paste callback registration, memory, and process-manipulation snippets for driver development—not a full framework. (source: wiki/sources/descriptions/gmh5225__KernelSnippets.md) Load-image notify hygiene samples such as [[ps-image-notify-routine-spam-filter]] (Staatsgeheim; filters noisy `PsImageNotifyRoutine` callbacks via `RtlWalkFrameChain` stack walking; practical callback hygiene for kernel monitoring and AC telemetry pipelines) complement enumeration catalogs. (source: wiki/sources/descriptions/Staatsgeheim__PsImageNotifyRoutineSpamFilter.md)
 
 ## Attack / defense
 
@@ -52,4 +53,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[pink-eye]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[notify-routine-hijack-thread]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[pink-eye]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[ps-image-notify-routine-spam-filter]] · [[notify-routine-hijack-thread]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
