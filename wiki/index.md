@@ -960,6 +960,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 
 - [fdlibm](entities/fdlibm.md) — portable C libm (Sun fdlibm transcendental/elementary math; Mathematics)
+- [file-explorer](entities/file-explorer.md) — Kotlin/Compose rooted Android file manager (dual-pane, Shizuku/libsu, APK analyzer, hex editor, Magisk/KernelSU/APatch module browser; Cheat Android File Explorer; SysAdminDoc)
 - [FreeDirect](entities/free-direct.md) — DX3 DirectDraw/DirectSound/DirectPlay subset on SDL3 (legacy 2D; DirectX Compatibility)
 - [Freeplay](entities/freeplay.md) — Rust Windows trainer (TOML configs; CE `.CT` import + Auto Assembler; Tauri overlay + CLI; Steam/Epic/GOG; refuses EAC/BE/Vanguard; offline single-player)
 - [FreeType](entities/freetype.md) — portable C font rasterization (TrueType/OpenType/CFF/Type 1/bitmap; hinting, anti-aliasing, subpixel; pluggable drivers; Render fonts)
