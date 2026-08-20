@@ -2445,6 +2445,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UE426 ABInfinite Win64 Shipping](entities/ue426-abinfinite-win64-shipping.md) — Arena Breakout Infinite UE4.26 SDK dump (C/C++; SDK generation; cheat / game:arena breakout infinite; cra0)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
 - [Unreal Engine Tools](entities/unreal-engine-tools.md) — official CE Lua scripts for UE4/UE5 runtime structure discovery (GNames/GObjects/UObject/UClass/FProperty; Structure Dissect; no inject; cheat-engine)
+- [unreal-image-capture](entities/unreal-image-capture.md) — UE C++ high-FPS RGB / segmentation / depth capture to disk for ML synthetic datasets (non-blocking render path; Game Engine / Unreal guide; TimmHess)
 - [unreal-source-explained](entities/unreal-source-explained.md) — profiler-driven UE4 source analysis (init / game loop / task graph / RHI / Metal·D3D11; Game Engine / Unreal guide; donaldwuid)
 - [unreal-mcp](entities/unreal-mcp.md) — MCP servers for Unreal Editor (kvick-games + chongdashu; asset/level/blueprint automation; Game Develop / MCP)
 - [UnrealEngine5-UltimateStreetFighters](entities/unrealengine5-ultimate-streetfighters.md) — UE5 Street Fighters game (audio / physics / animation; C#/C++; Game Develop / Unreal source)

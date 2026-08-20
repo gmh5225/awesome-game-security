@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TimmHess/UnrealImageCapture`: entity [[unreal-image-capture]] (TimmHess; UE C++ high-FPS RGB + synchronized segmentation masks + depth capture to disk without blocking render/game threads; synthetic annotated datasets for ML/CV; Game Engine / Unreal guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unreal-source-explained]], [[unreal-engine-guide]], [[obs-game-capture]], and [[present-hook]].
+
 - **2026-08-20** — ingest `description:TindalosKorone/dsh-cheatengine`: entity [[dsh-cheatengine]] (TindalosKorone; DeepSeek Harness TypeScript Node.js plugin; local TCP bridge to Cheat Engine; on-demand `ce_*` attach/scan/RW/disasm/breakpoints/pointers/AOB/Lua-AA; anti-cheat detection, module dump, speedhack, cheat-table I/O; session hypothesis/evidence/audit/undo/snapshot; gated write/script unlock; authorized game-security RE and dynamic memory analysis; Game Develop / MCP); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]] and [[cheatengine-mcp-bridge]].
 
 - **2026-08-20** — ingest `description:Tokyodidit/cs2External`: entity [[cs2external]] (Tokyodidit; C++ external CS2 ESP; process memory reads; configurable JSON offsets; world-to-screen entity tracking; transparent Win32/GDI overlay—boxes, health bars, player names; cheat prototyping and practical memory analysis; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-base]], [[cs2-external-cheat]], [[cs2-external]], [[cs2-external-1]], [[pythoncs2]], [[titled-gui-cs2]], [[cs2-offsets]], and [[world-to-screen]].
