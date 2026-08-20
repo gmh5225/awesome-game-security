@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheCruZ/Direct-EFI-Apex-Cheat`: entity [[direct-efi-apex-cheat]] (TheCruZ; user-mode Apex client + UEFI runtime component; command-based memory ops + process-base resolution; glow/aim logic; runtime variable hooks + EFI-bridged kernel function pointers; firmware-assisted cheat/AC bypass experimentation; cheat / game:apex legends); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[efi-driver-access]], [[fortnite-efi-external]], [[sub-get-variable]], [[efi-monitor]], and [[kdmapper]].
+
 - **2026-08-20** — ingest `description:TheCruZ/EFI_Driver_Access`: entity [[efi-driver-access]] (TheCruZ; GNU-EFI boot-loaded runtime driver + Visual Studio usermode client; read/write/process-base requests; build/boot workflow docs; kernel + AC bypass pre-OS path research; cheat / EFI RPM); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kdmapper]], [[efidump]], [[sub-get-variable]], [[efi-monitor]], and [[sumap]].
 
 - **2026-08-20** — ingest `description:TheCruZ/FindXrefs`: entity [[find-xrefs]] (TheCruZ; IDA Pro IDAPython plugin; full-database scan for missing RIP-relative/absolute pointer xrefs; materializes undefined bytes so cross-references appear; optional raw 32-bit sliding window + NumPy-accelerated sweeps; large game clients / AC modules; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xrefsext]], [[ida-find-.data-ptr]], [[findfunc]], and [[ida-plugins]].

@@ -20,4 +20,4 @@ Sits in the **EFI RPM** lane beside runtime process-memory PoCs such as [[efidum
 
 ## Related
 
-[[kdmapper]] · [[efidump]] · [[sub-get-variable]] · [[efi-monitor]] · [[sumap]] · [[uefi-bootloader]] · [[fortnite-efi-external]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kdmapper]] · [[direct-efi-apex-cheat]] · [[efidump]] · [[sub-get-variable]] · [[efi-monitor]] · [[sumap]] · [[uefi-bootloader]] · [[fortnite-efi-external]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
