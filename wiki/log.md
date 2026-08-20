@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SpiroHappy/Warzone-MW-Internal`: entity [[warzone-mw-internal]] (SpiroHappy; outdated C++ internal COD MW/Warzone framework; ESP / bone rendering / aimbot / recoil reduction / FOV / UAV; ImGui menu; internal cheat architecture + FPS feature-module integration reference); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-internal-cheat]], [[modern-warfare-warzone-cheat]], [[mwclap]], [[present-hook]], and [[world-to-screen]].
+
 - **2026-08-20** — ingest `description:Splitx12/StrongSteam`: entity [[strongsteam]] (Splitx12; kernel-assisted Steam overlay GDI renderer; C++/ASM; Steam-overlay-style in-game visual demo; overlay / cheat UI rendering research; README [GDI + Steam]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[steam-hook-render-poc]], [[game-overlay-ui-hook]], [[steam-overlay-x64]], [[krnl-gdi-render]], and [[eft]].
 
 - **2026-08-20** — ingest `description:Splitx12/eft`: entity [[eft]] (Splitx12; C++ internal Escape From Tarkov cheat + ASM helpers; Unity object/world/entity traversal + in-game rendering; ESP/exfil/aim-assist/menu modules; `KeUserModeCallBack` Win10 notes in `usercallback.h`; cheat / game:eft [Internal]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-tarkov-internal-cheat]], [[eft-internal]], [[simple-eft-base]], [[eft-monoeft]], [[meatyeftrelease]], and [[escapefromtarkov-trainer]].

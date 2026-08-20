@@ -1757,6 +1757,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [call-of-duty-warzone-mw-hack-esp-aimbot](entities/call-of-duty-warzone-mw-hack-esp-aimbot.md) — COD Warzone/MW external cheat source (C++; Direct3D9 + ImGui overlay/menu; driver-backed memory reads + entity handling; ESP/aimbot RE practice; YMY1666527646; cheat / game:cod warzone [External])
 - [modern-warfare-warzone-cheat](entities/modern-warfare-warzone-cheat.md) — COD Modern Warfare/Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
 - [warzone-internal-cheat](entities/warzone-internal-cheat.md) — COD Warzone internal: rendering / modding / hooking (C/C++; cheat / game:cod warzone; gmh5225)
+- [warzone-mw-internal](entities/warzone-mw-internal.md) — COD MW/Warzone internal framework: ESP / bone render / aimbot / recoil / FOV / UAV; C++ ImGui menu (SpiroHappy; outdated reference; cheat / game:cod warzone [Internal])
 - [mtasa-blue](entities/mtasa-blue.md) — MTA:SA GTA:SA multiplayer mod (C++/Lua; D3D/DInput hooks; CEF; built-in AC)
 - [Mystic-xorstr](entities/mystic-xorstr.md) — C++17 header-only compile-time string/integer encrypt (SIMD decrypt; AC Compile Time)
 - [Mydev Cheat Engine Tables](entities/mydev-cheat-engine-tables.md) — multi-game Cheat Engine `.CT` collection (pointer chains, script cheats, hotkeys; single-player modding; cheat / [Cheat Engine]; bbfox0703)
