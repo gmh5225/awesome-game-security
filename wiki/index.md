@@ -2302,6 +2302,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [simple-quest](entities/simple-quest.md) — UE5.6+ event-driven questline plugin (TheGeebus; C++ + Blueprint; visual graph authoring; objectives/prerequisites/rewards; quest components; save/load + SimpleCore; PIE debugging; Plugins:Unreal)
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)
 - [simple-eft-superman-training-bot](entities/simple-eft-superman-training-bot.md) — EFT Arduino HID training automation (.ino sketches + Python coords; keyboard/mouse emulation; skill-grinding; ZhaoKunqi)
+- [Simple Manual Map Injector](entities/simple-manual-map-injector.md) — compact Windows manual-map DLL injector (x86/x64; optional PE header/section strip; configurable protections; x64 exception handling; sample loader + test DLLs; Manual Map; TheCruZ)
 - [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)
 - [simple-rust-hack](entities/simple-rust-hack.md) — Facepunch Rust simple cheat source (C/C++; cheat / game:rust; gmh5225)
 - [simple_ac_internal_cheat](entities/simple-ac-internal-cheat.md) — educational C++20 AssaultCube internal (Detours DX / ImGui / ESP / aimbot)

@@ -20,4 +20,4 @@ README lane: Manual Map.
 
 ## Related
 
-[[modexmap]] · [[guided-hacking-injector]] · [[wizard-loader]] · [[stealthy-kernelmode-injector]] · [[faultline]] · [[windows-process-injection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[simple-manual-map-injector]] · [[modexmap]] · [[guided-hacking-injector]] · [[wizard-loader]] · [[stealthy-kernelmode-injector]] · [[faultline]] · [[windows-process-injection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
