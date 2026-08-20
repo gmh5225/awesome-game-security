@@ -1207,6 +1207,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
 - [Huan](entities/huan.md) — encrypted PE loader generator (per-run keys; payload in new loader section; PE structure/loading study; Anti Cheat → Binary Packer; frkngksl)
 - [hXOR-Packer](entities/hxor-packer.md) — C++ PE pack/unpack (Huffman + XOR; in-memory self-unpack stub; PE internals / packer behavior study; Anti Cheat → Binary Packer `[PE XOR]`)
+- [hm-pe-packer](entities/hm-pe-packer.md) — tutorial-oriented C++ x64 PE packer/protector (Visual Studio; load-time wrap/protect; PE structures, packing stubs, protection mechanics; Anti Cheat → Binary Packer `[PE X64]`; TheAenema)
 - [HydraHook](entities/hydrahook.md) — DX9–12 API-hook + overlay framework (Detours; ImGui/DirectXTK/OpenCV samples)
 - [HybridCLR](entities/hybridclr.md) — Unity IL2CPP hot-update runtime (C/C++; live-update / game hot-patch; modding + IL2CPP analysis; focus-creative-games)
 - [Hyara](entities/hyara.md) — multi-platform YARA rule generation (IDA Pro, Ghidra, Binary Ninja, Cutter; cheat / Yara)
