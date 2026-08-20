@@ -1216,6 +1216,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hwid-checker-mg](entities/hwid-checker-mg.md) — SMBIOS manufacturer/model/serial HWID checker (Detection:HWID)
 - [Full-Hwid-Spoofer-V6](entities/full-hwid-spoofer-v6.md) — comprehensive HWID spoofer v6 via KdMapper kernel driver + ImGui (disk/NIC/GPU/SMBIOS/registry; AMD/Intel Win10/11; gmh5225)
 - [hwid-spoofer](entities/hwid-spoofer.md) — EAC/BattlEye HWID spoofer (C/C++; Cheat HWID; gmh5225)
+- [Hwid--Spoofer (Theordernarkoz)](entities/hwid--spoofer.md) — Windows KMDF kernel-mode HWID spoofer driver; disk/mount/network control-path hooks; disk/NIC/SMBIOS/GPU identifier rewrite (Theordernarkoz; cheat / HWID)
 - [Hwid-Spoofer-EAC-BE](entities/hwid-spoofer-eac-be.md) — EAC/BE HWID spoofer via kernel driver hooks (disk serial / NIC MAC / SMBIOS; gmh5225)
 - [HWID-EclipsedSpoofer-EAC-BE](entities/hwid-eclipsed-spoofer-eac-be.md) — Eclipsed kernel HWID spoofer for EAC/BE (disk serial / NIC / other HWIDs; gmh5225)
 - [HWID-Kernel-Spoofer](entities/hwid-kernel-spoofer.md) — kernel-mode HWID spoofer via `IRP_MJ_DEVICE_CONTROL` dispatch hooks (disk serial / MAC / SMBIOS / GPU; gmh5225)

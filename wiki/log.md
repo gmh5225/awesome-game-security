@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Theordernarkoz/Hwid--Spoofer`: entity [[hwid--spoofer]] (Theordernarkoz; Windows KMDF kernel-mode HWID spoofer driver; disk/mount/network control-path hooks; disk/NIC/SMBIOS/GPU identifier rewrite; anti-cheat evasion; cheat / HWID; slug disambiguated from [[hwid-spoofer]] and [[theordernarkoz-hwid-spoofer]]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[easy-hwid-spoofer]], [[hwid-kernel-spoofer]], [[driver-hwid-btbd-modified]], and [[hwid-checker-mg]].
+
 - **2026-08-20** — ingest `description:Theordernarkoz/Hwid-Spoofer`: entity [[theordernarkoz-hwid-spoofer]] (Theordernarkoz; Windows ImGui+DirectX 9 one-click HWID spoofer launcher; downloads external driver/helper binaries; CLI spoof step; anti-cheat bypass workflows; cheat / HWID; slug disambiguated from [[hwid-spoofer]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[imgui-spoofer-leaked]], [[hwid-spoofer-eac-be]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
 
 - **2026-08-20** — ingest `description:ThirteenAG/GTAIV.EFLC.FusionFix`: entity [[gtaiv-eflc-fusionfix]] (ThirteenAG; GTA IV / EFLC Complete Edition ASI fix/enhancement mod; rendering bugfixes, graphics quality, gameplay fixes, configurable visual settings; graphics/FPS/QoL/scripting/widescreen); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[gta4-rtx]] and [[kotr-modern-patch]].
