@@ -18,4 +18,4 @@ Kernel and usermode communication sample (gmh5225) that repurposes **`IRP_MJ_FLU
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[kernel-payload-comms]] · [[gina-public]] · [[evcommunication]] · [[custom-data-ptr-swap-sample]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[shared-flushfilebuffers-communication]] · [[kernel-payload-comms]] · [[gina-public]] · [[evcommunication]] · [[custom-data-ptr-swap-sample]]

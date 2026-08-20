@@ -1347,6 +1347,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImOverlay-DX11](entities/imoverlay-dx11.md) — C++20 Win32/DX11 transparent multi-window overlay framework (Dear ImGui; smart click-through; parent-child hierarchy)
 - [immortal-rust](entities/immortal-rust.md) — Facepunch Rust OpenGL + SDK generation cheat source (C/C++; cheat / game:rust; gmh5225)
 - [imxyvimapper](entities/imxyvimapper.md) — BYOVD driver mapper via AsUpIO.sys (PE manual map; sections/imports/relocs/entry; gmh5225)
+- [shared-flushfilebuffers-communication](entities/shared-flushfilebuffers-communication.md) — shared buffer + `FlushFileBuffers`-triggered `IRP_MJ_FLUSH_BUFFERS` KM↔UM comm; no worker thread (UCFoxi; C++; cheat / driver communication)
 - [ucfoxi-shared-flushfilebuffers-communication-update](entities/ucfoxi-shared-flushfilebuffers-communication-update.md) — `\Driver\PEAUTH` `IRP_MJ_FLUSH_BUFFERS` hijack + registry-seeded shared buffer KM↔UM comm (gmh5225; cheat / driver communication)
 - [ucmapper](entities/ucmapper.md) — BYOVD kernel driver manual mapper via nvaudio.sys (EncodePayLoad reuse; runtime-list cleanup; gmh5225)
 - [in-memory-mutation-demo](entities/in-memory-mutation-demo.md) — C++23 in-memory polymorphic payload mutation demo (VirtualProtect/mprotect; ProtectedData XOR + key rotation; secure wipe; alekzandren)
