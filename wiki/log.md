@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:cognis-digital/rootsentry`: entity [[rootsentry]] (cognis-digital; zero-dependency Python mobile runtime-integrity framework; root/jailbreak, emulator, Frida/Xposed hook, tamper evidence → TRUSTED→CRITICAL posture verdicts; CLI/library + fleet cohort analysis + MITRE ATT&CK for Mobile; Kotlin/Swift reference collectors; RASP / attestation pipelines); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[device-trust]], [[risk-engine]], [[droidshield]], and [[frida-detection]].
+
 - **2026-08-20** — ingest `readme:categories`: Anti Cheat ~685 (+1; Cheat ~2732 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-20** — ingest `description:TKazer/ScyllaHide-For-IDA9.0RC`: entity [[scyllahide-for-ida9.0rc]] (TKazer; IDA 9.0 SDK ScyllaHide anti-anti-debug build; C/C++ hook libs, injector, debugger plugins; masks debugger artifacts vs common anti-debug; reverse engineering / malware analysis); cited on [[overviews/reverse-engineering]]; cross-linked [[scyllahidedetector2]], [[titanhide]], [[makin]], and [[magicmida-rs]].

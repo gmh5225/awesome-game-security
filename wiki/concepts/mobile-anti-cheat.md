@@ -31,7 +31,8 @@ sources:
   - wiki/sources/descriptions/Xheghun__DeviceTrust.md
   - wiki/sources/descriptions/WsttXm__RiskEngine.md
   - wiki/sources/descriptions/VisionR1__KeyAttestation.md
-updated: 2026-08-19
+  - wiki/sources/descriptions/cognis-digital__rootsentry.md
+updated: 2026-08-20
 confidence: medium
 ---
 
@@ -43,7 +44,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 
 - **Tencent ACE** — Chinese-market native protector; title RE such as [[honor-of-kings-re-research]] (`libtersafe`, IL2CPP, KernelPatch modules). Historical PUBG Mobile 1.6 decompiled `libtersafe.so` archives such as [[pubgm1.6-deadgame]] preserve ACE native symbols/functions from a dead client build for offline static RE. (source: wiki/sources/descriptions/gmh5225__PUBGM1.6-DeadGame.md) ARM64 coordinate-decryption emulation via [[dfm-android-unicorn]] (Unicorn replay of protected crypto paths). KernelPatch KPM cross-process memory read via ioctl hook via [[kpm-memreader]]. (source: wiki/sources/descriptions/libtersafe__dfm_android_unicorn.md) (source: wiki/sources/descriptions/libtersafe__KPM-MemReader.md)
 - **NetEase Protection** — NetEase titles; similar native + server mix.
-- **Per-game / SDK RASP** — [[droidshield]], Talsec freeRASP ([[free-rasp-unity-poc]], [[free-rasp-reactnative]], [[free-rasp-capacitor]]), [[rs-native-kit-security]], Unity UPM [[com-sipvlib-anticheat]] (server-verified GameTime + IntegrityChecker).
+- **Per-game / SDK RASP** — [[droidshield]], Talsec freeRASP ([[free-rasp-unity-poc]], [[free-rasp-reactnative]], [[free-rasp-capacitor]]), [[rs-native-kit-security]], [[rootsentry]] (Python CLI/library; root/jailbreak, emulator, hook, tamper scoring → TRUSTED→CRITICAL; fleet analysis + MITRE ATT&CK for Mobile; source: wiki/sources/descriptions/cognis-digital__rootsentry.md), Unity UPM [[com-sipvlib-anticheat]] (server-verified GameTime + IntegrityChecker).
 - **Commercial packers** — AppSealing, DexGuard/ProGuard, Arxan on APK/DEX/native layers.
 
 ## Detection methods
