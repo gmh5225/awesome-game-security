@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `readme:categories`: Cheat ~2731 (+1) / Anti Cheat ~684 (+1; Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-20** — ingest `description:Unkn0wnH4ck3r/GameOverlayUIHook`: entity [[game-overlay-ui-hook]] (C++ Steam overlay UI hook example; PaintTraverse VGUI pipeline intercept + shared-memory render comms; fallback shape drawing; overlay rendering constraints; overlay-hook / anti-cheat research; README [Steam]; Unkn0wnH4ck3r); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[steam-hook-render-poc]], [[steam-overlay-x64]], [[discord-overlay-hook]], and [[present-hook]].
 
 - **2026-08-20** — ingest `description:UnnamedZ03/CS2-external-base`: entity [[cs2-external-base]] (C++ CS2 external overlay visualization starter; team checks + box/health/distance/skeleton/text ESP; overlay-side structure only—omits memory R/W driver; educational external tooling architecture; cheat / game:cs2 [External]; UnnamedZ03); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-ext]], [[cs2-external-cheat]], [[pythoncs2]], [[titled-gui-cs2]], [[world-to-screen]], and [[valthrun]].
@@ -13,8 +15,6 @@ Append-only journal of ingest / lint / skill-sync activity.
 - **2026-08-20** — ingest `description:Valthrun/Valthrun`: entity [[valthrun]] (Rust CS2 external read-only kernel framework; kernel driver + overlay renderer + radar without in-process DLL injection; ESP/bomb/spectator/trigger + stream-proof overlay; low-level game security and anti-detection research; cheat / game:cs2 [External]; Valthrun); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[valthrun-uefi-mapper]], [[valthrun-pubg]], [[cs2-ext]], [[cs2-dma]], [[cs2-dumper]], and [[anti-screenshot-capture]].
 
 - **2026-08-20** — ingest `description:jxy-s/vfdynf`: entity [[vfdynf]] (Application Verifier DynFault provider; stack-hash low-resource fault injection; wait/heap/VM/registry/file/OLE API hooks; optional buffer fuzzing for TOCTOU; PCRE2 exclusions; `vfdynf.dll`; jxy-s); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[winafl]], [[fuzzable]], [[ioctlpus]], [[cfb]], and [[herpaderping]].
-
-- **2026-08-20** — ingest `readme:categories`: Cheat ~2730 (+1) / Anti Cheat ~683 (+1; Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-20** — ingest `description:Valthrun/Valthrun_PUBG`: entity [[valthrun-pubg]] (Rust PUBG external cheat framework; Zenith kernel-driver memory R/W; ESP/radar/health/distance; CR3 process-protection bypass + keyboard/mouse input injection; cheat / game:pubg [External]; Valthrun); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[valthrun-uefi-mapper]], [[pubg-external-cheat]], [[pubg-demo]], [[pubg-internal]], [[eac-cr3-bypass]], and [[ntmemory]].
 
