@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/astean1001__ProMBA.md
   - wiki/sources/descriptions/amruth-sn__kong.md
   - wiki/sources/descriptions/ThatLing__limba.md
+  - wiki/sources/descriptions/SynthesisLab__MBA.md
 updated: 2026-08-20
 confidence: high
 ---
@@ -27,7 +28,7 @@ confidence: high
 
 ## Recovery approaches
 
-1. **Algebraic simplification** — coefficient reconstruction and term cancellation ([[cobra]]; SSPAM, MBA-Blast, SiMBA in the broader corpus); practical MBA expression reduction via [[mbased]] (source: wiki/sources/descriptions/bliutech__mbased.md).
+1. **Algebraic simplification** — coefficient reconstruction and term cancellation ([[cobra]]; SSPAM, MBA-Blast, SiMBA in the broader corpus); practical MBA expression reduction via [[mbased]] (source: wiki/sources/descriptions/bliutech__mbased.md); GPU-accelerated CUDA MBA evaluation and simplification via [[mba]] (SynthesisLab; multiple kernel implementations; JSON I/O) (source: wiki/sources/descriptions/SynthesisLab__MBA.md).
 2. **Program synthesis** — oracle-guided expression search with SMT equivalence checks in IDA via [[qsynthesis]] (Python; Hex-Rays integration) (source: wiki/sources/descriptions/gmh5225__qsynthesis.md); exact finite-domain Drill & Join synthesis plus Bitwuzla equivalence proofs for 64-bit opaque predicates and MBA-style expressions via [[drill-and-join]] (C++17 header-only; SMT-guided bit dependency reduction) (source: wiki/sources/descriptions/fvrmatteo__DrillAndJoin.md); program synthesis plus term rewriting for linear/polynomial MBA deobfuscation via [[promba]] (astean1001; VM-protector contexts) (source: wiki/sources/descriptions/astean1001__ProMBA.md); agentic LLM-orchestrated deobfuscation via [[kong]] (in-process Ghidra; call-graph analysis; algebraic simplification, pattern matching, symbolic execution) (source: wiki/sources/descriptions/amruth-sn__kong.md).
 3. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
 4. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
@@ -39,4 +40,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[mbased]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[mbased]] · [[mba]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

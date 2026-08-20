@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SynthesisLab/MBA`: entity [[mba]] (SynthesisLab; GPU-accelerated CUDA MBA expression simplification toolkit; multiple CUDA kernels; JSON I/O; cooperative groups / memory / hashing helpers; deobfuscation research; Cheat Mixed boolean-arithmetic); cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[cobra]], [[mbased]], [[promba]], [[qsynthesis]], [[drill-and-join]], [[mutaben]], and [[mba-obfuscator]].
+
 - **2026-08-20** — ingest `description:SysAdminDoc/FileExplorer`: entity [[file-explorer]] (SysAdminDoc; Kotlin/Compose Material 3 Android file manager; libsu/Shizuku protected-path access; dual-pane, SAF, USB OTG; APK analyzer, hex editor, app manager; Magisk/KernelSU/APatch module browser; AES vaults, secure delete, checksum/SHA-256 integrity; SMB/SFTP/FTP/WebDAV; Cheat Android File Explorer); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xfiles]], [[adb-file-manager]], [[magisk]], [[kernelsu]], and [[apatch]].
 
 - **2026-08-20** — ingest `description:Systemcluster/wrappe`: entity [[wrappe]] (Systemcluster; Rust cross-platform packer; executable + resource directory → single self-contained binary; Zstandard compression; parallel pack/unpack; streaming decompression; metadata/resource transfer; portable one-file desktop deployment; Anti Cheat → Binary Packer `[Rust]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[oxide]], [[2pack]], [[papaw]], and [[awesome-executable-packing]].
