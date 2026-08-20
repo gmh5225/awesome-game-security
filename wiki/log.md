@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:ValveSoftware/GameNetworkingSockets`: entity [[game-networking-sockets]] (cross-platform C++/C game networking transport; reliable/unreliable messaging; fragmentation, ack vectors, bandwidth lanes, network simulation; encrypted transport + P2P NAT traversal; desktop/mobile/console; README [Steam]; ValveSoftware); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[halflife]], [[source-sdk-2013]], [[proton]], [[source-netvars]], and [[packet-sniffer]].
+
 - **2026-08-20** — ingest `description:ValveSoftware/halflife`: entity [[halflife]] (official Half-Life 1 GoldSrc engine and SDK; C/C++; client/server/shared interfaces; Windows + Linux builds; modding-oriented architecture; Game Engine / source; ValveSoftware); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[regamedll-cs]], [[cs16-client]], [[hl-mods]], [[valveanticheat1]], and [[source-sdk-2013]].
 
 - **2026-08-20** — ingest `description:ValveSoftware/Proton`: entity [[proton]] (Valve Steam Play compatibility layer; Wine-based; Docker build infra, prefix config, Steam integration manifests, per-title fixups; Linux gaming / Windows-to-Linux translation; README [Steam]; ValveSoftware); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[crossover-patcher]], [[aclist-github-io]], [[holodori-kernel-bypass]], [[winlator]], and [[elden-ring-ct-tga]].
