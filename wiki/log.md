@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TLeonardUK/ds3os`: entity [[ds3os]] (Dark Souls 2/3 online-service server emulator; Protobuf protocol; Docker; matchmaking/co-op/invasions/messages; game-server RE; Game Network / game:dark souls; TLeonardUK); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dark-souls-iii-cheat-engine-guide]], [[game-networking-sockets]], and [[packet-sniffer]].
+
 - **2026-08-20** — ingest `description:TOSTcRa/vigil`: entity [[vigil]] (TOSTcRa; Rust eBPF Linux-native anti-cheat; modular BPF ELF loading, perf event handling, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[tlac-modern-local-anti-cheat-reunioned]], [[tracee]], [[rootkit-detection-ebpf-time-trace]], [[proton]], and [[aclist-github-io]].
 
 - **2026-08-20** — ingest `description:TastSong/GameProgrammerStudyNotes`: entity [[game-programmer-study-notes]] (TastSong; large Unity C# study notes + sample projects; Markdown modules for design patterns, rendering, networking, AI, engine architecture; screenshots, snippets, hands-on exercises; Game Development notes / guide); cited on [[overviews/game-engine]]; cross-linked [[cpp-game-engine-book]], [[learn-awesome-gamedev]], [[gamedevguide]], and [[unity-script-collection]].

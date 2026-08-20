@@ -774,6 +774,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dse-Patcher-2](entities/dse-patcher-2.md) — CI.dll `g_CiOptions` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
 - [ds4-tools](entities/ds4-tools.md) — DualShock 4 HID scripts (input/LED/touchpad/motion/rumble; play + reverse-engineer DS4 on PC; gmh5225)
 - [dsh-cheatengine](entities/dsh-cheatengine.md) — DeepSeek Harness plugin: TCP bridge to Cheat Engine; on-demand `ce_*` scan/debug/script tools; session audit/snapshot; gated writes (TindalosKorone; Game Develop / MCP)
+- [ds3os](entities/ds3os.md) — Dark Souls 2/3 online-service server emulator (Protobuf protocol; Docker; matchmaking/co-op/invasions/messages; Game Network / game:dark souls; TLeonardUK)
 - [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)
 - [DVRT](entities/dvrt.md) — dynamic value resolution table for runtime address resolution (gmh5225; maintains/updates memory offsets on module load/relocation; cheat [Offset])
 - [Dynsec](entities/dynsec.md) — dynamic security analysis framework; instrumentation/monitoring for anti-tamper, anti-debug, integrity checks (gmh5225)
