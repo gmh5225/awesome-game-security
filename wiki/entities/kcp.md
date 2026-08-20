@@ -4,7 +4,8 @@ kind: entity
 topics: [game-engine, overview]
 sources:
   - wiki/sources/descriptions/skywind3000__kcp.md
-updated: 2026-07-22
+  - wiki/sources/descriptions/Unit-X__kcp-cpp.md
+updated: 2026-08-20
 confidence: medium
 ---
 
@@ -20,4 +21,4 @@ Sits under README `Game Network` as a study surface for reliable-UDP game transp
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[uwebsockets]] · [[socket-io]] · [[pitaya]] · [[jwt-tool]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[kcp-cpp]] · [[uwebsockets]] · [[socket-io]] · [[pitaya]] · [[cppserver]] · [[jwt-tool]]
