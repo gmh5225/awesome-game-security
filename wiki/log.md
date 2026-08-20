@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Splitx12/eft`: entity [[eft]] (Splitx12; C++ internal Escape From Tarkov cheat + ASM helpers; Unity object/world/entity traversal + in-game rendering; ESP/exfil/aim-assist/menu modules; `KeUserModeCallBack` Win10 notes in `usercallback.h`; cheat / game:eft [Internal]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-tarkov-internal-cheat]], [[eft-internal]], [[simple-eft-base]], [[eft-monoeft]], [[meatyeftrelease]], and [[escapefromtarkov-trainer]].
+
 - **2026-08-20** — ingest `description:Spuckwaffel/DMALib`: entity [[dmalib]] (Spuckwaffel; lightweight C++ DMA helper library; LeechCore/MemProcFS; process lookup, base resolution, memory R/W, pattern scanning, scatter reads; reusable layer for DMA game-security research tooling; cheat / DMA library); cited on [[concepts/dma]] and [[overviews/dma-attack]]; cross-linked [[volk-dma]], [[dma-invoker]], and [[pcileech]].
 
 - **2026-08-20** — ingest `description:Spuckwaffel/Kernel-Thread-Driver`: entity [[kernel-thread-driver]] (Spuckwaffel; Windows kernel-thread driver + usermode controller; status-code KM↔UM comms; target process setup, memory read, module base retrieval; AC bypass research / kernel-user architecture experiments; cheat / Thread); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[simple-mmcopymemory-hook]], [[ntmemory]], [[zero-thread-kernel]], and [[driver-hide-kernel-thread-iocancelirp]].
