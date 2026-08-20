@@ -12,7 +12,7 @@ confidence: medium
 
 General-purpose Nintendo Switch read/extract tool for displaying format metadata and extracting Switch content. Aimed at console-emulator developers and Switch researchers working in the README `Nintendo Switch` lane. (source: wiki/sources/descriptions/jakcron__nstool.md)
 
-Complements emulator trees such as [[nuzu]] and live homebrew memory tooling such as [[se-tools]] by focusing on offline cartridge/image introspection rather than runtime emulation or CFW memory editing.
+Complements GUI package browsers such as [[xci-explorer]] (WinForms XCI/NSP inspect/extract/cert edit), emulator trees such as [[nuzu]], and live homebrew memory tooling such as [[se-tools]] by focusing on offline cartridge/image introspection rather than runtime emulation or CFW memory editing.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements emulator trees such as [[nuzu]] and live homebrew memory tooling suc
 
 ## Related
 
-[[nuzu]] · [[se-tools]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[nuzu]] · [[xci-explorer]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

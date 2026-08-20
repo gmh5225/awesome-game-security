@@ -1016,6 +1016,7 @@ sources:
   - wiki/sources/descriptions/perilouswithadollarsign__cstrike15_src.md
   - wiki/sources/descriptions/quickemu-project__quickemu.md
   - wiki/sources/descriptions/jakcron__nstool.md
+  - wiki/sources/descriptions/StudentBlake__XCI-Explorer.md
   - wiki/sources/descriptions/qqq26__nuzu.md
   - wiki/sources/descriptions/gmh5225__yuzu-android.md
   - wiki/sources/descriptions/brunodev85__winlator.md
@@ -2118,6 +2119,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Raw Luma3DS `.3gx` overlay/cheat engine template [[ctr-composer]] (self-rendered UI; no CTRPluginFramework; any-Title-ID starter / revive old `.plg`/`.3gx`) sits in the console `Nintendo 3DS` lane. (source: wiki/sources/descriptions/samaBR85__CTRComposer.md)
 - OoT3D Luma3DS `.3gx` cheat/tools overlay [[ocarina-ctr-composer]] (built on [[ctr-composer]]; direct memory writes; cheat search / hex editor / RAM dump) sits in the same `Nintendo 3DS` lane. (source: wiki/sources/descriptions/samaBR85__OcarinaCTRComposer.md)
 - General-purpose Switch read/extract tooling such as [[nstool]] (format introspection / extraction; console-emulator / Switch research) sits in the `Nintendo Switch` lane. (source: wiki/sources/descriptions/jakcron__nstool.md)
+- Windows GUI Switch XCI/NSP package inspector such as [[xci-explorer]] (C# WinForms; XCI/NCA/HFS0/PFS0 parsers; metadata, partition browse, hash check, extract, certificate edit; Switch modding / cartridge image RE; StudentBlake; README [XCI Explorer]) sits in the same `Nintendo Switch` lane. (source: wiki/sources/descriptions/StudentBlake__XCI-Explorer.md)
 - Yuzu-based Switch emulator mirror [[nuzu]] (unofficial fork) sits in the same `Nintendo Switch` lane for console-emulator / Switch research. (source: wiki/sources/descriptions/qqq26__nuzu.md)
 - Android yuzu port [[yuzu-android]] (ARM64 JIT; Vulkan/OpenGL; Switch game compatibility on Android) sits in the same `Nintendo Switch` / mobile-emulator crossover lane. (source: wiki/sources/descriptions/gmh5225__yuzu-android.md)
 - Android Eden-based Switch emulator OpenSw (RemiPelloux/OpenSw; ARM64; Vulkan; per-game profiles; live cheat support) sits in the same `Nintendo Switch` / mobile-emulator crossover lane. (source: wiki/sources/README-categories.md)
