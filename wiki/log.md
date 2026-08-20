@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SsageParuders/Android_Native_Surface`: updated entity [[android-native-surface]] (SsageParuders fork; native surface rendering library; overlay surfaces without app-level permissions; AOSP-compatible Android 10–14; surface draw + screen recording; game-security / overlay-dev study; README Android Native Overlay); cited on [[overviews/mobile-security]] and [[overviews/graphics-api]]; cross-linked [[external-imgui-android]], [[android-imgui-menu]], and [[cheat-unity-games]].
+
 - **2026-08-20** — ingest `description:SsageParuders/CheatUnityGames`: entity [[cheat-unity-games]] (SsageParuders; Android NDK Unity cheat template; C/C++ VSCode build scripts; Il2CppResolver + Dobby runtime hooking; shared-object/native-binary builds; Android injection / native-layer Unity manipulation study; README Unity cheat framwork); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[il2cpp-resolver]], [[dobby]], [[android-cheat-template]], and [[imgui-unity-android]].
 
 - **2026-08-20** — ingest `description:Staatsgeheim/PsImageNotifyRoutineSpamFilter`: entity [[ps-image-notify-routine-spam-filter]] (Staatsgeheim; Windows kernel utility; filters noisy PsImageNotifyRoutine callbacks via RtlWalkFrameChain stack walking; C x64 driver; callback hygiene for kernel monitoring, AC telemetry, and cleaner driver-side event analysis; README ImageNotify Callback With RtlWalkFrameChain); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[driver-watchowl]], [[windbg-extensions]], [[ps-notif-routine-unloader]], and [[stack-spoofing]].

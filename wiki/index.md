@@ -200,7 +200,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
 - [android-imgui-menu](entities/android-imgui-menu.md) — Rust ARM64 Android ImGui cdylib (EGL/Vulkan hooks; cheat / render-draw)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)
-- [Android Native Surface](entities/android-native-surface.md) — native C/C++ overlay surface (ANativeWindow / SurfaceFlinger; transparent ESP/mod menu; gmh5225)
+- [Android Native Surface](entities/android-native-surface.md) — native C/C++ overlay surface library (ANativeWindow / SurfaceFlinger; Android 10–14 AOSP draw + screen record; no app-level permissions; gmh5225 + SsageParuders)
 - [Android OpenGL ES Chams](entities/android-opengl-es-chams.md) — OpenGL ES chams sample (GLES draw/shader hooks; annotated headers; cheat / render-draw [Chams]; gmh5225)
 - [Android Overlay Malware Example](entities/android-overlay-malware-example.md) — Android overlay credential-phishing PoC (foreground-app monitor; `WindowManager.addView` / `startActivity`; banking-trojan pattern; geeksonsecurity)
 - [Android Overlay Protection](entities/android-overlay-protection.md) — Java overlay/tapjacking detection library (`TYPE_APPLICATION_OVERLAY`; `filterTouchesWhenObscured`; callback alerts; geeksonsecurity)
