@@ -23,7 +23,8 @@ sources:
   - wiki/sources/descriptions/chrisgdt__DELBOT-Mouse.md
   - wiki/sources/descriptions/Zurek0x__NuremX.md
   - wiki/sources/descriptions/YouNeverKnow00__Rust-Auto-Weapon-Detection-OpenCV-Example.md
-updated: 2026-08-19
+  - wiki/sources/descriptions/gravemaulr__MLAntiCheat.md
+updated: 2026-08-20
 confidence: medium
 ---
 
@@ -76,6 +77,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[battlerite-bot]] — Battlerite arena brawler automation bot (memory or screen recognition; ability casting, targeting, movement; gmh5225)
 - [[auto-simulated-universe]] — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; gmh5225)
 - [[minecraft-anticheatai]] — Minecraft Paper DeepGuard; ONNX 1D-CNN over server-side behavior sequences (scaffold-bridging focus; BehaviorRecorder + PyTorch training pipeline)
+- [[mlanticheat]] — Minecraft Paper 1.21.4+ combat AC; per-server ensemble neural + logistic models + anomaly detection over combat rotations; operator labeling, Shadow Mode review, optional PacketEvents rotation tracking, automatic retraining (gravemaulr)
 - [[model-anti-cheat]] — DayZ server-side ML pipeline; mission-script per-second telemetry (position, view, weapon, raycast line-of-sight) + Python feature extraction + RandomForest aimbot/movement anomaly classifier (sample cheater sessions)
 - [[deep-learning-anti-cheat-csgo]] — CS:GO deep-learning anti-cheat implementation (memory scan, code integrity, process/debugger checks, network packet validation; detection-to-response pipeline; gmh5225)
 - [[ark]] — distributed-GPU deep learning framework for scaled offensive/defensive ML training (gmh5225; cheat / Tool)
