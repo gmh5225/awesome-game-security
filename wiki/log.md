@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:UETools/UETools`: entity [[uetools]] (.NET C# libraries for UE4 binary asset data; PAK virtual file systems; asset structures and registries; reusable modules for tooling; offline inspection/modding/format research; Game Assets; UETools); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uassetapi]], [[uassetgui]], [[paksmith]], [[rust-u4pak]], and [[awesome-game-file-format-reversing]].
+
 - **2026-08-20** — ingest `description:UTINKA/source-engine.2003`: entity [[source-engine-2003]] (early HL2-era Source engine archival snapshot; engine/client/server/rendering/utilities; material/graphics, game DLL logic, legacy VS project files; engine internals / legacy game security RE; Game Engine / source; UTINKA); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[source-engine]], [[source-engine-2007]], [[source-sdk-2013]], and [[hl2sdk]].
 
 - **2026-08-20** — ingest `description:UZDoom/UZDoom`: entity [[uzdoom]] (modern Doom source port; GZDoom continuation; high-resolution rendering, dynamic lighting, 3D floors, broad mod support; OpenGL/Vulkan; cross-platform CMake C/C++; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[gzdoom]], [[doomretro]], [[devilution]], and [[game-design-documents]].
