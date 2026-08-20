@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Tokyodidit/cs2External`: entity [[cs2external]] (Tokyodidit; C++ external CS2 ESP; process memory reads; configurable JSON offsets; world-to-screen entity tracking; transparent Win32/GDI overlay—boxes, health bars, player names; cheat prototyping and practical memory analysis; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-base]], [[cs2-external-cheat]], [[cs2-external]], [[cs2-external-1]], [[pythoncs2]], [[titled-gui-cs2]], [[cs2-offsets]], and [[world-to-screen]].
+
 - **2026-08-20** — ingest `description:TorgoTorgo/ghidra-findcrypt`: entity [[ghidra-findcrypt]] (TorgoTorgo; Java Gradle Ghidra analyzer; JSON crypto-constant signature DB; AES/DES/MD5/SHA-1/TEA/Salsa/CRC32 labeling; malware/game-security crypto routine triage; cheat / Ghidra Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[findcrypt-yara]], [[ghidra]], and [[ghidra-gradle-plugin]].
 
 - **2026-08-20** — ingest `description:TorqueGameEngines/Torque2D`: entity [[torque2d]] (open-source cross-platform 2D C++ game engine; rendering, Box2D physics, audio, animation, modular project tooling; Windows/macOS/Linux/iOS/Android/web; sample modules; Game Engine / 2D); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[torque3d]], [[openclaw]], [[cocos2d-x]], [[flatredball]], [[open-source-engines]], and [[custom-game-engines]].
