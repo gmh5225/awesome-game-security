@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Valthrun/valthrun-uefi-mapper`: entity [[valthrun-uefi-mapper]] (Rust x86_64 UEFI boot mapper; bootable ISO/USB deployment; pre-OS game driver load; boot-time driver init and stealth-oriented Windows security research; README [EFI Manual Map]; Valthrun); cited on [[overviews/windows-kernel]] and [[known-driver-mappers]]; cross-linked [[sumap]], [[xigmapper]], [[uefi-bootloader]], and [[luaboot]].
+
 - **2026-08-20** — ingest `description:ValveSoftware/GameNetworkingSockets`: entity [[game-networking-sockets]] (cross-platform C++/C game networking transport; reliable/unreliable messaging; fragmentation, ack vectors, bandwidth lanes, network simulation; encrypted transport + P2P NAT traversal; desktop/mobile/console; README [Steam]; ValveSoftware); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[halflife]], [[source-sdk-2013]], [[proton]], [[source-netvars]], and [[packet-sniffer]].
 
 - **2026-08-20** — ingest `description:ValveSoftware/halflife`: entity [[halflife]] (official Half-Life 1 GoldSrc engine and SDK; C/C++; client/server/shared interfaces; Windows + Linux builds; modding-oriented architecture; Game Engine / source; ValveSoftware); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[regamedll-cs]], [[cs16-client]], [[hl-mods]], [[valveanticheat1]], and [[source-sdk-2013]].

@@ -2527,6 +2527,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Valorant-SDK-2024](entities/valorant-sdk-2024.md) — Valorant SDK: shader / rendering / audio systems (C/C++; cheat / game:valorant [SDK])
 - [VALORANT-FNamePool](entities/valorant-fnamepool.md) — iterate/decrypt Valorant FNamePool->Entries (C/C++; cheat / game:valorant)
 - [ValorantCC](entities/valorantcc.md) — Valorant crosshair setting (cheat / game:valorant)
+- [valthrun-uefi-mapper](entities/valthrun-uefi-mapper.md) — Rust UEFI boot mapper; bootable ISO/USB; pre-OS game driver load; boot-time driver init and stealth security research (EFI Manual Map; Valthrun)
 - [Van1338](entities/van1338.md) — timing-attack handle elevation; Windows object-callback design (AC stress testing)
 - [VanderLeague](entities/vanderleague.md) — hypervisor-assisted LoL offensive stack (C/C++; kernel driver + rendering; gmh5225; cheat / game:lol)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
