@@ -18,4 +18,4 @@ Open-source Torque 3D game engine: a full-featured C++ codebase with CMake build
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overload]] · [[urho3d]] · [[wickedengine]] · [[open-source-engines]] · [[custom-game-engines]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[torque2d]] · [[overload]] · [[urho3d]] · [[wickedengine]] · [[open-source-engines]] · [[custom-game-engines]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TorqueGameEngines/Torque2D`: entity [[torque2d]] (open-source cross-platform 2D C++ game engine; rendering, Box2D physics, audio, animation, modular project tooling; Windows/macOS/Linux/iOS/Android/web; sample modules; Game Engine / 2D); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[torque3d]], [[openclaw]], [[cocos2d-x]], [[flatredball]], [[open-source-engines]], and [[custom-game-engines]].
+
 - **2026-08-20** — ingest `description:TorqueGameEngines/Torque3D`: entity [[torque3d]] (open-source Torque 3D C++ game engine; CMake; Assimp model import; rendering, physics, networking, scripting subsystems; multi-platform configurable builds; community-driven; Game Engine / 3D); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[overload]], [[urho3d]], [[wickedengine]], [[open-source-engines]], and [[custom-game-engines]].
 
 - **2026-08-20** — ingest `description:TrinityCore/TrinityCore`: entity [[trinitycore]] (open-source WoW MMORPG server framework; C++; modular auth/world servers; async DB pooling + prepared statements; scripting APIs; multi-expansion combat/quests/achievements/battlegrounds; protocol emulation; cheat / game:wow [Server for WOW]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[azerothcore-wotlk]], [[legioncore-7-3-5]], [[azerust]], and [[awesome-wow-rust]].

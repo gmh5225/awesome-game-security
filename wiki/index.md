@@ -2414,6 +2414,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [toon](entities/toon.md) — modular C++ graphics-demo engine (driver dev + OpenGL/Vulkan; benjinx; Game Engine / source)
 - [tool-diy-system-memory-dump](entities/tool-diy-system-memory-dump.md) — DIY live Windows system memory dump (crash-dump format; WinDbg / Volatility; gmh5225)
 - [Tool-Tree](entities/tool-tree.md) — Android ROM/APK unpack-repack toolkit for ARM64 (boot/super/APK/APKS/APEX; apktool-style decode/build; root or non-root; Zenlua)
+- [Torque 2D](entities/torque2d.md) — open-source cross-platform 2D C++ game engine (Box2D physics; render/audio/animation; modular tooling; multi-platform; Game Engine / 2D)
 - [Torque 3D](entities/torque3d.md) — open-source Torque 3D C++ game engine (CMake; Assimp import; render/physics/network/scripting; multi-platform; Game Engine / 3D)
 - [Tools](entities/tools.md) — doomedraven malware-analysis infra scripts (KVM/QEMU, IDA deobfuscation, Volatility3 plugins, CAPE/Cuckoo sandbox setup; QEMU Script)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
