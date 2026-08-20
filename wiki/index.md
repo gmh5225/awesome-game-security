@@ -2261,6 +2261,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [subhook](entities/subhook.md) — super-simple C/C++ inline hook lib (Win/Linux/macOS; x86 32/64; cheat / hook research)
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
 - [source-engine](entities/source-engine.md) — open TF2-era Source Engine tree (CI / cross-platform; Game Engine / source)
+- [source-engine-2003](entities/source-engine-2003.md) — early HL2-era Source engine archival snapshot (2003 tree; material/graphics, game DLL logic, legacy VS toolchains; Game Engine / source; UTINKA)
 - [source-engine-2007](entities/source-engine-2007.md) — Orange Box Source Engine 2007 source mirror (se2007; networking/demos/rendering; Game Engine / source; gmh5225)
 - [source-sdk-2013](entities/source-sdk-2013.md) — official Valve Source SDK 2013 (HL2/HL2DM/TF2; VS + Steam Runtime builds; non-commercial mods; Game Engine / source; ValveSoftware)
 - [source-sdk-orangebox](entities/source-sdk-orangebox.md) — Orange Box Source SDK tree (C/C++; shaders/rendering/drivers; Game Engine / source; gmh5225)

@@ -12,7 +12,7 @@ confidence: medium
 
 **Source Engine 2007** (Orange Box era) source-tree mirror (gmh5225) covering the engine, client, server, and related modules under `se2007`. Includes C++ engine internals—networking, demos, rendering hooks into the Source stack, and game-side subsystems—useful for game developers, engine programmers, and reverse engineers studying that Source generation. (source: wiki/sources/descriptions/gmh5225__SourceEngine2007.md)
 
-Complements TF2-era open trees such as [[source-engine]], Orange Box SDK references such as [[source-sdk-orangebox]], leaked CS:GO trees such as [[cstrike15-src]], reverse-engineered header dumps such as [[sdk]], and Source tooling such as [[sourceengineexplorer]].
+Complements earlier HL2-era archival snapshots such as [[source-engine-2003]], TF2-era open trees such as [[source-engine]], Orange Box SDK references such as [[source-sdk-orangebox]], leaked CS:GO trees such as [[cstrike15-src]], reverse-engineered header dumps such as [[sdk]], and Source tooling such as [[sourceengineexplorer]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements TF2-era open trees such as [[source-engine]], Orange Box SDK referen
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[source-engine]] · [[source-sdk-orangebox]] · [[sourceengineexplorer]] · [[cstrike15-src]] · [[sdk]] · [[teamfortress2-internal]] · [[source2gen]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[source-engine-2003]] · [[source-engine]] · [[source-sdk-orangebox]] · [[sourceengineexplorer]] · [[cstrike15-src]] · [[sdk]] · [[teamfortress2-internal]] · [[source2gen]]
