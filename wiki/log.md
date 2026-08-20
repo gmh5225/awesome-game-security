@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TLeonardUK/ds2os`: entity [[ds2os]] (deprecated Dark Souls 2 online-service placeholder; README-only migration pointer; no implementation; historical reference to [[ds3os]]; Game Network / game:dark souls; TLeonardUK); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[ds3os]] and [[dark-souls-iii-cheat-engine-guide]].
+
 - **2026-08-20** — ingest `description:TLeonardUK/ds3os`: entity [[ds3os]] (Dark Souls 2/3 online-service server emulator; Protobuf protocol; Docker; matchmaking/co-op/invasions/messages; game-server RE; Game Network / game:dark souls; TLeonardUK); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dark-souls-iii-cheat-engine-guide]], [[game-networking-sockets]], and [[packet-sniffer]].
 
 - **2026-08-20** — ingest `description:TOSTcRa/vigil`: entity [[vigil]] (TOSTcRa; Rust eBPF Linux-native anti-cheat; modular BPF ELF loading, perf event handling, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[tlac-modern-local-anti-cheat-reunioned]], [[tracee]], [[rootkit-detection-ebpf-time-trace]], [[proton]], and [[aclist-github-io]].

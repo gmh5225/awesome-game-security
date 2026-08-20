@@ -12,7 +12,7 @@ confidence: medium
 
 Open-source **Dark Souls 2** and **Dark Souls 3** online-service server emulator (TLeonardUK). Implements the Souls-series multiplayer protocol using **Protobuf** message definitions, supports **Docker** deployment, and handles player matchmaking, co-op summoning, invasions, and in-game message systems. Primarily useful for game-server researchers and reverse engineers studying Souls-series network protocols and multiplayer server architecture—not a live-service cheat client. (source: wiki/sources/descriptions/TLeonardUK__ds3os.md)
 
-The deprecated ds2os placeholder repo redirected active DS2 work into this codebase.
+The deprecated [[ds2os]] placeholder redirected active DS2 online-service work into this codebase. (source: wiki/sources/descriptions/TLeonardUK__ds2os.md)
 
 ## Links
 
@@ -20,4 +20,4 @@ The deprecated ds2os placeholder repo redirected active DS2 work into this codeb
 
 ## Related
 
-[[dark-souls-iii-cheat-engine-guide]] · [[game-networking-sockets]] · [[packet-sniffer]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[ds2os]] · [[dark-souls-iii-cheat-engine-guide]] · [[game-networking-sockets]] · [[packet-sniffer]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
