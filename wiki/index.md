@@ -1155,6 +1155,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Hooking-via-InstrumentationCallback](entities/hooking-via-instrumentation-callback.md) — Ring3 Instrumentation Callback hook (NtSetInformationProcess; no ntdll patch)
 - [HiveWE](entities/hivewe.md) — WC3 World Editor alternative (large-map editor; cheat / game:warcraft iii)
 - [Holodori-Kernel-Bypass](entities/holodori-kernel-bypass.md) — userspace emu of Hololive Dreams usrdrv017964.sys (Wine/Proton; MinHook)
+- [halflife](entities/halflife.md) — Half-Life 1 GoldSrc engine and SDK source (C/C++; client/server/shared interfaces; Windows + Linux builds; modding-oriented architecture; Game Engine / source; ValveSoftware)
 - [hl-mods](entities/hl-mods.md) — Half-Life / GoldSrc mods (Cold Ice Remastered + historical; Modification For Half-Life)
 - [hlmaster](entities/hlmaster.md) — reverse-engineered Half-Life Master Server (closed master-server protocol RE; Game Engine / source; ezhangle)
 - [hl2sdk](entities/hl2sdk.md) — AlliedModders Half-Life 2 Source SDK (C/C++; client/server/game logic + mod/plugin build infra; Game Engine / source)

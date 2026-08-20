@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:ValveSoftware/halflife`: entity [[halflife]] (official Half-Life 1 GoldSrc engine and SDK; C/C++; client/server/shared interfaces; Windows + Linux builds; modding-oriented architecture; Game Engine / source; ValveSoftware); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[regamedll-cs]], [[cs16-client]], [[hl-mods]], [[valveanticheat1]], and [[source-sdk-2013]].
+
 - **2026-08-19** — ingest `description:ValveSoftware/source-sdk-2013`: entity [[source-sdk-2013]] (official Valve Source SDK 2013; C++; HL2/HL2DM/TF2 game+engine code; Visual Studio + Steam Runtime Linux builds; non-commercial mod distribution; Game Engine / source; ValveSoftware); cited on [[overviews/game-engine]] and [[source-netvars]]; cross-linked [[hl2sdk]], [[source-engine]], [[source-engine-2007]], and [[source-sdk-orangebox]].
 
 - **2026-08-19** — ingest `description:VarshaWanjari0/Auto-Android-App-Modding-Tool`: entity [[auto-android-app-modding-tool]] (UAMT; Termux Python TUI; Frida Gadget + custom `.so` inject; patchelf vs APKEditor smali auto-select for libil2cpp.so/libunity.so; multi-ABI gadget, zipalign, v1/v2/v3 sign; no root; VarshaWanjari0); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[apk-sh]], [[tool-tree]], and [[termux-app]].
