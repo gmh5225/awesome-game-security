@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SurgeGotTappedAgain/Pink-Eye`: entity [[pink-eye]] (SurgeGotTappedAgain; Windows KMDF kernel-mode PoC; anti-cheat object-callback redirect via code caves + integrity-check path tampering; C/C++ driver; AC research / defensive testing / kernel detection hardening study); cited on [[concepts/kernel-callbacks]], [[overviews/anti-cheat]], and [[overviews/windows-kernel]]; cross-linked [[mapped-callback]], [[notify-routine-hijack-thread]], and [[bustercall]].
+
 - **2026-08-20** — ingest `description:SurgeGotTappedAgain/Window-Hijack`: entity [[window-hijack-overlay]] (SurgeGotTappedAgain; C++ external overlay window hijack PoC; existing HWND model + native flags; SetWindowsHookEx input; DX11/ImGui; visibility/detection tradeoff research; slug disambiguated from [[window-hijack]] thesecretclub KM driver); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[overlay]], [[setwindowhookex]], and [[present-hook]].
 
 - **2026-08-20** — ingest `description:Sutaigne/alibi`: entity [[alibi]] (Sutaigne; read-only PowerShell Windows forensic attestation kit; PC scan for cheat software/DMA artifacts/HWID spoofers + console-rig scan for capture-card stacks/vision aimbots/XIM/Cronus/ReaSnow; verdict-tier text/HTML reports; no install/telemetry; accused-player defensive evidence for tournament/Discord/lobby review; CoD/CS2/Apex/Tarkov/Rust/R6/Marvel Rivals); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[jaranalyzer]], [[driver-risk-scout]], [[drvscan]], [[hardware-input-injection]], and [[ai-aimbot-detection]].
