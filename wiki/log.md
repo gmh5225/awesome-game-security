@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Th3Spl/IoCreateDriver`: entity [[iocreatedriver]] (Th3Spl; custom IoCreateDriver load-path implementation; C/C++ Visual Studio + WDK; bypass standard driver-load visibility/logging; manual-map + entry-point notes; kernel experimentation / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[simpleuefi]], [[umap]], [[kdmapper]], [[map-file-in-system-space]], and [[known-driver-mappers]].
+
 - **2026-08-20** — ingest `description:Th3Spl/SimpleUEFI`: entity [[simpleuefi]] (Th3Spl; simplified UEFI application dev framework; Visual Studio + EDK-II toolchain; MSVC project templates, property sheets, Python setup script; bootstrap UEFI apps without full EDK-II build complexity; UEFI security / bootkit developers); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[eficmake]], [[uefi-bootkit]], [[uefi-bootloader]], [[bootlicker]], [[luaboot]], and [[efixplorer]].
 
 - **2026-08-20** — ingest `description:ThatLing/limba`: entity [[limba]] (ThatLing; compile-time MBA control-flow obfuscation PoC; C++20 Clang/clang-cl; randomized jump-target encoding + per-build rewrite rules; premake integration examples; RE resistance / binary obfuscation research; Cheat Mixed boolean-arithmetic); cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfusheader-h]], [[promba]], and [[cobra]].
