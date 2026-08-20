@@ -23,6 +23,7 @@ sources:
   - wiki/sources/descriptions/ch3rn0byl__WinDbg-Extensions.md
   - wiki/sources/descriptions/br-sn__CheekyBlinder.md
   - wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md
+  - wiki/sources/descriptions/zensenzay__wnf-driver-meme.md
 updated: 2026-08-20
 confidence: high
 ---
@@ -35,7 +36,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 - `PsSetCreateProcessNotifyRoutine(Ex/2)`, `PsSetCreateThreadNotifyRoutine(Ex)`
 - `PsSetLoadImageNotifyRoutine(Ex)`
-- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md); offensive handle-elevation research such as [[libelevate]] studies obtaining full-access process handles past AC/security strip restrictions for memory R/W (source: wiki/sources/descriptions/notscimmy__libelevate.md); timing-attack handle-elevation PoC [[van1338]] explores object-callback design complexity for AC engineers / stress testing (source: wiki/sources/descriptions/kkent030315__Van1338.md)
+- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md); offensive handle-elevation research such as [[libelevate]] studies obtaining full-access process handles past AC/security strip restrictions for memory R/W (source: wiki/sources/descriptions/notscimmy__libelevate.md); timing-attack handle-elevation PoC [[van1338]] explores object-callback design complexity for AC engineers / stress testing (source: wiki/sources/descriptions/kkent030315__Van1338.md); WNF-backed process-hardening drivers such as [[wnf-driver-meme]] (zensenzay; strip VM read/write, duplicate, suspend/resume on protected processes; covert KM↔UM comm without device objects) (source: wiki/sources/descriptions/zensenzay__wnf-driver-meme.md)
 - `CmRegisterCallback(Ex)`, minifilter `FltRegisterFilter`
 - `KeRegisterBoundCallback` — research sample [[boundcallback]] (cheat / driver-communication lane) (source: wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md)
 
@@ -49,4 +50,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[libelevate]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
