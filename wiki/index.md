@@ -2392,6 +2392,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TrickyStore](entities/trickystore.md) — Android Keystore trick rewrite (Android 10+; cheat / HWID / keystore research; beakthoven)
 - [triton-bn](entities/triton-bn.md) — Binary Ninja Triton DBA plugin scaffold (symbolic exec / lifting base; ergrelet; Cheat Binary Ninja Plugins)
 - [Trinity](entities/trinity.md) — Windows kernel exploitation framework (modular driver/memory/priv-esc chain → arbitrary kernel code execution; disables & removes Defender; cpz)
+- [TrinityCore](entities/trinitycore.md) — open-source WoW MMORPG server framework (modular auth/world servers; async DB pooling; scripting APIs; multi-expansion combat/quests/achievements/battlegrounds; protocol emulation; cheat / game:wow [Server for WOW])
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
 - [TrollStore](entities/trollstore.md) — iOS perma-signed jailed IPA installer (CoreTrust/AMFI; arbitrary entitlements)
 - [TS-Fucker](entities/ts-fucker.md) — runtime TestSigning toggle via Dell `dbutil_2_3.sys` BYOVD (kernel live-patch; symbol-assisted offsets; no reboot; gmh5225)

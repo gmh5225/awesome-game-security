@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TrinityCore/TrinityCore`: entity [[trinitycore]] (open-source WoW MMORPG server framework; C++; modular auth/world servers; async DB pooling + prepared statements; scripting APIs; multi-expansion combat/quests/achievements/battlegrounds; protocol emulation; cheat / game:wow [Server for WOW]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[azerothcore-wotlk]], [[legioncore-7-3-5]], [[azerust]], and [[awesome-wow-rust]].
+
 - **2026-08-20** — ingest `description:TrungNguyen1909/aarch64-sysreg-ida`: entity [[aarch64-sysreg-ida]] (TrungNguyen1909; Python IDA Pro plugin; AArch64 MSR/SYS → register names; embedded ARMv8 register DB + optional Apple register JSON; ARM OS/kernel RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[ida-kallsyms-symbol-renamer]], [[import-kallsyms]], [[ida-kernelcache-ng]], [[ida-kcpp]], [[farm64]], and [[list-of-ida-plugins]].
 
 - **2026-08-20** — ingest `description:Trustings/DMA_PE_Dumper`: entity [[dma-pe-dumper]] (Trustings; C++ DMA PE dumper via LeechCore/VMMDLL; PCIe FPGA physical memory; CR3 shuffle + DTB patching for EXE/DLL extraction; memory forensics / AC research); cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech]], [[volk-dma]], and [[dumpepe]].
