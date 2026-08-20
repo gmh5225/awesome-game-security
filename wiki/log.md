@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Squalr/Squally`: entity [[squally]] (Squalr; C++ Cocos2d-x 2D platformer; gamified game-hacking intro through gameplay; values/operators/logic for memory reasoning; Windows/macOS/Linux; cheat / guide); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[squalr-sharp]], [[intro-to-gamehacking]], [[gamehacking-cheatsheet]], and [[cocos2d-x]].
+
 - **2026-08-20** — ingest `description:Squalr/Squalr-Sharp`: entity [[squalr-sharp]] (Squalr; C#/.NET Windows memory editor; WPF GUI + CLI + engine API; SIMD scan, pointer resolution, NASM assemble/disassemble, C# scripting, process attach/debug, .NET object inspection; cheat / memory editor); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[pince]], [[bizhawk]], [[intro-to-gamehacking]], [[reclass-ex]], and [[dnspy]].
 
 - **2026-08-20** — ingest `description:SsageParuders/Android_Native_Surface`: updated entity [[android-native-surface]] (SsageParuders fork; native surface rendering library; overlay surfaces without app-level permissions; AOSP-compatible Android 10–14; surface draw + screen recording; game-security / overlay-dev study; README Android Native Overlay); cited on [[overviews/mobile-security]] and [[overviews/graphics-api]]; cross-linked [[external-imgui-android]], [[android-imgui-menu]], and [[cheat-unity-games]].

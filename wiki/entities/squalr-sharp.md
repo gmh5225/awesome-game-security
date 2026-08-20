@@ -22,4 +22,4 @@ Sits in the Windows **C# memory-editor** lane beside [[cheat-engine]] and [[pinc
 
 ## Related
 
-[[cheat-engine]] · [[pince]] · [[bizhawk]] · [[intro-to-gamehacking]] · [[reclass-ex]] · [[dnspy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[squally]] · [[cheat-engine]] · [[pince]] · [[bizhawk]] · [[intro-to-gamehacking]] · [[reclass-ex]] · [[dnspy]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
