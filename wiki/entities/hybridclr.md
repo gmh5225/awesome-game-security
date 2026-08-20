@@ -20,4 +20,4 @@ From the same focus-creative-games org as defensive Unity obfuscation [[obfuz]];
 
 ## Related
 
-[[il2cpp]] · [[obfuz]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[xlua]] · [[il2cpp]] · [[obfuz]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]

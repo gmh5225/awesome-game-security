@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Tencent/xLua`: entity [[xlua]] (Tencent; Lua↔C# bridge for Unity/.NET/Mono; two-way interop, runtime hotfix, generated bindings + GC opts; multi-platform game clients; Game Hot Patch / flexible scripting); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[hybridclr]], [[luamachine]], [[mono]], and [[il2cpp]].
+
 - **2026-08-20** — ingest `description:TensorBlock/awesome-mcp-servers`: entity [[awesome-mcp-servers]] (TensorBlock; large curated MCP server index; Markdown category pages across AI, data, infrastructure, security, gaming; discovery/cataloging for AI workflow tool backends; Awesome MCP); cited on [[overviews/overview]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-gamedev-agent-skills]], [[ida-pro-mcp]], [[cheatengine-mcp-bridge]], [[unity-mcp]], [[mcp-safety-scanner]], and [[vulnerable-mcp-servers-lab]].
 
 - **2026-08-20** — ingest `description:TensorWorks/UE-Clang-Format`: entity [[ue-clang-format]] (TensorWorks; Clang-Format config tuned for Unreal Engine C++ Epic-style conventions; VS Code/editor setup guidance; lightweight config/docs repo; team formatting consistency; Game Engine / UE Clang-Format configuration); cited on [[overviews/game-engine]] and [[unreal-engine-guide]]; cross-linked [[ue4-tutorials]], [[ue-buivalidator]], and [[clipboard-tools-ue4]].
