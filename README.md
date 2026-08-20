@@ -4620,6 +4620,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/0vercl0k/wtf
 - https://github.com/0vercl0k/snapshot [Rust WinDbg extension that dumps CPU register state and VM physical memory for snapshot-based kernel fuzzing (companion to wtf)]
 - https://github.com/kernullist/kernforge [Go workbench for Windows/anti-cheat project analysis, fuzzing, and evidence-backed verification]
+- https://github.com/jxy-s/vfdynf [Application Verifier DynFault provider for stack-aware Windows fault injection and targeted API fuzzing]
 
 > OpenCV
 - https://github.com/YouNeverKnow00/Rust-Auto-Weapon-Detection-OpenCV-Example
