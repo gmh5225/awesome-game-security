@@ -341,6 +341,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Binary Internals Viewer](entities/binaryinternals.md) — Java interactive binary format inspector (field/bit-level BMP/class/JPEG/PNG/ZIP; OpenJDK/Maven; reusable format libs; RE education / parser dev)
 - [BinaryShield](entities/binary-shield.md) — open-source bin2bin x86-64 code virtualizer (custom bytecode + purpose-built VM; AC Obfuscation Engine `[VM]`; connorjaydunn)
 - [binsync](entities/binsync.md) — cross-disassembler collaborative RE sync (IDA/Ghidra/BN/angr; Git-backed names/comments/types; cheat / Sync; gmh5225)
+- [BizHawk](entities/bizhawk.md) — multi-system C# retro emulator (TAS/TAStudio, Lua memory+input APIs, RAM search, hex editor, CPU debuggers, savestates/rewind; NES/SNES/GB/GBA/Genesis/N64/DS/PS1/MAME; TASEmulators)
 - [BloatedHammer](entities/bloatedhammer.md) — C++20 fold API hammering (no loops; AC Compile Time)
 - [BLOCKPOST-Cheat](entities/blockpost-cheat.md) — BLOCKPOST Unity IL2CPP cheat (C/C++; IL2CPP analysis + native hooking; cheat / game:blockpost; gmh5225)
 - [blood-hunt](entities/blood-hunt.md) — Blood Hunt cheat (C/C++; driver / rendering / modding; cheat / game:bloodhunt; gmh5225)

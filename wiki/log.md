@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TASEmulators/BizHawk`: entity [[bizhawk]] (TASEmulators; multi-system C#/.NET retro emulator + native cores; TAS/TAStudio, Lua memory+input APIs, RAM search, hex editor, CPU debuggers, savestates/rewind, Game Genie/GameShark decoders; NES/SNES/GB/GBA/Genesis/N64/DS/PS1/MAME; deterministic frame control for cheat/mechanics RE); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[feather-gb]], [[kevboy]], [[gecko]], and [[cheat-engine]].
+
 - **2026-08-20** — ingest `description:TKazer/CS2_External`: entity [[tkazer-cs2-external]] (TKazer; C++ external CS2 cheat framework; ESP variants, aimbot+RCS, triggerbot, radar, bunnyhop, visibility checks, offset management; external ImGui UI + process memory utilities; educational external cheat design and anti-cheat response research; cheat / game:cs2 [External]; slug disambiguated from [[cs2-external]]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-cheat]], [[cs2-external-1]], [[cs2external]], [[titled-gui-cs2]], [[cs2-offsets]], and [[world-to-screen]].
 
 - **2026-08-20** — ingest `description:cognis-digital/rootsentry`: entity [[rootsentry]] (cognis-digital; zero-dependency Python mobile runtime-integrity framework; root/jailbreak, emulator, Frida/Xposed hook, tamper evidence → TRUSTED→CRITICAL posture verdicts; CLI/library + fleet cohort analysis + MITRE ATT&CK for Mobile; Kotlin/Swift reference collectors; RASP / attestation pipelines); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[device-trust]], [[risk-engine]], [[droidshield]], and [[frida-detection]].

@@ -314,6 +314,7 @@ sources:
   - wiki/sources/descriptions/aclist__aclist.github.io.md
   - wiki/sources/descriptions/dazi2011__crossover-patcher.md
   - wiki/sources/descriptions/ValveSoftware__Proton.md
+  - wiki/sources/descriptions/TASEmulators__BizHawk.md
   - wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md
   - wiki/sources/descriptions/TOSTcRa__vigil.md
   - wiki/sources/descriptions/gmh5225__cfclap.md
@@ -2089,6 +2090,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 - Game Boy hardware emulation via [[kevboy]] (Rust; CPU/memory/graphics/input + ROM formats) sits in the console `Game Boy` lane for emulator architecture study. (source: wiki/sources/descriptions/xkevio__kevboy.md)
 - Peer Rust Game Boy emulator [[feather-gb]] targets retro handheld emulator developers and GB-area reverse engineers. (source: wiki/sources/descriptions/vojty__feather-gb.md)
+- Multi-system retro emulator [[bizhawk]] (TASEmulators; C#/.NET + native C/C++ cores; TAStudio movie editing, Lua memory/input scripting, RAM search/watch, hex editor, CPU debuggers/disassemblers, trace logging, savestates/rewind, Game Genie/GameShark decoders; NES/SNES/GB/GBA/Genesis/N64/DS/PlayStation/MAME arcade; deterministic frame-by-frame control for TAS authors, cheat testing, and retro game internals RE) sits in the console retro-emulator lane beside [[feather-gb]] and [[kevboy]]. (source: wiki/sources/descriptions/TASEmulators__BizHawk.md)
 - Cycle-accurate Rust GB/GBC emulator [[gecko]] (CPU/PPU/APU; wgpu render; desktop library GUI) sits in the console `Game Boy` lane—README miscategorizes it under `GameCube/Wii`. (source: wiki/sources/descriptions/ioncodes__gecko.md)
 - GBA cartridge RE in Ghidra via [[gba-ghidra-loader]] (region/IO map + header entry point) sits in the console `Game Boy` / Cheat Ghidra Plugins lane. (source: wiki/sources/descriptions/pudii__gba-ghidra-loader.md)
 - Xbox 360 emulation via [[xenia]] (C++; PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) sits in the console `Xbox` lane for hardware-abstraction / binary-translation research. (source: wiki/sources/descriptions/xenia-project__xenia.md)
