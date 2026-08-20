@@ -1,0 +1,559 @@
+Project Path: arc_zensenzay_wnf-driver-meme_8d9uyxey
+
+Source Tree:
+
+```txt
+arc_zensenzay_wnf-driver-meme_8d9uyxey
+├── README.md
+├── client
+│   └── main.cpp
+├── common
+│   └── shared_defs.h
+└── driver
+    ├── driver_memory.c
+    ├── driver_protect.c
+    └── driver_wnf.c
+
+```
+
+`README.md`:
+
+```md
+# wnf driver meme
+
+Kernel driver + usermode client that communicates over Windows Notification Facility state names instead of IOCTL/device paths.
+
+Join discord for full files: https://discord.gg/GSFE2xpRtU
+
+## Features
+
+- **Process memory R/W** — kernel-level read/write into any process by PID
+- **Handle protection** — strips `VM_READ`, `VM_WRITE`, `VM_OPERATION`, `DUP_HANDLE`, and `SUSPEND_RESUME` from handle opens to protected PIDs via `ObRegisterCallbacks`
+- **Covert channel** — no device path, no IOCTL codes; traffic goes through WNF state names indistinguishable from normal Windows system notifications
+
+```
+
+`client/main.cpp`:
+
+```cpp
+#include "comms.h"
+#include <stdio.h>
+#include <tlhelp32.h>
+
+#pragma comment(lib, "advapi32.lib")
+
+static void EnableColor(void) {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD  m = 0;
+    if (GetConsoleMode(h, &m)) SetConsoleMode(h, m | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+
+static void Banner(void) {
+    printf(CC
+        "\n"
+        "  +------------------------------------------------------+\n"
+        "  |                                                      |\n"
+        "  |         W N F   K E R N E L   C H A N N E L        |\n"
+        "  |                                                      |\n"
+        "  |   Memory R/W  /  Handle Protection                  |\n"
+        "  |   Zero IOCTL codes  /  Zero device paths            |\n"
+        "  |   Communicates via Windows Notification Facility    |\n"
+        "  |                                                      |\n"
+        "  +------------------------------------------------------+\n"
+        C0 "\n"
+    );
+}
+
+static void Section(const char* t) {
+    printf("\n" CB "  --------  " CW "%s" CB "  --------" C0 "\n\n", t);
+}
+
+static ULONG64 FindPid(const WCHAR* name) {
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return 0;
+    PROCESSENTRY32W pe = { sizeof(pe) };
+    ULONG64 pid = 0;
+    if (Process32FirstW(snap, &pe)) {
+        do {
+            if (!_wcsicmp(pe.szExeFile, name)) { pid = pe.th32ProcessID; break; }
+        } while (Process32NextW(snap, &pe));
+    }
+    CloseHandle(snap);
+    return pid;
+}
+
+static void PrintLoadInstructions(void) {
+    Section("How to load");
+
+    printf(CW "  1. " C0 CD "Run as Administrator (already done).\n\n" C0);
+    printf(CW "  2. " C0 CD "Map the driver:\n\n"
+              "          " CY "kdmapper.exe driver.sys\n\n" C0);
+    printf(CW "  3. " C0 CD "Run this client again.\n\n" C0);
+    printf(CD "  Channel key: " CY "HKLM\\%s\n\n" C0, WNF_REG_PATH_A);
+}
+
+static void RunDemo(void) {
+    Section("Ping");
+    if (WnfPing())
+        LOG_OK("Driver responded via WNF state name");
+    else
+        LOG_WARN("Ping timed out");
+
+    Section("Process protection");
+    ULONG64 self = GetCurrentProcessId();
+    if (WnfProtectPid(self))
+        LOG_OK("PID %llu is now protected", self);
+    else
+        LOG_WARN("ProtectPid failed");
+
+
+    Section("Memory R/W");
+    ULONG64 fnPid = FindPid(L"FortniteClient-Win64-Shipping.exe");
+    if (!fnPid) {
+        LOG_WARN("Fortnite not running -- skipping memory demo");
+        LOG_INFO("WnfReadMem(pid, address, buffer, size) when the game is open");
+    } else {
+        LOG_OK("Fortnite PID %llu", fnPid);
+
+        ULONG64 base = 0;
+        MODULEENTRY32W me = { sizeof(me) };
+        HANDLE ms = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, (DWORD)fnPid);
+        if (ms != INVALID_HANDLE_VALUE) {
+            if (Module32FirstW(ms, &me)) base = (ULONG64)(ULONG_PTR)me.modBaseAddr;
+            CloseHandle(ms);
+        }
+
+        if (base) {
+            BYTE buf[8] = {0};
+            if (WnfReadMem(fnPid, base, buf, sizeof(buf)))
+                LOG_OK("0x%llX  ->  %02X %02X %02X %02X %02X %02X %02X %02X",
+                       base, buf[0],buf[1],buf[2],buf[3],buf[4],buf[5],buf[6],buf[7]);
+            else
+                LOG_WARN("ReadMem failed -- ensure driver is loaded");
+        }
+    }
+}
+
+int main(void) {
+    EnableColor();
+    Banner();
+
+    LOG_INFO("Connecting via WNF state names...");
+    LOG_INFO("Reading channel from HKLM\\%s", WNF_REG_PATH_A);
+
+    if (!WnfConnect()) {
+        LOG_WARN("Driver not loaded or channel not found");
+        PrintLoadInstructions();
+        printf(CD "\n  Press Enter to exit..." C0);
+        getchar();
+        return 0;
+    }
+
+    LOG_OK("Connected");
+
+    RunDemo();
+
+    WnfDisconnect();
+
+    printf(CG "\n  Done.\n\n" C0);
+    printf(CD "  Press Enter to exit..." C0);
+    getchar();
+    return 0;
+}
+
+```
+
+`common/shared_defs.h`:
+
+```h
+#pragma once
+
+#define WNF_REG_PATH   L"SYSTEM\\CurrentControlSet\\Control\\WnfNotify"
+#define WNF_REG_PATH_A  "SYSTEM\\CurrentControlSet\\Control\\WnfNotify"
+#define WNF_REG_CMD    L"Cmd"
+#define WNF_REG_RSP    L"Rsp"
+#define WNF_BUF       512
+
+typedef enum _WNFCMD {
+    WNFCMD_PING    = 1,
+    WNFCMD_READ    = 2,
+    WNFCMD_WRITE   = 3,
+    WNFCMD_PROTECT = 4,
+    WNFCMD_RELEASE = 5,
+} WNFCMD;
+
+#pragma pack(push, 1)
+
+typedef struct _WNF_REQUEST {
+    ULONG   Seq;
+    ULONG   Cmd;
+    ULONG64 Pid;
+    ULONG64 Addr;
+    ULONG   Len;
+    UCHAR   Buf[WNF_BUF];
+} WNF_REQUEST, *PWNF_REQUEST;
+
+typedef struct _WNF_REPLY {
+    ULONG Seq;
+    LONG  Status;
+    UCHAR Buf[WNF_BUF];
+} WNF_REPLY, *PWNF_REPLY;
+
+#pragma pack(pop)
+
+```
+
+`driver/driver_memory.c`:
+
+```c
+#include "driver.h"
+
+NTSTATUS ReadProcessMem(ULONG64 pid, ULONG64 addr, PVOID out, ULONG size) {
+    if (!out || !size || size > WNF_BUF) return STATUS_INVALID_PARAMETER;
+
+    PEPROCESS proc = NULL;
+    NTSTATUS  s    = PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &proc);
+    if (!NT_SUCCESS(s)) return s;
+
+    PMDL  mdl    = NULL;
+    PVOID mapped = NULL;
+    KAPC_STATE apc;
+    KeStackAttachProcess(proc, &apc);
+
+    __try {
+        ProbeForRead((PVOID)(ULONG_PTR)addr, size, 1);
+        mdl = IoAllocateMdl((PVOID)(ULONG_PTR)addr, size, FALSE, FALSE, NULL);
+        if (!mdl) { s = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        MmProbeAndLockPages(mdl, UserMode, IoReadAccess);
+        mapped = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached, NULL, FALSE,
+                                              NormalPagePriority | MdlMappingNoExecute);
+        if (!mapped) { MmUnlockPages(mdl); IoFreeMdl(mdl); mdl = NULL; s = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        RtlCopyMemory(out, mapped, size);
+        MmUnmapLockedPages(mapped, mdl);
+        MmUnlockPages(mdl);
+        IoFreeMdl(mdl);
+        mdl    = NULL;
+        s      = STATUS_SUCCESS;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        if (mapped && mdl) MmUnmapLockedPages(mapped, mdl);
+        if (mdl) { MmUnlockPages(mdl); IoFreeMdl(mdl); }
+        s = GetExceptionCode();
+    }
+
+    KeUnstackDetachProcess(&apc);
+    ObDereferenceObject(proc);
+    return s;
+}
+
+NTSTATUS WriteProcessMem(ULONG64 pid, ULONG64 addr, PVOID in, ULONG size) {
+    if (!in || !size || size > WNF_BUF) return STATUS_INVALID_PARAMETER;
+
+    PEPROCESS proc = NULL;
+    NTSTATUS  s    = PsLookupProcessByProcessId((HANDLE)(ULONG_PTR)pid, &proc);
+    if (!NT_SUCCESS(s)) return s;
+
+    PMDL  mdl    = NULL;
+    PVOID mapped = NULL;
+    KAPC_STATE apc;
+    KeStackAttachProcess(proc, &apc);
+
+    __try {
+        ProbeForWrite((PVOID)(ULONG_PTR)addr, size, 1);
+        mdl = IoAllocateMdl((PVOID)(ULONG_PTR)addr, size, FALSE, FALSE, NULL);
+        if (!mdl) { s = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        MmProbeAndLockPages(mdl, UserMode, IoWriteAccess);
+        mapped = MmMapLockedPagesSpecifyCache(mdl, KernelMode, MmNonCached, NULL, FALSE,
+                                              NormalPagePriority);
+        if (!mapped) { MmUnlockPages(mdl); IoFreeMdl(mdl); mdl = NULL; s = STATUS_INSUFFICIENT_RESOURCES; __leave; }
+
+        RtlCopyMemory(mapped, in, size);
+        MmUnmapLockedPages(mapped, mdl);
+        MmUnlockPages(mdl);
+        IoFreeMdl(mdl);
+        mdl = NULL;
+        s   = STATUS_SUCCESS;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        if (mapped && mdl) MmUnmapLockedPages(mapped, mdl);
+        if (mdl) { MmUnlockPages(mdl); IoFreeMdl(mdl); }
+        s = GetExceptionCode();
+    }
+
+    KeUnstackDetachProcess(&apc);
+    ObDereferenceObject(proc);
+    return s;
+}
+
+```
+
+`driver/driver_protect.c`:
+
+```c
+#include "driver.h"
+
+static ULONG64    g_Pids[32];
+static ULONG      g_PidCount = 0;
+static KSPIN_LOCK g_Lock;
+static BOOLEAN    g_LockInit = FALSE;
+static PVOID      g_ObHandle = NULL;
+
+static void EnsureLock(void) {
+    if (!g_LockInit) { KeInitializeSpinLock(&g_Lock); g_LockInit = TRUE; }
+}
+
+NTSTATUS AddProtectedPid(ULONG64 pid) {
+    EnsureLock();
+    KIRQL irql;
+    KeAcquireSpinLock(&g_Lock, &irql);
+    if (g_PidCount >= 32) { KeReleaseSpinLock(&g_Lock, irql); return STATUS_QUOTA_EXCEEDED; }
+    g_Pids[g_PidCount++] = pid;
+    KeReleaseSpinLock(&g_Lock, irql);
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS RemoveProtectedPid(ULONG64 pid) {
+    EnsureLock();
+    KIRQL irql;
+    KeAcquireSpinLock(&g_Lock, &irql);
+    for (ULONG i = 0; i < g_PidCount; i++) {
+        if (g_Pids[i] == pid) {
+            g_Pids[i] = g_Pids[--g_PidCount];
+            KeReleaseSpinLock(&g_Lock, irql);
+            return STATUS_SUCCESS;
+        }
+    }
+    KeReleaseSpinLock(&g_Lock, irql);
+    return STATUS_NOT_FOUND;
+}
+
+static BOOLEAN IsPidProtected(ULONG64 pid) {
+    for (ULONG i = 0; i < g_PidCount; i++)
+        if (g_Pids[i] == pid) return TRUE;
+    return FALSE;
+}
+
+static OB_PREOP_CALLBACK_STATUS ObPre(PVOID Ctx, POB_PRE_OPERATION_INFORMATION Info) {
+    UNREFERENCED_PARAMETER(Ctx);
+    if (Info->KernelHandle) return OB_PREOP_SUCCESS;
+    if (Info->ObjectType != *PsProcessType) return OB_PREOP_SUCCESS;
+
+    ULONG64 pid = (ULONG64)(ULONG_PTR)PsGetProcessId((PEPROCESS)Info->Object);
+    if (!IsPidProtected(pid)) return OB_PREOP_SUCCESS;
+
+    ACCESS_MASK strip = PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION |
+                        PROCESS_DUP_HANDLE | PROCESS_SUSPEND_RESUME;
+
+    if (Info->Operation == OB_OPERATION_HANDLE_CREATE)
+        Info->Parameters->CreateHandleInformation.DesiredAccess    &= ~strip;
+    else
+        Info->Parameters->DuplicateHandleInformation.DesiredAccess &= ~strip;
+
+    return OB_PREOP_SUCCESS;
+}
+
+NTSTATUS InitObCallbacks(void) {
+    EnsureLock();
+
+    OB_OPERATION_REGISTRATION op  = {0};
+    OB_CALLBACK_REGISTRATION  reg = {0};
+
+    UNICODE_STRING alt = RTL_CONSTANT_STRING(L"328000");
+
+    op.ObjectType           = PsProcessType;
+    op.Operations           = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+    op.PreOperation         = ObPre;
+
+    reg.Version                     = OB_FLT_REGISTRATION_VERSION;
+    reg.OperationRegistrationCount  = 1;
+    reg.Altitude                    = alt;
+    reg.OperationRegistration       = &op;
+
+    return ObRegisterCallbacks(&reg, &g_ObHandle);
+}
+
+void RemoveObCallbacks(void) {
+    if (g_ObHandle) { ObUnRegisterCallbacks(g_ObHandle); g_ObHandle = NULL; }
+}
+
+```
+
+`driver/driver_wnf.c`:
+
+```c
+#include "driver.h"
+
+WNF_STATE_NAME g_CmdName = {{0, 0}};
+WNF_STATE_NAME g_RspName = {{0, 0}};
+
+static FnWnfCreate g_WnfCreate;
+static FnWnfQuery  g_WnfQuery;
+static FnWnfDelete g_WnfDelete;
+       FnWnfUpdate g_WnfUpdate;
+
+static KEVENT           g_Stop;
+static HANDLE           g_Thread    = NULL;
+static WNF_CHANGE_STAMP g_LastStamp = 0;
+
+BOOLEAN WnfResolve(void) {
+    UNICODE_STRING n;
+
+    RtlInitUnicodeString(&n, L"ZwCreateWnfStateName");
+    g_WnfCreate = (FnWnfCreate)MmGetSystemRoutineAddress(&n);
+
+    RtlInitUnicodeString(&n, L"ZwUpdateWnfStateData");
+    g_WnfUpdate = (FnWnfUpdate)MmGetSystemRoutineAddress(&n);
+
+    RtlInitUnicodeString(&n, L"ZwQueryWnfStateData");
+    g_WnfQuery  = (FnWnfQuery)MmGetSystemRoutineAddress(&n);
+
+    RtlInitUnicodeString(&n, L"ZwDeleteWnfStateName");
+    g_WnfDelete = (FnWnfDelete)MmGetSystemRoutineAddress(&n);
+
+    return g_WnfCreate && g_WnfUpdate && g_WnfQuery && g_WnfDelete;
+}
+
+static NTSTATUS OpenOrCreateRegKey(PHANDLE out) {
+    UNICODE_STRING path;
+    RtlInitUnicodeString(&path, L"\\Registry\\Machine\\" WNF_REG_PATH);
+    OBJECT_ATTRIBUTES oa;
+    InitializeObjectAttributes(&oa, &path, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
+    ULONG disp;
+    return ZwCreateKey(out, KEY_SET_VALUE, &oa, 0, NULL, REG_OPTION_NON_VOLATILE, &disp);
+}
+
+static void WriteStateNamesToReg(void) {
+    HANDLE hKey = NULL;
+    if (!NT_SUCCESS(OpenOrCreateRegKey(&hKey))) return;
+    UNICODE_STRING cmd, rsp;
+    RtlInitUnicodeString(&cmd, WNF_REG_CMD);
+    RtlInitUnicodeString(&rsp, WNF_REG_RSP);
+    ZwSetValueKey(hKey, &cmd, 0, REG_BINARY, &g_CmdName, sizeof(g_CmdName));
+    ZwSetValueKey(hKey, &rsp, 0, REG_BINARY, &g_RspName, sizeof(g_RspName));
+    ZwClose(hKey);
+}
+
+static void DeleteRegValues(void) {
+    UNICODE_STRING path;
+    RtlInitUnicodeString(&path, L"\\Registry\\Machine\\" WNF_REG_PATH);
+    OBJECT_ATTRIBUTES oa;
+    InitializeObjectAttributes(&oa, &path, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
+    HANDLE hKey = NULL;
+    if (!NT_SUCCESS(ZwOpenKey(&hKey, KEY_SET_VALUE, &oa))) return;
+    UNICODE_STRING cmd, rsp;
+    RtlInitUnicodeString(&cmd, WNF_REG_CMD);
+    RtlInitUnicodeString(&rsp, WNF_REG_RSP);
+    ZwDeleteValueKey(hKey, &cmd);
+    ZwDeleteValueKey(hKey, &rsp);
+    ZwClose(hKey);
+}
+
+static void DispatchCmd(PWNF_REQUEST req) {
+    WNF_REPLY rep;
+    RtlZeroMemory(&rep, sizeof(rep));
+    rep.Seq = req->Seq;
+
+    switch (req->Cmd) {
+        case WNFCMD_PING:
+            rep.Status = 0;
+            break;
+        case WNFCMD_READ:
+            rep.Status = ReadProcessMem(req->Pid, req->Addr, rep.Buf,
+                                        req->Len <= WNF_BUF ? req->Len : WNF_BUF);
+            break;
+        case WNFCMD_WRITE:
+            rep.Status = WriteProcessMem(req->Pid, req->Addr, req->Buf,
+                                         req->Len <= WNF_BUF ? req->Len : WNF_BUF);
+            break;
+        case WNFCMD_PROTECT:
+            rep.Status = AddProtectedPid(req->Pid);
+            break;
+        case WNFCMD_RELEASE:
+            rep.Status = RemoveProtectedPid(req->Pid);
+            break;
+        default:
+            rep.Status = STATUS_INVALID_PARAMETER;
+            break;
+    }
+
+    g_WnfUpdate(&g_RspName, &rep, sizeof(rep), NULL, NULL, 0, 0);
+}
+
+static void PollThread(PVOID ctx) {
+    UNREFERENCED_PARAMETER(ctx);
+    LARGE_INTEGER delay;
+    delay.QuadPart = -500000LL;
+
+    for (;;) {
+        NTSTATUS w = KeWaitForSingleObject(&g_Stop, Executive, KernelMode, FALSE, &delay);
+        if (w == STATUS_SUCCESS) break;
+
+        WNF_CHANGE_STAMP stamp = 0;
+        WNF_REQUEST      req   = {0};
+        ULONG            sz    = sizeof(req);
+
+        NTSTATUS s = g_WnfQuery(&g_CmdName, NULL, NULL, &stamp, &req, &sz);
+        if (NT_SUCCESS(s) && stamp && stamp != g_LastStamp) {
+            g_LastStamp = stamp;
+            DispatchCmd(&req);
+        }
+    }
+
+    PsTerminateSystemThread(STATUS_SUCCESS);
+}
+
+NTSTATUS WnfSetup(void) {
+    SECURITY_DESCRIPTOR sd;
+    RtlCreateSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+    RtlSetDaclSecurityDescriptor(&sd, TRUE, NULL, FALSE);
+
+    NTSTATUS s = g_WnfCreate(&g_CmdName, WnfPermanentStateName, WnfDataScopeSystem,
+                              FALSE, NULL, sizeof(WNF_REQUEST), &sd);
+    if (!NT_SUCCESS(s)) return s;
+
+    s = g_WnfCreate(&g_RspName, WnfPermanentStateName, WnfDataScopeSystem,
+                    FALSE, NULL, sizeof(WNF_REPLY), &sd);
+    if (!NT_SUCCESS(s)) {
+        g_WnfDelete(&g_CmdName);
+        return s;
+    }
+
+    WriteStateNamesToReg();
+    return STATUS_SUCCESS;
+}
+
+void WnfStartPoll(void) {
+    KeInitializeEvent(&g_Stop, NotificationEvent, FALSE);
+    OBJECT_ATTRIBUTES oa;
+    InitializeObjectAttributes(&oa, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+    HANDLE h = NULL;
+    if (NT_SUCCESS(PsCreateSystemThread(&h, THREAD_ALL_ACCESS, &oa, NULL, NULL, PollThread, NULL)))
+        g_Thread = h;
+}
+
+void WnfStopPoll(void) {
+    KeSetEvent(&g_Stop, 0, FALSE);
+    if (g_Thread) {
+        PVOID obj = NULL;
+        if (NT_SUCCESS(ObReferenceObjectByHandle(g_Thread, SYNCHRONIZE, NULL,
+                                                  KernelMode, &obj, NULL))) {
+            KeWaitForSingleObject(obj, Executive, KernelMode, FALSE, NULL);
+            ObDereferenceObject(obj);
+        }
+        ZwClose(g_Thread);
+        g_Thread = NULL;
+    }
+}
+
+void WnfCleanup(void) {
+    DeleteRegValues();
+    if (g_WnfDelete) {
+        if (g_CmdName.Data[0]) g_WnfDelete(&g_CmdName);
+        if (g_RspName.Data[0]) g_WnfDelete(&g_RspName);
+    }
+}
+
+```
