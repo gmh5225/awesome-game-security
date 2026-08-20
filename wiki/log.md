@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheHive-Project/TheHive`: entity [[the-hive]] (TheHive-Project; archived Scala + web SOC incident-response case-management platform; alert triage and analyst workflows; historical snapshot for legacy IR architecture study; README [EDR]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[wazuh]], [[bamboozledr]], and [[kernel-cve-analysis]].
+
 - **2026-08-20** — ingest `description:TheMille-Dev/AntiGuard`: entity [[antiguard]] (TheMille-Dev; Paper/Purpur Minecraft AC plugin; Java; single drop-in JAR; physics-based fly/speed/reach/kill aura/auto-click/no-swing/no-fall/fast-break checks; research-backed low-FP thresholds; embedded SQLite or LuckPerms DB; built-in web dashboard + REST API; legacy FastAPI reporting server + reference agent; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[dakotaac]], [[minecraft-anti-cheat]], [[cklsit-advanced-anticheat]], and [[windfall-anticheat]].
 
 - **2026-08-20** — ingest `description:TheQmaks/phantom-frida`: entity [[phantom-frida]] (TheQmaks; build system patching Frida to evade anti-instrumentation detection; Python patch scripts + name generators; randomized strings/symbols/artifacts; WSL build; JavaScript tests; mobile RE / stealth Frida); cited on [[overviews/mobile-security]] and [[frida]]; cross-linked [[florida]], [[fridare]], [[antifrida]], and [[frida-detection]].
