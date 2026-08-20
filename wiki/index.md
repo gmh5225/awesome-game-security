@@ -1017,6 +1017,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-hacking](entities/game-hacking.md) — curated game hacking tool index by type (disassemblers/debuggers/hex/memory/.NET/graphics debuggers/RE tutorials; CE/x64dbg/IDA/Ghidra/dnSpy/RenderDoc; dsasmblr; cheat / guide)
 - [game-lag-reducer](entities/game-lag-reducer.md) — cross-API D3D11/GL/Vulkan shader capture/flatten/replace for FPS (WPF launcher + C++ HookDll; user-consented GPU visual reduction; DirectX / hook)
 - [game-networking-sockets](entities/game-networking-sockets.md) — Valve cross-platform game networking transport (C++/C; reliable/unreliable messaging; ack vectors, bandwidth lanes, network simulation; encrypted transport + P2P NAT traversal; desktop/mobile/console; README [Steam]; ValveSoftware)
+- [game-overlay-ui-hook](entities/game-overlay-ui-hook.md) — Steam overlay VGUI UI hook example (C++; PaintTraverse hook + shared-memory render comms; fallback shape drawing; overlay rendering constraints; README [Steam]; Unkn0wnH4ck3r)
 - [gamehacking-cheatsheet](entities/gamehacking-cheatsheet.md) — game-hacking RE cheatsheet (memory / injection / AC; cheat / guide)
 - [GameAI-paper-list](entities/gameai-paper-list.md) — zh curated game-AI research papers (modding / tooling; AI category)
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)

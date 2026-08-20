@@ -10,7 +10,7 @@ confidence: low
 
 # Steam Hook Render PoC
 
-Proof-of-concept that hijacks Steam's in-game overlay rendering to inject custom draw calls via `GameOverlayRenderer` DLL—leveraging the overlay's trusted status to render cheat menus or ESP without spawning separate overlay windows that anti-cheat may flag. Useful for studying Steam overlay hijacking and trusted-overlay abuse for AC bypass, beside [[steam-overlay-x64]], [[nvidia-overlay-hijack]], and [[discord-overlay-hook]], not a maintained product. (source: wiki/sources/descriptions/gmh5225__Steam-Hook-Render-PoC.md)
+Proof-of-concept that hijacks Steam's in-game overlay rendering to inject custom draw calls via `GameOverlayRenderer` DLL—leveraging the overlay's trusted status to render cheat menus or ESP without spawning separate overlay windows that anti-cheat may flag. Useful for studying Steam overlay hijacking and trusted-overlay abuse for AC bypass, beside [[steam-overlay-x64]], [[game-overlay-ui-hook]], [[nvidia-overlay-hijack]], and [[discord-overlay-hook]], not a maintained product. (source: wiki/sources/descriptions/gmh5225__Steam-Hook-Render-PoC.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ Proof-of-concept that hijacks Steam's in-game overlay rendering to inject custom
 
 ## Related
 
-[[overviews/graphics-api]] · [[overviews/game-hacking]] · [[present-hook]] · [[steam-overlay-x64]] · [[nvidia-overlay-hijack]] · [[discord-overlay-hook]]
+[[overviews/graphics-api]] · [[overviews/game-hacking]] · [[present-hook]] · [[steam-overlay-x64]] · [[game-overlay-ui-hook]] · [[nvidia-overlay-hijack]] · [[discord-overlay-hook]]

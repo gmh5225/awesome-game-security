@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Unkn0wnH4ck3r/GameOverlayUIHook`: entity [[game-overlay-ui-hook]] (C++ Steam overlay UI hook example; PaintTraverse VGUI pipeline intercept + shared-memory render comms; fallback shape drawing; overlay rendering constraints; overlay-hook / anti-cheat research; README [Steam]; Unkn0wnH4ck3r); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[steam-hook-render-poc]], [[steam-overlay-x64]], [[discord-overlay-hook]], and [[present-hook]].
+
 - **2026-08-20** — ingest `description:UnnamedZ03/CS2-external-base`: entity [[cs2-external-base]] (C++ CS2 external overlay visualization starter; team checks + box/health/distance/skeleton/text ESP; overlay-side structure only—omits memory R/W driver; educational external tooling architecture; cheat / game:cs2 [External]; UnnamedZ03); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-ext]], [[cs2-external-cheat]], [[pythoncs2]], [[titled-gui-cs2]], [[world-to-screen]], and [[valthrun]].
 
 - **2026-08-20** — ingest `description:V-i-x-x/kernel-callback-removal`: entity [[kernel-callback-removal]] (ETW-TI kernel bypass; toggle provider enable flags from kernel memory via R/W primitive; locate kernel structures/offsets; C++ + WinDbg/IDA RE notes; educational EDR bypass research; README [Removing kernel callbacks]; V-i-x-x); cited on [[concepts/etw-threat-intelligence]] and [[concepts/kernel-callbacks]]; cross-linked [[edrsandblast]], [[bustercall]], [[disable-threat-tracing]], and [[etwti-fluctuation-monitor]].
