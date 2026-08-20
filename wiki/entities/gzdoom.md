@@ -20,4 +20,4 @@ Sits in the README **Game Engine → Source** lane — a feature-rich idTech 1 c
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[doomretro]] · [[devilution]] · [[game-design-documents]] · [[research-rigor]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/graphics-api]] · [[uzdoom]] · [[doomretro]] · [[devilution]] · [[game-design-documents]] · [[research-rigor]]

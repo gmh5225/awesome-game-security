@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:UZDoom/UZDoom`: entity [[uzdoom]] (modern Doom source port; GZDoom continuation; high-resolution rendering, dynamic lighting, 3D floors, broad mod support; OpenGL/Vulkan; cross-platform CMake C/C++; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[gzdoom]], [[doomretro]], [[devilution]], and [[game-design-documents]].
+
 - **2026-08-20** — ingest `description:n1h-nb/Shellcode-Obfuscation`: entity [[shellcode-obfuscation]] (academic lab; Caesar-cipher encoding pipeline; Python shellcode obfuscator + C VirtualAlloc in-memory loader; baseline loader; AV signature/heuristic/ML detection notes; bypass-rate measurements; n1h-nb); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[shellcode-entropyfix]], [[shellcode-fluctuation]], [[scfw]], and [[shellcode-factory]].
 
 - **2026-08-20** — ingest `description:zensenzay/wnf-driver-meme`: entity [[wnf-driver-meme]] (Windows kernel driver + C++ client; WNF state-name covert UM/KM comm via `WnfNotify` registry discovery; PID memory R/W; ObRegisterCallbacks handle stripping; no device path/IOCTL; game-security / AC / RE; zensenzay); cited on [[overviews/windows-kernel]] and [[concepts/kernel-callbacks]]; cross-linked [[memfilter-fn-driver]], [[evcommunication]], [[boundcallback]], and [[van1338]].
