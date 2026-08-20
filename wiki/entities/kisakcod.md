@@ -20,4 +20,4 @@ Primarily used by mod developers, engine tinkerers, and security-minded players 
 
 ## Related
 
-[[assaultcube]] · [[cod7-tools]] · [[source-netvars]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[kisakblack]] · [[assaultcube]] · [[cod7-tools]] · [[source-netvars]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
