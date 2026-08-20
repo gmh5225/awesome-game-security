@@ -2365,6 +2365,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [thread-call-stack-scanner](entities/thread-call-stack-scanner.md) — safe unload of hooked DLLs via thread call-stack scan (m417z; Anti Cheat / hook lifecycle)
 - [thread-namecalling](entities/thread-namecalling.md) — SetThreadDescription + remote GetThreadDescription via APC (working-set probe; cheat / injection:windows)
 - [ThreadStackSpoofer](entities/thread-stack-spoofer.md) — PoC thread call-stack spoof for in-process shellcode hiding (mgeeky; Cheat Spoof Stack)
+- [ThrottleStop-PoC](entities/throttlestop-poc.md) — CVE-2025-7771 PoC for **`ThrottleStop.sys`**; IOCTL physmem + I/O port R/W from user mode; VA translation + EPROCESS checks (U65535F; Cheat Vulnerable Driver)
 - [TiEtwAgent](entities/tietwagent.md) — ETW Threat-Intelligence injection-detection agent (krabsetw / Yara / PPL)
 - [TIGR](entities/tigr.md) — cross-platform framebuffer graphics library (Windows/macOS/Linux/iOS/Android; Image Codec)
 - [TinyInst](entities/tinyinst.md) — Google Project Zero lightweight DBI (C/C++; module-selective hooking / debugging; Cheat / DBI)
