@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Steesha/CodeCleaner`: entity [[codecleaner]] (Steesha; x64dbg plugin; C++ Capstone + AsmJit; cleans/simplifies disassembled machine code—redundant NOPs, no-op register moves; packed/obfuscated binary traces; README Cleaning Themida Mutation Assembly codes; Fix Themida / x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[themida-unmutate]], [[themidie]], and [[themida-research]].
+
 - **2026-08-20** — ingest `description:StelGR/ArrowAntiCheat`: entity [[arrow-anticheat]] (StelGR; Java Bukkit/Spigot packet AC; PacketEvents; combat/movement/misc checks—aim assist, kill aura, reach, fly, scaffold, timer; statistical analysis + movement prediction; alerts/verbose/logging; Java + Bedrock; AGPLv3; smaller-server OSS AC); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheat]], [[dakotaac]], [[minecraft-anti-cheat]], [[ycbr-anticheat]], [[avaanticheat]], and [[oomph]].
 
 - **2026-08-20** — ingest `description:StephanvanSchaik/windows-kernel-rs`: entity [[windows-kernel-rs]] (StephanvanSchaik; Rust Windows kernel driver framework; generated bindings + safer abstractions for IRPs, device I/O, sync primitives, process attach; staged examples + build scaffolding; researchers / systems dev; Writing Windows kernel drivers in Rust); cited on [[overviews/windows-kernel]]; cross-linked [[wkpe]], [[document]], [[windows-kernel-debugging-guide]], and [[kli]].

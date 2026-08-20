@@ -1320,6 +1320,7 @@ sources:
   - wiki/sources/descriptions/VirusTotal__vt-ida-plugin.md
   - wiki/sources/descriptions/Veuqx0__ImGui-Spoofer-Leaked.md
   - wiki/sources/descriptions/ViRb3__swift-ida.md
+  - wiki/sources/descriptions/Steesha__CodeCleaner.md
   - wiki/sources/descriptions/VenTaz__Themidie.md
   - wiki/sources/descriptions/VeroFess__PalWorld-Server-Unoffical-Fix.md
   - wiki/sources/descriptions/Visual1mpact__Paradox_AntiCheat.md
@@ -1574,6 +1575,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Static mutation deobfuscation via [[themida-unmutate]] (Python 3; Themida/WinLicense/Code Virtualizer 3.x insn mutation on selected functions; tested to Themida 3.1.9) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__themida-unmutate.md)
 - Obfuscated-region detection via [[themida-spotter-bn]] (Binary Ninja plugin; Themida/WinLicense/Code Virtualizer obfuscated code locations; x86/x64; Oreans ≤3.1.9; Cheat Binary Ninja Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/ergrelet__themida-spotter-bn.md)
 - Themida attach-and-debug via [[themidie]] (x64dbg plugin; C++ MinHook; neutralizes anti-debug/anti-VM/monitoring; practical debugger attach workflow vs full unpack automation; x64 Windows; VenTaz; Cheat x64dbg Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/VenTaz__Themidie.md)
+- In-debugger mutation-assembly cleanup via [[codecleaner]] (x64dbg plugin; C++ Capstone + AsmJit; removes redundant NOPs and no-op register moves from disassembly; packed/obfuscated binary traces; README Cleaning Themida Mutation Assembly codes; Steesha; Cheat x64dbg Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/Steesha__CodeCleaner.md)
 
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - Opaque-predicate removal via [[opaque-predicate-patcher]] (Vector35 Binary Ninja plugin; Python; MLIL branch-condition analysis; patch always/never branch; iterative re-analysis; Cheat Binary Ninja Plugins lane) complements detection tooling. (source: wiki/sources/descriptions/Vector35__OpaquePredicatePatcher.md)

@@ -431,6 +431,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CoD_Hacks](entities/cod-hacks.md) — Call of Duty v1.5 educational hack collection: Desk.dll multi-hack, internal W2S ESP, OpenGL `glDrawElements` wallhack, syscall wallhack, pattern-scan trainer (attilathedud; cheat / game:cod)
 - [COD7-Tools](entities/cod7-tools.md) — COD7 (Black Ops) research tooling (VcPkg; cheat / game:cod7)
 - [CODM-ESP-Aimbot-Mod-Menu](entities/codm-esp-aimbot-mod-menu.md) — Call of Duty Mobile internal mod menu: injectable library + overlay; ESP / aimbot / gameplay mods (gmh5225; cheat / game:codm [ESP])
+- [CodeCleaner](entities/codecleaner.md) — x64dbg plugin: Capstone + AsmJit disassembly cleanup (redundant NOPs, no-op register moves); Themida mutation assembly; packed/obfuscated binary RE (Steesha; Fix Themida / x64dbg Plugins)
 - [Command and Conquer: Red Alert](entities/cnc-red-alert.md) — EA open-source C&C: Red Alert + Steam Workshop (Westwood RTS; Game Develop / source)
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
