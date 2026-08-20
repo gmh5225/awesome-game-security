@@ -2450,6 +2450,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [umap](entities/umap.md) — minimalist Windows kernel driver mapper (BYOVD physmem → pool alloc, sections, relocs, imports, entry from user mode; no registry/standard load traces; btbd; cheat / EFI Manual Map)
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-BUIValidator](entities/ue-buivalidator.md) — UE4 UI texture validator plugin (configurable rules; multiple allowed values per setting; Game Engine Plugins:Unreal; benui-dev)
+- [UE Clang-Format](entities/ue-clang-format.md) — Clang-Format preset for Unreal C++ Epic-style conventions (VS Code setup; lightweight config/docs; Game Engine; TensorWorks)
 - [UE-Interview-Cheat-Sheet](entities/ue-interview-cheat-sheet.md) — Unreal Engine interview cheat sheet (Game Engine / Unreal guide)
 - [UE-Plugin-SCUE4-Plugin](entities/ue-plugin-scue4-plugin.md) — UE4 SCUE4 anti-cheat plugin (integrity checks, variable memory protection, packet encryption, binary tamper detection; Game Engine Protection:Unreal; gmh5225)
 - [UE-UnrealEngineSDK](entities/ue-unreal-engine-sdk.md) — reverse-engineered UE4/UE5 SDK headers (UObject/UWorld/ULevel; internal cheat/mod dev; Universal Cheat development kit; gmh5225)

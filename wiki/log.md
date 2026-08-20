@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TensorWorks/UE-Clang-Format`: entity [[ue-clang-format]] (TensorWorks; Clang-Format config tuned for Unreal Engine C++ Epic-style conventions; VS Code/editor setup guidance; lightweight config/docs repo; team formatting consistency; Game Engine / UE Clang-Format configuration); cited on [[overviews/game-engine]] and [[unreal-engine-guide]]; cross-linked [[ue4-tutorials]], [[ue-buivalidator]], and [[clipboard-tools-ue4]].
+
 - **2026-08-20** — ingest `description:Th3Spl/IoCreateDriver`: entity [[iocreatedriver]] (Th3Spl; custom IoCreateDriver load-path implementation; C/C++ Visual Studio + WDK; bypass standard driver-load visibility/logging; manual-map + entry-point notes; kernel experimentation / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[simpleuefi]], [[umap]], [[kdmapper]], [[map-file-in-system-space]], and [[known-driver-mappers]].
 
 - **2026-08-20** — ingest `description:Th3Spl/SimpleUEFI`: entity [[simpleuefi]] (Th3Spl; simplified UEFI application dev framework; Visual Studio + EDK-II toolchain; MSVC project templates, property sheets, Python setup script; bootstrap UEFI apps without full EDK-II build complexity; UEFI security / bootkit developers); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[eficmake]], [[uefi-bootkit]], [[uefi-bootloader]], [[bootlicker]], [[luaboot]], and [[efixplorer]].
