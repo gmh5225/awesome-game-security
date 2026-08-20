@@ -18,4 +18,4 @@ GTA IV RTX Remix compatibility mod that adapts The Complete Edition for NVIDIA鈥
 
 ## Related
 
-[[overviews/graphics-api]] 路 [[overviews/game-hacking]] 路 [[present-hook]]
+[[gtaiv-eflc-fusionfix]] 路 [[overviews/graphics-api]] 路 [[overviews/game-hacking]] 路 [[present-hook]]

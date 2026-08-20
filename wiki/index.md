@@ -1126,6 +1126,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [grafana-final-scanner](entities/grafana-final-scanner.md) — Grafana CVE scanner (path traversal/SSRF/auth bypass/info disclosure; version fingerprinting + config analysis; HTML/CSV/JSON reports; Cheat / RE Tools)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
+- [gtaiv-eflc-fusionfix](entities/gtaiv-eflc-fusionfix.md) — GTA IV Complete Edition ASI fix patch (rendering/graphics/FPS/QoL/scripting/widescreen; ThirteenAG)
 - [Game-GTA-re3](entities/game-gta-re3.md) — Reverse-engineered GTA III & Vice City engines (re3/reVC; decompiled portable C++; cross-platform incl. PS Vita; CMake; gmh5225)
 - [grand-theft-auto-modding-source](entities/grand-theft-auto-modding-source.md) — GTA modding source collection (re3/reVC; GTA III/Vice City RE; platform ports; DirectX/OpenGL; mod infrastructure; gmh5225)
 - [GrandTheftAutoV-Cheat](entities/grandtheftautov-cheat.md) — GTA V PC mod-menu cheat (money / vehicle spawn / teleport / player mods; scripting + memory manipulation; gmh5225)
