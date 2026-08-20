@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `readme:categories`: Cheat ~2730 (+1) / Anti Cheat ~683 (+1; Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-20** — ingest `description:Valthrun/Valthrun_PUBG`: entity [[valthrun-pubg]] (Rust PUBG external cheat framework; Zenith kernel-driver memory R/W; ESP/radar/health/distance; CR3 process-protection bypass + keyboard/mouse input injection; cheat / game:pubg [External]; Valthrun); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[valthrun-uefi-mapper]], [[pubg-external-cheat]], [[pubg-demo]], [[pubg-internal]], [[eac-cr3-bypass]], and [[ntmemory]].
 
 - **2026-08-20** — ingest `description:Valthrun/valthrun-uefi-mapper`: entity [[valthrun-uefi-mapper]] (Rust x86_64 UEFI boot mapper; bootable ISO/USB deployment; pre-OS game driver load; boot-time driver init and stealth-oriented Windows security research; README [EFI Manual Map]; Valthrun); cited on [[overviews/windows-kernel]] and [[known-driver-mappers]]; cross-linked [[sumap]], [[xigmapper]], [[uefi-bootloader]], and [[luaboot]].
