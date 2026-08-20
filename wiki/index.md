@@ -2376,6 +2376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TeleParser](entities/teleparser.md) — Python Telegram chat/channel parser (Telethon; JSON/CSV/MongoDB; NLTK lemmatizer; IS forensics / OSINT)
 - [tim_apple](entities/tim-apple.md) — external CS2 cheat (Source 2 SDK / pattern scan; offset JSON bootstrap; kristofhracza + gmh5225 forks; cheat / game:cs2)
 - [Titled Gui CS2](entities/titled-gui-cs2.md) — external CS2 cheat framework (C#; ImGui overlay; Win32 memory; cs2-dumper offsets; ESP / aimbot / D3D11 chams; GPLv3; cheat / game:cs2)
+- [TLAC (Modern Local Anti-Cheat Reunioned)](entities/tlac-modern-local-anti-cheat-reunioned.md) — lightweight MIT-licensed Linux local anti-cheat (Rust + C eBPF/kernel module + Python ONNX; signature scan, self-integrity, HWID bans, Tokio IPC; Steam Deck; TuncorReUnion; Open Source Anti Cheat System)
 - [ThreatIntelligenceConsumer](entities/threat-intelligence-consumer.md) — Threat-Intelligence ETW consume without driver/PPL (Win11 24H2/25H2)
 - [Titan](entities/titan.md) — VMProtect devirtualizer (Triton emulation/symbolic exec; AST handler matching; LLVM-oriented lift + CFG recovery; archercreat; Fix VMP)
 - [TitanHide](entities/titanhide.md) — SSDT-hook kernel driver: hide debuggers from selected processes (Nt* return tamper; cheat / debugging)
