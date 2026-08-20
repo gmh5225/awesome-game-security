@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SurgeGotTappedAgain/Window-Hijack`: entity [[window-hijack-overlay]] (SurgeGotTappedAgain; C++ external overlay window hijack PoC; existing HWND model + native flags; SetWindowsHookEx input; DX11/ImGui; visibility/detection tradeoff research; slug disambiguated from [[window-hijack]] thesecretclub KM driver); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[overlay]], [[setwindowhookex]], and [[present-hook]].
+
 - **2026-08-20** — ingest `description:Sutaigne/alibi`: entity [[alibi]] (Sutaigne; read-only PowerShell Windows forensic attestation kit; PC scan for cheat software/DMA artifacts/HWID spoofers + console-rig scan for capture-card stacks/vision aimbots/XIM/Cronus/ReaSnow; verdict-tier text/HTML reports; no install/telemetry; accused-player defensive evidence for tournament/Discord/lobby review; CoD/CS2/Apex/Tarkov/Rust/R6/Marvel Rivals); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[jaranalyzer]], [[driver-risk-scout]], [[drvscan]], [[hardware-input-injection]], and [[ai-aimbot-detection]].
 
 - **2026-08-20** — ingest `description:SwagSoftware/Kisak-Strike`: entity [[kisak-strike]] (SwagSoftware; open-source Linux CS:GO port on Source; full game + engine codebase; CMake; app framework, material/sound/networking, VPC files; SDL + OpenGL Linux paths; Source architecture + Linux porting study; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[source-engine]], [[kisakcod]], [[kisakblack]], and [[source-netvars]].

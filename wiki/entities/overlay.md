@@ -18,4 +18,4 @@ C++ research sample focused on **SetWindowsHookEx**—hooking and overlays in th
 
 ## Related
 
-[[present-hook]] · [[dwm-hook]] · [[steam-overlay-x64]] · [[eac-overlay]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]
+[[present-hook]] · [[dwm-hook]] · [[steam-overlay-x64]] · [[eac-overlay]] · [[window-hijack-overlay]] · [[overviews/graphics-api]] · [[overviews/game-hacking]]

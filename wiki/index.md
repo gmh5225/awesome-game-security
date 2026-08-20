@@ -2674,6 +2674,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Wells Anti Cheat](entities/wellsanticheat.md) — Among Us host-side BepInEx AC (RPC abuse / crashers / spam; Harmony)
 - [Weird Anti Cheat Ideas](entities/weird-anti-cheat-ideas.md) — unconventional AC design guide (anti-cheat research, networking, modding; Anti Cheat / guide; gmh5225)
 - [window_hijack](entities/window-hijack.md) — KM window-handle hijack for covert KM↔UM I/O (thread contexts)
+- [Window-Hijack (SurgeGotTappedAgain)](entities/window-hijack-overlay.md) — external overlay window hijack PoC: existing HWND model + native flags; SetWindowsHookEx input; DX11/ImGui; visibility/detection tradeoff research
 - [WindowProtect](entities/windowprotect.md) — window-hide research (driver / hooking; cheat / hide; gmh5225)
 - [Wazuh](entities/wazuh.md) — open-source XDR / HIDS (agent–manager; FIM / log / vuln; Elasticsearch)
 - [WickedEngine](entities/wickedengine.md) — open C++ 3D engine (`WickedEngine_Windows` static lib; Game Engine source)

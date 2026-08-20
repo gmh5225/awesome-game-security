@@ -20,4 +20,4 @@ Research sample for kernel / game-security work on Ring0↔UM paths that avoid o
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[boom]] · [[data-ptr-swap]] · [[evcommunication]] · [[double-callback]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[window-hijack-overlay]] · [[boom]] · [[data-ptr-swap]] · [[evcommunication]] · [[double-callback]]
