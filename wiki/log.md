@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:UnnamedZ03/CS2-external-base`: entity [[cs2-external-base]] (C++ CS2 external overlay visualization starter; team checks + box/health/distance/skeleton/text ESP; overlay-side structure only—omits memory R/W driver; educational external tooling architecture; cheat / game:cs2 [External]; UnnamedZ03); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-ext]], [[cs2-external-cheat]], [[pythoncs2]], [[titled-gui-cs2]], [[world-to-screen]], and [[valthrun]].
+
 - **2026-08-20** — ingest `description:V-i-x-x/kernel-callback-removal`: entity [[kernel-callback-removal]] (ETW-TI kernel bypass; toggle provider enable flags from kernel memory via R/W primitive; locate kernel structures/offsets; C++ + WinDbg/IDA RE notes; educational EDR bypass research; README [Removing kernel callbacks]; V-i-x-x); cited on [[concepts/etw-threat-intelligence]] and [[concepts/kernel-callbacks]]; cross-linked [[edrsandblast]], [[bustercall]], [[disable-threat-tracing]], and [[etwti-fluctuation-monitor]].
 
 - **2026-08-20** — ingest `description:Valthrun/Valthrun`: entity [[valthrun]] (Rust CS2 external read-only kernel framework; kernel driver + overlay renderer + radar without in-process DLL injection; ESP/bomb/spectator/trigger + stream-proof overlay; low-level game security and anti-detection research; cheat / game:cs2 [External]; Valthrun); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[valthrun-uefi-mapper]], [[valthrun-pubg]], [[cs2-ext]], [[cs2-dma]], [[cs2-dumper]], and [[anti-screenshot-capture]].

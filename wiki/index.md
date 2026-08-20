@@ -485,6 +485,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS2-External-Cheat](entities/cs2-external-cheat.md) — external CS2 cheat (C++; D3D11 ImGui overlay / aimbot / memory)
 - [CS2-External](entities/cs2-external.md) — external CS2 cheat (Zckyy; C#; read-only memory + overlay; entity/offset/view-matrix helpers; auth/subscription; cheat / game:cs2 [External])
 - [cs2-external-1](entities/cs2-external-1.md) — external CS2 cheat (gmh5225; ImGui + DirectX 11 overlay; aimbot / ESP / skeleton / snaplines; cheat / game:cs2 [External])
+- [cs2-external-base](entities/cs2-external-base.md) — CS2 external overlay starter base (UnnamedZ03; C++; team checks + box/health/distance/skeleton/text ESP; overlay structure only—no memory driver; educational; cheat / game:cs2 [External])
 - [CS2 Hybrid Anti-Cheat Proposal](entities/cs2-hybrid-anticheat-proposal.md) — CS2 hybrid AC proposal (Glicko-2 judges, honeypot entities, shadow monitoring; Python PoC)
 - [CS2AC](entities/cs2ac.md) — open-source server-side CS2 anti-cheat Metamod:Source plugin (aim/movement/input; ~17 modules; kick/ban; Discord webhooks)
 - [CS2KAC](entities/cs2kac.md) — open-source CS2 kernel-mode AC companion (KMDF driver + usermode service; client integrity signals for CS2AC/CS2FOW)
