@@ -2361,6 +2361,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [teamfortress2-internal](entities/teamfortress2-internal.md) — TF2 internal: modding / hooking (C++; cheat / game:team fortress 2; gmh5225)
 - [tft-ocr-bot](entities/tft-ocr-bot.md) — TFT OCR automation bot (Python; asset pipelines / overlay; screen OCR; cheat / game:lol [TFT]; gmh5225)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
+- [Hwid-Spoofer (Theordernarkoz)](entities/theordernarkoz-hwid-spoofer.md) — Windows ImGui+DX9 one-click HWID spoofer launcher; downloads driver/helper binaries; CLI spoof step (Theordernarkoz; cheat / HWID)
 - [tenet](entities/tenet.md) — IDA Pro plugin: execution-trace timeline (forward/backward stepping; register/memory state; multiple formats; gmh5225)
 - [tenet-ida9.0](entities/tenet-ida9.0.md) — IDA Pro 9.0 port of Tenet: execution-trace timeline (forward/backward stepping; IDA 9.0 SDK; gmh5225)
 - [tenrec](entities/tenrec.md) — Headless extendable multi-session IDA Pro MCP framework (ida-domain + FastMCP; multi-binary analysis; plugin entry points; axelmierczuk)
