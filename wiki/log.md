@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Systemcluster/wrappe`: entity [[wrappe]] (Systemcluster; Rust cross-platform packer; executable + resource directory → single self-contained binary; Zstandard compression; parallel pack/unpack; streaming decompression; metadata/resource transfer; portable one-file desktop deployment; Anti Cheat → Binary Packer `[Rust]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[oxide]], [[2pack]], [[papaw]], and [[awesome-executable-packing]].
+
 - **2026-08-20** — ingest `description:Systemhaus-Schulz/DriverRiskScout`: entity [[driver-risk-scout]] (Systemhaus-Schulz; read-only PowerShell + optional Python collector; loaded/installed/DriverStore driver inventory; signature verification; LOLDrivers/MS blocklist/BYOVD profile correlation; static PE/YARA scoring; Sysmon/Code Integrity correlation; HVCI/VBS/WDAC posture; CSV/JSON/HTML/Wazuh NDJSON + optional NVD/Sigma; defenders/IR/game-security BYOVD hunting without host modification); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[ms-vulnerable-driver-list]], [[vulnerable-driver-scanner]], and [[byovdfinder]].
 
 - **2026-08-20** — ingest `description:TASEmulators/BizHawk`: entity [[bizhawk]] (TASEmulators; multi-system C#/.NET retro emulator + native cores; TAS/TAStudio, Lua memory+input APIs, RAM search, hex editor, CPU debuggers, savestates/rewind, Game Genie/GameShark decoders; NES/SNES/GB/GBA/Genesis/N64/DS/PS1/MAME; deterministic frame control for cheat/mechanics RE); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[feather-gb]], [[kevboy]], [[gecko]], and [[cheat-engine]].

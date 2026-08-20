@@ -2726,6 +2726,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ward](entities/ward.md) — simple ELF runtime packer for stealthy droppers (Go/C; Anti Cheat → Binary Packer `[ELF]`)
 - [workflow-objc](entities/workflow-objc.md) — Binary Ninja Objective-C analysis workflow (Vector35; C++; objc_msgSend→direct-call HLIL cleanup; macOS/iOS; Cheat / [Objective-C])
 - [woody_woodpacker](entities/woody-woodpacker.md) — ELF binary packer (outputs “woody”; Anti Cheat → Binary Packer)
+- [wrappe](entities/wrappe.md) — Rust cross-platform app bundler (executable + resource dir → single binary; Zstandard; parallel pack/unpack; streaming decompression; metadata/resource transfer; portable one-file deployment; Anti Cheat → Binary Packer `[Rust]`; Systemcluster)
 - [WoWDumpFix](entities/wowdumpfix.md) — x64dbg plugin; removes anti-dump obstacles from protected Blizzard/WoW processes; Scylla import/dump repair; attach-time breakpoint restore (C/C++; cheat / game:wow / Dump Fix)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
 - [wow-wowautofishing](entities/wow-wowautofishing.md) — WoW auto-fishing automation (C/C++; rendering / audio / memory analysis; cheat / game:wow; gmh5225)
