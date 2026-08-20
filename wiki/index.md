@@ -392,6 +392,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [capture-engine](entities/capture-engine.md) — Windows game capture/recording (WGC/DDA or injected D3D9–D3D12/Vulkan/OpenGL/DXVK hooks; Matroska, HDR overlays, DLSS/FSR; explicit AC safety boundaries; aufkrawall)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
 - [CE Remap Plugin](entities/ce-remap-plugin.md) — Delphi CE plugin: remap disassembler memory pages for hidden/obfuscated code (CE plugin SDK; tested CE 7.4; cheat / Remap; gmh5225)
+- [CE Lua Extensions](entities/ce-lua-extensions.md) — Skyrimfus CE Lua autorun pack: extension loader + breakpoint cleanup, caller lookup, template insertion, UI workflow scripts (cheat / Lua Extensions)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
 - [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
