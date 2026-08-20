@@ -546,6 +546,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
 - [CovertThread (brew02)](entities/covert-thread.md) — covert system threads via page-table module removal, custom IDT address space, NMI-blocked inspection; direct kernel fn exec (Windows Ring0 / anti-forensic research)
 - [cpp-android-basic-samples](entities/cpp-android-basic-samples.md) — Google Play Games C++ SDK sample games (Game Develop / Android source)
+- [cpp-game-engine-book](entities/cpp-game-engine-book.md) — C++/OpenGL hands-on engine book (chapter samples; rendering→animation/GUI/audio/profiling/multithreaded rendering; Lua, Blender, FMOD; Game Engine / guide; ThisisGame)
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
 - [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)

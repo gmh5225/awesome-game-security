@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:ThisisGame/cpp-game-engine-book`: entity [[cpp-game-engine-book]] (ThisisGame; hands-on C++/OpenGL engine learning book + large chapter-based codebase; rendering→animation/GUI/audio/profiling/multithreaded rendering; Lua scripting, Blender export, FMOD audio; Game Engine / guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[game-engine-from-scratch]], [[metal-game-engine-tutorial]], [[gltut]], [[exengine]], [[3d-game-shaders-for-beginners]], [[blender-mcp]], and [[optick]].
+
 - **2026-08-20** — ingest `description:ThomasonZhao/InfinityHookProMax`: entity [[infinityhook-promax]] (ThomasonZhao; C++ driver-oriented InfinityHook successor; hook management + instruction disassembly; broader Windows version compatibility/stability; VM-tested; kernel security research / AC monitoring; ETW Hook WIN11); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]] and [[etwhook-infinityhookclass]].
 
 - **2026-08-20** — ingest `description:TimMisiak/WinDbgCookbook`: entity [[windbg-cookbook]] (TimMisiak; JS WinDbg data-model automation scripts + debugger queries; dependency inspection, stack collection/corruption detection, time-travel debugging analysis; ready-to-run `dx` examples for module/thread/environment inspection; WinDbg); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[ttddbg]], [[awesome-windbg-extensions]], and [[mcp-windbg]].
