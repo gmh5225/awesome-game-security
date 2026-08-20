@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SteamDatabase/Protobufs`: entity [[protobufs]] (SteamDatabase; continuously tracked Steam/Valve protobuf `.proto` schemas from update pipelines and automated dumpers; CS:GO/Steam client message definitions; protocol analysis, tooling maintenance, and game network RE; README [Protobuf]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[game-networking-sockets]], [[packet-sniffer]], [[ds3os]], [[source-sdk-2013]], [[proton]], and [[vac]].
+
 - **2026-08-20** — ingest `description:Steesha/CodeCleaner`: entity [[codecleaner]] (Steesha; x64dbg plugin; C++ Capstone + AsmJit; cleans/simplifies disassembled machine code—redundant NOPs, no-op register moves; packed/obfuscated binary traces; README Cleaning Themida Mutation Assembly codes; Fix Themida / x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[themida-unmutate]], [[themidie]], and [[themida-research]].
 
 - **2026-08-20** — ingest `description:StelGR/ArrowAntiCheat`: entity [[arrow-anticheat]] (StelGR; Java Bukkit/Spigot packet AC; PacketEvents; combat/movement/misc checks—aim assist, kill aura, reach, fly, scaffold, timer; statistical analysis + movement prediction; alerts/verbose/logging; Java + Bedrock; AGPLv3; smaller-server OSS AC); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheat]], [[dakotaac]], [[minecraft-anti-cheat]], [[ycbr-anticheat]], [[avaanticheat]], and [[oomph]].
