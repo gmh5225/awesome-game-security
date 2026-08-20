@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Unity-Technologies/FPSSample`: entity [[fpssample]] (Unity official production FPS sample; character animation, weapon handling, networked multiplayer architecture, asset pipelines; anim state machine + netcode study; Game Engine / Unity Game; Unity-Technologies); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unity-cs-reference]], [[il2cpp]], [[dnspy]], [[unityexplorer]], [[com-unity-demoteam-hair]], and [[unity-vrchat-template]].
+
 - **2026-08-20** — ingest `description:Unity-Technologies/UnityCsReference`: entity [[unity-cs-reference]] (official Unity engine/editor managed C# reference source; mirrors internal source tree; reference-only license; engine understanding, debugging, tooling research; Game Engine / [C# reference]; Unity-Technologies); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[il2cpp]], [[dnspy]], [[ilspy]], [[unityexplorer]], [[unity-script-collection]], and [[unity202x-externalresolve]].
 
 - **2026-08-20** — ingest `description:Unity-Technologies/com.unity.demoteam.hair`: entity [[com-unity-demoteam-hair]] (Unity Demo Team strand-based hair package; Alembic groom import, GPU simulation constraints, hierarchical LOD; Built-in/URP/HDRP shaders; C# editor/runtime + shader code; digital-human character rendering; Plugins:Unity; Unity-Technologies); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[kawaii-physics]], [[unity-vrchat-template]], [[the-seed-link-future]], [[3d-game-shaders-for-beginners]], and [[optick]].

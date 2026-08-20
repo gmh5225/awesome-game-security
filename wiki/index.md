@@ -914,6 +914,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Flying-Guys-fully-modified](entities/flying-guys-fully-modified.md) — Fall Guys fully modified cheat suite (kernel driver + KdMapper + ImGui; fly/movement hacks; gmh5225)
 - [FlyingGuys](entities/flying-guys.md) — Fall Guys kernel cheat (KdMapper custom driver + ImGui overlay; zlib network manipulation; gmh5225)
 - [FPGA DMA Multi Tool](entities/fpga-dma-multi-tool.md) — Artix-7 FPGA DMA board detect/flash/speedtest (Go/Fyne; openFPGALoader)
+- [FPSSample](entities/fpssample.md) — Unity official production FPS sample (character animation, weapons, networked multiplayer, asset pipelines; Game Engine / Unity Game; Unity-Technologies)
 - [Freedom](entities/freedom.md) — Android Google Play billing IAP bypass (billing-service hook; fake purchase confirmations; gmh5225)
 - [frida-android-hook](entities/frida-android-hook.md) — Frida class/function trace + return-value modify (cheat / Frida)
 - [frida-boot](entities/frida-boot.md) — Beginner Frida binary instrumentation workshop (YouTube stream; gmh5225; cheat / Frida)
