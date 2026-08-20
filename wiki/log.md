@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Spuckwaffel/UEDumper`: entity [[uedumper]] (Spuckwaffel; C++ all-in-one Unreal Engine dumper + live memory editor; ImGui UI; UE 4.19–5.3; SDK generation, structure dump, runtime browse; cheat / SDK Dump); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[ue4genny]], [[unrealdumper-4-25]], and [[re-ue4ss]].
+
 - **2026-08-20** — ingest `description:Squalr/Squally`: entity [[squally]] (Squalr; C++ Cocos2d-x 2D platformer; gamified game-hacking intro through gameplay; values/operators/logic for memory reasoning; Windows/macOS/Linux; cheat / guide); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[squalr-sharp]], [[intro-to-gamehacking]], [[gamehacking-cheatsheet]], and [[cocos2d-x]].
 
 - **2026-08-20** — ingest `description:Squalr/Squalr-Sharp`: entity [[squalr-sharp]] (Squalr; C#/.NET Windows memory editor; WPF GUI + CLI + engine API; SIMD scan, pointer resolution, NASM assemble/disassemble, C# scripting, process attach/debug, .NET object inspection; cheat / memory editor); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[pince]], [[bizhawk]], [[intro-to-gamehacking]], [[reclass-ex]], and [[dnspy]].
