@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SkyFire/MopCore547`: entity [[mopcore547]] (SkyFire; WoW MoP **5.4.7** server emulator; C++/CMake; world simulation / player management / NPC scripting / network protocol; game-server emulation + MMORPG protocol RE; cheat / game:wow); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[trinitycore]], [[legioncore-7-3-5]], [[azerothcore-wotlk]], [[azerust]], and [[awesome-wow-rust]].
+
 - **2026-08-20** — ingest `description:Skyrimfus/CE-lua-extensions`: entity [[ce-lua-extensions]] (Skyrimfus; CE Lua autorun extension pack; loader + breakpoint cleanup, function-caller lookup, template insertion, interface workflow scripts; speeds up RE and memory-analysis on Cheat Engine; cheat / Lua Extensions); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[controller-mode]], and [[unreal-engine-tools]].
 
 - **2026-08-20** — ingest `description:Snoopy-Sec/Localroot-ALL-CVE`: entity [[localroot-all-cve]] (Snoopy-Sec; historical CVE/year-indexed local privilege escalation PoC archive; mostly C with shell/Python scripts and per-vulnerability notes; exploit-development study and vulnerability timeline reference; README [Root CVE]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[windows-kernel-exploits]], [[kernel-cve-analysis]], and [[byovd]].
