@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:ThatLing/limba`: entity [[limba]] (ThatLing; compile-time MBA control-flow obfuscation PoC; C++20 Clang/clang-cl; randomized jump-target encoding + per-build rewrite rules; premake integration examples; RE resistance / binary obfuscation research; Cheat Mixed boolean-arithmetic); cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[mutaben]], [[mba-obfuscator]], [[mixed-boolean-transform]], [[obfusheader-h]], [[promba]], and [[cobra]].
+
 - **2026-08-20** — ingest `description:TheAenema/hm-pe-packer`: entity [[hm-pe-packer]] (TheAenema; tutorial-oriented C++ x64 PE packer/protector; Visual Studio; load-time wrap/protect; PE structures, packing stubs, protection mechanics; security learners / RE practitioners; Anti Cheat → Binary Packer `[PE X64]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[packer-tutorial]], [[x64-exe-packer]], [[atom-pe-packer]], [[pepacker]], and [[exe-packer]].
 
 - **2026-08-20** — ingest `description:TheCherno/Hazel`: entity [[hazel]] (TheCherno; early-stage C++ interactive app + rendering engine; engine/editor/sandbox; Vulkan SDK dependency setup; educational engine design + real-time rendering/game-framework prototyping; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[lumos]], [[game-engine-from-scratch]], and [[vk-engine]].

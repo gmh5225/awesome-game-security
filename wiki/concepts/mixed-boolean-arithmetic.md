@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/bliutech__mbased.md
   - wiki/sources/descriptions/astean1001__ProMBA.md
   - wiki/sources/descriptions/amruth-sn__kong.md
-updated: 2026-08-18
+  - wiki/sources/descriptions/ThatLing__limba.md
+updated: 2026-08-20
 confidence: high
 ---
 
@@ -30,7 +31,7 @@ confidence: high
 2. **Program synthesis** — oracle-guided expression search with SMT equivalence checks in IDA via [[qsynthesis]] (Python; Hex-Rays integration) (source: wiki/sources/descriptions/gmh5225__qsynthesis.md); exact finite-domain Drill & Join synthesis plus Bitwuzla equivalence proofs for 64-bit opaque predicates and MBA-style expressions via [[drill-and-join]] (C++17 header-only; SMT-guided bit dependency reduction) (source: wiki/sources/descriptions/fvrmatteo__DrillAndJoin.md); program synthesis plus term rewriting for linear/polynomial MBA deobfuscation via [[promba]] (astean1001; VM-protector contexts) (source: wiki/sources/descriptions/astean1001__ProMBA.md); agentic LLM-orchestrated deobfuscation via [[kong]] (in-process Ghidra; call-graph analysis; algebraic simplification, pattern matching, symbolic execution) (source: wiki/sources/descriptions/amruth-sn__kong.md).
 3. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
 4. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
-5. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md). VM-based protectors such as [[covirt]] embed MBA transforms inside stack-VM obfuscation passes for protected regions (source: wiki/sources/descriptions/dmaivel__covirt.md).
+5. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md); compile-time control-flow obfuscation that MBA-encodes jump targets with per-build randomized rewrite rules via [[limba]] (C++20; Clang/clang-cl; ThatLing) (source: wiki/sources/descriptions/ThatLing__limba.md). VM-based protectors such as [[covirt]] embed MBA transforms inside stack-VM obfuscation passes for protected regions (source: wiki/sources/descriptions/dmaivel__covirt.md).
 
 ## Detection context
 
@@ -38,4 +39,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[mbased]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[mbased]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
