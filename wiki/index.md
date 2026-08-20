@@ -910,6 +910,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [findcrypt-yara](entities/findcrypt-yara.md) — IDA Pro FindCrypt plugin (YARA crypto-constant scan; AES/DES/SHA/CRC signatures; algorithm annotation; gmh5225; cheat / Yara)
 - [findfunc](entities/findfunc.md) — IDA Pro function pattern search (byte patterns, instruction sequences, operand types, xrefs; Recognizing Function By Pattern; gmh5225; cheat / IDA Plugins)
+- [find-xrefs](entities/find-xrefs.md) — IDA Pro plugin: materialize missing string/data xrefs on large binaries (RIP-relative/absolute scan; optional raw 32-bit sliding window; NumPy-accelerated sweeps; TheCruZ; cheat / IDA Plugins)
 - [findyara-ida](entities/findyara-ida.md) — IDA Pro YARA scan plugin (match highlight + disasm navigation; custom malware/crypto/packer rules; gmh5225; cheat / Yara)
 - [Finger](entities/finger.md) — cloud function symbol recognition (Python SDK + IDA 7+ plugin; feature extraction → recognition backend → rename/highlight; Recognizing Function By Cloud; aliyunav; cheat / IDA Plugins)
 - [firmeye](entities/firmeye.md) — IDA Pro IoT firmware vuln hunter (Python; argument tracing into sensitive functions; static + debugger-assisted dynamic checks; overflow/command-exec/format-string rules; CLI batch; Vu1nT0tal; cheat / IoT / IDA Plugins)
