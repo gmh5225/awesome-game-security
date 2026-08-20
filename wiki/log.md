@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TKazer/ScyllaHide-For-IDA9.0RC`: entity [[scyllahide-for-ida9.0rc]] (TKazer; IDA 9.0 SDK ScyllaHide anti-anti-debug build; C/C++ hook libs, injector, debugger plugins; masks debugger artifacts vs common anti-debug; reverse engineering / malware analysis); cited on [[overviews/reverse-engineering]]; cross-linked [[scyllahidedetector2]], [[titanhide]], [[makin]], and [[magicmida-rs]].
+
 - **2026-08-20** — ingest `description:TLeonardUK/ds2os`: entity [[ds2os]] (deprecated Dark Souls 2 online-service placeholder; README-only migration pointer; no implementation; historical reference to [[ds3os]]; Game Network / game:dark souls; TLeonardUK); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[ds3os]] and [[dark-souls-iii-cheat-engine-guide]].
 
 - **2026-08-20** — ingest `description:TLeonardUK/ds3os`: entity [[ds3os]] (Dark Souls 2/3 online-service server emulator; Protobuf protocol; Docker; matchmaking/co-op/invasions/messages; game-server RE; Game Network / game:dark souls; TLeonardUK); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[dark-souls-iii-cheat-engine-guide]], [[game-networking-sockets]], and [[packet-sniffer]].

@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ **ScyllaHide Detector V2** sample that detects ScyllaHide anti-anti-debug use when a target is under debug and bytes are restored. Centers on hooking / debugging artifacts useful to anti-cheat engineers and defensive researchers studying the `Anti Cheat → Anti Debugging` lane against hide plugins (ScyllaHide / TitanHide / HyperHide class). (source: wiki/sources/descriptions/samshine__ScyllaHideDetector2.md)
 
-Complements anti-debug technique catalogs such as [[makin]] and tool-presence detectors such as [[cedetector]]; pairs with the ScyllaHide-class hide/bypass surface covered under [[overviews/reverse-engineering]] anti-analysis.
+Complements anti-debug technique catalogs such as [[makin]] and tool-presence detectors such as [[cedetector]]; pairs with the ScyllaHide-class hide/bypass surface including [[scyllahide-for-ida9.0rc]] (IDA 9.0 SDK build) covered under [[overviews/reverse-engineering]] anti-analysis.
 
 ## Links
 

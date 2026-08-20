@@ -2242,6 +2242,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shellcode-obfuscation](entities/shellcode-obfuscation.md) — Caesar-cipher encoding pipeline (Python obfuscator + C VirtualAlloc loader; AV bypass-rate measurements; academic lab)
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
+- [ScyllaHide-For-IDA9.0RC](entities/scyllahide-for-ida9.0rc.md) — IDA 9.0 SDK ScyllaHide anti-anti-debug build (C/C++ hook libs, injector, debugger plugins; masks debugger artifacts; TKazer)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
