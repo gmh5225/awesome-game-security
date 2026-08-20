@@ -14,7 +14,7 @@ IDA Pro plugin (FindCrypt) that identifies cryptographic constants and algorithm
 
 Built-in crypto-constant signature detection—not a general-purpose custom YARA rule runner.
 
-Complements general in-IDA YARA tooling such as [[findyara-ida]] (custom rule scan + match navigation), [[yara4ida]], [[yarascan-ida]], rule generation via [[hyara]], and compiled-rule analysis via [[yaravm]].
+Complements the Ghidra-side [[ghidra-findcrypt]] analyzer (Java Gradle extension; JSON crypto-constant signatures; labels AES/DES/MD5/SHA/TEA/Salsa/CRC32 routines during Ghidra analysis; TorgoTorgo) and general in-IDA YARA tooling such as [[findyara-ida]] (custom rule scan + match navigation), [[yara4ida]], [[yarascan-ida]], rule generation via [[hyara]], and compiled-rule analysis via [[yaravm]].
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements general in-IDA YARA tooling such as [[findyara-ida]] (custom rule sc
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[findyara-ida]] · [[yara4ida]] · [[yarascan-ida]] · [[hyara]] · [[yaravm]] · [[idaplugins]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[findyara-ida]] · [[yara4ida]] · [[yarascan-ida]] · [[hyara]] · [[yaravm]] · [[ghidra-findcrypt]] · [[idaplugins]]

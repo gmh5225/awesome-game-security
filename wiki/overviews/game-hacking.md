@@ -347,6 +347,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__FindFunc.md
   - wiki/sources/descriptions/gmh5225__findyara-ida.md
   - wiki/sources/descriptions/gmh5225__findcrypt-yara.md
+  - wiki/sources/descriptions/TorgoTorgo__ghidra-findcrypt.md
   - wiki/sources/descriptions/kweatherman__ida_missinglink.md
   - wiki/sources/descriptions/senko37__yarascan-ida.md
   - wiki/sources/descriptions/senator715__IDA-Fusion.md
@@ -1698,7 +1699,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - In-IDA Yara rule file scanning via [[yarascan-ida]] (Python; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senko37__yarascan-ida.md)
 - Unofficial YARA integration for IDA Pro via [[yara4ida]] (default **Alt-Y**; rebind via `plugins.cfg`; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/kweatherman__yara4ida.md)
 - In-IDA YARA rule scanning with match highlighting via [[findyara-ida]] (gmh5225; run custom rules on the loaded binary; disasm navigation to hits; malware/crypto/packer signatures; cheat / Yara) sits in the Cheat Yara / signature-scan lane. (source: wiki/sources/descriptions/gmh5225__findyara-ida.md)
-- FindCrypt crypto-constant scan via [[findcrypt-yara]] (gmh5225; Python IDA plugin; YARA rules for AES/DES/SHA/CRC signatures; annotate algorithm names; cheat / Yara) sits in the Cheat Yara / crypto-signature lane. (source: wiki/sources/descriptions/gmh5225__findcrypt-yara.md)
+- FindCrypt crypto-constant scan via [[findcrypt-yara]] (gmh5225; Python IDA plugin; YARA rules for AES/DES/SHA/CRC signatures; annotate algorithm names; cheat / Yara) sits in the Cheat Yara / crypto-signature lane. (source: wiki/sources/descriptions/gmh5225__findcrypt-yara.md) Ghidra-side crypto-constant labeling via [[ghidra-findcrypt]] (TorgoTorgo; Java Gradle analyzer; JSON byte-pattern DB for AES/DES/MD5/SHA-1/TEA/Salsa/CRC32; cheat / Ghidra Plugins) complements that lane for Ghidra workflows. (source: wiki/sources/descriptions/TorgoTorgo__ghidra-findcrypt.md)
 - Function pattern search via [[findfunc]] (gmh5225; filter functions by byte patterns, instruction sequences, operand types, and xrefs; Recognizing Function By Pattern; cheat / IDA Plugins) sits in the Cheat signature-scan / function-discovery lane beside [[ida-fusion]] and [[ida-sigmaker]]. (source: wiki/sources/descriptions/gmh5225__FindFunc.md)
 - Fast IDA signature scanner & creator via [[ida-fusion]] (unique sigs vs duplicated binary / anti-RE parts) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senator715__IDA-Fusion.md)
 - Zero-dependency IDA Pro 9+ signature maker & searcher via [[ida-sigmaker]] (Python; optional Cython/SIMD AVX2/NEON/SSE2; shortest unique sigs; wildcard operands; XREF fallback; batch text/CSV/JSON search; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/mahmoudimus__ida-sigmaker.md)
