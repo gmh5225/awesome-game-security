@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Speedi13/ROP-COMPILER`: entity [[rop-compiler]] (Speedi13; C++ x86 ROP compiler; assembly-like scripts → ROP chains; gadget scanning + offset handling; CS:GO/BF3/BF4 cheat payloads—triggerbot, glow ESP, minimap spotting; exploit-style cheat execution + AC evasion research; cheat / ROP Generation); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[angrop]], [[exrop]], [[ropgadget-rs]], [[agafi]], [[csgo-internal]], and [[osiris]].
+
 - **2026-08-20** — ingest `description:Spelchure/CSGO-Internal`: entity [[csgo-internal]] (Spelchure; C++17 internal CS:GO multi-feature cheat; aimbot, ESP/snaplines, bunnyhop, anti-flash; injected in-process tool; cheat development + competitive-shooter RE practice; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-internal-base]], [[aqhax-csgo]], [[csgo-kns]], [[solace-csgo]], [[world-to-screen]], and [[present-hook]].
 
 - **2026-08-20** — ingest `description:SpiroHappy/Warzone-MW-Internal`: entity [[warzone-mw-internal]] (SpiroHappy; outdated C++ internal COD MW/Warzone framework; ESP / bone rendering / aimbot / recoil reduction / FOV / UAV; ImGui menu; internal cheat architecture + FPS feature-module integration reference); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-internal-cheat]], [[modern-warfare-warzone-cheat]], [[mwclap]], [[present-hook]], and [[world-to-screen]].

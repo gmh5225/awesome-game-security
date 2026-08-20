@@ -2224,6 +2224,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rtcore64-vulnerability](entities/rtcore64-vulnerability.md) — BYOVD driver mapper via MSI Afterburner `RTCore64.sys` (R/W primitives + data-ptr hook; `MmAllocateIndependentPagesEx` search; manual unsigned map; gmh5225)
 - [RToolZ](entities/rtoolz.md) — rootkit-like process/callback utility (hide/unhide, callback enum/remove, protection-level control; ProcExp152.sys; gmh5225)
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
+- [rop-compiler](entities/rop-compiler.md) — x86 ROP compiler for game cheat payloads (assembly-like scripts → chains; CS:GO/BF3/BF4; triggerbot/glow ESP/minimap; gadget scan + offsets; C++; cheat / ROP Generation)
 - [ropgadget-rs](entities/ropgadget-rs.md) — Rust ROP gadget finder (parallel PE/ELF/Mach-O scan; ret-terminated chains; exploit-chain RE)
 - [rs-native-kit-security](entities/rs-native-kit-security.md) — React Native Nitro RASP SDK (root/jailbreak, Frida/Xposed/Magisk hook, tamper/integrity, VPN/proxy, device risk scoring; Android+iOS)
 - [rs-ldr](entities/rs-ldr.md) — Rust no_std hash-based WinAPI resolution (PEB walk, LdrLoadDll, XOR strings, Hell's Gate-style SSN resolver; stealth API resolution)
