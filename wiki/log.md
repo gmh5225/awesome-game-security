@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Suprcode/mir3-zircon`: entity [[mir3-zircon]] (Suprcode; C# open-source Legend of Mir 3 engine + tooling; client/server/launcher/editor; networking, content/data models, DirectX/SharpDX rendering; private-server operators / custom content; Game Engine / source; README `[MIR3]`); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[direct3d-hook]], [[maplestory-copy]], [[maple-unity]], and [[game-networking-sockets]].
+
 - **2026-08-20** — ingest `description:SurgeGotTappedAgain/Pink-Eye`: entity [[pink-eye]] (SurgeGotTappedAgain; Windows KMDF kernel-mode PoC; anti-cheat object-callback redirect via code caves + integrity-check path tampering; C/C++ driver; AC research / defensive testing / kernel detection hardening study); cited on [[concepts/kernel-callbacks]], [[overviews/anti-cheat]], and [[overviews/windows-kernel]]; cross-linked [[mapped-callback]], [[notify-routine-hijack-thread]], and [[bustercall]].
 
 - **2026-08-20** — ingest `description:SurgeGotTappedAgain/Window-Hijack`: entity [[window-hijack-overlay]] (SurgeGotTappedAgain; C++ external overlay window hijack PoC; existing HWND model + native flags; SetWindowsHookEx input; DX11/ImGui; visibility/detection tradeoff research; slug disambiguated from [[window-hijack]] thesecretclub KM driver); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[overlay]], [[setwindowhookex]], and [[present-hook]].
