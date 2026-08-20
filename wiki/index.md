@@ -1756,6 +1756,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NocturneLdr](entities/nocturneldr.md) — CET-compatible Win x64 shellcode loader (fully backed stacks; Spoof Stack)
 - [Norsefire](entities/norsefire.md) — kernel-mode W/RPM + mouse_event (C++; cheat / RPM)
 - [note](entities/note.md) — Chinese Android File Explorer guide (Guide-zh; Cheat Android File Explorer)
+- [notify-routine-hijack-thread](entities/notify-routine-hijack-thread.md) — kernel PoC hijacking `PspCreateThreadNotifyRoutine` via dedicated thread (UCFoxi; C++; anti-cheat / EDR callback evasion research; README [Hijack PspCreateThreadNotifyRoutine])
 - [NoVmp](entities/novmp.md) — static VMProtect x64 3.x devirtualizer (VTIL lift; can1357; Fix VMP)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)
 - [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:UCFoxi/NotifyRoutineHijackThread`: entity [[notify-routine-hijack-thread]] (UCFoxi; compact Visual Studio C++ KM PoC; dedicated-thread hijack of `PspCreateThreadNotifyRoutine`; minimal driver + technique showcase; anti-cheat / EDR callback evasion research; README [Hijack PspCreateThreadNotifyRoutine]); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[ps-notif-routine-unloader]], [[mapped-callback]], [[bustercall]], [[rtoolz]], and [[shared-flushfilebuffers-communication]].
+
 - **2026-08-20** — ingest `description:UCFoxi/Shared-FlushFileBuffers-Communication`: entity [[shared-flushfilebuffers-communication]] (UCFoxi; C++ KM+UM; shared buffer + `FlushFileBuffers`-triggered `IRP_MJ_FLUSH_BUFFERS` hook; no persistent worker thread; stealth driver comm / AC bypass research; README `[FlushFileBuffers]`); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ucfoxi-shared-flushfilebuffers-communication-update]], [[kernel-payload-comms]], [[gina-public]], [[evcommunication]], and [[km-um-communication]].
 
 - **2026-08-20** — ingest `description:UE-Explorer/UE-Explorer`: entity [[ue-explorer]] (Windows UE1–UE3 package browser/decompiler; C#/.NET WinForms; UnrealScript decompile, class/sound export, package dependency inspection, structured hex viewer; modding/RE; Browser and decompiler for UE packages; UE-Explorer); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uassetgui]], [[uassetapi]], [[uetools]], [[paksmith]], [[rust-u4pak]], and [[awesome-game-file-format-reversing]].
