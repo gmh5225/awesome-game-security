@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:UE-Explorer/UE-Explorer`: entity [[ue-explorer]] (Windows UE1–UE3 package browser/decompiler; C#/.NET WinForms; UnrealScript decompile, class/sound export, package dependency inspection, structured hex viewer; modding/RE; Browser and decompiler for UE packages; UE-Explorer); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uassetgui]], [[uassetapi]], [[uetools]], [[paksmith]], [[rust-u4pak]], and [[awesome-game-file-format-reversing]].
+
 - **2026-08-20** — ingest `description:UE4SS-RE/RE-UE4SS`: entity [[re-ue4ss]] (UE4/UE5 scripting/modding framework; Lua + C++ mod APIs, blueprint loading, live property inspection/editing, SDK/header dumpers; runtime hooks; UE4SS-RE); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[ue4genny]], [[regenny]], [[sdkgenny]], [[ue4-base]], and [[unreal-object-model]].
 
 - **2026-08-20** — ingest `description:UETools/UETools`: entity [[uetools]] (.NET C# libraries for UE4 binary asset data; PAK virtual file systems; asset structures and registries; reusable modules for tooling; offline inspection/modding/format research; Game Assets; UETools); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uassetapi]], [[uassetgui]], [[paksmith]], [[rust-u4pak]], and [[awesome-game-file-format-reversing]].
