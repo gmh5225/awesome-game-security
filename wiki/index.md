@@ -1495,6 +1495,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernel-dll-injector](entities/kernel-dll-injector.md) — kernel-mode DLL injector on kernel32 load (Sirifef/Max++ technique; driver + sample DLL; x86; Visual Studio/WDK; APC; alexkrnl)
 - [kernel-snippets](entities/kernel-snippets.md) — Windows KM code snippets (callback registration, memory/process ops; VGK SwapContextHk; gmh5225)
 - [Kernel-Special-APC-ReadProcessMemory](entities/kernel-special-apc-readprocessmemory.md) — teaching sample: special kernel APC cross-process read (`KeInitializeApc`/`KeInsertQueueApc`; thread selection; vs RPM; gmh5225)
+- [Kernel-Thread-Driver](entities/kernel-thread-driver.md) — Windows kernel-thread driver + usermode controller; status-code KM↔UM comms; target process setup, memory read, module base; AC bypass research; Spuckwaffel; cheat / Thread
 - [Kernel-VAD-Injector](entities/kernel-vad-injector.md) — unsigned-driver DLL inject with VAD/PTE concealment (`MiAllocateVad`/`MiInsertVad`; post-map VAD removal; Hide VAD; gmh5225)
 - [kernel-codecave-poc](entities/kernel-codecave-poc.md) — KM shellcode in driver .text caves (Find Codecave; vs pool/exec alloc scans)
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)

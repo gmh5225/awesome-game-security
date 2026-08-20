@@ -20,4 +20,4 @@ Sits in the **`MmCopyMemory` hook study** lane beside compact detour libraries s
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[driver-kdtour]] · [[efi-monitor]] · [[callmewin32kdriver]] · [[badeye]] · [[uedumper]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[driver-kdtour]] · [[efi-monitor]] · [[callmewin32kdriver]] · [[badeye]] · [[kernel-thread-driver]] · [[uedumper]]
