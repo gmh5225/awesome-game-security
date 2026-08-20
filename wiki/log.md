@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TrungNguyen1909/aarch64-sysreg-ida`: entity [[aarch64-sysreg-ida]] (TrungNguyen1909; Python IDA Pro plugin; AArch64 MSR/SYS → register names; embedded ARMv8 register DB + optional Apple register JSON; ARM OS/kernel RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[ida-kallsyms-symbol-renamer]], [[import-kallsyms]], [[ida-kernelcache-ng]], [[ida-kcpp]], [[farm64]], and [[list-of-ida-plugins]].
+
 - **2026-08-20** — ingest `description:Trustings/DMA_PE_Dumper`: entity [[dma-pe-dumper]] (Trustings; C++ DMA PE dumper via LeechCore/VMMDLL; PCIe FPGA physical memory; CR3 shuffle + DTB patching for EXE/DLL extraction; memory forensics / AC research); cited on [[overviews/dma-attack]] and [[dma]]; cross-linked [[pcileech]], [[volk-dma]], and [[dumpepe]].
 
 - **2026-08-20** — ingest `description:Trydos/fortnite-offsets`: entity [[trydos-fortnite-offsets]] (Trydos; lightweight JSON Fortnite offset database; engine pointers, entity structures, camera and weapon fields; data-only feed for external cheat/research tooling sync; cheat / game:fortnite [Offset]; slug disambiguated from [[fortnite-offsets]]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]], [[fortnite-offsets-and-sigs]], [[fortnite-sigs]], and [[fortnite-offset-dumper]].

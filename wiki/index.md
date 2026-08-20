@@ -109,6 +109,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [aho-corasick](entities/aho-corasick.md) — Aho-Corasick multi-pattern string matcher (ISM; mmap automata; C API; signature/YARA-style scan backend)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
 - [a53-code-exec](entities/a53-code-exec.md) — PS5 Cortex-A53 code-execution PoC (fw 02.00; kernel / SDK generation; PlayStation)
+- [aarch64-sysreg-ida](entities/aarch64-sysreg-ida.md) — IDA Pro plugin: AArch64 MSR/SYS → register names; ARMv8 DB + Apple JSON; ARM OS/kernel RE (TrungNguyen1909; cheat / IDA Plugins)
 - [AfdIrpCallDispatch](entities/afd-irp-call-dispatch.md) — Afd.sys .data pointer hook on AfdIrpCallDispatch (driver communication)
 - [ActionRoguelike](entities/action-roguelike.md) — UE Roguelike sample (gameplay systems; Game Develop / Unreal source)
 - [AERoot](entities/aeroot.md) — Quarkslab Android Emulator runtime root (debug pipe/ADB; custom su; no system-image rewrite)
