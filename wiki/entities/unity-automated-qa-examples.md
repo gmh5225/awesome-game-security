@@ -18,4 +18,4 @@ Unity Automated QA Guidebook: documentation and reference material for automated
 
 ## Related
 
-[[unicli]] · [[tracy]] · [[overviews/game-engine]] · [[overviews/overview]]
+[[games-test-automation-example]] · [[unicli]] · [[tracy]] · [[overviews/game-engine]] · [[overviews/overview]]
