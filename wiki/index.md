@@ -2299,6 +2299,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [simple-cs-16-multihack](entities/simple-cs-16-multihack.md) — CS1.6 multihack (C/C++; asset pipelines + Unity + hooking; cheat / game:cs1.6; execnone)
 - [SimpleFPSTemplate](entities/simple-fps-template.md) — UE4 FPS demo template (bloated C++ starter; Game Develop / Unreal source)
+- [simple-quest](entities/simple-quest.md) — UE5.6+ event-driven questline plugin (TheGeebus; C++ + Blueprint; visual graph authoring; objectives/prerequisites/rewards; quest components; save/load + SimpleCore; PIE debugging; Plugins:Unreal)
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)
 - [simple-eft-superman-training-bot](entities/simple-eft-superman-training-bot.md) — EFT Arduino HID training automation (.ino sketches + Python coords; keyboard/mouse emulation; skill-grinding; ZhaoKunqi)
 - [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheGeebus/SimpleQuest`: entity [[simple-quest]] (TheGeebus; UE5.6+ C++ + Blueprint questline plugin; visual graph authoring for objectives, prerequisites, activation groups, rewards; quest giver/trigger/observer/reward components; save/load + SimpleCore signal/world-state subsystem; PIE debugging; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[luamachine]], [[simple-fps-template]], and [[trinitycore]].
+
 - **2026-08-20** — ingest `description:TheHeadphonesAreNeeded/VoltClient`: entity [[voltclient]] (TheHeadphonesAreNeeded; educational AssaultCube external C++ client; DX11 Dear ImGui transparent overlay; RPM/WPM on `ac_client.exe` v1.3.0.2; ESP / tracers / FOV aimbot); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[assaultcube]], [[external-esp-hack-assaultcube]], [[simple-ac-internal-cheat]], and [[assault-cube-cheat]].
 
 - **2026-08-20** — ingest `description:TheHive-Project/TheHive`: entity [[the-hive]] (TheHive-Project; archived Scala + web SOC incident-response case-management platform; alert triage and analyst workflows; historical snapshot for legacy IR architecture study; README [EDR]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[wazuh]], [[bamboozledr]], and [[kernel-cve-analysis]].
