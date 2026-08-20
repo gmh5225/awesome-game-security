@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SwagSoftware/KisakCOD`: entity [[kisakcod]] (SwagSoftware; fully buildable open-source COD4 multiplayer executable reimplementation; C/C++ CMake/VS; DirectX-era middleware + Steam interfaces; gameplay/networking/engine modules; mod developers / engine tinkerers / legacy exploit-surface research; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[assaultcube]], [[cod7-tools]], and [[source-netvars]].
+
 - **2026-08-20** — ingest `description:SymbioticSec/ida-security-scanner`: entity [[ida-security-scanner]] (SymbioticSec; Python IDA Pro plugin; rule-based SAST on decompiled pseudocode; opengrep/semgrep-style YAML patterns; interactive findings UI; optional AI triage; reverse engineers / CTF / security auditors; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]]; cross-linked [[firmeye]], [[yarascan-ida]], [[wpechatgpt]], [[idassist]], and [[list-of-ida-plugins]].
 
 - **2026-08-20** — ingest `description:SynthesisLab/MBA`: entity [[mba]] (SynthesisLab; GPU-accelerated CUDA MBA expression simplification toolkit; multiple CUDA kernels; JSON I/O; cooperative groups / memory / hashing helpers; deobfuscation research; Cheat Mixed boolean-arithmetic); cited on [[mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[cobra]], [[mbased]], [[promba]], [[qsynthesis]], [[drill-and-join]], [[mutaben]], and [[mba-obfuscator]].
