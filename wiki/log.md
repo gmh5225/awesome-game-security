@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheCruZ/kdmapper`: refreshed entity [[kdmapper]] (TheCruZ; canonical C++ Intel `iqvw64e.sys` BYOVD mapper; multiple map modes; kernel bookkeeping trace cleanup; PDB/symbol offset helpers; broad Windows build support; kernel research / driver testing / AC bypass experimentation); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper-rs]], [[cve-2015-2291]], [[sinmapper]], and [[known-driver-mappers]].
+
 - **2026-08-20** — ingest `description:TheGeebus/SimpleQuest`: entity [[simple-quest]] (TheGeebus; UE5.6+ C++ + Blueprint questline plugin; visual graph authoring for objectives, prerequisites, activation groups, rewards; quest giver/trigger/observer/reward components; save/load + SimpleCore signal/world-state subsystem; PIE debugging; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[luamachine]], [[simple-fps-template]], and [[trinitycore]].
 
 - **2026-08-20** — ingest `description:TheHeadphonesAreNeeded/VoltClient`: entity [[voltclient]] (TheHeadphonesAreNeeded; educational AssaultCube external C++ client; DX11 Dear ImGui transparent overlay; RPM/WPM on `ac_client.exe` v1.3.0.2; ESP / tracers / FOV aimbot); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[assaultcube]], [[external-esp-hack-assaultcube]], [[simple-ac-internal-cheat]], and [[assault-cube-cheat]].
