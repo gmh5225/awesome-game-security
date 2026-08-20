@@ -784,6 +784,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/rmusser01/Infosec_Reference/blob/master/Draft/Games.md [Game Hacking]
 - https://github.com/cragson/osmium [C++ Framework for external cheats]
 - https://github.com/april-ivy/Apwil [Rust Windows gamehacking library, internal & external; process/memory/module/scan/hook/render/syscall/input/window]
+- https://github.com/Omega172/OmegaWare-Framework [Multi-engine internal cheat framework (Unity/Unreal/generic) with D3D11/D3D12 hooking, ImGui UI, feature plugins, and config system]
 - https://github.com/rdbo/libmem [Cross-platform game hacking library (memory, hooking, injection) for C/C++/Rust/Python]
 - https://github.com/WangXuan95/Xilinx-FPGA-PCIe-XDMA-Tutorial [DMA Tutorial]
 - https://github.com/NetKingJ/awesome-android-security [Android (Samsung) Security Research References]
