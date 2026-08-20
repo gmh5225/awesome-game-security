@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TheCruZ/EFI_Driver_Access`: entity [[efi-driver-access]] (TheCruZ; GNU-EFI boot-loaded runtime driver + Visual Studio usermode client; read/write/process-base requests; build/boot workflow docs; kernel + AC bypass pre-OS path research; cheat / EFI RPM); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kdmapper]], [[efidump]], [[sub-get-variable]], [[efi-monitor]], and [[sumap]].
+
 - **2026-08-20** — ingest `description:TheCruZ/FindXrefs`: entity [[find-xrefs]] (TheCruZ; IDA Pro IDAPython plugin; full-database scan for missing RIP-relative/absolute pointer xrefs; materializes undefined bytes so cross-references appear; optional raw 32-bit sliding window + NumPy-accelerated sweeps; large game clients / AC modules; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xrefsext]], [[ida-find-.data-ptr]], [[findfunc]], and [[ida-plugins]].
 
 - **2026-08-20** — ingest `description:TheCruZ/kdmapper`: refreshed entity [[kdmapper]] (TheCruZ; canonical C++ Intel `iqvw64e.sys` BYOVD mapper; multiple map modes; kernel bookkeeping trace cleanup; PDB/symbol offset helpers; broad Windows build support; kernel research / driver testing / AC bypass experimentation); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper-rs]], [[cve-2015-2291]], [[sinmapper]], and [[known-driver-mappers]].
