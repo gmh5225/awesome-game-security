@@ -432,6 +432,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CountHook](entities/count-hook.md) — working-set memory-check bypass (count-oriented; Cheat / Bypass Page Protection)
 - [CppServer](entities/cppserver.md) — C++ server framework with Fast Binary Encoding message protocols (Game Network / source; modding + memory analysis)
 
+- [com.unity.demoteam.hair](entities/com-unity-demoteam-hair.md) — Unity strand-based hair package (Alembic import, GPU sim, hierarchical LOD; Built-in/URP/HDRP; character rendering; Plugins:Unity)
 - [com.unity.ide.cursor](entities/com-unity-ide-cursor.md) — Unity package: Cursor as external code editor (Plugins:Unity; C#/C++)
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
 - [Common-Registry-Jmp-RCX](entities/common-registry-jmp-rcx.md) — CmRegisterCallback + JMP RCX gadget in nvraid.sys for covert KM↔UM registry-callback comm (gmh5225; Registry Callback)

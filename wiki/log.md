@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Unity-Technologies/com.unity.demoteam.hair`: entity [[com-unity-demoteam-hair]] (Unity Demo Team strand-based hair package; Alembic groom import, GPU simulation constraints, hierarchical LOD; Built-in/URP/HDRP shaders; C# editor/runtime + shader code; digital-human character rendering; Plugins:Unity; Unity-Technologies); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[kawaii-physics]], [[unity-vrchat-template]], [[the-seed-link-future]], [[3d-game-shaders-for-beginners]], and [[optick]].
+
 - **2026-08-20** — ingest `description:UnityTech/GamesTestAutomationExample`: entity [[games-test-automation-example]] (Unity mobile game test automation; Appium + device tooling + in-game instrumentation logs; Android/iOS pipelines; avoids fragile image matching; sample assets/scripts; Game Testing; UnityTech); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[unity-automated-qa-examples]], [[unity-gameci-sample]], [[unicli]], and [[lamda]].
 
 - **2026-08-20** — ingest `readme:categories`: Cheat ~2731 (+1) / Anti Cheat ~684 (+1; Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
