@@ -2133,6 +2133,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RPGMakerDecrypter](entities/rpgmakerdecrypter.md) — RPG Maker XP/VX/VX Ace encrypted-archive extractor (CLI; RE tools)
 - [RE-Architect](entities/re-architect.md) — automated RE platform (binary analysis + ML; cheat / RE tools)
 - [re-harness](entities/re-harness.md) — OpenCode agent harness for Qwen 27B/35B with read-only IDA 9.3/IDASQL PE static analysis; NeverD/LLVM lift→O3→redecompile fallback; malware/game-security RE
+- [re-ue4ss](entities/re-ue4ss.md) — UE4/UE5 scripting/modding framework (Lua + C++ mod APIs, blueprint loading, live property editing, SDK dumpers; runtime hooks; UE4SS-RE)
 - [reshade](entities/reshade.md) — cross-API post-processing injector (frame color/depth + ReShade FX; Renderer / graphics-programmer tooling; crosire)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
 - [retoolkit](entities/retoolkit.md) — Windows Inno Setup bundle (80+ RE tools: debug/decompile/PE/hex/network/YARA)
