@@ -713,6 +713,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Driver-DriverNoImage](entities/driver-driver-no-image.md) — no-image driver hijack PoC; shellcode via existing driver dispatch (NTFS handlers); inline hooks + WP disable + trampolines (gmh5225; Hijack Driver)
 - [Driver-read_write](entities/driver-read-write.md) — manually mapped KM R/W via Beep.sys IRP hijack; PiDDBCache/MmUnloadedDrivers cleanup (gmh5225; Hijack IRP Beep.sys)
 - [Driver-physical-rw](entities/driver-physical-rw.md) — C++ kernel driver; IOCTL phys/virt R/W, alloc/protect, module-base lookup, process helpers; DeviceIoControl client pattern (Vekor64; Kernel-mode W/RPM for Windows)
+- [driver-risk-scout](entities/driver-risk-scout.md) — read-only PowerShell endpoint driver inventory and risk scanner; LOLDrivers/MS blocklist/BYOVD profile correlation; PE/YARA scoring; HVCI/VBS/WDAC posture; CSV/JSON/HTML/Wazuh export (Systemhaus-Schulz)
 - [Driver-RPM-DirectPageManipulation](entities/driver-rpm-direct-page-manipulation.md) — minimal PTE-PFN rewrite + manual VA→PA cross-process copy; no documented copy helpers (gmh5225; read physical memory)
 - [Driver-SessionMapper](entities/driver-session-mapper.md) — session-space manual driver mapper; `ntoskrnl` callback hook; import/reloc/entry; loader-metadata scrub on unload (gmh5225; Session Driver)
 - [Driver-SoulExtraction](entities/driver-soul-extraction.md) — in-kernel PE Authenticode cert extraction; Lib-SoulExtraction PKCS#7/ASN.1/X.509; signer subject + validity window (gmh5225; Extracting cert information)
