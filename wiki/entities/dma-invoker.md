@@ -18,4 +18,4 @@ Windows **DMA RPM** research tool: external-style process memory reads via PCIe 
 
 ## Related
 
-[[dma]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[memmcp]] · [[umpmlib]] · [[ntmemory]]
+[[dma]] · [[dmalib]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[memmcp]] · [[umpmlib]] · [[ntmemory]]
