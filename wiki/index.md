@@ -1717,6 +1717,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [modly](entities/modly.md) — local image→3D mesh desktop app (open-source GPU AI; TypeScript/Python; Windows/Linux; AI category)
 - [modreveal](entities/modreveal.md) — find hidden Linux kernel modules (C; Detection:Hide; AC / rootkit RE)
 - [momentarius](entities/momentarius.md) — A12/A13 Apple PPL bypass via IOMobileFramebuffer GPU firmware (C; IOSurface physmem + kernel R/W; staturnzz and Clarity)
+- [moonwalk](entities/moonwalk.md) — Rust PEB-less DLL base discovery via TEB/stack walk (VirtualQuery or API-free variants; CLI + library; Teach2Breach)
 - [mojoelf](entities/mojoelf.md) — in-process ELF loader from non-filesystem sources (alternative to `dlopen()`; Cheat / Android memory loading)
 - [Mount System Partition (brew02)](entities/mount-system-partition.md) — user-mode Windows API ESP mount (C++; partition enumeration; UEFI security / firmware RE)
 - [MouHidInputHook (changeofpace)](entities/mouhid-input-hook.md) — MouHid CONNECT_DATA ClassService hook; filter/modify/inject mouse packets without filter devices (PatchGuard-safe; input simulation / AC research)
