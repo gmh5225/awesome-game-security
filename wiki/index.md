@@ -2205,6 +2205,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
 - [screenshot](entities/screenshot.md) — Windows capture-method comparison (BitBlt/DDA/PrintWindow/DWM; AC screenshot research; README `[BitBlt]`; gmh5225)
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
+- [shellcode-obfuscation](entities/shellcode-obfuscation.md) — Caesar-cipher encoding pipeline (Python obfuscator + C VirtualAlloc loader; AV bypass-rate measurements; academic lab)
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)

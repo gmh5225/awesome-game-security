@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:n1h-nb/Shellcode-Obfuscation`: entity [[shellcode-obfuscation]] (academic lab; Caesar-cipher encoding pipeline; Python shellcode obfuscator + C VirtualAlloc in-memory loader; baseline loader; AV signature/heuristic/ML detection notes; bypass-rate measurements; n1h-nb); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[shellcode-entropyfix]], [[shellcode-fluctuation]], [[scfw]], and [[shellcode-factory]].
+
 - **2026-08-20** — ingest `description:zensenzay/wnf-driver-meme`: entity [[wnf-driver-meme]] (Windows kernel driver + C++ client; WNF state-name covert UM/KM comm via `WnfNotify` registry discovery; PID memory R/W; ObRegisterCallbacks handle stripping; no device path/IOCTL; game-security / AC / RE; zensenzay); cited on [[overviews/windows-kernel]] and [[concepts/kernel-callbacks]]; cross-linked [[memfilter-fn-driver]], [[evcommunication]], [[boundcallback]], and [[van1338]].
 
 - **2026-08-20** — ingest `description:Unit-X/kcp-cpp`: entity [[kcp-cpp]] (lightweight C++17 KCP wrapper; client/server abstractions; callback-driven data handling; configurable low-latency transport; CMake desktop builds; game networking prototypes; README [KCP]; Unit-X); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[kcp]], [[cppserver]], [[skynet]], [[pitaya]], [[uwebsockets]], and [[snake-royal]].
