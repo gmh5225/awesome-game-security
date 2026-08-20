@@ -2364,6 +2364,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)
 - [steam-hook-render-poc](entities/steam-hook-render-poc.md) — Steam GameOverlayRenderer render-pipeline hijack PoC (custom draw via trusted overlay; gmh5225; README [Steam])
 - [steam-overlay-x64](entities/steam-overlay-x64.md) — Steam overlay / modding research (C; memory analysis)
+- [StrongSteam](entities/strongsteam.md) — kernel-assisted Steam overlay GDI renderer (Splitx12; C++/ASM; Steam-overlay-style in-game visual demo; overlay / cheat UI rendering research; README [GDI + Steam])
 - [star-rail](entities/star-rail.md) — Honkai: Star Rail cheat: DirectX / hooking (C/C++; cheat / game:honkai star rail; gmh5225)
 - [starrail-ace-b](entities/starrail-ace-b.md) — Honkai: Star Rail Tencent ACE RE (kernel driver, integrity checks, detection/bypass; explore anticheat; gmh5225)
 - [starrail-s-gc](entities/starrail-s-gc.md) — Honkai: Star Rail simple cheat (C/C++; Unity / hooking; cheat / game:honkai star rail; gmh5225)

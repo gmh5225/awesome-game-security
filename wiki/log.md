@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Splitx12/StrongSteam`: entity [[strongsteam]] (Splitx12; kernel-assisted Steam overlay GDI renderer; C++/ASM; Steam-overlay-style in-game visual demo; overlay / cheat UI rendering research; README [GDI + Steam]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[steam-hook-render-poc]], [[game-overlay-ui-hook]], [[steam-overlay-x64]], [[krnl-gdi-render]], and [[eft]].
+
 - **2026-08-20** — ingest `description:Splitx12/eft`: entity [[eft]] (Splitx12; C++ internal Escape From Tarkov cheat + ASM helpers; Unity object/world/entity traversal + in-game rendering; ESP/exfil/aim-assist/menu modules; `KeUserModeCallBack` Win10 notes in `usercallback.h`; cheat / game:eft [Internal]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-tarkov-internal-cheat]], [[eft-internal]], [[simple-eft-base]], [[eft-monoeft]], [[meatyeftrelease]], and [[escapefromtarkov-trainer]].
 
 - **2026-08-20** — ingest `description:Spuckwaffel/DMALib`: entity [[dmalib]] (Spuckwaffel; lightweight C++ DMA helper library; LeechCore/MemProcFS; process lookup, base resolution, memory R/W, pattern scanning, scatter reads; reusable layer for DMA game-security research tooling; cheat / DMA library); cited on [[concepts/dma]] and [[overviews/dma-attack]]; cross-linked [[volk-dma]], [[dma-invoker]], and [[pcileech]].
