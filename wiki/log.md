@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:TensorBlock/awesome-mcp-servers`: entity [[awesome-mcp-servers]] (TensorBlock; large curated MCP server index; Markdown category pages across AI, data, infrastructure, security, gaming; discovery/cataloging for AI workflow tool backends; Awesome MCP); cited on [[overviews/overview]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-gamedev-agent-skills]], [[ida-pro-mcp]], [[cheatengine-mcp-bridge]], [[unity-mcp]], [[mcp-safety-scanner]], and [[vulnerable-mcp-servers-lab]].
+
 - **2026-08-20** — ingest `description:TensorWorks/UE-Clang-Format`: entity [[ue-clang-format]] (TensorWorks; Clang-Format config tuned for Unreal Engine C++ Epic-style conventions; VS Code/editor setup guidance; lightweight config/docs repo; team formatting consistency; Game Engine / UE Clang-Format configuration); cited on [[overviews/game-engine]] and [[unreal-engine-guide]]; cross-linked [[ue4-tutorials]], [[ue-buivalidator]], and [[clipboard-tools-ue4]].
 
 - **2026-08-20** — ingest `description:Th3Spl/IoCreateDriver`: entity [[iocreatedriver]] (Th3Spl; custom IoCreateDriver load-path implementation; C/C++ Visual Studio + WDK; bypass standard driver-load visibility/logging; manual-map + entry-point notes; kernel experimentation / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[simpleuefi]], [[umap]], [[kdmapper]], [[map-file-in-system-space]], and [[known-driver-mappers]].

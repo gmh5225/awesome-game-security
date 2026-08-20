@@ -314,6 +314,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-game-file-format-reversing](entities/awesome-game-file-format-reversing.md) — curated game file-format/asset reversing resources (models/textures/archives; Unity/Unreal/Source/CryEngine; cheat / RE Tools)
 - [awesome-ida-x64-olly-plugin](entities/awesome-ida-x64-olly-plugin.md) — curated IDA/Ghidra/x64dbg/OllyDbg/GDB plugin index (patching, diffing, deobfuscation, emulation, YARA, anti-anti-debug; fr0gger)
 - [awesome-injection](entities/awesome-injection.md) — curated injection resources (Cheat / injection:windows)
+- [awesome-mcp-servers](entities/awesome-mcp-servers.md) — large curated MCP server index (AI, security, gaming, infrastructure; category Markdown navigation; Awesome MCP)
 - [awesome-obfuscations](entities/awesome-obfuscations.md) — curated binary, compile-time, and LLVM/GCC obfuscation tools (C/C++/Go/Rust/x86 assembly + VM protectors; anti-RE / native binary protection; killvxk)
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
 - [awesome-windbg-extensions](entities/awesome-windbg-extensions.md) — curated WinDbg extension index (kernel analysis, IR, rootkit hunting, memory inspection, debugger automation; WinDbg)
