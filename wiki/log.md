@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Static-Analyzer-Factory/static-analyzer-factory`: entity [[static-analyzer-factory]] (Static-Analyzer-Factory; Rust LLVM IR static analysis framework; C/C++ pointer/value-flow/taint/IFDS; abstract interpretation, points-to, call graphs; Python SDK, CLI, SARIF/HTML export; compiled-binary vulnerability detection); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-security-scanner]], [[cognitor]], [[retract]], and [[packpeek]].
+
 - **2026-08-20** — ingest `description:SteamDatabase/Protobufs`: entity [[protobufs]] (SteamDatabase; continuously tracked Steam/Valve protobuf `.proto` schemas from update pipelines and automated dumpers; CS:GO/Steam client message definitions; protocol analysis, tooling maintenance, and game network RE; README [Protobuf]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[game-networking-sockets]], [[packet-sniffer]], [[ds3os]], [[source-sdk-2013]], [[proton]], and [[vac]].
 
 - **2026-08-20** — ingest `description:Steesha/CodeCleaner`: entity [[codecleaner]] (Steesha; x64dbg plugin; C++ Capstone + AsmJit; cleans/simplifies disassembled machine code—redundant NOPs, no-op register moves; packed/obfuscated binary traces; README Cleaning Themida Mutation Assembly codes; Fix Themida / x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[themida-unmutate]], [[themidie]], and [[themida-research]].
