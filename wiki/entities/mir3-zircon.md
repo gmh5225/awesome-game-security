@@ -20,4 +20,4 @@ Targets Mir private-server operators and game-dev communities building custom co
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/graphics-api]] · [[direct3d-hook]] · [[maplestory-copy]] · [[maple-unity]] · [[game-networking-sockets]]
+[[overviews/game-engine]] · [[overviews/graphics-api]] · [[direct3d-hook]] · [[mir2]] · [[maplestory-copy]] · [[maple-unity]] · [[game-networking-sockets]]

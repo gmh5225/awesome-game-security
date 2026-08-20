@@ -1721,6 +1721,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Minetest](entities/minetest.md) — Luanti voxel engine (Lua mod API; Irrlicht/SDL2; procedural worlds + multiplayer; Game Engine / source)
 - [Mini-Launcher](entities/mini-launcher.md) — Steam-bypass game launcher (API stub / DLL inject / Lua; Launcher Abuser)
 - [MiniVisorPkg](entities/minivisorpkg.md) — educational Intel VT-x HV (UEFI + Windows driver; WinDbg; Detection:HV / EFI)
+- [Mir2](entities/mir2.md) — Legend of Mir 2 open-source client/server stack (Suprcode; C# client/server/launcher/admin tools + data utilities; modular managed architecture; private-server / preservation communities; Game Engine / source; README [MIR2])
 - [Mir3-Zircon](entities/mir3-zircon.md) — Legend of Mir 3 open-source engine stack (Suprcode; C# client/server/launcher/editor; networking + content models + DirectX/SharpDX; private-server / custom content; Game Engine / source; README [MIR3])
 - [MoBaDemo](entities/mobademo.md) — Unity MOBA demo (Game Develop / Unity source)
 - [Mojoc](entities/mojoc.md) — C99 OpenGLES3 mobile game engine (cross-platform; Game Engine source)
