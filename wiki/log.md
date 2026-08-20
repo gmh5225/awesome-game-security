@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:ThomasonZhao/InfinityHookProMax`: entity [[infinityhook-promax]] (ThomasonZhao; C++ driver-oriented InfinityHook successor; hook management + instruction disassembly; broader Windows version compatibility/stability; VM-tested; kernel security research / AC monitoring; ETW Hook WIN11); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]] and [[etwhook-infinityhookclass]].
+
 - **2026-08-20** — ingest `description:TimMisiak/WinDbgCookbook`: entity [[windbg-cookbook]] (TimMisiak; JS WinDbg data-model automation scripts + debugger queries; dependency inspection, stack collection/corruption detection, time-travel debugging analysis; ready-to-run `dx` examples for module/thread/environment inspection; WinDbg); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-scripts]], [[ttddbg]], [[awesome-windbg-extensions]], and [[mcp-windbg]].
 
 - **2026-08-20** — ingest `description:TimmHess/UnrealImageCapture`: entity [[unreal-image-capture]] (TimmHess; UE C++ high-FPS RGB + synchronized segmentation masks + depth capture to disk without blocking render/game threads; synthetic annotated datasets for ML/CV; Game Engine / Unreal guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unreal-source-explained]], [[unreal-engine-guide]], [[obs-game-capture]], and [[present-hook]].
