@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:SwagSoftware/Kisak-Strike`: entity [[kisak-strike]] (SwagSoftware; open-source Linux CS:GO port on Source; full game + engine codebase; CMake; app framework, material/sound/networking, VPC files; SDL + OpenGL Linux paths; Source architecture + Linux porting study; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[source-engine]], [[kisakcod]], [[kisakblack]], and [[source-netvars]].
+
 - **2026-08-20** — ingest `description:SwagSoftware/KisakBlack`: entity [[kisakblack]] (SwagSoftware; open-source COD: Black Ops dedicated server reimplementation from leaked source; DemonWare networking stack, zone/asset loading, community hosting infrastructure; server operators / mod developers / legacy online-service research; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[kisakcod]], [[cod7-tools]], and [[game-networking-sockets]].
 
 - **2026-08-20** — ingest `description:SwagSoftware/KisakCOD`: entity [[kisakcod]] (SwagSoftware; fully buildable open-source COD4 multiplayer executable reimplementation; C/C++ CMake/VS; DirectX-era middleware + Steam interfaces; gameplay/networking/engine modules; mod developers / engine tinkerers / legacy exploit-surface research; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[assaultcube]], [[cod7-tools]], and [[source-netvars]].
