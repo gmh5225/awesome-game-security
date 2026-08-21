@@ -2236,6 +2236,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
 - [readwrite-kernel-stable](entities/readwrite-kernel-stable.md) — stable kernel read/write driver (C/C++; cheat / RPM; driver development / modding)
 - [rw_socket_driver](entities/rw-socket-driver.md) — kernel socket RPM/WPM for protected processes (manual-map friendly; external cheat comm; adrianyy; cheat / Socket)
+- [RWXFinder](entities/rwxfinder.md) — VirtualQueryEx RWX page scanner (size-filtered exploitable regions for code injection; S12cybersecurity; cheat / injection:windows)
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
 - [ReClass DMA](entities/reclass-dma.md) — ReClass.NET plugin: DMA-backed structure recon (C/C++; external PCIe FPGA path; cheat / debugging)
 - [ReClass.NET-DriverReader](entities/reclass-net-driverreader.md) — ReClass.NET plugin: kernel-driver mem vs RPM (AC-blocked structure recon; C#/C++)
