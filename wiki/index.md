@@ -654,6 +654,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DIE-engine-web](entities/die-engine-web.md) — Detect It Easy in-browser (WASM PE/ELF/Mach-O packer/compiler ID)
 - [DFIRTriage](entities/dfirtriage.md) — Python Windows DFIR triage (process/network/registry/event logs/prefetch)
 - [DioProcess](entities/dioprocess-private.md) — Windows internals research (Rust/Dioxus + KM + UEFI; DSE/KPP)
+- [Direct3D9 Overlay](entities/direct3d9-overlay.md) — D3D9 proxy-DLL wrapper + Detours-style overlay (on-screen console, text feed, plugin modules; single-player modding; SeanPesce)
 - [Direct3DHook](entities/direct3d-hook.md) — C#/.NET D3D9–11 EasyHook inject + SharpDX capture/overlays (remoting CaptureInterface)
 - [DirectXHook](entities/directxhook.md) — DX11/12 Present hook + in-game overlay framework (C++; dinput8 DLL)
 - [DirectX11Hook](entities/directx11hook.md) — DX11 Present + DeviceContext hook + ImGui overlay base (C++; DirectX Hook)

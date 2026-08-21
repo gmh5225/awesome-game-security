@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SeanPesce/Direct3D9-Overlay`: entity [[direct3d9-overlay]] (SeanPesce; C++ D3D9 wrapper/proxy DLL + Detours-style intercept; built-in overlay with on-screen console, text feed, plugin interface for external modules; single-player modding / UI instrumentation / graphics overlay development); cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; cross-linked [[hydrahook]], [[gameplug]], [[direct3d-hook]], and [[universal-dear-imgui-hook]].
+
 - **2026-08-21** — ingest `description:SecondNewtonLaw/DriverBase`: entity [[driver-base]] (SecondNewtonLaw; C++ KMDF starter template; CMake + FindWDK; driver entry scaffolding, optional compile-time obfuscation via bundled obfusheader.h; simplifies WDK toolchain across Windows targets; security researchers / low-level driver prototyping baseline; README obfusheader.h for windows driver); cited on [[overviews/windows-kernel]]; cross-linked [[windows-kernel-rs]], [[kli]], [[kernelcloak]], and [[obfusheader-h]].
 
 - **2026-08-21** — ingest `description:SeeFlowerX/frida-smali-trace`: entity [[frida-smali-trace]] (SeeFlowerX; Frida-based Android smali instruction tracing; JS/TS agents hook ART interpreter paths; detailed execution logs; IDA static offset/register prep; Android RE / mobile security runtime behavior analysis; cheat / Smali trace); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[stackplz]], [[apktool]], and [[jadx]].
