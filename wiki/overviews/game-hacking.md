@@ -156,6 +156,7 @@ sources:
   - wiki/sources/descriptions/ekknod__MouseClassServiceCallbackMeme.md
   - wiki/sources/descriptions/a1ext__auto_re.md
   - wiki/sources/descriptions/a2x__cs2-dumper.md
+  - wiki/sources/descriptions/Salvatore-Als__cs2-signature-list.md
   - wiki/sources/descriptions/aahmad097__AlternativeShellcodeExec.md
   - wiki/sources/descriptions/adde88__SkyEngine.md
   - wiki/sources/descriptions/adde88__WoWDumpFix.md
@@ -1999,6 +2000,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 glow ESP such as [[cs-2-glow]] (C++; entity parse / offsets / external memory glow) sits in the same cheat / game:cs2 visual lane. (source: wiki/sources/descriptions/xvorost__CS-2-Glow.md)
 - Maintained CS2 offset/netvar dumps such as [[cs2-offsets]] (C++ headers + JSON; client/server layout after patches) and [[cs2-offsets-ro0ti]] (C#/C++; `[Offset]` tag) feed that same cheat / game:cs2 memory-layout lane. (source: wiki/sources/descriptions/sezzyaep__CS2-OFFSETS.md) (source: wiki/sources/descriptions/ro0ti__CS2-Offsets.md)
 - Live-process CS2 offset/interface dumpers such as [[cs2-dumper]] (a2x; Rust; memflow memory access on Windows/Linux; C#/C++/Rust/JSON codegen; cheat / game:cs2 `[Dump]`) automate per-patch schema and offset refresh consumed by externals such as [[cs2-dma]], [[titled-gui-cs2]], and [[overlayai]]. (source: wiki/sources/descriptions/a2x__cs2-dumper.md)
+- CS2 function-signature reference notes such as [[cs2-signature-list]] (Salvatore-Als; Markdown + IDC helper; string anchors and search guidance for team switch, item give, chat, damage routines—not fixed universal patterns; cheat / game:cs2 `[Signature]`) complement automated dumpers when refining pattern scans across builds. (source: wiki/sources/descriptions/Salvatore-Als__cs2-signature-list.md)
 - Rust external CS2 cheats such as [[proext]] (ESP / aimbot / triggerbot / radar / RCS; egui UI) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/snipcola__ProExt.md)
 - Browser-based CS2 radar cheats such as [[cs2-webradar]] (gmh5225 and clauadv forks; C++/JavaScript; asset pipelines / modding / memory analysis; cheat / game:cs2 [Browser based radar cheat]) illustrate external radar UIs that stream entity positions to a web client instead of a native overlay. (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md) (source: wiki/sources/descriptions/clauadv__cs2_webradar.md)
 - CS2 DMA radar samples such as [[cs2-dma-radar]] (gmh5225; PCIe DMA hardware; player positions + game state via direct memory access; real-time radar overlay; zero target-OS software; cheat / game:cs2 [DMA]) sit in the below-OS external radar lane beside [[eft-dma-radar-1]] and native overlays such as [[proext]]. (source: wiki/sources/descriptions/gmh5225__CS2-Dma-Radar.md)

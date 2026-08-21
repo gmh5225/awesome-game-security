@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Salvatore-Als/cs2-signature-list`: entity [[cs2-signature-list]] (Salvatore-Als; CS2 function-signature reference notes; Markdown + IDC helper; string anchors and per-build search guidance for team switch, item give, chat, damage routines; game RE / modding / offset-signature maintenance; cheat / [Signature]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-dumper]], [[cs2-offsets]], [[cs2-internals]], [[cs2-things]], and [[cs2-anticheat]].
+
 - **2026-08-21** — ingest `description:SamLarenN/CPUZ-DSEFix`: entity [[cpuc-dsefix]] (SamLarenN; Windows x64 C++ utility; CPU-Z vulnerable-driver BYOVD → DSE disable via `g_CiEnable`/`g_CiOptions` kernel patch; pattern scan + unsigned driver load helpers; PatchGuard crash risk; kernel security research / anti-cheat bypass experimentation; cheat / CPU-Z); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[cpuz]], [[byovd]], [[dse-hook]], [[dse-patcher-2]], [[patchguard]], [[kdmapper]], and [[vdm]].
 
 - **2026-08-21** — ingest `description:SamLarenN/PePacker`: entity [[pepacker-samlarenn]] (SamLarenN; simple C++ PE packer; `.text` XOR encrypt + appended decrypt stub; custom PE section parse/rewrite; RE practice / packer development / basic obfuscation; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[exe-packer]], [[xorpacker]], [[packer-tutorial]], [[pepacker]], and [[unpacker]].
