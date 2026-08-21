@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Razviar/assetstudio`: entity [[assetstudio]] (Razviar; C#/.NET; multi-threaded Unity asset extraction for Unity 2.x–Unity 6; GUI + CLI; parallel bundle load/export; format parsers + decompression + game-specific helpers; game data mining / modding / bundle RE; Extracting assets); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uabe]], [[uassetgui]], [[unityexplorer]], [[unity-game-hacking]], [[awesome-game-file-format-reversing]], and [[unturned-godot]].
+
 - **2026-08-21** — ingest `description:ReClassNET/ReClass.NET`: entity [[reclass-net]] (ReClassNET; .NET memory class reconstruction + remote process inspection; x86/x64; rich node types, scanners, debuggers, legacy ReClass import/export; C# UI + native C++ core; C++/C# layout export; cheat / debugging); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[reclass-net-driverreader]], [[reclass-dma]], [[reclass-ex]], and [[regenny]].
 
 - **2026-08-21** — ingest `description:ReFo0/anti-crack-system`: entity [[anti-crack-system]] (ReFo0; Windows C++ anti-tamper / anti-crack framework prototype; anti-debugging, anti-dump, anti-attach, integrity checks, process-kill routines, self-remapping code paths, string obfuscation + lightweight encryption helpers; software protection experiments adaptable to game security tooling); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[anti-debugger-protector-loader]], [[anti-debugging]], [[self-remapping-code]], and [[static-string-obfuscation]].
