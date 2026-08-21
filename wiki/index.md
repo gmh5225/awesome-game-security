@@ -2332,6 +2332,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
 - [rop-compiler](entities/rop-compiler.md) — x86 ROP compiler for game cheat payloads (assembly-like scripts → chains; CS:GO/BF3/BF4; triggerbot/glow ESP/minimap; gadget scan + offsets; C++; cheat / ROP Generation)
 - [ropgadget-rs](entities/ropgadget-rs.md) — Rust ROP gadget finder (parallel PE/ELF/Mach-O scan; ret-terminated chains; exploit-chain RE)
+- [rsdkv5-decompilation](entities/rsdkv5-decompilation.md) — Retro Engine v5/v5U decompilation (RSDKModding; Sonic Mania and other Retro Engine titles; cross-platform; modding API; multiple audio/rendering backends; legacy engine compatibility; Game Engine / source)
 - [rs-native-kit-security](entities/rs-native-kit-security.md) — React Native Nitro RASP SDK (root/jailbreak, Frida/Xposed/Magisk hook, tamper/integrity, VPN/proxy, device risk scoring; Android+iOS)
 - [rs-ldr](entities/rs-ldr.md) — Rust no_std hash-based WinAPI resolution (PEB walk, LdrLoadDll, XOR strings, Hell's Gate-style SSN resolver; stealth API resolution)
 - [rtti-parser](entities/rtti-parser.md) — IDA script: parse RTTI (IDA 9.2; cheat / IDA Plugins)
