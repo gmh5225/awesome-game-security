@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rakeshmonkee/DMA`: entity [[entities/dma]] (Rakeshmonkee; practical PCIe DMA FPGA firmware guide and toolkit; Vivado customization; Python/Tcl auto-generation scripts; config-space cloning; bitstream flash workflows; game-security research on DMA hardware behavior and anti-cheat evasion testing; cheat / Guide); cited on [[overviews/dma-attack]]; cross-linked [[dma-cfw-guide]], [[dma-attack-firmware-customization]], [[pcileech-fpga]], [[pcileechgen]], and [[concepts/dma]].
+
 - **2026-08-21** — ingest `description:Rantanen/ghidra-minidump-loader`: entity [[ghidra-minidump-loader]] (Rantanen; Java Gradle Ghidra extension; loads Windows minidumps as analyzable programs; runtime module mapping, private memory/thread stack import, thread metadata + stack-walk workflow; crash-dump / post-mortem malware RE; cheat / Ghidra Plugins / `[Windows Minidump loader for Ghidra]`); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ghidra]], [[minidump]], [[minidumpreader]], [[libmdmp]], and [[dumpulator]].
 
 - **2026-08-21** — ingest `description:Rat431/EAC_Emu`: entity [[eac-emu]] (Rat431; simple x64 EasyAntiCheat DLL emulator stub; exports expected anti-cheat API functions with placeholder implementations; C++ plus assembly patch helpers; PoC for RE and compatibility testing of EAC-linked client code; cheat / Simple EasyAntiCheat x64 emulator); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[eac-reversal]], [[eac-easyanticheat-src-1]], [[vac-emulator]], and [[vacation3-emu]].

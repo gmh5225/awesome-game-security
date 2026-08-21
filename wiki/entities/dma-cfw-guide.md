@@ -30,4 +30,4 @@ Broader multi-board coverage than board-specific NIC-cloning guides such as [[dm
 
 ## Related
 
-[[pcileech-fpga]] · [[pcileech]] · [[pcileechgen]] · [[dma-attack-firmware-customization]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma]] · [[iommu]] · [[easy-anti-cheat]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[pcileech-fpga]] · [[pcileech]] · [[pcileechgen]] · [[dma-attack-firmware-customization]] · [[entities/dma]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[concepts/dma]] · [[iommu]] · [[easy-anti-cheat]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
