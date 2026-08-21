@@ -233,6 +233,7 @@ sources:
   - wiki/sources/descriptions/aquasecurity__tracee.md
   - wiki/sources/descriptions/gmh5225__android_ebpf.md
   - wiki/sources/descriptions/ShinoLeah__eHook.md
+  - wiki/sources/descriptions/Sh11no__eDBG.md
   - wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md
   - wiki/sources/descriptions/aosp-mirror__kernel_common.md
   - wiki/sources/descriptions/gmh5225__Android-ModGamesByInjectZygote.md
@@ -405,7 +406,7 @@ Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger,
 
 ## eBPF tracing
 
-User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown, attach points permitting): stackplz, eDBG, [[tracee]] (Linux/Android runtime security + forensics via eBPF; behavioral detections + container/K8s monitoring; source: wiki/sources/descriptions/aquasecurity__tracee.md); corpus includes [[btrace]] (app behavior), [[peetch]] (TLS/sniff), [[android-ebpf]] (syscall/network/process/perf tracing examples for loading eBPF on Android) (source: wiki/sources/descriptions/gmh5225__android_ebpf.md), and [[ehook]] (ARM64 uprobe hook framework; Go orchestration + C eBPF; on-enter/on-leave handlers with memory R/W wrappers; rooted mobile game RE / runtime tracing; ShinoLeah; cheat / eBPF hook) (source: wiki/sources/descriptions/ShinoLeah__eHook.md). Programs/maps/links remain observable; CO-RE improves portability but does not guarantee run-everywhere.
+User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown, attach points permitting): stackplz, [[edbg]] (Sh11no; eBPF-based lightweight Android ARM64 CLI debugger; GDB-like breakpoints/memory/registers/threads; file+offset breakpoint model for fast startup and anti-debug resistance; rooted mobile RE / game security) (source: wiki/sources/descriptions/Sh11no__eDBG.md), [[tracee]] (Linux/Android runtime security + forensics via eBPF; behavioral detections + container/K8s monitoring; source: wiki/sources/descriptions/aquasecurity__tracee.md); corpus includes [[btrace]] (app behavior), [[peetch]] (TLS/sniff), [[android-ebpf]] (syscall/network/process/perf tracing examples for loading eBPF on Android) (source: wiki/sources/descriptions/gmh5225__android_ebpf.md), and [[ehook]] (ARM64 uprobe hook framework; Go orchestration + C eBPF; on-enter/on-leave handlers with memory R/W wrappers; rooted mobile game RE / runtime tracing; ShinoLeah; cheat / eBPF hook) (source: wiki/sources/descriptions/ShinoLeah__eHook.md). Programs/maps/links remain observable; CO-RE improves portability but does not guarantee run-everywhere.
 
 ## Network & SSL pinning
 

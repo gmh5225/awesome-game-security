@@ -850,6 +850,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EATGuard](entities/eat-guard.md) — Windows PoC: VEH + PAGE_GUARD monitors Export Address Table integrity; detects EAT hooking (rootkits/cheats; connormcgarr)
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [edb-debugger](entities/edb-debugger.md) — Linux OllyDbg-style Qt debugger (ptrace; x86/x86-64; disasm/registers/memory map/breakpoints/plugins; eteran; For Linux)
+- [eDBG](entities/edbg.md) — eBPF-based lightweight Android ARM64 CLI debugger (GDB-like breakpoints/memory/registers/threads; file+offset breakpoints; anti-debug resistance; Go + C/eBPF; rooted mobile RE / game security; Sh11no)
 - [ELFpacker](entities/elfpacker.md) — ELF32 `.text` XOR packer + prepend decrypt stub (ELF header/PHDR/SHDR inject; Anti Cheat → Binary Packer `[ELF]`)
 - [ELFcrypt](entities/elfcrypt.md) — ELF `.text` RC4 encrypt + self-decrypt stub (`mprotect`; mmap/section headers; runtime unpack; Anti Cheat → Binary Packer `[ELF]` RC4)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)
