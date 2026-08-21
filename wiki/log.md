@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Skengdo/mordhau-simple-auto-block-cheat`: entity [[mordhau-simple-auto-block-cheat]] (Skengdo; C++ internal Mordhau module; auto-block swings/kicks + optional auto-stab; large generated UE SDK from class/function dumps; combat automation + internal module structure study; cheat / game:mordhau [Internal]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ue4-base]], [[ue4-processevent-intercept]], [[uedumper]], and [[unreal-object-model]].
+
 - **2026-08-21** — ingest `description:Skengdo/simple-SetWindowsHookExW-injector`: entity [[simple-setwindowshookexw-injector]] (Skengdo; C++ SetWindowsHookExW DLL injector; PE parsing + registry helpers + optional certificate spoofing; payload + target window-class workflow; user-mode injection pipeline study; Injection Testing:SetWindowsHookExW); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[setwindowshookex-injector]], [[setwindowhookex]], [[injection]], and [[windows-process-injection]].
 
 - **2026-08-21** — ingest `description:Skengdo/ue4-processevent-intercept`: entity [[ue4-processevent-intercept]] (Skengdo; compact C++ UE4 ProcessEvent interceptor; VMT shadowing on selected objects; hook lifecycle reapplied as objects are recreated; gameplay call capture/modify example; UE4 RE / internal instrumentation); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[ue4-base]], [[ue4genny]], and [[re-ue4ss]].
