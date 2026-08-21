@@ -2501,7 +2501,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TOG](entities/tog.md) — The Online Gamer offsets generator (online-game cheat tooling; Offsets Generator)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
-- [TPM-SPOOFER](entities/tpm-spoofer.md) — KM TPM serial spoof via IOCTL hook (Cheat [TPM])
+- [tpm-spoofer](entities/tpm-spoofer.md) — KM TPM request-path hook + UM EK/serial checker (C/C++ WDK; TPM HWID spoof PoC; SamuelTulach + s0ngidong3; Cheat [TPM])
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
 - [tracee](entities/tracee.md) — Linux/Android runtime security + forensics via eBPF (Go; kernel telemetry + behavioral detections; K8s/container paths; Aqua Security)
 - [TrickyStore](entities/trickystore.md) — Android Keystore trick rewrite (Android 10+; cheat / HWID / keystore research; beakthoven)
