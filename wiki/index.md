@@ -2668,6 +2668,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unity202x-eXternalrEsolve](entities/unity202x-externalresolve.md) — header-only C++17 Unity 2020–2023 external runtime introspection (Mono/IL2CPP GOM scan, IL2CPP metadata, W2S, DumpSDK)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (justinpbarnett + wondeks; Game Develop / MCP workflow)
 - [Unity Markdown Viewer](entities/unity-markdown-viewer.md) — zero-setup Unity Editor markdown viewer (Plugins:Unity)
+- [Unity Design Pattern](entities/unity-design-pattern.md) — Unity C# GoF + game programming pattern sample library with runnable scenes (QianMo; Game Engine / Unity Design)
 - [Unity Script Collection](entities/unity-script-collection.md) — maintained free Unity scripts/libraries/plugins/extensions catalog (Game Engine / Plugins:Unity)
 - [Unity-Cheat-Sheet](entities/unity-cheat-sheet.md) — Unity engine/API cheat sheet (Game Engine / guide)
 - [Unity C# Reference](entities/unity-cs-reference.md) — official Unity engine/editor managed C# reference source (reference-only license; Game Engine / [C# reference]; Unity-Technologies)
