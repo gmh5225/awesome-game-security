@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:ShallowFeather/KDemu`: entity [[kdemu]] (ShallowFeather; hybrid semi-emulated/semi-native Windows kernel driver emulator; C++ PE load, exception handling, kernel dump integration, anti-detection, execution monitoring; rootkit/AC drivers resisting conventional debug; advanced malware/AC/low-level RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kace]], [[kubera]], and [[winvisor]].
+
 - **2026-08-21** — ingest `description:Sherman0236/XorData`: entity [[xordata]] (Sherman0236; C++17 framework; compile-time and runtime-style XOR obfuscation of constants, variables, and strings; helper structures + example outputs; software hardening / anti-analysis experiments; AC Compile Time / Obfuscation Engine); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscate]], [[crystr]], [[xorlit]], [[skcrypter]], [[mystic-xorstr]], and [[obfusheader-h]].
 
 - **2026-08-21** — ingest `description:Shhoya/Shh0yaUEDumper`: entity [[shh0yauedumper]] (Shhoya; Windows C++ UE4 dumper + SDK generator; process memory access, pattern scanning, engine structure parsing; names/objects/generated SDK headers; configuration-driven version handling; Unreal RE / tooling; cheat / SDK Dump); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[uedumper]], [[unrealdumper-4-25]], [[ue4genny]], and [[re-ue4ss]].
