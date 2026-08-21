@@ -20,4 +20,4 @@ Complements kernel/UM BE research such as [[blindeye]] and [[be-shellcode]] with
 
 ## Related
 
-[[battleye]] · [[blindeye]] · [[be-shellcode]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[battleye]] · [[arma3-external-variable-manager]] · [[blindeye]] · [[be-shellcode]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

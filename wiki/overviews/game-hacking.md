@@ -1383,6 +1383,7 @@ sources:
   - wiki/sources/descriptions/WeiNaYongQ__OmniClutch.md
   - wiki/sources/descriptions/Skengdo__mordhau-simple-auto-block-cheat.md
   - wiki/sources/descriptions/Skengdo__battlefield-2042-internal-sdk.md
+  - wiki/sources/descriptions/Skengdo__arma3-external-variable-manager.md
 updated: 2026-08-21
 confidence: high
 ---
@@ -1414,7 +1415,7 @@ Offensive technique taxonomy and threat model: how cheats escalate from user-mod
 - **Below OS** — [[dma]] FPGA/PCIe, hypervisor introspection, EFI runtime before DSE, SMM cheat research such as [[smm]] (ekknod; C/C++; driver development / graphics / networking; cheat / EFI driver area) (source: wiki/sources/descriptions/ekknod__smm.md), external second machine.
 - **Unified transport libraries** — [[vm]] (ekknod; C/C++ `vm.h`; swap kernel EPROCESS walks, RPM/WPM, Linux `/proc/pid/mem`, [[pcileech]] VMMDLL/LeechCore DMA, KVM guest introspection, Proton, or EFI-variable kernel comms without changing game-facing logic; CR3 translation, PEB/LDR module walk, pattern scan) (source: wiki/sources/descriptions/ekknod__vm.md). Focused EFI **GetVariable** RPM research such as [[sub-get-variable]] (ekknod; C/C++; kernel-level driver development / graphics; cheat / EFI RPM; README `[EFI RPM]`) sits in the same below-OS RPM lane beside [[efi-monitor]] and [[sumap]]. (source: wiki/sources/descriptions/ekknod__SubGetVariable.md)
 
-Pattern scan → pointer chains → structure reconstruction is the usual external workflow; internals read game objects directly after injection.
+Pattern scan → pointer chains → structure reconstruction is the usual external workflow; internals read game objects directly after injection. Title-specific Arma 3 external mission-variable tooling such as [[arma3-external-variable-manager]] (Skengdo; C++; dump/read/edit active mission variables including server economy fields; targets BE-disabled servers; online BE-protected use documented as requiring extra bypass; cheat / game:arma3 [External]) extends that external runtime-data manipulation lane. (source: wiki/sources/descriptions/Skengdo__arma3-external-variable-manager.md)
 
 ## AI visual pipeline
 
