@@ -348,6 +348,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Blanket](entities/blanket.md) — process hide via ActiveProcessLinks unlink + PspCidTable + NtQuerySystemInformation hook (cheat / hide)
 - [Blackout](entities/blackout.md) — BYOVD EDR/AV killer via GMER **`gmer64.sys`** (IOCTL PID terminate; Defender continuous suppression; gmh5225)
 - [binary-analysis-mcps](entities/binary-analysis-mcps.md) — Binary analysis MCP collection (Python; IDA Pro function/xref/variable tools for LLM agents; Binary analysis MCPs collections)
+- [binaryaudit](entities/binaryaudit.md) — Harbor benchmark for AI agents finding injected backdoors in stripped C/Go/Rust binaries (Docker; Ghidra/Radare2; lighttpd/dnsmasq/Dropbear/Sozu/Caddy; QuesmaOrg)
 - [binary-ninja-mcp](entities/binary-ninja-mcp.md) — Binary Ninja MCP server (Python; disasm/decompile/xrefs/functions/types for LLM agents; MCP for Binary_Ninja)
 - [binaryninja-ollama](entities/binaryninja-ollama.md) — Binary Ninja plugin: local Ollama LLM-assisted HLIL function/variable rename (ahaggard2013; offline models)
 - [binaryninja-openai](entities/binaryninja-openai.md) — Binary Ninja plugin: OpenAI-assisted HLIL/pseudo-C function summarize + variable rename (WhatTheFuzz; Integrates OpenAI)
