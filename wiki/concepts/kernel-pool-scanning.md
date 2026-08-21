@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/kernullist__kn-diff-pool.md
   - wiki/sources/descriptions/ioncodes__pooldump.md
   - wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md
+  - wiki/sources/descriptions/Sentient111__ClearDriverTraces.md
   - wiki/sources/descriptions/gmh5225__Allocating-individual-pages.md
 updated: 2026-08-15
 confidence: high
@@ -51,7 +52,7 @@ Complementary to pool walks, anti-cheat inspects kernel bookkeeping tables for h
 | **MmUnloadedDrivers** | Circular buffer of recently unloaded drivers (name + address range); not user-clearable; flags load-unload-reload patterns |
 | **PoolBigPageTable** | Maps large (≥ page) pool allocations to owning driver tag; finds manual-map memory without a loaded module |
 
-Offensive **driver trace cleaning** research such as [[hlunaaa-github-io]] documents **CI.dll** and **BigPool cache** artifacts targeted when hiding manual-map / BYOVD loads from PiDDBCache and pool-walk scanners — the hide side of the same forensics table. (source: wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md)
+Offensive **driver trace cleaning** research such as [[hlunaaa-github-io]] documents **CI.dll** and **BigPool cache** artifacts targeted when hiding manual-map / BYOVD loads from PiDDBCache and pool-walk scanners — the hide side of the same forensics table. (source: wiki/sources/descriptions/hLunaaa__hLunaaa.github.io.md) Kernel driver samples such as [[clear-driver-traces]] (Sentient111; MmUnloadedDrivers, PiDDBCacheTable, code-integrity hash caches; build-specific offsets; README Driver Trace Cleaner) implement the same artifact-removal lane for AC / driver forensics research. (source: wiki/sources/descriptions/Sentient111__ClearDriverTraces.md)
 
 **Pool tag forensics:** every `ExAllocatePoolWithTag` / `ExAllocatePool2` allocation carries a 4-byte tag — scan for known cheat-driver signatures via `pooltag.txt`, PoolMon, or WinDbg `!poolfind`. Tags present in pool but absent from any loaded module are suspicious.
 

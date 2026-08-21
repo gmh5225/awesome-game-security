@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sentient111/ClearDriverTraces`: entity [[clear-driver-traces]] (Sentient111; C++ KM driver; removes MmUnloadedDrivers, PiDDBCacheTable, and code-integrity hash-cache artifacts via version-specific offsets; anti-cheat and driver forensics research; README Driver Trace Cleaner); cited on [[overviews/windows-kernel]] and [[concepts/kernel-pool-scanning]]; cross-linked [[hide-driver-testing]], [[driver-read-write]], [[nullmap]], [[revert-mapper]], and [[hlunaaa-github-io]].
+
 - **2026-08-21** — ingest `description:Sentient111/Csgo-Full-kernel`: entity [[csgo-full-kernel]] (Sentient111; C++ KMDF driver; full-kernel external framework—memory access, drawing helpers, key handling, game offsets; cheat logic in Ring0 without conventional usermode external; kernel attack-surface / AC bypass research; README Running from kernelmode); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-csgo]], [[garhal-csgo]], [[kernel-drawing]], [[lithium-kernel]], and [[ultra-driver-game-cheat]].
 
 - **2026-08-21** — ingest `description:Sentient111/KernelDrawing`: entity [[kernel-drawing]] (Sentient111; C++ WDK PoC; Ring0 GDI draw without traditional hooks—spoofed thread context satisfies internal checks; version-dependent NT offsets and loading notes; low-level graphics and AC evasion research; README Drawing from kernelmode without any hooks); cited on [[overviews/graphics-api]] and [[overviews/windows-kernel]]; cross-linked [[krnl-gdi-render]], [[kernel-cheat-for-directx3d]], [[kernel-dwm]], and [[dxgkrnl-hook]].
