@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Reodus/CBS`: entity [[cbs]] (Reodus; Python IDAPython IDA Pro plugin + PyQt; regex scan disassembly lines; set/enable/disable/remove breakpoints by instruction patterns across functions; repeatable breakpoint automation for binary analysis; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[copy-rva]], [[ce-tracer-ida]], and [[lazyida]].
+
 - **2026-08-21** — ingest `description:RequestFX/ImGUI-Advanced-Cheat-Menu`: entity [[imgui-advanced-cheat-menu]] (RequestFX; C++ Windows ImGui cheat-menu framework; SFML backend; modular ESP, aim assist, recoil control, HUD, hotkey settings panels; custom widgets + in-memory font loading; starter template for organizing cheat UIs; cheat / Imgui Menu); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[imgui]], [[imgui-standalone]], [[external-imgui-cheat-menu-example-2023]], and [[present-hook]].
 
 - **2026-08-21** — ingest `description:RevEngAI/plugin-ghidra`: entity [[plugin-ghidra]] (RevEngAI; Java Gradle Ghidra 11.4+/Java 21 extension; RevEng.AI API integration; binary upload, code similarity, batch function matching/renaming, AI decompilation views; ML-assisted stripped-binary RE; cheat / Ghidra Plugins / `[RevEng.AI]`); cited on [[overviews/reverse-engineering]]; cross-linked [[reai-ida]], [[ghidra-openai]], [[ghidrassist]], [[ghidra-mcp]], and [[renamaida]].

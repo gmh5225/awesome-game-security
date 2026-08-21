@@ -1212,6 +1212,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__External-imgui-Cheat-Menu-Example-2023.md
   - wiki/sources/descriptions/adam-040__Enigma.md
   - wiki/sources/descriptions/adamhlt__ImGui-Standalone.md
+  - wiki/sources/descriptions/Reodus__CBS.md
   - wiki/sources/descriptions/RequestFX__ImGUI-Advanced-Cheat-Menu.md
   - wiki/sources/descriptions/gmh5225__eft-dma-radar-1.md
   - wiki/sources/descriptions/bytemyass__EFTLeecher.md
@@ -1572,6 +1573,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Open-source Rust Windows trainer [[freeplay]] (antaresjay; TOML game configs; imports CE `.CT` tables; built-in x86/x64 Auto Assembler; pointer scan, value freeze, instruction patching; Tauri overlay + CLI; Steam/Epic/GOG library integration; community table library; refuses [[easy-anti-cheat]]/[[battleye]]/[[vanguard]] protected processes; offline single-player focus; cheat / trainer) sits beside [[cheat-engine]] as a self-hosted CE-table runtime alternative. (source: wiki/sources/descriptions/antaresjay__freeplay.md)
 - Cheat Engine Godot runtime dumpers such as [[gddumper]] (Lua; Godot 3.x/4.x SceneTree / GDScript on Win x86/x64; Address List dump + experimental hot-reload) sit in the Cheat Engine Plugins / game engine explorer:Godot lane. (source: wiki/sources/descriptions/palepine__GDDumper.md)
 - Cheat Engine value tracing in IDA via [[ce-tracer-ida]] (Python; CheatEngine Value Tracer plugin; memory analysis; cheat / IDA Plugins) bridges CE scan workflows into static IDA analysis. (source: wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md)
+- IDA mnemonic-pattern breakpoint automation via [[cbs]] (Reodus; Python IDAPython + PyQt; regex on disassembly lines; set/enable/disable/remove breakpoints across functions; cheat / IDA Plugins) speeds repeatable static-analysis breakpoint setup before live debugging. (source: wiki/sources/descriptions/Reodus__CBS.md)
 - IDA Pro + Cheat Engine current-module offset sync via [[doffset]] (dNop90; resolves module RVAs while static IDA analysis runs alongside live debugging in Cheat Engine, x64dbg, and similar tools; cheat / IDA Plugins) bridges multi-tool RE when correlating static addresses with runtime module bases. (source: wiki/sources/descriptions/dNop90__dOffset.md)
 - Disassembler page remapping via [[ce-remap-plugin]] (Delphi CE plugin; hooks CE plugin SDK to remap disassembler memory pages so hidden or obfuscated code is visible in the disassembler view; tested on CE 7.4; cheat / Remap; gmh5225) extends CE static-analysis workflows when targets remap or conceal executable pages from the debugger UI. (source: wiki/sources/descriptions/gmh5225__CE-remap-plugin.md)
 - Delphi x86/x86_64 binary analysis via [[delphi-helper]] (eset; IDA/static-analysis helper for Object Pascal targets; setup requires `pip install py7zr`; cheat / IDA Plugins) supports RE when game clients or cheat tooling ship as Delphi PEs. (source: wiki/sources/descriptions/eset__DelphiHelper.md)
