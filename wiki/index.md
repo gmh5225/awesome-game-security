@@ -1121,6 +1121,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-findcrypt](entities/ghidra-findcrypt.md) — Ghidra analyzer for cryptographic constants (Java Gradle extension; JSON signature DB; AES/DES/MD5/SHA-1/TEA/Salsa/CRC32 labeling; TorgoTorgo; cheat / Ghidra Plugins)
 - [ghidra-gradle-plugin](entities/ghidra-gradle-plugin.md) — archived Gradle plugin for Ghidra extension builds (classpath wiring, IDE setup; Java/Groovy; astrelsky)
 - [ghidra-hexeditor](entities/ghidra-hexeditor.md) — dockable hex editor Ghidra script plugin (Java/Swing; in-place byte edit, binary search, BinaryExporter save; dark mode; sengi12; cheat / Ghidra Plugins)
+- [ghidra-minidump-loader](entities/ghidra-minidump-loader.md) — Windows minidump Ghidra extension (Java/Gradle; runtime module mapping, private memory/thread stacks, thread-view stack walking; crash-dump / post-mortem RE; Rantanen; cheat / Ghidra Plugins)
 - [ghidra-manager](entities/ghidra-manager.md) — cross-platform Python CLI Ghidra toolchain manager (release-pinned install, SHA-256 verify, curated extensions incl. GhidraMCP, project launch, MCP bridge, binary compare, rollback; alexbevi)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [ghidra-mcp](entities/ghidra-mcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; 200+ AI-assisted RE tools; GUI/headless; BSim; HTTP/stdio; Docker; bethington)
