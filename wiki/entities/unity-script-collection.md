@@ -20,4 +20,4 @@ Useful background index beside Unity guides ([[unity-cheat-sheet]]), editor tool
 
 ## Related
 
-[[overviews/game-engine]] · [[unity-cheat-sheet]] · [[unicli]] · [[com-unity-ide-cursor]] · [[unity-mcp]] · [[awesome-game-engine-dev]] · [[mobademo]]
+[[overviews/game-engine]] · [[unity-cheat-sheet]] · [[unicli]] · [[com-unity-ide-cursor]] · [[unity-mcp]] · [[awesome-unity]] · [[awesome-game-engine-dev]] · [[mobademo]]

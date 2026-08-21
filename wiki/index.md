@@ -329,6 +329,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-mcp-servers](entities/awesome-mcp-servers.md) — large curated MCP server index (AI, security, gaming, infrastructure; category Markdown navigation; Awesome MCP)
 - [awesome-obfuscations](entities/awesome-obfuscations.md) — curated binary, compile-time, and LLVM/GCC obfuscation tools (C/C++/Go/Rust/x86 assembly + VM protectors; anti-RE / native binary protection; killvxk)
 - [awesome-open-source-games](entities/awesome-open-source-games.md) — curated open-source games by platform/genre (Godot/Unity/custom; Collection of Games / Game Develop Guide)
+- [awesome-unity](entities/awesome-unity.md) — curated Unity assets, libraries, tutorials, and dev resources (AI, networking, UI, tweening, editor tooling, project examples; Game Engine / Unity)
 - [awesome-windbg-extensions](entities/awesome-windbg-extensions.md) — curated WinDbg extension index (kernel analysis, IR, rootkit hunting, memory inspection, debugger automation; WinDbg)
 - [awesome-wow-rust](entities/awesome-wow-rust.md) — curated Rust WoW private-server resources (server implementations / protocol + file-format libs / renderers; cheat / game:wow)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RyanNielson/awesome-unity`: entity [[awesome-unity]] (RyanNielson; community-curated Unity assets, libraries, tutorials, and dev resources; AI, networking, UI, tweening, editor tooling, complete project examples; documentation-centric discovery; README `[Unity]`); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[unity-script-collection]], [[unity-cheat-sheet]], [[unity-cs-reference]], [[gamedev]], and [[learn-awesome-gamedev]].
+
 - **2026-08-21** — ingest `description:Rycooop/Bloom-Anticheat`: entity [[bloom-anticheat]] (Rycooop; Windows x64 multi-component AC prototype; kernel driver ObRegisterCallbacks handle protection for AC + target processes; UM DLL/app; Visual Studio projects; kernel-callback vs UM monitoring tradeoffs; AC experimentation); cited on [[overviews/anti-cheat]] and [[concepts/kernel-callbacks]]; cross-linked [[kernel-anticheat]], [[oac]], [[sentinelac]], and [[ac]].
 
 - **2026-08-21** — ingest `description:Rythorndoran/Naraka-Hack`: entity [[naraka-hack]] (Rythorndoran; C++ external Unity IL2CPP cheat for NARAKA: BLADEPOINT; offset tables; entity/player RPM; NVIDIA overlay ESP boxes/names; hotkey menu + combat-assist automation; cheat-dev / runtime-structure RE); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[dummy-dlls-naraka-1-9-21]], [[il2cpp]], [[world-to-screen]], and [[nvidia-overlay]].
