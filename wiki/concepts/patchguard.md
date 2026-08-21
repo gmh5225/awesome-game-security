@@ -16,7 +16,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__Patchguard-2023.md
   - wiki/sources/descriptions/emlinhax__tableflipper.md
   - wiki/sources/descriptions/armasm__EasyAntiPatchGuard.md
-updated: 2026-08-18
+  - wiki/sources/descriptions/Rythorndoran__PageTableHook.md
+updated: 2026-08-21
 confidence: high
 ---
 
@@ -52,6 +53,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[easy-anti-patchguard]] (armasm) is a Win8–Win10-era kernel PoC that uses a driver plus assembly hooks to observe or short-circuit PatchGuard dispatch paths in protected routines, with call-chain analysis from kernel debugging sessions. (source: wiki/sources/descriptions/armasm__EasyAntiPatchGuard.md)
 
+[[page-table-hook]] (Rythorndoran; C++ driver demo) redirects execution by editing page-table mappings instead of patching kernel code—preserving original routine access while avoiding typical PatchGuard-triggering inline hooks; includes `NtCreateFile` interception for advanced kernel / AC bypass study. (source: wiki/sources/descriptions/Rythorndoran__PageTableHook.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]

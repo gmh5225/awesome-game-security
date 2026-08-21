@@ -2005,6 +2005,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pafish](entities/pafish.md) — open-source C anti-analysis testing tool; VM/sandbox/debugger/hook/environment checks (VMware, VirtualBox, QEMU, Wine); reproducible evasion testing (a0rtega)
 - [pairipcore](entities/pairipcore.md) — Solaree RE notes on Google's pairipcore Android app protection (integrity checks, pseudo-VM injection, CFI obfuscation, dynamic symbol resolution, anti-debug, optional root gates; educational documentation)
 - [Page Table Injector](entities/page-table-injector.md) — PT-Injector (C/C++; kernel driver; page-table manipulation / injection:windows; AC research)
+- [PageTableHook](entities/page-table-hook.md) — C++ PTE hook demo; edits paging structures to redirect execution without code patches; `NtCreateFile` example; PatchGuard-aware hook research (Rythorndoran; Some Tricks / PTE Hook)
 - [page_no_access](entities/page-no-access.md) — C++ lazy decrypt-on-first-access page protection (modding; Anti Cheat → Page Protection)
 - [PAGE_NO_ACCESS-not-byfron](entities/page-no-access-not-byfron.md) — VEH + PAGE_NOACCESS Byfron/Hyperion anti-tamper PoC (LoadLibrary tester; gmh5225)
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
