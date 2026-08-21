@@ -1750,6 +1750,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [memory-server](entities/memory-server.md) — jailbroken iOS REST memory scanner (Rust HTTP port 3030; process enum/read/pattern scan; Python PC client; cheat / iOS memory explorer; gmh5225)
 - [MemWars](entities/memwars.md) — Windows memory-analysis / process-manipulation C++ library (scan / pattern search / module enum / injection / memory edit; Testing Framework; gmh5225)
 - [MMFCodeInjection](entities/mmf-code-injection.md) — User APC + memory-mapped file code injection (stealthy DLL load via shared file mapping; Injection Testing; gmh5225)
+- [MMInject](entities/mminject.md) — kernel DLL injector via NX-bit swap + VAD hide (writable alloc; page-table execute; dynamic kernel data / I/O / loader; SDXT)
 - [memcs](entities/memcs.md) — external CS:GO; modding / SDK generation (Rust; cheat / game:csgo; gmh5225)
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
 - [Manual Mapping DLL Injector](entities/manual-mapping-dll-injector.md) — Windows manual-map DLL injector (injector + loader; thread hijack / NtCreateThreadEx; import/reloc/TLS/exception; header wipe, PEB unlink, handle hijack; Manual Map; andrew9382)

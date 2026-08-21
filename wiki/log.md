@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SDXT/MMInject`: entity [[mminject]] (SDXT; C kernel DLL injector; NX-bit swapping + VAD hide; writable alloc + page-table execute; dynamic kernel data / I/O / loader; stealthy kernel-assisted injection; cheat / Using NX Bit Swapping and VAD hide); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-vad-injector]], [[stealthy-kernelmode-injector]], [[page-table-injector]], and [[kernel-dll-injector]].
+
 - **2026-08-21** — ingest `description:SLAUC91/AntiCheat`: entity [[slauc91-anticheat]] (SLAUC91; C++ + partial C kernel driver; Visual Studio Win32/x64 console scanner; Native WinAPI process inspection; USN/DNS, PE/PEB, modules/handles/threads/drivers, pattern matching; user-mode IAT + kernel MSR/IDT/SSDT/IRP hook detection; game-security rootkit/cheat scanner prototype; Anti Cheat); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[openark]], [[xmalhunter]], [[unkover]], and [[anticheat-poc]].
 
 - **2026-08-21** — ingest `description:SM7325-AE/android_kernel_motorola_dubai`: entity [[android-kernel-motorola-dubai]] (SM7325-AE; Motorola Dubai / Moto Edge 30 SM7325 Snapdragon 778G GKI kernel source; GKI ABI, Qualcomm drivers, Motorola device tree; Android kernel customization / mobile security RE; cheat / Android Kernel Source); cited on [[overviews/mobile-security]]; cross-linked [[android-kernel-driver-template]], [[android-kernel-xiaomi-sweet]], and [[android-kernel-oneplus-sm7250-wksu]].
