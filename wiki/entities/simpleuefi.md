@@ -20,4 +20,4 @@ Aimed at **UEFI security researchers** and **bootkit developers** who want a str
 
 ## Related
 
-[[eficmake]] · [[uefi-bootkit]] · [[uefi-bootloader]] · [[bootlicker]] · [[luaboot]] · [[efixplorer]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[eficmake]] · [[visualuefi-2-0]] · [[uefi-bootkit]] · [[uefi-bootloader]] · [[bootlicker]] · [[luaboot]] · [[efixplorer]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
