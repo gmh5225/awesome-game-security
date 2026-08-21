@@ -18,4 +18,4 @@ Battlefield 4 internal overlay research repo (C++ / C/C++) focused on DirectX, r
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/graphics-api]] · [[battlefield-1-internal]] · [[present-hook]]
+[[overviews/game-hacking]] · [[overviews/graphics-api]] · [[battlefield-1-internal]] · [[battlefield-2042-internal-sdk]] · [[present-hook]]

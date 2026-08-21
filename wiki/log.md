@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Skengdo/battlefield-2042-internal-sdk`: entity [[battlefield-2042-internal-sdk]] (Skengdo; C++ internal BF2042 SDK scaffold; entities/players/vehicles/weapons/game context/rendering/W2S helpers; incomplete entity-list iteration; internal tooling + game security research prototypes; cheat / game:battlefield 2042 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[battlefield-1-internal]], [[bf4-internal-overlay]], [[world-to-screen]], and [[ue4-processevent-intercept]].
+
 - **2026-08-21** — ingest `description:Skengdo/mordhau-simple-auto-block-cheat`: entity [[mordhau-simple-auto-block-cheat]] (Skengdo; C++ internal Mordhau module; auto-block swings/kicks + optional auto-stab; large generated UE SDK from class/function dumps; combat automation + internal module structure study; cheat / game:mordhau [Internal]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ue4-base]], [[ue4-processevent-intercept]], [[uedumper]], and [[unreal-object-model]].
 
 - **2026-08-21** — ingest `description:Skengdo/simple-SetWindowsHookExW-injector`: entity [[simple-setwindowshookexw-injector]] (Skengdo; C++ SetWindowsHookExW DLL injector; PE parsing + registry helpers + optional certificate spoofing; payload + target window-class workflow; user-mode injection pipeline study; Injection Testing:SetWindowsHookExW); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[setwindowshookex-injector]], [[setwindowhookex]], [[injection]], and [[windows-process-injection]].

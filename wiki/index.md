@@ -69,6 +69,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
 - [BF4-Internal-overlay](entities/bf4-internal-overlay.md) — BF4 internal overlay: DirectX / rendering / SDK generation (C++; gmh5225; cheat / game:battlefield 4)
+- [battlefield-2042-internal-sdk](entities/battlefield-2042-internal-sdk.md) — BF2042 internal SDK scaffold (Skengdo; C++; entity/player/vehicle/weapon structures, rendering, W2S; incomplete; cheat / game:battlefield 2042 [Internal])
 - [Basic-Fortnite-Cheat-Source-Internal](entities/basic-fortnite-cheat-source-internal.md) — Fortnite internal: UE4 SDK / GObject/GNames / hooks (ESP + aimbot; C++)
 - [basic-anti-cheat](entities/basic-anti-cheat.md) — Basic C/C++ AC teaching sample (integrity / signature scan / debugger / modules / memory validation; gmh5225)
 - [BatteryShark Writeup Archive](entities/batteryshark-github-io.md) — Jekyll GitHub Pages RE writeups (game hacking / classic PC patching / Windows internals / arcade hardware; IDA + Python; Masterpiece consolizing series; QEMU-GDB; cheat / guide)
