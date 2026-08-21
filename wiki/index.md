@@ -1821,6 +1821,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nb_obfuscator](entities/nb-obfuscator.md) — Win32/x64 PE obfuscation framework (Capstone/udis86; polymorphic stub/dead-code; PSC-Engine; AC Obfuscation Engine)
 - [ndisapi](entities/ndisapi.md) — user-mode Windows Packet Filter / NDIS packet inspect-modify API
 - [nebulite-external](entities/nebulite-external.md) — external CS:GO; memory analysis (C/C++; cheat / game:csgo; gmh5225)
+- [negativespoofer](entities/negativespoofer.md) — boot-time Clover-style SMBIOS firmware-table spoof; C/EFI; pre-OS hardware identity / anti-cheat HWID research (SamuelTulach; cheat / [HWID])
 - [NeacSafe-Analysis](entities/neacsafe-analysis.md) — NetEase NeacSafe minifilter IPC probe (`\NeacSafePort`, encoded buffers; Pediy writeup reproduction; explore anticheat; gmh5225)
 - [Nemesis](entities/nemesis.md) — kernel-space process dump (cheat / windows kernel explorer)
 - [Nebula](entities/nebula.md) — modular C++ game engine (fips build; Nebula-demo setup.bat; Game Engine / source)
