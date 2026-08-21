@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SeeFlowerX/stackplz`: entity [[stackplz]] (SeeFlowerX; Android eBPF stack tracing + hook analysis; Go controller + C eBPF; syscall/uprobe/hardware-breakpoint capture on ARM64; args/registers/stacks; filtering, structured output, optional Frida RPC; rooted mobile security / game protection RE; cheat / eBPF-based debugger for Android); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[edbg]], [[ehook]], [[btrace]], and [[frida]].
+
 - **2026-08-21** — ingest `description:Sentient111/ClearDriverTraces`: entity [[clear-driver-traces]] (Sentient111; C++ KM driver; removes MmUnloadedDrivers, PiDDBCacheTable, and code-integrity hash-cache artifacts via version-specific offsets; anti-cheat and driver forensics research; README Driver Trace Cleaner); cited on [[overviews/windows-kernel]] and [[concepts/kernel-pool-scanning]]; cross-linked [[hide-driver-testing]], [[driver-read-write]], [[nullmap]], [[revert-mapper]], and [[hlunaaa-github-io]].
 
 - **2026-08-21** — ingest `description:Sentient111/Csgo-Full-kernel`: entity [[csgo-full-kernel]] (Sentient111; C++ KMDF driver; full-kernel external framework—memory access, drawing helpers, key handling, game offsets; cheat logic in Ring0 without conventional usermode external; kernel attack-surface / AC bypass research; README Running from kernelmode); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-csgo]], [[garhal-csgo]], [[kernel-drawing]], [[lithium-kernel]], and [[ultra-driver-game-cheat]].

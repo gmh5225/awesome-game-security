@@ -2392,6 +2392,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [simpleperf_demo](entities/simpleperf-demo.md) — Android simpleperf / Perf demo (app profiling)
 - [sinmapper](entities/sinmapper.md) — user-mode mapper into signed-driver section via physmem + PTE flip; trace cleanup; stealthy kernel load (armvirus; Manual Map In Signed Driver)
 - [sogen](entities/sogen.md) — Windows userspace PE emulator (Unicorn + Capstone; minidump / Zstd state; React web UI; FlatBuffers trace IPC; Windows User Space Emulator)
+- [stackplz](entities/stackplz.md) — Android eBPF stack tracing + hook analysis (SeeFlowerX; Go + C eBPF; syscall/uprobe/hardware-breakpoint capture on ARM64; args/registers/stacks; filtering, structured output, optional Frida RPC; rooted mobile security / game protection RE; cheat / eBPF-based debugger for Android)
 
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [STB (gmh5225)](entities/stb-gmh5225.md) — compile-time IDA-style string-to-array for stack trace building / spoofing research (gmh5225; Cheat Compile Time)
