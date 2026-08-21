@@ -2599,6 +2599,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unreal-image-capture](entities/unreal-image-capture.md) — UE C++ high-FPS RGB / segmentation / depth capture to disk for ML synthetic datasets (non-blocking render path; Game Engine / Unreal guide; TimmHess)
 - [unreal-source-explained](entities/unreal-source-explained.md) — profiler-driven UE4 source analysis (init / game loop / task graph / RHI / Metal·D3D11; Game Engine / Unreal guide; donaldwuid)
 - [unreal-mcp](entities/unreal-mcp.md) — MCP servers for Unreal Editor (kvick-games + chongdashu; asset/level/blueprint automation; Game Develop / MCP)
+- [UnrealModLoader](entities/unreal-mod-loader.md) — UE4 mod loading framework (Blueprint + SDK-based C++ mods; MinHook + ImGui hooks; injector + proxy DLL bootstrap; RussellJerome; Mod Loader)
 - [UnrealEngine5-UltimateStreetFighters](entities/unrealengine5-ultimate-streetfighters.md) — UE5 Street Fighters game (audio / physics / animation; C#/C++; Game Develop / Unreal source)
 - [UnrealDumper-4.25](entities/unrealdumper-4-25.md) — external UE4.25+ SDK dumper (C++; GObjects/GNames pattern scan; no inject)
 - [Unreal-Engine-5-PDB](entities/unreal-engine-5-pdb.md) — UE5 PDB symbol mirror (function/type/struct layouts; IDA/x64dbg; RE / Game Engine Explorer:Unreal)
