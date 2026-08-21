@@ -20,4 +20,4 @@ Broader agent bridge than curated disasm/decompile/xrefs-only IDA MCP plugins su
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-mcp-server-plugin]] · [[iida-mcp]] · [[idac]] · [[ghidra-headless-mcp]] · [[aida]] · [[ida-assistant]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ida-nexus-docker]] · [[ida-mcp-server-plugin]] · [[iida-mcp]] · [[idac]] · [[ghidra-headless-mcp]] · [[aida]] · [[ida-assistant]]

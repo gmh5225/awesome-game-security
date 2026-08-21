@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:mrexodia/ida-nexus-docker`: entity [[ida-nexus-docker]] (mrexodia; disposable Docker harness; IDA Pro 9.4+ with Pi agent + Hex-Rays IDA Nexus; ordered LLM prompt sessions in isolation; ZIP audit archive of Nexus traces, Pi transcripts, worker logs; hostile-sample safe; runtime model credentials; unpacking/API/string/config extraction/IDB markup; malware/game-security RE); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[re-harness]], [[ida-cli]], and [[headless-ida-mcp-server]].
+
 - **2026-08-21** — ingest `readme:categories`: Cheat ~2734 (+1; Anti Cheat ~687 / Game Develop ~186 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-21** — ingest `description:Rwkeith/Diglett`: entity [[diglett]] (Rwkeith; kernel-mode stealth PoC; hide system threads + alter thread entry-address visibility; driver + client; anti-cheat evasion / defender blind-spot study; README Hide Kernel Thread); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nomad]], [[driver-hide-kernel-thread-iocancelirp]], [[zero-thread-kernel]], [[system-thread-finder]], and [[unkover]].

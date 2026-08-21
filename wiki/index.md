@@ -1372,6 +1372,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-migrator](entities/ida-migrator.md) — Python IDA plugin: migrate IDB/database between IDA versions or environments (cheat / IDA Plugins)
 - [ida-minsc](entities/ida-minsc.md) — IDA Pro plugin: IDAPython namespace replacement (DWIM interface; tagging/filtering; database/function automation; cheat / IDA Plugins)
 - [ida-names](entities/ida-names.md) — IDA Pro plugin: batch rename, pattern match, prefix/suffix, import/export for function/symbol names (pseudocode window titles; cheat / IDA Plugins)
+- [ida-nexus-docker](entities/ida-nexus-docker.md) — Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus; ordered LLM analysis prompts in isolation; ZIP audit trails (mrexodia)
 - [ida-nord-theme](entities/ida-nord-theme.md) — IDA Pro Nord-palette dark color theme (disassembly/hex/graph/editor; cheat / Skins)
 - [IDASkins](entities/idaskins.md) — IDA Pro custom theme/skin plugin (CSS-like Qt GUI styling; disassembly/hex/output; cheat / Skins; gmh5225)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
