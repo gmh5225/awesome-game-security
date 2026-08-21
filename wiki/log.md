@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/PwnedBoot`: entity [[pwnedboot]] (SamuelTulach; C/C++ gnu-efi + VS; microcode-update DLL replacement boot payload; very-early boot-chain execution + remap; Secure Boot bypass via Windows bootloader shim; boot security / early-boot attack surface / pre-OS AC threat modeling); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[bootlicker]], [[rainbow]], [[uefi-bootkit]], and [[driver-efi-bootkit]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/SecureGame`: entity [[secure-game]] (SamuelTulach; Pong-like POC; core game logic in Windows VBS enclave; host app for render/input + enclave DLL for state/rules; C/C++ SDL2 Visual Studio vcpkg; trusted execution / anti-cheat research); cited on [[concepts/hvci]] and [[overviews/anti-cheat]]; cross-linked [[fake-enclave]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/eac_cr3_shuffle`: entity [[eac-cr3-shuffle]] (SamuelTulach; C++ compact research sample; CR3 shuffling in EAC-protected environments; physical memory range walk, directory-base discovery, VA→PA translation checks; reference on CR3 manipulation vs external memory inspection; cheat / Bypassing CR3 protection); cited on [[concepts/easy-anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[eac-cr3-bypass]], [[ntmemory]], and [[meme-rw]].
