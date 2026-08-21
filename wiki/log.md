@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:ShinoLeah/eHook`: entity [[ehook]] (ShinoLeah; Android ARM64 uprobe eBPF hook framework; Go orchestration + C eBPF; on-enter/on-leave handlers; memory R/W, logging, custom event wrappers; package/library offset config; rooted dynamic analysis, mobile game research, lightweight runtime tracing; cheat / eBPF hook); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[btrace]], [[peetch]], and [[frida]].
+
 - **2026-08-21** — ingest `description:Shtan7/VisualUEFI-2.0`: entity [[visualuefi-2-0]] (Shtan7; VisualUEFI-style Clang/DWARF UEFI dev setup; C/C++ samples + EDK2 + Visual Studio; VMware + CLion remote GDB; source-level firmware debugging; UEFI internals / boot-time behavior research; README [Debug source with clion+clang+gdb]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[simpleuefi]], [[eficmake]], [[efixplorer]], and [[ida-efiutils]].
 
 - **2026-08-21** — ingest `description:Sidenai/hyperion-disassembler`: entity [[hyperion-disassembler]] (Sidenai; native C++ multi-arch disassembler/decompiler; PE/ELF/Mach-O/.NET; x86/x64/ARM/AArch64/MIPS/PPC; CFG, FLIRT, PDB, BinDiff, RTTI recovery, SSA decompiler, packer detection, Lua scripting, ImGui UI; cheat / RE tools); cited on [[overviews/reverse-engineering]]; cross-linked [[binexport]], [[sig-database]], [[unpacker]], [[retdec]], [[ghidra]], and [[xdv]].

@@ -232,6 +232,7 @@ sources:
   - wiki/sources/descriptions/null-luo__btrace.md
   - wiki/sources/descriptions/aquasecurity__tracee.md
   - wiki/sources/descriptions/gmh5225__android_ebpf.md
+  - wiki/sources/descriptions/ShinoLeah__eHook.md
   - wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md
   - wiki/sources/descriptions/aosp-mirror__kernel_common.md
   - wiki/sources/descriptions/gmh5225__Android-ModGamesByInjectZygote.md
@@ -347,7 +348,7 @@ sources:
   - wiki/sources/descriptions/UnityTech__GamesTestAutomationExample.md
   - wiki/sources/descriptions/TrungNguyen1909__aarch64-sysreg-ida.md
   - wiki/sources/descriptions/cognis-digital__rootsentry.md
-updated: 2026-08-20
+updated: 2026-08-21
 confidence: high
 ---
 
@@ -404,7 +405,7 @@ Layered client checks (root/jailbreak, [[frida]], emulator, integrity, debugger,
 
 ## eBPF tracing
 
-User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown, attach points permitting): stackplz, eDBG, [[tracee]] (Linux/Android runtime security + forensics via eBPF; behavioral detections + container/K8s monitoring; source: wiki/sources/descriptions/aquasecurity__tracee.md); corpus includes [[btrace]] (app behavior), [[peetch]] (TLS/sniff), and [[android-ebpf]] (syscall/network/process/perf tracing examples for loading eBPF on Android) (source: wiki/sources/descriptions/gmh5225__android_ebpf.md). Programs/maps/links remain observable; CO-RE improves portability but does not guarantee run-everywhere.
+User/kernel probes without custom LKM on compatible GKI (BTF, SELinux, lockdown, attach points permitting): stackplz, eDBG, [[tracee]] (Linux/Android runtime security + forensics via eBPF; behavioral detections + container/K8s monitoring; source: wiki/sources/descriptions/aquasecurity__tracee.md); corpus includes [[btrace]] (app behavior), [[peetch]] (TLS/sniff), [[android-ebpf]] (syscall/network/process/perf tracing examples for loading eBPF on Android) (source: wiki/sources/descriptions/gmh5225__android_ebpf.md), and [[ehook]] (ARM64 uprobe hook framework; Go orchestration + C eBPF; on-enter/on-leave handlers with memory R/W wrappers; rooted mobile game RE / runtime tracing; ShinoLeah; cheat / eBPF hook) (source: wiki/sources/descriptions/ShinoLeah__eHook.md). Programs/maps/links remain observable; CO-RE improves portability but does not guarantee run-everywhere.
 
 ## Network & SSL pinning
 
