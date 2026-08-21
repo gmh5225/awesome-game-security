@@ -52,6 +52,7 @@ sources:
   - wiki/sources/descriptions/banteg__bn.md
   - wiki/sources/descriptions/basil00__Divert.md
   - wiki/sources/descriptions/batusan__Hardened-qemu.md
+  - wiki/sources/descriptions/ScriptWare-Software__native-predicate-solver.md
   - wiki/sources/descriptions/Scrut1ny__Hypervisor-Phantom.md
   - wiki/sources/descriptions/SingularityCloud__KVM.Performance.md
   - wiki/sources/descriptions/airbus-seclab__qemu_blog.md
@@ -1608,6 +1609,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 - Opaque-predicate detection via [[opaque-predicates-detective]] (invariant-expression / BB-local damage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/yellowbyte__opaque-predicates-detective.md)
 - Opaque-predicate removal via [[opaque-predicate-patcher]] (Vector35 Binary Ninja plugin; Python; MLIL branch-condition analysis; patch always/never branch; iterative re-analysis; Cheat Binary Ninja Plugins lane) complements detection tooling. (source: wiki/sources/descriptions/Vector35__OpaquePredicatePatcher.md)
+- Native opaque-predicate removal via [[native-predicate-solver]] (ScriptWare-Software Binary Ninja plugin; C++; MLIL conditional-branch analysis; single-function/whole-binary passes; configurable limits; multithreaded; Cheat Binary Ninja Plugins lane) complements Python patchers for large protected binaries. (source: wiki/sources/descriptions/ScriptWare-Software__native-predicate-solver.md)
 - SMT-assisted opaque-predicate deobfuscation via [[r2smt]] (Rust; radare2 integration; Z3/CVC5/Bitwuzla; IR lift + SSA + backward slice; batch JSON/MD reports; reversible patches) sits in the Cheat Radare Plugins lane. (source: wiki/sources/descriptions/seifreed__r2SMT.md)
 - Obfuscated-region pinpointing via [[obfuscation-detection]] (CFF / insn-complexity / n-gram BB outliers; batch scripts) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_detection.md)
 - Obfuscated-code analysis and simplification via [[obfuscation-analysis]] (MBA backward-slice + msynth oracle; opaque-predicate dataflow; Z3-verified BNIL deobfuscation) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md)
