@@ -19,7 +19,8 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__x86RetSpoof.md
   - wiki/sources/descriptions/cryotb__RASD.md
   - wiki/sources/descriptions/WithSecureLabs__CallStackSpoofer.md
-updated: 2026-08-19
+  - wiki/sources/descriptions/Sizeable-Bingus__BingusLdr.md
+updated: 2026-08-21
 confidence: medium
 ---
 
@@ -33,7 +34,7 @@ Before calling a sensitive API, replace the stack slot that holds the return add
 
 ## Synthetic call stacks
 
-Build multi-frame stacks whose return PCs land in legitimate modules with plausible offsets. Must satisfy **`RtlVirtualUnwind`** and **`.pdata` / UNWIND_INFO`** consistency—spoofed frames that violate unwind metadata fail deeper validation.
+Build multi-frame stacks whose return PCs land in legitimate modules with plausible offsets. Must satisfy **`RtlVirtualUnwind`** and **`.pdata` / UNWIND_INFO`** consistency—spoofed frames that violate unwind metadata fail deeper validation. Crystal Palace–based reflective DLL loaders such as [[bingusldr]] (Sizeable-Bingus; CET-friendly stack spoofing; EAF-compatible API resolution; heap/image masking; mingw-w64; Cobalt Strike `.cna` integration) combine stack evasion with in-memory payload loading for endpoint-detection and anti-cheat research. (source: wiki/sources/descriptions/Sizeable-Bingus__BingusLdr.md)
 
 ## Hardware-breakpoint stack spoofing
 

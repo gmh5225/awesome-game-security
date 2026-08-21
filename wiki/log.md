@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sizeable-Bingus/BingusLdr`: entity [[bingusldr]] (Sizeable-Bingus; Crystal Palace Win x64 DLL loader; mingw-w64 C; CET-compatible stack spoofing; EAF-compatible API resolution; heap/image masking; Cobalt Strike `.cna` + LinkSpec; PIC DLL wrap; reflective loading / call-stack evasion / endpoint-detection research); cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[nocturneldr]], [[return-address-spoofer]], [[cet-research]], [[windows-process-injection]], and [[scfw]].
+
 - **2026-08-21** — ingest `description:Skarbo/CSGOCrosshair`: entity [[csgocrosshair]] (Skarbo; web CS:GO crosshair generator; JavaScript/jQuery/KineticJS; visual preview, presets, ready-to-paste console config export, keybind setup; player/modding utility; cheat / game:csgo [Crosshair Generator]); cited on [[overviews/game-hacking]]; cross-linked [[master-guide]], [[csgo-sdk]], and [[csgo-internal-base]].
 
 - **2026-08-21** — ingest `description:Skeletal-Group/Bloodhound`: entity [[bloodhound]] (Skeletal-Group; C++ experimental user-mode EPT/NPT hook detection library; vectored exception handling + CPU intrinsics + VPGATHER accessibility probes for hypervisor page-state manipulation; stealthier executable/readable transition checks; anti-cheat / virtualization security research PoC; Various novel EPT/NPT hook detection mechanisms); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[ept-hook-detection]], [[ermsb-meme]], [[hypervisor-detection]], and [[checkhv-um]].
