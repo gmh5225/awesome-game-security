@@ -18,4 +18,4 @@ Read-only defensive tool for assessing Windows kernel-driver exposure and risk o
 
 ## Related
 
-[[byovd]] · [[loldrivers]] · [[ms-vulnerable-driver-list]] · [[hvci]] · [[vulnerable-driver-scanner]] · [[byovdfinder]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[loldrivers]] · [[ms-vulnerable-driver-list]] · [[hvci]] · [[vulnerable-driver-scanner]] · [[vulnerable-driverscanner]] · [[byovdfinder]] · [[loldrivers-client]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

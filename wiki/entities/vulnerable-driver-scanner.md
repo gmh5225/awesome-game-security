@@ -18,4 +18,4 @@ Lightweight C++ command-line scanner that searches directories for vulnerable Wi
 
 ## Related
 
-[[byovd]] · [[loldrivers]] · [[ms-vulnerable-driver-list]] · [[loldrivers-client]] · [[byovdfinder]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[vulnerable-driverscanner]] · [[loldrivers]] · [[ms-vulnerable-driver-list]] · [[loldrivers-client]] · [[byovdfinder]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
