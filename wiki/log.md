@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RixedLabs/IDLE-Abuse`: entity [[idle-abuse]] (RixedLabs; C++ PoC; undocumented `RegisterWaitForInputIdle` idle-state callback injection; shellcode delivery + process manipulation; process-lifecycle abuse detection study); cited on [[overviews/game-hacking]] and [[windows-process-injection]]; cross-linked [[frankenstein-apc-injection]], [[poolparty]], [[dirty-vanity]], and [[kernel-dll-injector]].
+
 - **2026-08-21** — ingest `description:RolfRolles/HexRaysDeob`: entity [[hex-rays-deob]] (RolfRolles; C++ Hex-Rays microcode plugin; pattern-based obfuscated-expression simplification; control-flow unflattening with dispatcher recovery + unreachable-block cleanup; obfuscated game/malware RE; Hex-Rays Microcode); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[d810-ng]], [[ollvm-unflattener]], [[idadeflat]], and [[genmc]].
 
 - **2026-08-21** — ingest `description:RomanRybachek/Copy_RVA`: entity [[copy-rva]] (RomanRybachek; Python IDAPython IDA Pro plugin; context-menu cursor RVA → clipboard; WinDbg breakpoints on unsymbolized drivers; kernel/game-security offset handling); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ioctl-helper]], [[driver-buddy-reloaded]], and [[ida-kmdf]].

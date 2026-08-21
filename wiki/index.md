@@ -1387,6 +1387,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [idasdk-collection](entities/idasdk-collection.md) — archived IDA Pro SDK releases (headers/libs/examples; multi-version plugin dev; cheat / IDA SDK)
 - [idasql](entities/idasql.md) — IDA database SQL virtual tables + AI natural-language RE queries (CLI on `.i64` or in-IDA plugin; remote query; cheat / IDA Plugins)
 - [ida-plugin-pcodegpt](entities/ida-plugin-pcodegpt.md) — ChatGPT IDA PCode assistant (Chinese UI; cheat / IDA Plugins)
+- [IDLE-Abuse](entities/idle-abuse.md) — Windows idle-state injection PoC (`RegisterWaitForInputIdle` callback; shellcode + process manipulation; process-lifecycle abuse detection study; RixedLabs)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [ioctl-helper](entities/ioctl-helper.md) — Qt GUI for custom Windows driver IOCTLs (C++/Qt Widgets; hex editor; multi-handle DeviceIoControl; driver reversing / kernel comm testing; RomanRybachek)
 - [ioctlpus](entities/ioctlpus.md) — Windows DeviceIoControl repeater (C# WinForms + CLI; craft/replay/save/edit IOCTL payloads; driver security research / interface auditing / fuzzing prep; VoidSec)
