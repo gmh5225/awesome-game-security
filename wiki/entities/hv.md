@@ -20,4 +20,4 @@ Useful alongside hacked-hypervisor detection research (e.g. [[vt-debuuger]]) and
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[hvci]] · [[vt-debuuger]] · [[overviews/reverse-engineering]]
+[[hypervisor-from-scratch]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[hvci]] · [[vt-debuuger]] · [[overviews/reverse-engineering]]

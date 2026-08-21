@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SinaKarvandi/Hypervisor-From-Scratch`: entity [[hypervisor-from-scratch]] (SinaKarvandi; tutorial x86 hypervisor; C/C++/asm; progressive VMX setup, VMCS, EPT translation, running-system virtualization; educational hypervisor-based analysis foundation; README [Hypervisor]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hv]], [[hypervisor]], [[ophion]], [[ept-hook-detection]], and [[hypervisor-detection]].
+
 - **2026-08-21** — ingest `description:Sinclairq/DataCommunication`: entity [[data-communication]] (Sinclairq; C++ kernel driver + usermode client; kernel `.data` pointer swap for high-speed KM↔UM messaging and R/W; pattern scan + process-base helpers; stability risks on protected systems; kernel research / AC experimentation; cheat / [NtCompareSigningLevels]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[afd-irp-call-dispatch]], [[data-ptr-swap]], [[kernel-thread-driver]], [[ntmemory]], and [[access]].
 
 - **2026-08-21** — ingest `description:Sinclairq/hiearchy-eac`: entity [[hiearchy-eac]] (Sinclairq; Windows kernel PoC; bypasses EAC self-integrity via call-hierarchy + memory-read manipulation; hooks verification routines toward cleaned image copy; module-load monitoring; EAC driver boundary tracking; stack/register spoofing; Integrity Checks lane); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; replaced mis-slugged [[hierarchy-eac]]; cross-linked [[bypassing-easyanticheat-integrity-check]], [[cveac-2020]], [[kernel-callbacks]], and [[stack-spoofing]].
