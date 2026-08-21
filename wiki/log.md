@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:R3voA3/3den-Enhanced`: entity [[3den-enhanced]] (R3voA3; Arma 3 Eden Editor expansion mod; SQF/config/addon modules; editor UI tools, mission attributes, workflow shortcuts; optional at runtime; Mod Editor / mission-maker tooling); cited on [[overviews/game-engine]]; cross-linked [[automation-examples]] and [[arma3-external-variable-manager]].
+
 - **2026-08-21** — ingest `description:R4YVEN/beservice_intcallbacks`: entity [[beservice-intcallbacks]] (R4YVEN; C++/asm Visual Studio PoC; BattlEye bypass experiment via Instrumentation Callback behavior; callback + symbol-handling techniques; exploratory anti-cheat bypass + Windows internals study; README Instrumentation Callback); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[hooking-via-instrumentation-callback]], [[instrumentation-callback-syscall-logger]], and [[syscall-detect]].
 
 - **2026-08-21** — ingest `description:R4YVEN/raybot-zero`: entity [[raybot-zero]] (R4YVEN; C++ Windows driver + minimal C# loader; kernel-mode CS:GO cheat; triggerbot, bunnyhop, glow, kernel key-state reads; core logic without traditional usermode controller; game offsets + low-level memory routines; cheat development / kernel AC evasion research; README Kernel-mode); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[csgo-full-kernel]], [[kernel-csgo]], [[garhal-csgo]], and [[ec]].
