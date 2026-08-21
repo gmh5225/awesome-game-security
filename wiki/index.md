@@ -695,6 +695,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [docker-win](entities/docker-win.md) — WSL2 networking lab (QEMU/KVM/PVE/VBOX research-host lane)
 - [dbk64-vulnerability-driver](entities/dbk64-vulnerability-driver.md) — Cheat Engine `dbk64.sys` BYOVD PoC (IOCTL → arbitrary kernel R/W; debugging-tool driver; gmh5225)
 - [dolboeb-executor](entities/dolboeb-executor.md) — Capcom.sys BYOVD kernel code executor (IOCTL → shellcode or arbitrary kernel calls; gmh5225)
+- [doom-syscalls](entities/doom-syscalls.md) — Windows x64 indirect syscalls; dynamic SSN + syscall-instruction resolve; return-address spoof via ntdll gadgets; userland hook / RIP-return evasion (SilentisVox)
 - [doomretro](entities/doomretro.md) — DOOM Retro idTech 1 source port (C/SDL2; widescreen/uncapped FPS/lighting/filtering; WAD/DeHackEd/BOOM; Game Engine / source)
 - [gzdoom](entities/gzdoom.md) — GZDoom modder-friendly Doom source port (C/C++; OpenGL/Vulkan; ZScript/mod scripting; GPLv3; Game Engine / source)
 - [uzdoom](entities/uzdoom.md) — UZDoom modern Doom source port (GZDoom continuation; OpenGL/Vulkan; high-res/dynamic lighting/3D floors; CMake cross-platform C/C++; Game Engine / source)

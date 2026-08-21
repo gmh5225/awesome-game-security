@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SilentisVox/DoomSyscalls`: entity [[doom-syscalls]] (SilentisVox; Windows x64 indirect syscalls; runtime ntdll SSN + syscall-instruction resolve; inline-asm invoke; return-address spoof via ntdll gadgets; bypasses user-mode API hooks / RIP-return evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscalls-cpp]], [[inline-syscall]], [[syscall-detect]], [[tabby]], [[tartarus-tp-alloc-inject]], [[callstackspoofer]], and [[stack-spoofing]].
+
 - **2026-08-21** — ingest `description:Silverr12/DMA-CFW-Guide`: entity [[dma-cfw-guide]] (Silverr12; step-by-step [[pcileech-fpga]] v4.15 custom DMA firmware guide for Squirrel/EnigmaX1/ZDMA; Arbor/Telescan PE donor PCI config harvest; SystemVerilog/Vivado IP patch for VID/DID, DSN, BARs, capabilities; TLP emulation, interrupt notes, bitstream build/flash; alternate `.coe`/writemask shadow-config path; anti-cheat evasion threat modeling / PCIe DMA hardware research); cited on [[overviews/dma-attack]] and [[pcileech-fpga]]; cross-linked [[dma-attack-firmware-customization]], [[pcileechgen]], [[pcileech-wifi]], and [[easy-anti-cheat]].
 
 - **2026-08-21** — ingest `description:SinaKarvandi/Hypervisor-From-Scratch`: entity [[hypervisor-from-scratch]] (SinaKarvandi; tutorial x86 hypervisor; C/C++/asm; progressive VMX setup, VMCS, EPT translation, running-system virtualization; educational hypervisor-based analysis foundation; README [Hypervisor]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hv]], [[hypervisor]], [[ophion]], [[ept-hook-detection]], and [[hypervisor-detection]].
