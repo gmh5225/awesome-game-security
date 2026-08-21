@@ -21,7 +21,7 @@ Step-by-step **guide** for customizing [[pcileech-fpga]] bitstreams so a LambdaC
 | Build/flash | Vivado bitstream for Screamer Squirrel 35T |
 | Verify | DMA R/W sanity checks; AC-facing PCIe inventory probes |
 
-Manual NIC-class cloning complements automated donor pipelines such as [[pcileechgen]] and WiFi-class forks ([[pcileech-wifi]], [[pcileech-wifi-v2]]) by documenting hand-edited RTL8111 fingerprints on a specific Artix-7 board. Detection relevance matches other **network-controller class** emulation: config-space integrity, BAR MMIO register layouts, MSI/MSI-X patterns, and driver-loaded behavioral baselines—not just Tier-0/1 placeholder IDs. (source: wiki/sources/descriptions/acageduser__DMA-Attack-Firmware-Customization.md)
+Manual NIC-class cloning complements automated donor pipelines such as [[pcileechgen]] and WiFi-class forks ([[pcileech-wifi]], [[pcileech-wifi-v2]]) by documenting hand-edited RTL8111 fingerprints on a specific Artix-7 board. Broader multi-board hand-edit coverage for **pcileech-fpga v4.15** (Squirrel, EnigmaX1, ZDMA; TLP emulation; `.coe`/writemask shadow config) lives in [[dma-cfw-guide]]. Detection relevance matches other **network-controller class** emulation: config-space integrity, BAR MMIO register layouts, MSI/MSI-X patterns, and driver-loaded behavioral baselines—not just Tier-0/1 placeholder IDs. (source: wiki/sources/descriptions/acageduser__DMA-Attack-Firmware-Customization.md)
 
 ## Links
 
@@ -29,4 +29,4 @@ Manual NIC-class cloning complements automated donor pipelines such as [[pcileec
 
 ## Related
 
-[[pcileech-fpga]] · [[pcileech]] · [[pcileechgen]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma]] · [[iommu]] · [[easy-anti-cheat]] · [[battleye-re]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[pcileech-fpga]] · [[pcileech]] · [[pcileechgen]] · [[dma-cfw-guide]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[dma]] · [[iommu]] · [[easy-anti-cheat]] · [[battleye-re]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]

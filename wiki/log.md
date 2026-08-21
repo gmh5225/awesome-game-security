@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Silverr12/DMA-CFW-Guide`: entity [[dma-cfw-guide]] (Silverr12; step-by-step [[pcileech-fpga]] v4.15 custom DMA firmware guide for Squirrel/EnigmaX1/ZDMA; Arbor/Telescan PE donor PCI config harvest; SystemVerilog/Vivado IP patch for VID/DID, DSN, BARs, capabilities; TLP emulation, interrupt notes, bitstream build/flash; alternate `.coe`/writemask shadow-config path; anti-cheat evasion threat modeling / PCIe DMA hardware research); cited on [[overviews/dma-attack]] and [[pcileech-fpga]]; cross-linked [[dma-attack-firmware-customization]], [[pcileechgen]], [[pcileech-wifi]], and [[easy-anti-cheat]].
+
 - **2026-08-21** — ingest `description:SinaKarvandi/Hypervisor-From-Scratch`: entity [[hypervisor-from-scratch]] (SinaKarvandi; tutorial x86 hypervisor; C/C++/asm; progressive VMX setup, VMCS, EPT translation, running-system virtualization; educational hypervisor-based analysis foundation; README [Hypervisor]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hv]], [[hypervisor]], [[ophion]], [[ept-hook-detection]], and [[hypervisor-detection]].
 
 - **2026-08-21** — ingest `description:Sinclairq/DataCommunication`: entity [[data-communication]] (Sinclairq; C++ kernel driver + usermode client; kernel `.data` pointer swap for high-speed KM↔UM messaging and R/W; pattern scan + process-base helpers; stability risks on protected systems; kernel research / AC experimentation; cheat / [NtCompareSigningLevels]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[afd-irp-call-dispatch]], [[data-ptr-swap]], [[kernel-thread-driver]], [[ntmemory]], and [[access]].

@@ -682,6 +682,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DDMA-1](entities/ddma-1.md) — disk-based DMA cheat framework (ATA/SCSI PCIe camouflage; zero target-OS footprint; gmh5225; cheat / DMA)
 - [DMACheatEngineLoader](entities/dma-cheat-engine-loader.md) — Cheat Engine DMA loader (copy CE → DMACE; closed-source)
 - [DMA Attack Firmware Customization](entities/dma-attack-firmware-customization.md) — Screamer Squirrel 35T [[pcileech-fpga]] RTL8111 NIC disguise guide (MindShare Arbor donor harvest; Vivado patch; BattlEye/EAC evasion testing; acageduser)
+- [DMA CFW Guide](entities/dma-cfw-guide.md) — [[pcileech-fpga]] v4.15 custom firmware guide for Squirrel/EnigmaX1/ZDMA (Arbor/Telescan PE donor harvest; Vivado IP patch; TLP emulation; `.coe`/writemask shadow config; Silverr12)
 - [dma-cheat-base](entities/dma-cheat-base.md) — DMA cheat base scaffold (C/C++; rendering, animation, SDK generation; cheat / DMA)
 - [DMALib](entities/dmalib.md) — lightweight C++ DMA helper library (LeechCore/MemProcFS; process lookup, R/W, pattern scan, scatter reads; Spuckwaffel; cheat / DMA library)
 - [DMAInvoker](entities/dma-invoker.md) — Windows DMA RPM via DMALibrary (cheat / RPM)
