@@ -1754,6 +1754,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gui-plugin-template](entities/gui-plugin-template.md) — Python cross-disassembler GUI plugin template (PyQt/PySide; IDA/Ghidra/Binary Ninja/Cutter; harmonized API; danielplohmann)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
 - [MobileRE-Skill](entities/mobile-re-skill.md) — AI-agent mobile RE skill set (layered Frida hooks; six-phase anti-detection pipeline; JADX/Ghidra)
+- [meowna_detector](entities/meowna-detector.md) — Android NDK PoC detector for meowna-class root-hide modules (missing logd socket + package-trace indicators; Rem01Gaming; Detection:Android root)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
 - [MQTT.js](entities/mqtt-js.md) — Node.js/browser MQTT client (v3.1/3.1.1/v5; TCP/TLS/WS/WSS; Game Network / mqtt nodejs)
 - [Paho MQTT C++](entities/paho-mqtt-cpp.md) — Eclipse C++ MQTT client (v3.1/3.1.1/v5; QoS 0–2; TLS; RAII; Game Network / mqtt cpp)
