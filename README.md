@@ -897,6 +897,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
+- https://github.com/mrexodia/ida-nexus-docker [Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus — runs ordered analysis prompts in isolation and exports audit trails]
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/smallworld-re/smallworld [Environment for streamlined binary harnessing for dynamic analysis]
 - https://github.com/BataBo/ACEPatcher [.NET Patcher]
