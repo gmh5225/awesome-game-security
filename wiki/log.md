@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sentient111/KernelDrawing`: entity [[kernel-drawing]] (Sentient111; C++ WDK PoC; Ring0 GDI draw without traditional hooks—spoofed thread context satisfies internal checks; version-dependent NT offsets and loading notes; low-level graphics and AC evasion research; README Drawing from kernelmode without any hooks); cited on [[overviews/graphics-api]] and [[overviews/windows-kernel]]; cross-linked [[krnl-gdi-render]], [[kernel-cheat-for-directx3d]], [[kernel-dwm]], and [[dxgkrnl-hook]].
+
 - **2026-08-21** — ingest `description:Sentient111/StealingSignatures`: entity [[stealing-signatures]] (Sentient111; C++ utility; PE header parse + Authenticode security-directory `WIN_CERTIFICATE` blob copy onto another executable; transplanted cert metadata without valid trusted signature—verifier/tampering/trust-pipeline edge-case testing; README Stealing signatures from pe files); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[sigthief]], [[signature-kid]], [[sigflip]], [[pesign-analyzer]], and [[pedigest]].
 
 - **2026-08-21** — ingest `description:Sentient111/VulnerableDriverScanner`: entity [[vulnerable-driverscanner]] (Sentient111; C++ console; folder scan for potentially risky kernel drivers; PE import parsing flags indicative driver-related APIs; simple static triage—not full behavioral analysis; preliminary vulnerable-driver hunting and kernel attack-surface assessment; README Scans for vulnerable drivers); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[vulnerable-driver-scanner]], [[driver-risk-scout]], [[loldrivers]], and [[ms-vulnerable-driver-list]].
