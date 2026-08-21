@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rprop/And64InlineHook`: entity [[and64-inline-hook]] (Rprop; lightweight C++ Android ARM64 inline hooking library; instruction patch + AArch64 branch relocation + trampolines; executable-memory changes + I-cache flush; mobile RE / instrumentation / game-security experimentation; Android ARMv8 inline hook framework); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[adbi]], [[dobby]], [[pyasm-patch]], [[farm64]], and [[china-pubg]].
+
 - **2026-08-21** — ingest `description:RuqoomTech/Pyramid-Engine`: entity [[pyramid-engine]] (RuqoomTech; pre-alpha C++17 Win32/OpenGL game engine; forward/deferred passes, shadow mapping, octree frustum culling, ECS serialization, modular math/input/asset/UI libs; CMake MSYS2 MinGW-w64; RTS vertical slice focus; tests + CI; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[exengine]], [[joshoengine-native]], and [[gltut]].
 
 - **2026-08-21** — ingest `description:RussellJerome/UnrealModLoader`: entity [[unreal-mod-loader]] (RussellJerome; UE4 mod loading framework; Blueprint + basic SDK-based C++ mods; native hooking + event callbacks; MinHook + ImGui lifecycle hooks; injector + proxy DLL bootstrap; Mod Loader / runtime extension + game instrumentation); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[re-ue4ss]], [[ue4-base]], [[ue4-injector]], and [[unreal-object-model]].
