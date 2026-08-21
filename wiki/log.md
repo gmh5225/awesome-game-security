@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Schnocker/EAC_dbp`: entity [[eac-dbp]] (Schnocker; Windows EAC debug/bypass PoC; kernel driver + user-mode module; callback/minifilter/control-path interference + user-layer API interception; Visual Studio/WDK; controlled RE and security testing; Debug lane); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[noeye]], [[kernel-callbacks]], [[memfilter-fn-driver]], [[eac-bypass]], and [[hiearchy-eac]].
+
 - **2026-08-21** — ingest `description:Schnocker/NoEye`: entity [[noeye]] (Schnocker; BattlEye bypass toolkit; C++ service/runtime + C# setup; service installation, process interaction, runtime control; historical BE bypass reference); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[fakeeye]], [[bedaisy-bypass]], and [[battleye-handler-bypass]].
 
 - **2026-08-21** — ingest `description:ScottyBauer/Android_Kernel_CVE_POCs`: entity [[android-kernel-cve-pocs]] (ScottyBauer; C PoC collection for known Android kernel CVEs; crafted ioctl, race conditions, vendor/Wi-Fi driver memory manipulation; reproduce bugs, validate mitigations, study exploit primitives; cheat / List); cited on [[overviews/mobile-security]]; cross-linked [[android-vuln-poc-exp]], [[android-kernel-exploitation]], [[android-vuln]], [[dirtypipe-android]], and [[cve-2019-2215]].

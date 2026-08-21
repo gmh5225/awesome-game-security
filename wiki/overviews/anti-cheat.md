@@ -100,6 +100,7 @@ sources:
   - wiki/sources/descriptions/kila58__qemu-patched.md
   - wiki/sources/descriptions/batusan__Hardened-qemu.md
   - wiki/sources/descriptions/Schnocker__NoEye.md
+  - wiki/sources/descriptions/Schnocker__EAC_dbp.md
   - wiki/sources/descriptions/Scrut1ny__Hypervisor-Phantom.md
   - wiki/sources/descriptions/SilentisVox__DoomSyscalls.md
   - wiki/sources/descriptions/SilentVoid13__Silent_Packer.md
@@ -708,6 +709,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[eac-vmcheck-asm]] — recovered `easyanticheat.sys` VM-detection assembly (`CheckVM` → `ExecVMREAD`; VMREAD probe; VM-found / VM-not-found branches) from driver `vm` directory for offline virtualization-check RE (Virtual machine checking lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-VmCheck.asm.md)
 - [[eac-easyanticheatmemorysig]] — documented EAC in-memory byte-pattern corpus for known cheat frameworks, injectors, and hack modules (Memory sig maker lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheatMemorySig.md)
 - [[eac-bypass]] — offensive EAC bypass research (C++; kernel driver + shader work; cheat / explore anticheat:eac) (source: wiki/sources/descriptions/ksoju__Eac-Bypass.md)
+- [[eac-dbp]] — EAC debug/bypass PoC; kernel driver + user-mode module; callback/minifilter/control-path interference + user-layer API interception; Visual Studio/WDK; controlled RE and security testing of EAC-protected processes (Debug lane; Schnocker) (source: wiki/sources/descriptions/Schnocker__EAC_dbp.md)
 - [[eac-kernel-packet-fucker]] — kernel-mode EAC telemetry suppression; hijacks dynamically imported `ExAllocatePoolWithTag` via writable section pointer so ~33 KB violation reports fail allocation and never reach backend servers (Packet suppression lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-Kernel-Packet-Fucker.md)
 - [[eac-hydrahook]] — Hydra KM↔UM channel hooking framework; intercepts and suppresses EAC detection reports on the Hydra protocol before backend upload (Packet suppression lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-HydraHook.md)
 - [[eac-driver-ud-for-now]] — kernel driver framed to evade EAC driver scanning; cross-process memory R/W via stealth KM↔UM channel avoiding known kernel-cheat detection vectors (Offensive driver UD lane; gmh5225 [Sample]) (source: wiki/sources/descriptions/gmh5225__EAC-Driver-UD-for-now.md)
