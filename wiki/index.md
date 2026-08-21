@@ -819,6 +819,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-bypass](entities/eac-bypass.md) — offensive EAC bypass research (C++; kernel driver + shader work)
 - [eac-bypass-1](entities/eac-bypass-1.md) — EAC bypass via `NtMapVisualRelativePoints` KM↔UM channel (C++; driver communication; gmh5225)
 - [eac-cr3-bypass](entities/eac-cr3-bypass.md) — UM+KM EAC CR3 bypass teaching sample (C/C++; driver dev)
+- [eac-cr3-shuffle](entities/eac-cr3-shuffle.md) — compact EAC CR3 shuffle research sample; paging walk + VA→PA checks (SamuelTulach; Bypassing CR3 protection)
 - [eac-dbp](entities/eac-dbp.md) — EAC debug/bypass PoC; kernel driver + UM module; callback/minifilter/control-path interference + API interception; Visual Studio/WDK; controlled RE/security testing (Debug; Schnocker)
 - [eac-driver-ud-for-now](entities/eac-driver-ud-for-now.md) — EAC driver-scan evasion sample; stealth KM↔UM memory R/W channel (gmh5225; [Sample])
 - [EAC-EasyAntiCheatMemorySig](entities/eac-easyanticheatmemorysig.md) — documented EAC in-memory byte-pattern corpus for cheat frameworks, injectors, and hack modules (Memory sig maker; gmh5225)
