@@ -497,6 +497,7 @@ sources:
   - wiki/sources/descriptions/synctop__tpm-mmio.md
   - wiki/sources/descriptions/s0ngidong3__TPM-SPOOFER.md
   - wiki/sources/descriptions/SamuelTulach__tpm-spoofer.md
+  - wiki/sources/descriptions/SamuelTulach__meme-rw.md
   - wiki/sources/descriptions/illegal-instruction-co__CountHook.md
   - wiki/sources/descriptions/svespalec__faultline.md
   - wiki/sources/descriptions/nelfo__PGHooker.md
@@ -777,6 +778,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[pandora]] — file-suspicion analysis framework with convenient result UI (Analysis Framework; Ubuntu 24.04 recommended) (source: wiki/sources/descriptions/pandora-analysis__pandora.md)
 - [[kiroshi]] — IDA Pro plugin to detect common Anti-Cheat artifacts (RE/academic; cheat / IDA Plugins) (source: wiki/sources/descriptions/not1cyyy__Kiroshi.md)
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
+- [[meme-rw]] — C++/CMake protected-process memory access PoC; vulnerable-driver mapping framework with driver-load helpers, process/module utilities, and memory R/W control; end-to-end target-process open + memory ops for anti-cheat bypass experimentation and defensive protected-memory research (SamuelTulach; cheat / kdmapper) (source: wiki/sources/descriptions/SamuelTulach__meme-rw.md)
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
 - [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)

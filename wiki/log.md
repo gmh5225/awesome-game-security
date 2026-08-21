@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/meme-rw`: entity [[meme-rw]] (SamuelTulach; C++/CMake protected-process memory R/W PoC; vulnerable-driver mapping; driver-load helpers + process/module utils + memory R/W control; end-to-end target open + memory ops; anti-cheat bypass experimentation / defensive protected-memory research; cheat / [kdmapper]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper]], [[ntmemory]], [[driver-read-write]], and [[readwrite-kernel-stable]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/mutante`: entity [[mutante]] (SamuelTulach; C/C++ WDK kernel HWID spoofer; disk serial / SMART / SMBIOS; hook-minimal driver; archival SMBIOS/storage identifier research; cheat / [HWID]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[negativespoofer]], [[skotschia-hwid-spoofer]], [[hdd-serial-spoofer]], and [[easy-hwid-spoofer]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/negativespoofer`: entity [[negativespoofer]] (SamuelTulach; boot-time Clover-style SMBIOS firmware-table spoof; C/EFI build guidance; pre-OS hardware identity / anti-cheat HWID research; cheat / [HWID]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[rainbow]], [[rainbow-efi]], [[spoofer-amidewin]], and [[hwid-checker-mg]].
