@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Serious-Engine/Base`: entity [[serious-engine-base]] (Croteam; open-source Serious Engine core for classic Serious Sam; C/C++; rendering, brush/world editing, entities, networking, math, audio, scripting; Visual Studio projects; Ogg/Vorbis; engine programmers / reverse engineers / modders; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[storm-engine]], [[doomretro]], [[gzdoom]], [[overgrowth]], and [[torque3d]].
+
 - **2026-08-21** — ingest `description:SeriousCache/UABE`: entity [[uabe]] (SeriousCache; C++ Win32 Unity `.assets`/AssetBundle editor; CMake; plugin architecture for textures/text/audio/meshes/raw data import/export to PNG/WAV/OBJ/DAE; multi-engine-version; modding/asset inspection/content research; Extracting assets); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unityexplorer]], [[unity-game-hacking]], [[unturned-godot]], [[awesome-game-file-format-reversing]], [[paksmith]], and [[uassetgui]].
 
 - **2026-08-21** — ingest `description:ServenScorpion/VirtualApp`: entity [[virtual-app]] (ServenScorpion; Android application virtualization framework; cloned apps in isolated container; Java/XML + native C/C++ hooks; Xposed compatibility + SandHook instrumentation; virtual package/process/component management; mobile RE / behavior analysis / multi-instance sandbox); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-virtual-inject]], [[xposed-module-kit]], [[canyie-pine]], and [[frida]].

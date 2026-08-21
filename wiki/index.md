@@ -2307,6 +2307,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
 - [Sensum](entities/sensum.md) — internal CS:GO cheat (actively developed; cheat / game:csgo)
 - [Serenity.gg-FN-and-Loader](entities/serenity-gg-fn-and-loader.md) — Fortnite: kernel driver + shader work + module loader (C/C++; cheat / game:fortnite; gmh5225)
+- [Serious Engine Base](entities/serious-engine-base.md) — open-source Croteam Serious Engine core (Serious Sam; C/C++; render/world/entities/network/audio/scripting; VS + Ogg/Vorbis; Game Engine / source)
 - [shibari](entities/shibari.md) — C++/C PE/PE+ multi-file linker (merge into one; modding; Anti Cheat → Binary Packer)
 - [shader-injector](entities/shader-injector.md) — D3D12 pixel-shader runtime inject/replace for FF7 Rebirth PC (MinHook + ImGui live edit; DX12 interceptor adaptable to other titles; DirectX / hook)
 - [Shadow](entities/shadow.md) — iOS jailbreak detection bypass for modern jailbreaks (cheat / iOS jailbreak; per-app success not guaranteed)
