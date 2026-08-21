@@ -1634,6 +1634,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
 - [lumixengine_maps](entities/lumixengine-maps.md) — Lumix OSM map downloader (roads/buildings; Plugins:Lumix)
 - [Lumos](entities/lumos.md) — open-source C++ 2D/3D engine (Vulkan/OpenGL PBR; ECS; Dear ImGui editor; Game Engine / source)
+- [Lucky Spark](entities/lucky-spark.md) — Windows stealthy shellcode loader (fiber execution, JIT decryption, WinHTTP staging, PEB-walk API resolve; Sliver-like; Schich)
 - [lsass-dump-that-lsass](entities/lsass-dump-that-lsass.md) — user-mode LSASS dump via handle theft + unhooked DbgHelp MiniDumpWriteDump (gmh5225; Elevating Handle)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [LUDA](entities/luda.md) — Lua IDA Pro scripting plugin (direct SDK access; cheat / IDA Plugins)
