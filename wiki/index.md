@@ -2365,6 +2365,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Splitgate-Internal](entities/splitgate-internal.md) — Splitgate internal (C/C++; cheat / game:splitgate)
 - [SubGetVariable (ekknod)](entities/sub-get-variable.md) — EFI GetVariable RPM (C/C++; kernel-level driver development / graphics; cheat / EFI RPM)
 - [subhook](entities/subhook.md) — super-simple C/C++ inline hook lib (Win/Linux/macOS; x86 32/64; cheat / hook research)
+- [subzero-fortnite-cheat](entities/subzero-fortnite-cheat.md) — SubZero Fortnite external cheat (Saxmason; C++ VS; kernel-driver RPM; DX9 ImGui overlay; mesh visibility aimbot; NtUserSendInput + stack/library spoofing + XOR obfuscation; cheat / game:fortnite [External])
 - [Solemn](entities/solemn.md) — HVCI HvciDisallowedImages blocklist CLI (Windows Security Features)
 - [source-engine](entities/source-engine.md) — open TF2-era Source Engine tree (CI / cross-platform; Game Engine / source)
 - [source-engine-2003](entities/source-engine-2003.md) — early HL2-era Source engine archival snapshot (2003 tree; material/graphics, game DLL logic, legacy VS toolchains; Game Engine / source; UTINKA)
