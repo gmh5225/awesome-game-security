@@ -1423,6 +1423,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [image-cockpit-for-codex-workflows](entities/image-cockpit-for-codex-workflows.md) — local Codex imagegen cockpit (pixel art, region edit, animation frames/sprite sheets; codex-handoff inbox/outbox; Game Develop / AI Agents)
 - [ImHex](entities/imhex.md) — C++ cross-platform hex editor / binary analysis platform (pattern-language parsing, disassembly, diff/hash, plugins; firmware/file/memory/game binary RE)
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
+- [ImGUI Advanced Cheat Menu](entities/imgui-advanced-cheat-menu.md) — Windows ImGui cheat-menu framework (C++ SFML; ESP/aim/recoil/HUD modules; hotkey panels; custom widgets + in-memory fonts; starter template; RequestFX; README `[Imgui Menu]`)
 - [ImGui Standalone](entities/imgui-standalone.md) — D3D11 external ImGui framework (EXE/DLL; own render window; VS x86/x64; game tooling / menu prototyping; adamhlt)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
