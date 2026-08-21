@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Scrut1ny/Windows-Spoofer`: entity [[windows-spoofer]] (Scrut1ny; open-source Win10/11 spoofing + cleanup toolkit; Batch + PowerShell modules; system identifiers + network values + trace artifact cleanup; external utilities for volume ID / SMBIOS; platform support notes; anti-cheat fingerprinting research in controlled labs; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[spoofer-amidewin]], [[hdd-serial-spoofer]], [[skotschia-hwid-spoofer]], [[windows-hardware-info]], [[hwid-checker-mg]], and [[alibi]].
+
 - **2026-08-21** — ingest `description:SeanPesce/Direct3D9-Overlay`: entity [[direct3d9-overlay]] (SeanPesce; C++ D3D9 wrapper/proxy DLL + Detours-style intercept; built-in overlay with on-screen console, text feed, plugin interface for external modules; single-player modding / UI instrumentation / graphics overlay development); cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; cross-linked [[hydrahook]], [[gameplug]], [[direct3d-hook]], and [[universal-dear-imgui-hook]].
 
 - **2026-08-21** — ingest `description:SecondNewtonLaw/DriverBase`: entity [[driver-base]] (SecondNewtonLaw; C++ KMDF starter template; CMake + FindWDK; driver entry scaffolding, optional compile-time obfuscation via bundled obfusheader.h; simplifies WDK toolchain across Windows targets; security researchers / low-level driver prototyping baseline; README obfusheader.h for windows driver); cited on [[overviews/windows-kernel]]; cross-linked [[windows-kernel-rs]], [[kli]], [[kernelcloak]], and [[obfusheader-h]].

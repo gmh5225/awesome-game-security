@@ -2766,6 +2766,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-10-22h2-vulnerable-driver-communication](entities/windows-10-22h2-vulnerable-driver-communication.md) — ASUS `asromgdrv.sys` BYOVD IOCTL wrapper (contiguous kernel pool + CR R/W; Win10 22H2 / Win11; gmh5225)
 - [windows-desktop-duplication-sample](entities/windows-desktop-duplication-sample.md) — DXGI Output Duplication desktop capture sample (C++; cursor + dirty/moved regions; `[DXGI]`)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
+- [Windows-Spoofer](entities/windows-spoofer.md) — open-source Win10/11 spoofing + cleanup toolkit (Batch/PowerShell; system IDs, network values, trace cleanup; volume ID / SMBIOS via external utilities; anti-cheat fingerprinting research; Scrut1ny; cheat / HWID)
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)
 - [windows-kernel-debugging-guide](entities/windows-kernel-debugging-guide.md) — remote Windows kernel debugging guide (cheat / guide)
