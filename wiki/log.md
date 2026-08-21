@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RageProject/5.4.7-Wow-source`: entity [[5-4-7-wow-source]] (RageProject; customized WoW MoP **5.4.7** TrinityCore-style private-server source; C/C++/CMake; auth/world servers; gameplay fixes / class+t talent support / level-90 stability; database + tooling; cheat / game:wow); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[trinitycore]], [[mopcore547]], [[legioncore-7-3-5]], [[azerothcore-wotlk]], and [[awesome-wow-rust]].
+
 - **2026-08-21** — ingest `description:Raival-e/File-Explorer`: entity [[raival-file-explorer]] (Raival-e; lightweight Kotlin/Java Material 3 Android file manager; core file ops, multi-tab navigation, task handling, integrated code editor, deep content search; standard Gradle project baseline for extension/study; Cheat Android File Explorer; slug disambiguated from [[file-explorer]]); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[file-explorer]], [[xfiles]], [[adb-file-manager]], [[termux-app]], [[apktool]], and [[jadx]].
 
 - **2026-08-21** — ingest `description:Rakeshmonkee/DMA`: entity [[entities/dma]] (Rakeshmonkee; practical PCIe DMA FPGA firmware guide and toolkit; Vivado customization; Python/Tcl auto-generation scripts; config-space cloning; bitstream flash workflows; game-security research on DMA hardware behavior and anti-cheat evasion testing; cheat / Guide); cited on [[overviews/dma-attack]]; cross-linked [[dma-cfw-guide]], [[dma-attack-firmware-customization]], [[pcileech-fpga]], [[pcileechgen]], and [[concepts/dma]].

@@ -12,7 +12,7 @@ confidence: medium
 
 Comprehensive open-source **MMORPG framework** implementing a complete **World of Warcraft** server emulator. The C++ codebase features modular authentication and world servers, asynchronous database pooling with prepared statements, extensive scripting APIs for custom content, and support for multiple WoW expansions including combat, quests, achievements, and battleground systems. Aimed at game server researchers and MMORPG reverse engineers studying large-scale game server architecture and protocol emulation—not a live-service cheat client. (source: wiki/sources/descriptions/TrinityCore__TrinityCore.md)
 
-Upstream framework for WoW private-server forks such as [[legioncore-7-3-5]] and TrinityCore-style database interop in stacks such as [[azerust]]. Sits in the README **Private Server** / `[wow]` lane beside [[azerothcore-wotlk]] and complements WoW client-side research samples such as [[dumpwow]], [[wow-iat-fix]], [[ohack]], and [[x14-08-coverstory-blizzard]].
+Upstream framework for WoW private-server forks such as [[legioncore-7-3-5]], MoP **5.4.7** customized trees such as [[5-4-7-wow-source]], and TrinityCore-style database interop in stacks such as [[azerust]]. Sits in the README **Private Server** / `[wow]` lane beside [[azerothcore-wotlk]] and [[mopcore547]], and complements WoW client-side research samples such as [[dumpwow]], [[wow-iat-fix]], [[ohack]], and [[x14-08-coverstory-blizzard]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Upstream framework for WoW private-server forks such as [[legioncore-7-3-5]] and
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[azerothcore-wotlk]] · [[legioncore-7-3-5]] · [[azerust]] · [[awesome-wow-rust]] · [[dumpwow]] · [[x14-08-coverstory-blizzard]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[azerothcore-wotlk]] · [[legioncore-7-3-5]] · [[5-4-7-wow-source]] · [[mopcore547]] · [[azerust]] · [[awesome-wow-rust]] · [[dumpwow]] · [[x14-08-coverstory-blizzard]]

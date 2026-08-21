@@ -1673,6 +1673,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AzerothCore WoTLK](entities/azerothcore-wotlk.md) — WoW WotLK private-server emulator (3.3.5a client; world simulation / player management / NPC AI / Eluna Lua / database-driven content / network protocol; cheat / game:wow)
 - [Azerust](entities/azerust.md) — experimental Rust WoW 3.3.5 server emulator (auth server; TrinityCore-style DB; async Rust; SQL + containers; cheat / game:wow)
 - [LegionCore 7.3.5](entities/legioncore-7-3-5.md) — WoW Legion private-server emulator (TrinityCore fork; 7.3.5 client; world simulation / dungeons / artifact weapons / class halls / world quests; cheat / game:wow)
+- [5.4.7 WoW Source](entities/5-4-7-wow-source.md) — WoW MoP private-server source (RageProject; TrinityCore-style 5.4.7 fork; C/C++/CMake; auth/world servers; gameplay fixes / class+t talent support / level-90 stability; database + tooling; cheat / game:wow)
 - [MopCore547](entities/mopcore547.md) — WoW MoP private-server emulator (SkyFire; 5.4.7 client; C++/CMake; world simulation / player management / NPC scripting / network protocol; cheat / game:wow)
 - [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
