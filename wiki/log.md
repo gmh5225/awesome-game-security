@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SV-Foster/UnSign`: entity [[unsign]] (SV-Foster; C CLI; 32/64-bit builds; strips Authenticode signatures from PE/COFF EXE/DLL/SYS; PE header edge-case handling for re-signing; RE / malware analysis / security testing); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[sigthief]], [[stealing-signatures]], [[signature-kid]], [[sigflip]], [[pesign-analyzer]], and [[pedigest]].
+
 - **2026-08-21** — ingest `description:SaadAhla/Anti-Sandbox`: entity [[anti-sandbox]] (SaadAhla; Windows C++ PoC; Any.Run-style sandbox detection via folder/process/user-profile/service-driver host artifact checks; layered multi-indicator scoring; malware-analysis / sandbox-evasion research; Detecting AnyRun sandbox); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[anticuckoo]], [[vmaware]], and [[hypervisor-detection]].
 
 - **2026-08-21** — ingest `description:willy92wins/dayz-mcp`: entity [[dayz-mcp]] (willy92wins; Python MCP + Enforce Script bridge; 53 server-authoritative tools for mod pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; Game Develop / MCP); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[dayzzz]], [[dayz-cheat]], and [[external-dayz-cheat]].

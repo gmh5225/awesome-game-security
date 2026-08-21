@@ -2632,6 +2632,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)
 - [unkover](entities/unkover.md) — hidden kernel-thread/rootkit scanner (scheduler/PspCidTable/stack cross-ref; NMI/APC mapped-driver detection; eversinc33)
 - [unmapper](entities/unmapper.md) — automatic dumped-PE header repair for decompilers (Dump Fix)
+- [UnSign](entities/unsign.md) — CLI Authenticode signature removal from PE/COFF (EXE/DLL/SYS; C; 32/64-bit; re-signing / RE / malware analysis; SV-Foster)
 - [unlicense](entities/unlicense.md) — Python 3 Frida dynamic unpacker for Themida/WinLicense 2.x/3.x (OEP + IAT rebuild; native PE + .NET; Fix Themida)
 - [Unpacker](entities/unpacker.md) — modular Python PE/ELF packer detection + unpack pipeline (UPX, ASPack, Themida, VMProtect; Unicorn/Qiling emulation; Fix VMP / Unpacker)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
