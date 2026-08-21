@@ -2839,6 +2839,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xnu-qemu-arm64](entities/xnu-qemu-arm64.md) — QEMU ARM64 fork booting functional iOS/XNU (launchd, bash, SSH; kernel exploit lab; `[xnu]`)
 - [xnuspy](entities/xnuspy.md) — iOS XNU kernel function hooking for checkra1n A8–A11 devices (no 4K; cheat / iOS memory explorer)
 - [xor-float](entities/xor-float.md) — C++ XOR float/value encrypt (Anti Cheat → Encrypt Variable)
+- [XorData](entities/xordata.md) — C++17 XOR obfuscation framework (constants, variables, strings; compile-time + runtime-style transforms; AC Compile Time / Obfuscation Engine; Sherman0236)
 - [xorlit](entities/xorlit.md) — string crypter (single-arg default key `xorlit::seed`; AC Compile Time / String Crypter)
 - [xorPacker](entities/xorpacker.md) — C# PE XOR cipher packer (all PE; Anti Cheat → Binary Packer)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
