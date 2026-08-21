@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Siesta/MCORE-Decompiler`: entity [[mcore-decompiler]] (Siesta; C++17 IDA Pro 9.4 plugin; lifts MCORE disasm to custom IR → optimization, control-flow structuring, stack-frame recovery, call-arg analysis → F5-bound C pseudocode; no Hex-Rays M·CORE backend; embedded firmware + feature-phone binaries such as Motorola E1000; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]]; cross-linked [[list-of-ida-plugins]], [[firmeye]], [[embedded-hacking]], and [[ida-security-scanner]].
+
 - **2026-08-21** — ingest `description:SilentVoid13/Silent_Packer`: entity [[silent-packer]] (SilentVoid13; pure C ELF/PE packer; section insertion, code caves, text-section infection; XOR/AES encryption; low-level loader + asm runtime unpack; RE practice / obfuscation experiments / defensive packed-binary research; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[exe-packer]], [[hxor-packer]], [[awesome-executable-packing]], and [[unpacker]].
 
 - **2026-08-21** — ingest `description:SilentisVox/DoomSyscalls`: entity [[doom-syscalls]] (SilentisVox; Windows x64 indirect syscalls; runtime ntdll SSN + syscall-instruction resolve; inline-asm invoke; return-address spoof via ntdll gadgets; bypasses user-mode API hooks / RIP-return evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscalls-cpp]], [[inline-syscall]], [[syscall-detect]], [[tabby]], [[tartarus-tp-alloc-inject]], [[callstackspoofer]], and [[stack-spoofing]].
