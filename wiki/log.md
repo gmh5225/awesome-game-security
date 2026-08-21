@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:S12cybersecurity/FrankensteinAPCInjection`: entity [[frankenstein-apc-injection]] (S12cybersecurity; C++ Windows low-footprint injection PoC; leaked process/thread handles + pre-existing RWX + NtQueueApcThreadEx2; avoids VirtualAllocEx/VirtualProtectEx/CreateRemoteThread; optional shellcode encryption; EDR/anti-cheat visibility testing; injection:windows); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[rwxfinder]], [[windows-process-injection]], [[apc-research]], [[poolparty]], and [[injectors]].
+
 - **2026-08-21** — ingest `description:S12cybersecurity/RWXFinder`: entity [[rwxfinder]] (S12cybersecurity; Windows VirtualQueryEx process memory scan; size-filtered RWX pages for code-injection staging; cheat / injection:windows); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[ghost]], and [[injectors]].
 
 - **2026-08-21** — ingest `description:SDXT/MMInject`: entity [[mminject]] (SDXT; C kernel DLL injector; NX-bit swapping + VAD hide; writable alloc + page-table execute; dynamic kernel data / I/O / loader; stealthy kernel-assisted injection; cheat / Using NX Bit Swapping and VAD hide); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-vad-injector]], [[stealthy-kernelmode-injector]], [[page-table-injector]], and [[kernel-dll-injector]].

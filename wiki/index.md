@@ -996,6 +996,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlavorTown](entities/flavortown.md) — multi-language shellcode execution techniques (C/C#/MATLAB; process/memory execution paths; evasion tradecraft; Wra7h; Shellcode Engine & Tricks)
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
 - [frank](entities/frank.md) — JavaScript LoL assistant / WeGame replacement (rendering, animation, asset pipelines; gmh5225; cheat / game:lol)
+- [FrankensteinAPCInjection](entities/frankenstein-apc-injection.md) — low-footprint Windows APC injection PoC (leaked handles + natural RWX + NtQueueApcThreadEx2; avoids VirtualAllocEx/CreateRemoteThread; S12cybersecurity; injection:windows)
 - [frinja](entities/frinja.md) — Binary Ninja Frida plugin (BinRida continuation; static+dynamic RE bridge; dzervas; cheat / Binary Ninja plugins)
 - [frinet](entities/frinet.md) — IDA Pro plugin: Frida dynamic instrumentation ↔ static analysis sync (memory/args/returns; cheat / Frida-based tracer)
 - [flare-vm](entities/flare-vm.md) — Mandiant Windows analysis VM (Chocolatey/Boxstarter; malware/IR/RE lab provisioning)

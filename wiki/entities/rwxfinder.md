@@ -14,7 +14,7 @@ Windows utility that scans a **target process** for **RWX (Read-Write-Execute)**
 
 README lane: find Windows RWX memory regions in a target process by size via VirtualQueryEx.
 
-Complements injection tradecraft collections such as [[windows-process-injection]] and defensive RWX scanners such as [[ghost]] and [[rasd]].
+Complements injection tradecraft collections such as [[windows-process-injection]] and defensive RWX scanners such as [[ghost]] and [[rasd]]. Sibling low-footprint injector [[frankenstein-apc-injection]] reuses discovered RWX regions with `NtQueueApcThreadEx2` APC delivery.
 
 ## Links
 
