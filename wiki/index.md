@@ -262,6 +262,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
 - [AntiFrida Bypass](entities/anti-frida-bypass.md) — Frida JS scripts to bypass common anti-Frida checks (libc/procfs hooks; multiple variants; apkunpacker)
 - [AntiGuard](entities/antiguard.md) — Paper/Purpur Minecraft AC plugin (Java; fly/speed/reach/kill aura/auto-click/no-swing/no-fall/fast-break; SQLite/LuckPerms storage; web dashboard + REST API; TheMille-Dev; Anti Cheat / game:minecraft)
+- [AntiXrayViewer](entities/antixrayviewer.md) — Paper Minecraft X-ray investigation plugin (Java 21 Gradle; ore-breaking pattern alerts; ~3-minute session capture + first-person replay; admin review commands; RiseShieldDev; Anti Cheat / game:minecraft)
 - [Anti-Frida](entities/anti-frida.md) — Android Frida detection write-ups (libc prologue hook checks; JS examples; apkunpacker)
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
 - [AntiHook](entities/antihook.md) — Windows kernel hook enum + remove (driver / graphics; cheat / RE tools)

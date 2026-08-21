@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RiseShieldDev/AntiXrayViewer`: entity [[antixrayviewer]] (RiseShieldDev; Paper Minecraft plugin; Java 21 Gradle; ore-breaking pattern detection—diamond, ancient debris; configurable threshold alerts; ~3-minute session capture of movement, look direction, block break/place; first-person replay with smooth camera interpolation; admin list/view/delete/manage commands; evidence-based X-ray investigation; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[minecraft-anti-cheat]], [[jaranalyzer]], [[mlanticheat]], and [[dakotaac]].
+
 - **2026-08-21** — ingest `description:RixedLabs/IDLE-Abuse`: entity [[idle-abuse]] (RixedLabs; C++ PoC; undocumented `RegisterWaitForInputIdle` idle-state callback injection; shellcode delivery + process manipulation; process-lifecycle abuse detection study); cited on [[overviews/game-hacking]] and [[windows-process-injection]]; cross-linked [[frankenstein-apc-injection]], [[poolparty]], [[dirty-vanity]], and [[kernel-dll-injector]].
 
 - **2026-08-21** — ingest `description:RolfRolles/HexRaysDeob`: entity [[hex-rays-deob]] (RolfRolles; C++ Hex-Rays microcode plugin; pattern-based obfuscated-expression simplification; control-flow unflattening with dispatcher recovery + unreachable-block cleanup; obfuscated game/malware RE; Hex-Rays Microcode); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[d810-ng]], [[ollvm-unflattener]], [[idadeflat]], and [[genmc]].
