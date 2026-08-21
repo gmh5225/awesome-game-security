@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/mutante`: entity [[mutante]] (SamuelTulach; C/C++ WDK kernel HWID spoofer; disk serial / SMART / SMBIOS; hook-minimal driver; archival SMBIOS/storage identifier research; cheat / [HWID]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[negativespoofer]], [[skotschia-hwid-spoofer]], [[hdd-serial-spoofer]], and [[easy-hwid-spoofer]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/negativespoofer`: entity [[negativespoofer]] (SamuelTulach; boot-time Clover-style SMBIOS firmware-table spoof; C/EFI build guidance; pre-OS hardware identity / anti-cheat HWID research; cheat / [HWID]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[rainbow]], [[rainbow-efi]], [[spoofer-amidewin]], and [[hwid-checker-mg]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/rainbow`: entity [[rainbow]] (SamuelTulach; EDK-II UEFI pre-kernel bootkit; OVMF/QEMU debug + Visual Studio UEFI build; pre-boot attack vectors / bootkit techniques / firmware persistence; cheat / [HWID]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[rainbow-efi]], [[driver-efi-bootkit]], [[bootlicker]], and [[uefi-bootkit]].
