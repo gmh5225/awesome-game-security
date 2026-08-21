@@ -2378,6 +2378,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SkyEngine](entities/sky-engine.md) — WoW Lua unlocker (adde88; C++; protected Lua / taint-state reset; scripting research / cheat prototyping / AC detection study; cheat / game:wow [Wow Lua Unlocker])
 - [Skylicht Engine](entities/skylicht-engine.md) — lightweight Irrlicht-evolved engine (Android/iOS; Game Engine source)
 - [Skynet](entities/skynet.md) — multi-user Lua actor-model game server framework (Chinese industry staple; Game Network / source)
+- [AntiCheat (SLAUC91)](entities/slauc91-anticheat.md) — Windows rootkit/cheat scanner (C++ console + partial KM driver; hooks, handles, drivers, modules, PE/PEB, USN/DNS; user-mode IAT + kernel MSR/IDT/SSDT/IRP hook detection; Anti Cheat)
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
 - [sloader](entities/sloader.md) — alternative Linux ELF dynamic loader (modern C++; replace glibc ld-linux.so; library load + symbol resolution; linker-internals research; Anti Cheat → Binary Packer `[ELF]`)
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
