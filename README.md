@@ -1894,6 +1894,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Gekkio/GhidraBoy [Sharp SM83 / Game Boy extension for Ghidra]
 - https://github.com/CUB3D/ghidra-hexagon-sleigh [Ghidra SLEIGH extension for Qualcomm Hexagon QDSP6 decompilation and analysis]
 - https://github.com/thixotropist/ghidra_decompiler_plugins [Loadable Ghidra decompiler plugins and rules that simplify RISC-V vector-instruction analysis in the decompiler window]
+- https://github.com/sengi12/ghidra-hexEditor [Dockable hex editor Ghidra plugin for byte-level memory editing during RE]
 - https://github.com/fmagin/ghidra-openai [ChatGPT]
 - https://github.com/securityjoes/ThreatResearch [ChatGPT]
 - https://github.com/evyatar9/GptHidra [ChatGPT]
