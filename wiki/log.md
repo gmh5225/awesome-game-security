@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RomanRybachek/Copy_RVA`: entity [[copy-rva]] (RomanRybachek; Python IDAPython IDA Pro plugin; context-menu cursor RVA → clipboard; WinDbg breakpoints on unsymbolized drivers; kernel/game-security offset handling); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ioctl-helper]], [[driver-buddy-reloaded]], and [[ida-kmdf]].
+
 - **2026-08-21** — ingest `description:RomanRybachek/ioctl_helper`: entity [[ioctl-helper]] (RomanRybachek; C++/Qt Widgets GUI; integrated hex editor; multi-handle DeviceIoControl with configurable control codes and buffer sizes; driver reversing, kernel communication testing, game security research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ioctlpus]], [[cfb]], [[drvtrace]], [[cognitor]], and [[driver-buddy-reloaded]].
 
 - **2026-08-21** — ingest `description:RomanceTheHeart/Automation_Examples`: entity [[automation-examples]] (RomanceTheHeart; UE4 editor automation sample; Blutility + EditorScriptingUtilities; C++ Editor Utility classes + Blueprint dashboard widgets; asset rename/duplicate, unused-content cleanup, call-in-editor content-pipeline patterns; Game Engine / Unreal editor tooling); cited on [[overviews/game-engine]]; cross-linked [[unreal-mcp]], [[ue-buivalidator]], and [[houdini-engine-for-unreal]].
