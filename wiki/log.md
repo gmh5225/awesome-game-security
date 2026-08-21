@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RavEngine/RavEngine`: entity [[ravengine]] (RavEngine; modern C++ game engine; data-oriented ECS; Vulkan via RGL abstraction; GameNetworkingSockets multiplayer; cross-platform CMake build; resource packing pipelines; input/GUI/audio subsystems; game engine developers + graphics researchers studying ECS/Vulkan design; README `[C++ 3D]`); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[vk-engine]], [[liblava]], [[lumos]], [[mxengine]], and [[doriax]].
+
 - **2026-08-21** — ingest `description:RavenOfTime/Apex-Legends-Esp`: entity [[apex-legends-esp]] (RavenOfTime; C++ Visual Studio; external ESP cheat source template for shooter games; separate kernel driver + usermode GDI overlay + kdmapper loader; memory-read pipeline and entity visualization learner template; demonstrated on Apex Legends; cheat / game:apex legends [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[world-to-screen]], [[apex-legends-driver-cheat]], [[lab-esp-and-aimbot]], [[external-esp-hack-assaultcube]], and [[apex-legends-sdk]].
 
 - **2026-08-21** — ingest `description:Razviar/assetstudio`: entity [[assetstudio]] (Razviar; C#/.NET; multi-threaded Unity asset extraction for Unity 2.x–Unity 6; GUI + CLI; parallel bundle load/export; format parsers + decompression + game-specific helpers; game data mining / modding / bundle RE; Extracting assets); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[uabe]], [[uassetgui]], [[unityexplorer]], [[unity-game-hacking]], [[awesome-game-file-format-reversing]], and [[unturned-godot]].
