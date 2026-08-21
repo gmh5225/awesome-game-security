@@ -874,6 +874,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [EfiDump](entities/efidump.md) — EFI runtime driver + Windows client for post-boot process memory R/W (gnu-efi; EDK2 shell load; PoC dumper; gmh5225; [Dump])
 - [EFI Driver Access](entities/efi-driver-access.md) — boot-loaded GNU-EFI runtime driver + usermode client for read/write/process-base (TheCruZ; pre-OS privileged memory; cheat / EFI RPM)
+- [efi-memory](entities/efi-memory.md) — EFI runtime virtual-memory R/W PoC; SetVariable hook comm (EfiGuard-inspired); firmware + usermode + kdmapper-style mapper client (SamuelTulach; cheat / EFI RPM)
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
 - [Enigma](entities/enigma.md) — standalone native Ghidra SLEIGH/Pcode decompiler (C++; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agents; adam-040)
 - [EntropyReducer](entities/entropy-reducer.md) — PE section padding / data-distribution manipulation to lower Shannon entropy (AV/AC heuristic evasion)
