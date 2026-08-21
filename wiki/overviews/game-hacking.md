@@ -56,6 +56,7 @@ sources:
   - wiki/sources/descriptions/Schich__Lucky-Spark.md
   - wiki/sources/descriptions/Saxmason__Interic-Fortnite-External-Cheat.md
   - wiki/sources/descriptions/Saxmason__Subzero-Fortnite-Cheat.md
+  - wiki/sources/descriptions/Sandspeare__ida2llvm.md
   - wiki/sources/descriptions/Scrut1ny__Hypervisor-Phantom.md
   - wiki/sources/descriptions/SingularityCloud__KVM.Performance.md
   - wiki/sources/descriptions/airbus-seclab__qemu_blog.md
@@ -1711,7 +1712,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - OpenAI-compatible IDA analysis assistant via [[wpechatgpt]] (Python IDAPython; explain function behavior, rename variables, Python routine reconstruction, vulnerability checks from decompiled views; automated function-tree traversal + summarization; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/WPeace-HcH__WPeChatGPT.md)
 - Integrated AI assistant via [[binoculars]] (Python; configurable model backends, command prompts, UI actions; function explain/rename + Go pclntab reconstruction helpers; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/Vis-Wing__Binoculars.md)
 - Official VirusTotal IDA integration via [[vt-ida-plugin]] (Python; cloud malware intelligence + byte/string/function code-similarity search from disassembly; notebook panel with AI function summaries, editable notes, exportable collaboration artifacts; cheat / IDA Plugins / VirusTotal plugin lane) sits in the same cloud-intelligence / LLM-assistant RE lane beside [[mcrit-plugin]]. (source: wiki/sources/descriptions/VirusTotal__vt-ida-plugin.md)
-- Dynamic IDA→LLVM IR binary lifting via [[ida2llvm]] (cursor-sync liftability viewer in the disassembly window; cheat / IDA Plugins) sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md)
+- IDA→LLVM IR lifting via [[ida2llvm]] includes dynamic cursor-sync disassembly lifting (loyaltypollution; cheat / IDA Plugins) and microcode→IR translation with llvmlite (Sandspeare; IDA type/structure mapping + sample IR); sits in the same static RE / IR lane beside [[levo]] and [[genmc]]. (source: wiki/sources/descriptions/loyaltypollution__ida2llvm.md) (source: wiki/sources/descriptions/Sandspeare__ida2llvm.md)
 - Ghidra decompiler integration in IDA Pro via [[blc]] (Binary Lifting Contraption; cseagle; cheat / IDA Plugins) sits beside [[ida2llvm]] and [[ghiradec]] for alternate pseudocode when Hex-Rays is unavailable or for cross-decompiler comparison. (source: wiki/sources/descriptions/cseagle__blc.md)
 - Vivisect↔Ghidra symbolic decompilation bridge via [[viv-ghidra-decompiler]] (Python/Java; symbolik effects → Ghidra p-code; headless JSON-RPC backend; Qt dock widget; cheat / Ghidra Plugins) sits beside [[blc]] and [[ghiradec]] when Vivisect symbolic analysis disagrees with Ghidra Sleigh lifting. (source: wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md)
 - Browser-based Ghidra decompilation via [[pyre]] (WASM-compiled SLEIGH; multi-arch pseudocode entirely in-browser; no server-side processing; cheat / Decompiler) sits beside [[ghiradec]] for portable Ghidra-quality decomp without a local Ghidra install. (source: wiki/sources/descriptions/ant4g0nist__pyre.md)
