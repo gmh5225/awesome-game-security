@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sinclairq/hiearchy-eac`: entity [[hiearchy-eac]] (Sinclairq; Windows kernel PoC; bypasses EAC self-integrity via call-hierarchy + memory-read manipulation; hooks verification routines toward cleaned image copy; module-load monitoring; EAC driver boundary tracking; stack/register spoofing; Integrity Checks lane); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; replaced mis-slugged [[hierarchy-eac]]; cross-linked [[bypassing-easyanticheat-integrity-check]], [[cveac-2020]], [[kernel-callbacks]], and [[stack-spoofing]].
+
 - **2026-08-21** — ingest `description:Sinclairq/hierarchy-eac`: entity [[hierarchy-eac]] (Sinclairq; Windows kernel driver PoC; bypasses EasyAntiCheat.sys self-integrity via call-hierarchy abuse; C++/x64 asm; PE parsing, section-bound checks, VM-style control logic; companion write-up; anti-cheat kernel integrity RE; cheat / explore anticheat:eac [Bypassing self-integrity]); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[bypassing-easyanticheat-integrity-check]], [[cveac-2020]], and [[kernel-callbacks]].
 
 - **2026-08-21** — ingest `description:SingularityCloud/KVM.Performance`: entity [[kvm-performance]] (SingularityCloud; Markdown KB for KVM guest tuning when running games and AC-protected software; ioapic driver tuning, split-lock, unhandled WRMSR/RDMSR on Unraid/Proxmox; troubleshooting game launch failures and performance in virtualized environments; README [ioapic]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[proxmox-ve-anti-detection]], [[proxmox]], [[hardened-qemu]], [[qemu-anti-detection]], and [[rdtsc-kvm-handler]].
