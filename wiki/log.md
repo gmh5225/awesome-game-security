@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `readme:categories`: Cheat ~2734 (+1; Anti Cheat ~687 / Game Develop ~186 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-21** — ingest `description:Rwkeith/Diglett`: entity [[diglett]] (Rwkeith; kernel-mode stealth PoC; hide system threads + alter thread entry-address visibility; driver + client; anti-cheat evasion / defender blind-spot study; README Hide Kernel Thread); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nomad]], [[driver-hide-kernel-thread-iocancelirp]], [[zero-thread-kernel]], [[system-thread-finder]], and [[unkover]].
 
 - **2026-08-21** — ingest `description:Rwkeith/Nomad`: entity [[nomad]] (Rwkeith; kernel AC-style detector for manually mapped drivers and suspicious kernel threads; thread stack walk, entry-point validation, big-pool abnormal refs, IOCTL hook signals; C++ WDK driver telemetry; README Mapped Driver); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-anticheat]], [[kernel-anti-cheat]], [[unkover]], [[nmi-callback-handler]], and [[kernel-pool-scanning]].
