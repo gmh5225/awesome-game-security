@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sh0ckFR/DLLirant`: updated entity [[dllirant]] (Sh0ckFR historical placeholder mirror for Hijacking researches; no implementation in snapshot; points to maintained redteamsocietegenerale/DLLirant); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
+
 - **2026-08-21** — ingest `description:Sh0ckFR/Universal-Dear-ImGui-Hook`: entity [[universal-dear-imgui-hook]] (Sh0ckFR; Windows C++ graphics hook; D3D9–12 + partial Vulkan backend-specific hooks; integrated input + toggleable in-process Dear ImGui menu after DLL inject; overlay prototyping / debug UI / render-pipeline research); cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; cross-linked [[universalhookx]], [[d3dhook-imgui]], [[hydrahook]], and [[imgui]].
 
 - **2026-08-21** — ingest `description:Sh11no/eDBG`: entity [[edbg]] (Sh11no; lightweight Android ARM64 CLI debugger built on eBPF not ptrace; Go + C/eBPF; GDB-like breakpoints/memory/registers/threads; file+offset breakpoint model for fast startup and anti-debug resistance; rooted mobile RE / game security analysis); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[ehook]], [[fastdbg]], and [[frida]].
