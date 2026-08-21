@@ -2613,6 +2613,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unlicense](entities/unlicense.md) — Python 3 Frida dynamic unpacker for Themida/WinLicense 2.x/3.x (OEP + IAT rebuild; native PE + .NET; Fix Themida)
 - [Unpacker](entities/unpacker.md) — modular Python PE/ELF packer detection + unpack pipeline (UPX, ASPack, Themida, VMProtect; Unicorn/Qiling emulation; Fix VMP / Unpacker)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
+- [unxorer](entities/unxorer.md) — IDA Pro/Home stack-string deobfuscator (C++; Unicorn emulation; branching-path exploration + stack scan; configurable start points; cheat / IDA Plugins; SamuelTulach)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
 - [usbsn (ekknod)](entities/usbsn.md) — root-only USB serial number changer (C++/Java; Windows/Linux/mobile; Some Tricks / Android; peripheral HWID spoof)
 - [UWPDumper](entities/uwp-dumper.md) — UWP runtime package dumper (C++ DLL + injector; Windows 10 SDK; inject into target process; Explore UWP / Microsoft Store game RE; Wunkolo)

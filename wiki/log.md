@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/unxorer`: entity [[unxorer]] (SamuelTulach; C++ IDA Pro/Home plugin; Unicorn emulation recovers stack strings from obfuscated binaries; branching-path exploration, state preservation, stack scan; configurable start points + output navigation; malware/game-security RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-jm-xorstr-decrypt-plugin]], [[anti-xorstr]], [[ripr]], and [[unicorn-pe]].
+
 - **2026-08-21** — ingest `description:Sandspeare/ida2llvm`: updated entity [[ida2llvm]] (Sandspeare; Python/IDA APIs + llvmlite; IDA microcode→LLVM IR; type/structure mapping; sample binaries + IR examples; binary analysis pipelines); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[genmc]], [[levo]], and [[static-analyzer-factory]].
 
 - **2026-08-21** — ingest `description:Satar07/edbgserver`: entity [[edbgserver]] (Satar07; Rust eBPF debugger server for Android and Linux; multi-crate CLI + shared logic + Arm64/x86_64 eBPF programs; breakpoints/stepping/memory/registers/signals/library info; ptrace-free low-intrusion model; low-level debugging / security researchers in monitored environments); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[edbg]], [[stackplz]], [[ehook]], and [[frida]].
