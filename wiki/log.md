@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/LightHook`: entity [[light-hook]] (SamuelTulach; single-header pure-C x86-64 hook library; Windows/Linux/EFI; user/kernel/firmware examples; platform memory shims; no heavy disassembler; low-level instrumentation / RE / game-security research; cross-platform hook library); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[subhook]], [[renhook]], [[polyhook]], [[plthook]], and [[efi-memory]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/OverlayCord`: entity [[overlaycord]] (SamuelTulach; C++ PoC; external-process hijack of Discord's internal game overlay pipeline via framebuffer sharing—no Discord file changes, module injection, or API hooks; reusable overlay code + example integration; overlay trust-boundary / AC detection-blind-spot research; cheat / [Discord]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[discord-overlay-hook]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/PwnedBoot`: entity [[pwnedboot]] (SamuelTulach; C/C++ gnu-efi + VS; microcode-update DLL replacement boot payload; very-early boot-chain execution + remap; Secure Boot bypass via Windows bootloader shim; boot security / early-boot attack surface / pre-OS AC threat modeling); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[bootlicker]], [[rainbow]], [[uefi-bootkit]], and [[driver-efi-bootkit]].

@@ -1586,6 +1586,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
 - [lightsaber](entities/lightsaber.md) — iOS 18.4–18.6.2 userland exploit; JS inject SpringBoard (DarkSword-derived)
+- [light-hook](entities/light-hook.md) — single-header x86-64 hook library (SamuelTulach; pure C; Windows/Linux/EFI; user/kernel/firmware examples; no heavy disassembler; cross-platform hook library)
 - [lilypublic](entities/lilypublic.md) — KM+UM cheat framework (DBVM hypervisor; physical mem R/W, pattern scan, object callbacks; DirectComposition/DirectDraw/DX9/11 ImGui overlays; dot1991)
 - [lithium-kernel](entities/lithium-kernel.md) — KM+UM driver framework (custom IOCTL phys/virt R/W, page-table walk, pattern scan, MouClass mouse, thread hide, NMI suppression, pool-tracker clean; bootmgfw)
 - [Lenovo-CVE-2025-8061](entities/lenovo-cve-2025-8061.md) — LnvMSRIO.sys LPE PoC (CVE-2025-8061; IOCTL → SYSTEM; BYOVD)
