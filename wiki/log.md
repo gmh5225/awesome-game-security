@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SaadAhla/Anti-Sandbox`: entity [[anti-sandbox]] (SaadAhla; Windows C++ PoC; Any.Run-style sandbox detection via folder/process/user-profile/service-driver host artifact checks; layered multi-indicator scoring; malware-analysis / sandbox-evasion research; Detecting AnyRun sandbox); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[anticuckoo]], [[vmaware]], and [[hypervisor-detection]].
+
 - **2026-08-21** — ingest `description:willy92wins/dayz-mcp`: entity [[dayz-mcp]] (willy92wins; Python MCP + Enforce Script bridge; 53 server-authoritative tools for mod pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; Game Develop / MCP); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[dayzzz]], [[dayz-cheat]], and [[external-dayz-cheat]].
 
 - **2026-08-21** — ingest `readme:categories`: Game Develop ~186 (+1; Cheat ~2733 / Anti Cheat ~687 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]] and [[overviews/game-engine]] README-map counts (Kavex/GameDev-Resources guide index); light `index.md` section notes (no per-category pages).

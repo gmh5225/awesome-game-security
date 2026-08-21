@@ -267,6 +267,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ANTfs](entities/antfs.md) — NTFS anti-forensics (user-mode MFT recovery + WDK kernel secure wipe; Delete File)
 
 - [anticuckoo](entities/anticuckoo.md) — Cuckoo sandbox / VE detection demos (Detection:Virtual Environments)
+- [anti-sandbox](entities/anti-sandbox.md) — Windows C++ PoC; Any.Run-style sandbox detection via host artifact checks (folders, processes, user profile, services/drivers; layered multi-indicator scoring; SaadAhla)
 - [anubis](entities/anubis.md) — Linux CS:GO internal cheat (danielkrupinski; C++; process injection; ESP/aimbot via Source SDK hooks on client rendering and game events; cheat / game:csgo [Linux])
 - [anything-about-game](entities/anything-about-game.md) — curated game-development resources (engine/rendering/physics/networking/AI; Game Development resources)
 - [ampa-sys-exp](entities/ampa-sys-exp.md) — ampa.sys BYOVD exploit (IOCTL → kernel R/W or code exec; unsigned load / LPE / AC bypass; gmh5225)
