@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sirkles/JoshoEngine-Native`: entity [[joshoengine-native]] (Sirkles; C++ native 2D OpenGL engine; high-level cross-platform API with vector/rectangle/circle primitives; Visual Studio–oriented Windows build artifacts; roadmap shaders/physics/mobile; engine-architecture learning + custom 2D game dev base; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[game-engine-from-scratch]], [[exengine]], [[torque2d]], [[ncine]], and [[flatredball]].
+
 - **2026-08-21** — ingest `description:Sizeable-Bingus/BingusLdr`: entity [[bingusldr]] (Sizeable-Bingus; Crystal Palace Win x64 DLL loader; mingw-w64 C; CET-compatible stack spoofing; EAF-compatible API resolution; heap/image masking; Cobalt Strike `.cna` + LinkSpec; PIC DLL wrap; reflective loading / call-stack evasion / endpoint-detection research); cited on [[stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[nocturneldr]], [[return-address-spoofer]], [[cet-research]], [[windows-process-injection]], and [[scfw]].
 
 - **2026-08-21** — ingest `description:Skarbo/CSGOCrosshair`: entity [[csgocrosshair]] (Skarbo; web CS:GO crosshair generator; JavaScript/jQuery/KineticJS; visual preview, presets, ready-to-paste console config export, keybind setup; player/modding utility; cheat / game:csgo [Crosshair Generator]); cited on [[overviews/game-hacking]]; cross-linked [[master-guide]], [[csgo-sdk]], and [[csgo-internal-base]].

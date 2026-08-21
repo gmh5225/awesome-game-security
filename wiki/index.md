@@ -1432,6 +1432,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [JS Debugger Bypass UserScript](entities/js-debugger-bypass-script.md) — JavaScript UserScript; bypass browser DevTools/debugger/timing/window-size anti-debug (web/JS RE)
 - [jazz2-native](entities/jazz2-native.md) — C++ Jazz Jackrabbit 2 remake (custom engine; OpenGL ES; cross-platform; actors/levels/tilesets/mechanics; Game Engine / source)
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
+- [joshoengine-native](entities/joshoengine-native.md) — C++ native 2D OpenGL engine (vectors/rectangles/circles; cross-platform API; VS build artifacts; roadmap shaders/physics/mobile; Game Engine / source; Sirkles)
 - [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
 - [JinYongLegend](entities/jynew.md) — Unity wuxia RPG framework with modding (Game Develop / Unity source)
 - [jumpy](entities/jumpy.md) — Rust tactical 2D multiplayer shooter (asset-driven maps/characters/items; cross-platform; Pixels style; Game Engine / source)
