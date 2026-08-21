@@ -1061,6 +1061,7 @@ sources:
   - wiki/sources/descriptions/StudentBlake__XCI-Explorer.md
   - wiki/sources/descriptions/qqq26__nuzu.md
   - wiki/sources/descriptions/gmh5225__yuzu-android.md
+  - wiki/sources/descriptions/RemiPelloux__OpenSw.md
   - wiki/sources/descriptions/brunodev85__winlator.md
   - wiki/sources/descriptions/qq703048949__event_replay.md
   - wiki/sources/descriptions/wchunlin1006__LocusMimic.md
@@ -2199,7 +2200,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Windows GUI Switch XCI/NSP package inspector such as [[xci-explorer]] (C# WinForms; XCI/NCA/HFS0/PFS0 parsers; metadata, partition browse, hash check, extract, certificate edit; Switch modding / cartridge image RE; StudentBlake; README [XCI Explorer]) sits in the same `Nintendo Switch` lane. (source: wiki/sources/descriptions/StudentBlake__XCI-Explorer.md)
 - Yuzu-based Switch emulator mirror [[nuzu]] (unofficial fork) sits in the same `Nintendo Switch` lane for console-emulator / Switch research. (source: wiki/sources/descriptions/qqq26__nuzu.md)
 - Android yuzu port [[yuzu-android]] (ARM64 JIT; Vulkan/OpenGL; Switch game compatibility on Android) sits in the same `Nintendo Switch` / mobile-emulator crossover lane. (source: wiki/sources/descriptions/gmh5225__yuzu-android.md)
-- Android Eden-based Switch emulator OpenSw (RemiPelloux/OpenSw; ARM64; Vulkan; per-game profiles; live cheat support) sits in the same `Nintendo Switch` / mobile-emulator crossover lane. (source: wiki/sources/README-categories.md)
+- Android Eden-based Switch emulator [[opensw]] (RemiPelloux; C++/Kotlin; dynarmic ARM64 JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel + performance diagnostics; Profile build automation bridge; AYN Thor profile; Nintendo Switch / mobile-emulator crossover) sits in the same lane. (source: wiki/sources/descriptions/RemiPelloux__OpenSw.md)
 - PS5 Linux boot via [[ps5-linux-loader]] (kernel/HV exploits, IOMMU setup, GPU init, TMR handling; custom bootloader payload) sits in the console `PlayStation` HV research lane. (source: wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md)
 - WebKit CSSFontFace UAF chain via [[cssfontface-exploit]] (PS4/PS5 browser userland R/W; PS4 6.00–11.02, kernel chain 7.00–11.02; PS5 needs separate ASLR/vtable defeat) sits in the same `PlayStation` jailbreak / WebKit research lane. (source: wiki/sources/descriptions/ntfargo__CSSFontFace-Exploit.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)

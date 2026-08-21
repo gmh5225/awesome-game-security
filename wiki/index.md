@@ -1931,6 +1931,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [XCI Explorer](entities/xci-explorer.md) — Windows Switch XCI/NSP package inspector (C# WinForms; XCI/NCA/HFS0/PFS0; metadata, extract, hash, cert edit; Switch modding / cartridge RE; StudentBlake)
 - [NuremX](entities/nuremx.md) — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; Windows/Linux; no memory hooking; cheat / [AI]; Zurek0x)
 - [nuzu](entities/nuzu.md) — yuzu-based Switch emulator mirror (unofficial fork; Nintendo Switch lane)
+- [OpenSw](entities/opensw.md) — Android ARM64 Switch emulator (Eden/yuzu lineage; dynarmic JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel; Profile build automation bridge; RemiPelloux)
 - [nzPerspective](entities/nz-perspective.md) — D3D9 hooking sample (C/C++; cheat / game:tgame; gmh5225)
 - [OAC](entities/oac.md) — Open Anti-Cheat demand-start framework (x64 kernel driver + user-mode client; ObCallbacks handle filtering, cross-view integrity checks, PiDDB/MmUnloadedDrivers forensics; lauralex)
 - [OFRP-device_xiaomi_mondrian](entities/ofrp-device-xiaomi-mondrian.md) — OFRP/TWRP device tree for Redmi K60 Pro (mondrian)
