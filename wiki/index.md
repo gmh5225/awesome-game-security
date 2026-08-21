@@ -725,6 +725,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [uzdoom](entities/uzdoom.md) — UZDoom modern Doom source port (GZDoom continuation; OpenGL/Vulkan; high-res/dynamic lighting/3D floors; CMake cross-platform C/C++; Game Engine / source)
 - [dumpulator](entities/dumpulator.md) — Python minidump → Unicorn x86/x64 emulation (memory/modules/threads; NT stubs / PEB·TEB / API hooks)
 - [dump-val-exception-handler](entities/dump-val-exception-handler.md) — Valorant exception handler registration + VEH chain dump (`RtlpCallVectoredHandlers`; Vanguard RE; gmh5225)
+- [DumpVAC](entities/dumpvac.md) — PoC to disable VAC module execution and dump received modules with automatic decryption (RenardDev; Steam/module-loading hooks; C/C++; explore anticheat:vac)
 - [DumpPE](entities/dumpepe.md) — lightweight CLI PE dumper (OpenProcess/RPM; SizeOfImage mapped-image dump; x86/x64; packed/protected EXE post-unpack RE; d35ha)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
 - [dynre-x86](entities/dynre-x86.md) — early x86 dynamic-recompilation learning codebase (C++; Zydis decode/operand inspect; Makefile + Docker; instruction-decoding / binary-translation pipeline study)
