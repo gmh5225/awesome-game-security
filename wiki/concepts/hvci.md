@@ -15,10 +15,11 @@ sources:
   - wiki/sources/descriptions/mattifestation__WDACTools.md
   - wiki/sources/descriptions/gmh5225__ZeroHVCI.md
   - wiki/sources/descriptions/gmh5225__FakeEnclave.md
+  - wiki/sources/descriptions/SamuelTulach__SecureGame.md
   - wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
   - wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md
-updated: 2026-08-19
+updated: 2026-08-21
 confidence: high
 ---
 
@@ -46,7 +47,7 @@ WDAC policy build/deploy tooling such as [[wdactools]] (PowerShell; base/supplem
 
 HVCI bypass PoCs such as [[zero-hvci]] (gmh5225; policy edge cases + vulnerable signed-driver primitives → unsigned kernel code under Memory Integrity) sit in the same kernel trust-feature research lane. (source: wiki/sources/descriptions/gmh5225__ZeroHVCI.md)
 
-VBS enclave abuse PoCs such as [[fake-enclave]] (gmh5225; proof-of-concept misusing Enclave isolation within the VBS stack) complement HVCI bypass work when studying virtualization-based security limitations. (source: wiki/sources/descriptions/gmh5225__FakeEnclave.md)
+VBS enclave abuse PoCs such as [[fake-enclave]] (gmh5225; proof-of-concept misusing Enclave isolation within the VBS stack) complement HVCI bypass work when studying virtualization-based security limitations. (source: wiki/sources/descriptions/gmh5225__FakeEnclave.md) Defensive enclave game-logic isolation PoCs such as [[secure-game]] (SamuelTulach; Pong-like sample; host app for render/input + enclave DLL for state/rules; SDL2; trusted execution / anti-cheat research) illustrate isolating sensitive gameplay from usermode tampering within the same VBS stack. (source: wiki/sources/descriptions/SamuelTulach__SecureGame.md)
 
 Lab teardown guides such as [[disabling-hyper-v]] (gmh5225; Win10; Microsoft's Device Guard and Credential Guard hardware readiness tool → disable HVCI, Device Guard, Credential Guard, and related VBS so Hyper-V can be fully removed—not an in-place bypass) document the configuration side of turning Memory Integrity off for research hosts. (source: wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md)
 
@@ -54,5 +55,5 @@ HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

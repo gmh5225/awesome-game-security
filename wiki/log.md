@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/SecureGame`: entity [[secure-game]] (SamuelTulach; Pong-like POC; core game logic in Windows VBS enclave; host app for render/input + enclave DLL for state/rules; C/C++ SDL2 Visual Studio vcpkg; trusted execution / anti-cheat research); cited on [[concepts/hvci]] and [[overviews/anti-cheat]]; cross-linked [[fake-enclave]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/eac_cr3_shuffle`: entity [[eac-cr3-shuffle]] (SamuelTulach; C++ compact research sample; CR3 shuffling in EAC-protected environments; physical memory range walk, directory-base discovery, VA→PA translation checks; reference on CR3 manipulation vs external memory inspection; cheat / Bypassing CR3 protection); cited on [[concepts/easy-anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[eac-cr3-bypass]], [[ntmemory]], and [[meme-rw]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/efi-memory`: entity [[efi-memory]] (SamuelTulach; EFI runtime virtual-memory R/W PoC; SetVariable hook comm inspired by EfiGuard; firmware-side + usermode companion; kdmapper-style mapper client; firmware security / pre-OS memory access / game-security research; cheat / EFI RPM); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[sub-get-variable]], [[efi-driver-access]], [[efidump]], and [[meme-rw]].
