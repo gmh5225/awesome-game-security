@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rat431/EAC_Emu`: entity [[eac-emu]] (Rat431; simple x64 EasyAntiCheat DLL emulator stub; exports expected anti-cheat API functions with placeholder implementations; C++ plus assembly patch helpers; PoC for RE and compatibility testing of EAC-linked client code; cheat / Simple EasyAntiCheat x64 emulator); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[eac-reversal]], [[eac-easyanticheat-src-1]], [[vac-emulator]], and [[vacation3-emu]].
+
 - **2026-08-21** — ingest `description:RavEngine/RavEngine`: entity [[ravengine]] (RavEngine; modern C++ game engine; data-oriented ECS; Vulkan via RGL abstraction; GameNetworkingSockets multiplayer; cross-platform CMake build; resource packing pipelines; input/GUI/audio subsystems; game engine developers + graphics researchers studying ECS/Vulkan design; README `[C++ 3D]`); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[vk-engine]], [[liblava]], [[lumos]], [[mxengine]], and [[doriax]].
 
 - **2026-08-21** — ingest `description:RavenOfTime/Apex-Legends-Esp`: entity [[apex-legends-esp]] (RavenOfTime; C++ Visual Studio; external ESP cheat source template for shooter games; separate kernel driver + usermode GDI overlay + kdmapper loader; memory-read pipeline and entity visualization learner template; demonstrated on Apex Legends; cheat / game:apex legends [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[world-to-screen]], [[apex-legends-driver-cheat]], [[lab-esp-and-aimbot]], [[external-esp-hack-assaultcube]], and [[apex-legends-sdk]].

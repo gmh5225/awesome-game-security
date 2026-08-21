@@ -841,6 +841,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-cr3-shuffle](entities/eac-cr3-shuffle.md) — compact EAC CR3 shuffle research sample; paging walk + VA→PA checks (SamuelTulach; Bypassing CR3 protection)
 - [eac-dbp](entities/eac-dbp.md) — EAC debug/bypass PoC; kernel driver + UM module; callback/minifilter/control-path interference + API interception; Visual Studio/WDK; controlled RE/security testing (Debug; Schnocker)
 - [eac-driver-ud-for-now](entities/eac-driver-ud-for-now.md) — EAC driver-scan evasion sample; stealth KM↔UM memory R/W channel (gmh5225; [Sample])
+- [eac-emu](entities/eac-emu.md) — simple x64 EAC DLL emulator stub; exports expected anti-cheat APIs with placeholder implementations; C++/asm patch helpers; RE/compatibility PoC (Rat431; Simple EasyAntiCheat x64 emulator)
 - [EAC-EasyAntiCheatMemorySig](entities/eac-easyanticheatmemorysig.md) — documented EAC in-memory byte-pattern corpus for cheat frameworks, injectors, and hack modules (Memory sig maker; gmh5225)
 - [EAC-EasyAntiCheat-Src-1](entities/eac-easyanticheat-src-1.md) — reconstructed/leaked EAC source; detection routines, driver comms, integrity validation (Reversed Source; gmh5225)
 - [eac-extractor-utility](entities/eac-extractor-utility.md) — decrypt/extract EAC driver, UM modules, config for offline RE
