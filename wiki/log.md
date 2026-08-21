@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-20** — ingest `description:Skotschia/hwid_spoofer`: entity [[skotschia-hwid-spoofer]] (Skotschia; Windows C++ HWID spoofer PoC; disk serial / SMART / SMBIOS; low-level helper modules + Visual Studio project files; older PoC with detection-hardening gaps; educational anti-cheat evasion research; cheat / HWID; slug disambiguated from [[hwid-spoofer]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hdd-serial-spoofer]], [[hwidspoofer]], [[hwid]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
+
 - **2026-08-20** — ingest `description:SkyFire/MopCore547`: entity [[mopcore547]] (SkyFire; WoW MoP **5.4.7** server emulator; C++/CMake; world simulation / player management / NPC scripting / network protocol; game-server emulation + MMORPG protocol RE; cheat / game:wow); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[trinitycore]], [[legioncore-7-3-5]], [[azerothcore-wotlk]], [[azerust]], and [[awesome-wow-rust]].
 
 - **2026-08-20** — ingest `description:Skyrimfus/CE-lua-extensions`: entity [[ce-lua-extensions]] (Skyrimfus; CE Lua autorun extension pack; loader + breakpoint cleanup, function-caller lookup, template insertion, interface workflow scripts; speeds up RE and memory-analysis on Cheat Engine; cheat / Lua Extensions); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[controller-mode]], and [[unreal-engine-tools]].
