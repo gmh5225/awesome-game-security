@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamLarenN/CPUZ-DSEFix`: entity [[cpuc-dsefix]] (SamLarenN; Windows x64 C++ utility; CPU-Z vulnerable-driver BYOVD → DSE disable via `g_CiEnable`/`g_CiOptions` kernel patch; pattern scan + unsigned driver load helpers; PatchGuard crash risk; kernel security research / anti-cheat bypass experimentation; cheat / CPU-Z); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[cpuz]], [[byovd]], [[dse-hook]], [[dse-patcher-2]], [[patchguard]], [[kdmapper]], and [[vdm]].
+
 - **2026-08-21** — ingest `description:SamLarenN/PePacker`: entity [[pepacker-samlarenn]] (SamLarenN; simple C++ PE packer; `.text` XOR encrypt + appended decrypt stub; custom PE section parse/rewrite; RE practice / packer development / basic obfuscation; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[exe-packer]], [[xorpacker]], [[packer-tutorial]], [[pepacker]], and [[unpacker]].
 
 - **2026-08-21** — ingest `description:SamVanheer/halflife-unified-sdk`: entity [[halflife-unified-sdk]] (SamVanheer; consolidated Half-Life SDK for HL/OpFor/Blue Shift mods; C++; CMake cross-platform VS/GCC builds; bug fixes, deduplicated shared systems, docs/tooling/changelogs; game development / classic FPS architecture study; README [Half-Life SDK]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[halflife]], [[regamedll-cs]], [[regs]], [[cs16-client]], and [[source-sdk-2013]].

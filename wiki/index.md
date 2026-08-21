@@ -573,6 +573,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cpp-android-basic-samples](entities/cpp-android-basic-samples.md) — Google Play Games C++ SDK sample games (Game Develop / Android source)
 - [cpp-game-engine-book](entities/cpp-game-engine-book.md) — C++/OpenGL hands-on engine book (chapter samples; rendering→animation/GUI/audio/profiling/multithreaded rendering; Lua, Blender, FMOD; Game Engine / guide; ThisisGame)
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
+- [CPUZ-DSEFix](entities/cpuc-dsefix.md) — CPU-Z BYOVD DSE bypass (`g_CiEnable`/`g_CiOptions` patch; unsigned driver load; PatchGuard risk; SamLarenN; cheat / CPU-Z)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
 - [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)
 - [CVE-2015-2291](entities/cve-2015-2291.md) — Intel `iqvw64e.sys` Nal-driver IOCTL PoC (arbitrary kernel R/W; NtQuerySystemInformation base leak → LPE; kdmapper-family backend; gmh5225)

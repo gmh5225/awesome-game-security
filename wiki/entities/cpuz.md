@@ -4,7 +4,7 @@ kind: entity
 topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/shareef12__cpuz.md
-updated: 2026-07-22
+updated: 2026-08-21
 confidence: medium
 ---
 
@@ -18,4 +18,4 @@ CPU-Z vulnerable-driver exploit research for Windows XP through Windows 10 1607.
 
 ## Related
 
-[[byovd]] · [[windows-kernel-exploits]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[lenovo-cve-2025-8061]] · [[av-edr-killer]]
+[[byovd]] · [[windows-kernel-exploits]] · [[cpuc-dsefix]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[lenovo-cve-2025-8061]] · [[av-edr-killer]]
