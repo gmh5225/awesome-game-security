@@ -1439,6 +1439,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [intro-to-gamehacking](entities/intro-to-gamehacking.md) — beginner game-hacking tutorial + lab (CE → C++ external/internal; memory scan / pointer chains / injection / hooks / patterns; cheat / guide)
 - [interactive-feedback-macos-mcp](entities/interactive-feedback-macos-mcp.md) — native macOS HITL feedback MCP (AppleScript dialogs + image support; fork of interactive-feedback-mcp; Game Develop / MCP)
 - [interactive-feedback-mcp](entities/interactive-feedback-mcp.md) — HITL user-feedback MCP (input/confirm/select prompts; Game Develop / MCP)
+- [interic-fortnite-external-cheat](entities/interic-fortnite-external-cheat.md) — Interic Fortnite external cheat (Saxmason; C++ VS; driver-assisted RPM; DX9 ImGui overlay; visibility ESP + hitbox aimbot; KeyAuth + anti-debug/anti-dump/string obfuscation; cheat / game:fortnite [External])
 - [intraceptor](entities/intraceptor.md) — NT API interception + kernel-driver redirect to bypass process/thread handle protections (crvvdev; cheat / access)
 - [Interep Driver Leak](entities/interep-driver-leak.md) — leaked cheat kernel driver; covert process memory R/W via `NtGdiPolyPolyDraw` win32k GDI channel; anti-cheat driver-detection evasion (gmh5225)
 - [internal-valorant-cheat](entities/internal-valorant-cheat.md) — Valorant internal: aimbot + ESP via in-process render/game-logic hooks; bypasses Vanguard user-mode protections (gmh5225; cheat / game:valorant [Internal])
