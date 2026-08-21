@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RevEngAI/reai-ida`: entity [[reai-ida]] (RevEngAI; Python IDAPython + Qt IDA Pro plugin; RevEng.AI platform integration; binary upload, similarity-based function matching, automated renaming, auto-unstrip workflows, AI decompilation views; ML-assisted stripped-binary analysis; cheat / IDA Plugins / `[RevEng.AI]`); cited on [[overviews/reverse-engineering]]; cross-linked [[renamaida]], [[finger]], [[wpechatgpt]], [[ida-gepetto]], and [[binoculars]].
+
 - **2026-08-21** — ingest `description:ReverseWarrior/IUM-Debugger`: entity [[ium-debugger]] (ReverseWarrior; .NET debugger for Windows IUM/VTL1 trustlets; Hyper-V hypercalls for trustlet memory R/W + disassembly in VSM secure enclaves; LiveCloudKd `hvmm.sys` host-side patch of guest securekernel debug check so WinDbg in guest attaches to VTL1 IUM trustlets; VBS isolation / kernel RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hvci]], [[hyper-rev]], [[hyperdeceit]], and [[windbg-scripts]].
 
 - **2026-08-21** — ingest `description:Ricardonacif/launcher-abuser`: entity [[launcher-abuser]] (Ricardonacif; stealth external memory R/W via Steam/Battle.net launcher-held game handles; named shared-memory IPC; minimal shellcode + thread hijack; syscall NtReadVirtualMemory/NtWriteVirtualMemory; no new handles/modules/threads/RWX pages; x86→x64 transition; low-footprint process interaction / AC evasion tradeoffs; Cheat / Launcher Abuser); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[mini-launcher]], [[rce-shield]], [[windows-process-injection]], and [[frankenstein-apc-injection]].
