@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Skeletal-Group/Bloodhound`: entity [[bloodhound]] (Skeletal-Group; C++ experimental user-mode EPT/NPT hook detection library; vectored exception handling + CPU intrinsics + VPGATHER accessibility probes for hypervisor page-state manipulation; stealthier executable/readable transition checks; anti-cheat / virtualization security research PoC; Various novel EPT/NPT hook detection mechanisms); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[ept-hook-detection]], [[ermsb-meme]], [[hypervisor-detection]], and [[checkhv-um]].
+
 - **2026-08-21** — ingest `description:Skengdo/arma3-external-variable-manager`: entity [[arma3-external-variable-manager]] (Skengdo; C++ external Arma 3 mission-variable tool; dump/read/edit active mission vars including server economy fields; BE-disabled servers; online BE-protected use needs bypass; runtime data manipulation research; cheat / game:arma3 [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[battleye]] and [[arma3beclient]].
 
 - **2026-08-21** — ingest `description:Skengdo/battlefield-2042-internal-sdk`: entity [[battlefield-2042-internal-sdk]] (Skengdo; C++ internal BF2042 SDK scaffold; entities/players/vehicles/weapons/game context/rendering/W2S helpers; incomplete entity-list iteration; internal tooling + game security research prototypes; cheat / game:battlefield 2042 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[battlefield-1-internal]], [[bf4-internal-overlay]], [[world-to-screen]], and [[ue4-processevent-intercept]].
