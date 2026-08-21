@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rycooop/Bloom-Anticheat`: entity [[bloom-anticheat]] (Rycooop; Windows x64 multi-component AC prototype; kernel driver ObRegisterCallbacks handle protection for AC + target processes; UM DLL/app; Visual Studio projects; kernel-callback vs UM monitoring tradeoffs; AC experimentation); cited on [[overviews/anti-cheat]] and [[concepts/kernel-callbacks]]; cross-linked [[kernel-anticheat]], [[oac]], [[sentinelac]], and [[ac]].
+
 - **2026-08-21** — ingest `description:Rythorndoran/Naraka-Hack`: entity [[naraka-hack]] (Rythorndoran; C++ external Unity IL2CPP cheat for NARAKA: BLADEPOINT; offset tables; entity/player RPM; NVIDIA overlay ESP boxes/names; hotkey menu + combat-assist automation; cheat-dev / runtime-structure RE); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[dummy-dlls-naraka-1-9-21]], [[il2cpp]], [[world-to-screen]], and [[nvidia-overlay]].
 
 - **2026-08-21** — ingest `description:Rythorndoran/PageTableHook`: entity [[page-table-hook]] (Rythorndoran; C++ WDK driver demo; constructs/edits paging structures to redirect execution without direct code patches; `NtCreateFile` interception; framed to avoid typical PatchGuard-triggering inline hooks; advanced kernel / AC bypass research; Some Tricks / PTE Hook); cited on [[overviews/windows-kernel]] and [[patchguard]]; cross-linked [[windows-kernel-pagehook]], [[yumekage]], [[pteditor]], [[fast-pf-hook]], and [[enum-real-dirbase]].

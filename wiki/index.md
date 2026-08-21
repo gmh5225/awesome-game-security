@@ -359,6 +359,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BLOCKPOST-Cheat](entities/blockpost-cheat.md) — BLOCKPOST Unity IL2CPP cheat (C/C++; IL2CPP analysis + native hooking; cheat / game:blockpost; gmh5225)
 - [blood-hunt](entities/blood-hunt.md) — Blood Hunt cheat (C/C++; driver / rendering / modding; cheat / game:bloodhunt; gmh5225)
 - [Bloodhound (Skeletal-Group)](entities/bloodhound.md) — user-mode EPT/NPT hook detector (C++; vectored exceptions + VPGATHER accessibility; hypervisor page-state PoC; anti-cheat / virtualization security research)
+- [Bloom Anti-Cheat](entities/bloom-anticheat.md) — Windows x64 kernel+UM AC prototype (ObRegisterCallbacks handle protection for AC + target processes; Visual Studio driver/DLL/app; callback vs UM monitoring tradeoffs; Rycooop; Anti Cheat)
 - [bloodhunt-external](entities/bloodhunt-external.md) — Blood Hunt external cheat (C++; ImGui DX9 overlay + memory/offset helpers; mhyprot driver utilities; ZZZ-Monster; cheat / game:bloodhunt [External])
 - [blitz](entities/blitz.md) — header-only UM lazy import resolver with direct calls (C++; Anti Cheat / Lazy Importer; emlinhax)
 - [blc](entities/blc.md) — IDA Pro plugin integrating Ghidra decompiler (Binary Lifting Contraption; cheat / IDA Plugins; cseagle)
