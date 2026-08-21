@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RomanRybachek/ioctl_helper`: entity [[ioctl-helper]] (RomanRybachek; C++/Qt Widgets GUI; integrated hex editor; multi-handle DeviceIoControl with configurable control codes and buffer sizes; driver reversing, kernel communication testing, game security research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ioctlpus]], [[cfb]], [[drvtrace]], [[cognitor]], and [[driver-buddy-reloaded]].
+
 - **2026-08-21** — ingest `description:RomanceTheHeart/Automation_Examples`: entity [[automation-examples]] (RomanceTheHeart; UE4 editor automation sample; Blutility + EditorScriptingUtilities; C++ Editor Utility classes + Blueprint dashboard widgets; asset rename/duplicate, unused-content cleanup, call-in-editor content-pipeline patterns; Game Engine / Unreal editor tooling); cited on [[overviews/game-engine]]; cross-linked [[unreal-mcp]], [[ue-buivalidator]], and [[houdini-engine-for-unreal]].
 
 - **2026-08-21** — ingest `description:RootKit-Org/AI-Aimbot`: entity [[ai-aimbot]] (RootKit-Org; Python YOLOv5 screen-capture aimbot; Conda env; per-game Fortnite/Rust models; configurable detection sensitivity + aim parameters; cheat / Machine Learning YOLOv5; AI-based cheat detection research); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[ai-fps-b00m-h3adsh0t]], [[yolov5-pubg]], [[nuremx]], and [[waldo]].
