@@ -21,7 +21,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__UE-UnrealEngineSDK.md
   - wiki/sources/descriptions/cheat-engine__UnrealEngineTools.md
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
-updated: 2026-08-20
+  - wiki/sources/descriptions/Skengdo__ue4-processevent-intercept.md
+updated: 2026-08-21
 confidence: high
 ---
 
@@ -51,6 +52,10 @@ Reflected property offsets come from version-specific class metadata, not fixed 
 
 Common fields include vtable, flags, internal index, class pointer, name, and outer pointers. **Order, packing, and presence are build-specific.** Encrypted or pooled name tables (e.g. Valorant, Fortnite) need per-title decrypt paths—see [[valorant-fnamepool]], [[fortnite-fnameentry]]. Title-specific vtable/index offset dumps such as [[fortnite-virtual-offsets]] (Fortnite; `GetPlayerViewPoint`, `ProcessEvent`, `LineOfSightTo`, camera helpers; text-only) document per-build virtual dispatch slots for hook and call-site RE beside full SDK dumpers. (source: wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md)
 
+## ProcessEvent dispatch
+
+`UObject::ProcessEvent` is the reflection dispatch path for Blueprint/native `UFunction` calls on live instances. Internal instrumentation often targets it after SDK generation—compact hook libraries such as [[ue4-processevent-intercept]] (Skengdo; VMT shadowing instead of direct vtable patches; hook lifecycle designed to reapply as objects are recreated; example captures/modifies gameplay-related calls; UE4 RE and game security research) sit beside vtable offset dumps when studying Unreal call flow. (source: wiki/sources/descriptions/Skengdo__ue4-processevent-intercept.md)
+
 ## SDK generation workflow
 
 1. Identify UE version from binary signatures or strings
@@ -64,4 +69,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

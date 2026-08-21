@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Skengdo/ue4-processevent-intercept`: entity [[ue4-processevent-intercept]] (Skengdo; compact C++ UE4 ProcessEvent interceptor; VMT shadowing on selected objects; hook lifecycle reapplied as objects are recreated; gameplay call capture/modify example; UE4 RE / internal instrumentation); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[ue4-base]], [[ue4genny]], and [[re-ue4ss]].
+
 - **2026-08-20** — ingest `description:Skotschia/hwid_spoofer`: entity [[skotschia-hwid-spoofer]] (Skotschia; Windows C++ HWID spoofer PoC; disk serial / SMART / SMBIOS; low-level helper modules + Visual Studio project files; older PoC with detection-hardening gaps; educational anti-cheat evasion research; cheat / HWID; slug disambiguated from [[hwid-spoofer]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hdd-serial-spoofer]], [[hwidspoofer]], [[hwid]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
 
 - **2026-08-20** — ingest `description:SkyFire/MopCore547`: entity [[mopcore547]] (SkyFire; WoW MoP **5.4.7** server emulator; C++/CMake; world simulation / player management / NPC scripting / network protocol; game-server emulation + MMORPG protocol RE; cheat / game:wow); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[trinitycore]], [[legioncore-7-3-5]], [[azerothcore-wotlk]], [[azerust]], and [[awesome-wow-rust]].
