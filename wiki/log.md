@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Schnocker/NoEye`: entity [[noeye]] (Schnocker; BattlEye bypass toolkit; C++ service/runtime + C# setup; service installation, process interaction, runtime control; historical BE bypass reference); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[fakeeye]], [[bedaisy-bypass]], and [[battleye-handler-bypass]].
+
 - **2026-08-21** — ingest `description:ScottyBauer/Android_Kernel_CVE_POCs`: entity [[android-kernel-cve-pocs]] (ScottyBauer; C PoC collection for known Android kernel CVEs; crafted ioctl, race conditions, vendor/Wi-Fi driver memory manipulation; reproduce bugs, validate mitigations, study exploit primitives; cheat / List); cited on [[overviews/mobile-security]]; cross-linked [[android-vuln-poc-exp]], [[android-kernel-exploitation]], [[android-vuln]], [[dirtypipe-android]], and [[cve-2019-2215]].
 
 - **2026-08-21** — ingest `description:ScriptWare-Software/native-predicate-solver`: entity [[native-predicate-solver]] (ScriptWare-Software; native Binary Ninja plugin; C++; MLIL conditional-branch analysis; detect always-true/false opaque predicates; single-function/whole-binary passes; configurable limits; multithreaded; malware/protected-binary deobfuscation; Cheat Binary Ninja Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[opaque-predicate-patcher]], [[opaque-predicates-detective]], [[obfuscation-analysis]], [[drill-and-join]], [[r2smt]], [[official-plugins]], and [[community-plugins]].

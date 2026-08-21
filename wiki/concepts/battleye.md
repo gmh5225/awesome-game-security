@@ -36,7 +36,8 @@ sources:
   - wiki/sources/descriptions/dllcrt0__battleye-shellcode.md
   - wiki/sources/descriptions/dllcrt0__battleye-decryption.md
   - wiki/sources/descriptions/es3n1n__be-shellcode-tester.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/Schnocker__NoEye.md
+updated: 2026-08-21
 confidence: medium
 ---
 
@@ -78,6 +79,8 @@ Title-specific R6 external samples such as [[r6-external]] (C/C++; driver develo
 
 Service/install/launch emulation is studied via [[fakeeye]]: SCM-managed `BEService`, external config, and BE-style game process creation without the real AC stack. (source: wiki/sources/descriptions/mexploitui__FakeEye.md)
 
+Historical service-layer bypass tradecraft is preserved in [[noeye]] (Schnocker): C++ runtime modules plus a dedicated Windows service and C# setup app for service installation, process interaction, and runtime control against older BE protection behavior. (source: wiki/sources/descriptions/Schnocker__NoEye.md)
+
 Client-side protocol emulation is studied via [[be-emulator]] (gmh5225): simulates BE communication protocol, heartbeat responses, and module-loading interface so games run without active BE protection—useful for analyzing game↔BE integration and protocol RE. (source: wiki/sources/descriptions/gmh5225__BE-Emulator.md)
 
 Handle-stripping bypass via periodic handle re-creation is implemented in [[battleye-handler-bypass]]: a KMDF driver that re-opens process handles before BE’s ~5-second cleanup cycle strips them, with IOCTL paths for usermode control. (source: wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md)
@@ -104,4 +107,4 @@ PUBG commercial P2C loader RE such as [[pubg-p2c-re]] (experienceds) documents i
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

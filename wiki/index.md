@@ -1835,6 +1835,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [no-access-protection-x86](entities/no-access-protection-x86.md) — x86 PAGE_NOACCESS page guards + VEH on-access decryption (anti-tamper / anti-dump)
 - [NoBastian v2](entities/nobastian-v2.md) — C++ named-pipe client/server memory toolkit; handle inspection + elevated-handle acquisition; RPM/WPM/protect/alloc/module-base (ZoondEngine; Elevating Handle By LSASS)
 - [NoCheatZ-3](entities/nocheatz-3.md) — Source Engine serverside anti-cheat plugin (CS:S, CS:GO, CS:P, TF2; C/C++; plugin + SDK generation)
+- [NoEye](entities/noeye.md) — BattlEye bypass toolkit (C++ service/runtime + C# setup; service install, process interaction, runtime control; historical BE bypass reference; Schnocker)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
 - [NoahGameFrame](entities/noahgameframe.md) — C++ server engine (OGRE/BigWorld-inspired; Game Network / Server Engine)
 - [Nocturne](entities/nocturne.md) — bin2bin x86-64 PE code virtualizer (SDK markers / VM handlers / junk; AC Obfuscation Engine)
