@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sidenai/hyperion-disassembler`: entity [[hyperion-disassembler]] (Sidenai; native C++ multi-arch disassembler/decompiler; PE/ELF/Mach-O/.NET; x86/x64/ARM/AArch64/MIPS/PPC; CFG, FLIRT, PDB, BinDiff, RTTI recovery, SSA decompiler, packer detection, Lua scripting, ImGui UI; cheat / RE tools); cited on [[overviews/reverse-engineering]]; cross-linked [[binexport]], [[sig-database]], [[unpacker]], [[retdec]], [[ghidra]], and [[xdv]].
+
 - **2026-08-21** — ingest `description:Siesta/MCORE-Decompiler`: entity [[mcore-decompiler]] (Siesta; C++17 IDA Pro 9.4 plugin; lifts MCORE disasm to custom IR → optimization, control-flow structuring, stack-frame recovery, call-arg analysis → F5-bound C pseudocode; no Hex-Rays M·CORE backend; embedded firmware + feature-phone binaries such as Motorola E1000; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]]; cross-linked [[list-of-ida-plugins]], [[firmeye]], [[embedded-hacking]], and [[ida-security-scanner]].
 
 - **2026-08-21** — ingest `description:SilentVoid13/Silent_Packer`: entity [[silent-packer]] (SilentVoid13; pure C ELF/PE packer; section insertion, code caves, text-section infection; XOR/AES encryption; low-level loader + asm runtime unpack; RE practice / obfuscation experiments / defensive packed-binary research; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[exe-packer]], [[hxor-packer]], [[awesome-executable-packing]], and [[unpacker]].
