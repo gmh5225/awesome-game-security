@@ -645,6 +645,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
 - [D3D9On12](entities/d3d9on12.md) — Microsoft D3D9 usermode DDI → D3D12 mapping layer (DirectX Compatibility)
 - [D2D Overlay](entities/d2d-overlay.md) — header-only Direct2D external overlay library (`DirectOverlay.h`; simple API + performance; coltonon)
+- [D2GI](entities/d2gi.md) — Hard Truck 2 DirectDraw7/D3D7→D3D9 wrapper (modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks; REDPOWAR; DirectX Compatibility)
 - [d3d12book](entities/d3d12book.md) — DX12 educational sample (shader/rendering/animation; DirectX / guide)
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
 - [UniversalHookX](entities/universalhookx.md) — universal DX9–12/OpenGL/Vulkan ImGui hook library (dummy-device vtable bootstrap; compile-time backend selection; bruhmoment21)
