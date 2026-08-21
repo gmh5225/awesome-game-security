@@ -1,0 +1,4071 @@
+Project Path: arc_sengi12_ghidra-hexEditor_okt5dzm6
+
+Source Tree:
+
+```txt
+arc_sengi12_ghidra-hexEditor_okt5dzm6
+├── HexEditor.java
+├── README.md
+├── cleanup.py
+├── img
+└── resources
+    ├── GhidraSrc.java
+    ├── HexEditorProvider.java
+    ├── HexHeader.java
+    ├── MainWindow.java
+    ├── Theme.java
+    ├── accent.java
+    ├── binEdit.java
+    ├── edObj.java
+    ├── filterRW.java
+    ├── findT.java
+    ├── jEP.java
+    ├── math.java
+    ├── saveT.java
+    └── slaveT.java
+
+```
+
+`HexEditor.java`:
+
+```java
+// Ghidra-HexEditor
+// @author Michael Sengelmann
+// @category Patching Binaries
+// @keybinding alt H
+// @toolbar img/zero.png
+
+import ghidra.app.script.GhidraScript;
+import ghidra.framework.plugintool.PluginTool;
+
+import javax.imageio.ImageIO;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.io.OutputStreamWriter;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+
+import javax.swing.*;
+
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import resources.MainWindow;
+import resources.GhidraSrc;
+import resources.*; 
+
+public class HexEditor extends GhidraSrc {
+
+    // mw / currentDirectory / name / frame are inherited from GhidraSrc. They used
+    // to be redeclared here, which shadowed the inherited fields: MainWindow reads
+    // hex.frame through its GhidraSrc reference, so it was resizing a JFrame that
+    // was never shown and the window no longer grew when the find bar opened.
+
+    public resources.HexEditorProvider provider;
+
+    @Override
+    protected void run() throws Exception {
+        this.currentDirectory = sourceFile.getAbsolutePath();
+        this.currentDirectory = currentDirectory.substring(0, currentDirectory.length()-14);
+        this.name = currentProgram.getName();
+        String path = normalizePath(currentProgram.getExecutablePath());
+
+        // match whatever theme the tool is wearing before any widget is built
+        resources.Theme.followHost();
+        this.mw = new resources.MainWindow(this, path);
+
+        PluginTool tool = state.getTool();
+        if(tool != null) {
+            try {
+                this.provider = resources.HexEditorProvider.open(tool, this.name, this.mw);
+                return;
+            } catch (Throwable t) {
+                // the docking API is the one thing here that varies between Ghidra
+                // releases. If it is not shaped the way this script expects, open a
+                // window rather than leaving the user with no editor at all.
+                dbprint("could not dock the editor, opening a window instead: " + t + "\n");
+            }
+        }
+        openInWindow();
+    }
+
+    /**
+     * Fallback for a script run outside a tool, where there is no docking
+     * framework to hand the editor to.
+     */
+    private void openInWindow() {
+        this.frame = new JFrame();
+        this.frame.setTitle(String.format("Ghidra Hex Editor    :   %s", name));
+        this.frame.getContentPane().add(this.mw);
+        this.frame.pack();
+        this.frame.setMinimumSize(new Dimension(560, 320));
+        resources.Theme.apply(this.frame);
+        setFrameIcon();
+        this.frame.setLocationRelativeTo(null); // centered, rather than pinned to the corner
+        this.frame.setVisible(true);
+        this.frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
+
+    private void setFrameIcon() {
+        try {
+            File icon = new File(this.currentDirectory, "img" + File.separator + "zero.png");
+            if(icon.exists()) {
+                this.frame.setIconImage(ImageIO.read(icon));
+            }
+        } catch (Exception e) {
+            dbprint("could not load the window icon\n"); // cosmetic only
+        }
+    }
+
+    /**
+     * On Windows, currentProgram.getExecutablePath() hands back the path with a
+     * leading separator - "/C:/dir/file.exe" - which java.nio.file.Paths.get()
+     * rejects with InvalidPathException. Strip that separator whenever what
+     * follows is a drive letter.
+     *
+     * The previous version of this check compared System.getProperty("os.name")
+     * against the literal "Windows 10", so it stopped firing the moment users
+     * moved to Windows 11 (issues #2 and #3). Matching on the shape of the path
+     * instead keeps working on every past and future Windows release.
+     */
+    public static String normalizePath(String path) {
+        if(path == null || path.length() < 3) {
+            return path;
+        }
+        char first = path.charAt(0);
+        boolean leadingSeparator = (first == '/' || first == '\\');
+        boolean driveLetterFollows = Character.isLetter(path.charAt(1)) && path.charAt(2) == ':';
+        if(leadingSeparator && driveLetterFollows) {
+            return path.substring(1);
+        }
+        return path;
+    }
+
+    @Override
+    public String getName(){
+        return currentProgram.getName();
+    }
+
+    @Override
+    public void changeTitle(String s){
+        if(this.provider != null) {
+            this.provider.setTitle("Hex Editor - " + s);
+        } else if(this.frame != null) {
+            this.frame.setTitle(String.format("Ghidra Hex Editor    :   %s",s));
+            this.frame.repaint();
+        }
+    }
+}
+
+```
+
+`README.md`:
+
+```md
+# Ghidra-HexEditor
+A Hex Editor implemented as a Ghidra Plugin
+> much of the original source code is forked from https://github.com/javadev/hexeditor
+
+![gui](./img/gui.png)
+
+## Installation and Setup:
+
+1. Clone the repository from Github
+
+   `git clone https://github.com/sengi12/ghidra-hexEditor.git`
+
+2. Install the latest version of Ghidra
+
+   1. Download from: [https://ghidra-sre.org](https://ghidra-sre.org/)
+   2. Refer to the Ghidra Installation Guide: https://ghidra-sre.org/InstallationGuide.html
+
+3. Open Ghidra and start a new Project
+
+4. Map the Script Manager to your `ghidra-hexEditor` repo
+
+   1. Click the green play button in the task bar (script manager)
+
+      ![script_mgr](./img/script_mgr.png)
+
+   2. Click on the icon called "script directories" when hovered over
+
+      ![script_dir](./img/script_dir.png)
+
+   3. Click the green `+` (plus sign) and add the ghidra-hexEditor directory to the list
+
+      <img src="./img/script_dir_menu.png" alt="script_dir_menu" style="zoom:50%;" />
+
+5. Run HexEditor for testing
+
+   1. Filter the script manager for `HexEditor.java`. 
+   2. Highlight the file and click the green play button
+
+> You can also assign a key binding to HexEditor.java by right clicking on the plugin. ( I prefer ALT-H )
+
+## The editor window
+
+The editor opens as a **dockable Ghidra window**, so it tabs and splits alongside the Listing and the Decompiler and Ghidra remembers where you put it between sessions. Re-running the script on the same program reuses its window instead of stacking up another tab.
+
+If the script is run without a tool, it falls back to a standalone window sized to its own content and centered on screen.
+
+## Theme
+
+The editor follows whatever theme Ghidra is wearing - it reads the current look and feel and matches it, so a dark Ghidra gets a dark hex editor with no setup. Ghidra's own setting lives under **Edit -> Tool Options -> Tool -> Swing Look And Feel**; picking one of the *Flat* themes there gets you a consistently themed tool, this editor included.
+
+To override that, use **View -> Toggle Dark Mode** or **Ctrl-W**. A theme you pick by hand wins over the host from then on and is remembered the next time you open the editor.
+
+Only the editor's own components are recolored; Ghidra's look and feel is left untouched. On look and feels that paint their own controls (macOS Aqua, for example) a few widgets such as combo boxes keep their native colors.
+
+## Keys
+
+| | |
+|---|---|
+| `Ctrl-F` | open the find bar |
+| `Esc` | close the find bar |
+| `Ctrl-W` | toggle dark mode |
+| `Ctrl-+` / `Ctrl--` | grow or shrink the byte grid |
+
+```
+
+`cleanup.py`:
+
+```py
+#!/usr/bin/env python3
+"""Remove this script's compiled bundles from Ghidra's cache.
+
+Ghidra 9.2 replaced the old per-script ``bin`` directory with an OSGi bundle
+cache, so the class files this script used to chase no longer exist. The cache
+now lives under the user settings directory:
+
+    <settings>/osgi/compiled-bundles/<hash>/
+
+where ``<hash>`` identifies one source directory. Ghidra recompiles a bundle
+automatically when its sources change, so clearing the cache is normally
+unnecessary - reach for this only when you suspect a stale or half-written
+bundle.
+
+Usage:
+    python3 cleanup.py                 # remove bundles built from this checkout
+    python3 cleanup.py --dry-run       # show what would be removed
+    python3 cleanup.py --all           # remove every compiled bundle
+    python3 cleanup.py --felix         # also clear the Felix bundle cache
+    python3 cleanup.py --settings-dir <path>
+"""
+
+import argparse
+import os
+import shutil
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent
+
+# Ghidra <=10.x puts settings in ~/.ghidra; 11.x moved to platform config dirs.
+# Probe all of them rather than deriving a version-specific path.
+def candidate_roots():
+    roots = []
+    env = os.environ.get("GHIDRA_USER_SETTINGS")
+    if env:
+        roots.append(Path(env))
+    home = Path.home()
+    roots += [home / ".ghidra", home / ".config" / "ghidra", home / "Library" / "ghidra"]
+    xdg = os.environ.get("XDG_CONFIG_HOME")
+    if xdg:
+        roots.append(Path(xdg) / "ghidra")
+    for var in ("APPDATA", "LOCALAPPDATA"):
+        val = os.environ.get(var)
+        if val:
+            roots.append(Path(val) / "ghidra")
+    return roots
+
+
+def find_bundle_dirs(explicit=None):
+    """Locate every <settings>/osgi/compiled-bundles directory."""
+    if explicit:
+        root = Path(explicit).expanduser()
+        if not root.is_dir():
+            sys.exit("no such settings directory: %s" % root)
+        roots = [root]
+    else:
+        roots = [r for r in candidate_roots() if r.is_dir()]
+
+    found = []
+    for root in roots:
+        # The settings dir may be the root itself or a .ghidra_<version> child.
+        for base in [root] + sorted(p for p in root.iterdir() if p.is_dir()):
+            cb = base / "osgi" / "compiled-bundles"
+            if cb.is_dir() and cb not in found:
+                found.append(cb)
+    return found
+
+
+def repo_class_names():
+    """Top-level script names in this checkout, e.g. {'HexEditor'}."""
+    return {p.stem for p in REPO.glob("*.java")}
+
+
+def owns_bundle(bundle, names):
+    return any((bundle / (n + ".class")).exists() for n in names)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--all", action="store_true",
+                    help="remove every compiled bundle, not just this checkout's")
+    ap.add_argument("--felix", action="store_true",
+                    help="also clear the Felix bundle cache alongside compiled-bundles")
+    ap.add_argument("-n", "--dry-run", action="store_true",
+                    help="list what would be removed without deleting")
+    ap.add_argument("--settings-dir",
+                    help="explicit Ghidra user settings directory")
+    args = ap.parse_args()
+
+    bundle_dirs = find_bundle_dirs(args.settings_dir)
+    if not bundle_dirs:
+        print("No Ghidra bundle cache found. Looked under:")
+        if args.settings_dir:
+            print("  %s" % Path(args.settings_dir).expanduser())
+            print("\nExpected an osgi/compiled-bundles directory there or in a "
+                  "version subdirectory.")
+        else:
+            for r in candidate_roots():
+                print("  %s%s" % (r, "" if r.is_dir() else "  (missing)"))
+            print("\nPass --settings-dir if Ghidra keeps its settings elsewhere.")
+        return 1
+
+    names = repo_class_names()
+    if not names and not args.all:
+        sys.exit("no .java files beside %s; use --all to clear everything" % Path(__file__).name)
+
+    removed = 0
+    for cache in bundle_dirs:
+        print("cache: %s" % cache)
+        # Guard against a mistyped --settings-dir turning this into rm -rf.
+        if cache.name != "compiled-bundles":
+            print("  refusing to touch unexpected path")
+            continue
+        for bundle in sorted(p for p in cache.iterdir() if p.is_dir()):
+            if not args.all and not owns_bundle(bundle, names):
+                print("  skip   %s  (not built from this checkout)" % bundle.name)
+                continue
+            if args.dry_run:
+                print("  would remove %s" % bundle.name)
+            else:
+                shutil.rmtree(bundle)
+                print("  removed %s" % bundle.name)
+            removed += 1
+
+        if args.felix:
+            felix = cache.parent / "felixcache"
+            if felix.is_dir():
+                if args.dry_run:
+                    print("  would remove felixcache")
+                else:
+                    shutil.rmtree(felix)
+                    print("  removed felixcache")
+
+    if removed == 0:
+        print("\nNothing to remove.")
+    elif args.dry_run:
+        print("\n%d bundle(s) would be removed." % removed)
+    else:
+        print("\n%d bundle(s) removed; Ghidra will rebuild on next run." % removed)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`resources/GhidraSrc.java`:
+
+```java
+package resources;
+
+import javax.swing.JFrame;
+import java.io.File;
+import java.io.IOException;
+import java.rmi.server.ExportException;
+
+import ghidra.app.script.GhidraScript;
+import ghidra.app.util.exporter.BinaryExporter;
+import ghidra.app.util.exporter.ExporterException;
+import ghidra.util.task.TaskMonitor;
+import ghidra.program.model.mem.Memory;
+import ghidra.program.model.listing.Program;
+
+public class GhidraSrc extends GhidraScript{
+    public MainWindow mw;
+    public String currentDirectory;
+    public String name;
+    public JFrame frame;
+    private boolean DEBUG = false;
+
+    public GhidraSrc(){
+        this.frame = new JFrame();
+    }
+
+    protected void run() throws Exception {
+    }
+
+    public String getName() {
+        return "";
+    }
+
+    public void dbprint(String s){
+        if(DEBUG){
+            print(s);
+        }
+    }
+    
+    public void createFile( File f ){
+        BinaryExporter bexp = new BinaryExporter();
+        Memory memory = currentProgram.getMemory();
+        TaskMonitor monitor = getMonitor();
+        Program domainObj = currentProgram;
+        try{
+            bexp.export(f, domainObj, memory, monitor);
+        } catch (ExporterException e){
+            dbprint("ERROR Saving File Locally\n"+e.toString());
+        } catch (IOException e){
+            dbprint("ERROR Saving File Locally\n"+e.toString());
+        }
+    }
+
+    public void changeTitle(String s){}
+}
+```
+
+`resources/HexEditorProvider.java`:
+
+```java
+package resources;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.JComponent;
+
+import ghidra.framework.plugintool.ComponentProviderAdapter;
+import ghidra.framework.plugintool.PluginTool;
+
+/**
+ * Hosts the editor as a dockable Ghidra window instead of a floating JFrame.
+ *
+ * Docked, it tabs and splits alongside the Listing and the Decompiler, Ghidra
+ * remembers where the user parked it between sessions, and it stops reading as
+ * a separate application that happens to have been launched from Ghidra.
+ *
+ * Only the long stable part of the docking API is touched - construct, add,
+ * remove - because a script is compiled against whichever Ghidra is running it.
+ */
+public class HexEditorProvider extends ComponentProviderAdapter {
+
+    /** The tool owner string every provider from this script registers under. */
+    public static final String OWNER = "HexEditor";
+
+    // one editor per program: re-running the script replaces its own window
+    // rather than stacking up another tab beside it
+    private static final Map OPEN = new HashMap();
+
+    private final JComponent component;
+
+    private HexEditorProvider(PluginTool tool, String name, JComponent component) {
+        super(tool, name, OWNER);
+        this.component = component;
+        setTransient();
+    }
+
+    /**
+     * Shows the editor for one program, replacing an editor this script already
+     * opened for the same program.
+     */
+    public static HexEditorProvider open(PluginTool tool, String programName, JComponent component) {
+        HexEditorProvider previous = (HexEditorProvider)OPEN.remove(programName);
+        if(previous != null) {
+            tool.removeComponentProvider(previous);
+        }
+
+        HexEditorProvider provider = new HexEditorProvider(tool, "Hex Editor - " + programName, component);
+        OPEN.put(programName, provider);
+        tool.addComponentProvider(provider, true);
+        return provider;
+    }
+
+    public JComponent getComponent() {
+        return this.component;
+    }
+}
+
+```
+
+`resources/HexHeader.java`:
+
+```java
+package resources;
+
+import java.awt.Dimension;
+import java.awt.Graphics;
+
+import javax.swing.JPanel;
+
+/**
+ * The column ruler above the byte grid: 00 .. 0F across the hex pane, a caption
+ * over the decoded text, and the column the caret sits in picked out in the
+ * accent color.
+ *
+ * It is a sibling of binEdit rather than an extra row inside it because binEdit
+ * turns a mouse Y straight into a row index - an extra row painted inside the
+ * canvas would put every click one line out.
+ */
+public class HexHeader extends JPanel {
+
+    private static final long serialVersionUID = 1L;
+    private static final char[] HEX = "0123456789ABCDEF".toCharArray();
+
+    private final binEdit editor;
+
+    public HexHeader(binEdit editor) {
+        this.editor = editor;
+        setOpaque(true);
+    }
+
+    public Dimension getPreferredSize() {
+        return new Dimension(10, (0 < this.editor.hChar ? this.editor.hChar : 16) + 6);
+    }
+
+    protected void paintComponent(Graphics g) {
+        Theme.applyTextHints(g);
+        g.setColor(Theme.canvasBackground());
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        if(this.editor.wChar < 1 || this.editor.font == null) {
+            return;
+        }
+
+        g.setFont(this.editor.font);
+        int baseline = this.editor.hMargin + 2;
+        int caretColumn = (int)(this.editor.lastPos & 15L);
+
+        for(int i = 0; i < 16; ++i) {
+            g.setColor(i == caretColumn ? Theme.accent() : Theme.canvasFaded());
+            g.drawString("0", this.editor.cShift['0'] + this.editor.wChar * this.editor.xNib[i * 2], baseline);
+            g.drawString("" + HEX[i], this.editor.cShift[HEX[i]] + this.editor.wChar * this.editor.xNib[i * 2 + 1], baseline);
+        }
+
+        g.setColor(Theme.canvasFaded());
+        g.drawString("Decoded text", this.editor.wChar * this.editor.xTxt[0], baseline);
+
+        // the same hairlines the canvas draws, so the two line up exactly
+        g.setColor(Theme.canvasRule());
+        g.fillRect(this.editor.wChar * (this.editor.xNib[0] - 3), 0, 1, getHeight());
+        g.fillRect(this.editor.wChar * (this.editor.xTxt[0] - 3), 0, 1, getHeight());
+        g.fillRect(0, getHeight() - 1, getWidth(), 1);
+    }
+}
+
+```
+
+`resources/MainWindow.java`:
+
+```java
+package resources;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollBar;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.Arrays;
+
+public class MainWindow extends JPanel implements ActionListener, ItemListener, CaretListener, MouseListener{
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    public String path;
+    public GhidraSrc hex;
+    public binEdit editor;
+    public HexHeader header;
+    
+    public JMenu menu;
+    public JMenuItem menuItem;
+    public JMenuBar menuBar = new JMenuBar();
+
+    public JComboBox[] viewCBox = new JComboBox[2];
+    public JLabel JTsizes = new JLabel("");
+    public JTextField JTFile = new JTextField();
+    public JTextField JTView = new JTextField();
+
+    public JComponent help;
+    public boolean helpFlag = false;
+
+    public JProgressBar savePBar = new JProgressBar(0, 0, 0);
+    public JProgressBar findPBar = new JProgressBar(0, 0, 0);
+
+    public JPanel jPBBP = new JPanel(new BorderLayout());
+    
+    public JPanel stat;
+    public JPanel frameFile;
+
+    public byte[] finByte;
+    public byte[] finByteU;
+    public byte[][][] findChar;
+    
+    // find bar components
+    public JPanel fP0 = new JPanel(new BorderLayout());
+    public JPanel fP1;
+    public JLabel fJL = new JLabel(" ");
+    public JButton[] fJB = new JButton[2];
+    public JComboBox[] fJCB = new JComboBox[4];
+    public JTextField[] fJTF = new JTextField[2];
+    public JCheckBox fJRB = new JCheckBox("Ignore case:");
+
+    JScrollBar jSB = new JScrollBar(1, 0, 1, 0, 1);
+
+    public boolean cp437Available = false;
+    public boolean useFindChar = false;
+    public boolean hexOffset = true;
+
+    public DecimalFormatSymbols dFS = new DecimalFormatSymbols();
+    public DecimalFormat fForm = new DecimalFormat("#.##########E0");
+    public DecimalFormat dForm = new DecimalFormat("#.###################E0");
+
+
+    public MainWindow(GhidraSrc h, String p) {
+        this.path = p;
+        this.hex = h;
+
+        this.fP1 = this.findPanel();
+        this.help = this.help();
+
+        setLayout(new BorderLayout());
+
+        // everything above the grid, stacked: menu bar, file path, save progress,
+        // find bar. weightx pins each row to full width at its own natural height
+        createMenuBar();
+        JPanel head = new JPanel(new GridBagLayout());
+        GridBagConstraints hc = new GridBagConstraints();
+        hc.gridx = 0;
+        hc.weightx = 1.0D;
+        hc.fill = GridBagConstraints.HORIZONTAL;
+        hc.anchor = GridBagConstraints.NORTH;
+        hc.gridy = 0;
+        head.add(this.menuBar, hc);
+        hc.gridy = 1;
+        head.add(this.JTFile, hc);
+        hc.gridy = 2;
+        head.add(this.jPBBP, hc);
+        hc.gridy = 3;
+        head.add(this.fP0, hc);
+        add(head, BorderLayout.NORTH);
+
+        this.savePBar.setStringPainted(true);
+        this.savePBar.setString("");
+        this.JTView.setEditable(false);
+        this.JTFile.setEditable(false);
+        this.JTFile.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+
+        // built before the grid: loading a file ends in setStatus(), which reads
+        // these combo boxes, and building them afterwards left the first status
+        // line to die on a NullPointerException that loadFile quietly swallowed
+        this.stat = this.status(this.hex);
+
+        // the grid, its column ruler and its scrollbar. BorderLayout means the
+        // grid takes every pixel left over, so the window is free to resize
+        this.editor = new binEdit(this.hex, this, this.path);
+        this.header = new HexHeader(this.editor);
+        JPanel body = new JPanel(new BorderLayout());
+        body.add(this.header, BorderLayout.NORTH);
+        body.add(this.editor, BorderLayout.CENTER);
+        body.add(this.jSB, BorderLayout.EAST);
+        add(body, BorderLayout.CENTER);
+
+        add(this.stat, BorderLayout.SOUTH);
+
+        // Escape gets out of the find bar, the way it does in every other editor
+        this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+            .put(KeyStroke.getKeyStroke("ESCAPE"), "hideFind");
+        this.getActionMap().put("hideFind", new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+            public void actionPerformed(ActionEvent e) {
+                hideFind();
+            }
+        });
+
+        this.dFS.setDecimalSeparator('.');
+        this.fForm.setDecimalFormatSymbols(this.dFS);
+        this.dForm.setDecimalFormatSymbols(this.dFS);
+
+        this.applyTheme();
+    }
+
+    /**
+     * Repaints the editor in the current theme.
+     *
+     * The walk deliberately starts at this panel and never climbs to the window:
+     * when the editor is docked inside Ghidra as a ComponentProvider, its window
+     * is Ghidra's own, and recoloring that would repaint the whole tool.
+     *
+     * The find bar and the help pane are passed separately because they spend
+     * most of their life detached, and a detached component is never reached by
+     * a walk over the visible tree.
+     */
+    public void applyTheme() {
+        Theme.apply(this);
+        Theme.apply(this.fP1);
+        Theme.apply(this.help);
+
+        // rebuilt rather than recolored: a Border cannot have its color changed
+        this.JTFile.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.divider()),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)));
+        this.fP1.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.divider()),
+            BorderFactory.createEmptyBorder(8, 10, 10, 10)));
+        this.stat.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(1, 0, 0, 0, Theme.divider()),
+            BorderFactory.createEmptyBorder(6, 8, 6, 8)));
+
+        this.revalidate();
+        this.repaint();
+    }
+
+    public static int getWindowWidth() {
+        return 1050;
+    }
+
+    public static int getWindowHeight() {
+        return 630;
+    }
+
+    public JComponent help() {
+        jEP editorPane = new jEP((String)null, false);
+        // editorPane.setContentType("text/html");
+        // String language = Locale.getDefault().getLanguage();
+        // language = "ReadMe" + Character.toUpperCase(language.charAt(0)) + language.charAt(1) + ".htm";
+
+        // try {
+        //     editorPane.eP.getEditorKit().read(UI.class.getResource(UI.class.getResource(language) == null?"ReadMeEn.htm":language).openStream(), editorPane.eP.getDocument(), 0);
+        //     editorPane.eP.getEditorKit().read(UI.class.getResource("shortKey.htm").openStream(), editorPane.eP.getDocument(), editorPane.eP.getDocument().getLength());
+        // } catch (Exception e) {
+        //     this.hex.dbprint("error opening up help\n");
+        // }
+
+        return editorPane;
+    }
+
+    private JPanel status(GhidraSrc hex) {
+        String[][] statStrMatrix = new String[][]{{"BE", "LE "}, {"Binary", "Byte, signed/unsigned    ", "Short (16), signed", "Short (16), unsigned", "Int (32), signed", "Int (32), unsigned", "Long (64), signed", "Long (64), unsigned", "Float (32)", "Double (64)", "DOS-US/OEM-US/cp437", "UTF-8", "UTF-16"}, {"<html>Big-Endian (natural order) or little-Endian (Intel order).", "<html>Conversion rule for the data following the caret (shown here after)."}};
+
+        try {
+            if(!(this.cp437Available = Charset.isSupported("cp437"))) {
+                statStrMatrix[1][10] = "ISO/CEI 8859-1";
+            }
+        } catch (Exception var6) {
+            ;
+        }
+
+        JPanel statPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(0, 0, 0, 0);
+
+        for(int i = 0; i < this.viewCBox.length; ++i) {
+            this.viewCBox[i] = new JComboBox();
+            this.viewCBox[i].setPrototypeDisplayValue(statStrMatrix[i][1]);
+            this.viewCBox[i].setToolTipText(statStrMatrix[2][i]);
+
+            for(int j = 0; j < statStrMatrix[i].length; ++j) {
+                this.viewCBox[i].addItem(statStrMatrix[i][j]);
+            }
+
+            ++gbc.gridx;
+            statPanel.add(this.viewCBox[i], gbc);
+        }
+
+        this.viewCBox[1].setSelectedIndex(1);
+        gbc.weightx = 1.0D;
+        ++gbc.gridx;
+        
+        // this.JTView.setPreferredSize(new Dimension(this.JTView.getPreferredSize().width, this.viewCBox[0].getMinimumSize().height));
+        this.JTView.setPreferredSize(new Dimension(550/* w */, 10/* h */));
+        statPanel.add(this.JTView, gbc);
+        gbc.weightx = 0.0D;
+        ++gbc.gridx;
+        gbc.gridwidth = 100;
+        statPanel.add(Box.createHorizontalStrut(3), gbc);
+        gbc.gridx+=100;
+        statPanel.add(this.JTsizes, gbc);
+        ++gbc.gridx;
+        statPanel.add(Box.createHorizontalStrut(3), gbc);
+        this.viewCBox[0].addItemListener(this);
+        this.viewCBox[1].addItemListener(this);
+        this.JTsizes.addMouseListener(this);
+
+        // offsets and decoded values are read digit by digit, so they belong in a
+        // monospaced face where the columns do not shift as the caret moves
+        this.JTsizes.setFont(Theme.monoFont(Font.PLAIN, this.JTsizes.getFont().getSize()));
+        this.JTView.setFont(Theme.monoFont(Font.PLAIN, this.JTView.getFont().getSize()));
+        this.JTView.setBorder(BorderFactory.createEmptyBorder(3, 6, 3, 6));
+        return statPanel;
+    }
+
+    public void createMenuBar(){
+        String[][] menuBarStrMatrix = new String[][]{
+            {"File", 
+               "Open", 
+               "Save as ", 
+               "Close file (Q)", 
+               "Export Local Copy",
+               "Take Screenshot"
+            }, 
+            {"Edit", 
+               "Select All", 
+               "Undo (Z)", 
+               "Redo (Y)", 
+               "Cut (X)", 
+               "Copy", 
+               "Paste (V)", 
+               "Find", 
+               "Insert (before)", 
+               "Delete"
+            }, 
+            {"View", 
+               "Goto", 
+               "Toggle position Mark", 
+               "Down to next mark", 
+               "Up to previous mark ", 
+               "Toggle caret ", 
+               "Higher fontSize", 
+               "Lower fontSize", 
+               "Toggle Dark Mode"
+            }, 
+            {"hidden", 
+               "Font +", 
+               "Font -"
+            }, 
+            {"Help", 
+               "Toggle help"
+            }
+        }; 
+        // case statement key codes
+        // decimal representations of ascii key
+        int[][] KeyDec = new int[][]{
+            {70, 79, 83, 81, 91, 80}, 
+            {91, 65, 90, 89, 88, 67, 86, 70, 155, 127}, 
+            {86, 71, 77, 68, 85, 84, 107, 109, 87}, 
+            {178, 521, 45}, {72, 72}
+        };
+        int[][] var7 = new int[][]{
+            {70, 79, 83, 81, 91, 80}, 
+            {91, 65, 90, 89, 88, 67, 86, 70, 73, 68}, 
+            {86, 71, 77, 68, 85, 84, 72, 76, 87}, 
+            {72, 43, 45}, 
+            {72, 72}
+        };
+        int[][] KeyMod = new int[][]{
+            {0, 2, 2, 2, 2, 2}, 
+            {0, 2, 2, 2, 2, 2, 2, 2, 0, 0}, 
+            {0, 2, 2, 2, 2, 2, 2, 2, 2}, 
+            {0, 2, 2}, 
+            {0, 2}
+        };
+
+
+        for(int i = 0; i < menuBarStrMatrix.length; ++i) {
+            (this.menu = new JMenu(menuBarStrMatrix[i][0])).setMnemonic(var7[i][0]);
+            for(int j = 1; j < menuBarStrMatrix[i].length; ++j) {
+                this.menuItem = new JMenuItem(menuBarStrMatrix[i][j], var7[i][j]);
+                if(i != 4) {
+                    this.menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyDec[i][j], KeyMod[i][j]));
+                }
+
+                this.menuItem.addActionListener(this);
+                this.menu.add(this.menuItem);
+                if(i == 1 && (j == 1 || j == 3 || j == 6 || j == 7) || i == 2 && (j == 1 || j == 4 || j == 5 || j == 7)) {
+                    this.menu.addSeparator();
+                }
+            }
+   
+            if(i != 3) {
+               // adds menu to menu bar
+               this.menuBar.add(this.menu);
+            }
+        }
+    }
+
+    private JPanel findPanel() {
+        String[][] var3 = new String[][]{{"BE", "LE"}, {"Signed", "Unsigned"}, {"Short (16)", "Int (32)", "Long (64)", "Float (32)", "Double (64)", "Hexa", "ISO/CEI 8859-1", "UTF-8", "UTF-16"}, {"8 bits", "16 bits", "32 bits", "64 bits", "128 bits"}, {"<html>Big-indian (natural order) or<br>Little-indian (Intel order).", "Only for integer", "Data type", "<html>Select \'64\' if you search a machine instruction for a 64 bits processor.<br>If you don\'t know, left it at \'8\'."}, {"BE", "Unsigned", "ISO/CEI 8859-1", "128 bits"}, {"Next", "Hide"}};
+        // three stacked rows: the query, its options, and the progress bar. The
+        // query field is the CENTER of a BorderLayout so it takes all the width
+        // that the label and the hint beside it do not need
+        JPanel findBar = new JPanel(new BorderLayout(0, 6));
+        JPanel searchBar = new JPanel(new BorderLayout(8, 0));
+        JPanel findOptions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        findBar.add(searchBar, BorderLayout.NORTH);
+        findBar.add(findOptions, BorderLayout.CENTER);
+        this.findPBar.setStringPainted(true);
+        this.findPBar.setVisible(false); // only while a search is actually running
+        findBar.add(this.findPBar, BorderLayout.SOUTH);
+
+        JLabel findLabel = new JLabel("Find");
+        findLabel.setFont(findLabel.getFont().deriveFont(Font.BOLD));
+        searchBar.add(findLabel, BorderLayout.WEST);
+        searchBar.add(this.fJTF[0] = new JTextField(), BorderLayout.CENTER);
+        this.fJTF[0].addCaretListener(this);
+        // hint text and the two buttons ride beside the query field rather than
+        // at the end of the options row, where a narrow window wrapped them out
+        // of sight
+        JPanel searchActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+        searchActions.add(this.fJL);
+        searchBar.add(searchActions, BorderLayout.EAST);
+
+        int var1;
+        for(var1 = 0; var1 < this.fJCB.length; ++var1) {
+            this.fJCB[var1] = new JComboBox();
+            this.fJCB[var1].setPrototypeDisplayValue(var3[5][var1]);
+            this.fJCB[var1].setToolTipText(var3[4][var1]);
+
+            for(int var2 = 0; var2 < var3[var1].length; ++var2) {
+                this.fJCB[var1].addItem(var3[var1][var2]);
+            }
+
+            this.fJCB[var1].addItemListener(this);
+            findOptions.add(this.fJCB[var1]);
+        }
+
+        this.fJRB.setHorizontalTextPosition(2);
+        this.fJRB.setMargin(new Insets(0, 1, 0, 1));
+        this.fJRB.addActionListener(this);
+        findOptions.add(this.fJRB);
+        findOptions.add(new JLabel("   From:"));
+        findOptions.add(this.fJTF[1] = new JTextField(15));
+
+        for(var1 = 0; var1 < this.fJB.length; ++var1) {
+            this.fJB[var1] = new JButton(var3[6][var1]);
+            this.fJB[var1].setMargin(new Insets(3, 8, 3, 8));
+            this.fJB[var1].addActionListener(this);
+            searchActions.add(this.fJB[var1]);
+        }
+
+        return findBar;
+    }
+
+    protected void saveRunning(boolean var1) {
+        if(var1) {
+            this.jPBBP.add(this.savePBar);
+        } else {
+            this.jPBBP.removeAll();
+        }
+
+        this.savePBar.setValue(0);
+        this.validate();
+        this.repaint();
+    }
+
+    protected void find() {
+        this.findPBar.setString("");
+        this.fP0.add(this.fP1, BorderLayout.CENTER);
+        this.revalidate();
+        this.repaint();
+        this.fJTF[0].requestFocusInWindow();
+    }
+
+    /** Closes the find bar and hands focus back to the byte grid. */
+    protected void hideFind() {
+        if(this.fP0.getComponentCount() == 0) {
+            return;
+        }
+        this.fP0.removeAll();
+        this.revalidate();
+        this.repaint();
+        this.editor.slideScr(-1L, false);
+        this.editor.requestFocusInWindow();
+    }
+
+    protected void findRunning(boolean testRun) {
+        this.findPBar.setVisible(testRun);
+        this.fJB[0].setText(testRun?"Stop":"Next");
+        this.fJB[1].setEnabled(!testRun);
+        this.findPBar.setValue(0);
+        if(!testRun) {
+            this.findPBar.setString("");
+        }
+
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == this.fJRB) {
+            this.checkFindEntry();
+        } else if(e.getSource() == this.fJB[0] && this.fJB[0].getText() == "Next") {
+            this.editor.find1();
+        } else if(e.getSource() == this.fJB[0] && this.fJB[0].getText() == "Stop") {
+            this.editor.find.interrupt();
+        } else if(e.getSource() == this.fJB[1]) { // hide find bar
+            this.hideFind();
+        } else if(e.getSource().getClass().isInstance(new JMenuItem())) { // help
+            boolean isToggleHelp = ((JMenuItem)((JMenuItem)e.getSource())).getText().equals("Toggle help");
+            if(isToggleHelp || this.helpFlag) {
+                this.hex.dbprint("help toggled\n");
+                // GridBagConstraints gbc = new GridBagConstraints();
+                // gbc.gridwidth = getWindowWidth();
+                // gbc.gridheight = getWindowHeight();
+                // gbc.gridx = 0;
+                // gbc.gridy = 0;
+                // gbc.fill = 1;
+                // this.removeAll();
+                // if(this.helpFlag) {
+                //     this.hex.dbprint("helpflag = t\n");
+                //     this.add(this.frameFile, gbc);
+                // } else {
+                //     this.hex.dbprint("helpflag = f\n");
+                //     this.add(this.help, gbc);
+                // }
+
+                // this.validate();
+                // this.repaint();
+            }
+
+            this.helpFlag = !this.helpFlag && isToggleHelp;
+            if(!isToggleHelp) {
+                this.editor.KeyFromMenu(((JMenuItem)e.getSource()).getAccelerator().getKeyCode());
+            }
+        }
+
+    }
+
+    private void checkFindEntry() {
+        // relabel vars to do
+        boolean check = false;
+        BigDecimal bigDec = null;
+        long time = System.currentTimeMillis();
+        long[] var17 = new long[2];
+        StringBuffer var18 = new StringBuffer(220);
+        var18.append("<html>");
+
+        while(System.currentTimeMillis() < time + 50L) {
+            ;
+        }
+
+        String var19 = this.fJTF[0].getText();
+        String var20 = null;
+        int var21 = var19.length();
+        int var22 = this.fJCB[2].getSelectedIndex();
+        boolean var24 = false;
+        boolean var25 = false;
+        this.useFindChar = this.fJRB.isSelected() && 5 < var22;
+        if(var21 == 0) {
+            this.fJL.setText(" ");
+        } else {
+            int var32;
+            int var23;
+            if(var22 < 5 && !var19.startsWith("0x") && !var19.startsWith("Ox") && !var19.startsWith("ox")) {
+                if(var19.charAt(0) == 45 && this.fJCB[1].getSelectedIndex() == 1 && var22 < 3) {
+                    this.fJL.setText("<html><FONT color=red>Input must be positive for unsigned integer.</FONT>");
+                    return;
+                }
+
+                if(var19.equals("-") || var19.equals("+")) {
+                    this.fJL.setText(" ");
+                    return;
+                }
+
+                BigDecimal var4 = var22 == 0?BigDecimal.valueOf(-32768L):(var22 == 1?BigDecimal.valueOf(-2147483648L):(var22 == 2?BigDecimal.valueOf(Long.MIN_VALUE):(var22 == 3?BigDecimal.valueOf(-3.4028234663852886E38D):BigDecimal.valueOf(-1.7976931348623157E308D))));
+                BigDecimal var5;
+                if(2 < var22) {
+                    var5 = var22 == 3?BigDecimal.valueOf(3.4028234663852886E38D):BigDecimal.valueOf(Double.MAX_VALUE);
+                } else if(this.fJCB[1].getSelectedIndex() == 0) {
+                    var5 = var22 == 0?BigDecimal.valueOf(32767L):(var22 == 1?BigDecimal.valueOf(2147483647L):BigDecimal.valueOf(Long.MAX_VALUE));
+                } else {
+                    var5 = var22 == 0?BigDecimal.valueOf(65535L):(var22 == 1?BigDecimal.valueOf(4294967295L):new BigDecimal("18446744073709551615"));
+                }
+
+                this.finByte = new byte[var22 < 3?2 << var22:(var22 == 3?4:8)];
+
+                while(0 < var21) {
+                    try {
+                    bigDec = new BigDecimal(var19.substring(0, var21));
+                    if(bigDec.compareTo(var4) >= 0 && var5.compareTo(bigDec) >= 0) {
+                        break;
+                    }
+
+                    throw new Exception("");
+                    } catch (Exception var31) {
+                    --var21;
+                    }
+                }
+
+                if(var21 == 0) {
+                    this.fJL.setText("<html><FONT color=red>Input must be a number.</FONT>");
+                } else if(var22 < 3) {
+                    BigInteger var7;
+                    try {
+                    var7 = bigDec.setScale(0, 7).unscaledValue();
+                    } catch (Exception var27) {
+                    var7 = bigDec.setScale(0, 5).unscaledValue();
+                    check = true;
+                    }
+
+                    if(var7.signum() < 0) {
+                    time = var7.longValue();
+                    if(this.fJCB[0].getSelectedIndex() == 0) {
+                        for(var23 = 0; var23 < this.finByte.length; ++var23) {
+                            this.finByte[this.finByte.length - var23 - 1] = (byte)((int)(time & 255L));
+                            time >>>= 8;
+                        }
+                    } else {
+                        for(var23 = 0; var23 < this.finByte.length; ++var23) {
+                            this.finByte[var23] = (byte)((int)(time & 255L));
+                            time >>>= 8;
+                        }
+                    }
+                    } else {
+                    byte[] var2 = var7.toByteArray();
+                    var32 = this.finByte.length < var2.length?this.finByte.length:var2.length;
+                    Arrays.fill(this.finByte, (byte)0);
+                    if(this.fJCB[0].getSelectedIndex() == 0) {
+                        for(var23 = 1; var23 <= var32; ++var23) {
+                            this.finByte[this.finByte.length - var23] = var2[var2.length - var23];
+                        }
+                    } else {
+                        for(var23 = 0; var23 < var32; ++var23) {
+                            this.finByte[var23] = var2[var2.length - 1 - var23];
+                        }
+                    }
+                    }
+                } else {
+                    float var13 = bigDec.floatValue();
+                    double var9 = bigDec.doubleValue();
+                    this.useFindChar = check = 0 != (var32 = bigDec.compareTo(new BigDecimal(var22 == 3?(double)var13:var9)));
+                    time = var17[0] = var22 == 3?(long)Float.floatToRawIntBits(var13):Double.doubleToRawLongBits(var9);
+                    if(this.fJCB[0].getSelectedIndex() == 0) {
+                    for(var23 = 0; var23 < this.finByte.length; ++var23) {
+                        this.finByte[this.finByte.length - var23 - 1] = (byte)((int)(time & 255L));
+                        time >>>= 8;
+                    }
+                    } else {
+                    for(var23 = 0; var23 < this.finByte.length; ++var23) {
+                        this.finByte[var23] = (byte)((int)(time & 255L));
+                        time >>>= 8;
+                    }
+                    }
+                    
+                    double testD = 0.0D;
+                    float testF = 0.0F;
+                    if(this.useFindChar) {
+                    var17[1] = var22 == 3?(long)Float.floatToRawIntBits(testF = 0 < var32?math.nextUp(var13):math.nextDown(var13)):Double.doubleToRawLongBits(testD = 0 < var32?math.nextUp(var9):math.nextDown(var9));
+                    if(var22 == 3) {
+                        var18.append(var32 < 0?"&lt; ":"&gt; ").append(this.fForm.format(new BigDecimal((double)var13))).append("<br>" + (var32 < 0?"&gt; ":"&lt; ")).append(this.fForm.format(new BigDecimal((double)testF)));
+                    } else {
+                        var18.append(var32 < 0?"&lt; ":"&gt; ").append(this.dForm.format(new BigDecimal(var9))).append("<br>" + (var32 < 0?"&gt; ":"&lt; ")).append(this.dForm.format(new BigDecimal(testD)));
+                    }
+
+                    this.findChar = new byte[1][2][var22 == 3?4:8];
+
+                    for(var32 = 0; var32 < 2; ++var32) {
+                        if(this.fJCB[0].getSelectedIndex() == 0) {
+                            for(var23 = 0; var23 < this.findChar[0][var32].length; ++var23) {
+                                this.findChar[0][var32][this.finByte.length - var23 - 1] = (byte)((int)(var17[var32] & 255L));
+                                var17[var32] >>>= 8;
+                            }
+                        } else {
+                            for(var23 = 0; var23 < this.findChar[0][var32].length; ++var23) {
+                                this.findChar[0][var32][var23] = (byte)((int)(var17[var32] & 255L));
+                                var17[var32] >>>= 8;
+                            }
+                        }
+                    }
+                    }
+                }
+            } else if(var22 == 5) {
+                var19 = var19.trim().replaceAll(" ", "");
+                if(var19.startsWith("0x") || var19.startsWith("Ox") || var19.startsWith("ox")) {
+                    var19 = var19.substring(2);
+                }
+
+                for(var21 = 0; var21 < var19.length() && -1 < "0123456789abcdefABCDEF".indexOf(var19.charAt(var21)); ++var21) {
+                    ;
+                }
+
+                if(var21 < 2) {
+                    this.fJL.setText(var21 == var19.length()?" ":"<html><FONT color=red>Input must be a hexa string.</FONT>");
+                    return;
+                }
+
+                this.finByte = new byte[var21 >> 1];
+
+                try {
+                    for(var23 = 0; var23 < this.finByte.length; ++var23) {
+                    this.finByte[var23] = (byte)Integer.parseInt(var19.substring(var23 << 1, var23 * 2 + 2), 16);
+                    }
+                } catch (Exception var30) {
+                    ;
+                }
+            } else if(var22 == 6) {
+                while(0 < var21) {
+                    try {
+                    var20 = var19.substring(0, var21);
+                    this.finByte = var20.getBytes("ISO-8859-1");
+                    if(!var20.equals(new String(this.finByte, "ISO-8859-1"))) {
+                        throw new Exception("");
+                    }
+                    break;
+                    } catch (Exception var28) {
+                    --var21;
+                    }
+                }
+
+                if(var21 < 1) {
+                    this.fJL.setText("<html><FONT color=red>Input must be an ISO-8859-1 string.</FONT>");
+                    return;
+                }
+            } else {
+                while(0 < var21) {
+                    try {
+                    var20 = var19.substring(0, var21);
+                    this.finByte = var20.getBytes(var22 == 7?"UTF-8":(this.fJCB[0].getSelectedIndex() == 0?"UTF-16BE":"UTF-16LE"));
+                    break;
+                    } catch (Exception var29) {
+                    --var21;
+                    }
+                }
+
+                if(var21 < 1) {
+                    this.fJL.setText("<html><FONT color=red>Input must be an UTF string.</FONT>");
+                    return;
+                }
+            }
+
+            if(var22 < 3 || 4 < var22 || !check) {
+                for(var23 = 0; var23 < this.finByte.length; ++var23) {
+                    var32 = this.finByte[var23] & 255;
+                    var18.append((var32 < 16?"0":"") + Integer.toHexString(var32).toUpperCase());
+                    if((var23 + 1) % 16 == 0) {
+                    var18.append("<br>");
+                    } else if((var23 + 1) % (1 << this.fJCB[3].getSelectedIndex()) == 0) {
+                    var18.append(" ");
+                    }
+                }
+            }
+
+            var19 = var19.toUpperCase();
+            if(var21 == var19.length() - 1 && (var22 >= 5 || var19.charAt(var19.length() - 1) != 69)) {
+                var18.append("<br><FONT color=red>The last char is invalid.</FONT>");
+            } else if(var21 < var19.length() - 1 && (var21 != var19.length() - 2 || var22 >= 5 || var19.charAt(var19.length() - 2) != 69 || var19.charAt(var19.length() - 1) != 43 && var19.charAt(var19.length() - 1) != 45)) {
+                var18.append("<br><FONT color=red>The last ").append(var19.length() - var21).append(" caracters are invalid.</FONT>");
+            }
+
+            if(check && !this.useFindChar) {
+                var18.append("<br><FONT color=red>The binary doesn\'t represent exactly the significand.</FONT>");
+            }
+
+            this.fJL.setText(var18.toString());
+            if(var20 != null && 0 < var20.length() && this.fJRB.isSelected() && !var20.toUpperCase().equals(var20.toLowerCase())) {
+                var20 = var20.toUpperCase();
+                this.findChar = new byte[var20.length()][][];
+
+                for(var21 = 0; var21 < var20.length(); ++var21) {
+                    char var8 = var20.charAt(var21);
+                    var23 = var8 == Character.toLowerCase(var8)?1:2;
+                    if(1 < var23) {
+                    for(var22 = 0; var22 < accent.s.length; ++var22) {
+                        if(-1 < accent.s[var22].indexOf(var8)) {
+                            var23 = accent.s[var22].length();
+                            break;
+                        }
+                    }
+                    }
+
+                    this.findChar[var21] = new byte[var23][];
+
+                    for(var32 = 0; var32 < var23; ++var32) {
+                    if(var23 < 3) {
+                        var8 = var32 == 0?var8:Character.toUpperCase(var8);
+                    } else if(var22 < accent.s.length) {
+                        var8 = accent.s[var22].charAt(var32);
+                    }
+
+                    if(var22 == 6) {
+                        this.findChar[var21][var32] = new byte[1];
+                        this.findChar[var21][var32][0] = var8 < 256?(byte)var8:this.findChar[var21][0][0];
+                    } else if(var22 == 8) {
+                        this.findChar[var21][var32] = new byte[2];
+                        this.findChar[var21][var32][1 - this.fJCB[0].getSelectedIndex()] = (byte)(var8 & 255);
+                        this.findChar[var21][var32][this.fJCB[0].getSelectedIndex()] = (byte)(var8 >> 8);
+                    } else {
+                        this.findChar[var21][var32] = new byte[var8 < 128?1:(var8 < 2048?2:(var8 < 65536?3:4))];
+                        if(var8 < 128) {
+                            this.findChar[var21][var32][0] = (byte)var8;
+                        } else {
+                            int var33;
+                            for(var33 = this.findChar[var21][var32].length - 1; 0 < var33; --var33) {
+                                this.findChar[var21][var32][var33] = (byte)(var8 & 63 | 128);
+                                var8 = (char)(var8 >> 6);
+                            }
+
+                            var33 = this.findChar[var21][var32].length;
+                            this.findChar[var21][var32][0] = (byte)(var8 | (var33 == 2?192:(var33 == 3?224:240)));
+                        }
+                    }
+                    }
+                }
+            }
+        }
+    }
+
+    public void itemStateChanged(ItemEvent e) {
+        if(e.getSource() != this.viewCBox[0] && e.getSource() != this.viewCBox[1]) {
+            if(e.getSource() == this.fJCB[2]) {
+                int i = this.fJCB[2].getSelectedIndex();
+                this.fJCB[0].setEnabled(i < 5 || i == 8);
+                this.fJCB[1].setEnabled(i < 3);
+                this.fJRB.setEnabled(5 < i);
+            }
+
+            this.checkFindEntry();
+        } else {
+            this.editor.rePaint();
+        }
+
+    }
+
+    public void caretUpdate(CaretEvent var1) {
+        this.checkFindEntry();
+    }
+
+    public void mouseReleased(MouseEvent var1) {}
+
+    public void mouseEntered(MouseEvent var1) {}
+
+    public void mouseExited(MouseEvent var1) {}
+
+    public void mousePressed(MouseEvent var1) {}
+
+    public void mouseClicked(MouseEvent var1) {
+        this.hexOffset = !this.hexOffset;
+        this.editor.setStatus();
+    }
+}
+```
+
+`resources/Theme.java`:
+
+```java
+package resources;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.prefs.Preferences;
+
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+import javax.swing.text.JTextComponent;
+
+/**
+ * Light / dark palette for the hex editor.
+ *
+ * The colors are only ever pushed onto this plugin's own component tree - the
+ * shared UIManager defaults are deliberately left alone so that toggling the
+ * theme here cannot repaint the rest of Ghidra.
+ *
+ * The choice is remembered between runs through java.util.prefs.
+ */
+public class Theme {
+
+    private static final String PREF_KEY = "darkMode";
+
+    // --- window chrome: menus, panels, labels, fields -------------------
+    private static final Color LIGHT_BG      = new Color(238, 238, 238);
+    private static final Color LIGHT_FG      = new Color( 30,  30,  30);
+    private static final Color LIGHT_FIELD   = new Color(255, 255, 255);
+    private static final Color LIGHT_SELECT  = new Color(184, 207, 229);
+    private static final Color LIGHT_ACCENT  = new Color(  0,   0, 255);
+    private static final Color LIGHT_ERROR   = new Color(200,   0,   0);
+
+    private static final Color DARK_BG       = new Color( 43,  43,  43);
+    private static final Color DARK_FG       = new Color(216, 216, 216);
+    private static final Color DARK_FIELD    = new Color( 30,  30,  30);
+    private static final Color DARK_SELECT   = new Color( 62,  85, 110);
+    private static final Color DARK_ACCENT   = new Color(102, 178, 255);
+    private static final Color DARK_ERROR    = new Color(255, 110, 110);
+
+    // --- hex canvas ----------------------------------------------------
+    private static final Color LIGHT_CANVAS         = Color.WHITE;
+    private static final Color LIGHT_CANVAS_TEXT    = Color.BLACK;
+    private static final Color LIGHT_CANVAS_OFFSET  = Color.BLUE;
+    private static final Color LIGHT_CANVAS_CHANGED = Color.RED;
+    private static final Color LIGHT_CANVAS_SELECT  = Color.CYAN;
+    private static final Color LIGHT_CANVAS_CARET   = Color.MAGENTA;
+    private static final Color LIGHT_CANVAS_MARK    = Color.GREEN.darker();
+
+    // the tint behind an unmodified byte is shared by both themes: in dark mode it
+    // is drawn in XOR mode, where anything brighter than this turns the byte grid
+    // into a row of solid blocks
+    private static final Color CANVAS_MODIFIED      = new Color( 50,  50,  50, 40);
+
+    private static final Color DARK_CANVAS          = new Color( 18,  19,  22);
+    private static final Color DARK_CANVAS_TEXT     = new Color(220, 220, 220);
+    private static final Color DARK_CANVAS_OFFSET   = new Color(120, 170, 255);
+    private static final Color DARK_CANVAS_CHANGED  = new Color(255, 120, 120);
+    private static final Color DARK_CANVAS_SELECT   = new Color( 38,  92, 112);
+    private static final Color DARK_CANVAS_CARET    = new Color(255, 120, 255);
+    private static final Color DARK_CANVAS_MARK     = new Color( 90, 200, 120);
+
+    // structure inside the byte grid: banding, rules, and the washed out color
+    // that a 0x00 byte or an unprintable character is drawn in
+    private static final Color LIGHT_CANVAS_BAND    = new Color(  0,   0,   0,  10);
+    private static final Color LIGHT_CANVAS_ROW     = new Color(  0,  90, 255,  20);
+    private static final Color LIGHT_CANVAS_RULE    = new Color(  0,   0,   0,  38);
+    private static final Color LIGHT_CANVAS_FADED   = new Color(  0,   0,   0,  75);
+
+    private static final Color DARK_CANVAS_BAND     = new Color(255, 255, 255,  10);
+    private static final Color DARK_CANVAS_ROW      = new Color(120, 170, 255,  28);
+    private static final Color DARK_CANVAS_RULE     = new Color(255, 255, 255,  30);
+    private static final Color DARK_CANVAS_FADED    = new Color(220, 220, 220,  85);
+
+    private static final Color LIGHT_DIVIDER = new Color(  0,   0,   0,  42);
+    private static final Color DARK_DIVIDER  = new Color(255, 255, 255,  32);
+
+    private static final Color TRANSPARENT = new Color(0, 0, 0, 0);
+
+    // null until the user picks a side for themselves, at which point we stop
+    // taking the host's word for it
+    private static Boolean chosen = loadPreference();
+    private static boolean dark = chosen != null && chosen.booleanValue();
+
+    // borrowed from the host look and feel while we are still following it
+    private static Color hostBg;
+    private static Color hostFg;
+    private static Color hostField;
+    private static Color hostFieldFg;
+
+    private Theme() {
+    }
+
+    /**
+     * Falls in behind whatever theme the host is using.
+     *
+     * Ghidra ships light and dark themes of its own, and an editor docked in the
+     * tool that ignores them looks pasted on. Rather than depend on a particular
+     * Ghidra release's theme API, this reads the current look and feel: the
+     * luminance of the panel color decides light or dark, and the actual colors
+     * are borrowed so the editor's chrome matches its neighbours exactly.
+     *
+     * A theme the user chose by hand always wins.
+     */
+    public static void followHost() {
+        if(chosen != null) {
+            dark = chosen.booleanValue();
+            releaseHostColors();
+            return;
+        }
+
+        hostBg = UIManager.getColor("Panel.background");
+        hostFg = UIManager.getColor("Panel.foreground");
+        hostField = UIManager.getColor("TextField.background");
+        hostFieldFg = UIManager.getColor("TextField.foreground");
+
+        Color probe = hostBg != null ? hostBg : UIManager.getColor("control");
+        dark = probe != null && luminance(probe) < 0.5D;
+    }
+
+    private static void releaseHostColors() {
+        hostBg = null;
+        hostFg = null;
+        hostField = null;
+        hostFieldFg = null;
+    }
+
+    private static double luminance(Color c) {
+        return (0.2126D * c.getRed() + 0.7152D * c.getGreen() + 0.0722D * c.getBlue()) / 255.0D;
+    }
+
+    public static boolean isDark() {
+        return dark;
+    }
+
+    public static void setDark(boolean b) {
+        chosen = Boolean.valueOf(b);
+        dark = b;
+        releaseHostColors();
+        savePreference();
+    }
+
+    /** Flips the theme and returns the new state. */
+    public static boolean toggle() {
+        setDark(!dark);
+        return dark;
+    }
+
+    public static Color background()      { return hostBg != null ? hostBg : (dark ? DARK_BG : LIGHT_BG); }
+    public static Color foreground()      { return hostFg != null ? hostFg : (dark ? DARK_FG : LIGHT_FG); }
+    public static Color fieldBackground() { return hostField != null ? hostField : (dark ? DARK_FIELD : LIGHT_FIELD); }
+    public static Color fieldForeground() { return hostFieldFg != null ? hostFieldFg : foreground(); }
+    public static Color selection()       { return dark ? DARK_SELECT : LIGHT_SELECT; }
+    public static Color accent()          { return dark ? DARK_ACCENT : LIGHT_ACCENT; }
+    public static Color error()           { return dark ? DARK_ERROR  : LIGHT_ERROR;  }
+    /** Hairline used to separate the bars of chrome from each other. */
+    public static Color divider()         { return dark ? DARK_DIVIDER : LIGHT_DIVIDER; }
+
+    public static Color canvasBackground()  { return dark ? DARK_CANVAS         : LIGHT_CANVAS;         }
+    public static Color canvasText()        { return dark ? DARK_CANVAS_TEXT    : LIGHT_CANVAS_TEXT;    }
+    public static Color canvasOffset()      { return dark ? DARK_CANVAS_OFFSET  : LIGHT_CANVAS_OFFSET;  }
+    public static Color canvasChangedByte() { return dark ? DARK_CANVAS_CHANGED : LIGHT_CANVAS_CHANGED; }
+    public static Color canvasSelection()   { return dark ? DARK_CANVAS_SELECT  : LIGHT_CANVAS_SELECT;  }
+    public static Color canvasCaret()       { return dark ? DARK_CANVAS_CARET   : LIGHT_CANVAS_CARET;   }
+    public static Color canvasMark()        { return dark ? DARK_CANVAS_MARK    : LIGHT_CANVAS_MARK;    }
+    public static Color canvasModified()    { return CANVAS_MODIFIED; }
+    public static Color canvasBand()        { return dark ? DARK_CANVAS_BAND    : LIGHT_CANVAS_BAND;    }
+    public static Color canvasCurrentRow()  { return dark ? DARK_CANVAS_ROW     : LIGHT_CANVAS_ROW;     }
+    public static Color canvasRule()        { return dark ? DARK_CANVAS_RULE    : LIGHT_CANVAS_RULE;    }
+    public static Color canvasFaded()       { return dark ? DARK_CANVAS_FADED   : LIGHT_CANVAS_FADED;   }
+    public static Color canvasWarning()     { return error(); }
+    public static Color transparent()       { return TRANSPARENT; }
+
+    private static String monoFamily;
+
+    /**
+     * The first modern monospaced family that is actually installed, falling back
+     * to Java's logical "Monospaced". That logical family resolves to Courier on
+     * several platforms, and a Courier byte grid is most of why this window reads
+     * as a 1990s terminal.
+     */
+    public static Font monoFont(int style, int size) {
+        if(monoFamily == null) {
+            String[] wanted = {"JetBrains Mono", "SF Mono", "Menlo", "Cascadia Mono",
+                               "Consolas", "DejaVu Sans Mono", "Liberation Mono",
+                               "Noto Sans Mono", "Ubuntu Mono", "Courier New"};
+            List installed = Arrays.asList(
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
+            monoFamily = "Monospaced";
+            for(int i = 0; i < wanted.length; ++i) {
+                if(installed.contains(wanted[i])) {
+                    monoFamily = wanted[i];
+                    break;
+                }
+            }
+        }
+        return new Font(monoFamily, style, size);
+    }
+
+    /**
+     * Turns on antialiasing for a canvas we paint ourselves. Without this the
+     * byte grid is rendered with hard aliased glyphs, which no other panel in a
+     * current desktop application still does.
+     */
+    public static void applyTextHints(Graphics g) {
+        if(!(g instanceof Graphics2D)) {
+            return;
+        }
+        Graphics2D g2 = (Graphics2D)g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+        // the desktop hints carry the platform's subpixel setting when there is one
+        Object desktop = Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+        if(desktop instanceof Map) {
+            g2.addRenderingHints((Map)desktop);
+        }
+        Object text = g2.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
+        if(text == null || RenderingHints.VALUE_TEXT_ANTIALIAS_OFF.equals(text)
+                || RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT.equals(text)) {
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        }
+    }
+
+    /**
+     * Recolors a component and everything below it. Safe to call repeatedly and
+     * safe to call on components that are currently detached from the frame,
+     * which is how the find bar and the help pane get themed while hidden.
+     */
+    public static void apply(Component c) {
+        if(c == null) {
+            return;
+        }
+
+        recolor(c);
+
+        // a JMenu keeps its items in a popup that is not part of getComponents()
+        if(c instanceof JMenu) {
+            JMenu menu = (JMenu)c;
+            apply(menu.getPopupMenu());
+            for(int i = 0; i < menu.getItemCount(); ++i) {
+                apply(menu.getItem(i)); // null for separators, handled above
+            }
+        }
+
+        if(c instanceof Container) {
+            Component[] children = ((Container)c).getComponents();
+            for(int i = 0; i < children.length; ++i) {
+                apply(children[i]);
+            }
+        }
+    }
+
+    private static void recolor(Component c) {
+        c.setBackground(background());
+        c.setForeground(foreground());
+
+        if(c instanceof JTextComponent) {
+            JTextComponent t = (JTextComponent)c;
+            t.setBackground(fieldBackground());
+            t.setForeground(fieldForeground());
+            t.setCaretColor(fieldForeground());
+            t.setSelectionColor(selection());
+            t.setSelectedTextColor(fieldForeground());
+            t.setDisabledTextColor(fieldForeground());
+        }
+
+        // several look and feels only honor setBackground() on a component that
+        // declares itself opaque - menus in particular paint their own fill
+        if(c instanceof JMenuBar || c instanceof JMenuItem || c instanceof JPopupMenu
+                || c instanceof JPanel || c instanceof JLabel) {
+            ((JComponent)c).setOpaque(true);
+        }
+
+        if(c instanceof JComponent) {
+            Border b = ((JComponent)c).getBorder();
+            if(b instanceof TitledBorder) {
+                ((TitledBorder)b).setTitleColor(accent());
+            }
+        }
+    }
+
+    private static Boolean loadPreference() {
+        try {
+            String stored = Preferences.userNodeForPackage(Theme.class).get(PREF_KEY, null);
+            return stored == null ? null : Boolean.valueOf(stored);
+        } catch (Exception e) {
+            return null; // no preference store available, follow the host
+        }
+    }
+
+    private static void savePreference() {
+        try {
+            Preferences.userNodeForPackage(Theme.class).put(PREF_KEY, String.valueOf(dark));
+        } catch (Exception e) {
+            // remembering the theme is a convenience, never a reason to fail
+        }
+    }
+}
+
+```
+
+`resources/accent.java`:
+
+```java
+package resources;
+
+public class accent {
+
+   public static final String[] s = new String[]{"@AaÀÁÂÃÄÅàáâãäåĀāĂăĄąǍǎǞǟǠǡǺǻȀȁȂȃȦȧȺḀḁẚẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặ₳ÅⒶⓐⱥⱯ＠Ａａ", "BbƀƁƂƃƄƅɃɓḂḃḄḅḆḇℬ␢ⒷⓑＢｂ", "Cc¢©ÇçĆćĈĉĊċČčƇƈȻȼḈḉ₡₢ℂ℃℄ℭⒸⓒꜾꜿＣｃ", "DdÐðĎďĐđƉƊƋƌȡɖɗḊḋḌḍḎḏḐḑḒḓ₫₯ⅅⅆ∂ⒹⓓꝩꝺＤｄ", "EeÈÉÊËèéêëĒēĔĕĖėĘęĚěƎǝȄȅȆȇȨȩḔḕḖḗḘḙḚḛḜḝẸẹẺẻẼẽẾếỀềỂểỄễỆệ₠€ℇ℮ℯℰⅇⒺⓔⱸⱻＥｅ", "FfƑƒḞḟ₣℉ℱℲ⅍ⒻⓕꜰꝫꝼꟻＦｆ", "GgĜĝĞğĠġĢģƓǤǥǦǧǴǵɠɡḠḡ₲ℊ⅁ⒼⓖꝽꝾꝿＧｇ", "HhĤĥĦħȞȟḢḣḤḥḦḧḨḩḪḫẖ₴ℋℌℍℎℏⒽⓗⱧⱨⱵⱶＨｈ", "IiÌÍÎÏìíîïĨĩĪīĬĭĮįİıƗǏǐȈȉȊȋɨӀḬḭḮḯỈỉỊịℐℑℹⅈⒾⓘꟾＩｉ", "JjĴĵǰȷɈɉⅉⒿⓙⱼＪｊ", "KkĶķĸƘƙǨǩḰḱḲḳḴḵ₭KⓀⓚⱩⱪꝀꝁꝂꝃꝄꝅＫｋ", "Ll£ĹĺĻļĽľĿŀŁłƚȴȽḶḷḸḹḺḻḼḽ₤₶ℒℓ℔⅂⅃ⓁⓛⱠⱡⱢꝆꝇꝈꝉꞀꞁＬｌ", "MmƜɯḾḿṀṁṂṃ₥ℳⓂⓜⱮꟽꟿＭｍ", "NnÑñŃńŅņŇňŉŊŋƝƞǸǹȠȵɲṄṅṆṇṈṉṊṋ₦₪ℕ№ⓃⓝＮｎ", "OoÒÓÔÕÖØòóôõöøŌōŎŏŐőƆƟƠơǑǒǪǫǬǭǾǿȌȍȎȏȪȫȬȭȮȯȰȱɔɵṌṍṎṏṐṑṒṓỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợℴ∅ⓄⓞⱺꝊꝋꝌꝍＯｏ", "PpƤƥṔṕṖṗ₧₱℗℘ℙⓅⓟⱣꝐꝑꝒꝓꝔꝕꟼＰｐ", "QqɊɋℚ℺ⓆⓠꝖꝗꝘꝙＱｑ", "Rr®ŔŕŖŗŘřȐȑȒȓɌɍṘṙṚṛṜṝṞṟ₨ℛℜℝ℞℟ⓇⓡⱤⱹꝚꝛꞂꞃＲｒ", "$SsŚśŜŝŞşŠšſȘșȿṠṡṢṣṤṥṦṧṨṩẛẜẝ₷⅀ⓈⓢⱾꜱꞄꞅ＄Ｓｓ", "TtŢţŤťŦŧƫƬƭƮȚțȶȾʈṪṫṬṭṮṯṰṱẗ₮₸ⓉⓣⱦꞆꞇＴｔ", "UuÙÚÛÜùúûüŨũŪūŬŭŮůŰűŲųƯưǓǔǕǖǗǘǙǚǛǜȔȕȖȗɄʉṲṳṴṵṶṷṸṹṺṻỤụỦủỨứỪừỬửỮữỰựⓊⓤＵｕ", "VvƲɅʋʌṼṽṾṿỼỽⓋⓥⱱⱴⱽꝞꝟＶｖ", "WwŴŵẀẁẂẃẄẅẆẇẈẉẘ₩ⓌⓦⱲⱳＷｗ", "Xx×ẊẋẌẍⓍⓧＸｘ", "Yy¥ÝýÿŶŷŸƳƴȲȳɎɏẎẏẙỲỳỴỵỶỷỸỹỾỿ⅄ⓎⓨＹｙ", "ZzŹźŻżŽžƵƶȤȥɀẐẑẒẓẔẕℤℨⓏⓩⱫⱬⱿꝢꝣＺｚ", "ÞþꝤꝥꝦꝧ", "ÆæǢǣǼǽ", "Œœɶ", "0⁰⓪⓿０", "1¹ⁱⅠⅰ①⑰⒈⓵１", "2²⁲Ⅱⅱ②⑵⒉⓶２", "3³⁳Ⅲⅲ③⑶⒊⓷３", "4⁴Ⅳⅳ④⑷⒋⓸４", "5⁵Ⅴⅴ⑤⑸⒌⓹５", "6⁶Ⅵⅵ⑥⑹⒍⓺６", "7⁷Ⅶⅶ⑦⑺⒎⓻７", "8Ȣȣ⁸Ⅷⅷ⑧⑻⒏⓼８", "9⁹Ⅸⅸ⑨⑼⒐⓽９", "ƷƸƹǮǯȜȝʒ", "ꜸꜹꜺꜻ", "ƿǷᚹ", "ǄǅǆǱǲǳ", "Ǉǈǉ", "Ǌǋǌ", "℡☎☏✆", "ɑΆΑάα∝ⱭⱰ", "ßΒβϐẞ", "ƔɣΓγℽℾ", "ƍΔδẟ∆", "Εεϵ϶∍ƐɛΈέ", "ΗηΉή", "Θθϑ", "ƖɩͅͺΊΙΪίιϊι℩", "Κκϰ", "ƛΛλ", "µΜμ", "ΌΟοό", "Ππϖℼℿ∏", "Ρρϱϼ", "ƩʃͻͼͽΣςσϚϛϲϹϽϾϿ∑", "ƱʊΎΥΫΰυϋύϒϔ℧☋", "ɸΦφϕⱷ", "ΏΩωώΩ☊", "ϘϙϞϟ", "ͲͳϠϡ", "Ͱͱ", "Ͷͷ"};
+
+
+}
+
+```
+
+`resources/binEdit.java`:
+
+```java
+package resources;
+
+import docking.widgets.combobox.GComboBox;
+
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Toolkit;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Dimension;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.Stack;
+import java.util.Vector;
+import javax.imageio.ImageIO;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.Timer;
+import javax.swing.JFileChooser;
+
+public class binEdit extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener, ActionListener, AdjustmentListener {
+
+   /**
+    *
+    */
+   private static final long serialVersionUID = 1L;
+   public GhidraSrc hex;
+   public String path;
+   boolean nibArea = true;
+   boolean isNibLow = false;
+   boolean jSbSource = true;
+   boolean isApplet;
+   int[] xPos;
+   int[] xNib = new int[32];
+   int[] xTxt = new int[16];
+   int[] cShift = new int[256];
+   int wChar = -1;
+   int wPanel = -1;
+   int hMargin = -1;
+   int hChar = -1;
+   int hPanel = -1;
+   int fontSize = 0;
+   int caretVisible = 0;
+   int maxRow = -1;
+   int maxPos;
+   int hLimit = -1;
+   Font font;
+   long virtualSize = 0L;
+   long scrPos = 0L;
+   long firstPos = 0L;
+   long lastPos = 0L;
+   long newPos = 0L;
+   long clipboardSize;
+   long jSBStep = 1L;
+   JFileChooser jFC;
+   Object[] InsDelOption = new Object[7];
+   JRadioButton[] InsDelB = new JRadioButton[5];
+   JTextField InsDelTF = new JTextField();
+   Timer timer = new Timer(500, this);
+   Clipboard clipboard;
+   RandomAccessFile rAF;
+   Stack undoStack = new Stack();
+   Vector srcV = new Vector();
+   Vector markV = new Vector();
+   Vector MarkV = new Vector();
+   Vector v1 = new Vector();
+   Vector XCV = new Vector();
+   Byte byteCtrlY = null;
+   edObj eObj = null;
+   edObj eObjCtrlY = null;
+   File f1 = null;
+   public MainWindow mw;
+   saveT sav;
+   findT find;
+   long longInput = 0L;
+
+
+   public binEdit(GhidraSrc h, MainWindow m, String p) {
+      hex = h;
+      path = new String(p);
+      this.mw = m;
+      this.setGrid(14);
+      this.addMouseListener(this);
+      this.addMouseMotionListener(this);
+      this.addMouseWheelListener(this);
+      this.addKeyListener(this);
+      mw.jSB.setEnabled(true);
+      mw.jSB.setFocusable(true);
+      mw.jSB.setUnitIncrement(1);
+      mw.jSB.addMouseWheelListener(this);
+      mw.jSB.addAdjustmentListener(this);
+      this.timer.addActionListener(this);
+      this.isApplet = true;
+      String[] var3 = new String[]{"Delete", "Insert & fill with 0x00", "Insert & fill with 0xFF", "Insert & fill with 0x20 (space)", "or Insert clipboard"};
+      ButtonGroup var4 = new ButtonGroup();
+
+      for(int var5 = 0; var5 < this.InsDelB.length; ++var5) {
+         (this.InsDelB[var5] = new JRadioButton(var3[var5])).addActionListener(this);
+         var4.add(this.InsDelB[var5]);
+         this.InsDelOption[var5 < 4?var5:6] = this.InsDelB[var5];
+      }
+
+      this.InsDelOption[4] = "<html>Bytes to delete or to insert<br>(0x.. for hexa entry):";
+      this.InsDelTF.setColumns(9);
+      this.InsDelOption[5] = this.InsDelTF;
+      this.jSbSource = false;
+      File f;
+      if(!existsLocally(path)){
+        hex.dbprint("Path does not exist locally: "+path+"\n");
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setDialogTitle("Export "+hex.getName()+" to...");
+        chooser.showDialog(mw, "Export Local Copy");
+        File dir = chooser.getSelectedFile();
+        if(dir == null) { // export cancelled, nothing was written locally
+            f = new File(p);
+        } else {
+            path = dir.getAbsolutePath();
+            f = new File(path, hex.getName());
+            hex.dbprint("Exporting "+f.getAbsolutePath());
+            hex.createFile(f);
+        }
+      } else {
+        f = new File(path);
+      }
+      loadFile(f);
+      this.jFC = new JFileChooser(path);
+      this.jFC.setAcceptAllFileFilterUsed(false);
+      JFileChooser var10001 = this.jFC;
+      this.jFC.setDialogType(0);
+      var10001 = this.jFC;
+      this.jFC.setFileSelectionMode(2);
+      this.jFC.setMultiSelectionEnabled(false);
+      this.jFC.setDragEnabled(false);
+      this.clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+      this.focus();
+   }
+
+   public void closeFile() {
+      if(this.rAF != null) {
+         try {
+            this.rAF.close();
+         } catch (Exception var2) {
+            System.err.println("Ctrl+OQ " + var2);
+         }
+      }
+
+      this.f1 = null;
+      this.undoStack.clear();
+      this.doVirtual();
+      System.gc();
+   }
+
+   /**
+    * Paths.get() answers a malformed path with InvalidPathException, and because
+    * that is unchecked it used to tear down the whole script - which is exactly
+    * how a Windows path carrying a leading separator surfaced in issues #2 and #3.
+    * Report such a path as "not here" so the export dialog opens instead.
+    */
+   private boolean existsLocally(String p) {
+      try {
+         return Files.exists(Paths.get(p));
+      } catch (InvalidPathException e) {
+         hex.dbprint("Not a usable path on this platform: "+p+"\n");
+         return false;
+      }
+   }
+
+   public void loadFile(File var1) {
+      this.f1 = var1;
+      this.mw.JTFile.setText(this.f1.toString() + (this.f1.canWrite()?"":" ( ReadOnly ) "));
+
+      try {
+         this.rAF = new RandomAccessFile(this.f1, this.f1.canWrite()?"rw":"r");
+         this.jSbSource = false;
+         mw.jSB.setValue(0);
+         this.undoStack.push(new edObj(0L, this.f1.length(), 0));
+         this.doVirtual();
+         this.focus();
+      } catch (Exception var3) {
+         System.err.println("loadFile " + var3);
+      }
+
+      this.eObjCtrlY = null;
+      this.byteCtrlY = null;
+   }
+
+   private void focus() {
+      if(!this.requestFocusInWindow()) {
+         this.requestFocus();
+      }
+
+   }
+
+   private void setGrid(int var1) {
+      byte var3 = 11;
+      byte var4 = 35;
+      int var5 = -3;
+      int var2;
+      if(var1 != this.fontSize) {
+         this.fontSize = var1 < var3?var3:(var4 < var1?var4:var1);
+         FontMetrics var6 = this.getFontMetrics(this.font = Theme.monoFont(this.fontSize < 27?0:1, this.fontSize));
+         this.cShift = var6.getWidths();
+         this.wChar = -1;
+
+         // Measure the printable ASCII range only. Sizing every cell to the widest
+         // glyph in all of Latin-1 meant one substituted glyph - Menlo has no char
+         // 131, and the fallback is 14px against an 8px digit - stretched the whole
+         // grid by three quarters and left every digit floating in its cell.
+         for(var2 = 32; var2 < 127; ++var2) {
+            this.wChar = this.cShift[var2] > this.wChar?this.cShift[var2]:this.wChar;
+         }
+
+         this.wChar = var6.charWidth('\u2219') > this.wChar?var6.charWidth('\u2219'):this.wChar;
+
+         for(var2 = 0; var2 < 256; ++var2) {
+            this.cShift[var2] = this.wChar - this.cShift[var2] >> 1;
+         }
+
+         this.wChar >>= 1;
+         this.hChar = var6.getHeight();
+         this.hMargin = var6.getLeading() + var6.getAscent();
+      }
+
+      this.maxRow = (this.hPanel - this.hMargin) / this.hChar + 1;
+      this.maxPos = (this.maxRow << 4) - 1;
+      this.xPos = new int[Long.toHexString(this.virtualSize + 32L).length() + 1 >> 1 << 1];
+
+      for(var2 = this.xPos.length - 1; -1 < var2; --var2) {
+         this.xPos[var2] = var5 += var2 % 2 == 0?2:3;
+      }
+
+      for(var2 = 0; var2 < this.xNib.length; ++var2) {
+         int var10003 = (var2 & 1) == 1?2:((var2 & 7) == 0?5:3);
+         int var10002 = var5 + ((var2 & 1) == 1?2:((var2 & 7) == 0?5:3));
+         var5 += var10003;
+         this.xNib[var2] = var10002;
+      }
+
+      var5 += 4;
+
+      for(var2 = 0; var2 < this.xTxt.length; ++var2) {
+         var5 += 2;
+         this.xTxt[var2] = var5;
+      }
+
+      long var8 = (this.virtualSize >> 4) + 2L;
+      if(var8 < 1073741824L) {
+         this.jSbSource = false;
+         mw.jSB.setMaximum((int)var8);
+         this.jSbSource = false;
+         mw.jSB.setVisibleAmount(this.maxRow);
+         this.jSbSource = false;
+         mw.jSB.setBlockIncrement(this.maxRow - 1);
+         this.jSBStep = 16L;
+      } else {
+         var2 = (int)(var8 >> 30);
+         this.jSbSource = false;
+         mw.jSB.setMaximum(1073741824);
+         this.jSbSource = false;
+         mw.jSB.setVisibleAmount(1);
+         this.jSbSource = false;
+         mw.jSB.setBlockIncrement(1048576);
+         this.jSBStep = (long)var2 << 4;
+      }
+
+   }
+
+   public void adjustmentValueChanged(AdjustmentEvent var1) {
+      if(var1.getSource() == mw.jSB && this.jSbSource) {
+         this.slideScr((long)mw.jSB.getValue() * this.jSBStep, false);
+      }
+
+      this.jSbSource = true;
+   }
+
+   protected void slideScr(long var1, boolean var3) {
+      long var4 = this.virtualSize < 9223372036854775792L?this.virtualSize & -16L:9223372036854775792L;
+      if(var3 || var1 >= 0L) {
+         if(var3 && (this.lastPos < var1 || var1 < this.lastPos - (long)this.maxPos)) {
+            this.scrPos = this.lastPos - (long)(this.maxPos >> 1) & -16L;
+         } else {
+            this.scrPos = var1 & -16L;
+         }
+      }
+
+      if(var4 - (long)this.maxPos + 31L <= this.scrPos) {
+         this.scrPos = var4 - (long)this.maxPos + 31L;
+      }
+
+      if(this.scrPos < 0L) {
+         this.scrPos = 0L;
+      }
+
+      if(this.scrPos != (long)mw.jSB.getValue() * this.jSBStep) {
+         this.jSbSource = false;
+         mw.jSB.setValue((int)(this.scrPos / this.jSBStep));
+      }
+
+      this.setSrc();
+      this.rePaint();
+      this.caretVisible = 0;
+      this.timer.restart();
+   }
+
+   protected void goTo(String var1) {
+      if(var1 != null) {
+         this.String2long(var1);
+         if(this.longInput < 0L) {
+            this.longInput = this.lastPos;
+         }
+
+         this.firstPos = this.lastPos = this.longInput < this.virtualSize?this.longInput:this.virtualSize;
+         this.isNibLow = false;
+         this.slideScr(0L, true);
+      }
+
+   }
+
+   /**
+    * Sized from the grid metrics instead of a hard coded pixel count, so the host
+    * window can be packed around the content and resized freely afterwards.
+    */
+   public Dimension getPreferredSize() {
+      if(this.wChar < 1 || this.xTxt[15] < 1) {
+         return new Dimension(720, 420);
+      }
+      return new Dimension(this.wChar * (this.xTxt[15] + 4), this.hChar * 26);
+   }
+
+   protected void paintComponent(Graphics var1) {
+      this.paintImg(var1, true);
+   }
+
+   protected void paintImg(Graphics var1, boolean var2) {
+      char[] var3 = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+      byte[] var5 = new byte[2];
+      int[] var10 = new int[2];
+      int[] var11 = new int[2];
+      long var12 = 0L;
+      if(this.hPanel != this.getHeight()) {
+         this.wPanel = this.getWidth();
+         this.hPanel = this.getHeight();
+         this.setGrid(this.fontSize);
+         this.setSrc();
+      }
+
+      Theme.applyTextHints(var1);
+      var1.setColor(Theme.canvasBackground());
+      var1.fillRect(0, 0, this.getWidth(), this.getHeight());
+
+      // banding first, so every glyph and highlight lands on top of it: every
+      // other row is tinted, and the row holding the caret is tinted more
+      int[] caretRC = this.pos2XY(this.lastPos);
+      boolean caretShown = this.scrPos <= this.lastPos && this.lastPos - (long)this.maxPos <= this.scrPos;
+      for(int band = 0; band < this.maxRow; ++band) {
+         if(caretShown && band == caretRC[1]) {
+            var1.setColor(Theme.canvasCurrentRow());
+         } else if((band & 1) == 1) {
+            var1.setColor(Theme.canvasBand());
+         } else {
+            continue;
+         }
+         var1.fillRect(0, this.hChar * band + 1, this.getWidth(), this.hChar);
+      }
+
+      // hairlines splitting the offset gutter, the hex pane and the decoded text
+      var1.setColor(Theme.canvasRule());
+      var1.fillRect(this.wChar * (this.xNib[0] - 3), 0, 1, this.getHeight());
+      var1.fillRect(this.wChar * (this.xTxt[0] - 3), 0, 1, this.getHeight());
+
+      var1.setFont(this.font);
+      var1.setColor(Theme.canvasOffset());
+      this.hLimit = 0;
+
+      char var6;
+      int var8;
+      int var9;
+      for(var9 = 0; var9 < this.maxRow; ++var9) {
+         var12 = this.scrPos + (long)(var9 << 4);
+         if((this.virtualSize | 15L) < var12 || var12 < 0L) {
+            break;
+         }
+
+         for(var8 = 0; var8 < this.xPos.length; ++var8) {
+            var6 = var3[(int)(var12 & 15L)];
+            var1.drawString("" + var6, this.cShift[var6] + this.wChar * this.xPos[var8], this.hLimit = this.hMargin + this.hChar * var9);
+            var12 >>= 4;
+         }
+      }
+
+      if(var12 < 0L) {
+         var1.setColor(Theme.canvasWarning());
+         var1.drawString("-- Limit = 0x7FFFFFFFFFFFFFFE = Long.MAX_VALUE-1 = 2^63-2 = 9223372036854775806 --", 0, this.hMargin + this.hChar * var9 - 3);
+      }
+
+      var1.setColor(Theme.canvasSelection());
+      boolean var16 = this.firstPos < this.lastPos;
+      var10 = this.pos2XY(var16?this.firstPos:this.lastPos);
+      var11 = this.pos2XY(!var16?this.firstPos:this.lastPos);
+      if(this.lastPos != this.firstPos && this.lastPos >= this.scrPos) {
+         if(var10[1] == var11[1]) {
+            var1.fillRect(this.wChar * this.xNib[var10[0] * 2] - 2, this.hChar * var10[1] + 3, this.wChar * (this.xNib[var11[0] * 2] - this.xNib[var10[0] * 2]), this.hChar - 4);
+            var1.fillRect(this.wChar * this.xTxt[var10[0]], this.hChar * var10[1] + 3, this.wChar * (this.xTxt[var11[0]] - this.xTxt[var10[0]]), this.hChar - 4);
+         } else if(var10[1] + 1 == var11[1] && var11[0] == 0) {
+            var1.fillRect(this.wChar * this.xNib[var10[0] * 2] - 2, this.hChar * var10[1] + 3, this.wChar * (this.xNib[31] + 2 - this.xNib[var10[0] * 2]), this.hChar - 4);
+            var1.fillRect(this.wChar * this.xTxt[var10[0]], this.hChar * var10[1] + 3, this.wChar * (this.xTxt[15] + 2 - this.xTxt[var10[0]]), this.hChar - 4);
+         } else {
+            var1.fillRect(this.wChar * this.xNib[var10[0] * 2] - 2, this.hChar * var10[1] + 3, this.wChar * (this.xNib[31] + 2 - this.xNib[var10[0] * 2]) + 4, this.hChar - 4);
+            var1.fillRect(this.wChar * this.xNib[0] - 2, this.hChar * (var10[1] + 1) - 1, this.wChar * (this.xNib[31] + 2 - this.xNib[0]) + 4, this.hChar * (var11[1] - var10[1] - 1) + 4);
+            if(this.xNib[var11[0] * 2] != this.xNib[0]) {
+               var1.fillRect(this.wChar * this.xNib[0] - 2, this.hChar * var11[1] + 3, this.wChar * (this.xNib[var11[0] * 2] - this.xNib[0]), this.hChar - 4);
+            }
+
+            var1.fillRect(this.wChar * this.xTxt[var10[0]], this.hChar * var10[1] + 3, this.wChar * (this.xTxt[15] + 2 - this.xTxt[var10[0]]), this.hChar - 4);
+            var1.fillRect(this.wChar * this.xTxt[0], this.hChar * (var10[1] + 1) - 1, this.wChar * (this.xTxt[15] + 2 - this.xTxt[0]), this.hChar * (var11[1] - var10[1] - 1) + 4);
+            var1.fillRect(this.wChar * this.xTxt[0], this.hChar * var11[1] + 3, this.wChar * (this.xTxt[var11[0]] - this.xTxt[0]), this.hChar - 4);
+         }
+      }
+
+      for(int var7 = 0; var7 < this.srcV.size() && var7 < this.maxRow << 4; ++var7) {
+         var8 = var7 % 16;
+         var9 = var7 >> 4;
+         var5 = (byte[])((byte[])((byte[])this.srcV.get(var7)));
+         var1.setColor(var5[1] != 1?Theme.transparent():Theme.canvasModified());
+         var1.fillRect(this.wChar * this.xNib[var8 * 2] - 2, this.hChar * var9 + 3, this.wChar * 5, this.hChar - 4);
+         var1.fillRect(this.wChar * this.xTxt[var8], this.hChar * var9 + 3, this.wChar * 2, this.hChar - 4);
+         var1.setColor(2 < var5[1]?Theme.canvasChangedByte():(var5[0] == 0?Theme.canvasFaded():Theme.canvasText()));
+         var6 = var3[(255 & var5[0]) >> 4];
+         var1.drawString("" + var6, this.cShift[var6] + this.wChar * this.xNib[var8 * 2], this.hMargin + this.hChar * var9);
+         var6 = var3[(255 & var5[0]) % 16];
+         var1.drawString("" + var6, this.cShift[var6] + this.wChar * this.xNib[var8 * 2 + 1], this.hMargin + this.hChar * var9);
+         var6 = (char)(255 & var5[0]);
+         if(Character.isISOControl(var6)) {
+            var1.setColor(Theme.canvasFaded());
+            var1.drawString("∙", this.wChar * this.xTxt[var8], this.hMargin + this.hChar * var9);
+         } else {
+            var1.drawString("" + var6, this.cShift[var6] + this.wChar * this.xTxt[var8], this.hMargin + this.hChar * var9);
+         }
+      }
+
+      var1.setColor(Theme.canvasMark());
+      long var14;
+      Iterator var17;
+      if(this.markV != null && 0 < this.markV.size()) {
+         var17 = this.markV.iterator();
+
+         while(var17.hasNext()) {
+            var14 = ((Long)var17.next()).longValue();
+            if(this.virtualSize <= var14) {
+               var17.remove();
+            } else if(this.scrPos <= var14 && var14 - (long)this.maxPos <= this.scrPos) {
+               var10 = this.pos2XY(var14);
+               var1.fillRect(this.wChar * (this.xNib[0] - 1), this.hChar * (var10[1] + 1) - 2, this.wChar * (this.xNib[var10[0] << 1] - this.xNib[0] + 1) - 2, 1);
+               var1.fillRect(this.wChar * this.xNib[var10[0] << 1] - 2, this.hChar * var10[1] + 3, 1, this.hChar - 4);
+               var1.fillRect(this.wChar * this.xNib[var10[0] << 1] - 2, this.hChar * var10[1] + 3, this.wChar * (this.xNib[31] - this.xNib[var10[0] << 1] + 3), 1);
+               var1.fillRect(this.wChar * (this.xTxt[0] - 1), this.hChar * (var10[1] + 1) - 2, this.wChar * (this.xTxt[var10[0]] - this.xTxt[0] + 1), 1);
+               var1.fillRect(this.wChar * this.xTxt[var10[0]] - 1, this.hChar * var10[1] + 3, 1, this.hChar - 4);
+               var1.fillRect(this.wChar * this.xTxt[var10[0]], this.hChar * var10[1] + 3, this.wChar * (this.xTxt[15] - this.xTxt[var10[0]] + 3), 1);
+            }
+         }
+      }
+
+      if(this.MarkV != null && 0 < this.MarkV.size()) {
+         var17 = this.MarkV.iterator();
+
+         while(var17.hasNext()) {
+            var14 = ((Long)var17.next()).longValue();
+            if(this.virtualSize <= var14) {
+               var17.remove();
+            } else if(this.scrPos <= var14 && var14 - (long)this.maxPos <= this.scrPos) {
+               var10 = this.pos2XY(var14);
+               var1.fillRect(this.wChar * (this.xNib[0] - 1), this.hChar * (var10[1] + 1) - 2, this.wChar * (this.xNib[var10[0] << 1] - this.xNib[0] + 1), 2);
+               var1.fillRect(this.wChar * this.xNib[var10[0] << 1] - 2, this.hChar * var10[1] + 3, 2, this.hChar - 3);
+               var1.fillRect(this.wChar * this.xNib[var10[0] << 1] - 2, this.hChar * var10[1] + 3, this.wChar * (this.xNib[31] - this.xNib[var10[0] << 1] + 3), 2);
+               var1.fillRect(this.wChar * (this.xTxt[0] - 1), this.hChar * (var10[1] + 1) - 2, this.wChar * (this.xTxt[var10[0]] - this.xTxt[0] + 1), 2);
+               var1.fillRect(this.wChar * this.xTxt[var10[0]] - 1, this.hChar * var10[1] + 3, 2, this.hChar - 3);
+               var1.fillRect(this.wChar * this.xTxt[var10[0]], this.hChar * var10[1] + 3, this.wChar * (this.xTxt[15] - this.xTxt[var10[0]] + 3), 2);
+            }
+         }
+      }
+
+      if(this.scrPos <= this.lastPos && this.lastPos - (long)this.maxPos <= this.scrPos) {
+         var1.setColor(Theme.canvasCaret());
+         var11 = this.pos2XY(this.lastPos);
+         if(this.caretVisible < 2 || !var2) {
+            var1.fillRect(this.wChar * (this.nibArea?this.xNib[(var11[0] << 1) + (this.isNibLow?1:0)]:this.xTxt[var11[0]]) - 1, this.hChar * var11[1] + 3, 2, this.hChar - 4);
+         }
+
+         var1.fillRect(this.wChar * (this.nibArea?this.xTxt[var11[0]]:this.xNib[var11[0] << 1]), this.hChar * (var11[1] + 1) - 2, this.wChar << (this.nibArea?1:2), 2);
+      }
+
+   }
+
+   private int[] pos2XY(long var1) {
+      var1 -= this.scrPos;
+      int var3 = var1 < 0L?0:(var1 < (long)(this.maxPos + 1)?(int)var1:this.maxPos + 1);
+      int[] var4 = new int[]{var3 % 16, var3 >> 4};
+      return var4;
+   }
+
+   protected void rePaint() {
+      this.repaint();
+      if(this.mw.header != null) { // null while binEdit is still being constructed
+         this.mw.header.repaint();
+      }
+      this.setStatus();
+   }
+
+   protected void setStatus() {
+      int var3 = this.mw.viewCBox[1].getSelectedIndex();
+      String var7 = "";
+      if(this.firstPos != this.lastPos) {
+         if(this.lastPos - this.firstPos < 2147483647L && this.firstPos - this.lastPos < 2147483647L) {
+            this.mw.JTsizes.setText(this.lastPos - this.firstPos + " bytes selected.");
+         } else {
+            this.mw.JTsizes.setForeground(Theme.error());
+            this.mw.JTsizes.setText("Don\'t select more than 2^31-1 bytes!");
+         }
+      } else {
+         // StringBuffer var6 = new StringBuffer(this.isApplet?"Offset: ":"<html>Offset:&nbsp;<b>");
+         StringBuffer var6 = new StringBuffer("Offset: ");
+         var6.append(this.coloredLong(this.lastPos)).append("/-").append(this.coloredLong(this.virtualSize - this.lastPos));
+         this.mw.JTsizes.setForeground(Theme.foreground());
+         this.mw.JTsizes.setText(var6.toString());
+      }
+
+      this.mw.JTView.setText("");
+      if(this.lastPos >= this.scrPos && this.scrPos + (long)this.srcV.size() >= this.lastPos) {
+         if(this.lastPos <= this.virtualSize) {
+            int var5 = var3 != 0 && var3 != 1?(var3 != 2 && var3 != 3?(var3 != 4 && var3 != 5 && var3 != 8?(var3 != 6 && var3 != 7 && var3 != 9?(var3 != 10 && var3 != 11?128:64):8):4):2):1;
+            int var4 = (int)((this.virtualSize < this.scrPos + (long)this.srcV.size()?this.virtualSize:this.scrPos + (long)this.srcV.size()) - this.lastPos);
+            if(var4 == 0 || var4 < var5 && var5 < 9) {
+               return;
+            }
+
+            var4 = var5 < var4?var5:(var3 != 12?var4:var4 >> 1 << 1);
+            byte[] var1 = new byte[var4];
+
+            for(var4 = 0; var4 < var1.length; ++var4) {
+               var1[var4] = ((byte[])((byte[])this.srcV.get((int)(this.lastPos - this.scrPos + (long)var4))))[0];
+            }
+
+            var5 = var1[0];
+
+            try {
+               if(var3 == 0) {
+                  for(var4 = 0; var4 < 8; ++var4) {
+                     var7 = var7 + ((var5 & 128) == 128?'1':'0');
+                     if(var4 == 3) {
+                        var7 = var7 + ' ';
+                     }
+
+                     var5 <<= 1;
+                  }
+               } else if(var3 == 1) {
+                  var7 = Integer.toString(var5) + " / " + Integer.toString(var5 & 255);
+               } else if(var3 == 8) {
+                  var7 = this.mw.fForm.format((double)Float.intBitsToFloat((new BigInteger(var1)).intValue()));
+               } else if(var3 == 9) {
+                  var7 = this.mw.dForm.format(Double.longBitsToDouble((new BigInteger(var1)).longValue()));
+               } else if(var3 == 10) {
+                  var7 = new String(var1, this.mw.cp437Available?"cp437":"ISO-8859-1");
+               } else if(var3 == 11) {
+                  var7 = new String(var1, "UTF-8");
+               } else if(var3 == 12) {
+                  var7 = new String(var1, this.mw.viewCBox[0].getSelectedIndex() < 1?"UTF-16BE":"UTF-16LE");
+               } else {
+                  byte[] var2 = new byte[var3 < 6?var3:(var3 == 6?8:9)];
+                  var2[0] = 0;
+                  if(this.mw.viewCBox[0].getSelectedIndex() < 1) {
+                     if((var2.length & 1) == 0) {
+                        System.arraycopy(var1, 0, var2, 0, var2.length);
+                     } else {
+                        System.arraycopy(var1, 0, var2, 1, var2.length - 1);
+                     }
+                  } else {
+                     for(var4 = var2.length & 1; var4 < var2.length; ++var4) {
+                        var2[var4] = var1[var2.length - var4 - 1];
+                     }
+                  }
+
+                  var7 = (new BigInteger(var2)).toString();
+               }
+            } catch (Exception var9) {
+               System.err.println("setStatus " + var9);
+            }
+
+            this.mw.JTView.setText(var7.replaceAll("\t", "  ").replaceAll("\n", "  "));
+            this.mw.JTView.setCaretPosition(0);
+         }
+
+      }
+   }
+
+   private String coloredLong(long var1) {
+      boolean var3 = this.mw.hexOffset;
+      StringBuffer var4 = new StringBuffer(var3?"0x":"");
+      String var5 = var3?Long.toHexString(var1).toUpperCase():Long.toString(var1);
+      int var7 = var5.length();
+      if(var3 && var7 % 2 == 1) {
+         var5 = "0" + var5;
+      }
+
+      var7 = var3?0:var7 % 3;
+      var4.append(var5);
+
+      return var4.toString();
+   }
+
+   public void actionPerformed(ActionEvent var1) {
+      if(var1.getSource() == this.timer) {
+         int[] var2 = this.pos2XY(this.lastPos);
+         this.caretVisible = ++this.caretVisible % 4;
+         if((this.caretVisible & 1) == 0) {
+            this.paintImmediately(this.wChar * (this.nibArea?this.xNib[var2[0] << 1]:this.xTxt[var2[0]]) - 1, this.hChar * var2[1] + 3, this.wChar + 1 << 1, this.hChar - 3);
+         }
+      } else if(var1.getSource() != this.InsDelB[4]) {
+         this.InsDelTF.setEnabled(true);
+      } else {
+         this.InsDelTF.setEnabled(true);
+         boolean var4 = this.mw.hexOffset;
+         String var3 = var4?Long.toHexString(this.clipboardSize).toUpperCase():Long.toString(this.clipboardSize);
+         if(var4 && var3.length() % 2 == 1) {
+            var3 = "0" + var3;
+         }
+
+         this.InsDelTF.setText((var4?"0x":"") + var3);
+         this.fromClipboard(true);
+      }
+
+   }
+
+   public void mouseClicked(MouseEvent var1) {}
+
+   public void mouseReleased(MouseEvent var1) {}
+
+   public void mouseEntered(MouseEvent var1) {
+      this.setCursor(new Cursor(2));
+   }
+
+   public void mouseExited(MouseEvent var1) {
+      this.setCursor((Cursor)null);
+   }
+
+   public void mousePressed(MouseEvent var1) {
+      this.focus();
+      this.lastPos = this.getCaretPos(var1);
+      this.caretVisible = 0;
+      if(var1.isShiftDown()) {
+         this.isNibLow = false;
+         this.rePaint();
+      } else {
+         this.firstPos = this.lastPos;
+         this.rePaint();
+         this.timer.restart();
+      }
+
+   }
+
+   public void mouseMoved(MouseEvent var1) {}
+
+   public void mouseDragged(MouseEvent var1) {
+      if(this.lastPos != (this.newPos = this.getCaretPos(var1))) {
+         this.lastPos = this.newPos;
+         this.isNibLow = false;
+         this.rePaint();
+      }
+
+   }
+
+   protected long getCaretPos(MouseEvent var1) {
+      int var3 = -2;
+      int var4 = (var1.getX() < this.getWidth()?(0 < var1.getX()?var1.getX() - 3 * this.wChar / 2:0):this.getWidth()) / this.wChar;
+
+      int var2;
+      for(var2 = 0; var2 < this.xNib.length && var3 < 0; ++var2) {
+         if(var4 < this.xNib[var2]) {
+            var3 = var2;
+         }
+      }
+
+      if(var3 < 0 && var4 < this.xNib[this.xNib.length - 1] + 3) {
+         var3 = this.xNib.length - 1;
+      }
+
+      this.nibArea = -2 < var3;
+      this.isNibLow = 1 == (var3 & 1);
+      var3 >>= 1;
+
+      for(var2 = 0; var2 < this.xTxt.length && var3 < 0; ++var2) {
+         if(var4 < this.xTxt[var2]) {
+            var3 = var2;
+         }
+      }
+
+      this.newPos = this.scrPos + (long)((var1.getY() < this.getHeight()?(0 < var1.getY()?var1.getY() / this.hChar:0):this.maxRow - 1) << 4) + (long)(var3 < 0?15:var3);
+      if(this.virtualSize <= this.newPos || this.newPos < 0L) {
+         this.newPos = this.virtualSize;
+         this.isNibLow = false;
+      }
+
+      if((this.lastPos != this.newPos || this.lastPos + 1L != this.newPos) && !this.undoStack.isEmpty()) {
+         ((edObj)this.undoStack.lastElement()).isEditing = false;
+      }
+
+      return this.newPos;
+   }
+
+   public void mouseWheelMoved(MouseWheelEvent var1) {
+      if(!var1.isControlDown()) {
+         this.slideScr(this.scrPos + (long)var1.getWheelRotation() * (var1.getScrollType() == 0?32L:(long)this.maxPos + 1L), false);
+      } else {
+         this.setGrid(this.fontSize - 3 * var1.getWheelRotation());
+         this.slideScr(this.scrPos, true);
+         this.rePaint();
+      }
+
+   }
+
+   public void keyReleased(KeyEvent var1) {}
+
+   public void keyPressed(KeyEvent var1) {
+      switch(var1.getKeyCode()) {
+      case 8:
+         this.KeyFromMenu(90);
+      case 33:
+         this.newPos = this.lastPos - ((long)this.maxPos - 15L);
+         break;
+      case 34:
+         this.newPos = this.lastPos + ((long)this.maxPos - 15L);
+         break;
+      case 35:
+         if(!var1.isControlDown() && this.lastPos + 15L <= this.virtualSize) {
+            this.newPos = this.lastPos | 15L;
+         } else {
+            this.newPos = this.virtualSize - 1L;
+         }
+         break;
+      case 36:
+         if(!var1.isControlDown()) {
+            this.newPos = this.lastPos & -16L;
+         } else {
+            this.newPos = 0L;
+         }
+         break;
+      case 37:
+      case 226:
+         this.newPos = this.lastPos - (this.isNibLow?0L:1L);
+         break;
+      case 38:
+      case 224:
+         this.newPos = this.lastPos - 16L;
+         break;
+      case 39:
+      case 227:
+         this.newPos = this.lastPos + 1L;
+         break;
+      case 40:
+      case 225:
+         this.newPos = this.lastPos + 16L;
+         break;
+      default:
+         return;
+      }
+
+      this.isNibLow = false;
+      long var2 = this.newPos - this.lastPos;
+      if(this.newPos == -1L && this.lastPos < 99999L) {
+         this.lastPos = 0L;
+      } else if(this.newPos <= 0L && this.lastPos < 99999L) {
+         this.lastPos = this.newPos & 15L;
+      } else if((this.newPos == this.virtualSize || this.newPos == this.virtualSize + 1L) && var2 == 1L) {
+         this.lastPos = this.virtualSize;
+      } else if(this.virtualSize > this.newPos && this.newPos >= 0L) {
+         this.lastPos = this.newPos;
+      } else {
+         this.lastPos = (this.virtualSize - 1L & -16L) + (this.newPos & 15L) - ((this.newPos & 15L) <= (this.virtualSize - 1L & 15L)?0L:16L);
+      }
+
+      if(!var1.isShiftDown()) {
+         this.firstPos = this.lastPos;
+      }
+
+      if(!this.undoStack.empty() && ((edObj)this.undoStack.lastElement()).isEditing) {
+         ((edObj)this.undoStack.lastElement()).isEditing = false;
+      }
+
+      if(9223372036854775792L - (long)this.maxPos + 16L < this.scrPos) {
+         this.slideScr(this.scrPos = Long.MAX_VALUE & -16L - (long)this.maxPos + 15L, true);
+      } else if(this.newPos >= this.scrPos && var2 != -((long)this.maxPos - 15L)) {
+         if(this.scrPos >= this.newPos - (long)this.maxPos && var2 != (long)this.maxPos - 15L) {
+            this.timer.stop();
+            this.rePaint();
+            this.caretVisible = 0;
+            this.timer.restart();
+         } else {
+            this.slideScr(this.scrPos += var2 + 15L & -16L, true);
+         }
+      } else {
+         this.slideScr(this.scrPos = this.scrPos + var2 & -16L, true);
+      }
+
+   }
+
+   public void KeyFromMenu(int key) {
+      char[] var2 = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+      boolean var3 = true;
+      boolean saveOrFind = this.sav != null || this.find != null;
+      Object[] var8 = new Object[]{"<html>Valid entry are:<br>decimal, hexa (0x..) or percent (..%)"};
+      int var5;
+      String var6;
+      long var10;
+      long var12;
+      switch(key) {
+      case 45:
+      case 107:
+      case 109:
+      case 521: // Increase/Decrease Font Size
+         this.setGrid(this.fontSize + (key != 107 && key != 521?-3:3));
+         this.slideScr(this.scrPos, true);
+         this.rePaint();
+         break;
+      case 65: // Select All
+         if(this.virtualSize < 2147483648L) {
+            this.firstPos = 0L;
+            this.lastPos = this.virtualSize;
+            this.rePaint();
+         } else {
+            JOptionPane.showMessageDialog(this, "Selection cannot be greater than 2GiB");
+         }
+         break;
+      case 67: // Copy
+      case 88: // Cut
+         if(this.firstPos != this.lastPos && !saveOrFind) {
+            boolean var21 = this.firstPos < this.lastPos;
+            var10 = var21?this.firstPos:this.lastPos;
+            var12 = !var21?this.firstPos:this.lastPos;
+
+            try {
+               this.XCV = this.virtualStack(var10, var12);
+               char[] var22;
+               if(!this.nibArea) {
+                  var22 = new char[this.XCV.size()];
+
+                  for(var5 = 0; var5 < this.XCV.size(); ++var5) {
+                     var22[var5] = (char)(255 & ((byte[])((byte[])this.XCV.get(var5)))[0]);
+                     if(Character.isISOControl(var22[var5]) && "\t\\u000A\f\\u000D".indexOf(var22[var5]) < 0) {
+                        throw new Exception("\'" + (var22[var5] & 255) + "\' isIsoControl");
+                     }
+                  }
+               } else {
+                  var22 = new char[this.XCV.size() << 1];
+
+                  for(var5 = 0; var5 < this.XCV.size(); ++var5) {
+                     var22[2 * var5] = var2[(255 & ((byte[])((byte[])this.XCV.get(var5)))[0]) >> 4];
+                     var22[2 * var5 + 1] = var2[(255 & ((byte[])((byte[])this.XCV.get(var5)))[0]) % 16];
+                  }
+               }
+
+               this.clipboard.setContents(new StringSelection(new String(var22)), (ClipboardOwner)null);
+            } catch (Exception var20) {
+               JOptionPane.showMessageDialog(this, "Can\'t copy text into the clipboard:\n" + var20);
+            }
+
+            if(key == 88) { // Copy?
+               this.pushHObj(new edObj(var10, var12 - var10, 8), (String)null);
+            }
+         }
+         break;
+      case 68: // Go Down To Next Mark
+      case 85: // Go Up To Previous Mark
+         var12 = 0L;
+         long var14 = this.virtualSize;
+         this.isNibLow = false;
+         Iterator var23;
+         if(this.markV != null && 0 < this.markV.size()) {
+            for(var23 = this.markV.iterator(); var23.hasNext(); var14 = this.lastPos < var10 && var10 < var14?var10:var14) {
+               var10 = ((Long)var23.next()).longValue();
+               var12 = var12 < var10 && var10 < this.lastPos?var10:var12;
+            }
+         }
+
+         if(this.MarkV != null && 0 < this.MarkV.size()) {
+            for(var23 = this.MarkV.iterator(); var23.hasNext(); var14 = this.lastPos < var10 && var10 < var14?var10:var14) {
+               var10 = ((Long)var23.next()).longValue();
+               var12 = var12 < var10 && var10 < this.lastPos?var10:var12;
+            }
+         }
+
+         this.firstPos = this.lastPos = key == 85?var12:var14;
+         this.slideScr(0L, true);
+         break;
+      case 70: // Find In File
+         if(this.find == null) {
+            this.mw.find();
+         }
+         break;
+      case 71: // Go To
+         this.goTo(JOptionPane.showInputDialog(this, var8, "Hexeditor.jar: GoTo", -1));
+         break;
+      case 77: // Insert Mark
+         Long var9 = new Long(this.lastPos);
+         if(this.markV.remove(var9)) {
+            this.MarkV.add(var9);
+         } else if(!this.MarkV.remove(var9)) {
+            this.markV.add(var9);
+         }
+         this.rePaint();
+         break;
+      case 79: // Open File
+      case 81: // Close File
+         if(!saveOrFind) {
+            if(this.rAF == null && !this.undoStack.empty() || this.rAF != null && 1 < this.undoStack.size()) {
+               var5 = JOptionPane.showConfirmDialog(this, "Save the current modified file?");
+               if(var5 == 2) {
+                  break;
+               }
+
+               if(var5 == 0) {
+                  this.save1();
+                  break;
+               }
+            }
+
+            this.closeFile();
+            if(key == 79 && this.jFC.showOpenDialog(this) == 0) {
+               File f = this.jFC.getSelectedFile();
+               this.loadFile(f);
+               this.hex.changeTitle(f.getName());
+            }
+         } else {
+            JOptionPane.showMessageDialog(this, "Busy, save or find running.");
+         }
+         break;
+      case 80: // Take Screenshot
+         var5 = this.wChar * (this.xTxt[15] + 9);
+         var5 = var5 < this.getWidth()?var5:this.getWidth();
+         BufferedImage var16 = new BufferedImage(var5, this.hLimit + 10, 8);
+         this.paintImg(var16.getGraphics(), false);
+         var6 = this.f1.getPath();
+         var5 = 1;
+
+         File var17;
+         do {
+            var17 = new File(var6 + var5 + ".png");
+            ++var5;
+         } while(var17.exists());
+
+         try {
+            ImageIO.write(var16, "png", var17);
+         } catch (IOException var19) {
+            var19.printStackTrace();
+         }
+         break;
+      case 91: // Export
+        File f;
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setDialogTitle("Export "+hex.getName()+" to...");
+        chooser.showDialog(mw, "Export Local Copy");
+        try {
+            path = chooser.getSelectedFile().getAbsolutePath();
+        } catch (NullPointerException e){
+            f = new File("");
+            break;
+        }
+        f = new File(path, hex.getName());
+        hex.dbprint("Exporting "+f.getAbsolutePath());
+        hex.createFile(f);
+        this.loadFile(f);
+        break;
+      case 83: // Save As
+         if(this.sav == null) {
+            this.save1();
+         }
+         break;
+      case 84: // Toggle Carret
+         this.nibArea = !this.nibArea;
+         this.isNibLow = false;
+         this.timer.stop();
+         this.repaint();
+         this.caretVisible = 0;
+         this.timer.restart();
+         break;
+      case 86: // Paste
+         if(!saveOrFind && !this.isApplet && (var6 = this.fromClipboard(true)) != null) {
+            this.pushHObj(new edObj(this.lastPos, (long)var6.length(), 4), var6);
+         }
+         break;
+      case 87: // Toggle Dark Mode
+         Theme.toggle();
+         this.mw.applyTheme();
+         this.rePaint();
+         break;
+      case 89: // Redo
+         if(this.eObjCtrlY != null) {
+            this.pushHObj(this.eObjCtrlY, (String)null);
+            this.eObjCtrlY = null;
+         } else if(this.byteCtrlY != null) {
+            this.eObj.B.push(this.byteCtrlY);
+            this.firstPos = ++this.lastPos;
+            if(this.scrPos < this.lastPos - (long)this.maxPos) {
+               this.scrPos += 16L;
+            }
+
+            this.doVirtual();
+            this.byteCtrlY = null;
+         }
+         break;
+      case 90: // Undo
+         if(!saveOrFind && !this.undoStack.empty() && (1 < this.undoStack.size() || 1 == this.undoStack.size() && 2 < ((edObj)this.undoStack.lastElement()).a1)) {
+            this.eObj = this.eObjCtrlY = (edObj)this.undoStack.lastElement();
+            if(this.eObj.isEditing && !this.eObj.B.empty()) {
+               this.byteCtrlY = (Byte)this.eObj.B.pop();
+               if(!this.isNibLow) {
+                  this.firstPos = --this.lastPos;
+               } else {
+                  this.isNibLow = false;
+               }
+
+               if((this.eObj.size = (long)this.eObj.B.size()) == 0L) {
+                  this.undoStack.pop();
+                  this.byteCtrlY = null;
+               } else {
+                  this.eObjCtrlY = null;
+               }
+            } else {
+               this.firstPos = this.lastPos = this.eObj.p1;
+               this.undoStack.pop();
+            }
+
+            this.doVirtual();
+            this.slideScr(this.scrPos, true);
+         }
+         break;
+      case 127: // Delete calls Insert with certain parameters?
+      case 155: // Insert Before / Delete Menu
+         if(!saveOrFind) {
+            this.InsDelB[key == 127?0:1].setSelected(true);
+            this.InsDelTF.setEnabled(true);
+            String var7 = this.fromClipboard(false);
+            if(JOptionPane.showConfirmDialog(this, this.InsDelOption, "Hexeditor.jar: DEL/INS", 2) != 2) {
+               label298: {
+                  if(this.InsDelB[4].isSelected()) {
+                     if(!this.isApplet && var7 != null && this.virtualSize + (long)var7.length() < Long.MAX_VALUE) {
+                        this.pushHObj(new edObj(this.lastPos, (long)var7.length(), 6), var7);
+                     }
+                  } else {
+                     if((var6 = this.InsDelTF.getText()) == null) {
+                        break label298;
+                     }
+
+                     this.String2long(var6);
+                     if(this.longInput < 1L) {
+                        break label298;
+                     }
+
+                     if(this.InsDelB[0].isSelected()) {
+                        this.longInput = this.longInput + this.lastPos < this.virtualSize?this.longInput:this.virtualSize - this.lastPos;
+                     } else if(Long.MAX_VALUE < this.virtualSize + this.longInput) {
+                        this.longInput = Long.MAX_VALUE - this.virtualSize;
+                     }
+
+                     this.pushHObj(new edObj(this.lastPos, this.longInput, this.InsDelB[0].isSelected()?8:6), this.InsDelB[0].isSelected()?null:(this.InsDelB[1].isSelected()?" ":(this.InsDelB[2].isSelected()?"ÿ":" ")));
+                  }
+
+                  this.isNibLow = false;
+                  this.eObjCtrlY = null;
+                  this.byteCtrlY = null;
+                  this.InsDelTF.setText("");
+               }
+            }
+         }
+      }
+
+      this.focus();
+   }
+
+   private void pushHObj(edObj var1, String var2) {
+      if(!this.undoStack.isEmpty()) {
+         (this.eObj = (edObj)this.undoStack.lastElement()).isEditing = false;
+      }
+
+      if(var2 != null) {
+         for(int var3 = 0; var3 < var2.length(); ++var3) {
+            var1.B.push(Byte.valueOf((byte)var2.charAt(var3)));
+         }
+      }
+
+      this.undoStack.push(var1);
+      this.firstPos = this.lastPos;
+      this.doVirtual();
+   }
+
+   private String fromClipboard(boolean var1) {
+      String var4 = null;
+      StringBuffer var5 = new StringBuffer();
+
+      try {
+         var4 = (String)this.clipboard.getContents((Object)null).getTransferData(DataFlavor.stringFlavor);
+         if(var4 == null || var4.length() < 1) {
+            throw new Exception("nothing to paste");
+         }
+
+         if(Long.MAX_VALUE < this.lastPos + (long)var4.length()) {
+            throw new Exception("file cannot exceed Long.MAX_VALUE");
+         }
+
+         if(this.nibArea) {
+            if(var4.length() % 2 != 0) {
+               throw new Exception("Nibble area, String must be an hexa string with odd characters.");
+            }
+
+            var4 = var4.toUpperCase();
+
+            for(int var3 = 0; var3 < var4.length(); var3 += 2) {
+               if("0123456789ABCDEFabcdef".indexOf(var4.charAt(var3)) < 0 || "0123456789ABCDEFabcdef".indexOf(var4.charAt(var3 + 1)) < 0) {
+                  throw new Exception("Nibble area, String must be an hexa string.");
+               }
+
+               var5.append((char)(("0123456789ABCDEFabcdef".indexOf(var4.charAt(var3)) << 4) + "0123456789ABCDEFabcdef".indexOf(var4.charAt(var3 + 1))));
+            }
+
+            var4 = var5.toString();
+         }
+
+         this.clipboardSize = (long)var4.length();
+      } catch (Exception var7) {
+         var4 = null;
+         this.clipboardSize = 0L;
+         if(var1) {
+            JOptionPane.showMessageDialog(this, "Can\'t paste text from the clipboard:\n" + var7);
+         }
+      }
+
+      return var4;
+   }
+
+   protected void String2long(String var1) {
+      this.longInput = -1L;
+      boolean var3 = true;
+      boolean var4 = true;
+      int var5 = -1;
+      int var6 = 0;
+      int var2;
+      if((var2 = var1.length()) != 0 && !var1.equals("-") && !var1.equals("+")) {
+         BigDecimal var7 = null;
+         BigInteger var8 = null;
+         boolean var9 = false;
+         boolean var10 = var1.startsWith("0x") || var1.startsWith("Ox") || var1.startsWith("ox");
+         String var11 = "yzafpnµm kMGTPEZY";
+         String var12 = "KMGTPE";
+         String[] var10000 = new String[]{"c", "d", "da", "h"};
+         var1.replaceAll(" ", "");
+         if(1 < var1.length() && !var10) {
+            if(var9 = 105 == var1.charAt(var1.length() - 1)) {
+               var5 = var12.indexOf(var1.charAt(var1.length() - 2));
+            } else {
+               int var18 = var1.endsWith("c")?-2:(var1.endsWith("d")?-1:(var1.endsWith("da")?1:(var1.endsWith("h")?2:(var1.endsWith("%")?-2:0))));
+               int var19 = var11.indexOf(var1.charAt(var1.length() - 1));
+               var6 = var18 != 0?var18:(-1 < var19?var19 * 3 - 24:0);
+            }
+         }
+
+         if(!var9 || var1.length() >= 3 && var5 >= 0) {
+            if(var10) {
+               if(var1.length() < 3) {
+                  return;
+               }
+
+               try {
+                  var8 = new BigInteger(var1.substring(2, var2), 16);
+               } catch (Exception var16) {
+                  return;
+               }
+            } else {
+               while(0 < var2) {
+                  try {
+                     var7 = new BigDecimal(var1.substring(0, var2));
+                     break;
+                  } catch (Exception var17) {
+                     --var2;
+                  }
+               }
+
+               if(var2 == 0 || var7 == null) {
+                  return;
+               }
+
+               var7 = var7.scaleByPowerOfTen(var6).multiply(BigDecimal.valueOf(1L << 10 * (var5 + 1)));
+               var8 = var7.toBigInteger();
+            }
+
+            long var14 = var8.longValue();
+            if(var8.signum() < 0) {
+               this.longInput = -1L;
+            } else if(BigInteger.valueOf(Long.MAX_VALUE).compareTo(var8) < 0) {
+               this.longInput = Long.MAX_VALUE;
+            } else {
+               this.longInput = var14;
+            }
+
+         }
+      }
+   }
+
+   public void keyTyped(KeyEvent var1) {
+      boolean var3 = this.sav != null || this.find != null;
+      char var5 = var1.getKeyChar();
+      boolean var6 = false;
+      int var7 = "0123456789ABCDEFabcdef".indexOf(Character.toUpperCase(var5));
+      if(!var1.isAltDown() && !var1.isControlDown() && !Character.isISOControl(var5) && var5 < 256 && var1.getSource() == this && 0L < this.virtualSize && !var3 && (!this.nibArea || -1 < var7)) {
+         if(!this.undoStack.empty() && ((edObj)this.undoStack.lastElement()).isEditing) {
+            this.eObj = (edObj)this.undoStack.lastElement();
+         } else {
+            this.eObj = new edObj(this.lastPos, 0L, 4);
+            this.undoStack.push(this.eObj);
+            this.eObj.isEditing = true;
+         }
+
+         if(!this.nibArea) {
+            this.eObj.B.push(Byte.valueOf((byte)var5));
+            if(this.lastPos < Long.MAX_VALUE) {
+               this.firstPos = ++this.lastPos;
+            }
+         } else if(-1 < "0123456789ABCDEFabcdef".indexOf(var5)) {
+            byte var4;
+            if((int)(this.lastPos - this.scrPos) < this.srcV.size()) {
+               var4 = ((byte[])((byte[])this.srcV.get((int)(this.lastPos - this.scrPos))))[0];
+            } else {
+               var4 = 0;
+            }
+
+            var4 = (byte)(this.isNibLow?(var4 & 240) + var7:(var7 << 4) + (var4 & 15));
+            if(this.isNibLow && !this.eObj.B.empty() && this.eObj.p1 + (long)this.eObj.B.size() == this.lastPos + 1L) {
+               this.eObj.B.pop();
+            }
+
+            this.eObj.B.push(Byte.valueOf(var4));
+            if(!(this.isNibLow = !this.isNibLow) && this.lastPos < Long.MAX_VALUE) {
+               this.firstPos = ++this.lastPos;
+            }
+         }
+
+         if(this.scrPos < this.lastPos - (long)this.maxPos) {
+            this.scrPos += 16L;
+         }
+
+         this.eObjCtrlY = null;
+         this.byteCtrlY = null;
+         this.doVirtual();
+      }
+
+   }
+
+   protected void doVirtual() {
+      this.v1.clear();
+      if(this.undoStack.isEmpty()) {
+         this.scrPos = this.firstPos = this.lastPos = this.virtualSize = 0L;
+         this.markV.clear();
+         this.MarkV.clear();
+         this.jSbSource = false;
+         mw.jSB.setValue(0);
+         this.mw.JTFile.setText("");
+         this.mw.fJTF[1].setText("");
+         this.setGrid(this.fontSize);
+         this.setSrc();
+         this.rePaint();
+         this.caretVisible = 0;
+         this.timer.restart();
+      } else {
+         edObj var5 = (edObj)this.undoStack.lastElement();
+         if(var5.a1 != 6 && var5.a1 != 8) {
+            var5.size = var5.B.size() != 0?(long)var5.B.size():var5.size;
+            var5.p2 = var5.p1 + var5.size;
+         }
+
+         if(!this.isApplet) {
+            String var10 = this.mw.JTFile.getText();
+            if(var10.endsWith(" *")) {
+               var10 = var10.substring(0, var10.length() - 2);
+            }
+
+            this.mw.JTFile.setText(var10 + (1 < this.undoStack.size()?" *":""));
+         }
+
+         var5 = (edObj)this.undoStack.firstElement();
+         this.v1.add(new edObj(0L, var5.p2, var5.offset, var5));
+
+         for(int var1 = 1; var1 < this.undoStack.size(); ++var1) {
+            var5 = (edObj)this.undoStack.get(var1);
+            edObj var9 = var5.a1 == 8?null:new edObj(var5.p1, var5.p2, var5.offset, var5);
+            long var3 = var5.a1 == 6?var5.size:(var5.a1 == 8?-var5.size:0L);
+            int var2 = this.v1.size() - 1;
+            if(var5 != null && var5.p1 != var5.p2) {
+               for(; -1 < var2; --var2) {
+                  edObj var6 = (edObj)this.v1.get(var2);
+                  if(var2 == this.v1.size() - 1 && var6.p2 == var5.p1) {
+                     this.v1AddNoNull(var2 + 1, var9);
+                     break;
+                  }
+
+                  if(var5.p2 <= var6.p1) {
+                     var6.p1 += var3;
+                     var6.p2 += var3;
+                  } else {
+                     if(var5.a1 == 6 && var6.p1 == var5.p1) {
+                        var6.p1 += var3;
+                        var6.p2 += var3;
+                        this.v1AddNoNull(var2, var9);
+                        break;
+                     }
+
+                     if(var5.a1 != 6 && var5.p1 <= var6.p1 && var6.p2 <= var5.p2) {
+                        this.v1.remove(var2);
+                        if(var6.p2 == var5.p2) {
+                           this.v1AddNoNull(var2, var9);
+                        }
+                     } else {
+                        if(var5.a1 != 6 && var5.p1 < var6.p2 && var6.p2 <= var5.p2) {
+                           if(var6.p2 == var5.p2) {
+                              this.v1AddNoNull(var2 + 1, var9);
+                           }
+
+                           var6.p2 = var5.p1;
+                           break;
+                        }
+
+                        if(var5.a1 == 6 || var5.p1 > var6.p1 || var6.p1 >= var5.p2) {
+                           if(var6.p1 < var5.p1 && (var5.p2 < var6.p2 || var5.a1 == 6)) {
+                              edObj var7 = this.v1Clone(var6);
+                              var7.p2 = var5.p1;
+                              var6.offset += (var5.a1 == 6?var5.p1:var5.p2) - var6.p1;
+                              var6.p1 = var5.a1 == 8?var5.p1:var5.p2;
+                              var6.p2 += var3;
+                              if(var6.p1 == var6.p2) {
+                                 this.v1.remove(var2);
+                              }
+
+                              this.v1AddNoNull(var2, var9);
+                              this.v1AddNoNull(var2, var7);
+                           }
+                           break;
+                        }
+
+                        var6.offset += var5.p2 - var6.p1;
+                        var6.p1 = var5.p2;
+                        this.v1AddNoNull(var2, var9);
+                     }
+                  }
+               }
+            }
+         }
+
+         long var12 = this.v1 != null && this.v1.size() != 0?((edObj)this.v1.lastElement()).p2:0L;
+         if(this.virtualSize != var12) {
+            this.virtualSize = var12;
+            this.setGrid(this.fontSize);
+         }
+
+         this.setSrc();
+         this.rePaint();
+         this.caretVisible = 0;
+         this.timer.restart();
+      }
+   }
+
+   protected void v1AddNoNull(int var1, edObj var2) {
+      if(var2 != null && -1 < var1 && var1 <= this.v1.size() && var2.p1 != var2.p2) {
+         this.v1.add(var1, var2);
+      }
+
+   }
+
+   protected edObj v1Clone(edObj var1) {
+      if(var1 != null && var1.p1 != var1.p2) {
+         edObj var2 = new edObj(var1.p1, var1.p2, var1.offset, var1.o);
+         return var2;
+      } else {
+         return null;
+      }
+   }
+
+   protected Vector virtualStack(long var1, long var3) {
+      byte[] var5 = new byte[2];
+      int var8 = 0;
+      int var10 = 0;
+      long var17 = var1;
+      edObj var19 = null;
+
+      Vector var20;
+      for(var20 = new Vector(); var8 < this.v1.size(); ++var8) {
+         var19 = (edObj)this.v1.get(var8);
+         if(var1 < var19.p2) {
+            break;
+         }
+      }
+
+      while(var8 < this.v1.size()) {
+         var19 = (edObj)this.v1.get(var8);
+         long var11 = var19.p1 - var19.offset;
+         long var13 = var19.p2 < var3?var19.p2:var3;
+         if(var19.o.a1 != 4 && var19.o.a1 != 2 && (var19.o.a1 != 6 || 1 >= var19.o.B.size())) {
+            if(var19.o.a1 == 6) {
+               var5[1] = (byte)var19.o.a1;
+
+               for(var5[0] = ((Byte)var19.o.B.get(0)).byteValue(); var17 < var13; ++var17) {
+                  var20.add(var5.clone());
+               }
+            } else {
+               try {
+                  var5[1] = (byte)(var19.p1 != var19.offset?1:var19.o.a1);
+                  byte[] var6 = new byte[(int)(var13 - var17)];
+                  this.rAF.seek(var17 - var11);
+                  int var9 = 0;
+
+                  int var7;
+                  while(var9 < var6.length) {
+                     var7 = this.rAF.read(var6, var9, var6.length - var9);
+                     if(var7 < 0) {
+                        throw new IOException("EOF");
+                     }
+
+                     var9 += var7;
+                     if(var7 == 0) {
+                        ++var10;
+                        if(var10 == 9) {
+                           var17 = var13;
+                           JOptionPane.showMessageDialog(this, "Unable to access file");
+                        }
+                     }
+                  }
+
+                  for(var7 = 0; var17 < var13 || var7 < var10; ++var7) {
+                     var5[0] = var6[var7];
+                     var20.add(var5.clone());
+                     ++var17;
+                  }
+               } catch (Exception var22) {
+                  System.err.println("virtualStack " + var22);
+               }
+            }
+         } else {
+            for(var5[1] = (byte)(var19.a1 == 2 && var19.p1 != var19.offset?1:var19.o.a1); var17 < var13; ++var17) {
+               var5[0] = ((Byte)var19.o.B.get((int)(var17 - var11))).byteValue();
+               var20.add(var5.clone());
+            }
+         }
+
+         if(var3 < var19.p2) {
+            break;
+         }
+
+         ++var8;
+      }
+
+      return var20;
+   }
+
+   protected void setSrc() {
+      this.srcV = this.virtualStack(this.scrPos, this.scrPos + (long)this.maxPos + 1L < 0L?Long.MAX_VALUE:this.scrPos + (long)this.maxPos + 1L);
+   }
+
+   protected boolean save1() {
+      JFileChooser var1 = new JFileChooser();
+      var1.setFileSelectionMode(0);
+      var1.setAcceptAllFileFilterUsed(false);
+      var1.setDialogTitle("Save as...");
+      var1.setDialogType(1);
+      var1.setMultiSelectionEnabled(false);
+      var1.setDragEnabled(false);
+      var1.setFileFilter(new filterRW());
+      if(this.f1 != null && this.f1.canWrite()) {
+         var1.setSelectedFile(this.f1);
+      } else {
+         var1.setCurrentDirectory(this.f1 == null?new File(System.getProperty("user.dir")):this.f1.getParentFile());
+      }
+
+      if(var1.showSaveDialog(this) != 0) {
+         return false;
+      } else {
+         this.mw.saveRunning(true);
+         if(this.sav != null) {
+            this.sav.interrupt();
+         }
+
+         (this.sav = new saveT()).setDaemon(true);
+         this.sav.f1 = this.f1;
+         this.sav.f2 = var1.getSelectedFile();
+         this.sav.v1 = this.v1;
+         this.sav.editor = this;
+         this.sav.jPBar = this.mw.savePBar;
+         this.sav.start();
+         return true;
+      }
+   }
+
+   protected void save2(File var1) {
+      if(var1 != null) {
+         this.f1 = new File(var1, "");
+         this.mw.JTFile.setText(this.f1.toString() + (this.f1.canWrite()?"":" (ReadOnly)"));
+
+         try {
+            this.rAF = new RandomAccessFile(this.f1, "rw");
+         } catch (Exception var3) {
+            System.err.println(var3);
+         }
+
+         this.undoStack.clear();
+         this.undoStack.push(new edObj(0L, this.f1.length(), 0));
+         this.doVirtual();
+      }
+
+      this.mw.saveRunning(false);
+      this.sav = null;
+      this.eObjCtrlY = null;
+      this.byteCtrlY = null;
+   }
+
+   protected void find1() {
+      if(this.virtualSize != 0L && (this.mw.finByte != null || this.mw.findChar != null)) {
+         this.String2long(this.mw.fJTF[1].getText());
+         if(this.find != null) {
+            this.find.interrupt();
+         }
+
+         (this.find = new findT()).setDaemon(true);
+         this.find.f1 = this.f1;
+         this.find.v1 = this.v1;
+         this.find.isApplet = this.isApplet;
+         this.find.ignoreCase = this.mw.useFindChar;
+         this.find.pos = this.longInput < 0L?(this.firstPos == this.lastPos?this.lastPos:this.lastPos + 1L):(this.virtualSize - 1L < this.longInput?this.virtualSize - 1L:(this.virtualSize - 1L == this.longInput?0L:this.longInput + 1L));
+         this.find.pos = this.find.pos==this.lastPos-1?0L:this.find.pos;
+         // this.hex.dbprint("cur: "+this.find.pos+"\nlast: "+this.lastPos+"\n\n");
+         this.find.inBytes = this.mw.finByte;
+         this.find.inChars = this.mw.findChar;
+         this.find.wordSize = 1 << this.mw.fJCB[3].getSelectedIndex();
+         this.find.hexV = this;
+         this.find.jPBar = this.mw.findPBar;
+         this.mw.findRunning(true);
+         this.find.start();
+      }
+   }
+
+   protected void find2(long var1, long var3) {
+      this.slideScr(0L, true);
+      StringBuffer var5 = new StringBuffer("0x");
+      String var6 = Long.toHexString(var3).toUpperCase();
+      if(var6.length() % 2 == 1) {
+         var5.append("0");
+      }
+
+      this.mw.findRunning(false);
+      this.mw.fJTF[1].setText(var5.append(var6).toString());
+      this.find = null;
+      this.lastPos = var3;
+      this.firstPos = var1;
+      this.isNibLow = false;
+      this.slideScr(0L, true);
+   }
+}
+
+```
+
+`resources/edObj.java`:
+
+```java
+package resources;
+
+import java.util.Stack;
+
+public class edObj {
+
+   int a1;
+   public long p1 = -1L;
+   public long p2 = -1L;
+   public long offset = 0L;
+   public long size = 0L;
+   public boolean isEditing = false;
+   edObj o = null;
+   public Stack B = new Stack();
+
+
+   public edObj(long var1, long var3, int var5) {
+      this.p1 = var1;
+      this.a1 = var5;
+      this.size = var3;
+      this.p2 = this.p1 + var3;
+   }
+
+   public edObj(long var1, long var3, long var5, edObj var7) {
+      this.p1 = var1;
+      this.p2 = var3;
+      this.offset = var5;
+      this.o = var7;
+   }
+
+   public String toString() {
+      return this.o != null?"p//offset: " + this.p1 + "/" + this.p2 + "//" + this.offset + "   \to.a1: " + this.o.a1 + "   \to.B.size/o.size: " + this.o.B.size() + "/" + this.o.size:"p: " + this.p1 + "/" + this.p2 + "   \ta1: " + this.a1 + "   \tB.size/size: " + this.B.size() + "/" + this.size;
+   }
+}
+
+```
+
+`resources/filterRW.java`:
+
+```java
+package resources;
+
+import java.io.File;
+import javax.swing.filechooser.FileFilter;
+
+public class filterRW extends FileFilter {
+
+   public boolean accept(File var1) {
+      return var1.canWrite();
+   }
+
+   public String getDescription() {
+      return "";
+   }
+}
+
+```
+
+`resources/findT.java`:
+
+```java
+package resources;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Vector;
+import javax.swing.JProgressBar;
+
+public class findT extends Thread {
+
+   File f1;
+   Vector v1;
+   boolean isApplet;
+   boolean ignoreCase;
+   long pos;
+   byte[] inBytes = null;
+   byte[][][] inChars = (byte[][][])null;
+   binEdit hexV;
+   JProgressBar jPBar;
+   private boolean isFound = false;
+   private int realLength = 0;
+   private int inCharsLength = 0;
+   protected int wordSize;
+   private long virtualSize;
+   private Vector pile = new Vector();
+
+
+   public void run() {
+      boolean var1 = false;
+      boolean var3 = false;
+      FileInputStream var5 = null;
+      byte[] var6 = new byte[2097152];
+      edObj var7 = null;
+      if(this.v1 != null && this.v1.size() != 0) {
+         long var12 = 0L;
+         this.virtualSize = ((edObj)this.v1.lastElement()).p2;
+         this.jPBar.setMaximum(1073741824);
+         int var2;
+         int var4;
+         int var18;
+         if(!this.ignoreCase) {
+            this.inCharsLength = this.inBytes.length;
+         } else {
+            for(var2 = 0; var2 < this.inChars.length; ++var2) {
+               var4 = 0;
+
+               for(var18 = 0; var18 < this.inChars[var2].length; ++var18) {
+                  var4 = var4 < this.inChars[var2][var18].length?var4:this.inChars[var2][var18].length;
+               }
+
+               this.inCharsLength += var4;
+            }
+         }
+
+         for(var18 = 0; var18 < this.v1.size(); ++var18) {
+            var7 = (edObj)this.v1.get(var18);
+            if(this.pos < var7.p2) {
+               break;
+            }
+         }
+
+         try {
+            if(this.f1 != null) {
+               var5 = new FileInputStream(this.f1);
+            }
+
+            while(var18 < this.v1.size() && this.next()) {
+               var7 = (edObj)this.v1.get(var18);
+               long var8 = var7.p1 - var7.offset;
+               if(var7.o.a1 != 4 && var7.o.a1 != 2 && (var7.o.a1 != 6 || 1 >= var7.o.B.size())) {
+                  if(var7.o.a1 == 6) {
+                     byte var17 = ((Byte)var7.o.B.get(0)).byteValue();
+
+                     while(this.pos < var7.p2 && this.next()) {
+                        this.findB(var17);
+                        if(this.pile.size() == 0 && this.pos < var7.p2 - (long)this.inCharsLength) {
+                           this.pos = var7.p2 - (long)this.inCharsLength;
+                        }
+                     }
+                  } else {
+                     long var10;
+                     for(var10 = this.pos - var8; var12 < var10; var12 += var5.skip(var10 - var12)) {
+                        ;
+                     }
+
+                     while(this.pos < var7.p2 && this.next()) {
+                        var10 = var7.p2 - this.pos;
+                        var2 = var5.read(var6, 0, var10 < 2097152L?(int)var10:2097152);
+                        if(var2 <= 0) {
+                           throw new IOException(var2 == 0?"Unable to access file":"EOF");
+                        }
+
+                        var12 += (long)var2;
+
+                        for(var4 = 0; var4 < var2 && this.next(); ++var4) {
+                           this.findB(var6[var4]);
+                        }
+
+                        this.setJPBar();
+                     }
+                  }
+               } else {
+                  while(this.pos < var7.p2 && this.next()) {
+                     this.findB(((Byte)var7.o.B.get((int)(this.pos - var8))).byteValue());
+                  }
+               }
+
+               this.setJPBar();
+               ++var18;
+            }
+
+            if(this.f1 != null) {
+               var5.close();
+            }
+         } catch (Exception var16) {
+            System.err.println("findT " + var16 + "\n\t" + var7 + "\n\t" + var18 + "\t" + this.pos);
+         }
+
+         try {
+            var5.close();
+         } catch (Exception var15) {
+            ;
+         }
+
+         this.hexV.find2(this.pos, this.pos - (long)(this.isFound?(this.ignoreCase?this.realLength:this.inBytes.length):0));
+      }
+   }
+
+   protected void setJPBar() {
+      this.jPBar.setValue((int)(1.07374182E9F * ((float)this.pos / (float)this.virtualSize)));
+      this.jPBar.setString((float)((int)((float)this.pos / ((float)this.virtualSize / 1000.0F))) / 10.0F + "%");
+   }
+
+   private boolean next() {
+      return !this.isFound && !Thread.currentThread().isInterrupted();
+   }
+
+   private void findB(byte var1) {
+      int[] var6 = new int[4];
+      int var3;
+      int var4;
+      if(!this.ignoreCase) {
+         for(var3 = this.pile.size() - 1; -1 < var3; --var3) {
+            var4 = ((Integer)this.pile.get(var3)).intValue();
+            if(this.inBytes[var4] != var1) {
+               this.pile.remove(var3);
+            } else {
+               if(var4 + 1 >= this.inBytes.length) {
+                  this.isFound = true;
+                  break;
+               }
+
+               this.pile.set(var3, new Integer(var4 + 1));
+            }
+         }
+
+         if(var1 == this.inBytes[0] && this.pos % (long)this.wordSize == 0L) {
+            this.pile.add(new Integer(1));
+            if(this.inBytes.length == 1) {
+               this.isFound = true;
+            }
+         }
+      } else {
+         for(var3 = this.pile.size() - 1; -1 < var3; --var3) {
+            var6 = (int[])((int[])this.pile.get(var3));
+            ++var6[2];
+            ++var6[3];
+            if(this.inChars[var6[0]][var6[1]].length <= var6[2]) {
+               ++var6[0];
+               var6[1] = var6[2] = 0;
+            }
+
+            if(this.inChars.length <= var6[0]) {
+               this.pile.remove(var3);
+            } else if(var1 == this.inChars[var6[0]][var6[1]][var6[2]]) {
+               this.pile.set(var3, var6.clone());
+               if(var6[2] + 1 == this.inChars[var6[0]][var6[1]].length && var6[0] + 1 == this.inChars.length) {
+                  this.isFound = true;
+               }
+            } else {
+               for(var4 = var6[1] + 1; var4 < this.inChars[var6[0]].length; ++var4) {
+                  int var5;
+                  for(var5 = 0; var5 < var6[2] && var5 < this.inChars[var6[0]][var4].length && this.inChars[var6[0]][var4][var5] == this.inChars[var6[0]][var6[1]][var5]; ++var5) {
+                     ;
+                  }
+
+                  if(var5 < var6[2]) {
+                     this.pile.remove(var3);
+                     break;
+                  }
+
+                  if(var1 == this.inChars[var6[0]][var4][var5]) {
+                     var6[1] = var4;
+                     this.pile.set(var3, var6.clone());
+                     if(var6[2] + 1 == this.inChars[var6[0]][var6[1]].length && var6[0] + 1 == this.inChars.length) {
+                        this.isFound = true;
+                     }
+                     break;
+                  }
+
+                  if(var4 + 1 == this.inChars[var6[0]].length) {
+                     this.pile.remove(var3);
+                     break;
+                  }
+               }
+
+               if(var6[0] + 1 == this.inChars.length && var6[1] + 1 == this.inChars[0].length && var6[2] + 1 == this.inChars[0][1].length) {
+                  this.pile.remove(var3);
+               }
+            }
+
+            if(this.isFound) {
+               this.realLength = var6[3];
+               break;
+            }
+         }
+
+         if(this.pos % (long)this.wordSize == 0L) {
+            for(var3 = 0; var3 < this.inChars[0].length; ++var3) {
+               if(var1 == this.inChars[0][var3][0]) {
+                  var6[0] = var6[2] = 0;
+                  var6[1] = var3;
+                  var6[3] = 1;
+                  this.pile.add(var6.clone());
+                  if(this.inChars.length + this.inChars[0][var3].length == 2) {
+                     this.isFound = true;
+                     this.realLength = var6[3];
+                  }
+                  break;
+               }
+            }
+         }
+      }
+
+      ++this.pos;
+   }
+}
+
+```
+
+`resources/jEP.java`:
+
+```java
+package resources;
+
+import java.net.URL;
+import java.text.MessageFormat;
+import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
+
+public class jEP extends JScrollPane implements HyperlinkListener {
+
+   /**
+    *
+    */
+   private static final long serialVersionUID = 1L;
+   JEditorPane eP = new JEditorPane();
+   String s1;
+   public String s2 = null;
+
+
+   public jEP(String var1, boolean var2) {
+      super(22, 30);
+      this.eP.addHyperlinkListener(this);
+      this.eP.setText(var1);
+      this.s1 = var1;
+      this.eP.setEditable(var2);
+      this.eP.setCaretPosition(0);
+      this.getViewport().setView(this.eP);
+   }
+
+   public void setContentType(String var1) {
+      this.eP.setContentType(var1);
+   }
+
+   public void setUrl(URL var1) {
+      try {
+         this.eP.setPage(var1);
+         this.eP.setCaretPosition(0);
+      } catch (Exception var3) {
+         this.eP.setText("Help file not found");
+      }
+
+   }
+
+   public void hyperlinkUpdate(HyperlinkEvent var1) {
+      if(var1.getEventType() == EventType.ACTIVATED) {
+         // UI.browse = var1.getURL().toString();
+         this.Browser2(var1.getURL());
+      }
+
+   }
+
+   public void Browser2(URL var1) {
+      String var2 = System.getProperty("os.name");
+      String var5 = new String(var1.toExternalForm());
+
+      try {
+         String var3;
+         MessageFormat var4;
+         Object[] var6;
+         if(var2.startsWith("Win")) {
+            var6 = new Object[]{var1.toString()};
+            String var7 = -1 >= var2.indexOf("9") && -1 >= var2.indexOf("Me")?"cmd.exe /c start \"\" \"{0}\"":"command.com /c start \"{0}\"";
+            var4 = new MessageFormat(var7);
+            var3 = var4.format(var6);
+            if(var1.getProtocol().equals("file")) {
+               throw new Exception("This class doesn\'t allow the opening a file, avoiding evil code.");
+            }
+
+            if(var1.toString().startsWith("mailto:")) {
+               throw new Exception("This class doesn\'t allow the opening of mailto: .");
+            }
+         } else if(var2.startsWith("Mac OS")) {
+            var6 = new Object[]{var5, var1.toString()};
+            var4 = new MessageFormat("open -a /Applications/Safari.app {0}");
+            var3 = var4.format(var6);
+         } else {
+            var6 = new Object[]{var5, var1.toString()};
+            var4 = new MessageFormat(System.getProperty("mozilla {0}"));
+            var3 = var4.format(var6);
+         }
+
+         Runtime.getRuntime().exec(var3);
+      } catch (Exception var8) {
+         System.err.println("Could not invoke browser: " + var8);
+      }
+
+   }
+}
+
+```
+
+`resources/math.java`:
+
+```java
+package resources;
+
+public class math {
+
+   public static double nextUp(double var0) {
+      if(!Double.isNaN(var0) && var0 != Double.POSITIVE_INFINITY) {
+         var0 += 0.0D;
+         return Double.longBitsToDouble(Double.doubleToRawLongBits(var0) + (var0 >= 0.0D?1L:-1L));
+      } else {
+         return var0;
+      }
+   }
+
+   public static float nextUp(float var0) {
+      if(!Float.isNaN(var0) && var0 != Float.POSITIVE_INFINITY) {
+         var0 += 0.0F;
+         return Float.intBitsToFloat(Float.floatToRawIntBits(var0) + (var0 >= 0.0F?1:-1));
+      } else {
+         return var0;
+      }
+   }
+
+   public static double nextDown(double var0) {
+      return !Double.isNaN(var0) && var0 != Double.NEGATIVE_INFINITY?(var0 == 0.0D?-4.9E-324D:Double.longBitsToDouble(Double.doubleToRawLongBits(var0) + (var0 > 0.0D?-1L:1L))):var0;
+   }
+
+   public static float nextDown(float var0) {
+      return !Float.isNaN(var0) && var0 != Float.NEGATIVE_INFINITY?(var0 == 0.0F?-1.4E-45F:Float.intBitsToFloat(Float.floatToRawIntBits(var0) + (var0 > 0.0F?-1:1))):var0;
+   }
+}
+
+```
+
+`resources/saveT.java`:
+
+```java
+package resources;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Vector;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+
+public class saveT extends Thread {
+
+   File f1;
+   File f2;
+   Vector v1;
+   binEdit editor;
+   JProgressBar jPBar;
+   private long time;
+   private long virtualSize;
+   private long pos;
+
+
+   public void run() {
+      boolean var1 = false;
+      int var3 = 0;
+      FileInputStream var5 = null;
+      byte[] var8 = new byte[2097152];
+      if(this.v1 != null && this.v1.size() != 0) {
+         long var14 = 0L;
+         this.pos = 0L;
+         this.time = System.currentTimeMillis();
+         this.virtualSize = ((edObj)this.v1.lastElement()).p2;
+         this.jPBar.setMaximum(1073741824);
+
+         edObj var9;
+         while(var3 < this.v1.size()) {
+            var9 = (edObj)this.v1.get(var3);
+            if(this.pos < var9.p2) {
+               break;
+            }
+
+            ++var3;
+         }
+
+         BufferedOutputStream var16 = null;
+
+         try {
+            if(this.f1 != null) {
+               var5 = new FileInputStream(this.f1);
+            }
+
+            File var6 = new File(this.f2.getPath() + ".TMP");
+
+            for(var16 = new BufferedOutputStream(new FileOutputStream(var6), 2097152); var3 < this.v1.size() && this.next(); ++var3) {
+               var9 = (edObj)this.v1.get(var3);
+               long var10 = var9.p1 - var9.offset;
+               this.pos = var9.p1;
+               if(var9.o.a1 != 4 && var9.o.a1 != 2 && (var9.o.a1 != 6 || 1 >= var9.o.B.size())) {
+                  int var2;
+                  long var12;
+                  if(var9.o.a1 == 6) {
+                     Arrays.fill(var8, ((Byte)var9.o.B.get(0)).byteValue());
+
+                     while(this.pos < var9.p2 && this.next()) {
+                        var12 = var9.p2 - this.pos;
+                        var2 = var12 < 2097152L?(int)var12:2097152;
+                        var16.write(var8, 0, var2);
+                        this.pos += (long)var2;
+                        this.setJPBar();
+                     }
+                  } else {
+                     for(var12 = this.pos - var10; var14 < var12; var14 += var5.skip(var12 - var14)) {
+                        ;
+                     }
+
+                     while(this.pos < var9.p2 && this.next()) {
+                        var12 = var9.p2 - this.pos;
+                        var2 = var5.read(var8, 0, var12 < 2097152L?(int)var12:2097152);
+                        if(var2 <= 0) {
+                           throw new IOException(var2 == 0?"Unable to access file":"EOF");
+                        }
+
+                        var14 += (long)var2;
+                        var16.write(var8, 0, var2);
+                        this.pos += (long)var2;
+                        this.setJPBar();
+                     }
+                  }
+               } else {
+                  while(this.pos < var9.p2 && this.next()) {
+                     var16.write(((Byte)var9.o.B.get((int)(this.pos - var10))).byteValue());
+                     ++this.pos;
+                  }
+
+                  this.setJPBar();
+               }
+            }
+
+            var16.close();
+            if(var5 != null) {
+               var5.close();
+            }
+
+            if(this.editor.rAF != null) {
+               this.editor.rAF.close();
+            }
+
+            if(this.f1 != null && this.f1.equals(this.f2)) {
+               File var7 = new File(this.f1.getParent(), this.f1.getName() + ".bak");
+               if(var7.exists()) {
+                  var7.delete();
+               }
+
+               this.f1.renameTo(var7);
+            }
+
+            var6.renameTo(this.f2);
+            this.editor.save2(this.f2);
+         } catch (Exception var20) {
+            JOptionPane.showMessageDialog(this.editor, var20);
+            this.editor.save2((File)null);
+         }
+
+         try {
+            var16.close();
+         } catch (Exception var19) {
+            ;
+         }
+
+         try {
+            var5.close();
+         } catch (Exception var18) {
+            ;
+         }
+
+      }
+   }
+
+   protected void setJPBar() {
+      this.jPBar.setValue((int)(1.07374182E9F * ((float)this.pos / (float)this.virtualSize)));
+      this.jPBar.setString(this.toTime(this.pos, this.virtualSize, System.currentTimeMillis() - this.time));
+   }
+
+   private boolean next() {
+      return !Thread.currentThread().isInterrupted();
+   }
+
+   private String toTime(long var1, long var3, long var5) {
+      StringBuffer var7 = new StringBuffer(Float.toString((float)((int)((float)var1 / ((float)var3 / 1000.0F))) / 10.0F));
+      var7.append("% saved");
+      if(var1 != 0L) {
+         var5 = var5 / 1000L * (var3 / var1);
+      }
+
+      if(var5 == Long.MAX_VALUE) {
+         return "";
+      } else {
+         long[] var8 = new long[]{86400L, 3600L, 60L, 1L};
+         String[] var9 = new String[]{"D ", "H ", "mn ", "s "};
+         int var11 = 0;
+         var7.append(", time remaining ");
+
+         for(int var10 = 0; var10 < var8.length && var11 < 2; ++var10) {
+            long var12;
+            if((var12 = var5 / var8[var10]) != 0L || var11 == 1) {
+               if(var12 < 10L && 0 < var11) {
+                  var7.append("0");
+               }
+
+               var7.append(var12).append(var9[var10]);
+               var5 %= var8[var10];
+               ++var11;
+            }
+         }
+
+         return var7.toString();
+      }
+   }
+}
+
+```
+
+`resources/slaveT.java`:
+
+```java
+package resources;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Vector;
+import javax.swing.Timer;
+
+public class slaveT extends Thread implements ActionListener {
+
+   binEdit hexV;
+   Timer timer = new Timer(300, this);
+   private BufferedReader bR;
+
+
+   slaveT() {
+      this.bR = new BufferedReader(new InputStreamReader(System.in));
+   }
+
+   public void run() {
+      this.timer.addActionListener(this);
+      this.timer.start();
+   }
+
+   public void actionPerformed(ActionEvent var1) {
+      boolean var2 = true;
+      boolean var3 = false;
+      int var4 = 0;
+      int var5 = 0;
+      String var9 = null;
+      StringBuffer var11 = new StringBuffer();
+      Vector var12 = new Vector();
+      if(var1.getSource() == this.timer) {
+         this.timer.stop();
+
+         try {
+            if(!this.bR.ready()) {
+               this.timer.setDelay(300);
+            } else {
+               var9 = this.bR.readLine().replaceAll("  ", " ");
+               this.timer.setDelay(50);
+            }
+         } catch (IOException var14) {
+            ;
+         }
+
+         if(var9 != null && 0 < var9.length()) {
+            for(; var5 < var9.length(); ++var5) {
+               var2 = true;
+               if(var9.charAt(var5) == 34) {
+                  var2 = !var2;
+               } else if(var2 && var9.charAt(var5) == 32) {
+                  var12.add(var9.substring(var4, var5));
+                  var4 = var5 + 1;
+               }
+            }
+
+            var12.add(var9.substring(var4, var5));
+            if(0 < var12.size()) {
+               var9 = (String)var12.firstElement();
+               if(var9.equals("-goto") && var12.size() == 2) {
+                  this.hexV.goTo((String)var12.elementAt(1));
+               } else if((var9.equals("-Mark") || var9.equals("-mark") || var9.equals("-delmark") || var9.equals("-delMark")) && 1 < var12.size()) {
+                  for(var4 = 1; var4 < var12.size(); ++var4) {
+                     try {
+                        Long var8 = Long.valueOf((String)var12.elementAt(var4));
+                        if(var9.equals("-Mark") && !this.hexV.MarkV.contains(var8)) {
+                           this.hexV.MarkV.add(var8);
+                        } else if(var9.equals("-mark") && !this.hexV.markV.contains(var8)) {
+                           this.hexV.markV.add(var8);
+                        } else if(var9.equals("-delMark")) {
+                           this.hexV.MarkV.remove(var8);
+                        } else if(var9.equals("-delmark")) {
+                           this.hexV.markV.remove(var8);
+                        }
+                     } catch (Exception var15) {
+                        ;
+                     }
+                  }
+               } else if(var9.equals("-file") && var12.size() == 2) {
+                  var9 = (String)var12.elementAt(1);
+                  if(var2 = (var9.length() & 3) == 0) {
+                     var4 = 0;
+
+                     while(var4 < var9.length() - 3 && var2) {
+                        long var6 = 0L;
+
+                        for(var5 = 0; var5 < 4 && var2; ++var5) {
+                           char var16 = var9.charAt(var4);
+                           var2 = 48 <= var16 && var16 <= 57 || 65 <= var16 && var16 <= 90;
+                           var6 = (var6 << 4) + (long)var16 - (long)(48 <= var16 && var16 <= 57?48:55);
+                           ++var4;
+                        }
+
+                        var11.append((char)((int)var6));
+                     }
+                  }
+
+                  this.hexV.loadFile(new File(var11.toString()));
+               } else if(var9.equals("-close")) {
+                  this.hexV.closeFile();
+               }
+            }
+         }
+
+         this.timer.restart();
+      }
+
+   }
+}
+
+```
