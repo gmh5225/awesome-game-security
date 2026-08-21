@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/es3n1n__obfuscator.md
   - wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md
   - wiki/sources/descriptions/cdong1012__ollvm-unflattener.md
+  - wiki/sources/descriptions/R7flex__dll-ollvm.md
   - wiki/sources/descriptions/RolfRolles__HexRaysDeob.md
 updated: 2026-08-21
 confidence: high
@@ -15,7 +16,7 @@ confidence: high
 
 # Control Flow Flattening
 
-**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[obscura]]). Source-level Rust CFF via proc macros such as [[rust-obfuscator]] (`labyrinth_macros`; automatic project-wide insertion) complements IR and binary flattening. Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md) (source: wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md)
+**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[dll-ollvm]] — LLVM 18 IR plugin with insn sub / bogus CFG / CFF / ctor-trim for manual-map DLL injection hardening; R7flex; source: wiki/sources/descriptions/R7flex__dll-ollvm.md), [[obscura]]). Source-level Rust CFF via proc macros such as [[rust-obfuscator]] (`labyrinth_macros`; automatic project-wide insertion) complements IR and binary flattening. Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md) (source: wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md)
 
 ## Recovery approaches
 

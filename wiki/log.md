@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:R7flex/dll-ollvm`: entity [[dll-ollvm]] (R7flex; LLVMObfuscationx LLVM 18 New Pass Manager plugin; insn sub / bogus CFG / CFF / global-ctor trim; tess-obf preset; per-function skip/protect/force markers; manual-map DLL injection hardening vs AC allocation/table pattern scans; Obfuscation Engine); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[control-flow-flattening]], [[ollvm-unflattener]], [[the-poor-mans-obfuscator]], and [[kagura]].
+
 - **2026-08-21** — ingest `description:REDPOWAR/D2GI`: entity [[d2gi]] (REDPOWAR; C++ DirectDraw7/D3D7→D3D9 wrapper for Hard Truck 2 / King of the Road; modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks; DirectX Compatibility); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[kotr-modern-patch]], [[dxwrapper]], and [[d3d9on12]].
 
 - **2026-08-21** — ingest `description:RSDKModding/RSDKv5-Decompilation`: entity [[rsdkv5-decompilation]] (RSDKModding; Retro Engine v5/v5U decompilation; Sonic Mania and other Retro Engine games; cross-platform; modding API; multiple audio/rendering backends; legacy engine compatibility; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[doomretro]], [[devilution]], [[game-gta-re3]], and [[gta-reversed-modern]].

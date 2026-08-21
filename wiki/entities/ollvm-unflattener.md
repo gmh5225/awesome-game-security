@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/cdong1012__ollvm-unflattener.md
-updated: 2026-08-17
+updated: 2026-08-21
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Not an IDA plugin—standalone binary-in / binary-out CFF recovery.
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[control-flow-flattening]] · [[idadeflat]] · [[unflat]] · [[d810-ng]] · [[obpo-plugin]]
+[[overviews/reverse-engineering]] · [[control-flow-flattening]] · [[dll-ollvm]] · [[idadeflat]] · [[unflat]] · [[d810-ng]] · [[obpo-plugin]]

@@ -695,6 +695,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [discord-overlay-hook](entities/discord-overlay-hook.md) — Discord overlay DX11 hook sample (C++; rendering / modding / hooking)
 
 - [dll-hot-reload](entities/dll-hot-reload.md) — injectable DLL hot-reload wrapper (ergrelet; reload payload on disk change; cheat / injection:windows)
+- [dll-ollvm](entities/dll-ollvm.md) — LLVM 18 pass plugin (sub/bcf/fla/trim) for manually mapped Windows DLLs; tess-obf pipeline; per-function markers; evades AC allocation/table pattern scans (R7flex; Obfuscation Engine)
 - [DllNotif](entities/dllnotif.md) — `LdrRegisterDllNotification` Ring3 callback research (blaquee; C++/C++; modding; anti-cheat / defensive Ring3 callback lane)
 - [DLLHSC](entities/dllhsc.md) — Windows DLL hijack scanner (ctxis; Visual Studio 2019; cheat / DLL Hijack research)
 - [DLLSpy](entities/dllspy.md) — CyberArk Windows DLL hijack vulnerability scanner (missing deps, writable dirs, unsafe search paths; audit reports)
