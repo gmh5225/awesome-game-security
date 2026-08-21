@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SeeFlowerX/frida-smali-trace`: entity [[frida-smali-trace]] (SeeFlowerX; Frida-based Android smali instruction tracing; JS/TS agents hook ART interpreter paths; detailed execution logs; IDA static offset/register prep; Android RE / mobile security runtime behavior analysis; cheat / Smali trace); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[frida]], [[stackplz]], [[apktool]], and [[jadx]].
+
 - **2026-08-21** — ingest `description:SeeFlowerX/stackplz`: entity [[stackplz]] (SeeFlowerX; Android eBPF stack tracing + hook analysis; Go controller + C eBPF; syscall/uprobe/hardware-breakpoint capture on ARM64; args/registers/stacks; filtering, structured output, optional Frida RPC; rooted mobile security / game protection RE; cheat / eBPF-based debugger for Android); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[edbg]], [[ehook]], [[btrace]], and [[frida]].
 
 - **2026-08-21** — ingest `description:Sentient111/ClearDriverTraces`: entity [[clear-driver-traces]] (Sentient111; C++ KM driver; removes MmUnloadedDrivers, PiDDBCacheTable, and code-integrity hash-cache artifacts via version-specific offsets; anti-cheat and driver forensics research; README Driver Trace Cleaner); cited on [[overviews/windows-kernel]] and [[concepts/kernel-pool-scanning]]; cross-linked [[hide-driver-testing]], [[driver-read-write]], [[nullmap]], [[revert-mapper]], and [[hlunaaa-github-io]].
