@@ -1535,6 +1535,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kit](entities/kit.md) — C/C++ pixels tooling + asset pipelines (Game Engine / Image Codec)
 - [kitsupe](entities/kitsupe.md) — PE parser/editor (headers, sections, imports/exports, relocations, resources; binary patching; cheat / PE; gmh5225)
 - [kittymemory-ios](entities/kittymemory-ios.md) — iOS runtime memory library (patch/hook/pattern scan; jailbreak-independent code patching; cheat / iOS memory explorer; gmh5225)
+- [kiero](entities/kiero.md) — universal Windows D3D9–12/GL/Vulkan graphics hooking library (MinHook method-table detours; sample ImGui overlays; x86/x64; Rebzzel)
 - [kiero2](entities/kiero2.md) — kiero v2 runtime D3D9–12/GL/Vulkan API locator (BYO hooking; CMake FetchContent; cross-platform GL/VK)
 - [KisakBlack](entities/kisakblack.md) — COD: Black Ops dedicated server open-source reimplementation (SwagSoftware; leaked source; DemonWare networking, zone/asset loading, community hosting; Game Engine / source)
 - [Kisak-Strike](entities/kisak-strike.md) — open-source Linux CS:GO port (SwagSoftware; full Source game codebase; CMake; SDL/OpenGL; engine architecture + Linux porting study; Game Engine / source)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rebzzel/kiero`: entity [[kiero]] (Rebzzel; C++ universal Windows D3D9–12/OpenGL/Vulkan graphics hooking; MinHook method-table detours; sample ImGui overlays; x86/x64; game security research / overlay tooling); cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[kiero2]], [[ntminhook]], [[d3dhook-imgui]], and [[universalhookx]].
+
 - **2026-08-21** — ingest `description:Reijaff/static_string_obfuscation`: entity [[static-string-obfuscation]] (Reijaff; Zig compile-time static string obfuscation; build-time randomized XOR keys; stripped x86_64 Windows executables; lightweight runtime decrypt; RE resistance / anti-analysis hardening; AC String Crypter); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[obfuscate]], [[crystr]], [[skcrypter]], [[xorlit]], [[xordata]], and [[obfuscatxor]].
 
 - **2026-08-21** — ingest `description:Rem01Gaming/meowna_detector`: entity [[meowna-detector]] (Rem01Gaming; C/NDK PoC; Android detector for meowna-class root-hide modules that disrupt logging services; missing logd socket + package-trace indicators; mobile security testing / fragile hide-technique study; cheat / Prove of concept of detecting meowna module); cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-linked [[android-native-root-detector]], [[magisk-killer]], [[detection]], [[riru-momo-hider]], and [[hideroot]].
