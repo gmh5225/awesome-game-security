@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Remus3/Lanternlight`: entity [[lanternlight]] (Remus3; Python; Mistfall Hunter PvPvE extraction ARPG companion; derives game state from logs, UE5 GVAS saves, and passive screen capture only—no injection, RPM, hooks, network intercept, or asset extraction; Emberforge combat/build math with provenance redaction; build planning + session analysis on kernel-AC live titles; cheat / Anti-cheat-safe companion); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[palworld-save-tools]], [[nuremx]], and [[easy-anti-cheat]].
+
 - **2026-08-21** — ingest `description:RenardDev/DumpVAC`: entity [[dumpvac]] (RenardDev; C/C++ PoC; hooks Steam/module-loading paths; disables VAC module execution; captures and decrypts received modules for offline inspection; detours/disasm helpers; VAC module delivery RE; explore anticheat:vac); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[vac-dumper]], [[vac-module-dumper]], and [[vac-bypass]].
 
 - **2026-08-21** — ingest `description:Reodus/CBS`: entity [[cbs]] (Reodus; Python IDAPython IDA Pro plugin + PyQt; regex scan disassembly lines; set/enable/disable/remove breakpoints by instruction patterns across functions; repeatable breakpoint automation for binary analysis; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[copy-rva]], [[ce-tracer-ida]], and [[lazyida]].
