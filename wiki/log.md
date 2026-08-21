@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SM7325-AE/android_kernel_motorola_dubai`: entity [[android-kernel-motorola-dubai]] (SM7325-AE; Motorola Dubai / Moto Edge 30 SM7325 Snapdragon 778G GKI kernel source; GKI ABI, Qualcomm drivers, Motorola device tree; Android kernel customization / mobile security RE; cheat / Android Kernel Source); cited on [[overviews/mobile-security]]; cross-linked [[android-kernel-driver-template]], [[android-kernel-xiaomi-sweet]], and [[android-kernel-oneplus-sm7250-wksu]].
+
 - **2026-08-21** — ingest `description:SV-Foster/UnSign`: entity [[unsign]] (SV-Foster; C CLI; 32/64-bit builds; strips Authenticode signatures from PE/COFF EXE/DLL/SYS; PE header edge-case handling for re-signing; RE / malware analysis / security testing); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[sigthief]], [[stealing-signatures]], [[signature-kid]], [[sigflip]], [[pesign-analyzer]], and [[pedigest]].
 
 - **2026-08-21** — ingest `description:SaadAhla/Anti-Sandbox`: entity [[anti-sandbox]] (SaadAhla; Windows C++ PoC; Any.Run-style sandbox detection via folder/process/user-profile/service-driver host artifact checks; layered multi-indicator scoring; malware-analysis / sandbox-evasion research; Detecting AnyRun sandbox); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[anticuckoo]], [[vmaware]], and [[hypervisor-detection]].
