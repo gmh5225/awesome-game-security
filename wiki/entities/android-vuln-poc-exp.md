@@ -18,4 +18,4 @@ Curated documentation and reference list for Android kernel CVE PoCs and exploit
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[android-vuln]] · [[cve-2026-43499-popsicle]] · [[cve-2019-2215]] · [[dirtypipe-android]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[android-vuln]] · [[android-kernel-cve-pocs]] · [[android-kernel-exploitation]] · [[cve-2026-43499-popsicle]] · [[cve-2019-2215]] · [[dirtypipe-android]]
