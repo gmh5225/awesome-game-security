@@ -20,4 +20,4 @@ Adjacent to PE triage viewers such as [[totalpe2]] and leaked-cert / DSE abuse r
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[totalpe2]] · [[pastdse]] · [[asctool]]
+[[stealing-signatures]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[totalpe2]] · [[pastdse]] · [[asctool]]

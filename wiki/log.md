@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Sentient111/StealingSignatures`: entity [[stealing-signatures]] (Sentient111; C++ utility; PE header parse + Authenticode security-directory `WIN_CERTIFICATE` blob copy onto another executable; transplanted cert metadata without valid trusted signature—verifier/tampering/trust-pipeline edge-case testing; README Stealing signatures from pe files); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[sigthief]], [[signature-kid]], [[sigflip]], [[pesign-analyzer]], and [[pedigest]].
+
 - **2026-08-21** — ingest `description:Sentient111/VulnerableDriverScanner`: entity [[vulnerable-driverscanner]] (Sentient111; C++ console; folder scan for potentially risky kernel drivers; PE import parsing flags indicative driver-related APIs; simple static triage—not full behavioral analysis; preliminary vulnerable-driver hunting and kernel attack-surface assessment; README Scans for vulnerable drivers); cited on [[byovd]] and [[overviews/windows-kernel]]; cross-linked [[vulnerable-driver-scanner]], [[driver-risk-scout]], [[loldrivers]], and [[ms-vulnerable-driver-list]].
 
 - **2026-08-21** — ingest `description:SentineLabs/AlphaGolang`: entity [[alphagolang]] (SentineLabs; IDAPython script toolkit for Go binary analysis in IDA Pro; stepwise workflow for binary ID, pclntab recovery, function discovery, strings, and types; YARA rule for Go PE/ELF/Mach-O; stripped/optimized Go malware and threat analysis; cheat / Analyzing Golang Binaries); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[golang-loader-assist]], [[goresym]], [[go-hacking]], and [[binoculars]].

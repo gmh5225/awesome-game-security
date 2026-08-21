@@ -20,4 +20,4 @@ Extends the PE signature-transplant lane beside [[sigthief]] (user-mode `certTab
 
 ## Related
 
-[[sigthief]] · [[sigflip]] · [[fakesign]] · [[lazy-sign]] · [[pesign-analyzer]] · [[pedigest]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[sigthief]] · [[stealing-signatures]] · [[sigflip]] · [[fakesign]] · [[lazy-sign]] · [[pesign-analyzer]] · [[pedigest]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
