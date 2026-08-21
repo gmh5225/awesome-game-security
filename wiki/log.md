@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RevEngAI/plugin-ghidra`: entity [[plugin-ghidra]] (RevEngAI; Java Gradle Ghidra 11.4+/Java 21 extension; RevEng.AI API integration; binary upload, code similarity, batch function matching/renaming, AI decompilation views; ML-assisted stripped-binary RE; cheat / Ghidra Plugins / `[RevEng.AI]`); cited on [[overviews/reverse-engineering]]; cross-linked [[reai-ida]], [[ghidra-openai]], [[ghidrassist]], [[ghidra-mcp]], and [[renamaida]].
+
 - **2026-08-21** — ingest `description:RevEngAI/reai-ida`: entity [[reai-ida]] (RevEngAI; Python IDAPython + Qt IDA Pro plugin; RevEng.AI platform integration; binary upload, similarity-based function matching, automated renaming, auto-unstrip workflows, AI decompilation views; ML-assisted stripped-binary analysis; cheat / IDA Plugins / `[RevEng.AI]`); cited on [[overviews/reverse-engineering]]; cross-linked [[renamaida]], [[finger]], [[wpechatgpt]], [[ida-gepetto]], and [[binoculars]].
 
 - **2026-08-21** — ingest `description:ReverseWarrior/IUM-Debugger`: entity [[ium-debugger]] (ReverseWarrior; .NET debugger for Windows IUM/VTL1 trustlets; Hyper-V hypercalls for trustlet memory R/W + disassembly in VSM secure enclaves; LiveCloudKd `hvmm.sys` host-side patch of guest securekernel debug check so WinDbg in guest attaches to VTL1 IUM trustlets; VBS isolation / kernel RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hvci]], [[hyper-rev]], [[hyperdeceit]], and [[windbg-scripts]].

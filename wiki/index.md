@@ -2119,6 +2119,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PixelFlasher](entities/pixel-flasher.md) — cross-platform Pixel flashing GUI (bootloader unlock, OTA/factory flash, Magisk/KernelSU/APatch root, boot-image patch, backup; cheat / Android ROM tool for Pixel)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [plthook](entities/plthook.md) — cross-platform PLT/GOT/IAT hook library (ELF/Mach-O/PE; Linux/macOS/Windows; cheat / hook research)
+- [plugin-ghidra](entities/plugin-ghidra.md) — RevEng.AI Ghidra extension: binary upload, code similarity, batch function matching/renaming, AI decompilation views (Java/Gradle; Ghidra 11.4+/Java 21; ML-assisted stripped-binary RE; cheat / Ghidra Plugins / `[RevEng.AI]`)
 - [PMI-hpc](entities/pmi-hpc.md) — PMI + hardware performance counters for Windows security monitoring (branch misprediction / cache miss interrupts; code injection / ROP anomaly detection)
 - [pmctrace](entities/pmctrace.md) — Intel PMC counter collection via ETW (C; cache/branch/instruction micro-arch events; profiling / side-channel RE)
 - [pooldump](entities/pooldump.md) — Windows kernel pool enumerator/dumper (tags, sizes, owning drivers; EAC manual-map DLL extraction)
