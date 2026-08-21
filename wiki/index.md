@@ -1979,6 +1979,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [osu!framework](entities/osu-framework.md) — C# 2D game framework (drawable / OpenGL / input·audio·UI; Game Engine)
 - [osx-cpu-temp](entities/osx-cpu-temp.md) — macOS SMC CPU temperature CLI (IOKit AppleSMC; °C/°F; Detection:HWID)
 - [overlay](entities/overlay.md) — SetWindowsHookEx overlay sample (C++; cheat / overlay)
+- [overlaycord](entities/overlaycord.md) — Discord game overlay pipeline hijack from external process (SamuelTulach; C++; framebuffer sharing; no hooks/injection; overlay trust-boundary / AC research; cheat / Discord)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
 - [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)

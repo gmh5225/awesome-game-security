@@ -18,4 +18,4 @@ DX11-focused C++ sample for hooking Discord's in-game overlay render path—rend
 
 ## Related
 
-[[overviews/graphics-api]] · [[overviews/game-hacking]] · [[present-hook]] · [[steam-overlay-x64]]
+[[overlaycord]] · [[overviews/graphics-api]] · [[overviews/game-hacking]] · [[present-hook]] · [[steam-overlay-x64]]
