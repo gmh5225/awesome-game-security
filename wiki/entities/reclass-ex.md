@@ -12,7 +12,7 @@ confidence: medium
 
 Extended **Windows memory class reconstruction and inspection** tool (ajkhoury; C++). Provides an interactive interface for modeling in-memory structures while attached to a target process—RTTI support, PDB symbol loading, module-based address targeting, plugin extensibility, and improved navigation for large class layouts. Widely used in game hacking and malware analysis workflows where understanding dynamic memory layouts is critical. (source: wiki/sources/descriptions/ajkhoury__ReClassEx.md)
 
-Complements ReClass.NET plugins such as [[reclass-net-driverreader]] and [[reclass-dma]], and interactive struct tools like [[regenny]].
+Complements the [[reclass-net]] host and its plugins such as [[reclass-net-driverreader]] and [[reclass-dma]], and interactive struct tools like [[regenny]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements ReClass.NET plugins such as [[reclass-net-driverreader]] and [[recla
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[reclass-net-driverreader]] · [[reclass-dma]] · [[regenny]] · [[pdb]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[reclass-net]] · [[reclass-net-driverreader]] · [[reclass-dma]] · [[regenny]] · [[pdb]]

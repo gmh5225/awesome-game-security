@@ -2268,6 +2268,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rw_socket_driver](entities/rw-socket-driver.md) — kernel socket RPM/WPM for protected processes (manual-map friendly; external cheat comm; adrianyy; cheat / Socket)
 - [RWXFinder](entities/rwxfinder.md) — VirtualQueryEx RWX page scanner (size-filtered exploitable regions for code injection; S12cybersecurity; cheat / injection:windows)
 - [Recast Navigation](entities/recastnavigation.md) — Recast & Detour navmesh toolset (voxelize → pathfind/steer; Game Tools)
+- [ReClass.NET](entities/reclass-net.md) — .NET memory class reconstruction + remote process inspection (x86/x64; scanners/debuggers; legacy ReClass import/export; C#/C++ layout export; cheat / debugging)
 - [ReClass DMA](entities/reclass-dma.md) — ReClass.NET plugin: DMA-backed structure recon (C/C++; external PCIe FPGA path; cheat / debugging)
 - [ReClass.NET-DriverReader](entities/reclass-net-driverreader.md) — ReClass.NET plugin: kernel-driver mem vs RPM (AC-blocked structure recon; C#/C++)
 - [ReClassEx](entities/reclass-ex.md) — extended Windows class reconstruction tool (ajkhoury; C++; RTTI, PDB, module targeting, plugins; cheat / debugging)
