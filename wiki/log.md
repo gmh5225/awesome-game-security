@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SafeBreach-Labs/PoolParty`: entity [[poolparty]] (SafeBreach-Labs; C++ Windows thread-pool injection collection; worker-factory start-routine overwrite + TP_WORK/TP_WAIT/TP_IO/TP_ALPC/TP_JOB/TP_DIRECT/TP_TIMER insertion; native API wrappers + handle hijacking; red-team / anti-cheat / EDR visibility testing; ThreadPool); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[tartarus-tp-alloc-inject]], [[the-perfect-injector]], and [[injectors]].
+
 - **2026-08-21** — ingest `description:Salvatore-Als/cs2-signature-list`: entity [[cs2-signature-list]] (Salvatore-Als; CS2 function-signature reference notes; Markdown + IDC helper; string anchors and per-build search guidance for team switch, item give, chat, damage routines; game RE / modding / offset-signature maintenance; cheat / [Signature]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-dumper]], [[cs2-offsets]], [[cs2-internals]], [[cs2-things]], and [[cs2-anticheat]].
 
 - **2026-08-21** — ingest `description:SamLarenN/CPUZ-DSEFix`: entity [[cpuc-dsefix]] (SamLarenN; Windows x64 C++ utility; CPU-Z vulnerable-driver BYOVD → DSE disable via `g_CiEnable`/`g_CiOptions` kernel patch; pattern scan + unsigned driver load helpers; PatchGuard crash risk; kernel security research / anti-cheat bypass experimentation; cheat / CPU-Z); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[cpuz]], [[byovd]], [[dse-hook]], [[dse-patcher-2]], [[patchguard]], [[kdmapper]], and [[vdm]].
