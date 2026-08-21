@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RomanceTheHeart/Automation_Examples`: entity [[automation-examples]] (RomanceTheHeart; UE4 editor automation sample; Blutility + EditorScriptingUtilities; C++ Editor Utility classes + Blueprint dashboard widgets; asset rename/duplicate, unused-content cleanup, call-in-editor content-pipeline patterns; Game Engine / Unreal editor tooling); cited on [[overviews/game-engine]]; cross-linked [[unreal-mcp]], [[ue-buivalidator]], and [[houdini-engine-for-unreal]].
+
 - **2026-08-21** — ingest `description:RootKit-Org/AI-Aimbot`: entity [[ai-aimbot]] (RootKit-Org; Python YOLOv5 screen-capture aimbot; Conda env; per-game Fortnite/Rust models; configurable detection sensitivity + aim parameters; cheat / Machine Learning YOLOv5; AI-based cheat detection research); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[ai-fps-b00m-h3adsh0t]], [[yolov5-pubg]], [[nuremx]], and [[waldo]].
 
 - **2026-08-21** — ingest `description:Rprop/And64InlineHook`: entity [[and64-inline-hook]] (Rprop; lightweight C++ Android ARM64 inline hooking library; instruction patch + AArch64 branch relocation + trampolines; executable-memory changes + I-cache flush; mobile RE / instrumentation / game-security experimentation; Android ARMv8 inline hook framework); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[adbi]], [[dobby]], [[pyasm-patch]], [[farm64]], and [[china-pubg]].
