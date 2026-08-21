@@ -119,6 +119,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AERoot](entities/aeroot.md) — Quarkslab Android Emulator runtime root (debug pipe/ADB; custom su; no system-image rewrite)
 - [AiDA](entities/aida.md) — AI-powered IDA 9.0+ assistant for C++ game RE (cheat / IDA Plugins)
 - [AICommand](entities/ai-command.md) — ChatGPT integration with Unity Editor (API key in UserSettings; Game Engine Plugins:Unity)
+- [AI-Aimbot](entities/ai-aimbot.md) — RootKit-Org YOLOv5 screen-capture aimbot (Conda; Fortnite/Rust custom models; detection sensitivity + aim tuning; cheat / Machine Learning YOLOv5)
 - [AI-FPS-b00m-h3adsh0t](entities/ai-fps-b00m-h3adsh0t.md) — AI-powered FPS aimbot (Python/C++; external screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
 - [AIMachDec](entities/aimachdec.md) — IDA LLM ARM64→C/ObjC/Swift for Mach-O (apps/kernelcache/DSC; cheat / IDA Plugins)
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)

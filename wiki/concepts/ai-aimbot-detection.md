@@ -24,7 +24,8 @@ sources:
   - wiki/sources/descriptions/Zurek0x__NuremX.md
   - wiki/sources/descriptions/YouNeverKnow00__Rust-Auto-Weapon-Detection-OpenCV-Example.md
   - wiki/sources/descriptions/gravemaulr__MLAntiCheat.md
-updated: 2026-08-20
+  - wiki/sources/descriptions/RootKit-Org__AI-Aimbot.md
+updated: 2026-08-21
 confidence: medium
 ---
 
@@ -71,6 +72,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[camera-triggerbot]] — camera triggerbot (movement/color around crosshair; no trained model; cheat / triggerbot & aimbot)
 - [[opencv-smart-aimbot]] — OpenCV + triggerbot (C++; classical CV; cheat / triggerbot & aimbot; gmh5225)
 - [[ai-fps-b00m-h3adsh0t]] — external FPS aimbot (Python/C++; screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
+- [[ai-aimbot]] — RootKit-Org YOLOv5 screen-capture aimbot (Conda; Fortnite/Rust custom models; detection sensitivity + aim tuning; cheat / Machine Learning YOLOv5)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[rust-auto-weapon-detection-opencv-example]] — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; no memory reads; YouNeverKnow00)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RootKit-Org/AI-Aimbot`: entity [[ai-aimbot]] (RootKit-Org; Python YOLOv5 screen-capture aimbot; Conda env; per-game Fortnite/Rust models; configurable detection sensitivity + aim parameters; cheat / Machine Learning YOLOv5; AI-based cheat detection research); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[ai-fps-b00m-h3adsh0t]], [[yolov5-pubg]], [[nuremx]], and [[waldo]].
+
 - **2026-08-21** — ingest `description:Rprop/And64InlineHook`: entity [[and64-inline-hook]] (Rprop; lightweight C++ Android ARM64 inline hooking library; instruction patch + AArch64 branch relocation + trampolines; executable-memory changes + I-cache flush; mobile RE / instrumentation / game-security experimentation; Android ARMv8 inline hook framework); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[adbi]], [[dobby]], [[pyasm-patch]], [[farm64]], and [[china-pubg]].
 
 - **2026-08-21** — ingest `description:RuqoomTech/Pyramid-Engine`: entity [[pyramid-engine]] (RuqoomTech; pre-alpha C++17 Win32/OpenGL game engine; forward/deferred passes, shadow mapping, octree frustum culling, ECS serialization, modular math/input/asset/UI libs; CMake MSYS2 MinGW-w64; RTS vertical slice focus; tests + CI; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[exengine]], [[joshoengine-native]], and [[gltut]].
