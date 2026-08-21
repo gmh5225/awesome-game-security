@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamLarenN/PePacker`: entity [[pepacker-samlarenn]] (SamLarenN; simple C++ PE packer; `.text` XOR encrypt + appended decrypt stub; custom PE section parse/rewrite; RE practice / packer development / basic obfuscation; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[exe-packer]], [[xorpacker]], [[packer-tutorial]], [[pepacker]], and [[unpacker]].
+
 - **2026-08-21** — ingest `description:SamVanheer/halflife-unified-sdk`: entity [[halflife-unified-sdk]] (SamVanheer; consolidated Half-Life SDK for HL/OpFor/Blue Shift mods; C++; CMake cross-platform VS/GCC builds; bug fixes, deduplicated shared systems, docs/tooling/changelogs; game development / classic FPS architecture study; README [Half-Life SDK]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[halflife]], [[regamedll-cs]], [[regs]], [[cs16-client]], and [[source-sdk-2013]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/BetterTiming`: entity [[better-timing]] (SamuelTulach; Linux KVM patch; records VM-exit timing characteristics + guest TSC offset; bare-metal-like execution timing; reduced VM-check tool detection; virtualization security / anti-cheat timing-heuristic testing; cheat / Bypass CPU Timing); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[rdtsc-kvm-handler]], [[hypervisor-phantom]], [[kvm-performance]], [[checkhv-um]], and [[ophion]].
