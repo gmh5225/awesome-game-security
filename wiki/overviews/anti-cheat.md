@@ -498,6 +498,7 @@ sources:
   - wiki/sources/descriptions/s0ngidong3__TPM-SPOOFER.md
   - wiki/sources/descriptions/SamuelTulach__tpm-spoofer.md
   - wiki/sources/descriptions/SamuelTulach__meme-rw.md
+  - wiki/sources/descriptions/SamuelTulach__HookGuard.md
   - wiki/sources/descriptions/SamuelTulach__SecureGame.md
   - wiki/sources/descriptions/illegal-instruction-co__CountHook.md
   - wiki/sources/descriptions/svespalec__faultline.md
@@ -808,6 +809,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[moonwalk]] — Rust PEB-less DLL base discovery via TEB/stack walk (VirtualQuery or API-free variants; CLI + library; evades monitored PEB module-enumeration paths) (source: wiki/sources/descriptions/Teach2Breach__moonwalk.md)
 - [[kaspersky-hook]] — syscall hooking via Kaspersky `klhk.sys` hypervisor (`IA32_LSTAR` dispatch-table redirect + custom driver; gmh5225; README `[Kaspersky]`) (source: wiki/sources/descriptions/gmh5225__KasperskyHook.md)
 - [[hook-hvl-switch-virtual-address-space]] — `HvlSwitchVirtualAddressSpace` hook; CR3 transition manipulation hides pages from process memory scans during address-space context switches (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Hook-HvlSwitchVirtualAddressSpace.md)
+- [[hook-guard]] — global exception-hook chain driver; monitors/obfuscates CR3 address-space switches and logs protected-context transition attempts; PatchGuard-aware/HVCI-compatible defensive memory-access-control research (SamuelTulach; README Global exception/KdpDebugRoutineSelect) (source: wiki/sources/descriptions/SamuelTulach__HookGuard.md)
 - [[driver-hypercall-page-hook]] — `nt!HvcallCodeVa` hypercall-page hook; custom dispatcher + `HvlEnlightenments` flip routes context-switch hypercalls through callbacks (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Driver-HypercallPageHook.md)
 - [[hyperdeceit]] — reusable C++ Hyper-V impersonation library; intercepts selected kernel hypercalls with ready-to-hook TLB flush, sleep/shutdown, address-space switch, and spinlock paths (Xyrem; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/Xyrem__HyperDeceit.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)

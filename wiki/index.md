@@ -1235,6 +1235,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hook-updater](entities/hook-updater.md) — Python auto-update Frida hook scripts (cheat / Frida)
 - [hh-lol-prophet](entities/hh-lol-prophet.md) — Go LoL modding sample (hh lol prophet; gmh5225; cheat / game:lol)
 - [HookHunter](entities/hookhunter.md) — Windows process hook/patch scanner + hook destination tracing (Detection:hook; mike1k)
+- [HookGuard](entities/hook-guard.md) — global exception-hook chain driver; CR3 address-space switch monitor/obfuscation; protected-context switch logging; PatchGuard-aware/HVCI-compatible AC research (SamuelTulach; Global exception/KdpDebugRoutineSelect)
 - [Hook KdTrap](entities/hook-kdtrap.md) — KdTrap global exception-handler hook via `HalpStallCounter` hijack (null-deref / reserved CR3-bit fault intercept; gmh5225; Some Tricks Ring0)
 - [Hook HvlSwitchVirtualAddressSpace](entities/hook-hvl-switch-virtual-address-space.md) — `HvlSwitchVirtualAddressSpace` hook; CR3 transition manipulation hides pages from AC process memory scans during address-space switches (gmh5225; HvcallCodeVa)
 - [HITCON 2023 Demo CVE-2023-20562](entities/hitcon-2023-demo-cve-2023-20562.md) — HITCON 2023 `AMDCpuProfiler.sys` CVE-2023-20562 demo (AMD driver LPE / kernel code exec; gmh5225)
