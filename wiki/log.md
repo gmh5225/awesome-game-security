@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `readme:categories`: Game Develop ~186 (+1; Cheat ~2733 / Anti Cheat ~687 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]] and [[overviews/game-engine]] README-map counts (Kavex/GameDev-Resources guide index); light `index.md` section notes (no per-category pages).
+
 - **2026-08-21** — ingest `description:SafeBreach-Labs/PoolParty`: entity [[poolparty]] (SafeBreach-Labs; C++ Windows thread-pool injection collection; worker-factory start-routine overwrite + TP_WORK/TP_WAIT/TP_IO/TP_ALPC/TP_JOB/TP_DIRECT/TP_TIMER insertion; native API wrappers + handle hijacking; red-team / anti-cheat / EDR visibility testing; ThreadPool); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[tartarus-tp-alloc-inject]], [[the-perfect-injector]], and [[injectors]].
 
 - **2026-08-21** — ingest `description:Salvatore-Als/cs2-signature-list`: entity [[cs2-signature-list]] (Salvatore-Als; CS2 function-signature reference notes; Markdown + IDC helper; string anchors and per-build search guidance for team switch, item give, chat, damage routines; game RE / modding / offset-signature maintenance; cheat / [Signature]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-dumper]], [[cs2-offsets]], [[cs2-internals]], [[cs2-things]], and [[cs2-anticheat]].
