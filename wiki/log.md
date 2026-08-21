@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Skarbo/CSGOCrosshair`: entity [[csgocrosshair]] (Skarbo; web CS:GO crosshair generator; JavaScript/jQuery/KineticJS; visual preview, presets, ready-to-paste console config export, keybind setup; player/modding utility; cheat / game:csgo [Crosshair Generator]); cited on [[overviews/game-hacking]]; cross-linked [[master-guide]], [[csgo-sdk]], and [[csgo-internal-base]].
+
 - **2026-08-21** — ingest `description:Skeletal-Group/Bloodhound`: entity [[bloodhound]] (Skeletal-Group; C++ experimental user-mode EPT/NPT hook detection library; vectored exception handling + CPU intrinsics + VPGATHER accessibility probes for hypervisor page-state manipulation; stealthier executable/readable transition checks; anti-cheat / virtualization security research PoC; Various novel EPT/NPT hook detection mechanisms); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[ept-hook-detection]], [[ermsb-meme]], [[hypervisor-detection]], and [[checkhv-um]].
 
 - **2026-08-21** — ingest `description:Skengdo/arma3-external-variable-manager`: entity [[arma3-external-variable-manager]] (Skengdo; C++ external Arma 3 mission-variable tool; dump/read/edit active mission vars including server economy fields; BE-disabled servers; online BE-protected use needs bypass; runtime data manipulation research; cheat / game:arma3 [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[battleye]] and [[arma3beclient]].

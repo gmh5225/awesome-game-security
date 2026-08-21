@@ -546,6 +546,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-p2c-dumper](entities/csgo-p2c-dumper.md) — CS:GO internal P2C process memory dumper (signature / hook-JMP / allocation diff; decoded assembly + handler offsets; Dump lane; ch4ncellor)
 - [csgo-sdk](entities/csgo-sdk.md) — CS:GO Source 1 SDK headers (gmh5225 + bloesway/csgo_sdk; classes / netvars / interfaces / rendering / networking / animation; cheat / game:csgo [SDK])
 - [csgo-sdk-improved](entities/csgo-sdk-improved.md) — improved CS:GO Source 1 SDK (corrected classes, extra interfaces, fuller netvars; cheat / game:csgo [Internal])
+- [csgocrosshair](entities/csgocrosshair.md) — web CS:GO crosshair generator (Skarbo; jQuery/KineticJS; visual preview, presets, console config export, keybind setup; cheat / game:csgo [Crosshair Generator])
 - [csgo2-cheat](entities/csgo2-cheat.md) — CS2 internal cheat: rendering / SDK generation / hooking (imnotdatguy + gmh5225 [Internal]; C++; cheat / game:cs2)
 - [solace-csgo](entities/solace-csgo.md) — CS:GO internal cheat (modern C++; ImGui menu; ESP, aimbot, triggerbot, movement, skin changer; Source SDK hooking; emilyinure [Internal])
 - [solana-sbpf-rlib](entities/solana-sbpf-rlib.md) — Solana sBPF rlib signature packs for IDA/Ghidra/Binary Ninja (Python; cheat / IDA signature database)
