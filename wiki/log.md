@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:R4YVEN/beservice_intcallbacks`: entity [[beservice-intcallbacks]] (R4YVEN; C++/asm Visual Studio PoC; BattlEye bypass experiment via Instrumentation Callback behavior; callback + symbol-handling techniques; exploratory anti-cheat bypass + Windows internals study; README Instrumentation Callback); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[hooking-via-instrumentation-callback]], [[instrumentation-callback-syscall-logger]], and [[syscall-detect]].
+
 - **2026-08-21** — ingest `description:R4YVEN/raybot-zero`: entity [[raybot-zero]] (R4YVEN; C++ Windows driver + minimal C# loader; kernel-mode CS:GO cheat; triggerbot, bunnyhop, glow, kernel key-state reads; core logic without traditional usermode controller; game offsets + low-level memory routines; cheat development / kernel AC evasion research; README Kernel-mode); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[csgo-full-kernel]], [[kernel-csgo]], [[garhal-csgo]], and [[ec]].
 
 - **2026-08-21** — ingest `description:R7flex/dll-ollvm`: entity [[dll-ollvm]] (R7flex; LLVMObfuscationx LLVM 18 New Pass Manager plugin; insn sub / bogus CFG / CFF / global-ctor trim; tess-obf preset; per-function skip/protect/force markers; manual-map DLL injection hardening vs AC allocation/table pattern scans; Obfuscation Engine); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[control-flow-flattening]], [[ollvm-unflattener]], [[the-poor-mans-obfuscator]], and [[kagura]].
