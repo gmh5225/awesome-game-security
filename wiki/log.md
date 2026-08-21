@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SilentVoid13/Silent_Packer`: entity [[silent-packer]] (SilentVoid13; pure C ELF/PE packer; section insertion, code caves, text-section infection; XOR/AES encryption; low-level loader + asm runtime unpack; RE practice / obfuscation experiments / defensive packed-binary research; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[exe-packer]], [[hxor-packer]], [[awesome-executable-packing]], and [[unpacker]].
+
 - **2026-08-21** — ingest `description:SilentisVox/DoomSyscalls`: entity [[doom-syscalls]] (SilentisVox; Windows x64 indirect syscalls; runtime ntdll SSN + syscall-instruction resolve; inline-asm invoke; return-address spoof via ntdll gadgets; bypasses user-mode API hooks / RIP-return evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscalls-cpp]], [[inline-syscall]], [[syscall-detect]], [[tabby]], [[tartarus-tp-alloc-inject]], [[callstackspoofer]], and [[stack-spoofing]].
 
 - **2026-08-21** — ingest `description:Silverr12/DMA-CFW-Guide`: entity [[dma-cfw-guide]] (Silverr12; step-by-step [[pcileech-fpga]] v4.15 custom DMA firmware guide for Squirrel/EnigmaX1/ZDMA; Arbor/Telescan PE donor PCI config harvest; SystemVerilog/Vivado IP patch for VID/DID, DSN, BARs, capabilities; TLP emulation, interrupt notes, bitstream build/flash; alternate `.coe`/writemask shadow-config path; anti-cheat evasion threat modeling / PCIe DMA hardware research); cited on [[overviews/dma-attack]] and [[pcileech-fpga]]; cross-linked [[dma-attack-firmware-customization]], [[pcileechgen]], [[pcileech-wifi]], and [[easy-anti-cheat]].
