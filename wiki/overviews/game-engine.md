@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/yucchiy__UniCli.md
   - wiki/sources/descriptions/neogeek__get-unity.md
   - wiki/sources/descriptions/wondeks__unity-mcp.md
+  - wiki/sources/descriptions/willy92wins__dayz-mcp.md
   - wiki/sources/descriptions/justinpbarnett__unity-mcp.md
   - wiki/sources/descriptions/regenrek__deepwiki-mcp.md
   - wiki/sources/descriptions/noopstudios__interactive-feedback-mcp.md
@@ -542,6 +543,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **UE5 MCP (design)** — [[ue5-mcp]] paused Blender↔UE5 pipeline concept (Markdown workflows; text-driven scenes, asset transfer, level automation, Blueprint assistance) (source: wiki/sources/descriptions/VedantRGosavi__UE5-MCP.md)
 - **Unity MCP** — [[unity-mcp]] editor + C# scripting interaction; the justinpbarnett tree adds C#/Python shader/rendering MCP tooling (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
+- **DayZ MCP** — [[dayz-mcp]] Enfusion mod-dev automation (Python MCP + Enforce Script bridge; 53 server-authoritative tools for addon pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; willy92wins) (source: wiki/sources/descriptions/willy92wins__dayz-mcp.md)
 - **Blender MCP** — [[blender-mcp]] DCC scene inspection/editing via addon + Python MCP server (object/material ops, scene queries, scripted execution; optional external/generated 3D assets) (source: wiki/sources/descriptions/ahujasid__blender-mcp.md)
 - **Roblox MCP** — [[vibe-blocks-mcp]] exposes Roblox Studio actions as MCP tools over SSE (source: wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md)
 - **Zig MCP Server** — [[zig-mcp-server]] high-performance, memory-efficient MCP protocol implementation in Zig for game developers, reverse engineers, and tooling builders (source: wiki/sources/descriptions/gmh5225__zig-mcp-server.md)

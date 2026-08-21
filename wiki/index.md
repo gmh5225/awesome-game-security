@@ -625,6 +625,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dayu](entities/dayu.md) — Open/HarmonyOS `.abc` parser and decompiler (mobile RE; maintenance not guaranteed)
 
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)
+- [dayz-mcp](entities/dayz-mcp.md) — DayZ MCP server (53 tools; Enforce Script bridge; server-authoritative world control, telemetry, automated in-game testing; willy92wins)
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [DbgViewEx](entities/dbgviewex.md) — ETW event + system debug-log capture (emlinhax; early-stage; cheat / RE telemetry)
 - [DbgNexum](entities/dbgnexum.md) — Debug API + HWBP shellcode injector; file-mapping transfer; no WPM/RPM/VirtualAllocEx (dis0rder0x00)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:willy92wins/dayz-mcp`: entity [[dayz-mcp]] (willy92wins; Python MCP + Enforce Script bridge; 53 server-authoritative tools for mod pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; Game Develop / MCP); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[dayzzz]], [[dayz-cheat]], and [[external-dayz-cheat]].
+
 - **2026-08-21** — ingest `readme:categories`: Game Develop ~186 (+1; Cheat ~2733 / Anti Cheat ~687 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); refreshed [[overviews/overview]] and [[overviews/game-engine]] README-map counts (Kavex/GameDev-Resources guide index); light `index.md` section notes (no per-category pages).
 
 - **2026-08-21** — ingest `description:SafeBreach-Labs/PoolParty`: entity [[poolparty]] (SafeBreach-Labs; C++ Windows thread-pool injection collection; worker-factory start-routine overwrite + TP_WORK/TP_WAIT/TP_IO/TP_ALPC/TP_JOB/TP_DIRECT/TP_TIMER insertion; native API wrappers + handle hijacking; red-team / anti-cheat / EDR visibility testing; ThreadPool); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[tartarus-tp-alloc-inject]], [[the-perfect-injector]], and [[injectors]].
