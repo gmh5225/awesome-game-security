@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/rainbow`: entity [[rainbow]] (SamuelTulach; EDK-II UEFI pre-kernel bootkit; OVMF/QEMU debug + Visual Studio UEFI build; pre-boot attack vectors / bootkit techniques / firmware persistence; cheat / [HWID]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[rainbow-efi]], [[driver-efi-bootkit]], [[bootlicker]], and [[uefi-bootkit]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/tpm-spoofer`: updated entity [[tpm-spoofer]] (SamuelTulach; C/C++ WDK PoC; KM TPM request-path hooks + UM EK-info utility; TPM/EK anti-cheat HWID tracking research; cheat / [TPM]); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[detect-tpm-spoofing]] and [[tpm-mmio]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/unxorer`: entity [[unxorer]] (SamuelTulach; C++ IDA Pro/Home plugin; Unicorn emulation recovers stack strings from obfuscated binaries; branching-path exploration, state preservation, stack scan; configurable start points + output navigation; malware/game-security RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-jm-xorstr-decrypt-plugin]], [[anti-xorstr]], [[ripr]], and [[unicorn-pe]].
