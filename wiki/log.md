@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Read1dno/vesta`: entity [[vesta]] (Read1dno; C++23 external CS2 cheat; no injection or kernel drivers; process-memory RPM + DX11 overlay ESP/chams/menus + external Windows input gateway; aimbot/triggerbot, grenade prediction, in-game radar, ballistics/penetration/collision simulation; sandboxed Lua 5.4 API for web-radar extensions; external cheat architecture and CS2 client state reconstruction research; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-external-cheat]], [[cs2-ext]], [[titled-gui-cs2]], [[tkazer-cs2-external]], and [[cs2-webradar]].
+
 - **2026-08-21** — ingest `description:ReallReaper/Fortnite-Offsets-Sigs-and-more`: entity [[fortnite-offsets-sigs-and-more]] (ReallReaper; compact C/C++ header reference for Fortnite memory offsets and signature values; UE pointer chains and gameplay structure constants for external cheat/analysis integration; cheat / game:fortnite [Offset]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-offsets]], [[fortnite-offsets-and-sigs]], [[fortnite-sigs]], and [[fortnite-offset-dumper]].
 
 - **2026-08-21** — ingest `description:Rebzzel/kiero`: entity [[kiero]] (Rebzzel; C++ universal Windows D3D9–12/OpenGL/Vulkan graphics hooking; MinHook method-table detours; sample ImGui overlays; x86/x64; game security research / overlay tooling); cited on [[overviews/graphics-api]] and [[present-hook]]; cross-linked [[kiero2]], [[ntminhook]], [[d3dhook-imgui]], and [[universalhookx]].
