@@ -12,7 +12,7 @@ confidence: medium
 
 **All-in-one Unreal Engine dumper and live memory editor** (Spuckwaffel; C++). Supports UE **4.19 through 5.3.0** with SDK generation, structure dumping, and runtime browsing utilities. ImGui-based UI with components for object management, type generation, and engine-version-specific handling—useful for Unreal game reverse engineering and game-security research workflows. Listed under cheat / SDK Dump for UE 4.19–5.2. (source: wiki/sources/descriptions/Spuckwaffel__UEDumper.md)
 
-Sits in the Unreal SDK-generation lane beside inject dumpers (Dumper-7 / [[re-ue4ss]]), runtime reflection generators such as [[ue4genny]], external pattern-scan dumpers such as [[unrealdumper-4-25]], and live explorers—all feeding the same [[unreal-object-model]] research surface.
+Sits in the Unreal SDK-generation lane beside inject dumpers (Dumper-7 / [[re-ue4ss]]), runtime reflection generators such as [[ue4genny]], version-targeted UE4 dumpers such as [[shh0yauedumper]], external pattern-scan dumpers such as [[unrealdumper-4-25]], and live explorers—all feeding the same [[unreal-object-model]] research surface.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the Unreal SDK-generation lane beside inject dumpers (Dumper-7 / [[re-ue
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unreal-object-model]] · [[ue4genny]] · [[unrealdumper-4-25]] · [[re-ue4ss]] · [[ts-ue4dumper]] · [[patternsleuth]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unreal-object-model]] · [[shh0yauedumper]] · [[ue4genny]] · [[unrealdumper-4-25]] · [[re-ue4ss]] · [[ts-ue4dumper]] · [[patternsleuth]]

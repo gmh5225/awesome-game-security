@@ -2530,6 +2530,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4genny](entities/ue4genny.md) — runtime UE4 reflection SDK generator (C++; UObject/UClass/UStruct/UEnum/UFunction → C++ headers; SDK Generator; cursey)
 - [ue4-processevent-intercept](entities/ue4-processevent-intercept.md) — compact UE4 ProcessEvent interceptor (C++; VMT shadowing on selected objects; hook lifecycle reapplied on object recreation; gameplay call capture/modify; UE4 RE / internal instrumentation; Skengdo)
 - [UEDumper](entities/uedumper.md) — all-in-one Unreal Engine dumper + live memory editor (C++; ImGui; UE 4.19–5.3; SDK generation, structure dump, runtime browse; Spuckwaffel; cheat / SDK Dump)
+- [Shh0yaUEDumper](entities/shh0yauedumper.md) — Windows UE4 dumper + SDK generator (C++; process memory + pattern scan + engine structure parse; names/objects/SDK headers; configuration-driven version handling; Shhoya; cheat / SDK Dump)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [UE426 ABInfinite Win64 Shipping](entities/ue426-abinfinite-win64-shipping.md) — Arena Breakout Infinite UE4.26 SDK dump (C/C++; SDK generation; cheat / game:arena breakout infinite; cra0)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)

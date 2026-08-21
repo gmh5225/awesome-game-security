@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Shhoya/Shh0yaUEDumper`: entity [[shh0yauedumper]] (Shhoya; Windows C++ UE4 dumper + SDK generator; process memory access, pattern scanning, engine structure parsing; names/objects/generated SDK headers; configuration-driven version handling; Unreal RE / tooling; cheat / SDK Dump); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[uedumper]], [[unrealdumper-4-25]], [[ue4genny]], and [[re-ue4ss]].
+
 - **2026-08-21** — ingest `description:ShinoLeah/eHook`: entity [[ehook]] (ShinoLeah; Android ARM64 uprobe eBPF hook framework; Go orchestration + C eBPF; on-enter/on-leave handlers; memory R/W, logging, custom event wrappers; package/library offset config; rooted dynamic analysis, mobile game research, lightweight runtime tracing; cheat / eBPF hook); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[btrace]], [[peetch]], and [[frida]].
 
 - **2026-08-21** — ingest `description:Shtan7/VisualUEFI-2.0`: entity [[visualuefi-2-0]] (Shtan7; VisualUEFI-style Clang/DWARF UEFI dev setup; C/C++ samples + EDK2 + Visual Studio; VMware + CLion remote GDB; source-level firmware debugging; UEFI internals / boot-time behavior research; README [Debug source with clion+clang+gdb]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[simpleuefi]], [[eficmake]], [[efixplorer]], and [[ida-efiutils]].
