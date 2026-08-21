@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/EasyUefi`: entity [[easyuefi]] (SamuelTulach; Visual Studio GNU-EFI template; C/asm + linker scripts + bundled GNU-EFI; ready-to-build Windows research scaffold; firmware security / boot-stage experimentation / low-level game-security tooling prototypes; README [Visual Studio template for GNU-EFI]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[simpleuefi]], [[visualuefi-2-0]], [[pwnedboot]], [[rainbow]], and [[efi-memory]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/HookGuard`: entity [[hook-guard]] (SamuelTulach; C kernel research driver; global exception-hook chain monitors/obfuscates process address-space switching; CR3/exception-dispatch/`KdpDebugRoutineSelect` paths; logs protected-context switch attempts; PatchGuard-aware + HVCI-compatible defensive AC research; cheat / Global exception/KdpDebugRoutineSelect); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hook-kdtrap]], [[hook-hvl-switch-virtual-address-space]], [[eac-cr3-shuffle]], [[patchguard]], and [[hvci]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/LightHook`: entity [[light-hook]] (SamuelTulach; single-header pure-C x86-64 hook library; Windows/Linux/EFI; user/kernel/firmware examples; platform memory shims; no heavy disassembler; low-level instrumentation / RE / game-security research; cross-platform hook library); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[subhook]], [[renhook]], [[polyhook]], [[plthook]], and [[efi-memory]].

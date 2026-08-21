@@ -858,6 +858,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EldenRingMods](entities/eldenringmods.md) — Elden Ring animation/modding (C++ / C/C++; cheat / game:eldenring [Mod])
 - [EasyPixel](entities/easypixel.md) — Magisk module: disguise device as Google Pixel (Cheat Magisk)
 - [EasyRe](entities/easyre.md) — RE toolkit: pattern scan, memory dump, structure reconstruction (Trace Execution; gmh5225)
+- [EasyUefi](entities/easyuefi.md) — Visual Studio GNU-EFI UEFI app template (SamuelTulach; C/asm + linker scripts + bundled GNU-EFI; firmware security / boot-stage / game-security prototyping)
 - [EATGuard](entities/eat-guard.md) — Windows PoC: VEH + PAGE_GUARD monitors Export Address Table integrity; detects EAT hooking (rootkits/cheats; connormcgarr)
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
 - [edb-debugger](entities/edb-debugger.md) — Linux OllyDbg-style Qt debugger (ptrace; x86/x86-64; disasm/registers/memory map/breakpoints/plugins; eteran; For Linux)
