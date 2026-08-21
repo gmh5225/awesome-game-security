@@ -1223,6 +1223,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Herpaderping](entities/herpaderping.md) — process/file obfuscation via write→map→modify→execute (SEC_IMAGE; on-disk decoy vs mapped image; cheat / hide)
 - [hex2dec-mcp](entities/hex2dec-mcp.md) — MCP hex↔decimal conversion for AI agents (JavaScript/TypeScript; Game Develop / MCP; gmh5225)
 - [HexWalk](entities/hexwalk.md) — Qt cross-platform hex editor / binary workbench (Capstone, entropy, binwalk, file diff, YAML PE/ELF overlays; Hex Viewer/Editor/Analyzer)
+- [hex-rays-deob](entities/hex-rays-deob.md) — Hex-Rays microcode plugin; pattern-based expr simplify + CFF unflatten; obfuscated game/malware RE (RolfRolles; Hex-Rays Microcode)
 - [hi3-ace-b](entities/hi3-ace-b.md) — Honkai Impact 3rd ACE bypass (integrity-check / detection circumvention; modified clients; explore anticheat; gmh5225)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)

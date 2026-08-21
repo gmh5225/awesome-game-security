@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RolfRolles/HexRaysDeob`: entity [[hex-rays-deob]] (RolfRolles; C++ Hex-Rays microcode plugin; pattern-based obfuscated-expression simplification; control-flow unflattening with dispatcher recovery + unreachable-block cleanup; obfuscated game/malware RE; Hex-Rays Microcode); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[d810-ng]], [[ollvm-unflattener]], [[idadeflat]], and [[genmc]].
+
 - **2026-08-21** — ingest `description:RomanRybachek/Copy_RVA`: entity [[copy-rva]] (RomanRybachek; Python IDAPython IDA Pro plugin; context-menu cursor RVA → clipboard; WinDbg breakpoints on unsymbolized drivers; kernel/game-security offset handling); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ioctl-helper]], [[driver-buddy-reloaded]], and [[ida-kmdf]].
 
 - **2026-08-21** — ingest `description:RomanRybachek/ioctl_helper`: entity [[ioctl-helper]] (RomanRybachek; C++/Qt Widgets GUI; integrated hex editor; multi-handle DeviceIoControl with configurable control codes and buffer sizes; driver reversing, kernel communication testing, game security research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ioctlpus]], [[cfb]], [[drvtrace]], [[cognitor]], and [[driver-buddy-reloaded]].
