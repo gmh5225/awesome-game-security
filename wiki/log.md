@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SamuelTulach/BetterTiming`: entity [[better-timing]] (SamuelTulach; Linux KVM patch; records VM-exit timing characteristics + guest TSC offset; bare-metal-like execution timing; reduced VM-check tool detection; virtualization security / anti-cheat timing-heuristic testing; cheat / Bypass CPU Timing); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[rdtsc-kvm-handler]], [[hypervisor-phantom]], [[kvm-performance]], [[checkhv-um]], and [[ophion]].
+
 - **2026-08-21** — ingest `description:SamuelTulach/EasyUefi`: entity [[easyuefi]] (SamuelTulach; Visual Studio GNU-EFI template; C/asm + linker scripts + bundled GNU-EFI; ready-to-build Windows research scaffold; firmware security / boot-stage experimentation / low-level game-security tooling prototypes; README [Visual Studio template for GNU-EFI]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[simpleuefi]], [[visualuefi-2-0]], [[pwnedboot]], [[rainbow]], and [[efi-memory]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/HookGuard`: entity [[hook-guard]] (SamuelTulach; C kernel research driver; global exception-hook chain monitors/obfuscates process address-space switching; CR3/exception-dispatch/`KdpDebugRoutineSelect` paths; logs protected-context switch attempts; PatchGuard-aware + HVCI-compatible defensive AC research; cheat / Global exception/KdpDebugRoutineSelect); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hook-kdtrap]], [[hook-hvl-switch-virtual-address-space]], [[eac-cr3-shuffle]], [[patchguard]], and [[hvci]].

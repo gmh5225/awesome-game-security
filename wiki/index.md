@@ -98,6 +98,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [better-godot-mcp](entities/better-godot-mcp.md) — Godot 4.x composite MCP (TS; scenes/GDScript; Game Develop / MCP)
 - [better-hi3-launcher](entities/better-hi3-launcher.md) — Honkai Impact 3rd enhanced launcher (download/version/server/config; gmh5225)
 - [better-string-analyzer](entities/better-string-analyzer.md) — Ghidra string analyzer plugin (Java; modding / Ghidra Plugins; fuzzypickles14)
+- [better-timing](entities/better-timing.md) — Linux KVM patch; VM-exit timing + guest TSC offset for bare-metal-like CPU timing; bypass timing-based anti-VM checks (SamuelTulach; cheat / Bypass CPU Timing)
 - [bethesda-modding-starter](entities/bethesda-modding-starter.md) — Bethesda F4SE/SFSE plugin bootstrap + Ghidra/x64dbg MCP RE (Fallout 4/Skyrim/Starfield; CommonLib; CMake/vcpkg; rollingrock)
 - [bevy](entities/bevy.md) — Rust data-driven ECS game engine (free OSS; Game Engine / source)
 - [bevy-personal-test](entities/bevy-personal-test.md) — Rust/Bevy multiplayer security testbed (rollback netcode, shadow-VM Wasm checks, Rhai sandbox VM, server replay validation; XX-Batsu)
