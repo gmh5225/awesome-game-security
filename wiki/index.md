@@ -2177,6 +2177,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pwatch](entities/pwatch.md) — Linux/Android HWBP process watch (debug without attach; cheat / debugging)
 - [pwatch-c](entities/pwatch-c.md) — C/C++ HWBP on Linux/Android (process watch without attach; cheat / debugging; enenH)
 - [pwnedboot](entities/pwnedboot.md) — Windows bootloader shim PoC: microcode-update DLL replacement; very-early boot payload + execution remap; Secure Boot bypass research (SamuelTulach; C/C++ gnu-efi + VS)
+- [pyramid-engine](entities/pyramid-engine.md) — pre-alpha C++17 Win32/OpenGL game engine (forward/deferred rendering, ECS scenes, shadow mapping, octree culling; CMake MSYS2; tests + CI; Game Engine / source; RuqoomTech)
 - [pyre](entities/pyre.md) — browser-based Ghidra decompiler (WASM SLEIGH; multi-arch pseudocode; client-side only; ant4g0nist)
 - [Pyarmor](entities/pyarmor.md) — Python CLI script obfuscator (rename / C-convert functions; machine bind + expiry; optional Themida; Python 2/3; AC Obfuscation Engine)
 - [PyClassInformer](entities/pyclassinformer.md) — IDA Pro C++ RTTI plugin: hierarchy viz, auto-rename, method/library classification (cheat / IDA Plugins)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:RuqoomTech/Pyramid-Engine`: entity [[pyramid-engine]] (RuqoomTech; pre-alpha C++17 Win32/OpenGL game engine; forward/deferred passes, shadow mapping, octree frustum culling, ECS serialization, modular math/input/asset/UI libs; CMake MSYS2 MinGW-w64; RTS vertical slice focus; tests + CI; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[exengine]], [[joshoengine-native]], and [[gltut]].
+
 - **2026-08-21** — ingest `description:RussellJerome/UnrealModLoader`: entity [[unreal-mod-loader]] (RussellJerome; UE4 mod loading framework; Blueprint + basic SDK-based C++ mods; native hooking + event callbacks; MinHook + ImGui lifecycle hooks; injector + proxy DLL bootstrap; Mod Loader / runtime extension + game instrumentation); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[re-ue4ss]], [[ue4-base]], [[ue4-injector]], and [[unreal-object-model]].
 
 - **2026-08-21** — ingest `description:mrexodia/ida-nexus-docker`: entity [[ida-nexus-docker]] (mrexodia; disposable Docker harness; IDA Pro 9.4+ with Pi agent + Hex-Rays IDA Nexus; ordered LLM prompt sessions in isolation; ZIP audit archive of Nexus traces, Pi transcripts, worker logs; hostile-sample safe; runtime model credentials; unpacking/API/string/config extraction/IDB markup; malware/game-security RE); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[re-harness]], [[ida-cli]], and [[headless-ida-mcp-server]].
