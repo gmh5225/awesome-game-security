@@ -1336,6 +1336,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-spotlight](entities/ida-spotlight.md) — IDA Pro workflow-centric function triage and prioritization plugin (large-binary RE; cheat / IDA Plugins)
 - [ida-taskr](entities/ida-taskr.md) — IDA Pro parallel computing library (Python; Qt + multiprocessing; cheat / IDA Plugins)
 - [IdaThemer](entities/ida-themer.md) — VS Code theme JSON → IDA Pro color theme converter (Long Night/Celestial base; cheat / IDA themes; gmh5225)
+- [ida-unity-pdb-downloader](entities/ida-unity-pdb-downloader.md) — IDA Pro plugin: download PDB symbols from Unity symbol server (C++; automates matching debug-symbol retrieval; game/Unity RE; cheat / IDA Plugins; SamuelTulach)
 - [ida-vtable-tools](entities/ida-vtable-tools.md) — IDA 9.X vtable ops: `.hpp` skeleton / rename / `this` type / slot index (Python; IDA Plugins)
 - [ida-vmware-windows-gdb](entities/ida-vmware-windows-gdb.md) — IDA Pro + VMware GDB stub Windows kernel debugging guide (live breakpoints/memory/step; cheat / guide)
 - [ida-wakatime-py](entities/ida-wakatime-py.md) — IDA Pro WakaTime plugin (Python; background heartbeats; tracks analyzed binaries and RE session time; es3n1n; cheat / IDA Plugins)

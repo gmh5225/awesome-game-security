@@ -4,7 +4,7 @@ kind: entity
 topics: [game-engine, reverse-engineering]
 sources:
   - wiki/sources/descriptions/bombaris34__il2cpp-pdb.md
-updated: 2026-08-17
+updated: 2026-08-21
 confidence: medium
 ---
 
@@ -20,4 +20,4 @@ Complements cross-platform dump tooling such as [[il2cpp-inspector]] and script-
 
 ## Related
 
-[[il2cpp]] · [[il2cpp-inspector]] · [[il2cppdumper]] · [[fakepdb]] · [[pdb]] · [[pdb-rs]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[il2cpp]] · [[il2cpp-inspector]] · [[il2cppdumper]] · [[ida-unity-pdb-downloader]] · [[fakepdb]] · [[pdb]] · [[pdb-rs]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
