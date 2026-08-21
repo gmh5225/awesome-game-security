@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Shadow-46/adaptive-boss-arena`: entity [[adaptive-boss-arena]] (Shadow-46; Unity 6 C# arena combat; compile-time assembly firewalls block AI/learning from player input; delayed human-observable perception; behavior tracking, pattern recognition, combat memory, counter-strategy selection; melee combat + edit/play-mode tests; adaptive AI / perception boundaries / cheat-resistant boss design); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[fpssample]], [[unity-vulnerable-entrypoint]], [[weird-anti-cheat-ideas]], and [[ghostbusters]].
+
 - **2026-08-21** — ingest `description:ShallowFeather/KDemu`: entity [[kdemu]] (ShallowFeather; hybrid semi-emulated/semi-native Windows kernel driver emulator; C++ PE load, exception handling, kernel dump integration, anti-detection, execution monitoring; rootkit/AC drivers resisting conventional debug; advanced malware/AC/low-level RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kace]], [[kubera]], and [[winvisor]].
 
 - **2026-08-21** — ingest `description:Sherman0236/XorData`: entity [[xordata]] (Sherman0236; C++17 framework; compile-time and runtime-style XOR obfuscation of constants, variables, and strings; helper structures + example outputs; software hardening / anti-analysis experiments; AC Compile Time / Obfuscation Engine); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscate]], [[crystr]], [[xorlit]], [[skcrypter]], [[mystic-xorstr]], and [[obfusheader-h]].

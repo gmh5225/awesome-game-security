@@ -106,6 +106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
 - [adbg](entities/adbg.md) — Linux anti-debugging techniques (C/C++; Anti Debugging)
 - [adbi](entities/adbi.md) — Android Dynamic Binary Instrumentation (ARM/Thumb hijack injector + inline entry hooking; NDK; mobile RE / security research; WaterlooBridge fork, crmulliner lineage)
+- [adaptive-boss-arena](entities/adaptive-boss-arena.md) — Unity 6 boss-arena demo; compile-time assembly firewalls block AI from player input; delayed perception; adaptive counters + edit/play-mode tests (Shadow-46; Game Develop / anti-cheat design)
 - [advanced-efi-driver-with-gdi-and-kernel-mouse-input](entities/advanced-efi-driver-with-gdi-and-kernel-mouse-input.md) — UEFI memory/process framework; GDI overlay + kernel mouse input; encrypted comms + anti-detection (Twobot7; cheat / EFI driver)
 - [aho-corasick](entities/aho-corasick.md) — Aho-Corasick multi-pattern string matcher (ISM; mmap automata; C API; signature/YARA-style scan backend)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
