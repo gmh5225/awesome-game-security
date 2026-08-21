@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Skengdo/simple-SetWindowsHookExW-injector`: entity [[simple-setwindowshookexw-injector]] (Skengdo; C++ SetWindowsHookExW DLL injector; PE parsing + registry helpers + optional certificate spoofing; payload + target window-class workflow; user-mode injection pipeline study; Injection Testing:SetWindowsHookExW); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[setwindowshookex-injector]], [[setwindowhookex]], [[injection]], and [[windows-process-injection]].
+
 - **2026-08-21** — ingest `description:Skengdo/ue4-processevent-intercept`: entity [[ue4-processevent-intercept]] (Skengdo; compact C++ UE4 ProcessEvent interceptor; VMT shadowing on selected objects; hook lifecycle reapplied as objects are recreated; gameplay call capture/modify example; UE4 RE / internal instrumentation); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[ue4-base]], [[ue4genny]], and [[re-ue4ss]].
 
 - **2026-08-20** — ingest `description:Skotschia/hwid_spoofer`: entity [[skotschia-hwid-spoofer]] (Skotschia; Windows C++ HWID spoofer PoC; disk serial / SMART / SMBIOS; low-level helper modules + Visual Studio project files; older PoC with detection-hardening gaps; educational anti-cheat evasion research; cheat / HWID; slug disambiguated from [[hwid-spoofer]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hdd-serial-spoofer]], [[hwidspoofer]], [[hwid]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].

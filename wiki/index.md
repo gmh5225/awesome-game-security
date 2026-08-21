@@ -2245,6 +2245,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-dll-crab](entities/rust-dll-crab.md) — Rust Windows DLL injector (multiple methods; Injection Testing; gmh5225)
 - [SetWindowHookEx (ekknod)](entities/setwindowhookex.md) — SetWindowHookEx preinjected DLL research (C; hooking; Some Tricks / Windows Ring3; ekknod)
 - [setwindowshookex-injector](entities/setwindowshookex-injector.md) — SetWindowsHookExW injection-testing PoC (C/C++; hooking / modding / Unreal Engine; Injection Testing; gmh5225)
+- [simple-setwindowshookexw-injector](entities/simple-setwindowshookexw-injector.md) — SetWindowsHookExW DLL injector (Skengdo; C++; PE parsing + registry helpers + optional cert spoofing; window-class targeting; Injection Testing)
 - [rust-external](entities/rust-external.md) — Facepunch Rust external cheat (C/C++; rendering / networking; cheat / game:rust; gmh5225)
 - [rust-external-1](entities/rust-external-1.md) — Facepunch Rust external cheat (C++; kernel driver/RPM; overlay ESP; EAC Unity; gmh5225)
 - [rust-external-and-driver-aliencheats](entities/rust-external-and-driver-aliencheats.md) — Facepunch Rust external cheat (C++/C/C++; driver / overlays / memory analysis; cheat / game:rust [External]; gmh5225)

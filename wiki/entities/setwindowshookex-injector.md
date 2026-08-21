@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ **SetWindowsHookExW injection-testing** PoC from gmh5225 (README: Injection Testing:SetWindowsHookExW). Demonstrates loading a DLL into a target process via the Windows message-hook API — a classic user-mode injection vector that anti-cheat engineers and defensive researchers use to stress-test hook-based load detection, message-queue monitoring, and module-enumeration coverage. (source: wiki/sources/descriptions/gmh5225__SetWindowsHookEx-Injector.md)
 
-Centers on modding, Unreal Engine, and hooking workflows where SetWindowsHookEx is a common overlay and inject path. Complements the broader [[injection]] corpus, message-hook overlay samples such as [[overlay]], preinjected-DLL SetWindowHookEx research such as [[setwindowhookex]] (ekknod), and other injection-testing harnesses such as [[injectors]] and [[rust-dll-crab]].
+Centers on modding, Unreal Engine, and hooking workflows where SetWindowsHookEx is a common overlay and inject path. Complements the broader [[injection]] corpus, message-hook overlay samples such as [[overlay]], preinjected-DLL SetWindowHookEx research such as [[setwindowhookex]] (ekknod), sibling Skengdo [[simple-setwindowshookexw-injector]] (PE parsing + registry helpers + optional cert spoofing; window-class workflow), and other injection-testing harnesses such as [[injectors]] and [[rust-dll-crab]].
 
 ## Links
 
