@@ -1189,6 +1189,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hi3-ace-b](entities/hi3-ace-b.md) — Honkai Impact 3rd ACE bypass (integrity-check / detection circumvention; modified clients; explore anticheat; gmh5225)
 - [hide-file](entities/hide-file.md) — C kernel file-hide driver (cheat / hide; Detection:Hide-adjacent)
 - [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)
+- [hierarchy-eac](entities/hierarchy-eac.md) — EAC self-integrity bypass PoC (call-hierarchy abuse; PE/section checks; VM-style control; C++/x64 asm; Sinclairq [Bypassing self-integrity])
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
 - [HideDriverTesting](entities/hide-driver-testing.md) — multi-artifact driver hide (MmUnloadedDrivers, PsLoadedModuleList, PiDDBCacheTable; Win11 21H2; gmh5225)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
