@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:SentineLabs/AlphaGolang`: entity [[alphagolang]] (SentineLabs; IDAPython script toolkit for Go binary analysis in IDA Pro; stepwise workflow for binary ID, pclntab recovery, function discovery, strings, and types; YARA rule for Go PE/ELF/Mach-O; stripped/optimized Go malware and threat analysis; cheat / Analyzing Golang Binaries); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[golang-loader-assist]], [[goresym]], [[go-hacking]], and [[binoculars]].
+
 - **2026-08-21** — ingest `description:SergeyMakeev/TaskScheduler`: entity [[task-scheduler]] (SergeyMakeev; cross-platform fiber-based C++ task scheduler; multi-threaded job execution, task grouping, work-stealing scheduling, Windows/POSIX abstractions; tests/examples + fiber context-switch components; engine programmers / parallel game-logic and render pipelines; Game Engine / Task Scheduler); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cpp-game-engine-book]], [[serious-engine-base]], [[tracy]], and [[optick]].
 
 - **2026-08-21** — ingest `description:Serious-Engine/Base`: entity [[serious-engine-base]] (Croteam; open-source Serious Engine core for classic Serious Sam; C/C++; rendering, brush/world editing, entities, networking, math, audio, scripting; Visual Studio projects; Ogg/Vorbis; engine programmers / reverse engineers / modders; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[storm-engine]], [[doomretro]], [[gzdoom]], [[overgrowth]], and [[torque3d]].
