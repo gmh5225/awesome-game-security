@@ -879,6 +879,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
 - [eneio64-driver-exploit](entities/eneio64-driver-exploit.md) — `eneio64.sys` educational physmem BYOVD PoC (VA translation + token-theft LPE; modern Windows offsets; Xacone)
+- [enum-real-dirbase](entities/enum-real-dirbase.md) — WDK kernel driver PoC; PFN database walk to enumerate real process CR3/dirbase from physical memory (Rythorndoran; Find real dirbase)
 - [EfiCMake](entities/eficmake.md) — minimal CMake UEFI app scaffold (EDK2 headers; MSVC `.efi`; boot services)
 - [EfiDump](entities/efidump.md) — EFI runtime driver + Windows client for post-boot process memory R/W (gnu-efi; EDK2 shell load; PoC dumper; gmh5225; [Dump])
 - [EFI Driver Access](entities/efi-driver-access.md) — boot-loaded GNU-EFI runtime driver + usermode client for read/write/process-base (TheCruZ; pre-OS privileged memory; cheat / EFI RPM)

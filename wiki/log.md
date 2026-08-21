@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rythorndoran/enum_real_dirbase`: entity [[enum-real-dirbase]] (Rythorndoran; C++ WDK kernel driver PoC; PFN database traversal + physical range walk; self-referencing page tables + runtime MmPfnDatabase resolve; enumerates real process CR3/dirbase; kernel AC research / memory forensics / hidden address-space tracking; cheat / Find real dirbase); cited on [[overviews/windows-kernel]] and [[concepts/easy-anti-cheat]]; cross-linked [[eac-cr3-shuffle]], [[eac-cr3-bypass]], [[ntmemory]], and [[meme-rw]].
+
 - **2026-08-21** — ingest `description:S12cybersecurity/FrankensteinAPCInjection`: entity [[frankenstein-apc-injection]] (S12cybersecurity; C++ Windows low-footprint injection PoC; leaked process/thread handles + pre-existing RWX + NtQueueApcThreadEx2; avoids VirtualAllocEx/VirtualProtectEx/CreateRemoteThread; optional shellcode encryption; EDR/anti-cheat visibility testing; injection:windows); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[rwxfinder]], [[windows-process-injection]], [[apc-research]], [[poolparty]], and [[injectors]].
 
 - **2026-08-21** — ingest `description:S12cybersecurity/RWXFinder`: entity [[rwxfinder]] (S12cybersecurity; Windows VirtualQueryEx process memory scan; size-filtered RWX pages for code-injection staging; cheat / injection:windows); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[ghost]], and [[injectors]].
