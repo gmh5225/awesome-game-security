@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Reijaff/static_string_obfuscation`: entity [[static-string-obfuscation]] (Reijaff; Zig compile-time static string obfuscation; build-time randomized XOR keys; stripped x86_64 Windows executables; lightweight runtime decrypt; RE resistance / anti-analysis hardening; AC String Crypter); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[obfuscate]], [[crystr]], [[skcrypter]], [[xorlit]], [[xordata]], and [[obfuscatxor]].
+
 - **2026-08-21** — ingest `description:Rem01Gaming/meowna_detector`: entity [[meowna-detector]] (Rem01Gaming; C/NDK PoC; Android detector for meowna-class root-hide modules that disrupt logging services; missing logd socket + package-trace indicators; mobile security testing / fragile hide-technique study; cheat / Prove of concept of detecting meowna module); cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-linked [[android-native-root-detector]], [[magisk-killer]], [[detection]], [[riru-momo-hider]], and [[hideroot]].
 
 - **2026-08-21** — ingest `description:RemiPelloux/OpenSw`: entity [[opensw]] (RemiPelloux; C++/Kotlin; standalone Android ARM64 Switch emulator; Eden/yuzu lineage; dynarmic JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel + performance diagnostics; Profile build automation bridge; AYN Thor profile; Switch research / live cheat / Android emulation); cited on [[overviews/game-hacking]] and [[overviews/mobile-security]]; cross-linked [[yuzu-android]], [[nuzu]], and [[se-tools]].

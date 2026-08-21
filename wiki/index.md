@@ -2461,6 +2461,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sogen](entities/sogen.md) — Windows userspace PE emulator (Unicorn + Capstone; minidump / Zstd state; React web UI; FlatBuffers trace IPC; Windows User Space Emulator)
 - [stackplz](entities/stackplz.md) — Android eBPF stack tracing + hook analysis (SeeFlowerX; Go + C eBPF; syscall/uprobe/hardware-breakpoint capture on ARM64; args/registers/stacks; filtering, structured output, optional Frida RPC; rooted mobile security / game protection RE; cheat / eBPF-based debugger for Android)
 
+- [Static String Obfuscation](entities/static-string-obfuscation.md) — Zig compile-time static string crypter (build-time randomized XOR keys; stripped x86_64 Windows; lightweight runtime decrypt; AC String Crypter; Reijaff)
 - [Static-Variables-Obfuscator-UE4](entities/static-variables-obfuscator-ue4.md) — UE4 static-variable obfuscation vs memory scanners
 - [STB (gmh5225)](entities/stb-gmh5225.md) — compile-time IDA-style string-to-array for stack trace building / spoofing research (gmh5225; Cheat Compile Time)
 - [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
