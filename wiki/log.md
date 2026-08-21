@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Rwkeith/Nomad`: entity [[nomad]] (Rwkeith; kernel AC-style detector for manually mapped drivers and suspicious kernel threads; thread stack walk, entry-point validation, big-pool abnormal refs, IOCTL hook signals; C++ WDK driver telemetry; README Mapped Driver); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-anticheat]], [[kernel-anti-cheat]], [[unkover]], [[nmi-callback-handler]], and [[kernel-pool-scanning]].
+
 - **2026-08-21** — ingest `description:RyanNielson/awesome-unity`: entity [[awesome-unity]] (RyanNielson; community-curated Unity assets, libraries, tutorials, and dev resources; AI, networking, UI, tweening, editor tooling, complete project examples; documentation-centric discovery; README `[Unity]`); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[unity-script-collection]], [[unity-cheat-sheet]], [[unity-cs-reference]], [[gamedev]], and [[learn-awesome-gamedev]].
 
 - **2026-08-21** — ingest `description:Rycooop/Bloom-Anticheat`: entity [[bloom-anticheat]] (Rycooop; Windows x64 multi-component AC prototype; kernel driver ObRegisterCallbacks handle protection for AC + target processes; UM DLL/app; Visual Studio projects; kernel-callback vs UM monitoring tradeoffs; AC experimentation); cited on [[overviews/anti-cheat]] and [[concepts/kernel-callbacks]]; cross-linked [[kernel-anticheat]], [[oac]], [[sentinelac]], and [[ac]].

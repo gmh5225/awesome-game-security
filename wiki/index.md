@@ -1866,6 +1866,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NoEye](entities/noeye.md) — BattlEye bypass toolkit (C++ service/runtime + C# setup; service install, process interaction, runtime control; historical BE bypass reference; Schnocker)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
 - [NoahGameFrame](entities/noahgameframe.md) — C++ server engine (OGRE/BigWorld-inspired; Game Network / Server Engine)
+- [Nomad](entities/nomad.md) — kernel AC-style mapped-driver detector (thread stack walk, entry-point validation, big-pool abnormal refs, IOCTL hook signals; C++ WDK; Rwkeith; README Mapped Driver)
 - [Nocturne](entities/nocturne.md) — bin2bin x86-64 PE code virtualizer (SDK markers / VM handlers / junk; AC Obfuscation Engine)
 - [NocturneLdr](entities/nocturneldr.md) — CET-compatible Win x64 shellcode loader (fully backed stacks; Spoof Stack)
 - [Norsefire](entities/norsefire.md) — kernel-mode W/RPM + mouse_event (C++; cheat / RPM)
