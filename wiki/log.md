@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:ReverseWarrior/IUM-Debugger`: entity [[ium-debugger]] (ReverseWarrior; .NET debugger for Windows IUM/VTL1 trustlets; Hyper-V hypercalls for trustlet memory R/W + disassembly in VSM secure enclaves; LiveCloudKd `hvmm.sys` host-side patch of guest securekernel debug check so WinDbg in guest attaches to VTL1 IUM trustlets; VBS isolation / kernel RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hvci]], [[hyper-rev]], [[hyperdeceit]], and [[windbg-scripts]].
+
 - **2026-08-21** — ingest `description:Ricardonacif/launcher-abuser`: entity [[launcher-abuser]] (Ricardonacif; stealth external memory R/W via Steam/Battle.net launcher-held game handles; named shared-memory IPC; minimal shellcode + thread hijack; syscall NtReadVirtualMemory/NtWriteVirtualMemory; no new handles/modules/threads/RWX pages; x86→x64 transition; low-footprint process interaction / AC evasion tradeoffs; Cheat / Launcher Abuser); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[mini-launcher]], [[rce-shield]], [[windows-process-injection]], and [[frankenstein-apc-injection]].
 
 - **2026-08-21** — ingest `description:Rick-laboratory/Windows-Screenshotcapture-DirectX`: entity [[windows-screenshotcapture-directx]] (Rick-laboratory; minimal Windows DX9 screenshot example; D3D9 device + `GetFrontBufferData` front-buffer readback; WIC PNG encode; graphics tooling prototypes and DirectX frame-capture study; README `[DX9]`); cited on [[overviews/graphics-api]] and [[anti-screenshot-capture]]; cross-linked [[windows-desktop-duplication-sample]], [[screenshot]], and [[direct3d9-overlay]].
