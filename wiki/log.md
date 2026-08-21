@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:ServenScorpion/VirtualApp`: entity [[virtual-app]] (ServenScorpion; Android application virtualization framework; cloned apps in isolated container; Java/XML + native C/C++ hooks; Xposed compatibility + SandHook instrumentation; virtual package/process/component management; mobile RE / behavior analysis / multi-instance sandbox); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-virtual-inject]], [[xposed-module-kit]], [[canyie-pine]], and [[frida]].
+
 - **2026-08-21** — ingest `description:Sh0ckFR/DLLirant`: updated entity [[dllirant]] (Sh0ckFR historical placeholder mirror for Hijacking researches; no implementation in snapshot; points to maintained redteamsocietegenerale/DLLirant); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]].
 
 - **2026-08-21** — ingest `description:Sh0ckFR/Universal-Dear-ImGui-Hook`: entity [[universal-dear-imgui-hook]] (Sh0ckFR; Windows C++ graphics hook; D3D9–12 + partial Vulkan backend-specific hooks; integrated input + toggleable in-process Dear ImGui menu after DLL inject; overlay prototyping / debug UI / render-pipeline research); cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; cross-linked [[universalhookx]], [[d3dhook-imgui]], [[hydrahook]], and [[imgui]].

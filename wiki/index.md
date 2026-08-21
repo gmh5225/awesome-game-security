@@ -229,6 +229,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Android-Ptrace-Injector](entities/android-ptrace-injector.md) — Android ptrace injector (C/C++; cheat / injection:android)
 - [Android-Virtual-Inject](entities/android-virtual-inject.md) — no-root Virtual Space inject (not for AC games; cheat / injection:android)
 - [Android-VirtualCam-Manager](entities/android-virtualcam-manager.md) — Magisk/Zygisk virtual camera (ArtHook Camera1 NV21/surface injection; no LSPosed; camera spoofing / liveness AC research)
+- [VirtualApp](entities/virtual-app.md) — Android app virtualization framework (cloned apps in isolated container; Xposed + SandHook; virtual package/process/component management; mobile RE / multi-instance sandbox; ServenScorpion)
 - [android-touch](entities/android-touch.md) — C/C++ Android touch-input driver (triggerbot & aimbot; driver development; gmh5225)
 - [android_virtualTouch](entities/android-virtual-touch.md) — ARM64 NDK uinput virtual touch (tap/swipe/multi-touch; rooted; game automation)
 - [android-vuln](entities/android-vuln.md) — Android Kernel CVE reference list (cheat / Android Kernel CVE)
