@@ -2240,6 +2240,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rAthenaCN](entities/rathenacn.md) — Chinese-localized rAthena fork (C/C++; asset pipelines / plugins / modding; cheat / game:ro; gmh5225)
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
 - [raytracing](entities/raytracing.md) — CUDA mesh ray tracing with BVH + PyTorch bindings (ashawkey; RayTracer)
+- [raybot-zero](entities/raybot-zero.md) — kernel-mode CS:GO cheat; C++ driver + C# loader; triggerbot, bunnyhop, glow, kernel key-state reads; no traditional usermode controller (R4YVEN; Kernel-mode)
 - [ravengine](entities/ravengine.md) — modern C++ ECS game engine (Vulkan via RGL; GameNetworkingSockets; CMake cross-platform; input/GUI/audio + resource packing; C++ 3D)
 - [raival-file-explorer](entities/raival-file-explorer.md) — lightweight Kotlin/Java Material 3 Android file manager (multi-tab, task handling, code editor, deep content search; Gradle baseline; Cheat Android File Explorer; Raival-e; slug disambiguated from [[file-explorer]])
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
