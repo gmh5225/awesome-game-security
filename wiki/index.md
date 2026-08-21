@@ -2822,6 +2822,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [win-driver-exp](entities/win-driver-exp.md) — multi-driver BYOVD exploit collection (IOCTL → kernel R/W, code exec, process manipulation; incl. `AsUpIO64.sys` CVE-2024-33218; gmh5225)
 - [windows-10-22h2-vulnerable-driver-communication](entities/windows-10-22h2-vulnerable-driver-communication.md) — ASUS `asromgdrv.sys` BYOVD IOCTL wrapper (contiguous kernel pool + CR R/W; Win10 22H2 / Win11; gmh5225)
 - [windows-desktop-duplication-sample](entities/windows-desktop-duplication-sample.md) — DXGI Output Duplication desktop capture sample (C++; cursor + dirty/moved regions; `[DXGI]`)
+- [windows-screenshotcapture-directx](entities/windows-screenshotcapture-directx.md) — minimal DX9 front-buffer screenshot capture (`GetFrontBufferData` + WIC PNG; `[DX9]`)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [Windows-Spoofer](entities/windows-spoofer.md) — open-source Win10/11 spoofing + cleanup toolkit (Batch/PowerShell; system IDs, network values, trace cleanup; volume ID / SMBIOS via external utilities; anti-cheat fingerprinting research; Scrut1ny; cheat / HWID)
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
