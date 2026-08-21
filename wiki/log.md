@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `readme:categories`: Cheat ~2733 (+1; Anti Cheat ~687 / Game Develop ~185 / DirectX ~39 / Some Tricks ~117 / Game Engine ~156 stable); fixed index Game Assets ~12→~11; refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-21** — ingest `description:SamuelTulach/ida-unity-pdb-downloader`: entity [[ida-unity-pdb-downloader]] (SamuelTulach; C++ IDA Pro plugin; downloads PDB symbols from Unity symbol server; automates matching debug-symbol retrieval during interactive RE; function names + structural context for Unity-related binaries; game RE / game-security analysis; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[il2cpp-pdb]], [[il2cpp]], [[pdb]], and [[unxorer]].
 
 - **2026-08-21** — ingest `description:SamuelTulach/meme-rw`: entity [[meme-rw]] (SamuelTulach; C++/CMake protected-process memory R/W PoC; vulnerable-driver mapping; driver-load helpers + process/module utils + memory R/W control; end-to-end target open + memory ops; anti-cheat bypass experimentation / defensive protected-memory research; cheat / [kdmapper]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kdmapper]], [[ntmemory]], [[driver-read-write]], and [[readwrite-kernel-stable]].
