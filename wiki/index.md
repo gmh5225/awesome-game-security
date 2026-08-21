@@ -913,6 +913,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EQU8-PoC](entities/equ8-poc.md) — full C++ EQU8 kernel driver reimplementation (explore anticheat:equ8; driver development)
 - [epic-r6-v9](entities/epic-r6-v9.md) — R6 internal: DirectX rendering + SDK generation (C++; cheat / game:r6; beans42)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
+- [evpp](entities/evpp.md) — C++11 libevent TCP/UDP/HTTP event-loop network library (nonblocking servers/clients; timers; async DNS; Memcached/NSQ clients; Game Network / source; Qihoo360)
 - [ErisDbg](entities/erisdbg.md) — VT debugger (C/C++; kernel drivers / modding; cheat / debugging)
 - [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
 - [meatyeftrelease](entities/meatyeftrelease.md) — open-source DMA EFT radar and companion toolkit (C++/ImGui; LeechCore/MemProcFS; fuser overlay; cheat / game:eft [DMA])

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-21** — ingest `description:Qihoo360/evpp`: entity [[evpp]] (Qihoo360; C++11 libevent network library; event-driven TCP/UDP/HTTP; nonblocking servers/clients; thread-safe event loops; timers; async DNS; production benchmarks; Memcached/NSQ clients; backend/infrastructure scalable low-latency services; Game Network / source); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[cppserver]], [[skynet]], [[noahgameframe]], [[kcp-cpp]], [[uwebsockets]], and [[game-networking-sockets]].
+
 - **2026-08-21** — ingest `description:QuesmaOrg/BinaryAudit`: entity [[binaryaudit]] (QuesmaOrg; Harbor-based open-source benchmark; AI agents find injected backdoors/malicious mods in stripped C/Go/Rust binaries; Docker isolation; Ghidra/Radare2; backdoor/clean-negative/timebomb tasks; lighttpd/dnsmasq/Dropbear/Sozu/Caddy; Python + YAML multi-model experiments; binary malware/backdoor RE agent evaluation); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[radare2-mcp]], [[binary-analysis-mcps]], [[plugin-ghidra]], and [[reai-ida]].
 
 - **2026-08-21** — ingest `description:R3voA3/3den-Enhanced`: entity [[3den-enhanced]] (R3voA3; Arma 3 Eden Editor expansion mod; SQF/config/addon modules; editor UI tools, mission attributes, workflow shortcuts; optional at runtime; Mod Editor / mission-maker tooling); cited on [[overviews/game-engine]]; cross-linked [[automation-examples]] and [[arma3-external-variable-manager]].
