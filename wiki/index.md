@@ -1237,6 +1237,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hyperion-disassembler](entities/hyperion-disassembler.md) — Sidenai; native C++ multi-arch disassembler/decompiler (PE/ELF/Mach-O/.NET; x86/x64/ARM/AArch64/MIPS/PPC; CFG, FLIRT, PDB, BinDiff, RTTI, SSA decompiler, packer detection, Lua, ImGui UI; cheat / RE tools)
 - [HyperDeceit](entities/hyperdeceit.md) — C++ Hyper-V impersonation library; intercepts selected kernel hypercalls (TLB flush, sleep/shutdown, address-space switch, spinlock; reusable hooks; Xyrem; HvcallCodeVa)
 - [Hypervisor-Detection](entities/hypervisor-detection.md) — C++ hacked-hypervisor detection (four techniques; Detection:HV)
+- [Hypervisor-Phantom](entities/hypervisor-phantom.md) — Scrut1ny; Bash-automated Linux VM lab with anti-detection QEMU/EDK2/kernel/VFIO patches (Hidden QEMU; cheat / QEMU/KVM/PVE/VBOX)
 - [Hypervisor From Scratch](entities/hypervisor-from-scratch.md) — SinaKarvandi; tutorial x86 hypervisor (VMX, VMCS, EPT, OS virtualization; C/C++/asm; educational HV internals; README [Hypervisor])
 - [hypervisor](entities/hypervisor.md) — experimental Intel VT-x Type-2 HV (EPT page hooks, violation watchpoints, per-process cleanup; integrity-check bypass research)
 - [ept-hook-detection](entities/ept-hook-detection.md) — usermode EPT hook detector (timing / write-compare / cross-core consistency; Detect EPT)
