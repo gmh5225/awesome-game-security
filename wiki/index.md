@@ -2002,6 +2002,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)
 - [obfuscxx](entities/obfuscxx.md) — C++20 header-only compile-time variable obfuscation (SIMD decrypt; AC Encrypt Variable)
 - [Obfusk8](entities/obfusk8.md) — C++17 compile-time/runtime obfuscation library (AC Compile Time)
+- [obengine](entities/obengine.md) — open-source 2D Lua+C++ game engine (SFML; scene/game-object/map/animation/input/networking/plugins; scriptable APIs; Game Engine / [2D+Lua])
 - [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
 - [official-plugins](entities/official-plugins.md) — Vector35 curated official Binary Ninja plugin index (Python indexing; structured metadata for descriptions, types, API targets, licenses; plugin-management catalog)
