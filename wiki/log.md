@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NeoMaster831/kurasagi`: entity [[kurasagi]] (NeoMaster831; C/C++ kernel PoC; Win11 24H2–25H2 runtime PatchGuard bypass; kdmapper manual-map load; CRITICAL_STRUCTURE_CORRUPTION edge-case research; lab-only PG bypass); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[patchguard-2023]], [[tableflipper]], and [[vulnerablepatchguardexploit]].
+
 - **2026-08-22** — ingest `description:NeoTerrm/NeoTerm`: entity [[neoterm]] (NeoTerrm; modern Android terminal emulator; Java/Kotlin + XML Android UI; Termux-oriented workflow; mobile shell usability, documentation, release distribution; portable CLI for developers and mobile security practitioners); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[termux-app]], [[neotty]], [[android-terminal-emulator]], [[auto-android-app-modding-tool]], and [[tool-tree]].
 
 - **2026-08-22** — ingest `description:NepMods/InjectARM64`: entity [[inject-arm64]] (NepMods; no-root ARM Android cheat injection platform; Java/Kotlin + C/C++ native hooks; virtualized app-space payload inject; ARM32/ARM64; configurable flows; newer Android; cheat / Non-root injection); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-virtual-inject]], [[virtual-app]], [[android-super-inject]], [[and64-inline-hook]], and [[dobby]].

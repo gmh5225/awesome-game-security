@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/emlinhax__tableflipper.md
   - wiki/sources/descriptions/armasm__EasyAntiPatchGuard.md
   - wiki/sources/descriptions/Rythorndoran__PageTableHook.md
-updated: 2026-08-21
+  - wiki/sources/descriptions/NeoMaster831__kurasagi.md
+updated: 2026-08-22
 confidence: high
 ---
 
@@ -55,6 +56,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[page-table-hook]] (Rythorndoran; C++ driver demo) redirects execution by editing page-table mappings instead of patching kernel code—preserving original routine access while avoiding typical PatchGuard-triggering inline hooks; includes `NtCreateFile` interception for advanced kernel / AC bypass study. (source: wiki/sources/descriptions/Rythorndoran__PageTableHook.md)
 
+[[kurasagi]] (NeoMaster831; C/C++ kernel PoC; Win11 24H2–25H2 runtime PatchGuard bypass; manual-map load via [[kdmapper]]; documents crash-prone edge cases and CRITICAL_STRUCTURE_CORRUPTION behavior for advanced kernel security researchers) targets recent-build KPP bypass study in controlled lab environments. (source: wiki/sources/descriptions/NeoMaster831__kurasagi.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]

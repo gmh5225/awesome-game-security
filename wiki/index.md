@@ -1654,6 +1654,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kvm-kernel-example](entities/kvm-kernel-example.md) — minimal KVM VMM + guest kernel tutorial (hypercalls, mmap, syscalls, ELF load; Guide)
 - [KVM.Performance](entities/kvm-performance.md) — KVM host troubleshooting KB (ioapic tuning, split-lock, WRMSR/RDMSR on Unraid/Proxmox; game/AC launch failures in VMs; SingularityCloud; ioapic)
 - [kur](entities/kur.md) — C/C++ kernel utility via echo_driver.sys BYOVD (kernel R/W, process manipulation, driver load; gmh5225)
+- [kurasagi](entities/kurasagi.md) — Win11 24H2–25H2 runtime PatchGuard bypass PoC; C/C++ kernel components; kdmapper manual-map load; CRITICAL_STRUCTURE_CORRUPTION edge-case research (NeoMaster831; cheat / PatchGuard-related)
 - [KvcForensic](entities/kvcforensic.md) — LSASS credential forensics (MSV/WDigest/Kerberos/DPAPI; Win/Linux dumps)
 
 - [lamda](entities/lamda.md) — FIRERPA all-in-one Android control (Python API; UI automation, WebRTC mirror, MITM, built-in Frida, MCP; root/non-root; firerpa)
