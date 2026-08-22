@@ -495,6 +495,7 @@ sources:
   - wiki/sources/descriptions/april-ivy__Apwil.md
   - wiki/sources/descriptions/apekros__valorant_offsets.md
   - wiki/sources/descriptions/apekros__binja_sigmaker.md
+  - wiki/sources/descriptions/TrackAndTruckDevs__SPF_GhidraPatternHelper.md
   - wiki/sources/descriptions/ahaggard2013__binaryninja-ollama.md
   - wiki/sources/descriptions/WhatTheFuzz__binaryninja-openai.md
   - wiki/sources/descriptions/apkunpacker__IDA-Gepetto.md
@@ -1808,6 +1809,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - gmh5225 [[ida-pro-sigmaker]] (Signature Maker; wildcard-masked byte-pattern signatures from selected code regions for runtime pattern scanning; cheat / IDA Plugins) sits in the same signature-scan lane. (source: wiki/sources/descriptions/gmh5225__IDA-Pro-SigMaker.md)
 - Binary Ninja → IDA FLIRT `.pat` export via [[bndb2pat]] (Python; LLIL function patterns with wildcard operands, CRC16, named symbols; sigmake → `.sig` libraries for stripped-binary function ID; cheat / Binary Ninja Plugins) sits in the same signature / library-ID lane beside [[sig-database]]. (source: wiki/sources/descriptions/joren485__bndb2pat.md)
 - Binary Ninja byte-pattern signature maker via [[binja-sigmaker]] (Python; IDA-style wildcard signatures from disassembled functions; function-start fallback; plugin-manager packaging; cheat / Binary Ninja Plugins) sits in the same runtime signature-scan lane beside [[ida-sigmaker]] and [[bndb2pat]]. (source: wiki/sources/descriptions/apekros__binja_sigmaker.md)
+- Ghidra SPF-style byte signature helper via [[spf-ghidra-pattern-helper]] (Java GhidraScript; generate/search signatures in loaded binaries; Pattern Generator/Finder tabs; SPF-Framework PatternFinder-compatible output; wildcards/ranges/alternation; optional uniqueness verify; ATS/ETS2 plugin modding RE; TrackAndTruckDevs; cheat / Ghidra Plugins) sits in the same runtime signature-scan lane beside [[binja-sigmaker]] and [[ida-pro-sigmaker]]. (source: wiki/sources/descriptions/TrackAndTruckDevs__SPF_GhidraPatternHelper.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
 - Automatic standard-function enum identification via [[auto-enum]] (Python/C; identifies and applies enums for common API/stdlib calls) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/junron__auto-enum.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:TrackAndTruckDevs/SPF_GhidraPatternHelper`: entity [[spf-ghidra-pattern-helper]] (Java GhidraScript; Pattern Generator/Finder GUI; SPF-style templates/masked hex/range patterns/raw bytes; PatternEngine wildcards/ranges/optional/alternation/displacement masking; SPF-Framework PatternFinder compat; auto uniqueness verify; ATS/ETS2 plugin RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binja-sigmaker]], [[ida-pro-sigmaker]], [[sigmakerex]], and [[ghidra-scripts]].
+
 - **2026-08-22** — ingest `description:zensu357/ksurusda`: entity [[ksurusda]] (Android Zygisk module; Rusda anti-detection Frida gadget inject at `postAppSpecialize`; KernelSU/Magisk/APatch; library remapping, startup delay, child-process gating; WebUI/JSON; TCP listen + offline script modes; no APK resign); cited on [[concepts/frida]] and [[concepts/zygisk]]; cross-linked [[florida-zygisk]], [[zygisk-frida]], and [[ksu-rust-frida]].
 
 - **2026-08-22** — ingest `readme:categories`: Cheat ~2736 (+2; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], [[overviews/game-engine]] (Game Develop [[zig-gamedev]] + Game Testing UptimeFaker); light `index.md` section notes (no per-category pages).
