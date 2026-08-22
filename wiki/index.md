@@ -422,7 +422,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Bullet3](entities/bullet3.md) — Bullet Physics SDK (C++ collision + multi-physics; rigid/soft body, vehicles, character controllers, OpenCL broadphase; PhysX SDK / Game Engine)
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
 - [bytecode-viewer](entities/bytecode-viewer.md) — Java/Android multi-decompiler suite (CFR/Procyon/FernFlower/JD-GUI/Krakatau; bytecode+Smali+source tabs; JAR/DEX/APK)
-- [BytecodeVM](entities/bytecodevm.md) — Java bytecode virtualizing obfuscator (pure-Java VM; mutated opcodes; AC Obfuscation Engine)
+- [BytecodeVM](entities/bytecodevm.md) — Java bytecode virtualizing obfuscator (Gradle/ASM CLI; pure-Java VM; dispatch/threaded/register/FSM architectures; encrypted operands + shuffled CFG; educational Java hardening; NHCM-dev; AC Obfuscation Engine)
 
 - [byfron-bypass](entities/byfron-bypass.md) — Byfron/Roblox client AC bypass research (C++; asset pipelines / editor tooling; explore anticheat:byfron; gmh5225)
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
