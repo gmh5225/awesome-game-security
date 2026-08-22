@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MrAle98/CVE-2024-49138-POC`: entity [[cve-2024-49138-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-exploits]] and [[kernel-cve-analysis]].
+
 - **2026-08-22** — ingest `description:MrDiamond64/Scythe-AntiCheat`: entity [[scythe-anticheat]] (MrDiamond64; JavaScript/JSON Bedrock behavior-pack AC; Scripting API + command/function files; combat/movement/packet-abuse/chat-spam/scaffold detection; moderation commands + player stats; Realms/worlds/servers; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[paradox-anticheat]], [[oomph]], [[oxclient]], [[dakotaac]], and [[minecraft-anti-cheat]].
 
 - **2026-08-22** — ingest `description:MrMugiwara/FTK-imager-OSX`: entity [[ftk-imager-osx]] (MrMugiwara; macOS package + usage guide for command-line forensic disk imaging; drive acquisition, split outputs, MD5/SHA1 integrity checks, E01/SMART formats, fragmentation/compression/evidence metadata; digital forensics / IR on macOS; Forensics Tools For MAC OS X); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[file-recovery-tool]], [[dfirtriage]], [[dumpit-mirror]], and [[ntfstool]].

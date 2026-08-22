@@ -639,6 +639,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2022-42046](entities/cve-2022-42046.md) — `wfshbr64.sys` IOCTL improper access control LPE (SYSTEM; gmh5225)
 - [CVE-2024-0044](entities/cve-2024-0044.md) — Android 12/13 app data-directory access via crafted payload (Application CVE)
 - [CVE-2024-35250](entities/cve-2024-35250.md) — `ks.sys` untrusted pointer dereference LPE via KSPROPERTY (Win10/11; gmh5225)
+- [CVE-2024-49138 PoC](entities/cve-2024-49138-poc.md) — `CLFS.sys` LPE via kernel R/W + token swap (Win11; MrAle98)
 - [CVE-2024-26229](entities/cve-2024-26229.md) — `csc.sys` improper address validation LPE via METHOD_NEITHER IOCTL (Win11 22H2; gmh5225)
 - [CVE-2024-21338](entities/cve-2024-21338.md) — `appid.sys` kernel IOCTL LPE (Win11 22H2 Build 22621; XSS PWN-Day; gmh5225)
 - [CVE-2025-21333](entities/cve-2025-21333.md) — Hyper-V `vskrnlintvsp.sys` heap overflow LPE (IoRing pool spray / pipe attr R/W)
