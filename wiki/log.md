@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PAMinerva/LearnDirectX`: entity [[learn-directx]] (PAMinerva; DX12 learning resource + step-by-step tutorials; window creation through command bundles, frame buffering, textures, and resource-state management; synchronization, descriptor handling, performance-oriented API; README [DX12]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[learning-directx12]], [[d3d12book]], [[intro-to-dx12-2nd-edition-revisited]], [[d3d12renderer]], [[cpp-3d-game-tutorial-series]], and [[hw3d]].
+
 - **2026-08-22** — ingest `description:PI-Defender/pi-defender`: entity [[pi-defender]] (PI-Defender; C++ WDK kernel security driver; filters dangerous handle rights—remote memory write and operation permissions—on protected processes to block injection chains; docs/tests for process hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[windows-process-injection]], [[injectors]], [[oac]], and [[peregrine-anticheat]].
 
 - **2026-08-22** — ingest `description:PShocker/Android_bpf_sys`: entity [[android-bpf-sys]] (PShocker; minimal Android eBPF syscall monitor; `raw_syscalls/sys_enter` tracepoint → BPF map; C++ userland readback via Android bpf libs; low-level security monitoring / syscall analysis; cheat / EBPF); cited on [[overviews/mobile-security]] and [[android-ebpf]]; cross-linked [[stackplz]], [[edbg]], [[btrace]], and [[frida]].
