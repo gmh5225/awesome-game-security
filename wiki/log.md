@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:ORCx41/KnownDllUnhook`: entity [[known-dll-unhook]] (ORCx41; Windows API unhooking via `\KnownDlls` clean images; iterate loaded DLLs; replace hooked `.text`; native syscalls for map/memory ops; EDR/anti-cheat hook detection & evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nt-unhooker]], [[edrsandblast]], [[dynamizer]], and [[injection]].
+
 - **2026-08-22** — ingest `description:OTFCG/Awesome-Game-Analysis`: entity [[awesome-game-analysis]] (OTFCG; curated Markdown index of game technology analysis links by game title, engine, developer, year, and topic; engine internals and production techniques; community-driven; README Video game tech analysis resources); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-game-engine-dev]], [[awesome-game-file-format-reversing]], [[learn-awesome-gamedev]], and [[anything-about-game]].
 
 - **2026-08-22** — ingest `description:ObEngine/ObEngine`: entity [[obengine]] (ObEngine; open-source 2D Lua+C++ game engine; SFML-backed scene/game-object management, map tooling, animation, input binding, networking, plugin support; scriptable APIs + project tooling; indie/learner 2D focus; Game Engine / [2D+Lua]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[love]], [[torque2d]], [[orx]], [[flatredball]], and [[open-source-engines]].

@@ -1592,6 +1592,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [koidbg](entities/koidbg.md) — Windows ARM64 debugger (EN/PT docs; cheat / debugging; game-security RE)
 - [kernforge](entities/kernforge.md) — Go AI workbench for Windows/AC project analysis, fuzz reasoning, driver POC scaffolding, verification (MCP skills)
 - [Known-Driver-Mappers](entities/known-driver-mappers.md) — catalog of known Driver Mappers (AC / stress-testing)
+- [KnownDllUnhook](entities/known-dll-unhook.md) — KnownDlls `.text` section restore for loaded modules (native syscalls; EDR/AC hook evasion research; ORCx41)
 - [KeyboardKit](entities/keyboardkit.md) — kernel keyboard IRP filter keylogger (UDP exfil; ExplorerFrame DLL hijack)
 - [Kernel Anti-Cheat](entities/kernel-anti-cheat.md) — experimental multi-telemetry kernel AC driver (NMI stack walk, thread start scan, big pool, PiDDBCache mapper residue; gmh5225; `[NMI]`)
 - [Kernel Anticheat](entities/kernel-anticheat.md) — Vasieco Windows kernel AC prototype (unsigned/abnormal drivers, physmem-handle abuse, hypervisor traces, big pool, mapper residue, suspicious system threads; C/C++ Visual Studio driver; anti-cheat research)
