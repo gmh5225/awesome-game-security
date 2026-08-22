@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MuntashirAkon/AppManager`: entity [[app-manager]] (MuntashirAkon; Java/Android + native; component inspection, permission/app-op control, backup/restore, logcat, tracker scanning, APK install/edit/sign, root/ADB ops; deep app auditing and RE-oriented device admin; Cheat Android File Explorer); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[jadx]], [[file-explorer]], [[xfiles]], and [[raival-file-explorer]].
+
 - **2026-08-22** — ingest `description:MustardChef/WSABuilds`: entity [[wsa-builds]] (MustardChef; customized WSA build distribution; Magisk/KernelSU + optional GApps variants; automation scripts; install/troubleshoot/recovery documentation; multi-version Windows compatibility; advanced Android security-tooling workflows; README `WSA`); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magiskonwsalocal]], [[wsa-linux-kernel]], [[wsapatch]], and [[wsa-pacman]].
 
 - **2026-08-22** — ingest `description:Muz1K1zuM/PoisonKiller_bof`: entity [[poison-killer-bof]] (Muz1K1zuM; Cobalt Strike Beacon Object Files; **`PoisonX.sys`** BYOVD backend; process kill, driver load/unload, kernel-mode file deletion; MinGW C BOFs + Python helper; red-team / BYOVD BOF payload research; README `[PoisonX.sys]`); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[process-killer-byovd]], [[killer]], [[usb-monitor-bof]], and [[kernel-cactus]].
