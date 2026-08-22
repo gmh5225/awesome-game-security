@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NoInitRD/Memory-Dump-UEFI`: entity [[memory-dump-uefi]] (NoInitRD; C UEFI application; live-boot USB + UEFI shell physical RAM dump; scripts/build/docs for memory-image collection; forensic acquisition / low-level security research; README [A UEFI application for dumping the contents of RAM]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[offline-crash-dump-uefi]], [[dumpit-mirror]], [[tool-diy-system-memory-dump]], and [[simpleuefi]].
+
 - **2026-08-22** — ingest `description:NoelFB/blah`: entity [[blah]] (NoelFB; lightweight portable C++ 2D game framework; CMake C++17; OpenGL or Direct3D11 backends; app lifecycle, rendering, input, audio, math utilities; few dependencies; hackable 2D prototype base; Game Engine / [C++ 2D]); cited on [[overviews/game-engine]]; cross-linked [[love]], [[obengine]], [[raylib]], [[macroquad]], and [[open-source-engines]].
 
 - **2026-08-22** — ingest `description:Noelo-Lab/decbench`: entity [[decbench]] (Noelo-Lab; Python decompiler benchmark; compile→decompile→score pipeline; CFG GED, DWARF type match, recompilation bytematch; angr/Ghidra/IDA/Binja/r2dec/dewolf + LLM/agent backends; Debian/embedded/firmware/sandboxed-malware corpora; cheat / Decompiler); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[kuna]], [[binaryaudit]], [[retdec]], and [[kong]].

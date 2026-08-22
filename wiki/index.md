@@ -1832,6 +1832,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PolarImGui](entities/polarimgui.md) — Android ImGui menu framework for Unity IL2CPP (C++ native + Android Studio; `.so` packaging for APK architectures; mobile mod-menu / cheat UI prototyping; Polarmods; Imgui On Android)
 - [Self-Remapping Code](entities/self-remapping-code.md) — Windows PoC: aliased virtual mappings of same physical pages; execute one view, integrity-check another (changeofpace; anti-patching / anti-debug)
 - [MemProcFS-Analyzer](entities/memprocfs-analyzer.md) — PowerShell MemProcFS forensic framework (processes/network/registry/event logs/browser/malware; HTML reports; VirusTotal TI; IS forensics)
+- [Memory-Dump-UEFI](entities/memory-dump-uefi.md) — UEFI application for physical RAM dump from USB live-boot + UEFI shell (C; forensic acquisition / low-level security research; NoInitRD)
 - [memory-relocalloc](entities/memory-relocalloc.md) — PE `.reloc`-backed allocation hiding (Windows/Android; evade AC heap/VAS memory scanners; gmh5225)
 - [memory-server](entities/memory-server.md) — jailbroken iOS REST memory scanner (Rust HTTP port 3030; process enum/read/pattern scan; Python PC client; cheat / iOS memory explorer; gmh5225)
 - [MemWars](entities/memwars.md) — Windows memory-analysis / process-manipulation C++ library (scan / pattern search / module enum / injection / memory edit; Testing Framework; gmh5225)
