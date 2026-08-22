@@ -2837,6 +2837,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMPUnpacker](entities/vmpunpacker.md) — VMProtect PE unpacker (C++/Python; LZMA → sections/IAT; Fix VMP / Unpacker)
 - [VMUnprotect](entities/vmunprotect.md) — .NET Harmony instrument VMProtect methods (trace / anti-debug; Fix VMP)
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
+- [vpgather](entities/vpgather.md) — AVX2 VPGATHER + VEH address-validity probe PoC (Peribunt; pre-fault accessibility checks; stealth memory probing; RE / AC bypass research)
 - [vpnhide](entities/vpnhide.md) — Android VPN hide (LSPosed system_server + GKI kretprobe/KernelPatch/Zygisk; ioctl/netlink/`/proc/net`; optional localhost ports block; Cheat Magisk)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
 - [WPeChatGPT](entities/wpechatgpt.md) — OpenAI-compatible IDA plugin: explain/rename, Python routine reconstruction, vuln checks, automated function-tree summarization (IDAPython; cheat / IDA Plugins / `[ChatGPT]`)

@@ -20,4 +20,4 @@ Complements timing / write-and-compare EPT detectors such as [[ept-hook-detectio
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[ept-hook-detection]] · [[ermsb-meme]] · [[hypervisor-detection]] · [[checkhv-um]] · [[budget-ept]] · [[ophion]] · [[hypervisor]]
+[[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[ept-hook-detection]] · [[ermsb-meme]] · [[hypervisor-detection]] · [[checkhv-um]] · [[budget-ept]] · [[ophion]] · [[hypervisor]] · [[vpgather]]
