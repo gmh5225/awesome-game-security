@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:QianMo/Game-Programmer-Study-Notes`: entity [[game-programmer-study-notes]] (QianMo; large Markdown graphics/rendering study notes; GPU Gems, shader programming, ray tracing, post-processing; software engineering for game dev; Game Engine / guide); renamed prior TastSong notes to [[tastsong-game-programmer-study-notes]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unity-design-pattern]], [[ue4-fps-game]], [[gltut]], [[cpp-game-engine-book]], and [[3d-game-shaders-for-beginners]].
+
 - **2026-08-22** — ingest `description:QianMo/UE4-FPS-Game`: entity [[ue4-fps-game]] (QianMo; UE4 FPS sample; C++ gameplay module + standard character control; Blueprint assets, input bindings, camera setup, starter maps; compact UE4 module/target layout; UE4 Game / C++ gameplay and editor workflow learning); cited on [[overviews/game-engine]]; cross-linked [[ue4-tank-game]], [[unity-design-pattern]], [[ue4-tutorials]], [[simple-fps-template]], and [[epic-survival-game]].
 
 - **2026-08-22** — ingest `description:QianMo/UE4-Tank-Game`: entity [[ue4-tank-game]] (QianMo; UE4 tank prototype; C++ gameplay + Blueprint assets; tank pawn, player/AI controllers, crosshair targeting; multiple maps; UE4 Game / controller-pattern learning); cited on [[overviews/game-engine]]; cross-linked [[unity-design-pattern]], [[ue4-tutorials]], [[action-roguelike]], and [[simple-fps-template]].

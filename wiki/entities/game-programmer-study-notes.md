@@ -1,23 +1,23 @@
 ---
-title: game-programmer-study-notes
+title: Game Programmer Study Notes
 kind: entity
-topics: [game-engine]
+topics: [game-engine, graphics-api]
 sources:
-  - wiki/sources/descriptions/TastSong__GameProgrammerStudyNotes.md
-updated: 2026-08-20
+  - wiki/sources/descriptions/QianMo__Game-Programmer-Study-Notes.md
+updated: 2026-08-22
 confidence: medium
 ---
 
-# game-programmer-study-notes
+# Game Programmer Study Notes
 
-Large collection of game programming study notes and practice materials from TastSong. Combines extensive Markdown documentation with Unity C# sample projects covering design patterns, rendering, networking, AI, and engine architecture. Content is organized as topic-focused modules with screenshots, code snippets, and hands-on exercises across different learning tracks—aimed at students and developers building practical game development and technical architecture skills. (source: wiki/sources/descriptions/TastSong__GameProgrammerStudyNotes.md)
+Large collection of game programming study notes from QianMo focused on graphics and real-time rendering. Most content is Markdown with extensive diagrams and media, covering GPU Gems, shader programming, ray tracing, and post-processing, plus software engineering and design material for practical game development. Structured as a reference for learners and developers studying game graphics and engine-related concepts—not a cheat, anti-cheat, or runtime hook artifact. (source: wiki/sources/descriptions/QianMo__Game-Programmer-Study-Notes.md)
 
-Sits in the Game Development notes / guide lane as educational Unity and engine-architecture material—not a cheat, anti-cheat, or runtime hook artifact.
+Sits in the README **Game Engine → Guide** lane beside other QianMo learning samples ([[unity-design-pattern]], [[ue4-fps-game]], [[ue4-tank-game]]) and graphics fundamentals ([[gltut]], [[cpp-game-engine-book]], [[3d-game-shaders-for-beginners]]).
 
 ## Links
 
-- Repo: https://github.com/TastSong/GameProgrammerStudyNotes
+- Repo: https://github.com/QianMo/Game-Programmer-Study-Notes
 
 ## Related
 
-[[overviews/game-engine]] · [[cpp-game-engine-book]] · [[learn-awesome-gamedev]] · [[gamedevguide]] · [[unity-script-collection]] · [[gamedev-libraries]] · [[game-design-documents]]
+[[overviews/game-engine]] · [[overviews/graphics-api]] · [[tastsong-game-programmer-study-notes]] · [[unity-design-pattern]] · [[ue4-fps-game]] · [[gltut]] · [[cpp-game-engine-book]] · [[3d-game-shaders-for-beginners]] · [[tinyraytracer]]
