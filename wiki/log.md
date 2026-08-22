@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NoobDigital/react-native-shieldscan`: entity [[react-native-shieldscan]] (NoobDigital; React Native native module; TS + Kotlin/Swift; root/jailbreak, Frida, debugger, emulator, Xposed/Substrate hooks, developer mode; weighted device risk score; app-switcher blur, screenshot/recording prevention + detection; mobile RASP / screen protection; Android+iOS); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[free-rasp-reactnative]], [[rs-native-kit-security]], [[droidshield]], and [[frida]].
+
 - **2026-08-22** — ingest `description:Noosh404/Maplestory-V179-Cheat-Engine`: entity [[maplestory-v179-cheat-engine]] (Noosh404; MapleStory v179 CE `.CT`/CEA collection; full-map attack, skill injection, no-delay, pet loot teleport, knockback tweaks via pattern-scan byte patches; legacy MapleStory RE practice; cheat / game:maplestory [V179 CT]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mydev-cheat-engine-tables]], [[msb]], [[msc]], and [[maplestory-cms95-client-address]].
 
 - **2026-08-22** — ingest `description:NotOfficer/cs2-sdk`: entity [[cs2-sdk]] (NotOfficer; auto-generated C++ header SDK for CS2 Source 2 binaries via [[source2gen]]; client/server/rendering/networking/schema class and enum declarations; patch-version metadata; cheat / game:cs2 [SDK]); cited on [[overviews/game-hacking]]; cross-linked [[source2gen]], [[cs2-sdk-source2gen]], [[source2sdk]], and [[cs2-offsets]].
