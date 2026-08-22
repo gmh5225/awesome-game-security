@@ -12,12 +12,12 @@ confidence: medium
 
 Updated **kernel BSOD visual hack** that renders **Bad Apple** animation frames through the **crash framebuffer path**. Maps and writes the **display framebuffer** directly instead of relying on legacy **BOOTVID VGA** output, and **hooks `KeBugCheckEx`** to intercept crash flow before drawing frames. C/C++ kernel code uses **stb_image** parsing and direct memory-copy routines for frame rendering. (source: wiki/sources/descriptions/NSG650__Bad-Bugcheck.md)
 
-Research lane: **Windows internals** study of **bugcheck hooking**, **display ownership**, and **crash-screen rendering behavior**—for kernel researchers exploring the bugcheck environment, not a production stability tool. Part of the NSG650 bugcheck-research family alongside [[bugcheckhack]], [[bugcheck2linux]], and suppression PoCs such as [[nomore-bugcheck]].
+Research lane: **Windows internals** study of **bugcheck hooking**, **display ownership**, and **crash-screen rendering behavior**—for kernel researchers exploring the bugcheck environment, not a production stability tool. Successor to legacy BOOTVID PoC [[bad-bugcheck-old]]; part of the NSG650 bugcheck-research family alongside [[bugcheckhack]], [[bugcheck2linux]], and suppression PoCs such as [[nomore-bugcheck]].
 
 ## Links
 
-- Repo: https://github.com/NSG650/Bad-BugCheck-Old
+- Repo: https://github.com/NSG650/Bad-Bugcheck
 
 ## Related
 
-[[bugcheckhack]] · [[bugcheck2linux]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheck-suppressor]] · [[patchguard]] · [[overviews/windows-kernel]]
+[[bad-bugcheck-old]] · [[bugcheckhack]] · [[bugcheck2linux]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheck-suppressor]] · [[patchguard]] · [[overviews/windows-kernel]]

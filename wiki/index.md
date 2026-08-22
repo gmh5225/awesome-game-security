@@ -64,6 +64,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BakaWare4](entities/bakaware4.md) — WIP CS2 cheat (debug unload/unhook; `-insecure`; cheat / game:cs2)
 - [BamboozlEDR](entities/bamboozledr.md) — ETW event generator TUI (multi-provider; EDR/detection lab; AC/IS forensics)
 - [Bad-Bugcheck](entities/bad-bugcheck.md) — NSG650; updated kernel BSOD visual hack; Bad Apple frames via crash framebuffer; hooks KeBugCheckEx; display framebuffer mapping (not legacy BOOTVID VGA); stb_image + direct memory copy; bugcheck hooking / crash-screen rendering research
+- [Bad-BugCheck Old](entities/bad-bugcheck-old.md) — NSG650; early kernel BSOD visual PoC; Bootvid VidBitBlt VGA-style animated frames on forced crash screen; triggers bugcheck after playback; legacy BOOTVID crash-screen graphics research
 - [BadRentdrv2](entities/badrentdrv2.md) — Rentdrv2.sys BYOVD (IOCTL → physmem R/W; driver map / kernel patch / AC bypass; gmh5225)
 - [BadEye](entities/badeye.md) — BE handle-access assumption bypass (C++ memory analysis; EPROCESS→MmCopyVirtualMemory; gmh5225; cheat / explore anticheat system:be)
 - [bad-query](entities/bad-query.md) — iOS 26–27 sandbox-escape PoC (Xcode; app/daemon/App Group/system-container path access; container isolation research; forcequitOS)

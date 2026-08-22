@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NSG650/Bad-BugCheck-Old`: entity [[bad-bugcheck-old]] (NSG650; early kernel BSOD visual PoC; Bootvid VidBitBlt VGA-style animated frames on forced crash screen; triggers bugcheck after playback; legacy BOOTVID crash-screen graphics research); cited on [[overviews/windows-kernel]]; cross-linked [[bad-bugcheck]], [[bugcheckhack]], [[bugcheck2linux]], [[nomore-bugcheck]], and [[bugcheck-suppressor]].
+
 - **2026-08-22** — ingest `description:NSG650/Bad-Bugcheck`: entity [[bad-bugcheck]] (NSG650; updated kernel BSOD visual hack; Bad Apple frames via crash framebuffer; hooks KeBugCheckEx; display framebuffer mapping instead of legacy BOOTVID VGA; stb_image + direct memory copy; bugcheck hooking / crash-screen rendering research); cited on [[overviews/windows-kernel]]; cross-linked [[bugcheckhack]], [[bugcheck2linux]], [[nomore-bugcheck]], [[nomore-bugcheck-reloaded]], and [[bugcheck-suppressor]].
 
 - **2026-08-22** — ingest `description:NSG650/BugCheck2Linux`: entity [[bugcheck2linux]] (NSG650; Windows kernel driver; mini-rv32ima RISC-V Linux emulator inside BSOD screen; BOOTVID framebuffer + embedded device tree/boot image; kernel-mode embedded emulation / bugcheck-environment research); cited on [[overviews/windows-kernel]]; cross-linked [[bugcheckhack]], [[nomore-bugcheck]], [[nomore-bugcheck-reloaded]], [[bugcheck-suppressor]], and [[ntdoom]].
