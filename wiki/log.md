@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PrinceFroggy/MSB`: entity [[msb]] (PrinceFroggy; legacy MapleStory GMS trainer toolkit; C++/C# launcher; injection/runtime control; GMS 128–140; historical MMO trainer architecture RE; cheat / game:maplestory [GMS Old Hack 128-140]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[msc]], [[maplestory-cms95-client-address]], and [[twms-hacking-data]].
+
 - **2026-08-22** — ingest `description:PrinceFroggy/MSC`: entity [[msc]] (PrinceFroggy; legacy MapleStory GMS bot framework; C++/C#; map/portal resource data; discontinued partial publish; historical bot-design RE; cheat / game:maplestory [GMS Bot]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[maplestory-auto-level-up]], [[maplestory-worlds-automation]], [[maplestory-cms95-client-address]], and [[maple-unity]].
 
 - **2026-08-22** — ingest `description:PrograMistV1/ursus`: entity [[ursus]] (PrograMistV1; Rust Vulkan game engine; Cargo workspace; render graph + automatic barrier tracking; deferred pipeline with shadows/depth prepass/G-buffer/lighting/post-process/FSR1; bindless textures; lock-free triple-buffered game/render threads; hecs ECS; OBJ/glTF async load; puffin GPU profiling; Vulkan 1.3+ ash + build-time SPIR-V; Linux/Windows; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[oxylus]], [[cat-annihilation]], [[lumos]], and [[hazel]].
