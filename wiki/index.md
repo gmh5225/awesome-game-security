@@ -987,6 +987,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
 - [FlagSecurePatcher](entities/flagsecurepatcher.md) — Android FLAG_SECURE + screenshot-listener disable (Cheat / Magisk reference)
 - [Force Page Protection](entities/force-page-protection.md) — x64dbg plugin: force page protection on mapped views when NtProtectVirtualMemory fails; SEC_NO_CHANGE remap bypass (changeofpace; Bypass Remap Memory)
+- [Forensia](entities/forensia.md) — Windows anti-forensics utility (C++; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team / IR validation; PaulNorman01)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
 - [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)
 - [FuckCertVerifyTimeValidity](entities/fuck-cert-verify-time-validity.md) — Detours signtool import hook; bypass cert time validity for leaked/expired Authenticode (Sign Leaked Cert)

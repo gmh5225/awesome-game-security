@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PaulNorman01/Forensia`: entity [[forensia]] (PaulNorman01; C++ Windows anti-forensics utility; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team simulation and defensive IR validation); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[anti-forensics]], [[antfs]], [[dfirtriage]], [[windows-forensic-artifacts]], [[usn]], [[ntfs-journal-viewer]], and [[clear-driver-traces]].
+
 - **2026-08-22** — ingest `description:Perfare/AssetStudio`: entity [[assetstudio]] (Perfare; canonical C# Unity asset/AssetBundle desktop extractor; wide Unity version + asset-type coverage; bundle decompression, scene hierarchy, export to images/OBJ/JSON/FBX; modders / RE / game-security analysts; [Extracting assets]); split prior Razviar fork to [[assetstudio-razviar]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[il2cppdumper]], [[uabe]], [[unityexplorer]], and [[awesome-game-file-format-reversing]].
 
 - **2026-08-22** — ingest `description:Perfare/Il2CppDumper`: entity [[il2cppdumper]] (Perfare; canonical C# Unity IL2CPP RE utility; ELF/Mach-O/PE/NSO/WASM; dummy DLL metadata + IDA/Ghidra/BN scripts + structure headers; static analysis / protection research; [Il2Cpp Dump]); split prior Android fork to [[il2cppdumper-kp7742]]; cited on [[concepts/il2cpp]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; cross-linked [[il2cpp-inspector]], [[il2cppdumpdroidgui]], [[il2cpp-pdb]], and [[zygisk-il2cppdumper]].

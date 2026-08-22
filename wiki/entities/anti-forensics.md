@@ -4,7 +4,7 @@ kind: entity
 topics: [reverse-engineering, anti-cheat, windows-kernel]
 sources:
   - wiki/sources/descriptions/ashemery__Anti-Forensics.md
-updated: 2026-08-18
+updated: 2026-08-22
 confidence: medium
 ---
 
@@ -18,4 +18,4 @@ Curated knowledge base of anti-forensic techniques — not an executable tool. T
 
 ## Related
 
-[[antfs]] · [[file-recovery-tool]] · [[ntfstool]] · [[dfirtriage]] · [[pwf]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[forensia]] · [[antfs]] · [[file-recovery-tool]] · [[ntfstool]] · [[dfirtriage]] · [[pwf]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
