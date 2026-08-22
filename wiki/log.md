@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NeoTerrm/NeoTerm`: entity [[neoterm]] (NeoTerrm; modern Android terminal emulator; Java/Kotlin + XML Android UI; Termux-oriented workflow; mobile shell usability, documentation, release distribution; portable CLI for developers and mobile security practitioners); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[termux-app]], [[neotty]], [[android-terminal-emulator]], [[auto-android-app-modding-tool]], and [[tool-tree]].
+
 - **2026-08-22** — ingest `description:NepMods/InjectARM64`: entity [[inject-arm64]] (NepMods; no-root ARM Android cheat injection platform; Java/Kotlin + C/C++ native hooks; virtualized app-space payload inject; ARM32/ARM64; configurable flows; newer Android; cheat / Non-root injection); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-virtual-inject]], [[virtual-app]], [[android-super-inject]], [[and64-inline-hook]], and [[dobby]].
 
 - **2026-08-22** — ingest `description:Net5F/AmalgamEngine`: entity [[amalgam-engine]] (Net5F; C++ CMake isometric sprite-based online virtual-world engine; client/server foundations, networking, chat, accounts, live in-world editing; scalable multiplayer on modest hardware; persistent social-world base; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[mir2]], [[mir3-zircon]], [[maplestory-copy]], [[custom-game-engines]], and [[open-source-engines]].

@@ -1939,6 +1939,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nemesis](entities/nemesis.md) — kernel-space process dump (cheat / windows kernel explorer)
 - [Nebula](entities/nebula.md) — modular C++ game engine (fips build; Nebula-demo setup.bat; Game Engine / source)
 - [NeoTTY](entities/neotty.md) — experimental Termux fork (Android terminal; full Linux system usage; cheat / Android Terminal Emulator; gmh5225)
+- [NeoTerm](entities/neoterm.md) — modern Android terminal emulator (NeoTerrm; Java/Kotlin; Termux-oriented workflow; mobile shell usability; portable CLI for mobile security practitioners)
 - [netcrypt](entities/netcrypt.md) — C# .NET PE packer (encrypted/compressed managed assembly in CLR loader stub; SimplePacker GUI; Anti Cheat → Binary Packer / `.NET`)
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [neverc](entities/neverc.md) — AI-friendly C23 security compiler (custom LLVM backend; integrated linker; compile-time string encryption/hash + mimalloc; DynCode PIC runtime codegen; 130+ phase plugin API; PE/ELF/Mach-O; Windows/Linux/Android; NeverSight)
