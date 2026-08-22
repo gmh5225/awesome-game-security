@@ -468,6 +468,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ConfuserEx](entities/confuserex.md) — open-source .NET application protector (Confuser successor; AC Binary Packer / CLR protection)
 - [ConfuserEx IDAPython](entities/confuserex-idapython.md) — Python IDAPython deobfuscation script for ConfuserEx (cheat / IDA Plugins)
 - [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
+- [Cubyz](entities/cubyz.md) — open-source Zig 3D voxel sandbox (OpenGL; LOD rendering, unbounded 3D chunks, procedural crafting; Windows/Linux; Game Engine / source)
 - [Controller Mode](entities/controller-mode.md) — official CE Lua add-on: gamepad-operated CE UI (D-pad navigation, A/B confirm/cancel, `.CT` picker, Steam Deck keyboard; cheat-engine)
 - [CountHook](entities/count-hook.md) — working-set memory-check bypass (count-oriented; Cheat / Bypass Page Protection)
 - [CppServer](entities/cppserver.md) — C++ server framework with Fast Binary Encoding message protocols (Game Network / source; modding + memory analysis)

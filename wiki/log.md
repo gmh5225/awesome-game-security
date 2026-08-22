@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PixelGuys/Cubyz`: entity [[cubyz]] (PixelGuys; open-source Zig 3D voxel sandbox; OpenGL pipeline; LOD rendering, unbounded 3D chunks, procedural crafting; Windows/Linux; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[zig-gamedev]], [[gltut]], [[cpp-game-engine-book]], and [[campfire]].
+
 - **2026-08-22** — ingest `description:PixelOS-AOSP/manifest`: entity [[manifest]] (PixelOS-AOSP; XML repo manifests + snippets; repo init/sync and ROM build docs; revision-locked upstream project selection; cheat / Android ROM); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[official-devices]], [[android-rom-list]], and [[pixel-flasher]].
 
 - **2026-08-22** — ingest `description:PixelOS-AOSP/official_devices`: entity [[official-devices]] (PixelOS-AOSP; metadata/documentation repo for officially supported PixelOS devices; Markdown/JSON device lists, API data, changelog notes, release templates; authoritative support matrix; cheat / PixelOS device trees); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-rom-list]], [[device-xiaomi-mondrian]], and [[pixel-flasher]].
