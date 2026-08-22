@@ -2867,6 +2867,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-desktop-duplication-sample](entities/windows-desktop-duplication-sample.md) — DXGI Output Duplication desktop capture sample (C++; cursor + dirty/moved regions; `[DXGI]`)
 - [windows-screenshotcapture-directx](entities/windows-screenshotcapture-directx.md) — minimal DX9 front-buffer screenshot capture (`GetFrontBufferData` + WIC PNG; `[DX9]`)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
+- [windows-forensic-artifacts](entities/windows-forensic-artifacts.md) — structured Markdown guide to Windows forensic artifacts (execution/account/file/network/persistence/user activity; locations, parsing, timeline correlation; DFIR reference; Psmths)
 - [Windows-Spoofer](entities/windows-spoofer.md) — open-source Win10/11 spoofing + cleanup toolkit (Batch/PowerShell; system IDs, network values, trace cleanup; volume ID / SMBIOS via external utilities; anti-cheat fingerprinting research; Scrut1ny; cheat / HWID)
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)

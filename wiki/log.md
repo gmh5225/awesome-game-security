@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Psmths/windows-forensic-artifacts`: entity [[windows-forensic-artifacts]] (Psmths; structured Markdown guide to Windows forensic artifacts; execution/account/file/network/persistence/user-activity domains; artifact locations, parsing options, timeline correlation; DFIR practitioner reference; Guide to the various Windows forensic artifacts); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[dfirtriage]], [[pwf]], [[anti-forensics]], [[shimcacheparser]], and [[alibi]].
+
 - **2026-08-22** — ingest `description:Pusty/BinaryNinjaPlugins`: entity [[binaryninjaplugins]] (Pusty; Python BN architecture plugins; Java class files, Renesas H8/300, Xtensa ELF; disassembly/decode/partial lifting; Java NOP/branch patch workflows; firmware/bytecode RE extension); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binaryninja-pcode]], [[ptxninja]], [[official-plugins]], and [[community-plugins]].
 
 - **2026-08-22** — ingest `description:Pycatchown/ClassMaker`: entity [[classmaker]] (Pycatchown; Python IDAPython IDA plugin; auto C++ class reconstruction from constructor pseudocode; vtable assignment trace, IDA struct create/update, naming heuristics; 32/64-bit practical reversing; game/native binary class recovery; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pyclassinformer]], [[ida-vtable-tools]], [[classy]], and [[ida-medigate]].
