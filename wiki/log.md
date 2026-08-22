@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PSkinnerTech/3d-asset-factory`: entity [[3d-asset-factory]] (PSkinnerTech; CLI YAML→3D pipeline; GPT Image 2.0 concept → TRELLIS.2 GLB; QA gate, review HTML, web/Unity/Unreal export; mock & remote GPU runners Modal/Replicate/RunPod; GLB/USDZ/STL; AI category); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[modly]], [[sprite-sheet-creator]], [[image-blaster]], and [[gameai-paper-list]].
+
 - **2026-08-22** — ingest `description:PacktPublishing/Learn-FPGA-Programming`: entity [[learn-fpga-programming]] (PacktPublishing; book companion SystemVerilog HDL + testbenches by chapter; logic design through I2C/PS/2/VGA/DDR and capstone projects; FPGA fundamentals for DMA/custom hardware development; Guide); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[pcileechgen]], [[xilinx-fpga-pcie-xdma-tutorial]], [[entities/dma]], and [[dma-cfw-guide]].
 
 - **2026-08-22** — ingest `description:PalassCQ/GuardAC`: entity [[guardac]] (PalassCQ; Kotlin Gradle JavaPlugin; Spigot/Paper/Folia **1.21.x**; cloud API aim-check verdicts with local alerts, violation tracking, and punishment ladders; alert-only mode; cross-server reputation; Geyser/WorldGuard exemptions; public plugin client only; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[mlanticheat]], [[minecraft-anticheatai]], [[minecraft-anti-cheat]], [[windfall-anticheat]], and [[ai-aimbot-detection]].

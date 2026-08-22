@@ -56,6 +56,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [2Pack](entities/2pack.md) — Rust PE & shellcode packer (EXE/DLL + raw; Anti Cheat → Binary Packer)
 - [360WFP Exploit](entities/360wfp-exploit.md) — BYOVD via Qihoo 360 `360netmon_x64.sys_wfp` (WFP; block EDR/XDR network)
 - [3D-Racing-Game](entities/3d-racing-game.md) — OpenGL racing game (M/N scene switch; Game Develop / OpenGL source)
+- [3d-asset-factory](entities/3d-asset-factory.md) — CLI YAML→3D pipeline (GPT Image 2.0 → TRELLIS.2 GLB; QA gate; web/Unity/Unreal export; Modal/Replicate/RunPod; AI category)
 - [3d-game-shaders-for-beginners](entities/3d-game-shaders-for-beginners.md) — GLSL shader tutorial (Panda3D; SSAO/bloom/post-processing; Shader)
 - [3d9](entities/3d9.md) — DX11 stereoscopic-fix tooling (developer-oriented; DirectX Tools)
 - [3den Enhanced](entities/3den-enhanced.md) — Arma 3 Eden Editor expansion mod (R3voA3; SQF/config/addon modules; editor UI tools, mission attributes, workflow shortcuts; optional at runtime; Mod Editor / mission-maker tooling)

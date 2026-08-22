@@ -12,7 +12,7 @@ confidence: medium
 
 Local desktop application that converts a single image into a 3D mesh using open-source GPU inference on Windows and Linux. TypeScript and Python codebase with pluggable generators for extending the image→mesh pipeline. (source: wiki/sources/descriptions/lightningpixel__modly.md)
 
-Sits in the README **AI** category local asset lane—offline mesh generation for game AI and tooling developers, complementary to cloud API skillsets such as [[image-blaster]] and YAML→GLB factories.
+Sits in the README **AI** category local asset lane—offline mesh generation for game AI and tooling developers, complementary to YAML→GLB CLI pipelines such as [[3d-asset-factory]], cloud API skillsets such as [[image-blaster]], and 2D sprite tools such as [[sprite-sheet-creator]].
 
 ## Links
 
