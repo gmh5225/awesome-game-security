@@ -129,6 +129,7 @@ sources:
   - wiki/sources/descriptions/zer0condition__gexec.md
   - wiki/sources/descriptions/ytk2128__pe32-password.md
   - wiki/sources/descriptions/ykus4__kagura.md
+  - wiki/sources/descriptions/Neo23x0__Raccine.md
   - wiki/sources/descriptions/NeverSight__NeverC.md
   - wiki/sources/descriptions/romainthomas__the-poor-mans-obfuscator.md
   - wiki/sources/descriptions/open-obfuscator__dProtect.md
@@ -821,6 +822,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
 - [[pi-defender]] — kernel security driver blocking process injection by filtering dangerous handle rights (remote memory write / operation permissions); docs/tests for hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research (PI-Defender) (source: wiki/sources/descriptions/PI-Defender__pi-defender.md)
+- [[raccine]] — lightweight Windows anti-ransomware (Neo23x0; debugger registration for `vssadmin`/`wmic`; YARA command-line rules; parent-chain termination + event logging; no resident agent; blocks shadow-copy deletion; C/C++/C#; README [EDR]) (source: wiki/sources/descriptions/Neo23x0__Raccine.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
 - [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)
 - [[deadlock-anti-cheat]] — UrnIt user-mode Deadlock session AC (process list, game-window PNG screenshots, focused-window key input, CPU/GPU HWID, cheat-process signatures with optional forum scrape, macro/bot key-timing variance; Discord webhook on exit/F12; tournament/session logging vs kernel enforcement; g8tsz) (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)

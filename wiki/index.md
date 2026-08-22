@@ -2327,6 +2327,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QQTang](entities/qqtang.md) — QQ Tang (QQ堂) client/protocol/memory/AC research (Tencent casual game; gmh5225)
 - [QQTang Cheat Engine](entities/qqtang-cheat-engine.md) — QQ Tang (QQ堂) title-specific cheat engine (C++/C; memory scan/edit; cheat / game:qqtang [Cheat Engine]; gmh5225)
 - [QSynthesis](entities/qsynthesis.md) — IDA Pro MBA expression synthesizer (Python; oracle-guided program synthesis + SMT; Hex-Rays; Cheat IDA Plugins)
+- [Raccine](entities/raccine.md) — Windows anti-ransomware (Neo23x0; debugger registration for vssadmin/wmic; YARA command-line rules; shadow-copy deletion block; no resident agent; README [EDR])
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [rAthenaCN](entities/rathenacn.md) — Chinese-localized rAthena fork (C/C++; asset pipelines / plugins / modding; cheat / game:ro; gmh5225)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Neo23x0/Raccine`: entity [[raccine]] (Neo23x0; lightweight Windows anti-ransomware; debugger registration for `vssadmin`/`wmic`; YARA command-line matching; parent-chain termination + event logging; no resident agent; blocks shadow-copy deletion; C/C++/C#; README [EDR]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[bamboozledr]], [[the-hive]], [[wazuh]], [[peregrine-anticheat]], and [[pi-defender]].
+
 - **2026-08-22** — ingest `description:NeoMaster831/kurasagi`: entity [[kurasagi]] (NeoMaster831; C/C++ kernel PoC; Win11 24H2–25H2 runtime PatchGuard bypass; kdmapper manual-map load; CRITICAL_STRUCTURE_CORRUPTION edge-case research; lab-only PG bypass); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[patchguard-2023]], [[tableflipper]], and [[vulnerablepatchguardexploit]].
 
 - **2026-08-22** — ingest `description:NeoTerrm/NeoTerm`: entity [[neoterm]] (NeoTerrm; modern Android terminal emulator; Java/Kotlin + XML Android UI; Termux-oriented workflow; mobile shell usability, documentation, release distribution; portable CLI for developers and mobile security practitioners); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[termux-app]], [[neotty]], [[android-terminal-emulator]], [[auto-android-app-modding-tool]], and [[tool-tree]].
