@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NurdAlert/modded-voyager`: entity [[modded-voyager]] (NurdAlert; modified Voyager-style UEFI hypervisor loader + payload framework; Intel/AMD VM-exit handlers; GPA/GVA translation + R/W + page-table init; UEFI hooks on bootmgfw/winload + Hyper-V path patches pre-OS; boot-time virtualization / kernel control / anti-cheat bypass research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[voyager]], [[bootlicker]], [[pwnedboot]], [[driver-efi-bootkit]], and [[hypervisor-detection]].
+
 - **2026-08-22** — ingest `description:Nuxar1/DecryptionDumper`: entity [[decryption-dumper]] (Nuxar1; Windows C++ runtime encrypted-pointer decrypt routine dumper; debugger single-step + Zydis; register/stack dependency trace until output resolves; pattern scan, context restore, instruction filtering; cheat / [Dump]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[veh-dumper]], [[gh-offset-dumper]], [[league-unpacker]], [[ida-jm-xorstr-decrypt-plugin]], and [[mixed-boolean-arithmetic]].
 
 - **2026-08-22** — ingest `description:OALabs/hashdb-ida`: entity [[hashdb-ida]] (OALabs; Python IDA Pro plugin; HashDB lookup service for hashed API/string constants; single/bulk module import; XOR-aware matching; hash-algorithm hunt + enum annotation; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[rs-ldr]], [[tabby]], [[augur-riot]], [[call-obfuscator]], [[anti-xorstr]], and [[auto-re]].
