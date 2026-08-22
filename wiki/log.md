@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PickAngE/AntiCheat-Scanner`: entity [[anticheat-scanner]] (PickAngE; Python 3.10+ read-only Windows forensic AC inventory; drivers/processes/services/registry/tasks/FS + BAM/Prefetch/MUICache; O(1) sig index + rapidfuzz + PE/Authenticode; ACE/EAC/BattlEye/EA AC/HoYoProtect; privacy/education lane); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[alibi]], [[windows-forensic-artifacts]], [[driver-risk-scout]], and [[easy-anti-cheat]].
+
 - **2026-08-22** — ingest `description:PierreCiholas/GetPixel-vs-BitBlt_GetDIBits`: entity [[getpixel-vs-bitblt-getdibits]] (PierreCiholas; C++ Win32 GDI benchmark/capture utility; switchable GetPixel vs BitBlt+GetDIBits; frame buffer + bitmap export; BitBlt bulk read dramatically faster than per-pixel GetPixel; external frame capture for game tooling and security research; README [GetPixel]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[not-an-overlay]], [[screenshot]], and [[screencapture]].
 
 - **2026-08-22** — ingest `description:PierreCiholas/NotAnOverlay`: entity [[not-an-overlay]] (PierreCiholas; Windows PoC; C++ Win32/GDI; regular window screen-region clone via BitBlt/StretchBlt instead of transparent always-on-top overlay; external ESP rendering / AC overlay-visibility detection tradeoffs; README [Duplicating with GDI]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[external-esp-hack-assaultcube]], [[cs2external]], [[d2d-overlay]], and [[window-hijack-overlay]].

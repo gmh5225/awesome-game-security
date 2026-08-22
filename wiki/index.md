@@ -249,6 +249,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiCheat](entities/anticheat.md) — C/C++ reference AC implementation (process integrity, module scan, memory patterns, debugger/overlay detection, driver comm; gmh5225; alias of anti-cheat-chrysalis)
 - [anticheat-android-cheap-engine](entities/anticheat-android-cheap-engine.md) — Sample Android anti-cheat implementation (C/C++; open-source AC system; gmh5225)
 - [anticheat-poc](entities/anticheat-poc.md) — Windows AC PoC (debugger / integrity / signature scan / process enum; Instrumentation Callback)
+- [AntiCheat Scanner](entities/anticheat-scanner.md) — read-only Windows forensic AC inventory scanner (Python 3.10+; drivers/processes/services/registry/tasks/FS + BAM/Prefetch/MUICache; O(1) sig index + rapidfuzz + PE/Authenticode; ACE/EAC/BattlEye/EA AC/HoYoProtect; PickAngE)
 - [anti-cheat-research-index](entities/anti-cheat-research-index.md) — structured AC/kernel/VT-x/graphics/RE research index (defensive engineering map; guide lane)
 - [anti-cheat](entities/anti-cheat.md) — C/C++ open-source anti-cheat system (jnastarot; Anti Cheat → Open Source Anti Cheat System)
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)

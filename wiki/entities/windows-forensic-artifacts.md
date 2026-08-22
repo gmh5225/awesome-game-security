@@ -20,4 +20,4 @@ Complements automated triage tools such as [[dfirtriage]] and training kits such
 
 ## Related
 
-[[dfirtriage]] · [[pwf]] · [[anti-forensics]] · [[shimcacheparser]] · [[file-recovery-tool]] · [[alibi]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[dfirtriage]] · [[pwf]] · [[anti-forensics]] · [[shimcacheparser]] · [[file-recovery-tool]] · [[alibi]] · [[anticheat-scanner]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
