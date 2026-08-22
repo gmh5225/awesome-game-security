@@ -411,6 +411,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bt-modular-game-features](entities/bt-modular-game-features.md) — BTS modular Unreal features (audio / physics / animation; C/C++; Plugins:Unreal; gmh5225)
 - [btop](entities/btop.md) — cross-platform C++ terminal resource monitor (CPU/memory/disk/network/process/GPU TUI; Performance Monitor)
 - [btrace](entities/btrace.md) — Android app dynamic behavior tracking via eBPF (C/C++/Go; cheat / RE tools)
+- [BugCheck2Linux](entities/bugcheck2linux.md) — NSG650; Windows kernel driver; mini-rv32ima RISC-V Linux emulator inside BSOD screen; BOOTVID framebuffer + embedded device tree/boot image; kernel-mode embedded emulation / bugcheck-environment research
 - [BugCheckHack](entities/bugcheckhack.md) — NSG650; Windows driver + user-mode utility; service workflow kernel load, offset resolution, bugcheck-routine patching; desktop controller; BSOD appearance/behavior research / kernel patching demo
 - [Bugcheck Suppressor](entities/bugcheck-suppressor.md) — HVCI/kCET-aware BSOD suppression PoC (data-only HAL dispatch hook + RtlUnwindEx SEH recovery; XaFF-XaFF)
 - [BudgetEPT (brew02)](entities/budget-ept.md) — SMAP/SMEP inline hooks emulating EPT split-page semantics without a hypervisor; limited software-virtualization concealment (Some Tricks / Windows Ring0) — SMAP/SMEP inline hooks emulating EPT split-page semantics without a hypervisor; limited software-virtualization concealment (Some Tricks / Windows Ring0)

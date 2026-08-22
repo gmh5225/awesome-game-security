@@ -20,4 +20,4 @@ Research lane: **low-level Windows crash-mechanism** study and demonstration of 
 
 ## Related
 
-[[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheck-suppressor]] · [[patchguard]] · [[overviews/windows-kernel]]
+[[bugcheck2linux]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheck-suppressor]] · [[patchguard]] · [[overviews/windows-kernel]]
