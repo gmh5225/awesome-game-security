@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Noelo-Lab/decbench`: entity [[decbench]] (Noelo-Lab; Python decompiler benchmark; compile→decompile→score pipeline; CFG GED, DWARF type match, recompilation bytematch; angr/Ghidra/IDA/Binja/r2dec/dewolf + LLM/agent backends; Debian/embedded/firmware/sandboxed-malware corpora; cheat / Decompiler); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[kuna]], [[binaryaudit]], [[retdec]], and [[kong]].
+
 - **2026-08-22** — ingest `description:Noelo-Lab/kuna`: entity [[kuna]] (Noelo-Lab; Rust agent-first Ghidra decompiler port; CLI, WASM in-browser, Ghidra plugin core swap; SLEIGH + phase pipeline tunable for LLM refinement; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[enigma]], [[pyre]], [[ghiradec]], and [[kong]].
 
 - **2026-08-22** — ingest `description:NoneShell/IDAComments`: entity [[idacomments]] (NoneShell; Python IDA Pro plugin; hooks comment actions; dedicated review view; keyboard/menu access; IDA 7.x/8.x; note management for game clients and anti-cheat modules; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-export-functions]], [[ida-function-string-associate]], [[idarling]], and [[list-of-ida-plugins]].
