@@ -8,6 +8,7 @@ sources:
   - wiki/sources/descriptions/reveny__Zygisk-ImGui-Mod-Menu.md
   - wiki/sources/descriptions/fedes1to__Zygisk-ImGui-Menu.md
   - wiki/sources/descriptions/zensu357__ksurusda.md
+  - wiki/sources/descriptions/PerformanC__ReZygisk.md
 updated: 2026-08-22
 confidence: medium
 ---
@@ -24,6 +25,10 @@ Magisk **Zygisk** API for native modules that hook the Android app specializatio
 
 Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList / Shamiko may hide root from apps that also scan Zygisk artifacts).
 
+## Standalone runtimes
+
+- **[[rezygisk]]** — open-source C reimplementation of the Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging, and operational tooling for transparent Zygisk-compatible injection. (source: wiki/sources/descriptions/PerformanC__ReZygisk.md)
+
 ## Game-security uses
 
 - **DEX/metadata extraction** — [[zygisk-dump-dex]] hooks `libdexfile.so` on Android 14/15.
@@ -35,4 +40,4 @@ Pair with [[research-rigor]] when generalizing injection timing across OEM/Andro
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

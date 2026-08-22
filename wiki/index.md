@@ -2340,6 +2340,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Retract](entities/retract.md) — Go static binary workbench (PE/ELF/Mach-O; disasm, CFG, pseudocode, YARA; browser UI)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
+- [rezygisk](entities/rezygisk.md) — standalone open-source C Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging (PerformanC; Transparent implementation of Zygisk)
 - [RescueX](entities/rescuex.md) — Magisk/KernelSU/APatch boot-loop auto-rescue (watchdog, module snapshots, WebUI recovery)
 - [Ret-Spoofing](entities/ret-spoofing.md) — minimal x64 return-address spoofing without exception handlers (Peribunt; C++ + ASM stubs; low-overhead fake return targets; Windows x64 nonvolatile-register assumptions; Cheat Spoof Stack)
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
