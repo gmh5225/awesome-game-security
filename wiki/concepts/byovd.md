@@ -75,6 +75,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Terminator.md
   - wiki/sources/descriptions/gmh5225__Blackout.md
   - wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md
+  - wiki/sources/descriptions/Muz1K1zuM__PoisonKiller_bof.md
   - wiki/sources/descriptions/gmh5225__Killer.md
   - wiki/sources/descriptions/gmh5225__Killer-Exercice.md
   - wiki/sources/descriptions/gmh5225__Kernel-Cactus.md
@@ -100,7 +101,7 @@ sources:
   - wiki/sources/descriptions/Sentient111__VulnerableDriverScanner.md
   - wiki/sources/descriptions/Systemhaus-Schulz__DriverRiskScout.md
   - wiki/sources/descriptions/U65535F__ThrottleStopPoC.md
-updated: 2026-08-21
+updated: 2026-08-22
 confidence: high
 ---
 
@@ -143,6 +144,8 @@ Avast signed hypervisor-component abuse such as [[avasthv]] (gmh5225; document/e
 Curated educational BYOVD lab [[entities/byovd|BYOVD Lab]] (gmh5225; multi-driver PoC collection for AV/EDR termination—`viragt64.sys`, TfSysMon, ksapi64, BdApiUtil, `wsftprm.sys`; Viragt64 branch notes real-world campaign overlap after publication) complements single-driver kill samples in the same lane. (source: wiki/sources/descriptions/gmh5225__BYOVD.md)
 
 **`viragt64.sys`** process-kill tooling such as [[process-killer-byovd]] (gmh5225; load signed vulnerable driver → kernel access → forceful termination of user-mode-protected anti-cheat, EDR, and AV processes; red-team / LOLdriver termination research) sits in the same BYOVD process-terminate lane as [[terminator]] and [[watchdog-killer]]. (source: wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md)
+
+**`PoisonX.sys`** Cobalt Strike BOF payloads such as [[poison-killer-bof]] (Muz1K1zuM; C BOFs + MinGW cross-compile + Python helper; process killing, driver load/unload, and kernel-mode file deletion through the signed vulnerable driver; red-team / BYOVD process-termination and kernel file-op research via Beacon Object Files) extend the same lane into C2 in-memory tradecraft. (source: wiki/sources/descriptions/Muz1K1zuM__PoisonKiller_bof.md)
 
 Kernel process-structure manipulation killers such as [[killer]] (gmh5225; kernel driver → forceful termination of protected anti-cheat, EDR, and AV processes that resist standard APIs; valid BYOVD killer reportedly not HVCI-blocklisted and not in common LOLdriver catalogs at publication) extend the same process-terminate lane. (source: wiki/sources/descriptions/gmh5225__Killer.md)
 
@@ -266,5 +269,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[ms-vulnerable-driver-list]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[blackout]] · [[avasthv]] · [[evil-kaspersky]] · [[process-killer-byovd]] · [[killer]] · [[killer-exercice]] · [[kernel-cactus]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[cve-2015-2291]] · [[cve-2017-9769]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[badrentdrv2]] · [[throttlestop-poc]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[nvdrv]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[asusdrv]] · [[asio-exploit]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[mhyprot2drvcontrol]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[ksldump]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[ms-vulnerable-driver-list]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[terminator]] · [[blackout]] · [[avasthv]] · [[evil-kaspersky]] · [[process-killer-byovd]] · [[poison-killer-bof]] · [[killer]] · [[killer-exercice]] · [[kernel-cactus]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[cve-2015-2291]] · [[cve-2017-9769]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[badrentdrv2]] · [[throttlestop-poc]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[nvdrv]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[asusdrv]] · [[asio-exploit]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[mhyprot2drvcontrol]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[ksldump]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

@@ -2290,6 +2290,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [PPLKiller](entities/pplkiller.md) — BYOVD PPL strip via **`RTCore64.sys`** (patch `EPROCESS` protection level; downgrade antimalware for debug/terminate; gmh5225)
 - [Process Killer BYOVD](entities/process-killer-byovd.md) — BYOVD process terminator via **`viragt64.sys`** (kernel access → forceful kill of protected AC/EDR/AV; gmh5225)
+- [PoisonKiller BOF](entities/poison-killer-bof.md) — Cobalt Strike BOFs via **`PoisonX.sys`** BYOVD (process kill, driver load/unload, kernel file delete; MinGW + Python helper; Muz1K1zuM; `[PoisonX.sys]`)
 - [Proxmox](entities/proxmox.md) — PVE Helper Scripts (dialog installers; Cheat QEMU/KVM/PVE lab)
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [procmap](entities/procmap.md) — C++14 Linux `/proc/pid/maps` parser (`MemorySegment`; layout analysis for forensics / game security)
