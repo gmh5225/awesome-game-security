@@ -2708,6 +2708,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UE5MultiplayerProject](entities/ue5-multiplayer-project.md) — UE5 horror multiplayer template (replication / sessions / dedicated server / GAS; README anti-cheat tag)
 - [UE5-With-Dear-ImGui](entities/ue5-with-dear-imgui.md) — UE 5.0.1 C++ Dear ImGui sample (Game Engine Plugins:Unreal)
 - [uefi-bootkit](entities/uefi-bootkit.md) — compact UEFI boot-chain PoC (ajkhoury; mostly C; UEFI app + runtime driver; ExitBootServices persistence; pre-OS boot security research)
+- [UEFI-Graphic](entities/uefi-graphic.md) — C++ UEFI graphics framework (Oliver-1-1; VisualUefi; framebuffer classes for screens/colors/text/shapes; mouse input + file ops; pre-boot graphical tooling; firmware / low-level security research)
 - [UEFI-Bootloader](entities/uefi-bootloader.md) — simple UEFI runtime-driver mmapper (C/C++; cheat / EFI driver)
 - [UEVR](entities/uevr.md) — universal UE4/UE5 VR inject mod (stereo / OpenXR·OpenVR; reflection + pattern scan)
 - [U3D](entities/u3d.md) — Unity-centered C++ 2D/3D community tree (Game Engine / source)
