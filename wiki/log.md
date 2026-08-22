@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Oliver-1-1/EtwKeyboardDetection`: entity [[etw-keyboard-detection]] (Oliver-1-1; Windows C++ ETW PoC; USB telemetry paths compare physical vs software-generated keyboard input; manual setup + keyboard-specific tuning; anti-cheat / endpoint input-integrity research; README [ETW]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[mousedetection]], [[karlann]], [[directinput]], [[delbot-mouse]], and [[concepts/etw-threat-intelligence]].
+
 - **2026-08-22** — ingest `description:Oliver-1-1/MouseDetection`: entity [[mousedetection]] (Oliver-1-1; minimal Windows C++ PoC; monitors movement behavior to detect software-generated vs hardware mouse motion; simulated motion APIs for testing; input validation research starter; README [Mouse]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[delbot-mouse]], [[human-mouse-movement]], [[mouse-input-injection]], [[kernel-mouse]], and [[ai-aimbot-detection]].
 
 - **2026-08-22** — ingest `description:g4vrk/React`: entity [[react]] (g4vrk; Java Paper/Folia aim-focused AC plugin; GCD-error scoring, acceleration-delta tracking, mode-averaged rotation quantization; optional ML inference service; streak-based violation buffering with decay; async PacketEvents; staff alerts not auto-ban; PvP combat aim protection; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[guardac]], [[mlanticheat]], [[minecraft-anti-cheat]], [[minecraft-anticheatai]], and [[ai-aimbot-detection]].
