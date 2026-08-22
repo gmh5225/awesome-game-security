@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `readme:categories`: Cheat ~2736 (+2; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], [[overviews/game-engine]] (Game Develop [[zig-gamedev]] + Game Testing UptimeFaker); light `index.md` section notes (no per-category pages).
+
 - **2026-08-22** — ingest `description:Qervas/segcap`: entity [[segcap]] (D3D12 MinHook intercept + UE4/5 CustomDepth runtime introspection; per-pixel object-ID masks on retail titles without engine source; automated virtual-gamepad capture; masks/RGB/JSON export for RE and game-security research); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[unreal-image-capture]], [[shader-injector]], [[draw-call-hook]], and [[present-hook]].
 
 - **2026-08-22** — ingest `description:Qfrost911/KACE`: updated entity [[kace]] (Qfrost911 fork; kernel anti-cheat emulation framework; C++ PE mapping, import resolution, memory tracking, exception handling, privileged-instruction emulation; models kernel structures + monitors R/W for anti-debug/anti-emulation checks; learning/experimentation platform; waryas upstream retained); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kdemu]], [[kubera]], and [[winvisor]].
