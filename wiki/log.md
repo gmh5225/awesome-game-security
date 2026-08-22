@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NMan1/warzone-internal`: entity [[warzone-internal]] (NMan1; internal C++ COD MW/Warzone cheat DLL; rendering-flow hook; DX12 present-hook + ImGui menu; ESP / aimbot / recoil control; assembly syscall stubs + utility/game abstraction layers; RE and cheat feature prototyping base; cheat / game:cod warzone [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[warzone-mw-internal]], [[warzone-internal-cheat]], [[modern-warfare-warzone-cheat]], [[present-hook]], and [[world-to-screen]].
+
 - **2026-08-22** — ingest `description:NPC2000/AppPealing-new`: entity [[apppealing-new]] (NPC2000; Android LSPosed Xposed module; disables Inka AppSealing anti-cheat/anti-root packer; root/cheat-detection bypass + decrypted-DEX dump; Java Xposed integration + native C++ [[dobby]] hooks; Magisk workflow; mobile app/game security testing / anti-tamper RE); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[xposed-module-kit]], [[magisk]], [[dobby]], [[zygisk-dump-dex]], and [[jadx]].
 
 - **2026-08-22** — ingest `description:NSG650/Bad-BugCheck-Old`: entity [[bad-bugcheck-old]] (NSG650; early kernel BSOD visual PoC; Bootvid VidBitBlt VGA-style animated frames on forced crash screen; triggers bugcheck after playback; legacy BOOTVID crash-screen graphics research); cited on [[overviews/windows-kernel]]; cross-linked [[bad-bugcheck]], [[bugcheckhack]], [[bugcheck2linux]], [[nomore-bugcheck]], and [[bugcheck-suppressor]].
