@@ -1285,6 +1285,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/ChiChou/grapefruit [Runtime mobile instrumentation toolkit for iOS/Android, web UI]
 - https://github.com/firerpa/lamda [Android full-stack device control with built-in Frida, MITM, UI automation, and reverse-engineering APIs]
 - https://github.com/Kakaxh1/RootRaven [Self-hosted Android/iOS pentest dashboard with Frida hooking, SSL pinning bypass, APK decompilation, and Burp proxy setup]
+- https://github.com/GliTcHZzZ67/mast-orchestrator [Flask web dashboard to deploy frida-server on rooted Android devices and run whitelisted injection scripts (SSL pinning bypass, root detection bypass, crypto monitoring)]
 - https://github.com/index-login/MobileRE-Skill [AI-agent mobile reverse-engineering skill set with layered Frida hooks and a six-stage anti-detection pipeline]
 - https://github.com/ChiChou/vscode-frida [Unofficial Frida extension for VSCode]
 - https://github.com/ChiChou/bagbak [iOS Frida app decrypt / dump to IPA; extensions; jailbreak; bagbak@5 needs frida@17; deprecated]
@@ -2603,6 +2604,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/pgarba/ptrace_read_teb [use ptrace to read the TEB of a process on Linux]
 - https://github.com/redecorate/Holodori-Kernel-Bypass [Userspace emulation of Hololive Dreams usrdrv017964 kernel anti-cheat for Wine/Proton]
 - https://github.com/dazi2011/crossover-patcher [Experimental CrossOver patcher to improve compatibility with Windows games protected by anti-cheat]
+- https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
@@ -4306,6 +4308,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/enis1enis2/Windfall-AntiCheat [Open-source Minecraft Spigot/Paper/Folia packet-based anti-cheat with combat/movement/inventory checks]
 - https://github.com/Gitex68/Katapult-AntiCheat [NeoForge 1.21.1 client/server Minecraft mod enforcing SHA-256 checksums on client mods and resource packs with live whitelist management]
 - https://github.com/clementine44613/seiun-ac [Fabric server/client mod that hashes and whitelists client mods and resource packs, with gray-list warnings, Discord alerts, and mid-session pack-change detection for Minecraft 1.21.11]
+- https://github.com/no1qq/UAGC [Context-aware PaperMC 1.21 anti-cheat plugin with check framework, confidence/evidence model, exemptions, and staff bypass visibility]
 - https://github.com/Lazyzouo/ICUAC [Open-source bilingual Paper/Folia server-side rule enforcement for commands, items/NBT, effects, and end-crystal combat]
 - https://github.com/StelGR/ArrowAntiCheat [Open-source Minecraft Java/Bedrock packet-based anti-cheat with combat and movement checks]
 - https://github.com/XuanXuan-ZhengGui/Minecraft-Anti-Cheat [Open-source Minecraft Spigot/Paper anti-cheat with combat/movement detections and confidence scoring]
