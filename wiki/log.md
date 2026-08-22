@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:OpenArena/engine`: entity [[openarena-engine]] (OpenArena; ioquake3 fork; Quake III renderer/audio/networking/runtime; make-based multi-platform C/C++; classic FPS multiplayer engine internals; engine developers, modders, researchers; Game Engine / source [quake3]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[q3vm]], [[open-source-engines]], [[openrct2]], and [[xray-16]].
+
 - **2026-08-22** — ingest `description:OpenRCT2/OpenRCT2`: entity [[openrct2]] (OpenRCT2; open-source RollerCoaster Tycoon 2 reimplementation; cooperative multiplayer, improved UI/AI, expanded editing, higher engine limits; CMake C++; scripting/plugin hooks; broad platform support; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[open-source-engines]], [[openclaw]], [[xray-16]], and [[devilution]].
 
 - **2026-08-22** — ingest `description:OpenXRay/xray-16`: entity [[xray-16]] (OpenXRay; improved open-source S.T.A.L.K.E.R. X-Ray engine; 64-bit, performance optimizations, bug fixes, mod-creator features; Windows/Linux/macOS; C++; modding/RE community engine study; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[open-source-engines]], [[rehlds]], [[regs]], and [[source-engine]].
