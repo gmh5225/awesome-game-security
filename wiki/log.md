@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nirad-Maharaj/Disable-Call-Recording-BookRestore-`: entity [[disable-call-recording-bookrestore]] (Nirad-Maharaj; iOS bl_sbx file-exploit; suppress call-recording notification sounds via system audio asset replacement; README non-jailbreak vs description jailbroken context; cheat / iOS file explorer); cited on [[overviews/mobile-security]]; cross-linked [[ipapatch]], [[xkvm-ios-injector]], [[trollstore]], and [[shadow]].
+
 - **2026-08-22** — ingest `description:Nitr0-G/PeVisor`: entity [[pevisor]] (Nitr0-G; early-stage C/C++ Windows PE analysis/instrumentation toolkit; PeVisor component; Blackbone process control/hooking/mapping + Unicorn emulation workflows; sample protection/unprotection test targets; malware/game-security PE internals research; cheat / [PE]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pe-bear]], [[pe-sieve]], [[pereconstruct]], [[unicorn-pe]], [[modfinder]], and [[xmalhunter]].
 
 - **2026-08-22** — ingest `description:NoCheatPlus/NoCheatPlus`: entity [[nocheatplus]] (NoCheatPlus; Java Maven multi-module Bukkit/Spigot plugin; movement/combat/block/inventory/chat/packet-rate checks; cancel/log/setback actions; reflection-based internals + client-mod MOTD; broad version coverage; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[minecraft-anti-cheat]], [[avaanticheat]], [[dakotaac]], and [[ycbr-anticheat]].
