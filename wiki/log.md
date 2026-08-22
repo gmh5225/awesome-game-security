@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NPC2000/AppPealing-new`: entity [[apppealing-new]] (NPC2000; Android LSPosed Xposed module; disables Inka AppSealing anti-cheat/anti-root packer; root/cheat-detection bypass + decrypted-DEX dump; Java Xposed integration + native C++ [[dobby]] hooks; Magisk workflow; mobile app/game security testing / anti-tamper RE); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[xposed-module-kit]], [[magisk]], [[dobby]], [[zygisk-dump-dex]], and [[jadx]].
+
 - **2026-08-22** — ingest `description:NSG650/Bad-BugCheck-Old`: entity [[bad-bugcheck-old]] (NSG650; early kernel BSOD visual PoC; Bootvid VidBitBlt VGA-style animated frames on forced crash screen; triggers bugcheck after playback; legacy BOOTVID crash-screen graphics research); cited on [[overviews/windows-kernel]]; cross-linked [[bad-bugcheck]], [[bugcheckhack]], [[bugcheck2linux]], [[nomore-bugcheck]], and [[bugcheck-suppressor]].
 
 - **2026-08-22** — ingest `description:NSG650/Bad-Bugcheck`: entity [[bad-bugcheck]] (NSG650; updated kernel BSOD visual hack; Bad Apple frames via crash framebuffer; hooks KeBugCheckEx; display framebuffer mapping instead of legacy BOOTVID VGA; stb_image + direct memory copy; bugcheck hooking / crash-screen rendering research); cited on [[overviews/windows-kernel]]; cross-linked [[bugcheckhack]], [[bugcheck2linux]], [[nomore-bugcheck]], [[nomore-bugcheck-reloaded]], and [[bugcheck-suppressor]].
