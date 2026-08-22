@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MxIris-Reverse-Engineering/RuntimeViewer`: entity [[runtime-viewer]] (MxIris-Reverse-Engineering; Swift/ObjC Apple runtime inspection app; ObjC/Swift metadata from loaded binaries/frameworks; interface browse, syntax-highlighted views, export, framework loading, local/network access; WIP code injection; macOS/iOS dynamic RE; Objective-C Runtime Viewer for macOS and iOS); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[workflow-objc]], [[aimachdec]], [[ida-ios-helper]], [[fridascript]], [[xpc-tracer]], and [[ida-mcp-server]].
+
 - **2026-08-22** — ingest `description:MxIris-Reverse-Engineering/ida-mcp-server`: entity [[ida-mcp-server]] (MxIris-Reverse-Engineering; Python MCP server + IDA plugin; bidirectional disassembly-context queries and analysis workflows for MCP clients; MCP for IDA pro); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-mcp-server-plugin]], [[ida-pro-mcp]], [[headless-ida-mcp-server]], [[mcp-server-idapro]], and [[ida-mcp-rs]].
 
 - **2026-08-22** — ingest `description:N-T33/UE4-Silent-Aim`: entity [[ue4-silent-aim]] (N-T33; minimal UE4 silent-aim PoC; C++; viewpoint/camera API hooks; rotation + bone-target selection while preserving visible view; game security research / aim-manipulation vectors; cheat / [Aimbot]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ue4-freecam]], [[fortnite-camera-cache-pov]], [[fortnite-virtual-offsets]], [[world-to-screen]], and [[ai-aimbot-detection]].

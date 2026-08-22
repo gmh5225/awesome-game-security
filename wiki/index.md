@@ -2488,6 +2488,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-obfuscator](entities/rust-obfuscator.md) — Rust source obfuscator (proc macros; `cryptify` string encrypt / `labyrinth_macros` CFF / symbol rename; AC Obfuscation Engine)
 - [rust-rustinternal](entities/rust-rustinternal.md) — Facepunch Rust Unity internal cheat (C++; Mono/IL2CPP hooks + game-object memory; ESP/aimbot/no-recoil; EAC; gmh5225)
 - [rust-u4pak](entities/rust-u4pak.md) — Rust UE4 .pak unpack/pack/list/check/mount (limited versions; Game Assets)
+- [runtime-viewer](entities/runtime-viewer.md) — Objective-C Runtime Viewer for macOS and iOS (MxIris-Reverse-Engineering; Swift/ObjC; live ObjC/Swift metadata browse, export, framework loading, local/network runtime access; WIP injection; dynamic RE)
 - [Ryujin](entities/ryujin.md) — x86 PE bin2bin protector/obfuscator (Bin2Bin transformation research; AC Obfuscation Engine)
 - [Sark](entities/sark.md) — IDAPython Made Easy (IDA plugins / older IDA-6.x branch)
 - [s4killer](entities/s4killer.md) — BYOVD via Samsung S4 `probmon.sys` (IOCTL phys/virt kernel R/W; unsigned load / AC bypass research; gmh5225)
