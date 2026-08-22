@@ -208,6 +208,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-ebpf](entities/android-ebpf.md) — Android eBPF tracing examples (syscalls, network, process, perf; cheat / EBPF)
 - [android-anti-cheat](entities/android-anti-cheat.md) — Open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; Anti Cheat / Open Source Anti Cheat System)
 - [android-boot-image-editor](entities/android-boot-image-editor.md) — Gradle boot/recovery/vendor_boot unpack-repack (AVB, LZ4/XZ/GZIP, EROFS/sparse; boot v0–4; JDK 11+; cfig)
+- [android-bpf-sys](entities/android-bpf-sys.md) — Minimal Android eBPF syscall monitor (`raw_syscalls/sys_enter` tracepoint → BPF map; C++ userland via Android bpf libs; PShocker; cheat / EBPF)
 - [android-hardware-attestation-demo](entities/android-hardware-attestation-demo.md) — Quarkslab attestation relay PoC (Frida Keystore hook + clean-device oracle; genuine TEE/StrongBox chain; no crypto forgery)
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
 - [android-imgui-menu](entities/android-imgui-menu.md) — Rust ARM64 Android ImGui cdylib (EGL/Vulkan hooks; cheat / render-draw)

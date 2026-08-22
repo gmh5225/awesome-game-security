@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PShocker/Android_bpf_sys`: entity [[android-bpf-sys]] (PShocker; minimal Android eBPF syscall monitor; `raw_syscalls/sys_enter` tracepoint → BPF map; C++ userland readback via Android bpf libs; low-level security monitoring / syscall analysis; cheat / EBPF); cited on [[overviews/mobile-security]] and [[android-ebpf]]; cross-linked [[stackplz]], [[edbg]], [[btrace]], and [[frida]].
+
 - **2026-08-22** — ingest `description:PShocker/Zygisk-MagiskHide`: entity [[zygisk-magiskhide]] (PShocker; Zygisk Magisk module recreating MagiskHide-style concealment; native mount hide + sensitive system-property patching; multi-ABI module archives; mobile security research / anti-detection testing); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[magisk]], [[magiskhide]], [[riru-momo-hider]], and [[magiskdetector]].
 
 - **2026-08-22** — ingest `description:PSkinnerTech/3d-asset-factory`: entity [[3d-asset-factory]] (PSkinnerTech; CLI YAML→3D pipeline; GPT Image 2.0 concept → TRELLIS.2 GLB; QA gate, review HTML, web/Unity/Unreal export; mock & remote GPU runners Modal/Replicate/RunPod; GLB/USDZ/STL; AI category); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[modly]], [[sprite-sheet-creator]], [[image-blaster]], and [[gameai-paper-list]].
