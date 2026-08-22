@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PAGalaxyLab/ghidra_scripts`: entity [[pagalaxylab-ghidra-scripts]] (PAGalaxyLab; Python Ghidra scripts; P-Code parameter tracing, Objective-C msgSend analysis, error-print rename, OLLVM CFF deobfuscation; shared helpers + docs; firmware/binary static-analysis automation; cheat / Scripts); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[ghidra]], [[ghidra-scripts]], [[ghidrascripts]], [[ollvm-unflattener]], and [[workflow-objc]].
+
 - **2026-08-22** — ingest `description:PAMinerva/LearnDirectX`: entity [[learn-directx]] (PAMinerva; DX12 learning resource + step-by-step tutorials; window creation through command bundles, frame buffering, textures, and resource-state management; synchronization, descriptor handling, performance-oriented API; README [DX12]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[learning-directx12]], [[d3d12book]], [[intro-to-dx12-2nd-edition-revisited]], [[d3d12renderer]], [[cpp-3d-game-tutorial-series]], and [[hw3d]].
 
 - **2026-08-22** — ingest `description:PI-Defender/pi-defender`: entity [[pi-defender]] (PI-Defender; C++ WDK kernel security driver; filters dangerous handle rights—remote memory write and operation permissions—on protected processes to block injection chains; docs/tests for process hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[windows-process-injection]], [[injectors]], [[oac]], and [[peregrine-anticheat]].
