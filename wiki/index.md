@@ -143,6 +143,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ADB Debug Detect Checker](entities/adb-debug-detect-checker.md) — Android Java ADB/debug-state detection app (reference for ADB debugging probes; Anti Debugging; fiord)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
 - [angrop](entities/angrop.md) — automatic angr ROP gadget finder + chain builder (symbolic execution, constraint solving; CLI + API; architecture-agnostic; Cheat / ROP Generation)
+- [angry-ghidra](entities/angry-ghidra.md) — Ghidra extension embedding angr symbolic execution (Java + Python/claripy; start/find/avoid addresses; patched-byte apply; CTF/malware/game RE; Nalen98; Use angr in Ghidra)
 - [Anbox](entities/anbox.md) — container-based full Android on Linux (LXC + host daemon; OpenGL ES; C++/CMake; archived reference; Android Emulator)
 - [Akebi Cheat 3.3](entities/akebi-cheat-3.3.md) — Akebi-framework Genshin Impact cheat (3.3 branch; cheat / game:genshin impact; gmh5225)
 - [Akebi Packet Sniffer](entities/akebi-packet-sniffer.md) — Akebi-framework packet sniffer (C++/C; driver development; DirectX/OpenGL; cheat / Packet Sniffer&Filter; gmh5225)

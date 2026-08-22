@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nalen98/AngryGhidra`: entity [[angry-ghidra]] (Nalen98; Ghidra extension; Java UI + Python angr/claripy; start/find/avoid addresses; symbolic exploration; apply patched bytes to analysis state; CTF/malware/game RE; Use angr in Ghidra); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[angrop]], [[oxidizer]], [[seninja]], [[smallworld]], and [[decbench]].
+
 - **2026-08-22** — ingest `description:Natfii/UnrealClaude`: entity [[unreal-claude]] (Natfii; UE5.7 editor plugin; Claude AI copilot via MCP bridge; context-aware assistance for actors, animations, assets, blueprints, characters, materials, enhanced input, replication, Slate UI; Claude Code CLI + built-in UE5.7 documentation context; Game Develop / MCP); cited on [[overviews/game-engine]]; cross-linked [[unreal-mcp]], [[automation-examples]], [[ue-buivalidator]], and [[unreal-engine-guide]].
 
 - **2026-08-22** — ingest `description:NattKh/PalWorld-Tools`: entity [[palworld-tools]] (NattKh; Python/PyQt desktop mod patcher; automates [[re-ue4ss]] starter mod setup for Palworld; download/apply/revert patch files; Lua mods for stamina, map visibility, progression; Mod Patcher; cheat / game:palworld [UE5]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[re-ue4ss]], [[palmods]], [[palworld-modding-kit]], and [[palworld-helper]].
