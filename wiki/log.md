@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nou4r/ModFinder`: entity [[modfinder]] (Nou4r; C++ Windows utility; enumerate mapped regions + DOS-header/PE heuristics for manually mapped modules incl. stripped optional headers; x86 runtime memory forensics; README Mapped Dll); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[faultline]], [[hidden-module-detector]], [[pe-sieve]], [[modexmap]], and [[present-injector]].
+
 - **2026-08-22** — ingest `description:Nou4r/Polymorphic-Engine`: entity [[polymorphic-engine]] (Nou4r; C++ runtime polymorphic variable obfuscation; stack/heap transforms for primitives and strings; optional SIMD; LLVM/Clang-primary with experimental MSVC; software protection / anti-analysis research; AC Encrypt Variable); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscxx]], [[encrypted-value]], [[xv]], [[kernelcloak]], [[present-injector]], and [[pkernelinterface-eft]].
 
 - **2026-08-22** — ingest `description:Nou4r/PresentInjector`: entity [[present-injector]] (Nou4r; C/C++ kernel-assisted DLL injection via graphics Present pointer swap; PFN/pointer-chain handling + post-injection cleanup; PTE.User; protected-process payload map; cheat / injection:windows); cited on [[concepts/present-hook]] and [[overviews/game-hacking]]; cross-linked [[executor]], [[fumo-loader]], [[page-table-injector]], and [[pkernelinterface-eft]].

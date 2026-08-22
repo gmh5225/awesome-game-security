@@ -1871,6 +1871,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MultiplayerBlasterGame](entities/multiplayer-blaster-game.md) — UE5 multiplayer FPS Blaster (network replication / aim offsets / weapons; Game Develop / Unreal source)
 - [Murder Engine](entities/murder.md) — C# MonoGame pixel-art 2D engine (ECS, Aseprite, dialogue editor; Game Engine / [pixel])
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
+- [ModFinder](entities/modfinder.md) — Windows C++ manual-map module finder (Nou4r; mapped-region DOS-header heuristics; x86 runtime AC/malware forensics; Mapped Dll)
 - [modded-voyager](entities/modded-voyager.md) — Voyager-style UEFI hypervisor loader (NurdAlert; Intel/AMD VM-exit handlers + GPA/GVA primitives; hooks bootmgfw/winload + Hyper-V paths pre-OS; boot-time virtualization / AC bypass research)
 - [modmap](entities/modmap.md) — kernel-assisted extend-manual-map DLL injector (MiAllocateVad + LDR SizeOfImage extension; blends with host module list; btbd; Extend Manual Map)
 - [modly](entities/modly.md) — local image→3D mesh desktop app (open-source GPU AI; TypeScript/Python; Windows/Linux; AI category)
