@@ -2744,6 +2744,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unispect-dma-plugin](entities/unispect-dma-plugin.md) — Unispect Mono dump + DMA (Razchek fork fix; Memory Plugin dispose; cheat / game engine explorer:Unity [DMA])
 - [unity-vrchat-template](entities/unity-vrchat-template.md) — Unity VRChat starter template (graphics / audio / physics; Game Develop / source)
 - [Unity-game-hacking](entities/unity-game-hacking.md) — small Unity asset/code extraction and modding guide (asset pipelines; cheat / guide)
+- [Unity-ImGUI-Android](entities/unity-imgui-android.md) — Android Unity native ImGui template (C++ Dobby hooks on eglSwapBuffers + Unity input injection; touch/key overlay; IDA/SigMaker libunity nativeInjectEvent tutorial; mod-menu prototyping / mobile Unity RE; Octowolve; Imgui For Unity)
 - [UnityResolve.hpp](entities/unityresolve-hpp.md) — C++ Unity cheat framework (rendering / physics / modding; game engine explorer:Unity)
 - [UnityVulnerableEntryPoint](entities/unity-vulnerable-entrypoint.md) — Unity Mono vulnerable entry points (Assembly-CSharp / MonoBehaviour inject demos)
 - [USecurity](entities/usecurity.md) — Unity runtime data + PlayerPrefs encryption (Game Engine Protection:Unity)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Octowolve/Unity-ImGUI-Android`: entity [[unity-imgui-android]] (Octowolve; Android Unity native ImGui template; C++ Dobby hooks on eglSwapBuffers + Unity input injection; touch/key overlay; IDA+SigMaker tutorial for nativeInjectEvent in libunity; mod-menu prototyping / mobile game RE; README Imgui For Unity); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[dobby]], [[imgui-unity-android]], [[polarimgui]], [[cheat-unity-games]], and [[android-mod-menu-imgui]].
+
 - **2026-08-22** — ingest `description:OguzKaira/FPS-Movement`: entity [[fps-movement]] (OguzKaira; Unity C# beginner FPS controller; Rigidbody player scripts; mouse look, walk/jump/dash/crouch; README setup/bindings and dash-sliding notes; learner movement prototype; Game Engine / Unity FPS); cited on [[overviews/game-engine]]; cross-linked [[fpssample]], [[sqlite-unity3d]], and [[unity-cs-reference]].
 
 - **2026-08-22** — ingest `description:OguzKaira/SQLite-Unity3D`: entity [[sqlite-unity3d]] (OguzKaira; Unity C# learner sample; `DatabaseManager` save/load workflow; player coordinates persisted via StreamingAssets SQLite; keyboard-triggered restore; lightweight game-state storage foundation; Game Engine / Unity SQLite); cited on [[overviews/game-engine]]; cross-linked [[fpssample]], [[unity-cs-reference]], [[il2cpp]], and [[simple-quest]].
