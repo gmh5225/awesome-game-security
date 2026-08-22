@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/sercanarga__PCILeechGen.md
   - wiki/sources/descriptions/acageduser__DMA-Attack-Firmware-Customization.md
   - wiki/sources/descriptions/Silverr12__DMA-CFW-Guide.md
-updated: 2026-08-21
+  - wiki/sources/descriptions/NoviceLevel__Pcileech-QuantumStealth-Max.md
+updated: 2026-08-22
 confidence: high
 ---
 
@@ -40,4 +41,4 @@ Artix-7 (T35–T200) dominates consumer boards; BRAM/LUT budgets constrain how m
 
 ## Related
 
-[[pcileech]] · [[pcileechgen]] · [[dma-attack-firmware-customization]] · [[dma-cfw-guide]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]
+[[pcileech]] · [[pcileechgen]] · [[dma-attack-firmware-customization]] · [[dma-cfw-guide]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[pcileech-dma-fullstealth]] · [[pcileech-quantumstealth-max]] · [[pcileech-fpga-dma-vmd]] · [[fpga-dma-multi-tool]] · [[dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/reverse-engineering]]

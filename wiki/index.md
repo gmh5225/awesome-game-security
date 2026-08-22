@@ -2146,6 +2146,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCIeM](entities/pciem.md) — Linux kernel synthetic userspace PCIe device emulation (bare-metal virtual PCI endpoints; no FPGA/VM/QEMU; DMA / PCIe security research; cakehonolulu)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
+- [Pcileech QuantumStealth Max](entities/pcileech-quantumstealth-max.md) — NoviceLevel PCILeech FPGA firmware collection (Vivado; M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T; config-space/BRAM/FIFO IP cores; batch build scripts)
 - [Pcileech-DMA-NVMe-VMD](entities/pcileech-dma-nvme-vmd.md) — PCILeech DMA firmware: motherboard VMD/NVMe real camouflage; Windows reinstall may be needed for driver init (gmh5225)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6
 - [PCILeech-FPGA-DMA-VMD](entities/pcileech-fpga-dma-vmd.md) — Artix-7 75T Intel RST VMD `9A0B` emulation (MSI-X, NVMe, BAR shadow; SystemVerilog)
