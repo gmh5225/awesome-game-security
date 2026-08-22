@@ -1313,6 +1313,7 @@ sources:
   - wiki/sources/descriptions/Pycatchown__ClassMaker.md
   - wiki/sources/descriptions/PrinceFroggy__MSC.md
   - wiki/sources/descriptions/PrinceFroggy__MSB.md
+  - wiki/sources/descriptions/Noelo-Lab__kuna.md
   - wiki/sources/descriptions/NoneShell__IDAComments.md
   - wiki/sources/descriptions/Noosh404__Maplestory-V179-Cheat-Engine.md
   - wiki/sources/descriptions/pbiernat__ripr.md
@@ -1791,6 +1792,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Vivisect↔Ghidra symbolic decompilation bridge via [[viv-ghidra-decompiler]] (Python/Java; symbolik effects → Ghidra p-code; headless JSON-RPC backend; Qt dock widget; cheat / Ghidra Plugins) sits beside [[blc]] and [[ghiradec]] when Vivisect symbolic analysis disagrees with Ghidra Sleigh lifting. (source: wiki/sources/descriptions/atlas0fd00m__viv-ghidra-decompiler.md)
 - Browser-based Ghidra decompilation via [[pyre]] (WASM-compiled SLEIGH; multi-arch pseudocode entirely in-browser; no server-side processing; cheat / Decompiler) sits beside [[ghiradec]] for portable Ghidra-quality decomp without a local Ghidra install. (source: wiki/sources/descriptions/ant4g0nist__pyre.md)
 - Native standalone Ghidra decompiler via [[enigma]] (C++; SLEIGH/Pcode extracted from Ghidra analytical core; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agent RE; cheat / Decompiler) sits beside [[ghiradec]] and [[pyre]] when a full Ghidra install is impractical. (source: wiki/sources/descriptions/adam-040__Enigma.md)
+- Agent-first Rust Ghidra decompiler via [[kuna]] (Noelo-Lab; full Rust port of Ghidra decompiler + SLEIGH; CLI, WASM in-browser, Ghidra plugin replacing stock decompiler core; runtime-configurable phase pipeline tuned for LLM-driven autonomous refinement; cheat / Decompiler) sits beside [[enigma]], [[pyre]], and [[ghiradec]] for agent/automation RE workflows. (source: wiki/sources/descriptions/Noelo-Lab__kuna.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
 - ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)

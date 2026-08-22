@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Noelo-Lab/kuna`: entity [[kuna]] (Noelo-Lab; Rust agent-first Ghidra decompiler port; CLI, WASM in-browser, Ghidra plugin core swap; SLEIGH + phase pipeline tunable for LLM refinement; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[enigma]], [[pyre]], [[ghiradec]], and [[kong]].
+
 - **2026-08-22** — ingest `description:NoneShell/IDAComments`: entity [[idacomments]] (NoneShell; Python IDA Pro plugin; hooks comment actions; dedicated review view; keyboard/menu access; IDA 7.x/8.x; note management for game clients and anti-cheat modules; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-export-functions]], [[ida-function-string-associate]], [[idarling]], and [[list-of-ida-plugins]].
 
 - **2026-08-22** — ingest `description:NoobDigital/react-native-shieldscan`: entity [[react-native-shieldscan]] (NoobDigital; React Native native module; TS + Kotlin/Swift; root/jailbreak, Frida, debugger, emulator, Xposed/Substrate hooks, developer mode; weighted device risk score; app-switcher blur, screenshot/recording prevention + detection; mobile RASP / screen protection; Android+iOS); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[free-rasp-reactnative]], [[rs-native-kit-security]], [[droidshield]], and [[frida]].
