@@ -18,6 +18,7 @@ sources:
   - wiki/sources/descriptions/armasm__EasyAntiPatchGuard.md
   - wiki/sources/descriptions/Rythorndoran__PageTableHook.md
   - wiki/sources/descriptions/NeoMaster831__kurasagi.md
+  - wiki/sources/descriptions/NSG650__NoMoreBugCheckReloaded.md
 updated: 2026-08-22
 confidence: high
 ---
@@ -58,6 +59,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[kurasagi]] (NeoMaster831; C/C++ kernel PoC; Win11 24H2–25H2 runtime PatchGuard bypass; manual-map load via [[kdmapper]]; documents crash-prone edge cases and CRITICAL_STRUCTURE_CORRUPTION behavior for advanced kernel security researchers) targets recent-build KPP bypass study in controlled lab environments. (source: wiki/sources/descriptions/NeoMaster831__kurasagi.md)
 
+[[nomore-bugcheck-reloaded]] (NSG650) moves kernel crash-handling patches into a **UEFI boot-stage loader**—altering bugcheck behavior before normal driver-load paths—illustrating below-OS timing that sidesteps runtime PatchGuard pressure on loaded driver images. (source: wiki/sources/descriptions/NSG650__NoMoreBugCheckReloaded.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck-reloaded]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
