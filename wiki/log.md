@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:QianMo/UE4-Tank-Game`: entity [[ue4-tank-game]] (QianMo; UE4 tank prototype; C++ gameplay + Blueprint assets; tank pawn, player/AI controllers, crosshair targeting; multiple maps; UE4 Game / controller-pattern learning); cited on [[overviews/game-engine]]; cross-linked [[unity-design-pattern]], [[ue4-tutorials]], [[action-roguelike]], and [[simple-fps-template]].
+
 - **2026-08-21** — ingest `description:QianMo/Unity-Design-Pattern`: entity [[unity-design-pattern]] (QianMo; Unity C# design-pattern library; all 23 GoF patterns plus selected game programming patterns; runnable scenes, diagrams, sample scripts; Unity Design / maintainable architecture learning); cited on [[overviews/game-engine]]; cross-linked [[unity-script-collection]], [[awesome-unity]], and [[unity-cheat-sheet]].
 
 - **2026-08-21** — ingest `description:Qihoo360/evpp`: entity [[evpp]] (Qihoo360; C++11 libevent network library; event-driven TCP/UDP/HTTP; nonblocking servers/clients; thread-safe event loops; timers; async DNS; production benchmarks; Memcached/NSQ clients; backend/infrastructure scalable low-latency services; Game Network / source); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[cppserver]], [[skynet]], [[noahgameframe]], [[kcp-cpp]], [[uwebsockets]], and [[game-networking-sockets]].
