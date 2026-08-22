@@ -164,6 +164,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Apex-ApexCheeseTest](entities/apex-apex-cheese-test.md) — Apex Legends KM↔UM communication: kernel–usermode channel (C/C++; gmh5225; cheat / game:apex legends)
 - [Apex-CHEAT-FIXED](entities/apex-cheat-fixed.md) — Apex Legends fixed cheat: driver development / modding / hooking (C/C++; gmh5225; cheat / game:apex legends)
 - [apex-cheating](entities/apex-cheating.md) — Apex Legends bundled cheat resources: C# HWID spoofer, seasonal offset dumps, EAC bypass scripts, SVG asset extraction (cheatingwitdacode; cheat / game:apex legends)
+- [apex-external](entities/apex-external.md) — Apex Legends external framework: OpenGL/GLFW + ImGui overlay, driver-style memory access; ESP/glow/aim/recoil/bhop (C++; NekoRem; cheat / game:apex legends [External])
 - [apex-external-cheat](entities/apex-external-cheat.md) — Apex Legends external (Echo_Apex): kernel-driver memory reads + DX11 ImGui overlay; offsets/hitboxes/string encryption (C++17; bootmgfw; cheat / game:apex legends [External])
 - [apex-legends-driver-cheat](entities/apex-legends-driver-cheat.md) — Apex Legends kernel-assisted external: BYOVD-mapped driver R/W + C++ usermode + transparent ESP/aim overlay (TheCruZ; cheat / game:apex legends [External])
 - [apex-legends-esp](entities/apex-legends-esp.md) — Apex Legends external ESP learner template: kernel driver + kdmapper loader + GDI overlay (RavenOfTime; C++ Visual Studio; memory-read pipeline / entity visualization; cheat / game:apex legends [External])
