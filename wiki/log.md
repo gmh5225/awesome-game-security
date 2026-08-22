@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:OguzKaira/FPS-Movement`: entity [[fps-movement]] (OguzKaira; Unity C# beginner FPS controller; Rigidbody player scripts; mouse look, walk/jump/dash/crouch; README setup/bindings and dash-sliding notes; learner movement prototype; Game Engine / Unity FPS); cited on [[overviews/game-engine]]; cross-linked [[fpssample]], [[sqlite-unity3d]], and [[unity-cs-reference]].
+
 - **2026-08-22** — ingest `description:OguzKaira/SQLite-Unity3D`: entity [[sqlite-unity3d]] (OguzKaira; Unity C# learner sample; `DatabaseManager` save/load workflow; player coordinates persisted via StreamingAssets SQLite; keyboard-triggered restore; lightweight game-state storage foundation; Game Engine / Unity SQLite); cited on [[overviews/game-engine]]; cross-linked [[fpssample]], [[unity-cs-reference]], [[il2cpp]], and [[simple-quest]].
 
 - **2026-08-22** — ingest `description:Oliver-1-1/EtwKeyboardDetection`: entity [[etw-keyboard-detection]] (Oliver-1-1; Windows C++ ETW PoC; USB telemetry paths compare physical vs software-generated keyboard input; manual setup + keyboard-specific tuning; anti-cheat / endpoint input-integrity research; README [ETW]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[mousedetection]], [[karlann]], [[directinput]], [[delbot-mouse]], and [[concepts/etw-threat-intelligence]].
