@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:OpenXRay/xray-16`: entity [[xray-16]] (OpenXRay; improved open-source S.T.A.L.K.E.R. X-Ray engine; 64-bit, performance optimizations, bug fixes, mod-creator features; Windows/Linux/macOS; C++; modding/RE community engine study; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[open-source-engines]], [[rehlds]], [[regs]], and [[source-engine]].
+
 - **2026-08-22** — ingest `description:Oxygen1a1/InfinityHook_latest`: entity [[infinityhook-latest]] (Oxygen1a1; C/C++ VS kernel driver; InfinityHook-style ETW syscall interception for newer Windows via HalPrivateDispatchTable callbacks; PMC counter + trace configuration RE notes; AC bypass / kernel security research; ETW Hook WIN11); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]], [[infinityhook-promax]], and [[etwhook-infinityhookclass]].
 
 - **2026-08-22** — ingest `description:P4nda0s/IDA-NO-MCP`: entity [[ida-no-mcp]] (P4nda0s; Python IDA plugin + Rust idalib CLI `inp`; exports Hex-Rays decompilation/disasm fallback, caller/callee metadata, strings, imports/exports, optional memory hexdumps, call graphs, and AGENTS.md for AI IDEs; per-function or consolidated layouts for large IDBs; AI-assisted binary analysis without MCP; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[research-rigor]]; cross-linked [[ida-cli]], [[ida-pro-mcp]], [[headless-ida-mcp-server]], [[ida-nexus-docker]], [[tocode]], and [[re-harness]].

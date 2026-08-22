@@ -2980,6 +2980,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x64dbgbinja](entities/x64dbgbinja.md) — Binary Ninja plugin (Python; x64dbg org; BN ↔ x64dbg lane)
 - [x86RetSpoof](entities/x86-ret-spoof.md) — x86 (32-bit) return-address spoofing header-only library (`JMP DWORD PTR [EBX]` gadget; stdcall/cdecl/fastcall/thiscall; danielkrupinski; Cheat Spoof Stack)
 - [xash-rt](entities/xash-rt.md) — Xash3D FWGS realtime path tracing (C/C++; OpenGL; Renderer)
+- [xray-16](entities/xray-16.md) — open-source S.T.A.L.K.E.R. X-Ray engine (OpenXRay; 64-bit, performance fixes, mod-creator features; Windows/Linux/macOS; C++; Game Engine / RE)
 
 - [x670e-tomahawk-anticheat-update](entities/x670e-tomahawk-anticheat-update.md) — MSI X670E Tomahawk BIOS v1KB DXE anti-cheat (option-ROM strip / NX)
 - [xemu](entities/xemu.md) — original Xbox LLE emulator (QEMU fork; NV2A/OpenGL; ISO/XISO)
