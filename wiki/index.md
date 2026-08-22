@@ -2370,6 +2370,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rainbow](entities/rainbow.md) — UEFI EDK-II pre-kernel bootkit; OVMF/QEMU debug + VS UEFI build; pre-boot attack vectors / firmware persistence (SamuelTulach; cheat / [HWID])
 - [rainbow-efi](entities/rainbow-efi.md) — UEFI boot-stage HWID spoof: EDK II + `rainbow.efi`; ExitBootServices → OslLoaderBlock → IopLoadDriver hook (gmh5225; [HWID])
 - [rainbow-6-siege-cheat](entities/rainbow-6-siege-cheat.md) — R6 cheat: rendering + hooking (C/C++; cheat / game:r6; gmh5225)
+- [rainbow-six-cheat](entities/rainbow-six-cheat.md) — R6 external: kernel driver + external menu + shared-memory comm; ESP/chams + silent-aim/recoil/spread + unlock/movement (NMan1; kernel-assisted cheat framework RE; cheat / game:r6 [External])
 - [rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat](entities/rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat.md) — R6 leaked external ESP/aimbot; WndProc-only input hook (cheat / game:r6; gmh5225)
 - [r6table-internal](entities/r6table-internal.md) — R6 internal: UE SDK ESP/aimbot + in-engine overlay (C++; cheat / game:r6)
 - [r69-driver](entities/r69-driver.md) — HalPrivateDispatchTable + NtQueryAuxiliaryCounterFrequency KM comm (CR3 phys R/W; gmh5225)
