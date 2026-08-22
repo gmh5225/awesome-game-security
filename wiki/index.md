@@ -1841,6 +1841,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
 - [MQTT.js](entities/mqtt-js.md) — Node.js/browser MQTT client (v3.1/3.1.1/v5; TCP/TLS/WS/WSS; Game Network / mqtt nodejs)
 - [Paho MQTT C++](entities/paho-mqtt-cpp.md) — Eclipse C++ MQTT client (v3.1/3.1.1/v5; QoS 0–2; TLS; RAII; Game Network / mqtt cpp)
+- [MemDetection](entities/memdetection.md) — Android anti-tampering demo; in-memory vs on-disk CRC of `libc.so`/`libart.so` (Java + Rust/JNI; Frida/Xposed/cloning detection; Mrack)
 - [memdumper](entities/memdumper.md) — Android `.so` memory dump + ELF rebuild (no ptrace; `/proc/<pid>/mem`; 32/64-bit)
 - [memdbg](entities/memdbg.md) — Android CE-style memory debugger (Vulkan+ImGui overlay, root engine, Lua 5.4, pointer scan, breakpoints, speedhack, trainer tables; aarch64 root/Termux ELF; dbcyyds)
 - [memfilter-fn-driver](entities/memfilter-fn-driver.md) — minifilter stealth + MDL cross-process memory (Flt/Cm/Ob hide + handle VM-access strip; Filter Manager port comm; zensenzay; cheat / hide + RPM)
