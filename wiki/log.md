@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PierreCiholas/GetPixel-vs-BitBlt_GetDIBits`: entity [[getpixel-vs-bitblt-getdibits]] (PierreCiholas; C++ Win32 GDI benchmark/capture utility; switchable GetPixel vs BitBlt+GetDIBits; frame buffer + bitmap export; BitBlt bulk read dramatically faster than per-pixel GetPixel; external frame capture for game tooling and security research; README [GetPixel]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[not-an-overlay]], [[screenshot]], and [[screencapture]].
+
 - **2026-08-22** — ingest `description:PierreCiholas/NotAnOverlay`: entity [[not-an-overlay]] (PierreCiholas; Windows PoC; C++ Win32/GDI; regular window screen-region clone via BitBlt/StretchBlt instead of transparent always-on-top overlay; external ESP rendering / AC overlay-visibility detection tradeoffs; README [Duplicating with GDI]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[external-esp-hack-assaultcube]], [[cs2external]], [[d2d-overlay]], and [[window-hijack-overlay]].
 
 - **2026-08-22** — ingest `description:Pintuzoft/OSAntiCheat`: entity [[osanticheat]] (Pintuzoft; experimental server-side CS2 CounterStrikeSharp heuristic AC; C#/.NET; server-visible positions/view angles/shots/timing; statistical spinbot/aimbot/triggerbot/wallhack detectors + McNemar null test; fusion suspicion engine with decay/corroboration → Watch/Review tiers; log-only calibration; Anti Cheat / Server); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[cs2ac]], [[cs2-calladmin]], [[aimbot-detection-prototype]], and [[cs2-hybrid-anticheat-proposal]].

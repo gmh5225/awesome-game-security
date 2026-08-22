@@ -1205,6 +1205,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Generic Game Detour API Hook](entities/generic-game-detour-api-hook.md) — Modular Microsoft Detours AC-bypass framework (~130 API hooks / 16 modules; dinput8.dll proxy; x86/x64)
 - [gina_public](entities/gina-public.md) — IRP Null hijack kernel driver (C/C++; cheat / driver communication)
 - [get-unity](entities/get-unity.md) — JS CLI: Unity Editor download URL (latest/pinned; Game Tools)
+- [GetPixel vs BitBlt GetDIBits](entities/getpixel-vs-bitblt-getdibits.md) — Win32 GDI capture benchmark: GetPixel vs BitBlt+GetDIBits; switchable modes; BitBlt bulk read much faster; external frame capture for game tooling / security research (PierreCiholas; [GetPixel])
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [GreyM](entities/greym.md) — PE-focused C/C++ debugging/packing (Anti Cheat → Binary Packer `[PE]`)
 - [glfm](entities/glfm.md) — GLFW-inspired single-header C API for OpenGL ES/Metal mobile windowing (iOS/tvOS/Android/Emscripten; touch/keyboard/sensors; Write OpenGL ES code in C/C++)
