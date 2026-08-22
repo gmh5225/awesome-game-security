@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Mowokuma/vm_str.hpp`: entity [[vm-str-hpp]] (Mowokuma; header-only C++20 compile-time string obfuscation; compile-time obfuscation bytecode schema + stack-based VM runtime reconstruct; narrow/wide string macros; keeps plaintext out of static program data; software hardening / RE resistance; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscate]], [[crystr]], [[static-string-obfuscation]], [[skcrypter]], and [[mystic-xorstr]].
+
 - **2026-08-22** — ingest `description:Mr-Un1k0d3r/AMSI-ETW-Patch`: entity [[amsi-etw-patch]] (Mr-Un1k0d3r; security research PoC; minimal byte patches bypassing AMSI + ETW; C/PowerShell/C# examples for AMSI branch logic + telemetry short-circuit; control-flow diagrams; red-team simulation + defensive in-memory tampering detection validation; README [ETW Testing]); cited on [[concepts/etw-threat-intelligence]] and [[overviews/windows-kernel]]; cross-linked [[disable-threat-tracing]] and [[kernel-callback-removal]].
 
 - **2026-08-22** — ingest `description:MrAle98/ATDCM64a-LPE`: entity [[atdcm64a-lpe]] (MrAle98; C++ Visual Studio LPE PoC; AMD **`atdcm64a.sys`** arbitrary pointer dereference; PowerShell/batch deployment scripts; lab-oriented driver-interaction exploit template; kernel exploitation / driver security hardening / anti-cheat research; README `[atdcm64a.sys]`); cited on [[overviews/windows-kernel]] and [[concepts/byovd]]; cross-linked [[hitcon-2023-demo-cve-2023-20562]], [[amd-ryzen-master-driver-v17-exploit]], [[cve-2024-49138-poc]], and [[windows-kernel-exploits]].
