@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nou4r/pKernelInterface-EFT`: entity [[pkernelinterface-eft]] (Nou4r; C++ external Escape from Tarkov reversal framework; kernel-assisted memory interaction + entity processing; ESP/aim modules; ImGui overlay stack; cheat / game:eft [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-external]], [[eft-streamed-cheat]], [[simple-eft-base]], [[meatyeftrelease]], and [[escape-from-tuxkov]].
+
 - **2026-08-22** — ingest `description:NoviceLevel/Pcileech-QuantumStealth-Max`: entity [[pcileech-quantumstealth-max]] (NoviceLevel; PCILeech-compatible FPGA firmware collection; Vivado IP cores for PCIe config space, BRAM, clock wizards, FIFOs; batch scripts for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T; memory forensics / DMA attack firmware research); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[pcileech-dma-fullstealth]], [[pcileechgen]], and [[dma-cfw-guide]].
 
 - **2026-08-22** — ingest `description:NullArray/WinKernel-Resources`: entity [[winkernel-resources]] (NullArray; curated Windows kernel internals & exploitation learning index; papers, conference talks, vulnerable-driver references, practical links; sample driver projects + Visual Studio solutions; offensive/defensive low-level security; security researchers, anti-cheat engineers; cheat / Guide); cited on [[overviews/windows-kernel]] and [[concepts/byovd]]; cross-linked [[windows-kernel-exploits]], [[windows-kernel-debugging-guide]], [[document]], [[km-um-communication]], and [[loldrivers]].
