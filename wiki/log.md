@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NaC-L/Mergen`: entity [[mergen]] (NaC-L; C/C++ binary lifting framework; assembly→LLVM IR; symbolic execution, control-flow recovery, deobfuscation, devirtualization; LLVM workflows + disassembly support; protected game-binary RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida2llvm]], [[neverd]], [[titan]], [[retdec]], and [[control-flow-flattening]].
+
 - **2026-08-22** — ingest `description:NaiJii/Apex-Mizu-Base`: entity [[apex-mizu-base]] (NaiJii; internal C++ Apex Legends cheat base; Visual Studio; hooking scaffolding, game/entity abstractions, math utilities, ImGui + DirectX menu; feature-development starter for FPS reverse-engineering practice; cheat / game:apex legends [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-full-cheat]], [[apex-legends-sdk]], [[csgo-main-internal]], [[nullbase]], [[easy-anti-cheat]], [[present-hook]], and [[world-to-screen]].
 
 - **2026-08-22** — ingest `description:Nalen98/AngryGhidra`: entity [[angry-ghidra]] (Nalen98; Ghidra extension; Java UI + Python angr/claripy; start/find/avoid addresses; symbolic exploration; apply patched bytes to analysis state; CTF/malware/game RE; Use angr in Ghidra); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[angrop]], [[oxidizer]], [[seninja]], [[smallworld]], and [[decbench]].

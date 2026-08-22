@@ -1950,6 +1950,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
 - [neverc](entities/neverc.md) — AI-friendly C23 security compiler (custom LLVM backend; integrated linker; compile-time string encryption/hash + mimalloc; DynCode PIC runtime codegen; 130+ phase plugin API; PE/ELF/Mach-O; Windows/Linux/Android; NeverSight)
 - [neverd](entities/neverd.md) — AI-friendly native binary analysis engine (Capstone→LLVM IR lift; structured C decomp; in-place rewrite; strict mode; `libneverd` C SDK; PE/ELF/Mach-O; JSON CLI; NeverSight)
+- [mergen](entities/mergen.md) — binary lifting framework (assembly→LLVM IR; symbolic exec, CFG recovery, deobfuscation/devirtualization; C/C++; protected game-binary RE; NaC-L)
 - [Netview](entities/netview.md) — AD domain host enumeration (`-d` current/specified domain; AC/IS forensics)
 - [NFD x64dbg](entities/nfdx64dbg.md) — x64dbg plugin: Nauz File Detector static scan tab (compiler/packer/protector ID; C++/Qt; Cheat x64dbg Plugins)
 - [Nauz File Detector](entities/nauz-file-detector.md) — standalone NFD: signature-based packer/compiler/protector/linker ID for PE/ELF/Mach-O+; C++/Qt GUI+CLI; binary triage

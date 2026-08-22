@@ -1321,6 +1321,7 @@ sources:
   - wiki/sources/descriptions/PrinceFroggy__MSC.md
   - wiki/sources/descriptions/PrinceFroggy__MSB.md
   - wiki/sources/descriptions/Noelo-Lab__kuna.md
+  - wiki/sources/descriptions/NaC-L__Mergen.md
   - wiki/sources/descriptions/NeverSight__NeverD.md
   - wiki/sources/descriptions/Neurosisccc__Apex-ItemGlow.md
   - wiki/sources/descriptions/NoneShell__IDAComments.md
@@ -1804,6 +1805,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Native standalone Ghidra decompiler via [[enigma]] (C++; SLEIGH/Pcode extracted from Ghidra analytical core; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agent RE; cheat / Decompiler) sits beside [[ghiradec]] and [[pyre]] when a full Ghidra install is impractical. (source: wiki/sources/descriptions/adam-040__Enigma.md)
 - Agent-first Rust Ghidra decompiler via [[kuna]] (Noelo-Lab; full Rust port of Ghidra decompiler + SLEIGH; CLI, WASM in-browser, Ghidra plugin replacing stock decompiler core; runtime-configurable phase pipeline tuned for LLM-driven autonomous refinement; cheat / Decompiler) sits beside [[enigma]], [[pyre]], and [[ghiradec]] for agent/automation RE workflows. (source: wiki/sources/descriptions/Noelo-Lab__kuna.md)
 - AI-friendly native binary analysis engine via [[neverd]] (NeverSight; C++20 `libneverd`; Capstone decode + four-stage IR on custom LLVM fork; PE/ELF/Mach-O x86-64/i386/AArch64/ARM32; 1:1 instruction lift to LLVM IR or structured C; strict mode; in-place rewrite; JSON CLI for automation; cheat / Decompiler) sits beside [[enigma]], [[kuna]], and [[retdec]] for embeddable lift/decompile pipelines in game and anti-cheat RE. (source: wiki/sources/descriptions/NeverSight__NeverD.md)
+- Binary lifting framework via [[mergen]] (NaC-L; C/C++; assembly→LLVM IR; symbolic execution, control-flow recovery, deobfuscation, and devirtualization workflows; disassembly support; protected game-binary RE) sits in the same LLVM IR analysis lane beside [[ida2llvm]] and [[neverd]]. (source: wiki/sources/descriptions/NaC-L__Mergen.md)
 - Whole-program Ghidra+GPT summarization via [[gpt-wpre]] (Python; `ghidra_bridge` decomp/call-graph extract → bottom-up callee-context summaries; ChatGPT / `[ChatGPT]` lane) sits in the Cheat Ghidra Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/moyix__gpt-wpre.md)
 - In-Ghidra OpenAI GPT assistant via [[ghidra-openai]] (Python/Java; sends decompiled functions to OpenAI API; purpose explain, rename suggestions, vuln ID in Ghidra UI; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/fmagin__ghidra-openai.md)
 - ChatGPT selected-function explainer via [[gpthidra]] (Ghidra plugin; prints explanation of the selected function to the Ghidra console; cheat / Ghidra Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/evyatar9__GptHidra.md)
