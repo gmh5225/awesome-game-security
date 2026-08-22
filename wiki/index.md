@@ -1358,6 +1358,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida_bitfields](entities/ida-bitfields.md) — IDA plugin: bitfield structure visualization (register/structure bit flags; driver IOCTL / flag-heavy RE; Windows Kernel Enhance)
 - [ida-bridge](entities/ida-bridge.md) — Python WebSocket agent bridge for IDA Pro 9+ (IDAPython/SQL; UI + headless idalib; supervisor lifecycle; bundled agent skill; macOS; Game Develop / MCP + IDA Plugins)
 - [ida-cli](entities/ida-cli.md) — headless IDA Pro MCP server for AI-assisted binary analysis (idalib; Rust/C++; cheat / IDA Plugins)
+- [IDAComments](entities/idacomments.md) — IDA Pro plugin: capture, organize, and review user comments (Python; IDA 7.x/8.x; dedicated view; keyboard/menu access; NoneShell; cheat / IDA Plugins)
 - [ida-dark-plus](entities/ida-dark-plus.md) — IDA Pro Dark+ theme (modern dark palette; disassembly/hex/structures/all windows; cheat / IDA themes)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)

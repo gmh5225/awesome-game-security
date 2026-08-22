@@ -1313,6 +1313,7 @@ sources:
   - wiki/sources/descriptions/Pycatchown__ClassMaker.md
   - wiki/sources/descriptions/PrinceFroggy__MSC.md
   - wiki/sources/descriptions/PrinceFroggy__MSB.md
+  - wiki/sources/descriptions/NoneShell__IDAComments.md
   - wiki/sources/descriptions/Noosh404__Maplestory-V179-Cheat-Engine.md
   - wiki/sources/descriptions/pbiernat__ripr.md
   - wiki/sources/descriptions/patrickcjk__TOG.md
@@ -1867,6 +1868,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Batch function/symbol name management via [[ida-names]] (Python; batch rename, pattern match, prefix/suffix, import/export; renames pseudocode window titles with current function name; cheat / IDA Plugins) sits in the same symbol-naming lane. (source: wiki/sources/descriptions/gmh5225__ida_names.md)
 - IDA function-list Markdown export via [[ida-export-functions]] (Python; dump DB function index to a specified path for notes/reporting; cheat / IDA Plugins) sits in the same documentation/reporting lane beside [[ida-slides]] and [[ida-screenshot]]. (source: wiki/sources/descriptions/gmh5225__ida_export_functions.md)
 - Function–string association and auto-comments from literals via [[ida-function-string-associate]] (IDA 9.X; scan function bodies for string refs; navigable per-function summary; cheat / IDA Plugins) sits in the same string-triage lane beside [[ida-names]] and [[idawilli]]. (source: wiki/sources/descriptions/gmh5225__ida-function-string-associate.md)
+- User comment capture and organization via [[idacomments]] (NoneShell; Python IDA 7.x/8.x plugin; hooks comment actions; dedicated review view; keyboard/menu access; note management while reversing game clients and anti-cheat modules; cheat / IDA Plugins) sits in the same annotation workflow lane beside [[ida-export-functions]] and [[idarling]]. (source: wiki/sources/descriptions/NoneShell__IDAComments.md)
 - `.data`-section pointer lookup via [[ida-find-.data-ptr]] (Python IDAPython; locate/xref global `.data` pointers during static RE; cheat / IDA Plugins) sits in the same data/xref triage lane beside [[ida-plugins]] and [[ida-missinglink]]. (source: wiki/sources/descriptions/gmh5225__ida-find-.data-ptr.md)
 - Hex-Rays pseudocode Ctrl+F search via [[idafind]] (IDA Pro plugin; find-in-text for Pseudocode windows; cheat / IDA Plugins) sits in the Hex-Rays/pseudocode UX lane beside [[ida-search]] and [[ida-names]]. (source: wiki/sources/descriptions/cristeigabriela__IDAFind.md)
 - Automatic symbol renaming via [[autorename]] (Python IDA Pro plugin; auto rename symbol; asset pipelines and plugin development; cheat / IDA Plugins) sits in the same symbol-recovery lane beside [[renamaida]], [[ida-names]], and [[pyclassinformer]]. (source: wiki/sources/descriptions/crifan__AutoRename.md)
