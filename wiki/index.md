@@ -1948,6 +1948,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [no-access-protection-x86](entities/no-access-protection-x86.md) — x86 PAGE_NOACCESS page guards + VEH on-access decryption (anti-tamper / anti-dump)
 - [NoBastian v2](entities/nobastian-v2.md) — C++ named-pipe client/server memory toolkit; handle inspection + elevated-handle acquisition; RPM/WPM/protect/alloc/module-base (ZoondEngine; Elevating Handle By LSASS)
+- [NoCheatPlus](entities/nocheatplus.md) — open-source Bukkit/Spigot Minecraft AC plugin (Java Maven multi-module; movement/combat/block/inventory/chat/packet checks; cancel/log/setback; reflection internals + client-mod MOTD; broad version coverage; Anti Cheat / game:minecraft)
 - [NoCheatZ-3](entities/nocheatz-3.md) — Source Engine serverside anti-cheat plugin (CS:S, CS:GO, CS:P, TF2; C/C++; plugin + SDK generation)
 - [NoEye](entities/noeye.md) — BattlEye bypass toolkit (C++ service/runtime + C# setup; service install, process interaction, runtime control; historical BE bypass reference; Schnocker)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
