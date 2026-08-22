@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PAGalaxyLab/YAHFA`: entity [[yahfa]] (PAGalaxyLab; Android ART method hooking; Java + native backup-and-hook APIs; static/virtual/JNI/framework method examples; reusable library + demo/plugin modules; runtime instrumentation / security research / dynamic behavior modification); cited on [[overviews/mobile-security]]; cross-linked [[canyie-pine]], [[frida]], [[frida-smali-trace]], [[virtual-app]], [[xposed-module-kit]], [[and64-inline-hook]], and [[adbi]].
+
 - **2026-08-22** — ingest `description:PAGalaxyLab/ghidra_scripts`: entity [[pagalaxylab-ghidra-scripts]] (PAGalaxyLab; Python Ghidra scripts; P-Code parameter tracing, Objective-C msgSend analysis, error-print rename, OLLVM CFF deobfuscation; shared helpers + docs; firmware/binary static-analysis automation; cheat / Scripts); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[ghidra]], [[ghidra-scripts]], [[ghidrascripts]], [[ollvm-unflattener]], and [[workflow-objc]].
 
 - **2026-08-22** — ingest `description:PAMinerva/LearnDirectX`: entity [[learn-directx]] (PAMinerva; DX12 learning resource + step-by-step tutorials; window creation through command bundles, frame buffering, textures, and resource-state management; synchronization, descriptor handling, performance-oriented API; README [DX12]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[learning-directx12]], [[d3d12book]], [[intro-to-dx12-2nd-edition-revisited]], [[d3d12renderer]], [[cpp-3d-game-tutorial-series]], and [[hw3d]].
