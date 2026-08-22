@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Mrack/DeObfBR`: entity [[deobfbr]] (Mrack; Python; Unicorn+Capstone+Keystone ARM64 branch-obfuscation deobf in ELF `.so`; function start/end → reconstructed output binary; malware/game-protection Android native RE; libtprt.so); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[deobf]], [[dfm-android-unicorn]], [[memdetection]], and [[control-flow-flattening]].
+
 - **2026-08-22** — ingest `description:Mrack/MemDetection`: entity [[memdetection]] (Mrack; Java Android app + Rust/JNI native component; in-memory vs on-disk CRC of `libc.so`/`libart.so`; Frida/Xposed/cloning runtime-integrity demo; mobile security hardening for Android apps/games); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[frida]], [[detect-frida]], and [[xposed-module-kit]].
 
 - **2026-08-22** — ingest `description:MuntashirAkon/AppManager`: entity [[app-manager]] (MuntashirAkon; Java/Android + native; component inspection, permission/app-op control, backup/restore, logcat, tracker scanning, APK install/edit/sign, root/ADB ops; deep app auditing and RE-oriented device admin; Cheat Android File Explorer); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[jadx]], [[file-explorer]], [[xfiles]], and [[raival-file-explorer]].

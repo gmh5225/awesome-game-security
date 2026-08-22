@@ -816,6 +816,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Duck-Detector-Refactoring](entities/duck-detector-refactoring.md) — Android local device-integrity inspector (Jetpack Compose + Kotlin + native C++/assembly; root/hook/mount/attestation/virtualization cards; eltavine; cheat / Android root)
 - [Duckov Market Mod](entities/duckov-marketmod.md) — Duckov flea-market C# mod (Harmony patches; Steam-auth API + WebSocket; mod loader with auto-update; RE-derived internals; a0yark; modding / online marketplace research)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
+- [deobfbr](entities/deobfbr.md) — ARM64 branch-obfuscation deobf in ELF `.so` (Mrack; Python; Unicorn+Capstone+Keystone; function range → reconstructed binary; libtprt.so; Android native RE)
 - [Deobfuscator](entities/deobfuscator.md) — Java bytecode deobfuscator (gmh5225 fork + narumii; ProGuard/Allatori/ZKM passes; cheat / RE tools)
 - [DetectTpmSpoofing](entities/detect-tpm-spoofing.md) — KMDF: TPM 2.0 EK spoof detect (IOCTL vs TPM.sys cache)
 - [DmaProtect](entities/dmaprotect.md) — Windows kernel driver configuring VT-d/AMD-Vi IOMMU remapping to block unauthorized PCIe DMA (cutecatsandvirtualmachines; DMA mitigation research)
