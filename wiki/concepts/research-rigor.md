@@ -9,7 +9,8 @@ sources:
   - wiki/sources/skills/reverse-engineering.md
   - wiki/sources/descriptions/xihedun-2026__Ponytail-Risk-.md
   - wiki/sources/descriptions/thatskriptkid__re-harness.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md
+updated: 2026-08-22
 confidence: high
 ---
 
@@ -43,7 +44,7 @@ Mobile root visibility, hook detection, emulator heuristics, and attestation out
 
 DBI coverage, trap-and-emulate latency, deobfuscation completeness, and anti-debug bypass effectiveness vary by binary build, Windows version, integrity checks, and timing defenses—record hash, tool version, and measured evidence before generalizing stealth or recovery claims. (source: wiki/sources/skills/reverse-engineering.md)
 
-LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs. (source: wiki/sources/descriptions/thatskriptkid__re-harness.md)
+LLM-assisted static RE should ground conclusions in disassembler/decompiler evidence (pseudocode, xrefs, FLIRT IDs) from tool APIs rather than model speculation—read-only agent harnesses such as [[re-harness]] enforce IDA/IDASQL-backed workflows for auditable outputs (source: wiki/sources/descriptions/thatskriptkid__re-harness.md); file-export bridges such as [[ida-no-mcp]] materialize decompilation, xref metadata, and call graphs as plain files for AI IDEs without live MCP, keeping analysis anchored to IDA output rather than model invention. (source: wiki/sources/descriptions/P4nda0s__IDA-NO-MCP.md)
 
 ## Related
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:P4nda0s/IDA-NO-MCP`: entity [[ida-no-mcp]] (P4nda0s; Python IDA plugin + Rust idalib CLI `inp`; exports Hex-Rays decompilation/disasm fallback, caller/callee metadata, strings, imports/exports, optional memory hexdumps, call graphs, and AGENTS.md for AI IDEs; per-function or consolidated layouts for large IDBs; AI-assisted binary analysis without MCP; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[research-rigor]]; cross-linked [[ida-cli]], [[ida-pro-mcp]], [[headless-ida-mcp-server]], [[ida-nexus-docker]], [[tocode]], and [[re-harness]].
+
 - **2026-08-22** — ingest `description:PAGalaxyLab/YAHFA`: entity [[yahfa]] (PAGalaxyLab; Android ART method hooking; Java + native backup-and-hook APIs; static/virtual/JNI/framework method examples; reusable library + demo/plugin modules; runtime instrumentation / security research / dynamic behavior modification); cited on [[overviews/mobile-security]]; cross-linked [[canyie-pine]], [[frida]], [[frida-smali-trace]], [[virtual-app]], [[xposed-module-kit]], [[and64-inline-hook]], and [[adbi]].
 
 - **2026-08-22** — ingest `description:PAGalaxyLab/ghidra_scripts`: entity [[pagalaxylab-ghidra-scripts]] (PAGalaxyLab; Python Ghidra scripts; P-Code parameter tracing, Objective-C msgSend analysis, error-print rename, OLLVM CFF deobfuscation; shared helpers + docs; firmware/binary static-analysis automation; cheat / Scripts); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[ghidra]], [[ghidra-scripts]], [[ghidrascripts]], [[ollvm-unflattener]], and [[workflow-objc]].
