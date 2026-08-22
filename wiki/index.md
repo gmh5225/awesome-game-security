@@ -2356,6 +2356,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [reshade](entities/reshade.md) — cross-API post-processing injector (frame color/depth + ReShade FX; Renderer / graphics-programmer tooling; crosire)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
 - [retoolkit](entities/retoolkit.md) — Windows Inno Setup bundle (80+ RE tools: debug/decompile/PE/hex/network/YARA)
+- [retoolsync](entities/retoolsync.md) — multi-tool RE cursor/goto sync (mrexodia; Tornado WebSocket hub; IDA/BN/x64dbg/WinDbg/VS Code plugins; Ctrl+click hex jump)
 - [RetDec](entities/retdec.md) — retargetable machine-code decompiler (binary lifting; limited maintenance; Cheat Decompiler)
 - [rev-tools-setup](entities/rev-tools-setup.md) — One-click Windows RE toolchain (Scoop): CE/Ghidra/x64dbg + read-only CE MCP + AI agent client config
 - [Retract](entities/retract.md) — Go static binary workbench (PE/ELF/Mach-O; disasm, CFG, pseudocode, YARA; browser UI)

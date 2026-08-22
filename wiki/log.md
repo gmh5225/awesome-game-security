@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:mrexodia/REToolSync`: entity [[retoolsync]] (mrexodia; Python Tornado WebSocket server; IDA/Binary Ninja/x64dbg/WinDbg/VS Code plugins; live cursor/selection/goto sync across static disassembly, debugging, and scripting; Ctrl+click hex in terminal jumps all connected tools; collaborative RE for game-security analysts); cited on [[overviews/reverse-engineering]]; cross-linked [[binsync]], [[idarling]], [[labsync]], [[x64dbg]], and [[ida-pro-mcp]].
+
 - **2026-08-22** — ingest `readme:categories`: Cheat ~2737 (+1) / Anti Cheat ~688 (+1; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-22** — ingest `description:Oliver-1-1/RwxScanner`: entity [[rwxscanner]] (Oliver-1-1; Windows WDK kernel driver; PML4/PDPT/PD/PT walk via physical memory reads; logs suspicious writable+executable mappings per process; image name + admin-token metadata; low-level AC/malware detection around injected or self-modifying code; README [RWX Memory scanner]); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[rwxfinder]], [[ghost]], [[ptview]], and [[page-table-injector]].
