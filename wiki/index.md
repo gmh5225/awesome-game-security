@@ -1727,6 +1727,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [manipulating_token](entities/manipulating-token.md) — Windows access-token theft/impersonation LPE samples (SeDebugPrivilege; SYSTEM integrity; gmh5225)
 - [ManyTypes](entities/manytypes.md) — x64dbg typeparsing plugin with Windows types (Cheat x64dbg Plugins)
 - [Map file in system space](entities/map-file-in-system-space.md) — kernel `MmCreateSection` / `MiMapViewInSystemSpace` file→system-space map (stealthy unsigned driver load; MiMapViewInSystemSpace; gmh5225)
+- [MSC](entities/msc.md) — legacy MapleStory GMS bot framework (C++/C#; map/portal data resources; discontinued partial publish; historical bot-design RE; cheat / game:maplestory [GMS Bot]; PrinceFroggy)
 - [MapleServer Android](entities/mapleserver-android.md) — MapleStory GMS-083 private server on Android (server-side game logic / character management / world simulation; Private Server-GMS-083 / game:maplestory; gmh5225)
 - [MapleStory Build Framework](entities/maplestory-build-framework.md) — MapleStory private-server client build framework (C/C++; individualized distribution + rudimentary anti-cheat; Anti Cheat / game:maplestory)
 - [MapleStory Client (HeavenMS)](entities/maplestory-client.md) — MapleStory custom/modified client (rendering / network protocol / UI; private-server connectivity; HeavenMS Client / game:maplestory; gmh5225)
