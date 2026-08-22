@@ -2095,6 +2095,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ParadiseBO2](entities/paradise-bo2.md) — PS3 Paradise SPRX mod-menu source for Black Ops II (window/UI code; Game Develop / source)
 - [Pareidolia Triggerbot](entities/pareidolia-triggerbot.md) — hypervisor-based external Overwatch Widowmaker triggerbot (VivienneVMM + MouClassInputInjection; bypasses Overwatch AC; cheat / triggerbot & aimbot / game:overwatch; blackhades00)
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
+- [PeregrineAntiCheat](entities/peregrine-anticheat.md) — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook, ETW-TI, YARA, stack/HWBP scans, named-pipe backend, Tauri GUI, cheat test suite; PatchRequest)
 - [papaw](entities/papaw.md) — Linux ELF packer (LZMA/zstd/miniz; statically-linked; self-replacement on disk; optional anti-debug; papawify/unpapawify; Anti Cheat → Binary Packer `[ELF]` LZMA)
 - [pawtrace](entities/pawtrace.md) — Linux x86-64 ptrace syscall tracer (attach/spawn; decodes args, socket addresses, W^X memory, /proc/maps snapshots, JSONL; remote TCP; C + assembly; cocomelonc)
 - [patch-finder](entities/patch-finder.md) — IDA plugin: detect in-memory patches/hooks via executable-region vs on-disk PE byte compare (custom PE parser; highlight diffs in disasm; cheat / IDA Plugins)

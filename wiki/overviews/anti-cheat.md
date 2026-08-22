@@ -311,6 +311,7 @@ sources:
   - wiki/sources/descriptions/rbmm__SearchEx.md
   - wiki/sources/descriptions/rbmm__LockFile-Poc.md
   - wiki/sources/descriptions/thetuh__anticheat-poc.md
+  - wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md
   - wiki/sources/descriptions/niemand-sec__AntiCheat-Testing-Framework.md
   - wiki/sources/descriptions/noahware__darken-anticheat.md
   - wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md
@@ -806,6 +807,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
 - [[meme-rw]] — C++/CMake protected-process memory access PoC; vulnerable-driver mapping framework with driver-load helpers, process/module utilities, and memory R/W control; end-to-end target-process open + memory ops for anti-cheat bypass experimentation and defensive protected-memory research (SamuelTulach; cheat / kdmapper) (source: wiki/sources/descriptions/SamuelTulach__meme-rw.md)
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
+- [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
 - [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)
 - [[deadlock-anti-cheat]] — UrnIt user-mode Deadlock session AC (process list, game-window PNG screenshots, focused-window key input, CPU/GPU HWID, cheat-process signatures with optional forum scrape, macro/bot key-timing variance; Discord webhook on exit/F12; tournament/session logging vs kernel enforcement; g8tsz) (source: wiki/sources/descriptions/g8tsz__deadlock-anti-cheat.md)
