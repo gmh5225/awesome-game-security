@@ -1,23 +1,23 @@
 ---
-title: IL2CPPDumper
+title: Il2CppDumper
 kind: entity
-topics: [game-engine, mobile-security, game-hacking, reverse-engineering]
+topics: [game-engine, reverse-engineering, game-hacking, mobile-security]
 sources:
-  - wiki/sources/descriptions/kp7742__IL2CPPDumper.md
-updated: 2026-08-01
-confidence: medium
+  - wiki/sources/descriptions/Perfare__Il2CppDumper.md
+updated: 2026-08-22
+confidence: high
 ---
 
-# IL2CPPDumper
+# Il2CppDumper
 
-C/C++ [[il2cpp]] static dump tool for **Android**: extracts type/method metadata from Unity mobile titles by pairing `libil2cpp.so` with `global-metadata.dat` (or equivalent) to produce analyst-friendly output (`dump.cs`, headers, `script.json`) for IDA/Ghidra import. README lane `[Il2Cpp Dump for Android Platform]`; also tagged for driver development, networking, and modding research. (source: wiki/sources/descriptions/kp7742__IL2CPPDumper.md)
+Canonical C# [[il2cpp]] reverse-engineering utility for Unity IL2CPP binaries and metadata. Parses IL2CPP executables plus `global-metadata.dat` across ELF, Mach-O, PE, NSO, and WASM on a broad range of Unity versions. Reconstructs dummy DLL metadata and emits analyst outputs — `dump.cs`, structure headers, and helper scripts for IDA, Ghidra, and Binary Ninja — for static analysis and protection research. README lane `[Il2Cpp Dump]`. (source: wiki/sources/descriptions/Perfare__Il2CppDumper.md)
 
-From the same author as [[ue4dumper]] and [[memdumper]]; complements APK diff tooling such as [[il2cpp-spy]] and live Frida dumps via [[frida-il2cpp-bridge]] on the mobile Unity explorer lane.
+Upstream for many forks and adaptations including [[il2cppdumpdroidgui]], [[il2cpp-pdb]], [[il2cppdumper-yuanshen]], and [[zygisk-il2cppdumper]] (same Perfare author). Complements cross-platform [[il2cpp-inspector]] and live harvesters such as [[frida-il2cpp-bridge]]; Android-native static fork [[il2cppdumper-kp7742]] targets mobile `.so` workflows.
 
 ## Links
 
-- Repo: https://github.com/kp7742/IL2CPPDumper
+- Repo: https://github.com/Perfare/Il2CppDumper
 
 ## Related
 
-[[il2cpp]] · [[ue4dumper]] · [[memdumper]] · [[il2cpp-spy]] · [[frida-il2cpp-bridge]] · [[android-il2cpp-modspeed]] · [[overviews/game-engine]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[il2cpp]] · [[il2cpp-inspector]] · [[il2cpp-pdb]] · [[il2cppdumpdroidgui]] · [[zygisk-il2cppdumper]] · [[il2cppdumper-kp7742]] · [[frida-il2cpp-bridge]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/mobile-security]]

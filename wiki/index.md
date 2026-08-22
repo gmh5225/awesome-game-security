@@ -1435,7 +1435,8 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2CppRuntimeDumper](entities/il2cpp-runtime-dumper.md) — IL2CPP runtime dump via reflection (reconstruct DLLs; cheat / game engine explorer:Unity)
 - [Il2CppVersions](entities/il2cpp-versions.md) — multi-version Unity IL2CPP headers/metadata (structure/API drift; game engine explorer:Unity)
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
-- [IL2CPPDumper](entities/il2cppdumper.md) — Android IL2CPP static dump (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
+- [Il2CppDumper](entities/il2cppdumper.md) — canonical Unity IL2CPP static dump (Perfare; C#; ELF/Mach-O/PE/NSO/WASM; dummy DLLs + IDA/Ghidra/BN scripts; [Il2Cpp Dump])
+- [IL2CPPDumper (kp7742)](entities/il2cppdumper-kp7742.md) — Android IL2CPP static dump fork (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
 - [Il2CppDumper-YuanShen](entities/il2cppdumper-yuanshen.md) — Genshin Impact IL2CPP static dump (khang06; cwd output; cheat / game engine explorer:Unity)
 - [Il2cppDumpDroidGUI](entities/il2cppdumpdroidgui.md) — Android on-device Il2CppDumper GUI (APK releases; Android 6–14; armeabi-v7a/arm64-v8a; Poko-Apps; [Il2Cpp Dump GUI])
 - [Il2cppEncrtypt](entities/il2cpp-encrtypt.md) — Unity IL2CPP encryption (C++; asset pipelines + plugin dev; Game Engine Protection:Unity; badApple001)
