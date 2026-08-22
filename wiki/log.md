@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:ProwlEngine/Prowl`: entity [[prowl]] (ProwlEngine; open-source C#/.NET 3D engine; Unity-style GameObject/MonoBehaviour; Prowl.Editor + Prowl.Runtime; PBR + bloom/TAA/SMAA/SSR/GTAO/volumetric fog; hot-reload C# scripting; prefabs + desktop builds; MIT; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[stride]], [[mxengine]], [[lumos]], and [[flatredball]].
+
 - **2026-08-22** — ingest `description:Psmths/windows-forensic-artifacts`: entity [[windows-forensic-artifacts]] (Psmths; structured Markdown guide to Windows forensic artifacts; execution/account/file/network/persistence/user-activity domains; artifact locations, parsing options, timeline correlation; DFIR practitioner reference; Guide to the various Windows forensic artifacts); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[dfirtriage]], [[pwf]], [[anti-forensics]], [[shimcacheparser]], and [[alibi]].
 
 - **2026-08-22** — ingest `description:Pusty/BinaryNinjaPlugins`: entity [[binaryninjaplugins]] (Pusty; Python BN architecture plugins; Java class files, Renesas H8/300, Xtensa ELF; disassembly/decode/partial lifting; Java NOP/branch patch workflows; firmware/bytecode RE extension); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binaryninja-pcode]], [[ptxninja]], [[official-plugins]], and [[community-plugins]].
