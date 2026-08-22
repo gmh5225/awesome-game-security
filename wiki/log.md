@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Noosh404/Maplestory-V179-Cheat-Engine`: entity [[maplestory-v179-cheat-engine]] (Noosh404; MapleStory v179 CE `.CT`/CEA collection; full-map attack, skill injection, no-delay, pet loot teleport, knockback tweaks via pattern-scan byte patches; legacy MapleStory RE practice; cheat / game:maplestory [V179 CT]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mydev-cheat-engine-tables]], [[msb]], [[msc]], and [[maplestory-cms95-client-address]].
+
 - **2026-08-22** — ingest `description:NotOfficer/cs2-sdk`: entity [[cs2-sdk]] (NotOfficer; auto-generated C++ header SDK for CS2 Source 2 binaries via [[source2gen]]; client/server/rendering/networking/schema class and enum declarations; patch-version metadata; cheat / game:cs2 [SDK]); cited on [[overviews/game-hacking]]; cross-linked [[source2gen]], [[cs2-sdk-source2gen]], [[source2sdk]], and [[cs2-offsets]].
 
 - **2026-08-22** — ingest `description:NotRequiem/antidbg`: entity [[antidbg]] (NotRequiem; C/C++ Windows userland anti-debug library + CLI; fully syscalled API/timing/process-environment/HWBP/exception checks + direct-syscall evasion; stealth-focused anti-RE protections; Anti Debugging); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[antidbg-baka]], [[anti-debugging]], [[makin]], [[dynamizer]], and [[anti-crack-system]].
