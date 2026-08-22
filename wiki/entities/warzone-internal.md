@@ -12,7 +12,7 @@ confidence: medium
 
 **warzone-internal** (NMan1/warzone-internal) is an **internal cheat DLL** for **Call of Duty: Modern Warfare** and **Warzone**. It hooks the game's rendering flow and implements ESP, aimbot, and recoil control behind an **ImGui** in-game menu with **DirectX 12 present-hook** rendering. Written mainly in **C++** with assembly syscall stubs plus custom utility and game abstraction layers, it is framed as a base for reverse engineering and cheat feature prototyping in competitive shooter environments. (source: wiki/sources/descriptions/NMan1__warzone-internal.md)
 
-Sits in the COD MW/Warzone in-process lane beside [[warzone-mw-internal]], [[warzone-internal-cheat]], and [[modern-warfare-warzone-cheat]] as a DX12 present-hook internal with explicit ESP/aimbot/recoil modules.
+Sits in the COD MW/Warzone in-process lane beside [[warzone-mw-internal]], [[warzone-internal-cheat]], and [[modern-warfare-warzone-cheat]] as a DX12 present-hook internal with explicit ESP/aimbot/recoil modules. NMan1's companion external sample [[external-warzone-cheat]] covers the same title with a manually mapped kernel driver and overlay-hijack ESP path instead of in-process Present hooks.
 
 ## Feature modules
 
@@ -32,4 +32,4 @@ See [[present-hook]] for DXGI/D3D12 Present interception patterns and [[world-to
 
 ## Related
 
-[[warzone-mw-internal]] · [[warzone-internal-cheat]] · [[modern-warfare-warzone-cheat]] · [[mwclap]] · [[present-hook]] · [[world-to-screen]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
+[[external-warzone-cheat]] · [[warzone-mw-internal]] · [[warzone-internal-cheat]] · [[modern-warfare-warzone-cheat]] · [[mwclap]] · [[present-hook]] · [[world-to-screen]] · [[overviews/game-hacking]] · [[overviews/graphics-api]]
