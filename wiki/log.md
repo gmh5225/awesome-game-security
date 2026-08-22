@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nou4r/PresentInjector`: entity [[present-injector]] (Nou4r; C/C++ kernel-assisted DLL injection via graphics Present pointer swap; PFN/pointer-chain handling + post-injection cleanup; PTE.User; protected-process payload map; cheat / injection:windows); cited on [[concepts/present-hook]] and [[overviews/game-hacking]]; cross-linked [[executor]], [[fumo-loader]], [[page-table-injector]], and [[pkernelinterface-eft]].
+
 - **2026-08-22** — ingest `description:Nou4r/pKernelInterface-EFT`: entity [[pkernelinterface-eft]] (Nou4r; C++ external Escape from Tarkov reversal framework; kernel-assisted memory interaction + entity processing; ESP/aim modules; ImGui overlay stack; cheat / game:eft [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-external]], [[eft-streamed-cheat]], [[simple-eft-base]], [[meatyeftrelease]], and [[escape-from-tuxkov]].
 
 - **2026-08-22** — ingest `description:NoviceLevel/Pcileech-QuantumStealth-Max`: entity [[pcileech-quantumstealth-max]] (NoviceLevel; PCILeech-compatible FPGA firmware collection; Vivado IP cores for PCIe config space, BRAM, clock wizards, FIFOs; batch scripts for M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T; memory forensics / DMA attack firmware research); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[pcileech-dma-fullstealth]], [[pcileechgen]], and [[dma-cfw-guide]].

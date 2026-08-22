@@ -40,7 +40,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
-- [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; platform constraints ([[swapchain-bottleneck]]); links [[obs-game-capture]], [[draw-call-hook]]
+- [Present Hook](concepts/present-hook.md) — IDXGISwapChain::Present / wglSwapBuffers / vkQueuePresentKHR overlay path; platform constraints ([[swapchain-bottleneck]]); links [[obs-game-capture]], [[draw-call-hook]], [[present-injector]]
 - [Research Rigor](concepts/research-rigor.md) — evidence discipline; pair with domain overviews; engine/mobile offset verification
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2)
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
@@ -2232,6 +2232,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Positron](entities/positron.md) — JS runtime inject via manual-map DLL (QuickJS/Electron; named-pipe IPC; REPL/SDK)
 - [Ponytail Risk](entities/ponytail-risk.md) — OSS behavioral risk control + evidence review for private game servers (Rust agent, C ABI SDK, shadow mode)
 - [PresentHookDetection](entities/present-hook-detection.md) — BE-style IDXGISwapChain::Present hook check (dummy D3D11 + dxgi prologue)
+- [PresentInjector](entities/present-injector.md) — Nou4r kernel-assisted DLL injection via graphics Present pointer swap; PFN/pointer-chain handling; PTE.User; protected-process payload map (cheat / injection:windows)
 - [prevent-vac](entities/prevent-vac.md) — VAC monitoring inhibition via `steamserver.dll` / WinAPI return spoofing (`vac_monitor_manager`; gmh5225; explore anticheat:vac)
 - [ProMBA](entities/promba.md) — MBA deobfuscator via program synthesis and term rewriting (linear/polynomial MBA; VM-protector contexts; astean1001; Cheat Mixed boolean-arithmetic)
 - [PG1903](entities/pg1903.md) — Win10 1903 PatchGuard disable via context-page NX (Demo NX)
