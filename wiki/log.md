@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nou4r/Polymorphic-Engine`: entity [[polymorphic-engine]] (Nou4r; C++ runtime polymorphic variable obfuscation; stack/heap transforms for primitives and strings; optional SIMD; LLVM/Clang-primary with experimental MSVC; software protection / anti-analysis research; AC Encrypt Variable); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscxx]], [[encrypted-value]], [[xv]], [[kernelcloak]], [[present-injector]], and [[pkernelinterface-eft]].
+
 - **2026-08-22** — ingest `description:Nou4r/PresentInjector`: entity [[present-injector]] (Nou4r; C/C++ kernel-assisted DLL injection via graphics Present pointer swap; PFN/pointer-chain handling + post-injection cleanup; PTE.User; protected-process payload map; cheat / injection:windows); cited on [[concepts/present-hook]] and [[overviews/game-hacking]]; cross-linked [[executor]], [[fumo-loader]], [[page-table-injector]], and [[pkernelinterface-eft]].
 
 - **2026-08-22** — ingest `description:Nou4r/pKernelInterface-EFT`: entity [[pkernelinterface-eft]] (Nou4r; C++ external Escape from Tarkov reversal framework; kernel-assisted memory interaction + entity processing; ESP/aim modules; ImGui overlay stack; cheat / game:eft [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[eft-external]], [[eft-streamed-cheat]], [[simple-eft-base]], [[meatyeftrelease]], and [[escape-from-tuxkov]].

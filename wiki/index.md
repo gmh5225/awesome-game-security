@@ -1822,6 +1822,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mempeek](entities/mempeek.md) — Linux CLI live memory inspector (`/proc/pid/mem`; CE-style scan filters; libprocmem maps; rustyline REPL; cheat / Linux memory explorer)
 - [MemoryGuard](entities/memory-guard.md) — Windows memory-protection library (`PAGE_GUARD` / VEH / periodic integrity checks; alert or revert tampering; gmh5225; Anti Cheat → Page Protection)
 - [PointerGuard](entities/pointer-guard.md) — Windows PoC: HWBP or PAGE_GUARD protects function pointers / vtable entries against runtime tampering (charliewolfe; VEH + PAGE_GUARD)
+- [Polymorphic-Engine](entities/polymorphic-engine.md) — Nou4r C++ runtime polymorphic variable obfuscation (stack/heap transforms; primitives/strings; optional SIMD; LLVM/Clang-primary; experimental MSVC; software protection / anti-analysis; AC Encrypt Variable)
 - [PolarImGui](entities/polarimgui.md) — Android ImGui menu framework for Unity IL2CPP (C++ native + Android Studio; `.so` packaging for APK architectures; mobile mod-menu / cheat UI prototyping; Polarmods; Imgui On Android)
 - [Self-Remapping Code](entities/self-remapping-code.md) — Windows PoC: aliased virtual mappings of same physical pages; execute one view, integrity-check another (changeofpace; anti-patching / anti-debug)
 - [MemProcFS-Analyzer](entities/memprocfs-analyzer.md) — PowerShell MemProcFS forensic framework (processes/network/registry/event logs/browser/malware; HTML reports; VirusTotal TI; IS forensics)
