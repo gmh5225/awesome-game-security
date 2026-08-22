@@ -1017,6 +1017,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FF3 MMO](entities/ff3mmo.md) — browser NES FF3 MMO (Node.js WebSocket; server arbiters; inventory mirror anti-dup; wire validation)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
+- [FTK Imager OSX](entities/ftk-imager-osx.md) — macOS forensic disk imaging package (MrMugiwara; CLI drive acquisition, split outputs, MD5/SHA1 verify, E01/SMART, fragmentation/compression/evidence metadata; DFIR on macOS)
 - [FlagSecurePatcher](entities/flagsecurepatcher.md) — Android FLAG_SECURE + screenshot-listener disable (Cheat / Magisk reference)
 - [Force Page Protection](entities/force-page-protection.md) — x64dbg plugin: force page protection on mapped views when NtProtectVirtualMemory fails; SEC_NO_CHANGE remap bypass (changeofpace; Bypass Remap Memory)
 - [Forensia](entities/forensia.md) — Windows anti-forensics utility (C++; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team / IR validation; PaulNorman01)
