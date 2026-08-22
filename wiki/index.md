@@ -2326,6 +2326,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReadDirectoryChanges](entities/readdirectorychanges.md) — C++ `ReadDirectoryChangesW` wrapper (async recursive directory watch; sync/security monitoring)
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
+- [React](entities/react.md) — Paper/Folia Minecraft aim-assist AC plugin (Java; GCD-error scoring, acceleration-delta tracking, mode-averaged rotation quantization; optional ML inference service; PacketEvents; streak-based violation buffering; staff alerts; g4vrk; Anti Cheat / game:minecraft)
 - [readwrite-kernel-stable](entities/readwrite-kernel-stable.md) — stable kernel read/write driver (C/C++; cheat / RPM; driver development / modding)
 - [rw_socket_driver](entities/rw-socket-driver.md) — kernel socket RPM/WPM for protected processes (manual-map friendly; external cheat comm; adrianyy; cheat / Socket)
 - [RWXFinder](entities/rwxfinder.md) — VirtualQueryEx RWX page scanner (size-filtered exploitable regions for code injection; S12cybersecurity; cheat / injection:windows)

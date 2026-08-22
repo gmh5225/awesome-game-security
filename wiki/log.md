@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:g4vrk/React`: entity [[react]] (g4vrk; Java Paper/Folia aim-focused AC plugin; GCD-error scoring, acceleration-delta tracking, mode-averaged rotation quantization; optional ML inference service; streak-based violation buffering with decay; async PacketEvents; staff alerts not auto-ban; PvP combat aim protection; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[guardac]], [[mlanticheat]], [[minecraft-anti-cheat]], [[minecraft-anticheatai]], and [[ai-aimbot-detection]].
+
 - **2026-08-22** — ingest `description:mrexodia/REToolSync`: entity [[retoolsync]] (mrexodia; Python Tornado WebSocket server; IDA/Binary Ninja/x64dbg/WinDbg/VS Code plugins; live cursor/selection/goto sync across static disassembly, debugging, and scripting; Ctrl+click hex in terminal jumps all connected tools; collaborative RE for game-security analysts); cited on [[overviews/reverse-engineering]]; cross-linked [[binsync]], [[idarling]], [[labsync]], [[x64dbg]], and [[ida-pro-mcp]].
 
 - **2026-08-22** — ingest `readme:categories`: Cheat ~2737 (+1) / Anti Cheat ~688 (+1; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
