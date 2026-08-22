@@ -1999,6 +1999,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NTFS-EFI](entities/ntfs-efi.md) — native UEFI x64 NTFS R/W driver (EfiNtfs; EFI Commander pre-boot FM; chkdsk-clean unmount)
 - [ntfs-journal-viewer](entities/ntfs-journal-viewer.md) — NTFS `$UsnJrnl` change-journal viewer (C; AC / IS forensics)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)
+- [ntfs-parse](entities/ntfs-parse.md) — Python NTFS forensic parser suite (MFT/$LogFile/$UsnJrnl; CLI export/transaction/timeline; CSV/text; DFIR)
 - [NTFSTool](entities/ntfstool.md) — NTFS forensics (MFT/USN/BitLocker/EFS; AC / IS forensics)
 - [NTMemory](entities/ntmemory.md) — kernel cross-process R/W (MDL / CR3 walk / physical translate)
 - [ntkernelwalkerlib](entities/ntkernelwalkerlib.md) — user-mode ntoskrnl symbol/struct offset + ROP gadget library (dbghelp + section scan)
