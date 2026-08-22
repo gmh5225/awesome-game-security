@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:OALabs/hashdb-ida`: entity [[hashdb-ida]] (OALabs; Python IDA Pro plugin; HashDB lookup service for hashed API/string constants; single/bulk module import; XOR-aware matching; hash-algorithm hunt + enum annotation; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[rs-ldr]], [[tabby]], [[augur-riot]], [[call-obfuscator]], [[anti-xorstr]], and [[auto-re]].
+
 - **2026-08-22** — ingest `description:OFFTKP/felix86`: entity [[felix86]] (OFFTKP; Linux userspace x86/x64 emulator on RISC-V; JIT recompiler + vectorized SSE translation + RISC-V extensions; modern C++; emulator dev / cross-arch execution research; Linux Emulator); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[zyemu]], [[winlator]], [[dynre-x86]], and [[levo]].
 
 - **2026-08-22** — ingest `description:ORCx41/KnownDllUnhook`: entity [[known-dll-unhook]] (ORCx41; Windows API unhooking via `\KnownDlls` clean images; iterate loaded DLLs; replace hooked `.text`; native syscalls for map/memory ops; EDR/anti-cheat hook detection & evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nt-unhooker]], [[edrsandblast]], [[dynamizer]], and [[injection]].

@@ -1257,6 +1257,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HappyIDA](entities/happyida.md) — IDAPython Hex-Rays decompiler utilities (parameter labels, SEH, Rust strings; cheat / IDA Plugins)
 - [hARMless](entities/harmless.md) — ARM64 Linux ELF packer/loader (encrypt; custom stub; fileless `memfd_create`; Anti Cheat → Binary Packer `[ELF]`)
 - [hazedumper](entities/hazedumper.md) — auto-updating CS:GO offset/netvar repository (frk1; signatures for engine.dll/client.dll; JSON/TOML/YAML/C++/C#/VB; cheat / game:csgo [Offset])
+- [hashdb-ida](entities/hashdb-ida.md) — OALabs IDA Pro plugin; HashDB API/string hash lookup; bulk module import; XOR-aware matching; hash-algorithm hunt + enum annotation (cheat / IDA Plugins)
 - [hazel](entities/hazel.md) — TheCherno C++ interactive app + rendering engine (engine/editor/sandbox; Vulkan SDK setup; educational engine architecture + real-time rendering prototyping; Game Engine / source)
 - [headless-ida-mcp-server](entities/headless-ida-mcp-server.md) — MCP for IDA Pro (headless; binary analysis; function/variable MCP tools; Game Develop / MCP server; cnitlrt)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
