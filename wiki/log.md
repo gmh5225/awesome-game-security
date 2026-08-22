@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PardCode/OpenGL-3D-Game-Tutorial-Series`: entity [[opengl-3d-game-tutorial-series]] (PardCode; cross-platform C++ OpenGL 3D game tutorial; Win32/Cocoa/X11 windowing; VAO/shaders/UBO; entity management + input; step-by-step engine build; beginners/intermediate; README [OpenGL]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[gltut]], [[cpp-game-engine-book]], [[joshoengine-native]], [[3d-game-shaders-for-beginners]], and [[game-engine-from-scratch]].
+
 - **2026-08-22** — ingest `description:PartialVolume/shredos.x86_64`: entity [[shredos-x86-64]] (PartialVolume; bootable Buildroot Linux disk eraser; nwipe with DoD/Gutmann/PRNG/verification; multi-drive; BIOS/UEFI IMG/ISO; optional wipe certificates/logs; security/forensics/IT media sanitization; Disk Eraser); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[forensia]], [[anti-forensics]], [[file-recovery-tool]], [[antfs]], and [[dfirtriage]].
 
 - **2026-08-22** — ingest `description:Passer1072/RookieAI_yolov8`: entity [[rookieai-yolov8]] (Passer1072; Python YOLOv8 Ultralytics real-time FPS aim-assist; multi-process capture/inference; PyTorch/TensorRT/ONNX model formats; Win32/Logitech/kmNet input backends; configurable aim/trigger; cheat / Machine Learning YOLOv8); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[ai-aimbot]], [[ai-fps-b00m-h3adsh0t]], [[yolov5-pubg]], [[nuremx]], [[maplestory-yolov8-training]], and [[hardware-input-injection]].
