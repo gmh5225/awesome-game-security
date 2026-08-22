@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NotYetGames/WarriOrb`: entity [[warriorb]] (NotYetGames; public UE4 Dark-Souls-like action platformer source release; extensive C++ gameplay, engine config, localization, multi-target packaging; code-only—omits commercial assets and proprietary plugins; production Unreal architecture study; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unreal-source-explained]], [[unreal-engine-guide]], [[ue4-tutorials]], and [[overgrowth]].
+
 - **2026-08-22** — ingest `description:Nou4r/ModFinder`: entity [[modfinder]] (Nou4r; C++ Windows utility; enumerate mapped regions + DOS-header/PE heuristics for manually mapped modules incl. stripped optional headers; x86 runtime memory forensics; README Mapped Dll); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[faultline]], [[hidden-module-detector]], [[pe-sieve]], [[modexmap]], and [[present-injector]].
 
 - **2026-08-22** — ingest `description:Nou4r/Polymorphic-Engine`: entity [[polymorphic-engine]] (Nou4r; C++ runtime polymorphic variable obfuscation; stack/heap transforms for primitives and strings; optional SIMD; LLVM/Clang-primary with experimental MSVC; software protection / anti-analysis research; AC Encrypt Variable); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscxx]], [[encrypted-value]], [[xv]], [[kernelcloak]], [[present-injector]], and [[pkernelinterface-eft]].

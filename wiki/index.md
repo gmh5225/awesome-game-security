@@ -2917,6 +2917,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [w1tn3ss](entities/w1tn3ss.md) — C++/C DBI / analysis / patching framework (modding / hooking / memory; Cheat DBI)
 - [Waldo](entities/waldo.md) — CS2 deep-learning triggerbot/aimbot detection (user-trained model; Detection:Aimbot)
+- [WarriOrb](entities/warriorb.md) — public UE4 action-platformer source release (NotYetGames; C++ gameplay + engine config; code-only study of production Unreal architecture; Game Engine / source)
 - [WardSweep](entities/wardsweep.md) — Windows Rust/WPF AC audit + orphan driver/service/registry/filesystem cleanup (Vanguard, EAC, BE, ACE; quarantine/rollback; poli0981)
 
 - [WaryasSWHE](entities/waryasswhe.md) — usermode shatter-attack AC bypass PoC (0day; cheat / RPM; C++)
