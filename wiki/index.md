@@ -2097,6 +2097,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OpenProcmon](entities/openprocmon.md) — OSS Procmon-style monitor (ETW + minifilter; process/file/registry/network/DLL)
 - [Ophion](entities/ophion.md) — stealth Intel VT-x Type-2 HV (EPT; CPUID/CR4/TSC anti-detect)
 - [Optick](entities/optick.md) — C++ game performance profiler (in-game SDK + WPF viewer; CPU/GPU D3D12/Vulkan timing, ETW threads/context switches; UE4/5/Unity; flame graphs; Game Testing)
+- [overflow-r6-v2](entities/overflow-r6-v2.md) — R6 v2 external: inline kernel function hook bypass + user-mode menu/rendering; aimbot/chams/rapid fire/recoil/spread/speed/FOV (NMan1; kernel-assisted cheat architecture RE; cheat / game:r6 [External])
 - [overflow-rust](entities/overflow-rust.md) — Facepunch Rust external: kernel driver + user-mode client; kernel call-chain hook bypass + shared-memory comm; ESP/recoil/automation + gameplay mods (NMan1; kernel hook + overlay RE; cheat / game:rust [External])
 - [overload](entities/overload.md) — open-source C++ 3D engine + integrated editor (Lua scripting; render/physics/audio/profiling/material tooling; Game Engine / source)
 - [Orkige](entities/orkige.md) — C++20 OGRE/Ogre-Next engine (Lua hot-reload; ImGui; desktop/mobile/Wasm; Game Engine)
