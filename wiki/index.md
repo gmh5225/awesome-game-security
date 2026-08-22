@@ -1937,6 +1937,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NeoTTY](entities/neotty.md) — experimental Termux fork (Android terminal; full Linux system usage; cheat / Android Terminal Emulator; gmh5225)
 - [netcrypt](entities/netcrypt.md) — C# .NET PE packer (encrypted/compressed managed assembly in CLR loader stub; SimplePacker GUI; Anti Cheat → Binary Packer / `.NET`)
 - [netImgui](entities/netimgui.md) — Dear ImGui remote access (input + draw-command forward; engine/plugin UI)
+- [neverc](entities/neverc.md) — AI-friendly C23 security compiler (custom LLVM backend; integrated linker; compile-time string encryption/hash + mimalloc; DynCode PIC runtime codegen; 130+ phase plugin API; PE/ELF/Mach-O; Windows/Linux/Android; NeverSight)
 - [neverd](entities/neverd.md) — AI-friendly native binary analysis engine (Capstone→LLVM IR lift; structured C decomp; in-place rewrite; strict mode; `libneverd` C SDK; PE/ELF/Mach-O; JSON CLI; NeverSight)
 - [Netview](entities/netview.md) — AD domain host enumeration (`-d` current/specified domain; AC/IS forensics)
 - [NFD x64dbg](entities/nfdx64dbg.md) — x64dbg plugin: Nauz File Detector static scan tab (compiler/packer/protector ID; C++/Qt; Cheat x64dbg Plugins)
