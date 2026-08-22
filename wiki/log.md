@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NVIDIA-RTX/godot`: entity [[nvidia-rtx-godot]] (NVIDIA RTX fork of Godot Engine; RTX rendering-server, editor, and scene-tree optimizations; ray tracing and GPU-accelerated Godot development; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[godot]], [[godot-demo-projects]], [[godot-plush-character]], [[spartan-engine]], and [[strolle]].
+
 - **2026-08-22** — ingest `description:NVIDIAGameWorks/PhysX-3.4`: entity [[physx-3-4]] (NVIDIA PhysX SDK 3.4; version-pinned production physics; rigid-body dynamics, CCD, scene queries, vehicles, cloth, particles; component-based cross-platform architecture; game/simulation integration study); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[physx]], [[bullet3]], [[kawaii-physics]], and [[gameplay]].
 
 - **2026-08-22** — ingest `description:NVIDIAGameWorks/PhysX`: entity [[physx]] (NVIDIA PhysX source release; C++; real-time rigid-body/collision SDK; sample apps, docs, engine integration; CMake + Python builds; Windows/Linux/Android/Apple; production physics for games/simulation research); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[bullet3]], [[kawaii-physics]], [[gameplay]], and [[yourgamelib]].
