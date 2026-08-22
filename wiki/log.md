@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PortSwigger/mcp-server`: entity [[mcp-server]] (PortSwigger; Burp Suite MCP extension; Kotlin/Java; MCP endpoint + stdio proxy; desktop AI client config; AI-assisted appsec/Burp workflows; MCP for Burp Suite); cited on [[overviews/overview]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-mcp-servers]], [[ida-pro-mcp]], [[mcp-safety-scanner]], and [[vulnerable-mcp-servers-lab]].
+
 - **2026-08-22** — ingest `description:PrinceFroggy/MSB`: entity [[msb]] (PrinceFroggy; legacy MapleStory GMS trainer toolkit; C++/C# launcher; injection/runtime control; GMS 128–140; historical MMO trainer architecture RE; cheat / game:maplestory [GMS Old Hack 128-140]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[msc]], [[maplestory-cms95-client-address]], and [[twms-hacking-data]].
 
 - **2026-08-22** — ingest `description:PrinceFroggy/MSC`: entity [[msc]] (PrinceFroggy; legacy MapleStory GMS bot framework; C++/C#; map/portal resource data; discontinued partial publish; historical bot-design RE; cheat / game:maplestory [GMS Bot]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[maplestory-auto-level-up]], [[maplestory-worlds-automation]], [[maplestory-cms95-client-address]], and [[maple-unity]].
