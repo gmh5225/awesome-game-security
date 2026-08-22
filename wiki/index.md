@@ -2754,6 +2754,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UE-UnrealEngineSDK](entities/ue-unreal-engine-sdk.md) — reverse-engineered UE4/UE5 SDK headers (UObject/UWorld/ULevel; internal cheat/mod dev; Universal Cheat development kit; gmh5225)
 - [UE4Injector](entities/ue4-injector.md) — UE4 process-injection PoC (C++; legacy UE4 vulnerability for shellcode/DLL payloads; Visual Studio CLI; privilege requirements; Inject / security research; Zebratic)
 - [UE4-Freecam](entities/ue4-freecam.md) — UE4 FOV changer (hooking / overlays; Game Engine Explorer:Unreal)
+- [UE4-Silent-Aim](entities/ue4-silent-aim.md) — minimal UE4 silent-aim PoC (viewpoint/camera API hooks; aim manipulation research; N-T33)
 - [UE4-c-](entities/ue4-c-.md) — Valorant external UE4 cheat (EFI manual-mapped kernel driver + IOCTL dispatch hooks; DirectX 9 ImGui overlay; UE4 actor/player reads; cheat / game:valorant [External]; frankelitoc)
 - [UE4 Cheat Engine](entities/ue4-cheat-engine.md) — Android UE4-aware CE (memory scan / GObject enum / UProperty / SDK gen; Cheat / Game Engine Explorer:Unreal)
 - [ue4-apk-dumper](entities/ue4-apk-dumper.md) — Android APK UE4 SDK dumper (UObject/property/offset extraction; modding / SDK generation; gmh5225)
