@@ -684,6 +684,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [dezlock-dump](entities/dezlock-dump.md) — runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); live-process dump; WebSocket bridge + schema browser; no source2gen required
+- [decryption-dumper](entities/decryption-dumper.md) — Windows C++ runtime encrypted-pointer decrypt routine dumper (Nuxar1; debugger single-step + Zydis; register/stack dependency trace; pattern scan + context restore; cheat / [Dump])
 - [digital-sdk](entities/digital-sdk.md) — CS:GO internal cheat base (MinHook, ImGui, ESP, bunnyhop, engine prediction, autowall, chams; CreateMove + D3D reset hooks; interfaces/netvars/rendering modules; W1lliam1337)
 - [Detours](entities/detours.md) — Microsoft Windows API monitoring/instrumentation (inline hook/trampoline; cheat / hook research)
 - [DetoursNT](entities/detoursnt.md) — NTDLL-only Microsoft Detours (no Win32; cheat / hook research)

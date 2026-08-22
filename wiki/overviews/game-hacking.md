@@ -319,6 +319,7 @@ sources:
   - wiki/sources/descriptions/cs1ime__AndroidSuperInject.md
   - wiki/sources/descriptions/cs1ime__ceserver-rawmem.md
   - wiki/sources/descriptions/cs1ime__blacksun-framework.md
+  - wiki/sources/descriptions/Nuxar1__DecryptionDumper.md
   - wiki/sources/descriptions/Oliver-1-1__MouseDetection.md
   - wiki/sources/descriptions/Oliver-1-1__EtwKeyboardDetection.md
   - wiki/sources/descriptions/Oliver-1-1__SmmInfect.md
@@ -2056,6 +2057,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS2 glow ESP such as [[cs-2-glow]] (C++; entity parse / offsets / external memory glow) sits in the same cheat / game:cs2 visual lane. (source: wiki/sources/descriptions/xvorost__CS-2-Glow.md)
 - Maintained CS2 offset/netvar dumps such as [[cs2-offsets]] (C++ headers + JSON; client/server layout after patches) and [[cs2-offsets-ro0ti]] (C#/C++; `[Offset]` tag) feed that same cheat / game:cs2 memory-layout lane. (source: wiki/sources/descriptions/sezzyaep__CS2-OFFSETS.md) (source: wiki/sources/descriptions/ro0ti__CS2-Offsets.md)
 - Live-process CS2 offset/interface dumpers such as [[cs2-dumper]] (a2x; Rust; memflow memory access on Windows/Linux; C#/C++/Rust/JSON codegen; cheat / game:cs2 `[Dump]`) automate per-patch schema and offset refresh consumed by externals such as [[cs2-dma]], [[titled-gui-cs2]], and [[overlayai]]. (source: wiki/sources/descriptions/a2x__cs2-dumper.md)
+- Runtime encrypted-pointer decryption dumpers such as [[decryption-dumper]] (Nuxar1; Windows C++; debugger single-step + Zydis; reconstructs decryption routines from live processes; pattern scan, context restore, instruction filtering; cheat / `[Dump]`) sit in the same offensive `[Dump]` lane for AC-protected pointer schemes beside schema/offset dumpers. (source: wiki/sources/descriptions/Nuxar1__DecryptionDumper.md)
 - CS2 function-signature reference notes such as [[cs2-signature-list]] (Salvatore-Als; Markdown + IDC helper; string anchors and search guidance for team switch, item give, chat, damage routines—not fixed universal patterns; cheat / game:cs2 `[Signature]`) complement automated dumpers when refining pattern scans across builds. (source: wiki/sources/descriptions/Salvatore-Als__cs2-signature-list.md)
 - Rust external CS2 cheats such as [[proext]] (ESP / aimbot / triggerbot / radar / RCS; egui UI) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/snipcola__ProExt.md)
 - Browser-based CS2 radar cheats such as [[cs2-webradar]] (gmh5225 and clauadv forks; C++/JavaScript; asset pipelines / modding / memory analysis; cheat / game:cs2 [Browser based radar cheat]) illustrate external radar UIs that stream entity positions to a web client instead of a native overlay. (source: wiki/sources/descriptions/gmh5225__cs2_webradar.md) (source: wiki/sources/descriptions/clauadv__cs2_webradar.md)
