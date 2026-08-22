@@ -2173,6 +2173,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pe-bear](entities/pe-bear.md) — Qt GUI PE viewer/editor (headers, imports/exports, TLS/CLR; hex edit, section manipulation, compare)
 - [pecleaner](entities/pecleaner.md) — C# strip Rich header, debug dir, PDB path, and timestamp metadata from x86/x64 PE (cheat / RE tools)
 - [pe-sieve](entities/pe-sieve.md) — Lightweight single-process malware/injection scan engine (Detection:hook; hasherezade; lib behind xMalHunter)
+- [PeVisor](entities/pevisor.md) — Early-stage Windows PE analysis/instrumentation toolkit (Nitr0-G; C/C++; Blackbone + Unicorn; process control, hooking, mapping, emulation; protection test material; cheat / [PE])
 - [PEReconstruct](entities/pereconstruct.md) — Python headerless PE rebuild from process memory (manual-map scan/dump, hook analysis, export resolution; no driver/debugger)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [PE-Packer](entities/pe-packer.md) — C/C++ PE X86 binary packer (Anti Cheat → Binary Packer `[X86]`; czs108)

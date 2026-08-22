@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nitr0-G/PeVisor`: entity [[pevisor]] (Nitr0-G; early-stage C/C++ Windows PE analysis/instrumentation toolkit; PeVisor component; Blackbone process control/hooking/mapping + Unicorn emulation workflows; sample protection/unprotection test targets; malware/game-security PE internals research; cheat / [PE]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pe-bear]], [[pe-sieve]], [[pereconstruct]], [[unicorn-pe]], [[modfinder]], and [[xmalhunter]].
+
 - **2026-08-22** — ingest `description:NoCheatPlus/NoCheatPlus`: entity [[nocheatplus]] (NoCheatPlus; Java Maven multi-module Bukkit/Spigot plugin; movement/combat/block/inventory/chat/packet-rate checks; cancel/log/setback actions; reflection-based internals + client-mod MOTD; broad version coverage; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[minecraft-anti-cheat]], [[avaanticheat]], [[dakotaac]], and [[ycbr-anticheat]].
 
 - **2026-08-22** — ingest `description:NoInitRD/Memory-Dump-UEFI`: entity [[memory-dump-uefi]] (NoInitRD; C UEFI application; live-boot USB + UEFI shell physical RAM dump; scripts/build/docs for memory-image collection; forensic acquisition / low-level security research; README [A UEFI application for dumping the contents of RAM]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[offline-crash-dump-uefi]], [[dumpit-mirror]], [[tool-diy-system-memory-dump]], and [[simpleuefi]].
