@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Qfrost911/KACE`: updated entity [[kace]] (Qfrost911 fork; kernel anti-cheat emulation framework; C++ PE mapping, import resolution, memory tracking, exception handling, privileged-instruction emulation; models kernel structures + monitors R/W for anti-debug/anti-emulation checks; learning/experimentation platform; waryas upstream retained); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kdemu]], [[kubera]], and [[winvisor]].
+
 - **2026-08-22** — ingest `description:QianMo/Game-Programmer-Study-Notes`: entity [[game-programmer-study-notes]] (QianMo; large Markdown graphics/rendering study notes; GPU Gems, shader programming, ray tracing, post-processing; software engineering for game dev; Game Engine / guide); renamed prior TastSong notes to [[tastsong-game-programmer-study-notes]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unity-design-pattern]], [[ue4-fps-game]], [[gltut]], [[cpp-game-engine-book]], and [[3d-game-shaders-for-beginners]].
 
 - **2026-08-22** — ingest `description:QianMo/UE4-FPS-Game`: entity [[ue4-fps-game]] (QianMo; UE4 FPS sample; C++ gameplay module + standard character control; Blueprint assets, input bindings, camera setup, starter maps; compact UE4 module/target layout; UE4 Game / C++ gameplay and editor workflow learning); cited on [[overviews/game-engine]]; cross-linked [[ue4-tank-game]], [[unity-design-pattern]], [[ue4-tutorials]], [[simple-fps-template]], and [[epic-survival-game]].
