@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MxIris-Reverse-Engineering/ida-mcp-server`: entity [[ida-mcp-server]] (MxIris-Reverse-Engineering; Python MCP server + IDA plugin; bidirectional disassembly-context queries and analysis workflows for MCP clients; MCP for IDA pro); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-mcp-server-plugin]], [[ida-pro-mcp]], [[headless-ida-mcp-server]], [[mcp-server-idapro]], and [[ida-mcp-rs]].
+
 - **2026-08-22** — ingest `description:N-T33/UE4-Silent-Aim`: entity [[ue4-silent-aim]] (N-T33; minimal UE4 silent-aim PoC; C++; viewpoint/camera API hooks; rotation + bone-target selection while preserving visible view; game security research / aim-manipulation vectors; cheat / [Aimbot]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ue4-freecam]], [[fortnite-camera-cache-pov]], [[fortnite-virtual-offsets]], [[world-to-screen]], and [[ai-aimbot-detection]].
 
 - **2026-08-22** — ingest `description:NHCM-dev/BytecodeVM`: entity [[bytecodevm]] (NHCM-dev; Java bytecode virtualizing obfuscator; Gradle/ASM CLI + YAML/annotation SDK; pure-Java VM interpreter; dispatch/threaded/polymorphic/register/data-flow/FSM architectures; encrypted operands, shuffled CFG, super-instruction fusion, runtime VM integrity checks; educational Java hardening / bytecode-VM research; Anti Cheat → Obfuscation Engine); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[deobfuscator]], [[bytecode-viewer]], [[dprotect]], [[nocturne]], and [[binary-shield]].

@@ -455,6 +455,7 @@ sources:
   - wiki/sources/descriptions/justfoxing__ghidra_bridge.md
   - wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md
   - wiki/sources/descriptions/moyix__gpt-wpre.md
+  - wiki/sources/descriptions/MxIris-Reverse-Engineering__ida-mcp-server.md
   - wiki/sources/descriptions/mrexodia__ida-pro-mcp.md
   - wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md
   - wiki/sources/descriptions/msd0pe-1__cve-maker.md
@@ -1790,6 +1791,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA Pro JSON-RPC daemon via [[ida-rpc]] (bkerler; decompile/xrefs/types/patches over network protocol; headless & GUI; ghidra-rpc-compatible CLI; LLM/agent-assisted RE) sits in the same agent-RE lane. (source: wiki/sources/descriptions/bkerler__ida_rpc.md)
 - Agent bridge for IDA Pro 9+ via [[ida-bridge]] (Cellebrite Labs; Python WebSocket bridge; IDAPython/SQL on live UI or headless idalib; supervisor lifecycle; bundled agent skill; macOS; Game Develop / MCP + IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cellebrite-labs__ida-bridge.md)
 - IDA ↔ VS Code IDAPython integration via [[idacode]] (execute/debug scripts from VS Code; early alpha; cheat / IDA Plugins) sits in the same IDAPython workflow lane. (source: wiki/sources/descriptions/gmh5225__idacode.md)
+- MCP bridge into IDA via [[ida-mcp-server]] (MxIris-Reverse-Engineering; Python standalone server + IDA plugin; bidirectional disassembly-context queries and analysis workflows; MCP for IDA pro) sits in the Cheat IDA Plugins / agent-RE lane. (source: wiki/sources/descriptions/MxIris-Reverse-Engineering__ida-mcp-server.md)
 - MCP bridge into IDA via [[ida-mcp-server-plugin]] (Python plugin; disasm/decompile/xrefs/functions/types for LLM clients) sits in the Cheat IDA Plugins / agent-RE lane. (source: wiki/sources/descriptions/taida957789__ida-mcp-server-plugin.md) Full IDAPython MCP automation via [[ida-pro-mcp]] (mrexodia; installable plugin + IDAPython docs + MCP test harness; rename/annotate/xrefs/decompile/structs) sits in the same agent-RE lane. (source: wiki/sources/descriptions/mrexodia__ida-pro-mcp.md) AI-assistant bridge via [[mcp-server-idapro]] (fdrechsler; MCP for IDA Pro; Game Develop / MCP) sits in the same agent-RE lane. (source: wiki/sources/descriptions/fdrechsler__mcp-server-idapro.md) Binary analysis MCP collection via [[binary-analysis-mcps]] (cycraft-corp; Python; IDA Pro function/xref/variable tools + utilities for LLM agents; Binary analysis MCPs collections) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cycraft-corp__BinaryAnalysisMCPs.md)
 - Also curated as MCP for IDA Pro: [[pcm]] (rand-tech; description summary additionally claims Process Context Monitor scheduling visibility). (source: wiki/sources/descriptions/rand-tech__pcm.md)
 - In-IDA Claude-3 chat assistant via [[ida-assistant]] (interactive Q&A / guidance during RE) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/stuxnet147__IDA-Assistant.md)

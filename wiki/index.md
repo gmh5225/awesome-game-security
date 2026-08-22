@@ -1434,6 +1434,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [idapcode](entities/idapcode.md) — IDA Pro plugin: display Hex-Rays P-Code for the current function (Python; cheat / IDA Plugins; binarly-io)
 - [IDA Kallsyms Symbol Renamer](entities/ida-kallsyms-symbol-renamer.md) — IDA Pro plugin: import `/proc/kallsyms` Linux kernel symbols; auto-rename functions/data in kernel/LKM IDBs (IDA kallsyms Renamer; gmh5225; cheat / IDA Plugins)
 - [IDA Map Symbol Parser](entities/ida-map-symbol-parser.md) — IDA Pro plugin: parse linker MAP files; apply function/global/segment names to stripped IDB (IDA Map File Symbol Renamer; gmh5225; cheat / IDA Plugins)
+- [ida-mcp-server](entities/ida-mcp-server.md) — MCP for IDA Pro (Python standalone server + IDA plugin; bidirectional disassembly-context queries; MxIris-Reverse-Engineering)
 - [ida-mcp-server-plugin](entities/ida-mcp-server-plugin.md) — IDA Pro MCP server plugin (disasm/decompile/xrefs/types for LLM clients)
 - [ida-mcp-rs](entities/ida-mcp-rs.md) — Headless IDA Pro MCP server (Rust; RE/modding/memory analysis; Game Develop / MCP server; blacktop)
 - [ida-rpc](entities/ida-rpc.md) — IDA Pro JSON-RPC daemon (decompile/xrefs/types/patches; headless & GUI; ghidra-rpc-compatible CLI; LLM/agent RE; bkerler)
