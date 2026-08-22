@@ -239,6 +239,7 @@ sources:
   - wiki/sources/descriptions/Read1dno__vesta.md
   - wiki/sources/descriptions/REDPOWAR__D2GI.md
   - wiki/sources/descriptions/Rebzzel__kiero.md
+  - wiki/sources/descriptions/Omega172__OmegaWare-Framework.md
   - wiki/sources/descriptions/keith2018__SoftGLRender.md
   - wiki/sources/descriptions/justinstenning__Direct3DHook.md
   - wiki/sources/descriptions/johndpope__pianogame.md
@@ -312,7 +313,7 @@ Interception and overlay rendering across DirectX, OpenGL, and Vulkan—Present/
 | OpenGL | `wglSwapBuffers` | `glDrawElements`, `glDrawArrays` |
 | Vulkan | `vkQueuePresentKHR`, `vkCreateSwapchainKHR` | `vkCmdDraw`, `vkCmdDrawIndexed`; instance/device layers |
 
-Vtable trampolines on swap chains remain the dominant internal-overlay pattern; the original Windows-only [[kiero]] (Rebzzel/kiero; universal D3D9–12 + OpenGL + Vulkan hooking; MinHook method-table detours; sample ImGui overlays; x86/x64) and cross-API runtime locators such as [[kiero2]] (kiero v2; method addresses only; BYO hooking; CMake FetchContent; Win/Linux/macOS for GL/VK) auto-detect the active graphics API at runtime. (source: wiki/sources/descriptions/Rebzzel__kiero.md) (source: wiki/sources/descriptions/kirchesz__kiero2.md) Portable hook foundations such as [[dobby]] (lightweight multi-platform C/C++ framework; DirectX / hook tooling for graphics programmers and Windows game tooling) underpin BYO Present/vtable interception beside MinHook/PolyHook2 in overlay samples. (source: wiki/sources/descriptions/jmpews__Dobby.md) Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
+Vtable trampolines on swap chains remain the dominant internal-overlay pattern; the original Windows-only [[kiero]] (Rebzzel/kiero; universal D3D9–12 + OpenGL + Vulkan hooking; MinHook method-table detours; sample ImGui overlays; x86/x64) and cross-API runtime locators such as [[kiero2]] (kiero v2; method addresses only; BYO hooking; CMake FetchContent; Win/Linux/macOS for GL/VK) auto-detect the active graphics API at runtime. (source: wiki/sources/descriptions/Rebzzel__kiero.md) (source: wiki/sources/descriptions/kirchesz__kiero2.md) Portable hook foundations such as [[dobby]] (lightweight multi-platform C/C++ framework; DirectX / hook tooling for graphics programmers and Windows game tooling) underpin BYO Present/vtable interception beside MinHook/PolyHook2 in overlay samples. (source: wiki/sources/descriptions/jmpews__Dobby.md) Multi-engine internal cheat scaffolds such as [[omegaware-framework]] (Omega172; auto D3D11/D3D12 detection; graphics pipeline + WndProc hooks; ImGui overlay/dev console; plugin features; cheat framework) extend universal hook libs with engine-aware scaffolding. (source: wiki/sources/descriptions/Omega172__OmegaWare-Framework.md) Dear ImGui backends wire through the Present hook with a `WndProc` forward for input.
 
 ## Overlay taxonomy
 

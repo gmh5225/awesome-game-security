@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Omega172/OmegaWare-Framework`: entity [[omegaware-framework]] (Omega172; Windows C++ internal cheat foundation; proxy + internal DLL via Xmake; Unity/Unreal/generic DirectX engine profiles; auto D3D11/D3D12 detection; graphics pipeline + WndProc hooks; ImGui overlay/dev console; plugin-style features with auto-registration, JSON config, localization, memory utils, compile-time CRC64 string hashing; cheat framework / AC countermeasure study); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[kiero]], [[kiero2]], [[present-hook]], [[universal-dear-imgui-hook]], and [[blacksun-framework]].
+
 - **2026-08-22** — ingest `description:Omn1z/Counter-Strike2-SDK`: entity [[counter-strike2-sdk]] (Omn1z; header-only CS2 SDK snapshot; Source 2 class declarations/enums; entity/gameplay/animation layouts with field offsets; bit-vector utilities for networked structures; RE/tooling/game-security research; cheat / game:cs2 [SDK]); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[cs2-sdk]], [[cs2-sdk-source2gen]], [[cs2-dumper]], and [[source-netvars]].
 
 - **2026-08-22** — ingest `description:OpenArena/engine`: entity [[openarena-engine]] (OpenArena; ioquake3 fork; Quake III renderer/audio/networking/runtime; make-based multi-platform C/C++; classic FPS multiplayer engine internals; engine developers, modders, researchers; Game Engine / source [quake3]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[q3vm]], [[open-source-engines]], [[openrct2]], and [[xray-16]].

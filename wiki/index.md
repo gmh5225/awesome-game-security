@@ -2014,6 +2014,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [OffsetStreaming](entities/offset-streaming.md) — simple C/C++ program to stream game offsets to cheat clients (Some Tricks / Windows Ring3; gmh5225)
 - [Olive.c](entities/olive-c.md) — single-header C 2D soft-raster (lines/tris/circles/text; Image Codec)
 - [OMath](entities/omath.md) — C++23 constexpr math/physics (W2S / projectile / GJK; Mathematics)
+- [OmegaWare Framework](entities/omegaware-framework.md) — multi-engine internal cheat framework (Unity/Unreal/generic DirectX; D3D11/D3D12 hooking; ImGui UI; feature plugins; JSON config; Omega172)
 - [OmniClutch](entities/omniclutch.md) — Fabric Minecraft 1.21+ automated fall/elytra clutch mod (raycast impact detection; hotbar item selection; Gaussian delays + camera interpolation; WeiNaYongQ; cheat / game:minecraft)
 - [oob_entry](entities/oob-entry.md) — iOS 3.0–10.3.4 tfp0 kernel exploit (C/C++; cheat / iOS jailbreak)
 - [Oomph](entities/oomph.md) — Minecraft Bedrock MiTM AC proxy (Go; server-auth movement/combat; Dragonfly/PocketMine)

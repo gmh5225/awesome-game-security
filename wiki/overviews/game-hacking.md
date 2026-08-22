@@ -318,6 +318,7 @@ sources:
   - wiki/sources/descriptions/cs1ime__AndroidSuperInject.md
   - wiki/sources/descriptions/cs1ime__ceserver-rawmem.md
   - wiki/sources/descriptions/cs1ime__blacksun-framework.md
+  - wiki/sources/descriptions/Omega172__OmegaWare-Framework.md
   - wiki/sources/descriptions/cnitlrt__headless-ida-mcp-server.md
   - wiki/sources/descriptions/clementine44613__seiun-ac.md
   - wiki/sources/descriptions/cklsit__AdvancedAntiCheat.md
@@ -1508,7 +1509,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 ## Development workflows
 
-**External** — pattern scan → RPM in separate process → overlay or input inject. General-purpose C++ external cheat scaffolds such as [[osmium]] (cragson; cheat / guide; offensive technique study—not a best-practices reference) illustrate that workflow for researchers. (source: wiki/sources/descriptions/cragson__osmium.md) **Internal** — inject → hook render path → direct object access in-process. Pair either with SDK codegen ([[luagenny]], [[source2gen]]) and offset dumps that rot per patch.
+**External** — pattern scan → RPM in separate process → overlay or input inject. General-purpose C++ external cheat scaffolds such as [[osmium]] (cragson; cheat / guide; offensive technique study—not a best-practices reference) illustrate that workflow for researchers. (source: wiki/sources/descriptions/cragson__osmium.md) **Internal** — inject → hook render path → direct object access in-process. Pair either with SDK codegen ([[luagenny]], [[source2gen]]) and offset dumps that rot per patch. Multi-engine internal cheat scaffolds such as [[omegaware-framework]] (Omega172; Xmake proxy + internal DLL; Unity/Unreal/generic DirectX engine profiles; auto D3D11/D3D12 detection; graphics pipeline + WndProc hooks; ImGui overlay/dev console; plugin features with JSON config and compile-time CRC64 string hashing; cheat framework) illustrate that workflow without per-title boilerplate. (source: wiki/sources/descriptions/Omega172__OmegaWare-Framework.md)
 
 ## Escalation model
 
