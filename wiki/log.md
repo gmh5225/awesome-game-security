@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MothCocoon/FlowGraph`: entity [[flowgraph]] (MothCocoon; UE plugin; design-agnostic event-flow graph for gameplay/narrative scripting; C++ with editor integration; async node execution, custom pin layouts, visual debugging; reusable game-specific nodes; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[simple-quest]], [[luamachine]], and [[automation-examples]].
+
 - **2026-08-22** — ingest `description:Mowokuma/vm_str.hpp`: entity [[vm-str-hpp]] (Mowokuma; header-only C++20 compile-time string obfuscation; compile-time obfuscation bytecode schema + stack-based VM runtime reconstruct; narrow/wide string macros; keeps plaintext out of static program data; software hardening / RE resistance; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscate]], [[crystr]], [[static-string-obfuscation]], [[skcrypter]], and [[mystic-xorstr]].
 
 - **2026-08-22** — ingest `description:Mr-Un1k0d3r/AMSI-ETW-Patch`: entity [[amsi-etw-patch]] (Mr-Un1k0d3r; security research PoC; minimal byte patches bypassing AMSI + ETW; C/PowerShell/C# examples for AMSI branch logic + telemetry short-circuit; control-flow diagrams; red-team simulation + defensive in-memory tampering detection validation; README [ETW Testing]); cited on [[concepts/etw-threat-intelligence]] and [[overviews/windows-kernel]]; cross-linked [[disable-threat-tracing]] and [[kernel-callback-removal]].
