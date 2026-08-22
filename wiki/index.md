@@ -2518,6 +2518,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
 - [ScyllaHide-For-IDA9.0RC](entities/scyllahide-for-ida9.0rc.md) — IDA 9.0 SDK ScyllaHide anti-anti-debug build (C/C++ hook libs, injector, debugger plugins; masks debugger artifacts; TKazer)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
+- [Scythe AntiCheat](entities/scythe-anticheat.md) — Minecraft Bedrock behavior-pack AC (JavaScript/JSON; Scripting API; combat/movement/packet-abuse/chat-spam/scaffold detection; moderation commands + player stats; Realms/worlds/servers; MrDiamond64; Anti Cheat / game:minecraft)
 - [SDCM](entities/sdcm.md) — Microsoft Partner Center CLI: WHQL/Attestation submissions, signed driver download, Windows Update shipping labels
 - [sdk](entities/sdk.md) — Source-engine RE SDK headers (netvars / interfaces; likely CS:GO; C++)
 - [sdkgenny](entities/sdkgenny.md) — general C++ SDK generation library (cursey; PEGTL optional parser; cheat / sdk codegen)
