@@ -595,6 +595,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)
 - [CovertThread (brew02)](entities/covert-thread.md) — covert system threads via page-table module removal, custom IDT address space, NMI-blocked inspection; direct kernel fn exec (Windows Ring0 / anti-forensic research)
+- [cpp-3d-game-tutorial-series](entities/cpp-3d-game-tutorial-series.md) — C++ DirectX 11 3D game tutorial (Win32 windowing; DX11 graphics; entity-component + input; staged engine modules vs game project; tagged milestones; README [DirectX]; PardCode)
 - [cpp-android-basic-samples](entities/cpp-android-basic-samples.md) — Google Play Games C++ SDK sample games (Game Develop / Android source)
 - [cpp-game-engine-book](entities/cpp-game-engine-book.md) — C++/OpenGL hands-on engine book (chapter samples; rendering→animation/GUI/audio/profiling/multithreaded rendering; Lua, Blender, FMOD; Game Engine / guide; ThisisGame)
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)

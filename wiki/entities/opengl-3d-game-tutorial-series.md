@@ -20,4 +20,4 @@ Sits in the README `[OpenGL]` lane beside progressive OpenGL tutorials such as [
 
 ## Related
 
-[[overviews/graphics-api]] · [[overviews/game-engine]] · [[gltut]] · [[cpp-game-engine-book]] · [[joshoengine-native]] · [[3d-game-shaders-for-beginners]] · [[game-engine-from-scratch]]
+[[overviews/graphics-api]] · [[overviews/game-engine]] · [[cpp-3d-game-tutorial-series]] · [[gltut]] · [[cpp-game-engine-book]] · [[joshoengine-native]] · [[3d-game-shaders-for-beginners]] · [[game-engine-from-scratch]]

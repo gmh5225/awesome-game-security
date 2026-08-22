@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PardCode/CPP-3D-Game-Tutorial-Series`: entity [[cpp-3d-game-tutorial-series]] (PardCode; C++ DirectX 11 3D game tutorial; Win32 windowing; DX11 graphics; entity-component patterns + input; reusable engine modules vs game project; tagged milestone versions; beginners/intermediate; README [DirectX]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[opengl-3d-game-tutorial-series]], [[hw3d]], [[intro-to-dx11-revisited]], [[cpp-game-engine-book]], and [[game-engine-from-scratch]].
+
 - **2026-08-22** — ingest `description:PardCode/OpenGL-3D-Game-Tutorial-Series`: entity [[opengl-3d-game-tutorial-series]] (PardCode; cross-platform C++ OpenGL 3D game tutorial; Win32/Cocoa/X11 windowing; VAO/shaders/UBO; entity management + input; step-by-step engine build; beginners/intermediate; README [OpenGL]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[gltut]], [[cpp-game-engine-book]], [[joshoengine-native]], [[3d-game-shaders-for-beginners]], and [[game-engine-from-scratch]].
 
 - **2026-08-22** — ingest `description:PartialVolume/shredos.x86_64`: entity [[shredos-x86-64]] (PartialVolume; bootable Buildroot Linux disk eraser; nwipe with DoD/Gutmann/PRNG/verification; multi-drive; BIOS/UEFI IMG/ISO; optional wipe certificates/logs; security/forensics/IT media sanitization; Disk Eraser); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[forensia]], [[anti-forensics]], [[file-recovery-tool]], [[antfs]], and [[dfirtriage]].
