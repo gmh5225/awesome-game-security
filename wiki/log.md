@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Net5F/AmalgamEngine`: entity [[amalgam-engine]] (Net5F; C++ CMake isometric sprite-based online virtual-world engine; client/server foundations, networking, chat, accounts, live in-world editing; scalable multiplayer on modest hardware; persistent social-world base; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[mir2]], [[mir3-zircon]], [[maplestory-copy]], [[custom-game-engines]], and [[open-source-engines]].
+
 - **2026-08-22** — ingest `description:NetKingJ/awesome-android-security`: entity [[awesome-android-security]] (NetKingJ; curated Android security learning index; Markdown/CSV theory links, tools, write-ups, PoCs, CVE reports; kernel exploitation, app testing, Frida workflows, case studies; Samsung security research references; cheat / Android (Samsung) Security Research References); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-android-root]], [[frida]], [[mobile-anti-cheat]], and [[android-kernel-exploitation]].
 
 - **2026-08-22** — ingest `description:Neurosisccc/Apex-ItemGlow`: entity [[apex-item-glow]] (Neurosisccc; minimal C++ Apex Legends item-glow snippet; entity-slot iteration + highlight memory writes; single wall-highlight visual feature; memory-write visual-hack PoC; cheat / game:apex legends [Item glow]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-simple-aimbot-glow-apex]], [[apex-legends-esp]], [[ow-outlines]], [[cs-2-glow]], and [[easy-anti-cheat]].

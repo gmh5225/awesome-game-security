@@ -151,6 +151,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui; AC/obfuscation-engine research)
 - [Allocating individual pages](entities/allocating-individual-pages.md) — `MmAllocateIndependentPagesEx` isolated kernel page alloc (stealth manual-map; pool-tag evasion; gmh5225)
 - [Alternative Shellcode Exec](entities/alternative-shellcode-exec.md) — Windows callback-API shellcode execution PoCs (Visual Studio samples; position-independent code without CreateThread; user-mode evasion / shellcode engine & tricks; aahmad097)
+- [AmalgamEngine](entities/amalgam-engine.md) — C++ CMake isometric sprite-based online virtual-world engine (client/server, networking, chat, accounts, live in-world editing; Game Engine / source)
 - [AlphaGolang](entities/alphagolang.md) — SentineLabs IDAPython Go binary analysis workflow (pclntab recovery, function discovery, strings, types; YARA for PE/ELF/Mach-O; stripped Go malware RE; cheat / Analyzing Golang Binaries)
 - [APatch](entities/apatch.md) — Android kernel/system patch root (KernelPatch boot.img; SuperKey above root; stock GKI; Cheat / Android root)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
