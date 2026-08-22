@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NotOfficer/cs2-sdk`: entity [[cs2-sdk]] (NotOfficer; auto-generated C++ header SDK for CS2 Source 2 binaries via [[source2gen]]; client/server/rendering/networking/schema class and enum declarations; patch-version metadata; cheat / game:cs2 [SDK]); cited on [[overviews/game-hacking]]; cross-linked [[source2gen]], [[cs2-sdk-source2gen]], [[source2sdk]], and [[cs2-offsets]].
+
 - **2026-08-22** — ingest `description:NotRequiem/antidbg`: entity [[antidbg]] (NotRequiem; C/C++ Windows userland anti-debug library + CLI; fully syscalled API/timing/process-environment/HWBP/exception checks + direct-syscall evasion; stealth-focused anti-RE protections; Anti Debugging); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[antidbg-baka]], [[anti-debugging]], [[makin]], [[dynamizer]], and [[anti-crack-system]].
 
 - **2026-08-22** — ingest `description:NotYetGames/WarriOrb`: entity [[warriorb]] (NotYetGames; public UE4 Dark-Souls-like action platformer source release; extensive C++ gameplay, engine config, localization, multi-target packaging; code-only—omits commercial assets and proprietary plugins; production Unreal architecture study; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unreal-source-explained]], [[unreal-engine-guide]], [[ue4-tutorials]], and [[overgrowth]].
