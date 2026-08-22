@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Qervas/segcap`: entity [[segcap]] (D3D12 MinHook intercept + UE4/5 CustomDepth runtime introspection; per-pixel object-ID masks on retail titles without engine source; automated virtual-gamepad capture; masks/RGB/JSON export for RE and game-security research); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[unreal-image-capture]], [[shader-injector]], [[draw-call-hook]], and [[present-hook]].
+
 - **2026-08-22** — ingest `description:Qfrost911/KACE`: updated entity [[kace]] (Qfrost911 fork; kernel anti-cheat emulation framework; C++ PE mapping, import resolution, memory tracking, exception handling, privileged-instruction emulation; models kernel structures + monitors R/W for anti-debug/anti-emulation checks; learning/experimentation platform; waryas upstream retained); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kdemu]], [[kubera]], and [[winvisor]].
 
 - **2026-08-22** — ingest `description:QianMo/Game-Programmer-Study-Notes`: entity [[game-programmer-study-notes]] (QianMo; large Markdown graphics/rendering study notes; GPU Gems, shader programming, ray tracing, post-processing; software engineering for game dev; Game Engine / guide); renamed prior TastSong notes to [[tastsong-game-programmer-study-notes]]; cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unity-design-pattern]], [[ue4-fps-game]], [[gltut]], [[cpp-game-engine-book]], and [[3d-game-shaders-for-beginners]].
