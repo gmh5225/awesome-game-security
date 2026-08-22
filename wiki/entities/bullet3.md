@@ -20,4 +20,4 @@ Sits in the README **PhysX SDK** / Game Engine lane as the canonical OSS physics
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[gameplay]] · [[gplayengine]] · [[lumos]] · [[stride]] · [[yourgamelib]] · [[kawaii-physics]] · [[omath]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[physx]] · [[gameplay]] · [[gplayengine]] · [[lumos]] · [[stride]] · [[yourgamelib]] · [[kawaii-physics]] · [[omath]]
