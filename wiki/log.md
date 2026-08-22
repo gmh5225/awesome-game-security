@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NeverSight/NeverD`: entity [[neverd]] (NeverSight; C++20 native binary analysis/decompilation; Capstone + four-stage IR on custom LLVM fork; PE/ELF/Mach-O x86-64/i386/AArch64/ARM32; 1:1 instruction lift→LLVM IR or structured C; strict mode; in-place rewrite; `libneverd` C SDK; JSON CLI/plugins; malware/game/anti-cheat RE; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[enigma]], [[kuna]], [[retdec]], [[ida2llvm]], [[re-harness]], and [[decbench]].
+
 - **2026-08-22** — ingest `description:Neverdecel/pcileech-memprocfs-mcp`: entity [[pcileech-memprocfs-mcp]] (Neverdecel; Linux-native Python MCP over memprocfs/leechcorepyc; live PCILeech/MemProcFS DMA R/W, process/module analysis, pattern/pointer-chain/xref scans, UE4/5 + Unity IL2CPP SDK dump helpers, FPGA TLP/benchmark control; DMA-assisted agent RE; Game Develop / MCP); cited on [[overviews/dma-attack]] and [[overviews/reverse-engineering]]; cross-linked [[pcileech]], [[memprocfs-analyzer]], [[memmcp]], and [[cheatengine-mcp-bridge]].
 
 - **2026-08-22** — ingest `description:Nevuly/WSL2-Linux-Kernel-Rolling`: entity [[wsl2-linux-kernel-rolling]] (Nevuly; rolling stable Linux kernel builds + config guidance for WSL2; Markdown docs + CI automation; x86/ARM64 build instructions; reproducible guest-kernel workflows for testing/research; README WSL lane); cited on [[overviews/windows-kernel]]; cross-linked [[wsl2-linux-kernel]], [[wsl]], [[windows-subsystem-linux]], and [[docker-win]].

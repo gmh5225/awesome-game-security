@@ -22,4 +22,4 @@ Aimed at reverse engineers and game security researchers who need LLM-assisted s
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[ida-bridge]] · [[daila]] · [[aida]] · [[ida-llm-explainer]] · [[ida2llvm]] · [[research-rigor]] · [[rev-tools-setup]]
+[[overviews/reverse-engineering]] · [[neverd]] · [[ida-bridge]] · [[daila]] · [[aida]] · [[ida-llm-explainer]] · [[ida2llvm]] · [[research-rigor]] · [[rev-tools-setup]]
