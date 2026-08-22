@@ -169,6 +169,7 @@ sources:
   - wiki/sources/descriptions/YMY1666527646__Phoenix-Valorant-Cheat.md
   - wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md
   - wiki/sources/descriptions/YMY1666527646__Call-of-Duty-Warzone-MW-HACK-ESP-AIMBOT.md
+  - wiki/sources/descriptions/NurdAlert__flirtnite.md
   - wiki/sources/descriptions/Waihbe__Fortnite-External-Cheat-Leak.md
   - wiki/sources/descriptions/tiansongyu__cs2_cheat.md
   - wiki/sources/descriptions/rlybasic__DWM_Hook.md
@@ -348,6 +349,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - Title-specific Fortnite internal DX11 ImGui samples such as [[fortnite-internal-cheat-fixed-and-updated]] (gmh5225; box/skeleton/distance/snapline/FOV/chest/ammo ESP + memory/silent aimbot; DirectX 11 ImGui overlay; cheat / game:fortnite) sit in the same in-process ImGui cheat-menu lane on EAC-protected UE clients. (source: wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md)
 - Title-specific Fortnite internal DX9 ImGui samples such as [[fortnite-hack-esp-exploits-with-menu]] (YMY1666527646; box/line ESP + menu-driven aim/exploit toggles; DirectX 9 ImGui overlay; cheat / game:fortnite [Internal]) sit in that same in-process ImGui cheat-menu lane beside DX11 internals. (source: wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md)
 - Title-specific Fortnite external DX9 ImGui samples such as [[fortnite-external-cheat-leak]] (Waihbe; leaked external source; DirectX 9 ImGui overlay + in-game feature menu; ESP/aim visualization over driver-assisted out-of-process reads; cheat / game:fortnite [External]) sit in the external layered-window / DX9 ImGui overlay lane beside [[fortnite-external-cheat-source-code]] and [[nigusfn]]. (source: wiki/sources/descriptions/Waihbe__Fortnite-External-Cheat-Leak.md)
+- Title-specific Fortnite external DX9 ImGui frameworks such as [[flirtnite]] (NurdAlert; Hyper-V memory interface + Unreal entity/aim modules; DirectX 9 ImGui menu/ESP overlay; cheat / game:fortnite [External]) sit in that same external layered-window / DX9 ImGui overlay lane beside [[fortnite-external-cheat-leak]] and [[interic-fortnite-external-cheat]]. (source: wiki/sources/descriptions/NurdAlert__flirtnite.md)
 - External CS:GO overlay samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; cheat / game:csgo [External]) sit in the external overlay lane beside [[nebulite-external]] and [[csgo-external-cheat]]. (source: wiki/sources/descriptions/gmh5225__Astra.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same external overlay lane beside [[csgo-external-cheat]] and [[astra]]. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - External CS2 Python overlay samples such as [[pythoncs2]] (Vekor64; PyMeow RPM + overlay draw; DearPyGui config UI; ESP boxes / health / weapon labels / lines; Python External tag) sit in the external overlay lane beside ImGui/C# samples such as [[titled-gui-cs2]]. (source: wiki/sources/descriptions/Vekor64__PythonCS2.md)
