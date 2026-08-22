@@ -2521,6 +2521,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [STB (gmh5225)](entities/stb-gmh5225.md) — compile-time IDA-style string-to-array for stack trace building / spoofing research (gmh5225; Cheat Compile Time)
 - [stb](entities/stb.md) — single-header public-domain C libs (stb_image / truetype / vorbis; Image Codec)
 - [stitch](entities/stitch.md) — x86 binary rewriting / obfuscation framework (function relocation, global ref patching, branch handling; CMake examples; badhive)
+- [strolle](entities/strolle.md) — Rust real-time renderer (dynamic GI; ReSTIR; wgpu standalone or Bevy plugin; consumer GPU; Game Engine / Real-time rendering engine)
 - [static-analyzer-factory](entities/static-analyzer-factory.md) — Rust LLVM IR static analysis (C/C++; pointer/value-flow/taint/IFDS; abstract interpretation, points-to, call graphs; Python SDK, CLI, SARIF/HTML export)
 - [sts2-kitlib](entities/sts2-kitlib.md) — Slay the Spire 2 in-game mod dev toolkit (C# Harmony; dev rail, cheat presets, Harmony analysis, hooks, MCP bridge; WRXinYue; cheat / Game Develop)
 - [SteamAntiAntiDebug](entities/steam-anti-anti-debug.md) — bypass Steam anti-debug for debugger attach (x64dbg; Steam)

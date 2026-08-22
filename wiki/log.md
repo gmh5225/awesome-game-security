@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Patryk27/strolle`: entity [[strolle]] (Patryk27; Rust real-time renderer; dynamic global illumination; ReSTIR; wgpu standalone or Bevy-integrated; consumer GPUs without RT cores; graphics programmers / engine researchers; Game Engine / Real-time rendering engine); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[nightshade]], and [[paintfe]].
+
 - **2026-08-22** — ingest `description:PaulNorman01/Dynamizer`: entity [[dynamizer]] (PaulNorman01; compact C++ anti-analysis toolkit; string obfuscation, anti-step-over, SW/HW breakpoint checks, `.text` integrity, return-address manipulation, system DLL unhooking; modular drop-in for dynamic-analysis evasion / anti-tamper research); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[anti-crack-system]], [[anti-debugging]], [[static-string-obfuscation]], [[nt-unhooker]], [[forensia]], and [[self-remapping-code]].
 
 - **2026-08-22** — ingest `description:PaulNorman01/Forensia`: entity [[forensia]] (PaulNorman01; C++ Windows anti-forensics utility; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team simulation and defensive IR validation); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[anti-forensics]], [[antfs]], [[dfirtriage]], [[windows-forensic-artifacts]], [[usn]], [[ntfs-journal-viewer]], and [[clear-driver-traces]].
