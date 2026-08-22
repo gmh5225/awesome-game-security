@@ -468,6 +468,7 @@ sources:
   - wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md
   - wiki/sources/descriptions/systemnb__RootSocketKit.md
   - wiki/sources/descriptions/rogxo__kernel_hack.md
+  - wiki/sources/descriptions/Poko-Apps__MemKernel.md
   - wiki/sources/descriptions/abcz316__rwProcMem33.md
   - wiki/sources/descriptions/abcz316__SKRoot-linuxKernelRoot.md
   - wiki/sources/descriptions/ri-char__rwMem.md
@@ -1867,6 +1868,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android cheat templates such as [[android-cheat-template]] (gmh5225 fork; C/C++; kernel-level work / OpenGL / memory analysis; cheat / game:sausage man) sit in the Cheat Android offensive scaffold lane beside Unity/OpenGL menu frameworks. (source: wiki/sources/descriptions/gmh5225__AndroidCheatTemplate.md) NDK Unity scaffolds such as [[cheat-unity-games]] (SsageParuders; C/C++ VSCode/NDK; Il2CppResolver + [[dobby]]; shared-object build scripts; Android injection / native-layer Unity manipulation study; cheat / game engine explorer:Unity) extend that lane. (source: wiki/sources/descriptions/SsageParuders__CheatUnityGames.md) IL2CPP ImGui menu frameworks such as [[polarimgui]] (Polarmods; C++ native libraries + Android Studio packaging; Unity IL2CPP in-game UI; mobile mod-menu / cheat UI prototyping; cheat / render-draw) extend that lane. (source: wiki/sources/descriptions/Polarmods__PolarImGui.md)
 - Android aarch64 LKM research toolkits such as [[android-kernel-hacking-toolkit]] (filecopy / hideproc / propedit / syscall_hijack; CFI bypass, kprobes, mmuhack for `sys_call_table`) sit in the Cheat Android kernel / LKM lane. (source: wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md)
 - Android/Linux game-memory LKMs such as [[kernel-hack]] (kernel-mode R/W, process management, verification; Kconfig) sit in the same Cheat Android / Linux kernel memory-ops lane. (source: wiki/sources/descriptions/rogxo__kernel_hack.md)
+- Android kernel driver setups such as [[memkernel]] (Poko-Apps; C/C++ kernel + userland; custom-interface process memory R/W; compile-into-kernel-build integration; cheat / `[RPM]`) sit in the same Cheat Android kernel memory-ops lane. (source: wiki/sources/descriptions/Poko-Apps__MemKernel.md)
 - Device kernel sources such as [[android-kernel-xiaomi-pipa]] (Xiaomi Pad 6 / pipa) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_xiaomi_pipa.md)
 
 - Device kernel sources such as [[android-kernel-oneplus-sm8250]] (OnePlus 8/8T/8Pro/(9R?) / SM8250) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_oneplus_sm8250.md)

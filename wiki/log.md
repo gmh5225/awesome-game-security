@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Poko-Apps/MemKernel`: entity [[memkernel]] (Poko-Apps; Android kernel driver setup; C/C++ kernel + userland; custom-interface process memory R/W; kernel-build integration; cheat / RPM); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-hack]], [[android-kernel-hacking-toolkit]], and [[compile-android-driver]].
+
 - **2026-08-22** — ingest `description:Polarmods/PolarImGui`: entity [[polarimgui]] (Polarmods; Android ImGui menu framework for Unity IL2CPP; C++ native + Android Studio build tooling; native `.so` packaging for target APK architectures; in-game UI rendering; mobile game modding / cheat UI prototyping; README Imgui On Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[imgui-unity-android]], [[cheat-unity-games]], [[android-mod-menu-imgui]], and [[il2cpp]].
 
 - **2026-08-22** — ingest `description:PortSwigger/mcp-server`: entity [[mcp-server]] (PortSwigger; Burp Suite MCP extension; Kotlin/Java; MCP endpoint + stdio proxy; desktop AI client config; AI-assisted appsec/Burp workflows; MCP for Burp Suite); cited on [[overviews/overview]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-mcp-servers]], [[ida-pro-mcp]], [[mcp-safety-scanner]], and [[vulnerable-mcp-servers-lab]].
