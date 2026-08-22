@@ -2439,6 +2439,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shadow-stack-walk](entities/shadow-stack-walk.md) — CET/HSP shadow-stack stack walk to catch thread stack spoofing (`CaptureStackBackTrace` / `StackWalk64`; gabriellandau; Detection:Spoof Stack)
 - [shprotect-ac](entities/shprotect-ac.md) — server-first Roblox Luau AC (movement/remote spam/fly/noclip; heartbeat/watchdog; scoring/rollback/kick)
 - [shredder-rs](entities/shredder-rs.md) — x86_64 polymorphic instruction shredding (Rust)
+- [ShredOS x86_64](entities/shredos-x86-64.md) — bootable Buildroot Linux disk eraser (nwipe; DoD/Gutmann/PRNG/verification; multi-drive; BIOS/UEFI IMG/ISO; optional wipe certificates/logs; security/forensics/IT media sanitization; PartialVolume)
 - [Shoggoth](entities/shoggoth.md) — polymorphic x86/x64 shellcode encoder (asmjit JIT; dual encryption + randomized decoders; COFF/PE reflective loaders; Polymorphic Encryptor)
 - [shootergame](entities/shootergame.md) — Unreal ShooterGame Demo with MIT improvements (Cheat / Game Engine Explorer:Unreal; cqcallaw)
 - [shootergame-hack](entities/shootergame-hack.md) — Unreal ShooterGame Demo offensive research (C/C++; rendering / debugging; Cheat / Game Engine Explorer:Unreal; gmh5225)
