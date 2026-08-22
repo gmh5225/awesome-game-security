@@ -3328,6 +3328,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tiansongyu/cs2_cheat [Educational CS2 external ESP (SDL2 + ImGui) with auto-updating offsets via cs2-dumper]
 - https://github.com/xfi0/Titled-Gui-CS2 [GPLv3 external CS2 cheat in C# with ESP, aimbot, radar, and minimal memory writes]
 - https://github.com/hendodev/cs2-ext [External CS2 cheat with aimbot, ESP, spinbot, and pluggable driver interface]
+- https://github.com/Atonl200/ProjectNexus-CSGO [C++20 external CS2 suite with aimbot, ESP, triggerbot, overlay, and optional kernel driver/mapper]
 - https://github.com/UnnamedZ03/CS2-external-base [External]
 - https://github.com/Tokyodidit/cs2External [External]
 - https://github.com/TKazer/CS2_External [External]
