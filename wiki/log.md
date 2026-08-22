@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NullTerminatorr/NullHook`: entity [[nullhook]] (NullTerminatorr; tutorial split driver+client kernel cheat sample; C/C++ memory/hook workflows; external manual-map load; educational kernel-assisted cheat development; README `[NtDxgkGetTrackedWorkloadStatistics]`); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-cheat-for-directx3d]], [[thread-hijacking-injector]], [[kdmapper]], and [[windows-kernel-pagehook]].
+
 - **2026-08-22** — ingest `description:NullTerminatorr/ThreadHijackingInjector`: entity [[thread-hijacking-injector]] (NullTerminatorr; minimal C++ thread-hijack DLL injection PoC; remote context manipulation + execution redirection; compact educational RE sample; Injection Testing); cited on [[overviews/game-hacking]]; cross-linked [[windows-process-injection]], [[launcher-abuser]], [[frankenstein-apc-injection]], [[injectors]], and [[dll-thread-injection-detector]].
 
 - **2026-08-22** — ingest `description:NulledNah/cheat-engine-undetectable`: entity [[cheat-engine-undetectable]] (NulledNah; modified Cheat Engine; Free Pascal/Lazarus + PowerShell patch pipeline; Tier 1 user-mode evasion via surface obfuscation, direct NT syscalls, PE Rich Header/section mutation; Tier 2 BYOVD kernel bridge with CR3 page-table R/W, ObCallback bypass, handleless process hiding; AC architecture / evasion education; cheat / UD CE); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[cheat-engine]], [[ce-easyanticheat-bypass]], [[detection-cheat-engine]], [[detection-cheat-engine-ring0]], [[dbk64-vulnerability-driver]], and [[byovd]].
