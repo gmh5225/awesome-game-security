@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NepMods/InjectARM64`: entity [[inject-arm64]] (NepMods; no-root ARM Android cheat injection platform; Java/Kotlin + C/C++ native hooks; virtualized app-space payload inject; ARM32/ARM64; configurable flows; newer Android; cheat / Non-root injection); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-virtual-inject]], [[virtual-app]], [[android-super-inject]], [[and64-inline-hook]], and [[dobby]].
+
 - **2026-08-22** — ingest `description:Net5F/AmalgamEngine`: entity [[amalgam-engine]] (Net5F; C++ CMake isometric sprite-based online virtual-world engine; client/server foundations, networking, chat, accounts, live in-world editing; scalable multiplayer on modest hardware; persistent social-world base; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[mir2]], [[mir3-zircon]], [[maplestory-copy]], [[custom-game-engines]], and [[open-source-engines]].
 
 - **2026-08-22** — ingest `description:NetKingJ/awesome-android-security`: entity [[awesome-android-security]] (NetKingJ; curated Android security learning index; Markdown/CSV theory links, tools, write-ups, PoCs, CVE reports; kernel exploitation, app testing, Frida workflows, case studies; Samsung security research references; cheat / Android (Samsung) Security Research References); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-android-root]], [[frida]], [[mobile-anti-cheat]], and [[android-kernel-exploitation]].
