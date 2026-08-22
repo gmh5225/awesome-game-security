@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Qemu-Gang/Escape-from-TuxKov`: entity [[escape-from-tuxkov]] (Qemu-Gang; C++ Escape from Tarkov cheat framework for QEMU workflows; ESP/aimbot/recoil; separate memory-access + data-collection; Unity/Mono structures; build/inject/extract/reload scripts; Linux/QEMU external or hybrid setups; cheat / game:eft [QEMU]); cited on [[overviews/game-hacking]]; cross-linked [[eft]], [[meatyeftrelease]], [[qemu-unrealdumper-4-25]], and [[memflow-kvm]].
+
 - **2026-08-22** — ingest `description:Qemu-Gang/QemuUnrealDumper-4.25`: entity [[qemu-unrealdumper-4-25]] (Qemu-Gang; C++ QEMU + memflow port of UnrealDumper-4.25; scans target processes for object arrays, name pools, and engine offsets; names/objects dump with per-game configuration; Unreal RE / game security; UE SDK Dump By QEMU); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[unrealdumper-4-25]], [[uedumper]], [[shh0yauedumper]], and [[memflow-kvm]].
 
 - **2026-08-22** — ingest `description:TrackAndTruckDevs/SPF_GhidraPatternHelper`: entity [[spf-ghidra-pattern-helper]] (Java GhidraScript; Pattern Generator/Finder GUI; SPF-style templates/masked hex/range patterns/raw bytes; PatternEngine wildcards/ranges/optional/alternation/displacement masking; SPF-Framework PatternFinder compat; auto uniqueness verify; ATS/ETS2 plugin RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binja-sigmaker]], [[ida-pro-sigmaker]], [[sigmakerex]], and [[ghidra-scripts]].

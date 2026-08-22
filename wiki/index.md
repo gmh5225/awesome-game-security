@@ -878,6 +878,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eft-monoeft](entities/eft-monoeft.md) — Escape From Tarkov Mono internal cheat (C#; Unity/Mono method hooks; ESP/silent aim/no-recoil/speed/stamina/loot; cheat / game:eft; gmh5225)
 - [eft-newtarkov-cheatproject](entities/eft-newtarkov-cheatproject.md) — Escape From Tarkov cheat (ESP, aimbot, loot visualization; Unity memory reads for overlay; cheat / game:eft; gmh5225)
 - [eft-veil-eft](entities/eft-veil-eft.md) — Escape From Tarkov Veil cheat framework (ESP, aimbot, radar; Unity client memory access; cheat / game:eft; gmh5225)
+- [Escape-from-TuxKov](entities/escape-from-tuxkov.md) — QEMU-based EFT cheat framework (Qemu-Gang; C++; ESP/aimbot/recoil; Unity/Mono structures; memory/data pipelines; build/inject/extract/reload scripts; Linux/QEMU external or hybrid; cheat / game:eft [QEMU])
 - [Elden Ring CT TGA](entities/elden-ring-ct-tga.md) — Elden Ring Cheat Engine table; protonhax + Wine CE on Steam Proton (cheat / game:eldenring [Cheat Engine])
 - [Elden Ring Debug Tool](entities/elden-ring-debug-tool.md) — Elden Ring debug/cheat tool; hidden parameters, stat edit, item spawn, teleport, no-clip (cheat / game:eldenring [Debug tool])
 - [EldenRingLauncher](entities/eldenringlauncher.md) — Elden Ring ImGui/SDL2 custom launcher; EAC bypass options + mod loading (cheat / game:eldenring [Launcher])
