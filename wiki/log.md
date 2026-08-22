@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Poko-Apps/CodMDumper`: entity [[codm-dumper]] (Poko-Apps; Call of Duty Mobile IL2CPP dump package; release distribution; armv7/arm64; Termux; dump.cs/ida.py/IDA JSON; mobile game RE; author-deprecated; [il2cpp dump]); cited on [[overviews/mobile-security]] and [[concepts/il2cpp]]; cross-linked [[il2cppdumper]], [[il2cppdumpdroidgui]], [[memkernel]], and [[codm-esp-aimbot-mod-menu]].
+
 - **2026-08-22** — ingest `description:Poko-Apps/Il2cppDumpDroidGUI`: entity [[il2cppdumpdroidgui]] (Poko-Apps; Android GUI Il2CppDumper adaptation; on-device IL2CPP dump; APK releases; Android 6–14 armeabi-v7a/arm64-v8a; follows upstream Il2CppDumper; mobile game RE; [Il2Cpp Dump GUI]); cited on [[overviews/mobile-security]] and [[concepts/il2cpp]]; cross-linked [[il2cppdumper]], [[il2cpp-inspector]], [[frida-il2cpp-bridge]], and [[memkernel]].
 
 - **2026-08-22** — ingest `description:Poko-Apps/MemKernel`: entity [[memkernel]] (Poko-Apps; Android kernel driver setup; C/C++ kernel + userland; custom-interface process memory R/W; kernel-build integration; cheat / RPM); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-hack]], [[android-kernel-hacking-toolkit]], and [[compile-android-driver]].
