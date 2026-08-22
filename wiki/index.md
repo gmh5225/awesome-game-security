@@ -2630,6 +2630,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Titan](entities/titan.md) — VMProtect devirtualizer (Triton emulation/symbolic exec; AST handler matching; LLVM-oriented lift + CFG recovery; archercreat; Fix VMP)
 - [TitanHide](entities/titanhide.md) — SSDT-hook kernel driver: hide debuggers from selected processes (Nt* return tamper; cheat / debugging)
 - [TOG](entities/tog.md) — The Online Gamer offsets generator (online-game cheat tooling; Offsets Generator)
+- [TOPMOST-Detection](entities/topmost-detection.md) — Win32 topmost-window detector (Oliver-1-1; C++; visible HWND enumeration + `WS_EX_TOPMOST` flagging; companion `SetWindowPos` test console; AC overlay-detection prototyping)
 - [TotalPE2](entities/totalpe2.md) — WPF PE viewer (headers, imports/exports, .NET metadata)
 - [tpm-mmio](entities/tpm-mmio.md) — MMIO TPM 2.0 public EK read (bypass OS hooks; Detection:HWID)
 - [tpm-spoofer](entities/tpm-spoofer.md) — KM TPM request-path hook + UM EK/serial checker (C/C++ WDK; TPM HWID spoof PoC; SamuelTulach + s0ngidong3; Cheat [TPM])
