@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MustardChef/WSABuilds`: entity [[wsa-builds]] (MustardChef; customized WSA build distribution; Magisk/KernelSU + optional GApps variants; automation scripts; install/troubleshoot/recovery documentation; multi-version Windows compatibility; advanced Android security-tooling workflows; README `WSA`); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magiskonwsalocal]], [[wsa-linux-kernel]], [[wsapatch]], and [[wsa-pacman]].
+
 - **2026-08-22** — ingest `description:Muz1K1zuM/PoisonKiller_bof`: entity [[poison-killer-bof]] (Muz1K1zuM; Cobalt Strike Beacon Object Files; **`PoisonX.sys`** BYOVD backend; process kill, driver load/unload, kernel-mode file deletion; MinGW C BOFs + Python helper; red-team / BYOVD BOF payload research; README `[PoisonX.sys]`); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[process-killer-byovd]], [[killer]], [[usb-monitor-bof]], and [[kernel-cactus]].
 
 - **2026-08-22** — ingest `description:MxIris-Reverse-Engineering/RuntimeViewer`: entity [[runtime-viewer]] (MxIris-Reverse-Engineering; Swift/ObjC Apple runtime inspection app; ObjC/Swift metadata from loaded binaries/frameworks; interface browse, syntax-highlighted views, export, framework loading, local/network access; WIP code injection; macOS/iOS dynamic RE; Objective-C Runtime Viewer for macOS and iOS); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[workflow-objc]], [[aimachdec]], [[ida-ios-helper]], [[fridascript]], [[xpc-tracer]], and [[ida-mcp-server]].

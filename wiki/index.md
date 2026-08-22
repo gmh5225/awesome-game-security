@@ -3019,6 +3019,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WubbabooMark](entities/wubbaboomark.md) — debugger-use / anti-anti-debug trace detector (Ghidra/IDA/OllyDbg/x32dbg/x64dbg/WinDbg; Anti Debugging)
 
 - [win11_apk_installer](entities/win11-apk-installer.md) — Win11 APK installer (Python; WSA / Android-on-Windows)
+- [WSA Builds](entities/wsa-builds.md) — customized WSA build distribution (Magisk/KernelSU + optional GApps; automation scripts; install/troubleshoot/recovery docs; MustardChef)
 - [WSA Linux Kernel](entities/wsa-linux-kernel.md) — WSA Linux kernel mirror + build automation (stock + KernelSU branches; GitHub Actions x86_64/arm64; reproducible kernel customization; WSA-Community)
 - [WSAPatch](entities/wsapatch.md) — WSA MSIX patcher for Win10/older Win11 (version-check + Hyper-V bypass; sideload; cinit)
 - [WSA PacMan](entities/wsa-pacman.md) — Flutter/Dart GUI WSA package manager (APK/XAPK sideload, metadata, upgrade/downgrade; alesimula)
