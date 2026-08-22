@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Peribunt/Exception-Ret-Spoofing`: entity [[exception-ret-spoofing]] (Peribunt; minimal x64 return-address spoofing via exception-handler flow; C++ PoC; gadget-chained spoofed call paths; calling-convention reliability/performance tradeoffs; anti-cheat evasion / offensive control-flow research; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[ret-spoofing]], [[callstackspoofer-2]], and [[vpgather]].
+
 - **2026-08-22** — ingest `description:Peribunt/Ret-Spoofing`: entity [[ret-spoofing]] (Peribunt; minimal x64 return-address spoofing without exception handlers; C++ + ASM stubs; low-overhead fake return targets; Windows x64 nonvolatile-register assumptions; stealth call-flow manipulation for RE / cheat development; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[callstackspoofer-2]], [[x86-ret-spoof]], and [[vpgather]].
 
 - **2026-08-22** — ingest `description:Peribunt/VPGATHER`: entity [[vpgather]] (Peribunt; user-mode PoC; AVX2 VPGATHER + vectored exception handling; infer virtual-address faultability before dereference; CPU support checks + repeated probe API; stealth memory probing for RE / AC bypass / low-level security research); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[bloodhound]] and [[cpp-veh-dbi]].
