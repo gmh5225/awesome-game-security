@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NekoyaHouse/Epsilon`: entity [[epsilon]] (NekoyaHouse; NeoForge/Fabric multi-loader Minecraft utility client; Java + Gradle Kotlin; modular combat/movement/player-automation/render modules; Mixins + custom event bus; extensible addon system + Lua scripting; Lumin/PrismRHI custom HUD/UI; packet manipulation + rotation systems + client-side bypass study; cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[lenrete-mod]], [[phantom-client]], [[yuri]], [[seiun-ac]], and [[minecraft-anti-cheat]].
+
 - **2026-08-22** — ingest `description:Neo23x0/Raccine`: entity [[raccine]] (Neo23x0; lightweight Windows anti-ransomware; debugger registration for `vssadmin`/`wmic`; YARA command-line matching; parent-chain termination + event logging; no resident agent; blocks shadow-copy deletion; C/C++/C#; README [EDR]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[bamboozledr]], [[the-hive]], [[wazuh]], [[peregrine-anticheat]], and [[pi-defender]].
 
 - **2026-08-22** — ingest `description:NeoMaster831/kurasagi`: entity [[kurasagi]] (NeoMaster831; C/C++ kernel PoC; Win11 24H2–25H2 runtime PatchGuard bypass; kdmapper manual-map load; CRITICAL_STRUCTURE_CORRUPTION edge-case research; lab-only PG bypass); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[patchguard-2023]], [[tableflipper]], and [[vulnerablepatchguardexploit]].

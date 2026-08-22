@@ -934,6 +934,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Enigma](entities/enigma.md) — standalone native Ghidra SLEIGH/Pcode decompiler (C++; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agents; adam-040)
 - [EntropyReducer](entities/entropy-reducer.md) — PE section padding / data-distribution manipulation to lower Shannon entropy (AV/AC heuristic evasion)
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
+- [Epsilon](entities/epsilon.md) — NeoForge/Fabric multi-loader Minecraft utility client (Java; modular combat/movement/render; Mixins + event bus; addon system + Lua; Lumin/PrismRHI HUD; NekoyaHouse; cheat / game:minecraft)
 - [EquilibriumEngine](entities/equilibrium-engine.md) — data-oriented C11 ECS game engine (multi-threaded; hot-reload libraries/shaders; clang; Game Engine / source)
 - [equ8_bypass](entities/equ8-bypass.md) — simple EQU8 user-mode bypass (registry driver path + IOCTL handle close; explore anticheat:equ8)
 - [EQU8-PoC](entities/equ8-poc.md) — full C++ EQU8 kernel driver reimplementation (explore anticheat:equ8; driver development)
