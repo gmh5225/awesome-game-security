@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Perfare/Zygisk-Il2CppDumper`: entity [[zygisk-il2cppdumper]] (Perfare; Android Zygisk runtime IL2CPP dump module; C/C++ native + Android build; inject into target apps; post-load metadata extraction bypasses static encryption/obfuscation/packing on mobile Unity titles; mobile game RE; [Il2Cpp Dump for Android Platform]); cited on [[overviews/mobile-security]] and [[concepts/il2cpp]]; cross-linked [[zygisk]], [[il2cppdumper]], [[il2cppdumpdroidgui]], and [[frida-il2cpp-bridge]].
+
 - **2026-08-22** — ingest `description:PerformanC/ReZygisk`: entity [[rezygisk]] (PerformanC; open-source standalone C Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging, operational tooling; transparent Zygisk-compatible runtime for Android security researchers and module developers; cheat / Transparent implementation of Zygisk); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[magisk]], [[kernelsu]], [[florida-zygisk]], [[ksurusda]], and [[zygisk-frida]].
 
 - **2026-08-22** — ingest `description:Peribunt/Exception-Ret-Spoofing`: entity [[exception-ret-spoofing]] (Peribunt; minimal x64 return-address spoofing via exception-handler flow; C++ PoC; gadget-chained spoofed call paths; calling-convention reliability/performance tradeoffs; anti-cheat evasion / offensive control-flow research; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[ret-spoofing]], [[callstackspoofer-2]], and [[vpgather]].
