@@ -12,7 +12,7 @@ confidence: medium
 
 **UEFI-based no-BSOD** proof of concept that **patches the Windows kernel during boot** instead of loading a runtime driver. An **EFI-stage loader** alters crash-handling behavior early in startup—moving bugcheck interception from a conventional kernel driver into the firmware/boot chain. C/C++ components combine export lookup, pattern search, and low-level memory overwrite helpers across kernel and firmware code. (source: wiki/sources/descriptions/NSG650__NoMoreBugCheckReloaded.md)
 
-Research lane: **firmware-to-kernel security**—early boot patching and **bugcheck interception** before normal OS driver-load telemetry. Successor/reloaded variant in the NSG650 bugcheck-research family (alongside runtime-driver approaches such as original NoMoreBugCheck and visual bugcheck hacks).
+Research lane: **firmware-to-kernel security**—early boot patching and **bugcheck interception** before normal OS driver-load telemetry. Successor/reloaded variant in the NSG650 bugcheck-research family (alongside runtime-driver approaches such as [[nomore-bugcheck]] and visual bugcheck hacks).
 
 ## Links
 
@@ -20,4 +20,4 @@ Research lane: **firmware-to-kernel security**—early boot patching and **bugch
 
 ## Related
 
-[[bugcheck-suppressor]] · [[bootlicker]] · [[patchguard]] · [[ntdoom]] · [[overviews/windows-kernel]]
+[[nomore-bugcheck]] · [[bugcheck-suppressor]] · [[bootlicker]] · [[patchguard]] · [[ntdoom]] · [[overviews/windows-kernel]]

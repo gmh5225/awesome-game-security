@@ -20,4 +20,4 @@ Research lane: kernel exception handling, bugcheck pipeline interception, and VB
 
 ## Related
 
-[[hvci]] · [[cet-research]] · [[windows-kernel-shadow-stack]] · [[patchguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[hvci]] · [[cet-research]] · [[windows-kernel-shadow-stack]] · [[patchguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

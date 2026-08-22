@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NSG650/NoMoreBugCheck`: entity [[nomore-bugcheck]] (NSG650; runtime kernel driver; KeBugCheckEx code patch + restoration logic suppresses standard BSOD handling; kernel-hooking experiment demonstrating crash-safety bypass risks); cited on [[overviews/windows-kernel]] and [[patchguard]]; cross-linked [[nomore-bugcheck-reloaded]], [[bugcheck-suppressor]], and [[patchguard]].
+
 - **2026-08-22** — ingest `description:NSG650/NoMoreBugCheckReloaded`: entity [[nomore-bugcheck-reloaded]] (NSG650; UEFI no-BSOD PoC; EFI-stage loader patches kernel during boot; export lookup + pattern search + low-level memory overwrite; moves bugcheck interception from runtime driver to firmware stage; early boot patching / bugcheck research); cited on [[overviews/windows-kernel]] and [[patchguard]]; cross-linked [[bugcheck-suppressor]], [[bootlicker]], and [[ntdoom]].
 
 - **2026-08-22** — ingest `description:NSG650/NtDOOM`: entity [[ntdoom]] (NSG650; Windows kernel DOOM port; PureDOOM adapted for driver context; win32k-side syscall handling + thread context spoofing + kernel graphics/input; extreme NT GUI/syscall research demo; README Doom running in the NT kernel); cited on [[overviews/windows-kernel]] and [[overviews/graphics-api]]; cross-linked [[kernel-drawing]], [[krnl-gdi-render]], [[callmewin32kdriver]], [[win32k-file-collection]], and [[driver-communication-list]].
