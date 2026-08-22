@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NSG650/NtDOOM`: entity [[ntdoom]] (NSG650; Windows kernel DOOM port; PureDOOM adapted for driver context; win32k-side syscall handling + thread context spoofing + kernel graphics/input; extreme NT GUI/syscall research demo; README Doom running in the NT kernel); cited on [[overviews/windows-kernel]] and [[overviews/graphics-api]]; cross-linked [[kernel-drawing]], [[krnl-gdi-render]], [[callmewin32kdriver]], [[win32k-file-collection]], and [[driver-communication-list]].
+
 - **2026-08-22** — ingest `description:NTFSparse/ntfs_parse`: entity [[ntfs-parse]] (NTFSparse; Python NTFS forensic parser suite; links MFT/$LogFile/$UsnJrnl; CLI record export, transaction parsing, data extraction, timeline PoC; modular parsers; parsed text/CSV; digital forensics / filesystem research); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[ntfs-linker]], [[ntfstool]], [[ntfs-journal-viewer]], [[file-recovery-tool]], and [[dfirtriage]].
 
 - **2026-08-22** — ingest `description:NVIDIA-RTX/godot`: entity [[nvidia-rtx-godot]] (NVIDIA RTX fork of Godot Engine; RTX rendering-server, editor, and scene-tree optimizations; ray tracing and GPU-accelerated Godot development; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[godot]], [[godot-demo-projects]], [[godot-plush-character]], [[spartan-engine]], and [[strolle]].
