@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Passer1072/RookieAI_yolov8`: entity [[rookieai-yolov8]] (Passer1072; Python YOLOv8 Ultralytics real-time FPS aim-assist; multi-process capture/inference; PyTorch/TensorRT/ONNX model formats; Win32/Logitech/kmNet input backends; configurable aim/trigger; cheat / Machine Learning YOLOv8); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[ai-aimbot]], [[ai-fps-b00m-h3adsh0t]], [[yolov5-pubg]], [[nuremx]], [[maplestory-yolov8-training]], and [[hardware-input-injection]].
+
 - **2026-08-22** — ingest `description:PatchRequest/PeregrineAntiCheat`: entity [[peregrine-anticheat]] (PatchRequest; educational full-stack Windows AC; kernel minifilter + ObCallbacks + APC injection + MinHook API hooks + ETW-TI; in-process YARA signature scan, call stack validation, hardware breakpoint monitoring, named-pipe backend reports; Tauri GUI + cheat test suite); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[concepts/kernel-callbacks]], [[concepts/etw-threat-intelligence]], [[anticheat-poc]], [[kernel-anticheat]], [[anti-cheat-testing-framework]], [[mandragora]], and [[basic-anti-cheat]].
 
 - **2026-08-22** — ingest `description:Patryk27/strolle`: entity [[strolle]] (Patryk27; Rust real-time renderer; dynamic global illumination; ReSTIR; wgpu standalone or Bevy-integrated; consumer GPUs without RT cores; graphics programmers / engine researchers; Game Engine / Real-time rendering engine); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[nightshade]], and [[paintfe]].

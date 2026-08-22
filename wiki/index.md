@@ -2362,6 +2362,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
 - [RIVER](entities/river.md) — Bitdefender dynamic binary analysis framework (ELF/PE loader; external mapping; native import resolution; x86 runtime instrumentation; cheat / DBI)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
+- [RookieAI_yolov8](entities/rookieai-yolov8.md) — Passer1072 YOLOv8 Ultralytics FPS aim-assist (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [RootAppDetector](entities/root-app-detector.md) — Java Android POC: detect installed root-manager apps via package/activity launch + SecurityException (Detection:Android root; apkunpacker)
 - [Root My Pixel](entities/root-my-pixel.md) — one-tap temporary Pixel root (CVE-2026-43499 IonStack + ReSukiSU/KernelSU; Shizuku; Pixel 7–10; Kotlin/JNI; cheat / Android root)
