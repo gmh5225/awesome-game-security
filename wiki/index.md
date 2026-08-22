@@ -637,6 +637,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
 - [d-process](entities/d-process.md) — Linux decoy process generator (on-demand C compile + nohup; arbitrary process names; anti-cheat / tracker enumeration research)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
+- [Dani's Nightmare](entities/danis-nightmare.md) — BepInEx Harmony mod for Muck (C# runtime debug/cheat chat commands; player/enemy/item/powerup/time manipulation; Tab autocomplete from live memory; mod dev / RE / engine stress-test; PlinKuuu)
 - [DakotaAC](entities/dakotaac.md) — Spigot/Paper Minecraft AC (ProtocolLib + Citizens2; combat/movement/inventory modules; YAML kick/ban)
 - [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)
 - [Dark Souls III Cheat Engine Guide](entities/dark-souls-iii-cheat-engine-guide.md) — The Grand Archives DS3 Cheat Engine table guide (cheat / game:dark souls [Cheat Engine])
