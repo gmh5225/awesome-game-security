@@ -4,7 +4,7 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
-- **2026-08-22** — ingest `description:Oliver-1-1/SmmInfect`: entity [[smm-infect]] (Oliver-1-1; SMM backdoor research framework; firmware SMI handler + Windows/Linux user-mode clients; UEFI/EDK2; BIOS patching docs; secure-boot/firmware constraints; firmware trust-boundary / high-privilege persistence research; README [SMM Driver]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[smm]], [[uefi-graphic]], [[simpleuefi]], [[visualuefi-2-0]], and [[uefi-bootkit]].
+- **2026-08-22** — ingest `description:Oliver-1-1/RwxScanner`: entity [[rwxscanner]] (Oliver-1-1; Windows WDK kernel driver; PML4/PDPT/PD/PT walk via physical memory reads; logs suspicious writable+executable mappings per process; image name + admin-token metadata; low-level AC/malware detection around injected or self-modifying code; README [RWX Memory scanner]); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[rwxfinder]], [[ghost]], [[ptview]], and [[page-table-injector]].
 
 - **2026-08-22** — ingest `description:Oliver-1-1/TOPMOST-Detection`: entity [[topmost-detection]] (Oliver-1-1; Windows C++ utility; Win32 visible-window enumeration; `WS_EX_TOPMOST` always-on-top overlay flagging; companion console self-topmost via `SetWindowPos` for testing; anti-cheat prototyping / basic overlay-detection experiments; README [Detect simple top most windows]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[not-an-overlay]], [[window-hijack-overlay]], [[anti-cheat-testing-framework]], and [[uefi-graphic]].
 
