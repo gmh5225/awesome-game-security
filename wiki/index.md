@@ -2454,6 +2454,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [StealingSignatures](entities/stealing-signatures.md) — C++ PE Authenticode security-directory blob copy; certificate metadata transplant without valid signature (Sentient111; verifier/tamper-detection testing)
 - [sign-expired](entities/sign-expired.md) — signtool XmlLite.dll sideload; patch cert/time APIs to bypass expiry (Sign Leaked Cert)
 - [sigmakerex](entities/sigmakerex.md) — enhanced IDA Pro signature maker (code/IDA/x64dbg formats; uniqueness verify; batch; clipboard; cheat / IDA Plugins)
+- [SpartanEngine](entities/spartan-engine.md) — C++ research game engine (bindless GPU-driven renderer; real-time GI + hardware ray tracing; high-frequency physics; engine subsystems/assets/build scripts; engine programmers + graphics researchers; Game Engine / Research-focused game engine)
 - [spf-ghidra-pattern-helper](entities/spf-ghidra-pattern-helper.md) — Ghidra script: SPF-style byte signature generate/search (Pattern Generator/Finder; wildcards/ranges/alternation; SPF-Framework PatternFinder compat; ATS/ETS2 plugin RE; TrackAndTruckDevs)
 - [SignToolEx](entities/signtoolex.md) — Sign Leaked Cert; expired/leaked Authenticode signing; no timestamp spoofing (Anti Cheat → Sign Tools)
 - [SignToolGUI](entities/signtoolgui.md) — Windows Forms signtool.exe GUI (cert store / PFX / Azure Trusted Signing; batch sign; Anti Cheat → Sign Tools)
