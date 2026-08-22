@@ -2163,6 +2163,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [Piano Game](entities/pianogame.md) — C/C++ piano game (rendering/graphics focus; Game Develop / source)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
+- [PI-Defender](entities/pi-defender.md) — Windows kernel driver blocking process injection via handle-right filtering (remote memory write / operation permissions; hollowing, doppelgänging, ghosting, DLL injection docs/tests; defensive AC hardening)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
 - [pipeviewer](entities/pipeviewer.md) — Windows GUI named-pipe enumerator (security descriptors, clients, access modes, owning process; filter/search; real-time create/delete monitor; CyberArk; Windows IPC RE)
 - [pixieditor](entities/pixieditor.md) — open-source C#/.NET Avalonia 2D editor (pixel art, painting, vector, animation, image editing; multi-toolset canvas, timeline animation, node-based rendering; artists/indie dev content creation; Game Engine / Universal Editor for 2D)

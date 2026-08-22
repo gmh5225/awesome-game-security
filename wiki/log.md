@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PI-Defender/pi-defender`: entity [[pi-defender]] (PI-Defender; C++ WDK kernel security driver; filters dangerous handle rights—remote memory write and operation permissions—on protected processes to block injection chains; docs/tests for process hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[windows-process-injection]], [[injectors]], [[oac]], and [[peregrine-anticheat]].
+
 - **2026-08-22** — ingest `description:PShocker/Android_bpf_sys`: entity [[android-bpf-sys]] (PShocker; minimal Android eBPF syscall monitor; `raw_syscalls/sys_enter` tracepoint → BPF map; C++ userland readback via Android bpf libs; low-level security monitoring / syscall analysis; cheat / EBPF); cited on [[overviews/mobile-security]] and [[android-ebpf]]; cross-linked [[stackplz]], [[edbg]], [[btrace]], and [[frida]].
 
 - **2026-08-22** — ingest `description:PShocker/Zygisk-MagiskHide`: entity [[zygisk-magiskhide]] (PShocker; Zygisk Magisk module recreating MagiskHide-style concealment; native mount hide + sensitive system-property patching; multi-ABI module archives; mobile security research / anti-detection testing); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[magisk]], [[magiskhide]], [[riru-momo-hider]], and [[magiskdetector]].
