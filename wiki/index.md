@@ -1986,6 +1986,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
 - [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
 - [OfflineCrashDumpUefi](entities/offline-crash-dump-uefi.md) — Microsoft EDK2 Offline Crash Dump package (firmware pre-OS memory dump; DXE writer; encryption/redaction; gmh5225)
+- [PixelOS official_devices](entities/official-devices.md) — PixelOS-AOSP metadata repo (Markdown/JSON device lists, API data, changelog notes, release templates; authoritative support matrix; cheat / PixelOS device trees)
 - [offsets](entities/offsets.md) — C++ CS:GO offset dump (`[Offset]`; cheat / game:csgo)
 - [ohack](entities/ohack.md) — open-source WoW hack (fail46; C++; memory analysis; cheat / game:wow)
 - [OffsetStreaming](entities/offset-streaming.md) — simple C/C++ program to stream game offsets to cheat clients (Some Tricks / Windows Ring3; gmh5225)
