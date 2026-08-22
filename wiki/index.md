@@ -257,6 +257,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiCheat-Testing-Framework](entities/anti-cheat-testing-framework.md) — modular Windows AC detection test harness (mem R/W / inject / overlay / input / KM; Testing Framework)
 - [Anti-Cheat-TestBench (ekknod)](entities/anti-cheat-testbench.md) — AC testBench harness (C++/C; AC research + driver development + hooking; Open Source Anti Cheat System; README [TestBench])
 - [UAC (c4kef)](entities/uac.md) — anti-cheat development platform (Visual Studio kernel driver; common cheat-technique detection; C++ kernel detection test framework; Cheat developer platform)
+- [UAGC (UltimateAntiGamingChair)](entities/uagc.md) — PaperMC **1.21** context-aware anti-cheat plugin (Java 21 Gradle; modular movement/combat/interaction/protocol checks; confidence/evidence model; exemptions, staff bypass visibility, punishments, freeze, integration API; no1qq; Anti Cheat / game:minecraft)
 - [Anti-Cheat-Amateur](entities/anti-cheat-amateur.md) — MemRE memory editor + GothGirlFeet kdmapper KMDF driver (NUL IOCTL; DBVM shims; UE scan; Tencent ACE research)
 - [anti-crack-system](entities/anti-crack-system.md) — Windows C++ anti-tamper / anti-crack framework prototype (anti-debug/anti-dump/anti-attach, integrity checks, process-kill, self-remapping code, string obfuscation; ReFo0)
 - [Anti-Debugger-Protector-Loader](entities/anti-debugger-protector-loader.md) — Windows C++ anti-debug protector/loader (debugger process/window/driver scans; optional termination; VMProtect SDK; YouNeverKnow00)
