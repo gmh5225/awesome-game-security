@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NullHooks/NullHooks`: entity [[nullhooks]] (NullHooks; learning-focused inactive internal CS:GO cheat; C++; modular gameplay features, configuration presets, and internal-cheat utilities; references and contribution notes; educational game-hacking architecture study; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[csgosimple]], [[solace-csgo]], [[osiris]], and [[intro-to-gamehacking]].
+
 - **2026-08-22** — ingest `readme:categories`: Cheat ~2739 (+2) / Anti Cheat ~689 (+1; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-22** — ingest `description:no1qq/UAGC`: entity [[uagc]] (no1qq; UltimateAntiGamingChair; PaperMC 1.21 Java plugin; modular check engine; confidence/evidence model; staff tooling—exemptions, bypass visibility, alerts, punishments, freeze, integration API; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[minecraft-anti-cheat]], [[dakotaac]], [[guardac]], [[react]], and [[mlanticheat]].

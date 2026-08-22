@@ -1990,6 +1990,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nullmap](entities/nullmap.md) — Windows driver mapper with post-map trace cleanup (header zero, pool unlink; Afd.sys; gmh5225)
 - [NullBase](entities/nullbase.md) — simple C++ game-hack base for beginners (NullTerminatorr; memory helpers, entity/local-player abstractions, math + W2S; Visual Studio layout; teaches cheat framework structure)
 - [NullHook](entities/nullhook.md) — tutorial split driver+client kernel cheat sample (NullTerminatorr; C/C++ memory/hook workflows; external manual-map load; educational kernel-assisted cheat development; NtDxgkGetTrackedWorkloadStatistics)
+- [NullHooks](entities/nullhooks.md) — learning-focused inactive internal CS:GO cheat (C++; modular gameplay features, config presets, internal-cheat utilities; educational game-hacking architecture study; Internal tag)
 - [NullDriverCheat](entities/nulldriver-cheat.md) — Win11 Null-pattern dxgkrnl export hook (`NtOpenCompositionSurfaceSectionInfo`; covert KM↔UM R/W + GDI helpers; gmh5225)
 - [nstool](entities/nstool.md) — general-purpose Switch read/extract tool (console emulator / Switch research)
 - [XCI Explorer](entities/xci-explorer.md) — Windows Switch XCI/NSP package inspector (C# WinForms; XCI/NCA/HFS0/PFS0; metadata, extract, hash, cert edit; Switch modding / cartridge RE; StudentBlake)
