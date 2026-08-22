@@ -2224,6 +2224,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
 - [qemu_blog](entities/qemu-blog.md) — Airbus SecLab QEMU internals guide (machine/device, memory regions, interrupts, timers, PCI, TCG; Markdown + source refs; Guide)
 - [qemu-patched](entities/qemu-patched.md) — Hidden QEMU fork (CPUID / SMBIOS / ACPI anti-VM spoof)
+- [QemuUnrealDumper-4.25](entities/qemu-unrealdumper-4-25.md) — QEMU/memflow UE4.25 dumper (C++; object arrays/name pools; names/objects; per-game offsets; UE SDK Dump By QEMU)
 - [qemu-gvm](entities/qemu-gvm.md) — QEMU (AMD/Intel; Android emulator research)
 - [QEMU-Nyx](entities/qemu-nyx.md) — Intel-PT QEMU fuzzing (fast reset / PT decode / breakpoint hooks; Cheat QEMU/KVM)
 - [ispras/qemu](entities/ispras-qemu.md) — ISP RAS QEMU fork (analysis / instrumentation / windbg tree; Cheat QEMU/KVM)

@@ -18,4 +18,4 @@ C++ **external** Unreal Engine 4.25+ SDK dumper: pattern-scans `GObjects` and `G
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unreal-object-model]] · [[patternsleuth]] · [[ts-ue4dumper]] · [[ue4dumper]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[unreal-object-model]] · [[qemu-unrealdumper-4-25]] · [[patternsleuth]] · [[ts-ue4dumper]] · [[ue4dumper]]

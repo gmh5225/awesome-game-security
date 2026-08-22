@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Qemu-Gang/QemuUnrealDumper-4.25`: entity [[qemu-unrealdumper-4-25]] (Qemu-Gang; C++ QEMU + memflow port of UnrealDumper-4.25; scans target processes for object arrays, name pools, and engine offsets; names/objects dump with per-game configuration; Unreal RE / game security; UE SDK Dump By QEMU); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[unrealdumper-4-25]], [[uedumper]], [[shh0yauedumper]], and [[memflow-kvm]].
+
 - **2026-08-22** — ingest `description:TrackAndTruckDevs/SPF_GhidraPatternHelper`: entity [[spf-ghidra-pattern-helper]] (Java GhidraScript; Pattern Generator/Finder GUI; SPF-style templates/masked hex/range patterns/raw bytes; PatternEngine wildcards/ranges/optional/alternation/displacement masking; SPF-Framework PatternFinder compat; auto uniqueness verify; ATS/ETS2 plugin RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binja-sigmaker]], [[ida-pro-sigmaker]], [[sigmakerex]], and [[ghidra-scripts]].
 
 - **2026-08-22** — ingest `description:zensu357/ksurusda`: entity [[ksurusda]] (Android Zygisk module; Rusda anti-detection Frida gadget inject at `postAppSpecialize`; KernelSU/Magisk/APatch; library remapping, startup delay, child-process gating; WebUI/JSON; TCP listen + offline script modes; no APK resign); cited on [[concepts/frida]] and [[concepts/zygisk]]; cross-linked [[florida-zygisk]], [[zygisk-frida]], and [[ksu-rust-frida]].
