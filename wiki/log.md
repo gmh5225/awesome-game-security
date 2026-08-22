@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Oliver-1-1/SmmInfect`: entity [[smm-infect]] (Oliver-1-1; SMM backdoor research framework; firmware SMI handler + Windows/Linux user-mode clients; UEFI/EDK2; BIOS patching docs; secure-boot/firmware constraints; firmware trust-boundary / high-privilege persistence research; README [SMM Driver]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[smm]], [[uefi-graphic]], [[simpleuefi]], [[visualuefi-2-0]], and [[uefi-bootkit]].
+
 - **2026-08-22** — ingest `description:Oliver-1-1/TOPMOST-Detection`: entity [[topmost-detection]] (Oliver-1-1; Windows C++ utility; Win32 visible-window enumeration; `WS_EX_TOPMOST` always-on-top overlay flagging; companion console self-topmost via `SetWindowPos` for testing; anti-cheat prototyping / basic overlay-detection experiments; README [Detect simple top most windows]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[not-an-overlay]], [[window-hijack-overlay]], [[anti-cheat-testing-framework]], and [[uefi-graphic]].
 
 - **2026-08-22** — ingest `description:Oliver-1-1/UEFI-Graphic`: entity [[uefi-graphic]] (Oliver-1-1; C++ UEFI graphics framework; VisualUefi workflow; framebuffer wrapper classes for screens/colors/text/shapes; mouse input + simple file ops; pre-boot graphical tooling for firmware developers / low-level security researchers; README [Simpel usage of graphic in UEFI]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[simpleuefi]], [[easyuefi]], [[visualuefi-2-0]], [[advanced-efi-driver-with-gdi-and-kernel-mouse-input]], and [[eficmake]].
