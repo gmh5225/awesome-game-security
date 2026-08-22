@@ -2036,6 +2036,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ow-Outlines](entities/ow-outlines.md) — Overwatch internal glow/outline ESP (injected DLL; GlowESP offset + VEH; outline rendering memory writes; cheat / game:overwatch)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
+- [OSAntiCheat](entities/osanticheat.md) — experimental server-side CS2 CounterStrikeSharp heuristic AC (spinbot/aimbot/triggerbot/wallhack detectors; fusion suspicion tiers; log-only)
 - [osiris](entities/osiris.md) — open-source CS:GO internal cheat (modern C++; ESP/glow/aimbot/triggerbot/backtrack/skin changer; interface pointers/pattern scan/VMT hooks; danielkrupinski; cheat / game:csgo)
 - [OsirisAndExtra](entities/osiris-and-extra.md) — Internal CS:GO: driver / OpenGL / rendering (C/C++; cheat / game:csgo)
 - [osmium](entities/osmium.md) — C++ framework for external cheats (cragson; cheat / guide; game-security RE / offensive technique study; not a best-practices reference)

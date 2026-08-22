@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Pintuzoft/OSAntiCheat`: entity [[osanticheat]] (Pintuzoft; experimental server-side CS2 CounterStrikeSharp heuristic AC; C#/.NET; server-visible positions/view angles/shots/timing; statistical spinbot/aimbot/triggerbot/wallhack detectors + McNemar null test; fusion suspicion engine with decay/corroboration → Watch/Review tiers; log-only calibration; Anti Cheat / Server); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[cs2ac]], [[cs2-calladmin]], [[aimbot-detection-prototype]], and [[cs2-hybrid-anticheat-proposal]].
+
 - **2026-08-22** — ingest `description:PixelGuys/Cubyz`: entity [[cubyz]] (PixelGuys; open-source Zig 3D voxel sandbox; OpenGL pipeline; LOD rendering, unbounded 3D chunks, procedural crafting; Windows/Linux; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[zig-gamedev]], [[gltut]], [[cpp-game-engine-book]], and [[campfire]].
 
 - **2026-08-22** — ingest `description:PixelOS-AOSP/manifest`: entity [[manifest]] (PixelOS-AOSP; XML repo manifests + snippets; repo init/sync and ROM build docs; revision-locked upstream project selection; cheat / Android ROM); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[official-devices]], [[android-rom-list]], and [[pixel-flasher]].
