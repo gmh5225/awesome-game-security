@@ -2143,6 +2143,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)
 - [pipeviewer](entities/pipeviewer.md) — Windows GUI named-pipe enumerator (security descriptors, clients, access modes, owning process; filter/search; real-time create/delete monitor; CyberArk; Windows IPC RE)
+- [pixieditor](entities/pixieditor.md) — open-source C#/.NET Avalonia 2D editor (pixel art, painting, vector, animation, image editing; multi-toolset canvas, timeline animation, node-based rendering; artists/indie dev content creation; Game Engine / Universal Editor for 2D)
 - [PINCE](entities/pince.md) — Linux GDB front-end (Qt; memory scan/edit, pointer chains, CE tables; Python + GDB)
 - [Pillager](entities/pillager.md) — Go Windows credential harvest (browser/Wi-Fi/chat decrypt-export; post-ex)
 - [Pine (canyie)](entities/canyie-pine.md) — Android ART Java method hooking (inline + replacement; Xposed-compatible API; Android 7.0+; no root; Android RE / app modification)

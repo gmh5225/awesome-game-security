@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PixiEditor/PixiEditor`: entity [[pixieditor]] (PixiEditor; open-source C#/.NET Avalonia 2D editor; pixel art, painting, vector, animation, image editing; multi-toolset canvas, timeline animation, node-based rendering; artists/indie dev content creation; Game Engine / Universal Editor for 2D); cited on [[overviews/game-engine]]; cross-linked [[flatredball]], [[murder]], [[prowl]], and [[gb-studio]].
+
 - **2026-08-22** — ingest `description:PlinKuuu/DanisNightmare`: entity [[danis-nightmare]] (PlinKuuu; BepInEx Harmony mod for Unity survival game Muck; C# runtime debug/cheat chat-command suite; Harmony IL patches on player stats, mob scaling, loot, chests, day/night, item spawn; /player /enemy /powerup /items with Tab autocomplete from live memory; god mode, wave control, peaceful mode, time travel; mod dev / RE / engine stress-test); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[bepinex-il2cppbase]], [[sts2-kitlib]], [[unityexplorer]], and [[wellsanticheat]].
 
 - **2026-08-22** — ingest `description:Poko-Apps/CodMDumper`: entity [[codm-dumper]] (Poko-Apps; Call of Duty Mobile IL2CPP dump package; release distribution; armv7/arm64; Termux; dump.cs/ida.py/IDA JSON; mobile game RE; author-deprecated; [il2cpp dump]); cited on [[overviews/mobile-security]] and [[concepts/il2cpp]]; cross-linked [[il2cppdumper]], [[il2cppdumpdroidgui]], [[memkernel]], and [[codm-esp-aimbot-mod-menu]].
