@@ -2215,6 +2215,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Phoenix-Valorant-Cheat](entities/phoenix-valorant-cheat.md) — Valorant external cheat (C++; ESP/aimbot/rage-mode; OpenGL/GLFW + ImGui menu/overlay; offset defs + vector math + external memory helpers; YMY1666527646; cheat / game:valorant [External])
 - [physmem_drivers](entities/physmem-drivers.md) — vulnerable physmem driver list (namazso; no PoC; Cheat Vulnerable Driver)
 - [PhysX](entities/physx.md) — NVIDIA PhysX source release (C++; rigid-body/collision SDK; CMake/Python builds; Windows/Linux/Android/Apple; PhysX SDK / Game Engine)
+- [PhysX 3.4](entities/physx-3-4.md) — NVIDIA PhysX SDK 3.4 (version-pinned; CCD, cloth, particles, vehicles; component-based; cross-platform; PhysX SDK / Game Engine)
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [Piano Game](entities/pianogame.md) — C/C++ piano game (rendering/graphics focus; Game Develop / source)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)

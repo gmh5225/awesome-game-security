@@ -4,6 +4,7 @@ kind: entity
 topics: [game-engine]
 sources:
   - wiki/sources/descriptions/NVIDIAGameWorks__PhysX.md
+  - wiki/sources/descriptions/NVIDIAGameWorks__PhysX-3.4.md
 updated: 2026-08-22
 confidence: medium
 ---
@@ -12,7 +13,7 @@ confidence: medium
 
 **NVIDIA PhysX** — open-source release of NVIDIA's real-time physics SDK for games and interactive simulation. Provides multi-platform **rigid-body dynamics** and **collision detection**, plus sample applications, documentation, and engine integration material used by major commercial game engines. Predominantly **C++**, with **CMake** and **Python-driven** build generation targeting **Windows**, **Linux**, **Android**, and **Apple** platforms. Aimed at engine and gameplay developers who need production-grade physics technology for game development and related simulation research — not a cheat or anti-cheat artifact. (source: wiki/sources/descriptions/NVIDIAGameWorks__PhysX.md)
 
-Sits in the README **PhysX SDK** / Game Engine lane beside [[bullet3]] as the canonical NVIDIA physics middleware that engines embed for collision, dynamics, and integration study.
+Sits in the README **PhysX SDK** / Game Engine lane beside [[bullet3]] as the canonical NVIDIA physics middleware that engines embed for collision, dynamics, and integration study. Version-pinned **3.4** snapshot: [[physx-3-4]] (CCD, cloth, particles, vehicles; component-based architecture).
 
 ## Links
 
@@ -20,4 +21,4 @@ Sits in the README **PhysX SDK** / Game Engine lane beside [[bullet3]] as the ca
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/overview]] · [[bullet3]] · [[kawaii-physics]] · [[gameplay]] · [[yourgamelib]]
+[[overviews/game-engine]] · [[overviews/overview]] · [[physx-3-4]] · [[bullet3]] · [[kawaii-physics]] · [[gameplay]] · [[yourgamelib]]

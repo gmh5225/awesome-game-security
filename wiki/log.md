@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NVIDIAGameWorks/PhysX-3.4`: entity [[physx-3-4]] (NVIDIA PhysX SDK 3.4; version-pinned production physics; rigid-body dynamics, CCD, scene queries, vehicles, cloth, particles; component-based cross-platform architecture; game/simulation integration study); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[physx]], [[bullet3]], [[kawaii-physics]], and [[gameplay]].
+
 - **2026-08-22** — ingest `description:NVIDIAGameWorks/PhysX`: entity [[physx]] (NVIDIA PhysX source release; C++; real-time rigid-body/collision SDK; sample apps, docs, engine integration; CMake + Python builds; Windows/Linux/Android/Apple; production physics for games/simulation research); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[bullet3]], [[kawaii-physics]], [[gameplay]], and [[yourgamelib]].
 
 - **2026-08-22** — ingest `description:NaC-L/Mergen`: entity [[mergen]] (NaC-L; C/C++ binary lifting framework; assembly→LLVM IR; symbolic execution, control-flow recovery, deobfuscation, devirtualization; LLVM workflows + disassembly support; protected game-binary RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida2llvm]], [[neverd]], [[titan]], [[retdec]], and [[control-flow-flattening]].
