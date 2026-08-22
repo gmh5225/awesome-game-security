@@ -14,7 +14,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Graphics API](overviews/graphics-api.md) — DX/GL/Vulkan hook points; [[present-hook]] / [[draw-call-hook]]; overlays + [[obs-game-capture]] / [[anti-screenshot-capture]]; Kiero/kiero2; Vulkan (~11) vocem Linux layers; DirectX (~39) shader inject/[[segcap]]; Renderer (~17 [[reshade]]) + AI mesh/splat adjacency
 - [Mobile Security](overviews/mobile-security.md) — Android/iOS; root frameworks (Magisk/KernelSU/APatch), [[zygisk]]/Frida hooking, [[mobile-anti-cheat]]; Terminal/File/Memory Explorer + App/Kernel CVE; WSA (~9), Droid-VM/Gunyah emulators
 - [Reverse Engineering](overviews/reverse-engineering.md) — RE workflow + [[research-rigor]]; [[dynamic-binary-instrumentation]] trap-and-emulate/WHP tracing; [[mixed-boolean-arithmetic]] / [[control-flow-flattening]] deobfuscation; MCP-assisted RE; binary diffing; anti-debug catalog; tools (Ghidra managers, MBA/DBI, packers, [[awesome-game-file-format-reversing]] asset-format index); Windows Emulator [[kdemu]] + console/Switch~8 OpenSw / Xbox~8 / PS BD-UN-JB+PSFree-Enhanced / 3DS 3Beans LLE / GC·Wii gecko RE (~2739 Cheat / ~689 AC lanes)
-- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; [[sewindows]] PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~117); Windows Emulator (~7) + WSL (~4; [[wsl]] / [[wsl2-linux-kernel]] / [[windows-subsystem-linux]] / [[docker-win]])
+- [Windows Kernel](overviews/windows-kernel.md) — callbacks, VBS/HVCI/CET/TPM attestation (~9; [[sewindows]] PCR), BYOVD, Segment Heap pool + [[kernel-pool-scanning]] / [[etw-threat-intelligence]]; symbol walking; Some Tricks Ring0 (~117); Windows Emulator (~7) + WSL (~5; [[wsl]] / [[wsl2-linux-kernel]] / [[wsl2-linux-kernel-rolling]] / [[windows-subsystem-linux]] / [[docker-win]])
 
 ## Concepts
 
@@ -2974,6 +2974,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-subsystem-linux](entities/windows-subsystem-linux.md) — WSL Linux kernel source tree (full layout; WSL research hosts)
 - [WSL](entities/wsl.md) — official Microsoft WSL stack (wsl.exe, Lxss Manager, DrvFS, GNS, init/VM infra; WSL lane)
 - [WSL2 Linux Kernel](entities/wsl2-linux-kernel.md) — official Microsoft WSL2 utility-VM Linux kernel source (arch/drivers/fs; WSL lane)
+- [WSL2 Linux Kernel Rolling](entities/wsl2-linux-kernel-rolling.md) — Nevuly rolling stable WSL2 kernel builds (CI x86/ARM64; reproducible guest-kernel workflows; config guidance; WSL lane)
 - [WubbabooMark](entities/wubbaboomark.md) — debugger-use / anti-anti-debug trace detector (Ghidra/IDA/OllyDbg/x32dbg/x64dbg/WinDbg; Anti Debugging)
 
 - [win11_apk_installer](entities/win11-apk-installer.md) — Win11 APK installer (Python; WSA / Android-on-Windows)

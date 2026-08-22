@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Nevuly/WSL2-Linux-Kernel-Rolling`: entity [[wsl2-linux-kernel-rolling]] (Nevuly; rolling stable Linux kernel builds + config guidance for WSL2; Markdown docs + CI automation; x86/ARM64 build instructions; reproducible guest-kernel workflows for testing/research; README WSL lane); cited on [[overviews/windows-kernel]]; cross-linked [[wsl2-linux-kernel]], [[wsl]], [[windows-subsystem-linux]], and [[docker-win]].
+
 - **2026-08-22** — ingest `description:Nirad-Maharaj/Disable-Call-Recording-BookRestore-`: entity [[disable-call-recording-bookrestore]] (Nirad-Maharaj; iOS bl_sbx file-exploit; suppress call-recording notification sounds via system audio asset replacement; README non-jailbreak vs description jailbroken context; cheat / iOS file explorer); cited on [[overviews/mobile-security]]; cross-linked [[ipapatch]], [[xkvm-ios-injector]], [[trollstore]], and [[shadow]].
 
 - **2026-08-22** — ingest `description:Nitr0-G/PeVisor`: entity [[pevisor]] (Nitr0-G; early-stage C/C++ Windows PE analysis/instrumentation toolkit; PeVisor component; Blackbone process control/hooking/mapping + Unicorn emulation workflows; sample protection/unprotection test targets; malware/game-security PE internals research; cheat / [PE]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[pe-bear]], [[pe-sieve]], [[pereconstruct]], [[unicorn-pe]], [[modfinder]], and [[xmalhunter]].
