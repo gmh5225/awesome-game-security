@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/ThomasonZhao__InfinityHookProMax.md
   - wiki/sources/descriptions/Oxygen1a1__InfinityHook_latest.md
   - wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md
+  - wiki/sources/descriptions/Mr-Un1k0d3r__AMSI-ETW-Patch.md
 updated: 2026-08-22
 confidence: high
 ---
@@ -50,11 +51,12 @@ Attackers with sufficient privilege may attempt to blind TI telemetry: (source: 
 | Target | Effect |
 |--------|--------|
 | `EtwEventWrite` in `ntdll.dll` | User-mode ETW silencing |
+| AMSI scan branch logic + ETW trace short-circuit | Minimal in-memory byte patches blind script/content scanning and telemetry (see [[amsi-etw-patch]]) |
 | `nt!EtwpEventWriteFull` | Kernel-mode ETW silencing |
 | `EtwThreatIntProvRegHandle` / registration list walks | Remove or redirect provider registration |
 | `NtSetInformationThread(ThreadHideFromDebugger)` | Hide thread from some ETW consumers |
 
-Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/blind side of this lane. (source: wiki/sources/descriptions/muturikaranja__disable-threat-tracing.md) Kernel-memory ETW-TI provider state toggling such as [[kernel-callback-removal]] (V-i-x-x; C++; locate kernel structures/offsets and patch enable flags via an existing R/W primitive; WinDbg/IDA RE notes; educational EDR bypass research) documents the same registration/enable-flag blind surface from the offensive side. (source: wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md)
+Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/blind side of this lane. (source: wiki/sources/descriptions/muturikaranja__disable-threat-tracing.md) Minimal AMSI + ETW byte-patch PoCs such as [[amsi-etw-patch]] (Mr-Un1k0d3r; C/PowerShell/C#; branch patches in AMSI paths + telemetry short-circuit; red-team / defensive in-memory tampering detection validation) document the same user-mode blind surface from the offensive side. (source: wiki/sources/descriptions/Mr-Un1k0d3r__AMSI-ETW-Patch.md) Kernel-memory ETW-TI provider state toggling such as [[kernel-callback-removal]] (V-i-x-x; C++; locate kernel structures/offsets and patch enable flags via an existing R/W primitive; WinDbg/IDA RE notes; educational EDR bypass research) documents the same registration/enable-flag blind surface from the offensive side. (source: wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md)
 
 ## Defensive countermeasures
 
@@ -64,4 +66,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
