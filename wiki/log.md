@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NoelFB/blah`: entity [[blah]] (NoelFB; lightweight portable C++ 2D game framework; CMake C++17; OpenGL or Direct3D11 backends; app lifecycle, rendering, input, audio, math utilities; few dependencies; hackable 2D prototype base; Game Engine / [C++ 2D]); cited on [[overviews/game-engine]]; cross-linked [[love]], [[obengine]], [[raylib]], [[macroquad]], and [[open-source-engines]].
+
 - **2026-08-22** — ingest `description:Noelo-Lab/decbench`: entity [[decbench]] (Noelo-Lab; Python decompiler benchmark; compile→decompile→score pipeline; CFG GED, DWARF type match, recompilation bytematch; angr/Ghidra/IDA/Binja/r2dec/dewolf + LLM/agent backends; Debian/embedded/firmware/sandboxed-malware corpora; cheat / Decompiler); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[kuna]], [[binaryaudit]], [[retdec]], and [[kong]].
 
 - **2026-08-22** — ingest `description:Noelo-Lab/kuna`: entity [[kuna]] (Noelo-Lab; Rust agent-first Ghidra decompiler port; CLI, WASM in-browser, Ghidra plugin core swap; SLEIGH + phase pipeline tunable for LLM refinement; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[enigma]], [[pyre]], [[ghiradec]], and [[kong]].
