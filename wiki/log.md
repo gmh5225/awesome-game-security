@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:MrAle98/ATDCM64a-LPE`: entity [[atdcm64a-lpe]] (MrAle98; C++ Visual Studio LPE PoC; AMD **`atdcm64a.sys`** arbitrary pointer dereference; PowerShell/batch deployment scripts; lab-oriented driver-interaction exploit template; kernel exploitation / driver security hardening / anti-cheat research; README `[atdcm64a.sys]`); cited on [[overviews/windows-kernel]] and [[concepts/byovd]]; cross-linked [[hitcon-2023-demo-cve-2023-20562]], [[amd-ryzen-master-driver-v17-exploit]], [[cve-2024-49138-poc]], and [[windows-kernel-exploits]].
+
 - **2026-08-22** — ingest `description:MrAle98/CVE-2024-49138-POC`: entity [[cve-2024-49138-poc]]; cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-exploits]] and [[kernel-cve-analysis]].
 
 - **2026-08-22** — ingest `description:MrDiamond64/Scythe-AntiCheat`: entity [[scythe-anticheat]] (MrDiamond64; JavaScript/JSON Bedrock behavior-pack AC; Scripting API + command/function files; combat/movement/packet-abuse/chat-spam/scaffold detection; moderation commands + player stats; Realms/worlds/servers; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[paradox-anticheat]], [[oomph]], [[oxclient]], [[dakotaac]], and [[minecraft-anti-cheat]].

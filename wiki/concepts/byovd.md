@@ -75,6 +75,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Terminator.md
   - wiki/sources/descriptions/gmh5225__Blackout.md
   - wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md
+  - wiki/sources/descriptions/MrAle98__ATDCM64a-LPE.md
   - wiki/sources/descriptions/Muz1K1zuM__PoisonKiller_bof.md
   - wiki/sources/descriptions/gmh5225__Killer.md
   - wiki/sources/descriptions/gmh5225__Killer-Exercice.md
@@ -200,6 +201,8 @@ Educational **`eneio64.sys`** physmem exploit PoC such as [[eneio64-driver-explo
 ThrottleStop **`ThrottleStop.sys`** CVE-2025-7771 PoC such as [[throttlestop-poc]] (U65535F; C; IOCTL physmem and I/O port R/W from user mode; virtual-to-physical translation + basic EPROCESS checks; kernel security / vulnerable-driver / AC threat-modeling research) complements physmem-focused samples in the same lane. (source: wiki/sources/descriptions/U65535F__ThrottleStopPoC.md)
 
 HITCON 2023 **`AMDCpuProfiler.sys`** demo such as [[hitcon-2023-demo-cve-2023-20562]] (gmh5225; CVE-2023-20562; AMD signed driver exploitation → local privilege escalation or arbitrary kernel code execution; conference PoC in the AMD driver BYOVD lane) complements physmem-focused [[amd-ryzen-master-driver-v17-exploit]]. (source: wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md)
+
+AMD **`atdcm64a.sys`** LPE PoC such as [[atdcm64a-lpe]] (MrAle98; C++ Visual Studio + deployment scripts; arbitrary pointer dereference in signed AMD driver; lab-oriented kernel exploitation template for driver security hardening and anti-cheat research) extends that AMD signed-driver lane beside [[hitcon-2023-demo-cve-2023-20562]]. (source: wiki/sources/descriptions/MrAle98__ATDCM64a-LPE.md)
 
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
 
