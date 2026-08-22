@@ -594,6 +594,7 @@ sources:
   - wiki/sources/descriptions/seekbytes__ptxNinja.md
   - wiki/sources/descriptions/seeinglogic__ariadne.md
   - wiki/sources/descriptions/pd0wm__binaryninja-pcode.md
+  - wiki/sources/descriptions/Pusty__BinaryNinjaPlugins.md
   - wiki/sources/descriptions/otter-sec__bn-ebpf-solana.md
   - wiki/sources/descriptions/x64dbg__x64dbg.md
   - wiki/sources/descriptions/x64dbg__SlothBP.md
@@ -1679,6 +1680,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Dynamic CUDA kernel instruction DBI via [[cutracer]] (facebookresearch; runtime trace with host-side analysis split; cheat / DBI) complements static PTX RE via [[ptxninja]]. (source: wiki/sources/descriptions/facebookresearch__CUTracer.md)
 - Call-graph / coverage-assisted graph analysis via [[ariadne]] (Binary Ninja plugin; static analysis + block coverage) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/seeinglogic__ariadne.md)
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
+- Custom Binary Ninja architecture plugins via [[binaryninjaplugins]] (Pusty; Python; Java class files, Renesas H8/300, Xtensa ELF; disassembly, decode, partial lifting; Java NOP/branch patch workflows; Cheat Binary Ninja Plugins / firmware+bytecode RE) sits beside [[binaryninja-pcode]]. (source: wiki/sources/descriptions/Pusty__BinaryNinjaPlugins.md)
 - Binary Ninja MCP server via [[binary-ninja-mcp]] (Python; disasm/decompile/xrefs/functions/types for LLM clients; MCP for Binary_Ninja) sits in the Cheat Binary Ninja Plugins / agent-RE lane. (source: wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md)
 - Binary Ninja CLI for agents via [[bn]] (banteg; Python; headless/agent-facing CLI over BN APIs; plugin development; Cheat Binary Ninja Plugins / agent-RE lane) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/banteg__bn.md)
 - Vector35 curated official Binary Ninja plugin index via [[official-plugins]] (structured plugin metadata catalog; Python indexing; trusted first-party/endorsed integrations; Cheat Binary Ninja Plugins lane) complements community plugin discovery. (source: wiki/sources/descriptions/Vector35__official-plugins.md)

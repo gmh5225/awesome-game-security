@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Pusty/BinaryNinjaPlugins`: entity [[binaryninjaplugins]] (Pusty; Python BN architecture plugins; Java class files, Renesas H8/300, Xtensa ELF; disassembly/decode/partial lifting; Java NOP/branch patch workflows; firmware/bytecode RE extension); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binaryninja-pcode]], [[ptxninja]], [[official-plugins]], and [[community-plugins]].
+
 - **2026-08-22** — ingest `description:Pycatchown/ClassMaker`: entity [[classmaker]] (Pycatchown; Python IDAPython IDA plugin; auto C++ class reconstruction from constructor pseudocode; vtable assignment trace, IDA struct create/update, naming heuristics; 32/64-bit practical reversing; game/native binary class recovery; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pyclassinformer]], [[ida-vtable-tools]], [[classy]], and [[ida-medigate]].
 
 - **2026-08-22** — ingest `description:Qemu-Gang/Escape-from-TuxKov`: entity [[escape-from-tuxkov]] (Qemu-Gang; C++ Escape from Tarkov cheat framework for QEMU workflows; ESP/aimbot/recoil; separate memory-access + data-collection; Unity/Mono structures; build/inject/extract/reload scripts; Linux/QEMU external or hybrid setups; cheat / game:eft [QEMU]); cited on [[overviews/game-hacking]]; cross-linked [[eft]], [[meatyeftrelease]], [[qemu-unrealdumper-4-25]], and [[memflow-kvm]].
