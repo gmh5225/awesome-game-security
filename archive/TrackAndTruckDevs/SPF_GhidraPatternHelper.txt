@@ -1,0 +1,3579 @@
+Project Path: arc_TrackAndTruckDevs_SPF_GhidraPatternHelper_b62qq37x
+
+Source Tree:
+
+```txt
+arc_TrackAndTruckDevs_SPF_GhidraPatternHelper_b62qq37x
+├── GhidraPatternHelper
+│   ├── GhidraPatternHelper.java
+│   ├── PatternEngine.java
+│   └── SPFTemplates.java
+├── LICENSE
+└── README.md
+
+```
+
+`GhidraPatternHelper/GhidraPatternHelper.java`:
+
+```java
+// Helper script for Ghidra to find and generate patterns compatible with PatternFinder
+// @author TrackAndTruckDevs
+// @version 1.0.2
+// @category SPF-Framework
+// @keybinding ctrl alt P
+// @menupath Tools.SPF Pattern Helper
+
+package GhidraPatternHelper;
+
+import ghidra.app.script.GhidraScript;
+import ghidra.app.services.CodeViewerService;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressRange;
+import ghidra.program.model.address.AddressSet;
+import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.Instruction;
+import ghidra.program.model.listing.Listing;
+import ghidra.program.model.mem.Memory;
+import ghidra.program.model.mem.MemoryBlock;
+import ghidra.program.util.ProgramSelection;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.*;
+import javax.swing.event.HyperlinkListener;
+
+
+public class GhidraPatternHelper extends GhidraScript {
+
+    private static final class SearchSummary {
+        final java.util.List<Long> matches;
+        final boolean truncated;
+
+        SearchSummary(java.util.List<Long> matches, boolean truncated) {
+            this.matches = matches;
+            this.truncated = truncated;
+        }
+    }
+
+    @Override
+    protected void run() throws Exception {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("SPF Pattern Helper");
+            frame.setSize(650, 400);
+            frame.setLayout(new BorderLayout());
+            frame.setLocationRelativeTo(null);
+
+            // Checkboxes for UI options
+            JCheckBox alwaysOnTopCheck = new JCheckBox("Always on top", true);
+            frame.setAlwaysOnTop(alwaysOnTopCheck.isSelected());
+            alwaysOnTopCheck.addActionListener(e -> frame.setAlwaysOnTop(alwaysOnTopCheck.isSelected()));
+
+            JCheckBox autoVerifyCheck = new JCheckBox("Automatically verify signature", false);
+            JCheckBox autoSwitchCheck = new JCheckBox("Auto switch to first match", false);
+            JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            topPanel.add(alwaysOnTopCheck);
+            topPanel.add(autoVerifyCheck);
+            topPanel.add(autoSwitchCheck);
+            frame.add(topPanel, BorderLayout.NORTH);
+            JTabbedPane tabbedPane = new JTabbedPane();
+
+            JPanel findPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            gbc.gridx = 0; gbc.gridy = 0;
+            findPanel.add(new JLabel("Signature:"), gbc);
+
+            gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
+            JTextField sigField = new JTextField();
+            findPanel.add(sigField, gbc);
+
+            gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2; gbc.weightx = 0;
+            JPanel scopePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            scopePanel.setBorder(BorderFactory.createTitledBorder("Search Scope"));
+            JRadioButton radioAll = new JRadioButton("All Executable Sections", true);
+            JRadioButton radioSelection = new JRadioButton("Selected Memory Block Only");
+            JRadioButton radioLimit = new JRadioButton("From Cursor with limit (bytes):");
+            JTextField limitField = new JTextField("64", 6);
+            // Direction of the cursor-limited search: forward scans down from the cursor,
+            // backward walks start points from the cursor upwards (FindBackward-style).
+            JRadioButton radioForward = new JRadioButton("Forward", true);
+            JRadioButton radioBackward = new JRadioButton("Backward");
+            ButtonGroup dirGroup = new ButtonGroup();
+            dirGroup.add(radioForward);
+            dirGroup.add(radioBackward);
+            radioForward.setEnabled(false);
+            radioBackward.setEnabled(false);
+            java.awt.event.ItemListener dirEnabler = e -> {
+                boolean on = radioLimit.isSelected();
+                radioForward.setEnabled(on);
+                radioBackward.setEnabled(on);
+            };
+            radioAll.addItemListener(dirEnabler);
+            radioSelection.addItemListener(dirEnabler);
+            radioLimit.addItemListener(dirEnabler);
+            ButtonGroup group = new ButtonGroup();
+            group.add(radioAll);
+            group.add(radioSelection);
+            group.add(radioLimit);
+            scopePanel.add(radioAll);
+            scopePanel.add(radioSelection);
+            scopePanel.add(radioLimit);
+            scopePanel.add(limitField);
+            scopePanel.add(radioForward);
+            scopePanel.add(radioBackward);
+            findPanel.add(scopePanel, gbc);
+
+            gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+            JButton findBtn = new JButton("Find Pattern");
+            findPanel.add(findBtn, gbc);
+
+            gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH;
+            JEditorPane logPane = new JEditorPane("text/html", "");
+            logPane.setEditable(false);
+            logPane.addHyperlinkListener(e -> {
+                if (e.getEventType() == javax.swing.event.HyperlinkEvent.EventType.ACTIVATED) {
+                    try {
+                        String addrStr = e.getDescription();
+                        Address addr = currentProgram.getAddressFactory().getDefaultAddressSpace().getAddress(addrStr);
+                        goTo(addr);
+                    } catch (Exception ex) {
+                        // ignore malformed address
+                    }
+                }
+            });
+            findPanel.add(new JScrollPane(logPane), gbc);
+
+            // Row 4: byte-distance calculator between two captured addresses
+            gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.weighty = 0.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+            JPanel distPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            distPanel.setBorder(BorderFactory.createTitledBorder("Byte Distance"));
+            JButton takeABtn = new JButton("Take A");
+            JTextField distFieldA = new JTextField(10);
+            JButton takeBBtn = new JButton("Take B");
+            JTextField distFieldB = new JTextField(10);
+            JLabel distLabel = new JLabel(" ");
+            JButton distSelBtn = new JButton("From Selection");
+            JButton distClearBtn = new JButton("Clear");
+            distPanel.add(takeABtn);
+            distPanel.add(distFieldA);
+            distPanel.add(takeBBtn);
+            distPanel.add(distFieldB);
+            distPanel.add(distLabel);
+            distPanel.add(distSelBtn);
+            distPanel.add(distClearBtn);
+            findPanel.add(distPanel, gbc);
+
+            Runnable updateDistance = () -> {
+                String aText = distFieldA.getText().trim();
+                String bText = distFieldB.getText().trim();
+                if (aText.isEmpty() || bText.isEmpty()) {
+                    distLabel.setText(" ");
+                    return;
+                }
+                try {
+                    Address addrA = currentProgram.getAddressFactory().getDefaultAddressSpace().getAddress(aText);
+                    Address addrB = currentProgram.getAddressFactory().getDefaultAddressSpace().getAddress(bText);
+                    long delta = addrB.getOffset() - addrA.getOffset();
+                    String hex = String.format("%s0x%x", delta >= 0 ? "+" : "-", Math.abs(delta));
+                    distLabel.setText(hex + " (" + delta + " bytes)");
+                } catch (Exception ex) {
+                    distLabel.setText("<invalid address>");
+                }
+            };
+            javax.swing.event.DocumentListener distDocListener = new javax.swing.event.DocumentListener() {
+                @Override
+                public void insertUpdate(javax.swing.event.DocumentEvent e) { updateDistance.run(); }
+                @Override
+                public void removeUpdate(javax.swing.event.DocumentEvent e) { updateDistance.run(); }
+                @Override
+                public void changedUpdate(javax.swing.event.DocumentEvent e) { updateDistance.run(); }
+            };
+            distFieldA.getDocument().addDocumentListener(distDocListener);
+            distFieldB.getDocument().addDocumentListener(distDocListener);
+            takeABtn.addActionListener(e -> {
+                try {
+                    Address curAddr = getLiveCursorAddress();
+                    if (curAddr == null) {
+                        distLabel.setText("No cursor location");
+                        return;
+                    }
+                    distFieldA.setText(curAddr.toString());
+                } catch (Exception ex) {
+                    distLabel.setText("Failed to get cursor location");
+                }
+            });
+            takeBBtn.addActionListener(e -> {
+                try {
+                    Address curAddr = getLiveCursorAddress();
+                    if (curAddr == null) {
+                        distLabel.setText("No cursor location");
+                        return;
+                    }
+                    distFieldB.setText(curAddr.toString());
+                } catch (Exception ex) {
+                    distLabel.setText("Failed to get cursor location");
+                }
+            });
+            distSelBtn.addActionListener(e -> {
+                ProgramSelection sel = getLiveSelection();
+                if (sel == null || sel.isEmpty()) {
+                    distLabel.setText("No active memory selection");
+                    return;
+                }
+                distFieldA.setText(sel.getMinAddress().toString());
+                distFieldB.setText(sel.getMaxAddress().toString());
+            });
+            distClearBtn.addActionListener(e -> {
+                distFieldA.setText("");
+                distFieldB.setText("");
+                distLabel.setText(" ");
+            });
+
+            tabbedPane.addTab("Pattern Finder", findPanel);
+
+            // === TAB 2: GENERATOR ===
+            JPanel genPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints genGbc = new GridBagConstraints();
+            genGbc.insets = new Insets(4, 4, 4, 4);
+            genGbc.fill = GridBagConstraints.BOTH;
+
+            // Row 0: Generate Button
+            genGbc.gridx = 0; genGbc.gridy = 0; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.0;
+            JButton genBtn = new JButton("Generate from Selection");
+            genPanel.add(genBtn, genGbc);
+
+            // Row 1: Auto-check result line
+            genGbc.gridx = 0; genGbc.gridy = 1; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.0;
+            JPanel genStatusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            JLabel genStatusLabel = new JLabel(" ");
+            JButton genMoreInfoBtn = new JButton("More info");
+            genMoreInfoBtn.setVisible(false);
+            genStatusPanel.add(genStatusLabel);
+            genStatusPanel.add(Box.createHorizontalStrut(8));
+            genStatusPanel.add(genMoreInfoBtn);
+            genPanel.add(genStatusPanel, genGbc);
+
+            // Row 2: SPF Pattern Label & Copy Button
+            genGbc.gridx = 0; genGbc.gridy = 2; genGbc.gridwidth = 1; genGbc.weightx = 0.85; genGbc.weighty = 0.0;
+            genPanel.add(new JLabel("SPF Pattern (compatible with C++ PatternFinder in SPF-Framework):"), genGbc);
+
+            genGbc.gridx = 1; genGbc.gridy = 2; genGbc.weightx = 0.15;
+            JButton copySpfBtn = new JButton("Copy");
+            genPanel.add(copySpfBtn, genGbc);
+
+            // Row 3: SPF Pattern Text Area
+            genGbc.gridx = 0; genGbc.gridy = 3; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.25;
+            JTextArea spfArea = new JTextArea();
+            spfArea.setLineWrap(true);
+            spfArea.setWrapStyleWord(true);
+            spfArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            genPanel.add(new JScrollPane(spfArea), genGbc);
+
+            // Row 4: Raw Pattern Label & Copy Button
+            genGbc.gridx = 0; genGbc.gridy = 4; genGbc.gridwidth = 1; genGbc.weightx = 0.85; genGbc.weighty = 0.0;
+            genPanel.add(new JLabel("Raw Pattern (Masked Hex):"), genGbc);
+
+            genGbc.gridx = 1; genGbc.gridy = 4; genGbc.weightx = 0.15;
+            JButton copyRawPatBtn = new JButton("Copy");
+            genPanel.add(copyRawPatBtn, genGbc);
+
+            // Row 5: Raw Pattern Text Area
+            genGbc.gridx = 0; genGbc.gridy = 5; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.25;
+            JTextArea rawPatArea = new JTextArea();
+            rawPatArea.setLineWrap(true);
+            rawPatArea.setWrapStyleWord(true);
+            rawPatArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            genPanel.add(new JScrollPane(rawPatArea), genGbc);
+
+            // Row 6: Extended Signature Label & Copy Button
+            genGbc.gridx = 0; genGbc.gridy = 6; genGbc.gridwidth = 1; genGbc.weightx = 0.85; genGbc.weighty = 0.0;
+            genPanel.add(new JLabel("Extended Signature (SPF-Framework compatible):"), genGbc);
+
+            genGbc.gridx = 1; genGbc.gridy = 6; genGbc.weightx = 0.15;
+            JButton copyExtSigBtn = new JButton("Copy");
+            genPanel.add(copyExtSigBtn, genGbc);
+
+            // Row 7: Extended Signature Text Area
+            genGbc.gridx = 0; genGbc.gridy = 7; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.25;
+            JTextArea extSigArea = new JTextArea();
+            extSigArea.setLineWrap(true);
+            extSigArea.setWrapStyleWord(true);
+            extSigArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            genPanel.add(new JScrollPane(extSigArea), genGbc);
+
+            // Row 8: Raw Bytes Label & Copy Button
+            genGbc.gridx = 0; genGbc.gridy = 8; genGbc.gridwidth = 1; genGbc.weightx = 0.85; genGbc.weighty = 0.0;
+            genPanel.add(new JLabel("Raw Bytes (Pure Hex):"), genGbc);
+
+            genGbc.gridx = 1; genGbc.gridy = 8; genGbc.weightx = 0.15;
+            JButton copyRawBytesBtn = new JButton("Copy");
+            genPanel.add(copyRawBytesBtn, genGbc);
+
+            // Row 9: Raw Bytes Text Area
+            genGbc.gridx = 0; genGbc.gridy = 9; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.25;
+            JTextArea rawBytesArea = new JTextArea();
+            rawBytesArea.setLineWrap(true);
+            rawBytesArea.setWrapStyleWord(true);
+            rawBytesArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            genPanel.add(new JScrollPane(rawBytesArea), genGbc);
+
+            // Row 10: Comment Label & Copy Button
+            genGbc.gridx = 0; genGbc.gridy = 10; genGbc.gridwidth = 1; genGbc.weightx = 0.85; genGbc.weighty = 0.0;
+            genPanel.add(new JLabel("SPF Comment (Addresses and Instructions for SPF-Framework):"), genGbc);
+
+            genGbc.gridx = 1; genGbc.gridy = 10; genGbc.weightx = 0.15;
+            JButton copyCommentBtn = new JButton("Copy");
+            genPanel.add(copyCommentBtn, genGbc);
+
+            // Row 11: Comment Text Area
+            genGbc.gridx = 0; genGbc.gridy = 11; genGbc.gridwidth = 2; genGbc.weightx = 1.0; genGbc.weighty = 0.25;
+            JTextArea commentArea = new JTextArea();
+            commentArea.setLineWrap(true);
+            commentArea.setWrapStyleWord(true);
+            commentArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            genPanel.add(new JScrollPane(commentArea), genGbc);
+
+            tabbedPane.addTab("Pattern Generator", genPanel);
+
+            frame.add(tabbedPane, BorderLayout.CENTER);
+
+            // BUTTON ACTIONS
+            findBtn.addActionListener(e -> {
+                logPane.setText("");
+                String sigStr = sigField.getText().trim();
+                if (sigStr.isEmpty()) {
+                    logPane.setText("<p style='color:red;'>Error: Signature string is empty</p>");
+                    return;
+                }
+
+                try {
+                    java.util.List<ByteMatcher> matchers = PatternEngine.compileSignature(sigStr);
+                    if (matchers.isEmpty()) {
+                        logPane.setText("<p style='color:red;'>Error: Failed to compile signature</p>");
+                        return;
+                    }
+
+                    // Refresh cursor address if searching from cursor with limit;
+                    // remember it as the base for per-match distance offsets.
+                    Long searchBaseOffset = null;
+                    if (radioLimit.isSelected()) {
+                        try {
+                            Address curAddr = getLiveCursorAddress();
+                            if (curAddr == null) {
+                                logPane.setText("<p style='color:red;'>No cursor location</p>");
+                                return;
+                            }
+                            searchBaseOffset = curAddr.getOffset();
+                        } catch (Exception ex) {
+                            logPane.setText("<p style='color:red;'>Failed to get cursor location</p>");
+                            return;
+                        }
+                    }
+                    StringBuilder html = new StringBuilder();
+                    html.append("<html><body style='font-family:monospace;'>");
+                    java.util.List<Long> matches = performSearch(matchers,
+                           radioAll.isSelected(),
+                           radioSelection.isSelected(),
+                           radioLimit.isSelected(),
+                           limitField.getText(),
+                           radioBackward.isSelected());
+                    if (!matches.isEmpty()) {
+                        if (matches.size() > 20) {
+                            html.append("<div>Searching for pattern... <span style='color:#d97706;'>Success</span>: more than 20 finds, this signature is not unique</div>");
+                            // Show only first 20 matches
+                            for (int i = 0; i < 20; ++i) {
+                                Address addr = currentProgram.getAddressFactory().getDefaultAddressSpace().getAddress(matches.get(i));
+                                html.append(formatSearchResultRow(i + 1, addr, searchBaseOffset));
+                            }
+                        } else {
+                            html.append(String.format("<div>Searching for pattern... <span style='color:#15803d;'>Success</span>: Found %d matches:</div>", matches.size()));
+                            for (int i = 0; i < matches.size(); ++i) {
+                                Address addr = currentProgram.getAddressFactory().getDefaultAddressSpace().getAddress(matches.get(i));
+                                html.append(formatSearchResultRow(i + 1, addr, searchBaseOffset));
+                            }
+                        }
+                        // Jump to first match only if not exceeding limit and autoSwitch enabled
+                        if (matches.size() <= 20 && autoSwitchCheck.isSelected()) {
+                            Address firstAddr = currentProgram.getAddressFactory().getDefaultAddressSpace().getAddress(matches.get(0));
+                            html.append(String.format("<div><span style='color:#666;'>Jumping to the first match:</span> <a href='%s'>%s</a></div>", firstAddr.toString(), htmlEscape(firstAddr.toString())));
+                            goTo(firstAddr);
+                        }
+                    } else {
+                        html.append("<div>Searching for pattern... <span style='color:#b91c1c;'>Failure</span>: Pattern NOT found.</div>");
+                    }
+                    html.append("</body></html>");
+                    logPane.setText(html.toString());
+        } catch (Exception ex) {
+            logPane.setText("<html><body><div style='color:red;'>Exception: " + htmlEscape(ex.getMessage()) + "</div></body></html>");
+        }
+            });
+            final String[] latestGeneratedPattern = new String[1];
+
+            genMoreInfoBtn.addActionListener(e -> {
+                String pattern = latestGeneratedPattern[0];
+                if (pattern == null || pattern.trim().isEmpty()) {
+                    return;
+                }
+                tabbedPane.setSelectedComponent(findPanel);
+                sigField.setText(pattern);
+                findBtn.doClick();
+            });
+
+            // BUTTON ACTION: generate signature from the current selection
+            genBtn.addActionListener(e -> {
+                spfArea.setText("");
+                rawPatArea.setText("");
+                extSigArea.setText("");
+                rawBytesArea.setText("");
+                genStatusLabel.setText(" ");
+                genStatusLabel.setForeground(UIManager.getColor("Label.foreground"));
+                genMoreInfoBtn.setVisible(false);
+                ProgramSelection sel = getLiveSelection();
+                if (sel == null || sel.isEmpty()) {
+                    spfArea.setText("Please select instructions in the Listing view first!");
+                    return;
+                }
+                try {
+                    String spfPattern = generateSPFPattern(sel);
+                    String rawPattern = generateRawPatternFromSelection(sel);
+                    String extPattern = generateExtendedSignature(sel);
+                    String rawBytes = generateRawBytesFromSelection(sel);
+                    String commentText = generateSPFCommentFromSelection(sel);
+
+                    spfArea.setText(spfPattern);
+                    rawPatArea.setText(rawPattern);
+                    extSigArea.setText(extPattern);
+                    rawBytesArea.setText(rawBytes);
+                    commentArea.setText(commentText);
+                    latestGeneratedPattern[0] = spfPattern;
+                    if (autoVerifyCheck.isSelected()) {
+                        genStatusLabel.setText("Checking signature uniqueness...");
+                        genStatusLabel.setForeground(new Color(120, 120, 120));
+                        SwingWorker<SearchSummary, Void> worker = new SwingWorker<SearchSummary, Void>() {
+                            @Override
+                            protected SearchSummary doInBackground() throws Exception {
+                                java.util.List<ByteMatcher> matchers = PatternEngine.compileSignature(spfPattern);
+                                if (matchers.isEmpty()) {
+                                    throw new Exception("Failed to compile signature");
+                                }
+                                return performSearch(matchers, true, false, false, null, false, 21);
+                            }
+
+                            @Override
+                            protected void done() {
+                                try {
+                                    SearchSummary summary = get();
+                                    applyGeneratorSearchStatus(summary, genStatusLabel, genMoreInfoBtn);
+                                } catch (Exception ex) {
+                                    genStatusLabel.setText("Auto-check failed: " + ex.getMessage());
+                                    genStatusLabel.setForeground(new Color(185, 28, 28));
+                                    genMoreInfoBtn.setVisible(false);
+                                }
+                            }
+                        };
+                        worker.execute();
+                    }
+                    SwingUtilities.invokeLater(() -> {
+                        frame.pack();
+                    });
+                } catch (Exception ex) {
+                    spfArea.setText("Error generating signature: " + ex.getMessage());
+                }
+            });
+
+            // COPY BUTTON ACTIONS
+            copySpfBtn.addActionListener(e -> copyToClipboard(spfArea.getText()));
+            copyRawPatBtn.addActionListener(e -> copyToClipboard(rawPatArea.getText()));
+            copyExtSigBtn.addActionListener(e -> copyToClipboard(extSigArea.getText()));
+            copyRawBytesBtn.addActionListener(e -> copyToClipboard(rawBytesArea.getText()));
+            copyCommentBtn.addActionListener(e -> copyToClipboard(commentArea.getText()));
+
+            frame.pack();
+            frame.setVisible(true);
+        });
+    }
+
+    // === SEARCH ALGORITHM ===
+
+    private ProgramSelection getLiveSelection() {
+        CodeViewerService cvs = state.getTool().getService(CodeViewerService.class);
+        return cvs != null ? cvs.getCurrentSelection() : null;
+    }
+
+    private Address getLiveCursorAddress() {
+        CodeViewerService cvs = state.getTool().getService(CodeViewerService.class);
+        if (cvs == null || cvs.getCurrentLocation() == null) {
+            return null;
+        }
+        return cvs.getCurrentLocation().getAddress();
+    }
+
+    private String formatSearchResultRow(int index, Address addr, Long baseOffset) throws Exception {
+        Listing listing = currentProgram.getListing();
+        Instruction instr = listing.getInstructionAt(addr);
+        Function function = currentProgram.getFunctionManager().getFunctionContaining(addr);
+
+        StringBuilder bytesText = new StringBuilder();
+        String instrText = "No instruction";
+
+        if (instr != null) {
+            int length = instr.getLength();
+            byte[] bytes = new byte[length];
+            currentProgram.getMemory().getBytes(addr, bytes);
+
+            for (int i = 0; i < bytes.length; ++i) {
+                bytesText.append(String.format("%02x", bytes[i] & 0xff));
+                if (i < bytes.length - 1) {
+                    bytesText.append(" ");
+                }
+            }
+            instrText = instr.toString();
+        }
+
+        String funcText = "no function";
+        String funcAddr = "";
+        if (function != null) {
+            funcText = function.getName();
+            funcAddr = function.getEntryPoint().toString();;
+        }
+
+        String addrText = htmlEscape(addr.toString());
+
+        // Per-match distance from the search base (cursor-limited searches only).
+        String offsetText = "";
+        String offsetCell = "";
+        if (baseOffset != null) {
+            long delta = addr.getOffset() - baseOffset;
+            offsetText = String.format("%s0x%02x (%+d)", delta >= 0 ? "+" : "-", Math.abs(delta), delta);
+            offsetCell = "  <td style='padding-right: 15px; color: #666;'>%s</td>\n";
+        }
+
+        return String.format(
+            "<tr>" +
+            "  <td style='padding-right: 10px; color: gray;'>[%d]</td>" +
+            "  <td style='padding-right: 15px; font-weight: bold;'><a href='%s'>%s</a></td>" +
+            offsetCell +
+            "  <td style='padding-right: 15px;'><span style='color: gray;'>%s</span> &nbsp; %s</td>" +
+            "  <td style='color: gray;'>[<span style='font-weight: bold;'><a href='%s'>%s</a></span>]</td>" +
+            "</tr>",
+            index,
+            addrText,
+            addrText,
+            offsetText,
+            htmlEscape(bytesText.toString()),
+            htmlEscape(instrText),
+            htmlEscape(funcAddr),
+            htmlEscape(funcText)
+        );
+    }
+
+    private String htmlEscape(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#39;");
+    }
+
+    private void applyGeneratorSearchStatus(SearchSummary summary,
+        JLabel genStatusLabel,
+        JButton genMoreInfoBtn) {
+        int count = summary.matches.size();
+        if (count == 1 && !summary.truncated) {
+            genStatusLabel.setText("Success: signature is unique.");
+            genStatusLabel.setForeground(new Color(21, 128, 61));
+            genMoreInfoBtn.setVisible(false);
+            Container parent = genMoreInfoBtn.getParent();
+            if (parent != null) {
+                parent.revalidate();
+                parent.repaint();
+            }
+            return;
+        }
+
+        if (count == 0) {
+            genStatusLabel.setText("Warning: signature was not found.");
+            genStatusLabel.setForeground(new Color(185, 28, 28));
+            genMoreInfoBtn.setVisible(false);
+            Container parent = genMoreInfoBtn.getParent();
+            if (parent != null) {
+                parent.revalidate();
+                parent.repaint();
+            }
+            return;
+        }
+
+        if (summary.truncated) {
+            genStatusLabel.setText("Warning: more than 20 matches found.");
+        } else {
+            genStatusLabel.setText("Warning: signature is not unique, found " + count + " matches.");
+        }
+        genStatusLabel.setForeground(new Color(180, 83, 9));
+        genMoreInfoBtn.setVisible(true);
+        genMoreInfoBtn.setText("More info");
+        genMoreInfoBtn.setToolTipText("Open Pattern Finder with this signature");
+        Container parent = genMoreInfoBtn.getParent();
+        if (parent != null) {
+            parent.revalidate();
+            parent.repaint();
+        }
+    }
+
+    private SearchSummary performSearch(java.util.List<ByteMatcher> matchers,
+        boolean all,
+        boolean selection,
+        boolean limit,
+        String limitBytes,
+        boolean backward,
+        int maxResults) throws Exception {
+        java.util.List<Long> results = new ArrayList<>();
+        Memory memory = currentProgram.getMemory();
+        AddressSet searchScope = new AddressSet();
+
+        if (all) {
+            for (MemoryBlock block : memory.getBlocks()) {
+                if (block.isExecute()) {
+                    searchScope.add(block.getStart(), block.getEnd());
+                }
+            }
+        } else if (selection) {
+            // Read the current selection at the moment of the click.
+            ProgramSelection curSel = getLiveSelection();
+            if (curSel != null && !curSel.isEmpty()) {
+                searchScope.add(curSel);
+            } else {
+                throw new Exception("No active memory selection");
+            }
+        } else if (limit) {
+            Address start = getLiveCursorAddress();
+            if (start == null) throw new Exception("No cursor location");
+            int len = Integer.parseInt(limitBytes);
+            if (backward) {
+                // Backward search: the window ends at the cursor.
+                searchScope.add(start.subtract(len - 1), start);
+            } else {
+                searchScope.add(start, start.add(len - 1));
+            }
+        }
+
+        int patternMinLen = 0;
+        for (ByteMatcher m : matchers) patternMinLen += m.minCount;
+
+        for (AddressRange range : searchScope.getAddressRanges()) {
+            Address start = range.getMinAddress();
+            Address end = range.getMaxAddress();
+            long totalBytes = end.getOffset() - start.getOffset() + 1;
+
+            if (totalBytes < patternMinLen) continue;
+
+            byte[] buffer = new byte[(int) totalBytes];
+            memory.getBytes(start, buffer);
+
+            if (backward) {
+                // Start points walk from the cursor backwards while each candidate is
+                // still matched forwards (PatternFinder::FindBackward logic). Results
+                // come ordered nearest-to-cursor first.
+                for (int i = (int) totalBytes - 1; i >= 0; --i) {
+                    int[] matchLen = new int[1];
+                    if (PatternEngine.matchInternal(buffer, i, matchers, 0, matchLen)) {
+                        results.add(start.getOffset() + i);
+                        if (results.size() >= maxResults) {
+                            return new SearchSummary(results, true);
+                        }
+                    }
+                }
+            } else {
+                for (int i = 0; i <= totalBytes - patternMinLen; ++i) {
+                    int[] matchLen = new int[1];
+                    if (PatternEngine.matchInternal(buffer, i, matchers, 0, matchLen)) {
+                        results.add(start.getOffset() + i);
+                        if (results.size() >= maxResults) {
+                            return new SearchSummary(results, true);
+                        }
+                    }
+                }
+            }
+        }
+        return new SearchSummary(results, false);
+    }
+
+    private java.util.List<Long> performSearch(java.util.List<ByteMatcher> matchers,
+        boolean all,
+        boolean selection,
+        boolean limit,
+        String limitBytes,
+        boolean backward) throws Exception {
+        return performSearch(matchers, all, selection, limit, limitBytes, backward, Integer.MAX_VALUE).matches;
+    }
+
+    // === PATTERN GENERATOR ===
+
+    private String generateSPFPattern(ProgramSelection selection) throws Exception {
+        Listing listing = currentProgram.getListing();
+        Memory memory = currentProgram.getMemory();
+        StringBuilder sigBuilder = new StringBuilder();
+
+        Address start = selection.getMinAddress();
+        Address end = selection.getMaxAddress();
+
+        Address curr = start;
+        while (curr != null && curr.compareTo(end) <= 0) {
+            Instruction instr = listing.getInstructionAt(curr);
+            if (instr == null) {
+                curr = curr.add(1);
+                continue;
+            }
+
+            int length = instr.getLength();
+            byte[] bytes = new byte[length];
+            memory.getBytes(curr, bytes);
+
+            // Attempt to match templates against the instruction bytes
+            String bestTemplate = null;
+            int templateLen = 0;
+
+            // Check for REX prefix (0x40-0x4F)
+            boolean hasREX = bytes.length > 1
+                && (bytes[0] & 0xFF) >= 0x40
+                && (bytes[0] & 0xFF) <= 0x4F;
+            int rexByte = hasREX ? (bytes[0] & 0xFF) : -1;
+
+            for (Map.Entry<String, String> entry : SPFTemplates.TEMPLATES.entrySet()) {
+                String templName = entry.getKey();
+                String rawPattern = entry.getValue();
+                java.util.List<ByteMatcher> compiled = PatternEngine.compileSignature(rawPattern);
+
+                // Try matching from byte 0 (template may contain explicit REX or bare opcode)
+                int[] matchLen = new int[1];
+                if (PatternEngine.matchInternal(bytes, 0, compiled, 0, matchLen)) {
+                    if (matchLen[0] == bytes.length) {
+                        if (matchLen[0] >= templateLen) {
+                            bestTemplate = templName;
+                            templateLen = matchLen[0];
+                        }
+                    }
+                }
+
+                // If REX prefix present, also try matching from byte 1 (skip REX)
+                if (hasREX) {
+                    int[] rexMatchLen = new int[1];
+                    if (PatternEngine.matchInternal(bytes, 1, compiled, 0, rexMatchLen)) {
+                        if (rexMatchLen[0] == bytes.length) {
+                            int rexMatchedBytes = rexMatchLen[0] - 1;
+                            if (rexMatchedBytes > templateLen) {
+                                bestTemplate = String.format("%02X", rexByte) + " " + templName;
+                                templateLen = rexMatchLen[0];
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (bestTemplate != null) {
+                sigBuilder.append(bestTemplate);
+                // Mask the rest of the bytes if the instruction is longer than the template
+                for (int i = templateLen; i < bytes.length; ++i) {
+                    sigBuilder.append(" ?");
+                }
+            } else {
+                // If no template matches, we fallback to exact bytes (except RIP-relative offsets)
+                // In Ghidra, we check if there are reference operands to mask
+                boolean[] mask = new boolean[length];
+                int firstByte = bytes[0] & 0xFF;
+                boolean isBranchRel32 = (firstByte == 0xE8 || firstByte == 0xE9) ||
+                    (bytes.length > 1 && firstByte == 0x0F &&
+                     (bytes[1] & 0xFF) >= 0x80 && (bytes[1] & 0xFF) <= 0x8F);
+                boolean isBranchRel8 = firstByte == 0xEB ||
+                    (firstByte >= 0x70 && firstByte <= 0x7F);
+                boolean foundMemRef = false;
+
+                for (int op = 0; op < instr.getNumOperands(); ++op) {
+                    if (instr.getOperandRefType(op) != null) {
+                        if (isBranchRel32) {
+                            if (length > 4) {
+                                for (int i = length - 4; i < length; ++i) mask[i] = true;
+                            }
+                        } else if (isBranchRel8) {
+                            if (length > 1) {
+                                for (int i = length - 1; i < length; ++i) mask[i] = true;
+                            }
+                        } else {
+                            foundMemRef = true;
+                        }
+                    } else if (instr.getScalar(op) != null) {
+                        ghidra.program.model.scalar.Scalar s = instr.getScalar(op);
+                        int byteCount = Math.max(1, (s.bitLength() + 7) / 8);
+                        int startOffset = Math.max(0, length - byteCount);
+                        if (startOffset >= 1) {
+                            for (int i = startOffset; i < length; ++i) mask[i] = true;
+                        }
+                    }
+                }
+
+                if (foundMemRef) {
+                    int[] dispInfo = PatternEngine.getDisplacementInfo(bytes);
+                    if (dispInfo != null) {
+                        for (int i = dispInfo[0]; i < dispInfo[0] + dispInfo[1]; ++i) {
+                            if (i < length) mask[i] = true;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < bytes.length; ++i) {
+                    if (mask[i]) {
+                        sigBuilder.append("?");
+                    } else {
+                        sigBuilder.append(String.format("%02X", bytes[i]));
+                    }
+                    if (i < bytes.length - 1) sigBuilder.append(" ");
+                }
+            }
+
+            sigBuilder.append(" ");
+            curr = curr.add(length);
+        }
+
+        return sigBuilder.toString().trim();
+    }
+
+    private String generateRawPatternFromSelection(ProgramSelection selection) throws Exception {
+        Listing listing = currentProgram.getListing();
+        Memory memory = currentProgram.getMemory();
+        StringBuilder sigBuilder = new StringBuilder();
+
+        Address start = selection.getMinAddress();
+        Address end = selection.getMaxAddress();
+
+        Address curr = start;
+        while (curr != null && curr.compareTo(end) <= 0) {
+            Instruction instr = listing.getInstructionAt(curr);
+            if (instr == null) {
+                curr = curr.add(1);
+                continue;
+            }
+
+            int length = instr.getLength();
+            byte[] bytes = new byte[length];
+            memory.getBytes(curr, bytes);
+
+            // Attempt template matching (like SPF Generator)
+            String bestTemplate = null;
+            java.util.List<ByteMatcher> bestMatchers = null;
+            boolean matchedFromREX = false;
+            int templateLen = 0;
+
+            boolean hasREX = bytes.length > 1
+                && (bytes[0] & 0xFF) >= 0x40
+                && (bytes[0] & 0xFF) <= 0x4F;
+
+            for (Map.Entry<String, String> entry : SPFTemplates.TEMPLATES.entrySet()) {
+                String templName = entry.getKey();
+                String rawPattern = entry.getValue();
+                java.util.List<ByteMatcher> compiled = PatternEngine.compileSignature(rawPattern);
+
+                int[] matchLen = new int[1];
+                if (PatternEngine.matchInternal(bytes, 0, compiled, 0, matchLen)) {
+                    if (matchLen[0] == bytes.length && matchLen[0] > templateLen) {
+                        bestTemplate = templName;
+                        bestMatchers = compiled;
+                        matchedFromREX = false;
+                        templateLen = matchLen[0];
+                    }
+                }
+
+                if (hasREX) {
+                    int[] rexMatchLen = new int[1];
+                    if (PatternEngine.matchInternal(bytes, 1, compiled, 0, rexMatchLen)) {
+                        if (rexMatchLen[0] == bytes.length && (rexMatchLen[0] - 1) > templateLen) {
+                            bestTemplate = templName;
+                            bestMatchers = compiled;
+                            matchedFromREX = true;
+                            templateLen = rexMatchLen[0];
+                        }
+                    }
+                }
+            }
+
+            boolean[] mask = new boolean[length];
+
+            if (bestMatchers != null) {
+                // Template matched: mask only wildcard bytes
+                int rexOffset = matchedFromREX ? 1 : 0;
+                byte[] templateBytes = java.util.Arrays.copyOfRange(bytes, rexOffset, bytes.length);
+                boolean[] tmplMask = PatternEngine.buildMaskFromTemplate(templateBytes, bestMatchers);
+                if (tmplMask != null) {
+                    for (int i = rexOffset; i < bytes.length; ++i) {
+                        int mi = i - rexOffset;
+                        if (mi < tmplMask.length) mask[i] = tmplMask[mi];
+                    }
+                }
+            } else {
+                // No template: fallback with ModRM analysis
+                int firstByte = bytes[0] & 0xFF;
+                boolean isBranchRel32 = (firstByte == 0xE8 || firstByte == 0xE9) ||
+                    (bytes.length > 1 && firstByte == 0x0F &&
+                     (bytes[1] & 0xFF) >= 0x80 && (bytes[1] & 0xFF) <= 0x8F);
+                boolean isBranchRel8 = firstByte == 0xEB ||
+                    (firstByte >= 0x70 && firstByte <= 0x7F);
+                boolean foundMemRef = false;
+
+                for (int op = 0; op < instr.getNumOperands(); ++op) {
+                    if (instr.getOperandRefType(op) != null) {
+                        if (isBranchRel32) {
+                            if (length > 4) {
+                                for (int i = length - 4; i < length; ++i) mask[i] = true;
+                            }
+                        } else if (isBranchRel8) {
+                            if (length > 1) {
+                                for (int i = length - 1; i < length; ++i) mask[i] = true;
+                            }
+                        } else {
+                            foundMemRef = true;
+                        }
+                    } else if (instr.getScalar(op) != null) {
+                        ghidra.program.model.scalar.Scalar s = instr.getScalar(op);
+                        int byteCount = Math.max(1, (s.bitLength() + 7) / 8);
+                        int startOffset = Math.max(0, length - byteCount);
+                        if (startOffset >= 1) {
+                            for (int i = startOffset; i < length; ++i) mask[i] = true;
+                        }
+                    }
+                }
+
+                if (foundMemRef) {
+                    int[] dispInfo = PatternEngine.getDisplacementInfo(bytes);
+                    if (dispInfo != null) {
+                        for (int i = dispInfo[0]; i < dispInfo[0] + dispInfo[1]; ++i) {
+                            if (i < length) mask[i] = true;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < bytes.length; ++i) {
+                if (mask[i]) {
+                    sigBuilder.append("?");
+                } else {
+                    sigBuilder.append(String.format("%02X", bytes[i]));
+                }
+                if (i < bytes.length - 1) sigBuilder.append(" ");
+            }
+
+            sigBuilder.append(" ");
+            curr = curr.add(length);
+        }
+
+        return sigBuilder.toString().trim();
+    }
+
+    private String generateExtendedSignature(ProgramSelection selection) throws Exception {
+        Listing listing = currentProgram.getListing();
+        Memory memory = currentProgram.getMemory();
+        StringBuilder sigBuilder = new StringBuilder();
+
+        Address start = selection.getMinAddress();
+        Address end = selection.getMaxAddress();
+
+        Address curr = start;
+        while (curr != null && curr.compareTo(end) <= 0) {
+            Instruction instr = listing.getInstructionAt(curr);
+            if (instr == null) {
+                curr = curr.add(1);
+                continue;
+            }
+
+            int length = instr.getLength();
+            byte[] bytes = new byte[length];
+            memory.getBytes(curr, bytes);
+
+            String bestTemplate = null;
+            java.util.List<ByteMatcher> bestMatchers = null;
+            boolean matchedFromREX = false;
+            int templateLen = 0;
+
+            boolean hasREX = bytes.length > 1
+                && (bytes[0] & 0xFF) >= 0x40
+                && (bytes[0] & 0xFF) <= 0x4F;
+
+            for (Map.Entry<String, String> entry : SPFTemplates.TEMPLATES.entrySet()) {
+                String rawPattern = entry.getValue();
+                java.util.List<ByteMatcher> compiled = PatternEngine.compileSignature(rawPattern);
+
+                int[] matchLen = new int[1];
+                if (PatternEngine.matchInternal(bytes, 0, compiled, 0, matchLen)) {
+                    if (matchLen[0] == bytes.length && matchLen[0] > templateLen) {
+                        bestTemplate = rawPattern;
+                        bestMatchers = compiled;
+                        matchedFromREX = false;
+                        templateLen = matchLen[0];
+                    }
+                }
+
+                if (hasREX) {
+                    int[] rexMatchLen = new int[1];
+                    if (PatternEngine.matchInternal(bytes, 1, compiled, 0, rexMatchLen)) {
+                        if (rexMatchLen[0] == bytes.length && (rexMatchLen[0] - 1) > templateLen) {
+                            bestTemplate = rawPattern;
+                            bestMatchers = compiled;
+                            matchedFromREX = true;
+                            templateLen = rexMatchLen[0];
+                        }
+                    }
+                }
+            }
+
+            if (bestTemplate != null) {
+                if (matchedFromREX) {
+                    sigBuilder.append(String.format("%02X ", bytes[0]));
+                }
+                sigBuilder.append(bestTemplate);
+                for (int i = templateLen; i < bytes.length; ++i) {
+                    sigBuilder.append(" ?");
+                }
+            } else {
+                boolean[] mask = new boolean[length];
+                int firstByte = bytes[0] & 0xFF;
+                boolean isBranchRel32 = (firstByte == 0xE8 || firstByte == 0xE9) ||
+                    (bytes.length > 1 && firstByte == 0x0F &&
+                     (bytes[1] & 0xFF) >= 0x80 && (bytes[1] & 0xFF) <= 0x8F);
+                boolean isBranchRel8 = firstByte == 0xEB ||
+                    (firstByte >= 0x70 && firstByte <= 0x7F);
+                boolean foundMemRef = false;
+
+                for (int op = 0; op < instr.getNumOperands(); ++op) {
+                    if (instr.getOperandRefType(op) != null) {
+                        if (isBranchRel32) {
+                            if (length > 4) {
+                                for (int i = length - 4; i < length; ++i) mask[i] = true;
+                            }
+                        } else if (isBranchRel8) {
+                            if (length > 1) {
+                                for (int i = length - 1; i < length; ++i) mask[i] = true;
+                            }
+                        } else {
+                            foundMemRef = true;
+                        }
+                    } else if (instr.getScalar(op) != null) {
+                        ghidra.program.model.scalar.Scalar s = instr.getScalar(op);
+                        int byteCount = Math.max(1, (s.bitLength() + 7) / 8);
+                        int startOffset = Math.max(0, length - byteCount);
+                        if (startOffset >= 1) {
+                            for (int i = startOffset; i < length; ++i) mask[i] = true;
+                        }
+                    }
+                }
+
+                if (foundMemRef) {
+                    int[] dispInfo = PatternEngine.getDisplacementInfo(bytes);
+                    if (dispInfo != null) {
+                        for (int i = dispInfo[0]; i < dispInfo[0] + dispInfo[1]; ++i) {
+                            if (i < length) mask[i] = true;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < bytes.length; ++i) {
+                    if (mask[i]) {
+                        sigBuilder.append("?");
+                    } else {
+                        sigBuilder.append(String.format("%02X", bytes[i]));
+                    }
+                    if (i < bytes.length - 1) sigBuilder.append(" ");
+                }
+            }
+
+            sigBuilder.append(" ");
+            curr = curr.add(length);
+        }
+
+        return sigBuilder.toString().trim();
+    }
+
+    private String generateRawBytesFromSelection(ProgramSelection selection) throws Exception {
+        Memory memory = currentProgram.getMemory();
+        StringBuilder sigBuilder = new StringBuilder();
+
+        Address start = selection.getMinAddress();
+        Address end = selection.getMaxAddress();
+
+        long size = end.getOffset() - start.getOffset() + 1;
+        byte[] bytes = new byte[(int) size];
+        memory.getBytes(start, bytes);
+
+        for (int i = 0; i < bytes.length; ++i) {
+            sigBuilder.append(String.format("%02X", bytes[i]));
+            if (i < bytes.length - 1) sigBuilder.append(" ");
+        }
+
+        return sigBuilder.toString();
+    }
+
+    private String generateSPFCommentFromSelection(ProgramSelection selection) throws Exception {
+        Listing listing = currentProgram.getListing();
+        Memory memory = currentProgram.getMemory();
+        StringBuilder comment = new StringBuilder();
+
+        Address start = selection.getMinAddress();
+        Address end = selection.getMaxAddress();
+        String programName = getProgramDisplayName();
+        Function function = currentProgram.getFunctionManager().getFunctionContaining(start);
+        String functionText = "[no function]";
+        if (function != null) {
+            functionText = function.getName() + "[" + function.getEntryPoint() + "]";
+        }
+
+        comment.append("* /--- Ghidra:(").append(programName)
+            .append(") Fun:(").append(functionText)
+            .append(") ---/\n");
+
+        Address curr = start;
+        while (curr != null && curr.compareTo(end) <= 0) {
+            Instruction instr = listing.getInstructionAt(curr);
+            if (instr == null) {
+                curr = curr.add(1);
+                continue;
+            }
+
+            int length = instr.getLength();
+            byte[] bytes = new byte[length];
+            memory.getBytes(curr, bytes);
+
+            StringBuilder hexBytes = new StringBuilder();
+            for (int i = 0; i < bytes.length; ++i) {
+                hexBytes.append(String.format("%02X", bytes[i] & 0xff));
+                if (i < bytes.length - 1) {
+                    hexBytes.append(" ");
+                }
+            }
+
+            comment.append(String.format("* %s  %-29s %s%n", curr, hexBytes.toString(), instr.toString()));
+
+            curr = curr.add(length);
+        }
+
+        return comment.toString().trim();
+    }
+
+    private String getProgramDisplayName() {
+        try {
+            String name = currentProgram.getDomainFile().getName();
+            if (name != null && !name.trim().isEmpty()) {
+                return name.trim();
+            }
+        } catch (Exception ignored) {
+            // Fall back to currentProgram.getName() below.
+        }
+        try {
+            String name = currentProgram.getName();
+            if (name != null && !name.trim().isEmpty()) {
+                return name.trim();
+            }
+        } catch (Exception ignored) {
+            // Fall back to a safe default below.
+        }
+        return "Unknown Program";
+    }
+
+    private static void copyToClipboard(String text) {
+        try {
+            java.awt.datatransfer.StringSelection selection = new java.awt.datatransfer.StringSelection(text);
+            java.awt.Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+        } catch (Exception ex) {
+            // Clipboard may be temporarily unavailable
+        }
+    }
+}
+
+```
+
+`GhidraPatternHelper/PatternEngine.java`:
+
+```java
+package GhidraPatternHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Pattern engine for GhidraPatternHelper: compiles signature strings into byte
+ * matcher trees and matches them over raw byte arrays. Mirrors the SPF framework's
+ * PatternFinder.cpp semantics (EXACT / WILDCARD / RANGE / LIST / SIB_CONDITIONAL /
+ * GROUP / ALTERNATION).
+ *
+ * Template definitions live in {@link SPFTemplates}; this file holds pure
+ * parsing/matching logic shared by the Ghidra script UI.
+ */
+final class PatternEngine {
+
+    private PatternEngine() {
+    }
+
+    // === SIGNATURE PARSING / COMPILING ===
+
+    private static String normalizeSignature(String signature) {
+        StringBuilder result = new StringBuilder();
+        boolean insideBrackets = false;
+        for (int i = 0; i < signature.length(); i++) {
+            char c = signature.charAt(i);
+            if (c == '[') {
+                insideBrackets = true;
+                result.append(c);
+            } else if (c == ']') {
+                insideBrackets = false;
+                result.append(c);
+            } else if (c == ' ' || c == '\t') {
+                if (!insideBrackets) {
+                    result.append(' ');
+                }
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString().replaceAll("\\s+", " ");
+    }
+
+    private static java.util.List<Integer> parseNibble(String str) {
+        java.util.List<Integer> result = new ArrayList<>();
+        if (str.isEmpty()) return result;
+        // Wildcard
+        if (str.equals("?")) {
+            for (int i = 0; i < 16; ++i) result.add(i);
+            return result;
+        }
+        // Bracketed expression – could be a range (e.g., [0-3]) or a list (e.g., [b|9])
+        if (str.startsWith("[") && str.endsWith("]")) {
+            String inner = str.substring(1, str.length() - 1);
+            // List case – split by '|'
+            if (inner.contains("|")) {
+                String[] parts = inner.split("\\|");
+                for (String part : parts) {
+                    if (part.isEmpty()) continue;
+                    // Each part should be a single hex digit
+                    int val = Integer.parseInt(part, 16);
+                    result.add(val);
+                }
+                return result;
+            }
+            // Range case – exactly three characters like "0-3"
+            if (inner.length() == 3 && inner.charAt(1) == '-') {
+                char startChar = Character.toLowerCase(inner.charAt(0));
+                char endChar = Character.toLowerCase(inner.charAt(2));
+                int startVal = (startChar >= '0' && startChar <= '9') ? (startChar - '0') : (startChar - 'a' + 10);
+                int endVal = (endChar >= '0' && endChar <= '9') ? (endChar - '0') : (endChar - 'a' + 10);
+                if (startVal <= endVal) {
+                    for (int i = startVal; i <= endVal; ++i) {
+                        result.add(i);
+                    }
+                }
+                return result;
+            }
+            // If it doesn't match list or range, fall through to treat as exact hex later
+        }
+        // Single hex digit (exact value)
+        char c = Character.toLowerCase(str.charAt(0));
+        if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+            int val = (c >= '0' && c <= '9') ? (c - '0') : (c - 'a' + 10);
+            result.add(val);
+        }
+        return result;
+    }
+
+    private static boolean trySplitNibbles(String part, String[] splitResult) {
+        if (part.isEmpty()) return false;
+        int idx = 0;
+        String highStr;
+        if (part.charAt(idx) == '[') {
+            int close = part.indexOf(']', idx);
+            if (close == -1) return false;
+            highStr = part.substring(idx, close + 1);
+            idx = close + 1;
+        } else {
+            highStr = part.substring(idx, idx + 1);
+            idx += 1;
+        }
+        String lowStr;
+        if (idx < part.length()) {
+            if (part.charAt(idx) == '[') {
+                int close = part.indexOf(']', idx);
+                if (close == -1) return false;
+                lowStr = part.substring(idx, close + 1);
+            } else {
+                lowStr = part.substring(idx, idx + 1);
+            }
+        } else {
+            return false;
+        }
+        splitResult[0] = highStr;
+        splitResult[1] = lowStr;
+        return true;
+    }
+
+    /**
+     * Splits an alternation group body on its top-level '|' separators.
+     * Depth-aware: '|' inside nested "[...]" (byte OR-lists like "[b|9]")
+     * or nested "{...}" groups is not a separator.
+     */
+    private static java.util.List<String> splitTopLevelAlternatives(String body) {
+        java.util.List<String> branches = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int depth = 0;
+        for (int k = 0; k < body.length(); k++) {
+            char c = body.charAt(k);
+            if (c == '[' || c == '{') {
+                depth++;
+            } else if (c == ']' || c == '}') {
+                depth--;
+            }
+            if (c == '|' && depth == 0) {
+                branches.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        branches.add(current.toString());
+        return branches;
+    }
+
+    static java.util.List<ByteMatcher> compileSignature(String signature) {
+        java.util.List<ByteMatcher> matchers = new ArrayList<>();
+        String templated = SPFTemplates.replaceTemplates(signature);
+        String normalized = normalizeSignature(templated);
+
+        Pattern rangeRegex = Pattern.compile("\\[([0-9A-Fa-f]{1,2})-([0-9A-Fa-f]{1,2})\\]");
+        Pattern countRegex = Pattern.compile("\\[([0-9]+)-([0-9]+)\\?\\]");
+
+        // Tokenize, treating brace-wrapped groups "{...}" (and their trailing "?") as single tokens.
+        java.util.List<String> tokens = new ArrayList<>();
+        int i = 0;
+        while (i < normalized.length()) {
+            char c = normalized.charAt(i);
+            if (c == ' ') {
+                i++;
+                continue;
+            }
+            if (c == '{') {
+                int depth = 0;
+                int j = i;
+                for (; j < normalized.length(); j++) {
+                    char gc = normalized.charAt(j);
+                    if (gc == '{') depth++;
+                    else if (gc == '}') {
+                        depth--;
+                        if (depth == 0) break;
+                    }
+                }
+                int end = (j < normalized.length() && j + 1 < normalized.length()
+                    && normalized.charAt(j + 1) == '?') ? j + 2 : j + 1;
+                tokens.add(normalized.substring(i, end));
+                i = end;
+            } else {
+                int j = normalized.indexOf(' ', i);
+                if (j == -1) j = normalized.length();
+                tokens.add(normalized.substring(i, j));
+                i = j;
+            }
+        }
+
+        for (String part : tokens) {
+            ByteMatcher bm = null;
+            if (part.isEmpty()) {
+                continue;
+            }
+
+            // Brace group { ... } or alternation {A|B}; trailing '?' makes it optional.
+            if (part.charAt(0) == '{') {
+                boolean groupOptional = part.charAt(part.length() - 1) == '?';
+                int innerLen = part.length() - (groupOptional ? 3 : 2); // strip '{', '}' and optional '?'
+                String inner = part.substring(1, 1 + innerLen);
+                java.util.List<String> branches = splitTopLevelAlternatives(inner);
+
+                // A stray separator (e.g. "{A|}") is a typo -- fail loudly instead of silently
+                // narrowing the pattern to the surviving branch.
+                boolean hasEmptyBranch = false;
+                for (String branch : branches) {
+                    if (branch.trim().isEmpty()) hasEmptyBranch = true;
+                }
+                if (hasEmptyBranch && branches.size() > 1) {
+                    System.out.println("GhidraPatternHelper: empty alternation branch in '{" + inner + "}'");
+                    matchers.clear();
+                    return matchers;
+                }
+
+                bm = new ByteMatcher();
+                bm.optional = groupOptional;
+                bm.minCount = 0;
+                bm.maxCount = 0;
+                if (branches.size() <= 1) {
+                    // Single sequence -- plain atomic group.
+                    bm.type = ByteMatcher.Type.GROUP;
+                    bm.group = compileSignature(branches.get(0));
+                    for (ByteMatcher sub : bm.group) {
+                        bm.minCount += sub.minCount;
+                        bm.maxCount += sub.maxCount;
+                    }
+                } else {
+                    // Alternation -- exactly one of the listed sequences must match.
+                    bm.type = ByteMatcher.Type.ALTERNATION;
+                    for (String branch : branches) {
+                        java.util.List<ByteMatcher> compiled = compileSignature(branch);
+                        int branchMin = 0;
+                        int branchMax = 0;
+                        for (ByteMatcher sub : compiled) {
+                            branchMin += sub.minCount;
+                            branchMax += sub.maxCount;
+                        }
+                        if (bm.alternatives.isEmpty() || branchMin < bm.minCount) bm.minCount = branchMin;
+                        if (bm.alternatives.isEmpty() || branchMax > bm.maxCount) bm.maxCount = branchMax;
+                        bm.alternatives.add(compiled);
+                    }
+                }
+                if (groupOptional) bm.minCount = 0;
+                matchers.add(bm);
+                continue;
+            }
+
+            // SIB conditional token — determines SIB presence from preceding ModRM byte
+            if (part.equals("[SIB?]")) {
+                bm = new ByteMatcher();
+                bm.type = ByteMatcher.Type.SIB_CONDITIONAL;
+                bm.minCount = 0;
+                bm.maxCount = 1;
+                matchers.add(bm);
+                continue;
+            }
+
+            // Check for count pattern [min-max?] FIRST (e.g. [0-2?] = 0 or 2 wildcard bytes).
+            // Must happen before trailing ? stripping, since the ? is inside the brackets.
+            Matcher mCount = countRegex.matcher(part);
+            if (mCount.matches()) {
+                bm = new ByteMatcher();
+                bm.type = ByteMatcher.Type.WILDCARD;
+                bm.minCount = Integer.parseInt(mCount.group(1));
+                bm.maxCount = Integer.parseInt(mCount.group(2));
+                matchers.add(bm);
+                continue;
+            }
+
+            boolean isOptional = false;
+            if (part.endsWith("?") && part.length() > 1 && !part.equals("??")) {
+                isOptional = true;
+                part = part.substring(0, part.length() - 1);
+            }
+
+            if (part.equals("?") || part.equals("??")) {
+                bm = new ByteMatcher();
+                bm.type = ByteMatcher.Type.WILDCARD;
+                bm.optional = isOptional;
+                matchers.add(bm);
+            } else if (part.startsWith("[") && part.endsWith("]") && part.contains("|")) {
+                bm = new ByteMatcher();
+                bm.type = ByteMatcher.Type.LIST;
+                bm.optional = isOptional;
+                String listContent = part.substring(1, part.length() - 1);
+                String[] listItems = listContent.split("\\|");
+                for (String item : listItems) {
+                    if (item.isEmpty()) continue;
+                    if (item.contains("-")) {
+                        String[] bounds = item.split("-");
+                        int startVal = Integer.parseInt(bounds[0], 16);
+                        int endVal = Integer.parseInt(bounds[1], 16);
+                        for (int val = startVal; val <= endVal; ++val) {
+                            bm.values.add(val);
+                        }
+                    } else {
+                        bm.values.add(Integer.parseInt(item, 16));
+                    }
+                }
+                matchers.add(bm);
+            } else if (rangeRegex.matcher(part).matches()) {
+                Matcher mRange = rangeRegex.matcher(part);
+                mRange.matches();
+                bm = new ByteMatcher();
+                bm.type = ByteMatcher.Type.RANGE;
+                bm.min = Integer.parseInt(mRange.group(1), 16);
+                bm.max = Integer.parseInt(mRange.group(2), 16);
+                bm.optional = isOptional;
+                matchers.add(bm);
+            } else {
+                // Fallback handling for exact bytes or nibble split
+                String[] split = new String[2];
+                if (trySplitNibbles(part, split)) {
+                    java.util.List<Integer> highVals = parseNibble(split[0]);
+                    java.util.List<Integer> lowVals = parseNibble(split[1]);
+                    if (!highVals.isEmpty() && !lowVals.isEmpty()) {
+                        bm = new ByteMatcher();
+                        bm.optional = isOptional;
+                        if (highVals.size() == 1 && lowVals.size() == 1) {
+                            bm.type = ByteMatcher.Type.EXACT;
+                            bm.min = highVals.get(0) * 16 + lowVals.get(0);
+                        } else {
+                            bm.type = ByteMatcher.Type.LIST;
+                            for (int h : highVals) {
+                                for (int l : lowVals) {
+                                    bm.values.add(h * 16 + l);
+                                }
+                            }
+                        }
+                        matchers.add(bm);
+                        continue;
+                    }
+                }
+                // Fallback
+                bm = new ByteMatcher();
+                bm.type = ByteMatcher.Type.EXACT;
+                bm.min = Integer.parseInt(part, 16);
+                bm.optional = isOptional;
+                matchers.add(bm);
+            }
+        }
+        return matchers;
+    }
+
+    // === SEARCH ALGORITHM ===
+
+    static boolean matchInternal(byte[] data, int dataIdx, java.util.List<ByteMatcher> matchers, int matcherIdx, int[] matchLen) {
+        if (matcherIdx == matchers.size()) {
+            matchLen[0] = dataIdx;
+            return true;
+        }
+
+        ByteMatcher m = matchers.get(matcherIdx);
+
+        // GROUP — optional instruction. Try matching the whole group first (greedy),
+        // then fall back to skipping it entirely if it is optional.
+        if (m.type == ByteMatcher.Type.GROUP) {
+            int[] subMatchLen = new int[1];
+            if (matchInternal(data, dataIdx, m.group, 0, subMatchLen)) {
+                if (m.optional) {
+                    // Option 1a: consume the group and continue.
+                    if (matchInternal(data, subMatchLen[0], matchers, matcherIdx + 1, matchLen)) return true;
+                    // Option 1b: the group matched but the tail failed — skip the group.
+                    if (matchInternal(data, dataIdx, matchers, matcherIdx + 1, matchLen)) return true;
+                    return false;
+                }
+                return matchInternal(data, subMatchLen[0], matchers, matcherIdx + 1, matchLen);
+            }
+            // Group did not match in-place.
+            if (m.optional) return matchInternal(data, dataIdx, matchers, matcherIdx + 1, matchLen);
+            return false;
+        }
+
+        // ALTERNATION -- exactly one of the listed sub-sequences. Branches are tried
+        // left to right; a matching branch continues with the remaining matchers so
+        // a failed tail can still backtrack into the next branch.
+        if (m.type == ByteMatcher.Type.ALTERNATION) {
+            for (java.util.List<ByteMatcher> alt : m.alternatives) {
+                int[] subMatchLen = new int[1];
+                if (!matchInternal(data, dataIdx, alt, 0, subMatchLen)) continue;
+                if (matchInternal(data, subMatchLen[0], matchers, matcherIdx + 1, matchLen)) return true;
+            }
+            // No branch produced a full tail match -- skip the whole group if optional.
+            if (m.optional) return matchInternal(data, dataIdx, matchers, matcherIdx + 1, matchLen);
+            return false;
+        }
+
+        // SIB conditional — check preceding ModRM byte
+        if (m.type == ByteMatcher.Type.SIB_CONDITIONAL) {
+            if (dataIdx > 0) {
+                int modrm = data[dataIdx - 1] & 0xFF;
+                boolean hasSib = (modrm & 0x07) == 0x04;
+                if (hasSib) {
+                    if (dataIdx < data.length) {
+                        if (matchInternal(data, dataIdx + 1, matchers, matcherIdx + 1, matchLen))
+                            return true;
+                    }
+                    return false;
+                } else {
+                    return matchInternal(data, dataIdx, matchers, matcherIdx + 1, matchLen);
+                }
+            }
+            // Fallback: no previous byte — try greedy (1 byte) then 0
+            if (dataIdx < data.length && matchInternal(data, dataIdx + 1, matchers, matcherIdx + 1, matchLen))
+                return true;
+            return matchInternal(data, dataIdx, matchers, matcherIdx + 1, matchLen);
+        }
+
+        if (m.optional) {
+            // Option 1: Match 1 byte and proceed (Greedy match)
+            if (dataIdx < data.length && m.matches(data[dataIdx])) {
+                if (matchInternal(data, dataIdx + 1, matchers, matcherIdx + 1, matchLen)) {
+                    return true;
+                }
+            }
+            // Option 2: Skip this optional matcher (consume 0 bytes)
+            if (matchInternal(data, dataIdx, matchers, matcherIdx + 1, matchLen)) {
+                return true;
+            }
+            return false;
+        }
+
+        if (dataIdx + m.minCount > data.length) return false;
+
+        if (m.minCount == m.maxCount) {
+            for (int i = 0; i < m.minCount; ++i) {
+                if (!m.matches(data[dataIdx + i])) return false;
+            }
+            return matchInternal(data, dataIdx + m.minCount, matchers, matcherIdx + 1, matchLen);
+        }
+
+        for (int count = m.maxCount; count >= m.minCount; --count) {
+            if (dataIdx + count > data.length) continue;
+            if (matchInternal(data, dataIdx + count, matchers, matcherIdx + 1, matchLen)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // === MODRM DISPLACEMENT ANALYZER ===
+
+    static int[] getDisplacementInfo(byte[] bytes) {
+        if (bytes == null || bytes.length < 2) return null;
+
+        int idx = 0;
+
+        // Skip legacy prefixes (66, F0, F2, F3, segment overrides, address size)
+        while (idx < bytes.length) {
+            int b = bytes[idx] & 0xFF;
+            if (b == 0x66 || b == 0xF0 || b == 0xF2 || b == 0xF3 ||
+                b == 0x2E || b == 0x36 || b == 0x3E || b == 0x26 ||
+                b == 0x64 || b == 0x65 || b == 0x67) {
+                idx++;
+            } else {
+                break;
+            }
+        }
+
+        // Skip REX prefix
+        if (idx < bytes.length && (bytes[idx] & 0xFF) >= 0x40 && (bytes[idx] & 0xFF) <= 0x4F) {
+            idx++;
+        }
+
+        // Skip opcode bytes
+        if (idx >= bytes.length) return null;
+
+        // Handle 0F prefix for 2/3-byte opcodes
+        if ((bytes[idx] & 0xFF) == 0x0F) {
+            idx++;
+            if (idx >= bytes.length) return null;
+            // 3-byte opcodes: 0F 38 xx or 0F 3A xx
+            int b = bytes[idx] & 0xFF;
+            if (b == 0x38 || b == 0x3A) {
+                idx++;
+                if (idx >= bytes.length) return null;
+            }
+        }
+
+        // Consume opcode byte
+        idx++;
+        if (idx >= bytes.length) return null;
+
+        // Parse ModRM
+        int modrm = bytes[idx] & 0xFF;
+        int mod = (modrm >> 6) & 3;
+        int rm = modrm & 7;
+
+        if (mod == 3) return null; // register target, no displacement
+
+        int dispOffset = idx + 1; // bytes after ModRM
+
+        // Handle SIB (ModRM R/M = 100)
+        if (rm == 4) {
+            if (dispOffset >= bytes.length) return null;
+            int sibBase = bytes[dispOffset] & 7;
+            dispOffset++; // consume SIB byte
+
+            if (mod == 0) {
+                // Mod=00 + SIB base=101 → disp32 follows
+                if (sibBase == 5) {
+                    if (dispOffset + 4 > bytes.length) return null;
+                    return new int[] { dispOffset, 4 };
+                }
+                // Mod=00 + SIB base != 101 → no displacement
+                return null;
+            }
+        } else if (mod == 0 && rm == 5) {
+            // Mod=00 + R/M=101 → RIP-relative disp32
+            if (dispOffset + 4 > bytes.length) return null;
+            return new int[] { dispOffset, 4 };
+        }
+
+        // Mod=01 → disp8, Mod=10 → disp32
+        if (mod == 1) {
+            if (dispOffset + 1 > bytes.length) return null;
+            return new int[] { dispOffset, 1 };
+        }
+        if (mod == 2) {
+            if (dispOffset + 4 > bytes.length) return null;
+            return new int[] { dispOffset, 4 };
+        }
+
+        return null;
+    }
+
+    // === TEMPLATE-AWARE MASKING (for Raw Pattern Generator) ===
+
+    private static boolean matchWithConsumption(byte[] data, int dataIdx,
+        java.util.List<ByteMatcher> matchers, int matcherIdx,
+        boolean[] mask, java.util.List<Integer> maskTrail, int[] matchLen) {
+        if (matcherIdx == matchers.size()) {
+            matchLen[0] = dataIdx;
+            return true;
+        }
+
+        ByteMatcher m = matchers.get(matcherIdx);
+
+        // GROUP -- optional instruction. Try matching the whole group first (greedy),
+        // then fall back to skipping it entirely if it is optional.
+        if (m.type == ByteMatcher.Type.GROUP) {
+            int[] subMatchLen = new int[1];
+            if (matchWithConsumption(data, dataIdx, m.group, 0, mask, maskTrail, subMatchLen)) {
+                int trailMark = maskTrail.size();
+                if (m.optional) {
+                    // Option 1a: consume the group and continue.
+                    if (matchWithConsumption(data, subMatchLen[0], matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+                    rollbackMask(mask, maskTrail, trailMark);
+                    // Option 1b: the group matched but the tail failed -- skip the group.
+                    if (matchWithConsumption(data, dataIdx, matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+                    return false;
+                }
+                return matchWithConsumption(data, subMatchLen[0], matchers, matcherIdx + 1, mask, maskTrail, matchLen);
+            }
+            // Group did not match in-place.
+            if (m.optional) return matchWithConsumption(data, dataIdx, matchers, matcherIdx + 1, mask, maskTrail, matchLen);
+            return false;
+        }
+
+        // ALTERNATION -- exactly one branch; failed tails backtrack into the next branch.
+        if (m.type == ByteMatcher.Type.ALTERNATION) {
+            for (java.util.List<ByteMatcher> alt : m.alternatives) {
+                int[] subMatchLen = new int[1];
+                if (!matchWithConsumption(data, dataIdx, alt, 0, mask, maskTrail, subMatchLen)) continue;
+                int trailMark = maskTrail.size();
+                if (matchWithConsumption(data, subMatchLen[0], matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+                rollbackMask(mask, maskTrail, trailMark);
+            }
+            // No branch produced a full tail match -- skip the whole group if optional.
+            if (m.optional) return matchWithConsumption(data, dataIdx, matchers, matcherIdx + 1, mask, maskTrail, matchLen);
+            return false;
+        }
+
+        // SIB conditional -- check preceding ModRM byte
+        if (m.type == ByteMatcher.Type.SIB_CONDITIONAL) {
+            boolean hasSib = false;
+            if (dataIdx > 0) hasSib = (data[dataIdx - 1] & 0x07) == 0x04;
+            if (hasSib) {
+                if (dataIdx >= data.length) return false;
+                return matchWithConsumption(data, dataIdx + 1, matchers, matcherIdx + 1, mask, maskTrail, matchLen);
+            }
+            // Fallback: no previous byte -- try greedy (1 byte) then 0
+            if (dataIdx == 0 && dataIdx < data.length
+                && matchWithConsumption(data, dataIdx + 1, matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+            return matchWithConsumption(data, dataIdx, matchers, matcherIdx + 1, mask, maskTrail, matchLen);
+        }
+
+        if (m.optional) {
+            // Option 1: Match 1 byte and proceed (Greedy match)
+            if (dataIdx < data.length && m.matches(data[dataIdx])) {
+                int trailMark = maskTrail.size();
+                if (m.type == ByteMatcher.Type.WILDCARD) markMask(mask, maskTrail, dataIdx, 1);
+                if (matchWithConsumption(data, dataIdx + 1, matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+                rollbackMask(mask, maskTrail, trailMark);
+            }
+            // Option 2: Skip this optional matcher (consume 0 bytes)
+            return matchWithConsumption(data, dataIdx, matchers, matcherIdx + 1, mask, maskTrail, matchLen);
+        }
+
+        if (dataIdx + m.minCount > data.length) return false;
+
+        if (m.minCount == m.maxCount) {
+            int count = m.minCount;
+            for (int i = 0; i < count; ++i) {
+                if (!m.matches(data[dataIdx + i])) return false;
+            }
+            int trailMark = maskTrail.size();
+            if (count > 0 && m.type == ByteMatcher.Type.WILDCARD) markMask(mask, maskTrail, dataIdx, count);
+            if (matchWithConsumption(data, dataIdx + count, matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+            rollbackMask(mask, maskTrail, trailMark);
+            return false;
+        }
+
+        for (int count = m.maxCount; count >= m.minCount; --count) {
+            if (dataIdx + count > data.length) continue;
+            int trailMark = maskTrail.size();
+            if (m.type == ByteMatcher.Type.WILDCARD) markMask(mask, maskTrail, dataIdx, count);
+            if (matchWithConsumption(data, dataIdx + count, matchers, matcherIdx + 1, mask, maskTrail, matchLen)) return true;
+            rollbackMask(mask, maskTrail, trailMark);
+        }
+        return false;
+    }
+
+    private static void markMask(boolean[] mask, java.util.List<Integer> maskTrail, int start, int count) {
+        for (int i = 0; i < count; ++i) {
+            mask[start + i] = true;
+            maskTrail.add(start + i);
+        }
+    }
+
+    private static void rollbackMask(boolean[] mask, java.util.List<Integer> maskTrail, int trailMark) {
+        while (maskTrail.size() > trailMark) {
+            mask[maskTrail.remove(maskTrail.size() - 1)] = false;
+        }
+    }
+
+    static boolean[] buildMaskFromTemplate(byte[] bytes, java.util.List<ByteMatcher> matchers) {
+        boolean[] mask = new boolean[bytes.length];
+        java.util.List<Integer> maskTrail = new ArrayList<>();
+        int[] matchLen = new int[1];
+
+        if (!matchWithConsumption(bytes, 0, matchers, 0, mask, maskTrail, matchLen)) return null;
+        if (matchLen[0] != bytes.length) return null;
+
+        for (int i = matchLen[0]; i < bytes.length; ++i) mask[i] = true;
+        return mask;
+    }
+}
+
+/**
+ * Single-byte matcher node used by the pattern engine. Deliberately top-level
+ * (not nested in {@link PatternEngine}) so the Ghidra script UI can reference it
+ * directly as {@code ByteMatcher} / {@code ByteMatcher.Type}.
+ */
+class ByteMatcher {
+    enum Type { EXACT, WILDCARD, RANGE, LIST, SIB_CONDITIONAL, GROUP, ALTERNATION }
+    Type type;
+    int min;
+    int max;
+    int minCount = 1;
+    int maxCount = 1;
+    boolean optional = false;
+    java.util.List<Integer> values = new ArrayList<>();
+    java.util.List<ByteMatcher> group = new ArrayList<>();
+    java.util.List<java.util.List<ByteMatcher>> alternatives = new ArrayList<>();
+
+    boolean matches(byte b) {
+        int val = b & 0xFF;
+        if (type == Type.WILDCARD) {
+            return true;
+        }
+        if (type == Type.EXACT) {
+            return val == min;
+        }
+        if (type == Type.RANGE) {
+            return val >= min && val <= max;
+        }
+        if (type == Type.LIST) {
+            return values.contains(val);
+        }
+        return false;
+    }
+}
+
+```
+
+`GhidraPatternHelper/SPFTemplates.java`:
+
+```java
+package GhidraPatternHelper;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * SPF pattern templates: bracketed template name -> raw byte pattern.
+ * Shared with GhidraPatternHelper via {@link PatternEngine} (SPFTemplates.replaceTemplates()).
+ * Edit/rebuild is picked up automatically: Ghidra compiles all .java files of this
+ * script folder together as one bundle and caches by source fingerprint.
+ */
+final class SPFTemplates {
+
+    static final Map<String, String> TEMPLATES = new LinkedHashMap<>();
+
+    private SPFTemplates() {
+    }
+
+    static String replaceTemplates(String signature) {
+        java.util.List<Map.Entry<String, String>> sorted = new ArrayList<>(TEMPLATES.entrySet());
+        sorted.sort((a, b) -> Integer.compare(b.getKey().length(), a.getKey().length()));
+        for (Map.Entry<String, String> entry : sorted) {
+            int idx;
+            final String name = entry.getKey();
+            final String replacement = entry.getValue();
+            while ((idx = signature.indexOf(name)) != -1) {
+                int afterName = idx + name.length();
+                // "[<template>]?" -> whole instruction is optional: wrap in an optional group.
+                if (afterName < signature.length() && signature.charAt(afterName) == '?') {
+                    signature = signature.substring(0, idx)
+                        + "{" + replacement + "}?"
+                        + signature.substring(afterName + 1);
+                } else {
+                    signature = signature.substring(0, idx)
+                        + replacement
+                        + signature.substring(idx + name.length());
+                }
+            }
+        }
+        return signature;
+    }
+
+    static {
+  // =========================================================================
+  // ===							MOV INSTRUCTIONS                         ===
+  // =========================================================================
+  //
+  // ModRM byte (Mod /Reg /R/M) — upper 2 bits = Mod addressing mode:
+  //   Mod=00 [00-3f] — [r64]                 (no displacement)
+  //   Mod=01 [40-7f] — [r64+disp8]           (8-bit displacement)
+  //   Mod=10 [80-bf] — [r64+disp32]          (32-bit displacement)
+  //   Mod=11 [c0-ff] — register-register
+  //   R/M=100 (0x4)  — SIB byte follows      (index*scale + base)
+  //   R/M=101 (0x5)  — RIP-relative (Mod=00) or disp32/64 (Mod=00)
+  //
+  // SIB byte (Scale:Index:Base):
+  //   Scale  — [7:6] = 00(x1) 01(x2) 10(x4) 11(x8)
+  //   Index  — [5:3] = register or 100=RSP (no index)
+  //   Base   — [2:0] = register or 101=RBP (no base, disp follows)
+  //
+  // REX prefix: byte 0x40-0x4F, bit W (bit 3) = 1 → 64-bit operand
+
+  // --- MOV: Register ← Immediate ---
+        TEMPLATES.put("[MOV r8, imm8]",           "[b0-b7] ?");
+        TEMPLATES.put("[MOV r32, imm32]",         "4[0-f]? [b8-bf] ? ? ? ?");
+        TEMPLATES.put("[MOV r64, imm64]",         "4[8-f] [b8-bf] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[MOV r64, imm32]",         "4[8-f] c7 [c0-ff] ? ? ? ?");
+
+  // --- MOV: Register ← Register ---
+        TEMPLATES.put("[MOV r32, r32]",           "8b [c0-ff]");
+        TEMPLATES.put("[MOV r64, r64]",           "4[8-f] 8[b|9] [c0-ff]");
+
+  // --- MOV: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[MOV r8, [rip+off32]]",    "8a 05 ? ? ? ?");
+        TEMPLATES.put("[MOV r32, [rip+off32]]",   "8b [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOV r64, [rip+off32]]",   "4[8-f] 8b [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+
+  // --- MOV: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[MOV r8, [r64+off32]]",    "8a [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOV r32, [r64+off32]]",   "8b [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOV r64, [r64+off32]]",   "4[8-f] 8b [80-bf] [SIB?] ? ? ? ?");
+
+  // --- MOV: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[MOV r8, [r64+off8]]",     "8a [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOV r32, [r64+off8]]",    "8b [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOV r64, [r64+off8]]",    "4[8-f] 8b [40-7f] [SIB?] ?");
+
+  // --- MOV: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[MOV r8, [r64]]",          "8a [00-3f] [SIB?]");
+        TEMPLATES.put("[MOV r32, [r64]]",         "8b [00-3f] [SIB?]");
+        TEMPLATES.put("[MOV r64, [r64]]",         "4[8-f] 8b [00-3f] [SIB?]");
+
+  // --- MOV: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[MOV [rip+off32], r8]",    "88 05 ? ? ? ?");
+        TEMPLATES.put("[MOV [rip+off32], r32]",   "4[0-f]? 89 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOV [rip+off32], r64]",   "4[8-f] 89 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+
+  // --- MOV: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[MOV byte ptr [rip+off32], imm8]",   "c6 05 ? ? ? ? ?");
+        TEMPLATES.put("[MOV dword ptr [rip+off32], imm32]", "c7 05 ? ? ? ? ? ? ? ?");
+
+  // --- MOV: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[MOV [r64+off32], r8]",    "88 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOV [r64+off32], r32]",   "89 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOV [r64+off32], r64]",   "4[8-f] 89 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- MOV: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[MOV [r64+off8], r8]",     "88 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOV [r64+off8], r32]",    "89 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOV [r64+off8], r64]",    "4[8-f] 89 [40-7f] [SIB?] ?");
+
+  // --- MOV: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[MOV [r64], r8]",          "88 [00-3f] [SIB?]");
+        TEMPLATES.put("[MOV [r64], r32]",         "89 [00-3f] [SIB?]");
+        TEMPLATES.put("[MOV [r64], r64]",         "4[8-f] 89 [00-3f] [SIB?]");
+
+  // --- MOV: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[MOV byte ptr [r64+off32], imm8]",     "c6 [80-bf] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[MOV dword ptr [r64+off32], imm32]",   "c7 [80-bf] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[MOV qword ptr [r64+off32], imm64_32]", "4[8-f] c7 [80-bf] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- MOV: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[MOV byte ptr [r64+off8], imm8]",      "c6 [40-7f] [SIB?] ? ?");
+        TEMPLATES.put("[MOV dword ptr [r64+off8], imm32]",    "c7 [40-7f] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[MOV qword ptr [r64+off8], imm64_32]",  "4[8-f] c7 [40-7f] [SIB?] ? ? ? ? ?");
+
+  // --- MOV: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[MOV r8, [r64+sib+off32]]",    "8a [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOV r8, [r64+sib+off8]]",     "8a [44-7c] ? ? ?");
+        TEMPLATES.put("[MOV r8, [r64+sib]]",          "8a [04-3c] ?");
+        TEMPLATES.put("[MOV r32, [r64+sib+off32]]",   "8b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOV r32, [r64+sib+off8]]",    "8b [44-7c] ? ? ?");
+        TEMPLATES.put("[MOV r32, [r64+sib]]",         "8b [04-3c] ?");
+        TEMPLATES.put("[MOV r64, [r64+sib+off32]]",   "4[8-f] 8b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOV r64, [r64+sib+off8]]",    "4[8-f] 8b [44-7c] ? ? ?");
+        TEMPLATES.put("[MOV r64, [r64+sib]]",         "4[8-f] 8b [04-3c] ?");
+
+  // --- MOV: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[MOV [r64+sib+off32], r8]",    "88 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOV [r64+sib+off8], r8]",     "88 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOV [r64+sib], r8]",          "88 [04-3c] ?");
+        TEMPLATES.put("[MOV [r64+sib+off32], r32]",   "89 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOV [r64+sib+off8], r32]",    "89 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOV [r64+sib], r32]",         "89 [04-3c] ?");
+        TEMPLATES.put("[MOV [r64+sib+off32], r64]",   "4[8-f] 89 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOV [r64+sib+off8], r64]",    "4[8-f] 89 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOV [r64+sib], r64]",         "4[8-f] 89 [04-3c] ?");
+
+  // --- MOV: Zero Extend (MOVZX) ---
+        TEMPLATES.put("[MOVZX r32, [r64]]",          "0f b6 [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVZX r32, [r64+off8]]",     "0f b6 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVZX r32, [r64+off32]]",    "0f b6 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVZX r64, [r64+off8]]",     "4[8-f] 0f b6 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVZX r64, [r64+off32]]",    "4[8-f] 0f b6 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVZX r32, w[r64]]",        "0f b7 [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVZX r32, w[r64+off8]]",   "0f b7 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVZX r32, w[r64+off32]]",  "0f b7 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVZX r32, r8]",            "0f b6 [c0-ff]");
+        TEMPLATES.put("[MOVZX r64, r8]",            "4[8-f] 0f b6 [c0-ff]");
+
+  // --- MOV: Sign Extend (MOVSXD) ---
+        TEMPLATES.put("[MOVSXD r64, r32]",            "4[8-f] 63 [c0-ff]");
+        TEMPLATES.put("[MOVSXD r64, [r64+off8]]",     "4[8-f] 63 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSXD r64, [r64+off32]]",    "4[8-f] 63 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- MOVSX: Sign Extend (Byte/Word to Dword/Qword) ---
+        TEMPLATES.put("[MOVSX r32, [r64]]",           "0f be [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVSX r32, [r64+off8]]",      "0f be [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSX r32, [r64+off32]]",     "0f be [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSX r64, [r64+off8]]",      "4[8-f] 0f be [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSX r64, [r64+off32]]",     "4[8-f] 0f be [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSX r32, w[r64]]",         "0f bf [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVSX r32, w[r64+off8]]",    "0f bf [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSX r32, w[r64+off32]]",   "0f bf [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSX r64, w[r64+off8]]",    "4[8-f] 0f bf [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSX r64, w[r64+off32]]",   "4[8-f] 0f bf [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSX r32, r8]",             "0f be [c0-ff]");
+        TEMPLATES.put("[MOVSX r64, r8]",             "4[8-f] 0f be [c0-ff]");
+        TEMPLATES.put("[MOVSX r32, r16]",            "0f bf [c0-ff]");
+        TEMPLATES.put("[MOVSX r64, r16]",            "4[8-f] 0f bf [c0-ff]");
+
+  // =========================================================================
+  // ===						LEA (LOAD EFFECTIVE ADDRESS)                 ===
+  // =========================================================================
+
+  // --- LEA: Register ← Address (64-bit operand) ---
+        TEMPLATES.put("[LEA r64, [rip+off32]]",   "4[8-f] 8d [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[LEA r64, [r64+off32]]",   "4[8-f] 8d [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[LEA r64, [r64+off8]]",    "4[8-f] 8d [40-7f] [SIB?] ?");
+        TEMPLATES.put("[LEA r64, [r64]]",         "4[8-f] 8d [00-3f] [SIB?]");
+
+  // --- LEA: Register ← Address (32-bit operand) ---
+        TEMPLATES.put("[LEA r32, [rip+off32]]",   "8d [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[LEA r32, [r64+off32]]",   "8d [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[LEA r32, [r64+off8]]",    "8d [40-7f] [SIB?] ?");
+        TEMPLATES.put("[LEA r32, [r64]]",         "8d [00-3f] [SIB?]");
+
+  // --- LEA: Register ← Address (16-bit operand) ---
+        TEMPLATES.put("[LEA r16, [rip+off32]]",   "66 8d [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[LEA r16, [r64+off8]]",    "66 8d [40-7f] [SIB?] ?");
+        TEMPLATES.put("[LEA r16, [r64]]",         "66 8d [00-3f] [SIB?]");
+
+  // --- LEA: SIB-specific (ModRM R/M=100) ---
+        TEMPLATES.put("[LEA r64, [r64+sib+off32]]", "4[8-f] 8d [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[LEA r64, [r64+sib+off8]]",  "4[8-f] 8d [44-7c] ? ? ?");
+        TEMPLATES.put("[LEA r64, [r64+sib]]",       "4[8-f] 8d [04-3c] ?");
+        TEMPLATES.put("[LEA r32, [r64+sib+off32]]", "8d [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[LEA r32, [r64+sib+off8]]",  "8d [44-7c] ? ? ?");
+        TEMPLATES.put("[LEA r32, [r64+sib]]",       "8d [04-3c] ?");
+
+  // =========================================================================
+  // ===							ARITHMETIC & LOGIC                       ===
+  // =========================================================================
+
+  // --- ADD: Register ← Register ---
+        TEMPLATES.put("[ADD r64, r64]",             "4[8-f] [01|03] [c0-ff]");
+        TEMPLATES.put("[ADD r32, r32]",             "[01|03] [c0-ff]");
+        TEMPLATES.put("[ADD r8, r8]",               "[00|02] [c0-ff]");
+
+  // --- ADD: Register ← Immediate ---
+        TEMPLATES.put("[ADD r64, imm32]",           "4[8-f] 81 [c0-c7] ? ? ? ?");
+        TEMPLATES.put("[ADD r32, imm32]",           "81 [c0-c7] ? ? ? ?");
+        TEMPLATES.put("[ADD r8, imm8]",             "80 [c0-c7] ?");
+        TEMPLATES.put("[ADD r64, imm8]",            "4[8-f] 83 [c0-c7] ?");
+        TEMPLATES.put("[ADD r32, imm8]",            "83 [c0-c7] ?");
+
+  // --- ADD: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[ADD r8, [rip+off32]]",      "02 05 ? ? ? ?");
+        TEMPLATES.put("[ADD r32, [rip+off32]]",     "03 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[ADD r64, [rip+off32]]",     "4[8-f] 03 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+
+  // --- ADD: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[ADD r8, [r64+off32]]",      "02 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[ADD r32, [r64+off32]]",     "03 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[ADD r64, [r64+off32]]",     "4[8-f] 03 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- ADD: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[ADD r8, [r64+off8]]",       "02 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[ADD r32, [r64+off8]]",      "03 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[ADD r64, [r64+off8]]",      "4[8-f] 03 [40-7f] [SIB?] ?");
+
+  // --- ADD: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[ADD r8, [r64]]",            "02 [00-3f] [SIB?]");
+        TEMPLATES.put("[ADD r32, [r64]]",           "03 [00-3f] [SIB?]");
+        TEMPLATES.put("[ADD r64, [r64]]",           "4[8-f] 03 [00-3f] [SIB?]");
+
+  // --- ADD: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[ADD [rip+off32], r8]",      "00 05 ? ? ? ?");
+        TEMPLATES.put("[ADD [rip+off32], r32]",     "01 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[ADD [rip+off32], r64]",     "4[8-f] 01 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+
+  // --- ADD: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[ADD [r64+off32], r8]",      "00 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[ADD [r64+off32], r32]",     "01 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[ADD [r64+off32], r64]",     "4[8-f] 01 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- ADD: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[ADD [r64+off8], r8]",       "00 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[ADD [r64+off8], r32]",      "01 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[ADD [r64+off8], r64]",      "4[8-f] 01 [40-7f] [SIB?] ?");
+
+  // --- ADD: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[ADD [r64], r8]",            "00 [00-3f] [SIB?]");
+        TEMPLATES.put("[ADD [r64], r32]",           "01 [00-3f] [SIB?]");
+        TEMPLATES.put("[ADD [r64], r64]",           "4[8-f] 01 [00-3f] [SIB?]");
+
+  // --- ADD: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[ADD byte ptr [r64+off32], imm8]",     "80 [80-87] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[ADD dword ptr [r64+off32], imm32]",   "81 [80-87] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[ADD qword ptr [r64+off32], imm64_32]", "4[8-f] 81 [80-87] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- ADD: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[ADD byte ptr [r64+off8], imm8]",      "80 [40-47] [SIB?] ? ?");
+        TEMPLATES.put("[ADD dword ptr [r64+off8], imm32]",    "81 [40-47] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[ADD qword ptr [r64+off8], imm64_32]",  "4[8-f] 81 [40-47] [SIB?] ? ? ? ? ?");
+
+  // --- ADD: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[ADD byte ptr [rip+off32], imm8]",     "80 05 ? ? ? ? ?");
+        TEMPLATES.put("[ADD dword ptr [rip+off32], imm32]",   "81 05 ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[ADD qword ptr [rip+off32], imm64_32]", "4[8-f] 81 05 ? ? ? ? ? ? ? ?");
+
+  // --- ADD: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[ADD r8, [r64+sib+off32]]",    "02 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[ADD r8, [r64+sib+off8]]",     "02 [44-7c] ? ? ?");
+        TEMPLATES.put("[ADD r8, [r64+sib]]",          "02 [04-3c] ?");
+        TEMPLATES.put("[ADD r32, [r64+sib+off32]]",   "03 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[ADD r32, [r64+sib+off8]]",    "03 [44-7c] ? ? ?");
+        TEMPLATES.put("[ADD r32, [r64+sib]]",         "03 [04-3c] ?");
+        TEMPLATES.put("[ADD r64, [r64+sib+off32]]",   "4[8-f] 03 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[ADD r64, [r64+sib+off8]]",    "4[8-f] 03 [44-7c] ? ? ?");
+        TEMPLATES.put("[ADD r64, [r64+sib]]",         "4[8-f] 03 [04-3c] ?");
+
+  // --- ADD: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[ADD [r64+sib+off32], r8]",    "00 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[ADD [r64+sib+off8], r8]",     "00 [44-7c] ? ? ?");
+        TEMPLATES.put("[ADD [r64+sib], r8]",          "00 [04-3c] ?");
+        TEMPLATES.put("[ADD [r64+sib+off32], r32]",   "01 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[ADD [r64+sib+off8], r32]",    "01 [44-7c] ? ? ?");
+        TEMPLATES.put("[ADD [r64+sib], r32]",         "01 [04-3c] ?");
+        TEMPLATES.put("[ADD [r64+sib+off32], r64]",   "4[8-f] 01 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[ADD [r64+sib+off8], r64]",    "4[8-f] 01 [44-7c] ? ? ?");
+        TEMPLATES.put("[ADD [r64+sib], r64]",         "4[8-f] 01 [04-3c] ?");
+
+  // --- SUB: Register ← Register ---
+        TEMPLATES.put("[SUB r64, r64]",             "4[8-f] [29|2b] [c0-ff]");
+        TEMPLATES.put("[SUB r32, r32]",             "[29|2b] [c0-ff]");
+        TEMPLATES.put("[SUB r8, r8]",               "[28|2a] [c0-ff]");
+
+  // --- SUB: Register ← Immediate ---
+        TEMPLATES.put("[SUB r64, imm32]",           "4[8-f] 81 [e8-ef] ? ? ? ?");
+        TEMPLATES.put("[SUB r32, imm32]",           "81 [e8-ef] ? ? ? ?");
+        TEMPLATES.put("[SUB r8, imm8]",             "80 [e8-ef] ?");
+        TEMPLATES.put("[SUB r64, imm8]",            "4[8-f] 83 [e8-ef] ?");
+        TEMPLATES.put("[SUB r32, imm8]",            "83 [e8-ef] ?");
+
+  // --- SUB: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[SUB r8, [rip+off32]]",      "2a 05 ? ? ? ?");
+        TEMPLATES.put("[SUB r32, [rip+off32]]",     "2b [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[SUB r64, [rip+off32]]",     "4[8-f] 2b [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+
+  // --- SUB: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[SUB r8, [r64+off32]]",      "2a [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[SUB r32, [r64+off32]]",     "2b [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[SUB r64, [r64+off32]]",     "4[8-f] 2b [80-bf] [SIB?] ? ? ? ?");
+
+  // --- SUB: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[SUB r8, [r64+off8]]",       "2a [40-7f] [SIB?] ?");
+        TEMPLATES.put("[SUB r32, [r64+off8]]",      "2b [40-7f] [SIB?] ?");
+        TEMPLATES.put("[SUB r64, [r64+off8]]",      "4[8-f] 2b [40-7f] [SIB?] ?");
+
+  // --- SUB: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[SUB r8, [r64]]",            "2a [00-3f] [SIB?]");
+        TEMPLATES.put("[SUB r32, [r64]]",           "2b [00-3f] [SIB?]");
+        TEMPLATES.put("[SUB r64, [r64]]",           "4[8-f] 2b [00-3f] [SIB?]");
+
+  // --- SUB: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[SUB [rip+off32], r8]",      "28 2d ? ? ? ?");
+        TEMPLATES.put("[SUB [rip+off32], r32]",     "29 2d ? ? ? ?");
+        TEMPLATES.put("[SUB [rip+off32], r64]",     "4[8-f] 29 2d ? ? ? ?");
+
+  // --- SUB: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[SUB [r64+off32], r8]",      "28 [a8-af] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[SUB [r64+off32], r32]",     "29 [a8-af] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[SUB [r64+off32], r64]",     "4[8-f] 29 [a8-af] [SIB?] ? ? ? ?");
+
+  // --- SUB: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[SUB [r64+off8], r8]",       "28 [68-6f] [SIB?] ?");
+        TEMPLATES.put("[SUB [r64+off8], r32]",      "29 [68-6f] [SIB?] ?");
+        TEMPLATES.put("[SUB [r64+off8], r64]",      "4[8-f] 29 [68-6f] [SIB?] ?");
+
+  // --- SUB: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[SUB [r64], r8]",            "28 [28-2f] [SIB?]");
+        TEMPLATES.put("[SUB [r64], r32]",           "29 [28-2f] [SIB?]");
+        TEMPLATES.put("[SUB [r64], r64]",           "4[8-f] 29 [28-2f] [SIB?]");
+
+  // --- SUB: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[SUB byte ptr [r64+off32], imm8]",     "80 [a8-af] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[SUB dword ptr [r64+off32], imm32]",   "81 [a8-af] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[SUB qword ptr [r64+off32], imm64_32]", "4[8-f] 81 [a8-af] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- SUB: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[SUB byte ptr [r64+off8], imm8]",      "80 [68-6f] [SIB?] ? ?");
+        TEMPLATES.put("[SUB dword ptr [r64+off8], imm32]",    "81 [68-6f] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[SUB qword ptr [r64+off8], imm64_32]",  "4[8-f] 81 [68-6f] [SIB?] ? ? ? ? ?");
+
+  // --- SUB: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[SUB byte ptr [rip+off32], imm8]",     "80 2d ? ? ? ? ?");
+        TEMPLATES.put("[SUB dword ptr [rip+off32], imm32]",   "81 2d ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[SUB qword ptr [rip+off32], imm64_32]", "4[8-f] 81 2d ? ? ? ? ? ? ? ?");
+
+  // --- SUB: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[SUB r8, [r64+sib+off32]]",    "2a [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[SUB r8, [r64+sib+off8]]",     "2a [44-7c] ? ? ?");
+        TEMPLATES.put("[SUB r8, [r64+sib]]",          "2a [04-3c] ?");
+        TEMPLATES.put("[SUB r32, [r64+sib+off32]]",   "2b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[SUB r32, [r64+sib+off8]]",    "2b [44-7c] ? ? ?");
+        TEMPLATES.put("[SUB r32, [r64+sib]]",         "2b [04-3c] ?");
+        TEMPLATES.put("[SUB r64, [r64+sib+off32]]",   "4[8-f] 2b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[SUB r64, [r64+sib+off8]]",    "4[8-f] 2b [44-7c] ? ? ?");
+        TEMPLATES.put("[SUB r64, [r64+sib]]",         "4[8-f] 2b [04-3c] ?");
+
+  // --- SUB: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[SUB [r64+sib+off32], r8]",    "28 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[SUB [r64+sib+off8], r8]",     "28 [44-7c] ? ? ?");
+        TEMPLATES.put("[SUB [r64+sib], r8]",          "28 [04-3c] ?");
+        TEMPLATES.put("[SUB [r64+sib+off32], r32]",   "29 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[SUB [r64+sib+off8], r32]",    "29 [44-7c] ? ? ?");
+        TEMPLATES.put("[SUB [r64+sib], r32]",         "29 [04-3c] ?");
+        TEMPLATES.put("[SUB [r64+sib+off32], r64]",   "4[8-f] 29 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[SUB [r64+sib+off8], r64]",    "4[8-f] 29 [44-7c] ? ? ?");
+        TEMPLATES.put("[SUB [r64+sib], r64]",         "4[8-f] 29 [04-3c] ?");
+
+  // --- XOR: Register ← Register ---
+        TEMPLATES.put("[XOR r64, r64]",             "4[8-f] [31|33] [c0-ff]");
+        TEMPLATES.put("[XOR r32, r32]",             "[31|33] [c0-ff]");
+        TEMPLATES.put("[XOR r16, r16]",             "66 [31|33] [c0-ff]");
+        TEMPLATES.put("[XOR r8, r8]",               "[30|32] [c0-ff]");
+
+  // --- XOR: Register ← Immediate ---
+        TEMPLATES.put("[XOR r64, imm32]",           "4[8-f] 81 [f0-f7] ? ? ? ?");
+        TEMPLATES.put("[XOR r32, imm32]",           "81 [f0-f7] ? ? ? ?");
+        TEMPLATES.put("[XOR r8, imm8]",             "80 [f0-f7] ?");
+        TEMPLATES.put("[XOR r64, imm8]",            "4[8-f] 83 [f0-f7] ?");
+        TEMPLATES.put("[XOR r32, imm8]",            "83 [f0-f7] ?");
+
+  // --- XOR: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[XOR r8, [rip+off32]]",      "32 35 ? ? ? ?");
+        TEMPLATES.put("[XOR r32, [rip+off32]]",     "33 35 ? ? ? ?");
+        TEMPLATES.put("[XOR r64, [rip+off32]]",     "4[8-f] 33 35 ? ? ? ?");
+
+  // --- XOR: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[XOR r8, [r64+off32]]",      "32 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[XOR r32, [r64+off32]]",     "33 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[XOR r64, [r64+off32]]",     "4[8-f] 33 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- XOR: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[XOR r8, [r64+off8]]",       "32 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[XOR r32, [r64+off8]]",      "33 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[XOR r64, [r64+off8]]",      "4[8-f] 33 [40-7f] [SIB?] ?");
+
+  // --- XOR: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[XOR r8, [r64]]",            "32 [00-3f] [SIB?]");
+        TEMPLATES.put("[XOR r32, [r64]]",           "33 [00-3f] [SIB?]");
+        TEMPLATES.put("[XOR r64, [r64]]",           "4[8-f] 33 [00-3f] [SIB?]");
+
+  // --- XOR: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[XOR [rip+off32], r8]",      "30 35 ? ? ? ?");
+        TEMPLATES.put("[XOR [rip+off32], r32]",     "31 35 ? ? ? ?");
+        TEMPLATES.put("[XOR [rip+off32], r64]",     "4[8-f] 31 35 ? ? ? ?");
+
+  // --- XOR: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[XOR [r64+off32], r8]",      "30 [b0-b7] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[XOR [r64+off32], r32]",     "31 [b0-b7] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[XOR [r64+off32], r64]",     "4[8-f] 31 [b0-b7] [SIB?] ? ? ? ?");
+
+  // --- XOR: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[XOR [r64+off8], r8]",       "30 [70-77] [SIB?] ?");
+        TEMPLATES.put("[XOR [r64+off8], r32]",      "31 [70-77] [SIB?] ?");
+        TEMPLATES.put("[XOR [r64+off8], r64]",      "4[8-f] 31 [70-77] [SIB?] ?");
+
+  // --- XOR: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[XOR [r64], r8]",            "30 [30-37] [SIB?]");
+        TEMPLATES.put("[XOR [r64], r32]",           "31 [30-37] [SIB?]");
+        TEMPLATES.put("[XOR [r64], r64]",           "4[8-f] 31 [30-37] [SIB?]");
+
+  // --- XOR: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[XOR byte ptr [r64+off32], imm8]",     "80 [b0-b7] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[XOR dword ptr [r64+off32], imm32]",   "81 [b0-b7] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[XOR qword ptr [r64+off32], imm64_32]", "4[8-f] 81 [b0-b7] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- XOR: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[XOR byte ptr [r64+off8], imm8]",      "80 [70-77] [SIB?] ? ?");
+        TEMPLATES.put("[XOR dword ptr [r64+off8], imm32]",    "81 [70-77] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[XOR qword ptr [r64+off8], imm64_32]",  "4[8-f] 81 [70-77] [SIB?] ? ? ? ? ?");
+
+  // --- XOR: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[XOR byte ptr [rip+off32], imm8]",     "80 35 ? ? ? ? ?");
+        TEMPLATES.put("[XOR dword ptr [rip+off32], imm32]",   "81 35 ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[XOR qword ptr [rip+off32], imm64_32]", "4[8-f] 81 35 ? ? ? ? ? ? ? ?");
+
+  // --- XOR: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[XOR r8, [r64+sib+off32]]",    "32 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[XOR r8, [r64+sib+off8]]",     "32 [44-7c] ? ? ?");
+        TEMPLATES.put("[XOR r8, [r64+sib]]",          "32 [04-3c] ?");
+        TEMPLATES.put("[XOR r32, [r64+sib+off32]]",   "33 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[XOR r32, [r64+sib+off8]]",    "33 [44-7c] ? ? ?");
+        TEMPLATES.put("[XOR r32, [r64+sib]]",         "33 [04-3c] ?");
+        TEMPLATES.put("[XOR r64, [r64+sib+off32]]",   "4[8-f] 33 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[XOR r64, [r64+sib+off8]]",    "4[8-f] 33 [44-7c] ? ? ?");
+        TEMPLATES.put("[XOR r64, [r64+sib]]",         "4[8-f] 33 [04-3c] ?");
+
+  // --- XOR: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[XOR [r64+sib+off32], r8]",    "30 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[XOR [r64+sib+off8], r8]",     "30 [44-7c] ? ? ?");
+        TEMPLATES.put("[XOR [r64+sib], r8]",          "30 [04-3c] ?");
+        TEMPLATES.put("[XOR [r64+sib+off32], r32]",   "31 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[XOR [r64+sib+off8], r32]",    "31 [44-7c] ? ? ?");
+        TEMPLATES.put("[XOR [r64+sib], r32]",         "31 [04-3c] ?");
+        TEMPLATES.put("[XOR [r64+sib+off32], r64]",   "4[8-f] 31 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[XOR [r64+sib+off8], r64]",    "4[8-f] 31 [44-7c] ? ? ?");
+        TEMPLATES.put("[XOR [r64+sib], r64]",         "4[8-f] 31 [04-3c] ?");
+
+  // --- AND: Register ← Register ---
+        TEMPLATES.put("[AND r64, r64]",             "4[8-f] [21|23] [c0-ff]");
+        TEMPLATES.put("[AND r32, r32]",             "[21|23] [c0-ff]");
+        TEMPLATES.put("[AND r8, r8]",               "[20|22] [c0-ff]");
+
+  // --- AND: Register ← Immediate ---
+        TEMPLATES.put("[AND r64, imm32]",           "4[8-f] 81 [e0-e7] ? ? ? ?");
+        TEMPLATES.put("[AND r32, imm32]",           "81 [e0-e7] ? ? ? ?");
+        TEMPLATES.put("[AND r8, imm8]",             "80 [e0-e7] ?");
+        TEMPLATES.put("[AND r64, imm8]",            "4[8-f] 83 [e0-e7] ?");
+        TEMPLATES.put("[AND r32, imm8]",            "83 [e0-e7] ?");
+        TEMPLATES.put("[AND AL, imm8]",             "24 ?");
+        TEMPLATES.put("[AND EAX, imm32]",           "25 ? ? ? ?");
+
+  // --- AND: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[AND r8, [rip+off32]]",      "22 25 ? ? ? ?");
+        TEMPLATES.put("[AND r32, [rip+off32]]",     "23 25 ? ? ? ?");
+        TEMPLATES.put("[AND r64, [rip+off32]]",     "4[8-f] 23 25 ? ? ? ?");
+
+  // --- AND: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[AND r8, [r64+off32]]",      "22 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[AND r32, [r64+off32]]",     "23 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[AND r64, [r64+off32]]",     "4[8-f] 23 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- AND: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[AND r8, [r64+off8]]",       "22 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[AND r32, [r64+off8]]",      "23 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[AND r64, [r64+off8]]",      "4[8-f] 23 [40-7f] [SIB?] ?");
+
+  // --- AND: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[AND r8, [r64]]",            "22 [00-3f] [SIB?]");
+        TEMPLATES.put("[AND r32, [r64]]",           "23 [00-3f] [SIB?]");
+        TEMPLATES.put("[AND r64, [r64]]",           "4[8-f] 23 [00-3f] [SIB?]");
+
+  // --- AND: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[AND [rip+off32], r8]",      "20 25 ? ? ? ?");
+        TEMPLATES.put("[AND [rip+off32], r32]",     "21 25 ? ? ? ?");
+        TEMPLATES.put("[AND [rip+off32], r64]",     "4[8-f] 21 25 ? ? ? ?");
+
+  // --- AND: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[AND [r64+off32], r8]",      "20 [a0-a7] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[AND [r64+off32], r32]",     "21 [a0-a7] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[AND [r64+off32], r64]",     "4[8-f] 21 [a0-a7] [SIB?] ? ? ? ?");
+
+  // --- AND: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[AND [r64+off8], r8]",       "20 [60-67] [SIB?] ?");
+        TEMPLATES.put("[AND [r64+off8], r32]",      "21 [60-67] [SIB?] ?");
+        TEMPLATES.put("[AND [r64+off8], r64]",      "4[8-f] 21 [60-67] [SIB?] ?");
+
+  // --- AND: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[AND [r64], r8]",            "20 [20-27] [SIB?]");
+        TEMPLATES.put("[AND [r64], r32]",           "21 [20-27] [SIB?]");
+        TEMPLATES.put("[AND [r64], r64]",           "4[8-f] 21 [20-27] [SIB?]");
+
+  // --- AND: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[AND byte ptr [r64+off32], imm8]",     "80 [a0-a7] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[AND dword ptr [r64+off32], imm32]",   "81 [a0-a7] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[AND qword ptr [r64+off32], imm64_32]", "4[8-f] 81 [a0-a7] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- AND: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[AND byte ptr [r64+off8], imm8]",      "80 [60-67] [SIB?] ? ?");
+        TEMPLATES.put("[AND dword ptr [r64+off8], imm32]",    "81 [60-67] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[AND qword ptr [r64+off8], imm64_32]",  "4[8-f] 81 [60-67] [SIB?] ? ? ? ? ?");
+
+  // --- AND: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[AND byte ptr [rip+off32], imm8]",     "80 25 ? ? ? ? ?");
+        TEMPLATES.put("[AND dword ptr [rip+off32], imm32]",   "81 25 ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[AND qword ptr [rip+off32], imm64_32]", "4[8-f] 81 25 ? ? ? ? ? ? ? ?");
+
+  // --- AND: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[AND r8, [r64+sib+off32]]",    "22 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[AND r8, [r64+sib+off8]]",     "22 [44-7c] ? ? ?");
+        TEMPLATES.put("[AND r8, [r64+sib]]",          "22 [04-3c] ?");
+        TEMPLATES.put("[AND r32, [r64+sib+off32]]",   "23 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[AND r32, [r64+sib+off8]]",    "23 [44-7c] ? ? ?");
+        TEMPLATES.put("[AND r32, [r64+sib]]",         "23 [04-3c] ?");
+        TEMPLATES.put("[AND r64, [r64+sib+off32]]",   "4[8-f] 23 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[AND r64, [r64+sib+off8]]",    "4[8-f] 23 [44-7c] ? ? ?");
+        TEMPLATES.put("[AND r64, [r64+sib]]",         "4[8-f] 23 [04-3c] ?");
+
+  // --- AND: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[AND [r64+sib+off32], r8]",    "20 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[AND [r64+sib+off8], r8]",     "20 [44-7c] ? ? ?");
+        TEMPLATES.put("[AND [r64+sib], r8]",          "20 [04-3c] ?");
+        TEMPLATES.put("[AND [r64+sib+off32], r32]",   "21 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[AND [r64+sib+off8], r32]",    "21 [44-7c] ? ? ?");
+        TEMPLATES.put("[AND [r64+sib], r32]",         "21 [04-3c] ?");
+        TEMPLATES.put("[AND [r64+sib+off32], r64]",   "4[8-f] 21 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[AND [r64+sib+off8], r64]",    "4[8-f] 21 [44-7c] ? ? ?");
+        TEMPLATES.put("[AND [r64+sib], r64]",         "4[8-f] 21 [04-3c] ?");
+
+  // --- OR: Register ← Register ---
+        TEMPLATES.put("[OR r64, r64]",              "4[8-f] [09|0b] [c0-ff]");
+        TEMPLATES.put("[OR r32, r32]",              "[09|0b] [c0-ff]");
+        TEMPLATES.put("[OR r8, r8]",                "[08|0a] [c0-ff]");
+
+  // --- OR: Register ← Immediate ---
+        TEMPLATES.put("[OR r64, imm32]",            "4[8-f] 81 [c8-cf] ? ? ? ?");
+        TEMPLATES.put("[OR r32, imm32]",            "81 [c8-cf] ? ? ? ?");
+        TEMPLATES.put("[OR r8, imm8]",              "80 [c8-cf] ?");
+        TEMPLATES.put("[OR r64, imm8]",             "4[8-f] 83 [c8-cf] ?");
+        TEMPLATES.put("[OR r32, imm8]",             "83 [c8-cf] ?");
+
+  // --- OR: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[OR r8, [rip+off32]]",       "0a 0d ? ? ? ?");
+        TEMPLATES.put("[OR r32, [rip+off32]]",      "0b 0d ? ? ? ?");
+        TEMPLATES.put("[OR r64, [rip+off32]]",      "4[8-f] 0b 0d ? ? ? ?");
+
+  // --- OR: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[OR r8, [r64+off32]]",       "0a [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[OR r32, [r64+off32]]",      "0b [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[OR r64, [r64+off32]]",      "4[8-f] 0b [80-bf] [SIB?] ? ? ? ?");
+
+  // --- OR: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[OR r8, [r64+off8]]",        "0a [40-7f] [SIB?] ?");
+        TEMPLATES.put("[OR r32, [r64+off8]]",       "0b [40-7f] [SIB?] ?");
+        TEMPLATES.put("[OR r64, [r64+off8]]",       "4[8-f] 0b [40-7f] [SIB?] ?");
+
+  // --- OR: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[OR r8, [r64]]",             "0a [00-3f] [SIB?]");
+        TEMPLATES.put("[OR r32, [r64]]",            "0b [00-3f] [SIB?]");
+        TEMPLATES.put("[OR r64, [r64]]",            "4[8-f] 0b [00-3f] [SIB?]");
+
+  // --- OR: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[OR [rip+off32], r8]",       "08 0d ? ? ? ?");
+        TEMPLATES.put("[OR [rip+off32], r32]",      "09 0d ? ? ? ?");
+        TEMPLATES.put("[OR [rip+off32], r64]",      "4[8-f] 09 0d ? ? ? ?");
+
+  // --- OR: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[OR [r64+off32], r8]",       "08 [88-8f] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[OR [r64+off32], r32]",      "09 [88-8f] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[OR [r64+off32], r64]",      "4[8-f] 09 [88-8f] [SIB?] ? ? ? ?");
+
+  // --- OR: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[OR [r64+off8], r8]",        "08 [48-4f] [SIB?] ?");
+        TEMPLATES.put("[OR [r64+off8], r32]",       "09 [48-4f] [SIB?] ?");
+        TEMPLATES.put("[OR [r64+off8], r64]",       "4[8-f] 09 [48-4f] [SIB?] ?");
+
+  // --- OR: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[OR [r64], r8]",             "08 [08-0f] [SIB?]");
+        TEMPLATES.put("[OR [r64], r32]",            "09 [08-0f] [SIB?]");
+        TEMPLATES.put("[OR [r64], r64]",            "4[8-f] 09 [08-0f] [SIB?]");
+
+  // --- OR: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[OR byte ptr [r64+off32], imm8]",     "80 [88-8f] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[OR dword ptr [r64+off32], imm32]",   "81 [88-8f] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[OR qword ptr [r64+off32], imm64_32]", "4[8-f] 81 [88-8f] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- OR: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[OR byte ptr [r64+off8], imm8]",      "80 [48-4f] [SIB?] ? ?");
+        TEMPLATES.put("[OR dword ptr [r64+off8], imm32]",    "81 [48-4f] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[OR qword ptr [r64+off8], imm64_32]",  "4[8-f] 81 [48-4f] [SIB?] ? ? ? ? ?");
+
+  // --- OR: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[OR byte ptr [rip+off32], imm8]",     "80 0d ? ? ? ? ?");
+        TEMPLATES.put("[OR dword ptr [rip+off32], imm32]",   "81 0d ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[OR qword ptr [rip+off32], imm64_32]", "4[8-f] 81 0d ? ? ? ? ? ? ? ?");
+
+  // --- OR: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[OR r8, [r64+sib+off32]]",     "0a [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[OR r8, [r64+sib+off8]]",      "0a [44-7c] ? ? ?");
+        TEMPLATES.put("[OR r8, [r64+sib]]",           "0a [04-3c] ?");
+        TEMPLATES.put("[OR r32, [r64+sib+off32]]",    "0b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[OR r32, [r64+sib+off8]]",     "0b [44-7c] ? ? ?");
+        TEMPLATES.put("[OR r32, [r64+sib]]",          "0b [04-3c] ?");
+        TEMPLATES.put("[OR r64, [r64+sib+off32]]",    "4[8-f] 0b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[OR r64, [r64+sib+off8]]",     "4[8-f] 0b [44-7c] ? ? ?");
+        TEMPLATES.put("[OR r64, [r64+sib]]",          "4[8-f] 0b [04-3c] ?");
+
+  // --- OR: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[OR [r64+sib+off32], r8]",     "08 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[OR [r64+sib+off8], r8]",      "08 [44-7c] ? ? ?");
+        TEMPLATES.put("[OR [r64+sib], r8]",           "08 [04-3c] ?");
+        TEMPLATES.put("[OR [r64+sib+off32], r32]",    "09 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[OR [r64+sib+off8], r32]",     "09 [44-7c] ? ? ?");
+        TEMPLATES.put("[OR [r64+sib], r32]",          "09 [04-3c] ?");
+        TEMPLATES.put("[OR [r64+sib+off32], r64]",    "4[8-f] 09 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[OR [r64+sib+off8], r64]",     "4[8-f] 09 [44-7c] ? ? ?");
+        TEMPLATES.put("[OR [r64+sib], r64]",          "4[8-f] 09 [04-3c] ?");
+
+  // --- INC / DEC Instructions ---
+        TEMPLATES.put("[INC r64]",                    "4[8-f] ff [c0-c7]");
+        TEMPLATES.put("[INC r32]",                    "ff [c0-c7]");
+        TEMPLATES.put("[DEC r64]",                    "4[8-f] ff [c8-cf]");
+        TEMPLATES.put("[DEC r32]",                    "ff [c8-cf]");
+
+  // --- NOT Instructions ---
+        TEMPLATES.put("[NOT r64]",                    "4[8-f] f7 [d0-d7]");
+        TEMPLATES.put("[NOT r32]",                    "f7 [d0-d7]");
+
+  // --- TEST Instructions ---
+        TEMPLATES.put("[TEST r64, r64]",              "4[8-f] 85 [c0-ff]");
+        TEMPLATES.put("[TEST r32, r32]",              "85 [c0-ff]");
+        TEMPLATES.put("[TEST r8, r8]",                "84 [c0-ff]");
+
+  // --- SHIFT by Immediate (Group 2, opcode C1) ---
+        TEMPLATES.put("[SHL r32, imm8]",            "c1 [e0-e7] ?");
+        TEMPLATES.put("[SHL r64, imm8]",            "4[8-f] c1 [e0-e7] ?");
+        TEMPLATES.put("[SHR r32, imm8]",            "c1 [e8-ef] ?");
+        TEMPLATES.put("[SHR r64, imm8]",            "4[8-f] c1 [e8-ef] ?");
+        TEMPLATES.put("[SAR r32, imm8]",            "c1 [f8-ff] ?");
+        TEMPLATES.put("[SAR r64, imm8]",            "4[8-f] c1 [f8-ff] ?");
+
+  // =========================================================================
+  // ===							COMPARISONS (CMP)                        ===
+  // =========================================================================
+
+  // --- CMP: Register ← Register ---
+        TEMPLATES.put("[CMP r64, r64]",             "4[8-f] 3[9|b] [c0-ff]");
+        TEMPLATES.put("[CMP r32, r32]",             "3[9|b] [c0-ff]");
+        TEMPLATES.put("[CMP r16, r16]",             "66 3[9|b] [c0-ff]");
+        TEMPLATES.put("[CMP r8, r8]",               "3[8|a] [c0-ff]");
+
+  // --- CMP: Register ← Immediate ---
+        TEMPLATES.put("[CMP r64, imm32]",           "4[8-f] 81 [f8-ff] ? ? ? ?");
+        TEMPLATES.put("[CMP r32, imm32]",           "81 [f8-ff] ? ? ? ?");
+        TEMPLATES.put("[CMP r16, imm16]",           "66 81 [f8-ff] ? ?");
+        TEMPLATES.put("[CMP r8, imm8]",             "80 [f8-ff] ?");
+        TEMPLATES.put("[CMP r64, imm8]",            "4[8-f] 83 [f8-ff] ?");
+        TEMPLATES.put("[CMP r32, imm8]",            "83 [f8-ff] ?");
+        TEMPLATES.put("[CMP r16, imm8]",            "66 83 [f8-ff] ?");
+
+  // --- CMP: Register ← Memory (RIP-Relative) ---
+        TEMPLATES.put("[CMP r8, [rip+off32]]",      "3a 3d ? ? ? ?");
+        TEMPLATES.put("[CMP r32, [rip+off32]]",     "3b 3d ? ? ? ?");
+        TEMPLATES.put("[CMP r64, [rip+off32]]",     "4[8-f] 3b 3d ? ? ? ?");
+        TEMPLATES.put("[CMP r16, [rip+off32]]",     "66 3b 3d ? ? ? ?");
+
+  // --- CMP: Register ← Memory (r64 base + disp32) ---
+        TEMPLATES.put("[CMP r8, [r64+off32]]",      "3a [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CMP r32, [r64+off32]]",     "3b [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CMP r64, [r64+off32]]",     "4[8-f] 3b [80-bf] [SIB?] ? ? ? ?");
+
+  // --- CMP: Register ← Memory (r64 base + disp8) ---
+        TEMPLATES.put("[CMP r8, [r64+off8]]",       "3a [40-7f] [SIB?] ?");
+        TEMPLATES.put("[CMP r32, [r64+off8]]",      "3b [40-7f] [SIB?] ?");
+        TEMPLATES.put("[CMP r64, [r64+off8]]",      "4[8-f] 3b [40-7f] [SIB?] ?");
+
+  // --- CMP: Register ← Memory (r64 base, no displacement) ---
+        TEMPLATES.put("[CMP r8, [r64]]",            "3a [00-3f] [SIB?]");
+        TEMPLATES.put("[CMP r32, [r64]]",           "3b [00-3f] [SIB?]");
+        TEMPLATES.put("[CMP r64, [r64]]",           "4[8-f] 3b [00-3f] [SIB?]");
+
+  // --- CMP: Memory (RIP-Relative) ← Register ---
+        TEMPLATES.put("[CMP [rip+off32], r8]",      "38 3d ? ? ? ?");
+        TEMPLATES.put("[CMP [rip+off32], r32]",     "39 3d ? ? ? ?");
+        TEMPLATES.put("[CMP [rip+off32], r64]",     "4[8-f] 39 3d ? ? ? ?");
+        TEMPLATES.put("[CMP [rip+off32], r16]",     "66 39 3d ? ? ? ?");
+
+  // --- CMP: Memory (r64 base + disp32) ← Register ---
+        TEMPLATES.put("[CMP [r64+off32], r8]",      "38 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CMP [r64+off32], r32]",     "39 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CMP [r64+off32], r64]",     "4[8-f] 39 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- CMP: Memory (r64 base + disp8) ← Register ---
+        TEMPLATES.put("[CMP [r64+off8], r8]",       "38 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[CMP [r64+off8], r32]",      "39 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[CMP [r64+off8], r64]",      "4[8-f] 39 [40-7f] [SIB?] ?");
+
+  // --- CMP: Memory (r64 base, no displacement) ← Register ---
+        TEMPLATES.put("[CMP [r64], r8]",            "38 [00-3f] [SIB?]");
+        TEMPLATES.put("[CMP [r64], r32]",           "39 [00-3f] [SIB?]");
+        TEMPLATES.put("[CMP [r64], r64]",           "4[8-f] 39 [00-3f] [SIB?]");
+
+  // --- CMP: Memory (r64 base + disp32) ← Immediate ---
+        TEMPLATES.put("[CMP byte ptr [r64+off32], imm8]",     "80 [b8-bf] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[CMP dword ptr [r64+off32], imm32]",   "81 [b8-bf] [SIB?] ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[CMP qword ptr [r64+off32], imm64_32]", "4[8-f] 81 [b8-bf] [SIB?] ? ? ? ? ? ? ? ?");
+
+  // --- CMP: Memory (r64 base + disp8) ← Immediate ---
+        TEMPLATES.put("[CMP byte ptr [r64+off8], imm8]",      "80 [78-7f] [SIB?] ? ?");
+        TEMPLATES.put("[CMP dword ptr [r64+off8], imm32]",    "81 [78-7f] [SIB?] ? ? ? ? ?");
+        TEMPLATES.put("[CMP qword ptr [r64+off8], imm64_32]",  "4[8-f] 81 [78-7f] [SIB?] ? ? ? ? ?");
+
+  // --- CMP: Memory (RIP-Relative) ← Immediate ---
+        TEMPLATES.put("[CMP byte ptr [rip+off32], imm8]",     "80 3d ? ? ? ? ?");
+        TEMPLATES.put("[CMP dword ptr [rip+off32], imm32]",   "81 3d ? ? ? ? ? ? ? ?");
+        TEMPLATES.put("[CMP qword ptr [rip+off32], imm64_32]", "4[8-f] 81 3d ? ? ? ? ? ? ? ?");
+
+  // --- CMP: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[CMP r8, [r64+sib+off32]]",    "3a [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMP r8, [r64+sib+off8]]",     "3a [44-7c] ? ? ?");
+        TEMPLATES.put("[CMP r8, [r64+sib]]",          "3a [04-3c] ?");
+        TEMPLATES.put("[CMP r32, [r64+sib+off32]]",   "3b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMP r32, [r64+sib+off8]]",    "3b [44-7c] ? ? ?");
+        TEMPLATES.put("[CMP r32, [r64+sib]]",         "3b [04-3c] ?");
+        TEMPLATES.put("[CMP r64, [r64+sib+off32]]",   "4[8-f] 3b [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMP r64, [r64+sib+off8]]",    "4[8-f] 3b [44-7c] ? ? ?");
+        TEMPLATES.put("[CMP r64, [r64+sib]]",         "4[8-f] 3b [04-3c] ?");
+
+  // --- CMP: SIB-specific Store (ModRM R/M=100, memory ← register) ---
+        TEMPLATES.put("[CMP [r64+sib+off32], r8]",    "38 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMP [r64+sib+off8], r8]",     "38 [44-7c] ? ? ?");
+        TEMPLATES.put("[CMP [r64+sib], r8]",          "38 [04-3c] ?");
+        TEMPLATES.put("[CMP [r64+sib+off32], r32]",   "39 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMP [r64+sib+off8], r32]",    "39 [44-7c] ? ? ?");
+        TEMPLATES.put("[CMP [r64+sib], r32]",         "39 [04-3c] ?");
+        TEMPLATES.put("[CMP [r64+sib+off32], r64]",   "4[8-f] 39 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMP [r64+sib+off8], r64]",    "4[8-f] 39 [44-7c] ? ? ?");
+        TEMPLATES.put("[CMP [r64+sib], r64]",         "4[8-f] 39 [04-3c] ?");
+
+  // =========================================================================
+  // ===						CONDITIONAL MOVES (CMOV)                     ===
+  // =========================================================================
+
+  // --- CMOV: Register ← Register (32-bit and 64-bit) ---
+        TEMPLATES.put("[CMOVO r64, r64]",     "4[8-f] 0f 40 [c0-ff]");
+        TEMPLATES.put("[CMOVNO r64, r64]",    "4[8-f] 0f 41 [c0-ff]");
+        TEMPLATES.put("[CMOVB r64, r64]",     "4[8-f] 0f 42 [c0-ff]");
+        TEMPLATES.put("[CMOVNB r64, r64]",    "4[8-f] 0f 43 [c0-ff]");
+        TEMPLATES.put("[CMOVE r64, r64]",     "4[8-f] 0f 44 [c0-ff]");
+        TEMPLATES.put("[CMOVNE r64, r64]",    "4[8-f] 0f 45 [c0-ff]");
+        TEMPLATES.put("[CMOVBE r64, r64]",    "4[8-f] 0f 46 [c0-ff]");
+        TEMPLATES.put("[CMOVA r64, r64]",     "4[8-f] 0f 47 [c0-ff]");
+        TEMPLATES.put("[CMOVS r64, r64]",     "4[8-f] 0f 48 [c0-ff]");
+        TEMPLATES.put("[CMOVNS r64, r64]",    "4[8-f] 0f 49 [c0-ff]");
+        TEMPLATES.put("[CMOVP r64, r64]",     "4[8-f] 0f 4a [c0-ff]");
+        TEMPLATES.put("[CMOVNP r64, r64]",    "4[8-f] 0f 4b [c0-ff]");
+        TEMPLATES.put("[CMOVL r64, r64]",     "4[8-f] 0f 4c [c0-ff]");
+        TEMPLATES.put("[CMOVGE r64, r64]",    "4[8-f] 0f 4d [c0-ff]");
+        TEMPLATES.put("[CMOVLE r64, r64]",    "4[8-f] 0f 4e [c0-ff]");
+        TEMPLATES.put("[CMOVG r64, r64]",     "4[8-f] 0f 4f [c0-ff]");
+
+        TEMPLATES.put("[CMOVO r32, r32]",     "0f 40 [c0-ff]");
+        TEMPLATES.put("[CMOVNO r32, r32]",    "0f 41 [c0-ff]");
+        TEMPLATES.put("[CMOVB r32, r32]",     "0f 42 [c0-ff]");
+        TEMPLATES.put("[CMOVNB r32, r32]",    "0f 43 [c0-ff]");
+        TEMPLATES.put("[CMOVE r32, r32]",     "0f 44 [c0-ff]");
+        TEMPLATES.put("[CMOVNE r32, r32]",    "0f 45 [c0-ff]");
+        TEMPLATES.put("[CMOVBE r32, r32]",    "0f 46 [c0-ff]");
+        TEMPLATES.put("[CMOVA r32, r32]",     "0f 47 [c0-ff]");
+        TEMPLATES.put("[CMOVS r32, r32]",     "0f 48 [c0-ff]");
+        TEMPLATES.put("[CMOVNS r32, r32]",    "0f 49 [c0-ff]");
+        TEMPLATES.put("[CMOVP r32, r32]",     "0f 4a [c0-ff]");
+        TEMPLATES.put("[CMOVNP r32, r32]",    "0f 4b [c0-ff]");
+        TEMPLATES.put("[CMOVL r32, r32]",     "0f 4c [c0-ff]");
+        TEMPLATES.put("[CMOVGE r32, r32]",    "0f 4d [c0-ff]");
+        TEMPLATES.put("[CMOVLE r32, r32]",    "0f 4e [c0-ff]");
+        TEMPLATES.put("[CMOVG r32, r32]",     "0f 4f [c0-ff]");
+
+  // --- CMOV: Register ← Memory (generic addressing) ---
+        TEMPLATES.put("[CMOVcc r64, [r64+off32]]",     "4[8-f] 0f 4[0-f] [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CMOVcc r64, [r64+off8]]",      "4[8-f] 0f 4[0-f] [40-7f] [SIB?] ?");
+        TEMPLATES.put("[CMOVcc r64, [r64]]",           "4[8-f] 0f 4[0-f] [00-3f] [SIB?]");
+        TEMPLATES.put("[CMOVcc r64, [rip+off32]]",     "4[8-f] 0f 4[0-f] [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[CMOVcc r32, [r64+off32]]",     "0f 4[0-f] [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CMOVcc r32, [r64+off8]]",      "0f 4[0-f] [40-7f] [SIB?] ?");
+        TEMPLATES.put("[CMOVcc r32, [r64]]",           "0f 4[0-f] [00-3f] [SIB?]");
+        TEMPLATES.put("[CMOVcc r32, [rip+off32]]",     "0f 4[0-f] [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+
+  // --- CMOV: SIB-specific Load (ModRM R/M=100, register ← memory) ---
+        TEMPLATES.put("[CMOVcc r64, [r64+sib+off32]]", "4[8-f] 0f 4[0-f] [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMOVcc r64, [r64+sib+off8]]",  "4[8-f] 0f 4[0-f] [44-7c] ? ? ?");
+        TEMPLATES.put("[CMOVcc r64, [r64+sib]]",       "4[8-f] 0f 4[0-f] [04-3c] ?");
+        TEMPLATES.put("[CMOVcc r32, [r64+sib+off32]]", "0f 4[0-f] [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[CMOVcc r32, [r64+sib+off8]]",  "0f 4[0-f] [44-7c] ? ? ?");
+        TEMPLATES.put("[CMOVcc r32, [r64+sib]]",       "0f 4[0-f] [04-3c] ?");
+
+  // =========================================================================
+  // ===					CALL / RET / LEAVE / JMP / Jcc                  ===
+  // =========================================================================
+
+  // --- CALL ---
+        TEMPLATES.put("[CALL rel32]",                "e8 ? ? ? ?");
+        TEMPLATES.put("[CALL r64]",                  "ff [d0-d7]");
+        TEMPLATES.put("[CALL r32]",                  "ff [d0-d7]");
+        TEMPLATES.put("[CALL [r64+off32]]",          "ff [90-97] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[CALL [r64+off8]]",           "ff [50-57] [SIB?] ?");
+        TEMPLATES.put("[CALL [r64]]",                "ff [10-17] [SIB?]");
+        TEMPLATES.put("[CALL [rip+off32]]",          "ff 15 ? ? ? ?");
+        TEMPLATES.put("[CALL [rip+sib+off32]]",      "ff 14 25 ? ? ? ?");
+
+  // --- CALL: SIB-specific ---
+        TEMPLATES.put("[CALL [r64+sib+off32]]",      "ff 94 ? ? ? ? ?");
+        TEMPLATES.put("[CALL [r64+sib+off8]]",       "ff 54 ? ? ?");
+        TEMPLATES.put("[CALL [r64+sib]]",            "ff 14 ? ?");
+
+  // --- RET / LEAVE ---
+        TEMPLATES.put("[RET]",                       "c3");
+        TEMPLATES.put("[RET imm16]",                 "c2 ? ?");
+        TEMPLATES.put("[LEAVE]",                     "c9");
+
+        // --- JMP ---
+        TEMPLATES.put("[JMP rel32]",                 "e9 ? ? ? ?");
+        TEMPLATES.put("[JMP rel8]",                  "eb ?");
+        TEMPLATES.put("[JMP r64]",                   "ff [e0-e7]");
+        TEMPLATES.put("[JMP r32]",                   "ff [e0-e7]");
+        TEMPLATES.put("[JMP [r64+off32]]",           "ff [a0-a7] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[JMP [r64+off8]]",            "ff [60-67] [SIB?] ?");
+        TEMPLATES.put("[JMP [r64]]",                 "ff [20-27] [SIB?]");
+        TEMPLATES.put("[JMP [rip+off32]]",           "ff 25 ? ? ? ?");
+        TEMPLATES.put("[JMP [rip+sib+off32]]",       "ff 24 25 ? ? ? ?");
+
+        // --- JMP: SIB-specific ---
+        TEMPLATES.put("[JMP [r64+sib+off32]]",       "ff a4 ? ? ? ? ?");
+        TEMPLATES.put("[JMP [r64+sib+off8]]",        "ff 64 ? ? ?");
+        TEMPLATES.put("[JMP [r64+sib]]",             "ff 24 ? ?");
+
+  // --- Jcc rel32 ---
+        TEMPLATES.put("[JO rel32]",                  "0f 80 ? ? ? ?");
+        TEMPLATES.put("[JNO rel32]",                 "0f 81 ? ? ? ?");
+        TEMPLATES.put("[JB rel32]",                  "0f 82 ? ? ? ?");
+        TEMPLATES.put("[JAE rel32]",                 "0f 83 ? ? ? ?");
+        TEMPLATES.put("[JE rel32]",                  "0f 84 ? ? ? ?");
+        TEMPLATES.put("[JNE rel32]",                 "0f 85 ? ? ? ?");
+        TEMPLATES.put("[JBE rel32]",                 "0f 86 ? ? ? ?");
+        TEMPLATES.put("[JA rel32]",                  "0f 87 ? ? ? ?");
+        TEMPLATES.put("[JS rel32]",                  "0f 88 ? ? ? ?");
+        TEMPLATES.put("[JNS rel32]",                 "0f 89 ? ? ? ?");
+        TEMPLATES.put("[JP rel32]",                  "0f 8a ? ? ? ?");
+        TEMPLATES.put("[JNP rel32]",                 "0f 8b ? ? ? ?");
+        TEMPLATES.put("[JL rel32]",                  "0f 8c ? ? ? ?");
+        TEMPLATES.put("[JGE rel32]",                 "0f 8d ? ? ? ?");
+        TEMPLATES.put("[JLE rel32]",                 "0f 8e ? ? ? ?");
+        TEMPLATES.put("[JG rel32]",                  "0f 8f ? ? ? ?");
+
+  // --- Jcc rel8 ---
+        TEMPLATES.put("[JO rel8]",                   "70 ?");
+        TEMPLATES.put("[JNO rel8]",                  "71 ?");
+        TEMPLATES.put("[JB rel8]",                   "72 ?");
+        TEMPLATES.put("[JAE rel8]",                  "73 ?");
+        TEMPLATES.put("[JE rel8]",                   "74 ?");
+        TEMPLATES.put("[JNE rel8]",                  "75 ?");
+        TEMPLATES.put("[JBE rel8]",                  "76 ?");
+        TEMPLATES.put("[JA rel8]",                   "77 ?");
+        TEMPLATES.put("[JS rel8]",                   "78 ?");
+        TEMPLATES.put("[JNS rel8]",                  "79 ?");
+        TEMPLATES.put("[JP rel8]",                   "7a ?");
+        TEMPLATES.put("[JNP rel8]",                  "7b ?");
+        TEMPLATES.put("[JL rel8]",                   "7c ?");
+        TEMPLATES.put("[JGE rel8]",                  "7d ?");
+        TEMPLATES.put("[JLE rel8]",                  "7e ?");
+        TEMPLATES.put("[JG rel8]",                   "7f ?");
+
+  // =========================================================================
+  // ===						XMM / FLOATING-POINT                         ===
+  // =========================================================================
+  // --- MOVSS: Scalar Single-Precision (load) ---
+        TEMPLATES.put("[MOVSS xmm, [rip+off32]]",     "f3 0f 10 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVSS xmm, [r64+off32]]",     "f3 0f 10 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSS xmm, [r64+off8]]",      "f3 0f 10 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSS xmm, [r64]]",           "f3 0f 10 [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVSS xmm, xmm]",             "f3 0f 10 [c0-ff]");
+
+  // --- MOVSS: Scalar Single-Precision (store) ---
+        TEMPLATES.put("[MOVSS [rip+off32], xmm]",     "f3 0f 11 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVSS [r64+off32], xmm]",     "f3 0f 11 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSS [r64+off8], xmm]",      "f3 0f 11 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSS [r64], xmm]",           "f3 0f 11 [00-3f] [SIB?]");
+
+  // --- MOVSD: Scalar Double-Precision (load) ---
+        TEMPLATES.put("[MOVSD xmm, [rip+off32]]",     "f2 0f 10 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVSD xmm, [r64+off32]]",     "f2 0f 10 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSD xmm, [r64+off8]]",      "f2 0f 10 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSD xmm, [r64]]",           "f2 0f 10 [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVSD xmm, xmm]",             "f2 0f 10 [c0-ff]");
+
+  // --- MOVSD: Scalar Double-Precision (store) ---
+        TEMPLATES.put("[MOVSD [rip+off32], xmm]",     "f2 0f 11 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVSD [r64+off32], xmm]",     "f2 0f 11 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVSD [r64+off8], xmm]",      "f2 0f 11 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVSD [r64], xmm]",           "f2 0f 11 [00-3f] [SIB?]");
+
+  // --- MOVSS/MOVSD: SIB-specific load ---
+        TEMPLATES.put("[MOVSS xmm, [r64+sib+off32]]", "f3 0f 10 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVSS xmm, [r64+sib+off8]]",  "f3 0f 10 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVSS xmm, [r64+sib]]",       "f3 0f 10 [04-3c] ?");
+        TEMPLATES.put("[MOVSD xmm, [r64+sib+off32]]", "f2 0f 10 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVSD xmm, [r64+sib+off8]]",  "f2 0f 10 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVSD xmm, [r64+sib]]",       "f2 0f 10 [04-3c] ?");
+
+  // --- MOVSS/MOVSD: SIB-specific store ---
+        TEMPLATES.put("[MOVSS [r64+sib+off32], xmm]", "f3 0f 11 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVSS [r64+sib+off8], xmm]",  "f3 0f 11 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVSS [r64+sib], xmm]",       "f3 0f 11 [04-3c] ?");
+        TEMPLATES.put("[MOVSD [r64+sib+off32], xmm]", "f2 0f 11 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVSD [r64+sib+off8], xmm]",  "f2 0f 11 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVSD [r64+sib], xmm]",       "f2 0f 11 [04-3c] ?");
+
+  // --- MOVUPS: Unaligned Packed Single (load) ---
+        TEMPLATES.put("[MOVUPS xmm, [rip+off32]]",    "0f 10 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVUPS xmm, [r64+off32]]",    "0f 10 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVUPS xmm, [r64+off8]]",     "0f 10 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVUPS xmm, [r64]]",          "0f 10 [00-3f] [SIB?]");
+
+  // --- MOVUPS: Unaligned Packed Single (store) ---
+        TEMPLATES.put("[MOVUPS [rip+off32], xmm]",    "0f 11 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVUPS [r64+off32], xmm]",    "0f 11 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVUPS [r64+off8], xmm]",     "0f 11 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVUPS [r64], xmm]",          "0f 11 [00-3f] [SIB?]");
+
+  // --- MOVUPD: Unaligned Packed Double (load) ---
+        TEMPLATES.put("[MOVUPD xmm, [rip+off32]]",    "66 0f 10 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVUPD xmm, [r64+off32]]",    "66 0f 10 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVUPD xmm, [r64+off8]]",     "66 0f 10 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVUPD xmm, [r64]]",          "66 0f 10 [00-3f] [SIB?]");
+
+  // --- MOVUPD: Unaligned Packed Double (store) ---
+        TEMPLATES.put("[MOVUPD [rip+off32], xmm]",    "66 0f 11 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVUPD [r64+off32], xmm]",    "66 0f 11 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVUPD [r64+off8], xmm]",     "66 0f 11 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVUPD [r64], xmm]",          "66 0f 11 [00-3f] [SIB?]");
+
+  // --- MOVAPS: Aligned Packed Single (load) ---
+        TEMPLATES.put("[MOVAPS xmm, [rip+off32]]",    "0f 28 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVAPS xmm, [r64+off32]]",    "0f 28 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVAPS xmm, [r64+off8]]",     "0f 28 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVAPS xmm, [r64]]",          "0f 28 [00-3f] [SIB?]");
+
+  // --- MOVAPS: Aligned Packed Single (store) ---
+        TEMPLATES.put("[MOVAPS [rip+off32], xmm]",    "0f 29 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVAPS [r64+off32], xmm]",    "0f 29 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVAPS [r64+off8], xmm]",     "0f 29 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVAPS [r64], xmm]",          "0f 29 [00-3f] [SIB?]");
+
+  // --- MOVAPS: SIB-specific ---
+        TEMPLATES.put("[MOVAPS xmm, [r64+sib+off32]]",  "0f 28 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVAPS xmm, [r64+sib+off8]]",   "0f 28 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVAPS xmm, [r64+sib]]",        "0f 28 [04-3c] ?");
+        TEMPLATES.put("[MOVAPS [r64+sib+off32], xmm]",  "0f 29 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVAPS [r64+sib+off8], xmm]",   "0f 29 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVAPS [r64+sib], xmm]",        "0f 29 [04-3c] ?");
+
+  // --- MOVAPD: Aligned Packed Double (load) ---
+        TEMPLATES.put("[MOVAPD xmm, [rip+off32]]",    "66 0f 28 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVAPD xmm, [r64+off32]]",    "66 0f 28 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVAPD xmm, [r64+off8]]",     "66 0f 28 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVAPD xmm, [r64]]",          "66 0f 28 [00-3f] [SIB?]");
+
+  // --- MOVAPD: Aligned Packed Double (store) ---
+        TEMPLATES.put("[MOVAPD [rip+off32], xmm]",    "66 0f 29 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVAPD [r64+off32], xmm]",    "66 0f 29 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVAPD [r64+off8], xmm]",     "66 0f 29 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVAPD [r64], xmm]",          "66 0f 29 [00-3f] [SIB?]");
+
+  // --- MOVAPD: SIB-specific ---
+        TEMPLATES.put("[MOVAPD xmm, [r64+sib+off32]]",  "66 0f 28 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVAPD xmm, [r64+sib+off8]]",   "66 0f 28 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVAPD xmm, [r64+sib]]",        "66 0f 28 [04-3c] ?");
+        TEMPLATES.put("[MOVAPD [r64+sib+off32], xmm]",  "66 0f 29 [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVAPD [r64+sib+off8], xmm]",   "66 0f 29 [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVAPD [r64+sib], xmm]",        "66 0f 29 [04-3c] ?");
+
+  // --- MOVDQA: Aligned Double Quadword (load) ---
+        TEMPLATES.put("[MOVDQA xmm, [rip+off32]]",    "66 0f 6f [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVDQA xmm, [r64+off32]]",    "66 0f 6f [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVDQA xmm, [r64+off8]]",     "66 0f 6f [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVDQA xmm, [r64]]",          "66 0f 6f [00-3f] [SIB?]");
+
+  // --- MOVDQA: Aligned Double Quadword (store) ---
+        TEMPLATES.put("[MOVDQA [rip+off32], xmm]",    "66 0f 7f [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVDQA [r64+off32], xmm]",    "66 0f 7f [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVDQA [r64+off8], xmm]",     "66 0f 7f [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVDQA [r64], xmm]",          "66 0f 7f [00-3f] [SIB?]");
+
+  // --- MOVDQA: SIB-specific ---
+        TEMPLATES.put("[MOVDQA xmm, [r64+sib+off32]]",  "66 0f 6f [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVDQA xmm, [r64+sib+off8]]",   "66 0f 6f [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVDQA xmm, [r64+sib]]",        "66 0f 6f [04-3c] ?");
+        TEMPLATES.put("[MOVDQA [r64+sib+off32], xmm]",  "66 0f 7f [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVDQA [r64+sib+off8], xmm]",   "66 0f 7f [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVDQA [r64+sib], xmm]",        "66 0f 7f [04-3c] ?");
+
+  // --- MOVDQU: Unaligned Double Quadword (load) ---
+        TEMPLATES.put("[MOVDQU xmm, [rip+off32]]",    "f3 0f 6f [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVDQU xmm, [r64+off32]]",    "f3 0f 6f [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVDQU xmm, [r64+off8]]",     "f3 0f 6f [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVDQU xmm, [r64]]",          "f3 0f 6f [00-3f] [SIB?]");
+
+  // --- MOVDQU: Unaligned Double Quadword (store) ---
+        TEMPLATES.put("[MOVDQU [rip+off32], xmm]",    "f3 0f 7f [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVDQU [r64+off32], xmm]",    "f3 0f 7f [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVDQU [r64+off8], xmm]",     "f3 0f 7f [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVDQU [r64], xmm]",          "f3 0f 7f [00-3f] [SIB?]");
+
+  // --- MOVDQU: SIB-specific ---
+        TEMPLATES.put("[MOVDQU xmm, [r64+sib+off32]]",  "f3 0f 6f [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVDQU xmm, [r64+sib+off8]]",   "f3 0f 6f [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVDQU xmm, [r64+sib]]",        "f3 0f 6f [04-3c] ?");
+        TEMPLATES.put("[MOVDQU [r64+sib+off32], xmm]",  "f3 0f 7f [84-bc] ? ? ? ? ?");
+        TEMPLATES.put("[MOVDQU [r64+sib+off8], xmm]",   "f3 0f 7f [44-7c] ? ? ?");
+        TEMPLATES.put("[MOVDQU [r64+sib], xmm]",        "f3 0f 7f [04-3c] ?");
+
+  // --- MOVD: Doubleword between GP and XMM ---
+        TEMPLATES.put("[MOVD xmm, r32]",               "66 0f 6e [c0-ff]");
+        TEMPLATES.put("[MOVD xmm, [r64+off32]]",       "66 0f 6e [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVD xmm, [r64+off8]]",        "66 0f 6e [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVD xmm, [r64]]",             "66 0f 6e [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVD r32, xmm]",               "66 0f 7e [c0-ff]");
+        TEMPLATES.put("[MOVD [r64+off32], xmm]",       "66 0f 7e [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVD [r64+off8], xmm]",        "66 0f 7e [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVD [r64], xmm]",             "66 0f 7e [00-3f] [SIB?]");
+
+  // --- MOVQ: Quadword between GP and XMM (REX.W MOVD encoding) ---
+        TEMPLATES.put("[MOVQ xmm, r64]",               "66 4[8-f] 0f 6e [c0-ff]");
+        TEMPLATES.put("[MOVQ xmm, [r64+off8]]",        "66 4[8-f] 0f 6e [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVQ xmm, [r64+off32]]",       "66 4[8-f] 0f 6e [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVQ xmm, [r64]]",             "66 4[8-f] 0f 6e [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVQ r64, xmm]",               "66 4[8-f] 0f 7e [c0-ff]");
+        TEMPLATES.put("[MOVQ [r64+off8], xmm]",        "66 4[8-f] 0f 7e [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVQ [r64+off32], xmm]",       "66 4[8-f] 0f 7e [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVQ [r64], xmm]",             "66 4[8-f] 0f 7e [00-3f] [SIB?]");
+
+  // --- MOVQ: Lower 64-bit XMM transfer ---
+        TEMPLATES.put("[MOVQ xmm, xmm]",               "f3 0f 7e [c0-ff]");
+        TEMPLATES.put("[MOVQ xmm, [r64+off8]]",        "f3 0f 7e [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVQ xmm, [r64+off32]]",       "f3 0f 7e [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVQ xmm, [r64]]",             "f3 0f 7e [00-3f] [SIB?]");
+        TEMPLATES.put("[MOVQ xmm, [rip+off32]]",       "f3 0f 7e [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[MOVQ [r64+off8], xmm]",        "66 0f d6 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[MOVQ [r64+off32], xmm]",       "66 0f d6 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MOVQ [r64], xmm]",             "66 0f d6 [00-3f] [SIB?]");
+
+  // --- XORPS / XORPD ---
+        TEMPLATES.put("[XORPS xmm, xmm]",             "0f 57 [c0-ff]");
+        TEMPLATES.put("[XORPS xmm, [r64+off32]]",     "0f 57 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[XORPS xmm, [r64+off8]]",      "0f 57 [40-7f] [SIB?] ?");
+        TEMPLATES.put("[XORPS xmm, [r64]]",           "0f 57 [00-3f] [SIB?]");
+        TEMPLATES.put("[XORPS xmm, [rip+off32]]",     "0f 57 [05|0d|15|1d|25|2d|35|3d] ? ? ? ?");
+        TEMPLATES.put("[XORPD xmm, xmm]",             "66 0f 57 [c0-ff]");
+
+  // --- Scalar Arithmetic (Register ← Register) ---
+        TEMPLATES.put("[ADDSS xmm, xmm]",             "f3 0f 58 [c0-ff]");
+        TEMPLATES.put("[ADDSD xmm, xmm]",             "f2 0f 58 [c0-ff]");
+        TEMPLATES.put("[SUBSS xmm, xmm]",             "f3 0f 5c [c0-ff]");
+        TEMPLATES.put("[SUBSD xmm, xmm]",             "f2 0f 5c [c0-ff]");
+        TEMPLATES.put("[MULSS xmm, xmm]",             "f3 0f 59 [c0-ff]");
+        TEMPLATES.put("[MULSD xmm, xmm]",             "f2 0f 59 [c0-ff]");
+        TEMPLATES.put("[DIVSS xmm, xmm]",             "f3 0f 5e [c0-ff]");
+        TEMPLATES.put("[DIVSD xmm, xmm]",             "f2 0f 5e [c0-ff]");
+        TEMPLATES.put("[SQRTSS xmm, xmm]",            "f3 0f 51 [c0-ff]");
+        TEMPLATES.put("[SQRTSD xmm, xmm]",            "f2 0f 51 [c0-ff]");
+
+  // --- Scalar Arithmetic (Register ← Memory) ---
+        TEMPLATES.put("[ADDSS xmm, [r64+off32]]",     "f3 0f 58 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[ADDSD xmm, [r64+off32]]",     "f2 0f 58 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MULSS xmm, [r64+off32]]",     "f3 0f 59 [80-bf] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[MULSD xmm, [r64+off32]]",     "f2 0f 59 [80-bf] [SIB?] ? ? ? ?");
+
+  // --- Comparisons ---
+        TEMPLATES.put("[COMISS xmm, xmm]",            "0f 2f [c0-ff]");
+        TEMPLATES.put("[COMISD xmm, xmm]",            "66 0f 2f [c0-ff]");
+        TEMPLATES.put("[UCOMISS xmm, xmm]",           "0f 2e [c0-ff]");
+        TEMPLATES.put("[UCOMISD xmm, xmm]",           "66 0f 2e [c0-ff]");
+
+  // --- Conversions: Integer → Float ---
+        TEMPLATES.put("[CVTSI2SS xmm, r32]",          "f3 0f 2a [c0-ff]");
+        TEMPLATES.put("[CVTSI2SS xmm, r64]",          "f3 4[8-f] 0f 2a [c0-ff]");
+        TEMPLATES.put("[CVTSI2SD xmm, r32]",          "f2 0f 2a [c0-ff]");
+        TEMPLATES.put("[CVTSI2SD xmm, r64]",          "f2 4[8-f] 0f 2a [c0-ff]");
+
+  // --- Conversions: Float → Integer ---
+        TEMPLATES.put("[CVTSS2SI r32, xmm]",          "f3 0f 2d [c0-ff]");
+        TEMPLATES.put("[CVTSS2SI r64, xmm]",          "f3 4[8-f] 0f 2d [c0-ff]");
+        TEMPLATES.put("[CVTSD2SI r32, xmm]",          "f2 0f 2d [c0-ff]");
+        TEMPLATES.put("[CVTSD2SI r64, xmm]",          "f2 4[8-f] 0f 2d [c0-ff]");
+
+  // --- Conversions: Truncated Float → Integer ---
+        TEMPLATES.put("[CVTTSS2SI r32, xmm]",         "f3 0f 2c [c0-ff]");
+        TEMPLATES.put("[CVTTSS2SI r64, xmm]",         "f3 4[8-f] 0f 2c [c0-ff]");
+        TEMPLATES.put("[CVTTSD2SI r32, xmm]",         "f2 0f 2c [c0-ff]");
+        TEMPLATES.put("[CVTTSD2SI r64, xmm]",         "f2 4[8-f] 0f 2c [c0-ff]");
+
+  // =========================================================================
+  // ===					STACK & MISC SYSTEM OPERATIONS                   ===
+  // =========================================================================
+
+  // --- PUSH (Register) ---
+        TEMPLATES.put("[PUSH r64]",                    "[50-57]");
+        TEMPLATES.put("[PUSH R8-R15]",                 "41 [50-57]");
+
+  // --- PUSH (Immediate) ---
+        TEMPLATES.put("[PUSH imm32]",                  "68 ? ? ? ?");
+        TEMPLATES.put("[PUSH imm8]",                   "6a ?");
+
+  // --- PUSH (Memory) ---
+        TEMPLATES.put("[PUSH [r64+off8]]",             "ff [70-77] [SIB?] ?");
+        TEMPLATES.put("[PUSH [r64+off32]]",            "ff [b0-b7] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[PUSH [r64]]",                  "ff [30-37] [SIB?]");
+        TEMPLATES.put("[PUSH [rip+off32]]",            "ff 35 ? ? ? ?");
+
+  // --- POP (Register) ---
+        TEMPLATES.put("[POP r64]",                     "[58-5f]");
+        TEMPLATES.put("[POP R8-R15]",                  "41 [58-5f]");
+
+  // --- POP (Memory) ---
+        TEMPLATES.put("[POP [r64+off8]]",              "8f [40-47] [SIB?] ?");
+        TEMPLATES.put("[POP [r64+off32]]",             "8f [80-87] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[POP [r64]]",                   "8f [00-07] [SIB?]");
+
+  // --- INC / DEC (Memory) ---
+        TEMPLATES.put("[INC dword ptr [r64+off8]]",    "ff [40-47] [SIB?] ?");
+        TEMPLATES.put("[INC dword ptr [r64+off32]]",   "ff [80-87] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[INC dword ptr [r64]]",         "ff [00-07] [SIB?]");
+        TEMPLATES.put("[INC qword ptr [r64+off8]]",    "4[8-f] ff [40-47] [SIB?] ?");
+        TEMPLATES.put("[INC qword ptr [r64+off32]]",   "4[8-f] ff [80-87] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[INC qword ptr [r64]]",         "4[8-f] ff [00-07] [SIB?]");
+        TEMPLATES.put("[DEC dword ptr [r64+off8]]",    "ff [48-4f] [SIB?] ?");
+        TEMPLATES.put("[DEC dword ptr [r64+off32]]",   "ff [88-8f] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[DEC dword ptr [r64]]",         "ff [08-0f] [SIB?]");
+        TEMPLATES.put("[DEC qword ptr [r64+off8]]",    "4[8-f] ff [48-4f] [SIB?] ?");
+        TEMPLATES.put("[DEC qword ptr [r64+off32]]",   "4[8-f] ff [88-8f] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[DEC qword ptr [r64]]",         "4[8-f] ff [08-0f] [SIB?]");
+
+  // --- NOT / NEG (Memory) ---
+        TEMPLATES.put("[NOT dword ptr [r64+off8]]",    "f7 [50-57] [SIB?] ?");
+        TEMPLATES.put("[NOT dword ptr [r64+off32]]",   "f7 [90-97] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[NOT dword ptr [r64]]",         "f7 [10-17] [SIB?]");
+        TEMPLATES.put("[NOT qword ptr [r64+off8]]",    "4[8-f] f7 [50-57] [SIB?] ?");
+        TEMPLATES.put("[NOT qword ptr [r64+off32]]",   "4[8-f] f7 [90-97] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[NOT qword ptr [r64]]",         "4[8-f] f7 [10-17] [SIB?]");
+        TEMPLATES.put("[NEG dword ptr [r64+off8]]",    "f7 [58-5f] [SIB?] ?");
+        TEMPLATES.put("[NEG dword ptr [r64+off32]]",   "f7 [98-9f] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[NEG dword ptr [r64]]",         "f7 [18-1f] [SIB?]");
+        TEMPLATES.put("[NEG qword ptr [r64+off8]]",    "4[8-f] f7 [58-5f] [SIB?] ?");
+        TEMPLATES.put("[NEG qword ptr [r64+off32]]",   "4[8-f] f7 [98-9f] [SIB?] ? ? ? ?");
+        TEMPLATES.put("[NEG qword ptr [r64]]",         "4[8-f] f7 [18-1f] [SIB?]");
+
+  // --- NOP / Multi-byte NOP ---
+        TEMPLATES.put("[NOP]",                         "90");
+        TEMPLATES.put("[NOP 3-byte]",                  "0f 1f 00");
+        TEMPLATES.put("[NOP 4-byte]",                  "0f 1f 40 00");
+        TEMPLATES.put("[NOP 5-byte]",                  "0f 1f 44 00 00");
+        TEMPLATES.put("[NOP 6-byte]",                  "66 0f 1f 44 00 00");
+        TEMPLATES.put("[NOP 7-byte]",                  "0f 1f 80 00 00 00 00");
+        TEMPLATES.put("[NOP 8-byte]",                  "0f 1f 84 00 00 00 00 00");
+        TEMPLATES.put("[NOP 9-byte]",                 "66 0f 1f 84 00 00 00 00 00");
+    }
+}
+```
+
+`LICENSE`:
+
+```
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+```
+
+`README.md`:
+
+```md
+<p align="center">
+  <a href=""><img src="https://github.com/user-attachments/assets/d9f293de-7b6a-4739-9fde-2bececa0b0e7" alt="Logo SPF Framework" height="400px" /></a>
+</p>
+
+<p align="center">
+    <a href="https://github.com/TrackAndTruckDevs/SPF_GhidraPatternHelper/releases/latest/" target="_blank" title="SPF Ghidra Pattern Helper release">
+        <img alt="GitHub Release" src="https://img.shields.io/github/v/release/TrackAndTruckDevs/SPF_GhidraPatternHelper">
+    </a>
+    <a href="/LICENSE" title="SPF Ghidra Pattern Helper license">
+        <img alt="GitHub License" src="https://img.shields.io/github/license/TrackAndTruckDevs/SPF_GhidraPatternHelper">
+    </a>
+</p>
+
+<p align="center">
+    <a href="https://www.patreon.com/TrackAndTruckDevs" target="_blank" title="Support us on Patreon">
+        <img alt="Patreon" src="https://img.shields.io/badge/patreon-become%20a%20patron-340402?style=flat&logo=patreon">
+    </a>
+    <a href="https://github.com/TrackAndTruckDevs/SPF_GhidraPatternHelper/stargazers" title="Liked it? Starred">
+        <img src="https://img.shields.io/github/stars/TrackAndTruckDevs/SPF_GhidraPatternHelper?style=flat&logo=github" alt="Stars" />
+    </a>
+    <a href="https://discord.gg/kadd8AQuMt" target="_blank" title="Join our Discord">
+        <img alt="Discord" src="https://img.shields.io/badge/discord-join-7289da?style=flat&logo=discord&logoColor=white">
+    </a>
+    <a href="https://youtube.com/@TrackAndTruck" target="_blank" title="Subscribe to our channel">
+        <img alt="Youtube" src="https://img.shields.io/badge/youtube-subscribe-orange?logo=youtube&style=flat">
+    </a>
+</p>
+
+<h1 align="center">SPF Ghidra Pattern Helper</h1>
+
+<p align="center">
+    Ghidra pattern helper for generating and searching byte signatures, with optional SPF-style template support.
+</p>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [SPF Framework Integration](#spf-framework-integration)
+- [Installation](#installation)
+- [Launch Methods](#launch-methods)
+- [Pattern Generator Tab](#pattern-generator-tab)
+  - [Output Fields Reference](#output-fields-reference)
+- [Pattern Finder Tab](#pattern-finder-tab)
+- [Search Syntax Reference](#search-syntax-reference)
+- [How to Use](#how-to-use)
+  - [Generate a Pattern](#generate-a-pattern)
+  - [Search a Pattern](#search-a-pattern)
+  - [Optional Auto-Verify](#optional-auto-verify)
+- [Troubleshooting & Tips](#troubleshooting--tips)
+- [Notes](#notes)
+- [Support the Project](#support-the-project)
+
+---
+
+## Overview
+
+`SPF Ghidra Pattern Helper` is a Ghidra script for creating and testing byte patterns.
+
+The script was created to make pattern work faster, cleaner, and less manual:
+
+- generate patterns directly from selected instructions
+- search with flexible byte syntax
+- quickly move between generated output and search results
+- avoid copying patterns by hand between tabs and tools
+
+> [!TIP]
+> For best results, select **stable instruction sequences** (3+ instructions) rather than tiny or highly repeated fragments. A single-instruction pattern often matches too many locations.
+
+> [!TIP]
+> If you generate a pattern that matches hundreds of results, try adding more instructions to the selection. The auto-verify feature will warn you when a match count seems too high.
+
+---
+
+## SPF Framework Integration
+
+This script was created for [SPF Framework](https://github.com/TrackAndTruckDevs/SPF-Framework) to make plugin development faster and less manual.
+
+For **SPF-Framework**, it supports compact template-style signatures like:
+
+```text
+[MOV [r64+off8], r32] [XOR r32, r32] [CALL rel32] [MOVSS [r64+off8], xmm] [LEA r64, [r64+off8]] ...
+```
+
+This makes it easier to work with the simplified signature style used by SPF-based plugins.
+
+> [!NOTE]
+> Template signatures are converted to raw patterns internally. If no template matches an instruction, the generator falls back to automatic displacement masking — the output still works with SPF-Framework's `PatternFinder`.
+
+---
+
+## Installation
+
+### Script Directory
+
+The script ships as a `GhidraPatternHelper/` folder with several `.java` files that work together. Keep all files in this one folder: Ghidra compiles them as a single bundle, and the folder name is their Java package name.
+
+1. Copy the whole `GhidraPatternHelper` folder into any of your Ghidra script directories.
+2. Open Ghidra.
+3. Go to `Window -> Script Manager`.
+4. Open `Script Directories` (Manage Script Directories).
+5. Add exactly this folder — `<script directory>/GhidraPatternHelper`.
+6. Refresh the script list.
+7. Run `GhidraPatternHelper`.
+
+### One-Time Run from Script Manager
+
+If the script is already in a configured Ghidra script directory:
+
+1. Open `Window -> Script Manager`.
+2. Find `GhidraPatternHelper`.
+3. Run it directly from the list.
+
+---
+
+## Launch Methods
+
+The script can be started in two ways:
+
+### Menu
+
+- `Tools -> SPF Pattern Helper`
+
+### Hotkey
+
+- `Ctrl + Alt + P`
+
+> [!TIP]
+> The hotkey only works while the Script Manager is open at least once per session. After that, Ghidra remembers the key binding.
+
+---
+
+## Pattern Generator Tab
+
+The generator produces up to four forms of the same pattern from your selection:
+
+<p align="center">
+  <a href=""><img src="https://github.com/user-attachments/assets/55311b9c-b922-44ff-82f0-cdd13d1839f1" alt="Pattern Generator output" /></a>
+</p>
+
+Exemple for:
+
+```text
+* /--- Ghidra: ---/
+* 140fb5e27  40 38 38                      CMP byte ptr [RAX],DIL
+* 140fb5e2a  75 2C                         JNZ 0x140fb5e58
+* 140fb5e2c  48 8B 16                      MOV RDX,qword ptr [RSI]
+* 140fb5e2f  48 8D 0D 0A 9B 15 01          LEA RCX,[0x14210f940]
+* 140fb5e36  48 8B 92 38 06 00 00          MOV RDX,qword ptr [RDX + 0x638]
+```
+
+```text
+40 [CMP [r64], r8] [JNE rel8] [MOV r64, [r64]] [LEA r64, [rip+off32]] [MOV r64, [r64+off32]]
+```
+
+```text
+40 38 38 75 ? 48 8B 16 48 8D 0D ? ? ? ? 48 8B 92 ? ? ? ?
+```
+
+```text
+40 38 [00-3f] [SIB?] 75 ? 48 8b [00-3f] [SIB?] 4[8-f] 8d [05|0d|15|1d|25|2d|35|3d] ? ? ? ? 48 8b [80-bf] [SIB?] ? ? ? ?
+```
+
+```text
+40 38 38 75 2C 48 8B 16 48 8D 0D 0A 9B 15 01 48 8B 92 38 06 00 00
+```
+
+### Output Fields Reference
+
+| Field | Description | When to Use |
+|---|---|---|
+| **SPF Pattern** | Compact template names like `[CMP r64, [r64+off32]]` separated by spaces. Each instruction is replaced by a named template if one matches. | Readable signatures for SPF-Framework `PatternFinder`. Ideal for use in SPF-Framework.. |
+| **Extended Signature** | Template raw patterns (same ranges as `PatternTemplates.hpp`) joined together. Shows the actual masked pattern like `4[8-f] 3b [80-bf] [SIB?] ? ? ? ?`. REX prefix is emitted explicitly when needed. | When you want to see (or tweak) the exact range-based pattern before using it. Fully compatible with SPF-Framework. |
+| **Raw Pattern (Masked Hex)** | Specific hex bytes with `?` for masked values. Example: `48 3B 98 ? ? ? ? 0F 83 ? ? ? ?`. Uses the instruction's actual REX byte. | Quick copy-paste for most workflows. Balances readability with precision. |
+| **Raw Bytes (Pure Hex)** | Exact hex bytes with no masking. Example: `48 3B 98 80 00 00 00 0F 83 0A 02 00 00`. | Debugging, diffing, or when you need the literal instruction bytes. |
+| **Comment** | Formatted block with addresses and disassembly for documentation. | Pasting into code as a reference comment above a signature. |
+
+> [!WARNING]
+> An **Extended Signature** may include a variable REX prefix (`4[8-f]`) while the **Raw Pattern** uses the literal REX byte from the selection. Both are valid — the extended form is broader, the raw form is more specific to the original instruction.
+
+---
+
+## Pattern Finder Tab
+
+- searches the loaded program for a pattern
+- supports searching in all executable sections
+- supports searching in the selected memory block
+- supports limited searches from the current cursor position
+- shows match results directly inside Ghidra
+
+Example of the finder UI:
+
+<p align="center">
+  <a href=""><img src="https://github.com/user-attachments/assets/4ec71471-c76a-48f6-83d9-45c294dfb6f6" alt="Pattern Finder UI" /></a>
+</p>
+
+---
+
+## Search Syntax Reference
+
+The finder supports a richer byte pattern syntax than the standard Ghidra pattern search.
+
+| Syntax | Description | Examples |
+|---|---|---|
+| `48 8B CF` | **Exact bytes** — match only these exact byte values in order. | `48 8B CF` matches only `48 8B CF`. |
+| `?` or `??` | **Wildcard** — match any single byte. | `?` = one byte, `??` = same meaning. |
+| `[1-5?]` | **Length wildcard** — match 1 to 5 bytes of any value. | `[1-5?]` can cover 1, 2, 3, 4, or 5 unknown bytes. |
+| `45?` | **Optional exact byte** — byte `45` may be present or omitted. | `40 45? 50` matches `40 50` and `40 45 50`. |
+| `[40-4C]` | **Byte range** — match any byte between 0x40 and 0x4C inclusive. | `[80\|BF]` matches 80 or BF. `[80\|BF\|C0]` matches 80, BF, or C0. `[80\|BF\|C0-C5]` matches 80, BF, or any byte from C0 to C5. |
+| `[4-7]8` | **Nibble range (high)** — high nibble varies, low nibble fixed to 8. | `[4-7]8` matches 48, 58, 68, 78. |
+| `[4-7][8-B]` | **Nibble range (both)** — both nibbles vary. | `[4-7][8-B]` matches 48..4B, 58..5B, 68..6B, 78..7B. |
+| `[SIB?]` | **Optional SIB byte** — 0 or 1 byte after ModRM when R/M=100. | Used internally by templates to cover both SIB and no-SIB forms. |
+| `[LEA r64, [r64+off8]]?` | **Optional template instruction** — trailing `?` right after a bracketed template name: the whole instruction is either present or absent (internally wrapped into `{...}?`). | `[LEA r64, [r64+off8]]? 48 8B CF` matches with and without that `LEA`. |
+| `{[MOV r64, [r64+off8]]\|[MOV r64, [r64+off32]]}` | **Alternation** — exactly one of the listed sub-sequences must match; branches may span multiple tokens and nest. | Matches either instruction form. |
+| `{A\|B}?` | **Optional alternation** — trailing `?` after `}` makes the whole alternation optional: it is taken or skipped entirely. Without `\|` inside it is an optional plain group. | `{40 45\|40 46}? 50` matches `40 45 50`, `40 46 50` and `50` |
+
+> [!IMPORTANT]
+> The `[0-1?]` syntax means "zero or one byte", not "a byte in range 0x00-0x01". This is a length wildcard, not a value range.
+
+---
+
+## How to Use
+
+### Generate a Pattern
+
+1. Open a program in Ghidra.
+2. Select one or more instructions in the Listing view.
+3. Open `SPF Pattern Helper`.
+4. Go to the `Pattern Generator` tab.
+5. Click `Generate from Selection`.
+
+> [!TIP]
+> Select 3-5 instructions for a good balance between uniqueness and stability across game updates.
+
+### Search a Pattern
+
+1. Go to the `Pattern Finder` tab.
+2. Paste or type the pattern.
+3. Choose the search scope.
+4. Click `Find Pattern`.
+
+> [!TIP]
+> Use **"Search in current block"** for faster results when you know which section contains the code. Use **"All executable sections"** for exhaustive searches.
+
+### Optional Auto-Verify
+
+1. Enable `Automatically verify signature`.
+2. Generate a pattern from the selection.
+3. The script will automatically search the program.
+4. The result line under the button will show the outcome.
+5. If needed, use `More info` to jump to `Pattern Finder`.
+
+---
+
+## Notes
+
+- The script is designed to simplify the development and testing of patterns in American Truck Simulator / Euro Truck Simulator 2 using the [SPF Framework](https://github.com/TrackAndTruckDevs/SPF-Framework). It serves as a basic tool for rapid prototyping of signature search during mod development.
+- Further updates and additional features may or may not appear.
+- If you have suggestions for improving the functionality, leave them in the repository or join our Discord chat channel.
+
+---
+
+## Support the Project
+
+If you enjoy this plugin and want to support the development of future projects, consider supporting us on Patreon.
+
+► **[Support on Patreon](https://www.patreon.com/TrackAndTruckDevs)**
+
+```
