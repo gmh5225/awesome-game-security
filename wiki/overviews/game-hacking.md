@@ -1282,6 +1282,7 @@ sources:
   - wiki/sources/descriptions/percpopper__Splitgate-Internal.md
   - wiki/sources/descriptions/percpopper__Fortnite-FNameEntry.md
   - wiki/sources/descriptions/percpopper__Fortnite-CameraCachePOV.md
+  - wiki/sources/descriptions/Pycatchown__ClassMaker.md
   - wiki/sources/descriptions/pbiernat__ripr.md
   - wiki/sources/descriptions/patrickcjk__TOG.md
   - wiki/sources/descriptions/lfreist__hwinfo.md
@@ -1774,6 +1775,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C++ RTTI/class metadata recovery in Ghidra via [[ghidra-cpp-class-analyzer]] (Java extension; GCC/Clang/MSVC RTTI models, vtables, ctors/dtors, inheritance reconstruction, class hierarchy views; cheat / Ghidra Plugins) sits in the same C++ static-RE lane beside [[rtti-parser]] and [[pyclassinformer]]. (source: wiki/sources/descriptions/astrelsky__Ghidra-Cpp-Class-Analyzer.md)
 - IDA 9.X C++ vtable ops via [[ida-vtable-tools]] (dump `.hpp` interface skeleton / class-prefix rename / `this` type / slot index·offset; Python) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md)
 - C++ class/vtable/signature management via [[classy]] (gmh5225; PyQt5 GUI; vtable generation, function-to-class assignment, Itanium mangling, struct mapping, C header export; cheat / IDA Plugins) sits in the same C++ static-RE lane beside [[ida-vtable-tools]] and [[ida-medigate]]. (source: wiki/sources/descriptions/gmh5225__Classy.md)
+- Automatic C++ class reconstruction from constructor pseudocode via [[classmaker]] (Pycatchown; Python IDAPython; traces vtable assignments, creates/updates IDA structs, naming heuristics for layouts; 32/64-bit practical reversing; cheat / IDA Plugins) sits in the same C++ static-RE lane beside [[pyclassinformer]] and [[ida-vtable-tools]]. (source: wiki/sources/descriptions/Pycatchown__ClassMaker.md)
 - Missing indirect CALL/JMP target recovery via [[ida-missinglink]] (C++ OOP-heavy game/client binaries; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/kweatherman__ida_missinglink.md)
 - Binary patch script generation via [[genpatch]] (Python; dialog when patch script succeeds; cheat / IDA Plugins) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/sterrasec__genpatch.md)
 - IDA PatchGen patched-byte export via [[ida-genpatch]] (IDAPython; Alt-F8; grouped file offsets, disassembly context, C# `SinglePatchHunk`; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / binary-patch lane. (source: wiki/sources/descriptions/frasten__ida-genpatch.md)

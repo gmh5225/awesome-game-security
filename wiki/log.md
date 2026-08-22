@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Pycatchown/ClassMaker`: entity [[classmaker]] (Pycatchown; Python IDAPython IDA plugin; auto C++ class reconstruction from constructor pseudocode; vtable assignment trace, IDA struct create/update, naming heuristics; 32/64-bit practical reversing; game/native binary class recovery; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pyclassinformer]], [[ida-vtable-tools]], [[classy]], and [[ida-medigate]].
+
 - **2026-08-22** — ingest `description:Qemu-Gang/Escape-from-TuxKov`: entity [[escape-from-tuxkov]] (Qemu-Gang; C++ Escape from Tarkov cheat framework for QEMU workflows; ESP/aimbot/recoil; separate memory-access + data-collection; Unity/Mono structures; build/inject/extract/reload scripts; Linux/QEMU external or hybrid setups; cheat / game:eft [QEMU]); cited on [[overviews/game-hacking]]; cross-linked [[eft]], [[meatyeftrelease]], [[qemu-unrealdumper-4-25]], and [[memflow-kvm]].
 
 - **2026-08-22** — ingest `description:Qemu-Gang/QemuUnrealDumper-4.25`: entity [[qemu-unrealdumper-4-25]] (Qemu-Gang; C++ QEMU + memflow port of UnrealDumper-4.25; scans target processes for object arrays, name pools, and engine offsets; names/objects dump with per-game configuration; Unreal RE / game security; UE SDK Dump By QEMU); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[unrealdumper-4-25]], [[uedumper]], [[shh0yauedumper]], and [[memflow-kvm]].

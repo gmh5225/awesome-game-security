@@ -446,6 +446,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [CirSAT](entities/cirsat.md) — circuit-based AIG SAT (DAG/AIGER; verification / equivalence; MBA constraint lane)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
+- [ClassMaker](entities/classmaker.md) — IDA Python plugin: auto C++ class reconstruction from constructor pseudocode; vtable trace, struct create/update, naming heuristics; 32/64-bit (Pycatchown; cheat / IDA Plugins)
 - [Classy](entities/classy.md) — IDA Pro C++ class/vtable/signature manager (PyQt5 GUI; vtable gen, Itanium mangling, struct mapping, C headers; gmh5225)
 - [ClawSearch](entities/clawsearch.md) — x64dbg plugin: Cheat Engine–style memory value scan (first/next; int/float; exact/changed/increased; fast-scan; dump jump; codecat)
 - [ClickPic](entities/clickpic.md) — screen pixel color detection + auto-click (OpenCV + triggerbot; gmh5225)
