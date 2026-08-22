@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Oxygen1a1/InfinityHook_latest`: entity [[infinityhook-latest]] (Oxygen1a1; C/C++ VS kernel driver; InfinityHook-style ETW syscall interception for newer Windows via HalPrivateDispatchTable callbacks; PMC counter + trace configuration RE notes; AC bypass / kernel security research; ETW Hook WIN11); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]], [[infinityhook-promax]], and [[etwhook-infinityhookclass]].
+
 - **2026-08-22** — ingest `description:P4nda0s/IDA-NO-MCP`: entity [[ida-no-mcp]] (P4nda0s; Python IDA plugin + Rust idalib CLI `inp`; exports Hex-Rays decompilation/disasm fallback, caller/callee metadata, strings, imports/exports, optional memory hexdumps, call graphs, and AGENTS.md for AI IDEs; per-function or consolidated layouts for large IDBs; AI-assisted binary analysis without MCP; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[research-rigor]]; cross-linked [[ida-cli]], [[ida-pro-mcp]], [[headless-ida-mcp-server]], [[ida-nexus-docker]], [[tocode]], and [[re-harness]].
 
 - **2026-08-22** — ingest `description:PAGalaxyLab/YAHFA`: entity [[yahfa]] (PAGalaxyLab; Android ART method hooking; Java + native backup-and-hook APIs; static/virtual/JNI/framework method examples; reusable library + demo/plugin modules; runtime instrumentation / security research / dynamic behavior modification); cited on [[overviews/mobile-security]]; cross-linked [[canyie-pine]], [[frida]], [[frida-smali-trace]], [[virtual-app]], [[xposed-module-kit]], [[and64-inline-hook]], and [[adbi]].
