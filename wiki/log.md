@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `readme:categories`: Cheat ~2737 (+1) / Anti Cheat ~688 (+1; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-22** — ingest `description:Oliver-1-1/RwxScanner`: entity [[rwxscanner]] (Oliver-1-1; Windows WDK kernel driver; PML4/PDPT/PD/PT walk via physical memory reads; logs suspicious writable+executable mappings per process; image name + admin-token metadata; low-level AC/malware detection around injected or self-modifying code; README [RWX Memory scanner]); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[rwxfinder]], [[ghost]], [[ptview]], and [[page-table-injector]].
 
 - **2026-08-22** — ingest `description:Oliver-1-1/TOPMOST-Detection`: entity [[topmost-detection]] (Oliver-1-1; Windows C++ utility; Win32 visible-window enumeration; `WS_EX_TOPMOST` always-on-top overlay flagging; companion console self-topmost via `SetWindowPos` for testing; anti-cheat prototyping / basic overlay-detection experiments; README [Detect simple top most windows]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[not-an-overlay]], [[window-hijack-overlay]], [[anti-cheat-testing-framework]], and [[uefi-graphic]].
