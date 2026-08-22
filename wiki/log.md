@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PhysX1337/BloodHunt-v1.1`: entity [[bloodhunt-v1-1]] (PhysX1337; C++ external Windows cheat framework; Unreal Engine Blood Hunt shooter; memory read + DirectX 9 ImGui overlay; ESP, aimbot, recoil mods; hardcoded offsets, actor caching, on-screen menu toggles; cheat prototyping / AC evasion research); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[blood-hunt]], [[bloodhunt-external]], [[easy-anti-cheat]], and [[imgui-standalone]].
+
 - **2026-08-22** — ingest `description:PiMoNFeeD/csgo-src`: entity [[csgo-src]] (PiMoNFeeD; leaked CS:GO Source engine mirror; networking/rendering/game logic/client-server architecture; engine researchers + Source/CS:GO RE; Game Engine / source [Leaked CSGO]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[kisak-strike]], [[source-engine]], and [[csgo-sdk]].
 
 - **2026-08-22** — ingest `description:PickAngE/AntiCheat-Scanner`: entity [[anticheat-scanner]] (PickAngE; Python 3.10+ read-only Windows forensic AC inventory; drivers/processes/services/registry/tasks/FS + BAM/Prefetch/MUICache; O(1) sig index + rapidfuzz + PE/Authenticode; ACE/EAC/BattlEye/EA AC/HoYoProtect; privacy/education lane); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[alibi]], [[windows-forensic-artifacts]], [[driver-risk-scout]], and [[easy-anti-cheat]].
