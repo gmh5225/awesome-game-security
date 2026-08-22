@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PiMoNFeeD/csgo-src`: entity [[csgo-src]] (PiMoNFeeD; leaked CS:GO Source engine mirror; networking/rendering/game logic/client-server architecture; engine researchers + Source/CS:GO RE; Game Engine / source [Leaked CSGO]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[kisak-strike]], [[source-engine]], and [[csgo-sdk]].
+
 - **2026-08-22** — ingest `description:PickAngE/AntiCheat-Scanner`: entity [[anticheat-scanner]] (PickAngE; Python 3.10+ read-only Windows forensic AC inventory; drivers/processes/services/registry/tasks/FS + BAM/Prefetch/MUICache; O(1) sig index + rapidfuzz + PE/Authenticode; ACE/EAC/BattlEye/EA AC/HoYoProtect; privacy/education lane); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[alibi]], [[windows-forensic-artifacts]], [[driver-risk-scout]], and [[easy-anti-cheat]].
 
 - **2026-08-22** — ingest `description:PierreCiholas/GetPixel-vs-BitBlt_GetDIBits`: entity [[getpixel-vs-bitblt-getdibits]] (PierreCiholas; C++ Win32 GDI benchmark/capture utility; switchable GetPixel vs BitBlt+GetDIBits; frame buffer + bitmap export; BitBlt bulk read dramatically faster than per-pixel GetPixel; external frame capture for game tooling and security research; README [GetPixel]); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[not-an-overlay]], [[screenshot]], and [[screencapture]].
