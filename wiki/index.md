@@ -1429,6 +1429,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [IL2CPPDumper](entities/il2cppdumper.md) — Android IL2CPP static dump (C/C++; libil2cpp.so + metadata; cheat / game engine explorer:Unity)
 - [Il2CppDumper-YuanShen](entities/il2cppdumper-yuanshen.md) — Genshin Impact IL2CPP static dump (khang06; cwd output; cheat / game engine explorer:Unity)
+- [Il2cppDumpDroidGUI](entities/il2cppdumpdroidgui.md) — Android on-device Il2CppDumper GUI (APK releases; Android 6–14; armeabi-v7a/arm64-v8a; Poko-Apps; [Il2Cpp Dump GUI])
 - [Il2cppEncrtypt](entities/il2cpp-encrtypt.md) — Unity IL2CPP encryption (C++; asset pipelines + plugin dev; Game Engine Protection:Unity; badApple001)
 - [il2cpp-finder](entities/il2cpp-finder.md) — Unity IL2CPP metadata locator (global-metadata.dat / CodeRegistration / MetadataRegistration scan; obfuscated binaries; cheat / game engine explorer:Unity)
 - [il2cpp-pdb](entities/il2cpp-pdb.md) — Il2CppDumper fork with Rust PDB generator for x64 PE GameAssembly.dll (function names, struct types, typed prototypes; IDA auto-load; [Il2Cpp Dump])
