@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:NullTerminatorr/NullBase`: entity [[nullbase]] (NullTerminatorr; simple C++ game-hack base; memory helpers, entity/local-player abstractions, math utilities, W2S code; straightforward Visual Studio layout; teaches beginner cheat framework structure and iteration; cheat / guide); cited on [[overviews/game-hacking]] and [[concepts/world-to-screen]]; cross-linked [[intro-to-gamehacking]], [[nullhook]], [[thread-hijacking-injector]], [[lab-esp-and-aimbot]], and [[gamehacking-cheatsheet]].
+
 - **2026-08-22** — ingest `description:NullTerminatorr/NullHook`: entity [[nullhook]] (NullTerminatorr; tutorial split driver+client kernel cheat sample; C/C++ memory/hook workflows; external manual-map load; educational kernel-assisted cheat development; README `[NtDxgkGetTrackedWorkloadStatistics]`); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-cheat-for-directx3d]], [[thread-hijacking-injector]], [[kdmapper]], and [[windows-kernel-pagehook]].
 
 - **2026-08-22** — ingest `description:NullTerminatorr/ThreadHijackingInjector`: entity [[thread-hijacking-injector]] (NullTerminatorr; minimal C++ thread-hijack DLL injection PoC; remote context manipulation + execution redirection; compact educational RE sample; Injection Testing); cited on [[overviews/game-hacking]]; cross-linked [[windows-process-injection]], [[launcher-abuser]], [[frankenstein-apc-injection]], [[injectors]], and [[dll-thread-injection-detector]].

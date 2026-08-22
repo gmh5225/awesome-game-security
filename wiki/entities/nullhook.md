@@ -14,7 +14,7 @@ Tutorial-oriented **Windows game-hacking** sample (NullTerminatorr) that combine
 
 README lane: **`NtDxgkGetTrackedWorkloadStatistics`** — dxgkrnl graphics-syscall hook channel for covert KM↔UM communication (same family as [[kernel-cheat-for-directx3d]] and [[comm-im-miraclela]]).
 
-Complements other NullTerminatorr educational samples such as [[thread-hijacking-injector]] (compact user-mode injection PoC) when studying split driver/client architecture.
+Complements other NullTerminatorr educational samples such as [[nullbase]] (readable C++ cheat-base scaffold with memory/entity/W2S building blocks) and [[thread-hijacking-injector]] (compact user-mode injection PoC) when studying split driver/client architecture.
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements other NullTerminatorr educational samples such as [[thread-hijacking
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[kernel-cheat-for-directx3d]] · [[thread-hijacking-injector]] · [[kdmapper]] · [[windows-kernel-pagehook]]
+[[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[nullbase]] · [[kernel-cheat-for-directx3d]] · [[thread-hijacking-injector]] · [[kdmapper]] · [[windows-kernel-pagehook]]
