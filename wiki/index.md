@@ -511,6 +511,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [crown](entities/crown.md) — C++ 2D/3D engine (DirectX/Vulkan + shader work; Game Engine / source)
 - [CReadMemory](entities/creadmemory.md) — user-mode cross-process memory read library; multiple methods beyond ReadProcessMemory; external cheat base (gmh5225)
 - [counterstrike2](entities/counterstrike2.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
+- [counter-strike2-sdk](entities/counter-strike2-sdk.md) — header-only CS2 SDK snapshot (Omn1z; Source 2 class declarations/enums; entity/gameplay/animation layouts with field offsets; bit-vector utilities; RE/tooling/game-security research; cheat / game:cs2 [SDK])
 - [cozinha-loader](entities/cozinha-loader.md) — CS:GO C++ remote-download inject loader (process hollowing/manual map; anti-debug + string encryption + import obfuscation; b1scoito [Injector])
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Omn1z/Counter-Strike2-SDK`: entity [[counter-strike2-sdk]] (Omn1z; header-only CS2 SDK snapshot; Source 2 class declarations/enums; entity/gameplay/animation layouts with field offsets; bit-vector utilities for networked structures; RE/tooling/game-security research; cheat / game:cs2 [SDK]); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[cs2-sdk]], [[cs2-sdk-source2gen]], [[cs2-dumper]], and [[source-netvars]].
+
 - **2026-08-22** — ingest `description:OpenArena/engine`: entity [[openarena-engine]] (OpenArena; ioquake3 fork; Quake III renderer/audio/networking/runtime; make-based multi-platform C/C++; classic FPS multiplayer engine internals; engine developers, modders, researchers; Game Engine / source [quake3]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[q3vm]], [[open-source-engines]], [[openrct2]], and [[xray-16]].
 
 - **2026-08-22** — ingest `description:OpenRCT2/OpenRCT2`: entity [[openrct2]] (OpenRCT2; open-source RollerCoaster Tycoon 2 reimplementation; cooperative multiplayer, improved UI/AI, expanded editing, higher engine limits; CMake C++; scripting/plugin hooks; broad platform support; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[open-source-engines]], [[openclaw]], [[xray-16]], and [[devilution]].
