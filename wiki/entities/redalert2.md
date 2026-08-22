@@ -20,4 +20,4 @@ README tags it as **Red Alert 2 on Web**—a readable remake surface in the Game
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[storm-engine]] · [[zelda3]] · [[openclaw]] · [[rathena]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[cnc-red-alert]] · [[phobos]] · [[storm-engine]] · [[zelda3]] · [[openclaw]] · [[rathena]]

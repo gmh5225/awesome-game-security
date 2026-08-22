@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Phobos-developers/Phobos`: entity [[phobos]] (Phobos-developers; C++ RA2/YR community engine extension; modified YRpp + Syringe injection; extends game behavior without replacing original executable; stable/dev/nightly builds; advanced RTS mod development; README Red Alert 2: Yuri's Revenge engine extension); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cnc-red-alert]] and [[redalert2]].
+
 - **2026-08-22** — ingest `description:PhysX1337/BloodHunt-v1.1`: entity [[bloodhunt-v1-1]] (PhysX1337; C++ external Windows cheat framework; Unreal Engine Blood Hunt shooter; memory read + DirectX 9 ImGui overlay; ESP, aimbot, recoil mods; hardcoded offsets, actor caching, on-screen menu toggles; cheat prototyping / AC evasion research); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[blood-hunt]], [[bloodhunt-external]], [[easy-anti-cheat]], and [[imgui-standalone]].
 
 - **2026-08-22** — ingest `description:PiMoNFeeD/csgo-src`: entity [[csgo-src]] (PiMoNFeeD; leaked CS:GO Source engine mirror; networking/rendering/game logic/client-server architecture; engine researchers + Source/CS:GO RE; Game Engine / source [Leaked CSGO]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[cstrike15-src]], [[kisak-strike]], [[source-engine]], and [[csgo-sdk]].
