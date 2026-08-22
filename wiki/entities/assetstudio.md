@@ -3,21 +3,21 @@ title: AssetStudio
 kind: entity
 topics: [game-engine, reverse-engineering]
 sources:
-  - wiki/sources/descriptions/Razviar__assetstudio.md
-updated: 2026-08-21
-confidence: medium
+  - wiki/sources/descriptions/Perfare__AssetStudio.md
+updated: 2026-08-22
+confidence: high
 ---
 
 # AssetStudio
 
-Multi-threaded Unity asset extraction tool covering Unity 2.x through Unity 6. Ships GUI and CLI binaries with parallel bundle loading and parallel export for large-scale asset processing. Implementation is primarily C#/.NET and includes format parsers, decompression routines, and game-specific helper logic. Used for game data mining, modding workflows, and reverse engineering of Unity asset bundles. (source: wiki/sources/descriptions/Razviar__assetstudio.md)
+Canonical desktop C# tool for exploring, extracting, and exporting Unity assets and AssetBundles. Supports a wide range of Unity versions and asset types — textures, audio, fonts, meshes, shaders, and animation-related data. Decompresses bundles, inspects scene hierarchies, and exports to practical formats such as images, OBJ, JSON, and FBX-related outputs. Commonly used by reverse engineers, modders, and game-security analysts who need to inspect Unity game content. README lane `[Extracting assets]`. (source: wiki/sources/descriptions/Perfare__AssetStudio.md)
 
-Sits in the README **Extracting assets** / Game Assets lane beside bulk offline extractors and editor-style Unity tooling such as [[uabe]], and complements runtime inspectors like [[unityexplorer]] when the goal is serialized bundle dump rather than in-process hierarchy inspection.
+Same Perfare author as [[il2cppdumper]]. Sits in the README **Extracting assets** / Game Assets lane beside editor-style [[uabe]] and multi-threaded fork [[assetstudio-razviar]]; complements runtime inspectors like [[unityexplorer]] when the goal is serialized bundle dump rather than in-process hierarchy inspection.
 
 ## Links
 
-- Repo: https://github.com/Razviar/assetstudio
+- Repo: https://github.com/Perfare/AssetStudio
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[uabe]] · [[uassetgui]] · [[unityexplorer]] · [[unity-game-hacking]] · [[awesome-game-file-format-reversing]] · [[unturned-godot]]
+[[il2cppdumper]] · [[assetstudio-razviar]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[uabe]] · [[uassetgui]] · [[unityexplorer]] · [[unity-game-hacking]] · [[awesome-game-file-format-reversing]] · [[unturned-godot]]

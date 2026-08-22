@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Perfare/AssetStudio`: entity [[assetstudio]] (Perfare; canonical C# Unity asset/AssetBundle desktop extractor; wide Unity version + asset-type coverage; bundle decompression, scene hierarchy, export to images/OBJ/JSON/FBX; modders / RE / game-security analysts; [Extracting assets]); split prior Razviar fork to [[assetstudio-razviar]]; cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[il2cppdumper]], [[uabe]], [[unityexplorer]], and [[awesome-game-file-format-reversing]].
+
 - **2026-08-22** — ingest `description:Perfare/Il2CppDumper`: entity [[il2cppdumper]] (Perfare; canonical C# Unity IL2CPP RE utility; ELF/Mach-O/PE/NSO/WASM; dummy DLL metadata + IDA/Ghidra/BN scripts + structure headers; static analysis / protection research; [Il2Cpp Dump]); split prior Android fork to [[il2cppdumper-kp7742]]; cited on [[concepts/il2cpp]], [[overviews/game-engine]], and [[overviews/reverse-engineering]]; cross-linked [[il2cpp-inspector]], [[il2cppdumpdroidgui]], [[il2cpp-pdb]], and [[zygisk-il2cppdumper]].
 
 - **2026-08-22** — ingest `description:Perfare/Zygisk-Il2CppDumper`: entity [[zygisk-il2cppdumper]] (Perfare; Android Zygisk runtime IL2CPP dump module; C/C++ native + Android build; inject into target apps; post-load metadata extraction bypasses static encryption/obfuscation/packing on mobile Unity titles; mobile game RE; [Il2Cpp Dump for Android Platform]); cited on [[overviews/mobile-security]] and [[concepts/il2cpp]]; cross-linked [[zygisk]], [[il2cppdumper]], [[il2cppdumpdroidgui]], and [[frida-il2cpp-bridge]].
