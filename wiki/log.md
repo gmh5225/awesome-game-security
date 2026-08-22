@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Octowolve/Il2CppSDKGenerator`: entity [[il2cpp-sdk-generator]] (Octowolve; Android IL2CPP C++ SDK generator; dnlib C# generator + C++ runtime helpers; DummyDll assemblies → typed headers/wrappers for native modules; class/method/field/il2cpp export resolution; Unity RE / game security workflows; README Il2Cpp SDK generator for Android); cited on [[concepts/il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cppdumper]], [[il2cpp-inspector]], [[il2cpp-resolver]], [[cheat-unity-games]], and [[unity-imgui-android]].
+
 - **2026-08-22** — ingest `description:Octowolve/Unity-ImGUI-Android`: entity [[unity-imgui-android]] (Octowolve; Android Unity native ImGui template; C++ Dobby hooks on eglSwapBuffers + Unity input injection; touch/key overlay; IDA+SigMaker tutorial for nativeInjectEvent in libunity; mod-menu prototyping / mobile game RE; README Imgui For Unity); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[dobby]], [[imgui-unity-android]], [[polarimgui]], [[cheat-unity-games]], and [[android-mod-menu-imgui]].
 
 - **2026-08-22** — ingest `description:OguzKaira/FPS-Movement`: entity [[fps-movement]] (OguzKaira; Unity C# beginner FPS controller; Rigidbody player scripts; mouse look, walk/jump/dash/crouch; README setup/bindings and dash-sliding notes; learner movement prototype; Game Engine / Unity FPS); cited on [[overviews/game-engine]]; cross-linked [[fpssample]], [[sqlite-unity3d]], and [[unity-cs-reference]].
