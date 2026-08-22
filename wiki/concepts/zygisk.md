@@ -9,6 +9,7 @@ sources:
   - wiki/sources/descriptions/fedes1to__Zygisk-ImGui-Menu.md
   - wiki/sources/descriptions/zensu357__ksurusda.md
   - wiki/sources/descriptions/PerformanC__ReZygisk.md
+  - wiki/sources/descriptions/PShocker__Zygisk-MagiskHide.md
 updated: 2026-08-22
 confidence: medium
 ---
@@ -25,6 +26,10 @@ Magisk **Zygisk** API for native modules that hook the Android app specializatio
 
 Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList / Shamiko may hide root from apps that also scan Zygisk artifacts).
 
+## Root-hide modules
+
+- **[[zygisk-magiskhide]]** — Zygisk Magisk module recreating MagiskHide-style concealment; native code hides Magisk mounts and patches sensitive system properties root checks probe. (source: wiki/sources/descriptions/PShocker__Zygisk-MagiskHide.md)
+
 ## Standalone runtimes
 
 - **[[rezygisk]]** — open-source C reimplementation of the Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging, and operational tooling for transparent Zygisk-compatible injection. (source: wiki/sources/descriptions/PerformanC__ReZygisk.md)
@@ -40,4 +45,4 @@ Pair with [[research-rigor]] when generalizing injection timing across OEM/Andro
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-magiskhide]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

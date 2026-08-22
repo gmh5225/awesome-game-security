@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:PShocker/Zygisk-MagiskHide`: entity [[zygisk-magiskhide]] (PShocker; Zygisk Magisk module recreating MagiskHide-style concealment; native mount hide + sensitive system-property patching; multi-ABI module archives; mobile security research / anti-detection testing); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[magisk]], [[magiskhide]], [[riru-momo-hider]], and [[magiskdetector]].
+
 - **2026-08-22** — ingest `description:PSkinnerTech/3d-asset-factory`: entity [[3d-asset-factory]] (PSkinnerTech; CLI YAML→3D pipeline; GPT Image 2.0 concept → TRELLIS.2 GLB; QA gate, review HTML, web/Unity/Unreal export; mock & remote GPU runners Modal/Replicate/RunPod; GLB/USDZ/STL; AI category); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[modly]], [[sprite-sheet-creator]], [[image-blaster]], and [[gameai-paper-list]].
 
 - **2026-08-22** — ingest `description:PacktPublishing/Learn-FPGA-Programming`: entity [[learn-fpga-programming]] (PacktPublishing; book companion SystemVerilog HDL + testbenches by chapter; logic design through I2C/PS/2/VGA/DDR and capstone projects; FPGA fundamentals for DMA/custom hardware development; Guide); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[pcileechgen]], [[xilinx-fpga-pcie-xdma-tutorial]], [[entities/dma]], and [[dma-cfw-guide]].

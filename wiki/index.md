@@ -3030,6 +3030,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zyemu](entities/zyemu.md) — WIP x86-64 user-mode emulator (JIT handlers + code cache; Zydis decode/encode; CPU/memory core; C++; low-level emulation / binary analysis; ZehMatt)
 - [zygisk-dump-dex](entities/zygisk-dump-dex.md) — Zygisk `libdexfile.so` DEX dump (Android 14/15; Cheat Magisk)
 - [zygisk-memdump](entities/zygisk-memdump.md) — Zygisk module dumps `.so` from process memory (C/C++; modding / hooking / memory analysis; Cheat Magisk)
+- [Zygisk-MagiskHide](entities/zygisk-magiskhide.md) — Zygisk Magisk module recreating MagiskHide-style root concealment (mount hide + system-property patching; multi-ABI; PShocker)
 - [Zygisk-Il2CppDumper](entities/zygisk-il2cppdumper.md) — Zygisk runtime IL2CPP dump module (Perfare; C/C++; post-load metadata; bypasses static encryption/obfuscation/packing; [Il2Cpp Dump for Android Platform])
 - [ZygiskFrida](entities/zygisk-frida.md) — Zygisk module injects Frida gadget into app processes (Cheat Magisk)
 - [Zygisk-ImGui-Menu](entities/zygisk-imgui-menu.md) — ImGui menu using Zygisk (cURL + ImGui; hook.cpp; cheat / render-draw)
