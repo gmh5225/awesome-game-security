@@ -1542,6 +1542,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [interic-fortnite-external-cheat](entities/interic-fortnite-external-cheat.md) — Interic Fortnite external cheat (Saxmason; C++ VS; driver-assisted RPM; DX9 ImGui overlay; visibility ESP + hitbox aimbot; KeyAuth + anti-debug/anti-dump/string obfuscation; cheat / game:fortnite [External])
 - [intraceptor](entities/intraceptor.md) — NT API interception + kernel-driver redirect to bypass process/thread handle protections (crvvdev; cheat / access)
 - [Interep Driver Leak](entities/interep-driver-leak.md) — leaked cheat kernel driver; covert process memory R/W via `NtGdiPolyPolyDraw` win32k GDI channel; anti-cheat driver-detection evasion (gmh5225)
+- [internal-rainbow-six-cheat-v3](entities/internal-rainbow-six-cheat-v3.md) — R6 internal: kernel injector + manually mapped user-mode DLL; D3D11 menu; ESP/aimbot/recoil/spread/movement/FOV (NMan1; kernel-assisted injection + detection-surface RE; cheat / game:r6 [Internal])
 - [internal-valorant-cheat](entities/internal-valorant-cheat.md) — Valorant internal: aimbot + ESP via in-process render/game-logic hooks; bypasses Vanguard user-mode protections (gmh5225; cheat / game:valorant [Internal])
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
