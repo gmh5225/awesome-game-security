@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-22** — ingest `description:Neurosisccc/Apex-ItemGlow`: entity [[apex-item-glow]] (Neurosisccc; minimal C++ Apex Legends item-glow snippet; entity-slot iteration + highlight memory writes; single wall-highlight visual feature; memory-write visual-hack PoC; cheat / game:apex legends [Item glow]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[apex-simple-aimbot-glow-apex]], [[apex-legends-esp]], [[ow-outlines]], [[cs-2-glow]], and [[easy-anti-cheat]].
+
 - **2026-08-22** — ingest `readme:categories`: Cheat ~2740 (+1) / WSL ~4 (−1; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-22** — ingest `description:NeverSight/NeverC`: entity [[neverc]] (NeverSight; security-oriented C23 compiler on custom LLVM backend; compile-time string encryption/hash + mimalloc; DynCode PIC runtime codegen incl. kernel mode; integrated linker; extensible plugin API across 130+ compiler phases; PE/ELF/Mach-O; Windows/Linux/Android user-mode EXE/DLL, Windows kernel drivers, Android kernel modules; game-security/RE/offensive toolchain; NeverC & NeverD / Compiler); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[neverd]], [[the-poor-mans-obfuscator]], [[kagura]], [[dll-ollvm]], [[static-string-obfuscation]], [[dynamizer]], and [[polymorphic-engine]].

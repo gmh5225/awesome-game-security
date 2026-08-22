@@ -1315,6 +1315,7 @@ sources:
   - wiki/sources/descriptions/PrinceFroggy__MSB.md
   - wiki/sources/descriptions/Noelo-Lab__kuna.md
   - wiki/sources/descriptions/NeverSight__NeverD.md
+  - wiki/sources/descriptions/Neurosisccc__Apex-ItemGlow.md
   - wiki/sources/descriptions/NoneShell__IDAComments.md
   - wiki/sources/descriptions/NoCheatPlus__NoCheatPlus.md
   - wiki/sources/descriptions/Noosh404__Maplestory-V179-Cheat-Engine.md
@@ -2155,6 +2156,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Apex Legends live-process offset dumpers such as [[apex-legends-offset-dumper]] (dhanax26; pattern scan + netvar enumeration from running process; interfaces, netvars, SwapChain pointers; cheat / game:apex legends `[Offset]`) automate per-patch layout refresh beside static SDK trees and full cheat samples. (source: wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md)
 - Legacy Apex Legends ESP samples such as [[apex-esp-old-project]] (gmh5225; C/C++; rendering / SDK generation / overlays; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex_ESP_Old_Project.md)
 - Title-specific Apex Legends aimbot + glow samples such as [[apex-simple-aimbot-glow-apex]] (gmh5225; C/C++; driver development / hooking / memory analysis; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex-SIMPLE-AIMBOT-GLOW-APEX.md)
+- Minimal Apex Legends item-glow PoCs such as [[apex-item-glow]] (Neurosisccc; C++; entity-slot iteration + highlight memory writes; single wall-highlight visual feature; compact memory-write visual-hack proof of concept; cheat / game:apex legends [Item glow]) sit beside full glow/aimbot stacks in the same lane. (source: wiki/sources/descriptions/Neurosisccc__Apex-ItemGlow.md)
 - Title-specific Apex Legends fixed-cheat samples such as [[apex-cheat-fixed]] (gmh5225; C/C++; driver development / modding / hooking; cheat / game:apex legends) sit in the same lane beside [[apex-simple-aimbot-glow-apex]] and [[apex-full-cheat]]. (source: wiki/sources/descriptions/gmh5225__Apex-CHEAT-FIXED.md)
 - Title-specific Apex Legends external ESP/aimbot/skinchanger samples such as [[apex-legends-external-esp-aimbot-skinchanger]] (gmh5225; C/C++; rendering / SDK generation / overlays; cheat / game:apex legends [External]) sit in the same lane. (source: wiki/sources/descriptions/gmh5225__Apex-Legends-External-Esp-Aimbot-Skinchanger.md)
 - Title-specific Apex Legends HWID spoofer samples such as [[apex-spoofer]] (gmh5225; kernel-level HWID-ban evasion; anti-cheat research / modding; cheat / HWID; game:apex legends under [[easy-anti-cheat]]) sit beside universal EAC spoofers such as [[hwid-spoofer-ud-fortnite-warzone-apex-rust-escape-from-tarkov-and-all-eac-be-games-imgui-loader-base]]. (source: wiki/sources/descriptions/gmh5225__Apex-Spoofer.md)
