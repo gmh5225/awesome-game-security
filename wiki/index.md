@@ -232,6 +232,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-boot-image-editor](entities/android-boot-image-editor.md) — Gradle boot/recovery/vendor_boot unpack-repack (AVB, LZ4/XZ/GZIP, EROFS/sparse; boot v0–4; JDK 11+; cfig)
 - [android-bpf-sys](entities/android-bpf-sys.md) — Minimal Android eBPF syscall monitor (`raw_syscalls/sys_enter` tracepoint → BPF map; C++ userland via Android bpf libs; PShocker; cheat / EBPF)
 - [android-hardware-attestation-demo](entities/android-hardware-attestation-demo.md) — Quarkslab attestation relay PoC (Frida Keystore hook + clean-device oracle; genuine TEE/StrongBox chain; no crypto forgery)
+- [AndroidHiddenApiBypass](entities/android-hidden-api-bypass.md) — LSPosed pure-Java hidden non-SDK API bypass (HiddenApiBypass + LSPass; invoke restricted methods/constructors, read hidden fields, exemption prefixes; no native code; instrumentation / compatibility / security research)
 - [Android-Library-Remap-Hide](entities/android-library-remap-hide.md) — Android lib remap-hide (two-lib; cheat / hide)
 - [android-imgui-menu](entities/android-imgui-menu.md) — Rust ARM64 Android ImGui cdylib (EGL/Vulkan hooks; cheat / render-draw)
 - [android-native-app-imgui](entities/android-native-app-imgui.md) — Android ImGui native app (Java/C++; cheat / render-draw)

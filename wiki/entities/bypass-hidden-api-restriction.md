@@ -18,4 +18,4 @@ Android library for bypassing **hidden non-SDK API restrictions** on Android 9 t
 
 ## Related
 
-[[canyie-pine]] · [[stoic]] · [[frida]] · [[adbi]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[android-hidden-api-bypass]] · [[canyie-pine]] · [[stoic]] · [[frida]] · [[adbi]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]

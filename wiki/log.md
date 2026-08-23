@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LSPosed/AndroidHiddenApiBypass`: entity [[android-hidden-api-bypass]] (LSPosed; pure-Java library bypassing Android non-SDK interface restrictions; HiddenApiBypass + LSPass variants; invoke restricted methods/constructors, read hidden fields, manage exemption prefixes; no native code; modern Android dependency packaging; advanced instrumentation / compatibility / security research); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[bypass-hidden-api-restriction]], [[xposed-module-kit]], [[dexbuilder]], [[canyie-pine]], and [[stoic]].
+
 - **2026-08-23** — ingest `description:LSPosed/DexBuilder`: entity [[dexbuilder]] (LSPosed; C++ library for programmatic DEX bytecode construction; AOSP-derived dexmaker alternative; LSPosed runtime integration; Android framework researchers/tooling developers); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dex2jar]], [[dexkit-android]], [[zygisk-dump-dex]], [[xposed-module-kit]], and [[dirty-sepolicy]].
 
 - **2026-08-23** — ingest `description:LSPosed/DirtySepolicy`: entity [[dirty-sepolicy]] (LSPosed; Android app; App Zygote AIDL service bind → runtime permissive SELinux rule injection without root/kernel mods; SELinux access checks detect userspace su solutions; Detection:Android root); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[advanced-root-checker]], [[root-app-detector]], [[android-super-inject]], [[magisk]], and [[kernelsu]].
