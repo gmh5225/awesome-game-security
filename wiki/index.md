@@ -1959,7 +1959,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mojoelf](entities/mojoelf.md) — in-process ELF loader from non-filesystem sources (alternative to `dlopen()`; Cheat / Android memory loading)
 - [Mount System Partition (brew02)](entities/mount-system-partition.md) — user-mode Windows API ESP mount (C++; partition enumeration; UEFI security / firmware RE)
 - [MouHidInputHook (changeofpace)](entities/mouhid-input-hook.md) — MouHid CONNECT_DATA ClassService hook; filter/modify/inject mouse packets without filter devices (PatchGuard-safe; input simulation / AC research)
-- [mouse-input-injection](entities/mouse-input-injection.md) — C++ NtUserInjectMouseInput syscall PoC (custom input structures + movement/click interface; alternative to SendInput; automation / input emulation / cheat-adjacent research; Zpes)
+- [mouse-input-injection](entities/mouse-input-injection.md) — NtUserInjectMouseInput syscall utilities (Zpes C++ PoC + M3351AN header-only `mouse_event`-like wrappers; alternative to SendInput; automation / input-path research)
 - [MouseDetection](entities/mousedetection.md) — Windows C++ PoC detecting software vs hardware mouse movement; behavior monitoring + simulated motion APIs for testing (Oliver-1-1; input validation research; README [Mouse])
 - [MouseClassServiceCallbackMeme (ekknod)](entities/mouseclassservicecallbackmeme.md) — MouClass ServiceCallback meme variant (C; cheat / triggerbot & aimbot)
 - [MouseClassServiceCallbackTrick (ekknod)](entities/mouseclassservicecallbacktrick.md) — MouClass ServiceCallback kernel mouse injection (C; cheat / triggerbot & aimbot)

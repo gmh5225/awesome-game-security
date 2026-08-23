@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:M3351AN/mouse_input_injection`: entity [[mouse-input-injection]] (M3351AN; header-only Windows mouse input injection; undocumented **NtUserInjectMouseInput** syscall; `mouse_event`-like API for easy migration; minimal C/C++ single-header integration; input automation / low-level input-path research; README [NtUserInjectMouseInput]); updated entity alongside Zpes PoC; cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ntuserinjectmouseinput-syscall]], [[kernel-mouse]], [[hardware-input-injection]], and [[mouseclassservicecallbacktrick]].
+
 - **2026-08-23** — ingest `description:MBA-research/mba-wasm`: entity [[mba-wasm]] (MBA-research; Rust WebAssembly MBA expression toolkit; browser UI with MathJax; obfuscation, linear congruence solving, permutation polynomial generation, expression simplification; obfuscation researchers + interactive deobfuscation; README Mixed Boolean-Arithmetic in Rust for WebAssembly); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[mba]], [[mbased]], [[cobra]], [[promba]], [[qsynthesis]], [[mutaben]], and [[mba-obfuscator]].
 
 - **2026-08-23** — ingest `description:MEhrn00/Ghidra_COFFParser`: entity [[ghidra-coffparser]] (MEhrn00; Python Ghidra analysis script; comprehensive COFF parsing beyond default loader; headers/symbols/string tables/relocations with type info; applies relocations and xrefs; COFF object RE; cheat / COFF); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ida2obj]], [[ghidra-scripts]], and [[pagalaxylab-ghidra-scripts]].
