@@ -1218,6 +1218,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-manager](entities/ghidra-manager.md) — cross-platform Python CLI Ghidra toolchain manager (release-pinned install, SHA-256 verify, curated extensions incl. GhidraMCP, project launch, MCP bridge, binary compare, rollback; alexbevi)
 - [ghidra-headless-mcp](entities/ghidra-headless-mcp.md) — headless Ghidra MCP server (40+ RE tools; fake backend + CLI; Cursor/Claude agents)
 - [ghidra-mcp](entities/ghidra-mcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; 200+ AI-assisted RE tools; GUI/headless; BSim; HTTP/stdio; Docker; bethington)
+- [ghidramcp](entities/ghidramcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; decompile, symbol/method enum, automated renaming; LaurieWired; MCP for Ghidra)
 - [ghidra-nativeaot](entities/ghidra-nativeaot.md) — Ghidra .NET Native AOT analyzer/UI plugin (type hierarchy, frozen objects, vtable redirections, ReadyToRun metadata recovery, metadata browser + rename refactor; .NET 8+; Washi1337)
 - [GptHidra](entities/gpthidra.md) — Ghidra ChatGPT plugin (selected-function explanation to console; cheat / Ghidra Plugins)
 - [ghidra-orbis](entities/ghidra-orbis.md) — Ghidra PS4 Orbis extension (loaders, analyzers, syscall/NID data; Java/Gradle; astrelsky)
