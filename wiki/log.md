@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LostOxygen/gnn_deobfuscation`: entity [[gnn-deobfuscation]] (LostOxygen; Python GNN MBA deobfuscation; training/testing pipelines; Loki/MBABlast/MBAObfuscator datasets by variable count and operation depth; deobfuscation researchers + ML simplification; Cheat Mixed boolean-arithmetic); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[mba]], [[mbased]], [[cobra]], [[promba]], [[qsynthesis]], [[mba-wasm]], [[mba-obfuscator]], and [[mutaben]].
+
 - **2026-08-23** — ingest `description:LowTension/android_kernel_xiaomi_sm8475`: entity [[android-kernel-xiaomi-sm8475]] (LowTension; Redmi K60 / POCO F5 Pro mondrian SM8475 Snapdragon 8+ Gen 1 GKI Android kernel source; GKI ABI, Qualcomm Waipio platform, device configs; Pixel Experience Plus; custom kernel builds; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[device-xiaomi-mondrian]], [[android-kernel-xiaomi-sweet]], [[xiaomi-kernel-opensource]], and [[kernel-devicetree]].
 
 - **2026-08-23** — ingest `description:LoxTus/dwm-overlay`: entity [[dwm-overlay]] (LoxTus; DLL-based DWM overlay PoC; C++; MinHook + DirectX 11 + ImGui; pattern scan dwmcore present routine; D3D11 swap-chain UI; graphics hook / desktop-level rendering interception research; README `[DWM]`); merged with existing Yukin02 [[dwm-overlay]] entity; cited on [[overviews/graphics-api]] and [[concepts/present-hook]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[dwm-dwmdraw]].
