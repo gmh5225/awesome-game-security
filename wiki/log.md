@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LeoChen-CoreMind/elf-got-patcher`: entity [[elf-got-patcher]] (LeoChen-CoreMind; ARM64 ELF static GOT hook patcher; code-cave shellcode injection, `.init_array` RELA hijack, config-driven ASLR-safe patching; redirect shared-library calls in ARM/ARM64 Android native binaries; cheat / Android RE); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[plthook]], [[pyasm-patch]], [[rel-fuscate]], [[and64-inline-hook]], [[dobby]], and [[adbi]].
+
 - **2026-08-23** — ingest `description:LeroyTechnologies/ProjectM`: entity [[projectm]] (LeroyTechnologies; UE5 tactical FPS/RTS prototype "On All Fronts"; C++ + Unreal plugins; Mass Entity ECS for tens-of-thousands combined AI/player battles; AI soldier control, command workflows, large-map architecture; high-scale simulation patterns for multiplayer security/anti-abuse design; UE5 FPS Game); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[warriorb]], [[ue5-multiplayer-project]], [[flowgraph]], and [[unreal-object-model]].
 
 - **2026-08-23** — ingest `description:Letomaniy/Speed-Hack`: entity [[speed-hack]] (Letomaniy; Windows C++ Visual Studio injectable DLL; Cheat Engine–style Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat development practice + AC time-manipulation research); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[speedhack]], [[cheat-engine]], and [[detours]].
