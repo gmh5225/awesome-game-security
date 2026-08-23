@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/amruth-sn__kong.md
   - wiki/sources/descriptions/ThatLing__limba.md
   - wiki/sources/descriptions/SynthesisLab__MBA.md
-updated: 2026-08-20
+  - wiki/sources/descriptions/MBA-research__mba-wasm.md
+updated: 2026-08-23
 confidence: high
 ---
 
@@ -33,6 +34,7 @@ confidence: high
 3. **Backward slicing + oracle lookup** — slice MBA regions, query msynth-style tables ([[obfuscation-analysis]]).
 4. **SMT/bitvector solvers** — prove equivalence or find simplifying substitutions ([[stp]], Z3 backends).
 5. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md); compile-time control-flow obfuscation that MBA-encodes jump targets with per-build randomized rewrite rules via [[limba]] (C++20; Clang/clang-cl; ThatLing) (source: wiki/sources/descriptions/ThatLing__limba.md). VM-based protectors such as [[covirt]] embed MBA transforms inside stack-VM obfuscation passes for protected regions (source: wiki/sources/descriptions/dmaivel__covirt.md).
+6. **Interactive web tooling** — browser-based Rust/WASM MBA obfuscation, linear congruence solving, permutation polynomial generation, and expression simplification via [[mba-wasm]] (MathJax UI; MBA-research) (source: wiki/sources/descriptions/MBA-research__mba-wasm.md).
 
 ## Detection context
 
@@ -40,4 +42,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[mbased]] · [[mba]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[mbased]] · [[mba]] · [[mba-wasm]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

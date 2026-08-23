@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MBA-research/mba-wasm`: entity [[mba-wasm]] (MBA-research; Rust WebAssembly MBA expression toolkit; browser UI with MathJax; obfuscation, linear congruence solving, permutation polynomial generation, expression simplification; obfuscation researchers + interactive deobfuscation; README Mixed Boolean-Arithmetic in Rust for WebAssembly); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[mba]], [[mbased]], [[cobra]], [[promba]], [[qsynthesis]], [[mutaben]], and [[mba-obfuscator]].
+
 - **2026-08-23** — ingest `description:MEhrn00/Ghidra_COFFParser`: entity [[ghidra-coffparser]] (MEhrn00; Python Ghidra analysis script; comprehensive COFF parsing beyond default loader; headers/symbols/string tables/relocations with type info; applies relocations and xrefs; COFF object RE; cheat / COFF); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ida2obj]], [[ghidra-scripts]], and [[pagalaxylab-ghidra-scripts]].
 
 - **2026-08-23** — ingest `description:MFatihMAR/Game-Networking-Resources`: entity [[game-networking-resources]] (MFatihMAR; curated Markdown knowledge base; articles/talks/libraries/tools; latency compensation, rollback, prediction, replication; Game Network / guide); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[lightyear]], [[game-networking-sockets]], [[kcp]], [[learn-awesome-gamedev]], and [[bevy-personal-test]].
