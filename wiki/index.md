@@ -1998,6 +1998,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NoCheatPlus](entities/nocheatplus.md) — open-source Bukkit/Spigot Minecraft AC plugin (Java Maven multi-module; movement/combat/block/inventory/chat/packet checks; cancel/log/setback; reflection internals + client-mod MOTD; broad version coverage; Anti Cheat / game:minecraft)
 - [NoCheatZ-3](entities/nocheatz-3.md) — Source Engine serverside anti-cheat plugin (CS:S, CS:GO, CS:P, TF2; C/C++; plugin + SDK generation)
 - [NoEye](entities/noeye.md) — BattlEye bypass toolkit (C++ service/runtime + C# setup; service install, process interaction, runtime control; historical BE bypass reference; Schnocker)
+- [NoHello](entities/nohello.md) — Zygisk module hiding root and Zygisk artifacts (blacklist/whitelist + mount-rule unmount; Magisk/KernelSU/APatch; root-detection resistance research; MhmRdd; cheat / Zygisk module to hide root)
 - [NoMercy](entities/no-mercy.md) — MIT OSS AC "gold standard" reference (mq1n fork; Open Source Anti Cheat System)
 - [NoMoreBugCheck](entities/nomore-bugcheck.md) — NSG650; runtime kernel driver; KeBugCheckEx code patch + restore logic suppresses standard BSOD path (kernel-hooking / crash-safety bypass experiment)
 - [NoMoreBugCheck Reloaded](entities/nomore-bugcheck-reloaded.md) — NSG650; UEFI no-BSOD PoC (EFI loader patches kernel during boot; export lookup + pattern search + memory overwrite; moves bugcheck interception from runtime driver to firmware stage; early boot patching research)

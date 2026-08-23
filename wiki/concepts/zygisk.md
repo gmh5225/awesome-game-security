@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/zensu357__ksurusda.md
   - wiki/sources/descriptions/PerformanC__ReZygisk.md
   - wiki/sources/descriptions/PShocker__Zygisk-MagiskHide.md
-updated: 2026-08-22
+  - wiki/sources/descriptions/MhmRdd__NoHello.md
+updated: 2026-08-23
 confidence: medium
 ---
 
@@ -29,6 +30,7 @@ Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList /
 ## Root-hide modules
 
 - **[[zygisk-magiskhide]]** — Zygisk Magisk module recreating MagiskHide-style concealment; native code hides Magisk mounts and patches sensitive system properties root checks probe. (source: wiki/sources/descriptions/PShocker__Zygisk-MagiskHide.md)
+- **[[nohello]]** — Zygisk module hiding root and Zygisk artifacts; blacklist/whitelist modes and mount-rule unmount logic; Magisk/KernelSU/APatch; root-detection resistance research. (source: wiki/sources/descriptions/MhmRdd__NoHello.md)
 
 ## Standalone runtimes
 
@@ -45,4 +47,4 @@ Pair with [[research-rigor]] when generalizing injection timing across OEM/Andro
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-magiskhide]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

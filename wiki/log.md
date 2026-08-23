@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MhmRdd/NoHello`: entity [[nohello]] (MhmRdd; Zygisk module hiding root and Zygisk artifacts; native code + Android build tooling; blacklist/whitelist modes + mount-rule unmount logic; Magisk/KernelSU/APatch; mobile root-detection resistance research; cheat / Zygisk module to hide root); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[magisk]], [[kernelsu]], [[apatch]], [[rezygisk]], and [[zygisk-magiskhide]].
+
 - **2026-08-23** — ingest `description:MiChongs/Frida-RS`: entity [[frida-rs]] (MiChongs; KernelSU module wrapping official frida-server; Rust supervisor `frida-ksud` + Material 3 WebUI; multi-ABI; loopback default + token for non-local TCP; Android security research / authorized app debugging); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[kernelsu]], [[ksu-rust-frida]], and [[florida-zygisk]].
 
 - **2026-08-23** — ingest `description:MiCode/Xiaomi_Kernel_OpenSource`: entity [[xiaomi-kernel-opensource]] (MiCode; index-style repo cataloging Xiaomi/Redmi kernel source branches by device and Android version; Markdown tables→branch tags/base refs; vendor kernel discovery for driver dev, auditing, platform debugging; cheat / xiaomi kernel); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-devicetree]], [[android-kernel-xiaomi-pipa]], [[android-kernel-xiaomi-sweet]], and [[xiaomi-hyperos-bootloader-bypass]].
