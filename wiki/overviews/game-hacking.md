@@ -1440,6 +1440,7 @@ sources:
   - wiki/sources/descriptions/Steesha__CodeCleaner.md
   - wiki/sources/descriptions/SteamDatabase__Protobufs.md
   - wiki/sources/descriptions/VenTaz__Themidie.md
+  - wiki/sources/descriptions/VollRagm__ghostdebug.md
   - wiki/sources/descriptions/VeroFess__PalWorld-Server-Unoffical-Fix.md
   - wiki/sources/descriptions/Visual1mpact__Paradox_AntiCheat.md
   - wiki/sources/descriptions/ViddeBoiiii__CSGO-Ormbunke-x86.md
@@ -1725,6 +1726,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Obfuscated-region pinpointing via [[obfuscation-detection]] (CFF / insn-complexity / n-gram BB outliers; batch scripts) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_detection.md)
 - Obfuscated-code analysis and simplification via [[obfuscation-analysis]] (MBA backward-slice + msynth oracle; opaque-predicate dataflow; Z3-verified BNIL deobfuscation) sits in the same Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/mrphrazer__obfuscation_analysis.md)
 - Windows x86/x64 debugging via [[x64dbg]] (feature-rich debugger + plugin system) is a core Cheat Debugging lane tool for offensive RE. (source: wiki/sources/descriptions/x64dbg__x64dbg.md)
+- VEH-based stealth debugger [[ghostdebug]] (VollRagm; native injected DLL + C# CLI; named-pipe JSON control; INT3 breakpoints and single-step without Win32 Debug API; Iced live disasm; TestTarget anti-debug probes; protected-process RE; cheat / debugging) complements [[x64dbg]] when attach-time debugger detection is the blocker. (source: wiki/sources/descriptions/VollRagm__ghostdebug.md)
 - AI reverse engineering assistant for x64dbg via [[x64dbg-rippy]] (WebView2 in-debugger chat; LLM tool-use for memory/disasm/breakpoints/single-step; Anthropic/OpenAI APIs; Cheat x64dbg Plugins / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-rippy.md)
 - Python x64dbg Automate client via [[x64dbg-automate-pyclient]] (ZeroMQ/msgpack RPC; breakpoints/memory/registers/disasm/session/GUI; optional MCP server; scriptable repeatable debug sessions; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md)
 - Dedicated x64dbg MCP server via [[x64dbg-mcp]] (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/bromoket__x64dbg_mcp.md)

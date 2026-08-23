@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:VollRagm/ghostdebug`: entity [[ghostdebug]] (VollRagm; Windows x64 VEH stealth debugger; injected native DLL + C# CLI over named pipe; INT3 breakpoints, single-step, register ops without Win32 Debug API; Iced live disasm + JSON control; TestTarget anti-debug validation; protected-process RE; cheat / debugging); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[titanhide]], [[anti-debugging]], and [[makin]].
+
 - **2026-08-23** — ingest `description:Midi12/QueryWorkingSetExample`: entity [[query-working-set-example]] (Midi12; C working-set anti-tamper demo; `QueryWorkingSet` shared-page metadata in non-writable `.text` reveals debugger breakpoints/protection changes; normal vs tampered screenshots; lightweight memory integrity for RE/defenders); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[faultline]], [[count-hook]], [[integrity-experiments]], and [[memory-guard]].
 
 - **2026-08-23** — ingest `description:Midi12/ow_unpack`: entity [[ow-unpack]] (Midi12; reuploaded C++ protected Overwatch binary unpack/decrypt codebase; multiple decryption/helper modules + assembly-assisted low-level unpacking; practical RE tool for binary analysis and protected-game unpack study; cheat / game:overwatch); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[overwatch-iat-fixer]], [[decryption-dumper]], [[league-unpacker]], [[unpacker]], and [[x64dbg]].

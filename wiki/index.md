@@ -1253,6 +1253,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genshin-remove-banner](entities/genshin-remove-banner.md) — C++ Genshin Impact in-game banner removal (cheat / game:genshin impact; gmh5225)
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
 - [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
+- [ghostdebug](entities/ghostdebug.md) — Windows x64 VEH stealth debugger (native DLL + .NET CLI; named-pipe JSON; INT3/single-step without Win32 Debug API; Iced disasm; TestTarget anti-debug validation; VollRagm; cheat / debugging)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)
 - [Generic Game Detour API Hook](entities/generic-game-detour-api-hook.md) — Modular Microsoft Detours AC-bypass framework (~130 API hooks / 16 modules; dinput8.dll proxy; x86/x64)
 - [gina_public](entities/gina-public.md) — IRP Null hijack kernel driver (C/C++; cheat / driver communication)
