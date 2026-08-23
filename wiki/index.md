@@ -3124,6 +3124,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Winlator](entities/winlator.md) — Android app: Windows x86/x64 via Box86/Box64 + Wine + PRoot (Mesa Turnip/VirGL; touch desktop; Windows Emulator)
 - [WNF Driver Meme](entities/wnf-driver-meme.md) — WNF state-name covert KM↔UM driver + client; PID memory R/W; ObRegisterCallbacks handle stripping (zensenzay; game-security / AC / RE)
 - [WinAFL](entities/winafl.md) — Windows AFL coverage-guided fuzzer (DynamoRIO/Intel PT; persistent mode; closed-source hook; corpus minimize + crash triage; Anti Cheat > Fuzzer)
+- [Win32.Nebula](entities/win32-nebula.md) — Lima-X PoC packed/protected module loader framework (C++; loader library + builder; SDK APIs, dynamic service manager; patch/encrypt/pack; software protection / loader architecture / anti-analysis research; PE X64)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
 - [win32k-file-collection](entities/win32k-file-collection.md) — win32k.sys and related GUI-subsystem binaries across Windows builds (patch diff / vuln research)
 - [win32k-file-collection2](entities/win32k-file-collection2.md) — versioned win32k.sys binary corpus (Win10/11; offline diff / syscall & input-path RE)

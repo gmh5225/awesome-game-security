@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Lima-X/Win32.Nebula`: entity [[win32-nebula]] (Lima-X; C++ PoC packed/protected module loader framework; lightweight loader library + builder patches/encrypts/packs binaries; SDK-style APIs, dynamic service manager; software protection / loader architecture / anti-analysis research in malware and anti-cheat ecosystems; PE X64); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[polyengine]], [[atom-pe-packer]], [[hm-pe-packer]], [[pe-packer]], [[wizard-loader]], [[windows-process-injection]], and [[rs-ldr]].
+
 - **2026-08-23** — ingest `description:Nai64/Nai64Patches`: entity [[nai64-patches]] (Nai64; Kotlin/Gradle Morphe universal patch catalog ~100 patches; ad removal, license/Play Integrity bypass, root/emulator hide, SSL pinning bypass, telemetry block, device/manifest spoof; APK rebuild inside Morphe; mobile game RE / modding; cheat / Morphe patch source); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[apktool]], [[apk-sh]], [[auto-android-app-modding-tool]], [[frida]], [[awesome-android-root]], [[spoofing-collection]], and [[keyattestation]].
 
 - **2026-08-23** — ingest `readme:categories`: Cheat ~2743 (+1; Nai64/Nai64Patches Morphe APK patch catalog — root/integrity bypass, license checks, Play Integrity spoof, SSL pinning; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
