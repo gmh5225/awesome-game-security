@@ -947,6 +947,7 @@ sources:
   - wiki/sources/descriptions/bootmgfw__Valorant-External-Cheat.md
   - wiki/sources/descriptions/bootmgfw__Rust-External-Cheat.md
   - wiki/sources/descriptions/LeoChen-CoreMind__elf-got-patcher.md
+  - wiki/sources/descriptions/L4ys__IDA-WPP-Remover.md
   - wiki/sources/descriptions/LGLTeam__Android-Mod-Menu.md
   - wiki/sources/descriptions/Leksa667__YOLOv8-Overlay-CS2.md
   - wiki/sources/descriptions/Lavender-exe__Shellcrypt.md
@@ -1913,6 +1914,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Hex-Rays P-Code display for the current function via [[idapcode]] (Python IDA plugin; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/binarly-io__idapcode.md)
 - Intel AVX→Hex-Rays microcode lifting via [[microavx]] (IDA Pro plugin; `m_ext` opcode visitor; decompiles AVX-heavy functions that otherwise show opaque ext nodes; companion scraper for coverage gaps; cheat / IDA Plugins / AVX Lifter) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gaasedelen__microavx.md)
 - Hex-Rays decompiler convenience utilities via [[happyida]] (IDAPython; Swift-style parameter labels, SEH try/catch reconstruction, vtable navigation, Rust string prettification; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gmh5225__HappyIDA.md)
+- Hex-Rays WPP trace-call cleanup via [[ida-wpp-remover]] (L4ys; Python; microcode pass strips `WPP_SF*` instrumentation noise from Windows PE pseudocode; toggle from decompiled view; clearer malware/game client RE; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/L4ys__IDA-WPP-Remover.md)
 - Nonstandard calling-convention retagging and tuple-like multi-return struct generation for Swift/Golang/fastcall via [[swift-ida]] (Python IDA plugin; context-menu actions; modern language runtime/ABI RE; ViRb3; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / language-ABI lane beside [[happyida]], [[golang-loader-assist]], and [[goresym]]. (source: wiki/sources/descriptions/ViRb3__swift-ida.md)
 - Curated essential IDA Pro plugin pack via [[idaplugins]] (deobfuscation / binary diffing / custom crypto) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/ssmugabi__IDAPlugins.md)
 - Willi Ballenthin IDA Pro script/plugin/util collection via [[idawilli]] (Python IDAPython; function analysis, string decryption, struct annotation, xref navigation, workflow automation; cheat / IDA Plugins) sits in the same Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__idawilli.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:L4ys/IDA-WPP-Remover`: entity [[ida-wpp-remover]] (L4ys; Python IDA Pro plugin; Hex-Rays microcode optimization pass removes WPP_SF* trace-call noise from Windows PE pseudocode; toggle from decompiled view; malware/game binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hex-rays-deob]], [[genmc]], [[happyida]], and [[ntrays]].
+
 - **2026-08-23** — ingest `description:LAC-Japan/IDA_Plugin_AntiDebugSeeker`: entity [[ida-plugin-antidebugseeker]] (LAC-Japan; Python/PyQt5 IDA Pro plugin; configurable rule files for Windows API + keyword anti-debug patterns; match highlighting, address annotation, quick navigation, in-IDE rule editor; malware/AC anti-debug triage; Extract anti-debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[ida-security-scanner]], [[anti-debugging]], [[makin]], [[al-khaser]], [[scyllahide-for-ida9.0rc]], and [[list-of-ida-plugins]].
 
 - **2026-08-23** — ingest `description:LGLTeam/Android-Mod-Menu`: entity [[android-mod-menu]] (LGLTeam; Java + native C/C++ floating mod-menu framework; IL2CPP + native Android games; KittyMemory, MSHook, And64InlineHook, string obfuscation; ARMv7/ARM64; Base64 embedded assets; runtime toggle / hook prototyping; cheat / Floating mod menu for Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory]], [[and64-inline-hook]], [[il2cpp]], [[android-modmenu-semijni]], [[android-mod-menu-kotlin]], and [[android-mod-menu-imgui]].
