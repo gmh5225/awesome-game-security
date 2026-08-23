@@ -202,6 +202,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AutoRE](entities/auto-re.md) — Python IDA Pro plugin: auto-rename dummy functions from API imports/jump targets; behavioral tagging (networking, injection, crypto, file I/O) with tag view (a1ext; cheat / IDA Plugins)
 - [AutoRename](entities/autorename.md) — Python IDA plugin: auto rename symbol (crifan; cheat / IDA Plugins)
 - [auto-simulated-universe](entities/auto-simulated-universe.md) — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; cheat / game:honkai star rail [Script]; gmh5225)
+- [autohotkey-l](entities/autohotkey-l.md) — AutoHotkey Windows macro/hotkey scripting platform (Lexikos; C/C++ interpreter + script runtime; experimental DLL embed; task automation + game-adjacent macro experimentation / script-behavior analysis)
 - [android-kernel-driver-template](entities/android-kernel-driver-template.md) — GKI AArch64 Android kernel driver template (product/OEM kernel; cheat / Android kernel driver development; gmh5225)
 - [android-drivesignity](entities/android-drivesignity.md) — Android kernel ARMv8.3 driver signature verification bypass (unofficial/modified LKM load; cheat / Android kernel driver development; gmh5225)
 - [android-kernel-cve-pocs](entities/android-kernel-cve-pocs.md) — Android kernel CVE PoC collection (C; ioctl/race/vendor-driver triggers; reproduce bugs, validate mitigations; ScottyBauer; cheat / List)

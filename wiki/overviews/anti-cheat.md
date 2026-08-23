@@ -316,6 +316,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__cheat-attack-thread-slemu.md
   - wiki/sources/descriptions/gmh5225__Hidden-Thread-Finder.md
   - wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md
+  - wiki/sources/descriptions/Lexikos__AutoHotkey_L.md
   - wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md
   - wiki/sources/descriptions/wesmar__FileRecoveryTool.md
   - wiki/sources/descriptions/wesjian__GenericGameDetourAPIHook.md
@@ -833,6 +834,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[goesp]] — cross-platform external CS:GO ESP (danielkrupinski; Dear ImGui overlay; memory-read boxes/names/health/weapons via game render path; Windows and Linux) for studying external overlay ESP and overlay-based detection against VAC (source: wiki/sources/descriptions/danielkrupinski__GOESP.md)
 - External overlay window-hijack PoCs such as [[window-hijack-overlay]] (SurgeGotTappedAgain; reuse existing overlay HWNDs while preserving native flags; SetWindowsHookEx input; DX11/ImGui; studies visibility vs AC overlay-detection tradeoffs) complement overlay-monitoring and HWND-enumeration defenses. (source: wiki/sources/descriptions/SurgeGotTappedAgain__Window-Hijack.md)
 - [[topmost-detection]] — minimal Win32 HWND enumeration utility (Oliver-1-1; C++; visible-window scan + `WS_EX_TOPMOST` flagging; companion topmost test console via `SetWindowPos`; basic overlay-detection prototyping for AC development) (source: wiki/sources/descriptions/Oliver-1-1__TOPMOST-Detection.md)
+- [[autohotkey-l]] — upstream AutoHotkey interpreter platform (Lexikos; Windows macro/hotkey scripting; input automation; game-adjacent macro experimentation and defensive analysis of script-driven behavior; underpins script-based samples like [[csgo-external-ahk-hack]]) (source: wiki/sources/descriptions/Lexikos__AutoHotkey_L.md)
 - [[csgo-external-ahk-hack]] — AutoHotkey external CS:GO sample (gmh5225; script RPM; triggerbot / bhop / basic ESP; no compiled cheat binary) for studying script-based out-of-process cheat surface and detection characteristics against VAC (source: wiki/sources/descriptions/gmh5225__csgo_external_ahk_hack.md)
 - [[nv-v2]] — CS:GO sound ESP sample (ekknod; C/C++; hooking; audio-derived positional awareness without visual overlay; cheat / game:csgo [Sound ESP]) for studying non-visual ESP cheat surface against VAC (source: wiki/sources/descriptions/ekknod__nv_v2.md)
 - [[csgo-backtrack-patch]] — CS:GO backtrack patch sample (C/C++; hooking / memory analysis) for studying lag-compensation / tick-history cheat surface against VAC (source: wiki/sources/descriptions/sneakyevilSK__CSGO_BacktrackPatch.md)
