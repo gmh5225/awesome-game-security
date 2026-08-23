@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MFatihMAR/Game-Networking-Resources`: entity [[game-networking-resources]] (MFatihMAR; curated Markdown knowledge base; articles/talks/libraries/tools; latency compensation, rollback, prediction, replication; Game Network / guide); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[lightyear]], [[game-networking-sockets]], [[kcp]], [[learn-awesome-gamedev]], and [[bevy-personal-test]].
+
 - **2026-08-23** — ingest `description:MGreif/PCILeech_DMA_Proxy`: entity [[pcileech-dma-proxy]] (MGreif; DLL proxy + loader; MinHook on process/module/thread/memory Win32 APIs; redirects standard memory calls to remote PCILeech/MemProcFS DMA; bundled DMA memory library with input/registry access; API-transparent remote memory + DMA-proxied game interaction research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[dmalibrary]], [[dma-invoker]], and [[cheat-engine-dma-plugin]].
 
 - **2026-08-23** — ingest `description:MISP/bsimvis`: entity [[bsimvis]] (MISP; Python + JS; Ghidra BSim behavioral-similarity platform; Kvrocks/Redis job queues + optional Milvus vector search; REST API + web UI; score-filtered similarity search, function diffing, HDBSCAN family clustering, call-graph navigation, analyst notes, optional local LLM summaries; scalable cross-binary corpus beyond Ghidra built-in BSim DB; cheat / Ghidra BSim-based binary similarity); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidriff]], [[ghidra]], [[ghidra-mcp]], [[diaphora]], and [[ida-multi-mcp]].
