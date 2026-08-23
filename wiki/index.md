@@ -3193,6 +3193,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zam64-zemina](entities/zam64-zemina.md) — BYOVD via Zemana zam64.sys (IOCTL process kill + memory access)
 - [ZeroHVCI](entities/zero-hvci.md) — HVCI bypass PoC for unsigned kernel code (gmh5225; policy edge cases / vulnerable signed drivers; VBS research)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
+- [ZhangBing-Injector](entities/zhangbing-injector.md) — M3351AN BYOVD DLL injector (C++ usermode + bundled WHQL-signed vulnerable `.sys` drivers; driver memory ops + protected-process injection; credits kdmapper; kernel-assisted injection research)
 - [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
 - [zig-mcp-server](entities/zig-mcp-server.md) — high-performance memory-efficient MCP protocol implementation in Zig (Game Develop / MCP server)
 - [ZombiesVsPlants](entities/zombies-vs-plants.md) — SDL2 Plants vs. Zombies clone (lane tower defense; plant placement / projectiles / waves / sun; Game Develop / source)
