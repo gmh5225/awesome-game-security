@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MisterY52/apex_dma_kvm_pub`: entity [[apex-dma-kvm-pub]] (MisterY52; external Apex Legends cheat framework; C++ gameplay + Rust memflow + C FFI; QEMU/KVM virtualization connectors; ESP/aim/prediction; Linux build scripts; DMA/VM-assisted game hacking + AC detection-surface research; cheat / game:apex legends [KVM/DMA]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[memflow-kvm]], [[ez-apex-dma-aimbot]], [[apex-dma-cheat-updated]], [[cs2-kvm-dma]], and [[escape-from-tuxkov]].
+
 - **2026-08-23** — ingest `description:Miziziziz/Retro3DGraphicsCollection`: entity [[retro-3d-graphics-collection]] (Miziziziz; PS1-style CC0 retro 3D asset index; README-linked models/textures/shader resources by theme; nature/contemporary/fantasy/UI; indie prototyping; Game Assets / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[3d-asset-factory]], [[awesome-unity]], [[3d-game-shaders-for-beginners]], and [[modly]].
 
 - **2026-08-23** — ingest `description:MlgmXyysd/KernelSU_Debug`: entity [[kernelsu-debug]] (MlgmXyysd; KernelSU fork; relaxed manager checks, permissive SELinux options, init scripts; kernel C + Android app/build assets; profile control; Android security research / system debugging; cheat / KernelSU modified for debugging); cited on [[overviews/mobile-security]]; cross-linked [[kernelsu]], [[apex-su]], [[xiaomi-hyperos-bootloader-bypass]], [[rezygisk]], and [[ksu-rust-frida]].
