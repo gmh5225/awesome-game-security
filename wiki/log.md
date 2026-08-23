@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kc57/iHide`: entity [[ihide]] (Kc57; iOS per-app jailbreak-hiding tweak; MobileSubstrate/ObjC hooks; Settings-panel enable/disable; common jailbreak-detection bypass; mobile app/game security testing; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[shadow]], [[free-rasp-ios]], [[dopamine]], [[opainject]], and [[ios-mod-menu-template-for-theos]].
+
 - **2026-08-23** — ingest `description:Ke4ton/hardware_bypass`: entity [[hardware-bypass]] (Ke4ton; DLL-based bypass for game-side GPU hardware check; C++ Visual Studio; inject shortly after launch to patch runtime validation; narrow build-and-inject workflow; client integrity / anti-cheat hardware-gating RE; README `[GPU check bypass]`); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[nvidia-gpu-spoof]], [[nvidiaapi]], [[windows-dll-injector]], and [[injectors]].
 
 - **2026-08-23** — ingest `description:KeServiceDescriptorTable/cormem.sys-vulnerable-driver`: entity [[cormem-sys-vulnerable-driver]] (KeServiceDescriptorTable; **`cormem.sys`** vulnerable kernel driver binary; memory R/W primitives for kernel-level access; BYOVD attack research; kernel security researchers and anti-cheat analysts studying vulnerable-driver exploitation and detection; README `[cormem.sys]`); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[vulnerable-drivers]], [[loldrivers]], [[ms-vulnerable-driver-list]], and [[drivers-and-shit]].
