@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kwansy98/ApiBreakpoint`: entity [[api-breakpoint]] (Kwansy98; C++ x64dbg GUI plugin; visual API breakpoint configure/manage workflow; x86/x64; Windows API runtime tracing; malware/RE/game-security analysts; Cheat x64dbg Plugins / Api Breakpoint); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[slothbp]], [[x64dbg-call-finder]], and [[xfindout]].
+
 - **2026-08-23** — ingest `description:Kwansy98/x64dbgCallFinder`: entity [[x64dbg-call-finder]] (Kwansy98; C++ x64dbg plugin; scans user functions with conditional breakpoints + call counters; filter by call count after in-app actions; UI/gameplay handler discovery; bilingual docs; Cheat x64dbg Plugins / Call Finder); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[xfindout]], [[clawsearch]], and [[x64dbg-trace-reader]].
 
 - **2026-08-23** — ingest `description:KyleBing/retro-game-console-icons`: entity [[retro-game-console-icons]] (KyleBing; multi-size PNG retro console icons; TrimUI/Miyoo themes; editor tooling + emulation content pipeline; Game Assets / modding); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[retro-3d-graphics-collection]], [[sprite-sheet-creator]], [[image-cockpit-for-codex-workflows]], [[bizhawk]], and [[feather-gb]].

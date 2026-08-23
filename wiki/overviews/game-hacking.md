@@ -791,6 +791,7 @@ sources:
   - wiki/sources/descriptions/shalzuth__PalWorldAntiCheat.md
   - wiki/sources/descriptions/loqix__Fortnite.md
   - wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md
+  - wiki/sources/descriptions/Kwansy98__ApiBreakpoint.md
   - wiki/sources/descriptions/Kwansy98__x64dbgCallFinder.md
   - wiki/sources/descriptions/KyleBing__retro-game-console-icons.md
   - wiki/sources/descriptions/kyojig__csgo_kns.md
@@ -1821,6 +1822,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IDA Pro EVM bytecode via [[ida-evm]] (Crytic processor module; PUSH/POP/SLOAD/SSTORE/CALL/JUMPI decode; operand formatting + xrefs; Python plugin; smart-contract bytecode RE; blockchain auditor lane) sits in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/crytic__ida-evm.md)
 - Process auto-attach via [[auto-attach]] (x64dbg plugin; `AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; target process name + optional delay; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/legendabrn__AutoAttach.md)
 - Collaborative breakpoint management via [[slothbp]] (x64dbg plugin; C/C++) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__SlothBP.md)
+- GUI API breakpoint setup via [[api-breakpoint]] (x64dbg plugin; C++; visual configure/manage workflow for Windows API tracing; x86/x64; Kwansy98; Cheat x64dbg Plugins / Api Breakpoint) sits in the same lane. (source: wiki/sources/descriptions/Kwansy98__ApiBreakpoint.md)
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)
 - OOP analysis via [[classroom]] (define member functions/variables while debugging; persisted class docs) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__Classroom.md)
 - Memory write/access tracing via [[xfindout]] (find what writes to or accesses an address; Cheat Engine–style watch inside [[x64dbg]]) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/morsisko__xFindOut.md)
