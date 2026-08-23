@@ -880,6 +880,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dsh-cheatengine](entities/dsh-cheatengine.md) — DeepSeek Harness plugin: TCP bridge to Cheat Engine; on-demand `ce_*` scan/debug/script tools; session audit/snapshot; gated writes (TindalosKorone; Game Develop / MCP)
 - [ds2os](entities/ds2os.md) — Deprecated Dark Souls 2 online-service placeholder; README-only migration pointer to [[ds3os]] (Game Network / game:dark souls; TLeonardUK)
 - [ds3os](entities/ds3os.md) — Dark Souls 2/3 online-service server emulator (Protobuf protocol; Docker; matchmaking/co-op/invasions/messages; Game Network / game:dark souls; TLeonardUK)
+- [DumpIt for Linux](entities/dumpit-linux.md) — MagnetForensics Linux live memory acquisition (Rust; `/proc/kcore` → ELF core; optional tar.zst; gdb/crash/drgn; no custom LKM; IR / Linux memory forensics)
 - [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)
 - [DVRT](entities/dvrt.md) — dynamic value resolution table for runtime address resolution (gmh5225; maintains/updates memory offsets on module load/relocation; cheat [Offset])
 - [Dynsec](entities/dynsec.md) — dynamic security analysis framework; instrumentation/monitoring for anti-tamper, anti-debug, integrity checks (gmh5225)

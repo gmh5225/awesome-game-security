@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MagnetForensics/dumpit-linux`: entity [[dumpit-linux]] (MagnetForensics; Rust Linux live memory acquisition; `/proc/kcore` → ELF core; optional tar.zst packaging; gdb/crash/drgn compatible; no custom kernel module; IR / Linux memory forensics; README DumpIt for linux); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[dumpit-mirror]], [[memnixfs]], [[volatility3]], [[tracee]], and [[rootkit]].
+
 - **2026-08-23** — ingest `description:MahmoudZohdy/APICallProxy`: entity [[apicallproxy]] (MahmoudZohdy; C/C++ Windows API call obfuscation; kernel-driver IOCTL proxy for file/process/memory/registry/network; sample APC-injection/driver-load/socket clients; API monitoring evasion + behavioral-analysis hardening research; README Windows API Call Obfuscation); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[iat-obfuscation]], [[call-obfuscator]], [[km-um-communication]], [[ioctlpus]], and [[process-injection-techniques]].
 
 - **2026-08-23** — ingest `description:MahmoudZohdy/IAT-Obfuscation`: entity [[iat-obfuscation]] (MahmoudZohdy; C++ Windows PE import obfuscation; same-DLL IAT entry swap + TLS pre-main restore; static API-sequence obfuscation; import-hiding educational research + malware-analysis workflow study; README IAT Obfuscation); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[call-obfuscator]], [[alcatraz]], [[process-injection-techniques]], [[overwatch-iat-fixer]], and [[wow-iat-fix]].

@@ -18,4 +18,4 @@ Mirror of Comae's **DumpIt** Windows live memory acquisition utility. Captures a
 
 ## Related
 
-[[volatility]] · [[volatility3]] · [[ephemera]] · [[vmem-decrypt]] · [[kvcforensic]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
+[[dumpit-linux]] · [[volatility]] · [[volatility3]] · [[ephemera]] · [[vmem-decrypt]] · [[kvcforensic]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
