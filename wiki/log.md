@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MatheuZSecurity/ksentinel`: entity [[ksentinel]] (MatheuZSecurity; Linux LKM kernel integrity monitor; function prologue hashing, syscall table validation, LSTAR checks; configurable intervals + extra symbol targets + anti-unload unlock key; rootkit hook-tampering detection research; README Kernel integrity monitor for detecting syscall hooking); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[modreveal]], [[rootkit-detection-ebpf-time-trace]], [[kernel-hook-framework]], [[tracee]], and [[venom]].
+
 - **2026-08-23** — ingest `description:Mattiwatti/EfiGuard`: entity [[efiguard]] (Mattiwatti; portable x64 UEFI bootkit; C/C++ + EDK2; patches Windows boot chain to disable PatchGuard + DSE at startup; runtime disassembly; SetVariable-based boot-time patch modes; EfiDSEFix helper; wide Win x64 version support; boot integrity / kernel protection / AC driver-load bypass research; README [EFI]); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[bootlicker]], [[driver-efi-bootkit]], [[efi-memory]], and [[upgdsed]].
 
 - **2026-08-23** — ingest `description:cxOrz/AnyWhere`: entity [[anywhere]] (cxOrz; Java Android mock-location app; OpenStreetMap picker + overlay joystick + location history; bundled LSPosed/Xposed module hides mock-provider flags; LBS debugging + location-spoof / mock-GPS AC research); cited on [[overviews/mobile-security]], [[overviews/game-hacking]], and [[concepts/mobile-anti-cheat]]; cross-linked [[locusmimic]] and [[xposed-module-kit]].

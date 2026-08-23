@@ -1605,6 +1605,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KernelSU-Pixel4XL](entities/kernelsu-pixel4xl.md) — Pixel 4 XL (coral) msm-floral kernel + KernelSU (su / SELinux / syscall hook; cheat / Android Kernel Source)
 - [kernel-common](entities/kernel-common.md) — Official AOSP GKI common kernel mirror (vendor-shared upstream; Android patches, Bazel, Rust; attack-surface / defense study; aosp-mirror)
 - [KSU-Rust-Frida](entities/ksu-rust-frida.md) — Rust KernelSU/Magisk module: Zygote-fork Frida gadget inject, attach/spawn/watch-so, HTTP RPC, stealth tiers (cheat / Frida)
+- [ksentinel](entities/ksentinel.md) — Linux LKM kernel integrity monitor (MatheuZSecurity; syscall table + LSTAR + prologue-hash checks; configurable intervals + anti-unload; rootkit hook-tampering detection research)
 - [ksurusda](entities/ksurusda.md) — Android Zygisk module: Rusda anti-detection Frida gadget on KernelSU/Magisk/APatch; WebUI, listen/offline modes, library remapping (cheat / Frida)
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [KExecDD](entities/kexecdd.md) — KSecDD.sys IOCTL PoC (LSASS inject; arbitrary kernel exec; DSE via ci.dll!g_CiOptions; gmh5225)
