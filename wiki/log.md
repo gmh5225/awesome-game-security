@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kwansy98/x64dbgCallFinder`: entity [[x64dbg-call-finder]] (Kwansy98; C++ x64dbg plugin; scans user functions with conditional breakpoints + call counters; filter by call count after in-app actions; UI/gameplay handler discovery; bilingual docs; Cheat x64dbg Plugins / Call Finder); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[xfindout]], [[clawsearch]], and [[x64dbg-trace-reader]].
+
 - **2026-08-23** — ingest `description:KyleBing/retro-game-console-icons`: entity [[retro-game-console-icons]] (KyleBing; multi-size PNG retro console icons; TrimUI/Miyoo themes; editor tooling + emulation content pipeline; Game Assets / modding); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[retro-3d-graphics-collection]], [[sprite-sheet-creator]], [[image-cockpit-for-codex-workflows]], [[bizhawk]], and [[feather-gb]].
 
 - **2026-08-23** — ingest `description:L-Spiro/L.-Spiro-Engine-2022`: entity [[l-spiro-engine-2022]] (L-Spiro; cross-platform modular C++ game engine; graphics, physics, sound, networking, math, memory, threading, model handling; Windows VS + macOS Xcode; DXT texture tools; stdlib abstraction; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[cpp-game-engine-book]], [[game-engine-from-scratch]], [[hazel]], and [[mhsx]].

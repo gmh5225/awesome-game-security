@@ -791,6 +791,7 @@ sources:
   - wiki/sources/descriptions/shalzuth__PalWorldAntiCheat.md
   - wiki/sources/descriptions/loqix__Fortnite.md
   - wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md
+  - wiki/sources/descriptions/Kwansy98__x64dbgCallFinder.md
   - wiki/sources/descriptions/KyleBing__retro-game-console-icons.md
   - wiki/sources/descriptions/kyojig__csgo_kns.md
   - wiki/sources/descriptions/lstrsrt__csgo_internal_base.md
@@ -1823,6 +1824,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Managed .NET 6 / C# x64dbg plugin authoring via [[dotx64dbg]] (live edit/debug; custom commands/expressions) sits in the same Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__DotX64Dbg.md)
 - OOP analysis via [[classroom]] (define member functions/variables while debugging; persisted class docs) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/x64dbg__Classroom.md)
 - Memory write/access tracing via [[xfindout]] (find what writes to or accesses an address; Cheat Engine–style watch inside [[x64dbg]]) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/morsisko__xFindOut.md)
+- Runtime call-frequency profiling via [[x64dbg-call-finder]] (x64dbg plugin; C++; scans user functions, conditional breakpoints + counters; filter by call count after in-app actions; UI/gameplay handler discovery; Kwansy98; Cheat x64dbg Plugins / Call Finder) sits in the same lane. (source: wiki/sources/descriptions/Kwansy98__x64dbgCallFinder.md)
 - Memory value scanning via [[clawsearch]] (Cheat Engine–style first/next scan inside [[x64dbg]]; int/float types; exact/changed/increased filters; fast-scan alignment; jump to dump) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/codecat__ClawSearch.md)
 - Offline `.trace64` execution-trace analysis via [[x64dbg-trace-reader]] (Capstone disasm; register/memory state reconstruction; regex filter over x64dbg trace exports) sits in the Cheat Debugging / Trace Reader lane. (source: wiki/sources/descriptions/mibho__x64dbgTraceReader.md)
 - Windows type parsing via [[manytypes]] (x64dbg typeparsing plugin; structure/type discovery for memory RE) sits in the Cheat x64dbg Plugins lane. (source: wiki/sources/descriptions/notpidgey__ManyTypes.md)

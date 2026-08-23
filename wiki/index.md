@@ -3188,6 +3188,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x64-EXE-Packer](entities/x64-exe-packer.md) — PE X64 binary packer (Anti Cheat → Binary Packer)
 - [x64-virtualizer-rs](entities/x64-virtualizer-rs.md) — Rust toy x86-64 stack-VM obfuscator (iced-x86 lift; JIT vmenter/vmexit; VM internals study; AC Obfuscation Engine `[VM]`; cursey)
 - [x64dbg](entities/x64dbg.md) — Windows x86/x64 debugger (plugins; Cheat Debugging)
+- [x64dbg Call Finder](entities/x64dbg-call-finder.md) — x64dbg plugin: runtime call-frequency profiling (conditional breakpoints + counters; filter by call count; UI/gameplay handler discovery; C++; Kwansy98; Cheat x64dbg Plugins / Call Finder)
 - [x64dbg-automate-pyclient](entities/x64dbg-automate-pyclient.md) — Python x64dbg Automate RPC client (ZeroMQ/msgpack; breakpoints/memory/registers/disasm/session/GUI; optional MCP server; scriptable debug sessions)
 - [x64dbg-mcp](entities/x64dbg-mcp.md) — MCP server for x64dbg (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf)
 - [x64dbg Playtime](entities/x64dbg-playtime.md) — x64dbg plugin: embedded Lua scripting (memory/registers/breakpoints/labels/modules/assembler; autorun scripts; ZehMatt; Lua script)
