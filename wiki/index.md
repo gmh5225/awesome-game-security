@@ -964,6 +964,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [edb-debugger](entities/edb-debugger.md) — Linux OllyDbg-style Qt debugger (ptrace; x86/x86-64; disasm/registers/memory map/breakpoints/plugins; eteran; For Linux)
 - [eDBG](entities/edbg.md) — eBPF-based lightweight Android ARM64 CLI debugger (GDB-like breakpoints/memory/registers/threads; file+offset breakpoints; anti-debug resistance; Go + C/eBPF; rooted mobile RE / game security; Sh11no)
 - [edbgserver](entities/edbgserver.md) — eBPF-powered debugger server for Android and Linux (Rust multi-crate; Arm64/x86_64; breakpoints/stepping/memory/registers/signals/library info; avoids ptrace; low-intrusion RE in monitored environments; Satar07)
+- [ebpf-dex-dumper](entities/ebpf-dex-dumper.md) — Android in-memory DEX dumper via eBPF probes (LLeavesG; Go; rooted ARM64; UID/package filter; method traces; ART dump + auto-repair; dynamically loaded bytecode recovery; cheat / DexDumper based eBPF on Android Platform)
 - [ELFpacker](entities/elfpacker.md) — ELF32 `.text` XOR packer + prepend decrypt stub (ELF header/PHDR/SHDR inject; Anti Cheat → Binary Packer `[ELF]`)
 - [ELFcrypt](entities/elfcrypt.md) — ELF `.text` RC4 encrypt + self-decrypt stub (`mprotect`; mmap/section headers; runtime unpack; Anti Cheat → Binary Packer `[ELF]` RC4)
 - [elfuck](entities/elfuck.md) — ELF packer/protector (NRV2E / password / anti-debug; Anti Cheat → Binary Packer)

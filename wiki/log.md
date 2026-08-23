@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LLeavesG/eBPFDexDumper`: entity [[ebpf-dex-dumper]] (LLeavesG; Go; Android in-memory DEX dumper via eBPF probes; rooted ARM64; UID/package filter; method execution traces; ART DEX dump + auto-repair; low-intrusion dynamically loaded bytecode recovery; cheat / DexDumper based eBPF on Android Platform); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[edbg]], [[stackplz]], [[ehook]], [[zygisk-dump-dex]], [[dexkit-android]], [[dexbuilder]], [[jadx]], and [[frida]].
+
 - **2026-08-23** — ingest `description:LSPosed/AndroidHiddenApiBypass`: entity [[android-hidden-api-bypass]] (LSPosed; pure-Java library bypassing Android non-SDK interface restrictions; HiddenApiBypass + LSPass variants; invoke restricted methods/constructors, read hidden fields, manage exemption prefixes; no native code; modern Android dependency packaging; advanced instrumentation / compatibility / security research); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[bypass-hidden-api-restriction]], [[xposed-module-kit]], [[dexbuilder]], [[canyie-pine]], and [[stoic]].
 
 - **2026-08-23** — ingest `description:LSPosed/DexBuilder`: entity [[dexbuilder]] (LSPosed; C++ library for programmatic DEX bytecode construction; AOSP-derived dexmaker alternative; LSPosed runtime integration; Android framework researchers/tooling developers); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dex2jar]], [[dexkit-android]], [[zygisk-dump-dex]], [[xposed-module-kit]], and [[dirty-sepolicy]].
