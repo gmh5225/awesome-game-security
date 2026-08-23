@@ -2082,6 +2082,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ntkernelwalkerlib](entities/ntkernelwalkerlib.md) — user-mode ntoskrnl symbol/struct offset + ROP gadget library (dbghelp + section scan)
 - [ntminhook](entities/ntminhook.md) — NTDLL-only MinHook fork (Native API; asset pipelines / modding / hooking; gmh5225)
 - [nt_unhooker](entities/nt-unhooker.md) — Rust NTDLL inline/IAT hook detect + restore (clean reference PE; CLI + library; Teach2Breach)
+- [ntqueueapcthreadex-ntdll-gadget-injection](entities/ntqueueapcthreadex-ntdll-gadget-injection.md) — C PoC; NtQueueApcThreadEx + random ntdll pop/ret gadgets for module-backed APC routine pointers; documents detection vectors (LloydLabs; stealth APC inject / AC·EDR telemetry evaluation)
 - [NtDOOM](entities/ntdoom.md) — NSG650; Windows kernel DOOM port (PureDOOM in driver context; win32k syscalls + thread context spoofing + kernel graphics/input; extreme NT GUI/syscall research demo; README Doom running in the NT kernel)
 - [ntoseye](entities/ntoseye.md) — Linux-host KVM/QEMU WinDbg-style Windows kernel debugger (GDB stub; PDB symbols; breakpoints; Kernel Debugger)
 - [ntoskrnl-file-collection](entities/ntoskrnl-file-collection.md) — multi-build ntoskrnl binary corpus (version diff / kernel RE reference)
