@@ -1895,6 +1895,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mba-wasm](entities/mba-wasm.md) — Rust WebAssembly MBA expression toolkit (browser UI; obfuscation, linear congruence solving, permutation polynomial generation, expression simplification; MathJax; MBA-research; Cheat Mixed boolean-arithmetic)
 - [MBA-Obfuscator](entities/mba-obfuscator.md) — non-linear MBA expressions (mba_obfuscator/ + samples/; Cheat Mixed boolean-arithmetic)
 - [mbased](entities/mbased.md) — practical MBA simplification (bliutech; Cheat Mixed boolean-arithmetic)
+- [mcdota](entities/mcdota.md) — Linux Dota 2 cheat/tinkering framework (LWSS; C++; runtime injection; Panorama UI, ESP, protobuf packet intercept/edit; standard/stealth/integrated load modes; cheat / game:dota2 [linux])
 - [mcp-gdb](entities/mcp-gdb.md) — GDB MCP server (breakpoints / memory / registers / step; AI debug)
 - [mcp-safety-scanner](entities/mcp-safety-scanner.md) — automated MCP safety auditing + remediation via agents (Game Develop / MCP security)
 - [mcp-server-idapro](entities/mcp-server-idapro.md) — MCP for IDA Pro (AI-assistant bridge to disassembler/debugger; Game Develop / MCP)
