@@ -3209,6 +3209,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Yumekage](entities/yumekage.md) — hidden/shadowed memory region PoC (C++; guarded-region + context-switch semantics; PTE Hook; anti-cheat bypass RE; Xyrem)
 - [Yuri](entities/yuri.md) — Minecraft 1.8.9 MCP Java hack client (Gradle; bundled Java 8 + full assets; Watchdog/Polar/Grim bypass modules; unleg1t; cheat / game:minecraft)
 - [yuzu-android](entities/yuzu-android.md) — yuzu Switch emulator Android port (ARM64 JIT; Vulkan/OpenGL; Nintendo Switch lane)
+- [yuzu-archive](entities/yuzu-archive.md) — yuzu DMCA/takedown placeholder archive (Logboy2000; documentation + DMCA notice record; no emulator source; Nintendo Switch enforcement reference)
 - [yourgamelib](entities/yourgamelib.md) — cross-platform C++11 OpenGL/OpenGL ES game framework (CMake; GLFW/GLM/ImGui/Lua/Box2D/Bullet/miniaudio; desktop/Android/web; Game Engine)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [zam64-zemina](entities/zam64-zemina.md) — BYOVD via Zemana zam64.sys (IOCTL process kill + memory access)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Logboy2000/yuzu-archive`: entity [[yuzu-archive]] (Logboy2000; placeholder archival repo for discontinued yuzu Switch emulator; README + DMCA notice record only—no source code; legal/ecosystem reference for Switch emulator enforcement timeline; Nintendo Switch lane); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[nuzu]], [[yuzu-android]], and [[opensw]].
+
 - **2026-08-23** — ingest `description:LongWayHomie/PolyEngine`: entity [[polyengine]] (LongWayHomie; polymorphic PE packer/crypter; junk code, instruction substitution, XTEA, RunPE process hollowing, stack spoofing, module stomping, Hell's Gate syscalls; CTF / Windows low-level security education; in-memory execution; Anti Cheat → Binary Packer); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[atom-pe-packer]], [[hm-pe-packer]], [[pe-packer]], [[windows-process-injection]], [[rs-ldr]], and [[polymorphic-engine]].
 
 - **2026-08-23** — ingest `description:Longno242/Encryptic-Roblox-Anti-Cheat`: entity [[encryptic-roblox-anti-cheat]] (Longno242; server-authoritative Luau anti-cheat for Roblox; ServerScriptService drop-in; modular movement/teleport/fly/noclip/humanoid/physics/godmode/fire-rate/remote/combat guards; strike-based BanManager with whitelist/decay; remote/gun/melee/tool hooks; Studio demo test panel; Roblox server-side cheat mitigation where native client AC is unavailable); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[shprotect-ac]], [[advanced-anticheat]], [[wontree-rblx-dumper]], [[roblox-cheats]], and [[lua-obfuscator-clyde-protection]].

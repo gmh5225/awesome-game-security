@@ -12,7 +12,7 @@ confidence: medium
 
 Android port of the yuzu Nintendo Switch emulator: ARM64 JIT recompilation, Vulkan/OpenGL rendering, and full Switch game compatibility on Android devices. Useful for console-emulator developers and mobile researchers studying Switch binary translation / GPU backends on ARM64 hosts in the README `Nintendo Switch` and `Android Emulator` crossover lanes. (source: wiki/sources/descriptions/gmh5225__yuzu-android.md)
 
-Adjacent to desktop yuzu forks such as [[nuzu]] and Switch tooling such as [[nstool]], but focused on on-device Android playback rather than PC hosts or format extraction.
+Adjacent to desktop yuzu forks such as [[nuzu]] and Switch tooling such as [[nstool]], but focused on on-device Android playback rather than PC hosts or format extraction. Historical takedown context for the upstream project is preserved in documentation-only [[yuzu-archive]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Adjacent to desktop yuzu forks such as [[nuzu]] and Switch tooling such as [[nst
 
 ## Related
 
-[[nuzu]] · [[nstool]] · [[se-tools]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]
+[[nuzu]] · [[yuzu-archive]] · [[nstool]] · [[se-tools]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/graphics-api]] · [[overviews/reverse-engineering]]
