@@ -20,4 +20,4 @@ Single-binary ARM64 engine with **attach**, **spawn**, and **watch-so** modes, l
 
 ## Related
 
-[[kernelsu]] · [[frida]] · [[magisk]] · [[zygisk-frida]] · [[rust-frida]] · [[mkpms]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[kernelsu]] · [[frida]] · [[frida-rs]] · [[magisk]] · [[zygisk-frida]] · [[rust-frida]] · [[mkpms]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
