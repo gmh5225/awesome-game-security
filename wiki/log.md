@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Misaka-Mikoto-Tech/MonoHook`: entity [[monohook]] (Misaka-Mikoto-Tech; C# runtime method hooking for Unity Mono/IL2CPP; in-memory JIT/AOT native patch; debug/stack-trace preservation; editor + device; Unity instrumentation / controlled function replacement; [mono hook]); cited on [[concepts/il2cpp]] and [[overviews/game-engine]]; cross-linked [[mono]], [[unityexplorer]], [[bepinex-il2cppbase]], and [[il2cpp-hook-scripts]].
+
 - **2026-08-23** — ingest `readme:categories`: Cheat ~2741 (+1; Game Assets ~11 retro console icons; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-engine]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts; light `index.md` section notes (no per-category pages).
 
 - **2026-08-23** — ingest `description:MisterY52/apex_dma_kvm_pub`: entity [[apex-dma-kvm-pub]] (MisterY52; external Apex Legends cheat framework; C++ gameplay + Rust memflow + C FFI; QEMU/KVM virtualization connectors; ESP/aim/prediction; Linux build scripts; DMA/VM-assisted game hacking + AC detection-surface research; cheat / game:apex legends [KVM/DMA]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[memflow-kvm]], [[ez-apex-dma-aimbot]], [[apex-dma-cheat-updated]], [[cs2-kvm-dma]], and [[escape-from-tuxkov]].

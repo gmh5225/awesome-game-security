@@ -1927,6 +1927,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MouseDetection](entities/mousedetection.md) — Windows C++ PoC detecting software vs hardware mouse movement; behavior monitoring + simulated motion APIs for testing (Oliver-1-1; input validation research; README [Mouse])
 - [MouseClassServiceCallbackMeme (ekknod)](entities/mouseclassservicecallbackmeme.md) — MouClass ServiceCallback meme variant (C; cheat / triggerbot & aimbot)
 - [MouseClassServiceCallbackTrick (ekknod)](entities/mouseclassservicecallbacktrick.md) — MouClass ServiceCallback kernel mouse injection (C; cheat / triggerbot & aimbot)
+- [MonoHook](entities/monohook.md) — Unity Mono/IL2CPP runtime C# method hooking (in-memory JIT/AOT patch; debug/stack-trace friendly; editor + device; instrumentation / RE / game security research; [mono hook])
 - [MonoGame](entities/monogame.md) — cross-platform .NET 2D/3D game framework (C# + native; graphics/audio/content/input; desktop/mobile; Game Engine / [.NET])
 - [Mono](entities/mono.md) — open-source .NET CLR (JIT/SGen/P/Invoke); Unity Mono scripting backend; game modding / RE target
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
