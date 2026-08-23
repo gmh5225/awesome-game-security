@@ -1589,6 +1589,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KDemu](entities/kdemu.md) — hybrid semi-emulated/semi-native Windows kernel driver emulator (PE load, exception handling, dump integration, anti-detection; rootkit/AC analysis; ShallowFeather)
 - [KernelPatch](entities/kernelpatch.md) — Linux kernel hook/modding framework (C/C++; APatch boot patch + KPM lane; Cheat / Hooking the Linux kernel)
 - [KernelSU](entities/kernelsu.md) — Android kernel su root (Kotlin/Rust; Cheat / Android root)
+- [KernelSU Debug](entities/kernelsu-debug.md) — KernelSU fork for debugging (MlgmXyysd; relaxed manager checks, permissive SELinux, init scripts; profile control; Android security research / system debugging; cheat / KernelSU modified for debugging)
 - [KernelSU-4.4](entities/kernelsu-4.4.md) — KernelSU backport for Linux kernel 4.4 (su / SELinux / APK sig verify; Google GCC 4.9; cheat / Android root)
 - [KernelSU-Pixel4XL](entities/kernelsu-pixel4xl.md) — Pixel 4 XL (coral) msm-floral kernel + KernelSU (su / SELinux / syscall hook; cheat / Android Kernel Source)
 - [kernel-common](entities/kernel-common.md) — Official AOSP GKI common kernel mirror (vendor-shared upstream; Android patches, Bazel, Rust; attack-surface / defense study; aosp-mirror)
