@@ -4,13 +4,14 @@ kind: entity
 topics: [dma-attack, game-hacking]
 sources:
   - wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/Metick__DMALibrary.md
+updated: 2026-08-23
 confidence: medium
 ---
 
 # DMAInvoker
 
-Windows **DMA RPM** research tool: external-style process memory reads via PCIe DMA rather than classic `ReadProcessMemory`. Built on **DMALibrary**; useful for game-security researchers and reverse engineers studying offensive cheat / RPM techniques that sit outside the gaming OS. (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md)
+Windows **DMA RPM** research tool: external-style process memory reads via PCIe DMA rather than classic `ReadProcessMemory`. Built on [[dmalibrary]]; useful for game-security researchers and reverse engineers studying offensive cheat / RPM techniques that sit outside the gaming OS. (source: wiki/sources/descriptions/un4ckn0wl3z__DMAInvoker.md)
 
 ## Links
 
@@ -18,4 +19,4 @@ Windows **DMA RPM** research tool: external-style process memory reads via PCIe 
 
 ## Related
 
-[[dma]] · [[dmalib]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[memmcp]] · [[umpmlib]] · [[ntmemory]]
+[[dma]] · [[dmalibrary]] · [[dmalib]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[memmcp]] · [[umpmlib]] · [[ntmemory]]

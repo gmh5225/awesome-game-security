@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Metick/DMALibrary`: entity [[dmalibrary]] (Metick; C++ DMA toolkit; signature scan, normal/scatter R/W, dumps, CR3 fix, PID/base lookup, import/export parsing; LeechCore/MemProcFS; advanced game-security research and cheat tooling; cheat / DMA library); cited on [[concepts/dma]] and [[overviews/dma-attack]]; cross-linked [[dmalib]], [[volk-dma]], [[dma-invoker]], [[pcileech]], and [[cheat-engine-dma-plugin]].
+
 - **2026-08-23** — ingest `description:MhmRdd/NoHello`: entity [[nohello]] (MhmRdd; Zygisk module hiding root and Zygisk artifacts; native code + Android build tooling; blacklist/whitelist modes + mount-rule unmount logic; Magisk/KernelSU/APatch; mobile root-detection resistance research; cheat / Zygisk module to hide root); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[magisk]], [[kernelsu]], [[apatch]], [[rezygisk]], and [[zygisk-magiskhide]].
 
 - **2026-08-23** — ingest `description:MiChongs/Frida-RS`: entity [[frida-rs]] (MiChongs; KernelSU module wrapping official frida-server; Rust supervisor `frida-ksud` + Material 3 WebUI; multi-ABI; loopback default + token for non-local TCP; Android security research / authorized app debugging); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[kernelsu]], [[ksu-rust-frida]], and [[florida-zygisk]].

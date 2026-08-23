@@ -24,4 +24,4 @@ Lightweight **C++ DMA helper library** (Spuckwaffel) for game memory access work
 
 ## Related
 
-[[dma]] · [[volk-dma]] · [[dma-invoker]] · [[pcileech]] · [[overviews/dma-attack]] · [[overviews/game-hacking]]
+[[dma]] · [[dmalibrary]] · [[volk-dma]] · [[dma-invoker]] · [[pcileech]] · [[overviews/dma-attack]] · [[overviews/game-hacking]]
