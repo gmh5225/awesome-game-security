@@ -2955,6 +2955,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnSign](entities/unsign.md) — CLI Authenticode signature removal from PE/COFF (EXE/DLL/SYS; C; 32/64-bit; re-signing / RE / malware analysis; SV-Foster)
 - [unlicense](entities/unlicense.md) — Python 3 Frida dynamic unpacker for Themida/WinLicense 2.x/3.x (OEP + IAT rebuild; native PE + .NET; Fix Themida)
 - [Unpacker](entities/unpacker.md) — modular Python PE/ELF packer detection + unpack pipeline (UPX, ASPack, Themida, VMProtect; Unicorn/Qiling emulation; Fix VMP / Unpacker)
+- [Unwinder](entities/unwinder.md) — Kudaes Rust call-stack spoofing crate (SilentMoonWalk-inspired; macros for functions + indirect syscalls; stable traces; chained spoof without linear stack growth; Rust + ASM; Cheat Spoof Stack / thread stack spoofing)
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
 - [unxorer](entities/unxorer.md) — IDA Pro/Home stack-string deobfuscator (C++; Unicorn emulation; branching-path exploration + stack scan; configurable start points; cheat / IDA Plugins; SamuelTulach)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
