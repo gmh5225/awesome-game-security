@@ -611,6 +611,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo-external-ahk-hack](entities/csgo-external-ahk-hack.md) — external CS:GO; AutoHotkey script RPM; triggerbot / bhop / basic ESP (cheat / game:csgo)
 - [csgo-external-cheat](entities/csgo-external-cheat.md) — external CS:GO; RPM/driver reads; ESP / aimbot / radar (C++; cheat / game:csgo)
 - [csgo-external-esp](entities/csgo-external-esp.md) — external CS:GO ESP (forceinline; MIT; cheat / game:csgo [External])
+- [CSGO-FindMDL](entities/csgo-findmdl.md) — internal CS:GO model changer (FindMDL hook; C++ DLL; interface wrappers, offsets, VMT utilities; injector workflow; Kruziikrel1; cheat / game:csgo [Model Changer])
 - [Csgo-Full-kernel](entities/csgo-full-kernel.md) — KMDF full-kernel CS:GO external; memory, draw, input, offsets in Ring0 without usermode cheat process (Sentient111; Running from kernelmode)
 - [csgo-dma-overlay](entities/csgo-dma-overlay.md) — CS:GO DMA + overlay sample (cheat / game:csgo [DMA])
 - [aqhax-csgo](entities/aqhax-csgo.md) — CS:GO internal cheat AqHax (interface capture, VMT hooks, netvar dump; ESP/aimbot/triggerbot/movement/skin changer; cheat / game:csgo)

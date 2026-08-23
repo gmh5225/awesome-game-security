@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kruziikrel1/CSGO-FindMDL`: entity [[csgo-findmdl]] (Kruziikrel1; internal CS:GO model changer; C++ DLL; FindMDL hook; interface wrappers, offset handling, VMT utilities; Visual Studio + injector workflow; customizable model replacement paths; cheat development + Source RE practice; cheat / game:csgo [Model Changer]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[csgo-internal-base]], [[csgo-cheat-base]], [[csgo-kns]], [[aqhax-csgo]], [[digital-sdk]], and [[source-netvars]].
+
 - **2026-08-23** — ingest `description:Kudaes/Dumpy`: entity [[dumpy]] (Kudaes; Rust LSASS memory dump via duplicated existing handles; native object/system information APIs; XOR-protected output + optional HTTP upload + decrypt mode; avoids direct OpenProcess telemetry; controlled offensive security / detection-evasion research; cheat / Reuse opened handles By LSASS); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[lsass-dump-that-lsass]], [[handle-ripper]], [[nobastian-v2]], [[shelter]], and [[puzzle]].
 
 - **2026-08-23** — ingest `description:Kudaes/Puzzle`: entity [[puzzle]] (Kudaes; Rust Windows minifilter-abuse PoCs; bind links, ID mapping, cloud sync providers, WIM hash manipulation; persistence/evasion; stealth/concealment; cheat / hide); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[memfilter-fn-driver]], [[hide-file]], [[vaultguard]], [[shelter]], and [[unwinder]].

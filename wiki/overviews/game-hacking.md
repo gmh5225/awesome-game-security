@@ -671,6 +671,7 @@ sources:
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
   - wiki/sources/descriptions/Kudaes__Unwinder.md
+  - wiki/sources/descriptions/Kruziikrel1__CSGO-FindMDL.md
   - wiki/sources/descriptions/klezVirus__SilentMoonwalk.md
   - wiki/sources/descriptions/klezVirus__BYOUD.md
   - wiki/sources/descriptions/mibho__x64dbgTraceReader.md
@@ -2129,6 +2130,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Internal CS:GO samples such as [[cstrike-hack]] (binkynz; C/C++; rendering / networking / animation focus; cheat / game:csgo) sit in the same cheat / game:csgo lane for studying Source 1 internal draw, net, and animation hook surfaces beside scaffold bases. (source: wiki/sources/descriptions/binkynz__cstrike-hack.md)
 - Internal CS:GO samples such as [[kakhack]] (cazzwastaken; reversed SDK + multiple graphics/game hooks; ImGui menu with FreeType fonts, JSON config, extensive visuals; x86 VS2022 DLL; Internal tag) sit in the same cheat / game:csgo lane for studying full-feature internal architecture beside scaffold bases. (source: wiki/sources/descriptions/cazzwastaken__kakhack.md)
 - Internal CS:GO samples such as [[csgo-kns]] (C++; VMT hooks + interface pointers; ESP, aimbot, bhop, skin changer; Internal tag) sit in the same cheat / game:csgo lane for studying Source engine SDK hook patterns. (source: wiki/sources/descriptions/kyojig__csgo_kns.md)
+- Internal CS:GO **model changer** samples such as [[csgo-findmdl]] (Kruziikrel1; C++ DLL; **FindMDL hook**; interface wrappers, offset handling, VMT utilities; Visual Studio + injector workflow; customizable model replacement paths; cheat development + Source RE practice; Model Changer tag) sit in the same cheat / game:csgo lane for studying cosmetic MDL-swap hooks beside skin-changer stacks. (source: wiki/sources/descriptions/Kruziikrel1__CSGO-FindMDL.md)
 - Internal CS:GO samples such as [[aqhax-csgo]] (AqHax; C++; interface capture + VMT hooks + netvar dump; ESP, aimbot, triggerbot, movement, skin changer) sit in the same cheat / game:csgo lane for studying typical internal cheat feature stacks. (source: wiki/sources/descriptions/krxdev-kaan__AqHax-CSGO.md)
 - Internal CS:GO samples such as [[autismware]] (gmh5225; C++; interface capture + VMT hooks; ESP, aimbot, backtrack, skin changer, ImGui menu; HvH tag) sit in the same cheat / game:csgo lane for studying standard Source 1 internal cheat feature implementation. (source: wiki/sources/descriptions/gmh5225__autismware.md)
 - Leaked commercial internal CS:GO samples such as [[csgo-aw-v5.1.13]] (gmh5225; AimWare v5.1.13; aimbot, visuals, movement, anti-aim, internal hooking framework; `[aw-v5.1.13]`) sit in the same cheat / game:csgo lane for studying production-grade Source 1 internal architecture beside open-source HvH stacks. (source: wiki/sources/descriptions/gmh5225__CSGO-aw-v5.1.13.md)
