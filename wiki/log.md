@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LooperSalty/cs2-tracker`: entity [[cs2-tracker]] (LooperSalty; Windows CS2 stats + live match tracker; Python FastAPI + SQLite + optional Qt/web UI; Steam Web API + Game State Integration only—no memory read/inject; ~30 explainable heuristic detectors; Bayesian 0–100 suspicion scoring; optional C++ live overlay; analyst/competitive-player transparency lane; game:cs2); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[osanticheat]], [[cs2ac]], [[cs2-calladmin]], [[aimbot-detection-prototype]], and [[alibi]].
+
 - **2026-08-23** — ingest `description:LordAbbot/Rust-External-Cheat`: entity [[lord-abbot-rust-external-cheat]] (LordAbbot; C++ Facepunch Rust external framework; custom kernel driver memory R/W + external DLL; ImGui/DirectX overlay; ESP/aimbot/recoil assistance; driver-assisted external + AC detection-surface research; cheat / game:rust [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[rust-external-cheat]], [[rust-external-1]], [[rust-external-source]], and [[overflow-rust]].
 
 - **2026-08-23** — ingest `description:LordNoteworthy/al-khaser`: entity [[al-khaser]] (LordNoteworthy; Windows C++ anti-analysis PoC test suite; anti-debug/anti-VM/anti-dump/anti-disassembly/timing CLI checks; VirtualBox/VMware/QEMU/Wine; sandbox/EDR/anti-malware visibility validation); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[compact-vm-detector]], [[anti-sandbox]], [[anticuckoo]], and [[vmaware]].
