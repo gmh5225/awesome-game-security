@@ -1948,6 +1948,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MemTools](entities/memtools.md) — Windows/Linux DMA testing toolkit (C++/C; driver/plugin development + memory analysis; gmh5225; cheat / DMA)
 - [MatScan](entities/matscan.md) — multi-threaded Facepunch Rust Unity material scanner (C++; IL2CPP + memory analysis; cheat / game:rust / game engine explorer:Unity; gmh5225)
 - [Metal-Game-Engine-Tutorial](entities/metal-game-engine-tutorial.md) — Apple Metal engine tutorial (open project; Game Engine / guide)
+- [L.-Spiro-Engine-2022](entities/l-spiro-engine-2022.md) — cross-platform modular C++ game engine (graphics, physics, sound, networking, math, memory, threading, models; Windows VS + macOS Xcode; DXT texture tools; stdlib abstraction; Game Engine / source)
 - [MhsX](entities/mhsx.md) — 64-bit MHS successor (C++ Windows; expression/regex/string scans, hex editor, disasm, PE inspect, speedhack, floating-point studio; live process memory analysis; cheat / memory searcher-debugger)
 - [melonJS](entities/melonjs.md) — modern lightweight HTML5 game engine (ES6 classes; esbuild bundling; Game Engine / HTML5)
 - [meowsense](entities/meowsense.md) — free multi-game cheat research sample (Overwatch 2 focus; offensive techniques; gmh5225)

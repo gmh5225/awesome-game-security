@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:L-Spiro/L.-Spiro-Engine-2022`: entity [[l-spiro-engine-2022]] (L-Spiro; cross-platform modular C++ game engine; graphics, physics, sound, networking, math, memory, threading, model handling; Windows VS + macOS Xcode; DXT texture tools; stdlib abstraction; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[cpp-game-engine-book]], [[game-engine-from-scratch]], [[hazel]], and [[mhsx]].
+
 - **2026-08-23** — ingest `description:L-Spiro/MhsX`: entity [[mhsx]] (L-Spiro; C++ Visual Studio; 64-bit from-scratch MHS successor; live attach, expression/regex/string scans, hex editor, x86/x64 disasm, PE inspection, speedhack, floating-point studio; cheat / memory searcher-debugger); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[squalr-sharp]], [[reclass-net]], and [[x64dbg]].
 
 - **2026-08-23** — ingest `description:L4ys/IDA-WPP-Remover`: entity [[ida-wpp-remover]] (L4ys; Python IDA Pro plugin; Hex-Rays microcode optimization pass removes WPP_SF* trace-call noise from Windows PE pseudocode; toggle from decompiled view; malware/game binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hex-rays-deob]], [[genmc]], [[happyida]], and [[ntrays]].
