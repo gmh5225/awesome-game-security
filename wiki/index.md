@@ -2212,6 +2212,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
 - [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)
 - [oxorany](entities/oxorany.md) — C/C++ compile-time any-constant encryption (platform-agnostic; AC Compile Time)
+- [oxide-dumper](entities/oxide-dumper.md) — Facepunch Rust automated offset pipeline (Python; SteamCMD + Il2CppDumper + GitHub Actions; C++ header export; cheat `[Auto Dump]` / game:rust; LabGuy94)
 - [oxide](entities/oxide.md) — Rust PE packer (`exe-rs`; compressed payload + TLS-callback unpack stub x86/x64 NASM; extensible obfuscation; Anti Cheat → Binary Packer `[Written by Rust]`)
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
 - [packer-tutorial](entities/packer-tutorial.md) — step-by-step PE packer-from-scratch tutorial (sections, imports, relocs, compression stub, OEP; Anti Cheat → Binary Packer `[Packer]`)
