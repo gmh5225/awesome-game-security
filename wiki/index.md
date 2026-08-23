@@ -2812,6 +2812,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TurboDiff](entities/turbodiff.md) — IDA Pro plugin: function-level binary diff between two binaries (cheat / IDA Plugins / diff)
 - [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
+- [Usugumo](entities/usugumo.md) — M3351AN kernel-mode PoC driver (C/C++ + MASM; DIRECT_IO IRP RPM/WPM, process/module lookup, mouse/keyboard injection; anti-capture + comm examples; non-production; kernel communication / game-security experimentation; Kernel-mode W/RPM/mouse_event for Windows)
 - [uWebSockets](entities/uwebsockets.md) — C++ WebSocket/HTTP server (TLS / pub-sub; Game Network)
 - [umium](entities/umium.md) — C++/CLI NT anti-tamper (undocumented syscalls + runtime mods; Anti Debugging)
 - [umap](entities/umap.md) — minimalist Windows kernel driver mapper (BYOVD physmem → pool alloc, sections, relocs, imports, entry from user mode; no registry/standard load traces; btbd; cheat / EFI Manual Map)
