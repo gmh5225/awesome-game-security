@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `readme:categories`: Game Network ~28 (+1; cBournhonesque/lightyear Rust Bevy server-authoritative netcode; other major section counts stable); refreshed [[overviews/overview]] and [[overviews/game-engine]] README-map counts; light `index.md` section notes (no per-category pages).
+
 - **2026-08-23** — ingest `description:MoZiHao/CS2_DMA_Extrnal`: entity [[cs2-dma-extrnal]] (MoZiHao; C++ external DMA toolset; LeechCore/VMMDLL; aimbot/triggerbot/radar/bhop/anti-flash; ImGui control UI; JSON offsets; zero target-OS software; cheat / game:cs2 [DMA External]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-dma-radar]], [[cs2-dma]], [[cs2-dma-cheat]], and [[pcileech]].
 
 - **2026-08-23** — ingest `description:MoZiHao/CS2_DMA_Radar`: updated [[cs2-dma-radar]] (MoZiHao fork; Java Spring Boot + WebSocket + Leaflet browser tactical map; VMM/LeechCore memory reads; multi-map assets/player markers; external situational-awareness / AC research; cheat / game:cs2 [DMA Radar]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-webradar]], [[cs2-dma]], [[pcileech]], and [[memprocfs-analyzer]].
