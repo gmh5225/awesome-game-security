@@ -1212,6 +1212,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [garble](entities/garble.md) — Go build-time obfuscator (wraps `cmd/go`; identifier/path hash rename, metadata strip, optional literals, tiny mode, experimental CFF; `garble reverse`; AC Obfuscation Engine)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [Glass](entities/glass.md) — Rust multi-arch binary analysis toolkit (ARM64/x86-64; ELF/Mach-O/DEX/PE; disasm/CFG/xrefs/patch; built-in MCP for mobile RE; `glass mcp`)
+- [GhostJoin](entities/ghostjoin.md) — pure Python headless Minecraft Java protocol client (stdlib Handshake→Login→Configuration→Play; offline-mode UUID, compression, Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat stress testing; KuryCat; cheat / game:minecraft)
 - [GhostLock App](entities/ghostlock-app.md) — Android one-tap root (CVE-2026-43499 pselect race; NDK + Java UI; Rust boot/OTA offset extractor; per-kernel JSON; KernelSU/ReSukiSU; cheat / Android root)
 - [gba-ghidra-loader](entities/gba-ghidra-loader.md) — Ghidra GBA ROM loader (memory/IO map + cartridge header; GameBoy)
 - [gb-studio](entities/gb-studio.md) — Game Boy adventure game creator (TypeScript/JS; driver/render/animation; Mac/Linux/Windows; GameBoy)

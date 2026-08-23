@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KuryCat/GhostJoin`: entity [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java protocol client; Handshake→Login→Configuration→Play without rendering; offline-mode UUID, compression, Client Information, brand plugin messages, Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat stress testing on offline-mode servers; cheat / game:minecraft); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[eafe]], [[minecraft-anticheat-list]], [[windfall-anticheat]], [[ycbr-anticheat]], and [[phantom-client]].
+
 - **2026-08-23** — ingest `description:Kwansy98/ApiBreakpoint`: entity [[api-breakpoint]] (Kwansy98; C++ x64dbg GUI plugin; visual API breakpoint configure/manage workflow; x86/x64; Windows API runtime tracing; malware/RE/game-security analysts; Cheat x64dbg Plugins / Api Breakpoint); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[slothbp]], [[x64dbg-call-finder]], and [[xfindout]].
 
 - **2026-08-23** — ingest `description:Kwansy98/x64dbgCallFinder`: entity [[x64dbg-call-finder]] (Kwansy98; C++ x64dbg plugin; scans user functions with conditional breakpoints + call counters; filter by call count after in-app actions; UI/gameplay handler discovery; bilingual docs; Cheat x64dbg Plugins / Call Finder); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[xfindout]], [[clawsearch]], and [[x64dbg-trace-reader]].

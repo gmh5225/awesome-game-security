@@ -333,6 +333,7 @@ sources:
   - wiki/sources/descriptions/mgeeky__ntfs-journal-viewer.md
   - wiki/sources/descriptions/MahmoudZohdy__IAT-Obfuscation.md
   - wiki/sources/descriptions/MahmoudZohdy__Process-Injection-Techniques.md
+  - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md
   - wiki/sources/descriptions/ManulMap__malstring.md
   - wiki/sources/descriptions/Metick__Anti-Debug.md
@@ -933,6 +934,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 
 **Minecraft catalog:** Cross-platform anticheat index [[minecraft-anticheat-list]] (Kotlin/JS + Gradle; hundreds of validated JSON entries; searchable platform/version/pricing/maintenance table; GitHub + Spigot API enrichment; Bukkit/Sponge/Fabric/Forge/Nukkit/PocketMine; Java + Bedrock) for server operators and AC researchers comparing server-side cheat detection. (source: wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md)
+
+**Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
 
 **Paper/Folia rule enforcement:** [[icuac]] (Lazyzouo; Java 21 Gradle; modular server-side command/inventory/combat integrity checks—blocked commands, tab-complete hiding, game-mode isolation, coordinate limits, death-drop control, banned materials, NBT/enchantment validation, stack/potion limits, end-crystal cooldowns; bilingual CN/EN; Folia-aware scheduling; SHA-256-verified updater; lightweight anti-abuse controls rather than full client-side AC; Anti Cheat / game:minecraft) for administrators needing transparent policy enforcement. (source: wiki/sources/descriptions/Lazyzouo__ICUAC.md)
 
