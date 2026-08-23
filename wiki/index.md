@@ -808,6 +808,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DumpVAC](entities/dumpvac.md) — PoC to disable VAC module execution and dump received modules with automatic decryption (RenardDev; Steam/module-loading hooks; C/C++; explore anticheat:vac)
 - [DumpPE](entities/dumpepe.md) — lightweight CLI PE dumper (OpenProcess/RPM; SizeOfImage mapped-image dump; x86/x64; packed/protected EXE post-unpack RE; d35ha)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
+- [dumpy](entities/dumpy.md) — Rust LSASS dump via duplicated existing handles (native object/system APIs; XOR output + optional HTTP upload; detection-evasion research; Kudaes; Elevating Handle By LSASS)
 - [dynre-x86](entities/dynre-x86.md) — early x86 dynamic-recompilation learning codebase (C++; Zydis decode/operand inspect; Makefile + Docker; instruction-decoding / binary-translation pipeline study)
 - [DummyDlls NARAKA 1.9.21](entities/dummy-dlls-naraka-1-9-21.md) — NARAKA: BLADEPOINT v1.9.21 IL2CPP dummy DLL stubs (C# class/method metadata; modding/cheat/RE; gmh5225; `[Dump]`)
 - [Dopamine](entities/dopamine.md) — iOS 15.0–15.4.1 rootless jailbreak (PAC/PPL/AMFI; Sileo/procursus `/var/jb`)

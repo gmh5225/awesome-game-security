@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kudaes/Dumpy`: entity [[dumpy]] (Kudaes; Rust LSASS memory dump via duplicated existing handles; native object/system information APIs; XOR-protected output + optional HTTP upload + decrypt mode; avoids direct OpenProcess telemetry; controlled offensive security / detection-evasion research; cheat / Reuse opened handles By LSASS); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[lsass-dump-that-lsass]], [[handle-ripper]], [[nobastian-v2]], [[shelter]], and [[puzzle]].
+
 - **2026-08-23** — ingest `description:Kudaes/Puzzle`: entity [[puzzle]] (Kudaes; Rust Windows minifilter-abuse PoCs; bind links, ID mapping, cloud sync providers, WIM hash manipulation; persistence/evasion; stealth/concealment; cheat / hide); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[memfilter-fn-driver]], [[hide-file]], [[vaultguard]], [[shelter]], and [[unwinder]].
 
 - **2026-08-23** — ingest `description:Kudaes/Shelter`: entity [[shelter]] (Kudaes; Rust ROP-based sleep obfuscation crate; AES-128 in-memory/whole-PE encrypt; strips execute permission while sleeping; ROP resume; stack spoofing + indirect syscalls; avoids timer/APC patterns; assembly stubs; red-team in-memory evasion research); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[unwinder]], [[deepsleep]], [[death-sleep]], and [[shellcode-fluctuation]].
