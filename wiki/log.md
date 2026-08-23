@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KiFilterFiberContext/BadlionLogger`: entity [[badlion-logger]] (KiFilterFiberContext; PoC kernel logger for black-box AC driver observation; IAT hooks during image-load callbacks; VMProtect-virtualized target module; C++; kernel callback instrumentation for anti-cheat research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[kernel-callbacks]], [[windows-software-policy]], [[kn-win32-api-monitor]], and [[nt-unhooker]].
+
 - **2026-08-23** — ingest `description:KiFilterFiberContext/windows-software-policy`: entity [[windows-software-policy]] (KiFilterFiberContext; Windows kernel licensing path via `SystemPolicyInformation` `NtQuerySystemInformation` class; user-mode licensing ↔ kernel policy driver; C source/headers + Python binary helper; Windows internals / software protection RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[anti-crack-system]], [[ntoskrnlwalker]], and [[winnt5-src-20201004]].
 
 - **2026-08-23** — ingest `description:KiruyaMomochi/wsa-kernel-build`: entity [[wsa-kernel-build]] (KiruyaMomochi; Docker-based WSA Linux kernel build environment; packaged x86_64/arm64 cross-compilation toolchain; reproducible local/CI builds; custom kernel testing/instrumentation; Cheat Build WSA Kernel with Docker); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[wsa-linux-kernel]], [[wsa-builds]], [[wsa-kernel-su]], [[magiskonwsalocal]], [[wsapatch]], and [[wsa-pacman]].

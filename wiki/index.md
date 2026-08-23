@@ -71,6 +71,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BadEye](entities/badeye.md) — BE handle-access assumption bypass (C++ memory analysis; EPROCESS→MmCopyVirtualMemory; gmh5225; cheat / explore anticheat system:be)
 - [bad-io-uring](entities/bad-io-uring.md) — Android io_uring kernel privesc PoC (Markakd; C/NDK; Pixel 6 root; per-device exploit variants; boot-image unpack + kallsyms helper; kernel security research; cheat / Root for Pixel 6)
 - [bad-query](entities/bad-query.md) — iOS 26–27 sandbox-escape PoC (Xcode; app/daemon/App Group/system-container path access; container isolation research; forcequitOS)
+- [badlion-logger](entities/badlion-logger.md) — KiFilterFiberContext PoC kernel logger for AC driver observation (IAT hooks on image-load callbacks; VMProtect-virtualized target; C++; driver-level monitoring research)
 - [BaiZe](entities/baize.md) — Magisk/KernelSU/APatch graded cache, log, APK-residue, and deep junk cleanup (Kotlin/C; risk tiers, quarantine)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
