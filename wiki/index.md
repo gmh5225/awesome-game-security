@@ -2627,6 +2627,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [shellcode-plain-sight](entities/shellcode-plain-sight.md) — C demo; hide shellcode in large randomized RW region at random offset; VirtualProtect to RX; post-exec zero cleanup (LloydLabs; memory evasion / AC detection testing)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
+- [Shelter](entities/shelter.md) — Kudaes Rust ROP-based sleep obfuscation (AES-128 in-memory/whole-PE encrypt; strips execute permission while sleeping; ROP resume; stack spoofing + indirect syscalls; avoids timer/APC patterns; assembly stubs; in-memory evasion research)
 - [ScyllaHide-For-IDA9.0RC](entities/scyllahide-for-ida9.0rc.md) — IDA 9.0 SDK ScyllaHide anti-anti-debug build (C/C++ hook libs, injector, debugger plugins; masks debugger artifacts; TKazer)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
 - [Scythe AntiCheat](entities/scythe-anticheat.md) — Minecraft Bedrock behavior-pack AC (JavaScript/JSON; Scripting API; combat/movement/packet-abuse/chat-spam/scaffold detection; moderation commands + player stats; Realms/worlds/servers; MrDiamond64; Anti Cheat / game:minecraft)

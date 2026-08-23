@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kudaes/Shelter`: entity [[shelter]] (Kudaes; Rust ROP-based sleep obfuscation crate; AES-128 in-memory/whole-PE encrypt; strips execute permission while sleeping; ROP resume; stack spoofing + indirect syscalls; avoids timer/APC patterns; assembly stubs; red-team in-memory evasion research); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[unwinder]], [[deepsleep]], [[death-sleep]], and [[shellcode-fluctuation]].
+
 - **2026-08-23** — ingest `description:Kudaes/Unwinder`: entity [[unwinder]] (Kudaes; Rust call-stack spoofing crate; SilentMoonWalk-inspired; macros for regular functions + indirect syscalls with stable spoofed traces; argument/return capture; chained spoof without linear stack growth; Rust + assembly helpers; Windows call-stack evasion research; Cheat Spoof Stack / thread stack spoofing); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[silent-moonwalk]], [[callstackspoofer-2]], [[thread-stack-spoofer]], and [[stack-spoofer-macro]].
 
 - **2026-08-23** — ingest `description:KuhakuPixel/AceTheGame`: entity [[ace-the-game]] (KuhakuPixel; open-source Android memory editing platform; C++ native scanning engine + Kotlin/Java client; process inspection, value edit/freeze workflows; modding/injection tooling; rooted and non-rooted paths; mobile game hacking + Android runtime manipulation research; cheat / Game Hacking Tools); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[cheap-engine]], [[android-mem-edit]], [[memdbg]], [[mypower]], [[kittymemory]], [[android-mod-menu]], and [[auto-android-app-modding-tool]].
