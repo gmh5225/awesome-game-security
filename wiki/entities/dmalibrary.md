@@ -25,4 +25,4 @@ confidence: medium
 
 ## Related
 
-[[dma]] · [[dmalib]] · [[volk-dma]] · [[dma-invoker]] · [[pcileech]] · [[cheat-engine-dma-plugin]] · [[overviews/dma-attack]] · [[overviews/game-hacking]]
+[[dma]] · [[dmalib]] · [[volk-dma]] · [[dma-invoker]] · [[pcileech]] · [[cheat-engine-dma-plugin]] · [[cheatengine-dma]] · [[overviews/dma-attack]] · [[overviews/game-hacking]]

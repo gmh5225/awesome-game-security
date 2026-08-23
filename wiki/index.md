@@ -748,6 +748,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Cheat Engine](entities/cheat-engine.md) — open-source memory scan/debug/disasm IDE (Lua, speedhack, code injection, cheat tables, trainer maker; user-mode + DBVM kernel driver; Delphi/Pascal + C)
 - [cheat-engine-undetectable](entities/cheat-engine-undetectable.md) — modified CE with user-mode evasion (direct syscalls, PE mutation), BYOVD kernel bridge (CR3 R/W, ObCallback bypass, handleless hide); AC research (NulledNah; Free Pascal/Lazarus)
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
+- [CheatEngine DMA](entities/cheatengine-dma.md) — Visual Studio C++ CE plugin (Metick; process attach, R/W, search/browse, module/thread enum, pointer scan; DMA hardware path; cheat / CheatEngine DMA)
 - [cheat-engine-ceserver-pcileech](entities/cheat-engine-ceserver-pcileech.md) — CE ceserver over PCILeech/LeechCore DMA; remote scan/edit invisible to target anti-cheat (gmh5225)
 - [cheat-it](entities/cheat-it.md) — UE multi-title internal cheat (Witch It + POLYGON; signature scan for UObject arrays / engine structures; configurable pattern matching; gmh5225)
 - [CheatUnityGames](entities/cheat-unity-games.md) — Android NDK Unity cheat template (C/C++; Il2CppResolver + Dobby hooks; VSCode build scripts; injection/native-layer study; SsageParuders; cheat / game engine explorer:Unity)
