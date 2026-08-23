@@ -1727,6 +1727,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernelmode Manual Mapping through IAT](entities/kernelmode-manual-mapping-through-iat.md) — kernel-mode IAT manual-map injector (process handle or KM driver; IAT Manual Map)
 - [KernelMon](entities/kernelmon.md) — virtualization-based ProcMon-style kernel monitor (VMX/EPT interception; file/registry/process/thread; usermode GUI; AC/malware research in VMs)
 - [KernelResearchKit](entities/kernel-research-kit.md) — Win11 25H2 boot-time DSE / SeCiCallbacks toolkit (manual map / IRP hijack / BYOVD)
+- [Korok](entities/korok.md) — lightweight cross-platform Go 2D game engine (component-based; animation, rendering, assets, audio, gameplay modules; package-oriented design; docs + samples; Game Engine / source [Golang])
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
 - [KoTR Modern Patch](entities/kotr-modern-patch.md) — King of the Road / Hard Truck 2 ASI patch (collision, camera, physics, AI traffic, trailer, UI; ModUtils + Ultimate ASI Loader; complements D2GI; DirectX Compatibility)
 - [Krunker Loader](entities/krunker-loader.md) — keyless Tampermonkey userscript stack for Krunker.io (aimbot, ESP, Quirify license-emulation loader)
