@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MemNixFS/MemNixFS`: entity [[memnixfs]] (MemNixFS; C++17 Linux memory forensics; mount AVML/LiME/raw/kdump dumps as filesystem; browse processes/files/sockets/modules/timelines; MemProcFS-style workflow on Linux images; Windows/Linux analysis hosts; AC / IS forensics / Linux memory forensics); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[memprocfs-analyzer]], [[volatility3]], [[volatility]], [[pcileech]], and [[tracee]].
+
 - **2026-08-23** — ingest `description:Merisho/tx-holdem`: entity [[tx-holdem]] (Merisho; JavaScript Texas Hold'em poker logic library; card/hand modeling, combination comparison, highest-hand selection, draw calculations; Node.js + browser; examples/tests; game developers + simulation authors; README `[Texas Holdem Poker made by JS]`); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[stockfish]], [[lc0]], [[2048-cpp]], and [[ue5-cardgame]].
 
 - **2026-08-23** — ingest `description:MeroZemory/ida-multi-mcp`: entity [[ida-multi-mcp]] (MeroZemory; Python MCP; IDA 8.5+; single endpoint routes parallel agent requests to many GUI/idalib sessions; auto-discovery; decompile/memory/patch/survey tools; BCSD cross-binary function similarity via MinHash, import/string anchors, CFG, optional jTrans embeddings; Claude Code/Cursor; malware/AC variant comparison); cited on [[overviews/reverse-engineering]] (MCP + binary diffing); cross-linked [[iida-mcp]], [[ida-pro-mcp]], [[tenrec]], [[binary-analysis-mcps]], [[mcrit-plugin]], and [[diaphora]].

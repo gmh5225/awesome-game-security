@@ -1875,6 +1875,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Polymorphic-Engine](entities/polymorphic-engine.md) — Nou4r C++ runtime polymorphic variable obfuscation (stack/heap transforms; primitives/strings; optional SIMD; LLVM/Clang-primary; experimental MSVC; software protection / anti-analysis; AC Encrypt Variable)
 - [PolarImGui](entities/polarimgui.md) — Android ImGui menu framework for Unity IL2CPP (C++ native + Android Studio; `.so` packaging for APK architectures; mobile mod-menu / cheat UI prototyping; Polarmods; Imgui On Android)
 - [Self-Remapping Code](entities/self-remapping-code.md) — Windows PoC: aliased virtual mappings of same physical pages; execute one view, integrity-check another (changeofpace; anti-patching / anti-debug)
+- [MemNixFS](entities/memnixfs.md) — Linux memory-dump filesystem (C++17; AVML/LiME/raw/kdump → `/proc`-like VFS; processes/files/sockets/modules/timelines; MemProcFS-style Linux forensics; Windows/Linux hosts; AC / IS forensics)
 - [MemProcFS-Analyzer](entities/memprocfs-analyzer.md) — PowerShell MemProcFS forensic framework (processes/network/registry/event logs/browser/malware; HTML reports; VirusTotal TI; IS forensics)
 - [Memory-Dump-UEFI](entities/memory-dump-uefi.md) — UEFI application for physical RAM dump from USB live-boot + UEFI shell (C; forensic acquisition / low-level security research; NoInitRD)
 - [memory-relocalloc](entities/memory-relocalloc.md) — PE `.reloc`-backed allocation hiding (Windows/Android; evade AC heap/VAS memory scanners; gmh5225)
