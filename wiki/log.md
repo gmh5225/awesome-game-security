@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MiCode/Xiaomi_Kernel_OpenSource`: entity [[xiaomi-kernel-opensource]] (MiCode; index-style repo cataloging Xiaomi/Redmi kernel source branches by device and Android version; Markdown tables→branch tags/base refs; vendor kernel discovery for driver dev, auditing, platform debugging; cheat / xiaomi kernel); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-devicetree]], [[android-kernel-xiaomi-pipa]], [[android-kernel-xiaomi-sweet]], and [[xiaomi-hyperos-bootloader-bypass]].
+
 - **2026-08-23** — ingest `description:MiCode/kernel_devicetree`: entity [[kernel-devicetree]] (MiCode; Xiaomi kernel device-tree branch index; README lookup table mapping branches→devices/platform tags/release baselines; kernel bring-up / board config / compatibility research; cheat / xiaomi device trees); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[device-xiaomi-mondrian]], [[android-kernel-xiaomi-pipa]], [[android-kernel-xiaomi-sweet]], and [[xiaomi-hyperos-bootloader-bypass]].
 
 - **2026-08-23** — ingest `description:VollRagm/ghostdebug`: entity [[ghostdebug]] (VollRagm; Windows x64 VEH stealth debugger; injected native DLL + C# CLI over named pipe; INT3 breakpoints, single-step, register ops without Win32 Debug API; Iced live disasm + JSON control; TestTarget anti-debug validation; protected-process RE; cheat / debugging); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[titanhide]], [[anti-debugging]], and [[makin]].
