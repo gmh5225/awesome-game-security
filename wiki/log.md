@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:L-Spiro/MhsX`: entity [[mhsx]] (L-Spiro; C++ Visual Studio; 64-bit from-scratch MHS successor; live attach, expression/regex/string scans, hex editor, x86/x64 disasm, PE inspection, speedhack, floating-point studio; cheat / memory searcher-debugger); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[squalr-sharp]], [[reclass-net]], and [[x64dbg]].
+
 - **2026-08-23** — ingest `description:L4ys/IDA-WPP-Remover`: entity [[ida-wpp-remover]] (L4ys; Python IDA Pro plugin; Hex-Rays microcode optimization pass removes WPP_SF* trace-call noise from Windows PE pseudocode; toggle from decompiled view; malware/game binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hex-rays-deob]], [[genmc]], [[happyida]], and [[ntrays]].
 
 - **2026-08-23** — ingest `description:LAC-Japan/IDA_Plugin_AntiDebugSeeker`: entity [[ida-plugin-antidebugseeker]] (LAC-Japan; Python/PyQt5 IDA Pro plugin; configurable rule files for Windows API + keyword anti-debug patterns; match highlighting, address annotation, quick navigation, in-IDE rule editor; malware/AC anti-debug triage; Extract anti-debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[ida-security-scanner]], [[anti-debugging]], [[makin]], [[al-khaser]], [[scyllahide-for-ida9.0rc]], and [[list-of-ida-plugins]].
