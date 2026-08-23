@@ -1382,6 +1382,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hLunaaa.github.io](entities/hlunaaa-github-io.md) — Driver Trace Cleaner blog (CI.dll + BigPool cache; CR3 abuse + physical R/W; cheat / hide)
 - [hidden_syscall_monitoring](entities/hidden-syscall-monitoring.md) — monitor hidden syscalls from COD anticheat (C/C++; hooking / memory)
 - [HIGU_ntcall](entities/higu-ntcall.md) — direct system calls (jnastarot; Some Tricks / Windows Ring3; Windows/Linux/mobile)
+- [hardware_bypass](entities/hardware-bypass.md) — game-side GPU hardware-check bypass DLL (Ke4ton; post-launch inject; client integrity / GPU check bypass)
 - [hook-buster](entities/hook-buster.md) — C/Python Detection:hook research (hook integrity / bust; Anti Cheat)
 - [hook-updater](entities/hook-updater.md) — Python auto-update Frida hook scripts (cheat / Frida)
 - [hh-lol-prophet](entities/hh-lol-prophet.md) — Go LoL modding sample (hh lol prophet; gmh5225; cheat / game:lol)
