@@ -1195,6 +1195,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Fortnite-Internal-Cheat-Fixed-and-Updated.md
   - wiki/sources/descriptions/gmh5225__Fortnite-3.5.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Leak5.md
+  - wiki/sources/descriptions/Makk5__FortConsole.md
   - wiki/sources/descriptions/gmh5225__Fortnite-Masterpasta-ihack-Source-Leak.md
   - wiki/sources/descriptions/gmh5225__ZeroGui-Fortnite-Internal.md
   - wiki/sources/descriptions/gmh5225__fortnite-exploits.md
@@ -1622,6 +1623,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Leaked Apple Lite Fortnite cheat remakes such as [[apple-lite-fortnite-cheat]] (gmh5225; Police remake of Apple Lite; C/C++; kernel-level work + shader work + modding; cheat / game:fortnite) sit in that same driver/shader Fortnite lane beside [[serenity-gg-fn-and-loader]]. (source: wiki/sources/descriptions/gmh5225__Apple-Lite-Fortnite-Cheat.md)
 - Fortnite DMA samples such as [[fn-dma-cheat]] (C++; Unreal Engine; PCIe DMA; cheat / game:fortnite [DMA]) sit in the below-OS cheat / game:fortnite lane beside kernel-driver externals. (source: wiki/sources/descriptions/lauralex__fn-dma-cheat.md)
 - Internal Fortnite samples such as [[basic-fortnite-cheat-source-internal]] (C++; UE4 SDK / GObject/GNames / engine hooks; ESP + aimbot) sit in the same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/vk-nom__Basic-Fortnite-Cheat-Source-Internal.md)
+- Fortnite UE console-restoration internals such as [[fortconsole]] (Makk5; C++ x64 DLL; pattern scan + engine object construction to re-enable Unreal in-game console; low-level UObject enums + memory helpers; internal injection; UE internals exploration in controlled AC-disabled environments; cheat / game:fortnite [Internal]) sit in that same cheat / game:fortnite internal lane for engine-debug tooling rather than combat automation. (source: wiki/sources/descriptions/Makk5__FortConsole.md)
 - Menu-driven internal Fortnite samples such as [[fortnite-hack-esp-exploits-with-menu]] (YMY1666527646; C++; DirectX 9 ImGui menu; box/line ESP + silent aim + FOV/teleport exploits + panic key; injection/hooking/overlay RE practice; cheat / game:fortnite [Internal]) sit in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/YMY1666527646__Fortnite-Hack-Esp-Exploits-With-Menu.md)
 - Leaked internal Fortnite samples such as [[fortnite-cheat-leak]] (Waihbe; C++; hook-driven gameplay manipulation + rendering/utility modules; MinHook + Detours function interception; no-spread / movement / vehicle / teleport features; cheat architecture + detection-surface RE; cheat / game:fortnite [Internal]) sit in that same cheat / game:fortnite internal lane beside [[fortnite-external-cheat-leak]] from the same author. (source: wiki/sources/descriptions/Waihbe__Fortnite-Cheat-LEAK.md)
 - From-scratch Fortnite internals such as [[ritz-amazing-fortnite-internal]] (simplified hook path; x64-release injector) sit beside them in that same cheat / game:fortnite internal lane. (source: wiki/sources/descriptions/pastor-ritz__ritz-amazing-fortnite-internal.md)

@@ -1110,6 +1110,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [furikuri](entities/furikuri.md) — C/C++ obfuscation engine (jnastarot; AC Obfuscation Engine)
 - [fuzzable](entities/fuzzable.md) — C/C++ source + binary fuzz-target discovery framework (Binary Ninja plugins lane; ex0dus-0x; Anti Cheat > Fuzzer)
 - [FortKit](entities/fortkit.md) — Fortnite dump / SDK generation (C++; cheat / game:fortnite [Dump])
+- [FortConsole](entities/fortconsole.md) — Fortnite UE in-game console re-enable DLL (Makk5; C++ x64; pattern scan + engine object construction; UObject enums + memory helpers; internal injection; UE internals / game security research in AC-disabled environments; cheat / game:fortnite)
 - [Fortnite](entities/fortnite.md) — Fortnite mechanics tutorial series + code (loqix; Game Develop / source; video walkthrough)
 - [Fortnite-External-P2C](entities/fortnite-external-p2c.md) — Fortnite external: shader-oriented sample (C++; [External])
 - [fortnite-esp-aimbot-exploits-hwid-spoofer-cleaner-hack-cheat](entities/fortnite-esp-aimbot-exploits-hwid-spoofer-cleaner-hack-cheat.md) — Fortnite external: ESP/aimbot + HWID spoofer; DiscordHook64.dll overlay hijack via pattern scan (gmh5225; [External])
