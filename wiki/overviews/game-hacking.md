@@ -370,6 +370,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__ceserver-ios.md
   - wiki/sources/descriptions/gmh5225__KittyMemory-IOS.md
   - wiki/sources/descriptions/MJx0__KittyMemory.md
+  - wiki/sources/descriptions/M3351AN__Echinoidea.md
   - wiki/sources/descriptions/M3351AN__saphire.md
   - wiki/sources/descriptions/M3351AN__Samidare.md
   - wiki/sources/descriptions/M3351AN__Shirakumo.md
@@ -2112,6 +2113,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
 - CS:GO radar samples such as [[boltobserv]] (boltgolt; README [Radar]; player slot numbers on map dots; cheat / game:csgo) sit in the same visual radar lane beside external ESP/radar cheats and DMA overlays such as [[csgo-dma-overlay]]. (source: wiki/sources/descriptions/boltgolt__boltobserv.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
+- Lightweight C# external CS:GO samples such as [[echinoidea]] (M3351AN; bunnyhop, overlay ESP, trigger bot; offset-driven workflow; write-signal reduction and VAC-era detection tradeoff notes; educational external cheat design; README External C#) sit in the same usermode external cheat / game:csgo lane beside script and C++ RPM externals. (source: wiki/sources/descriptions/M3351AN__Echinoidea.md)
 - Cross-platform external CS:GO ESP samples such as [[goesp]] (danielkrupinski; modern C++; Dear ImGui overlay; memory-read entity ESP—boxes, names, health, weapons—drawn via the game's rendering pipeline; Windows and Linux; README `[Cross-platform]`) sit in the same cheat / game:csgo lane for studying external overlay ESP and detection surfaces beside internal references like [[osiris]]. (source: wiki/sources/descriptions/danielkrupinski__GOESP.md)
 - CS:GO **sound ESP** samples such as [[nv-v2]] (ekknod; C/C++; hooking; audio-derived positional awareness; README `[Sound ESP]`) sit in the same cheat / game:csgo lane as an alternative to visual overlay ESP. (source: wiki/sources/descriptions/ekknod__nv_v2.md)
 - Kernel/driver CS:GO samples such as [[ec]] (ekknod; C/C++; kernel-level work / driver development / OpenGL; cheat / game:csgo) sit in the same lane beside the related [[ec-pro-lan]] FACEIT variant. (source: wiki/sources/descriptions/ekknod__EC.md)

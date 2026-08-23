@@ -998,6 +998,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Egret Engine](entities/egret-core.md) — HTML5 game engine (modular 2D/3D rendering, GUI, audio, resource management; Game Engine / HTML5)
 - [EC (ekknod)](entities/ec.md) — CS:GO kernel/driver/OpenGL cheat research (C/C++; cheat / game:csgo; README → EC_PRO-LAN)
 - [EC_PRO-LAN (ekknod)](entities/ec-pro-lan.md) — FACEIT AC exploration (C++/C; driver development / OpenGL; Win10 1607 LTSB + Ryzen B350–B450 + Logitech G HUB)
+- [Echinoidea](entities/echinoidea.md) — M3351AN lightweight external CS:GO cheat (C#; bunnyhop, overlay ESP, trigger bot; offset-driven workflow; write-signal reduction + VAC-era detection tradeoff notes; educational external cheat design; cheat / game:csgo [External C#])
 - [echoac-poc](entities/echoac-poc.md) — echo.ac `echo_driver.sys` LPE PoC (read IOCTL → EPROCESS token theft → SYSTEM; anti-cheat-adjacent screenshare driver; gmh5225)
 - [evil-mhyprot-cli](entities/evil-mhyprot-cli.md) — CLI PoC for `mhyprot2.sys` BYOVD (Genshin Impact; kernel/user R/W; gmh5225 + kkent030315 forks)
 - [EvilKaspersky](entities/evil-kaspersky.md) — abuse Kaspersky signed kernel-mode drivers for unauthorized privileged ops; kernel code exec masquerading as AV activity (gmh5225)
