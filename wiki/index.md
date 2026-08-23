@@ -2303,6 +2303,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PrecisionSpoofer-CPP](entities/precision-spoofer-cpp.md) — C++ kernel-driver HWID spoofer (cheat / HWID; gmh5225)
 - [processhacker-mcp](entities/processhacker-mcp.md) — Process Hacker MCP for AI agents (runtime process analysis; C/C++; DLL plugins; Game Develop / MCP)
 - [process-cloning](entities/process-cloning.md) — Windows process clone PoC (`NtCreateProcessEx`; VA-space snapshot; hollowing / memory analysis / credential dump)
+- [Process-Injection-Techniques](entities/process-injection-techniques.md) — Windows injection + persistence technique collection (C/C++; CreateRemoteThread/APC/Early Bird/TLS/thread hijack/reflective DLL/hollowing/doppelganging/ghosting + IFEO/AppInit_DLLs/AppCertDlls; unified CLI; security training + defensive detection testing; Injection Testing; MahmoudZohdy)
 - [processor-trace](entities/processor-trace.md) — libipt Intel PT decoder (reference packet/instruction decode; coverage / tracing tools)
 - [PoCsmith](entities/pocsmith.md) — AI Windows PoC gen (Claude + MCP Hyper-V/kd/Ghidra; patchwatch → verify VMs)
 - [poc-exflushtb](entities/poc-exflushtb.md) — C++ Tb-monitoring PoC (backengineering; Some Tricks / Windows Ring0; asset-pipeline oriented)
