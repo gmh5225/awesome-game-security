@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:M3351AN/Samidare`: entity [[samidare]] (M3351AN; external CS2 cheat; C++; FIFO-based kernel driver comm + DirectX overlay; offset management + game-data reads + coordinate math; driver-assisted external cheat + overlay rendering research; cheat / game:cs2 [External Ring3/Ring0]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ukia-rpm]], [[usugumo]], [[shirakumo]], [[cs2-ext]], and [[km-um-communication]].
+
 - **2026-08-23** — ingest `description:M3351AN/Shirakumo`: entity [[shirakumo]] (M3351AN; usermode RPM/WPM proxy PoC; C++; named-pipe IPC; read/write execution in separate process; optional DLL proxy deployment; experimental x64-only, not thread-safe; process-separated memory access for game tooling and evasion research; cheat / RPM for Windows); cited on [[overviews/game-hacking]]; cross-linked [[nobastian-v2]], [[usugumo]], [[ukia-rpm]], and [[creadmemory]].
 
 - **2026-08-23** — ingest `description:M3351AN/UkiaRPM`: entity [[ukia-rpm]] (M3351AN; external CS2 cheat; C++; kernel driver RPM; DirectX 9 ImGui menu + overlay; aimbot/ESP/radar/recoil control + config persistence; RPM-based external cheat patterns + kernel driver game-memory comm research; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[usugumo]], [[cs2-ext]], [[tkazer-cs2-external]], [[driver-physical-rw]], and [[norsefire]].
