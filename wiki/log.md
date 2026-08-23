@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LeroyTechnologies/ProjectM`: entity [[projectm]] (LeroyTechnologies; UE5 tactical FPS/RTS prototype "On All Fronts"; C++ + Unreal plugins; Mass Entity ECS for tens-of-thousands combined AI/player battles; AI soldier control, command workflows, large-map architecture; high-scale simulation patterns for multiplayer security/anti-abuse design; UE5 FPS Game); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[warriorb]], [[ue5-multiplayer-project]], [[flowgraph]], and [[unreal-object-model]].
+
 - **2026-08-23** — ingest `description:Letomaniy/Speed-Hack`: entity [[speed-hack]] (Letomaniy; Windows C++ Visual Studio injectable DLL; Cheat Engine–style Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat development practice + AC time-manipulation research); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[speedhack]], [[cheat-engine]], and [[detours]].
 
 - **2026-08-23** — ingest `description:Lexikos/AutoHotkey_L`: entity [[autohotkey-l]] (Lexikos; open-source Windows automation/macro scripting platform; custom hotkey language; C/C++ interpreter binaries + self-contained script runtime + experimental DLL embed; task automation and input scripting; game-adjacent macro experimentation and defensive script-behavior analysis); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-external-ahk-hack]], [[hardware-input-injection]], and [[mouse-input-injection]].
