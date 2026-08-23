@@ -10,7 +10,7 @@ confidence: medium
 
 # vulnerable-drivers
 
-Curated collection of **vulnerable signed Windows kernel drivers** gathered for security research. Includes dozens of `.sys` driver binaries from various vendors that expose exploitable IOCTL interfaces, memory-access primitives, or other security weaknesses. Useful for [[byovd]] researchers, anti-cheat engineers, and kernel security analysts studying vulnerable-driver cataloging and exploitation-surface analysis alongside metadata catalogs such as [[loldrivers]], hash inventories such as [[ms-vulnerable-driver-list]], and binary corpora such as [[drivers-and-shit]]. (source: wiki/sources/descriptions/KeServiceDescriptorTable__vulnerable-drivers.md)
+Curated collection of **vulnerable signed Windows kernel drivers** gathered for security research. Includes dozens of `.sys` driver binaries from various vendors that expose exploitable IOCTL interfaces, memory-access primitives, or other security weaknesses. Useful for [[byovd]] researchers, anti-cheat engineers, and kernel security analysts studying vulnerable-driver cataloging and exploitation-surface analysis alongside metadata catalogs such as [[loldrivers]], hash inventories such as [[ms-vulnerable-driver-list]], and binary corpora such as [[drivers-and-shit]]. Single-driver distributions from the same maintainer such as [[cormem-sys-vulnerable-driver]] (**`cormem.sys`**; memory R/W primitives) complement this multi-vendor corpus. (source: wiki/sources/descriptions/KeServiceDescriptorTable__vulnerable-drivers.md)
 
 ## Links
 
@@ -18,4 +18,4 @@ Curated collection of **vulnerable signed Windows kernel drivers** gathered for 
 
 ## Related
 
-[[byovd]] · [[loldrivers]] · [[ms-vulnerable-driver-list]] · [[drivers-and-shit]] · [[physmem-drivers]] · [[vulnerable-driver-scanner]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[cormem-sys-vulnerable-driver]] · [[loldrivers]] · [[ms-vulnerable-driver-list]] · [[drivers-and-shit]] · [[physmem-drivers]] · [[vulnerable-driver-scanner]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

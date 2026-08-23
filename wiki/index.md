@@ -543,6 +543,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [compiler-binary-richprint](entities/compiler-binary-richprint.md) — print MSVC Rich Header compiler info from PE (DOS stub→PE gap; cheat / RE tools; gmh5225)
 - [cos-mapper](entities/cos-mapper.md) — signed-helper driver mapper; kernel hooks transfer unsigned payload; unloaded-driver/cache cleanup (armvirus; Signed Driver Map)
 - [CompiledProtection](entities/compiled-protection.md) — C/C++ cheat compiler (CS:GO-adjacent; Cheat Compiler)
+- [cormem.sys-vulnerable-driver](entities/cormem-sys-vulnerable-driver.md) — **`cormem.sys`** vulnerable kernel driver binary; memory R/W primitives for BYOVD research (KeServiceDescriptorTable; Cheat Vulnerable Driver)
 - [coruna](entities/coruna.md) — leaked iOS WebKit exploit toolkit (multi-version chains; locally hostable; partial deobfuscation; cheat / iOS jailbreak)
 - [covcane](entities/covcane.md) — experimental Windows x86-64 DBI framework (C++; loader + instrumentation runtime; translation/rewriting/memory/exception handling; Zydis + AsmJIT; RE / runtime analysis; ZehMatt)
 - [covirt](entities/covirt.md) — x86-64 stack-VM code virtualizer (PE MinGW + ELF; MBA + self-modifying code; marker regions; AC Obfuscation Engine `[VM]`; dmaivel)
