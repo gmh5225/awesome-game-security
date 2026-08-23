@@ -2699,6 +2699,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [swift-ida](entities/swift-ida.md) — IDA Pro plugin: retag Swift/Golang/fastcall conventions + tuple-like multi-return structs (Python; cheat / IDA Plugins)
 - [swiftshield](entities/swiftshield.md) — Swift identifier obfuscator for iOS (SourceKit rename; vs RE/tweaks)
 - [swapchain-bottleneck](entities/swapchain-bottleneck.md) — DXGI swapchain/MPO overlay injection architecture analysis (Present-hook collisions, TDR cascades, AC whitelist friction; dantebuilds)
+- [super-fighter](entities/super-fighter.md) — Windows DX11 shoot-'em-up remake (MKXJun; C++; Direct3D + HLSL + DirectSound; data-driven stages/enemies, replay, Xbox controller; arcade game loop; README [DX11 Mini Game]; Game Develop / source)
 - [super-people-esp-aimbot-magic-hack](entities/super-people-esp-aimbot-magic-hack.md) — Super People UE4 ESP/aimbot + gameplay mods via SDK entity reads (C++; battle royale; cheat / game:super people; gmh5225)
 - [superpeople-client](entities/superpeople-client.md) — Super People client: driver / rendering / modding (C++; cheat / game:super people; gmh5225)
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
