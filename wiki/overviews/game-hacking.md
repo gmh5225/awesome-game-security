@@ -491,6 +491,7 @@ sources:
   - wiki/sources/descriptions/imugee__xdv.md
   - wiki/sources/descriptions/sad0p__venom.md
   - wiki/sources/descriptions/cloudfuzz__android-kernel-exploitation.md
+  - wiki/sources/descriptions/Marisa-Chan__GhidrOrean.md
   - wiki/sources/descriptions/Markakd__bad_io_uring.md
   - wiki/sources/descriptions/systemnb__compile_android_driver.md
   - wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md
@@ -1719,6 +1720,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Themida IDA plugin / Fix Themida via [[tde]] (devirtualization engine for Themida-protected binaries) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/sodareverse__TDE.md)
 - Automatic Themida v1/v2/v3 unpack via [[magicmida-rs]] (Rust Win32 Debug API debugger; OEP discovery + memory dump + PE IAT/section rebuild; optional ScyllaHide anti-debug bypass; verify mode) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/guoxing2024__magicmida-rs.md)
 - Themida 3.1.3 Tiger red64 unpack/unwrap via [[bobalkkagi]] (Python; Unicorn emulation + win10_v1903 API hooks; fast/hook_block/hook_code modes; optional OEP; planned devirt; Capstone/distorm3) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/bobalkkagi__bobalkkagi.md)
+- Oreans VM unvirtualization in Ghidra via [[ghidr-orean]] (Marisa-Chan; Python Ghidra scripts; Deathway Unvirtualizer reimplementation; CISC complete, TIGER largely finished, RISC/FISH assembler configs; main Orean script + configurable working directory; Themida/WinLicense/Code Virtualizer; Cheat Fix Themida / Ghidra Scripts) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/Marisa-Chan__GhidrOrean.md)
 - Dynamic Themida/WinLicense 2.x/3.x unpack via [[unlicense]] (Python 3; Frida instrumentation; OEP recovery + obfuscated IAT rebuild; x86/x64 native PE/DLL + .NET EXE; LIEF/Capstone) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__unlicense.md)
 - Static mutation deobfuscation via [[themida-unmutate]] (Python 3; Themida/WinLicense/Code Virtualizer 3.x insn mutation on selected functions; tested to Themida 3.1.9) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/ergrelet__themida-unmutate.md)
 - Obfuscated-region detection via [[themida-spotter-bn]] (Binary Ninja plugin; Themida/WinLicense/Code Virtualizer obfuscated code locations; x86/x64; Oreans ≤3.1.9; Cheat Binary Ninja Plugins / Fix Themida) also sits in that lane. (source: wiki/sources/descriptions/ergrelet__themida-spotter-bn.md)

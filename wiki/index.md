@@ -1202,6 +1202,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pagalaxylab-ghidra-scripts](entities/pagalaxylab-ghidra-scripts.md) — Python Ghidra scripts (P-Code param tracing, ObjC msgSend, error-print rename, OLLVM CFF deobfuscation; shared helpers; firmware/binary RE; PAGalaxyLab; cheat / Scripts)
 - [ghidrascripts](entities/ghidrascripts.md) — Maintained ATR GhidraScript automation (Java; AI rename, complexity viz, Golang, BSim/FunctionID, SHAREM/Malpedia; advanced-threat-research; cheat / Some scripts)
 - [ghidra-vxd-tools](entities/ghidra-vxd-tools.md) — Ghidra Jython Windows 9x VxD INT 20h annotator (VxDCall struct + VMDisp9x service decode; legacy kernel driver / historical game-protection RE; andrew-hoffman)
+- [ghidr-orean](entities/ghidr-orean.md) — Ghidra Python Oreans unvirtualizer (Deathway port; CISC/TIGER/RISC/FISH VM configs; Themida/WinLicense/Code Virtualizer; Marisa-Chan; Fix Themida / Ghidra Scripts)
 - [ghidriff](entities/ghidriff.md) — Python CLI Ghidra binary diffing engine (headless two-binary analysis; graph/BSim matching; Markdown decomp/call-graph reports; PE/Mach-O/ELF; Docker CI; clearbluejar)
 - [ghiradec](entities/ghiradec.md) — programmatic Ghidra decompiler (integration or standalone; Ghidra analysis engine; automated binary analysis; Cheat Ghidra Decompiler)
 - [GhidrAssist](entities/ghidrassist.md) — Ghidra LLM extension (OpenAI v1-compatible APIs; local/cloud; cheat / Ghidra Plugins)
