@@ -2508,6 +2508,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RisohEditor](entities/risoh-editor.md) — free Win32 PE resource editor (dialogs, menus, icons, RC import/export; 32/64-bit)
 - [RiskEngine](entities/risk-engine.md) — Android risk-control SDK + management platform (device fingerprinting; JNI root/hook/emulator/debug/VPN/sandbox detection; WsttXm)
 - [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
+- [Rigel-Driver](entities/rigel-driver.md) — C++ KM R/W driver; module-base/export lookup; protected-region writes; mapper load; dxgkrnl hook context (`NtGdiDdDDINetDispGetNextChunkInfo`; Lynnette177; driver-assisted memory access / AC bypass research)
 - [Rikugan](entities/rikugan.md) — in-IDA/BN RE AI agent (multi-provider LLM chat; agentic tool loop, plan mode, Ollama; buzzer-re)
 - [Ring Reaper](entities/ring-reaper.md) — Linux post-exploitation agent (MatheuZSecurity; C + Python control server; io_uring async I/O replaces traditional read/write/send/receive syscalls; file transfer, process/user enum, network inspection, session control; EDR evasion research)
 - [Riru-MomoHider](entities/riru-momo-hider.md) — Riru Zygote-injection Magisk root-hide module (syscall + Java API hooks; mount spoof, file hide, property-query block; canyie; Cheat / Magisk)
