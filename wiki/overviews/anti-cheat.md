@@ -746,6 +746,7 @@ sources:
   - wiki/sources/descriptions/Rwkeith__Nomad.md
   - wiki/sources/descriptions/Rycooop__Bloom-Anticheat.md
   - wiki/sources/descriptions/no1qq__UAGC.md
+  - wiki/sources/descriptions/Lazyzouo__ICUAC.md
   - wiki/sources/descriptions/NHCM-dev__BytecodeVM.md
 updated: 2026-08-23
 confidence: high
@@ -929,6 +930,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 
 **Minecraft catalog:** Cross-platform anticheat index [[minecraft-anticheat-list]] (Kotlin/JS + Gradle; hundreds of validated JSON entries; searchable platform/version/pricing/maintenance table; GitHub + Spigot API enrichment; Bukkit/Sponge/Fabric/Forge/Nukkit/PocketMine; Java + Bedrock) for server operators and AC researchers comparing server-side cheat detection. (source: wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md)
+
+**Paper/Folia rule enforcement:** [[icuac]] (Lazyzouo; Java 21 Gradle; modular server-side command/inventory/combat integrity checks—blocked commands, tab-complete hiding, game-mode isolation, coordinate limits, death-drop control, banned materials, NBT/enchantment validation, stack/potion limits, end-crystal cooldowns; bilingual CN/EN; Folia-aware scheduling; SHA-256-verified updater; lightweight anti-abuse controls rather than full client-side AC; Anti Cheat / game:minecraft) for administrators needing transparent policy enforcement. (source: wiki/sources/descriptions/Lazyzouo__ICUAC.md)
 
 ## README map
 
