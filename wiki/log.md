@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass`: entity [[xiaomi-hyperos-bootloader-bypass]] (MlgmXyysd; PHP automation + Docker/shell + ADB libraries; reproducible HyperOS bootloader account-binding unlock workflow; mobile security research on restriction weaknesses; cheat / bootloader bypass); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pixel-flasher]], [[qualcomm-avb-exploit-poc]], [[magisk]], [[kernelsu]], [[device-xiaomi-mondrian]], and [[keyattestation]].
+
 - **2026-08-23** — ingest `description:cBournhonesque/lightyear`: entity [[lightyear]] (Rust server-authoritative Bevy multiplayer library; prediction/rollback, snapshot interpolation, lag compensation, tick-synced inputs; UDP/WebSocket/Steam/WebTransport via aeronet; bevy_replicon world replication; WebAssembly; client-server trust-boundary study; Game Network / source); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[bevy]], [[bevy-personal-test]], [[certael]], and [[magnetite]].
 
 - **2026-08-23** — ingest `readme:categories`: Game Network ~28 (+1; cBournhonesque/lightyear Rust Bevy server-authoritative netcode; other major section counts stable); refreshed [[overviews/overview]] and [[overviews/game-engine]] README-map counts; light `index.md` section notes (no per-category pages).

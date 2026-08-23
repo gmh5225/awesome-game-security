@@ -3104,6 +3104,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xkvm-ios-injector](entities/xkvm-ios-injector.md) — pure-Go CLI/TUI iOS sideload tweak injector (IPA/TIPA dylib/.deb injection, package format conversion, App Store IPA decrypt, Mach-O repack + ad-hoc sign)
 - [xLua](entities/xlua.md) — Tencent Lua↔C# bridge for Unity/.NET/Mono (two-way interop, runtime hotfix, generated bindings; Game Hot Patch / scripting)
 - [xiaomi-c400-pwn](entities/xiaomi-c400-pwn.md) — Xiaomi Smart Camera C400 exploit/jailbreak research (Python RNG-prediction exploit; Tamarin handshake models; persistent jailbreak; IoT firmware exploitation; TaszkSecLabs)
+- [xiaomi-hyperos-bootloader-bypass](entities/xiaomi-hyperos-bootloader-bypass.md) — Xiaomi HyperOS bootloader account-binding bypass PoC (MlgmXyysd; PHP + ADB automation; Docker/shell; mobile bootloader restriction research; cheat / bootloader bypass)
 - [xigncode-dump](entities/xigncode-dump.md) — XIGNCODE client-module dump (gmh5225; modding / offline RE; cheat / explore anticheat:xigncode)
 - [xigncode3-blackdesert](entities/xigncode3-blackdesert.md) — XIGNCODE3/Black Desert full-pipeline static reconstruction (`xmag`/`xnina` unpack, Ghidra, Lua 5.3, VMProtect `xhunter1`; IPC/detection specs)
 - [xigncode3-bypass-alternative](entities/xigncode3-bypass-alternative.md) — XIGNCODE3 bypass alternative (C++; hooking / memory analysis; cheat / explore anticheat:xigncode)
