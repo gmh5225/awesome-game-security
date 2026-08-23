@@ -2366,6 +2366,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UPGDSED](entities/upgdsed.md) — runtime PatchGuard + DSE disable (vulnerable drivers, CI.dll, KPP context; Win7–11; hfiref0x)
 - [PGHooker](entities/pghooker.md) — C++ Page Guard (`PAGE_GUARD`) hook research (cheat / hook)
 - [ProExt](entities/proext.md) — Rust external CS2 cheat (ESP / aimbot / triggerbot / radar / RCS; egui UI)
+- [Project D Win64 Shipping](entities/project-d-win64-shipping.md) — Veiled Experts UE SDK dump (LagradOst; generated C++ headers—agents, weapons, vehicles, UI, engine subsystems; class hierarchies, offsets, vtables; SDK dumping methodology; cheat / game:veiled experts)
 - [ProjectM](entities/projectm.md) — UE5 tactical FPS/RTS prototype "On All Fronts" (LeroyTechnologies; Mass Entity ECS; tens-of-thousands AI/player battles; AI soldier control + command workflows; large-map architecture; multiplayer security/anti-abuse study; UE5 FPS Game)
 - [ProxyAPICall](entities/proxy-api-call.md) — custom stack call for proxying API calls through fabricated stacks (C/C++; Cheat Spoof Stack / Custom stack call; evilashz)
 
