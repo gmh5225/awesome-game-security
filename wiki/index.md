@@ -1529,6 +1529,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [iOS Jailbreak — Fugu15](entities/ios-jailbreak-fugu15.md) — iOS 15 untethered jailbreak (Fugu15 kernel exploit chain; root, codesign bypass, full-privilege code execution; gmh5225)
 - [iOS Mod Menu Template for Theos](entities/ios-mod-menu-template-for-theos.md) — Theos tweak mod-menu template (Logos; 50×50 icons; cheat / IOS mod menu)
 - [iOS Packager](entities/ios-packager.md) — Python CLI for repackaging/signing iOS app bundles (Info.plist/entitlements, provisioning profiles, codesign; mobile game security testing)
+- [iOS UE4Dumper](entities/ios-ue4dumper.md) — iOS Unreal Engine dumper MobileSubstrate tweak (C++/ObjC++; arm64/arm64e; pattern-based structure discovery; offsets/classes/structs/enums/functions + symbol JSON for IDA/Ghidra; MJx0; cheat / [SDK Dump For IOS])
 - [iOS Location Spoofer](entities/ios-location-spoofer.md) — non-jailbreak iOS network location spoof (MITM Apple map lookups; Surge/Shadowrocket/Loon/Stash/QX modules; motion-state spoof; web UI)
 - [wloc](entities/wloc.md) — non-jailbreak iOS gs-loc WLOC spoof (MITM protobuf patch; Surge/QX/Loon/Stash/Shadowrocket; online picker + Shortcuts; GCJ-02→WGS84; indoor/WiFi positioning; Yu9191)
 - [Imgui-Native-ModMenu](entities/imgui-native-modmenu.md) — Android native ImGui mod menu (OpenGL ES + JNI; cheat / Menu for Android)
