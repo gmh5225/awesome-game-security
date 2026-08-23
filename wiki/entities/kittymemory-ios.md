@@ -12,7 +12,7 @@ confidence: medium
 
 Runtime **memory editing library** for **iOS game hacking and modification**. Exposes APIs for **memory patching**, **function hooking**, and **pattern scanning** so cheats and mods can alter iOS application behavior in-process at runtime. Positioned for workflows that do not depend on jailbreak. (source: wiki/sources/descriptions/gmh5225__KittyMemory-IOS.md)
 
-Complements remote scan/edit stacks ([[ceserver-ios]], [[memory-server]], [[frida-ceserver]]) and title-specific iOS cheat samples ([[last-island-of-survival-ioscheat-source]]) when the workflow is embedded runtime code patching rather than desktop-driven memory exploration.
+Fork of upstream [[kittymemory]] (MJx0) focused on iOS runtime code patching. Complements remote scan/edit stacks ([[ceserver-ios]], [[memory-server]], [[frida-ceserver]]) and title-specific iOS cheat samples ([[last-island-of-survival-ioscheat-source]]) when the workflow is embedded runtime code patching rather than desktop-driven memory exploration.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements remote scan/edit stacks ([[ceserver-ios]], [[memory-server]], [[frid
 
 ## Related
 
-[[ceserver-ios]] · [[memory-server]] · [[frida-ceserver]] · [[opainject]] · [[ipapatch]] · [[last-island-of-survival-ioscheat-source]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[kittymemory]] · [[ceserver-ios]] · [[memory-server]] · [[frida-ceserver]] · [[opainject]] · [[ipapatch]] · [[last-island-of-survival-ioscheat-source]] · [[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

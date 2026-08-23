@@ -1638,6 +1638,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kit](entities/kit.md) — C/C++ pixels tooling + asset pipelines (Game Engine / Image Codec)
 - [kitsupe](entities/kitsupe.md) — PE parser/editor (headers, sections, imports/exports, relocations, resources; binary patching; cheat / PE; gmh5225)
 - [kuna](entities/kuna.md) — agent-first Rust Ghidra decompiler (CLI, WASM, Ghidra plugin; SLEIGH port; tunable phase pipeline for LLM agents; Noelo-Lab)
+- [KittyMemory](entities/kittymemory.md) — cross-platform Android/iOS runtime memory patching library (C++; memory scan, pointer validation, Keystone assembly patches, prebuilt binaries; mobile game RE; MJx0; cheat / [Runtime code patching])
 - [kittymemory-ios](entities/kittymemory-ios.md) — iOS runtime memory library (patch/hook/pattern scan; jailbreak-independent code patching; cheat / iOS memory explorer; gmh5225)
 - [kiero](entities/kiero.md) — universal Windows D3D9–12/GL/Vulkan graphics hooking library (MinHook method-table detours; sample ImGui overlays; x86/x64; Rebzzel)
 - [kiero2](entities/kiero2.md) — kiero v2 runtime D3D9–12/GL/Vulkan API locator (BYO hooking; CMake FetchContent; cross-platform GL/VK)
