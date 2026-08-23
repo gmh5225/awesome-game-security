@@ -3008,6 +3008,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
 - [vmp-devirtualization-lab](entities/vmp-devirtualization-lab.md) — Android native VMP devirt educational lab (mini-VM, dispatcher/handler recovery, symbolic lifting; QBDI/Unicorn/Triton/Frida; tomhamidi97-arch)
+- [vmp-unpacker](entities/vmp-unpacker.md) — C++ dynamic VMProtect unpacker (Win32 debug attach; PEB/ntdll anti-debug bypass; OEP discovery; mutated IAT rebuild; Fix VMP / Unpacker; Lucyferek-nunu)
 - [vmtrace](entities/vmtrace.md) — WHP C++ trap-driven guest execution (host-backed memory, page traps, CPUID/syscall intercept, single-step VM exits; asmjit)
 - [VirtualBox](entities/virtualbox.md) — Oracle open-source x86_64 VMM (CPU/memory virtualization, device emulation, guest additions, COM/IOCTL; hypervisor-internals and VM security research)
 - [VisualUEFI-2.0](entities/visualuefi-2-0.md) — VisualUEFI-style Clang/DWARF UEFI dev setup (EDK2 samples + Visual Studio; VMware + CLion remote GDB; firmware/boot-time RE; Shtan7)

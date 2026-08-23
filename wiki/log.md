@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Lucyferek-nunu/vmp-unpacker`: entity [[vmp-unpacker]] (Lucyferek-nunu; Windows C++ dynamic VMProtect PE/DLL unpacker; Win32 debugger attach; PEB/ntdll anti-debug bypass; OEP discovery via text-section guards/timed snapshots/manual triggers; memory dump + standard/mutated IAT rebuild; dynamic or passive import resolve; Fix VMP / Unpacker); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmprotect]], [[vmpunpacker]], [[vmpunpack]], [[vmpstatic]], [[unpacker]], and [[vmpimportfixer]].
+
 - **2026-08-23** — ingest `description:LukeGoule/compact_vm_detector`: entity [[compact-vm-detector]] (LukeGoule; compact embeddable Windows C++ VM-detection component; pafish-inspired lightweight anti-virtualization checks; Visual C++ integration; minimal footprint; anti-analysis experimentation and environment fingerprinting; Detection:Virtual Environments); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[vmaware]], [[anticuckoo]], and [[hypervisor-detection]].
 
 - **2026-08-23** — ingest `description:Luxon98/Super-Mario-Bros-game`: entity [[super-mario-bros-game]] (Luxon98; C++ Super Mario Bros remake; SDL2/SDL_image/SDL_mixer; Visual Studio; original-inspired and custom levels; 2D rendering, level flow, gameplay logic; game development learning / SDL engine practice; README [Remake of Super Mario]); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[zombies-vs-plants]], [[doomretro]], [[2048-cpp]], and [[cpp-game-engine-book]].

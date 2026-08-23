@@ -1407,6 +1407,7 @@ sources:
   - wiki/sources/descriptions/notgoodusename__OsirisAndExtra.md
   - wiki/sources/descriptions/notahacker8__RobloxCheats.md
   - wiki/sources/descriptions/LyeDevGit__WonTree-RBLX-Dumper.md
+  - wiki/sources/descriptions/Lucyferek-nunu__vmp-unpacker.md
   - wiki/sources/descriptions/nologic__idaref.md
   - wiki/sources/descriptions/samaBR85__OcarinaCTRComposer.md
   - wiki/sources/descriptions/samaBR85__CTRComposer.md
@@ -1726,6 +1727,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Dynamic .NET VMProtect unpack/dump via [[vmunprotect-dumper]] (force static ctor restore → AsmResolver PE dump; VMP 3.7.0) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md)
 - Native PE VMProtect unpack via [[vmpunpacker]] (C++/Python; LZMA decompress → original sections/IAT) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/oureveryday__VMPUnpacker.md)
 - Python emulation-based VMProtect/packer unpack via [[vmpunpack]] (patched sogen emulator to OEP; PE rebuild + IOC extract; stdlib-only; no devirt) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/milk-analyzer__vmpunpack.md)
+- Windows C++ dynamic VMProtect unpack via [[vmp-unpacker]] (Lucyferek-nunu; Win32 debugger attach; PEB/ntdll anti-debug bypass; OEP discovery via text-section guards/timed snapshots/manual triggers; memory dump + standard/mutated IAT rebuild; dynamic or passive import resolve) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/Lucyferek-nunu__vmp-unpacker.md)
 - Static Go VMProtect PE unpack/rebuild via [[vmpstatic]] (VMP 1.x–3.x) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/notsnakesilent__VMPStatic.md)
 - Emulation-based generic PE unpack via [[xvolkolak]] (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; 21 packer-specific unpackers incl. UPX/ASPack/MPRESS) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/horsicq__XVolkolak.md)
 - Modular Python PE/ELF packer detection + unpack pipeline via [[unpacker]] (anpa1200; section/entropy/heuristic/signature ID; UPX native + Unicorn/Unipacker for 32-bit ASPack/Themida/VMProtect + Qiling for 64-bit VMProtect; multi-layer re-detect + PE rebuild; CLI detect→unpack→validate) also sits in the Cheat Fix VMP / Unpacker lane. (source: wiki/sources/descriptions/anpa1200__Unpacker.md)
