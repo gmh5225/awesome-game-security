@@ -130,6 +130,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AI-Aimbot](entities/ai-aimbot.md) — RootKit-Org YOLOv5 screen-capture aimbot (Conda; Fortnite/Rust custom models; detection sensitivity + aim tuning; cheat / Machine Learning YOLOv5)
 - [AI-FPS-b00m-h3adsh0t](entities/ai-fps-b00m-h3adsh0t.md) — AI-powered FPS aimbot (Python/C++; external screen capture + YOLO player detection + mouse aim; cheat / Neural Network; gmh5225)
 - [AIMachDec](entities/aimachdec.md) — IDA LLM ARM64→C/ObjC/Swift for Mach-O (apps/kernelcache/DSC; cheat / IDA Plugins)
+- [AimStar](entities/aimstar.md) — M3351AN external CS2 cheat framework (C++; bone-based aimbot, entity tracking, ESP, triggerbot, offset management, menu config; multi-language docs; external cheat architecture + CS2 memory reading research; cheat / game:cs2 [External])
 - [aimbot-detection-prototype](entities/aimbot-detection-prototype.md) — deep-learning aimbot/triggerbot detection prototype (clips + live window; Detection:Aimbot)
 - [alt-V Anticheat Guide](entities/alt-v-anticheat-guide.md) — alt:V Multiplayer server AC guide (cheat detection, client integrity, behavior monitoring, server-side logic; Anti Cheat / guide; gmh5225; GTA5 MP servers)
 - [AMD IBS Toolkit](entities/amd-ibs-toolkit.md) — AMD Instruction-Based Sampling toolkit (hardware instruction subset sampling; cheat / Windows kernel explorer / AMD Sampling)
