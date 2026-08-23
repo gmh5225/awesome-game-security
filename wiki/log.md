@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Miziziziz/Retro3DGraphicsCollection`: entity [[retro-3d-graphics-collection]] (Miziziziz; PS1-style CC0 retro 3D asset index; README-linked models/textures/shader resources by theme; nature/contemporary/fantasy/UI; indie prototyping; Game Assets / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[3d-asset-factory]], [[awesome-unity]], [[3d-game-shaders-for-beginners]], and [[modly]].
+
 - **2026-08-23** — ingest `description:MlgmXyysd/KernelSU_Debug`: entity [[kernelsu-debug]] (MlgmXyysd; KernelSU fork; relaxed manager checks, permissive SELinux options, init scripts; kernel C + Android app/build assets; profile control; Android security research / system debugging; cheat / KernelSU modified for debugging); cited on [[overviews/mobile-security]]; cross-linked [[kernelsu]], [[apex-su]], [[xiaomi-hyperos-bootloader-bypass]], [[rezygisk]], and [[ksu-rust-frida]].
 
 - **2026-08-23** — ingest `description:MlgmXyysd/Xiaomi-HyperOS-BootLoader-Bypass`: entity [[xiaomi-hyperos-bootloader-bypass]] (MlgmXyysd; PHP automation + Docker/shell + ADB libraries; reproducible HyperOS bootloader account-binding unlock workflow; mobile security research on restriction weaknesses; cheat / bootloader bypass); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pixel-flasher]], [[qualcomm-avb-exploit-poc]], [[magisk]], [[kernelsu]], [[device-xiaomi-mondrian]], and [[keyattestation]].
