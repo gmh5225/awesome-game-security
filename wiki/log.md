@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MarilynDafa/Bulllord-Engine`: entity [[bulllord-engine]] (MarilynDafa; lightweight cross-platform pure-C game engine; modular rendering, audio, physics, and asset management; ASTC texture compression, FastLZ, FreeType; compact C-based cross-platform engine design study; README [lightspeed lightweight elegant game engine in pure c]); cited on [[overviews/game-engine]]; cross-linked [[lumos]], [[lplplugin]], [[custom-game-engines]], and [[cpp-game-engine-book]].
+
 - **2026-08-23** — ingest `description:Marisa-Chan/GhidrOrean`: entity [[ghidr-orean]] (Marisa-Chan; Ghidra Python Oreans unvirtualizer; Deathway Unvirtualizer reimplementation; CISC complete + TIGER largely finished; RISC/FISH assembler/instruction configs; main Orean script + configurable working directory; Themida/WinLicense/Code Virtualizer; Cheat Fix Themida / Ghidra Scripts); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[tde]], [[themida-unmutate]], [[themida-research]], [[themida-spotter-bn]], [[bobalkkagi]], and [[unlicense]].
 
 - **2026-08-23** — ingest `description:Markakd/bad_io_uring`: entity [[bad-io-uring]] (Markakd; Android io_uring kernel privesc PoC; C/NDK; per-device exploit variants; boot-image unpack + kernel-symbol extraction helpers; Pixel 6 root; kernel security research / exploit reproduction in authorized mobile test environments; README Root for Pixel 6); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-kernel-exploitation]], [[android-kernel-cve-pocs]], [[dirtypiperoot]], and [[ring-reaper]].
