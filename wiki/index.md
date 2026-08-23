@@ -3107,6 +3107,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Vocem Overlay](entities/vocem-overlay.md) — Linux Discord in-game overlay (Vulkan implicit layer + OpenGL LD_PRELOAD interposer; daemon RPC/shared memory; HDR/Flatpak; overlay-injection research; ales-drnz)
 - [VoltClient](entities/voltclient.md) — educational AssaultCube external (C++; DX11 Dear ImGui transparent overlay; RPM/WPM ESP + tracers + FOV aimbot; ac_client.exe v1.3.0.2; TheHeadphonesAreNeeded)
 - [vulnerable-driver-scanner](entities/vulnerable-driver-scanner.md) — C++ CLI directory scanner for vulnerable Windows drivers; BYOVD exposure triage in common system paths (Xxmmy)
+- [vulnerable-drivers](entities/vulnerable-drivers.md) — curated collection of vulnerable signed Windows kernel `.sys` binaries; exploitable IOCTL/memory primitives; BYOVD cataloging and exploitation-surface analysis (KeServiceDescriptorTable)
 - [VulnerableDriverScanner](entities/vulnerable-driverscanner.md) — C++ console PE-import triage; folder scan flags kernel drivers with indicative API imports; preliminary attack-surface assessment (Sentient111)
 - [vulnerable-mcp-servers-lab](entities/vulnerable-mcp-servers-lab.md) — intentionally vulnerable MCP servers for pentest training (path traversal, prompt injection, eval, typosquatting, secret leakage; Game Develop / MCP security)
 - [vulnerablekernel-driver](entities/vulnerablekernel-driver.md) — intentionally vulnerable **`MsIo64.sys`** training driver (IOCTL arbitrary R/W, overflow, UAF, races; kernel exploitation lab; gmh5225)

@@ -97,12 +97,13 @@ sources:
   - wiki/sources/descriptions/backengineering__msrexec.md
   - wiki/sources/descriptions/backengineering__VDM.md
   - wiki/sources/descriptions/alfarom256__drivers_and_shit.md
+  - wiki/sources/descriptions/KeServiceDescriptorTable__vulnerable-drivers.md
   - wiki/sources/descriptions/Xacone__Eneio64-Driver-Exploit.md
   - wiki/sources/descriptions/Xxmmy__vulnerable-driver-scanner.md
   - wiki/sources/descriptions/Sentient111__VulnerableDriverScanner.md
   - wiki/sources/descriptions/Systemhaus-Schulz__DriverRiskScout.md
   - wiki/sources/descriptions/U65535F__ThrottleStopPoC.md
-updated: 2026-08-22
+updated: 2026-08-23
 confidence: high
 ---
 
@@ -123,6 +124,8 @@ Microsoft vulnerable-driver blocklist ([[msft-driverblocklist]] mirrors the Reco
 Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drivers]] (namazso; list only, no PoC) help catalog signed drivers that expose physmem primitives commonly abused in BYOVD chains. (source: wiki/sources/descriptions/namazso__physmem_drivers.md)
 
 Categorized third-party driver binary corpora such as [[drivers-and-shit]] (alfarom256; large `.sys` collection from OEM tools, utilities, and security products; reference corpus for vulnerable-driver research and exploit reproduction—binaries only, no PoC) complement hash-list inventories in the same lane. (source: wiki/sources/descriptions/alfarom256__drivers_and_shit.md)
+
+Curated signed vulnerable-driver binary collection such as [[vulnerable-drivers]] (KeServiceDescriptorTable; dozens of vendor `.sys` binaries exposing exploitable IOCTL interfaces, memory-access primitives, or other weaknesses; BYOVD cataloging and exploitation-surface analysis—binaries only, no PoC) sits in the same research corpus lane beside [[drivers-and-shit]]. (source: wiki/sources/descriptions/KeServiceDescriptorTable__vulnerable-drivers.md)
 
 Educational kernel-exploit reference material such as [[windows-kernel-exploits]] sits in the same cheat / vulnerable-driver documentation lane. (source: wiki/sources/descriptions/xct__windows-kernel-exploits.md) Broader curated kernel learning collections such as [[winkernel-resources]] (NullArray; papers, talks, vulnerable-driver links, sample driver projects; cheat / Guide) complement exploit-specific write-ups in that lane. (source: wiki/sources/descriptions/NullArray__WinKernel-Resources.md) Hands-on vulnerable-driver lab guides such as [[hacksysextremevulnerabledriver]] (HackSys Team; kernel exploitation training in the cheat / vulnerable-driver lane) complement that documentation. (source: wiki/sources/descriptions/hacksysteam__HackSysExtremeVulnerableDriver.md) Intentionally vulnerable training drivers such as [[vulnerablekernel-driver]] (gmh5225; **`MsIo64.sys`**; IOCTL demos for arbitrary R/W, overflow, UAF, and race conditions) offer another kernel-exploitation lab target beside HackSys-style guides. (source: wiki/sources/descriptions/gmh5225__VulnerableKernel_Driver.md)
 
