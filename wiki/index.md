@@ -184,6 +184,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ApexSU](entities/apex-su.md) — Hardened KernelSU fork: Rust userspace, stealth IOCTL, GKI 2.0 boot patch (Android 12+; cheat / Android root)
 - [ApexD3D_External](entities/apexd3d-external.md) — Apex Legends external: D3D hooking / driver / SDK generation (C/C++; cheat / game:apex legends)
 - [ApexDmaCheatUpdated](entities/apex-dma-cheat-updated.md) — Apex Legends DMA external: PCILeech/MemProcFS FPGA reads; aimbot/recoil/ESP/camera math (C++; cheat / game:apex legends [DMA]; boowampp)
+- [ArcEngine](entities/arc-engine.md) — custom C++ game engine + editor (rendering, scene, physics, audio, input; C# script core; premake; sandbox; engine architecture prototyping; Game Engine / source)
 - [ArcRaidersRadar-dma-Radar](entities/arc-raiders-radar-dma-radar.md) — Arc Raiders DMA radar/ESP: FPGA + MemProcFS; Unicorn Engine pointer-decryption emulation; player/actor iteration (C++; cheat / game:arc raiders [DMA]; a0yark)
 - [Arrow Anti-Cheat](entities/arrow-anticheat.md) — Bukkit/Spigot Minecraft packet AC (Java; PacketEvents; combat/movement/misc checks; statistical analysis + movement prediction; Java + Bedrock; AGPLv3; StelGR; Anti Cheat / game:minecraft)
 - [ayypex](entities/ayypex.md) — Linux Apex Legends internal: Vulkan layer in-game overlay (MangoHud-style; cheat / game:apex legends [Linux])

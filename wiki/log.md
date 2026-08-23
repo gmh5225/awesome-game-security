@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MohitSethi99/ArcEngine`: entity [[arc-engine]] (MohitSethi99; custom C++ game engine + editor; rendering, scene, physics, audio, input, tooling; C# script core; premake build; platform backends + shader assets; sandbox samples; engine architecture prototyping; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[mxengine]], [[lumos]], [[spartan-engine]], and [[doriax]].
+
 - **2026-08-23** — ingest `description:MonoGame/MonoGame`: entity [[monogame]] (MonoGame; cross-platform .NET 2D/3D game framework; C# with native components; graphics, audio, content processing, input, platform abstractions; templates, tools, sample assets; desktop/mobile; Game Engine / [.NET]); cited on [[overviews/game-engine]]; cross-linked [[murder]], [[flatredball]], [[stride]], and [[mono]].
 
 - **2026-08-23** — ingest `description:Mood-Coding/pubgm_shitty_source`: entity [[pubgm-shitty-source]] (Mood-Coding; C++ PUBG Mobile cheat source package; version-pinned external workflow; aim/entity/overlay modules; bundled driver artifacts + privileged-memory helper scripts; mobile shooter cheat-architecture / AC RE; cheat / game:pubgm); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[bypass-pubg-mobile-imgui]], [[china-pubg]], [[pubg-mobile-memory-hacking-examples]], and [[pubgm-sdk-and-offsets]].
