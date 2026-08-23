@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:M1fisto/nullptr-apex-external`: entity [[nullptr-apex-external]] (M1fisto; external Apex Legends tutorial codebase; C++; kernel hijacking + game memory R/W + SDK entity handling; user-mode visualization/control; educational external cheat architecture + anti-cheat detection challenges; cheat / game:apex legends [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[apex-legends-esp]], [[apex-external]], [[apex-legends-cheat]], [[apex-legends-sdk]], and [[driver-read-write]].
+
 - **2026-08-23** — ingest `description:M3351AN/AimStar`: entity [[aimstar]] (M3351AN; external CS2 cheat framework; C++; bone-based aimbot, entity tracking, ESP, triggerbot, offset management, menu config; multi-language docs; external cheat architecture + CS2 memory reading research; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]]; cross-linked [[samidare]], [[ukia-rpm]], [[echinoidea]], [[tkazer-cs2-external]], [[cs2-external-cheat]], and [[cs2external]].
 
 - **2026-08-23** — ingest `description:M3351AN/Echinoidea`: entity [[echinoidea]] (M3351AN; lightweight external CS:GO cheat; C#; bunnyhop, overlay ESP, trigger bot; offset-driven workflow; write-signal reduction + VAC-era detection tradeoff notes; educational external cheat design; cheat / game:csgo [External C#]); cited on [[overviews/game-hacking]]; cross-linked [[csgo-external-esp]], [[csgo-external-cheat]], [[csgo-external-ahk-hack]], [[csgo-offsets]], [[samidare]], and [[ukia-rpm]].
