@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MiCode/kernel_devicetree`: entity [[kernel-devicetree]] (MiCode; Xiaomi kernel device-tree branch index; README lookup table mapping branches→devices/platform tags/release baselines; kernel bring-up / board config / compatibility research; cheat / xiaomi device trees); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[device-xiaomi-mondrian]], [[android-kernel-xiaomi-pipa]], [[android-kernel-xiaomi-sweet]], and [[xiaomi-hyperos-bootloader-bypass]].
+
 - **2026-08-23** — ingest `description:VollRagm/ghostdebug`: entity [[ghostdebug]] (VollRagm; Windows x64 VEH stealth debugger; injected native DLL + C# CLI over named pipe; INT3 breakpoints, single-step, register ops without Win32 Debug API; Iced live disasm + JSON control; TestTarget anti-debug validation; protected-process RE; cheat / debugging); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[titanhide]], [[anti-debugging]], and [[makin]].
 
 - **2026-08-23** — ingest `description:Midi12/QueryWorkingSetExample`: entity [[query-working-set-example]] (Midi12; C working-set anti-tamper demo; `QueryWorkingSet` shared-page metadata in non-writable `.text` reveals debugger breakpoints/protection changes; normal vs tampered screenshots; lightweight memory integrity for RE/defenders); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[faultline]], [[count-hook]], [[integrity-experiments]], and [[memory-guard]].

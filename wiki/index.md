@@ -1656,6 +1656,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel-csgo](entities/kernel-csgo.md) — simple kernel CS:GO cheat (hook KM↔UM comm; C++; cheat / game:csgo)
 - [kernel-cve-analysis](entities/kernel-cve-analysis.md) — defensive Windows kernel CVE write-ups (thexin7; AC/EDR telemetry, Sigma rules, hardening; cng/afd/appid)
 - [kernel-development](entities/kernel-development.md) — Greg Kroah-Hartman Linux kernel dev docs (patch workflow, drivers, LKM; guide lane)
+- [kernel_devicetree](entities/kernel-devicetree.md) — Xiaomi kernel device-tree branch index (MiCode; branch→device/platform/baseline lookup; kernel bring-up / board config)
 - [kernel-hook-framework](entities/kernel-hook-framework.md) — Linux kernel inline-hook framework (trampoline patching + kallsyms resolution; proc control; x86/ARM/RISC-V; kernel debug + anti-cheat research; WeiJiLab)
 - [kernel_build_action](entities/kernel-build-action.md) — GitHub Actions automated kernel build (TypeScript/Python; Android kernel driver CI; dabao1955)
 - [kernel build scripts](entities/kernel-build-scripts.md) — Bash Android GKI/non-GKI kernel build automation (repo sync, patches, defconfig, packaging; KernelSU/SUSFS; Pixel/OnePlus/Xiaomi; TheWildJames)
