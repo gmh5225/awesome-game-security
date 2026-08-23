@@ -20,4 +20,4 @@ Complements passive PMC profiling via [[pmctrace]] and branch-trace collection v
 
 ## Related
 
-[[pmctrace]] · [[pdf-pmc-x86]] · [[branch-monitoring-project]] · [[intel-pcm]] · [[libiht]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]
+[[pmctrace]] · [[pdf-pmc-x86]] · [[perfmon]] · [[thread-spy]] · [[branch-monitoring-project]] · [[intel-pcm]] · [[libiht]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]]

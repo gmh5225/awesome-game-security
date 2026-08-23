@@ -2328,6 +2328,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [peekaboo](entities/peekaboo.md) — modular malware-behavior emulator (safe C2/persistence/lateral-movement; Python CLI/TUI/Flask + C/C++ modules; MITRE ATT&CK + Sigma/YARA + VT; purple-team / detection engineering; cocomelonc)
 - [perf-ninja](entities/perf-ninja.md) — C++ CPU performance optimization labs (cache/branch/vectorization; Alder Lake/Zen 3/M1 CI; Performance Analysis)
+- [PerfMon (KelvinMsft)](entities/perfmon.md) — Windows kernel research driver; PMU/PMI flows, APIC handling, SSDT monitoring + hook-style interception; hardware-assisted monitoring on Win10-era platforms; README PMI Callback
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
 - [PESignAnalyzer](entities/pesign-analyzer.md) — Windows PE embedded Authenticode signature metadata extractor (Anti Cheat → Sign Tools)
 - [perses](entities/perses.md) — x86 PE instruction-expansion obfuscator (semantic-equivalent replacement sequences; Anti Cheat → Obfuscation Engine)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KelvinMsft/PerfMon`: entity [[perfmon]] (KelvinMsft; Windows kernel research driver; C/C++; PMU/PMI flows, APIC handling, interrupt paths; SSDT monitoring + hook-style interception; reference papers + test program; Win10-era hardware-assisted monitoring; README PMI Callback); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[pmi-hpc]], [[thread-spy]], and [[pdf-pmc-x86]].
+
 - **2026-08-23** — ingest `description:KelvinMsft/ThreadSpy`: entity [[thread-spy]] (KelvinMsft; hardware-assisted Windows thread hijacking framework; C++/WDK; PMI callback lane; take over running threads without instruction-byte patches; code injection / memory ops in target context; stealth execution redirection + anti-cheat bypass research; README PMI Callback); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[thread-hijacking-injector]], [[pmi-hpc]], [[process-injection-techniques]], and [[usbmon]].
 
 - **2026-08-23** — ingest `description:KelvinMsft/UsbMon`: entity [[usbmon]] (KelvinMsft; kernel-mode USB/HID monitoring framework; C/C++ WDK driver; hooks IRP and internal IOCTL/URB paths; parses HID reports; custom device-control capture/mapping; traces device data flows into consumer processes; USB/HID input-stack RE and HID attack/detection surface study); cited on [[overviews/windows-kernel]] and [[hardware-input-injection]]; cross-linked [[mouhid-input-hook]], [[ioctldump]], [[kernel-mouse]], and [[hardware-input-injection]].

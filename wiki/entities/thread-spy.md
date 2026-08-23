@@ -14,7 +14,7 @@ confidence: medium
 
 README lane: **PMI Callback** — offensive use of Performance Monitoring Interrupt paths for in-process execution redirection rather than detection-oriented HPC monitoring.
 
-Contrasts with usermode thread-hijack PoCs such as [[thread-hijacking-injector]] (NullTerminatorr; compact remote context manipulation) and complements PMI/HPC security-monitoring samples such as [[pmi-hpc]] and KelvinMsft PMU research such as [[usbmon]] in the same Windows kernel lane.
+Contrasts with usermode thread-hijack PoCs such as [[thread-hijacking-injector]] (NullTerminatorr; compact remote context manipulation) and complements PMI/HPC security-monitoring samples such as [[pmi-hpc]] and KelvinMsft PMU/PMI research such as [[perfmon]] and [[usbmon]] in the same Windows kernel lane.
 
 ## Links
 
@@ -22,4 +22,4 @@ Contrasts with usermode thread-hijack PoCs such as [[thread-hijacking-injector]]
 
 ## Related
 
-[[thread-hijacking-injector]] · [[pmi-hpc]] · [[process-injection-techniques]] · [[windows-process-injection]] · [[usbmon]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[thread-hijacking-injector]] · [[pmi-hpc]] · [[perfmon]] · [[process-injection-techniques]] · [[windows-process-injection]] · [[usbmon]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
