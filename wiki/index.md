@@ -2848,6 +2848,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [TS-Fucker](entities/ts-fucker.md) — runtime TestSigning toggle via Dell `dbutil_2_3.sys` BYOVD (kernel live-patch; symbol-assisted offsets; no reboot; gmh5225)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)
 - [TrustDevice iOS](entities/trustdevice-ios.md) — TrustDecision iOS fingerprint SDK (CocoaPod; integrity / risk signals)
+- [TrustMeBro](entities/trustmebro.md) — Authenticode signature manipulation toolkit (Python/C++; signature steal/clone, PKCS#7 SigStash, SIP hijack 19 types, WinVerifyTrust FinalPolicy bypass, Smart App Control evasion, SIPExec/FormatGhost; YARA/Sigma; KriyosArcane)
 - [TWMS Hacking Data](entities/twms-hacking-data.md) — Taiwan MapleStory live-client hacking corpus (offsets, packets, encryption keys, GameGuard bypass; cheat / game:maplestory [TMS CT]; gmh5225)
 - [TtdAntiDebugging](entities/ttd-anti-debugging.md) — C/C++ TTD debug-testing / hooking anti-debug stress sample (Debug Testing)
 - [ttddbg](entities/ttddbg.md) — IDA Pro plugin: replay WinDbg TTD `.run` traces (forward/backward stepping; Time Travel Debugging)
