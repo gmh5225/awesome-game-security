@@ -465,6 +465,7 @@ sources:
   - wiki/sources/descriptions/byPreaZy__.palmods.md
   - wiki/sources/descriptions/utziacre__android_kernel_xiaomi_pipa.md
   - wiki/sources/descriptions/fiqri19102002__android_kernel_xiaomi_sweet.md
+  - wiki/sources/descriptions/LowTension__android_kernel_xiaomi_sm8475.md
   - wiki/sources/descriptions/utziacre__android_kernel_oneplus_sm8250.md
   - wiki/sources/descriptions/psavarmattas__android_kernel_oneplus_sm7250-WKSU.md
   - wiki/sources/descriptions/mylove90__pc_ginkgo.md
@@ -1975,6 +1976,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Device kernel sources such as [[android-kernel-oneplus-sm7250-wksu]] (OnePlus Nord / SM7250 + KernelSU) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/psavarmattas__android_kernel_oneplus_sm7250-WKSU.md)
 - Device kernel sources such as [[pc-ginkgo]] (Redmi Note 8/8T / ginkgo + KernelSU) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/mylove90__pc_ginkgo.md)
 - Device kernel sources such as [[android-kernel-xiaomi-sweet]] (Redmi Note 10 Pro / sweet + KernelSU; Qualcomm) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/fiqri19102002__android_kernel_xiaomi_sweet.md)
+- Device kernel sources such as [[android-kernel-xiaomi-sm8475]] (Redmi K60 / POCO F5 Pro / mondrian; SM8475 Snapdragon 8+ Gen 1; GKI ABI, Qualcomm Waipio; Pixel Experience Plus) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/LowTension__android_kernel_xiaomi_sm8475.md)
 - Device kernel sources such as [[kernelsu-pixel4xl]] (Pixel 4 XL / coral / msm-floral + KernelSU; su injection / SELinux / syscall hook) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/msnx__KernelSU-Pixel4XL.md)
 - Device kernel sources such as [[android-kernel-samsung-universal5433]] (Samsung Exynos 5433 / Note 4 / Alpha) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/universal5433__android_kernel_samsung_universal5433.md)
 - Device kernel sources such as [[android-kernel-samsung-sm7150]] (Samsung SM7150) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/pascua28__android_kernel_samsung_sm7150.md)

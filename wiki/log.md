@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LowTension/android_kernel_xiaomi_sm8475`: entity [[android-kernel-xiaomi-sm8475]] (LowTension; Redmi K60 / POCO F5 Pro mondrian SM8475 Snapdragon 8+ Gen 1 GKI Android kernel source; GKI ABI, Qualcomm Waipio platform, device configs; Pixel Experience Plus; custom kernel builds; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[device-xiaomi-mondrian]], [[android-kernel-xiaomi-sweet]], [[xiaomi-kernel-opensource]], and [[kernel-devicetree]].
+
 - **2026-08-23** — ingest `description:LoxTus/dwm-overlay`: entity [[dwm-overlay]] (LoxTus; DLL-based DWM overlay PoC; C++; MinHook + DirectX 11 + ImGui; pattern scan dwmcore present routine; D3D11 swap-chain UI; graphics hook / desktop-level rendering interception research; README `[DWM]`); merged with existing Yukin02 [[dwm-overlay]] entity; cited on [[overviews/graphics-api]] and [[concepts/present-hook]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[dwm-dwmdraw]].
 
 - **2026-08-23** — ingest `description:Luchinkin/device-control-hooks-scanner`: entity [[device-control-hooks-scanner]] (Luchinkin; C++ KMDF kernel driver; walks `\Driver` object directory; audits `IRP_MJ_DEVICE_CONTROL` dispatch pointers against driver image bounds with module resolution for out-of-range handlers; kernel integrity auditing / driver hook detection research; README [device-control-hooks-scanner]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[slauc91-anticheat]], [[openark]], [[driver-read-write]], [[driver-detect-nullshit]], [[cfb]], and [[hwid-kernel-spoofer]].

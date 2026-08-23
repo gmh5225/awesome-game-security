@@ -216,6 +216,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [A146B-KSU](entities/a146b-ksu.md) — Samsung Galaxy A14 5G (A146B / a14x) Android kernel + KernelSU (cheat / Android Kernel Source; gmh5225)
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-xiaomi-sweet](entities/android-kernel-xiaomi-sweet.md) — Redmi Note 10 Pro (sweet) Android kernel + KernelSU (Qualcomm; cheat / Android Kernel Source)
+- [android-kernel-xiaomi-sm8475](entities/android-kernel-xiaomi-sm8475.md) — Redmi K60 / POCO F5 Pro (mondrian) SM8475 Snapdragon 8+ Gen 1 GKI Android kernel source (Pixel Experience Plus; cheat / Android Kernel Source)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (gmh5225 Java/Kotlin scoring library; reveny Java/C++ fork; Detection:Virtual Environments)
 - [android-classyshark](entities/android-classyshark.md) — Google ClassyShark APK/DEX/AAR/class bytecode viewer (hierarchies, dependencies, multidex triage)
