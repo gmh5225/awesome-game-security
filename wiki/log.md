@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Leksa667/YOLOv8-Overlay-CS2`: entity [[yolov8-overlay-cs2]] (Leksa667; Python CS2 real-time overlay; YOLOv8 ONNX + ONNX Runtime; mss screen capture; Pygame + Win32 transparent topmost overlay; optional CUDA, confidence filter, hotkeys, smooth aim-assist; computer-vision cheat prototyping + AI-assisted detection research; cheat / game:cs2 [YOLOv8 in CS2]); cited on [[overviews/game-hacking]] and [[concepts/ai-aimbot-detection]]; cross-linked [[rookieai-yolov8]], [[ai-aimbot]], [[gan-aimbots]], [[aimstar]], [[overlayai]], [[waldo]], and [[cs2-tracker]].
+
 - **2026-08-23** — ingest `description:LeoChen-CoreMind/VMPacker`: entity [[vmpacker]] (LeoChen-CoreMind; Go ARM64 ELF VM code protector; native→custom bytecode; indirect dispatch, chained encryption, CRC integrity, function-split obfuscation; demo programs; binary protection / VM obfuscation RE; README ARM64 ELF Virtual Machine Protection System); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[binary-shield]], [[bytecodevm]], [[covirt]], [[vmp-devirtualization-lab]], [[vmattack]], [[deobfbr]], and [[elf-got-patcher]].
 
 - **2026-08-23** — ingest `description:LeoChen-CoreMind/elf-got-patcher`: entity [[elf-got-patcher]] (LeoChen-CoreMind; ARM64 ELF static GOT hook patcher; code-cave shellcode injection, `.init_array` RELA hijack, config-driven ASLR-safe patching; redirect shared-library calls in ARM/ARM64 Android native binaries; cheat / Android RE); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[plthook]], [[pyasm-patch]], [[rel-fuscate]], [[and64-inline-hook]], [[dobby]], and [[adbi]].

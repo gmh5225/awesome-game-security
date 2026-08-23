@@ -3212,6 +3212,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Xilinx FPGA PCIe XDMA Tutorial](entities/xilinx-fpga-pcie-xdma-tutorial.md) — Vivado XDMA hands-on tutorial (BRAM R/W, AXI, Linux host C, MPEG2 acceleration; DMA / FPGA education; WangXuan95)
 - [yae-achievement](entities/yae-achievement.md) — Genshin Impact yae achievement mod (C#/C++; Unity/IL2CPP; gmh5225)
 - [yolov5_PUBG](entities/yolov5-pubg.md) — PUBG YOLOv5 object detection (Python; cheat / triggerbot & aimbot; modding)
+- [YOLOv8 Overlay CS2](entities/yolov8-overlay-cs2.md) — Leksa667 CS2 Python real-time overlay (YOLOv8 ONNX + ONNX Runtime; mss capture; Pygame + Win32 transparent overlay; optional CUDA, confidence filter, hotkeys, smooth aim-assist; computer-vision cheat prototyping + AC research; cheat / game:cs2 [YOLOv8 in CS2])
 - [yara4ida](entities/yara4ida.md) — Unofficial YARA IDA Pro plugin (Alt-Y; `plugins.cfg`; cheat / IDA Plugins)
 - [YaraVM](entities/yaravm.md) — IDA processor/loader for compiled YARA (`.yar.bin` bytecode/regex disasm; `libyara.til`; cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
