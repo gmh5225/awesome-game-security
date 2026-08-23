@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LSPosed/WSA-Kernel-SU`: entity [[wsa-kernel-su]] (LSPosed; kernel module for `/system/xbin/su` on Android kernels especially WSA; syscall hooks redirect `su` execution; credential/SELinux adjustments; low-level C; optional superuser stealth; Android platform modding / kernel-assisted root research; cheat / WSA with KernelSU); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[wsa-linux-kernel]], [[wsa-builds]], [[magiskonwsalocal]], [[wsapatch]], and [[wsa-pacman]].
+
 - **2026-08-23** — ingest `description:LWSS/Ape-ex-Abominations`: entity [[ape-ex-abominations]] (LWSS; DMA-oriented Apex Legends cheat; C++ feature modules + shell gdb injection/extraction/fast-reload automation; interface discovery + pattern scanning; QEMU/VFIO workflows; evdev-mirror kernel module input; virtualized/hardware-assisted cheat research; cheat / game:apex legends [Apex]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[apex-dma-kvm-pub]], [[apex-dma-cheat-updated]], [[ez-apex-dma-aimbot]], [[escape-from-tuxkov]], and [[mcdota]].
 
 - **2026-08-23** — ingest `description:LWSS/McDota`: entity [[mcdota]] (LWSS; C++ Linux Dota 2 cheat/tinkering framework; runtime injection; Panorama UI, ESP, camera controls, protobuf packet intercept/edit; standard/stealth/integrated load modes; Source 2 Linux client RE; cheat / game:dota2 [linux]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[dota2-cheat]], [[dota-cheat]], [[dota2dumped]], and [[source-netvars]].
