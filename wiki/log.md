@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KeyzpOnTheFluxxx/Fortnite-External`: entity [[keyzpon-thefluxxx-fortnite-external]] (KeyzpOnTheFluxxx; C++ Visual Studio; simple external Fortnite cheat; offset updates + external process interaction patterns; typical external cheat structure; game hacking + anti-cheat interaction analysis; cheat / game:fortnite [External]; slug disambiguated from [[fortnite-external]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[fortnite-external]], [[fortnite-external-cheat-base]], [[fortnite-external-cheat-source-code]], [[fortnite-offsets-and-sigs]], [[unreal-object-model]], and [[easy-anti-cheat]].
+
 - **2026-08-23** — ingest `description:Kharos102/IOCTLDump`: entity [[ioctldump]] (Kharos102; Windows WDK kernel driver + client; hooks target device drivers; records IOCTL code, transport path type, buffer sizes, and deduplicated input buffer contents; proprietary driver / anti-cheat interface RE; README [Monitor IRP]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfb]], [[drvtrace]], [[ioctlpus]], [[ioctl-helper]], and [[device-control-hooks-scanner]].
 
 - **2026-08-23** — ingest `description:KhronosGroup/glTF`: entity [[gltf]] (Khronos Group; royalty-free runtime 3D asset delivery specification; core spec, extension registry, conformance assets, JSON/GLB sample models; engine/render/asset-pipeline interoperability; Runtime 3D Asset Delivery); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tinygltf]], [[three-js]], [[ursus]], [[oxylus]], and [[nightshade]].
