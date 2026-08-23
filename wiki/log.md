@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LordAbbot/Rust-External-Cheat`: entity [[lord-abbot-rust-external-cheat]] (LordAbbot; C++ Facepunch Rust external framework; custom kernel driver memory R/W + external DLL; ImGui/DirectX overlay; ESP/aimbot/recoil assistance; driver-assisted external + AC detection-surface research; cheat / game:rust [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[rust-external-cheat]], [[rust-external-1]], [[rust-external-source]], and [[overflow-rust]].
+
 - **2026-08-23** — ingest `description:LordNoteworthy/al-khaser`: entity [[al-khaser]] (LordNoteworthy; Windows C++ anti-analysis PoC test suite; anti-debug/anti-VM/anti-dump/anti-disassembly/timing CLI checks; VirtualBox/VMware/QEMU/Wine; sandbox/EDR/anti-malware visibility validation); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[compact-vm-detector]], [[anti-sandbox]], [[anticuckoo]], and [[vmaware]].
 
 - **2026-08-23** — ingest `description:LostOxygen/gnn_deobfuscation`: entity [[gnn-deobfuscation]] (LostOxygen; Python GNN MBA deobfuscation; training/testing pipelines; Loki/MBABlast/MBAObfuscator datasets by variable count and operation depth; deobfuscation researchers + ML simplification; Cheat Mixed boolean-arithmetic); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[mba]], [[mbased]], [[cobra]], [[promba]], [[qsynthesis]], [[mba-wasm]], [[mba-obfuscator]], and [[mutaben]].

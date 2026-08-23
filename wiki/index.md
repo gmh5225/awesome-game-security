@@ -2554,6 +2554,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-external-1](entities/rust-external-1.md) — Facepunch Rust external cheat (C++; kernel driver/RPM; overlay ESP; EAC Unity; gmh5225)
 - [rust-external-and-driver-aliencheats](entities/rust-external-and-driver-aliencheats.md) — Facepunch Rust external cheat (C++/C/C++; driver / overlays / memory analysis; cheat / game:rust [External]; gmh5225)
 - [rust-external-cheat](entities/rust-external-cheat.md) — Facepunch Rust external (bootmgfw): WDM DriverRW IOCTL R/W + usermode Rust SDK; ESP/aimbot; DX9 ImGui overlay (C++; cheat / game:rust [External])
+- [lord-abbot-rust-external-cheat](entities/lord-abbot-rust-external-cheat.md) — Facepunch Rust external framework (LordAbbot; C++; custom kernel driver memory R/W + external DLL; ImGui/DirectX overlay; ESP/aimbot/recoil; driver-assisted external + AC detection-surface research; cheat / game:rust [External])
 - [rust-external-source](entities/rust-external-source.md) — Facepunch Rust external cheat source (C/C++; driver / shader / audio; cheat / game:rust [External]; gmh5225)
 - [rust-internal](entities/rust-internal.md) — Facepunch Rust internal cheat framework (C++; Horizon core + DX11/ImGui; memory/map helpers; gmh5225)
 - [kors-lol](entities/kors-lol.md) — Facepunch Rust internal cheat source (C++; ESP/hooks/Unity IL2CPP + ImGui menu; detours/spoofcall utilities; ZentifyZ [Internal])

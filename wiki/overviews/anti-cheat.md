@@ -39,6 +39,7 @@ sources:
   - wiki/sources/descriptions/SaadAhla__Anti-Sandbox.md
   - wiki/sources/descriptions/LukeGoule__compact_vm_detector.md
   - wiki/sources/descriptions/LordNoteworthy__al-khaser.md
+  - wiki/sources/descriptions/LordAbbot__Rust-External-Cheat.md
   - wiki/sources/descriptions/Luchinkin__device-control-hooks-scanner.md
   - wiki/sources/descriptions/adem-hosni__AtomicShieldClient.md
   - wiki/sources/descriptions/adde88__SkyEngine.md
@@ -758,7 +759,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 ## Major systems
 
-- [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md); CE tool-detection bypass [[ce-easyanticheat-bypass]] (CE process/window class/driver/memory-access signature evasion; cheat / UD CE; gmh5225) (source: wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md); multi-tier CE evasion research build [[cheat-engine-undetectable]] (NulledNah; direct syscalls, PE metadata mutation, BYOVD kernel bridge with CR3 memory access and ObCallback bypass; AC architecture study) (source: wiki/sources/descriptions/NulledNah__cheat-engine-undetectable.md)
+- [[easy-anti-cheat]] — service + driver + game-facing integrity (Fortnite, Apex, Rust); Integrity Checks PoC [[cveac-2020]] (WDK driver vs EAC kernel-module vuln; enum / PE / hooks) (source: wiki/sources/descriptions/thesecretclub__CVEAC-2020.md); CE tool-detection bypass [[ce-easyanticheat-bypass]] (CE process/window class/driver/memory-access signature evasion; cheat / UD CE; gmh5225) (source: wiki/sources/descriptions/gmh5225__ce-EasyAntiCheat-Bypass.md); multi-tier CE evasion research build [[cheat-engine-undetectable]] (NulledNah; direct syscalls, PE metadata mutation, BYOVD kernel bridge with CR3 memory access and ObCallback bypass; AC architecture study) (source: wiki/sources/descriptions/NulledNah__cheat-engine-undetectable.md); driver-assisted Rust external cheat samples such as [[lord-abbot-rust-external-cheat]] (LordAbbot; custom kernel driver + external DLL + ImGui/DirectX overlay; ESP/aimbot/recoil; AC detection-surface study around kernel-assisted externals; cheat / game:rust [External]) (source: wiki/sources/descriptions/LordAbbot__Rust-External-Cheat.md)
 - [[eac-extractor-utility]] — decrypt/extract EAC kernel driver, UM modules, and config from game dir + driver store for offline static RE (Dump lane) (source: wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md)
 - [[eac-runtime-extractor]] — MinHook DLL intercepts file I/O + driver load; captures EAC kernel driver from memory before disk write for offline RE (Runtime dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-Runtime-Extractor.md)
 - [[eazy-anti-cheat-src]] — reversed EAC source representation: reimplemented detection routines, driver communication, and integrity validation from binary analysis (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md)
