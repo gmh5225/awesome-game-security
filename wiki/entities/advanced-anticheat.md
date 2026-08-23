@@ -26,7 +26,7 @@ Open-source **client-server anti-cheat framework** for **Roblox** games, written
 - ProfileStore-backed persistence for player flags, bans, and error logs
 - Account-age gating, remote rate limiting, and detailed violation logging
 
-Targets Roblox developers who want a drop-in anti-cheat layer—the same server-authoritative plus client-integrity model as [[cs2ac]] and [[nocheatz-3]], applied to Roblox script games rather than Source or CS2 dedicated servers. Pair with [[lua-obfuscator-clyde-protection]] for Luau script hardening and [[roblox-cheats]] for the offensive Roblox client lane.
+Targets Roblox developers who want a drop-in anti-cheat layer—the same server-authoritative plus client-integrity model as [[encryptic-roblox-anti-cheat]], [[shprotect-ac]], [[cs2ac]], and [[nocheatz-3]], applied to Roblox script games rather than Source or CS2 dedicated servers. Pair with [[lua-obfuscator-clyde-protection]] for Luau script hardening and [[roblox-cheats]] for the offensive Roblox client lane.
 
 ## Links
 
@@ -34,4 +34,4 @@ Targets Roblox developers who want a drop-in anti-cheat layer—the same server-
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[roblox-cheats]] · [[lua-obfuscator-clyde-protection]] · [[cs2ac]] · [[nocheatz-3]]
+[[overviews/anti-cheat]] · [[overviews/game-engine]] · [[encryptic-roblox-anti-cheat]] · [[shprotect-ac]] · [[roblox-cheats]] · [[lua-obfuscator-clyde-protection]] · [[cs2ac]] · [[nocheatz-3]]

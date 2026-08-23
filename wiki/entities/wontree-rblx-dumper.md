@@ -21,7 +21,7 @@ Universal **Roblox** game analysis tool that decompiles reachable scripts and ex
 - Markdown and CSV report export
 - Executor noise filtering, graceful handling of protected scripts, configurable script limits and memory caps for large games
 
-Targets game security researchers and reverse engineers who need a practical reference map of a Roblox experience's scripts, remotes, assets, and security-relevant code paths. Pair with [[advanced-anticheat]] and [[shprotect-ac]] for defensive Luau AC context, [[byfron-bypass]] / [[vulkan]] for client anti-tamper RE, and [[roblox-cheats]] for the macOS native client offensive lane.
+Targets game security researchers and reverse engineers who need a practical reference map of a Roblox experience's scripts, remotes, assets, and security-relevant code paths. Pair with [[encryptic-roblox-anti-cheat]], [[advanced-anticheat]], and [[shprotect-ac]] for defensive Luau AC context, [[byfron-bypass]] / [[vulkan]] for client anti-tamper RE, and [[roblox-cheats]] for the macOS native client offensive lane.
 
 ## Links
 
@@ -29,4 +29,4 @@ Targets game security researchers and reverse engineers who need a practical ref
 
 ## Related
 
-[[roblox-cheats]] · [[advanced-anticheat]] · [[shprotect-ac]] · [[lua-obfuscator-clyde-protection]] · [[byfron-bypass]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[roblox-cheats]] · [[encryptic-roblox-anti-cheat]] · [[advanced-anticheat]] · [[shprotect-ac]] · [[lua-obfuscator-clyde-protection]] · [[byfron-bypass]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

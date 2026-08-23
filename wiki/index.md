@@ -972,6 +972,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [engine-showcase](entities/engine-showcase.md) — older custom C++ engine showcase (Lua/UI/levels/net; Game Engine / [Old engine])
 - [Enigma](entities/enigma.md) — standalone native Ghidra SLEIGH/Pcode decompiler (C++; no JVM; BFD multi-arch; Capstone pipelines; embeddable for AI/agents; adam-040)
 - [EntropyReducer](entities/entropy-reducer.md) — PE section padding / data-distribution manipulation to lower Shannon entropy (AV/AC heuristic evasion)
+- [Encryptic Roblox Anti-Cheat](entities/encryptic-roblox-anti-cheat.md) — server-authoritative Luau AC for Roblox (movement/remote/fly/noclip/combat guards; strike BanManager; Studio demo; Longno242)
 - [Ephemera](entities/ephemera.md) — multiplatform MEMORY.DMP analysis (WinDbg flavor; AC / kernel dump)
 - [Epsilon](entities/epsilon.md) — NeoForge/Fabric multi-loader Minecraft utility client (Java; modular combat/movement/render; Mixins + event bus; addon system + Lua; Lumin/PrismRHI HUD; NekoyaHouse; cheat / game:minecraft)
 - [EquilibriumEngine](entities/equilibrium-engine.md) — data-oriented C11 ECS game engine (multi-threaded; hot-reload libraries/shaders; clang; Game Engine / source)
