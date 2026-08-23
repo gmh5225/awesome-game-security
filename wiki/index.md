@@ -1313,6 +1313,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GhidraMetrics](entities/ghidrametrics.md) — Ghidra native-code metrics (cyclomatic / size / call depth; headless JSON)
 - [GreyM](entities/greym.md) — PE-focused C/C++ debugging/packing (Anti Cheat → Binary Packer `[PE]`)
 - [glfm](entities/glfm.md) — GLFW-inspired single-header C API for OpenGL ES/Metal mobile windowing (iOS/tvOS/Android/Emscripten; touch/keyboard/sensors; Write OpenGL ES code in C/C++)
+- [glTF](entities/gltf.md) — Khronos royalty-free runtime 3D asset delivery spec (core spec, extensions, conformance assets, JSON/GLB samples; Runtime 3D Asset Delivery)
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gnn-deobfuscation](entities/gnn-deobfuscation.md) — GNN-based MBA deobfuscation (LostOxygen; Python; training/testing pipelines; Loki/MBABlast/MBAObfuscator datasets by variable count and operation depth; ML simplification research; Cheat Mixed boolean-arithmetic)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
