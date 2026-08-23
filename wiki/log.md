@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:M3351AN/Shirakumo`: entity [[shirakumo]] (M3351AN; usermode RPM/WPM proxy PoC; C++; named-pipe IPC; read/write execution in separate process; optional DLL proxy deployment; experimental x64-only, not thread-safe; process-separated memory access for game tooling and evasion research; cheat / RPM for Windows); cited on [[overviews/game-hacking]]; cross-linked [[nobastian-v2]], [[usugumo]], [[ukia-rpm]], and [[creadmemory]].
+
 - **2026-08-23** — ingest `description:M3351AN/UkiaRPM`: entity [[ukia-rpm]] (M3351AN; external CS2 cheat; C++; kernel driver RPM; DirectX 9 ImGui menu + overlay; aimbot/ESP/radar/recoil control + config persistence; RPM-based external cheat patterns + kernel driver game-memory comm research; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[usugumo]], [[cs2-ext]], [[tkazer-cs2-external]], [[driver-physical-rw]], and [[norsefire]].
 
 - **2026-08-23** — ingest `description:M3351AN/Usugumo`: entity [[usugumo]] (M3351AN; Windows kernel-mode PoC driver; C/C++ + MASM; DIRECT_IO IRP proxy for RPM/WPM, process/module lookup, mouse/keyboard injection; anti-capture + communication examples; non-production; kernel communication + low-level game-security experimentation on x64 Windows; README Kernel-mode W/RPM/mouse_event for Windows); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[driver-physical-rw]], [[norsefire]], [[zhangbing-injector]], [[mouse-input-injection]], and [[km-um-communication]].

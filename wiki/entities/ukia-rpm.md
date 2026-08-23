@@ -12,7 +12,7 @@ confidence: medium
 
 **External Counter-Strike 2 cheat** from **M3351AN** that reads game state through **kernel driver–assisted remote process memory (RPM)** from a separate usermode process. Implemented in **C++**, it bundles aimbot, ESP, radar, recoil control, config persistence, and miscellaneous gameplay modifications behind an **ImGui DirectX 9** menu and visual overlay. Primary research value: studying **RPM-based external cheat architecture** and **kernel driver ↔ usermode communication** for protected-process game memory access. README **External** tag. (source: wiki/sources/descriptions/M3351AN__UkiaRPM.md)
 
-Sits in the kernel-assisted CS2 external lane beside [[cs2-ext]], [[valthrun]], and [[tkazer-cs2-external]], and beside same-author kernel PoCs such as [[usugumo]] and [[zhangbing-injector]].
+Sits in the kernel-assisted CS2 external lane beside [[cs2-ext]], [[valthrun]], and [[tkazer-cs2-external]], and beside same-author kernel PoCs such as [[usugumo]], [[shirakumo]], and [[zhangbing-injector]].
 
 ## Architecture highlights
 
@@ -29,4 +29,4 @@ Sits in the kernel-assisted CS2 external lane beside [[cs2-ext]], [[valthrun]], 
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]] · [[usugumo]] · [[cs2-ext]] · [[tkazer-cs2-external]] · [[cs2-external-cheat]] · [[driver-physical-rw]] · [[norsefire]] · [[km-um-communication]] · [[world-to-screen]]
+[[overviews/game-hacking]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]] · [[usugumo]] · [[shirakumo]] · [[cs2-ext]] · [[tkazer-cs2-external]] · [[cs2-external-cheat]] · [[driver-physical-rw]] · [[norsefire]] · [[km-um-communication]] · [[world-to-screen]]

@@ -2598,6 +2598,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shootergame](entities/shootergame.md) — Unreal ShooterGame Demo with MIT improvements (Cheat / Game Engine Explorer:Unreal; cqcallaw)
 - [shootergame-hack](entities/shootergame-hack.md) — Unreal ShooterGame Demo offensive research (C/C++; rendering / debugging; Cheat / Game Engine Explorer:Unreal; gmh5225)
 - [ShimCacheParser](entities/shimcacheparser.md) — AppCompat ShimCache parser (SYSTEM hive; paths/timestamps/flags; CSV/timeline; AC/IS forensics)
+- [Shirakumo](entities/shirakumo.md) — M3351AN usermode RPM/WPM proxy PoC (C++; named-pipe IPC; read/write in separate process; optional DLL proxy; experimental x64-only; process-separated memory access for game tooling and evasion research; cheat / RPM for Windows)
 - [Shtreeba](entities/shtreeba.md) — Windows manual-map DLL injector (MMap library; UI process picker; Injector)
 - [sig-database](entities/sig-database.md) — IDA FLIRT sigs for Linux libs (OpenSSL/Ubuntu amd64·i386; RE / library ID)
 - [SigFlip](entities/sigflip.md) — patch Authenticode signed PE without breaking signature (WIN_CERTIFICATE inject; SigLoader; Some Tricks / Ring3)
