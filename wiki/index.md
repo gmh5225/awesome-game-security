@@ -745,6 +745,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Diglett](entities/diglett.md) — kernel-mode stealth PoC; hide system threads + alter entry-address visibility; driver + client (Rwkeith; README Hide Kernel Thread)
 - [DirtyPipe-Android](entities/dirtypipe-android.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) permanent Magisk v24.3 root
 - [DirtyPipeRoot](entities/dirtypiperoot.md) — Pixel 6 Dirty Pipe (CVE-2022-0847) one-click temporary root
+- [DirtySepolicy](entities/dirty-sepolicy.md) — LSPosed Android App Zygote SELinux probe (AIDL permissive policy injection without root; detect userspace su; Detection:Android root)
 - [dirty-zero](entities/dirty-zero.md) — iOS XNU kernel KRW exploit (CVE-2025-24203; jailbreak-chain primitive)
 - [dirty-vanity](entities/dirty-vanity.md) — RtlCreateProcessReflection process-fork injection PoC; fork inherits shellcode without WPM (deepinstinct; EDR-evasion research)
 - [Direct EFI Apex Cheat](entities/direct-efi-apex-cheat.md) — Apex user-mode client + UEFI runtime; runtime variable hooks + EFI-bridged kernel pointers; glow/aim (TheCruZ; firmware-assisted AC bypass; cheat / game:apex legends)

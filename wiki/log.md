@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LSPosed/DirtySepolicy`: entity [[dirty-sepolicy]] (LSPosed; Android app; App Zygote AIDL service bind → runtime permissive SELinux rule injection without root/kernel mods; SELinux access checks detect userspace su solutions; Detection:Android root); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[advanced-root-checker]], [[root-app-detector]], [[android-super-inject]], [[magisk]], and [[kernelsu]].
+
 - **2026-08-23** — ingest `description:LSPosed/MagiskOnWSALocal`: entity [[magiskonwsalocal]] (LSPosed; Python/shell scripts integrate Magisk/KernelSU + GApps into WSA images locally; extract/patch system image; installable rooted WSA builds with LSPosed support; Android security researchers/developers; testing and analysis on Win11; cheat / WSA); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[kernelsu]], [[wsa-kernel-su]], [[wsa-linux-kernel]], [[wsa-builds]], [[wsapatch]], and [[wsa-pacman]].
 
 - **2026-08-23** — ingest `description:LSPosed/WSA-Kernel-SU`: entity [[wsa-kernel-su]] (LSPosed; kernel module for `/system/xbin/su` on Android kernels especially WSA; syscall hooks redirect `su` execution; credential/SELinux adjustments; low-level C; optional superuser stealth; Android platform modding / kernel-assisted root research; cheat / WSA with KernelSU); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[wsa-linux-kernel]], [[wsa-builds]], [[magiskonwsalocal]], [[wsapatch]], and [[wsa-pacman]].
