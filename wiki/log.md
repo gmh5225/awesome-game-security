@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Mood-Coding/pubgm_shitty_source`: entity [[pubgm-shitty-source]] (Mood-Coding; C++ PUBG Mobile cheat source package; version-pinned external workflow; aim/entity/overlay modules; bundled driver artifacts + privileged-memory helper scripts; mobile shooter cheat-architecture / AC RE; cheat / game:pubgm); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[bypass-pubg-mobile-imgui]], [[china-pubg]], [[pubg-mobile-memory-hacking-examples]], and [[pubgm-sdk-and-offsets]].
+
 - **2026-08-22** — ingest `description:MothCocoon/FlowGraph`: entity [[flowgraph]] (MothCocoon; UE plugin; design-agnostic event-flow graph for gameplay/narrative scripting; C++ with editor integration; async node execution, custom pin layouts, visual debugging; reusable game-specific nodes; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[generic-graph]], [[simple-quest]], [[luamachine]], and [[automation-examples]].
 
 - **2026-08-22** — ingest `description:Mowokuma/vm_str.hpp`: entity [[vm-str-hpp]] (Mowokuma; header-only C++20 compile-time string obfuscation; compile-time obfuscation bytecode schema + stack-based VM runtime reconstruct; narrow/wide string macros; keeps plaintext out of static program data; software hardening / RE resistance; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[obfuscate]], [[crystr]], [[static-string-obfuscation]], [[skcrypter]], and [[mystic-xorstr]].

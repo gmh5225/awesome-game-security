@@ -2325,6 +2325,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pubg-mobile-memory-hacking-examples](entities/pubg-mobile-memory-hacking-examples.md) — PUBG Mobile Android memory hacking examples (entity/player/weapon reads; scan + modify; cheat / game:pubgm; gmh5225)
 - [pubg-mobile-pak-extract](entities/pubg-mobile-pak-extract.md) — PUBG Mobile pak extractor (pre–1.1.0; post-update encryption unsupported; cheat / game:pubgm)
 - [pubgm-pubgpatcher](entities/pubgm-pubgpatcher.md) — PUBG Mobile client patcher (C/C++/Java; networking / asset pipelines / modding; cheat / game:pubgm; gmh5225)
+- [pubgm-shitty-source](entities/pubgm-shitty-source.md) — PUBG Mobile version-pinned cheat source (C++; aim/entity/overlay; driver artifacts + privileged-memory scripts; external workflow; Mood-Coding; cheat / game:pubgm)
 - [pubgm-sdk-and-offsets](entities/pubgm-sdk-and-offsets.md) — PUBG Mobile UE4 SDK + offsets (1.5 / 1.9; ARM32 reflection dump; cheat / game:pubgm [Offset])
 - [pubgm1.6-deadgame](entities/pubgm1.6-deadgame.md) — PUBG Mobile 1.6 decompiled dump archive (`libtersafe.so` + `libUE4.so`; historical ACE/UE4 native RE; cheat / game:pubgm; gmh5225)
 - [Push](entities/push.md) — in-game overlay + system tuning toolkit (C/C++; D3D8–11/DXGI hooks; CPU/GPU/RAM/storage OSD, frame limiting, sync control; Monitor GPU/CPU/RAM performance; Volkanite)
