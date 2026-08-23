@@ -1459,6 +1459,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-missinglink](entities/ida-missinglink.md) — IDA plugin: fill missing indirect CALL/JMP targets (C++ OOP RE; cheat / IDA Plugins)
 - [ida-migrator](entities/ida-migrator.md) — Python IDA plugin: migrate IDB/database between IDA versions or environments (cheat / IDA Plugins)
 - [ida-minsc](entities/ida-minsc.md) — IDA Pro plugin: IDAPython namespace replacement (DWIM interface; tagging/filtering; database/function automation; cheat / IDA Plugins)
+- [ida-multi-mcp](entities/ida-multi-mcp.md) — Multi-instance IDA Pro MCP (Python; one endpoint for many GUI/idalib sessions; parallel routing; BCSD cross-binary function similarity; Claude Code/Cursor)
 - [ida-names](entities/ida-names.md) — IDA Pro plugin: batch rename, pattern match, prefix/suffix, import/export for function/symbol names (pseudocode window titles; cheat / IDA Plugins)
 - [ida-nexus-docker](entities/ida-nexus-docker.md) — Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus; ordered LLM analysis prompts in isolation; ZIP audit trails (mrexodia)
 - [ida-no-mcp](entities/ida-no-mcp.md) — IDA plugin + Rust/idalib CLI: export Hex-Rays decompilation, disasm fallback, strings/imports/exports/memory as files for AI IDEs without MCP (P4nda0s; cheat / IDA Plugins)

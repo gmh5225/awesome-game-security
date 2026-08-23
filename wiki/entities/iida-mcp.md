@@ -12,7 +12,7 @@ confidence: medium
 
 Faster IDA Pro MCP plugin aimed at AI-agent reverse engineering: large tool surface (77 tools), multi-instance routing, and an optional Windows kernel companion driver (`iida-mcp-ioctl`) for live kernel memory/module access—so agents can combine static IDB analysis with dynamic kernel inspection over one MCP protocol. (source: wiki/sources/descriptions/saileaxh__iida-mcp.md)
 
-Peers with other IDA agent bridges such as [[ida-mcp-server-plugin]] (MCP without a kernel driver), [[idac]] (JSON CLI; not MCP), and LLM assistants like [[aida]] / [[ida-assistant]]. The ioctl-driven kernel path also sits next to kernel debug MCP such as [[mcp-windbg]].
+Peers with other IDA agent bridges such as [[ida-multi-mcp]] (multi-instance routing + BCSD cross-binary similarity; no kernel driver), [[ida-mcp-server-plugin]] (MCP without a kernel driver), [[idac]] (JSON CLI; not MCP), and LLM assistants like [[aida]] / [[ida-assistant]]. The ioctl-driven kernel path also sits next to kernel debug MCP such as [[mcp-windbg]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Peers with other IDA agent bridges such as [[ida-mcp-server-plugin]] (MCP withou
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[ida-mcp-server-plugin]] · [[idac]] · [[aida]] · [[ida-assistant]] · [[mcp-windbg]] · [[ida-kmdf]]
+[[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[ida-mcp-server-plugin]] · [[ida-multi-mcp]] · [[idac]] · [[aida]] · [[ida-assistant]] · [[mcp-windbg]] · [[ida-kmdf]]
