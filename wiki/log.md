@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Letomaniy/Speed-Hack`: entity [[speed-hack]] (Letomaniy; Windows C++ Visual Studio injectable DLL; Cheat Engine–style Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat development practice + AC time-manipulation research); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[speedhack]], [[cheat-engine]], and [[detours]].
+
 - **2026-08-23** — ingest `description:Lexikos/AutoHotkey_L`: entity [[autohotkey-l]] (Lexikos; open-source Windows automation/macro scripting platform; custom hotkey language; C/C++ interpreter binaries + self-contained script runtime + experimental DLL embed; task automation and input scripting; game-adjacent macro experimentation and defensive script-behavior analysis); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[csgo-external-ahk-hack]], [[hardware-input-injection]], and [[mouse-input-injection]].
 
 - **2026-08-23** — ingest `description:LibreHardwareMonitor/LibreHardwareMonitor`: entity [[libre-hardware-monitor]] (LibreHardwareMonitor; C# WinForms + .NET sensor library; CPU/GPU/storage temps, fans, voltages, loads, clocks; system diagnostics + game performance / environment-aware telemetry; actively maintained [[openhardwaremonitor]] fork); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[openhardwaremonitor]], [[openhardwaremonitor-poc]], [[windows-hardware-info]], [[hwinfo]], [[winring0]], and [[windows-rapl-driver]].
