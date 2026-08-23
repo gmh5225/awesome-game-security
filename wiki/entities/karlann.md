@@ -10,9 +10,9 @@ confidence: medium
 
 # Karlann
 
-Windows kernel driver proof-of-concept combining **keyboard input injection** (`Kbd.c`) and **Winsock Kernel (WSK)** network I/O (`Wsk.c` with a `libwsk` helper). README category: `[Keyboard]`. (source: wiki/sources/descriptions/hkx3upper__Karlann.md)
+Windows kernel driver proof-of-concept combining **keyboard input injection** (`Kbd.c`) and **Winsock Kernel (WSK)** network I/O (`Wsk.c` with [[libwsk]]). README category: `[Keyboard]`. (source: wiki/sources/descriptions/hkx3upper__Karlann.md)
 
-Useful for studying kernel-mode keyboard simulation paths beside MouClass mouse research such as [[kernel-mouse]], and for covert ring-0 TCP/UDP channels alongside BSD-style WSK wrappers such as [[ksocket]].
+Useful for studying kernel-mode keyboard simulation paths beside MouClass mouse research such as [[kernel-mouse]], and for covert ring-0 TCP/UDP channels alongside BSD-style WSK wrappers such as [[ksocket]] and [[libwsk]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for studying kernel-mode keyboard simulation paths beside MouClass mouse 
 
 ## Related
 
-[[kernel-mouse]] · [[ksocket]] · [[keyboardkit]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-mouse]] · [[ksocket]] · [[libwsk]] · [[keyboardkit]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
