@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KelvinMsft/NoTruth`: entity [[notruth]] (KelvinMsft; open-source Windows x64 VT-x/EPT user-mode memory hiding; C/C++ kernel driver + tests; redirect reads to fake values while controlling execution semantics; checksum/integrity bypass experiments; memory deception / hypervisor-assisted instrumentation research; README Hide Memory By VT); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hypervisor]], [[ophion]], [[budget-ept]], [[ept-hook-detection]], [[hypervisor-from-scratch]], and [[perfmon]].
+
 - **2026-08-23** — ingest `description:KelvinMsft/PerfMon`: entity [[perfmon]] (KelvinMsft; Windows kernel research driver; C/C++; PMU/PMI flows, APIC handling, interrupt paths; SSDT monitoring + hook-style interception; reference papers + test program; Win10-era hardware-assisted monitoring; README PMI Callback); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[pmi-hpc]], [[thread-spy]], and [[pdf-pmc-x86]].
 
 - **2026-08-23** — ingest `description:KelvinMsft/ThreadSpy`: entity [[thread-spy]] (KelvinMsft; hardware-assisted Windows thread hijacking framework; C++/WDK; PMI callback lane; take over running threads without instruction-byte patches; code injection / memory ops in target context; stealth execution redirection + anti-cheat bypass research; README PMI Callback); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[thread-hijacking-injector]], [[pmi-hpc]], [[process-injection-techniques]], and [[usbmon]].

@@ -2113,6 +2113,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NMI nmi_callback](entities/nmi-nmi-callback.md) — Windows kernel PoC to register/trigger NMI callbacks and inspect thread contexts (BattlEye-style detection study; gmh5225)
 - [nohv](entities/nohv.md) — C/C++ hypervisor VM-detection benchmark suite (kernel driver; Detection: Hacked Hypervisor)
 - [nokd](entities/nokd.md) — stealth kernel debugger protocol (local KdDebuggerDataBlock decode → WinDbg; no ntoskrnl KD globals)
+- [NoTruth (KelvinMsft)](entities/notruth.md) — VT-x/EPT user-mode memory deception; redirect reads to fake values while controlling execution; checksum/integrity bypass research; README Hide Memory By VT
 - [NTFS-EFI](entities/ntfs-efi.md) — native UEFI x64 NTFS R/W driver (EfiNtfs; EFI Commander pre-boot FM; chkdsk-clean unmount)
 - [ntfs-journal-viewer](entities/ntfs-journal-viewer.md) — NTFS `$UsnJrnl` change-journal viewer (C; AC / IS forensics)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)
