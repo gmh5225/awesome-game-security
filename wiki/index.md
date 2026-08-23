@@ -2481,6 +2481,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r6-cheat-dumper](entities/r6-cheat-dumper.md) — R6 external cheat dumper: driver + rendering + animation (C/C++; cheat / game:r6 [External]; gmh5225)
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
 - [r6-intel](entities/r6-intel.md) — R6 ranked-stat suspicion scorer: R6Data API heuristics (Node.js; integrity / moderation research; baldspots440)
+- [r6-updater](entities/r6-updater.md) — R6 offset dumper/updater: C++ pattern scan + memory modules for post-patch signature refresh (Kix48; cheat / game:r6 [Dump])
 - [r6s-external-v2](entities/r6s-external-v2.md) — R6 external v2: kernel driver/handle elevation ESP + aimbot (C++; cheat / game:r6 [External]; gmh5225)
 - [r6s-internal-cheat](entities/r6s-internal-cheat.md) — R6 internal: modding + overlays + memory analysis (C++; cheat / game:r6; gmh5225)
 - [rainbow](entities/rainbow.md) — UEFI EDK-II pre-kernel bootkit; OVMF/QEMU debug + VS UEFI build; pre-boot attack vectors / firmware persistence (SamuelTulach; cheat / [HWID])
