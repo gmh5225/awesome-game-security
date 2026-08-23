@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Krietz7/IDA-DataExportPlus`: entity [[ida-data-export-plus]] (Krietz7; Python IDA Pro plugin; extends/replaces default data export window; integer/float formats + assembly text export; hotkey-driven; modern IDA; repetitive disassembly extraction; binary analysts / security researchers; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-export-functions]], [[lazyida]], [[ida-function-string-associate]], and [[list-of-ida-plugins]].
+
 - **2026-08-23** — ingest `readme:categories`: Anti Cheat ~690 (+1; bad-antics/rce-shield duplicated in Guide lane; other major section counts stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
 
 - **2026-08-23** — ingest `description:Krilliac/SparkEngine`: entity [[spark-engine]] (Krilliac; cross-platform C++23 3D game engine; DX12/Vulkan/Metal RHI, ECS, Jolt Physics, ImGui editor; dedicated servers, replication, client prediction, lag compensation, encryption, packet validation, memory integrity checks; ARPG/MMO/MMOFPS sample modules; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[lightyear]], [[game-networking-resources]], [[methanekit]], [[l-spiro-engine-2022]], and [[hazel]].

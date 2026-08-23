@@ -1440,6 +1440,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-cli](entities/ida-cli.md) — headless IDA Pro MCP server for AI-assisted binary analysis (idalib; Rust/C++; cheat / IDA Plugins)
 - [IDAComments](entities/idacomments.md) — IDA Pro plugin: capture, organize, and review user comments (Python; IDA 7.x/8.x; dedicated view; keyboard/menu access; NoneShell; cheat / IDA Plugins)
 - [ida-dark-plus](entities/ida-dark-plus.md) — IDA Pro Dark+ theme (modern dark palette; disassembly/hex/structures/all windows; cheat / IDA themes)
+- [IDA DataExportPlus](entities/ida-data-export-plus.md) — IDA Pro plugin: extend/replace data export window; integer/float formats + assembly text (Python; hotkey-driven; Krietz7; cheat / IDA Plugins)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)
 - [IDArling](entities/idarling.md) — collaborative IDA Pro / Hex-Rays plugin (real-time multi-user IDB sync; cheat / IDA Plugins)

@@ -671,6 +671,7 @@ sources:
   - wiki/sources/descriptions/morsisko__xFindOut.md
   - wiki/sources/descriptions/mgeeky__ThreadStackSpoofer.md
   - wiki/sources/descriptions/Kudaes__Unwinder.md
+  - wiki/sources/descriptions/Krietz7__IDA-DataExportPlus.md
   - wiki/sources/descriptions/Kruziikrel1__CSGO-FindMDL.md
   - wiki/sources/descriptions/klezVirus__SilentMoonwalk.md
   - wiki/sources/descriptions/klezVirus__BYOUD.md
@@ -1973,6 +1974,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - IoT firmware vulnerability hunting via [[firmeye]] (Python IDA plugin; argument tracing into sensitive functions; static + debugger-assisted dynamic checks; overflow / command-exec / format-string rules; CLI batch workflows; firmware audit + embedded RE; Vu1nT0tal; cheat / IoT / IDA Plugins) sits in the firmware/IoT IDA Plugins lane beside [[renamaida]], [[efixplorer]], and [[embedded-hacking]]. (source: wiki/sources/descriptions/Vu1nT0tal__firmeye.md)
 - Batch function/symbol name management via [[ida-names]] (Python; batch rename, pattern match, prefix/suffix, import/export; renames pseudocode window titles with current function name; cheat / IDA Plugins) sits in the same symbol-naming lane. (source: wiki/sources/descriptions/gmh5225__ida_names.md)
 - IDA function-list Markdown export via [[ida-export-functions]] (Python; dump DB function index to a specified path for notes/reporting; cheat / IDA Plugins) sits in the same documentation/reporting lane beside [[ida-slides]] and [[ida-screenshot]]. (source: wiki/sources/descriptions/gmh5225__ida_export_functions.md)
+- Structured data and assembly text export via [[ida-data-export-plus]] (Krietz7; Python IDA Pro plugin; extends/replaces default data export window; integer/float formats + disassembly text; hotkey-driven; modern IDA; repetitive extraction during RE; cheat / IDA Plugins) sits in the same data-extraction lane beside [[ida-export-functions]] and [[lazyida]]. (source: wiki/sources/descriptions/Krietz7__IDA-DataExportPlus.md)
 - Function–string association and auto-comments from literals via [[ida-function-string-associate]] (IDA 9.X; scan function bodies for string refs; navigable per-function summary; cheat / IDA Plugins) sits in the same string-triage lane beside [[ida-names]] and [[idawilli]]. (source: wiki/sources/descriptions/gmh5225__ida-function-string-associate.md)
 - User comment capture and organization via [[idacomments]] (NoneShell; Python IDA 7.x/8.x plugin; hooks comment actions; dedicated review view; keyboard/menu access; note management while reversing game clients and anti-cheat modules; cheat / IDA Plugins) sits in the same annotation workflow lane beside [[ida-export-functions]] and [[idarling]]. (source: wiki/sources/descriptions/NoneShell__IDAComments.md)
 - `.data`-section pointer lookup via [[ida-find-.data-ptr]] (Python IDAPython; locate/xref global `.data` pointers during static RE; cheat / IDA Plugins) sits in the same data/xref triage lane beside [[ida-plugins]] and [[ida-missinglink]]. (source: wiki/sources/descriptions/gmh5225__ida-find-.data-ptr.md)
