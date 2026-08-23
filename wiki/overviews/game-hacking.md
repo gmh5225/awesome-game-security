@@ -597,6 +597,7 @@ sources:
   - wiki/sources/descriptions/sigwl__AiDA.md
   - wiki/sources/descriptions/trailofbits__CoBRA.md
   - wiki/sources/descriptions/stp__stp.md
+  - wiki/sources/descriptions/LLVMParty__smt-server.md
   - wiki/sources/descriptions/nbulsi__cirsat.md
   - wiki/sources/descriptions/stolevchristian__LUDA.md
   - wiki/sources/descriptions/xoxor4d__gta4-rtx.md
@@ -1716,6 +1717,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - MBA expression simplification via [[cobra]] (Trail of Bits CoBRA; C++ coefficient-based reconstruction) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/trailofbits__CoBRA.md)
 - Practical MBA simplification via [[mbased]] (bliutech; reduces mixed boolean-arithmetic obfuscation for analysis) sits in the same Mixed boolean-arithmetic lane. (source: wiki/sources/descriptions/bliutech__mbased.md)
 - Bitvector/array SMT solving via [[stp]] (Simple Theorem Prover; MiniSat/CryptoMiniSat; SMT-LIB 2) sits in the same Mixed boolean-arithmetic / constraint-solver lane. (source: wiki/sources/descriptions/stp__stp.md)
+- QF_BV SMT server [[smt-server]] (LLVMParty; Rust; SMT-LIB 2 parsing; bit-blasting to SAT; C++/Python client libraries for binary analysis and deobfuscation tooling) sits in that constraint-solver lane. (source: wiki/sources/descriptions/LLVMParty__smt-server.md)
 - Circuit-based AIG SAT via [[cirsat]] (DAG logic networks / AIGER; hardware verification & combinational equivalence) sits in the same constraint-solver lane. (source: wiki/sources/descriptions/nbulsi__cirsat.md)
 - Fix OLLVM / deobfuscation plugins targeting `libtprt.so` (e.g. [[deobf]]) sit in the Cheat Fix OLLVM lane. (source: wiki/sources/descriptions/zhuzhu-Top__deobf.md)
 - IDA CFF deflattening via [[idadeflat]] (angr-backed semi-auto CFG recover/patch) also sits in that Fix OLLVM / deflat lane. (source: wiki/sources/descriptions/za233__IDADeflat.md)

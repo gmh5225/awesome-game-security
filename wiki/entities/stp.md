@@ -18,4 +18,4 @@ Simple Theorem Prover — an efficient SMT solver for bitvector and array theori
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[cobra]] · [[mutaben]] · [[novmpy]] · [[rumba]] · [[idadeflat]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[smt-server]] · [[r2smt]] · [[cobra]] · [[mutaben]] · [[novmpy]] · [[rumba]] · [[idadeflat]]
