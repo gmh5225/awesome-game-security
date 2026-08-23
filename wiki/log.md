@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LING71671/open-reverselab`: entity [[open-reverselab]] (LING71671; Python agent-native RE lab; 180+ technique articles + 100+ MCP automation tools; knowledge router; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidramcp]], [[x64dbg]], [[x64dbg-mcp]], [[frida]], [[jadx]], [[apktool-mcp-server]], and [[glass]].
+
 - **2026-08-23** — ingest `description:LLVMParty/smt-server`: entity [[smt-server]] (LLVMParty; Rust QF_BV SMT solver server; SMT-LIB 2 parsing; bit-blasting to SAT; C++/Python client libraries for binary analysis and deobfuscation tooling; Cheat constraint-solver lane); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[stp]], [[r2smt]], [[cobra]], [[drill-and-join]], and [[obfuscation-analysis]].
 
 - **2026-08-23** — ingest `description:LLeavesG/eBPFDexDumper`: entity [[ebpf-dex-dumper]] (LLeavesG; Go; Android in-memory DEX dumper via eBPF probes; rooted ARM64; UID/package filter; method execution traces; ART DEX dump + auto-repair; low-intrusion dynamically loaded bytecode recovery; cheat / DexDumper based eBPF on Android Platform); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[android-ebpf]], [[edbg]], [[stackplz]], [[ehook]], [[zygisk-dump-dex]], [[dexkit-android]], [[dexbuilder]], [[jadx]], and [[frida]].

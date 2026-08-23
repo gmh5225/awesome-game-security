@@ -474,6 +474,7 @@ sources:
   - wiki/sources/descriptions/mrphrazer__ghidra-headless-mcp.md
   - wiki/sources/descriptions/bethington__ghidra-mcp.md
   - wiki/sources/descriptions/LaurieWired__GhidraMCP.md
+  - wiki/sources/descriptions/LING71671__open-reverselab.md
   - wiki/sources/descriptions/justfoxing__ghidra_bridge.md
   - wiki/sources/descriptions/mutinylaboratories__ghidra_svr_bridge.md
   - wiki/sources/descriptions/moyix__gpt-wpre.md
@@ -1780,6 +1781,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - AI reverse engineering assistant for x64dbg via [[x64dbg-rippy]] (WebView2 in-debugger chat; LLM tool-use for memory/disasm/breakpoints/single-step; Anthropic/OpenAI APIs; Cheat x64dbg Plugins / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-rippy.md)
 - Python x64dbg Automate client via [[x64dbg-automate-pyclient]] (ZeroMQ/msgpack RPC; breakpoints/memory/registers/disasm/session/GUI; optional MCP server; scriptable repeatable debug sessions; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md)
 - Dedicated x64dbg MCP server via [[x64dbg-mcp]] (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/bromoket__x64dbg_mcp.md)
+- Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)
 - Extension-plugin disassembler/debugger [[xdv]] (C/C++; plugin development / modding / SDK generation) complements [[x64dbg]] and [[syser]] in the Cheat Debugging lane for game-security offensive RE. (source: wiki/sources/descriptions/imugee__xdv.md)
 - Lightweight Java/JVM attach debugging via [[jdbg]] (JDWP; method hooks / breakpoints / variable inspect / class enum) supports runtime RE of Java game clients and obfuscated JVM apps. (source: wiki/sources/descriptions/roger1337__JDBG.md)
