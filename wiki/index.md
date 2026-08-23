@@ -2977,6 +2977,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unicorn-pe](entities/unicorn-pe.md) — Unicorn-based Windows PE emulation for packed binaries (per-instruction disasm; cheat / DBI)
 - [unxorer](entities/unxorer.md) — IDA Pro/Home stack-string deobfuscator (C++; Unicorn emulation; branching-path exploration + stack scan; configurable start points; cheat / IDA Plugins; SamuelTulach)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
+- [usbmon (KelvinMsft)](entities/usbmon.md) — kernel USB/HID monitoring framework; IRP/IOCTL/URB hooks + HID report parse; trace device data flows to consumer processes; input-stack RE / HID attack-detection surfaces
 - [usbsn (ekknod)](entities/usbsn.md) — root-only USB serial number changer (C++/Java; Windows/Linux/mobile; Some Tricks / Android; peripheral HWID spoof)
 - [UWPDumper](entities/uwp-dumper.md) — UWP runtime package dumper (C++ DLL + injector; Windows 10 SDK; inject into target process; Explore UWP / Microsoft Store game RE; Wunkolo)
 - [UnrealVTDbg](entities/unreal-vtdbg.md) — VT-x/EPT Unreal kernel debugger (Delphi UI + VMX/EPT driver, EPT hooks, Detours breakpoints; Win10/11)
