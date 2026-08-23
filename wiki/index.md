@@ -68,6 +68,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Bad-BugCheck Old](entities/bad-bugcheck-old.md) — NSG650; early kernel BSOD visual PoC; Bootvid VidBitBlt VGA-style animated frames on forced crash screen; triggers bugcheck after playback; legacy BOOTVID crash-screen graphics research
 - [BadRentdrv2](entities/badrentdrv2.md) — Rentdrv2.sys BYOVD (IOCTL → physmem R/W; driver map / kernel patch / AC bypass; gmh5225)
 - [BadEye](entities/badeye.md) — BE handle-access assumption bypass (C++ memory analysis; EPROCESS→MmCopyVirtualMemory; gmh5225; cheat / explore anticheat system:be)
+- [bad-io-uring](entities/bad-io-uring.md) — Android io_uring kernel privesc PoC (Markakd; C/NDK; Pixel 6 root; per-device exploit variants; boot-image unpack + kallsyms helper; kernel security research; cheat / Root for Pixel 6)
 - [bad-query](entities/bad-query.md) — iOS 26–27 sandbox-escape PoC (Xcode; app/daemon/App Group/system-container path access; container isolation research; forcequitOS)
 - [BaiZe](entities/baize.md) — Magisk/KernelSU/APatch graded cache, log, APK-residue, and deep junk cleanup (Kotlin/C; risk tiers, quarantine)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)

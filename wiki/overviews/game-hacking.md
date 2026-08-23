@@ -491,6 +491,7 @@ sources:
   - wiki/sources/descriptions/imugee__xdv.md
   - wiki/sources/descriptions/sad0p__venom.md
   - wiki/sources/descriptions/cloudfuzz__android-kernel-exploitation.md
+  - wiki/sources/descriptions/Markakd__bad_io_uring.md
   - wiki/sources/descriptions/systemnb__compile_android_driver.md
   - wiki/sources/descriptions/gmh5225__android-kernel-driver-template.md
   - wiki/sources/descriptions/aosp-mirror__kernel_common.md
@@ -1969,6 +1970,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android kernel exploitation guide/lab such as [[android-kernel-exploitation]] (kernel debugging, ARM/AArch64 layout, UAF/heap overflow/race vulns, KASLR/PAN/PXN bypass, full exploit chains; cheat / Android Kernel Exploitation) sits in the same Cheat Android kernel training lane beside CVE reference lists. (source: wiki/sources/descriptions/cloudfuzz__android-kernel-exploitation.md)
 - Android Kernel CVE reference lists such as [[android-vuln]] (documentation/list for cheat / Android Kernel CVE research) sit in the same Cheat Android Kernel CVE lane. (source: wiki/sources/descriptions/tangsilian__android-vuln.md) PoC/exploit list [[android-vuln-poc-exp]] (documentation/list; kernel CVE PoCs) sits beside it. (source: wiki/sources/descriptions/jiayy__android_vuln_poc-exp.md)
 - Dirty Pipe (CVE-2022-0847) temporary root via [[dirtypiperoot]] (Pixel 6; vuln check + native C; pipe page-cache overwrite of read-only files) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/tiann__DirtyPipeRoot.md) Permanent Magisk v24.3 root on Pixel 6 via [[dirtypipe-android]] (module-loader pipe overwrite + ARM64 SELinux/cred shellcode) sits beside it. (source: wiki/sources/descriptions/polygraphene__DirtyPipe-Android.md)
+- Android io_uring kernel privesc PoC via [[bad-io-uring]] (Markakd; C/NDK; per-device/kernel exploit variants; boot-image unpack + kallsyms helpers; Pixel 6 root; kernel exploit reproduction in authorized test environments; cheat / Root for Pixel 6) sits in the same Cheat Android Kernel CVE / Root lane. (source: wiki/sources/descriptions/Markakd__bad_io_uring.md)
 
 - Android Emulator runtime root via [[aeroot]] (Quarkslab Python; debug pipe / ADB root → remount + custom `su`; no system-image rewrite; multi-API) sits in the Cheat `[Root]` / Android Emulator lane. (source: wiki/sources/descriptions/quarkslab__AERoot.md)
 - AVD Magisk/root tooling via [[rootavd]] (kernel-level work / modding / SDK generation; Cheat Magisk / Android Emulator) sits beside that emulator-root lane. (source: wiki/sources/descriptions/newbit1__rootAVD.md)
