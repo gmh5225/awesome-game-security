@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KooroshRZ/Windows-DLL-Injector`: entity [[windows-dll-injector]] (KooroshRZ; C++ Visual Studio; CreateRemoteThread, native thread-creation variants, QueueUserAPC, SetWindowsHookEx, RtlCreateUserThread; x86/x64; injector + payload DLL projects; simplicity/compatibility/detection-surface trade-offs; process injection research; Injection Testing); cited on [[overviews/game-hacking]] and [[windows-process-injection]]; cross-linked [[thread-hijacking-injector]], [[simple-setwindowshookexw-injector]], [[guided-hacking-injector]], [[rust-dll-crab]], [[process-injection-techniques]], and [[injectors]].
+
 - **2026-08-23** — ingest `description:KorokEngine/Korok`: entity [[korok]] (KorokEngine; lightweight cross-platform Go 2D game engine; component-based architecture; animation, rendering, assets, audio, gameplay modules; compact package-oriented design; docs + samples; Game Engine / source [Golang]); cited on [[overviews/game-engine]]; cross-linked [[torque2d]], [[love]], [[bulllord-engine]], and [[custom-game-engines]].
 
 - **2026-08-23** — ingest `description:KpwnZ/Def1nit3lyN0tAJa1lbr3akTool`: entity [[def1nit3lyn0tajailbreaktool]] (KpwnZ; iOS 16.0–16.6.1 jailbreak tool; kernel exploitation + trustcache build paths; Objective-C/C native; post-exploitation workflows; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[dopamine2-roothide]], [[ios-jailbreak-fugu15]], [[palera1n]], [[kfd]], and [[opainject]].

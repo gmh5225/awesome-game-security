@@ -3139,6 +3139,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-10-22h2-vulnerable-driver-communication](entities/windows-10-22h2-vulnerable-driver-communication.md) — ASUS `asromgdrv.sys` BYOVD IOCTL wrapper (contiguous kernel pool + CR R/W; Win10 22H2 / Win11; gmh5225)
 - [windows-desktop-duplication-sample](entities/windows-desktop-duplication-sample.md) — DXGI Output Duplication desktop capture sample (C++; cursor + dirty/moved regions; `[DXGI]`)
 - [windows-screenshotcapture-directx](entities/windows-screenshotcapture-directx.md) — minimal DX9 front-buffer screenshot capture (`GetFrontBufferData` + WIC PNG; `[DX9]`)
+- [Windows-DLL-Injector](entities/windows-dll-injector.md) — C++ Visual Studio multi-method Windows DLL injector (CreateRemoteThread, native thread variants, QueueUserAPC, SetWindowsHookEx, RtlCreateUserThread; x86/x64; injector + payload DLL projects; Injection Testing; KooroshRZ)
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [windows-forensic-artifacts](entities/windows-forensic-artifacts.md) — structured Markdown guide to Windows forensic artifacts (execution/account/file/network/persistence/user activity; locations, parsing, timeline correlation; DFIR reference; Psmths)
 - [Windows-Spoofer](entities/windows-spoofer.md) — open-source Win10/11 spoofing + cleanup toolkit (Batch/PowerShell; system IDs, network values, trace cleanup; volume ID / SMBIOS via external utilities; anti-cheat fingerprinting research; Scrut1ny; cheat / HWID)
