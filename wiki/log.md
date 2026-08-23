@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LibreHardwareMonitor/LibreHardwareMonitor`: entity [[libre-hardware-monitor]] (LibreHardwareMonitor; C# WinForms + .NET sensor library; CPU/GPU/storage temps, fans, voltages, loads, clocks; system diagnostics + game performance / environment-aware telemetry; actively maintained [[openhardwaremonitor]] fork); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[openhardwaremonitor]], [[openhardwaremonitor-poc]], [[windows-hardware-info]], [[hwinfo]], [[winring0]], and [[windows-rapl-driver]].
+
 - **2026-08-23** — ingest `description:LilPidgey/BEClient`: entity [[beclient]] (LilPidgey; C++ Visual Studio PoC; initialize/call BattlEye client DLL interface; game/AC data structures, callback registration, run/command/exit handlers; structure headers for client comm fields; anti-cheat client integration RE in game processes); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[be-emulator]], [[fakeeye]], [[arma3beclient]], and [[battleye-decryption]].
 
 - **2026-08-23** — ingest `description:Lima-X/Win32.Nebula`: entity [[win32-nebula]] (Lima-X; C++ PoC packed/protected module loader framework; lightweight loader library + builder patches/encrypts/packs binaries; SDK-style APIs, dynamic service manager; software protection / loader architecture / anti-analysis research in malware and anti-cheat ecosystems; PE X64); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[polyengine]], [[atom-pe-packer]], [[hm-pe-packer]], [[pe-packer]], [[wizard-loader]], [[windows-process-injection]], and [[rs-ldr]].
