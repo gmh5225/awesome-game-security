@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/bmharper__WindowsDesktopDuplicationSample.md
   - wiki/sources/descriptions/bavulapati__DXGICaptureApplication.md
   - wiki/sources/descriptions/Rick-laboratory__Windows-Screenshotcapture-DirectX.md
-updated: 2026-08-21
+  - wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md
+updated: 2026-08-23
 confidence: medium
 ---
 
@@ -37,6 +38,7 @@ Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXG
 ## Cheat-side evasion (collection patterns)
 
 - **Frame suppression** — detect AC `BitBlt`/`PrintWindow` hooks and skip ImGui draw for the captured frame.
+- **GDI capture hook** — hook `BitBlt` in gdi32 so AC screenshot pipelines receive a pre-stored clean frame instead of the live overlay-modified client area; educational PoC [[screenshot-detection-bypass]] (Mes2d; C++; class-based hook + settings; README `[BitBlt]`). (source: wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md)
 - **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it.
 - **DWM composition** — separate surfaces that survive `PrintWindow` but not all BitBlt paths; kernel DC blocking in extreme cases.
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.

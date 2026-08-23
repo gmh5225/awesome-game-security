@@ -2535,6 +2535,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
 - [screenshot](entities/screenshot.md) — Windows capture-method comparison (BitBlt/DDA/PrintWindow/DWM; AC screenshot research; README `[BitBlt]`; gmh5225)
+- [screenshot-detection-bypass](entities/screenshot-detection-bypass.md) — C++ PoC; gdi32 BitBlt hook returns clean frame to AC screenshot pipelines; class-based hook; educational capture-hook evasion (Mes2d; README `[BitBlt]`)
 - [segcap](entities/segcap.md) — D3D12 hook extracting per-pixel object-ID segmentation masks from shipping UE4/UE5 retail titles (MinHook command intercept + CustomDepth runtime introspection; automated virtual-gamepad capture; masks/RGB/JSON export; Qervas)
 - [SecureGame](entities/secure-game.md) — Pong-like POC; core game logic in Windows VBS enclave; host render/input + enclave DLL state/rules; SDL2; trusted execution / anti-cheat research (SamuelTulach)
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
