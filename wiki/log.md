@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KiruyaMomochi/wsa-kernel-build`: entity [[wsa-kernel-build]] (KiruyaMomochi; Docker-based WSA Linux kernel build environment; packaged x86_64/arm64 cross-compilation toolchain; reproducible local/CI builds; custom kernel testing/instrumentation; Cheat Build WSA Kernel with Docker); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[wsa-linux-kernel]], [[wsa-builds]], [[wsa-kernel-su]], [[magiskonwsalocal]], [[wsapatch]], and [[wsa-pacman]].
+
 - **2026-08-23** — ingest `description:KisSsArt/CS2-Cheat-Base`: entity [[kisssart-cs2-cheat-base]] (KisSsArt; Windows DirectX injectable DLL; kiero + ImGui hook/rendering infrastructure; configurable ESP/bunny-hop modules; JSON config; Visual Studio x64 + manual-map injection; starter framework for cheat development + game security research; cheat / game:cs2 [Internal]; slug disambiguated from [[cs2-cheat-base]]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2-cheat-base]], [[cstrike2-hack]], [[asphyxia-cs2]], [[kiero]], [[present-hook]], and [[windows-dll-injector]].
 
 - **2026-08-23** — ingest `description:KitchenGun/UE4_FPS`: entity [[ue4-fps]] (KitchenGun; small UE4 FPS sample; C++ classes + Blueprint assets/maps; standard input/engine config; lightweight native gameplay layer; FPS development learning sandbox + engine-level game research target; UE4 FPS Demo); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[ue4-fps-game]], [[simple-fps-template]], and [[unreal-object-model]].
