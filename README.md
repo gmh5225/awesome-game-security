@@ -3911,6 +3911,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/MemWars [Testing Framework]
 - https://github.com/ekknod/EC [Testing Framework]
 - https://github.com/KuryCat/GhostJoin [Minimal Python Minecraft Java protocol client for authorized anti-bot/anti-cheat stress testing]
+- https://github.com/JoshKappler/laneguard [Behavioral anti-cheat test bench simulating a lane-change mobile skill game with attacker ladder, detector ensemble, ROC calibration, and economy analysis]
 - https://github.com/stuxnet147/Known-Driver-Mappers [Known Driver Mappers]
 - https://github.com/DanielRTeixeira/injectAllTheThings [Injection Testing]
 - https://github.com/MahmoudZohdy/Process-Injection-Techniques [Injection Testing]
