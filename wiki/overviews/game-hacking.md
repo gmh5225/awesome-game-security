@@ -987,6 +987,7 @@ sources:
   - wiki/sources/descriptions/mandiant__flare-vm.md
   - wiki/sources/descriptions/mandiant__GoReSym.md
   - wiki/sources/descriptions/mahaloz__DAILA.md
+  - wiki/sources/descriptions/MayerDaniel__ida_gpt.md
   - wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md
   - wiki/sources/descriptions/ke0z__VulChatGPT.md
   - wiki/sources/descriptions/loyaltypollution__ida2llvm.md
@@ -1818,6 +1819,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Local Ollama-assisted HLIL renaming via [[binaryninja-ollama]] (Python BN plugin; bulk/targeted function and variable rename; configurable local server/port/model; offline semantic labeling; Cheat Binary Ninja Plugins) sits in the same LLM-assistant lane beside [[rikugan]]. (source: wiki/sources/descriptions/ahaggard2013__binaryninja-ollama.md)
 - OpenAI-assisted HLIL analysis via [[binaryninja-openai]] (Python BN plugin; selected-function summarize from HLIL/pseudo-C + variable rename proposals in analysis view; BN plugin settings/API key management; Cheat Binary Ninja Plugins / Integrates OpenAI) sits beside [[binaryninja-ollama]] in the same LLM-assistant lane. (source: wiki/sources/descriptions/WhatTheFuzz__binaryninja-openai.md)
 - Decompiler ChatGPT assistant via [[daila]] (cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/mahaloz__DAILA.md)
+- ChatGPT-compatible IDAPython helper via [[ida-gpt]] (MayerDaniel; Python; function descriptions + automated variable/location/symbol rename suggestions; writes comments and renamed identifiers back into the IDA database; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/MayerDaniel__ida_gpt.md)
 - ChatGPT PCode assistant via [[ida-plugin-pcodegpt]] (Chinese UI only; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant / microcode lane. (source: wiki/sources/descriptions/lzyddf__IDA_Plugin_PCodeGPT.md)
 - Multi-provider IDA vulnerability analysis via [[vulchatgpt]] (BinAIVulHunter; OpenAI/Gemini/Ollama; decompiled-function vuln analysis + code explanation; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/ke0z__VulChatGPT.md)
 - OpenAI-compatible IDA analysis assistant via [[wpechatgpt]] (Python IDAPython; explain function behavior, rename variables, Python routine reconstruction, vulnerability checks from decompiled views; automated function-tree traversal + summarization; cheat / IDA Plugins / `[ChatGPT]` lane) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/WPeace-HcH__WPeChatGPT.md)

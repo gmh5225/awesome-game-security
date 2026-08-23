@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MayerDaniel/ida_gpt`: entity [[ida-gpt]] (MayerDaniel; Python IDAPython; ChatGPT-compatible backend; plain-language function descriptions + automated rename suggestions for variables, locations, and symbols; writes comments and renamed identifiers into IDA DB; interactive unfamiliar-binary triage; cheat / IDA Plugins / [ChatGPT]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[wpechatgpt]], [[daila]], [[binoculars]], [[aida]], and [[ida-llm-explainer]].
+
 - **2026-08-23** — ingest `description:MemNixFS/MemNixFS`: entity [[memnixfs]] (MemNixFS; C++17 Linux memory forensics; mount AVML/LiME/raw/kdump dumps as filesystem; browse processes/files/sockets/modules/timelines; MemProcFS-style workflow on Linux images; Windows/Linux analysis hosts; AC / IS forensics / Linux memory forensics); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[memprocfs-analyzer]], [[volatility3]], [[volatility]], [[pcileech]], and [[tracee]].
 
 - **2026-08-23** — ingest `description:Merisho/tx-holdem`: entity [[tx-holdem]] (Merisho; JavaScript Texas Hold'em poker logic library; card/hand modeling, combination comparison, highest-hand selection, draw calculations; Node.js + browser; examples/tests; game developers + simulation authors; README `[Texas Holdem Poker made by JS]`); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[stockfish]], [[lc0]], [[2048-cpp]], and [[ue5-cardgame]].
