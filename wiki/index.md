@@ -3147,6 +3147,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [windows-dll-hijacking](entities/windows-dll-hijacking.md) — Windows DLL hijack DB (sideload / search-order / phantom DLL)
 - [windows-forensic-artifacts](entities/windows-forensic-artifacts.md) — structured Markdown guide to Windows forensic artifacts (execution/account/file/network/persistence/user activity; locations, parsing, timeline correlation; DFIR reference; Psmths)
 - [Windows-Spoofer](entities/windows-spoofer.md) — open-source Win10/11 spoofing + cleanup toolkit (Batch/PowerShell; system IDs, network values, trace cleanup; volume ID / SMBIOS via external utilities; anti-cheat fingerprinting research; Scrut1ny; cheat / HWID)
+- [windows-software-policy](entities/windows-software-policy.md) — KiFilterFiberContext Windows kernel licensing path via `SystemPolicyInformation` (`NtQuerySystemInformation`); user-mode licensing ↔ kernel policy driver; C headers + Python binary helper; Windows internals / software protection RE
 - [WindowsHardwareInfo](entities/windows-hardware-info.md) — WMI C++ hardware inventory CLI (Detection:HWID)
 - [windows-process-injection](entities/windows-process-injection.md) — Windows injection techniques (shellcode / syscalls / stomping / stack spoof)
 - [windows-kernel-debugging-guide](entities/windows-kernel-debugging-guide.md) — remote Windows kernel debugging guide (cheat / guide)
