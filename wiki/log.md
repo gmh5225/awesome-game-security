@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LloydLabs/wsb-detect`: entity [[wsb-detect]] (LloydLabs; C library + sample; modular Windows Sandbox fingerprinting—processes, usernames, device paths, DNS suffixes, registry artifacts, timing; combinable by false-positive tolerance; anti-analysis / environment-awareness for malware studies, red-team simulation, and defensive countermeasure testing; Windows Sandbox ("WSB")); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[anti-sandbox]], [[al-khaser]], and [[compact-vm-detector]].
+
 - **2026-08-23** — ingest `description:Logboy2000/yuzu-archive`: entity [[yuzu-archive]] (Logboy2000; placeholder archival repo for discontinued yuzu Switch emulator; README + DMCA notice record only—no source code; legal/ecosystem reference for Switch emulator enforcement timeline; Nintendo Switch lane); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[nuzu]], [[yuzu-android]], and [[opensw]].
 
 - **2026-08-23** — ingest `description:LongWayHomie/PolyEngine`: entity [[polyengine]] (LongWayHomie; polymorphic PE packer/crypter; junk code, instruction substitution, XTEA, RunPE process hollowing, stack spoofing, module stomping, Hell's Gate syscalls; CTF / Windows low-level security education; in-memory execution; Anti Cheat → Binary Packer); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[atom-pe-packer]], [[hm-pe-packer]], [[pe-packer]], [[windows-process-injection]], [[rs-ldr]], and [[polymorphic-engine]].
