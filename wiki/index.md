@@ -2483,6 +2483,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RiskEngine](entities/risk-engine.md) — Android risk-control SDK + management platform (device fingerprinting; JNI root/hook/emulator/debug/VPN/sandbox detection; WsttXm)
 - [ripr](entities/ripr.md) — IDA/BN function rip → Python/Unicorn harness (r2pipe; Cheat IDA/BN Plugins)
 - [Rikugan](entities/rikugan.md) — in-IDA/BN RE AI agent (multi-provider LLM chat; agentic tool loop, plan mode, Ollama; buzzer-re)
+- [Ring Reaper](entities/ring-reaper.md) — Linux post-exploitation agent (MatheuZSecurity; C + Python control server; io_uring async I/O replaces traditional read/write/send/receive syscalls; file transfer, process/user enum, network inspection, session control; EDR evasion research)
 - [Riru-MomoHider](entities/riru-momo-hider.md) — Riru Zygote-injection Magisk root-hide module (syscall + Java API hooks; mount spoof, file hide, property-query block; canyie; Cheat / Magisk)
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
 - [RIVER](entities/river.md) — Bitdefender dynamic binary analysis framework (ELF/PE loader; external mapping; native import resolution; x86 runtime instrumentation; cheat / DBI)
