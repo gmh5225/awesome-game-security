@@ -2135,6 +2135,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ow-Anti-Flag](entities/ow-anti-flag.md) — Overwatch chainban anti-flag console tool (clears flag directories/registry keys; modern C++; cheat / HWID; dword64)
 - [Ow-FOV](entities/ow-fov.md) — Overwatch FOV changer (injected DLL; batch-file injector pairing recommended; cheat / game:overwatch [FOV]; dword64)
 - [Ow-Outlines](entities/ow-outlines.md) — Overwatch internal glow/outline ESP (injected DLL; GlowESP offset + VEH; outline rendering memory writes; cheat / game:overwatch)
+- [ow_unpack](entities/ow-unpack.md) — Overwatch protected-binary unpack/decrypt (Midi12; reuploaded C++; decryption/helper modules + asm-assisted low-level unpacking; binary analysis / unpack study; cheat / game:overwatch)
 - [orx](entities/orx.md) — portable data-driven 2D C/C++ engine (Game Engine / source)
 - [osslsigncode](entities/osslsigncode.md) — cross-platform Authenticode signing (OpenSSL/cURL; PE/CAB/CAT/MSI/APPX/scripts; Anti Cheat → Sign Tools)
 - [OSAntiCheat](entities/osanticheat.md) — experimental server-side CS2 CounterStrikeSharp heuristic AC (spinbot/aimbot/triggerbot/wallhack detectors; fusion suspicion tiers; log-only)
