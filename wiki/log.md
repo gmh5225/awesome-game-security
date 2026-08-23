@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:cBournhonesque/lightyear`: entity [[lightyear]] (Rust server-authoritative Bevy multiplayer library; prediction/rollback, snapshot interpolation, lag compensation, tick-synced inputs; UDP/WebSocket/Steam/WebTransport via aeronet; bevy_replicon world replication; WebAssembly; client-server trust-boundary study; Game Network / source); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[bevy]], [[bevy-personal-test]], [[certael]], and [[magnetite]].
+
 - **2026-08-23** — ingest `readme:categories`: Game Network ~28 (+1; cBournhonesque/lightyear Rust Bevy server-authoritative netcode; other major section counts stable); refreshed [[overviews/overview]] and [[overviews/game-engine]] README-map counts; light `index.md` section notes (no per-category pages).
 
 - **2026-08-23** — ingest `description:MoZiHao/CS2_DMA_Extrnal`: entity [[cs2-dma-extrnal]] (MoZiHao; C++ external DMA toolset; LeechCore/VMMDLL; aimbot/triggerbot/radar/bhop/anti-flash; ImGui control UI; JSON offsets; zero target-OS software; cheat / game:cs2 [DMA External]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[cs2-dma-radar]], [[cs2-dma]], [[cs2-dma-cheat]], and [[pcileech]].
