@@ -2589,6 +2589,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
 - [shellcode-obfuscation](entities/shellcode-obfuscation.md) — Caesar-cipher encoding pipeline (Python obfuscator + C VirtualAlloc loader; AV bypass-rate measurements; academic lab)
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
+- [shellcode-plain-sight](entities/shellcode-plain-sight.md) — C demo; hide shellcode in large randomized RW region at random offset; VirtualProtect to RX; post-exec zero cleanup (LloydLabs; memory evasion / AC detection testing)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
 - [ScyllaHide-For-IDA9.0RC](entities/scyllahide-for-ida9.0rc.md) — IDA 9.0 SDK ScyllaHide anti-anti-debug build (C/C++ hook libs, injector, debugger plugins; masks debugger artifacts; TKazer)
 - [ScyllaHideDetector2](entities/scyllahidedetector2.md) — ScyllaHide Detector V2 (C/C++; debug hide / byte restore; Anti Debugging)
