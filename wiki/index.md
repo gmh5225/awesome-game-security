@@ -2712,6 +2712,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Spoofer-AMIDEWIN](entities/spoofer-amidewin.md) — AMIDEWIN HWID / system-identifier spoof research (C/C++; Cheat HWID)
 - [spoof-stack-SafeCall](entities/spoof-stack-safecall.md) — Windows return-address spoofing library (SafeCall; fake legitimate stack returns; Cheat Spoof Stack; gmh5225)
 - [sprite-sheet-creator](entities/sprite-sheet-creator.md) — AI 2D pixel-art sprite sheets & parallax backgrounds (fal.ai; Next.js; walk/jump/attack/idle, sandbox; AI category)
+- [spark-engine](entities/spark-engine.md) — cross-platform C++23 3D game engine (Krilliac; DX12/Vulkan/Metal RHI, ECS, Jolt Physics, ImGui editor; dedicated servers, replication, prediction, lag compensation, encryption, packet validation, memory integrity checks; ARPG/MMO/MMOFPS samples; Game Engine / source)
 - [sqlite-unity3d](entities/sqlite-unity3d.md) — Unity C# SQLite save/load sample (OguzKaira; DatabaseManager; player coordinates via StreamingAssets; keyboard shortcuts; learner persistence foundation; Game Engine / Unity SQLite)
 - [SpookiMystic-GTA-Leak](entities/spookimystic-gta-leak.md) — leaked GTA V online mod-menu source (RAGE scripting hooks; money drops / teleport / griefing; cheat / `[Menu]`; gmh5225)
 - [Squally](entities/squally.md) — 2D platformer teaching game hacking via gameplay (C++ Cocos2d-x; values/operators/logic for memory reasoning; Win/macOS/Linux; Squalr)
