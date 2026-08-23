@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kurok00/R3nzSkin`: entity [[r3nzskin]] (Kurok00; C++ LoL skin changer; client-side skin rendering without game-file edits; DLL injector; pattern scanning + Python automated pattern updaters; community pattern fetching with KsDumper integration; game modding/LoL client RE; cheat / game:lol [Skin]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[r3nzskin-tft]], [[league-skin-changer]], [[league-of-legends-visuals-cheat]], [[lol-offset-dumper]], [[ksdumper-11]], and [[vanguard]].
+
 - **2026-08-23** — ingest `description:KuryCat/GhostJoin`: entity [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java protocol client; Handshake→Login→Configuration→Play without rendering; offline-mode UUID, compression, Client Information, brand plugin messages, Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat stress testing on offline-mode servers; cheat / game:minecraft); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[eafe]], [[minecraft-anticheat-list]], [[windfall-anticheat]], [[ycbr-anticheat]], and [[phantom-client]].
 
 - **2026-08-23** — ingest `description:Kwansy98/ApiBreakpoint`: entity [[api-breakpoint]] (Kwansy98; C++ x64dbg GUI plugin; visual API breakpoint configure/manage workflow; x86/x64; Windows API runtime tracing; malware/RE/game-security analysts; Cheat x64dbg Plugins / Api Breakpoint); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[slothbp]], [[x64dbg-call-finder]], and [[xfindout]].

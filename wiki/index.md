@@ -2466,6 +2466,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ravengine](entities/ravengine.md) — modern C++ ECS game engine (Vulkan via RGL; GameNetworkingSockets; CMake cross-platform; input/GUI/audio + resource packing; C++ 3D)
 - [raival-file-explorer](entities/raival-file-explorer.md) — lightweight Kotlin/Java Material 3 Android file manager (multi-tab, task handling, code editor, deep content search; Gradle baseline; Cheat Android File Explorer; Raival-e; slug disambiguated from [[file-explorer]])
 - [razer-rzctl](entities/razer-rzctl.md) — BYOVD via Razer `rzctl.sys` (kernel mouse/keyboard simulation or IOCTL kernel access; gmh5225)
+- [R3nzSkin](entities/r3nzskin.md) — LoL skin changer (C++; client-side skin rendering; DLL injector; pattern scan + Python auto-updaters; KsDumper integration; Skin; Kurok00; cheat / game:lol)
 - [R3nzSkinTFT](entities/r3nzskin-tft.md) — LoL/TFT skin changer (C++; champion skin ID memory patch; client-only cosmetic swap; Skin; gmh5225; cheat / game:lol)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
