@@ -341,6 +341,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__WOW-WowAutoFishing.md
   - wiki/sources/descriptions/gmh5225__overwatch-iat-fixer.md
   - wiki/sources/descriptions/Midi12__ow_unpack.md
+  - wiki/sources/descriptions/Midi12__QueryWorkingSetExample.md
   - wiki/sources/descriptions/liors619__TtdAntiDebugging.md
   - wiki/sources/descriptions/rrbranco__blackhat2012.md
   - wiki/sources/descriptions/samshine__ScyllaHideDetector2.md
@@ -1019,7 +1020,7 @@ sources:
   - wiki/sources/descriptions/Sidenai__hyperion-disassembler.md
   - wiki/sources/descriptions/Speedi13__ROP-COMPILER.md
   - wiki/sources/descriptions/NHCM-dev__BytecodeVM.md
-updated: 2026-08-22
+updated: 2026-08-23
 confidence: high
 ---
 
@@ -1066,6 +1067,8 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 **User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks.
 
 **Kernel-mode anti-debug:** `KdDebuggerEnabled`, DR0–DR7 monitoring, `KPROCESS.DebugPort` zeroing, NMI callbacks.
+
+**Working-set anti-tamper:** [[query-working-set-example]] (Midi12; C; `QueryWorkingSet` shared-page state in `.text` reveals debugger breakpoints/protection changes; lightweight memory integrity for RE/defenders) (source: wiki/sources/descriptions/Midi12__QueryWorkingSetExample.md).
 
 **Bypass/hide tooling:** [[titanhide]] (kernel SSDT tamper), ScyllaHide/HyperHide plugins for x64dbg/IDA including [[scyllahide-for-ida9.0rc]] (IDA 9.0 SDK build; hook libs + injector + debugger plugins; masks debugger artifacts; TKazer) (source: wiki/sources/descriptions/TKazer__ScyllaHide-For-IDA9.0RC.md); defensive detection via [[scyllahidedetector2]], [[makin]]. Ghost opcodes (`0F 1A`/`0F 1B`) blind some disassemblers — [[hint-break]].
 

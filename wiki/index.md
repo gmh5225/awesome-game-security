@@ -2367,6 +2367,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [quickemu](entities/quickemu.md) — optimized QEMU VM create/run (Win/macOS/Linux; Cheat QEMU/KVM lab)
 - [query-gpu-name-rs](entities/query-gpu-name-rs.md) — Rust Windows GPU display-name query (Detection:HWID; gmh5225)
 - [query-shadow-stack](entities/query-shadow-stack.md) — Windows CET shadow-stack query/mismatch PoC (return-address integrity; gmh5225)
+- [QueryWorkingSetExample](entities/query-working-set-example.md) — C working-set `.text` anti-tamper demo (`QueryWorkingSet`; breakpoint/protection detection; Midi12)
 - [qiling-il2cpp-dump](entities/qiling-il2cpp-dump.md) — Qiling emulation IL2CPP metadata dump (no game launch; obfuscated/anti-tamper; cheat / game engine explorer:Unity)
 - [qiomem](entities/qiomem.md) — BYOVD via Qualcomm `QIOMem.sys` (QCI0701 ACPI; virtual device → IOCTL physmem R/W; gmh5225)
 - [qualcomm_avb_exploit_poc](entities/qualcomm-avb-exploit-poc.md) — Qualcomm AVB bypass PoC (crafted partition data skips boot-image verification; persistent code execution; atlas4381)

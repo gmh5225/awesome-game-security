@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Midi12/QueryWorkingSetExample`: entity [[query-working-set-example]] (Midi12; C working-set anti-tamper demo; `QueryWorkingSet` shared-page metadata in non-writable `.text` reveals debugger breakpoints/protection changes; normal vs tampered screenshots; lightweight memory integrity for RE/defenders); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[faultline]], [[count-hook]], [[integrity-experiments]], and [[memory-guard]].
+
 - **2026-08-23** — ingest `description:Midi12/ow_unpack`: entity [[ow-unpack]] (Midi12; reuploaded C++ protected Overwatch binary unpack/decrypt codebase; multiple decryption/helper modules + assembly-assisted low-level unpacking; practical RE tool for binary analysis and protected-game unpack study; cheat / game:overwatch); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[overwatch-iat-fixer]], [[decryption-dumper]], [[league-unpacker]], [[unpacker]], and [[x64dbg]].
 
 - **2026-08-23** — ingest `description:Miffyli/gan-aimbots`: entity [[gan-aimbots]] (Miffyli; Python ML-aimbot research repo; ViZDoom FPS scenarios; data collection, GAN training/evaluation, classifier plots, experiment orchestration; reproduces published GAN-aimbot pipelines with shared group parameters; cheat generation + detection-strategy research; cheat / Machine Learning); cited on [[overviews/game-hacking]] and [[concepts/ai-aimbot-detection]]; cross-linked [[ai-aimbot]], [[rookieai-yolov8]], [[aimbot-detection-prototype]], and [[waldo]].
