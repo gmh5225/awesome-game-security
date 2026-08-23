@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `readme:categories`: Anti Cheat ~690 (+1; bad-antics/rce-shield duplicated in Guide lane; other major section counts stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
+
 - **2026-08-23** — ingest `description:Krilliac/SparkEngine`: entity [[spark-engine]] (Krilliac; cross-platform C++23 3D game engine; DX12/Vulkan/Metal RHI, ECS, Jolt Physics, ImGui editor; dedicated servers, replication, client prediction, lag compensation, encryption, packet validation, memory integrity checks; ARPG/MMO/MMOFPS sample modules; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/anti-cheat]]; cross-linked [[lightyear]], [[game-networking-resources]], [[methanekit]], [[l-spiro-engine-2022]], and [[hazel]].
 
 - **2026-08-23** — ingest `description:KriyosArcane/TrustMeBro`: entity [[trustmebro]] (KriyosArcane; Authenticode signature manipulation toolkit; Python + C++; signature steal/clone, PKCS#7 SigStash embedding, SIP hijack across 19 file types, WinVerifyTrust FinalPolicy bypass, Smart App Control evasion, SIPExec lateral movement, FormatGhost persistence; YARA/Sigma + Impacket remote registry; authorized red-team / trust-control research); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[sigthief]], [[stealing-signatures]], [[signature-kid]], [[sigflip]], and [[unsign]].
