@@ -28,6 +28,7 @@ sources:
   - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
   - wiki/sources/descriptions/Leksa667__YOLOv8-Overlay-CS2.md
   - wiki/sources/descriptions/Miffyli__gan-aimbots.md
+  - wiki/sources/descriptions/LaihoE__DLAC.md
 updated: 2026-08-23
 confidence: medium
 ---
@@ -79,6 +80,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[rookieai-yolov8]] — Passer1072 YOLOv8 Ultralytics FPS aim-assist framework (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
 - [[yolov8-overlay-cs2]] — Leksa667 CS2 Python real-time overlay (YOLOv8 ONNX via ONNX Runtime; mss capture; Pygame + Win32 transparent topmost overlay; optional CUDA, confidence filter, hotkeys, smooth aim-assist; computer-vision cheat prototyping + AC research; cheat / game:cs2 [YOLOv8 in CS2])
 - [[gan-aimbots]] — Miffyli academic ML-aimbot research repo (Python; ViZDoom FPS scenarios; data collection, GAN-aimbot training/evaluation, classifier plots, experiment orchestration; reproduces published pipelines with shared GAN-group parameters; offensive + defensive aimbot ML research; cheat / Machine Learning)
+- [[dlac]] — LaihoE CS:GO demo-analysis anti-cheat package (Python inference + Go demo parser; ONNX models; per-shot suspicious-aim prediction; terminal/CSV/in-memory export; tunable confidence thresholds; replay-based behavioral detection research; Anti Cheat / Machine Learning)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[rust-auto-weapon-detection-opencv-example]] — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; no memory reads; YouNeverKnow00)

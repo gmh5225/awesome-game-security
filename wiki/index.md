@@ -746,6 +746,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dirty-zero](entities/dirty-zero.md) — iOS XNU kernel KRW exploit (CVE-2025-24203; jailbreak-chain primitive)
 - [dirty-vanity](entities/dirty-vanity.md) — RtlCreateProcessReflection process-fork injection PoC; fork inherits shellcode without WPM (deepinstinct; EDR-evasion research)
 - [Direct EFI Apex Cheat](entities/direct-efi-apex-cheat.md) — Apex user-mode client + UEFI runtime; runtime variable hooks + EFI-bridged kernel pointers; glow/aim (TheCruZ; firmware-assisted AC bypass; cheat / game:apex legends)
+- [dlac](entities/dlac.md) — LaihoE CS:GO demo-analysis deep-learning anti-cheat (Python + Go parser; ONNX models; per-shot suspicious-aim prediction; CSV/terminal export; tunable confidence; replay-based behavioral detection research; Anti Cheat / Machine Learning)
 - [disable-call-recording-bookrestore](entities/disable-call-recording-bookrestore.md) — iOS bl_sbx file-exploit tool to suppress call-recording notification sounds (system audio asset replace; cheat / iOS file explorer)
 - [disable-threat-tracing](entities/disable-threat-tracing.md) — C ETW Testing / threat-tracing disable (AC stress-testing)
 - [disabling-hyper-v](entities/disabling-hyper-v.md) — Win10 Hyper-V / Device Guard / Credential Guard teardown guide (Microsoft hardware readiness tool → disable HVCI + VBS; gmh5225; Disable Hyper-V)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LaihoE/DLAC`: entity [[dlac]] (LaihoE; deep-learning anti-cheat package for CS:GO demo analysis; Python inference + Go demo parser; ONNX runtime models; per-shot suspicious-aim prediction; terminal/CSV/in-memory export; tunable confidence thresholds; replay-based behavioral detection research; Anti Cheat / Machine Learning); cited on [[overviews/anti-cheat]] and [[concepts/ai-aimbot-detection]]; cross-linked [[deep-learning-anti-cheat-csgo]], [[waldo]], [[delbot-mouse]], [[gan-aimbots]], [[pine]], and [[csgo-ac]].
+
 - **2026-08-23** — ingest `description:Lakr233/vphone-cli`: entity [[vphone-cli]] (Lakr233; Swift CLI + Python firmware patchers for iBoot/kernel/TXM; jailbreak patch sets, ramdisk builders, CFW; Virtualization.framework PCC research VM on Apple Silicon Macs; SIP/AMFI disabled, DFU/restore/ramdisk; iOS security RE / virtualized iOS lab; cheat / Boot virtual iPhone); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[xnu-qemu-arm64]], [[utm]], [[xnu-1day-practice]], [[malimite]], and [[ida-ios-helper]].
 
 - **2026-08-23** — ingest `description:LaurieWired/GhidraMCP`: entity [[ghidramcp]] (LaurieWired; Java Ghidra plugin + Python MCP server; decompile, symbol/method enumeration, automated renaming; semi-automated binary analysis for LLM desktop clients; cheat / MCP for Ghidra); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-mcp]], [[ghidra-headless-mcp]], [[ghidrassist-mcp]], [[ghidra-manager]], and [[malimite]].
