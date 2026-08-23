@@ -301,6 +301,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)
 - [AppInitHook](entities/appinithook.md) — AppInit_DLLs registry startup inject + MinHook hooking (INI dispatch; CMake/cmkr; cheat / hook)
 - [apic](entities/apic.md) — local APIC R/W + xAPIC/x2APIC IPI (KM; timing/detection research)
+- [APICallProxy](entities/apicallproxy.md) — Windows API call obfuscation via kernel-driver IOCTL proxy (C/C++; file/process/memory/registry/network; APC injection + driver-load samples; API monitoring evasion research; MahmoudZohdy)
 - [APKiD](entities/apkid.md) — Android APK/DEX packer·obfuscator·anti-analysis ID (YARA; PEiD for Android)
 - [apk.sh](entities/apk-sh.md) — Bash APK RE workflow (pull/decode/rebuild/patch, Frida gadget, split merge, apksigner; no root)
 - [apksigcopier](entities/apksigcopier.md) — copy/extract/patch Android APK v1/v2/v3 signatures (Python; Signing Block)
