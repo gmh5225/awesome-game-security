@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LuckyPray/DexKit-Android`: entity [[dexkit-android]] (LuckyPray; high-performance Android DEX deobfuscation library; C++ NDK + JNI/Kotlin; class/method search by strings, relations, opcode patterns; Gradle/prefab/CMake embed; app analysis, hook-point discovery, obfuscated code navigation; cheat / dex deobfuscator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[jadx]], [[dex2jar]], [[obfu-de-scate]], [[deobfuscator]], [[frida]], and [[glass]].
+
 - **2026-08-23** — ingest `description:Lucyferek-nunu/vmp-unpacker`: entity [[vmp-unpacker]] (Lucyferek-nunu; Windows C++ dynamic VMProtect PE/DLL unpacker; Win32 debugger attach; PEB/ntdll anti-debug bypass; OEP discovery via text-section guards/timed snapshots/manual triggers; memory dump + standard/mutated IAT rebuild; dynamic or passive import resolve; Fix VMP / Unpacker); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmprotect]], [[vmpunpacker]], [[vmpunpack]], [[vmpstatic]], [[unpacker]], and [[vmpimportfixer]].
 
 - **2026-08-23** — ingest `description:LukeGoule/compact_vm_detector`: entity [[compact-vm-detector]] (LukeGoule; compact embeddable Windows C++ VM-detection component; pafish-inspired lightweight anti-virtualization checks; Visual C++ integration; minimal footprint; anti-analysis experimentation and environment fingerprinting; Detection:Virtual Environments); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[vmaware]], [[anticuckoo]], and [[hypervisor-detection]].
