@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MethanePowered/MethaneKit`: entity [[methanekit]] (MethanePowered; cross-platform C++ graphics/application framework; unified D3D12/Vulkan/Metal interface; shared shader workflows; CMake; tutorials, samples, testing infrastructure, modular runtime; portable rendering foundation for visualization/game/security-adjacent experiments; README `[DirectX 12, Metal & Vulkan]`; Game Engine / source); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[bgfx]], [[horizon-engine]], [[doriax]], [[crown]], and [[kotek]].
+
 - **2026-08-23** — ingest `description:Metick/Anti-Debug`: entity [[anti-debug]] (Metick; Windows C++ PoC; `ResumeThread` suspend-count detects debugger attachment via WinAPI return; minimal single-signal anti-debug study sample; Anti Debugging); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[anti-debugging]], [[makin]], [[antidbg]], [[ghostdebug]], [[dmalibrary]], and [[cheatengine-dma]].
 
 - **2026-08-23** — ingest `description:Metick/CheatEngine-DMA`: entity [[cheatengine-dma]] (Metick; Visual Studio C++ CE plugin; process attach, R/W, search/browse, module/thread enum, pointer scan; DMA hardware path; cheat / CheatEngine DMA); cited on [[concepts/dma]] and [[overviews/dma-attack]]; cross-linked [[dmalibrary]], [[cheat-engine-dma-plugin]], [[dma-cheat-engine-loader]], [[cheat-engine]], and [[pcileech]].
