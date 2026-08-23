@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LSPosed/MagiskOnWSALocal`: entity [[magiskonwsalocal]] (LSPosed; Python/shell scripts integrate Magisk/KernelSU + GApps into WSA images locally; extract/patch system image; installable rooted WSA builds with LSPosed support; Android security researchers/developers; testing and analysis on Win11; cheat / WSA); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[kernelsu]], [[wsa-kernel-su]], [[wsa-linux-kernel]], [[wsa-builds]], [[wsapatch]], and [[wsa-pacman]].
+
 - **2026-08-23** — ingest `description:LSPosed/WSA-Kernel-SU`: entity [[wsa-kernel-su]] (LSPosed; kernel module for `/system/xbin/su` on Android kernels especially WSA; syscall hooks redirect `su` execution; credential/SELinux adjustments; low-level C; optional superuser stealth; Android platform modding / kernel-assisted root research; cheat / WSA with KernelSU); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[wsa-linux-kernel]], [[wsa-builds]], [[magiskonwsalocal]], [[wsapatch]], and [[wsa-pacman]].
 
 - **2026-08-23** — ingest `description:LWSS/Ape-ex-Abominations`: entity [[ape-ex-abominations]] (LWSS; DMA-oriented Apex Legends cheat; C++ feature modules + shell gdb injection/extraction/fast-reload automation; interface discovery + pattern scanning; QEMU/VFIO workflows; evdev-mirror kernel module input; virtualized/hardware-assisted cheat research; cheat / game:apex legends [Apex]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[apex-dma-kvm-pub]], [[apex-dma-cheat-updated]], [[ez-apex-dma-aimbot]], [[escape-from-tuxkov]], and [[mcdota]].

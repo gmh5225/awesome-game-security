@@ -745,6 +745,7 @@ sources:
   - wiki/sources/descriptions/quarkslab__AERoot.md
   - wiki/sources/descriptions/newbit1__rootAVD.md
   - wiki/sources/descriptions/gmh5225__MagiskOnWSALocal.md
+  - wiki/sources/descriptions/LSPosed__MagiskOnWSALocal.md
   - wiki/sources/descriptions/cinit__WSAPatch.md
   - wiki/sources/descriptions/alesimula__wsa_pacman.md
   - wiki/sources/descriptions/WSA-Community__WSA-Linux-Kernel.md
@@ -2016,7 +2017,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 
 - Android Emulator runtime root via [[aeroot]] (Quarkslab Python; debug pipe / ADB root → remount + custom `su`; no system-image rewrite; multi-API) sits in the Cheat `[Root]` / Android Emulator lane. (source: wiki/sources/descriptions/quarkslab__AERoot.md)
 - AVD Magisk/root tooling via [[rootavd]] (kernel-level work / modding / SDK generation; Cheat Magisk / Android Emulator) sits beside that emulator-root lane. (source: wiki/sources/descriptions/newbit1__rootAVD.md)
-- Local Magisk+GApps WSA integration via [[magiskonwsalocal]] (rooted Android + Play Store on Win11; Cheat Magisk / WSA) extends the same rooted Android-on-Windows lane. (source: wiki/sources/descriptions/gmh5225__MagiskOnWSALocal.md)
+- Local Magisk/KernelSU+GApps+LSPosed WSA integration via [[magiskonwsalocal]] (Python/shell scripts extract/patch WSA images; installable rooted builds with Play Store and LSPosed; Android security testing on Win11; Cheat Magisk / WSA) extends the same rooted Android-on-Windows lane. (source: wiki/sources/descriptions/LSPosed__MagiskOnWSALocal.md)
 - WSA MSIX compatibility patcher [[wsapatch]] (C++; Win10/older Win11; version-check + Hyper-V requirement bypass; sideload on unsupported Windows; Cheat WSA) sits beside that Android-on-Windows lane. (source: wiki/sources/descriptions/cinit__WSAPatch.md)
 - Flutter/Dart GUI WSA package manager [[wsa-pacman]] (APK/XAPK double-click install, version/permission metadata, upgrade/downgrade, Android settings shortcuts; sideload and test workflows; Cheat WSA) complements that Android-on-Windows lane. (source: wiki/sources/descriptions/alesimula__wsa_pacman.md)
 - WSA Linux kernel mirror/build automation via [[wsa-linux-kernel]] (stock + KernelSU branch variants; GitHub Actions x86_64/arm64 kernel images; helper shell script for KernelSU config patching; reproducible WSA kernel builds for Android/platform security research; Cheat WSA) complements that Android-on-Windows lane. (source: wiki/sources/descriptions/WSA-Community__WSA-Linux-Kernel.md)
