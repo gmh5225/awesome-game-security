@@ -356,6 +356,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
 - [awesome-executable-packing](entities/awesome-executable-packing.md) — curated executable packing/unpacking resources (PE/ELF/Mach-O; packers, protectors, unpackers, analysis tools; Executable File Packing)
 - [awesome-gamedev-agent-skills](entities/awesome-gamedev-agent-skills.md) — ~66 version-pinned game-dev Agent Skills + engine router (Godot/Unity/Unreal/Phaser/Bevy/etc.; Game Develop / AI Agents)
+- [Everything Game Dev Code](entities/everything-game-dev-code.md) — multi-engine AI agent scaffold; rules/agents/skills/phase contexts for Unity/Unreal/Godot/HTML; Claude/Codex/Cursor/OpenCode/Kiro harnesses; security/performance/console review roles (MRCalderon3D; Game Develop / AI Agents)
 - [awesome-game-analysis](entities/awesome-game-analysis.md) — curated game technology analysis resources (by game/engine/developer/year/topic; engine internals + production techniques; Game Develop / guide)
 - [awesome-game-engine-dev](entities/awesome-game-engine-dev.md) — curated game-engine-dev resources (DirectX/OpenGL; Game Engine / guide)
 - [awesome-game-file-format-reversing](entities/awesome-game-file-format-reversing.md) — curated game file-format/asset reversing resources (models/textures/archives; Unity/Unreal/Source/CryEngine; cheat / RE Tools)

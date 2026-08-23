@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MRCalderon3D/everything-game-dev-code`: entity [[everything-game-dev-code]] (MRCalderon3D; multi-engine AI agent scaffold; rules/agents/commands/skills/phase contexts for Unity/Unreal/Godot/HTML; Claude/Codex/Cursor/OpenCode/Kiro harnesses; Node.js manifest sync; security/performance/console compliance review roles; README Multi-engine AI agent scaffold); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[awesome-gamedev-agent-skills]], [[unreal-claude]], [[unity-mcp]], [[better-godot-mcp]], and [[com-unity-ide-cursor]].
+
 - **2026-08-23** — ingest `description:MagnetForensics/dumpit-linux`: entity [[dumpit-linux]] (MagnetForensics; Rust Linux live memory acquisition; `/proc/kcore` → ELF core; optional tar.zst packaging; gdb/crash/drgn compatible; no custom kernel module; IR / Linux memory forensics; README DumpIt for linux); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[dumpit-mirror]], [[memnixfs]], [[volatility3]], [[tracee]], and [[rootkit]].
 
 - **2026-08-23** — ingest `description:MahmoudZohdy/APICallProxy`: entity [[apicallproxy]] (MahmoudZohdy; C/C++ Windows API call obfuscation; kernel-driver IOCTL proxy for file/process/memory/registry/network; sample APC-injection/driver-load/socket clients; API monitoring evasion + behavioral-analysis hardening research; README Windows API Call Obfuscation); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[iat-obfuscation]], [[call-obfuscator]], [[km-um-communication]], [[ioctlpus]], and [[process-injection-techniques]].
