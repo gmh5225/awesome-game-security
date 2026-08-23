@@ -245,6 +245,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-privilege-cve-2022-20452-leakvalue](entities/android-privilege-cve-2022-20452-leakvalue.md) — CVE-2022-20452 LazyValue deserialization LPE (unprivileged app → system; Java/Kotlin PoC; gmh5225)
 
 - [android-mod-games-by-inject-zygote](entities/android-mod-games-by-inject-zygote.md) — Android game modding via zygote injection (C/C++; kernel/OpenGL/networking; cheat / injection:android; gmh5225)
+- [Android-Mod-Menu](entities/android-mod-menu.md) — Java + native C/C++ floating mod-menu framework for IL2CPP/native Android (KittyMemory, MSHook, And64InlineHook; ARMv7/ARM64; cheat / Floating mod menu for Android; LGLTeam)
 - [android-modmenu-semijni](entities/android-modmenu-semijni.md) — Android Java WindowManager + semi-JNI mod menu (native hooks; cheat / Menu for imgui)
 - [Android-Mod-Menu-Kotlin](entities/android-mod-menu-kotlin.md) — Android Kotlin floating-view + C++/JNI IL2CPP mod menu (cheat / IL2CPP Menu)
 - [Android-Mod-Menu-ImGui](entities/android-mod-menu-imgui.md) — Android native C++ ImGui mod-menu template (OpenGL ES + touch/JNI hooks; configurable layouts; README `[Imgui For Unity]`; gmh5225)
