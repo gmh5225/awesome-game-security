@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KooroshRZ/Evader`: entity [[evader]] (KooroshRZ; Windows C++ PE packer/crypter; packer + unpack stub; configurable key size/keyspace; runtime key recovery + in-memory payload execution; payload obfuscation, resource embedding, staged decryption; packer development / evasion-focused RE; Anti Cheat → Binary Packer `[PE]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[hm-pe-packer]], [[polyengine]], [[pepacker-samlarenn]], [[exe-packer]], [[atom-pe-packer]], [[packer-tutorial]], [[windows-dll-injector]], and [[unpacker]].
+
 - **2026-08-23** — ingest `description:KooroshRZ/Windows-DLL-Injector`: entity [[windows-dll-injector]] (KooroshRZ; C++ Visual Studio; CreateRemoteThread, native thread-creation variants, QueueUserAPC, SetWindowsHookEx, RtlCreateUserThread; x86/x64; injector + payload DLL projects; simplicity/compatibility/detection-surface trade-offs; process injection research; Injection Testing); cited on [[overviews/game-hacking]] and [[windows-process-injection]]; cross-linked [[thread-hijacking-injector]], [[simple-setwindowshookexw-injector]], [[guided-hacking-injector]], [[rust-dll-crab]], [[process-injection-techniques]], and [[injectors]].
 
 - **2026-08-23** — ingest `description:KorokEngine/Korok`: entity [[korok]] (KorokEngine; lightweight cross-platform Go 2D game engine; component-based architecture; animation, rendering, assets, audio, gameplay modules; compact package-oriented design; docs + samples; Game Engine / source [Golang]); cited on [[overviews/game-engine]]; cross-linked [[torque2d]], [[love]], [[bulllord-engine]], and [[custom-game-engines]].

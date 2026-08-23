@@ -1019,6 +1019,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ETWHOOK-InfinityHookClass](entities/etwhook-infinityhookclass.md) — C++ InfinityHook wrapper; ETW-backed syscall interception without SSDT patches (gmh5225; Some Tricks / ETW Hook Ex)
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
 - [EvCommunication](entities/evcommunication.md) — named-event kernel↔UM channel (NtTokenManager; vs IOCTL)
+- [Evader](entities/evader.md) — KooroshRZ Windows PE packer/crypter (C++ packer + unpack stub; configurable key size/keyspace; runtime key recovery + in-memory execution; payload obfuscation, resource embedding, staged decryption; packer development / evasion-focused RE; Anti Cheat → Binary Packer `[PE]`)
 - [executor](entities/executor.md) — PTE.User page-table injection (C/C++; kernel driver; cheat / injection:windows; gmh5225)
 - [ethersplay](entities/ethersplay.md) — Binary Ninja EVM bytecode disassembler (Solidity smart-contract CFG/xrefs; blockchain auditor lane; gmh5225)
 - [egui-d3d11](entities/egui-d3d11.md) — Rust egui renderer for D3D11 Present-hook overlay menus (HLSL + Win32 input; gmh5225; README [Menu])
