@@ -2775,6 +2775,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Torque 3D](entities/torque3d.md) — open-source Torque 3D C++ game engine (CMake; Assimp import; render/physics/network/scripting; multi-platform; Game Engine / 3D)
 - [Tools](entities/tools.md) — doomedraven malware-analysis infra scripts (KVM/QEMU, IDA deobfuscation, Volatility3 plugins, CAPE/Cuckoo sandbox setup; QEMU Script)
 - [ts-ue4dumper](entities/ts-ue4dumper.md) — TypeScript + Frida UE4 dumper (modular; C++ offsets)
+- [tx-holdem](entities/tx-holdem.md) — JavaScript Texas Hold'em poker logic library (card/hand modeling, combination compare, highest-hand selection, draw calculations; Node.js + browser; Merisho; Texas Holdem Poker made by JS)
 - [TurboDiff](entities/turbodiff.md) — IDA Pro plugin: function-level binary diff between two binaries (cheat / IDA Plugins / diff)
 - [Turbulenz Engine](entities/turbulenz-engine.md) — HTML5/TypeScript game engine (WebGL + server services; Game Engine)
 - [UTM](entities/utm.md) — QEMU VM host for iOS/macOS (Hypervisor.framework / JIT; IOS Emulator)
