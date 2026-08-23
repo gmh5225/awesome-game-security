@@ -1730,6 +1730,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lara](entities/lara.md) — WIP DarkSword kexploit (iOS 17.1.1–26.0.1; font/app bypass / DirtyZero2)
 - [LazySign](entities/lazy-sign.md) — fake-cert Authenticode signing (Microsoft devkit binaries; zero extra deps; Some Tricks / Ring3)
 - [LazyIDA](entities/lazyida.md) — IDA Pro productivity plugin (debug auto-relocation jump, memory dump, ASCII/HEX/BASE64 paste, RVA copy, jump-to-address without rebasing; gmh5225; cheat / IDA Plugins)
+- [Lazenca S](entities/lazenca-s.md) — Android anti-cheat engine (Java + JNI native C/C++; debugging, root, speed-hack, binary modification, VM indicators; mobile game protection experiments / AC detection study; Lazenca; Android Platform)
 - [L4D2 Basic](entities/l4d2-basic.md) — Left 4 Dead 2 basic cheat framework (Source engine hooks, interface resolution, starter template; gmh5225)
 - [L4D2 Cheat](entities/l4d2-cheat.md) — Left 4 Dead 2 internal cheat (Source engine SDK; VMT hooks + interface exploitation; ESP/aimbot/gameplay mods; Linux; gmh5225)
 - [l-assemblies](entities/l-assemblies.md) — C# LeagueSharp champion plugins (Orbwalker/TargetSelector combos; ward/cooldown minimap tracker; gmh5225; cheat / game:lol)
