@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:cxOrz/AnyWhere`: entity [[anywhere]] (cxOrz; Java Android mock-location app; OpenStreetMap picker + overlay joystick + location history; bundled LSPosed/Xposed module hides mock-provider flags; LBS debugging + location-spoof / mock-GPS AC research); cited on [[overviews/mobile-security]], [[overviews/game-hacking]], and [[concepts/mobile-anti-cheat]]; cross-linked [[locusmimic]] and [[xposed-module-kit]].
+
 - **2026-08-23** — ingest `readme:categories`: Cheat ~2742 (+1; cxOrz/AnyWhere Android mock-location + LSPosed mock-provider hide; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts; light `index.md` section notes (no per-category pages).
 
 - **2026-08-23** — ingest `description:Maxcloud/MapleResearch`: entity [[maple-research]] (Maxcloud; Markdown; MapleStory GMS v95.1 client-internals analysis; CSecurityClient + HackShield integration; practical localhost-environment RE notes; private-server / client-security starting map; cheat / game:maplestory [GMS-095 Client Analysis]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[maplestory-cms95-client-address]], [[rebirth]], [[twms-hacking-data]], [[msb]], and [[msc]].
