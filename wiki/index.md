@@ -2239,6 +2239,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCIE-Detector](entities/pcie-detector.md) — Kernel PCIe Config Space inspection driver (C++; defensive DMA detection research; gmh5225)
 - [PCIeM](entities/pciem.md) — Linux kernel synthetic userspace PCIe device emulation (bare-metal virtual PCI endpoints; no FPGA/VM/QEMU; DMA / PCIe security research; cakehonolulu)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
+- [PCILeech DMA Proxy](entities/pcileech-dma-proxy.md) — DLL proxy + loader; MinHook on Win32 memory APIs; redirects to remote PCILeech/MemProcFS DMA; input/registry access (MGreif; cheat / DMA)
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
 - [Pcileech QuantumStealth Max](entities/pcileech-quantumstealth-max.md) — NoviceLevel PCILeech FPGA firmware collection (Vivado; M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T; config-space/BRAM/FIFO IP cores; batch build scripts)
 - [Pcileech-DMA-NVMe-VMD](entities/pcileech-dma-nvme-vmd.md) — PCILeech DMA firmware: motherboard VMD/NVMe real camouflage; Windows reinstall may be needed for driver init (gmh5225)

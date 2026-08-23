@@ -6,7 +6,8 @@ sources:
   - wiki/sources/skills/dma-attack.md
   - wiki/sources/descriptions/ufrisk__pcileech.md
   - wiki/sources/descriptions/Neverdecel__pcileech-memprocfs-mcp.md
-updated: 2026-08-22
+  - wiki/sources/descriptions/MGreif__PCILeech_DMA_Proxy.md
+updated: 2026-08-23
 confidence: high
 ---
 
@@ -29,4 +30,4 @@ Unmodified [[pcileech-fpga]] builds commonly expose Tier-0/1 detection signals: 
 
 ## Related
 
-[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-memprocfs-mcp]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-dma-proxy]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-memprocfs-mcp]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
