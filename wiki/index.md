@@ -1194,6 +1194,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghinterfacescsgo](entities/ghinterfacescsgo.md) — Linux CS:GO interface/hook scaffold (C++; shared-object loader; minimal interface interaction; educational Linux hook base; VitorMob; cheat / game:csgo [Internal])
 - [ghidra](entities/ghidra.md) — Full NSA Ghidra RE framework source (Java decompiler, debugger integrations; gmh5225 mirror/fork)
 - [ghidra-bridge](entities/ghidra-bridge.md) — Python 3 bridge to Ghidra scripting (CPython outside Jython; external automation / gpt-wpre)
+- [ghidra-coffparser](entities/ghidra-coffparser.md) — Python Ghidra COFF object parser (headers/symbols/string tables/relocations with type info; applies relocations and xrefs beyond default loader; MEhrn00; cheat / COFF)
 - [ghidra-cpp-class-analyzer](entities/ghidra-cpp-class-analyzer.md) — Ghidra C++ class/RTTI analyzer (GCC/Clang/MSVC RTTI, vtables, ctors/dtors, inheritance; class hierarchy views; Java/Gradle; astrelsky)
 - [ghidra-decompiler-plugins](entities/ghidra-decompiler-plugins.md) — runtime-loadable Ghidra decompiler plugins (Bazel; RISC-V vector Rules/Actions; datatest; embedded/firmware RE)
 - [ghidra-findcrypt](entities/ghidra-findcrypt.md) — Ghidra analyzer for cryptographic constants (Java Gradle extension; JSON signature DB; AES/DES/MD5/SHA-1/TEA/Salsa/CRC32 labeling; TorgoTorgo; cheat / Ghidra Plugins)

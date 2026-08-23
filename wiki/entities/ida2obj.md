@@ -12,7 +12,7 @@ confidence: medium
 
 Tool that **exports IDA Pro database content back into linkable object files**. Reconstructs **COFF/ELF** objects from IDA analysis data—relocations, symbols, and section content—for **binary patching** and **recompilation** workflows. Listed under the cheat / RE lane with a `[COFF Relink]` tag. (source: wiki/sources/descriptions/gmh5225__IDA2Obj.md)
 
-Bridges static analysis in IDA to a relinkable object artifact; complements PE-level editors such as [[kitsupe]] and patch-script generators such as [[genpatch]] when the goal is to round-trip analyzed code into a linkable `.obj` rather than raw byte patches.
+Bridges static analysis in IDA to a relinkable object artifact; complements in-Ghidra COFF object analysis via [[ghidra-coffparser]] and PE-level editors such as [[kitsupe]] and patch-script generators such as [[genpatch]] when the goal is to round-trip analyzed code into a linkable `.obj` rather than raw byte patches.
 
 ## Links
 
