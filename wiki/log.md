@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LaurieWired/Malimite`: entity [[malimite]] (LaurieWired; Java Ghidra-based desktop decompiler; iOS IPA + macOS app bundles; Apple resource decode, Swift class reconstruction, Swift/ObjC binaries; malware analysis and Apple app security RE; cheat / iOS and macOS Decompiler); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ida-ios-helper]], [[aimachdec]], [[workflow-objc]], [[runtime-viewer]], [[ipapatch]], and [[ios-packager]].
+
 - **2026-08-23** — ingest `description:Lavender-exe/Shellcrypt`: entity [[shellcrypt]] (Lavender-exe; cross-platform Python shellcode obfuscation; AES/ChaCha20/RC4/Salsa20/XOR; chained encode/compress; C/C#/Go/Rust/Nim/Python/PowerShell emit; payload packing, format conversion, loader prototyping; offensive + game-security research; README QoL shellcode obfuscator); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[shellcode-obfuscation]], [[shellcode-entropyfix]], [[shellcode-fluctuation]], [[scfw]], [[shellcode-factory]], [[2pack]], and [[shoggoth]].
 
 - **2026-08-23** — ingest `description:Lazenca/Lazenca-S`: entity [[lazenca-s]] (Lazenca; Android anti-cheat engine; Java + JNI native C/C++; debugging, rooting, speed-hack, binary modification, VM indicators; mobile game protection experiments / AC detection study; Android Platform); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[android-anti-cheat]], [[memdetection]], [[detect-frida]], and [[mobile-anti-cheat]].
