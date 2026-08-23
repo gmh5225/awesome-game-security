@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LabGuy94/Diskjacker`: entity [[diskjacker]] (LabGuy94; C++ kernel + usermode + asm stubs; runtime Hyper-V VM-exit hijacking via DDMA-style DMA; low-level mapping and execution transfer; hardware/virtualization preconditions; hypervisor security PoC); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[ddma]], [[ddma-1]], [[voyager]], [[modded-voyager]], [[hyper-rev]], and [[hyperdeceit]].
+
 - **2026-08-23** — ingest `description:LabGuy94/OxideDumper`: entity [[oxide-dumper]] (LabGuy94; Python; SteamCMD + Il2CppDumper + GitHub Actions; automated Rust game offset refresh; reusable C++ header export; cheat `[Auto Dump]` / game:rust); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[il2cppdumper]], [[il2cpp]], [[cs2-dumper]], [[lord-abbot-rust-external-cheat]], and [[rustsecure-re]].
 
 - **2026-08-23** — ingest `description:Laert-Android/Advanced-Root-Checker`: entity [[advanced-root-checker]] (Laert-Android; free open-source offline Android app; Java; su/BusyBox/Magisk/KernelSU/APatch/Zygisk/Xposed/LSPosed, root cloaking, SELinux, Frida/debugger/hook anti-tamper, APK signature checks, risk score; local root detection + anti-cheat-style assessment; cheat / Android root); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[duck-detector-refactoring]], [[android-native-root-detector]], [[detect-frida]], [[memdetection]], [[root-app-detector]], [[magisk]], [[kernelsu]], and [[apatch]].
