@@ -2599,6 +2599,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SecureGame](entities/secure-game.md) — Pong-like POC; core game logic in Windows VBS enclave; host render/input + enclave DLL state/rules; SDL2; trusted execution / anti-cheat research (SamuelTulach)
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
 - [shellcode-obfuscation](entities/shellcode-obfuscation.md) — Caesar-cipher encoding pipeline (Python obfuscator + C VirtualAlloc loader; AV bypass-rate measurements; academic lab)
+- [shellcrypt](entities/shellcrypt.md) — Cross-platform Python shellcode obfuscation; AES/ChaCha20/RC4/Salsa20/XOR; chained encode/compress; C/C#/Go/Rust/Nim/Python/PowerShell emit (Lavender-exe; payload packing / loader prototyping)
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [shellcode-plain-sight](entities/shellcode-plain-sight.md) — C demo; hide shellcode in large randomized RW region at random offset; VirtualProtect to RX; post-exec zero cleanup (LloydLabs; memory evasion / AC detection testing)
 - [ShellcodeFluctuation](entities/shellcode-fluctuation.md) — cyclic shellcode encrypt/decrypt; RW/NoAccess↔RX fluctuation (mgeeky; page protection)
