@@ -273,6 +273,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anti-Cheat-Amateur](entities/anti-cheat-amateur.md) — MemRE memory editor + GothGirlFeet kdmapper KMDF driver (NUL IOCTL; DBVM shims; UE scan; Tencent ACE research)
 - [anti-crack-system](entities/anti-crack-system.md) — Windows C++ anti-tamper / anti-crack framework prototype (anti-debug/anti-dump/anti-attach, integrity checks, process-kill, self-remapping code, string obfuscation; ReFo0)
 - [Anti-Debugger-Protector-Loader](entities/anti-debugger-protector-loader.md) — Windows C++ anti-debug protector/loader (debugger process/window/driver scans; optional termination; VMProtect SDK; YouNeverKnow00)
+- [Anti-Debug](entities/anti-debug.md) — Windows C++ PoC; ResumeThread suspend-count debugger detection (minimal single-signal anti-debug sample; Metick; Anti Debugging)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
 - [AntiDebugandMemoryDump](entities/antidebugandmemorydump.md) — Android anti-debug + memory analysis / emulation / debugging (Java + C/C++; gmh5225)
 - [AntiDebug-AntiVM](entities/antidebug-antivm.md) — anti-debug + VirtualBox anti-VM technique examples (reference snippets; Vbox; gmh5225)

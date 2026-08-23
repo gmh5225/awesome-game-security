@@ -313,6 +313,7 @@ sources:
   - wiki/sources/descriptions/mdilai__Shtreeba.md
   - wiki/sources/descriptions/mgeeky__ShellcodeFluctuation.md
   - wiki/sources/descriptions/mgeeky__ntfs-journal-viewer.md
+  - wiki/sources/descriptions/Metick__Anti-Debug.md
   - wiki/sources/descriptions/Midi12__QueryWorkingSetExample.md
   - wiki/sources/descriptions/MrDiamond64__Scythe-AntiCheat.md
   - wiki/sources/descriptions/MrMugiwara__FTK-imager-OSX.md
@@ -841,6 +842,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
 - [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - [[gexec]] — register-machine bytecode interpreter for Windows kernel drivers (gasm, gvmlift PE lifter, embeddable host API; updatable portable logic without native recompile; zer0condition; kernel AC development research) (source: wiki/sources/descriptions/zer0condition__gexec.md)
+- [[anti-debug]] — Windows C++ PoC; `ResumeThread` suspend-count detects debugger attachment via WinAPI return value; minimal single-signal anti-debug study sample (Metick; Anti Debugging) (source: wiki/sources/descriptions/Metick__Anti-Debug.md)
 - [[antidebugandmemorydump]] — Android anti-debug + memory analysis / emulation / debugging reference (Java + C/C++; Anti Debugging lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebugandMemoryDump.md)
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)

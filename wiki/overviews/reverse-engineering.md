@@ -341,6 +341,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__dumpwow.md
   - wiki/sources/descriptions/gmh5225__WOW-WowAutoFishing.md
   - wiki/sources/descriptions/gmh5225__overwatch-iat-fixer.md
+  - wiki/sources/descriptions/Metick__Anti-Debug.md
   - wiki/sources/descriptions/Midi12__ow_unpack.md
   - wiki/sources/descriptions/Midi12__QueryWorkingSetExample.md
   - wiki/sources/descriptions/liors619__TtdAntiDebugging.md
@@ -1065,7 +1066,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 
 ## Anti-analysis & debugging
 
-**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks.
+**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks, `ResumeThread` suspend-count anomalies such as [[anti-debug]] (Metick; C++ PoC; debugger attachment leaves elevated suspend count observable via WinAPI return; minimal single-signal study sample) (source: wiki/sources/descriptions/Metick__Anti-Debug.md).
 
 **Kernel-mode anti-debug:** `KdDebuggerEnabled`, DR0–DR7 monitoring, `KPROCESS.DebugPort` zeroing, NMI callbacks.
 
