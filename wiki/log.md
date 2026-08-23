@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Luxon98/Super-Mario-Bros-game`: entity [[super-mario-bros-game]] (Luxon98; C++ Super Mario Bros remake; SDL2/SDL_image/SDL_mixer; Visual Studio; original-inspired and custom levels; 2D rendering, level flow, gameplay logic; game development learning / SDL engine practice; README [Remake of Super Mario]); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[zombies-vs-plants]], [[doomretro]], [[2048-cpp]], and [[cpp-game-engine-book]].
+
 - **2026-08-23** — ingest `description:LyeDevGit/WonTree-RBLX-Dumper`: entity [[wontree-rblx-dumper]] (LyeDevGit; Luau injectable Roblox game analysis dumper; four-layer decompile pipeline, client/server instance scan, remote call graphs, live FireServer/InvokeServer logger, framework + anti-cheat keyword detection; markdown/CSV reports; UNC-compatible executors; game security RE reference map); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[roblox-cheats]], [[advanced-anticheat]], [[shprotect-ac]], [[lua-obfuscator-clyde-protection]], and [[byfron-bypass]].
 
 - **2026-08-23** — ingest `description:Lynnette177/Rigel-Driver`: entity [[rigel-driver]] (Lynnette177; C++ Windows kernel driver; cross-process R/W, module-base/export lookup, protected-region writes; mapper-based load; dxgkrnl hook context via `NtGdiDdDDINetDispGetNextChunkInfo`; driver-assisted memory access / AC bypass research); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[nulldriver-cheat]], [[kernel-cheat-for-directx3d]], [[dxgkrnl-hook]], [[kdmapper]], [[ntmemory]], and [[driver-read-write]].
