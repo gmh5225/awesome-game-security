@@ -804,6 +804,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/cheat-engine/cheat-engine
 - https://github.com/L-Spiro/MhsX [64-bit from-scratch MHS successor: memory searcher/debugger with expression scans, regex/string search, floating-point studio, hex editor, and scripting]
 - https://github.com/NulledNah/cheat-engine-undetectable [Modified Cheat Engine with user-mode evasion, direct syscalls, and BYOVD kernel bridge for AC research]
+- https://github.com/VollRagm/ghostdebug [Windows x64 VEH-based stealth debugger (native DLL + .NET CLI) for targets with anti-debug checks]
 - https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
 - https://github.com/HeathHowren/Pointer-Lab [Windows x64 user-mode memory scanner and debugger with pointer chains, disassembly, patching, and ImGui UI]
 - https://github.com/TASEmulators/BizHawk [Multi-system C# emulator with memory inspection, rerecording, and per-core debugging tools for retro game analysis]
