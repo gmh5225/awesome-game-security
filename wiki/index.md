@@ -723,6 +723,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [decbench](entities/decbench.md) — Python decompiler benchmark suite (CFG GED, DWARF type match, recompile bytematch; angr/Ghidra/IDA/Binja/r2dec/dewolf + LLM backends; Debian/embedded/firmware/malware corpora; Noelo-Lab)
 - [Deep Learning Anti-Cheat For CSGO](entities/deep-learning-anti-cheat-csgo.md) — CS:GO OSS AC pipeline (memory/code-integrity/process/debugger checks + network packet validation; detection-to-response; gmh5225; Open Source Anti Cheat System)
 - [deepwiki-mcp](entities/deepwiki-mcp.md) — DeepWiki docs MCP server (query/retrieve wikis for AI agents; Game Develop / MCP)
+- [Def1nit3lyN0tAJa1lbr3akTool](entities/def1nit3lyn0tajailbreaktool.md) — iOS 16.0–16.6.1 jailbreak tool (kernel exploitation; trustcache build paths; Objective-C/C; post-exploitation workflows; KpwnZ)
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
 - [Delamain](entities/delamain.md) — headless JADX MCP server (APK/DEX/AAB; Frida hooks; AI agents)

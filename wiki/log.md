@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KpwnZ/Def1nit3lyN0tAJa1lbr3akTool`: entity [[def1nit3lyn0tajailbreaktool]] (KpwnZ; iOS 16.0–16.6.1 jailbreak tool; kernel exploitation + trustcache build paths; Objective-C/C native; post-exploitation workflows; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[dopamine2-roothide]], [[ios-jailbreak-fugu15]], [[palera1n]], [[kfd]], and [[opainject]].
+
 - **2026-08-23** — ingest `description:Krietz7/IDA-DataExportPlus`: entity [[ida-data-export-plus]] (Krietz7; Python IDA Pro plugin; extends/replaces default data export window; integer/float formats + assembly text export; hotkey-driven; modern IDA; repetitive disassembly extraction; binary analysts / security researchers; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-export-functions]], [[lazyida]], [[ida-function-string-associate]], and [[list-of-ida-plugins]].
 
 - **2026-08-23** — ingest `readme:categories`: Anti Cheat ~690 (+1; bad-antics/rce-shield duplicated in Guide lane; other major section counts stable); refreshed [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
