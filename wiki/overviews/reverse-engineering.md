@@ -35,6 +35,7 @@ sources:
   - wiki/sources/descriptions/Lima-X__Win32.Nebula.md
   - wiki/sources/descriptions/LeoChen-CoreMind__VMPacker.md
   - wiki/sources/descriptions/LabGuy94__OxideDumper.md
+  - wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md
   - wiki/sources/descriptions/Leeksov__rustsecure-re.md
   - wiki/sources/descriptions/Lavender-exe__Shellcrypt.md
   - wiki/sources/descriptions/Lakr233__vphone-cli.md
@@ -1104,7 +1105,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 
 ## Anti-analysis & debugging
 
-**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks, `ResumeThread` suspend-count anomalies such as [[anti-debug]] (Metick; C++ PoC; debugger attachment leaves elevated suspend count observable via WinAPI return; minimal single-signal study sample) (source: wiki/sources/descriptions/Metick__Anti-Debug.md).
+**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks, `ResumeThread` suspend-count anomalies such as [[anti-debug]] (Metick; C++ PoC; debugger attachment leaves elevated suspend count observable via WinAPI return; minimal single-signal study sample) (source: wiki/sources/descriptions/Metick__Anti-Debug.md). IDA triage via [[ida-plugin-antidebugseeker]] (LAC-Japan; Python/PyQt5; configurable rule files for Windows API + keyword anti-debug patterns; match highlighting, address annotation, quick navigation, in-IDE rule editor; Extract anti-debugging) (source: wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md).
 
 **Kernel-mode anti-debug:** `KdDebuggerEnabled`, DR0–DR7 monitoring, `KPROCESS.DebugPort` zeroing, NMI callbacks.
 

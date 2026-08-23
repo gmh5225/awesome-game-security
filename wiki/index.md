@@ -1512,6 +1512,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-sdk](entities/ida-sdk.md) — mirrored IDA Pro SDK (headers/libs/docs; plugin + processor-module dev; multi-version; cheat / IDA SDK)
 - [idasdk-collection](entities/idasdk-collection.md) — archived IDA Pro SDK releases (headers/libs/examples; multi-version plugin dev; cheat / IDA SDK)
 - [idasql](entities/idasql.md) — IDA database SQL virtual tables + AI natural-language RE queries (CLI on `.i64` or in-IDA plugin; remote query; cheat / IDA Plugins)
+- [ida-plugin-antidebugseeker](entities/ida-plugin-antidebugseeker.md) — IDA Pro plugin: rule-based Windows API + keyword anti-debug detection; match highlighting, address annotation, navigation; configurable rules + in-IDE editor (LAC-Japan; Extract anti-debugging)
 - [ida-plugin-pcodegpt](entities/ida-plugin-pcodegpt.md) — ChatGPT IDA PCode assistant (Chinese UI; cheat / IDA Plugins)
 - [IDLE-Abuse](entities/idle-abuse.md) — Windows idle-state injection PoC (`RegisterWaitForInputIdle` callback; shellcode + process manipulation; process-lifecycle abuse detection study; RixedLabs)
 - [IAT Obfuscation](entities/iat-obfuscation.md) — Windows PE import obfuscation (C++; same-DLL IAT entry swap + TLS pre-main restore; static API-sequence obfuscation; import-hiding educational research; MahmoudZohdy)

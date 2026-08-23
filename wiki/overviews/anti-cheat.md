@@ -747,6 +747,7 @@ sources:
   - wiki/sources/descriptions/Rycooop__Bloom-Anticheat.md
   - wiki/sources/descriptions/no1qq__UAGC.md
   - wiki/sources/descriptions/Lazyzouo__ICUAC.md
+  - wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md
   - wiki/sources/descriptions/LaihoE__DLAC.md
   - wiki/sources/descriptions/NHCM-dev__BytecodeVM.md
 updated: 2026-08-23
@@ -872,6 +873,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - [[gexec]] — register-machine bytecode interpreter for Windows kernel drivers (gasm, gvmlift PE lifter, embeddable host API; updatable portable logic without native recompile; zer0condition; kernel AC development research) (source: wiki/sources/descriptions/zer0condition__gexec.md)
 - [[anti-debug]] — Windows C++ PoC; `ResumeThread` suspend-count detects debugger attachment via WinAPI return value; minimal single-signal anti-debug study sample (Metick; Anti Debugging) (source: wiki/sources/descriptions/Metick__Anti-Debug.md)
+- [[ida-plugin-antidebugseeker]] — IDA Pro plugin; automated rule-based Windows API + keyword anti-debug detection; match highlighting, address annotation, quick navigation; configurable rules + in-IDE editor (LAC-Japan; Extract anti-debugging) (source: wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md)
 - [[antidebugandmemorydump]] — Android anti-debug + memory analysis / emulation / debugging reference (Java + C/C++; Anti Debugging lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebugandMemoryDump.md)
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
