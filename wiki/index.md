@@ -1532,6 +1532,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IUM-Debugger](entities/ium-debugger.md) — .NET debugger for Windows IUM/VTL1 trustlets; Hyper-V hypercalls for trustlet memory R/W + disassembly; LiveCloudKd host patch for guest WinDbg attach (ReverseWarrior)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)
 - [ioctl-helper](entities/ioctl-helper.md) — Qt GUI for custom Windows driver IOCTLs (C++/Qt Widgets; hex editor; multi-handle DeviceIoControl; driver reversing / kernel comm testing; RomanRybachek)
+- [ioctldump](entities/ioctldump.md) — Windows kernel IOCTL hook/dump driver (Kharos102; WDK driver + client; IOCTL metadata + deduplicated input buffers; target device selection; proprietary driver / AC interface RE; Monitor IRP)
 - [ioctlpus](entities/ioctlpus.md) — Windows DeviceIoControl repeater (C# WinForms + CLI; craft/replay/save/edit IOCTL payloads; driver security research / interface auditing / fuzzing prep; VoidSec)
 - [IoCreateDriver](entities/iocreatedriver.md) — custom IoCreateDriver load-path implementation (Th3Spl; C/C++ Visual Studio + WDK; bypass standard driver-load visibility/logging; manual-map + entry-point notes; kernel / AC evasion research)
 - [idarem](entities/idarem.md) — IDA Pro remote browser UI (Flask REST/SSE + React; live IDB sync)
