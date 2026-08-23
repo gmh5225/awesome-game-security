@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:KitchenGun/UE4_FPS`: entity [[ue4-fps]] (KitchenGun; small UE4 FPS sample; C++ classes + Blueprint assets/maps; standard input/engine config; lightweight native gameplay layer; FPS development learning sandbox + engine-level game research target; UE4 FPS Demo); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[ue4-fps-game]], [[simple-fps-template]], and [[unreal-object-model]].
+
 - **2026-08-23** — ingest `description:Kix48/R6Updater`: entity [[r6-updater]] (Kix48; C++ Visual Studio x64 Windows; offset dumper/updater; pattern scanning + memory modules for manager/patch-sensitive offset recovery after Siege updates; session-time signature refresh + offset extraction; cheat / game:r6 [Dump]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[r6-cheat-dumper]], [[r6-external]], [[r6s-external-v2]], and [[battleye]].
 
 - **2026-08-23** — ingest `description:KooroshRZ/Evader`: entity [[evader]] (KooroshRZ; Windows C++ PE packer/crypter; packer + unpack stub; configurable key size/keyspace; runtime key recovery + in-memory payload execution; payload obfuscation, resource embedding, staged decryption; packer development / evasion-focused RE; Anti Cheat → Binary Packer `[PE]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[hm-pe-packer]], [[polyengine]], [[pepacker-samlarenn]], [[exe-packer]], [[atom-pe-packer]], [[packer-tutorial]], [[windows-dll-injector]], and [[unpacker]].
