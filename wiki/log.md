@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Nai64/Nai64Patches`: entity [[nai64-patches]] (Nai64; Kotlin/Gradle Morphe universal patch catalog ~100 patches; ad removal, license/Play Integrity bypass, root/emulator hide, SSL pinning bypass, telemetry block, device/manifest spoof; APK rebuild inside Morphe; mobile game RE / modding; cheat / Morphe patch source); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[apktool]], [[apk-sh]], [[auto-android-app-modding-tool]], [[frida]], [[awesome-android-root]], [[spoofing-collection]], and [[keyattestation]].
+
 - **2026-08-23** — ingest `readme:categories`: Cheat ~2743 (+1; Nai64/Nai64Patches Morphe APK patch catalog — root/integrity bypass, license checks, Play Integrity spoof, SSL pinning; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
 
 - **2026-08-23** — ingest `description:LloydLabs/delete-self-poc`: entity [[delete-self-poc]] (LloydLabs; C PoC; rename primary data stream then SetFileInformationByHandle file disposition to delete locked or running executables from disk; handle sequencing and locked-file removal edge cases; anti-forensics / secure cleanup / defensive detection engineering; README A way to delete a locked file, or current running executable, on disk); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[forensia]], [[anti-forensics]], [[antfs]], [[file-recovery-tool]], [[dfirtriage]], [[shellcode-plain-sight]], and [[wsb-detect]].

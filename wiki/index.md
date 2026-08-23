@@ -2009,6 +2009,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
 - [nathans-tarkov-radar-public](entities/nathans-tarkov-radar-public.md) — public EFT radar (Vmread external or DMA; secondary-display top-down player/scav/loot/extraction; Unity memory; cheat / game:eft [Vmread + Radar]; gmh5225)
+- [nai64-patches](entities/nai64-patches.md) — curated Morphe Android APK patch catalog (~100 Kotlin/Gradle universal patches; ad removal, license/Play Integrity bypass, root/emulator hide, SSL pinning bypass, telemetry block, device/manifest spoof; mobile game RE / modding; Nai64)
 - [native-predicate-solver](entities/native-predicate-solver.md) — Binary Ninja native opaque-predicate remover (C++; MLIL branch analysis; single-function/whole-binary; multithreaded; ScriptWare-Software; Cheat Binary Ninja Plugins)
 - [nigusFN](entities/nigusfn.md) — Fortnite external cheat source (C++; nigusFN-style interface; DirectX 9 ImGui menu + driver/utility components; item defs + config headers; EAC-oriented tooling workflows; YMY1666527646; cheat / game:fortnite [External])
 - [NineS](entities/nines.md) — PS5 ELF injector (TCP :9033; remote manual map + thread; section load/relocs; PlayStation process injection)
