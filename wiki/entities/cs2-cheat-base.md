@@ -18,4 +18,4 @@ Base framework (gmh5225) for building Counter-Strike 2 internal cheats. Provides
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/graphics-api]] · [[cs2-cheat]] · [[cs2-sdk]] · [[cs2-internal]] · [[asphyxia-cs2]] · [[cs2-sdk-source2gen]] · [[cs2-offsets]] · [[present-hook]] · [[source2gen]] · [[source2sdk]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/graphics-api]] · [[kisssart-cs2-cheat-base]] · [[cs2-cheat]] · [[cs2-sdk]] · [[cs2-internal]] · [[asphyxia-cs2]] · [[cs2-sdk-source2gen]] · [[cs2-offsets]] · [[present-hook]] · [[source2gen]] · [[source2sdk]]
