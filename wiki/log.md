@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LSPosed/DexBuilder`: entity [[dexbuilder]] (LSPosed; C++ library for programmatic DEX bytecode construction; AOSP-derived dexmaker alternative; LSPosed runtime integration; Android framework researchers/tooling developers); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dex2jar]], [[dexkit-android]], [[zygisk-dump-dex]], [[xposed-module-kit]], and [[dirty-sepolicy]].
+
 - **2026-08-23** — ingest `description:LSPosed/DirtySepolicy`: entity [[dirty-sepolicy]] (LSPosed; Android app; App Zygote AIDL service bind → runtime permissive SELinux rule injection without root/kernel mods; SELinux access checks detect userspace su solutions; Detection:Android root); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[advanced-root-checker]], [[root-app-detector]], [[android-super-inject]], [[magisk]], and [[kernelsu]].
 
 - **2026-08-23** — ingest `description:LSPosed/MagiskOnWSALocal`: entity [[magiskonwsalocal]] (LSPosed; Python/shell scripts integrate Magisk/KernelSU + GApps into WSA images locally; extract/patch system image; installable rooted WSA builds with LSPosed support; Android security researchers/developers; testing and analysis on Win11; cheat / WSA); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[magisk]], [[kernelsu]], [[wsa-kernel-su]], [[wsa-linux-kernel]], [[wsa-builds]], [[wsapatch]], and [[wsa-pacman]].

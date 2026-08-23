@@ -866,6 +866,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DaliVM](entities/dalivm.md) — Python Dalvik VM emulator (DEX execution, Android API mocking, static analysis, string decryption, Multi-DEX; no Android runtime)
 - [Dalvikus](entities/dalvikus.md) — Android smali editor / Dalvik bytecode RE tool (ethical research)
 - [dex2jar](entities/dex2jar.md) — DEX↔JAR toolset (d2j-baksmali / APK sign / DEX manip; mobile RE)
+- [DexBuilder](entities/dexbuilder.md) — LSPosed C++ DEX bytecode generator (AOSP-derived dexmaker alternative; runtime integration; Android framework/tooling)
 - [dexkit-android](entities/dexkit-android.md) — high-performance Android DEX deobfuscation library (LuckyPray; C++ NDK + JNI/Kotlin; string/relation/opcode-pattern search; Gradle/prefab/CMake; hook-point discovery; cheat / dex deobfuscator)
 - [dfm-android-unicorn](entities/dfm-android-unicorn.md) — DFM Android ARM64 coordinate decryption via Unicorn emulation (C/C++; ACE/libtersafe; cheat / explore anticheat system:ACE)
 - [Diaphora](entities/diaphora.md) — open-source IDA Pro binary diffing plugin (CFG/BB-hash/mnemonics/strings/call-graph; symbol porting; patch analysis)
