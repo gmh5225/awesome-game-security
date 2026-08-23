@@ -166,6 +166,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AlphaGolang](entities/alphagolang.md) — SentineLabs IDAPython Go binary analysis workflow (pclntab recovery, function discovery, strings, types; YARA for PE/ELF/Mach-O; stripped Go malware RE; cheat / Analyzing Golang Binaries) — SentineLabs IDAPython Go binary analysis workflow (pclntab recovery, function discovery, strings, types; YARA for PE/ELF/Mach-O; stripped Go malware RE; cheat / Analyzing Golang Binaries)
 - [APatch](entities/apatch.md) — Android kernel/system patch root (KernelPatch boot.img; SuperKey above root; stock GKI; Cheat / Android root)
 - [APatch KPM](entities/apatch-kpm.md) — APatch KernelPatch Module collection (C/C++; kernel modding/debug; Cheat / Android root)
+- [ape-ex-abominations](entities/ape-ex-abominations.md) — Apex Legends DMA-oriented cheat: C++ feature modules + shell gdb inject/extract/reload; interface discovery + pattern scan; QEMU/VFIO workflows; evdev-mirror kernel input (LWSS; cheat / game:apex legends [Apex])
 - [apple-lite-fortnite-cheat](entities/apple-lite-fortnite-cheat.md) — Apple Lite Fortnite Cheat leak + Police remake (C/C++; kernel + shader + modding; gmh5225; cheat / game:fortnite)
 - [apex_full_cheat](entities/apex-full-cheat.md) — Apex Legends full cheat: rendering / SDK generation / hooking (C/C++; cheat / game:apex legends)
 - [apex_legends_sdk](entities/apex-legends-sdk.md) — Apex Legends SDK: rendering / SDK generation (C++; gmh5225; cheat / game:apex legends)

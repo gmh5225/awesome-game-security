@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LWSS/Ape-ex-Abominations`: entity [[ape-ex-abominations]] (LWSS; DMA-oriented Apex Legends cheat; C++ feature modules + shell gdb injection/extraction/fast-reload automation; interface discovery + pattern scanning; QEMU/VFIO workflows; evdev-mirror kernel module input; virtualized/hardware-assisted cheat research; cheat / game:apex legends [Apex]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[apex-dma-kvm-pub]], [[apex-dma-cheat-updated]], [[ez-apex-dma-aimbot]], [[escape-from-tuxkov]], and [[mcdota]].
+
 - **2026-08-23** — ingest `description:LWSS/McDota`: entity [[mcdota]] (LWSS; C++ Linux Dota 2 cheat/tinkering framework; runtime injection; Panorama UI, ESP, camera controls, protobuf packet intercept/edit; standard/stealth/integrated load modes; Source 2 Linux client RE; cheat / game:dota2 [linux]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[dota2-cheat]], [[dota-cheat]], [[dota2dumped]], and [[source-netvars]].
 
 - **2026-08-23** — ingest `description:LabGuy94/Diskjacker`: entity [[diskjacker]] (LabGuy94; C++ kernel + usermode + asm stubs; runtime Hyper-V VM-exit hijacking via DDMA-style DMA; low-level mapping and execution transfer; hardware/virtualization preconditions; hypervisor security PoC); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[ddma]], [[ddma-1]], [[voyager]], [[modded-voyager]], [[hyper-rev]], and [[hyperdeceit]].
