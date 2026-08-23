@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Lakr233/vphone-cli`: entity [[vphone-cli]] (Lakr233; Swift CLI + Python firmware patchers for iBoot/kernel/TXM; jailbreak patch sets, ramdisk builders, CFW; Virtualization.framework PCC research VM on Apple Silicon Macs; SIP/AMFI disabled, DFU/restore/ramdisk; iOS security RE / virtualized iOS lab; cheat / Boot virtual iPhone); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[xnu-qemu-arm64]], [[utm]], [[xnu-1day-practice]], [[malimite]], and [[ida-ios-helper]].
+
 - **2026-08-23** — ingest `description:LaurieWired/GhidraMCP`: entity [[ghidramcp]] (LaurieWired; Java Ghidra plugin + Python MCP server; decompile, symbol/method enumeration, automated renaming; semi-automated binary analysis for LLM desktop clients; cheat / MCP for Ghidra); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-mcp]], [[ghidra-headless-mcp]], [[ghidrassist-mcp]], [[ghidra-manager]], and [[malimite]].
 
 - **2026-08-23** — ingest `description:LaurieWired/Malimite`: entity [[malimite]] (LaurieWired; Java Ghidra-based desktop decompiler; iOS IPA + macOS app bundles; Apple resource decode, Swift class reconstruction, Swift/ObjC binaries; malware analysis and Apple app security RE; cheat / iOS and macOS Decompiler); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ida-ios-helper]], [[aimachdec]], [[workflow-objc]], [[runtime-viewer]], [[ipapatch]], and [[ios-packager]].

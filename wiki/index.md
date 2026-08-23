@@ -3053,6 +3053,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMUnprotect.Dumper](entities/vmunprotect-dumper.md) — dynamic .NET VMProtect unpack/dump (AsmResolver; Fix VMP)
 - [vpgather](entities/vpgather.md) — AVX2 VPGATHER + VEH address-validity probe PoC (Peribunt; pre-fault accessibility checks; stealth memory probing; RE / AC bypass research)
 - [vpnhide](entities/vpnhide.md) — Android VPN hide (LSPosed system_server + GKI kretprobe/KernelPatch/Zygisk; ioctl/netlink/`/proc/net`; optional localhost ports block; Cheat Magisk)
+- [vphone-cli](entities/vphone-cli.md) — Apple Silicon macOS virtualized iPhone CLI (Lakr233; Swift + Python iBoot/kernel/TXM patchers, ramdisk/CFW; Virtualization.framework PCC research VM; SIP/AMFI disabled, DFU/restore; iOS security RE / virtualized iOS lab)
 - [vulchatgpt](entities/vulchatgpt.md) — BinAIVulHunter IDA plugin: multi-provider AI vuln analysis on decompiled functions (OpenAI/Gemini/Ollama; cheat / IDA Plugins)
 - [WPeChatGPT](entities/wpechatgpt.md) — OpenAI-compatible IDA plugin: explain/rename, Python routine reconstruction, vuln checks, automated function-tree summarization (IDAPython; cheat / IDA Plugins / `[ChatGPT]`)
 - [vulkan](entities/vulkan.md) — PE dumper for Hyperion/Theia dynamic code encryption (NOACCESS page resolve; import fixup; Roblox/The Finals; atrexus; Dump lane)
