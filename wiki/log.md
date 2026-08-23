@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Mattiwatti/EfiGuard`: entity [[efiguard]] (Mattiwatti; portable x64 UEFI bootkit; C/C++ + EDK2; patches Windows boot chain to disable PatchGuard + DSE at startup; runtime disassembly; SetVariable-based boot-time patch modes; EfiDSEFix helper; wide Win x64 version support; boot integrity / kernel protection / AC driver-load bypass research; README [EFI]); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[bootlicker]], [[driver-efi-bootkit]], [[efi-memory]], and [[upgdsed]].
+
 - **2026-08-23** — ingest `description:cxOrz/AnyWhere`: entity [[anywhere]] (cxOrz; Java Android mock-location app; OpenStreetMap picker + overlay joystick + location history; bundled LSPosed/Xposed module hides mock-provider flags; LBS debugging + location-spoof / mock-GPS AC research); cited on [[overviews/mobile-security]], [[overviews/game-hacking]], and [[concepts/mobile-anti-cheat]]; cross-linked [[locusmimic]] and [[xposed-module-kit]].
 
 - **2026-08-23** — ingest `readme:categories`: Cheat ~2742 (+1; cxOrz/AnyWhere Android mock-location + LSPosed mock-provider hide; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts; light `index.md` section notes (no per-category pages).

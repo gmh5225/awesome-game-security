@@ -21,7 +21,8 @@ sources:
   - wiki/sources/descriptions/NSG650__NoMoreBugCheckReloaded.md
   - wiki/sources/descriptions/NSG650__NoMoreBugCheck.md
   - wiki/sources/descriptions/NSG650__BugCheckHack.md
-updated: 2026-08-22
+  - wiki/sources/descriptions/Mattiwatti__EfiGuard.md
+updated: 2026-08-23
 confidence: high
 ---
 
@@ -63,10 +64,12 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[nomore-bugcheck-reloaded]] (NSG650) moves kernel crash-handling patches into a **UEFI boot-stage loader**—altering bugcheck behavior before normal driver-load paths—illustrating below-OS timing that sidesteps runtime PatchGuard pressure on loaded driver images. (source: wiki/sources/descriptions/NSG650__NoMoreBugCheckReloaded.md)
 
+[[efiguard]] (Mattiwatti; portable x64 UEFI bootkit; patches the Windows boot chain at startup to disable PatchGuard and DSE; runtime disassembly; SetVariable-based boot-time patch modes; EfiDSEFix helper; wide Win x64 version support) illustrates **pre-kernel KPP + DSE neutralization** before normal driver-load telemetry exists. (source: wiki/sources/descriptions/Mattiwatti__EfiGuard.md)
+
 [[nomore-bugcheck]] (NSG650) is the earlier **runtime kernel driver** lane: direct **`KeBugCheckEx`** code patching with restore logic to suppress the normal bugcheck path—illustrating PatchGuard-adjacent risk when hostile code overwrites crash-handling entry points from a loaded driver. (source: wiki/sources/descriptions/NSG650__NoMoreBugCheck.md)
 
 [[bugcheckhack]] (NSG650) is a **driver + user-mode controller** that resolves kernel offsets and patches **bugcheck-related routines** to alter BSOD appearance and behavior—another runtime lane showing how crash-path patching research sits adjacent to PatchGuard-monitored kernel integrity. (source: wiki/sources/descriptions/NSG650__BugCheckHack.md)
 
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheckhack]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheckhack]] · [[efiguard]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
