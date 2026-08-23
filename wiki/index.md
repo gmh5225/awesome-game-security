@@ -522,6 +522,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [collateral-damage](entities/collateral-damage.md) — Xbox One/Series SystemOS kernel exploit (CVE-2024-30088; kernel 25398.4478/4908/4909; console emulator / Xbox RE)
 - [comida](entities/comida.md) — IDA Pro COM analysis plugin (GUID scan + registry correlation; Hex-Rays type inference on CoCreateInstance/QueryInterface; airbus-cert; cheat / IDA Plugins)
 - [comon](entities/comon.md) — WinDbg extension; trace COM class creation + interface querying (WinDbg Plugins)
+- [compact-vm-detector](entities/compact-vm-detector.md) — compact embeddable Windows C++ VM-detection component (pafish-inspired; lightweight anti-virtualization; Visual C++ integration; LukeGoule)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
 - [compile-time-regular-expressions](entities/compile-time-regular-expressions.md) — C++ CTRE compile-time regex (cmake `ctre`; AC Compile Time)
 - [cocos2d-x](entities/cocos2d-x.md) — cross-platform C++ 2D framework (cocos2d-iphone lineage; Game Engine / source)

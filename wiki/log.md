@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LukeGoule/compact_vm_detector`: entity [[compact-vm-detector]] (LukeGoule; compact embeddable Windows C++ VM-detection component; pafish-inspired lightweight anti-virtualization checks; Visual C++ integration; minimal footprint; anti-analysis experimentation and environment fingerprinting; Detection:Virtual Environments); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pafish]], [[vmaware]], [[anticuckoo]], and [[hypervisor-detection]].
+
 - **2026-08-23** — ingest `description:Luxon98/Super-Mario-Bros-game`: entity [[super-mario-bros-game]] (Luxon98; C++ Super Mario Bros remake; SDL2/SDL_image/SDL_mixer; Visual Studio; original-inspired and custom levels; 2D rendering, level flow, gameplay logic; game development learning / SDL engine practice; README [Remake of Super Mario]); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[zombies-vs-plants]], [[doomretro]], [[2048-cpp]], and [[cpp-game-engine-book]].
 
 - **2026-08-23** — ingest `description:LyeDevGit/WonTree-RBLX-Dumper`: entity [[wontree-rblx-dumper]] (LyeDevGit; Luau injectable Roblox game analysis dumper; four-layer decompile pipeline, client/server instance scan, remote call graphs, live FireServer/InvokeServer logger, framework + anti-cheat keyword detection; markdown/CSV reports; UNC-compatible executors; game security RE reference map); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[roblox-cheats]], [[advanced-anticheat]], [[shprotect-ac]], [[lua-obfuscator-clyde-protection]], and [[byfron-bypass]].
