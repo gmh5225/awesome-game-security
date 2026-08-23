@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:MJx0/AndUE4Dumper`: entity [[andue4dumper]] (MJx0; C++ Android NDK UE4 dumping toolkit; external executable or injectable shared library; engine offsets/classes/structs/enums/functions + symbol JSON for IDA/Ghidra; mobile game RE + Unreal mobile security research; cheat / [SDK Dump For Android]); cited on [[overviews/mobile-security]] and [[overviews/game-engine]]; cross-linked [[ios-ue4dumper]], [[ue4-apk-dumper]], [[ue4dumper]], [[frida-ue4dump]], [[uedumper]], [[shh0yauedumper]], [[kittymemory]], and [[unreal-object-model]].
+
 - **2026-08-23** — ingest `description:MJx0/KittyMemory`: entity [[kittymemory]] (MJx0; C++ cross-platform Android/iOS runtime memory patching library; memory scan, pointer validation, file helpers, Keystone assembly patch generation, prebuilt binaries + platform examples; mobile game RE / controlled in-memory modification; cheat / [Runtime code patching]); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory-ios]], [[ios-ue4dumper]], [[and64-inline-hook]], [[dobby]], [[android-memory-tool]], and [[ceserver-ios]].
 
 - **2026-08-23** — ingest `description:MJx0/iOS_UE4Dumper`: entity [[ios-ue4dumper]] (MJx0; iOS Unreal Engine dumper MobileSubstrate tweak; C++/ObjC++; arm64/arm64e; pattern-based engine-structure discovery; offsets/classes/structs/enums/functions + symbol JSON for IDA/Ghidra; iOS game RE + Unreal mobile security research; cheat / [SDK Dump For IOS]); cited on [[overviews/mobile-security]] and [[overviews/game-engine]]; cross-linked [[ue4-apk-dumper]], [[ue4dumper]], [[frida-ue4dump]], [[uedumper]], [[shh0yauedumper]], and [[unreal-object-model]].
