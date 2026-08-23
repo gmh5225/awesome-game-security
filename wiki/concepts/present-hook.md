@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/techiew__DirectXHook.md
   - wiki/sources/descriptions/rlybasic__DWM_Hook.md
   - wiki/sources/descriptions/Yukin02__Dwm-Overlay.md
+  - wiki/sources/descriptions/LoxTus__dwm-overlay.md
   - wiki/sources/descriptions/mfxiaosheng__dwmhook.md
   - wiki/sources/descriptions/gmh5225__dwmhook.md
   - wiki/sources/descriptions/gmh5225__Vulkan-Hook.md
@@ -40,7 +41,7 @@ sources:
   - wiki/sources/descriptions/SeanPesce__Direct3D9-Overlay.md
   - wiki/sources/descriptions/Rebzzel__kiero.md
   - wiki/sources/descriptions/Nou4r__PresentInjector.md
-updated: 2026-08-22
+updated: 2026-08-23
 confidence: high
 ---
 
@@ -67,7 +68,7 @@ Kernel graphics-subsystem hooks such as [[dxgkrnl-hook]] manipulate the screen b
 
 Kernel-mode GDI render frameworks such as [[krnl-gdi-render]] hook GDI drawing from Ring0 for overlays outside typical user-mode Present paths. (source: wiki/sources/descriptions/r1cky33__krnl-gdi-render.md)
 
-User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / overlays) draw via Desktop Window Manager composition rather than a single game swap-chain Present. (source: wiki/sources/descriptions/rlybasic__DWM_Hook.md) DWM/DirectX ImGui overlay frameworks such as [[dwm-overlay]] (Yukin02; assembly stubs for dispatch interception and present-path handling; external overlay drawing without `.text` patches; README `[DWM Overlay without modify .text]`) provide a minimal hook-integration base beside composition-function hooks. (source: wiki/sources/descriptions/Yukin02__Dwm-Overlay.md) DWM overlay projects named [[dwmhook]] span a PoC that hooks DWM composition functions to inject draw calls without a separate overlay window (gmh5225; README `[DWM]`) (source: wiki/sources/descriptions/gmh5225__dwmhook.md) and a fuller DX11 vtable ImGui framework (reflective inject; MinHook/PolyHook2; PDB/DIA compositor symbols; README `[DWM VFTable]`) (source: wiki/sources/descriptions/mfxiaosheng__dwmhook.md). DWM anti-screenshot samples such as [[disablenvidiascreenshot]] (C++; NVIDIA / capture-facing screenshot lane) use the same composition surface to study cheat-side anti-screenshot vs Present-path capture. (source: wiki/sources/descriptions/oakboat__DisableNvidiaScreenshot.md) DWM screenshot / AC research samples such as [[dwm-screen-shot]] (C++; defensive engineers studying DWM capture in the Anti Cheat / Screenshot lane) complement overlay and evasion work on the same composition surface. (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md)
+User-mode DWM hook samples such as [[dwm-hook]] (C++; rendering / hooking / overlays) draw via Desktop Window Manager composition rather than a single game swap-chain Present. (source: wiki/sources/descriptions/rlybasic__DWM_Hook.md) DWM/DirectX ImGui overlay frameworks such as [[dwm-overlay]] include Yukin02 assembly stubs for dispatch interception and present-path handling without `.text` patches (README `[DWM Overlay without modify .text]`) (source: wiki/sources/descriptions/Yukin02__Dwm-Overlay.md) and LoxTus MinHook + D3D11 + ImGui PoCs that pattern-scan dwmcore present routines and draw custom UI through the swap chain (README `[DWM]`) (source: wiki/sources/descriptions/LoxTus__dwm-overlay.md)—both provide hook-integration bases beside composition-function hooks. DWM overlay projects named [[dwmhook]] span a PoC that hooks DWM composition functions to inject draw calls without a separate overlay window (gmh5225; README `[DWM]`) (source: wiki/sources/descriptions/gmh5225__dwmhook.md) and a fuller DX11 vtable ImGui framework (reflective inject; MinHook/PolyHook2; PDB/DIA compositor symbols; README `[DWM VFTable]`) (source: wiki/sources/descriptions/mfxiaosheng__dwmhook.md). DWM anti-screenshot samples such as [[disablenvidiascreenshot]] (C++; NVIDIA / capture-facing screenshot lane) use the same composition surface to study cheat-side anti-screenshot vs Present-path capture. (source: wiki/sources/descriptions/oakboat__DisableNvidiaScreenshot.md) DWM screenshot / AC research samples such as [[dwm-screen-shot]] (C++; defensive engineers studying DWM capture in the Anti Cheat / Screenshot lane) complement overlay and evasion work on the same composition surface. (source: wiki/sources/descriptions/lainswork__dwm-screen-shot.md)
 
 DX11 stereoscopic-fix tooling such as [[3d9]] works in the same Present/swap-chain ecosystem (developer-oriented; not an end-user product). (source: wiki/sources/descriptions/visotw__3d9.md)
 

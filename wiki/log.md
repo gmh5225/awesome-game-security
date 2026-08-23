@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:LoxTus/dwm-overlay`: entity [[dwm-overlay]] (LoxTus; DLL-based DWM overlay PoC; C++; MinHook + DirectX 11 + ImGui; pattern scan dwmcore present routine; D3D11 swap-chain UI; graphics hook / desktop-level rendering interception research; README `[DWM]`); merged with existing Yukin02 [[dwm-overlay]] entity; cited on [[overviews/graphics-api]] and [[concepts/present-hook]]; cross-linked [[dwm-hook]], [[dwmhook]], and [[dwm-dwmdraw]].
+
 - **2026-08-23** — ingest `description:Luchinkin/device-control-hooks-scanner`: entity [[device-control-hooks-scanner]] (Luchinkin; C++ KMDF kernel driver; walks `\Driver` object directory; audits `IRP_MJ_DEVICE_CONTROL` dispatch pointers against driver image bounds with module resolution for out-of-range handlers; kernel integrity auditing / driver hook detection research; README [device-control-hooks-scanner]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[slauc91-anticheat]], [[openark]], [[driver-read-write]], [[driver-detect-nullshit]], [[cfb]], and [[hwid-kernel-spoofer]].
 
 - **2026-08-23** — ingest `description:LuckyPray/DexKit-Android`: entity [[dexkit-android]] (LuckyPray; high-performance Android DEX deobfuscation library; C++ NDK + JNI/Kotlin; class/method search by strings, relations, opcode patterns; Gradle/prefab/CMake embed; app analysis, hook-point discovery, obfuscated code navigation; cheat / dex deobfuscator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[jadx]], [[dex2jar]], [[obfu-de-scate]], [[deobfuscator]], [[frida]], and [[glass]].

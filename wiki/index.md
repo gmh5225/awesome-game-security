@@ -875,7 +875,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
 - [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)
 - [DWM-DwmDraw](entities/dwm-dwmdraw.md) — DWM `DwmDraw` pipeline overlay (gmh5225; ESP/visual hacks via compositor; README `[DWM StackWalk]`; anti-screenshot research)
-- [Dwm-Overlay](entities/dwm-overlay.md) — DWM/DirectX ImGui overlay framework (Yukin02; dispatch/present-path assembly stubs; external overlay without `.text` patches; README `[DWM Overlay without modify .text]`)
+- [dwm-overlay](entities/dwm-overlay.md) — DWM/DirectX ImGui overlay (Yukin02; dispatch/present-path assembly stubs; external overlay without `.text` patches; README `[DWM Overlay without modify .text]`) + LoxTus PoC (MinHook + D3D11 + ImGui; dwmcore present pattern scan; swap-chain UI; README `[DWM]`)
 - [dwmhook](entities/dwmhook.md) — DWM composition overlay (gmh5225 PoC; inject draw calls without overlay HWND; README `[DWM]`) + mfxiaosheng DX11 vtable ImGui framework (MinHook/PolyHook2; PDB/DIA; `[DWM VFTable]`)
 - [dwm-screen-shot](entities/dwm-screen-shot.md) — DWM screenshot / AC research (C++; anti-cheat engineers; README `[DWM]`)
 - [DroidShield](entities/droidshield.md) — Android RASP SDK (root/debugger/Frida-Xposed/emulator/tamper; polymorphic checks)
