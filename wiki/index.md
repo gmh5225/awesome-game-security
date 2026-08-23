@@ -2403,6 +2403,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ps-notif-routine-unloader](entities/ps-notif-routine-unloader.md) — remove process/thread/image notify callbacks from AC/security drivers (`PsSetCreateProcessNotifyRoutine` enum; RTCore64.sys; gmh5225)
 - [ptrace_read_teb](entities/ptrace-read-teb.md) — Linux ptrace TEB reader (C++; Cheat / Wine)
 - [ptxNinja](entities/ptxninja.md) — Binary Ninja PTX / CUDA GPU virtual ISA RE (plugin manager; Binary Ninja Plugins)
+- [Puzzle](entities/puzzle.md) — Kudaes Rust Windows minifilter-abuse PoCs (bind links, ID mapping, cloud sync providers, WIM hash manipulation; persistence/evasion; stealth/concealment; cheat / hide)
 - [pubg](entities/pubg.md) — PUBG-focused OpenGL hooking/modding sample (C/C++; cheat / game:pubgm; gmh5225)
 - [pubg-ai-yolov4](entities/pubg-ai-yolov4.md) — PUBG YOLOv4/Darknet object detection (screenshot-trained; YOLOv4-tiny/YOLOv7 configs; label tools; image/video scripts; cheat / triggerbot & aimbot; dqforgive-sudo)
 - [PUBG-DX](entities/pubg-dx.md) — PUBG internal DX11 ImGui cheat (ESP/aimbot; kernel-driver reads; Xenuine decrypt; return-address spoofing; VMProtect SDK; cheat / game:pubg; gmh5225)
