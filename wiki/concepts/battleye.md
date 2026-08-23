@@ -38,7 +38,8 @@ sources:
   - wiki/sources/descriptions/es3n1n__be-shellcode-tester.md
   - wiki/sources/descriptions/Schnocker__NoEye.md
   - wiki/sources/descriptions/R4YVEN__beservice_intcallbacks.md
-updated: 2026-08-21
+  - wiki/sources/descriptions/LilPidgey__BEClient.md
+updated: 2026-08-23
 confidence: medium
 ---
 
@@ -84,6 +85,8 @@ Historical service-layer bypass tradecraft is preserved in [[noeye]] (Schnocker)
 
 Client-side protocol emulation is studied via [[be-emulator]] (gmh5225): simulates BE communication protocol, heartbeat responses, and module-loading interface so games run without active BE protection—useful for analyzing game↔BE integration and protocol RE. (source: wiki/sources/descriptions/gmh5225__BE-Emulator.md)
 
+Minimal in-process client-interface scaffolding is provided by [[beclient]] (LilPidgey; C++ Visual Studio PoC): initializes the BattlEye client DLL, defines game/AC data structures, registers callbacks, and calls exported run/command/exit handlers—useful for RE of how titles wire the BEClient DLL contract without a full emulator stack. (source: wiki/sources/descriptions/LilPidgey__BEClient.md)
+
 Handle-stripping bypass via periodic handle re-creation is implemented in [[battleye-handler-bypass]]: a KMDF driver that re-opens process handles before BE’s ~5-second cleanup cycle strips them, with IOCTL paths for usermode control. (source: wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md)
 
 [[badeye]] (gmh5225) studies a complementary handle lane: BE assumes surviving handles already grant needed access and uses them only to resolve **EPROCESS** before **`MmCopyVirtualMemory`** cross-process reads—C++ memory-analysis research on that trust gap. (source: wiki/sources/descriptions/gmh5225__BadEye.md)
@@ -110,4 +113,4 @@ PUBG commercial P2C loader RE such as [[pubg-p2c-re]] (experienceds) documents i
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

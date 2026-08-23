@@ -85,6 +85,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BE BattlEye Shellcode](entities/be-battleye-shellcode.md) — reimplement recent BE UM shellcode scan stages as DLL study scaffold (hidden threads, KiUserExceptionDispatcher hooks, integrity/signature/thread scans, VEH-guarded calls; gmh5225; [shellcode])
 - [BE Emulator](entities/be-emulator.md) — BattlEye client-side protocol emulator (heartbeat, module load, comm; gmh5225; explore anticheat system:be)
 - [BE Forcer Fortnite](entities/be-forcer-fortnite.md) — Fortnite BattlEye init forcer; disables title-specific detection checks for injection/memory access (gmh5225; cheat / explore anticheat system:be / game:fortnite)
+- [BEClient](entities/beclient.md) — C++ PoC BattlEye client DLL interface (init, callbacks, run/command/exit; structure headers; Visual Studio; LilPidgey; anti-cheat client integration RE)
 - [beservice-intcallbacks](entities/beservice-intcallbacks.md) — BattlEye bypass PoC via Instrumentation Callback behavior (R4YVEN; C++/asm; callback + symbol-handling; exploratory BE service research; Instrumentation Callback)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
 - [Benowin Blanc (bb)](entities/bb.md) — parse Windows SDK/PHNT via libclang; struct layouts, enums, constants (`dt`-like) without WinDbg; CLI + TUI, JSON export (cristeigabriela)
