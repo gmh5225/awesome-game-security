@@ -1168,6 +1168,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gamesneeze](entities/gamesneeze.md) — Linux CS:GO cheat research (seksea; cheat / game:csgo)
 - [GamesoftACS](entities/gamesoftacs.md) — Knight Online Gamesoft server-side AC (speed/teleport/damage/inventory + client integrity)
 - [GarHal CSGO](entities/garhal-csgo.md) — CS:GO kernel cheat driver + IOCTL usermode controller (KM entity R/W; planned kernel DirectX overlay; dretax; cheat / game:csgo)
+- [gan-aimbots](entities/gan-aimbots.md) — Miffyli academic ML-aimbot research (Python; ViZDoom; data collection, GAN training/evaluation, classifier plots, experiment orchestration; cheat generation + detection research; cheat / Machine Learning)
 - [garble](entities/garble.md) — Go build-time obfuscator (wraps `cmd/go`; identifier/path hash rename, metadata strip, optional literals, tiny mode, experimental CFF; `garble reverse`; AC Obfuscation Engine)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [Glass](entities/glass.md) — Rust multi-arch binary analysis toolkit (ARM64/x86-64; ELF/Mach-O/DEX/PE; disasm/CFG/xrefs/patch; built-in MCP for mobile RE; `glass mcp`)

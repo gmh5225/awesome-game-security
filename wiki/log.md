@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Miffyli/gan-aimbots`: entity [[gan-aimbots]] (Miffyli; Python ML-aimbot research repo; ViZDoom FPS scenarios; data collection, GAN training/evaluation, classifier plots, experiment orchestration; reproduces published GAN-aimbot pipelines with shared group parameters; cheat generation + detection-strategy research; cheat / Machine Learning); cited on [[overviews/game-hacking]] and [[concepts/ai-aimbot-detection]]; cross-linked [[ai-aimbot]], [[rookieai-yolov8]], [[aimbot-detection-prototype]], and [[waldo]].
+
 - **2026-08-23** — ingest `description:MiroKaku/libwsk`: entity [[libwsk]] (MiroKaku; C/C++ kernel WSK wrapper; socket-style connect/send/recv + address helpers; NuGet/MSBuild; WDK/Visual Studio driver workflows; kernel driver dev + security research; Kernel-Mode Winsock library); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[ksocket]] and [[karlann]].
 
 - **2026-08-23** — ingest `description:Misaka-Mikoto-Tech/MonoHook`: entity [[monohook]] (Misaka-Mikoto-Tech; C# runtime method hooking for Unity Mono/IL2CPP; in-memory JIT/AOT native patch; debug/stack-trace preservation; editor + device; Unity instrumentation / controlled function replacement; [mono hook]); cited on [[concepts/il2cpp]] and [[overviews/game-engine]]; cross-linked [[mono]], [[unityexplorer]], [[bepinex-il2cppbase]], and [[il2cpp-hook-scripts]].
