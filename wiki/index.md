@@ -726,6 +726,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Direct3DHook](entities/direct3d-hook.md) — C#/.NET D3D9–11 EasyHook inject + SharpDX capture/overlays (remoting CaptureInterface)
 - [DirectXHook](entities/directxhook.md) — DX11/12 Present hook + in-game overlay framework (C++; dinput8 DLL)
 - [DirectX11Hook](entities/directx11hook.md) — DX11 Present + DeviceContext hook + ImGui overlay base (C++; DirectX Hook)
+- [directx11-with-windows-sdk](entities/directx11-with-windows-sdk.md) — Windows SDK DX11 tutorial + samples (MKXJun; progressive rendering + ImGui; CMake/VS; triangle → shadow mapping/deferred shading/compute; README [DX11 zh]; DirectX / guide)
 - [DirectXMath](entities/directxmath.md) — Microsoft SIMD inline C++ vectors/matrices/quaternions + collision (SSE–AVX2/NEON; Mathematics)
 - [Divert (WinDivert)](entities/divert.md) — WFP kernel-driver packet capture/divert; user-mode intercept/modify/drop/inject (C; cheat / Packet Divert; basil00)
 - [Diglett](entities/diglett.md) — kernel-mode stealth PoC; hide system threads + alter entry-address visibility; driver + client (Rwkeith; README Hide Kernel Thread)
