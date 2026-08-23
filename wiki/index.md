@@ -721,6 +721,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DELBOT-Mouse](entities/delbot-mouse.md) — deep learning human-vs-bot mouse movement classifier (Bureau404 internship; University of Mons; Detection:triggerbot & aimbot)
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
+- [delete-self-poc](entities/delete-self-poc.md) — C PoC; delete locked or running executable from disk via primary-stream rename + SetFileInformationByHandle disposition (LloydLabs; handle sequencing / locked-file removal; anti-forensics / secure cleanup / defensive detection engineering)
 - [dezlock-dump](entities/dezlock-dump.md) — runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); live-process dump; WebSocket bridge + schema browser; no source2gen required
 - [decryption-dumper](entities/decryption-dumper.md) — Windows C++ runtime encrypted-pointer decrypt routine dumper (Nuxar1; debugger single-step + Zydis; register/stack dependency trace; pattern scan + context restore; cheat / [Dump])
 - [digital-sdk](entities/digital-sdk.md) — CS:GO internal cheat base (MinHook, ImGui, ESP, bunnyhop, engine prediction, autowall, chams; CreateMove + D3D reset hooks; interfaces/netvars/rendering modules; W1lliam1337)
