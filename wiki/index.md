@@ -2500,6 +2500,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r6table-internal](entities/r6table-internal.md) — R6 internal: UE SDK ESP/aimbot + in-engine overlay (C++; cheat / game:r6)
 - [r69-driver](entities/r69-driver.md) — HalPrivateDispatchTable + NtQueryAuxiliaryCounterFrequency KM comm (CR3 phys R/W; gmh5225)
 - [r0ak](entities/r0ak.md) — kernel-level work and modding (C/C++; Some Tricks / Windows Ring3; gmh5225)
+- [roak](entities/roak.md) — HAL timer-query hook + packet KM R/W; kernel offset resolution (KeServiceDescriptorTable; NtQueryAuxiliaryCounterFrequency)
 - [rbfx](entities/rbfx.md) — Urho3D fork: C# support + WYSIWYG editor (Game Engine source)
 - [r2a](entities/r2a.md) — retired radare2 local-LLM pointer (repo gone; successor r2ai; Cheat Radare Plugins)
 - [r2ai](entities/r2ai.md) — LLM-based reversing assistant for radare2 (interactive LLM↔r2; Cheat Radare Plugins)
