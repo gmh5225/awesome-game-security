@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-23** — ingest `description:Kazade/kazmath`: entity [[kazmath]] (Kazade; lightweight portable C 3D mathematics library; vectors, matrices, transformation helpers; CMake build + examples/tests + optional language bindings; portable math foundation for rendering, simulation, and security research tooling; Mathematics); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[rtm]], [[directxmath]], [[fdlibm]], [[omath]], and [[world-to-screen]].
+
 - **2026-08-23** — ingest `description:Kc57/iHide`: entity [[ihide]] (Kc57; iOS per-app jailbreak-hiding tweak; MobileSubstrate/ObjC hooks; Settings-panel enable/disable; common jailbreak-detection bypass; mobile app/game security testing; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[shadow]], [[free-rasp-ios]], [[dopamine]], [[opainject]], and [[ios-mod-menu-template-for-theos]].
 
 - **2026-08-23** — ingest `description:Ke4ton/hardware_bypass`: entity [[hardware-bypass]] (Ke4ton; DLL-based bypass for game-side GPU hardware check; C++ Visual Studio; inject shortly after launch to patch runtime validation; narrow build-and-inject workflow; client integrity / anti-cheat hardware-gating RE; README `[GPU check bypass]`); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[nvidia-gpu-spoof]], [[nvidiaapi]], [[windows-dll-injector]], and [[injectors]].
