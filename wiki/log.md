@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IntelSDM/RustDMACheat`: entity [[rust-dma-cheat]] (IntelSDM; C++ Facepunch Rust DMA cheat framework; ESP + recoil/FOV/lighting/admin-view mods; configurable codebase; PCILeech/MemProcFS/Il2CppDumper/DMALibrary references; hardware-assisted memory access + external cheat workflows; cheat / game:rust [DMA]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[pcileech]], [[dmalibrary]], [[il2cppdumper]], [[oxide-dumper]], [[lord-abbot-rust-external-cheat]], and [[overflow-rust]].
+
 - **2026-08-24** — ingest `description:IntroVirt/IntroVirt`: entity [[introvirt]] (IntroVirt; patched KVM hypervisor + C++ userland library + symbol parsing; runtime guest memory/execution inspect/control; process/thread introspection, breakpoints, memory access, syscall visibility; Windows/Linux guest analysis; out-of-guest monitoring / malware analysis / hardened VM security; README Guest introspection library); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[memflow-kvm]], [[kvm-kernel-example]], [[kernelmon]], [[hyper-rev]], and [[panda]].
 
 - **2026-08-24** — ingest `description:Invoke-RE/binja-lattice-mcp`: entity [[binja-lattice-mcp]] (Invoke-RE; Python BN plugin; authenticated HTTP bridge to external MCP servers; token auth + optional TLS; REST API; export disasm/pseudocode + controlled rename/comment edits; live BN database agent-RE; MCP for Binary_Ninja); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[binary-ninja-mcp]], [[bn]], [[ida-pro-mcp]], [[ghidramcp]], and [[binary-analysis-mcps]].

@@ -1602,6 +1602,7 @@ sources:
   - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
   - wiki/sources/descriptions/no1qq__UAGC.md
   - wiki/sources/descriptions/Lazyzouo__ICUAC.md
+  - wiki/sources/descriptions/IntelSDM__RustDMACheat.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -2260,6 +2261,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Maintained CS2 offset/netvar dumps such as [[cs2-offsets]] (C++ headers + JSON; client/server layout after patches) and [[cs2-offsets-ro0ti]] (C#/C++; `[Offset]` tag) feed that same cheat / game:cs2 memory-layout lane. (source: wiki/sources/descriptions/sezzyaep__CS2-OFFSETS.md) (source: wiki/sources/descriptions/ro0ti__CS2-Offsets.md)
 - Live-process CS2 offset/interface dumpers such as [[cs2-dumper]] (a2x; Rust; memflow memory access on Windows/Linux; C#/C++/Rust/JSON codegen; cheat / game:cs2 `[Dump]`) automate per-patch schema and offset refresh consumed by externals such as [[cs2-dma]], [[titled-gui-cs2]], and [[overlayai]]. (source: wiki/sources/descriptions/a2x__cs2-dumper.md)
 - Automated Facepunch Rust offset pipelines such as [[oxide-dumper]] (LabGuy94; Python; SteamCMD fetch + [[il2cppdumper]] processing + GitHub Actions CI; reusable C++ header export; cheat `[Auto Dump]` / game:rust) automate per-update IL2CPP offset refresh for tooling maintainers tracking frequent Rust patches. (source: wiki/sources/descriptions/LabGuy94__OxideDumper.md)
+- Facepunch Rust DMA external frameworks such as [[rust-dma-cheat]] (IntelSDM; C++; ESP + recoil/FOV/lighting/admin-view gameplay mods; configurable codebase; [[pcileech]]/MemProcFS/[[il2cppdumper]]/[[dmalibrary]] ecosystem; hardware-assisted memory access + external cheat workflows; cheat / game:rust [DMA]) sit in the below-OS Rust lane beside kernel-assisted externals such as [[lord-abbot-rust-external-cheat]] and [[overflow-rust]]. (source: wiki/sources/descriptions/IntelSDM__RustDMACheat.md)
 - Runtime encrypted-pointer decryption dumpers such as [[decryption-dumper]] (Nuxar1; Windows C++; debugger single-step + Zydis; reconstructs decryption routines from live processes; pattern scan, context restore, instruction filtering; cheat / `[Dump]`) sit in the same offensive `[Dump]` lane for AC-protected pointer schemes beside schema/offset dumpers. (source: wiki/sources/descriptions/Nuxar1__DecryptionDumper.md)
 - CS2 function-signature reference notes such as [[cs2-signature-list]] (Salvatore-Als; Markdown + IDC helper; string anchors and search guidance for team switch, item give, chat, damage routines—not fixed universal patterns; cheat / game:cs2 `[Signature]`) complement automated dumpers when refining pattern scans across builds. (source: wiki/sources/descriptions/Salvatore-Als__cs2-signature-list.md)
 - Rust external CS2 cheats such as [[proext]] (ESP / aimbot / triggerbot / radar / RCS; egui UI) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/snipcola__ProExt.md)
