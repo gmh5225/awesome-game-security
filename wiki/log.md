@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HyperDbg/HyperDbg`: entity [[hyperdbg]] (HyperDbg; open-source VT-x/EPT hypervisor-assisted Windows debugger; C/C++; user-mode + kernel-mode; stealth breakpoints, hidden hooks, memory-access monitoring; RE / fuzzing / malware / anti-cheat research; README [VT debuger]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[x64dbg]], [[vt-debuger]], [[unreal-vtdbg]], [[hypervisor-from-scratch]], and [[novahypervisor]].
+
 - **2026-08-24** — ingest `description:Hypercall/FakeEye`: entity [[fakeeye]] (Hypercall; lightweight C++ Visual Studio BattlEye-style launcher emulator; reproduces launcher-side behavior for controlled lab experiments; anti-cheat research + compatibility testing; README [Emulator]); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[be-emulator]], [[beclient]], and [[noeye]].
 
 - **2026-08-24** — ingest `description:IAIK/armageddon`: entity [[armageddon]] (IAIK; C + Python; ARM mobile cache side-channel toolkit — Prime+Probe, Flush+Reload, Evict+Reload, Flush+Flush, cache template attacks; mobile privacy, crypto side channels, TrustZone observation; README Cache attacks on ARM); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[keybuster]], [[cve-2021-1961]], and [[armshellcode]].
