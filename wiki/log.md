@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JKornev/cfgdump`: entity [[cfgdump]] (JKornev; C++ WinDbg extension; print CFG maps, query address ranges, list protected regions; exploit development, binary hardening validation, low-level Windows debugging; Analyze Control Flow Guard map); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfg-find-hidden-shellcode]], [[x64dbg-xfg-marker]], [[cet-research]], [[hidden]], and [[awesome-windbg-extensions]].
+
 - **2026-08-24** — ingest `description:JKornev/hidden`: entity [[hidden]] (JKornev; WDK kernel driver + user-mode CLI/library; configurable rules hide files/directories/registry keys/processes + protect chosen processes from interference; WDK build scripts; reverse-engineering lab / controlled environment masking); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[blanket]], [[hide-file]], [[memfilter-fn-driver]], [[rootkit-2]], [[openark]], and [[volatility]].
 
 - **2026-08-24** — ingest `description:d4rken-org/butler`: entity [[butler]] (d4rken-org; Kotlin/Compose/Hilt/Room; multi-pane explorer, archive/trash/text editor, regex search; root/Shizuku/ADB/shell; app manager, APK export, protected-path browsing; Android security/RE/game-security analysts); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[file-explorer]], [[app-manager]], [[raival-file-explorer]], [[xfiles]], [[adb-file-manager]], [[apktool]], and [[jadx]].

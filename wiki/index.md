@@ -486,6 +486,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cet-research](entities/cet-research.md) — CET / shadow-stack research (C; Windows Security Features)
 - [cet-win10](entities/cet-win10.md) — Windows 10 Intel CET research (shadow stack + IBT; kernel forward/backward-edge CFI; gmh5225)
 - [CFG-FindHiddenShellcode](entities/cfg-find-hidden-shellcode.md) — CFG bitmap inconsistency shellcode scanner (C; valid call targets outside module code)
+- [cfgdump](entities/cfgdump.md) — WinDbg extension: inspect Control Flow Guard coverage (C++; print CFG maps, query ranges, list protected regions; JKornev; Analyze Control Flow Guard map)
 - [cfclap](entities/cfclap.md) — CrossFire (CF) cheat: memory manipulation / ESP / aimbot (cheat / game:crossfire; gmh5225)
 - [cgl](entities/cgl.md) — single-header C graphics/utility library (Jaysmito101; cross-platform windowing, rendering, noise, math, data structures, networking, threading; Rust/Python wrappers; bloom/audio/node editing; prototyping/demo scenes; Game Engine / source)
 - [cheap-engine](entities/cheap-engine.md) — lightweight Android memory scanner (scan/edit, exact/range/changed search, pointer scan; simplified CE alternative; gmh5225)
