@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JonathanSalwan/VMProtect-devirtualization`: entity [[vmprotect-devirtualization]] (JonathanSalwan; experimental dynamic VMProtect 3.x pure-function deobfuscation; Intel Pin trace + Triton symbolic exec; path predicates and I/O relations; LLVM IR lift for MBA simplification; Fix VMP); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[vmprotect]], [[titan]], [[novmpy]], [[novmp]], [[rumba]], and [[vmp-devirtualization-lab]].
+
 - **2026-08-24** — ingest `description:Jordan231111/lsposed-universal-template`: entity [[lsposed-universal-template]] (Jordan231111; LSPosed/LSPatch module scaffold; libxposed API 102; Java hooks + runtime feature registry + movable overlay mod menu; optional ShadowHook/JNI native pattern scan and module lookup; Unity/Unreal/Cocos2d-x/Godot engine detection; anti-cheat satellite process filters; Frida recon + IL2CPP/native workflow docs; Gradle/CMake; authorized mobile game RE); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[xposed-module-kit]], [[apppealing-new]], [[canyie-pine]], [[frida]], [[il2cpp]], and [[game-engine-detector]].
 
 - **2026-08-24** — ingest `description:JosefNemec/Playnite`: entity [[playnite]] (JosefNemec; OSS Windows game library manager/launcher; C#/XAML/.NET; plugin architecture for library integrations, themes, automation; emulation workflows + local metadata; Game Manager); cited on [[overviews/overview]] and [[overviews/game-hacking]]; cross-linked [[mini-launcher]], [[rce-shield]], and [[goldberg-emulator]].

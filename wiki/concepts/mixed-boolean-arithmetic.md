@@ -15,7 +15,8 @@ sources:
   - wiki/sources/descriptions/SynthesisLab__MBA.md
   - wiki/sources/descriptions/MBA-research__mba-wasm.md
   - wiki/sources/descriptions/LostOxygen__gnn_deobfuscation.md
-updated: 2026-08-23
+  - wiki/sources/descriptions/JonathanSalwan__VMProtect-devirtualization.md
+updated: 2026-08-24
 confidence: high
 ---
 
@@ -37,6 +38,7 @@ confidence: high
 5. **Sample generation for testing** — synthesize MBA expressions to validate simplifier pipelines ([[mutaben]], [[mba-obfuscator]]); source-level constant/arithmetic replacement with Z3-verified polynomial MBA via [[mixed-boolean-transform]] (C++; Eigen3 + GMP) (source: wiki/sources/descriptions/mizt0__mixed-boolean-transform.md); compile-time control-flow obfuscation that MBA-encodes jump targets with per-build randomized rewrite rules via [[limba]] (C++20; Clang/clang-cl; ThatLing) (source: wiki/sources/descriptions/ThatLing__limba.md). VM-based protectors such as [[covirt]] embed MBA transforms inside stack-VM obfuscation passes for protected regions (source: wiki/sources/descriptions/dmaivel__covirt.md).
 6. **Interactive web tooling** — browser-based Rust/WASM MBA obfuscation, linear congruence solving, permutation polynomial generation, and expression simplification via [[mba-wasm]] (MathJax UI; MBA-research) (source: wiki/sources/descriptions/MBA-research__mba-wasm.md).
 7. **Machine learning** — graph neural network models trained to deobfuscate MBA expressions via [[gnn-deobfuscation]] (Python; Loki/MBABlast/MBAObfuscator datasets by variable count and operation depth; LostOxygen) (source: wiki/sources/descriptions/LostOxygen__gnn_deobfuscation.md).
+8. **LLVM lift + optimizer passes** — dynamic VMProtect pure-function recovery via [[vmprotect-devirtualization]] synthesizes recovered expressions to LLVM IR so standard LLVM optimizations can simplify embedded MBA noise after Triton symbolic analysis (JonathanSalwan; source: wiki/sources/descriptions/JonathanSalwan__VMProtect-devirtualization.md).
 
 ## Detection context
 
@@ -44,4 +46,4 @@ MBA-heavy regions often co-occur with [[control-flow-flattening]] and opaque pre
 
 ## Related
 
-[[cobra]] · [[mbased]] · [[mba]] · [[mba-wasm]] · [[gnn-deobfuscation]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[cobra]] · [[mbased]] · [[mba]] · [[mba-wasm]] · [[gnn-deobfuscation]] · [[promba]] · [[kong]] · [[qsynthesis]] · [[drill-and-join]] · [[mutaben]] · [[mba-obfuscator]] · [[mixed-boolean-transform]] · [[limba]] · [[covirt]] · [[vmprotect-devirtualization]] · [[obfuscation-analysis]] · [[stp]] · [[control-flow-flattening]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

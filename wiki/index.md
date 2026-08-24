@@ -3109,6 +3109,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VMwareCloak](entities/vmware-cloak.md) — PowerShell VMware Windows VM cloak (hide guest from VM-evasive malware; analyst / virtual-environments research)
 - [VmwareHardenedLoader](entities/vmware-hardened-loader.md) — VMware anti-detection hardening (CPUID/SMBIOS/ACPI/registry/MAC spoof; hypervisor-level C/C++ loader; Windows + Linux guests)
 - [vmdevirt-vtil](entities/vmdevirt-vtil.md) — broken VTIL VMP devirt demo (Fix VMP / IDA jmp-around-vmenter)
+- [VMProtect-devirtualization](entities/vmprotect-devirtualization.md) — experimental dynamic VMProtect 3.x pure-function deobfuscation (Intel Pin trace + Triton symbolic exec; LLVM IR lift for MBA simplification; JonathanSalwan; Fix VMP)
 - [vmp-devirtualization-lab](entities/vmp-devirtualization-lab.md) — Android native VMP devirt educational lab (mini-VM, dispatcher/handler recovery, symbolic lifting; QBDI/Unicorn/Triton/Frida; tomhamidi97-arch)
 - [vmp-unpacker](entities/vmp-unpacker.md) — C++ dynamic VMProtect unpacker (Win32 debug attach; PEB/ntdll anti-debug bypass; OEP discovery; mutated IAT rebuild; Fix VMP / Unpacker; Lucyferek-nunu)
 - [VMPacker](entities/vmpacker.md) — ARM64 ELF VM code protection (Go; native→custom bytecode; indirect dispatch, chained encryption, CRC integrity, function-split obfuscation; demo programs; binary protection / VM obfuscation RE; LeoChen-CoreMind; AC Obfuscation Engine `[VM]`)
