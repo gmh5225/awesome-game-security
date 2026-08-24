@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/goomba (Hex-Rays + Z3)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -1321,6 +1321,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GoldSourceRebuild](entities/goldsource-rebuild.md) — decompiled/reconstructed GoldSource engine rebuild (HL1; rendering / networking / game systems; modding / research; Game Engine / RE)
 - [go-detection-hyper-v](entities/go-detection-hyper-v.md) — Go Hyper-V VM detection (CPUID feature checks, timing, hypervisor presence; gmh5225; Hyper-v)
 - [goesp](entities/goesp.md) — cross-platform CS:GO ESP (danielkrupinski; modern C++; Dear ImGui overlay; memory-read entity ESP via game render path; Windows/Linux; cheat / game:csgo [Cross-platform])
+- [goomba](entities/goomba.md) — Hex-Rays decompiler plugin; linear/non-linear MBA simplification; algebraic heuristics + optional fingerprint-oracle; Z3 soundness verification; IDA Pro / Hex-Rays workflows (HexRaysSA; Cheat Simplify MBA)
 - [goose-goose-duck-hack](entities/goose-goose-duck-hack.md) — Goose Goose Duck Unity IL2CPP internal cheat (ImGui overlay; dumped Assembly-CSharp + ACTk bypass; ESP/role reveal; gmh5225)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
 - [GOWTool](entities/gow-tool.md) — God of War (2018) Windows asset extractor/converter (HitmanHimself; C++ Visual Studio; DirectXTex + glTF; proprietary format RE / modding; God of War 2018)
