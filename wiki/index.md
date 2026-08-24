@@ -868,6 +868,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dragonhook](entities/dragonhook.md) — Ghidra↔Frida static+dynamic bridge (localhost HTTP GhidraDB API; runtime indirect-call resolution, live xref/comment sync, symbol backtraces, call tracing; mitros123; cheat / Ghidra Plugins)
 - [drivers_and_shit](entities/drivers-and-shit.md) — categorized Windows kernel `.sys` binary corpus from OEM/utility/security products; vulnerable-driver research reference (alfarom256; Vulnerable Driver List)
 - [droidrun](entities/droidrun.md) — Python LLM agent framework for Android/iOS device control (ADB + accessibility APIs; multi-provider; scripter agents; MCP for Android; mobile security testing / QA automation)
+- [Drv Hide And Camouflage](entities/drv-hide-and-camouflage.md) — unsigned driver load + identity camouflage via unexported kernel routines, manual offset init, object/import-table manipulation (IcEy-999; C ring-0; Hide Driver)
 - [drvtrace](entities/drvtrace.md) — Windows kernel IRP filter tracer (major/minor codes, buffers, completion status; IOCTL/device-protocol RE; eversinc33)
 - [drvscan (ekknod)](entities/drvscan.md) — Windows DMA/PCIe device scanner and memory forensics (C; PCIe enumeration, pcileech-style acquisition, cheat/rootkit signature scans; Anti Cheat / Detection:DMA [Scanner])
 - [DrillAndJoin](entities/drill-and-join.md) — C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla
