@@ -515,6 +515,7 @@ sources:
   - wiki/sources/descriptions/JonathanSalwan__Triton.md
   - wiki/sources/descriptions/JonathanSalwan__ROPgadget.md
   - wiki/sources/descriptions/JonDoNym__peinjector.md
+  - wiki/sources/descriptions/JKornev__hidden.md
   - wiki/sources/descriptions/JasonGoemaat__CheatEngineMonoHelper.md
   - wiki/sources/descriptions/Jackiemin233__Gemini-Genius.md
   - wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md
@@ -1139,7 +1140,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 
 **Working-set anti-tamper:** [[query-working-set-example]] (Midi12; C; `QueryWorkingSet` shared-page state in `.text` reveals debugger breakpoints/protection changes; lightweight memory integrity for RE/defenders) (source: wiki/sources/descriptions/Midi12__QueryWorkingSetExample.md).
 
-**Bypass/hide tooling:** [[titanhide]] (kernel SSDT tamper), ScyllaHide/HyperHide plugins for x64dbg/IDA including [[scyllahide-for-ida9.0rc]] (IDA 9.0 SDK build; hook libs + injector + debugger plugins; masks debugger artifacts; TKazer) (source: wiki/sources/descriptions/TKazer__ScyllaHide-For-IDA9.0RC.md); defensive detection via [[scyllahidedetector2]], [[makin]]. VEH-based stealth attach via [[ghostdebug]] (VollRagm; injected DLL + C# CLI over named pipe; INT3/single-step without Win32 Debug API; Iced disasm + JSON control; TestTarget anti-debug validation; cheat / debugging) (source: wiki/sources/descriptions/VollRagm__ghostdebug.md). Ghost opcodes (`0F 1A`/`0F 1B`) blind some disassemblers — [[hint-break]].
+**Bypass/hide tooling:** [[titanhide]] (kernel SSDT tamper), ScyllaHide/HyperHide plugins for x64dbg/IDA including [[scyllahide-for-ida9.0rc]] (IDA 9.0 SDK build; hook libs + injector + debugger plugins; masks debugger artifacts; TKazer) (source: wiki/sources/descriptions/TKazer__ScyllaHide-For-IDA9.0RC.md); defensive detection via [[scyllahidedetector2]], [[makin]]. Windows kernel artifact-masking frameworks such as [[hidden]] (JKornev; driver + user-mode rules engine; hides files/directories/registry keys/processes and protects chosen processes from interference; CLI/library + WDK build; controlled RE-lab environment masking) (source: wiki/sources/descriptions/JKornev__hidden.md) extend that lane beyond debugger-focused hides. VEH-based stealth attach via [[ghostdebug]] (VollRagm; injected DLL + C# CLI over named pipe; INT3/single-step without Win32 Debug API; Iced disasm + JSON control; TestTarget anti-debug validation; cheat / debugging) (source: wiki/sources/descriptions/VollRagm__ghostdebug.md). Ghost opcodes (`0F 1A`/`0F 1B`) blind some disassemblers — [[hint-break]].
 
 ## AI-assisted RE (MCP & summarization)
 

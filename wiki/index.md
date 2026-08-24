@@ -1387,6 +1387,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hiearchy-eac](entities/hiearchy-eac.md) — EAC self-integrity bypass PoC (call-hierarchy + memory-read manipulation; verification hooks; cleaned-image redirect; stack/register spoofing; Sinclairq [Integrity Checks])
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
 - [HideDriverTesting](entities/hide-driver-testing.md) — multi-artifact driver hide (MmUnloadedDrivers, PsLoadedModuleList, PiDDBCacheTable; Win11 21H2; gmh5225)
+- [Hidden](entities/hidden.md) — WDK kernel driver + user-mode CLI/library; configurable hide for files/directories/registry keys/processes + process protection; RE lab environment masking (JKornev)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
 - [Hidden-Thread-Finder](entities/hidden-thread-finder.md) — KTHREAD field-spoof detector via APC vs NMI callback comparison (Win10 20H2; gmh5225)
 - [DLLThreadInjectionDetector](entities/dll-thread-injection-detector.md) — kernel-level DLL thread injection detector (C/C++; Detection:Injection; mq1n)
