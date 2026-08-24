@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Inndy/MSDoggy`: entity [[msdoggy]] (Inndy; legacy Taiwan MapleStory game hack; C/C++ + inline assembly hooks; mob behavior changes + item-filter logic; low-level patching + optional protector integration; historical MMORPG cheat RE; cheat / game:maplestory [TMS Old Hack]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[msb]], [[msc]], and [[twms-hacking-data]].
+
 - **2026-08-24** — ingest `description:kroy-the-rabbit/openfpga-GBC-cheats-ui`: entity [[openfpga-gbc-cheats-ui]] (Pocket Cheat Picker; Python/tkinter; libretro cheat DB browse; Game Genie/GameShark parse; `.cht` SD-card deploy; CPU-read vs RAM-write safety flags; shared parser with openfpga-GBC-cheats core; CLI ROM compare-byte verify; Analogue Pocket GB/GBC openFPGA; cheat / Game Boy); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[bizhawk]], [[kevboy]], [[feather-gb]], and [[gecko]].
 
 - **2026-08-24** — ingest `readme:categories`: Game Boy ~4 (+1; kroy-the-rabbit/openfpga-GBC-cheats-ui Analogue Pocket libretro cheat deploy; major section counts otherwise stable); entity [[openfpga-gbc-cheats-ui]]; refreshed [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
