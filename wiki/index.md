@@ -1084,7 +1084,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [external-warzone-cheat](entities/external-warzone-cheat.md) — COD Warzone external: manually mapped kernel driver + overlay hijack ESP; C++ client/driver VS projects + game SDK/offset scaffolding (NMan1; driver-assisted external RE; cheat / game:cod warzone [External])
 - [EzApexDMAAimbot](entities/ez-apex-dma-aimbot.md) — Apex Legends KVM/DMA aimbot + glow: KVM memory reader; Linux host reads game state; guest-side control; recoil randomization, smoothing, bone randomization, team-aware glow (C/C++; cheat / game:apex legends [KVM]; Y33Tcoder)
 - [ez-drv-bak](entities/ez-drv-bak.md) — Windows kernel driver backup & restore (gmh5225; driver development / AC lab baselines)
-- [FakeEye](entities/fakeeye.md) — BattlEye init emulator (BEService SCM + BE-style game launch; [Emulator])
+- [FakeEye](entities/fakeeye.md) — BattlEye-style launcher emulator (Hypercall; lightweight C++ VS; launcher-side lab testing; mexploitui fork: BEService SCM + BE-style game launch; [Emulator])
 - [FakerAndroid](entities/fakerandroid.md) — APK→Android Studio project translator; javaScaffolding + fakeCpp JNI `.so` hooks + IL2CPP C++ scaffolding (gmh5225; cheat / game engine explorer:Unity)
 - [FakePDB](entities/fakepdb.md) — synthetic PDB generation from IDA analysis (stripped PE symbol recovery; PDB Generation From IDA; gmh5225)
 - [FakeSign](entities/fakesign.md) — fake Authenticode signatures on PE binaries (superficial cert validation bypass; Fake Cert; gmh5225)
