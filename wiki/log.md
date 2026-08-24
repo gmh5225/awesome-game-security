@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:d4rken-org/butler`: entity [[butler]] (d4rken-org; Kotlin/Compose/Hilt/Room; multi-pane explorer, archive/trash/text editor, regex search; root/Shizuku/ADB/shell; app manager, APK export, protected-path browsing; Android security/RE/game-security analysts); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[file-explorer]], [[app-manager]], [[raival-file-explorer]], [[xfiles]], [[adb-file-manager]], [[apktool]], and [[jadx]].
+
 - **2026-08-24** — ingest `readme:categories`: Cheat ~2745 (+1; d4rken-org/butler Android file explorer with root/Shizuku, app manager, APK export, regex search; other major section counts stable); entity [[butler]]; refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
 
 - **2026-08-24** — ingest `description:JOKOSAHS/DMA-Pcileech`: entity [[dma-pcileech]] (JOKOSAHS; open-source [[pcileech-fpga]] network-card-style firmware; SystemVerilog/Verilog + Vivado TCL/constraints; Screamer M2/Enigma X1/Squirrel/Artix-7; TLP handling, config-space shadow, BAR control, FT601 USB, FIFO/mux datapaths; TLP interrupt tuning; educational release after ACE network-card firmware detection; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-wifi]], [[pcileech-wifi-v2]], [[pcileechgen]], and [[dma-fw-guide-2.0]].

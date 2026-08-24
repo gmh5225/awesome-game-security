@@ -10,7 +10,7 @@ confidence: medium
 
 # Butler
 
-Open-source Android file explorer and app manager (Kotlin, Jetpack Compose, Hilt, Room) combining multi-pane browsing, archive handling, trash recovery, a built-in text editor, and an installed-apps workspace for APK metadata, component details, and running-process queries. Escalates access through root, Shizuku, ADB, and shell backends to reach protected paths such as `Android/data` and to run package and file operations normal storage APIs cannot perform. Targets Android security researchers, reverse engineers, and game security analysts inspecting app data, manipulating game files, and auditing installed applications on rooted or debuggable devices. (source: wiki/sources/descriptions/d4rken-org__butler.md)
+Open-source Android file explorer and app manager (Kotlin, Jetpack Compose, Hilt, Room) combining multi-pane browsing, archive handling, trash recovery, a built-in text editor, and regex search. The installed-apps workspace exposes APK metadata, component details, running-process queries, and APK export. Escalates access through root, Shizuku, ADB, and shell backends to reach protected paths such as `Android/data` and to run package and file operations normal storage APIs cannot perform. Targets Android security researchers, reverse engineers, and game security analysts inspecting app data, manipulating game files, and auditing installed applications on rooted or debuggable devices. (source: wiki/sources/descriptions/d4rken-org__butler.md)
 
 Listed in the README under **Cheat → Android File Explorer**.
 
