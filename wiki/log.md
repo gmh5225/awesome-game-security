@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Herooyyy/Pcileech-Intel-I226-V-FullEmu`: entity [[pcileech-intel-i226-v-fullemu]] (Herooyyy; prebuilt [[pcileech]]-class Intel I225/I226 wired-NIC emulation; synthetic TCP + persistent active-link state; binary payload release; activity-based AC evasion research vs Vanguard/Faceit/EAC; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[dma-pcileech]], [[pcileech-wifi]], [[pcileech-wifi-v2]], and [[vgk-dma-bypass]].
+
 - **2026-08-24** — ingest `description:HexRaysSA/goomba`: entity [[goomba]] (HexRaysSA; C++ Hex-Rays decompiler plugin; linear/non-linear MBA simplification; algebraic heuristics + optional fingerprint-oracle support; Z3 soundness verification; IDA Pro / Hex-Rays workflows; Simplify MBA); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[hex-rays-deob]], [[hrtng]], [[promba]], [[qsynthesis]], [[cobra]], and [[mbased]].
 
 - **2026-08-24** — ingest `description:HexRaysSA/ida-claude-code-plugins`: entity [[ida-claude-code-plugins]] (HexRaysSA; Python tooling + Markdown plugin/skill docs; Claude Code agent workflows; plugin development, automated scripting, optional sandboxed code-evaluation; repeatable automation-heavy binary analysis pipelines); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ida-codex-mcp]], [[ida-buddy]], [[ida-cli]], [[ida-cyberchef]], and [[idassist]].
