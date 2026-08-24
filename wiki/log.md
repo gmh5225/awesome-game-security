@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Hexze/anticheat`: entity [[hexze-anticheat]] (Hexze; Cheater Detector; Lua Starfish plugin; configurable NoSlow/AutoBlock/Eagle/Scaffold/Tower/LagRange/NoBreakDelay checks; movement/equipment/animation/metadata/block-break timing; violation thresholds, alert cooldowns, optional sound alerts; staff monitoring for Minecraft-style worlds; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheat]], [[arrow-anticheat]], [[paradox-anticheat]], [[scythe-anticheat]], [[ycbr-anticheat]], and [[minecraft-anticheat-list]].
+
 - **2026-08-24** — ingest `description:HitmanHimself/GOWTool`: entity [[gow-tool]] (HitmanHimself; C++ Visual Studio Windows utility; God of War 2018 asset extract/convert; DirectXTex + glTF; broader community extraction pipeline; modders / asset researchers / proprietary format RE; God of War 2018); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[assetstudio]], [[uabe]], [[awesome-game-file-format-reversing]], [[gltf]], and [[tinygltf]].
 
 - **2026-08-24** — ingest `description:HoLLy-HaCKeR/dnSpy.Extension.HoLLy`: entity [[dnspy-extension-holly]] (HoLLy-HaCKeR; C# dnSpyEx extension; source-map-style renaming, managed DLL injection while debugging, native disassembly, control-flow graph visualization; obfuscated .NET/Unity RE; For Unity); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[dnspy]], [[dnspy-unity-mono]], [[mono-debugger-soft]], [[confuserex]], and [[obfuscation-methods]].

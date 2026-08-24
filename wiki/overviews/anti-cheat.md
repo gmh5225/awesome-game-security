@@ -367,6 +367,7 @@ sources:
   - wiki/sources/descriptions/Mowokuma__vm_str.hpp.md
   - wiki/sources/descriptions/mexploitui__FakeEye.md
   - wiki/sources/descriptions/Hypercall__FakeEye.md
+  - wiki/sources/descriptions/Hexze__anticheat.md
   - wiki/sources/descriptions/masterpastaa__BattlEye-Handler-BYPASS.md
   - wiki/sources/descriptions/mastershadow547__Advanced-Anticheat.md
   - wiki/sources/descriptions/med0x2e__SigFlip.md
@@ -982,6 +983,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 **Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
 
 **Paper/Folia rule enforcement:** [[icuac]] (Lazyzouo; Java 21 Gradle; modular server-side command/inventory/combat integrity checks—blocked commands, tab-complete hiding, game-mode isolation, coordinate limits, death-drop control, banned materials, NBT/enchantment validation, stack/potion limits, end-crystal cooldowns; bilingual CN/EN; Folia-aware scheduling; SHA-256-verified updater; lightweight anti-abuse controls rather than full client-side AC; Anti Cheat / game:minecraft) for administrators needing transparent policy enforcement. (source: wiki/sources/descriptions/Lazyzouo__ICUAC.md)
+
+**Starfish Lua heuristic AC:** [[hexze-anticheat]] (Hexze; Cheater Detector; Lua Starfish plugin; configurable NoSlow/AutoBlock/Eagle/Scaffold/Tower/LagRange/NoBreakDelay checks; movement/equipment/animation/metadata/block-break timing; violation thresholds, alert cooldowns, optional sound alerts; staff monitoring for Minecraft-style worlds; Anti Cheat / game:minecraft) for Starfish server operators needing plugin-side cheat-pattern flagging. (source: wiki/sources/descriptions/Hexze__anticheat.md)
 
 ## README map
 
