@@ -2312,6 +2312,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [overlay](entities/overlay.md) — SetWindowsHookEx overlay sample (C++; cheat / overlay)
 - [overlaycord](entities/overlaycord.md) — Discord game overlay pipeline hijack from external process (SamuelTulach; C++; framebuffer sharing; no hooks/injection; overlay trust-boundary / AC research; cheat / Discord)
 - [owned_alignment](entities/owned-alignment.md) — abusing Alignment (C++; kernel driver/hook; cheat / HWID)
+- [Ouroboros](entities/ouroboros.md) — Rust symbolic-execution decompiler (constraint tracking, expression rewriting, structured control-flow recovery beyond SSA-only; processor specs + interactive frontend; advanced decompilation research)
 - [Oxidizer](entities/oxidizer.md) — Rust-accelerated angr / Rust decompiler (stripped-binary pseudocode; enum/match/? recovery)
 - [Oxylus](entities/oxylus.md) — data-driven C++ engine (Vulkan/vuk/Slang; Flecs ECS; Lua; ImGui editor; Game Engine)
 - [oxorany](entities/oxorany.md) — C/C++ compile-time any-constant encryption (platform-agnostic; AC Compile Time)
