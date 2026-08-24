@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IMXNOOBX/cs2-external-esp`: entity [[cs2-external-esp]] (IMXNOOBX; C++ Visual Studio; external CS2 ESP; out-of-process memory reads; handle hijacking; JSON config + offset maintenance scripts; GDI window overlay—boxes, names, health; external cheat architecture study; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2external]], [[cs2-external-base]], [[cs2-offsets]], [[cs2-dumper]], and [[world-to-screen]].
+
 - **2026-08-24** — ingest `description:ION28/BLUESPAWN`: entity [[bluespawn]] (ION28; open-source Windows active defense / EDR; Hunt/Mitigate/Monitor/Scan workflows; ATT&CK-oriented detections, YARA scanning, ETW monitoring, automated quarantine/process suspension; C++; rule-driven detection content; blue-team / endpoint defense research; README [EDR]); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[bamboozledr]], [[raccine]], [[peregrine-anticheat]], [[wazuh]], and [[the-hive]].
 
 - **2026-08-24** — ingest `description:IamFriendly0242u/The-Dreamers-Guards`: entity [[the-dreamers-guards]] (IamFriendly0242u; Fabric client+server AC; Java; encrypted join-time network payloads; mod blacklist scanning against known cheat clients; progressive four-phase suspension; anti-evasion logout-bypass checks; operator kick/ban/pardon/trust commands; Discord webhook alerts; Anti Cheat / game:minecraft); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[seiun-ac]], [[windfall-anticheatf]], [[jaranalyzer]], [[lenrete-mod]], and [[minecraft-anticheat-list]].

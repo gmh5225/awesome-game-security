@@ -595,6 +595,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS2-External](entities/cs2-external.md) — external CS2 cheat (Zckyy; C#; read-only memory + overlay; entity/offset/view-matrix helpers; auth/subscription; cheat / game:cs2 [External])
 - [cs2-external-1](entities/cs2-external-1.md) — external CS2 cheat (gmh5225; ImGui + DirectX 11 overlay; aimbot / ESP / skeleton / snaplines; cheat / game:cs2 [External])
 - [cs2-external-base](entities/cs2-external-base.md) — CS2 external overlay starter base (UnnamedZ03; C++; team checks + box/health/distance/skeleton/text ESP; overlay structure only—no memory driver; educational; cheat / game:cs2 [External])
+- [cs2-external-esp](entities/cs2-external-esp.md) — external CS2 ESP (IMXNOOBX; C++ Visual Studio; out-of-process memory reads; handle hijacking; JSON config + offset scripts; GDI overlay boxes/names/health; external cheat architecture study; cheat / game:cs2 [External])
 - [cs2External](entities/cs2external.md) — external CS2 ESP (Tokyodidit; C++; process memory reads; JSON offsets; W2S; Win32/GDI transparent overlay; boxes/health/names; cheat prototyping / memory analysis; cheat / game:cs2 [External])
 - [CS2_External](entities/tkazer-cs2-external.md) — external CS2 cheat framework (TKazer; C++; ESP/aimbot+RCS/triggerbot/radar/bhop/visibility/offsets; ImGui UI + process memory; external cheat/AC research; cheat / game:cs2 [External])
 - [CS2 Hybrid Anti-Cheat Proposal](entities/cs2-hybrid-anticheat-proposal.md) — CS2 hybrid AC proposal (Glicko-2 judges, honeypot entities, shadow monitoring; Python PoC)
