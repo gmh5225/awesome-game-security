@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:K0bin/SourceRenderer`: entity [[source-renderer]] (K0bin; Rust toy game engine; Bevy infrastructure + custom Vulkan 1.3/Metal/WebGPU graphics stack; bindless/RT/multi-draw indirect/PBR/SSAO/TAA; async BSP/VPK/VMT/VTF/MDL + glTF asset loading incl. CS:GO formats; Source map/asset graphics + RE; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[source-sdk-2013]], [[source-engine]], [[kisak-strike]], [[gltf]], [[ursus]], and [[awesome-game-file-format-reversing]].
+
 - **2026-08-24** — ingest `description:K3V1991/How-to-download-and-install-WSA`: entity [[how-to-download-and-install-wsa]] (K3V1991; step-by-step Win11 WSA manual install guide; Developer Mode + Virtual Machine Platform; dependency packages; Explorer/PowerShell bundle install; Cheat WSA / Guide); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[wsa-builds]], [[magiskonwsalocal]], [[wsapatch]], [[wsa-pacman]], and [[win11-apk-installer]].
 
 - **2026-08-24** — ingest `description:K4ryuu/IDA-VTableExplorer`: entity [[ida-vtable-explorer]] (K4ryuu; C++ IDA Pro 9.x plugin; automates GCC/MSVC vtable detection, class extraction, virtual-function index/offset annotation; RTTI inheritance analysis, override comparison, hierarchy visualization; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-vtable-tools]], [[ida-medigate]], [[classy]], [[classmaker]], [[pyclassinformer]], and [[ghidra-cpp-class-analyzer]].
