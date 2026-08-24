@@ -353,6 +353,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AutomataMP](entities/automatamp.md) — NieR Automata multiplayer / RE tooling (praydog; Game Develop / source)
 - [asus-bsitf-0-day-poc](entities/asus-bsitf-0-day-poc.md) — ASUS `bsitf.sys` BYOVD PoC (CVE-2026-13585; IOCTL maps contiguous kernel pool to usermode + physaddr leak; gmh5225)
 - [AsIO-Exploit](entities/asio-exploit.md) — ASUS `AsIO3.sys` LPE PoC (MSR IOCTLs + `ASIO_ADDPID` parent-PID trust bypass; native-syscall shellcode; gmh5225)
+- [asset-tutorial-plugin](entities/asset-tutorial-plugin.md) — UE C++ plugin tutorial: custom NormalDistribution asset type + dedicated editor; runtime/editor modules; reflection-enabled UObject classes (JanKXSKI; Game Engine / Unreal plugin development)
 - [AsusDrv](entities/asusdrv.md) — ASUS `AsusBiosIoDrv64.sys` physmem IOCTL wrapper (hardware-monitoring BYOVD; kernel exploitation research; gmh5225)
 - [ATDCM64a-LPE](entities/atdcm64a-lpe.md) — AMD `atdcm64a.sys` arbitrary-pointer-dereference LPE PoC (C++ VS + deploy scripts; lab kernel exploit template; MrAle98; [atdcm64a.sys])
 - [ATPMiniDump](entities/atpminidump.md) — C/C++ aTPMiniDump callback (Ring3 minidump instrumentation; memory analysis; AC / Windows callback lane; b4rtik)

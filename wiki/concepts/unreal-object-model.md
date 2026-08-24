@@ -5,6 +5,7 @@ topics: [game-engine, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/skills/game-engine.md
   - wiki/sources/descriptions/mikeroyal__Unreal-Engine-Guide.md
+  - wiki/sources/descriptions/JanKXSKI__AssetTutorialPlugin.md
   - wiki/sources/descriptions/guttir14__UnrealDumper-4.25.md
   - wiki/sources/descriptions/gmh5225__ue4_cheat_engine.md
   - wiki/sources/descriptions/gmh5225__fortnite-virtual-offsets.md
@@ -25,13 +26,13 @@ sources:
   - wiki/sources/descriptions/Zebratic__UE4Injector.md
   - wiki/sources/descriptions/Skengdo__ue4-processevent-intercept.md
   - wiki/sources/descriptions/Qemu-Gang__QemuUnrealDumper-4.25.md
-updated: 2026-08-22
+updated: 2026-08-24
 confidence: high
 ---
 
 # Unreal Object Model
 
-Unreal Engine exposes a reflection-driven C++ object hierarchy. Security and modding research targets **globals**, **UObject layout**, and **version-specific property offsets**—all branch-, build-, and platform-dependent. Apply [[research-rigor]] before generalizing signatures or SDK dumps across titles. (source: wiki/sources/skills/game-engine.md)
+Unreal Engine exposes a reflection-driven C++ object hierarchy. Security and modding research targets **globals**, **UObject layout**, and **version-specific property offsets**—all branch-, build-, and platform-dependent. Apply [[research-rigor]] before generalizing signatures or SDK dumps across titles. (source: wiki/sources/skills/game-engine.md) Hands-on plugin tutorials such as [[asset-tutorial-plugin]] (JanKXSKI; custom UObject asset types with reflection + editor modules) illustrate how the same hierarchy surfaces in legitimate asset-pipeline extension—not only runtime SDK dumps. (source: wiki/sources/descriptions/JanKXSKI__AssetTutorialPlugin.md)
 
 ## Core hierarchy
 
@@ -72,4 +73,4 @@ Curated UE tooling indexes such as [[unreal-engine-guide]] complement these SDK 
 
 ## Related
 
-[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[shh0yauedumper]] · [[unrealdumper-4-25]] · [[qemu-unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[unreal-engine-guide]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offsets-sigs-and-more]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[source-netvars]] · [[il2cpp]] · [[patternsleuth]] · [[source2gen]] · [[valorant-dumper]] · [[uedumper]] · [[shh0yauedumper]] · [[unrealdumper-4-25]] · [[qemu-unrealdumper-4-25]] · [[unreal-engine-tools]] · [[ue-unreal-engine-sdk]] · [[ue4-cheat-engine]] · [[ue4-injector]] · [[ue4-processevent-intercept]] · [[unreal-engine-guide]] · [[asset-tutorial-plugin]] · [[fortnite-virtual-offsets]] · [[fortnite-sigs]] · [[fortnite-sigs-updated-every-update]] · [[fortnite-offsets]] · [[fortnite-offsets-and-sigs]] · [[fortnite-offsets-sigs-and-more]] · [[fortnite-offset-dumper]] · [[fortnite-voyagertf]] · [[fortnite-masterpasta-ihack-source-leak]] · [[fortnite-leak5]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
