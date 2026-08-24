@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Herooyyy/Free-DMA-Firmware-pcileech`: entity [[free-dma-firmware-pcileech]] (Herooyyy; Verilog/SystemVerilog [[pcileech-fpga]] firmware; Vivado IP + board build scripts; PCIe config-space + MSI-X interrupt handling; multiple hardware persona profiles; VGK/Faceit DMA bypass research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-activator-anti-crack]], [[pcileech-amdpci]], [[pcileech-intel-i226-v-fullemu]], [[pcileech-isabridge]], and [[vgk-dma-bypass]].
+
 - **2026-08-24** — ingest `description:Herooyyy/Pcileech-AMDPCI`: entity [[pcileech-amdpci]] (Herooyyy; Verilog/SystemVerilog AMD PCI device-model [[pcileech-fpga]] profile; Vivado IP + 35T/75T/ZDMA build scripts; no-interrupt communication + hardware identity spoofing; Faceit/Vanguard hardware-signature research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-activator-anti-crack]], [[pcileech-intel-i226-v-fullemu]], [[pcileech-isabridge]], [[dma-pcileech]], and [[vgk-dma-bypass]].
 
 - **2026-08-24** — ingest `description:Herooyyy/Pcileech-Activator-Anti-crack`: entity [[pcileech-activator-anti-crack]] (Herooyyy; FT601/SystemVerilog basic+advanced [[pcileech-fpga]] configs; C++ activation-signal analysis; commercial panel signal registers, state machines, and anti-crack flags; DMA firmware activator protection research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-intel-i226-v-fullemu]], [[pcileech-isabridge]], [[dma-pcileech]], and [[pcileechgen]].
