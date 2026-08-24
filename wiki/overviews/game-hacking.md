@@ -1617,6 +1617,7 @@ sources:
   - wiki/sources/descriptions/Hexze__anticheat.md
   - wiki/sources/descriptions/Hexorg__CheatEngineTables.md
   - wiki/sources/descriptions/Hexorg__Ouroboros.md
+  - wiki/sources/descriptions/HexRaysSA__rax.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -1818,6 +1819,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Core dynamic binary analysis library [[triton]] (JonathanSalwan; C++/Python; symbolic exec, taint analysis, SMT-backed RE automation; feeds [[ponce]], [[triton-bn]], [[titan]], and VMP deobfuscation workflows) anchors the Cheat Symbolic Execution / RE Tools lane. (source: wiki/sources/descriptions/JonathanSalwan__Triton.md)
 - In-IDA symbolic + taint execution via [[ponce]] (Triton integration; path constraints, tainted data flow, input generation for target paths; Cheat Symbolic Execution / IDA Plugins) sits in the same symbolic-exec / RE Tools lane. (source: wiki/sources/descriptions/gmh5225__Ponce.md)
 - Function-level rip → Python/Unicorn harnesses via [[ripr]] (IDA plugin + r2pipe; BN/Unicorn packaging) sits in the Cheat IDA / Binary Ninja Plugins / RE Tools lane. (source: wiki/sources/descriptions/pbiernat__ripr.md)
+- Hex-Rays self-checking CPU emulator [[rax]] (Rust; multi-arch JIT; GDB stub for IDA Pro; instruction-level oracle diff vs KVM/QEMU; Linux boot + SDE trace; binary analysis / fuzzing; HexRaysSA) sits in the Cheat DBI / Windows Emulator / IDA integration lane. (source: wiki/sources/descriptions/HexRaysSA__rax.md)
 - VEH-based lightweight DBI via [[cpp-veh-dbi]] (C++ / PowerShell; exception-driven instrumentation) also sits in the Cheat DBI lane. (source: wiki/sources/descriptions/revsic__cpp-veh-dbi.md)
 - C++/C DBI / analysis / patching via [[w1tn3ss]] (modding / hooking / memory analysis) sits in the same Cheat DBI lane. (source: wiki/sources/descriptions/redthing1__w1tn3ss.md)
 - Platform-independent x86 Windows user+kernel environment emulator [[kubera]] (research; cheat / dynamic binary instrumentation; binsnake) sits in the Cheat DBI / Windows Emulator lane. (source: wiki/sources/descriptions/binsnake__KUBERA.md)

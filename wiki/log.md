@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HexRaysSA/rax`: entity [[rax]] (HexRaysSA; Rust self-checking multi-arch CPU emulator; x86/x64/ARM32/AArch64/Hexagon/RISC-V; SMIR JIT; instruction-level diff vs KVM/QEMU oracles; Linux boot, SDE trace, GDB stub for IDA; binary analysis / fuzzing / IDA Pro integration); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[unxorer]], [[ripr]], [[emulator]], [[unicorn-pe]], [[zyemu]], [[hex-rays-deob]], [[hrtng]], and [[qemu-nyx]].
+
 - **2026-08-24** — ingest `description:Hexorg/CheatEngineTables`: entity [[cheat-engine-tables]] (Hexorg; large forum-curated CE `.CT` archive; thousands of game-specific tables; pointer chains, AOB scans, Lua scripts, trainers; offline-focused; cheat / [Cheat Engine]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mydev-cheat-engine-tables]], [[maplestory-v179-cheat-engine]], and [[intro-to-gamehacking]].
 
 - **2026-08-24** — ingest `description:Hexorg/Ouroboros`: entity [[ouroboros]] (Hexorg; Rust symbolic-execution decompiler; constraint tracking, expression rewriting, structured control-flow recovery beyond SSA-only; processor specs + interactive frontend; advanced decompilation research; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[kuna]], [[oxidizer]], [[neverd]], [[retdec]], and [[enigma]].
