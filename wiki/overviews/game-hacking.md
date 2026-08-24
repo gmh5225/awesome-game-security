@@ -563,6 +563,7 @@ sources:
   - wiki/sources/descriptions/JusticeRage__Gepetto.md
   - wiki/sources/descriptions/aqilc__chasm.md
   - wiki/sources/descriptions/archercreat__titan.md
+  - wiki/sources/descriptions/JonathanSalwan__Triton.md
   - wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.md
   - wiki/sources/descriptions/void-stack__VMUnprotect.Dumper.md
@@ -1777,6 +1778,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Multi-emulator binary harnessing via [[smallworld]] (angr / Ghidra / PANDA / Unicorn; coverage, crash triage, firmware testing) sits in the Cheat RE Tools / DBI dynamic-analysis lane. (source: wiki/sources/descriptions/smallworld-re__smallworld.md)
 - Official radare2 GUI via [[iaito]] (Qt5/6; RE workflow / editor tooling / plugins) sits in the Cheat Radare / debugging UI lane. (source: wiki/sources/descriptions/radareorg__iaito.md)
 - Fast radare2 binary emulation + symbolic execution via [[radius2]] (Rust/C; modding / memory analysis) sits in the Cheat Radare Plugins / RE Tools lane. (source: wiki/sources/descriptions/radareorg__radius2.md)
+- Core dynamic binary analysis library [[triton]] (JonathanSalwan; C++/Python; symbolic exec, taint analysis, SMT-backed RE automation; feeds [[ponce]], [[triton-bn]], [[titan]], and VMP deobfuscation workflows) anchors the Cheat Symbolic Execution / RE Tools lane. (source: wiki/sources/descriptions/JonathanSalwan__Triton.md)
 - In-IDA symbolic + taint execution via [[ponce]] (Triton integration; path constraints, tainted data flow, input generation for target paths; Cheat Symbolic Execution / IDA Plugins) sits in the same symbolic-exec / RE Tools lane. (source: wiki/sources/descriptions/gmh5225__Ponce.md)
 - Function-level rip → Python/Unicorn harnesses via [[ripr]] (IDA plugin + r2pipe; BN/Unicorn packaging) sits in the Cheat IDA / Binary Ninja Plugins / RE Tools lane. (source: wiki/sources/descriptions/pbiernat__ripr.md)
 - VEH-based lightweight DBI via [[cpp-veh-dbi]] (C++ / PowerShell; exception-driven instrumentation) also sits in the Cheat DBI lane. (source: wiki/sources/descriptions/revsic__cpp-veh-dbi.md)

@@ -2885,6 +2885,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [traccar-geocoder](entities/traccar-geocoder.md) — self-hosted OSM reverse geocoder (Rust + C++ PBF; Game Network / Location)
 - [tracee](entities/tracee.md) — Linux/Android runtime security + forensics via eBPF (Go; kernel telemetry + behavioral detections; K8s/container paths; Aqua Security)
 - [TrickyStore](entities/trickystore.md) — Android Keystore trick rewrite (Android 10+; cheat / HWID / keystore research; beakthoven)
+- [Triton](entities/triton.md) — dynamic binary analysis library (symbolic exec, taint analysis, SMT simplification; x86/x64/ARM/AArch64/RISC-V; LLVM/Z3 lift; Z3/Bitwuzla; C++/Python; JonathanSalwan; DBA RE automation)
 - [triton-bn](entities/triton-bn.md) — Binary Ninja Triton DBA plugin scaffold (symbolic exec / lifting base; ergrelet; Cheat Binary Ninja Plugins)
 - [Trinity](entities/trinity.md) — Windows kernel exploitation framework (modular driver/memory/priv-esc chain → arbitrary kernel code execution; disables & removes Defender; cpz)
 - [TrinityCore](entities/trinitycore.md) — open-source WoW MMORPG server framework (modular auth/world servers; async DB pooling; scripting APIs; multi-expansion combat/quests/achievements/battlegrounds; protocol emulation; cheat / game:wow [Server for WOW])
