@@ -2960,6 +2960,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4-tank-game](entities/ue4-tank-game.md) — UE4 tank prototype (QianMo; C++ pawn + player/AI controllers; crosshair targeting; Blueprint maps; UE4 Game / architecture learning)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
 - [UE426 ABInfinite Win64 Shipping](entities/ue426-abinfinite-win64-shipping.md) — Arena Breakout Infinite UE4.26 SDK dump (C/C++; SDK generation; cheat / game:arena breakout infinite; cra0)
+- [unreal-development-guides-and-tips](entities/unreal-development-guides-and-tips.md) — community UE4 Markdown guides (scene creation, optimization, materials, lighting, ray tracing, Chaos Physics, Blueprints→C++; Game Engine / Unreal guide; JaredP94)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
 - [Unreal Engine Tools](entities/unreal-engine-tools.md) — official CE Lua scripts for UE4/UE5 runtime structure discovery (GNames/GObjects/UObject/UClass/FProperty; Structure Dissect; no inject; cheat-engine)
 - [unreal-image-capture](entities/unreal-image-capture.md) — UE C++ high-FPS RGB / segmentation / depth capture to disk for ML synthetic datasets (non-blocking render path; Game Engine / Unreal guide; TimmHess)
