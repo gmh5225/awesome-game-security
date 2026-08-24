@@ -2669,6 +2669,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Serious Engine Base](entities/serious-engine-base.md) — open-source Croteam Serious Engine core (Serious Sam; C/C++; render/world/entities/network/audio/scripting; VS + Ogg/Vorbis; Game Engine / source)
 - [shibari](entities/shibari.md) — C++/C PE/PE+ multi-file linker (merge into one; modding; Anti Cheat → Binary Packer)
 - [shader-injector](entities/shader-injector.md) — D3D12 pixel-shader runtime inject/replace for FF7 Rebirth PC (MinHook + ImGui live edit; DX12 interceptor adaptable to other titles; DirectX / hook)
+- [Shard](entities/shard.md) — Paper/Folia Minecraft AI anti-cheat plugin (Kotlin Gradle; PacketEvents; player tick data to remote inference API; SQLite/MySQL/MariaDB + Redis cross-server alerts; monitoring, profiling, punishment rules, WorldGuard/Geyser integrations; KaelusAI; Anti Cheat / game:minecraft)
 - [Shadow](entities/shadow.md) — iOS jailbreak detection bypass for modern jailbreaks (cheat / iOS jailbreak; per-app success not guaranteed)
 - [shadow-stack-walk](entities/shadow-stack-walk.md) — CET/HSP shadow-stack stack walk to catch thread stack spoofing (`CaptureStackBackTrace` / `StackWalk64`; gabriellandau; Detection:Spoof Stack)
 - [shprotect-ac](entities/shprotect-ac.md) — server-first Roblox Luau AC (movement/remote spam/fly/noclip; heartbeat/watchdog; scoring/rollback/kick)
