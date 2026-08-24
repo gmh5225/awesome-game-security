@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IntelSDM/7DTD`: entity [[7dtd]] (IntelSDM; full 7 Days to Die cheat ecosystem; Unity/Mono loader; C# in-game modules + C++ auth/transport/account backend; ESP/aimbot/weapon mods/player spoofing; anti-cheat bypass; end-to-end cheat delivery research; cheat / game:7dtd); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[7dtd-anticheatmod]], [[easy-anti-cheat]], [[mono]], [[eft-monoeft]], and [[rust-dma-cheat]].
+
 - **2026-08-24** — ingest `description:IntelSDM/RustDMACheat`: entity [[rust-dma-cheat]] (IntelSDM; C++ Facepunch Rust DMA cheat framework; ESP + recoil/FOV/lighting/admin-view mods; configurable codebase; PCILeech/MemProcFS/Il2CppDumper/DMALibrary references; hardware-assisted memory access + external cheat workflows; cheat / game:rust [DMA]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[pcileech]], [[dmalibrary]], [[il2cppdumper]], [[oxide-dumper]], [[lord-abbot-rust-external-cheat]], and [[overflow-rust]].
 
 - **2026-08-24** — ingest `description:IntroVirt/IntroVirt`: entity [[introvirt]] (IntroVirt; patched KVM hypervisor + C++ userland library + symbol parsing; runtime guest memory/execution inspect/control; process/thread introspection, breakpoints, memory access, syscall visibility; Windows/Linux guest analysis; out-of-guest monitoring / malware analysis / hardened VM security; README Guest introspection library); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[memflow-kvm]], [[kvm-kernel-example]], [[kernelmon]], [[hyper-rev]], and [[panda]].

@@ -471,6 +471,7 @@ sources:
   - wiki/sources/descriptions/kanekikun420__NoCheatZ-3.md
   - wiki/sources/descriptions/karola3vax__CS2AC.md
   - wiki/sources/descriptions/Pintuzoft__OSAntiCheat.md
+  - wiki/sources/descriptions/IntelSDM__7DTD.md
   - wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md
   - wiki/sources/descriptions/void-stack__Hypervisor-Detection.md
   - wiki/sources/descriptions/hypervisor__kli.md
@@ -910,7 +911,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
 - [[chessking]] — Rust Axum multiplayer chess platform with layered server-side AC (risk scoring, device fingerprinting, match integrity, IP reputation, chess-themed CAPTCHA step-up, ban escalation; shakmaty move validation; admin dashboard; educational reference; web-coder-lab) (source: wiki/sources/descriptions/web-coder-lab__chessking.md)
-- [[7dtd-anticheatmod]] — C# .NET 4.8 server mod for 7 Days to Die dedicated hosts without EAC; blocks cheat console/chat commands; movement thresholds for fly/teleport/speed/godmode; admin exemption; warning→kick→ban escalation; admin alerts + detection log (majimaakane) (source: wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md)
+- [[7dtd-anticheatmod]] — C# .NET 4.8 server mod for 7 Days to Die dedicated hosts without EAC; blocks cheat console/chat commands; movement thresholds for fly/teleport/speed/godmode; admin exemption; warning→kick→ban escalation; admin alerts + detection log (majimaakane) (source: wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md); contrast offensive end-to-end cheat delivery such as [[7dtd]] (IntelSDM; Unity/Mono loader + C# modules + C++ auth/transport backend; ESP/aimbot/weapon mods/player spoofing; anti-cheat bypass; cheat / game:7dtd) (source: wiki/sources/descriptions/IntelSDM__7DTD.md)
 - [[iw4madmin-sebzanticheat]] — IW4X server-side suspicion telemetry + IW4MAdmin review dashboard; GSC aim/visibility/radar checks; JS plugins + Discord case workflow; separate risk/confidence scoring; watch/clear/purge/recover moderation; no auto-ban (crazythecoder) (source: wiki/sources/descriptions/crazythecoder__IW4MAdmin-SebzAntiCheat.md)
 - [[little-anti-cheat]] — open-source SourceMod anti-cheat plugin for Source engine servers (SourcePawn; aimbot/aimlock, abnormal angles, bhop automation, fast duck, suspicious ConVar states; interpolation/backtrack countermeasures, optional high-ping enforcement, logging/translation; TF2/CS community servers; J-Tanzanite; For Source Games) (source: wiki/sources/descriptions/J-Tanzanite__Little-Anti-Cheat.md)
 - [[gatewarden-public]] — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes (flow-field softlock/maze checks; 30 Hz deterministic sim; 59 GUT tests + headless bot; test-driven validation reference; euuuuuuan) (source: wiki/sources/descriptions/euuuuuuan__gatewarden-public.md)
