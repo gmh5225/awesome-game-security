@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IamFriendly0242u/The-Dreamers-Guards`: entity [[the-dreamers-guards]] (IamFriendly0242u; Fabric client+server AC; Java; encrypted join-time network payloads; mod blacklist scanning against known cheat clients; progressive four-phase suspension; anti-evasion logout-bypass checks; operator kick/ban/pardon/trust commands; Discord webhook alerts; Anti Cheat / game:minecraft); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[seiun-ac]], [[windfall-anticheatf]], [[jaranalyzer]], [[lenrete-mod]], and [[minecraft-anticheat-list]].
+
 - **2026-08-24** — ingest `description:IamSanjid/ce_speed_hack`: entity [[ce-speed-hack]] (IamSanjid; compact C++ CE-style speed hack; Detours timing hooks; core hooking logic for learners studying time manipulation and basic user-mode game hacking; cheat practice); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[speed-hack]], [[speedhack]], [[cheat-engine]], and [[detours]].
 
 - **2026-08-24** — ingest `description:Iamgublin/ida-codex-mcp`: entity [[ida-codex-mcp]] (Iamgublin; Python IDA plugin TCP JSON bridge + MCP stdio server; function listing, call graphs, pseudocode/disassembly, xrefs, strings, memory reads, rename/type helpers; AI-assisted RE automation); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[iida-mcp]], [[ida-mcp-server-plugin]], [[ida-mcp-server]], [[ida-cli]], [[ida-buddy]], and [[ghidra-mcp]].

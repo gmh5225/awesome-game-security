@@ -2890,6 +2890,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [teamfortress2-internal](entities/teamfortress2-internal.md) — TF2 internal: modding / hooking (C++; cheat / game:team fortress 2; gmh5225)
 - [tft-ocr-bot](entities/tft-ocr-bot.md) — TFT OCR automation bot (Python; asset pipelines / overlay; screen OCR; cheat / game:lol [TFT]; gmh5225)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
+- [The Dreamers Guards](entities/the-dreamers-guards.md) — Fabric client+server AC (Java; encrypted join payloads; mod blacklist scanning; progressive four-phase suspension; anti-evasion; operator kick/ban/pardon/trust; Discord webhooks; IamFriendly0242u; Anti Cheat / game:minecraft)
 - [TheHive](entities/the-hive.md) — archived SOC incident-response case-management platform (Scala backend + web UI; alert triage workflows; historical IR architecture study; README [EDR]; TheHive-Project)
 - [Hwid-Spoofer (Theordernarkoz)](entities/theordernarkoz-hwid-spoofer.md) — Windows ImGui+DX9 one-click HWID spoofer launcher; downloads driver/helper binaries; CLI spoof step (Theordernarkoz; cheat / HWID)
 - [Game-Hacking (TheZong)](entities/thezong-game-hacking.md) — curated game hacking/cracking learning link list (tutorials/forums/RE refs/dumpers/mappers; CS:GO/GTA V/RDR2 starter bases; cheat / guide)

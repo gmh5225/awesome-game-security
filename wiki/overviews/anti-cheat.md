@@ -771,6 +771,7 @@ sources:
   - wiki/sources/descriptions/Ricardonacif__launcher-abuser.md
   - wiki/sources/descriptions/IcEy-999__Drv_Hide_And_Camouflage.md
   - wiki/sources/descriptions/IamSanjid__ce_speed_hack.md
+  - wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md
   - wiki/sources/descriptions/Idov31__NovaHypervisor.md
   - wiki/sources/descriptions/Idov31__Venom.md
   - wiki/sources/descriptions/Remus3__Lanternlight.md
@@ -972,6 +973,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 
 **Minecraft catalog:** Cross-platform anticheat index [[minecraft-anticheat-list]] (Kotlin/JS + Gradle; hundreds of validated JSON entries; searchable platform/version/pricing/maintenance table; GitHub + Spigot API enrichment; Bukkit/Sponge/Fabric/Forge/Nukkit/PocketMine; Java + Bedrock) for server operators and AC researchers comparing server-side cheat detection. (source: wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md)
+
+**Fabric client+server AC:** [[the-dreamers-guards]] (IamFriendly0242u; Java Fabric mod; encrypted join-time network payloads; mod blacklist scanning; progressive four-phase suspension; anti-evasion logout-bypass checks; operator kick/ban/pardon/trust commands; Discord webhook alerts; Anti Cheat / game:minecraft) for Fabric administrators needing combined client-integrity verification and automated server-side enforcement. (source: wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md)
 
 **Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
 
