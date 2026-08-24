@@ -2375,6 +2375,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
 - [PCIE-Detector](entities/pcie-detector.md) — Kernel PCIe Config Space inspection driver (C++; defensive DMA detection research; gmh5225)
 - [PCIeM](entities/pciem.md) — Linux kernel synthetic userspace PCIe device emulation (bare-metal virtual PCI endpoints; no FPGA/VM/QEMU; DMA / PCIe security research; cakehonolulu)
+- [Pcileech Activator Anti-crack](entities/pcileech-activator-anti-crack.md) — FT601/SystemVerilog DMA firmware activator protection research (Herooyyy; activation signal registers, state machines, anti-crack flags; C++ signal analysis; commercial panel licensing on PCILeech FPGA hardware; cheat / DMA)
 - [Pcileech Intel I226-V FullEmu](entities/pcileech-intel-i226-v-fullemu.md) — prebuilt Intel I225/I226 wired-NIC DMA firmware (Herooyyy; synthetic TCP + persistent active-link state; activity-based AC evasion research vs Vanguard/Faceit/EAC; cheat / DMA)
 - [Pcileech ISABridge](entities/pcileech-isabridge.md) — ISA-bridge-style PCILeech FPGA firmware (Herooyyy; Verilog/SystemVerilog + Vivado bitstreams; PID/VID spoofing via bridge-device simulation; Faceit-class PCIe hardware filtering research; cheat / DMA)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA

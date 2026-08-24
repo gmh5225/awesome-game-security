@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Herooyyy/Pcileech-Activator-Anti-crack`: entity [[pcileech-activator-anti-crack]] (Herooyyy; FT601/SystemVerilog basic+advanced [[pcileech-fpga]] configs; C++ activation-signal analysis; commercial panel signal registers, state machines, and anti-crack flags; DMA firmware activator protection research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-intel-i226-v-fullemu]], [[pcileech-isabridge]], [[dma-pcileech]], and [[pcileechgen]].
+
 - **2026-08-24** — ingest `description:Herooyyy/Pcileech-ISABridge`: entity [[pcileech-isabridge]] (Herooyyy; Verilog/SystemVerilog ISA-bridge-style [[pcileech-fpga]] profile; Vivado project + bitstream outputs; PID/VID spoofing via bridge-device simulation; Faceit-class PCIe hardware filtering research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-intel-i226-v-fullemu]], [[dma-pcileech]], [[pcileech-wifi]], [[pcileech-wifi-v2]], and [[pcileechgen]].
 
 - **2026-08-24** — ingest `description:Herooyyy/Pcileech-Intel-I226-V-FullEmu`: entity [[pcileech-intel-i226-v-fullemu]] (Herooyyy; prebuilt [[pcileech]]-class Intel I225/I226 wired-NIC emulation; synthetic TCP + persistent active-link state; binary payload release; activity-based AC evasion research vs Vanguard/Faceit/EAC; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[dma-pcileech]], [[pcileech-wifi]], [[pcileech-wifi-v2]], and [[vgk-dma-bypass]].

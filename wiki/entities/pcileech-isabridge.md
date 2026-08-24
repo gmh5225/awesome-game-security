@@ -22,4 +22,4 @@ Curated README positions the release toward **Faceit**-class **hardware filterin
 
 ## Related
 
-[[pcileech]] · [[pcileech-fpga]] · [[pcileech-intel-i226-v-fullemu]] · [[dma-pcileech]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[pcileechgen]] · [[concepts/dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[pcileech]] · [[pcileech-fpga]] · [[pcileech-activator-anti-crack]] · [[pcileech-intel-i226-v-fullemu]] · [[dma-pcileech]] · [[pcileech-wifi]] · [[pcileech-wifi-v2]] · [[pcileechgen]] · [[concepts/dma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
