@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Jamesits/BGRTInjector`: entity [[bgrt-injector]] (Jamesits; C UEFI loader/driver; ACPI BGRT boot-logo replacement via custom 24-bit BMP assets; rEFInd + default EFI path integration; firmware customization / boot-chain experimentation on Windows-capable UEFI; README [Changes the boot screen image on a UEFI computer]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[simpleuefi]], [[easyuefi]], [[uefi-graphic]], [[uefi-bootloader]], and [[eficmake]].
+
 - **2026-08-24** — ingest `description:JanKXSKI/AssetTutorialPlugin`: entity [[asset-tutorial-plugin]] (JanKXSKI; UE C++ plugin tutorial; custom NormalDistribution asset type + dedicated asset editor; runtime + editor modules; reflection-enabled UObject classes; module build scripts; Game Engine / Unreal plugin development reference); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[rider-source-code-access]], [[automation-examples]], [[unreal-development-guides-and-tips]], and [[unreal-engine-guide]].
 
 - **2026-08-24** — ingest `description:JaredP94/Unreal-Development-Guides-and-Tips`: entity [[unreal-development-guides-and-tips]] (JaredP94; community UE4 Markdown knowledge base; scene creation, optimization pipelines, materials, lighting, ray tracing, Chaos Physics, Blueprints-to-C++ transition; production workflow and performance; Game Engine / Unreal guide); cited on [[overviews/game-engine]]; cross-linked [[unreal-engine-guide]], [[ue4-tutorials]], [[gamedevguide]], and [[unreal-source-explained]].

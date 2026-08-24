@@ -430,6 +430,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)
+- [BGRTInjector](entities/bgrt-injector.md) — Jamesits; C UEFI loader/driver; ACPI BGRT boot-logo replacement via custom 24-bit BMP; rEFInd + default EFI path integration; firmware customization / boot-chain experimentation
 - [bootlicker](entities/bootlicker.md) — UEFI bootkit PoC (Boot Manager / OS loader patch; pre-kernel DSE / PatchGuard / Secure Boot research; gmh5225)
 - [boltgolt/boltobserv](entities/boltobserv.md) — CS:GO radar (player slot numbers on map dots; cheat / game:csgo [Radar])
 - [Branch Monitoring Project](entities/branch-monitoring-project.md) — Intel LBR/BTS branch-trace framework (C KM driver + usermode; PMI; control-flow monitoring)
