@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Jaysmito101/cgl`: entity [[cgl]] (Jaysmito101; single-header C graphics/utility library; cross-platform windowing, rendering utilities, noise, math, data structures, networking, threading; Rust/Python wrappers; optional bloom/audio/node editing; prototyping/demo scenes/small games; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[yourgamelib]], [[raylib]], [[olive-c]], [[stb]], [[learnopengl]], and [[gamedev-libraries]].
+
 - **2026-08-24** — ingest `description:JbvrgtonYT/ollvm-unflattener`: updated entity [[ollvm-unflattener]] (JbvrgtonYT fork; Python OLLVM CFF unflattener; Miasm + graph visualization; sample binaries/test inputs; control-flow-flattening RE research; Fix OLLVM / unflattener); cited on [[concepts/control-flow-flattening]] and [[overviews/reverse-engineering]]; cross-linked [[idadeflat]], [[unflat]], [[d810-ng]], and [[dll-ollvm]].
 
 - **2026-08-24** — ingest `description:JeanToBinks/Fortnite-Cheato-UD-EAC-BE`: entity [[fortnite-cheato-ud-eac-be]] (JeanToBinks; C++ external Fortnite cheat prototype; process memory access + Unreal transform math + DirectX-style overlay; player data extraction + real-time entity visualization; cheat development experimentation + anti-cheat evasion research; cheat / game:fortnite [External]); cited on [[overviews/game-hacking]] and [[concepts/easy-anti-cheat]]; cross-linked [[keyzpon-thefluxxx-fortnite-external]], [[fortnite-external-cheat-base]], [[fortnite-offsets-and-sigs]], [[unreal-object-model]], [[world-to-screen]], and [[easy-anti-cheat]].
