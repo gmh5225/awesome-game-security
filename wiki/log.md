@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JonathanSalwan/ROPgadget`: entity [[ropgadget]] (JonathanSalwan; Python CLI ROP gadget finder; Capstone; ELF/PE/Mach-O/raw multi-arch; filter/search + optional chain generation; binary exploitation / RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[triton]], [[ropgadget-rs]], [[exrop]], [[angrop]], [[agafi]], and [[rop-compiler]].
+
 - **2026-08-24** — ingest `description:JonathanSalwan/Triton`: entity [[triton]] (JonathanSalwan; C++/Python DBA library; dynamic symbolic exec, taint analysis, expression synthesis, SMT simplification; x86/x64/ARM/AArch64/RISC-V; LLVM/Z3 lift; Z3/Bitwuzla; RE automation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ponce]], [[triton-bn]], [[titan]], [[novmpy]], [[vmprotect-devirtualization]], [[radius2]], and [[angrop]].
 
 - **2026-08-24** — ingest `description:JonathanSalwan/VMProtect-devirtualization`: entity [[vmprotect-devirtualization]] (JonathanSalwan; experimental dynamic VMProtect 3.x pure-function deobfuscation; Intel Pin trace + Triton symbolic exec; path predicates and I/O relations; LLVM IR lift for MBA simplification; Fix VMP); cited on [[overviews/reverse-engineering]] and [[concepts/mixed-boolean-arithmetic]]; cross-linked [[vmprotect]], [[titan]], [[novmpy]], [[novmp]], [[rumba]], and [[vmp-devirtualization-lab]].
