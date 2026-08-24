@@ -41,7 +41,8 @@ sources:
   - wiki/sources/descriptions/Lazenca__Lazenca-S.md
   - wiki/sources/descriptions/Laert-Android__Advanced-Root-Checker.md
   - wiki/sources/descriptions/LSPosed__DirtySepolicy.md
-updated: 2026-08-23
+  - wiki/sources/descriptions/JingMatrix__Demo.md
+updated: 2026-08-24
 confidence: medium
 ---
 
@@ -61,7 +62,7 @@ Client-side integrity and environment checks on Android/iOS game clients, often 
 | Signal | Examples |
 |--------|----------|
 | Root / jailbreak | `su` paths, build tags, Magisk mounts, Xposed/LSPosed, KernelSU/APatch artifacts, installed root-manager apps (launch probes such as [[root-app-detector]]; source: wiki/sources/descriptions/apkunpacker__RootAppDetector.md); logging-service disruption artifacts (missing logd sockets, package traces) such as [[meowna-detector]] (source: wiki/sources/descriptions/Rem01Gaming__meowna_detector.md); Magisk `su`-daemon flaws such as [[magisk-eop]] (unprivileged app → root without grant UI; source: wiki/sources/descriptions/canyie__MagiskEoP.md) show root frameworks can fail closed on authorization |
-| Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]); ptrace-based Zygisk-style injection probes such as [[detect-zygisk]] (fork + `PTRACE_GETEVENTMSG`; source: wiki/sources/descriptions/apkunpacker__DetectZygisk.md) |
+| Instrumentation | Frida server/gadget, inline hooks, Zygisk modules ([[zygisk]]); ptrace-based Zygisk-style injection probes such as [[detect-zygisk]] (fork + `PTRACE_GETEVENTMSG`; source: wiki/sources/descriptions/apkunpacker__DetectZygisk.md); user-space library injection checks such as [[demo]] (JingMatrix; soinfo linked-list, virtual memory map inspection, module unload counters; Kotlin + native C++; source: wiki/sources/descriptions/JingMatrix__Demo.md) |
 | Emulator / VM | Build fingerprint, sensors, FS signatures ([[anti-emulator]], [[android-emulator-detection]], [[conbeerlib]]) |
 | Integrity | APK/signature hash, native `.so` checksums, in-memory vs on-disk CRC of `libc.so`/`libart.so` such as [[memdetection]] (Mrack; Java + Rust/JNI demo; Frida/Xposed/cloning signals; source: wiki/sources/descriptions/Mrack__MemDetection.md), Play Integrity / Key Attestation ([[keyattestation]]; VisionR1 fork adds RSA attestation, certificate-chain persistence, and local/remote revocation-list checks — source: wiki/sources/descriptions/VisionR1__KeyAttestation.md) — stricter on Android 14/15 per curated root research notes [[awesome-android-root]] (source: wiki/sources/descriptions/fynks__awesome-android-root.md); relay PoCs such as [[android-hardware-attestation-demo]] show genuine TEE/StrongBox chains can be proxied from a clean device via Frida Keystore hooks—server validation must bind beyond the attestation nonce (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md) |
 | Debugger | `TracerPid`, JDWP, ptrace |

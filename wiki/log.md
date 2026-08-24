@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JingMatrix/Demo`: entity [[demo]] (JingMatrix; Android demo app for runtime user-space library injection detection; Kotlin + native C++/CMake; soinfo linked-list checks, virtual memory map inspection, module unload counter monitoring; Zygisk injection focus; mobile anti-cheat / security research); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[detect-zygisk]], [[zygisk]], [[memdetection]], [[magisk-detection]], and [[detection]].
+
 - **2026-08-24** — ingest `description:JoeyDeVries/LearnOpenGL`: entity [[learnopengl]] (JoeyDeVries; LearnOpenGL tutorial companion source; progressive C++ OpenGL fundamentals through advanced rendering; lighting, Assimp model loading, shadow mapping, deferred shading, PBR, post-processing; GLFW/GLEW/GLM; README [OpenGL]); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[gltut]], [[opengl-3d-game-tutorial-series]], [[cpp-game-engine-book]], [[3d-game-shaders-for-beginners]], and [[game-engine-from-scratch]].
 
 - **2026-08-24** — ingest `description:JonDoNym/peinjector`: entity [[peinjector]] (JonDoNym; PE patching/infection framework; C PE parse/modify core; Python/Java control; multiple infection methods; transfer-time patch generation; web remote config; preserves original executable behavior; executable research / red-team / PE-tampering defense study); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[hintinject]], [[super-mega]], [[shoggoth]], [[windows-process-injection]], [[awesome-injection]], and [[injectors]].
