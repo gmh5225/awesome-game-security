@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:KDIo3/PCIBan`: entity [[pciban]] (KDIo3; PCI/AHCI direct HWID collection PoC; brute-force PCI enumeration for storage-controller identifiers without higher-level OS APIs; reduces hook/spoof exposure on conventional HWID queries; anti-cheat / Detection:HWID; experimental); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hwid-checker-mg]], [[windows-hardware-info]], [[uncloaking-raid0-hwid-serials]], [[easy-hwid-spoofer]], and [[mutante]].
+
 - **2026-08-24** — ingest `description:KGB-1337/memmap`: entity [[memmap]] (KGB-1337; C++ driver-assisted process memory + module mapping framework; request-based KM↔UM comms for R/W, alloc, protection changes, module queries; extend-map + hijacked API-call-path execution samples; Extend Manual Map; memory manipulation / injection / game security research); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[modmap]], [[modexmap]], [[kernelmode-dll-injector]], and [[rw-socket-driver]].
 
 - **2026-08-24** — ingest `description:KaelusAI/Shard`: entity [[shard]] (KaelusAI; free OSS Kotlin Gradle Paper/Folia AI anti-cheat plugin; PacketEvents packet analysis; player tick data to remote inference API; SQLite/MySQL/MariaDB + Redis cross-server alerts; monitoring, profiling, violation history, punishment rules, WorldGuard/Geyser integrations; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[guardac]], [[react]], [[mlanticheat]], [[minecraft-anti-cheat]], and [[minecraft-anticheatai]].
