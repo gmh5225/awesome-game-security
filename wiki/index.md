@@ -1152,6 +1152,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [fortnite-3.5](entities/fortnite-3.5.md) — Fortnite 3.50 internal DLL (memory aimbot + ESP; zgui menu; user-generated UE SDK; gmh5225; [Internal])
 - [fortnite-cheat-leak](entities/fortnite-cheat-leak.md) — Leaked Fortnite internal cheat source (C++; MinHook + Detours hooks; gameplay/render/utility modules; no-spread / movement / vehicle / teleport; cheat architecture RE; Waihbe; cheat / game:fortnite [Internal])
 - [fortnite-cheat-source-internal](entities/fortnite-cheat-source-internal.md) — Fortnite internal: SDK generation + hooking (C++; cheat / game:fortnite)
+- [fortnite-cheato-ud-eac-be](entities/fortnite-cheato-ud-eac-be.md) — Fortnite external cheat prototype (JeanToBinks; C++; process memory R/W + Unreal transform math + DirectX overlay; player structure extraction + entity ESP visualization; cheat dev + EAC evasion research; cheat / game:fortnite [External])
 - [function-collections](entities/function-collections.md) — C PoCs for uncommon Ring3 paths (memory analysis; AC callback lane)
 - [FunctionInliner](entities/function-inliner.md) — IDA Pro plugin: reverse clang function outlining (`--moutline`); inline outlined helpers per caller; restore Hex-Rays on ARM size-optimized binaries (Cellebrite Labs; cheat / IDA Plugins)
 - [fumo-loader](entities/fumo-loader.md) — PTE.User page-table injection loader (C/C++; kernel driver; anti-cheat research; cheat / injection:windows; dumbasPL)

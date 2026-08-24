@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JeanToBinks/Fortnite-Cheato-UD-EAC-BE`: entity [[fortnite-cheato-ud-eac-be]] (JeanToBinks; C++ external Fortnite cheat prototype; process memory access + Unreal transform math + DirectX-style overlay; player data extraction + real-time entity visualization; cheat development experimentation + anti-cheat evasion research; cheat / game:fortnite [External]); cited on [[overviews/game-hacking]] and [[concepts/easy-anti-cheat]]; cross-linked [[keyzpon-thefluxxx-fortnite-external]], [[fortnite-external-cheat-base]], [[fortnite-offsets-and-sigs]], [[unreal-object-model]], [[world-to-screen]], and [[easy-anti-cheat]].
+
 - **2026-08-24** — ingest `description:Jemmy1228/HookSigntool`: entity [[hooksigntool]] (Jemmy1228; C++ Detours hook DLL for Windows code-signing utilities; intercepts certificate validity and timestamp signing APIs; configurable custom timestamp endpoints and modified signing-time behavior; Sign Leaked Cert / Authenticode trust-pipeline research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[sign-expired]], [[fuck-cert-verify-time-validity]], [[signtoolex]], [[magic-signer]], [[signtoolgui]], and [[osslsigncode]].
 
 - **2026-08-24** — ingest `description:JetBrains/RiderSourceCodeAccess`: entity [[rider-source-code-access]] (JetBrains; Unreal Engine plugin; Rider as selectable external source editor inside Unreal Editor; C++ plugin modules; cross-platform Rider install discovery; configurable custom paths; Unreal C++ dev workflow); cited on [[overviews/game-engine]]; cross-linked [[com-unity-ide-cursor]], [[automation-examples]], [[re-ue4ss]], [[unreal-mod-loader]], and [[ue4-base]].
