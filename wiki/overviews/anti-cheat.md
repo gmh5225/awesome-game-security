@@ -78,6 +78,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md
   - wiki/sources/descriptions/Jackbail4__VAC-Bypass.md
+  - wiki/sources/descriptions/J-Tanzanite__Little-Anti-Cheat.md
   - wiki/sources/descriptions/JackBro__BetaShield.md
   - wiki/sources/descriptions/JUS7205__cheatguard.md
   - wiki/sources/descriptions/danielkrupinski__MemJect.md
@@ -911,6 +912,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[chessking]] — Rust Axum multiplayer chess platform with layered server-side AC (risk scoring, device fingerprinting, match integrity, IP reputation, chess-themed CAPTCHA step-up, ban escalation; shakmaty move validation; admin dashboard; educational reference; web-coder-lab) (source: wiki/sources/descriptions/web-coder-lab__chessking.md)
 - [[7dtd-anticheatmod]] — C# .NET 4.8 server mod for 7 Days to Die dedicated hosts without EAC; blocks cheat console/chat commands; movement thresholds for fly/teleport/speed/godmode; admin exemption; warning→kick→ban escalation; admin alerts + detection log (majimaakane) (source: wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md)
 - [[iw4madmin-sebzanticheat]] — IW4X server-side suspicion telemetry + IW4MAdmin review dashboard; GSC aim/visibility/radar checks; JS plugins + Discord case workflow; separate risk/confidence scoring; watch/clear/purge/recover moderation; no auto-ban (crazythecoder) (source: wiki/sources/descriptions/crazythecoder__IW4MAdmin-SebzAntiCheat.md)
+- [[little-anti-cheat]] — open-source SourceMod anti-cheat plugin for Source engine servers (SourcePawn; aimbot/aimlock, abnormal angles, bhop automation, fast duck, suspicious ConVar states; interpolation/backtrack countermeasures, optional high-ping enforcement, logging/translation; TF2/CS community servers; J-Tanzanite; For Source Games) (source: wiki/sources/descriptions/J-Tanzanite__Little-Anti-Cheat.md)
 - [[gatewarden-public]] — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes (flow-field softlock/maze checks; 30 Hz deterministic sim; 59 GUT tests + headless bot; test-driven validation reference; euuuuuuan) (source: wiki/sources/descriptions/euuuuuuan__gatewarden-public.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[aurum-re]] — Aurum RE Ricochet anti-cheat research (reverse engineering + driver development; explore anticheat:ricochet) (source: wiki/sources/descriptions/gmh5225__AurumRE.md)

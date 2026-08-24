@@ -1842,6 +1842,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
 - [lisa-py](entities/lisa-py.md) — LLDB MCP server (Python plugin + MCP bridge; breakpoints, backtraces, disasm, memory reads; ant4g0nist; MCP for LLDB)
 - [LitePCIe](entities/litepcie.md) — Python/Migen PCIe endpoint core (DMA engines, LTSSM trace, user-space drivers; KC705/KCU105/XCU1525/Acorn; enjoy-digital; DMA / FPGA research)
+- [Little Anti-Cheat](entities/little-anti-cheat.md) — open-source SourceMod anti-cheat plugin for Source engine servers (SourcePawn; aimbot/aimlock, abnormal angles, bhop/fast duck, ConVar checks; interpolation/backtrack countermeasures; TF2/CS community servers; J-Tanzanite; For Source Games)
 - [Limelighter](entities/limelighter.md) — Go CLI fake-cert generator/signer (domain-metadata spoofed certs → PFX; external signing utilities; red-team trust/EDR research; Fake Cert; Tylous)
 - [limba](entities/limba.md) — compile-time MBA control-flow obfuscation PoC (C++20; Clang/clang-cl; randomized jump-target encoding; premake examples; ThatLing; Cheat Mixed boolean-arithmetic)
 - [Lina Engine](entities/lina-engine.md) — cross-platform lightweight OSS 3D engine (LinaVG GUI; LinaGX Vulkan/DX12/Metal; Game Engine source)
