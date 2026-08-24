@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Harvester57/CodeIntegrity-DriverBlocklist`: entity [[code-integrity-driverblocklist]] (Harvester57; WDAC CI policy blocklist XML data; hash/identity deny rules incl. anti-cheat kernel modules; configuration data for WDAC/policy tooling; defensive hardening + kernel attack-surface reduction); cited on [[overviews/windows-kernel]] and [[concepts/hvci]]; cross-linked [[msft-driverblocklist]], [[wdactools]], [[solemn]], [[driver-risk-scout]], [[loldrivers]], and [[byovd]].
+
 - **2026-08-24** — ingest `description:HeathHowren/CSGO-Cheats`: entity [[csgo-cheats]] (HeathHowren; tutorial external CS:GO C++ examples; Visual Studio; window discovery, process open, memory R/W helper wrappers, offset maintenance; beginner game-memory manipulation + defender cheat-pattern study; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[pointer-lab]], [[csgo-external-cheat]], [[csgo-external-esp]], [[csgo-offsets]], and [[intro-to-gamehacking]].
 
 - **2026-08-24** — ingest `description:HeathHowren/Pointer-Lab`: entity [[pointer-lab]] (HeathHowren; Windows x64 user-mode memory research tool; C++20 ImGui dockspace; multi-type scan, ASLR-resilient pointer chains, Zydis/Keystone disasm/patch, Lua 5.4 scripting, `.iretable` projects; RE/CTF/authorized single-player—not stealth or online AC evasion; cheat / memory scanner); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mhsx]], [[intro-to-gamehacking]], and [[x64dbg]].

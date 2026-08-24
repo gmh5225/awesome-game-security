@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
   - wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md
   - wiki/sources/descriptions/Ido-Moshe-Github__CiDllDemo.md
+  - wiki/sources/descriptions/Harvester57__CodeIntegrity-DriverBlocklist.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -44,7 +45,7 @@ Operator tooling such as [[solemn]] automates adding drivers to the HVCI `HvciDi
 
 LOLdriver / vulnerable-driver inventory checks under HVCI appear in PowerShell research such as [[hvci-loldrivers-check]] (Trail of Bits; cheat / vulnerable-driver lane). (source: wiki/sources/descriptions/trailofbits__HVCI-loldrivers-check.md) [[byovdfinder]] (ghostbyt3; identifies LOLdrivers not blocked by the active HVCI policy—BYOVD attack-path research under Memory Integrity) targets the same policy-gap inventory lane. (source: wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md) General LOLdriver scan clients such as [[loldrivers-client]] (Go/PowerShell) cover the same inventory lane without an HVCI-specific framing. (source: wiki/sources/descriptions/rtfmkiesel__loldrivers-client.md)
 
-WDAC policy build/deploy tooling such as [[wdactools]] (PowerShell; base/supplemental CI policies, UMCI/WHQL/audit options, CIPolicyParser, CiTool.exe) helps study the user-mode side of the same code-integrity trust pipeline [[hvci]] enforces at the hypervisor. (source: wiki/sources/descriptions/mattifestation__WDACTools.md)
+WDAC policy build/deploy tooling such as [[wdactools]] (PowerShell; base/supplemental CI policies, UMCI/WHQL/audit options, CIPolicyParser, CiTool.exe) helps study the user-mode side of the same code-integrity trust pipeline [[hvci]] enforces at the hypervisor. (source: wiki/sources/descriptions/mattifestation__WDACTools.md) Community WDAC driver blocklist policy data such as [[code-integrity-driverblocklist]] (Harvester57; XML deny rules by hash and driver identity, including anti-cheat-relevant kernel modules; defensive hardening consumable by WDAC tooling) complements [[msft-driverblocklist]] in that lane. (source: wiki/sources/descriptions/Harvester57__CodeIntegrity-DriverBlocklist.md)
 
 HVCI bypass PoCs such as [[zero-hvci]] (gmh5225; policy edge cases + vulnerable signed-driver primitives → unsigned kernel code under Memory Integrity) sit in the same kernel trust-feature research lane. (source: wiki/sources/descriptions/gmh5225__ZeroHVCI.md)
 
@@ -56,5 +57,5 @@ HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

@@ -509,6 +509,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheatengine-mcp-bridge](entities/cheatengine-mcp-bridge.md) — MCP bridge: CE named pipe + Lua/FastMCP; 40+ tools (scan/read/pointers/RTTI/HWBP/DBVM); sub-2ms; miscusi-peek / beamstar forks
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [CiDllDemo](entities/ci-dll-demo.md) — kernel driver demo; ci.dll `CiValidateFileObject` / `CiCheckSignedFile`; process-creation notify hook; Authenticode certificate extraction (Ido-Moshe-Github; Windows Code Integrity research)
+- [Code Integrity DriverBlocklist](entities/code-integrity-driverblocklist.md) — WDAC CI policy blocklist XML data; hash/identity deny rules incl. anti-cheat kernel modules; defensive hardening + attack-surface reduction (Harvester57)
 - [CirSAT](entities/cirsat.md) — circuit-based AIG SAT (DAG/AIGER; verification / equivalence; MBA constraint lane)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
 - [ClassMaker](entities/classmaker.md) — IDA Python plugin: auto C++ class reconstruction from constructor pseudocode; vtable trace, struct create/update, naming heuristics; 32/64-bit (Pycatchown; cheat / IDA Plugins)
