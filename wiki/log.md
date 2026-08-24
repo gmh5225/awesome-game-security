@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:KANKOSHEV/Detect-MouseClassServiceCallback`: entity [[detect-mouseclassservicecallback]] (KANKOSHEV; kernel-mode PoC; MouseClassServiceCallback hook detection; low-level hook handling + driver logic to observe/validate mouse callback execution paths; Visual Studio / WDK-style build; anti-cheat / rootkit input-interception research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[mouseclassservicecallbacktrick]], [[mouseclassservicecallbackmeme]], [[mouhid-input-hook]], [[directinput]], [[kernel-mouse]], and [[mousedetection]].
+
 - **2026-08-24** — ingest `description:KANKOSHEV/NoScreen`: entity [[noscreen]] (KANKOSHEV; kernel-assisted window protection; custom driver + device interface; display-affinity-like anti-capture without target process memory modification; reduced user-mode detection surface; privacy / anti-capture / game AC research; README Hide Window); cited on [[concepts/anti-screenshot-capture]] and [[overviews/graphics-api]]; cross-linked [[wda-monitor-trick]], [[disablenvidiascreenshot]], and [[face-injector-v2]].
 
 - **2026-08-24** — ingest `description:KANKOSHEV/face-injector-v2`: entity [[face-injector-v2]] (KANKOSHEV; C++ mapped-kernel-driver injector framework; payload dropper + privilege elevation + randomized staging paths + mapper execution flow; multiple game targets; explicit ban warnings; Injection/Testing; educational driver-backed injection study); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[kernelmode-dll-injector]], [[stealthy-kernelmode-injector]], and [[memmap]].

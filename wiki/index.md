@@ -865,6 +865,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DmaProtect](entities/dmaprotect.md) — Windows kernel driver configuring VT-d/AMD-Vi IOMMU remapping to block unauthorized PCIe DMA (cutecatsandvirtualmachines; DMA mitigation research)
 - [DieDMAProtection](entities/diedmaprotection.md) — Windows PoC kernel driver disabling IOMMU/VT-d DMA remapping (iqrw0; IOMMU bypass research)
 - [detect-hypervisor-detect-ring-0](entities/detect-hypervisor-detect-ring-0.md) — ring-0 hypervisor detection test driver (CPUID leaves, TSC/APERF/MPERF VM-exit timing, LBR/DEBUGCTL; manual-map print harness; Secret Club lineage; gmh5225; Detection: Hacked Hypervisor)
+- [Detect-MouseClassServiceCallback](entities/detect-mouseclassservicecallback.md) — kernel-mode MouseClassServiceCallback hook detection PoC (KANKOSHEV; WDK driver; observe/validate mouse callback execution paths; anti-cheat / rootkit input-interception research)
 - [DetectFrida](entities/detect-frida.md) — Android native Frida detector (named-pipe scan, thread-name checks, `.text` memory-vs-disk ELF integrity; syscall libc + O-LLVM hardening; darvincisec; Detection:Frida)
 - [DetectZygisk](entities/detect-zygisk.md) — Android Zygisk-style injection POC (C++/JNI; fork + ptrace attach + PTRACE_GETEVENTMSG; sample APK/logs; apkunpacker)
 - [detection](entities/detection.md) — Android root/Xposed/Frida/VPN/dev-options multi-check collection (Java; Detection:Android root)
