@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `readme:categories`: Game Boy ~4 (+1; kroy-the-rabbit/openfpga-GBC-cheats-ui Analogue Pocket libretro cheat deploy; major section counts otherwise stable); entity [[openfpga-gbc-cheats-ui]]; refreshed [[overviews/overview]], [[overviews/game-hacking]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
+
 - **2026-08-24** — ingest `description:IntelSDM/7DTD`: entity [[7dtd]] (IntelSDM; full 7 Days to Die cheat ecosystem; Unity/Mono loader; C# in-game modules + C++ auth/transport/account backend; ESP/aimbot/weapon mods/player spoofing; anti-cheat bypass; end-to-end cheat delivery research; cheat / game:7dtd); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[7dtd-anticheatmod]], [[easy-anti-cheat]], [[mono]], [[eft-monoeft]], and [[rust-dma-cheat]].
 
 - **2026-08-24** — ingest `description:IntelSDM/RustDMACheat`: entity [[rust-dma-cheat]] (IntelSDM; C++ Facepunch Rust DMA cheat framework; ESP + recoil/FOV/lighting/admin-view mods; configurable codebase; PCILeech/MemProcFS/Il2CppDumper/DMALibrary references; hardware-assisted memory access + external cheat workflows; cheat / game:rust [DMA]); cited on [[overviews/dma-attack]] and [[overviews/game-hacking]]; cross-linked [[pcileech]], [[dmalibrary]], [[il2cppdumper]], [[oxide-dumper]], [[lord-abbot-rust-external-cheat]], and [[overflow-rust]].
