@@ -10,6 +10,7 @@ sources:
   - wiki/sources/descriptions/Herooyyy__Pcileech-Intel-I226-V-FullEmu.md
   - wiki/sources/descriptions/Herooyyy__Pcileech-ISABridge.md
   - wiki/sources/descriptions/Herooyyy__Pcileech-Activator-Anti-crack.md
+  - wiki/sources/descriptions/Herooyyy__Pcileech-AMDPCI.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -33,4 +34,4 @@ Unmodified [[pcileech-fpga]] builds commonly expose Tier-0/1 detection signals: 
 
 ## Related
 
-[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-activator-anti-crack]] · [[pcileech-intel-i226-v-fullemu]] · [[pcileech-isabridge]] · [[pcileech-dma-proxy]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-memprocfs-mcp]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-activator-anti-crack]] · [[pcileech-amdpci]] · [[pcileech-intel-i226-v-fullemu]] · [[pcileech-isabridge]] · [[pcileech-dma-proxy]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-memprocfs-mcp]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
