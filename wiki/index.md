@@ -2376,6 +2376,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PCIE-Detector](entities/pcie-detector.md) — Kernel PCIe Config Space inspection driver (C++; defensive DMA detection research; gmh5225)
 - [PCIeM](entities/pciem.md) — Linux kernel synthetic userspace PCIe device emulation (bare-metal virtual PCI endpoints; no FPGA/VM/QEMU; DMA / PCIe security research; cakehonolulu)
 - [Pcileech Intel I226-V FullEmu](entities/pcileech-intel-i226-v-fullemu.md) — prebuilt Intel I225/I226 wired-NIC DMA firmware (Herooyyy; synthetic TCP + persistent active-link state; activity-based AC evasion research vs Vanguard/Faceit/EAC; cheat / DMA)
+- [Pcileech ISABridge](entities/pcileech-isabridge.md) — ISA-bridge-style PCILeech FPGA firmware (Herooyyy; Verilog/SystemVerilog + Vivado bitstreams; PID/VID spoofing via bridge-device simulation; Faceit-class PCIe hardware filtering research; cheat / DMA)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech DMA Proxy](entities/pcileech-dma-proxy.md) — DLL proxy + loader; MinHook on Win32 memory APIs; redirects to remote PCILeech/MemProcFS DMA; input/registry access (MGreif; cheat / DMA)
 - [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
