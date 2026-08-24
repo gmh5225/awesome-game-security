@@ -6,7 +6,8 @@ sources:
   - wiki/sources/descriptions/dnSpy__dnSpy.md
   - wiki/sources/descriptions/dnSpy__dnSpy-Unity-mono.md
   - wiki/sources/descriptions/dnSpy__Mono.Debugger.Soft.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/HoLLy-HaCKeR__dnSpy.Extension.HoLLy.md
+updated: 2026-08-24
 confidence: medium
 ---
 
@@ -20,4 +21,4 @@ confidence: medium
 
 ## Related
 
-[[dnspy-unity-mono]] · [[mono-debugger-soft]] · [[ilspy]] · [[dncil]] · [[mono]] · [[il2cpp]] · [[confuserex]] · [[obfuscation-methods]] · [[retoolkit]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[dnspy-extension-holly]] · [[dnspy-unity-mono]] · [[mono-debugger-soft]] · [[ilspy]] · [[dncil]] · [[mono]] · [[il2cpp]] · [[confuserex]] · [[obfuscation-methods]] · [[retoolkit]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

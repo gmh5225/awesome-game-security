@@ -911,6 +911,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DiaSymbolView](entities/diasymbolview.md) — Delphi GUI PDB symbol inspector (MSDIA; navigable hierarchy; 200+ symbol properties; register-name resolution; RE / debugger symbols)
 - [dncil](entities/dncil.md) — Python CIL disassembly for .NET PE (Mandiant; metadata + operands; Unity Mono / YARA pipelines)
 - [dnSpy](entities/dnspy.md) — .NET assembly debugger/decompiler/editor (C#/VB/IL; live edit + breakpoints; Unity Mono via patched runtimes; For Unity)
+- [dnSpy.Extension.HoLLy](entities/dnspy-extension-holly.md) — dnSpyEx extension for obfuscated .NET RE (C#; source-map renaming, managed DLL inject-on-debug, native disasm, CFG viz; For Unity)
 - [dnSpy-Unity-mono](entities/dnspy-unity-mono.md) — patched Unity Mono sources + build tooling for dnSpy soft-debugger `mono.dll` / `mono-2.0-bdwgc.dll`; umpatcher; [mono]
 - [Mono.Debugger.Soft](entities/mono-debugger-soft.md) — dnSpy fork of Mono soft-debugger client (wire protocol + mirror API; breakpoints/stepping/object inspection; Unity/Mono RE; [Mono Debugger])
 - [Doriax](entities/doriax.md) — cross-platform C++ ECS game engine with ImGui editor (Lua/C++ scripting; Sokol OpenGL; DirectX/OpenGL/Metal/Vulkan; desktop/mobile/web)
