@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JosefNemec/Playnite`: entity [[playnite]] (JosefNemec; OSS Windows game library manager/launcher; C#/XAML/.NET; plugin architecture for library integrations, themes, automation; emulation workflows + local metadata; Game Manager); cited on [[overviews/overview]] and [[overviews/game-hacking]]; cross-linked [[mini-launcher]], [[rce-shield]], and [[goldberg-emulator]].
+
 - **2026-08-24** — ingest `description:JoshKappler/laneguard`: entity [[laneguard]] (JoshKappler; TypeScript/Next.js behavioral anti-cheat test bench; lane-change mobile skill-game sim; attacker ladder from naive bots to motor-noise camouflage bots; client kinematic/behavioral-texture detector with ROC calibration; headless batch runners + economy break-even; stealth bots evade client motor forensics while rake/win-rate/population stats bind server-side; Anti Cheat / behavioral); cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[ai-aimbot-detection]], [[mobile-anti-cheat]], [[research-rigor]], [[delbot-mouse]], [[human-mouse-movement]], and [[mlanticheat]].
 
 - **2026-08-24** — ingest `description:JustasMasiulis/ida_buddy`: entity [[ida-buddy]] (JustasMasiulis; Python WinDbg-style idalib CLI `idb` for agents; worker plugin; persistent headless worker per database; compact stdout; disasm/decompile/xrefs/types + DB mutations with undo; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-cli]], [[idac]], [[ida-bridge]], [[ida-rpc]], [[ida-mcp-server-plugin]], [[headless-ida-mcp-server]], and [[ida-jm-xorstr-decrypt-plugin]].
