@@ -4,7 +4,7 @@ kind: entity
 topics: [mobile-security, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/mabbcoll13__xposed-module-kit.md
-updated: 2026-07-31
+updated: 2026-08-24
 confidence: medium
 ---
 
@@ -22,4 +22,4 @@ Batteries-included **Android scaffold** for building **Xposed** and **LSPosed** 
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[locusmimic]] · [[frida]] · [[detection]] · [[mobile-anti-cheat]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[lsposed-universal-template]] · [[locusmimic]] · [[frida]] · [[detection]] · [[mobile-anti-cheat]]

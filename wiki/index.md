@@ -1824,6 +1824,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lina Engine](entities/lina-engine.md) — cross-platform lightweight OSS 3D engine (LinaVG GUI; LinaGX Vulkan/DX12/Metal; Game Engine source)
 - [lldbext-dump](entities/lldbext-dump.md) — LLDB Python extension: Android live session → Windows minidump + Unicorn replay (mobile RE / dump)
 - [AnyWhere](entities/anywhere.md) — Android mock-location app (OpenStreetMap picker, overlay joystick walk/run/cycle, location history; LSPosed module hides mock-provider flags; cxOrz; Cheat / Xposed)
+- [LSPosed Universal Template](entities/lsposed-universal-template.md) — LSPosed/LSPatch module scaffold (libxposed API 102; Java hooks + overlay mod menu; ShadowHook/JNI native pattern scan; Unity/Unreal/Cocos2d-x/Godot engine detection; AC process filters; Jordan231111; Cheat / Xposed)
 - [LocusMimic](entities/locusmimic.md) — LSPosed/Xposed Android GPS spoof (map picker, saved locations, app/system/mock-provider modes; Kotlin/Compose)
 - [LockFile-Poc](entities/lockfile-poc.md) — C++ Windows file-lock PoC (AC Stress Testing / Some Tricks Ring3)
 - [LocalAnticheat 1.8.9](entities/local-anticheat-1-8-9.md) — Forge 1.8.9 client mod; passive packet-flow checks (11 modules); local-chat flags; no server reports (freezato; Anti Cheat / game:minecraft)
