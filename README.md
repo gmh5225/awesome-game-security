@@ -4919,6 +4919,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/xkevio/kevboy [Emulator]
 - https://github.com/vojty/feather-gb [Emulator]
 - https://github.com/chrismaltby/gb-studio [GB Studio]
+- https://github.com/kroy-the-rabbit/openfpga-GBC-cheats-ui [Desktop cheat picker for Analogue Pocket Game Boy/GBC openFPGA cores with libretro cheat DB sync]
 
 ## GameCube/Wii
 - https://github.com/ioncodes/gecko [A cross-platform GameCube/Wii emulator and debugger written in Rust]
