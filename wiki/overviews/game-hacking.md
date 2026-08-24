@@ -195,6 +195,7 @@ sources:
   - wiki/sources/descriptions/frasten__ida-genpatch.md
   - wiki/sources/descriptions/fr0gger__awesome-ida-x64-olly-plugin.md
   - wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md
+  - wiki/sources/descriptions/Invoke-RE__binja-lattice-mcp.md
   - wiki/sources/descriptions/cycraft-corp__BinaryAnalysisMCPs.md
   - wiki/sources/descriptions/cyberus-technology__virtualbox-kvm.md
   - wiki/sources/descriptions/fdrechsler__mcp-server-idapro.md
@@ -1865,6 +1866,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Ghidra Sleigh/p-code bridging into Binary Ninja via [[binaryninja-pcode]] (C++; experimental LLIL from p-code) sits in the Cheat Binary Ninja Plugins lane. (source: wiki/sources/descriptions/pd0wm__binaryninja-pcode.md)
 - Custom Binary Ninja architecture plugins via [[binaryninjaplugins]] (Pusty; Python; Java class files, Renesas H8/300, Xtensa ELF; disassembly, decode, partial lifting; Java NOP/branch patch workflows; Cheat Binary Ninja Plugins / firmware+bytecode RE) sits beside [[binaryninja-pcode]]. (source: wiki/sources/descriptions/Pusty__BinaryNinjaPlugins.md)
 - Binary Ninja MCP server via [[binary-ninja-mcp]] (Python; disasm/decompile/xrefs/functions/types for LLM clients; MCP for Binary_Ninja) sits in the Cheat Binary Ninja Plugins / agent-RE lane. (source: wiki/sources/descriptions/fosdickio__binary_ninja_mcp.md)
+- BinjaLattice authenticated HTTP MCP bridge via [[binja-lattice-mcp]] (Invoke-RE; Python BN plugin; token auth + optional TLS; export disasm/pseudocode + controlled rename/comment edits; live BN database agent-RE; MCP for Binary_Ninja) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/Invoke-RE__binja-lattice-mcp.md)
 - Binary Ninja CLI for agents via [[bn]] (banteg; Python; headless/agent-facing CLI over BN APIs; plugin development; Cheat Binary Ninja Plugins / agent-RE lane) sits beside [[binary-ninja-mcp]]. (source: wiki/sources/descriptions/banteg__bn.md)
 - Vector35 curated official Binary Ninja plugin index via [[official-plugins]] (structured plugin metadata catalog; Python indexing; trusted first-party/endorsed integrations; Cheat Binary Ninja Plugins lane) complements community plugin discovery. (source: wiki/sources/descriptions/Vector35__official-plugins.md)
 - Vector35 community Binary Ninja plugin index via [[community-plugins]] (Python manifest validation + index generation; third-party licensing, compatibility, and update metadata; discover/install community extensions; Cheat Binary Ninja Plugins lane) pairs with [[official-plugins]]. (source: wiki/sources/descriptions/Vector35__community-plugins.md)
