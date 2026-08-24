@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:KGB-1337/memmap`: entity [[memmap]] (KGB-1337; C++ driver-assisted process memory + module mapping framework; request-based KM↔UM comms for R/W, alloc, protection changes, module queries; extend-map + hijacked API-call-path execution samples; Extend Manual Map; memory manipulation / injection / game security research); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[modmap]], [[modexmap]], [[kernelmode-dll-injector]], and [[rw-socket-driver]].
+
 - **2026-08-24** — ingest `description:KaelusAI/Shard`: entity [[shard]] (KaelusAI; free OSS Kotlin Gradle Paper/Folia AI anti-cheat plugin; PacketEvents packet analysis; player tick data to remote inference API; SQLite/MySQL/MariaDB + Redis cross-server alerts; monitoring, profiling, violation history, punishment rules, WorldGuard/Geyser integrations; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[guardac]], [[react]], [[mlanticheat]], [[minecraft-anti-cheat]], and [[minecraft-anticheatai]].
 
 - **2026-08-24** — ingest `description:Kakaxh1/RootRaven`: entity [[rootraven]] (Kakaxh1; self-hosted Android/iOS pentest web dashboard; Python/Flask + vanilla JS; ADB, Frida, JADX, Burp proxy, SSH, logcat; pre-built SSL pinning, root/jailbreak, anti-debug, biometric, and crypto hooks; manifest/SharedPreferences/deep-link/OWASP MASVS modules; game client and anti-cheat assessment); cited on [[overviews/mobile-security]] and [[concepts/frida]]; cross-linked [[jadx]], [[lamda]], [[nightowl]], and [[mobile-anti-cheat]].

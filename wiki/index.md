@@ -1969,6 +1969,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [memflow-kvm](entities/memflow-kvm.md) — memflow KVM connector (Linux kernel module; guest physmem → userspace; Rust bindings)
 - [Manual Mapping DLL Injector](entities/manual-mapping-dll-injector.md) — Windows manual-map DLL injector (injector + loader; thread hijack / NtCreateThreadEx; import/reloc/TLS/exception; header wipe, PEB unlink, handle hijack; Manual Map; andrew9382)
 - [MemJect](entities/memject.md) — minimal Windows manual-map DLL injector (embedded raw byte-array payload; VirtualAllocEx/WPM; optional PE header/entry erase; csgo.exe demo; danielkrupinski; Manual Map)
+- [memmap](entities/memmap.md) — driver-assisted extend-manual-map framework (KGB-1337; C++; request-based KM↔UM R/W, alloc, protection, module queries; hijacked API-call-path execution; Extend Manual Map)
 - [MemMCP](entities/memmcp.md) — Cheat Engine–like MCP server (Python; Game Develop / MCP)
 - [MemTools](entities/memtools.md) — Windows/Linux DMA testing toolkit (C++/C; driver/plugin development + memory analysis; gmh5225; cheat / DMA)
 - [MatScan](entities/matscan.md) — multi-threaded Facepunch Rust Unity material scanner (C++; IL2CPP + memory analysis; cheat / game:rust / game engine explorer:Unity; gmh5225)
