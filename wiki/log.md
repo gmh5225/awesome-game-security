@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Kakaxh1/RootRaven`: entity [[rootraven]] (Kakaxh1; self-hosted Android/iOS pentest web dashboard; Python/Flask + vanilla JS; ADB, Frida, JADX, Burp proxy, SSH, logcat; pre-built SSL pinning, root/jailbreak, anti-debug, biometric, and crypto hooks; manifest/SharedPreferences/deep-link/OWASP MASVS modules; game client and anti-cheat assessment); cited on [[overviews/mobile-security]] and [[concepts/frida]]; cross-linked [[jadx]], [[lamda]], [[nightowl]], and [[mobile-anti-cheat]].
+
 - **2026-08-24** — ingest `description:Karwmam/Vanguard-Service-Manager-vGK-Control`: entity [[vanguard-service-manager-vgk-control]] (Karwmam; C++ Visual Studio CLI; `vgkChecker` reports Vanguard/`vgk` running + auto-start state; `noVanguard` toggles service auto-start via SCM APIs; admin checks + optional restart prompts; players/sysadmins control idle kernel overhead when Riot titles unused—not runtime AC bypass); cited on [[concepts/vanguard]] and [[overviews/anti-cheat]]; cross-linked [[vanguard-update-notifier]] and [[wardsweep]].
 
 - **2026-08-24** — ingest `description:tomhamidi97-arch/frida-vmp-bypass`: entity [[frida-vmp-bypass]] (tomhamidi97-arch; Frida boundary-hook harness for stacked Android VMProtect+OLLVM; libc/JNI/Java three-layer exit monitoring; spawn-mode injection; caller-address cross-ref with IDA; arg/return tamper for detection bypass; mobile game security / anti-cheat / CTF; Cheat Fix VMP / Fix OLLVM); cited on [[concepts/frida]] and [[concepts/control-flow-flattening]]; cross-linked [[vmp-devirtualization-lab]], [[ollvm-unflattener]], [[vmprotect]], and [[mobile-anti-cheat]].

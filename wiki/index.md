@@ -2589,6 +2589,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RootAppDetector](entities/root-app-detector.md) — Java Android POC: detect installed root-manager apps via package/activity launch + SecurityException (Detection:Android root; apkunpacker)
 - [Root My Pixel](entities/root-my-pixel.md) — one-tap temporary Pixel root (CVE-2026-43499 IonStack + ReSukiSU/KernelSU; Shizuku; Pixel 7–10; Kotlin/JNI; cheat / Android root)
 - [RootSentry](entities/rootsentry.md) — zero-dependency Python mobile RASP CLI/library (root/jailbreak, emulator, Frida/Xposed hook, tamper scoring → TRUSTED→CRITICAL; fleet cohort + MITRE ATT&CK for Mobile; Kotlin/Swift collectors; cognis-digital)
+- [RootRaven](entities/rootraven.md) — self-hosted Android/iOS pentest web dashboard (Flask; ADB, Frida, JADX, Burp, logcat; SSL pinning, root/jailbreak, anti-debug, biometric, crypto hooks; MASVS tracker; Kakaxh1)
 - [rootkit](entities/rootkit.md) — MatheuZSecurity Linux rootkit sample collection (kernel/user/eBPF; hiding, hooking, privesc, persistence, anti-forensics; educational offensive/defensive research)
 - [rootkit-2](entities/rootkit-2.md) — CSRSS CSR_PROCESS walk to detect hidden processes (kernel PoC; gmh5225)
 - [rootkit-detection-ebpf-time-trace](entities/rootkit-detection-ebpf-time-trace.md) — Linux eBPF getdents timing-anomaly framework for file-hiding rootkit detection (ait-aecid; semi-supervised anomaly scoring)
