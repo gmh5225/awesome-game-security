@@ -523,6 +523,7 @@ sources:
   - wiki/sources/descriptions/rogxo__kernel_hack.md
   - wiki/sources/descriptions/Poko-Apps__MemKernel.md
   - wiki/sources/descriptions/JeanToBinks__Fortnite-Cheato-UD-EAC-BE.md
+  - wiki/sources/descriptions/JasonGoemaat__CheatEngineMonoHelper.md
   - wiki/sources/descriptions/Jesewe__VioletWing.md
   - wiki/sources/descriptions/Jiang-Night__Kernel_driver_hack.md
   - wiki/sources/descriptions/PierreCiholas__GetPixel-vs-BitBlt_GetDIBits.md
@@ -1745,6 +1746,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cheat Engine–style injectable speed-hack DLL [[speed-hack]] (Letomaniy; C++ Visual Studio; Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat practice + AC time-manipulation research) (source: wiki/sources/descriptions/Letomaniy__Speed-Hack.md)
 - Official CE Lua gamepad UI add-on [[controller-mode]] (Xbox-style D-pad navigation, A/B confirm/cancel, controller-friendly `.CT` file picker, experimental Steam Deck on-screen keyboard via Steam API; Lua + embedded C; cheat / CE plugin) extends [[cheat-engine]] for handheld/couch live memory editing. (source: wiki/sources/descriptions/cheat-engine__ControllerMode.md)
 - Community CE Lua extension pack [[ce-lua-extensions]] (Skyrimfus; autorun loader + breakpoint cleanup, function-caller lookup, template insertion, interface workflow utilities; cheat / Lua Extensions) accelerates RE and memory-analysis scripting on [[cheat-engine]]. (source: wiki/sources/descriptions/Skyrimfus__CE-lua-extensions.md)
+- CE Mono helper toolkit [[cheatengine-mono-helper]] (JasonGoemaat; Lua scripts + CE table assets; searchable class/field/method views, method hook templates, disassembly jump, reusable runtime monitoring table scripts; fast Mono introspection for Unity Mono RE; cheat / CE Mono Helper) extends [[cheat-engine]] for managed-game workflows beside [[mono-external-lib]] and [[monohook]]. (source: wiki/sources/descriptions/JasonGoemaat__CheatEngineMonoHelper.md)
 - Open-source Rust Windows trainer [[freeplay]] (antaresjay; TOML game configs; imports CE `.CT` tables; built-in x86/x64 Auto Assembler; pointer scan, value freeze, instruction patching; Tauri overlay + CLI; Steam/Epic/GOG library integration; community table library; refuses [[easy-anti-cheat]]/[[battleye]]/[[vanguard]] protected processes; offline single-player focus; cheat / trainer) sits beside [[cheat-engine]] as a self-hosted CE-table runtime alternative. (source: wiki/sources/descriptions/antaresjay__freeplay.md)
 - Cheat Engine Godot runtime dumpers such as [[gddumper]] (Lua; Godot 3.x/4.x SceneTree / GDScript on Win x86/x64; Address List dump + experimental hot-reload) sit in the Cheat Engine Plugins / game engine explorer:Godot lane. (source: wiki/sources/descriptions/palepine__GDDumper.md)
 - Cheat Engine value tracing in IDA via [[ce-tracer-ida]] (Python; CheatEngine Value Tracer plugin; memory analysis; cheat / IDA Plugins) bridges CE scan workflows into static IDA analysis. (source: wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md)

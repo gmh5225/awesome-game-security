@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JasonGoemaat/CheatEngineMonoHelper`: entity [[cheatengine-mono-helper]] (JasonGoemaat; CE Lua/table toolkit; searchable Mono class/field/method views, method hook templates, disassembly jump, reusable runtime monitoring scripts; fast Mono introspection for Unity Mono RE; cheat / CE Mono Helper); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[ce-lua-extensions]], [[mono]], [[mono-external-lib]], and [[monohook]].
+
 - **2026-08-24** — ingest `description:Jaysmito101/cgl`: entity [[cgl]] (Jaysmito101; single-header C graphics/utility library; cross-platform windowing, rendering utilities, noise, math, data structures, networking, threading; Rust/Python wrappers; optional bloom/audio/node editing; prototyping/demo scenes/small games; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[yourgamelib]], [[raylib]], [[olive-c]], [[stb]], [[learnopengl]], and [[gamedev-libraries]].
 
 - **2026-08-24** — ingest `description:JbvrgtonYT/ollvm-unflattener`: updated entity [[ollvm-unflattener]] (JbvrgtonYT fork; Python OLLVM CFF unflattener; Miasm + graph visualization; sample binaries/test inputs; control-flow-flattening RE research; Fix OLLVM / unflattener); cited on [[concepts/control-flow-flattening]] and [[overviews/reverse-engineering]]; cross-linked [[idadeflat]], [[unflat]], [[d810-ng]], and [[dll-ollvm]].
