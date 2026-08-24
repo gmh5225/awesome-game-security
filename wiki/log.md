@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JPShag/DMA-FW-Guide-2.0`: entity [[dma-fw-guide-2.0]] (JPShag; comprehensive FPGA PCIe DMA device-emulation firmware guide; donor profiling, config-space clone, BAR/interrupt handling, Vivado flash workflows; PCILeech-style hardware stack references; multi-language materials; hardware security + game anti-cheat DMA attack simulation research; Guide); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[dma-cfw-guide]], [[entities/dma]], [[pcileech-fpga]], [[pcileechgen]], and [[xilinx-fpga-pcie-xdma-tutorial]].
+
 - **2026-08-24** — ingest `description:JUS7205/cheatguard`: entity [[cheatguard]] (JUS7205; Rust engine-agnostic AC scanner; JSON signature ruleset; Win32 loaded-module enumeration; weighted signals—known cheat names, suspicious paths, unsigned modules, module-count anomalies; deterministic 0–100 CLEAN/SUSPICIOUS/MALICIOUS JSON report; library + CLI `cheatguard scan <pid>`; blue-team process-integrity / custom AC forensics); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[basic-anti-cheat]], [[modfinder]], [[betashield]], [[xmalhunter]], and [[anticheat-poc]].
 
 - **2026-08-24** — ingest `description:JackBro/BetaShield`: entity [[betashield]] (JackBro; C++/Boost client-side AC protection; integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform Boost utilities; open-source client protection design reference); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[anticheat-poc]], [[integrity]], [[rebirth-guard]], and [[atomicshieldclient]].

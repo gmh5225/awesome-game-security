@@ -800,6 +800,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DMA Attack Firmware Customization](entities/dma-attack-firmware-customization.md) — Screamer Squirrel 35T [[pcileech-fpga]] RTL8111 NIC disguise guide (MindShare Arbor donor harvest; Vivado patch; BattlEye/EAC evasion testing; acageduser)
 - [DMA (Rakeshmonkee)](entities/dma.md) — PCIe DMA FPGA firmware guide and toolkit (Vivado customization; Python/Tcl auto-generation; config-space cloning; flash workflows; anti-cheat evasion research; Guide)
 - [DMA CFW Guide](entities/dma-cfw-guide.md) — [[pcileech-fpga]] v4.15 custom firmware guide for Squirrel/EnigmaX1/ZDMA (Arbor/Telescan PE donor harvest; Vivado IP patch; TLP emulation; `.coe`/writemask shadow config; Silverr12)
+- [DMA FW Guide 2.0](entities/dma-fw-guide-2.0.md) — comprehensive FPGA PCIe DMA device-emulation firmware guide (donor profiling; config-space clone; BAR/interrupt handling; Vivado flash; PCILeech-style stack references; multi-language materials; JPShag; Guide)
 - [dma-cheat-base](entities/dma-cheat-base.md) — DMA cheat base scaffold (C/C++; rendering, animation, SDK generation; cheat / DMA)
 - [DMALib](entities/dmalib.md) — lightweight C++ DMA helper library (LeechCore/MemProcFS; process lookup, R/W, pattern scan, scatter reads; Spuckwaffel; cheat / DMA library)
 - [DMALibrary](entities/dmalibrary.md) — C++ DMA toolkit (Metick; signature scan, scatter/normal R/W, dumps, CR3 fix, PID/base lookup, import/export parsing; LeechCore/MemProcFS; cheat / DMA library)
