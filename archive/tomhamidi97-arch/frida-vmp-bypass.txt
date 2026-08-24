@@ -1,0 +1,124 @@
+Project Path: arc_tomhamidi97-arch_frida-vmp-bypass_ulo86ph7
+
+Source Tree:
+
+```txt
+arc_tomhamidi97-arch_frida-vmp-bypass_ulo86ph7
+└── README.md
+
+```
+
+`README.md`:
+
+```md
+# Reversing VMP + OLLVM with a Frida Boundary-Hook Harness
+
+> Updated: 2025-09-09
+> **Disclaimer**: This methodology is intended solely for authorized security research, CTF challenges, and security testing of apps you own or are authorized to test. I have personally used this script to defeat the protection of two VMP+OLLVM-hardened targets. **Do not use it for any illegal purpose.**
+
+## 1. Background: Why Static Analysis Fails
+
+VMP and OLLVM are the two most common native-layer code protection techniques in use today:
+
+- **OLLVM (Obfuscating LLVM)**: Flattens a clean function body into a chaotic state machine via control-flow flattening, bogus control flow, and instruction substitution passes. After disassembly in IDA / Ghidra the result is essentially unreadable by a human.
+- **VMP (Virtual Machine Protection)**: Compiles critical code into a custom bytecode that a runtime interpreter (the VM dispatcher) executes one instruction at a time. Statically you see only a giant `switch-case` dispatch loop — the real logic is invisible.
+
+When the two are stacked, **direct static reversal is extremely costly and yields very little**. So we change the approach:
+
+> No matter how thoroughly the native code is obfuscated internally, it ultimately has to call operating-system interfaces to produce any side effect. Instead of trying to *read* the obfuscated code, we monitor every one of its *exits*.
+
+## 2. Core Idea: A Three-Layer Boundary Hook
+
+Native code can produce side effects through only three channels. Hook all three and you can reconstruct the complete call chain:
+
+| Layer | Hook targets | Purpose |
+|---|---|---|
+| **libc** | `strlen`, `strstr`, `strcmp`, `open`, `fopen`, … | Capture string comparisons, file I/O, and other low-level behavior; pinpoint key decision points |
+| **JNI** | `FindClass`, `GetStaticFieldID`, `GetMethodID`, `CallObjectMethodV`, … | Capture native↔Java interaction: which class, field, or method is touched |
+| **Java** | The app's own sensitive methods | Capture upper-layer business-logic entry points |
+
+Every hook log line carries the **caller address (`called from: 0x...`)** — so you see not only *what* was done, but *which stretch of code inside the so did it*, which you can cross-reference against an address in IDA.
+
+## 3. Prerequisites
+
+- A rooted Android device or emulator with `frida-server` installed (version must match the PC side)
+- PC side: `pip install frida-tools`
+- The VMP+OLLVM-hardened `.so` of the app under analysis
+
+## 4. Usage
+
+1. Open `hook_jni_and_libc.js` and replace the default so name with the real name of the hardened target so.
+2. Start `frida-server` and confirm `frida-ps -U` lists device processes.
+3. Launch the app in **spawn mode** with the script injected (spawn is mandatory — otherwise early startup-time checks are missed):
+
+```bash
+frida -U -f com.yourapp.name -l hook_jni_and_libc.js --no-pause
+```
+
+4. Drive the app to trigger the logic of interest and watch the call-chain output on the console.
+
+## 5. Log-Walkthrough: Reconstructing an Environment Check
+
+The excerpt below is taken from a real run. We reconstruct the logic behind it block by block.
+
+**Block 1: Reading device hardware info**
+
+```
+[JNIHook] FindClass:      Class Name: [android/os/Build]
+[JNIHook] GetStaticFieldID called
+    Class: android.os.Build
+    Field Name: MANUFACTURER      Signature: Ljava/lang/String;
+    Field Name: BRAND             Signature: Ljava/lang/String;
+    Field Name: DISPLAY           Signature: Ljava/lang/String;
+[JNIHook] GetStringUTFChars called ...
+```
+
+The native code pulls three string fields via JNI — `Build.MANUFACTURER`, `Build.BRAND`, `Build.DISPLAY`. This is classic device-fingerprint collection.
+
+**Block 2: String comparison (the key decision point)**
+
+```
+[LibcHook] strlen  called str: Xiaomi
+[LibcHook] strlen  called str: QKQ1.190828.002 test-keys
+[LibcHook] strstr  called str1: xiaomi                       str2: other1
+[LibcHook] strstr  called str1: qkq1.190828.002 test-keys    str2: other1
+```
+
+The values read above are passed into `strlen` / `strstr`. Note that the `DISPLAY` field contains `test-keys`, indicating the app is running on a **non-officially-signed ROM** — a marker commonly seen on emulators, custom firmware, or systems repackaged after rooting. This block is deciding: *is this a suspicious device?*
+
+**Block 3: Confirming its own identity**
+
+```
+[LibcHook] strlen called str: com.unity3d.player.UnityPlayerActivity
+[JNIHook] GetObjectClass called, class name: android.app.Application
+[JNIHook] GetMethodID, Method Name: [getPackageName]  Signature: ()Ljava/lang/String;
+[JNIHook] CallObjectMethodV called - Class Name: android.app.Application
+```
+
+`com.unity3d.player.UnityPlayerActivity` is the entry Activity of a Unity game; the code then fetches its own package name via `Application.getPackageName()` — almost certainly an **anti-repackaging / anti-clone check** (verifying it is running under the "genuine" package name).
+
+**Reconstructed conclusion**
+
+> During startup the hardened so performs an environment security check: it first collects `Build` fields to identify the device brand and ROM legitimacy (`test-keys`), then verifies that its own package name has not been tampered with. If any condition is hit, downstream business logic takes a "risk-control / exit" branch. To bypass it, simply hook the return values of these checks and force the detection logic down the desired branch.
+
+## 6. Methodology Recap
+
+1. **Breadth first, then depth**: Run a full three-layer hook pass once, then filter the log for "suspicious fragments" (sensitive field names, sensitive string comparisons).
+2. **Locate via `called from`**: Pull high-frequency caller addresses into IDA and cross-reference them to pinpoint the detection function inside the so.
+3. **Targeted hooking**: Once the target function is locked, narrow the hook to just its arguments / return values, and perform argument replacement or return-value tampering to complete the bypass.
+4. **Mind anti-debugging**: Some hardening detects Frida; fall back to `frida-gadget`, rename the process, or use a kernel-level hiding scheme via Magisk when needed.
+
+Reading the Java, JNI, and libc call logs line by line lets you reconstruct the original business logic — that is exactly where dynamic analysis pays off over static deobfuscation.
+
+---
+
+## 📬 Need Custom Reverse Engineering Work?
+
+I take **authorized engagements** — protocol analysis, packer/RASP research, native algorithm restoration, and app security audits. Bilingual delivery (English / 中文).
+
+- **Telegram**: [@pidanfuzi](https://t.me/pidanfuzi)
+- **More research**: [android-reverse collection](https://github.com/tomhamidi97-arch/android-reverse)
+
+*All work requires written authorization. I do not accept requests involving unauthorized cracking, payment bypass, or gambling-related systems.*
+
+```
