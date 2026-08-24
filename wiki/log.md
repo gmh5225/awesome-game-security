@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Jemmy1228/HookSigntool`: entity [[hooksigntool]] (Jemmy1228; C++ Detours hook DLL for Windows code-signing utilities; intercepts certificate validity and timestamp signing APIs; configurable custom timestamp endpoints and modified signing-time behavior; Sign Leaked Cert / Authenticode trust-pipeline research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[sign-expired]], [[fuck-cert-verify-time-validity]], [[signtoolex]], [[magic-signer]], [[signtoolgui]], and [[osslsigncode]].
+
 - **2026-08-24** — ingest `description:JetBrains/RiderSourceCodeAccess`: entity [[rider-source-code-access]] (JetBrains; Unreal Engine plugin; Rider as selectable external source editor inside Unreal Editor; C++ plugin modules; cross-platform Rider install discovery; configurable custom paths; Unreal C++ dev workflow); cited on [[overviews/game-engine]]; cross-linked [[com-unity-ide-cursor]], [[automation-examples]], [[re-ue4ss]], [[unreal-mod-loader]], and [[ue4-base]].
 
 - **2026-08-24** — ingest `description:Jesewe/VioletWing`: entity [[violetwing]] (Jesewe; Python external CS2 helper; PyMeow overlay + customtkinter GUI; startup cs2-dumper offset refresh; triggerbot/ESP/bunnyhop/NoFlash; offline/private-server CS2 RE + game-security experimentation; cheat / game:cs2 Python external); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[pythoncs2]], [[cs2-dumper]], [[titled-gui-cs2]], [[overlayai]], [[aimstar]], and [[tkazer-cs2-external]].
