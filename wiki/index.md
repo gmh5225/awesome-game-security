@@ -2601,6 +2601,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReClass DMA](entities/reclass-dma.md) — ReClass.NET plugin: DMA-backed structure recon (C/C++; external PCIe FPGA path; cheat / debugging)
 - [ReClass.NET-DriverReader](entities/reclass-net-driverreader.md) — ReClass.NET plugin: kernel-driver mem vs RPM (AC-blocked structure recon; C#/C++)
 - [ReClassEx](entities/reclass-ex.md) — extended Windows class reconstruction tool (ajkhoury; C++; RTTI, PDB, module targeting, plugins; cheat / debugging)
+- [Reclass](entities/reclass.md) — structured binary editor for unknown data layouts (IChooseYou; C++17/Qt 6; structs/arrays/pointers; process-memory + WinDbg plugins; MCP; cheat / debugging)
 - [regenny](entities/regenny.md) — interactive live-memory struct reconstruction (cursey; C++; nested structs/arrays/pointers/enums/bitfields; header export; cheat / sdk codegen)
 - [recompiler](entities/recompiler.md) — Xbox360→Windows executable porting (console emulator / Xbox RE)
 - [Red Alert 2 on Web](entities/redalert2.md) — RA2/YR RTS engine reimplementation (unit AI, buildings, resources, multiplayer, map rendering; Game Engine / source)

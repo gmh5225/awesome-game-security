@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IChooseYou/Reclass`: entity [[reclass]] (IChooseYou; C++17/Qt 6/QScintilla structured binary editor; structs/arrays/pointers/primitives; inline edit, foldable views, hex/ASCII preview; process-memory + WinDbg plugins; MCP; cheat / debugging); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[reclass-net]], [[reclass-ex]], [[reclass-dma]], [[reclass-net-driverreader]], and [[regenny]].
+
 - **2026-08-24** — ingest `description:IIIImmmyyy/AntiOllvm`: entity [[anti-ollvm]] (IIIImmmyyy; C# Arm64 simulated execution; OLLVM CFF dispatcher pattern ID + if-else CFG rebuild; Python IDA CFG extract + Keystone codegen; fake runtime; security/game-protection RE; Fix OLLVM); cited on [[concepts/control-flow-flattening]] and [[overviews/reverse-engineering]]; cross-linked [[ollvm-unflattener]], [[idadeflat]], [[deobfbr]], and [[armshellcode]].
 
 - **2026-08-24** — ingest `description:IIIImmmyyy/ArmShellCode`: entity [[armshellcode]] (IIIImmmyyy; ARM64 Android shellcode framework; position-independent arm64-v8a payloads; Dobby symbol resolution; ELF/proc-maps parsing, syscall wrappers, modular loader + custom linker scripts; exploit / runtime code-injection research; cheat / Android arm arm64-v8a ShellCode Generate); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dobby]], [[elf-got-patcher]], [[pyasm-patch]], [[adbi]], and [[android-super-inject]].
