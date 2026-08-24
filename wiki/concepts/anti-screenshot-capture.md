@@ -13,7 +13,8 @@ sources:
   - wiki/sources/descriptions/bavulapati__DXGICaptureApplication.md
   - wiki/sources/descriptions/Rick-laboratory__Windows-Screenshotcapture-DirectX.md
   - wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md
-updated: 2026-08-23
+  - wiki/sources/descriptions/KANKOSHEV__NoScreen.md
+updated: 2026-08-24
 confidence: medium
 ---
 
@@ -39,7 +40,7 @@ Comparative Windows capture samples such as [[screenshot]] (gmh5225; BitBlt, DXG
 
 - **Frame suppression** — detect AC `BitBlt`/`PrintWindow` hooks and skip ImGui draw for the captured frame.
 - **GDI capture hook** — hook `BitBlt` in gdi32 so AC screenshot pipelines receive a pre-stored clean frame instead of the live overlay-modified client area; educational PoC [[screenshot-detection-bypass]] (Mes2d; C++; class-based hook + settings; README `[BitBlt]`). (source: wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md)
-- **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it.
+- **Display affinity** — `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on external overlay HWND so some capture APIs omit it. Kernel-assisted window protection such as [[noscreen]] (KANKOSHEV; custom driver + device interface; display-affinity-like anti-capture without direct target process memory modification; reduced user-mode detection surface; README Hide Window) extends that lane below user-mode WDA calls. (source: wiki/sources/descriptions/KANKOSHEV__NoScreen.md)
 - **DWM composition** — separate surfaces that survive `PrintWindow` but not all BitBlt paths; kernel DC blocking in extreme cases.
 - **Hardware overlay planes** — content on dedicated scan-out planes may be absent from software duplication.
 - **Off-screen render** — secondary display, capture card, or virtual camera feed outside the game window.

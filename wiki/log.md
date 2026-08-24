@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:KANKOSHEV/NoScreen`: entity [[noscreen]] (KANKOSHEV; kernel-assisted window protection; custom driver + device interface; display-affinity-like anti-capture without target process memory modification; reduced user-mode detection surface; privacy / anti-capture / game AC research; README Hide Window); cited on [[concepts/anti-screenshot-capture]] and [[overviews/graphics-api]]; cross-linked [[wda-monitor-trick]], [[disablenvidiascreenshot]], and [[face-injector-v2]].
+
 - **2026-08-24** — ingest `description:KANKOSHEV/face-injector-v2`: entity [[face-injector-v2]] (KANKOSHEV; C++ mapped-kernel-driver injector framework; payload dropper + privilege elevation + randomized staging paths + mapper execution flow; multiple game targets; explicit ban warnings; Injection/Testing; educational driver-backed injection study); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[kernelmode-dll-injector]], [[stealthy-kernelmode-injector]], and [[memmap]].
 
 - **2026-08-24** — ingest `description:KDIo3/PCIBan`: entity [[pciban]] (KDIo3; PCI/AHCI direct HWID collection PoC; brute-force PCI enumeration for storage-controller identifiers without higher-level OS APIs; reduces hook/spoof exposure on conventional HWID queries; anti-cheat / Detection:HWID; experimental); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[hwid-checker-mg]], [[windows-hardware-info]], [[uncloaking-raid0-hwid-serials]], [[easy-hwid-spoofer]], and [[mutante]].
