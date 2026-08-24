@@ -29,6 +29,7 @@ sources:
   - wiki/sources/descriptions/milostosic__rprof.md
   - wiki/sources/descriptions/dendibakh__perf-ninja.md
   - wiki/sources/descriptions/aristocratos__btop.md
+  - wiki/sources/descriptions/Jesewe__VioletWing.md
   - wiki/sources/descriptions/Vekor64__PythonCS2.md
   - wiki/sources/descriptions/ViddeBoiiii__CSGO-Ormbunke-x86.md
   - wiki/sources/descriptions/Vatrials__League-of-Legends-Visuals-Cheat.md
@@ -375,6 +376,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - External CS:GO overlay samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; cheat / game:csgo [External]) sit in the external overlay lane beside [[nebulite-external]] and [[csgo-external-cheat]]. (source: wiki/sources/descriptions/gmh5225__Astra.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same external overlay lane beside [[csgo-external-cheat]] and [[astra]]. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - External CS2 Python overlay samples such as [[pythoncs2]] (Vekor64; PyMeow RPM + overlay draw; DearPyGui config UI; ESP boxes / health / weapon labels / lines; Python External tag) sit in the external overlay lane beside ImGui/C# samples such as [[titled-gui-cs2]]. (source: wiki/sources/descriptions/Vekor64__PythonCS2.md)
+- External CS2 Python overlay samples such as [[violetwing]] (Jesewe; PyMeow RPM + overlay; customtkinter config GUI; ESP/triggerbot/bunnyhop/NoFlash; cs2-dumper startup offset bootstrap; Python external tag) sit in the external overlay lane beside [[pythoncs2]] and [[titled-gui-cs2]]. (source: wiki/sources/descriptions/Jesewe__VioletWing.md)
 - Educational CS2 overlay scaffold samples such as [[cs2-external-base]] (UnnamedZ03; C++; external ESP visualization—box, health, distance, skeleton, text; overlay-side structure only without bundled memory driver; external overlay architecture starter; External tag) sit in the external overlay lane beside full-stack samples such as [[cs2-ext]] and [[pythoncs2]]. (source: wiki/sources/descriptions/UnnamedZ03__CS2-external-base.md)
 - External CS2 Win32/GDI overlay samples such as [[cs2external]] (Tokyodidit; C++; transparent layered-window ESP—boxes, health bars, player names; out-of-process memory reads + JSON offsets + world-to-screen; cheat prototyping / memory analysis; External tag) sit in the external GDI overlay lane beside D3D/ImGui samples such as [[cs2-external-1]] and [[pythoncs2]]. (source: wiki/sources/descriptions/Tokyodidit__cs2External.md)
 - Title-specific Apex Legends OpenGL/GLFW external overlay samples such as [[apex-external]] (NekoRem; C++; separate OpenGL + GLFW transparent overlay + ImGui menu; out-of-process memory reads via driver-style access layer; ESP/glow/aim visuals; cheat / game:apex legends [External]) sit in the external OpenGL overlay lane beside DX11 ImGui samples such as [[apex-external-cheat]]. (source: wiki/sources/descriptions/NekoRem__apex-external.md)
