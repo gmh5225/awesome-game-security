@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:InfiniteC0re/OpenBarnyard`: entity [[openbarnyard]] (InfiniteC0re; WIP Barnyard + TOSHI 2.0 C++ reimplementation; DirectX 8/OpenGL via Premake; RE progress vs original binary addresses; Detours SDK hooks, mod loading, ImGui debug, sample graphics/speedrun mods; Ghidra RE workflow; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[rsdkv5-decompilation]], [[gta-reversed-modern]], [[devilution]], and [[detours]].
+
 - **2026-08-24** — ingest `description:Inndy/MSDoggy`: entity [[msdoggy]] (Inndy; legacy Taiwan MapleStory game hack; C/C++ + inline assembly hooks; mob behavior changes + item-filter logic; low-level patching + optional protector integration; historical MMORPG cheat RE; cheat / game:maplestory [TMS Old Hack]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[msb]], [[msc]], and [[twms-hacking-data]].
 
 - **2026-08-24** — ingest `description:kroy-the-rabbit/openfpga-GBC-cheats-ui`: entity [[openfpga-gbc-cheats-ui]] (Pocket Cheat Picker; Python/tkinter; libretro cheat DB browse; Game Genie/GameShark parse; `.cht` SD-card deploy; CPU-read vs RAM-write safety flags; shared parser with openfpga-GBC-cheats core; CLI ROM compare-byte verify; Analogue Pocket GB/GBC openFPGA; cheat / Game Boy); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[bizhawk]], [[kevboy]], [[feather-gb]], and [[gecko]].

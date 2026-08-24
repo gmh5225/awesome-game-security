@@ -2247,6 +2247,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [openfpga-gbc-cheats-ui](entities/openfpga-gbc-cheats-ui.md) — Pocket Cheat Picker; Analogue Pocket GB/GBC openFPGA `.cht` deploy (Python/tkinter; libretro DB; Game Genie/GameShark; CPU-read vs RAM-write flags; openfpga-GBC-cheats parser; Game Boy)
 - [open-reverselab](entities/open-reverselab.md) — agent-native RE lab (180+ technique articles, 100+ MCP tools; knowledge router; Ghidra/Frida/x64dbg/jadx; web CTF, APK/DEX, PE, crypto, game cheating/AC boards; LING71671)
 - [openarena-engine](entities/openarena-engine.md) — OpenArena ioquake3 fork (Quake III renderer/audio/networking/runtime; make-based multi-platform C/C++; classic FPS multiplayer engine study; Game Engine / source [quake3])
+- [openbarnyard](entities/openbarnyard.md) — WIP Barnyard + TOSHI 2.0 C++ reimplementation (DirectX 8/OpenGL; Premake; RE progress vs binary addresses; Detours SDK hooks, mod loading, ImGui debug; Ghidra RE workflow; Game Engine / source)
 - [openrct2](entities/openrct2.md) — open-source RollerCoaster Tycoon 2 reimplementation (cooperative multiplayer, expanded editing, scripting/plugins; CMake C++; broad platform support; Game Engine / source)
 - [opengl-3d-game-tutorial-series](entities/opengl-3d-game-tutorial-series.md) — cross-platform C++ OpenGL 3D game tutorial (Win32/Cocoa/X11; VAO/shaders/UBO; entity management + input; step-by-step engine build; README [OpenGL]; PardCode)
 - [Object Explorer](entities/object-explorer.md) — GUI Object Manager namespace/handles/types browser (driver + PDB/DIA decode)
