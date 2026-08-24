@@ -2745,6 +2745,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [smm (ekknod)](entities/smm.md) — SMM cheat (C/C++; driver development / graphics / networking; cheat / SMM; Ring -2 below-OS research)
 - [SmmInfect](entities/smm-infect.md) — SMM backdoor research framework (Oliver-1-1; UEFI/EDK2 SMI handler + Windows/Linux clients; BIOS patch workflows; firmware trust-boundary / persistence research; README [SMM Driver])
 - [smt-server](entities/smt-server.md) — Rust QF_BV SMT solver server (SMT-LIB 2; bit-blast→SAT; C++/Python clients; binary analysis/deobfuscation; LLVMParty; Cheat constraint-solver lane)
+- [smite-esp-aimbot](entities/smite-esp-aimbot.md) — Smite internal ESP/aimbot reference (JackBro; C++; reverse-engineered UE3 SDK headers + hook helpers; target acquisition + on-screen ESP; learner base for older UE3 titles; cheat / game:smite [Internal])
 - [SniParInject](entities/sniparinject.md) — Python Scapy game packet sniffer/parser (YAML opcode→field maps; IP/port filter; inject planned; Mana Plus demo; cheat / Packet Sniffer&Filter; airvzxf)
 - [SoftGLRender](entities/softglrender.md) — tiny C++ software rasterizer + OpenGL/Vulkan comparison backends (Renderer)
 - [Software D3D9](entities/software-d3d9.md) — software Direct3D 9 implementation targeting real games/programs (DirectX Emulation / Compatibility; code-tom-code)

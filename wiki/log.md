@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JackBro/SmiteESPAimbot`: entity [[smite-esp-aimbot]] (JackBro; internal C++ ESP/aimbot for Smite; reverse-engineered UE3 SDK headers + hook helpers; target acquisition + on-screen ESP; game-specific pointer quirks; learner reference for older UE3 titles; cheat / game:smite [Internal]); cited on [[overviews/game-hacking]] and [[concepts/unreal-object-model]]; cross-linked [[present-hook]], [[world-to-screen]], [[lab-esp-and-aimbot]], and [[mordhau-simple-auto-block-cheat]].
+
 - **2026-08-24** — ingest `description:Jackbail4/VAC-Bypass`: entity [[jackbail4-vac-bypass]] (Jackbail4; archived C++ Detours PoC; signature scan + internal routine patching; hooks `VirtualQuery`, process/module enumeration, debugger checks, and memory-read paths; Steam service context; non-working historical bypass research; slug disambiguated from [[vac-bypass]]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vac-bypass]], [[vac-hooks]], [[prevent-vac]], and [[como-funciona-vac]].
 
 - **2026-08-24** — ingest `description:Jackiemin233/Gemini-Genius`: entity [[gemini-genius]] (Jackiemin233; Python toolkit + IDA Python 3 plugin; CFG/ACFG graph-based embeddings; dataset preprocessing, model training/inference, embedding export, cross-binary function similarity search; RE and vulnerability research; cheat / IDA python 3 plugin and binary file similarity comparison); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[mcrit-plugin]], [[bsimvis]], [[ida-multi-mcp]], [[diaphora]], and [[ghidriff]].
