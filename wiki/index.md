@@ -1459,6 +1459,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-bochs-windows](entities/ida-bochs-windows.md) — IDA Pro + Bochs debugger backend on Windows (software CPU emulation; full-system + kernel-mode stepping; cheat / guide)
 - [ida_bitfields](entities/ida-bitfields.md) — IDA plugin: bitfield structure visualization (register/structure bit flags; driver IOCTL / flag-heavy RE; Windows Kernel Enhance)
 - [ida-bridge](entities/ida-bridge.md) — Python WebSocket agent bridge for IDA Pro 9+ (IDAPython/SQL; UI + headless idalib; supervisor lifecycle; bundled agent skill; macOS; Game Develop / MCP + IDA Plugins)
+- [ida-buddy](entities/ida-buddy.md) — Python WinDbg-style idalib CLI (`idb`) for agents (JustasMasiulis; persistent headless worker per database; compact stdout; disasm/decompile/xrefs/types + DB mutations with undo)
 - [ida-cli](entities/ida-cli.md) — headless IDA Pro MCP server for AI-assisted binary analysis (idalib; Rust/C++; cheat / IDA Plugins)
 - [IDAComments](entities/idacomments.md) — IDA Pro plugin: capture, organize, and review user comments (Python; IDA 7.x/8.x; dedicated view; keyboard/menu access; NoneShell; cheat / IDA Plugins)
 - [ida-dark-plus](entities/ida-dark-plus.md) — IDA Pro Dark+ theme (modern dark palette; disassembly/hex/structures/all windows; cheat / IDA themes)

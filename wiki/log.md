@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JustasMasiulis/ida_buddy`: entity [[ida-buddy]] (JustasMasiulis; Python WinDbg-style idalib CLI `idb` for agents; worker plugin; persistent headless worker per database; compact stdout; disasm/decompile/xrefs/types + DB mutations with undo; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-cli]], [[idac]], [[ida-bridge]], [[ida-rpc]], [[ida-mcp-server-plugin]], [[headless-ida-mcp-server]], and [[ida-jm-xorstr-decrypt-plugin]].
+
 - **2026-08-24** — ingest `description:JustasMasiulis/inline_syscall`: entity [[inline-syscall]] (JustasMasiulis; header-only C++ inline direct syscall generation; macro-based wrappers; compact inlinable x64 machine code; avoids normal import-table usage; low-level systems programming / anti-hooking / game-security research; README Inline syscalls made easy for windows on clang); merged with existing gmh5225 fork on same entity; cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscalls-cpp]], [[doom-syscalls]], [[lazy-importer]], [[xorstr]], [[syscall-detect]], and [[ntsleuth]].
 
 - **2026-08-24** — ingest `description:JustasMasiulis/lazy_importer`: entity [[lazy-importer]] (JustasMasiulis; header-only C++ runtime module/export lazy import; avoids static IAT entries and plaintext strings; safe/cached/forwarded resolve modes; per-build randomized hashes; minimal codegen; RE-resistant tooling / game security research; AC Lazy Importer); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[blitz]], [[kli]], [[kli-ex]], [[xorstr]], [[inline-syscall]], and [[ue4-base]].

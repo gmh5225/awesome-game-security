@@ -557,6 +557,7 @@ sources:
   - wiki/sources/descriptions/ahaggard2013__binaryninja-ollama.md
   - wiki/sources/descriptions/WhatTheFuzz__binaryninja-openai.md
   - wiki/sources/descriptions/apkunpacker__IDA-Gepetto.md
+  - wiki/sources/descriptions/JustasMasiulis__ida_buddy.md
   - wiki/sources/descriptions/JusticeRage__Gepetto.md
   - wiki/sources/descriptions/aqilc__chasm.md
   - wiki/sources/descriptions/archercreat__titan.md
@@ -1889,6 +1890,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Windows COM analysis in IDA via [[comida]] (airbus-cert; COM GUID scan + registry correlation; Hex-Rays inference on `CoCreateInstance` / `CoGetCallContext` / `QueryInterface`; malware/game COM triage; cheat / IDA Plugins) sits beside [[comon]] and [[classy]] in the Windows internals / COM RE lane. (source: wiki/sources/descriptions/airbus-cert__comida.md)
 - Agent/human IDA CLI via [[idac]] (Unix socket to live GUI or headless idalib; structured JSON; batch/preview/dry-run; bundled agent skill; not MCP; early alpha) sits in the same IDA-driven RE lane. (source: wiki/sources/descriptions/trailofbits__idac.md)
 - Headless IDA Pro MCP via [[ida-cli]] (cpkt9762; idalib-powered; AI-assisted binary analysis; Rust/C++; cheat / IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cpkt9762__ida-cli.md)
+- WinDbg-style idalib CLI via [[ida-buddy]] (JustasMasiulis; Python `idb`; persistent headless worker per database; compact stdout; disasm/decompile/xrefs/types + DB mutations with undo; agent-RE lane) (source: wiki/sources/descriptions/JustasMasiulis__ida_buddy.md) sits beside [[ida-cli]] and [[idac]] in the same agent-RE lane.
 - SQL-backed IDA query interface via [[idasql]] (allthingsida; virtual SQL tables + AI natural-language RE queries; CLI on `.i64` or in-IDA plugin; remote query; cheat / IDA Plugins) sits beside [[ida-bridge]] and [[idac]] in the agent-RE lane. (source: wiki/sources/descriptions/allthingsida__idasql.md)
 - Headless IDA Pro MCP via [[headless-ida-mcp-server]] (cnitlrt; IDA Pro headless binary analysis; MCP tools for functions/variables; Game Develop / MCP server) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cnitlrt__headless-ida-mcp-server.md)
 - Headless IDA Pro MCP via [[ida-mcp-rs]] (blacktop; Rust; RE/modding/memory analysis; Game Develop / MCP server) sits in the same agent-RE lane. (source: wiki/sources/descriptions/blacktop__ida-mcp-rs.md)
