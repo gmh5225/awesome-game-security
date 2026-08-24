@@ -4,7 +4,8 @@ kind: entity
 topics: [reverse-engineering, game-hacking]
 sources:
   - wiki/sources/descriptions/cdong1012__ollvm-unflattener.md
-updated: 2026-08-21
+  - wiki/sources/descriptions/JbvrgtonYT__ollvm-unflattener.md
+updated: 2026-08-24
 confidence: medium
 ---
 
@@ -14,9 +15,14 @@ Python tool that **deobfuscates OLLVM control-flow flattening** using the **Mias
 
 Not an IDA plugin—standalone binary-in / binary-out CFF recovery.
 
+## Forks
+
+**JbvrgtonYT/ollvm-unflattener** — alternate Python OLLVM unflattener that also relies on Miasm plus graph visualization tooling; ships sample binaries and test inputs for experimenting with deobfuscation behavior on control-flow-flattened software. (source: wiki/sources/descriptions/JbvrgtonYT__ollvm-unflattener.md)
+
 ## Links
 
-- Repo: https://github.com/cdong1012/ollvm-unflattener
+- Repo (cdong1012): https://github.com/cdong1012/ollvm-unflattener
+- Repo (JbvrgtonYT): https://github.com/JbvrgtonYT/ollvm-unflattener
 
 ## Related
 

@@ -2194,7 +2194,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obj2shellcode](entities/obj2shellcode.md) — C++ object-to-shellcode generation framework (AC shellcode engine & tricks)
 - [obpo-plugin](entities/obpo-plugin.md) — IDA client + Go OBPO backend (closed core; open plugin; Fix OLLVM)
 - [official-plugins](entities/official-plugins.md) — Vector35 curated official Binary Ninja plugin index (Python indexing; structured metadata for descriptions, types, API targets, licenses; plugin-management catalog)
-- [ollvm-unflattener](entities/ollvm-unflattener.md) — Python OLLVM CFF deobfuscator (Miasm symbolic exec; BFS call following; Win/Linux x86/x64 binary output; Fix OLLVM)
+- [ollvm-unflattener](entities/ollvm-unflattener.md) — Python OLLVM CFF deobfuscator (Miasm symbolic exec; BFS call following; Win/Linux x86/x64 binary output; cdong1012 + JbvrgtonYT fork with graph viz/samples; Fix OLLVM)
 - [obs-graphics-hook32-hook](entities/obs-graphics-hook32-hook.md) — gmh5225 32-bit OBS graphics-hook pointer-replacement sample (Game Capture inject hijack; cheat/overlay research; README [OBS Hook])
 - [obs-hook](entities/obs-hook.md) — gmh5225 OBS Game Capture hook DLL hijack for in-frame custom overlays via OBS trusted pipeline (no overlay HWND; AC whitelist research; README [OBS Hook])
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
