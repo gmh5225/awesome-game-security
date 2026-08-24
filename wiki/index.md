@@ -1305,6 +1305,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GoodEye](entities/goodeye.md) — BEDaisy APC instrumentation kernel driver (BE per-thread APC callback RE; cheat / explore anticheat system:be)
 - [unturned-godot](entities/unturned-godot.md) — Godot 4.7 port: reverse-engineers Unturned Unity formats from Steam install (Game Engine / asset extraction)
 
+- [gemini-genius](entities/gemini-genius.md) — IDA Python 3 graph-embedding binary function similarity (Jackiemin233; CFG/ACFG extraction, model training/inference, cross-binary matching; cheat / IDA python 3 plugin and binary file similarity comparison)
 - [genmc](entities/genmc.md) — IDAPython Hex-Rays microcode IR viewer (decompiler-plugin debug; cheat / IDA Plugins)
 - [genpatch](entities/genpatch.md) — Python binary-patch script generator (dialog on success; cheat / IDA Plugins)
 - [gecko](entities/gecko.md) — Rust GB/GBC cycle-accurate emulator (CPU/PPU/APU; wgpu; desktop library GUI)
