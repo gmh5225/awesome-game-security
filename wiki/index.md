@@ -1788,6 +1788,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lanternlight](entities/lanternlight.md) — Mistfall Hunter anti-cheat-safe Python companion (game log + UE5 GVAS saves + passive screen capture; Emberforge build math; no injection/RPM/hooks; Remus3)
 - [launcher-abuser](entities/launcher-abuser.md) — stealth external RPM via Steam/Battle.net launcher-held game handles (shared-memory IPC; minimal shellcode + thread hijack; syscall NtReadVirtualMemory/NtWriteVirtualMemory; Ricardonacif; Cheat / Launcher Abuser)
 - [LabSync](entities/labsync.md) — IDA Pro plugin: Git-backed partial IDB sync (YAML export on save; mergetool merge; MD5 input-file identity; Cellebrite Labs; cheat / IDA Plugins)
+- [LaneGuard](entities/laneguard.md) — behavioral anti-cheat test bench (JoshKappler; TypeScript/Next.js; lane-change mobile skill-game sim; attacker ladder, client kinematic/behavioral-texture detector with ROC calibration, headless batch runners, economy break-even; Anti Cheat / behavioral)
 - [lc0](entities/lc0.md) — Leela Chess Zero neural chess engine (MCTS + self-play RL; CUDA/cuDNN/OpenCL; Chess Engine / game AI)
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [learn-directx](entities/learn-directx.md) — DX12 step-by-step tutorials (window creation → command bundles, frame buffering, textures, resource states; synchronization, descriptors, performance API; DirectX / guide)
