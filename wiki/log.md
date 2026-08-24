@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JetBrains/RiderSourceCodeAccess`: entity [[rider-source-code-access]] (JetBrains; Unreal Engine plugin; Rider as selectable external source editor inside Unreal Editor; C++ plugin modules; cross-platform Rider install discovery; configurable custom paths; Unreal C++ dev workflow); cited on [[overviews/game-engine]]; cross-linked [[com-unity-ide-cursor]], [[automation-examples]], [[re-ue4ss]], [[unreal-mod-loader]], and [[ue4-base]].
+
 - **2026-08-24** — ingest `description:Jiang-Night/Kernel_driver_hack`: entity [[kernel-driver-hack]] (Jiang-Night; Android/Linux C kernel driver; device-interface ioctl process memory R/W + module base lookup + request dispatch; kernel module build + userland client; game memory RE / kernel-side tooling); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[memkernel]], [[kernel-hack]], [[android-kernel-hacking-toolkit]], [[compile-android-driver]], [[rw-proc-mem33]], and [[root-socket-kit]].
 
 - **2026-08-24** — ingest `description:JingMatrix/Demo`: entity [[demo]] (JingMatrix; Android demo app for runtime user-space library injection detection; Kotlin + native C++/CMake; soinfo linked-list checks, virtual memory map inspection, module unload counter monitoring; Zygisk injection focus; mobile anti-cheat / security research); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[detect-zygisk]], [[zygisk]], [[memdetection]], [[magisk-detection]], and [[detection]].

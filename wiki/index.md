@@ -2595,6 +2595,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RASD](entities/rasd.md) — R5AC/Apex Legends return-address spoofing detector (cryotb; `RtlCaptureStackBackTrace` stackwalk; gadget + unbacked-RWX heuristics; Detection:Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
 - [ricochet-disabler](entities/ricochet-disabler.md) — Ricochet AC disable/bypass (kernel driver + user-mode; COD research)
+- [rider-source-code-access](entities/rider-source-code-access.md) — JetBrains UE plugin; Rider as selectable external source editor in Unreal Editor; cross-platform install discovery; configurable paths; C++ plugin modules; Unreal C++ dev workflow
 - [rico-cheat-rust-external](entities/rico-cheat-rust-external.md) — Facepunch Rust external cheat (C++/C/C++; driver / rendering / Unity; cheat / game:rust [External]; gmh5225)
 - [RiscyWorkshop](entities/riscy-workshop.md) — RISC-V payload obfuscation workshop (riscvm VM + llvm-mingw + insn mutation; red-team exercises)
 - [RisohEditor](entities/risoh-editor.md) — free Win32 PE resource editor (dialogs, menus, icons, RC import/export; 32/64-bit)
