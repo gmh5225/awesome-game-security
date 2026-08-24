@@ -336,6 +336,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
 - [arma3-external-variable-manager](entities/arma3-external-variable-manager.md) — Arma 3 external mission-variable editor (Skengdo; C++; dump/read/edit active mission vars + economy fields; BE-disabled servers; cheat / game:arma3 [External])
 - [arma3beclient](entities/arma3beclient.md) — Arma 3 BattlEye Tool (C# / PowerShell; cheat / game:arma3)
+- [ArmShellCode](entities/armshellcode.md) — ARM64 Android shellcode framework (IIIImmmyyy; position-independent arm64-v8a payloads; Dobby symbol resolution; ELF/proc-maps parsing, syscall wrappers, modular loader + linker scripts; exploit / runtime code injection research; cheat / Android arm arm64-v8a ShellCode Generate)
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
 - [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
 - [Asdf Overlay](entities/asdf-overlay.md) — Rust cross-API overlay library (D3D9/11/12, OpenGL, Vulkan; Detours; named-pipe IPC; Rust/Node.js clients)
