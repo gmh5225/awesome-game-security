@@ -3153,6 +3153,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Windfall Anti-Cheat](entities/windfall-anticheat.md) — Spigot/Paper/Folia/Purpur packet AC (PacketEvents 2; combat/movement/inventory; lag compensation + prediction; Geyser/Bedrock; enis1enis2)
 - [Windfall AntiCheat F](entities/windfall-anticheatf.md) — Fabric **1.21.5+** server-side packet AC (combat/movement/inventory checks; physics prediction + latency compensation; Geyser/Bedrock; enis1enis2)
 - [windbg-decompile-ext](entities/windbg-decompile-ext.md) — WinDbg x64 extension; live disasm + LLM verified pseudocode (WinDbg Plugins)
+- [WinDbg-JS-Scripts](entities/windbg-js-scripts.md) — KasperskyLab JS WinDbg dump triage; exception records, STL map walk, noexcept stack repair, x86-in-x64 kernel stacks (JS Scripts)
 - [WinDbgCookbook](entities/windbg-cookbook.md) — JS WinDbg data-model scripts + dx query recipes; dependency/stack/TTD analysis (TimMisiak; WinDbg)
 - [WinDbg-Extensions](entities/windbg-extensions.md) — WinDbg extension; enumerate process/thread/image notify callbacks + driver modules (Callback Extension)
 - [WinDbg_Scripts](entities/windbg-scripts.md) — JS WinDbg scripts for kernel debug/modding (WinDbg Plugins)
