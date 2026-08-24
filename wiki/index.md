@@ -1654,6 +1654,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
 - [JADX](entities/jadx.md) — DEX→Java decompiler (APK/DEX/AAR; CLI+GUI; mobile RE)
 - [JDBG](entities/jdbg.md) — Java/JVM attach debugger (JDWP; method hooks / breakpoints; cheat RE)
+- [jackbail4-vac-bypass](entities/jackbail4-vac-bypass.md) — archived C++ Detours VAC bypass PoC (Jackbail4; signature scan + API spoofing; `VirtualQuery`/enumeration/debugger/memory-read hooks; Steam service context; non-working historical research; slug disambiguated from [[vac-bypass]])
 - [JarAnalyzer](entities/jaranalyzer.md) — Windows Minecraft screenshare cheat forensics (NTFS MFT JAR scan; constant-pool blacklist; obfuscation flags; recycle-bin + Java process probes; nested JAR unpack; GUI/CLI text/JSON/HTML reports; winzysss)
 - [Jektor](entities/jektor.md) — Windows shellcode injection toolkit (CreateThread/CreateRemoteThread/APC/EnumTimeFormatsEx/CreateFiber; GetProcAddress resolve; XOR msfvenom + NOP sled; Injection/Shellcode Testing; gavz)
 - [JavaScript Obfuscator](entities/javascript-obfuscator.md) — JS/Node.js source obfuscator (TypeScript; CLI + API; CFF / string arrays / self-defending / domain lock; browser games)

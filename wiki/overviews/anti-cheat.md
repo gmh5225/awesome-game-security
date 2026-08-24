@@ -77,6 +77,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__VAC.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md
+  - wiki/sources/descriptions/Jackbail4__VAC-Bypass.md
   - wiki/sources/descriptions/danielkrupinski__MemJect.md
   - wiki/sources/descriptions/danielkrupinski__GOESP.md
   - wiki/sources/descriptions/kkent030315__Van1338.md
@@ -839,6 +840,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[vook]] — VAC hook research (explore anticheat:vac) (source: wiki/sources/descriptions/krispybyte__Vook.md)
 - [[vac-hooks]] — C DLL hooks WinAPI functions used by VAC; log calls and intercept arguments/return values (danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__vac-hooks.md)
 - [[vac-bypass]] — C DLL disables VAC scanning in Steam client; injects into `Steam.exe`, patches `steamservice.dll`, hooks `LoadLibraryExW`/`GetProcAddress`/`GetSystemInfo` so VAC modules abort scans (danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md)
+- [[jackbail4-vac-bypass]] — archived C++ Detours PoC; signature scan + internal routine patching; hooks `VirtualQuery`, process/module enumeration, debugger checks, and memory-read paths to reduce VAC scanner visibility in Steam service context (Jackbail4; non-working; historical bypass research) (source: wiki/sources/descriptions/Jackbail4__VAC-Bypass.md)
 - [[vac-bypass-loader]] — C loader/injector for [[vac-bypass]] into Steam (VS 2019 / v142; danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md)
 - [[vac-bypass-kernel]] — kernel-mode VAC bypass against external scanner memory reads via syscalls such as `NtReadVirtualMemory` (crvvdev; explore anticheat:vac) (source: wiki/sources/descriptions/crvvdev__vac-bypass-kernel.md)
 - [[vac]] — decompiled/annotated VAC module RE corpus (detection modules, signature scanning, process memory checks, module integrity verification, Steam server comms; danielkrupinski; explore anticheat:vac) (source: wiki/sources/descriptions/danielkrupinski__VAC.md)
