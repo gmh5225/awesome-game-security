@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:J0xna/Kernel-Overlay-Hider`: entity [[kernel-overlay-hider]] (J0xna; Windows kernel driver + user-mode tests; DKOM-style win32k TAGWND/window-structure manipulation hides overlay HWND from enumeration; DirectX overlay trigger examples; overlay visibility + anti-cheat evasion mechanics research); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[topmost-detection]], [[not-an-overlay]], [[window-hijack-overlay]], [[callmewin32kdriver]], [[win32k-file-collection]], and [[capcom-dkom]].
+
 - **2026-08-24** — ingest `description:JANlittle/IDARustHelper`: entity [[ida-rust-helper]] (JANlittle; Python IDA Pro plugin; Rust symbol demangle/normalize, common type definitions, architecture-aware string recovery for x86/ARM/RISC-V; Rust malware/game-client/system-binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-rust-demangler]], [[ida-rust-cargo]], [[happyida]], and [[demumble]].
 
 - **2026-08-24** — ingest `description:JGonz1337/kernel-eac-be-comm`: entity [[kernel-eac-be-comm]] (JGonz1337; C++ kernel driver + user client; hooked win32k function pointer KM↔UM comm; custom request structures + XOR-obfuscated strings + compact control protocol; process/module lookup, memory R/W, alloc/free/protect; anti-cheat bypass + game memory tooling research; README `[NtGdiPolyPolyDraw]`); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-eac-be-injector]], [[comm-data-ptr-driver]], [[interep-driver-leak]], [[data-communication]], [[km-um-communication]], [[easy-anti-cheat]], and [[battleye]].
