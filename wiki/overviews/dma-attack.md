@@ -74,7 +74,7 @@ sources:
   - wiki/sources/descriptions/Neverdecel__pcileech-memprocfs-mcp.md
   - wiki/sources/descriptions/NoviceLevel__Pcileech-QuantumStealth-Max.md
   - wiki/sources/descriptions/MGreif__PCILeech_DMA_Proxy.md
-updated: 2026-08-23
+updated: 2026-08-24
 confidence: high
 ---
 
@@ -137,4 +137,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2743) DMA lanes and `Anti Cheat > Detection:DMA` (~690), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
+No top-level DMA section — maps via `Cheat` (~2744) DMA lanes and `Anti Cheat > Detection:DMA` (~690), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
