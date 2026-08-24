@@ -707,6 +707,7 @@ Compiled knowledge catalog for awesome-game-security.
 
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)
 - [dayz-mcp](entities/dayz-mcp.md) — DayZ MCP server (53 tools; Enforce Script bridge; server-authoritative world control, telemetry, automated in-game testing; willy92wins)
+- [dayz-server-battleye-remover](entities/dayz-server-battleye-remover.md) — DayZ server BE disable patch (C++ pattern scan + binary patch; reprocessable after updates; JonathanEke; Disable battleye)
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [DbgViewEx](entities/dbgviewex.md) — ETW event + system debug-log capture (emlinhax; early-stage; cheat / RE telemetry)
 - [DbgNexum](entities/dbgnexum.md) — Debug API + HWBP shellcode injector; file-mapping transfer; no WPM/RPM/VirtualAllocEx (dis0rder0x00)

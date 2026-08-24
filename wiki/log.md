@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JonathanEke/DayZ-Server-Battleye-Remover`: entity [[dayz-server-battleye-remover]] (JonathanEke; C++ DayZ server executable patch utility; automated pattern scan + binary patch to disable BattlEye checks; reprocessable after updates; controlled test env; Disable battleye); cited on [[concepts/battleye]] and [[overviews/game-hacking]]; cross-linked [[dayz-cheat]], [[external-dayz-cheat]], [[dayzzz]], [[dayz-mcp]], and [[model-anti-cheat]].
+
 - **2026-08-24** — ingest `description:JonathanSalwan/ROPgadget`: entity [[ropgadget]] (JonathanSalwan; Python CLI ROP gadget finder; Capstone; ELF/PE/Mach-O/raw multi-arch; filter/search + optional chain generation; binary exploitation / RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[triton]], [[ropgadget-rs]], [[exrop]], [[angrop]], [[agafi]], and [[rop-compiler]].
 
 - **2026-08-24** — ingest `description:JonathanSalwan/Triton`: entity [[triton]] (JonathanSalwan; C++/Python DBA library; dynamic symbolic exec, taint analysis, expression synthesis, SMT simplification; x86/x64/ARM/AArch64/RISC-V; LLVM/Z3 lift; Z3/Bitwuzla; RE automation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ponce]], [[triton-bn]], [[titan]], [[novmpy]], [[vmprotect-devirtualization]], [[radius2]], and [[angrop]].
