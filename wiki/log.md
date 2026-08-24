@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Hexorg/CheatEngineTables`: entity [[cheat-engine-tables]] (Hexorg; large forum-curated CE `.CT` archive; thousands of game-specific tables; pointer chains, AOB scans, Lua scripts, trainers; offline-focused; cheat / [Cheat Engine]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mydev-cheat-engine-tables]], [[maplestory-v179-cheat-engine]], and [[intro-to-gamehacking]].
+
 - **2026-08-24** — ingest `description:Hexorg/Ouroboros`: entity [[ouroboros]] (Hexorg; Rust symbolic-execution decompiler; constraint tracking, expression rewriting, structured control-flow recovery beyond SSA-only; processor specs + interactive frontend; advanced decompilation research; cheat / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[kuna]], [[oxidizer]], [[neverd]], [[retdec]], and [[enigma]].
 
 - **2026-08-24** — ingest `description:Hexze/anticheat`: entity [[hexze-anticheat]] (Hexze; Cheater Detector; Lua Starfish plugin; configurable NoSlow/AutoBlock/Eagle/Scaffold/Tower/LagRange/NoBreakDelay checks; movement/equipment/animation/metadata/block-break timing; violation thresholds, alert cooldowns, optional sound alerts; staff monitoring for Minecraft-style worlds; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[windfall-anticheat]], [[arrow-anticheat]], [[paradox-anticheat]], [[scythe-anticheat]], [[ycbr-anticheat]], and [[minecraft-anticheat-list]].

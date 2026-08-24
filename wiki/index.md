@@ -796,6 +796,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DLL-Hijack-ExportDumper](entities/dll-hijack-export-dumper.md) — PE export-table dump → proxy-DLL forwarding stubs for search-order sideload (gmh5225; Cheat / DLL Hijack)
 - [DLLirant](entities/dllirant.md) — automated Windows DLL search-order hijack discovery (proxy DLL + load monitor; Sh0ckFR historical mirror)
 - [Cheat Engine](entities/cheat-engine.md) — open-source memory scan/debug/disasm IDE (Lua, speedhack, code injection, cheat tables, trainer maker; user-mode + DBVM kernel driver; Delphi/Pascal + C)
+- [Cheat Engine Tables](entities/cheat-engine-tables.md) — large forum-curated CE `.CT` archive (Hexorg; thousands of game tables; pointer chains, AOB scans, Lua scripts, trainers; offline-focused; cheat / [Cheat Engine])
 - [cheat-engine-undetectable](entities/cheat-engine-undetectable.md) — modified CE with user-mode evasion (direct syscalls, PE mutation), BYOVD kernel bridge (CR3 R/W, ObCallback bypass, handleless hide); AC research (NulledNah; Free Pascal/Lazarus)
 - [Cheat Engine DMA Plugin](entities/cheat-engine-dma-plugin.md) — CE plugin: DMA R/W via LeechCore/PCILeech FPGA; replaces process memory path (C/C++)
 - [CheatEngine DMA](entities/cheatengine-dma.md) — Visual Studio C++ CE plugin (Metick; process attach, R/W, search/browse, module/thread enum, pointer scan; DMA hardware path; cheat / CheatEngine DMA)

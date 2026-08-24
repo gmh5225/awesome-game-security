@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[cheat-engine]] · [[dark-souls-iii-cheat-engine-guide]] · [[elden-ring-ct-tga]] · [[intro-to-gamehacking]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[cheat-engine]] · [[cheat-engine-tables]] · [[dark-souls-iii-cheat-engine-guide]] · [[elden-ring-ct-tga]] · [[intro-to-gamehacking]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
