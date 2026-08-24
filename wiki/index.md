@@ -3290,6 +3290,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [XorData](entities/xordata.md) — C++17 XOR obfuscation framework (constants, variables, strings; compile-time + runtime-style transforms; AC Compile Time / Obfuscation Engine; Sherman0236)
 - [xorlit](entities/xorlit.md) — string crypter (single-arg default key `xorlit::seed`; AC Compile Time / String Crypter)
 - [xorPacker](entities/xorpacker.md) — C# PE XOR cipher packer (all PE; Anti Cheat → Binary Packer)
+- [xorstr](entities/xorstr.md) — C++17 compile-time string encryption (SSE/AVX vectorized inline decrypt; compile-time keys; keeps literals out of `.rdata`; AC String Crypter; JustasMasiulis)
 - [xqemu](entities/xqemu.md) — original Xbox via QEMU (software full-machine; Cheat QEMU/KVM lane)
 - [xv](entities/xv.md) — C++ single-header pointer/value encryption (`xval<T>`; Anti Cheat → Encrypt Variable)
 - [XVolkolak](entities/xvolkolak.md) — emulation-based PE unpacker (XEmulUnpacker / XEmulator single-step to OEP; Qt GUI + CLI; UPX/ASPack/MPRESS + 18 packers; Fix VMP / Unpacker)
