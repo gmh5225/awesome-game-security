@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Ido-Moshe-Github/CiDllDemo`: entity [[ci-dll-demo]] (Ido-Moshe-Github; C/C++ kernel driver; process-creation notify hook; `CiValidateFileObject` / `CiCheckSignedFile`; Authenticode certificate extraction from policy data; x86/x64; Windows Code Integrity kernel-mode research; README Use ci.dll API for validating Authenticode signature of files); cited on [[overviews/windows-kernel]] and [[concepts/hvci]]; cross-linked [[dse-hook]], [[dse-patcher-2]], [[bootbypass]], [[wdactools]], [[mssymbolscollection]], and [[kernel-callbacks]].
+
 - **2026-08-24** — ingest `description:Idov31/EtwLeakKernel`: entity [[etwleakkernel]] (Idov31; C++ Windows PoC; ETW consumer stack traces leak kernel pointers; Administrator; exploitation / kernel address exposure research); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[etw-explorer]], [[etw-syscall-monitor]], [[novahypervisor]], and [[idov31-venom]].
 
 - **2026-08-24** — ingest `description:Idov31/NovaHypervisor`: entity [[novahypervisor]] (Idov31; defensive x64 Intel host hypervisor; C++/asm Windows kernel driver + client; per-address R/W/X memory policies; BYOVD mitigation + logging; anti-cheat / endpoint defense research; README defensive x64 Intel host based hypervisor); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[byovd]], [[hvci]], [[hypervisor]], [[ophion]], [[notruth]], and [[idov31-venom]].

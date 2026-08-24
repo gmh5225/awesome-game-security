@@ -19,7 +19,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__Disabling-Hyper-V.md
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
   - wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md
-updated: 2026-08-21
+  - wiki/sources/descriptions/Ido-Moshe-Github__CiDllDemo.md
+updated: 2026-08-24
 confidence: high
 ---
 
@@ -30,7 +31,7 @@ Hypervisor-Enforced Code Integrity (Memory Integrity): a **Virtualization-Based 
 ## Enforcement model
 
 - **W→X transition restriction:** enforced code pages are not intended to stay writable from VTL0; executability is granted only after configured code-integrity checks pass.
-- **Pipeline:** CI policy defines trust → hypervisor second-stage translation (EPT/SLAT) → strict execution rules on validated kernel pages.
+- **Pipeline:** CI policy defines trust → hypervisor second-stage translation (EPT/SLAT) → strict execution rules on validated kernel pages. Kernel-mode CI.dll API research such as [[ci-dll-demo]] (Ido-Moshe-Github; process-creation notify hook; `CiValidateFileObject` / `CiCheckSignedFile`; Authenticode certificate extraction from returned policy data) helps study the same validation pipeline Memory Integrity relies on. (source: wiki/sources/descriptions/Ido-Moshe-Github__CiDllDemo.md)
 - **Driver requirement:** drivers must be HVCI-compatible (no self-modifying kernel code paths that violate W→X). HVCI-oriented research platforms such as [[goodmans-kernel]] (signed WDM driver embedding wasm3 to hot-load unsigned wasm32 modules without per-iteration driver rebuild; SEH-guarded kernel memory access; zer0condition) illustrate updatable kernel logic under Memory Integrity constraints. (source: wiki/sources/descriptions/zer0condition__GoodmansKernel.md)
 
 ## Game-security role
@@ -55,5 +56,5 @@ HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 
