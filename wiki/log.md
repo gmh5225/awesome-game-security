@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Idov31/NovaHypervisor`: entity [[novahypervisor]] (Idov31; defensive x64 Intel host hypervisor; C++/asm Windows kernel driver + client; per-address R/W/X memory policies; BYOVD mitigation + logging; anti-cheat / endpoint defense research; README defensive x64 Intel host based hypervisor); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[byovd]], [[hvci]], [[hypervisor]], [[ophion]], [[notruth]], and [[idov31-venom]].
+
 - **2026-08-24** — ingest `description:Idov31/Venom`: entity [[idov31-venom]] (Idov31; single-header C++ covert Windows networking; hidden detached browser process + stolen socket reuse; Win32/Winsock handle discovery/duplication; evasion-oriented networking research; slug disambiguated from [[venom]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[handle-ripper]], [[launcher-abuser]], [[ndisapi]], and [[venom]].
 
 - **2026-08-24** — ingest `description:InfiniteC0re/OpenBarnyard`: entity [[openbarnyard]] (InfiniteC0re; WIP Barnyard + TOSHI 2.0 C++ reimplementation; DirectX 8/OpenGL via Premake; RE progress vs original binary addresses; Detours SDK hooks, mod loading, ImGui debug, sample graphics/speedrun mods; Ghidra RE workflow; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[rsdkv5-decompilation]], [[gta-reversed-modern]], [[devilution]], and [[detours]].
