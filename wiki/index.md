@@ -1794,6 +1794,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [learn-directx](entities/learn-directx.md) — DX12 step-by-step tutorials (window creation → command bundles, frame buffering, textures, resource states; synchronization, descriptors, performance API; DirectX / guide)
 - [Learn FPGA Programming](entities/learn-fpga-programming.md) — Packt book companion; chapter-organized SystemVerilog (logic design → I2C/PS/2/VGA/DDR; FPGA fundamentals for DMA/custom hardware; Guide)
+- [learnopengl](entities/learnopengl.md) — LearnOpenGL tutorial companion source (JoeyDeVries; progressive C++ OpenGL fundamentals through advanced rendering; lighting, Assimp, shadow mapping, deferred shading, PBR, post-processing; GLFW/GLEW/GLM; README [OpenGL])
 - [learning-directx12](entities/learning-directx12.md) — D3D12 tutorial series + C++ samples (device/PSO/heaps; triangle → scenes; DirectX / guide)
 - [levo](entities/levo.md) — experimental x86/x64 PE AOT binary translator (Ghidra CFG → XED/Remill lift → LLVM recompile; kernel32 API-intercept runtime)
 - [LetMeGG](entities/letme-gg.md) — C++ PoC; prevent WinDbg break/attach (Some Tricks / Windows Ring0 anti-debug; gmh5225)
