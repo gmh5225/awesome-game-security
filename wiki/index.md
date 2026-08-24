@@ -1416,6 +1416,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
 - [Horizon Engine](entities/horizon-engine.md) — Windows 3D rendering engine (D3D12 / Vulkan / Metal; Game Engine source)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
+- [How to Download and Install WSA](entities/how-to-download-and-install-wsa.md) — step-by-step Win11 WSA manual install guide (Developer Mode + Virtual Machine Platform; dependency packages; Explorer/PowerShell; K3V1991; Cheat WSA / Guide)
 - [Huan](entities/huan.md) — encrypted PE loader generator (per-run keys; payload in new loader section; PE structure/loading study; Anti Cheat → Binary Packer; frkngksl)
 - [hXOR-Packer](entities/hxor-packer.md) — C++ PE pack/unpack (Huffman + XOR; in-memory self-unpack stub; PE internals / packer behavior study; Anti Cheat → Binary Packer `[PE XOR]`)
 - [hm-pe-packer](entities/hm-pe-packer.md) — tutorial-oriented C++ x64 PE packer/protector (Visual Studio; load-time wrap/protect; PE structures, packing stubs, protection mechanics; Anti Cheat → Binary Packer `[PE X64]`; TheAenema)
