@@ -774,6 +774,7 @@ sources:
   - wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md
   - wiki/sources/descriptions/Idov31__NovaHypervisor.md
   - wiki/sources/descriptions/Idov31__Venom.md
+  - wiki/sources/descriptions/ION28__BLUESPAWN.md
   - wiki/sources/descriptions/Remus3__Lanternlight.md
   - wiki/sources/descriptions/RiseShieldDev__AntiXrayViewer.md
   - wiki/sources/descriptions/Rwkeith__Diglett.md
@@ -897,6 +898,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
 - [[pi-defender]] — kernel security driver blocking process injection by filtering dangerous handle rights (remote memory write / operation permissions); docs/tests for hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research (PI-Defender) (source: wiki/sources/descriptions/PI-Defender__pi-defender.md)
 - [[raccine]] — lightweight Windows anti-ransomware (Neo23x0; debugger registration for `vssadmin`/`wmic`; YARA command-line rules; parent-chain termination + event logging; no resident agent; blocks shadow-copy deletion; C/C++/C#; README [EDR]) (source: wiki/sources/descriptions/Neo23x0__Raccine.md)
+- [[bluespawn]] — open-source Windows active defense / EDR platform (ION28; Hunt/Mitigate/Monitor/Scan workflows; ATT&CK-oriented detections, YARA scanning, ETW monitoring, automated quarantine/process suspension; C++; rule-driven content; blue-team endpoint defense; README [EDR]) (source: wiki/sources/descriptions/ION28__BLUESPAWN.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)
 - [[uac]] — anti-cheat development platform with Visual Studio kernel-mode driver (common cheat-technique detection routines; C++ framework for testing/validating kernel-level detection; cheat-dev weakness probing; c4kef; Cheat developer platform) (source: wiki/sources/descriptions/c4kef__UAC.md)
 - [[quack]] — universal anti-cheat research kit (C++; modular client-side monitoring, game integration examples, documentation, companion red-team adversarial tooling; experimentation/validation—not production; JonathanBerkeley) (source: wiki/sources/descriptions/JonathanBerkeley__Quack.md)
