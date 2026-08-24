@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JackBro/BetaShield`: entity [[betashield]] (JackBro; C++/Boost client-side AC protection; integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform Boost utilities; open-source client protection design reference); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[anticheat-poc]], [[integrity]], [[rebirth-guard]], and [[atomicshieldclient]].
+
 - **2026-08-24** — ingest `description:JackBro/SmiteESPAimbot`: entity [[smite-esp-aimbot]] (JackBro; internal C++ ESP/aimbot for Smite; reverse-engineered UE3 SDK headers + hook helpers; target acquisition + on-screen ESP; game-specific pointer quirks; learner reference for older UE3 titles; cheat / game:smite [Internal]); cited on [[overviews/game-hacking]] and [[concepts/unreal-object-model]]; cross-linked [[present-hook]], [[world-to-screen]], [[lab-esp-and-aimbot]], and [[mordhau-simple-auto-block-cheat]].
 
 - **2026-08-24** — ingest `description:Jackbail4/VAC-Bypass`: entity [[jackbail4-vac-bypass]] (Jackbail4; archived C++ Detours PoC; signature scan + internal routine patching; hooks `VirtualQuery`, process/module enumeration, debugger checks, and memory-read paths; Steam service context; non-working historical bypass research; slug disambiguated from [[vac-bypass]]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vac-bypass]], [[vac-hooks]], [[prevent-vac]], and [[como-funciona-vac]].

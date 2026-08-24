@@ -78,6 +78,7 @@ sources:
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass.md
   - wiki/sources/descriptions/danielkrupinski__VAC-Bypass-Loader.md
   - wiki/sources/descriptions/Jackbail4__VAC-Bypass.md
+  - wiki/sources/descriptions/JackBro__BetaShield.md
   - wiki/sources/descriptions/danielkrupinski__MemJect.md
   - wiki/sources/descriptions/danielkrupinski__GOESP.md
   - wiki/sources/descriptions/kkent030315__Van1338.md
@@ -896,6 +897,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
 - [[android-anti-cheat]] — open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; open-source AC system lane; defensive researchers) (source: wiki/sources/descriptions/codetronik__AndroidAntiCheat.md)
 - [[rebirth-guard]] — Windows C++ open-source anti-cheat library (chztbby; modding / SDK generation; Open Source Anti Cheat System lane; defensive researchers) (source: wiki/sources/descriptions/chztbby__RebirthGuard.md)
+- [[betashield]] — C++/Boost client-side AC protection (integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform Boost utilities; open-source AC system lane; JackBro) (source: wiki/sources/descriptions/JackBro__BetaShield.md)
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
 - [[vigil]] — Rust eBPF Linux-native anti-cheat (BPF ELF loading, perf events, CLI, client–server distributed monitoring; kernel-level event tracing and threat detection; TOSTcRa; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TOSTcRa__vigil.md)
 - [[gexec]] — register-machine bytecode interpreter for Windows kernel drivers (gasm, gvmlift PE lifter, embeddable host API; updatable portable logic without native recompile; zer0condition; kernel AC development research) (source: wiki/sources/descriptions/zer0condition__gexec.md)
