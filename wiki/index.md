@@ -3316,6 +3316,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [xemu](entities/xemu.md) — original Xbox LLE emulator (QEMU fork; NV2A/OpenGL; ISO/XISO)
 - [xenia](entities/xenia.md) — Xbox 360 emulator (PowerPC recompiler; D3D12/Vulkan; XEX)
 - [xenia-mac](entities/xenia-mac.md) — macOS port of Xbox 360 emulator Xenia
+- [x360gamehack2025](entities/x360gamehack2025.md) — Xbox 360/OG Xbox all-in-one XEX/XBE/XISO/PKG/GOD patching (RGH/JTAG/Bad Update; C# WinForms)
 - [xbox360-emu](entities/xbox360-emu.md) — Xbox 360 emulator (C/C++; kernel, modding, memory analysis)
 - [XFiles](entities/xfiles.md) — rooted Android file explorer (prebuilt APKs; Cheat Android File Explorer)
 - [xFindOut](entities/xfindout.md) — x64dbg plugin: find what writes to / accesses an address (C/C++; Cheat x64dbg Plugins)

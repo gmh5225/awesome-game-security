@@ -12,7 +12,7 @@ confidence: medium
 
 IDA Pro loader plugin for Xbox 360 XEX (Xenon Executable) files (C++): parses the XEX container, extracts embedded PE, resolves imports/exports, and applies Xbox 360 kernel function names for annotated static analysis in IDA Pro 9. (source: wiki/sources/descriptions/emoose__idaxex.md)
 
-Useful for reverse engineers analyzing Xbox 360 game binaries and console security researchers in the README `Xbox` lane—adjacent to HLE playback via [[xenia]] / [[xenia-mac]], emulator work via [[xbox360-emu]], and executable porting via [[recompiler]], but focused on static XEX disassembly in IDA rather than runtime emulation.
+Useful for reverse engineers analyzing Xbox 360 game binaries and console security researchers in the README `Xbox` lane—adjacent to HLE playback via [[xenia]] / [[xenia-mac]], emulator work via [[xbox360-emu]], live modded-console patching via [[x360gamehack2025]], and executable porting via [[recompiler]], but focused on static XEX disassembly in IDA rather than runtime emulation or backup deployment.
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for reverse engineers analyzing Xbox 360 game binaries and console securi
 
 ## Related
 
-[[xenia]] · [[xenia-mac]] · [[xbox360-emu]] · [[recompiler]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[xenia]] · [[xenia-mac]] · [[xbox360-emu]] · [[x360gamehack2025]] · [[recompiler]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
