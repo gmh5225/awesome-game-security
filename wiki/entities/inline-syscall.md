@@ -3,21 +3,30 @@ title: inline-syscall
 kind: entity
 topics: [anti-cheat, windows-kernel]
 sources:
+  - wiki/sources/descriptions/JustasMasiulis__inline_syscall.md
   - wiki/sources/descriptions/gmh5225__inline-syscall.md
-updated: 2026-08-08
+updated: 2026-08-24
 confidence: medium
 ---
 
 # inline-syscall
 
-Simple C++ direct syscall wrapper with compatibility for x86 and x64 user-mode programs. Curated for anti-cheat engineers and defensive security researchers in the Anti Cheat → Compile Time lane — lightweight invocation stubs rather than full SSN table tooling. (source: wiki/sources/descriptions/gmh5225__inline-syscall.md)
+Direct Windows **syscall invocation** libraries for calling native routines without going through hooked `ntdll` stubs or normal import-table paths. Used in low-level systems programming, anti-hooking experiments, and game-security research (Anti Cheat → Compile Time / Windows Ring3).
 
-Complements modular header-only libraries such as [[syscalls-cpp]], direct-call helpers such as [[higu-ntcall]], and SSN extraction via [[ntsleuth]]; defensive analysts pair invocation samples with syscall-origin checks such as [[syscall-detect]] and return-path telemetry such as [[instrumentation-callback-syscall-logger]].
+## JustasMasiulis/inline_syscall
 
-## Links
+Header-only C++ library for generating **direct system calls inline**. Provides initialization and macro-based wrappers so callers invoke native routines without normal import-table usage. Focused on compact, inlinable machine code and low overhead on **x64 Windows** targets (Clang-oriented). (source: wiki/sources/descriptions/JustasMasiulis__inline_syscall.md)
+
+Canonical Clang/x64 inline-syscall reference in the README lane. Complements compile-time string hiding via [[xorstr]], runtime lazy import via [[lazy-importer]], and sibling direct-call helpers such as [[syscalls-cpp]] and [[doom-syscalls]]. Defensive analysts should pair inline `syscall` stubs in `.text` with origin checks such as [[syscall-detect]].
+
+- Repo: https://github.com/JustasMasiulis/inline_syscall
+
+## gmh5225/inline-syscall
+
+Simple C++ direct syscall wrapper with compatibility for **x86 and x64** user-mode programs. Lightweight invocation stubs rather than full SSN table tooling. (source: wiki/sources/descriptions/gmh5225__inline-syscall.md)
 
 - Repo: https://github.com/gmh5225/inline-syscall
 
 ## Related
 
-[[syscalls-cpp]] · [[higu-ntcall]] · [[ntsleuth]] · [[syscall-detect]] · [[instrumentation-callback-syscall-logger]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]
+[[syscalls-cpp]] · [[doom-syscalls]] · [[higu-ntcall]] · [[ntsleuth]] · [[syscall-detect]] · [[lazy-importer]] · [[xorstr]] · [[instrumentation-callback-syscall-logger]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]]
