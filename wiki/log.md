@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HeathHowren/CSGO-Cheats`: entity [[csgo-cheats]] (HeathHowren; tutorial external CS:GO C++ examples; Visual Studio; window discovery, process open, memory R/W helper wrappers, offset maintenance; beginner game-memory manipulation + defender cheat-pattern study; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[pointer-lab]], [[csgo-external-cheat]], [[csgo-external-esp]], [[csgo-offsets]], and [[intro-to-gamehacking]].
+
 - **2026-08-24** — ingest `description:HeathHowren/Pointer-Lab`: entity [[pointer-lab]] (HeathHowren; Windows x64 user-mode memory research tool; C++20 ImGui dockspace; multi-type scan, ASLR-resilient pointer chains, Zydis/Keystone disasm/patch, Lua 5.4 scripting, `.iretable` projects; RE/CTF/authorized single-player—not stealth or online AC evasion; cheat / memory scanner); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mhsx]], [[intro-to-gamehacking]], and [[x64dbg]].
 
 - **2026-08-24** — ingest `description:Hekbas/Luth`: entity [[luth]] (Hekbas; custom C++ Vulkan game engine; render graph, PBR, cascaded shadow maps, GTAO, GPU skeletal animation, ECS, fiber job system, integrated editor; Game Engine / source [C++ 2D]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[lumos]], [[ursus]], [[cat-annihilation]], [[oxylus]], [[hazel]], and [[wind-effects]].

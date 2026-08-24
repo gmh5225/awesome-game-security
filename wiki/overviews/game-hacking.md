@@ -1116,6 +1116,7 @@ sources:
   - wiki/sources/descriptions/guoxing2024__magicmida-rs.md
   - wiki/sources/descriptions/Hendi48__Magicmida.md
   - wiki/sources/descriptions/HeathHowren__Pointer-Lab.md
+  - wiki/sources/descriptions/HeathHowren__CSGO-Cheats.md
   - wiki/sources/descriptions/Hellonihaohh__yolo-v8s.md
   - wiki/sources/descriptions/Hellonihaohh__yolo-v8m.md
   - wiki/sources/descriptions/gmh5225__vscript_lua51.md
@@ -2256,6 +2257,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Kernel-mode CS:GO cheat samples such as [[raybot-zero]] (R4YVEN; C++ Windows driver + minimal C# loader; triggerbot, bunnyhop, glow visuals, kernel-level key-state reading; core logic without traditional usermode controller; game offsets + low-level entity/engine memory routines; cheat development and kernel anti-cheat evasion research; README Kernel-mode) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/R4YVEN__raybot-zero.md)
 - CS:GO kernel driver + IOCTL usermode controller samples such as [[garhal-csgo]] (dretax; KM entity R/W; planned kernel DirectX overlay; cheat / game:csgo) sit in the same ring-0 cheat / game:csgo lane. (source: wiki/sources/descriptions/dretax__GarHal_CSGO.md)
 - External CS:GO samples such as [[csgo-external-cheat]] (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) also sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
+- Tutorial-oriented external CS:GO examples such as [[csgo-cheats]] (HeathHowren; C++ Visual Studio; window discovery, process open, memory R/W helper wrappers, offset-driven maintenance; beginner game-memory manipulation + defender cheat-pattern study; cheat / game:csgo [External]) sit in the same educational external lane beside [[pointer-lab]] from the same author. (source: wiki/sources/descriptions/HeathHowren__CSGO-Cheats.md)
 - CS:GO radar samples such as [[boltobserv]] (boltgolt; README [Radar]; player slot numbers on map dots; cheat / game:csgo) sit in the same visual radar lane beside external ESP/radar cheats and DMA overlays such as [[csgo-dma-overlay]]. (source: wiki/sources/descriptions/boltgolt__boltobserv.md)
 - External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same cheat / game:csgo lane beside RPM/driver externals. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md)
 - Lightweight C# external CS:GO samples such as [[echinoidea]] (M3351AN; bunnyhop, overlay ESP, trigger bot; offset-driven workflow; write-signal reduction and VAC-era detection tradeoff notes; educational external cheat design; README External C#) sit in the same usermode external cheat / game:csgo lane beside script and C++ RPM externals. (source: wiki/sources/descriptions/M3351AN__Echinoidea.md)

@@ -335,6 +335,7 @@ sources:
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md
   - wiki/sources/descriptions/rrpvm__csgo-external-cheat.md
+  - wiki/sources/descriptions/HeathHowren__CSGO-Cheats.md
   - wiki/sources/descriptions/gmh5225__cfclap.md
   - wiki/sources/descriptions/gmh5225__cerberus.md
   - wiki/sources/descriptions/gmh5225__cheat-attack-thread-slemu.md
@@ -876,6 +877,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[heck-csgo-external]] — External CS:GO sample (C++; SDK generation / memory analysis) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - [[csgo-cheat-external]] — External CS:GO sample (C++; driver development) for studying driver-backed out-of-process cheat surface against VAC (source: wiki/sources/descriptions/si1kyyy__csgo_cheat_external.md)
 - [[csgo-external-cheat]] — External CS:GO sample (C++; RPM or kernel-driver reads; ESP / aimbot / radar; no inject) for studying out-of-process cheat surface against VAC (source: wiki/sources/descriptions/rrpvm__csgo-external-cheat.md)
+- [[csgo-cheats]] — Tutorial external CS:GO examples (HeathHowren; C++; window/process attach + memory R/W wrappers; offset maintenance; beginner manipulation study and defender mapping of common external cheat patterns) (source: wiki/sources/descriptions/HeathHowren__CSGO-Cheats.md)
 - [[goesp]] — cross-platform external CS:GO ESP (danielkrupinski; Dear ImGui overlay; memory-read boxes/names/health/weapons via game render path; Windows and Linux) for studying external overlay ESP and overlay-based detection against VAC (source: wiki/sources/descriptions/danielkrupinski__GOESP.md)
 - External overlay window-hijack PoCs such as [[window-hijack-overlay]] (SurgeGotTappedAgain; reuse existing overlay HWNDs while preserving native flags; SetWindowsHookEx input; DX11/ImGui; studies visibility vs AC overlay-detection tradeoffs) complement overlay-monitoring and HWND-enumeration defenses. (source: wiki/sources/descriptions/SurgeGotTappedAgain__Window-Hijack.md)
 - [[topmost-detection]] — minimal Win32 HWND enumeration utility (Oliver-1-1; C++; visible-window scan + `WS_EX_TOPMOST` flagging; companion topmost test console via `SetWindowPos`; basic overlay-detection prototyping for AC development) (source: wiki/sources/descriptions/Oliver-1-1__TOPMOST-Detection.md)
