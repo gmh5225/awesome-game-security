@@ -800,6 +800,7 @@ sources:
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/KuhakuPixel__AceTheGame.md
   - wiki/sources/descriptions/Kix48__R6Updater.md
+  - wiki/sources/descriptions/KaylinOwO__Project-Branthium.md
   - wiki/sources/descriptions/Ke4ton__hardware_bypass.md
   - wiki/sources/descriptions/Keyzp1337__Fortnite.md
   - wiki/sources/descriptions/KeyzpOnTheFluxxx__Fortnite-External.md
@@ -1569,7 +1570,7 @@ sources:
   - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
   - wiki/sources/descriptions/no1qq__UAGC.md
   - wiki/sources/descriptions/Lazyzouo__ICUAC.md
-updated: 2026-08-23
+updated: 2026-08-24
 confidence: high
 ---
 
@@ -2291,6 +2292,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Arc Raiders DMA radar/ESP samples such as [[arc-raiders-radar-dma-radar]] (a0yark; C++; FPGA + MemProcFS external reads; Unicorn Engine emulates game decryption routines for GWorld/GameInstance/CameraManager/BoneBase; player/actor iteration framework; cheat / game:arc raiders [DMA]) sit in the below-OS external lane beside [[cs2-dma-radar]] and [[eft-dma-radar-1]] for Unreal titles with obfuscated pointer chains. (source: wiki/sources/descriptions/a0yark__ArcRaidersRadar-dma-Radar.md)
 - Title-specific Apex Legends full-cheat samples such as [[apex-full-cheat]] (C/C++; rendering / SDK generation / hooking; cheat / game:apex legends) sit in the same lane. (source: wiki/sources/descriptions/hadevn__apex_full_cheat.md)
 - Internal Apex Legends cheat framework bases such as [[apex-mizu-base]] (NaiJii; C++; Visual Studio; hooking scaffolding, game/entity abstractions, math utilities, ImGui menu on Windows DirectX; starting framework for feature development and FPS reverse-engineering practice; cheat / game:apex legends [Internal]) sit beside [[apex-full-cheat]] in the same lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/NaiJii__Apex-Mizu-Base.md)
+- Hybrid Apex Legends UM+KM cheat frameworks such as [[project-branthium]] (KaylinOwO; C++ Visual Studio; user-mode client + kernel driver; aimbot, ESP, entity caching, weapon prediction; ImGui + DirectX 9 menu/overlay; low-level memory code in cheat and driver dirs; game-hacking experimentation + RE workflows; cheat / game:apex legends) sit beside [[apex-legends-cheat]] and [[apex-mizu-base]] in the same lane. (source: wiki/sources/descriptions/KaylinOwO__Project-Branthium.md)
 - Linux internal Apex Legends samples such as [[ayypex]] (gmh5225; Vulkan implicit-layer overlay on the game window—MangoHud-style; cheat / game:apex legends [Linux] [Internal]) extend that lane to Proton/Linux clients. (source: wiki/sources/descriptions/gmh5225__ayypex.md) Linux Discord in-game overlays such as [[vocem-overlay]] (ales-drnz; Vulkan implicit layer + OpenGL interposer; daemon-isolated Discord I/O; in-process graphics hooking / overlay injection study surface—not commercial-AC tested) extend that lane with a non-cheat overlay reference beside MangoHud-style cheat samples. (source: wiki/sources/descriptions/ales-drnz__vocem-overlay.md)
 - Linux-native Apex Legends cheat research such as [[apex-linux]] (ekknod; C++; cheat / game:apex legends [Linux]) complements [[ayypex]] on non-Windows Apex clients under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/ekknod__apex_linux.md)
 - Linux service-oriented Apex Legends external automation such as [[project-tanya]] (XRadius; C# / .NET; modular memory access, driver abstraction, game-state modeling, Aim/Sense layers; daemon build/install scripts; process isolation + ptrace hardening; long-running stealth-conscious memory-driven workflows; cheat / game:apex legends [Linux]) extends that lane beside KVM/DMA samples such as [[ez-apex-dma-aimbot]]. (source: wiki/sources/descriptions/XRadius__project-tanya.md)
