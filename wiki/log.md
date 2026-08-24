@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JonathanBerkeley/Quack`: entity [[quack]] (JonathanBerkeley; universal anti-cheat research kit; C++ modular client-side monitoring, game integration examples, documentation, companion red-team adversarial tooling; experimentation/validation—not production deployment); cited on [[overviews/anti-cheat]] and [[entities/anti-cheat-testing-framework]]; cross-linked [[anti-cheat-testbench]], [[uac]], [[anti-cheat-research-index]], [[research-rigor]], [[peregrine-anticheat]], and [[basic-anti-cheat]].
+
 - **2026-08-24** — ingest `description:JonathanEke/DayZ-Server-Battleye-Remover`: entity [[dayz-server-battleye-remover]] (JonathanEke; C++ DayZ server executable patch utility; automated pattern scan + binary patch to disable BattlEye checks; reprocessable after updates; controlled test env; Disable battleye); cited on [[concepts/battleye]] and [[overviews/game-hacking]]; cross-linked [[dayz-cheat]], [[external-dayz-cheat]], [[dayzzz]], [[dayz-mcp]], and [[model-anti-cheat]].
 
 - **2026-08-24** — ingest `description:JonathanSalwan/ROPgadget`: entity [[ropgadget]] (JonathanSalwan; Python CLI ROP gadget finder; Capstone; ELF/PE/Mach-O/raw multi-arch; filter/search + optional chain generation; binary exploitation / RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[triton]], [[ropgadget-rs]], [[exrop]], [[angrop]], [[agafi]], and [[rop-compiler]].

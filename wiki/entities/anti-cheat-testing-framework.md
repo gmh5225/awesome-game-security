@@ -20,4 +20,4 @@ README lane: **Testing Framework**. Complements narrower stress harnesses such a
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[injectors]] · [[anticheat-poc]] · [[cheat-driver]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[quack]] · [[anti-cheat-testbench]] · [[uac]] · [[injectors]] · [[anticheat-poc]] · [[cheat-driver]]
