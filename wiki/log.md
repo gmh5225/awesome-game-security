@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IAIK/armageddon`: entity [[armageddon]] (IAIK; C + Python; ARM mobile cache side-channel toolkit — Prime+Probe, Flush+Reload, Evict+Reload, Flush+Flush, cache template attacks; mobile privacy, crypto side channels, TrustZone observation; README Cache attacks on ARM); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[keybuster]], [[cve-2021-1961]], and [[armshellcode]].
+
 - **2026-08-24** — ingest `description:IChooseYou/Reclass`: entity [[reclass]] (IChooseYou; C++17/Qt 6/QScintilla structured binary editor; structs/arrays/pointers/primitives; inline edit, foldable views, hex/ASCII preview; process-memory + WinDbg plugins; MCP; cheat / debugging); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[reclass-net]], [[reclass-ex]], [[reclass-dma]], [[reclass-net-driverreader]], and [[regenny]].
 
 - **2026-08-24** — ingest `description:IIIImmmyyy/AntiOllvm`: entity [[anti-ollvm]] (IIIImmmyyy; C# Arm64 simulated execution; OLLVM CFF dispatcher pattern ID + if-else CFG rebuild; Python IDA CFG extract + Keystone codegen; fake runtime; security/game-protection RE; Fix OLLVM); cited on [[concepts/control-flow-flattening]] and [[overviews/reverse-engineering]]; cross-linked [[ollvm-unflattener]], [[idadeflat]], [[deobfbr]], and [[armshellcode]].
