@@ -557,6 +557,7 @@ sources:
   - wiki/sources/descriptions/ahaggard2013__binaryninja-ollama.md
   - wiki/sources/descriptions/WhatTheFuzz__binaryninja-openai.md
   - wiki/sources/descriptions/apkunpacker__IDA-Gepetto.md
+  - wiki/sources/descriptions/JusticeRage__Gepetto.md
   - wiki/sources/descriptions/aqilc__chasm.md
   - wiki/sources/descriptions/archercreat__titan.md
   - wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md
@@ -1900,7 +1901,8 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - In-IDA Claude-3 chat assistant via [[ida-assistant]] (interactive Q&A / guidance during RE) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/stuxnet147__IDA-Assistant.md)
 - AI-powered IDA 9.0+ assistant for C++ game RE via [[aida]] sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/sigwl__AiDA.md)
 - Local llama.cpp IDA LLM Explainer via [[ida-llm-explainer]] (function explain/rename/struct inference; human-in-the-loop accept; CFG recovery) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/pgarba__ida-llm-explainer.md)
-- Local LLM IDA pseudocode assistant via [[ida-gepetto]] (apkunpacker; IDAPython; explain decompiled functions + variable rename suggestions; pseudocode context-menu + keyboard shortcuts; configurable model backends + localization; malware analysis / game-security RE; cheat / IDA Plugins) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/apkunpacker__IDA-Gepetto.md)
+- LLM IDA pseudocode assistant via [[gepetto]] (JusticeRage; Python IDAPython; explain decompiled functions + variable rename + code comments; menu actions + hotkeys; cloud/local multi-provider config; malware/software/game-security RE; cheat / IDA Plugins / `[ChatGPT]`) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/JusticeRage__Gepetto.md)
+- Local LLM IDA pseudocode fork via [[ida-gepetto]] (apkunpacker; explain/rename; offline backends + localization; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/apkunpacker__IDA-Gepetto.md)
 - AI-powered IDA 9.0+ dockable panel via [[idassist]] (Python/PySide6; multi-provider LLM function explain/rename, semantic knowledge graph, RAG, MCP; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/jtang613__IDAssist.md)
 - Embedded RE agent for IDA Pro / Binary Ninja via [[rikugan]] (Python; multi-provider LLM chat in disassembler UI; agentic tool loop, plan mode, Ollama; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/buzzer-re__Rikugan.md)
 - Local Ollama-assisted HLIL renaming via [[binaryninja-ollama]] (Python BN plugin; bulk/targeted function and variable rename; configurable local server/port/model; offline semantic labeling; Cheat Binary Ninja Plugins) sits in the same LLM-assistant lane beside [[rikugan]]. (source: wiki/sources/descriptions/ahaggard2013__binaryninja-ollama.md)
