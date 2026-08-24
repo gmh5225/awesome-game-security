@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IcEy-999/Ntoskrnl_Viewer`: entity [[ntoskrnl-viewer]] (IcEy-999; C/C++ custom driver + user-mode client; WinDbg-like db/dw/dd/dq/d/x commands; symbol or address reads including exported/unexported kernel symbols; x64; kernel RE / troubleshooting / Windows internals study); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntoskrnlwalker]], [[ntkernelwalkerlib]], [[ntoskrnl-file-collection]], [[mssymbolscollection]], [[cfgdump]], and [[windbg-js-scripts]].
+
 - **2026-08-24** — ingest `description:IcyModz420/X360GameHack2025`: entity [[x360gamehack2025]] (IcyModz420; C# WinForms/.NET; Xbox 360 RGH/JTAG/Bad Update/devkit + OG Xbox ISO/XBE; XEX encrypt/decrypt/compress, package/DLC unlock, Title ID/Media ID, ISO→GOD/STFS, FTP/USB deploy; without Xbox Neighborhood; homebrew/modding backup tooling; cheat / Xbox); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[idaxex]], [[xbox360-emu]], [[xenia]], and [[recompiler]].
 
 - **2026-08-24** — ingest `description:Ido-Moshe-Github/CiDllDemo`: entity [[ci-dll-demo]] (Ido-Moshe-Github; C/C++ kernel driver; process-creation notify hook; `CiValidateFileObject` / `CiCheckSignedFile`; Authenticode certificate extraction from policy data; x86/x64; Windows Code Integrity kernel-mode research; README Use ci.dll API for validating Authenticode signature of files); cited on [[overviews/windows-kernel]] and [[concepts/hvci]]; cross-linked [[dse-hook]], [[dse-patcher-2]], [[bootbypass]], [[wdactools]], [[mssymbolscollection]], and [[kernel-callbacks]].

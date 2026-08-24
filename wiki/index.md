@@ -2183,6 +2183,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NtDOOM](entities/ntdoom.md) — NSG650; Windows kernel DOOM port (PureDOOM in driver context; win32k syscalls + thread context spoofing + kernel graphics/input; extreme NT GUI/syscall research demo; README Doom running in the NT kernel)
 - [ntoseye](entities/ntoseye.md) — Linux-host KVM/QEMU WinDbg-style Windows kernel debugger (GDB stub; PDB symbols; breakpoints; Kernel Debugger)
 - [ntoskrnl-file-collection](entities/ntoskrnl-file-collection.md) — multi-build ntoskrnl binary corpus (version diff / kernel RE reference)
+- [ntoskrnl-viewer](entities/ntoskrnl-viewer.md) — Windows kernel memory viewer; custom driver + UM client; WinDbg-like db/dw/dd/dq/d/x; symbol/address reads incl. unexported kernel symbols (IcEy-999; x64)
 - [ntoskrnlwalker](entities/ntoskrnlwalker.md) — ntoskrnl offset/gadget/symbol resolver (target-build kernel structure navigation)
 - [NtRays](entities/ntrays.md) — IDA Pro Hex-Rays plugin: NT kernel type/structure enrichment (NTSTATUS, IOCTL, object types, EPROCESS/ETHREAD; Windows Kernel Enhance; gmh5225)
 - [NTSleuth](entities/ntsleuth.md) — Windows syscall extractor (ntdll/win32u PDB + disasm → JSON/C headers)
