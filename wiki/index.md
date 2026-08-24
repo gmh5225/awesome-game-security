@@ -2018,6 +2018,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mempeek](entities/mempeek.md) — Linux CLI live memory inspector (`/proc/pid/mem`; CE-style scan filters; libprocmem maps; rustyline REPL; cheat / Linux memory explorer)
 - [MemoryGuard](entities/memory-guard.md) — Windows memory-protection library (`PAGE_GUARD` / VEH / periodic integrity checks; alert or revert tampering; gmh5225; Anti Cheat → Page Protection)
 - [PointerGuard](entities/pointer-guard.md) — Windows PoC: HWBP or PAGE_GUARD protects function pointers / vtable entries against runtime tampering (charliewolfe; VEH + PAGE_GUARD)
+- [Pointer Lab](entities/pointer-lab.md) — Windows x64 user-mode memory scanner/debugger (ImGui; pointer chains, disasm/patch, Lua scripting; RE/CTF practice; HeathHowren)
 - [Polymorphic-Engine](entities/polymorphic-engine.md) — Nou4r C++ runtime polymorphic variable obfuscation (stack/heap transforms; primitives/strings; optional SIMD; LLVM/Clang-primary; experimental MSVC; software protection / anti-analysis; AC Encrypt Variable)
 - [PolyEngine](entities/polyengine.md) — LongWayHomie polymorphic PE packer/crypter (junk code, instruction substitution, XTEA, RunPE process hollowing, stack spoofing, module stomping, Hell's Gate syscalls; CTF / Windows low-level security education; in-memory execution; Anti Cheat → Binary Packer)
 - [PolarImGui](entities/polarimgui.md) — Android ImGui menu framework for Unity IL2CPP (C++ native + Android Studio; `.so` packaging for APK architectures; mobile mod-menu / cheat UI prototyping; Polarmods; Imgui On Android)

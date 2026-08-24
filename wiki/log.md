@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HeathHowren/Pointer-Lab`: entity [[pointer-lab]] (HeathHowren; Windows x64 user-mode memory research tool; C++20 ImGui dockspace; multi-type scan, ASLR-resilient pointer chains, Zydis/Keystone disasm/patch, Lua 5.4 scripting, `.iretable` projects; RE/CTF/authorized single-player—not stealth or online AC evasion; cheat / memory scanner); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[mhsx]], [[intro-to-gamehacking]], and [[x64dbg]].
+
 - **2026-08-24** — ingest `description:Hekbas/Luth`: entity [[luth]] (Hekbas; custom C++ Vulkan game engine; render graph, PBR, cascaded shadow maps, GTAO, GPU skeletal animation, ECS, fiber job system, integrated editor; Game Engine / source [C++ 2D]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[lumos]], [[ursus]], [[cat-annihilation]], [[oxylus]], [[hazel]], and [[wind-effects]].
 
 - **2026-08-24** — ingest `description:Hellonihaohh/yolo-v8m`: entity [[yolo-v8m]] (Hellonihaohh; pretrained YOLOv8m weights-only distribution—license + split compressed model artifact; no training/inference codebase; downstream detection-based game automation research; cheat / PUBG yolo dataset); cited on [[overviews/game-hacking]] and [[concepts/ai-aimbot-detection]]; cross-linked [[yolo-v8s]], [[yolov5-pubg]], [[pubg-ai-yolov4]], [[rookieai-yolov8]], [[yolov8-overlay-cs2]], and [[waldo]].
