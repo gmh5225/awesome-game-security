@@ -1497,6 +1497,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-buddy](entities/ida-buddy.md) — Python WinDbg-style idalib CLI (`idb`) for agents (JustasMasiulis; persistent headless worker per database; compact stdout; disasm/decompile/xrefs/types + DB mutations with undo)
 - [ida-cli](entities/ida-cli.md) — headless IDA Pro MCP server for AI-assisted binary analysis (idalib; Rust/C++; cheat / IDA Plugins)
 - [ida-codex-mcp](entities/ida-codex-mcp.md) — IDA Pro MCP bridge (Python plugin + stdio server; functions, call graphs, decompile/disasm, xrefs, strings, memory, rename/type helpers)
+- [ida-cyberchef](entities/ida-cyberchef.md) — Hex-Rays IDA Pro CyberChef-style Qt plugin (Python; decode/encode/transformation pipelines in-IDA; malware analysis / binary triage)
 - [IDAComments](entities/idacomments.md) — IDA Pro plugin: capture, organize, and review user comments (Python; IDA 7.x/8.x; dedicated view; keyboard/menu access; NoneShell; cheat / IDA Plugins)
 - [ida-dark-plus](entities/ida-dark-plus.md) — IDA Pro Dark+ theme (modern dark palette; disassembly/hex/structures/all windows; cheat / IDA themes)
 - [IDA DataExportPlus](entities/ida-data-export-plus.md) — IDA Pro plugin: extend/replace data export window; integer/float formats + assembly text (Python; hotkey-driven; Krietz7; cheat / IDA Plugins)

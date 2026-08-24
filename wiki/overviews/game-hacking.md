@@ -1618,6 +1618,7 @@ sources:
   - wiki/sources/descriptions/Hexorg__CheatEngineTables.md
   - wiki/sources/descriptions/Hexorg__Ouroboros.md
   - wiki/sources/descriptions/HexRaysSA__rax.md
+  - wiki/sources/descriptions/HexRaysSA__ida-cyberchef.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -2035,6 +2036,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Binary Ninja byte-pattern signature maker via [[binja-sigmaker]] (Python; IDA-style wildcard signatures from disassembled functions; function-start fallback; plugin-manager packaging; cheat / Binary Ninja Plugins) sits in the same runtime signature-scan lane beside [[ida-sigmaker]] and [[bndb2pat]]. (source: wiki/sources/descriptions/apekros__binja_sigmaker.md)
 - Ghidra SPF-style byte signature helper via [[spf-ghidra-pattern-helper]] (Java GhidraScript; generate/search signatures in loaded binaries; Pattern Generator/Finder tabs; SPF-Framework PatternFinder-compatible output; wildcards/ranges/alternation; optional uniqueness verify; ATS/ETS2 plugin modding RE; TrackAndTruckDevs; cheat / Ghidra Plugins) sits in the same runtime signature-scan lane beside [[binja-sigmaker]] and [[ida-pro-sigmaker]]. (source: wiki/sources/descriptions/TrackAndTruckDevs__SPF_GhidraPatternHelper.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
+- CyberChef-style encode/decode/transformation pipelines in IDA via [[ida-cyberchef]] (HexRaysSA; Python + Qt; malware analysis / binary triage without leaving the disassembler; cheat / IDA Plugins) sits in the same in-IDA data-manipulation lane beside [[big5-decode-ida]]. (source: wiki/sources/descriptions/HexRaysSA__ida-cyberchef.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)
 - Automatic standard-function enum identification via [[auto-enum]] (Python/C; identifies and applies enums for common API/stdlib calls) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/junron__auto-enum.md)
 - Type-aware binary search via [[ida-search]] (IDA Pro 9.x; 010 Editor–style typed search; `ida-plugin.json` loads `plugin.py` on startup) sits in the Cheat IDA Plugins / search lane. (source: wiki/sources/descriptions/milankovo__ida-search.md)
