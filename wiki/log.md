@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:tomhamidi97-arch/frida-vmp-bypass`: entity [[frida-vmp-bypass]] (tomhamidi97-arch; Frida boundary-hook harness for stacked Android VMProtect+OLLVM; libc/JNI/Java three-layer exit monitoring; spawn-mode injection; caller-address cross-ref with IDA; arg/return tamper for detection bypass; mobile game security / anti-cheat / CTF; Cheat Fix VMP / Fix OLLVM); cited on [[concepts/frida]] and [[concepts/control-flow-flattening]]; cross-linked [[vmp-devirtualization-lab]], [[ollvm-unflattener]], [[vmprotect]], and [[mobile-anti-cheat]].
+
 - **2026-08-24** — ingest `readme:categories`: Cheat ~2744 (+1; tomhamidi97-arch/frida-vmp-bypass Frida boundary-hook writeup for stacked Android VMProtect+OLLVM via libc/JNI/Java exit monitoring; other major section counts stable); refreshed [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]] README-map counts/scope; light `index.md` section notes (no per-category pages).
 
 - **2026-08-24** — ingest `description:KasperskyLab/WinDbg-JS-Scripts`: entity [[windbg-js-scripts]] (KasperskyLab; JavaScript WinDbg dump triage; exception-record candidates, STL map walk, broken noexcept stack traces, x86 stacks in x64 kernel dumps; manifest XML + Python helper; reverse engineers + game-security researchers; cheat / JS Scripts); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[windbg-scripts]], [[windbg-cookbook]], [[awesome-windbg-extensions]], [[mcp-windbg]], and [[hrtng]].

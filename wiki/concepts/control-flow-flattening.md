@@ -11,7 +11,8 @@ sources:
   - wiki/sources/descriptions/R7flex__dll-ollvm.md
   - wiki/sources/descriptions/RolfRolles__HexRaysDeob.md
   - wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md
-updated: 2026-08-22
+  - wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md
+updated: 2026-08-24
 confidence: high
 ---
 
@@ -27,9 +28,10 @@ confidence: high
 4. **Python unflattener plugins** — extensible Fix OLLVM unflatten hooks ([[unflat]]; plugin development focus). (source: wiki/sources/descriptions/guheng-re__unflat.md) Ghidra in-process OLLVM CFF deobfuscation via [[pagalaxylab-ghidra-scripts]] (Python Ghidra scripts; PAGalaxyLab; source: wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md).
 5. **Heuristic region detection** — loop/dominator analysis and BB complexity scoring ([[obfuscation-detection]]) before manual work.
 6. **Trace-based recovery** — runtime traces from [[dynamic-binary-instrumentation]] resolve indirect branches under covered executions; completeness needs additional path exploration.
+7. **Boundary-hook monitoring** — when stacked VMP+OLLVM on Android resists static deflattening, [[frida-vmp-bypass]] hooks libc/JNI/Java API exits and logs caller addresses inside the protected library to reconstruct security-sensitive call chains without lifting flattened bytecode. (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
 
 CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — simplify MBA blocks after CFG recovery for readable pseudocode.
 
 ## Related
 
-[[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]

@@ -1111,6 +1111,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FridaScript](entities/fridascript.md) — Frida game/app hook scripts (call intercept, API trace, runtime modify; Android/iOS/desktop; gmh5225; iOS low-level scripting)
 - [frida-stack](entities/frida-stack.md) — Frida stack/backtrace helpers (cheat / Frida)
 - [frida-ue4dump](entities/frida-ue4dump.md) — Frida script for Android UE4 SDK dump (reflection hook; UObject / offsets / headers)
+- [frida-vmp-bypass](entities/frida-vmp-bypass.md) — Frida boundary-hook harness for stacked Android VMProtect+OLLVM (libc/JNI/Java exit monitoring; caller-address cross-ref; spawn-mode; tomhamidi97-arch; Fix VMP / Fix OLLVM)
 - [frida-watchpoint-tutorial](entities/frida-watchpoint-tutorial.md) — Frida `setHardwareWatchpoint` tutorial (hardware data breakpoints; cheat / Frida)
 - [frida_usb_dump](entities/frida-usb-dump.md) — Frida macOS USB traffic sniff/dump (Big Sur offsets; cheat / Frida)
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)

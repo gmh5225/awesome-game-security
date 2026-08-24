@@ -20,4 +20,4 @@ Covers the full devirtualization workflow: locating dispatchers, enumerating han
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]] · [[vmprotect]] · [[novmpy]] · [[rumba]] · [[vmattack]] · [[control-flow-flattening]] · [[mixed-boolean-arithmetic]] · [[frida]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[overviews/mobile-security]] · [[frida-vmp-bypass]] · [[vmprotect]] · [[novmpy]] · [[rumba]] · [[vmattack]] · [[control-flow-flattening]] · [[mixed-boolean-arithmetic]] · [[frida]]
