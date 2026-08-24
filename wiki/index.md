@@ -1519,6 +1519,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lost Ark Logger](entities/lost-ark-logger.md) — Lost Ark network packet logger/decoder (client–server protocol; events/items/combat; gmh5225)
 - [IDARustCargo](entities/ida-rust-cargo.md) — IDA plugin: display potentially installed Cargo dependencies (Python; cheat / IDA Plugins)
 - [IDARustDemangler](entities/ida-rust-demangler.md) — IDA Rust demangler & normalizer (`rs-dml`; cheat / IDA Plugins)
+- [IDARustHelper](entities/ida-rust-helper.md) — IDA plugin: Rust demangle/normalize, type defs, x86/ARM/RISC-V string recovery (Python; cheat / IDA Plugins)
 - [ida-search](entities/ida-search.md) — IDA Pro 9.x plugin: 010 Editor–style type-aware binary search (`ida-plugin.json`; cheat / IDA Plugins)
 - [ida-screenshot](entities/ida-screenshot.md) — IDA Pro high-resolution screenshot capture plugin (Python; macOS/Linux install; cheat / IDA Plugins)
 - [ida-security-scanner](entities/ida-security-scanner.md) — IDA Pro SAST plugin: semgrep-style YAML rules on decompiled pseudocode; interactive findings; optional AI triage (SymbioticSec; cheat / IDA Plugins)

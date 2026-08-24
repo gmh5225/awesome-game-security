@@ -527,6 +527,7 @@ sources:
   - wiki/sources/descriptions/khang06__genshinjumpfixer2.md
   - wiki/sources/descriptions/khang06__misc.md
   - wiki/sources/descriptions/kkent030315__IDARustCargo.md
+  - wiki/sources/descriptions/JANlittle__IDARustHelper.md
   - wiki/sources/descriptions/nico__demumble.md
   - wiki/sources/descriptions/threatlabz__pikabot-deobfuscator.md
 
