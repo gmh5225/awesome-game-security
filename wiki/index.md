@@ -1322,6 +1322,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [goesp](entities/goesp.md) — cross-platform CS:GO ESP (danielkrupinski; modern C++; Dear ImGui overlay; memory-read entity ESP via game render path; Windows/Linux; cheat / game:csgo [Cross-platform])
 - [goose-goose-duck-hack](entities/goose-goose-duck-hack.md) — Goose Goose Duck Unity IL2CPP internal cheat (ImGui overlay; dumped Assembly-CSharp + ACTk bypass; ESP/role reveal; gmh5225)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)
+- [GOWTool](entities/gow-tool.md) — God of War (2018) Windows asset extractor/converter (HitmanHimself; C++ Visual Studio; DirectXTex + glTF; proprietary format RE / modding; God of War 2018)
 - [GamePlug](entities/gameplug.md) — Multi-API (D3D9–12/Vulkan) proxy-DLL framework for ImGui overlays and game plugins on Windows (C++23; plugin API; x86/x64)
 - [GoodEye](entities/goodeye.md) — BEDaisy APC instrumentation kernel driver (BE per-thread APC callback RE; cheat / explore anticheat system:be)
 - [unturned-godot](entities/unturned-godot.md) — Godot 4.7 port: reverse-engineers Unturned Unity formats from Steam install (Game Engine / asset extraction)

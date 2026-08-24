@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HitmanHimself/GOWTool`: entity [[gow-tool]] (HitmanHimself; C++ Visual Studio Windows utility; God of War 2018 asset extract/convert; DirectXTex + glTF; broader community extraction pipeline; modders / asset researchers / proprietary format RE; God of War 2018); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[assetstudio]], [[uabe]], [[awesome-game-file-format-reversing]], [[gltf]], and [[tinygltf]].
+
 - **2026-08-24** — ingest `description:HoLLy-HaCKeR/dnSpy.Extension.HoLLy`: entity [[dnspy-extension-holly]] (HoLLy-HaCKeR; C# dnSpyEx extension; source-map-style renaming, managed DLL injection while debugging, native disassembly, control-flow graph visualization; obfuscated .NET/Unity RE; For Unity); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[dnspy]], [[dnspy-unity-mono]], [[mono-debugger-soft]], [[confuserex]], and [[obfuscation-methods]].
 
 - **2026-08-24** — ingest `description:HoShiMin/Kernel-Bridge`: entity [[kernel-bridge]] (HoShiMin; modern C++ Windows kernel driver framework/template; Intel VT-x + AMD-V hypervisor-assisted components; memory/IOCTL/hook/CPUID/MSR abstractions; advanced debugging, monitoring, and AC kernel security research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hyperdbg]], [[vt-debuger]], [[hypervisor-from-scratch]], [[driver-base]], and [[windows-kernel-rs]].
