@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HexRaysSA/ida-claude-code-plugins`: entity [[ida-claude-code-plugins]] (HexRaysSA; Python tooling + Markdown plugin/skill docs; Claude Code agent workflows; plugin development, automated scripting, optional sandboxed code-evaluation; repeatable automation-heavy binary analysis pipelines); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-pro-mcp]], [[ida-codex-mcp]], [[ida-buddy]], [[ida-cli]], [[ida-cyberchef]], and [[idassist]].
+
 - **2026-08-24** — ingest `description:HexRaysSA/ida-cyberchef`: entity [[ida-cyberchef]] (HexRaysSA; Python Qt IDA Pro plugin; CyberChef-style decode/encode/transformation pipelines in-IDA; malware analysis and binary triage); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[big5-decode-ida]], [[hrtng]], [[yara4ida]], [[ida-jm-xorstr-decrypt-plugin]], and [[ida-gameguard-str-dec]].
 
 - **2026-08-24** — ingest `description:HexRaysSA/rax`: entity [[rax]] (HexRaysSA; Rust self-checking multi-arch CPU emulator; x86/x64/ARM32/AArch64/Hexagon/RISC-V; SMIR JIT; instruction-level diff vs KVM/QEMU oracles; Linux boot, SDE trace, GDB stub for IDA; binary analysis / fuzzing / IDA Pro integration); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[unxorer]], [[ripr]], [[emulator]], [[unicorn-pe]], [[zyemu]], [[hex-rays-deob]], [[hrtng]], and [[qemu-nyx]].
