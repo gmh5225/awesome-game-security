@@ -1215,6 +1215,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [game-design-documents](entities/game-design-documents.md) — curated classic game design docs and PDFs (Doom, GTA, Fallout, Planescape: Torment, etc.; Game Develop / guide)
 - [game-engine-detector](entities/game-engine-detector.md) — Python APK/IPA game-engine detector (Mobile Game)
 - [gamedev](entities/gamedev.md) — Chinese-language curated gamedev resource index (tools, mixed reality, engine frameworks, learning; README [Unity]; Game Develop / guide)
+- [GameDev MCP Server](entities/gamedev-mcp-server.md) — engine-agnostic C# ASP.NET Core MCP proxy host for Unity-MCP, Godot-MCP, and Unreal-MCP plugins; SignalR bridge; stdio/streamableHttp; OAuth/session handling; Docker/.NET tool (IvanMurzak; Game Develop / MCP)
 - [GameDev Resources](entities/gamedev-resources.md) — curated index across art/code/engines/tooling/design/monetization; paid/free/OSS availability labels (Kavex; Game Development resources / Game Develop / guide)
 - [bgfx](entities/bgfx.md) — cross-platform rendering library (D3D9/11/12, Metal, OpenGL/ES, Vulkan, WebGPU; shaderc GLSL cross-compiler; Rendering library)
 - [GPlayEngine](entities/gplayengine.md) — GamePlay 3D v3.0 fork (BGFX replaces OpenGL 2.x; SDL2 + deferred pipeline + Bullet + ImGui editor; DirectX/Vulkan/Metal/OpenGL; Game Engine / source [C++ 2D/3D])
