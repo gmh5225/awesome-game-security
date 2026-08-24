@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JustasMasiulis/rep_mov_ept_detecc`: entity [[rep-mov-ept-detecc]] (JustasMasiulis; Windows C++ PoC; REP MOVS fault vs uninterrupted execution; overwrite-pattern signal for EPT hooking/access monitoring; compact single-file + executable memory + exception handling; anti-cheat / hypervisor detection research; README REP MOV based EPT detection); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[ermsb-meme]], [[ept-hook-detection]], [[bloodhound]], [[hypervisor-detection]], [[ophion]], [[hypervisor]], and [[xorstr]].
+
 - **2026-08-24** — ingest `description:JustasMasiulis/xorstr`: entity [[xorstr]] (JustasMasiulis; C++17 compile-time string encryption; SSE/AVX vectorized inline decrypt; compile-time keys; keeps string data out of normal read-only sections; widely used in security tooling / RE / game-security experiments; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[ida-jm-xorstr-decrypt-plugin]], [[anti-xorstr]], [[skcrypter]], [[mystic-xorstr]], [[obfuscate]], and [[crystr]].
 
 - **2026-08-24** — ingest `description:JusticeRage/Gepetto`: entity [[gepetto]] (JusticeRage; Python IDAPython IDA Pro plugin; LLM explain decompiled functions + variable rename + code comments; menu actions + hotkeys; cloud/local multi-provider config; malware/software/game-security RE; cheat / IDA Plugins / `[ChatGPT]`); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[wpechatgpt]], [[ida-gpt]], [[ida-llm-explainer]], and [[ida-gepetto]] (apkunpacker local fork).
