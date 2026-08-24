@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Hellonihaohh/yolo-v8m`: entity [[yolo-v8m]] (Hellonihaohh; pretrained YOLOv8m weights-only distribution—license + split compressed model artifact; no training/inference codebase; downstream detection-based game automation research; cheat / PUBG yolo dataset); cited on [[overviews/game-hacking]] and [[concepts/ai-aimbot-detection]]; cross-linked [[yolo-v8s]], [[yolov5-pubg]], [[pubg-ai-yolov4]], [[rookieai-yolov8]], [[yolov8-overlay-cs2]], and [[waldo]].
+
 - **2026-08-24** — ingest `description:Hellonihaohh/yolo-v8s`: entity [[yolo-v8s]] (Hellonihaohh; pretrained YOLOv8s weights-only distribution—license + compressed model artifact; no README or train/infer scripts; downstream game CV experiments; cheat / PUBG yolo dataset); cited on [[overviews/game-hacking]] and [[concepts/ai-aimbot-detection]]; cross-linked [[yolov5-pubg]], [[pubg-ai-yolov4]], [[rookieai-yolov8]], [[yolov8-overlay-cs2]], and [[waldo]].
 
 - **2026-08-24** — ingest `description:Hendi48/Magicmida`: entity [[magicmida]] (Hendi48; Object Pascal Themida auto-unpacker; custom user-mode debugger; 32/64-bit PE + .NET dump; import rebuild + section restore; BeaEngine disasm; GUI + `/unpack` CLI; ScyllaHide anti-debug settings; Fix Themida); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[magicmida-rs]], [[themida-research]], [[themida-unmutate]], [[themidie]], [[unlicense]], [[unpacker]], and [[bobalkkagi]].

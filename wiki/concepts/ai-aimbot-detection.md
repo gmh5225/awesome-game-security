@@ -19,6 +19,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Ark.md
   - wiki/sources/descriptions/gmh5225__AI-FPS-b00m-h3adsh0t.md
   - wiki/sources/descriptions/Hellonihaohh__yolo-v8s.md
+  - wiki/sources/descriptions/Hellonihaohh__yolo-v8m.md
   - wiki/sources/descriptions/dungnotnull__game-cheating-exploit-detection-agent-skill.md
   - wiki/sources/descriptions/dqforgive-sudo__pubg-ai-yolov4.md
   - wiki/sources/descriptions/chrisgdt__DELBOT-Mouse.md
@@ -74,6 +75,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[maplestory-worlds-automation]] — title-specific YOLO automation
 - [[yolov5-pubg]] — PUBG YOLOv5 object-detection / modding (Python; offensive CV pipeline)
 - [[yolo-v8s]] — PUBG YOLOv8s pretrained weights-only distribution (Hellonihaohh; license + compressed model artifact; no README or train/infer scripts; downstream game CV; cheat / PUBG yolo dataset)
+- [[yolo-v8m]] — PUBG YOLOv8m pretrained weights-only distribution (Hellonihaohh; license + split compressed model artifact; no training/inference codebase; downstream detection-based game automation research; cheat / PUBG yolo dataset)
 - [[pubg-ai-yolov4]] — PUBG YOLOv4/Darknet object detection (Darknet; screenshot-trained; YOLOv4-tiny/YOLOv7 configs; label tools; image/video scripts; dqforgive-sudo)
 - [[camera-triggerbot]] — camera triggerbot (movement/color around crosshair; no trained model; cheat / triggerbot & aimbot)
 - [[opencv-smart-aimbot]] — OpenCV + triggerbot (C++; classical CV; cheat / triggerbot & aimbot; gmh5225)
