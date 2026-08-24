@@ -2243,7 +2243,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [open.mp-anticheat](entities/open.mp-anticheat.md) — open.mp/SA-MP server AC (client self-memory sigs + RakNet; C++)
 - [open-source-engines](entities/open-source-engines.md) — curated open-source game engine index (raylib and peers; Game Engine / guide)
 - [open-source-games](entities/open-source-games.md) — open-source game index (Commander Keen, Cosmo's Cosmic; classic OSS titles; Game Develop Guide)
-- [openfpga-gbc-cheats-ui](entities/openfpga-gbc-cheats-ui.md) — Analogue Pocket GB/GBC openFPGA cheat picker (Python/tkinter; libretro DB; Game Genie/GameShark; `.cht` SD deploy; Game Boy)
+- [openfpga-gbc-cheats-ui](entities/openfpga-gbc-cheats-ui.md) — Pocket Cheat Picker; Analogue Pocket GB/GBC openFPGA `.cht` deploy (Python/tkinter; libretro DB; Game Genie/GameShark; CPU-read vs RAM-write flags; openfpga-GBC-cheats parser; Game Boy)
 - [open-reverselab](entities/open-reverselab.md) — agent-native RE lab (180+ technique articles, 100+ MCP tools; knowledge router; Ghidra/Frida/x64dbg/jadx; web CTF, APK/DEX, PE, crypto, game cheating/AC boards; LING71671)
 - [openarena-engine](entities/openarena-engine.md) — OpenArena ioquake3 fork (Quake III renderer/audio/networking/runtime; make-based multi-platform C/C++; classic FPS multiplayer engine study; Game Engine / source [quake3])
 - [openrct2](entities/openrct2.md) — open-source RollerCoaster Tycoon 2 reimplementation (cooperative multiplayer, expanded editing, scripting/plugins; CMake C++; broad platform support; Game Engine / source)
