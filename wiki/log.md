@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:HoShiMin/Kernel-Bridge`: entity [[kernel-bridge]] (HoShiMin; modern C++ Windows kernel driver framework/template; Intel VT-x + AMD-V hypervisor-assisted components; memory/IOCTL/hook/CPUID/MSR abstractions; advanced debugging, monitoring, and AC kernel security research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[hyperdbg]], [[vt-debuger]], [[hypervisor-from-scratch]], [[driver-base]], and [[windows-kernel-rs]].
+
 - **2026-08-24** — ingest `description:HulkOperator/Spoof-RetAddr`: entity [[spoof-ret-addr]] (HulkOperator; x64 WinAPI return-address spoofing PoC; C + NASM; stack manipulation; call-stack obfuscation / anti-detection education; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[ret-spoofing]], [[callstackspoofer-2]], and [[x86-ret-spoof]].
 
 - **2026-08-24** — ingest `description:Hydr8gon/3Beans`: entity [[3beans]] (Hydr8gon; C++ LLE Nintendo 3DS emulator; ARM9/ARM11 + Teak DSP interpreter cores; full OS boot from boot9/boot11/NAND dumps; HLE/LLE audio; software + hardware-accelerated GPU; Windows/macOS/Linux/Android; Nintendo 3DS / preservation + hardware-internals study); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ctr-composer]] and [[ocarina-ctr-composer]].
