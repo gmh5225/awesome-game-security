@@ -1749,6 +1749,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel_build_action](entities/kernel-build-action.md) — GitHub Actions automated kernel build (TypeScript/Python; Android kernel driver CI; dabao1955)
 - [kernel build scripts](entities/kernel-build-scripts.md) — Bash Android GKI/non-GKI kernel build automation (repo sync, patches, defconfig, packaging; KernelSU/SUSFS; Pixel/OnePlus/Xiaomi; TheWildJames)
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
+- [Kernel_driver_hack](entities/kernel-driver-hack.md) — Android/Linux kernel driver for process memory R/W via device ioctl (module base lookup; C kernel + userland; Jiang-Night)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
 - [kernel_payload_comms](entities/kernel-payload-comms.md) — shared-memory KM↔UM payload channel (gmh5225; cheat / driver communication)
 - [Kernelmode-DLL-Injector](entities/kernelmode-dll-injector.md) — kdmapper + Intel BYOVD kernel manual-map DLL injector (PE sections/imports/TLS; IOCTL comms; Manual Map; YouNeverKnow00)
