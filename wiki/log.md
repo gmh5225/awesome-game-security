@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Idov31/Venom`: entity [[idov31-venom]] (Idov31; single-header C++ covert Windows networking; hidden detached browser process + stolen socket reuse; Win32/Winsock handle discovery/duplication; evasion-oriented networking research; slug disambiguated from [[venom]]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[handle-ripper]], [[launcher-abuser]], [[ndisapi]], and [[venom]].
+
 - **2026-08-24** — ingest `description:InfiniteC0re/OpenBarnyard`: entity [[openbarnyard]] (InfiniteC0re; WIP Barnyard + TOSHI 2.0 C++ reimplementation; DirectX 8/OpenGL via Premake; RE progress vs original binary addresses; Detours SDK hooks, mod loading, ImGui debug, sample graphics/speedrun mods; Ghidra RE workflow; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[rsdkv5-decompilation]], [[gta-reversed-modern]], [[devilution]], and [[detours]].
 
 - **2026-08-24** — ingest `description:Inndy/MSDoggy`: entity [[msdoggy]] (Inndy; legacy Taiwan MapleStory game hack; C/C++ + inline assembly hooks; mob behavior changes + item-filter logic; low-level patching + optional protector integration; historical MMORPG cheat RE; cheat / game:maplestory [TMS Old Hack]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[msb]], [[msc]], and [[twms-hacking-data]].

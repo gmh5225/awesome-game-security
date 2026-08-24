@@ -1580,7 +1580,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [idawilli](entities/idawilli.md) — Willi Ballenthin IDA Pro scripts/plugins/utils (function analysis, string decrypt, struct/xref automation; cheat / IDA Plugins)
 - [idenLib](entities/idenlib.md) — IDA plugin: static library function ID (VC++/STL sigs; FLIRT-adjacent; Cheat IDA Plugins)
 - [idenLibX](entities/idenlibx.md) — x64dbg plugin: static library function ID (signatures → live names; Cheat x64dbg Plugins)
-
+- [idov31-venom](entities/idov31-venom.md) — Windows covert networking library (Idov31; single-header C++; hidden detached browser + stolen socket; Winsock handle discovery/duplication; evasion-oriented networking research; slug disambiguated from [[venom]])
 
 - [IDADeflat](entities/idadeflat.md) — IDA Pro CFF deflatten (angr; OLLVM-style)
 - [IL22CPP](entities/il22cpp.md) — C++ IL2CPP internal reflection remake (metadata resolution, managed type reconstruction, VM interface; gmh5225)
