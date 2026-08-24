@@ -1612,6 +1612,7 @@ sources:
   - wiki/sources/descriptions/Inndy__MSDoggy.md
   - wiki/sources/descriptions/IntelSDM__7DTD.md
   - wiki/sources/descriptions/IntelSDM__RustDMACheat.md
+  - wiki/sources/descriptions/Hydr8gon__3Beans.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -2477,6 +2478,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android Windows compatibility via [[winlator]] (Box86/Box64 x86→ARM translation + Wine + PRoot container; Mesa Turnip/VirGL GPU; virtual desktop + touch; runs Windows x86/x64 apps/games on ARM Android; cheat / `Windows Emulator`) sits in the cross-architecture binary-translation lane beside [[levo]] and WHP guests such as [[winvisor]]. (source: wiki/sources/descriptions/brunodev85__winlator.md)
 - Linux x86/x64-on-RISC-V userspace emulation via [[felix86]] (JIT recompiler, vectorized SSE translation, RISC-V extensions; modern C++; cross-architecture binary execution on RISC-V Linux hosts; cheat / `Linux Emulator`) complements Android [[winlator]] in the inverse translation direction. (source: wiki/sources/descriptions/OFFTKP__felix86.md)
 - Nintendo Switch homebrew memory/cheat tooling such as [[se-tools]] (scanner / pointer search / cheat manager / live viewer via Atmosphere `dmnt:cht`) sits in the console `Nintendo Switch` lane. (source: wiki/sources/descriptions/tomvita__SE-tools.md)
+- LLE Nintendo 3DS emulator [[3beans]] (Hydr8gon; C++; ARM9/ARM11 + Teak DSP cores; full OS boot from boot9/boot11/NAND dumps; HLE/LLE audio; software + hardware GPU rendering; Windows/macOS/Linux/Android; console `Nintendo 3DS` / preservation + hardware-internals study). (source: wiki/sources/descriptions/Hydr8gon__3Beans.md)
 - Raw Luma3DS `.3gx` overlay/cheat engine template [[ctr-composer]] (self-rendered UI; no CTRPluginFramework; any-Title-ID starter / revive old `.plg`/`.3gx`) sits in the console `Nintendo 3DS` lane. (source: wiki/sources/descriptions/samaBR85__CTRComposer.md)
 - OoT3D Luma3DS `.3gx` cheat/tools overlay [[ocarina-ctr-composer]] (built on [[ctr-composer]]; direct memory writes; cheat search / hex editor / RAM dump) sits in the same `Nintendo 3DS` lane. (source: wiki/sources/descriptions/samaBR85__OcarinaCTRComposer.md)
 - General-purpose Switch read/extract tooling such as [[nstool]] (format introspection / extraction; console-emulator / Switch research) sits in the `Nintendo Switch` lane. (source: wiki/sources/descriptions/jakcron__nstool.md)
