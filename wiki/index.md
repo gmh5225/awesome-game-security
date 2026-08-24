@@ -1034,6 +1034,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EtwExplorer](entities/etw-explorer.md) — GUI browse of ETW providers / event manifests
 - [EtwWatcher](entities/etw-watcher.md) — web UI browse/diff ETW provider manifests across Windows builds (ETWInspector-backed)
 - [EtwKeyboardDetection](entities/etw-keyboard-detection.md) — Windows C++ ETW PoC detecting emulated vs physical keyboard input via USB telemetry paths; manual setup + keyboard tuning (Oliver-1-1; input integrity research; README [ETW])
+- [EtwLeakKernel](entities/etwleakkernel.md) — ETW stack-trace PoC leaking kernel pointers (Idov31; C++; Administrator ETW consumer; exploitation / kernel address exposure research)
 - [InfinityHook](entities/infinityhook.md) — original C ETW syscall hooking library; patches ETW trace callback pointer without SSDT/ntoskrnl inline hooks (everdox; Some Tricks / ETW Hook)
 - [InfinityHook Pro Max](entities/infinityhook-promax.md) — C++ InfinityHook successor; driver hook management + disassembly; multi-Windows compatibility; VM-tested; kernel security / AC research (ThomasonZhao; ETW Hook WIN11)
 - [InfinityHook Latest](entities/infinityhook-latest.md) — C/C++ VS kernel driver; ETW + HalPrivateDispatchTable syscall interception for newer Windows; PMC/trace RE notes; AC bypass / kernel security research (Oxygen1a1; ETW Hook WIN11)

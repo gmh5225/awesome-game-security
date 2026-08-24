@@ -17,7 +17,8 @@ sources:
   - wiki/sources/descriptions/Oxygen1a1__InfinityHook_latest.md
   - wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md
   - wiki/sources/descriptions/Mr-Un1k0d3r__AMSI-ETW-Patch.md
-updated: 2026-08-22
+  - wiki/sources/descriptions/Idov31__EtwLeakKernel.md
+updated: 2026-08-24
 confidence: high
 ---
 
@@ -32,6 +33,8 @@ Event Tracing for Windows (ETW) provider/consumer architecture used by EDR and a
 - **Controllers** manage sessions (`xperf`, `tracelog`, `logman`).
 
 Key kernel providers include process/thread lifecycle, file I/O, and audit-API call streams. Schema exploration tools such as [[etw-explorer]] help map manifest fields before writing detectors. (source: wiki/sources/descriptions/zodiacon__EtwExplorer.md)
+
+Consumer-side **stack trace** fields can expose **kernel pointers** when providers emit call stacks — PoCs such as [[etwleakkernel]] start an ETW session, request provider stack data, and parse events to recover addresses for KASLR-bypass and exploit-development research. (source: wiki/sources/descriptions/Idov31__EtwLeakKernel.md)
 
 ## Threat Intelligence provider
 
@@ -66,4 +69,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
