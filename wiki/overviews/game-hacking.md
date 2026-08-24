@@ -1114,6 +1114,7 @@ sources:
   - wiki/sources/descriptions/gregkh__kernel-development.md
   - wiki/sources/descriptions/djolertrk__kLLDB.md
   - wiki/sources/descriptions/guoxing2024__magicmida-rs.md
+  - wiki/sources/descriptions/Hendi48__Magicmida.md
   - wiki/sources/descriptions/gmh5225__vscript_lua51.md
   - wiki/sources/descriptions/gmh5225__wasm-ceserver.md
   - wiki/sources/descriptions/gmh5225__Wizard-Loader.md
@@ -1844,6 +1845,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - VM-based code obfuscation engine via [[vmprotect]] (software CPU VM with memory/I/O ops; gmh5225; cheat / Fix VMP study surface) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/gmh5225__VMProtect.md)
 - Themida / WinLicense 3.x virtualization research via [[themida-research]] (`VM_CONTEXT` layout, handler dispatch, de-virtualization / Triton lifting ideas) sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/stuxnet147__Themida-Research.md)
 - Themida IDA plugin / Fix Themida via [[tde]] (devirtualization engine for Themida-protected binaries) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/sodareverse__TDE.md)
+- Original Pascal Themida auto-unpacker via [[magicmida]] (Hendi48; custom user-mode debugger; 32/64-bit PE + .NET dump; import rebuild + section restore; BeaEngine disasm; GUI + `/unpack` CLI; ScyllaHide anti-debug settings; Fix Themida) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/Hendi48__Magicmida.md)
 - Automatic Themida v1/v2/v3 unpack via [[magicmida-rs]] (Rust Win32 Debug API debugger; OEP discovery + memory dump + PE IAT/section rebuild; optional ScyllaHide anti-debug bypass; verify mode) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/guoxing2024__magicmida-rs.md)
 - Themida 3.1.3 Tiger red64 unpack/unwrap via [[bobalkkagi]] (Python; Unicorn emulation + win10_v1903 API hooks; fast/hook_block/hook_code modes; optional OEP; planned devirt; Capstone/distorm3) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/bobalkkagi__bobalkkagi.md)
 - Oreans VM unvirtualization in Ghidra via [[ghidr-orean]] (Marisa-Chan; Python Ghidra scripts; Deathway Unvirtualizer reimplementation; CISC complete, TIGER largely finished, RISC/FISH assembler configs; main Orean script + configurable working directory; Themida/WinLicense/Code Virtualizer; Cheat Fix Themida / Ghidra Scripts) also sits in the Cheat Fix Themida lane. (source: wiki/sources/descriptions/Marisa-Chan__GhidrOrean.md)

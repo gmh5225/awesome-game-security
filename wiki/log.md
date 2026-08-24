@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Hendi48/Magicmida`: entity [[magicmida]] (Hendi48; Object Pascal Themida auto-unpacker; custom user-mode debugger; 32/64-bit PE + .NET dump; import rebuild + section restore; BeaEngine disasm; GUI + `/unpack` CLI; ScyllaHide anti-debug settings; Fix Themida); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[magicmida-rs]], [[themida-research]], [[themida-unmutate]], [[themidie]], [[unlicense]], [[unpacker]], and [[bobalkkagi]].
+
 - **2026-08-24** — ingest `description:Herooyyy/Free-DMA-Firmware-pcileech`: entity [[free-dma-firmware-pcileech]] (Herooyyy; Verilog/SystemVerilog [[pcileech-fpga]] firmware; Vivado IP + board build scripts; PCIe config-space + MSI-X interrupt handling; multiple hardware persona profiles; VGK/Faceit DMA bypass research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-activator-anti-crack]], [[pcileech-amdpci]], [[pcileech-intel-i226-v-fullemu]], [[pcileech-isabridge]], and [[vgk-dma-bypass]].
 
 - **2026-08-24** — ingest `description:Herooyyy/Pcileech-AMDPCI`: entity [[pcileech-amdpci]] (Herooyyy; Verilog/SystemVerilog AMD PCI device-model [[pcileech-fpga]] profile; Vivado IP + 35T/75T/ZDMA build scripts; no-interrupt communication + hardware identity spoofing; Faceit/Vanguard hardware-signature research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-activator-anti-crack]], [[pcileech-intel-i226-v-fullemu]], [[pcileech-isabridge]], [[dma-pcileech]], and [[vgk-dma-bypass]].

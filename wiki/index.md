@@ -1919,6 +1919,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [m0dern_p4cker](entities/m0dern-p4cker.md) — C/C++ ELF binary packer (`[ELF]`; Anti Cheat → Binary Packer)
 - [macroquad](entities/macroquad.md) — Rust 2D game lib (shaders / render / audio; Game Engine / source)
 - [methanekit](entities/methanekit.md) — cross-platform C++ graphics/application framework (D3D12/Vulkan/Metal; shared shader workflows; CMake; tutorials/samples/modular runtime; Game Engine / source)
+- [magicmida](entities/magicmida.md) — Pascal Themida auto-unpacker (custom user-mode debugger; 32/64-bit PE + .NET dump; import rebuild; ScyllaHide; Fix Themida; Hendi48)
 - [magicmida-rs](entities/magicmida-rs.md) — Rust Themida automatic unpacker (Win32 Debug API; OEP + IAT rebuild; ScyllaHide; Fix Themida)
 - [midgetpack](entities/midgetpack.md) — ELF binary packer (password + Curve25519 challenge-response; AES-128/HMAC-SHA256; Linux/FreeBSD x86/x86-64/ARM cross-arch; Anti Cheat → Binary Packer `[ELF]`; arisada)
 - [MagicSigner](entities/magic-signer.md) — sign with leaked certs (admin; TLS side effects; AC sign tools)
