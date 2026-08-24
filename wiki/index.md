@@ -1904,6 +1904,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MopCore547](entities/mopcore547.md) — WoW MoP private-server emulator (SkyFire; 5.4.7 client; C++/CMake; world simulation / player management / NPC scripting / network protocol; cheat / game:wow)
 - [love](entities/love.md) — LOVE2D 2D Lua game framework (OpenGL/Metal; Box2D; `.love` archives; Game Engine / source)
 - [LplPlugin](entities/lplplugin.md) — experimental C++23 FullDive Engine (Vulkan ECS, Morton spatial partitioning, Linux kernel IPC module, OpenBCI BCI stack; Game Engine / source)
+- [Luth](entities/luth.md) — custom C++ Vulkan game engine (render graph, PBR, CSM, GTAO, GPU skinning, ECS, fiber job system, integrated editor; Game Engine / source [C++ 2D])
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
 - [lumixengine_maps](entities/lumixengine-maps.md) — Lumix OSM map downloader (roads/buildings; Plugins:Lumix)
