@@ -800,6 +800,7 @@ sources:
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/KuhakuPixel__AceTheGame.md
   - wiki/sources/descriptions/Kix48__R6Updater.md
+  - wiki/sources/descriptions/Katharsas__ghidra-struct-importer.md
   - wiki/sources/descriptions/KaylinOwO__Project-Branthium.md
   - wiki/sources/descriptions/Ke4ton__hardware_bypass.md
   - wiki/sources/descriptions/Keyzp1337__Fortnite.md
@@ -1930,6 +1931,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C++ RTTI class hierarchy visualization and RTTI-based rename via [[pyclassinformer]] (IDA Pro plugin; library/method classification, member coloring; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/herosi__PyClassInformer.md)
 - GCC RTTI class hierarchy and vtable reconstruction from stripped binaries via [[ida-medigate]] (IDA Pro Python; Hex-Rays union type disambiguation; bundled xref tracker; IoT/firmware/game-engine polymorphic C++; cheat / IDA Plugins) sits in the same C++ static-RE lane. (source: wiki/sources/descriptions/gmh5225__ida_medigate.md)
 - C++ RTTI/class metadata recovery in Ghidra via [[ghidra-cpp-class-analyzer]] (Java extension; GCC/Clang/MSVC RTTI models, vtables, ctors/dtors, inheritance reconstruction, class hierarchy views; cheat / Ghidra Plugins) sits in the same C++ static-RE lane beside [[rtti-parser]] and [[pyclassinformer]]. (source: wiki/sources/descriptions/astrelsky__Ghidra-Cpp-Class-Analyzer.md)
+- Targeted Ghidra C struct import from leaked SDKs or decompiled headers via [[ghidra-struct-importer]] (Katharsas; Java GhidraScript; per-struct import with dependency resolution beyond Parse C Source; iterative layout reconstruction; cheat / Struct Importer) sits in the same C++ static-RE lane beside [[ghidra-cpp-class-analyzer]] and [[classmaker]]. (source: wiki/sources/descriptions/Katharsas__ghidra-struct-importer.md)
 - IDA 9.X C++ vtable ops via [[ida-vtable-tools]] (dump `.hpp` interface skeleton / class-prefix rename / `this` type / slot index·offset; Python) sit in the Cheat IDA Plugins lane. (source: wiki/sources/descriptions/oxiKKK__ida-vtable-tools.md)
 - C++ class/vtable/signature management via [[classy]] (gmh5225; PyQt5 GUI; vtable generation, function-to-class assignment, Itanium mangling, struct mapping, C header export; cheat / IDA Plugins) sits in the same C++ static-RE lane beside [[ida-vtable-tools]] and [[ida-medigate]]. (source: wiki/sources/descriptions/gmh5225__Classy.md)
 - Automatic C++ class reconstruction from constructor pseudocode via [[classmaker]] (Pycatchown; Python IDAPython; traces vtable assignments, creates/updates IDA structs, naming heuristics for layouts; 32/64-bit practical reversing; cheat / IDA Plugins) sits in the same C++ static-RE lane beside [[pyclassinformer]] and [[ida-vtable-tools]]. (source: wiki/sources/descriptions/Pycatchown__ClassMaker.md)

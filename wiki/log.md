@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:Katharsas/ghidra-struct-importer`: entity [[ghidra-struct-importer]] (Katharsas; Java GhidraScript; imports individual C structs with dependency resolution; workaround for Parse C Source limitations; SDK-leak/decompiled-header layout reconstruction; reverse engineering + game security analysis; cheat / Struct Importer); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-cpp-class-analyzer]], [[ghidra-scripts]], and [[classmaker]].
+
 - **2026-08-24** — ingest `description:KaylinOwO/Project-Branthium`: entity [[project-branthium]] (KaylinOwO; Windows hybrid UM+KM cheat framework; C++ Visual Studio; user-mode client + kernel driver; aimbot, ESP, entity caching, weapon prediction; ImGui + DirectX 9 menu/overlay; Apex Legends–style game-hacking experimentation + RE workflows; cheat / game:apex legends); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[apex-legends-cheat]], [[apex-mizu-base]], [[world-to-screen]], and [[easy-anti-cheat]].
 
 - **2026-08-24** — ingest `description:Kavex/GameDev-Resources`: entity [[gamedev-resources]] (Kavex; curated Markdown index across art, code, engines, tooling, design, and monetization; structured sections with paid/free/OSS availability labels; discoverability-focused reference library; Game Development resources / Game Develop / guide); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[learn-awesome-gamedev]], [[anything-about-game]], [[gamedev-libraries]], and [[awesome-educational-games]].
