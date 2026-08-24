@@ -477,6 +477,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
 - [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
+- [ce_speed_hack](entities/ce-speed-hack.md) — compact C++ CE-style speed hack (Detours timing hooks; core hooking logic for learners; user-mode time manipulation; IamSanjid)
 - [ceserver-ios](entities/ceserver-ios.md) — Cheat Engine ceserver for jailbroken iOS (desktop CE remote scan/edit/pointer scan; dynamic analysis; gmh5225)
 - [ceserver-rawmem](entities/ceserver-rawmem.md) — Cheat Engine ceserver over raw physical memory (`/dev/mem` or DMA; bypasses OS process APIs and anti-cheat monitoring; cs1ime)
 - [CapcomDKOM](entities/capcom-dkom.md) — Capcom.sys BYOVD DKOM tool (IOCTL 0xAA013044; kernel shellcode via MmGetSystemRoutineAddress; gmh5225)

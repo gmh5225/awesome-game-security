@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IamSanjid/ce_speed_hack`: entity [[ce-speed-hack]] (IamSanjid; compact C++ CE-style speed hack; Detours timing hooks; core hooking logic for learners studying time manipulation and basic user-mode game hacking; cheat practice); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[speed-hack]], [[speedhack]], [[cheat-engine]], and [[detours]].
+
 - **2026-08-24** — ingest `description:Iamgublin/ida-codex-mcp`: entity [[ida-codex-mcp]] (Iamgublin; Python IDA plugin TCP JSON bridge + MCP stdio server; function listing, call graphs, pseudocode/disassembly, xrefs, strings, memory reads, rename/type helpers; AI-assisted RE automation); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[iida-mcp]], [[ida-mcp-server-plugin]], [[ida-mcp-server]], [[ida-cli]], [[ida-buddy]], and [[ghidra-mcp]].
 
 - **2026-08-24** — ingest `description:IcEy-999/Drv_Hide_And_Camouflage`: entity [[drv-hide-and-camouflage]] (IcEy-999; C ring-0; unsigned-driver load masking + identity camouflage via unexported kernel routines, manual offset init, object/import-table manipulation; modern Windows version tests; kernel security / anti-detection research; README Hide Driver); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hide-driver]], [[hide-driver-testing]], [[clear-driver-traces]], [[nullmap]], [[ntoskrnl-viewer]], [[kernel-pool-scanning]], and [[openark]].

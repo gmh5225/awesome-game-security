@@ -716,6 +716,7 @@ sources:
   - wiki/sources/descriptions/jseclab__obj2shellcode.md
   - wiki/sources/descriptions/wtsxDev__reverse-engineering.md
   - wiki/sources/descriptions/wiresock__ndisapi.md
+  - wiki/sources/descriptions/IamSanjid__ce_speed_hack.md
   - wiki/sources/descriptions/IcyModz420__X360GameHack2025.md
   - wiki/sources/descriptions/Idov31__Venom.md
   - wiki/sources/descriptions/hasaneyldrm__webcheat.md
@@ -1763,6 +1764,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - From-scratch 64-bit MHS successor [[mhsx]] (L-Spiro; C++ Visual Studio; Windows x86/x64 live attach; data-type/pointer/string/expression scans, Oniguruma regex, process-aware hex editor, x86/x64 disasm, PE inspection, speedhack, floating-point studio, hotkeys, found-address management; cheat / memory searcher-debugger) sits beside [[cheat-engine]] and [[squalr-sharp]] as a native Windows memory-analysis alternative. (source: wiki/sources/descriptions/L-Spiro__MhsX.md)
 - Lightweight injectable speedhack DLL [[speedhack]] (absoIute; C++; Detours hooks on timing APIs to accelerate, slow, or pause perceived runtime; Cheat / SpeedHack lane beside [[cheat-engine]] speedhack) (source: wiki/sources/descriptions/absoIute__Speedhack.md)
 - Cheat Engine–style injectable speed-hack DLL [[speed-hack]] (Letomaniy; C++ Visual Studio; Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat practice + AC time-manipulation research) (source: wiki/sources/descriptions/Letomaniy__Speed-Hack.md)
+- Compact CE-style speed-hack sample [[ce-speed-hack]] (IamSanjid; C++ Detours timing hooks; focused core hooking logic for learners studying time manipulation and basic user-mode game hacking; cheat practice) (source: wiki/sources/descriptions/IamSanjid__ce_speed_hack.md)
 - Official CE Lua gamepad UI add-on [[controller-mode]] (Xbox-style D-pad navigation, A/B confirm/cancel, controller-friendly `.CT` file picker, experimental Steam Deck on-screen keyboard via Steam API; Lua + embedded C; cheat / CE plugin) extends [[cheat-engine]] for handheld/couch live memory editing. (source: wiki/sources/descriptions/cheat-engine__ControllerMode.md)
 - Community CE Lua extension pack [[ce-lua-extensions]] (Skyrimfus; autorun loader + breakpoint cleanup, function-caller lookup, template insertion, interface workflow utilities; cheat / Lua Extensions) accelerates RE and memory-analysis scripting on [[cheat-engine]]. (source: wiki/sources/descriptions/Skyrimfus__CE-lua-extensions.md)
 - CE Mono helper toolkit [[cheatengine-mono-helper]] (JasonGoemaat; Lua scripts + CE table assets; searchable class/field/method views, method hook templates, disassembly jump, reusable runtime monitoring table scripts; fast Mono introspection for Unity Mono RE; cheat / CE Mono Helper) extends [[cheat-engine]] for managed-game workflows beside [[mono-external-lib]] and [[monohook]]. (source: wiki/sources/descriptions/JasonGoemaat__CheatEngineMonoHelper.md)
