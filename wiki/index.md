@@ -3022,6 +3022,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vac-hooks](entities/vac-hooks.md) — WinAPI hook/logging on VAC-used APIs (C DLL; danielkrupinski; explore anticheat:vac)
 - [Vook](entities/vook.md) — VAC hook research (explore anticheat:vac)
 - [vanguard-import-resolver](entities/vanguard-import-resolver.md) — Resolve Vanguard `vgk.sys` protected kernel imports; document import-resolution mechanism (gmh5225)
+- [vanguard-service-manager-vgk-control](entities/vanguard-service-manager-vgk-control.md) — Windows CLI: check `vgk` status/auto-start and toggle Vanguard service auto-start via SCM (Karwmam)
 - [vanguard-update-notifier](entities/vanguard-update-notifier.md) — Discord bot: poll Riot clientconfig, hash Vanguard setup, alert on AC updates
 - [vanguardtrace](entities/vanguardtrace.md) — Decrypt/intercept Vanguard `vgk.sys` encrypted imports; signature-scan table, hook with re-encrypt (armvirus)
 - [val-exception-handler](entities/val-exception-handler.md) — Vanguard exception-dispatch PoC (hardware exceptions / VEH; ZwRaiseException dump)
