@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:JGonz1337/r6-internal`: entity [[r6-internal]] (JGonz1337; C++ internal cheat base; small SDK + hooking utilities + ImGui/D3D11 overlay; snapline ESP, targeting, keyboard handling, entity access; educational internal architecture prototyping; cheat / game:r6 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[r6-internal-v3]], [[epic-r6-v9]], [[r6table-internal]], [[internal-rainbow-six-cheat-v3]], [[present-hook]], and [[world-to-screen]].
+
 - **2026-08-24** — ingest `description:JKornev/cfgdump`: entity [[cfgdump]] (JKornev; C++ WinDbg extension; print CFG maps, query address ranges, list protected regions; exploit development, binary hardening validation, low-level Windows debugging; Analyze Control Flow Guard map); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[cfg-find-hidden-shellcode]], [[x64dbg-xfg-marker]], [[cet-research]], [[hidden]], and [[awesome-windbg-extensions]].
 
 - **2026-08-24** — ingest `description:JKornev/hidden`: entity [[hidden]] (JKornev; WDK kernel driver + user-mode CLI/library; configurable rules hide files/directories/registry keys/processes + protect chosen processes from interference; WDK build scripts; reverse-engineering lab / controlled environment masking); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[blanket]], [[hide-file]], [[memfilter-fn-driver]], [[rootkit-2]], [[openark]], and [[volatility]].

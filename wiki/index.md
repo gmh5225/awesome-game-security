@@ -2532,6 +2532,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [R3nzSkin](entities/r3nzskin.md) — LoL skin changer (C++; client-side skin rendering; DLL injector; pattern scan + Python auto-updaters; KsDumper integration; Skin; Kurok00; cheat / game:lol)
 - [R3nzSkinTFT](entities/r3nzskin-tft.md) — LoL/TFT skin changer (C++; champion skin ID memory patch; client-only cosmetic swap; Skin; gmh5225; cheat / game:lol)
 - [R6-Internal-V3](entities/r6-internal-v3.md) — R6 internal: modding / SDK generation / memory analysis (C/C++)
+- [r6-internal](entities/r6-internal.md) — R6 internal cheat base: C++ SDK, hooking utils, ImGui + D3D11 overlay; snapline ESP, targeting, entity access (JGonz1337; educational internal architecture; cheat / game:r6 [Internal])
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-cheat-dumper](entities/r6-cheat-dumper.md) — R6 external cheat dumper: driver + rendering + animation (C/C++; cheat / game:r6 [External]; gmh5225)
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
