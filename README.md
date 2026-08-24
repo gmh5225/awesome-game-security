@@ -1059,6 +1059,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/milk-analyzer/vmpunpack [Generic x64 VMProtect/packer unpacker that drives samples through patched sogen emulation to OEP, dumps memory, and rebuilds PEs for IDA/Ghidra]
 - https://github.com/Lucyferek-nunu/vmp-unpacker [C++ dynamic VMProtect unpacker with anti-debug bypass, OEP discovery, and IAT repair]
 - https://github.com/tomhamidi97-arch/vmp-devirtualization-lab [Educational guide and lab notes on Android native-library VMProtect internals, dispatcher/handler recovery, and devirtualization workflows]
+- https://github.com/tomhamidi97-arch/frida-vmp-bypass [Frida boundary-hook writeup for reversing stacked VMProtect and OLLVM on Android via libc/JNI/Java exit monitoring]
 
 > Fix Themida
 - https://github.com/sodareverse/TDE
