@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-24** — ingest `description:IIIImmmyyy/AntiOllvm`: entity [[anti-ollvm]] (IIIImmmyyy; C# Arm64 simulated execution; OLLVM CFF dispatcher pattern ID + if-else CFG rebuild; Python IDA CFG extract + Keystone codegen; fake runtime; security/game-protection RE; Fix OLLVM); cited on [[concepts/control-flow-flattening]] and [[overviews/reverse-engineering]]; cross-linked [[ollvm-unflattener]], [[idadeflat]], [[deobfbr]], and [[armshellcode]].
+
 - **2026-08-24** — ingest `description:IIIImmmyyy/ArmShellCode`: entity [[armshellcode]] (IIIImmmyyy; ARM64 Android shellcode framework; position-independent arm64-v8a payloads; Dobby symbol resolution; ELF/proc-maps parsing, syscall wrappers, modular loader + custom linker scripts; exploit / runtime code-injection research; cheat / Android arm arm64-v8a ShellCode Generate); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dobby]], [[elf-got-patcher]], [[pyasm-patch]], [[adbi]], and [[android-super-inject]].
 
 - **2026-08-24** — ingest `description:IMXNOOBX/cs2-external-esp`: entity [[cs2-external-esp]] (IMXNOOBX; C++ Visual Studio; external CS2 ESP; out-of-process memory reads; handle hijacking; JSON config + offset maintenance scripts; GDI window overlay—boxes, names, health; external cheat architecture study; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[cs2external]], [[cs2-external-base]], [[cs2-offsets]], [[cs2-dumper]], and [[world-to-screen]].

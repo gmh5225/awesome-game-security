@@ -23,7 +23,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye](concepts/battleye.md)
 - [BYOVD](concepts/byovd.md)
 - [Compiled Wiki](concepts/compiled-wiki.md)
-- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic exec ([[ollvm-unflattener]], [[idadeflat]]), d810, OBPO; pairs MBA recovery
+- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic/simulated exec ([[ollvm-unflattener]], [[idadeflat]], [[anti-ollvm]] Arm64), d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
 - [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]/[[river]]/[[mambo]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
@@ -305,6 +305,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiXrayViewer](entities/antixrayviewer.md) — Paper Minecraft X-ray investigation plugin (Java 21 Gradle; ore-breaking pattern alerts; ~3-minute session capture + first-person replay; admin review commands; RiseShieldDev; Anti Cheat / game:minecraft)
 - [Anti-Frida](entities/anti-frida.md) — Android Frida detection write-ups (libc prologue hook checks; JS examples; apkunpacker)
 - [anti-emulator](entities/anti-emulator.md) — Android emulator detection (QEMU props / fingerprints / sensors; Java)
+- [anti-ollvm](entities/anti-ollvm.md) — Arm64 simulated execution CFF deflatten (IIIImmmyyy; C# fake runtime; dispatcher pattern ID + if-else CFG rebuild; Python IDA CFG extract + Keystone codegen; Fix OLLVM)
 - [AntiHook](entities/antihook.md) — Windows kernel hook enum + remove (driver / graphics; cheat / RE tools)
 - [Anti-xorstr](entities/anti-xorstr.md) — Python IDA anti-Xorstr plugin (cheat / IDA Plugins)
 - [Anti-Forensics](entities/anti-forensics.md) — curated anti-forensic technique knowledge base (data hiding, log tampering, registry/FS artifacts, virtualization evasion; DFIR tradecraft study)

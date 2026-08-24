@@ -13,6 +13,7 @@ sources:
   - wiki/sources/descriptions/RolfRolles__HexRaysDeob.md
   - wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md
   - wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md
+  - wiki/sources/descriptions/IIIImmmyyy__AntiOllvm.md
 updated: 2026-08-24
 confidence: high
 ---
@@ -23,7 +24,7 @@ confidence: high
 
 ## Recovery approaches
 
-1. **Symbolic execution** — identify dispatcher, recover real edges ([[idadeflat]] with angr; [[ollvm-unflattener]] with Miasm — BFS call following, deobfuscated binary output for Win/Linux x86/x64; JbvrgtonYT fork adds graph visualization and bundled sample binaries for CFF experiments). (source: wiki/sources/descriptions/cdong1012__ollvm-unflattener.md) (source: wiki/sources/descriptions/JbvrgtonYT__ollvm-unflattener.md)
+1. **Symbolic / simulated execution** — identify dispatcher, recover real edges ([[idadeflat]] with angr; [[ollvm-unflattener]] with Miasm — BFS call following, deobfuscated binary output for Win/Linux x86/x64; JbvrgtonYT fork adds graph visualization and bundled sample binaries for CFF experiments). **Arm64 fake-runtime simulation** via [[anti-ollvm]] (C# core; dispatcher pattern ID + if-else CFG rebuild; Python IDA CFG extract + Keystone codegen; IIIImmmyyy). (source: wiki/sources/descriptions/cdong1012__ollvm-unflattener.md) (source: wiki/sources/descriptions/JbvrgtonYT__ollvm-unflattener.md) (source: wiki/sources/descriptions/IIIImmmyyy__AntiOllvm.md)
 2. **Decompiler-time deflattening** — Hex-Rays microcode passes at lift time ([[d810-ng]]; [[hex-rays-deob]] — pattern-based expression simplify + dispatcher-driven CFF unflatten; RolfRolles; source: wiki/sources/descriptions/RolfRolles__HexRaysDeob.md).
 3. **External OBPO backends** — closed-core simplification with open IDA client ([[obpo-plugin]]).
 4. **Python unflattener plugins** — extensible Fix OLLVM unflatten hooks ([[unflat]]; plugin development focus). (source: wiki/sources/descriptions/guheng-re__unflat.md) Ghidra in-process OLLVM CFF deobfuscation via [[pagalaxylab-ghidra-scripts]] (Python Ghidra scripts; PAGalaxyLab; source: wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md).
@@ -35,4 +36,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[anti-ollvm]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
