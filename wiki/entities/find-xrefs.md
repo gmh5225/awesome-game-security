@@ -20,4 +20,4 @@ Aimed at reverse engineers analyzing large game clients, anti-cheat modules, and
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[xrefsext]] · [[ida-find-.data-ptr]] · [[findfunc]] · [[ida-plugins]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[xrefsext]] · [[xrefgen]] · [[ida-find-.data-ptr]] · [[findfunc]] · [[ida-plugins]]

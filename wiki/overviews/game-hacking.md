@@ -230,6 +230,7 @@ sources:
   - wiki/sources/descriptions/secrary__idenLibX.md
   - wiki/sources/descriptions/secrary__idenLib.md
   - wiki/sources/descriptions/seifreed__r2SMT.md
+  - wiki/sources/descriptions/seifreed__xrefgen.md
   - wiki/sources/descriptions/push0ebp__sig-database.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
   - wiki/sources/descriptions/gmh5225__meowsense.md

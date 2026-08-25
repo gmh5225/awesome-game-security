@@ -15,6 +15,7 @@ sources:
   - wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md
   - wiki/sources/descriptions/IIIImmmyyy__AntiOllvm.md
   - wiki/sources/descriptions/ElvisBlue__emotet-deobfuscator.md
+  - wiki/sources/descriptions/seifreed__xrefgen.md
 updated: 2026-08-25
 confidence: high
 ---
@@ -29,7 +30,7 @@ confidence: high
 2. **Decompiler-time deflattening** — Hex-Rays microcode passes at lift time ([[d810-ng]]; [[hex-rays-deob]] — pattern-based expression simplify + dispatcher-driven CFF unflatten; RolfRolles; source: wiki/sources/descriptions/RolfRolles__HexRaysDeob.md); Emotet-specific CFF recovery via [[emotet-deobfuscator]] (Python IDA plugin; dispatcher register/status identification; flattened branch rewrite; ElvisBlue; source: wiki/sources/descriptions/ElvisBlue__emotet-deobfuscator.md).
 3. **External OBPO backends** — closed-core simplification with open IDA client ([[obpo-plugin]]).
 4. **Python unflattener plugins** — extensible Fix OLLVM unflatten hooks ([[unflat]]; plugin development focus). (source: wiki/sources/descriptions/guheng-re__unflat.md) Ghidra in-process OLLVM CFF deobfuscation via [[pagalaxylab-ghidra-scripts]] (Python Ghidra scripts; PAGalaxyLab; source: wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md).
-5. **Heuristic region detection** — loop/dominator analysis and BB complexity scoring ([[obfuscation-detection]]) before manual work.
+5. **Heuristic region detection** — loop/dominator analysis and BB complexity scoring ([[obfuscation-detection]]) before manual work; [[xrefgen]] (Python IDA; data-flow taint + call-graph analysis; flags CFF and opaque predicates while recovering indirect control-flow xrefs; XRefer-compatible export; seifreed; source: wiki/sources/descriptions/seifreed__xrefgen.md).
 6. **Trace-based recovery** — runtime traces from [[dynamic-binary-instrumentation]] resolve indirect branches under covered executions; completeness needs additional path exploration.
 7. **Boundary-hook monitoring** — when stacked VMP+OLLVM on Android resists static deflattening, [[frida-vmp-bypass]] hooks libc/JNI/Java API exits and logs caller addresses inside the protected library to reconstruct security-sensitive call chains without lifting flattened bytecode. (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
 
@@ -37,4 +38,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[anti-ollvm]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[anti-ollvm]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:seifreed/xrefgen`: entity [[xrefgen]] (seifreed; Python IDA Pro plugin; high-confidence indirect/complex control-flow xref generation; Mandiant XRefer workflow extension; data-flow taint, call-graph, CFF/opaque-predicate detection; confidence-scored XRefer export; x86/x64/ARM/ARM64/MIPS/WASM; packed/obfuscated game-client RE); cited on [[overviews/reverse-engineering]] (CFF recovery table + IDA xref tools) and [[concepts/control-flow-flattening]] (heuristic detection); cross-linked [[find-xrefs]], [[xrefsext]], [[obfuscation-detection]], [[opaque-predicates-detective]], and [[dragonhook]].
+
 - **2026-08-25** — ingest `readme:categories`: Cheat ~2749 (+1; seifreed/xrefgen IDA Pro indirect/complex control-flow xref generator with XRefer-compatible output in Cheat > RE Tools; other major section counts stable); entity [[xrefgen]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-25** — ingest `description:EliseZeroTwo/SEH-Helper`: entity [[seh-helper]] (EliseZeroTwo; Python Binary Ninja plugin; PE Structured Exception Handler chain inspection; UI actions list entries, inspect cursor handler, follow cursor context; Windows exception metadata visibility for malware/game-security static RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[happyida]], [[bn]], [[binary-ninja-mcp]], [[tanto]], and [[gh-anti-debug-bypass-practice-tool]].

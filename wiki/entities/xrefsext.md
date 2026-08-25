@@ -20,4 +20,4 @@ Not a standalone disassembler—extends IDA’s xref navigation / analysis surfa
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[deobf]] · [[totalpe2]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[find-xrefs]] · [[xrefgen]] · [[deobf]] · [[totalpe2]]
