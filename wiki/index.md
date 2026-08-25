@@ -1641,6 +1641,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-plugin-antidebugseeker](entities/ida-plugin-antidebugseeker.md) — IDA Pro plugin: rule-based Windows API + keyword anti-debug detection; match highlighting, address annotation, navigation; configurable rules + in-IDE editor (LAC-Japan; Extract anti-debugging)
 - [ida-plugin-pcodegpt](entities/ida-plugin-pcodegpt.md) — ChatGPT IDA PCode assistant (Chinese UI; cheat / IDA Plugins)
 - [IDLE-Abuse](entities/idle-abuse.md) — Windows idle-state injection PoC (`RegisterWaitForInputIdle` callback; shellcode + process manipulation; process-lifecycle abuse detection study; RixedLabs)
+- [IDontLikeFileLocks](entities/idontlikefilelocks.md) — C++ locked-file extraction via memory-mapped section handle theft (EvilBytecode; duplicate/close remote handles; browser DB reads without stopping browser; file-lock evasion / info-stealer forensics; Dump locked files by stealing memory-mapped section handle)
 - [IAT Obfuscation](entities/iat-obfuscation.md) — Windows PE import obfuscation (C++; same-DLL IAT entry swap + TLS pre-main restore; static API-sequence obfuscation; import-hiding educational research; MahmoudZohdy)
 - [IUM-Debugger](entities/ium-debugger.md) — .NET debugger for Windows IUM/VTL1 trustlets; Hyper-V hypercalls for trustlet memory R/W + disassembly; LiveCloudKd host patch for guest WinDbg attach (ReverseWarrior)
 - [iida-mcp](entities/iida-mcp.md) — faster IDA Pro MCP (77 tools; multi-instance; optional KM mem via iida-mcp-ioctl)

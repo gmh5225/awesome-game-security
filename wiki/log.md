@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EvilBytecode/IDontLikeFileLocks`: entity [[idontlikefilelocks]] (EvilBytecode; C++ research collection; steal memory-mapped section handles, duplicate/close remote handles; low-noise locked-file acquisition e.g. browser DBs; authorized file-lock evasion / info-stealer tradecraft forensics; README Dump locked files by stealing memory-mapped section handle); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[handle-ripper]], [[lockfile-poc]], [[dumpy]], [[lsass-dump-that-lsass]], and [[forensia]].
+
 - **2026-08-25** — ingest `description:ExWhyZed9/android_kernel_gki_common_5.10`: entity [[android-kernel-gki-common-5-10]] (ExWhyZed9; custom Android GKI common 5.10 kernel; multi-vendor ABI symbol defs for Samsung/Qualcomm/MediaTek/ASUS/Motorola/OnePlus+; ZenX build script; Redmi Note 11T Pro(+)/POCO X4 GT; GKI-compliant custom kernels across platforms; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-common]], [[android-kernel-xiaomi-sm8475]], [[android-kernel-motorola-dubai]], [[compile-android-driver]], [[android-kernel-driver-template]], and [[kernel-build-scripts]].
 
 - **2026-08-25** — ingest `description:Exo1i/MagiskHluda`: entity [[magisk-hluda]] (Exo1i; Magisk module; auto-start stealth-modified `frida-server` at boot; module install/lifecycle scripts + C++ update/download helper; HTML/JS WebUI for start/stop/status/custom params; persistent mobile RE / reduced Frida detection; cheat / Magisk / Frida); cited on [[overviews/mobile-security]] and [[frida]]; cross-linked [[florida-zygisk]], [[frida-rs]], and [[magisk]].
