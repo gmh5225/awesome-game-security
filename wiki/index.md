@@ -2155,6 +2155,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nightshade](entities/nightshade.md) — Rust data-oriented game engine (custom ECS; wgpu PBR; native/web/VR; Game Engine / source)
 - [NightOwl](entities/nightowl.md) — unified Android APK security CLI (framework/RASP detection; auto Frida bypass scripts; MASTG Semgrep)
 - [NMMP](entities/nmmp.md) — Android DEX bytecode-to-native protector (Nativ Method Map Protector; JNI; Dex)
+- [NonEuclidean](entities/non-euclidean.md) — Windows OpenGL non-Euclidean rendering demo engine (C++; custom room transitions, camera movement, experimental geometric rendering; graphics/engine experimentation; Game Engine / guide; HackerPoet)
 - [Non-Newtonian New York](entities/non-newtonian-new-york.md) — Spider-Man Remastered non-Newtonian fluid/physics mod (urban destruction; [Mod])
 - [NO_ACCESS_Protection](entities/no-access-protection.md) — PAGE_NOACCESS + VEH / single-step anti-tamper (vs external scanners)
 - [no-access-protection-x86](entities/no-access-protection-x86.md) — x86 PAGE_NOACCESS page guards + VEH on-access decryption (anti-tamper / anti-dump)

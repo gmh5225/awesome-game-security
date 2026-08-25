@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:HackerPoet/NonEuclidean`: entity [[non-euclidean]] (HackerPoet; Windows OpenGL rendering demo engine; C++; real-time non-Euclidean space; custom room transitions, camera movement, experimental geometric rendering; graphics/engine experimentation—not anti-cheat; useful for low-level render-pipeline literacy; Game Engine / guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[learnopengl]], [[gltut]], [[exengine]], and [[game-engine-from-scratch]].
+
 - **2026-08-25** — ingest `description:HadockKali/battleye-user-mode-bypass`: entity [[battleye-user-mode-bypass]] (HadockKali; C++ Visual Studio PoC; implanter + sample DLL; CreateFileW hook + file-check masquerade; payload masquerades as trusted module; historical UM BE loading-path trust-validation weakness; SetWindowsHookExW); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[splendid-implanter]], [[noeye]], and [[beclient]].
 
 - **2026-08-25** — ingest `description:Halen84/ImGuiRDR2Hook`: entity [[imgui-rdr2-hook]] (Halen84; RDR2 Vulkan + DirectX 12 ImGui hook framework; C++; MinHook + Kiero + Dear ImGui; render-path intercept; hook entry points, render routines, config handling, stable menu draw/input notes; game overlay development / graphics API hooking practice / game security experimentation; cheat / render-draw); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[present-hook]], [[kiero]], [[imgui]], [[vulkan-hook]], and [[universal-dear-imgui-hook]].
