@@ -557,6 +557,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [com.unity.demoteam.hair](entities/com-unity-demoteam-hair.md) — Unity strand-based hair package (Alembic import, GPU sim, hierarchical LOD; Built-in/URP/HDRP; character rendering; Plugins:Unity)
 - [com.unity.ide.cursor](entities/com-unity-ide-cursor.md) — Unity package: Cursor as external code editor (Plugins:Unity; C#/C++)
 - [com.sipvlib.anticheat](entities/com-sipvlib-anticheat.md) — Unity UPM soft AC (server-verified GameTime + root/jailbreak/emulator/debugger)
+- [Common-Registry](entities/common-registry.md) — KMDF driver + user client; registry-based KM↔UM comm; custom process-attach handling; Windows internals / AC bypass PoC (EBalloon; Registry Callback)
 - [Common-Registry-Jmp-RCX](entities/common-registry-jmp-rcx.md) — CmRegisterCallback + JMP RCX gadget in nvraid.sys for covert KM↔UM registry-callback comm (gmh5225; Registry Callback)
 - [comm-data-ptr-driver](entities/comm-data-ptr-driver.md) — shared data-ptr KM↔UM comm via NtGdiPolyPolyDraw; avoids IOCTL telemetry (gmh5225; cheat driver)
 - [comm-data-pointer-swap](entities/comm-data-pointer-swap.md) — win32kbase data-ptr swap via NtDCompositionSetChildRootVisual; GUI-syscall covert KM↔UM PoC (gmh5225; cheat driver)

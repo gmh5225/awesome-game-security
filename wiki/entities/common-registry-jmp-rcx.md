@@ -20,4 +20,4 @@ Sits in the same stealth driver-communication and [[kernel-callbacks]] lane as [
 
 ## Related
 
-[[kernel-callbacks]] · [[boundcallback]] · [[mapped-callback]] · [[evcommunication]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[common-registry]] · [[boundcallback]] · [[mapped-callback]] · [[evcommunication]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EBalloon/Common-Registry`: entity [[common-registry]] (EBalloon; C++ KMDF driver + user client; registry-based KM↔UM comm PoC; custom process-attach handling and low-level memory-management ideas; Windows internals / anti-cheat bypass research; README [Registry Callback]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[common-registry-jmp-rcx]], [[boundcallback]], [[evcommunication]], and [[km-um-communication]].
+
 - **2026-08-25** — ingest `description:EBalloon/EasyAntiCheat-SRC`: entity [[easyanticheat-src]] (EBalloon; Hex-Rays decompiled source-style snapshot of EAC kernel driver; large C output + headers with function prototypes and data structures; process memory operations, validation, and anti-cheat control paths; educational EAC internals RE); cited on [[concepts/easy-anti-cheat]] and [[overviews/anti-cheat]]; cross-linked [[easyanticheat-reversing]], [[eac-easyanticheat-src-1]], [[eazy-anti-cheat-src]], [[eac-extractor-utility]], [[mm-copy-memory]], and [[remap]].
 
 - **2026-08-25** — ingest `description:EBalloon/MmCopyMemory`: entity [[mm-copy-memory]] (EBalloon; targeted MmCopyMemory scan-path bypass PoC; C++; explains kernel AC memory-scan behavior; minimal example patches a specific check path to alter scan handling; anti-cheat bypass / defensive kernel memory-inspection research; cheat / Bypass MmCopyMemory); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[simple-mmcopymemory-hook]], [[efi-monitor]], [[callmewin32kdriver]], [[badeye]], [[remap]], [[driver-kdtour]], [[readphys]], and [[ksldump]].
