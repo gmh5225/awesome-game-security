@@ -1719,6 +1719,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KUBERA](entities/kubera.md) — platform-independent x86 Windows user+kernel emulator (research; cheat / DBI; binsnake)
 - [Kagura](entities/kagura.md) — LLVM pass plugin: CFG/string obfuscation, anti-tamper, anti-debug (mobile/desktop/Wasm)
 - [Karlann](entities/karlann.md) — KM keyboard injection + WSK socket PoC (Kbd.c / Wsk.c; libwsk; cheat / Keyboard)
+- [Katapult AntiCheat](entities/katapult-anticheat.md) — NeoForge **1.21.1** client/server mod integrity AC (SHA-256 checksums on client mods and resource packs; server whitelists; join/reload pack monitoring; hot-reload config; Gitex68; Anti Cheat / game:minecraft)
 - [KasperskyHook](entities/kaspersky-hook.md) — Kaspersky `klhk.sys` hypervisor syscall hook (`IA32_LSTAR` dispatch redirect + custom driver; gmh5225)
 - [KawaiiPhysics](entities/kawaii-physics.md) — UE4/UE5 simple fake physics (animation / secondary motion; Game Develop / Unreal)
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)

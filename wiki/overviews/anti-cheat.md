@@ -330,6 +330,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__StarRail-S-GC.md
   - wiki/sources/descriptions/gmh5225__StarRail-ACE-B.md
   - wiki/sources/descriptions/gmh5225__HI3-ACE-B.md
+  - wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md
   - wiki/sources/descriptions/GuidoBartoli__sherloq.md
   - wiki/sources/descriptions/GunshipPenguin__kiteshield.md
   - wiki/sources/descriptions/H1d3r__GPU_ShellCode.md
@@ -995,6 +996,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 **Paper/Spigot movement simulation AC:** [[grim]] (GrimAnticheat; Java/Kotlin; open-source Minecraft anticheat for modern server versions and protocol combinations; detailed movement simulation, world replication, latency-aware validation; heavily asynchronous multithreaded architecture to scale checks and reduce false positives; server-side cheat detection for actively maintained Java communities; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/GrimAnticheat__Grim.md)
 
 **Fabric client+server AC:** [[the-dreamers-guards]] (IamFriendly0242u; Java Fabric mod; encrypted join-time network payloads; mod blacklist scanning; progressive four-phase suspension; anti-evasion logout-bypass checks; operator kick/ban/pardon/trust commands; Discord webhook alerts; Anti Cheat / game:minecraft) for Fabric administrators needing combined client-integrity verification and automated server-side enforcement. (source: wiki/sources/descriptions/IamFriendly0242u__The-Dreamers-Guards.md)
+
+**NeoForge client+server mod integrity AC:** [[katapult-anticheat]] (Gitex68; Java NeoForge **1.21.1** mod; SHA-256 checksums on client mod JARs and resource packs against server whitelists; real-time join/reload pack monitoring incl. renamed X-ray textures; hot-reloadable config, whitelist regeneration, live re-validation commands; Gson whitelist management; Anti Cheat / game:minecraft) for NeoForge modded-server operators needing file-integrity enforcement beyond gameplay packet checks. (source: wiki/sources/descriptions/Gitex68__Katapult-AntiCheat.md)
 
 **Headless protocol stress testing:** [[ghostjoin]] (KuryCat; pure Python stdlib Minecraft Java client; connects and stays online without rendering; full modern login/configuration/play flow with compression and Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat probe tool for offline-mode servers you own or have permission to test; Anti Cheat / game:minecraft) complements server-side plugins indexed by [[minecraft-anticheat-list]] for evaluating bot-connection defenses. (source: wiki/sources/descriptions/KuryCat__GhostJoin.md)
 

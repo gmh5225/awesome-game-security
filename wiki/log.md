@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Gitex68/Katapult-AntiCheat`: entity [[katapult-anticheat]] (Gitex68; NeoForge **1.21.1** client/server mod integrity AC; Java; SHA-256 checksums on client mod JARs and resource packs against server whitelists; real-time join/reload pack monitoring incl. renamed X-ray textures; hot-reloadable config, whitelist regeneration, live re-validation commands; Gson whitelist management; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[seiun-ac]], [[the-dreamers-guards]], [[grim]], [[minecraft-anticheat-list]], and [[epsilon]].
+
 - **2026-08-25** — ingest `description:GlacierW/MBA`: entity [[glacierw-mba]] (GlacierW; QEMU Malware Behavior Analyzer; whole-system dynamic binary analysis; memory forensics, API tracing, behavioral monitoring; Windows/Linux guests; full QEMU + instrumentation; malware analyst / security researcher introspection; Cheat QEMU/KVM / DBI); cited on [[dynamic-binary-instrumentation]] and [[overviews/reverse-engineering]]; cross-linked [[panda]], [[ispras-qemu]], [[pyda]], and [[smallworld]].
 
 - **2026-08-25** — ingest `description:GliTcHZzZ67/mast-orchestrator`: entity [[mast-orchestrator]] (GliTcHZzZ67; Flask web dashboard; ADB device discovery, root verification, one-click arch-matched frida-server deploy, whitelisted SSL pinning/root/crypto hooks, GitHub Raw/Codeshare script fetch, live browser hook output, token-auth API; mobile app security testing / Android Frida automation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[rootraven]], [[frida-ide]], and [[mobile-anti-cheat]].
