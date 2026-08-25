@@ -1732,6 +1732,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/LAC-Japan/IDA_Plugin_AntiDebugSeeker [Extract anti-debugging]
 - https://github.com/cseagle/blc [Integrate Ghidra's decompiler]
 - https://github.com/Goatman13/ps2_ida_vu_micro [Find and disassembly vu microcode in ps2 executables]
+- https://github.com/Goatman13/spu2c [IDA plugin that annotates PlayStation 3 Cell SPU opcodes as readable C-style comments]
 - https://github.com/arizvisa/ida-minsc [Functional DWIM interface]
 - https://github.com/wINfOG/IDA_Easy_Life [Deobfuscation]
 - https://github.com/senko37/yarascan-ida [Scan file with Yara rules]
