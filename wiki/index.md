@@ -585,6 +585,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CReadMemory](entities/creadmemory.md) — user-mode cross-process memory read library; multiple methods beyond ReadProcessMemory; external cheat base (gmh5225)
 - [counterstrike2](entities/counterstrike2.md) — CS2 cheat: rendering / SDK generation / hooking (C++; cheat / game:cs2)
 - [counter-strike2-sdk](entities/counter-strike2-sdk.md) — header-only CS2 SDK snapshot (Omn1z; Source 2 class declarations/enums; entity/gameplay/animation layouts with field offsets; bit-vector utilities; RE/tooling/game-security research; cheat / game:cs2 [SDK])
+- [counter-strike-nintendo-ds](entities/counter-strike-nintendo-ds.md) — Nintendo DS Counter-Strike demake (Fewnity; C; devkitPro + Nitro Engine; weapons/bots/maps/networking; online multiplayer on emulator and real hardware; homebrew FPS on constrained handheld hardware; cheat / Nintendo CS)
 - [cozinha-loader](entities/cozinha-loader.md) — CS:GO C++ remote-download inject loader (process hollowing/manual map; anti-debug + string encryption + import obfuscation; b1scoito [Injector])
 - [CounterStrike2-Linux-Cheat](entities/counterstrike2-linux-cheat.md) — Linux external CS2 cheat (C++; memory analysis)
 - [CS-2-Glow](entities/cs-2-glow.md) — external CS2 glow ESP (C++; entity / offsets / memory)

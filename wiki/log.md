@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Fewnity/Counter-Strike-Nintendo-DS`: entity [[counter-strike-nintendo-ds]] (Fewnity; C; devkitPro + Nitro Engine; Counter-Strike demake; weapons/bots/maps/networking; online multiplayer on emulator and real DS hardware; homebrew FPS development on constrained handheld hardware; cheat / Nintendo CS); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[3beans]], [[bizhawk]], [[ghidradboy]], and [[counter-strike2-sdk]].
+
 - **2026-08-25** — ingest `description:FiYHer/InfinityHookPro`: entity [[infinityhook-pro]] (FiYHer; C/C++ VS; modernized InfinityHook kernel hooking Win7–Win11; version-specific offset handling; low-level internals + extensive comments; kernel security / AC / EDR RE; ETW Hook Ex); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]], [[infinityhook-promax]], [[infinityhook-latest]], and [[etwhook-infinityhookclass]].
 
 - **2026-08-25** — ingest `description:Firejumper93/Ghost-Recon-Wildlands-First-Person-No-EAC`: entity [[ghost-recon-wildlands-first-person-no-eac]] (Firejumper93; C++20 dxgi.dll proxy; byte signature scan + ThunkHook on AnvilNext 2.0 camera paths; first-person head-bone camera mod; in-process memory writes without EAC bypass; solo/co-op modding and AC coexistence research); cited on [[concepts/easy-anti-cheat]] and [[overviews/graphics-api]]; cross-linked [[dxwrapper]], [[direct3d9-overlay]], [[gameplug]], [[present-hook]], and [[windows-dll-hijacking]].
