@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FourCoreLabs/LolDriverScan`: entity [[loldriverscan]] (FourCoreLabs; Go; public driver threat feed; local hash/metadata compare; verbose + JSON export; unprivileged; defensive security auditing, hardening, and AC environment checks; README Scan loldrivers); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[loldrivers-client]], [[driver-risk-scout]], and [[vulnerable-driver-scanner]].
+
 - **2026-08-25** — ingest `description:Fox2Code/FoxMagiskModuleManager`: entity [[fox-magisk-module-manager]] (Fox2Code; Kotlin Android app; Magisk module discovery/download/install from online repos; update checks, custom repos, local vs remote views, richer metadata/compatibility; rooted module management; Cheat / Magisk); cited on [[overviews/mobile-security]] and [[entities/magisk]]; cross-linked [[rescuex]], [[webui-x-portable]], [[magisk-tailscaled]], and [[baize]].
 
 - **2026-08-25** — ingest `description:Fr0go1/Aeonix-Cs2`: entity [[aeonix-cs2]] (Fr0go1; C++ external CS2 cheat framework; derivative external base; overlay + tooling; ESP, aimbot with RCS, triggerbot, radar, config management; memory access modules + offset handling + real-time visual rendering; offensive game security experimentation and cheat development learning; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[tkazer-cs2-external]], [[cs2-external-cheat]], [[aimstar]], [[cs2-offsets]], [[cs2-dumper]], and [[world-to-screen]].

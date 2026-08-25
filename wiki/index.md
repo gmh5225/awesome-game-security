@@ -1923,6 +1923,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LoudSunRun](entities/loudsunrun.md) — stack spoofing with synthetic frames (namazso / SilentMoonWalk / VulcanRaven; Cheat Spoof Stack)
 - [LOLDrivers](entities/loldrivers.md) — comprehensive LOLdriver catalog (YAML metadata, YARA, HVCI tracking; magicsword-io)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)
+- [LolDriverScan](entities/loldriverscan.md) — Go unprivileged LOLdriver scanner; public threat feed + local hash/metadata compare; verbose/JSON export; defensive auditing and AC environment checks (FourCoreLabs)
 - [league-base](entities/league-base.md) — C++ LoL cheat base framework (memory read, object enum, overlay; Packman/Vanguard; gmh5225; cheat / game:lol)
 - [league-dumper](entities/league-dumper.md) — LoL process memory dumper (Process Dump fork; code encryption, hidden modules, import reconstruction; gmh5225; cheat / game:lol [Dump])
 - [league-directx11-internal](entities/league-directx11-internal.md) — internal LoL cheat (D3D11 rendering hooks; spell DB; champion data; ImGui + custom fonts; named pipe IPC; Internal; gmh5225; cheat / game:lol)
