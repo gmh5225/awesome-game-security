@@ -2436,6 +2436,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [palworld-helper](entities/palworld-helper.md) — Palworld UE5 Python helper (modding; cheat / game:palworld [UE5])
 - [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)
 - [palworld-save-tools](entities/palworld-save-tools.md) — Palworld Python GVAS save toolkit (read/convert/edit; cheat / game:palworld [Save])
+- [palworld-setting-generator](entities/palworld-setting-generator.md) — Palworld web settings config generator (JS/HTML form editor; difficulty/progression; download config; Setting Generator; cheat / game:palworld [Server])
 - [palworld-tools](entities/palworld-tools.md) — Palworld UE4SS mod patcher (PyQt GUI; download/apply/revert; Lua mods; Mod Patcher; cheat / game:palworld [UE5])
 - [Palworld-Server-Modding](entities/palworld-server-modding.md) — Palworld UE5 dedicated-server mod example (Lua + C++; 100% rare Pal; cheat / game:palworld [UE5])
 - [PalWorld-Server-Unoffical-Fix](entities/palworld-server-unoffical-fix.md) — Palworld unofficial dedicated-server binary patches (memory-leak / CPU fixes; Linux + Windows; hash verification; Server patch)
