@@ -127,6 +127,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [And UE4Dumper](entities/andue4dumper.md) — Android Unreal Engine dumping toolkit (C++ NDK; external executable or injectable shared library; engine offsets/classes/structs/enums/functions + symbol JSON for IDA/Ghidra; MJx0; cheat / [SDK Dump For Android])
 - [adaptive-boss-arena](entities/adaptive-boss-arena.md) — Unity 6 boss-arena demo; compile-time assembly firewalls block AI from player input; delayed perception; adaptive counters + edit/play-mode tests (Shadow-46; Game Develop / anti-cheat design)
 - [advanced-efi-driver-with-gdi-and-kernel-mouse-input](entities/advanced-efi-driver-with-gdi-and-kernel-mouse-input.md) — UEFI memory/process framework; GDI overlay + kernel mouse input; encrypted comms + anti-detection (Twobot7; cheat / EFI driver)
+- [Aeonix CS2](entities/aeonix-cs2.md) — external CS2 cheat framework (Fr0go1; C++; derivative external base; overlay + ESP/aimbot+RCS/triggerbot/radar/config; memory access + offset handling; cheat / game:cs2 [External])
 - [aho-corasick](entities/aho-corasick.md) — Aho-Corasick multi-pattern string matcher (ISM; mmap automata; C API; signature/YARA-style scan backend)
 - [a-pasted-rust-script](entities/a-pasted-rust-script.md) — Rust/C++ ImGui cheat loader (anti-debug + feature modules)
 - [a53-code-exec](entities/a53-code-exec.md) — PS5 Cortex-A53 code-execution PoC (fw 02.00; kernel / SDK generation; PlayStation)
