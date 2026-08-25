@@ -1776,6 +1776,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KawaiiPhysics](entities/kawaii-physics.md) — UE4/UE5 simple fake physics (animation / secondary motion; Game Develop / Unreal)
 - [KCP](entities/kcp.md) — reliable-UDP ARQ (C; low-latency multiplayer; Game Network)
 - [kcp-cpp](entities/kcp-cpp.md) — lightweight C++17 KCP wrapper (client/server; callback-driven; configurable low-latency transport; game networking prototypes; README [KCP]; Unit-X)
+- [kajiya](entities/kajiya.md) — EmbarkStudios; experimental real-time global illumination renderer (Rust + Vulkan + HLSL hybrid raster/compute/RT; dynamic GI without probes, temporal reconstruction, RT shadows/reflections, reference path-tracing validation; advanced rendering research; Renderer)
 - [kakhack](entities/kakhack.md) — CS:GO internal cheat (reversed SDK, multi-hook, ImGui+FreeType menu, JSON config, visuals; x86 VS2022 DLL; cazzwastaken [Internal])
 - [kavanoz](entities/kavanoz.md) — Python automated Android DEX/resource unpacker (Bangcle/Ijiami/Qihoo 360+ packer ID + decrypt; banker malware; static APK analysis; eybisi)
 - [kazmath](entities/kazmath.md) — lightweight portable C 3D math library (vectors/matrices/transforms; CMake; examples/tests; Mathematics)

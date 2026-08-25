@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EmbarkStudios/kajiya`: entity [[kajiya]] (EmbarkStudios; experimental real-time global illumination renderer; Rust engine + Vulkan backend + HLSL hybrid rasterization/compute/ray-tracing; dynamic GI without prebaked probes, temporal reconstruction, RT shadows/reflections, reference path-tracing validation; advanced rendering research; README `[Experimental real-time global illumination renderer]`); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[strolle]], [[spartan-engine]], [[source-renderer]], [[d3d12renderer]], and [[explosion]].
+
 - **2026-08-25** — ingest `description:Encryqed/Dumper-7`: entity [[dumper-7]] (Encryqed; C++ UE4/UE5 SDK generator; in-process DLL inject; locates engine structures/offsets; emits generated C++ headers; configurable offset overrides + build options; Unreal RE / modding / game security research; cheat / SDK Dump for all of UE4 and UE5); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[re-ue4ss]], [[ue4genny]], [[uedumper]], [[shh0yauedumper]], and [[unrealdumper-4-25]].
 
 - **2026-08-25** — ingest `description:Enum0x539/Qvoid-Token-Grabber`: entity [[qvoid-token-grabber]] (Enum0x539; .NET credential/token grabber; Discord token harvest, browser cookie/password extraction, screenshot/Wi-Fi/clipboard collection, webhook exfiltration, anti-debug/anti-VM/anti-sandbox/anti-emulation; information-stealer / account-token abuse malware-analysis research); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[idontlikefilelocks]], [[anti-sandbox]], [[pafish]], [[al-khaser]], and [[dfirtriage]].
