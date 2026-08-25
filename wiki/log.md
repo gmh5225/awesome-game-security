@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EpicGames/UnrealEngine`: entity [[unreal-engine]] (EpicGames; official UE source + API documentation; complete runtime—build, rendering, physics, networking, platform abstraction, plugins, Python scripting; primary reference for UE internals, module development, platform integration; Game Engine / source); cited on [[overviews/game-engine]] and [[unreal-object-model]]; cross-linked [[unreal-engine-guide]], [[unreal-source-explained]], [[ue4-hacking-guideline]], [[lore]], and [[rider-source-code-access]].
+
 - **2026-08-25** — ingest `description:EquiFox/KsDumper`: entity [[ks-dumper]] (EquiFox; C++ kernel-assisted process dumper; custom driver + usermode client; main-module memory copy with PE32/64 header/section rebuild; restricted-handle / AC-protected target workflow; protected game binary RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ksdumper-11]], [[dumpepe]], [[league-dumper]], and [[byovd]].
 
 - **2026-08-25** — ingest `description:Erlite/NetworkTimeSync`: entity [[network-time-sync]] (Erlite; UE plugin; C++ subsystem; Blueprint-compatible server world time sync; drop-in install; reduces client clock drift for latency-sensitive multiplayer simulation/events; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[multiplayer-blaster-game]], [[unreal-network-profiler]], [[game-networking-resources]], [[lightyear]], and [[kcp]].
