@@ -1780,6 +1780,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KSU-Rust-Frida](entities/ksu-rust-frida.md) — Rust KernelSU/Magisk module: Zygote-fork Frida gadget inject, attach/spawn/watch-so, HTTP RPC, stealth tiers (cheat / Frida)
 - [ksentinel](entities/ksentinel.md) — Linux LKM kernel integrity monitor (MatheuZSecurity; syscall table + LSTAR + prologue-hash checks; configurable intervals + anti-unload; rootkit hook-tampering detection research)
 - [ksurusda](entities/ksurusda.md) — Android Zygisk module: Rusda anti-detection Frida gadget on KernelSU/Magisk/APatch; WebUI, listen/offline modes, library remapping (cheat / Frida)
+- [keusermodecallback](entities/keusermodecallback.md) — ExpLife0011; Windows kernel demo invoking user-mode via KeUserModeCallback; IOCTL driver; PEB/module export resolution; 32/64-bit callback stubs; kernel-to-user transition research; README [KeUserModeCallBack]
 - [kevboy](entities/kevboy.md) — Rust Game Boy emulator (CPU / memory / graphics / input)
 - [KExecDD](entities/kexecdd.md) — KSecDD.sys IOCTL PoC (LSASS inject; arbitrary kernel exec; DSE via ci.dll!g_CiOptions; gmh5225)
 - [KexecDDPlus](entities/kexecddplus.md) — LSASS-context KSecDD.sys IOCTL kernel execution (enhanced KExecDD; DSE bypass + arbitrary KM R/W; gmh5225)
