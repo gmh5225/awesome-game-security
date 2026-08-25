@@ -521,6 +521,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheat-driver](entities/cheat-driver.md) — MmCopyVirtualMemory KM test driver (AC stress / cross-process R/W)
 - [CiDllDemo](entities/ci-dll-demo.md) — kernel driver demo; ci.dll `CiValidateFileObject` / `CiCheckSignedFile`; process-creation notify hook; Authenticode certificate extraction (Ido-Moshe-Github; Windows Code Integrity research)
 - [Code Integrity DriverBlocklist](entities/code-integrity-driverblocklist.md) — WDAC CI policy blocklist XML data; hash/identity deny rules incl. anti-cheat kernel modules; defensive hardening + attack-surface reduction (Harvester57)
+- [code_injection](entities/code-injection.md) — Fahersto; C++ host-based Windows code injection collection (~two dozen PE/DLL/shellcode paths; hollowing, callbacks, loader abuse; per-technique executables; 32/64-bit, WoW64, multi-version notes; offensive tradecraft + defensive detection coverage)
 - [CirSAT](entities/cirsat.md) — circuit-based AIG SAT (DAG/AIGER; verification / equivalence; MBA constraint lane)
 - [Classroom](entities/classroom.md) — x64dbg OOP class docs (member funcs/vars; Cheat x64dbg Plugins)
 - [ClassMaker](entities/classmaker.md) — IDA Python plugin: auto C++ class reconstruction from constructor pseudocode; vtable trace, struct create/update, naming heuristics; 32/64-bit (Pycatchown; cheat / IDA Plugins)
