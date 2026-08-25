@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Gekkio/GhidraBoy`: entity [[ghidradboy]] (Gekkio; experimental Ghidra extension; Kotlin/Java + Sharp SM83 Sleigh; banked/unbanked ROM load, boot ROM variants, memory map blocks, hardware register symbols; retro game binary / firmware RE; cheat / Game Boy); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[gba-ghidra-loader]], [[kevboy]], and [[feather-gb]].
+
 - **2026-08-25** — ingest `description:Genymobile/genymotion-kernel`: entity [[genymotion-kernel]] (Genymobile; Linux kernel source for Genymotion Android emulator; full tree with Android configs and virtual-device patches; emulator developers and virtualized Android kernel RE; cheat / Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[scrcpy]], [[android-emulator]], and [[android-emulator-detection]].
 
 - **2026-08-25** — ingest `description:Genymobile/scrcpy`: entity [[scrcpy]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[qtscrcpy]], [[lamda]], and [[droidrun]].

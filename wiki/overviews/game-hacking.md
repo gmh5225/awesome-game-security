@@ -454,6 +454,7 @@ sources:
   - wiki/sources/descriptions/somewhatpublicacc__wellsanticheat.md
   - wiki/sources/descriptions/Ghostleadie__CheatManagerMenu.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
+  - wiki/sources/descriptions/Gekkio__GhidraBoy.md
   - wiki/sources/descriptions/GiannBart__BanMod.md
   - wiki/sources/descriptions/ricardoofnl__open.mp-anticheat.md
   - wiki/sources/descriptions/oomph-ac__oomph.md
@@ -2507,6 +2508,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Retro handheld theme asset packs such as [[retro-game-console-icons]] (KyleBing; multi-size PNG retro console icons; TrimUI/Miyoo theme pipelines; editor tooling + emulation content/modding for handheld UI) sit beside that console retro-emulator lane. (source: wiki/sources/descriptions/KyleBing__retro-game-console-icons.md)
 - Cycle-accurate Rust GB/GBC emulator [[gecko]] (CPU/PPU/APU; wgpu render; desktop library GUI) sits in the console `Game Boy` lane—README miscategorizes it under `GameCube/Wii`. (source: wiki/sources/descriptions/ioncodes__gecko.md)
 - GBA cartridge RE in Ghidra via [[gba-ghidra-loader]] (region/IO map + header entry point) sits in the console `Game Boy` / Cheat Ghidra Plugins lane. (source: wiki/sources/descriptions/pudii__gba-ghidra-loader.md)
+- Game Boy DMG cartridge RE in Ghidra via [[ghidradboy]] (Gekkio; Kotlin/Java; Sharp SM83 Sleigh; banked/unbanked ROM loading, boot ROM variants, memory map blocks, hardware register symbols; retro game binary analysis / low-level firmware research) sits in the same console `Game Boy` / Cheat Ghidra Plugins lane beside [[gba-ghidra-loader]]. (source: wiki/sources/descriptions/Gekkio__GhidraBoy.md)
 - Analogue Pocket GB/GBC openFPGA cheat deployment via [[openfpga-gbc-cheats-ui]] (Python/tkinter; libretro cheat DB browse; Game Genie/GameShark parse; `.cht` SD-card write; CPU-read vs RAM-write safety flags; CLI ROM compare-byte verify) sits in the console `Game Boy` lane for retro hardware cheat workflows. (source: wiki/sources/descriptions/kroy-the-rabbit__openfpga-GBC-cheats-ui.md)
 - Xbox 360 emulation via [[xenia]] (C++; PowerPC recompiler, D3D12/Vulkan GPU, XAM/kernel/XEX) sits in the console `Xbox` lane for hardware-abstraction / binary-translation research. (source: wiki/sources/descriptions/xenia-project__xenia.md)
 - macOS port [[xenia-mac]] extends that Xbox 360 HLE stack to Apple hosts for emulator / Xbox research. (source: wiki/sources/descriptions/wmarti__xenia-mac.md)

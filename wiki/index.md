@@ -1284,6 +1284,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-coffparser](entities/ghidra-coffparser.md) — Python Ghidra COFF object parser (headers/symbols/string tables/relocations with type info; applies relocations and xrefs beyond default loader; MEhrn00; cheat / COFF)
 - [ghidra-cpp-class-analyzer](entities/ghidra-cpp-class-analyzer.md) — Ghidra C++ class/RTTI analyzer (GCC/Clang/MSVC RTTI, vtables, ctors/dtors, inheritance; class hierarchy views; Java/Gradle; astrelsky)
 - [ghidra-decompiler-plugins](entities/ghidra-decompiler-plugins.md) — runtime-loadable Ghidra decompiler plugins (Bazel; RISC-V vector Rules/Actions; datatest; embedded/firmware RE)
+- [ghidradboy](entities/ghidradboy.md) — Ghidra Game Boy extension (Kotlin/Java; Sharp SM83 Sleigh; banked/unbanked ROM load, boot ROM variants, memory map blocks, hardware register symbols; Gekkio; cheat / Game Boy)
 - [ghidra-findcrypt](entities/ghidra-findcrypt.md) — Ghidra analyzer for cryptographic constants (Java Gradle extension; JSON signature DB; AES/DES/MD5/SHA-1/TEA/Salsa/CRC32 labeling; TorgoTorgo; cheat / Ghidra Plugins)
 - [ghidra-gradle-plugin](entities/ghidra-gradle-plugin.md) — archived Gradle plugin for Ghidra extension builds (classpath wiring, IDE setup; Java/Groovy; astrelsky)
 - [ghidra-hexeditor](entities/ghidra-hexeditor.md) — dockable hex editor Ghidra script plugin (Java/Swing; in-place byte edit, binary search, BinaryExporter save; dark mode; sengi12; cheat / Ghidra Plugins)

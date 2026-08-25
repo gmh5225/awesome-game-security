@@ -12,7 +12,7 @@ confidence: medium
 
 Ghidra loader for Game Boy Advance ROMs: maps GBA memory regions and I/O to the correct addresses, parses the cartridge header, and sets the entry point accordingly. Useful for game-security / console RE in the Cheat Ghidra Plugins and README `GameBoy` lanes. (source: wiki/sources/descriptions/pudii__gba-ghidra-loader.md)
 
-Complements GB emulator study such as [[kevboy]] / [[feather-gb]] (runtime hardware models) with static Ghidra analysis of GBA cartridge images; peer to other Ghidra tooling like [[ghidrametrics]] and [[threatresearch]].
+Complements GB emulator study such as [[kevboy]] / [[feather-gb]] (runtime hardware models) with static Ghidra analysis of GBA cartridge images; peer to DMG-focused [[ghidradboy]] and other Ghidra tooling like [[ghidrametrics]] and [[threatresearch]].
 
 ## Links
 
