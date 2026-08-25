@@ -3,14 +3,15 @@ title: Inertia
 kind: entity
 topics: [anti-cheat, game-hacking]
 sources:
+  - wiki/sources/descriptions/InertiaOrg__Inertia.md
   - wiki/sources/README-categories.md
 updated: 2026-08-25
-confidence: low
+confidence: medium
 ---
 
 # Inertia
 
-Open-source **Minecraft anti-cheat foundation** (InertiaOrg) built around version-neutral engine design rather than Bukkit/NMS package branching. The project models behavior profiles, normalized movement and packet frames, world snapshots, collision models, and testable evidence accumulation with false-positive context (teleports, velocity grace, latency spikes, server-health drops). Current modules: `inertia-api` (neutral contracts), `inertia-core` (engine + evidence), `inertia-testkit` (scenario tests without a live server). Platform adapters and plugin bootstrap are intentionally deferred; movement prediction is a foundation pass, not full vanilla parity yet. (source: wiki/sources/README-categories.md)
+Open-source **Minecraft anti-cheat foundation** (InertiaOrg) with a version-neutral engine that models **player behavior** rather than tying logic to specific server implementations (Bukkit/NMS). Written in **Java** with `inertia-api` (contracts for movement, packets, world snapshots, collision, debug tracing), `inertia-core` (evidence accumulator with confidence/decay and false-positive context: teleports, velocity grace, latency spikes, server health), and `inertia-testkit` (scenario-driven tests without a live server). Version profiles carry movement rules and limits; a **movement-prediction skeleton** tracks frame-by-frame state. Platform adapters are deferred; aimed at anti-cheat developers and server operators wanting a testable, platform-agnostic base for invalid-movement detection across many game versions. (source: wiki/sources/descriptions/InertiaOrg__Inertia.md)
 
 ## Design focus
 

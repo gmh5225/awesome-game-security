@@ -1513,7 +1513,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HumptyLock](entities/humptylock.md) — iOS 14.0–14.4.2 XNU kernel R/W exploit app (Coruna Pendulum PE; lockf/OOL-port/pipe primitives; wh1te4ever)
 - [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)
 - [ICUAC](entities/icuac.md) — Paper/Folia server-side rule enforcement plugin (Java 21 Gradle; command/inventory/combat integrity checks; blocked commands, NBT/enchantment validation, stack/potion limits, end-crystal cooldowns; bilingual CN/EN; Folia scheduling; SHA-256-verified updater; Lazyzouo; Anti Cheat / game:minecraft)
-- [Inertia](entities/inertia.md) — open-source Minecraft anti-cheat foundation (InertiaOrg; Java; version-neutral behavior profiles, movement/packet frames, evidence accumulation, false-positive context; inertia-api/core/testkit; no Bukkit/NMS in core; Anti Cheat / game:minecraft)
+- [Inertia](entities/inertia.md) — open-source Minecraft anti-cheat foundation (InertiaOrg; Java; version-neutral player-behavior engine; movement/packet/world/collision contracts; evidence accumulation with confidence/decay; version profiles + movement-prediction skeleton; inertia-api/core/testkit; scenario tests without live server; Anti Cheat / game:minecraft)
 - [iaito](entities/iaito.md) — official radare2 GUI (Qt5/6; RE workflow / editor tooling; Cheat Radare)
 - [idaxex](entities/idaxex.md) — IDA Pro 9 XEX/Xenon loader (XEX parse, PE extraction, import/export + kernel naming; Xbox 360 RE)
 - [ida2llvm](entities/ida2llvm.md) — IDA→LLVM IR lifting (loyaltypollution cursor-sync disassembly lift; Sandspeare microcode→IR via llvmlite; cheat / IDA Plugins)
