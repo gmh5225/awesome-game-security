@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Harrison1/unrealcpp`: entity [[unrealcpp]] (Harrison1; large UE4 C++ tutorial lesson projects; actor movement, camera, input, components; compile-as-reference samples; engine literacy for gameplay RE; Game Engine / UE4 C++ examples); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[ue4-tutorials]], [[unreal-engine-guide]], and [[asset-tutorial-plugin]].
+
 - **2026-08-24** — ingest `description:Harvester57/CodeIntegrity-DriverBlocklist`: entity [[code-integrity-driverblocklist]] (Harvester57; WDAC CI policy blocklist XML data; hash/identity deny rules incl. anti-cheat kernel modules; configuration data for WDAC/policy tooling; defensive hardening + kernel attack-surface reduction); cited on [[overviews/windows-kernel]] and [[concepts/hvci]]; cross-linked [[msft-driverblocklist]], [[wdactools]], [[solemn]], [[driver-risk-scout]], [[loldrivers]], and [[byovd]].
 
 - **2026-08-24** — ingest `description:HeathHowren/CSGO-Cheats`: entity [[csgo-cheats]] (HeathHowren; tutorial external CS:GO C++ examples; Visual Studio; window discovery, process open, memory R/W helper wrappers, offset maintenance; beginner game-memory manipulation + defender cheat-pattern study; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[pointer-lab]], [[csgo-external-cheat]], [[csgo-external-esp]], [[csgo-offsets]], and [[intro-to-gamehacking]].
