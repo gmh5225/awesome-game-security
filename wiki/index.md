@@ -1368,6 +1368,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gltut](entities/gltut.md) — OpenGL tutorial (C++ / XML docs; Renderer / OpenGL Render)
 - [gnn-deobfuscation](entities/gnn-deobfuscation.md) — GNN-based MBA deobfuscation (LostOxygen; Python; training/testing pipelines; Loki/MBABlast/MBAObfuscator datasets by variable count and operation depth; ML simplification research; Cheat Mixed boolean-arithmetic)
 - [gpt-wpre](entities/gpt-wpre.md) — Ghidra+GPT whole-program RE (ghidra_bridge decomp/call graph → bottom-up function summaries; ChatGPT)
+- [GPU_ShellCode](entities/gpu-shellcode.md) — NVIDIA GPU-resident shellcode staging PoC (CUDA + MinHook; payload in VRAM during idle; VEH restore to RX pages; memory hiding / AC evasion research; H1d3r)
 - [grafana-final-scanner](entities/grafana-final-scanner.md) — Grafana CVE scanner (path traversal/SSRF/auth bypass/info disclosure; version fingerprinting + config analysis; HTML/CSV/JSON reports; Cheat / RE Tools)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
