@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Ether2023/Ether-Uprotector`: entity [[ether-uprotector]] (Ether2023; C# Unity IL2CPP + asset protection; Unity asset parsing; metadata XXTEA/custom crypto; key-function obfuscation; config-driven asset/code workflows; game developers + protection researchers; Game Engine Protection:Unity); cited on [[concepts/il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cpp-encrtypt]], [[obfuz]], [[unity3d-obfuscator]], [[il2cppdumper]], and [[il2cpp-finder]].
+
 - **2026-08-25** — ingest `description:EvelynSchwab/ComponentFuseMechanic`: entity [[component-fuse-mechanic]] (EvelynSchwab; UE5.2 gameplay prototype; actor-component fuse mechanic; C++/Blueprint; socket alignment, placement previews, Chaos physics constraints; object-combination / physics-driven attachment prototyping; Game Engine / UE5 constraining system); cited on [[overviews/game-engine]]; cross-linked [[kawaii-physics]], [[ue5-roll-a-ball-game]], [[bt-modular-game-features]], [[physx]], and [[ue5-with-dear-imgui]].
 
 - **2026-08-25** — ingest `description:EvilBytecode/CustomDpapi`: entity [[custom-dpapi]] (EvilBytecode; C++ PoC; undocumented DPAPI RPC via `NdrClientCall3` to lsass `protected_storage`; bypasses `CryptUnprotectData`; dpapi.dll internals RE; Windows credential protection / RPC attack-surface research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kvcforensic]], [[pillager]], [[idontlikefilelocks]], and [[lsass-dump-that-lsass]].

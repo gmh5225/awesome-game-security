@@ -1110,6 +1110,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [exe_packer](entities/exe-packer.md) — C/C++ x86/x64 PE packer (Huffman compression; custom stub; NTDLL/KERNEL32 resolve; import decrypt; relocs; Anti Cheat → Binary Packer; andrew9382)
 - [exrop](entities/exrop.md) — Python automatic ROP chain generator (constraint-driven gadget synthesis from binary; Cheat / ROP Generation)
 - [EtherealEngine](entities/ethereal-engine.md) — cross-platform C++ engine (ECS + PBR + asset pipeline + editor; gmh5225; Game Engine source)
+- [Ether-Uprotector](entities/ether-uprotector.md) — Unity IL2CPP + asset protection (C#; XXTEA/custom metadata crypto; asset parsing; key-function obfuscation; config-driven asset/code workflows; Game Engine Protection:Unity; Ether2023)
 - [ExtendedCameraSettings](entities/extended-camera-settings.md) — gameplay camera mod (FOV / distance / rotation / viewpoint params beyond engine defaults; gmh5225)
 - [External ImGui Android](entities/external-imgui-android.md) — external ImGui mod menu (OpenGL ES 3.0; SurfaceView overlay + NDK JNI; UE memory tools; gmh5225)
 - [External Imgui Cheat Menu Example 2023](entities/external-imgui-cheat-menu-example-2023.md) — external ImGui menu template (SDL+OpenGL; `SDL_GL_SwapWindow` hook; GL context anti-flicker; gmh5225)
