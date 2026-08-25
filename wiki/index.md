@@ -764,6 +764,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)
 - [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
 - [debug-remover](entities/debug-remover.md) — C/C++ strip debug info from binaries (Anti Cheat → Binary Packer; anti-RE hardening)
+- [deadcell-csgo](entities/deadcell-csgo.md) — CS:GO internal cheat framework full source (EternityX; C++; aiming, visuals, config, menu; build-and-study learning codebase; legacy Source 1; cheat / game:csgo)
 - [deadlock-anti-cheat](entities/deadlock-anti-cheat.md) — UrnIt user-mode Deadlock session AC (process/screenshot/key/HWID logging; Discord webhook; tournament review)
 - [de4py](entities/de4py.md) — Python deobfuscation/analysis framework (Fadi002; GUI + CLI; multi-obfuscator support; packed-artifact analyzers, hash/string inspection, behavior monitoring, process-integrated execution; PySide6 + native Windows injection/hook helpers; malware/RE workflows; Toolkit for python reverse engineering)
 - [decbench](entities/decbench.md) — Python decompiler benchmark suite (CFG GED, DWARF type match, recompile bytematch; angr/Ghidra/IDA/Binja/r2dec/dewolf + LLM backends; Debian/embedded/firmware/malware corpora; Noelo-Lab)

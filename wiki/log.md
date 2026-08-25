@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EternityX/DEADCELL-CSGO`: entity [[deadcell-csgo]] (EternityX; C++ CS:GO internal cheat framework full source; aiming, visuals, config, in-game menu modules; Visual Studio project + UI components; build-and-study learning codebase for legacy Source-engine cheat architecture; cheat / game:csgo); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-cheat-base]], [[csgosimple]], [[csgo-internal-base]], and [[digital-sdk]].
+
 - **2026-08-25** — ingest `description:Ether2023/Ether-Uprotector`: entity [[ether-uprotector]] (Ether2023; C# Unity IL2CPP + asset protection; Unity asset parsing; metadata XXTEA/custom crypto; key-function obfuscation; config-driven asset/code workflows; game developers + protection researchers; Game Engine Protection:Unity); cited on [[concepts/il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cpp-encrtypt]], [[obfuz]], [[unity3d-obfuscator]], [[il2cppdumper]], and [[il2cpp-finder]].
 
 - **2026-08-25** — ingest `description:EvelynSchwab/ComponentFuseMechanic`: entity [[component-fuse-mechanic]] (EvelynSchwab; UE5.2 gameplay prototype; actor-component fuse mechanic; C++/Blueprint; socket alignment, placement previews, Chaos physics constraints; object-combination / physics-driven attachment prototyping; Game Engine / UE5 constraining system); cited on [[overviews/game-engine]]; cross-linked [[kawaii-physics]], [[ue5-roll-a-ball-game]], [[bt-modular-game-features]], [[physx]], and [[ue5-with-dear-imgui]].

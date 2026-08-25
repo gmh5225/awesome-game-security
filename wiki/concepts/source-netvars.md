@@ -31,9 +31,10 @@ sources:
   - wiki/sources/descriptions/dhanax26__Apex-Legends-Offset-Dumper.md
   - wiki/sources/descriptions/a2x__cs2-dumper.md
   - wiki/sources/descriptions/designer1337__csgo-cheat-base.md
+  - wiki/sources/descriptions/EternityX__DEADCELL-CSGO.md
   - wiki/sources/descriptions/W1lliam1337__digital-sdk.md
   - wiki/sources/descriptions/ProjectBorealis__PBCharacterMovement.md
-updated: 2026-08-22
+updated: 2026-08-25
 confidence: high
 ---
 
@@ -58,7 +59,7 @@ Source 2 extends the model with schema-driven layouts; generators such as [[sour
 | `IClientEntityList` | `GetClientEntity(index)` entity list; live-process entity-list discovery tools such as [[gh-entity-list-finder]] (x64/x86 scan for likely list addresses) complement signature dumpers (source: wiki/sources/descriptions/guided-hacking__GH-Entity-List-Finder.md) |
 | `IEngineTrace` | Ray/world traces |
 | `ICvar` | `FindVar("sv_cheats")` and console variables |
-| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane); internal bases such as [[csgo-cheat-base]] wrap these interfaces for DirectX surface drawing and glow ESP (source: wiki/sources/descriptions/designer1337__csgo-cheat-base.md); modular scaffolds such as [[digital-sdk]] pair dedicated netvars/rendering modules with CreateMove and Direct3D reset hooks for ESP, chams, and autowall features (source: wiki/sources/descriptions/W1lliam1337__digital-sdk.md) |
+| `ISurface` / `IPanel` | Overlay rendering (Source 1 HUD/ESP lane); internal bases such as [[csgo-cheat-base]] wrap these interfaces for DirectX surface drawing and glow ESP (source: wiki/sources/descriptions/designer1337__csgo-cheat-base.md); full-source learning frameworks such as [[deadcell-csgo]] (EternityX; aiming, visuals, config, menu modules; build-from-source CS:GO cheat architecture study) illustrate modular internal feature layout beside scaffold bases (source: wiki/sources/descriptions/EternityX__DEADCELL-CSGO.md); modular scaffolds such as [[digital-sdk]] pair dedicated netvars/rendering modules with CreateMove and Direct3D reset hooks for ESP, chams, and autowall features (source: wiki/sources/descriptions/W1lliam1337__digital-sdk.md) |
 
 Interface vtables and netvar tables drift per game build—verify against the target binary. Pair with [[research-rigor]] when porting offsets across patches.
 
@@ -68,4 +69,4 @@ UE4 movement plugins such as [[pbcharactermovement]] (ProjectBorealis; recreates
 
 ## Related
 
-[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[hazedumper]] · [[offsets]] · [[offset-streaming]] · [[dvrt]] · [[gh-offset-dumper]] · [[apex-legends-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[source2dumps]] · [[dezlock-dump]] · [[cs2-dumper]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-sdk]] · [[cs2-internal-sdk]] · [[cs2-things]] · [[cs2-webradar]] · [[cs2-fov-changer]] · [[source-engine]] · [[hl2sdk]] · [[source-sdk-2013]] · [[pbcharactermovement]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[csgo-cheat-base]] · [[csgo-internal-base]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[unreal-object-model]] · [[il2cpp]] · [[sdk]] · [[csgo-sdk]] · [[csgo-sdk-improved]] · [[csgo-offsets]] · [[hazedumper]] · [[offsets]] · [[offset-streaming]] · [[dvrt]] · [[gh-offset-dumper]] · [[apex-legends-offset-dumper]] · [[gh-entity-list-finder]] · [[source2gen]] · [[source2sdk]] · [[source2dumps]] · [[dezlock-dump]] · [[cs2-dumper]] · [[dota2dumped]] · [[cs2-offsets]] · [[cs2-sdk]] · [[cs2-internal-sdk]] · [[cs2-things]] · [[cs2-webradar]] · [[cs2-fov-changer]] · [[source-engine]] · [[hl2sdk]] · [[source-sdk-2013]] · [[pbcharactermovement]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[csso-src]] · [[csgo-cheat-base]] · [[deadcell-csgo]] · [[csgo-internal-base]] · [[research-rigor]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
