@@ -811,6 +811,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cheatguard](entities/cheatguard.md) — JUS7205 Rust engine-agnostic AC scanner (JSON signature ruleset; Win32 loaded-module enumeration; weighted signals; deterministic 0–100 CLEAN/SUSPICIOUS/MALICIOUS JSON report; library + CLI)
 - [cheat-engine-ceserver-pcileech](entities/cheat-engine-ceserver-pcileech.md) — CE ceserver over PCILeech/LeechCore DMA; remote scan/edit invisible to target anti-cheat (gmh5225)
 - [cheat-it](entities/cheat-it.md) — UE multi-title internal cheat (Witch It + POLYGON; signature scan for UObject arrays / engine structures; configurable pattern matching; gmh5225)
+- [Cheat Manager Menu](entities/cheat-manager-menu.md) — UE 5.8 Win64 plugin; auto-builds in-game cheat menu by reflecting UCheatManager + registered extensions; SlateIM UI; Shipping-stripped; Ghostleadie
 - [CheatUnityGames](entities/cheat-unity-games.md) — Android NDK Unity cheat template (C/C++; Il2CppResolver + Dobby hooks; VSCode build scripts; injection/native-layer study; SsageParuders; cheat / game engine explorer:Unity)
 - [cheat-attack-thread-slemu](entities/cheat-attack-thread-slemu.md) — thread sleep emulation / context manipulation to evade AC thread scanning (gmh5225; Heartbeat Testing)
 - [ddma](entities/ddma.md) — disk HBA ATA DMA PoC (SLAT/EPT bypass via unvirtualized storage; Hyper-V runtime modification; kernel/hypervisor research; btbd)
