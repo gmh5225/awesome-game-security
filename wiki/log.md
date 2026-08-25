@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Guardsquare/proguard`: entity [[proguard]] (Guardsquare; Java bytecode shrinker/optimizer/obfuscator/preverifier; Gradle/CLI; software protection / deployment hardening); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[deobfuscator]], [[obfu-de-scate]], [[apkid]], [[jadx]], and [[apktool]].
+
 - **2026-08-25** — ingest `description:GuidoBartoli/sherloq`: entity [[sherloq]] (GuidoBartoli; open-source digital image forensics toolset; Python GUI; ELA, EXIF metadata, frequency/gradient/histogram analysis, cloning detection, TruFor neural detector; AC screenshot manipulation / authenticity review); cited on [[concepts/anti-screenshot-capture]] and [[overviews/anti-cheat]]; cross-linked [[screenshot]], [[screenshot-detection-bypass]], and [[deadlock-anti-cheat]].
 
 - **2026-08-25** — ingest `description:GunshipPenguin/kiteshield`: entity [[kiteshield]] (GunshipPenguin; Linux x86-64 ELF packer/protector; layered RC4 encryption + custom user-space loader; ptrace keeps only active call-stack functions decrypted; anti-debug checks; C + asm; binary obfuscation / anti-analysis education; Anti Cheat → Binary Packer `[ELF X64]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[elfcrypt]], [[elfuck]], [[silent-packer]], [[vmpacker]], [[adbg]], [[anti-debugging]], and [[midgetpack]].
