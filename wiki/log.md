@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GetRektBoy724/DCMB`: entity [[dcmb]] (GetRektBoy724; C kernel driver; dynamic callback-list discovery for process/thread/image/registry/object/minifilter notify without hardcoded offsets or signatures; debug-output learning PoC; AC/EDR/callback inspection research; README Removing kernel callbacks); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[kpdb]], [[win32khooker]], [[bustercall]], [[ps-notif-routine-unloader]], and [[kernel-callback-removal]].
+
 - **2026-08-25** — ingest `description:damanoreshkan-beep/rtl8852au-userspace`: updated entity [[rtl8852au-userspace]] (Android no-root RTL8852AU userspace driver; libusb/usbfs cold boot + firmware; radiotap pcap + 2.4/5 GHz channel hopping + 802.11 frame injection; rtw89 register/calibration port; C + Kotlin/TS tooling; cheat / Android Network Explorer); cited on [[overviews/reverse-engineering]]; cross-linked [[pcapdroid]].
 
 - **2026-08-25** — ingest `readme:categories`: Cheat ~2747 (+1; damanoreshkan-beep/rtl8852au-userspace no-root RTL8852AU libusb monitor/inject in Cheat > Android Network Explorer; other major section counts stable); entity [[rtl8852au-userspace]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).

@@ -721,6 +721,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dataptrswap-driver](entities/dataptrswap-driver.md) — win32kbase data-ptr swap on NtSetCompositionSurfaceAnalogExclusive; MmUnloadedDrivers cleanup (gmh5225; cheat driver)
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
 - [d-process](entities/d-process.md) — Linux decoy process generator (on-demand C compile + nohup; arbitrary process names; anti-cheat / tracker enumeration research)
+- [DCMB](entities/dcmb.md) — dynamic kernel callback-list discovery without hardcoded offsets/signatures (GetRektBoy724; C driver; process/thread/image/registry/object/minifilter notify; debug-output learning PoC; AC/EDR callback inspection)
 - [Dainsleif](entities/dainsleif.md) — simple internal CS:GO cheat (RE training; cheat / game:csgo)
 - [Dani's Nightmare](entities/danis-nightmare.md) — BepInEx Harmony mod for Muck (C# runtime debug/cheat chat commands; player/enemy/item/powerup/time manipulation; Tab autocomplete from live memory; mod dev / RE / engine stress-test; PlinKuuu)
 - [DakotaAC](entities/dakotaac.md) — Spigot/Paper Minecraft AC (ProtocolLib + Citizens2; combat/movement/inventory modules; YAML kick/ban)
