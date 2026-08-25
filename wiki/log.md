@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GameCrashProject/UE4-Hacking-Guideline`: entity [[ue4-hacking-guideline]] (GameCrashProject; research-oriented UE4 security methodology; Markdown chapters on engine background, attack vectors, tooling, build setup, and analysis process; systematic engine-level vulnerability study for students and security researchers; Game Engine / Unreal guide); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[unreal-source-explained]], [[unreal-development-guides-and-tips]], [[unreal-object-model]], and [[unreal-engine-protection]].
+
 - **2026-08-25** — ingest `description:GameDevGrzesiek/OptimizationBible`: entity [[optimization-bible]] (GameDevGrzesiek; comprehensive Unity/Unreal optimization reference; performance profiling, console hardware specs and PC equivalents, rendering pipeline optimization, engine-specific tooling guides; Game Engine / guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unreal-development-guides-and-tips]], [[opengraphic]], [[presentmon]], and [[optick]].
 
 - **2026-08-25** — ingest `description:GameHackingBook/GameHackingCode`: entity [[game-hacking-code]] (GameHackingBook; No Starch Press *Game Hacking* companion code; Visual Studio Win32 chapter demos; C++; memory layout/scanning, DLL injection, NOP/IAT/vfunc/call hooks, Adobe AIR hooking, D3D Present overlays, Lua forensics scripts; cheat / guide); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[intro-to-gamehacking]], [[gamehacking-cheatsheet]], [[pointer-lab]], and [[present-hook]].

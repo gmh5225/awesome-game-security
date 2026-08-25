@@ -3052,6 +3052,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4dumper](entities/ue4dumper.md) — Android UE4 SDK dumper (C/C++; modding / SDK generation)
 - [ue4dumper-emulator](entities/ue4dumper-emulator.md) — Android emulator UE4 SDK dumper (C/C++; modding / SDK generation / memory analysis; gmh5225)
 - [ue4genny](entities/ue4genny.md) — runtime UE4 reflection SDK generator (C++; UObject/UClass/UStruct/UEnum/UFunction → C++ headers; SDK Generator; cursey)
+- [ue4-hacking-guideline](entities/ue4-hacking-guideline.md) — UE4 engine security assessment methodology (GameCrashProject; Markdown chapters on engine background, attack vectors, tooling, build setup, analysis process; systematic engine-level vulnerability study; Game Engine / Unreal guide)
 - [ue4-processevent-intercept](entities/ue4-processevent-intercept.md) — compact UE4 ProcessEvent interceptor (C++; VMT shadowing on selected objects; hook lifecycle reapplied on object recreation; gameplay call capture/modify; UE4 RE / internal instrumentation; Skengdo)
 - [UEDumper](entities/uedumper.md) — all-in-one Unreal Engine dumper + live memory editor (C++; ImGui; UE 4.19–5.3; SDK generation, structure dump, runtime browse; Spuckwaffel; cheat / SDK Dump)
 - [Shh0yaUEDumper](entities/shh0yauedumper.md) — Windows UE4 dumper + SDK generator (C++; process memory + pattern scan + engine structure parse; names/objects/SDK headers; configuration-driven version handling; Shhoya; cheat / SDK Dump)
