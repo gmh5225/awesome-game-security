@@ -1453,6 +1453,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hideroot](entities/hideroot.md) — Android root-hide sample (C/C++; Cheat / Magisk)
 - [hiearchy-eac](entities/hiearchy-eac.md) — EAC self-integrity bypass PoC (call-hierarchy + memory-read manipulation; verification hooks; cleaned-image redirect; stack/register spoofing; Sinclairq [Integrity Checks])
 - [HideDriver](entities/hide-driver.md) — hide driver via Flink/Blink unlink (cheat / hide; AC enum evasion)
+- [HideDriver (ExpLife0011)](entities/hidedriver.md) — ExpLife0011; ETW symbol discovery; PatchGuard-aware `DriverObject->DriverSection` removal via `MiProcessLoaderEntry`; post-load cleanup thread; driver forensics / AC evasion research; README [Hide Driver By MiProcessLoaderEntry]
 - [HideDriverTesting](entities/hide-driver-testing.md) — multi-artifact driver hide (MmUnloadedDrivers, PsLoadedModuleList, PiDDBCacheTable; Win11 21H2; gmh5225)
 - [Hidden](entities/hidden.md) — WDK kernel driver + user-mode CLI/library; configurable hide for files/directories/registry keys/processes + process protection; RE lab environment masking (JKornev)
 - [HiddenModuleDetector](entities/hidden-module-detector.md) — hidden module/DLL detector for Windows apps (C/C++; Detection:Hide; mq1n)
