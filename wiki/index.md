@@ -3332,6 +3332,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Win32.Nebula](entities/win32-nebula.md) — Lima-X PoC packed/protected module loader framework (C++; loader library + builder; SDK APIs, dynamic service manager; patch/encrypt/pack; software protection / loader architecture / anti-analysis research; PE X64)
 - [winipt](entities/winipt.md) — WinIPT library + tools for Intel Processor Trace on Windows (`ipt.sys`; per-process/per-CPU; coverage / fuzzing / execution tracing)
 - [win32k-file-collection](entities/win32k-file-collection.md) — win32k.sys and related GUI-subsystem binaries across Windows builds (patch diff / vuln research)
+- [Win32kHooker](entities/win32khooker.md) — win32k.sys session-space dispatch hooking; runtime disassembly + `.data` ptr swap for newer win32k builds (GetRektBoy724; GUI-subsystem / AC / RE research)
 - [win32k-file-collection2](entities/win32k-file-collection2.md) — versioned win32k.sys binary corpus (Win10/11; offline diff / syscall & input-path RE)
 - [winkernel-resources](entities/winkernel-resources.md) — curated Windows kernel internals & exploitation learning index (papers, talks, vulnerable-driver refs, sample driver VS solutions; NullArray; Guide)
 - [win-shaper](entities/win-shaper.md) — WFP callout traffic shaper (latency/bandwidth/packet loss/queue sizing; CLI+GUI; Game Testing / network-sensitive game testing; WPO-Foundation)
