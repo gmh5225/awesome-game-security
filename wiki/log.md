@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Gforcex/OpenGraphic`: entity [[opengraphic]] (Gforcex; curated Markdown knowledge base of OSS graphics and game engine resources; engines, rendering techniques, optimization, tools, tutorials; technology scouting for graphics programmers and engine developers; Graphic Engine & Game Engine lists); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[awesome-game-engine-dev]], [[gamedev-resources]], [[learn-awesome-gamedev]], and [[open-source-engines]].
+
 - **2026-08-25** — ingest `description:GhostNgEnd/Ghost-AntiCheat`: entity [[ghost-anticheat]] (GhostNgEnd; Java Gradle Nukkit plugin; ECS BDS movement/collision/physics simulation; latency-compensated packet checks; phase/no-slow/anti-knockback, reach/hitbox abuse, invalid block breaking, elytra flight anomalies, bad packets, multi-action violations; server-side Bedrock cheat detection; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[oomph]], [[paradox-anticheat]], [[scythe-anticheat]], [[minecraft-anticheat-list]], and [[grim]].
 
 - **2026-08-25** — ingest `description:Ghostleadie/CheatManagerMenu`: entity [[cheat-manager-menu]] (Ghostleadie; UE 5.8 C++ Win64 plugin; runtime reflection over `UCheatManager` + BlueprintCallable cheat extensions; SlateIM parameter-aware controls; keyboard/mouse/gamepad; filters/favorites/categories; compiled out of Shipping; dev/PIE/Test debug interface; cheat / Plugins:Unreal); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[unreal-imgui-tools]], [[unreal-object-model]], and [[unrealcpp]].

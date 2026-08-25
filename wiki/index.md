@@ -2294,6 +2294,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [open-source-engines](entities/open-source-engines.md) — curated open-source game engine index (raylib and peers; Game Engine / guide)
 - [open-source-games](entities/open-source-games.md) — open-source game index (Commander Keen, Cosmo's Cosmic; classic OSS titles; Game Develop Guide)
 - [openfpga-gbc-cheats-ui](entities/openfpga-gbc-cheats-ui.md) — Pocket Cheat Picker; Analogue Pocket GB/GBC openFPGA `.cht` deploy (Python/tkinter; libretro DB; Game Genie/GameShark; CPU-read vs RAM-write flags; openfpga-GBC-cheats parser; Game Boy)
+- [OpenGraphic](entities/opengraphic.md) — curated OSS graphics and game engine resource index (Gforcex; engines, rendering techniques, optimization, tools, tutorials; Graphic Engine & Game Engine lists)
 - [open-reverselab](entities/open-reverselab.md) — agent-native RE lab (180+ technique articles, 100+ MCP tools; knowledge router; Ghidra/Frida/x64dbg/jadx; web CTF, APK/DEX, PE, crypto, game cheating/AC boards; LING71671)
 - [openarena-engine](entities/openarena-engine.md) — OpenArena ioquake3 fork (Quake III renderer/audio/networking/runtime; make-based multi-platform C/C++; classic FPS multiplayer engine study; Game Engine / source [quake3])
 - [openbarnyard](entities/openbarnyard.md) — WIP Barnyard + TOSHI 2.0 C++ reimplementation (DirectX 8/OpenGL; Premake; RE progress vs binary addresses; Detours SDK hooks, mod loading, ImGui debug; Ghidra RE workflow; Game Engine / source)
