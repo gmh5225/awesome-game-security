@@ -2949,6 +2949,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [the-poor-mans-obfuscator](entities/the-poor-mans-obfuscator.md) — lightweight LLVM IR obfuscator (insn sub / CFF / string encrypt; ELF/Mach-O)
 - [ThePerfectInjector](entities/the-perfect-injector.md) — NtCreateThreadEx + runtime LdrLoadDll-resolving PIC shellcode DLL injector (can1357; WoW64; cheat / injection:windows)
 - [teamfortress2-internal](entities/teamfortress2-internal.md) — TF2 internal: modding / hooking (C++; cheat / game:team fortress 2; gmh5225)
+- [TF2BD Database](entities/tf2bd-database.md) — community-maintained TF2 cheater/suspicious-player/scammer JSON lists and chat word-filter rules for TF2 Bot Detector (TF2BD v3 schemas; client-side moderation; Garou3299)
 - [tft-ocr-bot](entities/tft-ocr-bot.md) — TFT OCR automation bot (Python; asset pipelines / overlay; screen OCR; cheat / game:lol [TFT]; gmh5225)
 - [the-finals-interior-cheat](entities/the-finals-interior-cheat.md) — The Finals internal: rendering / SDK generation / hooking (C/C++; cheat / game:the finals; gmh5225)
 - [The Dreamers Guards](entities/the-dreamers-guards.md) — Fabric client+server AC (Java; encrypted join payloads; mod blacklist scanning; progressive four-phase suspension; anti-evasion; operator kick/ban/pardon/trust; Discord webhooks; IamFriendly0242u; Anti Cheat / game:minecraft)
