@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FBlackBox/BlackBox`: entity [[blackbox]] (FBlackBox; deprecated Android virtualization project; README-only removal notice; dissolved community channel; no remaining source; historical game-security context; README Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[virtual-app]], [[android-virtual-inject]], and [[inject-arm64]].
+
 - **2026-08-25** — ingest `description:FHowington/CPUEngine`: entity [[cpuengine]] (FHowington; real-time CPU-only 3D software renderer; C++17 + SDL2; rasterization, depth testing, multiple shading models, post-processing, OBJ/TGA assets; scalar + SIMD paths, thread-pool triangle distribution, interactive camera/HUD; graphics education and low-level rendering performance research); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[tinyrenderer]], [[softglrender]], [[gltut]], and [[game-engine-from-scratch]].
 
 - **2026-08-25** — ingest `description:FaEryICE/MemScanner`: entity [[memscanner]] (FaEryICE; C WDK/VS; Windows x64 kernel memory layout scanner; enumerate drivers/processes/section objects; `DRIVER_OBJECT`, LDR entries, file objects; Win7–Win10 stability notes; kernel forensics / AC-oriented structure research; README Memory scanner); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[ntoskrnl-viewer]], [[rwxscanner]], [[pooldump]], [[kernel-pool-scanning]], and [[device-control-hooks-scanner]].
