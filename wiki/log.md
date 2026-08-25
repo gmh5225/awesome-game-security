@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `readme:categories`: Cheat ~2746 (+1; MrOplus/frida-ide web Frida IDE with JADX + Claude assistant in Cheat > Frida; other major section counts stable); fixed [[overviews/game-engine]] Game Assets ~12→~11; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], [[overviews/mobile-security]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-25** — ingest `description:HackerPoet/NonEuclidean`: entity [[non-euclidean]] (HackerPoet; Windows OpenGL rendering demo engine; C++; real-time non-Euclidean space; custom room transitions, camera movement, experimental geometric rendering; graphics/engine experimentation—not anti-cheat; useful for low-level render-pipeline literacy; Game Engine / guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[learnopengl]], [[gltut]], [[exengine]], and [[game-engine-from-scratch]].
 
 - **2026-08-25** — ingest `description:HadockKali/battleye-user-mode-bypass`: entity [[battleye-user-mode-bypass]] (HadockKali; C++ Visual Studio PoC; implanter + sample DLL; CreateFileW hook + file-check masquerade; payload masquerades as trusted module; historical UM BE loading-path trust-validation weakness; SetWindowsHookExW); cited on [[concepts/battleye]] and [[overviews/anti-cheat]]; cross-linked [[splendid-implanter]], [[noeye]], and [[beclient]].

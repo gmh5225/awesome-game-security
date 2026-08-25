@@ -82,7 +82,7 @@ sources:
   - wiki/sources/descriptions/Herooyyy__Pcileech-Activator-Anti-crack.md
   - wiki/sources/descriptions/Herooyyy__Pcileech-AMDPCI.md
   - wiki/sources/descriptions/Herooyyy__Free-DMA-Firmware-pcileech.md
-updated: 2026-08-24
+updated: 2026-08-25
 confidence: high
 ---
 
@@ -145,4 +145,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2745) DMA lanes and `Anti Cheat > Detection:DMA` (~690), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
+No top-level DMA section — maps via `Cheat` (~2746) DMA lanes and `Anti Cheat > Detection:DMA` (~690), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
