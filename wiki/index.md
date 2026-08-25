@@ -26,7 +26,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic/simulated exec ([[ollvm-unflattener]], [[idadeflat]], [[anti-ollvm]] Arm64), d810, OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
-- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[tinyinst]]/[[river]]/[[mambo]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
+- [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[drmemory]]/[[tinyinst]]/[[river]]/[[mambo]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
 - [Easy Anti-Cheat](concepts/easy-anti-cheat.md)
 - [ETW Threat Intelligence](concepts/etw-threat-intelligence.md) — Microsoft-Windows-Threat-Intelligence provider; PPL-gated cross-process memory telemetry; ETW bypass vs EPT hardening; [[etwti-fluctuation-monitor]] tamper alerts
 - [Frida](concepts/frida.md)
@@ -912,6 +912,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Drv Hide And Camouflage](entities/drv-hide-and-camouflage.md) — unsigned driver load + identity camouflage via unexported kernel routines, manual offset init, object/import-table manipulation (IcEy-999; C ring-0; Hide Driver)
 - [drvtrace](entities/drvtrace.md) — Windows kernel IRP filter tracer (major/minor codes, buffers, completion status; IOCTL/device-protocol RE; eversinc33)
 - [drvscan (ekknod)](entities/drvscan.md) — Windows DMA/PCIe device scanner and memory forensics (C; PCIe enumeration, pcileech-style acquisition, cheat/rootkit signature scans; Anti Cheat / Detection:DMA [Scanner])
+- [Dr. Memory](entities/drmemory.md) — DynamoRIO dynamic memory debugger (UAF, OOB, leaks, uninitialized reads; Windows handle/GDI checks; unmodified binaries; game/anti-cheat reliability testing)
 - [DrillAndJoin](entities/drill-and-join.md) — C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla
 - [Duck-Detector-Refactoring](entities/duck-detector-refactoring.md) — Android local device-integrity inspector (Jetpack Compose + Kotlin + native C++/assembly; root/hook/mount/attestation/virtualization cards; eltavine; cheat / Android root)
 - [Duckov Market Mod](entities/duckov-marketmod.md) — Duckov flea-market C# mod (Harmony patches; Steam-auth API + WebSocket; mod loader with auto-update; RE-derived internals; a0yark; modding / online marketplace research)

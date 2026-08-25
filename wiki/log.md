@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:DynamoRIO/drmemory`: entity [[drmemory]] (DynamoRIO; dynamic memory debugger on DynamoRIO; uninitialized reads, OOB, UAF, double-free, leaks; Windows handle/GDI checks; unmodified binaries on Windows/Linux/macOS/Android; IA-32/AMD64/ARM; software hardening and game/anti-cheat reliability testing); cited on [[concepts/dynamic-binary-instrumentation]] and [[overviews/reverse-engineering]]; cross-linked [[winafl]], [[tinyinst]], and [[rev-tools-setup]].
+
 - **2026-08-25** — ingest `description:DysonCheng/PalWorldSettingGenerator`: entity [[palworld-setting-generator]] (DysonCheng; web-based JS/HTML settings config generator/editor; form-driven difficulty/progression tuning; download generated PalWorld config; Setting Generator; cheat / game:palworld [Server]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworld-rcon]], [[docker-palworld-dedicated-server]], and [[palworld-server-modding]].
 
 - **2026-08-25** — ingest `description:EBalloon/Common-Registry`: entity [[common-registry]] (EBalloon; C++ KMDF driver + user client; registry-based KM↔UM comm PoC; custom process-attach handling and low-level memory-management ideas; Windows internals / anti-cheat bypass research; README [Registry Callback]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[common-registry-jmp-rcx]], [[boundcallback]], [[evcommunication]], and [[km-um-communication]].

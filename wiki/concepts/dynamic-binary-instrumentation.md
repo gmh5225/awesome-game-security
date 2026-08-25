@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/WaterlooBridge__adbi.md
   - wiki/sources/descriptions/GJDuck__e9patch.md
   - wiki/sources/descriptions/GlacierW__MBA.md
+  - wiki/sources/descriptions/DynamoRIO__drmemory.md
 updated: 2026-08-25
 confidence: high
 ---
@@ -27,7 +28,7 @@ Offline **static binary rewriting** on Linux ELF via [[e9patch]] can insert jump
 | Tool | Notes |
 |------|-------|
 | [[frida]] | Cross-platform; mobile + desktop hooking |
-| DynamoRIO / Pin / QBDI | Research-grade code manipulation |
+| DynamoRIO / Pin / QBDI | Research-grade code manipulation; [[drmemory]] adds DynamoRIO-based dynamic memory debugging (UAF, OOB, leaks; unmodified binaries) |
 | [[tinyinst]] | Lightweight module-selective DBI; hooking / debugging |
 | [[river]] | Bitdefender DBI + custom ELF/PE loader (x86; external mapping, import resolution) |
 | [[mambo]] | ARM/AArch64 Linux DBI; software code cache; instruction/block/function hooks |
@@ -57,4 +58,4 @@ WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID i
 
 ## Related
 
-[[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[drmemory]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
