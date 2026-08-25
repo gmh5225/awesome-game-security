@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Fox2Code/FoxMagiskModuleManager`: entity [[fox-magisk-module-manager]] (Fox2Code; Kotlin Android app; Magisk module discovery/download/install from online repos; update checks, custom repos, local vs remote views, richer metadata/compatibility; rooted module management; Cheat / Magisk); cited on [[overviews/mobile-security]] and [[entities/magisk]]; cross-linked [[rescuex]], [[webui-x-portable]], [[magisk-tailscaled]], and [[baize]].
+
 - **2026-08-25** — ingest `description:Fr0go1/Aeonix-Cs2`: entity [[aeonix-cs2]] (Fr0go1; C++ external CS2 cheat framework; derivative external base; overlay + tooling; ESP, aimbot with RCS, triggerbot, radar, config management; memory access modules + offset handling + real-time visual rendering; offensive game security experimentation and cheat development learning; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[tkazer-cs2-external]], [[cs2-external-cheat]], [[aimstar]], [[cs2-offsets]], [[cs2-dumper]], and [[world-to-screen]].
 
 - **2026-08-25** — ingest `description:Fragmentaim/Auto_aim`: entity [[auto-aim]] (Fragmentaim; C++ real-time AI aiming assistant core; DXGI Desktop Duplication capture; YOLO via ONNX Runtime/TensorRT; OpenCV vision; driver-level mouse simulation; CV game-automation research; DXGI + TensorRT + driver-level input); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[rookieai-yolov8]], [[ai-aimbot]], [[yolov8-overlay-cs2]], [[hardware-input-injection]], and [[screencapture]].

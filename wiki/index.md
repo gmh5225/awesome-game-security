@@ -1124,6 +1124,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Forensia](entities/forensia.md) — Windows anti-forensics utility (C++; file shredding, event-log/prefetch suppression, USN journal handling, timestamp cleanup, shell/cache artifact removal, Defender quarantine clearing, self-removal; post-exploitation trace reduction; red-team / IR validation; PaulNorman01)
 - [Fibratus](entities/fibratus.md) — Go Windows kernel ETW observability (rules / Elasticsearch; exploration & tracing)
 - [Fiano](entities/fiano.md) — Go UEFI firmware parse/edit toolkit (Firmware Volumes, FFS, PE32, LZMA/Tiano; flash extract/replace/remove)
+- [Fox Magisk Module Manager](entities/fox-magisk-module-manager.md) — Kotlin Android app; Magisk module discovery/download/install from online repos; update checks, custom repos, local vs remote views (Fox2Code; Cheat / Magisk)
 - [FuckCertVerifyTimeValidity](entities/fuck-cert-verify-time-validity.md) — Detours signtool import hook; bypass cert time validity for leaked/expired Authenticode (Sign Leaked Cert)
 - [fix-arxan](entities/fix-arxan.md) — Arxan PE protector dump/decrypt (loader info + working image; Dump Fix)
 - [findcrypt-yara](entities/findcrypt-yara.md) — IDA Pro FindCrypt plugin (YARA crypto-constant scan; AES/DES/SHA/CRC signatures; algorithm annotation; gmh5225; cheat / Yara)
