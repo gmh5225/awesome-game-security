@@ -469,6 +469,7 @@ sources:
   - wiki/sources/descriptions/EBalloon__MapPage.md
   - wiki/sources/descriptions/EBalloon__Remap.md
   - wiki/sources/descriptions/EBalloon__MmCopyMemory.md
+  - wiki/sources/descriptions/EBalloon__EasyAntiCheat-SRC.md
   - wiki/sources/descriptions/Ezmatehw__Encryptix-Crypter.md
   - wiki/sources/descriptions/vvb2060__MagiskDetector.md
   - wiki/sources/descriptions/rushiranpise__detection.md
@@ -845,6 +846,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[eazy-anti-cheat-src]] — reversed EAC source representation: reimplemented detection routines, driver communication, and integrity validation from binary analysis (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EazyAntiCheatSRC.md)
 - [[eac-easyanticheat-src-1]] — reconstructed/leaked EAC source representation: internal detection routines, driver communication protocols, and client-side integrity validation (Reversed Source lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC-EasyAntiCheat-Src-1.md)
 - [[easyanticheat-reversing]] — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable C-like driver output with registry strings and policy routines (Decompile dump lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EasyAntiCheat-Reversing.md)
+- [[easyanticheat-src]] — Hex-Rays decompiled source-style snapshot of EAC kernel driver; large C output + headers with function prototypes and data structures; process memory ops, validation, and anti-cheat control paths (Decompile dump lane; EBalloon) (source: wiki/sources/descriptions/EBalloon__EasyAntiCheat-SRC.md)
 - [[eac]] — mixed EAC study pack: reversed `easyanticheat.sys` kernel callback/heuristic logic + EAC/EOS SDK drop with headers and `EOS_FileDecryptionTool` (Study pack lane; gmh5225) (source: wiki/sources/descriptions/gmh5225__EAC.md)
 - [[eac-reversal]] — updated devirtualized EAC driver internals: callback checks, dispatch verification, callback enumeration, certificate validation, and code integrity as C++ pseudocode (Reversed driver lane; ch4ncellor) (source: wiki/sources/descriptions/ch4ncellor__EAC-Reversal.md)
 - [[eac-emu]] — simple x64 EAC DLL emulator stub; exports expected anti-cheat API functions with placeholder implementations; C++ plus assembly patch helpers; PoC for RE and compatibility testing of EAC-linked client code (Client stub lane; Rat431) (source: wiki/sources/descriptions/Rat431__EAC_Emu.md)
