@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FuzzySecurity/BinaryNinja-Themes`: entity [[binaryninja-themes]] (FuzzySecurity; `.bntheme` collection; standard/light/green Gruvbox-inspired palettes; disassembly and graph view readability; cheat / Theme); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-nord-theme]], [[long-night]], [[idaskins]], [[ida-dark-plus]], [[official-plugins]], and [[community-plugins]].
+
 - **2026-08-25** — ingest `description:FyroxEngine/Fyrox`: entity [[fyrox]] (FyroxEngine; production-ready Rust 2D/3D game engine; modular crates + integrated scene editor; editor-driven iteration; examples and learning resources; Game Engine / source [Rust]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[ursus]], [[source-renderer]], [[nightshade]], [[open-source-engines]], and [[awesome-game-engine-dev]].
 
 - **2026-08-25** — ingest `description:GAMMACASE/PltPatcher`: entity [[plt-patcher]] (GAMMACASE; Python IDAPython IDA Pro plugin set; repair ELF64 Procedure Linkage Table entries when auto-analysis fails; thunk type preserver for extern-call decompilation; binary RE / game security research; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[autoresolv]], [[plthook]], [[ida-pro-loadmap]], and [[idaplugins]].

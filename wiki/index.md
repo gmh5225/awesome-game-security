@@ -411,6 +411,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [binaryninja-openai](entities/binaryninja-openai.md) — Binary Ninja plugin: OpenAI-assisted HLIL/pseudo-C function summarize + variable rename (WhatTheFuzz; Integrates OpenAI)
 - [binaryninjaplugins](entities/binaryninjaplugins.md) — Binary Ninja custom architecture plugins: Java class files, Renesas H8/300, Xtensa ELF (Pusty; Python; disassembly/decode/lifting; patch workflows)
 - [binaryninja-pcode](entities/binaryninja-pcode.md) — BN ↔ Ghidra Sleigh/p-code bridge (experimental LLIL; Binary Ninja Plugins)
+- [binaryninja-themes](entities/binaryninja-themes.md) — Binary Ninja `.bntheme` collection: standard/light/green Gruvbox-inspired palettes (FuzzySecurity; Theme)
 - [binja-division-deoptimization](entities/binja-division-deoptimization.md) — Binary Ninja MLIL division/modulo deoptimizer (architecture-agnostic)
 - [binja-kc](entities/binja-kc.md) — Binary Ninja MachO kernelcache / KDK dSYM loader
 - [binja-lattice-mcp](entities/binja-lattice-mcp.md) — BinjaLattice BN plugin: authenticated HTTP bridge to external MCP servers; export disasm/pseudocode + controlled edits (Invoke-RE; MCP for Binary_Ninja)
