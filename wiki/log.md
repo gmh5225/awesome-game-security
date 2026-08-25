@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Guardsquare/flutter-re-demo`: entity [[flutter-re-demo]] (Guardsquare; Flutter mobile RE experiment kit; Python IDA Pro scripts for reFlutter/DWARF Dart rename, VM memory import, object/xref recovery, decompilation aids; Frida runtime capture; obfuscated/non-obfuscated sample APKs; Flutter app protection / Dart decompilation study); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[proguard]], [[unflutter]], [[frida]], [[frida-ide]], [[obfu-de-scate]], [[jadx]], and [[apktool]].
+
 - **2026-08-25** — ingest `description:Guardsquare/proguard`: entity [[proguard]] (Guardsquare; Java bytecode shrinker/optimizer/obfuscator/preverifier; Gradle/CLI; software protection / deployment hardening); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[deobfuscator]], [[obfu-de-scate]], [[apkid]], [[jadx]], and [[apktool]].
 
 - **2026-08-25** — ingest `description:GuidoBartoli/sherloq`: entity [[sherloq]] (GuidoBartoli; open-source digital image forensics toolset; Python GUI; ELA, EXIF metadata, frequency/gradient/histogram analysis, cloning detection, TruFor neural detector; AC screenshot manipulation / authenticity review); cited on [[concepts/anti-screenshot-capture]] and [[overviews/anti-cheat]]; cross-linked [[screenshot]], [[screenshot-detection-bypass]], and [[deadlock-anti-cheat]].

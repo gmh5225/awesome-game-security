@@ -1158,6 +1158,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FlowGraph](entities/flowgraph.md) — UE event-flow graph plugin (MothCocoon; C++; async nodes, custom pins, visual debugging; design-agnostic gameplay/narrative scripting; Plugins:Unreal)
 - [flirtnite](entities/flirtnite.md) — External Fortnite cheat framework (NurdAlert; C++; Hyper-V memory interface + Unreal structure handling; entity/aim modules; DirectX 9 ImGui menu/ESP overlay; cheat / game:fortnite [External])
 - [florida-zygisk](entities/florida-zygisk.md) — Magisk/KernelSU/APatch boot module; auto-starts Florida anti-detection frida-server
+- [flutter-re-demo](entities/flutter-re-demo.md) — Guardsquare Flutter RE experiment kit (Python IDA scripts; reFlutter/DWARF Dart rename, VM memory import, object/xref recovery; Frida capture; sample APKs)
 - [frank](entities/frank.md) — JavaScript LoL assistant / WeGame replacement (rendering, animation, asset pipelines; gmh5225; cheat / game:lol)
 - [FrankensteinAPCInjection](entities/frankenstein-apc-injection.md) — low-footprint Windows APC injection PoC (leaked handles + natural RWX + NtQueueApcThreadEx2; avoids VirtualAllocEx/CreateRemoteThread; S12cybersecurity; injection:windows)
 - [frinja](entities/frinja.md) — Binary Ninja Frida plugin (BinRida continuation; static+dynamic RE bridge; dzervas; cheat / Binary Ninja plugins)
