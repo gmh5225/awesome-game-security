@@ -1065,6 +1065,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
 - [evpp](entities/evpp.md) — C++11 libevent TCP/UDP/HTTP event-loop network library (nonblocking servers/clients; timers; async DNS; Memcached/NSQ clients; Game Network / source; Qihoo360)
 - [ErisDbg](entities/erisdbg.md) — VT debugger (C/C++; kernel drivers / modding; cheat / debugging)
+- [Eronana Packer](entities/eronana-packer.md) — Eronana basic Win32 x86 PE packer (C++ + companion compression; Visual Studio + CLI; self-validation extension branch; PE packing / unpacking RE education; Anti Cheat → Binary Packer `[PE X86]`)
 - [EscapeFromTarkov-Trainer](entities/escapefromtarkov-trainer.md) — discontinued EFT internal trainer (Mono era; IL2CPP 1.0 pivot; cheat / game:eft)
 - [meatyeftrelease](entities/meatyeftrelease.md) — open-source DMA EFT radar and companion toolkit (C++/ImGui; LeechCore/MemProcFS; fuser overlay; cheat / game:eft [DMA])
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)

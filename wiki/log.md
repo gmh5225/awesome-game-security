@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Eronana/packer`: entity [[eronana-packer]] (Eronana; basic Win32 x86 PE packer; C++ + companion compression; Visual Studio solution + CLI usage; self-validation extension branch; PE packing / binary protection / unpacking research education; Anti Cheat → Binary Packer `[PE X86]`; slug disambiguated from [[packer]]); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[packer]], [[exe-packer]], [[hm-pe-packer]], [[packer-tutorial]], [[unpacker]], and [[awesome-executable-packing]].
+
 - **2026-08-25** — ingest `description:Eruditi/CE-MCP-Plugin`: entity [[ce-mcp-plugin]] (Eruditi; C + Lua CE plugin; async TCP AI command channel; memory R/W, value freeze, disasm/asm, process management, DLL injection; non-blocking remote control for game memory research; cheat / MCP for Cheat Engine); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[cheatengine-mcp-bridge]], [[dsh-cheatengine]], and [[memmcp]].
 
 - **2026-08-25** — ingest `description:EternalWraith/PalEdit`: entity [[pal-edit]] (EternalWraith; Python desktop save editor; load/edit/clone Pal companion entries; write-back workflow; Windows executable build; save modding + structured format experimentation; cheat / game:palworld [Save]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworld-save-tools]] and [[palworldsaved]].
