@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Enum0x539/Qvoid-Token-Grabber`: entity [[qvoid-token-grabber]] (Enum0x539; .NET credential/token grabber; Discord token harvest, browser cookie/password extraction, screenshot/Wi-Fi/clipboard collection, webhook exfiltration, anti-debug/anti-VM/anti-sandbox/anti-emulation; information-stealer / account-token abuse malware-analysis research); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[idontlikefilelocks]], [[anti-sandbox]], [[pafish]], [[al-khaser]], and [[dfirtriage]].
+
 - **2026-08-25** — ingest `description:Enzo0721/ExternalCheatV3`: entity [[external-cheat-v3]] (Enzo0721; C++ external CS:GO cheat framework; ImGui + DirectX 9 overlay; aim assistance, glow, bunnyhop, no-flash; runtime-configurable modules; educational external tooling architecture study; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-external-cheat]], [[csgo-external-esp]], [[echinoidea]], [[csgo-cheats]], and [[heck-csgo-external]].
 
 - **2026-08-25** — ingest `description:EpicGames/UnrealEngine`: entity [[unreal-engine]] (EpicGames; official UE source + API documentation; complete runtime—build, rendering, physics, networking, platform abstraction, plugins, Python scripting; primary reference for UE internals, module development, platform integration; Game Engine / source); cited on [[overviews/game-engine]] and [[unreal-object-model]]; cross-linked [[unreal-engine-guide]], [[unreal-source-explained]], [[ue4-hacking-guideline]], [[lore]], and [[rider-source-code-access]].

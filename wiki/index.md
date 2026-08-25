@@ -2649,6 +2649,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [QQTang Cheat Engine](entities/qqtang-cheat-engine.md) — QQ Tang (QQ堂) title-specific cheat engine (C++/C; memory scan/edit; cheat / game:qqtang [Cheat Engine]; gmh5225)
 - [Quack](entities/quack.md) — universal anti-cheat research kit (C++; modular client monitoring, game integration examples, docs, red-team adversarial tooling; experimentation—not production; JonathanBerkeley)
 - [QSynthesis](entities/qsynthesis.md) — IDA Pro MBA expression synthesizer (Python; oracle-guided program synthesis + SMT; Hex-Rays; Cheat IDA Plugins)
+- [Qvoid Token Grabber](entities/qvoid-token-grabber.md) — .NET Discord/browser credential stealer (webhook exfil; anti-debug/anti-VM/anti-sandbox; token-abuse malware-analysis research; Enum0x539)
 - [Raccine](entities/raccine.md) — Windows anti-ransomware (Neo23x0; debugger registration for vssadmin/wmic; YARA command-line rules; shadow-copy deletion block; no resident agent; README [EDR])
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
