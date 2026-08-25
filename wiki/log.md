@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GameTechDev/PresentMon`: entity [[presentmon]] (GameTechDev/Intel; C++ game performance capture + real-time overlay; data-collection service, trace capture, frame timing analysis, telemetry pipelines for benchmarking; game developers / graphics engineers / technical analysts; Graphics Performance); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[present-hook]], [[tracy]], [[optick]], and [[push]].
+
 - **2026-08-25** — ingest `description:Garou3299/tf2bd-database`: entity [[tf2bd-database]] (Garou3299; community-maintained TF2 cheater/suspicious-player/scammer JSON lists + chat word-filter rules for TF2 Bot Detector; TF2BD v3 playerlist/rules schemas; last-seen metadata + proof; client-side alerts via surepy/tf2_bot_detector; lightweight community moderation); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[little-anti-cheat]], [[nocheatz-3]], [[teamfortress2-internal]], [[cunthook]], and [[fedoraware]].
 
 - **2026-08-25** — ingest `description:Gekkio/GhidraBoy`: entity [[ghidradboy]] (Gekkio; experimental Ghidra extension; Kotlin/Java + Sharp SM83 Sleigh; banked/unbanked ROM load, boot ROM variants, memory map blocks, hardware register symbols; retro game binary / firmware RE; cheat / Game Boy); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[gba-ghidra-loader]], [[kevboy]], and [[feather-gb]].
