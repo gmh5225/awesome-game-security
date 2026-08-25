@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EBalloon/Remap`: entity [[remap]] (EBalloon; Windows kernel page-remapping PoC; C++; copies protected-process pages into another process address space; post-setup memory R/W and dump workflows; Windows 10 range caveats and cleanup crash warnings; anti-cheat bypass / process-memory research; cheat / Clone process); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[meme-rw]], [[ks-dumper]], [[ntmemory]], [[driver-read-write]], [[memmap]], [[super-people-sdk]], and [[veiled-experts-sdk]].
+
 - **2026-08-25** — ingest `description:EBalloon/Super-People-sdk`: entity [[super-people-sdk]] (EBalloon; dumped Unreal Engine SDK for Super People; generated C++ headers for classes, structs, enums, blueprint objects; weapons, vehicles, player pawns, AI modules, animation blueprints, game-specific systems; SDK generation study; cheat / game:super people); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[super-people-esp-aimbot-magic-hack]], [[superpeople-client]], [[veiled-experts-sdk]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].
 
 - **2026-08-25** — ingest `description:EBalloon/VEILED-EXPERTS-SDK`: entity [[veiled-experts-sdk]] (EBalloon; dumped Unreal Engine SDK for Veiled Experts; generated C++ headers + names/objects dumps + offsets; agents, weapons, vehicles, UI, game modes, engine subsystems; SDK generation study; cheat / game:veiled experts); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[project-d-win64-shipping]], [[vx-it]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].
