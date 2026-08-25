@@ -373,6 +373,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AVA-Hack](entities/ava-hack.md) — AVA (Alliance of Valiant Arms) C/C++ cheat (DirectX/OpenGL/Vulkan; cheat / game:ava; boylin0)
 - [AvAAntiCheat](entities/avaanticheat.md) — Minecraft Bukkit/Spigot AC (fly/combat/autoclick/packet; Geyser leniency)
 - [AvastHV](entities/avasthv.md) — Avast signed hypervisor driver abuse for kernel-level ops; hypervisor-context code exec; DSE/AC bypass via trusted AV driver (gmh5225; README `[Avast]`)
+- [Avanguard](entities/avanguard.md) — Win32 anti-intrusion library (GravitLauncher; C/C++; anti-debug, anti-injection, memory/call-stack analysis, integrity checks, callback filtering, module checks; game-client hardening; Anti Debugging)
 - [avdebugger](entities/avdebugger.md) — AV signature recovery (Cheat → Anti Signature Scanning)
 - [avhook](entities/avhook.md) — CS:GO training software (Windows; joke features; gmh5225; cheat / game:csgo)
 - [awesome-anti-virtualization](entities/awesome-anti-virtualization.md) — curated anti-virtualization resources (Detection:Virtual Environments)

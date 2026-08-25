@@ -1120,6 +1120,7 @@ sources:
   - wiki/sources/descriptions/HoShiMin__Kernel-Bridge.md
   - wiki/sources/descriptions/GunshipPenguin__kiteshield.md
   - wiki/sources/descriptions/HackOvert__AntiDBG.md
+  - wiki/sources/descriptions/GravitLauncher__Avanguard.md
   - wiki/sources/descriptions/Speedi13__ROP-COMPILER.md
   - wiki/sources/descriptions/NHCM-dev__BytecodeVM.md
 updated: 2026-08-25
@@ -1166,7 +1167,7 @@ Full DBI frameworks — [[frida]], DynamoRIO, Pin, [[tinyinst]], QBDI — suppor
 
 ## Anti-analysis & debugging
 
-**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks, `ResumeThread` suspend-count anomalies such as [[anti-debug]] (Metick; C++ PoC; debugger attachment leaves elevated suspend count observable via WinAPI return; minimal single-signal study sample) (source: wiki/sources/descriptions/Metick__Anti-Debug.md). Technique catalogs such as [[antidbg-hackovert]] (HackOvert; C/C++ + x86/x64 asm; memory/CPU/timing/exception checks grouped by method; gauntlet sequential test app; RE education + software protection research; Anti Debugging) (source: wiki/sources/descriptions/HackOvert__AntiDBG.md). IDA triage via [[ida-plugin-antidebugseeker]] (LAC-Japan; Python/PyQt5; configurable rule files for Windows API + keyword anti-debug patterns; match highlighting, address annotation, quick navigation, in-IDE rule editor; Extract anti-debugging) (source: wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md).
+**User-mode anti-debug:** `IsDebuggerPresent`, `NtQueryInformationProcess` (DebugPort/Flags/ObjectHandle), PEB.BeingDebugged/NtGlobalFlag, INT 2D/3 scans, RDTSC/QPC timing, TLS early callbacks, VEH chain inspection, parent-process checks, `ResumeThread` suspend-count anomalies such as [[anti-debug]] (Metick; C++ PoC; debugger attachment leaves elevated suspend count observable via WinAPI return; minimal single-signal study sample) (source: wiki/sources/descriptions/Metick__Anti-Debug.md). Technique catalogs such as [[antidbg-hackovert]] (HackOvert; C/C++ + x86/x64 asm; memory/CPU/timing/exception checks grouped by method; gauntlet sequential test app; RE education + software protection research; Anti Debugging) (source: wiki/sources/descriptions/HackOvert__AntiDBG.md). Integratable client hardening libraries such as [[avanguard]] (GravitLauncher; Win32 C/C++ anti-intrusion; anti-debug, anti-injection, memory/call-stack analysis, integrity checks, callback filtering, module checks; game-client protection) (source: wiki/sources/descriptions/GravitLauncher__Avanguard.md). IDA triage via [[ida-plugin-antidebugseeker]] (LAC-Japan; Python/PyQt5; configurable rule files for Windows API + keyword anti-debug patterns; match highlighting, address annotation, quick navigation, in-IDE rule editor; Extract anti-debugging) (source: wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md).
 
 **Kernel-mode anti-debug:** `KdDebuggerEnabled`, DR0–DR7 monitoring, `KPROCESS.DebugPort` zeroing, NMI callbacks.
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GravitLauncher/Avanguard`: entity [[avanguard]] (GravitLauncher; Win32 anti-intrusion library; C/C++; anti-debug, anti-injection, memory/call-stack analysis, integrity checks, callback filtering, module checks; game-client and sensitive-software hardening; Anti Debugging); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[anti-crack-system]], [[antidbg]], [[antidbg-hackovert]], [[anti-debugging]], and [[al-khaser]].
+
 - **2026-08-25** — ingest `description:GrimAnticheat/Grim`: entity [[grim]] (GrimAnticheat; open-source Minecraft Java anticheat; Java/Kotlin; movement simulation, world replication, latency-aware validation; heavily async multithreaded architecture; modern server versions and protocol combinations; server-side cheat detection; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[minecraft-anti-cheat]], [[ycbr-anticheat]], [[yuri]], [[minecraft-anticheat-list]], and [[nocheatplus]].
 
 - **2026-08-25** — ingest `description:Guardsquare/flutter-re-demo`: entity [[flutter-re-demo]] (Guardsquare; Flutter mobile RE experiment kit; Python IDA Pro scripts for reFlutter/DWARF Dart rename, VM memory import, object/xref recovery, decompilation aids; Frida runtime capture; obfuscated/non-obfuscated sample APKs; Flutter app protection / Dart decompilation study); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[proguard]], [[unflutter]], [[frida]], [[frida-ide]], [[obfu-de-scate]], [[jadx]], and [[apktool]].

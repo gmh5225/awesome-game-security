@@ -342,6 +342,7 @@ sources:
   - wiki/sources/descriptions/Half-People__HPCS2.md
   - wiki/sources/descriptions/HadockKali__battleye-user-mode-bypass.md
   - wiki/sources/descriptions/HackOvert__AntiDBG.md
+  - wiki/sources/descriptions/GravitLauncher__Avanguard.md
   - wiki/sources/descriptions/HeathHowren__CSGO-Cheats.md
   - wiki/sources/descriptions/gmh5225__cfclap.md
   - wiki/sources/descriptions/gmh5225__cerberus.md
@@ -931,6 +932,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
 - [[antidbg-hackovert]] — Windows curated anti-debug technique collection (HackOvert; C/C++ + x86/x64 asm; memory structure, CPU/timing, forced exceptions; gauntlet sequential test app; RE education + anti-analysis defense evaluation; Anti Debugging) (source: wiki/sources/descriptions/HackOvert__AntiDBG.md)
+- [[avanguard]] — Win32 anti-intrusion library (GravitLauncher; C/C++; anti-debug, anti-injection, memory/call-stack analysis, integrity checks, callback filtering, module checks; game-client hardening; Anti Debugging) (source: wiki/sources/descriptions/GravitLauncher__Avanguard.md)
 - [[chessking]] — Rust Axum multiplayer chess platform with layered server-side AC (risk scoring, device fingerprinting, match integrity, IP reputation, chess-themed CAPTCHA step-up, ban escalation; shakmaty move validation; admin dashboard; educational reference; web-coder-lab) (source: wiki/sources/descriptions/web-coder-lab__chessking.md)
 - [[7dtd-anticheatmod]] — C# .NET 4.8 server mod for 7 Days to Die dedicated hosts without EAC; blocks cheat console/chat commands; movement thresholds for fly/teleport/speed/godmode; admin exemption; warning→kick→ban escalation; admin alerts + detection log (majimaakane) (source: wiki/sources/descriptions/majimaakane__7dtd-AntiCheatMod.md); contrast offensive end-to-end cheat delivery such as [[7dtd]] (IntelSDM; Unity/Mono loader + C# modules + C++ auth/transport backend; ESP/aimbot/weapon mods/player spoofing; anti-cheat bypass; cheat / game:7dtd) (source: wiki/sources/descriptions/IntelSDM__7DTD.md)
 - [[iw4madmin-sebzanticheat]] — IW4X server-side suspicion telemetry + IW4MAdmin review dashboard; GSC aim/visibility/radar checks; JS plugins + Discord case workflow; separate risk/confidence scoring; watch/clear/purge/recover moderation; no auto-ban (crazythecoder) (source: wiki/sources/descriptions/crazythecoder__IW4MAdmin-SebzAntiCheat.md)
