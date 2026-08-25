@@ -1237,6 +1237,7 @@ sources:
   - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
   - wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md
   - wiki/sources/descriptions/bromoket__x64dbg_mcp.md
+  - wiki/sources/descriptions/ElvisBlue__x64dbgpython.md
   - wiki/sources/descriptions/dnakov__radare2-mcp.md
   - wiki/sources/descriptions/radareorg__radius2.md
   - wiki/sources/descriptions/radareorg__r2ai.md
@@ -1966,6 +1967,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Multiline assemble/disassemble via [[multiline-ultimate-assembler]] (x64dbg/OllyDbg plugin; C/C++; plugin SDK / modding; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/m417z__Multiline-Ultimate-Assembler.md)
 - ChaiScript scripting via [[chaiscript-plugin]] (x64dbg plugin; three commands; thorough API vs rapid prototyping; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/jdavidberger__chaiScriptPlugin.md)
 - Lua scripting via [[x64dbg-playtime]] (x64dbg plugin; embedded Lua runtime + bundled libraries; memory/registers/breakpoints/labels/modules/assembler; autorun scripts; ZehMatt; Cheat x64dbg Plugins / Lua script lane) (source: wiki/sources/descriptions/ZehMatt__x64dbgPlaytime.md)
+- Python 3 scripting via [[x64dbgpython]] (x64dbg plugin; C++ in-debugger runtime; Python wrappers mirroring plugin SDK APIs; memory/assembly/module/GUI example scripts; x86/x64 debugger automation; ElvisBlue; Running python3 script) (source: wiki/sources/descriptions/ElvisBlue__x64dbgpython.md)
 - GTA menu-ecosystem Lua API/command reference documentation via [[yimmenu]] (documentation-only repo after source removal; Lua scripting interfaces, command docs, utility guides incl. LibreTranslate chat-translation setup; script developers maintaining Lua extensions; YimMenu) sits in the Cheat / menu scripting lane beside debugger Lua automation. (source: wiki/sources/descriptions/YimMenu__YimMenu.md)
 - x64dbg plugin install/management via [[x64dbg-plugin-manager]] (C++/C; plugin development / modding; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__x64dbg-Plugin-Manager.md)
 - In-process string search/browse via [[stringsx64dbg]] (C++/Qt x64dbg plugin; dedicated SearchStringsWidget tab; 32/64-bit; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/horsicq__stringsx64dbg.md)

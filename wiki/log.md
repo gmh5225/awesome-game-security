@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:ElvisBlue/x64dbgpython`: entity [[x64dbgpython]] (ElvisBlue; C++ x64dbg plugin; Python 3 scripting; Python-friendly plugin SDK wrappers; memory/assembly/module/GUI example scripts; x86/x64 debugger automation; Running python3 script); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-automate-pyclient]], [[x64dbg-playtime]], [[chaiscript-plugin]], and [[dotx64dbg]].
+
 - **2026-08-25** — ingest `description:EmbarkStudios/kajiya`: entity [[kajiya]] (EmbarkStudios; experimental real-time global illumination renderer; Rust engine + Vulkan backend + HLSL hybrid rasterization/compute/ray-tracing; dynamic GI without prebaked probes, temporal reconstruction, RT shadows/reflections, reference path-tracing validation; advanced rendering research; README `[Experimental real-time global illumination renderer]`); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[strolle]], [[spartan-engine]], [[source-renderer]], [[d3d12renderer]], and [[explosion]].
 
 - **2026-08-25** — ingest `description:Encryqed/Dumper-7`: entity [[dumper-7]] (Encryqed; C++ UE4/UE5 SDK generator; in-process DLL inject; locates engine structures/offsets; emits generated C++ headers; configurable offset overrides + build options; Unreal RE / modding / game security research; cheat / SDK Dump for all of UE4 and UE5); cited on [[concepts/unreal-object-model]] and [[overviews/game-engine]]; cross-linked [[re-ue4ss]], [[ue4genny]], [[uedumper]], [[shh0yauedumper]], and [[unrealdumper-4-25]].
