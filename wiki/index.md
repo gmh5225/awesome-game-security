@@ -2414,6 +2414,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Paksmith](entities/paksmith.md) — Rust UE pak/UAsset explorer (FModel rewrite; pak v3–v11; Game Assets)
 - [paladins-internal-cheat](entities/paladins-internal-cheat.md) — Paladins internal: optional Mhyprot backend + borderless overlay (gmh5225; cheat / game:paladins)
 - [PalAntiCheat-poc](entities/palanticheat-poc.md) — Palworld UE5 AC PoC (dumped SDK + UObject/UProperty fixup; Anti Cheat)
+- [PalEdit](entities/pal-edit.md) — Palworld Python desktop save editor (Pal companion edit/clone; write-back; Windows exe build; cheat / game:palworld [Save])
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [palmods](entities/palmods.md) — Palworld UE5 mod/trainer stack (Lua UE4SS + C++ PalTrainerUltra; ImGui/D3D11; RPM/injection; cheat / game:palworld [UE5])
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
