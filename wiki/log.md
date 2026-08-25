@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `readme:categories`: Cheat ~2748 (+1; Goatman13/spu2c PS3 Cell SPU opcode C-style annotation in Cheat > IDA Plugins; other major section counts stable); entity [[spu2c]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-25** — ingest `description:ExplosionEngine/Explosion`: entity [[explosion]] (ExplosionEngine; cross-platform ECS C++ game engine; Vulkan/DX12/Metal; editor + runtime modules; CMake/Conan; Qt/web-stack tooling; production-style workflows; game teams and rendering researchers; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[flax-engine]], [[fyrox]], [[hazel]], [[lumos]], [[open-source-engines]], and [[awesome-game-engine-dev]].
 
 - **2026-08-25** — ingest `description:Ezmatehw/Encryptix-Crypter`: entity [[encryptix-crypter]] (Ezmatehw; C# .NET Framework 4.8 WinForms GUI PE crypter/packer; AES/XOR + configurable stub template; RegAsm/RegSvcs/MSBuild LOLBin injection; optional persistence, anti-VM, sleep delays, metadata cloning; dnlib obfuscator + build-time stub compile; KeyAuth license gating; crypter construction / payload packing / evasion technique study; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[netcrypt]], [[evader]], [[polyengine]], [[pe-packer]], [[hm-pe-packer]], [[packer-tutorial]], [[windows-process-injection]], and [[unpacker]].
