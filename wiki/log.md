@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:MrOplus/frida-ide`: entity [[frida-ide]] (MrOplus; browser Frida IDE; Python/FastAPI + React/Monaco; device/process management, spawn/attach, one-click frida-server, APK pull + apktool/jadx, SSL pinning/root/trace/crypto snippets, Claude Code hook extraction, codeshare.frida.re import; Android RE / game security); cited on [[concepts/frida]], [[overviews/mobile-security]], and [[overviews/game-hacking]]; cross-linked [[jadx]], [[rootraven]], and [[lamda]].
+
 - **2026-08-25** — ingest `readme:categories`: Cheat ~2746 (+1; MrOplus/frida-ide web Frida IDE with JADX + Claude assistant in Cheat > Frida; other major section counts stable); fixed [[overviews/game-engine]] Game Assets ~12→~11; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], [[overviews/mobile-security]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-25** — ingest `description:HackerPoet/NonEuclidean`: entity [[non-euclidean]] (HackerPoet; Windows OpenGL rendering demo engine; C++; real-time non-Euclidean space; custom room transitions, camera movement, experimental geometric rendering; graphics/engine experimentation—not anti-cheat; useful for low-level render-pipeline literacy; Game Engine / guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[learnopengl]], [[gltut]], [[exengine]], and [[game-engine-from-scratch]].
