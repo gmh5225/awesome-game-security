@@ -18,4 +18,4 @@ Classic Windows kernel-mode process dumper: a C# GUI talks to a custom driver (`
 
 ## Related
 
-[[byovd]] · [[known-driver-mappers]] · [[nemesis]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[ks-dumper]] · [[byovd]] · [[known-driver-mappers]] · [[nemesis]] · [[overviews/windows-kernel]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]

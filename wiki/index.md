@@ -1879,6 +1879,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kptnhook](entities/kptnhook.md) — system-wide KM DLL inject + function hook (every process; cheat / injection:windows)
 - [krnl-gdi-render](entities/krnl-gdi-render.md) — KM GDI overlay framework (WDK; GDI hooks + sigscan; Dxgkrnl + GDI)
 - [KSOCKET](entities/ksocket.md) — kernel WSK BSD-socket lib (TCP/UDP from ring 0; no UM)
+- [KsDumper](entities/ks-dumper.md) — original C++ KM process dumper (custom driver + client; PE32/64 rebuild; AC-restricted handles; EquiFox)
 - [KsDumper-11](entities/ksdumper-11.md) — classic KM process dumper (C# GUI + `KsDumperDriver.sys`; KDU BYOVD; PE32/64; blocklist bypass)
 - [KslKatz](entities/kslkatz.md) — BYOVD LSASS dumper via Defender `KslD.sys` (WDigest/LSA; PPL/AV bypass)
 - [KslDump](entities/ksldump.md) — PPL LSASS dump via legacy on-disk Defender `KslD.sys` (IOCTL 0x222044 + MmCopyMemory; no external driver load; andreisss)
