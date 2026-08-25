@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GuidoBartoli/sherloq`: entity [[sherloq]] (GuidoBartoli; open-source digital image forensics toolset; Python GUI; ELA, EXIF metadata, frequency/gradient/histogram analysis, cloning detection, TruFor neural detector; AC screenshot manipulation / authenticity review); cited on [[concepts/anti-screenshot-capture]] and [[overviews/anti-cheat]]; cross-linked [[screenshot]], [[screenshot-detection-bypass]], and [[deadlock-anti-cheat]].
+
 - **2026-08-25** — ingest `description:GunshipPenguin/kiteshield`: entity [[kiteshield]] (GunshipPenguin; Linux x86-64 ELF packer/protector; layered RC4 encryption + custom user-space loader; ptrace keeps only active call-stack functions decrypted; anti-debug checks; C + asm; binary obfuscation / anti-analysis education; Anti Cheat → Binary Packer `[ELF X64]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[elfcrypt]], [[elfuck]], [[silent-packer]], [[vmpacker]], [[adbg]], [[anti-debugging]], and [[midgetpack]].
 
 - **2026-08-25** — ingest `description:H1d3r/GPU_ShellCode`: entity [[gpu-shellcode]] (H1d3r; Windows C/C++ PoC; CUDA APIs + MinHook on Sleep/VirtualAlloc; stages payload in NVIDIA GPU memory during idle, repopulates executable pages on wake via VEH; memory hiding vs process memory scanners; anti-cheat / shellcode evasion research); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[shellcode-fluctuation]], [[shellcode-plain-sight]], [[no-access-protection]], [[deepsleep]], and [[veh]].

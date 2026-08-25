@@ -14,7 +14,8 @@ sources:
   - wiki/sources/descriptions/Rick-laboratory__Windows-Screenshotcapture-DirectX.md
   - wiki/sources/descriptions/Mes2d__Screenshot-Detection-Bypass.md
   - wiki/sources/descriptions/KANKOSHEV__NoScreen.md
-updated: 2026-08-24
+  - wiki/sources/descriptions/GuidoBartoli__sherloq.md
+updated: 2026-08-25
 confidence: medium
 ---
 
@@ -50,8 +51,8 @@ Evasion samples in the corpus include [[disablenvidiascreenshot]] (DWM / NVIDIA 
 
 ## Detection pairing
 
-Screenshot evidence is rarely sufficient alone—correlate with [[present-hook]] integrity, foreign GDI DCs ([[winbo]]), module list (`obs-graphics-hook64.dll` is legitimate OBS, not proof of cheat), and gameplay telemetry ([[ai-aimbot-detection]]).
+Screenshot evidence is rarely sufficient alone—correlate with [[present-hook]] integrity, foreign GDI DCs ([[winbo]]), module list (`obs-graphics-hook64.dll` is legitimate OBS, not proof of cheat), and gameplay telemetry ([[ai-aimbot-detection]]). When reviewing player-submitted or AC-captured PNG/JPEG frames, digital image forensics tooling such as [[sherloq]] (GuidoBartoli; Python GUI; ELA, EXIF metadata, frequency/gradient/histogram analysis, cloning detection, TruFor neural detector; screenshot tampering detection for AC analysts) helps assess authenticity before treating pixels as proof. (source: wiki/sources/descriptions/GuidoBartoli__sherloq.md)
 
 ## Related
 
-[[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
+[[obs-game-capture]] · [[present-hook]] · [[flagsecurepatcher]] · [[sherloq]] · [[overviews/graphics-api]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[overviews/mobile-security]]
