@@ -618,6 +618,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cs2-sdk](entities/cs2-sdk.md) — CS2 Source 2 SDK headers (gmh5225/cs2_sdk + cs2-sdk; bruhmoment21/cs2-sdk cross-platform fork; NotOfficer/cs2-sdk source2gen auto-generated headers; C/C++; SDK generation / simplified Source 2 layout; driver / rendering / networking; DX11 + Vulkan; ImGui; cheat / game:cs2 [SDK])
 - [cs2-sdk-source2gen](entities/cs2-sdk-source2gen.md) — CS2 Source 2 SDK dump from source2gen (gmh5225; auto-generated C++ headers; animation/client/engine2/network/scene/schema; cheat / game:cs2 [SDK])
 - [cs2-signature-list](entities/cs2-signature-list.md) — CS2 function-signature reference notes (Salvatore-Als; Markdown + IDC helper; string anchors for team switch, item give, chat, damage; per-build search guidance; cheat / [Signature])
+- [CS2 VibeSignatures](entities/cs2-vibe-signatures.md) — automated CS2 signature/gamedata updater for CS2Fixes, CounterStrikeSharp, cs2kz, cs2surf (HLND2T; Python + C++ depot verification; ida-pro-mcp Agent SKILLS; cheat / game:cs2 [Signature])
 - [cs2-things](entities/cs2-things.md) — CS2 Source 2 research collection (VScript; RE structures / offsets / SDK / netvars; gmh5225)
 - [cs2-tracker](entities/cs2-tracker.md) — CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring (LooperSalty)
 - [cs2-webradar](entities/cs2-webradar.md) — CS2 browser-based radar cheat (C++/JavaScript; memory analysis / asset pipelines; gmh5225 and clauadv forks)
