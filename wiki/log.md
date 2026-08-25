@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:H5GG/H5GG`: entity [[h5gg]] (H5GG; iOS modding engine; JavaScript APIs + HTML5 UI; memory editing, local/remote script load, dynamic plugins, static pointer-chain search; jailbroken and non-jailbroken runtime modes; h5frida plugin for ObjC/C++ hook/patch; mobile game modding and iOS game security research; cheat / IOS cheat engine); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ceserver-ios]], [[memory-server]], [[frida-ceserver]], [[kittymemory-ios]], [[kfd-explorer]], and [[xnuspy]].
+
 - **2026-08-25** — ingest `description:HLND2T/CS2_VibeSignatures`: entity [[cs2-vibe-signatures]] (HLND2T; automated CS2 signature/gamedata updater; Python + C++ depot-binary verification; outputs for CS2Fixes, CounterStrikeSharp, cs2kz, cs2surf; ida-pro-mcp Agent SKILLS; cheat / game:cs2 [Signature]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2fixes]], [[cs2-dumper]], [[cs2-signature-list]], and [[cs2-offsets]].
 
 - **2026-08-25** — ingest `description:HackOvert/AntiDBG`: entity [[antidbg-hackovert]] (HackOvert; Windows curated anti-debug technique collection; C/C++ + x86/x64 asm; memory structure, CPU/timing, forced exceptions; gauntlet sequential test app; RE education + software protection research; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[makin]], [[al-khaser]], [[antidbg]], [[antidbg-baka]], and [[gh-anti-debug-bypass-practice-tool]].
