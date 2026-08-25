@@ -485,6 +485,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cbs](entities/cbs.md) — IDA Pro plugin: mnemonic-pattern breakpoint automation (Python IDAPython + PyQt; regex disasm scan; set/enable/disable/remove breakpoints across functions; Reodus; cheat / IDA Plugins)
 - [CEDetector](entities/cedetector.md) — Cheat Engine detector (window/process/driver/debug; CE stealth test)
 - [CE Remap Plugin](entities/ce-remap-plugin.md) — Delphi CE plugin: remap disassembler memory pages for hidden/obfuscated code (CE plugin SDK; tested CE 7.4; cheat / Remap; gmh5225)
+- [CE Examples](entities/ce-examples.md) — FreeER CE example/practice-table collection: Lua/`.CT` assets for memory scanning, Auto Assembler, pointer utilities, UI helpers, Mono workflows, trainer experiments; RE snippets and templates (cheat / Some Examples)
 - [CE Extensions](entities/ce-extensions.md) — FreeER modular CE Lua pack: autosave, disassembler highlighting, structure/offset helpers, process attach conveniences, independently loadable workflow scripts (cheat / Lua Extensions)
 - [CE Lua Extensions](entities/ce-lua-extensions.md) — Skyrimfus CE Lua autorun pack: extension loader + breakpoint cleanup, caller lookup, template insertion, UI workflow scripts (cheat / Lua Extensions)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)

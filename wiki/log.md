@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FreeER/CE-Examples`: entity [[ce-examples]] (FreeER; broad CE example/practice-table collection; Lua/`.CT` assets for memory scanning, Auto Assembler, pointer utilities, UI helpers, Mono workflows, trainer experiments; snippets and templates for RE and game memory manipulation; teaching CE workflows; cheat / Some Examples); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[ce-extensions]], [[cheat-engine-tables]], [[mydev-cheat-engine-tables]], [[ce-lua-extensions]], and [[cheatengine-mono-helper]].
+
 - **2026-08-25** — ingest `description:FreeER/CE-Extensions`: entity [[ce-extensions]] (FreeER; modular Lua CE extension pack; autosave controls, disassembler highlighting, structure/offset helpers, process attachment conveniences, independently loadable workflow QoL scripts; advanced CE users customizing RE and game analysis workflows; cheat / Lua Extensions); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[ce-lua-extensions]], [[controller-mode]], and [[cheatengine-mono-helper]].
 
 - **2026-08-25** — ingest `description:FrySimpl3/SDK_CS2`: entity [[sdk-cs2]] (FrySimpl3; generated CS2 SDK header pack; C++ engine types, enums, and subsystem interfaces; client/rendering/networking/schema/panorama/particles/physics; reference definitions for external tooling and CS2 analysis; cheat / game:cs2 [SDK]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-sdk]], [[counter-strike2-sdk]], [[cs2-sdk-source2gen]], [[cs2-dumper]], and [[source2gen]].

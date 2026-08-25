@@ -20,4 +20,4 @@ Primary audience is advanced [[cheat-engine]] users who customize live memory-an
 
 ## Related
 
-[[cheat-engine]] · [[ce-lua-extensions]] · [[controller-mode]] · [[cheatengine-mono-helper]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[cheat-engine]] · [[ce-examples]] · [[ce-lua-extensions]] · [[controller-mode]] · [[cheatengine-mono-helper]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
