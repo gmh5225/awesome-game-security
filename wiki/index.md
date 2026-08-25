@@ -724,6 +724,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cve-maker](entities/cve-maker.md) — Python CLI: multi-DB CVE/exploit search (keyword/product/CVE ID; severity + links)
 - [CVEAC-2020](entities/cveac-2020.md) — EAC kernel-module vuln PoC (WDK; Integrity Checks)
 - [custom-data-ptr-swap-sample](entities/custom-data-ptr-swap-sample.md) — NtQueryLicenseValue KM↔UM channel (C++; driver development; cheat / driver communication; gmh5225)
+- [custom-dpapi](entities/custom-dpapi.md) — C++ PoC; undocumented DPAPI RPC via NdrClientCall3 to lsass protected_storage; bypasses CryptUnprotectData; dpapi.dll RE (EvilBytecode)
 - [custom-VEH](entities/custom-veh.md) — RtlpCallVectoredHandlers hook for fast pre-vanilla VEH registration (Ring3 callback research; gmh5225)
 - [cunthook](entities/cunthook.md) — TF2/Source open hacking framework (full SDK; hooks / ESP / aimbot / gameplay mods; internal interfaces + Boost; Linux; gmh5225)
 - [CUTracer](entities/cutracer.md) — CUDA kernel instruction DBI (GPU-side trace + host-side analysis; Cheat / DBI)
