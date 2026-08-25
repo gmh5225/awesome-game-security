@@ -1535,6 +1535,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 
 > Android Network Explorer
 - https://github.com/emanuele-f/PCAPdroid
+- https://github.com/damanoreshkan-beep/rtl8852au-userspace [No-root userspace RTL8852AU Wi-Fi driver for Android with libusb monitor mode, channel hopping, and 802.11 frame injection]
 - https://github.com/zhizhuodemao/android_proxy_mcp [Android Proxy MCP — MCP-based HTTP/HTTPS capture & analysis for AI]
 
 > Cellular / SIM
