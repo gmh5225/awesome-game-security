@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:ExploitTheLoop/writemem`: entity [[writemem]] (ExploitTheLoop; Java memory utility library; rooted Android; range search, offset filter, read/write, periodic freeze across /proc maps; map parsing, data conversion, socket server; game memory experimentation/automation; cheat / Android memory); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-memory-tool]], [[cheap-engine]], [[ace-the-game]], and [[android-mem-edit]].
+
 - **2026-08-25** — ingest `description:Goatman13/spu2c`: entity [[spu2c]] (Goatman13; IDA Python plugin; PS3 Cell SPU opcode C-style annotation; vector lane sizes + shuffle-byte mask resolution; hex field parsing avoids common IDA SPU plugin bugs; instruction/selection/function scan shortcuts; PS3 SPU firmware/library/anti-cheat RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ps2-ida-vu-micro]], [[ida-ps4-helper]], [[ida-ps5-elf-plugin]], [[idaplugins]], and [[ida-plugins]].
 
 - **2026-08-25** — ingest `readme:categories`: Cheat ~2748 (+1; Goatman13/spu2c PS3 Cell SPU opcode C-style annotation in Cheat > IDA Plugins; other major section counts stable); entity [[spu2c]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
