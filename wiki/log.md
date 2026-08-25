@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:H3d9/sguard_limit`: entity [[sguard-limit]] (H3d9; Windows ACE-Guard client restriction/patch toolkit; user-mode C++ controller + kernel C/asm module; virtual memory ops, VAD traversal, suspend/resume, detour hooks; Visual Studio solution; anti-cheat RE / bypass experimentation); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[starrail-ace-b]], [[hi3-ace-b]], [[kernel-vad-injector]], and [[wkpe]].
+
 - **2026-08-25** — ingest `description:H5GG/H5GG`: entity [[h5gg]] (H5GG; iOS modding engine; JavaScript APIs + HTML5 UI; memory editing, local/remote script load, dynamic plugins, static pointer-chain search; jailbroken and non-jailbroken runtime modes; h5frida plugin for ObjC/C++ hook/patch; mobile game modding and iOS game security research; cheat / IOS cheat engine); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ceserver-ios]], [[memory-server]], [[frida-ceserver]], [[kittymemory-ios]], [[kfd-explorer]], and [[xnuspy]].
 
 - **2026-08-25** — ingest `description:HLND2T/CS2_VibeSignatures`: entity [[cs2-vibe-signatures]] (HLND2T; automated CS2 signature/gamedata updater; Python + C++ depot-binary verification; outputs for CS2Fixes, CounterStrikeSharp, cs2kz, cs2surf; ida-pro-mcp Agent SKILLS; cheat / game:cs2 [Signature]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2fixes]], [[cs2-dumper]], [[cs2-signature-list]], and [[cs2-offsets]].

@@ -330,6 +330,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__StarRail-S-GC.md
   - wiki/sources/descriptions/gmh5225__StarRail-ACE-B.md
   - wiki/sources/descriptions/gmh5225__HI3-ACE-B.md
+  - wiki/sources/descriptions/H3d9__sguard_limit.md
   - wiki/sources/descriptions/gmh5225__avhook.md
   - wiki/sources/descriptions/martinjanas__Sensum.md
   - wiki/sources/descriptions/soyware__heck_csgo_external.md
@@ -901,6 +902,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[pandora]] — file-suspicion analysis framework with convenient result UI (Analysis Framework; Ubuntu 24.04 recommended) (source: wiki/sources/descriptions/pandora-analysis__pandora.md)
 - [[kiroshi]] — IDA Pro plugin to detect common Anti-Cheat artifacts (RE/academic; cheat / IDA Plugins) (source: wiki/sources/descriptions/not1cyyy__Kiroshi.md)
 - [[anti-cheat-amateur]] — MemRE injectable memory editor + GothGirlFeet kdmapper-compatible KMDF driver (NUL-device IOCTL cross-process R/W; DBVM hypercall shims bypass RPM blocks); CE-style scan/pointer workflows, UE GWorld/GNames, Tencent ACE evasion research (source: wiki/sources/descriptions/not1cyyy__Anti-Cheat-Amateur.md)
+- [[sguard-limit]] — Windows ACE-Guard client restriction/patch toolkit (H3d9; user-mode C++ controller + kernel C/asm module; virtual memory ops, VAD traversal, suspend/resume, detour hooks; Visual Studio solution; anti-cheat RE / bypass experimentation) (source: wiki/sources/descriptions/H3d9__sguard_limit.md)
 - [[meme-rw]] — C++/CMake protected-process memory access PoC; vulnerable-driver mapping framework with driver-load helpers, process/module utilities, and memory R/W control; end-to-end target-process open + memory ops for anti-cheat bypass experimentation and defensive protected-memory research (SamuelTulach; cheat / kdmapper) (source: wiki/sources/descriptions/SamuelTulach__meme-rw.md)
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
 - [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
