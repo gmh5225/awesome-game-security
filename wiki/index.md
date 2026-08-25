@@ -1631,6 +1631,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [ImGUI Advanced Cheat Menu](entities/imgui-advanced-cheat-menu.md) — Windows ImGui cheat-menu framework (C++ SFML; ESP/aim/recoil/HUD modules; hotkey panels; custom widgets + in-memory fonts; starter template; RequestFX; README `[Imgui Menu]`)
 - [ImGui Standalone](entities/imgui-standalone.md) — D3D11 external ImGui framework (EXE/DLL; own render window; VS x86/x64; game tooling / menu prototyping; adamhlt)
+- [ImGuiRDR2Hook](entities/imgui-rdr2-hook.md) — RDR2 Vulkan + DirectX 12 ImGui hook framework (Halen84; MinHook + Kiero + Dear ImGui; render-path intercept; hook entry points, config handling, stable menu/input notes; overlay development / graphics API hooking practice; cheat / render-draw)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
 - [imgui-ios-mod-menu](entities/imgui-ios-mod-menu.md) — iOS ImGui mod menu (cheat / render-draw)
 - [iHide](entities/ihide.md) — iOS per-app jailbreak-hiding tweak (MobileSubstrate/ObjC hooks; Settings-panel toggle; common jailbreak-detection bypass; Kc57)

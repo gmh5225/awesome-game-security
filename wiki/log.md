@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Halen84/ImGuiRDR2Hook`: entity [[imgui-rdr2-hook]] (Halen84; RDR2 Vulkan + DirectX 12 ImGui hook framework; C++; MinHook + Kiero + Dear ImGui; render-path intercept; hook entry points, render routines, config handling, stable menu draw/input notes; game overlay development / graphics API hooking practice / game security experimentation; cheat / render-draw); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[present-hook]], [[kiero]], [[imgui]], [[vulkan-hook]], and [[universal-dear-imgui-hook]].
+
 - **2026-08-25** — ingest `description:Half-People/HPCS2`: entity [[hpcs2]] (Half-People; external CS2 cheat test project; C++ Visual Studio; process memory utilities + handle hijacking helpers + CS2 module offset headers; INI-configured aim assistance, recoil control, and ESP-style rendering; educational cheat and anti-cheat behavior study; cheat / game:cs2 [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[cs2-external-esp]], [[cs2-external-cheat]], [[tkazer-cs2-external]], [[cs2-offsets]], [[cs2-dumper]], and [[handle-ripper]].
 
 - **2026-08-25** — ingest `description:Harrison1/unrealcpp`: entity [[unrealcpp]] (Harrison1; large UE4 C++ tutorial lesson projects; actor movement, camera, input, components; compile-as-reference samples; engine literacy for gameplay RE; Game Engine / UE4 C++ examples); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[ue4-tutorials]], [[unreal-engine-guide]], and [[asset-tutorial-plugin]].
