@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `readme:categories`: Anti Cheat ~691 (+1; InertiaOrg/Inertia version-neutral Minecraft AC foundation with movement/packet modeling and evidence accumulation; other major section counts stable); entity [[inertia]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-25** — ingest `description:GameCrashProject/UE4-Hacking-Guideline`: entity [[ue4-hacking-guideline]] (GameCrashProject; research-oriented UE4 security methodology; Markdown chapters on engine background, attack vectors, tooling, build setup, and analysis process; systematic engine-level vulnerability study for students and security researchers; Game Engine / Unreal guide); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[unreal-source-explained]], [[unreal-development-guides-and-tips]], [[unreal-object-model]], and [[unreal-engine-protection]].
 
 - **2026-08-25** — ingest `description:GameDevGrzesiek/OptimizationBible`: entity [[optimization-bible]] (GameDevGrzesiek; comprehensive Unity/Unreal optimization reference; performance profiling, console hardware specs and PC equivalents, rendering pipeline optimization, engine-specific tooling guides; Game Engine / guide); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[unreal-development-guides-and-tips]], [[opengraphic]], [[presentmon]], and [[optick]].
