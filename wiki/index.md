@@ -3431,6 +3431,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
 - [vt-ida-plugin](entities/vt-ida-plugin.md) — VirusTotal official IDA plugin: cloud malware intelligence, byte/string/function code similarity, AI function-summary notebook (Python; cheat / IDA Plugins)
 - [VTuberWithUE4](entities/vtuber-with-ue4.md) — UE4 VTuber (physics / animation / asset pipelines; Game Develop / Unreal source)
+- [Veiled Experts SDK](entities/veiled-experts-sdk.md) — Veiled Experts UE SDK dump (EBalloon; generated C++ headers + names/objects dumps + offsets; agents, weapons, vehicles, UI, game modes, engine subsystems; SDK generation study; cheat / game:veiled experts)
 - [VX-It](entities/vx-it.md) — Unreal decrypt for Veiled Experts (C/C++; cheat / game:veiled experts `[Decrypt]`)
 - [VxLang](entities/vxlang-page.md) — Windows x86-64/.NET binary protector (virtualization / flatten / anti-tamper; PE/DLL/SYS)
 

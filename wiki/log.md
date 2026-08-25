@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EBalloon/VEILED-EXPERTS-SDK`: entity [[veiled-experts-sdk]] (EBalloon; dumped Unreal Engine SDK for Veiled Experts; generated C++ headers + names/objects dumps + offsets; agents, weapons, vehicles, UI, game modes, engine subsystems; SDK generation study; cheat / game:veiled experts); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[project-d-win64-shipping]], [[vx-it]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].
+
 - **2026-08-25** — ingest `description:EZFNDEV/UEDumper`: entity [[ezfndev-uedumper]] (EZFNDEV; C++ Unreal Engine SDK-style dumper; injection workflow; object name extraction, offset discovery, header generation; automated offset finding; version limitations and hardcoded/unstable parts noted; Unreal RE / game security research; cheat / SDK Dump; slug disambiguated from [[uedumper]]); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[uedumper]], [[dumper-7]], [[shh0yauedumper]], [[ue4genny]], and [[re-ue4ss]].
 
 - **2026-08-25** — ingest `description:EgeBalci/amber`: entity [[amber]] (EgeBalci; Go + assembly reflective PE loader + payload generator; EXE/DLL/SYS in-memory map; payload encoding, API resolution obfuscation, staged delivery, memory cleanup; offensive + defensive reflective-loading / scanner-evasion research); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[shoggoth]], [[bingusldr]], [[windows-process-injection]], [[process-injection-techniques]], [[modexmap]], and [[memject]].
