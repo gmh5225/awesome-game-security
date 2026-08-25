@@ -75,6 +75,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bad-query](entities/bad-query.md) — iOS 26–27 sandbox-escape PoC (Xcode; app/daemon/App Group/system-container path access; container isolation research; forcequitOS)
 - [badlion-logger](entities/badlion-logger.md) — KiFilterFiberContext PoC kernel logger for AC driver observation (IAT hooks on image-load callbacks; VMProtect-virtualized target; C++; driver-level monitoring research)
 - [BaiZe](entities/baize.md) — Magisk/KernelSU/APatch graded cache, log, APK-residue, and deep junk cleanup (Kotlin/C; risk tiers, quarantine)
+- [BanMod](entities/banmod.md) — Among Us BepInEx host-side moderation + AntiCheat (Harmony IL2CPP; synced ban lists; AFK/camera/follow detectors; GiannBart)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
