@@ -1205,6 +1205,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FunctionInliner](entities/function-inliner.md) — IDA Pro plugin: reverse clang function outlining (`--moutline`); inline outlined helpers per caller; restore Hex-Rays on ARM size-optimized binaries (Cellebrite Labs; cheat / IDA Plugins)
 - [fumo-loader](entities/fumo-loader.md) — PTE.User page-table injection loader (C/C++; kernel driver; anti-cheat research; cheat / injection:windows; dumbasPL)
 - [furikuri](entities/furikuri.md) — C/C++ obfuscation engine (jnastarot; AC Obfuscation Engine)
+- [Flax Engine](entities/flax-engine.md) — full-source C++/C# 3D game engine and editor (FlaxEngine; mixed native rendering/platform + .NET managed scripting; Vulkan; Windows/Linux/macOS; engine runtime, editor, build scripts; Game Engine / source [C++/C# 3D])
 - [Fyrox](entities/fyrox.md) — production-ready Rust 2D/3D game engine (FyroxEngine; modular crates + integrated scene editor; editor-driven iteration; examples and learning resources; Game Engine / source [Rust])
 - [fuzzable](entities/fuzzable.md) — C/C++ source + binary fuzz-target discovery framework (Binary Ninja plugins lane; ex0dus-0x; Anti Cheat > Fuzzer)
 - [FortKit](entities/fortkit.md) — Fortnite dump / SDK generation (C++; cheat / game:fortnite [Dump])

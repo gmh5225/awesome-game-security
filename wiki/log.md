@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FlaxEngine/FlaxEngine`: entity [[flax-engine]] (FlaxEngine; full-source C++/C# 3D game engine and editor; mixed native rendering/platform layers + .NET managed scripting; Vulkan; Windows/Linux/macOS; engine runtime, editor, build scripts; Game Engine / source [C++/C# 3D]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[fyrox]], [[godot]], [[bevy]], [[open-source-engines]], and [[awesome-game-engine-dev]].
+
 - **2026-08-25** — ingest `description:FourCoreLabs/LolDriverScan`: entity [[loldriverscan]] (FourCoreLabs; Go; public driver threat feed; local hash/metadata compare; verbose + JSON export; unprivileged; defensive security auditing, hardening, and AC environment checks; README Scan loldrivers); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[loldrivers]], [[loldrivers-client]], [[driver-risk-scout]], and [[vulnerable-driver-scanner]].
 
 - **2026-08-25** — ingest `description:Fox2Code/FoxMagiskModuleManager`: entity [[fox-magisk-module-manager]] (Fox2Code; Kotlin Android app; Magisk module discovery/download/install from online repos; update checks, custom repos, local vs remote views, richer metadata/compatibility; rooted module management; Cheat / Magisk); cited on [[overviews/mobile-security]] and [[entities/magisk]]; cross-linked [[rescuex]], [[webui-x-portable]], [[magisk-tailscaled]], and [[baize]].
