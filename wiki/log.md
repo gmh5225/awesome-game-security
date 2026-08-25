@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GLips/Figma-Context-MCP`: entity [[figma-context-mcp]] (GLips; Framelink MCP for Figma / Cursor Talk To Figma MCP server; TypeScript; simplified design metadata + referenced image download; stdio/HTTP transports; model-friendly layout/style context from Figma API; design-to-code UI automation; Game Develop / MCP server); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[blender-mcp]], [[unity-mcp]], and [[deepwiki-mcp]].
+
 - **2026-08-25** — ingest `description:GToad/Android_Inline_Hook_ARM64`: entity [[android-inline-hook-arm64]] (GToad; native ARM64 Android inline hooking framework; C/C++/ARM64 asm + NDK build; pure inline trampolines + register-level handler examples; mobile RE / native function interception; Android ARMv8 inline hook framework); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[and64-inline-hook]], [[dobby]], [[adbi]], and [[pyasm-patch]].
 
 - **2026-08-25** — ingest `readme:categories`: Anti Cheat ~691 (+1; InertiaOrg/Inertia version-neutral Minecraft AC foundation with movement/packet modeling and evidence accumulation; other major section counts stable); entity [[inertia]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).

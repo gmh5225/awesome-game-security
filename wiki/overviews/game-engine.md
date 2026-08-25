@@ -20,6 +20,7 @@ sources:
   - wiki/sources/descriptions/n24q02m__better-godot-mcp.md
   - wiki/sources/descriptions/IvanMurzak__GameDev-MCP-Server.md
   - wiki/sources/descriptions/ahujasid__blender-mcp.md
+  - wiki/sources/descriptions/GLips__Figma-Context-MCP.md
   - wiki/sources/descriptions/johnhalloran321__mcpSafetyScanner.md
   - wiki/sources/descriptions/appsecco__vulnerable-mcp-servers-lab.md
   - wiki/sources/descriptions/gmh5225__csso-src.md
@@ -646,6 +647,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
 - **DayZ MCP** — [[dayz-mcp]] Enfusion mod-dev automation (Python MCP + Enforce Script bridge; 53 server-authoritative tools for addon pack/build, test instances, entity/vehicle control, telemetry, screenshots, structured state assertions; localhost session leases; willy92wins) (source: wiki/sources/descriptions/willy92wins__dayz-mcp.md)
 - **Blender MCP** — [[blender-mcp]] DCC scene inspection/editing via addon + Python MCP server (object/material ops, scene queries, scripted execution; optional external/generated 3D assets) (source: wiki/sources/descriptions/ahujasid__blender-mcp.md)
+- **Figma Context MCP** — [[figma-context-mcp]] Framelink MCP for Figma; TypeScript server; simplified design metadata + referenced image download; stdio/HTTP transports; model-friendly layout/style context from Figma API for design-to-code UI automation (GLips) (source: wiki/sources/descriptions/GLips__Figma-Context-MCP.md)
 - **Roblox MCP** — [[vibe-blocks-mcp]] exposes Roblox Studio actions as MCP tools over SSE (source: wiki/sources/descriptions/gmh5225__vibe-blocks-mcp.md)
 - **Zig MCP Server** — [[zig-mcp-server]] high-performance, memory-efficient MCP protocol implementation in Zig for game developers, reverse engineers, and tooling builders (source: wiki/sources/descriptions/gmh5225__zig-mcp-server.md)
 - **Jupyter MCP Server** — [[jupyter-mcp-server]] exposes notebook create/read/edit/execute as MCP tools (stdio/streamable HTTP; local Jupyter/JupyterHub/Colab; AI-assisted data analysis) (source: wiki/sources/descriptions/datalayer__jupyter-mcp-server.md)
