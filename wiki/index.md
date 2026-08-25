@@ -1372,6 +1372,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GPU_ShellCode](entities/gpu-shellcode.md) — NVIDIA GPU-resident shellcode staging PoC (CUDA + MinHook; payload in VRAM during idle; VEH restore to RX pages; memory hiding / AC evasion research; H1d3r)
 - [grafana-final-scanner](entities/grafana-final-scanner.md) — Grafana CVE scanner (path traversal/SSRF/auth bypass/info disclosure; version fingerprinting + config analysis; HTML/CSV/JSON reports; Cheat / RE Tools)
 - [GRR Rapid Response](entities/grr.md) — Google remote live forensics (Python server + HTTP agents; fleet artifact/memory/registry collection; IS forensics)
+- [Grim (GrimAC)](entities/grim.md) — open-source Minecraft Java anticheat (Java/Kotlin; movement simulation, world replication, latency-aware validation; async multithreaded checks; modern server versions; GrimAnticheat; Anti Cheat / game:minecraft)
 - [gta4-rtx](entities/gta4-rtx.md) — GTA IV RTX Remix compatibility (DirectX / ASI Loader remaster)
 - [gtaiv-eflc-fusionfix](entities/gtaiv-eflc-fusionfix.md) — GTA IV Complete Edition ASI fix patch (rendering/graphics/FPS/QoL/scripting/widescreen; ThirteenAG)
 - [Game-GTA-re3](entities/game-gta-re3.md) — Reverse-engineered GTA III & Vice City engines (re3/reVC; decompiled portable C++; cross-platform incl. PS Vita; CMake; gmh5225)
