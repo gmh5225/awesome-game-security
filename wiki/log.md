@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FaEryICE/MemScanner`: entity [[memscanner]] (FaEryICE; C WDK/VS; Windows x64 kernel memory layout scanner; enumerate drivers/processes/section objects; `DRIVER_OBJECT`, LDR entries, file objects; Win7–Win10 stability notes; kernel forensics / AC-oriented structure research; README Memory scanner); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[ntoskrnl-viewer]], [[rwxscanner]], [[pooldump]], [[kernel-pool-scanning]], and [[device-control-hooks-scanner]].
+
 - **2026-08-25** — ingest `description:Fadi002/de4py`: entity [[de4py]] (Fadi002; open-source Python deobfuscation/analysis framework; GUI + CLI; multi-obfuscator support; packed-artifact analyzers, hash/string inspection, behavior monitoring, process-integrated execution; PySide6 + native Windows injection/hook helpers; malware/RE workflows; Toolkit for python reverse engineering); cited on [[overviews/reverse-engineering]]; cross-linked [[pyarmor]], [[decbench]], [[deobfuscator]], [[peekaboo]], and [[flare-vm]].
 
 - **2026-08-25** — ingest `description:Fahersto/code_injection`: entity [[code-injection]] (Fahersto; C++ host-based Windows code injection collection; ~two dozen PE/DLL/shellcode implementations—hollowing variants, callback-based methods, loader abuse; per-technique executables; 32/64-bit, WoW64, multi-version compatibility notes; offensive tradecraft + defensive detection coverage study); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[process-injection-techniques]], [[injectors]], and [[awesome-injection]].
