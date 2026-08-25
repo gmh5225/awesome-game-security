@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:damanoreshkan-beep/rtl8852au-userspace`: updated entity [[rtl8852au-userspace]] (Android no-root RTL8852AU userspace driver; libusb/usbfs cold boot + firmware; radiotap pcap + 2.4/5 GHz channel hopping + 802.11 frame injection; rtw89 register/calibration port; C + Kotlin/TS tooling; cheat / Android Network Explorer); cited on [[overviews/reverse-engineering]]; cross-linked [[pcapdroid]].
+
 - **2026-08-25** — ingest `readme:categories`: Cheat ~2747 (+1; damanoreshkan-beep/rtl8852au-userspace no-root RTL8852AU libusb monitor/inject in Cheat > Android Network Explorer; other major section counts stable); entity [[rtl8852au-userspace]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-25** — ingest `description:GetRektBoy724/KPDB`: updated entity [[kpdb]] (GetRektBoy724 pure C kernel-mode PDB parser; symbol+type stream handling; runtime debug-info parse avoids brittle offsets/sig scans; kernel RE / AC / security research; complements rbmm fork); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].

@@ -2400,7 +2400,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Packet-Sniffer](entities/packet-sniffer.md) — C/C++ packet logger/decryptor (networking + debugging; cheat / Packet Sniffer&Filter)
 - [PcapPlusPlus](entities/pcapplusplus.md) — multiplatform C++ packet capture/parse/craft (100+ protocols; libpcap/Npcap; Packet Capture&Parse)
 - [PCAPdroid](entities/pcapdroid.md) — privacy-friendly Android network monitor (track/analyze/block app connections; PCAP export; HTTP/TLS decrypt; cheat / Android Network Explorer)
-- [rtl8852au-userspace](entities/rtl8852au-userspace.md) — no-root RTL8852AU userspace Wi-Fi driver (libusb monitor mode, channel hopping, 802.11 frame injection; cheat / Android Network Explorer)
+- [rtl8852au-userspace](entities/rtl8852au-userspace.md) — Android no-root RTL8852AU userspace Wi-Fi driver (ASUS USB-AX56; libusb monitor mode, radiotap pcap, channel hopping, 802.11 frame injection; rtw89 port; cheat / Android Network Explorer)
 - [pawnio](entities/pawnio.md) — WDK kernel driver with embedded Pawn AMX VM (signed bytecode modules via IOCTL; phys/virt memory, MSR/PCI, CPUID, CR/DR, I/O ports, SMM; namazso)
 - [pcm](entities/pcm.md) — curated MCP for IDA Pro (rand-tech; desc also claims Process Context Monitor)
 - [PCIE-Detector](entities/pcie-detector.md) — Kernel PCIe Config Space inspection driver (C++; defensive DMA detection research; gmh5225)

@@ -4,7 +4,7 @@ kind: entity
 topics: [mobile-security, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/emanuele-f__PCAPdroid.md
-updated: 2026-08-15
+updated: 2026-08-25
 confidence: medium
 ---
 
@@ -29,4 +29,4 @@ Sits beside VPN/MITM stacks such as [[lamda]] and [[android-proxy-mcp]], and ker
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[peetch]] · [[lamda]] · [[android-proxy-mcp]] · [[move-certificate]] · [[pcapplusplus]]
+[[overviews/mobile-security]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[rtl8852au-userspace]] · [[peetch]] · [[lamda]] · [[android-proxy-mcp]] · [[move-certificate]] · [[pcapplusplus]]
