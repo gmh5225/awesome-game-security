@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EvilBytecode/EDR-XDR-AV-Killer`: entity [[edr-xdr-av-killer]] (EvilBytecode; Go Spyboy Terminator reproduction; **`zam64.sys`** Zemana BYOVD; IOCTL PID trust-list bypass → kernel-level EDR/XDR/AV process termination; BYOVD / EDR evasion research); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[terminator]], [[zam64-zemina]], [[av-edr-killer]], [[watchdog-killer]], and [[blackout]].
+
 - **2026-08-25** — ingest `description:EvilBytecode/Ebyte-Syscalls`: entity [[ebyte-syscalls]] (EvilBytecode; header-only C++ direct/indirect Windows syscalls; PEB loader walk + ntdll export parse for runtime SSN resolve; indirect syscall trampolines for EDR/AC hook evasion; VEH guard-page/INT3 byte-switching call obfuscation without RWX stub allocation; syscall hook bypass / detection research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[syscalls-cpp]], [[inline-syscall]], [[doom-syscalls]], [[syscall-detect]], [[ntsleuth]], [[known-dll-unhook]], and [[ghostveh]].
 
 - **2026-08-25** — ingest `description:EvilBytecode/GhostVEH`: entity [[ghostveh]] (EvilBytecode; C++ PoC; stealth VEH chain manipulation; locate `LdrpVectorHandlerList` in ntdll; RtlEncodePointer/RtlDecodePointer obfuscation; LdrProtectMrdata MRDATA unlock; bypasses RtlAddVectoredExceptionHandler; VEH internals / anti-debug / exception-handler manipulation research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[custom-veh]], [[ki-user-exception-dispatcher-hook]], [[veh-dumper]], [[veh]], [[dump-val-exception-handler]], and [[godefender]].

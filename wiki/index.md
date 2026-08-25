@@ -1026,6 +1026,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EasyUefi](entities/easyuefi.md) — Visual Studio GNU-EFI UEFI app template (SamuelTulach; C/asm + linker scripts + bundled GNU-EFI; firmware security / boot-stage / game-security prototyping)
 - [EATGuard](entities/eat-guard.md) — Windows PoC: VEH + PAGE_GUARD monitors Export Address Table integrity; detects EAT hooking (rootkits/cheats; connormcgarr)
 - [EDRSandblast](entities/edrsandblast.md) — BYOVD EDR/ETW blind (callbacks / ETW TI / ntdll unhook; C)
+- [EDR-XDR-AV-Killer](entities/edr-xdr-av-killer.md) — Go Spyboy Terminator reproduction via Zemana **`zam64.sys`** (IOCTL PID trust-list bypass → kernel EDR/XDR/AV kill; EvilBytecode; BYOVD evasion research)
 - [edb-debugger](entities/edb-debugger.md) — Linux OllyDbg-style Qt debugger (ptrace; x86/x86-64; disasm/registers/memory map/breakpoints/plugins; eteran; For Linux)
 - [eDBG](entities/edbg.md) — eBPF-based lightweight Android ARM64 CLI debugger (GDB-like breakpoints/memory/registers/threads; file+offset breakpoints; anti-debug resistance; Go + C/eBPF; rooted mobile RE / game security; Sh11no)
 - [edbgserver](entities/edbgserver.md) — eBPF-powered debugger server for Android and Linux (Rust multi-crate; Arm64/x86_64; breakpoints/stepping/memory/registers/signals/library info; avoids ptrace; low-intrusion RE in monitored environments; Satar07)

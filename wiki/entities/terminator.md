@@ -18,4 +18,4 @@ Windows BYOVD tool that terminates protected processes—antivirus, EDR, and ant
 
 ## Related
 
-[[byovd]] · [[zam64-zemina]] · [[watchdog-killer]] · [[av-edr-killer]] · [[phantomkiller]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[zam64-zemina]] · [[edr-xdr-av-killer]] · [[watchdog-killer]] · [[av-edr-killer]] · [[phantomkiller]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

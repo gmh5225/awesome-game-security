@@ -18,4 +18,4 @@ BYOVD research PoC targeting Zemana anti-malware **`zam64.sys`**. The signed dri
 
 ## Related
 
-[[byovd]] · [[terminator]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[terminator]] · [[edr-xdr-av-killer]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[watchdog-killer]] · [[loldrivers]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
