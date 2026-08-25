@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FrySimpl3/SDK_CS2`: entity [[sdk-cs2]] (FrySimpl3; generated CS2 SDK header pack; C++ engine types, enums, and subsystem interfaces; client/rendering/networking/schema/panorama/particles/physics; reference definitions for external tooling and CS2 analysis; cheat / game:cs2 [SDK]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cs2-sdk]], [[counter-strike2-sdk]], [[cs2-sdk-source2gen]], [[cs2-dumper]], and [[source2gen]].
+
 - **2026-08-25** — ingest `description:FuzzySecurity/BinaryNinja-Themes`: entity [[binaryninja-themes]] (FuzzySecurity; `.bntheme` collection; standard/light/green Gruvbox-inspired palettes; disassembly and graph view readability; cheat / Theme); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-nord-theme]], [[long-night]], [[idaskins]], [[ida-dark-plus]], [[official-plugins]], and [[community-plugins]].
 
 - **2026-08-25** — ingest `description:FyroxEngine/Fyrox`: entity [[fyrox]] (FyroxEngine; production-ready Rust 2D/3D game engine; modular crates + integrated scene editor; editor-driven iteration; examples and learning resources; Game Engine / source [Rust]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[ursus]], [[source-renderer]], [[nightshade]], [[open-source-engines]], and [[awesome-game-engine-dev]].
