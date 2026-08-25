@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Enzo0721/ExternalCheatV3`: entity [[external-cheat-v3]] (Enzo0721; C++ external CS:GO cheat framework; ImGui + DirectX 9 overlay; aim assistance, glow, bunnyhop, no-flash; runtime-configurable modules; educational external tooling architecture study; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-external-cheat]], [[csgo-external-esp]], [[echinoidea]], [[csgo-cheats]], and [[heck-csgo-external]].
+
 - **2026-08-25** — ingest `description:EpicGames/UnrealEngine`: entity [[unreal-engine]] (EpicGames; official UE source + API documentation; complete runtime—build, rendering, physics, networking, platform abstraction, plugins, Python scripting; primary reference for UE internals, module development, platform integration; Game Engine / source); cited on [[overviews/game-engine]] and [[unreal-object-model]]; cross-linked [[unreal-engine-guide]], [[unreal-source-explained]], [[ue4-hacking-guideline]], [[lore]], and [[rider-source-code-access]].
 
 - **2026-08-25** — ingest `description:EquiFox/KsDumper`: entity [[ks-dumper]] (EquiFox; C++ kernel-assisted process dumper; custom driver + usermode client; main-module memory copy with PE32/64 header/section rebuild; restricted-handle / AC-protected target workflow; protected game binary RE); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ksdumper-11]], [[dumpepe]], [[league-dumper]], and [[byovd]].

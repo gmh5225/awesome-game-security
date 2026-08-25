@@ -1117,6 +1117,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ExtendedCameraSettings](entities/extended-camera-settings.md) — gameplay camera mod (FOV / distance / rotation / viewpoint params beyond engine defaults; gmh5225)
 - [External ImGui Android](entities/external-imgui-android.md) — external ImGui mod menu (OpenGL ES 3.0; SurfaceView overlay + NDK JNI; UE memory tools; gmh5225)
 - [External Imgui Cheat Menu Example 2023](entities/external-imgui-cheat-menu-example-2023.md) — external ImGui menu template (SDL+OpenGL; `SDL_GL_SwapWindow` hook; GL context anti-flicker; gmh5225)
+- [external-cheat-v3](entities/external-cheat-v3.md) — external CS:GO C++ framework (ImGui + D3D9; aimbot, glow, bhop, no-flash; runtime config modules; educational external tooling; Enzo0721; cheat / game:csgo [External])
 - [external-dayz-cheat](entities/external-dayz-cheat.md) — DayZ external ESP (D3D9 transparent overlay; kernel driver entity reads; Enfusion SDK offsets; gmh5225)
 - [external-esp-hack-assaultcube](entities/external-esp-hack-assaultcube.md) — beginner AssaultCube external ESP (GDI overlay; RPM boxes / names / health; gmh5225)
 - [external-r6s-cheat](entities/external-r6s-cheat.md) — R6 external: kernel driver + shared memory section; ESP + aimbot (cheat / game:r6 [External]; gmh5225)
