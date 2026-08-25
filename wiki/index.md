@@ -221,6 +221,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-drivesignity](entities/android-drivesignity.md) — Android kernel ARMv8.3 driver signature verification bypass (unofficial/modified LKM load; cheat / Android kernel driver development; gmh5225)
 - [android-kernel-cve-pocs](entities/android-kernel-cve-pocs.md) — Android kernel CVE PoC collection (C; ioctl/race/vendor-driver triggers; reproduce bugs, validate mitigations; ScottyBauer; cheat / List)
 - [android-kernel-exploitation](entities/android-kernel-exploitation.md) — Android kernel exploitation guide/lab (ARM/AArch64 debug, UAF/heap/race, KASLR/PAN/PXN bypass, exploit chains; cheat / Android Kernel Exploitation)
+- [android-kernel-gki-common-5-10](entities/android-kernel-gki-common-5-10.md) — Custom Android GKI common 5.10 kernel (multi-vendor ABI; ZenX build; Redmi Note 11T Pro(+)/POCO X4 GT; ExWhyZed9; cheat / Android Kernel Source)
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
 - [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-huawei-hi6250-8-exp](entities/android-kernel-huawei-hi6250-8-exp.md) — Huawei hi6250 Android kernel + KernelSU (cheat / Android Kernel Source)
