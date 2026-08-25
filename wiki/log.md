@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:F0NDO/fortnite-sigs`: entity [[f0ndo-fortnite-sigs]] (F0NDO; compact plain-text Fortnite/UE signature dump; world pointers, name pools, event dispatch, visibility checks, aiming routines; manual or scripted updater pipelines; fast offset maintenance for external/internal tooling; cheat / game:fortnite [Signature]; slug disambiguated from [[fortnite-sigs]]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-sigs]], [[fortnite-sigs-updated-every-update]], [[fortnite-offsets]], and [[fortnite-offsets-and-sigs]].
+
 - **2026-08-25** — ingest `description:FBlackBox/BlackBox`: entity [[blackbox]] (FBlackBox; deprecated Android virtualization project; README-only removal notice; dissolved community channel; no remaining source; historical game-security context; README Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[virtual-app]], [[android-virtual-inject]], and [[inject-arm64]].
 
 - **2026-08-25** — ingest `description:FHowington/CPUEngine`: entity [[cpuengine]] (FHowington; real-time CPU-only 3D software renderer; C++17 + SDL2; rasterization, depth testing, multiple shading models, post-processing, OBJ/TGA assets; scalar + SIMD paths, thread-pool triangle distribution, interactive camera/HUD; graphics education and low-level rendering performance research); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[tinyrenderer]], [[softglrender]], [[gltut]], and [[game-engine-from-scratch]].
