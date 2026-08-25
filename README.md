@@ -1292,6 +1292,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/GliTcHZzZ67/mast-orchestrator [Flask web dashboard to deploy frida-server on rooted Android devices and run whitelisted injection scripts (SSL pinning bypass, root detection bypass, crypto monitoring)]
 - https://github.com/index-login/MobileRE-Skill [AI-agent mobile reverse-engineering skill set with layered Frida hooks and a six-stage anti-detection pipeline]
 - https://github.com/ChiChou/vscode-frida [Unofficial Frida extension for VSCode]
+- https://github.com/MrOplus/frida-ide [Web-based Frida IDE with integrated JADX decompilation, device/process management, and Claude AI assistant for mobile reverse engineering]
 - https://github.com/ChiChou/bagbak [iOS Frida app decrypt / dump to IPA; extensions; jailbreak; bagbak@5 needs frida@17; deprecated]
 - https://github.com/CrackerCat/strongR-frida-android
 - https://github.com/gmh5225/frida-ue4dump [UE4]
