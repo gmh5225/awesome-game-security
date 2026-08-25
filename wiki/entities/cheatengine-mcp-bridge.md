@@ -21,7 +21,7 @@ Named-pipe IPC path: a Lua worker thread inside CE stays synchronized with a Pyt
 
 Alternate README listing for MCP integration with Cheat Engine in the Game Develop / MCP server area. (source: wiki/sources/descriptions/beamstar__cheatengine-mcp-bridge.md)
 
-Unlike standalone Python memory MCP servers such as [[memmcp]], this path drives the full CE runtime (Lua engine, scanner, debugger, DBVM) rather than reimplementing CE-like primitives. Alternate agent bridge [[dsh-cheatengine]] uses DeepSeek Harness + TCP `ce_*` tools instead of MCP/FastMCP. Pairs with CE Lua plugins such as [[gddumper]] and AC-facing CE detection research such as [[cedetector]].
+Unlike standalone Python memory MCP servers such as [[memmcp]], this path drives the full CE runtime (Lua engine, scanner, debugger, DBVM) rather than reimplementing CE-like primitives. Alternate in-process CE MCP plugin [[ce-mcp-plugin]] (Eruditi; C + Lua; async TCP command channel for memory R/W, freeze, disasm/asm, process control, and DLL injection) targets the same AI-assisted live-CE lane via native plugin IPC rather than named pipes. (source: wiki/sources/descriptions/Eruditi__CE-MCP-Plugin.md) Alternate agent bridge [[dsh-cheatengine]] uses DeepSeek Harness + TCP `ce_*` tools instead of MCP/FastMCP. Pairs with CE Lua plugins such as [[gddumper]] and AC-facing CE detection research such as [[cedetector]].
 
 ## Links
 
@@ -30,4 +30,4 @@ Unlike standalone Python memory MCP servers such as [[memmcp]], this path drives
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[dsh-cheatengine]] · [[memmcp]] · [[gddumper]] · [[cedetector]] · [[dma-cheat-engine-loader]] · [[ghidra-headless-mcp]] · [[ida-pro-mcp]] · [[mcp-windbg]]
+[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[ce-mcp-plugin]] · [[dsh-cheatengine]] · [[memmcp]] · [[gddumper]] · [[cedetector]] · [[dma-cheat-engine-loader]] · [[ghidra-headless-mcp]] · [[ida-pro-mcp]] · [[mcp-windbg]]

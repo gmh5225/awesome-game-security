@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Eruditi/CE-MCP-Plugin`: entity [[ce-mcp-plugin]] (Eruditi; C + Lua CE plugin; async TCP AI command channel; memory R/W, value freeze, disasm/asm, process management, DLL injection; non-blocking remote control for game memory research; cheat / MCP for Cheat Engine); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[cheatengine-mcp-bridge]], [[dsh-cheatengine]], and [[memmcp]].
+
 - **2026-08-25** — ingest `description:EternalWraith/PalEdit`: entity [[pal-edit]] (EternalWraith; Python desktop save editor; load/edit/clone Pal companion entries; write-back workflow; Windows executable build; save modding + structured format experimentation; cheat / game:palworld [Save]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[palworld-save-tools]] and [[palworldsaved]].
 
 - **2026-08-25** — ingest `description:EternityX/DEADCELL-CSGO`: entity [[deadcell-csgo]] (EternityX; C++ CS:GO internal cheat framework full source; aiming, visuals, config, in-game menu modules; Visual Studio project + UI components; build-and-study learning codebase for legacy Source-engine cheat architecture; cheat / game:csgo); cited on [[overviews/game-hacking]] and [[source-netvars]]; cross-linked [[csgo-cheat-base]], [[csgosimple]], [[csgo-internal-base]], and [[digital-sdk]].

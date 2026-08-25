@@ -492,6 +492,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CE Examples](entities/ce-examples.md) — FreeER CE example/practice-table collection: Lua/`.CT` assets for memory scanning, Auto Assembler, pointer utilities, UI helpers, Mono workflows, trainer experiments; RE snippets and templates (cheat / Some Examples)
 - [CE Extensions](entities/ce-extensions.md) — FreeER modular CE Lua pack: autosave, disassembler highlighting, structure/offset helpers, process attach conveniences, independently loadable workflow scripts (cheat / Lua Extensions)
 - [CE Lua Extensions](entities/ce-lua-extensions.md) — Skyrimfus CE Lua autorun pack: extension loader + breakpoint cleanup, caller lookup, template insertion, UI workflow scripts (cheat / Lua Extensions)
+- [CE MCP Plugin](entities/ce-mcp-plugin.md) — Eruditi CE plugin: C + Lua; async TCP AI command channel; memory R/W, freeze, disasm/asm, process control, DLL injection (cheat / MCP for Cheat Engine)
 - [CE Tracer-IDA](entities/ce-tracer-ida.md) — Python IDA plugin: CheatEngine value tracer (memory analysis; cheat / IDA Plugins)
 - [ce-easyanticheat-bypass](entities/ce-easyanticheat-bypass.md) — Cheat Engine bypass for EAC (CE process/window class/driver/memory-access evasion; UD CE; gmh5225)
 - [ce-tutorial](entities/ce-tutorial.md) — Cheat Engine register tutorial (register roles vs common illustrations; cheat / guide)
