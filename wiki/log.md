@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Ezmatehw/Encryptix-Crypter`: entity [[encryptix-crypter]] (Ezmatehw; C# .NET Framework 4.8 WinForms GUI PE crypter/packer; AES/XOR + configurable stub template; RegAsm/RegSvcs/MSBuild LOLBin injection; optional persistence, anti-VM, sleep delays, metadata cloning; dnlib obfuscator + build-time stub compile; KeyAuth license gating; crypter construction / payload packing / evasion technique study; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[netcrypt]], [[evader]], [[polyengine]], [[pe-packer]], [[hm-pe-packer]], [[packer-tutorial]], [[windows-process-injection]], and [[unpacker]].
+
 - **2026-08-25** — ingest `description:F0NDO/fortnite-sigs`: entity [[f0ndo-fortnite-sigs]] (F0NDO; compact plain-text Fortnite/UE signature dump; world pointers, name pools, event dispatch, visibility checks, aiming routines; manual or scripted updater pipelines; fast offset maintenance for external/internal tooling; cheat / game:fortnite [Signature]; slug disambiguated from [[fortnite-sigs]]); cited on [[overviews/game-hacking]] and [[unreal-object-model]]; cross-linked [[fortnite-sigs]], [[fortnite-sigs-updated-every-update]], [[fortnite-offsets]], and [[fortnite-offsets-and-sigs]].
 
 - **2026-08-25** — ingest `description:FBlackBox/BlackBox`: entity [[blackbox]] (FBlackBox; deprecated Android virtualization project; README-only removal notice; dissolved community channel; no remaining source; historical game-security context; README Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[virtual-app]], [[android-virtual-inject]], and [[inject-arm64]].
