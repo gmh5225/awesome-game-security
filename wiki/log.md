@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GAMMACASE/PltPatcher`: entity [[plt-patcher]] (GAMMACASE; Python IDAPython IDA Pro plugin set; repair ELF64 Procedure Linkage Table entries when auto-analysis fails; thunk type preserver for extern-call decompilation; binary RE / game security research; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[autoresolv]], [[plthook]], [[ida-pro-loadmap]], and [[idaplugins]].
+
 - **2026-08-25** — ingest `description:InertiaOrg/Inertia`: entity [[inertia]] (InertiaOrg; Java; version-neutral MC AC foundation; player-behavior engine; movement/packet/world/collision/debug-tracing contracts; evidence accumulator with confidence/decay and false-positive context; version profiles + movement-prediction skeleton; inertia-api/core/testkit; scenario tests without live server); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[grim]], [[minecraft-anticheat-list]], and [[minecraft-anti-cheat]].
 
 - **2026-08-25** — ingest `description:GDPatch/GDPatch`: entity [[gdpatch]] (GDPatch; cross-platform cross-version Godot mod loader; Rust native loader injection; runtime GDScript patching/hooking; filesystem interception for virtualized assets; GDScript 3.x/4.x parsers; Lua mod scripting; usermode API hooks Win/Linux/macOS; runtime mod loading without modifying game files; Game Engine / mod loader); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[gddumper]], [[godot-sandbox]], [[godot]], [[unreal-mod-loader]], and [[re-ue4ss]].

@@ -456,6 +456,7 @@ sources:
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
   - wiki/sources/descriptions/GameHackingBook__GameHackingCode.md
   - wiki/sources/descriptions/GameCrashProject__UE4-Hacking-Guideline.md
+  - wiki/sources/descriptions/GAMMACASE__PltPatcher.md
   - wiki/sources/descriptions/Gekkio__GhidraBoy.md
   - wiki/sources/descriptions/GiannBart__BanMod.md
   - wiki/sources/descriptions/ricardoofnl__open.mp-anticheat.md
@@ -1962,6 +1963,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Offline CPU instruction docs at the cursor via [[idaref]] (Python; SQLite refs for x86-64/ARM/MIPS/Xtensa) sit in the Cheat IDA Plugins / instruction-reference lane. (source: wiki/sources/descriptions/nologic__idaref.md)
 - In-IDA register/instruction documentation via [[friend]] (C++; Capstone-backed processor extensions; contextual hints, external doc links, function summaries in disasm + Hex-Rays; Windows/Linux/macOS; cheat / IDA Plugins) sits beside [[idaref]] in the same instruction-reference lane. (source: wiki/sources/descriptions/alexhude__FRIEND.md)
 - ELF external library resolution in IDA via [[autoresolv]] (airbus-seclab; IDAPython; PyQt5 + pyelftools; resolve imported calls, wrapper→implementation mapping, call-site annotation, signature import from related binaries; multi-arch dynamically linked ELF; cheat / IDA Plugins) sits in the same symbol-recovery lane beside [[vmlinux-to-elf]] and [[ida-ps5-elf-plugin]]. (source: wiki/sources/descriptions/airbus-seclab__AutoResolv.md)
+- ELF64 PLT/thunk repair in IDA via [[plt-patcher]] (GAMMACASE; Python IDAPython; patches PLT sections when IDA auto-analysis fails; thunk type preserver for extern-call decompilation; cheat / IDA Plugins) complements [[autoresolv]] in the same ELF import-recovery lane. (source: wiki/sources/descriptions/GAMMACASE__PltPatcher.md)
 - Windows COM analysis in IDA via [[comida]] (airbus-cert; COM GUID scan + registry correlation; Hex-Rays inference on `CoCreateInstance` / `CoGetCallContext` / `QueryInterface`; malware/game COM triage; cheat / IDA Plugins) sits beside [[comon]] and [[classy]] in the Windows internals / COM RE lane. (source: wiki/sources/descriptions/airbus-cert__comida.md)
 - Agent/human IDA CLI via [[idac]] (Unix socket to live GUI or headless idalib; structured JSON; batch/preview/dry-run; bundled agent skill; not MCP; early alpha) sits in the same IDA-driven RE lane. (source: wiki/sources/descriptions/trailofbits__idac.md)
 - Headless IDA Pro MCP via [[ida-cli]] (cpkt9762; idalib-powered; AI-assisted binary analysis; Rust/C++; cheat / IDA Plugins) sits in the same agent-RE lane. (source: wiki/sources/descriptions/cpkt9762__ida-cli.md)
