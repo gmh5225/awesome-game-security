@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Exo1i/MagiskHluda`: entity [[magisk-hluda]] (Exo1i; Magisk module; auto-start stealth-modified `frida-server` at boot; module install/lifecycle scripts + C++ update/download helper; HTML/JS WebUI for start/stop/status/custom params; persistent mobile RE / reduced Frida detection; cheat / Magisk / Frida); cited on [[overviews/mobile-security]] and [[frida]]; cross-linked [[florida-zygisk]], [[frida-rs]], and [[magisk]].
+
 - **2026-08-25** — ingest `description:ExpLife0011/HideDriver`: entity [[hidedriver]] (ExpLife0011; Windows x64 kernel driver-hiding PoC; ETW symbol discovery to locate `MiProcessLoaderEntry`; PatchGuard-aware `DriverObject->DriverSection` removal; post-load artifact cleanup thread; anti-cheat evasion / driver forensic footprint research; README `[Hide Driver By MiProcessLoaderEntry]`); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hide-driver]], [[hide-driver-testing]], [[clear-driver-traces]], [[drv-hide-and-camouflage]], [[patchguard]], [[ntcomparesigninglevel-hook]], and [[keusermodecallback]].
 
 - **2026-08-25** — ingest `description:ExpLife0011/KeUserModeCallBack`: entity [[keusermodecallback]] (ExpLife0011; Windows kernel demo invoking user-mode via `KeUserModeCallback`; IOCTL driver; PEB/module export walk to resolve user32/MessageBoxA; 32/64-bit callback stubs; kernel-to-user transition / callback execution primitive research; README `[KeUserModeCallBack]`); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[eft]], [[ntcomparesigninglevel-hook]], [[km-um-communication]], and [[win32khooker]].
