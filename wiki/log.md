@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GDPatch/GDPatch`: entity [[gdpatch]] (GDPatch; cross-platform cross-version Godot mod loader; Rust native loader injection; runtime GDScript patching/hooking; filesystem interception for virtualized assets; GDScript 3.x/4.x parsers; Lua mod scripting; usermode API hooks Win/Linux/macOS; runtime mod loading without modifying game files; Game Engine / mod loader); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[gddumper]], [[godot-sandbox]], [[godot]], [[unreal-mod-loader]], and [[re-ue4ss]].
+
 - **2026-08-25** — ingest `description:GJDuck/e9patch`: entity [[e9patch]] (GJDuck; static binary rewriting for x86-64 Linux ELF; instruction punning + eviction; insert jumps/trampolines/instrumentation at any instruction without reassembly; offline instrumentation / RE); cited on [[overviews/reverse-engineering]] and [[concepts/dynamic-binary-instrumentation]]; cross-linked [[stitch]], [[neverd]], [[nocturne]], and [[mambo]].
 
 - **2026-08-25** — ingest `description:GLX-ILLUSION/valorant-offsets-autoupdater`: entity [[valorant-offsets-autoupdater]] (GLX-ILLUSION; C++ Visual Studio; JSON offset data + network fetch; adapts existing updater pattern; refresh Valorant memory offsets after patches without full loader rebuild; cheat / game:valorant [Offset]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[valorant-offsets]], [[valorant-externals]], [[valorant-dumper]], [[dota2-overlay-offset-updater]], and [[r6-updater]].

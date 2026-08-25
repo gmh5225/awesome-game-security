@@ -1326,6 +1326,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gdrv-loader-v2](entities/gdrv-loader-v2.md) — Gigabyte `gdrv.sys` loader v2 (C/C++; cheat / vulnerable-driver driver development)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
+- [GDPatch](entities/gdpatch.md) — cross-platform Godot 3.x/4.x mod loader (Rust; runtime GDScript patching, Lua hooks, filesystem virtualization; Win/Linux/macOS; runtime mod loading without modifying game files)
 - [GDMaim](entities/gdmaim.md) — Godot 4.x export plugin: GDScript obfuscation (rename/inlining/strip/shuffle; GDBC strings; source maps; Game Engine Protection:Godot)
 - [Gatling](entities/gatling.md) — Scala/JVM load-testing framework (Akka/Netty async; HTTP/WebSocket/gRPC/MQTT scenarios; percentile HTML reports; Game Testing / Server Testing)
 - [gd-internal](entities/gd-internal.md) — Geometry Dash internal cheat (ImGui menu; Comfortaa font; signatures in hookmgr.cpp; gmh5225)
