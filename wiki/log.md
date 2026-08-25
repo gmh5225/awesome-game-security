@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EBalloon/Super-People-sdk`: entity [[super-people-sdk]] (EBalloon; dumped Unreal Engine SDK for Super People; generated C++ headers for classes, structs, enums, blueprint objects; weapons, vehicles, player pawns, AI modules, animation blueprints, game-specific systems; SDK generation study; cheat / game:super people); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[super-people-esp-aimbot-magic-hack]], [[superpeople-client]], [[veiled-experts-sdk]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].
+
 - **2026-08-25** — ingest `description:EBalloon/VEILED-EXPERTS-SDK`: entity [[veiled-experts-sdk]] (EBalloon; dumped Unreal Engine SDK for Veiled Experts; generated C++ headers + names/objects dumps + offsets; agents, weapons, vehicles, UI, game modes, engine subsystems; SDK generation study; cheat / game:veiled experts); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[project-d-win64-shipping]], [[vx-it]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].
 
 - **2026-08-25** — ingest `description:EZFNDEV/UEDumper`: entity [[ezfndev-uedumper]] (EZFNDEV; C++ Unreal Engine SDK-style dumper; injection workflow; object name extraction, offset discovery, header generation; automated offset finding; version limitations and hardcoded/unstable parts noted; Unreal RE / game security research; cheat / SDK Dump; slug disambiguated from [[uedumper]]); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[uedumper]], [[dumper-7]], [[shh0yauedumper]], [[ue4genny]], and [[re-ue4ss]].

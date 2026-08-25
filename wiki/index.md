@@ -2987,6 +2987,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [super-mario-bros-game](entities/super-mario-bros-game.md) — C++ Super Mario Bros remake (Luxon98; SDL2/SDL_image/SDL_mixer; Visual Studio; original-inspired and custom levels; 2D rendering, level flow, gameplay; game development learning; README [Remake of Super Mario]; Game Develop / source)
 - [super-fighter](entities/super-fighter.md) — Windows DX11 shoot-'em-up remake (MKXJun; C++; Direct3D + HLSL + DirectSound; data-driven stages/enemies, replay, Xbox controller; arcade game loop; README [DX11 Mini Game]; Game Develop / source)
 - [super-people-esp-aimbot-magic-hack](entities/super-people-esp-aimbot-magic-hack.md) — Super People UE4 ESP/aimbot + gameplay mods via SDK entity reads (C++; battle royale; cheat / game:super people; gmh5225)
+- [Super People SDK](entities/super-people-sdk.md) — Super People UE SDK dump (EBalloon; generated C++ headers; weapons, vehicles, player pawns, AI, animation blueprints, game systems; SDK generation study; cheat / game:super people)
 - [superpeople-client](entities/superpeople-client.md) — Super People client: driver / rendering / modding (C++; cheat / game:super people; gmh5225)
 - [Symbridge](entities/symbridge.md) — live IDA ↔ x64dbg annotation/type sync (module+RVA; Python broker)
 - [Symless](entities/symless.md) — IDA structure/type recovery on stripped binaries (data-flow; Hex-Rays)

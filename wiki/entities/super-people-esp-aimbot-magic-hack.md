@@ -12,7 +12,7 @@ confidence: medium
 
 C++ **Super People** (battle royale) cheat providing **ESP**, **aimbot**, and gameplay modification features. Reads entity data from the Unreal Engine process to render player positions, health, and distance, with aimbot targeting and other combat advantages via **UE4 SDK structures**. Aimed at game security researchers studying UE4-based battle royale cheat implementations. (source: wiki/sources/descriptions/gmh5225__Super-People-Esp-Aimbot-Magic-Hack.md)
 
-Sits beside driver-backed Super People work such as [[superpeople-client]] and generic UE SDK kits such as [[ue-unreal-engine-sdk]] in the title-specific UE4 internal cheat lane.
+Sits beside driver-backed Super People work such as [[superpeople-client]], pre-collected title SDK dumps such as [[super-people-sdk]], and generic UE SDK kits such as [[ue-unreal-engine-sdk]] in the title-specific UE4 internal cheat lane.
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside driver-backed Super People work such as [[superpeople-client]] and g
 
 ## Related
 
-[[superpeople-client]] · [[ue-unreal-engine-sdk]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/game-engine]]
+[[superpeople-client]] · [[super-people-sdk]] · [[ue-unreal-engine-sdk]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/game-engine]]
