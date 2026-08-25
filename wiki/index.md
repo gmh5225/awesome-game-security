@@ -3141,6 +3141,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [usbmon (KelvinMsft)](entities/usbmon.md) — kernel USB/HID monitoring framework; IRP/IOCTL/URB hooks + HID report parse; trace device data flows to consumer processes; input-stack RE / HID attack-detection surfaces
 - [usbsn (ekknod)](entities/usbsn.md) — root-only USB serial number changer (C++/Java; Windows/Linux/mobile; Some Tricks / Android; peripheral HWID spoof)
 - [UWPDumper](entities/uwp-dumper.md) — UWP runtime package dumper (C++ DLL + injector; Windows 10 SDK; inject into target process; Explore UWP / Microsoft Store game RE; Wunkolo)
+- [uwpspy](entities/uwpspy.md) — UWP/WinRT interface hook and spy DLL (C++; console runtime logging; reusable hook scaffolding; UWP instrumentation and RE; Francesco149)
 - [UnrealVTDbg](entities/unreal-vtdbg.md) — VT-x/EPT Unreal kernel debugger (Delphi UI + VMX/EPT driver, EPT hooks, Detours breakpoints; Win10/11)
 - [UnrealCLR](entities/unrealclr.md) — UE CoreCLR / .NET 6 C# gameplay plugin (actors/components/Blueprints; Plugins:Unreal)
 - [UnrealImGuiTools](entities/unreal-imgui-tools.md) — UE ImGui tools + game-specific tool-window framework (Plugins:Unreal)
