@@ -1537,6 +1537,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pplorer](entities/pplorer.md) — IDA Pro plugin: resolve PPL gate calls to underlying PPL functions in iOS/macOS kernelcaches (Ctrl-Shift-X navigation; ida-netnode; cheat / IDA Plugins)
 - [ida-ps4-helper](entities/ida-ps4-helper.md) — IDA helper plugin for PS4 module loader (ps4-module-loader companion)
 - [ida-ps5-elf-plugin](entities/ida-ps5-elf-plugin.md) — IDA Pro PS5 ELF loader (PS5 ELF extensions, segments, dynamic linking; console security RE)
+- [ps2-ida-vu-micro](entities/ps2-ida-vu-micro.md) — IDA Python plugin: PS2 VU microcode search/disassembly (VIF MPG auto-discovery; vector-unit program RE)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
 - [ida-gameguard-str-dec](entities/ida-gameguard-str-dec.md) — IDA Pro nProtect GameGuard string decrypt (Python; modding; cheat / IDA Plugins; crtdll)
 - [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)

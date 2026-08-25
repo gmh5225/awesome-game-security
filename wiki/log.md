@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Goatman13/ps2_ida_vu_micro`: entity [[ps2-ida-vu-micro]] (Goatman13; IDA Python plugin; PS2 VU microcode search/disassembly; manual ranges + VIF MPG auto-discovery; vector-unit program RE; branch-target reconstruction limits; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-ps4-helper]], [[ida-ps5-elf-plugin]], [[idaplugins]], and [[ida-plugins]].
+
 - **2026-08-25** — ingest `description:GrapheneOS-Archive/kernel_msm-coral`: entity [[kernel-msm-coral]] (GrapheneOS-Archive; Pixel 4/4XL (coral) Qualcomm MSM kernel; hardened configs + Android security patches; hardened-kernel study on Snapdragon; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu-pixel4xl]], [[kernel-common]], [[compile-android-driver]], [[android-kernel-hacking-toolkit]], and [[pixel-flasher]].
 
 - **2026-08-25** — ingest `description:Grasscutters/Grasscutter`: entity [[grasscutter]] (Grasscutters; open-source Genshin Impact private-server emulator; Java; server-side game logic, player progression, world simulation, network protocol; quests/gacha/dungeons/multiplayer; MMORPG server-architecture RE; Private Server); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[genshin-akebi-gc]], [[easypeasy-gc]], [[genshin-genshin-data]], [[genshin-impact-base]], and [[genshin-cheat]].

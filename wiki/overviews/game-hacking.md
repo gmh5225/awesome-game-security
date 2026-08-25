@@ -1433,6 +1433,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Genshin-EasyPeasy-Bypass.md
   - wiki/sources/descriptions/gmh5225__GenshinImpact-Base.md
   - wiki/sources/descriptions/gmh5225__Genshin-GenshinData.md
+  - wiki/sources/descriptions/Goatman13__ps2_ida_vu_micro.md
   - wiki/sources/descriptions/Grasscutters__Grasscutter.md
   - wiki/sources/descriptions/gmh5225__genshin-cheat.md
   - wiki/sources/descriptions/gmh5225__genshin-remove-banner.md
@@ -2523,6 +2524,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - PS4 Orbis Ghidra extension via [[ghidra-orbis]] (loaders, analyzers, scripts, syscall/NID mapping; symbol recovery; Java/Gradle; Orbis OS file formats) sits in the same `PlayStation` / Cheat Ghidra Plugins lane beside [[ida-ps4-helper]]. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
 - PS5 ELF loader/analysis in IDA via [[ida-ps5-elf-plugin]] (PS5-specific ELF extensions, segment types, dynamic linking; game/system binaries; console security RE) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md)
+- PS2 VU microcode search/disassembly in IDA via [[ps2-ida-vu-micro]] (Goatman13; Python; manual ranges + VIF MPG auto-discovery; vector-unit program RE; branch-target reconstruction limits; cheat / IDA Plugins) sits in the same `PlayStation` static-RE lane for PS2 game binaries. (source: wiki/sources/descriptions/Goatman13__ps2_ida_vu_micro.md)
 - PS5 ELF loader for ps5-jar-loader via [[elfloader]] (Java; kernel-level modding / SDK generation; console PlayStation ELF load path; Anti Cheat → Binary Packer) sits in the same `PlayStation` lane beside static IDA loaders. (source: wiki/sources/descriptions/cryonumb__elfloader.md)
 - PS5 Cortex-A53 code-execution PoC via [[a53-code-exec]] (fw 02.00; kernel-level work / SDK generation; console emulator + PlayStation research) sits in the same `PlayStation` low-level CPU exploit lane. (source: wiki/sources/descriptions/cragson__a53-code-exec.md)
 - PS5 remote ELF manual-map injector via [[nines]] (TCP :9033; target process + ELF payload; section load, relocations, remote thread; John Törnblom PS5 SDK; Python helper; console PlayStation process-injection RE) sits in the same `PlayStation` runtime injection lane beside static loaders. (source: wiki/sources/descriptions/buzzer-re__NineS.md)
