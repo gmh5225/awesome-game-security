@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Fatmike-GH/Fatpack`: entity [[fatpack]] (Fatmike-GH; C++ Windows x64 PE packer; LZMA compression + custom loader stub; resource/section packing; icon/manifest; relocation/import/TLS; helper tooling for stub embed + post-build integration; executable protection research / manual-map loader experimentation; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[hm-pe-packer]], [[atom-pe-packer]], [[pe-packer]], [[exe-packer]], [[evader]], [[tinyload]], [[packer-tutorial]], and [[unpacker]].
+
 - **2026-08-25** — ingest `description:Fewnity/Counter-Strike-DS-Unity-Project`: entity [[counter-strike-ds-unity-project]] (Fewnity; Unity tooling workspace for DS Counter-Strike demake; map/collision/stair/culling/shadow/bomb/trigger export; pathfinding waypoints and matrices; scene-based gun-sprite pipeline; DS-compatible content iteration outside core game code; cheat / Unity CS); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[counter-strike-nintendo-ds]] and [[counter-strike2-sdk]].
 
 - **2026-08-25** — ingest `description:Fewnity/Counter-Strike-Nintendo-DS`: entity [[counter-strike-nintendo-ds]] (Fewnity; C; devkitPro + Nitro Engine; Counter-Strike demake; weapons/bots/maps/networking; online multiplayer on emulator and real DS hardware; homebrew FPS development on constrained handheld hardware; cheat / Nintendo CS); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[3beans]], [[bizhawk]], [[ghidradboy]], and [[counter-strike2-sdk]].

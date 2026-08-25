@@ -1114,6 +1114,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [FakePDB](entities/fakepdb.md) — synthetic PDB generation from IDA analysis (stripped PE symbol recovery; PDB Generation From IDA; gmh5225)
 - [FakeSign](entities/fakesign.md) — fake Authenticode signatures on PE binaries (superficial cert validation bypass; Fake Cert; gmh5225)
 - [FakeEnclave](entities/fake-enclave.md) — VBS enclave abuse PoC (Some Tricks / Windows Ring0; gmh5225)
+- [Fatpack](entities/fatpack.md) — Fatmike-GH Windows x64 PE packer (C++ LZMA compression + custom loader stub; resource/section packing; icon/manifest; relocation/import/TLS; helper tooling for stub embed + post-build integration; executable protection research / manual-map loader experimentation; Anti Cheat → Binary Packer)
 - [Faultline](entities/faultline.md) — usermode WS page-fault AC PoC (manual-map/shellcode; C++23)
 - [FastPFHook (brew02)](entities/fast-pf-hook.md) — #PF page-fault hook: parse/relocate target instructions to shadow page; exception-handler dispatch (Some Tricks / Windows Ring0)
 - [Fedoraware](entities/fedoraware.md) — TF2 training software (SE-Owned lineage; rendering / networking / animation; C/C++; cheat / game:team fortress 2; gmh5225)
