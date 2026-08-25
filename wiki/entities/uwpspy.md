@@ -20,4 +20,4 @@ README lane: Explore UWP (dll that hooks uwp interfaces).
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[uwp-dumper]] · [[detours]] · [[renhook]]
+[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[uwpinject]] · [[uwp-dumper]] · [[detours]] · [[renhook]]

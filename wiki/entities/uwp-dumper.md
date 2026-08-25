@@ -20,4 +20,4 @@ README lane: Explore UWP.
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[uwpspy]] · [[windows-process-injection]] · [[ue4-injector]] · [[unmapper]] · [[guided-hacking-injector]]
+[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[uwpinject]] · [[uwpspy]] · [[windows-process-injection]] · [[ue4-injector]] · [[unmapper]] · [[guided-hacking-injector]]
