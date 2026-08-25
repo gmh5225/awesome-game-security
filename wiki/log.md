@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Fragmentaim/Auto_aim`: entity [[auto-aim]] (Fragmentaim; C++ real-time AI aiming assistant core; DXGI Desktop Duplication capture; YOLO via ONNX Runtime/TensorRT; OpenCV vision; driver-level mouse simulation; CV game-automation research; DXGI + TensorRT + driver-level input); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[rookieai-yolov8]], [[ai-aimbot]], [[yolov8-overlay-cs2]], [[hardware-input-injection]], and [[screencapture]].
+
 - **2026-08-25** — ingest `description:Francesco149/uwpinject`: entity [[uwpinject]] (Francesco149; C CLI UWP early-startup DLL injector; Win32 + AppModel APIs; suspended debugger-like launch flow; DLL drop-in workflow; UWP RE, runtime instrumentation, and debugging; Explore UWP / Microsoft Store game RE); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[uwpspy]], [[uwp-dumper]], and [[windows-process-injection]].
 
 - **2026-08-25** — ingest `description:Francesco149/uwpspy`: entity [[uwpspy]] (Francesco149; C++ UWP/WinRT interface hook and spy DLL; console runtime logging; reusable low-level hook scaffolding for UWP instrumentation; Explore UWP / Microsoft Store game RE); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[uwp-dumper]], [[detours]], and [[renhook]].

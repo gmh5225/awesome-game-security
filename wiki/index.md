@@ -211,6 +211,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ayaya-league-external](entities/ayaya-league-external.md) — Node.js LoL external script platform (AyayaLeague; custom user scripts; gmh5225; cheat / game:lol)
 - [Auto-Android App Modding Tool](entities/auto-android-app-modding-tool.md) — Termux Python TUI for APK patch/rebuild/sign; Frida Gadget + native `.so` inject; patchelf/APKEditor auto-select; no root (UAMT; VarshaWanjari0)
 - [auto-enum](entities/auto-enum.md) — IDA plugin: auto-identify/set enums for standard functions (Python/C; cheat / IDA Plugins)
+- [Auto_aim](entities/auto-aim.md) — Fragmentaim C++ real-time AI aiming assistant (DXGI Desktop Duplication + YOLO ONNX Runtime/TensorRT + OpenCV; driver-level mouse simulation; CV game-automation research; DXGI + TensorRT + driver-level input)
 - [AutoRE](entities/auto-re.md) — Python IDA Pro plugin: auto-rename dummy functions from API imports/jump targets; behavioral tagging (networking, injection, crypto, file I/O) with tag view (a1ext; cheat / IDA Plugins)
 - [AutoRename](entities/autorename.md) — Python IDA plugin: auto rename symbol (crifan; cheat / IDA Plugins)
 - [auto-simulated-universe](entities/auto-simulated-universe.md) — Honkai: Star Rail Simulated Universe automation bot (screen recognition + input; pathfinding, combat rotation, blessing selection; cheat / game:honkai star rail [Script]; gmh5225)
