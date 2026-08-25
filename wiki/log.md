@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FarmEquipment69/umap-mapper`: entity [[umap-mapper]] (FarmEquipment69; C Windows kernel-mode manual mapper PoC; hooks kernel function pointer on `NtConvertBetweenAuxiliaryCounterAndPerformanceCounter` for mapping requests; PE copy + import/reloc + entry; pattern scan + protected memory writes; VS driver project; driver-load / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[umap]], [[iocreatedriver]], [[kdmapper]], [[known-driver-mappers]], and [[kernel-pool-scanning]].
+
 - **2026-08-25** — ingest `description:FastVM/minivm`: entity [[minivm]] (FastVM; small optimizing VM + JIT runtime; C11 + Cuik TB codegen; Lua tests/benchmarks; GNU Make; desktop + WASM; VM/compiler/runtime performance experimentation); cited on [[overviews/reverse-engineering]]; cross-linked [[q3vm]], [[bytecodevm]], [[x64-virtualizer-rs]], [[covirt]], and [[vmp-devirtualization-lab]].
 
 - **2026-08-25** — ingest `description:Fatmike-GH/Fatpack`: entity [[fatpack]] (Fatmike-GH; C++ Windows x64 PE packer; LZMA compression + custom loader stub; resource/section packing; icon/manifest; relocation/import/TLS; helper tooling for stub embed + post-build integration; executable protection research / manual-map loader experimentation; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[hm-pe-packer]], [[atom-pe-packer]], [[pe-packer]], [[exe-packer]], [[evader]], [[tinyload]], [[packer-tutorial]], and [[unpacker]].
