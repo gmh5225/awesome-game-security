@@ -364,6 +364,7 @@ sources:
   - wiki/sources/descriptions/MahmoudZohdy__IAT-Obfuscation.md
   - wiki/sources/descriptions/MahmoudZohdy__Process-Injection-Techniques.md
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
+  - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
   - wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md
   - wiki/sources/descriptions/ManulMap__malstring.md
   - wiki/sources/descriptions/Metick__Anti-Debug.md
@@ -1005,6 +1006,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 **Paper/Folia rule enforcement:** [[icuac]] (Lazyzouo; Java 21 Gradle; modular server-side command/inventory/combat integrity checks—blocked commands, tab-complete hiding, game-mode isolation, coordinate limits, death-drop control, banned materials, NBT/enchantment validation, stack/potion limits, end-crystal cooldowns; bilingual CN/EN; Folia-aware scheduling; SHA-256-verified updater; lightweight anti-abuse controls rather than full client-side AC; Anti Cheat / game:minecraft) for administrators needing transparent policy enforcement. (source: wiki/sources/descriptions/Lazyzouo__ICUAC.md)
 
 **Starfish Lua heuristic AC:** [[hexze-anticheat]] (Hexze; Cheater Detector; Lua Starfish plugin; configurable NoSlow/AutoBlock/Eagle/Scaffold/Tower/LagRange/NoBreakDelay checks; movement/equipment/animation/metadata/block-break timing; violation thresholds, alert cooldowns, optional sound alerts; staff monitoring for Minecraft-style worlds; Anti Cheat / game:minecraft) for Starfish server operators needing plugin-side cheat-pattern flagging. (source: wiki/sources/descriptions/Hexze__anticheat.md)
+
+**Nukkit Bedrock prediction AC:** [[ghost-anticheat]] (GhostNgEnd; Java Gradle Nukkit plugin; ECS architecture simulating BDS movement, collision, and physics; latency-compensated packet checks for phase, no-slow, anti-knockback, reach, hitbox abuse, invalid block breaking, elytra flight anomalies, bad packets, and multi-action violations; server-side cheat detection for Bedrock Nukkit operators; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md)
 
 ## README map
 

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GhostNgEnd/Ghost-AntiCheat`: entity [[ghost-anticheat]] (GhostNgEnd; Java Gradle Nukkit plugin; ECS BDS movement/collision/physics simulation; latency-compensated packet checks; phase/no-slow/anti-knockback, reach/hitbox abuse, invalid block breaking, elytra flight anomalies, bad packets, multi-action violations; server-side Bedrock cheat detection; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[oomph]], [[paradox-anticheat]], [[scythe-anticheat]], [[minecraft-anticheat-list]], and [[grim]].
+
 - **2026-08-25** — ingest `description:Ghostleadie/CheatManagerMenu`: entity [[cheat-manager-menu]] (Ghostleadie; UE 5.8 C++ Win64 plugin; runtime reflection over `UCheatManager` + BlueprintCallable cheat extensions; SlateIM parameter-aware controls; keyboard/mouse/gamepad; filters/favorites/categories; compiled out of Shipping; dev/PIE/Test debug interface; cheat / Plugins:Unreal); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[unreal-imgui-tools]], [[unreal-object-model]], and [[unrealcpp]].
 
 - **2026-08-25** — ingest `description:GiannBart/BanMod`: entity [[banmod]] (GiannBart; Among Us BepInEx moderation + AntiCheat; C# Harmony on Unity IL2CPP; server-synced ban/cheater/teemer lists; AFK/camera/follow detectors; moderator UI; custom roles + lobby discovery; Anti Cheat); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[wellsanticheat]], [[bepinex-il2cppbase]], and [[il2cpp]].
