@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:EvelynSchwab/ComponentFuseMechanic`: entity [[component-fuse-mechanic]] (EvelynSchwab; UE5.2 gameplay prototype; actor-component fuse mechanic; C++/Blueprint; socket alignment, placement previews, Chaos physics constraints; object-combination / physics-driven attachment prototyping; Game Engine / UE5 constraining system); cited on [[overviews/game-engine]]; cross-linked [[kawaii-physics]], [[ue5-roll-a-ball-game]], [[bt-modular-game-features]], [[physx]], and [[ue5-with-dear-imgui]].
+
 - **2026-08-25** — ingest `description:EvilBytecode/CustomDpapi`: entity [[custom-dpapi]] (EvilBytecode; C++ PoC; undocumented DPAPI RPC via `NdrClientCall3` to lsass `protected_storage`; bypasses `CryptUnprotectData`; dpapi.dll internals RE; Windows credential protection / RPC attack-surface research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[kvcforensic]], [[pillager]], [[idontlikefilelocks]], and [[lsass-dump-that-lsass]].
 
 - **2026-08-25** — ingest `description:EvilBytecode/EDR-XDR-AV-Killer`: entity [[edr-xdr-av-killer]] (EvilBytecode; Go Spyboy Terminator reproduction; **`zam64.sys`** Zemana BYOVD; IOCTL PID trust-list bypass → kernel-level EDR/XDR/AV process termination; BYOVD / EDR evasion research); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[terminator]], [[zam64-zemina]], [[av-edr-killer]], [[watchdog-killer]], and [[blackout]].
