@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Fewnity/Counter-Strike-DS-Unity-Project`: entity [[counter-strike-ds-unity-project]] (Fewnity; Unity tooling workspace for DS Counter-Strike demake; map/collision/stair/culling/shadow/bomb/trigger export; pathfinding waypoints and matrices; scene-based gun-sprite pipeline; DS-compatible content iteration outside core game code; cheat / Unity CS); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[counter-strike-nintendo-ds]] and [[counter-strike2-sdk]].
+
 - **2026-08-25** — ingest `description:Fewnity/Counter-Strike-Nintendo-DS`: entity [[counter-strike-nintendo-ds]] (Fewnity; C; devkitPro + Nitro Engine; Counter-Strike demake; weapons/bots/maps/networking; online multiplayer on emulator and real DS hardware; homebrew FPS development on constrained handheld hardware; cheat / Nintendo CS); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[3beans]], [[bizhawk]], [[ghidradboy]], and [[counter-strike2-sdk]].
 
 - **2026-08-25** — ingest `description:FiYHer/InfinityHookPro`: entity [[infinityhook-pro]] (FiYHer; C/C++ VS; modernized InfinityHook kernel hooking Win7–Win11; version-specific offset handling; low-level internals + extensive comments; kernel security / AC / EDR RE; ETW Hook Ex); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]], [[infinityhook-promax]], [[infinityhook-latest]], and [[etwhook-infinityhookclass]].
