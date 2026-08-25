@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `readme:categories`: Cheat ~2747 (+1; damanoreshkan-beep/rtl8852au-userspace no-root RTL8852AU libusb monitor/inject in Cheat > Android Network Explorer; other major section counts stable); entity [[rtl8852au-userspace]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-25** — ingest `description:GetRektBoy724/KPDB`: updated entity [[kpdb]] (GetRektBoy724 pure C kernel-mode PDB parser; symbol+type stream handling; runtime debug-info parse avoids brittle offsets/sig scans; kernel RE / AC / security research; complements rbmm fork); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
 
 - **2026-08-25** — ingest `description:GetRektBoy724/Win32kHooker`: entity [[win32khooker]] (GetRektBoy724; C++ kernel driver; locate/hook win32k.sys dispatch paths on modern builds; process attach + syscall mapping + runtime disassembly for session-space hook targets; `.data` ptr swapper for newer win32k where pointers live in opaque session-state; GUI-subsystem / anti-cheat / defensive RE research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[dataptrswap-driver]], [[comm-data-pointer-swap]], [[kernel-eac-be-comm]], [[callmewin32kdriver]], [[win32k-file-collection]], and [[driver-communication-list]].
