@@ -1765,6 +1765,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kisak-Strike](entities/kisak-strike.md) — open-source Linux CS:GO port (SwagSoftware; full Source game codebase; CMake; SDL/OpenGL; engine architecture + Linux porting study; Game Engine / source)
 - [KisakCOD](entities/kisakcod.md) — COD4 multiplayer executable open-source reimplementation (SwagSoftware; C/C++ CMake/VS; DirectX-era middleware + Steam; gameplay/networking/engine modules; modding + legacy exploit-surface research; Game Engine / source)
 - [Killing Floor Bot Client](entities/killingfloor-bot-client.md) — UE2.5 headless Killing Floor client (native UDP protocol; Steam auth RE; Ghidra scripts; UDP MITM; protocol docs)
+- [Kiteshield](entities/kiteshield.md) — Linux x86-64 ELF packer/protector (GunshipPenguin; layered RC4 + custom user-space loader; ptrace call-stack–scoped decrypt; anti-debug checks; C + asm; binary obfuscation / anti-analysis education; Anti Cheat → Binary Packer `[ELF X64]`)
 - [kLLDB](entities/klldb.md) — LLDB-based Linux kernel debugger (kLLDBLive + offline post-mortem; LLVM-19; Python scripting; LLDB vs GDB/KGDB)
 - [kn-diff-pool](entities/kn-diff-pool.md) — Windows kernel Big Pool snapshot/diff (driver capture + Go TUI; leak / manual-map forensics)
 - [kn-live-dbg](entities/kn-live-dbg.md) — Windows kernel live debugging (driver memory primitives + Zydis disasm; user-mode TUI; LiveKD-style)
