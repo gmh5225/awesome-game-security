@@ -766,6 +766,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DelphiReSym](entities/delphiresym.md) — Ghidra/pyghidra Delphi symbol recovery (function signatures, params, vtables from compiler metadata; modern Delphi; malware/legacy RE; WenzWenzWenz)
 - [DELBOT-Mouse](entities/delbot-mouse.md) — deep learning human-vs-bot mouse movement classifier (Bureau404 internship; University of Mons; Detection:triggerbot & aimbot)
 - [Demo](entities/demo.md) — JingMatrix Android demo app for runtime user-space library injection detection (Kotlin + native C++/CMake; soinfo linked-list, virtual memory map inspection, module unload counters; Zygisk injection focus; mobile AC research)
+- [Destiny](entities/destiny.md) — MapleStory v0.83 C# server emulator (Fraysa; center/login/game multi-server architecture; Lua NPC/portal scripting; SQL-backed account/world state; Visual Studio solution; private-server dev / MMORPG protocol research; Private Server-GMS-083 C#)
 - [demumble](entities/demumble.md) — Itanium/MSVC (+ D/Rust/Swift) demangler; c++filt/undname replacement (RE tools)
 - [Demystifying-PatchGuard](entities/demystifying-patchguard.md) — educational C/C++ walkthrough of PatchGuard
 - [delete-self-poc](entities/delete-self-poc.md) — C PoC; delete locked or running executable from disk via primary-stream rename + SetFileInformationByHandle disposition (LloydLabs; handle sequencing / locked-file removal; anti-forensics / secure cleanup / defensive detection engineering)

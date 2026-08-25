@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Fraysa/Destiny`: entity [[destiny]] (Fraysa; open-source C# MapleStory v0.83 server emulator; center/login/game multi-server architecture; Lua NPC/portal scripting; SQL-backed account/world state; Visual Studio solution; private-server development / MMORPG protocol research; Private Server-GMS-083 C#); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[maplestory-v83-maplestory-cpp]], [[maple-unity]], [[maplestory-server]], and [[maple-ezorsia]].
+
 - **2026-08-25** — ingest `description:FreeER/CE-Examples`: entity [[ce-examples]] (FreeER; broad CE example/practice-table collection; Lua/`.CT` assets for memory scanning, Auto Assembler, pointer utilities, UI helpers, Mono workflows, trainer experiments; snippets and templates for RE and game memory manipulation; teaching CE workflows; cheat / Some Examples); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[ce-extensions]], [[cheat-engine-tables]], [[mydev-cheat-engine-tables]], [[ce-lua-extensions]], and [[cheatengine-mono-helper]].
 
 - **2026-08-25** — ingest `description:FreeER/CE-Extensions`: entity [[ce-extensions]] (FreeER; modular Lua CE extension pack; autosave controls, disassembler highlighting, structure/offset helpers, process attachment conveniences, independently loadable workflow QoL scripts; advanced CE users customizing RE and game analysis workflows; cheat / Lua Extensions); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[ce-lua-extensions]], [[controller-mode]], and [[cheatengine-mono-helper]].
