@@ -689,6 +689,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [CPUZ-DSEFix](entities/cpuc-dsefix.md) — CPU-Z BYOVD DSE bypass (`g_CiEnable`/`g_CiOptions` patch; unsigned driver load; PatchGuard risk; SamLarenN; cheat / CPU-Z)
 - [cpuz](entities/cpuz.md) — CPU-Z vulnerable-driver exploit (XP–Win10 1607; Cheat Vulnerable Driver)
+- [cpuengine](entities/cpuengine.md) — real-time CPU-only 3D software renderer (FHowington; C++17 + SDL2; rasterization, depth testing, shading models, post-processing, OBJ/TGA; scalar + SIMD + thread-pool triangle distribution; interactive camera/HUD; graphics education and rendering performance research)
 - [cthash](entities/cthash.md) — constexpr SHA-2/SHA-3 hashes + `cthash::literals` hash_value suffixes (AC Compile Time)
 - [CVE-2015-2291](entities/cve-2015-2291.md) — Intel `iqvw64e.sys` Nal-driver IOCTL PoC (arbitrary kernel R/W; NtQuerySystemInformation base leak → LPE; kdmapper-family backend; gmh5225)
 - [CVE-2017-9769](entities/cve-2017-9769.md) — Razer Synapse `rzpnk.sys` IOCTL → ZwOpenProcess PoC (arbitrary process handle; unprivileged; v2.20.15.1104; gmh5225)

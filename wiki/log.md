@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FHowington/CPUEngine`: entity [[cpuengine]] (FHowington; real-time CPU-only 3D software renderer; C++17 + SDL2; rasterization, depth testing, multiple shading models, post-processing, OBJ/TGA assets; scalar + SIMD paths, thread-pool triangle distribution, interactive camera/HUD; graphics education and low-level rendering performance research); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[tinyrenderer]], [[softglrender]], [[gltut]], and [[game-engine-from-scratch]].
+
 - **2026-08-25** — ingest `description:FaEryICE/MemScanner`: entity [[memscanner]] (FaEryICE; C WDK/VS; Windows x64 kernel memory layout scanner; enumerate drivers/processes/section objects; `DRIVER_OBJECT`, LDR entries, file objects; Win7–Win10 stability notes; kernel forensics / AC-oriented structure research; README Memory scanner); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[ntoskrnl-viewer]], [[rwxscanner]], [[pooldump]], [[kernel-pool-scanning]], and [[device-control-hooks-scanner]].
 
 - **2026-08-25** — ingest `description:Fadi002/de4py`: entity [[de4py]] (Fadi002; open-source Python deobfuscation/analysis framework; GUI + CLI; multi-obfuscator support; packed-artifact analyzers, hash/string inspection, behavior monitoring, process-integrated execution; PySide6 + native Windows injection/hook helpers; malware/RE workflows; Toolkit for python reverse engineering); cited on [[overviews/reverse-engineering]]; cross-linked [[pyarmor]], [[decbench]], [[deobfuscator]], [[peekaboo]], and [[flare-vm]].
