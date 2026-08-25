@@ -1441,6 +1441,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HITCON 2023 Demo CVE-2023-20562](entities/hitcon-2023-demo-cve-2023-20562.md) — HITCON 2023 `AMDCpuProfiler.sys` CVE-2023-20562 demo (AMD driver LPE / kernel code exec; gmh5225)
 - [HP Hardware Diagnostics PoC](entities/hp-hardware-diagnostics-poc.md) — HP `etdsupp.sys` diagnostics driver IOCTL LPE (OEM BYOVD / privilege escalation; gmh5225)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
+- [HPCS2](entities/hpcs2.md) — external CS2 cheat test project (Half-People; C++ Visual Studio; process memory utilities + handle hijacking + CS2 offset headers; INI-configured aim/RCS/ESP; educational cheat and anti-cheat behavior study; cheat / game:cs2 [External])
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [HyperDbg](entities/hyperdbg.md) — open-source VT-x/EPT hypervisor-assisted Windows debugger (C/C++; user/kernel; stealth breakpoints, hidden hooks, memory-access monitoring; RE / fuzzing / malware / anti-cheat research; README [VT debuger])
 - [hyperion-disassembler](entities/hyperion-disassembler.md) — Sidenai; native C++ multi-arch disassembler/decompiler (PE/ELF/Mach-O/.NET; x86/x64/ARM/AArch64/MIPS/PPC; CFG, FLIRT, PDB, BinDiff, RTTI, SSA decompiler, packer detection, Lua, ImGui UI; cheat / RE tools)

@@ -1114,6 +1114,7 @@ sources:
   - wiki/sources/descriptions/gregkh__kernel-development.md
   - wiki/sources/descriptions/djolertrk__kLLDB.md
   - wiki/sources/descriptions/guoxing2024__magicmida-rs.md
+  - wiki/sources/descriptions/Half-People__HPCS2.md
   - wiki/sources/descriptions/Hendi48__Magicmida.md
   - wiki/sources/descriptions/HeathHowren__Pointer-Lab.md
   - wiki/sources/descriptions/HeathHowren__CSGO-Cheats.md
@@ -1625,7 +1626,7 @@ sources:
   - wiki/sources/descriptions/HexRaysSA__rax.md
   - wiki/sources/descriptions/HexRaysSA__ida-cyberchef.md
   - wiki/sources/descriptions/HexRaysSA__ida-claude-code-plugins.md
-updated: 2026-08-24
+updated: 2026-08-25
 confidence: high
 ---
 
@@ -2318,6 +2319,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Educational overlay-only CS2 external starter bases such as [[cs2-external-base]] (UnnamedZ03; C++; team checks + box / health / distance / skeleton / text ESP outputs; overlay-side structure only—intentionally omits memory R/W driver components; external tooling architecture study; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/UnnamedZ03__CS2-external-base.md)
 - External CS2 ESP samples such as [[cs2external]] (Tokyodidit; C++; process memory reads; configurable JSON offsets; world-to-screen entity tracking; transparent Win32/GDI overlay—boxes, health bars, player names; cheat prototyping and practical memory analysis; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/Tokyodidit__cs2External.md)
 - External CS2 ESP samples such as [[cs2-external-esp]] (IMXNOOBX; C++ Visual Studio; out-of-process memory reads; handle hijacking; JSON config + offset maintenance scripts; GDI window overlay—boxes, names, health; external cheat architecture study; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/IMXNOOBX__cs2-external-esp.md)
+- External CS2 test projects such as [[hpcs2]] (Half-People; C++ Visual Studio; process memory utilities + handle hijacking helpers + CS2 module offset headers; INI-configured aim assistance, recoil control, and ESP-style rendering; educational cheat and anti-cheat behavior study; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/Half-People__HPCS2.md)
 - External CS2 framework samples such as [[tkazer-cs2-external]] (TKazer; C++; ESP variants, aimbot with RCS, triggerbot, radar, bunnyhop, visibility checks, offset management; external ImGui UI + process memory utilities; educational external cheat design and anti-cheat response research; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/TKazer__CS2_External.md)
 - Open-source external CS2 stacks such as [[vesta]] (Read1dno; C++23; no injection or kernel drivers; process-memory RPM + DX11 overlay ESP/chams/menus + external Windows input gateway; aimbot/triggerbot, grenade prediction, in-game radar, ballistics/penetration/collision simulation; sandboxed Lua 5.4 API for extensions such as web radar; external cheat architecture and CS2 client state reconstruction research; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/Read1dno__vesta.md)
 - External CS2 kernel-assisted samples such as [[ukia-rpm]] (M3351AN; C++; kernel driver RPM; DirectX 9 ImGui menu + overlay; aimbot/ESP/radar/recoil control + config persistence; RPM-based external cheat patterns + kernel driver game-memory comm research; cheat / game:cs2 [External]) also sit in the cheat / game:cs2 lane. (source: wiki/sources/descriptions/M3351AN__UkiaRPM.md)
