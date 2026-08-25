@@ -2217,6 +2217,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nvidia-rtx-godot](entities/nvidia-rtx-godot.md) — NVIDIA RTX fork of Godot Engine (RTX rendering-server/editor/scene-tree optimizations; ray tracing; Game Engine / source)
 - [mergen](entities/mergen.md) — binary lifting framework (assembly→LLVM IR; symbolic exec, CFG recovery, deobfuscation/devirtualization; C/C++; protected game-binary RE; NaC-L)
 - [Netview](entities/netview.md) — AD domain host enumeration (`-d` current/specified domain; AC/IS forensics)
+- [NetworkTimeSync](entities/network-time-sync.md) — UE plugin: accurate server world time sync for multiplayer clients (C++ subsystem; Blueprint-compatible; drop-in; reduces clock drift; Erlite; Plugins:Unreal)
 - [NFD x64dbg](entities/nfdx64dbg.md) — x64dbg plugin: Nauz File Detector static scan tab (compiler/packer/protector ID; C++/Qt; Cheat x64dbg Plugins)
 - [Nauz File Detector](entities/nauz-file-detector.md) — standalone NFD: signature-based packer/compiler/protector/linker ID for PE/ELF/Mach-O+; C++/Qt GUI+CLI; binary triage
 - [NimicStack](entities/nimic-stack.md) — pure Nim call-stack spoofing (WithSecure Labs PoC lineage; mimic legitimate program stacks; Cheat Spoof Stack)

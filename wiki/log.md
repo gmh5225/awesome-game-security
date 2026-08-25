@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Erlite/NetworkTimeSync`: entity [[network-time-sync]] (Erlite; UE plugin; C++ subsystem; Blueprint-compatible server world time sync; drop-in install; reduces client clock drift for latency-sensitive multiplayer simulation/events; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[multiplayer-blaster-game]], [[unreal-network-profiler]], [[game-networking-resources]], [[lightyear]], and [[kcp]].
+
 - **2026-08-25** — ingest `description:Eronana/packer`: entity [[eronana-packer]] (Eronana; basic Win32 x86 PE packer; C++ + companion compression; Visual Studio solution + CLI usage; self-validation extension branch; PE packing / binary protection / unpacking research education; Anti Cheat → Binary Packer `[PE X86]`; slug disambiguated from [[packer]]); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[packer]], [[exe-packer]], [[hm-pe-packer]], [[packer-tutorial]], [[unpacker]], and [[awesome-executable-packing]].
 
 - **2026-08-25** — ingest `description:Eruditi/CE-MCP-Plugin`: entity [[ce-mcp-plugin]] (Eruditi; C + Lua CE plugin; async TCP AI command channel; memory R/W, value freeze, disasm/asm, process management, DLL injection; non-blocking remote control for game memory research; cheat / MCP for Cheat Engine); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[cheatengine-mcp-bridge]], [[dsh-cheatengine]], and [[memmcp]].
