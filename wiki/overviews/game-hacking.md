@@ -1638,6 +1638,7 @@ sources:
   - wiki/sources/descriptions/HexRaysSA__rax.md
   - wiki/sources/descriptions/HexRaysSA__ida-cyberchef.md
   - wiki/sources/descriptions/HexRaysSA__ida-claude-code-plugins.md
+  - wiki/sources/descriptions/Gezine__BD-UN-JB.md
 updated: 2026-08-25
 confidence: high
 ---
@@ -2527,6 +2528,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android Eden-based Switch emulator [[opensw]] (RemiPelloux; C++/Kotlin; dynarmic ARM64 JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel + performance diagnostics; Profile build automation bridge; AYN Thor profile; Nintendo Switch / mobile-emulator crossover) sits in the same lane. (source: wiki/sources/descriptions/RemiPelloux__OpenSw.md)
 - PS5 Linux boot via [[ps5-linux-loader]] (kernel/HV exploits, IOMMU setup, GPU init, TMR handling; custom bootloader payload) sits in the console `PlayStation` HV research lane. (source: wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md)
 - WebKit CSSFontFace UAF chain via [[cssfontface-exploit]] (PS4/PS5 browser userland R/W; PS4 6.00–11.02, kernel chain 7.00–11.02; PS5 needs separate ASLR/vtable defeat) sits in the same `PlayStation` jailbreak / WebKit research lane. (source: wiki/sources/descriptions/ntfargo__CSSFontFace-Exploit.md)
+- BD-J jailbreak tooling via [[bd-un-jb]] (Gezine; BD-J xlet payloads + `jdk.internal.misc.Unsafe` code execution; C `bdj_unpatch` BDMV manipulation; Python log client; BD-JB RemoteJarLoader for jailbroken PS5 ≤12.00 — unpatch BD-J, ISO, network JAR load/logging; PlayStation exploit-chain + BD-J sandbox-escape research) sits in the same `PlayStation` BD-J jailbreak lane beside WebKit chains. (source: wiki/sources/descriptions/Gezine__BD-UN-JB.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
 - PS4 Orbis Ghidra extension via [[ghidra-orbis]] (loaders, analyzers, scripts, syscall/NID mapping; symbol recovery; Java/Gradle; Orbis OS file formats) sits in the same `PlayStation` / Cheat Ghidra Plugins lane beside [[ida-ps4-helper]]. (source: wiki/sources/descriptions/astrelsky__GhidraOrbis.md)
 - PS5 ELF loader/analysis in IDA via [[ida-ps5-elf-plugin]] (PS5-specific ELF extensions, segment types, dynamic linking; game/system binaries; console security RE) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/gmh5225__ida_ps5_elf_plugin.md)
