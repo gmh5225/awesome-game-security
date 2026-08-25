@@ -20,4 +20,4 @@ Sits in the **`MmCopyMemory` bypass study** lane beside educational hook telemet
 
 ## Related
 
-[[simple-mmcopymemory-hook]] · [[efi-monitor]] · [[callmewin32kdriver]] · [[badeye]] · [[remap]] · [[driver-kdtour]] · [[readphys]] · [[ksldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[simple-mmcopymemory-hook]] · [[efi-monitor]] · [[callmewin32kdriver]] · [[badeye]] · [[remap]] · [[map-page]] · [[driver-kdtour]] · [[readphys]] · [[ksldump]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]

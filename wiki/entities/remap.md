@@ -20,4 +20,4 @@ Sits in the protected-process access lane beside MDL/CR3 helpers such as [[meme-
 
 ## Related
 
-[[meme-rw]] · [[ks-dumper]] · [[ntmemory]] · [[driver-read-write]] · [[memmap]] · [[byovd]] · [[super-people-sdk]] · [[veiled-experts-sdk]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
+[[meme-rw]] · [[ks-dumper]] · [[ntmemory]] · [[driver-read-write]] · [[memmap]] · [[byovd]] · [[map-page]] · [[mm-copy-memory]] · [[super-people-sdk]] · [[veiled-experts-sdk]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[overviews/game-hacking]]
