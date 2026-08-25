@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FastVM/minivm`: entity [[minivm]] (FastVM; small optimizing VM + JIT runtime; C11 + Cuik TB codegen; Lua tests/benchmarks; GNU Make; desktop + WASM; VM/compiler/runtime performance experimentation); cited on [[overviews/reverse-engineering]]; cross-linked [[q3vm]], [[bytecodevm]], [[x64-virtualizer-rs]], [[covirt]], and [[vmp-devirtualization-lab]].
+
 - **2026-08-25** — ingest `description:Fatmike-GH/Fatpack`: entity [[fatpack]] (Fatmike-GH; C++ Windows x64 PE packer; LZMA compression + custom loader stub; resource/section packing; icon/manifest; relocation/import/TLS; helper tooling for stub embed + post-build integration; executable protection research / manual-map loader experimentation; Anti Cheat → Binary Packer); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[hm-pe-packer]], [[atom-pe-packer]], [[pe-packer]], [[exe-packer]], [[evader]], [[tinyload]], [[packer-tutorial]], and [[unpacker]].
 
 - **2026-08-25** — ingest `description:Fewnity/Counter-Strike-DS-Unity-Project`: entity [[counter-strike-ds-unity-project]] (Fewnity; Unity tooling workspace for DS Counter-Strike demake; map/collision/stair/culling/shadow/bomb/trigger export; pathfinding waypoints and matrices; scene-based gun-sprite pipeline; DS-compatible content iteration outside core game code; cheat / Unity CS); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[counter-strike-nintendo-ds]] and [[counter-strike2-sdk]].

@@ -2111,6 +2111,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
 - [minivers](entities/minivers.md) — pre-modification backup copies for monitored files (change/delete/rename; AC / backup-file)
+- [minivm](entities/minivm.md) — small optimizing VM + JIT runtime (C11 + Cuik TB codegen; Lua tests/benchmarks; GNU Make; desktop + WASM; VM/compiler/runtime performance experimentation; FastVM)
 - [Mjölnir (Mj-lnir)](entities/mj-lnir.md) — Windows self-hosted studio AC (C++ core + Rust agent/server; observe-only default; Tauri dashboard)
 - [misc](entities/misc.md) — Genshin Impact Decode CFG (Rust/Python; RE / shader / rendering; khang06)
 - [Minetest](entities/minetest.md) — Luanti voxel engine (Lua mod API; Irrlicht/SDL2; procedural worlds + multiplayer; Game Engine / source)
