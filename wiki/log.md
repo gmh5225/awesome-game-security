@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GJDuck/e9patch`: entity [[e9patch]] (GJDuck; static binary rewriting for x86-64 Linux ELF; instruction punning + eviction; insert jumps/trampolines/instrumentation at any instruction without reassembly; offline instrumentation / RE); cited on [[overviews/reverse-engineering]] and [[concepts/dynamic-binary-instrumentation]]; cross-linked [[stitch]], [[neverd]], [[nocturne]], and [[mambo]].
+
 - **2026-08-25** — ingest `description:GLX-ILLUSION/valorant-offsets-autoupdater`: entity [[valorant-offsets-autoupdater]] (GLX-ILLUSION; C++ Visual Studio; JSON offset data + network fetch; adapts existing updater pattern; refresh Valorant memory offsets after patches without full loader rebuild; cheat / game:valorant [Offset]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[valorant-offsets]], [[valorant-externals]], [[valorant-dumper]], [[dota2-overlay-offset-updater]], and [[r6-updater]].
 
 - **2026-08-25** — ingest `description:GLips/Figma-Context-MCP`: entity [[figma-context-mcp]] (GLips; Framelink MCP for Figma / Cursor Talk To Figma MCP server; TypeScript; simplified design metadata + referenced image download; stdio/HTTP transports; model-friendly layout/style context from Figma API; design-to-code UI automation; Game Develop / MCP server); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[blender-mcp]], [[unity-mcp]], and [[deepwiki-mcp]].

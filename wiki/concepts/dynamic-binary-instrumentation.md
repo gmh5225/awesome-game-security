@@ -10,6 +10,7 @@ sources:
   - wiki/sources/descriptions/momo5502__vmtrace.md
   - wiki/sources/descriptions/ZehMatt__CovCane.md
   - wiki/sources/descriptions/WaterlooBridge__adbi.md
+  - wiki/sources/descriptions/GJDuck__e9patch.md
   - wiki/sources/descriptions/GlacierW__MBA.md
 updated: 2026-08-25
 confidence: high
@@ -18,6 +19,8 @@ confidence: high
 # Dynamic Binary Instrumentation
 
 **DBI** modifies or observes program behavior at runtime without recompiling the target. In game-security RE, DBI supports API hooking, coverage measurement, fuzz harness creation, behavioral analysis, and tracing of driver IOCTLs and kernel callbacks. (source: wiki/sources/skills/reverse-engineering.md)
+
+Offline **static binary rewriting** on Linux ELF via [[e9patch]] can insert jumps, trampolines, and probes at arbitrary instructions without reassembly—useful when runtime DBI is blocked or when preparing instrumented binaries ahead of execution. (source: wiki/sources/descriptions/GJDuck__e9patch.md)
 
 ## Full frameworks
 
@@ -54,4 +57,4 @@ WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID i
 
 ## Related
 
-[[frida]] · [[adbi]] · [[tinyinst]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[e9patch]] · [[frida]] · [[adbi]] · [[tinyinst]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
