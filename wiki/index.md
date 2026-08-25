@@ -44,7 +44,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Research Rigor](concepts/research-rigor.md) — evidence discipline; pair with domain overviews; engine/mobile offset verification
 - [Source NetVars](concepts/source-netvars.md) — ClientClass/RecvTable offset maps; CreateInterface exports (Source 1/2)
 - [Stack Spoofing](concepts/stack-spoofing.md) — synthetic return stacks vs RtlWalkFrameChain / unwind validation
-- [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; GObjects/GNames/GWorld; Dumper-7 SDK workflow
+- [Unreal Object Model](concepts/unreal-object-model.md) — UObject hierarchy; GObjects/GNames/GWorld; [[dumper-7]] SDK workflow
 - [Vanguard](concepts/vanguard.md)
 - [World-to-Screen](concepts/world-to-screen.md) — 3D view-matrix projection for ESP and aim FOV math
 - [Zygisk](concepts/zygisk.md) — Magisk zygote specialization hooks; early inject before Application.onCreate
@@ -865,6 +865,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dump-val-exception-handler](entities/dump-val-exception-handler.md) — Valorant exception handler registration + VEH chain dump (`RtlpCallVectoredHandlers`; Vanguard RE; gmh5225)
 - [DumpVAC](entities/dumpvac.md) — PoC to disable VAC module execution and dump received modules with automatic decryption (RenardDev; Steam/module-loading hooks; C/C++; explore anticheat:vac)
 - [DumpPE](entities/dumpepe.md) — lightweight CLI PE dumper (OpenProcess/RPM; SizeOfImage mapped-image dump; x86/x64; packed/protected EXE post-unpack RE; d35ha)
+- [Dumper-7](entities/dumper-7.md) — C++ UE4/UE5 SDK generator (Encryqed; in-process DLL inject; engine structure/offset discovery; generated C++ headers; configurable overrides; cheat / SDK Dump for all of UE4 and UE5)
 - [dumpwow](entities/dumpwow.md) — WoW client module unpacker (gmh5225 fork; C++/Python; namreeb lineage; cheat / game:wow)
 - [dumpy](entities/dumpy.md) — Rust LSASS dump via duplicated existing handles (native object/system APIs; XOR output + optional HTTP upload; detection-evasion research; Kudaes; Elevating Handle By LSASS)
 - [dynre-x86](entities/dynre-x86.md) — early x86 dynamic-recompilation learning codebase (C++; Zydis decode/operand inspect; Makefile + Docker; instruction-decoding / binary-translation pipeline study)
