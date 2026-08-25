@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Genymobile/genymotion-kernel`: entity [[genymotion-kernel]] (Genymobile; Linux kernel source for Genymotion Android emulator; full tree with Android configs and virtual-device patches; emulator developers and virtualized Android kernel RE; cheat / Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[scrcpy]], [[android-emulator]], and [[android-emulator-detection]].
+
 - **2026-08-25** — ingest `description:Genymobile/scrcpy`: entity [[scrcpy]]; cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[qtscrcpy]], [[lamda]], and [[droidrun]].
 
 - **2026-08-25** — ingest `description:GetRektBoy724/DCMB`: entity [[dcmb]] (GetRektBoy724; C kernel driver; dynamic callback-list discovery for process/thread/image/registry/object/minifilter notify without hardcoded offsets or signatures; debug-output learning PoC; AC/EDR/callback inspection research; README Removing kernel callbacks); cited on [[concepts/kernel-callbacks]] and [[overviews/windows-kernel]]; cross-linked [[kpdb]], [[win32khooker]], [[bustercall]], [[ps-notif-routine-unloader]], and [[kernel-callback-removal]].

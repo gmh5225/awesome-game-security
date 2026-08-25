@@ -1360,6 +1360,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [genshin-impact-script](entities/genshin-impact-script.md) — TypeScript Genshin Impact script (cheat / game:genshin impact)
 - [genshinjumpfixer2](entities/genshinjumpfixer2.md) — Genshin Impact Decode CFG (jump-target calc + code simplify; khang06)
 - [genshin-remove-banner](entities/genshin-remove-banner.md) — C++ Genshin Impact in-game banner removal (cheat / game:genshin impact; gmh5225)
+- [genymotion-kernel](entities/genymotion-kernel.md) — Genymotion Android emulator Linux kernel source (full tree; Android configs + virtual-device patches; emulator dev and virtualized Android kernel RE; Genymobile)
 - [grasscutter](entities/grasscutter.md) — Genshin Impact open-source private-server emulator (Java; server logic, progression, world simulation, network protocol; Grasscutters)
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
 - [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
