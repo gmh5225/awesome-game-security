@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GlacierW/MBA`: entity [[glacierw-mba]] (GlacierW; QEMU Malware Behavior Analyzer; whole-system dynamic binary analysis; memory forensics, API tracing, behavioral monitoring; Windows/Linux guests; full QEMU + instrumentation; malware analyst / security researcher introspection; Cheat QEMU/KVM / DBI); cited on [[dynamic-binary-instrumentation]] and [[overviews/reverse-engineering]]; cross-linked [[panda]], [[ispras-qemu]], [[pyda]], and [[smallworld]].
+
 - **2026-08-25** — ingest `description:GliTcHZzZ67/mast-orchestrator`: entity [[mast-orchestrator]] (GliTcHZzZ67; Flask web dashboard; ADB device discovery, root verification, one-click arch-matched frida-server deploy, whitelisted SSL pinning/root/crypto hooks, GitHub Raw/Codeshare script fetch, live browser hook output, token-auth API; mobile app security testing / Android Frida automation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[rootraven]], [[frida-ide]], and [[mobile-anti-cheat]].
 
 - **2026-08-25** — ingest `description:Goatman13/ps2_ida_vu_micro`: entity [[ps2-ida-vu-micro]] (Goatman13; IDA Python plugin; PS2 VU microcode search/disassembly; manual ranges + VIF MPG auto-discovery; vector-unit program RE; branch-target reconstruction limits; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-ps4-helper]], [[ida-ps5-elf-plugin]], [[idaplugins]], and [[ida-plugins]].

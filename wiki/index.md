@@ -1266,6 +1266,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gan-aimbots](entities/gan-aimbots.md) — Miffyli academic ML-aimbot research (Python; ViZDoom; data collection, GAN training/evaluation, classifier plots, experiment orchestration; cheat generation + detection research; cheat / Machine Learning)
 - [garble](entities/garble.md) — Go build-time obfuscator (wraps `cmd/go`; identifier/path hash rename, metadata strip, optional literals, tiny mode, experimental CFF; `garble reverse`; AC Obfuscation Engine)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
+- [GlacierW MBA (Malware Behavior Analyzer)](entities/glacierw-mba.md) — QEMU whole-system dynamic binary analysis (memory forensics, API tracing, behavioral monitoring; Windows/Linux guests; GlacierW; Cheat QEMU/KVM / DBI)
 - [Glass](entities/glass.md) — Rust multi-arch binary analysis toolkit (ARM64/x86-64; ELF/Mach-O/DEX/PE; disasm/CFG/xrefs/patch; built-in MCP for mobile RE; `glass mcp`)
 - [GhostJoin](entities/ghostjoin.md) — pure Python headless Minecraft Java protocol client (stdlib Handshake→Login→Configuration→Play; offline-mode UUID, compression, Keep Alive; protocol ~773–776; authorized anti-bot/anti-cheat stress testing; KuryCat; cheat / game:minecraft)
 - [GhostLock App](entities/ghostlock-app.md) — Android one-tap root (CVE-2026-43499 pselect race; NDK + Java UI; Rust boot/OTA offset extractor; per-kernel JSON; KernelSU/ReSukiSU; cheat / Android root)

@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/momo5502__vmtrace.md
   - wiki/sources/descriptions/ZehMatt__CovCane.md
   - wiki/sources/descriptions/WaterlooBridge__adbi.md
-updated: 2026-08-19
+  - wiki/sources/descriptions/GlacierW__MBA.md
+updated: 2026-08-25
 confidence: high
 ---
 
@@ -29,6 +30,7 @@ confidence: high
 | [[mambo]] | ARM/AArch64 Linux DBI; software code cache; instruction/block/function hooks |
 | [[pyda]] | QEMU user-mode Python DBI |
 | [[panda]] | Whole-system QEMU DBI |
+| [[glacierw-mba]] | QEMU Malware Behavior Analyzer; memory forensics, API tracing, behavioral monitoring (Windows/Linux guests) |
 | [[covcane]] | Experimental Windows x86-64 DBI; loader + runtime; Zydis + AsmJIT |
 | [[adbi]] | Android ARM/Thumb DBI; hijack injector + inline entry hooks; NDK sample instruments |
 
@@ -52,4 +54,4 @@ WHP API runs guest code snippets with EPT-equivalent page traps (R/W/X), CPUID i
 
 ## Related
 
-[[frida]] · [[adbi]] · [[tinyinst]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
+[[frida]] · [[adbi]] · [[tinyinst]] · [[river]] · [[mambo]] · [[covcane]] · [[cpp-veh-dbi]] · [[w1tn3ss]] · [[pyda]] · [[panda]] · [[glacierw-mba]] · [[vmtrace]] · [[winvisor]] · [[hyper-rev]] · [[ripr]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]]
