@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GToad/Android_Inline_Hook_ARM64`: entity [[android-inline-hook-arm64]] (GToad; native ARM64 Android inline hooking framework; C/C++/ARM64 asm + NDK build; pure inline trampolines + register-level handler examples; mobile RE / native function interception; Android ARMv8 inline hook framework); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[and64-inline-hook]], [[dobby]], [[adbi]], and [[pyasm-patch]].
+
 - **2026-08-25** — ingest `readme:categories`: Anti Cheat ~691 (+1; InertiaOrg/Inertia version-neutral Minecraft AC foundation with movement/packet modeling and evidence accumulation; other major section counts stable); entity [[inertia]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-25** — ingest `description:GameCrashProject/UE4-Hacking-Guideline`: entity [[ue4-hacking-guideline]] (GameCrashProject; research-oriented UE4 security methodology; Markdown chapters on engine background, attack vectors, tooling, build setup, and analysis process; systematic engine-level vulnerability study for students and security researchers; Game Engine / Unreal guide); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[unreal-source-explained]], [[unreal-development-guides-and-tips]], [[unreal-object-model]], and [[unreal-engine-protection]].
