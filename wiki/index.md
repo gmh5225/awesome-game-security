@@ -99,6 +99,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bedaisy-reversal](entities/bedaisy-reversal.md) — BEDaisy.sys comprehensive RE (integrity/callback/HAL/manual-map checks, handle protection, minifilter, physmem scan, CSRSS/graphics verify, thread/image notify; dllcrt0)
 - [BepInEx-IL2CPPBase](entities/bepinex-il2cppbase.md) — BepInEx Unity IL2CPP mod-menu base (C# rendering/audio/physics hooks; cheat / IL2CPP Menu; gmh5225)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
+- [BattlEye User-Mode Bypass](entities/battleye-user-mode-bypass.md) — C++ Visual Studio PoC; CreateFileW hook + file-check masquerade; historical UM BE loading-path bypass (HadockKali; SetWindowsHookExW)
 - [Battleye Shellcode Dumper](entities/battleye-shellcode-dumper.md) — intercept BE server-streamed runtime shellcode + keys pre-execution (BEClient2.dll Dumper)
 - [Battleye-VAC-EAC-Kernel-Bypass](entities/battleye-vac-eac-kernel-bypass.md) — kernel driver; process hide + IOCTL R/W via FSFilter/registry/process callbacks (BattlEye/VAC/EAC bypass research; FsFilter Testing; daswareinfach)
 - [battleye-re](entities/battleye-re.md) — BEDaisy.sys RE reference (IOCTL/API/anti-DMA; PE layout, HAL verify, VM obfuscation; experienceds)
