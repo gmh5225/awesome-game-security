@@ -1238,6 +1238,7 @@ sources:
   - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
   - wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md
   - wiki/sources/descriptions/bromoket__x64dbg_mcp.md
+  - wiki/sources/descriptions/Elinam03__Signature-Forge.md
   - wiki/sources/descriptions/EliseZeroTwo__SEH-Helper.md
   - wiki/sources/descriptions/ElvisBlue__x64dbgpython.md
   - wiki/sources/descriptions/dnakov__radare2-mcp.md
@@ -2097,6 +2098,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Binary Ninja → IDA FLIRT `.pat` export via [[bndb2pat]] (Python; LLIL function patterns with wildcard operands, CRC16, named symbols; sigmake → `.sig` libraries for stripped-binary function ID; cheat / Binary Ninja Plugins) sits in the same signature / library-ID lane beside [[sig-database]]. (source: wiki/sources/descriptions/joren485__bndb2pat.md)
 - Binary Ninja byte-pattern signature maker via [[binja-sigmaker]] (Python; IDA-style wildcard signatures from disassembled functions; function-start fallback; plugin-manager packaging; cheat / Binary Ninja Plugins) sits in the same runtime signature-scan lane beside [[ida-sigmaker]] and [[bndb2pat]]. (source: wiki/sources/descriptions/apekros__binja_sigmaker.md)
 - Ghidra SPF-style byte signature helper via [[spf-ghidra-pattern-helper]] (Java GhidraScript; generate/search signatures in loaded binaries; Pattern Generator/Finder tabs; SPF-Framework PatternFinder-compatible output; wildcards/ranges/alternation; optional uniqueness verify; ATS/ETS2 plugin modding RE; TrackAndTruckDevs; cheat / Ghidra Plugins) sits in the same runtime signature-scan lane beside [[binja-sigmaker]] and [[ida-pro-sigmaker]]. (source: wiki/sources/descriptions/TrackAndTruckDevs__SPF_GhidraPatternHelper.md)
+- Standalone x86 wildcard signature workshop via [[signature-forge]] (Elinam03; Python FastAPI + React/Electron; parses x64dbg/Cheat Engine/raw hex disassembly; smart anchor scoring; multi-variant wildcard rules; exports AOB/mask/IDA Python/CE script/C header/x64dbg patterns; cheat / RE Tools) sits in the same runtime signature-scan lane beside [[sigmakerex]] and [[spf-ghidra-pattern-helper]]. (source: wiki/sources/descriptions/Elinam03__Signature-Forge.md)
 - Big5 byte decode in IDA via [[big5-decode-ida]] (Python; Traditional Chinese string view) sits in the Cheat IDA Plugins / encoding lane. (source: wiki/sources/descriptions/sean2077__big5-decode-ida.md)
 - CyberChef-style encode/decode/transformation pipelines in IDA via [[ida-cyberchef]] (HexRaysSA; Python + Qt; malware analysis / binary triage without leaving the disassembler; cheat / IDA Plugins) sits in the same in-IDA data-manipulation lane beside [[big5-decode-ida]]. (source: wiki/sources/descriptions/HexRaysSA__ida-cyberchef.md)
 - Hex-Rays enum management via [[ida-enums-helper]] (hotkey **N** rename member / **A** add to enum / **Shift-A** append to last enum; `tinfo_t` ordinal chooser) sits in the Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/milankovo__ida_enums_helper.md)

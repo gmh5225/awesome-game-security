@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:Elinam03/Signature-Forge`: entity [[signature-forge]] (Elinam03; Python FastAPI + React/Electron desktop app; intelligent x86 wildcard byte signatures from disassembly; x64dbg/Cheat Engine/raw hex input; anchor stability scoring; AOB/mask/IDA Python/CE script/C header/x64dbg export; RE / pattern-scan workflows; cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[sigmakerex]], [[ida-pro-sigmaker]], [[binja-sigmaker]], [[spf-ghidra-pattern-helper]], [[patternsleuth]], [[x64dbg]], and [[cheat-engine]].
+
 - **2026-08-25** — ingest `description:seifreed/xrefgen`: entity [[xrefgen]] (seifreed; Python IDA Pro plugin; high-confidence indirect/complex control-flow xref generation; Mandiant XRefer workflow extension; data-flow taint, call-graph, CFF/opaque-predicate detection; confidence-scored XRefer export; x86/x64/ARM/ARM64/MIPS/WASM; packed/obfuscated game-client RE); cited on [[overviews/reverse-engineering]] (CFF recovery table + IDA xref tools) and [[concepts/control-flow-flattening]] (heuristic detection); cross-linked [[find-xrefs]], [[xrefsext]], [[obfuscation-detection]], [[opaque-predicates-detective]], and [[dragonhook]].
 
 - **2026-08-25** — ingest `readme:categories`: Cheat ~2749 (+1; seifreed/xrefgen IDA Pro indirect/complex control-flow xref generator with XRefer-compatible output in Cheat > RE Tools; other major section counts stable); entity [[xrefgen]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
