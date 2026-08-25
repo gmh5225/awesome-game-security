@@ -2251,6 +2251,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [nokd](entities/nokd.md) — stealth kernel debugger protocol (local KdDebuggerDataBlock decode → WinDbg; no ntoskrnl KD globals)
 - [NoTruth (KelvinMsft)](entities/notruth.md) — VT-x/EPT user-mode memory deception; redirect reads to fake values while controlling execution; checksum/integrity bypass research; README Hide Memory By VT
 - [NovaHypervisor (Idov31)](entities/novahypervisor.md) — Defensive x64 Intel host hypervisor; kernel memory R/W/X policies; BYOVD mitigation; Windows driver + client + logging; anti-cheat / endpoint defense research
+- [NtCompareSigningLevel-hook](entities/ntcomparesigninglevel-hook.md) — ExpLife0011; C/C++ kernel driver + usermode; `NtCompareSigningLevels` function-pointer swap for covert KM↔UM comm; abandoned (PatchGuard); README [NtCompareSigningLevels]
 - [NTFS-EFI](entities/ntfs-efi.md) — native UEFI x64 NTFS R/W driver (EfiNtfs; EFI Commander pre-boot FM; chkdsk-clean unmount)
 - [ntfs-journal-viewer](entities/ntfs-journal-viewer.md) — NTFS `$UsnJrnl` change-journal viewer (C; AC / IS forensics)
 - [ntfs-linker](entities/ntfs-linker.md) — NTFS $MFT/$UsnJrnl/$LogFile timeline correlator (C++; DFIR)
