@@ -1381,6 +1381,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
 - [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
 - [ghostdebug](entities/ghostdebug.md) — Windows x64 VEH stealth debugger (native DLL + .NET CLI; named-pipe JSON; INT3/single-step without Win32 Debug API; Iced disasm; TestTarget anti-debug validation; VollRagm; cheat / debugging)
+- [Ghost Recon Wildlands First-Person (No EAC)](entities/ghost-recon-wildlands-first-person-no-eac.md) — first-person camera mod for Ghost Recon Wildlands via dxgi.dll proxy, ThunkHook, and in-process memory writes on current EAC builds (Firejumper93; AnvilNext 2.0; modding / RE)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)
 - [Generic Game Detour API Hook](entities/generic-game-detour-api-hook.md) — Modular Microsoft Detours AC-bypass framework (~130 API hooks / 16 modules; dinput8.dll proxy; x86/x64)
 - [Gepetto](entities/gepetto.md) — Python IDA Pro LLM plugin: explain decompiled functions + variable rename + comments; cloud/local providers; menu + hotkeys (JusticeRage; cheat / IDA Plugins / `[ChatGPT]`)
