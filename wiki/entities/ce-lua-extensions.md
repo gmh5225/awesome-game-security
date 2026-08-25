@@ -20,4 +20,4 @@ Primary use case is speeding up reverse engineering and live memory-analysis wor
 
 ## Related
 
-[[cheat-engine]] · [[controller-mode]] · [[unreal-engine-tools]] · [[mydev-cheat-engine-tables]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[cheat-engine]] · [[ce-extensions]] · [[controller-mode]] · [[unreal-engine-tools]] · [[mydev-cheat-engine-tables]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
