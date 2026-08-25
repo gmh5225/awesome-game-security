@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:FiYHer/InfinityHookPro`: entity [[infinityhook-pro]] (FiYHer; C/C++ VS; modernized InfinityHook kernel hooking Win7–Win11; version-specific offset handling; low-level internals + extensive comments; kernel security / AC / EDR RE; ETW Hook Ex); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]], [[infinityhook-promax]], [[infinityhook-latest]], and [[etwhook-infinityhookclass]].
+
 - **2026-08-25** — ingest `description:Firejumper93/Ghost-Recon-Wildlands-First-Person-No-EAC`: entity [[ghost-recon-wildlands-first-person-no-eac]] (Firejumper93; C++20 dxgi.dll proxy; byte signature scan + ThunkHook on AnvilNext 2.0 camera paths; first-person head-bone camera mod; in-process memory writes without EAC bypass; solo/co-op modding and AC coexistence research); cited on [[concepts/easy-anti-cheat]] and [[overviews/graphics-api]]; cross-linked [[dxwrapper]], [[direct3d9-overlay]], [[gameplug]], [[present-hook]], and [[windows-dll-hijacking]].
 
 - **2026-08-25** — ingest `description:FlaxEngine/FlaxEngine`: entity [[flax-engine]] (FlaxEngine; full-source C++/C# 3D game engine and editor; mixed native rendering/platform layers + .NET managed scripting; Vulkan; Windows/Linux/macOS; engine runtime, editor, build scripts; Game Engine / source [C++/C# 3D]); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[fyrox]], [[godot]], [[bevy]], [[open-source-engines]], and [[awesome-game-engine-dev]].

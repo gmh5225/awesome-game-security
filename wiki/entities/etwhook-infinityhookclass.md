@@ -21,4 +21,4 @@ Complements ETW syscall modding samples such as [[etw-syscall]], passive EtwTi l
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[etw-threat-intelligence]] · [[infinityhook]] · [[etw-syscall]] · [[etw-syscall-monitor]] · [[etwti-syscall-hook]] · [[instrumentation-callback-syscall-logger]] · [[hidden-syscall-monitoring]] · [[syscall-detect]]
+[[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[etw-threat-intelligence]] · [[infinityhook]] · [[infinityhook-promax]] · [[infinityhook-pro]] · [[infinityhook-latest]] · [[etw-syscall]] · [[etw-syscall-monitor]] · [[etwti-syscall-hook]] · [[instrumentation-callback-syscall-logger]] · [[hidden-syscall-monitoring]] · [[syscall-detect]]

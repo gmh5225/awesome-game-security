@@ -15,10 +15,11 @@ sources:
   - wiki/sources/descriptions/everdox__InfinityHook.md
   - wiki/sources/descriptions/ThomasonZhao__InfinityHookProMax.md
   - wiki/sources/descriptions/Oxygen1a1__InfinityHook_latest.md
+  - wiki/sources/descriptions/FiYHer__InfinityHookPro.md
   - wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md
   - wiki/sources/descriptions/Mr-Un1k0d3r__AMSI-ETW-Patch.md
   - wiki/sources/descriptions/Idov31__EtwLeakKernel.md
-updated: 2026-08-24
+updated: 2026-08-25
 confidence: high
 ---
 
@@ -45,7 +46,7 @@ Consumer-side **stack trace** fields can expose **kernel pointers** when provide
 - Research consumers without driver/PPL: [[threat-intelligence-consumer]] (Win11 24H2/25H2) (source: wiki/sources/descriptions/preludeorg__ThreatIntelligenceConsumer.md)
 - Syscall-return instrumentation samples such as [[etwti-syscall-hook]] extend the same TI / Instrumentation Callback research surface. (source: wiki/sources/descriptions/paranoidninja__EtwTi-Syscall-Hook.md)
 - User-mode EtwTi syscall monitors such as [[etw-syscall-monitor]] log SSNs, parameters, process/thread context, and stack traces in real time without kernel hooks or drivers — a syscall-behavioral detection reference for AC/EDR research. (source: wiki/sources/descriptions/jdu2600__Etw-SyscallMonitor.md)
-- Offensive ETW infrastructure manipulation for syscall interception — the original [[infinityhook]] library patches the ETW syscall trace callback pointer for transparent interception without SSDT or `ntoskrnl` inline hooks, operating through a legitimate ETW path that avoids typical PatchGuard triggers. (source: wiki/sources/descriptions/everdox__InfinityHook.md) C++ wrappers such as [[etwhook-infinityhookclass]] package the same technique for reuse. (source: wiki/sources/descriptions/gmh5225__ETWHOOK-InfinityHookClass.md) Successors such as [[infinityhook-promax]] extend the lineage with driver-oriented hook management, instruction disassembly, and multi-version Windows compatibility for kernel security and AC monitoring research. (source: wiki/sources/descriptions/ThomasonZhao__InfinityHookProMax.md) [[infinityhook-latest]] (Oxygen1a1) adapts the same InfinityHook-style ETW syscall interception to newer builds via HalPrivateDispatchTable callbacks and PMC/trace configuration without direct `Nt*` patches. (source: wiki/sources/descriptions/Oxygen1a1__InfinityHook_latest.md)
+- Offensive ETW infrastructure manipulation for syscall interception — the original [[infinityhook]] library patches the ETW syscall trace callback pointer for transparent interception without SSDT or `ntoskrnl` inline hooks, operating through a legitimate ETW path that avoids typical PatchGuard triggers. (source: wiki/sources/descriptions/everdox__InfinityHook.md) C++ wrappers such as [[etwhook-infinityhookclass]] package the same technique for reuse. (source: wiki/sources/descriptions/gmh5225__ETWHOOK-InfinityHookClass.md) Successors such as [[infinityhook-promax]] extend the lineage with driver-oriented hook management, instruction disassembly, and multi-version Windows compatibility for kernel security and AC monitoring research. (source: wiki/sources/descriptions/ThomasonZhao__InfinityHookProMax.md) [[infinityhook-latest]] (Oxygen1a1) adapts the same InfinityHook-style ETW syscall interception to newer builds via HalPrivateDispatchTable callbacks and PMC/trace configuration without direct `Nt*` patches. (source: wiki/sources/descriptions/Oxygen1a1__InfinityHook_latest.md) [[infinityhook-pro]] (FiYHer) modernizes InfinityHook kernel hooking across Win7–Win11 with version-specific offset maintenance and heavily commented low-level internals for AC and EDR reverse engineering research. (source: wiki/sources/descriptions/FiYHer__InfinityHookPro.md)
 
 ## Common bypass patterns
 
@@ -69,4 +70,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[infinityhook-pro]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
