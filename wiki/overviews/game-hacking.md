@@ -1237,6 +1237,7 @@ sources:
   - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
   - wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md
   - wiki/sources/descriptions/bromoket__x64dbg_mcp.md
+  - wiki/sources/descriptions/EliseZeroTwo__SEH-Helper.md
   - wiki/sources/descriptions/ElvisBlue__x64dbgpython.md
   - wiki/sources/descriptions/dnakov__radare2-mcp.md
   - wiki/sources/descriptions/radareorg__radius2.md
@@ -2063,6 +2064,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Hex-Rays P-Code display for the current function via [[idapcode]] (Python IDA plugin; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/binarly-io__idapcode.md)
 - Intel AVX→Hex-Rays microcode lifting via [[microavx]] (IDA Pro plugin; `m_ext` opcode visitor; decompiles AVX-heavy functions that otherwise show opaque ext nodes; companion scraper for coverage gaps; cheat / IDA Plugins / AVX Lifter) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gaasedelen__microavx.md)
 - Hex-Rays decompiler convenience utilities via [[happyida]] (IDAPython; Swift-style parameter labels, SEH try/catch reconstruction, vtable navigation, Rust string prettification; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/gmh5225__HappyIDA.md)
+- Binary Ninja PE SEH chain inspection via [[seh-helper]] (Python; list SEH entries, inspect cursor handler, follow cursor context; Windows exception metadata visibility for protected client/malware static RE; EliseZeroTwo) sits in the Cheat Binary Ninja Plugins / Windows PE lane beside [[happyida]] and [[tanto]]. (source: wiki/sources/descriptions/EliseZeroTwo__SEH-Helper.md)
 - Hex-Rays WPP trace-call cleanup via [[ida-wpp-remover]] (L4ys; Python; microcode pass strips `WPP_SF*` instrumentation noise from Windows PE pseudocode; toggle from decompiled view; clearer malware/game client RE; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/L4ys__IDA-WPP-Remover.md)
 - Comprehensive Hex-Rays RE helper suite via [[hrtng]] (KasperskyLab; C++; variable rename, auto-comments, pseudocode recast, string/data decrypt, CFF unflatten, de-inlining, API-hash scan, microcode sigs, virtual/indirect call assist, patching; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / Hex-Rays lane. (source: wiki/sources/descriptions/KasperskyLab__hrtng.md)
 - Nonstandard calling-convention retagging and tuple-like multi-return struct generation for Swift/Golang/fastcall via [[swift-ida]] (Python IDA plugin; context-menu actions; modern language runtime/ABI RE; ViRb3; cheat / IDA Plugins) sits in the same Cheat IDA Plugins / language-ABI lane beside [[happyida]], [[golang-loader-assist]], and [[goresym]]. (source: wiki/sources/descriptions/ViRb3__swift-ida.md)
