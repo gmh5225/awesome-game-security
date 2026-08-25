@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:ElvisBlue/emotet-deobfuscator`: entity [[emotet-deobfuscator]] (ElvisBlue; Python IDA Hex-Rays plugin; Emotet CFF deobfuscation via microcode API; dispatcher register/status identification; flattened branch rewrite + dispatch cleanup; malware/RE workflows; IDA plugin to deobfuscate emotet CFF); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[hex-rays-deob]], [[hrtng]], [[d810-ng]], [[pikabot-deobfuscator]], and [[x64dbgpython]].
+
 - **2026-08-25** — ingest `description:ElvisBlue/x64dbgpython`: entity [[x64dbgpython]] (ElvisBlue; C++ x64dbg plugin; Python 3 scripting; Python-friendly plugin SDK wrappers; memory/assembly/module/GUI example scripts; x86/x64 debugger automation; Running python3 script); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-automate-pyclient]], [[x64dbg-playtime]], [[chaiscript-plugin]], and [[dotx64dbg]].
 
 - **2026-08-25** — ingest `description:EmbarkStudios/kajiya`: entity [[kajiya]] (EmbarkStudios; experimental real-time global illumination renderer; Rust engine + Vulkan backend + HLSL hybrid rasterization/compute/ray-tracing; dynamic GI without prebaked probes, temporal reconstruction, RT shadows/reflections, reference path-tracing validation; advanced rendering research; README `[Experimental real-time global illumination renderer]`); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[strolle]], [[spartan-engine]], [[source-renderer]], [[d3d12renderer]], and [[explosion]].

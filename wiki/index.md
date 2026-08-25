@@ -1045,6 +1045,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [elobuddy-addons](entities/elobuddy-addons.md) — EloBuddy LoL addon scripts (champion automation; orbwalker; skill-shot prediction; utility modules; gmh5225; cheat / game:lol)
 - [Embuche](entities/embuche.md) — ELF anti-reversing technique collection (Anti Cheat → Binary Packer `[ELF]`)
 - [emulator](entities/emulator.md) — Unicorn+Capstone debugger-emulator hybrid (PE load; dbghelp imports; API hooking; instruction logging; Windows User Space Emulator)
+- [emotet-deobfuscator](entities/emotet-deobfuscator.md) — Emotet CFF deobfuscation (ElvisBlue; Python IDA Hex-Rays plugin; microcode API; dispatcher register/status ID + block transition rewrite; cheat / IDA plugin to deobfuscate emotet CFF)
 - [encrypted_value](entities/encrypted-value.md) — C++ header-only scalar value encrypt (Anti Cheat → Encrypt Variable)
 - [eneio64-driver-exploit](entities/eneio64-driver-exploit.md) — `eneio64.sys` educational physmem BYOVD PoC (VA translation + token-theft LPE; modern Windows offsets; Xacone)
 - [enum-real-dirbase](entities/enum-real-dirbase.md) — WDK kernel driver PoC; PFN database walk to enumerate real process CR3/dirbase from physical memory (Rythorndoran; Find real dirbase)
