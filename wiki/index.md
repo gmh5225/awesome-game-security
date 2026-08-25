@@ -1394,6 +1394,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [grasscutter](entities/grasscutter.md) — Genshin Impact open-source private-server emulator (Java; server logic, progression, world simulation, network protocol; Grasscutters)
 - [ghost](entities/ghost.md) — Rust cross-platform process injection detector (RWX, shellcode, hooks, hollowing, threads; CLI/TUI; Detection:Injection)
 - [ghostbusters](entities/ghostbusters.md) — C++ senior-design modding-oriented anti-cheat detection system (Anti Cheat / guide; gmh5225)
+- [GhostVEH](entities/ghostveh.md) — C++ PoC stealth VEH chain manipulation (EvilBytecode; direct `LdrpVectorHandlerList` edit via `LdrProtectMrdata`; RtlEncodePointer/RtlDecodePointer; bypasses RtlAddVectoredExceptionHandler; VEH internals / anti-debug research)
 - [ghostdebug](entities/ghostdebug.md) — Windows x64 VEH stealth debugger (native DLL + .NET CLI; named-pipe JSON; INT3/single-step without Win32 Debug API; Iced disasm; TestTarget anti-debug validation; VollRagm; cheat / debugging)
 - [Ghost Recon Wildlands First-Person (No EAC)](entities/ghost-recon-wildlands-first-person-no-eac.md) — first-person camera mod for Ghost Recon Wildlands via dxgi.dll proxy, ThunkHook, and in-process memory writes on current EAC builds (Firejumper93; AnvilNext 2.0; modding / RE)
 - [GenericGraph](entities/generic-graph.md) — UE4 generic graph data-structure plugin (editor tooling / asset pipelines; Plugins:Unreal)

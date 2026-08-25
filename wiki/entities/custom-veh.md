@@ -12,7 +12,7 @@ confidence: medium
 
 Library for registering **custom Vectored Exception Handlers (VEH)** by hooking ntdll's internal `RtlpCallVectoredHandlers`. Handlers registered through this path are faster than standard `AddVectoredExceptionHandler` registrations and run **before** vanilla VEH entries—useful when studying or building Windows Ring3 exception-dispatch / callback ordering in anti-cheat and defensive security research. (source: wiki/sources/descriptions/gmh5225__custom-VEH.md)
 
-Complements standard VEH tooling such as [[veh]] (software debugger without the Debug API), VEH-chain dumpers such as [[veh-dumper]], and page-protection / VEH interception samples such as [[veh-printf-hook]] and [[veh-hide-memory]].
+Complements standard VEH tooling such as [[veh]] (software debugger without the Debug API), VEH-chain dumpers such as [[veh-dumper]], direct `LdrpVectorHandlerList` manipulation such as [[ghostveh]], and page-protection / VEH interception samples such as [[veh-printf-hook]] and [[veh-hide-memory]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements standard VEH tooling such as [[veh]] (software debugger without the 
 
 ## Related
 
-[[veh]] · [[veh-dumper]] · [[veh-printf-hook]] · [[veh-hide-memory]] · [[cpp-veh-dbi]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
+[[veh]] · [[veh-dumper]] · [[ghostveh]] · [[veh-printf-hook]] · [[veh-hide-memory]] · [[cpp-veh-dbi]] · [[overviews/anti-cheat]] · [[overviews/reverse-engineering]]
