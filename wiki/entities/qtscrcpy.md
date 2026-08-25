@@ -18,4 +18,4 @@ confidence: medium
 
 ## Related
 
-[[lamda]] · [[droidrun]] · [[adb-file-manager]] · [[android-terminal-emulator]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[scrcpy]] · [[lamda]] · [[droidrun]] · [[adb-file-manager]] · [[android-terminal-emulator]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]

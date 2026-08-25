@@ -2760,6 +2760,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sbox](entities/sbox.md) — C++ compile-time AES-128 / S-box string obfuscation (Obfusk8 spin-off)
 - [scc](entities/scc.md) — open-source shellcode compiler (Vector35; C/C++ CMake; compact PIC output; Binary Ninja integration; internal CTF origin; shellcode compiler / exploit-dev codegen)
 - [scfw](entities/scfw.md) — cross-platform C++ Windows shellcode framework (AC shellcode engine & tricks)
+- [scrcpy](entities/scrcpy.md) — upstream Android screen mirror/control over USB/TCP (C/Java; audio, recording, virtual display, HID input; low latency; no root; Genymobile)
 - [screencapture](entities/screencapture.md) — Windows DXGI Desktop Duplication capture library (C++/C#; multi-monitor GPU copy; `[DX11]`)
 - [screenshot](entities/screenshot.md) — Windows capture-method comparison (BitBlt/DDA/PrintWindow/DWM; AC screenshot research; README `[BitBlt]`; gmh5225)
 - [screenshot-detection-bypass](entities/screenshot-detection-bypass.md) — C++ PoC; gdi32 BitBlt hook returns clean frame to AC screenshot pipelines; class-based hook; educational capture-hook evasion (Mes2d; README `[BitBlt]`)
