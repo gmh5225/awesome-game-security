@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-25** — ingest `description:GetRektBoy724/KPDB`: updated entity [[kpdb]] (GetRektBoy724 pure C kernel-mode PDB parser; symbol+type stream handling; runtime debug-info parse avoids brittle offsets/sig scans; kernel RE / AC / security research; complements rbmm fork); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]].
+
 - **2026-08-25** — ingest `description:GetRektBoy724/Win32kHooker`: entity [[win32khooker]] (GetRektBoy724; C++ kernel driver; locate/hook win32k.sys dispatch paths on modern builds; process attach + syscall mapping + runtime disassembly for session-space hook targets; `.data` ptr swapper for newer win32k where pointers live in opaque session-state; GUI-subsystem / anti-cheat / defensive RE research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[dataptrswap-driver]], [[comm-data-pointer-swap]], [[kernel-eac-be-comm]], [[callmewin32kdriver]], [[win32k-file-collection]], and [[driver-communication-list]].
 
 - **2026-08-25** — ingest `description:Gezine/BD-UN-JB`: entity [[bd-un-jb]] (Gezine; Blu-ray Disc Java jailbreak exploit; BD-J xlet payloads + `jdk.internal.misc.Unsafe` code execution; C `bdj_unpatch` BDMV manipulation; Python log client; BD-JB RemoteJarLoader for jailbroken PS5 ≤12.00 — unpatch BD-J, ISO, network JAR load/logging; PlayStation exploit-chain + BD-J sandbox-escape research); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cssfontface-exploit]], [[ps5-linux-loader]], [[nines]], and [[a53-code-exec]].

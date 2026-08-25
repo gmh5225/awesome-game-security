@@ -1827,7 +1827,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kotek](entities/kotek.md) — modular C++20 engine core (ktkI* backends; GLES/Vulkan/DX/BGFX; Game Engine)
 - [KoTR Modern Patch](entities/kotr-modern-patch.md) — King of the Road / Hard Truck 2 ASI patch (collision, camera, physics, AI traffic, trailer, UI; ModUtils + Ultimate ASI Loader; complements D2GI; DirectX Compatibility)
 - [Krunker Loader](entities/krunker-loader.md) — keyless Tampermonkey userscript stack for Krunker.io (aimbot, ESP, Quirify license-emulation loader)
-- [KPDB](entities/kpdb.md) — parse PDB in driver (C++; Some Tricks / Windows Ring0)
+- [KPDB](entities/kpdb.md) — kernel-mode PDB parser (GetRektBoy724 pure C symbol+type streams; rbmm C++; runtime symbol resolution in drivers)
 - [KPM-MemReader](entities/kpm-memreader.md) — KernelPatch/APatch KPM cross-process memory read via ioctl hook (C/C++; libtersafe; cheat / Android kernel driver)
 - [kptnhook](entities/kptnhook.md) — system-wide KM DLL inject + function hook (every process; cheat / injection:windows)
 - [krnl-gdi-render](entities/krnl-gdi-render.md) — KM GDI overlay framework (WDK; GDI hooks + sigscan; Dxgkrnl + GDI)
