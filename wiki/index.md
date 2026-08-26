@@ -795,7 +795,9 @@ Compiled knowledge catalog for awesome-game-security.
 - [delete-self-poc](entities/delete-self-poc.md) — C PoC; delete locked or running executable from disk via primary-stream rename + SetFileInformationByHandle disposition (LloydLabs; handle sequencing / locked-file removal; anti-forensics / secure cleanup / defensive detection engineering)
 - [dezlock-dump](entities/dezlock-dump.md) — runtime schema + RTTI extraction for Source 2 (Deadlock, CS2, Dota 2); live-process dump; WebSocket bridge + schema browser; no source2gen required
 - [decryption-dumper](entities/decryption-dumper.md) — Windows C++ runtime encrypted-pointer decrypt routine dumper (Nuxar1; debugger single-step + Zydis; register/stack dependency trace; pattern scan + context restore; cheat / [Dump])
-- [digital-sdk](entities/digital-sdk.md) — CS:GO internal cheat base (MinHook, ImGui, ESP, bunnyhop, engine prediction, autowall, chams; CreateMove + D3D reset hooks; interfaces/netvars/rendering modules; W1lliam1337)
+- [digital-sdk](entities/digital-sdk.md)
+- [Diligent Engine](entities/diligent-engine.md) — cross-platform low-level 3D graphics library and rendering framework (D3D11/12, Vulkan, Metal, OpenGL/ES, WebGL, WebGPU; HLSL; modular C++ multithreaded command/resource workflows + render-state tooling; Rendering library)
+ — CS:GO internal cheat base (MinHook, ImGui, ESP, bunnyhop, engine prediction, autowall, chams; CreateMove + D3D reset hooks; interfaces/netvars/rendering modules; W1lliam1337)
 - [Detours](entities/detours.md) — Microsoft Windows API monitoring/instrumentation (inline hook/trampoline; cheat / hook research)
 - [DetoursNT](entities/detoursnt.md) — NTDLL-only Microsoft Detours (no Win32; cheat / hook research)
 - [Dobby](entities/dobby.md) — lightweight multi-platform hook framework (C/C++; DirectX / Windows game tooling; cheat / hook research)
