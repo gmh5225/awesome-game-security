@@ -807,6 +807,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/VollRagm/ghostdebug [Windows x64 VEH-based stealth debugger (native DLL + .NET CLI) for targets with anti-debug checks]
 - https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
 - https://github.com/HeathHowren/Pointer-Lab [Windows x64 user-mode memory scanner and debugger with pointer chains, disassembly, patching, and ImGui UI]
+- https://github.com/WoahToasty/ToastyLink [From-scratch C++17 XBDM trainer/debug toolkit for Xbox 360 (RGH/JTAG): pointer chains, value scanning, freeze engine, PPC patches, and shareable JSON cheat tables]
 - https://github.com/TASEmulators/BizHawk [Multi-system C# emulator with memory inspection, rerecording, and per-core debugging tools for retro game analysis]
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
 - https://github.com/JasonGoemaat/CheatEngineMonoHelper [CE Mono Helper]
@@ -1043,6 +1044,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/VMProtect
 - https://github.com/wallds/NoVmpy
 - https://github.com/can1357/NoVmp [Static VMProtect x64 3.x devirtualizer powered by VTIL]
+- https://github.com/sexyiam/VMPLift [Emulation-first VMProtect 3.8–3.10+ x64 handler walker and lifter for VIP tracing, devirtualization, and closed-form recovery in IDA/Ghidra workflows]
 - https://github.com/JonathanSalwan/VMProtect-devirtualization [Experimental VMProtect 3.x pure-function deobfuscation via symbolic execution and LLVM]
 - https://github.com/gmh5225/VMP-Vmp3_64bit_disasm-prerelease-
 - https://github.com/gmh5225/Vmp3_utils
