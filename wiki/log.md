@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:CookiePLMonster/UptimeFaker`: entity [[uptime-faker]] (CookiePLMonster; C++ Detours timing hook library; fakes system uptime for testing/compatibility; DLL or ASI inject; INI-configured timer API redirection + process-relative time simulation; Game Testing / high-PC-uptime bug diagnosis); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[detours]], [[speed-hack]], and [[ce-speed-hack]].
+
 - **2026-08-26** — ingest `description:WoahToasty/ToastyLink`: entity [[toastylink]] (WoahToasty; from-scratch C++17 XBDM trainer/debug for softmodded Xbox 360 RGH/JTAG; big-endian memory R/W, CE-style scan/freeze, pointer chains, PPC patch assembler, JSON cheat tables, LAN discovery, batch scripting; Cheat Debugging); cited on [[overviews/reverse-engineering]]; cross-linked [[x360gamehack2025]], [[idaxex]], [[xenia]], and [[cheat-engine]].
 
 - **2026-08-26** — ingest `description:sexyiam/VMPLift`: entity [[vmplift]] (sexyiam; C++ emulation-first VMProtect 3.8–3.10+ x64 handler walker/lifter; VIP trace, rolling-key recovery, closed-form recovery; LLVM IR/pseudo-C/devirt emit; IDA/Ghidra workflows; Fix VMP); cited on [[vmprotect]]; cross-linked [[novmp]], [[novmpy]], [[titan]], [[rumba]], [[vmprotect-devirtualization]], [[vmp-vmp3-64bit-disasm-prerelease-]], and [[vmp-devirtualization-lab]].
