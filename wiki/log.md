@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:CyberSecurityUP/ViGEmBus-Driver-Exploitation`: entity [[vigembus-driver-exploitation]] (CyberSecurityUP; C++; `ViGEmBus.sys` virtual gamepad driver; insecure IOCTL handling + access-control flaws; multiple PoCs for privilege escalation or system instability; RE artifacts; gaming peripheral driver hardening research; README `[ViGEmBus.sys]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[eneio64-driver-exploit]], [[throttlestop-poc]], [[windows-kernel-exploits]], [[razer-rzctl]], and [[loldrivers]].
+
 - **2026-08-26** — ingest `description:CynicRus/DWARFHelper`: entity [[dwarfhelper]] (CynicRus; x64dbg plugin; libdwarf; parse DWARF debug info from ELF/PE; import function names, variable types, file:line comments; x86/x64; Cheat x64dbg Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-mapldr]], [[pdb]], and [[dwex]].
 
 - **2026-08-26** — ingest `description:D3DXVECTOR2/NtUserUpdateWindowTrackingInfo`: entity [[ntuserupdatewindowtrackinginfo]] (D3DXVECTOR2; win32k function-pointer hook on **NtUserUpdateWindowTrackingInfo** syscall path; covert KM↔UM comm with process memory R/W, pattern scan, allocation, and pointer swap via custom request codes; user-mode client initializes syscall stub; cheat / AC evasion research at kernel boundary; README `[NtUserUpdateWindowTrackingInfo]`); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[kernel-eac-be-comm]], [[interep-driver-leak]], [[comm-data-ptr-driver]], [[win32khooker]], and [[km-um-communication]].

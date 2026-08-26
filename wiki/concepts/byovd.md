@@ -106,7 +106,8 @@ sources:
   - wiki/sources/descriptions/EvilBytecode__EDR-XDR-AV-Killer.md
   - wiki/sources/descriptions/FourCoreLabs__LolDriverScan.md
   - wiki/sources/descriptions/U65535F__ThrottleStopPoC.md
-updated: 2026-08-25
+  - wiki/sources/descriptions/CyberSecurityUP__ViGEmBus-Driver-Exploitation.md
+updated: 2026-08-26
 confidence: high
 ---
 
@@ -209,6 +210,8 @@ Rentdrv2 **`Rentdrv2.sys`** exploitation such as [[badrentdrv2]] (gmh5225; insec
 Educational **`eneio64.sys`** physmem exploit PoC such as [[eneio64-driver-exploit]] (Xacone; C++; signed-driver physical memory R/W → virtual-to-physical translation for effective virtual memory access; modern Windows offset notes; token-theft LPE path; kernel security / vulnerable-driver analysis training) complements physmem-focused samples in the same lane. (source: wiki/sources/descriptions/Xacone__Eneio64-Driver-Exploit.md)
 
 ThrottleStop **`ThrottleStop.sys`** CVE-2025-7771 PoC such as [[throttlestop-poc]] (U65535F; C; IOCTL physmem and I/O port R/W from user mode; virtual-to-physical translation + basic EPROCESS checks; kernel security / vulnerable-driver / AC threat-modeling research) complements physmem-focused samples in the same lane. (source: wiki/sources/descriptions/U65535F__ThrottleStopPoC.md)
+
+ViGEmBus **`ViGEmBus.sys`** virtual gamepad driver research PoC such as [[vigembus-driver-exploitation]] (CyberSecurityUP; C++; documents insecure IOCTL handling and access-control issues; C++ PoCs trigger vulnerable paths for privilege escalation or system instability; RE artifacts; gaming-related driver ecosystem hardening) complements IOCTL-focused samples in the same lane. (source: wiki/sources/descriptions/CyberSecurityUP__ViGEmBus-Driver-Exploitation.md)
 
 HITCON 2023 **`AMDCpuProfiler.sys`** demo such as [[hitcon-2023-demo-cve-2023-20562]] (gmh5225; CVE-2023-20562; AMD signed driver exploitation → local privilege escalation or arbitrary kernel code execution; conference PoC in the AMD driver BYOVD lane) complements physmem-focused [[amd-ryzen-master-driver-v17-exploit]]. (source: wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md)
 
