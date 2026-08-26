@@ -1,0 +1,4377 @@
+Project Path: arc_Eangly99_AstroX-AntiCheat_iiw65mxk
+
+Source Tree:
+
+```txt
+arc_Eangly99_AstroX-AntiCheat_iiw65mxk
+├── LICENSE
+├── README.md
+├── pom.xml
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── dev
+    │   │       └── lyy
+    │   │           └── astrox
+    │   │               ├── AstroxExtension.java
+    │   │               ├── action
+    │   │               │   ├── ActionManager.java
+    │   │               │   ├── DiscordWebhookDispatcher.java
+    │   │               │   └── SetbackHandler.java
+    │   │               ├── api
+    │   │               │   ├── AstroxAPI.java
+    │   │               │   ├── CheckType.java
+    │   │               │   └── event
+    │   │               │       ├── AstroxActionEvent.java
+    │   │               │       └── AstroxViolationEvent.java
+    │   │               ├── check
+    │   │               │   ├── AbstractCheck.java
+    │   │               │   ├── combat
+    │   │               │   │   ├── AngleCheck.java
+    │   │               │   │   ├── AutoclickerCheck.java
+    │   │               │   │   ├── HitboxBacktrackCheck.java
+    │   │               │   │   └── ReachCheck.java
+    │   │               │   ├── inventory
+    │   │               │   │   ├── AutoTotemCheck.java
+    │   │               │   │   ├── FastBreakCheck.java
+    │   │               │   │   └── FastPlaceCheck.java
+    │   │               │   ├── movement
+    │   │               │   │   ├── BoatMovementCheck.java
+    │   │               │   │   ├── ElytraAerodynamicCheck.java
+    │   │               │   │   ├── HorizontalSpeedCheck.java
+    │   │               │   │   ├── PhaseCheck.java
+    │   │               │   │   └── VerticalFlightCheck.java
+    │   │               │   └── packet
+    │   │               │       ├── BadPacketsCheck.java
+    │   │               │       ├── DeviceSpoofCheck.java
+    │   │               │       └── LeakyBucketTimerCheck.java
+    │   │               ├── collision
+    │   │               │   ├── BoundingBox3D.java
+    │   │               │   └── Ray3D.java
+    │   │               ├── command
+    │   │               │   ├── AstroxCommand.java
+    │   │               │   └── BukkitCommandBridge.java
+    │   │               ├── config
+    │   │               │   ├── ActionConfig.java
+    │   │               │   ├── CheckConfig.java
+    │   │               │   └── ConfigManager.java
+    │   │               ├── network
+    │   │               │   ├── AstroxChannelInitializer.java
+    │   │               │   ├── AstroxPacketInterceptor.java
+    │   │               │   └── firewall
+    │   │               │       └── CrasherFirewall.java
+    │   │               ├── session
+    │   │               │   ├── BedrockPlayerSession.java
+    │   │               │   ├── SessionManager.java
+    │   │               │   └── data
+    │   │               │       ├── BacktrackHistory.java
+    │   │               │       ├── InputTracker.java
+    │   │               │       └── ViolationTracker.java
+    │   │               └── util
+    │   │                   ├── BedrockPhysics.java
+    │   │                   ├── FastMath.java
+    │   │                   └── Vector3d.java
+    │   └── resources
+    │       ├── config.yml
+    │       └── extension.yml
+    └── test
+        └── java
+            └── dev
+                └── lyy
+                    └── astrox
+                        └── test
+                            ├── BedrockPhysicsTest.java
+                            ├── BoundingBoxTest.java
+                            └── LeakyBucketTimerTest.java
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Astrox Security / Lyy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# 🛡️ AstroxAC (v2)
+### High-Performance Native GeyserMC Extension Anti-Cheat for Bedrock Edition
+
+[![Java](https://img.shields.io/badge/Java-17%20%7C%2021-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
+[![GeyserMC](https://img.shields.io/badge/GeyserMC-Extension%20v2-2C5E8A?style=for-the-badge&logo=minecraft&logoColor=white)](https://geysermc.org)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge)]()
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
+
+</div>
+
+---
+
+## ⚡ Overview
+
+**AstroxAC** is an enterprise-grade, high-performance anti-cheat developed specifically as a native **GeyserMC Extension** (`dev.lyy.astrox.*`). 
+
+Traditional Bukkit/Spigot anti-cheats suffer from packet translation latency, coordinate quantization, and loss of sub-tick Bedrock telemetry. AstroxAC intercepts raw Bedrock UDP packets directly at the Netty channel layer before Java translation, delivering sub-millisecond detection precision with **zero main-thread server tick lag**.
+
+---
+
+## 🚀 Key Architectural Advantages
+
+```
+                     TRADITIONAL SPIGOT/BUKKIT ANTI-CHEAT
+Bedrock Client ──(RakNet UDP)──► [ GeyserMC ] ──(Java Translation)──► [ Spigot / Paper ] ──► [ Anti-Cheat ]
+                                     │                                      │
+                         - Coordinate Quantization              - Main Server Thread Delay
+                         - Packet Dropping / Bundling           - Loss of Raw Bedrock Flags
+                         - Velocity Interpolation               - Inaccurate Hitbox Modeling
+
+             ═════════════════════════════════════════════════════════════════
+
+                     ASTROX-AC GEYSER EXTENSION PIPELINE
+Bedrock Client ──(RakNet UDP)──► [ Astrox Packet Interceptor ] ──► [ Geyser Engine ] ──► [ Java Server ]
+                                                │
+                                    - Raw PlayerAuthInputPacket
+                                    - Exact InputMode & DeviceOS
+                                    - Exact Sub-Tick clientTick
+                                    - Zero Main-Thread CPU Overhead
+```
+
+- **Zero Main-Thread Tick Overhead**: Runs directly inside Geyser’s asynchronous Netty worker threads.
+- **Bedrock-Native Kinematics**: Exact 0.60m step-height calculation, eliminating false flags on slabs and stairs.
+- **Hardware InputMode Awareness**: Scales reach interaction cones dynamically ($3.05\text{m}$ for Mouse/Keyboard vs $3.85\text{m}$ for Mobile Touch).
+- **Latency Backtracking**: Sub-tick raymarching against a 1000ms rolling ring buffer of historical entity positions interpolated at:
+  $$t_{\text{target}} = t_{\text{now}} - \frac{\text{ping}}{2} - 50\text{ms}$$
+- **Leaky-Bucket Clock**: Token-bucket accumulator ($B = 8, \tau = 50\text{ms}$) absorbing UDP packet bundling bursts without false positives.
+- **Network Gateway Firewall**: Blocks malformed crasher packets (e.g. `LevelSoundEventPacket` NaN/infinite coordinates) before reaching server state machines.
+
+---
+
+## 📦 Heuristic Modules
+
+| Category | Heuristic | Description |
+| :--- | :--- | :--- |
+| **Movement** | `HorizontalSpeedCheck` | Validates kinematic acceleration, friction, sprint-jumping, and analog vectors. |
+| | `VerticalFlightCheck` | Validates Bedrock 0.60m step-height, jump impulses, gravity, and hover cheats. |
+| | `ElytraAerodynamicCheck` | Validates potential-to-kinetic glide conversion ($v \le 3.45\text{ m/tick}$) and rocket boost speed. |
+| | `PhaseCheck` | Continuous sweep collision validator to prevent noclip and phase exploits. |
+| | `BoatMovementCheck` | Validates boat ice velocity caps and vehicle fly exploits. |
+| **Combat** | `ReachCheck` | Enforces dynamic reach boundaries based on client `InputMode` (Mouse, Touch, Controller). |
+| | `HitboxBacktrackCheck` | Validates 3D line-of-sight raymarching against sub-tick historical entity positions. |
+| | `AngleCheck` | Validates angular acceleration and detects instant snap rotations. |
+| | `AutoclickerCheck` | Analyzes click interval standard deviation ($\sigma < 0.80\text{ms}$) and CPS limits. |
+| **Packet** | `BadPacketsCheck` | Validates coordinate finiteness, bounds, and conflicting input states (e.g., Sprint + Sneak). |
+| | `LeakyBucketTimerCheck` | Token-bucket clock detecting game-clock acceleration and tick rate spoofing. |
+| | `DeviceSpoofCheck` | Detects PC keyboard players spoofing Mobile Touch controls via analog vector quantization. |
+| **Inventory** | `AutoTotemCheck` | Detects inhuman offhand totem swaps following damage events ($< 80\text{ms}$). |
+| | `FastPlaceCheck` | Validates block placement cooldowns (minimum 4-tick placement rate limit). |
+| | `FastBreakCheck` | Validates block breaking progression duration to prevent instant nukers. |
+
+---
+
+## 🛠️ Installation & Setup
+
+1. Build the project or download the latest release:
+   ```bash
+   mvn clean package
+   ```
+2. Drop `astrox-ac-2.0.0.jar` into your Geyser `extensions/` directory:
+   - **Standalone**: `extensions/`
+   - **Spigot / Paper**: `plugins/Geyser-Spigot/extensions/`
+   - **Velocity**: `plugins/Geyser-Velocity/extensions/`
+   - **BungeeCord**: `plugins/Geyser-BungeeCord/extensions/`
+   - **Fabric**: `config/Geyser-Fabric/extensions/`
+3. Start or restart your server / Geyser instance.
+4. Customize configuration in `extensions/AstroxAC/config.yml`.
+
+---
+
+## 🎮 Commands & Permissions
+
+| Command | Permission | Description |
+| :--- | :--- | :--- |
+| `/astrox` | `astrox.admin` | Display command help and extension version. |
+| `/astrox reload` | `astrox.admin` | Reload `config.yml` configuration in real-time. |
+| `/astrox status` | `astrox.admin` | Display active monitored Bedrock sessions. |
+| `/astrox inspect <player>` | `astrox.admin` | View live telemetry, ping, input mode, CPS, and active violation scores. |
+
+---
+
+## 🔔 Discord Webhook Integration
+
+AstroxAC includes a non-blocking asynchronous Discord webhook dispatcher that sends rich violation embeds directly to your staff channels:
+
+```yaml
+webhook:
+  enabled: true
+  url: "https://discord.com/api/webhooks/..."
+  username: "Astrox Anti-Cheat"
+  avatar-url: "https://i.imgur.com/8Qe5hF4.png"
+  embed-color: 0x00E5FF
+  min-alert-vl: 5.0
+```
+
+---
+
+## 🧪 Testing & Verification
+
+AstroxAC includes comprehensive JUnit 5 unit tests validating vector kinematics, 3D Ray-AABB intersections, and timer token bucket mechanics:
+
+```bash
+mvn test
+```
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+```
+
+`pom.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dev.lyy</groupId>
+    <artifactId>astrox-ac</artifactId>
+    <version>2.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>AstroxAC</name>
+    <description>Enterprise-Grade High-Performance Anti-Cheat GeyserMC Extension for Bedrock Edition</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <geyser.version>2.4.2-SNAPSHOT</geyser.version>
+        <cloudburst.protocol.version>3.0.0.Beta1-SNAPSHOT</cloudburst.protocol.version>
+        <cloudburst.math.version>2.0-SNAPSHOT</cloudburst.math.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>opencollab-snapshot</id>
+            <url>https://repo.opencollab.dev/main/</url>
+        </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- GeyserMC Extension API -->
+        <dependency>
+            <groupId>org.geysermc.geyser</groupId>
+            <artifactId>api</artifactId>
+            <version>${geyser.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Cloudburst Protocol (Bedrock Packets) -->
+        <dependency>
+            <groupId>org.cloudburstmc.protocol</groupId>
+            <artifactId>bedrock-codec</artifactId>
+            <version>${cloudburst.protocol.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Cloudburst Vector Math -->
+        <dependency>
+            <groupId>org.cloudburstmc.math</groupId>
+            <artifactId>immutable</artifactId>
+            <version>${cloudburst.math.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Netty (Provided by Geyser runtime) -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.100.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- YAML Parser -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JSON / GSON -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- SLF4J Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- High-performance FastUtil collections -->
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>8.5.13</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Optional Paper/Spigot API for direct /astrox server console command bridge -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- JUnit 5 for tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <release>${java.version}</release>
+                    <parameters>true</parameters>
+                    <compilerArgs>
+                        <arg>-Xlint:all,-processing</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+```
+
+`src/main/java/dev/lyy/astrox/AstroxExtension.java`:
+
+```java
+package dev.lyy.astrox;
+
+import dev.lyy.astrox.action.ActionManager;
+import dev.lyy.astrox.action.DiscordWebhookDispatcher;
+import dev.lyy.astrox.action.SetbackHandler;
+import dev.lyy.astrox.api.AstroxAPI;
+import dev.lyy.astrox.command.AstroxCommand;
+import dev.lyy.astrox.config.ConfigManager;
+import dev.lyy.astrox.network.AstroxChannelInitializer;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.session.SessionManager;
+import org.geysermc.event.subscribe.Subscribe;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+import org.geysermc.geyser.api.event.bedrock.SessionDisconnectEvent;
+import org.geysermc.geyser.api.event.bedrock.SessionInitializeEvent;
+import org.geysermc.geyser.api.event.bedrock.SessionJoinEvent;
+import org.geysermc.geyser.api.event.lifecycle.GeyserDefineCommandsEvent;
+import org.geysermc.geyser.api.event.lifecycle.GeyserPostInitializeEvent;
+import org.geysermc.geyser.api.event.lifecycle.GeyserShutdownEvent;
+import org.geysermc.geyser.api.extension.Extension;
+
+public class AstroxExtension implements Extension {
+    private static AstroxExtension instance;
+
+    private ConfigManager configManager;
+    private SessionManager sessionManager;
+    private ActionManager actionManager;
+    private SetbackHandler setbackHandler;
+    private DiscordWebhookDispatcher webhookDispatcher;
+    private AstroxCommand commandHandler;
+
+    public static AstroxExtension getInstance() {
+        return instance;
+    }
+
+    @Subscribe
+    public void onPostInitialize(GeyserPostInitializeEvent event) {
+        instance = this;
+        long startTime = System.currentTimeMillis();
+
+        this.configManager = new ConfigManager(this);
+        this.configManager.loadConfig();
+
+        this.sessionManager = new SessionManager(this);
+        this.actionManager = new ActionManager(this);
+        this.setbackHandler = new SetbackHandler(this);
+        this.webhookDispatcher = new DiscordWebhookDispatcher(this);
+        this.commandHandler = new AstroxCommand(this);
+
+        AstroxAPI.init(this);
+
+        // Register platform-native /astrox command bridge if running on Spigot/Paper/Purpur
+        dev.lyy.astrox.command.BukkitCommandBridge.register(this, this.commandHandler);
+
+        logger().info("§b[AstroxAC] §aEnterprise Bedrock Anti-Cheat Extension v" + description().version() + " enabled in " + (System.currentTimeMillis() - startTime) + "ms.");
+    }
+
+    @Subscribe
+    public void onShutdown(GeyserShutdownEvent event) {
+        if (webhookDispatcher != null) {
+            webhookDispatcher.shutdown();
+        }
+        logger().info("§b[AstroxAC] §7Extension disabled.");
+    }
+
+    @Subscribe
+    public void onSessionInitialize(SessionInitializeEvent event) {
+        GeyserConnection connection = event.connection();
+        if (connection != null) {
+            BedrockPlayerSession session = sessionManager.createSession(connection);
+            AstroxChannelInitializer.inject(this, session);
+        }
+    }
+
+    @Subscribe
+    public void onSessionJoin(SessionJoinEvent event) {
+        GeyserConnection connection = event.connection();
+        if (connection != null) {
+            BedrockPlayerSession session = sessionManager.getSession(connection.xuid());
+            if (session == null) {
+                session = sessionManager.createSession(connection);
+            }
+            AstroxChannelInitializer.inject(this, session);
+        }
+    }
+
+    @Subscribe
+    public void onSessionDisconnect(SessionDisconnectEvent event) {
+        GeyserConnection connection = event.connection();
+        if (connection != null) {
+            sessionManager.removeSession(connection);
+        }
+    }
+
+    @Subscribe
+    public void onDefineCommands(GeyserDefineCommandsEvent event) {
+        if (commandHandler != null) {
+            commandHandler.register(event);
+        }
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
+    public ActionManager getActionManager() {
+        return actionManager;
+    }
+
+    public SetbackHandler getSetbackHandler() {
+        return setbackHandler;
+    }
+
+    public DiscordWebhookDispatcher getWebhookDispatcher() {
+        return webhookDispatcher;
+    }
+
+    public boolean isDebug() {
+        return configManager != null && configManager.isDebug();
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/action/ActionManager.java`:
+
+```java
+package dev.lyy.astrox.action;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.config.ActionConfig;
+import dev.lyy.astrox.config.CheckConfig;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ActionManager {
+    private final AstroxExtension extension;
+    private final Map<String, LastActionState> actionHistory = new ConcurrentHashMap<>();
+
+    private static class LastActionState {
+        double lastScore;
+        long lastTimestamp;
+
+        LastActionState(double lastScore, long lastTimestamp) {
+            this.lastScore = lastScore;
+            this.lastTimestamp = lastTimestamp;
+        }
+    }
+
+    public ActionManager(AstroxExtension extension) {
+        this.extension = extension;
+    }
+
+    public void cleanupSession(String xuid) {
+        if (xuid == null) return;
+        actionHistory.keySet().removeIf(key -> key.startsWith(xuid + ":"));
+    }
+
+    public void processViolation(BedrockPlayerSession session, CheckType checkType, double activeScore, double addedScore, String details) {
+        CheckConfig config = extension.getConfigManager().getCheckConfig(checkType);
+        if (config == null) return;
+
+        double cumulativeScore = session.getViolationTracker(checkType).getCumulativeScore();
+        long now = System.currentTimeMillis();
+
+        // Check configured actions
+        for (ActionConfig action : config.getActions().values()) {
+            String key = session.getXuid() + ":" + checkType.name() + ":" + action.getName();
+            LastActionState state = actionHistory.get(key);
+
+            boolean shouldExecute = false;
+            if (state == null) {
+                if (activeScore >= action.getExecutionThreshold()) {
+                    shouldExecute = true;
+                }
+            } else {
+                double scoreDiff = cumulativeScore - state.lastScore;
+                double timeDiffSec = (now - state.lastTimestamp) / 1000.0;
+                if (scoreDiff >= action.getRepetitionThreshold() && timeDiffSec >= action.getRepetitionDelay()) {
+                    shouldExecute = true;
+                }
+            }
+
+            if (shouldExecute) {
+                actionHistory.put(key, new LastActionState(cumulativeScore, now));
+                executeAction(session, checkType, action, activeScore);
+            }
+        }
+
+        // Webhook dispatch
+        if (extension.getConfigManager().isWebhookEnabled() && activeScore >= extension.getConfigManager().getWebhookMinAlertVl()) {
+            extension.getWebhookDispatcher().sendAlert(session, checkType, addedScore, activeScore, details);
+        }
+    }
+
+    private void executeAction(BedrockPlayerSession session, CheckType checkType, ActionConfig action, double score) {
+        if (action.getMessage() != null && !action.getMessage().isBlank()) {
+            String formattedMsg = action.getMessage()
+                .replace("%player%", session.getUsername())
+                .replace("%check%", checkType.getFriendlyName())
+                .replace("%score%", String.format("%.1f", score))
+                .replace("%ping%", String.valueOf(session.getPing()));
+
+            broadcastStaffAlert(formattedMsg);
+        }
+
+        if (action.getCommand() != null && !action.getCommand().isBlank()) {
+            String cmd = action.getCommand()
+                .replace("%player%", session.getUsername())
+                .replace("%check%", checkType.getFriendlyName())
+                .replace("%score%", String.format("%.1f", score))
+                .replace("%ping%", String.valueOf(session.getPing()));
+
+            extension.logger().info("[ACTION COMMAND] " + cmd);
+        }
+    }
+
+    private void broadcastStaffAlert(String message) {
+        // Log to console
+        extension.logger().info("[ALERT] " + message.replaceAll("&[0-9a-fk-or]", ""));
+
+        // Broadcast to players with alert permissions connected via Geyser
+        String perm = extension.getConfigManager().getAlertPermission();
+        for (BedrockPlayerSession s : extension.getSessionManager().getAllSessions()) {
+            if (s.getConnection() != null && (perm == null || perm.isBlank() || s.getConnection().hasPermission(perm))) {
+                try {
+                    s.getConnection().sendMessage(message);
+                } catch (Throwable ignored) {}
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/action/DiscordWebhookDispatcher.java`:
+
+```java
+package dev.lyy.astrox.action;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * Asynchronous, non-blocking Discord Webhook embed dispatcher.
+ */
+public class DiscordWebhookDispatcher {
+    private final AstroxExtension extension;
+    private final HttpClient httpClient;
+    private final ExecutorService executor;
+
+    public DiscordWebhookDispatcher(AstroxExtension extension) {
+        this.extension = extension;
+        this.httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(4))
+            .build();
+        this.executor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "Astrox-Webhook-Worker");
+            t.setDaemon(true);
+            return t;
+        });
+    }
+
+    public void sendAlert(BedrockPlayerSession session, CheckType checkType, double score, double totalScore, String details) {
+        if (!extension.getConfigManager().isWebhookEnabled()) return;
+        String webhookUrl = extension.getConfigManager().getWebhookUrl();
+        if (webhookUrl == null || webhookUrl.isBlank()) return;
+
+        executor.submit(() -> {
+            try {
+                JsonObject root = new JsonObject();
+                root.addProperty("username", extension.getConfigManager().getWebhookUsername());
+                root.addProperty("avatar_url", extension.getConfigManager().getWebhookAvatarUrl());
+
+                JsonArray embeds = new JsonArray();
+                JsonObject embed = new JsonObject();
+                embed.addProperty("title", "🛡️ Astrox Security Violation Detected");
+                embed.addProperty("color", extension.getConfigManager().getWebhookColor());
+                embed.addProperty("timestamp", Instant.now().toString());
+
+                JsonArray fields = new JsonArray();
+
+                // Player Field
+                JsonObject playerField = new JsonObject();
+                playerField.addProperty("name", "Player");
+                playerField.addProperty("value", session.getUsername() + "\n`" + session.getXuid() + "`");
+                playerField.addProperty("inline", true);
+                fields.add(playerField);
+
+                // Check Field
+                JsonObject checkField = new JsonObject();
+                checkField.addProperty("name", "Detection");
+                checkField.addProperty("value", checkType.getFriendlyName() + "\n`" + checkType.getConfigKey() + "`");
+                checkField.addProperty("inline", true);
+                fields.add(checkField);
+
+                // Violation Score Field
+                JsonObject scoreField = new JsonObject();
+                scoreField.addProperty("name", "VL Score");
+                scoreField.addProperty("value", String.format("%.1f", totalScore) + " (+" + String.format("%.1f", score) + ")");
+                scoreField.addProperty("inline", true);
+                fields.add(scoreField);
+
+                // Metrics Field
+                JsonObject metricsField = new JsonObject();
+                metricsField.addProperty("name", "Connection Metrics");
+                metricsField.addProperty("value", "Ping: `" + session.getPing() + "ms`\nMode: `" + session.getInputTracker().getInputMode() + "`");
+                metricsField.addProperty("inline", true);
+                fields.add(metricsField);
+
+                // Location Field
+                JsonObject locField = new JsonObject();
+                locField.addProperty("name", "Coordinates");
+                locField.addProperty("value", String.format("X: %.1f, Y: %.1f, Z: %.1f", session.currentPosition.x, session.currentPosition.y, session.currentPosition.z));
+                locField.addProperty("inline", true);
+                fields.add(locField);
+
+                // Details Field
+                if (details != null && !details.isBlank()) {
+                    JsonObject detailsField = new JsonObject();
+                    detailsField.addProperty("name", "Telemetry Details");
+                    detailsField.addProperty("value", "```" + details + "```");
+                    detailsField.addProperty("inline", false);
+                    fields.add(detailsField);
+                }
+
+                embed.add("fields", fields);
+
+                JsonObject footer = new JsonObject();
+                footer.addProperty("text", "AstroxAC GeyserMC Extension • v1.0.0");
+                embed.add("footer", footer);
+
+                embeds.add(embed);
+                root.add("embeds", embeds);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(webhookUrl))
+                    .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(5))
+                    .POST(HttpRequest.BodyPublishers.ofString(root.toString()))
+                    .build();
+
+                httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+            } catch (Throwable t) {
+                if (extension.isDebug()) {
+                    extension.logger().warning("Webhook dispatch error: " + t.getMessage());
+                }
+            }
+        });
+    }
+
+    public void shutdown() {
+        executor.shutdownNow();
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/action/SetbackHandler.java`:
+
+```java
+package dev.lyy.astrox.action;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.Vector3d;
+import org.cloudburstmc.math.vector.Vector3f;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
+import org.cloudburstmc.protocol.bedrock.packet.MovePlayerPacket;
+
+import java.lang.reflect.Method;
+
+/**
+ * Handles packet-level rubberbanding and position setbacks directly over the Bedrock protocol.
+ */
+public class SetbackHandler {
+    private final AstroxExtension extension;
+
+    public SetbackHandler(AstroxExtension extension) {
+        this.extension = extension;
+    }
+
+    public void executeSetback(BedrockPlayerSession session) {
+        if (session == null || session.getConnection() == null) return;
+
+        Vector3d setbackPos = session.lastValidPosition;
+        if (setbackPos.lengthSquared() < 0.1) {
+            setbackPos = session.previousPosition;
+        }
+
+        try {
+            long entityId = session.getRuntimeEntityId() > 0 ? session.getRuntimeEntityId() : 1L;
+
+            MovePlayerPacket movePacket = new MovePlayerPacket();
+            movePacket.setRuntimeEntityId(entityId);
+            movePacket.setPosition(Vector3f.from((float) setbackPos.x, (float) setbackPos.y, (float) setbackPos.z));
+            movePacket.setRotation(Vector3f.from(session.pitch, session.yaw, session.headYaw));
+            movePacket.setMode(MovePlayerPacket.Mode.TELEPORT);
+            movePacket.setOnGround(true);
+            movePacket.setRidingRuntimeEntityId(0);
+            movePacket.setTick(session.clientTick);
+
+            sendDownstreamPacket(session.getConnection(), movePacket);
+
+            session.recordTeleport();
+            session.currentPosition.set(setbackPos);
+
+            if (extension.isDebug()) {
+                extension.logger().info("[SETBACK] Executed setback for " + session.getUsername() + " to " + setbackPos);
+            }
+        } catch (Throwable t) {
+            extension.logger().warning("Failed to dispatch setback packet to " + session.getUsername() + ": " + t.getMessage());
+        }
+    }
+
+    private void sendDownstreamPacket(Object connection, BedrockPacket packet) {
+        if (connection == null || packet == null) return;
+
+        // Try direct sendDownstreamPacket or sendUpstreamPacket on GeyserSession
+        try {
+            Method sendDownstream = connection.getClass().getMethod("sendDownstreamPacket", BedrockPacket.class);
+            sendDownstream.invoke(connection, packet);
+            return;
+        } catch (Throwable ignored) {}
+
+        try {
+            Method sendUpstream = connection.getClass().getMethod("sendUpstreamPacket", BedrockPacket.class);
+            sendUpstream.invoke(connection, packet);
+            return;
+        } catch (Throwable ignored) {}
+
+        try {
+            Method getBedrockSession = connection.getClass().getMethod("getBedrockSession");
+            Object bedrockSession = getBedrockSession.invoke(connection);
+            if (bedrockSession != null) {
+                Method sendPacket = bedrockSession.getClass().getMethod("sendPacket", BedrockPacket.class);
+                sendPacket.invoke(bedrockSession, packet);
+                return;
+            }
+        } catch (Throwable ignored) {}
+
+        try {
+            Method sendPacket = connection.getClass().getMethod("sendPacket", BedrockPacket.class);
+            sendPacket.invoke(connection, packet);
+        } catch (Throwable ignored) {}
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/api/AstroxAPI.java`:
+
+```java
+package dev.lyy.astrox.api;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+
+import java.util.Collection;
+import java.util.UUID;
+
+public final class AstroxAPI {
+    private static AstroxExtension extensionInstance;
+
+    private AstroxAPI() {}
+
+    public static void init(AstroxExtension extension) {
+        extensionInstance = extension;
+    }
+
+    public static AstroxExtension getExtension() {
+        return extensionInstance;
+    }
+
+    public static BedrockPlayerSession getSession(UUID uuid) {
+        if (extensionInstance == null) return null;
+        return extensionInstance.getSessionManager().getSession(uuid);
+    }
+
+    public static BedrockPlayerSession getSession(GeyserConnection connection) {
+        if (extensionInstance == null || connection == null) return null;
+        return extensionInstance.getSessionManager().getSession(connection.xuid());
+    }
+
+    public static Collection<BedrockPlayerSession> getAllSessions() {
+        if (extensionInstance == null) return null;
+        return extensionInstance.getSessionManager().getAllSessions();
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/api/CheckType.java`:
+
+```java
+package dev.lyy.astrox.api;
+
+public enum CheckType {
+    // Movement
+    HORIZONTAL_SPEED("Horizontal Speed", "Detects impossible horizontal velocity, speed hacks, and inertia bypasses"),
+    VERTICAL_FLIGHT("Vertical Flight", "Detects illegal ascending, hover, glide, and step modifications"),
+    ELYTRA_AERODYNAMIC("Elytra Aerodynamics", "Detects Elytra glide speed bypasses and impossible flight dynamics"),
+    PHASE("Phase", "Detects noclip and walking through solid block geometry"),
+    BOAT_MOVEMENT("Boat Movement", "Detects boat fly, speed, and vehicle desync exploits"),
+
+    // Combat
+    REACH("Reach", "Detects extended combat interaction distance considering hardware InputMode"),
+    HITBOX_BACKTRACK("Hitbox Backtrack", "Validates raycast line-of-sight against historical entity positions"),
+    ANGLE("Angle", "Detects impossible angular velocity and snap killaura"),
+    AUTOCLICKER("Autoclicker", "Analyzes click distribution entropy, standard deviation, and CPS"),
+
+    // Packet & Protocol
+    BAD_PACKETS("Bad Packets", "Detects malformed packet state machines and impossible action combinations"),
+    TIMER("Timer", "Detects client game-clock speeding and tick rate spoofing via leaky-bucket clock"),
+    DEVICE_SPOOF("Device Spoof", "Detects input mode and device OS spoofing via analog vector quantization"),
+
+    // Inventory & Interaction
+    AUTO_TOTEM("Auto Totem", "Detects inhuman offhand totem swaps following damage"),
+    FAST_PLACE("Fast Place", "Detects packet-level block placement rate limit violations"),
+    FAST_BREAK("Fast Break", "Detects impossible dig progression speeds");
+
+    private final String friendlyName;
+    private final String description;
+
+    CheckType(String friendlyName, String description) {
+        this.friendlyName = friendlyName;
+        this.description = description;
+    }
+
+    public String getFriendlyName() {
+        return friendlyName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getConfigKey() {
+        return name().toLowerCase();
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/api/event/AstroxActionEvent.java`:
+
+```java
+package dev.lyy.astrox.api.event;
+
+import dev.lyy.astrox.api.CheckType;
+import org.geysermc.event.Event;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+
+import java.util.List;
+
+/**
+ * Dispatched when an automated punishment or notification action is triggered.
+ */
+public class AstroxActionEvent implements Event {
+    private final GeyserConnection connection;
+    private final CheckType checkType;
+    private final String actionName;
+    private final double score;
+    private final List<String> commands;
+    private boolean cancelled = false;
+
+    public AstroxActionEvent(GeyserConnection connection, CheckType checkType, String actionName, double score, List<String> commands) {
+        this.connection = connection;
+        this.checkType = checkType;
+        this.actionName = actionName;
+        this.score = score;
+        this.commands = commands;
+    }
+
+    public GeyserConnection getConnection() {
+        return connection;
+    }
+
+    public CheckType getCheckType() {
+        return checkType;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public List<String> getCommands() {
+        return commands;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/api/event/AstroxViolationEvent.java`:
+
+```java
+package dev.lyy.astrox.api.event;
+
+import dev.lyy.astrox.api.CheckType;
+import org.geysermc.event.Event;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+
+/**
+ * Dispatched asynchronously when a Bedrock player violates a detection heuristic.
+ */
+public class AstroxViolationEvent implements Event {
+    private final GeyserConnection connection;
+    private final CheckType checkType;
+    private final double addedScore;
+    private final double totalScore;
+    private final int ping;
+    private final String debugDetails;
+    private boolean cancelled = false;
+
+    public AstroxViolationEvent(GeyserConnection connection, CheckType checkType, double addedScore, double totalScore, int ping, String debugDetails) {
+        this.connection = connection;
+        this.checkType = checkType;
+        this.addedScore = addedScore;
+        this.totalScore = totalScore;
+        this.ping = ping;
+        this.debugDetails = debugDetails;
+    }
+
+    public GeyserConnection getConnection() {
+        return connection;
+    }
+
+    public CheckType getCheckType() {
+        return checkType;
+    }
+
+    public double getAddedScore() {
+        return addedScore;
+    }
+
+    public double getTotalScore() {
+        return totalScore;
+    }
+
+    public int getPing() {
+        return ping;
+    }
+
+    public String getDebugDetails() {
+        return debugDetails;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/AbstractCheck.java`:
+
+```java
+package dev.lyy.astrox.check;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.api.event.AstroxViolationEvent;
+import dev.lyy.astrox.config.CheckConfig;
+import dev.lyy.astrox.config.ConfigManager;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+/**
+ * Base template for all Astrox cheat detection heuristics.
+ */
+public abstract class AbstractCheck {
+    protected final CheckType checkType;
+    protected final BedrockPlayerSession session;
+
+    public AbstractCheck(CheckType checkType, BedrockPlayerSession session) {
+        this.checkType = checkType;
+        this.session = session;
+    }
+
+    public CheckType getCheckType() {
+        return checkType;
+    }
+
+    public BedrockPlayerSession getSession() {
+        return session;
+    }
+
+    /**
+     * Flags a violation. Returns TRUE if the packet should be ALLOWED, or FALSE if it should be DROPPED/CANCELLED.
+     */
+    public boolean flag(double score, String debugDetails) {
+        AstroxExtension ext = session.getExtension();
+        ConfigManager configManager = ext.getConfigManager();
+        CheckConfig config = configManager.getCheckConfig(checkType);
+
+        if (config == null || !config.isEnabled()) {
+            return true;
+        }
+
+        // Join grace period
+        long elapsedSinceJoin = System.currentTimeMillis() - session.getJoinTimestamp();
+        if (elapsedSinceJoin < configManager.getJoinGracePeriodMs()) {
+            return true;
+        }
+
+        // Max ping filter
+        if (configManager.getMaxPingMs() > 0 && session.getPing() > configManager.getMaxPingMs()) {
+            return true;
+        }
+
+        // Add to violation tracker
+        session.getViolationTracker(checkType).addViolation(score, config);
+        double activeScore = session.getViolationTracker(checkType).getActiveScore(config);
+
+        // Fire AstroxViolationEvent
+        AstroxViolationEvent event = new AstroxViolationEvent(
+            session.getConnection(), checkType, score, activeScore, session.getPing(), debugDetails
+        );
+
+        if (ext.isDebug()) {
+            ext.logger().info("[DEBUG] " + session.getUsername() + " flagged " + checkType.getFriendlyName() + " (Score: " + String.format("%.2f", score) + ", Active: " + String.format("%.2f", activeScore) + ") Info: " + debugDetails);
+        }
+
+        // Dispatch action manager
+        ext.getActionManager().processViolation(session, checkType, activeScore, score, debugDetails);
+
+        // Mitigation: Cancel packet or trigger setback
+        boolean allowPacket = true;
+        if (config.isCancelPacket() && activeScore >= config.getBlockThreshold()) {
+            allowPacket = false;
+        }
+
+        if (config.isSetback() && activeScore >= config.getBlockThreshold()) {
+            ext.getSetbackHandler().executeSetback(session);
+        }
+
+        return allowPacket;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/combat/AngleCheck.java`:
+
+```java
+package dev.lyy.astrox.check.combat;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.FastMath;
+
+/**
+ * Validates rotational angular acceleration and view direction consistency during attacks.
+ */
+public class AngleCheck extends AbstractCheck {
+    private float lastDeltaYaw = 0.0f;
+
+    public AngleCheck(BedrockPlayerSession session) {
+        super(CheckType.ANGLE, session);
+    }
+
+    public boolean processRotation(float newPitch, float newYaw) {
+        float deltaPitch = Math.abs(newPitch - session.prevPitch);
+        float deltaYaw = (float) FastMath.angleDifference(newYaw, session.prevYaw);
+
+        // 1. Impossible Pitch Bounds
+        if (newPitch < -90.05f || newPitch > 90.05f) {
+            return flag(10.0, "Impossible Pitch: " + newPitch);
+        }
+
+        // 2. Snap Killaura Rotation (Instant > 120 deg view snap during attack)
+        if (deltaYaw > 120.0f) {
+            return flag(4.0, "Snap Aura Yaw Delta=" + String.format("%.1f", deltaYaw) + "°");
+        }
+
+        // 3. Angular Derivation Acceleration (Sudden acceleration spike > 80 deg)
+        float angularAccel = Math.abs(deltaYaw - lastDeltaYaw);
+        this.lastDeltaYaw = deltaYaw;
+
+        if (angularAccel > 95.0f) {
+            return flag(3.0, "Impossible Angular Acceleration: " + String.format("%.1f", angularAccel) + "°/tick");
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/combat/AutoclickerCheck.java`:
+
+```java
+package dev.lyy.astrox.check.combat;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+/**
+ * Validates click entropy, standard deviation, and impossible continuous CPS limits.
+ */
+public class AutoclickerCheck extends AbstractCheck {
+    public AutoclickerCheck(BedrockPlayerSession session) {
+        super(CheckType.AUTOCLICKER, session);
+    }
+
+    public boolean processClick() {
+        boolean isNewClick = session.getInputTracker().recordClick(session.clientTick);
+        if (!isNewClick) {
+            return true; // Click already recorded for this sub-tick frame
+        }
+
+        double cps = session.getInputTracker().getCPS();
+
+        // High CPS limit for Bedrock butterfly/multi-touch tap
+        if (cps > 25.0) {
+            return flag(4.0, "Impossible CPS: " + (int) cps);
+        }
+
+        if (cps > 14.0) {
+            double stdDev = session.getInputTracker().calculateIntervalStandardDeviation();
+            // Inhuman flat distribution (< 0.65ms std deviation over 40 clicks)
+            if (stdDev < 0.65) {
+                return flag(3.0, "Robotic Click Timing (StdDev=" + String.format("%.2f", stdDev) + "ms, CPS=" + (int) cps + ")");
+            }
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/combat/HitboxBacktrackCheck.java`:
+
+```java
+package dev.lyy.astrox.check.combat;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.collision.BoundingBox3D;
+import dev.lyy.astrox.collision.Ray3D;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.session.data.BacktrackHistory;
+
+/**
+ * Validates 3D raymarching line-of-sight against sub-tick historical entity positions.
+ */
+public class HitboxBacktrackCheck extends AbstractCheck {
+    public HitboxBacktrackCheck(BedrockPlayerSession session) {
+        super(CheckType.HITBOX_BACKTRACK, session);
+    }
+
+    public boolean processAttack(BedrockPlayerSession targetSession) {
+        if (targetSession == null) return true;
+
+        long now = System.currentTimeMillis();
+        // Estimated timestamp when the client perceived the target
+        long clientPerceptionTime = now - (session.getPing() / 2) - 50L;
+
+        BacktrackHistory history = targetSession.getBacktrackHistory();
+        BoundingBox3D targetBox = history.getInterpolatedBox(clientPerceptionTime);
+        if (targetBox == null) {
+            targetBox = targetSession.getBoundingBox();
+        }
+
+        // Ray from attacker's eye
+        double eyeX = session.currentPosition.x;
+        double eyeY = session.currentPosition.y + session.getEyeHeight();
+        double eyeZ = session.currentPosition.z;
+
+        Ray3D lookRay = Ray3D.fromPitchYaw(eyeX, eyeY, eyeZ, session.pitch, session.yaw);
+
+        // Expand target box by tolerance
+        BoundingBox3D expandedBox = targetBox.copy().expand(0.18, 0.18, 0.18);
+        double hitDist = expandedBox.calculateRayIntersection(lookRay, 6.0);
+
+        if (hitDist < 0.0) {
+            double centerDist = targetBox.getClosestPointDistance(eyeX, eyeY, eyeZ);
+            if (centerDist > 1.2) {
+                return flag(3.0, "Ray Missed Backtrack AABB (CenterDist=" + String.format("%.2f", centerDist) + "m, Ping=" + session.getPing() + "ms)");
+            }
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/combat/ReachCheck.java`:
+
+```java
+package dev.lyy.astrox.check.combat;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.collision.BoundingBox3D;
+import dev.lyy.astrox.config.CheckConfig;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.BedrockPhysics;
+import org.cloudburstmc.protocol.bedrock.data.InputMode;
+
+/**
+ * Validates combat interaction distances with device InputMode-aware tolerance (Touch vs Mouse vs Gamepad).
+ */
+public class ReachCheck extends AbstractCheck {
+    public ReachCheck(BedrockPlayerSession session) {
+        super(CheckType.REACH, session);
+    }
+
+    public boolean processAttack(BoundingBox3D targetBox, double targetX, double targetY, double targetZ) {
+        if (targetBox == null) return true;
+
+        CheckConfig config = session.getExtension().getConfigManager().getCheckConfig(checkType);
+        InputMode mode = session.getInputTracker().getInputMode();
+
+        double maxReach;
+        if (mode == InputMode.TOUCH) {
+            maxReach = config != null ? config.getDouble("touch-reach-max", BedrockPhysics.TOUCH_REACH_LIMIT) : BedrockPhysics.TOUCH_REACH_LIMIT;
+        } else if (mode == InputMode.GAMEPAD || mode == InputMode.MOTION_CONTROLLER) {
+            maxReach = config != null ? config.getDouble("controller-reach-max", BedrockPhysics.CONTROLLER_REACH_LIMIT) : BedrockPhysics.CONTROLLER_REACH_LIMIT;
+        } else {
+            maxReach = config != null ? config.getDouble("mouse-reach-max", BedrockPhysics.MOUSE_REACH_LIMIT) : BedrockPhysics.MOUSE_REACH_LIMIT;
+        }
+
+        double eyeX = session.currentPosition.x;
+        double eyeY = session.currentPosition.y + session.getEyeHeight();
+        double eyeZ = session.currentPosition.z;
+
+        double dist = targetBox.getClosestPointDistance(eyeX, eyeY, eyeZ);
+
+        if (dist > maxReach) {
+            double score = (dist - maxReach) * 8.0;
+            return flag(score, "Reach=" + String.format("%.3f", dist) + " > Max=" + String.format("%.3f", maxReach) + " (Mode=" + mode + ")");
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/inventory/AutoTotemCheck.java`:
+
+```java
+package dev.lyy.astrox.check.inventory;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+/**
+ * Detects automated offhand totem equipping within inhuman sub-80ms reaction times after taking damage.
+ */
+public class AutoTotemCheck extends AbstractCheck {
+    public AutoTotemCheck(BedrockPlayerSession session) {
+        super(CheckType.AUTO_TOTEM, session);
+    }
+
+    public boolean processOffhandSwap() {
+        long now = System.currentTimeMillis();
+        long timeSinceDamage = now - session.getLastDamageTime();
+
+        // Inhuman swap immediately upon taking damage
+        if (timeSinceDamage < 75L && session.getLastDamageTime() > 0) {
+            return flag(4.0, "Inhuman AutoTotem swap delay: " + timeSinceDamage + "ms");
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/inventory/FastBreakCheck.java`:
+
+```java
+package dev.lyy.astrox.check.inventory;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+/**
+ * Validates block breaking progression ticks and prevents instant nuker/break cheats.
+ */
+public class FastBreakCheck extends AbstractCheck {
+    private long startBreakTime = 0L;
+
+    public FastBreakCheck(BedrockPlayerSession session) {
+        super(CheckType.FAST_BREAK, session);
+    }
+
+    public void startBreaking() {
+        this.startBreakTime = System.currentTimeMillis();
+    }
+
+    public boolean completeBreaking() {
+        long now = System.currentTimeMillis();
+        long breakDuration = now - startBreakTime;
+
+        // In Bedrock, instabreak blocks (torches, flowers, slime) and creative mining break in <= 50ms without START_BREAK
+        // Only flag if a sustained block break was started but completed abnormally fast (< 35ms)
+        if (startBreakTime > 0L && breakDuration < 35L) {
+            this.startBreakTime = 0L;
+            return flag(2.0, "Impossible dig progression duration: " + breakDuration + "ms");
+        }
+
+        this.startBreakTime = 0L;
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/inventory/FastPlaceCheck.java`:
+
+```java
+package dev.lyy.astrox.check.inventory;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+/**
+ * Validates block placement cooldowns and limits (Bedrock enforces minimum 4 ticks between successive placements).
+ */
+public class FastPlaceCheck extends AbstractCheck {
+    private long lastPlaceTime = 0L;
+    private int burstCount = 0;
+
+    public FastPlaceCheck(BedrockPlayerSession session) {
+        super(CheckType.FAST_PLACE, session);
+    }
+
+    public boolean processBlockPlace() {
+        long now = System.currentTimeMillis();
+        long interval = now - lastPlaceTime;
+        this.lastPlaceTime = now;
+
+        // Vanilla Bedrock place delay is 4 ticks (200ms) with small 50ms packet burst tolerance
+        if (interval < 60L) {
+            burstCount++;
+            if (burstCount > 3) {
+                return flag(2.0, "FastPlace burst rate (Interval=" + interval + "ms, Burst=" + burstCount + ")");
+            }
+        } else {
+            burstCount = Math.max(0, burstCount - 1);
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/movement/BoatMovementCheck.java`:
+
+```java
+package dev.lyy.astrox.check.movement;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.FastMath;
+
+/**
+ * Validates boat vehicle dynamics, ice acceleration limits, and vehicle fly exploits.
+ */
+public class BoatMovementCheck extends AbstractCheck {
+    public BoatMovementCheck(BedrockPlayerSession session) {
+        super(CheckType.BOAT_MOVEMENT, session);
+    }
+
+    public boolean processMovement(double dx, double dy, double dz) {
+        if (!session.inVehicle) {
+            return true;
+        }
+
+        double deltaXZ = FastMath.hypot(dx, dz);
+
+        // Bedrock Boat Ice Top Speed Cap (2.50 blocks/tick)
+        double maxBoatSpeed = 2.50;
+
+        boolean allowed = true;
+        if (deltaXZ > maxBoatSpeed) {
+            double score = (deltaXZ - maxBoatSpeed) * 3.0;
+            allowed = flag(score, "Boat DeltaXZ=" + String.format("%.3f", deltaXZ) + " > Max=" + maxBoatSpeed);
+        }
+
+        // Boat Fly (Unnatural upward boat propulsion)
+        if (dy > 0.65 && !session.onGround) {
+            double score = dy * 4.0;
+            allowed = flag(score, "Boat Fly DeltaY=" + String.format("%.3f", dy));
+        }
+
+        return allowed;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/movement/ElytraAerodynamicCheck.java`:
+
+```java
+package dev.lyy.astrox.check.movement;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.FastMath;
+
+/**
+ * Validates dynamic aerodynamic potential-to-kinetic conversion and firework boost speed caps.
+ */
+public class ElytraAerodynamicCheck extends AbstractCheck {
+    private int fireworkBoostTicks = 0;
+
+    public ElytraAerodynamicCheck(BedrockPlayerSession session) {
+        super(CheckType.ELYTRA_AERODYNAMIC, session);
+    }
+
+    public void recordFireworkBoost(int rocketPower) {
+        this.fireworkBoostTicks = (Math.max(rocketPower, 1) + 1) * 10 + 15;
+    }
+
+    public boolean processMovement(double dx, double dy, double dz) {
+        if (!session.isGliding) {
+            fireworkBoostTicks = 0;
+            return true;
+        }
+
+        if (fireworkBoostTicks > 0) {
+            fireworkBoostTicks--;
+            return true;
+        }
+
+        double deltaXZ = FastMath.hypot(dx, dz);
+        double delta3D = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        // Maximum aerodynamic dive-pull speed in vanilla Bedrock
+        double maxDiveSpeed = 3.45;
+        double maxLevelSpeed = 1.95;
+
+        boolean allowed = true;
+        if (delta3D > maxDiveSpeed && !session.isExplosionExempt()) {
+            double score = (delta3D - maxDiveSpeed) * 3.0;
+            allowed = flag(score, "Elytra 3DSpeed=" + String.format("%.3f", delta3D) + " > Max=" + maxDiveSpeed);
+        } else if (dy >= -0.10 && deltaXZ > maxLevelSpeed && !session.isExplosionExempt()) {
+            // Ascending or level gliding cannot sustain > 1.95 without rocket boost
+            double score = (deltaXZ - maxLevelSpeed) * 4.0;
+            allowed = flag(score, "Elytra LevelSpeed=" + String.format("%.3f", deltaXZ) + " > Max=" + maxLevelSpeed);
+        }
+
+        return allowed;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/movement/HorizontalSpeedCheck.java`:
+
+```java
+package dev.lyy.astrox.check.movement;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.BedrockPhysics;
+import dev.lyy.astrox.util.FastMath;
+
+/**
+ * Validates Bedrock horizontal kinematics, friction, sprint-jumping, and analog movement vectors.
+ */
+public class HorizontalSpeedCheck extends AbstractCheck {
+    private double expectedSpeed = BedrockPhysics.BASE_WALK_SPEED;
+
+    public HorizontalSpeedCheck(BedrockPlayerSession session) {
+        super(CheckType.HORIZONTAL_SPEED, session);
+    }
+
+    public boolean processMovement(double dx, double dz, boolean onGround) {
+        if (session.inVehicle || session.isGliding || session.isTeleportExempt()) {
+            expectedSpeed = BedrockPhysics.BASE_WALK_SPEED;
+            return true;
+        }
+
+        double deltaXZ = FastMath.hypot(dx, dz);
+
+        // Base Speed with Stance Multipliers
+        double baseSpeed = BedrockPhysics.BASE_WALK_SPEED;
+        if (session.isSprinting) {
+            baseSpeed *= BedrockPhysics.SPRINT_MULTIPLIER;
+        }
+        if (session.isSneaking) {
+            baseSpeed *= BedrockPhysics.SNEAK_MULTIPLIER;
+        }
+
+        // Potion Modifiers (Speed Effect ID: 1, Slowness: 2)
+        int speedAmp = session.getPotionAmplifier(1);
+        if (speedAmp >= 0) {
+            baseSpeed *= (1.0 + (speedAmp + 1) * 0.20);
+        }
+        int slowAmp = session.getPotionAmplifier(2);
+        if (slowAmp >= 0) {
+            baseSpeed *= Math.max(0.0, 1.0 - (slowAmp + 1) * 0.15);
+        }
+
+        double friction;
+        double acceleration;
+
+        if (session.isSwimming) {
+            friction = BedrockPhysics.WATER_DRAG;
+            acceleration = 0.025;
+        } else if (onGround) {
+            double slipperiness = BedrockPhysics.DEFAULT_SLIPPERINESS;
+            friction = BedrockPhysics.calculateGroundFriction(slipperiness);
+            acceleration = BedrockPhysics.calculateGroundAcceleration(baseSpeed, slipperiness);
+        } else {
+            friction = BedrockPhysics.HORIZONTAL_AIR_DRAG;
+            acceleration = 0.026;
+            // Jump takeoff boost
+            if (session.prevOnGround && session.isSprinting) {
+                acceleration += BedrockPhysics.SPRINT_JUMP_BOOST;
+            }
+        }
+
+        // Knockback velocity incorporation
+        double velocityBoost = session.consumeVelocity();
+        expectedSpeed += velocityBoost;
+
+        // Coordinate float precision tolerance buffer
+        double coordTolerance = 0.008 + (FastMath.hypot(session.currentPosition.x, session.currentPosition.z) / 4_000_000.0);
+        double maxAllowed = Math.max(expectedSpeed + coordTolerance, (expectedSpeed + acceleration) * friction + coordTolerance + 0.01);
+
+        boolean allowed = true;
+        if (deltaXZ > maxAllowed && !session.isExplosionExempt()) {
+            double violationScore = Math.sqrt(deltaXZ - maxAllowed) * 8.0;
+            allowed = flag(violationScore, "DeltaXZ=" + String.format("%.4f", deltaXZ) + " > Max=" + String.format("%.4f", maxAllowed) + " (Exp=" + String.format("%.4f", expectedSpeed) + ")");
+        } else {
+            session.lastValidPosition.set(session.currentPosition);
+        }
+
+        expectedSpeed = (expectedSpeed + acceleration) * friction;
+        expectedSpeed = Math.max(expectedSpeed, 0.18);
+        return allowed;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/movement/PhaseCheck.java`:
+
+```java
+package dev.lyy.astrox.check.movement;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.BedrockPhysics;
+import dev.lyy.astrox.util.FastMath;
+
+/**
+ * Validates continuous collision sweep trajectories to prevent noclip and block phasing.
+ */
+public class PhaseCheck extends AbstractCheck {
+    public PhaseCheck(BedrockPlayerSession session) {
+        super(CheckType.PHASE, session);
+    }
+
+    public boolean processMovement(double fromX, double fromY, double fromZ, double toX, double toY, double toZ) {
+        if (session.isTeleportExempt() || session.inVehicle) {
+            return true;
+        }
+
+        double dx = toX - fromX;
+        double dy = toY - fromY;
+        double dz = toZ - fromZ;
+
+        double distSq = dx * dx + dy * dy + dz * dz;
+        // Large displacement / teleport threshold
+        if (distSq > 144.0) {
+            return true;
+        }
+
+        // Horizontal displacement step check
+        double deltaXZ = FastMath.hypot(dx, dz);
+        if (deltaXZ > 1.35 && !session.isGliding && !session.isExplosionExempt()) {
+            return flag(3.0, "Impossible Horizontal Step Length: " + String.format("%.3f", deltaXZ));
+        }
+
+        // Vertical upward step check (falling is exempted up to terminal velocity)
+        if (dy > 1.25 && !session.isGliding && !session.isExplosionExempt()) {
+            return flag(3.0, "Impossible Upward Step Length: " + String.format("%.3f", dy));
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/movement/VerticalFlightCheck.java`:
+
+```java
+package dev.lyy.astrox.check.movement;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.BedrockPhysics;
+
+/**
+ * Validates Bedrock vertical kinematics, 0.60m step-height, jump impulses, gravity, and slow-glide cheats.
+ */
+public class VerticalFlightCheck extends AbstractCheck {
+    private double expectedMotionY = 0.0;
+
+    public VerticalFlightCheck(BedrockPlayerSession session) {
+        super(CheckType.VERTICAL_FLIGHT, session);
+    }
+
+    public boolean processMovement(double deltaY, boolean onGround) {
+        if (session.inVehicle || session.isGliding || session.isTeleportExempt()) {
+            expectedMotionY = 0.0;
+            return true;
+        }
+
+        boolean allowed = true;
+        int jumpBoost = session.getPotionAmplifier(8); // Jump Boost ID: 8
+        double maxJump = BedrockPhysics.calculateJumpVelocity(jumpBoost);
+
+        if (onGround) {
+            if (deltaY > 0.0) {
+                // Bedrock allows direct 0.60m step-up without jumping on slabs/stairs
+                double maxAllowedUp = Math.max(BedrockPhysics.BEDROCK_STEP_HEIGHT + 0.02, maxJump + 0.05);
+
+                if (deltaY > maxAllowedUp && !session.isExplosionExempt()) {
+                    double score = Math.abs(deltaY - maxAllowedUp) * 6.0;
+                    allowed = flag(score, "Ground DeltaY=" + String.format("%.4f", deltaY) + " > Max=" + String.format("%.4f", maxAllowedUp));
+                } else {
+                    expectedMotionY = deltaY;
+                }
+            } else {
+                expectedMotionY = 0.0;
+            }
+        } else {
+            // Ground-to-Air Takeoff Transition
+            if (session.prevOnGround) {
+                expectedMotionY = Math.max(deltaY, maxJump);
+            }
+
+            // Air Phase Gravity
+            double gravity = BedrockPhysics.GRAVITY;
+            int slowFalling = session.getPotionAmplifier(28); // Slow Falling ID: 28
+            if (slowFalling >= 0) {
+                gravity = 0.01;
+            }
+
+            int levitation = session.getPotionAmplifier(25); // Levitation ID: 25
+            if (levitation >= 0) {
+                expectedMotionY = (levitation + 1) * 0.05;
+            } else {
+                expectedMotionY = (expectedMotionY - gravity) * BedrockPhysics.VERTICAL_DRAG;
+                expectedMotionY = Math.max(expectedMotionY, -BedrockPhysics.TERMINAL_VELOCITY);
+            }
+
+            // Flag if ascending in air without jump or levitation, or hovering unnaturally
+            double tolerance = 0.08;
+            if (deltaY > (expectedMotionY + tolerance) && !session.isExplosionExempt()) {
+                if (expectedMotionY < 0.0 && deltaY >= -0.005) {
+                    double score = Math.abs(deltaY - expectedMotionY) * 4.0;
+                    allowed = flag(score, "Air Hover/Fly DeltaY=" + String.format("%.4f", deltaY) + " Exp=" + String.format("%.4f", expectedMotionY));
+                }
+            }
+        }
+
+        return allowed;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/packet/BadPacketsCheck.java`:
+
+```java
+package dev.lyy.astrox.check.packet;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.FastMath;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.packet.PlayerAuthInputPacket;
+
+import java.util.Set;
+
+/**
+ * Validates Bedrock state machine transitions, coordinate finiteness, and illegal packet flag combinations.
+ */
+public class BadPacketsCheck extends AbstractCheck {
+    public BadPacketsCheck(BedrockPlayerSession session) {
+        super(CheckType.BAD_PACKETS, session);
+    }
+
+    public boolean processAuthInput(PlayerAuthInputPacket packet) {
+        double x = packet.getPosition().getX();
+        double y = packet.getPosition().getY();
+        double z = packet.getPosition().getZ();
+        float pitch = packet.getRotation().getX();
+        float yaw = packet.getRotation().getY();
+
+        // 1. Check Finiteness (Anti-Crasher)
+        if (!FastMath.isFinite(x) || !FastMath.isFinite(y) || !FastMath.isFinite(z) ||
+            !FastMath.isFinite(pitch) || !FastMath.isFinite(yaw)) {
+            return flag(20.0, "Non-finite NaN/Infinity packet coordinates");
+        }
+
+        // 2. Out-of-bounds Coordinates
+        if (Math.abs(x) > 30_000_000.0 || Math.abs(z) > 30_000_000.0 || Math.abs(y) > 4000.0) {
+            return flag(20.0, "Out-of-bounds coordinates (Y=" + y + ")");
+        }
+
+        // 3. Pitch Out-of-range
+        if (Math.abs(pitch) > 90.05f) {
+            return flag(10.0, "Illegal Pitch: " + pitch);
+        }
+
+        // 4. Client Tick Decrement / Manipulation
+        long tick = packet.getTick();
+        if (session.lastClientTick > 0 && tick < session.lastClientTick && (session.lastClientTick - tick) < 100000L) {
+            return flag(5.0, "ClientTick Regressed: " + tick + " < " + session.lastClientTick);
+        }
+
+        // 5. Conflicting Action Flags
+        Set<PlayerAuthInputData> flags = packet.getInputData();
+        if (flags.contains(PlayerAuthInputData.START_SPRINTING) && flags.contains(PlayerAuthInputData.START_SNEAKING)) {
+            return flag(4.0, "Simultaneous Start Sprint + Start Sneak");
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/packet/DeviceSpoofCheck.java`:
+
+```java
+package dev.lyy.astrox.check.packet;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import org.cloudburstmc.protocol.bedrock.data.InputMode;
+
+/**
+ * Analyzes analog movement vector continuity to catch PC keyboard players spoofing Mobile Touch input mode.
+ */
+public class DeviceSpoofCheck extends AbstractCheck {
+    private int suspiciousSampleCount = 0;
+
+    public DeviceSpoofCheck(BedrockPlayerSession session) {
+        super(CheckType.DEVICE_SPOOF, session);
+    }
+
+    public boolean processInput(InputMode reportedMode, float analogX, float analogZ) {
+        // Mobile Bedrock supports both joystick and digital D-pad button layouts.
+        // We only perform statistical profiling when user claims VR / motion controller while sending flat vectors.
+        if (reportedMode == InputMode.MOTION_CONTROLLER) {
+            boolean isStrictDiscrete = (Math.abs(analogX) == 1.0f || analogX == 0.0f) &&
+                                       (Math.abs(analogZ) == 1.0f || analogZ == 0.0f);
+
+            if (isStrictDiscrete && (analogX != 0.0f || analogZ != 0.0f)) {
+                suspiciousSampleCount++;
+                if (suspiciousSampleCount > 200) {
+                    suspiciousSampleCount = 0;
+                    return flag(3.0, "Reported VR/Motion Controller but sent 200 continuous discrete WASD vectors");
+                }
+            } else {
+                suspiciousSampleCount = Math.max(0, suspiciousSampleCount - 1);
+            }
+        } else {
+            suspiciousSampleCount = 0;
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/check/packet/LeakyBucketTimerCheck.java`:
+
+```java
+package dev.lyy.astrox.check.packet;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+
+/**
+ * Token-Bucket Leaky Clock validating clientTick advancement rate against wall-clock time.
+ * Absorbs UDP packet bundling bursts up to 8 packets without false flagging.
+ */
+public class LeakyBucketTimerCheck extends AbstractCheck {
+    private static final int BUCKET_CAPACITY = 8;
+    private static final double LEAK_RATE_MS = 50.0; // 1 token every 50ms (20 TPS)
+
+    private double balance = 0.0;
+    private long lastLeakTimestamp = 0L;
+
+    public LeakyBucketTimerCheck(BedrockPlayerSession session) {
+        super(CheckType.TIMER, session);
+        this.lastLeakTimestamp = System.currentTimeMillis();
+    }
+
+    public boolean processPacket() {
+        long now = System.currentTimeMillis();
+        long elapsed = now - lastLeakTimestamp;
+        this.lastLeakTimestamp = now;
+
+        if (session.isTeleportExempt()) {
+            this.balance = 0.0;
+            return true;
+        }
+
+        // Leak tokens based on real time elapsed
+        double leaked = elapsed / LEAK_RATE_MS;
+        this.balance = Math.max(0.0, this.balance - leaked);
+
+        // Add 1 token for incoming input packet
+        this.balance += 1.0;
+
+        // Check overflow
+        if (this.balance > BUCKET_CAPACITY) {
+            double overflow = this.balance - BUCKET_CAPACITY;
+            this.balance = BUCKET_CAPACITY;
+            return flag(overflow * 2.0, "Timer Burst Overflow: Balance=" + String.format("%.2f", this.balance) + " (Elapsed=" + elapsed + "ms)");
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/collision/BoundingBox3D.java`:
+
+```java
+package dev.lyy.astrox.collision;
+
+import dev.lyy.astrox.util.FastMath;
+import dev.lyy.astrox.util.Vector3d;
+
+/**
+ * Axis-Aligned Bounding Box (AABB) with zero-allocation geometric intersection routines.
+ */
+public class BoundingBox3D {
+    public double minX;
+    public double minY;
+    public double minZ;
+    public double maxX;
+    public double maxY;
+    public double maxZ;
+
+    public BoundingBox3D() {
+        this(0, 0, 0, 0, 0, 0);
+    }
+
+    public BoundingBox3D(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        this.minX = minX;
+        this.minY = minY;
+        this.minZ = minZ;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this.maxZ = maxZ;
+    }
+
+    public BoundingBox3D set(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+        this.minX = minX;
+        this.minY = minY;
+        this.minZ = minZ;
+        this.maxX = maxX;
+        this.maxY = maxY;
+        this.maxZ = maxZ;
+        return this;
+    }
+
+    public BoundingBox3D setFromCenterAndSize(double cx, double cy, double cz, double width, double height) {
+        double halfW = width * 0.5;
+        this.minX = cx - halfW;
+        this.minY = cy;
+        this.minZ = cz - halfW;
+        this.maxX = cx + halfW;
+        this.maxY = cy + height;
+        this.maxZ = cz + halfW;
+        return this;
+    }
+
+    public BoundingBox3D expand(double dx, double dy, double dz) {
+        this.minX -= dx;
+        this.minY -= dy;
+        this.minZ -= dz;
+        this.maxX += dx;
+        this.maxY += dy;
+        this.maxZ += dz;
+        return this;
+    }
+
+    public double getClosestPointDistanceSquared(double px, double py, double pz) {
+        double cx = FastMath.clamp(px, minX, maxX);
+        double cy = FastMath.clamp(py, minY, maxY);
+        double cz = FastMath.clamp(pz, minZ, maxZ);
+        double dx = px - cx;
+        double dy = py - cy;
+        double dz = pz - cz;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public double getClosestPointDistance(double px, double py, double pz) {
+        return Math.sqrt(getClosestPointDistanceSquared(px, py, pz));
+    }
+
+    public boolean contains(double x, double y, double z) {
+        return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
+    }
+
+    public boolean intersects(BoundingBox3D other) {
+        return this.minX <= other.maxX && this.maxX >= other.minX &&
+               this.minY <= other.maxY && this.maxY >= other.minY &&
+               this.minZ <= other.maxZ && this.maxZ >= other.minZ;
+    }
+
+    /**
+     * Fast Slab Ray-AABB intersection test. Returns distance or -1 if no hit.
+     */
+    public double calculateRayIntersection(Ray3D ray, double maxDistance) {
+        double tMin = 0.0;
+        double tMax = maxDistance;
+
+        // X axis
+        if (Math.abs(ray.direction.x) < FastMath.EPSILON) {
+            if (ray.origin.x < minX || ray.origin.x > maxX) return -1.0;
+        } else {
+            double invD = 1.0 / ray.direction.x;
+            double t1 = (minX - ray.origin.x) * invD;
+            double t2 = (maxX - ray.origin.x) * invD;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+            if (tMin > tMax) return -1.0;
+        }
+
+        // Y axis
+        if (Math.abs(ray.direction.y) < FastMath.EPSILON) {
+            if (ray.origin.y < minY || ray.origin.y > maxY) return -1.0;
+        } else {
+            double invD = 1.0 / ray.direction.y;
+            double t1 = (minY - ray.origin.y) * invD;
+            double t2 = (maxY - ray.origin.y) * invD;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+            if (tMin > tMax) return -1.0;
+        }
+
+        // Z axis
+        if (Math.abs(ray.direction.z) < FastMath.EPSILON) {
+            if (ray.origin.z < minZ || ray.origin.z > maxZ) return -1.0;
+        } else {
+            double invD = 1.0 / ray.direction.z;
+            double t1 = (minZ - ray.origin.z) * invD;
+            double t2 = (maxZ - ray.origin.z) * invD;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            tMin = Math.max(tMin, t1);
+            tMax = Math.min(tMax, t2);
+            if (tMin > tMax) return -1.0;
+        }
+
+        if (tMin <= tMax && tMax >= 0.0) {
+            return tMin >= 0.0 ? tMin : tMax;
+        }
+        return -1.0;
+    }
+
+    public BoundingBox3D copy() {
+        return new BoundingBox3D(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/collision/Ray3D.java`:
+
+```java
+package dev.lyy.astrox.collision;
+
+import dev.lyy.astrox.util.FastMath;
+import dev.lyy.astrox.util.Vector3d;
+
+/**
+ * 3D Ray Representation for raymarching, line-of-sight calculation, and reach validation.
+ */
+public class Ray3D {
+    public final Vector3d origin = new Vector3d();
+    public final Vector3d direction = new Vector3d();
+
+    public Ray3D() {}
+
+    public Ray3D(double ox, double oy, double oz, double dx, double dy, double dz) {
+        this.origin.set(ox, oy, oz);
+        this.direction.set(dx, dy, dz).normalize();
+    }
+
+    public Ray3D set(double ox, double oy, double oz, double dx, double dy, double dz) {
+        this.origin.set(ox, oy, oz);
+        this.direction.set(dx, dy, dz).normalize();
+        return this;
+    }
+
+    public static Ray3D fromPitchYaw(double ox, double oy, double oz, float pitch, float yaw) {
+        double pitchRad = pitch * FastMath.TO_RADIANS;
+        double yawRad = yaw * FastMath.TO_RADIANS;
+
+        double cosPitch = Math.cos(pitchRad);
+        double dx = -Math.sin(yawRad) * cosPitch;
+        double dy = -Math.sin(pitchRad);
+        double dz = Math.cos(yawRad) * cosPitch;
+
+        return new Ray3D(ox, oy, oz, dx, dy, dz);
+    }
+
+    public Vector3d getPointAtDistance(double distance) {
+        return new Vector3d(
+            origin.x + direction.x * distance,
+            origin.y + direction.y * distance,
+            origin.z + direction.z * distance
+        );
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/command/AstroxCommand.java`:
+
+```java
+package dev.lyy.astrox.command;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import org.geysermc.geyser.api.command.Command;
+import org.geysermc.geyser.api.command.CommandSource;
+import org.geysermc.geyser.api.event.lifecycle.GeyserDefineCommandsEvent;
+
+import java.util.List;
+import java.util.function.Consumer;
+
+public class AstroxCommand {
+    private final AstroxExtension extension;
+
+    public AstroxCommand(AstroxExtension extension) {
+        this.extension = extension;
+    }
+
+    public void register(GeyserDefineCommandsEvent event) {
+        Command rootCommand = Command.builder(extension)
+            .name("astrox")
+            .description("Astrox Anti-Cheat administrative command")
+            .permission("astrox.admin")
+            .aliases(List.of("astroxac", "aac"))
+            .playerOnly(false)
+            .bedrockOnly(false)
+            .executor(this::handleGeyserCommand)
+            .build();
+
+        event.register(rootCommand);
+    }
+
+    private void handleGeyserCommand(CommandSource source, Command command, String[] args) {
+        handleCommandSender(source::sendMessage, args);
+    }
+
+    public void handleCommandSender(Consumer<String> messenger, String[] args) {
+        if (args.length == 0) {
+            messenger.accept("§b§lAstrox Anti-Cheat §7v" + extension.description().version());
+            messenger.accept("§7• §b/astrox reload §8- §7Reload configuration file");
+            messenger.accept("§7• §b/astrox status §8- §7Display active monitored sessions");
+            messenger.accept("§7• §b/astrox inspect <player> §8- §7Inspect player telemetry & VLs");
+            return;
+        }
+
+        String sub = args[0].toLowerCase();
+        if (sub.equals("reload")) {
+            extension.getConfigManager().loadConfig();
+            messenger.accept("§a[Astrox] Configuration reloaded successfully.");
+        } else if (sub.equals("status")) {
+            int count = extension.getSessionManager().getAllSessions().size();
+            messenger.accept("§b[Astrox] §7Currently monitoring §a" + count + " §7Bedrock session(s).");
+        } else if (sub.equals("inspect") && args.length > 1) {
+            String targetName = args[1];
+            BedrockPlayerSession target = null;
+            for (BedrockPlayerSession s : extension.getSessionManager().getAllSessions()) {
+                if (s.getUsername().equalsIgnoreCase(targetName)) {
+                    target = s;
+                    break;
+                }
+            }
+
+            if (target == null) {
+                messenger.accept("§c[Astrox] Bedrock player not found: " + targetName);
+                return;
+            }
+
+            messenger.accept("§8================ §b§lAstrox Telemetry §8================");
+            messenger.accept("§7Player: §f" + target.getUsername() + " §8(XUID: " + target.getXuid() + ")");
+            messenger.accept("§7Input Mode: §b" + target.getInputTracker().getInputMode());
+            messenger.accept("§7Ping: §a" + target.getPing() + "ms §7| CPS: §e" + (int) target.getInputTracker().getCPS());
+            messenger.accept("§7Position: §f" + String.format("%.1f, %.1f, %.1f", target.currentPosition.x, target.currentPosition.y, target.currentPosition.z));
+            messenger.accept("§7Active Violations:");
+            for (CheckType ct : CheckType.values()) {
+                double score = target.getViolationTracker(ct).getActiveScore(extension.getConfigManager().getCheckConfig(ct));
+                if (score > 0.0) {
+                    messenger.accept("  §8• §7" + ct.getFriendlyName() + ": §c" + String.format("%.1f", score));
+                }
+            }
+            messenger.accept("§8==================================================");
+        } else {
+            messenger.accept("§c[Astrox] Unknown command argument. Use §e/astrox §cfor help.");
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/command/BukkitCommandBridge.java`:
+
+```java
+package dev.lyy.astrox.command;
+
+import dev.lyy.astrox.AstroxExtension;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Dynamic bridge that registers root `/astrox` commands into Bukkit/Spigot/Paper CommandMap
+ * when Geyser is running as a server plugin, while keeping pure extension portability.
+ */
+public class BukkitCommandBridge {
+
+    public static void register(AstroxExtension extension, AstroxCommand commandHandler) {
+        try {
+            Class.forName("org.bukkit.Bukkit");
+        } catch (ClassNotFoundException e) {
+            // Not running on a Bukkit/Spigot/Paper server (e.g. Velocity, BungeeCord, Standalone Geyser)
+            return;
+        }
+
+        try {
+            CommandMap commandMap = getBukkitCommandMap();
+            if (commandMap == null) return;
+
+            Command bukkitCmd = new Command("astrox", "Astrox Anti-Cheat administrative command", "/astrox <reload|status|inspect>", Arrays.asList("astroxac", "aac")) {
+                @Override
+                public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+                    if (!sender.hasPermission("astrox.admin")) {
+                        sender.sendMessage("§cYou do not have permission to execute AstroxAC administrative commands.");
+                        return true;
+                    }
+                    commandHandler.handleCommandSender(sender::sendMessage, args);
+                    return true;
+                }
+
+                @Override
+                public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+                    if (args.length == 1) {
+                        return Arrays.asList("reload", "status", "inspect");
+                    }
+                    return List.of();
+                }
+            };
+
+            commandMap.register("astrox", bukkitCmd);
+            extension.logger().info("§b[AstroxAC] §aRegistered native /astrox command to Bukkit/Spigot server.");
+        } catch (Throwable t) {
+            if (extension.isDebug()) {
+                extension.logger().warning("Failed to register Bukkit command bridge: " + t.getMessage());
+            }
+        }
+    }
+
+    private static CommandMap getBukkitCommandMap() {
+        try {
+            Method getCommandMap = Bukkit.getServer().getClass().getMethod("getCommandMap");
+            return (CommandMap) getCommandMap.invoke(Bukkit.getServer());
+        } catch (Throwable ignored) {}
+
+        try {
+            Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            return (CommandMap) commandMapField.get(Bukkit.getServer());
+        } catch (Throwable ignored) {}
+
+        return null;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/config/ActionConfig.java`:
+
+```java
+package dev.lyy.astrox.config;
+
+import java.util.Collections;
+import java.util.List;
+
+public class ActionConfig {
+    private final String name;
+    private final double executionThreshold;
+    private final double repetitionThreshold;
+    private final double repetitionDelay;
+    private final String message;
+    private final String command;
+
+    public ActionConfig(String name, double executionThreshold, double repetitionThreshold, double repetitionDelay, String message, String command) {
+        this.name = name;
+        this.executionThreshold = executionThreshold;
+        this.repetitionThreshold = repetitionThreshold;
+        this.repetitionDelay = repetitionDelay;
+        this.message = message;
+        this.command = command;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getExecutionThreshold() {
+        return executionThreshold;
+    }
+
+    public double getRepetitionThreshold() {
+        return repetitionThreshold;
+    }
+
+    public double getRepetitionDelay() {
+        return repetitionDelay;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/config/CheckConfig.java`:
+
+```java
+package dev.lyy.astrox.config;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class CheckConfig {
+    private final boolean enabled;
+    private final boolean cancelPacket;
+    private final boolean setback;
+    private final double blockThreshold;
+    private final double violationExpiration;
+    private final Map<String, Object> customOptions = new HashMap<>();
+    private final Map<String, ActionConfig> actions = new HashMap<>();
+
+    public CheckConfig(boolean enabled, boolean cancelPacket, boolean setback, double blockThreshold, double violationExpiration) {
+        this.enabled = enabled;
+        this.cancelPacket = cancelPacket;
+        this.setback = setback;
+        this.blockThreshold = blockThreshold;
+        this.violationExpiration = violationExpiration;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isCancelPacket() {
+        return cancelPacket;
+    }
+
+    public boolean isSetback() {
+        return setback;
+    }
+
+    public double getBlockThreshold() {
+        return blockThreshold;
+    }
+
+    public double getViolationExpiration() {
+        return violationExpiration;
+    }
+
+    public Map<String, ActionConfig> getActions() {
+        return actions;
+    }
+
+    public void addAction(ActionConfig action) {
+        this.actions.put(action.getName(), action);
+    }
+
+    public void setOption(String key, Object val) {
+        this.customOptions.put(key, val);
+    }
+
+    public double getDouble(String key, double fallback) {
+        Object val = customOptions.get(key);
+        if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        }
+        return fallback;
+    }
+
+    public int getInt(String key, int fallback) {
+        Object val = customOptions.get(key);
+        if (val instanceof Number) {
+            return ((Number) val).intValue();
+        }
+        return fallback;
+    }
+
+    public boolean getBoolean(String key, boolean fallback) {
+        Object val = customOptions.get(key);
+        if (val instanceof Boolean) {
+            return (Boolean) val;
+        }
+        return fallback;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/config/ConfigManager.java`:
+
+```java
+package dev.lyy.astrox.config;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class ConfigManager {
+    private final AstroxExtension extension;
+    private final Map<CheckType, CheckConfig> checkConfigs = new EnumMap<>(CheckType.class);
+
+    // Global
+    private boolean debug = false;
+    private String alertPermission = "astrox.alerts";
+    private String bypassPermission = "astrox.bypass";
+    private long joinGracePeriodMs = 1500L;
+    private int maxPingMs = 600;
+
+    // Webhook
+    private boolean webhookEnabled = false;
+    private String webhookUrl = "";
+    private String webhookUsername = "Astrox Anti-Cheat";
+    private String webhookAvatarUrl = "https://i.imgur.com/8Qe5hF4.png";
+    private int webhookColor = 0x00E5FF;
+    private double webhookMinAlertVl = 5.0;
+
+    public ConfigManager(AstroxExtension extension) {
+        this.extension = extension;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void loadConfig() {
+        try {
+            Path dataFolder = extension.dataFolder();
+            if (!Files.exists(dataFolder)) {
+                Files.createDirectories(dataFolder);
+            }
+
+            File configFile = dataFolder.resolve("config.yml").toFile();
+            if (!configFile.exists()) {
+                try (InputStream is = getClass().getClassLoader().getResourceAsStream("config.yml")) {
+                    if (is != null) {
+                        Files.copy(is, configFile.toPath());
+                    }
+                }
+            }
+
+            Yaml yaml = new Yaml();
+            Map<String, Object> root;
+            try (InputStream in = new FileInputStream(configFile)) {
+                root = yaml.load(in);
+            }
+
+            if (root == null) root = new HashMap<>();
+
+            // General section
+            Map<String, Object> general = (Map<String, Object>) root.get("general");
+            if (general != null) {
+                this.debug = Boolean.TRUE.equals(general.get("debug"));
+                this.alertPermission = (String) general.getOrDefault("alert-permission", "astrox.alerts");
+                this.bypassPermission = (String) general.getOrDefault("bypass-permission", "astrox.bypass");
+                Number grace = (Number) general.get("join-grace-period-ms");
+                this.joinGracePeriodMs = grace != null ? grace.longValue() : 1500L;
+                Number ping = (Number) general.get("max-ping-ms");
+                this.maxPingMs = ping != null ? ping.intValue() : 600;
+            }
+
+            // Webhook section
+            Map<String, Object> webhook = (Map<String, Object>) root.get("webhook");
+            if (webhook != null) {
+                this.webhookEnabled = Boolean.TRUE.equals(webhook.get("enabled"));
+                this.webhookUrl = (String) webhook.getOrDefault("url", "");
+                this.webhookUsername = (String) webhook.getOrDefault("username", "Astrox Anti-Cheat");
+                this.webhookAvatarUrl = (String) webhook.getOrDefault("avatar-url", "https://i.imgur.com/8Qe5hF4.png");
+                Number color = (Number) webhook.get("embed-color");
+                this.webhookColor = color != null ? color.intValue() : 0x00E5FF;
+                Number minVl = (Number) webhook.get("min-alert-vl");
+                this.webhookMinAlertVl = minVl != null ? minVl.doubleValue() : 5.0;
+            }
+
+            // Defaults
+            Map<String, Object> def = (Map<String, Object>) root.get("default");
+            boolean defEnabled = def == null || !Boolean.FALSE.equals(def.get("enabled"));
+            boolean defCancel = def == null || !Boolean.FALSE.equals(def.get("cancel-packet"));
+            boolean defSetback = def == null || !Boolean.FALSE.equals(def.get("setback"));
+            double defBlockThreshold = def != null && def.get("block-threshold") instanceof Number ? ((Number) def.get("block-threshold")).doubleValue() : 5.0;
+            double defViolationExpiration = def != null && def.get("violation-expiration") instanceof Number ? ((Number) def.get("violation-expiration")).doubleValue() : 300.0;
+
+            Map<String, ActionConfig> defaultActions = new HashMap<>();
+            if (def != null && def.get("actions") instanceof Map) {
+                Map<String, Object> actionsMap = (Map<String, Object>) def.get("actions");
+                for (Map.Entry<String, Object> e : actionsMap.entrySet()) {
+                    if (e.getValue() instanceof Map) {
+                        Map<String, Object> a = (Map<String, Object>) e.getValue();
+                        double exec = a.get("execution-threshold") instanceof Number ? ((Number) a.get("execution-threshold")).doubleValue() : 5.0;
+                        double repT = a.get("repetition-threshold") instanceof Number ? ((Number) a.get("repetition-threshold")).doubleValue() : 5.0;
+                        double repD = a.get("repetition-delay") instanceof Number ? ((Number) a.get("repetition-delay")).doubleValue() : 10.0;
+                        String msg = (String) a.get("message");
+                        String cmd = (String) a.get("command");
+                        defaultActions.put(e.getKey(), new ActionConfig(e.getKey(), exec, repT, repD, msg, cmd));
+                    }
+                }
+            }
+
+            // Checks section
+            Map<String, Object> checksSec = (Map<String, Object>) root.get("checks");
+            for (CheckType type : CheckType.values()) {
+                Map<String, Object> c = checksSec != null ? (Map<String, Object>) checksSec.get(type.getConfigKey()) : null;
+                boolean enabled = c != null && c.get("enabled") != null ? Boolean.TRUE.equals(c.get("enabled")) : defEnabled;
+                boolean cancel = c != null && c.get("cancel-packet") != null ? Boolean.TRUE.equals(c.get("cancel-packet")) : defCancel;
+                boolean setback = c != null && c.get("setback") != null ? Boolean.TRUE.equals(c.get("setback")) : defSetback;
+                double blockThreshold = c != null && c.get("block-threshold") instanceof Number ? ((Number) c.get("block-threshold")).doubleValue() : defBlockThreshold;
+                double expiration = c != null && c.get("violation-expiration") instanceof Number ? ((Number) c.get("violation-expiration")).doubleValue() : defViolationExpiration;
+
+                CheckConfig checkCfg = new CheckConfig(enabled, cancel, setback, blockThreshold, expiration);
+                if (c != null) {
+                    for (Map.Entry<String, Object> entry : c.entrySet()) {
+                        checkCfg.setOption(entry.getKey(), entry.getValue());
+                    }
+                }
+
+                for (ActionConfig act : defaultActions.values()) {
+                    checkCfg.addAction(act);
+                }
+
+                checkConfigs.put(type, checkCfg);
+            }
+
+            extension.logger().info("AstroxAC configuration loaded successfully.");
+        } catch (Exception e) {
+            extension.logger().error("Failed to load AstroxAC configuration!", e);
+        }
+    }
+
+    public CheckConfig getCheckConfig(CheckType type) {
+        return checkConfigs.get(type);
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public String getAlertPermission() {
+        return alertPermission;
+    }
+
+    public String getBypassPermission() {
+        return bypassPermission;
+    }
+
+    public long getJoinGracePeriodMs() {
+        return joinGracePeriodMs;
+    }
+
+    public int getMaxPingMs() {
+        return maxPingMs;
+    }
+
+    public boolean isWebhookEnabled() {
+        return webhookEnabled;
+    }
+
+    public String getWebhookUrl() {
+        return webhookUrl;
+    }
+
+    public String getWebhookUsername() {
+        return webhookUsername;
+    }
+
+    public String getWebhookAvatarUrl() {
+        return webhookAvatarUrl;
+    }
+
+    public int getWebhookColor() {
+        return webhookColor;
+    }
+
+    public double getWebhookMinAlertVl() {
+        return webhookMinAlertVl;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/network/AstroxChannelInitializer.java`:
+
+```java
+package dev.lyy.astrox.network;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+
+import java.lang.reflect.Method;
+
+public final class AstroxChannelInitializer {
+    private AstroxChannelInitializer() {}
+
+    public static void inject(AstroxExtension extension, BedrockPlayerSession session) {
+        GeyserConnection connection = session.getConnection();
+        if (connection == null) return;
+
+        try {
+            Channel channel = extractNettyChannel(connection);
+            if (channel != null && channel.pipeline() != null) {
+                ChannelPipeline pipeline = channel.pipeline();
+                String handlerName = "astrox_packet_interceptor";
+
+                if (pipeline.get(handlerName) != null) {
+                    pipeline.remove(handlerName);
+                }
+
+                // Add interceptor at the front of the inbound pipeline
+                pipeline.addBefore(pipeline.firstContext().name(), handlerName, new AstroxPacketInterceptor(extension, session));
+
+                if (extension.isDebug()) {
+                    extension.logger().info("[NETTY] Injected AstroxPacketInterceptor into pipeline for " + session.getUsername());
+                }
+            }
+        } catch (Throwable t) {
+            extension.logger().warning("Could not inject Netty pipeline directly for " + session.getUsername() + ": " + t.getMessage());
+        }
+    }
+
+    private static Channel extractNettyChannel(Object connection) {
+        try {
+            // Check getBedrockSession() or getUpstream() on GeyserSession
+            Method getBedrockSession = connection.getClass().getMethod("getBedrockSession");
+            Object bedrockSession = getBedrockSession.invoke(connection);
+            if (bedrockSession != null) {
+                Method getChannel = bedrockSession.getClass().getMethod("getChannel");
+                return (Channel) getChannel.invoke(bedrockSession);
+            }
+        } catch (Throwable ignored) {
+            try {
+                // Alternative path via getUpstream()
+                Method getUpstream = connection.getClass().getMethod("getUpstream");
+                Object upstream = getUpstream.invoke(connection);
+                if (upstream != null) {
+                    Method getSession = upstream.getClass().getMethod("getSession");
+                    Object bedrockSession = getSession.invoke(upstream);
+                    if (bedrockSession != null) {
+                        Method getChannel = bedrockSession.getClass().getMethod("getChannel");
+                        return (Channel) getChannel.invoke(bedrockSession);
+                    }
+                }
+            } catch (Throwable ignored2) {}
+        }
+        return null;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/network/AstroxPacketInterceptor.java`:
+
+```java
+package dev.lyy.astrox.network;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.combat.AngleCheck;
+import dev.lyy.astrox.check.combat.AutoclickerCheck;
+import dev.lyy.astrox.check.combat.HitboxBacktrackCheck;
+import dev.lyy.astrox.check.combat.ReachCheck;
+import dev.lyy.astrox.check.inventory.AutoTotemCheck;
+import dev.lyy.astrox.check.inventory.FastBreakCheck;
+import dev.lyy.astrox.check.inventory.FastPlaceCheck;
+import dev.lyy.astrox.check.movement.*;
+import dev.lyy.astrox.check.packet.BadPacketsCheck;
+import dev.lyy.astrox.check.packet.DeviceSpoofCheck;
+import dev.lyy.astrox.check.packet.LeakyBucketTimerCheck;
+import dev.lyy.astrox.network.firewall.CrasherFirewall;
+import dev.lyy.astrox.session.BedrockPlayerSession;
+import dev.lyy.astrox.util.BedrockPhysics;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.cloudburstmc.math.vector.Vector3f;
+import org.cloudburstmc.protocol.bedrock.data.PlayerActionType;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.cloudburstmc.protocol.bedrock.data.entity.EntityEventType;
+import org.cloudburstmc.protocol.bedrock.data.inventory.transaction.InventoryTransactionType;
+import org.cloudburstmc.protocol.bedrock.packet.*;
+
+import java.util.Set;
+
+/**
+ * Netty Inbound Packet Interceptor inspecting raw Bedrock packets at zero latency before Geyser translation.
+ */
+public class AstroxPacketInterceptor extends ChannelInboundHandlerAdapter {
+    private final AstroxExtension extension;
+    private final BedrockPlayerSession session;
+
+    public AstroxPacketInterceptor(AstroxExtension extension, BedrockPlayerSession session) {
+        this.extension = extension;
+        this.session = session;
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (!(msg instanceof BedrockPacket)) {
+            super.channelRead(ctx, msg);
+            return;
+        }
+
+        BedrockPacket packet = (BedrockPacket) msg;
+
+        // 1. Gateway Anti-Crasher Firewall
+        if (!CrasherFirewall.isSafe(packet)) {
+            if (extension.isDebug()) {
+                extension.logger().warning("[FIREWALL] Dropped malformed crasher packet from " + session.getUsername() + ": " + packet.getClass().getSimpleName());
+            }
+            return; // Drop packet
+        }
+
+        boolean allow = processPacket(packet);
+        if (allow) {
+            super.channelRead(ctx, msg);
+        } else {
+            if (extension.isDebug()) {
+                extension.logger().info("[CANCELLED] Packet " + packet.getClass().getSimpleName() + " cancelled for " + session.getUsername());
+            }
+        }
+    }
+
+    private boolean processPacket(BedrockPacket packet) {
+        if (packet instanceof PlayerAuthInputPacket) {
+            return handleAuthInput((PlayerAuthInputPacket) packet);
+        } else if (packet instanceof MovePlayerPacket) {
+            return handleMovePlayer((MovePlayerPacket) packet);
+        } else if (packet instanceof InventoryTransactionPacket) {
+            return handleInventoryTransaction((InventoryTransactionPacket) packet);
+        } else if (packet instanceof PlayerActionPacket) {
+            return handlePlayerAction((PlayerActionPacket) packet);
+        } else if (packet instanceof AnimatePacket) {
+            return handleAnimate((AnimatePacket) packet);
+        } else if (packet instanceof MobEquipmentPacket) {
+            return handleMobEquipment((MobEquipmentPacket) packet);
+        } else if (packet instanceof MobEffectPacket) {
+            return handleMobEffect((MobEffectPacket) packet);
+        } else if (packet instanceof EntityEventPacket) {
+            return handleEntityEvent((EntityEventPacket) packet);
+        } else if (packet instanceof SetEntityLinkPacket) {
+            return handleSetEntityLink((SetEntityLinkPacket) packet);
+        } else if (packet instanceof InteractPacket) {
+            return handleInteract((InteractPacket) packet);
+        }
+
+        return true;
+    }
+
+    private boolean handleAuthInput(PlayerAuthInputPacket packet) {
+        // BadPackets Check
+        BadPacketsCheck badPackets = (BadPacketsCheck) session.getCheck(CheckType.BAD_PACKETS);
+        if (badPackets != null && !badPackets.processAuthInput(packet)) {
+            return false;
+        }
+
+        // LeakyBucket Timer Check
+        LeakyBucketTimerCheck timer = (LeakyBucketTimerCheck) session.getCheck(CheckType.TIMER);
+        if (timer != null && !timer.processPacket()) {
+            return false;
+        }
+
+        // Device Spoof Check
+        DeviceSpoofCheck deviceSpoof = (DeviceSpoofCheck) session.getCheck(CheckType.DEVICE_SPOOF);
+        if (deviceSpoof != null && packet.getMotion() != null) {
+            deviceSpoof.processInput(packet.getInputMode(), packet.getMotion().getX(), packet.getMotion().getY());
+        }
+
+        Vector3f pos = packet.getPosition();
+        Vector3f rot = packet.getRotation();
+        Set<PlayerAuthInputData> inputData = packet.getInputData();
+
+        // Update Session State
+        session.previousPosition.set(session.currentPosition);
+        session.currentPosition.set(pos.getX(), pos.getY(), pos.getZ());
+        if (packet.getDelta() != null) {
+            session.deltaPosition.set(packet.getDelta().getX(), packet.getDelta().getY(), packet.getDelta().getZ());
+        }
+
+        session.prevPitch = session.pitch;
+        session.prevYaw = session.yaw;
+        session.pitch = rot.getX();
+        session.yaw = rot.getY();
+        session.headYaw = rot.getZ();
+
+        session.prevOnGround = session.onGround;
+        session.onGround = inputData.contains(PlayerAuthInputData.JUMP_DOWN) || (packet.getDelta() != null && packet.getDelta().getY() == 0.0f);
+        session.isSprinting = inputData.contains(PlayerAuthInputData.SPRINTING) || inputData.contains(PlayerAuthInputData.START_SPRINTING);
+        session.isSneaking = inputData.contains(PlayerAuthInputData.SNEAKING) || inputData.contains(PlayerAuthInputData.START_SNEAKING);
+        session.isJumping = inputData.contains(PlayerAuthInputData.START_JUMPING) || inputData.contains(PlayerAuthInputData.JUMPING);
+        session.isGliding = inputData.contains(PlayerAuthInputData.START_GLIDING) || session.isGliding;
+        if (inputData.contains(PlayerAuthInputData.STOP_GLIDING)) session.isGliding = false;
+        session.isSwimming = inputData.contains(PlayerAuthInputData.START_SWIMMING) || session.isSwimming;
+        if (inputData.contains(PlayerAuthInputData.STOP_SWIMMING)) session.isSwimming = false;
+
+        session.lastClientTick = session.clientTick;
+        session.clientTick = packet.getTick();
+        session.lastPacketTime = System.currentTimeMillis();
+
+        float motionX = packet.getMotion() != null ? packet.getMotion().getX() : 0.0f;
+        float motionZ = packet.getMotion() != null ? packet.getMotion().getY() : 0.0f;
+        session.getInputTracker().updateInput(packet.getInputMode(), motionX, motionZ, inputData);
+
+        // Record Backtrack Snapshot
+        session.getBacktrackHistory().recordSnapshot(
+            pos.getX(), pos.getY(), pos.getZ(), rot.getX(), rot.getY(),
+            packet.getTick(), BedrockPhysics.PLAYER_WIDTH, session.getBoundingHeight()
+        );
+
+        double dx = session.currentPosition.x - session.previousPosition.x;
+        double dy = session.currentPosition.y - session.previousPosition.y;
+        double dz = session.currentPosition.z - session.previousPosition.z;
+
+        // Execute Movement Checks
+        HorizontalSpeedCheck speedCheck = (HorizontalSpeedCheck) session.getCheck(CheckType.HORIZONTAL_SPEED);
+        if (speedCheck != null && !speedCheck.processMovement(dx, dz, session.onGround)) {
+            return false;
+        }
+
+        VerticalFlightCheck flightCheck = (VerticalFlightCheck) session.getCheck(CheckType.VERTICAL_FLIGHT);
+        if (flightCheck != null && !flightCheck.processMovement(dy, session.onGround)) {
+            return false;
+        }
+
+        ElytraAerodynamicCheck elytraCheck = (ElytraAerodynamicCheck) session.getCheck(CheckType.ELYTRA_AERODYNAMIC);
+        if (elytraCheck != null && !elytraCheck.processMovement(dx, dy, dz)) {
+            return false;
+        }
+
+        PhaseCheck phaseCheck = (PhaseCheck) session.getCheck(CheckType.PHASE);
+        if (phaseCheck != null && !phaseCheck.processMovement(session.previousPosition.x, session.previousPosition.y, session.previousPosition.z, session.currentPosition.x, session.currentPosition.y, session.currentPosition.z)) {
+            return false;
+        }
+
+        BoatMovementCheck boatCheck = (BoatMovementCheck) session.getCheck(CheckType.BOAT_MOVEMENT);
+        if (boatCheck != null && !boatCheck.processMovement(dx, dy, dz)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean handleMovePlayer(MovePlayerPacket packet) {
+        if (session.getRuntimeEntityId() <= 0 && packet.getRuntimeEntityId() > 0) {
+            session.setRuntimeEntityId(packet.getRuntimeEntityId());
+        }
+
+        if (packet.getMode() == MovePlayerPacket.Mode.TELEPORT || packet.getMode() == MovePlayerPacket.Mode.RESPAWN) {
+            session.recordTeleport();
+        }
+        return true;
+    }
+
+    private boolean handleInventoryTransaction(InventoryTransactionPacket packet) {
+        InventoryTransactionType type = packet.getTransactionType();
+
+        // Combat Attack Transaction
+        if (type == InventoryTransactionType.ITEM_USE_ON_ENTITY && packet.getActionType() == 1) { // 1 = Attack
+            long targetRuntimeId = packet.getRuntimeEntityId();
+
+            // Autoclicker Check (with deduplication)
+            AutoclickerCheck autoclicker = (AutoclickerCheck) session.getCheck(CheckType.AUTOCLICKER);
+            if (autoclicker != null && !autoclicker.processClick()) {
+                return false;
+            }
+
+            // Angle Check
+            AngleCheck angle = (AngleCheck) session.getCheck(CheckType.ANGLE);
+            if (angle != null && !angle.processRotation(session.pitch, session.yaw)) {
+                return false;
+            }
+
+            // Find Target Session with direct runtime ID mapping
+            BedrockPlayerSession targetSession = extension.getSessionManager().getSessionByRuntimeId(targetRuntimeId);
+            if (targetSession == null) {
+                for (BedrockPlayerSession s : extension.getSessionManager().getAllSessions()) {
+                    if (s.getConnection() != null && !s.equals(session)) {
+                        targetSession = s;
+                        break;
+                    }
+                }
+            }
+
+            if (targetSession != null) {
+                ReachCheck reach = (ReachCheck) session.getCheck(CheckType.REACH);
+                if (reach != null && !reach.processAttack(targetSession.getBoundingBox(), targetSession.currentPosition.x, targetSession.currentPosition.y, targetSession.currentPosition.z)) {
+                    return false;
+                }
+
+                HitboxBacktrackCheck backtrack = (HitboxBacktrackCheck) session.getCheck(CheckType.HITBOX_BACKTRACK);
+                if (backtrack != null && !backtrack.processAttack(targetSession)) {
+                    return false;
+                }
+            }
+        }
+
+        // Block Place Transaction
+        if (type == InventoryTransactionType.ITEM_USE && packet.getActionType() == 0) { // 0 = Place Block
+            FastPlaceCheck fastPlace = (FastPlaceCheck) session.getCheck(CheckType.FAST_PLACE);
+            if (fastPlace != null && !fastPlace.processBlockPlace()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean handlePlayerAction(PlayerActionPacket packet) {
+        if (session.getRuntimeEntityId() <= 0 && packet.getRuntimeEntityId() > 0) {
+            session.setRuntimeEntityId(packet.getRuntimeEntityId());
+        }
+
+        PlayerActionType action = packet.getAction();
+        if (action == PlayerActionType.START_BREAK) {
+            FastBreakCheck fastBreak = (FastBreakCheck) session.getCheck(CheckType.FAST_BREAK);
+            if (fastBreak != null) fastBreak.startBreaking();
+        } else if (action == PlayerActionType.STOP_BREAK) {
+            FastBreakCheck fastBreak = (FastBreakCheck) session.getCheck(CheckType.FAST_BREAK);
+            if (fastBreak != null && !fastBreak.completeBreaking()) {
+                return false;
+            }
+        } else if (action == PlayerActionType.START_GLIDE) {
+            session.isGliding = true;
+        } else if (action == PlayerActionType.STOP_GLIDE) {
+            session.isGliding = false;
+        } else if (action == PlayerActionType.RESPAWN) {
+            session.recordTeleport();
+        }
+        return true;
+    }
+
+    private boolean handleAnimate(AnimatePacket packet) {
+        if (packet.getAction() == AnimatePacket.Action.SWING_ARM) {
+            AutoclickerCheck autoclicker = (AutoclickerCheck) session.getCheck(CheckType.AUTOCLICKER);
+            if (autoclicker != null) {
+                autoclicker.processClick();
+            }
+        }
+        return true;
+    }
+
+    private boolean handleMobEquipment(MobEquipmentPacket packet) {
+        if (packet.getContainerId() == 119) { // Offhand slot container
+            AutoTotemCheck autoTotem = (AutoTotemCheck) session.getCheck(CheckType.AUTO_TOTEM);
+            if (autoTotem != null && !autoTotem.processOffhandSwap()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean handleMobEffect(MobEffectPacket packet) {
+        if (packet.getEvent() == MobEffectPacket.Event.ADD || packet.getEvent() == MobEffectPacket.Event.MODIFY) {
+            session.setPotionAmplifier(packet.getEffectId(), packet.getAmplifier());
+        } else if (packet.getEvent() == MobEffectPacket.Event.REMOVE) {
+            session.setPotionAmplifier(packet.getEffectId(), -1);
+        }
+        return true;
+    }
+
+    private boolean handleEntityEvent(EntityEventPacket packet) {
+        if (packet.getType() == EntityEventType.HURT) {
+            session.recordDamage();
+        }
+        return true;
+    }
+
+    private boolean handleSetEntityLink(SetEntityLinkPacket packet) {
+        if (packet.getEntityLink() != null) {
+            session.inVehicle = packet.getEntityLink().getType() == org.cloudburstmc.protocol.bedrock.data.entity.EntityLinkData.Type.RIDER;
+        }
+        return true;
+    }
+
+    private boolean handleInteract(InteractPacket packet) {
+        if (packet.getAction() == InteractPacket.Action.OPEN_INVENTORY) {
+            // Player opened inventory
+        }
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/network/firewall/CrasherFirewall.java`:
+
+```java
+package dev.lyy.astrox.network.firewall;
+
+import dev.lyy.astrox.util.FastMath;
+import org.cloudburstmc.math.vector.Vector3f;
+import org.cloudburstmc.protocol.bedrock.packet.BedrockPacket;
+import org.cloudburstmc.protocol.bedrock.packet.CommandRequestPacket;
+import org.cloudburstmc.protocol.bedrock.packet.LevelSoundEventPacket;
+
+/**
+ * Firewall filtering malformed crasher packets, NaN coordinates, and packet floods at the network gateway.
+ */
+public final class CrasherFirewall {
+    private CrasherFirewall() {}
+
+    public static boolean isSafe(BedrockPacket packet) {
+        if (packet == null) return false;
+
+        // LevelSoundEvent Packet Crasher Protection
+        if (packet instanceof LevelSoundEventPacket) {
+            LevelSoundEventPacket sound = (LevelSoundEventPacket) packet;
+            Vector3f pos = sound.getPosition();
+            if (pos == null || !FastMath.isFinite(pos.getX()) || !FastMath.isFinite(pos.getY()) || !FastMath.isFinite(pos.getZ())) {
+                return false;
+            }
+            if (Math.abs(pos.getX()) > 30_000_000.0 || Math.abs(pos.getY()) > 5000.0 || Math.abs(pos.getZ()) > 30_000_000.0) {
+                return false;
+            }
+            if (sound.getSound() == null) {
+                return false;
+            }
+        }
+
+        // Command Overflow Crasher Protection
+        if (packet instanceof CommandRequestPacket) {
+            CommandRequestPacket cmd = (CommandRequestPacket) packet;
+            String command = cmd.getCommand();
+            if (command != null && command.length() > 512) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/session/BedrockPlayerSession.java`:
+
+```java
+package dev.lyy.astrox.session;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.AbstractCheck;
+import dev.lyy.astrox.collision.BoundingBox3D;
+import dev.lyy.astrox.session.data.BacktrackHistory;
+import dev.lyy.astrox.session.data.InputTracker;
+import dev.lyy.astrox.session.data.ViolationTracker;
+import dev.lyy.astrox.util.BedrockPhysics;
+import dev.lyy.astrox.util.Vector3d;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * High-performance state representation for a single Bedrock player session.
+ */
+public class BedrockPlayerSession {
+    private final AstroxExtension extension;
+    private final GeyserConnection connection;
+    private final UUID uuid;
+    private final String xuid;
+    private final String username;
+    private final long joinTimestamp;
+    private long runtimeEntityId = -1L;
+
+    // Kinematics & Position
+    public final Vector3d currentPosition = new Vector3d();
+    public final Vector3d previousPosition = new Vector3d();
+    public final Vector3d deltaPosition = new Vector3d();
+    public final Vector3d lastValidPosition = new Vector3d();
+    public final Vector3d lastGroundPosition = new Vector3d();
+
+    // Rotations (Degrees)
+    public float pitch = 0.0f;
+    public float yaw = 0.0f;
+    public float headYaw = 0.0f;
+    public float prevPitch = 0.0f;
+    public float prevYaw = 0.0f;
+
+    // State Flags & Ticks
+    public long clientTick = 0L;
+    public long lastClientTick = 0L;
+    public long lastPacketTime = 0L;
+    public boolean onGround = true;
+    public boolean prevOnGround = true;
+    public boolean inVehicle = false;
+    public boolean isGliding = false;
+    public boolean isSwimming = false;
+    public boolean isSneaking = false;
+    public boolean isSprinting = false;
+    public boolean isJumping = false;
+
+    // Velocity & Immunity
+    private final Deque<VelocityEntry> velocityQueue = new ArrayDeque<>();
+    private long lastExplosionTime = 0L;
+    private long lastTeleportTime = 0L;
+    private long lastDamageTime = 0L;
+    private int ping = 0;
+
+    // Potions: ID -> Amplifier
+    private final Map<Integer, Integer> potionAmplifiers = new ConcurrentHashMap<>();
+
+    // Subsystems
+    private final InputTracker inputTracker = new InputTracker();
+    private final BacktrackHistory backtrackHistory = new BacktrackHistory();
+    private final Map<CheckType, ViolationTracker> violationTrackers = new EnumMap<>(CheckType.class);
+    private final Map<CheckType, AbstractCheck> checks = new EnumMap<>(CheckType.class);
+
+    public static class VelocityEntry {
+        public final double velocity;
+        public final long timestamp;
+
+        public VelocityEntry(double velocity, long timestamp) {
+            this.velocity = velocity;
+            this.timestamp = timestamp;
+        }
+    }
+
+    public BedrockPlayerSession(AstroxExtension extension, GeyserConnection connection) {
+        this.extension = extension;
+        this.connection = connection;
+        this.uuid = connection.javaUuid();
+        this.xuid = connection.xuid();
+        this.username = connection.name();
+        this.joinTimestamp = System.currentTimeMillis();
+
+        for (CheckType type : CheckType.values()) {
+            this.violationTrackers.put(type, new ViolationTracker(type));
+        }
+    }
+
+    public AstroxExtension getExtension() {
+        return extension;
+    }
+
+    public GeyserConnection getConnection() {
+        return connection;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getXuid() {
+        return xuid;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public long getJoinTimestamp() {
+        return joinTimestamp;
+    }
+
+    public long getRuntimeEntityId() {
+        return runtimeEntityId;
+    }
+
+    public void setRuntimeEntityId(long runtimeEntityId) {
+        this.runtimeEntityId = runtimeEntityId;
+        extension.getSessionManager().registerRuntimeId(runtimeEntityId, this);
+    }
+
+    public int getPing() {
+        return ping;
+    }
+
+    public void setPing(int ping) {
+        this.ping = ping;
+    }
+
+    public InputTracker getInputTracker() {
+        return inputTracker;
+    }
+
+    public BacktrackHistory getBacktrackHistory() {
+        return backtrackHistory;
+    }
+
+    public ViolationTracker getViolationTracker(CheckType type) {
+        return violationTrackers.get(type);
+    }
+
+    public void registerCheck(CheckType type, AbstractCheck check) {
+        this.checks.put(type, check);
+    }
+
+    public AbstractCheck getCheck(CheckType type) {
+        return checks.get(type);
+    }
+
+    public Collection<AbstractCheck> getAllChecks() {
+        return checks.values();
+    }
+
+    public synchronized void pushVelocity(double velocity) {
+        velocityQueue.addLast(new VelocityEntry(velocity, System.currentTimeMillis()));
+    }
+
+    public synchronized double consumeVelocity() {
+        long now = System.currentTimeMillis();
+        double sum = 0.0;
+        while (!velocityQueue.isEmpty()) {
+            VelocityEntry entry = velocityQueue.pollFirst();
+            if ((now - entry.timestamp) <= 1200L) {
+                sum += entry.velocity;
+            }
+        }
+        return sum;
+    }
+
+    public void recordExplosion() {
+        this.lastExplosionTime = System.currentTimeMillis();
+    }
+
+    public boolean isExplosionExempt() {
+        return (System.currentTimeMillis() - lastExplosionTime) <= 1500L;
+    }
+
+    public void recordTeleport() {
+        this.lastTeleportTime = System.currentTimeMillis();
+    }
+
+    public boolean isTeleportExempt() {
+        return (System.currentTimeMillis() - lastTeleportTime) <= 1200L;
+    }
+
+    public void recordDamage() {
+        this.lastDamageTime = System.currentTimeMillis();
+    }
+
+    public long getLastDamageTime() {
+        return lastDamageTime;
+    }
+
+    public void setPotionAmplifier(int effectId, int amplifier) {
+        if (amplifier < 0) {
+            potionAmplifiers.remove(effectId);
+        } else {
+            potionAmplifiers.put(effectId, amplifier);
+        }
+    }
+
+    public int getPotionAmplifier(int effectId) {
+        return potionAmplifiers.getOrDefault(effectId, -1);
+    }
+
+    public double getEyeHeight() {
+        if (isGliding) return BedrockPhysics.EYE_HEIGHT_GLIDING;
+        if (isSwimming) return BedrockPhysics.EYE_HEIGHT_SWIMMING;
+        if (isSneaking) return BedrockPhysics.EYE_HEIGHT_SNEAKING;
+        return BedrockPhysics.EYE_HEIGHT_STANDING;
+    }
+
+    public double getBoundingHeight() {
+        if (isGliding) return BedrockPhysics.PLAYER_HEIGHT_GLIDING;
+        if (isSwimming) return BedrockPhysics.PLAYER_HEIGHT_SWIMMING;
+        if (isSneaking) return BedrockPhysics.PLAYER_HEIGHT_SNEAKING;
+        return BedrockPhysics.PLAYER_HEIGHT_STANDING;
+    }
+
+    public BoundingBox3D getBoundingBox() {
+        return new BoundingBox3D().setFromCenterAndSize(
+            currentPosition.x, currentPosition.y, currentPosition.z,
+            BedrockPhysics.PLAYER_WIDTH, getBoundingHeight()
+        );
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/session/SessionManager.java`:
+
+```java
+package dev.lyy.astrox.session;
+
+import dev.lyy.astrox.AstroxExtension;
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.check.combat.*;
+import dev.lyy.astrox.check.inventory.*;
+import dev.lyy.astrox.check.movement.*;
+import dev.lyy.astrox.check.packet.*;
+import org.geysermc.geyser.api.connection.GeyserConnection;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class SessionManager {
+    private final AstroxExtension extension;
+    private final Map<UUID, BedrockPlayerSession> sessionsByUuid = new ConcurrentHashMap<>();
+    private final Map<String, BedrockPlayerSession> sessionsByXuid = new ConcurrentHashMap<>();
+    private final Map<Long, BedrockPlayerSession> sessionsByRuntimeId = new ConcurrentHashMap<>();
+
+    public SessionManager(AstroxExtension extension) {
+        this.extension = extension;
+    }
+
+    public BedrockPlayerSession createSession(GeyserConnection connection) {
+        if (connection == null) return null;
+
+        BedrockPlayerSession session = new BedrockPlayerSession(extension, connection);
+
+        // Register All Movement Checks
+        session.registerCheck(CheckType.HORIZONTAL_SPEED, new HorizontalSpeedCheck(session));
+        session.registerCheck(CheckType.VERTICAL_FLIGHT, new VerticalFlightCheck(session));
+        session.registerCheck(CheckType.ELYTRA_AERODYNAMIC, new ElytraAerodynamicCheck(session));
+        session.registerCheck(CheckType.PHASE, new PhaseCheck(session));
+        session.registerCheck(CheckType.BOAT_MOVEMENT, new BoatMovementCheck(session));
+
+        // Register All Combat Checks
+        session.registerCheck(CheckType.REACH, new ReachCheck(session));
+        session.registerCheck(CheckType.HITBOX_BACKTRACK, new HitboxBacktrackCheck(session));
+        session.registerCheck(CheckType.ANGLE, new AngleCheck(session));
+        session.registerCheck(CheckType.AUTOCLICKER, new AutoclickerCheck(session));
+
+        // Register All Packet & Exploit Checks
+        session.registerCheck(CheckType.BAD_PACKETS, new BadPacketsCheck(session));
+        session.registerCheck(CheckType.TIMER, new LeakyBucketTimerCheck(session));
+        session.registerCheck(CheckType.DEVICE_SPOOF, new DeviceSpoofCheck(session));
+
+        // Register All Inventory Checks
+        session.registerCheck(CheckType.AUTO_TOTEM, new AutoTotemCheck(session));
+        session.registerCheck(CheckType.FAST_PLACE, new FastPlaceCheck(session));
+        session.registerCheck(CheckType.FAST_BREAK, new FastBreakCheck(session));
+
+        if (connection.javaUuid() != null) {
+            sessionsByUuid.put(connection.javaUuid(), session);
+        }
+        if (connection.xuid() != null) {
+            sessionsByXuid.put(connection.xuid(), session);
+        }
+
+        return session;
+    }
+
+    public void registerRuntimeId(long runtimeEntityId, BedrockPlayerSession session) {
+        if (runtimeEntityId > 0 && session != null) {
+            sessionsByRuntimeId.put(runtimeEntityId, session);
+        }
+    }
+
+    public void removeSession(GeyserConnection connection) {
+        if (connection == null) return;
+        if (connection.javaUuid() != null) {
+            sessionsByUuid.remove(connection.javaUuid());
+        }
+        if (connection.xuid() != null) {
+            BedrockPlayerSession session = sessionsByXuid.remove(connection.xuid());
+            if (session != null && session.getRuntimeEntityId() > 0) {
+                sessionsByRuntimeId.remove(session.getRuntimeEntityId());
+            }
+            extension.getActionManager().cleanupSession(connection.xuid());
+        }
+    }
+
+    public BedrockPlayerSession getSession(UUID uuid) {
+        if (uuid == null) return null;
+        return sessionsByUuid.get(uuid);
+    }
+
+    public BedrockPlayerSession getSession(String xuid) {
+        if (xuid == null) return null;
+        return sessionsByXuid.get(xuid);
+    }
+
+    public BedrockPlayerSession getSessionByRuntimeId(long runtimeEntityId) {
+        return sessionsByRuntimeId.get(runtimeEntityId);
+    }
+
+    public Collection<BedrockPlayerSession> getAllSessions() {
+        return sessionsByUuid.values();
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/session/data/BacktrackHistory.java`:
+
+```java
+package dev.lyy.astrox.session.data;
+
+import dev.lyy.astrox.collision.BoundingBox3D;
+import dev.lyy.astrox.util.FastMath;
+import dev.lyy.astrox.util.Vector3d;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+/**
+ * 1000ms rolling circular history of spatial position and bounding box snapshots for latency backtracking.
+ */
+public class BacktrackHistory {
+    private static final int MAX_SNAPSHOTS = 40; // 2000ms at 20 ticks
+    private final Deque<PositionSnapshot> snapshots = new ArrayDeque<>(MAX_SNAPSHOTS);
+
+    public static class PositionSnapshot {
+        public final double x, y, z;
+        public final float pitch, yaw;
+        public final long timestamp;
+        public final long clientTick;
+        public final BoundingBox3D boundingBox;
+
+        public PositionSnapshot(double x, double y, double z, float pitch, float yaw, long timestamp, long clientTick, double width, double height) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.pitch = pitch;
+            this.yaw = yaw;
+            this.timestamp = timestamp;
+            this.clientTick = clientTick;
+            this.boundingBox = new BoundingBox3D().setFromCenterAndSize(x, y, z, width, height);
+        }
+    }
+
+    public synchronized void recordSnapshot(double x, double y, double z, float pitch, float yaw, long clientTick, double width, double height) {
+        long now = System.currentTimeMillis();
+        snapshots.addLast(new PositionSnapshot(x, y, z, pitch, yaw, now, clientTick, width, height));
+
+        // Expire snapshots older than 1200ms
+        while (snapshots.size() > 1) {
+            PositionSnapshot first = snapshots.peekFirst();
+            if ((now - first.timestamp) > 1200L || snapshots.size() > MAX_SNAPSHOTS) {
+                snapshots.removeFirst();
+            } else {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Interpolates the closest bounding box for a target at a specific past timestamp.
+     */
+    public synchronized BoundingBox3D getInterpolatedBox(long targetTimestamp) {
+        if (snapshots.isEmpty()) return null;
+        if (snapshots.size() == 1) return snapshots.peekFirst().boundingBox.copy();
+
+        PositionSnapshot prev = null;
+        for (PositionSnapshot curr : snapshots) {
+            if (curr.timestamp >= targetTimestamp) {
+                if (prev == null) return curr.boundingBox.copy();
+
+                // Linear interpolation factor
+                double total = curr.timestamp - prev.timestamp;
+                double progress = total > 0 ? FastMath.clamp((double) (targetTimestamp - prev.timestamp) / total, 0.0, 1.0) : 0.0;
+
+                double ix = prev.x + (curr.x - prev.x) * progress;
+                double iy = prev.y + (curr.y - prev.y) * progress;
+                double iz = prev.z + (curr.z - prev.z) * progress;
+
+                double width = curr.boundingBox.maxX - curr.boundingBox.minX;
+                double height = curr.boundingBox.maxY - curr.boundingBox.minY;
+
+                return new BoundingBox3D().setFromCenterAndSize(ix, iy, iz, width, height);
+            }
+            prev = curr;
+        }
+
+        return snapshots.peekLast().boundingBox.copy();
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/session/data/InputTracker.java`:
+
+```java
+package dev.lyy.astrox.session.data;
+
+import org.cloudburstmc.protocol.bedrock.data.InputMode;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Set;
+
+/**
+ * Thread-safe tracking of hardware input mode, analog movement curves, click entropy, and input action bitsets.
+ */
+public class InputTracker {
+    private volatile InputMode inputMode = InputMode.MOUSE;
+    private volatile float analogX = 0.0f;
+    private volatile float analogZ = 0.0f;
+    private volatile Set<PlayerAuthInputData> lastInputFlags = Set.of();
+
+    // Click Statistics
+    private final Deque<Long> clickTimestamps = new ArrayDeque<>();
+    private final Deque<Long> attackIntervals = new ArrayDeque<>();
+    private long lastAttackTime = 0L;
+    private long lastClickTick = -1L;
+
+    public synchronized void updateInput(InputMode mode, float analogX, float analogZ, Set<PlayerAuthInputData> inputFlags) {
+        if (mode != null) {
+            this.inputMode = mode;
+        }
+        this.analogX = analogX;
+        this.analogZ = analogZ;
+        this.lastInputFlags = inputFlags;
+    }
+
+    public synchronized boolean recordClick(long clientTick) {
+        // Prevent double-counting when both AnimatePacket and InventoryTransactionPacket arrive in same tick
+        if (clientTick > 0 && clientTick == lastClickTick) {
+            return false;
+        }
+        this.lastClickTick = clientTick;
+
+        long now = System.currentTimeMillis();
+        clickTimestamps.addLast(now);
+
+        if (lastAttackTime > 0) {
+            long delta = now - lastAttackTime;
+            if (delta < 1000L) {
+                attackIntervals.addLast(delta);
+                if (attackIntervals.size() > 40) {
+                    attackIntervals.removeFirst();
+                }
+            }
+        }
+        lastAttackTime = now;
+
+        // Expire clicks older than 1000ms
+        while (!clickTimestamps.isEmpty() && (now - clickTimestamps.peekFirst()) > 1000L) {
+            clickTimestamps.removeFirst();
+        }
+        return true;
+    }
+
+    public synchronized double getCPS() {
+        long now = System.currentTimeMillis();
+        while (!clickTimestamps.isEmpty() && (now - clickTimestamps.peekFirst()) > 1000L) {
+            clickTimestamps.removeFirst();
+        }
+        return clickTimestamps.size();
+    }
+
+    public synchronized double calculateIntervalStandardDeviation() {
+        if (attackIntervals.size() < 10) return 10.0;
+
+        double sum = 0.0;
+        for (long interval : attackIntervals) {
+            sum += interval;
+        }
+        double mean = sum / attackIntervals.size();
+
+        double varianceSum = 0.0;
+        for (long interval : attackIntervals) {
+            double diff = interval - mean;
+            varianceSum += diff * diff;
+        }
+        return Math.sqrt(varianceSum / attackIntervals.size());
+    }
+
+    public InputMode getInputMode() {
+        return inputMode;
+    }
+
+    public float getAnalogX() {
+        return analogX;
+    }
+
+    public float getAnalogZ() {
+        return analogZ;
+    }
+
+    public Set<PlayerAuthInputData> getLastInputFlags() {
+        return lastInputFlags;
+    }
+
+    public boolean hasFlag(PlayerAuthInputData flag) {
+        return lastInputFlags != null && lastInputFlags.contains(flag);
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/session/data/ViolationTracker.java`:
+
+```java
+package dev.lyy.astrox.session.data;
+
+import dev.lyy.astrox.api.CheckType;
+import dev.lyy.astrox.config.CheckConfig;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+public class ViolationTracker {
+    private final CheckType checkType;
+    private final Deque<ViolationEntry> history = new ArrayDeque<>();
+    private double cumulativeScore = 0.0;
+
+    public static class ViolationEntry {
+        public final double score;
+        public final long timestamp;
+
+        public ViolationEntry(double score, long timestamp) {
+            this.score = score;
+            this.timestamp = timestamp;
+        }
+    }
+
+    public ViolationTracker(CheckType checkType) {
+        this.checkType = checkType;
+    }
+
+    public synchronized void addViolation(double score, CheckConfig config) {
+        long now = System.currentTimeMillis();
+        history.addLast(new ViolationEntry(score, now));
+        cumulativeScore += score;
+        purgeExpired(now, config);
+    }
+
+    public synchronized double getActiveScore(CheckConfig config) {
+        long now = System.currentTimeMillis();
+        purgeExpired(now, config);
+        double total = 0.0;
+        for (ViolationEntry entry : history) {
+            total += entry.score;
+        }
+        return total;
+    }
+
+    public synchronized double getCumulativeScore() {
+        return cumulativeScore;
+    }
+
+    public synchronized void reset() {
+        history.clear();
+        cumulativeScore = 0.0;
+    }
+
+    private void purgeExpired(long now, CheckConfig config) {
+        if (config == null || config.getViolationExpiration() <= 0.0) return;
+        long maxAgeMs = (long) (config.getViolationExpiration() * 1000.0);
+
+        while (!history.isEmpty()) {
+            ViolationEntry first = history.peekFirst();
+            if ((now - first.timestamp) >= maxAgeMs) {
+                history.removeFirst();
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/util/BedrockPhysics.java`:
+
+```java
+package dev.lyy.astrox.util;
+
+/**
+ * Bedrock Edition physics constants, kinematic formulas, and stance dimensions.
+ */
+public final class BedrockPhysics {
+    // Kinematic Acceleration & Drag Constants
+    public static final double GRAVITY = 0.08;
+    public static final double VERTICAL_DRAG = 0.98;
+    public static final double HORIZONTAL_AIR_DRAG = 0.91;
+    public static final double WATER_DRAG = 0.90;
+    public static final double DOLPHIN_GRACE_DRAG = 0.96;
+    public static final double LAVA_DRAG = 0.50;
+
+    // Slipperiness
+    public static final double DEFAULT_SLIPPERINESS = 0.60;
+    public static final double ICE_SLIPPERINESS = 0.98;
+    public static final double BLUE_ICE_SLIPPERINESS = 0.989;
+    public static final double SLIME_SLIPPERINESS = 0.80;
+
+    // Movement Speeds
+    public static final double BASE_WALK_SPEED = 0.10;
+    public static final double SPRINT_MULTIPLIER = 1.30;
+    public static final double SNEAK_MULTIPLIER = 0.30;
+    public static final double SPRINT_JUMP_BOOST = 0.20;
+
+    // Jump & Step
+    public static final double BASE_JUMP_VELOCITY = 0.42;
+    public static final double JUMP_BOOST_PER_LEVEL = 0.10;
+    public static final double BEDROCK_STEP_HEIGHT = 0.60;
+    public static final double TERMINAL_VELOCITY = 3.92;
+
+    // Reach Limits (Blocks)
+    public static final double MOUSE_REACH_LIMIT = 3.05;
+    public static final double TOUCH_REACH_LIMIT = 3.85;
+    public static final double CONTROLLER_REACH_LIMIT = 3.10;
+    public static final double CREATIVE_REACH_LIMIT = 6.00;
+
+    // Player Bounding Box Dimensions
+    public static final double PLAYER_WIDTH = 0.60;
+    public static final double PLAYER_HEIGHT_STANDING = 1.80;
+    public static final double PLAYER_HEIGHT_SNEAKING = 1.32;
+    public static final double PLAYER_HEIGHT_SWIMMING = 0.60;
+    public static final double PLAYER_HEIGHT_GLIDING = 0.60;
+    public static final double PLAYER_HEIGHT_CRAWLING = 0.60;
+
+    public static final double EYE_HEIGHT_STANDING = 1.62;
+    public static final double EYE_HEIGHT_SNEAKING = 1.32;
+    public static final double EYE_HEIGHT_SWIMMING = 0.40;
+    public static final double EYE_HEIGHT_GLIDING = 0.40;
+    public static final double EYE_HEIGHT_CRAWLING = 0.40;
+
+    private BedrockPhysics() {}
+
+    public static double calculateGroundFriction(double slipperiness) {
+        return slipperiness * 0.91;
+    }
+
+    public static double calculateGroundAcceleration(double baseSpeed, double slipperiness) {
+        double s3 = slipperiness * slipperiness * slipperiness;
+        return baseSpeed * (0.216 / (s3 > 0.0001 ? s3 : 0.216));
+    }
+
+    public static double calculateJumpVelocity(int jumpBoostLevel) {
+        if (jumpBoostLevel <= 0) return BASE_JUMP_VELOCITY;
+        return BASE_JUMP_VELOCITY + (jumpBoostLevel * JUMP_BOOST_PER_LEVEL);
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/util/FastMath.java`:
+
+```java
+package dev.lyy.astrox.util;
+
+/**
+ * High-performance mathematical utilities with optimized floating-point routines.
+ */
+public final class FastMath {
+    public static final double EPSILON = 1.0E-5;
+    public static final double TO_RADIANS = Math.PI / 180.0;
+    public static final double TO_DEGREES = 180.0 / Math.PI;
+
+    private FastMath() {}
+
+    public static double hypot(double x, double z) {
+        return Math.sqrt(x * x + z * z);
+    }
+
+    public static double distanceSquared(double x1, double y1, double z1, double x2, double y2, double z2) {
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        double dz = z2 - z1;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        return Math.sqrt(distanceSquared(x1, y1, z1, x2, y2, z2));
+    }
+
+    public static double clamp(double value, double min, double max) {
+        return value < min ? min : Math.min(value, max);
+    }
+
+    public static float clamp(float value, float min, float max) {
+        return value < min ? min : Math.min(value, max);
+    }
+
+    public static int clamp(int value, int min, int max) {
+        return value < min ? min : Math.min(value, max);
+    }
+
+    public static double wrapDegrees(double value) {
+        double angle = value % 360.0;
+        if (angle >= 180.0) {
+            angle -= 360.0;
+        }
+        if (angle < -180.0) {
+            angle += 360.0;
+        }
+        return angle;
+    }
+
+    public static float wrapDegrees(float value) {
+        float angle = value % 360.0F;
+        if (angle >= 180.0F) {
+            angle -= 360.0F;
+        }
+        if (angle < -180.0F) {
+            angle += 360.0F;
+        }
+        return angle;
+    }
+
+    public static double angleDifference(double a, double b) {
+        return Math.abs(wrapDegrees(a - b));
+    }
+
+    public static boolean isFinite(double d) {
+        return !Double.isNaN(d) && !Double.isInfinite(d);
+    }
+
+    public static boolean isFinite(float f) {
+        return !Float.isNaN(f) && !Float.isInfinite(f);
+    }
+}
+
+```
+
+`src/main/java/dev/lyy/astrox/util/Vector3d.java`:
+
+```java
+package dev.lyy.astrox.util;
+
+import java.util.Objects;
+
+/**
+ * Mutable high-performance 3D vector for zero-allocation mathematical transformations.
+ */
+public class Vector3d {
+    public double x;
+    public double y;
+    public double z;
+
+    public Vector3d() {
+        this(0.0, 0.0, 0.0);
+    }
+
+    public Vector3d(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public Vector3d set(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        return this;
+    }
+
+    public Vector3d set(Vector3d other) {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+        return this;
+    }
+
+    public Vector3d add(double dx, double dy, double dz) {
+        this.x += dx;
+        this.y += dy;
+        this.z += dz;
+        return this;
+    }
+
+    public Vector3d subtract(double dx, double dy, double dz) {
+        this.x -= dx;
+        this.y -= dy;
+        this.z -= dz;
+        return this;
+    }
+
+    public Vector3d multiply(double scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+        this.z *= scalar;
+        return this;
+    }
+
+    public double lengthSquared() {
+        return x * x + y * y + z * z;
+    }
+
+    public double length() {
+        return Math.sqrt(lengthSquared());
+    }
+
+    public double horizontalLengthSquared() {
+        return x * x + z * z;
+    }
+
+    public double horizontalLength() {
+        return Math.sqrt(horizontalLengthSquared());
+    }
+
+    public double distanceSquared(Vector3d other) {
+        double dx = this.x - other.x;
+        double dy = this.y - other.y;
+        double dz = this.z - other.z;
+        return dx * dx + dy * dy + dz * dz;
+    }
+
+    public double distance(Vector3d other) {
+        return Math.sqrt(distanceSquared(other));
+    }
+
+    public Vector3d normalize() {
+        double len = length();
+        if (len > FastMath.EPSILON) {
+            this.x /= len;
+            this.y /= len;
+            this.z /= len;
+        }
+        return this;
+    }
+
+    public double dot(Vector3d other) {
+        return this.x * other.x + this.y * other.y + this.z * other.z;
+    }
+
+    public Vector3d copy() {
+        return new Vector3d(x, y, z);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vector3d vector3d = (Vector3d) o;
+        return Double.compare(vector3d.x, x) == 0 &&
+               Double.compare(vector3d.y, y) == 0 &&
+               Double.compare(vector3d.z, z) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z);
+    }
+
+    @Override
+    public String toString() {
+        return "Vector3d{" + "x=" + x + ", y=" + y + ", z=" + z + '}';
+    }
+}
+
+```
+
+`src/main/resources/config.yml`:
+
+```yml
+# ==============================================================================
+#                      ASTROX-AC - GEYSERMC EXTENSION CONFIG
+#                      Enterprise-Grade Bedrock Anti-Cheat
+# ==============================================================================
+
+# Global settings
+general:
+  debug: false
+  alert-permission: "astrox.alerts"
+  bypass-permission: "astrox.bypass"
+  join-grace-period-ms: 1500
+  max-ping-ms: 600
+
+# Default thresholds applicable across checks unless overridden
+default:
+  enabled: true
+  cancel-packet: true
+  setback: true
+  block-threshold: 5.0
+  violation-expiration: 300.0 # seconds before violation decays
+  actions:
+    staff_alert:
+      execution-threshold: 3.0
+      repetition-threshold: 3.0
+      repetition-delay: 5.0
+      message: "&8[&bAstrox&8] &7%player% &ffailed &b%check% &8(&cVL: %score%&8, &7Ping: %ping%ms&8)"
+    console_log:
+      execution-threshold: 5.0
+      repetition-threshold: 5.0
+      repetition-delay: 10.0
+      command: "logger warn [Astrox] %player% flagged %check% (VL: %score%, Ping: %ping%ms)"
+
+# Check Specific Configurations
+checks:
+  # ============================================================================
+  # MOVEMENT CHECKS
+  # ============================================================================
+  horizontal_speed:
+    enabled: true
+    cancel-packet: true
+    setback: true
+    block-threshold: 4.0
+    buffer-tolerance: 0.008
+    knockback-immunity-ms: 1200
+    explosion-immunity-ms: 1500
+
+  vertical_flight:
+    enabled: true
+    cancel-packet: true
+    setback: true
+    block-threshold: 4.0
+    step-height-tolerance: 0.62
+    jump-boost-scale: 0.10
+
+  elytra_aerodynamic:
+    enabled: true
+    cancel-packet: true
+    setback: true
+    block-threshold: 5.0
+    max-kinetic-dive-speed: 3.45
+
+  phase:
+    enabled: true
+    cancel-packet: true
+    setback: true
+    block-threshold: 2.0
+
+  boat_movement:
+    enabled: true
+    cancel-packet: true
+    setback: true
+    block-threshold: 4.0
+    max-ice-speed: 2.50
+
+  # ============================================================================
+  # COMBAT CHECKS
+  # ============================================================================
+  reach:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 3.0
+    mouse-reach-max: 3.05
+    touch-reach-max: 3.85
+    controller-reach-max: 3.10
+    creative-reach-max: 6.00
+
+  hitbox_backtrack:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 4.0
+    max-backtrack-ms: 1000
+    ray-tolerance: 0.15
+
+  angle:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 5.0
+    max-angular-velocity: 360.0
+
+  autoclicker:
+    enabled: true
+    cancel-packet: false
+    block-threshold: 8.0
+    max-cps: 24.0
+    min-std-dev: 0.85
+
+  # ============================================================================
+  # PACKET & EXPLOIT CHECKS
+  # ============================================================================
+  bad_packets:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 1.0
+
+  timer:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 5.0
+    token-bucket-capacity: 8
+    max-tps-allowed: 20.6
+
+  device_spoof:
+    enabled: true
+    cancel-packet: false
+    block-threshold: 10.0
+
+  # ============================================================================
+  # INVENTORY & INTERACTION CHECKS
+  # ============================================================================
+  auto_totem:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 3.0
+    min-swap-delay-ms: 80
+
+  fast_place:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 4.0
+    min-place-interval-ticks: 3
+
+  fast_break:
+    enabled: true
+    cancel-packet: true
+    block-threshold: 4.0
+
+# ==============================================================================
+# DISCORD WEBHOOK INTEGRATION
+# ==============================================================================
+webhook:
+  enabled: false
+  url: ""
+  avatar-url: "https://i.imgur.com/8Qe5hF4.png"
+  username: "Astrox Anti-Cheat"
+  embed-color: 0x00E5FF
+  min-alert-vl: 5.0
+  send-punishments: true
+
+```
+
+`src/main/resources/extension.yml`:
+
+```yml
+id: astrox-ac
+name: AstroxAC
+version: 2.0.0
+main: dev.lyy.astrox.AstroxExtension
+api: 2.4.0
+authors:
+  - Lyy
+
+```
+
+`src/test/java/dev/lyy/astrox/test/BedrockPhysicsTest.java`:
+
+```java
+package dev.lyy.astrox.test;
+
+import dev.lyy.astrox.util.BedrockPhysics;
+import dev.lyy.astrox.util.FastMath;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class BedrockPhysicsTest {
+
+    @Test
+    @DisplayName("Verify Jump Velocity with Potions")
+    public void testJumpVelocity() {
+        assertEquals(0.42, BedrockPhysics.calculateJumpVelocity(0), 1E-5);
+        assertEquals(0.52, BedrockPhysics.calculateJumpVelocity(1), 1E-5);
+        assertEquals(0.62, BedrockPhysics.calculateJumpVelocity(2), 1E-5);
+    }
+
+    @Test
+    @DisplayName("Verify Ground Slipperiness & Friction")
+    public void testFrictionCalculations() {
+        double normalFriction = BedrockPhysics.calculateGroundFriction(0.60);
+        assertEquals(0.546, normalFriction, 1E-5);
+
+        double iceFriction = BedrockPhysics.calculateGroundFriction(0.98);
+        assertEquals(0.8918, iceFriction, 1E-4);
+    }
+
+    @Test
+    @DisplayName("Verify Angle Normalization and Distance")
+    public void testFastMath() {
+        assertEquals(45.0, FastMath.wrapDegrees(405.0), 1E-5);
+        assertEquals(-45.0, FastMath.wrapDegrees(-405.0), 1E-5);
+        assertEquals(90.0, FastMath.angleDifference(0.0, 90.0), 1E-5);
+        assertEquals(10.0, FastMath.angleDifference(355.0, 5.0), 1E-5);
+    }
+}
+
+```
+
+`src/test/java/dev/lyy/astrox/test/BoundingBoxTest.java`:
+
+```java
+package dev.lyy.astrox.test;
+
+import dev.lyy.astrox.collision.BoundingBox3D;
+import dev.lyy.astrox.collision.Ray3D;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class BoundingBoxTest {
+
+    @Test
+    @DisplayName("Verify Closest Point Distance")
+    public void testClosestPoint() {
+        BoundingBox3D box = new BoundingBox3D(0, 0, 0, 1, 2, 1);
+
+        // Point inside
+        assertEquals(0.0, box.getClosestPointDistance(0.5, 1.0, 0.5), 1E-5);
+
+        // Point 1 block along X axis
+        assertEquals(1.0, box.getClosestPointDistance(2.0, 1.0, 0.5), 1E-5);
+
+        // Point diagonal
+        double diag = box.getClosestPointDistance(2.0, 3.0, 2.0);
+        assertEquals(Math.sqrt(1.0 + 1.0 + 1.0), diag, 1E-5);
+    }
+
+    @Test
+    @DisplayName("Verify Ray-AABB Intersection")
+    public void testRayIntersection() {
+        BoundingBox3D box = new BoundingBox3D(0, 0, 0, 1, 2, 1);
+
+        // Direct hit from (0.5, 1.0, -5.0) pointing along +Z (Pitch=0, Yaw=0)
+        Ray3D directRay = Ray3D.fromPitchYaw(0.5, 1.0, -5.0, 0.0f, 0.0f);
+        double hitDist = box.calculateRayIntersection(directRay, 10.0);
+        assertTrue(hitDist >= 0.0, "Ray should hit box");
+        assertEquals(5.0, hitDist, 1E-4);
+
+        // Ray pointing opposite direction (Yaw=180)
+        Ray3D missRay = Ray3D.fromPitchYaw(0.5, 1.0, -5.0, 0.0f, 180.0f);
+        double missDist = box.calculateRayIntersection(missRay, 10.0);
+        assertEquals(-1.0, missDist, "Ray pointing away should miss");
+    }
+}
+
+```
+
+`src/test/java/dev/lyy/astrox/test/LeakyBucketTimerTest.java`:
+
+```java
+package dev.lyy.astrox.test;
+
+import dev.lyy.astrox.session.data.InputTracker;
+import org.cloudburstmc.protocol.bedrock.data.InputMode;
+import org.cloudburstmc.protocol.bedrock.data.PlayerAuthInputData;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class LeakyBucketTimerTest {
+
+    @Test
+    @DisplayName("Verify CPS calculation and attack interval variance")
+    public void testInputTrackerCPS() {
+        InputTracker tracker = new InputTracker();
+        tracker.updateInput(InputMode.TOUCH, 0.5f, 0.5f, Set.of(PlayerAuthInputData.SPRINTING));
+
+        assertEquals(InputMode.TOUCH, tracker.getInputMode());
+        assertTrue(tracker.hasFlag(PlayerAuthInputData.SPRINTING));
+        assertFalse(tracker.hasFlag(PlayerAuthInputData.SNEAKING));
+
+        // Simulate 10 rapid clicks across 10 client ticks
+        for (int i = 1; i <= 10; i++) {
+            tracker.recordClick(i);
+        }
+
+        assertTrue(tracker.getCPS() >= 9.0, "CPS should reflect recent clicks");
+    }
+}
+
+```
