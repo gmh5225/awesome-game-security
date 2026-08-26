@@ -4332,6 +4332,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Visual1mpact/Paradox_AntiCheat [Open-source anti-cheat for Minecraft Bedrock (Realms/BDS)]
 - https://github.com/oomph-ac/oomph [Minecraft Bedrock MiTM anti-cheat proxy with server-authoritative movement and combat]
 - https://github.com/GhostNgEnd/Ghost-AntiCheat [Prediction-based movement anti-cheat for Minecraft Bedrock Edition with packet, offset, and ping checks]
+- https://github.com/Eangly99/AstroX-AntiCheat [GeyserMC extension anti-cheat for Minecraft Bedrock intercepting raw RakNet packets before Java translation]
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
 - https://github.com/Garou3299/tf2bd-database [Community-maintained TF2 cheater and suspicious-player JSON lists for surepy/tf2_bot_detector]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
