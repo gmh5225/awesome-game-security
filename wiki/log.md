@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Deatty/Ghidra-Obfuscation-Detection`: entity [[ghidra-obfuscation-detection]] (Deatty; Java Ghidra script; heuristic function-body feature extraction flags obfuscated or unusually complex functions; lightweight RE workflow integration; malware/game protected-code triage; Detect obfuscated/complex code); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[obfuscation-detection]], [[obfuscation-analysis]], [[ghidra]], [[ghidrametrics]], and [[xrefgen]].
+
 - **2026-08-26** — ingest `description:DeiVid-12/SmKernel-CSGO`: entity [[smkernel-csgo]] (DeiVid-12; educational CS:GO kernel-driver PoC; shared-memory KM↔UM comm; module-base lookup + cross-process memory R/W; simple triggerbot; detectability tradeoffs vs stronger kernel AC; cheat / game:csgo [Driver]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-csgo]], [[garhal-csgo]], [[raybot-zero]], and [[cheat-driver]].
 
 - **2026-08-26** — ingest `description:DejavuSecure/DetectNtoskrnlIntegrity`: entity [[detect-ntoskrnl-integrity]] (DejavuSecure; C++ Windows kernel integrity research; validate in-memory ntoskrnl.exe against on-disk image; SSDT transforms, page-table randomization, retpoline-era behavior; anti-rootkit / AC / defensive kernel security research; README [Memory Integrity Verification with Disk Verification of ntoskrnl.exe]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-detect-nullshit]], [[device-control-hooks-scanner]], [[ntoskrnl-viewer]], [[ntoskrnlwalker]], [[ntoskrnl-file-collection]], and [[hygieia]].

@@ -1356,6 +1356,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ghidra-mcp](entities/ghidra-mcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; 200+ AI-assisted RE tools; GUI/headless; BSim; HTTP/stdio; Docker; bethington)
 - [ghidramcp](entities/ghidramcp.md) — Ghidra MCP server/plugin (Java extension + Python bridge; decompile, symbol/method enum, automated renaming; LaurieWired; MCP for Ghidra)
 - [ghidra-nativeaot](entities/ghidra-nativeaot.md) — Ghidra .NET Native AOT analyzer/UI plugin (type hierarchy, frozen objects, vtable redirections, ReadyToRun metadata recovery, metadata browser + rename refactor; .NET 8+; Washi1337)
+- [ghidra-obfuscation-detection](entities/ghidra-obfuscation-detection.md) — Ghidra script for obfuscated/complex function triage (Java; heuristic function-body feature extraction; malware/game protected-code prioritization; Deatty; cheat / Ghidra Scripts)
 - [GptHidra](entities/gpthidra.md) — Ghidra ChatGPT plugin (selected-function explanation to console; cheat / Ghidra Plugins)
 - [ghidra-orbis](entities/ghidra-orbis.md) — Ghidra PS4 Orbis extension (loaders, analyzers, syscall/NID data; Java/Gradle; astrelsky)
 - [ghidra-openai](entities/ghidra-openai.md) — Ghidra OpenAI GPT plugin (decompiled-function explain/rename/vuln hints; ChatGPT lane)
