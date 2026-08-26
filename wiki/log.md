@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DQLin/VolumetricReSTIRRelease`: entity [[volumetric-restir-release]] (DQLin; Falcor C++/Slang research renderer; spatiotemporal reservoir resampling for volumetric rendering; custom volumetric pass; RTX-class real-time performance; paper scene pipelines; graphics researchers / engine developers; Renderer); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[strolle]] and [[kajiya]].
+
 - **2026-08-26** — ingest `description:DSecurity/efiSeek`: entity [[efiseek]] (DSecurity; Java Ghidra analyzer plugin; known EFI GUID identification, protocol usage patterns, LOCATE_PROTOCOL/NOTIFY/INSTALL_PROTOCOL_INTERFACE callback flows; helper scripts + GUID data for headless structured firmware analysis; firmware security / UEFI internals RE; Ghidra analyzer for UEFI firmware); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ghidra]], [[efixplorer]], [[ida-efiutils]], [[fiano]], and [[visualuefi-2-0]].
 
 - **2026-08-26** — ingest `description:Da3kL3o/VeiledExpertsSDK`: entity [[veiled-expertssdk]] (Da3kL3o; generated UE SDK dump for Veiled Experts; Unreal Engine-style C++ headers + object/name tables; class/struct layouts and runtime metadata for static analysis and external tooling; reverse engineers / game security researchers; cheat / game:veiled experts); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[veiled-experts-sdk]], [[project-d-win64-shipping]], [[vx-it]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].

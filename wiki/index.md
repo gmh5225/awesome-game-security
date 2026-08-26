@@ -3378,6 +3378,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vulnerable-mcp-servers-lab](entities/vulnerable-mcp-servers-lab.md) — intentionally vulnerable MCP servers for pentest training (path traversal, prompt injection, eval, typosquatting, secret leakage; Game Develop / MCP security)
 - [vulnerablekernel-driver](entities/vulnerablekernel-driver.md) — intentionally vulnerable **`MsIo64.sys`** training driver (IOCTL arbitrary R/W, overflow, UAF, races; kernel exploitation lab; gmh5225)
 - [vulnerablepatchguardexploit](entities/vulnerablepatchguardexploit.md) — runtime vulnerable PatchGuard exploit to disable KPP (C++; cheat / PatchGuard-related; gmh5225)
+- [volumetric-restir-release](entities/volumetric-restir-release.md) — Falcor C++/Slang volumetric ReSTIR research renderer (spatiotemporal reservoir resampling; RTX-class real-time; paper scene pipelines; Renderer)
 - [volto-external-spowar-ud-eac-be-fortnite-external-cheat](entities/volto-external-spowar-ud-eac-be-fortnite-external-cheat.md) — Fortnite external: kernel driver + overlay; HWID-spoof / EAC-evasion naming (C/C++; cheat / game:fortnite [External]; gmh5225)
 - [vibe-blocks-mcp](entities/vibe-blocks-mcp.md) — MCP server for Roblox Studio (SSE; studio actions as agent tools; Game Develop / MCP)
 - [VioletWing](entities/violetwing.md) — Jesewe Python external CS2 helper (PyMeow overlay + customtkinter GUI; cs2-dumper startup offsets; triggerbot/ESP/bunnyhop/NoFlash; offline/private-server RE; cheat / game:cs2 Python external)
