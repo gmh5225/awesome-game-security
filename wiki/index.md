@@ -2552,6 +2552,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [peetch](entities/peetch.md) — eBPF dump/tls/proxy (PID sniff + OpenSSL keys; PCAPng; cheat / android kernel explorer)
 - [peinjector](entities/peinjector.md) — PE patching/infection framework (C PE parse/modify; Python/Java control; multiple infection methods; transfer-time patches; web remote config; preserves host behavior; JonDoNym)
 - [peekaboo](entities/peekaboo.md) — modular malware-behavior emulator (safe C2/persistence/lateral-movement; Python CLI/TUI/Flask + C/C++ modules; MITRE ATT&CK + Sigma/YARA + VT; purple-team / detection engineering; cocomelonc)
+- [PeaceMaker](entities/peacemaker.md) — Windows kernel-mode behavior-based threat detection platform (D4stiny; process/image/remote-thread/hidden-code/FS+registry monitoring with stack traces; driver + CLI + Qt GUI; defensive anti-malware + AC research; Anti Virus in fact but also Anti Cheat)
 - [perf-ninja](entities/perf-ninja.md) — C++ CPU performance optimization labs (cache/branch/vectorization; Alder Lake/Zen 3/M1 CI; Performance Analysis)
 - [PerfMon (KelvinMsft)](entities/perfmon.md) — Windows kernel research driver; PMU/PMI flows, APIC handling, SSDT monitoring + hook-style interception; hardware-assisted monitoring on Win10-era platforms; README PMI Callback
 - [pesign](entities/pesign.md) — Linux UEFI Secure Boot PE-COFF Authenticode/PKCS#7 sign/verify (NSS)
