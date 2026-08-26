@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Cr4sh/SmmBackdoorNg`: entity [[smm-backdoor-ng]] (Cr4sh; UEFI SMM backdoor framework; DXE + SMM C firmware + Python Windows/Linux clients; flash-image infection or pre-boot DMA-assisted loading; privilege-escalation and hypervisor-interaction demos; firmware security / persistence / pre-OS attack-surface research; README [UEFI backdoor]); cited on [[overviews/windows-kernel]] and [[overviews/dma-attack]]; cross-linked [[smm-infect]], [[smm]], [[pico-dma]], and [[s6-pcie-microblaze]].
+
 - **2026-08-26** — ingest `description:Cr4sh/pico_dma`: entity [[pico-dma]] (Cr4sh; FPGA pre-boot PCIe DMA platform on compact hardware; Verilog + Vivado/Vitis + MicroBlaze; autonomous or UART-controlled payload execution; SPI flash deployment; boot/firmware security + DMA implant prototyping research); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[s6-pcie-microblaze]], [[pcileech]], [[pcileech-fpga]], [[litepcie]], and [[iommu]].
 
 - **2026-08-26** — ingest `description:Cr4sh/s6_pcie_microblaze`: entity [[s6-pcie-microblaze]] (Cr4sh; PCIe DIY DMA toolkit on Xilinx SP605 Spartan-6; Verilog + MicroBlaze; software-controllable Gen 1.1 endpoint; raw TLP over Ethernet; Python host R/W, physmem scan, IOMMU audit; UEFI DXE injection, Hyper-V VM-exit backdoor, Boot Backdoor runtime shell/file-transfer PoCs; DMA / Option ROM / pre-boot compromise research); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[litepcie]], [[diskjacker]], and [[iommu]].

@@ -2960,6 +2960,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [smap](entities/smap.md) — Windows kernel shellcode mapper (BYOVD PIC shellcode → kernel pool + exec primitive; no PE image; btbd; Scatter Manual Map)
 - [SmKernel-CSGO](entities/smkernel-csgo.md) — educational CS:GO kernel-driver PoC (DeiVid-12; shared-memory KM↔UM comm; module-base lookup + process memory R/W; triggerbot sample; detectability tradeoffs vs kernel AC; cheat / game:csgo [Driver])
 - [smm (ekknod)](entities/smm.md) — SMM cheat (C/C++; driver development / graphics / networking; cheat / SMM; Ring -2 below-OS research)
+- [SmmBackdoorNg](entities/smm-backdoor-ng.md) — UEFI SMM backdoor framework (Cr4sh; DXE + SMM firmware + Python Windows/Linux clients; flash-image infection or pre-boot DMA-assisted loading; privilege escalation / hypervisor-interaction demos; firmware persistence / pre-OS research; README [UEFI backdoor])
 - [SmmInfect](entities/smm-infect.md) — SMM backdoor research framework (Oliver-1-1; UEFI/EDK2 SMI handler + Windows/Linux clients; BIOS patch workflows; firmware trust-boundary / persistence research; README [SMM Driver])
 - [smt-server](entities/smt-server.md) — Rust QF_BV SMT solver server (SMT-LIB 2; bit-blast→SAT; C++/Python clients; binary analysis/deobfuscation; LLVMParty; Cheat constraint-solver lane)
 - [smite-esp-aimbot](entities/smite-esp-aimbot.md) — Smite internal ESP/aimbot reference (JackBro; C++; reverse-engineered UE3 SDK headers + hook helpers; target acquisition + on-screen ESP; learner base for older UE3 titles; cheat / game:smite [Internal])
