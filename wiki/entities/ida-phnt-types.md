@@ -20,4 +20,4 @@ Type-import lane—not live struct browsing ([[bb]], [[bb-viewer]]) or Hex-Rays 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[bb]] · [[bb-viewer]] · [[ntrays]] · [[ida-kmdf]]
+[[overviews/reverse-engineering]] · [[overviews/windows-kernel]] · [[apply-callee-type-ex]] · [[bb]] · [[bb-viewer]] · [[ntrays]] · [[ida-kmdf]]
