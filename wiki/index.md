@@ -3378,7 +3378,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [virtualbox-kvm](entities/virtualbox-kvm.md) — VirtualBox with KVM backend (manual GPU accel; cheat / QEMU/KVM/PVE/VBOX research-host lane; cyberus-technology)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
 - [VMkatz](entities/vmkatz.md) — in-place VM snapshot/VHD cred extract (LSASS/SAM/LSA/NTDS; AC/IS forensics)
-- [VMPLift](entities/vmplift.md) — emulation-first VMProtect 3.8–3.10+ x64 handler walker/lifter (VIP trace, rolling-key recovery, LLVM IR/pseudo-C; Fix VMP)
+- [VMPLift](entities/vmplift.md) — emulation-first VMProtect 3.8–3.10+ x64 handler walker/lifter (VIP trace, rolling-key recovery, closed-form recovery, LLVM IR/pseudo-C/devirt; IDA/Ghidra; Fix VMP; sexyiam)
 - [VMP3 x64 Disasm (prerelease)](entities/vmp-vmp3-64bit-disasm-prerelease-.md) — VMProtect 3 x64 bytecode disassembler (custom insn decode, virtual opcode handlers, flow reconstruction; Fix VMP; gmh5225)
 - [VMPImportFixer](entities/vmpimportfixer.md) — VMP 3.x import protection fix via Unicorn emulation (near-call stubs → real imports; Zydis + pepp; x86/x64; Fix VMP)
 - [Vmp3_utils](entities/vmp3-utils.md) — Python VMP3 editor tooling utilities (Fix VMP; gmh5225)
