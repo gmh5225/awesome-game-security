@@ -840,6 +840,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Driver-RPM-DirectPageManipulation.md
   - wiki/sources/descriptions/ryan-weil__ReadWriteDriver.md
   - wiki/sources/descriptions/cheahjs__palworld-save-tools.md
+  - wiki/sources/descriptions/Duntss__IDA-ZVM-Disassembler.md
   - wiki/sources/descriptions/DysonCheng__PalWorldSettingGenerator.md
   - wiki/sources/descriptions/EternalWraith__PalEdit.md
   - wiki/sources/descriptions/weizhking__PalworldSaved.md
@@ -1873,6 +1874,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Frida boundary-hook writeup for stacked Android VMProtect+OLLVM via libc/JNI/Java exit monitoring (tomhamidi97-arch/frida-vmp-bypass; spawn-mode Frida; caller-address cross-ref with IDA; environment-check and anti-tamper call-chain reconstruction; Cheat Fix VMP / Fix OLLVM) (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
 - Multi-engine VM detection/analysis via [[vmdragonslayer]] (DTT / SE / pattern classification / ML) sits in the Cheat RE Tools / Fix VMP-adjacent lane. (source: wiki/sources/descriptions/poppopjmp__VMDragonSlayer.md)
 - IDA Pro VM obfuscation analysis via [[vmattack]] (Python plugin; dispatcher loops, virtual opcode handler tables, execution trace, devirtualization assist for custom VM architectures; gmh5225) also sits in the Cheat Fix VMP / devirt lane. (source: wiki/sources/descriptions/gmh5225__VMAttack.md)
+- IDA Pro Zeus VM bytecode via [[ida-zvm-disassembler]] (Duntss processor module + loader; 69 instructions; XOR key-chain decryption; branch-target xrefs + semantic auto-comments; OALabs ZVM lineage; custom-VM static RE; Cheat IDA Plugins lane) (source: wiki/sources/descriptions/Duntss__IDA-ZVM-Disassembler.md)
 - Python VMProtect trace/symbolic-exec handler recovery via [[rumba]] (virtual opcode handlers → original CFG/semantics; MBA-tagged README) also sits in the Cheat Fix VMP lane. (source: wiki/sources/descriptions/thalium__rumba.md)
 - Execution-trace view/edit/analyze via [[execution-trace-viewer]] (originally for obfuscated-code RE; any-trace analysis) sits in the Cheat Debugging / RE Tools lane. (source: wiki/sources/descriptions/teemu-l__execution-trace-viewer.md)
 - Multi-emulator binary harnessing via [[smallworld]] (angr / Ghidra / PANDA / Unicorn; coverage, crash triage, firmware testing) sits in the Cheat RE Tools / DBI dynamic-analysis lane. (source: wiki/sources/descriptions/smallworld-re__smallworld.md)
