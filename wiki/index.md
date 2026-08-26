@@ -756,6 +756,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DayZzz](entities/dayzzz.md) — DayZ cheat/modding: SDK generation + overlays (C/C++)
 - [DbgViewEx](entities/dbgviewex.md) — ETW event + system debug-log capture (emlinhax; early-stage; cheat / RE telemetry)
 - [DbgNexum](entities/dbgnexum.md) — Debug API + HWBP shellcode injector; file-mapping transfer; no WPM/RPM/VirtualAllocEx (dis0rder0x00)
+- [D3D12 Hook ImGui](entities/d3d12-hook-imgui.md) — DX12 ImGui overlay hook sample (DrNseven; C++; MinHook-style interception; DLL inject + frame hook + real-time menu; graphics API research / overlay prototyping; DirectX Hook [DX12 Imgui])
 - [D3D12Renderer](entities/d3d12renderer.md) — DX12 renderer sample (raytracing / mesh shaders; DirectX / guide)
 - [D3D9On12](entities/d3d9on12.md) — Microsoft D3D9 usermode DDI → D3D12 mapping layer (DirectX Compatibility)
 - [D2D Overlay](entities/d2d-overlay.md) — header-only Direct2D external overlay library (`DirectOverlay.h`; simple API + performance; coltonon)
