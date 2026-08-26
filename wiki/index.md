@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/goomba (Hex-Rays + Z3)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/goomba (Hex-Rays + Z3)/GAMBA (Python simplifier + benchmark datasets)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -1327,6 +1327,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GamesoftACS](entities/gamesoftacs.md) — Knight Online Gamesoft server-side AC (speed/teleport/damage/inventory + client integrity)
 - [GarHal CSGO](entities/garhal-csgo.md) — CS:GO kernel cheat driver + IOCTL usermode controller (KM entity R/W; planned kernel DirectX overlay; dretax; cheat / game:csgo)
 - [gan-aimbots](entities/gan-aimbots.md) — Miffyli academic ML-aimbot research (Python; ViZDoom; data collection, GAN training/evaluation, classifier plots, experiment orchestration; cheat generation + detection research; cheat / Machine Learning)
+- [gamba](entities/gamba.md) — Python MBA expression simplifier (DenuvoSoftwareSolutions; linear/nonlinear MBA + bitwise expression factory; NeuReduce/QSynth/Syntia experiment datasets; research paper + slides; obfuscation/deobfuscation research; Cheat Simplify MBA)
 - [garble](entities/garble.md) — Go build-time obfuscator (wraps `cmd/go`; identifier/path hash rename, metadata strip, optional literals, tiny mode, experimental CFF; `garble reverse`; AC Obfuscation Engine)
 - [garlic](entities/garlic.md) — C multi-format binary analysis / Fast APK/DEX/JAR Java decompiler (PE/ELF/Mach-O/DEX/APK + ARM)
 - [GlacierW MBA (Malware Behavior Analyzer)](entities/glacierw-mba.md) — QEMU whole-system dynamic binary analysis (memory forensics, API tracing, behavioral monitoring; Windows/Linux guests; GlacierW; Cheat QEMU/KVM / DBI)
