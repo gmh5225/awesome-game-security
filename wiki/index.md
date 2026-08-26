@@ -1099,6 +1099,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [meatyeftrelease](entities/meatyeftrelease.md) — open-source DMA EFT radar and companion toolkit (C++/ImGui; LeechCore/MemProcFS; fuser overlay; cheat / game:eft [DMA])
 - [EfiTool](entities/efitool.md) — UEFI ExitBootServices in-RAM SYSTEM hive patch (SYSTEM shell; no disk/driver)
 - [efi-monitor (ekknod)](entities/efi-monitor.md) — PatchGuard-safe MmCopyMemory hook (C/C++; driver development / graphics / networking; cheat / EFI driver area)
+- [efiSeek](entities/efiseek.md) — Ghidra UEFI firmware analyzer (Java; EFI GUID/protocol/callback automation; LOCATE_PROTOCOL·NOTIFY·INSTALL_PROTOCOL_INTERFACE flows; headless firmware RE; DSecurity)
 - [efiXplorer](entities/efixplorer.md) — IDA Pro UEFI firmware annotator (GUID/protocol matching; Boot·Runtime Services; PEI/DXE deps; bootkit/EFI malware RE; gmh5225)
 - [EtwTi-Syscall-Hook](entities/etwti-syscall-hook.md) — Instrumentation Callback syscall hook (C/C++; Detection:hook / ETW TI–adjacent)
 - [EtwTi-FluctuationMonitor](entities/etwti-fluctuation-monitor.md) — EtwTi provider registration fluctuation monitor (C; ETW callback tamper alerts)
