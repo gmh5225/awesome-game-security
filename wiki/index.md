@@ -406,6 +406,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-windbg-extensions](entities/awesome-windbg-extensions.md) — curated WinDbg extension index (kernel analysis, IR, rootkit hunting, memory inspection, debugger automation; WinDbg)
 - [awesome-wow-rust](entities/awesome-wow-rust.md) — curated Rust WoW private-server resources (server implementations / protocol + file-format libs / renderers; cheat / game:wow)
 - [blackhat2012](entities/blackhat2012.md) — BH2012 anti-debug / anti-disasm / obfuscation / Anti-VM PoCs (C/C++ + FASM)
+- [Blackbone](entities/blackbone.md) — Windows memory hacking library (DarthTon; x86/x64; alloc/R/W/protect, module enum, manual PE map, WOW64 thread control; user+kernel APIs; RE / game-security / AC tooling)
 - [BlackBox](entities/blackbox.md) — deprecated FBlackBox Android virtualization project (README-only removal notice; historical context; cheat / Android)
 - [blacksun-framework](entities/blacksun-framework.md) — modular C++ game cheat framework (user-mode/kernel/DMA access backends; pattern scan, hooking, overlays, comm layers; cs1ime)
 - [BlackSignatureDriver](entities/black-signature-driver.md) — black-signature kernel driver dev + networking (gmh5225; Anti Cheat → Black Signature)

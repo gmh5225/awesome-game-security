@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DarthTon/Blackbone`: entity [[blackbone]] (DarthTon; Windows memory hacking library; x86/x64 process manipulation; alloc/R/W/protect, module enum, manual PE map, WOW64 thread control; user-mode + kernel-related APIs; RE / game-security / AC tooling experiments); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[pevisor]], [[modexmap]], [[windows-process-injection]], [[libmem]], and [[memwars]].
+
 - **2026-08-26** — ingest `description:DavidBuchanan314/stelf-loader`: entity [[stelf-loader]] (DavidBuchanan314; Python + NASM shellcode; Linux x64 ELF→self-loading shell script; map segments, restore protections, jump to entry; compressed/base64/raw-entry/one-liner modes; exploit/payload/ELF runtime loading research; Anti Cheat → Binary Packer `[ELF]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[sloader]], [[harmless]], [[elfpacker]], and [[mojoelf]].
 
 - **2026-08-26** — ingest `description:DeDf/WProtect`: entity [[dedf-wprotect]] (DeDf; C++ Windows PE code virtualizer; disassemble selected native blocks→custom VM bytecode; jump stubs + appended PE section; AsmJit + udis86 + PE rewrite; software protection / VM anti-tamper research; slug disambiguated from [[wprotect]]); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[wprotect]], [[phantasm-x86-virtualizer]], [[x64-virtualizer-rs]], [[nb-obfuscator]], and [[alcatraz]].
