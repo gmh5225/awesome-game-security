@@ -1775,6 +1775,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [internal-rainbow-six-cheat-v3](entities/internal-rainbow-six-cheat-v3.md) — R6 internal: kernel injector + manually mapped user-mode DLL; D3D11 menu; ESP/aimbot/recoil/spread/movement/FOV (NMan1; kernel-assisted injection + detection-surface RE; cheat / game:r6 [Internal])
 - [internal-valorant-cheat](entities/internal-valorant-cheat.md) — Valorant internal: aimbot + ESP via in-process render/game-logic hooks; bypasses Vanguard user-mode protections (gmh5225; cheat / game:valorant [Internal])
 - [InstrumentationCallbackSyscallLogger](entities/instrumentation-callback-syscall-logger.md) — Ring3 Instrumentation Callback on syscall return (AC / Windows)
+- [instrumentation_callbacks](entities/instrumentation-callbacks.md) — Deputation Windows Instrumentation Callback demo (C++/asm; TLS recursion mitigation; syscall + exception interception; telemetry/runtime-control research; Instrumentation Callback)
 - [Island](entities/island.md) — experimental hot-reloading Vulkan renderer (C/C++; Linux+Windows; Renderer / Vulkan)
 - [JADX](entities/jadx.md) — DEX→Java decompiler (APK/DEX/AAR; CLI+GUI; mobile RE)
 - [JDBG](entities/jdbg.md) — Java/JVM attach debugger (JDWP; method hooks / breakpoints; cheat RE)
