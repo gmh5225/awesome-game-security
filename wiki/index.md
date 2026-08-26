@@ -577,6 +577,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [compact-vm-detector](entities/compact-vm-detector.md) — compact embeddable Windows C++ VM-detection component (pafish-inspired; lightweight anti-virtualization; Visual C++ integration; LukeGoule)
 - [component-fuse-mechanic](entities/component-fuse-mechanic.md) — UE5.2 actor-component fuse prototype (EvelynSchwab; C++/Blueprint; socket alignment, placement previews, Chaos physics constraints; object-combination mechanic prototyping; Game Engine / UE5 constraining system)
 - [compile_android_driver](entities/compile-android-driver.md) — out-of-tree Android kernel driver build/ABI (kade / Kadeflow; GKI)
+- [compile-time-random](entities/compile-time-random.md) — C++11 header-only compile-time random constants (constexpr FNV/Murmur3-style hashing; 32/64-bit macros; no runtime RNG; lightweight obfuscation / AC Compile Time; Deniskore)
 - [compile-time-regular-expressions](entities/compile-time-regular-expressions.md) — C++ CTRE compile-time regex (cmake `ctre`; AC Compile Time)
 - [cocos2d-x](entities/cocos2d-x.md) — cross-platform C++ 2D framework (cocos2d-iphone lineage; Game Engine / source)
 - [cocos4](entities/cocos4.md) — COCOS 4 cross-platform C++ engine (script bindings; write-once-run-anywhere; Game Engine / source)

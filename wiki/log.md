@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Deniskore/CompileTimeRandom`: entity [[compile-time-random]] (Deniskore; C++11 header-only compile-time random constants; constexpr FNV/Murmur3-style hashing; 32/64-bit macros; no runtime RNG; low-level tooling / lightweight obfuscation / game-security research; AC Compile Time); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[xorstr]], [[obfuscate]], [[crystr]], [[oxorany]], [[compile-time-regular-expressions]], and [[skcrypter]].
+
 - **2026-08-26** — ingest `description:DennyDai/headless-ida`: entity [[headless-ida]] (DennyDai; Python headless IDAPython toolkit; module/CLI scripts, one-liners, interactive sessions; RPyC remote server; idat64/idalib backends; scalable malware/binary/game-security RE automation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ida-buddy]], [[ida-cli]], [[headless-ida-mcp-server]], [[idac]], and [[ida-bridge]].
 
 - **2026-08-26** — ingest `description:DenuvoSoftwareSolutions/GAMBA`: entity [[gamba]] (DenuvoSoftwareSolutions; Python MBA simplifier; linear and nonlinear MBA expressions; bitwise expression factory; experiment datasets from NeuReduce, QSynth, and Syntia; research paper + presentation slides; obfuscation/deobfuscation research; Cheat Simplify MBA); cited on [[concepts/mixed-boolean-arithmetic]] and [[overviews/reverse-engineering]]; cross-linked [[goomba]], [[promba]], [[qsynthesis]], [[cobra]], [[mbased]], and [[onlooker]].
