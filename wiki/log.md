@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DruidMech/MultiplayerCourseBlasterGame`: entity [[multiplayer-course-blaster-game]] (DruidMech; UE5 C++ Blaster course sample; combat components, lag compensation, weapons/pickups/HUD, team modes, CTF; multiplayer sessions plugin + Steam online subsystem; UE networking reference for security researchers; Game Develop / UE5 FPS Game); cited on [[overviews/game-engine]]; cross-linked [[multiplayer-blaster-game]], [[network-time-sync]], and [[ue5-multiplayer-project]].
+
 - **2026-08-26** — ingest `description:Dump-GUY/ApplyCalleeTypeEx`: entity [[apply-callee-type-ex]] (Dump-GUY; Python IDA plugin; ApplyCalleeType reborn; apply function prototype to indirect CALL for correct decompiler/disasm; enhanced callee type propagation; IDA 8.x–9.3+; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-phnt-types]] and [[list-of-ida-plugins]].
 
 - **2026-08-26** — ingest `description:Dump-GUY/IDA_PHNT_TYPES`: entity [[ida-phnt-types]] (Dump-GUY; PHNT Native API headers → IDA TIL/IDC; idaclang/tilib; 32/64-bit; Windows SDK + PHNT types for driver/AC binary RE); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[bb]], [[bb-viewer]], [[ntrays]], [[ida-kmdf]], and [[disable-parallel-loader]].

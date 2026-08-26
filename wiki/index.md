@@ -2163,6 +2163,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Mojoc](entities/mojoc.md) — C99 OpenGLES3 mobile game engine (cross-platform; Game Engine source)
 - [Multiline Ultimate Assembler](entities/multiline-ultimate-assembler.md) — x64dbg/OllyDbg multiline assembler/disassembler plugin (m417z; Cheat x64dbg Plugins)
 - [MultiplayerBlasterGame](entities/multiplayer-blaster-game.md) — UE5 multiplayer FPS Blaster (network replication / aim offsets / weapons; Game Develop / Unreal source)
+- [MultiplayerCourseBlasterGame](entities/multiplayer-course-blaster-game.md) — UE5 C++ Blaster course sample (lag compensation / combat / Steam sessions / CTF; UE networking study; DruidMech; Game Develop / Unreal source)
 - [Murder Engine](entities/murder.md) — C# MonoGame pixel-art 2D engine (ECS, Aseprite, dialogue editor; Game Engine / [pixel])
 - [ModExMap](entities/modexmap.md) — user-mode PE manual-map DLL injector (x86/x64; TLS; Extend Manual Map)
 - [ModFinder](entities/modfinder.md) — Windows C++ manual-map module finder (Nou4r; mapped-region DOS-header heuristics; x86 runtime AC/malware forensics; Mapped Dll)
