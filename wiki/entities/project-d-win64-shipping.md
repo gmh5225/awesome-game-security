@@ -12,7 +12,7 @@ confidence: medium
 
 **Veiled Experts (Project D) Unreal Engine SDK dump** (LagradOst) — pre-generated C++ class and struct headers for the title's agents, weapons, vehicles, UI systems, and engine subsystems. Includes full class hierarchies, member offsets, and virtual function tables. Useful for game security researchers and reverse engineers studying Unreal Engine game internals and SDK dumping methodologies rather than as a live dumper. (source: wiki/sources/descriptions/LagradOst__ProjectD-Win64-Shipping.md)
 
-Complements sibling Veiled Experts SDK dumps such as [[veiled-experts-sdk]] (EBalloon; generated headers + names/objects dumps + offsets), decrypt tooling such as [[vx-it]] (`[Decrypt]` tag), and generic UE SDK workflows under [[unreal-object-model]] and [[uedumper]].
+Complements sibling Veiled Experts SDK dumps such as [[veiled-experts-sdk]] (EBalloon; generated headers + names/objects dumps + offsets), [[veiled-expertssdk]] (Da3kL3o; UE-style headers + object/name tables), decrypt tooling such as [[vx-it]] (`[Decrypt]` tag), and generic UE SDK workflows under [[unreal-object-model]] and [[uedumper]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements sibling Veiled Experts SDK dumps such as [[veiled-experts-sdk]] (EBa
 
 ## Related
 
-[[veiled-experts-sdk]] · [[vx-it]] · [[unreal-object-model]] · [[uedumper]] · [[ue-unreal-engine-sdk]] · [[palworld-sdk-dump]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[veiled-experts-sdk]] · [[veiled-expertssdk]] · [[vx-it]] · [[unreal-object-model]] · [[uedumper]] · [[ue-unreal-engine-sdk]] · [[palworld-sdk-dump]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

@@ -12,7 +12,7 @@ confidence: medium
 
 **Dumped Unreal Engine SDK for Veiled Experts** (EBalloon) — pre-generated C++ headers plus names dump, objects dump, and offsets file for the tactical shooter. Coverage includes agents, weapons, vehicles, UI elements, game modes, and engine subsystems specific to the title. Primarily useful for game security researchers and reverse engineers studying Unreal Engine game internals and SDK generation techniques rather than as a live dumper. (source: wiki/sources/descriptions/EBalloon__VEILED-EXPERTS-SDK.md)
 
-Complements sibling Veiled Experts SDK dumps such as [[project-d-win64-shipping]] (LagradOst), live decrypt tooling such as [[vx-it]] (`[Decrypt]`), and generic UE SDK workflows under [[unreal-object-model]].
+Complements sibling Veiled Experts SDK dumps such as [[veiled-expertssdk]] (Da3kL3o; UE-style headers + object/name tables), [[project-d-win64-shipping]] (LagradOst), live decrypt tooling such as [[vx-it]] (`[Decrypt]`), and generic UE SDK workflows under [[unreal-object-model]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements sibling Veiled Experts SDK dumps such as [[project-d-win64-shipping]
 
 ## Related
 
-[[project-d-win64-shipping]] · [[vx-it]] · [[unreal-object-model]] · [[uedumper]] · [[dumper-7]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[veiled-expertssdk]] · [[project-d-win64-shipping]] · [[vx-it]] · [[unreal-object-model]] · [[uedumper]] · [[dumper-7]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Da3kL3o/VeiledExpertsSDK`: entity [[veiled-expertssdk]] (Da3kL3o; generated UE SDK dump for Veiled Experts; Unreal Engine-style C++ headers + object/name tables; class/struct layouts and runtime metadata for static analysis and external tooling; reverse engineers / game security researchers; cheat / game:veiled experts); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[veiled-experts-sdk]], [[project-d-win64-shipping]], [[vx-it]], [[unreal-object-model]], [[uedumper]], and [[dumper-7]].
+
 - **2026-08-26** — ingest `description:DaedalicEntertainment/ue4-test-automation`: entity [[ue4-test-automation]] (DaedalicEntertainment; UE4 Gauntlet integration-test plugin; C++; assertions, delays, simulated input, trigger checks, parameterized + performance scenarios; unattended CI regression validation; Game Testing); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[automation-examples]], [[optick]], [[games-test-automation-example]], and [[unreal-engine]].
 
 - **2026-08-26** — ingest `description:Daivuk/PureDOOM`: entity [[pure-doom]] (Daivuk; header-only dependency-free DOOM source port; pure C; stdlib-free portable interface; 32/64-bit; minimal embed model for constrained hosts; engine experimentation and low-level runtime research; README [DOOM]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[doomretro]], [[gzdoom]], [[uzdoom]], [[ntdoom]], [[devilution]], and [[game-design-documents]].
