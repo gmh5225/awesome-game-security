@@ -14,7 +14,7 @@ C++ **Visual Studio** sample suite demonstrating multiple **Windows DLL injectio
 
 README lane: **Injection Testing** — multi-method user-mode DLL load study sample.
 
-Complements broader injection corpora such as [[windows-process-injection]], focused PoCs such as [[thread-hijacking-injector]] and [[simple-setwindowshookexw-injector]], and multi-method injectors such as [[guided-hacking-injector]] and [[rust-dll-crab]].
+Complements broader injection corpora such as [[windows-process-injection]], per-technique educational samples such as [[inject-all-the-things]] (DanielRTeixeira; CreateRemoteThread through reflective load; isolated source files; x86/x64; Injection Testing), focused PoCs such as [[thread-hijacking-injector]] and [[simple-setwindowshookexw-injector]], and multi-method injectors such as [[guided-hacking-injector]] and [[rust-dll-crab]].
 
 ## Links
 

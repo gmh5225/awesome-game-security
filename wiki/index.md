@@ -1754,6 +1754,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [in-memory-mutation-demo](entities/in-memory-mutation-demo.md) — C++23 in-memory polymorphic payload mutation demo (VirtualProtect/mprotect; ProtectedData XOR + key rotation; secure wipe; alekzandren)
 - [import-kallsyms](entities/import-kallsyms.md) — IDA Pro plugin: import kallsyms dump → Linux kernel symbol names/addresses in IDB (Python; stripped/partial kernel RE; XMCVE; cheat / IDA Plugins)
 - [inject](entities/inject.md) — CLI network protocol craft/inject/sniff tool (wide protocol range; cheat / Packet Sniffer&Filter; fksvs)
+- [inject-all-the-things](entities/inject-all-the-things.md) — Educational Visual Studio DLL injection samples (DanielRTeixeira; seven techniques in isolated source files; CreateRemoteThread through reflective load; x86/x64; Injection Testing)
 - [InjectARM64](entities/inject-arm64.md) — no-root ARM Android inject platform (Java/Kotlin + C/C++ hooks; virtualized app space; ARM32/ARM64; configurable flows; cheat / Non-root injection; NepMods)
 - [InjectFix](entities/injectfix.md) — Tencent Unity C# logic hotfix (IL inject/route patched gameplay at runtime; broad Unity version/platform; Game Hot Patch / live bugfix)
 - [Injectors](entities/injectors.md) — injection-testing harness (C/C++; AC stress)

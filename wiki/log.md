@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DanielRTeixeira/injectAllTheThings`: entity [[inject-all-the-things]] (DanielRTeixeira; educational Visual Studio project; seven DLL injection methods—CreateRemoteThread, NtCreateThreadEx, QueueUserAPC, SetWindowsHookEx, RtlCreateUserThread, SetThreadContext, reflective DLL load; per-technique source files; x86/x64; security learners / RE / injection mechanics study; Injection Testing); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-dll-injector]], [[windows-process-injection]], [[process-injection-techniques]], and [[code-injection]].
+
 - **2026-08-26** — ingest `description:DarknessFX/DFoundryFX`: entity [[dfoundryfx]] (DarknessFX; UE5 plugin; in-viewport performance tooling; customizable metric charts, shader compilation monitoring, STAT command controls; no extra level actors; Unreal C++ modules; runtime diagnostics during gameplay/profiling; Plugins:Unreal); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[optick]], [[tracy]], [[unreal-network-profiler]], [[ue5-with-dear-imgui]], and [[unreal-engine]].
 
 - **2026-08-26** — ingest `description:DarthTon/Blackbone`: entity [[blackbone]] (DarthTon; Windows memory hacking library; x86/x64 process manipulation; alloc/R/W/protect, module enum, manual PE map, WOW64 thread control; user-mode + kernel-related APIs; RE / game-security / AC tooling experiments); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[pevisor]], [[modexmap]], [[windows-process-injection]], [[libmem]], and [[memwars]].
