@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Cracked5pider/earlycascade-injection`: entity [[earlycascade-injection]] (Cracked5pider; C++ Visual Studio early cascade process-injection PoC; creates process and triggers stealthier code injection during early initialization; hardcoded structure offsets for specific OS builds; malware analysis, EDR bypass research, and defensive injection-detection testing; Injection Testing); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-process-injection]], [[process-injection-techniques]], [[threadject]], [[uwpinject]], [[inject-all-the-things]], and [[injectors]].
+
 - **2026-08-26** — ingest `description:CrackerCat/strongR-frida-android`: entity [[strongr-frida-android]] (CrackerCat; Android `frida-server` anti-detection patch automation; upstream tracking; core patches to strings, pipes, symbols, and protocol behaviors; lightweight patch-workflow repo; mobile RE / anti-instrumentation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[florida]], [[phantom-frida]], [[fridare]], [[florida-zygisk]], and [[detect-frida]].
 
 - **2026-08-26** — ingest `description:CristiNacu/ingsoc`: entity [[ingsoc]] (CristiNacu; Windows Intel PT toolkit; KM driver + user-mode controller + Python trace decoder; Kafka packet streaming; execution reconstruction + control-flow/timing visual analytics; exploit/malware behavior + code-reuse research; README [Intel PT]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[processor-trace]], [[winipt]], [[windows-intel-pt]], [[pt-detector]], and [[libipt-rs]].
