@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:CrackerCat/strongR-frida-android`: entity [[strongr-frida-android]] (CrackerCat; Android `frida-server` anti-detection patch automation; upstream tracking; core patches to strings, pipes, symbols, and protocol behaviors; lightweight patch-workflow repo; mobile RE / anti-instrumentation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[florida]], [[phantom-frida]], [[fridare]], [[florida-zygisk]], and [[detect-frida]].
+
 - **2026-08-26** — ingest `description:CristiNacu/ingsoc`: entity [[ingsoc]] (CristiNacu; Windows Intel PT toolkit; KM driver + user-mode controller + Python trace decoder; Kafka packet streaming; execution reconstruction + control-flow/timing visual analytics; exploit/malware behavior + code-reuse research; README [Intel PT]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[processor-trace]], [[winipt]], [[windows-intel-pt]], [[pt-detector]], and [[libipt-rs]].
 
 - **2026-08-26** — ingest `description:Ctapchuk/android_bootable_recovery-OFRP`: entity [[android-bootable-recovery-ofrp]] (Ctapchuk; full OrangeFox Recovery OFRP custom recovery codebase; C/C++ system components, Android build scripts, XML, Java; recovery UI, partition management, flashing workflows; Android bootable recovery infrastructure; firmware developers / power users; cheat / OrangeFox Recovery); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ofrp-device-xiaomi-mondrian]], [[magiskboot]], [[android-boot-image-editor]], [[pixel-flasher]], and [[android-rom-list]].

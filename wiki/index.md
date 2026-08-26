@@ -1227,6 +1227,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida_usb_dump](entities/frida-usb-dump.md) — Frida macOS USB traffic sniff/dump (Big Sur offsets; cheat / Frida)
 - [fridare](entities/fridare.md) — Frida repackaging / anti-detection (iOS+Android; string/symbol hex-replace)
 - [Florida](entities/florida.md) — Ylarod Frida patch/build automation; anti-detection Android frida-server (string/symbol/artifact renaming)
+- [strongR-frida-android](entities/strongr-frida-android.md) — CrackerCat Android frida-server patch automation; upstream tracking; strings/pipes/symbols/protocol patches; anti-instrumentation RE
 - [FlavorTown](entities/flavortown.md) — multi-language shellcode execution techniques (C/C#/MATLAB; process/memory execution paths; evasion tradecraft; Wra7h; Shellcode Engine & Tricks)
 - [FlowGraph](entities/flowgraph.md) — UE event-flow graph plugin (MothCocoon; C++; async nodes, custom pins, visual debugging; design-agnostic gameplay/narrative scripting; Plugins:Unreal)
 - [flirtnite](entities/flirtnite.md) — External Fortnite cheat framework (NurdAlert; C++; Hyper-V memory interface + Unreal structure handling; entity/aim modules; DirectX 9 ImGui menu/ESP overlay; cheat / game:fortnite [External])
