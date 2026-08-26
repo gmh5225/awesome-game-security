@@ -2360,6 +2360,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obscura](entities/obscura.md) — LLVM pass-plugin obfuscator (C/C++/ObjC/Swift; 13 passes; Darwin-strong; AC Obfuscation Engine)
 - [OcarinaCTRComposer](entities/ocarina-ctr-composer.md) — OoT3D Luma3DS .3gx cheat/tools overlay (on CTRComposer; search/hex/RAM dump)
 - [OfflineCrashDumpUefi](entities/offline-crash-dump-uefi.md) — Microsoft EDK2 Offline Crash Dump package (firmware pre-OS memory dump; DXE writer; encryption/redaction; gmh5225)
+- [onlooker](entities/onlooker.md) — Windows process-tree memory profiler (DenuvoSoftwareSolutions; C++/CMake/Qt; time-like stats + GUI trace viewer + JSON export; memory growth/OOM/regression diagnosis)
 - [PixelOS manifest](entities/manifest.md) — PixelOS-AOSP repo manifest (XML manifests + snippets; repo init/sync and ROM build docs; revision-locked upstream project selection; cheat / Android ROM)
 - [PixelOS official_devices](entities/official-devices.md) — PixelOS-AOSP metadata repo (Markdown/JSON device lists, API data, changelog notes, release templates; authoritative support matrix; cheat / PixelOS device trees)
 - [offsets](entities/offsets.md) — C++ CS:GO offset dump (`[Offset]`; cheat / game:csgo)
