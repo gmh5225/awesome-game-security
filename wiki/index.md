@@ -544,6 +544,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ClawSearch](entities/clawsearch.md) — x64dbg plugin: Cheat Engine–style memory value scan (first/next; int/float; exact/changed/increased; fast-scan; dump jump; codecat)
 - [ClickPic](entities/clickpic.md) — screen pixel color detection + auto-click (OpenCV + triggerbot; gmh5225)
 - [ClearDriverTraces](entities/clear-driver-traces.md) — C++ KM driver; MmUnloadedDrivers, PiDDBCacheTable, CI hash-cache cleanup; version-specific offsets (Sentient111; Driver Trace Cleaner)
+- [CleanCheat](entities/clean-cheat.md) — C++ modular game cheat foundation (data providers, feature modules, runners, shared state; Unreal internal sample; CorrM; cheat / Game cheat base)
 - [clipboard-tools-ue4](entities/clipboard-tools-ue4.md) — UE4 plugin: copy string args to system clipboard (C++ module; UE4.27; in-engine debug/scripting text transfer; Plugins:Unreal; aoharudesu)
 - [ClrGuard](entities/clrguard.md) — Windows defensive CLR assembly-load monitor/blocker (ClrHook DLL hooks; PE metadata/hash logging; optional Windows service; endgameinc; Anti Cheat → CLR Protection)
 - [CoBRA](entities/cobra.md) — Trail of Bits MBA expression simplifier (C++; Cheat Mixed boolean-arithmetic)
