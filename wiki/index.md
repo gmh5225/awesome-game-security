@@ -3156,6 +3156,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [umium](entities/umium.md) — C++/CLI NT anti-tamper (undocumented syscalls + runtime mods; Anti Debugging)
 - [umap](entities/umap.md) — minimalist Windows kernel driver mapper (BYOVD physmem → pool alloc, sections, relocs, imports, entry from user mode; no registry/standard load traces; btbd; cheat / EFI Manual Map)
 - [umap-mapper](entities/umap-mapper.md) — Windows kernel-mode manual mapper PoC (FarmEquipment69; C; kernel function-pointer hook on NtConvertBetweenAuxiliaryCounterAndPerformanceCounter; PE copy + import/reloc + entry; pattern scan + protected writes; VS driver; driver-load / AC evasion research; cheat / NtConvertBetweenAuxiliaryCounterAndPerformanceCounter)
+- [UrekMazino-Malware](entities/urek-mazino-malware.md) — CyberSecurityUP C++ malware-style PoC; **`viragt64.sys`** BYOVD IOCTL security-process kill; WinINet payload download + temp execute; executable-memory shellcode loader; BYOVD threat simulation / IR / endpoint tampering research; README `[viragt64.sys]`
 - [UMPMLib](entities/umpmlib.md) — C/C++ usermode memory analysis (cheat / RPM)
 - [UE-BUIValidator](entities/ue-buivalidator.md) — UE4 UI texture validator plugin (configurable rules; multiple allowed values per setting; Game Engine Plugins:Unreal; benui-dev)
 - [UE Clang-Format](entities/ue-clang-format.md) — Clang-Format preset for Unreal C++ Epic-style conventions (VS Code setup; lightweight config/docs; Game Engine; TensorWorks)

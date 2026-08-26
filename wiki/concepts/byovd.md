@@ -107,6 +107,7 @@ sources:
   - wiki/sources/descriptions/FourCoreLabs__LolDriverScan.md
   - wiki/sources/descriptions/U65535F__ThrottleStopPoC.md
   - wiki/sources/descriptions/CyberSecurityUP__ViGEmBus-Driver-Exploitation.md
+  - wiki/sources/descriptions/CyberSecurityUP__UrekMazino-Malware.md
 updated: 2026-08-26
 confidence: high
 ---
@@ -156,6 +157,8 @@ Avast signed hypervisor-component abuse such as [[avasthv]] (gmh5225; document/e
 Curated educational BYOVD lab [[entities/byovd|BYOVD Lab]] (gmh5225; multi-driver PoC collection for AV/EDR termination—`viragt64.sys`, TfSysMon, ksapi64, BdApiUtil, `wsftprm.sys`; Viragt64 branch notes real-world campaign overlap after publication) complements single-driver kill samples in the same lane. (source: wiki/sources/descriptions/gmh5225__BYOVD.md)
 
 **`viragt64.sys`** process-kill tooling such as [[process-killer-byovd]] (gmh5225; load signed vulnerable driver → kernel access → forceful termination of user-mode-protected anti-cheat, EDR, and AV processes; red-team / LOLdriver termination research) sits in the same BYOVD process-terminate lane as [[terminator]] and [[watchdog-killer]]. (source: wiki/sources/descriptions/gmh5225__ProcessKiller-BYOVD.md)
+
+Malware-style multi-stage PoC such as [[urek-mazino-malware]] (CyberSecurityUP; C++; **`viragt64.sys`** BYOVD → crafted IOCTL security-process kill; WinINet payload download + temp execution; executable-memory shellcode loader; BYOVD threat simulation / IR training / endpoint tampering research; README `[viragt64.sys]`) extends that **`viragt64.sys`** lane with staged payload delivery beside [[process-killer-byovd]]. (source: wiki/sources/descriptions/CyberSecurityUP__UrekMazino-Malware.md)
 
 **`PoisonX.sys`** Cobalt Strike BOF payloads such as [[poison-killer-bof]] (Muz1K1zuM; C BOFs + MinGW cross-compile + Python helper; process killing, driver load/unload, and kernel-mode file deletion through the signed vulnerable driver; red-team / BYOVD process-termination and kernel file-op research via Beacon Object Files) extend the same lane into C2 in-memory tradecraft. (source: wiki/sources/descriptions/Muz1K1zuM__PoisonKiller_bof.md)
 
