@@ -237,6 +237,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-xiaomi-pipa](entities/android-kernel-xiaomi-pipa.md) — Xiaomi Pad 6 (pipa) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-xiaomi-sweet](entities/android-kernel-xiaomi-sweet.md) — Redmi Note 10 Pro (sweet) Android kernel + KernelSU (Qualcomm; cheat / Android Kernel Source)
 - [android-kernel-xiaomi-sm8475](entities/android-kernel-xiaomi-sm8475.md) — Redmi K60 / POCO F5 Pro (mondrian) SM8475 Snapdragon 8+ Gen 1 GKI Android kernel source (Pixel Experience Plus; cheat / Android Kernel Source)
+- [kernel-xiaomi-sm8250](entities/kernel-xiaomi-sm8250.md) — POCO F3/F4 SM8250 custom Xiaomi Android kernel (AnyKernel3, defconfigs, GitLab CI, GKI ABI; Snapdragon 870/888; cheat / xiaomi kernel for POCO F3/F4)
 
 - [Android-Emulator-Detection](entities/android-emulator-detection.md) — Android Anti-Emulator (gmh5225 Java/Kotlin scoring library; reveny Java/C++ fork; Detection:Virtual Environments)
 - [android-classyshark](entities/android-classyshark.md) — Google ClassyShark APK/DEX/AAR/class bytecode viewer (hierarchies, dependencies, multidex triage)

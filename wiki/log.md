@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Danda420/kernel_xiaomi_sm8250`: entity [[kernel-xiaomi-sm8250]] (Danda420; custom Android kernel for POCO F3/F4 SM8250; AnyKernel3 packaging, device defconfigs, GitLab CI, GKI ABI for Qualcomm Snapdragon 870/888; Android kernel dev / mobile security research; cheat / xiaomi kernel for POCO F3/F4); cited on [[overviews/mobile-security]]; cross-linked [[android-kernel-oneplus-sm8250]], [[android-kernel-xiaomi-sm8475]], [[android-kernel-xiaomi-sweet]], [[xiaomi-kernel-opensource]], and [[kernel-devicetree]].
+
 - **2026-08-26** — ingest `description:Daniel-Lobo/WineHooks`: entity [[winehooks]] (Daniel-Lobo; C/C++ classic PC game compatibility/enhancement hook framework; DirectX/OpenGL interception, resolution scaling, texture replacement, audio/input fixes, per-title patch profiles; native Windows + Wine/Linux; modders + RE practitioners; DirectX Compatibility); cited on [[overviews/graphics-api]] and [[overviews/reverse-engineering]]; cross-linked [[dxwrapper]], [[d2gi]], [[present-hook]], and [[crossover-patcher]].
 
 - **2026-08-26** — ingest `description:DanielRTeixeira/injectAllTheThings`: entity [[inject-all-the-things]] (DanielRTeixeira; educational Visual Studio project; seven DLL injection methods—CreateRemoteThread, NtCreateThreadEx, QueueUserAPC, SetWindowsHookEx, RtlCreateUserThread, SetThreadContext, reflective DLL load; per-technique source files; x86/x64; security learners / RE / injection mechanics study; Injection Testing); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[windows-dll-injector]], [[windows-process-injection]], [[process-injection-techniques]], and [[code-injection]].
