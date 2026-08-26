@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DumpAnalysis/WinDbg_Copilot`: entity [[windbg-copilot]] (DumpAnalysis; Python WinDbg extension; ChatGPT-style copilot reads command output for guidance, explanations, and next-command suggestions; OpenAI/Azure OpenAI backends; crash analysis, kernel debugging, RE triage); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[mcp-windbg]], [[windbg-scripts]], [[windbg-cookbook]], and [[windbg-decompile-ext]].
+
 - **2026-08-25** — ingest `description:Duntss/IDA-ZVM-Disassembler`: entity [[ida-zvm-disassembler]] (Duntss; IDA Pro processor module + loader; Zeus VM/ZVM custom bytecode; 69 instructions; XOR key-chain decryption; branch-target xrefs + semantic auto-comments; OALabs ZVM; custom-VM static RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[vmattack]], [[ida-evm]], [[hashdb-ida]], [[bytecodevm]], [[binary-shield]], and [[cerberus]].
 
 - **2026-08-25** — ingest `description:DynamoRIO/drmemory`: entity [[drmemory]] (DynamoRIO; dynamic memory debugger on DynamoRIO; uninitialized reads, OOB, UAF, double-free, leaks; Windows handle/GDI checks; unmodified binaries on Windows/Linux/macOS/Android; IA-32/AMD64/ARM; software hardening and game/anti-cheat reliability testing); cited on [[concepts/dynamic-binary-instrumentation]] and [[overviews/reverse-engineering]]; cross-linked [[winafl]], [[tinyinst]], and [[rev-tools-setup]].
