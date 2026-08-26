@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DProvinciani/pt-detector`: entity [[pt-detector]] (DProvinciani; Windows research prototype; Intel PT KM+UM trace capture; execution-stream decode for ROP/JOP suspicious control flow; C/C++ infrastructure + Python analysis; exploit detection / CFI experimentation; README [Intel PT]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[processor-trace]], [[winipt]], [[windows-intel-pt]], and [[libipt-rs]].
+
 - **2026-08-26** — ingest `description:DQLin/VolumetricReSTIRRelease`: entity [[volumetric-restir-release]] (DQLin; Falcor C++/Slang research renderer; spatiotemporal reservoir resampling for volumetric rendering; custom volumetric pass; RTX-class real-time performance; paper scene pipelines; graphics researchers / engine developers; Renderer); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[strolle]] and [[kajiya]].
 
 - **2026-08-26** — ingest `description:DSecurity/efiSeek`: entity [[efiseek]] (DSecurity; Java Ghidra analyzer plugin; known EFI GUID identification, protocol usage patterns, LOCATE_PROTOCOL/NOTIFY/INSTALL_PROTOCOL_INTERFACE callback flows; helper scripts + GUID data for headless structured firmware analysis; firmware security / UEFI internals RE; Ghidra analyzer for UEFI firmware); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[ghidra]], [[efixplorer]], [[ida-efiutils]], [[fiano]], and [[visualuefi-2-0]].

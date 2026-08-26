@@ -2603,6 +2603,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pokemongo-dumper](entities/pokemongo-dumper.md) — Pokemon GO Unity IL2CPP dumper (C#/C++; cheat / game:pokemongo; gmh5225)
 - [polygon-ue5](entities/polygon-ue5.md) — POLYGON UE5 offensive research (C/C++; graphics / Unreal Engine / hooking; cheat / game:polygon [UE5]; gmh5225)
 - [pom-pom](entities/pom-pom.md) — Honkai: Star Rail simple cheat (C/C++; hooking / overlays; cheat / game:honkai star rail; gmh5225)
+- [pt-detector](entities/pt-detector.md) — Windows Intel PT research prototype (DProvinciani; KM+UM trace capture; execution-stream decode for ROP/JOP suspicious control flow; C/C++ + Python; exploit detection / CFI research; Intel PT)
 - [ptfaketouch](entities/ptfaketouch.md) — iOS synthetic touch library (IOKit/UIKit inject; game bot / UI automation; gmh5225)
 - [PTEditor](entities/pteditor.md) — cross-platform page-table editor (PGD/PUD/PMD/PTE R/W; VA→PA; PAT/NX/TLB; Linux LKM + Windows driver; Some Tricks / PTE Hook)
 - [PTView](entities/ptview.md) — live Windows process page-table browser (C++ driver + C# GUI; PTE browse/dump, VA→PA, large pages; OS memory research / AC kernel investigations; VollRagm; Browse Page Tables on Windows)
