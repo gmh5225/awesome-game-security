@@ -21,7 +21,8 @@ sources:
   - wiki/sources/descriptions/XaFF-XaFF__BugcheckSuppressor.md
   - wiki/sources/descriptions/Ido-Moshe-Github__CiDllDemo.md
   - wiki/sources/descriptions/Harvester57__CodeIntegrity-DriverBlocklist.md
-updated: 2026-08-24
+  - wiki/sources/descriptions/Cr4sh__KernelForge.md
+updated: 2026-08-26
 confidence: high
 ---
 
@@ -33,7 +34,7 @@ Hypervisor-Enforced Code Integrity (Memory Integrity): a **Virtualization-Based 
 
 - **W→X transition restriction:** enforced code pages are not intended to stay writable from VTL0; executability is granted only after configured code-integrity checks pass.
 - **Pipeline:** CI policy defines trust → hypervisor second-stage translation (EPT/SLAT) → strict execution rules on validated kernel pages. Kernel-mode CI.dll API research such as [[ci-dll-demo]] (Ido-Moshe-Github; process-creation notify hook; `CiValidateFileObject` / `CiCheckSignedFile`; Authenticode certificate extraction from returned policy data) helps study the same validation pipeline Memory Integrity relies on. (source: wiki/sources/descriptions/Ido-Moshe-Github__CiDllDemo.md)
-- **Driver requirement:** drivers must be HVCI-compatible (no self-modifying kernel code paths that violate W→X). HVCI-oriented research platforms such as [[goodmans-kernel]] (signed WDM driver embedding wasm3 to hot-load unsigned wasm32 modules without per-iteration driver rebuild; SEH-guarded kernel memory access; zer0condition) illustrate updatable kernel logic under Memory Integrity constraints. (source: wiki/sources/descriptions/zer0condition__GoodmansKernel.md)
+- **Driver requirement:** drivers must be HVCI-compatible (no self-modifying kernel code paths that violate W→X). HVCI-oriented research platforms such as [[goodmans-kernel]] (signed WDM driver embedding wasm3 to hot-load unsigned wasm32 modules without per-iteration driver rebuild; SEH-guarded kernel memory access; zer0condition) illustrate updatable kernel logic under Memory Integrity constraints. (source: wiki/sources/descriptions/zer0condition__GoodmansKernel.md) User-mode kernel invocation research such as [[kernel-forge]] (Cr4sh; signed-driver-wrapper primitives + higher-level kernel function calls on VBS/HVCI hosts; kernel-to-user DLL injection demo; exploit-prototyping under Memory Integrity; README [Hijack ROP]) illustrates calling kernel routines without classic unsigned code-mapping paths. (source: wiki/sources/descriptions/Cr4sh__KernelForge.md)
 
 ## Game-security role
 
@@ -57,5 +58,5 @@ HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[kernel-forge]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 

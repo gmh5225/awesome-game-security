@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Cr4sh/KernelForge`: entity [[kernel-forge]] (Cr4sh; C++ Windows library; signed-driver-wrapper kernel-memory primitives + higher-level kernel routine calls on VBS/HVCI hosts; kernel-to-user DLL injection example; advanced kernel security / exploit-prototyping research; README [Hijack ROP]); cited on [[overviews/windows-kernel]] and [[concepts/hvci]]; cross-linked [[goodmans-kernel]], [[bustercall]], [[kernel-dll-injector]], [[pico-dma]], and [[smm-backdoor-ng]].
+
 - **2026-08-26** — ingest `description:Cr4sh/SmmBackdoorNg`: entity [[smm-backdoor-ng]] (Cr4sh; UEFI SMM backdoor framework; DXE + SMM C firmware + Python Windows/Linux clients; flash-image infection or pre-boot DMA-assisted loading; privilege-escalation and hypervisor-interaction demos; firmware security / persistence / pre-OS attack-surface research; README [UEFI backdoor]); cited on [[overviews/windows-kernel]] and [[overviews/dma-attack]]; cross-linked [[smm-infect]], [[smm]], [[pico-dma]], and [[s6-pcie-microblaze]].
 
 - **2026-08-26** — ingest `description:Cr4sh/pico_dma`: entity [[pico-dma]] (Cr4sh; FPGA pre-boot PCIe DMA platform on compact hardware; Verilog + Vivado/Vitis + MicroBlaze; autonomous or UART-controlled payload execution; SPI flash deployment; boot/firmware security + DMA implant prototyping research); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[s6-pcie-microblaze]], [[pcileech]], [[pcileech-fpga]], [[litepcie]], and [[iommu]].
