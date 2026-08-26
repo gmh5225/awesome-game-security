@@ -2931,6 +2931,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
 - [smap](entities/smap.md) — Windows kernel shellcode mapper (BYOVD PIC shellcode → kernel pool + exec primitive; no PE image; btbd; Scatter Manual Map)
+- [SmKernel-CSGO](entities/smkernel-csgo.md) — educational CS:GO kernel-driver PoC (DeiVid-12; shared-memory KM↔UM comm; module-base lookup + process memory R/W; triggerbot sample; detectability tradeoffs vs kernel AC; cheat / game:csgo [Driver])
 - [smm (ekknod)](entities/smm.md) — SMM cheat (C/C++; driver development / graphics / networking; cheat / SMM; Ring -2 below-OS research)
 - [SmmInfect](entities/smm-infect.md) — SMM backdoor research framework (Oliver-1-1; UEFI/EDK2 SMI handler + Windows/Linux clients; BIOS patch workflows; firmware trust-boundary / persistence research; README [SMM Driver])
 - [smt-server](entities/smt-server.md) — Rust QF_BV SMT solver server (SMT-LIB 2; bit-blast→SAT; C++/Python clients; binary analysis/deobfuscation; LLVMParty; Cheat constraint-solver lane)
