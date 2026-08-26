@@ -1397,6 +1397,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GuardAC](entities/guardac.md) — Spigot/Paper/Folia Minecraft **1.21.x** AI-assisted server-side AC (Kotlin; cloud API aim-check verdicts; local alerts/violations/punishment ladders; alert-only mode; cross-server reputation; Geyser/WorldGuard exemptions; PalassCQ; Anti Cheat / game:minecraft)
 - [guardian-rs](entities/guardian-rs.md) — Rust x86-64 code/PE virtualizer (three-component VM obfuscation; AC Obfuscation Engine `[VM]`)
 - [gdb-mcp](entities/gdb-mcp.md) — lightweight GDB MCP (FastMCP + SSE; gdb-command proxy; breakpoints / memory / step)
+- [gdbghidra](entities/gdbghidra.md) — live GDB ↔ Ghidra bridge (Python client + Java extension; cursor/stack sync, register propagation, breakpoints, relocations; Comsecuris; GDB session)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [gdrv-loader](entities/gdrv-loader.md) — Gigabyte `gdrv64.sys` unsigned driver mapper (BYOVD; DSE bypass; kernel research)
 - [gdriver-lib](entities/gdriver-lib.md) — C++ library wrapping Gigabyte `gdrv64.sys` (physmem R/W, physical mapping, kernel ops via IOCTLs; BYOVD access primitive)

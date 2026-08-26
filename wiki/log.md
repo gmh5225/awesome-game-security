@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Comsecuris/gdbghidra`: entity [[gdbghidra]] (Comsecuris; Python GDB client + Java Ghidra extension; live cursor/stack sync, register propagation for decompilation, breakpoint control, relocation handling; interactive static+dynamic RE; cheat / GDB session); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[gdb-mcp]], and [[mcp-gdb]].
+
 - **2026-08-26** — ingest `description:u8012146108-bit/anticheat-qa`: entity [[anticheat-qa]] (u8012146108-bit; Java Fabric **1.21.11** client mod; ClickGUI/HUD reach/movement/rotation/CPS/velocity/ping monitors; ESP/tracers/FreeCam; test simulator + Y-Level Probe for server-side data-stripping validation; observes/simulates detections without cheats; Anti Cheat / Stress Testing / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[ghostjoin]], [[local-anticheat-1-8-9]], and [[minecraft-anticheat-list]].
 
 - **2026-08-26** — ingest `description:vs-sr-dev/pc-wackywheels-doc`: entity [[pc-wackywheels-doc]] (vs-sr-dev; Wacky Wheels 1994 DOS kart racer; WACKY.DAT archive, track/sprite formats, pseudo-3D floor-renderer fixed-point LUTs, audio/save/config; Python 3 + numpy/Pillow extractors; Skunny Kart cross-ref; archaeological retail-build RE; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[awesome-game-file-format-reversing]], [[batteryshark-github-io]], and [[devilution]].
