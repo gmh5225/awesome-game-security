@@ -3171,6 +3171,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ue4-fps-game](entities/ue4-fps-game.md) — UE4 FPS sample (QianMo; C++ gameplay module + character control; Blueprint assets, input bindings, camera setup, starter maps; UE4 Game / C++ gameplay and editor workflow learning)
 - [ue4-tank-game](entities/ue4-tank-game.md) — UE4 tank prototype (QianMo; C++ pawn + player/AI controllers; crosshair targeting; Blueprint maps; UE4 Game / architecture learning)
 - [ue4-tutorials](entities/ue4-tutorials.md) — UE4 C++ tutorials (audio / physics / animation; Game Engine / Unreal guide)
+- [UE4 Test Automation](entities/ue4-test-automation.md) — UE4 Gauntlet integration-test plugin (C++; assertions, delays, simulated input, trigger checks, parameterized + performance scenarios; unattended CI regression validation; DaedalicEntertainment; Game Testing)
 - [UE426 ABInfinite Win64 Shipping](entities/ue426-abinfinite-win64-shipping.md) — Arena Breakout Infinite UE4.26 SDK dump (C/C++; SDK generation; cheat / game:arena breakout infinite; cra0)
 - [unreal-development-guides-and-tips](entities/unreal-development-guides-and-tips.md) — community UE4 Markdown guides (scene creation, optimization, materials, lighting, ray tracing, Chaos Physics, Blueprints→C++; Game Engine / Unreal guide; JaredP94)
 - [unreal-engine-guide](entities/unreal-engine-guide.md) — curated Unreal Engine apps/libraries/tools guide (Game Engine / Unreal guide; mikeroyal)
