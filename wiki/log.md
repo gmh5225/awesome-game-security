@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:CoolestEnoch/kernel-su-huawei-nova2`: entity [[kernel-su-huawei-nova2]] (CoolestEnoch; Huawei Nova 2 ARM64 vendor kernel + KernelSU framework patches; Android kernel configs + device tree; vendor BSP KernelSU integration study; Android kernel researchers / root-access developers; cheat / KernelSU for huawei); cited on [[kernelsu]] and [[overviews/mobile-security]]; cross-linked [[android-kernel-huawei-hi6250-8-exp]], [[android-kernel-huawei-mt6761]], [[kernelsu-pixel4xl]], and [[pc-ginkgo]].
+
 - **2026-08-26** — ingest `description:CorrM/CleanCheat`: entity [[clean-cheat]] (CorrM; C++ modular game cheat foundation; separated data providers, feature modules, runners, shared state; sample projects incl. Unreal internal example; maintainable cheat prototype architecture; cheat / Game cheat base); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[unreal-finder-tool]], [[blacksun-framework]], [[omegaware-framework]], [[ue4-base]], and [[nullhooks]].
 
 - **2026-08-26** — ingest `description:CorrM/Unreal-Finder-Tool`: entity [[unreal-finder-tool]] (CorrM; C++ UE runtime discovery + SDK generator; `GNames`/`GObjects` discovery, instance dumping, SDK generation; ImGui UI; kernel-assisted memory R/W; per-engine configuration profiles; Unreal RE / game analysis; cheat / SDK View); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[uedumper]], [[ezfndev-uedumper]], [[dumper-7]], [[shh0yauedumper]], and [[re-ue4ss]].
