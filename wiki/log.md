@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:andoridcharlyroot-debug/charlyengine`: entity [[charlyengine]] (Kotlin+NDK Android CE clone; Jetpack Compose + `/proc` daemon; scan/rescan/inject/freeze, per-title sessions, Termux text protocol; offline/personal-use intent); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
+
 - **2026-08-26** — ingest `readme:categories`: Cheat ~2750 (+1; andoridcharlyroot-debug/charlyengine Kotlin+NDK Android CE clone in Cheat > Android Memory Explorer; other major section counts stable); entity [[charlyengine]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; cited on [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-26** — ingest `description:Droid-VM/DroidVM`: entity [[droidvm]] (Droid-VM; Android on-device VM manager; QEMU/KVM + Qualcomm Gunyah hypervisor; ARM64/x86_64 guests; crosvm/QEMU; UEFI Linux/Windows; VirGL/GfxStream GPU, VNC, VirtFS; root required; Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[gunyah-hypervisor]], [[qemu-gvm]], [[android-emulator]], [[aeroot]], and [[rootavd]].
