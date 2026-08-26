@@ -12,7 +12,7 @@ confidence: medium
 
 **Dumpy** is a **Rust-based** Windows **LSASS memory dumping** tool that avoids directly opening `lsass.exe`. Instead it **enumerates and duplicates existing process handles** via native Windows object and system-information APIs, reducing obvious direct-open telemetry. Output supports **XOR-protected dumps**, optional **HTTP upload**, and a **decryption mode** to restore captured data. (source: wiki/sources/descriptions/Kudaes__Dumpy.md)
 
-Useful for controlled offensive security research and **detection-evasion testing** around credential-extraction tooling — complementary to handle-theft dumps such as [[lsass-dump-that-lsass]], minimal handle-hijack teaching PoCs such as [[handle-ripper]], and elevated-handle memory toolkits such as [[nobastian-v2]]. Same-author evasion crates: [[shelter]], [[unwinder]], and [[puzzle]].
+Useful for controlled offensive security research and **detection-evasion testing** around credential-extraction tooling — complementary to handle-theft dumps such as [[lsass-dump-that-lsass]], user-mode LSASS handle-reuse bypass demos such as [[lsass-usermode-bypass]], minimal handle-hijack teaching PoCs such as [[handle-ripper]], and elevated-handle memory toolkits such as [[nobastian-v2]]. Same-author evasion crates: [[shelter]], [[unwinder]], and [[puzzle]].
 
 README category: Reuse opened handles By LSASS (Elevating Handle).
 

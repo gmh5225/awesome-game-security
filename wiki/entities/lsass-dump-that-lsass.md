@@ -12,7 +12,7 @@ confidence: medium
 
 User-mode **LSASS dumping** proof of concept that combines **handle theft** with an unhooked copy of DbgHelp and a lightly obfuscated dump path. The tool enumerates `SystemHandleInformation`, duplicates candidate process handles, filters by full image path containing `lsass.exe`, writes the dump via `MiniDumpWriteDump` through a fresh `DbgHelp.dll` loaded from disk (avoiding possibly hooked exports), then encrypts the resulting file on disk. (source: wiki/sources/descriptions/gmh5225__LSASS-DumpThatLSASS.md)
 
-Useful for Windows security researchers studying handle-based dump acquisition, user-mode hook evasion around `MiniDumpWriteDump`, and tradeoffs of recycled privileged handles — complementary to kernel [[byovd]] LSASS readers such as [[kslkatz]] and trusted-process mapping research such as [[lsass-extend-mapper]].
+Useful for Windows security researchers studying handle-based dump acquisition, user-mode hook evasion around `MiniDumpWriteDump`, and tradeoffs of recycled privileged handles — complementary to user-mode LSASS handle-reuse bypass demos such as [[lsass-usermode-bypass]], kernel [[byovd]] LSASS readers such as [[kslkatz]], and trusted-process mapping research such as [[lsass-extend-mapper]].
 
 README category: Elevating Handle.
 

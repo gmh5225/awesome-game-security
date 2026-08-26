@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:ContionMig/LSASS-Usermode-Bypass`: entity [[lsass-usermode-bypass]] (ContionMig; C++ user-mode bypass demo; reuse LSASS process handles for memory access without kernel-driver load; stability-risk notes on sensitive-process interaction; game anti-cheat bypass tradeoff research; README Elevating Handle By LSASS); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dumpy]], [[lsass-dump-that-lsass]], [[nobastian-v2]], and [[handle-ripper]].
+
 - **2026-08-26** — ingest `description:CookiePLMonster/UptimeFaker`: entity [[uptime-faker]] (CookiePLMonster; C++ Detours timing hook library; fakes system uptime for testing/compatibility; DLL or ASI inject; INI-configured timer API redirection + process-relative time simulation; Game Testing / high-PC-uptime bug diagnosis); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[detours]], [[speed-hack]], and [[ce-speed-hack]].
 
 - **2026-08-26** — ingest `description:WoahToasty/ToastyLink`: entity [[toastylink]] (WoahToasty; from-scratch C++17 XBDM trainer/debug for softmodded Xbox 360 RGH/JTAG; big-endian memory R/W, CE-style scan/freeze, pointer chains, PPC patch assembler, JSON cheat tables, LAN discovery, batch scripting; Cheat Debugging); cited on [[overviews/reverse-engineering]]; cross-linked [[x360gamehack2025]], [[idaxex]], [[xenia]], and [[cheat-engine]].

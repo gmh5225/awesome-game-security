@@ -20,4 +20,4 @@ README category: Elevating Handle By LSASS.
 
 ## Related
 
-[[libelevate]] · [[handle-ripper]] · [[lsass-dump-that-lsass]] · [[lsass-extend-mapper]] · [[km-um-communication]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[libelevate]] · [[handle-ripper]] · [[lsass-dump-that-lsass]] · [[lsass-usermode-bypass]] · [[lsass-extend-mapper]] · [[km-um-communication]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
