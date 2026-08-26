@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:CyberSecurityUP/DriverVuln-Analyzer-IDA-Plugin`: entity [[driver-vuln-analyzer-ida-plugin]] (CyberSecurityUP; Python IDAPython IDA Pro plugin; static triage of potentially vulnerable Windows kernel drivers; auto-extract/decode IOCTL `CTL_CODE`, flag `METHOD_NEITHER` + sensitive kernel API patterns; JSON export; driver attack-surface assessment; README [Driver Vuln Analyzer]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[driver-buddy-reloaded]], [[cognitor]], [[ioctl-helper]], and [[ida-kmdf]].
+
 - **2026-08-26** — ingest `description:CyberSecurityUP/UrekMazino-Malware`: entity [[urek-mazino-malware]] (CyberSecurityUP; C++; **`viragt64.sys`** BYOVD IOCTL security-process kill; WinINet payload download + temp execute; executable-memory shellcode loader; BYOVD threat simulation / IR / endpoint tampering research; README `[viragt64.sys]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[process-killer-byovd]], [[entities/byovd|BYOVD Lab]], [[terminator]], [[watchdog-killer]], and [[loldrivers]].
 
 - **2026-08-26** — ingest `description:CyberSecurityUP/ViGEmBus-Driver-Exploitation`: entity [[vigembus-driver-exploitation]] (CyberSecurityUP; C++; `ViGEmBus.sys` virtual gamepad driver; insecure IOCTL handling + access-control flaws; multiple PoCs for privilege escalation or system instability; RE artifacts; gaming peripheral driver hardening research; README `[ViGEmBus.sys]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[eneio64-driver-exploit]], [[throttlestop-poc]], [[windows-kernel-exploits]], [[razer-rzctl]], and [[loldrivers]].
