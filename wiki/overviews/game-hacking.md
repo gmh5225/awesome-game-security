@@ -98,6 +98,7 @@ sources:
   - wiki/sources/descriptions/tenclass__mvisor.md
   - wiki/sources/descriptions/quic__gunyah-hypervisor.md
   - wiki/sources/descriptions/Droid-VM__DroidVM.md
+  - wiki/sources/descriptions/DrYenyen__Drive-Cloning-For-PS4-PS5.md
   - wiki/sources/descriptions/qemu-gvm__qemu-gvm.md
   - wiki/sources/descriptions/Qemu-Gang__Escape-from-TuxKov.md
   - wiki/sources/descriptions/jwmcglynn__android-emulator.md
@@ -2585,6 +2586,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android yuzu port [[yuzu-android]] (ARM64 JIT; Vulkan/OpenGL; Switch game compatibility on Android) sits in the same `Nintendo Switch` / mobile-emulator crossover lane. (source: wiki/sources/descriptions/gmh5225__yuzu-android.md)
 - Android Eden-based Switch emulator [[opensw]] (RemiPelloux; C++/Kotlin; dynarmic ARM64 JIT; Vulkan/OpenGL; build-ID-aware Atmosphere/Eden cheat import; dmnt-style cheat engine; per-game profiles; Cockpit panel + performance diagnostics; Profile build automation bridge; AYN Thor profile; Nintendo Switch / mobile-emulator crossover) sits in the same lane. (source: wiki/sources/descriptions/RemiPelloux__OpenSw.md)
 - PS5 Linux boot via [[ps5-linux-loader]] (kernel/HV exploits, IOMMU setup, GPU init, TMR handling; custom bootloader payload) sits in the console `PlayStation` HV research lane. (source: wiki/sources/descriptions/ps5-linux__ps5-linux-loader.md)
+- PS4/PS5 extended-storage drive cloning via [[drive-cloning-for-ps4-ps5]] (DrYenyen; Linux `dd` + sparse images; research docs/scripts for imaging extended storage and transferring installed applications between consoles; PlayStation storage migration) sits in the same `PlayStation` console lane beside HV and static-RE tooling. (source: wiki/sources/descriptions/DrYenyen__Drive-Cloning-For-PS4-PS5.md)
 - WebKit CSSFontFace UAF chain via [[cssfontface-exploit]] (PS4/PS5 browser userland R/W; PS4 6.00–11.02, kernel chain 7.00–11.02; PS5 needs separate ASLR/vtable defeat) sits in the same `PlayStation` jailbreak / WebKit research lane. (source: wiki/sources/descriptions/ntfargo__CSSFontFace-Exploit.md)
 - BD-J jailbreak tooling via [[bd-un-jb]] (Gezine; BD-J xlet payloads + `jdk.internal.misc.Unsafe` code execution; C `bdj_unpatch` BDMV manipulation; Python log client; BD-JB RemoteJarLoader for jailbroken PS5 ≤12.00 — unpatch BD-J, ISO, network JAR load/logging; PlayStation exploit-chain + BD-J sandbox-escape research) sits in the same `PlayStation` BD-J jailbreak lane beside WebKit chains. (source: wiki/sources/descriptions/Gezine__BD-UN-JB.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; static RE for jailbroken PS4 modules) sits in the same `PlayStation` / Cheat IDA Plugins lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)

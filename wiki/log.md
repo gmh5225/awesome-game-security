@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DrYenyen/Drive-Cloning-For-PS4-PS5`: entity [[drive-cloning-for-ps4-ps5]] (DrYenyen; Linux dd + sparse images; PS4/PS5 extended-storage cloning docs/scripts; transfer installed applications between consoles; PlayStation storage migration); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[ps5-linux-loader]], [[ida-ps4-helper]], and [[ida-ps5-elf-plugin]].
+
 - **2026-08-26** — ingest `description:andoridcharlyroot-debug/charlyengine`: entity [[charlyengine]] (Kotlin+NDK Android CE clone; Jetpack Compose + `/proc` daemon; scan/rescan/inject/freeze, per-title sessions, Termux text protocol; offline/personal-use intent); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]].
 
 - **2026-08-26** — ingest `readme:categories`: Cheat ~2750 (+1; andoridcharlyroot-debug/charlyengine Kotlin+NDK Android CE clone in Cheat > Android Memory Explorer; other major section counts stable); entity [[charlyengine]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; cited on [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).

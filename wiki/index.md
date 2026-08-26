@@ -887,6 +887,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dOffset](entities/doffset.md) — IDA Pro + Cheat Engine current-module offset sync (multi-tool static+dynamic RE; cheat / IDA Plugins; dNop90)
 - [dota2dumped](entities/dota2dumped.md) — Dota 2 Source 2 offset dumper (C++ headers; netvars / interfaces / class layouts; `[Offset dumper]`)
 - [draw-ida](entities/draw-ida.md) — lightweight IDA Pro whiteboard plugin (sketch/brainstorm in-IDA; MIT; cheat / IDA Plugins)
+- [drive-cloning-for-ps4-ps5](entities/drive-cloning-for-ps4-ps5.md) — PS4/PS5 extended-storage drive cloning (DrYenyen; Linux dd + sparse images; installed-app transfer between consoles; PlayStation)
 - [Driver-intel-PEBs-LoopHPCs](entities/driver-intel-pebs-loophpcs.md) — LoopHPCs filter-driver framework; PEBS + LBR loop-centric hot-loop telemetry for unpacking/malware RE (gmh5225; Intel PEBs)
 - [driver-efi-bootkit](entities/driver-efi-bootkit.md) — UEFI boot-stage implant: EFI→kernel staged chain; loader hook + pre-OS driver patch; Python BOOTDOOR inject (gmh5225)
 - [Driver-kaldereta](entities/driver-kaldereta.md) — unsigned KM cheat-driver skeleton; `KALDERETA_MEMORY` via hooked Win32 `NtTokenManagerGetAnalogExclusiveTokenEvent`; R/W, input sim, pattern scan, manual DLL map (gmh5225)
