@@ -980,6 +980,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dpatch](entities/dpatch.md) — syscall dispatcher patching PoC (table copy + dispatcher jump)
 - [dProtect](entities/dprotect.md) — Android/iOS LLVM native obfuscator (CFF / MBA / string encrypt; AC Obfuscation Engine)
 - [DsArk64](entities/dsark64.md) — BYOVD via Qihoo 360 `DsArk64.sys` (handle donor; ring-0 kill + kernel R/W)
+- [DWARFHelper](entities/dwarfhelper.md) — x64dbg plugin: load DWARF debug symbols from PE/ELF via libdwarf (function names, variable types, file:line comments; x86/x64; Cheat x64dbg Plugins)
 - [DWEX](entities/dwex.md) — DWARF Explorer GUI (ELF/debug files; pyelftools; RE tools)
 - [DWM_Hook](entities/dwm-hook.md) — DWM hook / overlay research (C++; cheat / overlay)
 - [DWM-DwmDraw](entities/dwm-dwmdraw.md) — DWM `DwmDraw` pipeline overlay (gmh5225; ESP/visual hacks via compositor; README `[DWM StackWalk]`; anti-screenshot research)

@@ -433,6 +433,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__PAGE_NO_ACCESS-not-byfron.md
   - wiki/sources/descriptions/gmh5225__X64DBG-ViewDllNotification.md
   - wiki/sources/descriptions/gmh5225__X64DBG-MapLdr.md
+  - wiki/sources/descriptions/CynicRus__DWARFHelper.md
   - wiki/sources/descriptions/gmh5225__cartmanv2.md
   - wiki/sources/descriptions/gmh5225__compiler-binary-richprint.md
   - wiki/sources/descriptions/colinsenner__PECleaner.md
@@ -2128,6 +2129,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Linker `.MAP` symbol import via [[ida-pro-loadmap]] (VC/Borland/Dede/GCC/IDA formats; section:offset → named functions/labels; IDA SDK kernwin/segment APIs) sits in the Cheat IDA Plugins / symbol-recovery lane. (source: wiki/sources/descriptions/mefistotelis__ida-pro-loadmap.md)
 - Linker `.MAP` symbol rename via [[ida-map-symbol-parser]] (gmh5225; parse MAP files; apply function names, globals, and segment info to the current IDA database; IDA Map File Symbol Renamer; cheat / IDA Plugins) sits beside [[ida-pro-loadmap]] in the symbol-recovery lane. (source: wiki/sources/descriptions/gmh5225__IDA-MapSymbolParser.md)
 - Runtime `.MAP` symbol import in [[x64dbg]] via [[x64dbg-mapldr]] (C++ plugin; MSVC/Borland/linker or IDA-exported MAP → function/global/segment names in the debugger symbol DB; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/gmh5225__X64DBG-MapLdr.md)
+- DWARF debug symbol import in [[x64dbg]] via [[dwarfhelper]] (CynicRus; libdwarf; ELF/PE function names, variable types, file:line comments; x86/x64; Cheat x64dbg Plugins lane) (source: wiki/sources/descriptions/CynicRus__DWARFHelper.md)
 - High-resolution IDA screenshot capture via [[ida-screenshot]] (Python plugin; macOS/Linux `make install` or manual `screenshot.py` drop; cheat / IDA Plugins) sits in the documentation/reporting lane. (source: wiki/sources/descriptions/jonpalmisc__ida_screenshot.md)
 - Lightweight in-IDA whiteboard sketching via [[draw-ida]] (MIT; reverse engineers sketch and brainstorm inside IDA; cheat / IDA Plugins) sits in the annotation/ideation lane beside [[ida-screenshot]]. (source: wiki/sources/descriptions/idkhidden__DrawIDA.md)
 - Live Marp/Slidev RE presentation decks docked in IDA via [[ida-slides]] (IDA 9.2+ Python; `@name`/`@0xADDR` tokens jump disasm/pseudocode; embed decompiled lines on save; hover previews; unresolved-ref lint; native webview + file-watcher reload; cheat / IDA Plugins) sits in the presentation/documentation lane beside [[ida-screenshot]] and [[draw-ida]]. (source: wiki/sources/descriptions/hyuunnn__ida-slides.md)
