@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Eangly99/AstroX-AntiCheat`: entity [[astrox-anticheat]] (Eangly99; Java Maven GeyserMC extension; raw Bedrock UDP/RakNet intercept at Netty channel layer before Java translation; sub-ms off-tick detection; movement/combat/inventory/packet heuristics—reach, hitbox backtracking, flight, autoclicker, device spoofing, crash-packet firewall; Bedrock-native kinematics, input-mode-aware reach, latency backtracking, leaky-bucket timer; Discord webhooks + admin commands; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[oomph]], [[ghost-anticheat]], [[paradox-anticheat]], [[windfall-anticheat]], and [[minecraft-anticheat-list]].
+
 - **2026-08-26** — ingest `readme:categories`: Anti Cheat ~692 (+1; Eangly99/AstroX-AntiCheat GeyserMC extension intercepting raw RakNet packets before Java translation in Open Source Anti Cheat System; other major section counts stable); entity [[astrox-anticheat]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-26** — ingest `description:DenuvoSoftwareSolutions/Onlooker`: entity [[onlooker]] (DenuvoSoftwareSolutions; lightweight Windows memory profiler; process-tree stats like Linux time; Qt GUI trace inspector + JSON conversion; memory growth/OOM/performance regression diagnosis in native toolchains; C++/CMake/Qt Widgets); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[windbg-tool]], [[reclass]], [[x64dbg]], and [[drmemory]].
