@@ -1,0 +1,5909 @@
+Project Path: arc_sexyiam_VMPLift_qvmj311b
+
+Source Tree:
+
+```txt
+arc_sexyiam_VMPLift_qvmj311b
+├── LICENSE
+├── README.md
+├── devirt_engine.cpp
+├── devirt_engine.hpp
+├── dispatch_resolver.cpp
+├── dispatch_resolver.hpp
+├── handler_classify.cpp
+├── handler_classify.hpp
+├── handler_walker.cpp
+├── handler_walker.hpp
+├── indirect_dispatch.cpp
+├── indirect_dispatch.hpp
+├── ir_lifter.cpp
+├── ir_lifter.hpp
+├── ir_optimizer.cpp
+├── ir_optimizer.hpp
+├── l4_recover.cpp
+├── l4_recover.hpp
+├── main.cpp
+├── pe_image.cpp
+├── pe_image.hpp
+├── rolling_key.cpp
+├── rolling_key.hpp
+├── semantic_peel.cpp
+├── semantic_peel.hpp
+├── util.cpp
+├── util.hpp
+├── vip_context.cpp
+├── vip_context.hpp
+├── vm_types.hpp
+├── vmenter.cpp
+├── vmenter.hpp
+├── vmp_version.cpp
+└── vmp_version.hpp
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 sexyiam
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# vmp-lift
+
+Handler walker / VIP tracer for **unpacked** VMProtect 3.8–3.10+ x64.
+
+[![image.png](https://i.postimg.cc/h4ymnzJW/image.png)](https://postimg.cc/vDnTLmL3)
+
+
+## Why 3.8 / 3.10 suck for older tools
+
+Stuff aimed at ~3.5 (NoVmp etc.) assumed a pretty stable world: read a VIP byte, hit a dispatch stub, one op, repeat. Opcode tables mostly worked.
+
+Then 3.7+ released, and 3.8–3.10 lean into it:
+
+- **Merged handlers** — one native chunk often does several VM ops *and* the next-handler math. Old per-opcode maps just guess wrong.
+- **Rolling key** — VIP immediates are encrypted and the key mutates as you go. Spawn a fresh emu per handler and you lose the chain.
+- **Everything moves** — VIP / VSP / key sit in random GPRs. Sections look like `.kbB0` / `.WhW0` instead of a nice `.vmp0`.
+- **Weird enters** — a lot of the research samples are `push enc; call enter_stub` (sometimes via a `.text` jmp), not “PE entry = vmenter.”
+
+So this is emu-first on purpose. Walk from a real vmenter, peel what Unicorn actually does (VIP reads, VSP, ALU), dump that, and if it's a dumb pure function (`rcx,rdx → rax`) try to synth it into `devirt_l4.c`. Static mnemonic classify is only a backup.
+
+
+## Usage
+
+```
+build\Release\vmp-lift.exe scan ..\samples\adder.vmp.exe
+build\Release\vmp-lift.exe lift ..\samples\adder.vmp.exe
+build\Release\vmp-lift.exe lift ..\samples\WaveUIAuth_static_unpacked.dll --vmenter 0x18101da77
+```
+
+
+## Output
+
+Whatever you pass as `--out-dir`:
+
+| file | |
+|------|--|
+| `report.txt` | quick summary |
+| `lifted.ll` / `lifted.c` | handler IR |
+| `vip_trace.*` | emu bytecode stream |
+| `devirt.vasm` / `devirt_native.c` | peeled ops → stack C |
+| `devirt_l4.c` | closed form when probes work (adder comes out as `a+b`) |
+| `summary.json` | counts / flags |
+
+
+## Refs
+
+Recon 2024 VMP 3.8 talk, vxcall / r0da posts, [mzakocs samples](https://github.com/mzakocs/VirtualizationObfuscatorAnalysis).
+
+```
+
+`devirt_engine.cpp`:
+
+```cpp
+#include "devirt_engine.hpp"
+
+#include "handler_walker.hpp"
+#include "handler_classify.hpp"
+#include "indirect_dispatch.hpp"
+#include "util.hpp"
+#include "vip_context.hpp"
+
+#include <sstream>
+
+namespace vmp {
+
+DevirtEngine::DevirtEngine(PeImage image)
+    : image_(std::move(image)), version_(detect_version(image_)) {}
+
+std::vector<VmenterSite> DevirtEngine::scan_vmenters() const {
+  VmenterScanner sc(image_);
+  return sc.scan_all();
+}
+
+static void do_lift(const std::vector<HandlerBlock>& blocks, const DevirtOptions& opts,
+                    IrLifter& lifter, IrOptimizer& opt, DevirtReport& report,
+                    std::ostringstream& llvm, std::ostringstream& pseudo) {
+  int idx = 0;
+  for (const auto& h : blocks) {
+    auto fn = opt.optimize(lifter.lift_handler(h, idx++));
+    report.functions.push_back(fn);
+    if (opts.emit_llvm) {
+      llvm << lifter.emit_llvm_text(fn);
+    }
+    if (opts.emit_pseudo_c) {
+      pseudo << lifter.emit_pseudo_c(fn);
+    }
+  }
+}
+
+DevirtReport DevirtEngine::lift(const DevirtOptions& opts) const {
+  DevirtReport report;
+  report.version = version_;
+  report.vmenters = scan_vmenters();
+
+  std::uint64_t entry = opts.vmenter_va;
+  if (entry == 0) {
+    if (auto best = VmenterScanner::pick_best(report.vmenters)) {
+      entry = *best;
+    } else {
+      throw std::runtime_error("no vmenter — pass --vmenter");
+    }
+  }
+
+  HandlerWalker walker(image_, image_.image_base());
+
+  std::vector<HandlerBlock> blocks;
+  if (opts.use_callgraph) {
+    DiscoveryOptions dopts;
+    dopts.max_blocks = opts.max_handlers;
+    dopts.max_depth = opts.max_callgraph_depth;
+    dopts.max_insns_per_block = opts.max_insns_per_handler;
+    dopts.vmp_sections_only = true;
+
+    report.discovery = walker.discover(entry, dopts);
+    blocks = report.discovery.blocks;
+
+    report.walk.start_va = entry;
+    report.walk.handlers = blocks;
+    report.walk.truncated = report.discovery.truncated;
+  } else {
+    report.walk = walker.walk_from(entry, opts.max_handlers, opts.max_insns_per_handler);
+    blocks = report.walk.handlers;
+  }
+
+  IrLifter lifter;
+  IrOptimizer optimizer;
+
+  std::ostringstream llvm;
+  std::ostringstream pseudo;
+
+  llvm << "; lift\n";
+  llvm << "; " << image_.path() << "\n";
+  llvm << "; " << report.version.label << "\n";
+  llvm << "; entry " << hex_u64(entry) << "\n";
+  llvm << "; mode " << (opts.use_callgraph ? "callgraph" : "chain") << "\n";
+  llvm << "; blocks " << blocks.size() << "\n\n";
+
+  do_lift(blocks, opts, lifter, optimizer, report, llvm, pseudo);
+
+  report.llvm_ir = llvm.str();
+  report.pseudo_c = pseudo.str();
+
+  auto vip_tr = unicorn_vip_trace(image_, entry, std::min<std::size_t>(opts.max_handlers, 256),
+                                  std::max<std::size_t>(opts.max_insns_per_handler * 16, 4096));
+  report.vip_trace_text = format_vip_trace_text(vip_tr);
+  report.vip_trace_json = {
+      {"seed_note", vip_tr.seed.note},
+      {"seeded", vip_tr.seeded},
+      {"initial_vip", hex_u64(vip_tr.initial_vip)},
+      {"key_candidate", hex_u64(vip_tr.rolling_key)},
+      {"steps", vip_tr.steps.size()},
+  };
+  if (vip_tr.seed.enc_push_imm) {
+    report.vip_trace_json["enc_push_imm"] = hex_u64(*vip_tr.seed.enc_push_imm);
+  }
+  nlohmann::json steps = nlohmann::json::array();
+  for (const auto& s : vip_tr.steps) {
+    nlohmann::json j = {{"handler", hex_u64(s.handler_va)},
+                        {"vip", hex_u64(s.vip)},
+                        {"fetch_enc", hex_u64(s.fetched_enc)},
+                        {"note", s.note}};
+    if (s.next_handler) j["next"] = hex_u64(*s.next_handler);
+    if (!s.vip_reg.empty()) j["vip_reg"] = s.vip_reg;
+    steps.push_back(j);
+  }
+  report.vip_trace_json["trace"] = steps;
+
+  if (opts.emit_pseudo_c && !report.vip_trace_text.empty()) {
+    report.pseudo_c = report.vip_trace_text + "\n" + report.pseudo_c;
+  }
+
+  if (opts.emit_devirt) {
+    auto dv = run_devirt(image_, entry, blocks, opts.max_vip_steps);
+    report.vasm = std::move(dv.vasm);
+    report.native_pseudo = std::move(dv.native_pseudo);
+    report.native_l4 = std::move(dv.native_l4);
+    report.devirt_json = {
+        {"classified", dv.classified},
+        {"unknown", dv.unknown},
+        {"stream_ops", dv.stream.size()},
+        {"handlers", dv.handlers.size()},
+        {"vip_seeded", dv.vip.seeded},
+        {"vip_steps", dv.vip.steps.size()},
+        {"rolling_key", hex_u64(dv.vip.rolling_key)},
+        {"l4", dv.l4_summary},
+    };
+    nlohmann::json ops = nlohmann::json::array();
+    for (const auto& op : dv.stream) {
+      nlohmann::json j = {{"i", op.index},
+                          {"op", op.mnemonic},
+                          {"handler", hex_u64(op.handler_va)},
+                          {"conf", op.confidence},
+                          {"vip", hex_u64(op.vip)},
+                          {"fetch_enc", hex_u64(op.fetch_enc)},
+                          {"semantic", op.semantic},
+                          {"comment", op.comment}};
+      if (op.fetch_dec) j["fetch_dec"] = hex_u64(*op.fetch_dec);
+      if (op.next) j["next"] = hex_u64(*op.next);
+      ops.push_back(j);
+    }
+    report.devirt_json["ops"] = ops;
+  }
+
+  std::size_t insn_count = 0;
+  for (const auto& b : blocks) {
+    insn_count += b.insns.size();
+  }
+
+  report.summary = {
+      {"binary", image_.path()},
+      {"image_base", hex_u64(image_.image_base())},
+      {"version", report.version.label},
+      {"merged_handlers", report.version.has_merged_handlers},
+      {"rolling_key", report.version.uses_rolling_key},
+      {"vmenter", hex_u64(entry)},
+      {"mode", opts.use_callgraph ? "callgraph" : "chain"},
+      {"handlers_discovered", blocks.size()},
+      {"handlers_lifted", report.functions.size()},
+      {"total_insns", insn_count},
+      {"walk_truncated", report.walk.truncated},
+      {"vmenter_candidates", report.vmenters.size()},
+      {"vip_steps", vip_tr.steps.size()},
+      {"vip_seeded", vip_tr.seeded},
+      {"vip_initial", hex_u64(vip_tr.initial_vip)},
+  };
+  if (opts.emit_devirt && report.devirt_json.contains("classified")) {
+    report.summary["devirt_classified"] = report.devirt_json["classified"];
+    report.summary["devirt_unknown"] = report.devirt_json["unknown"];
+    report.summary["devirt_ops"] = report.devirt_json["stream_ops"];
+    if (report.devirt_json.contains("l4")) report.summary["l4"] = report.devirt_json["l4"];
+  }
+
+  report.summary["unicorn"] = unicorn_available();
+
+  return report;
+}
+
+std::string DevirtEngine::format_text_report(const DevirtReport& report) const {
+  std::ostringstream oss;
+  oss << "vmp-lift reprot\n";
+  oss << "==============\n";
+  oss << "binary:      " << image_.path() << "\n";
+  oss << "image base:  " << hex_u64(image_.image_base()) << "\n";
+  oss << "version:     " << report.version.label << "\n";
+  oss << "mode:        " << report.summary.value("mode", "callgraph") << "\n";
+  oss << "vmp sections:";
+  for (const auto& sec : report.version.vmp_sections) {
+    oss << " " << sec;
+  }
+  oss << "\n\n";
+
+  oss << "VMENTER candidates (" << report.vmenters.size() << ", top 25):\n";
+  auto show_n = report.vmenters.size();
+  if (show_n > 25) {
+    show_n = 25;
+  }
+  for (std::size_t i = 0; i < show_n; i++) {
+    const auto& site = report.vmenters[i];
+    oss << "  " << hex_u64(site.va) << " rva=" << hex_u64(site.rva) << " conf=" << site.confidence
+        << " src=" << site.source;
+    if (site.first_handler_va) {
+      oss << " target=" << hex_u64(site.first_handler_va);
+    }
+    oss << "\n";
+  }
+  if (report.vmenters.size() > show_n) {
+    oss << "  ... " << (report.vmenters.size() - show_n) << " more\n";
+  }
+
+  const auto& blocks =
+      report.walk.handlers.empty() ? report.discovery.blocks : report.walk.handlers;
+  oss << "\nHandlers lifted (" << blocks.size() << " blocks):\n";
+  std::size_t block_show = blocks.size() > 40 ? 40 : blocks.size();
+  for (std::size_t i = 0; i < block_show; i++) {
+    const auto& h = blocks[i];
+    oss << "  [" << i << "] " << hex_u64(h.entry_va) << " insns=" << h.insns.size();
+    if (h.next_handler_va) {
+      oss << " -> " << hex_u64(*h.next_handler_va);
+    }
+    if (h.is_exit) {
+      oss << " (exit)";
+    }
+    if (!h.stop_reason.empty()) {
+      oss << " {" << h.stop_reason << "}";
+    }
+    oss << "\n";
+  }
+  if (blocks.size() > block_show) {
+    oss << "  ... " << (blocks.size() - block_show) << " more\n";
+  }
+
+  if (report.walk.truncated) {
+    oss << "\n(note: hit handler cap — bump --max-handlers)\n";
+  }
+
+  return oss.str();
+}
+
+}
+
+```
+
+`devirt_engine.hpp`:
+
+```hpp
+#pragma once
+
+#include "handler_walker.hpp"
+#include "ir_lifter.hpp"
+#include "ir_optimizer.hpp"
+#include "pe_image.hpp"
+#include "vmenter.hpp"
+#include "vmp_version.hpp"
+
+#include <nlohmann/json.hpp>
+#include <string>
+
+namespace vmp {
+
+struct DevirtOptions {
+  std::uint64_t vmenter_va = 0;
+  std::size_t max_handlers = 256;
+  std::size_t max_insns_per_handler = 128;
+  std::size_t max_callgraph_depth = 8;
+  std::size_t max_vip_steps = 256;
+  bool use_callgraph = true;
+  bool emit_llvm = true;
+  bool emit_pseudo_c = true;
+  bool export_json = true;
+  bool emit_devirt = true;
+};
+
+struct DevirtReport {
+  VersionInfo version;
+  std::vector<VmenterSite> vmenters;
+  WalkResult walk;
+  DiscoveryResult discovery;
+  std::vector<IrFunction> functions;
+  std::string llvm_ir;
+  std::string pseudo_c;
+  std::string vip_trace_text;
+  std::string vasm;
+  std::string native_pseudo;
+  std::string native_l4;
+  nlohmann::json summary;
+  nlohmann::json vip_trace_json;
+  nlohmann::json devirt_json;
+};
+
+class DevirtEngine {
+public:
+  explicit DevirtEngine(PeImage image);
+
+  const PeImage& image() const { return image_; }
+  VersionInfo version() const { return version_; }
+
+  std::vector<VmenterSite> scan_vmenters() const;
+  DevirtReport lift(const DevirtOptions& opts) const;
+  std::string format_text_report(const DevirtReport& report) const;
+
+private:
+  PeImage image_;
+  VersionInfo version_;
+};
+
+}
+
+```
+
+`dispatch_resolver.cpp`:
+
+```cpp
+#include "dispatch_resolver.hpp"
+
+#include "indirect_dispatch.hpp"
+#include "util.hpp"
+
+#include <capstone/capstone.h>
+#include <capstone/x86.h>
+
+#include <deque>
+#include <set>
+
+namespace vmp {
+
+namespace {
+
+bool is_call(const std::string& m) { return m == "call"; }
+
+bool is_jcc(const std::string& m) {
+  return !m.empty() && m[0] == 'j' && m != "jmp" && m != "call";
+}
+
+}
+
+DispatchResolver::DispatchResolver(const PeImage& image)
+    : image_(image), image_base_(image.image_base()) {
+  cs_open(CS_ARCH_X86, CS_MODE_64, &cs_handle_);
+  cs_option(cs_handle_, CS_OPT_DETAIL, CS_OPT_ON);
+}
+
+DispatchResolver::~DispatchResolver() {
+  if (cs_handle_) {
+    cs_close(&cs_handle_);
+  }
+}
+
+bool DispatchResolver::is_vmp_va(std::uint64_t va) const {
+  const auto* sec = image_.section_for_va(va);
+  if (!sec) {
+    return false;
+  }
+
+  return is_vmp_section_name(sec->name) || sec->name == ".text";
+}
+
+bool DispatchResolver::is_plausible_handler(std::uint64_t va) const {
+  if (!image_.contains_va(va)) {
+    return false;
+  }
+  auto bytes = image_.read_at_va(va, 8);
+  if (bytes.empty()) {
+    return false;
+  }
+  int nz = 0;
+  for (auto b : bytes) {
+    if (b != 0 && b != 0xCC) {
+      nz++;
+    }
+  }
+  return nz >= 2;
+}
+
+std::optional<std::uint64_t> DispatchResolver::imm_branch_target(const RawInsn& insn) const {
+  if (insn.branch_target != 0) {
+    return insn.branch_target;
+  }
+  return std::nullopt;
+}
+
+std::vector<RawInsn> DispatchResolver::linear_disasm(std::uint64_t va, std::size_t max_insns,
+                                                     std::size_t max_bytes) const {
+  std::vector<RawInsn> out;
+  std::uint64_t cur = va;
+  std::uint64_t end = va + max_bytes;
+
+  for (std::size_t n = 0; n < max_insns && cur < end; n++) {
+    auto bytes = image_.read_at_va(cur, 16);
+    if (bytes.empty()) {
+      break;
+    }
+
+    cs_insn* raw_cs = nullptr;
+    auto count = cs_disasm(cs_handle_, bytes.data(), bytes.size(), cur, 1, &raw_cs);
+    if (count == 0) {
+      cur++;
+      continue;
+    }
+
+    RawInsn ri;
+    ri.va = raw_cs[0].address;
+    ri.mnemonic = raw_cs[0].mnemonic;
+    ri.op_str = raw_cs[0].op_str;
+    ri.size = raw_cs[0].size;
+    std::copy_n(raw_cs[0].bytes, std::min<std::size_t>(ri.size, 16), ri.bytes);
+
+    if (raw_cs[0].detail) {
+      const auto& x86 = raw_cs[0].detail->x86;
+      for (std::uint8_t j = 0; j < x86.op_count; j++) {
+        const auto& op = x86.operands[j];
+        if (op.type == X86_OP_IMM) {
+          ri.has_imm = true;
+          ri.imm = op.imm;
+          ri.branch_target = static_cast<std::uint64_t>(op.imm);
+        }
+        if (op.type == X86_OP_MEM && op.mem.base == X86_REG_RIP) {
+          ri.rip_rel = true;
+          ri.lea_target = cur + ri.size + static_cast<std::uint64_t>(op.mem.disp);
+        }
+        if (op.type == X86_OP_REG && (ri.mnemonic == "jmp" || ri.mnemonic == "call") && j == 0) {
+          ri.is_branch = true;
+          ri.is_reg_branch = true;
+          ri.branch_reg = x86_reg_name(op.reg);
+        }
+      }
+      if (x86.op_count >= 1 && x86.operands[0].type == X86_OP_IMM &&
+          (ri.mnemonic == "jmp" || ri.mnemonic == "call" || is_jcc(ri.mnemonic))) {
+        ri.is_branch = true;
+        ri.branch_target = static_cast<std::uint64_t>(x86.operands[0].imm);
+        ri.is_reg_branch = false;
+      }
+    }
+
+    ri.is_call = ri.mnemonic == "call";
+    ri.is_ret = (ri.mnemonic == "ret" || ri.mnemonic == "retf" || ri.mnemonic == "retn");
+    if (ri.mnemonic == "jmp") {
+      ri.is_branch = true;
+    }
+
+    cs_free(raw_cs, count);
+    out.push_back(ri);
+    cur += ri.size;
+
+    if (ri.is_ret) break;
+    if (ri.mnemonic == "jmp") break;
+    if (ri.is_reg_branch) break;
+  }
+
+  return out;
+}
+
+HandlerBoundary DispatchResolver::analyze_boundary(const std::vector<RawInsn>& insns) const {
+  HandlerBoundary b;
+  if (insns.empty()) {
+    b.reason = "empty";
+    return b;
+  }
+
+  b.end_index = insns.size() - 1;
+
+  std::size_t first_xfer = insns.size();
+  for (std::size_t i = 0; i < insns.size(); i++) {
+    const auto& in = insns[i];
+    if (in.is_reg_branch || (in.mnemonic == "jmp" && !in.is_reg_branch) || in.is_ret) {
+      first_xfer = i;
+      break;
+    }
+  }
+
+  if (first_xfer < insns.size() && insns[first_xfer].is_reg_branch) {
+    if (auto next = resolve_reg_dispatch(insns)) {
+      b.next_handler_va = next;
+      b.end_index = first_xfer;
+      b.reason = "jmp_reg";
+      return b;
+    }
+  }
+
+  std::size_t last_cf = insns.size();
+  for (std::size_t i = insns.size(); i-- > 0;) {
+    if (insns[i].is_ret || insns[i].mnemonic == "jmp" || insns[i].is_call) {
+      last_cf = i;
+      break;
+    }
+  }
+
+  if (last_cf < insns.size() && insns[last_cf].is_reg_branch) {
+    if (auto next = resolve_reg_dispatch(insns)) {
+      if (is_plausible_handler(*next)) {
+        b.next_handler_va = next;
+        b.end_index = last_cf;
+        b.reason = "jmp_reg";
+        return b;
+      }
+    }
+  }
+
+  bool had_reg_xfer = false;
+  for (const auto& in : insns) {
+    if (in.is_reg_branch) {
+      had_reg_xfer = true;
+      break;
+    }
+  }
+
+  if (!had_reg_xfer && last_cf < insns.size() && insns[last_cf].is_ret) {
+    b.is_vmexit = true;
+    b.end_index = last_cf;
+    b.reason = "ret";
+    return b;
+  }
+
+  if (!had_reg_xfer) {
+    for (std::size_t i = insns.size(); i-- > 0;) {
+      if (insns[i].is_ret) {
+        b.is_vmexit = true;
+        b.end_index = i;
+        b.reason = "ret";
+        return b;
+      }
+    }
+  }
+
+  std::optional<std::uint64_t> tail_jmp;
+  for (std::size_t i = insns.size(); i-- > 0;) {
+    const auto& in = insns[i];
+    if (in.mnemonic == "jmp" && in.branch_target != 0 && !in.is_reg_branch) {
+      if (is_vmp_va(in.branch_target) && is_plausible_handler(in.branch_target)) {
+        tail_jmp = in.branch_target;
+        b.end_index = i;
+        b.reason = "tail_jmp";
+        break;
+      }
+    }
+  }
+
+  if (tail_jmp) {
+    b.next_handler_va = tail_jmp;
+    return b;
+  }
+
+  for (std::size_t i = insns.size(); i-- > 0;) {
+    const auto& in = insns[i];
+    if (is_call(in.mnemonic) && in.branch_target != 0 && is_vmp_va(in.branch_target) &&
+        !in.is_reg_branch) {
+      b.next_handler_va = in.branch_target;
+      b.end_index = i;
+      b.reason = "tail_call";
+      return b;
+    }
+  }
+
+  bool had_reg = false;
+  for (const auto& in : insns) {
+    if (in.is_reg_branch) {
+      had_reg = true;
+      break;
+    }
+  }
+  if (had_reg && !insns.empty()) {
+    if (auto next = unicorn_tail_next(image_, insns.front().va)) {
+      if (is_plausible_handler(*next) && *next != insns.front().va) {
+        b.next_handler_va = next;
+        b.reason = "unicorn";
+        return b;
+      }
+    }
+  }
+
+  b.reason = "unknown";
+  return b;
+}
+
+std::optional<std::uint64_t> DispatchResolver::resolve_reg_dispatch(
+    const std::vector<RawInsn>& insns) const {
+
+  if (insns.empty()) {
+    return std::nullopt;
+  }
+  return unicorn_tail_next(image_, insns.front().va);
+}
+
+HandlerBlock DispatchResolver::lift_block(std::uint64_t handler_va, std::size_t max_insns) const {
+  HandlerBlock blk;
+  blk.entry_va = handler_va;
+  blk.insns = linear_disasm(handler_va, max_insns);
+
+  auto boundary = analyze_boundary(blk.insns);
+  if (boundary.end_index + 1 < blk.insns.size()) {
+    blk.insns.resize(boundary.end_index + 1);
+  }
+
+  blk.is_exit = boundary.is_vmexit;
+  blk.next_handler_va = boundary.next_handler_va;
+  blk.stop_reason = boundary.reason;
+  return blk;
+}
+
+DiscoveryResult DispatchResolver::discover_callgraph(std::uint64_t root_va,
+                                                     const DiscoveryOptions& opts) const {
+  DiscoveryResult res;
+  res.root_va = root_va;
+
+  struct QNode {
+    std::uint64_t va;
+    std::size_t depth;
+  };
+
+  std::deque<QNode> q;
+  std::set<std::uint64_t> seen;
+
+  if (is_plausible_handler(root_va)) {
+    q.push_back({root_va, 0});
+  }
+
+  while (!q.empty() && res.handler_vas.size() < opts.max_blocks) {
+    auto [va, depth] = q.front();
+    q.pop_front();
+
+    if (!seen.insert(va).second) {
+      continue;
+    }
+    if (opts.vmp_sections_only && !is_vmp_va(va)) {
+      continue;
+    }
+
+    res.handler_vas.push_back(va);
+    auto insns = linear_disasm(va, opts.max_insns_per_block);
+    res.blocks.push_back([&] {
+      HandlerBlock hb;
+      hb.entry_va = va;
+      hb.insns = insns;
+      auto bd = analyze_boundary(insns);
+      if (bd.end_index + 1 < hb.insns.size()) {
+        hb.insns.resize(bd.end_index + 1);
+      }
+      hb.is_exit = bd.is_vmexit;
+      hb.next_handler_va = bd.next_handler_va;
+      hb.stop_reason = bd.reason;
+      return hb;
+    }());
+
+    if (depth >= opts.max_depth) {
+      continue;
+    }
+
+    for (const auto& in : insns) {
+      if (is_call(in.mnemonic) || in.mnemonic == "jmp") {
+        auto tgt = imm_branch_target(in);
+        if (!tgt || in.is_reg_branch) {
+          continue;
+        }
+        if (!is_vmp_va(*tgt) || !is_plausible_handler(*tgt)) {
+          continue;
+        }
+        if (!seen.count(*tgt)) {
+          q.push_back({*tgt, depth + 1});
+        }
+      }
+    }
+    if (res.blocks.back().next_handler_va) {
+      auto nxt = *res.blocks.back().next_handler_va;
+      if (!seen.count(nxt) && is_plausible_handler(nxt)) {
+        q.push_back({nxt, depth + 1});
+      }
+    }
+  }
+
+  if (!q.empty() || seen.size() >= opts.max_blocks) {
+    res.truncated = static_cast<std::size_t>(q.size());
+  }
+
+  return res;
+}
+
+WalkResult DispatchResolver::walk_chain(std::uint64_t entry_va, std::size_t max_handlers,
+                                        std::size_t max_insns_per_handler) const {
+  WalkResult wr;
+  wr.start_va = entry_va;
+
+  std::set<std::uint64_t> visited;
+  std::uint64_t cur = entry_va;
+
+  while (wr.handlers.size() < max_handlers) {
+    if (!visited.insert(cur).second) {
+      break;
+    }
+
+    auto blk = lift_block(cur, max_insns_per_handler);
+    if (blk.insns.empty()) {
+      wr.truncated++;
+      break;
+    }
+
+    wr.handlers.push_back(blk);
+
+    if (blk.is_exit) {
+      break;
+    }
+    if (!blk.next_handler_va) {
+      wr.truncated++;
+      break;
+    }
+    cur = *blk.next_handler_va;
+  }
+
+  return wr;
+}
+
+}
+
+```
+
+`dispatch_resolver.hpp`:
+
+```hpp
+#pragma once
+
+#include "indirect_dispatch.hpp"
+#include "pe_image.hpp"
+#include "vm_types.hpp"
+
+#include <capstone/capstone.h>
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+struct HandlerBoundary {
+  std::size_t end_index = 0;
+  std::optional<std::uint64_t> next_handler_va;
+  bool is_vmexit = false;
+  std::string reason;
+};
+
+struct DiscoveryOptions {
+  std::size_t max_blocks = 256;
+  std::size_t max_depth = 8;
+  std::size_t max_insns_per_block = 128;
+  bool vmp_sections_only = true;
+};
+
+struct DiscoveryResult {
+  std::uint64_t root_va = 0;
+  std::vector<std::uint64_t> handler_vas;
+  std::vector<HandlerBlock> blocks;
+  std::size_t truncated = 0;
+};
+
+class DispatchResolver {
+public:
+  explicit DispatchResolver(const PeImage& image);
+  ~DispatchResolver();
+
+  std::vector<RawInsn> linear_disasm(std::uint64_t va, std::size_t max_insns,
+                                     std::size_t max_bytes = 0x1000) const;
+
+  HandlerBoundary analyze_boundary(const std::vector<RawInsn>& insns) const;
+
+  HandlerBlock lift_block(std::uint64_t handler_va, std::size_t max_insns) const;
+
+  DiscoveryResult discover_callgraph(std::uint64_t root_va,
+                                     const DiscoveryOptions& opts) const;
+
+  WalkResult walk_chain(std::uint64_t entry_va, std::size_t max_handlers,
+                        std::size_t max_insns_per_handler) const;
+
+  std::optional<std::uint64_t> resolve_reg_dispatch(const std::vector<RawInsn>& insns) const;
+
+private:
+  const PeImage& image_;
+  std::uint64_t image_base_;
+  csh cs_handle_ = 0;
+
+  bool is_vmp_va(std::uint64_t va) const;
+  bool is_plausible_handler(std::uint64_t va) const;
+  std::optional<std::uint64_t> imm_branch_target(const RawInsn& insn) const;
+};
+
+}
+
+```
+
+`handler_classify.cpp`:
+
+```cpp
+#include "handler_classify.hpp"
+
+#include "dispatch_resolver.hpp"
+#include "l4_recover.hpp"
+#include "semantic_peel.hpp"
+#include "util.hpp"
+
+#include <algorithm>
+#include <sstream>
+#include <string>
+
+namespace vmp {
+
+namespace {
+
+struct Counts {
+  int push = 0, pop = 0, pushfq = 0, popfq = 0;
+  int add = 0, sub = 0, xor_ = 0, and_ = 0, or_ = 0, not_ = 0, neg = 0;
+  int shl = 0, shr = 0, rol = 0, ror = 0, bswap = 0;
+  int mov = 0, lea = 0, xchg = 0;
+  int jmp = 0, call = 0, ret = 0;
+  int mem = 0;
+  int total = 0;
+};
+
+Counts count_insns(const HandlerBlock& blk) {
+  Counts c;
+  c.total = static_cast<int>(blk.insns.size());
+  for (const auto& in : blk.insns) {
+    const auto& m = in.mnemonic;
+    if (m == "push") c.push++;
+    else if (m == "pop") c.pop++;
+    else if (m == "pushfq") c.pushfq++;
+    else if (m == "popfq") c.popfq++;
+    else if (m == "add" || m == "adc") c.add++;
+    else if (m == "sub" || m == "sbb") c.sub++;
+    else if (m == "xor") c.xor_++;
+    else if (m == "and") c.and_++;
+    else if (m == "or") c.or_++;
+    else if (m == "not") c.not_++;
+    else if (m == "neg") c.neg++;
+    else if (m == "shl" || m == "sal") c.shl++;
+    else if (m == "shr" || m == "sar") c.shr++;
+    else if (m == "rol") c.rol++;
+    else if (m == "ror") c.ror++;
+    else if (m == "bswap") c.bswap++;
+    else if (m == "mov" || m == "movabs" || m == "movzx" || m == "movsx" || m == "movsxd")
+      c.mov++;
+    else if (m == "lea") c.lea++;
+    else if (m == "xchg") c.xchg++;
+    else if (m == "jmp") c.jmp++;
+    else if (m == "call") c.call++;
+    else if (m == "ret" || m == "retn" || m == "retf") c.ret++;
+
+    if (in.op_str.find('[') != std::string::npos) c.mem++;
+  }
+  return c;
+}
+
+}
+
+std::string vmop_name(VmOpKind k) {
+  switch (k) {
+    case VmOpKind::VmEnter:
+      return "vmenter";
+    case VmOpKind::VmExit:
+      return "vmexit";
+    case VmOpKind::CalcJmp:
+      return "calc_jmp";
+    case VmOpKind::FetchImm:
+      return "fetch";
+    case VmOpKind::Push:
+      return "push";
+    case VmOpKind::Pop:
+      return "pop";
+    case VmOpKind::Add:
+      return "add";
+    case VmOpKind::Sub:
+      return "sub";
+    case VmOpKind::Xor:
+      return "xor";
+    case VmOpKind::And:
+      return "and";
+    case VmOpKind::Or:
+      return "or";
+    case VmOpKind::Nor:
+      return "nor";
+    case VmOpKind::Shl:
+      return "shl";
+    case VmOpKind::Shr:
+      return "shr";
+    case VmOpKind::Not:
+      return "not";
+    case VmOpKind::Neg:
+      return "neg";
+    case VmOpKind::Load:
+      return "load";
+    case VmOpKind::Store:
+      return "store";
+    case VmOpKind::Mov:
+      return "mov";
+    case VmOpKind::Flags:
+      return "flags";
+    default:
+      return "unk";
+  }
+}
+
+ClassifiedHandler classify_handler(const HandlerBlock& blk) {
+  ClassifiedHandler out;
+  out.va = blk.entry_va;
+  out.insn_count = blk.insns.size();
+  auto c = count_insns(blk);
+
+  const bool xfer_stop = blk.stop_reason == "jmp_reg" || blk.stop_reason == "unicorn" ||
+                         blk.stop_reason == "xfer" || blk.stop_reason == "tail_jmp" ||
+                         blk.stop_reason == "tail_call" || blk.next_handler_va.has_value();
+
+  if ((blk.is_exit || c.ret > 0) && !xfer_stop && (c.pop >= 4 || c.popfq || blk.is_exit)) {
+    out.kind = VmOpKind::VmExit;
+    out.confidence = blk.is_exit ? 90 : 75;
+    out.why = "ret/vmexit";
+  } else if (c.push >= 6 && c.pushfq >= 1 && c.total < 40) {
+    out.kind = VmOpKind::VmEnter;
+    out.confidence = 85;
+    out.why = "push storm + pushfq";
+  } else if (xfer_stop && (c.xor_ >= 2 || c.rol + c.ror + c.bswap + c.neg + c.not_ >= 1)) {
+    out.kind = VmOpKind::CalcJmp;
+    out.confidence = 75;
+    out.why = "xfer+decrypt";
+  } else if (xfer_stop) {
+    out.kind = VmOpKind::CalcJmp;
+    out.confidence = 55;
+    out.why = "has next edge";
+  } else if (c.pushfq || c.popfq) {
+    out.kind = VmOpKind::Flags;
+    out.confidence = 60;
+    out.why = "flags xfer";
+  } else if ((c.not_ >= 1 && c.and_ >= 1) || (c.not_ >= 2 && c.and_ >= 1)) {
+
+    out.kind = VmOpKind::Nor;
+    out.confidence = 65;
+    out.why = "not+and (~nor)";
+  } else if (c.add >= 2 && c.add + c.sub >= c.xor_) {
+    out.kind = VmOpKind::Add;
+    out.confidence = 55;
+    out.why = "add-heavy";
+  } else if (c.sub >= 2) {
+    out.kind = VmOpKind::Sub;
+    out.confidence = 50;
+    out.why = "sub-heavy";
+  } else if (c.xor_ >= 3 && (c.rol + c.ror + c.bswap + c.neg + c.not_) >= 2) {
+
+    out.kind = VmOpKind::CalcJmp;
+    out.confidence = 70;
+    out.why = "xor+transforms (fdj-ish)";
+  } else if (c.xor_ >= 2 && c.mem >= 1) {
+    out.kind = VmOpKind::Xor;
+    out.confidence = 45;
+    out.why = "xor+mem";
+  } else if (c.and_ >= 2) {
+    out.kind = VmOpKind::And;
+    out.confidence = 45;
+    out.why = "and-heavy";
+  } else if (c.or_ >= 2) {
+    out.kind = VmOpKind::Or;
+    out.confidence = 45;
+    out.why = "or-heavy";
+  } else if (c.shl + c.shr >= 2) {
+    out.kind = (c.shl >= c.shr) ? VmOpKind::Shl : VmOpKind::Shr;
+    out.confidence = 50;
+    out.why = "shift";
+  } else if (c.push >= 2 && c.pop == 0 && c.mem <= 2) {
+    out.kind = VmOpKind::Push;
+    out.confidence = 40;
+    out.why = "pushes";
+  } else if (c.pop >= 2 && c.push == 0) {
+    out.kind = VmOpKind::Pop;
+    out.confidence = 40;
+    out.why = "pops";
+  } else if (c.mem >= 3 && c.mov >= 2) {
+    out.kind = VmOpKind::Load;
+    out.confidence = 35;
+    out.why = "mem heavy";
+  } else if (c.mov + c.lea >= 3) {
+    out.kind = VmOpKind::Mov;
+    out.confidence = 30;
+    out.why = "mov/lea";
+  } else if (c.ret > 0 && !xfer_stop) {
+    out.kind = VmOpKind::VmExit;
+    out.confidence = 50;
+    out.why = "lonely ret";
+  } else {
+    out.kind = VmOpKind::Unknown;
+    out.confidence = 10;
+    out.why = "no pattern";
+  }
+
+  out.name = vmop_name(out.kind);
+  return out;
+}
+
+DevirtResult run_devirt(const PeImage& image, std::uint64_t vmenter_va,
+                        const std::vector<HandlerBlock>& blocks, std::size_t max_vip_steps) {
+  DevirtResult res;
+
+  auto sem = unicorn_semantic_trace(image, vmenter_va, max_vip_steps, 4096);
+  res.vip = sem.vip;
+
+  if (!sem.effects.empty()) {
+
+    std::uint64_t locked_key = sem.vip.rolling_key;
+    if (!locked_key) {
+      for (auto it = sem.effects.rbegin(); it != sem.effects.rend(); ++it) {
+        if (it->key_after) {
+          locked_key = it->key_after;
+          break;
+        }
+      }
+    }
+    if (locked_key) res.vip.rolling_key = locked_key;
+
+    for (std::size_t i = 0; i < sem.effects.size(); i++) {
+      auto e = sem.effects[i];
+      if (locked_key) {
+        for (auto& f : e.fetches) {
+          if (!f.decrypted) {
+            f.dec = static_cast<std::uint32_t>(f.enc) ^ static_cast<std::uint32_t>(locked_key);
+            f.decrypted = true;
+          }
+        }
+        if (!e.pushed_imm && !e.fetches.empty() && e.fetches.back().decrypted)
+          e.pushed_imm = e.fetches.back().dec;
+        peel_effect(e);
+      }
+
+      DevirtOp op;
+      op.index = i;
+      op.handler_va = e.handler_va;
+      op.vip = e.vip_after ? e.vip_after : e.vip_before;
+      op.next = e.next_handler;
+      op.kind = e.kind;
+      op.confidence = e.confidence;
+      op.mnemonic = vmop_name(e.kind);
+      op.comment = e.why;
+      op.semantic = true;
+      if (!e.fetches.empty()) {
+        op.fetch_enc = static_cast<std::uint32_t>(e.fetches.back().enc);
+        if (e.fetches.back().decrypted) op.fetch_dec = e.fetches.back().dec;
+      }
+
+      if (e.pushed_imm) op.fetch_dec = *e.pushed_imm;
+
+      if (op.kind == VmOpKind::Unknown) {
+        DispatchResolver dr(image);
+        auto blk = dr.lift_block(e.handler_va, 256);
+        if (e.next_handler) {
+          blk.next_handler_va = e.next_handler;
+          blk.stop_reason = "xfer";
+          blk.is_exit = false;
+        }
+        auto cl = classify_handler(blk);
+        if (cl.kind != VmOpKind::Unknown && cl.kind != VmOpKind::CalcJmp) {
+          op.kind = cl.kind;
+          op.confidence = cl.confidence;
+          op.mnemonic = cl.name;
+          op.comment = cl.why + "+mn";
+          op.semantic = false;
+        }
+      }
+
+      ClassifiedHandler ch;
+      ch.va = op.handler_va;
+      ch.kind = op.kind;
+      ch.name = op.mnemonic;
+      ch.confidence = op.confidence;
+      ch.why = op.comment;
+      res.handlers.push_back(ch);
+      if (op.kind == VmOpKind::Unknown) res.unknown++;
+      else res.classified++;
+      res.stream.push_back(op);
+    }
+  } else if (!res.vip.steps.empty()) {
+
+    res.vip = unicorn_vip_trace(image, vmenter_va, max_vip_steps, 4096);
+    for (std::size_t i = 0; i < res.vip.steps.size(); i++) {
+      const auto& s = res.vip.steps[i];
+      DevirtOp op;
+      op.index = i;
+      op.handler_va = s.handler_va;
+      op.vip = s.vip;
+      op.fetch_enc = s.fetched_enc;
+      op.next = s.next_handler;
+      op.comment = s.note;
+      DispatchResolver dr(image);
+      auto blk = dr.lift_block(s.handler_va, 256);
+      if (s.next_handler) {
+        blk.next_handler_va = s.next_handler;
+        blk.stop_reason = "xfer";
+        blk.is_exit = false;
+      }
+      auto cl = classify_handler(blk);
+      op.kind = cl.kind;
+      op.confidence = cl.confidence;
+      op.mnemonic = cl.name;
+      res.handlers.push_back(cl);
+      if (cl.kind == VmOpKind::Unknown) res.unknown++;
+      else res.classified++;
+      res.stream.push_back(op);
+    }
+  } else {
+    for (const auto& b : blocks) {
+      auto cl = classify_handler(b);
+      res.handlers.push_back(cl);
+      if (cl.kind == VmOpKind::Unknown) res.unknown++;
+      else res.classified++;
+    }
+    for (std::size_t i = 0; i < blocks.size(); i++) {
+      const auto& cl = res.handlers[i];
+      DevirtOp op;
+      op.index = i;
+      op.handler_va = cl.va;
+      op.kind = cl.kind;
+      op.mnemonic = cl.name;
+      op.confidence = cl.confidence;
+      op.comment = cl.why;
+      op.next = blocks[i].next_handler_va;
+      res.stream.push_back(op);
+    }
+  }
+
+  std::ostringstream vasm;
+  vasm << "; stream\n";
+  vasm << "; vmenter " << hex_u64(vmenter_va) << " vip_seed=" << res.vip.seed.note;
+  if (!sem.key_reg.empty()) vasm << " key_reg=" << sem.key_reg;
+  if (!sem.vip_reg.empty()) vasm << " vip_reg=" << sem.vip_reg;
+  if (!sem.vsp_reg.empty()) vasm << " vsp_reg=" << sem.vsp_reg;
+  vasm << "\n; steps=" << res.stream.size() << " classified=" << res.classified
+       << " unknown=" << res.unknown << " key=" << hex_u64(res.vip.rolling_key) << "\n\n";
+  for (const auto& op : res.stream) {
+    vasm << "  " << op.mnemonic;
+    if (op.fetch_dec) vasm << "  imm=" << hex_u64(*op.fetch_dec);
+    else if (op.fetch_enc) vasm << "  ; enc=" << hex_u64(op.fetch_enc);
+    if (op.vip) vasm << " vip=" << hex_u64(op.vip);
+    vasm << "  @" << hex_u64(op.handler_va);
+    if (op.confidence) vasm << "  conf=" << op.confidence;
+    if (op.semantic) vasm << "  [sem]";
+    if (!op.comment.empty()) vasm << "  ; " << op.comment;
+    vasm << "\n";
+    if (op.next) vasm << "       -> " << hex_u64(*op.next) << "\n";
+  }
+  res.vasm = vasm.str();
+
+  std::ostringstream nat;
+  nat << "void recovered(void) {\n";
+  nat << "  uint64_t vsp[512]; int top = 0;\n";
+  for (const auto& op : res.stream) {
+    switch (op.kind) {
+      case VmOpKind::VmEnter:
+        break;
+      case VmOpKind::VmExit:
+        nat << "  return;\n";
+        break;
+      case VmOpKind::CalcJmp:
+      case VmOpKind::Mov:
+        break;
+      case VmOpKind::FetchImm:
+      case VmOpKind::Push: {
+        if (op.fetch_dec) {
+          nat << "  vsp[top++] = " << hex_u64(*op.fetch_dec) << "ull;\n";
+        } else if (op.fetch_enc) {
+          nat << "  vsp[top++] = " << hex_u64(op.fetch_enc) << "ull;\n";
+        } else {
+          nat << "  vsp[top++] = 0;\n";
+        }
+        break;
+      }
+      case VmOpKind::Add:
+        nat << "  vsp[top-2] += vsp[top-1]; --top;\n";
+        break;
+      case VmOpKind::Sub:
+        nat << "  vsp[top-2] -= vsp[top-1]; --top;\n";
+        break;
+      case VmOpKind::Xor:
+        if (op.fetch_dec) {
+          nat << "  vsp[top-1] ^= " << hex_u64(*op.fetch_dec) << "ull;\n";
+        } else {
+          nat << "  vsp[top-2] ^= vsp[top-1]; --top;\n";
+        }
+        break;
+      case VmOpKind::And:
+        nat << "  vsp[top-2] &= vsp[top-1]; --top;\n";
+        break;
+      case VmOpKind::Or:
+        nat << "  vsp[top-2] |= vsp[top-1]; --top;\n";
+        break;
+      case VmOpKind::Nor:
+        nat << "  vsp[top-2] = ~(vsp[top-2] | vsp[top-1]); --top;\n";
+        break;
+      case VmOpKind::Shl:
+        if (op.fetch_dec) {
+          nat << "  vsp[top-1] <<= (" << hex_u64(*op.fetch_dec) << "ull & 63);\n";
+        } else {
+          nat << "  vsp[top-2] <<= (vsp[top-1] & 63); --top;\n";
+        }
+        break;
+      case VmOpKind::Shr:
+        nat << "  vsp[top-2] >>= (vsp[top-1] & 63); --top;\n";
+        break;
+      case VmOpKind::Not:
+        nat << "  vsp[top-1] = ~vsp[top-1];\n";
+        break;
+      case VmOpKind::Neg:
+        nat << "  vsp[top-1] = (uint64_t)-(int64_t)vsp[top-1];\n";
+        break;
+      case VmOpKind::Pop:
+        nat << "  --top;\n";
+        break;
+      case VmOpKind::Load:
+        nat << "  vsp[top-1] = *(uint64_t*)vsp[top-1];\n";
+        break;
+      case VmOpKind::Store:
+        nat << "  *(uint64_t*)vsp[top-1] = vsp[top-2]; top -= 2;\n";
+        break;
+      case VmOpKind::Flags:
+        break;
+      default:
+        break;
+    }
+  }
+  nat << "}\n";
+  res.native_pseudo = nat.str();
+
+  auto l4 = recover_l4(image, vmenter_va, res);
+  res.native_l4 = std::move(l4.c_source);
+  res.l4_summary = std::move(l4.summary);
+
+  return res;
+}
+
+}
+
+```
+
+`handler_classify.hpp`:
+
+```hpp
+#pragma once
+
+#include "vm_types.hpp"
+#include "vip_context.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+enum class VmOpKind {
+  Unknown,
+  VmEnter,
+  VmExit,
+  CalcJmp,
+  FetchImm,
+  Push,
+  Pop,
+  Add,
+  Sub,
+  Xor,
+  And,
+  Or,
+  Nor,
+  Shl,
+  Shr,
+  Not,
+  Neg,
+  Load,
+  Store,
+  Mov,
+  Flags,
+};
+
+struct ClassifiedHandler {
+  std::uint64_t va = 0;
+  VmOpKind kind = VmOpKind::Unknown;
+  std::string name;
+  int confidence = 0;
+  std::string why;
+  std::size_t insn_count = 0;
+};
+
+struct DevirtOp {
+  std::size_t index = 0;
+  std::uint64_t handler_va = 0;
+  VmOpKind kind = VmOpKind::Unknown;
+  std::string mnemonic;
+  std::uint64_t vip = 0;
+  std::uint32_t fetch_enc = 0;
+  std::optional<std::uint64_t> fetch_dec;
+  std::optional<std::uint64_t> next;
+  int confidence = 0;
+  std::string comment;
+  bool semantic = false;
+};
+
+struct DevirtResult {
+  std::vector<ClassifiedHandler> handlers;
+  std::vector<DevirtOp> stream;
+  VipTrace vip;
+  std::string vasm;
+  std::string native_pseudo;
+  std::string native_l4;
+  std::string l4_summary;
+  std::size_t classified = 0;
+  std::size_t unknown = 0;
+};
+
+ClassifiedHandler classify_handler(const HandlerBlock& blk);
+std::string vmop_name(VmOpKind k);
+
+DevirtResult run_devirt(const PeImage& image, std::uint64_t vmenter_va,
+                        const std::vector<HandlerBlock>& blocks,
+                        std::size_t max_vip_steps = 64);
+
+}
+
+```
+
+`handler_walker.cpp`:
+
+```cpp
+#include "handler_walker.hpp"
+
+#include "dispatch_resolver.hpp"
+#include "util.hpp"
+
+#include <memory>
+
+namespace vmp {
+
+HandlerWalker::HandlerWalker(const PeImage& image, std::uint64_t image_base)
+    : image_(image), image_base_(image_base), resolver_(std::make_unique<DispatchResolver>(image)) {}
+
+HandlerWalker::~HandlerWalker() = default;
+
+bool HandlerWalker::is_in_vmp_region(std::uint64_t va) const {
+  const auto* sec = image_.section_for_va(va);
+  if (!sec) {
+    return false;
+  }
+  return is_vmp_section_name(sec->name) || sec->name == ".text";
+}
+
+std::vector<RawInsn> HandlerWalker::disassemble_range(std::uint64_t va, std::size_t max_bytes,
+                                                      std::size_t max_insns) const {
+  return resolver_->linear_disasm(va, max_insns, max_bytes);
+}
+
+std::optional<HandlerBlock> HandlerWalker::lift_single_handler(std::uint64_t va,
+                                                               std::size_t max_insns) const {
+  if (!is_in_vmp_region(va) && !image_.contains_va(va)) {
+    return std::nullopt;
+  }
+  auto blk = resolver_->lift_block(va, max_insns);
+  if (blk.insns.empty()) {
+    return std::nullopt;
+  }
+  return blk;
+}
+
+std::optional<std::uint64_t> HandlerWalker::extract_next_handler(const HandlerBlock& blk) const {
+  if (blk.next_handler_va) {
+    return blk.next_handler_va;
+  }
+  return resolver_->analyze_boundary(blk.insns).next_handler_va;
+}
+
+WalkResult HandlerWalker::walk_from(std::uint64_t entry, std::size_t max_handlers,
+                                      std::size_t max_insns) const {
+  return resolver_->walk_chain(entry, max_handlers, max_insns);
+}
+
+DiscoveryResult HandlerWalker::discover(std::uint64_t root, const DiscoveryOptions& opts) const {
+  return resolver_->discover_callgraph(root, opts);
+}
+
+}
+
+```
+
+`handler_walker.hpp`:
+
+```hpp
+#pragma once
+
+#include "dispatch_resolver.hpp"
+#include "pe_image.hpp"
+#include "vm_types.hpp"
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <vector>
+
+namespace vmp {
+
+class HandlerWalker {
+public:
+  HandlerWalker(const PeImage& image, std::uint64_t image_base);
+  ~HandlerWalker();
+
+  WalkResult walk_from(std::uint64_t entry_va, std::size_t max_handlers,
+                       std::size_t max_insns_per_handler) const;
+
+  DiscoveryResult discover(std::uint64_t root_va, const DiscoveryOptions& opts) const;
+
+  std::optional<HandlerBlock> lift_single_handler(std::uint64_t handler_va,
+                                                  std::size_t max_insns) const;
+
+private:
+  const PeImage& image_;
+  std::uint64_t image_base_;
+  std::unique_ptr<DispatchResolver> resolver_;
+
+  std::vector<RawInsn> disassemble_range(std::uint64_t va, std::size_t max_bytes,
+                                         std::size_t max_insns) const;
+  std::optional<std::uint64_t> extract_next_handler(const HandlerBlock& block) const;
+  bool is_in_vmp_region(std::uint64_t va) const;
+};
+
+}
+
+```
+
+`indirect_dispatch.cpp`:
+
+```cpp
+#include "indirect_dispatch.hpp"
+
+#include "util.hpp"
+#include "vip_context.hpp"
+
+#include <capstone/capstone.h>
+#include <capstone/x86.h>
+#include <unicorn/unicorn.h>
+
+#include <algorithm>
+#include <cstring>
+#include <deque>
+#include <set>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+std::string x86_reg_name(int capstone_reg) {
+  switch (capstone_reg) {
+    case X86_REG_RAX:
+    case X86_REG_EAX:
+      return "rax";
+    case X86_REG_RCX:
+    case X86_REG_ECX:
+      return "rcx";
+    case X86_REG_RDX:
+    case X86_REG_EDX:
+      return "rdx";
+    case X86_REG_RBX:
+    case X86_REG_EBX:
+      return "rbx";
+    case X86_REG_RSP:
+    case X86_REG_ESP:
+      return "rsp";
+    case X86_REG_RBP:
+    case X86_REG_EBP:
+      return "rbp";
+    case X86_REG_RSI:
+    case X86_REG_ESI:
+      return "rsi";
+    case X86_REG_RDI:
+    case X86_REG_EDI:
+      return "rdi";
+    case X86_REG_R8:
+    case X86_REG_R8D:
+      return "r8";
+    case X86_REG_R9:
+    case X86_REG_R9D:
+      return "r9";
+    case X86_REG_R10:
+    case X86_REG_R10D:
+      return "r10";
+    case X86_REG_R11:
+    case X86_REG_R11D:
+      return "r11";
+    case X86_REG_R12:
+    case X86_REG_R12D:
+      return "r12";
+    case X86_REG_R13:
+    case X86_REG_R13D:
+      return "r13";
+    case X86_REG_R14:
+    case X86_REG_R14D:
+      return "r14";
+    case X86_REG_R15:
+    case X86_REG_R15D:
+      return "r15";
+    default:
+      return {};
+  }
+}
+
+bool unicorn_available() { return true; }
+
+namespace {
+
+int unicorn_reg(const std::string& name) {
+  if (name == "rax") return UC_X86_REG_RAX;
+  if (name == "rcx") return UC_X86_REG_RCX;
+  if (name == "rdx") return UC_X86_REG_RDX;
+  if (name == "rbx") return UC_X86_REG_RBX;
+  if (name == "rsp") return UC_X86_REG_RSP;
+  if (name == "rbp") return UC_X86_REG_RBP;
+  if (name == "rsi") return UC_X86_REG_RSI;
+  if (name == "rdi") return UC_X86_REG_RDI;
+  if (name == "r8") return UC_X86_REG_R8;
+  if (name == "r9") return UC_X86_REG_R9;
+  if (name == "r10") return UC_X86_REG_R10;
+  if (name == "r11") return UC_X86_REG_R11;
+  if (name == "r12") return UC_X86_REG_R12;
+  if (name == "r13") return UC_X86_REG_R13;
+  if (name == "r14") return UC_X86_REG_R14;
+  if (name == "r15") return UC_X86_REG_R15;
+  if (name == "rip") return UC_X86_REG_RIP;
+  return 0;
+}
+
+bool looks_like_code(const PeImage& image, std::uint64_t va) {
+  if (!image.contains_va(va)) {
+    return false;
+  }
+  auto* sec = image.section_for_va(va);
+  if (!sec) {
+    return false;
+  }
+
+  if (!is_vmp_section_name(sec->name) && sec->name != ".text") {
+    return false;
+  }
+  auto b = image.read_at_va(va, 4);
+  if (b.size() < 2) {
+    return false;
+  }
+  int nz = 0;
+  for (auto x : b) {
+    if (x != 0 && x != 0xCC) nz++;
+  }
+  return nz >= 2;
+}
+
+struct Slice {
+  uc_engine* uc = nullptr;
+  csh cs = 0;
+  const PeImage* image = nullptr;
+  std::uint64_t next = 0;
+  std::uint64_t start = 0;
+  bool hit = false;
+  bool saw_ret = false;
+  std::size_t steps = 0;
+  std::size_t max_insns = 2048;
+};
+
+void on_code(uc_engine* uc, std::uint64_t addr, std::uint32_t size, void* user) {
+  auto* st = static_cast<Slice*>(user);
+  if (++st->steps > st->max_insns) {
+    uc_emu_stop(uc);
+    return;
+  }
+
+  std::uint8_t buf[16]{};
+  auto n = size < 15u ? size : 15u;
+  if (uc_mem_read(uc, addr, buf, n) != UC_ERR_OK) {
+    uc_emu_stop(uc);
+    return;
+  }
+
+  cs_insn* ins = nullptr;
+  auto count = cs_disasm(st->cs, buf, n, addr, 1, &ins);
+  if (count == 0) {
+    return;
+  }
+
+  std::string mnem = ins[0].mnemonic;
+  if (mnem == "ret" || mnem == "retn" || mnem == "retf") {
+    st->saw_ret = true;
+    uc_emu_stop(uc);
+    cs_free(ins, count);
+    return;
+  }
+
+  const bool xfer = (mnem == "jmp" || mnem == "call");
+  if (xfer && ins[0].detail && ins[0].detail->x86.op_count >= 1) {
+    const auto& op = ins[0].detail->x86.operands[0];
+    if (op.type == X86_OP_REG) {
+      auto rname = x86_reg_name(op.reg);
+      auto ureg = unicorn_reg(rname);
+      std::uint64_t target = 0;
+      if (ureg != 0) {
+        uc_reg_read(uc, ureg, &target);
+      }
+
+      if (target && target != addr && target != st->start && looks_like_code(*st->image, target)) {
+        st->next = target;
+        st->hit = true;
+        uc_emu_stop(uc);
+      }
+    }
+  }
+  cs_free(ins, count);
+}
+
+bool on_unmapped(uc_engine* , uc_mem_type , std::uint64_t addr, int ,
+                 std::int64_t , void* user) {
+  auto* st = static_cast<Slice*>(user);
+  auto page = addr & ~0xFFFULL;
+
+  if (uc_mem_map(st->uc, page, 0x1000, UC_PROT_ALL) == UC_ERR_OK) {
+    return true;
+  }
+  return false;
+}
+
+bool map_pe_image(uc_engine* uc, const PeImage& image) {
+  auto base = image.image_base();
+  auto img_sz = (image.size_of_image() + 0xFFF) & ~0xFFFULL;
+  if (img_sz < 0x1000) {
+    img_sz = 0x1000;
+  }
+
+  if (uc_mem_map(uc, base, img_sz, UC_PROT_ALL) != UC_ERR_OK) {
+    return false;
+  }
+
+  for (const auto& sec : image.sections()) {
+    auto va = base + sec.virtual_address;
+    auto want = static_cast<std::size_t>(
+        sec.raw_size ? (sec.raw_size < sec.virtual_size ? sec.raw_size : sec.virtual_size)
+                     : sec.virtual_size);
+    if (want == 0) {
+      continue;
+    }
+    auto bytes = image.read_at_va(va, want);
+    if (!bytes.empty()) {
+      uc_mem_write(uc, va, bytes.data(), bytes.size());
+    }
+
+    if (sec.virtual_size > want) {
+      auto gap = static_cast<std::size_t>(sec.virtual_size - want);
+      if (gap > 0x100000) gap = 0x100000;
+      std::vector<std::uint8_t> z(gap, 0);
+      uc_mem_write(uc, va + want, z.data(), z.size());
+    }
+  }
+  return true;
+}
+
+}
+
+std::optional<std::uint64_t> unicorn_tail_next(const PeImage& image, std::uint64_t handler_va,
+                                               std::size_t max_insns) {
+
+  auto tr = unicorn_vip_trace(image, handler_va, 1, max_insns);
+  if (!tr.steps.empty() && tr.steps.front().next_handler &&
+      *tr.steps.front().next_handler != handler_va) {
+    return tr.steps.front().next_handler;
+  }
+  return std::nullopt;
+}
+
+std::vector<std::uint64_t> unicorn_discover_edges(const PeImage& image, std::uint64_t root_va,
+                                                  std::size_t max_handlers, std::size_t max_insns) {
+  std::vector<std::uint64_t> found;
+  std::deque<std::uint64_t> q;
+  std::set<std::uint64_t> seen;
+
+  if (!looks_like_code(image, root_va)) {
+    return found;
+  }
+  q.push_back(root_va);
+
+  while (!q.empty() && found.size() < max_handlers) {
+    auto va = q.front();
+    q.pop_front();
+    if (!seen.insert(va).second) {
+      continue;
+    }
+    found.push_back(va);
+
+    auto nxt = unicorn_tail_next(image, va, max_insns);
+    if (nxt && !seen.count(*nxt) && looks_like_code(image, *nxt)) {
+      q.push_back(*nxt);
+    }
+  }
+  return found;
+}
+
+}
+
+```
+
+`indirect_dispatch.hpp`:
+
+```hpp
+#pragma once
+
+#include "pe_image.hpp"
+#include "vm_types.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+bool unicorn_available();
+
+std::optional<std::uint64_t> unicorn_tail_next(const PeImage& image, std::uint64_t handler_va,
+                                               std::size_t max_insns = 2048);
+
+std::vector<std::uint64_t> unicorn_discover_edges(const PeImage& image, std::uint64_t root_va,
+                                                  std::size_t max_handlers = 256,
+                                                  std::size_t max_insns = 2048);
+
+std::string x86_reg_name(int capstone_reg);
+
+}
+
+```
+
+`ir_lifter.cpp`:
+
+```cpp
+#include "ir_lifter.hpp"
+
+#include "util.hpp"
+
+#include <sstream>
+#include <unordered_map>
+
+namespace vmp {
+
+std::string IrLifter::fresh_temp() const {
+  return "%t" + std::to_string(temp_++);
+}
+
+IrOp IrLifter::map_mnemonic(const std::string& m) const {
+  static const std::unordered_map<std::string, IrOp> tbl = {
+      {"mov", IrOp::Mov},   {"movabs", IrOp::Mov}, {"lea", IrOp::Mov},   {"xor", IrOp::Xor},
+      {"add", IrOp::Add},   {"sub", IrOp::Sub},    {"and", IrOp::And},   {"or", IrOp::Or},
+      {"shl", IrOp::Shl},   {"shr", IrOp::Shr},    {"sar", IrOp::Shr},   {"cmp", IrOp::Cmp},
+      {"test", IrOp::Cmp},  {"call", IrOp::Call},  {"ret", IrOp::Ret},   {"jmp", IrOp::Branch},
+      {"pop", IrOp::Load},  {"push", IrOp::Store},
+  };
+  auto it = tbl.find(m);
+  if (it == tbl.end()) {
+    return IrOp::Unknown;
+  }
+  return it->second;
+}
+
+IrInst IrLifter::lift_insn(const RawInsn& in) const {
+  IrInst out;
+  out.source_va = in.va;
+  out.mnemonic = in.mnemonic;
+  out.op = map_mnemonic(in.mnemonic);
+  out.comment = in.op_str;
+
+  IrValue dst;
+  dst.name = fresh_temp();
+  out.results.push_back(dst);
+
+  IrValue src;
+  src.name = in.op_str.empty() ? "?" : in.op_str;
+  out.operands.push_back(src);
+
+  if (in.branch_target != 0) {
+    IrValue tgt;
+    tgt.name = hex_u64(in.branch_target);
+    tgt.constant = static_cast<std::int64_t>(in.branch_target);
+    out.operands.push_back(tgt);
+  }
+
+  return out;
+}
+
+IrFunction IrLifter::lift_handler(const HandlerBlock& hb, int index) const {
+  IrFunction fn;
+  fn.entry_va = hb.entry_va;
+  fn.name = "handler_" + std::to_string(index) + "_" + hex_u64(hb.entry_va, false);
+
+  for (const auto& in : hb.insns) {
+    fn.blocks.push_back(lift_insn(in));
+  }
+
+  if (hb.next_handler_va) {
+    IrInst edge;
+    edge.op = IrOp::Branch;
+    edge.mnemonic = "vm_next";
+    edge.comment = "next";
+    IrValue tgt;
+    tgt.name = hex_u64(*hb.next_handler_va);
+    tgt.constant = static_cast<std::int64_t>(*hb.next_handler_va);
+    edge.operands.push_back(tgt);
+    fn.blocks.push_back(edge);
+  }
+
+  if (hb.is_exit) {
+    IrInst x;
+    x.op = IrOp::Ret;
+    x.mnemonic = "vmexit";
+    fn.blocks.push_back(x);
+  }
+
+  return fn;
+}
+
+std::string IrLifter::emit_llvm_text(const IrFunction& fn) const {
+  std::ostringstream oss;
+  oss << "; " << hex_u64(fn.entry_va) << "\n";
+  oss << "define i64 @" << fn.name << "() {\n";
+  oss << "entry:\n";
+
+  for (const auto& inst : fn.blocks) {
+    oss << "  ; " << hex_u64(inst.source_va) << " " << inst.mnemonic;
+    if (!inst.comment.empty()) {
+      oss << " " << inst.comment;
+    }
+    oss << "\n";
+
+    switch (inst.op) {
+      case IrOp::Mov:
+      case IrOp::Xor:
+      case IrOp::Add:
+      case IrOp::Sub:
+      case IrOp::And:
+      case IrOp::Or:
+      case IrOp::Shl:
+      case IrOp::Shr:
+        if (!inst.results.empty()) {
+
+          oss << "  " << inst.results[0].name << " = add i64 0, 0 ; " << inst.mnemonic << " "
+              << inst.comment << "\n";
+        }
+        break;
+      case IrOp::Branch:
+        if (!inst.operands.empty()) {
+          oss << "  br label %" << inst.operands[0].name << "\n";
+        }
+        break;
+      case IrOp::Ret:
+        oss << "  ret i64 0\n";
+        break;
+      default:
+        oss << "  ; unlowered " << inst.mnemonic << "\n";
+        break;
+    }
+  }
+
+  oss << "}\n\n";
+  return oss.str();
+}
+
+std::string IrLifter::emit_pseudo_c(const IrFunction& fn) const {
+  std::ostringstream oss;
+  oss << "// " << hex_u64(fn.entry_va) << "\n";
+  oss << "void " << fn.name << "() {\n";
+  for (const auto& inst : fn.blocks) {
+    if (inst.op == IrOp::Branch && !inst.operands.empty()) {
+      oss << "  goto " << inst.operands[0].name << ";\n";
+      continue;
+    }
+    if (inst.op == IrOp::Ret) {
+      oss << "  return;\n";
+      continue;
+    }
+    if (inst.source_va != 0) {
+      oss << "  // " << hex_u64(inst.source_va) << ": " << inst.mnemonic << " " << inst.comment
+          << "\n";
+    }
+  }
+  oss << "}\n\n";
+  return oss.str();
+}
+
+}
+
+```
+
+`ir_lifter.hpp`:
+
+```hpp
+#pragma once
+
+#include "handler_walker.hpp"
+#include "vm_types.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+namespace vmp {
+
+enum class IrOp {
+  Invalid,
+  Load,
+  Store,
+  BinOp,
+  UnaryOp,
+  Mov,
+  Xor,
+  Add,
+  Sub,
+  And,
+  Or,
+  Shl,
+  Shr,
+  Cmp,
+  Branch,
+  Call,
+  Ret,
+  Phi,
+  Unknown,
+};
+
+struct IrValue {
+  std::string name;
+  std::string type = "i64";
+  std::optional<std::int64_t> constant;
+};
+
+struct IrInst {
+  std::uint64_t source_va = 0;
+  IrOp op = IrOp::Invalid;
+  std::string mnemonic;
+  std::vector<IrValue> operands;
+  std::vector<IrValue> results;
+  std::string comment;
+};
+
+struct IrFunction {
+  std::string name;
+  std::uint64_t entry_va = 0;
+  std::vector<IrInst> blocks;
+};
+
+class IrLifter {
+public:
+  IrFunction lift_handler(const HandlerBlock& handler, int index) const;
+  std::string emit_llvm_text(const IrFunction& fn) const;
+  std::string emit_pseudo_c(const IrFunction& fn) const;
+
+private:
+  mutable int temp_ = 0;
+  std::string fresh_temp() const;
+  IrOp map_mnemonic(const std::string& mnemonic) const;
+  IrInst lift_insn(const RawInsn& insn) const;
+};
+
+}
+
+```
+
+`ir_optimizer.cpp`:
+
+```cpp
+#include "ir_optimizer.hpp"
+
+#include <unordered_set>
+
+namespace vmp {
+
+IrFunction IrOptimizer::optimize(IrFunction fn) const {
+  fold_constants(fn);
+  remove_identity_ops(fn);
+  remove_dead(fn);
+  return fn;
+}
+
+void IrOptimizer::fold_constants(IrFunction& fn) const {
+  for (auto& inst : fn.blocks) {
+    for (auto& op : inst.operands) {
+      if (op.name.rfind("0x", 0) == 0) {
+        try {
+          op.constant = static_cast<std::int64_t>(std::stoull(op.name.substr(2), nullptr, 16));
+        } catch (...) {
+        }
+      }
+    }
+  }
+}
+
+void IrOptimizer::remove_identity_ops(IrFunction& fn) const {
+  std::vector<IrInst> kept;
+  kept.reserve(fn.blocks.size());
+  for (const auto& inst : fn.blocks) {
+    if (inst.op == IrOp::Unknown && inst.mnemonic == "nop") {
+      continue;
+    }
+    kept.push_back(inst);
+  }
+  fn.blocks = std::move(kept);
+}
+
+void IrOptimizer::remove_dead(IrFunction& fn) const {
+  std::unordered_set<std::string> live;
+  for (auto it = fn.blocks.rbegin(); it != fn.blocks.rend(); ++it) {
+    if (it->op == IrOp::Branch || it->op == IrOp::Ret || it->op == IrOp::Call) {
+      for (const auto& op : it->operands) {
+        live.insert(op.name);
+      }
+    }
+    for (const auto& r : it->results) {
+      if (live.count(r.name)) {
+        for (const auto& op : it->operands) {
+          live.insert(op.name);
+        }
+      }
+    }
+  }
+
+  std::vector<IrInst> kept;
+  for (const auto& inst : fn.blocks) {
+    if (inst.op == IrOp::Mov || inst.op == IrOp::Add || inst.op == IrOp::Xor) {
+      if (!inst.results.empty() && !live.count(inst.results[0].name)) {
+        continue;
+      }
+    }
+    kept.push_back(inst);
+  }
+  fn.blocks = std::move(kept);
+}
+
+}
+
+```
+
+`ir_optimizer.hpp`:
+
+```hpp
+#pragma once
+
+#include "ir_lifter.hpp"
+
+namespace vmp {
+
+class IrOptimizer {
+public:
+  IrFunction optimize(IrFunction fn) const;
+
+private:
+  void fold_constants(IrFunction& fn) const;
+  void remove_identity_ops(IrFunction& fn) const;
+  void remove_dead(IrFunction& fn) const;
+};
+
+}
+
+```
+
+`l4_recover.cpp`:
+
+```cpp
+#include "l4_recover.hpp"
+
+#include "util.hpp"
+#include "vip_context.hpp"
+
+#include <unicorn/unicorn.h>
+
+#include <capstone/capstone.h>
+#include <capstone/x86.h>
+
+#include <algorithm>
+#include <functional>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace vmp {
+namespace {
+
+bool in_vmp(const PeImage& image, std::uint64_t va) {
+  auto* sec = image.section_for_va(va);
+  return sec && is_vmp_section_name(sec->name);
+}
+
+bool map_pe(uc_engine* uc, const PeImage& image) {
+  auto base = image.image_base();
+  auto img_sz = (image.size_of_image() + 0xFFF) & ~0xFFFULL;
+  if (img_sz < 0x1000) img_sz = 0x1000;
+  if (uc_mem_map(uc, base, img_sz, UC_PROT_ALL) != UC_ERR_OK) return false;
+  for (const auto& sec : image.sections()) {
+    auto va = base + sec.virtual_address;
+    auto want = static_cast<std::size_t>(
+        sec.raw_size ? (sec.raw_size < sec.virtual_size ? sec.raw_size : sec.virtual_size)
+                     : sec.virtual_size);
+    if (!want) continue;
+    auto bytes = image.read_at_va(va, want);
+    if (!bytes.empty()) uc_mem_write(uc, va, bytes.data(), bytes.size());
+  }
+  return true;
+}
+
+struct RunState {
+  const PeImage* image = nullptr;
+  std::uint64_t vmenter = 0;
+  std::uint64_t sentinel = 0;
+  std::size_t steps = 0;
+  std::size_t max_steps = 2'000'000;
+  bool exited = false;
+  bool started = false;
+};
+
+void hook_code(uc_engine* uc, std::uint64_t addr, std::uint32_t , void* user) {
+  auto* st = static_cast<RunState*>(user);
+  if (++st->steps > st->max_steps) {
+    uc_emu_stop(uc);
+    return;
+  }
+  if (!st->started) {
+    if (addr == st->vmenter) st->started = true;
+    return;
+  }
+
+  if (addr == st->sentinel || !in_vmp(*st->image, addr)) {
+    st->exited = true;
+    uc_emu_stop(uc);
+  }
+}
+
+bool hook_unmapped(uc_engine* uc, uc_mem_type , std::uint64_t addr, int ,
+                   std::int64_t , void* ) {
+  auto page = addr & ~0xFFFULL;
+  return uc_mem_map(uc, page, 0x1000, UC_PROT_ALL) == UC_ERR_OK;
+}
+
+std::optional<std::uint64_t> unicorn_probe(const PeImage& image, std::uint64_t vmenter,
+                                           std::uint64_t arg_rcx, std::uint64_t arg_rdx) {
+  uc_engine* uc = nullptr;
+  if (uc_open(UC_ARCH_X86, UC_MODE_64, &uc) != UC_ERR_OK) return std::nullopt;
+  if (!map_pe(uc, image)) {
+    uc_close(uc);
+    return std::nullopt;
+  }
+
+  constexpr std::uint64_t kStack = 0x7FE00000ULL;
+  constexpr std::uint64_t kStackSz = 0x200000ULL;
+  uc_mem_map(uc, kStack, kStackSz, UC_PROT_ALL);
+  std::uint64_t rsp = kStack + kStackSz - 0x400;
+  std::uint64_t sentinel = image.image_base() + 0x1000;
+
+  std::uint8_t cc[16];
+  for (auto& b : cc) b = 0xCC;
+  uc_mem_write(uc, sentinel, cc, sizeof(cc));
+
+  bool start_is_push_call = false;
+  {
+    auto b = image.read_at_va(vmenter, 10);
+    start_is_push_call = b.size() >= 10 && b[0] == 0x68 && b[5] == 0xE8;
+  }
+  auto seed = extract_vip_seed(image, vmenter);
+  if (seed.enc_push_imm && !start_is_push_call) {
+    rsp -= 8;
+    std::uint64_t imm = *seed.enc_push_imm;
+    uc_mem_write(uc, rsp, &imm, 8);
+  }
+  rsp -= 8;
+  uc_mem_write(uc, rsp, &sentinel, 8);
+  uc_reg_write(uc, UC_X86_REG_RSP, &rsp);
+
+  std::uint64_t z = 0;
+  for (int r : {UC_X86_REG_RAX, UC_X86_REG_RBX, UC_X86_REG_RBP, UC_X86_REG_RSI, UC_X86_REG_RDI,
+                UC_X86_REG_R8, UC_X86_REG_R9, UC_X86_REG_R10, UC_X86_REG_R11, UC_X86_REG_R12,
+                UC_X86_REG_R13, UC_X86_REG_R14, UC_X86_REG_R15}) {
+    uc_reg_write(uc, r, &z);
+  }
+  uc_reg_write(uc, UC_X86_REG_RCX, &arg_rcx);
+  uc_reg_write(uc, UC_X86_REG_RDX, &arg_rdx);
+  if (seed.movabs_imm) {
+    std::uint64_t m = *seed.movabs_imm;
+    uc_reg_write(uc, UC_X86_REG_RBP, &m);
+  }
+
+  RunState st;
+  st.image = &image;
+  st.vmenter = vmenter;
+  st.sentinel = sentinel;
+
+  uc_hook h_code{}, h_unmap{};
+  uc_hook_add(uc, &h_code, UC_HOOK_CODE, reinterpret_cast<void*>(hook_code), &st, 1, 0);
+  uc_hook_add(uc, &h_unmap, UC_HOOK_MEM_UNMAPPED, reinterpret_cast<void*>(hook_unmapped), &st, 1,
+              0);
+
+  uc_emu_start(uc, vmenter, 0, 0, 0);
+  std::uint64_t rax = 0;
+  uc_reg_read(uc, UC_X86_REG_RAX, &rax);
+  bool ok = st.exited;
+  uc_close(uc);
+  if (!ok) return std::nullopt;
+  return rax;
+}
+
+struct Probe {
+  std::uint64_t a = 0, b = 0, out = 0;
+};
+
+bool fit_linear(const std::vector<Probe>& ps, std::int64_t& p, std::int64_t& q, std::int64_t& r) {
+
+  if (ps.size() < 3) return false;
+
+  std::optional<std::int64_t> p_guess, q_guess;
+  for (std::size_t i = 0; i < ps.size(); i++) {
+    for (std::size_t j = i + 1; j < ps.size(); j++) {
+      if (ps[i].b == ps[j].b && ps[i].a != ps[j].a) {
+        auto da = static_cast<std::int64_t>(ps[j].a) - static_cast<std::int64_t>(ps[i].a);
+        auto dout = static_cast<std::int64_t>(ps[j].out) - static_cast<std::int64_t>(ps[i].out);
+        if (da != 0 && dout % da == 0) {
+          auto cand = dout / da;
+          if (!p_guess) p_guess = cand;
+          else if (*p_guess != cand) return false;
+        }
+      }
+      if (ps[i].a == ps[j].a && ps[i].b != ps[j].b) {
+        auto db = static_cast<std::int64_t>(ps[j].b) - static_cast<std::int64_t>(ps[i].b);
+        auto dout = static_cast<std::int64_t>(ps[j].out) - static_cast<std::int64_t>(ps[i].out);
+        if (db != 0 && dout % db == 0) {
+          auto cand = dout / db;
+          if (!q_guess) q_guess = cand;
+          else if (*q_guess != cand) return false;
+        }
+      }
+    }
+  }
+  if (!p_guess || !q_guess) return false;
+  p = *p_guess;
+  q = *q_guess;
+  r = static_cast<std::int64_t>(ps[0].out) - p * static_cast<std::int64_t>(ps[0].a) -
+      q * static_cast<std::int64_t>(ps[0].b);
+  for (const auto& x : ps) {
+    auto pred = p * static_cast<std::int64_t>(x.a) + q * static_cast<std::int64_t>(x.b) + r;
+    if (static_cast<std::uint64_t>(pred) != x.out &&
+        static_cast<std::uint32_t>(pred) != static_cast<std::uint32_t>(x.out)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool all_match(const std::vector<Probe>& ps,
+               const std::function<std::uint64_t(std::uint64_t, std::uint64_t)>& f) {
+  for (const auto& x : ps) {
+    if (f(x.a, x.b) != x.out &&
+        static_cast<std::uint32_t>(f(x.a, x.b)) != static_cast<std::uint32_t>(x.out)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+struct Expr {
+  enum Kind { Const, Arg, Add, Sub, Xor, And, Or, Nor, Not, Neg, Load } kind = Const;
+  std::uint64_t imm = 0;
+  int arg = -1;
+  std::vector<Expr> kids;
+
+  static Expr c(std::uint64_t v) {
+    Expr e;
+    e.kind = Const;
+    e.imm = v;
+    return e;
+  }
+  static Expr a(int i) {
+    Expr e;
+    e.kind = Arg;
+    e.arg = i;
+    return e;
+  }
+  static Expr bin(Kind k, Expr l, Expr r) {
+    Expr e;
+    e.kind = k;
+    e.kids = {std::move(l), std::move(r)};
+    return e;
+  }
+  static Expr un(Kind k, Expr x) {
+    Expr e;
+    e.kind = k;
+    e.kids = {std::move(x)};
+    return e;
+  }
+};
+
+Expr fold(Expr e);
+
+Expr fold_bin(Expr::Kind k, Expr l, Expr r) {
+  l = fold(std::move(l));
+  r = fold(std::move(r));
+  if (l.kind == Expr::Const && r.kind == Expr::Const) {
+    std::uint64_t v = 0;
+    switch (k) {
+      case Expr::Add: v = l.imm + r.imm; break;
+      case Expr::Sub: v = l.imm - r.imm; break;
+      case Expr::Xor: v = l.imm ^ r.imm; break;
+      case Expr::And: v = l.imm & r.imm; break;
+      case Expr::Or: v = l.imm | r.imm; break;
+      case Expr::Nor: v = ~(l.imm | r.imm); break;
+      default: break;
+    }
+    return Expr::c(v);
+  }
+
+  if (k == Expr::Add && r.kind == Expr::Const && r.imm == 0) return l;
+  if (k == Expr::Add && l.kind == Expr::Const && l.imm == 0) return r;
+  if (k == Expr::Xor && r.kind == Expr::Const && r.imm == 0) return l;
+  if (k == Expr::And && r.kind == Expr::Const && r.imm == ~0ull) return l;
+  if (k == Expr::Or && r.kind == Expr::Const && r.imm == 0) return l;
+
+  if (k == Expr::Nor && l.kind == Expr::Not && r.kind == Expr::Not)
+    return fold(Expr::bin(Expr::And, l.kids[0], r.kids[0]));
+  return Expr::bin(k, std::move(l), std::move(r));
+}
+
+Expr fold(Expr e) {
+  if (e.kind == Expr::Not && e.kids.size() == 1) {
+    auto x = fold(e.kids[0]);
+    if (x.kind == Expr::Const) return Expr::c(~x.imm);
+    if (x.kind == Expr::Not) return fold(x.kids[0]);
+    return Expr::un(Expr::Not, std::move(x));
+  }
+  if (e.kind == Expr::Neg && e.kids.size() == 1) {
+    auto x = fold(e.kids[0]);
+    if (x.kind == Expr::Const) return Expr::c(static_cast<std::uint64_t>(-static_cast<std::int64_t>(x.imm)));
+    return Expr::un(Expr::Neg, std::move(x));
+  }
+  if (e.kids.size() == 2) return fold_bin(e.kind, e.kids[0], e.kids[1]);
+  return e;
+}
+
+std::string emit_expr(const Expr& e) {
+  switch (e.kind) {
+    case Expr::Const: return hex_u64(e.imm) + "ull";
+    case Expr::Arg: return e.arg == 0 ? "a" : (e.arg == 1 ? "b" : ("arg" + std::to_string(e.arg)));
+    case Expr::Add: return "(" + emit_expr(e.kids[0]) + " + " + emit_expr(e.kids[1]) + ")";
+    case Expr::Sub: return "(" + emit_expr(e.kids[0]) + " - " + emit_expr(e.kids[1]) + ")";
+    case Expr::Xor: return "(" + emit_expr(e.kids[0]) + " ^ " + emit_expr(e.kids[1]) + ")";
+    case Expr::And: return "(" + emit_expr(e.kids[0]) + " & " + emit_expr(e.kids[1]) + ")";
+    case Expr::Or: return "(" + emit_expr(e.kids[0]) + " | " + emit_expr(e.kids[1]) + ")";
+    case Expr::Nor: return "(~(" + emit_expr(e.kids[0]) + " | " + emit_expr(e.kids[1]) + "))";
+    case Expr::Not: return "(~" + emit_expr(e.kids[0]) + ")";
+    case Expr::Neg: return "(-" + emit_expr(e.kids[0]) + ")";
+    case Expr::Load: return "(*(uint64_t*)" + emit_expr(e.kids[0]) + ")";
+  }
+  return "?";
+}
+
+Expr const_or_arg(std::uint64_t v, std::uint64_t a, std::uint64_t b) {
+  if (v == a || static_cast<std::uint32_t>(v) == static_cast<std::uint32_t>(a)) return Expr::a(0);
+  if (v == b || static_cast<std::uint32_t>(v) == static_cast<std::uint32_t>(b)) return Expr::a(1);
+  return Expr::c(v);
+}
+
+std::string fold_stream(const DevirtResult& sem, std::uint64_t a, std::uint64_t b) {
+  std::vector<Expr> st;
+  auto push = [&](Expr e) { st.push_back(fold(std::move(e))); };
+  auto pop = [&]() -> Expr {
+    if (st.empty()) return Expr::c(0);
+    auto e = st.back();
+    st.pop_back();
+    return e;
+  };
+
+  for (const auto& op : sem.stream) {
+    if (op.kind == VmOpKind::CalcJmp || op.kind == VmOpKind::Mov || op.kind == VmOpKind::Flags ||
+        op.kind == VmOpKind::VmEnter)
+      continue;
+    if (op.kind == VmOpKind::VmExit) break;
+
+    switch (op.kind) {
+      case VmOpKind::FetchImm:
+      case VmOpKind::Push: {
+        std::uint64_t v = op.fetch_dec ? *op.fetch_dec : op.fetch_enc;
+        push(const_or_arg(v, a, b));
+        break;
+      }
+      case VmOpKind::Add: {
+        auto r = pop(), l = pop();
+        push(Expr::bin(Expr::Add, std::move(l), std::move(r)));
+        break;
+      }
+      case VmOpKind::Sub: {
+        auto r = pop(), l = pop();
+        push(Expr::bin(Expr::Sub, std::move(l), std::move(r)));
+        break;
+      }
+      case VmOpKind::Xor: {
+        auto r = pop(), l = pop();
+        push(Expr::bin(Expr::Xor, std::move(l), std::move(r)));
+        break;
+      }
+      case VmOpKind::And: {
+        auto r = pop(), l = pop();
+        push(Expr::bin(Expr::And, std::move(l), std::move(r)));
+        break;
+      }
+      case VmOpKind::Or: {
+        auto r = pop(), l = pop();
+        push(Expr::bin(Expr::Or, std::move(l), std::move(r)));
+        break;
+      }
+      case VmOpKind::Nor: {
+        auto r = pop(), l = pop();
+        push(Expr::bin(Expr::Nor, std::move(l), std::move(r)));
+        break;
+      }
+      case VmOpKind::Not: {
+        auto x = pop();
+        push(Expr::un(Expr::Not, std::move(x)));
+        break;
+      }
+      case VmOpKind::Neg: {
+        auto x = pop();
+        push(Expr::un(Expr::Neg, std::move(x)));
+        break;
+      }
+      case VmOpKind::Pop:
+        (void)pop();
+        break;
+      case VmOpKind::Load: {
+        auto x = pop();
+        push(Expr::un(Expr::Load, std::move(x)));
+        break;
+      }
+      case VmOpKind::Store:
+        (void)pop();
+        (void)pop();
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (st.empty()) return {};
+  auto top = fold(st.back());
+  return emit_expr(top);
+}
+
+}
+
+L4Result recover_l4(const PeImage& image, std::uint64_t vmenter_va, const DevirtResult& sem_devirt) {
+  L4Result out;
+
+  const std::pair<std::uint64_t, std::uint64_t> vectors[] = {
+      {0, 0}, {1, 0}, {0, 1}, {3, 5}, {7, 11}, {100, 200}, {0x1234, 0x55aa},
+  };
+
+  std::vector<Probe> probes;
+  for (auto [a, b] : vectors) {
+    auto r = unicorn_probe(image, vmenter_va, a, b);
+    if (!r) continue;
+    probes.push_back({a, b, *r});
+  }
+
+  std::string body;
+  if (probes.empty()) {
+    out.method = "none";
+    out.summary = "l4: unicorn probes failed (no exit)";
+    auto folded = fold_stream(sem_devirt, 3, 5);
+    if (!folded.empty()) {
+      body = "  return " + folded + ";\n";
+      out.method = "fold";
+      out.ok = true;
+      out.summary = "l4: fold-only " + folded;
+    } else {
+      body = "  (void)a; (void)b;\n  return 0;\n";
+      out.summary = "l4: unrecovered";
+    }
+  } else {
+    out.probe_rax = probes.back().out;
+    out.ok = true;
+
+    auto match32 = [](std::uint64_t x, std::uint64_t y) {
+      return x == y || static_cast<std::uint32_t>(x) == static_cast<std::uint32_t>(y);
+    };
+
+    auto is_add = [&](const Probe& p) { return match32(p.out, p.a + p.b); };
+    auto is_xor = [&](const Probe& p) { return match32(p.out, p.a ^ p.b); };
+    auto is_and = [&](const Probe& p) { return match32(p.out, p.a & p.b); };
+    auto is_or = [&](const Probe& p) { return match32(p.out, p.a | p.b); };
+    auto is_b = [&](const Probe& p) { return match32(p.out, p.b); };
+    auto is_a = [&](const Probe& p) { return match32(p.out, p.a); };
+
+    out.matches_add = std::all_of(probes.begin(), probes.end(), is_add);
+    out.matches_xor = std::all_of(probes.begin(), probes.end(), is_xor);
+    out.matches_and = std::all_of(probes.begin(), probes.end(), is_and);
+    out.matches_or = std::all_of(probes.begin(), probes.end(), is_or);
+    out.matches_identity_b = std::all_of(probes.begin(), probes.end(), is_b);
+
+    if (out.matches_add) {
+      out.method = "synth_linear";
+      body = "  return (uint32_t)(a + b);\n";
+      out.summary = "l4: return (uint32_t)(a + b)";
+    } else if (out.matches_xor) {
+      out.method = "synth_bitwise";
+      body = "  return a ^ b;\n";
+      out.summary = "l4: return a ^ b";
+    } else if (out.matches_and) {
+      out.method = "synth_bitwise";
+      body = "  return a & b;\n";
+      out.summary = "l4: return a & b";
+    } else if (out.matches_or) {
+      out.method = "synth_bitwise";
+      body = "  return a | b;\n";
+      out.summary = "l4: return a | b";
+    } else if (out.matches_identity_b) {
+      out.method = "synth_bitwise";
+      body = "  (void)a;\n  return b;\n";
+      out.summary = "l4: return b";
+    } else if (std::all_of(probes.begin(), probes.end(), is_a)) {
+      out.method = "synth_bitwise";
+      body = "  (void)b;\n  return a;\n";
+      out.summary = "l4: return a";
+    } else {
+      std::int64_t p = 0, q = 0, r = 0;
+      if (fit_linear(probes, p, q, r)) {
+        out.method = "synth_linear";
+        std::ostringstream bb;
+        bb << "  return (uint64_t)(" << p << " * (int64_t)a + " << q << " * (int64_t)b + " << r
+           << ");\n";
+        body = bb.str();
+        out.summary = "l4: linear " + std::to_string(p) + "*a + " + std::to_string(q) + "*b + " +
+                      std::to_string(r);
+      } else {
+        auto f_chain = [](std::uint64_t a, std::uint64_t b) {
+          auto t = a ^ b;
+          t &= b;
+          t |= b;
+          return t;
+        };
+        if (all_match(probes, f_chain)) {
+          out.method = "synth_bitwise";
+          body = "  uint64_t t = a ^ b;\n  t &= b;\n  t |= b;\n  return t;\n";
+          out.summary = "l4: ((a^b)&b)|b";
+        } else {
+          auto folded = fold_stream(sem_devirt, 3, 5);
+          out.method = folded.empty() ? "probe_only" : "fold";
+          if (!folded.empty()) {
+            body = "  return " + folded + ";\n";
+            out.summary = "l4: fold " + folded;
+          } else {
+            std::ostringstream bb;
+            bb << "  (void)a; (void)b;\n  return " << hex_u64(probes[0].out) << "ull;\n";
+            body = bb.str();
+            out.summary = "l4: probes only";
+          }
+        }
+      }
+    }
+  }
+
+  std::ostringstream src;
+  src << "#include <stdint.h>\n\n";
+  src << "uint64_t recovered(uint64_t a, uint64_t b) {\n";
+  src << body;
+  src << "}\n";
+  out.c_source = src.str();
+  return out;
+}
+
+}
+
+```
+
+`l4_recover.hpp`:
+
+```hpp
+#pragma once
+
+#include "handler_classify.hpp"
+#include "pe_image.hpp"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+struct L4Result {
+  bool ok = false;
+  std::string method;
+  std::string c_source;
+  std::string summary;
+  std::uint64_t probe_rax = 0;
+  bool matches_add = false;
+  bool matches_xor = false;
+  bool matches_and = false;
+  bool matches_or = false;
+  bool matches_identity_b = false;
+};
+
+L4Result recover_l4(const PeImage& image, std::uint64_t vmenter_va,
+                    const DevirtResult& sem_devirt);
+
+}
+
+```
+
+`main.cpp`:
+
+```cpp
+#include "devirt_engine.hpp"
+#include "dispatch_resolver.hpp"
+#include "util.hpp"
+#include "vmp_version.hpp"
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+
+#include <algorithm>
+#include <cstdio>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <string>
+
+namespace {
+
+constexpr const char* kReset = "\033[0m";
+constexpr const char* kCyan = "\033[96m";
+constexpr const char* kGreen = "\033[92m";
+constexpr const char* kYellow = "\033[93m";
+constexpr const char* kDim = "\033[90m";
+
+void enable_ansi() {
+  auto hout = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (hout == INVALID_HANDLE_VALUE) {
+    return;
+  }
+  DWORD mode = 0;
+  if (!GetConsoleMode(hout, &mode)) {
+    return;
+  }
+  SetConsoleMode(hout, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+
+void banner() {
+  std::cout
+      << kCyan
+      << "                       _ _  __ _\n"
+      << "__   ___ __ ___  _ __ | (_)/ _| |_\n"
+      << "\\ \\ / / '_ ` _ \\| '_ \\| | | |_| __|\n"
+      << " \\ V /| | | | | | |_) | | |  _| |_\n"
+      << "  \\_/ |_| |_| |_| .__/|_|_|_|  \\__|\n"
+      << "                |_|                \n"
+      << kReset
+      << kDim << "vmprotect 3.8 / 3.10 handler lifter\n"
+      << kReset << "\n";
+}
+
+void ok(const std::string& msg) {
+  std::cout << kGreen << "[+] " << kReset << msg << "\n";
+}
+
+std::string hex_pad(std::uint64_t v, int width) {
+  char buf[32];
+  std::snprintf(buf, sizeof(buf), "0x%0*llX", width, static_cast<unsigned long long>(v));
+  return buf;
+}
+
+void print_scan(const vmp::DevirtEngine& engine, const std::string& binary,
+                const std::vector<vmp::VmenterSite>& sites) {
+  const auto& img = engine.image();
+  const auto ver = engine.version();
+  const auto fname = std::filesystem::path(binary).filename().string();
+
+  banner();
+  ok("Loading file: " + fname);
+  ok("Read " + hex_pad(img.bytes().size(), 8) + " bytes");
+  ok("PE parse ok");
+  std::cout << "\n";
+  std::cout << "    Image type:   " << (img.is_64bit() ? "PE32+" : "PE32") << "\n";
+  std::cout << "    Machine:      AMD64\n";
+  std::cout << "    Image base:   " << vmp::hex_u64(img.image_base()) << "\n";
+  std::cout << "    Entry point:  "
+            << vmp::hex_u64(img.image_base() + img.entry_point_rva()) << "\n";
+  std::cout << "    Sections:     " << img.sections().size() << "\n\n";
+
+  ok("Sections:");
+  std::cout << "    " << std::left << std::setw(4) << "#" << std::setw(10) << "Name"
+            << std::setw(14) << "VA" << std::setw(12) << "VSize" << "RawSize\n";
+  int idx = 0;
+  for (const auto& sec : img.sections()) {
+    bool vmp_sec = vmp::is_vmp_section_name(sec.name);
+    if (vmp_sec) {
+      std::cout << kYellow;
+    }
+    std::cout << "    " << std::left << std::setw(4) << idx << std::setw(10) << sec.name
+              << std::setw(14) << hex_pad(sec.virtual_address, 8) << std::setw(12)
+              << hex_pad(sec.virtual_size, 8) << hex_pad(sec.raw_size, 8);
+    if (vmp_sec) {
+      std::cout << "  (VMP)";
+    }
+    std::cout << kReset << "\n";
+    idx++;
+  }
+  std::cout << "\n";
+
+  ok("Version detect: " + ver.label);
+  if (ver.randomized_sections) {
+    ok("Detected protection: VMProtect 3.x + randomized sections");
+  }
+  ok("Scanning for VM entrypoints (vmenter patterns) ...");
+  ok("Found " + std::to_string(sites.size()) + " vmenter candidate(s):");
+  std::cout << "\n";
+  std::cout << "    " << std::left << std::setw(4) << "#" << std::setw(18) << "Address"
+            << std::setw(10) << "Score" << "Notes\n";
+
+  const auto best_va = vmp::VmenterScanner::pick_best(sites);
+  const std::size_t show = std::min<std::size_t>(sites.size(), 12);
+  for (std::size_t i = 0; i < show; i++) {
+    const auto& s = sites[i];
+    bool best = best_va && s.va == *best_va;
+    if (best) {
+      std::cout << kYellow;
+    }
+    std::cout << "    " << std::left << std::setw(4) << i << std::setw(18) << vmp::hex_u64(s.va)
+              << std::setw(10) << s.confidence << s.source;
+    if (s.first_handler_va) {
+      std::cout << "  target=" << vmp::hex_u64(s.first_handler_va);
+    }
+    if (best) {
+      std::cout << "  *";
+    }
+    std::cout << kReset << "\n";
+  }
+  if (sites.size() > show) {
+    std::cout << kDim << "    ... " << (sites.size() - show) << " more\n" << kReset;
+  }
+  if (best_va) {
+    std::string src = "?";
+    int conf = 0;
+    for (const auto& s : sites) {
+      if (s.va == *best_va) {
+        src = s.source;
+        conf = s.confidence;
+        break;
+      }
+    }
+    std::cout << "\n";
+    ok("vmenter " + vmp::hex_u64(*best_va) + " score " + std::to_string(conf) + " " + src);
+  }
+}
+
+void usage() {
+  std::cerr
+      << "vmp-lift - vmp 3.8/3.10 handler lifter + heuristic devirt\n\n"
+      << "usage:\n"
+      << "  vmp-lift scan <binary>\n"
+      << "  vmp-lift lift <binary> [--vmenter 0xVA] [--max-handlers N]\n"
+      << "                   [--mode callgraph|chain] [--out-dir DIR]\n"
+      << "  vmp-lift devirt <binary> [--vmenter 0xVA] [--max-handlers N]\n"
+      << "                     [--mode callgraph|chain] [--out-dir DIR]\n"
+      << "  vmp-lift test [--binary PATH]\n\n"
+      << "example:\n"
+      << "  vmp-lift lift WaveUIAuth_static_unpacked.dll --vmenter 0x18006DB87\n"
+      << "  vmp-lift devirt WaveUIAuth_static_unpacked.dll --out-dir out\n";
+}
+
+struct Args {
+  std::string command;
+  std::string binary;
+  std::uint64_t vmenter = 0;
+  std::size_t max_handlers = 256;
+  std::string mode = "callgraph";
+  std::string out_dir = "devirt_out";
+  bool emit_llvm = true;
+  bool emit_pseudo_c = true;
+  bool emit_json = true;
+};
+
+Args parse_args(int argc, char** argv) {
+  if (argc < 2) {
+    usage();
+    throw std::runtime_error("missing args");
+  }
+
+  Args a;
+  a.command = argv[1];
+  if (a.command != "test" && argc < 3) {
+    usage();
+    throw std::runtime_error("need binary path");
+  }
+  if (argc >= 3) {
+    a.binary = argv[2];
+  }
+
+  for (int i = 3; i < argc; ++i) {
+    const std::string flag = argv[i];
+    auto next = [&](const char* name) {
+      if (i + 1 >= argc) {
+        throw std::runtime_error(std::string("need value for ") + name);
+      }
+      return std::string(argv[++i]);
+    };
+
+    if (flag == "--vmenter") {
+      auto val = next("--vmenter");
+      auto parsed = vmp::parse_hex_u64(val);
+      if (!parsed) {
+        throw std::runtime_error("bad --vmenter");
+      }
+      a.vmenter = *parsed;
+    } else if (flag == "--max-handlers") {
+      a.max_handlers = static_cast<std::size_t>(std::stoull(next("--max-handlers")));
+    } else if (flag == "--mode") {
+      a.mode = next("--mode");
+    } else if (flag == "--out-dir") {
+      a.out_dir = next("--out-dir");
+    } else if (flag == "--no-llvm") {
+      a.emit_llvm = false;
+    } else if (flag == "--no-pseudo-c") {
+      a.emit_pseudo_c = false;
+    } else if (flag == "--no-json") {
+      a.emit_json = false;
+    } else if (flag == "--llvm" || flag == "--pseudo-c" || flag == "--json") {
+
+    } else {
+      throw std::runtime_error("unknown flag: " + flag);
+    }
+  }
+
+  return a;
+}
+
+void dump_file(const std::filesystem::path& p, const std::string& text) {
+  std::ofstream out(p, std::ios::binary);
+  if (!out) {
+    throw std::runtime_error("cant write " + p.string());
+  }
+  out << text;
+}
+
+}
+
+int main(int argc, char** argv) {
+  enable_ansi();
+  try {
+    const auto args = parse_args(argc, argv);
+    auto image = vmp::PeImage::load(args.binary);
+    vmp::DevirtEngine engine(std::move(image));
+
+    if (args.command == "scan") {
+      auto sites = engine.scan_vmenters();
+      print_scan(engine, args.binary, sites);
+      return sites.empty() ? 2 : 0;
+    }
+
+    if (args.command == "lift" || args.command == "devirt") {
+      banner();
+      ok("Loading file: " + std::filesystem::path(args.binary).filename().string());
+      vmp::DevirtOptions opts;
+      opts.vmenter_va = args.vmenter;
+      opts.max_handlers = args.max_handlers;
+      opts.use_callgraph = (args.mode != "chain");
+      opts.emit_llvm = args.emit_llvm;
+      opts.emit_pseudo_c = args.emit_pseudo_c;
+      opts.export_json = args.emit_json;
+      opts.emit_devirt = true;
+
+      const auto report = engine.lift(opts);
+      const auto txt = engine.format_text_report(report);
+      std::cout << txt;
+
+      std::filesystem::create_directories(args.out_dir);
+      auto base = std::filesystem::path(args.out_dir);
+      dump_file(base / "report.txt", engine.format_text_report(report));
+      if (args.emit_llvm) {
+        dump_file(base / "lifted.ll", report.llvm_ir);
+      }
+      if (args.emit_pseudo_c) {
+        dump_file(base / "lifted.c", report.pseudo_c);
+      }
+      if (args.emit_json) {
+        dump_file(base / "summary.json", report.summary.dump(2));
+        dump_file(base / "vip_trace.json", report.vip_trace_json.dump(2));
+      }
+      if (!report.vip_trace_text.empty()) {
+        dump_file(base / "vip_trace.txt", report.vip_trace_text);
+      }
+      if (!report.vasm.empty()) {
+        dump_file(base / "devirt.vasm", report.vasm);
+      }
+      if (!report.native_pseudo.empty()) {
+        dump_file(base / "devirt_native.c", report.native_pseudo);
+      }
+      if (!report.native_l4.empty()) {
+        dump_file(base / "devirt_l4.c", report.native_l4);
+      }
+      if (args.emit_json && !report.devirt_json.empty()) {
+        dump_file(base / "devirt.json", report.devirt_json.dump(2));
+      }
+
+      std::cout << "\nwrote output -> " << args.out_dir << "\n";
+      if (report.summary.contains("vip_steps")) {
+        ok("vip trace steps: " + std::to_string(report.summary["vip_steps"].get<std::size_t>()) +
+           (report.summary.value("vip_seeded", false) ? " (seeded)" : " (unseeded)"));
+      }
+      if (report.summary.contains("devirt_ops")) {
+        ok("devirt ops: " + std::to_string(report.summary["devirt_ops"].get<std::size_t>()) +
+           " classified=" +
+           std::to_string(report.summary.value("devirt_classified", 0)) +
+           " unknown=" + std::to_string(report.summary.value("devirt_unknown", 0)));
+      }
+      if (report.summary.contains("l4")) {
+        ok("l4: " + report.summary["l4"].get<std::string>());
+      }
+      return report.functions.empty() ? 3 : 0;
+    }
+
+    if (args.command == "test") {
+      std::string bin = args.binary;
+      if (bin.empty()) {
+        bin = "WaveUIAuth_static_unpacked.dll";
+      }
+      if (!std::filesystem::exists(bin)) {
+        bin = (std::filesystem::path("..") / "WaveUIAuth_static_unpacked.dll").string();
+      }
+      if (!std::filesystem::exists(bin)) {
+        throw std::runtime_error("test binary missing: " + bin);
+      }
+
+      auto test_img = vmp::PeImage::load(bin);
+      int fails = 0;
+      auto check = [&](bool ok, const std::string& name) {
+        std::cout << (ok ? "[PASS] " : "[FAIL] ") << name << "\n";
+        if (!ok) {
+          ++fails;
+        }
+      };
+
+      const auto version = vmp::detect_version(test_img);
+      check(version.version == vmp::VmpVersion::Vmp38Plus, "version is VMP 3.8+");
+      check(test_img.image_base() == 0x180000000ULL, "image base");
+
+      vmp::DevirtEngine eng(std::move(test_img));
+      const auto sites = eng.scan_vmenters();
+      bool got_download = false;
+      for (const auto& site : sites) {
+        if (site.va == 0x18101DA77ULL && site.confidence >= 90) {
+          got_download = true;
+        }
+      }
+      check(got_download, "export Download VMENTER at 0x18101da77");
+
+      vmp::DevirtOptions opts;
+      opts.vmenter_va = 0x18101DA77ULL;
+      opts.max_handlers = 256;
+      opts.use_callgraph = true;
+      opts.emit_llvm = false;
+      opts.emit_pseudo_c = false;
+      const auto report = eng.lift(opts);
+      check(report.functions.size() >= 50, "callgraph discovers >= 50 handlers");
+      check(report.summary.value("total_insns", 0) >= 500, "lifted >= 500 total insns");
+
+      vmp::DispatchResolver resolver(eng.image());
+      const auto insns = resolver.linear_disasm(0x18101DA77ULL, 20);
+      check(insns.size() >= 5, "linear disasm at Download VMENTER");
+      bool prologue = false;
+      for (const auto& ins : insns) {
+        if (ins.mnemonic == "pushfq" || ins.mnemonic == "push") {
+          prologue = true;
+        }
+      }
+      check(prologue, "Download VMENTER has VMP prologue");
+
+      vmp::DevirtOptions chain = opts;
+      chain.use_callgraph = false;
+      chain.max_handlers = 16;
+      const auto chain_report = eng.lift(chain);
+      check(!chain_report.functions.empty(), "chain mode lifts at least one handler");
+
+      std::cout << "\n" << fails << " failure(s)\n";
+      return fails == 0 ? 0 : 1;
+    }
+
+    usage();
+    return 1;
+  } catch (const std::exception& ex) {
+    std::cerr << "error: " << ex.what() << "\n";
+    return 1;
+  }
+}
+
+```
+
+`pe_image.cpp`:
+
+```cpp
+#include "pe_image.hpp"
+#include "util.hpp"
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+
+#include <cstring>
+#include <fstream>
+#include <stdexcept>
+
+namespace vmp {
+
+namespace {
+
+std::string trim_name(const char* raw, std::size_t n) {
+  std::string s(raw, strnlen(raw, n));
+  while (!s.empty() && s.back() == '\0') {
+    s.pop_back();
+  }
+  return s;
+}
+
+}
+
+PeImage PeImage::load(const std::string& path) {
+  PeImage img;
+  img.path_ = path;
+
+  std::ifstream f(path, std::ios::binary);
+  if (!f) {
+    throw std::runtime_error("failed to open: " + path);
+  }
+
+  f.seekg(0, std::ios::end);
+  auto file_size = static_cast<std::size_t>(f.tellg());
+  f.seekg(0, std::ios::beg);
+  img.bytes_.resize(file_size);
+  f.read(reinterpret_cast<char*>(img.bytes_.data()), static_cast<std::streamsize>(file_size));
+
+  if (file_size < sizeof(IMAGE_DOS_HEADER)) {
+    throw std::runtime_error("file too small");
+  }
+
+  const auto* dos = reinterpret_cast<const IMAGE_DOS_HEADER*>(img.bytes_.data());
+  if (dos->e_magic != IMAGE_DOS_SIGNATURE) {
+    throw std::runtime_error("not MZ");
+  }
+
+  if (static_cast<std::size_t>(dos->e_lfanew) + sizeof(IMAGE_NT_HEADERS64) > file_size) {
+    throw std::runtime_error("bad pe offset");
+  }
+
+  const auto* nt = reinterpret_cast<const IMAGE_NT_HEADERS64*>(img.bytes_.data() + dos->e_lfanew);
+  if (nt->Signature != IMAGE_NT_SIGNATURE) {
+    throw std::runtime_error("not PE");
+  }
+
+  img.is_64bit_ = nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC;
+  if (!img.is_64bit_) {
+    throw std::runtime_error("x64 only");
+  }
+
+  img.image_base_ = nt->OptionalHeader.ImageBase;
+  img.size_of_image_ = nt->OptionalHeader.SizeOfImage;
+  img.entry_point_rva_ = nt->OptionalHeader.AddressOfEntryPoint;
+
+  const auto* sh = IMAGE_FIRST_SECTION(nt);
+  for (WORD i = 0; i < nt->FileHeader.NumberOfSections; i++) {
+    SectionInfo si;
+    si.name = trim_name(reinterpret_cast<const char*>(sh[i].Name), IMAGE_SIZEOF_SHORT_NAME);
+    si.virtual_address = sh[i].VirtualAddress;
+    si.virtual_size = sh[i].Misc.VirtualSize;
+    si.raw_offset = sh[i].PointerToRawData;
+    si.raw_size = sh[i].SizeOfRawData;
+    img.sections_.push_back(si);
+  }
+
+  auto export_rva = nt->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+  if (export_rva != 0) {
+    auto export_off = img.va_to_offset(img.image_base_ + export_rva);
+    if (export_off) {
+      const auto* exp =
+          reinterpret_cast<const IMAGE_EXPORT_DIRECTORY*>(img.bytes_.data() + *export_off);
+      auto names_off = img.va_to_offset(img.image_base_ + exp->AddressOfNames);
+      auto ordinals_off = img.va_to_offset(img.image_base_ + exp->AddressOfNameOrdinals);
+      auto funcs_off = img.va_to_offset(img.image_base_ + exp->AddressOfFunctions);
+
+      if (names_off && ordinals_off && funcs_off) {
+        const auto* names =
+            reinterpret_cast<const std::uint32_t*>(img.bytes_.data() + *names_off);
+        const auto* ords =
+            reinterpret_cast<const std::uint16_t*>(img.bytes_.data() + *ordinals_off);
+        const auto* funcs =
+            reinterpret_cast<const std::uint32_t*>(img.bytes_.data() + *funcs_off);
+
+        for (std::uint32_t i = 0; i < exp->NumberOfNames; i++) {
+          auto name_off = img.va_to_offset(img.image_base_ + names[i]);
+          if (!name_off) {
+            continue;
+          }
+          const char* ename = reinterpret_cast<const char*>(img.bytes_.data() + *name_off);
+          auto ord = ords[i];
+          auto fn_rva = funcs[ord];
+          img.export_rvas_.push_back(fn_rva);
+          img.named_exports_.emplace_back(ename, fn_rva);
+        }
+      }
+    }
+  }
+
+  return img;
+}
+
+std::optional<std::uint64_t> PeImage::rva_to_va(std::uint64_t rva) const {
+  return image_base_ + rva;
+}
+
+std::optional<std::uint64_t> PeImage::va_to_rva(std::uint64_t va) const {
+  if (va < image_base_) {
+    return std::nullopt;
+  }
+  return va - image_base_;
+}
+
+std::optional<std::uint64_t> PeImage::va_to_offset(std::uint64_t va) const {
+  auto rva = va_to_rva(va);
+  if (!rva) {
+    return std::nullopt;
+  }
+  for (const auto& sec : sections_) {
+    auto sec_end = sec.virtual_address + (sec.virtual_size > sec.raw_size ? sec.virtual_size
+                                                                            : sec.raw_size);
+    if (*rva >= sec.virtual_address && *rva < sec_end) {
+      auto delta = *rva - sec.virtual_address;
+      auto off = sec.raw_offset + delta;
+      if (off < bytes_.size()) {
+        return off;
+      }
+    }
+  }
+  return std::nullopt;
+}
+
+std::optional<std::uint64_t> PeImage::offset_to_va(std::uint64_t offset) const {
+  for (const auto& sec : sections_) {
+    if (offset >= sec.raw_offset && offset < sec.raw_offset + sec.raw_size) {
+      return image_base_ + sec.virtual_address + (offset - sec.raw_offset);
+    }
+  }
+  return std::nullopt;
+}
+
+bool PeImage::contains_va(std::uint64_t va) const {
+  auto rva = va_to_rva(va);
+  if (!rva) {
+    return false;
+  }
+  return *rva < size_of_image_;
+}
+
+const SectionInfo* PeImage::section_for_va(std::uint64_t va) const {
+  auto rva = va_to_rva(va);
+  if (!rva) {
+    return nullptr;
+  }
+  for (const auto& sec : sections_) {
+    if (*rva >= sec.virtual_address && *rva < sec.virtual_address + sec.virtual_size) {
+      return &sec;
+    }
+  }
+  return nullptr;
+}
+
+const SectionInfo* PeImage::section_by_name(const std::string& name) const {
+  for (const auto& sec : sections_) {
+    if (sec.name == name) {
+      return &sec;
+    }
+  }
+  return nullptr;
+}
+
+std::vector<std::uint8_t> PeImage::read_at_va(std::uint64_t va, std::size_t size) const {
+  auto off = va_to_offset(va);
+  if (!off) {
+    return {};
+  }
+  if (*off + size > bytes_.size()) {
+    return {};
+  }
+  return {bytes_.begin() + static_cast<std::ptrdiff_t>(*off),
+          bytes_.begin() + static_cast<std::ptrdiff_t>(*off + size)};
+}
+
+std::optional<std::uint8_t> PeImage::read_u8(std::uint64_t va) const {
+  auto d = read_at_va(va, 1);
+  if (d.empty()) {
+    return std::nullopt;
+  }
+  return d[0];
+}
+
+std::optional<std::uint32_t> PeImage::read_u32(std::uint64_t va) const {
+  auto d = read_at_va(va, 4);
+  if (d.size() != 4) {
+    return std::nullopt;
+  }
+  return static_cast<std::uint32_t>(d[0]) | (static_cast<std::uint32_t>(d[1]) << 8) |
+         (static_cast<std::uint32_t>(d[2]) << 16) | (static_cast<std::uint32_t>(d[3]) << 24);
+}
+
+std::optional<std::uint64_t> PeImage::read_u64(std::uint64_t va) const {
+  auto d = read_at_va(va, 8);
+  if (d.size() != 8) {
+    return std::nullopt;
+  }
+  std::uint64_t v = 0;
+  for (int i = 0; i < 8; i++) {
+    v |= static_cast<std::uint64_t>(d[i]) << (8 * i);
+  }
+  return v;
+}
+
+std::vector<std::uint64_t> PeImage::export_rvas() const { return export_rvas_; }
+
+std::vector<std::pair<std::string, std::uint64_t>> PeImage::named_exports() const {
+  return named_exports_;
+}
+
+}
+
+```
+
+`pe_image.hpp`:
+
+```hpp
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+struct SectionInfo {
+  std::string name;
+  std::uint64_t virtual_address = 0;
+  std::uint64_t virtual_size = 0;
+  std::uint64_t raw_offset = 0;
+  std::uint64_t raw_size = 0;
+};
+
+class PeImage {
+public:
+  static PeImage load(const std::string& path);
+
+  const std::string& path() const { return path_; }
+  bool is_64bit() const { return is_64bit_; }
+  std::uint64_t image_base() const { return image_base_; }
+  std::uint64_t entry_point_rva() const { return entry_point_rva_; }
+  std::uint64_t size_of_image() const { return size_of_image_; }
+  const std::vector<SectionInfo>& sections() const { return sections_; }
+  const std::vector<std::uint8_t>& bytes() const { return bytes_; }
+
+  std::optional<std::uint64_t> rva_to_va(std::uint64_t rva) const;
+  std::optional<std::uint64_t> va_to_rva(std::uint64_t va) const;
+  std::optional<std::uint64_t> va_to_offset(std::uint64_t va) const;
+  std::optional<std::uint64_t> offset_to_va(std::uint64_t offset) const;
+
+  bool contains_va(std::uint64_t va) const;
+  const SectionInfo* section_for_va(std::uint64_t va) const;
+  const SectionInfo* section_by_name(const std::string& name) const;
+
+  std::vector<std::uint8_t> read_at_va(std::uint64_t va, std::size_t size) const;
+  std::optional<std::uint8_t> read_u8(std::uint64_t va) const;
+  std::optional<std::uint32_t> read_u32(std::uint64_t va) const;
+  std::optional<std::uint64_t> read_u64(std::uint64_t va) const;
+
+  std::vector<std::uint64_t> export_rvas() const;
+  std::vector<std::pair<std::string, std::uint64_t>> named_exports() const;
+
+private:
+  PeImage() = default;
+
+  std::string path_;
+  bool is_64bit_ = false;
+  std::uint64_t image_base_ = 0;
+  std::uint64_t size_of_image_ = 0;
+  std::uint64_t entry_point_rva_ = 0;
+  std::vector<SectionInfo> sections_;
+  std::vector<std::uint8_t> bytes_;
+  std::vector<std::uint64_t> export_rvas_;
+  std::vector<std::pair<std::string, std::uint64_t>> named_exports_;
+};
+
+}
+
+```
+
+`rolling_key.cpp`:
+
+```cpp
+#include "rolling_key.hpp"
+
+namespace vmp {
+
+std::uint32_t RollingKey::advance() {
+  key_ = (key_ * 0x343FD + 0x269EC3) & 0xFFFFFFFFu;
+  return key_;
+}
+
+std::uint32_t RollingKey::decrypt_u32(std::uint32_t enc) {
+  return enc ^ advance();
+}
+
+std::uint64_t RollingKey::decrypt_ptr(std::uint64_t enc, std::uint64_t image_base) {
+  auto lo = decrypt_u32(static_cast<std::uint32_t>(enc & 0xFFFFFFFFu));
+  auto hi = decrypt_u32(static_cast<std::uint32_t>(enc >> 32));
+  auto val = (static_cast<std::uint64_t>(hi) << 32) | lo;
+  if (val < 0x10000) {
+    return image_base + val;
+  }
+  return val;
+}
+
+std::optional<std::uint32_t> RollingKey::guess_seed_from_handler_tail(
+    const std::vector<std::uint8_t>& tail) {
+  if (tail.size() < 8) {
+    return std::nullopt;
+  }
+  std::uint32_t seed = 0;
+  for (std::size_t i = 0; i + 4 <= tail.size(); i += 4) {
+    seed ^= static_cast<std::uint32_t>(tail[i]) |
+            (static_cast<std::uint32_t>(tail[i + 1]) << 8) |
+            (static_cast<std::uint32_t>(tail[i + 2]) << 16) |
+            (static_cast<std::uint32_t>(tail[i + 3]) << 24);
+  }
+  if (seed == 0) {
+    return std::nullopt;
+  }
+  return seed;
+}
+
+}
+
+```
+
+`rolling_key.hpp`:
+
+```hpp
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <vector>
+
+namespace vmp {
+
+class RollingKey {
+public:
+  RollingKey() = default;
+  explicit RollingKey(std::uint32_t seed) : key_(seed) {}
+
+  void reset(std::uint32_t seed) { key_ = seed; }
+  std::uint32_t key() const { return key_; }
+
+  std::uint32_t decrypt_u32(std::uint32_t encrypted);
+  std::uint64_t decrypt_ptr(std::uint64_t encrypted, std::uint64_t image_base);
+
+  static std::optional<std::uint32_t> guess_seed_from_handler_tail(
+      const std::vector<std::uint8_t>& tail_bytes);
+
+private:
+  std::uint32_t key_ = 0;
+  std::uint32_t advance();
+};
+
+}
+
+```
+
+`semantic_peel.cpp`:
+
+```cpp
+#include "semantic_peel.hpp"
+
+#include "util.hpp"
+
+#include <capstone/capstone.h>
+#include <capstone/x86.h>
+#include <unicorn/unicorn.h>
+
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <set>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+namespace {
+
+std::string reg_name(int capstone_reg) {
+  switch (capstone_reg) {
+    case X86_REG_RAX:
+    case X86_REG_EAX:
+      return "rax";
+    case X86_REG_RCX:
+    case X86_REG_ECX:
+      return "rcx";
+    case X86_REG_RDX:
+    case X86_REG_EDX:
+      return "rdx";
+    case X86_REG_RBX:
+    case X86_REG_EBX:
+      return "rbx";
+    case X86_REG_RSP:
+    case X86_REG_ESP:
+      return "rsp";
+    case X86_REG_RBP:
+    case X86_REG_EBP:
+      return "rbp";
+    case X86_REG_RSI:
+    case X86_REG_ESI:
+      return "rsi";
+    case X86_REG_RDI:
+    case X86_REG_EDI:
+      return "rdi";
+    case X86_REG_R8:
+    case X86_REG_R8D:
+      return "r8";
+    case X86_REG_R9:
+    case X86_REG_R9D:
+      return "r9";
+    case X86_REG_R10:
+    case X86_REG_R10D:
+      return "r10";
+    case X86_REG_R11:
+    case X86_REG_R11D:
+      return "r11";
+    case X86_REG_R12:
+    case X86_REG_R12D:
+      return "r12";
+    case X86_REG_R13:
+    case X86_REG_R13D:
+      return "r13";
+    case X86_REG_R14:
+    case X86_REG_R14D:
+      return "r14";
+    case X86_REG_R15:
+    case X86_REG_R15D:
+      return "r15";
+    default:
+      return {};
+  }
+}
+
+int unicorn_reg(const std::string& name) {
+  if (name == "rax") return UC_X86_REG_RAX;
+  if (name == "rcx") return UC_X86_REG_RCX;
+  if (name == "rdx") return UC_X86_REG_RDX;
+  if (name == "rbx") return UC_X86_REG_RBX;
+  if (name == "rsp") return UC_X86_REG_RSP;
+  if (name == "rbp") return UC_X86_REG_RBP;
+  if (name == "rsi") return UC_X86_REG_RSI;
+  if (name == "rdi") return UC_X86_REG_RDI;
+  if (name == "r8") return UC_X86_REG_R8;
+  if (name == "r9") return UC_X86_REG_R9;
+  if (name == "r10") return UC_X86_REG_R10;
+  if (name == "r11") return UC_X86_REG_R11;
+  if (name == "r12") return UC_X86_REG_R12;
+  if (name == "r13") return UC_X86_REG_R13;
+  if (name == "r14") return UC_X86_REG_R14;
+  if (name == "r15") return UC_X86_REG_R15;
+  return 0;
+}
+
+bool in_vmp(const PeImage& image, std::uint64_t va) {
+  auto* sec = image.section_for_va(va);
+  return sec && is_vmp_section_name(sec->name);
+}
+
+bool looks_like_code_va(const PeImage& image, std::uint64_t va) {
+  if (!image.contains_va(va)) return false;
+  auto* sec = image.section_for_va(va);
+  if (!sec) return false;
+  if (!is_vmp_section_name(sec->name) && sec->name != ".text") {
+    auto b = image.read_at_va(va, 8);
+    if (b.size() < 4) return false;
+    int nz = 0;
+    for (auto x : b)
+      if (x && x != 0xCC) nz++;
+    return nz >= 3;
+  }
+  auto b = image.read_at_va(va, 4);
+  if (b.size() < 2) return false;
+  int nz = 0;
+  for (auto x : b)
+    if (x && x != 0xCC) nz++;
+  return nz >= 1;
+}
+
+std::uint64_t read_mem_op_addr(uc_engine* uc, const cs_x86_op& op) {
+  std::uint64_t addr = static_cast<std::uint64_t>(op.mem.disp);
+  if (op.mem.base != X86_REG_INVALID) {
+    auto ur = unicorn_reg(reg_name(op.mem.base));
+    std::uint64_t base = 0;
+    if (ur) uc_reg_read(uc, ur, &base);
+    addr += base;
+  }
+  if (op.mem.index != X86_REG_INVALID) {
+    auto ur = unicorn_reg(reg_name(op.mem.index));
+    std::uint64_t idx = 0;
+    if (ur) uc_reg_read(uc, ur, &idx);
+    addr += idx * (op.mem.scale ? op.mem.scale : 1);
+  }
+  return addr;
+}
+
+bool map_pe(uc_engine* uc, const PeImage& image) {
+  auto base = image.image_base();
+  auto img_sz = (image.size_of_image() + 0xFFF) & ~0xFFFULL;
+  if (img_sz < 0x1000) img_sz = 0x1000;
+  if (uc_mem_map(uc, base, img_sz, UC_PROT_ALL) != UC_ERR_OK) return false;
+  for (const auto& sec : image.sections()) {
+    auto va = base + sec.virtual_address;
+    auto want = static_cast<std::size_t>(
+        sec.raw_size ? (sec.raw_size < sec.virtual_size ? sec.raw_size : sec.virtual_size)
+                     : sec.virtual_size);
+    if (!want) continue;
+    auto bytes = image.read_at_va(va, want);
+    if (!bytes.empty()) uc_mem_write(uc, va, bytes.data(), bytes.size());
+  }
+  return true;
+}
+
+struct DeepSession {
+  uc_engine* uc = nullptr;
+  csh cs = 0;
+  const PeImage* image = nullptr;
+
+  std::uint64_t handler_entry = 0;
+  std::uint64_t next = 0;
+  bool hit = false;
+  bool saw_ret = false;
+  std::size_t steps = 0;
+  std::size_t max_insns = 4096;
+
+  std::uint64_t vip = 0;
+  std::uint64_t key_val = 0;
+  std::string vip_reg;
+  std::string key_reg;
+  std::string vsp_reg;
+  std::uint64_t vsp = 0;
+
+  HandlerEffect* cur = nullptr;
+  std::uint64_t gpr_enter[16]{};
+  std::uint64_t last_vip_fetch_enc = 0;
+  bool have_last_fetch = false;
+  int post_fetch_watch = 0;
+  bool key_pending_refresh = false;
+  int xor_src_hits[16]{};
+};
+
+const char* kGprs[] = {"rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
+                       "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15"};
+
+void read_gprs(uc_engine* uc, std::uint64_t out[16]) {
+  for (int i = 0; i < 16; i++) {
+    auto ur = unicorn_reg(kGprs[i]);
+    out[i] = 0;
+    if (ur) uc_reg_read(uc, ur, &out[i]);
+  }
+}
+
+void refresh_context_ptrs(DeepSession* st) {
+  for (int i = 0; i < 16; i++) {
+    if (std::string(kGprs[i]) == "rsp") continue;
+    std::uint64_t v = 0;
+    auto ur = unicorn_reg(kGprs[i]);
+    if (!ur) continue;
+    uc_reg_read(st->uc, ur, &v);
+    if (!v || !st->image->contains_va(v)) continue;
+    if (!in_vmp(*st->image, v)) continue;
+
+    if (st->have_last_fetch && st->cur && !st->cur->fetches.empty()) {
+      auto fa = st->cur->fetches.back().addr;
+      if (v == fa || (v < fa && fa - v < 0x40) || (v > fa && v - fa < 0x40)) {
+        st->vip = v;
+        st->vip_reg = kGprs[i];
+        continue;
+      }
+    }
+    if (st->vip_reg.empty() || st->vip == 0) {
+      st->vip = v;
+      st->vip_reg = kGprs[i];
+    }
+  }
+}
+
+void apply_key_decrypt(DeepSession* st, FetchEvent& fe) {
+  std::uint32_t enc32 = static_cast<std::uint32_t>(fe.enc);
+  if (!st->key_reg.empty()) {
+    auto ur = unicorn_reg(st->key_reg);
+    std::uint64_t kv = 0;
+    if (ur) uc_reg_read(st->uc, ur, &kv);
+    st->key_val = kv;
+  }
+  if (st->key_val || !st->key_reg.empty()) {
+    fe.dec = enc32 ^ static_cast<std::uint32_t>(st->key_val);
+    fe.decrypted = true;
+    if (st->cur && !st->cur->pushed_imm) st->cur->pushed_imm = fe.dec;
+  }
+}
+
+void try_bind_decrypt(DeepSession* st) {
+  if (!st->cur || !st->have_last_fetch || st->cur->fetches.empty()) return;
+  auto& fe = st->cur->fetches.back();
+  std::uint64_t gpr[16];
+  read_gprs(st->uc, gpr);
+  std::uint32_t enc32 = static_cast<std::uint32_t>(fe.enc);
+
+  if (!st->key_reg.empty() || st->key_val) {
+    apply_key_decrypt(st, fe);
+
+    for (int i = 0; i < 16; i++) {
+      if (std::string(kGprs[i]) == "rsp") continue;
+      if (static_cast<std::uint32_t>(gpr[i]) == static_cast<std::uint32_t>(fe.dec) &&
+          gpr[i] != st->gpr_enter[i]) {
+        fe.via_reg = kGprs[i];
+        st->cur->pushed_imm = fe.dec;
+        break;
+      }
+    }
+    return;
+  }
+
+  for (int di = 0; di < 16; di++) {
+    if (std::string(kGprs[di]) == "rsp") continue;
+    if (gpr[di] == st->gpr_enter[di]) continue;
+    std::uint32_t d32 = static_cast<std::uint32_t>(gpr[di]);
+    std::uint32_t implied_key = enc32 ^ d32;
+
+    const bool looks_small = d32 < 0x100000u;
+    const bool looks_rva = d32 > 0x1000u && d32 < 0x2000000u;
+    const bool looks_img = st->image->contains_va(gpr[di]);
+    if (!(looks_small || looks_rva || looks_img)) continue;
+
+    for (int ki = 0; ki < 16; ki++) {
+      if (ki == di) continue;
+      if (std::string(kGprs[ki]) == "rsp") continue;
+      if (static_cast<std::uint32_t>(gpr[ki]) == implied_key) {
+        st->key_reg = kGprs[ki];
+        st->key_val = implied_key;
+        fe.dec = d32;
+        fe.decrypted = true;
+        fe.via_reg = kGprs[di];
+        st->cur->pushed_imm = d32;
+        return;
+      }
+    }
+
+    st->key_val = implied_key;
+    fe.dec = d32;
+    fe.decrypted = true;
+    fe.via_reg = kGprs[di];
+    st->cur->pushed_imm = d32;
+    return;
+  }
+}
+
+void on_mem_read(uc_engine* , uc_mem_type , std::uint64_t addr, int size,
+                 std::int64_t , void* user) {
+  auto* st = static_cast<DeepSession*>(user);
+  if (!st->cur || !st->image->contains_va(addr)) return;
+  if (!in_vmp(*st->image, addr)) {
+
+    if (!st->vsp_reg.empty() && st->vsp) {
+      std::int64_t off = static_cast<std::int64_t>(addr - st->vsp);
+      if (off >= -0x400 && off <= 0x400) st->cur->mem_load++;
+    }
+    return;
+  }
+
+  std::uint64_t enc = 0;
+  std::uint8_t b[8]{};
+  auto n = static_cast<std::size_t>(size);
+  if (n > 8) n = 8;
+  if (uc_mem_read(st->uc, addr, b, n) != UC_ERR_OK) return;
+  for (std::size_t i = 0; i < n; i++) enc |= static_cast<std::uint64_t>(b[i]) << (8 * i);
+
+  FetchEvent fe;
+  fe.addr = addr;
+  fe.size = static_cast<std::uint32_t>(size);
+  fe.enc = enc;
+
+  if (st->key_val || !st->key_reg.empty()) {
+    apply_key_decrypt(st, fe);
+  }
+  st->cur->fetches.push_back(fe);
+  st->vip = addr;
+  st->last_vip_fetch_enc = enc;
+  st->have_last_fetch = true;
+  st->post_fetch_watch = 24;
+}
+
+void on_mem_write(uc_engine* , uc_mem_type , std::uint64_t addr, int size,
+                  std::int64_t value, void* user) {
+  auto* st = static_cast<DeepSession*>(user);
+  if (!st->cur) return;
+
+  if (size == 8 || size == 4) {
+    std::uint64_t gpr[16];
+    read_gprs(st->uc, gpr);
+    for (int i = 0; i < 16; i++) {
+      if (std::string(kGprs[i]) == "rsp") continue;
+
+      if (gpr[i] && (addr == gpr[i] || (addr + 8 == gpr[i]) || (addr == gpr[i] - 8))) {
+        st->vsp_reg = kGprs[i];
+        st->vsp = gpr[i];
+        st->cur->vsp_reg = kGprs[i];
+        st->cur->pushes++;
+
+        auto uval = static_cast<std::uint64_t>(value);
+        if (uval < 0x7FD00000ULL || uval >= 0x80000000ULL) {
+          st->cur->pushed_imm = uval;
+        }
+
+        if (st->have_last_fetch && st->cur->fetches.size()) {
+          auto& fe = st->cur->fetches.back();
+          if (!fe.decrypted) {
+            fe.dec = static_cast<std::uint64_t>(value);
+            fe.decrypted = true;
+          }
+        }
+        break;
+      }
+    }
+    if (!st->vsp_reg.empty() && st->vsp) {
+      std::int64_t off = static_cast<std::int64_t>(addr - st->vsp);
+      if (off >= -0x400 && off <= 0x400) st->cur->mem_store++;
+    }
+  }
+}
+
+void on_code(uc_engine* uc, std::uint64_t addr, std::uint32_t size, void* user) {
+  auto* st = static_cast<DeepSession*>(user);
+  if (++st->steps > st->max_insns) {
+    uc_emu_stop(uc);
+    return;
+  }
+  std::uint8_t buf[16]{};
+  auto n = size < 15u ? size : 15u;
+  if (uc_mem_read(uc, addr, buf, n) != UC_ERR_OK) {
+    uc_emu_stop(uc);
+    return;
+  }
+  cs_insn* ins = nullptr;
+  auto count = cs_disasm(st->cs, buf, n, addr, 1, &ins);
+  if (!count) return;
+
+  std::string mnem = ins[0].mnemonic;
+
+  if (mnem.rfind("rep", 0) == 0 || mnem == "movsb" || mnem == "movsw" || mnem == "movsd" ||
+      mnem == "movsq" || mnem == "stosb" || mnem == "stosq") {
+    std::uint64_t rip = addr + ins[0].size;
+    uc_reg_write(uc, UC_X86_REG_RIP, &rip);
+    cs_free(ins, count);
+    return;
+  }
+
+  if (st->cur) {
+    if (mnem == "add" || mnem == "adc") st->cur->alu_add++;
+    else if (mnem == "sub" || mnem == "sbb") st->cur->alu_sub++;
+    else if (mnem == "xor") st->cur->alu_xor++;
+    else if (mnem == "and") st->cur->alu_and++;
+    else if (mnem == "or") st->cur->alu_or++;
+    else if (mnem == "not") st->cur->alu_not++;
+    else if (mnem == "neg") st->cur->alu_neg++;
+    else if (mnem == "shl" || mnem == "sal") st->cur->alu_shl++;
+    else if (mnem == "shr" || mnem == "sar") st->cur->alu_shr++;
+    else if (mnem == "push") st->cur->pushes++;
+    else if (mnem == "pop") st->cur->pops++;
+
+    if (!st->key_reg.empty() && ins[0].detail) {
+      const auto& x86 = ins[0].detail->x86;
+      if (x86.op_count >= 1 && x86.operands[0].type == X86_OP_REG) {
+        auto dn = reg_name(x86.operands[0].reg);
+        if (dn == st->key_reg) {
+          auto ur = unicorn_reg(st->key_reg);
+          std::uint64_t kv = 0;
+          if (ur) uc_reg_read(uc, ur, &kv);
+
+          st->key_pending_refresh = true;
+        }
+      }
+    }
+
+    if (mnem == "xor" && ins[0].detail) {
+      const auto& x86 = ins[0].detail->x86;
+      if (x86.op_count >= 2 && x86.operands[0].type == X86_OP_REG &&
+          x86.operands[1].type == X86_OP_REG) {
+        auto dn = reg_name(x86.operands[0].reg);
+        auto sn = reg_name(x86.operands[1].reg);
+        if (!sn.empty() && sn != dn) {
+          for (int hi = 0; hi < 16; hi++) {
+            if (kGprs[hi] == sn) {
+              st->xor_src_hits[hi]++;
+              break;
+            }
+          }
+          if (st->key_reg.empty()) st->key_reg = sn;
+          auto ur = unicorn_reg(st->key_reg.empty() ? sn : st->key_reg);
+          std::uint64_t kv = 0;
+          if (ur) uc_reg_read(uc, ur, &kv);
+          st->key_val = kv;
+        }
+      }
+    }
+  }
+
+  if (st->post_fetch_watch > 0) {
+    st->post_fetch_watch--;
+    if (st->key_pending_refresh && !st->key_reg.empty()) {
+      auto ur = unicorn_reg(st->key_reg);
+      std::uint64_t kv = 0;
+      if (ur) uc_reg_read(uc, ur, &kv);
+      st->key_val = kv;
+      st->key_pending_refresh = false;
+    }
+    try_bind_decrypt(st);
+  }
+
+  if (mnem == "ret" || mnem == "retn" || mnem == "retf") {
+    std::uint64_t rsp = 0;
+    uc_reg_read(uc, UC_X86_REG_RSP, &rsp);
+    std::uint64_t ret_target = 0;
+    if (uc_mem_read(uc, rsp, &ret_target, 8) == UC_ERR_OK && ret_target &&
+        ret_target != addr && ret_target != st->handler_entry &&
+        looks_like_code_va(*st->image, ret_target)) {
+      st->next = ret_target;
+      st->hit = true;
+      if (st->cur) {
+        st->cur->has_xfer = true;
+        st->cur->next_handler = ret_target;
+      }
+      uc_emu_stop(uc);
+      cs_free(ins, count);
+      return;
+    }
+    st->saw_ret = true;
+    if (st->cur) st->cur->has_ret_exit = true;
+    uc_emu_stop(uc);
+    cs_free(ins, count);
+    return;
+  }
+
+  if ((mnem == "jmp" || mnem == "call") && ins[0].detail && ins[0].detail->x86.op_count >= 1) {
+
+    if (mnem == "call") {
+      cs_free(ins, count);
+      return;
+    }
+    const auto& op = ins[0].detail->x86.operands[0];
+    std::uint64_t target = 0;
+    if (op.type == X86_OP_IMM) {
+      target = static_cast<std::uint64_t>(op.imm);
+    } else if (op.type == X86_OP_REG) {
+      auto ureg = unicorn_reg(reg_name(op.reg));
+      if (ureg) uc_reg_read(uc, ureg, &target);
+    } else if (op.type == X86_OP_MEM) {
+      auto mem_addr = read_mem_op_addr(uc, op);
+      uc_mem_read(uc, mem_addr, &target, 8);
+    }
+    if (target && target != addr && target != st->handler_entry &&
+        looks_like_code_va(*st->image, target)) {
+
+      if (!in_vmp(*st->image, target)) {
+        auto* sec = st->image->section_for_va(target);
+        const bool to_text = sec && sec->name == ".text";
+        const bool to_sentinel = target == (st->image->image_base() + 0x1000);
+        if (to_text || to_sentinel || !st->image->contains_va(target)) {
+          st->saw_ret = true;
+          if (st->cur) {
+            st->cur->has_ret_exit = true;
+            st->cur->has_xfer = false;
+          }
+          uc_emu_stop(uc);
+          cs_free(ins, count);
+          return;
+        }
+      }
+
+      const std::uint64_t lo = target < st->handler_entry ? target : st->handler_entry;
+      const std::uint64_t hi = target < st->handler_entry ? st->handler_entry : target;
+      if (hi - lo < 0x100ull) {
+        cs_free(ins, count);
+        return;
+      }
+      st->next = target;
+      st->hit = true;
+      if (st->cur) {
+        st->cur->has_xfer = true;
+        st->cur->next_handler = target;
+      }
+      refresh_context_ptrs(st);
+      uc_emu_stop(uc);
+    }
+  }
+  cs_free(ins, count);
+}
+
+bool on_unmapped(uc_engine* uc, uc_mem_type , std::uint64_t addr, int , std::int64_t ,
+                 void* ) {
+  auto page = addr & ~0xFFFULL;
+  return uc_mem_map(uc, page, 0x1000, UC_PROT_ALL) == UC_ERR_OK;
+}
+
+std::optional<std::uint64_t> static_next_handler(csh cs, const PeImage& image, std::uint64_t va) {
+  auto bytes = image.read_at_va(va, 256);
+  if (bytes.size() < 8) return std::nullopt;
+  cs_insn* ins = nullptr;
+  auto n = cs_disasm(cs, bytes.data(), bytes.size(), va, 48, &ins);
+  std::optional<std::uint64_t> next;
+  for (std::size_t i = 0; i < n; i++) {
+    std::string m = ins[i].mnemonic;
+    if (m == "jmp" && ins[i].detail && ins[i].detail->x86.op_count >= 1) {
+      const auto& op = ins[i].detail->x86.operands[0];
+      if (op.type == X86_OP_IMM) {
+        auto t = static_cast<std::uint64_t>(op.imm);
+        if (t != va && looks_like_code_va(image, t)) {
+          next = t;
+          break;
+        }
+      }
+    }
+    if (m == "ret" || m == "retn" || m == "retf") break;
+  }
+  cs_free(ins, n);
+  return next;
+}
+
+}
+
+void peel_effect(HandlerEffect& e) {
+  for (auto& f : e.fetches) {
+    if (!f.decrypted && e.pushed_imm) {
+      f.dec = *e.pushed_imm;
+      f.decrypted = true;
+    }
+  }
+
+  const bool got_fetch = !e.fetches.empty();
+  const bool got_imm = e.pushed_imm.has_value() ||
+                       std::any_of(e.fetches.begin(), e.fetches.end(),
+                                   [](const FetchEvent& f) { return f.decrypted; });
+  const int alu = e.alu_add + e.alu_sub + e.alu_xor + e.alu_and + e.alu_or + e.alu_not +
+                  e.alu_neg + e.alu_shl + e.alu_shr;
+  const bool stackish = e.mem_load > 0 || e.mem_store > 0 || e.vsp_delta != 0 ||
+                        (!e.vsp_reg.empty() && (e.pushes > 0 || e.pops > 0));
+  const bool xfer = e.has_xfer || e.next_handler.has_value();
+
+  if (e.has_ret_exit && !xfer) {
+    e.kind = VmOpKind::VmExit;
+    e.confidence = 95;
+    e.why = "semantic:ret_exit";
+    return;
+  }
+
+  if (got_imm) {
+
+    if (stackish && alu >= 1 && e.mem_store + e.mem_load >= 1) {
+
+    } else {
+      e.kind = VmOpKind::FetchImm;
+      e.confidence = got_fetch ? 88 : 75;
+      e.why = got_fetch ? "semantic:vip_dec" : "semantic:imm";
+      return;
+    }
+  }
+  if (got_fetch && e.vip_delta != 0) {
+    e.kind = VmOpKind::FetchImm;
+    e.confidence = 72;
+    e.why = "semantic:vip_advance";
+    return;
+  }
+
+
+  if (xfer && !got_fetch && !stackish) {
+    e.kind = VmOpKind::CalcJmp;
+    e.confidence = alu ? 50 : 40;
+    e.why = alu ? "semantic:keychain" : "semantic:dispatch";
+    return;
+  }
+
+  if (e.alu_not >= 1 && e.alu_and >= 1) {
+    e.kind = VmOpKind::Nor;
+    e.confidence = 82;
+    e.why = "semantic:nor";
+    return;
+  }
+  if (e.alu_add >= 1 && e.alu_add >= e.alu_xor && e.alu_add >= e.alu_sub) {
+    e.kind = VmOpKind::Add;
+    e.confidence = e.alu_add >= 2 ? 80 : 68;
+    e.why = "semantic:add";
+    return;
+  }
+  if (e.alu_sub >= 1 && e.alu_sub >= e.alu_xor) {
+    e.kind = VmOpKind::Sub;
+    e.confidence = e.alu_sub >= 2 ? 78 : 65;
+    e.why = "semantic:sub";
+    return;
+  }
+  if (e.alu_xor >= 1) {
+    e.kind = VmOpKind::Xor;
+    e.confidence = e.alu_xor >= 2 ? 78 : 65;
+    e.why = "semantic:xor";
+    return;
+  }
+  if (e.alu_and >= 1 && e.alu_not == 0) {
+    e.kind = VmOpKind::And;
+    e.confidence = 70;
+    e.why = "semantic:and";
+    return;
+  }
+  if (e.alu_or >= 1) {
+    e.kind = VmOpKind::Or;
+    e.confidence = 70;
+    e.why = "semantic:or";
+    return;
+  }
+  if (e.alu_shl + e.alu_shr >= 1) {
+    e.kind = e.alu_shl >= e.alu_shr ? VmOpKind::Shl : VmOpKind::Shr;
+    e.confidence = 72;
+    e.why = "semantic:shift";
+    return;
+  }
+  if (e.alu_not >= 1) {
+    e.kind = VmOpKind::Not;
+    e.confidence = 70;
+    e.why = "semantic:not";
+    return;
+  }
+  if (e.alu_neg >= 1) {
+    e.kind = VmOpKind::Neg;
+    e.confidence = 70;
+    e.why = "semantic:neg";
+    return;
+  }
+  if (e.mem_load >= 1) {
+    e.kind = VmOpKind::Load;
+    e.confidence = 70;
+    e.why = "semantic:load";
+    return;
+  }
+  if (e.mem_store >= 1) {
+    e.kind = VmOpKind::Store;
+    e.confidence = 70;
+    e.why = "semantic:store";
+    return;
+  }
+  if (e.pushes >= 1 && e.pops == 0) {
+    e.kind = VmOpKind::Push;
+    e.confidence = got_imm ? 75 : 60;
+    e.why = "semantic:push";
+    return;
+  }
+  if (e.pops >= 1 && e.pushes == 0) {
+    e.kind = VmOpKind::Pop;
+    e.confidence = 65;
+    e.why = "semantic:pop";
+    return;
+  }
+  if (xfer) {
+    e.kind = VmOpKind::CalcJmp;
+    e.confidence = 35;
+    e.why = "semantic:xfer";
+    return;
+  }
+  e.kind = VmOpKind::Unknown;
+  e.confidence = 10;
+  e.why = "semantic:no_effect";
+}
+
+SemanticTrace unicorn_semantic_trace(const PeImage& image, std::uint64_t start_va,
+                                     std::size_t max_handlers, std::size_t max_insns_each) {
+  SemanticTrace out;
+  out.vip.seed = extract_vip_seed(image, start_va);
+  out.vip.seeded = out.vip.seed.enc_push_imm.has_value() || out.vip.seed.movabs_imm.has_value();
+
+  DeepSession st;
+  st.image = &image;
+  st.max_insns = max_insns_each;
+
+  if (cs_open(CS_ARCH_X86, CS_MODE_64, &st.cs) != CS_ERR_OK) return out;
+  cs_option(st.cs, CS_OPT_DETAIL, CS_OPT_ON);
+  if (uc_open(UC_ARCH_X86, UC_MODE_64, &st.uc) != UC_ERR_OK) {
+    cs_close(&st.cs);
+    return out;
+  }
+  if (!map_pe(st.uc, image)) {
+    uc_close(st.uc);
+    cs_close(&st.cs);
+    return out;
+  }
+
+  constexpr std::uint64_t kStack = 0x7FE00000ULL;
+  constexpr std::uint64_t kStackSz = 0x200000ULL;
+  uc_mem_map(st.uc, kStack, kStackSz, UC_PROT_ALL);
+  std::uint64_t rsp = kStack + kStackSz - 0x400;
+
+  bool start_is_push_call = false;
+  {
+    auto b = image.read_at_va(start_va, 10);
+    start_is_push_call = b.size() >= 10 && b[0] == 0x68 && b[5] == 0xE8;
+  }
+  if (out.vip.seed.enc_push_imm && !start_is_push_call) {
+    rsp -= 8;
+    std::uint64_t imm = *out.vip.seed.enc_push_imm;
+    uc_mem_write(st.uc, rsp, &imm, 8);
+  }
+  rsp -= 8;
+  std::uint64_t ret = image.image_base() + 0x1000;
+  uc_mem_write(st.uc, rsp, &ret, 8);
+  uc_reg_write(st.uc, UC_X86_REG_RSP, &rsp);
+
+  std::uint64_t junk = 0x1111111111111111ULL;
+  std::uint64_t z = 0;
+  for (int r : {UC_X86_REG_RAX, UC_X86_REG_RBX, UC_X86_REG_RCX, UC_X86_REG_RDX, UC_X86_REG_RSI,
+                UC_X86_REG_RDI, UC_X86_REG_R8,  UC_X86_REG_R9,  UC_X86_REG_R10, UC_X86_REG_R11,
+                UC_X86_REG_R12, UC_X86_REG_R13, UC_X86_REG_R14, UC_X86_REG_R15}) {
+    uc_reg_write(st.uc, r, &junk);
+  }
+  uc_reg_write(st.uc, UC_X86_REG_RBP, &z);
+  if (out.vip.seed.movabs_imm) {
+    std::uint64_t m = *out.vip.seed.movabs_imm;
+    auto ur = unicorn_reg(out.vip.seed.movabs_reg.empty() ? "rbp" : out.vip.seed.movabs_reg);
+    if (!ur) ur = UC_X86_REG_RBP;
+    uc_reg_write(st.uc, ur, &m);
+  }
+
+  constexpr std::uint64_t kVsp = 0x7FD00000ULL;
+  uc_mem_map(st.uc, kVsp, 0x10000, UC_PROT_ALL);
+
+  uc_hook h_code{}, h_rd{}, h_wr{}, h_unmap{};
+  uc_hook_add(st.uc, &h_code, UC_HOOK_CODE, reinterpret_cast<void*>(on_code), &st, 1, 0);
+  uc_hook_add(st.uc, &h_rd, UC_HOOK_MEM_READ, reinterpret_cast<void*>(on_mem_read), &st, 1, 0);
+  uc_hook_add(st.uc, &h_wr, UC_HOOK_MEM_WRITE, reinterpret_cast<void*>(on_mem_write), &st, 1, 0);
+  uc_hook_add(st.uc, &h_unmap, UC_HOOK_MEM_UNMAPPED, reinterpret_cast<void*>(on_unmapped), &st, 1,
+              0);
+
+  std::set<std::uint64_t> seen;
+  std::uint64_t cur = start_va;
+  std::size_t soft_stalls = 0;
+
+  for (std::size_t i = 0; i < max_handlers; i++) {
+    bool revisit = !seen.insert(cur).second;
+    if (revisit && soft_stalls > 4) break;
+
+    HandlerEffect eff;
+    eff.handler_va = cur;
+    eff.vip_before = st.vip;
+    eff.key_before = st.key_val;
+    eff.vip_reg = st.vip_reg;
+    eff.key_reg = st.key_reg;
+    eff.vsp_reg = st.vsp_reg;
+
+    st.handler_entry = cur;
+    st.next = 0;
+    st.hit = false;
+    st.saw_ret = false;
+    st.steps = 0;
+    st.have_last_fetch = false;
+    st.post_fetch_watch = 0;
+    st.cur = &eff;
+    read_gprs(st.uc, st.gpr_enter);
+
+    uc_emu_start(st.uc, cur, 0, 0, max_insns_each);
+
+
+    {
+      int best = -1, bestn = 0;
+      for (int hi = 0; hi < 16; hi++) {
+        if (st.xor_src_hits[hi] <= bestn) continue;
+        auto ur = unicorn_reg(kGprs[hi]);
+        std::uint64_t kv = 0;
+        if (ur) uc_reg_read(st.uc, ur, &kv);
+        if (kv && image.contains_va(kv)) continue;
+        if (std::string(kGprs[hi]) == "rsp") continue;
+        bestn = st.xor_src_hits[hi];
+        best = hi;
+      }
+      if (best >= 0 && bestn >= 2) {
+        st.key_reg = kGprs[best];
+        auto ur = unicorn_reg(st.key_reg);
+        std::uint64_t kv = 0;
+        if (ur) uc_reg_read(st.uc, ur, &kv);
+        st.key_val = kv;
+      }
+    }
+
+    if (!st.key_reg.empty()) {
+      auto ur = unicorn_reg(st.key_reg);
+      std::uint64_t kv = 0;
+      if (ur) uc_reg_read(st.uc, ur, &kv);
+      if (!(kv && image.contains_va(kv))) st.key_val = kv;
+    }
+
+    for (auto& f : eff.fetches) {
+      if (!f.decrypted && (st.key_val || !st.key_reg.empty())) {
+        f.dec = static_cast<std::uint32_t>(f.enc) ^ static_cast<std::uint32_t>(st.key_val);
+        f.decrypted = true;
+        if (!eff.pushed_imm) eff.pushed_imm = f.dec;
+      }
+    }
+
+    if (!st.vip && out.vip.seed.enc_push_imm && st.key_val) {
+      const std::uint32_t enc = *out.vip.seed.enc_push_imm;
+      const std::uint32_t k = static_cast<std::uint32_t>(st.key_val);
+      const std::uint32_t candidates[] = {
+          enc ^ k,
+          enc - k,
+          enc + k,
+          static_cast<std::uint32_t>(enc ^ (k * 0x343FD + 0x269EC3)),
+      };
+      for (auto rva : candidates) {
+        auto va = image.image_base() + rva;
+        if (in_vmp(image, va)) {
+          st.vip = va;
+
+          std::uint64_t gpr[16];
+          read_gprs(st.uc, gpr);
+          for (int gi = 0; gi < 16; gi++) {
+            if (gpr[gi] == va || static_cast<std::uint32_t>(gpr[gi]) == rva) {
+              st.vip_reg = kGprs[gi];
+              break;
+            }
+          }
+          if (st.vip_reg.empty()) {
+
+            st.vip_reg = "rsi";
+            auto ur = unicorn_reg("rsi");
+            if (ur) uc_reg_write(st.uc, ur, &va);
+          }
+          break;
+        }
+      }
+    }
+
+    if (!st.vip) {
+      std::uint64_t gpr[16];
+      read_gprs(st.uc, gpr);
+      for (int gi = 0; gi < 16; gi++) {
+        if (std::string(kGprs[gi]) == "rsp") continue;
+        auto v = gpr[gi];
+        if (v && in_vmp(image, v) && v != cur && (v < cur || v - cur > 0x200)) {
+
+          auto b = image.read_at_va(v, 4);
+          st.vip = v;
+          st.vip_reg = kGprs[gi];
+          break;
+        }
+      }
+    }
+
+    eff.vip_after = st.vip;
+    eff.key_after = st.key_val;
+    eff.key_reg = st.key_reg;
+    eff.vip_reg = st.vip_reg;
+    eff.vip_delta = static_cast<std::int64_t>(eff.vip_after - eff.vip_before);
+    if (st.hit) {
+      eff.has_xfer = true;
+      eff.next_handler = st.next;
+    }
+    if (st.vsp_reg.size()) {
+      auto ur = unicorn_reg(st.vsp_reg);
+      std::uint64_t vsp_now = 0;
+      if (ur) uc_reg_read(st.uc, ur, &vsp_now);
+      if (st.vsp) eff.vsp_delta = static_cast<std::int64_t>(vsp_now - st.vsp);
+      st.vsp = vsp_now ? vsp_now : st.vsp;
+    }
+    peel_effect(eff);
+    out.effects.push_back(eff);
+
+    VipStep step;
+    step.handler_va = cur;
+    step.vip = st.vip;
+    step.vip_reg = st.vip_reg;
+    step.key_reg = st.key_reg;
+    if (!eff.fetches.empty())
+      step.fetched_enc = static_cast<std::uint32_t>(eff.fetches.back().enc);
+    if (eff.next_handler) step.next_handler = *eff.next_handler;
+    if (!eff.fetches.empty() && eff.fetches.back().decrypted)
+      step.note = "dec=0x" + hex_u64(eff.fetches.back().dec).substr(2);
+    else if (st.hit)
+      step.note = "xfer";
+    else if (st.saw_ret)
+      step.note = "ret";
+    else
+      step.note = "stall";
+    out.vip.steps.push_back(step);
+
+    if (i == 0) out.vip.initial_vip = st.vip;
+    if (st.key_val) out.vip.rolling_key = st.key_val;
+    out.key_reg = st.key_reg;
+    out.vip_reg = st.vip_reg;
+    out.vsp_reg = st.vsp_reg;
+
+    st.cur = nullptr;
+
+    if (st.saw_ret && !st.hit) break;
+    if (!st.hit) {
+      if (auto nxt = static_next_handler(st.cs, image, cur)) {
+        out.effects.back().next_handler = *nxt;
+        out.effects.back().has_xfer = true;
+        out.vip.steps.back().next_handler = *nxt;
+        out.vip.steps.back().note = "stall_recover";
+        if (out.effects.back().kind == VmOpKind::Unknown ||
+            out.effects.back().kind == VmOpKind::CalcJmp) {
+          peel_effect(out.effects.back());
+        }
+        soft_stalls++;
+        if (soft_stalls > 32) break;
+        cur = *nxt;
+        uc_reg_write(st.uc, UC_X86_REG_RIP, &cur);
+        continue;
+      }
+      break;
+    }
+    soft_stalls = 0;
+    cur = st.next;
+    uc_reg_write(st.uc, UC_X86_REG_RIP, &cur);
+  }
+
+  uc_close(st.uc);
+  cs_close(&st.cs);
+  return out;
+}
+
+}
+
+```
+
+`semantic_peel.hpp`:
+
+```hpp
+#pragma once
+
+#include "handler_classify.hpp"
+#include "pe_image.hpp"
+#include "vip_context.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+struct FetchEvent {
+  std::uint64_t addr = 0;
+  std::uint32_t size = 0;
+  std::uint64_t enc = 0;
+  std::uint64_t dec = 0;
+  bool decrypted = false;
+  std::string via_reg;
+};
+
+struct HandlerEffect {
+  std::uint64_t handler_va = 0;
+  std::uint64_t vip_before = 0;
+  std::uint64_t vip_after = 0;
+  std::int64_t vip_delta = 0;
+  std::uint64_t key_before = 0;
+  std::uint64_t key_after = 0;
+  std::string vip_reg;
+  std::string key_reg;
+  std::string vsp_reg;
+  std::int64_t vsp_delta = 0;
+  int pushes = 0;
+  int pops = 0;
+  int alu_add = 0, alu_sub = 0, alu_xor = 0, alu_and = 0, alu_or = 0;
+  int alu_not = 0, alu_neg = 0, alu_shl = 0, alu_shr = 0;
+  int mem_load = 0, mem_store = 0;
+  bool has_xfer = false;
+  bool has_ret_exit = false;
+  std::optional<std::uint64_t> next_handler;
+  std::vector<FetchEvent> fetches;
+  std::optional<std::uint64_t> pushed_imm;
+  VmOpKind kind = VmOpKind::Unknown;
+  int confidence = 0;
+  std::string why;
+};
+
+struct SemanticTrace {
+  VipTrace vip;
+  std::vector<HandlerEffect> effects;
+  std::string key_reg;
+  std::string vip_reg;
+  std::string vsp_reg;
+};
+
+SemanticTrace unicorn_semantic_trace(const PeImage& image, std::uint64_t vmenter_va,
+                                     std::size_t max_handlers = 256,
+                                     std::size_t max_insns_each = 4096);
+
+void peel_effect(HandlerEffect& e);
+
+}
+
+```
+
+`util.cpp`:
+
+```cpp
+#include "util.hpp"
+
+#include <cctype>
+#include <iomanip>
+#include <sstream>
+
+namespace vmp {
+
+std::string hex_u64(std::uint64_t value, bool prefix) {
+  std::ostringstream oss;
+  if (prefix) {
+    oss << "0x";
+  }
+  oss << std::hex << std::nouppercase << value;
+  return oss.str();
+}
+
+std::optional<std::uint64_t> parse_hex_u64(const std::string& text) {
+  if (text.empty()) {
+    return std::nullopt;
+  }
+  std::string value = text;
+  if (value.rfind("0x", 0) == 0 || value.rfind("0X", 0) == 0) {
+    value = value.substr(2);
+  }
+  if (value.empty()) {
+    return std::nullopt;
+  }
+  for (char ch : value) {
+    if (!std::isxdigit(static_cast<unsigned char>(ch))) {
+      return std::nullopt;
+    }
+  }
+  return std::stoull(value, nullptr, 16);
+}
+
+bool is_vmp_section_name(const std::string& name) {
+  if (name.rfind(".vmp", 0) == 0) {
+    return true;
+  }
+  if (name == ".kbB0" || name == ".kbB1") {
+    return true;
+  }
+  if (name.size() >= 2 && name[0] == '.' && name != ".text" && name != ".rdata" &&
+      name != ".data" && name != ".pdata" && name != ".rsrc" && name != ".reloc" &&
+      name != ".idata" && name != ".edata" && name != ".tls" && name != ".debug" &&
+      name != ".fptable") {
+    const auto is_standard = name == ".bss" || name == ".CRT" || name == ".gfids";
+    if (!is_standard) {
+      return true;
+    }
+  }
+  return false;
+}
+
+}
+
+```
+
+`util.hpp`:
+
+```hpp
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+
+namespace vmp {
+
+std::string hex_u64(std::uint64_t value, bool prefix = true);
+std::optional<std::uint64_t> parse_hex_u64(const std::string& text);
+bool is_vmp_section_name(const std::string& name);
+
+}
+
+```
+
+`vip_context.cpp`:
+
+```cpp
+#include "vip_context.hpp"
+
+#include "util.hpp"
+
+#include <capstone/capstone.h>
+#include <capstone/x86.h>
+#include <unicorn/unicorn.h>
+
+#include <cstdio>
+#include <cstring>
+#include <optional>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+namespace {
+
+std::string reg_name(int capstone_reg) {
+  switch (capstone_reg) {
+    case X86_REG_RAX:
+    case X86_REG_EAX:
+      return "rax";
+    case X86_REG_RCX:
+    case X86_REG_ECX:
+      return "rcx";
+    case X86_REG_RDX:
+    case X86_REG_EDX:
+      return "rdx";
+    case X86_REG_RBX:
+    case X86_REG_EBX:
+      return "rbx";
+    case X86_REG_RSP:
+    case X86_REG_ESP:
+      return "rsp";
+    case X86_REG_RBP:
+    case X86_REG_EBP:
+      return "rbp";
+    case X86_REG_RSI:
+    case X86_REG_ESI:
+      return "rsi";
+    case X86_REG_RDI:
+    case X86_REG_EDI:
+      return "rdi";
+    case X86_REG_R8:
+    case X86_REG_R8D:
+      return "r8";
+    case X86_REG_R9:
+    case X86_REG_R9D:
+      return "r9";
+    case X86_REG_R10:
+    case X86_REG_R10D:
+      return "r10";
+    case X86_REG_R11:
+    case X86_REG_R11D:
+      return "r11";
+    case X86_REG_R12:
+    case X86_REG_R12D:
+      return "r12";
+    case X86_REG_R13:
+    case X86_REG_R13D:
+      return "r13";
+    case X86_REG_R14:
+    case X86_REG_R14D:
+      return "r14";
+    case X86_REG_R15:
+    case X86_REG_R15D:
+      return "r15";
+    default:
+      return {};
+  }
+}
+
+int unicorn_reg(const std::string& name) {
+  if (name == "rax") return UC_X86_REG_RAX;
+  if (name == "rcx") return UC_X86_REG_RCX;
+  if (name == "rdx") return UC_X86_REG_RDX;
+  if (name == "rbx") return UC_X86_REG_RBX;
+  if (name == "rsp") return UC_X86_REG_RSP;
+  if (name == "rbp") return UC_X86_REG_RBP;
+  if (name == "rsi") return UC_X86_REG_RSI;
+  if (name == "rdi") return UC_X86_REG_RDI;
+  if (name == "r8") return UC_X86_REG_R8;
+  if (name == "r9") return UC_X86_REG_R9;
+  if (name == "r10") return UC_X86_REG_R10;
+  if (name == "r11") return UC_X86_REG_R11;
+  if (name == "r12") return UC_X86_REG_R12;
+  if (name == "r13") return UC_X86_REG_R13;
+  if (name == "r14") return UC_X86_REG_R14;
+  if (name == "r15") return UC_X86_REG_R15;
+  return 0;
+}
+
+bool in_vmp_or_text(const PeImage& image, std::uint64_t va) {
+  auto* sec = image.section_for_va(va);
+  if (!sec) return false;
+  return is_vmp_section_name(sec->name) || sec->name == ".text";
+}
+
+bool looks_like_code_va(const PeImage& image, std::uint64_t va) {
+  if (!image.contains_va(va)) return false;
+  if (in_vmp_or_text(image, va)) {
+    auto b = image.read_at_va(va, 4);
+    if (b.size() < 2) return false;
+    int nz = 0;
+    for (auto x : b)
+      if (x && x != 0xCC) nz++;
+    return nz >= 1;
+  }
+
+  auto b = image.read_at_va(va, 8);
+  if (b.size() < 4) return false;
+  int nz = 0;
+  for (auto x : b)
+    if (x && x != 0xCC) nz++;
+  return nz >= 3;
+}
+
+std::uint64_t read_mem_op_addr(uc_engine* uc, const cs_x86_op& op) {
+  std::uint64_t addr = static_cast<std::uint64_t>(op.mem.disp);
+  if (op.mem.base != X86_REG_INVALID) {
+    auto rn = reg_name(op.mem.base);
+    auto ur = unicorn_reg(rn);
+    std::uint64_t base = 0;
+    if (ur) uc_reg_read(uc, ur, &base);
+    addr += base;
+  }
+  if (op.mem.index != X86_REG_INVALID) {
+    auto rn = reg_name(op.mem.index);
+    auto ur = unicorn_reg(rn);
+    std::uint64_t idx = 0;
+    if (ur) uc_reg_read(uc, ur, &idx);
+    addr += idx * (op.mem.scale ? op.mem.scale : 1);
+  }
+  return addr;
+}
+
+bool map_pe(uc_engine* uc, const PeImage& image) {
+  auto base = image.image_base();
+  auto img_sz = (image.size_of_image() + 0xFFF) & ~0xFFFULL;
+  if (img_sz < 0x1000) img_sz = 0x1000;
+  if (uc_mem_map(uc, base, img_sz, UC_PROT_ALL) != UC_ERR_OK) return false;
+  for (const auto& sec : image.sections()) {
+    auto va = base + sec.virtual_address;
+    auto want = static_cast<std::size_t>(
+        sec.raw_size ? (sec.raw_size < sec.virtual_size ? sec.raw_size : sec.virtual_size)
+                     : sec.virtual_size);
+    if (!want) continue;
+    auto bytes = image.read_at_va(va, want);
+    if (!bytes.empty()) uc_mem_write(uc, va, bytes.data(), bytes.size());
+  }
+  return true;
+}
+
+struct Session {
+  uc_engine* uc = nullptr;
+  csh cs = 0;
+  const PeImage* image = nullptr;
+
+  std::uint64_t handler_entry = 0;
+  std::uint64_t next = 0;
+  std::uint64_t vip = 0;
+  std::uint64_t key = 0;
+  std::string vip_reg;
+  std::string key_reg;
+  std::uint32_t last_fetch = 0;
+  int vip_reads = 0;
+  std::size_t steps = 0;
+  std::size_t max_insns = 2048;
+  bool hit = false;
+  bool saw_ret = false;
+  bool stop_xfer = false;
+};
+
+void snapshot_context(Session* st) {
+  const char* regs[] = {"rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
+                        "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15"};
+  for (auto* rn : regs) {
+    std::uint64_t v = 0;
+    auto ur = unicorn_reg(rn);
+    if (!ur) continue;
+    uc_reg_read(st->uc, ur, &v);
+    if (!v || !st->image->contains_va(v)) continue;
+    auto* sec = st->image->section_for_va(v);
+    if (!sec || !is_vmp_section_name(sec->name)) continue;
+    if (st->vip == 0 || v == st->vip || st->vip_reads == 0) {
+      st->vip = v;
+      st->vip_reg = rn;
+    } else if (st->key == 0 && v != st->vip) {
+      st->key = v;
+      st->key_reg = rn;
+    }
+  }
+}
+
+void on_code(uc_engine* uc, std::uint64_t addr, std::uint32_t size, void* user) {
+  auto* st = static_cast<Session*>(user);
+  if (++st->steps > st->max_insns) {
+    uc_emu_stop(uc);
+    return;
+  }
+  std::uint8_t buf[16]{};
+  auto n = size < 15u ? size : 15u;
+  if (uc_mem_read(uc, addr, buf, n) != UC_ERR_OK) {
+    uc_emu_stop(uc);
+    return;
+  }
+  cs_insn* ins = nullptr;
+  auto count = cs_disasm(st->cs, buf, n, addr, 1, &ins);
+  if (!count) return;
+
+  std::string mnem = ins[0].mnemonic;
+
+  if (mnem.rfind("rep", 0) == 0 || mnem == "movsb" || mnem == "movsw" || mnem == "movsd" ||
+      mnem == "movsq" || mnem == "stosb" || mnem == "stosq" || mnem == "scasb" ||
+      mnem == "cmpsb") {
+    std::uint64_t rip = addr + ins[0].size;
+    uc_reg_write(uc, UC_X86_REG_RIP, &rip);
+    cs_free(ins, count);
+    return;
+  }
+
+  if (mnem == "ret" || mnem == "retn" || mnem == "retf") {
+    std::uint64_t rsp = 0;
+    uc_reg_read(uc, UC_X86_REG_RSP, &rsp);
+    std::uint64_t ret_target = 0;
+    if (uc_mem_read(uc, rsp, &ret_target, 8) == UC_ERR_OK && ret_target &&
+        ret_target != addr && ret_target != st->handler_entry &&
+        looks_like_code_va(*st->image, ret_target)) {
+      st->next = ret_target;
+      st->hit = true;
+      st->stop_xfer = true;
+      snapshot_context(st);
+      uc_emu_stop(uc);
+      cs_free(ins, count);
+      return;
+    }
+
+    st->saw_ret = true;
+    st->stop_xfer = true;
+    uc_emu_stop(uc);
+    cs_free(ins, count);
+    return;
+  }
+
+  if ((mnem == "jmp" || mnem == "call") && ins[0].detail && ins[0].detail->x86.op_count >= 1) {
+
+    if (mnem == "call") {
+      cs_free(ins, count);
+      return;
+    }
+    const auto& op = ins[0].detail->x86.operands[0];
+    std::uint64_t target = 0;
+    if (op.type == X86_OP_IMM) {
+      target = static_cast<std::uint64_t>(op.imm);
+    } else if (op.type == X86_OP_REG) {
+      auto ureg = unicorn_reg(reg_name(op.reg));
+      if (ureg) uc_reg_read(uc, ureg, &target);
+    } else if (op.type == X86_OP_MEM) {
+      auto mem_addr = read_mem_op_addr(uc, op);
+      uc_mem_read(uc, mem_addr, &target, 8);
+    }
+
+    if (target && target != addr && target != st->handler_entry &&
+        looks_like_code_va(*st->image, target)) {
+      st->next = target;
+      st->hit = true;
+      st->stop_xfer = true;
+      snapshot_context(st);
+      uc_emu_stop(uc);
+    }
+  }
+  cs_free(ins, count);
+}
+
+void on_mem_read(uc_engine* , uc_mem_type , std::uint64_t addr, int size,
+                 std::int64_t , void* user) {
+  auto* st = static_cast<Session*>(user);
+  if (size != 1 && size != 2 && size != 4 && size != 8) return;
+  if (!st->image->contains_va(addr)) return;
+  auto* sec = st->image->section_for_va(addr);
+  if (!sec || !is_vmp_section_name(sec->name)) return;
+  st->vip = addr;
+  st->vip_reads++;
+  if (size == 4) {
+    std::uint8_t b[4]{};
+    if (uc_mem_read(st->uc, addr, b, 4) == UC_ERR_OK) {
+      st->last_fetch = static_cast<std::uint32_t>(b[0]) | (static_cast<std::uint32_t>(b[1]) << 8) |
+                       (static_cast<std::uint32_t>(b[2]) << 16) |
+                       (static_cast<std::uint32_t>(b[3]) << 24);
+    }
+  }
+}
+
+bool on_unmapped(uc_engine* uc, uc_mem_type , std::uint64_t addr, int , std::int64_t ,
+                 void* ) {
+  auto page = addr & ~0xFFFULL;
+  return uc_mem_map(uc, page, 0x1000, UC_PROT_ALL) == UC_ERR_OK;
+}
+
+std::optional<std::uint64_t> static_next_handler(csh cs, const PeImage& image, std::uint64_t va) {
+  auto bytes = image.read_at_va(va, 256);
+  if (bytes.size() < 8) return std::nullopt;
+  cs_insn* ins = nullptr;
+  auto n = cs_disasm(cs, bytes.data(), bytes.size(), va, 48, &ins);
+  std::optional<std::uint64_t> next;
+  for (std::size_t i = 0; i < n; i++) {
+    std::string m = ins[i].mnemonic;
+    if (m == "jmp" && ins[i].detail && ins[i].detail->x86.op_count >= 1) {
+      const auto& op = ins[i].detail->x86.operands[0];
+      if (op.type == X86_OP_IMM) {
+        auto t = static_cast<std::uint64_t>(op.imm);
+        if (t != va && looks_like_code_va(image, t)) {
+          next = t;
+          break;
+        }
+      }
+    }
+    if (m == "ret" || m == "retn" || m == "retf") break;
+  }
+  cs_free(ins, n);
+  return next;
+}
+
+}
+
+VipSeed extract_vip_seed(const PeImage& image, std::uint64_t vmenter_va) {
+  VipSeed seed;
+  seed.image_high = image.image_base() & 0xFFFFFFFF00000000ULL;
+  seed.note = "none";
+
+  auto bytes = image.read_at_va(vmenter_va, 128);
+  if (bytes.size() < 8) return seed;
+
+  csh cs{};
+  if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK) return seed;
+  cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+  cs_insn* ins = nullptr;
+  auto n = cs_disasm(cs, bytes.data(), bytes.size(), vmenter_va, 24, &ins);
+
+  for (std::size_t i = 0; i < n; i++) {
+    std::string m = ins[i].mnemonic;
+    if (m == "push" && ins[i].detail) {
+      const auto& x86 = ins[i].detail->x86;
+      if (x86.op_count >= 1 && x86.operands[0].type == X86_OP_IMM) {
+        auto imm = static_cast<std::uint64_t>(x86.operands[0].imm);
+        if (imm <= 0xFFFFFFFFULL) {
+          seed.enc_push_imm = static_cast<std::uint32_t>(imm);
+          seed.note = "push_imm";
+        }
+      }
+    }
+    if ((m == "mov" || m == "movabs") && ins[i].detail) {
+      const auto& x86 = ins[i].detail->x86;
+      if (x86.op_count >= 2 && x86.operands[1].type == X86_OP_IMM &&
+          x86.operands[0].type == X86_OP_REG) {
+        auto imm = static_cast<std::uint64_t>(x86.operands[1].imm);
+
+        bool ntstatus = (imm & 0xFFFF0000ULL) == 0xC0000000ULL;
+        bool tiny = imm <= 0xFFFF;
+        if (!tiny && !ntstatus && !seed.movabs_imm) {
+          seed.movabs_imm = imm;
+          seed.movabs_reg = reg_name(x86.operands[0].reg);
+          if (seed.movabs_reg.empty()) seed.movabs_reg = "rbp";
+          if (seed.note == "none") seed.note = "movabs";
+          else seed.note += "+movabs";
+        }
+      }
+    }
+  }
+  cs_free(ins, n);
+  cs_close(&cs);
+  return seed;
+}
+
+VipTrace unicorn_vip_trace(const PeImage& image, std::uint64_t start_va, std::size_t max_handlers,
+                           std::size_t max_insns_each) {
+  VipTrace tr;
+  tr.seed = extract_vip_seed(image, start_va);
+  tr.seeded = tr.seed.enc_push_imm.has_value() || tr.seed.movabs_imm.has_value();
+
+  Session st;
+  st.image = &image;
+  st.max_insns = max_insns_each;
+
+  if (cs_open(CS_ARCH_X86, CS_MODE_64, &st.cs) != CS_ERR_OK) return tr;
+  cs_option(st.cs, CS_OPT_DETAIL, CS_OPT_ON);
+  if (uc_open(UC_ARCH_X86, UC_MODE_64, &st.uc) != UC_ERR_OK) {
+    cs_close(&st.cs);
+    return tr;
+  }
+  if (!map_pe(st.uc, image)) {
+    uc_close(st.uc);
+    cs_close(&st.cs);
+    return tr;
+  }
+
+  constexpr std::uint64_t kStack = 0x7FE00000ULL;
+  constexpr std::uint64_t kStackSz = 0x200000ULL;
+  uc_mem_map(st.uc, kStack, kStackSz, UC_PROT_ALL);
+  std::uint64_t rsp = kStack + kStackSz - 0x400;
+
+  bool start_is_push_call = false;
+  {
+    auto b = image.read_at_va(start_va, 10);
+    start_is_push_call = b.size() >= 10 && b[0] == 0x68 && b[5] == 0xE8;
+  }
+  if (tr.seed.enc_push_imm && !start_is_push_call) {
+    rsp -= 8;
+    std::uint64_t imm = *tr.seed.enc_push_imm;
+    uc_mem_write(st.uc, rsp, &imm, 8);
+  }
+  rsp -= 8;
+  std::uint64_t ret = image.image_base() + 0x1000;
+  uc_mem_write(st.uc, rsp, &ret, 8);
+  uc_reg_write(st.uc, UC_X86_REG_RSP, &rsp);
+
+  std::uint64_t junk = 0x1111111111111111ULL;
+  std::uint64_t z = 0;
+  for (int r : {UC_X86_REG_RAX, UC_X86_REG_RBX, UC_X86_REG_RCX, UC_X86_REG_RDX, UC_X86_REG_RSI,
+                UC_X86_REG_RDI, UC_X86_REG_R8,  UC_X86_REG_R9,  UC_X86_REG_R10, UC_X86_REG_R11,
+                UC_X86_REG_R12, UC_X86_REG_R13, UC_X86_REG_R14, UC_X86_REG_R15}) {
+    uc_reg_write(st.uc, r, &junk);
+  }
+  uc_reg_write(st.uc, UC_X86_REG_RBP, &z);
+  if (tr.seed.movabs_imm) {
+    std::uint64_t m = *tr.seed.movabs_imm;
+    auto ur = unicorn_reg(tr.seed.movabs_reg.empty() ? "rbp" : tr.seed.movabs_reg);
+    if (!ur) ur = UC_X86_REG_RBP;
+    uc_reg_write(st.uc, ur, &m);
+  }
+
+  uc_hook h_code{}, h_mem{}, h_unmap{};
+  uc_hook_add(st.uc, &h_code, UC_HOOK_CODE, reinterpret_cast<void*>(on_code), &st, 1, 0);
+  uc_hook_add(st.uc, &h_mem, UC_HOOK_MEM_READ, reinterpret_cast<void*>(on_mem_read), &st, 1, 0);
+  uc_hook_add(st.uc, &h_unmap, UC_HOOK_MEM_UNMAPPED, reinterpret_cast<void*>(on_unmapped), &st, 1,
+              0);
+
+  std::set<std::uint64_t> seen;
+  std::uint64_t cur = start_va;
+
+  std::size_t soft_stalls = 0;
+
+  for (std::size_t i = 0; i < max_handlers; i++) {
+    bool revisit = !seen.insert(cur).second;
+    if (revisit && soft_stalls > 2) break;
+
+    st.handler_entry = cur;
+    st.next = 0;
+    st.hit = false;
+    st.saw_ret = false;
+    st.stop_xfer = false;
+    st.steps = 0;
+    st.vip_reads = 0;
+    st.last_fetch = 0;
+
+    uc_emu_start(st.uc, cur, 0, 0, max_insns_each);
+
+    VipStep step;
+    step.handler_va = cur;
+    step.vip = st.vip;
+    step.fetched_enc = st.last_fetch;
+    step.vip_reg = st.vip_reg;
+    step.key_reg = st.key_reg;
+    if (st.hit) step.next_handler = st.next;
+    if (st.vip_reads) {
+      char buf[64];
+      std::snprintf(buf, sizeof(buf), "vip_reads=%d", st.vip_reads);
+      step.note = buf;
+    } else if (st.hit && st.saw_ret) {
+      step.note = "ret_xfer";
+    } else if (st.saw_ret) {
+      step.note = "ret";
+    } else if (st.hit) {
+      step.note = "xfer";
+    } else {
+      step.note = "stall";
+    }
+    tr.steps.push_back(step);
+
+    if (i == 0) {
+      tr.initial_vip = st.vip;
+    }
+    if (st.key) tr.rolling_key = st.key;
+
+    if (st.saw_ret && !st.hit) break;
+
+    if (!st.hit) {
+
+      if (auto nxt = static_next_handler(st.cs, image, cur)) {
+        tr.steps.back().next_handler = *nxt;
+        tr.steps.back().note = "stall_recover";
+        soft_stalls++;
+        if (soft_stalls > 32) break;
+
+        cur = *nxt;
+        uc_reg_write(st.uc, UC_X86_REG_RIP, &cur);
+        continue;
+      }
+      break;
+    }
+    soft_stalls = 0;
+    cur = st.next;
+    uc_reg_write(st.uc, UC_X86_REG_RIP, &cur);
+  }
+
+  uc_close(st.uc);
+  cs_close(&st.cs);
+  return tr;
+}
+
+std::string format_vip_trace_text(const VipTrace& tr) {
+  std::ostringstream oss;
+  oss << "; vip trace\n";
+  oss << "; seed=" << tr.seed.note;
+  if (tr.seed.enc_push_imm) oss << " push_imm=0x" << std::hex << *tr.seed.enc_push_imm;
+  if (tr.seed.movabs_imm) oss << " movabs=0x" << std::hex << *tr.seed.movabs_imm;
+  oss << std::dec << "\n";
+  if (tr.initial_vip) oss << "; initial_vip=" << hex_u64(tr.initial_vip) << "\n";
+  if (tr.rolling_key) oss << "; key_candidate=" << hex_u64(tr.rolling_key) << "\n";
+  oss << "; steps=" << tr.steps.size() << "\n\n";
+
+  for (std::size_t i = 0; i < tr.steps.size(); i++) {
+    const auto& s = tr.steps[i];
+    oss << "VOP_" << i << ":\n";
+    oss << "  handler  " << hex_u64(s.handler_va) << "\n";
+    if (s.vip) {
+      oss << "  vip      " << hex_u64(s.vip);
+      if (!s.vip_reg.empty()) oss << " (" << s.vip_reg << ")";
+      oss << "\n";
+      oss << "  fetch    0x" << std::hex << s.fetched_enc << std::dec << "  ; enc dword @ vip\n";
+    }
+    if (s.next_handler) oss << "  next     " << hex_u64(*s.next_handler) << "\n";
+    if (!s.note.empty()) oss << "  ; " << s.note << "\n";
+    oss << "\n";
+  }
+  return oss.str();
+}
+
+}
+
+```
+
+`vip_context.hpp`:
+
+```hpp
+#pragma once
+
+#include "pe_image.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+struct VipSeed {
+  std::optional<std::uint32_t> enc_push_imm;
+  std::optional<std::uint64_t> movabs_imm;
+  std::string movabs_reg;
+  std::uint64_t image_high = 0;
+  std::string note;
+};
+
+struct VipStep {
+  std::uint64_t handler_va = 0;
+  std::uint64_t vip = 0;
+  std::uint32_t fetched_enc = 0;
+  std::optional<std::uint64_t> next_handler;
+  std::string vip_reg;
+  std::string key_reg;
+  std::string note;
+};
+
+struct VipTrace {
+  VipSeed seed;
+  std::vector<VipStep> steps;
+  std::uint64_t initial_vip = 0;
+  std::uint64_t rolling_key = 0;
+  bool seeded = false;
+};
+
+VipSeed extract_vip_seed(const PeImage& image, std::uint64_t vmenter_va);
+
+VipTrace unicorn_vip_trace(const PeImage& image, std::uint64_t start_va,
+                           std::size_t max_handlers = 64, std::size_t max_insns_each = 2048);
+
+std::string format_vip_trace_text(const VipTrace& tr);
+
+}
+
+```
+
+`vm_types.hpp`:
+
+```hpp
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+struct RawInsn {
+  std::uint64_t va = 0;
+  std::string mnemonic;
+  std::string op_str;
+  std::uint8_t bytes[16]{};
+  std::size_t size = 0;
+  bool is_branch = false;
+  bool is_call = false;
+  bool is_ret = false;
+  bool is_reg_branch = false;
+  bool has_imm = false;
+  bool rip_rel = false;
+  std::uint64_t branch_target = 0;
+  std::uint64_t lea_target = 0;
+  std::int64_t imm = 0;
+  std::string branch_reg;
+};
+
+struct HandlerBlock {
+  std::uint64_t entry_va = 0;
+  std::vector<RawInsn> insns;
+  std::optional<std::uint64_t> next_handler_va;
+  std::vector<std::uint64_t> branch_targets;
+  bool is_exit = false;
+  std::string stop_reason;
+};
+
+struct WalkResult {
+  std::uint64_t start_va = 0;
+  std::vector<HandlerBlock> handlers;
+  std::size_t truncated = 0;
+};
+
+}
+
+```
+
+`vmenter.cpp`:
+
+```cpp
+#include "vmenter.hpp"
+
+#include "util.hpp"
+
+#include <capstone/capstone.h>
+#include <capstone/x86.h>
+
+#include <algorithm>
+#include <set>
+#include <string>
+
+namespace vmp {
+
+namespace {
+
+bool looks_like_push_imm(const std::vector<std::uint8_t>& b) {
+  if (b.size() < 2) {
+    return false;
+  }
+  if (b[0] == 0x6A) {
+    return true;
+  }
+  return b[0] == 0x68;
+}
+
+bool looks_like_pushfq(const std::vector<std::uint8_t>& b) {
+  return b.size() >= 1 && b[0] == 0x9C;
+}
+
+bool looks_like_push_reg_fq(const std::vector<std::uint8_t>& b) {
+  return b.size() >= 2 && b[0] >= 0x50 && b[0] <= 0x57 && b[1] == 0x9C;
+}
+
+}
+
+VmenterScanner::VmenterScanner(const PeImage& image) : image_(image) {}
+
+bool VmenterScanner::is_likely_code_va(std::uint64_t va) const {
+  if (!image_.contains_va(va)) {
+    return false;
+  }
+  auto bytes = image_.read_at_va(va, 16);
+  if (bytes.empty()) {
+    return false;
+  }
+  int ok = 0;
+  for (auto b : bytes) {
+    if (b != 0x00 && b != 0xCC && b != 0x90) {
+      ok++;
+    }
+  }
+  return ok >= 4;
+}
+
+bool VmenterScanner::looks_like_vmp_region(std::uint64_t va) const {
+  auto* sec = image_.section_for_va(va);
+  if (!sec) {
+    return false;
+  }
+  return is_vmp_section_name(sec->name) || sec->name == ".text";
+}
+
+int VmenterScanner::score_prologue(std::uint64_t va) const {
+
+  auto bytes = image_.read_at_va(va, 96);
+  if (bytes.size() < 8) {
+    return 0;
+  }
+
+  csh cs{};
+  if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK) {
+    return 0;
+  }
+  cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+
+  cs_insn* ins = nullptr;
+  auto n = cs_disasm(cs, bytes.data(), bytes.size(), va, 16, &ins);
+  int score = 0;
+  int pushes = 0;
+  bool saw_fq = false;
+  bool saw_xfer = false;
+
+  for (std::size_t i = 0; i < n; i++) {
+    std::string m = ins[i].mnemonic;
+    if (m == "push") {
+      pushes++;
+      score += 4;
+    } else if (m == "pushfq") {
+      saw_fq = true;
+      score += 12;
+    } else if (m == "mov" || m == "lea") {
+      score += 2;
+    } else if (m == "jmp" || m == "call") {
+      saw_xfer = true;
+      if (ins[i].detail && ins[i].detail->x86.op_count >= 1) {
+        const auto& op = ins[i].detail->x86.operands[0];
+        if (op.type == X86_OP_IMM && looks_like_vmp_region(static_cast<std::uint64_t>(op.imm))) {
+          score += 25;
+        } else if (op.type == X86_OP_REG) {
+          score += 8;
+        }
+      }
+      break;
+    } else if (m == "ret" || m == "int3" || m == "ud2") {
+      score -= 20;
+      break;
+    } else if (m == "nop") {
+      score -= 1;
+    }
+  }
+
+  if (pushes >= 4 && saw_fq) {
+    score += 15;
+  } else if (pushes >= 2 && saw_fq) {
+    score += 8;
+  }
+  if (!saw_xfer && pushes < 2) {
+    score = score / 2;
+  }
+
+  cs_free(ins, n);
+  cs_close(&cs);
+  if (score < 0) {
+    score = 0;
+  }
+  if (score > 100) {
+    score = 100;
+  }
+  return score;
+}
+
+std::optional<std::uint64_t> VmenterScanner::follow_code_stub(std::uint64_t va,
+                                                              std::size_t max_insns) const {
+  auto bytes = image_.read_at_va(va, 64);
+  if (bytes.size() < 5) {
+    return std::nullopt;
+  }
+
+  csh cs{};
+  if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK) {
+    return std::nullopt;
+  }
+  cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+
+  cs_insn* ins = nullptr;
+  auto n = cs_disasm(cs, bytes.data(), bytes.size(), va, max_insns, &ins);
+  std::optional<std::uint64_t> jmp_target;
+  for (std::size_t i = 0; i < n; i++) {
+    std::string m = ins[i].mnemonic;
+    if (m == "jmp" && ins[i].detail && ins[i].detail->x86.op_count >= 1) {
+      const auto& op = ins[i].detail->x86.operands[0];
+      if (op.type == X86_OP_IMM) {
+        jmp_target = static_cast<std::uint64_t>(op.imm);
+        break;
+      }
+    }
+
+    if (m == "call" || m == "ret" || m == "pushfq") {
+      break;
+    }
+  }
+  cs_free(ins, n);
+  cs_close(&cs);
+  return jmp_target;
+}
+
+std::optional<VmenterSite> VmenterScanner::probe_entry(std::uint64_t va, VmenterKind kind,
+                                                       const std::string& source,
+                                                       int confidence) const {
+  if (!is_likely_code_va(va)) {
+    return std::nullopt;
+  }
+  VmenterSite site;
+  site.va = va;
+  site.rva = image_.va_to_rva(va).value_or(0);
+  site.kind = kind;
+  site.source = source;
+  site.confidence = confidence;
+
+  if (auto tgt = follow_code_stub(va, 8)) {
+    if (looks_like_vmp_region(*tgt)) {
+      site.first_handler_va = *tgt;
+    }
+  }
+  return site;
+}
+
+std::vector<VmenterSite> VmenterScanner::scan_exports() const {
+  std::vector<VmenterSite> out;
+  for (const auto& [name, rva] : image_.named_exports()) {
+    auto export_va = image_.image_base() + rva;
+    auto target = follow_code_stub(export_va);
+    if (!target) {
+
+      if (looks_like_vmp_region(export_va) && score_prologue(export_va) >= 20) {
+        target = export_va;
+      } else {
+        continue;
+      }
+    }
+    if (!looks_like_vmp_region(*target)) {
+      continue;
+    }
+    int conf = 90 + std::min(8, score_prologue(*target) / 12);
+    auto site = probe_entry(*target, VmenterKind::ExportStubJump, "export:" + name, conf);
+    if (site) {
+      site->first_handler_va = *target;
+      out.push_back(*site);
+    }
+  }
+  return out;
+}
+
+std::vector<VmenterSite> VmenterScanner::scan_entry_point() const {
+  std::vector<VmenterSite> out;
+  auto ep = image_.image_base() + image_.entry_point_rva();
+  if (!image_.contains_va(ep)) {
+    return out;
+  }
+
+  std::uint64_t cur = ep;
+  for (int hop = 0; hop < 4; hop++) {
+    if (looks_like_vmp_region(cur)) {
+      int sc = score_prologue(cur);
+
+      int conf = 0;
+      if (sc >= 40) {
+        conf = 88 + std::min(10, sc / 10);
+      } else if (sc >= 20) {
+        conf = 50 + sc / 4;
+      } else {
+        conf = std::min(35, sc);
+      }
+      auto site = probe_entry(cur, VmenterKind::EntryPoint,
+                              hop == 0 ? "entry" : "entry:hop" + std::to_string(hop), conf);
+      if (site) {
+        out.push_back(*site);
+      }
+      break;
+    }
+    auto next = follow_code_stub(cur);
+    if (!next || *next == cur) {
+      break;
+    }
+    cur = *next;
+  }
+  return out;
+}
+
+std::vector<VmenterSite> VmenterScanner::scan_vmp_sections() const {
+  std::vector<VmenterSite> out;
+  std::set<std::uint64_t> seen;
+
+  auto add_site = [&](std::uint64_t va, VmenterKind kind, const std::string& src, int conf) {
+    if (!seen.insert(va).second) return;
+    if (auto s = probe_entry(va, kind, src, conf)) out.push_back(*s);
+  };
+
+
+  for (const auto& sec : image_.sections()) {
+    if (!is_vmp_section_name(sec.name) && sec.name != ".text") continue;
+    auto start = image_.image_base() + sec.virtual_address;
+    auto scan_sz = sec.raw_size ? sec.raw_size : sec.virtual_size;
+    if (scan_sz > 0x400000) scan_sz = 0x400000;
+    auto chunk = image_.read_at_va(start, static_cast<std::size_t>(scan_sz));
+    if (chunk.size() < 10) continue;
+
+    for (std::size_t i = 0; i + 10 < chunk.size(); i++) {
+      if (chunk[i] != 0x68 || chunk[i + 5] != 0xE8) continue;
+      auto va = start + i;
+      auto rel = static_cast<std::int32_t>(chunk[i + 6] | (chunk[i + 7] << 8) |
+                                           (chunk[i + 8] << 16) | (chunk[i + 9] << 24));
+      auto call_va = va + 5;
+      auto stub = static_cast<std::uint64_t>(static_cast<std::int64_t>(call_va + 5) + rel);
+      if (!image_.contains_va(stub) || !looks_like_vmp_region(stub)) continue;
+      int stub_sc = score_prologue(stub);
+      if (stub_sc < 40) continue;
+      int conf = 88 + std::min(10, stub_sc / 10);
+      if (conf > 98) conf = 98;
+      add_site(va, VmenterKind::PushCallEnter, sec.name + ":push+call", conf);
+    }
+  }
+
+  {
+    auto ep = image_.image_base() + image_.entry_point_rva();
+
+    for (const auto& sec : image_.sections()) {
+      if (sec.name != ".text") continue;
+      auto start = image_.image_base() + sec.virtual_address;
+      auto chunk = image_.read_at_va(start, std::min<std::uint32_t>(sec.raw_size ? sec.raw_size : 0x2000, 0x2000));
+      csh cs{};
+      if (cs_open(CS_ARCH_X86, CS_MODE_64, &cs) != CS_ERR_OK) break;
+      cs_option(cs, CS_OPT_DETAIL, CS_OPT_ON);
+      cs_insn* ins = nullptr;
+      auto n = cs_disasm(cs, chunk.data(), chunk.size(), start, 64, &ins);
+      for (std::size_t i = 0; i < n; i++) {
+        std::string m = ins[i].mnemonic;
+        if ((m != "jmp" && m != "call") || !ins[i].detail) continue;
+        const auto& op = ins[i].detail->x86.operands[0];
+        if (op.type != X86_OP_IMM) continue;
+        auto t = static_cast<std::uint64_t>(op.imm);
+        auto b = image_.read_at_va(t, 10);
+        if (b.size() < 10 || b[0] != 0x68 || b[5] != 0xE8) continue;
+        add_site(t, VmenterKind::PushCallEnter, ".text:jmp->push+call", 96);
+      }
+      cs_free(ins, n);
+      cs_close(&cs);
+      (void)ep;
+    }
+  }
+
+  for (const auto& sec : image_.sections()) {
+    if (!is_vmp_section_name(sec.name) && sec.name != ".text") {
+      continue;
+    }
+    auto start = image_.image_base() + sec.virtual_address;
+    auto scan_sz = sec.raw_size ? sec.raw_size : sec.virtual_size;
+    if (sec.name == ".text") {
+      if (scan_sz > 0x20000) {
+        scan_sz = 0x20000;
+      }
+    } else if (scan_sz > 0x400000) {
+      scan_sz = 0x400000;
+    }
+
+    auto chunk = image_.read_at_va(start, static_cast<std::size_t>(scan_sz));
+    if (chunk.size() < 16) {
+      continue;
+    }
+
+    for (std::size_t i = 0; i + 16 < chunk.size(); i += 16) {
+      auto va = start + i;
+      if (seen.count(va)) continue;
+
+      std::vector<std::uint8_t> win(chunk.begin() + static_cast<std::ptrdiff_t>(i),
+                                    chunk.begin() + static_cast<std::ptrdiff_t>(i + 16));
+
+      int base = 0;
+      VmenterKind kind = VmenterKind::ClassicPushImm;
+      std::string src = sec.name;
+
+      if (looks_like_push_reg_fq(win)) {
+        base = 55;
+        kind = VmenterKind::PushFqMovAbs;
+        src += ":push+fq";
+      } else if (looks_like_pushfq(win)) {
+        base = 50;
+        kind = VmenterKind::PushFqMovAbs;
+      } else if (looks_like_push_imm(win)) {
+
+        base = 55;
+        kind = VmenterKind::ClassicPushImm;
+        src += ":push_imm";
+      } else {
+        continue;
+      }
+
+      int sc = score_prologue(va);
+      if (sc < 25) {
+        continue;
+      }
+      int conf = base + std::min(25, sc / 3);
+      if (conf > 82) {
+        conf = 82;
+      }
+
+      add_site(va, kind, src, conf);
+    }
+  }
+
+  std::sort(out.begin(), out.end(), [](const VmenterSite& a, const VmenterSite& b) {
+    if (a.confidence != b.confidence) {
+      return a.confidence > b.confidence;
+    }
+    return a.va < b.va;
+  });
+  if (out.size() > 180) {
+    out.resize(180);
+  }
+  return out;
+}
+
+std::vector<VmenterSite> VmenterScanner::scan_all() const {
+  std::vector<VmenterSite> all;
+  std::set<std::uint64_t> dedupe;
+
+  auto merge = [&](const std::vector<VmenterSite>& batch) {
+    for (const auto& s : batch) {
+      auto key = s.va & ~0xFULL;
+      if (dedupe.insert(key).second) {
+        all.push_back(s);
+      }
+    }
+  };
+
+  merge(scan_exports());
+  merge(scan_entry_point());
+  merge(scan_vmp_sections());
+
+  std::sort(all.begin(), all.end(), [](const VmenterSite& a, const VmenterSite& b) {
+    if (a.confidence != b.confidence) {
+      return a.confidence > b.confidence;
+    }
+
+    auto rank = [](VmenterKind k) {
+      switch (k) {
+        case VmenterKind::ExportStubJump:
+          return 0;
+        case VmenterKind::EntryPoint:
+          return 1;
+        default:
+          return 2;
+      }
+    };
+    if (rank(a.kind) != rank(b.kind)) {
+      return rank(a.kind) < rank(b.kind);
+    }
+    return a.va < b.va;
+  });
+  return all;
+}
+
+std::optional<std::uint64_t> VmenterScanner::pick_best(const std::vector<VmenterSite>& sites) {
+  if (sites.empty()) {
+    return std::nullopt;
+  }
+
+  for (const auto& s : sites) {
+    if (s.kind == VmenterKind::ExportStubJump && s.confidence >= 88) {
+      return s.va;
+    }
+  }
+
+  for (const auto& s : sites) {
+    if (s.kind == VmenterKind::PushCallEnter && s.confidence >= 85) {
+      return s.va;
+    }
+  }
+
+  for (const auto& s : sites) {
+    if (s.kind != VmenterKind::EntryPoint && s.confidence >= 60 &&
+        (s.source.find("push") != std::string::npos || s.source.find("fq") != std::string::npos ||
+         s.confidence >= 68)) {
+      return s.va;
+    }
+  }
+
+  for (const auto& s : sites) {
+    if (s.kind == VmenterKind::EntryPoint && s.confidence >= 85) {
+      return s.va;
+    }
+  }
+
+  for (const auto& s : sites) {
+    if (s.confidence >= 88) {
+      return s.va;
+    }
+  }
+
+  return sites.front().va;
+}
+
+}
+
+```
+
+`vmenter.hpp`:
+
+```hpp
+#pragma once
+
+#include "pe_image.hpp"
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vmp {
+
+enum class VmenterKind {
+  ClassicPushImm,
+  PushFqMovAbs,
+  ExportStubJump,
+  EntryPoint,
+  CallSetup,
+  PushCallEnter,
+};
+
+struct VmenterSite {
+  std::uint64_t va = 0;
+  std::uint64_t rva = 0;
+  VmenterKind kind = VmenterKind::ClassicPushImm;
+  std::string source;
+  int confidence = 0;
+  std::uint64_t first_handler_va = 0;
+};
+
+class VmenterScanner {
+public:
+  explicit VmenterScanner(const PeImage& image);
+
+  std::vector<VmenterSite> scan_all() const;
+  std::vector<VmenterSite> scan_exports() const;
+  std::vector<VmenterSite> scan_entry_point() const;
+  std::vector<VmenterSite> scan_vmp_sections() const;
+
+  static std::optional<std::uint64_t> pick_best(const std::vector<VmenterSite>& sites);
+
+private:
+  const PeImage& image_;
+
+  bool is_likely_code_va(std::uint64_t va) const;
+  bool looks_like_vmp_region(std::uint64_t va) const;
+  int score_prologue(std::uint64_t va) const;
+
+  std::optional<VmenterSite> probe_entry(std::uint64_t va, VmenterKind kind,
+                                         const std::string& source, int confidence) const;
+  std::optional<std::uint64_t> follow_code_stub(std::uint64_t va, std::size_t max_insns = 12) const;
+};
+
+}
+
+```
+
+`vmp_version.cpp`:
+
+```cpp
+#include "util.hpp"
+#include "vmp_version.hpp"
+
+namespace vmp {
+
+VersionInfo detect_version(const PeImage& image) {
+  VersionInfo info;
+  bool vmp0 = false;
+  bool vmp1 = false;
+  bool weird_sections = false;
+
+  for (const auto& sec : image.sections()) {
+    if (sec.name == ".vmp0") {
+      vmp0 = true;
+      info.vmp_sections.push_back(sec.name);
+    } else if (sec.name == ".vmp1") {
+      vmp1 = true;
+      info.vmp_sections.push_back(sec.name);
+    } else if (is_vmp_section_name(sec.name)) {
+      info.vmp_sections.push_back(sec.name);
+      if (sec.name != ".vmp0" && sec.name != ".vmp1" && sec.name != ".vmp2") {
+        weird_sections = true;
+      }
+    }
+  }
+
+  info.randomized_sections = weird_sections;
+
+  if (vmp0 && vmp1) {
+    info.version = VmpVersion::Vmp35;
+    info.label = "VMProtect 3.5.x";
+    info.uses_rolling_key = true;
+    info.has_merged_handlers = false;
+    return info;
+  }
+
+  if (vmp0 || vmp1) {
+    info.version = VmpVersion::Vmp36;
+    info.label = "VMProtect 3.6.x";
+    info.uses_rolling_key = true;
+    info.has_merged_handlers = true;
+    return info;
+  }
+
+  if (weird_sections || !info.vmp_sections.empty()) {
+    info.version = VmpVersion::Vmp38Plus;
+
+    info.label = "VMProtect 3.8-3.10+ (merged handlers)";
+    info.uses_rolling_key = true;
+    info.has_merged_handlers = true;
+    return info;
+  }
+
+  if (!info.vmp_sections.empty()) {
+    info.version = VmpVersion::Vmp30;
+    info.label = "VMProtect 3.0-3.4";
+    return info;
+  }
+
+  info.version = VmpVersion::Unknown;
+  info.label = "Unknown / unpacked";
+  return info;
+}
+
+}
+
+```
+
+`vmp_version.hpp`:
+
+```hpp
+#pragma once
+
+#include "pe_image.hpp"
+
+namespace vmp {
+
+enum class VmpVersion {
+  Unknown,
+  Vmp30,
+  Vmp35,
+  Vmp36,
+  Vmp38Plus,
+};
+
+struct VersionInfo {
+  VmpVersion version = VmpVersion::Unknown;
+  std::string label;
+  bool has_merged_handlers = false;
+  bool uses_rolling_key = false;
+  bool randomized_sections = false;
+  std::vector<std::string> vmp_sections;
+};
+
+VersionInfo detect_version(const PeImage& image);
+
+}
+
+```

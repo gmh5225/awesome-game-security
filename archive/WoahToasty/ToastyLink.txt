@@ -1,0 +1,5232 @@
+Project Path: arc_WoahToasty_ToastyLink_sluz8wen
+
+Source Tree:
+
+```txt
+arc_WoahToasty_ToastyLink_sluz8wen
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── include
+│   └── ToastyLink
+│       ├── AddressResolver.h
+│       ├── Assembler.h
+│       ├── ConsoleBook.h
+│       ├── Discovery.h
+│       ├── FreezeEngine.h
+│       ├── HexUtils.h
+│       ├── Json.h
+│       ├── MemoryScanner.h
+│       ├── PatchEngine.h
+│       ├── Shell.h
+│       ├── Socket.h
+│       ├── TypedValue.h
+│       ├── ValueScanner.h
+│       ├── Version.h
+│       └── XbdmClient.h
+├── src
+│   ├── AddressResolver.cpp
+│   ├── Assembler.cpp
+│   ├── ConsoleBook.cpp
+│   ├── Discovery.cpp
+│   ├── FreezeEngine.cpp
+│   ├── HexUtils.cpp
+│   ├── Json.cpp
+│   ├── MemoryScanner.cpp
+│   ├── PatchEngine.cpp
+│   ├── Shell.cpp
+│   ├── Socket.cpp
+│   ├── TypedValue.cpp
+│   ├── ValueScanner.cpp
+│   ├── XbdmClient.cpp
+│   └── main.cpp
+└── tests
+    ├── mock_xbdm.py
+    └── run_tests.py
+
+```
+
+`CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.15)
+project(ToastyLink VERSION 0.3.1 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+find_package(Threads REQUIRED)
+
+add_executable(toastylink
+    src/main.cpp
+    src/Socket.cpp
+    src/XbdmClient.cpp
+    src/HexUtils.cpp
+    src/MemoryScanner.cpp
+    src/Shell.cpp
+    src/TypedValue.cpp
+    src/AddressResolver.cpp
+    src/ValueScanner.cpp
+    src/Json.cpp
+    src/FreezeEngine.cpp
+    src/ConsoleBook.cpp
+    src/Discovery.cpp
+    src/Assembler.cpp
+    src/PatchEngine.cpp
+)
+
+target_include_directories(toastylink PRIVATE include)
+
+target_link_libraries(toastylink PRIVATE Threads::Threads)
+
+if(WIN32)
+    target_link_libraries(toastylink PRIVATE ws2_32)
+endif()
+
+# GCC before 9 ships std::filesystem in a separate archive.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+    target_link_libraries(toastylink PRIVATE stdc++fs)
+endif()
+
+if(MSVC)
+    target_compile_options(toastylink PRIVATE /W4)
+else()
+    target_compile_options(toastylink PRIVATE -Wall -Wextra)
+endif()
+
+install(TARGETS toastylink RUNTIME DESTINATION bin)
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 woahtoasty
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# ToastyLink
+
+A from-scratch C++17 **trainer and debug toolkit** for **XBDM** (Xbox Debug
+Monitor), the network control/debug protocol exposed by Xbox 360 kernels
+and dashboards that have debugging enabled. On a softmodded console
+(RGH/JTAG running a custom dashboard such as Aurora, Freestyle Dash, or
+XeXMenu with Dashlaunch) this is the same class of protocol tools like
+Xbox 360 Neighborhood or Cheat Engine 360 talk to — ToastyLink implements
+the wire protocol itself, in plain C++, with no third-party SDK.
+
+It's built around the workflow the RGH/JTAG community actually uses day to
+day: find an address, make sure it survives a reboot, freeze it, share the
+result.
+
+- **Typed, endian-correct memory access** — `read`/`write` for i8 through
+  f64, handled explicitly for Xenon's big-endian PowerPC byte order (the
+  #1 source of silent bugs when a little-endian PC talks to it)
+- **Pointer chains** — `base,off1,off2,...` resolves live against the
+  console, so an address survives game restarts instead of rotting the
+  moment ASLR-free-but-dynamic allocations move
+- **Cheat Engine-style progressive value scanning** (`vscan`) — first
+  scan captures every candidate matching a value/type over a range, then
+  each `vscan next changed|unchanged|increased|decreased|exact` re-reads
+  and narrows the set, exactly how you find an unknown health/ammo/
+  currency address by playing between scans
+- **A real freeze/trainer engine** (`freeze`) — named entries with a
+  literal address or pointer chain, continuously rewritten by a
+  background thread, saved and loaded as small **JSON cheat-table files**
+  you can hand to someone else running ToastyLink, or auto-saved/loaded
+  under a name derived from whatever title is currently running
+  (`freeze autosave` / `freeze autoload`)
+- **Toggleable code patches with a tiny built-in PPC/Xenon assembler**
+  (`patch`, `asm`) — install writes new bytes at an address and remembers
+  the originals so it can be reverted exactly; `asm` hand-assembles
+  `nop`/`blr`/`b`/`bl`/`li` so common patches (skip a check, redirect a
+  call) don't need an external toolchain
+- **AOB (array-of-bytes) pattern scanning** with wildcards, over a range
+  or the whole mapped address space
+- **LAN console discovery** (`discover`) — probes a subnet for anything
+  answering on the XBDM port so you don't have to go find the console's
+  IP yourself
+- Module/thread/memory-region listing, filesystem browsing
+  (`dirlist`/`mkdir`/`delete`), best-effort on-screen `notify`, a live
+  `watch` view for one value, and a console address book so you can
+  `connect myrgh` instead of memorizing an IP
+- Batch scripting (`--script file.txt`) so a whole setup — attach,
+  resolve pointers, load a cheat table, start freezing — is one command
+- Raw XBDM passthrough for anything without a dedicated wrapper — the
+  protocol framing is correct regardless of which command you send
+
+No game-specific memory offsets ship in the code. Offsets are
+build-specific and go stale the moment a title updates, so instead of a
+pile of addresses that would rot on day one, ToastyLink gives you the
+primitives — `scan`, `vscan`, pointer chains — to find and pin down your
+own, and a file format (the cheat table) to save and share what you find.
+
+## Status — please read before trusting it with your console
+
+The code builds clean (zero warnings at `/W4 /permissive-`, MSVC/GCC/Clang)
+and every feature is exercised by an automated test suite against a
+**mock XBDM server** that emulates the protocol, including realistic
+awkwardness like capping how much a single `getmem` returns and reporting
+unmapped bytes.
+
+**It has not yet been tested against a physical Xbox 360.** That's the
+honest limitation: the mock encodes my understanding of the protocol, so
+if that understanding is wrong somewhere, the mock agrees with the client
+and the tests pass anyway. The framing (status lines, multiline bodies,
+the `.` terminator) is well documented and I'm confident in it; exact
+parameter spelling for individual commands is the part most likely to
+differ on real hardware.
+
+If something doesn't work on your console, `raw <command>` prints the
+console's exact reply — that's the fastest way to see what your XBDM
+build actually expects, and it makes for a great bug report. Reads are
+harmless; be deliberate with `setmem`, `patch`, and `freeze`, which write
+to a running title.
+
+## Why this exists
+
+Most public XBDM tooling is old, closed-source, C#/.NET, or bundled into
+a much larger GUI app, and almost none of it does progressive value
+scanning or pointer-chain freezing without a much heavier Cheat Engine
+setup on top. ToastyLink is a small, readable, single-purpose C++
+implementation of the protocol *and* the trainer workflow on top of it —
+useful on its own, and as a reference for anyone writing their own Xbox
+360 tooling.
+
+## Requirements
+
+- A Windows, Linux, or macOS machine on the same network as the console
+- An Xbox 360 with a softmod (RGH or JTAG) running a dashboard with XBDM
+  enabled (e.g. Dashlaunch's `xbdm` hook), **or** a devkit-mode console.
+  XBDM listens on **TCP port 730** by default.
+- A C++17 compiler + CMake 3.15+ to build. Uses `std::thread`/
+  `std::filesystem` from the standard library only — no external
+  dependencies.
+
+## Building
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+This produces `toastylink` (or `toastylink.exe` on Windows) in `build/`.
+Tested with MSVC (Visual Studio 2022 toolset) on Windows; it also builds
+clean with GCC/Clang on Linux/macOS.
+
+### Running the tests
+
+No console required — the suite drives the real binary against a mock
+XBDM server over a real socket (Python 3, no packages needed):
+
+```bash
+python tests/run_tests.py build/toastylink
+```
+
+86 checks covering exact round-trips for every value type at its
+boundaries, pointer-chain resolution, scan correctness across chunk
+boundaries, the patch lifecycle, the freeze engine actually holding a
+value against a competing write, and every assembler encoding. Each suite
+runs three times against different `getmem` size caps, because a console
+capping a single read is exactly the condition that hides chunking bugs.
+
+## Usage
+
+```bash
+# Interactive shell
+toastylink 192.168.1.50
+
+# One-shot: run a single command and exit
+toastylink 192.168.1.50 -- dbgname
+
+# Batch: run every line of a script and exit
+toastylink 192.168.1.50 --script trainer.txt
+
+# Nicknames saved with 'consoles add' work anywhere an IP does
+toastylink myrgh -- dbgname
+```
+
+### Quick tour: find the console, then find and freeze a value
+
+```
+toastylink> discover 192.168.1
+scanning 192.168.1.1-254 on port 730...
+1 console(s) found:
+  192.168.1.50  (201- connected)
+tip: 'connect 192.168.1.50' or 'consoles add <name> 192.168.1.50'
+```
+
+```
+toastylink> vscan new i32 0x82000000 0x200000 exact 100
+scanning 0x82000000 + 0x00200000 as i32...
+414 candidate(s). Play/change the value, then run 'vscan next ...'.
+
+(take damage in-game, so the value is no longer 100)
+
+toastylink> vscan next changed
+6 candidate(s) remaining.
+
+(take damage again)
+
+toastylink> vscan next decreased
+1 candidate(s) remaining.
+
+toastylink> vscan list
+0x82045a10 = 73
+1 of 1 candidate(s) shown
+
+toastylink> freeze add health i32 0x82045a10 100
+added
+toastylink> freeze start
+freeze engine started (interval 200ms)
+```
+
+That address will move next time you restart the game. To pin it down
+with a pointer chain instead (so it survives restarts), walk backwards
+from a module's static data with a memory-analysis tool of your choice,
+then use the chain directly:
+
+```
+toastylink> read i32 0x82000100,0x18,0x4
+0x820abcd0 = 100
+toastylink> freeze add health i32 0x82000100,0x18,0x4 100
+```
+
+`base,off1,off2,...`: `base` is the address of the first pointer; each
+offset reads the pointer at the current address and adds the offset,
+producing the next address to dereference (or, on the last offset, the
+final target address).
+
+Once you're happy with a set of frozen values, `freeze autosave` writes it
+under a name derived from the running title (its name plus its main
+module's checksum/timestamp), so `freeze autoload` on a later session
+picks it back up automatically without you tracking a filename.
+
+### Quick tour: patching code instead of freezing a value
+
+Freezing rewrites a value forever; sometimes you'd rather patch the
+instruction that checks it once, so nothing has to keep re-writing it.
+`asm` hand-assembles the handful of PowerPC instructions this comes up
+for constantly:
+
+```
+toastylink> asm nop
+60000000
+toastylink> asm b 0x82001000 0x82001010
+48000010
+```
+
+`patch install` reads and remembers the original bytes before writing, so
+`patch revert` restores them exactly:
+
+```
+toastylink> patch install skipcheck 0x82001000 asm nop
+installed (60000000)
+toastylink> patch list
+[on]  skipcheck  addr=0x82001000  new=60000000  orig=7C0802A6
+toastylink> patch revert skipcheck
+ok
+toastylink> patch reinstall skipcheck
+ok
+toastylink> patch save mytitle_patches.json
+saved
+```
+
+`patch install <name> <addr> asm b <target>` / `bl <target>` compute the
+branch relative to `<addr>` (where the patch itself lives) automatically.
+`patch load` never re-applies patches by itself — call `patch reinstall
+<name>` for each one you actually want live, so loading a file is never a
+silent write.
+
+### Command reference
+
+| Command | Description |
+|---|---|
+| `discover <subnet-prefix>` | Find XBDM consoles on your LAN, e.g. `discover 192.168.1` |
+| `connect <ip\|nickname> [port]` | Disconnect and connect to a different console |
+| `consoles add/list/rm` | Manage the saved console address book |
+| `dbgname` | Show the console's debug name |
+| `modules` | List loaded modules (name, base, size) |
+| `threads` | List running thread IDs |
+| `walkmem` | List mapped memory regions |
+| `xbeinfo` | Info about the currently running title |
+| `reboot [title\|cold]` | Reboot the console |
+| `getmem <addr> <len>` | Read raw bytes; unmapped bytes print as `??` |
+| `setmem <addr> <hexbytes>` | Write raw bytes |
+| `read <type> <addr>` | Typed read; `<addr>` may be a pointer chain |
+| `write <type> <addr> <value>` | Typed write; `<addr>` may be a pointer chain |
+| `watch <type> <addr> [count] [ms]` | Repeatedly re-read a value (default 20x @ 500ms) |
+| `scan <addr> <len> <pattern>` | AOB scan a range, e.g. `scan 0x82000000 0x10000 48 65 ?? 6F` |
+| `scanall <pattern>` | AOB scan every mapped region |
+| `vscan new/next/list/reset` | Progressive value scan (see above) |
+| `freeze add/rm/enable/disable/list/start/stop/save/load/autosave/autoload` | Trainer engine (see above) |
+| `asm nop\|blr\|b\|bl\|li` | Hand-assemble one PPC instruction, print its bytes |
+| `patch install/revert/reinstall/rm/list/save/load` | Toggleable code patches (see above) |
+| `dirlist <path>` (alias `ls`) | Browse a drive/directory |
+| `mkdir <path>` | Create a directory |
+| `delete <path> [dir]` (alias `rm`) | Delete a file or directory |
+| `notify <text>` | Best-effort on-screen popup |
+| `sleep <ms>` | Pause (useful in scripts) |
+| `raw <xbdm command...>` | Send any raw XBDM command, print the reply verbatim |
+| `help` | List commands |
+| `quit` / `exit` | Disconnect and exit |
+
+Types for `read`/`write`/`vscan`/`freeze`: `i8 u8 i16 u16 i32 u32 i64 u64
+f32 f64`. Anything not in the table above is forwarded to the console as
+a raw XBDM command automatically.
+
+### Cheat tables
+
+`freeze save mytitle.json` writes every entry as JSON:
+
+```json
+[
+  {
+    "name": "health",
+    "address": "0x82000100,0x18,0x4",
+    "type": "i32",
+    "value": "100",
+    "enabled": true
+  }
+]
+```
+
+`freeze load mytitle.json` reads it back (merging by name). This is a
+plain text format anyone can hand-edit or generate — a shareable trainer
+definition for a given title that anyone running ToastyLink can load.
+
+### Batch scripts
+
+`toastylink <console> --script setup.txt` runs one shell command per
+non-empty line (lines starting with `#` are comments) — the same commands
+you'd type interactively, so a whole session (connect, load a cheat
+table, start freezing) is reproducible as one file.
+
+## How it works
+
+- **`Socket`** — a small blocking TCP wrapper (Winsock on Windows, BSD
+  sockets elsewhere) with a buffered line reader.
+- **`XbdmClient`** — implements XBDM's line-oriented framing: a command is
+  one CRLF-terminated line; the reply starts with a `<code>- <message>`
+  status line, and a `2xx` "multiline" reply is followed by additional
+  lines up to a terminating `.` line. Thread-safe (internally
+  mutex-guarded) so the freeze engine's background thread and the shell
+  can share one connection without corrupting the protocol stream.
+  `SendCommand()` is exposed directly for any command without a
+  dedicated wrapper.
+- **`TypedValue`** — packs/unpacks `i8..f64` to/from Xenon's big-endian
+  wire format by hand (bit shifts, not `memcpy`), so it's correct
+  regardless of the host machine's own endianness.
+- **`AddressResolver`** — resolves `base,off1,off2,...` pointer chains
+  live against the console.
+- **`MemoryScanner`** — chunked, overlap-aware AOB scanning.
+- **`ValueScanner`** — progressive value scanning; re-reads on `vscan
+  next` are batched by merging nearby candidate addresses into single
+  bulk reads rather than one round trip per address.
+- **`FreezeEngine`** — a background `std::thread` that re-resolves each
+  entry's address (so pointer chains keep working across the target
+  moving) and rewrites its value on an interval; entries persist as JSON
+  via a small hand-rolled parser/writer (`Json.h`/`.cpp`, no external
+  dependency).
+- **`ConsoleBook`** — a JSON-backed nickname → IP/port address book, and
+  the base directory for auto-saved cheat tables.
+- **`Assembler`** — hand-assembles `nop`/`blr`/`b`/`bl`/`li` using the
+  fixed PowerPC ISA encodings; branch displacements outside the 24-bit
+  (+/-32MB) field are rejected rather than silently truncated.
+- **`PatchEngine`** — install/revert/reinstall for named byte patches;
+  reads and stores the original bytes before ever writing, so a patch is
+  always exactly reversible. Persists as JSON like cheat tables, but
+  never re-applies a loaded patch automatically.
+- **`Discovery`** — probes TCP port 730 across a subnet with a bounded
+  per-host timeout (via a non-blocking connect + `select`, not the OS's
+  much longer default TCP timeout) across a small thread pool, and
+  reports any host that answers with an XBDM-shaped greeting line. Not a
+  protocol-specific broadcast discovery scheme — there's no XBDM
+  discovery packet format this project could implement with confidence,
+  so it does the honest equivalent instead: a banner probe.
+- **`Shell`** — the REPL / one-shot / batch-script command dispatcher.
+
+## Scope and intent
+
+This is offline/homebrew tooling for **your own** console: memory
+inspection, trainers, and debugging against a devkit or a private
+RGH/JTAG box, playable offline or in private lobbies. It talks to
+nothing but the IP address you give it, and file get/put (bulk transfer
+of files to/from the console's filesystem) is intentionally not
+implemented — that command's binary framing varies enough between XBDM
+implementations that shipping a guessed version risked silently
+corrupting the exact file you're trying to deploy. `dirlist`/`mkdir`/
+`delete` (all plain text protocol, well-documented) are implemented; for
+anything else filesystem-related, `raw` gets you there to inspect the
+exact reply your console's XBDM sends before relying on it.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+```
+
+`include/ToastyLink/AddressResolver.h`:
+
+```h
+// Resolves address expressions: either a plain literal address, or a
+// CE-style pointer path "base,off1,off2,..." that gets re-resolved live
+// against the console every time it's used. Pointer paths matter because
+// raw addresses shift between game sessions/reboots, but a pointer chain
+// rooted at a stable base (a module's static data, typically) tends to
+// stay valid across restarts.
+//
+// Semantics of "base,off1,off2,...,offN": `base` is the address OF the
+// first pointer (i.e. the console holds a 32-bit pointer value AT that
+// address). For each offset in turn: read a 32-bit big-endian pointer at
+// the current address, add the offset, and that sum becomes either the
+// next address to dereference (if more offsets follow) or the final
+// resolved address (for the last offset). A single token with no commas
+// is just a literal address and is never dereferenced.
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+
+namespace tl {
+
+class XbdmClient;
+
+// Returns the resolved address, or nullopt with *err set on failure
+// (malformed expression, or a pointer in the chain pointing at unmapped
+// memory).
+std::optional<uint64_t> ResolveAddress(XbdmClient& client, const std::string& expr,
+                                        std::string* err = nullptr);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/Assembler.h`:
+
+```h
+// A tiny hand-rolled assembler for the handful of PowerPC/Xenon
+// instructions that come up constantly when patching Xbox 360 title code:
+// nop, blr, unconditional branch (with or without link), and load-
+// immediate. These encodings are fixed by the PowerPC ISA (not build- or
+// title-specific), so unlike memory offsets there's nothing here that can
+// go stale -- the risk with a wrong branch offset is a crash, so out-of-
+// range offsets are rejected rather than silently truncated.
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace tl {
+
+// A 4-byte NOP ("ori r0,r0,0"): 0x60000000.
+std::vector<uint8_t> AssembleNop();
+
+// "blr" (branch to link register, used to return early from a function): 0x4E800020.
+std::vector<uint8_t> AssembleBlr();
+
+// Unconditional relative branch from `fromAddr` to `targetAddr`. `link`
+// selects `b`/`bl` (sets the LK bit, so the return address is saved --
+// use this to call out to injected code and return). Fails if the
+// displacement doesn't fit in the 24-bit (+/-32MB) branch field.
+std::optional<std::vector<uint8_t>> AssembleBranch(uint64_t fromAddr, uint64_t targetAddr, bool link,
+                                                     std::string* err = nullptr);
+
+// "li rD, value" (load a 16-bit signed immediate into rD; pseudo-op for
+// "addi rD,0,value"). Fails if reg is out of [0,31] or value doesn't fit
+// in a signed/unsigned 16-bit field.
+std::optional<std::vector<uint8_t>> AssembleLoadImmediate(int reg, int64_t value, std::string* err = nullptr);
+
+// Parses a small assembly snippet -- one of "nop", "blr", "b <target>",
+// "bl <target>", "li <reg> <value>" -- into its encoded bytes. `atAddr` is
+// the address the resulting instruction will be placed at (used as the
+// branch source for b/bl). Returns nullopt and sets *err on a syntax
+// error or an out-of-range operand.
+std::optional<std::vector<uint8_t>> AssembleLine(const std::vector<std::string>& tokens, uint64_t atAddr,
+                                                   std::string* err = nullptr);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/ConsoleBook.h`:
+
+```h
+// A tiny address book mapping a nickname to a console's IP/port, stored as
+// JSON in the user's home directory. Lets you type `toastylink myrgh`
+// instead of memorizing an IP, and is the natural place to remember every
+// console you've ever connected to on a LAN with more than one.
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace tl {
+
+struct ConsoleEntry {
+    std::string name;
+    std::string host;
+    uint16_t port = 730;
+};
+
+class ConsoleBook {
+public:
+    ConsoleBook() = default;
+
+    bool Load(const std::string& path, std::string* err = nullptr);
+    bool Save(const std::string& path) const;
+
+    void Upsert(const ConsoleEntry& entry);
+    bool Remove(const std::string& name);
+    std::optional<ConsoleEntry> Find(const std::string& name) const;
+    const std::vector<ConsoleEntry>& All() const { return m_entries; }
+
+    // ~/.toastylink/consoles.json (or %USERPROFILE%\.toastylink\consoles.json
+    // on Windows); created on first Save() if missing.
+    static std::string DefaultPath();
+
+    // ~/.toastylink (or %USERPROFILE%\.toastylink on Windows) -- the base
+    // directory DefaultPath() lives in, also used for saved cheat/patch
+    // tables (see Shell's `freeze autosave`/`patch autosave`).
+    static std::string ConfigDir();
+
+private:
+    std::vector<ConsoleEntry> m_entries;
+};
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/Discovery.h`:
+
+```h
+// LAN discovery for XBDM-speaking consoles. There's no reliable, well-
+// documented UDP broadcast discovery packet for XBDM that this project can
+// implement with confidence, so instead of guessing at one, this probes
+// TCP port 730 directly across a subnet -- any host that answers with an
+// XBDM-style greeting line is almost certainly a debug-enabled Xbox 360.
+// This is plain application-level banner probing (like a targeted nmap
+// -p730 sweep of your own LAN), not a protocol-specific discovery scheme.
+#pragma once
+
+#include <cstdint>
+#include <functional>
+#include <string>
+#include <vector>
+
+namespace tl {
+
+struct DiscoveredConsole {
+    std::string host;
+    std::string greeting;
+};
+
+using DiscoveryProgressFn = std::function<void(int scanned, int total)>;
+
+// Probes <subnetPrefix>.1 through <subnetPrefix>.254 (e.g. "192.168.1") on
+// `port`, using `concurrency` worker threads and a per-host connect+read
+// budget of `timeoutMs`. Returns every host that answered with something
+// that looks like an XBDM greeting.
+std::vector<DiscoveredConsole> DiscoverConsoles(const std::string& subnetPrefix, uint16_t port = 730,
+                                                 int timeoutMs = 300, int concurrency = 64,
+                                                 const DiscoveryProgressFn& progress = nullptr);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/FreezeEngine.h`:
+
+```h
+// A small trainer engine: named "cheat" entries (an address expression --
+// literal or pointer chain, see AddressResolver -- a value type, and a
+// value to hold) that a background thread continuously rewrites at a
+// fixed interval, the classic "freeze" behaviour from Cheat Engine-style
+// tools. Entries can be saved/loaded as a JSON "cheat table" file, so a
+// trainer for a given title can be written once and shared with anyone
+// else running ToastyLink.
+#pragma once
+
+#include <atomic>
+#include <cstdint>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include "ToastyLink/TypedValue.h"
+
+namespace tl {
+
+class XbdmClient;
+
+struct FreezeEntry {
+    std::string name;
+    std::string addressExpr; // literal address or "base,off1,off2,..." pointer chain
+    ValueType type = ValueType::I32;
+    TypedValue value;
+    bool enabled = true;
+    std::string lastStatus; // most recent write result, for `freeze list`
+};
+
+class FreezeEngine {
+public:
+    explicit FreezeEngine(XbdmClient& client) : m_client(client) {}
+    ~FreezeEngine();
+
+    FreezeEngine(const FreezeEngine&) = delete;
+    FreezeEngine& operator=(const FreezeEngine&) = delete;
+
+    bool Add(const FreezeEntry& entry);           // false if name already exists
+    bool Remove(const std::string& name);
+    bool SetEnabled(const std::string& name, bool enabled);
+    void SetAllEnabled(bool enabled);
+    std::vector<FreezeEntry> List() const;
+
+    void Start(int intervalMs = 200); // no-op if already running
+    void Stop();
+    bool IsRunning() const { return m_running.load(); }
+
+    bool SaveToFile(const std::string& path) const;
+    bool LoadFromFile(const std::string& path, std::string* err); // appends/replaces by name
+
+private:
+    XbdmClient& m_client;
+    mutable std::mutex m_mutex;
+    std::vector<FreezeEntry> m_entries;
+
+    std::thread m_thread;
+    std::atomic<bool> m_running{false};
+    std::atomic<bool> m_stopRequested{false};
+    int m_intervalMs = 200;
+
+    void ThreadMain();
+};
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/HexUtils.h`:
+
+```h
+// Small hex/byte-pattern helpers shared by the XBDM client and the memory
+// scanner. No dependency on XBDM specifics — pure text/byte manipulation.
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace tl {
+
+// One byte of a search pattern: either a concrete value to match, or a
+// wildcard ("??") that matches anything.
+struct PatternByte {
+    uint8_t value = 0;
+    bool wildcard = false;
+};
+
+// Formats bytes as a contiguous uppercase hex string, e.g. {0xDE,0xAD} -> "DEAD".
+std::string BytesToHex(const std::vector<uint8_t>& bytes);
+
+// Parses a contiguous hex string ("DEADBEEF" or "de ad be ef") into bytes.
+// Returns std::nullopt if the string contains an odd number of hex digits
+// or non-hex characters (other than whitespace, which is ignored).
+std::optional<std::vector<uint8_t>> HexToBytes(const std::string& hex);
+
+// Parses a space-separated byte pattern where each token is either a two
+// hex-digit byte ("4D") or a wildcard ("??" or "?"). Example:
+//   "48 65 ?? ?? 6F" matches 'H' 'e' <any> <any> 'o'.
+std::optional<std::vector<PatternByte>> ParsePattern(const std::string& pattern);
+
+// Parses a hex or decimal integer address/length, accepting an optional
+// "0x"/"0X" prefix. Returns std::nullopt on malformed input.
+std::optional<uint64_t> ParseIntArg(const std::string& text);
+
+// Formats an address consistently as "0xXXXXXXXX" (8 hex digits, more if
+// the value needs them).
+std::string FormatAddress(uint64_t addr);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/Json.h`:
+
+```h
+// A small, dependency-free JSON reader/writer. Not a general-purpose
+// library -- just enough (objects, arrays, strings, numbers, bools, null,
+// basic escapes) to read and write ToastyLink's own config files (freeze
+// cheat-table files, the console address book) in a format any text
+// editor or other tool can also produce and consume.
+#pragma once
+
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace tl {
+
+class JsonValue {
+public:
+    enum class Kind { Null, Bool, Number, String, Array, Object };
+
+    Kind kind = Kind::Null;
+    bool boolVal = false;
+    double numVal = 0.0;
+    std::string strVal;
+    std::vector<JsonValue> arrVal;
+    std::vector<std::pair<std::string, JsonValue>> objVal; // insertion order preserved
+
+    static JsonValue MakeObject();
+    static JsonValue MakeArray();
+    static JsonValue MakeString(const std::string& s);
+    static JsonValue MakeNumber(double n);
+    static JsonValue MakeBool(bool b);
+
+    void Set(const std::string& key, JsonValue v); // object only; replaces existing key
+    const JsonValue* Find(const std::string& key) const; // object only; nullptr if absent
+
+    std::optional<std::string> AsString() const;
+    std::optional<double> AsNumber() const;
+    std::optional<bool> AsBool() const;
+
+    std::string Dump(int indent = 0) const;
+};
+
+// Parses a full JSON document. Returns nullopt and sets *err on failure.
+std::optional<JsonValue> ParseJson(const std::string& text, std::string* err = nullptr);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/MemoryScanner.h`:
+
+```h
+// Byte-pattern (AOB) and value scanning over a live XBDM connection.
+// Built entirely on top of XbdmClient::GetMemory()/WalkMemory(), so its
+// correctness does not depend on any game- or build-specific assumptions.
+#pragma once
+
+#include <cstdint>
+#include <functional>
+#include <vector>
+
+#include "ToastyLink/HexUtils.h"
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+// Called periodically during a scan with (bytesScanned, bytesTotal) so a
+// caller can render progress. May be null.
+using ScanProgressFn = std::function<void(uint64_t scanned, uint64_t total)>;
+
+class MemoryScanner {
+public:
+    explicit MemoryScanner(XbdmClient& client) : m_client(client) {}
+
+    // Scans [start, start+length) for `pattern`, reading memory in
+    // chunks. Returns every address where the pattern matched. Regions
+    // reported as unmapped by the console are skipped without aborting
+    // the scan.
+    std::vector<uint64_t> ScanRange(uint64_t start, uint64_t length,
+                                     const std::vector<PatternByte>& pattern,
+                                     const ScanProgressFn& progress = nullptr,
+                                     uint32_t chunkSize = 0x10000);
+
+    // Scans every writable/readable region reported by "walkmem". Useful
+    // when the caller doesn't know a specific address range to target.
+    std::vector<uint64_t> ScanAllRegions(const std::vector<PatternByte>& pattern,
+                                          const ScanProgressFn& progress = nullptr,
+                                          uint32_t chunkSize = 0x10000);
+
+private:
+    XbdmClient& m_client;
+};
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/PatchEngine.h`:
+
+```h
+// Named, revertible byte patches -- the code-patching counterpart to
+// FreezeEngine's memory freezing. Installing a patch reads and remembers
+// the original bytes at the target address before overwriting them, so it
+// can be reverted exactly, and toggled back on without needing to
+// re-derive the new bytes. Patch sets save/load as JSON, same as cheat
+// tables, so a title's patch set (remove a check, redirect a call, ...)
+// can be shared.
+#pragma once
+
+#include <cstdint>
+#include <mutex>
+#include <string>
+#include <vector>
+
+namespace tl {
+
+class XbdmClient;
+
+struct PatchEntry {
+    std::string name;
+    uint64_t address = 0;
+    std::vector<uint8_t> originalBytes; // captured at install time
+    std::vector<uint8_t> newBytes;
+    bool installed = false; // true if newBytes is currently the live content at address
+};
+
+class PatchEngine {
+public:
+    explicit PatchEngine(XbdmClient& client) : m_client(client) {}
+
+    // Reads len(newBytes) original bytes at `address` (fails if any are
+    // unmapped or a patch with this name already exists), stores them,
+    // then writes newBytes. The entry is left installed=true.
+    bool Install(const std::string& name, uint64_t address, const std::vector<uint8_t>& newBytes,
+                 std::string* err = nullptr);
+
+    // Writes the saved original bytes back, leaving the entry loaded but
+    // installed=false so it can be re-applied later with Reinstall().
+    bool Revert(const std::string& name, std::string* err = nullptr);
+
+    // Re-writes newBytes for an entry that was previously reverted (or
+    // loaded from a file), without re-reading "original" bytes again.
+    bool Reinstall(const std::string& name, std::string* err = nullptr);
+
+    // Reverts (if installed) and forgets the entry entirely.
+    bool Remove(const std::string& name);
+
+    std::vector<PatchEntry> List() const;
+
+    bool SaveToFile(const std::string& path) const;
+    // Loaded entries are always marked installed=false regardless of the
+    // saved state -- loading a file never writes to the console by
+    // itself; call Reinstall() explicitly for each entry you want applied.
+    bool LoadFromFile(const std::string& path, std::string* err = nullptr);
+
+private:
+    XbdmClient& m_client;
+    mutable std::mutex m_mutex;
+    std::vector<PatchEntry> m_entries;
+
+    PatchEntry* Find(const std::string& name); // caller must hold m_mutex
+};
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/Shell.h`:
+
+```h
+// Interactive REPL and single-shot/batch command dispatcher. Owns the
+// higher-level engines (value scanner, freeze/trainer engine, console
+// address book) that sit on top of the raw XbdmClient connection.
+#pragma once
+
+#include <string>
+#include <vector>
+
+#include "ToastyLink/ConsoleBook.h"
+#include "ToastyLink/FreezeEngine.h"
+#include "ToastyLink/PatchEngine.h"
+#include "ToastyLink/ValueScanner.h"
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+class Shell {
+public:
+    explicit Shell(XbdmClient& client);
+
+    // Runs one command (already split into tokens) and prints its result.
+    // Returns false only for the "quit"/"exit" command, signalling the
+    // caller to stop.
+    bool Dispatch(const std::vector<std::string>& tokens);
+
+    void Run();                                  // interactive loop
+    void RunScript(const std::string& path);      // batch mode: one command per line
+
+private:
+    XbdmClient& m_client;
+    ValueScanner m_scanner;
+    FreezeEngine m_freeze;
+    PatchEngine m_patch;
+    ConsoleBook m_consoleBook;
+
+    std::string TitleFingerprint(); // stable-ish filename-safe id for the running title
+
+    void PrintHelp() const;
+    void CmdRaw(const std::vector<std::string>& tokens);
+    void CmdDbgName();
+    void CmdModules();
+    void CmdThreads();
+    void CmdWalkMem();
+    void CmdGetMem(const std::vector<std::string>& tokens);
+    void CmdSetMem(const std::vector<std::string>& tokens);
+    void CmdXbeInfo();
+    void CmdReboot(const std::vector<std::string>& tokens);
+    void CmdScan(const std::vector<std::string>& tokens);
+    void CmdScanAll(const std::vector<std::string>& tokens);
+
+    void CmdRead(const std::vector<std::string>& tokens);
+    void CmdWrite(const std::vector<std::string>& tokens);
+
+    void CmdVScan(const std::vector<std::string>& tokens);
+    void CmdFreeze(const std::vector<std::string>& tokens);
+
+    void CmdDirList(const std::vector<std::string>& tokens);
+    void CmdDelete(const std::vector<std::string>& tokens);
+    void CmdMkdir(const std::vector<std::string>& tokens);
+    void CmdNotify(const std::vector<std::string>& tokens);
+
+    void CmdConsoles(const std::vector<std::string>& tokens);
+    void CmdConnect(const std::vector<std::string>& tokens);
+    void CmdSleep(const std::vector<std::string>& tokens);
+    void CmdDiscover(const std::vector<std::string>& tokens);
+    void CmdAsm(const std::vector<std::string>& tokens);
+    void CmdPatch(const std::vector<std::string>& tokens);
+    void CmdWatch(const std::vector<std::string>& tokens);
+};
+
+std::vector<std::string> Tokenize(const std::string& line);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/Socket.h`:
+
+```h
+// Minimal cross-platform blocking TCP socket wrapper.
+#pragma once
+
+#include <cstdint>
+#include <string>
+
+namespace tl {
+
+class TcpSocket {
+public:
+    TcpSocket();
+    ~TcpSocket();
+
+    TcpSocket(const TcpSocket&) = delete;
+    TcpSocket& operator=(const TcpSocket&) = delete;
+
+    // Resolves host and connects. Returns true on success; on failure,
+    // errorOut (if non-null) receives a human-readable message.
+    bool Connect(const std::string& host, uint16_t port, std::string* errorOut = nullptr);
+
+    // Like Connect(), but bounded to timeoutMs regardless of the OS's own
+    // (often much longer) TCP connect timeout. Used for LAN discovery,
+    // where most addresses probed have nothing listening and a normal
+    // connect() can otherwise take many seconds to fail.
+    bool ConnectWithTimeout(const std::string& host, uint16_t port, int timeoutMs,
+                             std::string* errorOut = nullptr);
+
+    // Bounds subsequent RecvSome()/ReadLine() calls to timeoutMs; a timed
+    // out read returns as if the connection had errored (RecvSome() < 0).
+    void SetReceiveTimeout(int timeoutMs);
+
+    void Close();
+    bool IsOpen() const { return m_open; }
+
+    // Sends the entire buffer, looping on partial writes. Returns false on
+    // any socket error.
+    bool SendAll(const void* data, size_t len);
+    bool SendString(const std::string& s);
+
+    // Reads up to bufLen bytes into buf. Returns the number of bytes read,
+    // 0 on orderly shutdown, or -1 on error.
+    int RecvSome(void* buf, size_t bufLen);
+
+    // Buffered line reader used by the XBDM text protocol. Reads until a
+    // '\n' is seen, strips a trailing '\r\n' or '\n', and returns true.
+    // Returns false if the connection closed or errored before a full
+    // line was available.
+    bool ReadLine(std::string& outLine);
+
+private:
+    // Platform socket handle. On Windows this is a SOCKET (unsigned
+    // pointer-sized type); on POSIX it is a plain int file descriptor.
+    // Stored as intptr_t so this header stays free of platform includes.
+    intptr_t m_fd;
+    bool m_open;
+    std::string m_recvBuf; // leftover bytes after the last full line
+};
+
+// Must be called once before any sockets are used, and ShutdownSockets()
+// once at program exit. On POSIX these are no-ops.
+bool InitSockets(std::string* errorOut = nullptr);
+void ShutdownSockets();
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/TypedValue.h`:
+
+```h
+// Typed memory values with explicit big-endian (Xenon/PowerPC) wire-format
+// handling. The host running this tool is virtually always little-endian
+// (x86/x64/ARM64), so every conversion here is written by hand with shifts
+// rather than memcpy-ing across the address space -- that's the #1 source
+// of silent bugs when talking to a big-endian console from a little-endian
+// PC, so it gets done in exactly one place.
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace tl {
+
+class XbdmClient;
+
+enum class ValueType { I8, U8, I16, U16, I32, U32, I64, U64, F32, F64 };
+
+size_t ValueTypeSize(ValueType t);
+const char* ValueTypeName(ValueType t);
+std::optional<ValueType> ParseValueType(const std::string& s);
+
+// A value in Xenon wire format: exactly ValueTypeSize(type) bytes, stored
+// big-endian, independent of host endianness.
+struct TypedValue {
+    ValueType type = ValueType::I32;
+    std::vector<uint8_t> bytes;
+
+    bool IsFloat() const { return type == ValueType::F32 || type == ValueType::F64; }
+    bool IsSigned() const;
+
+    // Exact integer views. Only meaningful for integer types -- never
+    // route a 64-bit integer through AsDouble(), which has a 53-bit
+    // mantissa and silently mangles large values.
+    int64_t AsInt64() const;
+    uint64_t AsUInt64() const;
+
+    double AsDouble() const;       // float interpretation (exact only for F32/F64)
+    std::string ToString() const;  // human-readable decimal/float text
+    bool EqualsBytes(const TypedValue& other) const;
+};
+
+// Three-way compare of two same-typed values: -1 / 0 / +1. Integer types
+// are compared exactly (no double round-trip); float types compare as
+// doubles. Returns 0 if the types differ.
+int CompareTypedValues(const TypedValue& a, const TypedValue& b);
+
+// Parses human-entered text ("123", "-5", "3.14") into a big-endian
+// TypedValue of the given type. Returns nullopt if out of range or
+// unparsable.
+std::optional<TypedValue> ParseTypedValue(ValueType type, const std::string& text);
+
+// Wraps raw big-endian bytes (as already read from the console) into a
+// TypedValue. Returns nullopt if beBytes.size() != ValueTypeSize(type).
+std::optional<TypedValue> TypedValueFromBigEndianBytes(ValueType type,
+                                                        const std::vector<uint8_t>& beBytes);
+
+// Convenience typed read/write built on XbdmClient::GetMemory/SetMemory.
+// ReadTyped fails (nullopt) if any byte of the value is reported unmapped.
+std::optional<TypedValue> ReadTyped(XbdmClient& client, uint64_t address, ValueType type);
+bool WriteTyped(XbdmClient& client, uint64_t address, const TypedValue& value);
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/ValueScanner.h`:
+
+```h
+// Progressive ("Cheat Engine style") value scanning: a first scan collects
+// every address matching a value/type over a range, then successive scans
+// filter that candidate set down by re-reading current values and keeping
+// only the ones matching a comparison mode (changed / unchanged / bigger /
+// smaller / a new exact value) -- the standard way to find an unknown
+// address (health, ammo, currency, ...) by playing the game between scans.
+#pragma once
+
+#include <cstdint>
+#include <functional>
+#include <optional>
+#include <vector>
+
+#include "ToastyLink/TypedValue.h"
+
+namespace tl {
+
+class XbdmClient;
+
+struct ScanCandidate {
+    uint64_t address = 0;
+    TypedValue value;
+};
+
+enum class NextScanMode { Changed, Unchanged, Increased, Decreased, Exact };
+
+using ScanProgressFn = std::function<void(uint64_t scanned, uint64_t total)>;
+
+class ValueScanner {
+public:
+    explicit ValueScanner(XbdmClient& client) : m_client(client) {}
+
+    // Starts a new scan: reads [start, start+length) and keeps every
+    // type-aligned (or every byte offset, if alignedOnly is false)
+    // position as a candidate, optionally filtered to those equal to
+    // `exactValue` if provided. Returns the number of candidates found.
+    size_t FirstScan(uint64_t start, uint64_t length, ValueType type,
+                      const std::optional<TypedValue>& exactValue, bool alignedOnly,
+                      const ScanProgressFn& progress = nullptr);
+
+    // Re-reads every current candidate's value and keeps only those
+    // matching `mode` (comparing against each candidate's previously
+    // stored value, or against `exactValue` for NextScanMode::Exact).
+    // Returns the number of candidates remaining.
+    size_t NextScan(NextScanMode mode, const std::optional<TypedValue>& exactValue = std::nullopt);
+
+    const std::vector<ScanCandidate>& Candidates() const { return m_candidates; }
+    size_t Count() const { return m_candidates.size(); }
+    bool HasScan() const { return m_hasScan; }
+    ValueType Type() const { return m_type; }
+    void Reset();
+
+private:
+    XbdmClient& m_client;
+    std::vector<ScanCandidate> m_candidates;
+    ValueType m_type = ValueType::I32;
+    bool m_hasScan = false;
+
+    // Re-reads the current value at each address as efficiently as
+    // possible by merging nearby addresses into single bulk reads. The
+    // result is aligned with `addresses`; an entry is nullopt if that
+    // address (or any byte of the value at it) is unmapped.
+    std::vector<std::optional<TypedValue>> ReadValuesAt(const std::vector<uint64_t>& addresses,
+                                                          ValueType type) const;
+};
+
+} // namespace tl
+
+```
+
+`include/ToastyLink/Version.h`:
+
+```h
+#pragma once
+
+namespace tl {
+inline constexpr const char* kVersion = "0.3.1";
+} // namespace tl
+
+```
+
+`include/ToastyLink/XbdmClient.h`:
+
+```h
+// XbdmClient implements the wire protocol spoken by XBDM (Xbox Debug
+// Monitor), the network debug/control service exposed by Xbox 360
+// dashboards/kernels that have debugging enabled -- which on RGH/JTAG
+// consoles means Dashlaunch (or an equivalent softmod) with the "xbdm"
+// plugin/hook loaded, or a devkit-mode kernel. Default port is 730.
+//
+// The protocol is a simple line-oriented text protocol:
+//   - The server greets a new connection with a single status line.
+//   - A command is a single CRLF-terminated ASCII line.
+//   - A response starts with a line "<code>- <message>\r\n" where <code>
+//     is a 3-digit status code. 2xx means success, 4xx/6xx mean failure.
+//   - If the message indicates a multiline response ("...follows"), the
+//     server sends additional lines until a line containing only "."
+//     which terminates the block.
+//
+// This class only implements the always-correct framing (connect, send
+// line, read status line, read multiline body up to the "."
+// terminator) plus thin convenience wrappers for the handful of commands
+// whose reply format is unambiguous and well documented. Anything else
+// can be issued with SendCommand() directly -- the framing is correct
+// regardless of which command you send, so the raw passthrough is always
+// usable even for commands this header doesn't wrap.
+#pragma once
+
+#include <cstdint>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "ToastyLink/Socket.h"
+
+namespace tl {
+
+struct XbdmResponse {
+    int code = 0;                    // e.g. 200, 202, 410
+    bool success = false;            // true if code is in [200, 299]
+    bool multiline = false;          // true if a body followed the status line
+    std::string statusLine;          // full first line, e.g. "200- OK"
+    std::string message;             // status line with the "CODE- " prefix stripped
+    std::vector<std::string> lines;  // body lines (multiline responses only)
+};
+
+// One entry from "getmem": either a concrete byte or an unmapped address
+// (XBDM reports unmapped/unreadable bytes as "??" rather than failing the
+// whole request).
+struct MemoryByte {
+    uint8_t value = 0;
+    bool mapped = true;
+};
+
+struct ModuleInfo {
+    std::string name;
+    uint64_t base = 0;
+    uint64_t size = 0;
+    uint64_t checksum = 0;
+    uint64_t timestamp = 0;
+    std::string raw; // original line, always populated
+};
+
+struct MemoryRegion {
+    uint64_t base = 0;
+    uint64_t size = 0;
+    uint32_t protect = 0;
+    std::string raw; // original line, always populated
+};
+
+struct DirEntry {
+    std::string name;
+    uint64_t size = 0;
+    bool isDirectory = false;
+    std::string raw; // original line, always populated
+};
+
+// XbdmClient is safe to call from multiple threads: every public method
+// that touches the socket or shared state takes an internal mutex, so a
+// background thread (e.g. FreezeEngine) and the interactive shell can
+// share one connection without corrupting the protocol stream. Each call
+// still fully owns the socket for the duration of its request/response
+// exchange, so calls from different threads are simply serialized, not
+// parallelized.
+class XbdmClient {
+public:
+    XbdmClient() = default;
+
+    // Connects to host:port and reads the initial greeting line. Returns
+    // true on success. On failure, LastError() explains why.
+    bool Connect(const std::string& host, uint16_t port = 730);
+    void Disconnect();
+    bool IsConnected() const;
+
+    std::string Greeting() const;
+    std::string LastError() const;
+
+    // Sends a raw command line and parses the response according to the
+    // framing rules described above. This is always safe to call with any
+    // command string -- it is the mechanism every higher-level method
+    // below is built on.
+    XbdmResponse SendCommand(const std::string& command);
+
+    // --- Convenience wrappers over well-documented commands ---------------
+
+    // "dbgname" -> the console's debug name.
+    std::optional<std::string> GetDebugName();
+
+    // "modules" -> loaded module list. Parsing is best-effort key=value
+    // extraction; ModuleInfo::raw always holds the untouched line so
+    // nothing is lost if a field isn't recognized.
+    std::optional<std::vector<ModuleInfo>> ListModules();
+
+    // "threads" -> list of thread IDs currently running in the title.
+    std::optional<std::vector<uint32_t>> ListThreads();
+
+    // "walkmem" -> enumerates mapped memory regions (address-space map).
+    std::optional<std::vector<MemoryRegion>> WalkMemory();
+
+    // "getmem addr=<hex> length=<n>" -> reads `length` bytes starting at
+    // `address`. Bytes XBDM reports as unmapped ("??") come back with
+    // MemoryByte::mapped == false and value == 0.
+    std::optional<std::vector<MemoryByte>> GetMemory(uint64_t address, uint32_t length);
+
+    // "setmem addr=<hex> data=<hex>" -> writes bytes at `address`. Returns
+    // true if the console reported success.
+    bool SetMemory(uint64_t address, const std::vector<uint8_t>& bytes);
+
+    // "xbeinfo running" -> raw multiline info about the currently running
+    // title (name=, launchpath=, etc. as reported by the console).
+    std::optional<std::vector<std::string>> GetRunningXbeInfo();
+
+    // "reboot" (optionally "reboot cold" / "reboot title" upstream can
+    // pass extra args) -> true if the console acknowledged the request.
+    bool Reboot(const std::string& mode = "");
+
+    // "dirlist name=\"<path>\"" -> directory listing. `path` should use
+    // Xbox-style drive syntax, e.g. "hdd:\\" or "usb0:\\Games".
+    std::optional<std::vector<DirEntry>> DirList(const std::string& path);
+
+    // "delete name=\"<path>\" [dir]" -> removes a file, or a directory if
+    // isDirectory is true. Returns true on success.
+    bool Delete(const std::string& path, bool isDirectory = false);
+
+    // "mkdir name=\"<path>\"" -> creates a directory.
+    bool MakeDirectory(const std::string& path);
+
+    // "notify text=\"<msg>\"" -> best-effort on-screen popup. Support
+    // varies by dashboard/kernel build; a false return usually just means
+    // the running dashboard doesn't implement it, not a connection problem.
+    bool Notify(const std::string& text);
+
+private:
+    mutable std::mutex m_mutex;
+    TcpSocket m_socket;
+    std::string m_greeting;
+    std::string m_lastError;
+
+    bool ReadStatusLine(XbdmResponse& resp);
+    void ReadMultilineBody(XbdmResponse& resp);
+};
+
+} // namespace tl
+
+```
+
+`src/AddressResolver.cpp`:
+
+```cpp
+#include "ToastyLink/AddressResolver.h"
+
+#include <cctype>
+#include <sstream>
+#include <vector>
+
+#include "ToastyLink/HexUtils.h"
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+namespace {
+
+// Splits on ',' WITHOUT discarding empty components, so a malformed
+// expression like "0x82000000," or "a,,b" surfaces as an empty component
+// the caller rejects. Silently dropping them would quietly demote a
+// mistyped pointer chain to a plain literal address -- the kind of
+// misinterpretation that writes to entirely the wrong memory.
+std::vector<std::string> SplitComma(const std::string& s) {
+    std::vector<std::string> out;
+    std::string cur;
+    for (char c : s) {
+        if (c == ',') {
+            out.push_back(cur);
+            cur.clear();
+        } else if (!std::isspace(static_cast<unsigned char>(c))) {
+            cur.push_back(c);
+        }
+    }
+    out.push_back(cur);
+    return out;
+}
+
+} // namespace
+
+std::optional<uint64_t> ResolveAddress(XbdmClient& client, const std::string& expr, std::string* err) {
+    std::vector<std::string> tokens = SplitComma(expr);
+    if (tokens.empty()) {
+        if (err) *err = "empty address expression";
+        return std::nullopt;
+    }
+
+    std::vector<uint64_t> values;
+    values.reserve(tokens.size());
+    for (auto& t : tokens) {
+        auto v = ParseIntArg(t);
+        if (!v) {
+            if (err) *err = "could not parse '" + t + "' as a number";
+            return std::nullopt;
+        }
+        values.push_back(*v);
+    }
+
+    if (values.size() == 1) return values[0];
+
+    uint64_t cursor = values[0];
+    for (size_t i = 1; i < values.size(); ++i) {
+        auto bytes = client.GetMemory(cursor, 4);
+        if (!bytes || bytes->size() != 4) {
+            if (err) *err = "failed to read pointer at " + FormatAddress(cursor) + " (" + client.LastError() + ")";
+            return std::nullopt;
+        }
+        for (auto& b : *bytes) {
+            if (!b.mapped) {
+                if (err) *err = "pointer at " + FormatAddress(cursor) + " is not mapped";
+                return std::nullopt;
+            }
+        }
+        uint32_t ptrVal = (static_cast<uint32_t>((*bytes)[0].value) << 24) |
+                           (static_cast<uint32_t>((*bytes)[1].value) << 16) |
+                           (static_cast<uint32_t>((*bytes)[2].value) << 8) |
+                           static_cast<uint32_t>((*bytes)[3].value);
+        cursor = static_cast<uint64_t>(ptrVal) + values[i];
+    }
+    return cursor;
+}
+
+} // namespace tl
+
+```
+
+`src/Assembler.cpp`:
+
+```cpp
+#include "ToastyLink/Assembler.h"
+
+#include "ToastyLink/HexUtils.h"
+
+namespace tl {
+
+namespace {
+
+std::vector<uint8_t> PackBE32(uint32_t v) {
+    return {static_cast<uint8_t>((v >> 24) & 0xFF), static_cast<uint8_t>((v >> 16) & 0xFF),
+            static_cast<uint8_t>((v >> 8) & 0xFF), static_cast<uint8_t>(v & 0xFF)};
+}
+
+// ParseIntArg (HexUtils) only accepts non-negative values, which is right
+// for addresses but not for li's signed immediate. This accepts an
+// optional leading '-' in addition to everything ParseIntArg supports.
+std::optional<int64_t> ParseSignedArg(const std::string& text) {
+    if (!text.empty() && text[0] == '-') {
+        auto mag = ParseIntArg(text.substr(1));
+        if (!mag) return std::nullopt;
+        return -static_cast<int64_t>(*mag);
+    }
+    auto v = ParseIntArg(text);
+    if (!v) return std::nullopt;
+    return static_cast<int64_t>(*v);
+}
+
+} // namespace
+
+std::vector<uint8_t> AssembleNop() { return PackBE32(0x60000000u); }
+
+std::vector<uint8_t> AssembleBlr() { return PackBE32(0x4E800020u); }
+
+std::optional<std::vector<uint8_t>> AssembleBranch(uint64_t fromAddr, uint64_t targetAddr, bool link,
+                                                     std::string* err) {
+    int64_t disp = static_cast<int64_t>(targetAddr) - static_cast<int64_t>(fromAddr);
+    if (disp % 4 != 0) {
+        if (err) *err = "branch displacement must be a multiple of 4 (unaligned target/source)";
+        return std::nullopt;
+    }
+    // LI field is 24 bits representing a word displacement, i.e. +/-32MB.
+    constexpr int64_t kMax = 0x01FFFFFF; // 0x02000000 - 1, matches the 26-bit signed byte range
+    constexpr int64_t kMin = -0x02000000;
+    if (disp > kMax || disp < kMin) {
+        if (err) *err = "branch target is out of range for a relative b/bl (+/-32MB)";
+        return std::nullopt;
+    }
+    uint32_t instr = 0x48000000u | (static_cast<uint32_t>(disp) & 0x03FFFFFCu);
+    if (link) instr |= 0x1u;
+    return PackBE32(instr);
+}
+
+std::optional<std::vector<uint8_t>> AssembleLoadImmediate(int reg, int64_t value, std::string* err) {
+    if (reg < 0 || reg > 31) {
+        if (err) *err = "register must be r0..r31";
+        return std::nullopt;
+    }
+    if (value < -32768 || value > 65535) {
+        if (err) *err = "li value must fit in 16 bits (-32768..65535)";
+        return std::nullopt;
+    }
+    uint32_t instr = 0x38000000u | (static_cast<uint32_t>(reg) << 21) | (static_cast<uint32_t>(value) & 0xFFFFu);
+    return PackBE32(instr);
+}
+
+std::optional<std::vector<uint8_t>> AssembleLine(const std::vector<std::string>& tokens, uint64_t atAddr,
+                                                   std::string* err) {
+    if (tokens.empty()) {
+        if (err) *err = "empty instruction";
+        return std::nullopt;
+    }
+    const std::string& op = tokens[0];
+
+    if (op == "nop") return AssembleNop();
+    if (op == "blr") return AssembleBlr();
+
+    if (op == "b" || op == "bl") {
+        if (tokens.size() < 2) {
+            if (err) *err = "usage: " + op + " <target>";
+            return std::nullopt;
+        }
+        auto target = ParseIntArg(tokens[1]);
+        if (!target) {
+            if (err) *err = "could not parse branch target";
+            return std::nullopt;
+        }
+        return AssembleBranch(atAddr, *target, op == "bl", err);
+    }
+
+    if (op == "li") {
+        if (tokens.size() < 3) {
+            if (err) *err = "usage: li <reg 0-31> <value>";
+            return std::nullopt;
+        }
+        auto reg = ParseIntArg(tokens[1]);
+        auto val = ParseSignedArg(tokens[2]);
+        if (!reg || !val) {
+            if (err) *err = "could not parse register/value";
+            return std::nullopt;
+        }
+        return AssembleLoadImmediate(static_cast<int>(*reg), *val, err);
+    }
+
+    if (err) *err = "unknown mnemonic '" + op + "' (supported: nop, blr, b, bl, li)";
+    return std::nullopt;
+}
+
+} // namespace tl
+
+```
+
+`src/ConsoleBook.cpp`:
+
+```cpp
+#include "ToastyLink/ConsoleBook.h"
+
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
+
+#include "ToastyLink/Json.h"
+
+namespace tl {
+
+bool ConsoleBook::Load(const std::string& path, std::string* err) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) {
+        // A missing address book is not an error -- it just means no
+        // consoles have been saved yet.
+        return true;
+    }
+    std::ostringstream ss;
+    ss << in.rdbuf();
+
+    std::string parseErr;
+    auto root = ParseJson(ss.str(), &parseErr);
+    if (!root || root->kind != JsonValue::Kind::Array) {
+        if (err) *err = "invalid console book JSON" + (parseErr.empty() ? "" : (": " + parseErr));
+        return false;
+    }
+
+    m_entries.clear();
+    for (auto& item : root->arrVal) {
+        if (item.kind != JsonValue::Kind::Object) continue;
+        auto name = item.Find("name");
+        auto host = item.Find("host");
+        auto port = item.Find("port");
+        if (!name || !host) continue;
+        ConsoleEntry e;
+        e.name = name->strVal;
+        e.host = host->strVal;
+        e.port = port ? static_cast<uint16_t>(port->numVal) : 730;
+        m_entries.push_back(std::move(e));
+    }
+    return true;
+}
+
+bool ConsoleBook::Save(const std::string& path) const {
+    std::filesystem::path p(path);
+    std::error_code ec;
+    if (p.has_parent_path()) std::filesystem::create_directories(p.parent_path(), ec);
+
+    JsonValue root = JsonValue::MakeArray();
+    for (auto& e : m_entries) {
+        JsonValue obj = JsonValue::MakeObject();
+        obj.Set("name", JsonValue::MakeString(e.name));
+        obj.Set("host", JsonValue::MakeString(e.host));
+        obj.Set("port", JsonValue::MakeNumber(e.port));
+        root.arrVal.push_back(std::move(obj));
+    }
+
+    std::ofstream out(path, std::ios::binary);
+    if (!out) return false;
+    out << root.Dump(0) << "\n";
+    return static_cast<bool>(out);
+}
+
+void ConsoleBook::Upsert(const ConsoleEntry& entry) {
+    for (auto& e : m_entries) {
+        if (e.name == entry.name) { e = entry; return; }
+    }
+    m_entries.push_back(entry);
+}
+
+bool ConsoleBook::Remove(const std::string& name) {
+    for (auto it = m_entries.begin(); it != m_entries.end(); ++it) {
+        if (it->name == name) { m_entries.erase(it); return true; }
+    }
+    return false;
+}
+
+std::optional<ConsoleEntry> ConsoleBook::Find(const std::string& name) const {
+    for (auto& e : m_entries) {
+        if (e.name == name) return e;
+    }
+    return std::nullopt;
+}
+
+namespace {
+// std::getenv is flagged by MSVC as "unsafe" (it recommends the
+// non-portable _dupenv_s instead); it's perfectly safe for a read-only
+// lookup of a well-known variable like this, so the warning is silenced
+// locally rather than dropping portability for one call.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+const char* GetEnvVar(const char* name) { return std::getenv(name); }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+} // namespace
+
+std::string ConsoleBook::ConfigDir() {
+    std::filesystem::path home;
+#ifdef _WIN32
+    const char* profile = GetEnvVar("USERPROFILE");
+    home = profile ? std::filesystem::path(profile) : std::filesystem::path(".");
+#else
+    const char* homeEnv = GetEnvVar("HOME");
+    home = homeEnv ? std::filesystem::path(homeEnv) : std::filesystem::path(".");
+#endif
+    return (home / ".toastylink").string();
+}
+
+std::string ConsoleBook::DefaultPath() {
+    return (std::filesystem::path(ConfigDir()) / "consoles.json").string();
+}
+
+} // namespace tl
+
+```
+
+`src/Discovery.cpp`:
+
+```cpp
+#include "ToastyLink/Discovery.h"
+
+#include <algorithm>
+#include <atomic>
+#include <cctype>
+#include <mutex>
+#include <thread>
+
+#include "ToastyLink/Socket.h"
+
+namespace tl {
+
+namespace {
+
+bool LooksLikeXbdmGreeting(const std::string& line) {
+    // Real greetings look like "201- connected". Require the "<digits>-"
+    // status-line shape so a stray banner from an unrelated service on
+    // port 730 doesn't get reported as a console.
+    size_t dash = line.find('-');
+    if (dash == std::string::npos || dash == 0) return false;
+    for (size_t i = 0; i < dash; ++i) {
+        if (!std::isdigit(static_cast<unsigned char>(line[i]))) return false;
+    }
+    return true;
+}
+
+} // namespace
+
+std::vector<DiscoveredConsole> DiscoverConsoles(const std::string& subnetPrefix, uint16_t port,
+                                                 int timeoutMs, int concurrency,
+                                                 const DiscoveryProgressFn& progress) {
+    std::vector<DiscoveredConsole> found;
+    std::mutex foundMutex;
+    std::atomic<int> nextHost{1};
+    std::atomic<int> scanned{0};
+    constexpr int kTotal = 254;
+
+    auto worker = [&]() {
+        for (;;) {
+            int host = nextHost.fetch_add(1);
+            if (host > kTotal) break;
+
+            std::string ip = subnetPrefix + "." + std::to_string(host);
+            TcpSocket sock;
+            if (sock.ConnectWithTimeout(ip, port, timeoutMs)) {
+                sock.SetReceiveTimeout(timeoutMs);
+                std::string line;
+                if (sock.ReadLine(line) && LooksLikeXbdmGreeting(line)) {
+                    std::lock_guard<std::mutex> lock(foundMutex);
+                    found.push_back({ip, line});
+                }
+                sock.Close();
+            }
+
+            int done = scanned.fetch_add(1) + 1;
+            if (progress) progress(done, kTotal);
+        }
+    };
+
+    int workerCount = std::max(1, std::min(concurrency, kTotal));
+    std::vector<std::thread> threads;
+    threads.reserve(static_cast<size_t>(workerCount));
+    for (int i = 0; i < workerCount; ++i) threads.emplace_back(worker);
+    for (auto& t : threads) t.join();
+
+    std::sort(found.begin(), found.end(),
+              [](const DiscoveredConsole& a, const DiscoveredConsole& b) { return a.host < b.host; });
+    return found;
+}
+
+} // namespace tl
+
+```
+
+`src/FreezeEngine.cpp`:
+
+```cpp
+#include "ToastyLink/FreezeEngine.h"
+
+#include <chrono>
+#include <fstream>
+#include <sstream>
+
+#include "ToastyLink/AddressResolver.h"
+#include "ToastyLink/HexUtils.h"
+#include "ToastyLink/Json.h"
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+FreezeEngine::~FreezeEngine() { Stop(); }
+
+bool FreezeEngine::Add(const FreezeEntry& entry) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& e : m_entries) {
+        if (e.name == entry.name) return false;
+    }
+    m_entries.push_back(entry);
+    return true;
+}
+
+bool FreezeEngine::Remove(const std::string& name) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto it = m_entries.begin(); it != m_entries.end(); ++it) {
+        if (it->name == name) {
+            m_entries.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FreezeEngine::SetEnabled(const std::string& name, bool enabled) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& e : m_entries) {
+        if (e.name == name) {
+            e.enabled = enabled;
+            return true;
+        }
+    }
+    return false;
+}
+
+void FreezeEngine::SetAllEnabled(bool enabled) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto& e : m_entries) e.enabled = enabled;
+}
+
+std::vector<FreezeEntry> FreezeEngine::List() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_entries;
+}
+
+void FreezeEngine::Start(int intervalMs) {
+    if (m_running.load()) return;
+    m_intervalMs = intervalMs > 0 ? intervalMs : 200;
+    m_stopRequested.store(false);
+    m_running.store(true);
+    m_thread = std::thread(&FreezeEngine::ThreadMain, this);
+}
+
+void FreezeEngine::Stop() {
+    if (!m_running.load()) return;
+    m_stopRequested.store(true);
+    if (m_thread.joinable()) m_thread.join();
+    m_running.store(false);
+}
+
+void FreezeEngine::ThreadMain() {
+    while (!m_stopRequested.load()) {
+        std::vector<FreezeEntry> snapshot;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            for (auto& e : m_entries) {
+                if (e.enabled) snapshot.push_back(e);
+            }
+        }
+
+        std::vector<std::pair<std::string, std::string>> results; // name -> status
+        for (auto& e : snapshot) {
+            std::string err;
+            auto addr = ResolveAddress(m_client, e.addressExpr, &err);
+            if (!addr) {
+                results.emplace_back(e.name, "error: " + err);
+                continue;
+            }
+            bool ok = WriteTyped(m_client, *addr, e.value);
+            results.emplace_back(e.name, ok ? "ok @ " + FormatAddress(*addr)
+                                             : "write failed @ " + FormatAddress(*addr));
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            for (auto& r : results) {
+                for (auto& e : m_entries) {
+                    if (e.name == r.first) { e.lastStatus = r.second; break; }
+                }
+            }
+        }
+
+        // Sleep in short slices so Stop() is responsive even with a long interval.
+        int remaining = m_intervalMs;
+        while (remaining > 0 && !m_stopRequested.load()) {
+            int slice = remaining < 50 ? remaining : 50;
+            std::this_thread::sleep_for(std::chrono::milliseconds(slice));
+            remaining -= slice;
+        }
+    }
+}
+
+bool FreezeEngine::SaveToFile(const std::string& path) const {
+    JsonValue root = JsonValue::MakeArray();
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (auto& e : m_entries) {
+            JsonValue obj = JsonValue::MakeObject();
+            obj.Set("name", JsonValue::MakeString(e.name));
+            obj.Set("address", JsonValue::MakeString(e.addressExpr));
+            obj.Set("type", JsonValue::MakeString(ValueTypeName(e.type)));
+            obj.Set("value", JsonValue::MakeString(e.value.ToString()));
+            obj.Set("enabled", JsonValue::MakeBool(e.enabled));
+            root.arrVal.push_back(std::move(obj));
+        }
+    }
+    std::ofstream out(path, std::ios::binary);
+    if (!out) return false;
+    out << root.Dump(0) << "\n";
+    return static_cast<bool>(out);
+}
+
+bool FreezeEngine::LoadFromFile(const std::string& path, std::string* err) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) {
+        if (err) *err = "could not open '" + path + "'";
+        return false;
+    }
+    std::ostringstream ss;
+    ss << in.rdbuf();
+
+    std::string parseErr;
+    auto root = ParseJson(ss.str(), &parseErr);
+    if (!root || root->kind != JsonValue::Kind::Array) {
+        if (err) *err = "invalid cheat table JSON" + (parseErr.empty() ? "" : (": " + parseErr));
+        return false;
+    }
+
+    for (auto& item : root->arrVal) {
+        if (item.kind != JsonValue::Kind::Object) continue;
+        auto name = item.Find("name");
+        auto address = item.Find("address");
+        auto typeStr = item.Find("type");
+        auto valueStr = item.Find("value");
+        auto enabled = item.Find("enabled");
+        if (!name || !address || !typeStr || !valueStr) continue;
+
+        auto type = ParseValueType(typeStr->strVal);
+        if (!type) continue;
+        auto value = ParseTypedValue(*type, valueStr->strVal);
+        if (!value) continue;
+
+        FreezeEntry e;
+        e.name = name->strVal;
+        e.addressExpr = address->strVal;
+        e.type = *type;
+        e.value = *value;
+        e.enabled = enabled ? enabled->boolVal : true;
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        bool replaced = false;
+        for (auto& existing : m_entries) {
+            if (existing.name == e.name) { existing = e; replaced = true; break; }
+        }
+        if (!replaced) m_entries.push_back(e);
+    }
+    return true;
+}
+
+} // namespace tl
+
+```
+
+`src/HexUtils.cpp`:
+
+```cpp
+#include "ToastyLink/HexUtils.h"
+
+#include <cctype>
+#include <cstdio>
+#include <sstream>
+
+namespace tl {
+
+namespace {
+
+int HexNibble(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return 10 + (c - 'a');
+    if (c >= 'A' && c <= 'F') return 10 + (c - 'A');
+    return -1;
+}
+
+} // namespace
+
+std::string BytesToHex(const std::vector<uint8_t>& bytes) {
+    static const char* kDigits = "0123456789ABCDEF";
+    std::string out;
+    out.reserve(bytes.size() * 2);
+    for (uint8_t b : bytes) {
+        out.push_back(kDigits[(b >> 4) & 0xF]);
+        out.push_back(kDigits[b & 0xF]);
+    }
+    return out;
+}
+
+std::optional<std::vector<uint8_t>> HexToBytes(const std::string& hex) {
+    std::vector<uint8_t> out;
+    int hi = -1;
+    for (char c : hex) {
+        if (std::isspace(static_cast<unsigned char>(c))) continue;
+        int nibble = HexNibble(c);
+        if (nibble < 0) return std::nullopt;
+        if (hi < 0) {
+            hi = nibble;
+        } else {
+            out.push_back(static_cast<uint8_t>((hi << 4) | nibble));
+            hi = -1;
+        }
+    }
+    if (hi >= 0) return std::nullopt; // odd number of hex digits
+    return out;
+}
+
+std::optional<std::vector<PatternByte>> ParsePattern(const std::string& pattern) {
+    std::vector<PatternByte> out;
+    std::istringstream iss(pattern);
+    std::string token;
+    while (iss >> token) {
+        if (token == "?" || token == "??") {
+            PatternByte pb;
+            pb.wildcard = true;
+            out.push_back(pb);
+            continue;
+        }
+        if (token.size() != 2) return std::nullopt;
+        int hi = HexNibble(token[0]);
+        int lo = HexNibble(token[1]);
+        if (hi < 0 || lo < 0) return std::nullopt;
+        PatternByte pb;
+        pb.wildcard = false;
+        pb.value = static_cast<uint8_t>((hi << 4) | lo);
+        out.push_back(pb);
+    }
+    if (out.empty()) return std::nullopt;
+    return out;
+}
+
+std::optional<uint64_t> ParseIntArg(const std::string& text) {
+    if (text.empty()) return std::nullopt;
+    std::string t = text;
+    int base = 10;
+    if (t.size() > 2 && t[0] == '0' && (t[1] == 'x' || t[1] == 'X')) {
+        base = 16;
+        t = t.substr(2);
+    }
+    if (t.empty()) return std::nullopt;
+    for (char c : t) {
+        if (HexNibble(c) < 0) return std::nullopt;
+        if (base == 10 && !std::isdigit(static_cast<unsigned char>(c))) return std::nullopt;
+    }
+    try {
+        size_t consumed = 0;
+        uint64_t value = std::stoull(t, &consumed, base);
+        if (consumed != t.size()) return std::nullopt;
+        return value;
+    } catch (...) {
+        return std::nullopt;
+    }
+}
+
+std::string FormatAddress(uint64_t addr) {
+    char buf[32];
+    std::snprintf(buf, sizeof(buf), "0x%08llX", static_cast<unsigned long long>(addr));
+    return std::string(buf);
+}
+
+} // namespace tl
+
+```
+
+`src/Json.cpp`:
+
+```cpp
+#include "ToastyLink/Json.h"
+
+#include <cctype>
+#include <cmath>
+#include <cstdio>
+#include <sstream>
+
+namespace tl {
+
+JsonValue JsonValue::MakeObject() { JsonValue v; v.kind = Kind::Object; return v; }
+JsonValue JsonValue::MakeArray() { JsonValue v; v.kind = Kind::Array; return v; }
+JsonValue JsonValue::MakeString(const std::string& s) { JsonValue v; v.kind = Kind::String; v.strVal = s; return v; }
+JsonValue JsonValue::MakeNumber(double n) { JsonValue v; v.kind = Kind::Number; v.numVal = n; return v; }
+JsonValue JsonValue::MakeBool(bool b) { JsonValue v; v.kind = Kind::Bool; v.boolVal = b; return v; }
+
+void JsonValue::Set(const std::string& key, JsonValue v) {
+    for (auto& kv : objVal) {
+        if (kv.first == key) {
+            kv.second = std::move(v);
+            return;
+        }
+    }
+    objVal.emplace_back(key, std::move(v));
+}
+
+const JsonValue* JsonValue::Find(const std::string& key) const {
+    for (auto& kv : objVal) {
+        if (kv.first == key) return &kv.second;
+    }
+    return nullptr;
+}
+
+std::optional<std::string> JsonValue::AsString() const {
+    if (kind != Kind::String) return std::nullopt;
+    return strVal;
+}
+
+std::optional<double> JsonValue::AsNumber() const {
+    if (kind != Kind::Number) return std::nullopt;
+    return numVal;
+}
+
+std::optional<bool> JsonValue::AsBool() const {
+    if (kind != Kind::Bool) return std::nullopt;
+    return boolVal;
+}
+
+namespace {
+
+void EscapeInto(std::ostringstream& out, const std::string& s) {
+    out << '"';
+    for (char c : s) {
+        switch (c) {
+            case '"': out << "\\\""; break;
+            case '\\': out << "\\\\"; break;
+            case '\n': out << "\\n"; break;
+            case '\r': out << "\\r"; break;
+            case '\t': out << "\\t"; break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    char buf[8];
+                    std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+                    out << buf;
+                } else {
+                    out << c;
+                }
+        }
+    }
+    out << '"';
+}
+
+std::string NumberToString(double n) {
+    if (n == static_cast<long long>(n) && std::abs(n) < 1e15) {
+        std::ostringstream oss;
+        oss << static_cast<long long>(n);
+        return oss.str();
+    }
+    std::ostringstream oss;
+    oss.precision(15);
+    oss << n;
+    return oss.str();
+}
+
+} // namespace
+
+std::string JsonValue::Dump(int indent) const {
+    std::string pad(static_cast<size_t>(indent) * 2, ' ');
+    std::string padIn(static_cast<size_t>(indent + 1) * 2, ' ');
+    std::ostringstream out;
+    switch (kind) {
+        case Kind::Null: out << "null"; break;
+        case Kind::Bool: out << (boolVal ? "true" : "false"); break;
+        case Kind::Number: out << NumberToString(numVal); break;
+        case Kind::String: EscapeInto(out, strVal); break;
+        case Kind::Array: {
+            if (arrVal.empty()) { out << "[]"; break; }
+            out << "[\n";
+            for (size_t i = 0; i < arrVal.size(); ++i) {
+                out << padIn << arrVal[i].Dump(indent + 1);
+                if (i + 1 < arrVal.size()) out << ",";
+                out << "\n";
+            }
+            out << pad << "]";
+            break;
+        }
+        case Kind::Object: {
+            if (objVal.empty()) { out << "{}"; break; }
+            out << "{\n";
+            for (size_t i = 0; i < objVal.size(); ++i) {
+                out << padIn;
+                EscapeInto(out, objVal[i].first);
+                out << ": " << objVal[i].second.Dump(indent + 1);
+                if (i + 1 < objVal.size()) out << ",";
+                out << "\n";
+            }
+            out << pad << "}";
+            break;
+        }
+    }
+    return out.str();
+}
+
+namespace {
+
+class Parser {
+public:
+    explicit Parser(const std::string& text) : m_text(text) {}
+
+    std::optional<JsonValue> Parse(std::string* err) {
+        SkipWs();
+        auto v = ParseValue(err);
+        if (!v) return std::nullopt;
+        SkipWs();
+        if (m_pos != m_text.size()) {
+            if (err) *err = "trailing data after JSON value";
+            return std::nullopt;
+        }
+        return v;
+    }
+
+private:
+    const std::string& m_text;
+    size_t m_pos = 0;
+
+    bool AtEnd() const { return m_pos >= m_text.size(); }
+    char Peek() const { return m_text[m_pos]; }
+
+    void SkipWs() {
+        while (!AtEnd() && std::isspace(static_cast<unsigned char>(Peek()))) ++m_pos;
+    }
+
+    bool Consume(char c) {
+        if (!AtEnd() && Peek() == c) { ++m_pos; return true; }
+        return false;
+    }
+
+    bool ConsumeLiteral(const char* lit) {
+        size_t len = std::string(lit).size();
+        if (m_text.compare(m_pos, len, lit) == 0) { m_pos += len; return true; }
+        return false;
+    }
+
+    std::optional<JsonValue> ParseValue(std::string* err) {
+        if (AtEnd()) { if (err) *err = "unexpected end of input"; return std::nullopt; }
+        char c = Peek();
+        if (c == '{') return ParseObject(err);
+        if (c == '[') return ParseArray(err);
+        if (c == '"') return ParseString(err);
+        if (c == 't' || c == 'f') return ParseBool(err);
+        if (c == 'n') return ParseNull(err);
+        if (c == '-' || std::isdigit(static_cast<unsigned char>(c))) return ParseNumber(err);
+        if (err) *err = std::string("unexpected character '") + c + "'";
+        return std::nullopt;
+    }
+
+    std::optional<JsonValue> ParseObject(std::string* err) {
+        ++m_pos; // '{'
+        JsonValue obj = JsonValue::MakeObject();
+        SkipWs();
+        if (Consume('}')) return obj;
+        for (;;) {
+            SkipWs();
+            if (AtEnd() || Peek() != '"') { if (err) *err = "expected string key"; return std::nullopt; }
+            auto key = ParseString(err);
+            if (!key) return std::nullopt;
+            SkipWs();
+            if (!Consume(':')) { if (err) *err = "expected ':'"; return std::nullopt; }
+            SkipWs();
+            auto val = ParseValue(err);
+            if (!val) return std::nullopt;
+            obj.objVal.emplace_back(key->strVal, std::move(*val));
+            SkipWs();
+            if (Consume(',')) continue;
+            if (Consume('}')) break;
+            if (err) *err = "expected ',' or '}'";
+            return std::nullopt;
+        }
+        return obj;
+    }
+
+    std::optional<JsonValue> ParseArray(std::string* err) {
+        ++m_pos; // '['
+        JsonValue arr = JsonValue::MakeArray();
+        SkipWs();
+        if (Consume(']')) return arr;
+        for (;;) {
+            SkipWs();
+            auto val = ParseValue(err);
+            if (!val) return std::nullopt;
+            arr.arrVal.push_back(std::move(*val));
+            SkipWs();
+            if (Consume(',')) continue;
+            if (Consume(']')) break;
+            if (err) *err = "expected ',' or ']'";
+            return std::nullopt;
+        }
+        return arr;
+    }
+
+    std::optional<JsonValue> ParseString(std::string* err) {
+        ++m_pos; // opening quote
+        std::string s;
+        while (true) {
+            if (AtEnd()) { if (err) *err = "unterminated string"; return std::nullopt; }
+            char c = m_text[m_pos++];
+            if (c == '"') break;
+            if (c == '\\') {
+                if (AtEnd()) { if (err) *err = "unterminated escape"; return std::nullopt; }
+                char e = m_text[m_pos++];
+                switch (e) {
+                    case '"': s.push_back('"'); break;
+                    case '\\': s.push_back('\\'); break;
+                    case '/': s.push_back('/'); break;
+                    case 'n': s.push_back('\n'); break;
+                    case 'r': s.push_back('\r'); break;
+                    case 't': s.push_back('\t'); break;
+                    case 'b': s.push_back('\b'); break;
+                    case 'f': s.push_back('\f'); break;
+                    case 'u': {
+                        if (m_pos + 4 > m_text.size()) { if (err) *err = "bad \\u escape"; return std::nullopt; }
+                        std::string hex = m_text.substr(m_pos, 4);
+                        m_pos += 4;
+                        unsigned code = 0;
+                        try { code = static_cast<unsigned>(std::stoul(hex, nullptr, 16)); }
+                        catch (...) { if (err) *err = "bad \\u escape"; return std::nullopt; }
+                        // Minimal UTF-8 encode of the BMP code point (no
+                        // surrogate pair handling -- sufficient for the
+                        // ASCII-range config values this tool writes).
+                        if (code < 0x80) {
+                            s.push_back(static_cast<char>(code));
+                        } else if (code < 0x800) {
+                            s.push_back(static_cast<char>(0xC0 | (code >> 6)));
+                            s.push_back(static_cast<char>(0x80 | (code & 0x3F)));
+                        } else {
+                            s.push_back(static_cast<char>(0xE0 | (code >> 12)));
+                            s.push_back(static_cast<char>(0x80 | ((code >> 6) & 0x3F)));
+                            s.push_back(static_cast<char>(0x80 | (code & 0x3F)));
+                        }
+                        break;
+                    }
+                    default:
+                        if (err) *err = "unknown escape sequence";
+                        return std::nullopt;
+                }
+            } else {
+                s.push_back(c);
+            }
+        }
+        return JsonValue::MakeString(s);
+    }
+
+    std::optional<JsonValue> ParseBool(std::string* err) {
+        if (ConsumeLiteral("true")) return JsonValue::MakeBool(true);
+        if (ConsumeLiteral("false")) return JsonValue::MakeBool(false);
+        if (err) *err = "invalid literal";
+        return std::nullopt;
+    }
+
+    std::optional<JsonValue> ParseNull(std::string* err) {
+        if (ConsumeLiteral("null")) return JsonValue{};
+        if (err) *err = "invalid literal";
+        return std::nullopt;
+    }
+
+    std::optional<JsonValue> ParseNumber(std::string* err) {
+        size_t start = m_pos;
+        if (!AtEnd() && Peek() == '-') ++m_pos;
+        while (!AtEnd() && std::isdigit(static_cast<unsigned char>(Peek()))) ++m_pos;
+        if (!AtEnd() && Peek() == '.') {
+            ++m_pos;
+            while (!AtEnd() && std::isdigit(static_cast<unsigned char>(Peek()))) ++m_pos;
+        }
+        if (!AtEnd() && (Peek() == 'e' || Peek() == 'E')) {
+            ++m_pos;
+            if (!AtEnd() && (Peek() == '+' || Peek() == '-')) ++m_pos;
+            while (!AtEnd() && std::isdigit(static_cast<unsigned char>(Peek()))) ++m_pos;
+        }
+        std::string tok = m_text.substr(start, m_pos - start);
+        try {
+            return JsonValue::MakeNumber(std::stod(tok));
+        } catch (...) {
+            if (err) *err = "invalid number literal";
+            return std::nullopt;
+        }
+    }
+};
+
+} // namespace
+
+std::optional<JsonValue> ParseJson(const std::string& text, std::string* err) {
+    Parser p(text);
+    return p.Parse(err);
+}
+
+} // namespace tl
+
+```
+
+`src/MemoryScanner.cpp`:
+
+```cpp
+#include "ToastyLink/MemoryScanner.h"
+
+#include <algorithm>
+
+namespace tl {
+
+namespace {
+
+bool MatchesAt(const std::vector<MemoryByte>& buf, size_t offset,
+                const std::vector<PatternByte>& pattern) {
+    for (size_t i = 0; i < pattern.size(); ++i) {
+        const MemoryByte& mb = buf[offset + i];
+        if (!mb.mapped) return false;
+        if (!pattern[i].wildcard && mb.value != pattern[i].value) return false;
+    }
+    return true;
+}
+
+} // namespace
+
+std::vector<uint64_t> MemoryScanner::ScanRange(uint64_t start, uint64_t length,
+                                                const std::vector<PatternByte>& pattern,
+                                                const ScanProgressFn& progress,
+                                                uint32_t chunkSize) {
+    std::vector<uint64_t> matches;
+    if (pattern.empty() || length == 0) return matches;
+
+    const size_t patLen = pattern.size();
+    // Ensure chunks are comfortably larger than the pattern so the overlap
+    // logic below always has room to work with.
+    if (chunkSize < patLen * 4) chunkSize = static_cast<uint32_t>(patLen * 4);
+
+    uint64_t pos = start;
+    const uint64_t end = start + length;
+    const uint32_t overlap = static_cast<uint32_t>(patLen - 1);
+
+    while (pos < end) {
+        uint64_t remaining = end - pos;
+        uint32_t readLen = static_cast<uint32_t>(std::min<uint64_t>(chunkSize, remaining));
+        auto bytes = m_client.GetMemory(pos, readLen);
+        if (!bytes || bytes->empty()) {
+            // Unreadable region (module unmapped, console busy, etc.) --
+            // skip forward rather than aborting the whole scan.
+            uint64_t advance = std::min<uint64_t>(readLen, remaining);
+            pos += (advance > 0 ? advance : 1); // never spin
+            if (progress) progress(pos - start, length);
+            continue;
+        }
+
+        const size_t n = bytes->size();
+        if (n >= patLen) {
+            for (size_t i = 0; i + patLen <= n; ++i) {
+                if (MatchesAt(*bytes, i, pattern)) {
+                    matches.push_back(pos + i);
+                }
+            }
+        }
+
+        // Step by what the console ACTUALLY returned, not by what was
+        // requested -- XBDM implementations legitimately cap a single
+        // getmem, and stepping by the requested length would silently
+        // skip every byte that never arrived. The overlap keeps a match
+        // straddling the boundary findable in the next iteration.
+        uint64_t step;
+        if (n > overlap) {
+            step = n - overlap;
+        } else {
+            step = (n > 0) ? n : readLen;
+        }
+        if (step == 0) step = 1; // guarantee forward progress
+        pos += step;
+
+        if (progress) progress(std::min<uint64_t>(pos - start, length), length);
+    }
+
+    return matches;
+}
+
+std::vector<uint64_t> MemoryScanner::ScanAllRegions(const std::vector<PatternByte>& pattern,
+                                                      const ScanProgressFn& progress,
+                                                      uint32_t chunkSize) {
+    std::vector<uint64_t> matches;
+    auto regions = m_client.WalkMemory();
+    if (!regions) return matches;
+
+    uint64_t totalSize = 0;
+    for (auto& r : *regions) totalSize += r.size;
+
+    uint64_t scannedBefore = 0;
+    for (auto& region : *regions) {
+        if (region.size == 0) continue;
+        auto regionMatches = ScanRange(
+            region.base, region.size, pattern,
+            [&](uint64_t scanned, uint64_t /*regionTotal*/) {
+                if (progress) progress(scannedBefore + scanned, totalSize);
+            },
+            chunkSize);
+        matches.insert(matches.end(), regionMatches.begin(), regionMatches.end());
+        scannedBefore += region.size;
+    }
+    return matches;
+}
+
+} // namespace tl
+
+```
+
+`src/PatchEngine.cpp`:
+
+```cpp
+#include "ToastyLink/PatchEngine.h"
+
+#include <fstream>
+#include <sstream>
+
+#include "ToastyLink/HexUtils.h"
+#include "ToastyLink/Json.h"
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+PatchEntry* PatchEngine::Find(const std::string& name) {
+    for (auto& e : m_entries) {
+        if (e.name == name) return &e;
+    }
+    return nullptr;
+}
+
+bool PatchEngine::Install(const std::string& name, uint64_t address, const std::vector<uint8_t>& newBytes,
+                           std::string* err) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (Find(name)) {
+        if (err) *err = "a patch named '" + name + "' already exists";
+        return false;
+    }
+    if (newBytes.empty()) {
+        if (err) *err = "no bytes to install";
+        return false;
+    }
+
+    auto original = m_client.GetMemory(address, static_cast<uint32_t>(newBytes.size()));
+    if (!original || original->size() != newBytes.size()) {
+        if (err) *err = "failed to read original bytes at " + FormatAddress(address) + " (" + m_client.LastError() + ")";
+        return false;
+    }
+    std::vector<uint8_t> origBytes;
+    origBytes.reserve(original->size());
+    for (auto& b : *original) {
+        if (!b.mapped) {
+            if (err) *err = "address " + FormatAddress(address) + " is not fully mapped";
+            return false;
+        }
+        origBytes.push_back(b.value);
+    }
+
+    if (!m_client.SetMemory(address, newBytes)) {
+        if (err) *err = "failed to write patch bytes (" + m_client.LastError() + ")";
+        return false;
+    }
+
+    PatchEntry e;
+    e.name = name;
+    e.address = address;
+    e.originalBytes = origBytes;
+    e.newBytes = newBytes;
+    e.installed = true;
+    m_entries.push_back(std::move(e));
+    return true;
+}
+
+bool PatchEngine::Revert(const std::string& name, std::string* err) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    PatchEntry* e = Find(name);
+    if (!e) {
+        if (err) *err = "no such patch";
+        return false;
+    }
+    if (!m_client.SetMemory(e->address, e->originalBytes)) {
+        if (err) *err = "failed to write original bytes back (" + m_client.LastError() + ")";
+        return false;
+    }
+    e->installed = false;
+    return true;
+}
+
+bool PatchEngine::Reinstall(const std::string& name, std::string* err) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    PatchEntry* e = Find(name);
+    if (!e) {
+        if (err) *err = "no such patch";
+        return false;
+    }
+    if (!m_client.SetMemory(e->address, e->newBytes)) {
+        if (err) *err = "failed to write patch bytes (" + m_client.LastError() + ")";
+        return false;
+    }
+    e->installed = true;
+    return true;
+}
+
+bool PatchEngine::Remove(const std::string& name) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto it = m_entries.begin(); it != m_entries.end(); ++it) {
+        if (it->name == name) {
+            if (it->installed) m_client.SetMemory(it->address, it->originalBytes);
+            m_entries.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<PatchEntry> PatchEngine::List() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_entries;
+}
+
+bool PatchEngine::SaveToFile(const std::string& path) const {
+    JsonValue root = JsonValue::MakeArray();
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        for (auto& e : m_entries) {
+            JsonValue obj = JsonValue::MakeObject();
+            obj.Set("name", JsonValue::MakeString(e.name));
+            obj.Set("address", JsonValue::MakeString(FormatAddress(e.address)));
+            obj.Set("original", JsonValue::MakeString(BytesToHex(e.originalBytes)));
+            obj.Set("bytes", JsonValue::MakeString(BytesToHex(e.newBytes)));
+            root.arrVal.push_back(std::move(obj));
+        }
+    }
+    std::ofstream out(path, std::ios::binary);
+    if (!out) return false;
+    out << root.Dump(0) << "\n";
+    return static_cast<bool>(out);
+}
+
+bool PatchEngine::LoadFromFile(const std::string& path, std::string* err) {
+    std::ifstream in(path, std::ios::binary);
+    if (!in) {
+        if (err) *err = "could not open '" + path + "'";
+        return false;
+    }
+    std::ostringstream ss;
+    ss << in.rdbuf();
+
+    std::string parseErr;
+    auto root = ParseJson(ss.str(), &parseErr);
+    if (!root || root->kind != JsonValue::Kind::Array) {
+        if (err) *err = "invalid patch set JSON" + (parseErr.empty() ? "" : (": " + parseErr));
+        return false;
+    }
+
+    for (auto& item : root->arrVal) {
+        if (item.kind != JsonValue::Kind::Object) continue;
+        auto name = item.Find("name");
+        auto address = item.Find("address");
+        auto original = item.Find("original");
+        auto bytes = item.Find("bytes");
+        if (!name || !address || !original || !bytes) continue;
+
+        auto addr = ParseIntArg(address->strVal);
+        auto origBytes = HexToBytes(original->strVal);
+        auto newBytes = HexToBytes(bytes->strVal);
+        if (!addr || !origBytes || !newBytes) continue;
+
+        PatchEntry e;
+        e.name = name->strVal;
+        e.address = *addr;
+        e.originalBytes = *origBytes;
+        e.newBytes = *newBytes;
+        e.installed = false;
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        bool replaced = false;
+        for (auto& existing : m_entries) {
+            if (existing.name == e.name) { existing = e; replaced = true; break; }
+        }
+        if (!replaced) m_entries.push_back(e);
+    }
+    return true;
+}
+
+} // namespace tl
+
+```
+
+`src/Shell.cpp`:
+
+```cpp
+#include "ToastyLink/Shell.h"
+
+#include <chrono>
+#include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <mutex>
+#include <sstream>
+#include <thread>
+
+#include "ToastyLink/AddressResolver.h"
+#include "ToastyLink/Assembler.h"
+#include "ToastyLink/Discovery.h"
+#include "ToastyLink/HexUtils.h"
+#include "ToastyLink/MemoryScanner.h"
+
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
+
+namespace tl {
+
+namespace {
+
+// Percent-progress printer. The "last printed percent" has to live per
+// scan rather than in a function-local static, or state leaks between
+// consecutive scans and the first ticks of a later scan get swallowed.
+class ProgressPrinter {
+public:
+    void operator()(uint64_t scanned, uint64_t total) {
+        if (total == 0) return;
+        uint64_t pct = (scanned * 100) / total;
+        if (pct != m_lastPct) {
+            m_lastPct = pct;
+            std::cout << "\r  " << pct << "%   " << std::flush;
+        }
+    }
+
+private:
+    uint64_t m_lastPct = static_cast<uint64_t>(-1);
+};
+
+} // namespace
+
+std::vector<std::string> Tokenize(const std::string& line) {
+    std::vector<std::string> out;
+    std::istringstream iss(line);
+    std::string tok;
+    while (iss >> tok) out.push_back(tok);
+    return out;
+}
+
+Shell::Shell(XbdmClient& client) : m_client(client), m_scanner(client), m_freeze(client), m_patch(client) {
+    m_consoleBook.Load(ConsoleBook::DefaultPath());
+}
+
+std::string Shell::TitleFingerprint() {
+    std::string name = "unknowntitle";
+    if (auto info = m_client.GetRunningXbeInfo()) {
+        for (auto& line : *info) {
+            size_t pos = line.find("name=\"");
+            if (pos != std::string::npos) {
+                size_t start = pos + 6;
+                size_t end = line.find('"', start);
+                if (end != std::string::npos) { name = line.substr(start, end - start); break; }
+            }
+        }
+    }
+
+    uint64_t checksum = 0, timestamp = 0;
+    if (auto mods = m_client.ListModules()) {
+        uint64_t bestSize = 0;
+        for (auto& m : *mods) {
+            if (m.size > bestSize) { bestSize = m.size; checksum = m.checksum; timestamp = m.timestamp; }
+        }
+    }
+
+    std::string safe;
+    for (char c : name) {
+        safe.push_back(std::isalnum(static_cast<unsigned char>(c)) ? c : '_');
+    }
+    if (safe.empty()) safe = "unknowntitle";
+
+    char suffix[32];
+    std::snprintf(suffix, sizeof(suffix), "_%08llX%08llX", static_cast<unsigned long long>(checksum),
+                  static_cast<unsigned long long>(timestamp));
+    return safe + suffix;
+}
+
+void Shell::PrintHelp() const {
+    std::cout <<
+        "Connection & console book:\n"
+        "  discover <subnet-prefix>         find XBDM consoles on your LAN, e.g. discover 192.168.1\n"
+        "  connect <ip|nickname> [port]     disconnect and connect to a different console\n"
+        "  consoles add <name> <ip> [port]  save a console under a nickname\n"
+        "  consoles list                    list saved consoles\n"
+        "  consoles rm <name>               remove a saved console\n"
+        "\n"
+        "Basics:\n"
+        "  dbgname                          show the console's debug name\n"
+        "  modules                          list loaded modules\n"
+        "  threads                          list running thread IDs\n"
+        "  walkmem                          list mapped memory regions\n"
+        "  xbeinfo                          info about the running title\n"
+        "  reboot [title|cold]              reboot the console\n"
+        "\n"
+        "Raw memory:\n"
+        "  getmem <addr> <len>              read raw bytes; unmapped bytes print as ??\n"
+        "  setmem <addr> <hexbytes>         write raw bytes, e.g. setmem 0x82000000 DEADBEEF\n"
+        "\n"
+        "Typed memory (addr accepts a pointer chain: base,off1,off2,...):\n"
+        "  read <type> <addr>               e.g. read f32 0x82000000  or  read i32 0x82000000,10,4\n"
+        "  write <type> <addr> <value>      e.g. write i32 0x82000000 9999\n"
+        "  watch <type> <addr> [count] [ms] repeatedly re-read a value (default 20x @ 500ms)\n"
+        "  types: i8 u8 i16 u16 i32 u32 i64 u64 f32 f64\n"
+        "\n"
+        "AOB pattern scan:\n"
+        "  scan <addr> <len> <pattern>      e.g. scan 0x82000000 0x10000 48 65 ?? 6F\n"
+        "  scanall <pattern>                scan every mapped region (slower)\n"
+        "\n"
+        "Cheat Engine-style value scan (find an unknown address by narrowing candidates):\n"
+        "  vscan new <type> <addr> <len> [unaligned] [exact <value>]\n"
+        "  vscan next <changed|unchanged|increased|decreased>\n"
+        "  vscan next exact <value>\n"
+        "  vscan list [count]               show current candidates (default 50)\n"
+        "  vscan reset\n"
+        "\n"
+        "Freeze / trainer engine (background thread rewrites frozen values):\n"
+        "  freeze add <name> <type> <addr> <value>    addr may be a pointer chain\n"
+        "  freeze rm <name>\n"
+        "  freeze enable <name>  /  freeze disable <name>\n"
+        "  freeze list\n"
+        "  freeze start [intervalMs]   /   freeze stop\n"
+        "  freeze save <file.json>     /   freeze load <file.json>\n"
+        "  freeze autosave / autoload  save/load under a name derived from the running title\n"
+        "\n"
+        "Code patches (PPC/Xenon; one-shot install with tracked, revertible original bytes):\n"
+        "  asm nop | asm blr | asm b <from> <target> | asm bl <from> <target> | asm li <reg> <value>\n"
+        "  patch install <name> <addr> hex <hexbytes>\n"
+        "  patch install <name> <addr> asm <nop|blr|b <target>|bl <target>|li <reg> <value>>\n"
+        "  patch revert <name>  /  patch reinstall <name>  /  patch rm <name>\n"
+        "  patch list\n"
+        "  patch save <file.json>      /   patch load <file.json>\n"
+        "\n"
+        "Filesystem:\n"
+        "  dirlist <path>  (alias: ls)      e.g. dirlist hdd:\\  or  ls usb0:\\Games\n"
+        "  mkdir <path>\n"
+        "  delete <path> [dir]  (alias: rm)\n"
+        "\n"
+        "Misc:\n"
+        "  notify <text>                    best-effort on-screen popup (dashboard-dependent)\n"
+        "  sleep <ms>                       pause for a bit (useful in scripts, e.g. after reboot)\n"
+        "  raw <xbdm command...>            send a raw XBDM command, print the reply verbatim\n"
+        "  help                             show this text\n"
+        "  quit / exit                      close the connection and exit\n"
+        "\n"
+        "Anything else is forwarded verbatim as a raw XBDM command.\n";
+}
+
+void Shell::CmdRaw(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        std::cout << "usage: raw <xbdm command...>\n";
+        return;
+    }
+    std::ostringstream cmd;
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        if (i) cmd << ' ';
+        cmd << tokens[i];
+    }
+    XbdmResponse resp = m_client.SendCommand(cmd.str());
+    std::cout << resp.statusLine << "\n";
+    for (auto& l : resp.lines) std::cout << l << "\n";
+}
+
+void Shell::CmdDbgName() {
+    auto name = m_client.GetDebugName();
+    if (!name) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    std::cout << *name << "\n";
+}
+
+void Shell::CmdModules() {
+    auto mods = m_client.ListModules();
+    if (!mods) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    for (auto& m : *mods) {
+        if (!m.name.empty()) {
+            std::cout << m.name << "  base=" << FormatAddress(m.base)
+                       << "  size=" << FormatAddress(m.size) << "\n";
+        } else {
+            std::cout << m.raw << "\n";
+        }
+    }
+    std::cout << mods->size() << " module(s)\n";
+}
+
+void Shell::CmdThreads() {
+    auto threads = m_client.ListThreads();
+    if (!threads) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    for (auto id : *threads) std::cout << id << "\n";
+    std::cout << threads->size() << " thread(s)\n";
+}
+
+void Shell::CmdWalkMem() {
+    auto regions = m_client.WalkMemory();
+    if (!regions) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    for (auto& r : *regions) {
+        std::cout << FormatAddress(r.base) << "  size=" << FormatAddress(r.size)
+                   << "  protect=0x" << std::hex << r.protect << std::dec << "\n";
+    }
+    std::cout << regions->size() << " region(s)\n";
+}
+
+void Shell::CmdGetMem(const std::vector<std::string>& tokens) {
+    if (tokens.size() < 2) { std::cout << "usage: getmem <addr> <len>\n"; return; }
+    auto addr = ParseIntArg(tokens[0]);
+    auto len = ParseIntArg(tokens[1]);
+    if (!addr || !len) { std::cout << "error: could not parse address/length\n"; return; }
+    auto bytes = m_client.GetMemory(*addr, static_cast<uint32_t>(*len));
+    if (!bytes) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    for (size_t i = 0; i < bytes->size(); ++i) {
+        if (i % 16 == 0) {
+            if (i) std::cout << "\n";
+            std::cout << FormatAddress(*addr + i) << ": ";
+        }
+        const MemoryByte& mb = (*bytes)[i];
+        if (mb.mapped) {
+            char buf[4];
+            std::snprintf(buf, sizeof(buf), "%02X ", mb.value);
+            std::cout << buf;
+        } else {
+            std::cout << "?? ";
+        }
+    }
+    std::cout << "\n";
+}
+
+void Shell::CmdSetMem(const std::vector<std::string>& tokens) {
+    if (tokens.size() < 2) { std::cout << "usage: setmem <addr> <hexbytes>\n"; return; }
+    auto addr = ParseIntArg(tokens[0]);
+    auto bytes = HexToBytes(tokens[1]);
+    if (!addr || !bytes) { std::cout << "error: could not parse address/hex bytes\n"; return; }
+    bool ok = m_client.SetMemory(*addr, *bytes);
+    std::cout << (ok ? "OK" : ("error: " + m_client.LastError())) << "\n";
+}
+
+void Shell::CmdXbeInfo() {
+    auto info = m_client.GetRunningXbeInfo();
+    if (!info) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    for (auto& l : *info) std::cout << l << "\n";
+}
+
+void Shell::CmdReboot(const std::vector<std::string>& tokens) {
+    std::string mode = tokens.empty() ? "" : tokens[0];
+    bool ok = m_client.Reboot(mode);
+    std::cout << (ok ? "reboot requested" : ("error: " + m_client.LastError())) << "\n";
+}
+
+void Shell::CmdScan(const std::vector<std::string>& tokens) {
+    if (tokens.size() < 3) {
+        std::cout << "usage: scan <addr> <len> <pattern bytes, e.g. 48 65 ?? 6F>\n";
+        return;
+    }
+    auto addr = ParseIntArg(tokens[0]);
+    auto len = ParseIntArg(tokens[1]);
+    if (!addr || !len) { std::cout << "error: could not parse address/length\n"; return; }
+
+    std::ostringstream patternText;
+    for (size_t i = 2; i < tokens.size(); ++i) {
+        if (i > 2) patternText << ' ';
+        patternText << tokens[i];
+    }
+    auto pattern = ParsePattern(patternText.str());
+    if (!pattern) { std::cout << "error: could not parse pattern (use two hex digits or ?? per byte)\n"; return; }
+
+    MemoryScanner scanner(m_client);
+    std::cout << "scanning " << FormatAddress(*addr) << " + " << FormatAddress(*len) << "...\n";
+    auto matches = scanner.ScanRange(*addr, *len, *pattern, ProgressPrinter{});
+    std::cout << "\r" << matches.size() << " match(es):\n";
+    for (auto m : matches) std::cout << "  " << FormatAddress(m) << "\n";
+}
+
+void Shell::CmdScanAll(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: scanall <pattern>\n"; return; }
+    std::ostringstream patternText;
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        if (i) patternText << ' ';
+        patternText << tokens[i];
+    }
+    auto pattern = ParsePattern(patternText.str());
+    if (!pattern) { std::cout << "error: could not parse pattern\n"; return; }
+
+    MemoryScanner scanner(m_client);
+    std::cout << "scanning all mapped regions (this can take a while)...\n";
+    auto matches = scanner.ScanAllRegions(*pattern, ProgressPrinter{});
+    std::cout << "\r" << matches.size() << " match(es):\n";
+    for (auto m : matches) std::cout << "  " << FormatAddress(m) << "\n";
+}
+
+void Shell::CmdRead(const std::vector<std::string>& tokens) {
+    if (tokens.size() < 2) {
+        std::cout << "usage: read <type> <addr>   (addr may be base,off1,off2,... for a pointer chain)\n";
+        return;
+    }
+    auto type = ParseValueType(tokens[0]);
+    if (!type) { std::cout << "error: unknown type '" << tokens[0] << "'\n"; return; }
+
+    std::string err;
+    auto addr = ResolveAddress(m_client, tokens[1], &err);
+    if (!addr) { std::cout << "error: " << err << "\n"; return; }
+
+    auto val = ReadTyped(m_client, *addr, *type);
+    if (!val) { std::cout << "error: could not read " << ValueTypeName(*type) << " at "
+                           << FormatAddress(*addr) << " (" << m_client.LastError() << ")\n"; return; }
+    std::cout << FormatAddress(*addr) << " = " << val->ToString() << "\n";
+}
+
+void Shell::CmdWrite(const std::vector<std::string>& tokens) {
+    if (tokens.size() < 3) {
+        std::cout << "usage: write <type> <addr> <value>   (addr may be base,off1,off2,... for a pointer chain)\n";
+        return;
+    }
+    auto type = ParseValueType(tokens[0]);
+    if (!type) { std::cout << "error: unknown type '" << tokens[0] << "'\n"; return; }
+
+    std::string err;
+    auto addr = ResolveAddress(m_client, tokens[1], &err);
+    if (!addr) { std::cout << "error: " << err << "\n"; return; }
+
+    auto val = ParseTypedValue(*type, tokens[2]);
+    if (!val) { std::cout << "error: could not parse '" << tokens[2] << "' as " << ValueTypeName(*type) << "\n"; return; }
+
+    bool ok = WriteTyped(m_client, *addr, *val);
+    std::cout << (ok ? ("OK @ " + FormatAddress(*addr)) : ("error: " + m_client.LastError())) << "\n";
+}
+
+void Shell::CmdVScan(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        std::cout << "usage: vscan <new|next|list|reset> ...  (see 'help')\n";
+        return;
+    }
+    const std::string& sub = tokens[0];
+
+    if (sub == "reset") { m_scanner.Reset(); std::cout << "scan cleared\n"; return; }
+
+    if (sub == "new") {
+        if (tokens.size() < 4) {
+            std::cout << "usage: vscan new <type> <addr> <len> [unaligned] [exact <value>]\n";
+            return;
+        }
+        auto type = ParseValueType(tokens[1]);
+        auto addr = ParseIntArg(tokens[2]);
+        auto len = ParseIntArg(tokens[3]);
+        if (!type || !addr || !len) { std::cout << "error: could not parse type/addr/len\n"; return; }
+
+        bool alignedOnly = true;
+        std::optional<TypedValue> exact;
+        for (size_t i = 4; i < tokens.size(); ++i) {
+            if (tokens[i] == "unaligned") {
+                alignedOnly = false;
+            } else if (tokens[i] == "exact" && i + 1 < tokens.size()) {
+                exact = ParseTypedValue(*type, tokens[i + 1]);
+                if (!exact) { std::cout << "error: could not parse exact value\n"; return; }
+                ++i;
+            }
+        }
+
+        std::cout << "scanning " << FormatAddress(*addr) << " + " << FormatAddress(*len) << " as "
+                   << ValueTypeName(*type) << "...\n";
+        size_t n = m_scanner.FirstScan(*addr, *len, *type, exact, alignedOnly, ProgressPrinter{});
+        std::cout << "\r" << n << " candidate(s). Play/change the value, then run 'vscan next ...'.\n";
+        return;
+    }
+
+    if (sub == "next") {
+        if (!m_scanner.HasScan()) { std::cout << "error: no active scan -- run 'vscan new' first\n"; return; }
+        if (tokens.size() < 2) {
+            std::cout << "usage: vscan next <changed|unchanged|increased|decreased>  or  vscan next exact <value>\n";
+            return;
+        }
+        NextScanMode mode;
+        std::optional<TypedValue> exact;
+        if (tokens[1] == "changed") mode = NextScanMode::Changed;
+        else if (tokens[1] == "unchanged") mode = NextScanMode::Unchanged;
+        else if (tokens[1] == "increased") mode = NextScanMode::Increased;
+        else if (tokens[1] == "decreased") mode = NextScanMode::Decreased;
+        else if (tokens[1] == "exact" && tokens.size() >= 3) {
+            mode = NextScanMode::Exact;
+            exact = ParseTypedValue(m_scanner.Type(), tokens[2]);
+            if (!exact) { std::cout << "error: could not parse exact value\n"; return; }
+        } else {
+            std::cout << "error: unknown mode '" << tokens[1] << "'\n";
+            return;
+        }
+
+        size_t n = m_scanner.NextScan(mode, exact);
+        std::cout << n << " candidate(s) remaining.\n";
+        return;
+    }
+
+    if (sub == "list") {
+        size_t limit = 50;
+        if (tokens.size() >= 2) {
+            if (auto v = ParseIntArg(tokens[1])) limit = static_cast<size_t>(*v);
+        }
+        auto& candidates = m_scanner.Candidates();
+        size_t shown = 0;
+        for (auto& c : candidates) {
+            if (shown >= limit) break;
+            std::cout << FormatAddress(c.address) << " = " << c.value.ToString() << "\n";
+            ++shown;
+        }
+        std::cout << shown << " of " << candidates.size() << " candidate(s) shown\n";
+        return;
+    }
+
+    std::cout << "error: unknown vscan subcommand '" << sub << "'\n";
+}
+
+void Shell::CmdFreeze(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        std::cout << "usage: freeze <add|rm|enable|disable|list|start|stop|save|load> ...  (see 'help')\n";
+        return;
+    }
+    const std::string& sub = tokens[0];
+
+    if (sub == "add") {
+        if (tokens.size() < 5) { std::cout << "usage: freeze add <name> <type> <addr> <value>\n"; return; }
+        auto type = ParseValueType(tokens[2]);
+        if (!type) { std::cout << "error: unknown type '" << tokens[2] << "'\n"; return; }
+        auto value = ParseTypedValue(*type, tokens[4]);
+        if (!value) { std::cout << "error: could not parse value\n"; return; }
+
+        FreezeEntry e;
+        e.name = tokens[1];
+        e.type = *type;
+        e.addressExpr = tokens[3];
+        e.value = *value;
+        e.enabled = true;
+        bool ok = m_freeze.Add(e);
+        std::cout << (ok ? "added" : "error: an entry with that name already exists") << "\n";
+        return;
+    }
+
+    if (sub == "rm") {
+        if (tokens.size() < 2) { std::cout << "usage: freeze rm <name>\n"; return; }
+        std::cout << (m_freeze.Remove(tokens[1]) ? "removed" : "error: no such entry") << "\n";
+        return;
+    }
+
+    if (sub == "enable" || sub == "disable") {
+        if (tokens.size() < 2) { std::cout << "usage: freeze " << sub << " <name>\n"; return; }
+        bool ok = m_freeze.SetEnabled(tokens[1], sub == "enable");
+        std::cout << (ok ? "ok" : "error: no such entry") << "\n";
+        return;
+    }
+
+    if (sub == "list") {
+        auto entries = m_freeze.List();
+        std::cout << "engine: " << (m_freeze.IsRunning() ? "running" : "stopped") << "\n";
+        for (auto& e : entries) {
+            std::cout << (e.enabled ? "[on]  " : "[off] ") << e.name << "  " << ValueTypeName(e.type)
+                       << "  addr=" << e.addressExpr << "  value=" << e.value.ToString();
+            if (!e.lastStatus.empty()) std::cout << "  (" << e.lastStatus << ")";
+            std::cout << "\n";
+        }
+        std::cout << entries.size() << " entrie(s)\n";
+        return;
+    }
+
+    if (sub == "start") {
+        if (m_freeze.IsRunning()) {
+            std::cout << "freeze engine is already running (stop it first to change the interval)\n";
+            return;
+        }
+        int interval = 200;
+        if (tokens.size() >= 2) {
+            if (auto v = ParseIntArg(tokens[1])) interval = static_cast<int>(*v);
+        }
+        m_freeze.Start(interval);
+        std::cout << "freeze engine started (interval " << interval << "ms)\n";
+        return;
+    }
+
+    if (sub == "stop") {
+        if (!m_freeze.IsRunning()) {
+            std::cout << "freeze engine is not running\n";
+            return;
+        }
+        m_freeze.Stop();
+        std::cout << "freeze engine stopped\n";
+        return;
+    }
+
+    if (sub == "save") {
+        if (tokens.size() < 2) { std::cout << "usage: freeze save <file.json>\n"; return; }
+        std::cout << (m_freeze.SaveToFile(tokens[1]) ? "saved" : "error: could not write file") << "\n";
+        return;
+    }
+
+    if (sub == "load") {
+        if (tokens.size() < 2) { std::cout << "usage: freeze load <file.json>\n"; return; }
+        std::string err;
+        bool ok = m_freeze.LoadFromFile(tokens[1], &err);
+        std::cout << (ok ? "loaded" : ("error: " + err)) << "\n";
+        return;
+    }
+
+    if (sub == "autosave") {
+        std::string dir = ConsoleBook::ConfigDir() + "/tables";
+        std::error_code ec;
+        std::filesystem::create_directories(dir, ec);
+        std::string path = dir + "/" + TitleFingerprint() + ".json";
+        bool ok = m_freeze.SaveToFile(path);
+        std::cout << (ok ? ("saved to " + path) : "error: could not write file") << "\n";
+        return;
+    }
+
+    if (sub == "autoload") {
+        std::string path = ConsoleBook::ConfigDir() + "/tables/" + TitleFingerprint() + ".json";
+        std::string err;
+        bool ok = m_freeze.LoadFromFile(path, &err);
+        std::cout << (ok ? ("loaded from " + path) : ("error: " + err)) << "\n";
+        return;
+    }
+
+    std::cout << "error: unknown freeze subcommand '" << sub << "'\n";
+}
+
+void Shell::CmdDirList(const std::vector<std::string>& tokens) {
+    std::string path = tokens.empty() ? "hdd:\\" : tokens[0];
+    auto entries = m_client.DirList(path);
+    if (!entries) { std::cout << "error: " << m_client.LastError() << "\n"; return; }
+    for (auto& e : *entries) {
+        if (!e.name.empty()) {
+            std::cout << (e.isDirectory ? "<DIR> " : "      ") << e.name;
+            if (!e.isDirectory) std::cout << "  (" << e.size << " bytes)";
+            std::cout << "\n";
+        } else {
+            std::cout << e.raw << "\n";
+        }
+    }
+    std::cout << entries->size() << " entrie(s)\n";
+}
+
+void Shell::CmdDelete(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: delete <path> [dir]\n"; return; }
+    bool isDir = tokens.size() >= 2 && tokens[1] == "dir";
+    bool ok = m_client.Delete(tokens[0], isDir);
+    std::cout << (ok ? "deleted" : ("error: " + m_client.LastError())) << "\n";
+}
+
+void Shell::CmdMkdir(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: mkdir <path>\n"; return; }
+    bool ok = m_client.MakeDirectory(tokens[0]);
+    std::cout << (ok ? "created" : ("error: " + m_client.LastError())) << "\n";
+}
+
+void Shell::CmdNotify(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: notify <text>\n"; return; }
+    std::ostringstream text;
+    for (size_t i = 0; i < tokens.size(); ++i) {
+        if (i) text << ' ';
+        text << tokens[i];
+    }
+    bool ok = m_client.Notify(text.str());
+    std::cout << (ok ? "sent" : "note: console did not acknowledge (this dashboard may not support notify)") << "\n";
+}
+
+void Shell::CmdConsoles(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: consoles <add|list|rm> ...\n"; return; }
+    const std::string& sub = tokens[0];
+
+    if (sub == "add") {
+        if (tokens.size() < 3) { std::cout << "usage: consoles add <name> <ip> [port]\n"; return; }
+        ConsoleEntry e;
+        e.name = tokens[1];
+        e.host = tokens[2];
+        e.port = 730;
+        if (tokens.size() >= 4) {
+            if (auto p = ParseIntArg(tokens[3])) e.port = static_cast<uint16_t>(*p);
+        }
+        m_consoleBook.Upsert(e);
+        m_consoleBook.Save(ConsoleBook::DefaultPath());
+        std::cout << "saved '" << e.name << "' -> " << e.host << ":" << e.port << "\n";
+        return;
+    }
+
+    if (sub == "list") {
+        for (auto& e : m_consoleBook.All()) {
+            std::cout << e.name << "  " << e.host << ":" << e.port << "\n";
+        }
+        std::cout << m_consoleBook.All().size() << " saved console(s)\n";
+        return;
+    }
+
+    if (sub == "rm") {
+        if (tokens.size() < 2) { std::cout << "usage: consoles rm <name>\n"; return; }
+        bool ok = m_consoleBook.Remove(tokens[1]);
+        if (ok) m_consoleBook.Save(ConsoleBook::DefaultPath());
+        std::cout << (ok ? "removed" : "error: no such entry") << "\n";
+        return;
+    }
+
+    std::cout << "error: unknown consoles subcommand '" << sub << "'\n";
+}
+
+void Shell::CmdConnect(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: connect <ip|nickname> [port]\n"; return; }
+
+    std::string host = tokens[0];
+    uint16_t port = 730;
+    if (auto saved = m_consoleBook.Find(tokens[0])) {
+        host = saved->host;
+        port = saved->port;
+    }
+    if (tokens.size() >= 2) {
+        if (auto p = ParseIntArg(tokens[1])) port = static_cast<uint16_t>(*p);
+    }
+
+    m_client.Disconnect();
+    std::cout << "connecting to " << host << ":" << port << "...\n";
+    if (!m_client.Connect(host, port)) {
+        std::cout << "error: " << m_client.LastError() << "\n";
+        return;
+    }
+    std::cout << "connected: " << m_client.Greeting() << "\n";
+}
+
+void Shell::CmdSleep(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) { std::cout << "usage: sleep <ms>\n"; return; }
+    auto ms = ParseIntArg(tokens[0]);
+    if (!ms) { std::cout << "error: could not parse milliseconds\n"; return; }
+    std::this_thread::sleep_for(std::chrono::milliseconds(*ms));
+}
+
+void Shell::CmdDiscover(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        std::cout << "usage: discover <subnet-prefix>   e.g. discover 192.168.1\n";
+        return;
+    }
+    std::cout << "scanning " << tokens[0] << ".1-254 on port 730...\n";
+    // DiscoverConsoles runs many worker threads concurrently, so this
+    // callback can be invoked from several of them at once -- guard the
+    // shared "last printed percent" state and the actual write together,
+    // or concurrent writes to std::cout interleave into garbage.
+    std::mutex progressMutex;
+    int lastPct = -1;
+    auto found = DiscoverConsoles(tokens[0], 730, 300, 64, [&](int scanned, int total) {
+        std::lock_guard<std::mutex> lock(progressMutex);
+        int pct = total > 0 ? (scanned * 100) / total : 100;
+        if (pct != lastPct) { lastPct = pct; std::cout << "\r  " << pct << "%   " << std::flush; }
+    });
+    std::cout << "\r" << found.size() << " console(s) found:\n";
+    for (auto& c : found) std::cout << "  " << c.host << "  (" << c.greeting << ")\n";
+    if (!found.empty()) {
+        std::cout << "tip: 'connect " << found[0].host << "' or 'consoles add <name> " << found[0].host << "'\n";
+    }
+}
+
+void Shell::CmdAsm(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        std::cout << "usage: asm nop | asm blr | asm b <from> <target> | asm bl <from> <target> | asm li <reg> <value>\n";
+        return;
+    }
+    const std::string& op = tokens[0];
+    std::optional<std::vector<uint8_t>> bytes;
+    std::string err;
+
+    if (op == "nop") {
+        bytes = AssembleNop();
+    } else if (op == "blr") {
+        bytes = AssembleBlr();
+    } else if (op == "b" || op == "bl") {
+        if (tokens.size() < 3) { std::cout << "usage: asm " << op << " <from> <target>\n"; return; }
+        auto from = ParseIntArg(tokens[1]);
+        auto target = ParseIntArg(tokens[2]);
+        if (!from || !target) { std::cout << "error: could not parse from/target\n"; return; }
+        bytes = AssembleBranch(*from, *target, op == "bl", &err);
+    } else if (op == "li") {
+        if (tokens.size() < 3) { std::cout << "usage: asm li <reg 0-31> <value>\n"; return; }
+        bytes = AssembleLine(tokens, 0, &err);
+    } else {
+        std::cout << "error: unknown mnemonic '" << op << "' (supported: nop, blr, b, bl, li)\n";
+        return;
+    }
+
+    if (!bytes) { std::cout << "error: " << err << "\n"; return; }
+    std::cout << BytesToHex(*bytes) << "\n";
+}
+
+void Shell::CmdPatch(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) {
+        std::cout << "usage: patch <install|revert|reinstall|rm|list|save|load> ...  (see 'help')\n";
+        return;
+    }
+    const std::string& sub = tokens[0];
+
+    if (sub == "install") {
+        if (tokens.size() < 4) {
+            std::cout << "usage: patch install <name> <addr> hex <hexbytes>\n"
+                          "       patch install <name> <addr> asm <nop|blr|b <target>|bl <target>|li <reg> <value>>\n";
+            return;
+        }
+        auto addr = ParseIntArg(tokens[2]);
+        if (!addr) { std::cout << "error: could not parse address\n"; return; }
+
+        std::vector<uint8_t> bytes;
+        if (tokens[3] == "hex") {
+            if (tokens.size() < 5) { std::cout << "usage: patch install <name> <addr> hex <hexbytes>\n"; return; }
+            auto parsed = HexToBytes(tokens[4]);
+            if (!parsed) { std::cout << "error: could not parse hex bytes\n"; return; }
+            bytes = *parsed;
+        } else if (tokens[3] == "asm") {
+            std::vector<std::string> asmTokens(tokens.begin() + 4, tokens.end());
+            std::string asmErr;
+            auto parsed = AssembleLine(asmTokens, *addr, &asmErr);
+            if (!parsed) { std::cout << "error: " << asmErr << "\n"; return; }
+            bytes = *parsed;
+        } else {
+            std::cout << "error: expected 'hex' or 'asm' after the address\n";
+            return;
+        }
+
+        std::string err;
+        bool ok = m_patch.Install(tokens[1], *addr, bytes, &err);
+        std::cout << (ok ? ("installed (" + BytesToHex(bytes) + ")") : ("error: " + err)) << "\n";
+        return;
+    }
+
+    if (sub == "revert" || sub == "reinstall") {
+        if (tokens.size() < 2) { std::cout << "usage: patch " << sub << " <name>\n"; return; }
+        std::string err;
+        bool ok = sub == "revert" ? m_patch.Revert(tokens[1], &err) : m_patch.Reinstall(tokens[1], &err);
+        std::cout << (ok ? "ok" : ("error: " + err)) << "\n";
+        return;
+    }
+
+    if (sub == "rm") {
+        if (tokens.size() < 2) { std::cout << "usage: patch rm <name>\n"; return; }
+        std::cout << (m_patch.Remove(tokens[1]) ? "removed" : "error: no such patch") << "\n";
+        return;
+    }
+
+    if (sub == "list") {
+        auto entries = m_patch.List();
+        for (auto& e : entries) {
+            std::cout << (e.installed ? "[on]  " : "[off] ") << e.name << "  addr=" << FormatAddress(e.address)
+                       << "  new=" << BytesToHex(e.newBytes) << "  orig=" << BytesToHex(e.originalBytes) << "\n";
+        }
+        std::cout << entries.size() << " patch(es)\n";
+        return;
+    }
+
+    if (sub == "save") {
+        if (tokens.size() < 2) { std::cout << "usage: patch save <file.json>\n"; return; }
+        std::cout << (m_patch.SaveToFile(tokens[1]) ? "saved" : "error: could not write file") << "\n";
+        return;
+    }
+
+    if (sub == "load") {
+        if (tokens.size() < 2) { std::cout << "usage: patch load <file.json>\n"; return; }
+        std::string err;
+        bool ok = m_patch.LoadFromFile(tokens[1], &err);
+        std::cout << (ok ? "loaded (use 'patch reinstall <name>' to apply)" : ("error: " + err)) << "\n";
+        return;
+    }
+
+    std::cout << "error: unknown patch subcommand '" << sub << "'\n";
+}
+
+void Shell::CmdWatch(const std::vector<std::string>& tokens) {
+    if (tokens.size() < 2) {
+        std::cout << "usage: watch <type> <addr> [count=20] [intervalMs=500]\n";
+        return;
+    }
+    auto type = ParseValueType(tokens[0]);
+    if (!type) { std::cout << "error: unknown type '" << tokens[0] << "'\n"; return; }
+
+    std::string err;
+    auto addr = ResolveAddress(m_client, tokens[1], &err);
+    if (!addr) { std::cout << "error: " << err << "\n"; return; }
+
+    int count = 20;
+    int intervalMs = 500;
+    if (tokens.size() >= 3) { if (auto v = ParseIntArg(tokens[2])) count = static_cast<int>(*v); }
+    if (tokens.size() >= 4) { if (auto v = ParseIntArg(tokens[3])) intervalMs = static_cast<int>(*v); }
+
+    for (int i = 0; i < count; ++i) {
+        auto val = ReadTyped(m_client, *addr, *type);
+        std::cout << "[" << (i + 1) << "/" << count << "] " << FormatAddress(*addr) << " = "
+                   << (val ? val->ToString() : std::string("??")) << "\n";
+        if (i + 1 < count) std::this_thread::sleep_for(std::chrono::milliseconds(intervalMs));
+    }
+}
+
+bool Shell::Dispatch(const std::vector<std::string>& tokens) {
+    if (tokens.empty()) return true;
+    if (!tokens[0].empty() && tokens[0][0] == '#') return true; // comment line (script mode)
+
+    const std::string& cmd = tokens[0];
+    std::vector<std::string> rest(tokens.begin() + 1, tokens.end());
+
+    if (cmd == "quit" || cmd == "exit") return false;
+    if (cmd == "help" || cmd == "?") { PrintHelp(); return true; }
+    if (cmd == "raw") { CmdRaw(rest); return true; }
+    if (cmd == "dbgname") { CmdDbgName(); return true; }
+    if (cmd == "modules") { CmdModules(); return true; }
+    if (cmd == "threads") { CmdThreads(); return true; }
+    if (cmd == "walkmem") { CmdWalkMem(); return true; }
+    if (cmd == "getmem") { CmdGetMem(rest); return true; }
+    if (cmd == "setmem") { CmdSetMem(rest); return true; }
+    if (cmd == "xbeinfo") { CmdXbeInfo(); return true; }
+    if (cmd == "reboot") { CmdReboot(rest); return true; }
+    if (cmd == "scan") { CmdScan(rest); return true; }
+    if (cmd == "scanall") { CmdScanAll(rest); return true; }
+    if (cmd == "read") { CmdRead(rest); return true; }
+    if (cmd == "write") { CmdWrite(rest); return true; }
+    if (cmd == "vscan") { CmdVScan(rest); return true; }
+    if (cmd == "freeze") { CmdFreeze(rest); return true; }
+    if (cmd == "dirlist" || cmd == "ls") { CmdDirList(rest); return true; }
+    if (cmd == "delete" || cmd == "rm") { CmdDelete(rest); return true; }
+    if (cmd == "mkdir") { CmdMkdir(rest); return true; }
+    if (cmd == "notify") { CmdNotify(rest); return true; }
+    if (cmd == "consoles") { CmdConsoles(rest); return true; }
+    if (cmd == "connect") { CmdConnect(rest); return true; }
+    if (cmd == "sleep") { CmdSleep(rest); return true; }
+    if (cmd == "discover") { CmdDiscover(rest); return true; }
+    if (cmd == "asm") { CmdAsm(rest); return true; }
+    if (cmd == "patch") { CmdPatch(rest); return true; }
+    if (cmd == "watch") { CmdWatch(rest); return true; }
+
+    // Unknown local command: forward it verbatim as a raw XBDM command so
+    // the shell stays useful for commands it doesn't specifically wrap.
+    CmdRaw(tokens);
+    return true;
+}
+
+void Shell::Run() {
+    std::cout << "Connected: " << m_client.Greeting() << "\n";
+    std::cout << "Type 'help' for commands, 'quit' to exit.\n";
+    std::string line;
+    for (;;) {
+        std::cout << "toastylink> " << std::flush;
+        if (!std::getline(std::cin, line)) break;
+        auto tokens = Tokenize(line);
+        if (!Dispatch(tokens)) break;
+        if (!m_client.IsConnected()) {
+            std::cout << "connection closed by console.\n";
+            break;
+        }
+    }
+}
+
+void Shell::RunScript(const std::string& path) {
+    std::ifstream in(path);
+    if (!in) {
+        std::cout << "error: could not open script '" << path << "'\n";
+        return;
+    }
+    std::string line;
+    int lineNo = 0;
+    while (std::getline(in, line)) {
+        ++lineNo;
+        auto tokens = Tokenize(line);
+        if (tokens.empty()) continue;
+        std::cout << "[" << lineNo << "] " << line << "\n";
+        if (!Dispatch(tokens)) break;
+    }
+}
+
+} // namespace tl
+
+```
+
+`src/Socket.cpp`:
+
+```cpp
+#include "ToastyLink/Socket.h"
+
+#ifdef _WIN32
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #pragma comment(lib, "ws2_32.lib")
+    using socket_t = SOCKET;
+    static constexpr socket_t kInvalidSocket = INVALID_SOCKET;
+#else
+    #include <sys/socket.h>
+    #include <sys/select.h>
+    #include <sys/time.h>
+    #include <netdb.h>
+    #include <unistd.h>
+    #include <fcntl.h>
+    #include <cerrno>
+    #include <cstring>
+    using socket_t = int;
+    static constexpr socket_t kInvalidSocket = -1;
+#endif
+
+namespace tl {
+
+bool InitSockets(std::string* errorOut) {
+#ifdef _WIN32
+    WSADATA wsaData;
+    int rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (rc != 0) {
+        if (errorOut) *errorOut = "WSAStartup failed with code " + std::to_string(rc);
+        return false;
+    }
+#else
+    (void)errorOut;
+#endif
+    return true;
+}
+
+void ShutdownSockets() {
+#ifdef _WIN32
+    WSACleanup();
+#endif
+}
+
+static void CloseRaw(socket_t fd) {
+#ifdef _WIN32
+    closesocket(fd);
+#else
+    close(fd);
+#endif
+}
+
+TcpSocket::TcpSocket() : m_fd(static_cast<intptr_t>(kInvalidSocket)), m_open(false) {}
+
+TcpSocket::~TcpSocket() { Close(); }
+
+bool TcpSocket::Connect(const std::string& host, uint16_t port, std::string* errorOut) {
+    Close();
+
+    struct addrinfo hints;
+    std::memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    struct addrinfo* result = nullptr;
+    const std::string portStr = std::to_string(port);
+    int rc = getaddrinfo(host.c_str(), portStr.c_str(), &hints, &result);
+    if (rc != 0 || result == nullptr) {
+        if (errorOut) *errorOut = "failed to resolve host '" + host + "'";
+        return false;
+    }
+
+    socket_t fd = kInvalidSocket;
+    struct addrinfo* attempt = nullptr;
+    for (attempt = result; attempt != nullptr; attempt = attempt->ai_next) {
+        fd = socket(attempt->ai_family, attempt->ai_socktype, attempt->ai_protocol);
+        if (fd == kInvalidSocket) continue;
+        if (connect(fd, attempt->ai_addr, static_cast<int>(attempt->ai_addrlen)) == 0) {
+            break; // connected
+        }
+        CloseRaw(fd);
+        fd = kInvalidSocket;
+    }
+    freeaddrinfo(result);
+
+    if (fd == kInvalidSocket) {
+        if (errorOut) *errorOut = "could not connect to " + host + ":" + portStr +
+                                   " (is XBDM enabled and the console reachable?)";
+        return false;
+    }
+
+    m_fd = static_cast<intptr_t>(fd);
+    m_open = true;
+    m_recvBuf.clear();
+    return true;
+}
+
+bool TcpSocket::ConnectWithTimeout(const std::string& host, uint16_t port, int timeoutMs,
+                                    std::string* errorOut) {
+    Close();
+
+    struct addrinfo hints;
+    std::memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    struct addrinfo* result = nullptr;
+    const std::string portStr = std::to_string(port);
+    int rc = getaddrinfo(host.c_str(), portStr.c_str(), &hints, &result);
+    if (rc != 0 || result == nullptr) {
+        if (errorOut) *errorOut = "failed to resolve host '" + host + "'";
+        return false;
+    }
+
+    socket_t fd = kInvalidSocket;
+    bool connected = false;
+
+    for (struct addrinfo* attempt = result; attempt != nullptr && !connected; attempt = attempt->ai_next) {
+        fd = socket(attempt->ai_family, attempt->ai_socktype, attempt->ai_protocol);
+        if (fd == kInvalidSocket) continue;
+
+#ifdef _WIN32
+        u_long mode = 1;
+        ioctlsocket(fd, FIONBIO, &mode);
+#else
+        int flags = fcntl(fd, F_GETFL, 0);
+        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#endif
+
+        int cr = connect(fd, attempt->ai_addr, static_cast<int>(attempt->ai_addrlen));
+        bool inProgress =
+#ifdef _WIN32
+            (cr != 0 && WSAGetLastError() == WSAEWOULDBLOCK);
+#else
+            (cr != 0 && errno == EINPROGRESS);
+#endif
+
+        if (cr == 0) {
+            connected = true;
+        } else if (inProgress) {
+            fd_set writeSet, errSet;
+            FD_ZERO(&writeSet);
+            FD_ZERO(&errSet);
+            FD_SET(fd, &writeSet);
+            FD_SET(fd, &errSet);
+            struct timeval tv;
+            tv.tv_sec = timeoutMs / 1000;
+            tv.tv_usec = (timeoutMs % 1000) * 1000;
+
+            int sel = select(static_cast<int>(fd) + 1, nullptr, &writeSet, &errSet, &tv);
+            if (sel > 0 && FD_ISSET(fd, &writeSet) && !FD_ISSET(fd, &errSet)) {
+                int soErr = 0;
+#ifdef _WIN32
+                int errLen = sizeof(soErr);
+                getsockopt(fd, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&soErr), &errLen);
+#else
+                socklen_t errLen = sizeof(soErr);
+                getsockopt(fd, SOL_SOCKET, SO_ERROR, &soErr, &errLen);
+#endif
+                connected = (soErr == 0);
+            }
+        }
+
+        if (!connected) {
+            CloseRaw(fd);
+            fd = kInvalidSocket;
+        }
+    }
+    freeaddrinfo(result);
+
+    if (!connected) {
+        if (errorOut) *errorOut = "no response from " + host + ":" + portStr;
+        return false;
+    }
+
+    // Back to blocking mode for normal send/recv use after a successful connect.
+#ifdef _WIN32
+    u_long mode = 0;
+    ioctlsocket(fd, FIONBIO, &mode);
+#else
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
+#endif
+
+    m_fd = static_cast<intptr_t>(fd);
+    m_open = true;
+    m_recvBuf.clear();
+    return true;
+}
+
+void TcpSocket::SetReceiveTimeout(int timeoutMs) {
+    if (!m_open) return;
+    socket_t fd = static_cast<socket_t>(m_fd);
+#ifdef _WIN32
+    DWORD ms = static_cast<DWORD>(timeoutMs);
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char*>(&ms), sizeof(ms));
+#else
+    struct timeval tv;
+    tv.tv_sec = timeoutMs / 1000;
+    tv.tv_usec = (timeoutMs % 1000) * 1000;
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+#endif
+}
+
+void TcpSocket::Close() {
+    if (m_open) {
+        CloseRaw(static_cast<socket_t>(m_fd));
+        m_open = false;
+    }
+    m_fd = static_cast<intptr_t>(kInvalidSocket);
+}
+
+bool TcpSocket::SendAll(const void* data, size_t len) {
+    if (!m_open) return false;
+    const char* p = static_cast<const char*>(data);
+    size_t sent = 0;
+    while (sent < len) {
+        int rc = send(static_cast<socket_t>(m_fd), p + sent, static_cast<int>(len - sent), 0);
+        if (rc <= 0) return false;
+        sent += static_cast<size_t>(rc);
+    }
+    return true;
+}
+
+bool TcpSocket::SendString(const std::string& s) { return SendAll(s.data(), s.size()); }
+
+int TcpSocket::RecvSome(void* buf, size_t bufLen) {
+    if (!m_open) return -1;
+    int rc = recv(static_cast<socket_t>(m_fd), static_cast<char*>(buf), static_cast<int>(bufLen), 0);
+    return rc;
+}
+
+bool TcpSocket::ReadLine(std::string& outLine) {
+    for (;;) {
+        // Look for a newline already buffered from a previous recv().
+        size_t pos = m_recvBuf.find('\n');
+        if (pos != std::string::npos) {
+            std::string line = m_recvBuf.substr(0, pos);
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            m_recvBuf.erase(0, pos + 1);
+            outLine = line;
+            return true;
+        }
+
+        if (!m_open) return false;
+
+        char chunk[4096];
+        int n = RecvSome(chunk, sizeof(chunk));
+        if (n <= 0) {
+            // Connection closed or errored. Surface any trailing partial
+            // line as a last "line" so callers see it instead of it being
+            // silently dropped.
+            m_open = false;
+            if (!m_recvBuf.empty()) {
+                outLine = m_recvBuf;
+                m_recvBuf.clear();
+                return true;
+            }
+            return false;
+        }
+        m_recvBuf.append(chunk, static_cast<size_t>(n));
+    }
+}
+
+} // namespace tl
+
+```
+
+`src/TypedValue.cpp`:
+
+```cpp
+#include "ToastyLink/TypedValue.h"
+
+#include <cmath>
+#include <cstring>
+#include <sstream>
+
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+namespace {
+
+std::vector<uint8_t> PackBE(uint64_t value, size_t n) {
+    std::vector<uint8_t> out(n);
+    for (size_t i = 0; i < n; ++i) {
+        out[i] = static_cast<uint8_t>((value >> (8 * (n - 1 - i))) & 0xFFu);
+    }
+    return out;
+}
+
+uint64_t UnpackBE(const std::vector<uint8_t>& b) {
+    uint64_t v = 0;
+    for (uint8_t byte : b) v = (v << 8) | byte;
+    return v;
+}
+
+bool InRangeSigned(long long v, long long lo, long long hi) { return v >= lo && v <= hi; }
+bool InRangeUnsigned(unsigned long long v, unsigned long long hi) { return v <= hi; }
+
+} // namespace
+
+size_t ValueTypeSize(ValueType t) {
+    switch (t) {
+        case ValueType::I8:
+        case ValueType::U8: return 1;
+        case ValueType::I16:
+        case ValueType::U16: return 2;
+        case ValueType::I32:
+        case ValueType::U32:
+        case ValueType::F32: return 4;
+        case ValueType::I64:
+        case ValueType::U64:
+        case ValueType::F64: return 8;
+    }
+    return 0;
+}
+
+const char* ValueTypeName(ValueType t) {
+    switch (t) {
+        case ValueType::I8: return "i8";
+        case ValueType::U8: return "u8";
+        case ValueType::I16: return "i16";
+        case ValueType::U16: return "u16";
+        case ValueType::I32: return "i32";
+        case ValueType::U32: return "u32";
+        case ValueType::I64: return "i64";
+        case ValueType::U64: return "u64";
+        case ValueType::F32: return "f32";
+        case ValueType::F64: return "f64";
+    }
+    return "?";
+}
+
+std::optional<ValueType> ParseValueType(const std::string& s) {
+    if (s == "i8") return ValueType::I8;
+    if (s == "u8") return ValueType::U8;
+    if (s == "i16") return ValueType::I16;
+    if (s == "u16") return ValueType::U16;
+    if (s == "i32") return ValueType::I32;
+    if (s == "u32") return ValueType::U32;
+    if (s == "i64") return ValueType::I64;
+    if (s == "u64") return ValueType::U64;
+    if (s == "f32") return ValueType::F32;
+    if (s == "f64") return ValueType::F64;
+    return std::nullopt;
+}
+
+std::optional<TypedValue> TypedValueFromBigEndianBytes(ValueType type,
+                                                        const std::vector<uint8_t>& beBytes) {
+    if (beBytes.size() != ValueTypeSize(type)) return std::nullopt;
+    TypedValue tv;
+    tv.type = type;
+    tv.bytes = beBytes;
+    return tv;
+}
+
+std::optional<TypedValue> ParseTypedValue(ValueType type, const std::string& text) {
+    try {
+        switch (type) {
+            case ValueType::I8: {
+                long long v = std::stoll(text);
+                if (!InRangeSigned(v, -128, 127)) return std::nullopt;
+                return TypedValue{type, PackBE(static_cast<uint64_t>(static_cast<int64_t>(v)) & 0xFFu, 1)};
+            }
+            case ValueType::U8: {
+                unsigned long long v = std::stoull(text);
+                if (!InRangeUnsigned(v, 0xFFu)) return std::nullopt;
+                return TypedValue{type, PackBE(v, 1)};
+            }
+            case ValueType::I16: {
+                long long v = std::stoll(text);
+                if (!InRangeSigned(v, -32768, 32767)) return std::nullopt;
+                return TypedValue{type, PackBE(static_cast<uint64_t>(static_cast<int64_t>(v)) & 0xFFFFu, 2)};
+            }
+            case ValueType::U16: {
+                unsigned long long v = std::stoull(text);
+                if (!InRangeUnsigned(v, 0xFFFFu)) return std::nullopt;
+                return TypedValue{type, PackBE(v, 2)};
+            }
+            case ValueType::I32: {
+                long long v = std::stoll(text);
+                if (!InRangeSigned(v, INT32_MIN, INT32_MAX)) return std::nullopt;
+                return TypedValue{type, PackBE(static_cast<uint64_t>(static_cast<int64_t>(v)) & 0xFFFFFFFFu, 4)};
+            }
+            case ValueType::U32: {
+                unsigned long long v = std::stoull(text);
+                if (!InRangeUnsigned(v, 0xFFFFFFFFu)) return std::nullopt;
+                return TypedValue{type, PackBE(v, 4)};
+            }
+            case ValueType::I64: {
+                long long v = std::stoll(text);
+                return TypedValue{type, PackBE(static_cast<uint64_t>(static_cast<int64_t>(v)), 8)};
+            }
+            case ValueType::U64: {
+                unsigned long long v = std::stoull(text);
+                return TypedValue{type, PackBE(static_cast<uint64_t>(v), 8)};
+            }
+            case ValueType::F32: {
+                double d = std::stod(text);
+                float f = static_cast<float>(d);
+                uint32_t bits = 0;
+                std::memcpy(&bits, &f, sizeof(bits));
+                return TypedValue{type, PackBE(bits, 4)};
+            }
+            case ValueType::F64: {
+                double d = std::stod(text);
+                uint64_t bits = 0;
+                std::memcpy(&bits, &d, sizeof(bits));
+                return TypedValue{type, PackBE(bits, 8)};
+            }
+        }
+    } catch (...) {
+        return std::nullopt;
+    }
+    return std::nullopt;
+}
+
+bool TypedValue::IsSigned() const {
+    switch (type) {
+        case ValueType::I8:
+        case ValueType::I16:
+        case ValueType::I32:
+        case ValueType::I64: return true;
+        default: return false;
+    }
+}
+
+int64_t TypedValue::AsInt64() const {
+    uint64_t raw = UnpackBE(bytes);
+    switch (type) {
+        case ValueType::I8: return static_cast<int8_t>(raw);
+        case ValueType::I16: return static_cast<int16_t>(raw);
+        case ValueType::I32: return static_cast<int32_t>(raw);
+        case ValueType::I64: return static_cast<int64_t>(raw);
+        default: return static_cast<int64_t>(raw);
+    }
+}
+
+uint64_t TypedValue::AsUInt64() const { return UnpackBE(bytes); }
+
+int CompareTypedValues(const TypedValue& a, const TypedValue& b) {
+    if (a.type != b.type) return 0;
+    if (a.IsFloat()) {
+        double x = a.AsDouble(), y = b.AsDouble();
+        if (x < y) return -1;
+        if (x > y) return 1;
+        return 0;
+    }
+    if (a.IsSigned()) {
+        int64_t x = a.AsInt64(), y = b.AsInt64();
+        if (x < y) return -1;
+        if (x > y) return 1;
+        return 0;
+    }
+    uint64_t x = a.AsUInt64(), y = b.AsUInt64();
+    if (x < y) return -1;
+    if (x > y) return 1;
+    return 0;
+}
+
+double TypedValue::AsDouble() const {
+    uint64_t raw = UnpackBE(bytes);
+    switch (type) {
+        case ValueType::I8: return static_cast<double>(static_cast<int8_t>(raw));
+        case ValueType::U8: return static_cast<double>(static_cast<uint8_t>(raw));
+        case ValueType::I16: return static_cast<double>(static_cast<int16_t>(raw));
+        case ValueType::U16: return static_cast<double>(static_cast<uint16_t>(raw));
+        case ValueType::I32: return static_cast<double>(static_cast<int32_t>(raw));
+        case ValueType::U32: return static_cast<double>(static_cast<uint32_t>(raw));
+        case ValueType::I64: return static_cast<double>(static_cast<int64_t>(raw));
+        case ValueType::U64: return static_cast<double>(raw);
+        case ValueType::F32: {
+            uint32_t bits = static_cast<uint32_t>(raw);
+            float f = 0.0f;
+            std::memcpy(&f, &bits, sizeof(f));
+            return static_cast<double>(f);
+        }
+        case ValueType::F64: {
+            double d = 0.0;
+            std::memcpy(&d, &raw, sizeof(d));
+            return d;
+        }
+    }
+    return 0.0;
+}
+
+std::string TypedValue::ToString() const {
+    std::ostringstream oss;
+    if (IsFloat()) {
+        // Enough significant digits to round-trip the value exactly:
+        // 9 for float, 17 for double. Cheat tables persist values as
+        // this text and re-parse them, so anything less silently
+        // degrades a saved value every save/load cycle.
+        oss.precision(type == ValueType::F32 ? 9 : 17);
+        oss << AsDouble();
+    } else if (IsSigned()) {
+        // Formatted straight from the integer view: routing through
+        // double would silently mangle any value needing more than 53
+        // bits of mantissa (e.g. u64 max came back as 2^63).
+        oss << static_cast<long long>(AsInt64());
+    } else {
+        oss << static_cast<unsigned long long>(AsUInt64());
+    }
+    return oss.str();
+}
+
+bool TypedValue::EqualsBytes(const TypedValue& other) const {
+    return type == other.type && bytes == other.bytes;
+}
+
+std::optional<TypedValue> ReadTyped(XbdmClient& client, uint64_t address, ValueType type) {
+    auto raw = client.GetMemory(address, static_cast<uint32_t>(ValueTypeSize(type)));
+    if (!raw) return std::nullopt;
+    std::vector<uint8_t> bytes;
+    bytes.reserve(raw->size());
+    for (auto& b : *raw) {
+        if (!b.mapped) return std::nullopt;
+        bytes.push_back(b.value);
+    }
+    return TypedValueFromBigEndianBytes(type, bytes);
+}
+
+bool WriteTyped(XbdmClient& client, uint64_t address, const TypedValue& value) {
+    return client.SetMemory(address, value.bytes);
+}
+
+} // namespace tl
+
+```
+
+`src/ValueScanner.cpp`:
+
+```cpp
+#include "ToastyLink/ValueScanner.h"
+
+#include <algorithm>
+
+#include "ToastyLink/XbdmClient.h"
+
+namespace tl {
+
+namespace {
+
+constexpr uint64_t kMergeThreshold = 0x1000;   // merge candidates within this gap into one read
+constexpr uint64_t kMaxClusterSpan = 0x40000;  // cap a single bulk read's span
+
+} // namespace
+
+size_t ValueScanner::FirstScan(uint64_t start, uint64_t length, ValueType type,
+                                const std::optional<TypedValue>& exactValue, bool alignedOnly,
+                                const ScanProgressFn& progress) {
+    m_candidates.clear();
+    m_type = type;
+    m_hasScan = true;
+
+    const size_t valSize = ValueTypeSize(type);
+    if (valSize == 0 || length < valSize) return 0;
+
+    const uint32_t chunkSize = 0x10000;
+    const uint64_t end = start + length;
+    uint64_t pos = start;
+
+    while (pos < end) {
+        uint64_t remaining = end - pos;
+        // Overlap by (valSize - 1) so a value straddling a chunk boundary
+        // is never missed.
+        uint32_t readLen = static_cast<uint32_t>(std::min<uint64_t>(chunkSize, remaining));
+        auto bytes = m_client.GetMemory(pos, readLen);
+        if (!bytes || bytes->empty()) {
+            pos += (readLen > 0 ? readLen : 1); // never spin on a zero-length read
+            if (progress) progress(pos - start, length);
+            continue;
+        }
+
+        const size_t n = bytes->size();
+        const size_t step = alignedOnly ? valSize : 1;
+
+        // Chunks overlap by (valSize - 1) so a value straddling a boundary
+        // isn't missed, which means a chunk's start address is usually NOT
+        // aligned to valSize relative to `start`. For an aligned scan the
+        // candidate offsets therefore have to be derived from the absolute
+        // address, not from offset 0 of the chunk -- otherwise every chunk
+        // after the first scans at the wrong phase, reporting misaligned
+        // addresses and missing the genuinely aligned values entirely.
+        size_t i0 = 0;
+        if (alignedOnly) {
+            uint64_t misalign = (pos - start) % valSize;
+            if (misalign != 0) i0 = static_cast<size_t>(valSize - misalign);
+        }
+
+        for (size_t i = i0; i + valSize <= n; i += step) {
+            std::vector<uint8_t> raw;
+            raw.reserve(valSize);
+            bool mapped = true;
+            for (size_t j = 0; j < valSize; ++j) {
+                const MemoryByte& mb = (*bytes)[i + j];
+                if (!mb.mapped) { mapped = false; break; }
+                raw.push_back(mb.value);
+            }
+            if (!mapped) continue;
+
+            auto tv = TypedValueFromBigEndianBytes(type, raw);
+            if (!tv) continue;
+            if (exactValue && !tv->EqualsBytes(*exactValue)) continue;
+
+            ScanCandidate c;
+            c.address = pos + i;
+            c.value = *tv;
+            m_candidates.push_back(std::move(c));
+        }
+
+        // Advance by what the console ACTUALLY returned, not by what was
+        // requested: XBDM implementations legitimately cap how much a
+        // single getmem returns, and advancing by the requested length
+        // would silently skip every byte that didn't arrive.
+        const uint64_t overlap = valSize - 1;
+        uint64_t adv;
+        if (n > overlap) {
+            adv = n - overlap; // keep overlap so a straddling value isn't missed
+        } else {
+            adv = (n > 0) ? n : readLen; // degenerate short read: just make progress
+        }
+        if (adv == 0) adv = 1; // guarantee forward progress, never spin
+        pos += adv;
+
+        if (progress) progress(std::min<uint64_t>(pos - start, length), length);
+    }
+
+    return m_candidates.size();
+}
+
+std::vector<std::optional<TypedValue>> ValueScanner::ReadValuesAt(const std::vector<uint64_t>& addresses,
+                                                                    ValueType type) const {
+    std::vector<std::optional<TypedValue>> results(addresses.size());
+    if (addresses.empty()) return results;
+
+    const size_t valSize = ValueTypeSize(type);
+
+    // Sort indices by address so nearby candidates can share one bulk read.
+    std::vector<size_t> order(addresses.size());
+    for (size_t i = 0; i < order.size(); ++i) order[i] = i;
+    std::sort(order.begin(), order.end(),
+              [&](size_t a, size_t b) { return addresses[a] < addresses[b]; });
+
+    size_t i = 0;
+    while (i < order.size()) {
+        size_t j = i;
+        uint64_t clusterStart = addresses[order[i]];
+        uint64_t clusterEnd = clusterStart + valSize;
+        while (j + 1 < order.size()) {
+            uint64_t nextAddr = addresses[order[j + 1]];
+            uint64_t nextEnd = nextAddr + valSize;
+            if (nextAddr <= clusterEnd + kMergeThreshold && (nextEnd - clusterStart) <= kMaxClusterSpan) {
+                clusterEnd = nextEnd;
+                ++j;
+            } else {
+                break;
+            }
+        }
+
+        auto bytes = m_client.GetMemory(clusterStart, static_cast<uint32_t>(clusterEnd - clusterStart));
+        if (bytes) {
+            for (size_t k = i; k <= j; ++k) {
+                uint64_t addr = addresses[order[k]];
+                size_t offset = static_cast<size_t>(addr - clusterStart);
+                if (offset + valSize > bytes->size()) continue;
+                std::vector<uint8_t> raw;
+                raw.reserve(valSize);
+                bool mapped = true;
+                for (size_t b = 0; b < valSize; ++b) {
+                    const MemoryByte& mb = (*bytes)[offset + b];
+                    if (!mb.mapped) { mapped = false; break; }
+                    raw.push_back(mb.value);
+                }
+                if (mapped) results[order[k]] = TypedValueFromBigEndianBytes(type, raw);
+            }
+        }
+
+        i = j + 1;
+    }
+
+    return results;
+}
+
+size_t ValueScanner::NextScan(NextScanMode mode, const std::optional<TypedValue>& exactValue) {
+    if (m_candidates.empty()) return 0;
+
+    std::vector<uint64_t> addrs;
+    addrs.reserve(m_candidates.size());
+    for (auto& c : m_candidates) addrs.push_back(c.address);
+
+    auto fresh = ReadValuesAt(addrs, m_type);
+
+    std::vector<ScanCandidate> kept;
+    kept.reserve(m_candidates.size());
+    for (size_t i = 0; i < m_candidates.size(); ++i) {
+        if (!fresh[i]) continue; // now unmapped/unreadable -- drop
+        const TypedValue& oldVal = m_candidates[i].value;
+        const TypedValue& newVal = *fresh[i];
+
+        bool keep = false;
+        switch (mode) {
+            case NextScanMode::Changed: keep = !newVal.EqualsBytes(oldVal); break;
+            case NextScanMode::Unchanged: keep = newVal.EqualsBytes(oldVal); break;
+            // Exact three-way compare: comparing via double would misjudge
+            // 64-bit values whose difference falls below a double's
+            // 53-bit mantissa resolution.
+            case NextScanMode::Increased: keep = CompareTypedValues(newVal, oldVal) > 0; break;
+            case NextScanMode::Decreased: keep = CompareTypedValues(newVal, oldVal) < 0; break;
+            case NextScanMode::Exact: keep = exactValue && newVal.EqualsBytes(*exactValue); break;
+        }
+
+        if (keep) {
+            ScanCandidate c;
+            c.address = m_candidates[i].address;
+            c.value = newVal;
+            kept.push_back(std::move(c));
+        }
+    }
+
+    m_candidates = std::move(kept);
+    return m_candidates.size();
+}
+
+void ValueScanner::Reset() {
+    m_candidates.clear();
+    m_hasScan = false;
+}
+
+} // namespace tl
+
+```
+
+`src/XbdmClient.cpp`:
+
+```cpp
+#include "ToastyLink/XbdmClient.h"
+
+#include <algorithm>
+#include <cctype>
+#include <sstream>
+
+#include "ToastyLink/HexUtils.h"
+
+namespace tl {
+
+namespace {
+
+std::string ToLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    return s;
+}
+
+std::string Trim(const std::string& s) {
+    size_t start = s.find_first_not_of(" \t\r\n");
+    if (start == std::string::npos) return "";
+    size_t end = s.find_last_not_of(" \t\r\n");
+    return s.substr(start, end - start + 1);
+}
+
+// Best-effort key=value / key="value" tokenizer for XBDM's semi-structured
+// response lines (e.g. `name="xam.xex" base=0x82000000 size=0x1a2b3c`).
+std::vector<std::pair<std::string, std::string>> ParseKeyValues(const std::string& line) {
+    std::vector<std::pair<std::string, std::string>> out;
+    size_t i = 0;
+    const size_t n = line.size();
+    while (i < n) {
+        while (i < n && std::isspace(static_cast<unsigned char>(line[i]))) ++i;
+        size_t keyStart = i;
+        while (i < n && line[i] != '=' && !std::isspace(static_cast<unsigned char>(line[i]))) ++i;
+        if (i >= n || line[i] != '=') {
+            // No '=' found for this token; skip to next whitespace.
+            while (i < n && !std::isspace(static_cast<unsigned char>(line[i]))) ++i;
+            continue;
+        }
+        std::string key = line.substr(keyStart, i - keyStart);
+        ++i; // skip '='
+        std::string value;
+        if (i < n && line[i] == '"') {
+            ++i;
+            size_t valStart = i;
+            while (i < n && line[i] != '"') ++i;
+            value = line.substr(valStart, i - valStart);
+            if (i < n) ++i; // skip closing quote
+        } else {
+            size_t valStart = i;
+            while (i < n && !std::isspace(static_cast<unsigned char>(line[i]))) ++i;
+            value = line.substr(valStart, i - valStart);
+        }
+        out.emplace_back(ToLower(key), value);
+    }
+    return out;
+}
+
+std::optional<uint64_t> FindHex(const std::vector<std::pair<std::string, std::string>>& kv,
+                                 const std::string& key) {
+    for (auto& p : kv) {
+        if (p.first == key) return ParseIntArg(p.second);
+    }
+    return std::nullopt;
+}
+
+std::optional<std::string> FindStr(const std::vector<std::pair<std::string, std::string>>& kv,
+                                    const std::string& key) {
+    for (auto& p : kv) {
+        if (p.first == key) return p.second;
+    }
+    return std::nullopt;
+}
+
+} // namespace
+
+bool XbdmClient::Connect(const std::string& host, uint16_t port) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_lastError.clear();
+    m_greeting.clear();
+
+    if (!m_socket.Connect(host, port, &m_lastError)) {
+        return false;
+    }
+
+    // The server sends a single greeting line immediately on connect,
+    // e.g. "201- connected".
+    std::string line;
+    if (!m_socket.ReadLine(line)) {
+        m_lastError = "connected, but console closed the connection before greeting";
+        m_socket.Close();
+        return false;
+    }
+    m_greeting = line;
+    return true;
+}
+
+void XbdmClient::Disconnect() {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_socket.Close();
+}
+
+bool XbdmClient::IsConnected() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_socket.IsOpen();
+}
+
+std::string XbdmClient::Greeting() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_greeting;
+}
+
+std::string XbdmClient::LastError() const {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_lastError;
+}
+
+bool XbdmClient::ReadStatusLine(XbdmResponse& resp) {
+    std::string line;
+    if (!m_socket.ReadLine(line)) {
+        m_lastError = "connection closed while waiting for a response";
+        return false;
+    }
+    resp.statusLine = line;
+
+    size_t dash = line.find('-');
+    if (dash == std::string::npos) {
+        // Not a well-formed status line; surface it as-is rather than
+        // silently failing.
+        resp.code = 0;
+        resp.message = line;
+        resp.success = false;
+        return true;
+    }
+
+    std::string codeStr = Trim(line.substr(0, dash));
+    resp.message = Trim(line.substr(dash + 1));
+    try {
+        resp.code = std::stoi(codeStr);
+    } catch (...) {
+        resp.code = 0;
+    }
+    resp.success = (resp.code >= 200 && resp.code < 300);
+
+    std::string lowerMsg = ToLower(resp.message);
+    resp.multiline = resp.code == 202 || lowerMsg.find("multiline") != std::string::npos;
+    return true;
+}
+
+void XbdmClient::ReadMultilineBody(XbdmResponse& resp) {
+    std::string line;
+    while (m_socket.ReadLine(line)) {
+        if (line == ".") break;
+        resp.lines.push_back(line);
+    }
+}
+
+XbdmResponse XbdmClient::SendCommand(const std::string& command) {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    XbdmResponse resp;
+    if (!m_socket.IsOpen()) {
+        m_lastError = "not connected";
+        return resp;
+    }
+    if (!m_socket.SendString(command + "\r\n")) {
+        m_lastError = "failed to send command (connection lost)";
+        return resp;
+    }
+    if (!ReadStatusLine(resp)) {
+        return resp;
+    }
+    if (resp.multiline) {
+        ReadMultilineBody(resp);
+    }
+    return resp;
+}
+
+std::optional<std::string> XbdmClient::GetDebugName() {
+    XbdmResponse resp = SendCommand("dbgname");
+    if (!resp.success) return std::nullopt;
+    return resp.message;
+}
+
+std::optional<std::vector<ModuleInfo>> XbdmClient::ListModules() {
+    XbdmResponse resp = SendCommand("modules");
+    if (!resp.success) return std::nullopt;
+
+    std::vector<ModuleInfo> out;
+    for (auto& line : resp.lines) {
+        auto kv = ParseKeyValues(line);
+        ModuleInfo mi;
+        mi.raw = line;
+        if (auto v = FindStr(kv, "name")) mi.name = *v;
+        if (auto v = FindHex(kv, "base")) mi.base = *v;
+        if (auto v = FindHex(kv, "size")) mi.size = *v;
+        if (auto v = FindHex(kv, "check")) mi.checksum = *v;
+        if (auto v = FindHex(kv, "timestamp")) mi.timestamp = *v;
+        out.push_back(std::move(mi));
+    }
+    return out;
+}
+
+std::optional<std::vector<uint32_t>> XbdmClient::ListThreads() {
+    XbdmResponse resp = SendCommand("threads");
+    if (!resp.success) return std::nullopt;
+
+    std::vector<uint32_t> out;
+    for (auto& line : resp.lines) {
+        std::string t = Trim(line);
+        if (t.empty()) continue;
+        if (auto v = ParseIntArg(t)) out.push_back(static_cast<uint32_t>(*v));
+    }
+    return out;
+}
+
+std::optional<std::vector<MemoryRegion>> XbdmClient::WalkMemory() {
+    XbdmResponse resp = SendCommand("walkmem");
+    if (!resp.success) return std::nullopt;
+
+    std::vector<MemoryRegion> out;
+    for (auto& line : resp.lines) {
+        auto kv = ParseKeyValues(line);
+        MemoryRegion mr;
+        mr.raw = line;
+        if (auto v = FindHex(kv, "base")) mr.base = *v;
+        if (auto v = FindHex(kv, "size")) mr.size = *v;
+        if (auto v = FindHex(kv, "protect")) mr.protect = static_cast<uint32_t>(*v);
+        out.push_back(std::move(mr));
+    }
+    return out;
+}
+
+std::optional<std::vector<MemoryByte>> XbdmClient::GetMemory(uint64_t address, uint32_t length) {
+    // `length` is sent in decimal deliberately: a decimal integer parses
+    // correctly under any integer parser, whereas a 0x-prefixed value
+    // relies on the console's parser handling the prefix for this field.
+    // Addresses stay 0x-prefixed, which is the conventional form for them.
+    std::ostringstream cmd;
+    cmd << "getmem addr=" << FormatAddress(address) << " length=" << std::dec << length;
+    XbdmResponse resp = SendCommand(cmd.str());
+    if (!resp.success) return std::nullopt;
+
+    // Body is a contiguous hex stream (optionally split across several
+    // lines); unmapped/unreadable bytes are reported as "??" pairs.
+    std::string joined;
+    for (auto& l : resp.lines) joined += l;
+
+    std::vector<MemoryByte> out;
+    out.reserve(length);
+    for (size_t i = 0; i + 1 < joined.size() && out.size() < length; i += 2) {
+        char a = joined[i];
+        char b = joined[i + 1];
+        MemoryByte mb;
+        if (a == '?' || b == '?') {
+            mb.mapped = false;
+            mb.value = 0;
+        } else {
+            auto byte = HexToBytes(std::string(1, a) + std::string(1, b));
+            if (!byte || byte->empty()) {
+                mb.mapped = false;
+                mb.value = 0;
+            } else {
+                mb.mapped = true;
+                mb.value = (*byte)[0];
+            }
+        }
+        out.push_back(mb);
+    }
+    return out;
+}
+
+bool XbdmClient::SetMemory(uint64_t address, const std::vector<uint8_t>& bytes) {
+    std::ostringstream cmd;
+    cmd << "setmem addr=" << FormatAddress(address) << " data=" << BytesToHex(bytes);
+    XbdmResponse resp = SendCommand(cmd.str());
+    return resp.success;
+}
+
+std::optional<std::vector<std::string>> XbdmClient::GetRunningXbeInfo() {
+    XbdmResponse resp = SendCommand("xbeinfo running");
+    if (!resp.success) return std::nullopt;
+    if (resp.multiline) return resp.lines;
+    // Some XBDM implementations answer this as a single status line
+    // rather than a multiline block; surface it either way.
+    return std::vector<std::string>{resp.message};
+}
+
+bool XbdmClient::Reboot(const std::string& mode) {
+    std::string cmd = "reboot";
+    if (!mode.empty()) cmd += " " + mode;
+    XbdmResponse resp = SendCommand(cmd);
+    return resp.success;
+}
+
+std::optional<std::vector<DirEntry>> XbdmClient::DirList(const std::string& path) {
+    XbdmResponse resp = SendCommand("dirlist name=\"" + path + "\"");
+    if (!resp.success) return std::nullopt;
+
+    std::vector<DirEntry> out;
+    for (auto& line : resp.lines) {
+        auto kv = ParseKeyValues(line);
+        DirEntry de;
+        de.raw = line;
+        if (auto v = FindStr(kv, "name")) de.name = *v;
+        uint64_t sizeHi = FindHex(kv, "sizehi").value_or(0);
+        uint64_t sizeLo = FindHex(kv, "sizelo").value_or(0);
+        de.size = (sizeHi << 32) | sizeLo;
+        uint64_t attrs = FindHex(kv, "attributes").value_or(0);
+        de.isDirectory = (attrs & 0x10) != 0; // FILE_ATTRIBUTE_DIRECTORY
+        out.push_back(std::move(de));
+    }
+    return out;
+}
+
+bool XbdmClient::Delete(const std::string& path, bool isDirectory) {
+    std::string cmd = "delete name=\"" + path + "\"";
+    if (isDirectory) cmd += " dir";
+    XbdmResponse resp = SendCommand(cmd);
+    return resp.success;
+}
+
+bool XbdmClient::MakeDirectory(const std::string& path) {
+    XbdmResponse resp = SendCommand("mkdir name=\"" + path + "\"");
+    return resp.success;
+}
+
+bool XbdmClient::Notify(const std::string& text) {
+    XbdmResponse resp = SendCommand("notify text=\"" + text + "\"");
+    return resp.success;
+}
+
+} // namespace tl
+
+```
+
+`src/main.cpp`:
+
+```cpp
+// ToastyLink -- a from-scratch C++ trainer/debug toolkit for the XBDM
+// protocol used by Xbox 360 dashboards/kernels with debugging enabled
+// (RGH/JTAG consoles running Dashlaunch or an equivalent softmod, or
+// devkit-mode consoles).
+//
+// Usage:
+//   toastylink <console-ip-or-nickname> [port]                  interactive shell
+//   toastylink <console-ip-or-nickname> [port] -- <command...>  run one command, print, exit
+//   toastylink <console-ip-or-nickname> [port] --script <file>  run every line of a script, exit
+//
+// See README.md for setup notes and the full command list ('help' inside
+// the shell also lists them).
+#include <cstdint>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "ToastyLink/ConsoleBook.h"
+#include "ToastyLink/Shell.h"
+#include "ToastyLink/Socket.h"
+#include "ToastyLink/Version.h"
+#include "ToastyLink/XbdmClient.h"
+
+namespace {
+
+void PrintUsage(const char* argv0) {
+    std::cout <<
+        "ToastyLink " << tl::kVersion << " - C++ XBDM trainer/debug toolkit for Xbox 360 RGH/JTAG consoles\n\n"
+        "Usage:\n"
+        "  " << argv0 << " <console-ip-or-nickname> [port]                  interactive shell (default port 730)\n"
+        "  " << argv0 << " <console-ip-or-nickname> [port] -- <command...>  run one command and exit\n"
+        "  " << argv0 << " <console-ip-or-nickname> [port] --script <file>  run a batch script and exit\n\n"
+        "Examples:\n"
+        "  " << argv0 << " 192.168.1.50\n"
+        "  " << argv0 << " myrgh -- dbgname\n"
+        "  " << argv0 << " 192.168.1.50 730 -- getmem 0x82000000 0x100\n"
+        "  " << argv0 << " myrgh --script trainer.txt\n\n"
+        "A nickname saved with the shell's 'consoles add' command can be used\n"
+        "anywhere an IP is expected.\n";
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        PrintUsage(argv[0]);
+        return 1;
+    }
+
+    if (std::string(argv[1]) == "--version" || std::string(argv[1]) == "-v") {
+        std::cout << "ToastyLink " << tl::kVersion << "\n";
+        return 0;
+    }
+
+    std::string hostArg = argv[1];
+    uint16_t port = 730;
+    int nextArg = 2;
+
+    if (argc > 2) {
+        std::string maybePort = argv[2];
+        if (maybePort != "--" && maybePort != "--script") {
+            try {
+                int p = std::stoi(maybePort);
+                if (p > 0 && p <= 65535) {
+                    port = static_cast<uint16_t>(p);
+                    nextArg = 3;
+                }
+            } catch (...) {
+                // Not a number; fall through and let the flag check below
+                // handle it (or fail with a clear "unexpected argument").
+            }
+        }
+    }
+
+    std::vector<std::string> oneShotCommand;
+    std::string scriptPath;
+    if (nextArg < argc) {
+        std::string tok = argv[nextArg];
+        if (tok == "--") {
+            for (int i = nextArg + 1; i < argc; ++i) oneShotCommand.emplace_back(argv[i]);
+        } else if (tok == "--script") {
+            if (nextArg + 1 >= argc) {
+                std::cerr << "--script requires a file path\n";
+                return 1;
+            }
+            scriptPath = argv[nextArg + 1];
+        } else {
+            std::cerr << "unexpected argument: " << tok << "\n\n";
+            PrintUsage(argv[0]);
+            return 1;
+        }
+    }
+
+    // Resolve a saved nickname to an IP before connecting.
+    tl::ConsoleBook book;
+    book.Load(tl::ConsoleBook::DefaultPath());
+    std::string host = hostArg;
+    if (auto saved = book.Find(hostArg)) {
+        host = saved->host;
+        if (nextArg != 3) port = saved->port; // an explicit port argument still wins
+    }
+
+    std::string sockErr;
+    if (!tl::InitSockets(&sockErr)) {
+        std::cerr << "socket init failed: " << sockErr << "\n";
+        return 1;
+    }
+
+    tl::XbdmClient client;
+    std::cout << "connecting to " << host << ":" << port << "...\n";
+    if (!client.Connect(host, port)) {
+        std::cerr << "connect failed: " << client.LastError() << "\n";
+        tl::ShutdownSockets();
+        return 1;
+    }
+
+    // Scoped so the Shell -- and with it the FreezeEngine's background
+    // thread -- is fully destroyed and joined BEFORE the socket layer is
+    // torn down. Calling WSACleanup() while that thread is still doing
+    // socket I/O is undefined behaviour, even though it often appears to
+    // work.
+    {
+        tl::Shell shell(client);
+        if (!scriptPath.empty()) {
+            shell.RunScript(scriptPath);
+        } else if (oneShotCommand.empty()) {
+            shell.Run();
+        } else {
+            shell.Dispatch(oneShotCommand);
+        }
+    }
+
+    client.Disconnect();
+    tl::ShutdownSockets();
+    return 0;
+}
+
+```
+
+`tests/mock_xbdm.py`:
+
+```py
+"""A mock XBDM server for testing ToastyLink without a console.
+
+Speaks the same line-oriented protocol a debug-enabled Xbox 360 does, over
+a small simulated big-endian address space, and deliberately reproduces the
+awkward parts of real implementations -- capping how much a single getmem
+returns, reporting unmapped bytes as "??" -- so the client's chunking and
+short-read handling actually get exercised.
+
+    python mock_xbdm.py [port] [max-getmem-bytes]
+
+`max-getmem-bytes` defaults to 0 (unlimited); pass e.g. 0x800 to emulate a
+console that caps each read. Run tests/run_tests.py to drive it.
+"""
+
+import re, socket, struct, sys, threading
+
+HOST = "127.0.0.1"
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 7301
+# Max bytes a single getmem will return (0 = unlimited). Real XBDM caps this.
+MAX_GETMEM = int(sys.argv[2], 0) if len(sys.argv) > 2 else 0
+
+BASE = 0x82000000
+SIZE = 0x30000          # deliberately spans several 0x10000 scan chunks
+MEM = bytearray(SIZE)
+
+# A uniquely-valued i32 at a 4-byte-aligned address PAST the first chunk
+# boundary, to catch aligned-scan chunking bugs.
+ALIGNED_PROBE_OFF = 0x18000        # 4-byte aligned, inside chunk 2
+struct.pack_into(">i", MEM, ALIGNED_PROBE_OFF, 0x5AFE)
+
+# An 8-byte AOB pattern deliberately straddling the 0x10000 chunk
+# boundary, to catch chunk-overlap bugs in the pattern scanner.
+STRADDLE_OFF = 0xFFFC
+MEM[STRADDLE_OFF:STRADDLE_OFF + 8] = bytes([0xC0, 0xFF, 0xEE, 0x11, 0x22, 0xBA, 0xDD, 0x1E])
+
+# Seed a pointer chain: MEM[0x100] holds a BE pointer to BASE+0x200; reading
+# that pointer and adding offset 0x10 should land on BASE+0x210, where we
+# put a known i32 value (1234).
+struct.pack_into(">I", MEM, 0x100, BASE + 0x200)
+struct.pack_into(">i", MEM, 0x210, 1234)
+
+# Seed a small block of "candidate" i32 values at BASE+0x1000.. for vscan
+# testing (some equal to 100, so an exact-value first scan has hits).
+for i, v in enumerate([100, 55, 100, 7, 100, 999]):
+    struct.pack_into(">i", MEM, 0x1000 + i * 4, v)
+
+LOCK = threading.Lock()
+
+
+def get_mem_hex(addr, length):
+    out = []
+    with LOCK:
+        for i in range(length):
+            a = addr + i
+            if BASE <= a < BASE + SIZE:
+                out.append("%02X" % MEM[a - BASE])
+            else:
+                out.append("??")
+    return "".join(out)
+
+
+def set_mem(addr, data_hex):
+    data = bytes.fromhex(data_hex)
+    with LOCK:
+        for i, b in enumerate(data):
+            a = addr + i
+            if BASE <= a < BASE + SIZE:
+                MEM[a - BASE] = b
+
+
+def handle(conn):
+    conn.sendall(b"201- connected\r\n")
+    f = conn.makefile("rwb")
+    while True:
+        line = f.readline()
+        if not line:
+            break
+        cmd = line.decode(errors="replace").strip()
+
+        if cmd == "dbgname":
+            conn.sendall(b"200- TESTCONSOLE\r\n")
+        elif cmd == "modules":
+            conn.sendall(b"202- multiline response follows\r\n")
+            conn.sendall(b'name="xam.xex" base=0x82000000 size=0x00080000 check=0x12345678 timestamp=0x5f000000\r\n')
+            conn.sendall(b'name="default.xex" base=0x82080000 size=0x00040000 check=0xaabbccdd timestamp=0x5f000001\r\n')
+            conn.sendall(b".\r\n")
+        elif cmd == "threads":
+            conn.sendall(b"202- multiline response follows\r\n")
+            conn.sendall(b"4\r\n8\r\n12\r\n")
+            conn.sendall(b".\r\n")
+        elif cmd == "walkmem":
+            conn.sendall(b"202- multiline response follows\r\n")
+            conn.sendall(("base=0x%08X size=0x%08X protect=0x00000004\r\n" % (BASE, SIZE)).encode())
+            conn.sendall(b".\r\n")
+        elif cmd.startswith("getmem"):
+            # Accept length as decimal OR 0x-hex, like a real parser would.
+            m = re.search(r"addr=(0x[0-9a-fA-F]+)\s+length=(0x[0-9a-fA-F]+|\d+)", cmd)
+            addr = int(m.group(1), 16)
+            length = int(m.group(2), 0)
+            # Real XBDM implementations cap how much a single getmem
+            # returns. Emulate that so short reads are exercised.
+            if MAX_GETMEM:
+                length = min(length, MAX_GETMEM)
+            conn.sendall(b"202- multiline response follows\r\n")
+            hexstr = get_mem_hex(addr, length)
+            # split into ~64-char lines like real XBDM tends to
+            for i in range(0, len(hexstr), 64):
+                conn.sendall(hexstr[i:i+64].encode() + b"\r\n")
+            conn.sendall(b".\r\n")
+        elif cmd.startswith("setmem"):
+            m = re.search(r"addr=(0x[0-9a-fA-F]+)\s+data=([0-9a-fA-F]+)", cmd)
+            addr = int(m.group(1), 16)
+            set_mem(addr, m.group(2))
+            conn.sendall(b"200- OK\r\n")
+        elif cmd == "xbeinfo running":
+            conn.sendall(b"202- multiline response follows\r\n")
+            conn.sendall(b'name="default.xex" launchpath="hdd:\\\\game\\\\default.xex"\r\n')
+            conn.sendall(b".\r\n")
+        elif cmd.startswith("dirlist"):
+            conn.sendall(b"202- multiline response follows\r\n")
+            conn.sendall(b'name="default.xex" sizehi=0x00000000 sizelo=0x00080000 attributes=0x00000020\r\n')
+            conn.sendall(b'name="save" sizehi=0x00000000 sizelo=0x00000000 attributes=0x00000010\r\n')
+            conn.sendall(b".\r\n")
+        elif cmd.startswith("delete"):
+            conn.sendall(b"200- OK\r\n")
+        elif cmd.startswith("mkdir"):
+            conn.sendall(b"200- OK\r\n")
+        elif cmd.startswith("notify"):
+            conn.sendall(b"200- OK\r\n")
+        elif cmd.startswith("reboot"):
+            conn.sendall(b"200- OK\r\n")
+            break
+        elif cmd == "bogus command":
+            conn.sendall(b"407- unknown command\r\n")
+        else:
+            conn.sendall(b"400- unexpected error\r\n")
+    conn.close()
+
+
+def main():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind((HOST, PORT))
+    s.listen(5)
+    print(f"mock xbdm listening on {HOST}:{PORT}", flush=True)
+    while True:
+        conn, _ = s.accept()
+        t = threading.Thread(target=handle, args=(conn,), daemon=True)
+        t.start()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`tests/run_tests.py`:
+
+```py
+#!/usr/bin/env python3
+"""End-to-end tests for ToastyLink against the mock XBDM server.
+
+Builds nothing -- point it at an already-built binary:
+
+    python tests/run_tests.py build/toastylink        (or build\\toastylink.exe)
+
+Each case runs the real binary against a real socket server and asserts on
+its output. The suite runs against several getmem caps, because a console
+capping a single read is exactly the condition that hides chunking bugs.
+"""
+
+import os
+import subprocess
+import sys
+import tempfile
+import time
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+MOCK = os.path.join(HERE, "mock_xbdm.py")
+
+# Values the mock seeds; see mock_xbdm.py.
+PTR_CHAIN = "0x82000100,0x10"   # resolves to 0x82000210
+PTR_TARGET = "0x82000210"
+ALIGNED_PROBE_ADDR = "0x82018000"
+ALIGNED_PROBE_VAL = 23294        # 0x5AFE, past the first scan chunk
+STRADDLE_ADDR = "0x8200FFFC"     # AOB pattern spanning a chunk boundary
+STRADDLE_PATTERN = "C0 FF EE 11 22 BA DD 1E"
+
+failures = []
+passed = 0
+
+
+def run(binary, port, script_lines):
+    """Runs a batch script through the binary, returns combined output."""
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as f:
+        f.write("\n".join(script_lines) + "\n")
+        path = f.name
+    try:
+        proc = subprocess.run(
+            [binary, "127.0.0.1", str(port), "--script", path],
+            capture_output=True, text=True, timeout=120,
+        )
+        return proc.stdout + proc.stderr
+    finally:
+        os.unlink(path)
+
+
+def check(name, condition, detail=""):
+    global passed
+    if condition:
+        passed += 1
+        print(f"  PASS  {name}")
+    else:
+        failures.append(f"{name}: {detail}")
+        print(f"  FAIL  {name}  {detail}")
+
+
+def start_mock(port, cap=0):
+    args = [sys.executable, MOCK, str(port)]
+    if cap:
+        args.append(hex(cap))
+    proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(1.0)
+    return proc
+
+
+def suite(binary, port, cap):
+    label = f"getmem cap={hex(cap) if cap else 'none'}"
+    print(f"\n== {label} ==")
+
+    out = run(binary, port, [
+        "dbgname",
+        f"read i32 {PTR_TARGET}",
+        f"read i32 {PTR_CHAIN}",
+        "read i32 0x82000000,",
+        "read i32 0x99999999,0x10",
+    ])
+    check("dbgname", "TESTCONSOLE" in out, out.strip()[:120])
+    check("pointer chain resolves to same address as literal",
+          out.count(f"{PTR_TARGET} = 1234") == 2, out.strip()[:200])
+    check("trailing comma rejected",
+          "could not parse '' as a number" in out, "should not silently read a literal")
+    check("unmapped pointer reported",
+          "is not mapped" in out, out.strip()[:120])
+
+    # Every value type round-trips exactly at its boundaries. u64/i64 catch
+    # precision loss from routing integers through a double.
+    cases = [
+        ("u64", "0x82000350", "18446744073709551615"),
+        ("u64", "0x82000358", "12345678901234567890"),
+        ("i64", "0x82000368", "-9223372036854775808"),
+        ("i64", "0x82000370", "1234567890123456789"),
+        ("u32", "0x82000380", "4294967295"),
+        ("i32", "0x82000384", "-2147483648"),
+        ("u16", "0x82000390", "65535"),
+        ("i16", "0x82000394", "-32768"),
+        ("u8", "0x82000398", "255"),
+        ("i8", "0x82000399", "-128"),
+    ]
+    script = []
+    for ty, addr, val in cases:
+        script += [f"write {ty} {addr} {val}", f"read {ty} {addr}"]
+    out = run(binary, port, script)
+    for ty, addr, val in cases:
+        check(f"{ty} round-trips exactly ({val})", f"{addr} = {val}" in out,
+              f"expected '{addr} = {val}'")
+
+    # Scans must find values/patterns that live past the first chunk and
+    # across chunk boundaries -- both aligned and unaligned.
+    out = run(binary, port, [
+        f"vscan new i32 0x82000000 0x30000 exact {ALIGNED_PROBE_VAL}",
+        "vscan list",
+    ])
+    check("aligned vscan finds value past first chunk",
+          f"{ALIGNED_PROBE_ADDR} = {ALIGNED_PROBE_VAL}" in out and "1 of 1" in out,
+          out.strip()[-200:])
+
+    out = run(binary, port, [
+        f"vscan new i32 0x82000000 0x30000 unaligned exact {ALIGNED_PROBE_VAL}",
+        "vscan list",
+    ])
+    check("unaligned vscan finds same value",
+          f"{ALIGNED_PROBE_ADDR} = {ALIGNED_PROBE_VAL}" in out and "1 of 1" in out,
+          out.strip()[-200:])
+
+    out = run(binary, port, [f"scan 0x82000000 0x30000 {STRADDLE_PATTERN}"])
+    check("AOB finds pattern straddling chunk boundary, exactly once",
+          "1 match(es)" in out and STRADDLE_ADDR in out, out.strip()[-200:])
+
+    out = run(binary, port, [f"scan 0x82000000 0x30000 C0 FF ?? 11 ?? BA DD 1E"])
+    check("AOB wildcards work", "1 match(es)" in out and STRADDLE_ADDR in out,
+          out.strip()[-200:])
+
+    # Exact 64-bit comparison: these two values are indistinguishable as
+    # doubles, so a double-based compare would drop the candidate.
+    out = run(binary, port, [
+        "write u64 0x82001100 18446744073709551614",
+        "vscan new u64 0x82001100 0x8 exact 18446744073709551614",
+        "write u64 0x82001100 18446744073709551615",
+        "vscan next increased",
+    ])
+    check("vscan 'increased' compares 64-bit values exactly",
+          "1 candidate(s) remaining" in out, out.strip()[-200:])
+
+    # Patch lifecycle, including exact revert.
+    out = run(binary, port, [
+        "setmem 0x82000400 AABBCCDD",
+        "patch install p 0x82000400 asm nop",
+        "getmem 0x82000400 0x4",
+        "patch install p 0x82000400 hex 11111111",
+        "patch revert p",
+        "getmem 0x82000400 0x4",
+        "patch reinstall p",
+        "getmem 0x82000400 0x4",
+    ])
+    check("patch installs assembled nop", "60 00 00 00" in out, out.strip()[:400])
+    check("duplicate patch name rejected", "already exists" in out, out.strip()[:400])
+    check("patch revert restores original bytes", "AA BB CC DD" in out, out.strip()[:400])
+
+    # Freeze engine actually holds a value against a competing write.
+    out = run(binary, port, [
+        "freeze add hp i32 0x82000210 777",
+        "freeze start 30",
+        "sleep 100",
+        "raw setmem addr=0x82000210 data=00000001",
+        "sleep 200",
+        "read i32 0x82000210",
+        "freeze start 50",
+        "freeze stop",
+        "freeze stop",
+    ])
+    check("freeze restores a value overwritten behind its back",
+          "0x82000210 = 777" in out, out.strip()[-300:])
+    check("double freeze start reports already-running",
+          "already running" in out, out.strip()[-300:])
+    check("double freeze stop reports not-running",
+          "is not running" in out, out.strip()[-300:])
+
+
+def assembler_suite(binary, port):
+    print("\n== assembler (fixed PPC encodings) ==")
+    expected = [
+        ("asm nop", "60000000"),
+        ("asm blr", "4E800020"),
+        ("asm b 0x82001000 0x82001010", "48000010"),
+        ("asm bl 0x82001000 0x82000FF0", "4BFFFFF1"),
+        ("asm li 3 1234", "386004D2"),
+        ("asm li 3 -1", "3860FFFF"),
+    ]
+    out = run(binary, port, [cmd for cmd, _ in expected])
+    for cmd, enc in expected:
+        check(f"{cmd} -> {enc}", enc in out, out.strip()[:400])
+
+    out = run(binary, port, [
+        "asm b 0x82000000 0x99000000",
+        "asm b 0x82000001 0x82000010",
+        "asm li 99 5",
+        "asm li 3 99999",
+        "asm bogus",
+    ])
+    check("out-of-range branch rejected", "out of range" in out, out[:400])
+    check("unaligned branch rejected", "multiple of 4" in out, out[:400])
+    check("bad register rejected", "r0..r31" in out, out[:400])
+    check("oversized li rejected", "16 bits" in out, out[:400])
+    check("unknown mnemonic rejected", "unknown mnemonic" in out, out[:400])
+
+
+def main():
+    if len(sys.argv) < 2:
+        print(__doc__)
+        return 2
+    # Absolute path: CreateProcess on Windows won't resolve a bare
+    # relative path the way a shell does.
+    binary = os.path.abspath(sys.argv[1])
+    if not os.path.exists(binary):
+        print(f"binary not found: {binary}")
+        return 2
+
+    mocks = []
+    try:
+        for i, cap in enumerate([0, 0x800, 0x10]):
+            port = 7401 + i
+            mocks.append(start_mock(port, cap))
+            suite(binary, port, cap)
+        assembler_suite(binary, 7401)
+    finally:
+        for m in mocks:
+            m.terminate()
+
+    print(f"\n{passed} passed, {len(failures)} failed")
+    for f in failures:
+        print(f"  FAILED: {f}")
+    return 1 if failures else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
