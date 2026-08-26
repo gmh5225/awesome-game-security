@@ -310,6 +310,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiDBG (HackOvert)](entities/antidbg-hackovert.md) — Windows curated anti-debug technique collection (C/C++ + asm; memory/CPU/timing/exception checks; gauntlet test app; RE education + software protection research; HackOvert)
 - [AntiDbg-AmogusPlugin](entities/antidbg-amogus-plugin.md) — Windows C/C++ anti-debug plugin (hooking / plugin development / debugging integration; Anti Debugging; gmh5225)
 - [AntiKernelDebug-POC](entities/anti-kernel-debug-poc.md) — C driver PoC; detect/prevent kernel-mode debugging (debug port / KdDebuggerEnabled / KUSER_SHARED_DATA / interrupt checks; Windows Kernel; gmh5225)
+- [Anti miHoYo JCC Obfuscate](entities/anti-mihoyo-jcc-obfuscate.md) — x64dbg plugin: runtime JCC/jump-based control-flow deobfuscation for protected Unity/miHoYo code paths (monitors decryption ranges, dynamic jump tracking, in-session instruction patches; build-offset-specific; unmaintained; DNLINYJ)
 - [Baka (antidbg-Baka)](entities/antidbg-baka.md) — Windows C/C++ anti-debug library (PEB/NtQueryInformationProcess/HWBP/timing/exception/parent; ScyllaHide/HyperHide/TitanHide detection; Anti Debugging)
 - [AntiFrida](entities/antifrida.md) — Java/C++ Detection:Frida sample (Anti Cheat → Detection:Frida)
 - [AntiFrida Bypass](entities/anti-frida-bypass.md) — Frida JS scripts to bypass common anti-Frida checks (libc/procfs hooks; multiple variants; apkunpacker)

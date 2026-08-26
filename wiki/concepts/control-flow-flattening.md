@@ -17,6 +17,7 @@ sources:
   - wiki/sources/descriptions/ElvisBlue__emotet-deobfuscator.md
   - wiki/sources/descriptions/seifreed__xrefgen.md
   - wiki/sources/descriptions/Deatty__Ghidra-Obfuscation-Detection.md
+  - wiki/sources/descriptions/DNLINYJ__Anti_miHoYo_Jcc_Obfuscate.md
 updated: 2026-08-26
 confidence: high
 ---
@@ -33,10 +34,11 @@ confidence: high
 4. **Python unflattener plugins** — extensible Fix OLLVM unflatten hooks ([[unflat]]; plugin development focus). (source: wiki/sources/descriptions/guheng-re__unflat.md) Ghidra in-process OLLVM CFF deobfuscation via [[pagalaxylab-ghidra-scripts]] (Python Ghidra scripts; PAGalaxyLab; source: wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md).
 5. **Heuristic region detection** — loop/dominator analysis and BB complexity scoring ([[obfuscation-detection]]) before manual work; Ghidra function-body heuristic triage via [[ghidra-obfuscation-detection]] (Java Ghidra script; feature extraction flags obfuscated or unusually complex functions; Deatty; source: wiki/sources/descriptions/Deatty__Ghidra-Obfuscation-Detection.md); [[xrefgen]] (Python IDA; data-flow taint + call-graph analysis; flags CFF and opaque predicates while recovering indirect control-flow xrefs; XRefer-compatible export; seifreed; source: wiki/sources/descriptions/seifreed__xrefgen.md).
 6. **Trace-based recovery** — runtime traces from [[dynamic-binary-instrumentation]] resolve indirect branches under covered executions; completeness needs additional path exploration.
-7. **Boundary-hook monitoring** — when stacked VMP+OLLVM on Android resists static deflattening, [[frida-vmp-bypass]] hooks libc/JNI/Java API exits and logs caller addresses inside the protected library to reconstruct security-sensitive call chains without lifting flattened bytecode. (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
+7. **Live debugger JCC patching** — when jump-conditional and indirect-branch obfuscation wraps Unity/miHoYo decryption stubs, [[anti-mihoyo-jcc-obfuscate]] (DNLINYJ; x64dbg plugin; monitors decryption ranges, tracks dynamic jumps, patches instructions in-session; build-offset-specific; unmaintained; source: wiki/sources/descriptions/DNLINYJ__Anti_miHoYo_Jcc_Obfuscate.md) complements static Genshin CFG tools such as [[genshinjumpfixer2]] for readable stepping through protected game paths.
+8. **Boundary-hook monitoring** — when stacked VMP+OLLVM on Android resists static deflattening, [[frida-vmp-bypass]] hooks libc/JNI/Java API exits and logs caller addresses inside the protected library to reconstruct security-sensitive call chains without lifting flattened bytecode. (source: wiki/sources/descriptions/tomhamidi97-arch__frida-vmp-bypass.md)
 
 CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — simplify MBA blocks after CFG recovery for readable pseudocode.
 
 ## Related
 
-[[anti-ollvm]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]

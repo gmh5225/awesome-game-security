@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DNLINYJ/Anti_miHoYo_Jcc_Obfuscate`: entity [[anti-mihoyo-jcc-obfuscate]] (DNLINYJ; C++ x64dbg plugin; runtime JCC/jump-based control-flow deobfuscation for protected Unity/miHoYo code paths; monitors decryption ranges, tracks dynamic jumps, patches instructions during debug; build-offset-specific; unmaintained); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[x64dbg]], [[codecleaner]], [[genshinjumpfixer2]], and [[il2cpp]].
+
 - **2026-08-26** — ingest `description:DP-Hridayan/aShellYou`: entity [[ashellyou]] (DP-Hridayan; Kotlin + Jetpack Compose + Material 3 on-device ADB/root/shell utility; embedded ADB library; Shizuku/root local execution, OTG/wireless remote devices, push/pull explorer, logcat, bookmarks; PC-free debugging; cheat / Android Terminal); cited on [[overviews/mobile-security]]; cross-linked [[termux-app]], [[neoterm]], [[android-terminal-emulator]], [[app-manager]], [[file-explorer]], [[butler]], [[scrcpy]], [[lamda]], and [[rootraven]].
 
 - **2026-08-26** — ingest `description:DProvinciani/pt-detector`: entity [[pt-detector]] (DProvinciani; Windows research prototype; Intel PT KM+UM trace capture; execution-stream decode for ROP/JOP suspicious control flow; C/C++ infrastructure + Python analysis; exploit detection / CFI experimentation; README [Intel PT]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[processor-trace]], [[winipt]], [[windows-intel-pt]], and [[libipt-rs]].
