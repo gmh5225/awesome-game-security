@@ -354,6 +354,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [armageddon](entities/armageddon.md) — ARM mobile cache side-channel toolkit (IAIK; C + Python; Prime+Probe, Flush+Reload, Evict+Reload, Flush+Flush, cache template attacks; mobile privacy, crypto side channels, TrustZone observation; README Cache attacks on ARM)
 - [ArmShellCode](entities/armshellcode.md) — ARM64 Android shellcode framework (IIIImmmyyy; position-independent arm64-v8a payloads; Dobby symbol resolution; ELF/proc-maps parsing, syscall wrappers, modular loader + linker scripts; exploit / runtime code injection research; cheat / Android arm arm64-v8a ShellCode Generate)
 - [ASCTool](entities/asctool.md) — Kotlin APK Signature Crack Tool (Some Tricks / Android; [Apk])
+- [aShell You](entities/ashellyou.md) — Material You on-device Android ADB/root/shell utility (Kotlin + Compose; Shizuku/root, OTG/wireless debugging, push/pull explorer, logcat, bookmarks; DP-Hridayan; Cheat Android Terminal)
 - [Asphyxia CS2](entities/asphyxia-cs2.md) — open-source internal CS2 cheat (C++; ESP / aimbot / triggerbot; Source 2 SDK; cheat / game:cs2)
 - [Asdf Overlay](entities/asdf-overlay.md) — Rust cross-API overlay library (D3D9/11/12, OpenGL, Vulkan; Detours; named-pipe IPC; Rust/Node.js clients)
 - [AssaultCube](entities/assaultcube.md) — open-source CUBE-engine multiplayer FPS (C/C++; maps, bots, demos; engine study / modding / AC experimentation; assaultcube/AC)
