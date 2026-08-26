@@ -1760,6 +1760,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [shared-flushfilebuffers-communication](entities/shared-flushfilebuffers-communication.md) — shared buffer + `FlushFileBuffers`-triggered `IRP_MJ_FLUSH_BUFFERS` KM↔UM comm; no worker thread (UCFoxi; C++; cheat / driver communication)
 - [ucfoxi-shared-flushfilebuffers-communication-update](entities/ucfoxi-shared-flushfilebuffers-communication-update.md) — `\Driver\PEAUTH` `IRP_MJ_FLUSH_BUFFERS` hijack + registry-seeded shared buffer KM↔UM comm (gmh5225; cheat / driver communication)
 - [ucmapper](entities/ucmapper.md) — BYOVD kernel driver manual mapper via nvaudio.sys (EncodePayLoad reuse; runtime-list cleanup; gmh5225)
+- [ingsoc](entities/ingsoc.md) — Windows Intel PT toolkit (CristiNacu; KM driver + user-mode controller + Python decoder; Kafka trace streaming; execution reconstruction + control-flow/timing analytics; exploit/malware + code-reuse research; Intel PT)
 - [in-memory-mutation-demo](entities/in-memory-mutation-demo.md) — C++23 in-memory polymorphic payload mutation demo (VirtualProtect/mprotect; ProtectedData XOR + key rotation; secure wipe; alekzandren)
 - [import-kallsyms](entities/import-kallsyms.md) — IDA Pro plugin: import kallsyms dump → Linux kernel symbol names/addresses in IDB (Python; stripped/partial kernel RE; XMCVE; cheat / IDA Plugins)
 - [inject](entities/inject.md) — CLI network protocol craft/inject/sniff tool (wide protocol range; cheat / Packet Sniffer&Filter; fksvs)
