@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DavidBuchanan314/stelf-loader`: entity [[stelf-loader]] (DavidBuchanan314; Python + NASM shellcode; Linux x64 ELF→self-loading shell script; map segments, restore protections, jump to entry; compressed/base64/raw-entry/one-liner modes; exploit/payload/ELF runtime loading research; Anti Cheat → Binary Packer `[ELF]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[sloader]], [[harmless]], [[elfpacker]], and [[mojoelf]].
+
 - **2026-08-26** — ingest `description:DeDf/WProtect`: entity [[dedf-wprotect]] (DeDf; C++ Windows PE code virtualizer; disassemble selected native blocks→custom VM bytecode; jump stubs + appended PE section; AsmJit + udis86 + PE rewrite; software protection / VM anti-tamper research; slug disambiguated from [[wprotect]]); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[wprotect]], [[phantasm-x86-virtualizer]], [[x64-virtualizer-rs]], [[nb-obfuscator]], and [[alcatraz]].
 
 - **2026-08-26** — ingest `description:DeNA/mempatch`: entity [[mempatch]] (DeNA; C++ Android NDK memory tampering tool; address handling, patching, snapshots, range tracking, optional value freeze; platform abstraction + test assets; vulnerability assessment / dev support; cheat / Memory tampering tool); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory]], [[android-memory-tool]], [[ace-the-game]], [[memdbg]], [[cheap-engine]], and [[writemem]].

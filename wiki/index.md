@@ -2932,6 +2932,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AntiCheat (SLAUC91)](entities/slauc91-anticheat.md) — Windows rootkit/cheat scanner (C++ console + partial KM driver; hooks, handles, drivers, modules, PE/PEB, USN/DNS; user-mode IAT + kernel MSR/IDT/SSDT/IRP hook detection; Anti Cheat)
 - [SlothBP](entities/slothbp.md) — x64dbg collaborative breakpoint manager (Cheat x64dbg Plugins)
 - [sloader](entities/sloader.md) — alternative Linux ELF dynamic loader (modern C++; replace glibc ld-linux.so; library load + symbol resolution; linker-internals research; Anti Cheat → Binary Packer `[ELF]`)
+- [stelf-loader](entities/stelf-loader.md) — Linux x64 ELF→self-loading shell script toolchain (Python + NASM shellcode; segment map, mprotect restore, compressed/base64/one-liner modes; exploit/payload/ELF loader research; Anti Cheat → Binary Packer `[ELF]`)
 - [SmallWorld](entities/smallworld.md) — multi-emulator binary harness (angr/Ghidra/PANDA/Unicorn; coverage/crash/firmware)
 - [Smep-Bypass](entities/smep-bypass.md) — Windows SMEP bypass PoC (CR4 / ROP / vuln-driver; kernel exec user shellcode)
 - [smap](entities/smap.md) — Windows kernel shellcode mapper (BYOVD PIC shellcode → kernel pool + exec primitive; no PE image; btbd; Scatter Manual Map)

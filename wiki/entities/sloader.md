@@ -20,4 +20,4 @@ Complements PS5/Java and Android ELF loader research such as [[elfloader]] and [
 
 ## Related
 
-[[elfloader]] · [[rudroid]] · [[mojoelf]] · [[harmless]] · [[river]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[elfloader]] · [[rudroid]] · [[mojoelf]] · [[harmless]] · [[stelf-loader]] · [[river]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
