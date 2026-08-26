@@ -1651,6 +1651,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-nexus-docker](entities/ida-nexus-docker.md) — Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus; ordered LLM analysis prompts in isolation; ZIP audit trails (mrexodia)
 - [ida-no-mcp](entities/ida-no-mcp.md) — IDA plugin + Rust/idalib CLI: export Hex-Rays decompilation, disasm fallback, strings/imports/exports/memory as files for AI IDEs without MCP (P4nda0s; cheat / IDA Plugins)
 - [ida-nord-theme](entities/ida-nord-theme.md) — IDA Pro Nord-palette dark color theme (disassembly/hex/graph/editor; cheat / Skins)
+- [ida-phnt-types](entities/ida-phnt-types.md) — PHNT Native API headers → IDA TIL/IDC (Dump-GUY; idaclang/tilib; 32/64-bit; Windows SDK + PHNT types for driver/AC binary RE)
 - [IDASkins](entities/idaskins.md) — IDA Pro custom theme/skin plugin (CSS-like Qt GUI styling; disassembly/hex/output; cheat / Skins; gmh5225)
 - [ida-pro-loadmap](entities/ida-pro-loadmap.md) — IDA plugin: import linker .MAP symbols (VC/Borland/Dede/GCC/IDA; section:offset → names; cheat / IDA Plugins)
 - [IDA-Pro-SigMaker](entities/ida-pro-sigmaker.md) — IDA Pro plugin: wildcard-masked byte-pattern signatures from selected code for runtime scan (gmh5225; cheat / IDA Plugins)
