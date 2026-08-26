@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Cr4sh/pico_dma`: entity [[pico-dma]] (Cr4sh; FPGA pre-boot PCIe DMA platform on compact hardware; Verilog + Vivado/Vitis + MicroBlaze; autonomous or UART-controlled payload execution; SPI flash deployment; boot/firmware security + DMA implant prototyping research); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[s6-pcie-microblaze]], [[pcileech]], [[pcileech-fpga]], [[litepcie]], and [[iommu]].
+
 - **2026-08-26** — ingest `description:Cr4sh/s6_pcie_microblaze`: entity [[s6-pcie-microblaze]] (Cr4sh; PCIe DIY DMA toolkit on Xilinx SP605 Spartan-6; Verilog + MicroBlaze; software-controllable Gen 1.1 endpoint; raw TLP over Ethernet; Python host R/W, physmem scan, IOMMU audit; UEFI DXE injection, Hyper-V VM-exit backdoor, Boot Backdoor runtime shell/file-transfer PoCs; DMA / Option ROM / pre-boot compromise research); cited on [[overviews/dma-attack]] and [[overviews/windows-kernel]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[litepcie]], [[diskjacker]], and [[iommu]].
 
 - **2026-08-26** — ingest `description:Cracked5pider/KaynStrike`: entity [[kayn-strike]] (Cracked5pider; custom reflective Cobalt Strike Beacon loader; thread start-address spoof + post-entry loader memory cleanup; C + ASM + Aggressor script; stageless payload builds; offensive + defensive in-memory execution / detection-evasion research; Spoofs Thread Start Address); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[bingusldr]], [[amber]], [[earlycascade-injection]], [[stack-spoofing]], [[thread-stack-spoofer]], [[windows-process-injection]], and [[process-injection-techniques]].

@@ -2580,6 +2580,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PhysX 3.4](entities/physx-3-4.md) — NVIDIA PhysX SDK 3.4 (version-pinned; CCD, cloth, particles, vehicles; component-based; cross-platform; PhysX SDK / Game Engine)
 - [PhysPatch](entities/physpatch.md) — DMA scan/patch Windows kernel via physical memory (VA→PA walk; sonodima)
 - [Piano Game](entities/pianogame.md) — C/C++ piano game (rendering/graphics focus; Game Develop / source)
+- [pico-dma](entities/pico-dma.md) — Compact FPGA pre-boot PCIe DMA platform (Cr4sh; Verilog + Vivado/Vitis + MicroBlaze; autonomous/UART payloads; SPI flash; boot/firmware security + DMA implant research)
 - [PiDqSerializationWrite-Example](entities/pidqserializationwrite-example.md) — Unity-centered `PiDqSerializationWrite` C++ example (Some Tricks / Windows Ring0)
 - [PI-Defender](entities/pi-defender.md) — Windows kernel driver blocking process injection via handle-right filtering (remote memory write / operation permissions; hollowing, doppelgänging, ghosting, DLL injection docs/tests; defensive AC hardening)
 - [pikabot-deobfuscator](entities/pikabot-deobfuscator.md) — Pikabot RC4/AES string decrypt (IDA Hex-Rays; cheat / IDA Plugins)

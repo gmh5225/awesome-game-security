@@ -14,7 +14,7 @@ confidence: medium
 
 ## Role in the DMA stack
 
-Educational **custom FPGA endpoint** lane on legacy **Spartan-6 SP605** hardware—contrasts with Artix-7 [[pcileech-fpga]] M.2 stacks and Cr4sh's compact **pico_dma** pre-boot MicroBlaze flows on smaller boards. Useful for researchers studying **Option ROM / pre-boot compromise**, **protected Windows platform** reverse engineering, and **below-OS DMA** threat models before modern IOMMU policy.
+Educational **custom FPGA endpoint** lane on legacy **Spartan-6 SP605** hardware—contrasts with Artix-7 [[pcileech-fpga]] M.2 stacks and Cr4sh's compact [[pico-dma]] pre-boot MicroBlaze flows on smaller boards. Useful for researchers studying **Option ROM / pre-boot compromise**, **protected Windows platform** reverse engineering, and **below-OS DMA** threat models before modern IOMMU policy.
 
 ## Links
 
@@ -22,4 +22,4 @@ Educational **custom FPGA endpoint** lane on legacy **Spartan-6 SP605** hardware
 
 ## Related
 
-[[pcileech]] · [[pcileech-fpga]] · [[litepcie]] · [[xilinx-fpga-pcie-xdma-tutorial]] · [[diskjacker]] · [[ddma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/windows-kernel]]
+[[pico-dma]] · [[pcileech]] · [[pcileech-fpga]] · [[litepcie]] · [[xilinx-fpga-pcie-xdma-tutorial]] · [[diskjacker]] · [[ddma]] · [[iommu]] · [[overviews/dma-attack]] · [[overviews/windows-kernel]]
