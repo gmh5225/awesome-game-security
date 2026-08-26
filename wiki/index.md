@@ -2123,6 +2123,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mcrit-plugin](entities/mcrit-plugin.md) — IDA Pro plugin for MCRIT MinHash function similarity (upload samples, query matches, manage MCRIT server from disassembler)
 - [gui-plugin-template](entities/gui-plugin-template.md) — Python cross-disassembler GUI plugin template (PyQt/PySide; IDA/Ghidra/Binary Ninja/Cutter; harmonized API; danielplohmann)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
+- [mkPIVM](entities/mk-pivm.md) — process-independent PIVM obfuscation engine (x86/x64→custom IR→polymorphic VM bytecode with encrypted handlers; PE dispatcher embed; arbitrary shellcode input; AC Obfuscation Engine `[VM]`; D7EAD)
 - [MobileRE-Skill](entities/mobile-re-skill.md) — AI-agent mobile RE skill set (layered Frida hooks; six-phase anti-detection pipeline; JADX/Ghidra)
 - [meowna_detector](entities/meowna-detector.md) — Android NDK PoC detector for meowna-class root-hide modules (missing logd socket + package-trace indicators; Rem01Gaming; Detection:Android root)
 - [mqtt](entities/mqtt.md) — Chinese MQTT v3.1.1 OASIS spec (14 control packets; QoS; WebSocket; Game Network / mqtt)
