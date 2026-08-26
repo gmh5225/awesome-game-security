@@ -1032,6 +1032,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [eac-injector-driver](entities/eac-injector-driver.md) — EAC state toggle via `NtQueryIntervalProfile` + HalDispatchTable (manual-map driver; thread/callback manipulation; gmh5225)
 - [EAC-Kernel-Packet-Fucker](entities/eac-kernel-packet-fucker.md) — kernel-mode EAC telemetry suppression via `ExAllocatePoolWithTag` hijack; drops ~33 KB violation reports before backend upload (gmh5225)
 - [eac-leak](entities/eac-leak.md) — leaked EAC server + EOS SDK anti-cheat session handling; game-server ↔ cloud validation protocol RE (chaeyk)
+- [eac-mapper](entities/eac-mapper.md) — EAC session-driver integrity mapper PoC; `gdrv.sys` BYOVD; bypasses read-only section checks when drivers are not globally mapped in EAC context; patching + low-noise KM↔UM hooks (Compiled-Code; C++; mapper attack-path research; cheat / gdrv.sys)
 - [eac-overlay](entities/eac-overlay.md) — EAC overlay PoC (ESP via alt surfaces / window manip; C++)
 - [eac-spoofer-meme](entities/eac-spoofer-meme.md) — open-source kernel HWID spoofer for EAC fingerprinting; C driver + C++ IOCTL controller; SMBIOS/disk/NVMe/MAC/GPU/PCI/CPUID/EFI/ACPI/registry; VT-x/SVM CPUID hooks (zensenzay; cheat / HWID)
 - [EAC-Reversal](entities/eac-reversal.md) — devirtualized EAC driver internals; callback/dispatch/certificate/code-integrity RE as C++ pseudocode (ch4ncellor; [Reversed EAC])

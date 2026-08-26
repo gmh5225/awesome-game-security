@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Compiled-Code/eac-mapper`: entity [[eac-mapper]] (Compiled-Code; C++ kernel mapping PoC; targets EAC session-driver integrity blind spot; read-only section-check bypass when drivers are not globally mapped in anti-cheat execution context; patching + hook placement for low-noise KM↔UM comm; AC internals / mapper attack-path research; cheat / `[gdrv.sys]`); cited on [[concepts/easy-anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[gdrv-loader]], [[cve-2018-19320]], [[kdmapper]], [[known-driver-mappers]], [[driver-session-mapper]], [[callmewin32kdriver]], [[bypassing-easyanticheat-integrity-check]], [[map-page]], and [[mm-copy-memory]].
+
 - **2026-08-26** — ingest `description:Compiled-Code/external-il2cpp`: entity [[external-il2cpp]] (Compiled-Code; C++ external IL2CPP metadata framework; WinAPI process/module discovery + ReadProcessMemory; enumerate assemblies/images/classes/fields by name; static/instance field address resolution from GameAssembly offsets; Unity IL2CPP RE + external tooling; [Il2Cpp]); cited on [[concepts/il2cpp]] and [[overviews/game-hacking]]; cross-linked [[il2cpp-resolver-external]], [[unity202x-externalresolve]], and [[il2cppdumper]].
 
 - **2026-08-26** — ingest `description:Comsecuris/gdbghidra`: entity [[gdbghidra]] (Comsecuris; Python GDB client + Java Ghidra extension; live cursor/stack sync, register propagation for decompilation, breakpoint control, relocation handling; interactive static+dynamic RE; cheat / GDB session); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[gdb-mcp]], and [[mcp-gdb]].
