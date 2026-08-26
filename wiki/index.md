@@ -3448,6 +3448,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WSA PacMan](entities/wsa-pacman.md) — Flutter/Dart GUI WSA package manager (APK/XAPK sideload, metadata, upgrade/downgrade; alesimula)
 - [wsb-detect](entities/wsb-detect.md) — Windows Sandbox fingerprint C library (LloydLabs; modular process/username/device-path/DNS/registry/timing checks; combinable by false-positive tolerance; anti-analysis / environment-awareness research; Windows Sandbox ("WSB"))
 - [winbo](entities/winbo.md) — overlay hijack detect via dxgkrnl ETW Present + GDI table (Detection:Overlay)
+- [WineHooks](entities/winehooks.md) — classic PC game compatibility/enhancement hook framework (DirectX/OpenGL interception, resolution scaling, texture replacement, audio/input fixes, per-title patch profiles; native Windows + Wine/Linux; Daniel-Lobo; DirectX Compatibility)
 - [WinNT5_src_20201004](entities/winnt5-src-20201004.md) — leaked Windows NT 5.x source tree (2000/XP/Server 2003; kernel/Win32 RE reference)
 - [WinObjEx64](entities/winobjex64.md) — Windows Object Manager namespace explorer + callback enum (admin; AC / Ring0 callback research)
 - [WinDefCtl](entities/windefctl.md) — Defender / Tamper Protection control via kernel priv-esc (Win11 26H1)
