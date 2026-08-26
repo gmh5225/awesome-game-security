@@ -807,6 +807,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Dobby](entities/dobby.md) — lightweight multi-platform hook framework (C/C++; DirectX / Windows game tooling; cheat / hook research)
 - [DIE-engine-web](entities/die-engine-web.md) — Detect It Easy in-browser (WASM PE/ELF/Mach-O packer/compiler ID)
 - [DFIRTriage](entities/dfirtriage.md) — Python Windows DFIR triage (process/network/registry/event logs/prefetch)
+- [DFoundryFX](entities/dfoundryfx.md) — UE5 plugin: in-viewport performance tooling (customizable metric charts, shader compile monitoring, STAT command controls; no extra level actors; C++ modules; runtime diagnostics; DarknessFX; Plugins:Unreal)
 - [DioProcess](entities/dioprocess-private.md) — Windows internals research (Rust/Dioxus + KM + UEFI; DSE/KPP)
 - [Direct3D9 Overlay](entities/direct3d9-overlay.md) — D3D9 proxy-DLL wrapper + Detours-style overlay (on-screen console, text feed, plugin modules; single-player modding; SeanPesce)
 - [Direct3DHook](entities/direct3d-hook.md) — C#/.NET D3D9–11 EasyHook inject + SharpDX capture/overlays (remoting CaptureInterface)
