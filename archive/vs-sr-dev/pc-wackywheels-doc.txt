@@ -1,0 +1,3088 @@
+Project Path: arc_vs-sr-dev_pc-wackywheels-doc_jq7j0e90
+
+Source Tree:
+
+```txt
+arc_vs-sr-dev_pc-wackywheels-doc_jq7j0e90
+├── README.md
+├── docs
+│   ├── 00-overview.md
+│   ├── 01-wacky-dat.md
+│   ├── 02-graphics.md
+│   ├── 03-tracks.md
+│   ├── 04-engine-tables.md
+│   ├── 05-audio.md
+│   ├── 06-config-and-saves.md
+│   ├── 07-vs-mario-kart.md
+│   ├── 08-open-questions.md
+│   ├── 09-skunny-kart.md
+│   └── 10-the-developers-account.md
+├── notes
+│   └── wacky-dat-inventory.md
+└── tools
+    ├── lidlib.py
+    ├── wwcompare.py
+    ├── wwdat.py
+    ├── wwexport.py
+    ├── wwpcx.py
+    ├── wwsaves.py
+    ├── wwsp.py
+    ├── wwtables.py
+    └── wwtrack.py
+
+```
+
+`README.md`:
+
+```md
+# pc-wackywheels-doc
+
+Reverse-engineering notes on **Wacky Wheels** (Beavis Soft / Apogee Software, 1994) —
+the DOS kart racer that is usually introduced as "the *Super Mario Kart* clone for the PC".
+
+This repository documents the **shipped game data**: the `WACKY.DAT` archive, the
+track and sprite formats, the fixed-point look-up tables that drive the pseudo-3D
+floor renderer, and the save/config files. Everything here was derived from the
+retail files of the GOG.com release (the original 17 Oct 1994 build, v1.1
+"registered and upgraded"), not from any fan source reconstruction.
+
+**Documentation only.** No game assets, no extracted art, no executable code is
+committed here. The tools in [`tools/`](tools/) reproduce every figure and table
+from your own legally obtained copy.
+
+> There is a fan-made source *recreation* of Wacky Wheels in circulation. It is
+> deliberately **not** used as a reference anywhere in this repo: the point of the
+> exercise is archaeological — what the 1994 build actually contains, and what that
+> tells us about how it was made.
+
+## What is documented
+
+| Doc | Contents |
+|---|---|
+| [00-overview.md](docs/00-overview.md) | Release, build chain, credits, content layout (42 track slots) |
+| [01-wacky-dat.md](docs/01-wacky-dat.md) | The `WACKY.DAT` archive, including the two-byte offset bug baked into the shipped file |
+| [02-graphics.md](docs/02-graphics.md) | PCX variant, `.SP` sprite banks, `SPRITE.ATR`, the `WxH.INF` pre-compiled scalers, fonts |
+| [03-tracks.md](docs/03-tracks.md) | `.GAM .M .POS .PAR .SIN .RD .SPW` and the 2048×2048 tiled world |
+| [04-engine-tables.md](docs/04-engine-tables.md) | `TRIG.DAT`, `SLP`, `VIEW`, `NDIST`, `MAP.XY`, `VEL*.TAB` — the renderer's LUTs |
+| [05-audio.md](docs/05-audio.md) | `.MID`, `.KLM`, `.VOC`, `AUDIOT.FX`, the Apogee Sound System |
+| [06-config-and-saves.md](docs/06-config-and-saves.md) | `WACKY.CFG`, `WACKY.ING`, `.HI/.TIM/.HTT/.OTT`, `WACKY.DTT`, `MODEM.PCK`, exit screens |
+| [07-vs-mario-kart.md](docs/07-vs-mario-kart.md) | What is genuinely *Mario Kart*, what is genuinely *Wolfenstein*, what is neither |
+| [08-open-questions.md](docs/08-open-questions.md) | Everything still unresolved, with the evidence gathered so far |
+| [09-skunny-kart.md](docs/09-skunny-kart.md) | **Skunny Kart** (Copysoft, 1994): the bit-rotated `.LID` container, eleven byte-identical files, and the seven-cycle rename of the track extensions |
+| [10-the-developers-account.md](docs/10-the-developers-account.md) | Andy Edwardson's first-hand history of the project, checked point by point against the shipped files |
+| [notes/wacky-dat-inventory.md](notes/wacky-dat-inventory.md) | All 577 archive entries |
+
+## Tools
+
+Pure Python 3 (`numpy` + `pillow` only for the rendering helpers).
+
+```
+tools/wwdat.py      WACKY.DAT directory reader / extractor
+tools/wwpcx.py      the PCX variant used by the game (2 stray bytes up front)
+tools/wwsp.py       .SP column-major sprite banks
+tools/wwtrack.py    .GAM/.M/.POS/.RD/.SPW/.SIN parsers + world-texture rebuild
+tools/wwtables.py   TRIG.DAT / SLP / VIEW / NDIST / MAP.XY / VEL*.TAB
+tools/wwsaves.py    .HI / .TIM / .DTT record readers
+tools/wwexport.py   one-shot: extract the archive and render every asset to PNG
+tools/lidlib.py     Skunny Kart .LID archives (bit-rotated container)
+tools/wwcompare.py  content-hash cross-reference between two extracted dirs
+```
+
+```sh
+python tools/wwdat.py  "<install>/WACKY.DAT" extract ./out
+python tools/wwexport.py ./out ./png
+
+python tools/lidlib.py "<skunny>/SKUNNYK.LID" extract ./sk
+python tools/wwcompare.py ./out ./sk
+```
+
+Chapter 10 checks Andy Edwardson's own history of the project — the only
+surviving first-hand account, given to the Apogee FAQ — point by point against
+the shipped files. It corroborates most of what the bytes already said, and
+resolves `DOPE.SP`: a 165 x 72 strip holding the Dopefish cameo, with
+`BELCH.VOC` supplied by Joe Siegler, a microphone and a two litre bottle of
+Diet Coke.
+
+Also documented: **Skunny Kart** (Copysoft / Edisys, 1994). Its `.LID` archives
+are obfuscated with a per-byte rotate-left-by-one; underneath, eleven files are
+byte-identical to Wacky Wheels — including the incrementally generated
+`TRIG.DAT` sine table with its characteristic drift — and the seven per-track
+file extensions have been permuted by a single seven-cycle. Wacky Wheels'
+parsers run on Skunny Kart's data unmodified. See
+[09-skunny-kart.md](docs/09-skunny-kart.md).
+
+## Status
+
+First pass. The archive, the track data model, the sprite storage, the renderer
+look-up tables and the save formats are solved and round-trip cleanly. The
+`WxH.INF` scaler byte-code, `WACKY.SDX`, `*.BMC` and a handful of sprite banks
+with non-factorable sizes are partially understood — see
+[08-open-questions.md](docs/08-open-questions.md).
+
+Wacky Wheels is © 1994 Apogee Software, Ltd. / Beavis Soft. Skunny Kart is
+© 1994 Copysoft / Edisys SCRL. This repository is independent documentation and
+ships neither.
+
+```
+
+`docs/00-overview.md`:
+
+```md
+# 00 — Overview
+
+## The build under analysis
+
+| | |
+|---|---|
+| Title | Wacky Wheels |
+| Developer | Beavis Soft (UK) |
+| Publisher | Apogee Software, Ltd. |
+| Version string in `WW.EXE` | `WACKY WHEELS VERSION 1.1` |
+| Copyright string | `COPYRIGHT BEAVIS-SOFT 1994` |
+| Executable date | 17 Oct 1994 |
+| Source | GOG.com release, files unmodified from the 1994 build; GOG adds only a DOSBox wrapper |
+
+The GOG package is the **registered + upgrade** content set: all 42 track slots
+are present in `WACKY.DAT` and `WWREG.BIN` (the registered DOS exit screen) is
+selected. `WWSW.BIN`, the shareware exit screen, is still in the archive.
+
+Version 1.0 was never a public release — per Andy Edwardson's account
+([10-the-developers-account.md](10-the-developers-account.md)) it was an
+incomplete build sent to a UK magazine, and 1.1 was the first complete release.
+The config template inside the archive, `WACKY.ING`, already stamps `1.1`
+against the date `MAR 1994`, six months before the executable's October date.
+
+## Toolchain fingerprints
+
+`WW.EXE` is a DOS 32-bit protected-mode binary:
+
+```
+MZ stub  ->  Rational Systems DOS/4G  (Copyright 1987-1993)
+             "DOS/4GW Professional Protected Mode Run-time"
+             "Copyright (c) Rational Systems, Inc. 1990-1994"
+             build stamp  "May 19 1994 14:44:26"
+LE image at file offset 0x290FC
+```
+
+The runtime strings identify **Watcom C/C++32** (`WATCOM C Run-Time system code
+is provided on an "as is" basis ... (c) Copyright by WATCOM International Corp.
+1988-1993`). Note the *Professional* extender: Apogee licensed the paid DOS/4GW
+Pro rather than shipping the free `DOS4GW.EXE`, which is why there is no separate
+extender file in the install directory.
+
+`SETUP.EXE` is built with the same chain (Watcom + DOS/4G) and writes
+`WACKY.CFG`, `WACKY1.HI`, `WACKY2.HI`, `WACKY1.TIM`, `WACKY2.TIM` and
+`WACKY.DTT`.
+
+## Credits, as stored in the executable
+
+Read verbatim from the credits string block at file offset ~0x9CF42:
+
+```
+PROGRAMMING AND DESIGN   ANDREW EDWARDSON
+ART AND DESIGN           SHAUN GADALLA
+SOUND CODE               JIM DOSE'
+MUSIC                    MARK KLEM
+```
+
+Two of those leave direct traces in the data:
+
+* **Jim Dosé** wrote the Apogee Sound System; the error-string tables in `WW.EXE`
+  are the ASS ones verbatim (`Multivoc`, `GUSWAVE`, `TaskMan`, `FX_MAN`,
+  `MPUDELAY`, `Pro AudioSpectrum`, `Sound Source`, `ULTRAMID.INI`). See
+  [05-audio.md](05-audio.md).
+* **Mark Klem** gives the `.KLM` music files their extension. Every track exists
+  twice — once as a General MIDI `.MID`, once as a `.KLM` for the OPL2 path.
+
+The "very special thanks" block names John "J.D." Haynes, Boyd Miller, **Tom
+Hall**, Stephen Hornback, Jim Dryburgh, William Scarboro, Steven Blackburn, and
+the Apogee support crew (Steve Quarella, **Lee Jackson**, Joe Selinske, **Joe
+Siegler**, Kevin Green, Mr D. Fish, George and Scott). Most of those names
+reappear as the default record holders in `WAC1.OTT` — including **Scott Miller**
+himself as the default best-race holder on track 8.
+
+## Content layout: why there are 42 track slots
+
+`WACKY.DAT` contains 42 complete track descriptions (`1..42` × `.GAM .M .POS
+.PAR .SIN .RD .SPW`) and 42 preview screens `SHRINK1..42.PCX`. The captions
+baked into those previews resolve the layout exactly:
+
+| Slots | Preview caption | Content |
+|---|---|---|
+| 1–5 | `BRONZE WHEELS` | race tracks |
+| 6–10 | `SILVER WHEELS` | race tracks |
+| 11–15 | `GOLD WHEELS` | race tracks |
+| 16–21 | `SHOOTOUT ZONE 1..6` | shoot-out arenas |
+| 22–26 | `BONUS BRONZE WHEELS` | race tracks |
+| 27–31 | `BONUS SILVER WHEELS` | race tracks |
+| 32–36 | `BONUS GOLD WHEELS` | race tracks |
+| 37–42 | bonus shoot-out zones | shoot-out arenas |
+
+30 race tracks + 12 shoot-out zones = 42 — "three sets of tracks" in the
+regular registered version and "an additional three sets" in the upgrade
+edition, exactly as Edwardson describes the two retail tiers. This lines up
+with the shareware DOS exit screen (`WWSW.BIN`) sales pitch:
+
+```
+Standard Wacky Wheels ($24.95)      UPGRADE EDITION ($34.95)
+ * 10 NEW race tracks (15 total)     * 15 MORE tracks (30 total)
+ * 4 NEW shootout zones              * 6 MORE shootout zones (12 total)
+ * 4 NEW duck shootout zones
+ * 10 NEW songs
+```
+
+The in-game menus (strings at ~0x9A138) confirm the split with
+`REGULAR ZONES` / `BONUS PACK ZONES` and `REGULAR RACES` / `BONUS PACK RACES`.
+
+## Drivers
+
+Eight playable characters, name and tag-line stored as fixed 12- and 20-byte
+records in `WW.EXE`:
+
+| Slot | Name | Tag-line | Sprite bank | Species |
+|---|---|---|---|---|
+| 0 | UNO | `CUTE AND FAST` | `PANDA.SP` | panda |
+| 1 | SULTAN | `ONE HUMP OR TWO` | `CAMEL.SP` | camel |
+| 2 | MORRIS | `OLD RELIABLE` | `MOOSE.SP` | moose |
+| 3 | PEGGLES | `TURBO SQUAWK!` | `PELICAN.SP` | pelican |
+| 4 | RAZER | `KILLER WHEELS` | `SHARK.SP` | shark |
+| 5 | RINGO | `RAPID RASCAL` | `RINGO.SP` | raccoon |
+| 6 | BLOMBO | `NEVER FORGETS` | `ELE.SP` | elephant |
+| 7 | TIGI | `VROOM! GROWL!` | `TIGER.SP` | tiger |
+
+The bank-to-slot mapping is the order in which `WW.EXE` references the files
+(~0x9B720); rendering the first frame of each `CARS.SP` block against the first
+frame of each named bank confirms it — the blocks and the banks are the same
+eight characters in the same order. `CARS.SP` packs all eight drivers ×
+12 heading frames into one 102 144-byte block. `DIGGER.SP` is the ninth bank and
+holds the duck used by the *Wacky Duck Shoot* mini-game rather than a driver.
+
+### Names live in the code, species live in the assets
+
+Seven of the eight sprite banks are named after the **animal**, not the
+character: `PANDA.SP`, `CAMEL.SP`, `MOOSE.SP`, `PELICAN.SP`, `SHARK.SP`,
+`ELE.SP`, `TIGER.SP`. Only `RINGO.SP` carries a character name. The names and
+tag-lines exist nowhere in `WACKY.DAT` at all — they are fixed-width records in
+the executable's string table, and the art pipeline never saw them.
+
+The same split shows up in the mascot. `GIGGLES.SP` is the largest character
+bank in the archive (44 pixels tall against the drivers' 28), has a dedicated
+scripted movement path (`GIG.MOV`), and names the taunt system
+(`F1 - F6 ARE YOUR GIGGLE KEYS!`, `GIG1..GIG5.VOC`). Giggles the hedgehog is
+not a playable driver: the hedgehog appears in the attract sequence and then as
+the game's projectile (`HOGMIS.SP`, `HOG.VOC`).
+
+For contrast, Skunny Kart's title character is also its `FAST` roster entry
+(`SKUNNY (FAST)` in the class table) and carried across a line of Copysoft
+releases. Wacky Wheels keeps character identity in the string table and puts
+the recognisable animal in the intro and the weapon. See
+[09-skunny-kart.md](09-skunny-kart.md) for that game's roster.
+
+## Game modes
+
+From the main-menu string block (~0x9AD0C):
+
+```
+SINGLE PLAYER RACING     TWO PLAYER RACE       TWO PLAYER SHOOT OUT
+WACKY DUCK SHOOT         COMM#BAT~ PLAY        GAME OPTIONS
+WACKY WHEELS INFO        ORDERING INFO         LEAVE GAME
+```
+
+Difficulty: `AMATEUR CLASS` / `PRO CLASS` / `CHAMPION CLASS` / `TIME TRIAL` /
+`KID MODE` (the last one drives the throttle for you: *"THE CHILD ONLY HAS TO
+STEER THE VEHICLE IN THIS MODE AND DOES NOT NEED TO ACCELERATE AS THE COMPUTER
+FIXES THE SPEED OF THE CAR."*). Race length is 6, 8 or 10 laps; engines are
+`FAST 12 HP` or `SLOW 6 HP`, which select `VEL.TAB` or `VEL2.TAB`.
+
+`COMM#BAT~` is Apogee's serial/modem link layer; the string block carries a full
+chat system (`BI-DIRECTIONAL CHITTER CHATTER!`, `PRESS 'C' TO CHAT`) and baud
+selection from 9600 to 57600.
+
+## CD installs
+
+The game writes `WACKY.CFG` next to itself unless `APOGEECD` is set:
+
+```
+If you are running this game from a CD
+You will need to set the APOGEECD enviroment label
+To a writeable area of your system.
+Example:  SET APOGEECD=C:\WACKY\
+```
+
+(`enviroment` is Apogee's own typo, preserved.)
+
+```
+
+`docs/01-wacky-dat.md`:
+
+```md
+# 01 — `WACKY.DAT`
+
+One flat, uncompressed archive holds every asset: 7 771 880 bytes, 577 entries.
+
+## Layout
+
+```c
+struct wacky_dat {
+    uint16_t count;                 /* 577 */
+    struct {
+        char     name[14];          /* NUL-terminated, tail not cleared */
+        uint32_t size;              /* payload length in bytes          */
+        uint32_t offset;            /* TWO BYTES TOO LOW - see below    */
+    } dir[count];
+    uint8_t  pad[22];               /* one unused directory slot        */
+    uint8_t  payload[];
+};
+```
+
+Directory entry stride is 22 bytes. The payload starts at
+`2 + (count + 1) * 22 = 12718 = 0x31AE`, i.e. there is exactly one spare entry
+slot between the last directory record and the first file. Files are stored
+back-to-back with no alignment padding and no compression.
+
+## The two-byte skew
+
+The offsets in the shipped directory are all **2 bytes lower than the real
+payload position**. Reading naively at `offset` yields the last two bytes of the
+*previous* file followed by all but the last two bytes of the wanted one — which
+is why a naive dump produces PCX files whose magic byte sits at index 2 and
+whose 256-colour palette is two bytes short.
+
+The correct read is:
+
+```python
+data = blob[entry.offset + 2 : entry.offset + 2 + entry.size]
+```
+
+Three independent checks confirm it:
+
+* `TRIG.DAT` only decodes as a clean `cos/sin` table when shifted by 2
+  (`+1.0, 0.0` at index 0 instead of `0.0, 0.00002`).
+* Every PCX then has `0x0A 0x05 0x01 0x08` at offset 0 and its `0x0C`
+  palette marker exactly 769 bytes from the end.
+* The last entry (`WWREG.BIN`, size 4000, offset 7 767 878) ends at
+  `7 767 878 + 2 + 4000 = 7 771 880` — exactly EOF.
+
+The most economical explanation is that the packer recorded
+`entry.offset = ftell() - 2` (an off-by-one on a 16-bit word, or a stale
+`ftell()` captured before a two-byte write), and the loader inside `WW.EXE`
+compensates by seeking to `offset + 2`. The bug is *stable*: because every
+entry is skewed by the same amount, the chain stays self-consistent and the game
+never notices.
+
+## Stale bytes in the name field
+
+`name[14]` is a reused stack/`memcpy` buffer that is never zeroed past the
+terminator, so short names carry the tail of a previously written longer name:
+
+```
+WIN.PCX\0CX\0\0\0\0        <- leftover from WINTRO.PCX
+DANCE.MID\0ID\0\0          <- leftover from BASSATTK.MID
+BSB1.PCX\0\0LM\0\0         <- leftover from ...KLM
+```
+
+Harmless, but it is a neat fingerprint of the build tool and it lets you
+reconstruct part of the order in which the archive was assembled. The full list
+is in [`notes/wacky-dat-inventory.md`](../notes/wacky-dat-inventory.md).
+
+## Content census
+
+| Extension | Count | What it is |
+|---|---:|---|
+| `.PCX` | 116 | 320×200 8bpp images: tile sheets, minimap sheets, skies, screens, 42 track previews |
+| `.SP` | 67 | raw column-major sprite banks |
+| `.SPW .SIN .RD .POS .PAR .M .GAM` | 42 each | one complete set per track slot |
+| `.VOC` | 36 | Creative Voice sound effects |
+| `.MID` | 16 | General MIDI songs |
+| `.KLM` | 16 | the same 16 songs for the OPL2 driver |
+| `.INF` | 7 | pre-compiled sprite scalers, named `WIDTHxHEIGHT` |
+| `.BMC` | 6 | attract-mode demo recordings (tracks 1,2,3,4,5,7) |
+| `.HTT .OTT` | 2 each | pristine hall-of-fame / lap-record templates |
+| `.TAB` | 2 | `VEL.TAB`, `VEL2.TAB` engine speed ramps |
+| `.BIN` | 2 | `WWSW.BIN`, `WWREG.BIN` DOS exit screens |
+| `.FX` | 2 | `AUDIOHED.FX`, `AUDIOT.FX` — id-style AdLib effect chunks |
+| others | | `MAP.XY`, `TRIG.DAT`, `SLP`, `VIEW`, `NDIST`, `SPRITE.ATR`, `WACKY.SDX`, `GIG.MOV`, `WACKY.ING` |
+
+## Reading it
+
+```sh
+python tools/wwdat.py "<install>/WACKY.DAT" list
+python tools/wwdat.py "<install>/WACKY.DAT" extract ./out
+```
+
+```
+
+`docs/02-graphics.md`:
+
+```md
+# 02 — Graphics
+
+Everything is 8bpp for VGA mode 13h (320×200, 256 colours). The engine strings
+confirm the hard requirement: *"WACKY WHEELS requires a VGA card you do not seem
+to have one"*.
+
+## PCX
+
+All 116 `.PCX` entries are ordinary ZSoft PCX v5, 1 plane, 8 bits, RLE, with a
+trailing `0x0C` + 768-byte VGA palette:
+
+```
+manufacturer 0x0A   version 5   encoding 1 (RLE)   bpp 8
+xmin/ymin 0/0       xmax/ymax 319/199              planes 1   bpl 320
+```
+
+Nothing custom — the only trap is the archive skew from
+[01-wacky-dat.md](01-wacky-dat.md); read at `offset+2` and stock PCX loaders work.
+
+Roles:
+
+| Family | Purpose |
+|---|---|
+| `A_F1..A_F17` | floor tile sheets — 10 × 6 grid of 32×32 tiles = 60 tiles per sheet |
+| `A_MA1..A_MA17` | the *same* grid, flat-shaded, used for the overhead radar |
+| `BACK1..BACK3` | sky gradients (blue / city haze / dusk) |
+| `SHRINK1..SHRINK42` | track preview screens with the zone caption baked in |
+| `SB1..3`, `BSB1..3`, `SBCS`, `BSBCS` | zone-select boards |
+| `INT1..8`, `OR1..11`, `END1`, `WIN`, `WINTRO`, `LEAD`, `CHECK`, `ORDER`, `APOG1`, `BEAVIS` | menu / interstitial screens |
+
+`A_F12.PCX` and `A_MA12.PCX` are present in the archive but no `.GAM` references
+`f12.pcx` — an orphaned tile set that never shipped in a track.
+
+The `A_` prefix is added by the loader: the `.GAM` descriptors name the sheets
+as `f1.pcx`, `ma1.pcx` and so on. Only the `A_` variant exists in the retail
+archive, which is suggestive given the three-way `HIGH / MEDIUM / LOW DETAIL`
+menu option — `B_`/`C_` sets were presumably planned and then handled at runtime
+instead.
+
+## `.SP` — sprite banks
+
+Raw 8bpp, no header, no compression, **column-major**:
+
+```
+byte[x * height + y]  ==  pixel(x, y)
+frame count           ==  filesize / (width * height)
+colour index 0        ==  transparent
+```
+
+Column-major is not an accident: the whole sprite path scales sprites one
+destination *column* at a time, so the source pixels for a column are
+contiguous. The pre-compiled scalers (below) walk the same axis.
+
+Dimensions are not stored in the file. They come from three places:
+
+1. `SPRITE.ATR` for the roadside scenery banks;
+2. the `WIDTHxHEIGHT.INF` scaler the code pairs with the bank;
+3. constants in `WW.EXE` for everything else.
+
+Confirmed sizes:
+
+| Bank | Frame | Frames | Notes |
+|---|---|---:|---|
+| `CARS.SP` | 38×28 | 96 | 8 drivers × 12 heading frames |
+| `PANDA/CAMEL/MOOSE/PELICAN/SHARK/RINGO/ELE/TIGER/DIGGER.SP` | 38×28 | 16–24 | per-driver extra animation; `DIGGER` is the duck |
+| `AJ.SP`, `PUF.SP` | 38×28 | 4 | |
+| `H1..H25.SP` | 32×24 | 2–7 | roadside scenery, see `SPRITE.ATR` |
+| `OB1..OB13.SP` | 28×28 or 14×28 | 1 | static obstacles |
+| `BRONZEM/SILVERM/GOLDM/BONUSB/BONUSS/BONUSG.SP` | 65×50 | 6 | medal / bonus animations |
+| `WFONT1.SP` | 15×13 | 42 | the "wacky" caption font |
+| `GIGGLES.SP` | ?×44 | 1064 columns | the hedgehog mascot |
+| `ACTION.SP` | 251×6 | 1 | a single banner strip; pairs with `251X6.INF` |
+
+A handful of banks (`EFFECTS.SP`, `GENEF.SP`, `ICONS.SP`, `LAP.SP`, `OFONT.SP`,
+`CRACK.SP`, `HANDLE.SP`) have sizes with large prime factors and therefore
+almost certainly carry a small header or an internal sub-sprite directory —
+see [08-open-questions.md](08-open-questions.md).
+
+## `SPRITE.ATR` — roadside scenery table
+
+1442 bytes: a 4-byte header, then 36 records of 40 bytes.
+
+```c
+struct sprite_atr {
+    uint16_t unknown;       /* 106 */
+    uint16_t count;         /* 36  */
+    struct {
+        uint16_t kind;      /* 0..7  */
+        uint16_t unk;       /* always 10 */
+        uint16_t w, h;      /* 32,24  or 28,28  or 14,28 */
+        uint16_t w2, h2;    /* identical to w,h in every shipped record */
+        uint16_t scaler;    /* 1,2,3 -> which WxH.INF table to use */
+        uint16_t frames;    /* 1..7 */
+        char     file[24];  /* "H1.SP", "OB7.SP", ... */
+    } entry[count];
+};
+```
+
+`frames` matches `filesize / (w*h)` for every record, which is what pins the
+`.SP` geometry down. The `scaler` field selects between the `32X24`, `14X28` and
+`28X28` `.INF` tables, exactly the three sizes that appear in `w,h`.
+
+The 36 entries are indexed directly by the `type` field of each track's
+[`.SPW` object list](03-tracks.md).
+
+## `WIDTHxHEIGHT.INF` — pre-compiled scalers
+
+Seven files: `38X28`, `32X24`, `28X28`, `14X28`, `18X13`, `15X13`, `251X6`.
+Each is a stream of 16-bit signed words that acts as **byte-code for the sprite
+blitter** — one program per discrete zoom step, so no divides happen at draw
+time.
+
+Structure, verified on `38X28.INF` and `32X24.INF`:
+
+```
+block := -1 , dest_offset , { src_delta , dst_delta } * rows
+```
+
+* `-1` (`0xFFFF`) opens a destination *column*.
+* the next word is the absolute destination offset of that column
+  (0, h, 2h, 3h … in the largest step — i.e. the destination is column-major too).
+* then one `(src_delta, dst_delta)` pair per output row; `src_delta` is 0 or 1
+  (skip a source row or advance), `dst_delta` is 1.
+* the final `dst_delta` of a block is `-(h-1)`, rewinding the destination
+  pointer to the top of the next column.
+
+Walking `38X28.INF` gives ten zoom steps whose (columns × rows) are
+
+```
+37x28  34x25  31x23  28x21  25x19  22x16  19x14  16x12  13x10  10x8
+```
+
+— a geometric ladder at roughly ×0.88 per step, holding the 38:28 aspect. The
+game therefore does **not** scale sprites continuously; it snaps each sprite to
+one of ten pre-baked sizes chosen by distance. That is directly visible in play
+as the "popping" of roadside objects as you approach them.
+
+## Fonts
+
+* `WFONT1.SP` — 42 glyphs of 15×13, scaled by `15X13.INF`. Matching
+  `18X13.INF` suggests a second, wider variant.
+* `OFONT.SP` — 16 444 bytes, the "ordering info" / menu font. Size does not
+  factor cleanly, so it carries a header.
+
+## Reproducing
+
+```sh
+python tools/wwsp.py            # library
+python tools/wwexport.py out png   # every PCX and every known .SP bank -> PNG
+```
+
+```
+
+`docs/03-tracks.md`:
+
+```md
+# 03 — Track data
+
+Every one of the 42 slots is described by seven files sharing a numeric stem:
+
+```
+n.GAM   n.M   n.POS   n.RD   n.SPW   n.SIN   n.PAR      (n = 1..42)
+```
+
+Plus `SHRINKn.PCX`, the preview screen.
+
+## World geometry
+
+```
+tile            32 x 32 texels
+map             64 x 64 tiles
+world           2048 x 2048 texels, wrapping
+angle unit      1 / 1920 revolution   (0 = +X, increasing toward +Y)
+```
+
+64 × 64 = 4096, which is exactly the size of `n.M`, and 2048 is the ceiling of
+every coordinate found in `n.RD` and `n.SPW`. The angle unit is fixed by two
+independent facts: `TRIG.DAT` holds exactly 1920 entries, and the pre-computed
+`angle` field of each road segment matches `atan2(dy,dx) × 1920/360°` to within
+one unit.
+
+## `n.GAM` — track descriptor (ASCII, CRLF)
+
+```
+f1.pcx          floor tile sheet A        -> A_F1.PCX
+f2.pcx          floor tile sheet B        -> A_F2.PCX
+ma1.pcx         radar tile sheet A        -> A_MA1.PCX
+ma2.pcx         radar tile sheet B        -> A_MA2.PCX
+back1.pcx       sky gradient              -> BACK1.PCX
+1250            constant in all 42 files
+1500            constant in all 42 files
+1               17-char label field, "1" padded, in all 42 files
+288             \
+608              |  eight (x, y) starting-grid slots,
+320              |  in world texels
+704              |
+...             /
+0               trailer: 0, or the list 1 2 4 3
+```
+
+Observations across all 42 descriptors:
+
+* Only **nine** tile-set pairings are used: `f1/f2`, `f1/f15`, `f3/f4`,
+  `f3/f11`, `f5/f6`, `f7/f8`, `f9/f10`, `f13/f14`, `f16/f17`. There are also
+  exactly nine distinct `n.PAR` panoramas, but the two sets do not line up
+  one-to-one — tracks 1 and 5 share the `f1/f2` tile set and use *different*
+  panoramas, while tracks 7/11/14/17/23/28/30/34/41 share one panorama across
+  two different tile sets. Scenery and ground are chosen independently.
+* `f12.pcx` is never referenced — `A_F12.PCX` is an orphan.
+* `back1` on 30 tracks, `back2` on 6, `back3` on 6.
+* The trailer is `0` except on the six `f3/f4` and `f3/f11` tracks (2, 12, 16,
+  27, 33, 42), which carry `1 2 4 3`. Those six are exactly the tracks that use
+  `back2.pcx` and share one panorama, so the list is theme-scoped — most likely
+  an animated-tile or palette-cycle spec. Unconfirmed.
+* `1250` and `1500` never vary, so they were probably meant to be per-track
+  tuning (draw distance / fog?) and ended up as constants.
+
+## `n.M` — tile map (4096 B)
+
+64 × 64 bytes, row-major, `map[y][x]` = tile index. Values observed 0…119.
+
+Tile bitmaps come from the two floor sheets named in `.GAM`. Each sheet is
+320×200 = a 10 × 6 grid of 32×32 tiles, so
+
+```
+index  0..59   ->  sheet A, tile (index % 10, index / 10)
+index 60..119  ->  sheet B, tile ((index-60) % 10, (index-60) / 10)
+```
+
+Rebuilding the 2048×2048 world texture for track 1 with those rules reproduces
+`SHRINK1.PCX` pixel-for-pixel in layout, which is the confirmation that both the
+tile size and the two-sheet split are right.
+
+The radar uses the identical map with the `ma*` sheets, which are the same tiles
+flat-filled with two colours (grass / road).
+
+```sh
+python tools/wwtrack.py <extracted_dir> 1
+```
+
+## `n.POS` — progress map (8194 B)
+
+64 × 64 `uint16`, one per tile, followed by two spare bytes. Values are small
+sector indices (0…27 on track 1, up to ~40 on longer ones); 0 means "not part
+of the racing line region". Walking the track the value increases monotonically
+and wraps at the start/finish line.
+
+This is the game's lap and rank oracle — `WW.EXE` calls it `posmap` (the
+allocation failure message is `posmap failed`). Comparing two cars' `POS` value
+gives the running order in constant time without any path arithmetic, and the
+wrap detects a completed lap. Rendered as a greyscale it looks like a set of
+concentric blocky bands following the circuit.
+
+30 of the 42 `n.POS` files are unique; the rest are shared by tracks that reuse
+a layout.
+
+## `n.RD` — road centre line
+
+```c
+uint16_t count;
+struct {
+    uint16_t x1, y1;      /* segment start, world texels */
+    uint16_t x2, y2;      /* segment end                 */
+    uint16_t angle;       /* heading, 1920 units / turn  */
+    uint16_t flag;        /* 0 or 1                      */
+    uint16_t length;      /* |(dx,dy)|, integer          */
+} seg[count];
+```
+
+Segments are chained: `seg[i].x2,y2 == seg[i+1].x1,y1`. Counts run from 22
+(track 19) to 83 (track 14). The `angle` and `length` fields are redundant with
+the endpoints — they are cached so the AI and the rubber-band logic never have
+to call `atan2` or `sqrt`.
+
+Worked example, track 1 segment 0:
+
+```
+(254,535) -> (253,1399)   dx=-1  dy=+864
+length 864                       = round(hypot(-1,864))
+angle  480                       = 90.07 deg * 1920/360
+```
+
+`flag` is 1 on a minority of segments; the distribution is consistent with
+"this segment crosses a checkpoint / lap line", but that is not yet proven.
+
+## `n.SPW` — scenery and object placement
+
+```c
+uint16_t count;
+struct {
+    uint32_t type;        /* index into SPRITE.ATR (0..35) */
+    uint16_t x, y;        /* world texels                  */
+    uint32_t extra;       /* 0 in every shipped record     */
+} obj[count];
+```
+
+7 to 38 objects per track. `type` values seen include 10, 23, 30 — inside the
+36-entry range of `SPRITE.ATR`, which is what identifies the field.
+
+## `n.SIN` — per-tile surface attributes (1296 B)
+
+108 records of 12 bytes (6 × `uint16`). 108 is the number of distinct tiles a
+theme actually uses (track 1's map tops out at index 107).
+
+```
+field 0 : 0 or 1        - drivable / solid
+field 1 : 0 or 1
+field 2 : 0,1,3,5,12,13,18,19,26
+field 3 : 0
+field 4 : 0, 3, 18
+field 5 : 0
+```
+
+18 distinct `.SIN` files across 42 tracks, i.e. roughly two variants per tile
+theme. The most probable reading is *surface class + friction/speed penalty +
+effect id* (grass, sand, water, wall, boost), but the exact mapping is still
+open — it needs to be cross-checked against the tile bitmaps.
+
+## `n.PAR` — parallax horizon (25 600 B)
+
+**640 × 40, 8bpp, row-major**, drawn above the floor band and scrolled with the
+camera heading. The width is settled numerically: of every factorisation of
+25 600, only 640×40 gives smooth vertical coherence (mean absolute row-to-row
+delta 2.8 versus ~33 for every other candidate).
+
+Only 9 distinct panoramas exist across the 42 tracks. Track 1's is a full city
+skyline (which reads oddly against its countryside circuit); track 2's is a
+cloud band. The panorama is what makes the horizon rotate as you steer; the
+`BACKn.PCX` behind it is a static vertical sky gradient.
+
+Panorama-to-track mapping:
+
+| Tracks | Tile sets | Sky |
+|---|---|---|
+| 1, 15, 19, 38 | `f1/f2`, `f1/f15` | `back1` |
+| 2, 12, 16, 27, 33, 42 | `f3/f4`, `f3/f11` | `back2` |
+| 3 | `f5/f6` | `back3` |
+| 4, 24, 35 | `f7/f8` | `back1` |
+| 5, 10, 26, 31, 36 | `f1/f2`, `f1/f15` | `back1` |
+| 6, 13, 20, 25, 32, 39 | `f9/f10` | `back1` |
+| 7, 11, 14, 17, 23, 28, 30, 34, 41 | `f13/f14`, `f16/f17` | `back1` |
+| 8, 18, 40 | `f7/f8` | `back1` |
+| 9, 21, 22, 29, 37 | `f5/f6` | `back3` |
+
+## `SHRINKn.PCX`
+
+320×200 preview of the whole circuit with a caption strip at the bottom
+(`BRONZE WHEELS`, `SHOOTOUT ZONE 3`, `BONUS GOLD WHEELS`, …). These are the
+images the zone-select screen shrinks and pans; the captions are what pins the
+42-slot layout down (see [00-overview.md](00-overview.md)).
+
+## `n.BMC`
+
+Six files for tracks 1, 2, 3, 4, 5 and 7. Layout is `uint16 count` followed by
+`count` 3-byte records `(uint16 duration, uint8 code)` with `code` in 0…6 and
+`duration` in 1…37. That is textbook run-length-encoded controller input, which
+matches the `DEMO MODE` / `LOADING DEMO` strings — these are the attract-mode
+demo recordings. Not yet replayed to confirm.
+
+```
+
+`docs/04-engine-tables.md`:
+
+```md
+# 04 — Engine look-up tables
+
+Wacky Wheels runs a textured-floor renderer on a 386 with no FPU. Every
+trigonometric, perspective and distance term the inner loops need is baked into
+a table inside `WACKY.DAT` and loaded once at startup. Taken together these six
+files describe the renderer completely enough to reconstruct its geometry.
+
+## `TRIG.DAT` — 15 360 B
+
+1920 records of 8 bytes:
+
+```c
+struct { int32_t cos; int32_t sin; } trig[1920];   /* 16.16 fixed point */
+```
+
+Index *i* is the heading in **1920ths of a revolution**; 0 is +X and the angle
+grows toward +Y (screen-down), i.e. clockwise. 1920 = 2⁷ × 15, which gives exact
+integer indices for 90° (480), 45° (240), 30° (160), 24°, 22.5°, 18°, 15°, 12°,
+10°, 9°, 8°, 6°, 5°, 4°, 3°, 2°, 1°.
+
+The table was **not** generated by calling `cos()` per entry. It was built by
+repeated incremental rotation, and the accumulated error is visible:
+
+| i | angle | stored cos | true cos | stored sin | true sin |
+|---:|---:|---:|---:|---:|---:|
+| 0 | 0° | 1.000000 | 1.000000 | 0.000000 | 0.000000 |
+| 240 | 45° | 0.706696 | 0.707107 | 0.707504 | 0.707107 |
+| 480 | 90° | **-0.001160** | 0.000000 | 0.999985 | 1.000000 |
+| 960 | 180° | -0.999985 | -1.000000 | **-0.002319** | 0.000000 |
+| 1440 | 270° | 0.000214 | 0.000000 | -1.000000 | -1.000000 |
+
+The drift peaks around a quarter of a texel per 2048-unit world, so it never
+shows — but it is a clean fingerprint of a 1994 table generator that trusted a
+rotation recurrence over 1920 steps.
+
+## `SLP` — 7 680 B
+
+1920 × `int32` = `65536 · tan(θ)`, same angle unit and the same drift.
+Entry 480 (90°) is forced to **0** rather than saturating, so the caller has to
+special-case the vertical direction. Sign flips correctly on either side
+(`SLP[479] = +18 383 128`, `SLP[481] = -18 383 128`). A slope table indexed by
+heading is what you build a DDA line walker around.
+
+## `VIEW` — 1 280 B
+
+320 × `uint32`, one entry per screen column:
+
+```
+VIEW[160] = 16384          (2^14, the centre column)
+VIEW[  0] = VIEW[319] = 14185
+acos(14185 / 16384)        = 30.03 degrees
+```
+
+So `VIEW[x] = 16384 · cos(column_angle(x))` and the **horizontal field of view
+is 60°**. This is precisely the Wolfenstein-3D fish-eye correction table: divide
+the ray distance by `VIEW[x]` (or multiply the projected height by it) to turn a
+ray-length into a perpendicular distance and keep straight walls straight.
+
+## `NDIST` — 89 600 B
+
+`320 × 70` `uint32`, **column-major** — 70 consecutive entries per screen
+column. It is the world-space distance of the ground plane at every pixel of a
+**70-row floor band**. Values run 115 (nearest, centre column) to 1122
+(farthest, edge column).
+
+The relationship to `VIEW` is exact:
+
+```
+NDIST[c][r] / NDIST[160][r]  ==  VIEW[160] / VIEW[c]
+   col 0 :  133/115 = 1.1565      16384/14185 = 1.1550
+```
+
+so `NDIST` is the per-row perpendicular distance already divided by the
+per-column cosine. With that table the inner loop for the floor is nothing but
+
+```
+for each screen row r in the 70-row band:
+    for each column c:
+        d = NDIST[c][r]
+        wx = camX + d * cos(heading + colAngle[c])
+        wy = camY + d * sin(heading + colAngle[c])
+        pixel = worldTexture[wy & 2047][wx & 2047]
+```
+
+with the `cos`/`sin` coming from `TRIG.DAT`.
+
+That loop is **inferred from the shape of the tables, not from a disassembly** —
+but the shape is hard to explain any other way. A Mode-7 style affine floor only
+needs one distance per *row*; storing a distance per *(column, row)* pair, with
+the fish-eye division already folded in, is what you do when each column is its
+own ray. It is a ray-cast floor with a per-column table, not an affine row
+transform. See [07-vs-mario-kart.md](07-vs-mario-kart.md) for why that
+distinction matters.
+
+70 rows is the ground band; the rest of the 200-line frame is sky, the
+[`n.PAR`](03-tracks.md) horizon panorama and the HUD. The `HIGH / MEDIUM / LOW
+DETAIL` and `SINGLE SCREEN DETAIL` / `SPLIT SCREEN DETAIL` menu options change
+how many of those rows are actually stepped versus line-doubled; no asset is
+swapped, since only the `A_` tile sheets ship.
+
+## `MAP.XY` — 4 096 B
+
+Two 2048-byte ramps back to back:
+
+```
+MAP.XY[    0 .. 2047]   world X (0..2047)  ->  radar X (0..77)
+MAP.XY[ 2048 .. 4095]   world Y (0..2047)  ->  radar Y (0..49)
+```
+
+so the overhead map is a **78 × 50 pixel** widget, and the game converts a world
+position to a radar pixel with two table reads and no division.
+
+## `VEL.TAB` / `VEL2.TAB` — 400 B each
+
+200 × `uint16` monotone ramps:
+
+```
+VEL.TAB   0,0,1,1,2,2,2,3,3,4,4,4,5,...  peaks at 80
+VEL2.TAB  0,0,1,1,1,1,1,2,2,3,3,3,4,...  peaks at 56
+```
+
+These are the two engine classes offered on the menu, `FAST 12 HP ENGINES` and
+`SLOW 6 HP ENGINES`. The index is the accelerator charge (0…199) and the value
+is the resulting speed, so acceleration curve and top speed are one table each —
+no physics constants in code.
+
+## `GIG.MOV` — 326 B
+
+Pairs of `int16` deltas after a 4-byte header, forming a continuous path
+(`(0,0) (-2,0) (-4,0) (-6,-2) …`). A scripted movement route for `GIGGLES.SP`,
+the hedgehog mascot, used in the intro/attract sequence.
+
+## Reproducing
+
+```sh
+python tools/wwtables.py <extracted_dir>
+```
+
+```
+
+`docs/05-audio.md`:
+
+```md
+# 05 — Audio
+
+The sound layer is **not** Beavis Soft's. The credits say `SOUND CODE — JIM
+DOSE'` and the string tables in `WW.EXE` are the Apogee Sound System's, verbatim:
+
+```
+Fx ok. / Music ok. / Sound Blaster ok. / Pro AudioSpectrum ok. /
+GUSWAVE ok. / Sound Source ok. / Multivoc ok. / Ultrasound music ok. /
+PC FX ok. / DMA channel ok. / TaskMan error. / DPMI Error in FX_MAN.
+BLASTER evironment variable not set. / ULTRADIR environment variable not set.
+Can't find ULTRASND.INI file. / MPUDELAY / ULTRAMID.INI / GF1PATCH110
+```
+
+Supported devices therefore span AdLib/OPL2, Sound Blaster + Pro, Pro
+AudioSpectrum 16, Gravis UltraSound (both GUSWAVE digital and GusMidi with
+`.pat` patches), Disney Sound Source, MPU-401 and PC speaker. The mixer is
+Multivoc; `SETUP.EXE` writes the choice into `WACKY.CFG`.
+
+It was also a **late replacement**. Andy Edwardson's account of the project
+(see [10-the-developers-account.md](10-the-developers-account.md)) says the
+original sound engine was torn out during beta, after George Broussard asked
+for more music and Jim Dose had just joined Apogee — and that Jim Dose is who
+put the team in touch with Mark Klem. That is why the audio strings in
+`WW.EXE` are the only part of its string table that is not bespoke, and why
+every song ships twice.
+
+## Music — `.MID` and `.KLM`
+
+Sixteen songs, each present **twice**:
+
+```
+APOGEE  ASHES  BANSHI  BASSATTK  BRICWALL  DANCE  FLIGHT  GAMEOVER
+KARD    MAINMENU  OVERDRIV  PUMPER  SPACEY  STARBRAI  TURBO  LEADRBRD
+```
+
+* `*.MID` — plain Standard MIDI File, format 1. `APOGEE.MID` is
+  `MThd, format 1, 14 tracks, 120 ticks per quarter note`. These feed the
+  MPU-401 / General MIDI / GusMidi paths.
+* `*.KLM` — the OPL2 version of the same song. `KLM` is **Mark Klem**, the
+  composer credited in the executable; the extension is his name, not a generic
+  format. Every file begins `18 01 01`, then a stream of small records. The
+  internal event encoding has not been decoded here.
+
+`WW.EXE` picks between them at load time by appending either `.KLM` or `.MID` to
+the song name, right after printing `Checking Music Hardware....`. Choosing
+`None` produces `No MUSIC selected....`.
+
+`LEADRBRD.MID` (1989 B) and `GAMEOVER.MID` (2641 B) are the two short stingers;
+`OVERDRIV.MID` is the largest at 49 765 B.
+
+## Sound effects — `.VOC`
+
+36 Creative Voice files, standard `Creative Voice File\x1A` header, 8-bit
+unsigned PCM. `WW.EXE` holds a parallel 12-byte-stride name table at ~0x4DC64:
+
+```
+UNO SULTAN MORRIS PEGGLES RAZER RINGO BLOMBO TIGI
+PASS BELL START GLASS WARP BOOM HORN SPLASH PLIP SKID PUF FLAME
+HOG CLANG SWIPE DROP BACKFIRE STALL1
+```
+
+The first eight are the drivers' voice barks — one per character, which is the
+game's direct answer to *Mario Kart*'s character voices. `GIG1..GIG5.VOC` are
+the five "giggle" taunts bound to F1–F6 (`F1 - F6 ARE YOUR GIGGLE KEYS!`),
+`QUACK.VOC` belongs to the duck shoot, `BELCH.VOC` to the Dopefish cameo in
+`DOPE.SP` (the belch was recorded by Joe Siegler with a microphone and a two
+litre bottle of Diet Coke),
+and `MOTOR.VOC` / `HORN1.VOC` are loaded into dedicated always-resident buffers
+(the failure messages are `Engine VOC failed`, `Horn voice failed`,
+`Devil Voices Failed`).
+
+## `AUDIOHED.FX` / `AUDIOT.FX`
+
+This pair is the **id Software `AudioHed`/`AudioT` layout**, reused unchanged:
+
+```
+AUDIOHED.FX   316 B  =  79 x uint32 chunk offsets
+AUDIOT.FX    3109 B  =  the concatenated chunks (78 of them)
+```
+
+Offsets `0, 7, 14, 21, 28, 35, 42, 49, 56, 188, 257, ...`: the first eight chunks
+are 7 bytes each (empty PC-speaker entries), the rest are 30-180 byte AdLib
+instrument/effect blocks. This is the same container Commander Keen and
+Wolfenstein 3D use, which is unsurprising — the Apogee Sound System grew out of
+that codebase and Jim Dose brought it along.
+
+The last offset (3101) leaves eight unaccounted bytes at the tail of
+`AUDIOT.FX`; either a final unindexed chunk or padding.
+
+```
+
+`docs/06-config-and-saves.md`:
+
+```md
+# 06 — Configuration and persistent state
+
+## `WACKY.CFG` — 2778 B
+
+Written by `SETUP.EXE`, read (and validated) by `WW.EXE`. If it is missing or
+the version does not match, the game refuses to start:
+
+```
+Wacky Wheels Config File not found. Please run SETUP.EXE
+Incorrect Wacky Wheels Config File!
+Please run SETUP.EXE to correct this
+If this error persists your SETUP.EXE
+May not be the correct version.
+Your WACKY.CFG file may also be corrupted
+Delete this file and run SETUP.EXE
+```
+
+The file is a raw dump of a C struct, mostly zero-filled. Identifiable regions:
+
+| Offset | Contents |
+|---|---|
+| 0x2A–0x42 | device/detail selectors (`01 00 01 00 01 00 07 00 20 02 02 00 01 00 01 00`) — the same bytes appear in the `WACKY.ING` template |
+| 0x490–0x4B4 | keyboard scan codes: `4B 4D 38 1D 50 39 20 21 1E 1F 22 23` = Left, Right, Up, Ctrl, Down, Space, D, F, A, S, G, H |
+| 0x4C0–0x4D8 | joystick calibration (`0x2580, 0x4B, 0x96, 0xE1, 0x1C2`) |
+| 0x4FE.. | modem strings in 48-byte slots: `AT &F &C1 &D1 &K0 &Q6 S36=3`, `ATDT`, `AT Z H0` |
+| 0x5C8–0x5F8 | serial table `0x3F8/4, 0x2F8/3, 0x3E8/4, 0x2E8/3` — COM1..COM4 base ports and IRQs |
+| 0x60A.. | link profiles, 48-byte slots: `SERIALLINK`, then five `BLANK` entries |
+| 0x788.. | control-scheme table, entries named `LEFT CURSOR`, ... |
+
+`WACKY.ING` (1170 B, inside `WACKY.DAT`) is the **template** the game copies out
+when no config exists. It carries the version string `1.1`, the date `MAR 1994`,
+the default hall-of-fame taunt `KNOCK ME OFF!`, and the same selector block found
+at 0x2A of `WACKY.CFG`. A `MAR 1994` stamp against an Oct 1994 executable dates
+the template to roughly six months before release.
+
+## `WACKY1.HI` / `WACKY2.HI` — hall of fame (6624 B)
+
+Defaults ship in `WACKY.DAT` as `WAC1.HTT` / `WAC2.HTT` (`HTT` = hall-of-fame
+template; `1`/`2` are the two save slots).
+
+```c
+struct hi_record {                  /* 46 bytes, 144 records */
+    uint16_t group;                 /* 1..6  zone group      */
+    uint16_t slot;                  /* 0..7  driver position */
+    int16_t  points;                /* 45,36,27,18,9,0,-9,-18 by default */
+    char     date[12];              /* "01 SEP 1994"         */
+    uint8_t  pad[8];
+    char     name[20];              /* "KNOCK ME OFF!"       */
+};
+```
+
+144 = 18 boards x 8 slots — six zone groups (Bronze/Silver/Gold Wheels plus the
+three Bonus sets) across the three classes (Amateur/Pro/Champion). The menu
+exposes them as `AMATEUR CLASS DRIVERS`, `PRO CLASS DRIVERS`,
+`CHAMP CLASS DRIVERS`, `TIME TRIAL DRIVERS`.
+
+## `WACKY1.TIM` / `WACKY2.TIM` — lap and race records (3600 B)
+
+Defaults ship as `WAC1.OTT` / `WAC2.OTT`.
+
+```c
+struct tim_record {                 /* 120 bytes, 30 records = the 30 race tracks */
+    char     lap_name[4][20];       /* 16 chars used, 4 pad */
+    uint32_t lap_time[4];           /* ticks */
+    char     race_name[20];
+    uint32_t race_time;
+};
+```
+
+The shipped defaults are an Apogee staff roll-call — Brian Dhatt, Chris White,
+Craig Hamilton, Dan Creeron, Hank Leukart, Neil Rubenking, ..., and on track 8:
+`LEE JACKSON`, `STEVE QUARRELLA`, `JOE SELINSKE`, `MR D.FISH` with
+**`SCOTT MILLER`** holding the best race time. In-game these back the
+`TIME TRIAL HALL OF FAME`, `TOP FOUR LAP TIMES` and
+`BEST TIME FOR ENTIRE RACE` screens.
+
+## `WACKY.DTT` — duck-shoot leaderboard (96 B)
+
+Four 24-byte records `{ char name[16]; uint32 pad; uint32 score; }`. Ships
+pre-filled with the development team:
+
+```
+SHAUN  16     (Shaun Gadalla, art)
+ANDY   12     (Andrew Edwardson, code)
+NUGGET  8
+RUEBEN  6
+```
+
+`NUGGET` and `RUEBEN` appear nowhere in the credits block.
+
+## `MODEM.PCK` — 4825 B
+
+Plain text, self-documenting:
+
+```
+; Wacky Wheels Modem String File
+; Wacky Wheels is (c) 1994 Apogee Software, Ltd / Beavis Soft
+; 1) Line #1 is the name of the modem you wish to use
+; 2) Line #2 is the initialization string.  We urge you to use &F ...
+; 3) The third line is the hangup command.
+; 4) The fourth line is blank.  The blank line is important.
+```
+
+Split into a "Tested Strings" section (modems Apogee actually verified) and a
+larger untested list. Purely a `SETUP.EXE` input.
+
+## `WWSW.BIN` / `WWREG.BIN` — 4000 B each
+
+Standard 80x25 VGA text pages (character + attribute per cell), blitted to
+`0xB8000` on exit. `WWSW.BIN` is the shareware order pitch (quoted in
+[00-overview.md](00-overview.md)); `WWREG.BIN` is the registered version's
+farewell. `WW.EXE` reports `Cannot find DOS end screen %s` if either is missing.
+
+## `ERR.LOG` and `HELP_ME.EXE`
+
+`WW.EXE` opens `ERR.LOG` for diagnostics and prints `Error - %s` /
+`Cannot open %s for WRITE/UPDATE` on failure. It also references
+`HELP_ME.EXE` (`Please execute HELP_ME.EXE for possible solutions.`), which is
+**not** present in the GOG install — GOG ships a 2009 Windows helper called
+`WWHELP.EXE` instead.
+
+## Reading them
+
+```sh
+python tools/wwsaves.py tim "<install>/WACKY1.TIM"
+python tools/wwsaves.py hi  "<install>/WACKY1.HI"
+python tools/wwsaves.py dtt "<install>/WACKY.DTT"
+```
+
+```
+
+`docs/07-vs-mario-kart.md`:
+
+```md
+# 07 — What is actually *Mario Kart* about Wacky Wheels
+
+Wacky Wheels shipped in October 1994, twenty-six months after *Super Mario Kart*
+(August 1992), and Apogee never pretended otherwise. What the data shows is more
+interesting than "it's a clone": the **design** is copied closely, the
+**technology** is not copied at all. Wacky Wheels reaches a Mode 7 look with a
+Wolfenstein-3D toolbox.
+
+Everything in the "Wacky Wheels" column below is established in
+[03-tracks.md](03-tracks.md) and [04-engine-tables.md](04-engine-tables.md).
+The *Super Mario Kart* column is general platform knowledge, included for
+contrast — nothing in this repository was derived from Nintendo data.
+
+## Design: very close
+
+| | Super Mario Kart | Wacky Wheels |
+|---|---|---|
+| Roster | 8 drivers | 8 drivers (`UNO SULTAN MORRIS PEGGLES RAZER RINGO BLOMBO TIGI`) |
+| Driver voices | per-character samples | per-character `.VOC`, one per driver, plus five "giggle" taunt keys |
+| Cup structure | 4 cups x 5 tracks | 6 zone groups x 5 tracks (`BRONZE/SILVER/GOLD WHEELS` + the same three as `BONUS`) |
+| Engine classes | 50 / 100 / 150cc | `12 HP` / `6 HP` engines, selecting `VEL.TAB` / `VEL2.TAB`; plus `AMATEUR / PRO / CHAMPION` AI classes |
+| Scoring | points per finishing position | default hall-of-fame ladder `45 36 27 18 9 0 -9 -18` across eight finishers — i.e. 9 points a win over a five-race group, and *negative* points at the back |
+| Weapons | shells, bananas, mushrooms | thrown hedgehogs (`HOGMIS.SP`, `HOG.VOC`), plus `ICE`, `FIRE`, `JUMP`, `UP`, `NOW` |
+| Battle mode | 4 balloon arenas | 12 `SHOOTOUT ZONE` arenas, `PLAY FOR 5/10/15/20 HITS` |
+| Radar | bottom-screen map | 78 x 50 px overhead map (`MAP.XY`), toggleable in `RACE SCREEN OPTIONS` |
+| Time trial | yes, with ghost | `TIME TRIAL`, `TOP FOUR LAP TIMES` + `BEST TIME FOR ENTIRE RACE` (no ghost) |
+| Two-player | split-screen | split-screen **and** serial/modem link (`COMM#BAT~ PLAY`) with a chat mode |
+
+Two additions have no Mario Kart counterpart: **KID MODE**, which drives the
+throttle for the player, and the **Wacky Duck Shoot**, a two-minute standalone
+shooting gallery with its own leaderboard file (`WACKY.DTT`).
+
+## Technology: not close at all
+
+*Super Mario Kart* renders its ground with the SNES PPU's Mode 7: one hardware
+affine transform of a single 128 x 128 tile map of 8 x 8 tiles (a 1024 x 1024
+texture), with the matrix rewritten every scanline by HDMA to fake perspective.
+The transform is free; the console does it.
+
+Wacky Wheels has no such hardware, and the tables in `WACKY.DAT` show exactly
+what was built instead:
+
+| | Super Mario Kart | Wacky Wheels |
+|---|---|---|
+| Ground texture | 128 x 128 tiles of 8 x 8 = **1024 x 1024** | 64 x 64 tiles of 32 x 32 = **2048 x 2048** |
+| Tile storage | one VRAM tile set | two 320 x 200 PCX sheets, 60 tiles each, index 0-59 / 60-119 |
+| Transform | PPU affine matrix, per scanline | software, per **column**: `NDIST[320][70]` distances with the fish-eye divide pre-folded in |
+| Angles | 8-bit BAM, hardware sin/cos ROM | 1920 steps per revolution, `TRIG.DAT` = 1920 x {cos, sin} in 16.16 |
+| Perspective | HDMA matrix scaling | `VIEW[320]` = `16384 * cos(column angle)`, half-FOV exactly 30 deg |
+| Ground band | full playfield | 70 scanlines |
+| Horizon | scrolling BG layer | 640 x 40 8bpp panorama (`n.PAR`), 9 of them, over a static sky gradient |
+| Sprite scaling | pre-drawn frames, hardware OBJ | ten pre-baked zoom steps, driven by the `WxH.INF` blitter byte-code |
+| Kart rotation | pre-drawn frames | 12 heading frames per driver, all eight packed into `CARS.SP` |
+
+The distinctive numbers — **60 degree horizontal FOV**, a per-column cosine
+correction table, a `1/tan` slope table indexed by heading, one distance value
+per screen column — are the Wolfenstein 3D / Doom-era PC raycaster vocabulary,
+not the console Mode 7 one. Wacky Wheels is a raycaster pointed at the floor
+instead of at walls. The Apogee heritage is literal in places: the sound effects
+live in `AUDIOHED.FX` / `AUDIOT.FX`, the same `AudioHed`/`AudioT` container
+Commander Keen and Wolfenstein 3D use, carried over with the Apogee Sound System.
+
+## Where the two approaches diverge visibly
+
+* **Texel density.** Wacky Wheels' tiles are 32 x 32 over a 2048-unit world;
+  Super Mario Kart's are 8 x 8 over 1024. The PC game therefore has *four times
+  the world size in texels* but far fewer, chunkier tiles — which is why its
+  tracks read as broad and blocky where Mario Kart's read as detailed.
+* **Sprite popping.** `38X28.INF` contains exactly ten zoom steps
+  (`37x28 34x25 31x23 28x21 25x19 22x16 19x14 16x12 13x10 10x8`). Roadside
+  objects snap between them rather than scaling smoothly — a visible artefact of
+  trading continuous scaling for table lookups on a 386.
+* **Detail levels.** Mode 7 has no quality knob. Wacky Wheels offers
+  `HIGH / MEDIUM / LOW DETAIL` and separate single/split-screen detail settings,
+  because the floor loop's cost is under software control.
+* **Progress tracking.** Super Mario Kart tracks lap position with checkpoint
+  data; Wacky Wheels stores a whole `64 x 64 uint16` **sector map** per track
+  (`n.POS`, internally `posmap`) so ranking is a single table read per car.
+
+## Verdict
+
+Wacky Wheels is a faithful *design* clone and an entirely independent *engine*.
+Somebody at Beavis Soft played a lot of Super Mario Kart and then solved the
+rendering problem from the PC side of the fence, with tables where the SNES has
+silicon. The most telling artefact is `TRIG.DAT`: its cos/sin values drift
+measurably (cos 90 deg comes out as `-0.00116`) because the table was generated
+by an incremental rotation recurrence rather than by calling `cos()` 1920 times.
+That is a 1994 PC programmer's shortcut, and there is nothing Nintendo about it.
+
+```
+
+`docs/08-open-questions.md`:
+
+```md
+# 08 — Open questions
+
+Everything listed here is unresolved after the first pass. Each entry records
+what is known so the next session does not repeat the work.
+
+> **Cross-check from Skunny Kart:** Skunny Kart ships a file called
+> `SKUNNYK.SDX`, but its content is Wacky Wheels' `TRIG.DAT`, not Wacky Wheels'
+> `WACKY.SDX` — see [09-skunny-kart.md](09-skunny-kart.md). Skunny Kart has no
+> file with `WACKY.SDX`'s content and no `MAP.XY` equivalent, so its build gives
+> no leverage on either. Everything below stands.
+
+## `WACKY.SDX` — 9062 B
+
+Loaded by `WW.EXE` in the same group as `MAP.XY`, `TRIG.DAT`, `NDIST` and
+`GIG.MOV`, so it is a global engine table, not per-track.
+
+Known: first word is `0x001E` (= 30, and there are 30 race tracks). The
+remaining 9060 bytes are almost entirely `0x00` (7555 of them), with `0x01`
+(367), `0x03` (797) and a long tail of small values. `9060 = 30 x 302`, which
+would give one 302-byte record per race track, and the best periodicity scores
+land on 4, 5, 6 and 302. The sparse 0/1 pattern in the first block looks like a
+bitmask rather than a value array.
+
+Candidate readings: a per-track flag table (which tracks are unlocked / which
+belong to which group), or a shading/dither pattern table. Untested.
+
+## `*.BMC` — 836, 920, 797, 662, 713, 743 B
+
+Six files, for tracks 1, 2, 3, 4, 5 and 7. Structure resolves cleanly as
+`uint16 count` + `count x { uint16 duration, uint8 code }` (836 = 2 + 278*3).
+`code` stays in 0..6, `duration` in 1..37. Combined with the `DEMO MODE` and
+`LOADING DEMO` strings this is almost certainly RLE-encoded controller input for
+the attract mode. Needs replaying against the game to confirm the code bits.
+
+## `n.SIN` — per-tile surface attributes
+
+108 records of 6 x `uint16`, 18 distinct files across the 42 tracks. Field 0 and
+1 are 0/1; field 2 takes 0, 1, 3, 5, 12, 13, 18, 19, 26; field 4 takes 0, 3, 18;
+fields 3 and 5 are always 0. The natural reading is *surface class + friction or
+speed penalty + effect id*, but it has not been cross-referenced against the
+actual tile bitmaps yet. Doing that (render each tile of a theme next to its
+`.SIN` record) should settle it in one pass.
+
+## `n.RD` `flag` field
+
+`uint16`, 0 on most segments, 1 on a minority. Best guess: the segment carries
+a checkpoint or the start/finish line. Should be checkable by plotting the
+flagged segments over the reconstructed world texture.
+
+## `n.GAM` unknowns
+
+* `1250` and `1500` are identical in all 42 descriptors — dead tuning knobs.
+  Best guesses: draw distance and fog/horizon distance, or lap-time targets.
+* The 17-character label field is `"1"` padded with spaces in every file.
+* The trailer is `0` except on the six city-theme tracks (2, 12, 16, 27, 33, 42),
+  which carry `1 2 4 3`. Those are exactly the `f3/f4` and `f3/f11` tile sets
+  with `back2.pcx`. Most likely an animated-tile or palette-cycle list.
+
+## `WxH.INF` scaler byte-code
+
+The block structure is solved (`-1`, destination column offset, then
+`(src_delta, dst_delta)` pairs terminated by `-(h-1)`), and the ten-step zoom
+ladder falls out of it. Not yet resolved:
+
+* `38X28.INF` has 355 `-1` markers where the ten steps only account for 235
+  columns; 111 of the blocks are one word long. Those are probably
+  end-of-program separators between zoom steps, but the exact framing is open.
+* `15X13.INF` has a completely different shape — 15 blocks and then one
+  1625-word run. It may not be a scaler at all but a font-specific table.
+* The relation between a distance value from `NDIST` and the chosen zoom step
+  has not been located.
+
+## `.SP` banks with non-factorable sizes
+
+These almost certainly carry a header or an internal sub-sprite directory,
+because their byte counts have large prime factors:
+
+| File | Size | Factors |
+|---|---:|---|
+| `EFFECTS.SP` | 29836 | 2^2 x 7459 (7459 prime) |
+| `GENEF.SP` | 14692 | 2^2 x 3673 |
+| `ICONS.SP` | 5574 | 2 x 3 x 929 |
+| `LAP.SP` | 19542 | 2 x 3 x 3257 |
+| `OFONT.SP` | 16444 | 2^2 x 4111 |
+| `CRACK.SP` | 5208 | best column fit h=62 |
+| `HANDLE.SP` | 3680 | best column fit h=23 |
+| `GIGGLES.SP` | 46816 | h=44 fits, 1064 columns; frame width unknown |
+| `HOGMIS.SP` | 6084 | 78^2; could be 12 frames of 13x39 or 9 of 26x26 |
+| ~~`DOPE.SP`~~ | ~~11895~~ | **solved:** 15 leading zero bytes + a 165 x 72 column-major strip holding two Dopefish frames, mouth shut and mouth open |
+
+The `A_` prefix on every tile-sheet PCX, against `.GAM` descriptors that name
+them without it, hints at a planned `B_`/`C_` detail-level asset set that was
+dropped. Nothing in the archive confirms it.
+
+## `.KLM` music format
+
+Every file starts `18 01 01`. Beyond that the event stream has not been
+decoded. Since each `.KLM` has a `.MID` twin, aligning the two would make
+reverse-engineering the encoding tractable — useful, because Mark Klem's format
+appears in other Apogee-era titles.
+
+## The `HTT` group field
+
+In `WAC1.HTT` the `group` field takes values 1..6 but with an uneven
+distribution (1:8, 2:56, 3:56, 4:8, 5:8, 6:8 across 144 records), which does not
+match a clean 18 x 8 board layout. Either the field is not the zone group, or
+the shipped defaults were hand-edited. Low priority.
+
+## Not attempted
+
+* Disassembly of the LE image in `WW.EXE` (starts at file offset `0x290FC`).
+  Everything documented so far comes from data layout plus the string tables.
+* The serial/modem protocol (`COMM#BAT~`).
+* `SETUP.EXE` internals beyond its string table.
+
+```
+
+`docs/09-skunny-kart.md`:
+
+```md
+# 09 — Skunny Kart
+
+**Skunny Kart** (Copysoft / Edisys SCRL, Brussels, 1994) is the kart racer that
+has always been described as sharing Wacky Wheels' engine. This chapter reports
+what the shipped files actually show.
+
+Build under analysis: the shareware release, `SKUNNYK.EXE` 461 183 B, engine
+banner `Initializing SKUNNY KART game engine (1.4)`.
+
+Short version: **the container was rewritten, the audio stack was replaced, the
+art is new — and the engine's data layer is Wacky Wheels, down to eleven
+byte-identical files and a seven-way rotation of the file extensions.**
+
+---
+
+## 1. The container is different, and obfuscated
+
+Wacky Wheels ships one plain `WACKY.DAT`. Skunny Kart ships four `.LID`
+archives (`SKUNNYK`, `VOC`, `MUS`, `BEEP`) with a completely different header
+and one extra trick: **every byte after the 17-byte magic is rotated left by one
+bit.**
+
+```c
+stored = ((plain << 1) | (plain >> 7)) & 0xFF;
+plain  = ((stored >> 1) | ((stored & 1) << 7)) & 0xFF;
+```
+
+That is the whole obfuscation — no key, no compression, no per-file variation.
+It is enough to defeat a `strings` pass or a naive file carver, which is
+presumably the point.
+
+After de-rotating:
+
+```c
+char  magic[17];        /* "SKUNNY KART LIB \x1A", stored *unrotated* */
+byte  pad[25];
+char  sig[16];          /* "SKUNNY KART LIB " again, this time rotated */
+u32   constant;         /* 26 in all four archives */
+u32   blob_size;        /* leading unnamed chunk */
+u32   blob_offset;
+struct {
+    char name[14];      /* NUL-terminated */
+    byte stale[20];     /* uncleared record buffer */
+    u32  size;
+    u32  offset;        /* absolute, and correct */
+} dir[];                /* runs until it reaches blob_offset */
+```
+
+Two details worth recording:
+
+* the leading unnamed blob in `SKUNNYK.LID` is five bytes: `0D 0A 0D 0A 1A` —
+  a `TYPE`-guard, the DOS equivalent of "nothing to see here";
+* the directory carries **one spare slot past the last real file**, holding a
+  name (`SOUNDS.ATR`) with size and offset both zero. Wacky Wheels' directory
+  has the same one-spare-slot quirk, and the same habit of leaving stale bytes
+  in the name buffer.
+
+Unlike Wacky Wheels, the offsets here are correct — the two-byte skew documented
+in [01-wacky-dat.md](01-wacky-dat.md) is **not** present. Whatever tool built
+the `.LID` files, it was not the tool that built `WACKY.DAT`.
+
+Reader: [`tools/lidlib.py`](../tools/lidlib.py).
+
+```
+SKUNNYK.LID   518 entries   4 218 558 B
+VOC.LID        55 entries     407 815 B
+MUS.LID         6 entries      54 790 B
+BEEP.LID       55 entries      15 563 B
+```
+
+---
+
+## 2. Eleven files are byte-identical — and every one of them is renamed
+
+Hashing all 577 Wacky Wheels files against all 518 Skunny Kart files:
+
+| Wacky Wheels | Skunny Kart | Bytes | What it really is |
+|---|---|---:|---|
+| `TRIG.DAT` | `SKUNNYK.SDX` | 15 360 | 1920 × {cos, sin} 16.16 |
+| `NDIST` | `TRIG.DAT` | 89 600 | 320 × 70 ground distances |
+| `SLP` | `NDIST` | 7 680 | 1920 × 65536·tan |
+| `VIEW` | `CARS.SP` | 1 280 | 320 × 16384·cos, 60° FOV |
+| `VEL.TAB` | `VIEW` | 400 | 12 HP speed ramp |
+| `38X28.INF` | `SLP` | 20 892 | sprite scaler byte-code |
+| `28X28.INF` | `38X28.INF` | 15 400 | sprite scaler byte-code |
+| `14X28.INF` | `28X28.INF` | 7 736 | sprite scaler byte-code |
+| `32X24.INF` | `14X28.INF` | 14 960 | sprite scaler byte-code |
+| `15X13.INF` | `32X24.INF` | 4 092 | sprite scaler byte-code |
+| `PUF.SP` | `WFONT1.SP` | 4 256 | 4 frames of 38 × 28 |
+| `16.POS` | `16.PAR` | 8 194 | *(trivial: both are all zeros — see note)* |
+
+The last row is a freebie and should be discounted: track 16 is a shoot-out
+arena, so its progress map is 8194 zero bytes in both games. That leaves
+**eleven files with real content matching byte for byte**.
+
+Not one of them kept its name. Skunny Kart's `CARS.SP` is 1280 bytes and is
+Wacky Wheels' fish-eye correction table; its `VIEW` is 400 bytes and is Wacky
+Wheels' engine speed ramp; its `SLP` is a sprite scaler. The names and the
+contents have been decoupled.
+
+**`TRIG.DAT` is the one that settles it.** As documented in
+[04-engine-tables.md](04-engine-tables.md), Wacky Wheels' sine/cosine table was
+not produced by calling `cos()` — it was built by an incremental rotation
+recurrence over 1920 steps, and it drifts measurably (`cos(90°)` comes out as
+`-0.00116`, `sin(180°)` as `-0.00232`). Two teams independently choosing 1920
+steps, 16.16 fixed point, the same recurrence, the same seed and the same
+rounding, and landing on the same 15 360 bytes, is not a thing that happens.
+The same argument applies to `NDIST`, `SLP` and `VIEW`, which encode a specific
+60° field of view over a specific 70-row ground band.
+
+### The rename is systematic, not random
+
+Both executables carry the scaler filenames as an ordered list, and the two
+lists are the same:
+
+```
+WW.EXE       38X28.INF  28X28.INF  14X28.INF  32X24.INF  15X13.INF  18X13.INF
+SKUNNYK.EXE  38X28.INF  28X28.INF  14X28.INF  32X24.INF  15X13.INF  21X19.INF
+```
+
+Skunny's file at position *i* holds Wacky's content from position *i+1*, right
+along the list — a clean shift by one, with the last slot regenerated for a new
+sprite size. The engine-table block behaves the same way: Skunny's `SKUNNYK.SDX`
+holds Wacky's `TRIG.DAT`, Skunny's `TRIG.DAT` holds Wacky's `NDIST`, and so on
+down the load order.
+
+Whether that shift is a deliberate reshuffle or an off-by-one in whatever script
+copied the files across, the outcome is the same: a filename-level comparison
+between the two games finds nothing, and a content-level comparison finds
+everything.
+
+---
+
+## 3. The track file extensions are rotated by a perfect seven-cycle
+
+Both games describe a track with exactly seven files sharing a numeric stem.
+The extensions are the same seven strings. They mean different things.
+
+```
+Wacky Wheels          Skunny Kart
+------------          -----------
+n.GAM   text descriptor  ->  n.SIN
+n.SIN   surface attrs    ->  n.SPW
+n.SPW   object list      ->  n.POS
+n.POS   progress map     ->  n.PAR
+n.PAR   horizon panorama ->  n.M
+n.M     tile map         ->  n.RD
+n.RD    road polyline    ->  n.GAM
+```
+
+`GAM → SIN → SPW → POS → PAR → M → RD → GAM`. A single seven-cycle, applied to
+all 50 tracks.
+
+Every Wacky Wheels parser in [`tools/wwtrack.py`](../tools/wwtrack.py) runs on
+the correspondingly renamed Skunny Kart file **without a single change**:
+
+| Wacky parser | Skunny file | Result |
+|---|---|---|
+| `read_gam` | `1.SIN` | five asset names, `1250`, `1500`, the 17-char `"1"` label, eight `(x,y)` start slots, trailing `0` |
+| `read_tilemap` | `1.RD` | 64 × 64, tile indices 0…119 |
+| `read_posmap` | `1.PAR` | 64 × 64 `uint16`, sectors 0…28 |
+| `read_road` | `1.GAM` | 62 chained segments; 59/62 have `length == hypot(dx,dy)` and `angle == atan2·1920/360` |
+| `read_objects` | `1.POS` | 12-byte records, `(type, x, y, 0)` |
+| `read_surface` | `1.SPW` | 108 records × 6 `uint16` |
+| 640 × 40 panorama | `1.M` | 25 600 B horizon strip |
+
+The world model is identical: **64 × 64 tiles of 32 × 32 over a wrapping
+2048 × 2048 texture**, two 320×200 PCX sheets of 60 tiles each, and the same
+**1920 units per revolution** angle unit in the road segments. Composing
+Skunny Kart track 1 with Wacky Wheels' tile rules produces a correct, complete
+circuit on the first try.
+
+The `.GAM` descriptor is the most damning single file. Skunny Kart's version is
+Wacky Wheels' version with **one extra asset line** (`blank2.pcx`) inserted, and
+otherwise carries the identical scalars:
+
+```
+f1.pcx | f2.pcx | ma1.pcx | ma2.pcx | back1.pcx | blank2.pcx |
+1250 | 1500 | "1                " |
+223|510| 289|607| 224|702| 289|798| 224|895| 289|990| 224|1086| 288|1182 | 0
+```
+
+`1250` and `1500` are constant across all 42 Wacky Wheels tracks and all 50
+Skunny Kart tracks — dead tuning knobs, carried over unchanged. The 17-character
+label field padded with `"1"` came along too.
+
+One inversion worth flagging: in Wacky Wheels `A_F*.PCX` is the detailed floor
+sheet and `A_MA*.PCX` the flat radar sheet. In Skunny Kart it is the other way
+round. The `.GAM` still names them `f1.pcx` / `ma1.pcx` in the same order.
+
+---
+
+## 4. Sprites: same format, same frame count, new art
+
+`.SP` is unchanged: raw 8bpp, **column-major**, colour index 0 transparent, no
+header. Skunny Kart's kart bank is `LAP.SP` — 102 144 bytes, which is byte-for-byte
+the same size as Wacky Wheels' `CARS.SP`: **8 characters × 12 heading frames of
+38 × 28**. Wacky Wheels' `wwsp.py` decodes it directly and the sheet comes out
+in the same layout and frame order.
+
+Skunny Kart's eight drivers, with the class strings the executable pairs them
+with:
+
+```
+POTAME (SLOW)   HIRAGI (MEDIUM)   NACARD (SLOW)    GONDRA (MEDIUM)
+GOLFI (MEDIUM)  SKUNNY (FAST)     PUSSY (SLOW)     HANDBAG (FAST)
+```
+
+`SPRITE.ATR` is *not* carried over: Wacky Wheels' is 1442 B of 40-byte records,
+Skunny Kart's is 100 B in an unrelated format. The roadside-scenery system was
+rewritten.
+
+---
+
+## 5. What Copysoft actually replaced
+
+| Layer | Wacky Wheels | Skunny Kart |
+|---|---|---|
+| Container | plain `WACKY.DAT`, 577 entries | four bit-rotated `.LID`, 634 entries |
+| Music | 16 songs as `.MID` + Mark Klem's `.KLM` | 6 `.HSC` (HSC-Tracker AdLib) |
+| Digital sound | 36 `.VOC` via the Apogee Sound System | 55 `.VOC` via Copysoft's own "Digital Sound Mixer" |
+| PC speaker | id-style `AUDIOHED.FX` / `AUDIOT.FX` | 55 `.BPR` in a separate `BEEP.LID` |
+| Sound devices | SB, SB Pro, PAS16, GUS, MPU-401, Sound Source, PC speaker | Sound Blaster / SB Pro + FM chip only |
+| Detail control | `HIGH / MEDIUM / LOW DETAIL` | `VGA7 LOWRES / HIRES` + a `GAME SPEED %` slider |
+| Engine classes | `12 HP` / `6 HP` | `50 CC` / `100 CC` |
+| Multiplayer | split screen + serial/modem `COMM#BAT~` | split screen only |
+| Content | 30 races + 12 shoot-out zones = 42 | 50 track slots (shareware exposes 3 battle zones; the order screen promises *"6 NEW CUPS TO RACE AND 10 NEW BATTLE TRACKS -- 50 TRACKS IN ALL"*) |
+| Extender | DOS/4GW Professional **1.97**, `May 19 1994` | DOS/4GW Professional **1.95**, `Nov 23 1993` |
+| Compiler | Watcom C/C++32 | Watcom C/C++32 |
+
+The audio replacement has a simpler explanation than licensing. Andy
+Edwardson's account (see [10-the-developers-account.md](10-the-developers-account.md))
+places the Apogee Sound System's arrival *during Wacky Wheels' beta* — the
+original sound engine was ripped out and Jim Dose's put in after Copysoft
+already had the code. **The sound system was never in the source they held.**
+Copysoft wrote their own mixer because they had to.
+
+None of Wacky Wheels' internal diagnostic strings survive in `SKUNNYK.EXE` —
+no `posmap failed`, no `Car_pool failed`, no `picbufs[0] Failed`. The message
+tables were rewritten. But the *shape* of the loader survives: `SKUNNYK.EXE`
+loads its tables in the same order and with the same uppercase-name /
+lowercase-tag idiom Wacky Wheels uses:
+
+```
+WW.EXE       VEL.TAB  vel.tab  VEL2.TAB  VIEW  sufview  SLP  slp
+SKUNNYK.EXE  VEL.TAB  view                                  SLP
+```
+
+And the debug format strings name variables the game has no use for:
+
+```
+missile active stop computer... hex:%i hey:%i
+SEEK MAN   :%i hex:%i hey:%i dix:%i diy:%i ti:%i tib:%i cpt:%i
+keep jumping surf:%i
+Pos[%i]:%i
+```
+
+`hex` / `hey` for the missile's coordinates reads as *hedgehog x* / *hedgehog y*.
+Wacky Wheels' projectile is a thrown hedgehog (`HOGMIS.SP`, `HOG.VOC`); Skunny
+Kart has no hedgehogs. `surf` is the surface class from the per-tile attribute
+table, `Pos[]` the progress-sector map. This is suggestive rather than
+conclusive — variable names are cheap coincidences — but it points the same way
+as everything else.
+
+A smaller fossil: the six music files in `MUS.LID` are named `MENU.HSC`,
+`WKWINNER.HSC`, `WKLOOSER.HSC`, `WKTRACK1.HSC`, `WKTRACK2.HSC`, `WKTRACK3.HSC`.
+A `WK` prefix in a game whose every other file is prefixed `SKUNNYK`.
+
+---
+
+## 6. Credits and provenance
+
+`SKUNNYK.EXE` credits:
+
+```
+PROGRAMMING: PHILIPPE MERCIER
+GRAPHICS   : JEANLUC DENBROEDER, PASCAL NOEL, ROBIN HANNON
+MUSIC      : HANNES SEIFERT
+SOUNDS     : PHILIPPE BOSSENS
+THANKS TO  : JACQUES MYTER
+             VGA7 (C) COPYSOFT 1994
+             (C) 1994  EDISYS SCRL
+```
+
+Publisher addresses in the ordering screens: Copysoft, Rue du Menuisier 109,
+1200 Brussels; distribution through CDV (Karlsruhe), BudgetWare (Sydney),
+Transend (Bradford), DP Tool Club (Villeneuve d'Ascq), CSD (Gorssel),
+Pro*Soft (Ringsted); home BBS Exec-PC.
+
+No Beavis Soft or Apogee credit appears anywhere in the shipped files.
+
+The `VOC.LID` sample library is worth a line of its own: `BART.VOC`,
+`BART5.VOC`, `BUTTSIMP.VOC`, `BATMAN2.VOC`, `TERMINAT.VOC`, `BUGS.VOC`,
+`TOADS.VOC`, `BOWSNAP.VOC`. Copysoft's sound design was a shareware-era grab bag
+of television and film samples.
+
+---
+
+## 7. What this does and does not prove
+
+**Established from the bytes:**
+
+* Eleven files with real content are identical between the two games (twelve
+  including one all-zero pair), among them four generated
+  look-up tables whose exact values encode a specific generator, a specific
+  1920-step angle unit and a specific 60° field of view.
+* All seven per-track file formats are the same, down to record layouts, the
+  `1250`/`1500` constants and the padded label field, and are reachable by
+  applying one seven-cycle to the extensions.
+* The world model, the angle unit, the tile geometry and the sprite storage are
+  identical, and Wacky Wheels' parsers run on Skunny Kart's data unmodified.
+
+**Not established here:** how the code got from one company to the other, who
+did what, or what was agreed between the parties. That is a question about
+people and contracts, and file bytes cannot answer it. What the bytes do say is
+that Skunny Kart is not an independent implementation of the same idea — it is
+the same data layer, wearing different filenames.
+
+For the one surviving first-hand account of how that happened — Andy
+Edwardson's, given to the Apogee FAQ — and a point-by-point check of it against
+the files, see [10-the-developers-account.md](10-the-developers-account.md).
+
+---
+
+## 8. Reproducing
+
+```sh
+python tools/lidlib.py "<skunny>/SKUNNYK.LID" list
+python tools/lidlib.py "<skunny>/SKUNNYK.LID" extract ./sk
+python tools/wwcompare.py ./ww ./sk        # the byte-identical cross-reference
+python tools/wwtrack.py   ./sk 1           # Wacky parsers, Skunny data
+```
+
+`tools/wwcompare.py` hashes two extracted directories and prints every pair of
+files with identical content, flagging the renames.
+
+```
+
+`docs/10-the-developers-account.md`:
+
+```md
+# 10 — The developer's account, checked against the bytes
+
+Andy Edwardson, who wrote Wacky Wheels, gave a first-person history of the
+project for the **Apogee FAQ** maintained by Samuel Stoddard at RinkWorks
+(section 2.8.9, "Wacky Wheels"):
+
+> <http://rinkworks.com/apogee/s/2.8.9.shtml>
+
+It is one side of the story and the only surviving first-hand testimony, so it
+is worth being explicit about which parts the shipped files can independently
+confirm and which they cannot. Short quotations below are for that purpose;
+the full text is at the link.
+
+Everything in the "what the files show" column was established in this
+repository *before* the account was consulted — see chapters
+[00](00-overview.md), [04](04-engine-tables.md), [05](05-audio.md) and
+[09](09-skunny-kart.md).
+
+---
+
+## Corroborated
+
+### The engine was worked out from scratch by watching Mario Kart
+
+> "I figured that the PC could do the mode7 stuff that the Super Nintendo was
+> doing. I could not find any references for it, so I just studied Mario Kart
+> and tried to figure out how it worked."
+
+This is exactly the conclusion [07-vs-mario-kart.md](07-vs-mario-kart.md)
+reached from the tables alone: the *design* is copied closely and the
+*technology* is not copied at all. There is no Mode 7 in Wacky Wheels — there
+is a 60° field of view, a per-column cosine correction table, a heading-indexed
+tangent table and one distance value per screen column, which is the vocabulary
+of a PC raycaster, not of an affine console transform. Someone reverse-designing
+the *look* of Mario Kart with PC tools would produce precisely this. Someone
+with references would probably have written an affine row-stepper instead.
+
+The `TRIG.DAT` drift belongs to the same picture: a table built by an
+incremental rotation recurrence over 1920 steps, accurate enough and no more.
+
+### The registered version shipped in two tiers, three track sets each
+
+> "the registered version of Wacky Wheels was available in two forms: a regular
+> version, containing three sets of tracks, for $24.95; and an 'upgrade
+> edition,' containing an additional three sets of tracks, for $34.95."
+
+Matches the archive exactly. The 42 track slots resolve into
+`BRONZE / SILVER / GOLD WHEELS` and `BONUS BRONZE / SILVER / GOLD WHEELS`,
+five tracks each — three sets plus three more — with six shoot-out zones on
+each side of the split. The shareware exit screen `WWSW.BIN` still carries the
+sales copy for both tiers at those prices. See
+[00-overview.md](00-overview.md).
+
+### 1.0 was an incomplete UK magazine build; 1.1 was the first public release
+
+The GOG files self-report `WACKY WHEELS VERSION 1.1`, and the config template
+`WACKY.ING` inside the archive stamps `1.1` alongside the date `MAR 1994`
+against an executable dated 17 Oct 1994 — a template written roughly six months
+before the public release.
+
+### The Apogee Sound System was swapped in late
+
+> "The music in Wacky Wheels was really lacking, and George Broussard said we
+> needed more tunes. Jim Dose had just been hired at Apogee, and he had a
+> terrific sound engine. We ripped out the old one and put his in. Jim also
+> put us in touch with Mark Klem."
+
+Two things fall into place. First, the audio strings in `WW.EXE` are the Apogee
+Sound System's verbatim (`Multivoc`, `GUSWAVE`, `TaskMan`, `FX_MAN`,
+`ULTRAMID.INI`) and sit oddly against a game whose own code strings are
+otherwise all bespoke — it *is* bolted on. Second, `.KLM` really is Mark Klem,
+and every one of the sixteen songs exists twice, once as `.MID` and once as
+`.KLM`: a second music path added for a second sound driver.
+
+It also explains a finding from [09-skunny-kart.md](09-skunny-kart.md) better
+than that chapter's own guess. Skunny Kart has no trace of the Apogee Sound
+System, and chapter 09 attributed that to licensing. The account gives a
+simpler reason: the engine source Copysoft ended up with predates Jim Dosé's
+involvement, so **the sound system was never in the code they had**. Copysoft
+had to write a mixer because the copy they held had a different one — or none.
+
+### The Dopefish cameo, and Joe Siegler's belch
+
+> "I knew he was into Dopefish, so I asked if we could put the fish in as a
+> cameo. ... he sent me some stills and a collection of belches that he had
+> recorded when he sat down one night with a microphone and a two liter bottle
+> of Diet Coke."
+
+`WACKY.DAT` holds `DOPE.SP` (11 895 B) and `BELCH.VOC`, loaded next to each
+other in the executable's asset list. `DOPE.SP` had resisted decoding because
+its size factors badly; it resolves as **15 leading zero bytes followed by a
+165 × 72 column-major strip** holding two Dopefish frames, mouth shut and mouth
+open. It is the cameo, and `BELCH.VOC` is the Diet Coke.
+
+### Remote Ridicule was in Wacky Wheels
+
+> "Despite popular belief, Rise of the Triad did not introduce Remote Ridicule
+> -- Wacky Wheels had it first."
+
+The taunt system is in the files: `GIG1.VOC` … `GIG5.VOC`, and the prompt
+`F1 - F6 ARE YOUR GIGGLE KEYS!` (with a `1  - 6  ARE YOUR GIGGLE KEYS!`
+variant for the second player's keyboard half). Wacky Wheels 1.1 also has typed
+chat — `BI-DIRECTIONAL CHITTER CHATTER!`, `PRESS 'C' TO CHAT`,
+`PRESS ESC TO END CHAT MODE` — so by the 1.1 build the "one step further"
+he credits to Rise of the Triad was present here too. Which of the two shipped
+it first is not something these files can settle.
+
+### Modem play was hard-won
+
+> "I never realised how unreliable packets were until I did the multiplayer
+> engine. ... I was working at Shaun's place, and his phone lines were awful.
+> But it did make the protocol really robust!"
+
+The link layer carries a live diagnostics readout — `BAD CRC  =`, `TIMEOUTS =`,
+`OVERRUNS =`, `NOISE    =` — plus `EXCESSIVE DATA ERRORS!`,
+`EXCESSIVE ERRORS ABORTING!!!`, `COULD NOT SYNC!!!`,
+`INTERBYTE DELAY IS SET TO`, and a version handshake that negotiates down to
+the lower of the two players' builds. Nobody writes a per-session error counter
+for noise and overruns unless bad lines were the daily reality.
+
+### The Copysoft relationship, and the source on the demo disk
+
+> "Back in 1993, we were doing some low budget stuff for a Belgium outfit
+> called Copysoft. ... I had made an unfortunate mistake -- I had included the
+> C++ source code on the demo disk we left with them."
+
+The Belgian company checks out: `SKUNNYK.EXE` credits `(C) 1994 EDISYS SCRL`
+with a Copysoft address at Rue du Menuisier 109, 1200 Brussels.
+
+And the timing fits a 1993 source drop. Skunny Kart is built with **DOS/4GW
+Professional 1.95, stamped `Nov 23 1993`**; Wacky Wheels ships with **1.97,
+stamped `May 19 1994`**. That is not proof on its own — extenders do not get
+updated on a schedule — but it is consistent with Copysoft working from a
+snapshot taken before Wacky Wheels' own final year of development.
+
+---
+
+## The one place the account and the bytes disagree
+
+> "The only saving grace was that it was not all that similar to Wacky Wheels."
+
+From the outside that is a fair description: different characters, different
+art, different music, a different container, a different audio stack, 50 tracks
+instead of 42, and a filename list with nothing in common.
+
+From the inside it is not. [09-skunny-kart.md](09-skunny-kart.md) finds eleven
+files with real content byte-for-byte identical — including `TRIG.DAT`,
+`NDIST`, `SLP` and `VIEW`, the four tables that *are* the renderer's geometry —
+every one of them renamed, and the seven per-track file extensions permuted by
+a single seven-cycle. Underneath, Wacky Wheels' parsers read Skunny Kart's
+track data without a line changed.
+
+The gap between those two readings is the interesting part. Skunny Kart looks
+different because everything a player can see was replaced; it *is* the same
+engine because nothing a player can see was the engine. Andy Edwardson was
+judging it in 1994 the only way anyone could — by playing it.
+
+His own summary needs no correction from the files:
+
+> "There was no way Copysoft had the ability to write an engine like that from
+> scratch."
+
+---
+
+## What the account asserts that the files cannot check
+
+* the sequence of events with Scott Miller, the CompuServe screenshots and the
+  royalty dispute;
+* who at Copysoft did what with the source, and under what claim of right;
+* the outcome of the "legal wrangle";
+* the beta-test process, the Apogee office visit, and everything else that
+  happened between people rather than between files.
+
+None of that is visible in a byte stream, and this repository does not pretend
+otherwise. What the bytes establish is narrower and firmer: the two games share
+a data layer, and the design lineage from Super Mario Kart is a matter of
+imitation rather than of code.
+
+---
+
+*Source: Apogee FAQ, section 2.8.9, compiled by Samuel Stoddard (RinkWorks),
+with Andy Edwardson's paraphrased history. Quotations above are short excerpts
+for the purpose of cross-checking file evidence.*
+
+```
+
+`notes/wacky-dat-inventory.md`:
+
+```md
+# WACKY.DAT inventory
+
+Wacky Wheels 1.1 (registered + upgrade, GOG build of the 17 Oct 1994 files).
+`size` is the payload length, `offset` is already corrected for the
+two-byte skew described in [docs/01-wacky-dat.md](../docs/01-wacky-dat.md).
+`stale` shows the leftover bytes the build tool never cleared after the
+NUL terminator of a shorter name -- they are the tail of a previous,
+longer entry and are pure archaeology.
+
+| # | name | size | offset | stale name bytes |
+|---:|---|---:|---:|---|
+| 0 | `WACKY.ING` | 1170 | 0x0031AE |  |
+| 1 | `APOG1.PCX` | 29614 | 0x003640 |  |
+| 2 | `BEAVIS.PCX` | 10419 | 0x00A9EE |  |
+| 3 | `ACTION.SP` | 1506 | 0x00D2A1 |  |
+| 4 | `251X6.INF` | 35400 | 0x00D883 |  |
+| 5 | `DOPE.SP` | 11895 | 0x0162CB | `F` |
+| 6 | `WINTRO.PCX` | 43220 | 0x019142 |  |
+| 7 | `WIN.PCX` | 41797 | 0x023A16 | `CX` |
+| 8 | `APOGEE.MID` | 1540 | 0x02DD5B |  |
+| 9 | `ASHES.MID` | 13492 | 0x02E35F |  |
+| 10 | `BANSHI.MID` | 23290 | 0x031813 |  |
+| 11 | `BASSATTK.MID` | 35687 | 0x03730D |  |
+| 12 | `BRICWALL.MID` | 40195 | 0x03FE74 |  |
+| 13 | `DANCE.MID` | 22923 | 0x049B77 | `ID` |
+| 14 | `FLIGHT.MID` | 36725 | 0x04F502 | `D` |
+| 15 | `GAMEOVER.MID` | 2641 | 0x058477 |  |
+| 16 | `KARD.MID` | 15287 | 0x058EC8 | `MID` |
+| 17 | `MAINMENU.MID` | 30077 | 0x05CA7F |  |
+| 18 | `OVERDRIV.MID` | 49765 | 0x063FFC |  |
+| 19 | `PUMPER.MID` | 16331 | 0x070261 | `D` |
+| 20 | `SPACEY.MID` | 11482 | 0x07422C | `D` |
+| 21 | `STARBRAI.MID` | 37299 | 0x076F06 |  |
+| 22 | `TURBO.MID` | 48257 | 0x0800B9 | `ID` |
+| 23 | `LEADRBRD.MID` | 1989 | 0x08BD3A |  |
+| 24 | `APOGEE.KLM` | 1703 | 0x08C4FF | `D` |
+| 25 | `ASHES.KLM` | 5154 | 0x08CBA6 | `\x00D` |
+| 26 | `BANSHI.KLM` | 14103 | 0x08DFC8 | `D` |
+| 27 | `BASSATTK.KLM` | 20767 | 0x0916DF |  |
+| 28 | `BRICWALL.KLM` | 14627 | 0x0967FE |  |
+| 29 | `DANCE.KLM` | 15845 | 0x09A121 | `LM` |
+| 30 | `FLIGHT.KLM` | 17584 | 0x09DF06 | `M` |
+| 31 | `GAMEOVER.KLM` | 639 | 0x0A23B6 |  |
+| 32 | `KARD.KLM` | 7815 | 0x0A2635 | `KLM` |
+| 33 | `MAINMENU.KLM` | 17289 | 0x0A44BC |  |
+| 34 | `OVERDRIV.KLM` | 25282 | 0x0A8845 |  |
+| 35 | `PUMPER.KLM` | 15468 | 0x0AEB07 | `M` |
+| 36 | `SPACEY.KLM` | 8009 | 0x0B2773 | `M` |
+| 37 | `STARBRAI.KLM` | 20845 | 0x0B46BC |  |
+| 38 | `TURBO.KLM` | 28587 | 0x0B9829 | `LM` |
+| 39 | `LEADRBRD.KLM` | 1142 | 0x0C07D4 |  |
+| 40 | `LEAD.PCX` | 12523 | 0x0C0C4A | `KLM` |
+| 41 | `SBCS.PCX` | 40376 | 0x0C3D35 | `KLM` |
+| 42 | `SB1.PCX` | 33920 | 0x0CDAED | `\x00KLM` |
+| 43 | `SB2.PCX` | 35430 | 0x0D5F6D | `\x00KLM` |
+| 44 | `SB3.PCX` | 35262 | 0x0DE9D3 | `\x00KLM` |
+| 45 | `BSBCS.PCX` | 37412 | 0x0E7391 | `LM` |
+| 46 | `BSB1.PCX` | 35324 | 0x0F05B5 | `\x00LM` |
+| 47 | `BSB2.PCX` | 35779 | 0x0F8FB1 | `\x00LM` |
+| 48 | `BSB3.PCX` | 35631 | 0x101B74 | `\x00LM` |
+| 49 | `BACK1.PCX` | 31290 | 0x10A6A3 | `LM` |
+| 50 | `BACK2.PCX` | 34235 | 0x1120DD | `LM` |
+| 51 | `BACK3.PCX` | 3297 | 0x11A698 | `LM` |
+| 52 | `BLANK.PCX` | 3973 | 0x11B379 | `LM` |
+| 53 | `BEACH.PCX` | 5020 | 0x11C2FE | `LM` |
+| 54 | `SHRINK1.PCX` | 48361 | 0x11D69A |  |
+| 55 | `SHRINK2.PCX` | 48722 | 0x129383 |  |
+| 56 | `SHRINK3.PCX` | 55234 | 0x1351D5 |  |
+| 57 | `SHRINK4.PCX` | 68723 | 0x142997 |  |
+| 58 | `SHRINK5.PCX` | 46034 | 0x15360A |  |
+| 59 | `SHRINK6.PCX` | 67195 | 0x15E9DC |  |
+| 60 | `SHRINK7.PCX` | 64355 | 0x16F057 |  |
+| 61 | `SHRINK8.PCX` | 65818 | 0x17EBBA |  |
+| 62 | `SHRINK9.PCX` | 53224 | 0x18ECD4 |  |
+| 63 | `SHRINK10.PCX` | 45272 | 0x19BCBC |  |
+| 64 | `SHRINK11.PCX` | 63501 | 0x1A6D94 |  |
+| 65 | `SHRINK12.PCX` | 54108 | 0x1B65A1 |  |
+| 66 | `SHRINK13.PCX` | 66158 | 0x1C38FD |  |
+| 67 | `SHRINK14.PCX` | 64339 | 0x1D3B6B |  |
+| 68 | `SHRINK15.PCX` | 44790 | 0x1E36BE |  |
+| 69 | `SHRINK16.PCX` | 36112 | 0x1EE5B4 |  |
+| 70 | `SHRINK17.PCX` | 45687 | 0x1F72C4 |  |
+| 71 | `SHRINK18.PCX` | 45473 | 0x20253B |  |
+| 72 | `SHRINK19.PCX` | 33358 | 0x20D6DC |  |
+| 73 | `SHRINK20.PCX` | 47778 | 0x21592A |  |
+| 74 | `SHRINK21.PCX` | 34791 | 0x2213CC |  |
+| 75 | `SHRINK22.PCX` | 54814 | 0x229BB3 |  |
+| 76 | `SHRINK23.PCX` | 62361 | 0x2371D1 |  |
+| 77 | `SHRINK24.PCX` | 68153 | 0x24656A |  |
+| 78 | `SHRINK25.PCX` | 68372 | 0x256FA3 |  |
+| 79 | `SHRINK26.PCX` | 46339 | 0x267AB7 |  |
+| 80 | `SHRINK27.PCX` | 54343 | 0x272FBA |  |
+| 81 | `SHRINK28.PCX` | 65818 | 0x280401 |  |
+| 82 | `SHRINK29.PCX` | 54961 | 0x29051B |  |
+| 83 | `SHRINK30.PCX` | 66534 | 0x29DBCC |  |
+| 84 | `SHRINK31.PCX` | 45574 | 0x2ADFB2 |  |
+| 85 | `SHRINK32.PCX` | 68689 | 0x2B91B8 |  |
+| 86 | `SHRINK33.PCX` | 52909 | 0x2C9E09 |  |
+| 87 | `SHRINK34.PCX` | 64228 | 0x2D6CB6 |  |
+| 88 | `SHRINK35.PCX` | 68669 | 0x2E679A |  |
+| 89 | `SHRINK36.PCX` | 45126 | 0x2F73D7 |  |
+| 90 | `SHRINK37.PCX` | 37668 | 0x30241D |  |
+| 91 | `SHRINK38.PCX` | 27590 | 0x30B741 |  |
+| 92 | `SHRINK39.PCX` | 42285 | 0x312307 |  |
+| 93 | `SHRINK40.PCX` | 41241 | 0x31C834 |  |
+| 94 | `SHRINK41.PCX` | 40069 | 0x32694D |  |
+| 95 | `SHRINK42.PCX` | 31946 | 0x3305D2 |  |
+| 96 | `1.GAM` | 162 | 0x33829C | `42.PCX` |
+| 97 | `2.GAM` | 171 | 0x33833E | `42.PCX` |
+| 98 | `3.GAM` | 162 | 0x3383E9 | `42.PCX` |
+| 99 | `4.GAM` | 162 | 0x33848B | `42.PCX` |
+| 100 | `5.GAM` | 162 | 0x33852D | `42.PCX` |
+| 101 | `6.GAM` | 164 | 0x3385CF | `42.PCX` |
+| 102 | `7.GAM` | 171 | 0x338673 | `42.PCX` |
+| 103 | `8.GAM` | 166 | 0x33871E | `42.PCX` |
+| 104 | `9.GAM` | 162 | 0x3387C4 | `42.PCX` |
+| 105 | `10.GAM` | 164 | 0x338866 | `2.PCX` |
+| 106 | `11.GAM` | 166 | 0x33890A | `2.PCX` |
+| 107 | `12.GAM` | 171 | 0x3389B0 | `2.PCX` |
+| 108 | `13.GAM` | 164 | 0x338A5B | `2.PCX` |
+| 109 | `14.GAM` | 168 | 0x338AFF | `2.PCX` |
+| 110 | `15.GAM` | 161 | 0x338BA7 | `2.PCX` |
+| 111 | `16.GAM` | 160 | 0x338C48 | `2.PCX` |
+| 112 | `17.GAM` | 152 | 0x338CE8 | `2.PCX` |
+| 113 | `18.GAM` | 148 | 0x338D80 | `2.PCX` |
+| 114 | `19.GAM` | 152 | 0x338E14 | `2.PCX` |
+| 115 | `20.GAM` | 150 | 0x338EAC | `2.PCX` |
+| 116 | `21.GAM` | 148 | 0x338F42 | `2.PCX` |
+| 117 | `22.GAM` | 162 | 0x338FD6 | `2.PCX` |
+| 118 | `23.GAM` | 170 | 0x339078 | `2.PCX` |
+| 119 | `24.GAM` | 162 | 0x339122 | `2.PCX` |
+| 120 | `25.GAM` | 164 | 0x3391C4 | `2.PCX` |
+| 121 | `26.GAM` | 162 | 0x339268 | `2.PCX` |
+| 122 | `27.GAM` | 173 | 0x33930A | `2.PCX` |
+| 123 | `28.GAM` | 166 | 0x3393B7 | `2.PCX` |
+| 124 | `29.GAM` | 162 | 0x33945D | `2.PCX` |
+| 125 | `30.GAM` | 169 | 0x3394FF | `2.PCX` |
+| 126 | `31.GAM` | 162 | 0x3395A8 | `2.PCX` |
+| 127 | `32.GAM` | 164 | 0x33964A | `2.PCX` |
+| 128 | `33.GAM` | 171 | 0x3396EE | `2.PCX` |
+| 129 | `34.GAM` | 166 | 0x339799 | `2.PCX` |
+| 130 | `35.GAM` | 162 | 0x33983F | `2.PCX` |
+| 131 | `36.GAM` | 162 | 0x3398E1 | `2.PCX` |
+| 132 | `37.GAM` | 148 | 0x339983 | `2.PCX` |
+| 133 | `38.GAM` | 152 | 0x339A17 | `2.PCX` |
+| 134 | `39.GAM` | 150 | 0x339AAF | `2.PCX` |
+| 135 | `40.GAM` | 148 | 0x339B45 | `2.PCX` |
+| 136 | `41.GAM` | 152 | 0x339BD9 | `2.PCX` |
+| 137 | `42.GAM` | 159 | 0x339C71 | `2.PCX` |
+| 138 | `1.RD` | 590 | 0x339D10 | `M\x002.PCX` |
+| 139 | `1.M` | 4096 | 0x339F5E | `\x00M\x002.PCX` |
+| 140 | `1.PAR` | 25600 | 0x33AF5E | `\x002.PCX` |
+| 141 | `1.POS` | 8194 | 0x34135E | `\x002.PCX` |
+| 142 | `1.SPW` | 158 | 0x343360 | `\x002.PCX` |
+| 143 | `1.SIN` | 1296 | 0x3433FE | `\x002.PCX` |
+| 144 | `2.RD` | 814 | 0x34390E | `\x00\x002.PCX` |
+| 145 | `2.M` | 4096 | 0x343C3C | `\x00\x00\x002.PCX` |
+| 146 | `2.PAR` | 25600 | 0x344C3C | `\x002.PCX` |
+| 147 | `2.POS` | 8194 | 0x34B03C | `\x002.PCX` |
+| 148 | `2.SPW` | 218 | 0x34D03E | `\x002.PCX` |
+| 149 | `2.SIN` | 1296 | 0x34D118 | `\x002.PCX` |
+| 150 | `3.RD` | 520 | 0x34D628 | `\x00\x002.PCX` |
+| 151 | `3.M` | 4096 | 0x34D830 | `\x00\x00\x002.PCX` |
+| 152 | `3.PAR` | 25600 | 0x34E830 | `\x002.PCX` |
+| 153 | `3.POS` | 8194 | 0x354C30 | `\x002.PCX` |
+| 154 | `3.SPW` | 134 | 0x356C32 | `\x002.PCX` |
+| 155 | `3.SIN` | 1296 | 0x356CB8 | `\x002.PCX` |
+| 156 | `4.RD` | 702 | 0x3571C8 | `\x00\x002.PCX` |
+| 157 | `4.M` | 4096 | 0x357486 | `\x00\x00\x002.PCX` |
+| 158 | `4.PAR` | 25600 | 0x358486 | `\x002.PCX` |
+| 159 | `4.POS` | 8194 | 0x35E886 | `\x002.PCX` |
+| 160 | `4.SPW` | 230 | 0x360888 | `\x002.PCX` |
+| 161 | `4.SIN` | 1296 | 0x36096E | `\x002.PCX` |
+| 162 | `5.RD` | 744 | 0x360E7E | `\x00\x002.PCX` |
+| 163 | `5.M` | 4096 | 0x361166 | `\x00\x00\x002.PCX` |
+| 164 | `5.PAR` | 25600 | 0x362166 | `\x002.PCX` |
+| 165 | `5.POS` | 8194 | 0x368566 | `\x002.PCX` |
+| 166 | `5.SPW` | 194 | 0x36A568 | `\x002.PCX` |
+| 167 | `5.SIN` | 1296 | 0x36A62A | `\x002.PCX` |
+| 168 | `6.RD` | 954 | 0x36AB3A | `\x00\x002.PCX` |
+| 169 | `6.M` | 4096 | 0x36AEF4 | `\x00\x00\x002.PCX` |
+| 170 | `6.PAR` | 25600 | 0x36BEF4 | `\x002.PCX` |
+| 171 | `6.POS` | 8194 | 0x3722F4 | `\x002.PCX` |
+| 172 | `6.SPW` | 230 | 0x3742F6 | `\x002.PCX` |
+| 173 | `6.SIN` | 1296 | 0x3743DC | `\x002.PCX` |
+| 174 | `7.RD` | 982 | 0x3748EC | `\x00\x002.PCX` |
+| 175 | `7.M` | 4096 | 0x374CC2 | `\x00\x00\x002.PCX` |
+| 176 | `7.PAR` | 25600 | 0x375CC2 | `\x002.PCX` |
+| 177 | `7.POS` | 8194 | 0x37C0C2 | `\x002.PCX` |
+| 178 | `7.SPW` | 266 | 0x37E0C4 | `\x002.PCX` |
+| 179 | `7.SIN` | 1296 | 0x37E1CE | `\x002.PCX` |
+| 180 | `8.RD` | 1024 | 0x37E6DE | `\x00\x002.PCX` |
+| 181 | `8.M` | 4096 | 0x37EADE | `\x00\x00\x002.PCX` |
+| 182 | `8.PAR` | 25600 | 0x37FADE | `\x002.PCX` |
+| 183 | `8.POS` | 8194 | 0x385EDE | `\x002.PCX` |
+| 184 | `8.SPW` | 86 | 0x387EE0 | `\x002.PCX` |
+| 185 | `8.SIN` | 1296 | 0x387F36 | `\x002.PCX` |
+| 186 | `9.RD` | 674 | 0x388446 | `\x00\x002.PCX` |
+| 187 | `9.M` | 4096 | 0x3886E8 | `\x00\x00\x002.PCX` |
+| 188 | `9.PAR` | 25600 | 0x3896E8 | `\x002.PCX` |
+| 189 | `9.POS` | 8194 | 0x38FAE8 | `\x002.PCX` |
+| 190 | `9.SPW` | 194 | 0x391AEA | `\x002.PCX` |
+| 191 | `9.SIN` | 1296 | 0x391BAC | `\x002.PCX` |
+| 192 | `10.RD` | 884 | 0x3920BC | `\x002.PCX` |
+| 193 | `10.M` | 4096 | 0x392430 | `\x00\x002.PCX` |
+| 194 | `10.PAR` | 25600 | 0x393430 | `2.PCX` |
+| 195 | `10.POS` | 8194 | 0x399830 | `2.PCX` |
+| 196 | `10.SPW` | 194 | 0x39B832 | `2.PCX` |
+| 197 | `10.SIN` | 1296 | 0x39B8F4 | `2.PCX` |
+| 198 | `11.RD` | 702 | 0x39BE04 | `\x002.PCX` |
+| 199 | `11.M` | 4096 | 0x39C0C2 | `\x00\x002.PCX` |
+| 200 | `11.PAR` | 25600 | 0x39D0C2 | `2.PCX` |
+| 201 | `11.POS` | 8194 | 0x3A34C2 | `2.PCX` |
+| 202 | `11.SPW` | 182 | 0x3A54C4 | `2.PCX` |
+| 203 | `11.SIN` | 1296 | 0x3A557A | `2.PCX` |
+| 204 | `12.RD` | 380 | 0x3A5A8A | `\x002.PCX` |
+| 205 | `12.M` | 4096 | 0x3A5C06 | `\x00\x002.PCX` |
+| 206 | `12.PAR` | 25600 | 0x3A6C06 | `2.PCX` |
+| 207 | `12.POS` | 8194 | 0x3AD006 | `2.PCX` |
+| 208 | `12.SPW` | 230 | 0x3AF008 | `2.PCX` |
+| 209 | `12.SIN` | 1296 | 0x3AF0EE | `2.PCX` |
+| 210 | `13.RD` | 1038 | 0x3AF5FE | `\x002.PCX` |
+| 211 | `13.M` | 4096 | 0x3AFA0C | `\x00\x002.PCX` |
+| 212 | `13.PAR` | 25600 | 0x3B0A0C | `2.PCX` |
+| 213 | `13.POS` | 8194 | 0x3B6E0C | `2.PCX` |
+| 214 | `13.SPW` | 242 | 0x3B8E0E | `2.PCX` |
+| 215 | `13.SIN` | 1296 | 0x3B8F00 | `2.PCX` |
+| 216 | `14.RD` | 1164 | 0x3B9410 | `\x002.PCX` |
+| 217 | `14.M` | 4096 | 0x3B989C | `\x00\x002.PCX` |
+| 218 | `14.PAR` | 25600 | 0x3BA89C | `2.PCX` |
+| 219 | `14.POS` | 8194 | 0x3C0C9C | `2.PCX` |
+| 220 | `14.SPW` | 206 | 0x3C2C9E | `2.PCX` |
+| 221 | `14.SIN` | 1296 | 0x3C2D6C | `2.PCX` |
+| 222 | `15.RD` | 856 | 0x3C327C | `\x002.PCX` |
+| 223 | `15.M` | 4096 | 0x3C35D4 | `\x00\x002.PCX` |
+| 224 | `15.PAR` | 25600 | 0x3C45D4 | `2.PCX` |
+| 225 | `15.POS` | 8194 | 0x3CA9D4 | `2.PCX` |
+| 226 | `15.SPW` | 218 | 0x3CC9D6 | `2.PCX` |
+| 227 | `15.SIN` | 1296 | 0x3CCAB0 | `2.PCX` |
+| 228 | `16.RD` | 702 | 0x3CCFC0 | `\x002.PCX` |
+| 229 | `16.M` | 4096 | 0x3CD27E | `\x00\x002.PCX` |
+| 230 | `16.PAR` | 25600 | 0x3CE27E | `2.PCX` |
+| 231 | `16.POS` | 8194 | 0x3D467E | `2.PCX` |
+| 232 | `16.SPW` | 458 | 0x3D6680 | `2.PCX` |
+| 233 | `16.SIN` | 1296 | 0x3D684A | `2.PCX` |
+| 234 | `17.RD` | 744 | 0x3D6D5A | `\x002.PCX` |
+| 235 | `17.M` | 4096 | 0x3D7042 | `\x00\x002.PCX` |
+| 236 | `17.PAR` | 25600 | 0x3D8042 | `2.PCX` |
+| 237 | `17.POS` | 8194 | 0x3DE442 | `2.PCX` |
+| 238 | `17.SPW` | 386 | 0x3E0444 | `2.PCX` |
+| 239 | `17.SIN` | 1296 | 0x3E05C6 | `2.PCX` |
+| 240 | `18.RD` | 898 | 0x3E0AD6 | `\x002.PCX` |
+| 241 | `18.M` | 4096 | 0x3E0E58 | `\x00\x002.PCX` |
+| 242 | `18.PAR` | 25600 | 0x3E1E58 | `2.PCX` |
+| 243 | `18.POS` | 8194 | 0x3E8258 | `2.PCX` |
+| 244 | `18.SPW` | 326 | 0x3EA25A | `2.PCX` |
+| 245 | `18.SIN` | 1296 | 0x3EA3A0 | `2.PCX` |
+| 246 | `19.RD` | 310 | 0x3EA8B0 | `\x002.PCX` |
+| 247 | `19.M` | 4096 | 0x3EA9E6 | `\x00\x002.PCX` |
+| 248 | `19.PAR` | 25600 | 0x3EB9E6 | `2.PCX` |
+| 249 | `19.POS` | 8194 | 0x3F1DE6 | `2.PCX` |
+| 250 | `19.SPW` | 326 | 0x3F3DE8 | `2.PCX` |
+| 251 | `19.SIN` | 1296 | 0x3F3F2E | `2.PCX` |
+| 252 | `20.RD` | 716 | 0x3F443E | `\x002.PCX` |
+| 253 | `20.M` | 4096 | 0x3F470A | `\x00\x002.PCX` |
+| 254 | `20.PAR` | 25600 | 0x3F570A | `2.PCX` |
+| 255 | `20.POS` | 8194 | 0x3FBB0A | `2.PCX` |
+| 256 | `20.SPW` | 326 | 0x3FDB0C | `2.PCX` |
+| 257 | `20.SIN` | 1296 | 0x3FDC52 | `2.PCX` |
+| 258 | `21.RD` | 422 | 0x3FE162 | `\x002.PCX` |
+| 259 | `21.M` | 4096 | 0x3FE308 | `\x00\x002.PCX` |
+| 260 | `21.PAR` | 25600 | 0x3FF308 | `2.PCX` |
+| 261 | `21.POS` | 8194 | 0x405708 | `2.PCX` |
+| 262 | `21.SPW` | 242 | 0x40770A | `2.PCX` |
+| 263 | `21.SIN` | 1296 | 0x4077FC | `2.PCX` |
+| 264 | `22.RD` | 352 | 0x407D0C | `\x002.PCX` |
+| 265 | `22.M` | 4096 | 0x407E6C | `\x00\x002.PCX` |
+| 266 | `22.PAR` | 25600 | 0x408E6C | `2.PCX` |
+| 267 | `22.POS` | 8194 | 0x40F26C | `2.PCX` |
+| 268 | `22.SPW` | 194 | 0x41126E | `2.PCX` |
+| 269 | `22.SIN` | 1296 | 0x411330 | `2.PCX` |
+| 270 | `23.RD` | 562 | 0x411840 | `\x002.PCX` |
+| 271 | `23.M` | 4096 | 0x411A72 | `\x00\x002.PCX` |
+| 272 | `23.PAR` | 25600 | 0x412A72 | `2.PCX` |
+| 273 | `23.POS` | 8194 | 0x418E72 | `2.PCX` |
+| 274 | `23.SPW` | 278 | 0x41AE74 | `2.PCX` |
+| 275 | `23.SIN` | 1296 | 0x41AF8A | `2.PCX` |
+| 276 | `24.RD` | 422 | 0x41B49A | `\x002.PCX` |
+| 277 | `24.M` | 4096 | 0x41B640 | `\x00\x002.PCX` |
+| 278 | `24.PAR` | 25600 | 0x41C640 | `2.PCX` |
+| 279 | `24.POS` | 8194 | 0x422A40 | `2.PCX` |
+| 280 | `24.SPW` | 218 | 0x424A42 | `2.PCX` |
+| 281 | `24.SIN` | 1296 | 0x424B1C | `2.PCX` |
+| 282 | `25.RD` | 618 | 0x42502C | `\x002.PCX` |
+| 283 | `25.M` | 4096 | 0x425296 | `\x00\x002.PCX` |
+| 284 | `25.PAR` | 25600 | 0x426296 | `2.PCX` |
+| 285 | `25.POS` | 8194 | 0x42C696 | `2.PCX` |
+| 286 | `25.SPW` | 230 | 0x42E698 | `2.PCX` |
+| 287 | `25.SIN` | 1296 | 0x42E77E | `2.PCX` |
+| 288 | `26.RD` | 632 | 0x42EC8E | `\x002.PCX` |
+| 289 | `26.M` | 4096 | 0x42EF06 | `\x00\x002.PCX` |
+| 290 | `26.PAR` | 25600 | 0x42FF06 | `2.PCX` |
+| 291 | `26.POS` | 8194 | 0x436306 | `2.PCX` |
+| 292 | `26.SPW` | 182 | 0x438308 | `2.PCX` |
+| 293 | `26.SIN` | 1296 | 0x4383BE | `2.PCX` |
+| 294 | `27.RD` | 464 | 0x4388CE | `\x002.PCX` |
+| 295 | `27.M` | 4096 | 0x438A9E | `\x00\x002.PCX` |
+| 296 | `27.PAR` | 25600 | 0x439A9E | `2.PCX` |
+| 297 | `27.POS` | 8194 | 0x43FE9E | `2.PCX` |
+| 298 | `27.SPW` | 266 | 0x441EA0 | `2.PCX` |
+| 299 | `27.SIN` | 1296 | 0x441FAA | `2.PCX` |
+| 300 | `28.RD` | 688 | 0x4424BA | `\x002.PCX` |
+| 301 | `28.M` | 4096 | 0x44276A | `\x00\x002.PCX` |
+| 302 | `28.PAR` | 25600 | 0x44376A | `2.PCX` |
+| 303 | `28.POS` | 8194 | 0x449B6A | `2.PCX` |
+| 304 | `28.SPW` | 230 | 0x44BB6C | `2.PCX` |
+| 305 | `28.SIN` | 1296 | 0x44BC52 | `2.PCX` |
+| 306 | `29.RD` | 982 | 0x44C162 | `\x002.PCX` |
+| 307 | `29.M` | 4096 | 0x44C538 | `\x00\x002.PCX` |
+| 308 | `29.PAR` | 25600 | 0x44D538 | `2.PCX` |
+| 309 | `29.POS` | 8194 | 0x453938 | `2.PCX` |
+| 310 | `29.SPW` | 230 | 0x45593A | `2.PCX` |
+| 311 | `29.SIN` | 1296 | 0x455A20 | `2.PCX` |
+| 312 | `30.RD` | 884 | 0x455F30 | `\x002.PCX` |
+| 313 | `30.M` | 4096 | 0x4562A4 | `\x00\x002.PCX` |
+| 314 | `30.PAR` | 25600 | 0x4572A4 | `2.PCX` |
+| 315 | `30.POS` | 8194 | 0x45D6A4 | `2.PCX` |
+| 316 | `30.SPW` | 314 | 0x45F6A6 | `2.PCX` |
+| 317 | `30.SIN` | 1296 | 0x45F7E0 | `2.PCX` |
+| 318 | `31.RD` | 758 | 0x45FCF0 | `\x002.PCX` |
+| 319 | `31.M` | 4096 | 0x45FFE6 | `\x00\x002.PCX` |
+| 320 | `31.PAR` | 25600 | 0x460FE6 | `2.PCX` |
+| 321 | `31.POS` | 8194 | 0x4673E6 | `2.PCX` |
+| 322 | `31.SPW` | 170 | 0x4693E8 | `2.PCX` |
+| 323 | `31.SIN` | 1296 | 0x469492 | `2.PCX` |
+| 324 | `32.RD` | 996 | 0x4699A2 | `\x002.PCX` |
+| 325 | `32.M` | 4096 | 0x469D86 | `\x00\x002.PCX` |
+| 326 | `32.PAR` | 25600 | 0x46AD86 | `2.PCX` |
+| 327 | `32.POS` | 8194 | 0x471186 | `2.PCX` |
+| 328 | `32.SPW` | 242 | 0x473188 | `2.PCX` |
+| 329 | `32.SIN` | 1296 | 0x47327A | `2.PCX` |
+| 330 | `33.RD` | 380 | 0x47378A | `\x002.PCX` |
+| 331 | `33.M` | 4096 | 0x473906 | `\x00\x002.PCX` |
+| 332 | `33.PAR` | 25600 | 0x474906 | `2.PCX` |
+| 333 | `33.POS` | 8194 | 0x47AD06 | `2.PCX` |
+| 334 | `33.SPW` | 350 | 0x47CD08 | `2.PCX` |
+| 335 | `33.SIN` | 1296 | 0x47CE66 | `2.PCX` |
+| 336 | `34.RD` | 814 | 0x47D376 | `\x002.PCX` |
+| 337 | `34.M` | 4096 | 0x47D6A4 | `\x00\x002.PCX` |
+| 338 | `34.PAR` | 25600 | 0x47E6A4 | `2.PCX` |
+| 339 | `34.POS` | 8194 | 0x484AA4 | `2.PCX` |
+| 340 | `34.SPW` | 266 | 0x486AA6 | `2.PCX` |
+| 341 | `34.SIN` | 1296 | 0x486BB0 | `2.PCX` |
+| 342 | `35.RD` | 576 | 0x4870C0 | `\x002.PCX` |
+| 343 | `35.M` | 4096 | 0x487300 | `\x00\x002.PCX` |
+| 344 | `35.PAR` | 25600 | 0x488300 | `2.PCX` |
+| 345 | `35.POS` | 8194 | 0x48E700 | `2.PCX` |
+| 346 | `35.SPW` | 242 | 0x490702 | `2.PCX` |
+| 347 | `35.SIN` | 1296 | 0x4907F4 | `2.PCX` |
+| 348 | `36.RD` | 702 | 0x490D04 | `\x002.PCX` |
+| 349 | `36.M` | 4096 | 0x490FC2 | `\x00\x002.PCX` |
+| 350 | `36.PAR` | 25600 | 0x491FC2 | `2.PCX` |
+| 351 | `36.POS` | 8194 | 0x4983C2 | `2.PCX` |
+| 352 | `36.SPW` | 98 | 0x49A3C4 | `2.PCX` |
+| 353 | `36.SIN` | 1296 | 0x49A426 | `2.PCX` |
+| 354 | `37.RD` | 786 | 0x49A936 | `\x002.PCX` |
+| 355 | `37.M` | 4096 | 0x49AC48 | `\x00\x002.PCX` |
+| 356 | `37.PAR` | 25600 | 0x49BC48 | `2.PCX` |
+| 357 | `37.POS` | 8194 | 0x4A2048 | `2.PCX` |
+| 358 | `37.SPW` | 230 | 0x4A404A | `2.PCX` |
+| 359 | `37.SIN` | 1296 | 0x4A4130 | `2.PCX` |
+| 360 | `38.RD` | 814 | 0x4A4640 | `\x002.PCX` |
+| 361 | `38.M` | 4096 | 0x4A496E | `\x00\x002.PCX` |
+| 362 | `38.PAR` | 25600 | 0x4A596E | `2.PCX` |
+| 363 | `38.POS` | 8194 | 0x4ABD6E | `2.PCX` |
+| 364 | `38.SPW` | 278 | 0x4ADD70 | `2.PCX` |
+| 365 | `38.SIN` | 1296 | 0x4ADE86 | `2.PCX` |
+| 366 | `39.RD` | 632 | 0x4AE396 | `\x002.PCX` |
+| 367 | `39.M` | 4096 | 0x4AE60E | `\x00\x002.PCX` |
+| 368 | `39.PAR` | 25600 | 0x4AF60E | `2.PCX` |
+| 369 | `39.POS` | 8194 | 0x4B5A0E | `2.PCX` |
+| 370 | `39.SPW` | 242 | 0x4B7A10 | `2.PCX` |
+| 371 | `39.SIN` | 1296 | 0x4B7B02 | `2.PCX` |
+| 372 | `40.RD` | 968 | 0x4B8012 | `\x002.PCX` |
+| 373 | `40.M` | 4096 | 0x4B83DA | `\x00\x002.PCX` |
+| 374 | `40.PAR` | 25600 | 0x4B93DA | `2.PCX` |
+| 375 | `40.POS` | 8194 | 0x4BF7DA | `2.PCX` |
+| 376 | `40.SPW` | 266 | 0x4C17DC | `2.PCX` |
+| 377 | `40.SIN` | 1296 | 0x4C18E6 | `2.PCX` |
+| 378 | `41.RD` | 800 | 0x4C1DF6 | `\x002.PCX` |
+| 379 | `41.M` | 4096 | 0x4C2116 | `\x00\x002.PCX` |
+| 380 | `41.PAR` | 25600 | 0x4C3116 | `2.PCX` |
+| 381 | `41.POS` | 8194 | 0x4C9516 | `2.PCX` |
+| 382 | `41.SPW` | 314 | 0x4CB518 | `2.PCX` |
+| 383 | `41.SIN` | 1296 | 0x4CB652 | `2.PCX` |
+| 384 | `42.RD` | 912 | 0x4CBB62 | `\x002.PCX` |
+| 385 | `42.M` | 4096 | 0x4CBEF2 | `\x00\x002.PCX` |
+| 386 | `42.PAR` | 25600 | 0x4CCEF2 | `2.PCX` |
+| 387 | `42.POS` | 8194 | 0x4D32F2 | `2.PCX` |
+| 388 | `42.SPW` | 254 | 0x4D52F4 | `2.PCX` |
+| 389 | `42.SIN` | 1296 | 0x4D53F2 | `2.PCX` |
+| 390 | `A_F1.PCX` | 38975 | 0x4D5902 | `PCX` |
+| 391 | `A_MA1.PCX` | 5037 | 0x4DF141 | `CX` |
+| 392 | `A_F2.PCX` | 44066 | 0x4E04EE | `\x00CX` |
+| 393 | `A_MA2.PCX` | 5691 | 0x4EB110 | `CX` |
+| 394 | `A_F3.PCX` | 27298 | 0x4EC74B | `\x00CX` |
+| 395 | `A_MA3.PCX` | 4766 | 0x4F31ED | `CX` |
+| 396 | `A_F4.PCX` | 57761 | 0x4F448B | `\x00CX` |
+| 397 | `A_MA4.PCX` | 5746 | 0x50262C | `CX` |
+| 398 | `A_F5.PCX` | 48631 | 0x503C9E | `\x00CX` |
+| 399 | `A_MA5.PCX` | 5624 | 0x50FA95 | `CX` |
+| 400 | `A_F6.PCX` | 42911 | 0x51108D | `\x00CX` |
+| 401 | `A_MA6.PCX` | 4607 | 0x51B82C | `CX` |
+| 402 | `A_F7.PCX` | 63671 | 0x51CA2B | `\x00CX` |
+| 403 | `A_MA7.PCX` | 6181 | 0x52C2E2 | `CX` |
+| 404 | `A_F8.PCX` | 49868 | 0x52DB07 | `\x00CX` |
+| 405 | `A_MA8.PCX` | 5141 | 0x539DD3 | `CX` |
+| 406 | `A_F9.PCX` | 63863 | 0x53B1E8 | `\x00CX` |
+| 407 | `A_MA9.PCX` | 5770 | 0x54AB5F | `CX` |
+| 408 | `A_F10.PCX` | 51534 | 0x54C1E9 | `CX` |
+| 409 | `A_MA10.PCX` | 4829 | 0x558B37 | `X` |
+| 410 | `A_F11.PCX` | 26818 | 0x559E14 | `\x00X` |
+| 411 | `A_MA11.PCX` | 4871 | 0x5606D6 | `X` |
+| 412 | `A_F12.PCX` | 41183 | 0x5619DD | `\x00X` |
+| 413 | `A_MA12.PCX` | 4923 | 0x56BABC | `X` |
+| 414 | `A_F13.PCX` | 55975 | 0x56CDF7 | `\x00X` |
+| 415 | `A_MA13.PCX` | 5346 | 0x57A89E | `X` |
+| 416 | `A_F14.PCX` | 56371 | 0x57BD80 | `\x00X` |
+| 417 | `A_MA14.PCX` | 6133 | 0x5899B3 | `X` |
+| 418 | `A_F15.PCX` | 33813 | 0x58B1A8 | `\x00X` |
+| 419 | `A_MA15.PCX` | 4837 | 0x5935BD | `X` |
+| 420 | `A_F16.PCX` | 61534 | 0x5948A2 | `\x00X` |
+| 421 | `A_MA16.PCX` | 5580 | 0x5A3900 | `X` |
+| 422 | `A_F17.PCX` | 55944 | 0x5A4ECC | `\x00X` |
+| 423 | `A_MA17.PCX` | 6007 | 0x5B2954 | `X` |
+| 424 | `CHECK.PCX` | 9622 | 0x5B40CB | `\x00X` |
+| 425 | `ORDER.PCX` | 7609 | 0x5B6661 | `\x00X` |
+| 426 | `OR1.PCX` | 31949 | 0x5B841A | `X\x00\x00X` |
+| 427 | `OR2.PCX` | 33586 | 0x5C00E7 | `X\x00\x00X` |
+| 428 | `OR3.PCX` | 33508 | 0x5C8419 | `X\x00\x00X` |
+| 429 | `OR4.PCX` | 35111 | 0x5D06FD | `X\x00\x00X` |
+| 430 | `OR5.PCX` | 35759 | 0x5D9024 | `X\x00\x00X` |
+| 431 | `OR6.PCX` | 32314 | 0x5E1BD3 | `X\x00\x00X` |
+| 432 | `OR7.PCX` | 34195 | 0x5E9A0D | `X\x00\x00X` |
+| 433 | `OR8.PCX` | 33868 | 0x5F1FA0 | `X\x00\x00X` |
+| 434 | `OR9.PCX` | 33069 | 0x5FA3EC | `X\x00\x00X` |
+| 435 | `OR10.PCX` | 33960 | 0x602519 | `\x00\x00X` |
+| 436 | `OR11.PCX` | 33229 | 0x60A9C1 | `\x00\x00X` |
+| 437 | `INT1.PCX` | 34616 | 0x612B8E | `\x00\x00X` |
+| 438 | `INT2.PCX` | 35815 | 0x61B2C6 | `\x00\x00X` |
+| 439 | `INT3.PCX` | 32650 | 0x623EAD | `\x00\x00X` |
+| 440 | `INT4.PCX` | 34065 | 0x62BE37 | `\x00\x00X` |
+| 441 | `INT5.PCX` | 34104 | 0x634348 | `\x00\x00X` |
+| 442 | `INT6.PCX` | 34149 | 0x63C880 | `\x00\x00X` |
+| 443 | `INT7.PCX` | 34382 | 0x644DE5 | `\x00\x00X` |
+| 444 | `INT8.PCX` | 35780 | 0x64D433 | `\x00\x00X` |
+| 445 | `END1.PCX` | 44798 | 0x655FF7 | `\x00\x00X` |
+| 446 | `BRONZEM.SP` | 19500 | 0x660EF5 | `X` |
+| 447 | `SILVERM.SP` | 19500 | 0x665B21 | `X` |
+| 448 | `GOLDM.SP` | 19500 | 0x66A74D | `P\x00X` |
+| 449 | `BONUSB.SP` | 19500 | 0x66F379 | `\x00X` |
+| 450 | `BONUSS.SP` | 19500 | 0x673FA5 | `\x00X` |
+| 451 | `BONUSG.SP` | 19500 | 0x678BD1 | `\x00X` |
+| 452 | `EFFECTS.SP` | 29836 | 0x67D7FD | `X` |
+| 453 | `GIGGLES.SP` | 46816 | 0x684C89 | `X` |
+| 454 | `WFONT1.SP` | 8190 | 0x690369 | `\x00X` |
+| 455 | `OFONT.SP` | 16444 | 0x692367 | `\x00\x00X` |
+| 456 | `GENEF.SP` | 14692 | 0x6963A3 | `\x00\x00X` |
+| 457 | `CRACK.SP` | 5208 | 0x699D07 | `\x00\x00X` |
+| 458 | `ICONS.SP` | 5574 | 0x69B15F | `\x00\x00X` |
+| 459 | `AJ.SP` | 4256 | 0x69C725 | `SP\x00\x00\x00X` |
+| 460 | `PUF.SP` | 4256 | 0x69D7C5 | `P\x00\x00\x00X` |
+| 461 | `HANDLE.SP` | 3680 | 0x69E865 | `\x00X` |
+| 462 | `LAP.SP` | 19542 | 0x69F6C5 | `SP\x00\x00X` |
+| 463 | `CARS.SP` | 102144 | 0x6A431B | `P\x00\x00X` |
+| 464 | `PANDA.SP` | 19152 | 0x6BD21B | `\x00\x00X` |
+| 465 | `CAMEL.SP` | 21280 | 0x6C1CEB | `\x00\x00X` |
+| 466 | `MOOSE.SP` | 25536 | 0x6C700B | `\x00\x00X` |
+| 467 | `PELICAN.SP` | 25536 | 0x6CD3CB | `X` |
+| 468 | `SHARK.SP` | 17024 | 0x6D378B | `P\x00X` |
+| 469 | `RINGO.SP` | 21280 | 0x6D7A0B | `P\x00X` |
+| 470 | `ELE.SP` | 17024 | 0x6DCD2B | `P\x00P\x00X` |
+| 471 | `TIGER.SP` | 18088 | 0x6E0FAB | `P\x00X` |
+| 472 | `DIGGER.SP` | 17024 | 0x6E5653 | `\x00X` |
+| 473 | `HOGMIS.SP` | 6084 | 0x6E98D3 | `\x00X` |
+| 474 | `SPARK.SP` | 360 | 0x6EB097 | `\x00\x00X` |
+| 475 | `VIEW` | 1280 | 0x6EB1FF | `.SP\x00\x00\x00X` |
+| 476 | `VEL.TAB` | 400 | 0x6EB6FF | `\x00\x00\x00X` |
+| 477 | `VEL2.TAB` | 400 | 0x6EB88F | `\x00\x00X` |
+| 478 | `MAP.XY` | 4096 | 0x6EBA1F | `B\x00\x00\x00X` |
+| 479 | `WACKY.SDX` | 9062 | 0x6ECA1F | `\x00X` |
+| 480 | `TRIG.DAT` | 15360 | 0x6EED85 | `\x00\x00X` |
+| 481 | `NDIST` | 89600 | 0x6F2985 | `AT\x00\x00\x00X` |
+| 482 | `SLP` | 7680 | 0x708785 | `T\x00AT\x00\x00\x00X` |
+| 483 | `38X28.INF` | 20892 | 0x70A585 | `\x00X` |
+| 484 | `28X28.INF` | 15400 | 0x70F721 | `\x00X` |
+| 485 | `14X28.INF` | 7736 | 0x713349 | `\x00X` |
+| 486 | `32X24.INF` | 14960 | 0x715181 | `\x00X` |
+| 487 | `15X13.INF` | 4092 | 0x718BF1 | `\x00X` |
+| 488 | `18X13.INF` | 4992 | 0x719BED | `\x00X` |
+| 489 | `1.BMC` | 836 | 0x71AF6D | `INF\x00\x00X` |
+| 490 | `2.BMC` | 920 | 0x71B2B1 | `INF\x00\x00X` |
+| 491 | `3.BMC` | 797 | 0x71B649 | `INF\x00\x00X` |
+| 492 | `4.BMC` | 662 | 0x71B966 | `INF\x00\x00X` |
+| 493 | `5.BMC` | 713 | 0x71BBFC | `INF\x00\x00X` |
+| 494 | `7.BMC` | 743 | 0x71BEC5 | `INF\x00\x00X` |
+| 495 | `GIG.MOV` | 326 | 0x71C1AC | `F\x00\x00X` |
+| 496 | `GIG1.VOC` | 7903 | 0x71C2F2 | `\x00\x00X` |
+| 497 | `GIG2.VOC` | 17665 | 0x71E1D1 | `\x00\x00X` |
+| 498 | `GIG3.VOC` | 4386 | 0x7226D2 | `\x00\x00X` |
+| 499 | `GIG4.VOC` | 5093 | 0x7237F4 | `\x00\x00X` |
+| 500 | `GIG5.VOC` | 5474 | 0x724BD9 | `\x00\x00X` |
+| 501 | `UNO.VOC` | 7634 | 0x72613B | `\x00\x00\x00X` |
+| 502 | `SULTAN.VOC` | 3352 | 0x727F0D | `X` |
+| 503 | `MORRIS.VOC` | 6267 | 0x728C25 | `X` |
+| 504 | `PEGGLES.VOC` | 4042 | 0x72A4A0 |  |
+| 505 | `RAZER.VOC` | 7174 | 0x72B46A | `C` |
+| 506 | `RINGO.VOC` | 3637 | 0x72D070 | `C` |
+| 507 | `BLOMBO.VOC` | 5257 | 0x72DEA5 |  |
+| 508 | `TIGI.VOC` | 6078 | 0x72F32E | `C` |
+| 509 | `PASS.VOC` | 8281 | 0x730AEC | `C` |
+| 510 | `BELL.VOC` | 6544 | 0x732B45 | `C` |
+| 511 | `START.VOC` | 9166 | 0x7344D5 |  |
+| 512 | `GLASS.VOC` | 4775 | 0x7368A3 |  |
+| 513 | `WARP.VOC` | 7230 | 0x737B4A |  |
+| 514 | `BOOM.VOC` | 7840 | 0x739788 |  |
+| 515 | `HORN.VOC` | 5720 | 0x73B628 |  |
+| 516 | `SPLASH.VOC` | 5811 | 0x73CC80 |  |
+| 517 | `PLIP.VOC` | 2724 | 0x73E333 | `C` |
+| 518 | `SKID.VOC` | 6425 | 0x73EDD7 | `C` |
+| 519 | `PUF.VOC` | 1531 | 0x7406F0 | `\x00C` |
+| 520 | `FLAME.VOC` | 8126 | 0x740CEB |  |
+| 521 | `HOG.VOC` | 5700 | 0x742CA9 | `C` |
+| 522 | `CLANG.VOC` | 1844 | 0x7442ED |  |
+| 523 | `SWIPE.VOC` | 2865 | 0x744A21 |  |
+| 524 | `DROP.VOC` | 2787 | 0x745552 |  |
+| 525 | `BACKFIRE.VOC` | 7955 | 0x746035 |  |
+| 526 | `STALL1.VOC` | 14028 | 0x747F48 | `C` |
+| 527 | `MOTOR.VOC` | 2370 | 0x74B614 | `\x00C` |
+| 528 | `NO.VOC` | 3879 | 0x74BF56 | `OC\x00\x00C` |
+| 529 | `BELCH.VOC` | 3481 | 0x74CE7D | `\x00C` |
+| 530 | `QUACK.VOC` | 3642 | 0x74DC16 | `\x00C` |
+| 531 | `HORN1.VOC` | 4069 | 0x74EA50 | `\x00C` |
+| 532 | `AUDIOHED.FX` | 316 | 0x74FA35 |  |
+| 533 | `AUDIOT.FX` | 3109 | 0x74FB71 | `X` |
+| 534 | `H1.SP` | 1536 | 0x750796 | `.FX\x00X` |
+| 535 | `H2.SP` | 1536 | 0x750D96 | `.FX\x00X` |
+| 536 | `H4.SP` | 3072 | 0x751396 | `.FX\x00X` |
+| 537 | `H5.SP` | 1536 | 0x751F96 | `.FX\x00X` |
+| 538 | `H7.SP` | 1536 | 0x752596 | `.FX\x00X` |
+| 539 | `H6.SP` | 1536 | 0x752B96 | `.FX\x00X` |
+| 540 | `H8.SP` | 3072 | 0x753196 | `.FX\x00X` |
+| 541 | `H9.SP` | 3072 | 0x753D96 | `.FX\x00X` |
+| 542 | `H10.SP` | 3072 | 0x754996 | `FX\x00X` |
+| 543 | `H11.SP` | 3072 | 0x755596 | `FX\x00X` |
+| 544 | `H12.SP` | 1536 | 0x756196 | `FX\x00X` |
+| 545 | `H14.SP` | 3072 | 0x756796 | `FX\x00X` |
+| 546 | `H15.SP` | 1536 | 0x757396 | `FX\x00X` |
+| 547 | `H16.SP` | 1536 | 0x757996 | `FX\x00X` |
+| 548 | `H17.SP` | 4608 | 0x757F96 | `FX\x00X` |
+| 549 | `H18.SP` | 3072 | 0x759196 | `FX\x00X` |
+| 550 | `H19.SP` | 4608 | 0x759D96 | `FX\x00X` |
+| 551 | `H20.SP` | 1536 | 0x75AF96 | `FX\x00X` |
+| 552 | `H21.SP` | 5376 | 0x75B596 | `FX\x00X` |
+| 553 | `H22.SP` | 4608 | 0x75CA96 | `FX\x00X` |
+| 554 | `H23.SP` | 4608 | 0x75DC96 | `FX\x00X` |
+| 555 | `H24.SP` | 3840 | 0x75EE96 | `FX\x00X` |
+| 556 | `H25.SP` | 1536 | 0x75FD96 | `FX\x00X` |
+| 557 | `OB1.SP` | 784 | 0x760396 | `FX\x00X` |
+| 558 | `OB2.SP` | 392 | 0x7606A6 | `FX\x00X` |
+| 559 | `OB3.SP` | 392 | 0x76082E | `FX\x00X` |
+| 560 | `OB4.SP` | 392 | 0x7609B6 | `FX\x00X` |
+| 561 | `OB5.SP` | 784 | 0x760B3E | `FX\x00X` |
+| 562 | `OB6.SP` | 784 | 0x760E4E | `FX\x00X` |
+| 563 | `OB7.SP` | 784 | 0x76115E | `FX\x00X` |
+| 564 | `OB8.SP` | 784 | 0x76146E | `FX\x00X` |
+| 565 | `OB9.SP` | 784 | 0x76177E | `FX\x00X` |
+| 566 | `OB10.SP` | 392 | 0x761A8E | `X\x00X` |
+| 567 | `OB11.SP` | 392 | 0x761C16 | `X\x00X` |
+| 568 | `OB12.SP` | 768 | 0x761D9E | `X\x00X` |
+| 569 | `OB13.SP` | 392 | 0x76209E | `X\x00X` |
+| 570 | `SPRITE.ATR` | 1442 | 0x762226 |  |
+| 571 | `WAC1.OTT` | 3600 | 0x7627C8 | `R` |
+| 572 | `WAC2.OTT` | 3600 | 0x7635D8 | `R` |
+| 573 | `WAC1.HTT` | 6624 | 0x7643E8 | `R` |
+| 574 | `WAC2.HTT` | 6624 | 0x765DC8 | `R` |
+| 575 | `WWSW.BIN` | 4000 | 0x7677A8 | `R` |
+| 576 | `WWREG.BIN` | 4000 | 0x768748 |  |
+
+```
+
+`tools/lidlib.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+.LID archive reader -- Skunny Kart (Copysoft, 1994).
+
+The whole file except the 17-byte plain magic is obfuscated with a per-byte
+ROTATE LEFT by one bit:
+
+    stored = ((plain << 1) | (plain >> 7)) & 0xFF
+    plain  = ((stored >> 1) | ((stored & 1) << 7)) & 0xFF
+
+That is the only transform -- no compression, no keying, no per-file variation.
+
+Layout (after de-rotating):
+
+    char  magic[17]      "SKUNNY KART LIB \x1A"   (stored *unrotated*)
+    byte  pad[25]
+    char  sig[16]        "SKUNNY KART LIB "       (rotated, like everything else)
+    u32   unknown        26
+    u32   blob_size      5
+    u32   blob_offset    21840
+    struct {
+        char name[34];   /* NUL-terminated; the tail is uncleared buffer  */
+        u32  size;
+        u32  offset;     /* absolute, and correct -- no skew here         */
+    } dir[];             /* runs until it meets the payload               */
+"""
+import struct, os, sys
+
+MAGIC = b'SKUNNY KART LIB \x1a'
+HDR   = 0x46
+REC   = 42
+
+def unrot(b):
+    return bytes(((x >> 1) | ((x & 1) << 7)) & 0xFF for x in b)
+
+def read_dir(path):
+    raw = open(path, 'rb').read()
+    assert raw[:len(MAGIC)] == MAGIC, "not a SKUNNY KART LIB"
+    plain = unrot(raw)
+    (_, blob_size, blob_off) = struct.unpack_from('<3I', plain, 0x3A)
+    ents, off = [], HDR
+    while off + REC <= blob_off:
+        rec = plain[off:off+REC]
+        name = rec[:34].split(b'\0')[0].decode('latin1')
+        size, poff = struct.unpack('<2I', rec[34:42])
+        if not name:
+            break
+        ents.append(dict(i=len(ents), name=name, size=size, off=poff,
+                         junk=rec[len(name)+1:34].rstrip(b'\0')))
+        off += REC
+    return raw, plain, ents, dict(blob_size=blob_size, blob_off=blob_off, dir_end=off)
+
+def extract(path, outdir):
+    raw, plain, ents, hdr = read_dir(path)
+    os.makedirs(outdir, exist_ok=True)
+    for e in ents:
+        open(os.path.join(outdir, e['name']), 'wb').write(plain[e['off']:e['off']+e['size']])
+    return ents, hdr
+
+if __name__ == '__main__':
+    p = sys.argv[1]; cmd = sys.argv[2] if len(sys.argv) > 2 else 'list'
+    raw, plain, ents, hdr = read_dir(p)
+    if cmd == 'list':
+        print("# %s: %d entries, dir 0x%x..0x%x, payload from %d, filesize %d"
+              % (p, len(ents), HDR, hdr['dir_end'], hdr['blob_off'], len(raw)))
+        for e in ents:
+            print("%4d %-16s size=%8d off=%9d" % (e['i'], e['name'], e['size'], e['off']))
+    else:
+        ents, hdr = extract(p, sys.argv[3]); print("extracted", len(ents))
+
+```
+
+`tools/wwcompare.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Cross-reference two extracted asset directories by content hash.
+
+    python tools/wwcompare.py <dir_a> <dir_b>
+
+Prints every pair of files whose bytes are identical, flagging the ones that
+were renamed.  Written for the Wacky Wheels / Skunny Kart comparison in
+docs/09-skunny-kart.md, but it is generic.
+
+Zero-length files are skipped.  All-zero files are reported but marked, since
+they match trivially and prove nothing.
+"""
+import os, sys, hashlib, collections
+
+def index(d):
+    m = collections.defaultdict(list)
+    for n in sorted(os.listdir(d)):
+        p = os.path.join(d, n)
+        if os.path.isfile(p) and os.path.getsize(p):
+            b = open(p, 'rb').read()
+            m[hashlib.md5(b).hexdigest()].append((n, len(b), not any(b)))
+    return m
+
+def main(a, b):
+    A, B = index(a), index(b)
+    common = sorted(set(A) & set(B), key=lambda h: -A[h][0][1])
+    print("%s: %d files, %d distinct" % (a, sum(len(v) for v in A.values()), len(A)))
+    print("%s: %d files, %d distinct" % (b, sum(len(v) for v in B.values()), len(B)))
+    print("identical content: %d\n" % len(common))
+    for h in common:
+        na, size, zero = A[h][0]
+        nb = B[h][0][0]
+        tag = "  <-- RENAMED" if na != nb else ""
+        if zero:
+            tag += "   [all zero - trivial match]"
+        print("  %-16s ==  %-16s  %8d B%s" % (na, nb, size, tag))
+
+if __name__ == '__main__':
+    main(sys.argv[1], sys.argv[2])
+
+```
+
+`tools/wwdat.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+WACKY.DAT archive reader  --  Wacky Wheels (Beavis Soft / Apogee, 1994)
+
+Layout
+------
+  u16              entry_count          (577 in WW 1.1 registered)
+  entry[count]     22 bytes each:
+                       char  name[14]   NUL-terminated, tail bytes are stale
+                                        garbage from the previous longer name
+                       u32   size       payload length in bytes
+                       u32   offset     *2 bytes too low* -- see below
+  <22 bytes pad>                        one unused entry slot
+  payload blob
+
+Off-by-two
+----------
+The build tool recorded `offset = ftell() - 2` for every entry, so the
+directory offsets all point two bytes before the real payload.  Reading
+[offset, offset+size) yields the last two bytes of the *previous* file
+followed by all but the last two bytes of this one.  The correct read is
+    data = blob[offset + 2 : offset + 2 + size]
+which makes entries perfectly contiguous and ends exactly at EOF.
+"""
+import struct, sys, os
+
+ENTRY = struct.Struct('<14sII')
+SKEW  = 2                      # the archiver's systematic offset error
+
+def read_dir(path):
+    f = open(path, 'rb')
+    (count,) = struct.unpack('<H', f.read(2))
+    entries = []
+    for i in range(count):
+        name, size, off = ENTRY.unpack(f.read(ENTRY.size))
+        clean = name.split(b'\0')[0].decode('latin1')
+        junk  = name[len(clean)+1:].rstrip(b'\0').decode('latin1')
+        entries.append(dict(i=i, name=clean, size=size, off=off + SKEW, junk=junk))
+    return count, entries, f
+
+def read_file(f, e):
+    f.seek(e['off']); return f.read(e['size'])
+
+def extract(path, outdir):
+    count, entries, f = read_dir(path)
+    os.makedirs(outdir, exist_ok=True)
+    for e in entries:
+        open(os.path.join(outdir, e['name']), 'wb').write(read_file(f, e))
+    return count
+
+if __name__ == '__main__':
+    path = sys.argv[1]
+    cmd  = sys.argv[2] if len(sys.argv) > 2 else 'list'
+    count, entries, f = read_dir(path)
+    if cmd == 'list':
+        print(f"# {path}: {count} entries, payload starts 0x{2+(count+1)*ENTRY.size:x}, "
+              f"file size {os.path.getsize(path)}")
+        for e in entries:
+            print(f"{e['i']:4d} {e['name']:<14} size={e['size']:8d} off=0x{e['off']:08x} junk={e['junk']!r}")
+    elif cmd == 'extract':
+        print("extracted", extract(path, sys.argv[3]))
+
+```
+
+`tools/wwexport.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+One-shot exporter: turn an extracted WACKY.DAT directory into PNGs.
+
+    python tools/wwdat.py "<install>/WACKY.DAT" extract ./out
+    python tools/wwexport.py ./out ./png
+
+Produces
+    png/pcx/*.png           every PCX with its own palette
+    png/sprites/*.png       every .SP bank whose geometry is known, as a sheet
+    png/tracks/N_world.png  the rebuilt 2048x2048 world texture (downscaled)
+    png/tracks/N_pos.png    the n.POS progress sector map
+    png/tracks/N_par.png    the 640x40 parallax horizon
+
+Requires numpy and pillow.  Nothing here is committed to the repository --
+these are your own files, rendered locally.
+"""
+import os, sys
+import numpy as np
+from PIL import Image
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wwpcx, wwsp, wwtrack
+
+# frame geometry that is known for sure (see docs/02-graphics.md)
+SP_GEOMETRY = {
+    'CARS.SP': (38, 28), 'PANDA.SP': (38, 28), 'CAMEL.SP': (38, 28),
+    'MOOSE.SP': (38, 28), 'PELICAN.SP': (38, 28), 'SHARK.SP': (38, 28),
+    'RINGO.SP': (38, 28), 'ELE.SP': (38, 28), 'TIGER.SP': (38, 28),
+    'DIGGER.SP': (38, 28), 'AJ.SP': (38, 28), 'PUF.SP': (38, 28),
+    'ACTION.SP': (251, 6), 'WFONT1.SP': (15, 13),
+    'BRONZEM.SP': (65, 50), 'SILVERM.SP': (65, 50), 'GOLDM.SP': (65, 50),
+    'BONUSB.SP': (65, 50), 'BONUSS.SP': (65, 50), 'BONUSG.SP': (65, 50),
+}
+for i in list(range(1, 26)):
+    SP_GEOMETRY['H%d.SP' % i] = (32, 24)
+for i, wh in {1: (28, 28), 2: (14, 28), 3: (14, 28), 4: (14, 28), 5: (28, 28),
+              6: (28, 28), 7: (28, 28), 8: (28, 28), 9: (28, 28), 10: (14, 28),
+              11: (14, 28), 12: (32, 24), 13: (14, 28)}.items():
+    SP_GEOMETRY['OB%d.SP' % i] = wh
+
+
+def save_indexed(px, w, h, pal, path, scale=1):
+    im = Image.frombytes('P', (w, h), bytes(px))
+    im.putpalette(pal)
+    im = im.convert('RGB')
+    if scale != 1:
+        im = im.resize((w*scale, h*scale), Image.NEAREST)
+    im.save(path)
+
+
+def main(src, dst):
+    for sub in ('pcx', 'sprites', 'tracks'):
+        os.makedirs(os.path.join(dst, sub), exist_ok=True)
+
+    pal = None
+    for n in sorted(os.listdir(src)):
+        if not n.endswith('.PCX'):
+            continue
+        d = wwpcx.decode(open(os.path.join(src, n), 'rb').read())
+        if pal is None:
+            pal = d['palette']
+        save_indexed(d['pixels'], d['w'], d['h'], d['palette'],
+                     os.path.join(dst, 'pcx', n[:-4] + '.png'))
+    print("pcx done")
+
+    ref = wwpcx.decode(open(os.path.join(src, 'A_F1.PCX'), 'rb').read())['palette']
+    for n, (w, h) in sorted(SP_GEOMETRY.items()):
+        p = os.path.join(src, n)
+        if not os.path.exists(p):
+            continue
+        data = open(p, 'rb').read()
+        if len(data) % (w*h):
+            print("  skip %s: %d not a multiple of %dx%d" % (n, len(data), w, h))
+            continue
+        cols = min(12, max(1, len(data)//(w*h)))
+        s = wwsp.sheet(data, w, h, cols)
+        save_indexed(s.tobytes(), s.shape[1], s.shape[0], ref,
+                     os.path.join(dst, 'sprites', n[:-3] + '.png'), scale=2)
+    print("sprites done")
+
+    for t in range(1, 43):
+        g = wwtrack.read_gam(open(os.path.join(src, '%d.GAM' % t), 'rb').read())
+        sa = wwpcx.decode(open(os.path.join(src, 'A_' + g['floor_a'].upper()), 'rb').read())
+        sb = wwpcx.decode(open(os.path.join(src, 'A_' + g['floor_b'].upper()), 'rb').read())
+        m = wwtrack.read_tilemap(open(os.path.join(src, '%d.M' % t), 'rb').read())
+        world = wwtrack.compose(m, sa['pixels'], sb['pixels'])
+        im = Image.fromarray(world, 'P'); im.putpalette(sa['palette'])
+        im.convert('RGB').resize((1024, 1024), Image.LANCZOS)\
+          .save(os.path.join(dst, 'tracks', '%d_world.png' % t))
+
+        pos = wwtrack.read_posmap(open(os.path.join(src, '%d.POS' % t), 'rb').read())
+        g8 = (pos.astype(np.float32) / max(1, pos.max()) * 255).astype(np.uint8)
+        Image.fromarray(g8).resize((512, 512), Image.NEAREST)\
+             .save(os.path.join(dst, 'tracks', '%d_pos.png' % t))
+
+        sky = wwpcx.decode(open(os.path.join(src, g['sky'].upper()), 'rb').read())
+        par = open(os.path.join(src, '%d.PAR' % t), 'rb').read()
+        save_indexed(par, wwtrack.PAR_W, wwtrack.PAR_H, sky['palette'],
+                     os.path.join(dst, 'tracks', '%d_par.png' % t), scale=2)
+    print("tracks done")
+
+
+if __name__ == '__main__':
+    main(sys.argv[1], sys.argv[2])
+
+```
+
+`tools/wwpcx.py`:
+
+```py
+#!/usr/bin/env python3
+"""Minimal PCX (v5, 8bpp, RLE) decoder used by Wacky Wheels assets."""
+import struct
+
+def decode(data):
+    assert data[0] == 0x0A, "not a PCX"
+    ver, enc, bpp = data[1], data[2], data[3]
+    xmin, ymin, xmax, ymax = struct.unpack_from('<4H', data, 4)
+    nplanes = data[65]
+    bpl = struct.unpack_from('<H', data, 66)[0]
+    w, h = xmax-xmin+1, ymax-ymin+1
+    out = bytearray()
+    p = 128
+    total = bpl*nplanes*h
+    while len(out) < total and p < len(data):
+        b = data[p]; p += 1
+        if enc == 1 and (b & 0xC0) == 0xC0:
+            n = b & 0x3F; out += bytes([data[p]])*n; p += 1
+        else:
+            out.append(b)
+    pal = None
+    if data[-769] == 0x0C:
+        pal = data[-768:]
+    px = bytearray(w*h)
+    for y in range(h):
+        px[y*w:(y+1)*w] = out[y*bpl*nplanes:y*bpl*nplanes+w]
+    return dict(w=w, h=h, bpp=bpp, planes=nplanes, bpl=bpl, ver=ver, pixels=bytes(px), palette=pal)
+
+```
+
+`tools/wwsaves.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Persistent state files.  The pristine defaults ship inside WACKY.DAT and are
+copied next to the executable on first run:
+
+    WAC1.HTT / WAC2.HTT   ->  WACKY1.HI  / WACKY2.HI    (hall of fame)
+    WAC1.OTT / WAC2.OTT   ->  WACKY1.TIM / WACKY2.TIM   (lap/race records)
+    WACKY.DTT                                            (duck-shoot scores)
+    WACKY.ING             ->  WACKY.CFG                  (config template)
+
+.HI / .HTT   6624 B = 144 records x 46 B
+    u16  group      1..6   (Bronze/Silver/Gold Wheels + the three Bonus sets)
+    u16  slot       0..7   (eight drivers per board)
+    i16  points     45,36,27,18,9,0,-9,-18 in the shipped defaults
+    char date[12]   "01 SEP 1994"
+    u8   pad[8]
+    char name[20]   "KNOCK ME OFF!"
+    144 = 18 boards x 8 slots (6 zone groups x 3 classes).
+
+.TIM / .OTT  3600 B = 30 records x 120 B, one per race track (1..30)
+    4 x { char name[20]; }      best four lap holders
+    4 x   u32 lapTime           ticks
+    1 x { char name[20]; }      best full-race holder
+    1 x   u32 raceTime
+
+WACKY.DTT      96 B = 4 records x 24 B  (duck shoot leaderboard)
+    char name[16]; u32 pad; u32 score
+"""
+import struct, sys
+
+HI = struct.Struct('<HHh12s8s20s')
+
+def read_hi(data):
+    out = []
+    for i in range(len(data)//46):
+        g, slot, pts, date, _, name = HI.unpack_from(data, i*46)
+        out.append(dict(group=g, slot=slot, points=pts,
+                        date=date.split(b'\0')[0].decode('latin1'),
+                        name=name.split(b'\0')[0].decode('latin1')))
+    return out
+
+def read_tim(data):
+    out = []
+    for t in range(len(data)//120):
+        b = t*120
+        laps = [data[b+i*20:b+i*20+16].split(b'\0')[0].decode('latin1').strip() for i in range(4)]
+        times = struct.unpack_from('<4I', data, b+80)
+        rname = data[b+96:b+112].split(b'\0')[0].decode('latin1').strip()
+        (rtime,) = struct.unpack_from('<I', data, b+116)
+        out.append(dict(track=t+1, lap_names=laps, lap_times=list(times),
+                        race_name=rname, race_time=rtime))
+    return out
+
+def read_dtt(data):
+    return [dict(name=data[i*24:i*24+16].split(b'\0')[0].decode('latin1').strip(),
+                 score=struct.unpack_from('<I', data, i*24+20)[0])
+            for i in range(len(data)//24)]
+
+if __name__ == '__main__':
+    kind, path = sys.argv[1], sys.argv[2]
+    d = open(path, 'rb').read()
+    for r in {'hi': read_hi, 'tim': read_tim, 'dtt': read_dtt}[kind](d)[:8]:
+        print(r)
+
+```
+
+`tools/wwsp.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+.SP = raw 8bpp sprite bank, COLUMN-MAJOR, no header.
+
+    file = frame[0] .. frame[n-1]
+    frame = w*h bytes, stored column by column (x-major):
+            byte[x*h + y] == pixel(x, y)
+    colour index 0 == transparent
+    n = filesize / (w*h)
+
+Frame dimensions are not in the file; they come from
+  * SPRITE.ATR      for the roadside scenery banks (H*.SP / OB*.SP)
+  * the WxH.INF scaler that the code pairs with the bank
+  * hard-coded constants in WW.EXE for the rest.
+"""
+import numpy as np
+
+def frames(data, w, h):
+    n = len(data) // (w*h)
+    a = np.frombuffer(data[:n*w*h], dtype=np.uint8).reshape(n, w, h)
+    return a.transpose(0, 2, 1)          # -> (n, h, w)
+
+def sheet(data, w, h, cols=16):
+    f = frames(data, w, h); n = f.shape[0]
+    rows = (n + cols - 1)//cols
+    out = np.zeros((rows*h, cols*w), np.uint8)
+    for i in range(n):
+        out[(i//cols)*h:(i//cols)*h+h, (i % cols)*w:(i % cols)*w+w] = f[i]
+    return out
+
+```
+
+`tools/wwtables.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Global engine look-up tables shipped inside WACKY.DAT.
+
+TRIG.DAT  15360 B  1920 x { int32 cos, int32 sin }, 16.16 fixed point.
+                   Angle unit = 1/1920 revolution (0 = +X, CW towards +Y).
+                   Generated by incremental rotation, not by calling cos():
+                   cos(90 deg) comes out as -76/65536 instead of 0 and the
+                   error grows smoothly with the index.
+
+SLP        7680 B  1920 x int32 = 65536 * tan(theta), same angle unit.
+                   Entry 480 (90 deg) is forced to 0 instead of infinity.
+
+VIEW       1280 B  320 x uint32 = 16384 * cos(column angle).
+                   VIEW[160] = 16384, VIEW[0] = VIEW[319] = 14185
+                   -> acos(14185/16384) = 30.0 deg, i.e. a 60 deg horizontal
+                   field of view.  This is the classic raycaster fish-eye
+                   correction table, one entry per screen column.
+
+NDIST     89600 B  320 x 70 x uint32, column-major (70 consecutive rows per
+                   column).  Ground-plane distance for every pixel of the
+                   70-row floor band.  NDIST[c][r] == NDIST[160][r] / cos(c),
+                   i.e. the perpendicular row distance divided by VIEW[c].
+                   Range 115 .. 1122 world units.
+
+MAP.XY     4096 B  two 2048-byte ramps: world X (0..2047) -> radar X (0..77)
+                   and world Y (0..2047) -> radar Y (0..49).  The overhead
+                   map is therefore 78 x 50 pixels.
+
+VEL.TAB     400 B  200 x uint16, 0..80  - speed ramp for the 12 HP engine
+VEL2.TAB    400 B  200 x uint16, 0..56  - speed ramp for the  6 HP engine
+"""
+import struct, numpy as np, math, os
+
+REV = 1920                                  # angle units per revolution
+
+def trig(data):
+    v = np.frombuffer(data, dtype='<i4')
+    return v[0::2].copy(), v[1::2].copy()   # cos, sin  (16.16)
+
+def slope(data):   return np.frombuffer(data, dtype='<i4')
+def view(data):    return np.frombuffer(data, dtype='<u4')
+def ndist(data):   return np.frombuffer(data, dtype='<u4').reshape(320, 70)
+def mapxy(data):   return np.frombuffer(data[:2048], dtype=np.uint8), \
+                          np.frombuffer(data[2048:], dtype=np.uint8)
+def vel(data):     return np.frombuffer(data, dtype='<u2')
+
+if __name__ == '__main__':
+    import sys
+    d = sys.argv[1]
+    c, s = trig(open(os.path.join(d, 'TRIG.DAT'), 'rb').read())
+    print("TRIG.DAT  entries=%d" % len(c))
+    for i in (0, 240, 480, 960, 1440):
+        ref = 2*math.pi*i/REV
+        print("   %4d  cos %9.6f (ref %9.6f)   sin %9.6f (ref %9.6f)"
+              % (i, c[i]/65536, math.cos(ref), s[i]/65536, math.sin(ref)))
+    v = view(open(os.path.join(d, 'VIEW'), 'rb').read())
+    print("VIEW      half-FOV = %.2f deg" % math.degrees(math.acos(v[0]/v[160])))
+    n = ndist(open(os.path.join(d, 'NDIST'), 'rb').read())
+    print("NDIST     shape %s  centre col row0=%d row69=%d" % (n.shape, n[160, 0], n[160, 69]))
+    x, y = mapxy(open(os.path.join(d, 'MAP.XY'), 'rb').read())
+    print("MAP.XY    radar %d x %d px" % (x.max()+1, y.max()+1))
+
+```
+
+`tools/wwtrack.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+Track data for Wacky Wheels.  Every track n (1..42) is described by seven
+files inside WACKY.DAT:
+
+  n.GAM   ASCII descriptor: tile sheets, sky, two scalars, label, 8 start slots
+  n.M     4096 B  - 64x64 byte tile map (the whole world, 2048x2048 texels)
+  n.POS   8194 B  - 64x64 u16 "position map": lap/rank progress sector per tile
+  n.RD    var     - u16 count + count * 14 B road centre-line segments
+  n.SPW   var     - u16 count + count * 12 B scenery/object placements
+  n.SIN   1296 B  - 108 * 12 B per-tile surface attributes (shared by theme)
+  n.PAR   25600 B - 640x40 8bpp parallax horizon strip (shared by theme)
+
+World geometry
+    tile          = 32 x 32 texels
+    map           = 64 x 64 tiles  ->  2048 x 2048 texels, wrapping
+    tile bitmaps  = two 320x200 PCX sheets, 10 x 6 = 60 tiles each,
+                    index 0..59 -> sheet A, 60..119 -> sheet B
+    angles        = 1920 units per revolution, 0 = +X, growing towards +Y
+"""
+import struct, os, numpy as np
+
+TILE = 32
+MAPW = MAPH = 64
+
+# ---------------------------------------------------------------- .GAM
+def read_gam(data):
+    L = data.decode('latin1').replace('\r\n', '\n').split('\n')
+    g = dict(floor_a=L[0], floor_b=L[1], map_a=L[2], map_b=L[3], sky=L[4],
+             scalar1=int(L[5]), scalar2=int(L[6]), label=L[7].strip())
+    nums = [int(x) for x in L[8:] if x.strip().lstrip('-').isdigit()]
+    g['starts'] = [(nums[i], nums[i+1]) for i in range(0, 16, 2)]
+    g['trailer'] = nums[16:]
+    return g
+
+# ---------------------------------------------------------------- .M / .POS
+def read_tilemap(data):
+    return np.frombuffer(data[:MAPW*MAPH], dtype=np.uint8).reshape(MAPH, MAPW)
+
+def read_posmap(data):
+    return np.frombuffer(data[:MAPW*MAPH*2], dtype='<u2').reshape(MAPH, MAPW)
+
+# ---------------------------------------------------------------- .RD
+RD = struct.Struct('<7H')      # x1 y1 x2 y2 angle flag length
+
+def read_road(data):
+    (n,) = struct.unpack_from('<H', data, 0)
+    out = []
+    for i in range(n):
+        x1, y1, x2, y2, ang, flag, ln = RD.unpack_from(data, 2 + i*RD.size)
+        out.append(dict(i=i, x1=x1, y1=y1, x2=x2, y2=y2,
+                        angle=ang, flag=flag, length=ln))
+    return out
+
+# ---------------------------------------------------------------- .SPW
+SPW = struct.Struct('<IHHI')   # type x y unknown(always 0 so far)
+
+def read_objects(data):
+    (n,) = struct.unpack_from('<H', data, 0)
+    return [dict(zip(('type', 'x', 'y', 'extra'), SPW.unpack_from(data, 2 + i*SPW.size)))
+            for i in range(n)]
+
+# ---------------------------------------------------------------- .SIN
+def read_surface(data):
+    """108 tiles x 6 u16.  Field 0/1 are flags, 2..5 look like drive params."""
+    return [struct.unpack_from('<6H', data, i*12) for i in range(len(data)//12)]
+
+# ---------------------------------------------------------------- .PAR
+PAR_W, PAR_H = 640, 40
+
+# ---------------------------------------------------------------- rendering
+def compose(tilemap, sheet_a_pixels, sheet_b_pixels):
+    """Rebuild the full 2048x2048 world texture from the two 320x200 sheets."""
+    def cut(px):
+        a = np.frombuffer(px, dtype=np.uint8).reshape(200, 320)
+        return [a[r*TILE:(r+1)*TILE, c*TILE:(c+1)*TILE] for r in range(6) for c in range(10)]
+    T = cut(sheet_a_pixels) + cut(sheet_b_pixels)
+    out = np.zeros((MAPH*TILE, MAPW*TILE), np.uint8)
+    for y in range(MAPH):
+        for x in range(MAPW):
+            out[y*TILE:(y+1)*TILE, x*TILE:(x+1)*TILE] = T[tilemap[y, x]]
+    return out
+
+if __name__ == '__main__':
+    import sys
+    d = sys.argv[1]; n = sys.argv[2] if len(sys.argv) > 2 else '1'
+    g = read_gam(open(os.path.join(d, n + '.GAM'), 'rb').read())
+    print(g)
+    rd = read_road(open(os.path.join(d, n + '.RD'), 'rb').read())
+    print("road segments:", len(rd), rd[0])
+    ob = read_objects(open(os.path.join(d, n + '.SPW'), 'rb').read())
+    print("objects:", len(ob), ob[:3])
+
+```

@@ -1,0 +1,2350 @@
+Project Path: arc_u8012146108-bit_anticheat-qa_iwl41_3t
+
+Source Tree:
+
+```txt
+arc_u8012146108-bit_anticheat-qa_iwl41_3t
+├── LICENSE
+├── README.md
+├── build.gradle
+├── gradle.properties
+├── settings.gradle
+└── src
+    └── main
+        ├── java
+        │   └── dev
+        │       └── anticheatqa
+        │           ├── AntiCheatQA.java
+        │           ├── config
+        │           │   └── ConfigManager.java
+        │           ├── gui
+        │           │   └── ClickGuiScreen.java
+        │           ├── mixin
+        │           │   ├── CameraMixin.java
+        │           │   └── ClientPlayerEntityMixin.java
+        │           ├── module
+        │           │   ├── Category.java
+        │           │   ├── Module.java
+        │           │   ├── ModuleManager.java
+        │           │   ├── monitor
+        │           │   │   ├── CPSMonitor.java
+        │           │   │   ├── FPSMonitor.java
+        │           │   │   ├── MovementMonitor.java
+        │           │   │   ├── PingMonitor.java
+        │           │   │   ├── ReachMonitor.java
+        │           │   │   ├── RotationMonitor.java
+        │           │   │   ├── TickMonitor.java
+        │           │   │   └── VelocityMonitor.java
+        │           │   ├── qa
+        │           │   │   ├── Dashboard.java
+        │           │   │   ├── TestSimulator.java
+        │           │   │   └── YLevelProbe.java
+        │           │   └── visuals
+        │           │       ├── BlockESP.java
+        │           │       ├── ChestESP.java
+        │           │       ├── EntityESP.java
+        │           │       ├── FreeCam.java
+        │           │       ├── Fullbright.java
+        │           │       ├── Nametags.java
+        │           │       └── Tracers.java
+        │           ├── render
+        │           │   ├── HudRenderer.java
+        │           │   └── WorldEspRenderer.java
+        │           └── util
+        │               └── LogManager.java
+        └── resources
+            ├── anticheat-qa.mixins.json
+            ├── assets
+            │   └── anticheat-qa
+            │       └── lang
+            │           └── en_us.json
+            └── fabric.mod.json
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 AntiCheatQA
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# anticheat-qa
+Fabric 1.21.11 Anti-Cheat QA / Developer Client - observes, visualizes, logs and simulates. No cheats.
+
+## Y-Level Probe (v1.0.2)
+QA module that counts **client-visible** blocks (ores/spawners), chests, and entities **strictly below Y = 0**.
+
+Use it to verify a server-side anti-cheat that withholds or strips world data below Y=0:
+
+1. Join the server with the anti-cheat active.
+2. Open ClickGUI (Right Shift) → QA → enable **Y-Level Probe**.
+3. Stand near Y=0 or use FreeCam below Y=0.
+4. HUD shows: `Y<0 | Blocks:N Chests:N Ents:N Players:N`
+
+- **Expected if anti-cheat works:** all counts stay **0** (client never received that data).
+- **If counts rise:** the client still has below-Y=0 data in loaded chunks (anti-cheat may not be stripping packets/chunks as intended).
+
+Observation only — does not request extra chunks or bypass the server.
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id 'fabric-loom' version '1.14-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    maven { url = "https://maven.fabricmc.net/" }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2G -Dfile.encoding=UTF-8
+org.gradle.parallel=true
+minecraft_version=1.21.11
+yarn_mappings=1.21.11+build.3
+loader_version=0.18.2
+fabric_version=0.140.0+1.21.11
+mod_version=1.0.2
+maven_group=dev.anticheatqa
+archives_base_name=anticheat-qa
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        maven { url = "https://maven.fabricmc.net/" }
+        gradlePluginPortal()
+    }
+}
+rootProject.name = "anticheat-qa"
+
+```
+
+`src/main/java/dev/anticheatqa/AntiCheatQA.java`:
+
+```java
+package dev.anticheatqa;
+
+import dev.anticheatqa.config.ConfigManager;
+import dev.anticheatqa.gui.ClickGuiScreen;
+import dev.anticheatqa.module.ModuleManager;
+import dev.anticheatqa.render.HudRenderer;
+import dev.anticheatqa.render.WorldEspRenderer;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.Identifier;
+import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class AntiCheatQA implements ClientModInitializer {
+    public static final String MOD_ID = "anticheat-qa";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static AntiCheatQA INSTANCE;
+
+    private ModuleManager moduleManager;
+    private ConfigManager configManager;
+    private HudRenderer hudRenderer;
+    private boolean lastRightShift = false;
+
+    @Override
+    public void onInitializeClient() {
+        INSTANCE = this;
+        LOGGER.info("AntiCheat QA Client initializing (1.21.11)");
+
+        moduleManager = new ModuleManager();
+        configManager = new ConfigManager();
+        hudRenderer = new HudRenderer();
+        configManager.load();
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (client.player == null) return;
+
+            long window = client.getWindow().getHandle();
+            boolean pressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS;
+            if (pressed && !lastRightShift) {
+                if (client.currentScreen instanceof ClickGuiScreen) {
+                    client.setScreen(null);
+                } else if (client.currentScreen == null) {
+                    client.setScreen(new ClickGuiScreen());
+                }
+            }
+            lastRightShift = pressed;
+
+            moduleManager.onTick(client);
+        });
+
+        Identifier layerId = Identifier.of(MOD_ID, "overlay");
+        HudElementRegistry.attachElementAfter(
+                VanillaHudElements.MISC_OVERLAYS,
+                layerId,
+                (context, tickCounter) -> {
+                    if (INSTANCE != null && MinecraftClient.getInstance().player != null) {
+                        hudRenderer.render(context, 0f);
+                    }
+                }
+        );
+
+        // 3D world-space ESP outlines + tracers
+        WorldRenderEvents.AFTER_ENTITIES.register(WorldEspRenderer::render);
+
+        LOGGER.info("AntiCheat QA ready. Press Right Shift to open ClickGUI.");
+    }
+
+    public ModuleManager getModuleManager() { return moduleManager; }
+    public ConfigManager getConfigManager() { return configManager; }
+    public HudRenderer getHudRenderer() { return hudRenderer; }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/config/ConfigManager.java`:
+
+```java
+package dev.anticheatqa.config;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import dev.anticheatqa.AntiCheatQA;
+import dev.anticheatqa.module.Module;
+import org.lwjgl.glfw.GLFW;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class ConfigManager {
+    private static final Path CONFIG_PATH = Paths.get("config", "anticheat-qa.json");
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    public void save() {
+        try {
+            Files.createDirectories(CONFIG_PATH.getParent());
+            JsonObject root = new JsonObject();
+            JsonObject modules = new JsonObject();
+            for (Module m : AntiCheatQA.INSTANCE.getModuleManager().getModules()) {
+                JsonObject mod = new JsonObject();
+                mod.addProperty("enabled", m.isEnabled());
+                mod.addProperty("keybind", m.getKeybind());
+                JsonObject settings = new JsonObject();
+                for (Module.Setting<?> s : m.getSettings()) {
+                    if (s instanceof Module.BooleanSetting bs) {
+                        settings.addProperty(s.getName(), bs.get());
+                    } else if (s instanceof Module.NumberSetting ns) {
+                        settings.addProperty(s.getName(), ns.get());
+                    } else if (s instanceof Module.ColorSetting cs) {
+                        settings.addProperty(s.getName(), cs.get());
+                    }
+                }
+                mod.add("settings", settings);
+                modules.add(m.getName(), mod);
+            }
+            root.add("modules", modules);
+            Files.writeString(CONFIG_PATH, gson.toJson(root));
+        } catch (Exception e) {
+            AntiCheatQA.LOGGER.error("Failed to save config", e);
+        }
+    }
+
+    public void load() {
+        if (!Files.exists(CONFIG_PATH)) return;
+        try {
+            String json = Files.readString(CONFIG_PATH);
+            JsonObject root = gson.fromJson(json, JsonObject.class);
+            if (root == null || !root.has("modules")) return;
+            JsonObject modules = root.getAsJsonObject("modules");
+            for (Module m : AntiCheatQA.INSTANCE.getModuleManager().getModules()) {
+                if (!modules.has(m.getName())) continue;
+                JsonObject mod = modules.getAsJsonObject(m.getName());
+                if (mod.has("enabled")) m.setEnabled(mod.get("enabled").getAsBoolean());
+                if (mod.has("keybind")) m.setKeybind(mod.get("keybind").getAsInt());
+                if (mod.has("settings")) {
+                    JsonObject settings = mod.getAsJsonObject("settings");
+                    for (Module.Setting<?> s : m.getSettings()) {
+                        if (!settings.has(s.getName())) continue;
+                        if (s instanceof Module.BooleanSetting bs) {
+                            bs.set(settings.get(s.getName()).getAsBoolean());
+                        } else if (s instanceof Module.NumberSetting ns) {
+                            ns.set(settings.get(s.getName()).getAsDouble());
+                        } else if (s instanceof Module.ColorSetting cs) {
+                            cs.set(settings.get(s.getName()).getAsInt());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            AntiCheatQA.LOGGER.error("Failed to load config", e);
+        }
+    }
+
+    public void reset() {
+        for (Module m : AntiCheatQA.INSTANCE.getModuleManager().getModules()) {
+            m.setEnabled(false);
+            m.setKeybind(GLFW.GLFW_KEY_UNKNOWN);
+            for (Module.Setting<?> s : m.getSettings()) s.reset();
+        }
+        Module dash = AntiCheatQA.INSTANCE.getModuleManager().getModule("Dashboard");
+        if (dash != null) dash.setEnabled(true);
+        save();
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/gui/ClickGuiScreen.java`:
+
+```java
+package dev.anticheatqa.gui;
+
+import dev.anticheatqa.AntiCheatQA;
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
+
+public class ClickGuiScreen extends Screen {
+    private Category selectedCategory = Category.VISUALS;
+    private Module settingsModule = null;
+    private boolean waitingForKeybind = false;
+    private int scrollOffset = 0;
+
+    public ClickGuiScreen() {
+        super(Text.literal("AntiCheat QA"));
+    }
+
+    @Override
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        context.fill(0, 0, width, height, 0xCC101018);
+        context.fill(0, 0, 120, height, 0xFF1A1A24);
+        context.drawText(textRenderer, "AntiCheat QA", 10, 12, 0xFFFFAA00, true);
+
+        int y = 40;
+        for (Category cat : Category.values()) {
+            boolean selected = cat == selectedCategory;
+            if (selected) context.fill(0, y - 2, 120, y + 14, 0xFF2A2A3A);
+            context.drawText(textRenderer, cat.displayName, 12, y, selected ? 0xFFFFAA00 : 0xFFCCCCCC, false);
+            y += 18;
+        }
+
+        context.fill(130, 30, 360, height - 20, 0xFF16161E);
+        context.drawText(textRenderer, "L-Click: Toggle  |  R-Click: Settings", 135, 12, 0xFF888888, false);
+
+        if (AntiCheatQA.INSTANCE != null) {
+            List<Module> mods = AntiCheatQA.INSTANCE.getModuleManager().getModulesByCategory(selectedCategory);
+            int my = 40 - scrollOffset;
+            for (Module m : mods) {
+                if (my > 30 && my < height - 30) {
+                    if (m.isEnabled()) {
+                        context.fill(135, my - 1, 350, my + 13, 0xFF1E3A2A);
+                    }
+                    int color = m.isEnabled() ? 0xFF55FF55 : 0xFFAAAAAA;
+                    context.drawText(textRenderer, m.getName(), 140, my, color, false);
+                    String kb = keyName(m.getKeybind());
+                    if (!kb.isEmpty()) {
+                        context.drawText(textRenderer, "[" + kb + "]", 280, my, 0xFF888888, false);
+                    }
+                }
+                my += 16;
+            }
+        }
+
+        if (settingsModule != null) {
+            context.fill(370, 30, width - 20, height - 20, 0xFF1A1A24);
+            context.drawText(textRenderer, "Settings: " + settingsModule.getName(), 380, 40, 0xFFFFAA00, true);
+            context.drawText(textRenderer, settingsModule.getDescription(), 380, 56, 0xFF888888, false);
+
+            int sy = 80;
+            context.drawText(textRenderer, "Keybind:", 380, sy, 0xFFCCCCCC, false);
+            String kbText = waitingForKeybind ? "Press a key..." : keyName(settingsModule.getKeybind());
+            if (kbText.isEmpty()) kbText = "None";
+            context.fill(460, sy - 2, 560, sy + 12, waitingForKeybind ? 0xFF3A3A1A : 0xFF2A2A3A);
+            context.drawText(textRenderer, kbText, 465, sy, 0xFFFFFFFF, false);
+            sy += 22;
+
+            for (Module.Setting<?> s : settingsModule.getSettings()) {
+                context.drawText(textRenderer, s.getName() + ":", 380, sy, 0xFFCCCCCC, false);
+                if (s instanceof Module.BooleanSetting bs) {
+                    context.drawText(textRenderer, bs.get() ? "ON" : "OFF", 500, sy, 0xFFFFFFFF, false);
+                } else if (s instanceof Module.NumberSetting ns) {
+                    context.drawText(textRenderer, String.format("%.2f", ns.get()), 500, sy, 0xFFFFFFFF, false);
+                    context.drawText(textRenderer, "[- / +]", 550, sy, 0xFF888888, false);
+                } else if (s instanceof Module.ColorSetting cs) {
+                    context.drawText(textRenderer, String.format("#%08X", cs.get()), 500, sy, 0xFFFFFFFF, false);
+                }
+                sy += 16;
+            }
+
+            sy += 10;
+            context.fill(380, sy, 450, sy + 16, 0xFF2A4A2A);
+            context.drawText(textRenderer, "Save Config", 385, sy + 4, 0xFF55FF55, false);
+            context.fill(460, sy, 530, sy + 16, 0xFF4A2A2A);
+            context.drawText(textRenderer, "Reset Mod", 465, sy + 4, 0xFFFF5555, false);
+        }
+
+        context.drawText(textRenderer, "Right Shift = Close  |  Changes auto-save on close", 10, height - 14, 0xFF666666, false);
+    }
+
+    @Override
+    public boolean mouseClicked(Click click, boolean doubled) {
+        int mx = (int) click.x();
+        int my = (int) click.y();
+        int button = click.button();
+
+        int y = 40;
+        for (Category cat : Category.values()) {
+            if (mx < 120 && my >= y - 2 && my < y + 16) {
+                selectedCategory = cat;
+                settingsModule = null;
+                waitingForKeybind = false;
+                return true;
+            }
+            y += 18;
+        }
+
+        if (AntiCheatQA.INSTANCE == null) return false;
+
+        List<Module> mods = AntiCheatQA.INSTANCE.getModuleManager().getModulesByCategory(selectedCategory);
+        int myPos = 40 - scrollOffset;
+        for (Module m : mods) {
+            if (mx >= 130 && mx < 360 && my >= myPos - 1 && my < myPos + 15) {
+                if (button == 0) {
+                    m.toggle();
+                    AntiCheatQA.INSTANCE.getConfigManager().save();
+                    return true;
+                }
+                if (button == 1) {
+                    settingsModule = m;
+                    waitingForKeybind = false;
+                    return true;
+                }
+            }
+            myPos += 16;
+        }
+
+        if (settingsModule != null && mx >= 370) {
+            int sy = 80;
+            if (my >= sy - 2 && my < sy + 14 && mx >= 460 && mx < 560) {
+                waitingForKeybind = true;
+                return true;
+            }
+            sy += 22;
+
+            for (Module.Setting<?> s : settingsModule.getSettings()) {
+                if (my >= sy && my < sy + 16) {
+                    if (s instanceof Module.BooleanSetting bs) {
+                        bs.set(!bs.get());
+                        AntiCheatQA.INSTANCE.getConfigManager().save();
+                        return true;
+                    }
+                    if (s instanceof Module.NumberSetting ns) {
+                        double step = ns.getStep();
+                        if (button == 0) ns.setClamped(ns.get() + step);
+                        else ns.setClamped(ns.get() - step);
+                        AntiCheatQA.INSTANCE.getConfigManager().save();
+                        return true;
+                    }
+                }
+                sy += 16;
+            }
+
+            sy += 10;
+            if (my >= sy && my < sy + 16 && mx >= 380 && mx < 450) {
+                AntiCheatQA.INSTANCE.getConfigManager().save();
+                return true;
+            }
+            if (my >= sy && my < sy + 16 && mx >= 460 && mx < 530) {
+                for (Module.Setting<?> s : settingsModule.getSettings()) s.reset();
+                settingsModule.setKeybind(GLFW.GLFW_KEY_UNKNOWN);
+                AntiCheatQA.INSTANCE.getConfigManager().save();
+                return true;
+            }
+        }
+
+        return super.mouseClicked(click, doubled);
+    }
+
+    @Override
+    public boolean keyPressed(KeyInput input) {
+        int keyCode = input.getKeycode();
+
+        if (waitingForKeybind && settingsModule != null) {
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+                settingsModule.setKeybind(GLFW.GLFW_KEY_UNKNOWN);
+            } else if (keyCode != GLFW.GLFW_KEY_RIGHT_SHIFT) {
+                settingsModule.setKeybind(keyCode);
+            }
+            waitingForKeybind = false;
+            AntiCheatQA.INSTANCE.getConfigManager().save();
+            return true;
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            close();
+            return true;
+        }
+        return super.keyPressed(input);
+    }
+
+    @Override
+    public void close() {
+        if (AntiCheatQA.INSTANCE != null) {
+            AntiCheatQA.INSTANCE.getConfigManager().save();
+        }
+        super.close();
+    }
+
+    @Override
+    public boolean shouldPause() {
+        return false;
+    }
+
+    private static String keyName(int key) {
+        if (key == GLFW.GLFW_KEY_UNKNOWN || key < 0) return "";
+        String name = GLFW.glfwGetKeyName(key, 0);
+        if (name != null) return name.toUpperCase();
+        return switch (key) {
+            case GLFW.GLFW_KEY_SPACE -> "SPACE";
+            case GLFW.GLFW_KEY_LEFT_SHIFT -> "LSHIFT";
+            case GLFW.GLFW_KEY_RIGHT_SHIFT -> "RSHIFT";
+            case GLFW.GLFW_KEY_LEFT_CONTROL -> "LCTRL";
+            case GLFW.GLFW_KEY_RIGHT_CONTROL -> "RCTRL";
+            case GLFW.GLFW_KEY_LEFT_ALT -> "LALT";
+            case GLFW.GLFW_KEY_RIGHT_ALT -> "RALT";
+            case GLFW.GLFW_KEY_TAB -> "TAB";
+            case GLFW.GLFW_KEY_CAPS_LOCK -> "CAPS";
+            case GLFW.GLFW_KEY_INSERT -> "INS";
+            case GLFW.GLFW_KEY_DELETE -> "DEL";
+            case GLFW.GLFW_KEY_HOME -> "HOME";
+            case GLFW.GLFW_KEY_END -> "END";
+            case GLFW.GLFW_KEY_PAGE_UP -> "PGUP";
+            case GLFW.GLFW_KEY_PAGE_DOWN -> "PGDN";
+            case GLFW.GLFW_KEY_UP -> "UP";
+            case GLFW.GLFW_KEY_DOWN -> "DOWN";
+            case GLFW.GLFW_KEY_LEFT -> "LEFT";
+            case GLFW.GLFW_KEY_RIGHT -> "RIGHT";
+            case GLFW.GLFW_KEY_F1 -> "F1";
+            case GLFW.GLFW_KEY_F2 -> "F2";
+            case GLFW.GLFW_KEY_F3 -> "F3";
+            case GLFW.GLFW_KEY_F4 -> "F4";
+            case GLFW.GLFW_KEY_F5 -> "F5";
+            case GLFW.GLFW_KEY_F6 -> "F6";
+            case GLFW.GLFW_KEY_F7 -> "F7";
+            case GLFW.GLFW_KEY_F8 -> "F8";
+            case GLFW.GLFW_KEY_F9 -> "F9";
+            case GLFW.GLFW_KEY_F10 -> "F10";
+            case GLFW.GLFW_KEY_F11 -> "F11";
+            case GLFW.GLFW_KEY_F12 -> "F12";
+            default -> "KEY" + key;
+        };
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/mixin/CameraMixin.java`:
+
+```java
+package dev.anticheatqa.mixin;
+
+import dev.anticheatqa.module.visuals.FreeCam;
+import net.minecraft.client.render.Camera;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(Camera.class)
+public abstract class CameraMixin {
+    @Shadow
+    protected abstract void setPos(double x, double y, double z);
+
+    @Shadow
+    protected abstract void setRotation(float yaw, float pitch);
+
+    @Inject(method = "update", at = @At("RETURN"))
+    private void onCameraUpdate(World area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo ci) {
+        try {
+            if (!FreeCam.active) return;
+            setPos(FreeCam.camX, FreeCam.camY, FreeCam.camZ);
+            setRotation(FreeCam.camYaw, FreeCam.camPitch);
+        } catch (Throwable ignored) {}
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/mixin/ClientPlayerEntityMixin.java`:
+
+```java
+package dev.anticheatqa.mixin;
+
+import dev.anticheatqa.module.visuals.FreeCam;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.PlayerInput;
+import net.minecraft.util.math.Vec3d;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ClientPlayerEntity.class)
+public class ClientPlayerEntityMixin {
+
+    /** Zero movement input so the player body stays frozen while FreeCam camera moves. */
+    @Inject(method = "tickMovement", at = @At("HEAD"))
+    private void anticheatqa$freezeBody(CallbackInfo ci) {
+        if (!FreeCam.active) return;
+        ClientPlayerEntity self = (ClientPlayerEntity) (Object) this;
+        if (self.input != null) {
+            self.input.playerInput = PlayerInput.DEFAULT;
+        }
+        self.setVelocity(Vec3d.ZERO);
+        self.setSprinting(false);
+    }
+
+    @Inject(method = "tickMovement", at = @At("RETURN"))
+    private void anticheatqa$snapBody(CallbackInfo ci) {
+        if (!FreeCam.active) return;
+        ClientPlayerEntity self = (ClientPlayerEntity) (Object) this;
+        self.setVelocity(Vec3d.ZERO);
+        if (FreeCam.hasSaved) {
+            self.setPosition(FreeCam.savedX, FreeCam.savedY, FreeCam.savedZ);
+            self.setVelocity(Vec3d.ZERO);
+        }
+        if (self.input != null) {
+            self.input.playerInput = PlayerInput.DEFAULT;
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/Category.java`:
+
+```java
+package dev.anticheatqa.module;
+
+public enum Category {
+    VISUALS("Visuals"),
+    MONITOR("Monitor"),
+    QA("QA"),
+    SETTINGS("Settings");
+
+    public final String displayName;
+
+    Category(String displayName) {
+        this.displayName = displayName;
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/Module.java`:
+
+```java
+package dev.anticheatqa.module;
+
+import net.minecraft.client.MinecraftClient;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public abstract class Module {
+    private final String name;
+    private final String description;
+    private final Category category;
+    private boolean enabled;
+    private int keybind = GLFW.GLFW_KEY_UNKNOWN;
+    protected final List<Setting<?>> settings = new ArrayList<>();
+
+    public Module(String name, String description, Category category) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+    }
+
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public Category getCategory() { return category; }
+    public boolean isEnabled() { return enabled; }
+    public int getKeybind() { return keybind; }
+    public void setKeybind(int key) { this.keybind = key; }
+    public List<Setting<?>> getSettings() { return settings; }
+
+    public void setEnabled(boolean enabled) {
+        if (this.enabled == enabled) return;
+        this.enabled = enabled;
+        if (enabled) onEnable();
+        else onDisable();
+    }
+
+    public void toggle() {
+        setEnabled(!enabled);
+    }
+
+    protected void onEnable() {}
+    protected void onDisable() {}
+    public void onTick(MinecraftClient client) {}
+    public String getDisplay() { return ""; }
+
+    public static abstract class Setting<T> {
+        private final String name;
+        private T value;
+        private final T defaultValue;
+
+        public Setting(String name, T defaultValue) {
+            this.name = name;
+            this.defaultValue = defaultValue;
+            this.value = defaultValue;
+        }
+
+        public String getName() { return name; }
+        public T get() { return value; }
+        public void set(T value) { this.value = value; }
+        public T getDefault() { return defaultValue; }
+        public void reset() { this.value = defaultValue; }
+    }
+
+    public static class BooleanSetting extends Setting<Boolean> {
+        public BooleanSetting(String name, boolean defaultValue) {
+            super(name, defaultValue);
+        }
+    }
+
+    public static class NumberSetting extends Setting<Double> {
+        private final double min, max, step;
+
+        public NumberSetting(String name, double defaultValue, double min, double max, double step) {
+            super(name, defaultValue);
+            this.min = min;
+            this.max = max;
+            this.step = step;
+        }
+
+        public double getMin() { return min; }
+        public double getMax() { return max; }
+        public double getStep() { return step; }
+
+        public void setClamped(double v) {
+            set(Math.max(min, Math.min(max, v)));
+        }
+    }
+
+    public static class ColorSetting extends Setting<Integer> {
+        public ColorSetting(String name, int defaultArgb) {
+            super(name, defaultArgb);
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/ModuleManager.java`:
+
+```java
+package dev.anticheatqa.module;
+
+import dev.anticheatqa.module.monitor.*;
+import dev.anticheatqa.module.qa.Dashboard;
+import dev.anticheatqa.module.qa.TestSimulator;
+import dev.anticheatqa.module.qa.YLevelProbe;
+import dev.anticheatqa.module.visuals.*;
+import net.minecraft.client.MinecraftClient;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class ModuleManager {
+    private final List<Module> modules = new ArrayList<>();
+    private final boolean[] keyWasDown = new boolean[512];
+
+    public ModuleManager() {
+        register(new BlockESP());
+        register(new EntityESP());
+        register(new ChestESP());
+        register(new Tracers());
+        register(new Fullbright());
+        register(new Nametags());
+        register(new FreeCam());
+        register(new ReachMonitor());
+        register(new MovementMonitor());
+        register(new RotationMonitor());
+        register(new CPSMonitor());
+        register(new VelocityMonitor());
+        register(new PingMonitor());
+        register(new FPSMonitor());
+        register(new TickMonitor());
+        register(new Dashboard());
+        register(new TestSimulator());
+        register(new YLevelProbe());
+    }
+
+    private void register(Module module) {
+        modules.add(module);
+    }
+
+    public List<Module> getModules() {
+        return Collections.unmodifiableList(modules);
+    }
+
+    public List<Module> getModulesByCategory(Category category) {
+        List<Module> result = new ArrayList<>();
+        for (Module m : modules) {
+            if (m.getCategory() == category) result.add(m);
+        }
+        return result;
+    }
+
+    public Module getModule(String name) {
+        for (Module m : modules) {
+            if (m.getName().equalsIgnoreCase(name)) return m;
+        }
+        return null;
+    }
+
+    public void onTick(MinecraftClient client) {
+        long window = client.getWindow().getHandle();
+        for (Module m : modules) {
+            int key = m.getKeybind();
+            if (key == GLFW.GLFW_KEY_UNKNOWN || key < 0 || key >= keyWasDown.length) continue;
+            boolean down = GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
+            if (down && !keyWasDown[key]) {
+                if (client.currentScreen == null || client.currentScreen.getClass().getSimpleName().contains("ClickGui")) {
+                    m.toggle();
+                }
+            }
+            keyWasDown[key] = down;
+        }
+
+        for (Module m : modules) {
+            if (m.isEnabled()) {
+                try {
+                    m.onTick(client);
+                } catch (Throwable t) {
+                }
+            }
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/CPSMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+public class CPSMonitor extends Module {
+    private final Deque<Long> leftClicks = new ArrayDeque<>();
+    private final Deque<Long> rightClicks = new ArrayDeque<>();
+    private boolean lastLeft;
+    private boolean lastRight;
+
+    public CPSMonitor() {
+        super("CPS Monitor", "Measures actual left/right click activity.", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        long now = System.currentTimeMillis();
+        while (!leftClicks.isEmpty() && now - leftClicks.peekFirst() > 1000L) leftClicks.pollFirst();
+        while (!rightClicks.isEmpty() && now - rightClicks.peekFirst() > 1000L) rightClicks.pollFirst();
+
+        // Correct: attackKey = left mouse (L-CPS), useKey = right mouse (R-CPS)
+        boolean left = client.options.attackKey.isPressed();
+        boolean right = client.options.useKey.isPressed();
+
+        if (left && !lastLeft) leftClicks.addLast(now);
+        if (right && !lastRight) rightClicks.addLast(now);
+
+        lastLeft = left;
+        lastRight = right;
+    }
+
+    public int getLeftCPS() { return leftClicks.size(); }
+    public int getRightCPS() { return rightClicks.size(); }
+
+    @Override
+    public String getDisplay() {
+        return "L-CPS: " + getLeftCPS() + "  R-CPS: " + getRightCPS();
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/FPSMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+
+public class FPSMonitor extends Module {
+    public FPSMonitor() {
+        super("FPS Monitor", "Displays current FPS.", Category.MONITOR);
+    }
+
+    @Override
+    public String getDisplay() {
+        return "FPS: " + MinecraftClient.getInstance().getCurrentFps();
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/MovementMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.math.Vec3d;
+
+public class MovementMonitor extends Module {
+    private double x, y, z, hSpeed, vSpeed;
+    private boolean onGround, sprinting;
+    private Vec3d velocity = Vec3d.ZERO;
+
+    public MovementMonitor() {
+        super("Movement Monitor", "Displays position, speed and movement state.", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        if (client.player == null) return;
+        ClientPlayerEntity p = client.player;
+        x = p.getX();
+        y = p.getY();
+        z = p.getZ();
+        velocity = p.getVelocity();
+        hSpeed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        vSpeed = velocity.y;
+        onGround = p.isOnGround();
+        sprinting = p.isSprinting();
+    }
+
+    @Override
+    public String getDisplay() {
+        return String.format("XYZ: %.1f %.1f %.1f  H:%.3f V:%.3f  Ground:%s Sprint:%s",
+                x, y, z, hSpeed, vSpeed, onGround, sprinting);
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/PingMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.network.ServerInfo;
+
+public class PingMonitor extends Module {
+    private int ping = -1;
+
+    public PingMonitor() {
+        super("Ping Monitor", "Displays real server latency.", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        try {
+            if (client.player == null) {
+                ping = -1;
+                return;
+            }
+
+            ClientPlayNetworkHandler handler = client.getNetworkHandler();
+            if (handler == null) {
+                // Singleplayer integrated server
+                ping = 0;
+                return;
+            }
+
+            int best = -1;
+
+            // 1) Tab-list latency for local player (updated by server)
+            PlayerListEntry entry = handler.getPlayerListEntry(client.player.getUuid());
+            if (entry != null) {
+                int lat = entry.getLatency();
+                if (lat >= 0) best = lat;
+            }
+
+            // 2) Server list / multiplayer screen ping (last successful query)
+            ServerInfo info = client.getCurrentServerEntry();
+            if (info != null && info.ping > 0) {
+                if (best < 0 || info.ping < best) {
+                    // Prefer tab-list if available; use server entry if tab list is 0/missing
+                    if (best <= 0) best = (int) info.ping;
+                }
+            }
+
+            // 3) If still unknown but connected, show 0 rather than N/A
+            if (best < 0 && handler.getConnection() != null && handler.getConnection().isOpen()) {
+                best = 0;
+            }
+
+            ping = best;
+        } catch (Throwable t) {
+            ping = -1;
+        }
+    }
+
+    @Override
+    public String getDisplay() {
+        if (ping < 0) return "Ping: N/A";
+        if (ping == 0) return "Ping: 0ms (local)";
+        return "Ping: " + ping + "ms";
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/ReachMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+
+public class ReachMonitor extends Module {
+    private String lastTarget = "None";
+    private double lastDistance;
+
+    public ReachMonitor() {
+        super("Reach Monitor", "Measures actual distance to targeted entity.", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        if (client.player == null || client.crosshairTarget == null) {
+            lastTarget = "None";
+            lastDistance = 0;
+            return;
+        }
+        if (client.crosshairTarget.getType() == HitResult.Type.ENTITY) {
+            EntityHitResult ehr = (EntityHitResult) client.crosshairTarget;
+            lastTarget = ehr.getEntity().getName().getString();
+            lastDistance = client.player.getEyePos().distanceTo(ehr.getPos());
+        } else {
+            lastTarget = "None";
+            lastDistance = 0;
+        }
+    }
+
+    @Override
+    public String getDisplay() {
+        return String.format("Target: %s  Distance: %.2f", lastTarget, lastDistance);
+    }
+
+    public double getLastDistance() { return lastDistance; }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/RotationMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+
+public class RotationMonitor extends Module {
+    private float yaw, pitch, deltaYaw, deltaPitch, rotationSpeed;
+    private float lastYaw, lastPitch;
+
+    public RotationMonitor() {
+        super("Rotation Monitor", "Displays yaw, pitch and rotation change.", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        if (client.player == null) return;
+        lastYaw = yaw;
+        lastPitch = pitch;
+        yaw = client.player.getYaw();
+        pitch = client.player.getPitch();
+        deltaYaw = yaw - lastYaw;
+        deltaPitch = pitch - lastPitch;
+        while (deltaYaw > 180f) deltaYaw -= 360f;
+        while (deltaYaw < -180f) deltaYaw += 360f;
+        rotationSpeed = (float) Math.sqrt(deltaYaw * deltaYaw + deltaPitch * deltaPitch);
+    }
+
+    @Override
+    public String getDisplay() {
+        return String.format("Yaw:%.1f Pitch:%.1f  dY:%.2f dP:%.2f  Speed:%.2f",
+                yaw, pitch, deltaYaw, deltaPitch, rotationSpeed);
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/TickMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+
+public class TickMonitor extends Module {
+    private long lastTime = System.nanoTime();
+    private double tpsEstimate = 20.0;
+
+    public TickMonitor() {
+        super("Tick Monitor", "Rough client tick rate estimate.", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        long now = System.nanoTime();
+        double delta = (now - lastTime) / 1_000_000_000.0;
+        lastTime = now;
+        if (delta > 0) {
+            double instant = 1.0 / delta;
+            tpsEstimate = tpsEstimate * 0.9 + instant * 0.1;
+        }
+    }
+
+    @Override
+    public String getDisplay() {
+        return String.format("Client TPS: %.1f", Math.min(20.0, tpsEstimate));
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/monitor/VelocityMonitor.java`:
+
+```java
+package dev.anticheatqa.module.monitor;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.Vec3d;
+
+public class VelocityMonitor extends Module {
+    private Vec3d velocity = Vec3d.ZERO;
+    private double lastMagnitude;
+
+    public VelocityMonitor() {
+        super("Velocity Monitor", "Displays player velocity (useful after knockback).", Category.MONITOR);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        if (client.player == null) return;
+        velocity = client.player.getVelocity();
+        lastMagnitude = velocity.length();
+    }
+
+    @Override
+    public String getDisplay() {
+        return String.format("Vel: %.3f %.3f %.3f  Mag:%.3f",
+                velocity.x, velocity.y, velocity.z, lastMagnitude);
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/qa/Dashboard.java`:
+
+```java
+package dev.anticheatqa.module.qa;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Dashboard extends Module {
+    public static final AtomicInteger detections = new AtomicInteger(0);
+    public static final AtomicInteger warnings = new AtomicInteger(0);
+    public static final AtomicInteger tests = new AtomicInteger(0);
+
+    public Dashboard() {
+        super("Dashboard", "Anti-Cheat QA overview panel.", Category.QA);
+        setEnabled(true);
+    }
+
+    @Override
+    public String getDisplay() {
+        return String.format("QA | Det:%d Warn:%d Tests:%d",
+                detections.get(), warnings.get(), tests.get());
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/qa/TestSimulator.java`:
+
+```java
+package dev.anticheatqa.module.qa;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import dev.anticheatqa.util.LogManager;
+import net.minecraft.client.MinecraftClient;
+
+import java.util.Random;
+
+public class TestSimulator extends Module {
+    public final BooleanSetting auto = new BooleanSetting("Auto Simulate", false);
+    public final NumberSetting interval = new NumberSetting("Interval (s)", 5.0, 1.0, 30.0, 1.0);
+
+    private int tickCounter = 0;
+    private final Random random = new Random();
+    private final String[] checks = {"Speed", "Flight", "Reach", "NoFall", "Scaffold", "CPS", "Rotation", "Velocity"};
+    private final String[] severities = {"LOW", "MEDIUM", "HIGH"};
+
+    public TestSimulator() {
+        super("Test Simulator", "Safe local simulation of detection events for GUI/logging tests.", Category.QA);
+        settings.add(auto);
+        settings.add(interval);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        if (!auto.get()) return;
+        ++tickCounter;
+        if (tickCounter >= interval.get() * 20.0) {
+            tickCounter = 0;
+            simulateRandom();
+        }
+    }
+
+    public void simulateRandom() {
+        String check = checks[random.nextInt(checks.length)];
+        String severity = severities[random.nextInt(severities.length)];
+        simulate(check, severity);
+    }
+
+    public void simulate(String check, String severity) {
+        Dashboard.tests.incrementAndGet();
+        if ("HIGH".equals(severity)) {
+            Dashboard.detections.incrementAndGet();
+        } else {
+            Dashboard.warnings.incrementAndGet();
+        }
+        String msg = String.format("[SIMULATION] Check: %s | Severity: %s | Result: Detection Triggered", check, severity);
+        LogManager.log(msg);
+    }
+
+    @Override
+    public String getDisplay() {
+        return auto.get() ? "Simulating..." : "";
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/qa/YLevelProbe.java`:
+
+```java
+package dev.anticheatqa.module.qa;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.block.entity.BarrelBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.block.entity.EnderChestBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.WorldChunk;
+
+/**
+ * QA probe: counts client-visible blocks / chests / entities strictly below Y = 0.
+ * Used to verify a server-side anti-cheat that strips or withholds world data below Y=0.
+ * Observation only — does not request extra chunks or bypass server logic.
+ */
+public class YLevelProbe extends Module {
+
+    public final NumberSetting scanRange = new NumberSetting("Scan Range", 24.0, 8.0, 64.0, 4.0);
+    public final BooleanSetting countOres = new BooleanSetting("Count Ores/Spawners", true);
+    public final BooleanSetting countChests = new BooleanSetting("Count Chests", true);
+    public final BooleanSetting countEntities = new BooleanSetting("Count Entities", true);
+    public final BooleanSetting countPlayers = new BooleanSetting("Include Players", true);
+    public final BooleanSetting countItems = new BooleanSetting("Include Items", false);
+
+    private int blockCount;
+    private int chestCount;
+    private int entityCount;
+    private int playerCount;
+    private int scanTicker;
+    private String lastDetail = "";
+
+    public YLevelProbe() {
+        super(
+                "Y-Level Probe",
+                "Counts client-visible blocks, chests and entities below Y=0. Use to verify server-side anti-cheat visibility rules.",
+                Category.QA
+        );
+        settings.add(scanRange);
+        settings.add(countOres);
+        settings.add(countChests);
+        settings.add(countEntities);
+        settings.add(countPlayers);
+        settings.add(countItems);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        try {
+            ++scanTicker;
+            // Throttle: full scan every 10 ticks (~0.5s)
+            if (scanTicker % 10 != 0) return;
+            if (client.world == null || client.player == null) {
+                blockCount = chestCount = entityCount = playerCount = 0;
+                lastDetail = "";
+                return;
+            }
+
+            int blocks = 0;
+            int chests = 0;
+            int entities = 0;
+            int players = 0;
+
+            int range = scanRange.get().intValue();
+            BlockPos playerPos = client.player.getBlockPos();
+
+            // --- Chests / barrels / ender chests below Y=0 in nearby chunks ---
+            if (countChests.get()) {
+                int chunkR = (range / 16) + 1;
+                ChunkPos playerChunk = new ChunkPos(playerPos);
+                for (int cx = -chunkR; cx <= chunkR; cx++) {
+                    for (int cz = -chunkR; cz <= chunkR; cz++) {
+                        WorldChunk chunk = client.world.getChunk(playerChunk.x + cx, playerChunk.z + cz);
+                        if (chunk == null) continue;
+                        for (BlockEntity be : chunk.getBlockEntities().values()) {
+                            if (!(be instanceof ChestBlockEntity
+                                    || be instanceof BarrelBlockEntity
+                                    || be instanceof EnderChestBlockEntity)) {
+                                continue;
+                            }
+                            BlockPos pos = be.getPos();
+                            if (pos.getY() >= 0) continue;
+                            if (!pos.isWithinDistance(playerPos, range)) continue;
+                            chests++;
+                        }
+                    }
+                }
+            }
+
+            // --- Interesting blocks (ores / spawners) below Y=0 ---
+            if (countOres.get()) {
+                int cx = playerPos.getX();
+                int cy = Math.min(playerPos.getY(), -1); // bias scan center into negative Y when possible
+                int cz = playerPos.getZ();
+                // Clamp vertical scan to Y < 0 only
+                int yMin = Math.max(client.world.getBottomY(), cy - range);
+                int yMax = Math.min(-1, cy + range);
+
+                for (int x = cx - range; x <= cx + range; x++) {
+                    for (int z = cz - range; z <= cz + range; z++) {
+                        for (int y = yMin; y <= yMax; y++) {
+                            BlockPos pos = new BlockPos(x, y, z);
+                            if (pos.getY() >= 0) continue;
+                            String id = client.world.getBlockState(pos).getBlock().getTranslationKey().toLowerCase();
+                            if (id.contains("diamond_ore")
+                                    || id.contains("emerald_ore")
+                                    || id.contains("gold_ore")
+                                    || id.contains("iron_ore")
+                                    || id.contains("coal_ore")
+                                    || id.contains("ancient_debris")
+                                    || id.contains("spawner")
+                                    || (id.contains("deepslate") && (id.contains("ore") || id.contains("debris")))) {
+                                blocks++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- Entities below Y=0 ---
+            if (countEntities.get()) {
+                for (Entity e : client.world.getEntities()) {
+                    if (e == client.player || !e.isAlive()) continue;
+                    if (e.getY() >= 0.0) continue;
+                    // Distance filter (horizontal + vertical)
+                    if (client.player.squaredDistanceTo(e) > (double) range * range) continue;
+
+                    if (e instanceof PlayerEntity) {
+                        if (countPlayers.get()) {
+                            players++;
+                            entities++;
+                        }
+                    } else if (e instanceof ItemEntity) {
+                        if (countItems.get()) {
+                            entities++;
+                        }
+                    } else if (e instanceof LivingEntity) {
+                        entities++;
+                    } else {
+                        // projectiles / other — count as entity for probe
+                        entities++;
+                    }
+                }
+            }
+
+            blockCount = blocks;
+            chestCount = chests;
+            entityCount = entities;
+            playerCount = players;
+            lastDetail = String.format("B:%d C:%d E:%d P:%d", blocks, chests, entities, players);
+        } catch (Throwable ignored) {
+            // Never crash the client from a QA probe
+        }
+    }
+
+    @Override
+    protected void onDisable() {
+        blockCount = chestCount = entityCount = playerCount = 0;
+        lastDetail = "";
+    }
+
+    @Override
+    public String getDisplay() {
+        if (!isEnabled()) return "";
+        // Clear signal for anti-cheat QA:
+        // 0 across the board under a working server-side strip → PASS for "no visibility below Y=0"
+        return String.format("Y<0 | Blocks:%d Chests:%d Ents:%d Players:%d",
+                blockCount, chestCount, entityCount, playerCount);
+    }
+
+    public int getBlockCount() { return blockCount; }
+    public int getChestCount() { return chestCount; }
+    public int getEntityCount() { return entityCount; }
+    public int getPlayerCount() { return playerCount; }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/BlockESP.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.block.BlockState;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class BlockESP extends Module {
+    public static List<BlockPos> positions = new CopyOnWriteArrayList<>();
+    private int count;
+    private int scanTicker;
+
+    public final NumberSetting range = new NumberSetting("Range", 12.0, 4.0, 32.0, 1.0);
+    public final BooleanSetting diamond = new BooleanSetting("Diamond Ore", true);
+    public final BooleanSetting emerald = new BooleanSetting("Emerald Ore", true);
+    public final BooleanSetting gold = new BooleanSetting("Gold Ore", true);
+    public final BooleanSetting iron = new BooleanSetting("Iron Ore", true);
+    public final BooleanSetting coal = new BooleanSetting("Coal Ore", true);
+    public final BooleanSetting ancient = new BooleanSetting("Ancient Debris", true);
+    public final BooleanSetting spawner = new BooleanSetting("Monster Spawner", true);
+
+    public BlockESP() {
+        super("Block ESP", "3D outlines for ores and monster spawners.", Category.VISUALS);
+        settings.add(range);
+        settings.add(diamond);
+        settings.add(emerald);
+        settings.add(gold);
+        settings.add(iron);
+        settings.add(coal);
+        settings.add(ancient);
+        settings.add(spawner);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        try {
+            ++scanTicker;
+            if (scanTicker % 20 != 0) return;
+            if (client.world == null || client.player == null) return;
+
+            positions.clear();
+            int r = range.get().intValue();
+            int cx = (int) client.player.getX();
+            int cy = (int) client.player.getY();
+            int cz = (int) client.player.getZ();
+            int n = 0;
+
+            for (int x = -r; x <= r; x++) {
+                for (int y = -r; y <= r; y++) {
+                    for (int z = -r; z <= r; z++) {
+                        BlockPos pos = new BlockPos(cx + x, cy + y, cz + z);
+                        BlockState state = client.world.getBlockState(pos);
+                        String id = state.getBlock().getTranslationKey().toLowerCase();
+                        boolean match = false;
+                        if (diamond.get() && id.contains("diamond_ore")) match = true;
+                        else if (emerald.get() && id.contains("emerald_ore")) match = true;
+                        else if (gold.get() && id.contains("gold_ore")) match = true;
+                        else if (iron.get() && id.contains("iron_ore")) match = true;
+                        else if (coal.get() && id.contains("coal_ore")) match = true;
+                        else if (ancient.get() && id.contains("ancient_debris")) match = true;
+                        else if (spawner.get() && id.contains("spawner")) match = true;
+                        if (match) {
+                            positions.add(pos.toImmutable());
+                            n++;
+                        }
+                    }
+                }
+            }
+            count = n;
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
+    protected void onDisable() {
+        positions.clear();
+        count = 0;
+    }
+
+    @Override
+    public String getDisplay() {
+        return "Blocks: " + count;
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/ChestESP.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.block.entity.BarrelBlockEntity;
+import net.minecraft.block.entity.EnderChestBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.WorldChunk;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class ChestESP extends Module {
+    public static List<BlockPos> positions = new CopyOnWriteArrayList<>();
+    private int count;
+    private int scanTicker;
+
+    public final NumberSetting range = new NumberSetting("Range", 32.0, 8.0, 64.0, 4.0);
+
+    public ChestESP() {
+        super("Chest ESP", "Highlights chests, barrels and ender chests.", Category.VISUALS);
+        settings.add(range);
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        try {
+            ++scanTicker;
+            if (scanTicker % 10 != 0) return;
+            if (client.world == null || client.player == null) return;
+
+            positions.clear();
+            int r = range.get().intValue();
+            BlockPos playerPos = client.player.getBlockPos();
+            int n = 0;
+
+            int chunkR = (r / 16) + 1;
+            ChunkPos playerChunk = new ChunkPos(playerPos);
+            for (int cx = -chunkR; cx <= chunkR; cx++) {
+                for (int cz = -chunkR; cz <= chunkR; cz++) {
+                    WorldChunk chunk = client.world.getChunk(playerChunk.x + cx, playerChunk.z + cz);
+                    if (chunk == null) continue;
+                    for (BlockEntity be : chunk.getBlockEntities().values()) {
+                        if (be instanceof ChestBlockEntity || be instanceof BarrelBlockEntity || be instanceof EnderChestBlockEntity) {
+                            BlockPos pos = be.getPos();
+                            if (pos.isWithinDistance(playerPos, r)) {
+                                positions.add(pos.toImmutable());
+                                n++;
+                            }
+                        }
+                    }
+                }
+            }
+            count = n;
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
+    protected void onDisable() {
+        positions.clear();
+        count = 0;
+    }
+
+    @Override
+    public String getDisplay() {
+        return "Chests: " + count;
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/EntityESP.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+
+public class EntityESP extends Module {
+    /** When true, WorldEspRenderer draws 3D boxes around glowing entities. */
+    public static boolean boxesEnabled;
+
+    private int count;
+
+    public final BooleanSetting players = new BooleanSetting("Players", true);
+    public final BooleanSetting mobs = new BooleanSetting("Mobs", true);
+    public final BooleanSetting animals = new BooleanSetting("Animals", false);
+    public final BooleanSetting items = new BooleanSetting("Items", false);
+    public final BooleanSetting projectiles = new BooleanSetting("Projectiles", false);
+    public final BooleanSetting boxes = new BooleanSetting("3D Boxes", true);
+
+    public EntityESP() {
+        super("Entity ESP", "Glow + optional 3D box outlines on entities.", Category.VISUALS);
+        settings.add(players);
+        settings.add(mobs);
+        settings.add(animals);
+        settings.add(items);
+        settings.add(projectiles);
+        settings.add(boxes);
+    }
+
+    @Override
+    protected void onEnable() {
+        boxesEnabled = boxes.get();
+    }
+
+    @Override
+    protected void onDisable() {
+        boxesEnabled = false;
+        try {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.world != null) {
+                for (Entity e : client.world.getEntities()) {
+                    e.setGlowing(false);
+                }
+            }
+        } catch (Throwable ignored) {}
+        count = 0;
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        try {
+            if (client.world == null || client.player == null) return;
+            boxesEnabled = isEnabled() && boxes.get();
+            int n = 0;
+            for (Entity e : client.world.getEntities()) {
+                if (e == client.player) continue;
+                boolean shouldGlow = false;
+                if (players.get() && e instanceof PlayerEntity) shouldGlow = true;
+                else if (mobs.get() && e instanceof MobEntity && !(e instanceof AnimalEntity)) shouldGlow = true;
+                else if (animals.get() && e instanceof AnimalEntity) shouldGlow = true;
+                else if (items.get() && e instanceof ItemEntity) shouldGlow = true;
+                else if (projectiles.get() && e instanceof ProjectileEntity) shouldGlow = true;
+
+                e.setGlowing(shouldGlow);
+                if (shouldGlow) n++;
+            }
+            count = n;
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
+    public String getDisplay() {
+        return "ESP Entities: " + count;
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/FreeCam.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.math.Vec3d;
+
+public class FreeCam extends Module {
+    public static boolean active;
+    public static double camX, camY, camZ;
+    public static float camYaw, camPitch;
+
+    public final NumberSetting speed = new NumberSetting("Speed", 1.0, 0.1, 5.0, 0.1);
+
+    public static double savedX, savedY, savedZ;
+    public static boolean hasSaved;
+
+    public FreeCam() {
+        super("FreeCam", "Detached free camera for QA inspection. WASD+Jump/Sneak moves camera only.", Category.VISUALS);
+        settings.add(speed);
+    }
+
+    @Override
+    protected void onEnable() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+        ClientPlayerEntity p = client.player;
+        Vec3d eye = p.getEyePos();
+        camX = eye.x;
+        camY = eye.y;
+        camZ = eye.z;
+        camYaw = p.getYaw();
+        camPitch = p.getPitch();
+        savedX = p.getX();
+        savedY = p.getY();
+        savedZ = p.getZ();
+        hasSaved = true;
+        active = true;
+        p.setVelocity(Vec3d.ZERO);
+    }
+
+    @Override
+    protected void onDisable() {
+        active = false;
+        hasSaved = false;
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        if (client.player == null || !active) return;
+
+        // Force body to stay at saved position every tick
+        client.player.setVelocity(Vec3d.ZERO);
+        if (hasSaved) {
+            client.player.setPosition(savedX, savedY, savedZ);
+            client.player.setVelocity(Vec3d.ZERO);
+        }
+
+        camYaw = client.player.getYaw();
+        camPitch = client.player.getPitch();
+
+        double sp = speed.get();
+        double yawRad = Math.toRadians(camYaw);
+        var opts = client.options;
+
+        if (opts.forwardKey.isPressed()) {
+            camX += -Math.sin(yawRad) * sp;
+            camZ += Math.cos(yawRad) * sp;
+        }
+        if (opts.backKey.isPressed()) {
+            camX += Math.sin(yawRad) * sp;
+            camZ += -Math.cos(yawRad) * sp;
+        }
+        if (opts.leftKey.isPressed()) {
+            camX += Math.cos(yawRad) * sp;
+            camZ += Math.sin(yawRad) * sp;
+        }
+        if (opts.rightKey.isPressed()) {
+            camX += -Math.cos(yawRad) * sp;
+            camZ += -Math.sin(yawRad) * sp;
+        }
+        if (opts.jumpKey.isPressed()) camY += sp;
+        if (opts.sneakKey.isPressed()) camY -= sp;
+    }
+
+    @Override
+    public String getDisplay() {
+        return active ? "FreeCam ON" : "";
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/Fullbright.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.SimpleOption;
+
+public class Fullbright extends Module {
+    public final NumberSetting gamma = new NumberSetting("Gamma", 16.0, 1.0, 16.0, 0.5);
+    private double previousGamma = 1.0;
+
+    public Fullbright() {
+        super("Fullbright", "Client-side brightness (gamma).", Category.VISUALS);
+        settings.add(gamma);
+    }
+
+    @Override
+    protected void onEnable() {
+        try {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.options == null) return;
+            SimpleOption<Double> opt = client.options.getGamma();
+            previousGamma = opt.getValue();
+            opt.setValue(gamma.get());
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
+    protected void onDisable() {
+        try {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.options == null) return;
+            client.options.getGamma().setValue(previousGamma);
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
+    public void onTick(MinecraftClient client) {
+        try {
+            if (client.options == null) return;
+            client.options.getGamma().setValue(gamma.get());
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
+    public String getDisplay() {
+        return "Fullbright";
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/Nametags.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+
+public class Nametags extends Module {
+    public static boolean active;
+
+    public final BooleanSetting showHealth = new BooleanSetting("Show Health", true);
+    public final BooleanSetting showDistance = new BooleanSetting("Show Distance", true);
+
+    public Nametags() {
+        super("Nametags", "Forces entity nameplates + extra info on HUD.", Category.VISUALS);
+        settings.add(showHealth);
+        settings.add(showDistance);
+    }
+
+    @Override
+    protected void onEnable() { active = true; }
+
+    @Override
+    protected void onDisable() { active = false; }
+
+    @Override
+    public void onTick(MinecraftClient client) {}
+
+    @Override
+    public String getDisplay() {
+        return active ? "Nametags" : "";
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/module/visuals/Tracers.java`:
+
+```java
+package dev.anticheatqa.module.visuals;
+
+import dev.anticheatqa.module.Category;
+import dev.anticheatqa.module.Module;
+import net.minecraft.client.MinecraftClient;
+
+public class Tracers extends Module {
+    public static boolean active;
+
+    public final BooleanSetting players = new BooleanSetting("Players", true);
+    public final BooleanSetting mobs = new BooleanSetting("Mobs", false);
+
+    public Tracers() {
+        super("Tracers", "2D screen-space markers toward entities (HUD).", Category.VISUALS);
+        settings.add(players);
+        settings.add(mobs);
+    }
+
+    @Override
+    protected void onEnable() { active = true; }
+
+    @Override
+    protected void onDisable() { active = false; }
+
+    @Override
+    public void onTick(MinecraftClient client) {}
+
+    @Override
+    public String getDisplay() {
+        return active ? "Tracers" : "";
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/render/HudRenderer.java`:
+
+```java
+package dev.anticheatqa.render;
+
+import dev.anticheatqa.AntiCheatQA;
+import dev.anticheatqa.module.Module;
+import dev.anticheatqa.module.visuals.BlockESP;
+import dev.anticheatqa.module.visuals.ChestESP;
+import dev.anticheatqa.module.visuals.Nametags;
+import dev.anticheatqa.module.visuals.Tracers;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+
+public class HudRenderer {
+
+    public void render(DrawContext context, float tickDelta) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null || client.world == null) return;
+        if (client.options.hudHidden) return;
+
+        try {
+            int y = 4;
+            for (Module m : AntiCheatQA.INSTANCE.getModuleManager().getModules()) {
+                if (!m.isEnabled()) continue;
+                String d = m.getDisplay();
+                if (d == null || d.isEmpty()) d = m.getName();
+                context.drawText(client.textRenderer, d, 5, y + 1, 0x88000000, false);
+                context.drawText(client.textRenderer, d, 4, y, 0xFF55FF55, false);
+                y += 11;
+            }
+
+            int cx = client.getWindow().getScaledWidth() / 2;
+            int cy = client.getWindow().getScaledHeight() / 2;
+            float playerYaw = client.player.getYaw();
+
+            // Chest ESP tracers – always on HUD so direction is visible through walls
+            if (ChestESP.positions != null && !ChestESP.positions.isEmpty()) {
+                for (BlockPos pos : ChestESP.positions) {
+                    double dx = pos.getX() + 0.5 - client.player.getX();
+                    double dz = pos.getZ() + 0.5 - client.player.getZ();
+                    double dist = Math.sqrt(dx * dx + dz * dz);
+                    double angle = Math.toDegrees(Math.atan2(dx, dz)) - playerYaw;
+                    double rad = Math.toRadians(angle);
+                    int reach = (int) Math.min(90, 40 + dist * 2);
+                    int mx = cx + (int) (Math.sin(rad) * reach);
+                    int my = cy + (int) (-Math.cos(rad) * reach);
+                    drawLine(context, cx, cy, mx, my, 0xFFFF8800);
+                    context.fill(mx - 4, my - 4, mx + 4, my + 4, 0xFFFFAA00);
+                    context.fill(mx - 2, my - 2, mx + 2, my + 2, 0xFFFF5500);
+                }
+            }
+
+            // Block ESP markers on HUD
+            if (BlockESP.positions != null && !BlockESP.positions.isEmpty()) {
+                for (BlockPos pos : BlockESP.positions) {
+                    double dx = pos.getX() + 0.5 - client.player.getX();
+                    double dz = pos.getZ() + 0.5 - client.player.getZ();
+                    double angle = Math.toDegrees(Math.atan2(dx, dz)) - playerYaw;
+                    double rad = Math.toRadians(angle);
+                    int mx = cx + (int) (Math.sin(rad) * 55);
+                    int my = cy + (int) (-Math.cos(rad) * 55);
+                    String id = client.world.getBlockState(pos).getBlock().getTranslationKey().toLowerCase();
+                    int color = id.contains("spawner") ? 0xFFFF33FF : 0xFF55FFFF;
+                    context.fill(mx - 3, my - 3, mx + 3, my + 3, color);
+                }
+            }
+
+            boolean tracersOn = Tracers.active
+                    || (AntiCheatQA.INSTANCE.getModuleManager().getModule("Tracers") != null
+                    && AntiCheatQA.INSTANCE.getModuleManager().getModule("Tracers").isEnabled());
+
+            if (tracersOn) {
+                for (Entity e : client.world.getEntities()) {
+                    if (e == client.player || !e.isAlive()) continue;
+                    double dx = e.getX() - client.player.getX();
+                    double dz = e.getZ() - client.player.getZ();
+                    double dist = Math.sqrt(dx * dx + dz * dz);
+                    if (dist > 64) continue;
+                    double angle = Math.toDegrees(Math.atan2(dx, dz)) - playerYaw;
+                    double rad = Math.toRadians(angle);
+                    int mx = cx + (int) (Math.sin(rad) * 70);
+                    int my = cy + (int) (-Math.cos(rad) * 70);
+                    int color = e instanceof PlayerEntity ? 0xFFFF5555 : 0xFF55FF55;
+                    context.fill(mx - 3, my - 3, mx + 3, my + 3, color);
+                }
+            }
+
+            if (Nametags.active) {
+                int ny = client.getWindow().getScaledHeight() / 2 - 80;
+                for (Entity e : client.world.getEntities()) {
+                    if (!(e instanceof LivingEntity living) || e == client.player) continue;
+                    double dist = client.player.distanceTo(e);
+                    if (dist > 48) continue;
+                    String label = e.getName().getString()
+                            + String.format(" %.0fHP %.1fm", living.getHealth(), dist);
+                    context.drawText(client.textRenderer, label, 4, ny, 0xFFFFFF, true);
+                    ny += 10;
+                    if (ny > client.getWindow().getScaledHeight() / 2 + 60) break;
+                }
+            }
+        } catch (Throwable t) {
+            AntiCheatQA.LOGGER.error("HUD render error", t);
+        }
+    }
+
+    private static void drawLine(DrawContext context, int x0, int y0, int x1, int y1, int color) {
+        int dx = Math.abs(x1 - x0);
+        int dy = Math.abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+        int err = dx - dy;
+        int x = x0;
+        int y = y0;
+        while (true) {
+            context.fill(x, y, x + 1, y + 1, color);
+            if (x == x1 && y == y1) break;
+            int e2 = 2 * err;
+            if (e2 > -dy) { err -= dy; x += sx; }
+            if (e2 < dx) { err += dx; y += sy; }
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/render/WorldEspRenderer.java`:
+
+```java
+package dev.anticheatqa.render;
+
+import dev.anticheatqa.module.visuals.BlockESP;
+import dev.anticheatqa.module.visuals.ChestESP;
+import dev.anticheatqa.module.visuals.EntityESP;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShapes;
+
+/**
+ * Stable 3D ESP outlines (VertexRendering.drawOutline).
+ * Note: vanilla LINES layer uses depth test; HUD tracers complement for through-wall awareness.
+ */
+public final class WorldEspRenderer {
+
+    private static final float LINE_W = 2.5f;
+
+    private WorldEspRenderer() {}
+
+    public static void render(WorldRenderContext context) {
+        try {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.player == null || client.world == null) return;
+
+            MatrixStack matrices = context.matrices();
+            VertexConsumerProvider consumers = context.consumers();
+            if (matrices == null || consumers == null) return;
+
+            Vec3d cam = context.worldState().cameraRenderState.pos;
+            VertexConsumer lines = consumers.getBuffer(RenderLayers.LINES);
+
+            matrices.push();
+
+            // Chest ESP – orange boxes
+            if (ChestESP.positions != null && !ChestESP.positions.isEmpty()) {
+                int orange = 0xFFFF8C00;
+                for (BlockPos pos : ChestESP.positions) {
+                    double x = pos.getX() - cam.x;
+                    double y = pos.getY() - cam.y;
+                    double z = pos.getZ() - cam.z;
+                    VertexRendering.drawOutline(matrices, lines, VoxelShapes.fullCube(), x, y, z, orange, LINE_W);
+                }
+            }
+
+            // Block ESP – cyan ores / magenta spawners
+            if (BlockESP.positions != null && !BlockESP.positions.isEmpty()) {
+                for (BlockPos pos : BlockESP.positions) {
+                    double x = pos.getX() - cam.x;
+                    double y = pos.getY() - cam.y;
+                    double z = pos.getZ() - cam.z;
+                    String id = client.world.getBlockState(pos).getBlock().getTranslationKey().toLowerCase();
+                    int color = id.contains("spawner") ? 0xFFFF33FF : 0xFF33FFFF;
+                    VertexRendering.drawOutline(matrices, lines, VoxelShapes.fullCube(), x, y, z, color, LINE_W);
+                }
+            }
+
+            // Entity ESP – boxes on glowing entities
+            if (EntityESP.boxesEnabled) {
+                for (Entity e : client.world.getEntities()) {
+                    if (e == client.player || !e.isAlive() || !e.isGlowing()) continue;
+                    Box box = e.getBoundingBox().expand(0.05);
+                    int color = e instanceof PlayerEntity ? 0xFFFF4040 : 0xFF40FF40;
+                    double cx = (box.minX + box.maxX) * 0.5 - cam.x - 0.5;
+                    double cy = box.minY - cam.y;
+                    double cz = (box.minZ + box.maxZ) * 0.5 - cam.z - 0.5;
+                    VertexRendering.drawOutline(matrices, lines, VoxelShapes.fullCube(), cx, cy, cz, color, LINE_W);
+                }
+            }
+
+            matrices.pop();
+        } catch (Throwable ignored) {
+        }
+    }
+}
+
+```
+
+`src/main/java/dev/anticheatqa/util/LogManager.java`:
+
+```java
+package dev.anticheatqa.util;
+
+import dev.anticheatqa.AntiCheatQA;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class LogManager {
+    private static final List<String> entries = Collections.synchronizedList(new ArrayList<>());
+    private static final Path LOG_PATH = Paths.get("config", "anticheat-qa-log.txt");
+    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    public static void log(String message) {
+        String line = "[" + LocalTime.now().format(FMT) + "] " + message;
+        entries.add(line);
+        if (entries.size() > 500) entries.remove(0);
+        AntiCheatQA.LOGGER.info(line);
+        try {
+            Files.createDirectories(LOG_PATH.getParent());
+            Files.writeString(LOG_PATH, line + System.lineSeparator(),
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException ignored) {}
+    }
+
+    public static List<String> getEntries() {
+        return new ArrayList<>(entries);
+    }
+
+    public static void clear() {
+        entries.clear();
+    }
+}
+
+```
+
+`src/main/resources/anticheat-qa.mixins.json`:
+
+```json
+{
+  "required": true,
+  "package": "dev.anticheatqa.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CameraMixin",
+    "ClientPlayerEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+
+```
+
+`src/main/resources/assets/anticheat-qa/lang/en_us.json`:
+
+```json
+{
+  "key.categories.anticheat-qa": "AntiCheat QA",
+  "key.anticheat-qa.open_gui": "Open ClickGUI"
+}
+
+```
+
+`src/main/resources/fabric.mod.json`:
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "anticheat-qa",
+  "version": "${version}",
+  "name": "AntiCheat QA",
+  "description": "Client-side Anti-Cheat QA / Developer Client. Observes, visualizes, logs and simulates. No cheats, no bypasses.",
+  "authors": ["AntiCheatQA"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.anticheatqa.AntiCheatQA"
+    ]
+  },
+  "mixins": [
+    "anticheat-qa.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
+
+```
