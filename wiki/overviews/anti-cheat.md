@@ -814,7 +814,8 @@ sources:
   - wiki/sources/descriptions/LAC-Japan__IDA_Plugin_AntiDebugSeeker.md
   - wiki/sources/descriptions/LaihoE__DLAC.md
   - wiki/sources/descriptions/NHCM-dev__BytecodeVM.md
-updated: 2026-08-25
+  - wiki/sources/descriptions/DownWithUp__CallMon.md
+updated: 2026-08-26
 confidence: high
 ---
 
@@ -966,6 +967,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[aurum-re]] — Aurum RE Ricochet anti-cheat research (reverse engineering + driver development; explore anticheat:ricochet) (source: wiki/sources/descriptions/gmh5225__AurumRE.md)
 - [[ricochet-disabler]] — disable/bypass Ricochet kernel driver and user-mode monitoring for COD AC architecture research (source: wiki/sources/descriptions/gmh5225__ricochet-disabler.md)
 - [[hidden-syscall-monitoring]] — C/C++ monitor of hidden syscalls from Call of Duty anticheat (hooking / memory analysis) (source: wiki/sources/descriptions/ssnob__hidden_syscall_monitoring.md)
+- [[callmon]] — Windows kernel-driver syscall monitor via **PsAltSystemCallHandlers** (DownWithUp; per-process intercept; trap frame + stack telemetry through named pipe; C + optional Rust driver; process-level API monitoring / AC research; AltSystemCallHandlers) (source: wiki/sources/descriptions/DownWithUp__CallMon.md)
 - [[badlion-logger]] — KiFilterFiberContext PoC kernel logger for black-box AC driver observation (IAT hooks on image-load callbacks; VMProtect-virtualized target module; C++; driver-level monitoring research) (source: wiki/sources/descriptions/KiFilterFiberContext__BadlionLogger.md)
 - [[kn-win32-api-monitor]] — Tauri 2 Win32 API trace workstation (IAT hooks; ~30k APIs; `.knapm` replay; security/RE/anti-cheat research; kernullist) (source: wiki/sources/descriptions/kernullist__KnWin32ApiMonitor.md)
 - [[syscall-detect]] — C PoC detecting direct/indirect syscalls via Instrumentation Callback or thread stack inspection (flags custom stubs vs ntdll) (source: wiki/sources/descriptions/jackullrich__syscall-detect.md)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DownWithUp/CallMon`: entity [[callmon]] (DownWithUp; Windows kernel-driver + user-mode GUI syscall monitor; **PsAltSystemCallHandlers** per-process intercept; trap frame + stack telemetry via named pipe; C + optional Rust driver; kernel telemetry / syscall behavior analysis / AC process-level API monitoring research; AltSystemCallHandlers); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[etw-syscall-monitor]], [[instrumentation-callback-syscall-logger]], [[hidden-syscall-monitoring]], [[kernelmon]], and [[syscall-detect]].
+
 - **2026-08-26** — ingest `description:Dr-TSNG/ApplistDetector`: entity [[applist-detector]] (Dr-TSNG; Android detection library + demo; Kotlin + native C++; package inspection, FS artifacts, syscall file probes, Xposed status, dual/work-profile anomalies; mobile anti-cheat / root-detection / app-integrity research); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[root-app-detector]], [[advanced-root-checker]], [[magisk-detection]], and [[magisk]].
 
 - **2026-08-26** — ingest `description:Dr-TSNG/ZygiskOnKernelSU`: entity [[zygisk-on-kernelsu]] (Dr-TSNG; standalone Zygisk runtime; Zygisk API compatibility for KernelSU; can replace Magisk built-in Zygisk; KernelSU/Magisk/APatch platform requirements and compatibility notes; advanced modding / Zygisk module support outside default Magisk stack); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[kernelsu]], [[rezygisk]], and [[magisk]].
