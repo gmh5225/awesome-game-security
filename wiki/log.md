@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:vs-sr-dev/pc-wackywheels-doc`: entity [[pc-wackywheels-doc]] (vs-sr-dev; Wacky Wheels 1994 DOS kart racer; WACKY.DAT archive, track/sprite formats, pseudo-3D floor-renderer fixed-point LUTs, audio/save/config; Python 3 + numpy/Pillow extractors; Skunny Kart cross-ref; archaeological retail-build RE; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[awesome-game-file-format-reversing]], [[batteryshark-github-io]], and [[devilution]].
+
 - **2026-08-26** — ingest `readme:categories`: Cheat ~2753 (+1; vs-sr-dev/pc-wackywheels-doc Wacky Wheels DOS archive/sprite/pseudo-3D LUT RE doc in Cheat > RE Tools) / Anti Cheat ~693 (+1; u8012146108-bit/anticheat-qa Fabric 1.21 MC AC QA client mod in Stress Testing; other major section counts stable); entities [[pc-wackywheels-doc]] and [[anticheat-qa]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-26** — ingest `description:ConWan30/QorTroller`: entity [[qortroller]] (ConWan30; hardware-rooted controller attestation; VAPI protocol; DualShock bridge; PoEP presence challenges; Circom/Groth16 ZK verified-human proofs; Solidity session receipts; Python/Rust/firmware stack; game security / anti-cheat research; README Cryptographic console anti-cheat); cited on [[overviews/anti-cheat]] and [[concepts/hardware-input-injection]]; cross-linked [[ai-aimbot-detection]] and [[usbmon]].

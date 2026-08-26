@@ -2514,7 +2514,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [patch-finder](entities/patch-finder.md) — IDA plugin: detect in-memory patches/hooks via executable-region vs on-disk PE byte compare (custom PE parser; highlight diffs in disasm; cheat / IDA Plugins)
 - [patchguard-2023](entities/patchguard-2023.md) — 2023 PatchGuard internals research (timer verification, context encryption, protected-structure list, recovery routines; gmh5225; cheat / PatchGuard-related)
 - [PatternSleuth](entities/patternsleuth.md) — Rust SIMD pattern/signature scan (file + process; Unreal address scanner)
-- [PC Wacky Wheels Doc](entities/pc-wackywheels-doc.md) — Wacky Wheels (1994 DOS) RE documentation (WACKY.DAT archive, track/sprite formats, pseudo-3D LUTs; Python extractors; vs-sr-dev; Cheat / RE Tools)
+- [PC Wacky Wheels Doc](entities/pc-wackywheels-doc.md) — Wacky Wheels (1994 DOS) retail-data RE doc (WACKY.DAT archive, track/sprite formats, pseudo-3D LUTs; Python extractors; Skunny Kart cross-ref; vs-sr-dev; Cheat / RE Tools)
 - [pbcharactermovement](entities/pbcharactermovement.md) — UE4 C++ character movement plugin recreating HL2/Source-style FPS movement (bunnyhopping, surfing, strafe boosting, wall strafing, advanced crouch; source + prebuilt binaries; ProjectBorealis; Game Engine / UE4 Game)
 - [pc_ginkgo](entities/pc-ginkgo.md) — Redmi Note 8/8T (ginkgo) Android kernel + KernelSU (cheat / Android Kernel Source)
 - [pedigest](entities/pedigest.md) — C PE Authenticode digest library (hash-exclusion; BCrypt SHA-*; kernel ksecdd + usermode; WIN_CERTIFICATE parse; Anti Cheat → Sign Tools)
