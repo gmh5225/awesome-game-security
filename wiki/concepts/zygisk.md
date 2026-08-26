@@ -9,9 +9,10 @@ sources:
   - wiki/sources/descriptions/fedes1to__Zygisk-ImGui-Menu.md
   - wiki/sources/descriptions/zensu357__ksurusda.md
   - wiki/sources/descriptions/PerformanC__ReZygisk.md
+  - wiki/sources/descriptions/Dr-TSNG__ZygiskOnKernelSU.md
   - wiki/sources/descriptions/PShocker__Zygisk-MagiskHide.md
   - wiki/sources/descriptions/MhmRdd__NoHello.md
-updated: 2026-08-23
+updated: 2026-08-26
 confidence: medium
 ---
 
@@ -35,6 +36,7 @@ Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList /
 ## Standalone runtimes
 
 - **[[rezygisk]]** — open-source C reimplementation of the Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging, and operational tooling for transparent Zygisk-compatible injection. (source: wiki/sources/descriptions/PerformanC__ReZygisk.md)
+- **[[zygisk-on-kernelsu]]** — standalone Zygisk runtime with API compatibility for KernelSU; can replace Magisk built-in Zygisk; documents KernelSU/Magisk/APatch requirements and compatibility notes. (source: wiki/sources/descriptions/Dr-TSNG__ZygiskOnKernelSU.md)
 
 ## Game-security uses
 
@@ -47,4 +49,4 @@ Pair with [[research-rigor]] when generalizing injection timing across OEM/Andro
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
