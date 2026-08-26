@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `readme:categories`: Cheat ~2753 (+1; vs-sr-dev/pc-wackywheels-doc Wacky Wheels DOS archive/sprite/pseudo-3D LUT RE doc in Cheat > RE Tools) / Anti Cheat ~693 (+1; u8012146108-bit/anticheat-qa Fabric 1.21 MC AC QA client mod in Stress Testing; other major section counts stable); entities [[pc-wackywheels-doc]] and [[anticheat-qa]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-26** — ingest `description:ConWan30/QorTroller`: entity [[qortroller]] (ConWan30; hardware-rooted controller attestation; VAPI protocol; DualShock bridge; PoEP presence challenges; Circom/Groth16 ZK verified-human proofs; Solidity session receipts; Python/Rust/firmware stack; game security / anti-cheat research; README Cryptographic console anti-cheat); cited on [[overviews/anti-cheat]] and [[concepts/hardware-input-injection]]; cross-linked [[ai-aimbot-detection]] and [[usbmon]].
 
 - **2026-08-26** — ingest `description:ContionMig/LSASS-Usermode-Bypass`: entity [[lsass-usermode-bypass]] (ContionMig; C++ user-mode bypass demo; reuse LSASS process handles for memory access without kernel-driver load; stability-risk notes on sensitive-process interaction; game anti-cheat bypass tradeoff research; README Elevating Handle By LSASS); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[dumpy]], [[lsass-dump-that-lsass]], [[nobastian-v2]], and [[handle-ripper]].
