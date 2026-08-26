@@ -2783,6 +2783,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ring Reaper](entities/ring-reaper.md) — Linux post-exploitation agent (MatheuZSecurity; C + Python control server; io_uring async I/O replaces traditional read/write/send/receive syscalls; file transfer, process/user enum, network inspection, session control; EDR evasion research)
 - [Riru-MomoHider](entities/riru-momo-hider.md) — Riru Zygote-injection Magisk root-hide module (syscall + Java API hooks; mount spoof, file hide, property-query block; canyie; Cheat / Magisk)
 - [ritz-amazing-fortnite-internal](entities/ritz-amazing-fortnite-internal.md) — Fortnite internal: from-scratch hook + x64 injector (cheat / game:fortnite)
+- [ritz-amazing-fortnite-internal-updated](entities/ritz-amazing-fortnite-internal-updated.md) — Ritz-lineage Fortnite internal base (DontCry361x; UE object access; aim/ESP menu; offset helpers + call spoofing + weapon hooks; [Internal])
 - [RIVER](entities/river.md) — Bitdefender dynamic binary analysis framework (ELF/PE loader; external mapping; native import resolution; x86 runtime instrumentation; cheat / DBI)
 - [RobloxCheats](entities/roblox-cheats.md) — macOS Roblox dylib injector (Mach VM / shared-memory IPC; internal+external ESP; offset finder)
 - [RookieAI_yolov8](entities/rookieai-yolov8.md) — Passer1072 YOLOv8 Ultralytics FPS aim-assist (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
