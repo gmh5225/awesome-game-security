@@ -1754,6 +1754,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [integrity-experiments](entities/integrity-experiments.md) — header-only C/C++ memory-integrity experiment corpus (gmh5225; Anti Cheat → Detection:Memory Integrity)
 - [integrity](entities/integrity.md) — header-only C PE section checksum library (non-writable baseline hashes, SSE4.2 CRC32, compile-time algorithm config; tamper detection / AC hardening; afulsamet; Detection:Memory Integrity)
 - [inline-syscall](entities/inline-syscall.md) — header-only C++ inline direct syscall x64 + x86/x64 wrappers (JustasMasiulis / gmh5225; AC Compile Time; anti-hooking)
+- [integrated-kernel-module](entities/integrated-kernel-module.md) — Dispa1r Android ARM64 lsdriver LKM + wxshadow + Zygisk rfrida_zygisk; PTE-remap R/W, stealth breakpoints, syscall monitor, virtual touch/gyro/GNSS; ptrace-less Frida agent; game RE
 - [IPAPatch](entities/ipapatch.md) — patch iOS apps without jailbreak (C/C++/ObjC; cheat / IOS jailbreak)
 - [irql](entities/irql.md) — Rust compile-time IRQL safety / pool Box·Vec (Windows KM drivers)
 

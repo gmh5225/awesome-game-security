@@ -12,6 +12,7 @@ sources:
   - wiki/sources/descriptions/Dr-TSNG__ZygiskOnKernelSU.md
   - wiki/sources/descriptions/PShocker__Zygisk-MagiskHide.md
   - wiki/sources/descriptions/MhmRdd__NoHello.md
+  - wiki/sources/descriptions/Dispa1r__Integrated_kernel_module.md
 updated: 2026-08-26
 confidence: medium
 ---
@@ -43,10 +44,11 @@ Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList /
 - **DEX/metadata extraction** — [[zygisk-dump-dex]] hooks `libdexfile.so` on Android 14/15.
 - **Overlay menus** — [[zygisk-imgui-menu]] (fedes1to; ImGui + cURL; `hook.cpp`; cheat / render-draw) (source: wiki/sources/descriptions/fedes1to__Zygisk-ImGui-Menu.md); in-dev [[zygisk-imgui-mod-menu]] and hobby [[zygisk-imgui-modmenu]]; complements non-Zygisk GLES templates ([[imgui-native-modmenu]], [[imgui-unity]]).
 - **Stealth Frida gadget** — [[ksurusda]] (Zygisk `postAppSpecialize`; Rusda anti-detection Frida kernel; library remapping, ptrace/startup anti-debug evasion; WebUI/JSON; TCP listen + offline script modes; KernelSU/Magisk/APatch). (source: wiki/sources/descriptions/zensu357__ksurusda.md)
+- **Kernel + Zygisk RE stack** — [[integrated-kernel-module]] (Dispa1r; lsdriver LKM + rfrida_zygisk; PTE-remap memory R/W, wxshadow W^X shadow-page stealth breakpoints, ptrace-less Frida agent via anonymous-mmap ELF linker; virtual touch/gyro/GNSS; rooted Android game RE). (source: wiki/sources/descriptions/Dispa1r__Integrated_kernel_module.md)
 - **Conflict management** — managed-instrumentation workflows may disable conflicting Zygisk modules, reboot for analysis, then restore (source: wiki/sources/skills/mobile-security.md).
 
 Pair with [[research-rigor]] when generalizing injection timing across OEM/Android versions.
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[integrated-kernel-module]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
