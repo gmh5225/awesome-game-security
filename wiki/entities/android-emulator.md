@@ -12,7 +12,7 @@ confidence: low
 
 Android emulator project centered on **emulation** for mobile-platform and Android emulator researchers. (source: wiki/sources/descriptions/jwmcglynn__android-emulator.md)
 
-Sits in the README `Android Emulator` lane beside QEMU research hosts such as [[qemu-gvm]], runtime emulator root via [[aeroot]], AVD Magisk/root via [[rootavd]], and Snapdragon/Gunyah stacks like [[gunyah-hypervisor]]—oriented toward emulator internals rather than anti-emulator detection ([[anti-emulator]], [[android-emulator-detection]]).
+Sits in the README `Android Emulator` lane beside QEMU research hosts such as [[qemu-gvm]], on-device Snapdragon VM manager [[droidvm]], runtime emulator root via [[aeroot]], AVD Magisk/root via [[rootavd]], and Snapdragon/Gunyah stacks like [[gunyah-hypervisor]]—oriented toward emulator internals rather than anti-emulator detection ([[anti-emulator]], [[android-emulator-detection]]).
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the README `Android Emulator` lane beside QEMU research hosts such as [[
 
 ## Related
 
-[[qemu-gvm]] · [[aeroot]] · [[rootavd]] · [[gunyah-hypervisor]] · [[anti-emulator]] · [[android-emulator-detection]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[qemu-gvm]] · [[droidvm]] · [[aeroot]] · [[rootavd]] · [[gunyah-hypervisor]] · [[anti-emulator]] · [[android-emulator-detection]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

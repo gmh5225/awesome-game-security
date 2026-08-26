@@ -97,6 +97,7 @@ sources:
   - wiki/sources/descriptions/tteck__Proxmox.md
   - wiki/sources/descriptions/tenclass__mvisor.md
   - wiki/sources/descriptions/quic__gunyah-hypervisor.md
+  - wiki/sources/descriptions/Droid-VM__DroidVM.md
   - wiki/sources/descriptions/qemu-gvm__qemu-gvm.md
   - wiki/sources/descriptions/Qemu-Gang__Escape-from-TuxKov.md
   - wiki/sources/descriptions/jwmcglynn__android-emulator.md
@@ -1675,7 +1676,7 @@ sources:
   - wiki/sources/descriptions/HexRaysSA__ida-claude-code-plugins.md
   - wiki/sources/descriptions/Gezine__BD-UN-JB.md
   - wiki/sources/descriptions/GLX-ILLUSION__valorant-offsets-autoupdater.md
-updated: 2026-08-25
+updated: 2026-08-26
 confidence: high
 ---
 
@@ -2540,6 +2541,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - C++ remake [[mvisor]] (kernel-level + rendering/audio systems) also sits in the `Cheat > QEMU/KVM/PVE/VBOX` research lane. (source: wiki/sources/descriptions/tenclass__mvisor.md)
 - WSL2 networking lab work via [[docker-win]] (networking-centric WSL2 host plumbing for cheat / QEMU/KVM/PVE/VBOX researchers) also sits in that research-host lane. (source: wiki/sources/descriptions/k3v1n1990s__docker-win.md)
 - ARM64 Type-1 reference HV [[gunyah-hypervisor]] (trusted/dependent VM hosting) also sits in that QEMU/KVM/PVE/VBOX research lane. (source: wiki/sources/descriptions/quic__gunyah-hypervisor.md)
+- On-device Snapdragon VM host [[droidvm]] (QEMU/KVM + Gunyah; ARM64/x86_64 guests; VNC/console; README Android Emulator lane) complements that stack for mobile hypervisor research. (source: wiki/sources/descriptions/Droid-VM__DroidVM.md)
 - AMD/Intel QEMU research host [[qemu-gvm]] (mobile / Android emulator focus) also sits in that QEMU/KVM lane for emulator researchers. (source: wiki/sources/descriptions/qemu-gvm__qemu-gvm.md)
 - Original Xbox software emulation via [[xqemu]] (full-machine QEMU, no hardware VT required) also sits in that QEMU/KVM research lane for title playback / RE. (source: wiki/sources/descriptions/xqemu__xqemu.md)
 - Architecture-neutral dynamic analysis via [[panda]] (QEMU-based PANDA; full-machine software emulation without hardware VT) sits in the same QEMU/KVM research / DBI lane. (source: wiki/sources/descriptions/panda-re__panda.md)
