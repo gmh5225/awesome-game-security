@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Dr-TSNG/ApplistDetector`: entity [[applist-detector]] (Dr-TSNG; Android detection library + demo; Kotlin + native C++; package inspection, FS artifacts, syscall file probes, Xposed status, dual/work-profile anomalies; mobile anti-cheat / root-detection / app-integrity research); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[root-app-detector]], [[advanced-root-checker]], [[magisk-detection]], and [[magisk]].
+
 - **2026-08-26** — ingest `description:Dr-TSNG/ZygiskOnKernelSU`: entity [[zygisk-on-kernelsu]] (Dr-TSNG; standalone Zygisk runtime; Zygisk API compatibility for KernelSU; can replace Magisk built-in Zygisk; KernelSU/Magisk/APatch platform requirements and compatibility notes; advanced modding / Zygisk module support outside default Magisk stack); cited on [[concepts/zygisk]] and [[overviews/mobile-security]]; cross-linked [[kernelsu]], [[rezygisk]], and [[magisk]].
 
 - **2026-08-26** — ingest `description:DrNseven/D3D11-Wallhack`: entity [[d3d11-wallhack]] (DrNseven; C++ Direct3D 11 hook-based wallhack; Detours + ImGui; DLL inject + render-path hooks; menu-driven stride/index-count logging for target-model identification; 32/64-bit Windows; cheat prototyping / graphics pipeline analysis); cited on [[concepts/draw-call-hook]] and [[overviews/graphics-api]]; cross-linked [[gh-d3d11-hook]], [[d3d11-worldtoscreen-finder]], and [[d3d12-hook-imgui]].
