@@ -3199,6 +3199,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Unreal Engine](entities/unreal-engine.md) — official Epic Games engine source + API documentation (complete runtime: build, rendering, physics, networking, platform abstraction, plugins, Python scripting; Game Engine / source)
 - [unrealcpp](entities/unrealcpp.md) — UE4 C++ tutorial lesson projects (actor movement, camera, input, components; compile-as-reference; Game Engine / UE4 C++ examples; Harrison1)
 - [Unreal Engine Tools](entities/unreal-engine-tools.md) — official CE Lua scripts for UE4/UE5 runtime structure discovery (GNames/GObjects/UObject/UClass/FProperty; Structure Dissect; no inject; cheat-engine)
+- [Unreal Finder Tool](entities/unreal-finder-tool.md) — C++ UE runtime discovery + SDK generator (`GNames`/`GObjects`, instance dumping, SDK output; ImGui UI; kernel-assisted memory R/W; per-engine configuration profiles; CorrM; cheat / SDK View)
 - [unreal-image-capture](entities/unreal-image-capture.md) — UE C++ high-FPS RGB / segmentation / depth capture to disk for ML synthetic datasets (non-blocking render path; Game Engine / Unreal guide; TimmHess)
 - [unreal-source-explained](entities/unreal-source-explained.md) — profiler-driven UE4 source analysis (init / game loop / task graph / RHI / Metal·D3D11; Game Engine / Unreal guide; donaldwuid)
 - [unreal-mcp](entities/unreal-mcp.md) — MCP servers for Unreal Editor (kvick-games + chongdashu; asset/level/blueprint automation; Game Develop / MCP)

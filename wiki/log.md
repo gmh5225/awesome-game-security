@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:CorrM/Unreal-Finder-Tool`: entity [[unreal-finder-tool]] (CorrM; C++ UE runtime discovery + SDK generator; `GNames`/`GObjects` discovery, instance dumping, SDK generation; ImGui UI; kernel-assisted memory R/W; per-engine configuration profiles; Unreal RE / game analysis; cheat / SDK View); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[uedumper]], [[ezfndev-uedumper]], [[dumper-7]], [[shh0yauedumper]], and [[re-ue4ss]].
+
 - **2026-08-26** — ingest `description:Cr4sh/KernelForge`: entity [[kernel-forge]] (Cr4sh; C++ Windows library; signed-driver-wrapper kernel-memory primitives + higher-level kernel routine calls on VBS/HVCI hosts; kernel-to-user DLL injection example; advanced kernel security / exploit-prototyping research; README [Hijack ROP]); cited on [[overviews/windows-kernel]] and [[concepts/hvci]]; cross-linked [[goodmans-kernel]], [[bustercall]], [[kernel-dll-injector]], [[pico-dma]], and [[smm-backdoor-ng]].
 
 - **2026-08-26** — ingest `description:Cr4sh/SmmBackdoorNg`: entity [[smm-backdoor-ng]] (Cr4sh; UEFI SMM backdoor framework; DXE + SMM C firmware + Python Windows/Linux clients; flash-image infection or pre-boot DMA-assisted loading; privilege-escalation and hypervisor-interaction demos; firmware security / persistence / pre-OS attack-surface research; README [UEFI backdoor]); cited on [[overviews/windows-kernel]] and [[overviews/dma-attack]]; cross-linked [[smm-infect]], [[smm]], [[pico-dma]], and [[s6-pcie-microblaze]].
