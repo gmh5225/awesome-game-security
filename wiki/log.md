@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `readme:categories`: Cheat ~2750 (+1; andoridcharlyroot-debug/charlyengine Kotlin+NDK Android CE clone in Cheat > Android Memory Explorer; other major section counts stable); entity [[charlyengine]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; cited on [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-26** — ingest `description:Droid-VM/DroidVM`: entity [[droidvm]] (Droid-VM; Android on-device VM manager; QEMU/KVM + Qualcomm Gunyah hypervisor; ARM64/x86_64 guests; crosvm/QEMU; UEFI Linux/Windows; VirGL/GfxStream GPU, VNC, VirtFS; root required; Android Emulator); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[gunyah-hypervisor]], [[qemu-gvm]], [[android-emulator]], [[aeroot]], and [[rootavd]].
 
 - **2026-08-26** — ingest `description:DruidMech/MultiplayerCourseBlasterGame`: entity [[multiplayer-course-blaster-game]] (DruidMech; UE5 C++ Blaster course sample; combat components, lag compensation, weapons/pickups/HUD, team modes, CTF; multiplayer sessions plugin + Steam online subsystem; UE networking reference for security researchers; Game Develop / UE5 FPS Game); cited on [[overviews/game-engine]]; cross-linked [[multiplayer-blaster-game]], [[network-time-sync]], and [[ue5-multiplayer-project]].
