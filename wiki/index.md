@@ -1477,6 +1477,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hazedumper](entities/hazedumper.md) — auto-updating CS:GO offset/netvar repository (frk1; signatures for engine.dll/client.dll; JSON/TOML/YAML/C++/C#/VB; cheat / game:csgo [Offset])
 - [hashdb-ida](entities/hashdb-ida.md) — OALabs IDA Pro plugin; HashDB API/string hash lookup; bulk module import; XOR-aware matching; hash-algorithm hunt + enum annotation (cheat / IDA Plugins)
 - [hazel](entities/hazel.md) — TheCherno C++ interactive app + rendering engine (engine/editor/sandbox; Vulkan SDK setup; educational engine architecture + real-time rendering prototyping; Game Engine / source)
+- [headless-ida](entities/headless-ida.md) — Python toolkit for headless IDA Pro workflows (IDAPython scripts/one-liners/interactive sessions; RPyC remote server; idat64/idalib; malware/binary/game-security RE automation; DennyDai)
 - [headless-ida-mcp-server](entities/headless-ida-mcp-server.md) — MCP for IDA Pro (headless; binary analysis; function/variable MCP tools; Game Develop / MCP server; cnitlrt)
 - [heck_csgo_external](entities/heck-csgo-external.md) — external CS:GO; SDK generation / memory analysis (C++; cheat / game:csgo)
 - [Herpaderping](entities/herpaderping.md) — process/file obfuscation via write→map→modify→execute (SEC_IMAGE; on-disk decoy vs mapped image; cheat / hide)
