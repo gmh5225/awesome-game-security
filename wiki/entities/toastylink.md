@@ -11,7 +11,15 @@ confidence: medium
 
 # ToastyLink
 
-From-scratch **C++17** trainer and debug toolkit implementing the Xbox Debug Monitor (**XBDM**) wire protocol for remotely inspecting and modifying memory on softmodded **Xbox 360** consoles (RGH/JTAG). Provides typed big-endian memory read/write, Cheat Engine–style progressive value scanning, pointer-chain resolution, a background freeze engine with JSON cheat-table persistence, and toggleable **PowerPC** code patches via a built-in assembler. Also supports array-of-bytes pattern scanning, LAN console discovery, batch scripting, and raw XBDM command passthrough without third-party SDK dependencies. (source: wiki/sources/descriptions/WoahToasty__ToastyLink.md)
+From-scratch **C++17** trainer and debug toolkit implementing the Xbox Debug Monitor (**XBDM**) wire protocol for remotely inspecting and modifying memory on softmodded **Xbox 360** consoles (RGH/JTAG). Targets the modding community and anyone reverse engineering or building trainers for 360 titles over the network—without third-party SDK dependencies. (source: wiki/sources/descriptions/WoahToasty__ToastyLink.md)
+
+## Capabilities
+
+- Typed big-endian memory read/write over XBDM
+- Cheat Engine–style progressive value scanning and array-of-bytes pattern scan
+- Pointer-chain resolution and background freeze engine with JSON cheat-table persistence
+- Toggleable **PowerPC** code patches via built-in assembler
+- LAN console discovery, batch scripting, and raw XBDM command passthrough
 
 Listed under Cheat **Debugging** beside CE-style desktop scanners such as [[pointer-lab]] and console-side Xbox tooling such as [[x360gamehack2025]] (package patching vs live XBDM memory/trainer workflows).
 

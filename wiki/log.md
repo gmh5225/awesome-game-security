@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:WoahToasty/ToastyLink`: entity [[toastylink]] (WoahToasty; from-scratch C++17 XBDM trainer/debug for softmodded Xbox 360 RGH/JTAG; big-endian memory R/W, CE-style scan/freeze, pointer chains, PPC patch assembler, JSON cheat tables, LAN discovery, batch scripting; Cheat Debugging); cited on [[overviews/reverse-engineering]]; cross-linked [[x360gamehack2025]], [[idaxex]], [[xenia]], and [[cheat-engine]].
+
 - **2026-08-26** — ingest `description:sexyiam/VMPLift`: entity [[vmplift]] (sexyiam; C++ emulation-first VMProtect 3.8–3.10+ x64 handler walker/lifter; VIP trace, rolling-key recovery, closed-form recovery; LLVM IR/pseudo-C/devirt emit; IDA/Ghidra workflows; Fix VMP); cited on [[vmprotect]]; cross-linked [[novmp]], [[novmpy]], [[titan]], [[rumba]], [[vmprotect-devirtualization]], [[vmp-vmp3-64bit-disasm-prerelease-]], and [[vmp-devirtualization-lab]].
 
 - **2026-08-26** — ingest `readme:categories`: Cheat ~2752 (+2; WoahToasty/ToastyLink XBDM Xbox 360 trainer in Cheat > Debugging + sexyiam/VMPLift emulation-first VMProtect 3.8–3.10+ handler lifter in Cheat > Fix VMP; other major section counts stable); entities [[toastylink]] and [[vmplift]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

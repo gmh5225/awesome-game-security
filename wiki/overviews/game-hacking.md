@@ -1640,6 +1640,7 @@ sources:
   - wiki/sources/descriptions/WerWolv__ImHex.md
   - wiki/sources/descriptions/Washi1337__ghidra-nativeaot.md
   - wiki/sources/descriptions/WenzWenzWenz__DelphiReSym.md
+  - wiki/sources/descriptions/WoahToasty__ToastyLink.md
   - wiki/sources/descriptions/WPeace-HcH__WPeChatGPT.md
   - wiki/sources/descriptions/WPO-Foundation__win-shaper.md
   - wiki/sources/descriptions/WopsS__RenHook.md
