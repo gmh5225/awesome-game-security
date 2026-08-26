@@ -8,7 +8,8 @@ sources:
   - wiki/sources/descriptions/ekknod__logitech-cve.md
   - wiki/sources/descriptions/ZhaoKunqi__simple-eft-superman-training-bot.md
   - wiki/sources/descriptions/KelvinMsft__UsbMon.md
-updated: 2026-08-23
+  - wiki/sources/descriptions/ConWan30__QorTroller.md
+updated: 2026-08-26
 confidence: medium
 ---
 
@@ -40,8 +41,8 @@ Not a universal stealth ranking—measure per title and AC generation:
 4. Known filter drivers — driver identity and load path
 5. User-mode injection APIs — direct syscall/API telemetry
 
-Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-signatures, server replay). Kernel USB/HID monitoring frameworks such as [[usbmon]] (KelvinMsft; driver hooks IRP/IOCTL/URB paths and parses HID reports for tracing input into consumer processes) support reverse engineering of hardware input behavior and HID-based attack or detection surfaces. (source: wiki/sources/descriptions/KelvinMsft__UsbMon.md) Offensive smoothing samples: [[human-mouse-movement]], [[pine]]. End-to-end colorbot + Arduino Leonardo serial HID samples such as [[overwatch2-colorbot-cheats]] (Python screen purple-outline detection → aim deltas → 115200-baud serial → chunked `Mouse.move()`; cheat / game:overwatch2) illustrate the Arduino/Teensy class in a zero-memory visual pipeline. (source: wiki/sources/descriptions/gmh5225__Overwatch2-colorbot-Cheats.md) EFT training-routine automation such as [[simple-eft-superman-training-bot]] (ZhaoKunqi; Arduino HID-capable boards; keyboard/mouse emulation for repetitive in-game movement cycles; `.ino` sketches + Python coordinate helper; cheat / game:eft) illustrates the same Arduino class for title-specific skill-grinding rather than AI visual aim. (source: wiki/sources/descriptions/ZhaoKunqi__simple-eft-superman-training-bot.md)
+Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-signatures, server replay). Hardware-rooted controller attestation stacks such as [[qortroller]] (ConWan30; VAPI protocol; DualShock bridge; PoEP presence challenges; Circom/Groth16 verified-human proofs; session receipts; anti-cheat research) aim to prove live human gamepad input rather than spoofed HID or scripted macros. (source: wiki/sources/descriptions/ConWan30__QorTroller.md) Kernel USB/HID monitoring frameworks such as [[usbmon]] (KelvinMsft; driver hooks IRP/IOCTL/URB paths and parses HID reports for tracing input into consumer processes) support reverse engineering of hardware input behavior and HID-based attack or detection surfaces. (source: wiki/sources/descriptions/KelvinMsft__UsbMon.md) Offensive smoothing samples: [[human-mouse-movement]], [[pine]]. End-to-end colorbot + Arduino Leonardo serial HID samples such as [[overwatch2-colorbot-cheats]] (Python screen purple-outline detection → aim deltas → 115200-baud serial → chunked `Mouse.move()`; cheat / game:overwatch2) illustrate the Arduino/Teensy class in a zero-memory visual pipeline. (source: wiki/sources/descriptions/gmh5225__Overwatch2-colorbot-Cheats.md) EFT training-routine automation such as [[simple-eft-superman-training-bot]] (ZhaoKunqi; Arduino HID-capable boards; keyboard/mouse emulation for repetitive in-game movement cycles; `.ino` sketches + Python coordinate helper; cheat / game:eft) illustrates the same Arduino class for title-specific skill-grinding rather than AI visual aim. (source: wiki/sources/descriptions/ZhaoKunqi__simple-eft-superman-training-bot.md)
 
 ## Related
 
-[[logitech-cve]] · [[kernel-mouse]] · [[usbmon]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[logitech-cve]] · [[qortroller]] · [[kernel-mouse]] · [[usbmon]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
