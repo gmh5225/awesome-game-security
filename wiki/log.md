@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DosX-dev/obfus.h`: entity [[obfus-h]] (DosX-dev; macro-only C compile-time obfuscation header; TCC-oriented Windows x86/x64; function-call obfuscation, control-flow mutation, string hiding, anti-debug, anti-decompilation, fake signatures, optional virtualized math; preprocessor-flag toggles; software protection / binary hardening research; AC Obfuscation Engine / Compile Time); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[obfusheader-h]], [[obfusk8]], [[crycall]], [[brkida]], [[obfuscate]], and [[xorstr]].
+
 - **2026-08-26** — ingest `description:DownWithUp/CallMon`: entity [[callmon]] (DownWithUp; Windows kernel-driver + user-mode GUI syscall monitor; **PsAltSystemCallHandlers** per-process intercept; trap frame + stack telemetry via named pipe; C + optional Rust driver; kernel telemetry / syscall behavior analysis / AC process-level API monitoring research; AltSystemCallHandlers); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[etw-syscall-monitor]], [[instrumentation-callback-syscall-logger]], [[hidden-syscall-monitoring]], [[kernelmon]], and [[syscall-detect]].
 
 - **2026-08-26** — ingest `description:Dr-TSNG/ApplistDetector`: entity [[applist-detector]] (Dr-TSNG; Android detection library + demo; Kotlin + native C++; package inspection, FS artifacts, syscall file probes, Xposed status, dual/work-profile anomalies; mobile anti-cheat / root-detection / app-integrity research); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[root-app-detector]], [[advanced-root-checker]], [[magisk-detection]], and [[magisk]].

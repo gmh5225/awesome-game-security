@@ -2336,6 +2336,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [obfuscation-detection](entities/obfuscation-detection.md) — Binary Ninja obfuscated-region heuristics (CFF / insn complexity / n-gram BB DB; batch scripts; Cheat Binary Ninja Plugins)
 - [ObfuscationMethods](entities/obfuscation-methods.md) — C#/dnlib .NET obfuscation technique demos (CFF / anti-dump / anti-de4dot; AC Obfuscation Engine)
 - [obfuscator](entities/obfuscator.md) — x64 PE multi-pass bin2bin obfuscator (CFF / junk / insn mutation / import obfuscation / anti-disasm; es3n1n; AC Obfuscation Engine)
+- [obfus.h](entities/obfus-h.md) — macro-only C compile-time obfuscation header (DosX-dev; TCC Windows x86/x64; call obfuscation, CFF mutation, string hiding, anti-debug, anti-decompilation, fake signatures, optional virtualized math; preprocessor flags; AC Obfuscation Engine / Compile Time)
 - [obfusheader.h](entities/obfusheader-h.md) — header-only C++14 portable compile-time obfuscation (string/constant encryption, import/call hiding, control-flow mutation, anti-decompiler; Windows/Unix; AC Obfuscation Engine; ac3ss0r)
 - [Obfuscate](entities/obfuscate.md) — header-only C++14 compile-time string literal obfuscation (constexpr encrypt + randomized keys; macro API; runtime decrypt; AC String Crypter; adamyaxley)
 - [obfuscatxor](entities/obfuscatxor.md) — Go string crypter (encrypted string vars; AC Compile Time / String Crypter)
