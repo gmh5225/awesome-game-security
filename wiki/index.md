@@ -1106,6 +1106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [InfinityHook](entities/infinityhook.md) — original C ETW syscall hooking library; patches ETW trace callback pointer without SSDT/ntoskrnl inline hooks (everdox; Some Tricks / ETW Hook)
 - [InfinityHook Pro Max](entities/infinityhook-promax.md) — C++ InfinityHook successor; driver hook management + disassembly; multi-Windows compatibility; VM-tested; kernel security / AC research (ThomasonZhao; ETW Hook WIN11)
 - [InfinityHook Pro](entities/infinityhook-pro.md) — C/C++ VS InfinityHook modernization; Win7–Win11 compatibility via version-specific kernel offsets; low-level internals + comments; kernel security / AC / EDR RE (FiYHer; ETW Hook Ex)
+- [InfinityHookPro Main](entities/infinityhookpro-main.md) — C/C++ InfinityHook derivative with physical-machine support; ETW/CKCL syscall interception, SSDT context handling, kernel pattern scanning; callback-based dispatch monitoring; Win7–Win11; AC telemetry / hook detection research (DearXiaoGui; ETW Hook WIN11)
 - [InfinityHook Latest](entities/infinityhook-latest.md) — C/C++ VS kernel driver; ETW + HalPrivateDispatchTable syscall interception for newer Windows; PMC/trace RE notes; AC bypass / kernel security research (Oxygen1a1; ETW Hook WIN11)
 - [ETWHOOK-InfinityHookClass](entities/etwhook-infinityhookclass.md) — C++ InfinityHook wrapper; ETW-backed syscall interception without SSDT patches (gmh5225; Some Tricks / ETW Hook Ex)
 - [EUPMAccess](entities/eupmaccess.md) — C/C++ memory analysis (cheat / RPM; waryas)
