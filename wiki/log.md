@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DrNseven/D3D11-Wallhack`: entity [[d3d11-wallhack]] (DrNseven; C++ Direct3D 11 hook-based wallhack; Detours + ImGui; DLL inject + render-path hooks; menu-driven stride/index-count logging for target-model identification; 32/64-bit Windows; cheat prototyping / graphics pipeline analysis); cited on [[concepts/draw-call-hook]] and [[overviews/graphics-api]]; cross-linked [[gh-d3d11-hook]], [[d3d11-worldtoscreen-finder]], and [[d3d12-hook-imgui]].
+
 - **2026-08-26** — ingest `description:DrNseven/D3D11-Worldtoscreen-Finder`: entity [[d3d11-worldtoscreen-finder]] (DrNseven; C++ Direct3D 11 world-to-screen finder; MinHook + ImGui overlay; brute-force matrix/constant-buffer combinations; model-position text + matched-target logging; ESP/aim visual bootstrap; game security / cheat research); cited on [[concepts/world-to-screen]] and [[overviews/graphics-api]]; cross-linked [[gh-d3d11-hook]], [[d3d12-hook-imgui]], [[present-hook]], and [[lab-esp-and-aimbot]].
 
 - **2026-08-26** — ingest `description:DrNseven/D3D12-Hook-ImGui`: entity [[d3d12-hook-imgui]] (DrNseven; C++ Direct3D 12 hooking sample; MinHook-style function interception; DLL build/inject flow, frame hook setup, real-time ImGui menu rendering; graphics API research, overlay prototyping, low-level game instrumentation; README `[DX12 Imgui]`); cited on [[concepts/present-hook]] and [[overviews/graphics-api]]; cross-linked [[d3dhook-imgui]], [[universal-dear-imgui-hook]], [[imgui-rdr2-hook]], and [[warzone-internal]].
