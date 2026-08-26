@@ -1160,6 +1160,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [external-cheat-v3](entities/external-cheat-v3.md) — external CS:GO C++ framework (ImGui + D3D9; aimbot, glow, bhop, no-flash; runtime config modules; educational external tooling; Enzo0721; cheat / game:csgo [External])
 - [external-dayz-cheat](entities/external-dayz-cheat.md) — DayZ external ESP (D3D9 transparent overlay; kernel driver entity reads; Enfusion SDK offsets; gmh5225)
 - [external-esp-hack-assaultcube](entities/external-esp-hack-assaultcube.md) — beginner AssaultCube external ESP (GDI overlay; RPM boxes / names / health; gmh5225)
+- [external-il2cpp](entities/external-il2cpp.md) — external C++ IL2CPP metadata navigator (WinAPI + RPM; assembly/class/field resolution; GameAssembly offset abstractions; Unity IL2CPP RE + external tooling; Compiled-Code; [Il2Cpp])
 - [external-r6s-cheat](entities/external-r6s-cheat.md) — R6 external: kernel driver + shared memory section; ESP + aimbot (cheat / game:r6 [External]; gmh5225)
 - [external-warzone-cheat](entities/external-warzone-cheat.md) — COD Warzone external: manually mapped kernel driver + overlay hijack ESP; C++ client/driver VS projects + game SDK/offset scaffolding (NMan1; driver-assisted external RE; cheat / game:cod warzone [External])
 - [EzApexDMAAimbot](entities/ez-apex-dma-aimbot.md) — Apex Legends KVM/DMA aimbot + glow: KVM memory reader; Linux host reads game state; guest-side control; recoil randomization, smoothing, bone randomization, team-aware glow (C/C++; cheat / game:apex legends [KVM]; Y33Tcoder)

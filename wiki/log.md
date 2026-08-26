@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Compiled-Code/external-il2cpp`: entity [[external-il2cpp]] (Compiled-Code; C++ external IL2CPP metadata framework; WinAPI process/module discovery + ReadProcessMemory; enumerate assemblies/images/classes/fields by name; static/instance field address resolution from GameAssembly offsets; Unity IL2CPP RE + external tooling; [Il2Cpp]); cited on [[concepts/il2cpp]] and [[overviews/game-hacking]]; cross-linked [[il2cpp-resolver-external]], [[unity202x-externalresolve]], and [[il2cppdumper]].
+
 - **2026-08-26** — ingest `description:Comsecuris/gdbghidra`: entity [[gdbghidra]] (Comsecuris; Python GDB client + Java Ghidra extension; live cursor/stack sync, register propagation for decompilation, breakpoint control, relocation handling; interactive static+dynamic RE; cheat / GDB session); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[ghidra-bridge]], [[gdb-mcp]], and [[mcp-gdb]].
 
 - **2026-08-26** — ingest `description:u8012146108-bit/anticheat-qa`: entity [[anticheat-qa]] (u8012146108-bit; Java Fabric **1.21.11** client mod; ClickGUI/HUD reach/movement/rotation/CPS/velocity/ping monitors; ESP/tracers/FreeCam; test simulator + Y-Level Probe for server-side data-stripping validation; observes/simulates detections without cheats; Anti Cheat / Stress Testing / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[ghostjoin]], [[local-anticheat-1-8-9]], and [[minecraft-anticheat-list]].
