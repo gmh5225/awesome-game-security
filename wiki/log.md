@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:DeNA/mempatch`: entity [[mempatch]] (DeNA; C++ Android NDK memory tampering tool; address handling, patching, snapshots, range tracking, optional value freeze; platform abstraction + test assets; vulnerability assessment / dev support; cheat / Memory tampering tool); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory]], [[android-memory-tool]], [[ace-the-game]], [[memdbg]], [[cheap-engine]], and [[writemem]].
+
 - **2026-08-26** — ingest `description:DearXiaoGui/InfinityHookPro-main`: entity [[infinityhookpro-main]] (DearXiaoGui; C/C++ InfinityHook derivative with physical-machine support; ETW/CKCL syscall interception, SSDT context handling, kernel pattern scanning; callback-based dispatch monitoring; Win7–Win11; AC telemetry / syscall monitoring / hook detection research; README [ETW Hook WIN11]); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[infinityhook]], [[infinityhook-pro]], [[infinityhook-promax]], [[infinityhook-latest]], and [[etwhook-infinityhookclass]].
 
 - **2026-08-26** — ingest `description:Deatty/Ghidra-Obfuscation-Detection`: entity [[ghidra-obfuscation-detection]] (Deatty; Java Ghidra script; heuristic function-body feature extraction flags obfuscated or unusually complex functions; lightweight RE workflow integration; malware/game protected-code triage; Detect obfuscated/complex code); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[obfuscation-detection]], [[obfuscation-analysis]], [[ghidra]], [[ghidrametrics]], and [[xrefgen]].
