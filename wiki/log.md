@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:D4stiny/ThreadJect`: entity [[threadject]] (D4stiny; C++ Visual Studio manual thread-hijack DLL injector; validates/maps payload, prepares loader metadata, patches shellcode with runtime addresses, redirects existing-thread execution; low-level injection-chain control; process injection research + endpoint detection test cases; Injection Testing); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[thread-hijacking-injector]], [[inject-all-the-things]], [[windows-dll-injector]], [[windows-process-injection]], [[process-injection-techniques]], and [[injectors]].
+
 - **2026-08-26** — ingest `description:D7EAD/mkPIVM`: entity [[mk-pivm]] (D7EAD; process-independent virtual machine code obfuscation engine; lifts x86/x64 instructions—including arbitrary shellcode—into custom IR; generates polymorphic position-independent VM bytecode with encrypted handlers; embeds VM dispatcher into PE executables; AC Obfuscation Engine `[VM]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[binary-shield]], [[guardian-rs]], [[covirt]], [[x64-virtualizer-rs]], [[phantasm-x86-virtualizer]], and [[vmattack]].
 
 - **2026-08-26** — ingest `description:DMaroo/GhidRust`: entity [[ghidrust]] (DMaroo; Java Ghidra extension; Rust binary detection heuristics, Function ID stdlib matching, experimental C→Rust decompiler output translation; stripped Rust executables; paused maintenance; cheat / Rust decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[kuna]], [[ghidra-nativeaot]], [[ida-rust-helper]], [[oxidizer]], and [[rust-obfuscator]].

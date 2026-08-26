@@ -3088,6 +3088,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ThreatResearch](entities/threatresearch.md) — Security Joes Ghidra/IDA plugins + malware RE scripts / YARA (Cheat Ghidra)
 - [thread-call-stack-scanner](entities/thread-call-stack-scanner.md) — safe unload of hooked DLLs via thread call-stack scan (m417z; Anti Cheat / hook lifecycle)
 - [ThreadHijackingInjector](entities/thread-hijacking-injector.md) — minimal C++ thread-hijack DLL injection PoC (NullTerminatorr; remote context manipulation + execution redirection; Injection Testing)
+- [ThreadJect](entities/threadject.md) — manual thread-hijack DLL injector PoC (D4stiny; payload map + loader metadata + runtime shellcode patch + thread redirect; Visual Studio; Injection Testing)
 - [ThreadSpy (KelvinMsft)](entities/thread-spy.md) — hardware-assisted Windows thread hijacking via PMI callback; in-flight thread takeover without instruction-byte patches; stealth execution redirection / AC bypass research
 - [thread-namecalling](entities/thread-namecalling.md) — SetThreadDescription + remote GetThreadDescription via APC (working-set probe; cheat / injection:windows)
 - [ThreadStackSpoofer](entities/thread-stack-spoofer.md) — PoC thread call-stack spoof for in-process shellcode hiding (mgeeky; Cheat Spoof Stack)

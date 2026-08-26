@@ -14,7 +14,7 @@ Minimal **C++ proof-of-concept** for **DLL injection via thread hijacking** on W
 
 README lane: **Injection Testing** — thread-hijack DLL load study sample.
 
-Complements broader injection corpora such as [[windows-process-injection]], thread-hijack usage in [[launcher-abuser]], and low-footprint inject PoCs such as [[frankenstein-apc-injection]] and [[idle-abuse]].
+Complements broader injection corpora such as [[windows-process-injection]], manual thread-hijack injectors such as [[threadject]] (D4stiny; payload map + loader metadata + runtime shellcode patch + thread redirect; Injection Testing), thread-hijack usage in [[launcher-abuser]], and low-footprint inject PoCs such as [[frankenstein-apc-injection]] and [[idle-abuse]].
 
 ## Links
 
