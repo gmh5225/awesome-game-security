@@ -1,0 +1,4092 @@
+Project Path: arc_andoridcharlyroot-debug_charlyengine_a4qzjyoo
+
+Source Tree:
+
+```txt
+arc_andoridcharlyroot-debug_charlyengine_a4qzjyoo
+├── LICENSE
+├── README.md
+├── app
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       └── main
+│           ├── AndroidManifest.xml
+│           ├── cpp
+│           │   ├── CMakeLists.txt
+│           │   └── memscand.c
+│           ├── java
+│           │   └── com
+│           │       └── memscan
+│           │           └── app
+│           │               ├── MainActivity.kt
+│           │               ├── scan
+│           │               │   ├── MemscanDaemon.kt
+│           │               │   ├── RootShell.kt
+│           │               │   ├── ScanViewModel.kt
+│           │               │   └── SessionStore.kt
+│           │               └── ui
+│           │                   ├── AppListScreen.kt
+│           │                   ├── Components.kt
+│           │                   ├── Draw.kt
+│           │                   ├── GuideDialog.kt
+│           │                   ├── ScanScreen.kt
+│           │                   └── Theme.kt
+│           └── res
+│               ├── drawable
+│               │   └── ic_launcher.xml
+│               └── values
+│                   ├── strings.xml
+│                   └── themes.xml
+├── build.gradle.kts
+├── docs
+│   └── index.html
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── native-test
+│   ├── driver.py
+│   ├── run_test.sh
+│   └── test_target.c
+└── settings.gradle.kts
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 MemScan contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# CharlyEngine 🟢>_ — mini Cheat Engine per Android (root)
+
+> Selezioni un gioco → scansioni la memoria cercando il valore della valuta →
+> la valuta cambia nel gioco → riscansioni → gli indirizzi si restringono →
+> **INIETTI** il valore che vuoi (o lo **CONGELI** per sempre) e vedi i cambiamenti
+> **in tempo reale nel terminale**.
+
+Un [Cheat Engine](https://www.cheatengine.org/) minimale per Android: app Kotlin + Jetpack Compose,
+core di scansione in C (NDK) eseguito come root.
+
+⚠️ **Solo per uso legittimo:** dispositivo tuo, giochi offline/single-player.
+Usarlo su giochi online viola i ToS e porta al ban dell'account; testare sistemi di terzi
+senza autorizzazione è un reato (art. 615-ter c.p. in Italia).
+
+---
+
+## Funzioni
+
+- 🔎 **SCANSIONA** — cerca nella memoria del gioco tutti gli indirizzi che contengono un valore
+- 🔄 **RISCANSIONA** — raffina dopo un cambio della valuta nel gioco (il classico ciclo Cheat Engine)
+- 💰 **INIETTA / INIETTA IN TUTTI** — scrive il valore scelto in un indirizzo o in tutti insieme
+- ❄ **CONGELA / CONGELA TUTTI** — blocca il valore per sempre (riscritto ogni 250 ms)
+- 💾 **Sessioni salvate** — esci dall'app e torna quando vuoi: indirizzi e congelamenti di ogni gioco restano salvati e si ripristinano da soli
+- 📲 **AVVIA e aggancia** — puoi partire anche col gioco chiuso: CharlyEngine lo apre e lo aggancia appena parte
+- 🖥️ **Terminale live** — registro di tutto + righe `[LIVE]` quando un valore cambia
+- 📖 **Guida integrata** — procedura a 4 passi spiegata per utenti non esperti (si apre al primo avvio)
+- Tipi di valore: intero, decimale, long, word, byte
+
+## Screenshot del flusso
+
+```
+1 · App      →  2 · Cerco      →  3 · Affino        →  4 · Inietto
+  scegli il      scrivi 850       cambia la valuta     💰 999999 + ❄ congelati
+  gioco          e SCANSIONA      e RISCANSIONA        e guardali nel terminale
+```
+
+## Requisiti
+
+| Cosa | Perché |
+|---|---|
+| Dispositivo **rootato** (Magisk o KernelSU) | leggere/scrivere `/proc/<pid>/mem` di un'altra app |
+| Android 8.0+ (API 26) | — |
+| Android Studio + **NDK** + CMake (SDK Manager → SDK Tools) | compilare la parte nativa |
+
+## Compilazione
+
+```bash
+# 1. apri la cartella memscan/ in Android Studio (la prima sync scarica tutto)
+# 2. Build ▸ Build APK(s)     oppure da terminale:
+./gradlew assembleDebug
+# 3. installa:
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+All'avvio concedi l'accesso root quando Magisk lo chiede (il daemon deve girare come root).
+
+## Come si usa — il flusso della "valuta"
+
+1. Trova il gioco nell'elenco (se è chiuso: **▶ AVVIA**, CharlyEngine lo aggancia da solo)
+2. Guarda la valuta nel gioco (es. monete = `850`), scrivi `850` e premi **SCANSIONA**
+3. **Cambia la valuta nel gioco** (spendi o guadagna, es. diventa `743`)
+4. Scrivi `743` e premi **RISCANSIONA** — ripeti 3-4 finché restano pochi indirizzi
+5. Scrivi il valore dei sogni (es. `999999`) e premi **💰 INIETTA IN TUTTI**
+6. Se il gioco riporta il valore indietro: **❄ CONGELA TUTTI**
+
+Consigli: monete → tipo «Intero»; vite/energia → «Decimale». Se non trovi il valore,
+prova ×10/×100 (il gioco mostra `850` ma salva `8500`).
+
+## Architettura
+
+```
+┌────────────────────────────── app (Kotlin/Compose, uid app) ──────────┐
+│  UI: lista app · procedura 4 passi · risultati live · terminale       │
+│  SessionStore: indirizzi/congelamenti salvati per ogni gioco          │
+│           │  righe di testo (stdin/stdout via `su`)                   │
+└───────────┼───────────────────────────────────────────────────────────┘
+            ▼
+┌──────────────────── memscand (C, eseguito come root) ────────────────┐
+│ ATTACH pid → legge /proc/pid/maps (solo regioni rw-p)                │
+│ SCAN valore   → pread64 a blocchi di 1 MB + confronto in memoria     │
+│ RESCAN valore → rilegge SOLO gli indirizzi candidati e filtra        │
+│ RESTORE addrs → ricarica una sessione salvata (indirizzi validati)   │
+│ WRITE addr    → pwrite64 del nuovo valore (+ verifica read-back)     │
+│ FREEZE addr   → thread che riscrive il valore ogni 250 ms            │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+L'eseguibile C è pacchettizzato nell'APK col trucco `libmemscand.so` (CMake
+`PREFIX lib` + `SUFFIX .so`), copiato all'avvio in `/data/local/tmp` e lanciato
+con `su`. Quando l'app muore, il daemon riceve EOF su stdin e si spegne da solo.
+
+### Protocollo del daemon (per giocarci da Termux)
+
+```
+su -c /data/local/tmp/memscand
+PING · HELLO · PROCS · ATTACH <pid> · REGIONS
+SCAN <tipo> <valore> · RESCAN <tipo> <valore> · COUNT · RESULTS <start> <count>
+READ <tipo> <addr> · WRITE <tipo> <addr> <valore>
+FREEZE <tipo> <addr> <valore> · UNFREEZE <addr> · UNFREEZE_ALL
+RESTORE <tipo> <addr> [<addr> …] · RESET · DETACH · QUIT
+(tipi: b w d q f D)
+```
+
+Ogni risposta: righe dati opzionali + una riga finale `OK …` / `ERR …`.
+
+## Test del core nativo (Linux o Termux, senza Android)
+
+```bash
+cd native-test && ./run_test.sh
+```
+
+22 controlli end-to-end: scansione, restringimento dopo cambio valore, scrittura,
+freeze (il bersaglio prova a cambiare il valore ma resta bloccato), float,
+restore delle sessioni, detach.
+
+## Struttura
+
+```
+memscan/
+├── app/src/main/cpp/memscand.c      ← il cuore: scanner/patcher di memoria (C)
+├── app/src/main/java/com/memscan/app/
+│   ├── MainActivity.kt              ← navigazione + edge-to-edge corretto
+│   ├── scan/RootShell.kt            ← wrapper `su -c`
+│   ├── scan/MemscanDaemon.kt        ← ciclo di vita + protocollo col daemon
+│   ├── scan/ScanViewModel.kt        ← stato, polling live, sessioni, restore
+│   ├── scan/SessionStore.kt         ← persistenza sessioni per ogni gioco
+│   └── ui/                          ← Compose: lista app, procedura, terminale, guida
+├── native-test/                     ← test end-to-end del core (gcc + python)
+└── gradle/…                         ← build Android (AGP 8.7, Kotlin 2.0, Compose BOM)
+```
+
+## Licenza
+
+MIT — vedi [LICENSE](LICENSE).
+
+```
+
+`app/build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+}
+
+android {
+    namespace = "com.memscan.app"
+    compileSdk = 35
+    ndkVersion = "27.0.12077973"
+
+    defaultConfig {
+        applicationId = "com.memscan.app"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 6
+        versionName = "0.4.0"
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+
+    packaging {
+        // estrae le "librerie" (in realtà l'eseguibile memscand) su disco,
+        // così possiamo copiarle in /data/local/tmp ed eseguirle con su
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+}
+
+dependencies {
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+}
+
+```
+
+`app/proguard-rules.pro`:
+
+```pro
+# Regole minime: nessuna riflessione usata.
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Elencare le app installate/in esecuzione (sideload: non per il Play Store) -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.MemScan">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+```
+
+`app/src/main/cpp/CMakeLists.txt`:
+
+```txt
+cmake_minimum_required(VERSION 3.22.1)
+project(memscand C)
+
+# Eseguibile (non libreria): lo sporchiamo col trucco lib*.so così l'AGP
+# lo pacchettizza nell'APK e lo estrae in nativeLibraryDir.
+add_executable(memscand memscand.c)
+target_link_libraries(memscand log)
+set_target_properties(memscand PROPERTIES
+    PREFIX "lib"
+    SUFFIX ".so"
+    OUTPUT_NAME "memscand")
+
+# Conformità pagine da 16 KB (Android 15+)
+target_link_options(memscand PRIVATE "-Wl,-z,max-page-size=16384")
+
+```
+
+`app/src/main/cpp/memscand.c`:
+
+```c
+/*
+ * memscand — daemon minimale di scansione/modifica memoria (richiede root)
+ *
+ * Protocollo testuale su stdin/stdout: una riga per comando,
+ * risposta = righe dati (opzionali) + UNA riga finale "OK ..." oppure "ERR ...".
+ *
+ * Comandi:
+ *   HELLO
+ *   PING
+ *   PROCS                                  -> "pid|comm|cmdline" per ogni processo
+ *   ATTACH <pid>                           -> apre /proc/pid/mem e legge le mappe
+ *   REGIONS [n]                            -> elenco regioni rw-p
+ *   SCAN   <tipo> <valore>                 -> prima scansione (tipo: b w d q f D)
+ *   RESCAN <tipo> <valore>                 -> raffina: tiene solo gli indirizzi
+ *                                             il cui valore ATTUALE == valore
+ *   COUNT
+ *   RESULTS <start> <count>                -> "indirizzohex|valoreattuale"
+ *   READ   <tipo> <indirizzohex>
+ *   WRITE  <tipo> <indirizzohex> <valore>
+ *   FREEZE <tipo> <indirizzohex> <valore>  -> riscrive il valore ogni ~250 ms
+ *   UNFREEZE <indirizzohex>  |  UNFREEZE_ALL
+ *   RESET | DETACH | QUIT
+ *
+ * Tipi valore: b=int8, w=int16, d=int32, q=int64, f=float32, D=float64
+ */
+
+#define _GNU_SOURCE
+#define _FILE_OFFSET_BITS 64
+
+#include <ctype.h>
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define MAX_REGIONS  8192
+#define MAX_MATCHES  300000
+#define CHUNK_SIZE   (1u << 20)
+#define MAX_FREEZES  256
+#define FREEZE_US    250000
+
+typedef struct {
+    uint64_t start;
+    uint64_t end;
+    char     perms[5];
+    char     path[384];
+} Region;
+
+static Region g_regions[MAX_REGIONS];
+static int     g_nregions;
+static int     g_pid   = -1;
+static int     g_memfd = -1;
+
+static uint64_t *g_matches = NULL;
+static size_t    g_nmatches;
+static int       g_truncated;
+static char      g_last_type = 'd';
+
+static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+
+/* ------------------------------ freeze ---------------------------------- */
+
+typedef struct {
+    uint64_t addr;
+    size_t   len;
+    uint8_t  bytes[8];
+    int      active;
+} Freeze;
+
+static Freeze g_freezes[MAX_FREEZES];
+static int    g_nfreezes;
+static volatile int g_freeze_running = 0;
+static pthread_t    g_freeze_thread;
+
+static void clear_freezes(void) {
+    for (int i = 0; i < g_nfreezes; i++) g_freezes[i].active = 0;
+    g_nfreezes = 0;
+}
+
+static void *freeze_thread(void *arg) {
+    (void)arg;
+    while (g_freeze_running) {
+        usleep(FREEZE_US);
+        if (g_memfd < 0) continue;
+        pthread_mutex_lock(&g_lock);
+        for (int i = 0; i < g_nfreezes; i++) {
+            if (!g_freezes[i].active) continue;
+            if (pwrite64(g_memfd, g_freezes[i].bytes, g_freezes[i].len,
+                         (off64_t)g_freezes[i].addr) != (ssize_t)g_freezes[i].len) {
+                g_freezes[i].active = 0; /* indirizzo andato: disarmalo */
+            }
+        }
+        pthread_mutex_unlock(&g_lock);
+    }
+    return NULL;
+}
+
+static void ensure_freeze_thread(void) {
+    if (!g_freeze_running) {
+        g_freeze_running = 1;
+        pthread_create(&g_freeze_thread, NULL, freeze_thread, NULL);
+    }
+}
+
+/* ------------------------------ valori ----------------------------------- */
+
+static size_t type_size(char t) {
+    switch (t) {
+        case 'b': return 1;
+        case 'w': return 2;
+        case 'd': case 'f': return 4;
+        case 'q': case 'D': return 8;
+        default:  return 0;
+    }
+}
+
+/* Converte "1337" / "12.5" / "0xFF" nei byte del tipo richiesto. */
+static int pack_value(char t, const char *s, uint8_t *out, size_t *len) {
+    char *end = NULL;
+    size_t n = type_size(t);
+    if (n == 0 || s == NULL || *s == '\0') return -1;
+    errno = 0;
+    if (t == 'f') {
+        float v = strtof(s, &end);
+        if (end == s) return -1;
+        memcpy(out, &v, 4);
+    } else if (t == 'D') {
+        double v = strtod(s, &end);
+        if (end == s) return -1;
+        memcpy(out, &v, 8);
+    } else {
+        long long v = strtoll(s, &end, 0);
+        if (end == s) return -1;
+        switch (t) {
+            case 'b':
+                if (v < -128 || v > 127) return -1;
+                { int8_t x = (int8_t)v;  memcpy(out, &x, 1); } break;
+            case 'w':
+                if (v < -32768 || v > 32767) return -1;
+                { int16_t x = (int16_t)v; memcpy(out, &x, 2); } break;
+            case 'd':
+                if (v < INT32_MIN || v > INT32_MAX) return -1;
+                { int32_t x = (int32_t)v; memcpy(out, &x, 4); } break;
+            case 'q':
+                { int64_t x = (int64_t)v; memcpy(out, &x, 8); } break;
+        }
+    }
+    *len = n;
+    return 0;
+}
+
+/* Legge il valore all'indirizzo e lo formatta secondo il tipo. */
+static void format_at(uint64_t addr, char t, char *out, size_t outsz) {
+    uint8_t tmp[8];
+    size_t n = type_size(t);
+    if (n == 0) { snprintf(out, outsz, "?"); return; }
+    if (pread64(g_memfd, tmp, n, (off64_t)addr) != (ssize_t)n) {
+        snprintf(out, outsz, "?");
+        return;
+    }
+    switch (t) {
+        case 'b': { int8_t  v; memcpy(&v, tmp, 1); snprintf(out, outsz, "%d", (int)v);  break; }
+        case 'w': { int16_t v; memcpy(&v, tmp, 2); snprintf(out, outsz, "%d", (int)v);  break; }
+        case 'd': { int32_t v; memcpy(&v, tmp, 4); snprintf(out, outsz, "%d", v);       break; }
+        case 'q': { int64_t v; memcpy(&v, tmp, 8); snprintf(out, outsz, "%lld", (long long)v); break; }
+        case 'f': { float   v; memcpy(&v, tmp, 4); snprintf(out, outsz, "%g", v);       break; }
+        case 'D': { double  v; memcpy(&v, tmp, 8); snprintf(out, outsz, "%g", v);       break; }
+        default:  snprintf(out, outsz, "?");
+    }
+}
+
+/* ------------------------------ mappe ------------------------------------ */
+
+static int load_regions(void) {
+    char path[64];
+    snprintf(path, sizeof(path), "/proc/%d/maps", g_pid);
+    FILE *f = fopen(path, "r");
+    if (!f) return -1;
+    g_nregions = 0;
+    char line[1024];
+    while (fgets(line, sizeof(line), f)) {
+        unsigned long a = 0, b = 0;
+        char perms[8] = {0};
+        char ppath[512] = {0};
+        int n = sscanf(line, "%lx-%lx %4s %*s %*s %*s %511[^\n]", &a, &b, perms, ppath);
+        if (n < 3) continue;
+        if (perms[0] != 'r' || perms[1] != 'w') continue;   /* solo rw */
+        if (b <= a) continue;
+        if (strncmp(ppath, "/dev/", 5) == 0) continue;      /* device: salta */
+        if (strncmp(ppath, "[vvar", 5) == 0) continue;
+        if (strncmp(ppath, "[vdso", 5) == 0) continue;
+        if (strncmp(ppath, "[vsyscall", 9) == 0) continue;
+        if (g_nregions >= MAX_REGIONS) break;
+        Region *r = &g_regions[g_nregions++];
+        r->start = (uint64_t)a;
+        r->end   = (uint64_t)b;
+        snprintf(r->perms, sizeof(r->perms), "%s", perms);
+        char *p = ppath;
+        while (*p == ' ' || *p == '\t') p++;
+        snprintf(r->path, sizeof(r->path), "%s", p);
+    }
+    fclose(f);
+    return g_nregions;
+}
+
+/* ------------------------------ scansione -------------------------------- */
+
+static void do_scan(const uint8_t *needle, size_t len) {
+    g_nmatches = 0;
+    g_truncated = 0;
+    uint8_t *buf = malloc(CHUNK_SIZE);
+    if (!buf) return;
+
+    for (int i = 0; i < g_nregions && !g_truncated; i++) {
+        Region *r = &g_regions[i];
+        uint64_t size = r->end - r->start;
+        uint64_t off  = 0;
+        while (off < size && !g_truncated) {
+            size_t want = (size - off > CHUNK_SIZE) ? CHUNK_SIZE : (size_t)(size - off);
+            ssize_t got = pread64(g_memfd, buf, want, (off64_t)(r->start + off));
+            if (got <= 0) break;                 /* regione illeggibile: salta */
+            if (got >= (ssize_t)len) {
+                uint8_t *limit = buf + got - len; /* ultimo start valido */
+                for (uint8_t *p = memchr(buf, needle[0], (size_t)(limit - buf) + 1);
+                     p != NULL;
+                     p = memchr(p + 1, needle[0], (size_t)(limit - p))) {
+                    if (memcmp(p, needle, len) == 0) {
+                        if (g_nmatches < MAX_MATCHES)
+                            g_matches[g_nmatches] = r->start + off + (uint64_t)(p - buf);
+                        g_nmatches++;
+                        if (g_nmatches >= MAX_MATCHES) { g_truncated = 1; break; }
+                    }
+                }
+            }
+            if ((uint64_t)got < want) break;      /* lettura corta: ferma la regione */
+            off += (uint64_t)got;
+        }
+    }
+    free(buf);
+}
+
+static void do_rescan(const uint8_t *needle, size_t len) {
+    size_t w = 0;
+    uint8_t tmp[8];
+    for (size_t i = 0; i < g_nmatches; i++) {
+        if (pread64(g_memfd, tmp, len, (off64_t)g_matches[i]) == (ssize_t)len &&
+            memcmp(tmp, needle, len) == 0) {
+            g_matches[w++] = g_matches[i];
+        }
+    }
+    g_nmatches = w;
+    g_truncated = 0;
+}
+
+/* ------------------------------ processi --------------------------------- */
+
+static void list_procs(void) {
+    DIR *d = opendir("/proc");
+    if (!d) { printf("ERR opendir /proc\n"); return; }
+    struct dirent *de;
+    while ((de = readdir(d))) {
+        if (!isdigit((unsigned char)de->d_name[0])) continue;
+        int pid = atoi(de->d_name);
+        char comm[128] = {0};
+        char cmd[1024] = {0};
+        char p[64];
+
+        snprintf(p, sizeof(p), "/proc/%d/comm", pid);
+        FILE *f = fopen(p, "r");
+        if (f) {
+            if (fgets(comm, sizeof(comm), f)) comm[strcspn(comm, "\n")] = 0;
+            fclose(f);
+        }
+
+        snprintf(p, sizeof(p), "/proc/%d/cmdline", pid);
+        int fd = open(p, O_RDONLY);
+        if (fd >= 0) {
+            ssize_t n = read(fd, cmd, sizeof(cmd) - 1);
+            if (n > 0) {
+                cmd[n] = 0;
+                for (ssize_t i = 0; i < n; i++) if (cmd[i] == 0) cmd[i] = ' ';
+                while (n > 0 && cmd[n - 1] == ' ') cmd[--n] = 0;
+            } else {
+                cmd[0] = 0;
+            }
+            close(fd);
+        }
+        if (cmd[0] == 0) continue; /* thread kernel / zombie */
+        printf("%d|%s|%s\n", pid, comm, cmd);
+    }
+    closedir(d);
+}
+
+/* ------------------------------ dispatch --------------------------------- */
+
+static void on_term(int sig) {
+    (void)sig;
+    clear_freezes();
+    _exit(0);
+}
+
+static void dispatch(char *line) {
+    size_t L = strlen(line);
+    while (L > 0 && (line[L - 1] == '\n' || line[L - 1] == '\r')) line[--L] = 0;
+    char *s = line;
+    while (*s == ' ' || *s == '\t') s++;
+    if (*s == 0 || *s == '#') return;
+
+    char cmd[32] = {0};
+    char a1[256] = {0}, a2[256] = {0}, a3[256] = {0};
+    int ntok = sscanf(s, "%31s %255s %255s %255s", cmd, a1, a2, a3);
+    if (ntok < 1) return;
+    for (char *c = cmd; *c; c++) *c = (char)toupper((unsigned char)*c);
+
+    if (strcmp(cmd, "PING") == 0) {
+        printf("OK pong\n");
+
+    } else if (strcmp(cmd, "HELLO") == 0) {
+        printf("CharlyEngine daemon v0.4 — core di scansione memoria\n");
+        printf("protocollo: PING PROCS ATTACH ALIVE REGIONS SCAN RESCAN COUNT RESULTS\n");
+        printf("            READ WRITE FREEZE UNFREEZE RESET RESTORE DETACH QUIT\n");
+        printf("tipi valore: b=int8 w=int16 d=int32 q=int64 f=float D=double\n");
+        printf("OK ready\n");
+
+    } else if (strcmp(cmd, "PROCS") == 0) {
+        list_procs();
+        printf("OK end\n");
+
+    } else if (strcmp(cmd, "ALIVE") == 0) {
+        /* Il processo collegato esiste ancora? (usato dal watchdog dell'app) */
+        if (g_pid < 0) { printf("OK alive=0\n"); return; }
+        char ap[64];
+        snprintf(ap, sizeof(ap), "/proc/%d/maps", g_pid);
+        FILE *af = fopen(ap, "r");
+        printf("OK alive=%d\n", af != NULL);
+        if (af) fclose(af);
+
+    } else if (strcmp(cmd, "ATTACH") == 0) {
+        if (ntok < 2) { printf("ERR uso: ATTACH <pid>\n"); return; }
+        int pid = atoi(a1);
+        if (pid <= 0) { printf("ERR pid non valido\n"); return; }
+        char p[64];
+        snprintf(p, sizeof(p), "/proc/%d/mem", pid);
+        int fd = open(p, O_RDWR);
+        if (fd < 0) {
+            printf("ERR impossibile aprire %s: %s\n", p, strerror(errno));
+            return;
+        }
+        if (g_memfd >= 0) close(g_memfd);
+        g_memfd = fd;
+        g_pid = pid;
+        clear_freezes();
+        g_nmatches = 0;
+        g_truncated = 0;
+        if (load_regions() < 0) {
+            close(fd);
+            g_memfd = -1;
+            g_pid = -1;
+            printf("ERR maps non leggibili\n");
+            return;
+        }
+        printf("OK attached pid=%d regions=%d\n", pid, g_nregions);
+
+    } else if (strcmp(cmd, "REGIONS") == 0) {
+        int maxr = (ntok >= 2) ? atoi(a1) : 40;
+        if (maxr <= 0) maxr = 40;
+        for (int i = 0; i < g_nregions && i < maxr; i++)
+            printf("%016llx-%016llx %s %s\n",
+                   (unsigned long long)g_regions[i].start,
+                   (unsigned long long)g_regions[i].end,
+                   g_regions[i].perms, g_regions[i].path);
+        printf("OK regions=%d\n", g_nregions);
+
+    } else if (strcmp(cmd, "SCAN") == 0 || strcmp(cmd, "RESCAN") == 0) {
+        if (g_memfd < 0) { printf("ERR nessun processo collegato (ATTACH)\n"); return; }
+        if (ntok < 3) { printf("ERR uso: %s <tipo> <valore>\n", cmd); return; }
+        char t = (char)tolower((unsigned char)a1[0]);
+        uint8_t needle[8];
+        size_t len = 0;
+        if (pack_value(t, a2, needle, &len) != 0) {
+            printf("ERR valore non valido per il tipo '%c'\n", t);
+            return;
+        }
+        g_last_type = t;
+        pthread_mutex_lock(&g_lock);
+        if (strcmp(cmd, "SCAN") == 0) {
+            if (load_regions() < 0) {
+                pthread_mutex_unlock(&g_lock);
+                printf("ERR maps non leggibili\n");
+                return;
+            }
+            do_scan(needle, len);
+        } else {
+            do_rescan(needle, len);
+        }
+        pthread_mutex_unlock(&g_lock);
+        if (g_truncated)
+            printf("OK found=%zu truncated=1\n", g_nmatches);
+        else
+            printf("OK found=%zu\n", g_nmatches);
+
+    } else if (strcmp(cmd, "COUNT") == 0) {
+        printf("OK count=%zu\n", g_nmatches);
+
+    } else if (strcmp(cmd, "RESULTS") == 0) {
+        if (g_memfd < 0) { printf("ERR nessun processo collegato\n"); return; }
+        size_t start = (ntok >= 2) ? (size_t)strtoull(a1, NULL, 0) : 0;
+        size_t count = (ntok >= 3) ? (size_t)strtoull(a2, NULL, 0) : 32;
+        if (count > 256) count = 256;
+        char val[64];
+        pthread_mutex_lock(&g_lock);
+        for (size_t i = start; i < g_nmatches && i < start + count; i++) {
+            format_at(g_matches[i], g_last_type, val, sizeof(val));
+            printf("%llx|%s\n", (unsigned long long)g_matches[i], val);
+        }
+        pthread_mutex_unlock(&g_lock);
+        printf("OK results=%zu\n", g_nmatches);
+
+    } else if (strcmp(cmd, "READ") == 0) {
+        if (g_memfd < 0) { printf("ERR nessun processo collegato\n"); return; }
+        if (ntok < 3) { printf("ERR uso: READ <tipo> <indirizzo hex>\n"); return; }
+        char t = (char)tolower((unsigned char)a1[0]);
+        uint64_t addr = strtoull(a2, NULL, 16);
+        char val[64];
+        pthread_mutex_lock(&g_lock);
+        format_at(addr, t, val, sizeof(val));
+        pthread_mutex_unlock(&g_lock);
+        printf("%llx|%s\n", (unsigned long long)addr, val);
+        printf("OK read\n");
+
+    } else if (strcmp(cmd, "WRITE") == 0) {
+        if (g_memfd < 0) { printf("ERR nessun processo collegato\n"); return; }
+        if (ntok < 4) { printf("ERR uso: WRITE <tipo> <indirizzo hex> <valore>\n"); return; }
+        char t = (char)tolower((unsigned char)a1[0]);
+        uint64_t addr = strtoull(a2, NULL, 16);
+        uint8_t bytes[8];
+        size_t len = 0;
+        if (pack_value(t, a3, bytes, &len) != 0) {
+            printf("ERR valore non valido\n");
+            return;
+        }
+        pthread_mutex_lock(&g_lock);
+        ssize_t w = pwrite64(g_memfd, bytes, len, (off64_t)addr);
+        pthread_mutex_unlock(&g_lock);
+        if (w != (ssize_t)len) {
+            printf("ERR scrittura fallita: %s\n", strerror(errno));
+            return;
+        }
+        char val[64];
+        pthread_mutex_lock(&g_lock);
+        format_at(addr, t, val, sizeof(val));
+        pthread_mutex_unlock(&g_lock);
+        printf("OK write addr=%llx value=%s\n", (unsigned long long)addr, val);
+
+    } else if (strcmp(cmd, "FREEZE") == 0) {
+        if (g_memfd < 0) { printf("ERR nessun processo collegato\n"); return; }
+        if (ntok < 4) { printf("ERR uso: FREEZE <tipo> <indirizzo hex> <valore>\n"); return; }
+        char t = (char)tolower((unsigned char)a1[0]);
+        uint64_t addr = strtoull(a2, NULL, 16);
+        uint8_t bytes[8];
+        size_t len = 0;
+        if (pack_value(t, a3, bytes, &len) != 0) {
+            printf("ERR valore non valido\n");
+            return;
+        }
+        int slot = -1;
+        for (int i = 0; i < g_nfreezes; i++)
+            if (g_freezes[i].addr == addr) { slot = i; break; }
+        if (slot < 0) {
+            if (g_nfreezes >= MAX_FREEZES) { printf("ERR troppi freeze\n"); return; }
+            slot = g_nfreezes++;
+        }
+        g_freezes[slot].addr = addr;
+        g_freezes[slot].len = len;
+        memcpy(g_freezes[slot].bytes, bytes, 8);
+        g_freezes[slot].active = 1;
+        ensure_freeze_thread();
+        printf("OK frozen=%d\n", g_nfreezes);
+
+    } else if (strcmp(cmd, "UNFREEZE") == 0) {
+        if (ntok < 2) { printf("ERR uso: UNFREEZE <indirizzo hex>\n"); return; }
+        uint64_t addr = strtoull(a1, NULL, 16);
+        for (int i = 0; i < g_nfreezes; i++)
+            if (g_freezes[i].addr == addr) g_freezes[i].active = 0;
+        printf("OK unfrozen\n");
+
+    } else if (strcmp(cmd, "UNFREEZE_ALL") == 0) {
+        clear_freezes();
+        printf("OK unfrozen_all\n");
+
+    } else if (strcmp(cmd, "RESTORE") == 0) {
+        /* Ripristina una lista di indirizzi (sessione salvata dall'app).
+         * RESTORE <tipo> <addr hex> <addr hex> ...  — gli indirizzi non più
+         * leggibili (gioco riavviato) vengono scartati. */
+        if (g_memfd < 0) { printf("ERR nessun processo collegato\n"); return; }
+        char t = (char)tolower((unsigned char)a1[0]);
+        if (type_size(t) == 0) { printf("ERR tipo non valido\n"); return; }
+        g_last_type = t;
+        size_t n = 0;
+        char *p = strtok(s, " \t");      /* "RESTORE" */
+        p = strtok(NULL, " \t");         /* tipo */
+        while ((p = strtok(NULL, " \t")) != NULL) {
+            uint64_t addr = strtoull(p, NULL, 16);
+            if (addr == 0) continue;
+            uint8_t tmp[8];
+            if (pread64(g_memfd, tmp, type_size(t), (off64_t)addr) == (ssize_t)type_size(t)) {
+                if (n < MAX_MATCHES) g_matches[n++] = addr;
+            }
+        }
+        g_nmatches = n;
+        g_truncated = 0;
+        printf("OK restored=%zu\n", n);
+
+    } else if (strcmp(cmd, "RESET") == 0) {
+        g_nmatches = 0;
+        g_truncated = 0;
+        printf("OK reset\n");
+
+    } else if (strcmp(cmd, "DETACH") == 0) {
+        clear_freezes();
+        g_nmatches = 0;
+        g_truncated = 0;
+        if (g_memfd >= 0) close(g_memfd);
+        g_memfd = -1;
+        g_pid = -1;
+        g_nregions = 0;
+        printf("OK detached\n");
+
+    } else if (strcmp(cmd, "QUIT") == 0) {
+        printf("OK bye\n");
+        fflush(stdout);
+        clear_freezes();
+        if (g_memfd >= 0) close(g_memfd);
+        exit(0);
+
+    } else {
+        printf("ERR comando sconosciuto: %s (HELP/HELLO per l'elenco)\n", cmd);
+    }
+}
+
+int main(void) {
+    setvbuf(stdout, NULL, _IOLBF, 8192);
+    signal(SIGPIPE, SIG_IGN);
+    signal(SIGTERM, on_term);
+    signal(SIGINT, on_term);
+
+    g_matches = malloc(sizeof(uint64_t) * MAX_MATCHES);
+    if (!g_matches) {
+        printf("ERR out of memory\n");
+        return 1;
+    }
+
+    char *line = NULL;
+    size_t cap = 0;
+    while (getline(&line, &cap, stdin) >= 0) {
+        dispatch(line);
+        fflush(stdout);
+    }
+    /* EOF: l'app è morta → esci anche tu */
+    clear_freezes();
+    free(line);
+    free(g_matches);
+    return 0;
+}
+
+```
+
+`app/src/main/java/com/memscan/app/MainActivity.kt`:
+
+```kt
+package com.memscan.app
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.memscan.app.scan.ScanViewModel
+import com.memscan.app.ui.AppListScreen
+import com.memscan.app.ui.MemScanTheme
+import com.memscan.app.ui.ScanScreen
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // edge-to-edge corretto: sfondo sotto la status bar, contenuto mai
+        // sotto l'orologio/notch (padding safeDrawing qui sotto)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
+        setContent {
+            MemScanTheme {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.safeDrawing),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Root()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Root() {
+    val vm: ScanViewModel = viewModel()
+    val state by vm.state.collectAsState()
+
+    when {
+        state.rootOk == null -> CenterBox("Verifica accesso root…")
+
+        state.rootOk == false -> MessageScreen(
+            message = "Accesso root necessario\n\n" +
+                "CharlyEngine ha bisogno dei permessi di root.\n\n" +
+                "1. Controlla in Magisk/KernelSU che\n" +
+                "   CharlyEngine sia AUTORIZZATO\n" +
+                "2. Poi premi RIPROVA",
+            buttonText = "RIPROVA",
+            onButton = vm::retry
+        )
+
+        state.fatalError != null -> MessageScreen(
+            message = state.fatalError ?: "",
+            buttonText = "RIPROVA",
+            onButton = vm::retry
+        )
+
+        state.target == null -> AppListScreen(vm, state)
+
+        else -> ScanScreen(vm, state)
+    }
+}
+
+@Composable
+private fun CenterBox(msg: String) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            msg,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun MessageScreen(message: String, buttonText: String, onButton: () -> Unit) {
+    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                message,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(20.dp))
+            Button(onClick = onButton) { Text(buttonText) }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/scan/MemscanDaemon.kt`:
+
+```kt
+package com.memscan.app.scan
+
+import android.content.Context
+import java.io.BufferedReader
+import java.io.BufferedWriter
+import java.io.File
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+
+/**
+ * Gestisce il daemon nativo memscand:
+ *  1. copia l'eseguibile (spacciato per libreria) da nativeLibraryDir a /data/local/tmp
+ *  2. lo avvia con `su` restando agganciato a stdin/stdout (protocollo a righe)
+ *
+ * Ogni risposta del daemon = righe dati (opzionali) + una riga finale "OK ..."/"ERR ...".
+ */
+class MemscanDaemon(private val context: Context) {
+
+    data class Reply(val ok: Boolean, val status: String, val data: List<String>)
+
+    /** Callback opzionale: riceve ogni riga per il terminale a schermo. */
+    var onLog: ((String) -> Unit)? = null
+
+    private var process: Process? = null
+    private var writer: BufferedWriter? = null
+    private var reader: BufferedReader? = null
+
+    val isRunning: Boolean get() = process?.isAlive == true
+
+    private fun log(line: String) {
+        onLog?.invoke(line)
+    }
+
+    /** null = avvenuto, altrimenti messaggio d'errore. */
+    fun start(): String? {
+        if (isRunning) return null
+        return try {
+            val lib = File(context.applicationInfo.nativeLibraryDir, "libmemscand.so")
+            if (!lib.exists()) {
+                return "libmemscand.so non trovato in ${context.applicationInfo.nativeLibraryDir}"
+            }
+            log("[su] installo il daemon in /data/local/tmp …")
+            val setup = RootShell.run(
+                "cp \"${lib.absolutePath}\" /data/local/tmp/memscand && " +
+                    "chmod 755 /data/local/tmp/memscand && echo MEMSCAN_OK"
+            )
+            if (!setup.contains("MEMSCAN_OK")) {
+                return "Installazione del daemon fallita (root negato?). su: $setup"
+            }
+
+            val p = ProcessBuilder("su", "-c", "/data/local/tmp/memscand").start()
+            process = p
+            writer = BufferedWriter(OutputStreamWriter(p.outputStream))
+            reader = BufferedReader(InputStreamReader(p.inputStream))
+
+            val hello = send("HELLO")
+            if (!hello.ok) return "Il daemon non risponde: ${hello.status}"
+            hello.data.forEach { log(it) }
+            log("[daemon] attivo, in esecuzione come root")
+            null
+        } catch (e: Exception) {
+            "Errore avvio daemon: ${e.message}"
+        }
+    }
+
+    /** Invia un comando e attende la risposta completa.
+     *  quiet=true: non logga nel terminale (usato per il polling di routine). */
+    @Synchronized
+    fun send(cmd: String, quiet: Boolean = false): Reply {
+        val w = writer ?: throw IllegalStateException("daemon non avviato")
+        val r = reader ?: throw IllegalStateException("daemon non avviato")
+        if (!quiet) log("> $cmd")
+        w.write(cmd)
+        w.newLine()
+        w.flush()
+
+        val data = mutableListOf<String>()
+        var status = ""
+        while (true) {
+            val line = r.readLine() ?: throw IllegalStateException("daemon terminato")
+            if (line.startsWith("OK") || line.startsWith("ERR")) {
+                status = line
+                break
+            }
+            data.add(line)
+        }
+        if (!quiet) {
+            log(
+                if (data.isEmpty()) "< $status"
+                else "< $status  (+${data.size} righe)"
+            )
+        }
+        return Reply(status.startsWith("OK"), status, data)
+    }
+
+    fun stop() {
+        try {
+            if (isRunning) send("QUIT")
+        } catch (_: Exception) {
+        }
+        process?.destroy()
+        process = null
+        writer = null
+        reader = null
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/scan/RootShell.kt`:
+
+```kt
+package com.memscan.app.scan
+
+import java.util.concurrent.TimeUnit
+
+/** Mini wrapper per la shell root (`su -c`). */
+object RootShell {
+
+    /** Esegue un comando come root e ne restituisce lo stdout (+stderr). */
+    fun run(cmd: String, timeoutMs: Long = 20_000): String = try {
+        val p = ProcessBuilder("su", "-c", cmd)
+            .redirectErrorStream(true)
+            .start()
+        val out = p.inputStream.bufferedReader().use { it.readText() }
+        p.waitFor(timeoutMs, TimeUnit.MILLISECONDS)
+        out.trim()
+    } catch (e: Exception) {
+        "ERR: ${e.message}"
+    }
+
+    /** true se `su` esiste, funziona e siamo uid 0. */
+    fun isRootAvailable(): Boolean {
+        if (whichSu().isEmpty()) return false
+        return run("id -u", 8_000).contains("0")
+    }
+
+    private fun whichSu(): String {
+        val paths = System.getenv("PATH") ?: "/system/bin:/system/xbin:/sbin:/vendor/bin"
+        for (dir in paths.split(":")) {
+            val f = java.io.File(dir, "su")
+            if (f.exists()) return f.absolutePath
+        }
+        return ""
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/scan/ScanViewModel.kt`:
+
+```kt
+package com.memscan.app.scan
+
+import android.app.Application
+import android.content.Intent
+import android.graphics.drawable.Drawable
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+enum class ValueType(val code: Char, val label: String, val desc: String) {
+    DWORD('d', "Intero", "monete, gemme, punti"),
+    FLOAT('f', "Decimale", "vita, energia, tempo"),
+    DOUBLE('D', "Decimale doppio", "caso raro"),
+    QWORD('q', "Intero grande", "valori enormi"),
+    WORD('w', "Intero piccolo", "max 32767"),
+    BYTE('b', "Intero piccolissimo", "max 127");
+}
+
+/** pid = 0 -> app non in esecuzione. */
+data class AppEntry(val label: String, val packageName: String, val icon: Drawable?, val pid: Int)
+data class MatchRow(val address: Long, val value: String, val frozen: Boolean)
+
+class ScanViewModel(app: Application) : AndroidViewModel(app) {
+
+    data class UiState(
+        val rootOk: Boolean? = null,        // null = verifica in corso
+        val fatalError: String? = null,
+        val apps: List<AppEntry> = emptyList(),
+        val appsLoading: Boolean = false,
+        val savedCounts: Map<String, Int> = emptyMap(),
+        val search: String = "",
+        val target: AppEntry? = null,
+        val regions: Int = 0,
+        val type: ValueType = ValueType.DWORD,
+        val valueInput: String = "",
+        val matchCount: Long = 0,
+        val truncated: Boolean = false,
+        val results: List<MatchRow> = emptyList(),
+        val log: List<String> = emptyList(),
+        val busy: Boolean = false,
+        val hint: String? = null,
+        // il gioco si è chiuso: sessione conservata, attesa riapertura
+        val watchdog: Boolean = false,
+        // impostazione: mantieni i dati anche se il gioco si chiude
+        val keepData: Boolean = true
+    )
+
+    private val appCtx = getApplication<Application>()
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+
+    private val daemon = MemscanDaemon(appCtx)
+    private val mutex = Mutex()
+    private var pollJob: Job? = null
+    private var watchdogJob: Job? = null
+    private val frozen = mutableSetOf<Long>()
+    private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.ITALY)
+
+    init {
+        _state.update { it.copy(keepData = SessionStore.getKeepData(appCtx)) }
+        daemon.onLog = { line -> pushLog(line) }
+        viewModelScope.launch { bootstrap() }
+    }
+
+    private fun pushLog(line: String) {
+        val stamp = timeFmt.format(Date())
+        _state.update { it.copy(log = (it.log + "$stamp  $line").takeLast(400)) }
+    }
+
+    fun clearLog() = _state.update { it.copy(log = emptyList()) }
+
+    fun setKeepData(on: Boolean) {
+        SessionStore.setKeepData(appCtx, on)
+        _state.update { it.copy(keepData = on) }
+        pushLog("[i] «mantieni dati se il gioco si chiude»: ${if (on) "ON" else "OFF"}")
+    }
+
+    /** Rifa da capo: verifica root + avvio daemon + elenco app. */
+    fun retry() {
+        viewModelScope.launch {
+            try {
+                daemon.stop()
+            } catch (_: Exception) {
+            }
+            _state.update {
+                it.copy(rootOk = null, fatalError = null, log = emptyList(), hint = null)
+            }
+            bootstrap()
+        }
+    }
+
+    private suspend fun bootstrap() {
+        pushLog("[i] verifico l'accesso root…")
+        val root = withContext(Dispatchers.IO) { RootShell.isRootAvailable() }
+        _state.update { it.copy(rootOk = root) }
+        if (!root) {
+            pushLog("[!] nessun root: controlla l'autorizzazione in Magisk/KernelSU")
+            return
+        }
+        pushLog("[+] root OK")
+        _state.update { it.copy(hint = "Avvio del daemon root… autorizza CharlyEngine se Magisk chiede") }
+        val err = withContext(Dispatchers.IO) { daemon.start() }
+        if (err != null) {
+            _state.update { it.copy(fatalError = err) }
+            pushLog("[!] $err")
+            return
+        }
+        loadApps()
+    }
+
+    /* -------------------------- sessioni salvate -------------------------- */
+
+    /** Salva la sessione corrente (indirizzi + congelamenti) per il gioco collegato. */
+    private fun saveSessionNow() {
+        val st = _state.value
+        val target = st.target ?: return
+        val matches = st.results.map { SavedMatch(it.address, it.frozen, it.value) }
+        SessionStore.save(
+            appCtx,
+            SavedSession(target.packageName, target.label, st.type.code, matches, System.currentTimeMillis())
+        )
+        _state.update {
+            it.copy(savedCounts = it.savedCounts + (target.packageName to matches.size))
+        }
+    }
+
+    private fun removeSession() {
+        val pkg = _state.value.target?.packageName ?: return
+        SessionStore.remove(appCtx, pkg)
+        _state.update { it.copy(savedCounts = it.savedCounts - pkg) }
+    }
+
+    /** Dopo l'ATTACH: se c'è una sessione salvata su disco per questo gioco la ripristina. */
+    private suspend fun maybeRestoreSession(entry: AppEntry) {
+        val saved = SessionStore.load(appCtx)[entry.packageName] ?: return
+        if (saved.matches.isEmpty()) return
+        val savedType = ValueType.entries.firstOrNull { it.code == saved.typeCode }
+            ?: ValueType.DWORD
+        _state.update { it.copy(type = savedType) }
+        restoreRows(saved.matches.map { MatchRow(it.address, it.value, it.frozen) })
+        if (_state.value.matchCount > 0) {
+            _state.update {
+                it.copy(
+                    hint = "💾 Sessione ripristinata (${
+                        _state.value.matchCount
+                    } indirizzi, ${frozen.size} congelati). Riprendi da dove eri, oppure «Reset» per ripartire."
+                )
+            }
+        }
+    }
+
+    /** Ripristina un elenco di righe (da disco o dalla memoria durante il watchdog). */
+    private suspend fun restoreRows(rows: List<MatchRow>) {
+        if (rows.isEmpty()) return
+        val typeCode = _state.value.type.code
+        val addrArgs = rows.joinToString(" ") { it.address.toString(16) }
+        val r = send("RESTORE $typeCode $addrArgs")
+        val restored = r?.let {
+            Regex("restored=(\\d+)").find(it.status)?.groupValues?.get(1)?.toIntOrNull()
+        } ?: 0
+
+        if (r != null && r.ok && restored > 0) {
+            for (m in rows.filter { it.frozen }) {
+                val fr = send("FREEZE $typeCode ${m.address.toString(16)} ${m.value}", quiet = true)
+                if (fr?.ok == true) frozen.add(m.address)
+            }
+            _state.update { it.copy(matchCount = restored.toLong(), truncated = false) }
+            pushLog("[💾] ripristinati $restored/${rows.size} indirizzi (${frozen.size} congelati)")
+            loadResultsSuspend()
+            startPolling()
+        } else {
+            _state.update {
+                it.copy(
+                    matchCount = 0, results = emptyList(),
+                    hint = "La sessione salvata non è più valida (il gioco è stato riavviato): fai una nuova scansione"
+                )
+            }
+            pushLog("[!] sessione non valida: rimossa")
+            removeSession()
+        }
+    }
+
+    /* ---------------------------- input UI ------------------------------- */
+
+    fun setSearch(s: String) = _state.update { it.copy(search = s) }
+
+    fun setValueInput(v: String) = _state.update { it.copy(valueInput = v, hint = null) }
+
+    fun setType(t: ValueType) {
+        if (t == _state.value.type) return
+        viewModelScope.launch {
+            send("RESET")
+            frozen.clear()
+            _state.update {
+                it.copy(
+                    type = t, matchCount = 0, truncated = false,
+                    results = emptyList(), valueInput = "",
+                    hint = "Tipo cambiato: rifai la scansione"
+                )
+            }
+        }
+    }
+
+    /* --------------------------- comando base ---------------------------- */
+
+    private suspend fun send(cmd: String, quiet: Boolean = false): MemscanDaemon.Reply? = mutex.withLock {
+        if (!daemon.isRunning) {
+            pushLog("[!] daemon non attivo")
+            null
+        } else {
+            withContext(Dispatchers.IO) {
+                try {
+                    daemon.send(cmd, quiet)
+                } catch (e: Exception) {
+                    pushLog("[!] errore daemon: ${e.message}")
+                    null
+                }
+            }
+        }
+    }
+
+    /** pid corrente del package (0 se non in esecuzione), dai processi live. */
+    private suspend fun pidOf(packageName: String): Int {
+        val reply = send("PROCS", quiet = true) ?: return 0
+        val lines = reply.data
+        val exact = lines.firstOrNull {
+            it.split("|", limit = 3).getOrNull(2)?.trim() == packageName
+        } ?: lines.firstOrNull {
+            it.split("|", limit = 3).getOrNull(2)?.trim()?.startsWith("$packageName:") == true
+        }
+        return exact?.split("|")?.firstOrNull()?.trim()?.toIntOrNull() ?: 0
+    }
+
+    /* ------------------------------ app list ----------------------------- */
+
+    fun loadApps() {
+        viewModelScope.launch {
+            _state.update { it.copy(appsLoading = true) }
+
+            val running = mutableMapOf<String, Int>()
+            send("PROCS")?.data?.forEach { line ->
+                val parts = line.split("|", limit = 3)
+                if (parts.size == 3) {
+                    val pid = parts[0].toIntOrNull() ?: return@forEach
+                    val cmd0 = parts[2].trim().split(" ").firstOrNull() ?: ""
+                    if (cmd0.isNotEmpty() && !running.containsKey(cmd0)) running[cmd0] = pid
+                }
+            }
+
+            val saved = SessionStore.load(appCtx)
+            val pm = appCtx.packageManager
+            val me = appCtx.packageName
+            val apps = withContext(Dispatchers.Default) {
+                pm.getInstalledApplications(0).mapNotNull { ai ->
+                    if (ai.packageName == me) return@mapNotNull null
+                    if (pm.getLaunchIntentForPackage(ai.packageName) == null) return@mapNotNull null
+                    val pid = running[ai.packageName]
+                        ?: running.entries.firstOrNull {
+                            it.key.startsWith(ai.packageName + ":")
+                        }?.value ?: 0
+                    AppEntry(
+                        label = ai.loadLabel(pm).toString(),
+                        packageName = ai.packageName,
+                        icon = runCatching { ai.loadIcon(pm) }.getOrNull(),
+                        pid = pid
+                    )
+                }.sortedWith(
+                    compareByDescending<AppEntry> { it.pid > 0 }
+                        .thenByDescending { (saved[it.packageName]?.matches?.size ?: 0) > 0 }
+                        .thenBy { it.label.lowercase(Locale.ITALY) }
+                )
+            }
+
+            val savedCounts = saved.mapValues { it.value.matches.size }
+            val nRunning = apps.count { it.pid > 0 }
+            _state.update {
+                it.copy(apps = apps, appsLoading = false, savedCounts = savedCounts, hint = null)
+            }
+            pushLog("[i] ${apps.size} app · $nRunning in esecuzione · ${savedCounts.size} sessioni salvate")
+        }
+    }
+
+    /**
+     * Avvia un'app chiusa e la aggancia automaticamente appena il processo parte
+     * (controlla ogni 1,5 s per max 30 s).
+     */
+    fun launchAndAttach(entry: AppEntry) {
+        viewModelScope.launch {
+            val intent = appCtx.packageManager.getLaunchIntentForPackage(entry.packageName)
+            if (intent == null) {
+                pushLog("[!] impossibile avviare ${entry.label}")
+                return@launch
+            }
+            appCtx.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            pushLog("[▶] avvio ${entry.label}… attesa del processo")
+            _state.update { it.copy(hint = "Avvio ${entry.label}… torno qui appena parte") }
+
+            var waited = 0
+            while (waited < 30_000) {
+                delay(1500)
+                waited += 1500
+                val pid = pidOf(entry.packageName)
+                if (pid > 0) {
+                    pushLog("[+] ${entry.label} è in esecuzione (pid $pid): aggancio!")
+                    attach(AppEntry(entry.label, entry.packageName, entry.icon, pid))
+                    return@launch
+                }
+            }
+            _state.update {
+                it.copy(hint = "${entry.label} non risulta avviato: apri il gioco e premi ⟳")
+            }
+            pushLog("[!] ${entry.label} non risulta in esecuzione")
+        }
+    }
+
+    fun openApp(entry: AppEntry) {
+        if (entry.pid > 0) {
+            attach(entry)
+        } else {
+            launchAndAttach(entry)
+        }
+    }
+
+    /* ------------------------------- attach ------------------------------ */
+
+    fun attach(entry: AppEntry) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true) }
+            val ok = attachSuspend(entry, entry.pid, fromStore = true, restartWatchdog = true)
+            if (ok) saveSessionNow()
+            _state.update { it.copy(busy = false) }
+        }
+    }
+
+    /**
+     * Collega un pid. fromStore=true -> ripristina anche la sessione salvata su disco.
+     * restartWatchdog=false quando siamo già DENTRO il watchdog (per non cancellarci da soli).
+     */
+    private suspend fun attachSuspend(
+        entry: AppEntry,
+        pid: Int,
+        fromStore: Boolean,
+        restartWatchdog: Boolean
+    ): Boolean {
+        val reply = send("ATTACH $pid")
+        if (reply == null || !reply.ok) {
+            pushLog("[!] collegamento fallito: ${reply?.status ?: "daemon non attivo"}")
+            loadApps()
+            return false
+        }
+        val regions = Regex("regions=(\\d+)").find(reply.status)
+            ?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        frozen.clear()
+        _state.update {
+            it.copy(
+                target = AppEntry(entry.label, entry.packageName, entry.icon, pid),
+                regions = regions,
+                matchCount = 0, truncated = false,
+                results = emptyList(), valueInput = "", hint = null,
+                watchdog = false
+            )
+        }
+        pushLog("[+] collegato a: ${entry.label} (pid $pid, $regions regioni)")
+        if (fromStore) {
+            maybeRestoreSession(entry)
+        }
+        if (restartWatchdog) startWatchdog()
+        return true
+    }
+
+    fun detach() {
+        viewModelScope.launch {
+            pollJob?.cancel()
+            watchdogJob?.cancel()
+            saveSessionNow()   // la sessione resta salvata: ci puoi tornare
+            send("DETACH")
+            frozen.clear()
+            _state.update {
+                it.copy(
+                    target = null, matchCount = 0, truncated = false,
+                    results = emptyList(), regions = 0, valueInput = "",
+                    hint = null, watchdog = false
+                )
+            }
+            loadApps()
+        }
+    }
+
+    /* --------------------- watchdog: il gioco si chiude ------------------- */
+
+    /**
+     * Controlla ogni 2 s che il gioco sia ancora vivo. Se muore:
+     * con «mantieni dati» ON -> conserva la sessione e attende la riapertura,
+     * poi si ricollega da solo e ripristina indirizzi + congelamenti.
+     */
+    private fun startWatchdog() {
+        watchdogJob?.cancel()
+        watchdogJob = viewModelScope.launch {
+            while (isActive) {
+                delay(2000)
+                val st = _state.value
+                if (st.target == null || st.watchdog || st.busy) continue
+                val alive = send("ALIVE", quiet = true)?.status?.contains("alive=1") == true
+                if (!alive) {
+                    onTargetDied()
+                }
+            }
+        }
+    }
+
+    private suspend fun onTargetDied() {
+        if (_state.value.watchdog) return   // già in attesa
+        pollJob?.cancel()
+        val st = _state.value
+        val target = st.target ?: return
+
+        if (!st.keepData) {
+            send("DETACH", quiet = true)
+            frozen.clear()
+            _state.update {
+                it.copy(
+                    target = null, matchCount = 0, truncated = false,
+                    results = emptyList(), regions = 0, valueInput = "",
+                    hint = null, watchdog = false
+                )
+            }
+            pushLog("[!] ${target.label} si è chiuso: dati azzerati (impostazione «mantieni dati» OFF)")
+            loadApps()
+            return
+        }
+
+        val savedRows = st.results
+        _state.update { it.copy(watchdog = true, hint = null) }
+        pushLog(
+            "[!] ${target.label} si è chiuso: sessione conservata " +
+                "(${savedRows.size} indirizzi). Attendo la riapertura…"
+        )
+
+        var waited = 0
+        while (waited < 1_800_000 && _state.value.target?.packageName == target.packageName) {
+            delay(2500)
+            waited += 2500
+            val pid = pidOf(target.packageName)
+            if (pid > 0) {
+                delay(1500)   // dai il tempo al gioco di avviarsi
+                pushLog("[+] ${target.label} è tornato (pid $pid): ricollego e ripristino…")
+                val ok = attachSuspend(target, pid, fromStore = false, restartWatchdog = false)
+                if (ok) {
+                    restoreRows(savedRows)
+                    _state.update {
+                        it.copy(
+                            hint = "💾 Ricollegato dopo la riapertura: ${
+                                it.matchCount
+                            }/${savedRows.size} indirizzi ancora validi. " +
+                                "Se sono 0, il riavvio ha spostato la memoria: rifai la scansione."
+                        )
+                    }
+                    saveSessionNow()
+                } else {
+                    _state.update { it.copy(watchdog = false) }
+                }
+                return
+            }
+        }
+        // attesa scaduta (30 min): torno in modalità normale, il watchdog riparte da solo
+        _state.update { it.copy(watchdog = false) }
+    }
+
+    /* ------------------------------- scansioni --------------------------- */
+
+    fun newScan() {
+        val st = _state.value
+        if (st.valueInput.isBlank()) {
+            _state.update { it.copy(hint = "Inserisci il valore attuale della valuta") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, hint = null) }
+            val reply = send("SCAN ${st.type.code} ${st.valueInput.trim()}")
+            _state.update { it.copy(busy = false) }
+            applyScanReply(reply, first = true)
+        }
+    }
+
+    fun rescan() {
+        val st = _state.value
+        if (st.matchCount <= 0L) {
+            newScan()
+            return
+        }
+        if (st.valueInput.isBlank()) {
+            _state.update { it.copy(hint = "Scrivi il NUOVO valore assunto nel gioco dopo il cambio") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, hint = null) }
+            val reply = send("RESCAN ${st.type.code} ${st.valueInput.trim()}")
+            _state.update { it.copy(busy = false) }
+            applyScanReply(reply, first = false)
+        }
+    }
+
+    private suspend fun applyScanReply(reply: MemscanDaemon.Reply?, first: Boolean) {
+        if (reply == null) return
+        pushLog("[${if (first) "SCANSIONE" else "RISCANSIONE"}] ${reply.status}")
+        if (!reply.ok) {
+            // il gioco è morto mentre eravamo collegati
+            if (reply.status.contains("maps non leggibili") ||
+                reply.status.contains("impossibile aprire")
+            ) {
+                onTargetDied()
+                return
+            }
+            _state.update { it.copy(hint = reply.status.removePrefix("ERR ")) }
+            return
+        }
+        val count = Regex("found=(\\d+)").find(reply.status)
+            ?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+        val truncated = reply.status.contains("truncated=1")
+        _state.update { it.copy(matchCount = count, truncated = truncated) }
+        when {
+            count == 0L -> _state.update {
+                it.copy(results = emptyList(), hint = "Nessun risultato: valore sbagliato? Riprova con SCANSIONA")
+            }
+            count <= 64 -> {
+                loadResultsSuspend()
+                startPolling()
+            }
+            else -> _state.update {
+                it.copy(
+                    results = emptyList(),
+                    hint = "$count indirizzi: fai cambiare la valuta nel gioco e poi RISCANSIONA col nuovo valore"
+                )
+            }
+        }
+        saveSessionNow()
+    }
+
+    fun resetScan() {
+        viewModelScope.launch {
+            send("RESET")
+            frozen.clear()
+            removeSession()
+            _state.update {
+                it.copy(
+                    matchCount = 0, truncated = false, results = emptyList(),
+                    valueInput = "", hint = "Ricerca azzerata (sessione salvata rimossa)"
+                )
+            }
+        }
+    }
+
+    /* ------------------------------- risultati --------------------------- */
+
+    private suspend fun loadResultsSuspend() {
+        val count = _state.value.matchCount
+        if (count !in 1..64) return
+        // polling di routine: quiet=true, nel terminale compaiono solo i cambi [LIVE]
+        val reply = send("RESULTS 0 64", quiet = true) ?: return
+        if (!reply.ok) return
+        val rows = reply.data.mapNotNull { line ->
+            val idx = line.indexOf('|')
+            if (idx <= 0) return@mapNotNull null
+            val addr = line.substring(0, idx).toLongOrNull(16) ?: return@mapNotNull null
+            MatchRow(addr, line.substring(idx + 1), frozen.contains(addr))
+        }
+        // log dei cambiamenti in tempo reale
+        val old = _state.value.results
+        if (old.isNotEmpty()) {
+            val oldMap = old.associate { it.address to it.value }
+            rows.forEach { row ->
+                val prev = oldMap[row.address]
+                if (prev != null && prev != row.value) {
+                    pushLog("[LIVE] 0x${row.address.toString(16)}: $prev → ${row.value}")
+                }
+            }
+        }
+        _state.update { it.copy(results = rows) }
+    }
+
+    fun refreshResults() {
+        viewModelScope.launch { loadResultsSuspend() }
+    }
+
+    /** Aggiorna i risultati (≤64) ogni ~800 ms: il terminale mostra i cambi live. */
+    private fun startPolling() {
+        pollJob?.cancel()
+        pollJob = viewModelScope.launch {
+            while (isActive) {
+                delay(800)
+                val st = _state.value
+                if (!st.busy && !st.watchdog && st.target != null && st.matchCount in 1..64) {
+                    loadResultsSuspend()
+                }
+            }
+        }
+    }
+
+    /* ------------------------------- iniezione --------------------------- */
+
+    /** Scrive il valore in TUTTI gli indirizzi trovati (copie visualizzate incluse). */
+    fun injectAll(rawValue: String) {
+        val st = _state.value
+        val targets = st.results.filter { it.value != "?" }
+        if (rawValue.isBlank() || targets.isEmpty()) return
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, hint = null) }
+            var ok = 0
+            for (row in targets) {
+                val reply = send("WRITE ${st.type.code} ${row.address.toString(16)} ${rawValue.trim()}")
+                if (reply != null && reply.ok) ok++
+            }
+            _state.update { it.copy(busy = false) }
+            if (ok > 0) {
+                pushLog("[💰] INIETTATO $rawValue in $ok/${targets.size} indirizzi")
+            } else {
+                pushLog("[!] iniezione fallita: valore non valido?")
+                _state.update { it.copy(hint = "Iniezione fallita: controlla il valore scritto") }
+            }
+            loadResultsSuspend()
+            saveSessionNow()
+        }
+    }
+
+    fun writeValue(address: Long, rawValue: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true) }
+            val reply = send("WRITE ${_state.value.type.code} ${address.toString(16)} ${rawValue.trim()}")
+            _state.update { it.copy(busy = false) }
+            if (reply != null && reply.ok) {
+                pushLog("[💰] INIETTATO ${rawValue.trim()} in 0x${address.toString(16)}")
+            } else {
+                pushLog("[!] scrittura fallita: ${reply?.status}")
+            }
+            loadResultsSuspend()
+            saveSessionNow()
+        }
+    }
+
+    /** Congela TUTTI gli indirizzi trovati al loro valore attuale. */
+    fun freezeAll() {
+        val st = _state.value
+        val targets = st.results.filter { it.value != "?" }
+        if (targets.isEmpty()) return
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true) }
+            var ok = 0
+            for (row in targets) {
+                val reply = send(
+                    "FREEZE ${st.type.code} ${row.address.toString(16)} ${row.value}",
+                    quiet = true
+                )
+                if (reply?.ok == true) {
+                    frozen.add(row.address)
+                    ok++
+                }
+            }
+            _state.update { it.copy(busy = false) }
+            pushLog("[❄] congelati $ok/${targets.size} indirizzi (valore fisso)")
+            loadResultsSuspend()
+            saveSessionNow()
+        }
+    }
+
+    fun toggleFreeze(row: MatchRow) {
+        viewModelScope.launch {
+            val hexAddr = row.address.toString(16)
+            if (row.frozen) {
+                val reply = send("UNFREEZE $hexAddr")
+                if (reply?.ok == true) {
+                    frozen.remove(row.address)
+                    pushLog("[❄] sbloccato 0x$hexAddr")
+                }
+            } else {
+                val reply = send("FREEZE ${_state.value.type.code} $hexAddr ${row.value}")
+                if (reply?.ok == true) {
+                    frozen.add(row.address)
+                    pushLog("[❄] congelato 0x$hexAddr = ${row.value}")
+                } else {
+                    pushLog("[!] freeze fallito: ${reply?.status}")
+                }
+            }
+            loadResultsSuspend()
+            saveSessionNow()
+        }
+    }
+
+    fun unfreezeAll() {
+        viewModelScope.launch {
+            send("UNFREEZE_ALL")
+            frozen.clear()
+            pushLog("[❄] tutti gli indirizzi sbloccati")
+            loadResultsSuspend()
+            saveSessionNow()
+        }
+    }
+
+    override fun onCleared() {
+        saveSessionNow()
+        Thread { runCatching { daemon.stop() } }.start()
+        super.onCleared()
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/scan/SessionStore.kt`:
+
+```kt
+package com.memscan.app.scan
+
+import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
+
+data class SavedMatch(val address: Long, val frozen: Boolean, val value: String)
+
+data class SavedSession(
+    val packageName: String,
+    val label: String,
+    val typeCode: Char,
+    val matches: List<SavedMatch>,
+    val timestamp: Long
+)
+
+/** Persistenza leggera su SharedPreferences: una sessione per ogni app moddata. */
+object SessionStore {
+    private const val PREFS = "memscan_sessions"
+    private const val KEY_SESSIONS = "sessions"
+    private const val KEY_FIRST_RUN = "first_run_done"
+    private const val KEY_KEEP_DATA = "keep_data"
+
+    /** Impostazione: conserva la sessione anche se il gioco si chiude (default ON). */
+    fun getKeepData(context: Context): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_KEEP_DATA, true)
+
+    fun setKeepData(context: Context, on: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_KEEP_DATA, on).apply()
+    }
+
+    fun save(context: Context, s: SavedSession) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val all = readAll(prefs)
+        val matches = JSONArray()
+        s.matches.forEach { m ->
+            matches.put(
+                JSONObject()
+                    .put("a", m.address.toString(16))
+                    .put("f", m.frozen)
+                    .put("v", m.value)
+            )
+        }
+        all.put(
+            s.packageName,
+            JSONObject()
+                .put("label", s.label)
+                .put("type", s.typeCode.toString())
+                .put("ts", s.timestamp)
+                .put("matches", matches)
+        )
+        prefs.edit().putString(KEY_SESSIONS, all.toString()).apply()
+    }
+
+    fun remove(context: Context, pkg: String) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val all = readAll(prefs)
+        all.remove(pkg)
+        prefs.edit().putString(KEY_SESSIONS, all.toString()).apply()
+    }
+
+    fun load(context: Context): Map<String, SavedSession> {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val all = readAll(prefs)
+        val out = mutableMapOf<String, SavedSession>()
+        val keys = all.keys()
+        while (keys.hasNext()) {
+            val pkg = keys.next() ?: continue
+            val o = runCatching { all.getJSONObject(pkg) }.getOrNull() ?: continue
+            val matches = mutableListOf<SavedMatch>()
+            runCatching {
+                val arr = o.getJSONArray("matches")
+                for (i in 0 until arr.length()) {
+                    val m = arr.getJSONObject(i)
+                    val addr = m.optString("a").toLongOrNull(16) ?: continue
+                    matches.add(SavedMatch(addr, m.optBoolean("f", false), m.optString("v", "0")))
+                }
+            }
+            out[pkg] = SavedSession(
+                packageName = pkg,
+                label = runCatching { o.getString("label") }.getOrDefault(pkg),
+                typeCode = runCatching { o.getString("type").firstOrNull() }.getOrNull() ?: 'd',
+                matches = matches,
+                timestamp = runCatching { o.getLong("ts") }.getOrDefault(0L)
+            )
+        }
+        return out
+    }
+
+    fun isFirstRun(context: Context): Boolean =
+        !context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_FIRST_RUN, false)
+
+    fun setFirstRunDone(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit().putBoolean(KEY_FIRST_RUN, true).apply()
+    }
+
+    private fun readAll(prefs: android.content.SharedPreferences): JSONObject =
+        runCatching { JSONObject(prefs.getString(KEY_SESSIONS, "{}") ?: "{}") }
+            .getOrDefault(JSONObject())
+}
+
+```
+
+`app/src/main/java/com/memscan/app/ui/AppListScreen.kt`:
+
+```kt
+package com.memscan.app.ui
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.memscan.app.scan.AppEntry
+import com.memscan.app.scan.ScanViewModel
+import com.memscan.app.scan.SessionStore
+
+@Composable
+fun AppListScreen(vm: ScanViewModel, state: ScanViewModel.UiState) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    var showGuide by remember { mutableStateOf(SessionStore.isFirstRun(ctx)) }
+    LaunchedEffect(Unit) {
+        if (SessionStore.isFirstRun(ctx)) SessionStore.setFirstRunDone(ctx)
+    }
+
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+
+        Spacer(Modifier.size(12.dp))
+
+        /* intestazione */
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(44.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    ">_",
+                    fontSize = 17.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "CharlyEngine",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "il mini Cheat Engine · serve root · v0.4",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(onClick = { showGuide = true }) {
+                Icon(Icons.Filled.HelpOutline, contentDescription = "guida",
+                    tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+
+        Spacer(Modifier.size(12.dp))
+
+        /* istruzioni passo 1 */
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier
+                        .size(38.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) { Text("📲", fontSize = 17.sp) }
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text("Passo 1 — Scegli il gioco", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.size(2.dp))
+                    Text(
+                        "• Gioco GIÀ APERTO → tocalo per collegarti subito\n" +
+                            "• Gioco CHIUSO → tocca ▶ AVVIA: lo aggancio da solo appena parte\n" +
+                            "• 💾 = hai una sessione salvata per quel gioco",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.size(12.dp))
+
+        /* ricerca + ricarica */
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = state.search,
+                onValueChange = vm::setSearch,
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("Cerca il gioco…") },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            FilledTonalButton(
+                onClick = vm::loadApps,
+                enabled = !state.appsLoading,
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 14.dp)
+            ) { Text(if (state.appsLoading) "…" else "⟳") }
+        }
+
+        state.hint?.let {
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+
+        if (state.appsLoading) {
+            LinearProgressIndicator(Modifier.fillMaxWidth().padding(vertical = 8.dp))
+        }
+
+        val filtered = remember(state.apps, state.search) {
+            if (state.search.isBlank()) state.apps
+            else state.apps.filter {
+                it.label.contains(state.search, true) ||
+                    it.packageName.contains(state.search, true)
+            }
+        }
+
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            items(filtered, key = { it.packageName }) { app ->
+                AppRow(app, savedCount = state.savedCounts[app.packageName] ?: 0) {
+                    vm.openApp(app)
+                }
+            }
+        }
+
+        Spacer(Modifier.size(8.dp))
+    }
+
+    if (showGuide) {
+        GuideDialog { showGuide = false }
+    }
+}
+
+@Composable
+private fun AppRow(app: AppEntry, savedCount: Int, onClick: () -> Unit) {
+    val running = app.pid > 0
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = if (running) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (running) MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+            else MaterialTheme.colorScheme.outline
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            val bmp = remember(app.packageName) { app.icon?.toBitmapOrNull() }
+            if (bmp != null) {
+                Image(bitmap = bmp, contentDescription = null, modifier = Modifier.size(44.dp))
+            } else {
+                Box(
+                    Modifier
+                        .size(44.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(app.label, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.Medium)
+                Text(
+                    app.packageName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (savedCount > 0) {
+                    Text(
+                        "💾 sessione salvata · $savedCount indirizzi",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            if (running) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(50)
+                ) {
+                    Text(
+                        "● IN ESECUZIONE · pid ${app.pid}",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                    )
+                }
+            } else {
+                FilledTonalButton(
+                    onClick = onClick,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                        horizontal = 12.dp, vertical = 6.dp
+                    )
+                ) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(2.dp))
+                    Text("AVVIA", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/ui/Components.kt`:
+
+```kt
+package com.memscan.app.ui
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+/** Pulsante azione grande: emoji + titolo in grassetto + sottotitolo. */
+@Composable
+fun ActionButton(
+    text: String,
+    sub: String? = null,
+    emoji: String? = null,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    containerColor: Color? = null,
+    contentColor: Color? = null,
+    outlined: Boolean = false
+) {
+    val shape = RoundedCornerShape(16.dp)
+    val inner: @Composable () -> Unit = {
+        if (emoji != null) {
+            Text(emoji, fontSize = 18.sp)
+            Spacer(Modifier.width(8.dp))
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
+            if (sub != null) {
+                Text(sub, fontSize = 10.sp, fontWeight = FontWeight.Normal)
+            }
+        }
+    }
+    if (outlined) {
+        OutlinedButton(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = modifier,
+            shape = shape
+        ) { inner() }
+    } else {
+        Button(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = modifier,
+            shape = shape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = containerColor ?: MaterialTheme.colorScheme.primary,
+                contentColor = contentColor ?: MaterialTheme.colorScheme.onPrimary
+            )
+        ) { inner() }
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/ui/Draw.kt`:
+
+```kt
+package com.memscan.app.ui
+
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import androidx.compose.ui.graphics.asImageBitmap
+
+/** Converte un Drawable in ImageBitmap per la UI Compose. */
+fun Drawable.toBitmapOrNull(): androidx.compose.ui.graphics.ImageBitmap? = runCatching {
+    if (this is BitmapDrawable) {
+        bitmap.asImageBitmap()
+    } else {
+        val w = intrinsicWidth.coerceAtLeast(1)
+        val h = intrinsicHeight.coerceAtLeast(1)
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        setBounds(0, 0, canvas.width, canvas.height)
+        draw(canvas)
+        bmp.asImageBitmap()
+    }
+}.getOrNull()
+
+```
+
+`app/src/main/java/com/memscan/app/ui/GuideDialog.kt`:
+
+```kt
+package com.memscan.app.ui
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+
+/** Guida in-app: spiega tutta la procedura e ogni pulsante. */
+@Composable
+fun GuideDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Come funziona (guida rapida)") },
+        text = {
+            Column(
+                Modifier
+                    .heightIn(max = 440.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Section(
+                    "📲 I 4 passi",
+                    "1. Trova il gioco nell'elenco: se è chiuso tocca ▶ AVVIA e MemScan lo aggancia da solo appena parte\n" +
+                        "2. Guarda la valuta nel gioco (es. 850 monete), scrivi 850 in MemScan e premi SCANSIONA\n" +
+                        "3. Fai cambiare la valuta nel gioco (compra qualcosa → 743), scrivi 743 e premi RISCANSIONA. Ripeti finché restano pochi indirizzi\n" +
+                        "4. INIETTA il valore che vuoi (es. 999999) e/o CONGELA per tenerlo fisso"
+                )
+                Section(
+                    "🔎 SCANSIONA",
+                    "Cerca nella memoria del gioco tutti gli indirizzi che contengono il numero scritto. Se trovi migliaia di risultati è normale: il numero esiste in tante copie."
+                )
+                Section(
+                    "🔄 RISCANSIONA",
+                    "Tiene solo gli indirizzi che ADESSO contengono il nuovo numero. Serve dopo aver fatto cambiare la valuta nel gioco: è così che si \"separa\" l'indirizzo giusto dalle copie."
+                )
+                Section(
+                    "💰 INIETTA / INIETTA IN TUTTI",
+                    "Scrive il numero sceluto direttamente nella memoria del gioco. \"INIETTA IN TUTTI\" lo scrive in tutti gli indirizzi trovati in un colpo — utile perché il gioco spesso tiene una copia \"da mostrare\" e una \"vera\"."
+                )
+                Section(
+                    "❄ CONGELA / CONGELA TUTTI / SBLOCCA",
+                    "Blocca il valore per sempre: MemScan lo riscrive ogni 250 ms, quindi il gioco non può più cambiarlo. Perfetto se la valuta torna indietro da sola. SBLOCCA lo libera di nuovo."
+                )
+                Section(
+                    "🔢 Tipo di valore",
+                    "Monete, gemme, punti → «Intero». Vita, energia, tempo → «Decimale». Gli altri tipi sono per casi particolari."
+                )
+                Section(
+                    "🖥️ TERMINALE",
+                    "Il registro di tutto quello che succede: scansioni, iniezioni e — quando un valore cambia — le righe [LIVE] che mostrano il cambiamento in tempo reale."
+                )
+                Section(
+                    "💡 Consigli",
+                    "• Non trovi il valore? Prova ×10 o ×100: il gioco mostra 850 ma salva 8500\n" +
+                        "• Il gioco mostra il vecchio numero dopo l'iniezione? Usa INIETTA IN TUTTI\n" +
+                        "• Il valore torna indietro da solo? CONGELA TUTTI\n" +
+                        "• Con pochi risultati guarda le righe [LIVE]: l'indirizzo giusto è quello che cambia quando cambia la valuta"
+                )
+                Section(
+                    "💾 Sessioni salvate e riapertura",
+                    "Quando esci da CharlyEngine gli indirizzi trovati per ogni gioco restano salvati (li vedi col pallino 💾 nell'elenco) e si ripristinano da soli al ritorno. In più, con l'impostazione «Mantieni i dati se il gioco si chiude» attiva: se il gioco si chiude mentre sei collegato, la sessione resta in memoria e appena lo riapri CharlyEngine si ricollega e ripristina indirizzi e congelamenti da solo. Se il riavvio sposta la memoria, gli indirizzi validi superstiti vengono conservati e gli altri scartati."
+                )
+                Section(
+                    "⚠️ Uso responsabile",
+                    "Solo giochi OFFLINE sul TUO telefono. Nei giochi online i valori stanno nel server e non si possono toccare; modificarli viola i termini di servizio e porta al ban."
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Ho capito!") }
+        }
+    )
+}
+
+@Composable
+private fun Section(title: String, body: String) {
+    Spacer(Modifier.height(12.dp))
+    Text(
+        title,
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary
+    )
+    Spacer(Modifier.height(2.dp))
+    Text(
+        body,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+```
+
+`app/src/main/java/com/memscan/app/ui/ScanScreen.kt`:
+
+```kt
+package com.memscan.app.ui
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.memscan.app.scan.MatchRow
+import com.memscan.app.scan.ScanViewModel
+import com.memscan.app.scan.ValueType
+
+/* ------------------------- procedura a 4 passi --------------------------- */
+
+enum class Step(val n: Int, val title: String) {
+    APP(1, "App"),
+    CERCA(2, "Cerco"),
+    AFFINA(3, "Affino"),
+    INIETTA(4, "Inietto")
+}
+
+fun currentStep(state: ScanViewModel.UiState): Step = when {
+    state.target == null -> Step.APP
+    state.matchCount == 0L -> Step.CERCA
+    state.matchCount > 64 -> Step.AFFINA
+    else -> Step.INIETTA
+}
+
+private val MoneyBg = Color(0xFFFFD666)
+private val MoneyFg = Color(0xFF3B2F00)
+
+/* ------------------------------ schermata -------------------------------- */
+
+@Composable
+fun ScanScreen(vm: ScanViewModel, state: ScanViewModel.UiState) {
+    var editing by remember { mutableStateOf<MatchRow?>(null) }
+    var showGuide by remember { mutableStateOf(false) }
+    val step = currentStep(state)
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .animateContentSize()
+            .padding(bottom = 8.dp)
+    ) {
+
+        /* intestazione */
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val bmp = remember(state.target?.packageName) { state.target?.icon?.toBitmapOrNull() }
+            if (bmp != null) {
+                Image(
+                    bitmap = bmp, contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
+                )
+            }
+            Spacer(Modifier.width(10.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    state.target?.label ?: "—",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    "pid ${state.target?.pid} · ${state.regions} regioni di memoria",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(onClick = { showGuide = true }) {
+                Icon(Icons.Filled.HelpOutline, contentDescription = "guida",
+                    tint = MaterialTheme.colorScheme.primary)
+            }
+            TextButton(onClick = vm::detach) { Text("Cambia app", fontSize = 12.sp) }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        StepBar(step)
+
+        Spacer(Modifier.height(10.dp))
+        InstructionCard(step, state)
+
+        /* banner: il gioco si è chiuso ma la sessione è al sicuro */
+        if (state.watchdog) {
+            Spacer(Modifier.height(10.dp))
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("⏳", fontSize = 22.sp)
+                    Spacer(Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            "Gioco chiuso — dati al sicuro",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                        Text(
+                            "Sessione conservata (${state.results.size} indirizzi). Riapri il gioco quando vuoi: " +
+                                "mi ricollego e ripristino tutto da solo.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+            }
+        }
+
+        if (state.busy) {
+            Spacer(Modifier.height(6.dp))
+            LinearProgressIndicator(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        /* valore + tipo */
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = state.valueInput,
+                onValueChange = vm::setValueInput,
+                modifier = Modifier.weight(1f),
+                label = { Text("Valore della valuta (es. 850)") },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            TypeSelector(state.type, vm::setType)
+        }
+
+        /* bottoni principali */
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ActionButton(
+                text = if (state.matchCount == 0L) "SCANSIONA" else "NUOVA RICERCA",
+                sub = "col valore attuale",
+                emoji = "🔎",
+                onClick = vm::newScan,
+                enabled = !state.busy && !state.watchdog && state.valueInput.isNotBlank(),
+                modifier = Modifier.weight(1f)
+            )
+            ActionButton(
+                text = "RISCANSIONA",
+                sub = "dopo il cambio nel gioco",
+                emoji = "🔄",
+                onClick = vm::rescan,
+                enabled = !state.busy && !state.watchdog && state.matchCount > 0,
+                modifier = Modifier.weight(1f),
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
+            )
+        }
+        TextButton(onClick = vm::resetScan, enabled = !state.busy) { Text("Reset ricerca", fontSize = 12.sp) }
+
+        /* impostazione: mantieni i dati se il gioco si chiude */
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "Mantieni i dati se il gioco si chiude",
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = state.keepData,
+                onCheckedChange = vm::setKeepData,
+                modifier = Modifier.scale(0.75f)
+            )
+        }
+
+        /* stato */
+        Text(
+            buildString {
+                append("Indirizzi trovati: ")
+                append(if (state.matchCount == 0L) "—" else state.matchCount)
+                if (state.truncated) append(" (troppi: raffina)")
+            },
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            color = if (state.matchCount in 1..64) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp
+        )
+        state.hint?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary)
+        }
+
+        /* pannello INIETTA */
+        if (step == Step.INIETTA) {
+            Spacer(Modifier.height(10.dp))
+            InjectPanel(vm, state)
+        }
+
+        /* risultati */
+        if (state.results.isNotEmpty()) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "Risultati (valori live) — tocca INIETTA su un indirizzo:",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Spacer(Modifier.height(6.dp))
+            LazyColumn(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                items(state.results, key = { it.address }) { row ->
+                    ResultRow(
+                        row = row,
+                        onInject = { editing = row },
+                        onFreeze = { vm.toggleFreeze(row) }
+                    )
+                }
+            }
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+
+        /* terminale */
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(8.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "TERMINALE — registro live",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = vm::clearLog, contentPadding = PaddingValues(0.dp)) {
+                Text("pulisci", fontSize = 11.sp)
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        TerminalBox(state.log, Modifier.weight(0.28f).fillMaxWidth())
+    }
+
+    editing?.let { row ->
+        EditValueDialog(
+            row = row,
+            onConfirm = { v ->
+                vm.writeValue(row.address, v)
+                editing = null
+            },
+            onDismiss = { editing = null }
+        )
+    }
+
+    if (showGuide) {
+        GuideDialog { showGuide = false }
+    }
+}
+
+/* ------------------------------ step bar --------------------------------- */
+
+@Composable
+private fun StepBar(current: Step) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Step.entries.forEach { s ->
+            val active = s == current
+            val done = s.n < current.n
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = when {
+                    active -> MaterialTheme.colorScheme.primary
+                    done -> MaterialTheme.colorScheme.secondaryContainer
+                    else -> MaterialTheme.colorScheme.surface
+                },
+                border = if (!active)
+                    androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                else null,
+                modifier = Modifier.weight(1f)
+            ) {
+                Row(
+                    Modifier.padding(vertical = 7.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (done) "✓" else "${s.n}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            active -> MaterialTheme.colorScheme.onPrimary
+                            done -> MaterialTheme.colorScheme.onSecondaryContainer
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        s.title,
+                        fontSize = 11.sp,
+                        fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                        color = when {
+                            active -> MaterialTheme.colorScheme.onPrimary
+                            done -> MaterialTheme.colorScheme.onSecondaryContainer
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/* -------------------------- istruzioni per passo ------------------------- */
+
+@Composable
+private fun InstructionCard(step: Step, state: ScanViewModel.UiState) {
+    val (icon, title, text) = when (step) {
+        Step.CERCA -> Triple(
+            "💡",
+            "Passo 2 — Cerco il valore",
+            "Apri il gioco e guarda il numero della valuta (es. 850 monete). Scrivi qui sotto quel numero e premi SCANSIONA."
+        )
+        Step.AFFINA -> Triple(
+            "🔄",
+            "Passo 3 — Affino la ricerca",
+            "${state.matchCount} indirizzi sono troppi. Fai cambiare la valuta nel gioco (compra o vendi qualcosa), poi scrivi il NUOVO numero e premi RISCANSIONA. Ripeti finché ne restano pochi."
+        )
+        Step.INIETTA -> Triple(
+            "💰",
+            "Passo 4 — Inietta!",
+            "Scrivi sotto il valore che vuoi (es. 999999) e premi INIETTA IN TUTTI. Se il gioco lo riporta indietro, premi CONGELA TUTTI."
+        )
+        Step.APP -> Triple("", "", "")
+    }
+    if (step == Step.APP) return
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier
+                    .size(38.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                contentAlignment = Alignment.Center
+            ) { Text(icon, fontSize = 17.sp) }
+            Spacer(Modifier.width(10.dp))
+            Column {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/* --------------------------- pannello inietta ---------------------------- */
+
+@Composable
+private fun InjectPanel(vm: ScanViewModel, state: ScanViewModel.UiState) {
+    var value by remember(state.matchCount) { mutableStateOf("") }
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = RoundedCornerShape(18.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                "💰 Valore da iniettare",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = value,
+                onValueChange = { value = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("es. 999999") },
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp)
+            )
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ActionButton(
+                    text = "INIETTA IN TUTTI",
+                    sub = "in ${state.results.size} indirizzi",
+                    emoji = "💰",
+                    onClick = { vm.injectAll(value) },
+                    enabled = value.isNotBlank() && !state.busy,
+                    modifier = Modifier.weight(1f),
+                    containerColor = MoneyBg,
+                    contentColor = MoneyFg
+                )
+                ActionButton(
+                    text = "CONGELA TUTTI",
+                    sub = "valore fisso per sempre",
+                    emoji = "❄",
+                    onClick = vm::freezeAll,
+                    enabled = !state.busy && state.results.any { !it.frozen },
+                    modifier = Modifier.weight(1f),
+                    outlined = true
+                )
+            }
+            if (state.results.any { it.frozen }) {
+                TextButton(onClick = vm::unfreezeAll) { Text("Sblocca tutti", fontSize = 12.sp) }
+            }
+        }
+    }
+}
+
+/* ------------------------------ risultati -------------------------------- */
+
+@Composable
+private fun ResultRow(row: MatchRow, onInject: () -> Unit, onFreeze: () -> Unit) {
+    Surface(
+        color = if (row.frozen) MaterialTheme.colorScheme.secondaryContainer
+        else MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(14.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (row.frozen) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+            else MaterialTheme.colorScheme.outline
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "0x${row.address.toString(16)}",
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        row.value,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (row.frozen) MaterialTheme.colorScheme.secondary
+                        else MaterialTheme.colorScheme.primary
+                    )
+                    if (row.frozen) {
+                        Spacer(Modifier.width(6.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(50)
+                        ) {
+                            Text(
+                                "❄ CONGELATO",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            OutlinedButton(
+                onClick = onInject,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(14.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("INIETTA", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            }
+            TextButton(
+                onClick = onFreeze,
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp)
+            ) {
+                Icon(
+                    Icons.Filled.AcUnit,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = if (row.frozen) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(2.dp))
+                Text(
+                    if (row.frozen) "SBLOCCA" else "CONGELA",
+                    fontSize = 11.sp
+                )
+            }
+        }
+    }
+}
+
+/* ------------------------------- terminale ------------------------------- */
+
+@Composable
+fun TerminalBox(lines: List<String>, modifier: Modifier = Modifier) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(lines.size) {
+        if (lines.isNotEmpty()) listState.animateScrollToItem(lines.lastIndex)
+    }
+    Surface(
+        color = Color(0xFF05070A),
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = modifier
+    ) {
+        SelectionContainer {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                items(lines.size) { i ->
+                    Text(
+                        lines[i],
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 11.sp,
+                        color = Color(0xFF39D353)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/* ------------------------------- dialoghi -------------------------------- */
+
+@Composable
+private fun EditValueDialog(
+    row: MatchRow,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var text by remember { mutableStateOf(row.value) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("💰 Inietta valore") },
+        text = {
+            Column {
+                Text(
+                    "Indirizzo 0x${row.address.toString(16)}",
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("Nuovo valore (es. 999999)") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(text) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MoneyBg,
+                    contentColor = MoneyFg
+                )
+            ) { Text("INIETTA NELLA MEMORIA", fontWeight = FontWeight.Bold) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Annulla") }
+        }
+    )
+}
+
+@Composable
+private fun TypeSelector(current: ValueType, onPick: (ValueType) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        FilledTonalButton(onClick = { open = true }) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(current.label, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("tipo · tocca per cambiare", fontSize = 9.sp)
+            }
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            ValueType.entries.forEach { t ->
+                DropdownMenuItem(
+                    text = {
+                        Column {
+                            Text(t.label, fontWeight = FontWeight.Bold)
+                            Text(
+                                t.desc,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    onClick = {
+                        onPick(t)
+                        open = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+```
+
+`app/src/main/java/com/memscan/app/ui/Theme.kt`:
+
+```kt
+package com.memscan.app.ui
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+private val Colors = darkColorScheme(
+    primary = Color(0xFF3FB950),
+    onPrimary = Color(0xFF04170A),
+    primaryContainer = Color(0xFF0F2E19),
+    onPrimaryContainer = Color(0xFFA7F3B0),
+    secondary = Color(0xFF58A6FF),
+    onSecondary = Color(0xFF00254D),
+    secondaryContainer = Color(0xFF11213A),
+    onSecondaryContainer = Color(0xFFB6D4FF),
+    tertiary = Color(0xFFFFD666),
+    onTertiary = Color(0xFF3B2F00),
+    tertiaryContainer = Color(0xFF332B00),
+    onTertiaryContainer = Color(0xFFFFE599),
+    background = Color(0xFF0A0E14),
+    onBackground = Color(0xFFC9D1D9),
+    surface = Color(0xFF141A23),
+    onSurface = Color(0xFFC9D1D9),
+    surfaceVariant = Color(0xFF1D2530),
+    onSurfaceVariant = Color(0xFF8B949E),
+    error = Color(0xFFE5534B),
+    outline = Color(0xFF30363D)
+)
+
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp)
+)
+
+@Composable
+fun MemScanTheme(content: @Composable () -> Unit) {
+    // tema sempre scuro (è un tool da hacker, dai)
+    MaterialTheme(colorScheme = Colors, shapes = AppShapes, content = content)
+}
+
+```
+
+`app/src/main/res/drawable/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<!-- CharlyEngine: C di Charly + cursore stile terminale. Minimal. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- sfondo scuro con angoli morbidi -->
+    <path
+        android:fillColor="#0B0F14"
+        android:pathData="M14,0 L94,0 A14,14 0 0 1 108,14 L108,94 A14,14 0 0 1 94,108 L14,108 A14,14 0 0 1 0,94 L0,14 A14,14 0 0 1 14,0 Z" />
+
+    <!-- la "C": arco verde spesso con estremità arrotondate -->
+    <path
+        android:pathData="M69.6,38.4 A22,22 0 1 0 69.6,69.6"
+        android:strokeColor="#3FB950"
+        android:strokeWidth="13"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+
+    <!-- cursore dorato nella bocca della C -->
+    <path
+        android:fillColor="#FFD666"
+        android:pathData="M77,46 h9 a4,4 0 0 1 4,4 v9 a4,4 0 0 1 -4,4 h-9 a4,4 0 0 1 -4,-4 v-9 a4,4 0 0 1 4,-4 Z" />
+</vector>
+
+```
+
+`app/src/main/res/values/strings.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CharlyEngine</string>
+</resources>
+
+```
+
+`app/src/main/res/values/themes.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MemScan" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#0D1117</item>
+        <item name="android:statusBarColor">#0D1117</item>
+        <item name="android:navigationBarColor">#0D1117</item>
+    </style>
+</resources>
+
+```
+
+`build.gradle.kts`:
+
+```kts
+plugins {
+    id("com.android.application") version "8.7.3" apply false
+    id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21" apply false
+}
+
+```
+
+`docs/index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CharlyEngine — mini Cheat Engine per Android (root)</title>
+<style>
+  :root {
+    --bg: #0a0e14; --surface: #141a23; --border: #30363d;
+    --text: #c9d1d9; --muted: #8b949e;
+    --green: #3fb950; --green-dark: #04170a;
+    --blue: #58a6ff; --gold: #ffd666;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* hero */
+  .hero { text-align: center; padding: 72px 20px 48px; }
+  .logo {
+    display: inline-block; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 18px 26px; font-size: 42px; font-weight: 700;
+    color: var(--green); font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace;
+    box-shadow: 0 0 60px rgba(63,185,80,.15);
+  }
+  .hero h1 { font-size: 44px; margin-top: 24px; letter-spacing: -1px; }
+  .hero h1 span { color: var(--green); }
+  .hero p.tag { color: var(--muted); font-size: 19px; margin-top: 10px; }
+  .badges { margin-top: 18px; }
+  .badge {
+    display: inline-block; border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 14px; font-size: 13px; color: var(--muted); margin: 4px;
+    background: var(--surface);
+  }
+  .badge.green { color: var(--green); border-color: rgba(63,185,80,.4); }
+  .badge.gold { color: var(--gold); border-color: rgba(255,214,102,.4); }
+
+  /* terminal mockup */
+  .term {
+    background: #05070a; border: 1px solid var(--border); border-radius: 12px;
+    margin: 36px auto; max-width: 640px; overflow: hidden;
+    font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-size: 13px;
+  }
+  .term .bar {
+    background: var(--surface); padding: 8px 12px; color: var(--muted); font-size: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .term .body { padding: 14px; color: #39d353; white-space: pre; overflow-x: auto; }
+  .term .body .c { color: var(--muted); }
+  .term .body .g { color: var(--gold); }
+
+  /* sections */
+  section { padding: 40px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 26px; margin-bottom: 20px; }
+  h2 .n { color: var(--green); font-family: ui-monospace, monospace; margin-right: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+  }
+  .card .ico { font-size: 26px; }
+  .card h3 { margin: 8px 0 4px; font-size: 16px; }
+  .card p { color: var(--muted); font-size: 14px; }
+
+  .steps { counter-reset: s; }
+  .step {
+    display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px dashed var(--border);
+  }
+  .step:last-child { border-bottom: none; }
+  .step .num {
+    flex: 0 0 40px; height: 40px; border-radius: 50%; background: var(--green);
+    color: var(--green-dark); font-weight: 700; display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .step b { display: block; }
+  .step span { color: var(--muted); font-size: 14px; }
+
+  .cta {
+    text-align: center; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 36px 20px;
+  }
+  .btn {
+    display: inline-block; background: var(--green); color: var(--green-dark);
+    font-weight: 700; font-size: 18px; padding: 14px 34px; border-radius: 14px;
+  }
+  .btn:hover { text-decoration: none; filter: brightness(1.1); }
+  .cta .note { color: var(--muted); font-size: 13px; margin-top: 12px; }
+
+  .warn {
+    border: 1px solid rgba(229,83,75,.4); background: rgba(229,83,75,.08);
+    border-radius: 12px; padding: 16px 18px; font-size: 14px; margin-top: 28px;
+  }
+  .warn b { color: #e5534b; }
+
+  footer { border-top: 1px solid var(--border); padding: 28px 0 48px; color: var(--muted); font-size: 13px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="logo">&gt;_</div>
+  <h1>Charly<span>Engine</span></h1>
+  <p class="tag">Il mini Cheat Engine <b>open source</b> per Android</p>
+  <div class="badges">
+    <span class="badge green">🔓 richiede root (Magisk / KernelSU)</span>
+    <span class="badge">🤖 Android 8.0+</span>
+    <span class="badge gold">⚖️ licenza MIT</span>
+    <span class="badge">🇮🇹 100% italiano</span>
+  </div>
+
+  <div class="term">
+    <div class="bar">TERMINALE — registro live</div>
+    <div class="body"><span class="c">01:44:51</span> [SCANSIONE] OK found=48213
+<span class="c">01:45:02</span> [RISCANSIONE] OK found=3
+<span class="c">01:45:10</span> <span class="g">[💰] INIETTATO 999999 in 3/3 indirizzi</span>
+<span class="c">01:45:11</span> <span class="g">[❄] congelati 3/3 indirizzi (valore fisso)</span>
+<span class="c">01:45:12</span> [LIVE] 0x7f12ab3410: 743 → <span class="g">999999</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="n">#</span>Cosa fa</h2>
+    <div class="grid">
+      <div class="card"><div class="ico">🔎</div><h3>SCANSIONA</h3><p>Cerca nella memoria del gioco tutti gli indirizzi che contengono il valore della valuta (monete, gemme, vite…).</p></div>
+      <div class="card"><div class="ico">🔄</div><h3>RISCANSIONA</h3><p>Cambia la valuta nel gioco, riscansiona col nuovo valore: gli indirizzi si restringono finché resta quello giusto.</p></div>
+      <div class="card"><div class="ico">💰</div><h3>INIETTA</h3><p>Scrive il valore che vuoi direttamente in memoria, in un indirizzo o in tutti insieme (copie visualizzate incluse).</p></div>
+      <div class="card"><div class="ico">❄</div><h3>CONGELA</h3><p>Blocca il valore per sempre: viene riscritto ogni 250 ms e il gioco non può più cambiarlo.</p></div>
+      <div class="card"><div class="ico">💾</div><h3>Sessioni salvate</h3><p>Esci dall'app e torna quando vuoi: indirizzi e congelamenti di ogni gioco restano salvati e si ripristinano da soli.</p></div>
+      <div class="card"><div class="ico">🖥️</div><h3>Terminale live</h3><p>Registro di tutto quello che succede, con i cambiamenti dei valori mostrati in tempo reale.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">#</span>Come funziona in 4 passi</h2>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div><b>Scegli il gioco</b><span>Nell'elenco delle app. Se è chiuso, CharlyEngine lo avvia e lo aggancia da solo appena parte.</span></div></div>
+      <div class="step"><div class="num">2</div><div><b>Cerca il valore</b><span>Guarda la valuta nel gioco (es. 850 monete), scrivi 850 e premi SCANSIONA.</span></div></div>
+      <div class="step"><div class="num">3</div><div><b>Affina</b><span>Fai cambiare la valuta nel gioco, scrivi il nuovo valore e premi RISCANSIONA. Ripeti finché restano pochi indirizzi.</span></div></div>
+      <div class="step"><div class="num">4</div><div><b>Inietta!</b><p>Scrivi 999999, premi INIETTA IN TUTTI e goditi le monete. Se il gioco le riporta indietro: CONGELA TUTTI.</p></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cta">
+      <h2>⬇ Scarica l'APK</h2>
+      <p style="color:var(--muted); margin-bottom:18px">Compilato automaticamente da GitHub Actions</p>
+      <a class="btn" href="https://github.com/andoridcharlyroot-debug/charlyengine/releases">Scarica l'ultima versione</a>
+      <p class="note">Serve un dispositivo <b>rootato</b> con Magisk o KernelSU · Android 8.0+ · nessun permesso speciale</p>
+      <div class="warn">
+        <b>⚠️ Uso responsabile:</b> solo giochi offline sul tuo dispositivo. I giochi online archiviano i valori
+        sui server e non sono modificabili; tentare comunque viola i loro termini di servizio e porta al ban dell'account.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">#</span>Tecnologia</h2>
+    <p style="color:var(--muted)">
+      App in <b style="color:var(--text)">Kotlin + Jetpack Compose</b> (Material 3) e core di scansione in
+      <b style="color:var(--text)">C</b> compilato con l'NDK, eseguito come root via <code>su</code>:
+      legge <code>/proc/&lt;pid&gt;/maps</code>, scansiona la memoria con <code>pread64</code> a blocchi da 1 MB
+      e modifica i valori con <code>pwrite64</code>. Il daemon comunica con l'app con un protocollo testuale.
+      Il tutto in ~600 righe di C e zero dipendenze native. Codice sorgente:
+      <a href="https://github.com/andoridcharlyroot-debug/charlyengine">github.com/andoridcharlyroot-debug/charlyengine</a>
+    </p>
+  </section>
+
+</div>
+
+<footer>
+  CharlyEngine · software libero sotto licenza <a href="https://github.com/andoridcharlyroot-debug/charlyengine/blob/main/LICENSE">MIT</a><br>
+  Fatto con 🔍 e >_ · usa responsibly
+</footer>
+
+</body>
+</html>
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+android.useAndroidX=true
+android.nonTransitiveRClass=true
+kotlin.code.style=official
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/HEAD/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s
+' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='-Dfile.encoding=UTF-8 "-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        org.gradle.wrapper.GradleWrapperMain \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS=-Dfile.encoding=UTF-8 "-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`native-test/driver.py`:
+
+```py
+#!/usr/bin/env python3
+"""Test end-to-end del daemon memscand:
+scansione -> cambio valore nel bersaglio -> rescan -> scrittura -> freeze."""
+import subprocess
+import sys
+import time
+
+MEMSCAN = "./memscand"
+TARGET = "./test_target"
+
+
+class Daemon:
+    def __init__(self):
+        self.p = subprocess.Popen(
+            [MEMSCAN], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            text=True, bufsize=1)
+
+    def cmd(self, line):
+        self.p.stdin.write(line + "\n")
+        self.p.stdin.flush()
+        data = []
+        while True:
+            l = self.p.stdout.readline()
+            if not l:
+                raise RuntimeError("daemon morto")
+            l = l.rstrip("\n")
+            if l.startswith("OK") or l.startswith("ERR"):
+                return l, data
+            data.append(l)
+
+
+fails = []
+
+
+def check(name, cond, info=""):
+    print(("PASS  " if cond else "FAIL  ") + name + ("" if cond else "  -> " + str(info)))
+    if not cond:
+        fails.append(name)
+
+
+t = subprocess.Popen([TARGET], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                     text=True, bufsize=1)
+pid_line = t.stdout.readline().strip()
+assert pid_line.startswith("PID"), pid_line
+tpid = int(pid_line.split()[1])
+print("bersaglio pid:", tpid)
+
+d = Daemon()
+
+# --- base ---
+st, _ = d.cmd("PING");                                   check("PING", st.startswith("OK pong"), st)
+st, _ = d.cmd("PROCS");                                  check("PROCS vede il bersaglio", any(l.startswith(f"{tpid}|") for l in _), st)
+st, _ = d.cmd(f"ATTACH {tpid}");                         check("ATTACH", st.startswith("OK attached"), st)
+st, _ = d.cmd("ALIVE");                                  check("ALIVE (processo vivo)", st.startswith("OK alive=1"), st)
+st, _ = d.cmd("SCAN d 999999999");                       check("SCAN valore assente = 0", st == "OK found=0", st)
+
+# --- flusso monete (DWORD) ---
+st, _ = d.cmd("SCAN d 13371337")
+found = int(st.split("found=")[1].split()[0])
+check("SCAN trova il valore", st.startswith("OK") and found >= 1, st)
+
+t.stdin.write("c\n"); t.stdin.flush()                    # il gioco cambia la valuta
+print("bersaglio:", t.stdout.readline().strip())
+
+st, _ = d.cmd("RESCAN d 424242")
+found = int(st.split("found=")[1].split()[0])
+check("RESCAN dopo il cambio", st.startswith("OK") and found >= 1, st)
+
+st, res = d.cmd("RESULTS 0 64")
+check("RESULTS mostra 424242", st.startswith("OK") and any(l.endswith("|424242") for l in res), (st, res))
+
+addrs = [int(l.split("|")[0], 16) for l in res]
+for a in addrs:
+    st, _2 = d.cmd(f"WRITE d {a:x} 7777777")
+    check(f"WRITE 0x{a:x}", st.startswith("OK write"), st)
+
+t.stdin.write("p\n"); t.stdin.flush()
+coins = t.stdout.readline().strip()
+check("il bersaglio legge 7777777", coins == "COINS 7777777", coins)
+
+# --- freeze: il gioco prova a cambiare ma il valore resta ---
+for a in addrs:
+    st, _3 = d.cmd(f"FREEZE d {a:x} 7777777")
+    check(f"FREEZE 0x{a:x}", st.startswith("OK frozen"), st)
+
+t.stdin.write("c\n"); t.stdin.flush()
+print("bersaglio:", t.stdout.readline().strip())
+time.sleep(1.0)                                          # il thread freeze riscrive ogni 250 ms
+t.stdin.write("p\n"); t.stdin.flush()
+coins = t.stdout.readline().strip()
+check("FREEZE mantiene il valore", coins == "COINS 7777777", coins)
+
+st, _ = d.cmd(f"UNFREEZE {addrs[0]:x}");                 check("UNFREEZE", st.startswith("OK"), st)
+st, _ = d.cmd("UNFREEZE_ALL");                           check("UNFREEZE_ALL", st.startswith("OK"), st)
+
+# --- flusso float (vita) ---
+st, _ = d.cmd("SCAN f 12.5")
+check("SCAN float", st.startswith("OK") and int(st.split("found=")[1].split()[0]) >= 1, st)
+t.stdin.write("h\n"); t.stdin.flush()
+print("bersaglio:", t.stdout.readline().strip())
+st, _ = d.cmd("RESCAN f 99.25")
+check("RESCAN float", st.startswith("OK") and int(st.split("found=")[1].split()[0]) >= 1, st)
+st, res = d.cmd("RESULTS 0 64")
+for l in res:
+    a = int(l.split("|")[0], 16)
+    st, _4 = d.cmd(f"WRITE f {a:x} 3.5")
+    check(f"WRITE float 0x{a:x}", st.startswith("OK write"), st)
+t.stdin.write("r\n"); t.stdin.flush()
+hp = t.stdout.readline().strip()
+check("il bersaglio legge HP 3.50", hp == "HP 3.50", hp)
+
+# --- RESTORE (sessione salvata) ---
+st, _ = d.cmd(f"RESTORE d {addrs[0]:x}")
+check("RESTORE indirizzo valido", st.startswith("OK restored=1"), st)
+st, res = d.cmd("RESULTS 0 8")
+check("RESULTS dopo RESTORE", any(l.endswith("|7777777") for l in res), res)
+st, _ = d.cmd("RESTORE d deadbeef00000000")
+check("RESTORE indirizzo morto scartato", st.startswith("OK restored=0"), st)
+
+# --- chiusura ---
+st, _ = d.cmd("DETACH");                                 check("DETACH", st.startswith("OK detached"), st)
+st, _ = d.cmd("QUIT");                                   check("QUIT", st.startswith("OK bye"), st)
+t.stdin.write("q\n"); t.stdin.flush()
+t.wait(timeout=5)
+
+print()
+if fails:
+    print("TEST FALLITI:", fails)
+    sys.exit(1)
+print("TUTTI I TEST PASSATI ✔")
+
+```
+
+`native-test/run_test.sh`:
+
+```sh
+#!/usr/bin/env bash
+# Test end-to-end del core nativo (funziona su Linux o in Termux)
+set -e
+cd "$(dirname "$0")"
+gcc -O2 -Wall -Wextra -o memscand ../app/src/main/cpp/memscand.c
+gcc -O2 -Wall -Wextra -o test_target test_target.c
+python3 driver.py
+
+```
+
+`native-test/test_target.c`:
+
+```c
+/* Bersaglio finto per i test: "monete" (int) e "vita" (float) sullo heap. */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(void) {
+    int   *coins = malloc(sizeof(int));
+    float *hp    = malloc(sizeof(float));
+    *coins = 13371337;
+    *hp    = 12.5f;
+
+    printf("PID %d\n", (int)getpid());
+    fflush(stdout);
+
+    char buf[64];
+    while (fgets(buf, sizeof buf, stdin)) {
+        if      (buf[0] == 'c') { *coins = 424242;   printf("CHANGED\n"); }
+        else if (buf[0] == 'p') {                    printf("COINS %d\n",  *coins); }
+        else if (buf[0] == 'h') { *hp = 99.25f;      printf("HPCHANGED\n"); }
+        else if (buf[0] == 'r') {                    printf("HP %.2f\n",   *hp); }
+        else if (buf[0] == 'q') break;
+        else printf("?\n");
+        fflush(stdout);
+    }
+    return 0;
+}
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "MemScan"
+include(":app")
+
+```
