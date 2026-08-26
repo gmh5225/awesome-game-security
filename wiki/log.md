@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `description:Deputation/hygieia`: entity [[hygieia]] (Deputation; C/C++ WDK kernel driver; paging-structure scan for vulnerable-driver traces; 1 GB/2 MB/4 KB page mappings; low-level memory forensics; detect/understand prior unsigned-driver activity; anti-cheat + kernel security research); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[memscanner]], [[clear-driver-traces]], [[kernel-pool-scanning]], [[byovd]], and [[instrumentation-callbacks]].
+
 - **2026-08-26** — ingest `description:Deputation/instrumentation_callbacks`: entity [[instrumentation-callbacks]] (Deputation; C++/asm Windows Instrumentation Callback demo; TLS-based recursion mitigation; process-level syscall + exception interception; syscall origin monitoring; analysis and abuse-oriented scenarios; reverse engineers + AC researchers; Instrumentation Callback); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[instrumentation-callback-syscall-logger]], [[hooking-via-instrumentation-callback]], [[syscall-detect]], [[callmon]], [[nasty-alignment]], and [[beservice-intcallbacks]].
 
 - **2026-08-26** — ingest `description:DerekSelander/dynadump`: entity [[dynadump]] (DerekSelander; Objective-C CLI class-dump; dlopen-assisted runtime introspection; Apple binaries + shared cache; dylib/class/interface dump, demangled signatures, in-place signing; exception-handling to avoid constructor side effects; macOS/iOS RE); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[workflow-objc]], [[malimite]], [[aimachdec]], [[runtime-viewer]], and [[ida-ios-helper]].

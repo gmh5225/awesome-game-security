@@ -1523,6 +1523,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [HP Hardware Diagnostics PoC](entities/hp-hardware-diagnostics-poc.md) — HP `etdsupp.sys` diagnostics driver IOCTL LPE (OEM BYOVD / privilege escalation; gmh5225)
 - [hpp-hack](entities/hpp-hack.md) — CS1.6 HPP hack (C/C++; OpenGL + modding + SDK generation; cheat / game:cs1.6; gmh5225)
 - [HPCS2](entities/hpcs2.md) — external CS2 cheat test project (Half-People; C++ Visual Studio; process memory utilities + handle hijacking + CS2 offset headers; INI-configured aim/RCS/ESP; educational cheat and anti-cheat behavior study; cheat / game:cs2 [External])
+- [hygieia](entities/hygieia.md) — Deputation WDK kernel driver; paging-structure scan for vulnerable-driver traces; 1 GB/2 MB/4 KB page mappings; low-level memory forensics for prior unsigned-driver activity; anti-cheat / kernel security research
 - [hyper-reV](entities/hyper-rev.md) — Hyper-V memory introspection / RE (structures / hypercalls / partitions)
 - [HyperDbg](entities/hyperdbg.md) — open-source VT-x/EPT hypervisor-assisted Windows debugger (C/C++; user/kernel; stealth breakpoints, hidden hooks, memory-access monitoring; RE / fuzzing / malware / anti-cheat research; README [VT debuger])
 - [hyperion-disassembler](entities/hyperion-disassembler.md) — Sidenai; native C++ multi-arch disassembler/decompiler (PE/ELF/Mach-O/.NET; x86/x64/ARM/AArch64/MIPS/PPC; CFG, FLIRT, PDB, BinDiff, RTTI, SSA decompiler, packer detection, Lua, ImGui UI; cheat / RE tools)
