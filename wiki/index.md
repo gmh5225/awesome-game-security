@@ -988,6 +988,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DumpIt-mirror](entities/dumpit-mirror.md) — Comae DumpIt mirror; one-click Windows live physical RAM capture (raw / crash dump; Volatility / WinDbg)
 - [DVRT](entities/dvrt.md) — dynamic value resolution table for runtime address resolution (gmh5225; maintains/updates memory offsets on module load/relocation; cheat [Offset])
 - [Dynsec](entities/dynsec.md) — dynamic security analysis framework; instrumentation/monitoring for anti-tamper, anti-debug, integrity checks (gmh5225)
+- [DynaDbg](entities/dynadbg.md) — remote cross-platform RE/dynamic analysis suite (DoranekoSystems; Tauri/React GUI + Rust/C/C++ backend; memory scan, watchpoints, code tracing, host-remote workflows; Android/iOS debugger)
 - [Dynamizer](entities/dynamizer.md) — compact C++ anti-analysis toolkit (string obfuscation, anti-step-over, SW/HW breakpoint checks, `.text` integrity, return-address manipulation, system DLL unhooking; modular drop-in; PaulNorman01)
 - [DX11-BaseHook](entities/dx11-basehook.md) — minimal DX11 Present trampoline + ImGui overlay base (C++; DirectX Hook)
 - [DXInject-UC](entities/dxinject-uc.md) — D3D11 GPU payload transport + compute-shader decode; GPU-assisted process hollowing PoC (a0yark; injection:windows research)
