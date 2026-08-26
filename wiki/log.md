@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-26** — ingest `readme:categories`: Cheat ~2752 (+2; WoahToasty/ToastyLink XBDM Xbox 360 trainer in Cheat > Debugging + sexyiam/VMPLift emulation-first VMProtect 3.8–3.10+ handler lifter in Cheat > Fix VMP; other major section counts stable); entities [[toastylink]] and [[vmplift]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-26** — ingest `description:CoolestEnoch/kernel-su-huawei-nova2`: entity [[kernel-su-huawei-nova2]] (CoolestEnoch; Huawei Nova 2 ARM64 vendor kernel + KernelSU framework patches; Android kernel configs + device tree; vendor BSP KernelSU integration study; Android kernel researchers / root-access developers; cheat / KernelSU for huawei); cited on [[kernelsu]] and [[overviews/mobile-security]]; cross-linked [[android-kernel-huawei-hi6250-8-exp]], [[android-kernel-huawei-mt6761]], [[kernelsu-pixel4xl]], and [[pc-ginkgo]].
 
 - **2026-08-26** — ingest `description:CorrM/CleanCheat`: entity [[clean-cheat]] (CorrM; C++ modular game cheat foundation; separated data providers, feature modules, runners, shared state; sample projects incl. Unreal internal example; maintainable cheat prototype architecture; cheat / Game cheat base); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[unreal-finder-tool]], [[blacksun-framework]], [[omegaware-framework]], [[ue4-base]], and [[nullhooks]].
