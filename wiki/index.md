@@ -775,6 +775,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
 - [daila](entities/daila.md) — ChatGPT decompiler AI assistant (DAILA; cheat / IDA Plugins; human–LLM RE research)
 - [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)
+- [WProtect (DeDf)](entities/dedf-wprotect.md) — Windows PE code virtualizer (disassemble→VM bytecode, jump stubs, new section; AsmJit + udis86; software protection / VM anti-tamper research; DeDf)
 - [DeepSleep](entities/deepsleep.md) — x64 Gargoyle variant; ROP-only + PIC sleep-hide (no APCs; page protection)
 - [debug-remover](entities/debug-remover.md) — C/C++ strip debug info from binaries (Anti Cheat → Binary Packer; anti-RE hardening)
 - [deadcell-csgo](entities/deadcell-csgo.md) — CS:GO internal cheat framework full source (EternityX; C++; aiming, visuals, config, menu; build-and-study learning codebase; legacy Source 1; cheat / game:csgo)
@@ -3394,7 +3395,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [wda_monitor_trick](entities/wda-monitor-trick.md) — WDA/D3D9 monitor hook (display capture intercept; C++)
 
 - [WDACTools](entities/wdactools.md) — PowerShell WDAC CI policy build/deploy (UMCI, CiTool.exe, p7b decrypt)
-- [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (Anti Cheat → Obfuscation Engine)
+- [WProtect](entities/wprotect.md) — C/C++ obfuscation engine (xiaoweime; Anti Cheat → Obfuscation Engine)
 - [WProtectSDK](entities/wprotectsdk.md) — C/C++ WProtect SDK generation (Anti Cheat → Obfuscation Engine)
 - [wpp](entities/wpp.md) — WPP trace-infrastructure DeviceControl hijack PoC (`disk.sys`/`mountmgr.sys`; IRP capture; HWID disk-serial research; btbd)
 - [WDUTF](entities/wdutf.md) — Windows Driver Unit Test Framework (user-space MSTest for kernel drivers)

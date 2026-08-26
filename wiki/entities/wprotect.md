@@ -10,7 +10,9 @@ confidence: medium
 
 # WProtect
 
-C/C++ project listed under Anti Cheat → Obfuscation Engine, centered on WProtect. Aimed at anti-cheat engineers and defensive researchers studying obfuscation-engine designs rather than shipping as an AC product. (source: wiki/sources/descriptions/xiaoweime__WProtect.md)
+C/C++ project listed under Anti Cheat → Obfuscation Engine, centered on WProtect (`xiaoweime/WProtect`). Aimed at anti-cheat engineers and defensive researchers studying obfuscation-engine designs rather than shipping as an AC product. (source: wiki/sources/descriptions/xiaoweime__WProtect.md)
+
+Distinct from [[dedf-wprotect]] (`DeDf/WProtect`) — a separate PE rewrite + custom VM bytecode virtualizer for software protection / anti-tamper research.
 
 Useful as an open obfuscation-engine reference alongside packers and LLVM pass-plugin hardeners—not a full unpacker or commercial protector.
 
@@ -20,4 +22,4 @@ Useful as an open obfuscation-engine reference alongside packers and LLVM pass-p
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[kagura]] · [[shredder-rs]] · [[pe32-password]] · [[x64-exe-packer]]
+[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[dedf-wprotect]] · [[kagura]] · [[shredder-rs]] · [[pe32-password]] · [[x64-exe-packer]]
