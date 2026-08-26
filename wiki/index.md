@@ -2341,6 +2341,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NtPhp](entities/ntphp.md) — PHP interpreter embedded in WDK kernel drivers (Anti Cheat → Dynamic Script)
 - [NlsCodeInjectionThroughRegistry](entities/nls-code-injection-through-registry.md) — NLS registry code-page redirection for early DLL load / persistence (injection research; gmh5225)
 - [NtUserInjectMouseInput-syscall](entities/ntuserinjectmouseinput-syscall.md) — win32k NtUserInjectMouseInput syscall path (user-mode mouse injection; triggerbot/aimbot primitives; gmh5225)
+- [NtUserUpdateWindowTrackingInfo](entities/ntuserupdatewindowtrackinginfo.md) — win32k NtUserUpdateWindowTrackingInfo syscall-path covert KM↔UM comm framework (memory R/W, pattern scan, allocation, pointer swap; D3DXVECTOR2; cheat / AC evasion research)
 - [nullmap](entities/nullmap.md) — Windows driver mapper with post-map trace cleanup (header zero, pool unlink; Afd.sys; gmh5225)
 - [NullBase](entities/nullbase.md) — simple C++ game-hack base for beginners (NullTerminatorr; memory helpers, entity/local-player abstractions, math + W2S; Visual Studio layout; teaches cheat framework structure)
 - [NullHook](entities/nullhook.md) — tutorial split driver+client kernel cheat sample (NullTerminatorr; C/C++ memory/hook workflows; external manual-map load; educational kernel-assisted cheat development; NtDxgkGetTrackedWorkloadStatistics)
