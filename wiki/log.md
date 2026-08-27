@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:ChwnWang0/Android-kernel-inline-hook-framework`: entity [[android-kernel-inline-hook-framework]] (ChwnWang0; lightweight ARM64 Android kernel inline hook framework; full instruction relocation B/BL/ADRP/LDR literal/CBZ/TBZ; 64-bit trampoline long jumps; automatic WP/memory-permission bypass; Android kernel RE / driver and syscall hook research); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-hook-framework]], [[integrated-kernel-module]], [[and64-inline-hook]], and [[android-inline-hook-arm64]].
+
 - **2026-08-27** — ingest `description:Ckateowm/ModernWarfare2-Cpp-External`: entity [[modernwarfare2-cpp-external]] (Ckateowm; C++ injected DLL; D3D11/12 Kiero Present hook + MinHook + ImGui; ESP / aimbot / no recoil; Battle.net + Steam offset paths; lazy imports, XOR strings, direct syscalls; in-process cheat architecture / SDK / AC bypass research; cheat / game:cod mw2); cited on [[overviews/game-hacking]] and [[concepts/present-hook]]; cross-linked [[warzone-internal]], [[modern-warfare-warzone-cheat]], [[kiero]], [[ntminhook]], and [[world-to-screen]].
 
 - **2026-08-27** — ingest `description:ClaudiuGeorgiu/Obfuscapk`: entity [[obfuscapk]] (ClaudiuGeorgiu; modular Python black-box Android APK obfuscator; apktool decompile → smali/resources/manifest obfuscation passes → rebuild; multiple obfuscators; early AAB support via external decompiler; mobile RE / anti-RE resilience evaluation; `[Android]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[black-obfuscator]], [[proguard]], [[jadx]], [[recaf]], and [[deobfuscator]].

@@ -228,6 +228,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-hacking-toolkit](entities/android-kernel-hacking-toolkit.md) — Android aarch64 LKM toolkit (filecopy / hideproc / propedit / syscall_hijack)
 - [android-kernel-huawei-mt6761](entities/android-kernel-huawei-mt6761.md) — Huawei MT6761 (Helio P22) Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-huawei-hi6250-8-exp](entities/android-kernel-huawei-hi6250-8-exp.md) — Huawei hi6250 Android kernel + KernelSU (cheat / Android Kernel Source)
+- [android-kernel-inline-hook-framework](entities/android-kernel-inline-hook-framework.md) — ChwnWang0 ARM64 Android kernel inline hook framework (instruction relocation B/BL/ADRP/LDR literal/CBZ/TBZ; 64-bit trampoline long jumps; automatic WP/memory-permission bypass; kernel RE / hook research)
 - [kernel-su-huawei-nova2](entities/kernel-su-huawei-nova2.md) — Huawei Nova 2 ARM64 kernel + KernelSU (device tree + vendor BSP; cheat / KernelSU for huawei)
 - [android-kernel-motorola-dubai](entities/android-kernel-motorola-dubai.md) — Motorola Dubai (Moto Edge 30) SM7325 Snapdragon 778G GKI Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-oneplus-sm8250](entities/android-kernel-oneplus-sm8250.md) — OnePlus 8/8T/8Pro/(9R?) SM8250 Android kernel source (cheat / Android Kernel Source)
