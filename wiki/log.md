@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:ChiChou/grapefruit`: entity [[grapefruit]] (ChiChou; TypeScript Frida runtime exploration toolkit; web UI; method/crypto hooks, filesystem/SQLite, logs/crash reports, keychain/keystore, traffic capture, Java/ObjC introspection, environment manipulation; iOS + Android; mobile RE / dynamic analysis); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[frida-ide]], [[vscode-frida]], [[mast-orchestrator]], and [[rootraven]].
+
 - **2026-08-27** — ingest `description:ChiChou/vscode-frida`: entity [[vscode-frida]] (ChiChou; unofficial VS Code Frida workbench; TypeScript + Python; target selection, script editing/dispatch, REPL, device logs, iOS/Android helper tooling; frida-tools + mobile connectivity utilities; mobile RE / IDE-native instrumentation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[frida-ide]], [[mast-orchestrator]], and [[rootraven]].
 
 - **2026-08-27** — ingest `description:StarBloomMinecraft/BlarionAntiCheat`: entity [[blarion-anticheat]] (StarBloomMinecraft; JavaScript Bedrock ScriptAPI behavior-pack AC; 40+ combat/movement/inventory/packet modules—fly, killaura, speed, reach, noclip, autoclicker, xray; configurable thresholds/punishments; admin inventory scan + `/flag` WebSocket/proxy API; vanilla/BDS/LiteLoader; Anti Cheat / game:minecraft); already cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[paradox-anticheat]], [[scythe-anticheat]], and [[minecraft-anticheat-list]].

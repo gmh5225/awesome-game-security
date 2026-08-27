@@ -14,7 +14,7 @@ Unofficial Visual Studio Code extension that provides a Frida workbench for mobi
 
 Integrates target selection, script editing and dispatch, REPL workflows, device log viewing, and helper tooling for iOS and Android sessions—aimed at mobile security researchers and reverse engineers who want Frida workflows directly inside an IDE rather than a separate terminal stack.
 
-Complements browser-based [[frida-ide]] and dashboard tools such as [[mast-orchestrator]] and [[rootraven]] as an editor-native mobile instrumentation surface.
+Complements browser-based [[frida-ide]], sibling web UI [[grapefruit]], and dashboard tools such as [[mast-orchestrator]] and [[rootraven]] as an editor-native mobile instrumentation surface.
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements browser-based [[frida-ide]] and dashboard tools such as [[mast-orche
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[frida]] · [[frida-ide]] · [[mast-orchestrator]] · [[rootraven]] · [[frida-android-hook]] · [[frida-smali-trace]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[frida]] · [[frida-ide]] · [[grapefruit]] · [[mast-orchestrator]] · [[rootraven]] · [[frida-android-hook]] · [[frida-smali-trace]]
