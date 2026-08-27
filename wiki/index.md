@@ -354,6 +354,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Ares Framework](entities/ares-framework.md) — C++/C# modding, hooking, and debugging framework (Anti Cheat → Binary Packer; craids)
 - [Ark](entities/ark.md) — distributed-GPU deep learning framework (game security / cheat ML training; gmh5225)
 - [arkdecompiler](entities/arkdecompiler.md) — HarmonyOS NEXT ArkCompiler `.abc` decompiler (ArkTS/ArkJS → JS/TS; mobile RE)
+- [Ark-tools](entities/ark-tools.md) — Windows kernel research tool collection (C/C++ Visual Studio; debug-register/IDT/GDT hooks, kernel APC injection, shadow SSDT inline hooking, registry driver ops, WOW64 cross-arch injection; rootkit / defensive detection study; ChengChengCC; Some kernel research)
 - [Arknights](entities/arknights.md) — Unity-style Arknights gameplay reimplementation (C#; character/monster/dungeon/UI/event/state managers; resource/audio/shop + Lua hooks; no bundled assets; tower-defense RPG architecture study; Game Engine / source; Saukiya)
 - [Ariadne](entities/ariadne.md) — Binary Ninja graph analysis (call graph + block coverage; Cheat Binary Ninja Plugins)
 - [arma3-external-variable-manager](entities/arma3-external-variable-manager.md) — Arma 3 external mission-variable editor (Skengdo; C++; dump/read/edit active mission vars + economy fields; BE-disabled servers; cheat / game:arma3 [External])
