@@ -3171,6 +3171,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [toon](entities/toon.md) — modular C++ graphics-demo engine (driver dev + OpenGL/Vulkan; benjinx; Game Engine / source)
 - [tool-diy-system-memory-dump](entities/tool-diy-system-memory-dump.md) — DIY live Windows system memory dump (crash-dump format; WinDbg / Volatility; gmh5225)
 - [Tool-Tree](entities/tool-tree.md) — Android ROM/APK unpack-repack toolkit for ARM64 (boot/super/APK/APKS/APEX; apktool-style decode/build; root or non-root; Zenlua)
+- [tp-2dside-scroller-bp](entities/tp-2dside-scroller-bp.md) — UE5 2D side-scroller blueprint template (Paper2D starter project, sample assets, optional PaperZD; CobraCodeDev; Game Develop / [UE5 2D template])
 - [ToastyLink](entities/toastylink.md) — C++17 XBDM Xbox 360 trainer/debug (RGH/JTAG; pointer chains, scan/freeze, PPC patches, JSON cheat tables; Cheat Debugging)
 - [Torque 2D](entities/torque2d.md) — open-source cross-platform 2D C++ game engine (Box2D physics; render/audio/animation; modular tooling; multi-platform; Game Engine / 2D)
 - [Torque 3D](entities/torque3d.md) — open-source Torque 3D C++ game engine (CMake; Assimp import; render/physics/network/scripting; multi-platform; Game Engine / 3D)
