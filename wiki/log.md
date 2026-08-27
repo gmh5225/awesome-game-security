@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:Ckateowm/ModernWarfare2-Cpp-External`: entity [[modernwarfare2-cpp-external]] (Ckateowm; C++ injected DLL; D3D11/12 Kiero Present hook + MinHook + ImGui; ESP / aimbot / no recoil; Battle.net + Steam offset paths; lazy imports, XOR strings, direct syscalls; in-process cheat architecture / SDK / AC bypass research; cheat / game:cod mw2); cited on [[overviews/game-hacking]] and [[concepts/present-hook]]; cross-linked [[warzone-internal]], [[modern-warfare-warzone-cheat]], [[kiero]], [[ntminhook]], and [[world-to-screen]].
+
 - **2026-08-27** — ingest `description:ClaudiuGeorgiu/Obfuscapk`: entity [[obfuscapk]] (ClaudiuGeorgiu; modular Python black-box Android APK obfuscator; apktool decompile → smali/resources/manifest obfuscation passes → rebuild; multiple obfuscators; early AAB support via external decompiler; mobile RE / anti-RE resilience evaluation; `[Android]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[black-obfuscator]], [[proguard]], [[jadx]], [[recaf]], and [[deobfuscator]].
 
 - **2026-08-27** — ingest `description:CnCNet/cnc-ddraw`: entity [[cnc-ddraw]] (CnCNet; C/C++ DirectDraw replacement wrapper; rendering backends, shader upscaling, windowed/borderless modes, frame limiting; Windows + Wine/Linux/macOS/Android; legacy 2D retro/modder titles; Old Game / DirectX Compatibility); cited on [[overviews/graphics-api]]; cross-linked [[d2gi]], [[dxwrapper]], [[free-direct]], [[cnc-red-alert]], and [[borderless-gaming]].
