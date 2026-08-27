@@ -14,7 +14,7 @@ Frida-powered runtime exploration toolkit for iOS and Android with a web-based i
 
 Supports method hooking, crypto API interception, filesystem and SQLite inspection, log streaming, and crash reporting. Platform-specific modules cover keychain and keystore inspection, traffic capture, Java and Objective-C introspection, and environment manipulation—aimed at mobile app security testing, reverse engineering, and dynamic analysis workflows.
 
-Complements browser IDE [[frida-ide]], editor-native [[vscode-frida]] (same author), and dashboard tools such as [[mast-orchestrator]] and [[rootraven]] as a unified web UI for Frida mobile instrumentation.
+Complements browser IDE [[frida-ide]], editor-native [[vscode-frida]] (same author), iOS IPA dump CLI [[bagbak]], and dashboard tools such as [[mast-orchestrator]] and [[rootraven]] as a unified web UI for Frida mobile instrumentation.
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements browser IDE [[frida-ide]], editor-native [[vscode-frida]] (same auth
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[frida]] · [[frida-ide]] · [[vscode-frida]] · [[mast-orchestrator]] · [[rootraven]] · [[frida-android-hook]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[frida]] · [[frida-ide]] · [[vscode-frida]] · [[bagbak]] · [[mast-orchestrator]] · [[rootraven]] · [[frida-android-hook]]

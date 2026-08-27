@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:ChiChou/bagbak`: entity [[bagbak]] (ChiChou; Node.js/TypeScript CLI; Frida runtime-decryption agent; decrypt/dump iOS apps to IPA from jailbroken devices; app extensions and embedded frameworks; USB and remote connections; deprecated; `bagbak@5` requires Frida 17; iOS app decryption / binary analysis / mobile RE); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[grapefruit]], [[vscode-frida]], and [[frida-ide]].
+
 - **2026-08-27** — ingest `description:ChiChou/grapefruit`: entity [[grapefruit]] (ChiChou; TypeScript Frida runtime exploration toolkit; web UI; method/crypto hooks, filesystem/SQLite, logs/crash reports, keychain/keystore, traffic capture, Java/ObjC introspection, environment manipulation; iOS + Android; mobile RE / dynamic analysis); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[frida-ide]], [[vscode-frida]], [[mast-orchestrator]], and [[rootraven]].
 
 - **2026-08-27** — ingest `description:ChiChou/vscode-frida`: entity [[vscode-frida]] (ChiChou; unofficial VS Code Frida workbench; TypeScript + Python; target selection, script editing/dispatch, REPL, device logs, iOS/Android helper tooling; frida-tools + mobile connectivity utilities; mobile RE / IDE-native instrumentation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[frida-ide]], [[mast-orchestrator]], and [[rootraven]].
