@@ -2048,6 +2048,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [lsass-usermode-bypass](entities/lsass-usermode-bypass.md) — C++ user-mode bypass demo; reuse LSASS process handles for memory access without kernel driver (ContionMig; Elevating Handle By LSASS)
 - [lsass-extend-mapper](entities/lsass-extend-mapper.md) — unsigned driver map via lsass address-space extend
 - [LUDA](entities/luda.md) — Lua IDA Pro scripting plugin (direct SDK access; cheat / IDA Plugins)
+- [luadecompiler](entities/luadecompiler.md) — Coldzer0 Pascal Lua 5.1–5.5 bytecode disassembler/decompiler (SSA CFG reconstruction, boolean recovery, custom opcode tables for game-modified Lua VMs; script RE / Decompiler)
 - [luagenny](entities/luagenny.md) — C++ Lua SDK codegen (cheat / sdk codegen; RE)
 - [luaboot](entities/luaboot.md) — fully scriptable UEFI bootloader (Lua; MIT; cheat / EFI driver research)
 - [LuaMachine](entities/luamachine.md) — UE4 Lua gameplay scripting plugin (Blueprint assets / metatables; Plugins:Unreal)

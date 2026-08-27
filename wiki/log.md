@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:Coldzer0/LuaDecompiler`: entity [[luadecompiler]] (Coldzer0; Pascal Lua 5.1–5.5 bytecode disassembler/decompiler; SSA CFG reconstruction, boolean expression recovery, custom opcode tables for game-modified Lua VMs; script RE / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[xlua]], [[luamachine]], [[vscript-lua51]], and [[lua-obfuscator-clyde-protection]].
+
 - **2026-08-27** — ingest `description:Colorful-glassblock/duchamp-root`: entity [[duchamp-root]] (Colorful-glassblock; Xiaomi K70e / duchamp one-tap root; CVE-2026-43499 IonStack; NDK C aarch64 LD_PRELOAD preload.so; pselect KASLR leak, futex PI race, pipe-buffer phys R/W, cred patch uid 0; embedded KernelSU ksud; Android 16 per-device offsets; Android kernel LPE / root persistence RE); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[cve-2026-43499-popsicle]], [[root-my-pixel]], and [[ghostlock-app]].
 
 - **2026-08-27** — ingest `description:ComodoSecurity/openedr`: entity [[openedr]] (Comodo Security; open-source EDR platform; C++; system monitoring, event collection, threat detection, AWS SDK cloud analysis integration; real-time Windows endpoint telemetry/response; EDR architecture / endpoint monitoring / defensive system design study; README [EDR]); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[bluespawn]], [[raccine]], [[bamboozledr]], [[edrsandblast]], and [[concepts/etw-threat-intelligence]].
