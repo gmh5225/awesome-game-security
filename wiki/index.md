@@ -99,6 +99,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BD-UN-JB](entities/bd-un-jb.md) — BD-J jailbreak exploit chain (Gezine; xlet payloads + Unsafe; bdj_unpatch BDMV tool; RemoteJarLoader PS5 ≤12.00; network JAR load/logging; PlayStation BD-J sandbox escape)
 - [BetaShield](entities/betashield.md) — C++/Boost client-side AC (integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform; open-source protection design reference; JackBro)
 - [BEDaisy.sys report bypass](entities/bedaisy-bypass.md) — suppress BEDaisy outbound reports; preserve service responses (gmh5225; cheat / explore anticheat system:be)
+- [be-injector](entities/be-injector.md) — Windows COW-bypass injection PoC; physical memory mapping to patch signed module code before copy-on-write split; evades thread/API/signature module checks; AC bypass research (Compiled-Code; cheat / Attack COW)
 - [bedaisy-reversal](entities/bedaisy-reversal.md) — BEDaisy.sys comprehensive RE (integrity/callback/HAL/manual-map checks, handle protection, minifilter, physmem scan, CSRSS/graphics verify, thread/image notify; dllcrt0)
 - [BepInEx-IL2CPPBase](entities/bepinex-il2cppbase.md) — BepInEx Unity IL2CPP mod-menu base (C# rendering/audio/physics hooks; cheat / IL2CPP Menu; gmh5225)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
