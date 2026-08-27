@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:CnCNet/cnc-ddraw`: entity [[cnc-ddraw]] (CnCNet; C/C++ DirectDraw replacement wrapper; rendering backends, shader upscaling, windowed/borderless modes, frame limiting; Windows + Wine/Linux/macOS/Android; legacy 2D retro/modder titles; Old Game / DirectX Compatibility); cited on [[overviews/graphics-api]]; cross-linked [[d2gi]], [[dxwrapper]], [[free-direct]], [[cnc-red-alert]], and [[borderless-gaming]].
+
 - **2026-08-27** — ingest `description:CobraCodeDev/TP_2DSideScrollerBP`: entity [[tp-2dside-scroller-bp]] (CobraCodeDev; UE5 blueprint template; Paper2D-style 2D side-scroller starter project, sample assets, setup guidance; optional PaperZD animation variants; game-dev prototyping—not security research; Game Develop / [UE5 2D template]); cited on [[overviews/game-engine]]; cross-linked [[ue5-roll-a-ball-game]], [[simple-fps-template]], and [[fightinggame-ue5]].
 
 - **2026-08-27** — ingest `description:CodeCracker-Tools/MegaDumper`: entity [[mega-dumper]] (CodeCracker-Tools; C# WinForms; dump native + managed assemblies from live processes; module inspection, anti-dump/hook detection, virtual memory/heap/process exploration, AppDomain enumeration, managed injection + minidump; malware/.NET RE; cheat / [Dump native and .NET assemblies]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[vmunprotect-dumper]], [[magicmida]], [[minidump]], and [[al-khaser]].

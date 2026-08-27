@@ -560,6 +560,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CodM Dumper](entities/codm-dumper.md) — Call of Duty Mobile IL2CPP dump package (Poko-Apps; armv7/arm64; Termux; dump.cs/ida.py/IDA JSON; release distribution; deprecated; [il2cpp dump])
 - [CODM-ESP-Aimbot-Mod-Menu](entities/codm-esp-aimbot-mod-menu.md) — Call of Duty Mobile internal mod menu: injectable library + overlay; ESP / aimbot / gameplay mods (gmh5225; cheat / game:codm [ESP])
 - [CodeCleaner](entities/codecleaner.md) — x64dbg plugin: Capstone + AsmJit disassembly cleanup (redundant NOPs, no-op register moves); Themida mutation assembly; packed/obfuscated binary RE (Steesha; Fix Themida / x64dbg Plugins)
+- [cnc-ddraw](entities/cnc-ddraw.md) — DirectDraw replacement wrapper (CnCNet; C/C++; shader upscaling, windowed/borderless, frame limiting; Windows + Wine; legacy 2D RTS/modder titles; Old Game / DirectX Compatibility)
 - [Command and Conquer: Red Alert](entities/cnc-red-alert.md) — EA open-source C&C: Red Alert + Steam Workshop (Westwood RTS; Game Develop / source)
 - [CmdT](entities/cmdt.md) — TrustedInstaller token launcher (x86/x64 asm; TI ACL / RE forensics)
 - [ConBeerLib](entities/conbeerlib.md) — Linux/Android container·VM detect (cgroup/fs/env; Docker/LXC/K8s/WSL)
