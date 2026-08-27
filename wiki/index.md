@@ -941,6 +941,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [drvscan (ekknod)](entities/drvscan.md) — Windows DMA/PCIe device scanner and memory forensics (C; PCIe enumeration, pcileech-style acquisition, cheat/rootkit signature scans; Anti Cheat / Detection:DMA [Scanner])
 - [Dr. Memory](entities/drmemory.md) — DynamoRIO dynamic memory debugger (UAF, OOB, leaks, uninitialized reads; Windows handle/GDI checks; unmodified binaries; game/anti-cheat reliability testing)
 - [DrillAndJoin](entities/drill-and-join.md) — C++17 Drill & Join exact Boolean synthesis; SMT-guided 64-bit opaque-predicate and MBA-style simplification via Bitwuzla
+- [Duchamp Root](entities/duchamp-root.md) — Xiaomi K70e (duchamp) one-tap root (CVE-2026-43499 IonStack; LD_PRELOAD preload.so; pselect KASLR leak, futex PI race, pipe-buffer phys R/W; embedded KernelSU ksud; Android 16 offsets; cheat / Android root)
 - [Duck-Detector-Refactoring](entities/duck-detector-refactoring.md) — Android local device-integrity inspector (Jetpack Compose + Kotlin + native C++/assembly; root/hook/mount/attestation/virtualization cards; eltavine; cheat / Android root)
 - [Duckov Market Mod](entities/duckov-marketmod.md) — Duckov flea-market C# mod (Harmony patches; Steam-auth API + WebSocket; mod loader with auto-update; RE-derived internals; a0yark; modding / online marketplace research)
 - [deobf](entities/deobf.md) — libtprt.so OLLVM deobf / plugin hooks (Python)
