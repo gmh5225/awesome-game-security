@@ -460,6 +460,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bndb2pat](entities/bndb2pat.md) — Binary Ninja plugin: IDA FLIRT `.pat` patterns from LLIL (wildcard masks, CRC16; sigmake → `.sig`; joren485)
 - [bsimvis](entities/bsimvis.md) — Ghidra BSim binary similarity platform (MISP; Python + JS; Kvrocks/Redis + optional Milvus; REST API + web UI; function diffing, HDBSCAN clustering, call-graph navigation; cheat / Ghidra BSim-based binary similarity)
 - [bobalkkagi](entities/bobalkkagi.md) — Python Themida 3.1.3 Tiger red64 unpack via Unicorn API-hook emulation (win10_v1903 DLL set; fast/hook_block/hook_code; optional OEP; planned devirt; Fix Themida)
+- [borderless-gaming](entities/borderless-gaming.md) — Windows C#/.NET utility: windowed games → borderless fullscreen; process watch + HWND manipulation; faster alt-tab vs exclusive fullscreen; Game Testing / external overlay prerequisite (Codeusa)
 - [BOOM](entities/boom.md) — hijack Beep.sys; stealth driver communication
 - [BootBypass](entities/bootbypass.md) — Secure Boot / DSE / HVCI bypass (native; SeCiCallbacks / CI.dll)
 - [BootExecuteEDR](entities/bootexecute-edr.md) — bootExecute EDR bypass (pre-service; cheat / hide)

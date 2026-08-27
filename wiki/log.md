@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:Codeusa/Borderless-Gaming`: entity [[borderless-gaming]] (Codeusa; C#/.NET WinForms; windowed→borderless fullscreen; process watch + HWND manipulation + startup behavior; language packs + Steam components + standalone installer; Game Testing / external overlay prerequisite); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[mwclap]], [[paladins-internal-cheat]], [[present-hook]], and [[d2d-overlay]].
+
 - **2026-08-27** — ingest `description:CodingGay/BlackObfuscator`: entity [[black-obfuscator]] (CodingGay; Java DEX control-flow obfuscator; modified dex2jar pipeline; configurable depth/package/rules; GUI + Android Studio plugin; mobile app protection / anti-RE; `[Dex]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[proguard]], [[dex2jar]], [[recaf]], [[jadx]], and [[apktool]].
 
 - **2026-08-27** — ingest `description:Col-E/Recaf`: entity [[recaf]] (Col-E; Java JVM/Android bytecode editing workstation; multi-decompiler, bytecode assembly, recompile, deep class/constant/instruction search, deobfuscation transforms + malformed-input handling; RE / `[Java]`); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[bytecode-viewer]], [[deobfuscator]], [[raung]], [[jadx]], and [[apktool]].
