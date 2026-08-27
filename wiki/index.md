@@ -1620,6 +1620,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IDA DataExportPlus](entities/ida-data-export-plus.md) — IDA Pro plugin: extend/replace data export window; integer/float formats + assembly text (Python; hotkey-driven; Krietz7; cheat / IDA Plugins)
 - [IDA Easy Life](entities/ida-easy-life.md) — IDA Pro deobfuscation plugin (Python; cheat / IDA Plugins)
 - [IDA-Fusion](entities/ida-fusion.md) — Fast Signature scanner & creator (cheat / IDA Plugins)
+- [IDA-For-Delphi](entities/ida-for-delphi.md) — Coldzer0 IDAPython script; recover Delphi function names from event constructor patterns (live debug; 64-bit; malware/legacy Delphi RE; cheat / IDA Plugins)
 - [IDArling](entities/idarling.md) — collaborative IDA Pro / Hex-Rays plugin (real-time multi-user IDB sync; cheat / IDA Plugins)
 - [ida-efiutils](entities/ida-efiutils.md) — IDA UEFI firmware annotator (GUIDs / Boot·Runtime Services / PEI·DXE; Python)
 - [ida-enums-helper](entities/ida-enums-helper.md) — IDA plugin: Hex-Rays enum rename/add hotkeys (N/A/Shift-A; tinfo_t chooser; cheat / IDA Plugins)

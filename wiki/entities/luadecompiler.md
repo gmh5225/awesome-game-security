@@ -20,4 +20,4 @@ Complements live-script bridges such as [[xlua]], [[luamachine]], and [[vscript-
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[xlua]] · [[luamachine]] · [[vscript-lua51]] · [[lua-obfuscator-clyde-protection]] · [[bytecode-viewer]]
+[[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]] · [[ida-for-delphi]] · [[xlua]] · [[luamachine]] · [[vscript-lua51]] · [[lua-obfuscator-clyde-protection]] · [[bytecode-viewer]]
