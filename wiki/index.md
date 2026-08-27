@@ -2497,6 +2497,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PalEdit](entities/pal-edit.md) — Palworld Python desktop save editor (Pal companion edit/clone; write-back; Windows exe build; cheat / game:palworld [Save])
 - [PalWorldAntiCheat](entities/palworld-anti-cheat.md) — Palworld UE5 AC research (C#; shader/render/audio; Anti Cheat)
 - [palmods](entities/palmods.md) — Palworld UE5 mod/trainer stack (Lua UE4SS + C++ PalTrainerUltra; ImGui/D3D11; RPM/injection; cheat / game:palworld [UE5])
+- [PalOps Web](entities/palopsweb.md) — Palworld dedicated-server ops workbench (ASP.NET Core + Vue 3; PalDefender anti-cheat integration; REST/RCON; whitelist/bans/config; lifecycle, saves, maps, backups; cheat / game:palworld [Server])
 - [PalworldModdingKit](entities/palworld-modding-kit.md) — Palworld UE5 modding kit (cheat / game:palworld [UE5])
 - [palworld-helper](entities/palworld-helper.md) — Palworld UE5 Python helper (modding; cheat / game:palworld [UE5])
 - [palworld-rcon](entities/palworld-rcon.md) — Palworld dedicated server RCON client (Source RCON; Server on Windows)

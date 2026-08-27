@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:CoderYiXin/PalOpsWeb`: entity [[palopsweb]] (CoderYiXin; ASP.NET Core/.NET 10 + Vue 3; all-in-one Palworld dedicated-server ops console; PalDefender REST/RCON integration for whitelist, bans, version checks, and managed JSON config; native Palworld REST, lifecycle, save indexing, player/guild intel, MapLibre maps, backups, automation, webhooks, audit access control; same-host Windows deployment; cheat / game:palworld [Server]); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[palworld-rcon]], [[palworld-setting-generator]], [[palworld-anti-cheat]], [[docker-palworld-dedicated-server]], and [[palworld-server-modding]].
+
 - **2026-08-27** — ingest `description:Codeusa/Borderless-Gaming`: entity [[borderless-gaming]] (Codeusa; C#/.NET WinForms; windowed→borderless fullscreen; process watch + HWND manipulation + startup behavior; language packs + Steam components + standalone installer; Game Testing / external overlay prerequisite); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[mwclap]], [[paladins-internal-cheat]], [[present-hook]], and [[d2d-overlay]].
 
 - **2026-08-27** — ingest `description:CodingGay/BlackObfuscator`: entity [[black-obfuscator]] (CodingGay; Java DEX control-flow obfuscator; modified dex2jar pipeline; configurable depth/package/rules; GUI + Android Studio plugin; mobile app protection / anti-RE; `[Dex]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[proguard]], [[dex2jar]], [[recaf]], [[jadx]], and [[apktool]].
