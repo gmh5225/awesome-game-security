@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:StarBloomMinecraft/BlarionAntiCheat`: entity [[blarion-anticheat]] (StarBloomMinecraft; JavaScript Bedrock ScriptAPI behavior-pack AC; 40+ combat/movement/inventory/packet modules—fly, killaura, speed, reach, noclip, autoclicker, xray; configurable thresholds/punishments; admin inventory scan + `/flag` WebSocket/proxy API; vanilla/BDS/LiteLoader; Anti Cheat / game:minecraft); already cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[paradox-anticheat]], [[scythe-anticheat]], and [[minecraft-anticheat-list]].
+
 - **2026-08-27** — ingest `readme:categories`: Anti Cheat ~694 (+1; StarBloomMinecraft/BlarionAntiCheat Bedrock ScriptAPI behavior-pack AC in Open Source Anti Cheat System; other major section counts stable); entity [[blarion-anticheat]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-27** — ingest `description:ChwnWang0/Android-kernel-inline-hook-framework`: entity [[android-kernel-inline-hook-framework]] (ChwnWang0; lightweight ARM64 Android kernel inline hook framework; full instruction relocation B/BL/ADRP/LDR literal/CBZ/TBZ; 64-bit trampoline long jumps; automatic WP/memory-permission bypass; Android kernel RE / driver and syscall hook research); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernel-hook-framework]], [[integrated-kernel-module]], [[and64-inline-hook]], and [[android-inline-hook-arm64]].
