@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:Col-E/Recaf`: entity [[recaf]] (Col-E; Java JVM/Android bytecode editing workstation; multi-decompiler, bytecode assembly, recompile, deep class/constant/instruction search, deobfuscation transforms + malformed-input handling; RE / `[Java]`); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[bytecode-viewer]], [[deobfuscator]], [[raung]], [[jadx]], and [[apktool]].
+
 - **2026-08-27** — ingest `description:Coldzer0/IDA-For-Delphi`: entity [[ida-for-delphi]] (Coldzer0; IDAPython; recover Delphi function names from event constructor patterns; live debug session; 64-bit; malware/legacy Delphi RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[delphi-helper]], [[delphiresym]], and [[luadecompiler]].
 
 - **2026-08-27** — ingest `description:Coldzer0/LuaDecompiler`: entity [[luadecompiler]] (Coldzer0; Pascal Lua 5.1–5.5 bytecode disassembler/decompiler; SSA CFG reconstruction, boolean expression recovery, custom opcode tables for game-modified Lua VMs; script RE / Decompiler); cited on [[overviews/reverse-engineering]] and [[overviews/game-engine]]; cross-linked [[xlua]], [[luamachine]], [[vscript-lua51]], and [[lua-obfuscator-clyde-protection]].

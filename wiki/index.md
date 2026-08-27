@@ -2731,6 +2731,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Qvoid Token Grabber](entities/qvoid-token-grabber.md) — .NET Discord/browser credential stealer (webhook exfil; anti-debug/anti-VM/anti-sandbox; token-abuse malware-analysis research; Enum0x539)
 - [Raccine](entities/raccine.md) — Windows anti-ransomware (Neo23x0; debugger registration for vssadmin/wmic; YARA command-line rules; shadow-copy deletion block; no resident agent; README [EDR])
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
+- [Recaf](entities/recaf.md) — modern JVM/Android bytecode editing workstation (Col-E; multi-decompiler, assembly, recompile, deep search, deobfuscation transforms; `[Java]`)
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [rAthenaCN](entities/rathenacn.md) — Chinese-localized rAthena fork (C/C++; asset pipelines / plugins / modding; cheat / game:ro; gmh5225)
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
