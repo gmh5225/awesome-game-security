@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:ClaudiuGeorgiu/Obfuscapk`: entity [[obfuscapk]] (ClaudiuGeorgiu; modular Python black-box Android APK obfuscator; apktool decompile → smali/resources/manifest obfuscation passes → rebuild; multiple obfuscators; early AAB support via external decompiler; mobile RE / anti-RE resilience evaluation; `[Android]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[black-obfuscator]], [[proguard]], [[jadx]], [[recaf]], and [[deobfuscator]].
+
 - **2026-08-27** — ingest `description:CnCNet/cnc-ddraw`: entity [[cnc-ddraw]] (CnCNet; C/C++ DirectDraw replacement wrapper; rendering backends, shader upscaling, windowed/borderless modes, frame limiting; Windows + Wine/Linux/macOS/Android; legacy 2D retro/modder titles; Old Game / DirectX Compatibility); cited on [[overviews/graphics-api]]; cross-linked [[d2gi]], [[dxwrapper]], [[free-direct]], [[cnc-red-alert]], and [[borderless-gaming]].
 
 - **2026-08-27** — ingest `description:CobraCodeDev/TP_2DSideScrollerBP`: entity [[tp-2dside-scroller-bp]] (CobraCodeDev; UE5 blueprint template; Paper2D-style 2D side-scroller starter project, sample assets, setup guidance; optional PaperZD animation variants; game-dev prototyping—not security research; Game Develop / [UE5 2D template]); cited on [[overviews/game-engine]]; cross-linked [[ue5-roll-a-ball-game]], [[simple-fps-template]], and [[fightinggame-ue5]].
