@@ -2427,6 +2427,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Object Explorer](entities/object-explorer.md) — GUI Object Manager namespace/handles/types browser (driver + PDB/DIA decode)
 - [OpenArk](entities/openark.md) — Qt anti-rootkit / kernel analysis (callbacks, SSDT, drivers)
 - [OpenClaw](entities/openclaw.md) — C++ Captain Claw reimplementation (Box2D; CMake/Android; Game Develop / source)
+- [OpenEDR](entities/openedr.md) — open-source EDR platform (Comodo Security; C++; system monitoring, event collection, threat detection, AWS cloud analysis; real-time Windows endpoint telemetry/response; README [EDR])
 - [OpenGame](entities/opengame.md) — agentic web-game testing/debug framework (Game Skill; GameCoder-27B; OpenGame-Bench; Game Testing)
 - [OpenHardwareMonitor](entities/openhardwaremonitor.md) — OSS hardware monitor (C#/JS; sensors/drivers; Detection:HWID)
 - [openhardwaremonitor-poc](entities/openhardwaremonitor-poc.md) — OpenHardwareMonitorLib.sys MSR IOCTL PoC (0x9C402084/0x9C402088 → arbitrary MSR R/W; hardware-monitoring BYOVD; gmh5225)
