@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-27** — ingest `description:ChiChou/vscode-frida`: entity [[vscode-frida]] (ChiChou; unofficial VS Code Frida workbench; TypeScript + Python; target selection, script editing/dispatch, REPL, device logs, iOS/Android helper tooling; frida-tools + mobile connectivity utilities; mobile RE / IDE-native instrumentation); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[frida-ide]], [[mast-orchestrator]], and [[rootraven]].
+
 - **2026-08-27** — ingest `description:StarBloomMinecraft/BlarionAntiCheat`: entity [[blarion-anticheat]] (StarBloomMinecraft; JavaScript Bedrock ScriptAPI behavior-pack AC; 40+ combat/movement/inventory/packet modules—fly, killaura, speed, reach, noclip, autoclicker, xray; configurable thresholds/punishments; admin inventory scan + `/flag` WebSocket/proxy API; vanilla/BDS/LiteLoader; Anti Cheat / game:minecraft); already cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[paradox-anticheat]], [[scythe-anticheat]], and [[minecraft-anticheat-list]].
 
 - **2026-08-27** — ingest `readme:categories`: Anti Cheat ~694 (+1; StarBloomMinecraft/BlarionAntiCheat Bedrock ScriptAPI behavior-pack AC in Open Source Anti Cheat System; other major section counts stable); entity [[blarion-anticheat]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).

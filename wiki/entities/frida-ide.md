@@ -22,4 +22,4 @@ Targets Android security researchers, reverse engineers, and game security analy
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[frida]] · [[jadx]] · [[rootraven]] · [[lamda]] · [[delamain]] · [[mobile-anti-cheat]] · [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[frida]] · [[vscode-frida]] · [[jadx]] · [[rootraven]] · [[lamda]] · [[delamain]] · [[mobile-anti-cheat]] · [[auto-generate-frida-bypass-scripts-for-ssl-pinning-root-detection-on-android-ios]]
