@@ -1611,6 +1611,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hwinfo](entities/hwinfo.md) — cross-platform C++ hardware inventory library (CPU/RAM/GPU; Detection:HWID)
 - [hwidspoofer](entities/hwidspoofer.md) — Windows HWID spoof + tracking-trace clean (Cheat HWID)
 - [HumptyLock](entities/humptylock.md) — iOS 14.0–14.4.2 XNU kernel R/W exploit app (Coruna Pendulum PE; lockf/OOL-port/pipe primitives; wh1te4ever)
+- [Ib Input Simulator](entities/ib-input-simulator.md) — Windows multi-backend driver input library (Logitech/Razer/MouClassInputInjection/DD virtual devices; C/C++ + AHK; automation / game tooling / AC evasion research; Chaoses-Ib)
 - [ice9](entities/ice9.md) — C/C++ open-source anti-cheat research (modding/hooking; Anti Cheat → Open Source Anti Cheat System; jnastarot)
 - [ICUAC](entities/icuac.md) — Paper/Folia server-side rule enforcement plugin (Java 21 Gradle; command/inventory/combat integrity checks; blocked commands, NBT/enchantment validation, stack/potion limits, end-crystal cooldowns; bilingual CN/EN; Folia scheduling; SHA-256-verified updater; Lazyzouo; Anti Cheat / game:minecraft)
 - [Inertia](entities/inertia.md) — open-source Minecraft anti-cheat foundation (InertiaOrg; Java; version-neutral player-behavior engine; movement/packet/world/collision contracts; evidence accumulation with confidence/decay; version profiles + movement-prediction skeleton; inertia-api/core/testkit; scenario tests without live server; Anti Cheat / game:minecraft)

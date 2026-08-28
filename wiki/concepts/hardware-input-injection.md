@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/ZhaoKunqi__simple-eft-superman-training-bot.md
   - wiki/sources/descriptions/KelvinMsft__UsbMon.md
   - wiki/sources/descriptions/ConWan30__QorTroller.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md
+updated: 2026-08-28
 confidence: medium
 ---
 
@@ -25,7 +26,7 @@ Input paths that emit **protocol-conformant HID reports** (USB keyboard/mouse) o
 | Arduino / Teensy | Serial commands → ATmega32U4 HID | Low cost; custom firmware |
 | Logitech driver abuse | Inject into G HUB/LGS; internal move APIs | No extra hardware; version-patched |
 
-Logitech-focused driver/CVE research such as [[logitech-cve]] (ekknod; C/C++; driver development; cheat / triggerbot & aimbot) complements G HUB/LGS abuse PoCs when studying vendor-driver mouse input paths. (source: wiki/sources/descriptions/ekknod__logitech-cve.md)
+Logitech-focused driver/CVE research such as [[logitech-cve]] (ekknod; C/C++; driver development; cheat / triggerbot & aimbot) complements G HUB/LGS abuse PoCs when studying vendor-driver mouse input paths. (source: wiki/sources/descriptions/ekknod__logitech-cve.md) Unified multi-backend Windows input libraries such as [[ib-input-simulator]] (Chaoses-Ib; Logitech, Razer Synapse, MouClassInputInjection, DD virtual devices; AHK integration; driver-backed keyboard/mouse when user-mode APIs are blocked) sit beside single-vendor PoCs like [[razer-rzctl]]. (source: wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md)
 | interception.sys | Filter driver inject | Known signature; widely flagged |
 | KVM middleman | Hardware between mouse and host | Complex setup; limited host software |
 
@@ -45,4 +46,4 @@ Defensive pairing: [[ai-aimbot-detection]] (hardware enumeration, input micro-si
 
 ## Related
 
-[[logitech-cve]] · [[qortroller]] · [[kernel-mouse]] · [[usbmon]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
+[[ib-input-simulator]] · [[logitech-cve]] · [[razer-rzctl]] · [[qortroller]] · [[kernel-mouse]] · [[usbmon]] · [[ai-aimbot-detection]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]]
