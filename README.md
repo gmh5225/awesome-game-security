@@ -857,6 +857,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/H5GG/H5GG [IOS cheat engine]
 - https://github.com/hasaneyldrm/webcheat [Chrome extension Cheat Engine for browser/WebAssembly games — scan, edit, freeze memory and control game speed]
 - https://github.com/levifrsn63/krunker-loader [Keyless Tampermonkey userscript stack for Krunker.io with aimbot, ESP, and Quirify license-emulation loader]
+- https://github.com/murka007/glotus-client [Tampermonkey userscript cheat client for Moomoo.io with combat automation, bots, and in-browser hooking]
 - https://github.com/ri-char/pwatch [HWBP on linux/android]
 - https://github.com/enenH/pwatch-c [HWBP on linux/android]
 - https://github.com/Ylarod/hardware-breakpoint [HWBP on linux/android]
@@ -1285,6 +1286,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Jordan231111/lsposed-universal-template [LSPosed/LSPatch module template with Unity/Unreal/Godot engine detection, native pattern scan and memory helpers, and runtime overlay toggles]
 - https://github.com/wchunlin1006/LocusMimic [LSPosed/Xposed Android GPS spoof module with map picker, saved locations, and app/system/mock-provider modes]
 - https://github.com/cxOrz/AnyWhere [Android mock-location app with map picker, joystick movement, and LSPosed module to hide mock-provider detection]
+- https://github.com/xposed-modules-repo/com.wowsoftware.hidemyandroid [LSPosed/Xposed anti-detect module for profile-based device identifier and environment spoofing (Android ID, GAID, IMEI, SIM, root/LSPosed/VPN hiding)]
 - https://github.com/salvogiangri/KnoxPatch [LSPosed module to restore Samsung Knox-gated apps and features on rooted Galaxy devices]
 
 > Frida
