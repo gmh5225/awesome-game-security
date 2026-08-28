@@ -43,7 +43,8 @@ sources:
   - wiki/sources/descriptions/LSPosed__DirtySepolicy.md
   - wiki/sources/descriptions/JingMatrix__Demo.md
   - wiki/sources/descriptions/Dr-TSNG__ApplistDetector.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/Xposed-Modules-Repo__com.wowsoftware.hidemyandroid.md
+updated: 2026-08-28
 confidence: medium
 ---
 
@@ -78,7 +79,7 @@ Multi-check collections: [[detection]], [[android-native-root-detector]], [[meow
 ## Bypass strategies (research framing)
 
 1. Static RE of detection routines in DEX/native code.
-2. Hook or patch check functions ([[frida]], [[locusmimic]] / [[anywhere]] for mock-location edge cases—LSPosed hide modules bypass `isFromMockProvider` and related spoofing checks; source: wiki/sources/descriptions/cxOrz__AnyWhere.md).
+2. Hook or patch check functions ([[frida]], [[locusmimic]] / [[anywhere]] for mock-location edge cases—LSPosed hide modules bypass `isFromMockProvider` and related spoofing checks; source: wiki/sources/descriptions/cxOrz__AnyWhere.md). Profile-based identifier and environment spoofing via [[hidemyandroid]] intercepts Android ID, GAID, IMEI, Widevine, and root/LSPosed/VPN/proxy/dev-options probes per app profile. (source: wiki/sources/descriptions/Xposed-Modules-Repo__com.wowsoftware.hidemyandroid.md)
 3. Reduce injection footprint (stealth Frida [[fridare]], WXSHADOW/RECOMP tiers, root-hide DenyList/Shamiko, KernelSU process isolation). Riru Zygote-injection hide modules such as [[riru-momo-hider]] hook syscalls and Java root-check APIs (mount spoof, Magisk artifact hide, property-query block) to evade libraries like [[magiskdetector]]/RootBeer. (source: wiki/sources/descriptions/canyie__Riru-MomoHider.md) Hardened KernelSU forks such as [[apex-su]] study reduced root artifacts—IOCTL over anonymous `io_uring`-disguised inodes with no proc/sys/dev entries—against FS and process-based root probes. (source: wiki/sources/descriptions/rathorekrishna401-NeuroVoid__ApexSU.md) OEM Knox integrity on Samsung Galaxy: [[knoxpatch]] hooks target Samsung apps to bypass root detection and disable Knox SDK / Samsung Attestation Key checks, with companion Magisk/KernelSU system patches for Secure Folder on legacy One UI—useful for studying how Samsung apps gate features on rooted hardware. (source: wiki/sources/descriptions/salvogiangri__KnoxPatch.md)
 4. Timing — checks may run once at launch vs periodically.
 5. Environment emulation — hide emulator props or use physical devices with clean attestation; attestation relay from a second clean device via [[android-hardware-attestation-demo]] (no crypto forgery; backend nonce forwarded to an oracle) passes hardware-backed checks on rooted analysis hardware. (source: wiki/sources/descriptions/quarkslab__android-hardware-attestation-demo.md)
@@ -87,4 +88,4 @@ Apply [[research-rigor]]—detectors and bypasses vary by build, OEM, and server
 
 ## Related
 
-[[research-rigor]] · [[frida]] · [[memdetection]] · [[lazenca-s]] · [[pairipcore]] · [[apppealing-new]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[react-native-shieldscan]] · [[free-rasp-reactnative]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[locusmimic]] · [[anywhere]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]
+[[research-rigor]] · [[frida]] · [[memdetection]] · [[lazenca-s]] · [[pairipcore]] · [[apppealing-new]] · [[freedom]] · [[vpnhide]] · [[android-overlay-protection]] · [[android-overlay-malware-example]] · [[android-native-surface]] · [[zygisk]] · [[magisk]] · [[kernelsu]] · [[apex-su]] · [[knoxpatch]] · [[riru-momo-hider]] · [[magisk-killer]] · [[magisk-eop]] · [[keyattestation]] · [[android-hardware-attestation-demo]] · [[droidshield]] · [[react-native-shieldscan]] · [[free-rasp-reactnative]] · [[detection]] · [[antifrida]] · [[android-virtualcam-manager]] · [[locusmimic]] · [[anywhere]] · [[hidemyandroid]] · [[spoofing-collection]] · [[honor-of-kings-re-research]] · [[dfm-android-unicorn]] · [[kpm-memreader]] · [[pubgm1.6-deadgame]] · [[overviews/mobile-security]] · [[overviews/anti-cheat]]

@@ -14,6 +14,8 @@ confidence: medium
 
 **Masking:** Android ID, GAID, IMEI, Widevine DRM ID; root, LSPosed, VPN, proxy, and developer-mode hiding; SIM, Wi-Fi, Bluetooth, GPS, timezone, and browser fingerprint spoofing; per-profile account and proxy isolation with backup, restore, and device simulation.
 
+Built on the **Xposed hooking framework** with a profile-based configuration system — each target app can receive a distinct spoofed environment without reflashing or rebooting. README category: Cheat / Xposed.
+
 Useful for studying app-level anti-detection and fingerprinting checks — including mobile game security, anti-cheat evasion, and Android reverse-engineering research on identifier probes.
 
 ## Links

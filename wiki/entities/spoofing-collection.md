@@ -20,4 +20,4 @@ Aimed at security researchers studying **mobile anti-cheat**, **Play Integrity**
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[magisk]] · [[xposed-module-kit]] · [[locusmimic]] · [[easypixel]] · [[keyattestation]] · [[trustdevice-android]] · [[magiskdetector]] · [[mobile-anti-cheat]]
+[[overviews/mobile-security]] · [[overviews/anti-cheat]] · [[magisk]] · [[xposed-module-kit]] · [[hidemyandroid]] · [[locusmimic]] · [[easypixel]] · [[keyattestation]] · [[trustdevice-android]] · [[magiskdetector]] · [[mobile-anti-cheat]]

@@ -6,6 +6,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-28** — ingest `description:Xposed-Modules-Repo/com.wowsoftware.hidemyandroid`: entity [[hidemyandroid]] (wowsoftware; LSPosed/Xposed anti-detect module; profile-based identifier/environment spoofing—Android ID, GAID, IMEI, Widevine, SIM, Wi-Fi, Bluetooth, GPS, timezone, browser fingerprints; root/LSPosed/VPN/proxy/dev-options hiding; per-profile backup/restore/device simulation; Android 9+; mobile game security / anti-cheat evasion / Android RE); cited on [[concepts/mobile-anti-cheat]]; cross-linked [[spoofing-collection]].
+
 - **2026-08-28** — ingest `readme:categories`: Cheat ~2755 (+2; murka007/glotus-client Moomoo.io Tampermonkey userscript in Cheat > Debugging + xposed-modules-repo/com.wowsoftware.hidemyandroid LSPosed profile identifier/environment spoofing in Cheat > Xposed; Anti Cheat ~694 stable); entities [[glotus-client]] and [[hidemyandroid]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-27** — ingest `description:ChengChengCC/Ark-tools`: entity [[ark-tools]] (ChengChengCC; C/C++ Visual Studio kernel research tool collection; debug-register hooks, IDT/GDT hooks, kernel APC injection, shadow SSDT inline hooking, registry driver ops, WOW64 cross-arch injection; rootkit technique / defensive detection study; README [Some kernel research]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[openark]], [[apc-research]], [[injdrv]], [[kinject]], and [[slauc91-anticheat]].
