@@ -4294,6 +4294,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/ConWan30/QorTroller [Cryptographic console anti-cheat proving human controller presence via attested inputs and verifiable match receipts]
 - https://github.com/wflores9/Ironwall [Open-source anti-cheat protocol stack with thin client, TEE attestation, ZK-SNARK human-input proofs, and Hedera HCS + XRPL dual-anchored match receipts]
 - https://github.com/Abdelnour2/MiniAntiCheatV2 [Educational Windows kernel anti-cheat PoC: process blacklist plus ObCallbacks handle shield]
+- https://github.com/HEEAAP/Sentinel-Anti-Cheat [Educational usermode anti-cheat daemon with remote debugger checks, hardware-breakpoint scanning, PEB-based memory reads, and configurable threat response policies]
 - https://github.com/vovasicidk/sentinelac [Open-source anti-cheat skeleton with usermode SDK, ObRegisterCallbacks kernel stub, overlay isolation, and stack-walk injection detection]
 - https://github.com/nulli83/Mj-lnir [Windows client-server anti-cheat with C++ core scanner, Rust agent, and self-hosted studio control plane for injection detection and enforcement]
 - https://github.com/JUS7205/cheatguard [Rust engine-agnostic anti-cheat scanner: JSON signature ruleset, loaded-module enumeration, and deterministic 0–100 risk scoring with CLEAN/SUSPICIOUS/MALICIOUS verdicts]
