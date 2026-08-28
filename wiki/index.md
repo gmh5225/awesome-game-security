@@ -2829,6 +2829,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [re-ue4ss](entities/re-ue4ss.md) — UE4/UE5 scripting/modding framework (Lua + C++ mod APIs, blueprint loading, live property editing, SDK dumpers; runtime hooks; UE4SS-RE)
 - [reai-ida](entities/reai-ida.md) — RevEng.AI IDA Pro plugin: binary upload, similarity-based function matching, automated renaming, auto-unstrip, AI decompilation views (Python/Qt; ML-assisted stripped-binary RE; cheat / IDA Plugins / `[RevEng.AI]`)
 - [remap](entities/remap.md) — Windows kernel page-remapping PoC; copies protected-process pages into surrogate process VA for R/W and dump workflows (EBalloon; C++; Windows 10 caveats; cheat / Clone process)
+- [remotery](entities/remotery.md) — lightweight real-time CPU/GPU profiler (single C library + browser viewer; multithreaded; D3D11/12/OpenGL/Vulkan/CUDA/Metal; Game Testing)
 - [reshade](entities/reshade.md) — cross-API post-processing injector (frame color/depth + ReShade FX; Renderer / graphics-programmer tooling; crosire)
 - [RETools](entities/retools.md) — curated RE/security tool catalog (disasm/debug/decompiler; toolkit guide)
 - [retoolkit](entities/retoolkit.md) — Windows Inno Setup bundle (80+ RE tools: debug/decompile/PE/hex/network/YARA)

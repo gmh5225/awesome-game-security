@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-28** — ingest `description:Celtoys/Remotery`: entity [[remotery]] (Celtoys; lightweight real-time CPU/GPU profiler; single C library + browser viewer; multithreaded instrumentation; live command/log channels; saved trace playback; D3D11/12/OpenGL/Vulkan/CUDA/Metal; Game Testing); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tracy]], [[optick]], [[rprof]], and [[orbit]].
+
 - **2026-08-28** — ingest `description:Chaoses-Ib/IbInputSimulator`: entity [[ib-input-simulator]] (Chaoses-Ib; Windows multi-backend driver input library; Logitech software, Razer Synapse, MouClassInputInjection, DD virtual devices; C/C++ + AHK unified init/send; automation / game tooling / AC evasion research; Simulating keyboard, mouse); cited on [[overviews/game-hacking]] and [[hardware-input-injection]]; cross-linked [[autohotkey-l]], [[razer-rzctl]], [[logitech-cve]], and [[mouhid-input-hook]].
 
 - **2026-08-28** — ingest `description:Chase1803/UCMiraka-ValorantExternal`: entity [[ucmiraka-valorant-external]] (Chase1803; C++ PoC external framework; kernel driver hooks win32k **NtUserGetPointerProprietaryId** for custom request packets—process memory R/W and PML4-related retrieval; user client locates Valorant and reads UWorld/ULevel/GameState; driver comm + external data extraction / AC research; cheat / game:valorant [External]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[ntuserupdatewindowtrackinginfo]], [[kernel-eac-be-comm]], [[valorant-external-source]], [[valo-driver]], and [[vanguard]].
