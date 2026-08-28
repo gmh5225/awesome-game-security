@@ -1428,6 +1428,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [godot](entities/godot.md) — Godot Engine OSS source (GDScript/C#; scene graph, scripting, rendering; Game Engine / source)
 - [godot-demo-projects](entities/godot-demo-projects.md) — official Godot demos + template projects (GitHub Pages exports; Game Develop / source)
 - [godogen](entities/godogen.md) — autonomous Godot/Bevy/Babylon.js game dev with Claude Code and Codex (feature planning, asset gen, screenshot self-repair; Game Develop / AI Agents)
+- [godfather-fortnite-cheat-cracked](entities/godfather-fortnite-cheat-cracked.md) — Leaked/modified Fortnite external cheat (CheaterRehab; C++ DX9 Dear ImGui overlay + kernel driver with callback comm; loader/mapper deployment + detection-status notes; pasted-cheat infrastructure RE; cheat / game:fortnite [External])
 - [goldberg-emulator](entities/goldberg-emulator.md) — Goldberg Steam Emulator (offline Steamworks API; LAN; preservation / Steam DRM+API RE)
 - [GoldSourceRebuild](entities/goldsource-rebuild.md) — decompiled/reconstructed GoldSource engine rebuild (HL1; rendering / networking / game systems; modding / research; Game Engine / RE)
 - [go-detection-hyper-v](entities/go-detection-hyper-v.md) — Go Hyper-V VM detection (CPUID feature checks, timing, hypervisor presence; gmh5225; Hyper-v)
