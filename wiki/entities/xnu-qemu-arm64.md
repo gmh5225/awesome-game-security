@@ -20,4 +20,4 @@ Primarily for iOS security researchers and kernel exploit developers studying XN
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[xnu-1day-practice]] · [[xnuspy]] · [[kfd]] · [[kfd-explorer]] · [[cve-2026-xnu-aio-kevent-uaf]] · [[utm]] · [[qemu-gvm]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[qemu-apple-silicon]] · [[vphone-cli]] · [[xnu-1day-practice]] · [[xnuspy]] · [[kfd]] · [[kfd-explorer]] · [[cve-2026-xnu-aio-kevent-uaf]] · [[utm]] · [[qemu-gvm]]

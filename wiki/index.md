@@ -2721,6 +2721,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [qbdi-tracer-android](entities/qbdi-tracer-android.md) — Android QBDI + Dobby per-instruction native tracer (linker SO-load hooks, backtrace, memory/pattern scan; ARM64 Android/iOS)
 - [Hardened-qemu](entities/hardened-qemu.md) — stealth QEMU/KVM build hiding VirtualBox/VMware/Bochs/QEMU artifacts (anti-VM analysis VMs; Hidden QEMU)
 - [qemu-anti-detection](entities/qemu-anti-detection.md) — Hidden QEMU (device-string / fingerprint spoof)
+- [qemu-apple-silicon](entities/qemu-apple-silicon.md) — ChefKissInc QEMU fork; Apple Silicon virtualization + iOS device emulation; hardware-accelerated ARM VMs on macOS; iOS security RE / app testing (IOS Emulator)
 - [qemu_blog](entities/qemu-blog.md) — Airbus SecLab QEMU internals guide (machine/device, memory regions, interrupts, timers, PCI, TCG; Markdown + source refs; Guide)
 - [qemu-patched](entities/qemu-patched.md) — Hidden QEMU fork (CPUID / SMBIOS / ACPI anti-VM spoof)
 - [QemuUnrealDumper-4.25](entities/qemu-unrealdumper-4-25.md) — QEMU/memflow UE4.25 dumper (C++; object arrays/name pools; names/objects; per-game offsets; UE SDK Dump By QEMU)
