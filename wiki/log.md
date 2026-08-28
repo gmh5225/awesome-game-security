@@ -4,6 +4,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-28** — ingest `readme:categories`: Cheat ~2755 (+2; murka007/glotus-client Moomoo.io Tampermonkey userscript in Cheat > Debugging + xposed-modules-repo/com.wowsoftware.hidemyandroid LSPosed profile identifier/environment spoofing in Cheat > Xposed; Anti Cheat ~694 stable); entities [[glotus-client]] and [[hidemyandroid]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/mobile-security]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-27** — ingest `description:ChengChengCC/Ark-tools`: entity [[ark-tools]] (ChengChengCC; C/C++ Visual Studio kernel research tool collection; debug-register hooks, IDT/GDT hooks, kernel APC injection, shadow SSDT inline hooking, registry driver ops, WOW64 cross-arch injection; rootkit technique / defensive detection study; README [Some kernel research]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[openark]], [[apc-research]], [[injdrv]], [[kinject]], and [[slauc91-anticheat]].
 
 - **2026-08-27** — ingest `description:ChiChou/bagbak`: entity [[bagbak]] (ChiChou; Node.js/TypeScript CLI; Frida runtime-decryption agent; decrypt/dump iOS apps to IPA from jailbroken devices; app extensions and embedded frameworks; USB and remote connections; deprecated; `bagbak@5` requires Frida 17; iOS app decryption / binary analysis / mobile RE); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[grapefruit]], [[vscode-frida]], and [[frida-ide]].
