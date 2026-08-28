@@ -6,6 +6,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-28** — ingest `readme:categories`: Anti Cheat ~695 (+1; HEEAAP/Sentinel-Anti-Cheat educational usermode daemon in Open Source Anti Cheat System; Cheat ~2755 stable); entity [[sentinel-anti-cheat]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-28** — ingest `description:CheckPointSW/Nodejs-Tracer`: entity [[nodejs-tracer]] (CheckPointSW; Node.js preload runtime tracer; instrument core module calls; log API usage, spoof anti-analysis checks, preserve dropped files; lightweight attach to obfuscated scripts; malware/dynamic JS RE); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[javascript-obfuscator]], [[js-debugger-bypass-script]], [[showstopper]], and [[de4py]].
 
 - **2026-08-28** — ingest `description:CheckPointSW/showstopper`: entity [[showstopper]] (CheckPointSW; Windows anti-debug exploration tool; large malware/research check collection; exposes function addresses for hands-on attach; compare debuggers, plugins, and mitigations on modern Windows; anti-anti-debug validation; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[al-khaser]], [[antidbg-hackovert]], [[gh-anti-debug-bypass-practice-tool]], [[anti-debugging]], [[makin]], and [[scyllahide]].
