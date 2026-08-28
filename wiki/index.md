@@ -2957,6 +2957,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Shoggoth](entities/shoggoth.md) — polymorphic x86/x64 shellcode encoder (asmjit JIT; dual encryption + randomized decoders; COFF/PE reflective loaders; Polymorphic Encryptor)
 - [shootergame](entities/shootergame.md) — Unreal ShooterGame Demo with MIT improvements (Cheat / Game Engine Explorer:Unreal; cqcallaw)
 - [shootergame-hack](entities/shootergame-hack.md) — Unreal ShooterGame Demo offensive research (C/C++; rendering / debugging; Cheat / Game Engine Explorer:Unreal; gmh5225)
+- [showstopper](entities/showstopper.md) — Windows anti-debug exploration tool (CheckPointSW; malware/research check collection; exposes function addresses; debugger attach/compare across tools, plugins, mitigations; anti-anti-debug validation; Anti Debugging)
 - [ShimCacheParser](entities/shimcacheparser.md) — AppCompat ShimCache parser (SYSTEM hive; paths/timestamps/flags; CSV/timeline; AC/IS forensics)
 - [Shirakumo](entities/shirakumo.md) — M3351AN usermode RPM/WPM proxy PoC (C++; named-pipe IPC; read/write in separate process; optional DLL proxy; experimental x64-only; process-separated memory access for game tooling and evasion research; cheat / RPM for Windows)
 - [Shtreeba](entities/shtreeba.md) — Windows manual-map DLL injector (MMap library; UI process picker; Injector)

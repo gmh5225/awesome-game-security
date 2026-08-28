@@ -6,6 +6,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-28** — ingest `description:CheckPointSW/showstopper`: entity [[showstopper]] (CheckPointSW; Windows anti-debug exploration tool; large malware/research check collection; exposes function addresses for hands-on attach; compare debuggers, plugins, and mitigations on modern Windows; anti-anti-debug validation; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[al-khaser]], [[antidbg-hackovert]], [[gh-anti-debug-bypass-practice-tool]], [[anti-debugging]], [[makin]], and [[scyllahide]].
+
 - **2026-08-28** — ingest `description:ChefKissInc/qemu-apple-silicon`: entity [[qemu-apple-silicon]] (ChefKissInc; QEMU fork; Apple Silicon virtualization + iOS device emulation; full codebase + platform mods; hardware-accelerated ARM VMs on macOS; iOS security researchers / emulator developers; app testing and analysis; IOS Emulator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[xnu-qemu-arm64]], [[vphone-cli]], and [[utm]].
 
 - **2026-08-28** — ingest `description:Murka007/Glotus-Client`: entity [[glotus-client]] (Murka007; TypeScript/Bun Tampermonkey userscript; Moomoo.io document-start inject; WebSocket/game-object/input hooks; modular combat/defense/grinding/bot automation; packet/socket managers, movement simulation, spatial indexing, custom overlays; Altcha proof-of-work solver via Web Workers before connect; Cheat / Debugging); cited on [[overviews/anti-cheat]] (anti-bot PoW gate bypass) and [[overviews/reverse-engineering]] (browser WebSocket/packet RE lane); cross-linked [[krunker-loader]], [[webcheat]], [[ff3mmo]], and [[js-debugger-bypass-script]].
