@@ -2330,6 +2330,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [notify-routine-hijack-thread](entities/notify-routine-hijack-thread.md) — kernel PoC hijacking `PspCreateThreadNotifyRoutine` via dedicated thread (UCFoxi; C++; anti-cheat / EDR callback evasion research; README [Hijack PspCreateThreadNotifyRoutine])
 - [NoVmp](entities/novmp.md) — static VMProtect x64 3.x devirtualizer (VTIL lift; can1357; Fix VMP)
 - [NoVmpy](entities/novmpy.md) — Python VMProtect deobf (symbolic exec / Triton; Fix VMP)
+- [Nodejs Tracer](entities/nodejs-tracer.md) — Node.js runtime core-module tracer (CheckPointSW; preload instrumentation; log API calls, spoof anti-analysis checks, preserve dropped files; obfuscated Node.js malware / dynamic JS RE)
 - [NotAnOverlay](entities/not-an-overlay.md) — Windows GDI PoC: regular-window screen clone vs transparent always-on-top overlay; BitBlt/StretchBlt; external ESP rendering / AC overlay-visibility tradeoffs (PierreCiholas; [Duplicating with GDI])
 - [Npcap](entities/npcap.md) — Windows packet capture/inject (Nmap; WinPcap successor; Packet Capture&Parse)
 - [NvidiaApi](entities/nvidiaapi.md) — undocumented NvAPI GPU serial / board fingerprint (HWID research)

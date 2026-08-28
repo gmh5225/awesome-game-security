@@ -6,6 +6,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-28** — ingest `description:CheckPointSW/Nodejs-Tracer`: entity [[nodejs-tracer]] (CheckPointSW; Node.js preload runtime tracer; instrument core module calls; log API usage, spoof anti-analysis checks, preserve dropped files; lightweight attach to obfuscated scripts; malware/dynamic JS RE); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[javascript-obfuscator]], [[js-debugger-bypass-script]], [[showstopper]], and [[de4py]].
+
 - **2026-08-28** — ingest `description:CheckPointSW/showstopper`: entity [[showstopper]] (CheckPointSW; Windows anti-debug exploration tool; large malware/research check collection; exposes function addresses for hands-on attach; compare debuggers, plugins, and mitigations on modern Windows; anti-anti-debug validation; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[al-khaser]], [[antidbg-hackovert]], [[gh-anti-debug-bypass-practice-tool]], [[anti-debugging]], [[makin]], and [[scyllahide]].
 
 - **2026-08-28** — ingest `description:ChefKissInc/qemu-apple-silicon`: entity [[qemu-apple-silicon]] (ChefKissInc; QEMU fork; Apple Silicon virtualization + iOS device emulation; full codebase + platform mods; hardware-accelerated ARM VMs on macOS; iOS security researchers / emulator developers; app testing and analysis; IOS Emulator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[xnu-qemu-arm64]], [[vphone-cli]], and [[utm]].
