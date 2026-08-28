@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-28** — ingest `description:HEEAAP/Sentinel-Anti-Cheat`: entity [[sentinel-anti-cheat]] (HEEAAP; C++/Visual Studio usermode AC daemon; suspended launch + pre-resume attach; `NtQueryInformationProcess`/`ReadProcessMemory`/thread-context polling for remote debuggers, HWBP in debug registers, INT 3 in executable sections; configurable log/suspend/terminate policies; TaskDialog splash; early-process anti-debug reference; Open Source Anti Cheat System); cited on [[overviews/reverse-engineering]]; cross-linked [[showstopper]], [[anti-debug]], [[basic-anti-cheat]], and [[sentinelac]].
+
 - **2026-08-28** — ingest `readme:categories`: Anti Cheat ~695 (+1; HEEAAP/Sentinel-Anti-Cheat educational usermode daemon in Open Source Anti Cheat System; Cheat ~2755 stable); entity [[sentinel-anti-cheat]]; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-28** — ingest `description:CheckPointSW/Nodejs-Tracer`: entity [[nodejs-tracer]] (CheckPointSW; Node.js preload runtime tracer; instrument core module calls; log API usage, spoof anti-analysis checks, preserve dropped files; lightweight attach to obfuscated scripts; malware/dynamic JS RE); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[javascript-obfuscator]], [[js-debugger-bypass-script]], [[showstopper]], and [[de4py]].

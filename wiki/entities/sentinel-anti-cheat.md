@@ -11,9 +11,19 @@ confidence: medium
 
 # Sentinel Anti-Cheat
 
-Educational Windows **user-mode anti-cheat daemon** (HEEAAP; C++/Visual Studio) that launches a target game process suspended, attaches protection before resume, and polls for tampering. Uses Win32 APIs such as `NtQueryInformationProcess`, `ReadProcessMemory`, and thread-context inspection to detect remote debuggers, hardware breakpoints in debug registers, and software breakpoints (`INT 3`) in executable code sections. Configurable response policies log events, suspend via `NtSuspendProcess`, or terminate outright; a TaskDialog splash screen covers startup while the monitor loop runs. Reference implementation for early-process attachment and basic anti-debug enforcement on Windows. (source: wiki/sources/descriptions/HEEAAP__Sentinel-Anti-Cheat.md)
+Educational Windows **user-mode anti-cheat daemon** (HEEAAP; C++/Visual Studio) that launches a target game process suspended, attaches protection before resume, and polls for tampering. Reference implementation for **early-process attachment** and basic anti-debug enforcement on Windows — aimed at game developers and security researchers studying out-of-process monitoring before first instruction. (source: wiki/sources/descriptions/HEEAAP__Sentinel-Anti-Cheat.md)
 
-Complements educational usermode samples such as [[basic-anti-cheat]], [[mandragora]], and [[peregrine-anticheat]]; distinct from the multi-tier OSS skeleton [[sentinelac]].
+## Detection
+
+- Remote debuggers via `NtQueryInformationProcess` and related process queries
+- Hardware breakpoints in debug registers (thread context inspection)
+- Software breakpoints (`INT 3`) in executable code sections (`ReadProcessMemory`)
+
+## Response
+
+Configurable policies: log the event, suspend the target via `NtSuspendProcess`, or terminate outright. A TaskDialog splash screen covers startup while a polling monitor loop runs.
+
+Complements educational usermode samples such as [[basic-anti-cheat]], [[mandragora]], and [[peregrine-anticheat]]; distinct from the multi-tier OSS skeleton [[sentinelac]]. Pairs with anti-debug study harnesses such as [[showstopper]] and [[anti-debug]] for validation workflows.
 
 ## Links
 
@@ -21,4 +31,4 @@ Complements educational usermode samples such as [[basic-anti-cheat]], [[mandrag
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[basic-anti-cheat]] · [[mandragora]] · [[peregrine-anticheat]] · [[sentinelac]] · [[anti-debug]]
+[[overviews/anti-cheat]] · [[overviews/reverse-engineering]] · [[basic-anti-cheat]] · [[mandragora]] · [[peregrine-anticheat]] · [[sentinelac]] · [[showstopper]] · [[anti-debug]]

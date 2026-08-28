@@ -2943,7 +2943,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sdkgenny](entities/sdkgenny.md) — general C++ SDK generation library (cursey; PEGTL optional parser; cheat / sdk codegen)
 - [SE-tools](entities/se-tools.md) — Switch homebrew memory/cheat toolkit (Atmosphere dmnt:cht; scanner / pointer / viewer)
 - [SEWindows](entities/sewindows.md) — Windows TPM measured-boot verifier (TCG event log, PCR replay, WBCL policy, EK/AK remote attestation; CPU virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist; fsquirt)
-- [Sentinel Anti-Cheat](entities/sentinel-anti-cheat.md) — educational usermode AC daemon (suspended launch; remote-debugger/HWBP/INT3 checks; log/suspend/terminate policies; HEEAAP; Anti Cheat)
+- [Sentinel Anti-Cheat](entities/sentinel-anti-cheat.md) — educational usermode AC daemon (HEEAAP; suspended launch + pre-resume attach; remote-debugger/HWBP/INT3 polling; log/suspend/terminate policies; TaskDialog splash; Open Source Anti Cheat System)
 - [SentinelAC](entities/sentinelac.md) — OSS Windows AC skeleton (SDK + UM service + ObRegisterCallbacks; overlay / stack-walk)
 - [Sensum](entities/sensum.md) — internal CS:GO cheat (actively developed; cheat / game:csgo)
 - [Serenity.gg-FN-and-Loader](entities/serenity-gg-fn-and-loader.md) — Fortnite: kernel driver + shader work + module loader (C/C++; cheat / game:fortnite; gmh5225)
