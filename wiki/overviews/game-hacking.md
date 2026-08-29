@@ -1240,6 +1240,7 @@ sources:
   - wiki/sources/descriptions/revsic__cpp-veh-dbi.md
   - wiki/sources/descriptions/redthing1__w1tn3ss.md
   - wiki/sources/descriptions/redbg__CS2-Internal.md
+  - wiki/sources/descriptions/Byrom90__XenonDumper.md
   - wiki/sources/descriptions/ByteCorum__DragonBurn.md
   - wiki/sources/descriptions/maecry__asphyxia-cs2.md
   - wiki/sources/descriptions/mactec0__Kernelmode-manual-mapping-through-IAT.md
@@ -2625,6 +2626,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Xbox 360 XEX static analysis in IDA Pro via [[idaxex]] (C++ loader; XEX format parse, PE extraction, import/export + kernel symbol naming; IDA 9) sits in the console `Xbox` lane for reverse engineers and console security researchers. (source: wiki/sources/descriptions/emoose__idaxex.md)
 - Xbox 360 modded-console backup install and XEX/package patching via [[x360gamehack2025]] (IcyModz420; C# WinForms/.NET Framework; RGH/JTAG/Bad Update/Bad Avatar/devkit + OG Xbox ISO/XBE; XEX encrypt/decrypt/compress, Title ID/Media ID changes, ISO→GOD/STFS, FTP/USB deploy; without Xbox Neighborhood) sits in the console `Xbox` lane for homebrew/modding and backup-deployment workflows. (source: wiki/sources/descriptions/IcyModz420__X360GameHack2025.md)
 - Xbox 360 live XBDM trainer/debug via [[toastylink]] (WoahToasty; from-scratch C++17; RGH/JTAG; pointer chains, CE-style scan/freeze, PPC patch assembler, JSON cheat tables, LAN discovery; Cheat Debugging) sits beside [[x360gamehack2025]] for network memory RE on modded consoles. (source: wiki/sources/descriptions/WoahToasty__ToastyLink.md)
+- Xbox 360 fuse/bootloader/NAND dump for LLE emulator prep via [[xenondumper]] (Byrom90; C/C++; modified retail/devkit; fuses, bootloader, NAND artifacts; console RE, preservation, emulator preparation research) sits in the console `Xbox` lane beside [[x360gamehack2025]] and [[toastylink]] for modded-console artifact extraction before PC emulation. (source: wiki/sources/descriptions/Byrom90__XenonDumper.md)
 - Xbox One/Series SystemOS kernel exploit via [[collateral-damage]] (CVE-2024-30088; kernel 25398.4478, 25398.4908, 25398.4909) sits in the console `Xbox` lane for emulator developers and Xbox researchers. (source: wiki/sources/descriptions/exploits-forsale__collateral-damage.md)
 - x86/x64 PE AOT binary translation via [[levo]] (Ghidra CFG recovery → LLVM lift/recompile; `kernel32` API-intercept runtime) supports Windows game-client binary-translation study without full emulation. (source: wiki/sources/descriptions/momo5502__levo.md)
 - Educational x86 dynamic-recompilation practice via [[dynre-x86]] (Zydis instruction decode + operand inspect; register tables; early pipeline study) complements [[levo]] as a decode-first learning baseline in the binary-translation lane. (source: wiki/sources/descriptions/aroxby__dynre-x86.md) WIP JIT-based x86-64 user-mode emulator [[zyemu]] (handler codegen + code cache; Zydis; C++; Windows User Space Emulator lane) extends that decode/codegen pipeline toward runnable low-level emulation. (source: wiki/sources/descriptions/ZehMatt__zyemu.md)
