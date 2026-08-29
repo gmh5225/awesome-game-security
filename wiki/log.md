@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:CENSUS/ghidra-frida-hook-gen`: entity [[ghidra-frida-hook-gen]] (CENSUS; Java Ghidra extension; right-click actions generate Frida hook scripts from disassembly context—full scripts, reusable snippets, advanced hook config; function-level and arbitrary address hooks; static→dynamic RE bridge; cheat / Ghidra Plugins); cited on [[overviews/reverse-engineering]] and [[concepts/frida]]; cross-linked [[ghidra]], [[dragonhook]], [[frinet]], and [[frinja]].
+
 - **2026-08-29** — ingest `description:CKCat/d810`: entity [[d810]] (CKCat; Python IDA Pro plugin; deobfuscate at decompilation time by rewriting Hex-Rays microcode; configurable extensible rule sets; malware/game-security analysts on heavily obfuscated binaries; README [Deobfuscate code at decompilation time by modifying IDA Pro microcode]); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[d810-ng]], [[hex-rays-deob]], [[hrtng]], and [[emotet-deobfuscator]].
 
 - **2026-08-29** — ingest `description:CSIT-SG/AETHER`: entity [[aether]] (CSIT-SG; Python IDA Pro LLM copilot; AI-assisted decompilation, interactive chatbot with tool-calling, function annotation, vulnerability analysis, RAG context from binary databases; multi-provider backends, prompt templates, syntax highlighting, custom viewer UI; malware/RE workflows; README [An AI-powered reverse-engineering copilot for assisting tedious malware analysis in IDA Pro]); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[ida-llm-explainer]], [[gepetto]], [[ida-gepetto]], [[ida-assistant]], [[idassist]], and [[aida]].

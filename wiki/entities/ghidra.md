@@ -12,7 +12,7 @@ confidence: medium
 
 Full Ghidra reverse-engineering framework source tree (NSA Ghidra mirror/fork). Includes the Java-based decompiler, debugger integrations, and supporting modules—the standard Ghidra codebase for binary analysis, disassembly, and decompilation workflows. Listed for reverse engineers and game security researchers analyzing protected game and anti-cheat binaries. (source: wiki/sources/descriptions/gmh5225__ghidra.md)
 
-Upstream base for the Ghidra plugin and automation ecosystem in this catalog: [[angry-ghidra]], [[ghidra-bridge]], [[gdbghidra]], [[ghidra-coffparser]], [[dragonhook]], [[enigma]], [[ghidra-cpp-class-analyzer]], [[ghidra-decompiler-plugins]], [[ghidradboy]], [[ghidrust]], [[ghiradec]], [[ghidra-headless-mcp]], [[ghidra-hexeditor]], [[ghidra-nativeaot]], [[ghidrassist]], [[ghidra-openai]], [[ghidrametrics]], [[ghidriff]], [[ghidra-scripts]], [[ghidra-struct-importer]], [[ghidrascripts]], [[pagalaxylab-ghidra-scripts]], [[ghidra-vxd-tools]], [[ghidra-orbis]], [[ghidra-gradle-plugin]], [[ghidra-manager]], [[gpt-wpre]], [[binsync]], and related loaders/bridges.
+Upstream base for the Ghidra plugin and automation ecosystem in this catalog: [[angry-ghidra]], [[ghidra-bridge]], [[gdbghidra]], [[ghidra-coffparser]], [[dragonhook]], [[ghidra-frida-hook-gen]], [[enigma]], [[ghidra-cpp-class-analyzer]], [[ghidra-decompiler-plugins]], [[ghidradboy]], [[ghidrust]], [[ghiradec]], [[ghidra-headless-mcp]], [[ghidra-hexeditor]], [[ghidra-nativeaot]], [[ghidrassist]], [[ghidra-openai]], [[ghidrametrics]], [[ghidriff]], [[ghidra-scripts]], [[ghidra-struct-importer]], [[ghidrascripts]], [[pagalaxylab-ghidra-scripts]], [[ghidra-vxd-tools]], [[ghidra-orbis]], [[ghidra-gradle-plugin]], [[ghidra-manager]], [[gpt-wpre]], [[binsync]], and related loaders/bridges.
 
 ## Links
 
@@ -20,4 +20,4 @@ Upstream base for the Ghidra plugin and automation ecosystem in this catalog: [[
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra-bridge]] · [[gdbghidra]] · [[dragonhook]] · [[enigma]] · [[ghidra-decompiler-plugins]] · [[ghiradec]] · [[ghidra-headless-mcp]] · [[ghidrassist]] · [[ghidra-openai]] · [[ghidrametrics]] · [[retdec]] · [[iaito]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra-bridge]] · [[gdbghidra]] · [[dragonhook]] · [[ghidra-frida-hook-gen]] · [[enigma]] · [[ghidra-decompiler-plugins]] · [[ghiradec]] · [[ghidra-headless-mcp]] · [[ghidrassist]] · [[ghidra-openai]] · [[ghidrametrics]] · [[retdec]] · [[iaito]]
