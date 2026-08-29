@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:Th3Spl/NoImportz`: entity [[noimportz]] (Th3Spl; C++17 header-only kernel zero-IAT lazy importer; LSTAR MSR→ntoskrnl backward scan, PsLoadedModuleList module walk, PE export parse like MmGetSystemRoutineAddress; template variadic calls + optional hash-map cache; custom mem routines avoid compiler imports; sample KMDF driver for ntoskrnl/ndis.sys; manually mapped import-free KM code; Anti Cheat / Lazy Importer); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[lazy-importer]], [[kli]], [[kli-ex]], [[kernelmode-manual-mapping-through-iat]], and [[perfectsmbios]].
+
 - **2026-08-29** — ingest `description:Th3Spl/PerfectSMBios`: entity [[perfectsmbios]] (Th3Spl; lightweight UEFI C library; SMBIOS 2.0/3.0 read/spoof before OS load via EFI config table; structure lookup + randomized string overwrite; VisualUefi/EDK2; no ntoskrnl/winload pointers; Windows+Linux; pre-boot HWID / anti-cheat RE; cheat / EFI Driver + HWID); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[simpleuefi]], [[negativespoofer]], [[rainbow-efi]], and [[mutante]].
 
 - **2026-08-29** — ingest `description:jprx/darwin-vm`: entity [[darwin-vm]] (jprx; QEMU Darwin VM boot lightweight debuggable iOS/macOS to root shell without jailbreak; virtual iPhone 12–17 and M1–M5 Macs; custom qemu-sptm fork; SPTM/TXM/MIE kernel debug; IPSW patch/trust-cache automation; GDB/LLDB; no GUI/SpringBoard; IOS Emulator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[qemu-apple-silicon]], [[vphone-cli]], and [[xnu-qemu-arm64]].

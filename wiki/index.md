@@ -2357,7 +2357,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [NMI EnumNmiCallback](entities/nmi-enum-nmi-callback.md) — C/C++ kernel PoC to enumerate registered NMI callbacks (cheat / windows kernel explorer; gmh5225)
 - [NMI nmi_callback](entities/nmi-nmi-callback.md) — Windows kernel PoC to register/trigger NMI callbacks and inspect thread contexts (BattlEye-style detection study; gmh5225)
 - [nohv](entities/nohv.md) — C/C++ hypervisor VM-detection benchmark suite (kernel driver; Detection: Hacked Hypervisor)
-- [noimportz](entities/noimportz.md) — kernel zero-IAT header; LSTAR→ntoskrnl walk + PsLoadedModuleList PE export resolve; import-table evasion (Th3Spl; Anti Cheat / Lazy Importer)
+- [noimportz](entities/noimportz.md) — C++17 kernel zero-IAT header; LSTAR→ntoskrnl walk + PsLoadedModuleList PE export resolve; template variadic calls + hash-map cache; sample KMDF driver; import-table evasion (Th3Spl; Anti Cheat / Lazy Importer)
 - [nokd](entities/nokd.md) — stealth kernel debugger protocol (local KdDebuggerDataBlock decode → WinDbg; no ntoskrnl KD globals)
 - [NoTruth (KelvinMsft)](entities/notruth.md) — VT-x/EPT user-mode memory deception; redirect reads to fake values while controlling execution; checksum/integrity bypass research; README Hide Memory By VT
 - [NovaHypervisor (Idov31)](entities/novahypervisor.md) — Defensive x64 Intel host hypervisor; kernel memory R/W/X policies; BYOVD mitigation; Windows driver + client + logging; anti-cheat / endpoint defense research
