@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:Th3Spl/PerfectSMBios`: entity [[perfectsmbios]] (Th3Spl; lightweight UEFI C library; SMBIOS 2.0/3.0 read/spoof before OS load via EFI config table; structure lookup + randomized string overwrite; VisualUefi/EDK2; no ntoskrnl/winload pointers; Windows+Linux; pre-boot HWID / anti-cheat RE; cheat / EFI Driver + HWID); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[simpleuefi]], [[negativespoofer]], [[rainbow-efi]], and [[mutante]].
+
 - **2026-08-29** — ingest `description:jprx/darwin-vm`: entity [[darwin-vm]] (jprx; QEMU Darwin VM boot lightweight debuggable iOS/macOS to root shell without jailbreak; virtual iPhone 12–17 and M1–M5 Macs; custom qemu-sptm fork; SPTM/TXM/MIE kernel debug; IPSW patch/trust-cache automation; GDB/LLDB; no GUI/SpringBoard; IOS Emulator); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[qemu-apple-silicon]], [[vphone-cli]], and [[xnu-qemu-arm64]].
 
 - **2026-08-29** — ingest `description:talsec/Free-RASP-Community`: entity [[free-rasp-community]] (Talsec; community hub for freeRASP mobile RASP SDK; root/jailbreak/Frida/Xposed/repackaging/tamper/integrity; Flutter/React Native/Capacitor/Cordova/KMP/Unity/Unreal; optional freeMalwareDetection; OWASP MASVS V8; callback API); cited on [[overviews/mobile-security]] and [[overviews/anti-cheat]]; cross-linked [[free-rasp-android]], [[free-rasp-ios]], [[free-rasp-unity-poc]], [[free-rasp-reactnative]], [[free-rasp-capacitor]], [[free-rasp-cordova]], [[free-rasp-flutter]], and [[free-rasp-kmp]].
