@@ -771,7 +771,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Darken Anti-Cheat](entities/darken-anticheat.md) — kernel AC PoC (driver comm / integrity / sigscan / debugger / overlay; C/C++)
 - [Dark Souls III Cheat Engine Guide](entities/dark-souls-iii-cheat-engine-guide.md) — The Grand Archives DS3 Cheat Engine table guide (cheat / game:dark souls [Cheat Engine])
 - [darksword-kexploit-fun](entities/darksword-kexploit-fun.md) — DarkSword kernel r/w playground (iOS 17.0–26.0.1; sandbox/SSV/PAC; ObjC/C)
-- [darwin-vm](entities/darwin-vm.md) — QEMU Darwin VM boot iOS/macOS to root shell; virtual iPhone 12–17 and M1–M5 Macs; SPTM/TXM/MIE kernel debug (jprx; IOS Emulator)
+- [darwin-vm](entities/darwin-vm.md) — QEMU Darwin VM boot iOS/macOS to root shell; virtual iPhone 12–17 (A14–A19) and M1–M5 Macs; SPTM/TXM/MIE kernel debug; no GUI/SpringBoard (jprx; IOS Emulator)
 - [dayu](entities/dayu.md) — Open/HarmonyOS `.abc` parser and decompiler (mobile RE; maintenance not guaranteed)
 
 - [DayZ-Cheat](entities/dayz-cheat.md) — DayZ external cheat (ESP, aimbot, item ESP; external memory reads + overlay; gmh5225)

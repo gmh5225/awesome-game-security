@@ -97,6 +97,7 @@ sources:
   - wiki/sources/descriptions/TheWildJames__kernel_build_scripts.md
 
   - wiki/sources/descriptions/xProHackerx__imgui-ios-mod-menu.md
+  - wiki/sources/descriptions/jprx__darwin-vm.md
   - wiki/sources/descriptions/jixiaoyong__ApkSigner.md
   - wiki/sources/descriptions/joeyjurjens__iOS-Mod-Menu-Template-for-Theos.md
   - wiki/sources/descriptions/x-spy__CVE-2026-43499-popsicle.md
