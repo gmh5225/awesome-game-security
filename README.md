@@ -4136,6 +4136,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/1hAck-0/zeroimport
 - https://github.com/emlinhax/blitz
 - https://github.com/alfarom256/rs-ldr [Rust no_std hash-based WinAPI resolution via PEB walk, LdrLoadDll, and compile-time string obfuscation]
+- https://github.com/Th3Spl/NoImportz [Kernel zero-IAT header: LSTAR→ntoskrnl walk, PsLoadedModuleList + PE export resolve; C++17]
 
 > Anti-Cheat Programming
 - https://github.com/m417z/thread-call-stack-scanner [Safely manage the unloading of DLLs that have been hooked into a process. Context]
