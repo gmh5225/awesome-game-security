@@ -2697,6 +2697,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [proxmox-ve-anti-detection](entities/proxmox-ve-anti-detection.md) — Hidden PVE / QEMU-KVM anti-detection (kernel)
 - [procmap](entities/procmap.md) — C++14 Linux `/proc/pid/maps` parser (`MemorySegment`; layout analysis for forensics / game security)
 - [proton](entities/proton.md) — Valve Steam Play compatibility layer (Wine-based; Docker build infra, prefix config, Steam manifests, per-title fixups; Linux gaming / Windows-to-Linux translation; ValveSoftware; [Steam])
+- [RunEXE](entities/runexe.md) — Python PE analyzer and Wine launcher (CDJuaum; import/manifest/.NET triage; flags EAC/BattlEye kernel AC from DLL signatures; Wine prefix + Winetricks auto-provisioning; Linux game-security RE)
 - [prowl](entities/prowl.md) — open-source C#/.NET 3D game engine with Unity-like editor (GameObject/MonoBehaviour; Prowl.Editor + Prowl.Runtime; PBR + post-processing; hot-reload C#; prefabs; MIT; Game Engine / source)
 - [protobufs](entities/protobufs.md) — SteamDatabase tracked Steam/Valve protobuf schema dumps (`.proto` files from update pipelines and automated dumpers; CS:GO/Steam client message schemas; protocol analysis and tooling maintenance; README [Protobuf])
 - [ps5-linux-loader](entities/ps5-linux-loader.md) — PS5 Linux loader (kernel/HV exploits, IOMMU/GPU/TMR; PlayStation)

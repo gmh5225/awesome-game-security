@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:CDJuaum/RunEXE`: entity [[runexe]] (CDJuaum; Python CLI PE analyzer + Wine launcher; static import/manifest/.NET triage; flags [[easy-anti-cheat]]/[[battleye]] kernel AC from DLL signatures; Wine prefix + Winetricks dependency provisioning; Linux game-security RE); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[totalpe2]], [[pe-bear]], [[proton]], [[winehooks]], and [[aclist-github-io]].
+
 - **2026-08-29** — ingest `description:CENSUS/ghidra-frida-hook-gen`: entity [[ghidra-frida-hook-gen]] (CENSUS; Java Ghidra extension; right-click actions generate Frida hook scripts from disassembly context—full scripts, reusable snippets, advanced hook config; function-level and arbitrary address hooks; static→dynamic RE bridge; cheat / Ghidra Plugins); cited on [[overviews/reverse-engineering]] and [[concepts/frida]]; cross-linked [[ghidra]], [[dragonhook]], [[frinet]], and [[frinja]].
 
 - **2026-08-29** — ingest `description:CKCat/d810`: entity [[d810]] (CKCat; Python IDA Pro plugin; deobfuscate at decompilation time by rewriting Hex-Rays microcode; configurable extensible rule sets; malware/game-security analysts on heavily obfuscated binaries; README [Deobfuscate code at decompilation time by modifying IDA Pro microcode]); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[d810-ng]], [[hex-rays-deob]], [[hrtng]], and [[emotet-deobfuscator]].
