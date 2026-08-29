@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `readme:categories`: Cheat ~2758 (+1) / Game Develop ~187 (+1); 41 sections (`NeverC & NeverD` placeholder stable); refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-29** — ingest `description:CallumCVM/ValveGen`: entity [[valvegen]] (CallumCVM; C++ Source Engine SDK generator; parses networked ClientClass/RecvTable and data-table structures from client metadata; emits generated class definitions and offsets; game RE and tooling workflows needing up-to-date Source-engine SDK representations; [SDK Generator]); cited on [[overviews/game-engine]] and [[concepts/source-netvars]]; cross-linked [[gh-offset-dumper]], [[hazedumper]], [[csf-w]], [[csf]], [[csgo-sdk]], and [[sdk]].
 
 - **2026-08-29** — ingest `description:Th3Spl/NoImportz`: entity [[noimportz]] (Th3Spl; C++17 header-only kernel zero-IAT lazy importer; LSTAR MSR→ntoskrnl backward scan, PsLoadedModuleList module walk, PE export parse like MmGetSystemRoutineAddress; template variadic calls + optional hash-map cache; custom mem routines avoid compiler imports; sample KMDF driver for ntoskrnl/ndis.sys; manually mapped import-free KM code; Anti Cheat / Lazy Importer); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[lazy-importer]], [[kli]], [[kli-ex]], [[kernelmode-manual-mapping-through-iat]], and [[perfectsmbios]].
