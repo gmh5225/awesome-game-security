@@ -562,6 +562,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/droidrun/droidrun [MCP for Android]
 - https://github.com/un4ckn0wl3z/MemMCP [Cheat Engine-like but MCP]
 - https://github.com/Neverdecel/pcileech-memprocfs-mcp [Linux-native MCP server for PCILeech/MemProcFS DMA memory R/W, RE scanning, and UE/Unity SDK dumping]
+- https://github.com/rabbanyhmm/DnSpyMCP [MCP server for .NET assembly RE, IL2CPP/Unity dump analysis, cross-refs, and network patching (31 tools)]
 - https://github.com/Eruditi/CE-MCP-Plugin [MCP for Cheat Engine]
 - https://github.com/miscusi-peek/cheatengine-mcp-bridge [MCP for Cheat Engine]
 - https://github.com/beamstar/cheatengine-mcp-bridge [MCP for Cheat Engine]
