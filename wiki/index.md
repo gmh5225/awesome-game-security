@@ -1616,6 +1616,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [hwid-spoofer](entities/hwid-spoofer.md) — EAC/BattlEye HWID spoofer (C/C++; Cheat HWID; gmh5225)
 - [Hwid--Spoofer (Theordernarkoz)](entities/hwid--spoofer.md) — Windows KMDF kernel-mode HWID spoofer driver; disk/mount/network control-path hooks; disk/NIC/SMBIOS/GPU identifier rewrite (Theordernarkoz; cheat / HWID)
 - [Hwid-Spoofer-EAC-BE](entities/hwid-spoofer-eac-be.md) — EAC/BE HWID spoofer via kernel driver hooks (disk serial / NIC MAC / SMBIOS; gmh5225)
+- [HWIDSpooferEAC](entities/hwid-spoofer-eac.md) — Windows ImGui HWID spoofing toolkit with kernel driver mapper/loader + service handling; low-level hardware ID changes for EAC testing (BuzzerFelix; cheat / HWID)
 - [HWID-EclipsedSpoofer-EAC-BE](entities/hwid-eclipsed-spoofer-eac-be.md) — Eclipsed kernel HWID spoofer for EAC/BE (disk serial / NIC / other HWIDs; gmh5225)
 - [HWID-Kernel-Spoofer](entities/hwid-kernel-spoofer.md) — kernel-mode HWID spoofer via `IRP_MJ_DEVICE_CONTROL` dispatch hooks (disk serial / MAC / SMBIOS / GPU; gmh5225)
 - [HWID-SteamSpywareTerminator](entities/hwid-steam-spyware-terminator.md) — block Steam client HWID fingerprinting and telemetry to Valve servers (gmh5225; README [Steam])

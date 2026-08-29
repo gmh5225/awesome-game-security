@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:BuzzerFelix/HWIDSpooferEAC`: entity [[hwid-spoofer-eac]] (BuzzerFelix; C++; ImGui GUI + driver mapper/loader + service handling; low-level hardware identifier changes; practical testing workflow; game bypass / anti-cheat HWID research; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[imgui-spoofer-leaked]], [[hwid-spoofer-eac-be]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
+
 - **2026-08-29** — ingest `description:LargoScript/n0xis`: entity [[n0xis]] (LargoScript; Rust; x64 Windows game binaries; unified static CFG/SSA decompilation + live memory scan, pointer paths, struct dissection, hooks, cheat tables; CLI + MCP versioned JSON artifacts; Unity IL2CPP, Lua/LuaJIT; N0xHUD companion; agent-native RE bridging disassemblers and CE-style runtime manipulation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[cheat-engine]], [[pointer-lab]], [[ida-pro-mcp]], [[concepts/il2cpp]], [[aether]], and [[neverd]].
 
 - **2026-08-29** — ingest `description:abhijeetadarsh/CTTrainer`: entity [[cttrainer]] (abhijeetadarsh; C++ Visual Studio; standalone Windows ImGui/DX11 trainer; loads CE `.CT` tables; XML cheat entries with module offsets and pointer chains; per-cheat or bulk value freeze via cheat-manager threads; 32/64-bit attach; external trainer without running CE; RE / trainer authoring); cited on [[overviews/game-hacking]]; cross-linked [[cheat-engine]], [[freeplay]], [[cheat-engine-tables]], [[mydev-cheat-engine-tables]], and [[pointer-lab]].
