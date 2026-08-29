@@ -404,6 +404,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-android-security](entities/awesome-android-security.md) — curated Android security learning index (theory/tools/write-ups/PoCs/CVEs; kernel exploitation, app testing, Frida; Samsung research references)
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
 - [awesome-executable-packing](entities/awesome-executable-packing.md) — curated executable packing/unpacking resources (PE/ELF/Mach-O; packers, protectors, unpackers, analysis tools; Executable File Packing)
+- [awesome-gamedev](entities/awesome-gamedev.md) — curated free/open gamedev resources (tools, engines, libraries, learning, assets; openly licensed focus; Game Develop / guide)
 - [awesome-gamedev-agent-skills](entities/awesome-gamedev-agent-skills.md) — ~66 version-pinned game-dev Agent Skills + engine router (Godot/Unity/Unreal/Phaser/Bevy/etc.; Game Develop / AI Agents)
 - [Everything Game Dev Code](entities/everything-game-dev-code.md) — multi-engine AI agent scaffold; rules/agents/skills/phase contexts for Unity/Unreal/Godot/HTML; Claude/Codex/Cursor/OpenCode/Kiro harnesses; security/performance/console review roles (MRCalderon3D; Game Develop / AI Agents)
 - [awesome-game-analysis](entities/awesome-game-analysis.md) — curated game technology analysis resources (by game/engine/developer/year/topic; engine internals + production techniques; Game Develop / guide)

@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:Calinou/awesome-gamedev`: entity [[awesome-gamedev]] (Calinou; curated Markdown list of free/open gamedev tools, engines, libraries, learning material, and assets across languages and domains; openly licensed focus with non-free notes; Game Develop / guide); cited on [[overviews/game-engine]] and [[overviews/overview]]; cross-linked [[learn-awesome-gamedev]], [[gamedev-resources]], [[gamedev-libraries]], and [[awesome-educational-games]].
+
 - **2026-08-29** — ingest `description:Chinaapps/ZN-Toolbox`: entity [[zn-toolbox]] (Chinaapps; host-no-root Android container VM on Twoyi fork; Rust native core + Kotlin Jetpack Compose UI; built-in root + LSPosed inside isolated guest; multi-profile container management + Scrcpy remote display/control; Chinese UI; security researchers / RE / modders needing rooted Xposed sandbox on non-rooted phones; Cheat / Xposed); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[virtual-app]], [[lsposed-universal-template]], [[xposed-module-kit]], [[droidvm]], [[scrcpy]], [[android-virtual-inject]], and [[inject-arm64]].
 
 - **2026-08-29** — ingest `description:Glmour/ue-live-bridge`: entity [[ue-live-bridge]] (Glmour; UE4SS Lua mod + Python MCP driver; external process reads/writes live UObject state over append-only JSONL IPC; property read, UFunction call, verified write claims CONFIRMED/FALSE_SUCCESS; off-engine dishonest-bridge tests; modding / automation / RE on controlled Unreal titles; Game Develop / MCP); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[re-ue4ss]], [[unreal-mcp]], [[unreal-claude]], and [[research-rigor]].

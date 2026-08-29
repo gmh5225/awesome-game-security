@@ -12,7 +12,7 @@ confidence: medium
 
 Mega-list of learning resources for game creators—aimed at learning the craft of game development. Useful for game developers, reverse engineers, and tooling builders in the Game Develop / guide lane, not a cheat or anti-cheat artifact. (source: wiki/sources/descriptions/notpresident35__learn-awesome-gamedev.md)
 
-Sits beside other curated gamedev learning indexes such as [[awesome-educational-games]], [[gamedev-resources]], and engine-dev lists such as [[awesome-game-engine-dev]].
+Sits beside other curated gamedev learning indexes such as [[awesome-gamedev]], [[awesome-educational-games]], [[gamedev-resources]], and engine-dev lists such as [[awesome-game-engine-dev]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits beside other curated gamedev learning indexes such as [[awesome-educational
 
 ## Related
 
-[[overviews/overview]] · [[overviews/game-engine]] · [[awesome-educational-games]] · [[awesome-game-engine-dev]] · [[gamedev-resources]] · [[gamedev-libraries]]
+[[overviews/overview]] · [[overviews/game-engine]] · [[awesome-gamedev]] · [[awesome-educational-games]] · [[awesome-game-engine-dev]] · [[gamedev-resources]] · [[gamedev-libraries]]
