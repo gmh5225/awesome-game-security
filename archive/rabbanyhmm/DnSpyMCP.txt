@@ -1,0 +1,4581 @@
+Project Path: arc_rabbanyhmm_DnSpyMCP_ky05u4qo
+
+Source Tree:
+
+```txt
+arc_rabbanyhmm_DnSpyMCP_ky05u4qo
+├── AGENT.md
+├── Directory.Build.props
+├── LICENSE
+├── README.md
+├── configs
+│   ├── claude-code.mcp.json
+│   ├── codex.mcp.json
+│   ├── instructions.md
+│   └── opencode.mcp.json
+├── dotnet-inspector-mcp.slnx
+├── publish.ps1
+└── src
+    └── DotNetInspectorMcp
+        ├── Communication
+        │   └── StdioJsonRpc.cs
+        ├── Domain
+        │   ├── AssemblyAnalyzer.Advanced.cs
+        │   ├── AssemblyAnalyzer.cs
+        │   └── ResourceRegistry.cs
+        ├── DotNetInspectorMcp.csproj
+        ├── Endpoints
+        │   ├── AssemblyTools.Advanced.cs
+        │   ├── AssemblyTools.cs
+        │   ├── Attributes.cs
+        │   ├── ToolCallResult.cs
+        │   ├── ToolContext.cs
+        │   └── ToolRegistry.cs
+        ├── Hosting
+        │   └── McpServerHost.cs
+        ├── Models
+        │   └── McpServer.cs
+        ├── Program.cs
+        └── Properties
+            └── PublishProfiles
+                ├── linux-x64.pubxml
+                └── win-x64.pubxml
+
+```
+
+`AGENT.md`:
+
+```md
+# AGENT.md — DnSpy MCP Server v2.3.0
+
+This document explains **every major aspect** of this MCP server so another agent (or human) can operate, extend, and troubleshoot it safely.
+
+---
+
+## 1) Purpose
+
+`DnSpyMCP` is a local MCP (Model Context Protocol) server for .NET reverse engineering, game hacking, and network analysis.
+
+It provides 30 tools to:
+- inspect assemblies (`list_types`, `list_methods`, `search_members`, `analyze_type`)
+- decompile code (`decompile_type`, `decompile_method`)
+- inspect IL (`get_method_il`, `find_string_references`)
+- game dump analysis (`search_by_offset`, `get_method_rva`, `get_struct_layout`, `find_enum_values`, `find_ui_bindings`, `get_class_pointer`)
+- cross-references (`find_method_callers`, `find_field_references`, `trace_field_consumers`, `find_derived_types`, `search_by_inheritance`)
+- token resolution (`lookup_token`)
+- network reversing (`find_network_handlers`, `find_crypto_usage`, `scan_secrets`)
+- multi-assembly search (`search_workspace`)
+- class comparison & signatures (`diff_types`, `resolve_method_signature`)
+- dump.cs bridge (`resolve_dump_line`)
+- generate navigation instructions (`format_inspector_jump`)
+- patch binaries (`patch_replace_string_literal`, `patch_nop_instructions`)
+
+It does **not** require dnSpy at runtime. It uses:
+- `dnlib` — for reading/writing .NET assemblies and IL
+- `ICSharpCode.Decompiler` — for C# decompilation
+
+---
+
+## 2) MCP transport + protocol
+
+Transport: **stdio JSON-RPC**.
+
+Supported framing:
+- LSP-style headers: `Content-Length: N\r\n\r\n<json>`
+- Line framed JSON (single JSON message per line, or multi-line with balanced braces)
+
+Implemented MCP methods:
+- `initialize`
+- `notifications/initialized`
+- `ping`
+- `tools/list`
+- `tools/call`
+- `resources/list`
+- `resources/read`
+
+Protocol version used: `2024-11-05`.
+
+---
+
+## 3) Project layout
+
+```
+src/DotNetInspectorMcp/
+├── Program.cs                       — entry point with graceful Ctrl+C shutdown
+├── Hosting/McpServerHost.cs         — dependency wiring, IDisposable host
+├── Models/McpServer.cs              — request router
+├── Communication/StdioJsonRpc.cs    — stdio read/write + framing, IDisposable
+├── Domain/AssemblyAnalyzer.cs       — core analysis engine, IDisposable
+├── Domain/ResourceRegistry.cs       — MCP resources
+├── Endpoints/AssemblyTools.cs       — all 22 tool implementations
+├── Endpoints/ToolRegistry.cs        — reflection-based tool discovery
+├── Endpoints/Attributes.cs          — [McpTool] and [ToolParam] attributes
+├── Endpoints/ToolCallResult.cs      — tool result model
+└── Endpoints/ToolContext.cs         — DI context record
+```
+
+---
+
+## 4) Tool registration model
+
+Tools are discovered via reflection:
+- Static methods in `Endpoints/AssemblyTools.cs`
+- Marked with `[McpTool(name, description)]`
+- Parameters described with `[ToolParam(description, Required = true/false)]`
+
+`ToolRegistry` generates MCP JSON schema from C# method signatures.
+Parameters with `Required = true` are always included in the JSON schema `required` array.
+
+First parameter of every tool must be `ToolContext`.
+Methods can return `ToolCallResult` (sync) or `Task<ToolCallResult>` (async).
+
+---
+
+## 5) Error handling & null guards
+
+All tool handlers validate required parameters **before** calling into the analyzer.
+If `assemblyPath` (or any required param) is null/empty, the tool returns a friendly
+`ToolCallResult` with an actionable error message instead of throwing an exception.
+
+Default assembly path auto-discovery:
+1. Checks `DNSPY_DEFAULT_ASSEMBLY` environment variable
+2. Scans CWD for `DummyDll/Assembly-CSharp.dll`, `Managed/Assembly-CSharp.dll`, etc.
+
+---
+
+## 6) Tool reference (30 tools)
+
+### Assembly Inspection
+1. `list_types` — list types with optional `gameCodeOnly` filter
+2. `decompile_type` — decompile full type to C#
+3. `decompile_method` — decompile method, auto-detects Il2Cpp dummies
+4. `get_method_il` — raw IL listing
+5. `search_members` — search by name across types, methods, fields, properties
+6. `list_methods` — list methods of a type
+7. `find_string_references` — find string literals in IL
+
+### Game Dump / Il2Cpp
+8. `analyze_type` — full class layout (fields + offsets + properties + methods + RVAs)
+9. `get_struct_layout` — advanced C++ struct export with explicit `_pad` bytes
+10. `get_type_layout` — basic C-struct layout 
+11. `get_method_rva` — Il2Cpp RVA for a method
+12. `search_by_offset` — find field/method by hex or decimal offset
+13. `find_enum_values` — find/resolve enum values by magic number
+14. `find_ui_bindings` — scan class for Unity UI refs & their modifiers
+15. `get_class_pointer` — get static `TypeInfo` pointer from `script.json` for memory scanning
+
+### Cross-References & Deep Reversing
+16. `trace_field_consumers` — full call graph from field access (who ultimately uses it)
+16. `find_method_callers` — who calls a target method
+17. `find_field_references` — who reads/writes a target field
+18. `find_derived_types` — inheritance tree scan
+19. `search_by_inheritance` — filtered inheritance search
+20. `lookup_token` — resolve raw hex token to Type/Method/Field/Property
+21. `diff_types` — compare field offsets/signatures between two classes
+22. `resolve_method_signature` — generate C++ typedef for hooking
+
+### Network Reversing
+23. `find_network_handlers` — heuristic scan for TCP/Socket/Packet logic
+24. `find_crypto_usage` — heuristic scan for AES/RSA/encryption
+25. `scan_secrets` — extract hardcoded IPs, URLs, API keys
+
+### Multi-Assembly & Bridge
+26. `search_workspace` — search ALL .dll files in a directory
+27. `resolve_dump_line` — bridge dump.cs line numbers to DummyDll types
+
+### Patching
+28. `patch_replace_string_literal` — replace string at IL offset (backup first)
+29. `patch_nop_instructions` — NOP instructions at IL offset (backup first)
+
+### Navigation
+- `format_inspector_jump` — build navigation steps from tokens
+
+---
+
+## 7) Resources
+
+`resources/list` returns:
+- `inspector://assemblies`
+- Per-cached-assembly resources for summary/types
+
+`resources/read` supports:
+- `inspector://assemblies`
+- `inspector://assembly?path=<...>&view=summary`
+- `inspector://assembly?path=<...>&view=types`
+
+Cache is populated when tools load assemblies by `assemblyPath`.
+
+---
+
+## 8) Lifecycle & disposal
+
+- `Program.cs` registers `Console.CancelKeyPress` and `AppDomain.ProcessExit`
+- On shutdown, `McpServerHost.Dispose()` is called
+- This disposes `AssemblyAnalyzer` (releases all loaded `ModuleDefMD` handles)
+- And disposes `StdioJsonRpc` (releases `SemaphoreSlim`)
+
+---
+
+## 9) Typical agent workflows
+
+### A) Il2Cpp game field analysis
+1. `list_types` with `gameCodeOnly=true`
+2. `analyze_type` for full memory layout
+3. `get_type_layout` for C-struct export
+4. `search_by_offset` to find what's at `0x16D0`
+5. `find_field_references` to trace who modifies it
+
+### B) TCP Proxy / Packet hooking
+1. `find_network_handlers` to locate Send/Receive
+2. `find_crypto_usage` to find encryption layer
+3. `scan_secrets` to extract server IPs/endpoints
+4. `get_method_rva` for Frida hook targets
+
+### C) Multi-DLL discovery
+1. `search_workspace` to find which DLL contains a type
+2. `analyze_type` to deep dive into the matching type
+3. `find_field_references` / `find_method_callers` for cross-references
+
+### D) Patch popup text
+1. `find_string_references` with literal fragment
+2. `patch_replace_string_literal` with new text
+3. Verify by re-running `find_string_references` on patched file
+
+### E) Bridge dump.cs
+1. `resolve_dump_line` with dump.cs path and line number
+2. Optionally provide `assemblyPath` for full DummyDll cross-reference
+
+---
+
+## 10) Build, run, publish
+
+Build: `dotnet build src/DotNetInspectorMcp/DotNetInspectorMcp.csproj -c Release`
+Run: `dotnet run --project src/DotNetInspectorMcp/DotNetInspectorMcp.csproj -c Release`
+Publish: `./publish.ps1 -Runtime win-x64` or `./publish.ps1 -Runtime linux-x64`
+
+---
+
+## 11) Known caveats
+
+- Patching can break signatures/strong-name expectations in some apps.
+- NOP patching can break control flow if applied blindly.
+- Always validate patched binaries in isolated test environments.
+- Heuristic network/crypto scanners may have false positives on large assemblies.
+- Il2Cpp DummyDlls have no real method bodies — decompilation shows stubs.
+- `resolve_dump_line` uses regex-based parsing; may not handle all dump.cs formatting edge cases.
+
+---
+
+## 12) Extension guidance
+
+When adding tools:
+1. Add async method in `Domain/AssemblyAnalyzer.cs`
+2. Add `[McpTool]` endpoint in `Endpoints/AssemblyTools.cs`
+3. Mark required parameters with `[ToolParam(description, Required = true)]`
+4. Add null guards with `ValidateRequired()` before calling the analyzer
+5. Ensure token-rich output (TypeDef, MethodDef, RVA, etc.)
+6. Update this AGENT.md + README.md + configs/instructions.md
+
+```
+
+`Directory.Build.props`:
+
+```props
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Existence
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+<div align="center">
+
+# 🔬 DnSpy MCP Server
+
+[![GitHub stars](https://img.shields.io/github/stars/rabbanyhmm/DnSpyMCP?style=for-the-badge&logo=github&color=gold)](https://github.com/rabbanyhmm/DnSpyMCP/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/rabbanyhmm/DnSpyMCP?style=for-the-badge&logo=github&color=blue)](https://github.com/rabbanyhmm/DnSpyMCP/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/rabbanyhmm/DnSpyMCP?style=for-the-badge&logo=github&color=red)](https://github.com/rabbanyhmm/DnSpyMCP/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/rabbanyhmm/DnSpyMCP?style=for-the-badge&logo=github&color=green)](https://github.com/rabbanyhmm/DnSpyMCP/commits)
+[![GitHub license](https://img.shields.io/badge/license-MIT-purple?style=for-the-badge)](https://github.com/rabbanyhmm/DnSpyMCP/blob/main/LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
+[![Version](https://img.shields.io/badge/version-2.4.1-orange?style=for-the-badge)](https://github.com/rabbanyhmm/DnSpyMCP/releases)
+
+**A powerful MCP server for .NET reverse engineering, game hacking, and Il2Cpp dump analysis.**
+
+*31 AI-optimized tools • Cross-References • Network Reversing • Il2Cpp Support • TCP Proxy Analysis • Multi-DLL Search*
+
+[![Visitors](https://api.visitorbadge.io/api/visitors?path=rabbanyhmm%2FDnSpyMCP&countColor=%23263759&style=for-the-badge)](https://visitorbadge.io/status?path=rabbanyhmm%2FDnSpyMCP)
+
+
+</div>
+
+---
+
+## Features
+
+- **31 MCP Tools** for deep .NET assembly analysis, patching, and game reversing
+- Fully async, non-blocking architecture
+- Il2Cpp / Unity game dump optimized (offset search, RVA lookup, dummy detection)
+- Cross-reference scanning (method callers, field references)
+- Network/TCP proxy reverse engineering (packet handler discovery, crypto usage scanning)
+- Hardcoded secret extraction (IPs, URLs, API keys)
+- **Multi-assembly search** — search all DLLs in a folder at once
+- **dump.cs bridge** — resolve dump.cs line numbers to DummyDll types
+- **C-struct layout export** — ready for cheat engine / Frida scripts
+- **Default assembly auto-discovery** — `DNSPY_DEFAULT_ASSEMBLY` env var support
+- **AI agent instructions** — `instructions.md` for AI agent onboarding
+- Single-file publish (win-x64 / linux-x64)
+- MCP stdio transport (Claude Code / Codex / Cursor / OpenCode / Antigravity compatible)
+
+## Project Layout
+
+```
+src/DotNetInspectorMcp/
+├── Program.cs                          # Entry point with graceful shutdown
+├── Hosting/McpServerHost.cs            # Dependency wiring
+├── Models/McpServer.cs                 # MCP request router
+├── Communication/StdioJsonRpc.cs       # Stdio JSON-RPC transport
+├── Domain/AssemblyAnalyzer.cs          # Core analysis engine
+├── Domain/ResourceRegistry.cs          # MCP resources
+├── Endpoints/AssemblyTools.cs          # All tool implementations
+├── Endpoints/ToolRegistry.cs           # Reflection-based tool discovery
+├── Endpoints/Attributes.cs             # [McpTool] / [ToolParam] attributes
+├── Endpoints/ToolCallResult.cs         # Tool result model
+└── Endpoints/ToolContext.cs            # DI context for tools
+```
+
+## Tools (31 total)
+
+### Assembly Inspection
+| Tool | Description |
+|------|-------------|
+| `list_types` | List all types. Supports `gameCodeOnly` filter to hide Unity/System noise. |
+| `decompile_type` | Decompile a full type to C#. |
+| `decompile_method` | Decompile a specific method. Auto-detects Il2Cpp dummy bodies. |
+| `get_method_il` | Get raw IL instructions for a method. |
+| `search_members` | Search types, methods, fields, properties by name. |
+| `list_methods` | List all methods of a type with tokens. |
+| `find_string_references` | Find all string literal usages across the assembly. |
+
+### Game Dump / Il2Cpp Analysis
+| Tool | Description |
+|------|-------------|
+| `analyze_type` | Full class layout: fields with offsets, properties, methods with RVAs. |
+<<<<<<< HEAD
+| `get_type_layout` | Basic C-struct layout for cheat development. Automatically marks inline value types (`[Inline Struct]`) and omits pointer formatting. |
+=======
+| `get_type_layout` | Basic C-struct layout for cheat development. |
+>>>>>>> 9b7039f949a85947fd36460a2e67b8073fd13b11
+| `get_struct_layout` | Advanced C++ struct export with explicit padding (`char _pad`) computed from offsets. |
+| `get_method_rva` | Get the Il2Cpp RVA for a specific method. |
+| `search_by_offset` | Search by hex (`0x16D0`) or decimal offset to find fields/methods. Numeric comparison. |
+| `find_enum_values` | Find/resolve enum values by magic number, hex value, or partial name. |
+| `find_ui_bindings` | Scan a class to find all Unity UI component references and the methods modifying them. |
+| `get_class_pointer` | Parse `script.json` from Il2CppDumper to get static `TypeInfo` class pointers for memory scanning. |
+
+### Deep Reverse Engineering
+| Tool | Description |
+|------|-------------|
+| `find_method_callers` | Cross-reference: find all methods that call a target method. |
+| `find_field_references` | Cross-reference: find all methods that read/write a target field. |
+| `trace_field_consumers` | Traces the full call graph up from a field read/write to find who ultimately consumes the data. |
+| `find_derived_types` | Find all classes inheriting from a base class or interface. |
+| `search_by_inheritance` | Find classes inheriting from a base type and optionally filter by field names. |
+| `lookup_token` | Resolve a raw hex token (e.g., `0x06001234`) to its Type/Method/Field. |
+| `diff_types` | Compare two types side-by-side to find field offset and signature differences. |
+| `resolve_method_signature` | Generates C++ function pointer typedefs for hooking (e.g., MinHook/Frida). |
+
+### Network / TCP Proxy Reversing
+| Tool | Description |
+|------|-------------|
+| `find_network_handlers` | Heuristic scan for Socket/TcpClient/Packet handlers with RVAs. |
+| `find_crypto_usage` | Heuristic scan for AES/RSA/Encrypt/Decrypt methods. |
+| `scan_secrets` | Extract hardcoded IPs, URLs, WebSocket endpoints, and API keys. |
+
+### Multi-Assembly & Dump Bridge
+| Tool | Description |
+|------|-------------|
+| `search_workspace` | Search ALL .dll files in a directory for matching types/members. |
+| `resolve_dump_line` | Bridge dump.cs line numbers to DummyDll types with full analysis. |
+
+### Patching
+| Tool | Description |
+|------|-------------|
+| `patch_replace_string_literal` | Replace a string literal at a specific IL offset. Always creates backup. |
+| `patch_nop_instructions` | NOP one or more IL instructions. Always creates backup. |
+
+### Navigation
+| Tool | Description |
+|------|-------------|
+| `format_inspector_jump` | Build step-by-step navigation from metadata tokens. |
+
+## Default Assembly Path
+
+You can avoid repeating `assemblyPath` on every tool call by setting:
+
+```bash
+# Environment variable
+set DNSPY_DEFAULT_ASSEMBLY=C:\path\to\DummyDll\Assembly-CSharp.dll
+```
+
+The server also auto-discovers assemblies in common locations relative to CWD:
+- `DummyDll/Assembly-CSharp.dll`
+- `Dump/DummyDll/Assembly-CSharp.dll`
+- `Managed/Assembly-CSharp.dll`
+
+## Resources
+
+- `inspector://assemblies` — list cached assemblies
+- `inspector://assembly?path=<path>&view=summary` — assembly summary
+- `inspector://assembly?path=<path>&view=types` — all type names
+
+## Build
+
+```bash
+dotnet build src/DotNetInspectorMcp/DotNetInspectorMcp.csproj -c Release
+```
+
+## Run
+
+```bash
+dotnet run --project src/DotNetInspectorMcp/DotNetInspectorMcp.csproj -c Release
+```
+
+## Publish (single-file)
+
+```powershell
+./publish.ps1 -Runtime win-x64
+./publish.ps1 -Runtime linux-x64
+```
+
+## MCP Client Configuration
+
+### Claude Code / Cursor / Codex
+
+```json
+{
+  "mcpServers": {
+    "dnspy-mcp": {
+      "command": "dotnet",
+      "args": [
+        "<PATH_TO>/DnSpyMCP.dll"
+      ]
+    }
+  }
+}
+```
+
+### OpenCode (Windows)
+
+Config file: `%USERPROFILE%\.config\opencode\opencode.json`
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "dnspy-mcp": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "dotnet",
+        "<PATH_TO>/DnSpyMCP.dll"
+      ]
+    }
+  }
+}
+```
+
+### Using Published .exe (no dotnet runtime needed)
+
+```json
+{
+  "mcpServers": {
+    "dnspy-mcp": {
+      "command": "<PATH_TO>/DnSpyMCP-win-x64.exe",
+      "args": []
+    }
+  }
+}
+```
+
+> Replace `<PATH_TO>` with the actual path to your built DLL or published EXE.
+
+### AI Agent Instructions
+
+Copy `configs/instructions.md` to your MCP server's tool directory so AI agents automatically get usage guidance:
+```bash
+# Antigravity example:
+copy configs\instructions.md %USERPROFILE%\.gemini\antigravity-ide\mcp\dnspy\instructions.md
+```
+
+## Quick Start
+
+1. Build or publish
+2. Add config to your MCP client (see above)
+3. Copy `configs/instructions.md` to your MCP tool directory
+4. Restart your MCP client
+5. Ask the AI to call `list_types` with your target assembly path
+
+## Example Workflows
+
+### Find what modifies a health field
+```
+1. search_members → find "health" field
+2. find_field_references → see all methods that read/write it
+3. decompile_method → inspect the logic
+4. get_method_rva → get the RVA for Frida hooking
+```
+
+### TCP Proxy / Packet Interception
+```
+1. find_network_handlers → find Send/Receive methods
+2. find_crypto_usage → find encryption before packets are sent
+3. scan_secrets → extract server IPs and endpoints
+4. get_method_rva → get RVAs for Frida hooks
+```
+
+### Il2Cpp Game Analysis
+```
+1. list_types (gameCodeOnly=true) → see only game scripts
+2. analyze_type → get full memory layout with offsets
+3. get_type_layout → export as C struct for cheat engine
+4. search_by_offset 0x16D0 → find what field is at that offset
+5. find_method_callers → trace who calls a specific function
+```
+
+### Multi-DLL Discovery
+```
+1. search_workspace → search all DLLs in DummyDll folder
+2. analyze_type → deep dive into the matching type
+3. find_field_references → cross-reference analysis
+```
+
+### Bridge dump.cs to DummyDll
+```
+1. resolve_dump_line → resolve a dump.cs line to a type/member
+2. analyze_type → get the full analysis from DummyDll
+```
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=rabbanyhmm%2FDnSpyMCP&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=rabbanyhmm/DnSpyMCP&type=date&theme=dark&legend=bottom-right" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=rabbanyhmm/DnSpyMCP&type=date&legend=bottom-right" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=rabbanyhmm/DnSpyMCP&type=date&legend=bottom-right" />
+ </picture>
+</a>
+
+```
+
+`configs/claude-code.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "dotnet-inspector": {
+      "command": "dotnet",
+      "args": [
+        "<PATH_TO>/DnSpyMCP.dll"
+      ]
+    }
+  }
+}
+
+```
+
+`configs/codex.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "dotnet-inspector": {
+      "command": "dotnet",
+      "args": [
+        "<PATH_TO>/DnSpyMCP.dll"
+      ]
+    }
+  }
+}
+
+```
+
+`configs/instructions.md`:
+
+```md
+# DnSpy MCP — AI Agent Usage Guide
+
+## Overview
+DnSpy MCP is a .NET reverse engineering MCP server designed for game hacking, Il2Cpp dump analysis, and TCP proxy reversing. It provides 22 tools that operate on .NET assemblies (.dll/.exe files).
+
+## Critical: Assembly Path
+**Every tool requires `assemblyPath`** — the full path to a .NET assembly file.
+
+For Il2Cpp Unity games, point to:
+```
+<project>/Dump/DummyDll/Assembly-CSharp.dll
+```
+
+You can also set the `DNSPY_DEFAULT_ASSEMBLY` environment variable to avoid repeating the path.
+
+If you don't know which DLL contains a type, use `search_workspace` with the DummyDll folder path.
+
+---
+
+## Recommended Workflows
+
+### 1. Finding & Analyzing a Type
+```
+search_members(query="PlayerHealth", assemblyPath="...")
+  → find the type name
+analyze_type(typeFullName="PlayerHealth", assemblyPath="...")
+  → get full memory layout (fields + offsets + methods + RVAs)
+get_type_layout(typeFullName="PlayerHealth", assemblyPath="...")
+  → get C-struct format for Frida/cheat engine
+```
+
+### 2. Cross-Reference Analysis (Who Uses What?)
+```
+find_field_references(typeFullName="BaseProfileInfo", fieldName="Health", assemblyPath="...")
+  → find all methods that read/write the Health field
+find_method_callers(typeFullName="NetworkManager", methodName="SendPacket", assemblyPath="...")
+  → find all methods that call SendPacket
+```
+
+### 3. TCP Proxy / Network Reversing
+```
+find_network_handlers(assemblyPath="...")
+  → find Socket/TcpClient/Packet handler methods with RVAs
+find_crypto_usage(assemblyPath="...")
+  → find encryption/decryption methods
+scan_secrets(assemblyPath="...")
+  → extract hardcoded IPs, URLs, API keys
+```
+
+### 4. Il2Cpp Game Modding
+```
+list_types(gameCodeOnly=true, assemblyPath="...")
+  → filter out Unity/System noise
+search_by_offset(offsetQuery="0x16D0", assemblyPath="...")
+  → find what field/method is at a given offset
+get_method_rva(typeFullName="...", methodName="...", assemblyPath="...")
+  → get the RVA for native hooking in Frida
+```
+
+### 5. Bridging dump.cs to DummyDll
+```
+resolve_dump_line(dumpCsPath="path/to/dump.cs", lineNumber=789108, assemblyPath="...Assembly-CSharp.dll")
+  → resolves a dump.cs line number to a type/member and cross-references the DummyDll
+```
+
+### 6. Multi-DLL Discovery
+```
+search_workspace(directoryPath="path/to/DummyDll", query="NetworkManager")
+  → searches ALL .dll files in the folder for matching types/members
+```
+
+---
+
+## Important Notes
+
+- **Il2Cpp DummyDlls have NO real method bodies.** `decompile_method` will show stubs with `NotImplementedException`. This is expected — use `get_method_rva` to get the RVA for hooking in native code (GameAssembly.dll).
+- **Field offsets from `analyze_type`** are the actual memory offsets used for reading/writing in memory at runtime.
+- **`search_by_offset`** uses numeric comparison, so `0x4142DB4` and `0x04142DB4` will both match correctly.
+- **`get_type_layout`** outputs a C-struct format ready for copy-paste into cheat engine or Frida scripts.
+- **Patching tools** (`patch_replace_string_literal`, `patch_nop_instructions`) always create a backup before modifying files.
+
+---
+
+## Tool Quick Reference (22 tools)
+
+| Tool | Purpose |
+|------|---------|
+| `list_types` | List all types, with optional `gameCodeOnly` filter |
+| `search_members` | Search types, methods, fields by name |
+| `search_workspace` | Search ALL DLLs in a folder |
+| `decompile_type` | Decompile a full type to C# |
+| `decompile_method` | Decompile a specific method |
+| `get_method_il` | Get raw IL instructions |
+| `list_methods` | List methods of a type |
+| `find_string_references` | Find string literal usages |
+| `analyze_type` | Full class layout (fields, offsets, methods, RVAs) |
+| `get_type_layout` | C-struct memory layout for cheat development |
+| `get_method_rva` | Get Il2Cpp RVA for a method |
+| `search_by_offset` | Find field/method by hex or decimal offset |
+| `find_method_callers` | Cross-ref: who calls a method |
+| `find_field_references` | Cross-ref: who reads/writes a field |
+| `find_derived_types` | Find all subclasses of a type |
+| `lookup_token` | Resolve metadata token to type/method/field |
+| `find_network_handlers` | Find TCP/Socket/Packet handlers |
+| `find_crypto_usage` | Find encryption/decryption usage |
+| `scan_secrets` | Extract hardcoded IPs, URLs, API keys |
+| `resolve_dump_line` | Bridge dump.cs line numbers to DummyDll types |
+| `patch_replace_string_literal` | Replace a string literal in IL |
+| `patch_nop_instructions` | NOP IL instructions |
+| `format_inspector_jump` | Build navigation instructions from tokens |
+
+```
+
+`configs/opencode.mcp.json`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "dotnet-inspector": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "dotnet",
+        "<PATH_TO>/DnSpyMCP.dll"
+      ]
+    }
+  }
+}
+
+```
+
+`dotnet-inspector-mcp.slnx`:
+
+```slnx
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DotNetInspectorMcp/DotNetInspectorMcp.csproj" />
+  </Folder>
+</Solution>
+```
+
+`publish.ps1`:
+
+```ps1
+param(
+  [ValidateSet('win-x64','linux-x64')]
+  [string]$Runtime = 'win-x64'
+)
+
+$project = "src/DotNetInspectorMcp/DotNetInspectorMcp.csproj"
+$profile = if ($Runtime -eq 'win-x64') { 'win-x64' } else { 'linux-x64' }
+$assemblyName = "DnSpyMCP-$Runtime"
+
+dotnet publish $project -c Release -p:PublishProfile=$profile -p:AssemblyName=$assemblyName
+
+```
+
+`src/DotNetInspectorMcp/Communication/StdioJsonRpc.cs`:
+
+```cs
+using System.Text;
+using System.Text.Json;
+
+namespace DotNetInspectorMcp.Communication;
+
+internal sealed class StdioJsonRpc : IDisposable
+{
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+    };
+
+    private readonly Stream _input = Console.OpenStandardInput();
+    private readonly Stream _output = Console.OpenStandardOutput();
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
+    private bool? _lineFraming;
+
+    public async Task<string?> ReadMessageAsync(CancellationToken cancellationToken)
+    {
+        var firstByte = new byte[1];
+        while (true)
+        {
+            var n = await _input.ReadAsync(firstByte.AsMemory(0, 1), cancellationToken);
+            if (n == 0)
+                return null;
+
+            if (firstByte[0] is (byte)' ' or (byte)'\t' or (byte)'\r' or (byte)'\n')
+                continue;
+
+            break;
+        }
+
+        if (firstByte[0] is (byte)'{' or (byte)'[')
+        {
+            _lineFraming = true;
+            return await ReadLineFramedJsonAsync(firstByte[0], cancellationToken);
+        }
+
+        _lineFraming = false;
+        var headers = await ReadHeadersAsync(firstByte[0], cancellationToken);
+        if (!headers.TryGetValue("Content-Length", out var lengthText) || !int.TryParse(lengthText, out var contentLength))
+            throw new InvalidOperationException("Missing Content-Length header");
+
+        var payload = new byte[contentLength];
+        var offset = 0;
+
+        while (offset < contentLength)
+        {
+            var read = await _input.ReadAsync(payload.AsMemory(offset, contentLength - offset), cancellationToken);
+            if (read == 0)
+                throw new EndOfStreamException("Unexpected EOF while reading payload.");
+            offset += read;
+        }
+
+        return Encoding.UTF8.GetString(payload);
+    }
+
+    public Task WriteResultAsync(JsonElement id, object result, CancellationToken cancellationToken) =>
+        WriteMessageAsync(new { jsonrpc = "2.0", id, result }, cancellationToken);
+
+    public Task WriteErrorAsync(JsonElement id, int code, string message, CancellationToken cancellationToken) =>
+        WriteMessageAsync(new
+        {
+            jsonrpc = "2.0",
+            id,
+            error = new { code, message }
+        }, cancellationToken);
+
+    public void Dispose()
+    {
+        _writeLock.Dispose();
+    }
+
+    private async Task WriteMessageAsync(object message, CancellationToken cancellationToken)
+    {
+        var json = JsonSerializer.Serialize(message, JsonOptions);
+        var bytes = Encoding.UTF8.GetBytes(json);
+
+        await _writeLock.WaitAsync(cancellationToken);
+        try
+        {
+            if (_lineFraming == true)
+            {
+                await _output.WriteAsync(bytes, cancellationToken);
+                await _output.WriteAsync(new byte[] { (byte)'\n' }, cancellationToken);
+            }
+            else
+            {
+                var header = Encoding.ASCII.GetBytes($"Content-Length: {bytes.Length}\r\n\r\n");
+                await _output.WriteAsync(header, cancellationToken);
+                await _output.WriteAsync(bytes, cancellationToken);
+            }
+
+            await _output.FlushAsync(cancellationToken);
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
+    }
+
+    private async Task<string> ReadLineFramedJsonAsync(byte firstByte, CancellationToken cancellationToken)
+    {
+        var buffer = new List<byte> { firstByte };
+        var one = new byte[1];
+        var depth = 0;
+
+        // Track brace/bracket depth so multi-line JSON is handled correctly
+        if (firstByte == (byte)'{' || firstByte == (byte)'[')
+            depth = 1;
+
+        while (true)
+        {
+            var n = await _input.ReadAsync(one.AsMemory(0, 1), cancellationToken);
+            if (n == 0)
+                break;
+
+            if (one[0] == (byte)'\r')
+                continue;
+
+            if (one[0] == (byte)'\n')
+            {
+                // Only break on newline if braces are balanced
+                if (depth <= 0)
+                    break;
+                // If still inside nested braces, keep reading
+                buffer.Add(one[0]);
+                continue;
+            }
+
+            buffer.Add(one[0]);
+
+            if (one[0] == (byte)'{' || one[0] == (byte)'[')
+                depth++;
+            else if (one[0] == (byte)'}' || one[0] == (byte)']')
+            {
+                depth--;
+                if (depth <= 0)
+                    break;
+            }
+        }
+
+        return Encoding.UTF8.GetString(buffer.ToArray()).Trim();
+    }
+
+    private async Task<Dictionary<string, string>> ReadHeadersAsync(byte firstByte, CancellationToken cancellationToken)
+    {
+        var buffer = new List<byte> { firstByte };
+        var one = new byte[1];
+
+        while (true)
+        {
+            var read = await _input.ReadAsync(one.AsMemory(0, 1), cancellationToken);
+            if (read == 0)
+                throw new EndOfStreamException("Unexpected EOF while reading headers.");
+
+            buffer.Add(one[0]);
+            if (HasHeaderTerminator(buffer))
+                break;
+        }
+
+        var text = Encoding.ASCII.GetString(buffer.ToArray())
+            .Replace("\r\n", "\n", StringComparison.Ordinal);
+        var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var line in lines)
+        {
+            var idx = line.IndexOf(':');
+            if (idx <= 0)
+                continue;
+
+            headers[line[..idx].Trim()] = line[(idx + 1)..].Trim();
+        }
+
+        return headers;
+    }
+
+    private static bool HasHeaderTerminator(List<byte> bytes)
+    {
+        var n = bytes.Count;
+        if (n >= 4 && bytes[n - 4] == '\r' && bytes[n - 3] == '\n' && bytes[n - 2] == '\r' && bytes[n - 1] == '\n')
+            return true;
+
+        if (n >= 2 && bytes[n - 2] == '\n' && bytes[n - 1] == '\n')
+            return true;
+
+        return false;
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/Domain/AssemblyAnalyzer.Advanced.cs`:
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using dnlib.DotNet;
+
+namespace DotNetInspectorMcp.Domain;
+
+internal sealed partial class AssemblyAnalyzer
+{
+    // ── 1. trace_field_consumers ───────────────────────────────────────────
+
+    public Task<string> TraceFieldConsumersAsync(string assemblyPath, string typeFullName, string fieldName, int maxDepth) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var targetType = FindType(module, typeFullName);
+        var targetField = targetType.Fields.FirstOrDefault(f => f.Name == fieldName) 
+            ?? throw new InvalidOperationException($"Field not found: {fieldName}");
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"--- Trace for {typeFullName}.{fieldName} (Depth: {maxDepth}) ---");
+
+        // Step 1: Find immediate consumers
+        var immediateConsumers = new List<MethodDef>();
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody || method.Body is null) continue;
+
+                foreach (var instr in method.Body.Instructions)
+                {
+                    if (instr.Operand is dnlib.DotNet.IField operandField)
+                    {
+                        if (operandField.Name == targetField.Name && operandField.DeclaringType.FullName == targetField.DeclaringType.FullName)
+                        {
+                            immediateConsumers.Add(method);
+                            break; // No need to add the same method twice
+                        }
+                    }
+                }
+            }
+        }
+
+        if (immediateConsumers.Count == 0)
+            return $"No consumers found for {typeFullName}.{fieldName}";
+
+        // Step 2: Trace call graph up to depth
+        var visited = new HashSet<MethodDef>();
+        foreach (var consumer in immediateConsumers)
+        {
+            TraceCallGraphRecursive(module, consumer, sb, 0, maxDepth, visited);
+        }
+
+        return sb.ToString();
+    });
+
+    private void TraceCallGraphRecursive(ModuleDefMD module, MethodDef method, StringBuilder sb, int currentDepth, int maxDepth, HashSet<MethodDef> visited)
+    {
+        var indent = new string(' ', currentDepth * 4);
+        var rva = GetMethodAddressRva(method);
+        var action = currentDepth == 0 ? "reads/writes field" : "calls";
+        sb.AppendLine($"{indent}-> {method.DeclaringType.FullName}.{method.Name} ({action}) // {(rva != null ? "RVA: " + rva : "No RVA")}");
+
+        if (currentDepth >= maxDepth) return;
+        if (!visited.Add(method)) return; // Prevent infinite loops
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var caller in type.Methods)
+            {
+                if (!caller.HasBody || caller.Body is null) continue;
+
+                foreach (var instr in caller.Body.Instructions)
+                {
+                    if (instr.Operand is dnlib.DotNet.IMethod operandMethod)
+                    {
+                        if (operandMethod.Name == method.Name && operandMethod.DeclaringType.FullName == method.DeclaringType.FullName)
+                        {
+                            TraceCallGraphRecursive(module, caller, sb, currentDepth + 1, maxDepth, visited);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── 2. get_struct_layout (C++ format with padding) ───────────────────
+
+    public Task<string> GetStructLayoutAsync(string assemblyPath, string typeFullName, string format) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"// Type: {type.FullName} (C++ Struct Layout)");
+
+        sb.AppendLine($"struct {SanitizeCName(type.Name)} {{");
+
+        var fields = new List<(uint Offset, string CType, string Name, uint Size)>();
+
+        // Il2Cpp object header (Assuming 64-bit pointers)
+        var baseType = type.BaseType?.FullName;
+        if (baseType == "System.Object" || baseType?.Contains("MonoBehaviour") == true || baseType?.Contains("ScriptableObject") == true)
+        {
+            fields.Add((0x00, "void*", "klass", 8));
+            fields.Add((0x08, "void*", "monitor", 8));
+        }
+
+        foreach (var field in type.Fields)
+        {
+            if (field.IsStatic) continue;
+
+            var offsetStr = GetFieldOffset(field);
+            uint offset = 0;
+            if (offsetStr != null && offsetStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                uint.TryParse(offsetStr[2..], System.Globalization.NumberStyles.HexNumber, null, out offset);
+            else if (offsetStr != null)
+                uint.TryParse(offsetStr, out offset);
+            else if (field.FieldOffset.HasValue)
+                offset = field.FieldOffset.Value;
+
+            var cType = MapToCType(field.FieldType.FullName);
+            var size = GetTypeSize(field.FieldType.FullName);
+            fields.Add((offset, cType, field.Name, size));
+        }
+
+        fields = fields.OrderBy(f => f.Offset).ToList();
+
+        uint currentOffset = 0;
+        int padCount = 0;
+
+        foreach (var field in fields)
+        {
+            if (field.Offset > currentOffset)
+            {
+                var padSize = field.Offset - currentOffset;
+                sb.AppendLine($"    char _pad{padCount++}[0x{padSize:X2}];");
+                currentOffset = field.Offset;
+            }
+
+            var padding = new string(' ', Math.Max(1, 20 - field.CType.Length));
+            sb.AppendLine($"    {field.CType}{padding}{SanitizeCName(field.Name)}; // 0x{field.Offset:X2}");
+            currentOffset += field.Size;
+        }
+
+        sb.AppendLine("};");
+        return sb.ToString();
+    });
+
+    private static uint GetTypeSize(string dotnetType)
+    {
+        return dotnetType switch
+        {
+            "System.Boolean" => 1,
+            "System.Byte" => 1,
+            "System.SByte" => 1,
+            "System.Int16" => 2,
+            "System.UInt16" => 2,
+            "System.Int32" => 4,
+            "System.UInt32" => 4,
+            "System.Single" => 4,
+            "System.Int64" => 8,
+            "System.UInt64" => 8,
+            "System.Double" => 8,
+            _ => 8 // Assume pointers for classes/strings/arrays
+        };
+    }
+
+    // ── 3. find_enum_values ──────────────────────────────────────────────
+
+    public Task<string> FindEnumValuesAsync(string assemblyPath, string query, string? enumName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>();
+
+        foreach (var type in module.GetTypes().Where(t => t.IsEnum))
+        {
+            bool typeMatches = !string.IsNullOrEmpty(enumName) && type.FullName.Contains(enumName, StringComparison.OrdinalIgnoreCase);
+
+            foreach (var field in type.Fields)
+            {
+                if (!field.IsStatic || !field.HasConstant) continue;
+
+                var valStr = field.Constant.Value?.ToString() ?? "0";
+                uint valNum = 0;
+                uint.TryParse(valStr, out valNum);
+                var hexVal = $"0x{valNum:X}";
+
+                bool valueMatches = !string.IsNullOrEmpty(query) && 
+                    (field.Name.String.Contains(query, StringComparison.OrdinalIgnoreCase) || 
+                     valStr == query || 
+                     hexVal.Equals(query, StringComparison.OrdinalIgnoreCase));
+
+                if (typeMatches || valueMatches)
+                {
+                    results.Add($"Enum: {type.FullName} | Field: {field.Name} = {valStr} ({hexVal})");
+                }
+            }
+        }
+
+        return results.Count == 0 ? "No enum values found matching the criteria." : string.Join(Environment.NewLine, results);
+    });
+
+    // ── 4. find_ui_bindings ──────────────────────────────────────────────
+
+    public Task<string> FindUiBindingsAsync(string assemblyPath, string typeFullName, string[]? customUiTypes = null) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+        var results = new List<string>();
+
+        results.Add($"--- UI Bindings for {typeFullName} ---");
+
+        var uiFields = type.Fields.Where(f => 
+            f.FieldType.FullName.Contains("UnityEngine.UI") || 
+            f.FieldType.FullName.Contains("TMPro") ||
+            (customUiTypes != null && customUiTypes.Any(c => f.FieldType.FullName.Contains(c, StringComparison.OrdinalIgnoreCase)))).ToList();
+
+        if (uiFields.Count == 0)
+        {
+            return $"No UI fields found in {typeFullName}.";
+        }
+
+        results.Add("UI Fields:");
+        foreach (var field in uiFields)
+        {
+            var offset = GetFieldOffset(field) ?? "Unknown Offset";
+            results.Add($"  - {field.Name} ({field.FieldType.FullName}) | Offset: {offset}");
+        }
+
+        results.Add("\nMethods that modify UI:");
+        foreach (var method in type.Methods)
+        {
+            if (!method.HasBody || method.Body is null) continue;
+
+            var modifiedFields = new HashSet<string>();
+
+            for (int i = 0; i < method.Body.Instructions.Count; i++)
+            {
+                var instr = method.Body.Instructions[i];
+                if (instr.OpCode.Code == dnlib.DotNet.Emit.Code.Ldfld && instr.Operand is dnlib.DotNet.IField fieldRef)
+                {
+                    if (uiFields.Any(f => f.Name == fieldRef.Name))
+                    {
+                        // Look ahead for a Callvirt that sets a property (like set_text, set_sprite)
+                        for (int j = i + 1; j < Math.Min(i + 5, method.Body.Instructions.Count); j++)
+                        {
+                            var nextInstr = method.Body.Instructions[j];
+                            if (nextInstr.OpCode.Code == dnlib.DotNet.Emit.Code.Callvirt && nextInstr.Operand is dnlib.DotNet.IMethod callMethod)
+                            {
+                                if (callMethod.Name.String.StartsWith("set_"))
+                                {
+                                    modifiedFields.Add($"{fieldRef.Name}.{callMethod.Name}");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (modifiedFields.Count > 0)
+            {
+                var rva = GetMethodAddressRva(method);
+                results.Add($"  - {method.Name} () | RVA: {rva}");
+                foreach (var mod in modifiedFields)
+                {
+                    results.Add($"      -> calls {mod}");
+                }
+            }
+        }
+
+        return string.Join(Environment.NewLine, results);
+    });
+
+    // ── 5. search_by_inheritance ─────────────────────────────────────────
+
+    public Task<string> SearchByInheritanceAsync(string assemblyPath, string baseTypeFullName, string? fieldContains, int maxDepth) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>();
+        
+        var baseType = FindType(module, baseTypeFullName);
+
+        // Build derived map
+        var derivedMap = new Dictionary<string, List<TypeDef>>();
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            var bType = type.BaseType?.FullName;
+            if (bType != null)
+            {
+                if (!derivedMap.ContainsKey(bType)) derivedMap[bType] = new List<TypeDef>();
+                derivedMap[bType].Add(type);
+            }
+        }
+
+        var matchingTypes = new HashSet<TypeDef>();
+        SearchDerivedRecursive(derivedMap, baseTypeFullName, 0, maxDepth, matchingTypes);
+
+        foreach (var type in matchingTypes)
+        {
+            if (string.IsNullOrEmpty(fieldContains))
+            {
+                results.Add($"Class: {type.FullName}");
+            }
+            else
+            {
+                var matchingFields = type.Fields.Where(f => f.Name.String.Contains(fieldContains, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (matchingFields.Count > 0)
+                {
+                    results.Add($"Class: {type.FullName}");
+                    foreach (var f in matchingFields)
+                    {
+                        var offset = GetFieldOffset(f) ?? "Unknown";
+                        results.Add($"  -> Field: {f.Name} ({f.FieldType.FullName}) | Offset: {offset}");
+                    }
+                }
+            }
+        }
+
+        return results.Count == 0 ? "No classes found matching criteria." : string.Join(Environment.NewLine, results);
+    });
+
+    private void SearchDerivedRecursive(Dictionary<string, List<TypeDef>> derivedMap, string currentTypeName, int depth, int maxDepth, HashSet<TypeDef> results)
+    {
+        if (depth >= maxDepth) return;
+        if (!derivedMap.TryGetValue(currentTypeName, out var derivedTypes)) return;
+
+        foreach (var type in derivedTypes)
+        {
+            results.Add(type);
+            SearchDerivedRecursive(derivedMap, type.FullName, depth + 1, maxDepth, results);
+        }
+    }
+
+    // ── 6. diff_types ────────────────────────────────────────────────────
+
+    public Task<string> DiffTypesAsync(string assemblyPath, string typeA, string typeB) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var tA = FindType(module, typeA);
+        var tB = FindType(module, typeB);
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"--- Diff: {typeA} vs {typeB} ---");
+
+        var fieldsA = tA.Fields.ToDictionary(f => f.Name.String, f => f);
+        var fieldsB = tB.Fields.ToDictionary(f => f.Name.String, f => f);
+
+        sb.AppendLine("\n[Fields Only in A]:");
+        foreach (var f in fieldsA.Values.Where(f => !fieldsB.ContainsKey(f.Name)))
+            sb.AppendLine($"  - {f.Name} ({f.FieldType.FullName})");
+
+        sb.AppendLine("\n[Fields Only in B]:");
+        foreach (var f in fieldsB.Values.Where(f => !fieldsA.ContainsKey(f.Name)))
+            sb.AppendLine($"  - {f.Name} ({f.FieldType.FullName})");
+
+        sb.AppendLine("\n[Field Differences]:");
+        foreach (var fA in fieldsA.Values)
+        {
+            if (fieldsB.TryGetValue(fA.Name, out var fB))
+            {
+                var offA = GetFieldOffset(fA);
+                var offB = GetFieldOffset(fB);
+                if (offA != offB || fA.FieldType.FullName != fB.FieldType.FullName)
+                {
+                    sb.AppendLine($"  - {fA.Name}: A({fA.FieldType.FullName} @ {offA}) vs B({fB.FieldType.FullName} @ {offB})");
+                }
+            }
+        }
+
+        return sb.ToString();
+    });
+
+    // ── 7. resolve_method_signature (C++ Typedef Generator) ──────────────
+
+    public Task<string> ResolveMethodSignatureAsync(string assemblyPath, string typeFullName, string methodName, string format) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+        var method = FindMethod(type, methodName, null);
+
+        if (format != "cpp_hook")
+            return "Only format='cpp_hook' is supported currently.";
+
+        var retType = MapToCType(method.ReturnType.FullName);
+        var args = new List<string>();
+
+        if (!method.IsStatic)
+        {
+            args.Add("void* instance");
+        }
+
+        foreach (var param in method.Parameters)
+        {
+            if (param.IsHiddenThisParameter) continue;
+            var cType = MapToCType(param.Type.FullName);
+            args.Add($"{cType} {SanitizeCName(param.Name)}");
+        }
+
+        var argStr = string.Join(", ", args);
+        var rva = GetMethodAddressRva(method) ?? "Unknown";
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"// {typeFullName}.{methodName} | RVA: {rva}");
+        sb.AppendLine($"typedef {retType}(*t{method.Name})({argStr});");
+
+        return sb.ToString();
+    });
+
+    // ── 8. get_class_pointer ─────────────────────────────────────────────
+
+    public Task<string> GetClassPointerAsync(string scriptJsonPath, string typeFullName) => Task.Run(() =>
+    {
+        var normalizedPath = System.IO.Path.GetFullPath(scriptJsonPath);
+        if (!System.IO.File.Exists(normalizedPath))
+            throw new System.IO.FileNotFoundException($"script.json not found: {normalizedPath}");
+
+        using var fs = System.IO.File.OpenRead(normalizedPath);
+        using var doc = System.Text.Json.JsonDocument.Parse(fs);
+
+        if (!doc.RootElement.TryGetProperty("ScriptMetadata", out var metadataArray) || metadataArray.ValueKind != System.Text.Json.JsonValueKind.Array)
+            return "Error: Could not find 'ScriptMetadata' array in script.json. Is this a valid Il2CppDumper output?";
+
+        var targetName = typeFullName + "_TypeInfo";
+        
+        foreach (var item in metadataArray.EnumerateArray())
+        {
+            if (item.TryGetProperty("Name", out var nameProp) && nameProp.GetString() == targetName)
+            {
+                if (item.TryGetProperty("Address", out var addressProp))
+                {
+                    if (addressProp.TryGetUInt64(out var address))
+                    {
+                        return $"[TypeInfo Class Pointer] {typeFullName} -> Hex Offset: 0x{address:X} (Decimal: {address})";
+                    }
+                }
+            }
+        }
+
+        return $"Class pointer for '{typeFullName}' not found in script.json. Note: Only classes that are statically referenced by the game will have a TypeInfo pointer generated in global-metadata.";
+    });
+}
+
+```
+
+`src/DotNetInspectorMcp/Domain/AssemblyAnalyzer.cs`:
+
+```cs
+using System.Collections.Concurrent;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
+using System.Text.RegularExpressions;
+using dnlib.DotNet;
+using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.CSharp;
+using ICSharpCode.Decompiler.TypeSystem;
+
+namespace DotNetInspectorMcp.Domain;
+
+internal sealed partial class AssemblyAnalyzer : IDisposable
+{
+    private readonly ConcurrentDictionary<string, Lazy<LoadedAssembly>> _cache = new(StringComparer.OrdinalIgnoreCase);
+    private string? _defaultAssemblyPath;
+    private bool _defaultAssemblyChecked;
+
+    public IReadOnlyList<string> GetCachedAssemblyPaths() => _cache.Keys.OrderBy(x => x).ToArray();
+
+    /// <summary>
+    /// Auto-discovered default assembly path.
+    /// Checks DNSPY_DEFAULT_ASSEMBLY env var first, then scans CWD for common DummyDll locations.
+    /// </summary>
+    public string? DefaultAssemblyPath
+    {
+        get
+        {
+            if (_defaultAssemblyChecked)
+                return _defaultAssemblyPath;
+
+            _defaultAssemblyChecked = true;
+
+            // 1. Check environment variable
+            var envPath = Environment.GetEnvironmentVariable("DNSPY_DEFAULT_ASSEMBLY");
+            if (!string.IsNullOrWhiteSpace(envPath) && File.Exists(envPath))
+            {
+                _defaultAssemblyPath = Path.GetFullPath(envPath);
+                return _defaultAssemblyPath;
+            }
+
+            // 2. Auto-discover common locations from CWD
+            var cwd = Environment.CurrentDirectory;
+            var candidates = new[]
+            {
+                "DummyDll/Assembly-CSharp.dll",
+                "Dump/DummyDll/Assembly-CSharp.dll",
+                "Il2CppDumper/DummyDll/Assembly-CSharp.dll",
+                "Managed/Assembly-CSharp.dll",
+                "Assembly-CSharp.dll"
+            };
+
+            foreach (var candidate in candidates)
+            {
+                var fullPath = Path.Combine(cwd, candidate);
+                if (File.Exists(fullPath))
+                {
+                    _defaultAssemblyPath = Path.GetFullPath(fullPath);
+                    return _defaultAssemblyPath;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    public Task<string> GetAssemblySummaryAsync(string assemblyPath) => Task.Run(() =>
+    {
+        var asm = GetOrLoad(assemblyPath);
+        var module = asm.Module;
+        var allTypes = module.GetTypes().Where(t => !t.IsGlobalModuleType).ToArray();
+        var methodCount = allTypes.Sum(t => t.Methods.Count);
+
+        var lines = new[]
+        {
+            $"path: {asm.Path}",
+            $"module: {module.Name}",
+            $"runtime: {module.RuntimeVersion}",
+            $"types: {allTypes.Length}",
+            $"methods: {methodCount}"
+        };
+
+        return string.Join(Environment.NewLine, lines);
+    });
+
+    public Task<string[]> GetTypesAsync(string assemblyPath, string? namespaceFilter, bool includeNested, bool gameCodeOnly = false) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        
+        var query = module.GetTypes()
+            .Where(t => !t.IsGlobalModuleType)
+            .Where(t => includeNested || !t.IsNested)
+            .Where(t => string.IsNullOrWhiteSpace(namespaceFilter) || string.Equals(t.Namespace, namespaceFilter, StringComparison.Ordinal));
+
+        if (gameCodeOnly)
+        {
+            query = query.Where(t => 
+                string.IsNullOrWhiteSpace(t.Namespace) || 
+                (!t.Namespace.StartsWith("System") &&
+                 !t.Namespace.StartsWith("Microsoft") &&
+                 !t.Namespace.StartsWith("UnityEngine") &&
+                 !t.Namespace.StartsWith("Unity.") &&
+                 !t.Namespace.StartsWith("Mono") &&
+                 !t.Namespace.StartsWith("JetBrains") &&
+                 !t.Namespace.StartsWith("TMPro") &&
+                 !t.Namespace.StartsWith("Cinemachine")));
+        }
+
+        return query
+            .Select(t => t.FullName)
+            .OrderBy(t => t)
+            .ToArray();
+    });
+
+    public async Task<string> ListTypesAsync(string assemblyPath, string? namespaceFilter, bool includeNested, bool gameCodeOnly = false)
+    {
+        var types = await GetTypesAsync(assemblyPath, namespaceFilter, includeNested, gameCodeOnly);
+        return types.Length == 0 ? "No types found." : string.Join(Environment.NewLine, types);
+    }
+
+    public Task<string> AnalyzeTypeAsync(string assemblyPath, string typeFullName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+        
+        var sb = new StringBuilder();
+        var baseType = type.BaseType?.FullName;
+        var interfaces = type.Interfaces.Select(i => i.Interface.FullName).ToList();
+        
+        sb.AppendLine($"// Type: {type.FullName}");
+        if (baseType != null) sb.AppendLine($"// Base: {baseType}");
+        if (interfaces.Any()) sb.AppendLine($"// Interfaces: {string.Join(", ", interfaces)}");
+        sb.AppendLine($"// Size: {(type.ClassLayout?.ClassSize > 0 ? "0x" + type.ClassLayout.ClassSize.ToString("X") : "Unknown")}");
+        sb.AppendLine();
+        
+        sb.AppendLine("// --- Fields (Memory Layout) ---");
+        var fields = new List<(uint Offset, string Declaration)>();
+        
+        foreach (var field in type.Fields)
+        {
+            var offsetStr = GetFieldOffset(field);
+            uint offset = 0;
+            if (offsetStr != null && offsetStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                uint.TryParse(offsetStr[2..], System.Globalization.NumberStyles.HexNumber, null, out offset);
+            else if (offsetStr != null)
+                uint.TryParse(offsetStr, out offset);
+            else if (field.FieldOffset.HasValue)
+                offset = field.FieldOffset.Value;
+                
+            var access = field.IsPublic ? "public" : field.IsPrivate ? "private" : field.IsFamily ? "protected" : field.IsAssembly ? "internal" : "private";
+            var staticModifier = field.IsStatic ? " static" : "";
+            var decl = $"{access}{staticModifier} {field.FieldType.FullName} {field.Name}; // {(offsetStr != null ? offsetStr : (field.FieldOffset.HasValue ? "0x" + offset.ToString("X") : "Unknown Offset"))}";
+            fields.Add((offset, decl));
+        }
+        
+        foreach (var field in fields.OrderBy(f => f.Offset))
+        {
+            sb.AppendLine(field.Declaration);
+        }
+        
+        if (fields.Count == 0) sb.AppendLine("// No fields found.");
+        
+        sb.AppendLine();
+        sb.AppendLine("// --- Properties ---");
+        var props = type.Properties.ToList();
+        if (props.Count == 0) sb.AppendLine("// No properties found.");
+        foreach(var prop in props) {
+           var getter = prop.GetMethod != null ? "get; " : "";
+           var setter = prop.SetMethod != null ? "set; " : "";
+           sb.AppendLine($"public {prop.PropertySig?.RetType?.FullName ?? "Unknown"} {prop.Name} {{ {getter}{setter}}}");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("// --- Methods ---");
+        var methods = type.Methods.Where(m => !m.IsGetter && !m.IsSetter && !m.IsAddOn && !m.IsRemoveOn).ToList();
+        if (methods.Count == 0) sb.AppendLine("// No methods found.");
+        foreach(var method in methods) {
+           var rva = GetMethodAddressRva(method);
+           var access = method.IsPublic ? "public" : method.IsPrivate ? "private" : method.IsFamily ? "protected" : method.IsAssembly ? "internal" : "private";
+           var staticModifier = method.IsStatic ? " static" : "";
+           sb.AppendLine($"{access}{staticModifier} {RenderMethodSignature(method)} // {(rva != null ? "RVA: " + rva : "No RVA")}");
+        }
+        
+        return sb.ToString();
+    });
+
+    public Task<string> GetMethodRvaAsync(string assemblyPath, string typeFullName, string methodName, string[]? parameterTypeNames) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+        var method = FindMethod(type, methodName, parameterTypeNames);
+        
+        var rva = GetMethodAddressRva(method);
+        if (rva == null)
+            return "No RVA found for this method. (Not an Il2Cpp dump or missing AddressAttribute).";
+            
+        return $"Method: {RenderMethodSignature(method)}\nRVA: {rva}";
+    });
+
+    public Task<string> SearchByOffsetAsync(string assemblyPath, string offsetQuery) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        
+        // Parse the query into a numeric value for reliable matching
+        var targetValue = TryParseHexValue(offsetQuery);
+        if (targetValue == null)
+        {
+            // Try parsing as decimal
+            if (ulong.TryParse(offsetQuery, out var decVal))
+                targetValue = decVal;
+            else
+                return "Invalid offset query format. Use decimal (e.g. 5840) or hex (e.g. 0x16D0).";
+        }
+            
+        var results = new List<string>();
+        
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var field in type.Fields)
+            {
+                var offset = GetFieldOffset(field);
+                var fieldValue = TryParseHexValue(offset);
+                if (fieldValue != null && fieldValue == targetValue)
+                {
+                    var access = field.IsPublic ? "public" : field.IsPrivate ? "private" : field.IsFamily ? "protected" : field.IsAssembly ? "internal" : "private";
+                    results.Add($"{access} {field.FieldType.FullName} {field.Name}; // {offset} | Type={type.FullName}");
+                }
+            }
+            
+            foreach (var method in type.Methods)
+            {
+                var rva = GetMethodAddressRva(method);
+                var rvaValue = TryParseHexValue(rva);
+                if (rvaValue != null && rvaValue == targetValue)
+                {
+                    var access = method.IsPublic ? "public" : method.IsPrivate ? "private" : method.IsFamily ? "protected" : method.IsAssembly ? "internal" : "private";
+                    var retType = method.ReturnType.FullName;
+                    var parameters = string.Join(", ", method.Parameters.Select(p => $"{p.Type.FullName} {p.Name}"));
+                    results.Add($"{access} {retType} {method.Name}({parameters}) // RVA: {rva} | Type={type.FullName}");
+                }
+            }
+        }
+        
+        return results.Count == 0 ? "No matches found for offset 0x" + targetValue?.ToString("X") : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> DecompileTypeAsync(string assemblyPath, string typeFullName) => Task.Run(() =>
+    {
+        var asm = GetOrLoad(assemblyPath);
+        var type = FindType(asm.Module, typeFullName);
+        var code = asm.Decompiler.Value.DecompileTypeAsString(new FullTypeName(type.ReflectionFullName));
+
+        return $"// dnSpy location: TypeDef token {FormatToken(type.MDToken.Raw)}{Environment.NewLine}{code}";
+    });
+
+    public Task<string> DecompileMethodAsync(string assemblyPath, string typeFullName, string methodName, string[]? parameterTypeNames) => Task.Run(() =>
+    {
+        var asm = GetOrLoad(assemblyPath);
+        var type = FindType(asm.Module, typeFullName);
+        var method = FindMethod(type, methodName, parameterTypeNames);
+
+        var handle = MetadataTokens.EntityHandle((int)method.MDToken.Raw);
+        var code = asm.Decompiler.Value.DecompileAsString(new[] { handle });
+
+        var rva = GetMethodAddressRva(method);
+        if (rva != null)
+        {
+            var isDummy = method.Body == null || 
+                          (method.Body.Instructions.Count <= 3 && method.Body.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Newobj && i.Operand?.ToString()?.Contains("NotImplementedException") == true));
+            if (isDummy)
+            {
+                code += $"\n\n// [DnSpyMCP Warning]: This appears to be an Il2Cpp dummy dump. There is no IL code here.\n// If you want to modify this behavior, you must patch GameAssembly.dll at RVA {rva}";
+            }
+        }
+
+        return $"// dnSpy location: TypeDef {FormatToken(type.MDToken.Raw)}, MethodDef {FormatToken(method.MDToken.Raw)}{Environment.NewLine}{code}";
+    });
+
+    public Task<string> GetMethodIlAsync(string assemblyPath, string typeFullName, string methodName, string[]? parameterTypeNames) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+        var method = FindMethod(type, methodName, parameterTypeNames);
+
+        if (!method.HasBody || method.Body is null)
+            return "Method has no IL body.";
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"dnSpy location: TypeDef {FormatToken(type.MDToken.Raw)}, MethodDef {FormatToken(method.MDToken.Raw)}");
+        sb.AppendLine(RenderMethodSignature(method));
+        foreach (var instruction in method.Body.Instructions)
+        {
+            var operand = instruction.Operand is null ? string.Empty : $" {instruction.Operand}";
+            sb.AppendLine($"IL_{instruction.Offset:X4}: {instruction.OpCode}{operand}");
+        }
+
+        return sb.ToString();
+    });
+
+    public Task<string> SearchMembersAsync(string assemblyPath, string query, int maxResults) => Task.Run(() =>
+    {
+        if (maxResults <= 0)
+            maxResults = 500;
+
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>(capacity: Math.Min(maxResults, 1000));
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            if (ContainsIgnoreCase(type.FullName, query))
+                results.Add($"type: {type.FullName} | TypeDef={FormatToken(type.MDToken.Raw)}");
+
+            foreach (var method in type.Methods)
+            {
+                if (ContainsIgnoreCase(method.Name, query)) 
+                {
+                    var methodLine = $"method: {RenderMethodSignature(method)} | Type={type.FullName} | TypeDef={FormatToken(type.MDToken.Raw)} | MethodDef={FormatToken(method.MDToken.Raw)}";
+                    var rva = GetMethodAddressRva(method);
+                    if (rva != null)
+                        methodLine += $" | Il2CppRVA={rva}";
+                    results.Add(methodLine);
+                }
+            }
+
+            foreach (var field in type.Fields)
+            {
+                if (ContainsIgnoreCase(field.Name, query))
+                {
+                    var fieldLine = $"field: {field.Name} | Type={type.FullName} | TypeDef={FormatToken(type.MDToken.Raw)} | FieldDef={FormatToken(field.MDToken.Raw)}";
+                    var offset = GetFieldOffset(field);
+                    if (offset != null)
+                        fieldLine += $" | Il2CppFieldOffset={offset}";
+                    results.Add(fieldLine);
+                }
+            }
+
+            foreach (var property in type.Properties)
+            {
+                if (ContainsIgnoreCase(property.Name, query))
+                {
+                    results.Add($"property: {property.Name} | Type={type.FullName} | TypeDef={FormatToken(type.MDToken.Raw)} | PropertyDef={FormatToken(property.MDToken.Raw)}");
+                }
+            }
+
+            if (results.Count >= maxResults)
+                break;
+        }
+
+        return results.Count == 0 ? "No matches found." : string.Join(Environment.NewLine, results.Take(maxResults));
+    });
+
+    public Task<string> FindStringReferencesAsync(string assemblyPath, string text, bool caseSensitive, int maxResults) => Task.Run(() =>
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new InvalidOperationException("Search text cannot be empty.");
+
+        if (maxResults <= 0)
+            maxResults = 500;
+
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>(Math.Min(maxResults, 1000));
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody || method.Body is null)
+                    continue;
+
+                foreach (var instruction in method.Body.Instructions)
+                {
+                    if (instruction.Operand is not string literal)
+                        continue;
+
+                    if (!Contains(literal, text, caseSensitive))
+                        continue;
+
+                    var match = $"{type.FullName}.{RenderMethodSignature(method)} | TypeDef={FormatToken(type.MDToken.Raw)} | MethodDef={FormatToken(method.MDToken.Raw)} | IL_{instruction.Offset:X4} | \"{literal}\"";
+                    results.Add(match);
+
+                    if (results.Count >= maxResults)
+                        return string.Join(Environment.NewLine, results);
+                }
+            }
+        }
+
+        return results.Count == 0 ? "No string references found." : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> ListMethodsAsync(string assemblyPath, string typeFullName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+
+        var methods = type.Methods
+            .Where(m => !m.IsGetter && !m.IsSetter && !m.IsAddOn && !m.IsRemoveOn)
+            .Select(m => $"{RenderMethodSignature(m)} | MethodDef={FormatToken(m.MDToken.Raw)}")
+            .OrderBy(m => m)
+            .ToArray();
+
+        return methods.Length == 0 ? "No methods found." : string.Join(Environment.NewLine, methods);
+    });
+
+    public Task<string> PatchReplaceStringLiteralAsync(string assemblyPath, string methodDefToken, string ilOffset, string newText, bool inPlace = false, string? outputPath = null) => Task.Run(() =>
+    {
+        var sourcePath = NormalizePath(assemblyPath);
+        if (!File.Exists(sourcePath))
+            throw new FileNotFoundException($"Assembly not found: {sourcePath}");
+
+        var destinationPath = ResolvePatchDestination(sourcePath, inPlace, outputPath);
+        var backupPath = BuildBackupPath(sourcePath);
+        File.Copy(sourcePath, backupPath, overwrite: false);
+
+        var bytes = File.ReadAllBytes(sourcePath);
+        using var module = ModuleDefMD.Load(bytes);
+        var method = ResolveMethodByToken(module, methodDefToken);
+        if (!method.HasBody || method.Body is null)
+            throw new InvalidOperationException($"Method has no IL body: {methodDefToken}");
+
+        var offset = ParseIlOffset(ilOffset);
+        var instruction = method.Body.Instructions.FirstOrDefault(i => i.Offset == offset)
+            ?? throw new InvalidOperationException($"IL offset not found in method {methodDefToken}: IL_{offset:X4}");
+
+        if (instruction.Operand is not string oldText)
+            throw new InvalidOperationException($"Instruction at IL_{offset:X4} is not a string literal (ldstr).");
+
+        instruction.Operand = newText;
+        module.Write(destinationPath);
+        
+        if (inPlace)
+        {
+            _cache.TryRemove(sourcePath, out var oldLazy);
+            if (oldLazy != null && oldLazy.IsValueCreated)
+                oldLazy.Value.Dispose();
+        }
+
+        return string.Join(Environment.NewLine,
+            "Patch applied: replace string literal",
+            $"source: {sourcePath}",
+            $"backup: {backupPath}",
+            $"output: {destinationPath}",
+            $"method: {FormatToken(method.MDToken.Raw)}",
+            $"offset: IL_{offset:X4}",
+            $"old: \"{oldText}\"",
+            $"new: \"{newText}\"");
+    });
+
+    public Task<string> PatchNopInstructionsAsync(string assemblyPath, string methodDefToken, string ilOffset, int count, bool inPlace = false, string? outputPath = null) => Task.Run(() =>
+    {
+        if (count <= 0)
+            throw new InvalidOperationException("count must be > 0");
+
+        try
+        {
+            var sourcePath = NormalizePath(assemblyPath);
+            if (!File.Exists(sourcePath))
+                throw new FileNotFoundException($"Assembly not found: {sourcePath}");
+
+            var destinationPath = ResolvePatchDestination(sourcePath, inPlace, outputPath);
+            var backupPath = BuildBackupPath(sourcePath);
+            File.Copy(sourcePath, backupPath, overwrite: false);
+
+            var bytes = File.ReadAllBytes(sourcePath);
+            using var module = ModuleDefMD.Load(bytes);
+            var method = ResolveMethodByToken(module, methodDefToken);
+            if (!method.HasBody || method.Body is null)
+                throw new InvalidOperationException($"Method has no IL body: {methodDefToken}");
+
+            var offset = ParseIlOffset(ilOffset);
+            var instructions = method.Body.Instructions;
+            var startIndex = -1;
+            for (var i = 0; i < instructions.Count; i++)
+            {
+                if (instructions[i].Offset == offset)
+                {
+                    startIndex = i;
+                    break;
+                }
+            }
+
+            if (startIndex < 0)
+                throw new InvalidOperationException($"IL offset not found in method {methodDefToken}: IL_{offset:X4}");
+
+            var end = Math.Min(startIndex + count, instructions.Count);
+            for (var i = startIndex; i < end; i++)
+            {
+                instructions[i] = new dnlib.DotNet.Emit.Instruction(dnlib.DotNet.Emit.OpCodes.Nop);
+            }
+
+            module.Write(destinationPath);
+            
+            if (inPlace)
+            {
+                _cache.TryRemove(sourcePath, out var oldLazy);
+                if (oldLazy != null && oldLazy.IsValueCreated)
+                    oldLazy.Value.Dispose();
+            }
+
+            return string.Join(Environment.NewLine,
+                "Patch applied: NOP instructions",
+                $"source: {sourcePath}",
+                $"backup: {backupPath}",
+                $"output: {destinationPath}",
+                $"method: {FormatToken(method.MDToken.Raw)}",
+                $"startOffset: IL_{offset:X4}",
+                $"count: {end - startIndex}");
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Patch NOP failed: {ex.GetType().Name}: {ex.Message}", ex);
+        }
+    });
+
+    public Task<string> FindMethodCallersAsync(string assemblyPath, string typeFullName, string methodName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var targetType = FindType(module, typeFullName);
+        var targetMethod = FindMethod(targetType, methodName, null);
+
+        var results = new List<string>();
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody || method.Body is null) continue;
+
+                foreach (var instr in method.Body.Instructions)
+                {
+                    if (instr.Operand is dnlib.DotNet.IMethod operandMethod)
+                    {
+                        if (operandMethod.Name == targetMethod.Name && operandMethod.DeclaringType.FullName == targetMethod.DeclaringType.FullName)
+                        {
+                            var rva = GetMethodAddressRva(method);
+                            results.Add($"{type.FullName}.{method.Name} calls {targetMethod.Name} at IL_{instr.Offset:X4} | TypeDef={FormatToken(type.MDToken.Raw)} MethodDef={FormatToken(method.MDToken.Raw)} {(rva != null ? "RVA=" + rva : "")}");
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return results.Count == 0 ? "No callers found." : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> FindFieldReferencesAsync(string assemblyPath, string typeFullName, string fieldName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var targetType = FindType(module, typeFullName);
+        var targetField = targetType.Fields.FirstOrDefault(f => f.Name == fieldName) ?? throw new InvalidOperationException($"Field not found: {fieldName}");
+
+        var results = new List<string>();
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody || method.Body is null) continue;
+
+                foreach (var instr in method.Body.Instructions)
+                {
+                    if (instr.Operand is dnlib.DotNet.IField operandField)
+                    {
+                        if (operandField.Name == targetField.Name && operandField.DeclaringType.FullName == targetField.DeclaringType.FullName)
+                        {
+                            var rva = GetMethodAddressRva(method);
+                            var action = (instr.OpCode.Code == dnlib.DotNet.Emit.Code.Stfld || instr.OpCode.Code == dnlib.DotNet.Emit.Code.Stsfld) ? "writes" : "reads";
+                            results.Add($"{type.FullName}.{method.Name} {action} {targetField.Name} at IL_{instr.Offset:X4} | TypeDef={FormatToken(type.MDToken.Raw)} MethodDef={FormatToken(method.MDToken.Raw)} {(rva != null ? "RVA=" + rva : "")}");
+                        }
+                    }
+                }
+            }
+        }
+        return results.Count == 0 ? "No references found." : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> FindDerivedTypesAsync(string assemblyPath, string baseTypeFullName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var targetType = FindType(module, baseTypeFullName);
+
+        var results = new List<string>();
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            if (type.BaseType != null && type.BaseType.FullName == targetType.FullName)
+            {
+                results.Add($"Inherits: {type.FullName} | TypeDef={FormatToken(type.MDToken.Raw)}");
+            }
+            else if (type.Interfaces.Any(i => i.Interface?.FullName == targetType.FullName))
+            {
+                results.Add($"Implements: {type.FullName} | TypeDef={FormatToken(type.MDToken.Raw)}");
+            }
+        }
+        return results.Count == 0 ? "No derived types found." : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> LookupTokenAsync(string assemblyPath, string tokenText) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        uint token;
+        try
+        {
+            token = ParseHexToken(tokenText);
+        }
+        catch
+        {
+            return "Invalid token format. Use hex (e.g., 0x06001234).";
+        }
+
+        var member = module.ResolveToken(token);
+        if (member == null)
+            return $"Token {FormatToken(token)} not found in this module.";
+
+        if (member is TypeDef typeDef)
+        {
+            return $"Token {FormatToken(token)} resolves to Type: {typeDef.FullName}";
+        }
+        else if (member is MethodDef methodDef)
+        {
+            var rva = GetMethodAddressRva(methodDef);
+            return $"Token {FormatToken(token)} resolves to Method: {methodDef.DeclaringType.FullName}.{RenderMethodSignature(methodDef)} // {(rva != null ? "RVA: " + rva : "No RVA")}";
+        }
+        else if (member is FieldDef fieldDef)
+        {
+            var offset = GetFieldOffset(fieldDef);
+            return $"Token {FormatToken(token)} resolves to Field: {fieldDef.DeclaringType.FullName}.{fieldDef.Name} // {(offset != null ? "Offset: " + offset : "No Offset")}";
+        }
+        else if (member is PropertyDef propDef)
+        {
+            return $"Token {FormatToken(token)} resolves to Property: {propDef.DeclaringType.FullName}.{propDef.Name}";
+        }
+        else if (member is IMemberDef memberDef)
+        {
+            return $"Token {FormatToken(token)} resolves to Member: {memberDef.FullName}";
+        }
+
+        return $"Token {FormatToken(token)} resolves to {member.GetType().Name}: {member}";
+    });
+
+    public Task<string> FindNetworkHandlersAsync(string assemblyPath) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>();
+        
+        var networkKeywords = new[] { "Send", "Receive", "Socket", "Tcp", "Udp", "Network", "Packet", "Message", "OnMessage", "Serialize", "Deserialize", "Client", "Server" };
+        var networkTypes = new[] { "System.Net.Sockets.Socket", "System.Net.Sockets.TcpClient", "System.Net.Sockets.UdpClient", "System.Net.Sockets.NetworkStream", "UnityEngine.Networking", "Mirror", "Photon", "Lidgren", "NetMQ" };
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            bool isNetworkType = false;
+            if (networkKeywords.Any(k => type.Name.String.Contains(k, StringComparison.OrdinalIgnoreCase)))
+                isNetworkType = true;
+            
+            foreach (var field in type.Fields)
+            {
+                if (networkTypes.Any(t => field.FieldType.FullName.Contains(t)))
+                {
+                    isNetworkType = true;
+                    var offset = GetFieldOffset(field);
+                    results.Add($"[Network Field] {type.FullName}.{field.Name} ({field.FieldType.FullName}) // {(offset != null ? "Offset: " + offset : "")}");
+                }
+            }
+
+            foreach (var method in type.Methods)
+            {
+                bool matchesName = networkKeywords.Any(k => method.Name.String.Contains(k, StringComparison.OrdinalIgnoreCase));
+                bool matchesParams = method.Parameters.Any(p => networkTypes.Any(nt => p.Type.FullName.Contains(nt)));
+                
+                if (matchesName && (isNetworkType || matchesParams))
+                {
+                    var rva = GetMethodAddressRva(method);
+                    results.Add($"[Network Method] {type.FullName}.{RenderMethodSignature(method)} // {(rva != null ? "RVA: " + rva : "No RVA")}");
+                }
+            }
+        }
+        return results.Count == 0 ? "No network handlers found." : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> FindCryptoUsageAsync(string assemblyPath) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>();
+        
+        var cryptoKeywords = new[] { "Encrypt", "Decrypt", "Crypto", "Cipher", "Aes", "Rsa", "Des", "Md5", "Sha1", "Sha256", "Obfuscate", "Xor" };
+        var cryptoNamespaces = new[] { "System.Security.Cryptography" };
+
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var method in type.Methods)
+            {
+                bool isCrypto = false;
+                if (cryptoKeywords.Any(k => method.Name.String.Contains(k, StringComparison.OrdinalIgnoreCase)))
+                    isCrypto = true;
+                    
+                if (!isCrypto && method.HasBody && method.Body != null)
+                {
+                    foreach(var instr in method.Body.Instructions)
+                    {
+                        if (instr.Operand is dnlib.DotNet.IMethod opMethod)
+                        {
+                            if (cryptoNamespaces.Any(ns => opMethod.DeclaringType.FullName.StartsWith(ns)))
+                            {
+                                isCrypto = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (isCrypto)
+                {
+                    var rva = GetMethodAddressRva(method);
+                    results.Add($"[Crypto Logic] {type.FullName}.{RenderMethodSignature(method)} // {(rva != null ? "RVA: " + rva : "No RVA")}");
+                }
+            }
+        }
+        return results.Count == 0 ? "No crypto usage found." : string.Join(Environment.NewLine, results);
+    });
+
+    public Task<string> ScanSecretsAsync(string assemblyPath) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var results = new List<string>();
+        
+        var ipRegex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+        var urlRegex = new Regex(@"https?://[\w\-._~:/?#[\]@!$&'()*+,;=]+");
+        var wsRegex = new Regex(@"wss?://[\w\-._~:/?#[\]@!$&'()*+,;=]+");
+        
+        foreach (var type in module.GetTypes().Where(t => !t.IsGlobalModuleType))
+        {
+            foreach (var method in type.Methods)
+            {
+                if (!method.HasBody || method.Body is null) continue;
+
+                foreach (var instr in method.Body.Instructions)
+                {
+                    if (instr.Operand is string literal && literal.Length > 3)
+                    {
+                        if (ipRegex.IsMatch(literal))
+                            results.Add($"[IP Address] \"{literal}\" in {type.FullName}.{method.Name}");
+                        else if (urlRegex.IsMatch(literal) || wsRegex.IsMatch(literal))
+                            results.Add($"[URL/Endpoint] \"{literal}\" in {type.FullName}.{method.Name}");
+                        else if (literal.Length > 20 && literal.Length < 100 && !literal.Contains(" ") && !literal.Contains("<") && !literal.Contains("{") && !literal.Contains("_") && !literal.Contains("."))
+                        {
+                            // Basic heuristic for Base64, Tokens, or API Keys: Long string, no typical code/formatting symbols.
+                            results.Add($"[Potential Key/Secret] \"{literal}\" in {type.FullName}.{method.Name}");
+                        }
+                    }
+                }
+            }
+        }
+        
+        return results.Count == 0 ? "No secrets found." : string.Join(Environment.NewLine, results);
+    });
+
+    // ── Multi-Assembly Search ─────────────────────────────────────────────
+
+    public Task<string> SearchWorkspaceAsync(string directoryPath, string query, int maxResultsPerDll, bool recursive) => Task.Run(() =>
+    {
+        var normalizedDir = Path.GetFullPath(directoryPath);
+        if (!Directory.Exists(normalizedDir))
+            throw new DirectoryNotFoundException($"Directory not found: {normalizedDir}");
+
+        var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var dllFiles = Directory.GetFiles(normalizedDir, "*.dll", searchOption);
+
+        if (dllFiles.Length == 0)
+            return $"No .dll files found in {normalizedDir}";
+
+        var allResults = new List<string>();
+        var errors = new List<string>();
+
+        foreach (var dllPath in dllFiles.OrderBy(f => f))
+        {
+            try
+            {
+                var result = SearchMembersAsync(dllPath, query, maxResultsPerDll).GetAwaiter().GetResult();
+                if (result != "No matches found.")
+                {
+                    var dllName = Path.GetFileName(dllPath);
+                    allResults.Add($"--- {dllName} ---");
+                    allResults.Add(result);
+                    allResults.Add("");
+                }
+            }
+            catch
+            {
+                errors.Add($"[Skipped] {Path.GetFileName(dllPath)} (not a valid .NET assembly)");
+            }
+        }
+
+        if (allResults.Count == 0)
+        {
+            var msg = $"No matches found for \"{query}\" across {dllFiles.Length} DLLs in {normalizedDir}";
+            if (errors.Count > 0)
+                msg += "\n" + string.Join("\n", errors);
+            return msg;
+        }
+
+        var summary = $"Search results for \"{query}\" across {dllFiles.Length} DLLs:\n\n";
+        return summary + string.Join(Environment.NewLine, allResults);
+    });
+
+    // ── Dump.cs Bridge ────────────────────────────────────────────────────
+
+    public Task<string> ResolveDumpLineAsync(string dumpCsPath, int lineNumber, string? assemblyPath) => Task.Run(() =>
+    {
+        var normalizedPath = Path.GetFullPath(dumpCsPath);
+        if (!File.Exists(normalizedPath))
+            throw new FileNotFoundException($"dump.cs not found: {normalizedPath}");
+
+        // Read a window of lines around the target line to find context
+        var contextSize = 100;
+        var startLine = Math.Max(0, lineNumber - contextSize);
+        var lines = File.ReadLines(normalizedPath).Skip(startLine).Take(contextSize * 2 + 1).ToArray();
+
+        var relativeLineIndex = Math.Min(lineNumber - startLine - 1, lines.Length - 1);
+        if (relativeLineIndex < 0 || relativeLineIndex >= lines.Length)
+            return $"Line {lineNumber} is out of range.";
+
+        var targetLine = lines[relativeLineIndex].Trim();
+
+        // Walk backwards to find the enclosing class and namespace
+        string? currentNamespace = null;
+        string? currentClass = null;
+        string? baseClass = null;
+        var memberContext = new List<string>();
+
+        // Regex patterns for Il2CppDumper output
+        var nsRegex = new Regex(@"^// Namespace:\s*(.*)$");
+        var classRegex = new Regex(@"^(?:public\s+|private\s+|protected\s+|internal\s+)?(?:abstract\s+|sealed\s+|static\s+)*(?:class|struct|enum|interface)\s+(\S+)(?:\s*:\s*(.+))?");
+        var methodRegex = new Regex(@"^\s*(?:public|private|protected|internal).*?\s+(\S+)\(.*\).*//\s*RVA:\s*(0x[\dA-Fa-f]+)");
+        var fieldRegex = new Regex(@"^\s*(?:public|private|protected|internal).*?\s+(\S+)\s+(\S+);\s*//\s*(0x[\dA-Fa-f]+)");
+
+        for (var i = relativeLineIndex; i >= 0; i--)
+        {
+            var line = lines[i].Trim();
+
+            if (currentClass == null)
+            {
+                var classMatch = classRegex.Match(line);
+                if (classMatch.Success)
+                {
+                    currentClass = classMatch.Groups[1].Value;
+                    baseClass = classMatch.Groups[2].Success ? classMatch.Groups[2].Value.Trim() : null;
+                }
+            }
+
+            if (currentNamespace == null)
+            {
+                var nsMatch = nsRegex.Match(line);
+                if (nsMatch.Success)
+                {
+                    currentNamespace = nsMatch.Groups[1].Value.Trim();
+                    if (string.IsNullOrEmpty(currentNamespace))
+                        currentNamespace = "(global)";
+                    break; // Found both namespace and class
+                }
+            }
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"--- dump.cs line {lineNumber} ---");
+        sb.AppendLine($"Content: {targetLine}");
+        sb.AppendLine();
+
+        var fullTypeName = !string.IsNullOrEmpty(currentNamespace) && currentNamespace != "(global)"
+            ? $"{currentNamespace}.{currentClass}"
+            : currentClass;
+
+        sb.AppendLine($"Namespace: {currentNamespace ?? "Unknown"}");
+        sb.AppendLine($"Type: {currentClass ?? "Unknown"}");
+        sb.AppendLine($"Full Type Name: {fullTypeName ?? "Unknown"}");
+        if (baseClass != null)
+            sb.AppendLine($"Base/Interfaces: {baseClass}");
+
+        // Parse the target line itself
+        var methodMatch = methodRegex.Match(targetLine);
+        if (methodMatch.Success)
+        {
+            sb.AppendLine($"Member Type: Method");
+            sb.AppendLine($"Method Name: {methodMatch.Groups[1].Value}");
+            sb.AppendLine($"RVA: {methodMatch.Groups[2].Value}");
+        }
+
+        var fieldMatch = fieldRegex.Match(targetLine);
+        if (fieldMatch.Success)
+        {
+            sb.AppendLine($"Member Type: Field");
+            sb.AppendLine($"Field Type: {fieldMatch.Groups[1].Value}");
+            sb.AppendLine($"Field Name: {fieldMatch.Groups[2].Value}");
+            sb.AppendLine($"Offset: {fieldMatch.Groups[3].Value}");
+        }
+
+        // If assemblyPath is provided, cross-reference with DummyDll
+        if (!string.IsNullOrWhiteSpace(assemblyPath) && !string.IsNullOrWhiteSpace(fullTypeName))
+        {
+            try
+            {
+                sb.AppendLine();
+                sb.AppendLine("--- DummyDll Cross-Reference ---");
+                var analysis = AnalyzeTypeAsync(assemblyPath, fullTypeName).GetAwaiter().GetResult();
+                sb.AppendLine(analysis);
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"Cross-reference failed: {ex.Message}");
+                sb.AppendLine("Tip: The type name in dump.cs may not match the DummyDll exactly. Try search_members instead.");
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(assemblyPath))
+        {
+            sb.AppendLine();
+            sb.AppendLine("Tip: Provide assemblyPath to cross-reference this type against the DummyDll for full analysis (fields, offsets, methods, RVAs).");
+        }
+
+        return sb.ToString();
+    });
+
+    // ── C-Struct Layout ───────────────────────────────────────────────────
+
+    public Task<string> GetTypeLayoutAsync(string assemblyPath, string typeFullName) => Task.Run(() =>
+    {
+        var module = GetOrLoad(assemblyPath).Module;
+        var type = FindType(module, typeFullName);
+
+        var sb = new StringBuilder();
+
+        var baseType = type.BaseType?.FullName;
+        var interfaces = type.Interfaces.Select(i => i.Interface.FullName).ToList();
+        var classSize = type.ClassLayout?.ClassSize > 0 ? "0x" + type.ClassLayout.ClassSize.ToString("X") : "Unknown";
+
+        sb.AppendLine($"// {type.FullName}{(baseType != null ? $" (Base: {baseType})" : "")}");
+        if (interfaces.Any())
+            sb.AppendLine($"// Implements: {string.Join(", ", interfaces)}");
+        sb.AppendLine($"// Size: {classSize}");
+        sb.AppendLine($"struct {SanitizeCName(type.Name)} {{");
+
+        // Add Il2Cpp object header fields
+        if (baseType == "System.Object" || baseType?.Contains("MonoBehaviour") == true || baseType?.Contains("ScriptableObject") == true)
+        {
+            sb.AppendLine("    void* klass;              // 0x00 (Il2Cpp internal)");
+            sb.AppendLine("    void* monitor;            // 0x08 (Il2Cpp internal)");
+        }
+
+        // Build sorted field list
+        var fields = new List<(uint Offset, string CType, string Name, string OriginalType, bool IsStatic, bool IsValueType)>();
+
+        foreach (var field in type.Fields)
+        {
+            var offsetStr = GetFieldOffset(field);
+            uint offset = 0;
+            if (offsetStr != null && offsetStr.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                uint.TryParse(offsetStr[2..], System.Globalization.NumberStyles.HexNumber, null, out offset);
+            else if (offsetStr != null)
+                uint.TryParse(offsetStr, out offset);
+            else if (field.FieldOffset.HasValue)
+                offset = field.FieldOffset.Value;
+
+            bool isValueType = field.FieldType.IsValueType;
+            var cType = MapToCType(field.FieldType.FullName, isValueType);
+            fields.Add((offset, cType, field.Name, field.FieldType.FullName, field.IsStatic, isValueType));
+        }
+
+        // Instance fields sorted by offset
+        var instanceFields = fields.Where(f => !f.IsStatic).OrderBy(f => f.Offset).ToList();
+        var staticFields = fields.Where(f => f.IsStatic).ToList();
+
+        foreach (var field in instanceFields)
+        {
+            var padding = new string(' ', Math.Max(1, 22 - field.CType.Length));
+            var inlineNote = field.IsValueType && !field.OriginalType.StartsWith("System.") ? " [Inline Struct]" : "";
+            sb.AppendLine($"    {field.CType}{padding}{SanitizeCName(field.Name)};{new string(' ', Math.Max(1, 20 - field.Name.Length))}// 0x{field.Offset:X2} ({field.OriginalType}){inlineNote}");
+        }
+
+        if (staticFields.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("    // --- Static Fields (not in instance memory) ---");
+            foreach (var field in staticFields)
+            {
+                var cType = MapToCType(field.OriginalType, field.IsValueType);
+                sb.AppendLine($"    // static {cType} {SanitizeCName(field.Name)}; ({field.OriginalType})");
+            }
+        }
+
+        sb.AppendLine("};");
+
+        // Add method RVA list for Frida hooking
+        var methods = type.Methods.Where(m => !m.IsGetter && !m.IsSetter && !m.IsAddOn && !m.IsRemoveOn).ToList();
+        var methodsWithRva = methods.Where(m => GetMethodAddressRva(m) != null).ToList();
+
+        if (methodsWithRva.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("// --- Method RVAs (for Frida/native hooking) ---");
+            foreach (var method in methodsWithRva)
+            {
+                var rva = GetMethodAddressRva(method);
+                sb.AppendLine($"// {RenderMethodSignature(method)} → RVA: {rva}");
+            }
+        }
+
+        return sb.ToString();
+    });
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────
+
+    public void Dispose()
+    {
+        foreach (var lazy in _cache.Values)
+        {
+            if (lazy.IsValueCreated)
+            {
+                lazy.Value.Dispose();
+            }
+        }
+        _cache.Clear();
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────
+
+    private LoadedAssembly GetOrLoad(string assemblyPath)
+    {
+        var normalized = NormalizePath(assemblyPath);
+        if (!File.Exists(normalized))
+            throw new FileNotFoundException($"Assembly not found: {normalized}");
+
+        return _cache.GetOrAdd(normalized, path => new Lazy<LoadedAssembly>(() =>
+        {
+            var bytes = File.ReadAllBytes(path);
+            var module = ModuleDefMD.Load(bytes);
+            var settings = new DecompilerSettings(LanguageVersion.Latest)
+            {
+                ThrowOnAssemblyResolveErrors = false
+            };
+
+            var decompiler = new Lazy<CSharpDecompiler>(() => new CSharpDecompiler(path, settings));
+            return new LoadedAssembly(path, module, decompiler);
+        })).Value;
+    }
+
+    private static TypeDef FindType(ModuleDefMD module, string typeFullName)
+    {
+        var type = module.GetTypes().FirstOrDefault(t =>
+            string.Equals(t.FullName, typeFullName, StringComparison.Ordinal) ||
+            string.Equals(t.ReflectionFullName, typeFullName, StringComparison.Ordinal));
+
+        return type ?? throw new InvalidOperationException($"Type not found: {typeFullName}");
+    }
+
+    private static MethodDef FindMethod(TypeDef type, string methodName, string[]? parameterTypeNames)
+    {
+        var candidates = type.Methods
+            .Where(m => string.Equals(m.Name, methodName, StringComparison.Ordinal))
+            .ToArray();
+
+        if (candidates.Length == 0)
+            throw new InvalidOperationException($"Method not found: {type.FullName}.{methodName}");
+
+        if (parameterTypeNames is { Length: > 0 })
+        {
+            var normalized = parameterTypeNames.Select(NormalizeTypeName).ToArray();
+            var matched = candidates.Where(m => ParametersMatch(m, normalized)).ToArray();
+
+            if (matched.Length == 1)
+                return matched[0];
+
+            if (matched.Length == 0)
+                throw new InvalidOperationException(
+                    $"No overload matched parameterTypeNames for {type.FullName}.{methodName}. Available: {string.Join(" | ", candidates.Select(RenderMethodSignature))}");
+
+            throw new InvalidOperationException(
+                $"Multiple overloads matched. Provide more specific parameterTypeNames. Matches: {string.Join(" | ", matched.Select(RenderMethodSignature))}");
+        }
+
+        if (candidates.Length == 1)
+            return candidates[0];
+
+        throw new InvalidOperationException(
+            $"Ambiguous method name '{methodName}'. Provide parameterTypeNames. Available: {string.Join(" | ", candidates.Select(RenderMethodSignature))}");
+    }
+
+    private static bool ParametersMatch(MethodDef method, IReadOnlyList<string> normalizedParameterTypeNames)
+    {
+        var sigParams = method.MethodSig.Params;
+        if (sigParams.Count != normalizedParameterTypeNames.Count)
+            return false;
+
+        for (var i = 0; i < sigParams.Count; i++)
+        {
+            var actual = NormalizeTypeName(sigParams[i].FullName);
+            if (!string.Equals(actual, normalizedParameterTypeNames[i], StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static string RenderMethodSignature(MethodDef method)
+    {
+        var parameters = string.Join(", ", method.Parameters.Select(p => $"{p.Type.FullName} {p.Name}"));
+        return $"{method.ReturnType.FullName} {method.Name}({parameters})";
+    }
+
+    private static string FormatToken(uint raw) => $"0x{raw:X8}";
+
+    private static MethodDef ResolveMethodByToken(ModuleDefMD module, string methodDefToken)
+    {
+        var token = ParseHexToken(methodDefToken);
+        var provider = module.ResolveToken(token) as MethodDef;
+        return provider ?? throw new InvalidOperationException($"MethodDef token not found: {FormatToken(token)}");
+    }
+
+    private static uint ParseHexToken(string tokenText)
+    {
+        var t = tokenText.Trim();
+        if (t.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            t = t[2..];
+
+        if (!uint.TryParse(t, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out var value))
+            throw new InvalidOperationException($"Invalid token format: {tokenText}");
+
+        return value;
+    }
+
+    private static int ParseIlOffset(string ilOffset)
+    {
+        var t = ilOffset.Trim();
+        if (t.StartsWith("IL_", StringComparison.OrdinalIgnoreCase))
+            t = t[3..];
+
+        if (!int.TryParse(t, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out var value) || value < 0)
+            throw new InvalidOperationException($"Invalid IL offset: {ilOffset}");
+
+        return value;
+    }
+
+    private static string ResolvePatchDestination(string sourcePath, bool inPlace, string? outputPath)
+    {
+        if (inPlace)
+            return sourcePath;
+
+        if (!string.IsNullOrWhiteSpace(outputPath))
+            return NormalizePath(outputPath);
+
+        var dir = Path.GetDirectoryName(sourcePath) ?? Environment.CurrentDirectory;
+        var name = Path.GetFileNameWithoutExtension(sourcePath);
+        var ext = Path.GetExtension(sourcePath);
+        return Path.Combine(dir, $"{name}.patched{ext}");
+    }
+
+    private static string BuildBackupPath(string sourcePath)
+    {
+        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        var candidate = $"{sourcePath}.{timestamp}.bak";
+        return candidate;
+    }
+
+    private static string NormalizeTypeName(string typeName)
+        => typeName.Replace(" ", string.Empty, StringComparison.Ordinal)
+                   .Replace("+", "/", StringComparison.Ordinal);
+
+    private static bool ContainsIgnoreCase(string source, string value)
+        => source.Contains(value, StringComparison.OrdinalIgnoreCase);
+
+    private static bool Contains(string source, string value, bool caseSensitive)
+        => source.Contains(value, caseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase);
+
+    private static string NormalizePath(string input)
+    {
+        if (Path.IsPathRooted(input))
+            return Path.GetFullPath(input);
+
+        return Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, input));
+    }
+
+    private static string? GetMethodAddressRva(MethodDef method) =>
+        GetIl2CppMetadataAttributeValue(method.CustomAttributes, "AddressAttribute", "RVA");
+
+    private static string? GetFieldOffset(FieldDef field) =>
+        GetIl2CppMetadataAttributeValue(field.CustomAttributes, "FieldOffset", "Offset");
+
+    private static string? GetIl2CppMetadataAttributeValue(IEnumerable<CustomAttribute> attributes, string attributeName, string argumentName)
+    {
+        foreach (var attr in attributes)
+        {
+            if (!attr.TypeFullName.Contains(attributeName))
+                continue;
+            
+            try
+            {
+                var arg = attr.NamedArguments.FirstOrDefault(a => a.Name == argumentName);
+                if (arg == null)
+                    continue;
+
+                var value = arg.Argument.Value;
+                return value switch
+                {
+                    string s => s,
+                    uint u => $"0x{u:X}",
+                    ulong ul => $"0x{ul:X}",
+                    _ => value?.ToString()
+                };
+            }
+            catch
+            {
+                // Ignore malformed custom attribute blobs
+                continue;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Parse a hex string (with or without 0x prefix) into a numeric value for reliable comparison.
+    /// Returns null if the input is null, empty, or unparseable.
+    /// </summary>
+    private static ulong? TryParseHexValue(string? hex)
+    {
+        if (string.IsNullOrWhiteSpace(hex))
+            return null;
+
+        var clean = hex.Trim();
+        if (clean.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            clean = clean[2..];
+
+        return ulong.TryParse(clean, System.Globalization.NumberStyles.HexNumber, null, out var val) ? val : null;
+    }
+
+    /// <summary>
+    /// Map a .NET type name to an approximate C type for struct layout output.
+    /// </summary>
+    private static string MapToCType(string dotnetType, bool isValueType = false)
+    {
+        return dotnetType switch
+        {
+            "System.Boolean" => "bool",
+            "System.Byte" => "uint8_t",
+            "System.SByte" => "int8_t",
+            "System.Int16" => "int16_t",
+            "System.UInt16" => "uint16_t",
+            "System.Int32" => "int32_t",
+            "System.UInt32" => "uint32_t",
+            "System.Int64" => "int64_t",
+            "System.UInt64" => "uint64_t",
+            "System.Single" => "float",
+            "System.Double" => "double",
+            "System.Char" => "uint16_t",
+            "System.IntPtr" => "intptr_t",
+            "System.UIntPtr" => "uintptr_t",
+            "System.String" => "String*",
+            "System.Object" => "Il2CppObject*",
+            "System.Void" => "void",
+            _ when dotnetType.EndsWith("[]") => $"Il2CppArray*",
+            _ when dotnetType.Contains("List`1") => "Il2CppList*",
+            _ when dotnetType.Contains("Dictionary`2") => "Il2CppDictionary*",
+            _ when !dotnetType.StartsWith("System.") => isValueType ? SanitizeCName(dotnetType.Split('.').Last()) : $"{SanitizeCName(dotnetType.Split('.').Last())}*",
+            _ => "void*"
+        };
+    }
+
+    /// <summary>
+    /// Sanitize a .NET type/field name for use as a C identifier.
+    /// </summary>
+    private static string SanitizeCName(string name)
+    {
+        return name.Replace('<', '_').Replace('>', '_').Replace('`', '_').Replace('.', '_').Replace('+', '_').Replace('/', '_');
+    }
+
+    private sealed record LoadedAssembly(string Path, ModuleDefMD Module, Lazy<CSharpDecompiler> Decompiler) : IDisposable
+    {
+        public void Dispose() => Module.Dispose();
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/Domain/ResourceRegistry.cs`:
+
+```cs
+namespace DotNetInspectorMcp.Domain;
+
+internal sealed class ResourceRegistry(AssemblyAnalyzer analysis)
+{
+    private const string AssembliesUri = "inspector://assemblies";
+
+    public object[] ListResources()
+    {
+        var list = new List<object>
+        {
+            new
+            {
+                uri = AssembliesUri,
+                name = "Loaded assemblies",
+                description = "Assemblies loaded in the DotNet Inspector MCP cache.",
+                mimeType = "text/plain"
+            }
+        };
+
+        foreach (var path in analysis.GetCachedAssemblyPaths())
+        {
+            var encoded = Uri.EscapeDataString(path);
+            list.Add(new
+            {
+                uri = $"inspector://assembly?path={encoded}&view=summary",
+                name = Path.GetFileName(path),
+                description = $"Summary for {path}",
+                mimeType = "text/plain"
+            });
+
+            list.Add(new
+            {
+                uri = $"inspector://assembly?path={encoded}&view=types",
+                name = $"{Path.GetFileName(path)} types",
+                description = $"All type names for {path}",
+                mimeType = "text/plain"
+            });
+        }
+
+        return list.ToArray();
+    }
+
+    public async Task<string> ReadResourceAsync(string uriText)
+    {
+        if (string.Equals(uriText, AssembliesUri, StringComparison.OrdinalIgnoreCase))
+        {
+            var assemblies = analysis.GetCachedAssemblyPaths();
+            return assemblies.Count == 0
+                ? "No assemblies loaded yet. Call any tool with assemblyPath first, then resources/list again."
+                : string.Join(Environment.NewLine, assemblies);
+        }
+
+        if (!Uri.TryCreate(uriText, UriKind.Absolute, out var uri) || !string.Equals(uri.Scheme, "inspector", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Unsupported resource URI: {uriText}");
+
+        if (!string.Equals(uri.Host, "assembly", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Unsupported inspector resource host: {uri.Host}");
+
+        var query = ParseQuery(uri.Query);
+        query.TryGetValue("path", out var encodedPath);
+        var view = query.TryGetValue("view", out var tmpView) ? tmpView : "summary";
+
+        if (string.IsNullOrWhiteSpace(encodedPath))
+            throw new InvalidOperationException("Resource URI missing 'path' query parameter.");
+
+        var path = Uri.UnescapeDataString(encodedPath);
+
+        return view.ToLowerInvariant() switch
+        {
+            "summary" => await analysis.GetAssemblySummaryAsync(path),
+            "types" => await analysis.ListTypesAsync(path, namespaceFilter: null, includeNested: true),
+            _ => throw new InvalidOperationException($"Unsupported resource view: {view}")
+        };
+    }
+
+    private static Dictionary<string, string> ParseQuery(string query)
+    {
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(query))
+            return result;
+
+        var trimmed = query.StartsWith('?') ? query[1..] : query;
+        foreach (var part in trimmed.Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var idx = part.IndexOf('=');
+            if (idx < 0)
+            {
+                result[Uri.UnescapeDataString(part)] = string.Empty;
+                continue;
+            }
+
+            var key = Uri.UnescapeDataString(part[..idx]);
+            var value = Uri.UnescapeDataString(part[(idx + 1)..]);
+            result[key] = value;
+        }
+
+        return result;
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/DotNetInspectorMcp.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>DnSpyMCP</AssemblyName>
+    <RootNamespace>DotNetInspectorMcp</RootNamespace>
+    <Version>2.4.1</Version>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dnlib" Version="4.5.0" />
+    <PackageReference Include="ICSharpCode.Decompiler" Version="8.2.0.7535" />
+  </ItemGroup>
+</Project>
+
+```
+
+`src/DotNetInspectorMcp/Endpoints/AssemblyTools.Advanced.cs`:
+
+```cs
+using System;
+using System.Threading.Tasks;
+
+namespace DotNetInspectorMcp.Endpoints;
+
+internal static partial class AssemblyTools
+{
+    // ── 1. trace_field_consumers ───────────────────────────────────────────
+
+    [McpTool("trace_field_consumers", "Trace the full call graph of methods that read or write a specific field. Answers 'Who ultimately uses this field?'")]
+    public static async Task<ToolCallResult> TraceFieldConsumers(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Target type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Target field name.", Required = true)]
+        string fieldName,
+        [ToolParam("Max recursion depth for tracing call graph. Default: 3.")]
+        int depth = 3)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+        if (ValidateRequired(fieldName, "fieldName", "Provide the field name.") is { } err3) return err3;
+
+        try
+        {
+            var text = await ctx.Analysis.TraceFieldConsumersAsync(assemblyPath, typeFullName, fieldName, depth);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                fieldName,
+                depth,
+                trace = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 2. get_struct_layout (C++ format with padding) ───────────────────
+
+    [McpTool("get_struct_layout", "Export a type as a C/C++ struct with precise memory padding (_pad) automatically calculated for cheat development.")]
+    public static async Task<ToolCallResult> GetStructLayout(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Format. Default: 'cpp'.")]
+        string format = "cpp")
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.GetStructLayoutAsync(assemblyPath, typeFullName, format);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                format,
+                structLayout = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 3. find_enum_values ──────────────────────────────────────────────
+
+    [McpTool("find_enum_values", "Find and resolve enum values. Search by magic number, hex value, partial name, or dump a specific enum.")]
+    public static async Task<ToolCallResult> FindEnumValues(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Query to search for (e.g., '0x2000', '8192', 'KOL'). Leave empty to dump full enumName.")]
+        string query = "",
+        [ToolParam("Optional exact or partial enum type name to restrict search (e.g., 'CIKPIKDDDKE').")]
+        string? enumName = null)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+
+        if (string.IsNullOrWhiteSpace(query) && string.IsNullOrWhiteSpace(enumName))
+            return new ToolCallResult("Error: Provide either a query or an enumName.", new { error = true });
+
+        try
+        {
+            var text = await ctx.Analysis.FindEnumValuesAsync(assemblyPath, query, enumName);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                query,
+                enumName,
+                results = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 4. find_ui_bindings ──────────────────────────────────────────────
+
+    [McpTool("find_ui_bindings", "Scan a class to find all Unity UI component references (Image, Text, TMPro) and custom UI classes, listing methods that modify them.")]
+    public static async Task<ToolCallResult> FindUiBindings(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name of the UI script (e.g., UIHudKillNotificationItem).", Required = true)]
+        string typeFullName,
+        [ToolParam("Optional array of custom UI class names to scan for (e.g., ['UITable', 'UIRelocateToLabelSprite']).")]
+        string[]? customUiTypes = null)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.FindUiBindingsAsync(assemblyPath, typeFullName, customUiTypes);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                customUiTypes,
+                bindings = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 5. search_by_inheritance ─────────────────────────────────────────
+
+    [McpTool("search_by_inheritance", "Find all classes that inherit from a base type and optionally filter by field names.")]
+    public static async Task<ToolCallResult> SearchByInheritance(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Base type full name (e.g., MonoBehaviour).", Required = true)]
+        string baseType,
+        [ToolParam("Optional text the field name must contain (e.g., 'badge').")]
+        string? fieldContains = null,
+        [ToolParam("Max inheritance depth. Default: 2.")]
+        int maxDepth = 2)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(baseType, "baseType", "Provide the base type full name.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.SearchByInheritanceAsync(assemblyPath, baseType, fieldContains, maxDepth);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                baseType,
+                fieldContains,
+                maxDepth,
+                results = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 6. diff_types ────────────────────────────────────────────────────
+
+    [McpTool("diff_types", "Compare two types side-by-side to see field offset and signature differences.")]
+    public static async Task<ToolCallResult> DiffTypes(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type A full name.", Required = true)]
+        string typeA,
+        [ToolParam("Type B full name.", Required = true)]
+        string typeB)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeA, "typeA", "Provide the first type full name.") is { } err2) return err2;
+        if (ValidateRequired(typeB, "typeB", "Provide the second type full name.") is { } err3) return err3;
+
+        try
+        {
+            var text = await ctx.Analysis.DiffTypesAsync(assemblyPath, typeA, typeB);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeA,
+                typeB,
+                diff = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 7. resolve_method_signature (C++ Typedef Generator) ──────────────
+
+    [McpTool("resolve_method_signature", "Generate a C++ function pointer typedef matching a game method's signature for MinHook or Frida.")]
+    public static async Task<ToolCallResult> ResolveMethodSignature(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Method name.", Required = true)]
+        string methodName,
+        [ToolParam("Format type. Default: 'cpp_hook'.")]
+        string format = "cpp_hook")
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the type full name.") is { } err2) return err2;
+        if (ValidateRequired(methodName, "methodName", "Provide the method name.") is { } err3) return err3;
+
+        try
+        {
+            var text = await ctx.Analysis.ResolveMethodSignatureAsync(assemblyPath, typeFullName, methodName, format);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                methodName,
+                format,
+                signature = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── 8. get_class_pointer ─────────────────────────────────────────────
+
+    [McpTool("get_class_pointer", "Parse Il2CppDumper's script.json to get the static TypeInfo/Il2CppClass* pointer offset for external memory scanning.")]
+    public static async Task<ToolCallResult> GetClassPointer(
+        ToolContext ctx,
+        [ToolParam("Path to the script.json file generated by Il2CppDumper.", Required = true)]
+        string scriptJsonPath,
+        [ToolParam("Type full name to find the pointer for.", Required = true)]
+        string typeFullName)
+    {
+        if (ValidateRequired(scriptJsonPath, "scriptJsonPath", "Provide the full path to script.json.") is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the type full name.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.GetClassPointerAsync(scriptJsonPath, typeFullName);
+            return new ToolCallResult(text, new
+            {
+                scriptJsonPath,
+                typeFullName,
+                pointer = text
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/Endpoints/AssemblyTools.cs`:
+
+```cs
+using DotNetInspectorMcp.Domain;
+
+namespace DotNetInspectorMcp.Endpoints;
+
+internal static partial class AssemblyTools
+{
+    // ── Shared validation helper ──────────────────────────────────────────
+    private static ToolCallResult? ValidateRequired(string? value, string paramName, string hint)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return new ToolCallResult(
+            $"Error: {paramName} is required. {hint}",
+            new { error = true, message = $"{paramName} is required", hint });
+    }
+
+    private static string ResolveAssemblyPath(ToolContext ctx, string? assemblyPath)
+    {
+        if (!string.IsNullOrWhiteSpace(assemblyPath))
+            return assemblyPath;
+
+        var defaultPath = ctx.Analysis.DefaultAssemblyPath;
+        if (defaultPath != null)
+            return defaultPath;
+
+        return assemblyPath ?? string.Empty; // Will be caught by null guard
+    }
+
+    private const string AssemblyPathHint =
+        "Provide the full path to a .NET assembly (.dll/.exe). " +
+        "For Il2Cpp Unity games, use the DummyDll/Assembly-CSharp.dll path. " +
+        "You can also set the DNSPY_DEFAULT_ASSEMBLY environment variable.";
+
+    // ── Assembly Inspection ───────────────────────────────────────────────
+
+    [McpTool("list_types", "List all types in a .NET assembly.")]
+    public static async Task<ToolCallResult> ListTypes(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly (.dll/.exe).", Required = true)]
+        string assemblyPath,
+        [ToolParam("Optional namespace filter (exact match).")]
+        string? @namespace = null,
+        [ToolParam("Include nested types in output.")]
+        bool includeNested = true,
+        [ToolParam("If true, filters out System, UnityEngine, and other standard namespaces to show only game code.")]
+        bool gameCodeOnly = false)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err) return err;
+
+        try
+        {
+            var text = await ctx.Analysis.ListTypesAsync(assemblyPath, @namespace, includeNested, gameCodeOnly);
+            var types = await ctx.Analysis.GetTypesAsync(assemblyPath, @namespace, includeNested, gameCodeOnly);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                @namespace,
+                includeNested,
+                gameCodeOnly,
+                count = types.Length,
+                types
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("decompile_type", "Decompile a type from an assembly into C#.")]
+    public static async Task<ToolCallResult> DecompileType(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name. Supports dnlib and reflection format.", Required = true)]
+        string typeFullName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name (e.g. 'MyNamespace.MyClass'). Use search_members to find types.") is { } err2) return err2;
+
+        try
+        {
+            var code = await ctx.Analysis.DecompileTypeAsync(assemblyPath, typeFullName);
+            return new ToolCallResult(code, new
+            {
+                assemblyPath,
+                typeFullName,
+                language = "csharp",
+                code
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("decompile_method", "Decompile one method into C#. Supports overload selection.")]
+    public static async Task<ToolCallResult> DecompileMethod(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Method name.", Required = true)]
+        string methodName,
+        [ToolParam("Optional parameter type list to pick a specific overload (e.g. [\"System.String\",\"System.Int32\"]).")]
+        string[]? parameterTypeNames = null)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name. Use search_members to find it.") is { } err2) return err2;
+        if (ValidateRequired(methodName, "methodName", "Provide the method name. Use list_methods to see available methods.") is { } err3) return err3;
+
+        try
+        {
+            var code = await ctx.Analysis.DecompileMethodAsync(assemblyPath, typeFullName, methodName, parameterTypeNames);
+            return new ToolCallResult(code, new
+            {
+                assemblyPath,
+                typeFullName,
+                methodName,
+                parameterTypeNames,
+                language = "csharp",
+                code
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new
+            {
+                error = true,
+                message = ex.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
+    }
+
+    [McpTool("get_method_il", "Get raw IL for one method. Supports overload selection.")]
+    public static async Task<ToolCallResult> GetMethodIl(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Method name.", Required = true)]
+        string methodName,
+        [ToolParam("Optional parameter type list to pick a specific overload.")]
+        string[]? parameterTypeNames = null)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+        if (ValidateRequired(methodName, "methodName", "Provide the method name.") is { } err3) return err3;
+
+        try
+        {
+            var il = await ctx.Analysis.GetMethodIlAsync(assemblyPath, typeFullName, methodName, parameterTypeNames);
+            return new ToolCallResult(il, new
+            {
+                assemblyPath,
+                typeFullName,
+                methodName,
+                parameterTypeNames,
+                language = "il",
+                il
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new
+            {
+                error = true,
+                message = ex.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
+    }
+
+    [McpTool("search_members", "Search matching type/member names inside an assembly.")]
+    public static async Task<ToolCallResult> SearchMembers(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Case-insensitive search text.", Required = true)]
+        string query,
+        [ToolParam("Max number of results (default 500).")]
+        int maxResults = 500)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(query, "query", "Provide a search string (e.g. 'Health', 'Damage', 'Player').") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.SearchMembersAsync(assemblyPath, query, maxResults);
+            var lines = text == "No matches found." ? Array.Empty<string>() : text.Split(Environment.NewLine);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                query,
+                maxResults,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("list_methods", "List methods for a given type with signatures (helps overload targeting).")]
+    public static async Task<ToolCallResult> ListMethods(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name. Use search_members to find it.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.ListMethodsAsync(assemblyPath, typeFullName);
+            var lines = text == "No methods found." ? Array.Empty<string>() : text.Split(Environment.NewLine);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                count = lines.Length,
+                methods = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("find_string_references", "Find methods that reference a given string literal in IL (ldstr).")]
+    public static async Task<ToolCallResult> FindStringReferences(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("String text to search for (path fragment, filename, token, etc.).", Required = true)]
+        string text,
+        [ToolParam("Case-sensitive search. Default: false.")]
+        bool caseSensitive = false,
+        [ToolParam("Max number of matches to return. Default: 500.")]
+        int maxResults = 500)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(text, "text", "Provide the string literal text to search for.") is { } err2) return err2;
+
+        try
+        {
+            var output = await ctx.Analysis.FindStringReferencesAsync(assemblyPath, text, caseSensitive, maxResults);
+            var lines = output == "No string references found." ? Array.Empty<string>() : output.Split(Environment.NewLine);
+            return new ToolCallResult(output, new
+            {
+                assemblyPath,
+                text,
+                caseSensitive,
+                maxResults,
+                count = lines.Length,
+                matches = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Patching ──────────────────────────────────────────────────────────
+
+    [McpTool("patch_replace_string_literal", "Patch one IL string literal at a method token + IL offset. Always creates a backup first.")]
+    public static async Task<ToolCallResult> PatchReplaceStringLiteral(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly (.exe/.dll).", Required = true)]
+        string assemblyPath,
+        [ToolParam("MethodDef token (example: 0x060005C1).", Required = true)]
+        string methodDefToken,
+        [ToolParam("IL offset (example: IL_01D2).", Required = true)]
+        string ilOffset,
+        [ToolParam("New literal text.", Required = true)]
+        string newText,
+        [ToolParam("Patch in place (default false).")]
+        bool inPlace = false,
+        [ToolParam("Output path when not inPlace. Optional.")]
+        string? outputPath = null)
+    {
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(methodDefToken, "methodDefToken", "Provide a MethodDef token (e.g. 0x060005C1). Use list_methods or search_members to find it.") is { } err2) return err2;
+        if (ValidateRequired(ilOffset, "ilOffset", "Provide the IL offset (e.g. IL_01D2). Use get_method_il to find it.") is { } err3) return err3;
+        if (ValidateRequired(newText, "newText", "Provide the replacement string text.") is { } err4) return err4;
+
+        try
+        {
+            var result = await ctx.Analysis.PatchReplaceStringLiteralAsync(assemblyPath, methodDefToken, ilOffset, newText, inPlace, outputPath);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                methodDefToken,
+                ilOffset,
+                newText,
+                inPlace,
+                outputPath,
+                backupAlwaysCreated = true,
+                result
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("patch_nop_instructions", "Patch one or more IL instructions to NOP starting at an IL offset. Always creates a backup first.")]
+    public static async Task<ToolCallResult> PatchNopInstructions(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly (.exe/.dll).", Required = true)]
+        string assemblyPath,
+        [ToolParam("MethodDef token (example: 0x060005C1).", Required = true)]
+        string methodDefToken,
+        [ToolParam("Start IL offset (example: IL_01DD).", Required = true)]
+        string ilOffset,
+        [ToolParam("Number of instructions to NOP.")]
+        int count = 1,
+        [ToolParam("Patch in place (default false).")]
+        bool inPlace = false,
+        [ToolParam("Output path when not inPlace. Optional.")]
+        string? outputPath = null)
+    {
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(methodDefToken, "methodDefToken", "Provide a MethodDef token. Use list_methods or search_members to find it.") is { } err2) return err2;
+        if (ValidateRequired(ilOffset, "ilOffset", "Provide the start IL offset. Use get_method_il to find it.") is { } err3) return err3;
+
+        try
+        {
+            var result = await ctx.Analysis.PatchNopInstructionsAsync(assemblyPath, methodDefToken, ilOffset, count, inPlace, outputPath);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                methodDefToken,
+                ilOffset,
+                count,
+                inPlace,
+                outputPath,
+                backupAlwaysCreated = true,
+                result
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Game Dump / Il2Cpp Analysis ───────────────────────────────────────
+
+    [McpTool("analyze_type", "Get the exact memory layout, fields, properties, methods, and RVAs of a class.")]
+    public static async Task<ToolCallResult> AnalyzeType(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name. Use search_members to find it.") is { } err2) return err2;
+
+        try
+        {
+            var code = await ctx.Analysis.AnalyzeTypeAsync(assemblyPath, typeFullName);
+            return new ToolCallResult(code, new
+            {
+                assemblyPath,
+                typeFullName,
+                analysis = code
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("get_method_rva", "Get the Il2Cpp RVA (AddressAttribute) for a specific method.")]
+    public static async Task<ToolCallResult> GetMethodRva(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Method name.", Required = true)]
+        string methodName,
+        [ToolParam("Optional parameter type list to pick a specific overload.")]
+        string[]? parameterTypeNames = null)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+        if (ValidateRequired(methodName, "methodName", "Provide the method name.") is { } err3) return err3;
+
+        try
+        {
+            var result = await ctx.Analysis.GetMethodRvaAsync(assemblyPath, typeFullName, methodName, parameterTypeNames);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                typeFullName,
+                methodName,
+                parameterTypeNames,
+                result
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("search_by_offset", "Search for a field or method by its memory offset or RVA. Supports hex (0x16D0) or decimal (5840). Uses numeric comparison for reliable matching.")]
+    public static async Task<ToolCallResult> SearchByOffset(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("The offset to search for (e.g., 0x16D0 or 5840).", Required = true)]
+        string offsetQuery)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(offsetQuery, "offsetQuery", "Provide a hex (0x16D0) or decimal (5840) offset to search for.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.SearchByOffsetAsync(assemblyPath, offsetQuery);
+            var lines = text.StartsWith("No matches") || text.StartsWith("Invalid") ? Array.Empty<string>() : text.Split(Environment.NewLine);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                offsetQuery,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Deep Reverse Engineering ──────────────────────────────────────────
+
+    [McpTool("find_method_callers", "Find all methods that call a specific target method (Cross-References).")]
+    public static async Task<ToolCallResult> FindMethodCallers(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Target type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Target method name.", Required = true)]
+        string methodName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+        if (ValidateRequired(methodName, "methodName", "Provide the method name.") is { } err3) return err3;
+
+        try
+        {
+            var text = await ctx.Analysis.FindMethodCallersAsync(assemblyPath, typeFullName, methodName);
+            var lines = text.StartsWith("No callers") ? Array.Empty<string>() : text.Split(Environment.NewLine);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                methodName,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("find_field_references", "Find all methods that read or write to a specific target field (Cross-References).")]
+    public static async Task<ToolCallResult> FindFieldReferences(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Target type full name.", Required = true)]
+        string typeFullName,
+        [ToolParam("Target field name.", Required = true)]
+        string fieldName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name.") is { } err2) return err2;
+        if (ValidateRequired(fieldName, "fieldName", "Provide the field name. Use analyze_type to see available fields.") is { } err3) return err3;
+
+        try
+        {
+            var text = await ctx.Analysis.FindFieldReferencesAsync(assemblyPath, typeFullName, fieldName);
+            var lines = text.StartsWith("No references") ? Array.Empty<string>() : text.Split(Environment.NewLine);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeFullName,
+                fieldName,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("find_derived_types", "Find all classes that inherit from or implement a target base class/interface.")]
+    public static async Task<ToolCallResult> FindDerivedTypes(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Base type or interface full name.", Required = true)]
+        string baseTypeFullName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(baseTypeFullName, "baseTypeFullName", "Provide the full type name of the base class or interface.") is { } err2) return err2;
+
+        try
+        {
+            var text = await ctx.Analysis.FindDerivedTypesAsync(assemblyPath, baseTypeFullName);
+            var lines = text.StartsWith("No derived") ? Array.Empty<string>() : text.Split(Environment.NewLine);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                baseTypeFullName,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("lookup_token", "Resolve a raw hexadecimal metadata token (e.g., 0x06001234) into its corresponding Type/Method/Field/Property.")]
+    public static async Task<ToolCallResult> LookupToken(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("The metadata token in hex format (e.g., 0x06001234).", Required = true)]
+        string tokenText)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(tokenText, "tokenText", "Provide a metadata token in hex (e.g. 0x06001234).") is { } err2) return err2;
+
+        try
+        {
+            var result = await ctx.Analysis.LookupTokenAsync(assemblyPath, tokenText);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                tokenText,
+                result
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Network / TCP Proxy Reversing ─────────────────────────────────────
+
+    [McpTool("find_network_handlers", "Heuristically scan the game for network packet handling, TcpClient, Sockets, and serialization methods.")]
+    public static async Task<ToolCallResult> FindNetworkHandlers(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err) return err;
+
+        try
+        {
+            var result = await ctx.Analysis.FindNetworkHandlersAsync(assemblyPath);
+            var lines = result.StartsWith("No network") ? Array.Empty<string>() : result.Split(Environment.NewLine);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("find_crypto_usage", "Heuristically scan the game for Cryptography usage (AES, RSA, MD5, Encrypt/Decrypt methods) used to hide packets.")]
+    public static async Task<ToolCallResult> FindCryptoUsage(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err) return err;
+
+        try
+        {
+            var result = await ctx.Analysis.FindCryptoUsageAsync(assemblyPath);
+            var lines = result.StartsWith("No crypto") ? Array.Empty<string>() : result.Split(Environment.NewLine);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    [McpTool("scan_secrets", "Scan all string literals in the game to extract hardcoded Server IP Addresses, Websocket URLs, and API Keys.")]
+    public static async Task<ToolCallResult> ScanSecrets(
+        ToolContext ctx,
+        [ToolParam("Path to target assembly.", Required = true)]
+        string assemblyPath)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err) return err;
+
+        try
+        {
+            var result = await ctx.Analysis.ScanSecretsAsync(assemblyPath);
+            var lines = result.StartsWith("No secrets") ? Array.Empty<string>() : result.Split(Environment.NewLine);
+            return new ToolCallResult(result, new
+            {
+                assemblyPath,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Multi-Assembly Search ─────────────────────────────────────────────
+
+    [McpTool("search_workspace", "Search ALL .dll files in a directory for matching types, methods, fields, and properties. Useful when you don't know which DLL contains a type.")]
+    public static async Task<ToolCallResult> SearchWorkspace(
+        ToolContext ctx,
+        [ToolParam("Path to folder containing .dll files (e.g., the DummyDll directory).", Required = true)]
+        string directoryPath,
+        [ToolParam("Case-insensitive search text.", Required = true)]
+        string query,
+        [ToolParam("Max results per DLL (default 50).")]
+        int maxResultsPerDll = 50,
+        [ToolParam("Search subdirectories recursively (default false).")]
+        bool recursive = false)
+    {
+        if (ValidateRequired(directoryPath, "directoryPath", "Provide the path to a folder containing .dll files (e.g. the DummyDll directory).") is { } err1) return err1;
+        if (ValidateRequired(query, "query", "Provide a search string (e.g. 'Health', 'Damage', 'Player').") is { } err2) return err2;
+
+        try
+        {
+            var result = await ctx.Analysis.SearchWorkspaceAsync(directoryPath, query, maxResultsPerDll, recursive);
+            var lines = result.StartsWith("No matches") ? Array.Empty<string>() : result.Split(Environment.NewLine);
+            return new ToolCallResult(result, new
+            {
+                directoryPath,
+                query,
+                maxResultsPerDll,
+                recursive,
+                count = lines.Length,
+                results = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Dump.cs Bridge ────────────────────────────────────────────────────
+
+    [McpTool("resolve_dump_line", "Given a dump.cs file and line number, resolve the type/member and optionally look it up in the DummyDll assembly.")]
+    public static async Task<ToolCallResult> ResolveDumpLine(
+        ToolContext ctx,
+        [ToolParam("Path to dump.cs file.", Required = true)]
+        string dumpCsPath,
+        [ToolParam("The line number to resolve (1-indexed).", Required = true)]
+        int lineNumber,
+        [ToolParam("Optional: path to the DummyDll assembly to cross-reference. If provided, returns full analysis.")]
+        string? assemblyPath = null)
+    {
+        if (ValidateRequired(dumpCsPath, "dumpCsPath", "Provide the path to the dump.cs file.") is { } err1) return err1;
+        if (lineNumber <= 0)
+            return new ToolCallResult("Error: lineNumber must be a positive integer.", new { error = true, message = "lineNumber must be positive" });
+
+        assemblyPath = string.IsNullOrWhiteSpace(assemblyPath) ? ResolveAssemblyPath(ctx, null) : assemblyPath;
+
+        try
+        {
+            var result = await ctx.Analysis.ResolveDumpLineAsync(dumpCsPath, lineNumber, assemblyPath);
+            return new ToolCallResult(result, new
+            {
+                dumpCsPath,
+                lineNumber,
+                assemblyPath,
+                result
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── C-Struct Layout ───────────────────────────────────────────────────
+
+    [McpTool("get_type_layout", "Get a C-struct-style memory layout of a type, ready for cheat engine, Frida scripts, or memory reading.")]
+    public static async Task<ToolCallResult> GetTypeLayout(
+        ToolContext ctx,
+        [ToolParam("Path to the target .NET assembly.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Type full name.", Required = true)]
+        string typeFullName)
+    {
+        assemblyPath = ResolveAssemblyPath(ctx, assemblyPath);
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err1) return err1;
+        if (ValidateRequired(typeFullName, "typeFullName", "Provide the full type name. Use search_members to find it.") is { } err2) return err2;
+
+        try
+        {
+            var layout = await ctx.Analysis.GetTypeLayoutAsync(assemblyPath, typeFullName);
+            return new ToolCallResult(layout, new
+            {
+                assemblyPath,
+                typeFullName,
+                layout
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────
+
+    [McpTool("format_inspector_jump", "Build step-by-step DotNet Inspector navigation instructions from metadata tokens.")]
+    public static ToolCallResult FormatInspectorJump(
+        ToolContext ctx,
+        [ToolParam("Path to assembly to open in Inspector.", Required = true)]
+        string assemblyPath,
+        [ToolParam("Optional TypeDef token (example: 0x02000058).")]
+        string? typeDefToken = null,
+        [ToolParam("Optional MethodDef token (example: 0x060005C1).")]
+        string? methodDefToken = null,
+        [ToolParam("Optional FieldDef token (example: 0x04000012).")]
+        string? fieldDefToken = null,
+        [ToolParam("Optional PropertyDef token (example: 0x17000001).")]
+        string? propertyDefToken = null,
+        [ToolParam("Optional IL offset (example: IL_01D2 or 01D2).")]
+        string? ilOffset = null)
+    {
+        if (ValidateRequired(assemblyPath, "assemblyPath", AssemblyPathHint) is { } err) return err;
+
+        try
+        {
+            var normalizedType = NormalizeToken(typeDefToken);
+            var normalizedMethod = NormalizeToken(methodDefToken);
+            var normalizedField = NormalizeToken(fieldDefToken);
+            var normalizedProperty = NormalizeToken(propertyDefToken);
+            var normalizedIl = NormalizeIlOffset(ilOffset);
+
+            var lines = new List<string>
+            {
+                "DotNet Inspector navigation plan:",
+                $"1) Open assembly: {assemblyPath}",
+                "2) Use metadata token navigation/search and jump to the token(s) below:"
+            };
+
+            if (normalizedType is not null) lines.Add($"   - TypeDef: {normalizedType}");
+            if (normalizedMethod is not null) lines.Add($"   - MethodDef: {normalizedMethod}");
+            if (normalizedField is not null) lines.Add($"   - FieldDef: {normalizedField}");
+            if (normalizedProperty is not null) lines.Add($"   - PropertyDef: {normalizedProperty}");
+
+            if (normalizedType is null && normalizedMethod is null && normalizedField is null && normalizedProperty is null)
+                lines.Add("   - (No metadata token provided)");
+
+            if (normalizedIl is not null)
+            {
+                lines.Add("3) Open the method body (IL view) and jump/scroll to offset:");
+                lines.Add($"   - {normalizedIl}");
+            }
+
+            lines.Add("Tip: tokens from find_string_references/search_members/list_methods are directly reusable here.");
+
+            var text = string.Join(Environment.NewLine, lines);
+            return new ToolCallResult(text, new
+            {
+                assemblyPath,
+                typeDefToken = normalizedType,
+                methodDefToken = normalizedMethod,
+                fieldDefToken = normalizedField,
+                propertyDefToken = normalizedProperty,
+                ilOffset = normalizedIl,
+                steps = lines
+            });
+        }
+        catch (Exception ex)
+        {
+            return new ToolCallResult($"Error: {ex.Message}\n{ex.StackTrace}", new { error = true, message = ex.Message, stackTrace = ex.StackTrace });
+        }
+    }
+
+    private static string? NormalizeToken(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return null;
+
+        var t = token.Trim();
+        if (t.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            t = t[2..];
+
+        if (!uint.TryParse(t, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out var value))
+            throw new InvalidOperationException($"Invalid token format: {token}");
+
+        return $"0x{value:X8}";
+    }
+
+    private static string? NormalizeIlOffset(string? il)
+    {
+        if (string.IsNullOrWhiteSpace(il))
+            return null;
+
+        var x = il.Trim().ToUpperInvariant();
+        if (x.StartsWith("IL_", StringComparison.Ordinal))
+            x = x[3..];
+
+        if (!int.TryParse(x, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out var value) || value < 0)
+            throw new InvalidOperationException($"Invalid IL offset: {il}");
+
+        return $"IL_{value:X4}";
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/Endpoints/Attributes.cs`:
+
+```cs
+namespace DotNetInspectorMcp.Endpoints;
+
+[AttributeUsage(AttributeTargets.Method)]
+internal sealed class McpToolAttribute(string name, string description) : Attribute
+{
+    public string Name { get; } = name;
+    public string Description { get; } = description;
+}
+
+[AttributeUsage(AttributeTargets.Parameter)]
+internal sealed class ToolParamAttribute(string description) : Attribute
+{
+    public string Description { get; } = description;
+    public bool Required { get; init; }
+}
+
+```
+
+`src/DotNetInspectorMcp/Endpoints/ToolCallResult.cs`:
+
+```cs
+namespace DotNetInspectorMcp.Endpoints;
+
+internal sealed record ToolCallResult(string Text, object? StructuredContent = null)
+{
+    public static ToolCallResult FromText(string text) => new(text);
+}
+
+```
+
+`src/DotNetInspectorMcp/Endpoints/ToolContext.cs`:
+
+```cs
+using DotNetInspectorMcp.Domain;
+
+namespace DotNetInspectorMcp.Endpoints;
+
+internal sealed record ToolContext(AssemblyAnalyzer Analysis);
+
+```
+
+`src/DotNetInspectorMcp/Endpoints/ToolRegistry.cs`:
+
+```cs
+using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
+
+namespace DotNetInspectorMcp.Endpoints;
+
+internal sealed class ToolRegistry
+{
+    private readonly Dictionary<string, ToolBinding> _tools;
+
+    private ToolRegistry(Dictionary<string, ToolBinding> tools)
+    {
+        _tools = tools;
+    }
+
+    public static ToolRegistry From(Type type)
+    {
+        var tools = new Dictionary<string, ToolBinding>(StringComparer.OrdinalIgnoreCase);
+        var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(m => m.GetCustomAttribute<McpToolAttribute>() is not null);
+
+        foreach (var method in methods)
+        {
+            var attr = method.GetCustomAttribute<McpToolAttribute>()!;
+            var parameters = method.GetParameters();
+            if (parameters.Length == 0 || parameters[0].ParameterType != typeof(ToolContext))
+                throw new InvalidOperationException($"Tool '{attr.Name}' must receive ToolContext as first parameter.");
+
+            var exposedParams = parameters.Skip(1).ToArray();
+            var definition = BuildDefinition(attr, exposedParams);
+
+            tools[attr.Name] = new ToolBinding(attr.Name, definition, method, exposedParams);
+        }
+
+        return new ToolRegistry(tools);
+    }
+
+    public object[] GetDefinitions() => _tools.Values.Select(t => t.Definition).Cast<object>().ToArray();
+
+    public async Task<ToolCallResult> InvokeAsync(string toolName, JsonElement arguments, ToolContext context)
+    {
+        if (!_tools.TryGetValue(toolName, out var tool))
+            throw new InvalidOperationException($"Unknown tool: {toolName}");
+
+        var invokeArgs = new object?[tool.ExposedParameters.Length + 1];
+        invokeArgs[0] = context;
+
+        for (var i = 0; i < tool.ExposedParameters.Length; i++)
+        {
+            var param = tool.ExposedParameters[i];
+            if (TryReadArgument(arguments, param.Name!, out var value))
+            {
+                invokeArgs[i + 1] = ConvertJson(value, param.ParameterType, param.Name!);
+            }
+            else if (param.HasDefaultValue)
+            {
+                invokeArgs[i + 1] = param.DefaultValue;
+            }
+            else if (IsNullable(param.ParameterType))
+            {
+                invokeArgs[i + 1] = null;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Missing required argument: {param.Name}");
+            }
+        }
+
+        var result = tool.Method.Invoke(null, invokeArgs);
+        
+        if (result is Task<ToolCallResult> task)
+        {
+            return await task;
+        }
+
+        return result switch
+        {
+            ToolCallResult typed => typed,
+            string text => ToolCallResult.FromText(text),
+            _ => ToolCallResult.FromText(result?.ToString() ?? string.Empty)
+        };
+    }
+
+    private static bool TryReadArgument(JsonElement args, string name, out JsonElement value)
+    {
+        if (args.ValueKind == JsonValueKind.Object && args.TryGetProperty(name, out value))
+            return true;
+
+        value = default;
+        return false;
+    }
+
+    private static object BuildDefinition(McpToolAttribute attr, ParameterInfo[] parameters)
+    {
+        var properties = new Dictionary<string, object>();
+        var required = new List<string>();
+
+        foreach (var parameter in parameters)
+        {
+            var parameterType = UnwrapNullable(parameter.ParameterType);
+            var schemaType = ToJsonSchemaType(parameterType);
+            var parameterDescription = parameter.GetCustomAttribute<ToolParamAttribute>()?.Description
+                                     ?? $"Parameter '{parameter.Name}'";
+
+            if (parameterType == typeof(string[]))
+            {
+                properties[parameter.Name!] = new
+                {
+                    type = "array",
+                    items = new { type = "string" },
+                    description = parameterDescription
+                };
+            }
+            else
+            {
+                properties[parameter.Name!] = new
+                {
+                    type = schemaType,
+                    description = parameterDescription
+                };
+            }
+
+            if (!parameter.HasDefaultValue && !IsNullable(parameter.ParameterType))
+                required.Add(parameter.Name!);
+            else if (parameter.GetCustomAttribute<ToolParamAttribute>() is { Required: true })
+                required.Add(parameter.Name!);
+        }
+
+        return new
+        {
+            name = attr.Name,
+            description = attr.Description,
+            inputSchema = new
+            {
+                title = attr.Name,
+                description = attr.Description,
+                type = "object",
+                properties,
+                required = required.ToArray()
+            }
+        };
+    }
+
+    private static object? ConvertJson(JsonElement json, Type targetType, string paramName)
+    {
+        var unwrapped = UnwrapNullable(targetType);
+
+        try
+        {
+            if (unwrapped == typeof(string))
+                return json.ValueKind == JsonValueKind.Null ? null : json.GetString();
+
+            if (unwrapped == typeof(bool))
+                return json.GetBoolean();
+
+            if (unwrapped == typeof(int))
+                return json.GetInt32();
+
+            if (unwrapped == typeof(long))
+                return json.GetInt64();
+
+            if (unwrapped == typeof(double))
+                return json.GetDouble();
+
+            if (unwrapped == typeof(string[]))
+            {
+                if (json.ValueKind != JsonValueKind.Array)
+                    throw new InvalidOperationException($"Parameter '{paramName}' must be an array.");
+
+                return json.EnumerateArray()
+                    .Select(v => v.GetString() ?? string.Empty)
+                    .ToArray();
+            }
+
+            if (unwrapped.IsEnum)
+            {
+                var text = json.GetString() ?? throw new InvalidOperationException();
+                return Enum.Parse(unwrapped, text, ignoreCase: true);
+            }
+
+            return Convert.ChangeType(json.ToString(), unwrapped, CultureInfo.InvariantCulture);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Invalid argument '{paramName}': {ex.Message}");
+        }
+    }
+
+    private static string ToJsonSchemaType(Type type)
+    {
+        if (type == typeof(bool)) return "boolean";
+        if (type == typeof(int) || type == typeof(long) || type.IsEnum) return "integer";
+        if (type == typeof(float) || type == typeof(double) || type == typeof(decimal)) return "number";
+        if (type == typeof(string[])) return "array";
+        return "string";
+    }
+
+    private static bool IsNullable(Type type) => Nullable.GetUnderlyingType(type) is not null || !type.IsValueType;
+
+    private static Type UnwrapNullable(Type type) => Nullable.GetUnderlyingType(type) ?? type;
+
+    private sealed record ToolBinding(string Name, object Definition, MethodInfo Method, ParameterInfo[] ExposedParameters);
+}
+
+```
+
+`src/DotNetInspectorMcp/Hosting/McpServerHost.cs`:
+
+```cs
+using DotNetInspectorMcp.Domain;
+using DotNetInspectorMcp.Endpoints;
+using DotNetInspectorMcp.Communication;
+using DotNetInspectorMcp.Models;
+
+namespace DotNetInspectorMcp.Hosting;
+
+internal sealed class McpServerHost : IDisposable
+{
+    private readonly AssemblyAnalyzer _analyzer;
+    private readonly StdioJsonRpc _rpc;
+    private readonly McpServer _server;
+
+    private McpServerHost(AssemblyAnalyzer analyzer, StdioJsonRpc rpc, McpServer server)
+    {
+        _analyzer = analyzer;
+        _rpc = rpc;
+        _server = server;
+    }
+
+    public static McpServerHost CreateDefault()
+    {
+        var rpc = new StdioJsonRpc();
+        var analysis = new AssemblyAnalyzer();
+        var context = new ToolContext(analysis);
+        var registry = ToolRegistry.From(typeof(AssemblyTools));
+        var server = new McpServer(rpc, registry, context);
+
+        return new McpServerHost(analysis, rpc, server);
+    }
+
+    public Task RunAsync(CancellationToken cancellationToken = default)
+        => _server.RunAsync(cancellationToken);
+
+    public void Dispose()
+    {
+        _analyzer.Dispose();
+        _rpc.Dispose();
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/Models/McpServer.cs`:
+
+```cs
+using System.Text.Json;
+using DotNetInspectorMcp.Domain;
+using DotNetInspectorMcp.Endpoints;
+using DotNetInspectorMcp.Communication;
+
+namespace DotNetInspectorMcp.Models;
+
+internal sealed class McpServer(StdioJsonRpc rpc, ToolRegistry tools, ToolContext toolContext)
+{
+    private const string SupportedProtocolVersion = "2024-11-05";
+    private readonly ResourceRegistry _resources = new(toolContext.Analysis);
+
+    public async Task RunAsync(CancellationToken cancellationToken = default)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var raw = await rpc.ReadMessageAsync(cancellationToken);
+            if (raw is null)
+                break;
+
+            JsonDocument? doc = null;
+            JsonElement? extractedId = null;
+            try
+            {
+                doc = JsonDocument.Parse(raw);
+                var root = doc.RootElement;
+
+                // Extract id early so we can use it in the catch block without re-parsing
+                extractedId = TryExtractId(root);
+
+                if (root.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var entry in root.EnumerateArray())
+                        await ProcessRequestAsync(entry, cancellationToken);
+                }
+                else if (root.ValueKind == JsonValueKind.Object)
+                {
+                    await ProcessRequestAsync(root, cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw; // Let cancellation propagate for graceful shutdown
+            }
+            catch (Exception ex)
+            {
+                if (extractedId is JsonElement requestId)
+                    await rpc.WriteErrorAsync(requestId, -32000, ex.Message, cancellationToken);
+            }
+            finally
+            {
+                doc?.Dispose();
+            }
+        }
+    }
+
+    private async Task ProcessRequestAsync(JsonElement request, CancellationToken cancellationToken)
+    {
+        var method = request.GetProperty("method").GetString();
+        var hasId = request.TryGetProperty("id", out var id);
+        var @params = request.TryGetProperty("params", out var value) ? value : default;
+
+        object? result;
+        switch (method)
+        {
+            case "initialize":
+                result = BuildInitializeResult(@params);
+                break;
+            case "notifications/initialized":
+                result = null;
+                break;
+            case "ping":
+                result = new { };
+                break;
+            case "tools/list":
+                result = new { tools = tools.GetDefinitions() };
+                break;
+            case "tools/call":
+                result = await HandleToolCallAsync(@params);
+                break;
+            case "resources/list":
+                result = new { resources = _resources.ListResources() };
+                break;
+            case "resources/read":
+                result = await HandleResourceReadAsync(@params);
+                break;
+            default:
+                throw new InvalidOperationException($"Method not found: {method}");
+        }
+
+        if (!hasId)
+            return;
+
+        await rpc.WriteResultAsync(id, result ?? new { }, cancellationToken);
+    }
+
+    private object BuildInitializeResult(JsonElement @params)
+    {
+        var protocolVersion = SupportedProtocolVersion;
+        if (@params.ValueKind == JsonValueKind.Object &&
+            @params.TryGetProperty("protocolVersion", out var clientVersion) &&
+            clientVersion.ValueKind == JsonValueKind.String)
+        {
+            protocolVersion = clientVersion.GetString() ?? protocolVersion;
+        }
+
+        return new
+        {
+            protocolVersion,
+            capabilities = new
+            {
+                tools = new
+                {
+                    listChanged = false
+                },
+                resources = new
+                {
+                    listChanged = true,
+                    subscribe = false
+                }
+            },
+            serverInfo = new
+            {
+                name = "dnspy-mcp",
+                version = "2.3.0"
+            }
+        };
+    }
+
+    private async Task<object> HandleToolCallAsync(JsonElement @params)
+    {
+        var toolName = @params.GetProperty("name").GetString()
+            ?? throw new InvalidOperationException("Missing tool name.");
+        var arguments = @params.TryGetProperty("arguments", out var args) ? args : default;
+
+        try
+        {
+            var output = await tools.InvokeAsync(toolName, arguments, toolContext);
+            return new
+            {
+                content = new[]
+                {
+                    new { type = "text", text = output.Text }
+                },
+                structuredContent = output.StructuredContent
+            };
+        }
+        catch (Exception ex)
+        {
+            return new
+            {
+                content = new[]
+                {
+                    new { type = "text", text = ex.Message }
+                },
+                isError = true
+            };
+        }
+    }
+
+    private async Task<object> HandleResourceReadAsync(JsonElement @params)
+    {
+        var uri = @params.GetProperty("uri").GetString()
+            ?? throw new InvalidOperationException("Missing resource uri.");
+
+        var text = await _resources.ReadResourceAsync(uri);
+        return new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    uri,
+                    mimeType = "text/plain",
+                    text
+                }
+            }
+        };
+    }
+
+    private static JsonElement? TryExtractId(JsonElement root)
+    {
+        if (root.ValueKind == JsonValueKind.Object)
+            return root.TryGetProperty("id", out var id) ? id.Clone() : null;
+
+        if (root.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var entry in root.EnumerateArray())
+            {
+                if (entry.ValueKind == JsonValueKind.Object && entry.TryGetProperty("id", out var id))
+                    return id.Clone();
+            }
+        }
+
+        return null;
+    }
+}
+
+```
+
+`src/DotNetInspectorMcp/Program.cs`:
+
+```cs
+using DotNetInspectorMcp.Hosting;
+
+using var cts = new CancellationTokenSource();
+
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
+
+AppDomain.CurrentDomain.ProcessExit += (_, _) => cts.Cancel();
+
+using var host = McpServerHost.CreateDefault();
+
+try
+{
+    await host.RunAsync(cts.Token);
+}
+catch (OperationCanceledException)
+{
+    // Graceful shutdown — expected on Ctrl+C
+}
+
+```
+
+`src/DotNetInspectorMcp/Properties/PublishProfiles/linux-x64.pubxml`:
+
+```pubxml
+<Project>
+  <PropertyGroup>
+    <Configuration>Release</Configuration>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <PublishDir>bin/Release/net8.0/publish/linux-x64/</PublishDir>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
+</Project>
+
+```
+
+`src/DotNetInspectorMcp/Properties/PublishProfiles/win-x64.pubxml`:
+
+```pubxml
+<Project>
+  <PropertyGroup>
+    <Configuration>Release</Configuration>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishDir>bin\Release\net8.0\publish\win-x64\</PublishDir>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
+</Project>
+
+```
