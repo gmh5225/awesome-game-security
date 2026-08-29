@@ -1056,6 +1056,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EASY-HWID-SPOOFER](entities/easy-hwid-spoofer.md) — kernel-mode HWID spoofer via driver dispatch hooks + physical-memory patches (disk/NIC/GPU/SMBIOS; Win10; gmh5225)
 - [EasyAntiPatchGuard](entities/easy-anti-patchguard.md) — Win8–Win10 kernel PoC; driver + assembly hooks observe/short-circuit PatchGuard dispatch paths; call-chain analysis from kernel debugging (armasm; cheat / PatchGuard-related)
 - [easypeasy-gc](entities/easypeasy-gc.md) — Genshin Impact EasyPeasy-framework cheat client (Grasscutter custom server; client-side gameplay mods; gmh5225)
+- [EasyAntiCheat-Emulator](entities/easyanticheat-emulator.md) — lightweight EAC client-interface DLL stub; fake client-side exports for debugging-oriented RE and compatibility testing; no server-side protocol spoofing (CamxxCore; EAC Emulator)
 - [EasyAntiCheat-Reversing](entities/easyanticheat-reversing.md) — IDA Pro 7.7 decompilation dump of `EasyAntiCheat.sys`; searchable driver RE snapshot (gmh5225)
 - [EasyAntiCheat-SRC](entities/easyanticheat-src.md) — Hex-Rays decompiled EAC kernel driver snapshot; C output + headers; process memory ops, validation, anti-cheat control paths (EBalloon)
 - [EazyAntiCheatSRC](entities/eazy-anti-cheat-src.md) — reversed EAC source; detection routines, driver comms, integrity validation (Reversed Source; gmh5225)
