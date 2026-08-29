@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `readme:categories`: Cheat ~2761 (+3; ByteCorum/[[dragonburn]] CS2 external + CasualX/[[apexbot]]/[[apexdream]] Apex externals; Anti Cheat ~698 / Game Develop ~187 stable; 41 sections); refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-29** — ingest `description:ByNameModding/BNM-Android`: entity [[bnm-android]] (ByNameModding; C++20 Android Unity IL2CPP modding library; class/method/field name lookup; runtime access, patching, hook-framework integration; supported Unity versions; reusable mod foundation; cheat / [Modding il2cpp games]); cited on [[concepts/il2cpp]], [[overviews/mobile-security]], and [[overviews/game-hacking]]; cross-linked [[il2cpp-resolver]], [[il2cpp-sdk-generator]], [[cheat-unity-games]], [[android-mod-menu]], [[polarimgui]], and [[frida-il2cpp-bridge]].
 
 - **2026-08-29** — ingest `description:Byrom90/XenonDumper`: entity [[xenondumper]] (Byrom90; C/C++ Xbox 360 dumping utility; fuses, bootloader, NAND artifacts for Xenon LLE emulator prep; modified retail/devkit privileged access; console RE, preservation, emulator preparation research; README [Dumps files & data required to use the Xenon Xbox 360 Low Level Emulator]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[xenia]], [[xenia-mac]], [[xbox360-emu]], [[idaxex]], [[x360gamehack2025]], [[toastylink]], and [[recompiler]].
