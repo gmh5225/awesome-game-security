@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:Glmour/ue-live-bridge`: entity [[ue-live-bridge]] (Glmour; UE4SS Lua mod + Python MCP driver; external process reads/writes live UObject state over append-only JSONL IPC; property read, UFunction call, verified write claims CONFIRMED/FALSE_SUCCESS; off-engine dishonest-bridge tests; modding / automation / RE on controlled Unreal titles; Game Develop / MCP); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[re-ue4ss]], [[unreal-mcp]], [[unreal-claude]], and [[research-rigor]].
+
 - **2026-08-29** — ingest `readme:categories`: Cheat ~2758 (+1) / Game Develop ~187 (+1); 41 sections (`NeverC & NeverD` placeholder stable); refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-29** — ingest `description:CallumCVM/ValveGen`: entity [[valvegen]] (CallumCVM; C++ Source Engine SDK generator; parses networked ClientClass/RecvTable and data-table structures from client metadata; emits generated class definitions and offsets; game RE and tooling workflows needing up-to-date Source-engine SDK representations; [SDK Generator]); cited on [[overviews/game-engine]] and [[concepts/source-netvars]]; cross-linked [[gh-offset-dumper]], [[hazedumper]], [[csf-w]], [[csf]], [[csgo-sdk]], and [[sdk]].

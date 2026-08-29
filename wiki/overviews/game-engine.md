@@ -147,6 +147,7 @@ sources:
   - wiki/sources/descriptions/kvick-games__UnrealMCP.md
   - wiki/sources/descriptions/chongdashu__unreal-mcp.md
   - wiki/sources/descriptions/Natfii__UnrealClaude.md
+  - wiki/sources/descriptions/Glmour__ue-live-bridge.md
   - wiki/sources/descriptions/VedantRGosavi__UE5-MCP.md
   - wiki/sources/descriptions/cdpred__RedTalaria.md
   - wiki/sources/descriptions/kp7742__UE4Dumper.md
@@ -675,6 +676,7 @@ Editor-facing MCP bridges in the README's **MCP server** subcategory let AI agen
 - **GameDev MCP Server** — [[gamedev-mcp-server]] engine-agnostic C# ASP.NET Core proxy host shared by Unity-MCP, Godot-MCP, and Unreal-MCP plugins; SignalR bridge to in-editor plugins; stdio/streamableHttp transports; OAuth, origin allow-listing, session handling; standalone/Docker/global .NET tool (IvanMurzak) (source: wiki/sources/descriptions/IvanMurzak__GameDev-MCP-Server.md)
 - **Unreal MCP** — [[unreal-mcp]] editor integration (kvick-games: asset management, level editing, blueprints, project config; chongdashu: experimental UE MCP) (source: wiki/sources/descriptions/kvick-games__UnrealMCP.md) (source: wiki/sources/descriptions/chongdashu__unreal-mcp.md)
 - **UnrealClaude** — [[unreal-claude]] UE5.7 editor plugin; Claude AI copilot via MCP bridge; context-aware assistance for actors, animations, assets, blueprints, materials, replication, Slate UI; built-in UE5.7 documentation context (source: wiki/sources/descriptions/Natfii__UnrealClaude.md)
+- **ue-live-bridge** — [[ue-live-bridge]] runtime UE4SS Lua mod + Python MCP driver; external process reads/writes live UObject state over append-only JSONL IPC; verified write claims (CONFIRMED/FALSE_SUCCESS) with independent re-reads; no engine/game source changes (Glmour) (source: wiki/sources/descriptions/Glmour__ue-live-bridge.md)
 - **UE5 MCP (design)** — [[ue5-mcp]] paused Blender↔UE5 pipeline concept (Markdown workflows; text-driven scenes, asset transfer, level automation, Blueprint assistance) (source: wiki/sources/descriptions/VedantRGosavi__UE5-MCP.md)
 - **Unity MCP** — [[unity-mcp]] editor + C# scripting interaction; the justinpbarnett tree adds C#/Python shader/rendering MCP tooling (source: wiki/sources/descriptions/justinpbarnett__unity-mcp.md)
 - **Godot MCP** — [[better-godot-mcp]] scenes/GDScript control
