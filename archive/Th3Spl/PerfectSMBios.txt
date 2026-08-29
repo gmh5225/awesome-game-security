@@ -1,0 +1,796 @@
+Project Path: arc_Th3Spl_PerfectSMBios_2bad5i5a
+
+Source Tree:
+
+```txt
+arc_Th3Spl_PerfectSMBios_2bad5i5a
+├── LICENSE
+├── PerfectSMBios
+│   ├── PerfectSMBios
+│   │   ├── PerfectSMBios.c
+│   │   └── PerfectSMBios.h
+│   ├── PerfectSMBios.vcxproj
+│   ├── PerfectSMBios.vcxproj.filters
+│   ├── PerfectSMBios.vcxproj.user
+│   └── main.c
+├── PerfectSMBios.c
+├── PerfectSMBios.h
+├── PerfectSMBios.sln
+└── README.md
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 Th3Spl
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`PerfectSMBios.c`:
+
+```c
+#include "PerfectSMBios.h"
+
+
+/* Config Table Finder */
+static EFI_STATUS __fastcall PSMB_FindTable( unsigned long long SystemTable, unsigned long long* lookUpGUID, unsigned long long* out_info )
+{
+	unsigned int v2;
+	unsigned int res;
+	unsigned __int64 n_of_entries;
+	__int64 config_table;
+	__int64 v6;
+
+	v2 = 0;
+	res = ( unsigned int )-1073741275;																	/* STATUS_NOT_FOUND */
+	n_of_entries = *( unsigned long long* )( ( unsigned long long )SystemTable + 104 );					/* Number of Table Entries ( 0x68 ) */
+	if ( n_of_entries )
+	{
+		config_table = *( unsigned long long* )( ( unsigned long long )SystemTable + 112 );				/* EFI_CONFIGURATION_TABLE ptr ( 0x70 ) */
+		v6 = 0i64;
+		while ( *( unsigned long long* )( config_table + 24 * v6 ) != *lookUpGUID || *( unsigned long long* )( config_table + 24 * v6 + 8 ) != lookUpGUID[ 1 ] )
+		{
+			v6 = ++v2;
+			if ( v2 >= n_of_entries )
+				return res;
+		}
+		res = 0;
+		*out_info = *( unsigned long long* )( config_table + 24 * v6 + 16 );
+	}
+	return res;
+}
+
+
+/* Getting the SMBios Table */
+SMBIOS_TABLE_ENTRY_POINT* __fastcall PSMB_GetSMBiosTableEntry( EFI_SYSTEM_TABLE* SystemTable )
+{
+	/* Vars */
+	unsigned long long smbios_addr = 0;
+
+	/* Getting the table ( SMBiosTableGuid ) */
+	if ( PSMB_FindTable(
+		( unsigned long long )SystemTable,
+		( unsigned long long* )&PerfectSMBios_SMBiosTableGuid,
+		&smbios_addr) == 0 
+	)
+		return ( SMBIOS_TABLE_ENTRY_POINT* )smbios_addr;
+
+
+	/* Cast and return */
+	return ( SMBIOS_TABLE_ENTRY_POINT* )0;
+}
+
+
+/* Getting the SMBios3 Table */
+SMBIOS_TABLE_3_0_ENTRY_POINT* __fastcall PSMB_GetSMBios3TableEntry( EFI_SYSTEM_TABLE* SystemTable )
+{
+	/* Vars */
+	unsigned long long smbios_addr = 0;
+
+	/* Getting the table ( SMBios3TableGuid ) */
+	if ( PSMB_FindTable(
+		( unsigned long long )SystemTable,
+		( unsigned long long* ) & PerfectSMBios_SMBios3TableGuid,
+		&smbios_addr ) == 0
+	)
+		return ( SMBIOS_TABLE_3_0_ENTRY_POINT* )smbios_addr;
+
+	/* Cast and return */
+	return ( SMBIOS_TABLE_3_0_ENTRY_POINT* )0;
+}
+
+
+/* Get Target Table */
+void* __fastcall PSMB_GetTargetTable( PSMB_TableEnum table_type, void* table_addr, unsigned long long table_length )
+{
+	/* Vars */
+	UINT8* table_iterator = ( UINT8* )table_addr;
+	UINT8* table_end = ( UINT8* )table_addr + table_length;
+
+
+	/* iterating */
+	while ( table_iterator < table_end )
+	{
+		/* Getting the current header */
+		SMBIOS_STRUCTURE* header = ( SMBIOS_STRUCTURE* )table_iterator;
+
+
+		/* Checking if the target table is the one we need */
+		if ( header->Type == table_type )
+			return table_iterator;	/* succeeded */
+
+
+		/* Getting the next structure */
+		UINT8* next = table_iterator + header->Length;
+
+		/* Skipping the double 0 termiated strings */
+		while ( ( next + 1 ) < table_end && ( next[ 0 ] != 0 || next[ 1 ] != 0 ) ) next++; 
+
+		/* Skipping the double zero terminator */
+		next += 2;
+		table_iterator = next;
+	}
+
+
+	/* failed */
+	return NULL;
+}
+
+
+/* Getting an SMBios string ( by standard Print will use wide chars so u have to convert it ) */
+CHAR8* __fastcall PSMB_GetSMBiosString( SMBIOS_STRUCTURE* Hdr, UINT8 str_idx )
+{
+	/* vars */
+	CHAR8* str = ( CHAR8* )Hdr + Hdr->Length;
+
+	/* check */
+	if ( !Hdr || !str_idx || *str == 0 ) return 0;
+
+	/* getting the target string */
+	while ( --str_idx )
+	{
+		UINTN len = 0;
+		while ( str && str[ len ] != '\0' ) {
+			len++;
+		}
+
+		str += len + 1;
+	}
+
+	return str;
+}
+
+
+/* Generating a random number within bounds */
+UINTN PSMB_GenRandNumber( UINTN min, UINTN max )
+{
+	if ( min > max ) return 0;
+
+	UINT64 tsc = AsmReadTsc( ); /* use __rdtsc() in alternative */
+	UINTN seed = ( UINT32 )( tsc ^ ( tsc >> 32 ) );
+
+	UINT32 a = 1204565595;
+	UINT32 c = 53214;
+	UINT32 m = 0x7FFFFFFF;
+
+	UINT32 rand = ( a * seed + c ) & m;
+	UINT32 range = (UINT32)max - ( UINT32 )min + 1;
+	return min + ( rand % range );
+}
+
+
+/* Generating a random ASCII character */
+CHAR8 PSMB_GenRandASCII( )
+{
+	const char* dict = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	return dict[ PSMB_GenRandNumber( 0, 62 ) ];
+}
+
+
+/* Generating a random ASCII string */
+CHAR8* PSMB_GenRandASCIIString( UINTN len )
+{
+	/* Allocating the memory for the string */
+	CHAR8* string = AllocateZeroPool( len + 1 );
+	if ( !string ) return 0;
+
+	/* Filling*/
+	for ( UINTN i = 0; i < len; i++ ) { string[ i ] = PSMB_GenRandASCII( ); }
+	string[ len ] = '\0';
+
+	return string;
+}
+```
+
+`PerfectSMBios.h`:
+
+```h
+#pragma once
+#ifndef PerfectSMBios_h
+#define PerfectSMBios_h
+
+
+/* Basic UEFI Libraries ( I suggest compiling with VisualUefi ) */
+#include <Uefi.h>
+#include <Library/UefiLib.h>
+#include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/ShellLib.h>
+
+
+//
+// This is needed for SMBios structures however you 
+// can manually define everything, just use the EDK2
+// 
+#include <Protocol/Smbios.h>	
+
+
+/* This enum will represent all the different tables */
+typedef enum _PSMB_TableEnum {
+	PSMB_BIOSInformation			= 0,
+	PSMB_SystemInformation			= 1,
+	PSMB_BaseBoardInformation		= 2,
+	PSMB_SystemEnclosureOrChassis	= 3,
+	PSMB_ProcessorInformation		= 4,
+	PSMB_CacheInformation			= 7,
+	PSMB_PortConnectorInformation	= 8,
+	PSMB_SystemSlots				= 9,
+	PSMB_OEMStrings					= 11,
+	PSMB_MemoryDevice				= 17,
+	PSMB_TPMDevice					= 43,
+}PSMB_TableEnum;
+
+
+/* Target GUIDs */
+static EFI_GUID PerfectSMBios_SMBiosTableGuid	= { 0xEB9D2D31, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D } };
+static EFI_GUID PerfectSMBios_SMBios3TableGuid	= { 0xF2FD1544, 0x9794, 0x4A2C, { 0x99, 0x2E, 0xE5, 0xBB, 0xCF, 0x20, 0xE3, 0x94 } };
+
+
+/* Config Table Finder */
+static EFI_STATUS __fastcall PSMB_FindTable( unsigned long long SystemTable, unsigned long long* lookUpGUID, unsigned long long* out_info );
+
+
+/* Getting the SMBios Table */
+SMBIOS_TABLE_ENTRY_POINT* __fastcall PSMB_GetSMBiosTableEntry( EFI_SYSTEM_TABLE* SystemTable );
+
+
+/* Getting the SMBios3 Table */
+SMBIOS_TABLE_3_0_ENTRY_POINT* __fastcall PSMB_GetSMBios3TableEntry( EFI_SYSTEM_TABLE* SystemTable );
+
+
+/* Get Target Table */
+void* __fastcall PSMB_GetTargetTable( PSMB_TableEnum table_type, void* table_addr, unsigned long long table_length );
+
+
+/* Getting an SMBios string */
+CHAR8* __fastcall PSMB_GetSMBiosString( SMBIOS_STRUCTURE* Hdr, UINT8 str_idx );
+
+
+/* Generating a random number within bounds */
+UINTN PSMB_GenRandNumber( UINTN min, UINTN max );
+
+
+/* Generating a random ASCII character */
+CHAR8 PSMB_GenRandASCII( );
+
+
+/* Generating a random ASCII string */
+CHAR8* PSMB_GenRandASCIIString( UINTN len );
+
+#endif
+```
+
+`PerfectSMBios.sln`:
+
+```sln
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35818.85 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PerfectSMBios", "PerfectSMBios\PerfectSMBios.vcxproj", "{D0AFAC55-2E74-4162-8D88-542C74752547}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0AFAC55-2E74-4162-8D88-542C74752547}.Release|x64.ActiveCfg = Release|x64
+		{D0AFAC55-2E74-4162-8D88-542C74752547}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A8972631-F948-4474-A19B-6E47E8F0ED2C}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`PerfectSMBios/PerfectSMBios.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{D0AFAC55-2E74-4162-8D88-542C74752547}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="C:\Program Files\MSVC_UEFI\UEFI.default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="C:\Program Files\MSVC_UEFI\UEFI.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>UefiApplicationEntryPoint.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>EFI Application</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c" />
+    <ClCompile Include="PerfectSMBios\PerfectSMBios.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PerfectSMBios\PerfectSMBios.h" />
+  </ItemGroup>
+</Project>
+```
+
+`PerfectSMBios/PerfectSMBios.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.c" />
+    <ClCompile Include="PerfectSMBios\PerfectSMBios.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PerfectSMBios\PerfectSMBios.h" />
+  </ItemGroup>
+</Project>
+```
+
+`PerfectSMBios/PerfectSMBios.vcxproj.user`:
+
+```user
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ShowAllFiles>true</ShowAllFiles>
+  </PropertyGroup>
+</Project>
+```
+
+`PerfectSMBios/PerfectSMBios/PerfectSMBios.c`:
+
+```c
+#include "PerfectSMBios.h"
+
+
+/* Config Table Finder */
+static EFI_STATUS __fastcall PSMB_FindTable( unsigned long long SystemTable, unsigned long long* lookUpGUID, unsigned long long* out_info )
+{
+	unsigned int v2;
+	unsigned int res;
+	unsigned __int64 n_of_entries;
+	__int64 config_table;
+	__int64 v6;
+
+	v2 = 0;
+	res = ( unsigned int )-1073741275;																	/* STATUS_NOT_FOUND */
+	n_of_entries = *( unsigned long long* )( ( unsigned long long )SystemTable + 104 );					/* Number of Table Entries ( 0x68 ) */
+	if ( n_of_entries )
+	{
+		config_table = *( unsigned long long* )( ( unsigned long long )SystemTable + 112 );				/* EFI_CONFIGURATION_TABLE ptr ( 0x70 ) */
+		v6 = 0i64;
+		while ( *( unsigned long long* )( config_table + 24 * v6 ) != *lookUpGUID || *( unsigned long long* )( config_table + 24 * v6 + 8 ) != lookUpGUID[ 1 ] )
+		{
+			v6 = ++v2;
+			if ( v2 >= n_of_entries )
+				return res;
+		}
+		res = 0;
+		*out_info = *( unsigned long long* )( config_table + 24 * v6 + 16 );
+	}
+	return res;
+}
+
+
+/* Getting the SMBios Table */
+SMBIOS_TABLE_ENTRY_POINT* __fastcall PSMB_GetSMBiosTableEntry( EFI_SYSTEM_TABLE* SystemTable )
+{
+	/* Vars */
+	unsigned long long smbios_addr = 0;
+
+	/* Getting the table ( SMBiosTableGuid ) */
+	if ( PSMB_FindTable(
+		( unsigned long long )SystemTable,
+		( unsigned long long* )&PerfectSMBios_SMBiosTableGuid,
+		&smbios_addr) == 0 
+	)
+		return ( SMBIOS_TABLE_ENTRY_POINT* )smbios_addr;
+
+
+	/* Cast and return */
+	return ( SMBIOS_TABLE_ENTRY_POINT* )0;
+}
+
+
+/* Getting the SMBios3 Table */
+SMBIOS_TABLE_3_0_ENTRY_POINT* __fastcall PSMB_GetSMBios3TableEntry( EFI_SYSTEM_TABLE* SystemTable )
+{
+	/* Vars */
+	unsigned long long smbios_addr = 0;
+
+	/* Getting the table ( SMBios3TableGuid ) */
+	if ( PSMB_FindTable(
+		( unsigned long long )SystemTable,
+		( unsigned long long* ) & PerfectSMBios_SMBios3TableGuid,
+		&smbios_addr ) == 0
+	)
+		return ( SMBIOS_TABLE_3_0_ENTRY_POINT* )smbios_addr;
+
+	/* Cast and return */
+	return ( SMBIOS_TABLE_3_0_ENTRY_POINT* )0;
+}
+
+
+/* Get Target Table */
+void* __fastcall PSMB_GetTargetTable( PSMB_TableEnum table_type, void* table_addr, unsigned long long table_length )
+{
+	/* Vars */
+	UINT8* table_iterator = ( UINT8* )table_addr;
+	UINT8* table_end = ( UINT8* )table_addr + table_length;
+
+
+	/* iterating */
+	while ( table_iterator < table_end )
+	{
+		/* Getting the current header */
+		SMBIOS_STRUCTURE* header = ( SMBIOS_STRUCTURE* )table_iterator;
+
+
+		/* Checking if the target table is the one we need */
+		if ( header->Type == table_type )
+			return table_iterator;	/* succeeded */
+
+
+		/* Getting the next structure */
+		UINT8* next = table_iterator + header->Length;
+
+		/* Skipping the double 0 termiated strings */
+		while ( ( next + 1 ) < table_end && ( next[ 0 ] != 0 || next[ 1 ] != 0 ) ) next++; 
+
+		/* Skipping the double zero terminator */
+		next += 2;
+		table_iterator = next;
+	}
+
+
+	/* failed */
+	return NULL;
+}
+
+
+/* Getting an SMBios string ( by standard Print will use wide chars so u have to convert it ) */
+CHAR8* __fastcall PSMB_GetSMBiosString( SMBIOS_STRUCTURE* Hdr, UINT8 str_idx )
+{
+	/* vars */
+	CHAR8* str = ( CHAR8* )Hdr + Hdr->Length;
+
+	/* check */
+	if ( !Hdr || !str_idx || *str == 0 ) return 0;
+
+	/* getting the target string */
+	while ( --str_idx )
+	{
+		UINTN len = 0;
+		while ( str && str[ len ] != '\0' ) {
+			len++;
+		}
+
+		str += len + 1;
+	}
+
+	return str;
+}
+
+
+/* Generating a random number within bounds */
+UINTN PSMB_GenRandNumber( UINTN min, UINTN max )
+{
+	if ( min > max ) return 0;
+
+	UINT64 tsc = AsmReadTsc( ); /* use __rdtsc() in alternative */
+	UINTN seed = ( UINT32 )( tsc ^ ( tsc >> 32 ) );
+
+	UINT32 a = 1204565595;
+	UINT32 c = 53214;
+	UINT32 m = 0x7FFFFFFF;
+
+	UINT32 rand = ( a * seed + c ) & m;
+	UINT32 range = (UINT32)max - ( UINT32 )min + 1;
+	return min + ( rand % range );
+}
+
+
+/* Generating a random ASCII character */
+CHAR8 PSMB_GenRandASCII( )
+{
+	const char* dict = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	return dict[ PSMB_GenRandNumber( 0, 62 ) ];
+}
+
+
+/* Generating a random ASCII string */
+CHAR8* PSMB_GenRandASCIIString( UINTN len )
+{
+	/* Allocating the memory for the string */
+	CHAR8* string = AllocateZeroPool( len + 1 );
+	if ( !string ) return 0;
+
+	/* Filling*/
+	for ( UINTN i = 0; i < len; i++ ) { string[ i ] = PSMB_GenRandASCII( ); }
+	string[ len ] = '\0';
+
+	return string;
+}
+```
+
+`PerfectSMBios/PerfectSMBios/PerfectSMBios.h`:
+
+```h
+#pragma once
+#ifndef PerfectSMBios_h
+#define PerfectSMBios_h
+
+
+/* Basic UEFI Libraries ( I suggest compiling with VisualUefi ) */
+#include <Uefi.h>
+#include <Library/UefiLib.h>
+#include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/ShellLib.h>
+
+
+//
+// This is needed for SMBios structures however you 
+// can manually define everything, just use the EDK2
+// 
+#include <Protocol/Smbios.h>	
+
+
+/* This enum will represent all the different tables */
+typedef enum _PSMB_TableEnum {
+	PSMB_BIOSInformation			= 0,
+	PSMB_SystemInformation			= 1,
+	PSMB_BaseBoardInformation		= 2,
+	PSMB_SystemEnclosureOrChassis	= 3,
+	PSMB_ProcessorInformation		= 4,
+	PSMB_CacheInformation			= 7,
+	PSMB_PortConnectorInformation	= 8,
+	PSMB_SystemSlots				= 9,
+	PSMB_OEMStrings					= 11,
+	PSMB_MemoryDevice				= 17,
+	PSMB_TPMDevice					= 43,
+}PSMB_TableEnum;
+
+
+/* Target GUIDs */
+static EFI_GUID PerfectSMBios_SMBiosTableGuid	= { 0xEB9D2D31, 0x2D88, 0x11D3, { 0x9A, 0x16, 0x00, 0x90, 0x27, 0x3F, 0xC1, 0x4D } };
+static EFI_GUID PerfectSMBios_SMBios3TableGuid	= { 0xF2FD1544, 0x9794, 0x4A2C, { 0x99, 0x2E, 0xE5, 0xBB, 0xCF, 0x20, 0xE3, 0x94 } };
+
+
+/* Config Table Finder */
+static EFI_STATUS __fastcall PSMB_FindTable( unsigned long long SystemTable, unsigned long long* lookUpGUID, unsigned long long* out_info );
+
+
+/* Getting the SMBios Table */
+SMBIOS_TABLE_ENTRY_POINT* __fastcall PSMB_GetSMBiosTableEntry( EFI_SYSTEM_TABLE* SystemTable );
+
+
+/* Getting the SMBios3 Table */
+SMBIOS_TABLE_3_0_ENTRY_POINT* __fastcall PSMB_GetSMBios3TableEntry( EFI_SYSTEM_TABLE* SystemTable );
+
+
+/* Get Target Table */
+void* __fastcall PSMB_GetTargetTable( PSMB_TableEnum table_type, void* table_addr, unsigned long long table_length );
+
+
+/* Getting an SMBios string */
+CHAR8* __fastcall PSMB_GetSMBiosString( SMBIOS_STRUCTURE* Hdr, UINT8 str_idx );
+
+
+/* Generating a random number within bounds */
+UINTN PSMB_GenRandNumber( UINTN min, UINTN max );
+
+
+/* Generating a random ASCII character */
+CHAR8 PSMB_GenRandASCII( );
+
+
+/* Generating a random ASCII string */
+CHAR8* PSMB_GenRandASCIIString( UINTN len );
+
+#endif
+```
+
+`PerfectSMBios/main.c`:
+
+```c
+//
+// Basic UEFI Libraries
+//
+#include <Uefi.h>
+#include <Library/UefiLib.h>
+#include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/ShellLib.h>
+#include ".\PerfectSMBios\PerfectSMBios.h"
+
+/* UEFI Boilerplate */
+extern CONST UINT32 _gUefiDriverRevision = 1;
+CHAR8 *gEfiCallerBaseName = "PerfectSMBios";
+
+
+
+//
+// UEFI Unload | Won't be called
+//
+EFI_STATUS EFIAPI UefiUnload ( IN EFI_HANDLE ImageHandle ) { ASSERT(FALSE); }
+
+
+
+//
+// Calling the UEFI Main
+//
+EFI_STATUS EFIAPI UefiMain ( IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE* SystemTable )
+{
+    /* Vars */
+    EFI_STATUS  status      = EFI_SUCCESS;
+    void*       table_base  = NULL;
+    UINTN       table_len   = 0;
+
+
+    /* Logs */
+    SystemTable->ConOut->ClearScreen( SystemTable->ConOut );
+    Print( L"(+) Welcome to PerfectSMBios:\n" );
+
+    
+    /* Getting the table pointer */
+    SMBIOS_TABLE_ENTRY_POINT* entry2_0 = PSMB_GetSMBiosTableEntry( SystemTable );
+    if ( entry2_0 )
+    {
+        table_base = ( void* )( ( UINTN )entry2_0->TableAddress );
+        table_len = entry2_0->TableLength;
+    }
+    else
+    {
+        /* If it's version 3 this will work otherwise it's unsupported */
+        SMBIOS_TABLE_3_0_ENTRY_POINT* entry3_0 = PSMB_GetSMBios3TableEntry( SystemTable );
+        if ( !entry3_0 ) return EFI_UNSUPPORTED;
+
+        /* Saving the table base */
+        table_base = ( void* )( ( UINTN )entry3_0->TableAddress );
+        table_len = entry3_0->TableMaximumSize;
+    }
+    
+
+    /* Logs */
+    Print( L"(+) Table: 0x%p\n", table_base );
+
+    
+    /* Getting the table 1 */
+    SMBIOS_TABLE_TYPE1* sys_info = PSMB_GetTargetTable( PSMB_SystemInformation, table_base, table_len );
+
+
+    /* Getting the manufacturer string */
+    CHAR8* ascii_manufacturer = PSMB_GetSMBiosString( &sys_info->Hdr, sys_info->Manufacturer );
+    if ( !ascii_manufacturer ) return EFI_UNSUPPORTED;
+    UINTN manufacturer_len = AsciiStrLen( ascii_manufacturer );
+
+
+    /* Converting to unicode and printing */
+    CHAR16* unicode_manufacturer = AllocateZeroPool( manufacturer_len * sizeof( CHAR16 ) + sizeof( CHAR16 ) );
+    if ( !unicode_manufacturer ) return EFI_UNSUPPORTED;
+    AsciiStrToUnicodeStr( ascii_manufacturer, unicode_manufacturer );
+    Print( L"(+) Original manufacturer: %s\n", unicode_manufacturer );
+    
+
+    /* Changing the manufacturer ( Randomized ) */
+    CopyMem( ascii_manufacturer, PSMB_GenRandASCIIString( manufacturer_len ), manufacturer_len );
+    Print( L"(+) Spoofed\n" );
+
+
+    /* cleaning */
+    FreePool( unicode_manufacturer );
+    return status;
+}
+
+
+```
+
+`README.md`:
+
+```md
+# PerfectSMBios ( PSMB )
+
+There are already a bunch of repositories which will allow you to spoof
+your `SMBios` from `UEFI`. However, not a single one i've come across
+seems to support `linux` or in general do it without getting some pointers
+from `ntoskrnl.exe` or `winload.efi` even though is way easier and cleaner
+the way `PerfectSMBios` does it.
+
+### How to use:
+1. Get `PerfectSMBios.c` and `PerfectSMBios.h` from this repo
+2. Include both in your project and you're good
+
+The functions are self explanatory and easy to understand with comments 
+
+### How do i build the example?
+If you are having issues compiling the example or more in general with
+the `EDK2` i highly suggest checking out my other repository [`SimpleUEFI`](https://github.com/Th3Spl/SimpleUEFI)
+which will setup the `EDK2` and the `MSVC` environment for you.
+
+### Showcase:
+
+Before:
+</br>
+![Before](https://i.imgur.com/2YBEvjd.png)
+</br>
+After:
+</br>
+![Afer](https://i.imgur.com/NK3djvD.png)
+</br>
+Logs:
+</br>
+![Logs](https://i.imgur.com/lBCvH2F.png)
+</br>
+
+#### Notes:
+PerfectSMBios is lightweight, simple and C compliant
+</br>
+if you have any issue feel free to contact me or open an issue here.
+
+- Th3spl
+
+```
