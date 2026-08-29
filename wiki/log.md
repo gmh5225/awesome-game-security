@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:CasualX/obfstr`: entity [[obfstr]] (CasualX; Rust compile-time string obfuscation; `obfstr!`/`obfcstr!`/`obfbytes!`/`wide!`/`random!` macros embed obfuscated constants with local runtime decode; lightweight source integration and reproducible build-time randomness rather than strong secret protection; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[xorstr]], [[malstring]], [[crystr]], [[static-string-obfuscation]], [[rust-obfuscator]], and [[garble]].
+
 - **2026-08-28** — ingest `description:Celtoys/Remotery`: entity [[remotery]] (Celtoys; lightweight real-time CPU/GPU profiler; single C library + browser viewer; multithreaded instrumentation; live command/log channels; saved trace playback; D3D11/12/OpenGL/Vulkan/CUDA/Metal; Game Testing); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tracy]], [[optick]], [[rprof]], and [[orbit]].
 
 - **2026-08-28** — ingest `description:Chaoses-Ib/IbInputSimulator`: entity [[ib-input-simulator]] (Chaoses-Ib; Windows multi-backend driver input library; Logitech software, Razer Synapse, MouClassInputInjection, DD virtual devices; C/C++ + AHK unified init/send; automation / game tooling / AC evasion research; Simulating keyboard, mouse); cited on [[overviews/game-hacking]] and [[hardware-input-injection]]; cross-linked [[autohotkey-l]], [[razer-rzctl]], [[logitech-cve]], and [[mouhid-input-hook]].

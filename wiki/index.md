@@ -2395,6 +2395,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Obfuz](entities/obfuz.md) — open-source Unity C# code obfuscation and protection (commercial game projects; Game Engine Protection:Unity)
 - [Unity3D Obfuscator](entities/unity3d-obfuscator.md) — C# Unity obfuscator (Unity/debugging-oriented managed protection; Game Engine Protection:Unity; bmjoy)
 - [obfCoder](entities/obfcoder.md) — C++ source/binary obfuscation tool (CMake / OpenSSL demos; AC Obfuscation Engine)
+- [obfstr](entities/obfstr.md) — Rust compile-time string obfuscation (`obfstr!`/`obfcstr!`/`obfbytes!`/`wide!`/`random!`; local runtime decode; reproducible build-time randomness; AC String Crypter; CasualX)
 - [Obfuscar](entities/obfuscar.md) — open-source .NET assembly obfuscator (rename/string hide; AC Obfuscation Engine)
 - [Obfuscapk](entities/obfuscapk.md) — modular Python black-box Android APK obfuscator (ClaudiuGeorgiu; apktool decompile; smali/resources/manifest passes; rebuild; multiple obfuscators; early AAB support; mobile RE / anti-RE resilience evaluation; `[Android]`)
 - [obfuscation-analysis](entities/obfuscation-analysis.md) — Binary Ninja obfuscation analyze/simplify (MBA msynth / opaque-predicate dataflow / Z3 BNIL verify; Cheat Binary Ninja Plugins)
