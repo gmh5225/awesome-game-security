@@ -8,6 +8,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:CasualX/apexdream`: entity [[apexdream]] (CasualX; Rust external Apex Legends library + Win32 example; process attach + live-memory aim assist with per-weapon triggers, ESP/radar, recoil, highlighting, projectile prediction; embeddable API; companion `apexdumper` pelite PE analysis for classes/convars/datamaps/recv tables/interfaces → `gamedata.ini`; cheat / game:apex legends [External]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[apex-legends-offset-dumper]], [[apex-legends-sdk]], [[apex-external]], and [[obfstr]].
+
 - **2026-08-29** — ingest `description:CasualX/obfstr`: entity [[obfstr]] (CasualX; Rust compile-time string obfuscation; `obfstr!`/`obfcstr!`/`obfbytes!`/`wide!`/`random!` macros embed obfuscated constants with local runtime decode; lightweight source integration and reproducible build-time randomness rather than strong secret protection; AC String Crypter); cited on [[overviews/anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[xorstr]], [[malstring]], [[crystr]], [[static-string-obfuscation]], [[rust-obfuscator]], and [[garble]].
 
 - **2026-08-28** — ingest `description:Celtoys/Remotery`: entity [[remotery]] (Celtoys; lightweight real-time CPU/GPU profiler; single C library + browser viewer; multithreaded instrumentation; live command/log channels; saved trace playback; D3D11/12/OpenGL/Vulkan/CUDA/Metal; Game Testing); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[tracy]], [[optick]], [[rprof]], and [[orbit]].

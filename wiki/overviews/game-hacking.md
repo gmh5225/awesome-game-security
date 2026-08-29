@@ -66,6 +66,7 @@ sources:
   - wiki/sources/descriptions/Schich__Lucky-Spark.md
   - wiki/sources/descriptions/Saxmason__Interic-Fortnite-External-Cheat.md
   - wiki/sources/descriptions/Saxmason__Subzero-Fortnite-Cheat.md
+  - wiki/sources/descriptions/CasualX__apexdream.md
   - wiki/sources/descriptions/CheaterRehab__GodFather-Fortnite-Cheat-Cracked.md
   - wiki/sources/descriptions/Chase1803__UCMiraka-ValorantExternal.md
   - wiki/sources/descriptions/Sandspeare__ida2llvm.md
@@ -1709,7 +1710,7 @@ sources:
   - wiki/sources/descriptions/Cracked5pider__earlycascade-injection.md
   - wiki/sources/descriptions/Cracked5pider__KaynStrike.md
   - wiki/sources/descriptions/D3DXVECTOR2__NtUserUpdateWindowTrackingInfo.md
-updated: 2026-08-28
+updated: 2026-08-29
 confidence: high
 ---
 
@@ -2486,6 +2487,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Title-specific Apex Legends kernel-assisted externals such as [[apex-external-cheat]] (bootmgfw; Echo_Apex; C++17; driver-backed cross-process reads + DX11 ImGui overlay; offset/hitbox modules + string encryption; admin-required release; cheat / game:apex legends [External]) sit in the same lane beside [[lithium-kernel]] from the same author. (source: wiki/sources/descriptions/bootmgfw__apex-external-cheat.md)
 - Title-specific Apex Legends kernel-assisted driver cheat frameworks such as [[apex-legends-driver-cheat]] (TheCruZ; C++ usermode controller + kernel driver R/W + transparent overlay for ESP/aim; loads kernel component via vulnerable-driver mapping; cheat development / AC bypass research; cheat / game:apex legends [External]) sit in the same lane beside [[apex-external-cheat]] and [[direct-efi-apex-cheat]]. (source: wiki/sources/descriptions/TheCruZ__Apex_Legends_Driver_Cheat.md)
 - Title-specific Apex Legends OpenGL/GLFW external frameworks such as [[apex-external]] (NekoRem; C++; OpenGL + GLFW overlay stack + ImGui UI + custom driver-style memory access; player/loot ESP, glow, aim assist with smoothing/FOV, recoil, bunny hop, configurable visuals; external overlay architecture + memory-driven cheat research; cheat / game:apex legends [External]) sit in the same lane beside [[apex-external-cheat]] and [[apex-legends-driver-cheat]]. (source: wiki/sources/descriptions/NekoRem__apex-external.md)
+- Title-specific Apex Legends Rust external frameworks such as [[apexdream]] (CasualX; Rust library + Win32 example; process attach + live-memory aim assist with per-weapon trigger settings, ESP/radar overlays, recoil control, player highlighting, projectile prediction; embeddable API; companion `apexdumper` for pelite PE offset recovery; cheat / game:apex legends [External]) sit beside [[apex-external]] in the user-mode external lane under [[easy-anti-cheat]]. (source: wiki/sources/descriptions/CasualX__apexdream.md)
 - Title-specific Apex Legends kernel-driver external frameworks such as [[apex-legends-cheat]] (NMan1; C++; kernel driver + loader + client DLL; separate VS projects for driver logic, usermode loading, and feature modules; ESP / chams visuals + input-assisted aim; syscall-hooking + kernel-thread execution bypass lane; kernel-mediated cheat pipeline RE; cheat / game:apex legends [External]) sit beside [[apex-legends-driver-cheat]] and [[apex-external]] from the same NMan1 author lane as [[external-warzone-cheat]]. (source: wiki/sources/descriptions/NMan1__apex-legends-cheat.md)
 - Educational Apex Legends external tutorial codebases such as [[nullptr-apex-external]] (M1fisto; C++; kernel hijacking + game memory R/W + SDK-based entity handling; user-mode visualization/control elements; external cheat architecture + anti-cheat detection challenges; cheat / game:apex legends [External]) sit beside [[apex-legends-esp]] and [[apex-legends-cheat]] in the controlled learning lane. (source: wiki/sources/descriptions/M1fisto__nullptr-apex-external.md)
 - Educational Apex Legends external ESP source templates such as [[apex-legends-esp]] (RavenOfTime; C++ Visual Studio; separate kernel driver + usermode GDI overlay + [[kdmapper]] loader; memory-read pipeline and on-screen entity visualization learner template for shooter games; demonstrated on Apex Legends; cheat / game:apex legends [External]) sit beside [[lab-esp-and-aimbot]] and [[external-esp-hack-assaultcube]] in the controlled learning lane. (source: wiki/sources/descriptions/RavenOfTime__Apex-Legends-Esp.md)
