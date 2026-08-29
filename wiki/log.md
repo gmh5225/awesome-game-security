@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:CUB3D/ghidra-hexagon-sleigh`: entity [[ghidra-hexagon-sleigh]] (CUB3D; Ghidra SLEIGH processor module for Qualcomm Hexagon QDSP6; Hexagon v81 p-code decompilation, hardware loops/predicates, System/Monitor+Guest modes; Java analyzers, QDB log viewer, Python QMI/QuRT/RTTI scripts, Q6Zip/DLPager emulation decompression; Qualcomm firmware/binary RE; game security + mobile security research); cited on [[overviews/reverse-engineering]] and [[overviews/mobile-security]]; cross-linked [[ghidra]], [[ghidra-nativeaot]], [[qualcomm-avb-exploit-poc]], and [[rax]].
+
 - **2026-08-29** — ingest `description:no1qq/RustBlox`: entity [[rustblox]] (no1qq; Rust Windows Roblox desktop launcher; isolated official-CDN install; FastFlags + egui/eframe dashboard; **TheWatcher** client-side watchdog scans cheat processes, suspicious memory, DLL injection, and script executors while Roblox runs; Discord Rich Presence; deep-link URIs; security-minded players wanting self-contained session protection); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[byfron-bypass]], [[roblox-cheats]], [[encryptic-roblox-anti-cheat]], [[shprotect-ac]], and [[wontree-rblx-dumper]].
 
 - **2026-08-29** — ingest `readme:categories`: Anti Cheat ~698 (+1; CasualX/[[obfstr]] Rust compile-time string crypter in String Crypter; Cheat ~2758 / Game Develop ~187 stable; 41 sections); refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
