@@ -521,6 +521,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/chongdashu/unreal-mcp [MCP for Unreal Engine]
 - https://github.com/kvick-games/UnrealMCP [MCP for Unreal Engine]
 - https://github.com/VedantRGosavi/UE5-MCP [MCP for Unreal Engine 5]
+- https://github.com/glmour/ue-live-bridge [UE4SS Lua bridge with Python MCP driver for live UObject/UFunction control and verified agent write claims]
 - https://github.com/justinpbarnett/unity-mcp [MCP for unity]
 - https://github.com/wondeks/unity-mcp [MCP for unity]
 - https://github.com/gmh5225/mcpup [MCP for unity]
@@ -1602,6 +1603,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 > Virtual Environments
 - https://github.com/FBlackBox/BlackBox [Android]
 - https://github.com/ServenScorpion/VirtualApp [Android]
+- https://github.com/chinaapps/zn-toolbox [Host-no-root Android container VM (Twoyi fork) with built-in root and LSPosed for isolated mobile modding]
 - https://github.com/mandiant/flare-vm
 - https://github.com/hzqst/VmwareHardenedLoader
 - https://github.com/d4rksystem/VMwareCloak
