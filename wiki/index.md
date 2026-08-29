@@ -713,6 +713,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [cstrike2-hack](entities/cstrike2-hack.md) — Rust internal CS2 cheat base (modular crates; DX11 + egui menu; MinHook; pattern scanning; interfaces/hooks/settings/rendering; W1lliam1337; [Internal])
 - [cstrike15_src](entities/cstrike15-src.md) — leaked partial CS:GO Source tree (client/server / weapons / net; Game Engine)
 - [CTRComposer](entities/ctr-composer.md) — raw Luma3DS .3gx overlay/cheat engine (self-rendered UI; any Title ID template)
+- [CTTrainer](entities/cttrainer.md) — standalone Windows ImGui/DX11 trainer (abhijeetadarsh; loads CE `.CT` tables; module offsets, pointer chains, value freeze; 32/64-bit attach; external trainer without CE)
 - [custom-game-engines](entities/custom-game-engines.md) — curated custom game engines list (2020 study; Game Engine / guide)
 
 - [CounterStrikeSource-Linux-Trainer](entities/counterstrikesource-linux-trainer.md) — Linux external CS:S trainer (movement / info display)

@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:abhijeetadarsh/CTTrainer`: entity [[cttrainer]] (abhijeetadarsh; C++ Visual Studio; standalone Windows ImGui/DX11 trainer; loads CE `.CT` tables; XML cheat entries with module offsets and pointer chains; per-cheat or bulk value freeze via cheat-manager threads; 32/64-bit attach; external trainer without running CE; RE / trainer authoring); cited on [[overviews/game-hacking]]; cross-linked [[cheat-engine]], [[freeplay]], [[cheat-engine-tables]], [[mydev-cheat-engine-tables]], and [[pointer-lab]].
+
 - **2026-08-29** — ingest `description:whoamicrash/VMProtectDumper`: entity [[vmprotect-dumper]] (whoamicrash; pure C WinAPI console; live-memory VMProtect PE unpack for EXE/DLL/OCX/CPL; section-decrypt polling; OEP/IAT via thunk follow + API hooks; dynamic exec-region harvest; drag-drop/dropper/DLL modes; optional PE-sieve; IOC strings; password-protected artifact archive; malware/IR/IDA-Ghidra static prep; Fix VMP / Unpacker); cited on [[overviews/reverse-engineering]] and [[vmprotect]]; cross-linked [[vmp-unpacker]], [[vmpunpack]], [[vmunprotect-dumper]], [[pe-sieve]], [[dumpepe]], and [[unpacker]].
 
 - **2026-08-29** — ingest `readme:categories`: Cheat ~2761 (+3; ByteCorum/[[dragonburn]] CS2 external + CasualX/[[apexbot]]/[[apexdream]] Apex externals; Anti Cheat ~698 / Game Develop ~187 stable; 41 sections); refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
