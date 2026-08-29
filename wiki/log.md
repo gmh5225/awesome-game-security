@@ -8,6 +8,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-29** — ingest `readme:categories`: Anti Cheat ~698 (+1; CasualX/[[obfstr]] Rust compile-time string crypter in String Crypter; Cheat ~2758 / Game Develop ~187 stable; 41 sections); refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-29** — ingest `description:CalebFenton/simplify`: entity [[simplify]] (CalebFenton; Java Android deobfuscation framework; virtual Dalvik execution + optimizer passes — constant propagation, dead-code removal, reflection cleanup; demo materials; obfuscated APK/DEX analysis; `[Java]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[jadx]], [[dalvikus]], [[dalivm]], [[deobfuscator]], and [[dexkit-android]].
 
 - **2026-08-29** — ingest `description:CaledoniaProject/drivers-binaries`: entity [[drivers-binaries]] (CaledoniaProject; multi-vendor compiled Windows kernel `.sys` binaries + CVE/report/exploit writeup reference links; practical samples for detection rules, threat-hunting pipelines, and defensive controls around signed-driver abuse; defender-focused kernel attack-surface research; README Vulnerable Driver List); cited on [[concepts/byovd]] and [[overviews/windows-kernel]]; cross-linked [[vulnerable-drivers]], [[drivers-and-shit]], [[loldrivers]], [[ms-vulnerable-driver-list]], [[vulnerable-driver-scanner]], and [[driver-risk-scout]].
