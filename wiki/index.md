@@ -3383,6 +3383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [valthrun](entities/valthrun.md) — CS2 external read-only kernel framework (Rust; kernel driver + overlay + radar; no in-process DLL injection; ESP/bomb/spectator/trigger; stream-proof overlay; anti-detection research; cheat / game:cs2 [External]; Valthrun)
 - [valthrun-pubg](entities/valthrun-pubg.md) — PUBG external cheat framework (Rust; Zenith kernel driver; ESP/radar/health/distance; CR3 process-protection bypass + keyboard/mouse input; cheat / game:pubg [External]; Valthrun)
 - [valthrun-uefi-mapper](entities/valthrun-uefi-mapper.md) — Rust UEFI boot mapper; bootable ISO/USB; pre-OS game driver load; boot-time driver init and stealth security research (EFI Manual Map; Valthrun)
+- [ValveGen](entities/valvegen.md) — Source Engine SDK generator (CallumCVM; C++; ClientClass/RecvTable/data-table parse from client metadata → class definitions and offsets; [SDK Generator])
 - [Van1338](entities/van1338.md) — timing-attack handle elevation; Windows object-callback design (AC stress testing)
 - [VanderLeague](entities/vanderleague.md) — hypervisor-assisted LoL offensive stack (C/C++; kernel driver + rendering; gmh5225; cheat / game:lol)
 - [VaultGuard](entities/vaultguard.md) — FSFilter minifilter + process access block (x64 MASM; anti-debug/tamper)
