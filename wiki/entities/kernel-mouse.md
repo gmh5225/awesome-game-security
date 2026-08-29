@@ -4,7 +4,8 @@ kind: entity
 topics: [windows-kernel, game-hacking]
 sources:
   - wiki/sources/descriptions/vsaint1__kernel-mouse.md
-updated: 2026-07-19
+  - wiki/sources/descriptions/BuddyBoi__KernelMoveMouse.md
+updated: 2026-08-29
 confidence: medium
 ---
 
@@ -20,4 +21,4 @@ Useful threat-model reference for kernel mouse-class / MouClass surfaces that si
 
 ## Related
 
-[[mouseclassservicecallbacktrick]] · [[mouseclassservicecallbackmeme]] · [[keyboardkit]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-move-mouse]] · [[mouseclassservicecallbacktrick]] · [[mouseclassservicecallbackmeme]] · [[keyboardkit]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]

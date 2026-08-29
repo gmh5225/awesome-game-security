@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:BuddyBoi/KernelMoveMouse`: entity [[kernel-move-mouse]] (BuddyBoi; C++ WDK driver skeleton; relative mouse movement from kernel; OS version checks + per-build offset handling; intentionally limited low-level input demo; driver development / game input control learning); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-mouse]], [[mouseclassservicecallbacktrick]], and [[directinput]].
+
 - **2026-08-29** — ingest `description:BuzzerFelix/HWIDSpooferEAC`: entity [[hwid-spoofer-eac]] (BuzzerFelix; C++; ImGui GUI + driver mapper/loader + service handling; low-level hardware identifier changes; practical testing workflow; game bypass / anti-cheat HWID research; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[imgui-spoofer-leaked]], [[hwid-spoofer-eac-be]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
 
 - **2026-08-29** — ingest `description:LargoScript/n0xis`: entity [[n0xis]] (LargoScript; Rust; x64 Windows game binaries; unified static CFG/SSA decompilation + live memory scan, pointer paths, struct dissection, hooks, cheat tables; CLI + MCP versioned JSON artifacts; Unity IL2CPP, Lua/LuaJIT; N0xHUD companion; agent-native RE bridging disassemblers and CE-style runtime manipulation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[cheat-engine]], [[pointer-lab]], [[ida-pro-mcp]], [[concepts/il2cpp]], [[aether]], and [[neverd]].

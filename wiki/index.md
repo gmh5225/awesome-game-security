@@ -1958,6 +1958,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kernel_hack](entities/kernel-hack.md) — Android/Linux LKM game-memory R/W (process mgmt / verification; Kconfig)
 - [Kernel_driver_hack](entities/kernel-driver-hack.md) — Android/Linux kernel driver for process memory R/W via device ioctl (module base lookup; C kernel + userland; Jiang-Night)
 - [kernel-mouse](entities/kernel-mouse.md) — MouClass kernel mouse driver (Win10/11; triggerbot/aimbot input research)
+- [kernel-move-mouse](entities/kernel-move-mouse.md) — WDK relative-movement driver skeleton; version checks + per-build offsets; driver-dev / kernel input learning (BuddyBoi)
 - [kernel_payload_comms](entities/kernel-payload-comms.md) — shared-memory KM↔UM payload channel (gmh5225; cheat / driver communication)
 - [Kernelmode-DLL-Injector](entities/kernelmode-dll-injector.md) — kdmapper + Intel BYOVD kernel manual-map DLL injector (PE sections/imports/TLS; IOCTL comms; Manual Map; YouNeverKnow00)
 - [Kernelmode Manual Mapping through IAT](entities/kernelmode-manual-mapping-through-iat.md) — kernel-mode IAT manual-map injector (process handle or KM driver; IAT Manual Map)
