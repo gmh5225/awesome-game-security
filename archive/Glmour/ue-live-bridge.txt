@@ -1,0 +1,1655 @@
+Project Path: arc_Glmour_ue-live-bridge_5e84bjm2
+
+Source Tree:
+
+```txt
+arc_Glmour_ue-live-bridge_5e84bjm2
+├── LICENSE
+├── README.md
+├── bridge
+│   └── GameBridge
+│       └── Scripts
+│           └── main.lua
+├── drive.py
+├── mcp_server.py
+├── requirements.txt
+├── test
+│   ├── conftest.py
+│   ├── fake_bridge.py
+│   ├── mcp_test.py
+│   ├── sim_game.py
+│   └── spike_test.py
+└── verify.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Glmour
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# ue-live-bridge
+
+**Drive a running Unreal Engine game from outside — and find out whether what you asked for actually happened.**
+
+A [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) Lua mod exposes the live game over a pair of append-only files. A Python driver on the other side reads and writes UObject properties, calls UFunctions, and — the part that matters — refuses to report success it cannot prove.
+
+It speaks MCP, so an agent can drive the game directly — and the write tool
+returns a verdict rather than a boolean, so an agent cannot report a state
+change it did not make.
+
+No engine source, no game source, no C++, no sockets.
+
+```
+$ python drive.py --data "<game>/Binaries/Win64/ue4ss/Mods/GameBridge/data" probe BP_ChangeManager_C --prop DEBUG_ANOMALY_TYPE
+
+[1] ping
+    world=World /Game/_Exit8/Level/L_Game.L_Game  travelling=False
+[2] find BP_ChangeManager_C
+    found 1: ['BP_ChangeManager_C /Game/_Exit8/Level/L_Game1...BP_ChangeActorManager_C_1']
+[3] read DEBUG_ANOMALY_TYPE
+    DEBUG_ANOMALY_TYPE = 36
+[4] write DEBUG_ANOMALY_TYPE <- 43.0
+    bridge claimed: True   (before=36 after=43)
+[5] postcondition: independent re-read
+    re-read DEBUG_ANOMALY_TYPE = 43  -> target
+[6] cross-channel agreement
+    write-site says landed: True    re-read says landed: True
+[7] negative control: prove the check can go red
+    poison landed at write site: True
+    re-read after poison: 1277; check went RED
+[8] restore
+    DEBUG_ANOMALY_TYPE = 36
+
+Chain verified end to end, and the check is provably alive.
+```
+
+That is a real transcript against The Exit 8, not a mock.
+
+---
+
+## Why steps 6 and 7 exist
+
+Automated callers — agents especially — report success they did not achieve. This is measured, not folklore: across published trajectory studies, 45–48% of agent failures in single-control settings end with the agent asserting it finished, and among coding-agent runs that wrote an explicit structured success flag, **75.8% of those claims were wrong**. LLM judges do not catch it; across five judges and five prompt strategies none exceeded AUROC 0.65, and on raw call traces they sat near a coin flip, because judges reward assertion vocabulary rather than verified state change.
+
+The standard fix is right as far as it goes: assert a postcondition against the authoritative record, from a process the caller cannot write to. This tool does that at step 5.
+
+But a postcondition that can never fail is indistinguishable from one that passes, and dead checks are common — a comparison lost in a refactor, an exception swallowed into a `True`, a field name that silently resolves to something else. So step 7 poisons the world and requires the check to notice. **A check that survives its own poison is reported as a harness failure, not as a passing test.**
+
+### The bug this design found in itself
+
+The first version of the negative control ran the poison through the same write path as the action. Against a bridge that acknowledged writes without performing them *and* faked the read-back, the harness printed:
+
+```
+[5] re-read Health = 107.0  -> CONFIRMED
+[6] poisoned to 1341.0; check went RED (alive)
+    Chain verified end to end, and the check is provably alive.
+```
+
+The value was 100.0 the entire time. The poison had not landed either, and its failure to land is exactly what made the faked read look like it had changed.
+
+Two rules came out of that, and they are the whole design now:
+
+1. **A channel cannot verify itself.** The write response carries its own before/after observation; treat it as a second independent channel and withhold any verdict when the two disagree, rather than picking one to believe.
+2. **A negative control proves nothing until the poison is shown to have landed.** And the negative control is what licenses trusting a *pass* — a failure that two independent channels agree on is already conclusive without it.
+
+## Verdicts
+
+The CLI and the MCP tool report the same five outcomes.
+
+| MCP `verdict` | CLI line | Meaning | Exit |
+|---|---|---|---|
+| `CONFIRMED` | Chain verified end to end | Both channels agree, and the check was proven capable of failing | 0 |
+| `FALSE_SUCCESS` | FALSE SUCCESS caught | The bridge claimed a write it did not make; both channels agree | 1 |
+| `INCONSISTENT_BRIDGE` | INCONSISTENT BRIDGE | Write site and re-read disagree; no verdict is available | 1 |
+| `WITHHELD` | VERDICT WITHHELD | The poison never applied, so the apparent pass is unproven | 1 |
+| `DEAD_CHECK` | DEAD CHECK | The check survived a poison that provably landed | 1 |
+
+Only the first is a success. The other four are distinct facts, and collapsing
+them into "failed" throws away the part that tells you what to do next.
+
+## Install
+
+Requires UE4SS in the target game.
+
+```bash
+cp -r bridge/GameBridge "<game>/Binaries/Win64/ue4ss/Mods/"
+mkdir -p "<game>/Binaries/Win64/ue4ss/Mods/GameBridge/data"
+# add "GameBridge : 1" to Mods/mods.txt, above the Keybinds line
+```
+
+Then, with the game running and in a level:
+
+```bash
+python drive.py --data "<game>/.../Mods/GameBridge/data" ping
+python drive.py --data "<game>/.../Mods/GameBridge/data" find BP_PlayerCharacter_C
+python drive.py --data "<game>/.../Mods/GameBridge/data" probe BP_PlayerCharacter_C --prop Health
+python drive.py --data "<game>/.../Mods/GameBridge/data" bench    # what a cache miss costs here
+```
+
+Blueprint classes take the `_C` suffix — `BP_ChangeManager_C`, not `BP_ChangeManager`.
+
+## Use it from an agent (MCP)
+
+```bash
+pip install "mcp>=2"
+claude mcp add ue-live -- python /abs/path/mcp_server.py --data "/abs/path/to/GameBridge/data"
+```
+
+Five tools: `ping`, `find_objects`, `read_property`, `call_function`, `write_property`.
+
+`write_property` is the one that matters. It never returns a bare boolean; it
+returns one of the verdicts below, and the server's instructions tell the client
+to treat anything other than `CONFIRMED` as the write not having happened —
+including `WITHHELD`, because *unproven* is not *succeeded*.
+
+```json
+{
+  "verdict": "CONFIRMED",
+  "detail": "independently observed, and the check was proven able to fail",
+  "value": 21.0,
+  "original": 36
+}
+```
+
+That transcript is from The Exit 8, through the MCP tool, against the running game.
+
+## Tests
+
+The verification logic runs off-engine, against a simulated game that can be told to lie:
+
+```bash
+python test/spike_test.py                              # 4 scenarios, no game needed
+python test/mcp_test.py                                # MCP verdicts, all three bridges
+python test/fake_bridge.py --data ./_t --lie           # then: python drive.py --data ./_t probe
+```
+
+`fake_bridge.py` reproduces both failure modes on demand (`--lie`, `--deadcheck`), which is how the design flaw above was found and how the fix was confirmed.
+
+
+## What a cache miss actually costs
+
+`bench` searches for a name that cannot exist, which forces the complete worst-case sweep.
+
+| Game | State | UObjects | `FindAllOf("Object")` | Full scan | Per object |
+|---|---|---|---|---|---|
+| The Exit 8 (one corridor) | **in level** | 23,919 | 11 ms | 29.6 ms | 1.24 µs |
+| Escape the Backrooms (26 GB) | **main menu only** | 29,784 | 13 ms | 37.6 ms | 1.26 µs |
+
+Two things fall out of that, and the second is the one that changed the design.
+
+**Object count is dominated by the engine and loaded assets, not by world size.** A 26 GB game sitting on its *main menu*, with zero Characters spawned, carries 25% more UObjects than another title's fully loaded playable level. Do not reason about this cost from how big the map looks.
+
+**The cost is linear at ~1.25 µs per object, on the game thread.** That is 30 ms where it is cheapest, and it scales from there — roughly 125 ms at 100k objects, a quarter of a second at 200k. Every millisecond of it is a frame hitch.
+
+So the scan is off by default. Spending a visible stall is a decision the caller should make deliberately, not something the resolver does behind their back because a name was not in a table.
+
+*Caveat, since it changes what the second row proves: Escape the Backrooms was measured at its main menu, not in a level. It bounds the engine's baseline, not a loaded open world. The per-object figure is the number that transfers.*
+
+## Design notes
+
+Each of these was paid for:
+
+- **The command file is never rewound.** A line cursor is set to the file's current length at load, so commands left over from a previous session are not replayed. Without this, whoever starts the game executes the leftovers — a stale write lands minutes after anyone asked for it, and the symptom looks nothing like the cause.
+- **`resolve` caches, re-validates on every hit, and refuses to scan by default.** The engine recycles object slots, so a pointer that still passes `IsValid()` can belong to something else; the cached name is checked again before use. `find` populates the cache from objects it is already holding, so the normal find-then-act flow does no scanning at all — measured at **7 resolve hits, 0 full scans** across a complete probe run. A cache miss returns an error telling you to call `find` first, rather than silently spending a frame hitch; `allow_scan=1` opts in. See the measurement below for why.
+- **The cache is dropped during travel.** Objects do not survive a level change, and a stale entry that happened to re-validate would hand back an object from the old world.
+- **Arrays are tagged.** An empty Lua table is ambiguous between `{}` and `[]`; without a tag an empty result set serialises as an object and breaks the reader's indexing.
+- **Every command runs inside `pcall`.** A malformed request must not take the poll loop down with it.
+- **File names are pure ASCII.** Lua's `io.open` goes through the system ANSI codepage, and a non-ASCII path fails to open without saying so.
+
+## What was verified, and what wasn't
+
+**Verified** — The Exit 8 (UE 5.2), real session, transcript above:
+
+- Mod loads, poll loop runs, **0 loop errors across 314 ticks**
+- `ping` / `find` / `read` / `write` / `call` against live objects
+- Round trip ~200 ms including Python process startup
+- Negative control confirmed alive; game state restored afterwards
+- MCP tools end to end against the live game; `write_property` returned CONFIRMED
+- Off-engine: 4/4 spike scenarios and 3/3 MCP verdicts, including the adversarial ones
+
+**Not verified:**
+
+- **A genuinely large loaded world.** Both measurements above are bounded: one small game in a level, one large game at a menu. The linear per-object cost should hold, but no open world with a fully streamed-in level has been measured.
+- **Long sessions.** The longest run here is minutes, not hours.
+- **Level transitions.** The cache is dropped on travel by construction, but the behaviour has not been exercised across an actual transition.
+- **Engines other than 5.2.**
+
+## Scope
+
+This drives games you own, for modding and tooling. It is not an anti-cheat bypass, it does not touch competitive multiplayer, and the bridge is deliberately an open local channel with no authentication — do not expose it to anything you do not control.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+```
+
+`bridge/GameBridge/Scripts/main.lua`:
+
+```lua
+--[[
+  GameBridge -- expose a running Unreal Engine game to an external process.
+
+  Transport is a pair of append-only files, which is the pattern that already
+  survives contact with shipped games: no sockets to punch through, no ordering
+  ambiguity, and a full transcript on disk when something goes wrong.
+
+      cmd.jsonl    external -> game   one JSON object per line
+      resp.jsonl   game -> external   one JSON object per line, keyed by id
+
+  A line cursor is kept in memory rather than deleting consumed commands, so
+  there is no write/delete race with the writer.
+
+  Commands:
+      {"id":1,"op":"ping"}
+      {"id":2,"op":"find","class":"BP_PlayerCharacter_C","limit":10}
+      {"id":3,"op":"read","obj":"<full name>","prop":"Health"}
+      {"id":4,"op":"write","obj":"<full name>","prop":"Health","value":250}
+      {"id":5,"op":"call","obj":"<full name>","fn":"K2_GetActorLocation"}
+
+  Deliberate constraints, each one paid for:
+    * every command runs inside pcall; a bad request must not take the loop down
+    * file names are pure ASCII -- Lua io.open goes through the system ANSI
+      codepage and a non-ASCII path silently fails to open
+    * no full FindAllOf sweep while the world is travelling; the object array is
+      in flux and you get half-torn objects or nothing
+    * UObject identity is by full name string, never by == on the objects
+]]
+
+local UEHelpers = require("UEHelpers")
+
+local MOD_ROOT = debug.getinfo(1, "S").source:match("@?(.*[/\\])")
+local DATA_DIR = MOD_ROOT and (MOD_ROOT .. "../data/") or "./GameBridge_data/"
+
+local CFG = {
+    tick_ms   = 200,
+    cmd_file  = DATA_DIR .. "cmd.jsonl",
+    resp_file = DATA_DIR .. "resp.jsonl",
+    max_find  = 200,
+}
+
+-- ── json out ────────────────────────────────────────────────────────────────
+
+local function esc(s)
+    return (tostring(s):gsub("\\", "\\\\"):gsub('"', '\\"')
+                       :gsub("\n", "\\n"):gsub("\r", "\\r"):gsub("\t", "\\t"))
+end
+
+local function jval(v)
+    local t = type(v)
+    if v == nil then return "null" end
+    if t == "boolean" then return v and "true" or "false" end
+    if t == "number" then
+        -- NaN and infinities are not JSON; emitting them produces a document the
+        -- other side cannot parse, which reads as "the bridge died".
+        if v ~= v or v == math.huge or v == -math.huge then return "null" end
+        return tostring(v)
+    end
+    if t == "table" then
+        local parts = {}
+        -- An empty Lua table is ambiguous: {} and [] are the same value. Tables
+        -- meant as arrays are tagged so an empty list does not serialise as an
+        -- empty object and break the reader's indexing.
+        if v.__arr then
+            for i = 1, #v do parts[#parts + 1] = jval(v[i]) end
+            return "[" .. table.concat(parts, ",") .. "]"
+        end
+        local n = #v
+        if n > 0 then
+            for i = 1, n do parts[#parts + 1] = jval(v[i]) end
+            return "[" .. table.concat(parts, ",") .. "]"
+        end
+        for k, val in pairs(v) do
+            if k ~= "__arr" then
+                parts[#parts + 1] = '"' .. esc(k) .. '":' .. jval(val)
+            end
+        end
+        return "{" .. table.concat(parts, ",") .. "}"
+    end
+    return '"' .. esc(v) .. '"'
+end
+
+local function respond(tbl)
+    local f = io.open(CFG.resp_file, "a")
+    if not f then return end
+    f:write(jval(tbl), "\n")
+    f:close()
+end
+
+-- ── minimal json in (flat objects only, which is all the protocol uses) ──────
+
+local function parseLine(line)
+    local o = {}
+    for k, v in line:gmatch('"([%w_]+)"%s*:%s*"([^"]*)"') do o[k] = v end
+    for k, v in line:gmatch('"([%w_]+)"%s*:%s*(-?%d+%.?%d*)') do o[k] = tonumber(v) end
+    for k, v in line:gmatch('"([%w_]+)"%s*:%s*(true)') do o[k] = true end
+    for k, v in line:gmatch('"([%w_]+)"%s*:%s*(false)') do o[k] = false end
+    return o
+end
+
+-- ── helpers ─────────────────────────────────────────────────────────────────
+
+local function valid(o)
+    if not o then return false end
+    local ok, r = pcall(function() return o:IsValid() end)
+    return ok and r == true
+end
+
+local function fullName(o)
+    local n
+    pcall(function() n = o:GetFullName() end)
+    return n
+end
+
+-- Full name -> object. Populated by `find`, which already holds the objects, so
+-- the normal find-then-act flow never pays for a scan.
+local CACHE = {}
+local STATS = { resolve_hits = 0, resolve_scans = 0, cache_evictions = 0 }
+
+local function cachePut(o)
+    local n = fullName(o)
+    if n then CACHE[n] = o end
+    return n
+end
+
+--- Resolve an object by its full name.
+---
+--- Identity is the name string. UObject values cannot be compared with == in
+--- UE4SS Lua, so any lookup matching by object reference silently finds nothing.
+---
+--- A cached entry is re-validated on every use: the engine recycles object slots,
+--- so a pointer that is still "valid" can belong to something else entirely by
+--- the time you use it. Checking the name again is what makes the cache safe.
+local function resolve(name, allow_scan)
+    local hit = CACHE[name]
+    if hit and valid(hit) and fullName(hit) == name then
+        STATS.resolve_hits = STATS.resolve_hits + 1
+        return hit
+    end
+    if hit then
+        CACHE[name] = nil
+        STATS.cache_evictions = STATS.cache_evictions + 1
+    end
+
+    -- Fallback: a linear sweep of the whole object array, on the game thread.
+    --
+    -- Measured at ~1.25 us per object, and object count is dominated by the
+    -- engine and loaded assets rather than by world size -- a one-corridor game
+    -- carries 23,919 objects and another title's *main menu* carries 29,784. So
+    -- this costs 30 ms where it is cheapest and scales linearly from there:
+    -- ~125 ms at 100k objects, all of it a frame hitch.
+    --
+    -- That is too expensive to spend implicitly. Off by default: the caller is
+    -- told to run `find` first, which populates the cache from objects it is
+    -- already holding and costs nothing extra. Pass allow_scan to opt in.
+    if not allow_scan then
+        return nil, "not cached; call find for this class first, or pass "
+                 .. "allow_scan=1 to accept a full object-array sweep "
+                 .. "(~1.25us/object on the game thread)"
+    end
+
+    STATS.resolve_scans = STATS.resolve_scans + 1
+    local found
+    pcall(function()
+        local all = FindAllOf("Object")
+        if not all then return end
+        for i = 1, #all do
+            if fullName(all[i]) == name then found = all[i]; return end
+        end
+    end)
+    if found then cachePut(found) end
+    return found
+end
+
+--- Drop everything. Objects do not survive a level change, and a stale entry
+--- that happens to re-validate would hand back an object from the old world.
+local function cacheClear()
+    CACHE = {}
+end
+
+local function cacheSize()
+    local n = 0
+    for _ in pairs(CACHE) do n = n + 1 end
+    return n
+end
+
+--- True while the world is mid-travel. Sweeping the object array here returns
+--- garbage; better to refuse the command than to answer with nonsense.
+local function travelling()
+    local w = UEHelpers.GetWorld()
+    if not valid(w) then return true end
+    local t = false
+    pcall(function() t = w.IsInSeamlessTravel == true end)
+    return t
+end
+
+-- ── ops ─────────────────────────────────────────────────────────────────────
+
+local OPS = {}
+
+function OPS.ping()
+    local w = UEHelpers.GetWorld()
+    return { ok = true, world = valid(w) and fullName(w) or nil, travelling = travelling(),
+             cached = cacheSize(), resolve_hits = STATS.resolve_hits,
+             resolve_scans = STATS.resolve_scans, evictions = STATS.cache_evictions }
+end
+
+function OPS.find(c)
+    if travelling() then return { ok = false, err = "world is travelling" } end
+    local out, n = { __arr = true }, 0
+    local limit = math.min(tonumber(c.limit) or 25, CFG.max_find)
+    pcall(function()
+        local all = FindAllOf(c.class)
+        if not all then return end
+        for i = 1, #all do
+            if n >= limit then break end
+            if valid(all[i]) then
+                -- Cache on the way past. The caller is about to act on one of
+                -- these, and we are already holding it.
+                local nm = cachePut(all[i])
+                if nm then n = n + 1; out[n] = nm end
+            end
+        end
+    end)
+    return { ok = true, count = n, objects = out }
+end
+
+--- Measure what a cache miss actually costs on this game.
+---
+--- `resolve` falls back to a linear sweep of the whole object array, calling
+--- GetFullName on each entry until it matches. That is cheap on a corridor and
+--- unknown on an open world, so measure it rather than guess: search for a name
+--- that cannot exist, which forces the complete worst-case traversal.
+function OPS.bench(c)
+    if travelling() then return { ok = false, err = "world is travelling" } end
+
+    local t0 = os.clock()
+    local all, n = nil, 0
+    pcall(function() all = FindAllOf("Object") end)
+    if all then n = #all end
+    local t_enum = os.clock() - t0
+
+    local rounds = math.min(tonumber(c.rounds) or 3, 10)
+    local worst, total = 0, 0
+    for _ = 1, rounds do
+        local t1 = os.clock()
+        pcall(function()
+            for i = 1, n do
+                if fullName(all[i]) == "\1no-such-object\1" then break end
+            end
+        end)
+        local dt = os.clock() - t1
+        total = total + dt
+        if dt > worst then worst = dt end
+    end
+
+    return {
+        ok = true,
+        objects = n,
+        enum_ms = math.floor(t_enum * 100000 + 0.5) / 100,
+        scan_avg_ms = math.floor((total / rounds) * 100000 + 0.5) / 100,
+        scan_worst_ms = math.floor(worst * 100000 + 0.5) / 100,
+        rounds = rounds,
+        cached = cacheSize(),
+    }
+end
+
+function OPS.read(c)
+    local o, why = resolve(c.obj, c.allow_scan)
+    if not valid(o) then
+        return { ok = false, err = why or "object not found" }
+    end
+    local v, got
+    local ok = pcall(function() v = o[c.prop]; got = true end)
+    if not ok or not got then return { ok = false, err = "property read failed" } end
+    local t = type(v)
+    if t == "userdata" then
+        local s; pcall(function() s = v:ToString() end)
+        return { ok = true, value = s or "<userdata>", vtype = "object" }
+    end
+    return { ok = true, value = v, vtype = t }
+end
+
+--- Write a property.
+---
+--- Returns only what it OBSERVED, never a bare success. The caller gets the
+--- value read back immediately after the write, and decides for itself whether
+--- that constitutes success. A bridge that reports "ok" and nothing else is a
+--- bridge that can lie without being caught, and that is the exact failure this
+--- whole design targets.
+function OPS.write(c)
+    local o, why = resolve(c.obj, c.allow_scan)
+    if not valid(o) then
+        return { ok = false, err = why or "object not found" }
+    end
+
+    local before
+    pcall(function() before = o[c.prop] end)
+
+    local wrote = pcall(function() o[c.prop] = c.value end)
+
+    local after
+    pcall(function() after = o[c.prop] end)
+
+    return {
+        ok = wrote,
+        wrote = wrote,
+        before = type(before) == "userdata" and "<object>" or before,
+        after  = type(after) == "userdata" and "<object>" or after,
+        requested = c.value,
+    }
+end
+
+function OPS.call(c)
+    local o, why = resolve(c.obj, c.allow_scan)
+    if not valid(o) then
+        return { ok = false, err = why or "object not found" }
+    end
+    local ret, called
+    local ok = pcall(function() ret = o[c.fn](o); called = true end)
+    if not ok or not called then return { ok = false, err = "call failed" } end
+    return { ok = true, ret = type(ret) == "userdata" and "<object>" or ret }
+end
+
+-- ── loop ────────────────────────────────────────────────────────────────────
+
+local cursor, tick, errors = 0, 0, 0
+
+--- Skip everything already in the command file at load time.
+---
+--- Without this the cursor starts at 0 and every command left over from a
+--- previous session is replayed on boot -- "whoever starts the process executes
+--- the leftovers." A stale `write` silently changes state minutes after anyone
+--- asked for it, and the symptom looks nothing like its cause.
+local function purgeStale()
+    local n = 0
+    local f = io.open(CFG.cmd_file, "r")
+    if f then
+        for _ in f:lines() do n = n + 1 end
+        f:close()
+    end
+    cursor = n
+    return n
+end
+
+local function pump()
+    tick = tick + 1
+
+    -- Objects do not survive a level change; a stale entry that happened to
+    -- re-validate would hand back an object belonging to the old world.
+    if travelling() then cacheClear() end
+    local f = io.open(CFG.cmd_file, "r")
+    if not f then return end
+
+    local n = 0
+    for line in f:lines() do
+        n = n + 1
+        if n > cursor and #line > 2 then
+            cursor = n
+            local c = parseLine(line)
+            local op = OPS[c.op or ""]
+            local res
+            if not op then
+                res = { ok = false, err = "unknown op: " .. tostring(c.op) }
+            else
+                local ok, r = pcall(op, c)
+                res = ok and r or { ok = false, err = tostring(r) }
+            end
+            res.id = c.id
+            res.tick = tick
+            respond(res)
+        end
+    end
+    if n < cursor then cursor = n end   -- writer truncated the file; resync
+    f:close()
+end
+
+LoopInGameThreadWithDelay(CFG.tick_ms, function()
+    local ok, err = pcall(pump)
+    if not ok then
+        errors = errors + 1
+        respond({ id = -1, ok = false, err = tostring(err), loop_errors = errors })
+    end
+end)
+
+local stale = purgeStale()
+respond({ id = 0, ok = true, event = "bridge_up", data_dir = DATA_DIR, purged_stale = stale })
+print("[GameBridge] up, polling " .. CFG.cmd_file .. " (skipped " .. stale .. " stale)\n")
+
+```
+
+`drive.py`:
+
+```py
+"""
+Drive the in-game bridge from outside, and verify what it claims.
+
+This is the piece that turns the spike into a real answer: point it at a running
+game with the GameBridge mod loaded and it will exercise the whole chain, then
+run the negative-control pass over a real write.
+
+    python drive.py --data "<game>/Binaries/Win64/ue4ss/Mods/GameBridge/data" ping
+    python drive.py --data ... find BP_PlayerCharacter_C
+    python drive.py --data ... probe          # full chain + negative control
+
+The `probe` mode is the one that matters. It:
+  1. finds a live object
+  2. reads a numeric property
+  3. writes a new value, taking the bridge's own claim
+  4. RE-READS through a separate request and compares       <- postcondition
+  5. poisons the check and confirms it goes red             <- negative control
+  6. restores the original value
+
+Step 5 is the part nothing else does, and it is what separates "my check passed"
+from "my check is capable of failing."
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+
+
+class FileBridge:
+    """Talks to the in-game Lua bridge over the two append-only files."""
+
+    def __init__(self, data_dir: Path, timeout: float = 8.0):
+        self.dir = Path(data_dir)
+        self.cmd = self.dir / "cmd.jsonl"
+        self.resp = self.dir / "resp.jsonl"
+        self.timeout = timeout
+        self._id = int(time.time()) % 100000
+        self.dir.mkdir(parents=True, exist_ok=True)
+        self.cmd.touch(exist_ok=True)
+        self.resp.touch(exist_ok=True)
+        # Start reading responses from the end, so a previous session's
+        # transcript is never mistaken for an answer to this request.
+        self._seen = sum(1 for _ in self.resp.open(encoding="utf-8", errors="replace"))
+
+    def send(self, **cmd) -> dict:
+        self._id += 1
+        cmd["id"] = self._id
+        with self.cmd.open("a", encoding="ascii") as f:
+            f.write(json.dumps(cmd) + "\n")
+        return self._await(self._id)
+
+    def _await(self, want_id: int) -> dict:
+        deadline = time.time() + self.timeout
+        while time.time() < deadline:
+            lines = self.resp.open(encoding="utf-8", errors="replace").readlines()
+            for line in lines[self._seen:]:
+                try:
+                    obj = json.loads(line)
+                except Exception:
+                    continue
+                if obj.get("id") == want_id:
+                    self._seen = len(lines)
+                    return obj
+            time.sleep(0.15)
+        raise TimeoutError(
+            f"no response to id={want_id} within {self.timeout}s. "
+            "Is the game running with GameBridge loaded, and is this the right data dir?"
+        )
+
+    # verifier-side read: a separate request, never the write's own return value
+    def read(self, obj: str, prop: str):
+        r = self.send(op="read", obj=obj, prop=prop)
+        if not r.get("ok"):
+            raise RuntimeError(r.get("err", "read failed"))
+        return r["value"]
+
+
+def probe(b: FileBridge, cls: str, prop: str) -> int:
+    print(f"\n[1] ping")
+    r = b.send(op="ping")
+    print(f"    world={r.get('world')}  travelling={r.get('travelling')}")
+    if not r.get("ok"):
+        print("    bridge did not answer ok"); return 1
+
+    print(f"\n[2] find {cls}")
+    r = b.send(op="find", **{"class": cls}, limit=5)
+    objs = r.get("objects") or []
+    print(f"    found {r.get('count')}: {objs[:3]}")
+    if not objs:
+        print("    nothing found -- pick a class that exists in the current level")
+        return 1
+    obj = objs[0]
+
+    print(f"\n[3] read {prop}")
+    original = b.read(obj, prop)
+    print(f"    {prop} = {original!r}")
+    if not isinstance(original, (int, float)):
+        print("    need a numeric property for the write test")
+        return 1
+
+    target = float(original) + 7.0
+    print(f"\n[4] write {prop} <- {target}")
+    w = b.send(op="write", obj=obj, prop=prop, value=target)
+    claimed = bool(w.get("wrote"))
+    w_before, w_after = w.get("before"), w.get("after")
+    print(f"    bridge claimed: {claimed}   (before={w_before} after={w_after})")
+
+    # The write response carries its own observation, taken at the write site.
+    # Treat it as a second, independent channel rather than as decoration: when
+    # it disagrees with the re-read below, one of the two is fabricated, and
+    # that disagreement is worth more than either reading alone.
+    landed_at_write = (
+        isinstance(w_after, (int, float)) and abs(float(w_after) - target) < 1e-6
+    )
+
+    print(f"\n[5] postcondition: independent re-read")
+    observed = b.read(obj, prop)
+    holds = abs(float(observed) - target) < 1e-6
+    print(f"    re-read {prop} = {observed!r}  -> {'target' if holds else 'NOT target'}")
+
+    print(f"\n[6] cross-channel agreement")
+    print(f"    write-site says landed: {landed_at_write}    re-read says landed: {holds}")
+    contradiction = landed_at_write != holds
+    if contradiction:
+        print("    CONTRADICTION -- the two channels disagree; at least one is lying")
+
+    print(f"\n[7] negative control: prove the check can go red")
+    # The poison must be shown to have LANDED before its result means anything.
+    # A poison that silently fails to apply makes a dead check look alive, which
+    # is how this harness fooled itself on the first run.
+    poison_val = float(target) + 1234.0
+    pw = b.send(op="write", obj=obj, prop=prop, value=poison_val)
+    poison_landed = (
+        isinstance(pw.get("after"), (int, float))
+        and abs(float(pw["after"]) - poison_val) < 1e-6
+    )
+    poisoned = b.read(obj, prop)
+    noticed = abs(float(poisoned) - target) >= 1e-6
+    print(f"    poison landed at write site: {poison_landed}")
+    print(f"    re-read after poison: {poisoned!r}; check "
+          f"{'went RED' if noticed else 'still passed'}")
+    if not poison_landed:
+        print("    poison never applied -- the negative control proves nothing here")
+
+    print(f"\n[8] restore")
+    b.send(op="write", obj=obj, prop=prop, value=original)
+    print(f"    {prop} = {b.read(obj, prop)!r}")
+
+    print("\n" + "=" * 58)
+    # Order matters. The negative control is what licenses trusting a PASS; it is
+    # not needed to trust a FAIL. Two independent channels agreeing that nothing
+    # changed is already conclusive, so that verdict is reported on its own.
+    if contradiction:
+        print("INCONSISTENT BRIDGE: the write site and the re-read disagree about")
+        print("whether the value changed. No verdict about success is available")
+        print("from this bridge -- a channel cannot verify itself.")
+        return 1
+    if claimed and not holds:
+        print("FALSE SUCCESS caught: the bridge reported a write it did not make.")
+        print("Both channels agree the value never changed.")
+        return 1
+    if not poison_landed:
+        print("VERDICT WITHHELD: the poison did not apply, so the check was never")
+        print("shown to be capable of failing. The apparent pass is unproven.")
+        return 1
+    if not noticed:
+        print("DEAD CHECK: the check survived a poison that provably landed.")
+        return 1
+    print("Chain verified end to end, and the check is provably alive.")
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data", required=True, help="GameBridge data directory")
+    ap.add_argument("cmd", choices=["ping", "find", "read", "probe", "bench"])
+    ap.add_argument("arg", nargs="?", default="BP_PlayerCharacter_C")
+    ap.add_argument("--prop", default="Health")
+    a = ap.parse_args()
+
+    b = FileBridge(Path(a.data))
+    if a.cmd == "ping":
+        print(json.dumps(b.send(op="ping"), indent=1))
+    elif a.cmd == "find":
+        print(json.dumps(b.send(op="find", **{"class": a.arg}, limit=25), indent=1))
+    elif a.cmd == "read":
+        print(b.read(a.arg, a.prop))
+    elif a.cmd == "bench":
+        r = b.send(op="bench", rounds=5)
+        print(json.dumps(r, indent=1))
+    else:
+        return probe(b, a.arg, a.prop)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except TimeoutError as e:
+        print(f"\nTIMEOUT: {e}")
+        sys.exit(2)
+
+```
+
+`mcp_server.py`:
+
+```py
+"""
+MCP server for a running Unreal Engine game.
+
+Exposes the live game to an agent, with one deliberate difference from every
+other "drive the game" tool: the write tool cannot return a bare success.
+
+`write_property` runs the full verification -- an independent re-read, a
+cross-check against the write site's own observation, and a negative control
+that proves the check is capable of failing -- and returns a verdict. When the
+evidence does not support a claim of success, it says so, and it says why.
+
+That is the whole design. An agent calling this tool cannot report a state
+change it did not make, because the tool will not hand it the words.
+
+Run:
+    pip install "mcp>=2"
+    python mcp_server.py --data "<game>/Binaries/Win64/ue4ss/Mods/GameBridge/data"
+
+Register with a client (Claude Code shown; adapt for others):
+    claude mcp add ue-live -- python /abs/path/mcp_server.py --data "/abs/path/to/data"
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+from typing import Any
+
+from mcp.server.mcpserver import MCPServer
+
+from drive import FileBridge
+
+DATA_DIR = os.environ.get("UE_LIVE_BRIDGE_DATA", "")
+
+server = MCPServer(
+    name="ue-live-bridge",
+    instructions=(
+        "Drives a running Unreal Engine game through a UE4SS bridge.\n\n"
+        "Blueprint class names take the _C suffix (BP_ChangeManager_C, not "
+        "BP_ChangeManager). Call find_objects before reading or writing: it "
+        "returns full object names, which are the only valid handles, and it "
+        "warms the resolver so later calls do not scan the object array.\n\n"
+        "write_property returns a verdict, not a boolean. Treat any verdict "
+        "other than CONFIRMED as the write NOT having happened, including "
+        "WITHHELD -- 'unproven' is not 'succeeded'. Do not retry a write on a "
+        "verdict of INCONSISTENT_BRIDGE; the bridge is unreliable and repeating "
+        "the call will not make it truthful."
+    ),
+)
+
+_bridge: FileBridge | None = None
+
+
+def bridge() -> FileBridge:
+    global _bridge
+    if _bridge is None:
+        if not DATA_DIR:
+            raise RuntimeError(
+                "no data directory configured; pass --data or set UE_LIVE_BRIDGE_DATA"
+            )
+        _bridge = FileBridge(Path(DATA_DIR))
+    return _bridge
+
+
+@server.tool(description="Check that the game is running and the bridge is responding. Returns the current world and resolver cache stats.")
+def ping() -> dict:
+    return bridge().send(op="ping")
+
+
+@server.tool(description="List live objects of a class. Blueprint classes need the _C suffix. Returns full object names, which are the handles used by every other tool.")
+def find_objects(class_name: str, limit: int = 25) -> dict:
+    return bridge().send(op="find", **{"class": class_name}, limit=limit)
+
+
+@server.tool(description="Read one property off a live object. Takes the full object name from find_objects.")
+def read_property(obj: str, prop: str) -> dict:
+    return bridge().send(op="read", obj=obj, prop=prop)
+
+
+@server.tool(description="Call a no-argument UFunction on a live object.")
+def call_function(obj: str, fn: str) -> dict:
+    return bridge().send(op="call", obj=obj, fn=fn)
+
+
+@server.tool(
+    description=(
+        "Write a property and verify it. Returns a verdict, never a bare success. "
+        "CONFIRMED means the change was independently observed and the check was "
+        "proven capable of failing. Anything else means the write should be "
+        "treated as not having happened."
+    )
+)
+def write_property(obj: str, prop: str, value: float) -> dict:
+    """Write, then earn the right to say it worked.
+
+    Four things have to line up before this returns CONFIRMED:
+      1. the write site reports the new value
+      2. an independent re-read agrees
+      3. a poison value provably lands
+      4. the check notices the poison
+
+    Any gap between them is reported as the specific gap it is, because
+    "unverified" and "failed" are different facts and collapsing them is how
+    a caller ends up confidently wrong.
+    """
+    b = bridge()
+
+    before = b.send(op="read", obj=obj, prop=prop)
+    if not before.get("ok"):
+        return {"verdict": "UNREADABLE", "detail": before.get("err", "read failed")}
+    original = before["value"]
+
+    w = b.send(op="write", obj=obj, prop=prop, value=value)
+    if not w.get("ok"):
+        return {"verdict": "WRITE_REJECTED", "detail": w.get("err", "write failed"),
+                "original": original}
+
+    def near(a: Any, x: float) -> bool:
+        return isinstance(a, (int, float)) and abs(float(a) - x) < 1e-6
+
+    landed_at_write = near(w.get("after"), value)
+
+    r = b.send(op="read", obj=obj, prop=prop)
+    holds = r.get("ok") and near(r.get("value"), value)
+
+    if landed_at_write != holds:
+        return {
+            "verdict": "INCONSISTENT_BRIDGE",
+            "detail": "the write site and an independent re-read disagree about "
+                      "whether the value changed; a channel cannot verify itself",
+            "write_site_after": w.get("after"),
+            "reread": r.get("value"),
+            "original": original,
+        }
+
+    if not holds:
+        return {
+            "verdict": "FALSE_SUCCESS",
+            "detail": "the bridge accepted the write but the value did not change; "
+                      "both channels agree",
+            "observed": r.get("value"),
+            "original": original,
+        }
+
+    # The value looks right. That is not yet a reason to believe the check.
+    poison = float(value) + 1234.0
+    pw = b.send(op="write", obj=obj, prop=prop, value=poison)
+    poison_landed = near(pw.get("after"), poison)
+    pr = b.send(op="read", obj=obj, prop=prop)
+    noticed = not (pr.get("ok") and near(pr.get("value"), value))
+
+    b.send(op="write", obj=obj, prop=prop, value=original if _restore_original else value)
+
+    if not poison_landed:
+        return {
+            "verdict": "WITHHELD",
+            "detail": "the poison never applied, so the check was never shown to be "
+                      "capable of failing; the apparent success is unproven",
+            "original": original,
+        }
+    if not noticed:
+        return {
+            "verdict": "DEAD_CHECK",
+            "detail": "the check survived a poison that provably landed; it cannot "
+                      "distinguish success from failure and its verdict means nothing",
+            "original": original,
+        }
+
+    return {
+        "verdict": "CONFIRMED",
+        "detail": "independently observed, and the check was proven able to fail",
+        "value": value,
+        "original": original,
+    }
+
+
+# The negative control leaves the world holding a poison value for a moment. The
+# final write puts back whichever the caller asked for: the value they wanted
+# (default) or the value that was there before.
+_restore_original = False
+
+
+def main() -> int:
+    global DATA_DIR, _restore_original
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data", default=DATA_DIR,
+                    help="GameBridge data directory inside the game install")
+    ap.add_argument("--restore-original", action="store_true",
+                    help="after verifying, put the original value back instead of "
+                         "leaving the requested one (useful for read-only auditing)")
+    a = ap.parse_args()
+    if not a.data:
+        print("--data is required (or set UE_LIVE_BRIDGE_DATA)", file=sys.stderr)
+        return 2
+    DATA_DIR = a.data
+    _restore_original = a.restore_original
+    server.run(transport="stdio")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`requirements.txt`:
+
+```txt
+mcp>=2
+
+```
+
+`test/conftest.py`:
+
+```py
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+```
+
+`test/fake_bridge.py`:
+
+```py
+"""
+A stand-in for the in-game Lua bridge, speaking the same two-file protocol.
+
+Lets drive.py be exercised end to end without launching a game, and -- more
+usefully -- lets the two failure modes be reproduced on demand:
+
+    --lie        acknowledge writes without performing them
+    --deadcheck  additionally fake reads so the value always looks correct
+
+Run in one terminal:   python fake_bridge.py --data ./_t [--lie]
+And in another:        python drive.py --data ./_t probe
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import time
+from pathlib import Path
+
+WORLD = {
+    "BP_PlayerCharacter_C /Game/Maps/L_Test.L_Test:PersistentLevel.BP_PlayerCharacter_C_0": {
+        "Health": 100.0, "MaxHealth": 100.0,
+    },
+}
+
+
+def run(data: Path, lie: bool, deadcheck: bool) -> None:
+    data.mkdir(parents=True, exist_ok=True)
+    cmd, resp = data / "cmd.jsonl", data / "resp.jsonl"
+    cmd.touch(exist_ok=True)
+    resp.touch(exist_ok=True)
+    cursor = sum(1 for _ in cmd.open(encoding="utf-8", errors="replace"))
+
+    def reply(o: dict) -> None:
+        with resp.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(o) + "\n")
+
+    reply({"id": 0, "ok": True, "event": "bridge_up",
+           "mode": ("lying" if lie else "honest") + ("+deadcheck" if deadcheck else "")})
+    print(f"[fake_bridge] up on {data}  lie={lie} deadcheck={deadcheck}")
+
+    faked: dict[tuple[str, str], float] = {}
+
+    while True:
+        lines = cmd.open(encoding="utf-8", errors="replace").readlines()
+        for line in lines[cursor:]:
+            cursor += 1
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                c = json.loads(line)
+            except Exception:
+                continue
+            op, out = c.get("op"), {}
+
+            if op == "ping":
+                out = {"ok": True, "world": "L_Test", "travelling": False}
+            elif op == "find":
+                keys = [k for k in WORLD if k.startswith(c.get("class", ""))]
+                out = {"ok": True, "count": len(keys), "objects": keys}
+            elif op == "read":
+                key = (c["obj"], c["prop"])
+                if deadcheck and key in faked:
+                    out = {"ok": True, "value": faked[key], "vtype": "number"}
+                else:
+                    try:
+                        out = {"ok": True, "value": WORLD[c["obj"]][c["prop"]], "vtype": "number"}
+                    except KeyError:
+                        out = {"ok": False, "err": "object not found"}
+            elif op == "write":
+                try:
+                    before = WORLD[c["obj"]][c["prop"]]
+                except KeyError:
+                    out = {"ok": False, "err": "object not found"}
+                else:
+                    if lie:
+                        after = before                       # never actually written
+                        if deadcheck:
+                            faked[(c["obj"], c["prop"])] = c["value"]  # but reads back "right"
+                    else:
+                        WORLD[c["obj"]][c["prop"]] = c["value"]
+                        after = c["value"]
+                    out = {"ok": True, "wrote": True, "before": before,
+                           "after": after, "requested": c["value"]}
+            else:
+                out = {"ok": False, "err": f"unknown op: {op}"}
+
+            out["id"] = c.get("id")
+            reply(out)
+        time.sleep(0.05)
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data", required=True)
+    ap.add_argument("--lie", action="store_true")
+    ap.add_argument("--deadcheck", action="store_true")
+    a = ap.parse_args()
+    run(Path(a.data), a.lie, a.deadcheck)
+
+```
+
+`test/mcp_test.py`:
+
+```py
+"""
+Verify that write_property returns the right verdict for each kind of bridge.
+
+The tool's whole value is that it will not say CONFIRMED unless it earned it, so
+this drives it against a bridge that is honest, one that lies, and one that lies
+about the read-back too, and asserts the verdict each time.
+
+    python test/mcp_test.py
+"""
+
+from __future__ import annotations
+
+import pathlib
+import subprocess
+import sys
+import time
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+OBJ = ("BP_PlayerCharacter_C /Game/Maps/L_Test.L_Test:"
+       "PersistentLevel.BP_PlayerCharacter_C_0")
+PROP = "Health"
+
+CASES = [
+    ("honest bridge",              [],                        "CONFIRMED"),
+    ("lying bridge",               ["--lie"],                 "FALSE_SUCCESS"),
+    ("lying bridge + faked reads", ["--lie", "--deadcheck"],  "INCONSISTENT_BRIDGE"),
+]
+
+failures: list[str] = []
+
+
+def run_case(label: str, flags: list[str], want: str, i: int) -> None:
+    data = ROOT / f"_mcp_t{i}"
+    if data.exists():
+        for f in data.iterdir():
+            f.unlink()
+    proc = subprocess.Popen(
+        [sys.executable, str(ROOT / "test" / "fake_bridge.py"), "--data", str(data), *flags],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    )
+    try:
+        time.sleep(1.5)
+        # Import fresh so the module-level bridge handle points at this case's dir.
+        for m in ("mcp_server", "drive"):
+            sys.modules.pop(m, None)
+        import mcp_server
+        mcp_server.DATA_DIR = str(data)
+        mcp_server._bridge = None
+
+        got = mcp_server.write_property(OBJ, PROP, 250.0)
+        verdict = got.get("verdict")
+        ok = verdict == want
+        print(f"  {'PASS ' if ok else 'FAIL '} {label:<28} -> {verdict}")
+        if not ok:
+            print(f"        want {want}; detail: {got.get('detail')}")
+            failures.append(label)
+        elif got.get("detail"):
+            print(f"        {got['detail'][:78]}")
+    finally:
+        proc.terminate()
+        proc.wait(timeout=5)
+        for f in data.iterdir():
+            f.unlink()
+        data.rmdir()
+
+
+def main() -> int:
+    print("write_property verdict test\n" + "=" * 60)
+    for i, (label, flags, want) in enumerate(CASES):
+        run_case(label, flags, want, i)
+    print("=" * 60)
+    if failures:
+        print(f"FAILED: {', '.join(failures)}")
+        return 1
+    print("all verdicts correct")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`test/sim_game.py`:
+
+```py
+"""
+A simulated live game, standing in for a UE4SS / BepInEx bridge.
+
+Exists so the verification logic can be proven before any game is launched, and
+so the two failure modes it targets can be reproduced on demand:
+
+  * a bridge that reports a write succeeded when it did not  (false success)
+  * a postcondition that can never fail                      (dead check)
+
+The real bridge speaks the same shape over a command file plus a JSONL response
+tail -- the file-IPC pattern already proven in shipped mods -- so swapping this
+for the real thing changes the transport, not the verification.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any
+
+
+@dataclass
+class SimGame:
+    """Authoritative world state. Nothing here is visible to the agent directly."""
+
+    objects: dict[str, dict[str, Any]] = field(default_factory=lambda: {
+        "BP_PlayerCharacter_C_0": {"Health": 100.0, "MaxHealth": 100.0, "Team": 0},
+        "BP_GameState_C_0": {"RoundNumber": 3, "Floor": 7},
+    })
+
+    # When True, writes are acknowledged but silently dropped. This is the
+    # behaviour a real bridge exhibits when a hook attached to a stale object,
+    # when the property name resolved to a different field, or when the game
+    # overwrote the value on the next tick.
+    drop_writes: bool = False
+
+    def read(self, obj: str, prop: str) -> Any:
+        return self.objects[obj][prop]
+
+    def write(self, obj: str, prop: str, value: Any) -> bool:
+        """Returns the *claim*, which is not the same thing as the effect."""
+        if self.drop_writes:
+            return True          # "success"
+        self.objects[obj][prop] = value
+        return True
+
+
+@dataclass
+class AgentHandle:
+    """What the agent acts through. Write access."""
+    game: SimGame
+
+    def set_property(self, obj: str, prop: str, value: Any) -> bool:
+        return self.game.write(obj, prop, value)
+
+
+@dataclass
+class VerifierHandle:
+    """What the verifier reads through. Read-only, and a separate object.
+
+    Sharing a handle with the agent would let a broken bridge confirm its own
+    claim, which is the mistake the whole design exists to avoid.
+    """
+    game: SimGame
+
+    def read(self, obj: str, prop: str) -> Any:
+        return self.game.read(obj, prop)
+
+```
+
+`test/spike_test.py`:
+
+```py
+"""
+Feasibility spike: does negative-control verification actually catch anything?
+
+Four scenarios, run against a simulated game so the logic is settled before a
+real one is launched:
+
+  1. honest bridge, live check   -> CONFIRMED
+  2. lying bridge,  live check   -> FALSE_SUCCESS      (the published failure mode)
+  3. honest bridge, dead check   -> DEAD_CHECK         (the harness's own failure)
+  4. lying bridge,  dead check   -> DEAD_CHECK, and the money shot: without the
+                                    negative control this scenario emits a
+                                    confident CONFIRMED that is entirely false.
+
+Run:  python test/spike_test.py
+"""
+
+from __future__ import annotations
+
+import sys
+
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+from sim_game import AgentHandle, SimGame, VerifierHandle
+from verify import Postcondition, Verdict, Verifier, prop_equals
+
+OBJ = "BP_PlayerCharacter_C_0"
+PROP = "Health"
+TARGET = 250.0
+
+failures: list[str] = []
+
+
+def check(label: str, got, want) -> None:
+    ok = got == want
+    print(f"  {'PASS ' if ok else 'FAIL '} {label}: {got}" + ("" if ok else f"  (want {want})"))
+    if not ok:
+        failures.append(label)
+
+
+def live_postcondition(game: SimGame) -> Postcondition:
+    """A real check with a real negative control."""
+    saved: dict = {}
+
+    def poison(_b) -> None:
+        saved["v"] = game.objects[OBJ][PROP]
+        game.objects[OBJ][PROP] = -99999.0     # a value the check must reject
+
+    def undo(_b) -> None:
+        game.objects[OBJ][PROP] = saved["v"]
+
+    return Postcondition(
+        name="health_is_target",
+        check=prop_equals(OBJ, PROP, TARGET),
+        poison=poison,
+        undo_poison=undo,
+    )
+
+
+def dead_postcondition(game: SimGame) -> Postcondition:
+    """A check that can never fail.
+
+    Deliberately written the way real dead checks get written: it means to
+    compare the value, but the comparison was lost in a refactor and what is
+    left just confirms the property exists.
+    """
+    saved: dict = {}
+
+    def poison(_b) -> None:
+        saved["v"] = game.objects[OBJ][PROP]
+        game.objects[OBJ][PROP] = -99999.0
+
+    def undo(_b) -> None:
+        game.objects[OBJ][PROP] = saved["v"]
+
+    def broken_check(b) -> bool:
+        try:
+            b.read(OBJ, PROP)
+            return True          # <-- reads, then asserts nothing
+        except Exception:
+            return False
+
+    return Postcondition(
+        name="health_is_target__but_broken",
+        check=broken_check,
+        poison=poison,
+        undo_poison=undo,
+    )
+
+
+def scenario(label: str, *, drop_writes: bool, dead: bool):
+    game = SimGame(drop_writes=drop_writes)
+    agent = AgentHandle(game)
+    verifier = Verifier(bridge=VerifierHandle(game))
+    pc = dead_postcondition(game) if dead else live_postcondition(game)
+
+    claimed = agent.set_property(OBJ, PROP, TARGET)   # the agent's own assertion
+    result = verifier.verify(pc, agent_claimed_success=claimed)
+
+    print(f"\n[{label}]")
+    print(f"  bridge={'LYING' if drop_writes else 'honest'}  check={'DEAD' if dead else 'live'}")
+    print(f"  agent claimed success : {claimed}")
+    print(f"  actual value in world : {game.objects[OBJ][PROP]}")
+    return game, pc, verifier, result
+
+
+def main() -> int:
+    print("negative-control verification spike\n" + "=" * 52)
+
+    # 1 -------------------------------------------------------------------
+    _, _, _, r = scenario("1. honest bridge, live check", drop_writes=False, dead=False)
+    check("verdict", r.verdict, Verdict.CONFIRMED)
+
+    # 2 -------------------------------------------------------------------
+    _, _, _, r = scenario("2. LYING bridge, live check", drop_writes=True, dead=False)
+    check("verdict", r.verdict, Verdict.FALSE_SUCCESS)
+    check("agent claimed success", r.claimed, True)
+    check("world disagreed", r.observed, False)
+
+    # 3 -------------------------------------------------------------------
+    _, _, v, r = scenario("3. honest bridge, DEAD check", drop_writes=False, dead=True)
+    check("verdict", r.verdict, Verdict.DEAD_CHECK)
+    check("dead check named", v.dead_checks, ["health_is_target__but_broken"])
+
+    # 4 -------------------------------------------------------------------
+    game, pc, v, r = scenario("4. LYING bridge, DEAD check  <- the money shot",
+                              drop_writes=True, dead=True)
+    check("verdict", r.verdict, Verdict.DEAD_CHECK)
+
+    # What the standard approach -- assert postconditions, no negative control --
+    # would have emitted for this exact scenario:
+    naive_says_ok = pc.check(v.bridge)
+    print(f"\n  without the negative control, this run reports: "
+          f"{'CONFIRMED (FALSE)' if naive_says_ok else 'caught'}")
+    print(f"  actual value in world is still {game.objects[OBJ][PROP]}, "
+          f"never {TARGET}")
+    check("naive postcondition would have passed a false success", naive_says_ok, True)
+
+    print("\n" + "=" * 52)
+    if failures:
+        print(f"FAILED: {len(failures)} check(s): {', '.join(failures)}")
+        return 1
+    print("all checks passed\n")
+    print("Conclusion: the negative control catches a class of failure that a")
+    print("postcondition alone cannot -- a broken checker paired with a lying")
+    print("bridge, which is precisely the combination that produces a confident")
+    print("and entirely false CONFIRMED.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`verify.py`:
+
+```py
+"""
+Negative-control verification for agent actions against a live game.
+
+The industry answer to agents falsely claiming success is: assert a postcondition
+against the authoritative record, from a process the agent cannot write to.
+
+That is necessary and not sufficient. Nobody checks whether the checker works.
+A postcondition that can never go red is indistinguishable from one that passes,
+and in practice a surprising number of guards are dead on arrival -- they read the
+wrong field, they swallow an exception, they compare a string to an int.
+
+So the rule here is stricter:
+
+    A postcondition may not be registered without a poison that provably makes it
+    go red. Before any verdict is trusted, every postcondition is run against its
+    own poison. A check that survives its poison is a DEAD CHECK and is reported
+    as a harness failure, not as a passing test.
+
+This is the same discipline that came out of shipping game mods, where "the hook
+attached" and "the hook fires" are separate claims and the gap between them
+silently eats days.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Protocol
+
+
+class Bridge(Protocol):
+    """Read-only view of the live game, from the verifier's side.
+
+    The verifier holds a *separate* handle from the one the agent acts through.
+    Reading back through the same object the agent wrote to would let a broken
+    or lying bridge confirm its own claim.
+    """
+
+    def read(self, obj: str, prop: str) -> Any: ...
+
+
+class Verdict(str, Enum):
+    CONFIRMED = "CONFIRMED"      # the agent claimed success and the world agrees
+    FALSE_SUCCESS = "FALSE_SUCCESS"   # the agent claimed success, the world disagrees
+    HONEST_FAILURE = "HONEST_FAILURE"  # the agent reported failure; not our problem
+    DEAD_CHECK = "DEAD_CHECK"    # the postcondition survived its own poison
+
+
+@dataclass
+class Postcondition:
+    """A claim about the world, plus proof that the claim can fail.
+
+    check:  reads authoritative state through the verifier's own bridge and
+            returns True when the world is in the expected state.
+    poison: mutates the world (or the bridge's view of it) into a state that
+            MUST make `check` return False. This is the negative control.
+    """
+
+    name: str
+    check: Callable[[Bridge], bool]
+    poison: Callable[[Bridge], None]
+    undo_poison: Callable[[Bridge], None]
+
+    def __post_init__(self) -> None:
+        if self.poison is None or self.undo_poison is None:
+            raise ValueError(
+                f"postcondition {self.name!r} has no negative control; "
+                "a check you cannot make fail is not a check"
+            )
+
+
+@dataclass
+class Result:
+    verdict: Verdict
+    postcondition: str
+    claimed: bool
+    observed: bool
+    detail: str = ""
+
+    @property
+    def ok(self) -> bool:
+        return self.verdict in (Verdict.CONFIRMED, Verdict.HONEST_FAILURE)
+
+
+@dataclass
+class Verifier:
+    bridge: Bridge
+    dead_checks: list[str] = field(default_factory=list)
+
+    def prove_alive(self, pc: Postcondition) -> bool:
+        """Negative control: poison the world, require the check to notice.
+
+        Runs before any verdict from this postcondition is trusted. Restores the
+        world afterwards regardless of outcome.
+        """
+        try:
+            pc.poison(self.bridge)
+            noticed = not pc.check(self.bridge)
+        finally:
+            pc.undo_poison(self.bridge)
+
+        if not noticed:
+            self.dead_checks.append(pc.name)
+        return noticed
+
+    def verify(self, pc: Postcondition, agent_claimed_success: bool) -> Result:
+        """The whole point: separate what the agent *said* from what is *true*.
+
+        `agent_claimed_success` is the agent's own assertion, which is exactly the
+        signal the published measurements show to be wrong 45-76% of the time when
+        it fails. It is recorded, never trusted.
+        """
+        if not self.prove_alive(pc):
+            return Result(
+                Verdict.DEAD_CHECK, pc.name, agent_claimed_success, False,
+                "postcondition survived its own poison; verdict withheld",
+            )
+
+        observed = pc.check(self.bridge)
+
+        if agent_claimed_success and observed:
+            return Result(Verdict.CONFIRMED, pc.name, True, True)
+        if agent_claimed_success and not observed:
+            return Result(
+                Verdict.FALSE_SUCCESS, pc.name, True, False,
+                "agent reported success; authoritative state disagrees",
+            )
+        return Result(
+            Verdict.HONEST_FAILURE, pc.name, False, observed,
+            "agent did not claim success",
+        )
+
+
+def prop_equals(obj: str, prop: str, want: Any) -> Callable[[Bridge], bool]:
+    """The common case: a property should now hold a given value."""
+    def _check(b: Bridge) -> bool:
+        try:
+            return b.read(obj, prop) == want
+        except Exception:
+            # A check that cannot read is a check that cannot pass. Never
+            # swallow this into a True -- that is how dead checks are born.
+            return False
+    return _check
+
+```
