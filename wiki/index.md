@@ -161,6 +161,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AcDrv](entities/acdrv.md) — Windows kernel AC research driver (process/module callbacks, memory intercept, syscall monitoring; ETW Hook; gmh5225)
 - [aclist.github.io](entities/aclist-github-io.md) — static site: anti-cheat compatibility list + Linux gaming docs (HTML/CSS/JS; conservative manual verification; Anti-cheat compatibility list)
 - [AetherVisor](entities/aether-visor.md) — AMD SVM hacked-hypervisor testing (feature implementation walkthrough; Detection: Hacked Hypervisor Testing AMD; gmh5225)
+- [AETHER](entities/aether.md) — CSIT-SG IDA Pro LLM copilot (Python; AI decompilation, chatbot with tool-calling, function annotation, vulnerability analysis, RAG from binary DB; multi-provider; prompt templates + custom viewer; malware analysis)
 - [AdbFileManager](entities/adb-file-manager.md) — Windows ADB file manager (C#/.NET dual-pane Explorer UI; faster than MTP; Cheat Android File Explorer; gmh5225)
 - [ADB Debug Detect Checker](entities/adb-debug-detect-checker.md) — Android Java ADB/debug-state detection app (reference for ADB debugging probes; Anti Debugging; fiord)
 - [Agafi](entities/agafi.md) — x86 ROP gadget finder + ROP chainer (programs/modules/live processes; Cheat / ROP Finder)
