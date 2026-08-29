@@ -2537,6 +2537,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/mrexodia/EfiCMake
 - https://github.com/tandasat/MiniVisorPkg
 - https://github.com/Th3Spl/SimpleUEFI [UEFI Environment for VisualStudio (MSVC), Extremely easy to setup]
+- https://github.com/Th3Spl/PerfectSMBios [UEFI SMBIOS serial spoof before bootx64.efi; no ntoskrnl/winload pointers; Linux-capable; C]
 - https://github.com/Oliver-1-1/SmmInfect [SMM Driver]
 - https://github.com/Shtan7/VisualUEFI-2.0 [Debug source with clion+clang+gdb]
 - https://github.com/SamuelTulach/EasyUefi [Visual Studio template for GNU-EFI]
@@ -2771,6 +2772,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/Full-Hwid-Spoofer-V6
 - https://github.com/gmh5225/HWID-SteamSpywareTerminator [Steam]
 - https://github.com/SamuelTulach/negativespoofer [EFI]
+- https://github.com/Th3Spl/PerfectSMBios [EFI SMBIOS serial spoof before bootx64.efi; no ntoskrnl/winload pointers; Linux-capable]
 - https://github.com/Alex3434/wmi-static-spoofer
 - https://github.com/zensenzay/eac-spoofer-meme [Kernel HWID spoofer source for SMBIOS WMI, disk/volume, GPU, network, EFI, and registry modules]
 - https://github.com/gmh5225/hwid-spoofer
