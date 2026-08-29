@@ -2297,6 +2297,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Naraka-Hack](entities/naraka-hack.md) — NARAKA: BLADEPOINT external Unity IL2CPP cheat (C++; offset tables; entity/player RPM; NVIDIA overlay ESP; hotkey menu + combat assist; Rythorndoran; cheat-dev / runtime-structure RE)
 - [NastyAlignment](entities/nasty-alignment.md) — Windows Instrumentation Callback PoC (alignment-check edge cases; STATUS_DATATYPE_MISALIGNMENT; asamy)
 - [NativeNetSharp](entities/nativenetsharp.md) — C# code injection (managed/.NET; cheat / guide)
+- [n0xis](entities/n0xis.md) — cross-platform Rust agent-native RE pipeline (static PE/ELF CFG/SSA decompilation + live memory scan, pointer paths, hooks, cheat tables; CLI + MCP JSON artifacts; Unity IL2CPP, Lua/LuaJIT; N0xHUD; LargoScript)
 - [nCine](entities/ncine.md) — C++11 2D engine (optional Lua; MIT; Game Engine / source)
 - [nathans-tarkov-radar-public](entities/nathans-tarkov-radar-public.md) — public EFT radar (Vmread external or DMA; secondary-display top-down player/scav/loot/extraction; Unity memory; cheat / game:eft [Vmread + Radar]; gmh5225)
 - [nai64-patches](entities/nai64-patches.md) — curated Morphe Android APK patch catalog (~100 Kotlin/Gradle universal patches; ad removal, license/Play Integrity bypass, root/emulator hide, SSL pinning bypass, telemetry block, device/manifest spoof; mobile game RE / modding; Nai64)
