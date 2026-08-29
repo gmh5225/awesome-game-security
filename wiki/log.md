@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:CKCat/d810`: entity [[d810]] (CKCat; Python IDA Pro plugin; deobfuscate at decompilation time by rewriting Hex-Rays microcode; configurable extensible rule sets; malware/game-security analysts on heavily obfuscated binaries; README [Deobfuscate code at decompilation time by modifying IDA Pro microcode]); cited on [[overviews/reverse-engineering]] and [[control-flow-flattening]]; cross-linked [[d810-ng]], [[hex-rays-deob]], [[hrtng]], and [[emotet-deobfuscator]].
+
 - **2026-08-29** — ingest `description:CSIT-SG/AETHER`: entity [[aether]] (CSIT-SG; Python IDA Pro LLM copilot; AI-assisted decompilation, interactive chatbot with tool-calling, function annotation, vulnerability analysis, RAG context from binary databases; multi-provider backends, prompt templates, syntax highlighting, custom viewer UI; malware/RE workflows; README [An AI-powered reverse-engineering copilot for assisting tedious malware analysis in IDA Pro]); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-pro-mcp]], [[ida-llm-explainer]], [[gepetto]], [[ida-gepetto]], [[ida-assistant]], [[idassist]], and [[aida]].
 
 - **2026-08-29** — ingest `description:CTCaer/hekate`: entity [[hekate]] (CTCaer; GUI Nintendo Switch bootloader and maintenance toolkit; C/low-level; multi-environment boot management, payload launch, firmware patches; eMMC/emuMMC backup-restore, partition tools, hardware diagnostics; console modding / firmware research / CFW entry point; README [A GUI based Nintendo Switch Bootloader]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[se-tools]], [[nstool]], [[xci-explorer]], and [[opensw]].

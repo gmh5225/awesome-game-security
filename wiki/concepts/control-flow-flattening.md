@@ -18,7 +18,8 @@ sources:
   - wiki/sources/descriptions/seifreed__xrefgen.md
   - wiki/sources/descriptions/Deatty__Ghidra-Obfuscation-Detection.md
   - wiki/sources/descriptions/DNLINYJ__Anti_miHoYo_Jcc_Obfuscate.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/CKCat__d810.md
+updated: 2026-08-29
 confidence: high
 ---
 
@@ -29,7 +30,7 @@ confidence: high
 ## Recovery approaches
 
 1. **Symbolic / simulated execution** — identify dispatcher, recover real edges ([[idadeflat]] with angr; [[ollvm-unflattener]] with Miasm — BFS call following, deobfuscated binary output for Win/Linux x86/x64; JbvrgtonYT fork adds graph visualization and bundled sample binaries for CFF experiments). **Arm64 fake-runtime simulation** via [[anti-ollvm]] (C# core; dispatcher pattern ID + if-else CFG rebuild; Python IDA CFG extract + Keystone codegen; IIIImmmyyy). (source: wiki/sources/descriptions/cdong1012__ollvm-unflattener.md) (source: wiki/sources/descriptions/JbvrgtonYT__ollvm-unflattener.md) (source: wiki/sources/descriptions/IIIImmmyyy__AntiOllvm.md)
-2. **Decompiler-time deflattening** — Hex-Rays microcode passes at lift time ([[d810-ng]]; [[hex-rays-deob]] — pattern-based expression simplify + dispatcher-driven CFF unflatten; RolfRolles; source: wiki/sources/descriptions/RolfRolles__HexRaysDeob.md); Emotet-specific CFF recovery via [[emotet-deobfuscator]] (Python IDA plugin; dispatcher register/status identification; flattened branch rewrite; ElvisBlue; source: wiki/sources/descriptions/ElvisBlue__emotet-deobfuscator.md).
+2. **Decompiler-time deflattening** — Hex-Rays microcode passes at lift time ([[d810]] — CKCat; Python IDA plugin; configurable rule-set framework for microcode rewrite deobfuscation; extensible for malware/game-security workflows; source: wiki/sources/descriptions/CKCat__d810.md; successor [[d810-ng]]); [[hex-rays-deob]] — pattern-based expression simplify + dispatcher-driven CFF unflatten; RolfRolles; source: wiki/sources/descriptions/RolfRolles__HexRaysDeob.md); Emotet-specific CFF recovery via [[emotet-deobfuscator]] (Python IDA plugin; dispatcher register/status identification; flattened branch rewrite; ElvisBlue; source: wiki/sources/descriptions/ElvisBlue__emotet-deobfuscator.md).
 3. **External OBPO backends** — closed-core simplification with open IDA client ([[obpo-plugin]]).
 4. **Python unflattener plugins** — extensible Fix OLLVM unflatten hooks ([[unflat]]; plugin development focus). (source: wiki/sources/descriptions/guheng-re__unflat.md) Ghidra in-process OLLVM CFF deobfuscation via [[pagalaxylab-ghidra-scripts]] (Python Ghidra scripts; PAGalaxyLab; source: wiki/sources/descriptions/PAGalaxyLab__ghidra_scripts.md).
 5. **Heuristic region detection** — loop/dominator analysis and BB complexity scoring ([[obfuscation-detection]]) before manual work; Ghidra function-body heuristic triage via [[ghidra-obfuscation-detection]] (Java Ghidra script; feature extraction flags obfuscated or unusually complex functions; Deatty; source: wiki/sources/descriptions/Deatty__Ghidra-Obfuscation-Detection.md); [[xrefgen]] (Python IDA; data-flow taint + call-graph analysis; flags CFF and opaque predicates while recovering indirect control-flow xrefs; XRefer-compatible export; seifreed; source: wiki/sources/descriptions/seifreed__xrefgen.md).
@@ -41,4 +42,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]

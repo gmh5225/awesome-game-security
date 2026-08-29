@@ -23,7 +23,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye](concepts/battleye.md)
 - [BYOVD](concepts/byovd.md)
 - [Compiled Wiki](concepts/compiled-wiki.md)
-- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic/simulated exec ([[ollvm-unflattener]], [[idadeflat]], [[anti-ollvm]] Arm64), d810, OBPO; pairs MBA recovery
+- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic/simulated exec ([[ollvm-unflattener]], [[idadeflat]], [[anti-ollvm]] Arm64), [[d810]]/[[d810-ng]], OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
 - [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[drmemory]]/[[tinyinst]]/[[river]]/[[mambo]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
@@ -793,6 +793,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
 - [UniversalHookX](entities/universalhookx.md) — universal DX9–12/OpenGL/Vulkan ImGui hook library (dummy-device vtable bootstrap; compile-time backend selection; bruhmoment21)
 - [Universal Dear ImGui Hook](entities/universal-dear-imgui-hook.md) — Windows D3D9–12 + partial Vulkan Dear ImGui overlay hook (backend-specific hooks; toggleable in-process menu; overlay prototyping / debug UI; Sh0ckFR)
+- [d810](entities/d810.md) — CKCat; Python IDA Pro microcode deobfuscation at decompilation time; configurable extensible rule sets (malware/game-security RE)
 - [d810-ng](entities/d810-ng.md) — d810 next-gen; deobfuscate at decompilation time (Fix OLLVM)
 - [daila](entities/daila.md) — ChatGPT decompiler AI assistant (DAILA; cheat / IDA Plugins; human–LLM RE research)
 - [DeathSleep](entities/death-sleep.md) — thread terminate/restore sleep obfuscation; page protection during no-execution (AC page protection)
