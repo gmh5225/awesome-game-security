@@ -108,7 +108,8 @@ sources:
   - wiki/sources/descriptions/U65535F__ThrottleStopPoC.md
   - wiki/sources/descriptions/CyberSecurityUP__ViGEmBus-Driver-Exploitation.md
   - wiki/sources/descriptions/CyberSecurityUP__UrekMazino-Malware.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/CaledoniaProject__drivers-binaries.md
+updated: 2026-08-29
 confidence: high
 ---
 
@@ -131,6 +132,8 @@ Physical-memory–oriented vulnerable-driver inventories such as [[physmem-drive
 Categorized third-party driver binary corpora such as [[drivers-and-shit]] (alfarom256; large `.sys` collection from OEM tools, utilities, and security products; reference corpus for vulnerable-driver research and exploit reproduction—binaries only, no PoC) complement hash-list inventories in the same lane. (source: wiki/sources/descriptions/alfarom256__drivers_and_shit.md)
 
 Curated signed vulnerable-driver binary collection such as [[vulnerable-drivers]] (KeServiceDescriptorTable; dozens of vendor `.sys` binaries exposing exploitable IOCTL interfaces, memory-access primitives, or other weaknesses; BYOVD cataloging and exploitation-surface analysis—binaries only, no PoC) sits in the same research corpus lane beside [[drivers-and-shit]]. (source: wiki/sources/descriptions/KeServiceDescriptorTable__vulnerable-drivers.md)
+
+Multi-vendor compiled `.sys` sample corpus such as [[drivers-binaries]] (CaledoniaProject; vendor kernel driver binaries plus CVE/report/exploit writeup reference links; practical samples for detection-rule, threat-hunting, and signed-driver-abuse defensive testing; defender-focused kernel attack-surface research—binaries only, no PoC) complements those curated corpora. (source: wiki/sources/descriptions/CaledoniaProject__drivers-binaries.md)
 
 Single-driver binary distribution such as [[cormem-sys-vulnerable-driver]] (KeServiceDescriptorTable; **`cormem.sys`**; memory R/W primitives for kernel-level access; BYOVD research binary) complements those curated corpora. (source: wiki/sources/descriptions/KeServiceDescriptorTable__cormem.sys-vulnerable-driver.md)
 
