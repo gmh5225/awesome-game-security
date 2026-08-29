@@ -902,6 +902,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
+- https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
 - https://github.com/mrexodia/ida-nexus-docker [Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus — runs ordered analysis prompts in isolation and exports audit trails]
 - https://github.com/mrexodia/retoolsync [WebSocket server and plugins (IDA, x64dbg, WinDbg, Binary Ninja, VS Code) to sync cursor navigation and goto requests across reverse-engineering sessions]
 - https://github.com/stevemk14ebr/RETools
@@ -1063,6 +1064,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/notsnakesilent/VMPStatic [A static VMProtect unpacker for PE files, supports VMProtect 1.x–3.x and rebuilding unpacked PE images]
 - https://github.com/milk-analyzer/vmpunpack [Generic x64 VMProtect/packer unpacker that drives samples through patched sogen emulation to OEP, dumps memory, and rebuilds PEs for IDA/Ghidra]
 - https://github.com/Lucyferek-nunu/vmp-unpacker [C++ dynamic VMProtect unpacker with anti-debug bypass, OEP discovery, and IAT repair]
+- https://github.com/whoamicrash/VMProtectDumper [Windows C tool to unpack VMProtect-protected PEs from memory with OEP/IAT recovery, dynamic exec-region harvesting, and pe-sieve orchestration]
 - https://github.com/tomhamidi97-arch/vmp-devirtualization-lab [Educational guide and lab notes on Android native-library VMProtect internals, dispatcher/handler recovery, and devirtualization workflows]
 - https://github.com/tomhamidi97-arch/frida-vmp-bypass [Frida boundary-hook writeup for reversing stacked VMProtect and OLLVM on Android via libc/JNI/Java exit monitoring]
 
@@ -2030,6 +2032,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/bbfox0703/Mydev-Cheat-Engine-Tables [CT]
 - https://github.com/Hexorg/CheatEngineTables [Collection of Cheat Engine tables curated from CE forums (offline-focused)]
 - https://github.com/antaresjay/freeplay [Rust Windows trainer that converts Cheat Engine .CT tables to TOML and runs Auto Assembler scripts]
+- https://github.com/abhijeetadarsh/CTTrainer [Standalone Windows ImGui/DX11 trainer that parses Cheat Engine .CT tables and reads, writes, and freezes values in attached 32/64-bit game processes]
 - https://github.com/inuNorii/Elden-Ring-CT-TGA [Elden Ring]
 - https://github.com/gmh5225/CE-remap-plugin [Remap]
 - https://github.com/gmh5225/overwatch-iat-fixer [Overwatch IAT Fixer]
