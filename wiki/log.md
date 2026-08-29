@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-29** — ingest `description:no1qq/RustBlox`: entity [[rustblox]] (no1qq; Rust Windows Roblox desktop launcher; isolated official-CDN install; FastFlags + egui/eframe dashboard; **TheWatcher** client-side watchdog scans cheat processes, suspicious memory, DLL injection, and script executors while Roblox runs; Discord Rich Presence; deep-link URIs; security-minded players wanting self-contained session protection); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[byfron-bypass]], [[roblox-cheats]], [[encryptic-roblox-anti-cheat]], [[shprotect-ac]], and [[wontree-rblx-dumper]].
+
 - **2026-08-29** — ingest `readme:categories`: Anti Cheat ~698 (+1; CasualX/[[obfstr]] Rust compile-time string crypter in String Crypter; Cheat ~2758 / Game Develop ~187 stable; 41 sections); refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-29** — ingest `description:CalebFenton/simplify`: entity [[simplify]] (CalebFenton; Java Android deobfuscation framework; virtual Dalvik execution + optimizer passes — constant propagation, dead-code removal, reflection cleanup; demo materials; obfuscated APK/DEX analysis; `[Java]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[jadx]], [[dalvikus]], [[dalivm]], [[deobfuscator]], and [[dexkit-android]].

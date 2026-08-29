@@ -2900,6 +2900,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rust-cheat-external-main](entities/rust-cheat-external-main.md) — Facepunch Rust external framework (Disline1337; Windows driver IOCTL memory R/W + usermode overlay + gameplay SDK helpers; UnityPlayer/GameAssembly module handling; driver-assisted external + AC attack-pattern research; cheat / game:rust [External])
 - [rust-dma-cheat](entities/rust-dma-cheat.md) — Facepunch Rust DMA cheat framework (IntelSDM; C++; ESP + recoil/FOV/lighting/admin-view mods; PCILeech/MemProcFS/Il2CppDumper/DMALibrary; hardware-assisted external cheat research; cheat / game:rust [DMA])
 - [rust-dll-crab](entities/rust-dll-crab.md) — Rust Windows DLL injector (multiple methods; Injection Testing; gmh5225)
+- [RustBlox](entities/rustblox.md) — Rust Windows Roblox launcher with TheWatcher client-side watchdog (cheat process/DLL injection/executor scan; isolated CDN install; FastFlags; egui dashboard; no1qq)
 - [SetWindowHookEx (ekknod)](entities/setwindowhookex.md) — SetWindowHookEx preinjected DLL research (C; hooking; Some Tricks / Windows Ring3; ekknod)
 - [setwindowshookex-injector](entities/setwindowshookex-injector.md) — SetWindowsHookExW injection-testing PoC (C/C++; hooking / modding / Unreal Engine; Injection Testing; gmh5225)
 - [simple-setwindowshookexw-injector](entities/simple-setwindowshookexw-injector.md) — SetWindowsHookExW DLL injector (Skengdo; C++; PE parsing + registry helpers + optional cert spoofing; window-class targeting; Injection Testing)
