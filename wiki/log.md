@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Bratah123/ElectronMS`: entity [[electronms]] (Bratah123; Java MapleStory KMS-316 private-server emulator; SQL schemas; JavaScript event/NPC scripts for bosses/party quests/progression; packet handling + server properties; MMORPG server-architecture RE; Private Server-KMS-316); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[azurev316]], [[spirit-ida-plugin]], [[spirit-ptcgo]], [[maplestory-server]], and [[mnwvs196]].
+
 - **2026-08-30** — ingest `description:Darlenepurpleblack444/Zygisk-Il2CppFucker`: entity [[zygisk-il2cppfucker]] (Darlenepurpleblack444; Zygisk Magisk module; fork of [[zygisk-il2cppdumper]]; Android Unity IL2CPP in-process RE engine; dump.cs incl. [[hybridclr]]; name-based class/field/method resolve; memory R/W, instance scan, `il2cpp_runtime_invoke`; Lua 5.4 + `.cmd` channel + overlay; C++/Gradle; security researchers / mobile game logic manipulation without external attach); cited on [[concepts/il2cpp]] and [[overviews/mobile-security]]; cross-linked [[zygisk-il2cppdumper]], [[frida-il2cpp-bridge]], [[bnm-android]], and [[il2cppdumpdroidgui]].
 
 - **2026-08-30** — ingest `readme:categories`: Cheat ~2763 (+2); Anti Cheat ~698 / Game Develop ~188 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
