@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:BossKoopa/BWSR`: entity [[bwsr]] (BossKoopa; cross-platform C inline hooking library for Arm64/Arm64e; iOS, Android, Linux, macOS; low-level patching primitives + multi-platform build paths; portable runtime code interception for security researchers / systems developers; cheat / Arm64 inline hooking); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[and64-inline-hook]], [[android-inline-hook-arm64]], [[dobby]], [[adbi]], and [[kittymemory]].
+
 - **2026-08-30** — ingest `description:Boyan-MILANOV/ropium`: entity [[ropium]] (Boyan-MILANOV; C++ core + Python bindings; gadget extract/analyze + semantic query chain builder; CLI + scriptable workflows; exploit dev / binary security education; cheat / ROP Generation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ropgadget]], [[ropgadget-rs]], [[exrop]], [[angrop]], and [[rop-compiler]].
 
 - **2026-08-30** — ingest `description:Bratah123/BattleAnalysis176`: entity [[battleanalysis176]] (Bratah123; C++ console; MapleStory v176 farming-performance estimator; pointer/offset memory reads; projected mesos/NX hourly gains; private-server / RE runtime economy metrics; cheat / game:maplestory [Battle Analysis]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[maplestory-v179-cheat-engine]], [[maple-research]], [[spirit-ida-plugin]], and [[electronms]].
