@@ -180,6 +180,7 @@ sources:
   - wiki/sources/descriptions/xxFURYWOLFxx__veh-dumper.md
   - wiki/sources/descriptions/t3ssellate__unmapper.md
   - wiki/sources/descriptions/pr701__fix-arxan.md
+  - wiki/sources/descriptions/Brentdevent__S2x.md
   - wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md
   - wiki/sources/descriptions/preludeorg__ThreatIntelligenceConsumer.md
   - wiki/sources/descriptions/xsj3n__x64-EXE-Packer.md
@@ -954,6 +955,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[lost-ark]] — Lost Ark MMORPG client memory-manipulation cheat sample (gmh5225; ESP / gameplay mods / automation) for studying title-specific UE MMORPG client-side protection and cheat-detection mechanisms (source: wiki/sources/descriptions/gmh5225__LostArk.md)
 - [[unmapper]] — automatic dumped-PE header repair so decompilers load cleanly (Dump Fix) (source: wiki/sources/descriptions/t3ssellate__unmapper.md)
 - [[fix-arxan]] — Arxan PE protector: loader info + decrypted working image for research (Dump Fix) (source: wiki/sources/descriptions/pr701__fix-arxan.md)
+- [[s2x]] — runtime Arxan anti-tamper bypass, code healing, and integrity-check neutralization in a COD MW2 (2009) client mod framework (Brentdevent; Anti Tamper / Integrity) (source: wiki/sources/descriptions/Brentdevent__S2x.md)
 - [[android-unpacker]] — Android packed-sample unpack tooling for malware RE (Sample Unpacker; handle samples carefully) (source: wiki/sources/descriptions/strazzere__android-unpacker.md)
 - [[mal-unpack-drv]] — experimental test-signed kernel driver for Windows malware sample unpacking (VM-only; Sample Unpacker) (source: wiki/sources/descriptions/hasherezade__mal_unpack_drv.md)
 - [[malicious-code-detection-bugu]] — Go gRPC microservices malware-scan platform (Bugu; file upload, hash verification, automated analysis; Protobuf gRPC+HTTP API; gmh5225; Malicious code detection and obfuscation) (source: wiki/sources/descriptions/gmh5225__Malicious-code-detection-bugu.md)
