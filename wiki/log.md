@@ -14,6 +14,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `readme:categories`: Cheat ~2764 / Anti Cheat ~701 (+1) / Game Network ~29 (+1) / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-30** — ingest `description:Blaumaus/le_chiffre`: entity [[le-chiffre]] (Blaumaus; C++ lightweight external CS:GO PoC; bunnyhop, triggerbot, aimbot, glow ESP, radar; educational memory-based manipulation + RE fundamentals; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[csgo-external-cheat]], [[csgo-cheats]], [[external-cheat-v3]], [[heck-csgo-external]], and [[echinoidea]].
 
 - **2026-08-30** — ingest `description:Bloom-Engine/engine`: entity [[bloom-engine]] (Bloom-Engine; TypeScript game engine; Perry LLVM AOT TypeScript→native; Rust core + wgpu across Metal/DX12/Vulkan/OpenGL/WebGPU; raylib-inspired 2D/3D API; Jolt Physics, glTF GPU skeletal animation, WGSL; npm-packaged TS surface; desktop/mobile/WASM; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[nightshade]], [[raylib]], [[engine]], and [[bgfx]].
