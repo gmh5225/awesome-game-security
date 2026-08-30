@@ -2628,6 +2628,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/redecorate/Holodori-Kernel-Bypass [Userspace emulation of Hololive Dreams usrdrv017964 kernel anti-cheat for Wine/Proton]
 - https://github.com/dazi2011/crossover-patcher [Experimental CrossOver patcher to improve compatibility with Windows games protected by anti-cheat]
 - https://github.com/CDJuaum/RunEXE [Python PE analyzer and Wine launcher that flags kernel anti-cheat/DRM blockers and auto-provisions prefixes and dependencies before running Windows games on Linux]
+- https://github.com/BlaMacfly/ArchMod [Native Rust/Tauri cheat panel for Steam games on Proton: launch Windows trainers in the correct prefix, scan memory natively, and share community address profiles]
 
 > Anti Screenshot
 - https://github.com/KANKOSHEV/NoScreen [Hide Window]
@@ -2860,6 +2861,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Poko-Apps/Il2cppDumpDroidGUI [Il2Cpp Dump GUI]
 - https://github.com/shalzuth/Il2CppRuntimeDumper [Il2Cpp Dump Runtime]
 - https://github.com/Perfare/Zygisk-Il2CppDumper [Il2Cpp Dump for Android Platform]
+- https://github.com/Darlenepurpleblack444/Zygisk-Il2CppFucker [Zygisk module for live IL2CPP metadata dumping, in-process memory editing, method invocation, and Lua scripting on Android Unity games]
 - https://github.com/kp7742/IL2CPPDumper [Il2Cpp Dump for Android Platform]
 - https://github.com/yukiarrr/Il2cppSpy [Unity IL2CPP Disassembler (for apk)]
 - https://github.com/djkaty/Il2CppInspector [Il2Cpp Dump]
