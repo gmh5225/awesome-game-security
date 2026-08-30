@@ -10,6 +10,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-30** — ingest `readme:categories`: Cheat ~2764 (+1; williballenthin/ida-settings IDA plugin settings manager in RE Tools) / Anti Cheat ~700 (+2; Charlie328402/Sentinel-Anti-Cheat NeoForge server-side MC mod + NaySurGithub/Amethyst PowerNukkitX Bedrock prediction AC); 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-30** — ingest `description:BossKoopa/BWSR`: entity [[bwsr]] (BossKoopa; cross-platform C inline hooking library for Arm64/Arm64e; iOS, Android, Linux, macOS; low-level patching primitives + multi-platform build paths; portable runtime code interception for security researchers / systems developers; cheat / Arm64 inline hooking); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[and64-inline-hook]], [[android-inline-hook-arm64]], [[dobby]], [[adbi]], and [[kittymemory]].
 
 - **2026-08-30** — ingest `description:Boyan-MILANOV/ropium`: entity [[ropium]] (Boyan-MILANOV; C++ core + Python bindings; gadget extract/analyze + semantic query chain builder; CLI + scriptable workflows; exploit dev / binary security education; cheat / ROP Generation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ropgadget]], [[ropgadget-rs]], [[exrop]], [[angrop]], and [[rop-compiler]].
