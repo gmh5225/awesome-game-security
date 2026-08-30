@@ -2800,6 +2800,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rAthena](entities/rathena.md) — Ragnarok Online server emulator (login/char/map; NPC/WoE/MySQL; [MMORPG])
 - [rAthenaCN](entities/rathenacn.md) — Chinese-localized rAthena fork (C/C++; asset pipelines / plugins / modding; cheat / game:ro; gmh5225)
 - [raylib](entities/raylib.md) — simple C/C++ videogame library (OpenGL / Vulkan; Game Develop / source)
+- [r3d](entities/r3d.md) — C/C++ 3D rendering extension for raylib (PBR, deferred/forward, shadow mapping, SSAO, bloom, decals, skeletal animation, particles; OpenGL pipeline; Game Engine / source)
 - [raytracing](entities/raytracing.md) — CUDA mesh ray tracing with BVH + PyTorch bindings (ashawkey; RayTracer)
 - [raybot-zero](entities/raybot-zero.md) — kernel-mode CS:GO cheat; C++ driver + C# loader; triggerbot, bunnyhop, glow, kernel key-state reads; no traditional usermode controller (R4YVEN; Kernel-mode)
 - [ravengine](entities/ravengine.md) — modern C++ ECS game engine (Vulkan via RGL; GameNetworkingSockets; CMake cross-platform; input/GUI/audio + resource packing; C++ 3D)
