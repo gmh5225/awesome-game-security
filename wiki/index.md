@@ -1451,6 +1451,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [go-detection-hyper-v](entities/go-detection-hyper-v.md) — Go Hyper-V VM detection (CPUID feature checks, timing, hypervisor presence; gmh5225; Hyper-v)
 - [GoDefender](entities/godefender.md) — Windows Go security toolkit (EvilBytecode; anti-debug, anti-VM, anti-DLL-injection, hook detection; modular internal components; low-level WinAPI; security-sensitive Go app hardening; Anti Debugging)
 - [goesp](entities/goesp.md) — cross-platform CS:GO ESP (danielkrupinski; modern C++; Dear ImGui overlay; memory-read entity ESP via game render path; Windows/Linux; cheat / game:csgo [Cross-platform])
+- [gojo-the-spire](entities/gojo-the-spire.md) — Java Slay the Spire Gojo Satoru character mod (cards/deck, assets, mod config; gameplay customization and character-mod dev learning; Bratah123; Slay The Spire Remastered Mod / Game Develop)
 - [goomba](entities/goomba.md) — Hex-Rays decompiler plugin; linear/non-linear MBA simplification; algebraic heuristics + optional fingerprint-oracle; Z3 soundness verification; IDA Pro / Hex-Rays workflows (HexRaysSA; Cheat Simplify MBA)
 - [goose-goose-duck-hack](entities/goose-goose-duck-hack.md) — Goose Goose Duck Unity IL2CPP internal cheat (ImGui overlay; dumped Assembly-CSharp + ACTk bypass; ESP/role reveal; gmh5225)
 - [GOverlay](entities/goverlay.md) — DirectX 9–12 hook overlay framework (Electron/Qt/CEF/WPF composite; IPC + shared memory; companion/stats UI)

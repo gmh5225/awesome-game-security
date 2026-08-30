@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Bratah123/GojoTheSpire`: entity [[gojo-the-spire]] (Bratah123; Java Slay the Spire mod; custom Gojo Satoru character, cards/deck, assets, mod config; gameplay customization and character-mod development; Slay The Spire Remastered Mod / Game Develop); cited on [[overviews/game-hacking]]; cross-linked [[sts2-kitlib]], [[spirit-ptcgo]], and [[spirit-ida-plugin]].
+
 - **2026-08-30** — ingest `description:Bratah123/Spirit-PTCGO`: entity [[spirit-ptcgo]] (Bratah123; Python PTCGO private-server reimplementation; card rules/effects, account/inventory/economy/shop, versus/tournaments, custom cosmetics, HTTP+game server, protobuf client protocol, card-bundle RE helpers, nginx/Caddy deploy; Private Server / Pokemon TCG Online); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[spirit-ida-plugin]], [[protobufs]], [[packet-sniffer]], and [[ds3os]].
 
 - **2026-08-30** — ingest `description:Bratah123/SpiritIDAPlugin`: entity [[spirit-ida-plugin]] (Bratah123; Python IDAPython IDA Pro plugin; MapleStory packet structure/header extraction, function output generation, text export for offline protocol docs; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[maple-research]], [[packet-sniffer]], [[ida-gameguard-str-dec]], and [[ce-tracer-ida]].
