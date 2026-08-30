@@ -1,0 +1,2212 @@
+Project Path: arc_williballenthin_ida-settings_hzihex2d
+
+Source Tree:
+
+```txt
+arc_williballenthin_ida-settings_hzihex2d
+├── ida-plugin.json
+├── plugin
+│   ├── entrypoint.py
+│   ├── main.py
+│   └── settings_editor
+│       ├── __init__.py
+│       ├── controller.py
+│       ├── editors.py
+│       ├── model.py
+│       └── view.py
+├── pyproject.toml
+├── readme.md
+├── src
+│   └── ida_settings
+│       ├── __init__.py
+│       ├── legacy.py
+│       └── py.typed
+└── tests
+    └── test_no_qt_at_import.py
+
+```
+
+`ida-plugin.json`:
+
+```json
+{
+  "IDAMetadataDescriptorVersion": 1,
+  "plugin": {
+    "name": "ida-settings-editor",
+    "version": "1.2.3",
+    "description": "Settings manager UI for IDA Pro plugins",
+    "entryPoint": "./plugin/entrypoint.py",
+    "authors": [{"name": "Willi Ballenthin", "email": "wballenthin@hex-rays.com"}],
+    "urls": {
+      "repository": "https://github.com/williballenthin/ida-settings"
+    },
+    "license": "Apache 2.0",
+    "idaVersions": ">=9.0",
+    "categories": [
+      "ui-ux-and-visualization"
+    ],
+    "pythonDependencies": ["ida-hcli", "ida-settings"],
+    "keywords": [
+      "settings",
+      "configuration",
+      "preferences",
+      "plugin-manager",
+      "ui",
+      "editor"
+    ]
+  }
+}
+
+```
+
+`plugin/entrypoint.py`:
+
+```py
+import logging
+import os
+
+import ida_expr
+import ida_idaapi
+import ida_kernwin
+
+logger = logging.getLogger(__name__)
+
+
+def should_load():
+    if not ida_kernwin.is_idaq():
+        return False
+
+    if os.environ.get("IDA_IS_INTERACTIVE") != "1":
+        return False
+
+    kernel_version: tuple[int, ...] = tuple(
+        int(part)
+        for part in ida_kernwin.get_kernel_version().split(".")
+        if part.isdigit()
+    ) or (0,)
+    if kernel_version < (9, 0):
+        logger.warning(
+            "IDA too old (must be 9.0+): %s", ida_kernwin.get_kernel_version()
+        )
+        return False
+
+    return True
+
+
+if should_load():
+    try:
+        from PyQt5.QtCore import Qt
+        from PyQt5.QtWidgets import QVBoxLayout
+    except ImportError:
+        from PySide6.QtCore import Qt
+        from PySide6.QtWidgets import QVBoxLayout
+
+    from settings_editor.controller import SettingsController
+    from settings_editor.model import SettingsModel
+    from settings_editor.view import settings_manager_widget_t
+
+    class settings_manager_form_t(ida_kernwin.PluginForm):
+        def __init__(
+            self,
+            caption: str = "Plugin Settings Manager",
+            form_registry: dict[str, "settings_manager_form_t"] | None = None,
+        ):
+            super().__init__()
+            self.TITLE = caption
+            self.form_registry = form_registry
+            self.model = None
+            self.view = None
+            self.controller = None
+
+        def OnCreate(self, form):
+            self.parent = self.FormToPyQtWidget(form)
+
+            self.model = SettingsModel()
+            self.view = settings_manager_widget_t(self.parent)
+            self.controller = SettingsController(self.model, self.view)
+
+            layout = self.parent.layout()
+            if layout is None:
+                layout = QVBoxLayout()
+                self.parent.setLayout(layout)
+
+            layout.addWidget(self.view)
+
+            if self.form_registry is not None:
+                self.form_registry[self.TITLE] = self
+
+        def select_plugin(self, plugin_name: str) -> bool:
+            if self.view is None:
+                return False
+            items = self.view.plugin_list.findItems(plugin_name, Qt.MatchExactly)
+            if not items:
+                return False
+            self.view.plugin_list.setCurrentItem(items[0])
+            return True
+
+        def OnClose(self, form):
+            if self.form_registry is not None:
+                self.form_registry.pop(self.TITLE, None)
+
+    class open_settings_handler_t(ida_kernwin.action_handler_t):
+        def __init__(self, plugmod: "settings_editor_plugmod_t"):
+            super().__init__()
+            self.plugmod = plugmod
+
+        def activate(self, ctx):
+            self.plugmod.show_settings_manager()
+            return 1
+
+        def update(self, ctx):
+            return ida_kernwin.AST_ENABLE_ALWAYS
+
+    class settings_editor_plugmod_t(ida_idaapi.plugmod_t):
+        ACTION_NAME = "settings_editor:open"
+        MENU_PATH_PLUGINS = "Edit/Plugins/"
+        MENU_PATH_SUBVIEWS = "View/Open subviews/"
+
+        def __init__(self):
+            super().__init__()
+            self.form_registry: dict[str, settings_manager_form_t] = {}
+            self.init()
+
+        IDC_FUNC_NAME = "ida_settings_show_plugin_settings"
+
+        def init(self):
+            self._register_actions()
+            self._register_idc_func()
+
+        def _register_actions(self):
+            action_desc = ida_kernwin.action_desc_t(
+                self.ACTION_NAME,
+                "Plugin Settings Manager",
+                open_settings_handler_t(self),
+                "",
+                "Open plugin settings manager",
+                -1,
+            )
+            ida_kernwin.register_action(action_desc)
+
+            ida_kernwin.attach_action_to_menu(
+                self.MENU_PATH_PLUGINS, self.ACTION_NAME, ida_kernwin.SETMENU_APP
+            )
+
+            ida_kernwin.attach_action_to_menu(
+                self.MENU_PATH_SUBVIEWS, self.ACTION_NAME, ida_kernwin.SETMENU_APP
+            )
+
+        def _unregister_actions(self):
+            ida_kernwin.detach_action_from_menu(
+                self.MENU_PATH_PLUGINS, self.ACTION_NAME
+            )
+            ida_kernwin.detach_action_from_menu(
+                self.MENU_PATH_SUBVIEWS, self.ACTION_NAME
+            )
+            ida_kernwin.unregister_action(self.ACTION_NAME)
+
+        def _register_idc_func(self):
+            def idc_show_settings(plugin_name: str) -> str:
+                self.show_settings_manager(plugin_name)
+                return plugin_name
+
+            if ida_expr.add_idc_func(
+                self.IDC_FUNC_NAME, idc_show_settings, (ida_expr.VT_STR,)
+            ):
+                logger.debug("registered %s IDC function", self.IDC_FUNC_NAME)
+            else:
+                logger.warning("failed to register %s IDC function", self.IDC_FUNC_NAME)
+
+        def _unregister_idc_func(self):
+            ida_expr.del_idc_func(self.IDC_FUNC_NAME)
+
+        def show_settings_manager(self, plugin_name: str = ""):
+            caption = "Plugin Settings Manager"
+
+            if caption in self.form_registry:
+                widget = ida_kernwin.find_widget(caption)
+                if widget:
+                    ida_kernwin.activate_widget(widget, True)
+                    if plugin_name:
+                        self.form_registry[caption].select_plugin(plugin_name)
+                    return
+
+            form = settings_manager_form_t(caption, self.form_registry)
+            form.Show(
+                caption,
+                options=(
+                    ida_kernwin.PluginForm.WOPN_TAB
+                    | ida_kernwin.PluginForm.WOPN_MENU
+                    | ida_kernwin.PluginForm.WOPN_RESTORE
+                    | ida_kernwin.PluginForm.WCLS_SAVE
+                ),
+            )
+
+            if plugin_name:
+                form.select_plugin(plugin_name)
+
+        def run(self, arg):
+            self.show_settings_manager()
+            return True
+
+        def term(self):
+            self._unregister_idc_func()
+            self._unregister_actions()
+
+    class settings_editor_plugin_t(ida_idaapi.plugin_t):
+        flags = ida_idaapi.PLUGIN_KEEP
+        comment = "Settings manager UI for IDA Pro plugins"
+        help = "Open via Edit/Plugins or View/Open subviews"
+        wanted_name = "Plugin Settings Manager"
+        wanted_hotkey = ""
+
+        def init(self):
+            return settings_editor_plugmod_t()
+
+        def run(self, arg):
+            pass
+
+        def term(self):
+            pass
+
+    def PLUGIN_ENTRY():
+        return settings_editor_plugin_t()
+
+else:
+
+    class settings_editor_nop_plugin_t(ida_idaapi.plugin_t):
+        flags = ida_idaapi.PLUGIN_HIDE | ida_idaapi.PLUGIN_UNL
+        wanted_name = "Plugin Settings Manager disabled"
+        comment = "Plugin Settings Manager is disabled for this IDA environment"
+        help = ""
+        wanted_hotkey = ""
+
+        def init(self):
+            return ida_idaapi.PLUGIN_SKIP
+
+    def PLUGIN_ENTRY():
+        return settings_editor_nop_plugin_t()
+
+```
+
+`plugin/main.py`:
+
+```py
+#!/usr/bin/env python3
+"""Standalone Qt application for testing the settings editor outside IDA Pro.
+
+This application loads the settings editor UI components without requiring IDA Pro.
+It uses the same MVC architecture as the IDA plugin but wraps it in a standalone
+QApplication instead of ida_kernwin.PluginForm.
+
+Usage:
+    python plugin/main.py
+"""
+
+import sys
+
+try:
+    from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget
+except ImportError:
+    from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+
+from settings_editor.controller import SettingsController
+from settings_editor.model import SettingsModel
+from settings_editor.view import settings_manager_widget_t
+
+
+class StandaloneSettingsWindow(QWidget):
+    """Standalone window for settings editor."""
+
+    def __init__(self):
+        """Initialize standalone settings window."""
+        super().__init__()
+        self.setWindowTitle("Plugin Settings Manager (Standalone)")
+        self.resize(900, 600)
+
+        self.model = SettingsModel()
+        self.view = settings_manager_widget_t(self)
+        self.controller = SettingsController(self.model, self.view)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.view)
+        self.setLayout(layout)
+
+
+def main():
+    """Main entry point for standalone application."""
+    app = QApplication(sys.argv)
+
+    window = StandaloneSettingsWindow()
+    window.show()
+
+    return app.exec() if hasattr(app, "exec") else app.exec_()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+```
+
+`plugin/settings_editor/controller.py`:
+
+```py
+"""Settings controller."""
+
+from settings_editor.model import SettingsModel
+from settings_editor.view import setting_editor_row_t, settings_manager_widget_t
+
+
+class SettingsController:
+    """Controller for settings manager."""
+
+    def __init__(self, model: SettingsModel, view: settings_manager_widget_t):
+        """Initialize controller."""
+        self.model = model
+        self.view = view
+        self.current_plugin = None
+
+        self._connect_signals()
+
+        self.model.load_plugins()
+
+    def _connect_signals(self):
+        """Connect model and view signals."""
+        self.model.pluginsLoaded.connect(self._on_plugins_loaded)
+
+        self.view.plugin_list.currentTextChanged.connect(self._on_plugin_selected)
+
+    def _on_plugins_loaded(self, plugins: list):
+        """Handle plugins loaded."""
+        self.view.plugin_list.clear()
+        if plugins:
+            self.view.plugin_list.addItems(plugins)
+            self.view.plugin_list.setCurrentRow(0)
+        else:
+            self.view.settings_editor.show_message("No plugins with settings found")
+
+    def _on_plugin_selected(self, plugin_name: str):
+        """Handle plugin selection."""
+        if not plugin_name:
+            self.view.settings_editor.clear_editors()
+            return
+
+        self.current_plugin = plugin_name
+        self.view.settings_editor.clear_editors()
+
+        try:
+            descriptors = self.model.get_plugin_settings(plugin_name)
+
+            if not descriptors:
+                self.view.settings_editor.show_message(
+                    "No settings defined for this plugin"
+                )
+                return
+
+            for descriptor in descriptors:
+                row = setting_editor_row_t(descriptor)
+
+                is_explicit = self.model.is_setting_explicit(
+                    plugin_name, descriptor.key
+                )
+
+                if is_explicit:
+                    try:
+                        value = self.model.get_setting_value(
+                            plugin_name, descriptor.key
+                        )
+                        row.set_value(value)
+                    except KeyError:
+                        pass
+                else:
+                    row.set_value(None)
+
+                row.set_explicit(is_explicit)
+
+                row.valueChanged.connect(
+                    lambda k, v, p=plugin_name: self._on_setting_value_changed(p, k, v)
+                )
+                row.deleteRequested.connect(
+                    lambda k, p=plugin_name: self._on_delete_requested(p, k)
+                )
+
+                self.view.settings_editor.add_editor_row(descriptor.key, row)
+
+        except Exception as e:
+            self.view.settings_editor.show_message(f"Error loading settings: {e}")
+
+    def _on_setting_value_changed(self, plugin_name: str, key: str, value):
+        """Handle setting value change."""
+        row = self.view.settings_editor.get_editor_row(key)
+        if not row:
+            return
+
+        try:
+            if value is None or value == "":
+                if row.descriptor.default is not None:
+                    self.model.delete_setting(plugin_name, key)
+                    row.hide_error()
+                    row.set_explicit(False)
+                    row.set_value(None)
+                else:
+                    row.show_error("Required setting cannot be empty")
+            else:
+                self.model.set_setting_value(plugin_name, key, value)
+                row.hide_error()
+                row.set_explicit(True)
+        except ValueError as e:
+            row.show_error(str(e))
+        except Exception as e:
+            row.show_error(f"Error: {e}")
+
+    def _on_delete_requested(self, plugin_name: str, key: str):
+        """Handle delete setting request."""
+        row = self.view.settings_editor.get_editor_row(key)
+        if not row:
+            return
+
+        try:
+            self.model.delete_setting(plugin_name, key)
+            row.hide_error()
+            row.set_explicit(False)
+            row.set_value(None)
+        except ValueError as e:
+            row.show_error(str(e))
+        except Exception as e:
+            row.show_error(f"Error: {e}")
+
+```
+
+`plugin/settings_editor/editors.py`:
+
+```py
+"""Setting editor widget helpers."""
+
+from typing import Callable, Tuple
+
+try:
+    from PyQt5.QtWidgets import QCheckBox, QComboBox, QLineEdit, QWidget
+except ImportError:
+    from PySide6.QtWidgets import QCheckBox, QComboBox, QLineEdit, QWidget
+
+from hcli.lib.ida.plugin import PluginSettingDescriptor
+
+
+def create_boolean_editor(
+    descriptor: PluginSettingDescriptor,
+) -> Tuple[QWidget, Callable, Callable]:
+    """Create a checkbox editor for boolean settings.
+
+    Returns:
+        (widget, get_value_func, set_value_func)
+    """
+    checkbox = QCheckBox()
+
+    def get_value():
+        return checkbox.isChecked()
+
+    def set_value(value):
+        if value is None:
+            checkbox.setChecked(
+                bool(descriptor.default) if descriptor.default is not None else False
+            )
+        else:
+            checkbox.setChecked(bool(value))
+
+    return checkbox, get_value, set_value
+
+
+def create_string_editor(
+    descriptor: PluginSettingDescriptor,
+) -> Tuple[QWidget, Callable, Callable]:
+    """Create a text input or combobox editor for string settings.
+
+    Returns:
+        (widget, get_value_func, set_value_func)
+    """
+    if descriptor.choices:
+        combobox = QComboBox()
+        combobox.setEditable(False)
+        combobox.addItem("")
+        combobox.addItems(descriptor.choices)
+
+        def get_value():
+            text = combobox.currentText()
+            return text if text else None
+
+        def set_value(value):
+            if value is None or value == "":
+                combobox.setCurrentIndex(0)
+            else:
+                index = combobox.findText(str(value))
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+
+        return combobox, get_value, set_value
+    else:
+        lineedit = QLineEdit()
+        if descriptor.default is not None:
+            lineedit.setPlaceholderText(str(descriptor.default))
+
+        def get_value():
+            text = lineedit.text()
+            return text if text else None
+
+        def set_value(value):
+            if value is None or value == "":
+                lineedit.clear()
+            else:
+                lineedit.setText(str(value))
+
+        return lineedit, get_value, set_value
+
+
+def create_editor_for_setting(
+    descriptor: PluginSettingDescriptor,
+) -> Tuple[QWidget, Callable, Callable]:
+    """Create appropriate editor widget for setting type.
+
+    Returns:
+        (widget, get_value_func, set_value_func)
+    """
+    if descriptor.type == "boolean":
+        return create_boolean_editor(descriptor)
+    elif descriptor.type == "string":
+        return create_string_editor(descriptor)
+    else:
+        raise ValueError(f"Unsupported setting type: {descriptor.type}")
+
+```
+
+`plugin/settings_editor/model.py`:
+
+```py
+"""Settings data model."""
+
+try:
+    from PyQt5.QtCore import QObject
+    from PyQt5.QtCore import pyqtSignal as Signal
+except ImportError:
+    from PySide6.QtCore import QObject, Signal
+
+from hcli.lib.ida.plugin import ChoiceValueError, PluginSettingDescriptor
+from hcli.lib.ida.plugin.install import (
+    get_metadata_from_plugin_directory,
+    get_plugin_directory,
+)
+from hcli.lib.ida.plugin.settings import (
+    del_plugin_setting,
+    get_plugin_setting,
+    set_plugin_setting,
+)
+
+
+class SettingsModel(QObject):
+    """Model for plugin settings data."""
+
+    pluginsLoaded = Signal(list)
+    settingChanged = Signal(str, str, object)
+    settingDeleted = Signal(str, str)
+    validationError = Signal(str, str, str)
+
+    def __init__(self):
+        """Initialize settings model."""
+        super().__init__()
+        self._plugins = []
+        self._plugin_metadata = {}
+
+    def load_plugins(self):
+        """Enumerate installed plugins with settings."""
+        self._plugins = []
+        self._plugin_metadata = {}
+
+        from pathlib import Path
+
+        from hcli.lib.ida import get_ida_user_dir
+
+        ida_user_dir = Path(get_ida_user_dir())
+        plugins_dir = ida_user_dir / "plugins"
+
+        if not plugins_dir.exists():
+            self.pluginsLoaded.emit([])
+            return
+
+        for entry in plugins_dir.iterdir():
+            if not entry.is_dir():
+                continue
+
+            metadata_file = entry / "ida-plugin.json"
+            if not metadata_file.exists():
+                continue
+
+            try:
+                metadata = get_metadata_from_plugin_directory(entry)
+                if metadata.plugin.settings:
+                    self._plugins.append(entry.name)
+                    self._plugin_metadata[entry.name] = metadata
+            except Exception:
+                continue
+
+        self._plugins.sort()
+        self.pluginsLoaded.emit(self._plugins)
+
+    def get_plugin_settings(self, plugin_name: str) -> list[PluginSettingDescriptor]:
+        """Get all setting descriptors for a plugin."""
+        if plugin_name not in self._plugin_metadata:
+            plugin_path = get_plugin_directory(plugin_name)
+            metadata = get_metadata_from_plugin_directory(plugin_path)
+            self._plugin_metadata[plugin_name] = metadata
+
+        return self._plugin_metadata[plugin_name].plugin.settings
+
+    def get_setting_value(self, plugin_name: str, key: str) -> str | bool:
+        """Get current value (or default) for a setting."""
+        try:
+            return get_plugin_setting(plugin_name, key)
+        except KeyError:
+            descriptors = self.get_plugin_settings(plugin_name)
+            for desc in descriptors:
+                if desc.key == key:
+                    return desc.default
+            raise KeyError(f"Setting not found: {plugin_name}.{key}")
+
+    def set_setting_value(self, plugin_name: str, key: str, value: str | bool):
+        """Validate and set a setting value."""
+        descriptors = self.get_plugin_settings(plugin_name)
+        descriptor = None
+        for desc in descriptors:
+            if desc.key == key:
+                descriptor = desc
+                break
+
+        if descriptor is None:
+            raise KeyError(f"Setting not found: {plugin_name}.{key}")
+
+        if descriptor.type == "string" and not isinstance(value, str):
+            raise ValueError(f"Expected string, got {type(value).__name__}")
+        elif descriptor.type == "boolean" and not isinstance(value, bool):
+            raise ValueError(f"Expected boolean, got {type(value).__name__}")
+
+        try:
+            descriptor.validate_value(value)
+        except ChoiceValueError as e:
+            choices_str = ", ".join(e.choices)
+            raise ValueError(f"Must be one of: {choices_str}") from e
+        except ValueError as e:
+            raise ValueError(str(e)) from e
+
+        set_plugin_setting(plugin_name, key, value)
+        self.settingChanged.emit(plugin_name, key, value)
+
+    def delete_setting(self, plugin_name: str, key: str):
+        """Remove explicit setting, revert to default."""
+        descriptors = self.get_plugin_settings(plugin_name)
+        descriptor = None
+        for desc in descriptors:
+            if desc.key == key:
+                descriptor = desc
+                break
+
+        if descriptor is None:
+            raise KeyError(f"Setting not found: {plugin_name}.{key}")
+
+        if descriptor.required and descriptor.default is None:
+            raise ValueError("Cannot delete required setting without default")
+
+        del_plugin_setting(plugin_name, key)
+        self.settingDeleted.emit(plugin_name, key)
+
+    def is_setting_explicit(self, plugin_name: str, key: str) -> bool:
+        """Check if setting is explicitly set vs using default."""
+        from hcli.lib.ida import get_ida_config
+
+        config = get_ida_config()
+        if plugin_name not in config.plugins:
+            return False
+
+        plugin_config = config.plugins[plugin_name]
+        return key in plugin_config.settings
+
+```
+
+`plugin/settings_editor/view.py`:
+
+```py
+"""Settings view widgets."""
+
+try:
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtCore import pyqtSignal as Signal
+    from PyQt5.QtWidgets import (
+        QComboBox,
+        QHBoxLayout,
+        QLabel,
+        QLineEdit,
+        QListWidget,
+        QPushButton,
+        QScrollArea,
+        QSplitter,
+        QVBoxLayout,
+        QWidget,
+    )
+except ImportError:
+    from PySide6.QtCore import Qt, Signal
+    from PySide6.QtWidgets import (
+        QComboBox,
+        QHBoxLayout,
+        QLabel,
+        QLineEdit,
+        QListWidget,
+        QPushButton,
+        QScrollArea,
+        QSplitter,
+        QVBoxLayout,
+        QWidget,
+    )
+
+from hcli.lib.ida.plugin import PluginSettingDescriptor
+
+from settings_editor.editors import create_editor_for_setting
+
+
+class setting_editor_row_t(QWidget):
+    """Widget for editing a single setting."""
+
+    valueChanged = Signal(str, object)
+    deleteRequested = Signal(str)
+
+    def __init__(self, descriptor: PluginSettingDescriptor, parent=None):
+        """Initialize setting editor row."""
+        super().__init__(parent)
+        self.descriptor = descriptor
+        self._setup_ui()
+
+    def _setup_ui(self):
+        """Setup UI components."""
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 5, 0, 5)
+
+        row_layout = QHBoxLayout()
+        row_layout.setSpacing(10)
+
+        self.name_label = QLabel(self.descriptor.name)
+        self.name_label.setMinimumWidth(100)
+        self.name_label.setMaximumWidth(100)
+        self.name_label.setWordWrap(True)
+        self.name_label.setAlignment(Qt.AlignTop)
+        row_layout.addWidget(self.name_label)
+
+        editor_container = QVBoxLayout()
+        editor_container.setSpacing(3)
+
+        self.editor_widget, self._get_value, self._set_value = (
+            create_editor_for_setting(self.descriptor)
+        )
+        editor_container.addWidget(self.editor_widget)
+
+        if self.descriptor.type == "boolean":
+            self.editor_widget.stateChanged.connect(self._on_value_changed)
+        elif isinstance(self.editor_widget, QLineEdit):
+            self.editor_widget.textChanged.connect(self._on_value_changed)
+        elif isinstance(self.editor_widget, QComboBox):
+            self.editor_widget.currentTextChanged.connect(self._on_value_changed)
+
+        if self.descriptor.documentation:
+            self.doc_label = QLabel(self.descriptor.documentation)
+            self.doc_label.setStyleSheet("color: gray; font-size: 10px;")
+            self.doc_label.setWordWrap(True)
+            editor_container.addWidget(self.doc_label)
+
+        self.default_label = None
+        if self.descriptor.default is not None:
+            default_text = str(self.descriptor.default)
+            if self.descriptor.type == "boolean":
+                default_text = "true" if self.descriptor.default else "false"
+            self.default_label = QLabel(
+                f'<span style="color: gray; font-size: 10px;">default: {default_text}</span>'
+            )
+            self.default_label.setVisible(False)
+            editor_container.addWidget(self.default_label)
+
+        self.error_label = QLabel()
+        self.error_label.setStyleSheet("color: red; font-size: 10px;")
+        self.error_label.setWordWrap(True)
+        self.error_label.setVisible(False)
+        editor_container.addWidget(self.error_label)
+
+        row_layout.addLayout(editor_container, 1)
+
+        self.delete_button = QPushButton("✖")
+        self.delete_button.setMinimumWidth(40)
+        self.delete_button.setMaximumWidth(40)
+        self.delete_button.clicked.connect(
+            lambda: self.deleteRequested.emit(self.descriptor.key)
+        )
+
+        if self.descriptor.required and self.descriptor.default is None:
+            self.delete_button.setEnabled(False)
+            self.delete_button.setToolTip("Required settings cannot be deleted")
+
+        row_layout.addWidget(self.delete_button, alignment=Qt.AlignTop)
+
+        main_layout.addLayout(row_layout)
+        self.setLayout(main_layout)
+
+    def _on_value_changed(self):
+        """Handle value change."""
+        value = self._get_value()
+        self.valueChanged.emit(self.descriptor.key, value)
+
+    def get_value(self):
+        """Get current editor value."""
+        return self._get_value()
+
+    def set_value(self, value):
+        """Set editor value."""
+        self._set_value(value)
+
+    def show_error(self, message: str):
+        """Show error message."""
+        self.error_label.setText(f"⚠ {message}")
+        self.error_label.setVisible(True)
+
+    def hide_error(self):
+        """Hide error message."""
+        self.error_label.setVisible(False)
+
+    def set_explicit(self, is_explicit: bool):
+        """Enable/disable delete button and show/hide default label based on explicit setting."""
+        if self.descriptor.required and self.descriptor.default is None:
+            self.delete_button.setEnabled(False)
+            self.delete_button.setToolTip("Required settings cannot be deleted")
+        else:
+            self.delete_button.setEnabled(is_explicit)
+            if is_explicit:
+                self.delete_button.setToolTip(
+                    "Delete this setting to revert to default value"
+                )
+            else:
+                self.delete_button.setToolTip("")
+
+        if self.default_label:
+            self.default_label.setVisible(not is_explicit)
+
+
+class settings_editor_view_t(QScrollArea):
+    """Scrollable area for settings editors."""
+
+    def __init__(self, parent=None):
+        """Initialize settings editor view."""
+        super().__init__(parent)
+        self.setWidgetResizable(True)
+        self.editor_rows = {}
+
+        self.content_widget = QWidget()
+        self.layout = QVBoxLayout()
+        self.layout.addStretch()
+        self.content_widget.setLayout(self.layout)
+        self.setWidget(self.content_widget)
+
+    def clear_editors(self):
+        """Clear all editor rows."""
+        for row in self.editor_rows.values():
+            row.deleteLater()
+        self.editor_rows = {}
+
+    def add_editor_row(self, key: str, row: setting_editor_row_t):
+        """Add an editor row."""
+        self.editor_rows[key] = row
+        self.layout.insertWidget(self.layout.count() - 1, row)
+
+    def get_editor_row(self, key: str) -> setting_editor_row_t:
+        """Get editor row by key."""
+        return self.editor_rows.get(key)
+
+    def show_message(self, message: str):
+        """Show a message in the editor area."""
+        self.clear_editors()
+        label = QLabel(message)
+        label.setStyleSheet("color: gray; padding: 20px;")
+        label.setAlignment(Qt.AlignCenter)
+        self.layout.insertWidget(0, label)
+
+
+class plugin_list_view_t(QListWidget):
+    """List widget for displaying plugins."""
+
+    def __init__(self, parent=None):
+        """Initialize plugin list view."""
+        super().__init__(parent)
+
+
+class settings_manager_widget_t(QWidget):
+    """Main settings manager widget."""
+
+    def __init__(self, parent=None):
+        """Initialize settings manager widget."""
+        super().__init__(parent)
+        self._setup_ui()
+
+    def _setup_ui(self):
+        """Setup UI components."""
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        splitter = QSplitter(Qt.Horizontal)
+
+        self.plugin_list = plugin_list_view_t()
+        self.plugin_list.setMaximumWidth(250)
+        splitter.addWidget(self.plugin_list)
+
+        self.settings_editor = settings_editor_view_t()
+        splitter.addWidget(self.settings_editor)
+
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 3)
+
+        layout.addWidget(splitter)
+        self.setLayout(layout)
+
+```
+
+`pyproject.toml`:
+
+```toml
+[project]
+name = "ida-settings"
+version = "3.5.1"
+description = "Fetch configuration values for IDA Pro plugins"
+readme = "readme.md"
+authors = [
+    { name = "Willi Ballenthin", email = "wballenthin@hex-rays.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "ida-hcli>=0.14.2"
+]
+
+[build-system]
+requires = ["uv_build>=0.8.6,<0.9.0"]
+build-backend = "uv_build"
+
+```
+
+`readme.md`:
+
+```md
+# ida-settings
+
+ida-settings is a Python library used by IDA Pro plugins to fetch configuration values from the shared settings infrastructure.
+
+During plugin installation, [hcli](https://hcli.docs.hex-rays.com/) prompts users for the configuration values and stores them in `ida-config.json`.
+Subsequently, users can invoke hcli (or later, the IDA Pro GUI) to update their configuration.
+This is the library that plugins use to fetch the configuration values.
+
+For example, within an IDA Pro plugin:
+
+```py
+import ida_settings
+
+api_key = ida_settings.get_current_plugin_setting("openai_key")
+```
+
+### API reference
+
+```
+def get_current_plugin_setting(key: str) -> str | bool
+```
+
+Fetch the setting value identified by `key`, raising `KeyError` if its not found.
+This setting should be declared in the current plugin's `ida-plugin.json` file.
+
+Changing of configuration values should be done via hcli or the IDA Pro GUI.
+However, there are also `set`/`del`/`has`/`list` routines for programmatic access.
+
+
+### Notes
+
+- this library relies on the IDA Pro's specific plugin environment to identify the current plugin; therefore, this library doesn't work outside of IDA Pro.
+- plugins shouldn't try to reach into `ida-config.json` themselves, because in the future, we may introduce cascading settings, a la VS Code.
+
+## IDA Settings Editor Plugin
+
+This repository also includes a graphical settings manager plugin for IDA Pro.
+
+Install it with:
+
+```bash
+hcli plugin install ida-settings-editor
+```
+
+### Features
+
+- Browse all plugins with settings
+- Edit settings with appropriate UI controls
+- Immediate validation and feedback
+- Revert to defaults
+- Dockable/floating window
+
+### Usage
+
+Open via:
+- Edit → Plugins → Plugin Settings Manager
+- View → Open subviews → Plugin Settings Manager
+
+Other plugins can open the settings UI focused on a specific plugin via IDC:
+
+```py
+import idc
+idc.eval_idc('ida_settings_show_plugin_settings("my-plugin-name")')
+```
+
+### Integration with HCLI
+
+HCLI-compatible IDA plugins can declare settings that are set/fetched with ida-settings. An `ida-plugin.json` file
+may have a settings block like:
+
+```json
+    "settings": [
+      {
+        "key": "required_api_key",
+        "type": "string",
+        "required": true,
+        "name": "Demo API Key",
+        "documentation": "Required API key for authentication (cannot be deleted)"
+      },
+      {
+        "key": "key1",
+        "type": "string",
+        "required": false,
+        "default": "default-value",
+        "name": "Demo String Setting",
+        "documentation": "A demo string setting to test the settings editor"
+      },
+      {
+        "key": "key2",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "name": "Demo Boolean Setting",
+        "documentation": "A demo boolean setting to test the settings editor"
+      },
+      {
+        "key": "log_level",
+        "type": "string",
+        "required": false,
+        "default": "info",
+        "name": "Demo Log Level",
+        "documentation": "Logging verbosity level",
+        "choices": ["debug", "info", "warning", "error"]
+      },
+      {
+        "key": "api_endpoint",
+        "type": "string",
+        "required": false,
+        "default": "https://api.example.com",
+        "name": "Demo API Endpoint",
+        "documentation": "URL for the API endpoint (must start with https://)",
+        "validation_pattern": "^https://.*$"
+      },
+      {
+        "key": "enable_debug_mode",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "name": "Demo Enable Debug Mode",
+        "documentation": "Enable verbose debug logging and diagnostics"
+      },
+      {
+        "key": "timeout",
+        "type": "string",
+        "required": true,
+        "default": "30",
+        "name": "Demo Timeout",
+        "documentation": "Request timeout in seconds (must be a positive integer)",
+        "validation_pattern": "^[1-9][0-9]*$"
+      }
+    ],
+    ...
+```
+
+and HCLI will prompt for the settings during installation:
+
+```
+configure 5 settings:
+? Demo String Setting default-value
+? Demo Boolean Setting No
+? Demo API Endpoint https://api.example.com
+? Demo Enable Debug Mode No
+? Demo Timeout 30
+Installed plugin: demo-settings==1.0.0
+```
+
+```
+
+`src/ida_settings/__init__.py`:
+
+```py
+import logging
+
+from hcli.lib.ida.plugin.settings import (
+    del_current_plugin_setting,
+    del_plugin_setting,
+    get_current_plugin,
+    get_current_plugin_setting,
+    get_plugin_setting,
+    has_current_plugin_setting,
+    has_plugin_setting,
+    set_current_plugin_setting,
+    set_plugin_setting,
+)
+from hcli.lib.ida.plugin.settings import (
+    list_current_plugin_settings as _list_current_plugin_settings,
+)
+
+logger = logging.getLogger(__name__)
+
+try:
+    from .legacy import IDASettings, PermissionError
+except (ImportError, NotImplementedError) as e:
+    logger.warning("failed to import legacy ida-settings: %s", e)
+
+
+__all__ = [
+    "del_current_plugin_setting",
+    "get_current_plugin_setting",
+    "has_current_plugin_setting",
+    "set_current_plugin_setting",
+    "list_current_plugin_settings",
+    "IDASettings",
+    "PermissionError",
+    "PluginSettings",
+    "get_current_plugin_settings",
+]
+
+
+def list_current_plugin_settings() -> list[dict]:
+    descriptors = _list_current_plugin_settings()
+    return [
+        {
+            "key": d.key,
+            "type": d.type,
+            "default": d.default,
+            "required": d.required,
+            "documentation": d.documentation,
+            "choices": d.choices,
+        }
+        for d in descriptors
+    ]
+
+
+class PluginSettings:
+    def __init__(self, plugin_name: str):
+        self._plugin_name = plugin_name
+
+    def get_setting(self, key: str) -> str | bool:
+        return get_plugin_setting(self._plugin_name, key)
+
+    def del_setting(self, key: str) -> None:
+        return del_plugin_setting(self._plugin_name, key)
+
+    def has_setting(self, key: str) -> bool:
+        return has_plugin_setting(self._plugin_name, key)
+
+    def set_setting(self, key: str, value: str | bool) -> None:
+        return set_plugin_setting(self._plugin_name, key, value)
+
+
+def get_current_plugin_settings() -> PluginSettings:
+    return PluginSettings(get_current_plugin())
+
+```
+
+`src/ida_settings/legacy.py`:
+
+```py
+"""
+ida_settings provides a mechanism for settings and fetching
+configration values for IDAPython scripts and plugins.
+Configurations are namespaced by plugin name,
+and scoped to the global system, current user,
+working directory, or current IDB file. Configurations
+can be exported and imported using an .ini-style intermediate
+representation.
+
+Example fetching a configuration value:
+
+    settings = IDASettings("MSDN-doc")
+    if settings["verbosity"] == "high":
+        ...
+
+Example setting a global configuration value:
+
+    settings = IDASettings("MSDN-doc")
+    settings.system["verbosity"] = "high"
+
+Example setting a working directory configuration value:
+
+    settings = IDASettings("MSDN-doc")
+    settings.directory["verbosity"] = "high"
+
+Use the properties "system", "user", "directory" and "idb"
+to scope configuration accesses and mutations to the global
+system, current user, working directory, or current IDB file.
+
+Plugins that write settings should pick the appropriate
+scope for their settings. Plugins that read settings should
+fetch them from the default scope. This allows for precedence
+of scopes, such as the current IDB over system-wide configuration.
+For example:
+
+    settings = IDASettings("MSDN-doc")
+    # when writing, use a scope:
+    settings.user["verbosity"] = "high"
+
+    # when reading, use the default scope:
+    settings["verbosity"] --> "high"
+
+Generally, treat a settings instance like a dictionary. For example:
+
+    settings = IDASettings("MSDN-doc")
+    "verbosity" in settings.user --> False
+    settings.user["verbosity"] = "high"
+    settings.user["verbosity"] --> "high"
+    settings.user.keys()       --> ["verbosity"]
+    settings.user.values()     --> ["high"]
+    settings.user.items()      --> [("verbosity", "high')]
+
+The value of a particular settings entry must be a JSON-encodable
+value. For example, these are fine:
+
+    settings = IDASettings("MSDN-doc")
+    settings.user["verbosity"] = "high"
+    settings.user["count"] = 1
+    settings.user["percentage"] = 0.75
+    settings.user["filenames"] = ["a.txt", "b.txt"]
+    settings.user["aliases"] = {"bp": "breakpoint", "g": "go"}
+
+and this is not:
+
+    settings.user["object"] = hashlib.md5()      # this is not JSON-encodable
+
+Enumerate the plugin names for the various levels using the
+IDASettings class properties:
+
+    IDASettings.get_system_plugin_names()     --> ["plugin-1", "plugin-2"]
+    IDASettings.get_user_plugin_names()       --> ["plugin-3", "plugin-4"]
+    IDASettings.get_directory_plugin_names()  --> ["plugin-5", "plugin-6"]
+    IDASettings.get_idb_plugin_names()        --> ["plugin-7", "plugin-8"]
+
+This module is a single file that you can include in IDAPython
+plugin module or scripts.
+
+It depends on ida-netnode, which you can download here:
+https://github.com/williballenthin/ida-netnode
+
+This project is licensed under the Apache 2.0 license.
+
+Author: Willi Ballenthin <william.ballenthin@fireeye.com>
+"""
+
+import abc
+import datetime
+import json
+import os
+import sys
+import warnings
+
+try:
+    import idaapi  # noqa: F401
+    import idc
+    import netnode
+except ImportError:
+    pass
+
+
+# we'll use a function here to avoid polluting our global variable namespace.
+def import_qtcore():
+    """
+    Force loading of IDA's Qt bindings.
+    Supports PyQt5 and PySide6.
+    """
+    has_ida = False
+    try:
+        import idaapi
+
+        has_ida = True
+    except ImportError:
+        has_ida = False
+
+    if has_ida:
+        old_path = sys.path[:]
+        try:
+            ida_python_path = os.path.dirname(idaapi.__file__)
+            sys.path.insert(0, ida_python_path)
+            try:
+                from PyQt5 import QtCore
+
+                return QtCore
+            except ImportError:
+                from PySide6 import QtCore
+
+                return QtCore
+        finally:
+            sys.path = old_path
+    else:
+        try:
+            from PyQt5 import QtCore
+
+            return QtCore
+        except ImportError:
+            pass
+
+        try:
+            from PySide6 import QtCore
+
+            return QtCore
+        except ImportError:
+            pass
+
+        raise ImportError("No module named PyQt5 or PySide6")
+
+
+_QTCORE = None
+
+
+def _qtcore():
+    """Return QtCore, importing the binding on first use.
+
+    Deliberately *not* called at module scope. ``ida_settings/__init__`` imports
+    this module for ``IDASettings``, so a module-scope ``import_qtcore()`` makes
+    every consumer of the modern hcli-backed API load Qt as a side effect --
+    even though that API touches no Qt at all.
+
+    Inside a non-GUI IDA that is fatal rather than merely wasteful: IDA answers
+    the PyQt5 import with its own compatibility shim, which constructs a
+    QMessageBox (<IDA>/python/PyQt5/utils.py confirm_decision). A QWidget with
+    no QApplication calls qFatal(), so the process dies with SIGABRT. That is an
+    abort(), not an exception, so the ``except (ImportError, NotImplementedError)``
+    around this module's import cannot catch it.
+
+    Every QtCore use in this module is inside a function, so deferring costs
+    nothing.
+    """
+    global _QTCORE
+    if _QTCORE is None:
+        _QTCORE = import_qtcore()
+    return _QTCORE
+
+
+def __getattr__(name):
+    # PEP 562: keep ``ida_settings.legacy.QtCore`` working for external
+    # callers, resolving it on first access rather than at import.
+    if name == "QtCore":
+        return _qtcore()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+CONFIG_FILE_NANE = ".ida-settings.ini"
+IDA_SETTINGS_ORGANIZATION = "IDAPython"
+IDA_SETTINGS_APPLICATION = "IDA-Settings"
+
+
+def deprecated(func):
+    """Decorator to mark functions as deprecated."""
+
+    def wrapper(*args, **kwargs):
+        warnings.warn(
+            f"{func.__name__} is deprecated and will be removed in a future version. "
+            "Please migrate to the new ida_settings API.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
+
+
+def validate_key(key):
+    if not isinstance(key, str):
+        raise TypeError("key must be str")
+
+
+def validate_value(value):
+    if isinstance(value, bytes):
+        raise TypeError("value cannot be bytes")
+
+    try:
+        _ = json.dumps(value)
+    except Exception:
+        raise TypeError("value cannot be json encoded")
+
+
+# enforce methods required by settings providers
+class IDASettingsInterface(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def get_value(self, key):
+        """
+        Fetch the settings value with the given key, or raise KeyError.
+
+        type key: basestring
+        rtype value: Union[basestring, int, float, List, Dict]
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def set_value(self, key, value):
+        """
+        Set the settings value with the given key.
+
+        type key: basestring
+        type value: Union[basestring, int, float, List, Dict]
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def del_value(self, key):
+        """
+        Remove the settings value with the given key.
+        Does not raise an error if the key does not already exist.
+
+        type key: basestring
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_keys(self):
+        """
+        Fetch an iterable of the settings keys, which are strings.
+
+        rtype: Iterable[basestring]
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def clear(self):
+        """
+        Delete all settings for this settings instance.
+
+        rtype: None
+        """
+        raise NotImplementedError
+
+
+def validate(s):
+    # the slash character is used by QSettings to denote a subgroup
+    # we want to have a single nested structure of settings
+    if "/" in s:
+        return False
+    if "\\" in s:
+        # QSettings automatically translates '\' to '/'
+        return False
+    return True
+
+
+# provide base constructor args required by settings providers
+class IDASettingsBase(IDASettingsInterface):
+    def __init__(self, plugin_name):
+        super(IDASettingsBase, self).__init__()
+        if not validate(plugin_name):
+            raise RuntimeError("invalid plugin name")
+        self._plugin_name = plugin_name
+
+
+# allow IDASettings to look like dicts
+class DictMixin:
+    def __getitem__(self, key):
+        validate_key(key)
+        return self.get_value(key)
+
+    def __setitem__(self, key, value):
+        validate_key(key)
+        validate_value(value)
+        return self.set_value(key, value)
+
+    def __delitem__(self, key):
+        validate_key(key)
+        return self.del_value(key)
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key):
+        try:
+            if self[key] is not None:
+                return True
+            return False
+        except KeyError:
+            return False
+
+    def iterkeys(self):
+        return self.get_keys()
+
+    def keys(self):
+        return [k for k in self.iterkeys()]
+
+    def itervalues(self):
+        for k in self.iterkeys():
+            yield self[k]
+
+    def values(self):
+        return [v for v in self.itervalues()]
+
+    def iteritems(self):
+        for k in self.iterkeys():
+            yield k, self[k]
+
+    def items(self):
+        return [(k, v) for k, v in self.items()]
+
+
+MARKER_KEY = "__meta/permission_check"
+
+
+def has_qsettings_write_permission(settings):
+    value = datetime.datetime.now().isoformat("T")
+    settings.setValue(MARKER_KEY, value)
+    settings.sync()
+    # there's a race here, if another thread/process also
+    # performs the same check at the same time
+    if settings.status() != _qtcore().QSettings.NoError:
+        return False
+    if settings.value(MARKER_KEY) != value:
+        return False
+    settings.remove(MARKER_KEY)
+    settings.sync()
+    return True
+
+
+class PermissionError(IOError):
+    def __init__(self):
+        super(PermissionError, self).__init__("Unable to write to QSettings")
+
+
+class QSettingsIDASettings(IDASettingsInterface):
+    """
+    An IDASettings implementation that uses an existing QSettings
+     instance to persist the keys and values.
+    """
+
+    def __init__(self, qsettings):
+        super(QSettingsIDASettings, self).__init__()
+        self._settings = qsettings
+        self._has_perms = None
+
+    def _check_perms(self):
+        if self._has_perms is None:
+            self._has_perms = has_qsettings_write_permission(self._settings)
+        if not self._has_perms:
+            raise PermissionError()
+
+    def get_value(self, key):
+        validate_key(key)
+        v = self._settings.value(key)
+        if v is None:
+            raise KeyError("key not found")
+        return json.loads(v)
+
+    def set_value(self, key, value):
+        validate_key(key)
+        validate_value(value)
+        self._check_perms()
+        self._settings.setValue(key, json.dumps(value))
+
+    def del_value(self, key):
+        validate_key(key)
+        self._check_perms()
+        return self._settings.remove(key)
+
+    def get_keys(self):
+        for k in self._settings.allKeys():
+            yield k
+
+    def clear(self):
+        self._check_perms()
+        # Qt: the empty string removes all entries in the current group
+        self._settings.remove("")
+
+
+class SystemIDASettings(IDASettingsBase, DictMixin):
+    """
+    An IDASettings implementation that persists keys and values in the
+     system scope using a QSettings instance.
+    """
+
+    def __init__(self, plugin_name, *args, **kwargs):
+        super(SystemIDASettings, self).__init__(plugin_name, *args, **kwargs)
+        s = _qtcore().QSettings(
+            _qtcore().QSettings.SystemScope,
+            IDA_SETTINGS_ORGANIZATION,
+            IDA_SETTINGS_APPLICATION,
+        )
+        s.beginGroup(self._plugin_name)
+        self._qsettings = QSettingsIDASettings(s)
+
+    def get_value(self, key):
+        validate_key(key)
+        return self._qsettings.get_value(key)
+
+    def set_value(self, key, value):
+        validate_key(key)
+        validate_value(value)
+        return self._qsettings.set_value(key, value)
+
+    def del_value(self, key):
+        validate_key(key)
+        return self._qsettings.del_value(key)
+
+    def get_keys(self):
+        return self._qsettings.get_keys()
+
+    def clear(self):
+        return self._qsettings.clear()
+
+
+class UserIDASettings(IDASettingsBase, DictMixin):
+    """
+    An IDASettings implementation that persists keys and values in the
+     user scope using a QSettings instance.
+    """
+
+    def __init__(self, plugin_name, *args, **kwargs):
+        super(UserIDASettings, self).__init__(plugin_name, *args, **kwargs)
+        s = _qtcore().QSettings(
+            _qtcore().QSettings.UserScope,
+            IDA_SETTINGS_ORGANIZATION,
+            IDA_SETTINGS_APPLICATION,
+        )
+        s.beginGroup(self._plugin_name)
+        self._qsettings = QSettingsIDASettings(s)
+
+    def get_value(self, key):
+        validate_key(key)
+        return self._qsettings.get_value(key)
+
+    def set_value(self, key, value):
+        validate_key(key)
+        validate_value(value)
+        return self._qsettings.set_value(key, value)
+
+    def del_value(self, key):
+        validate_key(key)
+        return self._qsettings.del_value(key)
+
+    def get_keys(self):
+        return self._qsettings.get_keys()
+
+    def clear(self):
+        return self._qsettings.clear()
+
+
+def get_directory_config_path(directory=None):
+    if directory is None:
+        directory = os.path.dirname(idc.get_idb_path())
+    config_path = os.path.join(directory, CONFIG_FILE_NANE)
+    return config_path
+
+
+class DirectoryIDASettings(IDASettingsBase, DictMixin):
+    """
+    An IDASettings implementation that persists keys and values in the
+     directory scope using a QSettings instance.
+    """
+
+    def __init__(self, plugin_name, *args, **kwargs):
+        config_directory = kwargs.pop("directory")
+        super(DirectoryIDASettings, self).__init__(plugin_name, *args, **kwargs)
+        config_path = get_directory_config_path(config_directory)
+        s = _qtcore().QSettings(config_path, _qtcore().QSettings.IniFormat)
+        s.beginGroup(self._plugin_name)
+        self._qsettings = QSettingsIDASettings(s)
+
+    def get_value(self, key):
+        validate_key(key)
+        return self._qsettings.get_value(key)
+
+    def set_value(self, key, value):
+        validate_key(key)
+        validate_value(value)
+        return self._qsettings.set_value(key, value)
+
+    def del_value(self, key):
+        validate_key(key)
+        return self._qsettings.del_value(key)
+
+    def get_keys(self):
+        return self._qsettings.get_keys()
+
+    def clear(self):
+        return self._qsettings.clear()
+
+
+def get_meta_netnode():
+    """
+    Get the netnode used to store settings metadata in the current IDB.
+    Note that this implicitly uses the open IDB via the idc iterface.
+    """
+    node_name = "$ {org:s}.{application:s}".format(
+        org=IDA_SETTINGS_ORGANIZATION, application=IDA_SETTINGS_APPLICATION
+    )
+    return netnode.Netnode(node_name)
+
+
+PLUGIN_NAMES_KEY = "plugin_names"
+
+
+def get_netnode_plugin_names():
+    """
+    Get a iterable of the plugin names registered in the current IDB.
+    Note that this implicitly uses the open IDB via the idc iterface.
+    """
+    try:
+        return json.loads(get_meta_netnode()[PLUGIN_NAMES_KEY])
+    except KeyError:
+        # TODO: there may be other exception types to catch here
+        return []
+
+
+def add_netnode_plugin_name(plugin_name):
+    """
+    Add the given plugin name to the list of plugin names registered in
+      the current IDB.
+    Note that this implicitly uses the open IDB via the idc iterface.
+    """
+    current_names = set(get_netnode_plugin_names())
+    if plugin_name in current_names:
+        return
+
+    current_names.add(plugin_name)
+
+    get_meta_netnode()[PLUGIN_NAMES_KEY] = json.dumps(list(current_names))
+
+
+def del_netnode_plugin_name(plugin_name):
+    """
+    Remove the given plugin name to the list of plugin names registered in
+      the current IDB.
+    Note that this implicitly uses the open IDB via the idc iterface.
+    """
+    current_names = set(get_netnode_plugin_names())
+    if plugin_name not in current_names:
+        return
+
+    try:
+        current_names.remove(plugin_name)
+    except KeyError:
+        return
+
+    get_meta_netnode()[PLUGIN_NAMES_KEY] = json.dumps(list(current_names))
+
+
+class IDBIDASettings(IDASettingsBase, DictMixin):
+    """
+    An IDASettings implementation that persists keys and values in the
+     current IDB database.
+    """
+
+    @property
+    def _netnode(self):
+        node_name = "$ {org:s}.{application:s}.{plugin_name:s}".format(
+            org=IDA_SETTINGS_ORGANIZATION,
+            application=IDA_SETTINGS_APPLICATION,
+            plugin_name=self._plugin_name,
+        )
+        return netnode.Netnode(node_name)
+
+    def get_value(self, key):
+        validate_key(key)
+
+        try:
+            v = self._netnode[key]
+        except TypeError:
+            raise KeyError("key not found")
+        if v is None:
+            raise KeyError("key not found")
+
+        return json.loads(v)
+
+    def set_value(self, key, value):
+        validate_key(key)
+        validate_value(value)
+        self._netnode[key] = json.dumps(value)
+        add_netnode_plugin_name(self._plugin_name)
+
+    def del_value(self, key):
+        validate_key(key)
+
+        try:
+            del self._netnode[key]
+        except KeyError:
+            pass
+
+    def get_keys(self):
+        return iter(self._netnode.keys())
+
+    def clear(self):
+        for k in self.get_keys():
+            self.del_value(k)
+        self._netnode.kill()
+        del_netnode_plugin_name(self._plugin_name)
+
+
+def ensure_ida_loaded():
+    try:
+        import idaapi  # noqa: F401
+        import idc  # noqa: F401
+    except ImportError:
+        raise EnvironmentError(
+            "Must be running in IDA to access IDB or directory settings"
+        )
+
+
+class IDASettings(object):
+    @deprecated
+    def __init__(self, plugin_name, directory=None):
+        super(IDASettings, self).__init__()
+        if not validate(plugin_name):
+            raise RuntimeError("invalid plugin name")
+        self._plugin_name = plugin_name
+        self._config_directory = directory
+
+    @property
+    def idb(self):
+        """
+        Fetch the IDASettings instance for the curren plugin with IDB scope.
+
+        rtype: IDASettingsInterface
+        """
+        ensure_ida_loaded()
+        return IDBIDASettings(self._plugin_name)
+
+    @property
+    def directory(self):
+        """
+        Fetch the IDASettings instance for the curren plugin with directory scope.
+
+        rtype: IDASettingsInterface
+        """
+        if self._config_directory is None:
+            ensure_ida_loaded()
+        return DirectoryIDASettings(self._plugin_name, directory=self._config_directory)
+
+    @property
+    def user(self):
+        """
+        Fetch the IDASettings instance for the curren plugin with user scope.
+
+        rtype: IDASettingsInterface
+        """
+        return UserIDASettings(self._plugin_name)
+
+    @property
+    def system(self):
+        """
+        Fetch the IDASettings instance for the curren plugin with system scope.
+
+        rtype: IDASettingsInterface
+        """
+        return SystemIDASettings(self._plugin_name)
+
+    def get_value(self, key):
+        """
+        Fetch the settings value with the highest precedence for the given
+         key, or raise KeyError.
+        Precedence:
+          - IDB scope
+          - directory scope
+          - user scope
+          - system scope
+
+        type key: basestring
+        rtype value: Union[basestring, int, float, List, Dict]
+        """
+        validate_key(key)
+
+        try:
+            return self.idb.get_value(key)
+        except (KeyError, EnvironmentError):
+            pass
+        try:
+            return self.directory.get_value(key)
+        except (KeyError, EnvironmentError):
+            pass
+        try:
+            return self.user.get_value(key)
+        except KeyError:
+            pass
+        try:
+            return self.system.get_value(key)
+        except KeyError:
+            pass
+
+        raise KeyError("key not found")
+
+    def iterkeys(self):
+        """
+        Enumerate the keys found at any scope for the current plugin.
+
+        rtype: Generator[str]
+        """
+        visited_keys = set()
+        try:
+            for key in self.idb.keys():
+                if key not in visited_keys:
+                    yield key
+                    visited_keys.add(key)
+        except (PermissionError, EnvironmentError):
+            pass
+
+        try:
+            for key in self.directory.keys():
+                if key not in visited_keys:
+                    yield key
+                    visited_keys.add(key)
+        except (PermissionError, EnvironmentError):
+            pass
+
+        try:
+            for key in self.user.keys():
+                if key not in visited_keys:
+                    yield key
+                    visited_keys.add(key)
+        except (PermissionError, EnvironmentError):
+            pass
+
+        try:
+            for key in self.system.keys():
+                if key not in visited_keys:
+                    yield key
+                    visited_keys.add(key)
+        except (PermissionError, EnvironmentError):
+            pass
+
+    def keys(self):
+        """
+        Enumerate the keys found at any scope for the current plugin.
+
+        rtype: Generator[str]
+        """
+
+        return list(self.keys())
+
+    def itervalues(self):
+        """
+        Enumerate the values found at any scope for the current plugin.
+
+        rtype: Generator[jsonable]
+        """
+
+        for key in self.keys():
+            yield self[key]
+
+    def values(self):
+        """
+        Enumerate the values found at any scope for the current plugin.
+
+        rtype: Sequence[jsonable]
+        """
+
+        return list(self.values())
+
+    def iteritems(self):
+        """
+        Enumerate the (key, value) pairs found at any scope for the current plugin.
+
+        rtype: Sequence[Tuple[str, jsonable]]
+        """
+        for key in self.keys():
+            yield (key, self[key])
+
+    def items(self):
+        """
+        Enumerate the (key, value) pairs found at any scope for the current plugin.
+
+        rtype: Sequence[Tuple[str, jsonable]]
+        """
+        return list(self.items())
+
+    def __getitem__(self, key):
+        validate_key(key)
+        return self.get_value(key)
+
+    def get(self, key, default=None):
+        validate_key(key)
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key):
+        validate_key(key)
+        try:
+            if self[key] is not None:
+                return True
+            return False
+        except KeyError:
+            return False
+
+    @staticmethod
+    def get_system_plugin_names():
+        """
+        Get the names of all plugins at the system scope.
+        As this is a static method, you can call the directly on IDASettings:
+
+            import ida_settings
+            print( ida_settings.IDASettings.get_system_plugin_names() )
+
+        rtype: Sequence[str]
+        """
+        return _qtcore().QSettings(
+            _qtcore().QSettings.SystemScope,
+            IDA_SETTINGS_ORGANIZATION,
+            IDA_SETTINGS_APPLICATION,
+        ).childGroups()[:]
+
+    @staticmethod
+    def get_user_plugin_names():
+        """
+        Get the names of all plugins at the user scope.
+        As this is a static method, you can call the directly on IDASettings:
+
+            import ida_settings
+            print( ida_settings.IDASettings.get_user_plugin_names() )
+
+        rtype: Sequence[str]
+        """
+        return _qtcore().QSettings(
+            _qtcore().QSettings.UserScope,
+            IDA_SETTINGS_ORGANIZATION,
+            IDA_SETTINGS_APPLICATION,
+        ).childGroups()[:]
+
+    @staticmethod
+    def get_directory_plugin_names(config_directory=None):
+        """
+        Get the names of all plugins at the directory scope.
+        Provide a config directory path to use this method outside of IDA.
+        As this is a static method, you can call the directly on IDASettings:
+
+            import ida_settings
+            print( ida_settings.IDASettings.get_directory_plugin_names("/tmp/ida/1/") )
+
+        type config_directory: str
+        rtype: Sequence[str]
+        """
+        ensure_ida_loaded()
+        return _qtcore().QSettings(
+            get_directory_config_path(directory=config_directory),
+            _qtcore().QSettings.IniFormat,
+        ).childGroups()[:]
+
+    @staticmethod
+    def get_idb_plugin_names():
+        """
+        Get the names of all plugins at the IDB scope.
+        Cannot be used outside of IDA.
+        As this is a static method, you can call the directly on IDASettings:
+
+            import ida_settings
+            print( ida_settings.IDASettings.get_idb_plugin_names() )
+
+        rtype: Sequence[str]
+        """
+        ensure_ida_loaded()
+        return get_netnode_plugin_names()
+
+```
+
+`tests/test_no_qt_at_import.py`:
+
+```py
+"""Importing ``ida_settings`` must not pull in a Qt binding.
+
+The modern API (``get_current_plugin_setting`` and friends) comes from
+``hcli.lib.ida.plugin.settings``, which touches no Qt at all. But
+``__init__`` imports ``.legacy``, and ``legacy`` calls ``import_qtcore()``
+at module scope -- so every consumer of the modern API loads Qt as a side
+effect.
+
+Inside a non-GUI IDA that is not merely wasteful, it is fatal. IDA answers a
+PyQt5 import with its own compatibility shim, which constructs a QMessageBox
+(<IDA>/python/PyQt5/utils.py:119 confirm_decision). A QWidget with no
+QApplication calls qFatal(), so the process dies with SIGABRT -- and because
+that is an abort() rather than an exception, the ``except (ImportError,
+NotImplementedError)`` guard in ``__init__`` cannot catch it.
+"""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
+
+SRC = Path(__file__).resolve().parent.parent / "src"
+
+QT_MODULES = ("PyQt5", "PySide6", "PyQt5.QtCore", "PySide6.QtCore")
+
+
+def _run(body: str) -> subprocess.CompletedProcess:
+    """Run a snippet in a clean interpreter; import state is process-global."""
+    script = textwrap.dedent(
+        f"""
+        import sys
+        sys.path.insert(0, {str(SRC)!r})
+        {textwrap.indent(textwrap.dedent(body), " " * 8).lstrip()}
+        """
+    )
+    return subprocess.run(
+        [sys.executable, "-c", script], capture_output=True, text=True, timeout=120
+    )
+
+
+def test_importing_the_package_loads_no_qt_binding() -> None:
+    result = _run(
+        """
+        import ida_settings
+        loaded = sorted(m for m in sys.modules if m.split(".")[0] in ("PyQt5", "PySide6"))
+        print("LOADED:" + ",".join(loaded))
+        """
+    )
+
+    assert result.returncode == 0, result.stderr
+    loaded = result.stdout.split("LOADED:")[1].strip()
+    assert loaded == "", f"importing ida_settings loaded Qt: {loaded}"
+
+
+def test_the_modern_api_is_available_without_qt() -> None:
+    result = _run(
+        """
+        import ida_settings
+        assert callable(ida_settings.get_current_plugin_setting)
+        assert callable(ida_settings.set_current_plugin_setting)
+        print("OK")
+        """
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "OK" in result.stdout
+
+
+def test_legacy_qtcore_still_resolves_on_access() -> None:
+    """Deferring must not remove ``legacy.QtCore``; it resolves on first use."""
+    result = _run(
+        """
+        from ida_settings import legacy
+        before = [m for m in sys.modules if m.split(".")[0] in ("PyQt5", "PySide6")]
+        qtcore = legacy.QtCore
+        assert hasattr(qtcore, "QSettings"), qtcore
+        print("BEFORE:" + str(bool(before)))
+        print("OK")
+        """
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "BEFORE:False" in result.stdout, "importing legacy should not preload Qt"
+    assert "OK" in result.stdout
+
+```
