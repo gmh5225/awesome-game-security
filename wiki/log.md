@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:BuSung-dev/Root-My-Galaxy`: entity [[root-my-galaxy]] (BuSung-dev; Kotlin/Compose + NDK; Samsung Galaxy one-tap KernelSU installer; auto device match by kernel release/build/SDK/ABI/page size; external feed for exploit payloads + KernelSU artifacts; native KASLR/probe validation; CVE-2026-43499; Android kernel exploitation / rooting RE); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kernelsu]], [[cve-2026-43499-popsicle]], [[root-my-pixel]], [[ghostlock-app]], and [[duchamp-root]].
+
 - **2026-08-30** — ingest `description:rabbanyhmm/DnSpyMCP`: entity [[dnspymcp]] (rabbanyhmm; C# .NET 8 local MCP server; dnlib + ICSharpCode.Decompiler; 31 tools for .NET assembly inspect/decompile/IL analysis/binary patch; Unity/IL2CPP offset+RVA lookup, struct layout export, dump.cs bridging, cross-refs, multi-DLL workspace search; packet-handler/crypto/secret scans; stdio JSON-RPC for Cursor/Claude Code/Codex/OpenCode; no dnSpy GUI); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[concepts/il2cpp]], [[n0xis]], [[ida-pro-mcp]], and [[x64dbg-mcp]].
 
 - **2026-08-30** — ingest `readme:categories`: Game Develop ~188 (+1; OTFCG/[[awesome-game-analysis]] video-game tech analysis guide); Cheat ~2761 / Anti Cheat ~698 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
