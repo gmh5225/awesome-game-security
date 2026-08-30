@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Darlenepurpleblack444/Zygisk-Il2CppFucker`: entity [[zygisk-il2cppfucker]] (Darlenepurpleblack444; Zygisk Magisk module; fork of [[zygisk-il2cppdumper]]; Android Unity IL2CPP in-process RE engine; dump.cs incl. [[hybridclr]]; name-based class/field/method resolve; memory R/W, instance scan, `il2cpp_runtime_invoke`; Lua 5.4 + `.cmd` channel + overlay; C++/Gradle; security researchers / mobile game logic manipulation without external attach); cited on [[concepts/il2cpp]] and [[overviews/mobile-security]]; cross-linked [[zygisk-il2cppdumper]], [[frida-il2cpp-bridge]], [[bnm-android]], and [[il2cppdumpdroidgui]].
+
 - **2026-08-30** — ingest `readme:categories`: Cheat ~2763 (+2); Anti Cheat ~698 / Game Develop ~188 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-30** — ingest `description:Bratah123/GojoTheSpire`: entity [[gojo-the-spire]] (Bratah123; Java Slay the Spire mod; custom Gojo Satoru character, cards/deck, assets, mod config; gameplay customization and character-mod development; Slay The Spire Remastered Mod / Game Develop); cited on [[overviews/game-hacking]]; cross-linked [[sts2-kitlib]], [[spirit-ptcgo]], and [[spirit-ida-plugin]].
