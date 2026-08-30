@@ -12,6 +12,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-30** — ingest `description:Bloom-Engine/engine`: entity [[bloom-engine]] (Bloom-Engine; TypeScript game engine; Perry LLVM AOT TypeScript→native; Rust core + wgpu across Metal/DX12/Vulkan/OpenGL/WebGPU; raylib-inspired 2D/3D API; Jolt Physics, glTF GPU skeletal animation, WGSL; npm-packaged TS surface; desktop/mobile/WASM; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[nightshade]], [[raylib]], [[engine]], and [[bgfx]].
+
 - **2026-08-30** — ingest `description:BobHUnrealTech/UnrealSDKDumper-4.25`: entity [[unrealsdkdumper-4-25]] (BobHUnrealTech; C++ UE4.23–4.27 SDK generator; dependency-aware class ordering, identifier sanitization, ready-to-include sdk.h + SDK folder; wide-character Chinese name handling; Unreal RE / analysis / tooling; cheat / SDK Dump for UE 4.23 - 4.27); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[unrealdumper-4-25]], [[dumper-7]], [[uedumper]], [[shh0yauedumper]], and [[re-ue4ss]].
 
 - **2026-08-30** — ingest `description:BobbyAnguelov/Esoterica`: entity [[esoterica]] (BobbyAnguelov; MIT C++ prototype game engine framework; serialization, resource management, reflection codegen, editor tooling; actor/ECS hybrid, animation graphs, PhysX ragdoll; engine developers and researchers experimenting with rendering, gameplay architecture, and tooling design; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[pilot]], [[hazel]], [[cpp-game-engine-book]], [[game-engine-from-scratch]], [[explosion]], and [[custom-game-engines]].
