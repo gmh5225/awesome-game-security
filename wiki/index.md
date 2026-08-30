@@ -97,6 +97,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BEClient](entities/beclient.md) — C++ PoC BattlEye client DLL interface (init, callbacks, run/command/exit; structure headers; Visual Studio; LilPidgey; anti-cheat client integration RE)
 - [beservice-intcallbacks](entities/beservice-intcallbacks.md) — BattlEye bypass PoC via Instrumentation Callback behavior (R4YVEN; C++/asm; callback + symbol-handling; exploratory BE service research; Instrumentation Callback)
 - [Beatrice.py](entities/beatrice-py.md) — Python x64 opcode-equivalent mutation (AV/AC signature evasion)
+- [bemaniutils](entities/bemaniutils.md) — Python Konami BEMANI arcade RE toolkit (eAmusement protocol, packet sniff/MITM/replay, IFS/2DX/AFP asset unpack-repack, hobby server backends for IIDX/DDR/Pop'n/SVDX; DragonMinded; cheat / RE toolkit)
 - [Benowin Blanc (bb)](entities/bb.md) — parse Windows SDK/PHNT via libclang; struct layouts, enums, constants (`dt`-like) without WinDbg; CLI + TUI, JSON export (cristeigabriela)
 - [bb-viewer](entities/bb-viewer.md) — web explorer for bb output: Windows SDK/PHNT functions, types, constants, IRQL annotations, type graphs; search/filter; user/kernel; amd64/x86/arm/arm64 (cristeigabriela)
 - [BD-UN-JB](entities/bd-un-jb.md) — BD-J jailbreak exploit chain (Gezine; xlet payloads + Unsafe; bdj_unpatch BDMV tool; RemoteJarLoader PS5 ≤12.00; network JAR load/logging; PlayStation BD-J sandbox escape)

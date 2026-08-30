@@ -12,6 +12,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:DragonMinded/bemaniutils`: entity [[bemaniutils]] (DragonMinded; Python Konami BEMANI arcade RE toolkit; IFS/2DX/AFP asset unpack-repack, encrypted NVRAM, eAmusement wire protocol, packet sniff/MITM/replay, hobby server backends for IIDX/DDR/Pop'n/SVDX; legacy arcade networking + preservation; cheat / RE toolkit); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[packet-sniffer]], [[spirit-ptcgo]], [[protobufs]], and [[ds3os]].
+
 - **2026-08-30** — ingest `readme:categories`: Cheat ~2764 / Anti Cheat ~700 / other major section counts stable; 41 sections; synced [[bs-anticheat]] Paper/Folia MC heuristic AC into README-map scope on [[overviews/overview]], [[overviews/anti-cheat]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-30** — ingest `description:BoomingTech/Pilot`: entity [[pilot]] (BoomingTech; now Piccolo Engine; compact cross-platform C++ GAMES104 teaching engine+editor; CMake Windows/Linux/macOS; rendering, resource, scripting, tooling; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[game-engine-from-scratch]], [[hazel]], [[exengine]], [[metal-game-engine-tutorial]], and [[custom-game-engines]].
