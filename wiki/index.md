@@ -2906,6 +2906,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RToolZ](entities/rtoolz.md) — rootkit-like process/callback utility (hide/unhide, callback enum/remove, protection-level control; ProcExp152.sys; gmh5225)
 - [RootSocketKit](entities/root-socket-kit.md) — Android LKM + Unix-socket root memory R/W (Magisk/KernelSU/APatch JNI; GUI)
 - [rop-compiler](entities/rop-compiler.md) — x86 ROP compiler for game cheat payloads (assembly-like scripts → chains; CS:GO/BF3/BF4; triggerbot/glow ESP/minimap; gadget scan + offsets; C++; cheat / ROP Generation)
+- [ropium](entities/ropium.md) — ROP chain builder (C++ core + Python bindings; gadget extract/analyze + semantic queries; CLI + scriptable; exploit dev / binary security education; Boyan-MILANOV; cheat / ROP Generation)
 - [ropgadget](entities/ropgadget.md) — Python ROP gadget finder (Capstone; ELF/PE/Mach-O/raw; multi-arch filter/search; optional chain gen; JonathanSalwan; cheat / ROP Finder)
 - [ropgadget-rs](entities/ropgadget-rs.md) — Rust ROP gadget finder (parallel PE/ELF/Mach-O scan; ret-terminated chains; exploit-chain RE)
 - [rsdkv5-decompilation](entities/rsdkv5-decompilation.md) — Retro Engine v5/v5U decompilation (RSDKModding; Sonic Mania and other Retro Engine titles; cross-platform; modding API; multiple audio/rendering backends; legacy engine compatibility; Game Engine / source)
