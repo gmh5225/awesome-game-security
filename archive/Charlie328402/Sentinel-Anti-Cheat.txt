@@ -1,0 +1,2516 @@
+Project Path: arc_Charlie328402_Sentinel-Anti-Cheat_mq0jtzp1
+
+Source Tree:
+
+```txt
+arc_Charlie328402_Sentinel-Anti-Cheat_mq0jtzp1
+├── DEPLOYMENT.md
+├── Dockerfile
+├── README.md
+├── discord-bot
+│   ├── bot.py
+│   ├── db.py
+│   ├── ftpsync.py
+│   ├── migration.sql
+│   ├── nixpacks.toml
+│   ├── requirements.txt
+│   ├── sync_log.py
+│   └── systemd
+│       ├── sentinel-bot.service
+│       └── sentinel-sync.service
+└── mod
+    ├── build.gradle
+    ├── gradle
+    │   └── wrapper
+    │       ├── gradle-wrapper.jar
+    │       └── gradle-wrapper.properties
+    ├── gradle.properties
+    ├── gradlew
+    ├── gradlew.bat
+    ├── settings.gradle
+    └── src
+        └── main
+            ├── java
+            │   └── com
+            │       └── anticheat
+            │           └── sentinel
+            │               ├── SentinelAntiCheat.java
+            │               ├── command
+            │               │   └── AntiCheatCommand.java
+            │               ├── config
+            │               │   └── SentinelConfig.java
+            │               ├── core
+            │               │   ├── PlayerCheckData.java
+            │               │   ├── Violation.java
+            │               │   ├── ViolationManager.java
+            │               │   └── ViolationType.java
+            │               └── listener
+            │                   ├── CombatListener.java
+            │                   ├── MovementListener.java
+            │                   ├── PlayerLifecycleListener.java
+            │                   └── WorldListener.java
+            └── resources
+                └── META-INF
+                    └── neoforge.mods.toml
+
+```
+
+`DEPLOYMENT.md`:
+
+```md
+# Deploying Sentinel AntiCheat — where every file goes
+
+You're running a NeoForge server managed through a panel-style file
+manager (that's what was in your screenshot — looks like Pterodactyl/Pufferpanel
+style, root folder called `minecraft`). Here's exactly where each piece lands.
+
+## 1. The mod (`sentinel-anticheat/mod`)
+
+This is server-side Java code — it has to be **built into a .jar first**,
+then uploaded like any other mod.
+
+1. On a machine with internet access and **JDK 25** installed, run:
+   ```
+   cd mod
+   ./gradlew build
+   ```
+   The Gradle wrapper (`gradlew` + `gradle/wrapper/`) is committed, so no
+   separate Gradle install is needed. The first run downloads NeoForge
+   and decompiles Minecraft from `maven.neoforged.net` (a few minutes);
+   later runs are fast.
+
+   Or just let CI do it: every push that touches `mod/**` runs
+   `.github/workflows/build-mod.yml`, which builds the jar and uploads it
+   as the `sentinel-ac-jar` artifact (Actions tab → latest run → Artifacts).
+2. That produces `mod/build/libs/sentinel_ac-1.0.0.jar`.
+3. In your file manager, open the `mods` folder shown in your screenshot
+   (`minecraft/mods/`) and upload that jar there — same place as
+   `installed_mods` if that's actually where NeoForge loads mods on your
+   panel; check whichever folder your other mods currently sit in.
+4. Restart the server. On startup the mod creates
+   `minecraft/config/sentinel_ac-server.toml` (all the thresholds from
+   `SentinelConfig.java`, editable live) and starts writing to
+   `minecraft/logs/sentinel-anticheat/violations.jsonl`.
+
+That log file is the only thing the Discord bot needs from the server.
+
+## 2. The Discord bot (`sentinel-anticheat/discord-bot`)
+
+This is a **separate, always-on process** — it is not a mod and does not
+go in the `mods` folder. It needs outbound internet access to Discord and
+needs to be able to read `violations.jsonl` as new lines get appended.
+
+`bot.py` now also does the FTP log mirroring itself (the logic in
+`ftpsync.py`) whenever `FTP_HOST` / `FTP_USER` / `FTP_PASSWORD` are set,
+so it's a single process — no separate sync job needed. `sync_log.py` is
+still there if you want the sync isolated, but you don't need both.
+
+### Deploying on Coolify (Nixpacks)
+
+The repo root has both a Java mod and this Python bot, so Nixpacks can't
+autodetect it. In the Coolify application settings:
+
+1. **Build Pack**: Nixpacks
+2. **Base Directory**: `/discord-bot`  ← this is the fix for the
+   "failed to detect the application type" error
+3. Leave the start command blank — `discord-bot/nixpacks.toml` sets it
+   (`python bot.py`).
+4. **Environment Variables** (Coolify UI, not a `.env` file): set every
+   key from `discord-bot/.env.example` — `DISCORD_BOT_TOKEN`,
+   `DISCORD_CHANNEL_ID`, `DISCORD_GUILD_ID`, `DB_*`, and the `FTP_*`
+   values so the bot mirrors the dathost log itself.
+5. No domain / port needed — it's a worker, not a web app. If Coolify
+   insists on a health check, disable it.
+6. Redeploy.
+
+The mirrored log lives on the container's ephemeral filesystem, which is
+fine: on restart the bot re-pulls the file from FTP once. Attach a
+persistent volume at the `SYNC_LOCAL_PATH` directory only if you want to
+avoid that one re-download.
+
+### Running it on a plain VPS instead
+
+Where it runs depends on what your panel allows:
+
+- **Best case — your panel lets you run an extra background process
+  (a "generic"/"custom" server type, a shell/SSH addon, or a sidecar
+  container) on the same machine as the Minecraft server.** Put the
+  `discord-bot` folder there, `pip install -r requirements.txt`,
+  point `VIOLATIONS_LOG_PATH` in `.env` at the same
+  `logs/sentinel-anticheat/violations.jsonl` path used above, and run
+  `python bot.py` (ideally under a process manager like `pm2`,
+  `systemd`, or a `screen`/`tmux` session so it survives disconnects).
+
+- **If your panel is Minecraft-only (no arbitrary processes)**, the bot
+  has to run elsewhere — a small VPS, a Raspberry Pi, your own PC, etc.
+  — and needs the log file synced to it. Options, cheapest first:
+  - If the panel exposes SFTP (most do — check its "File Manager" or
+    "SFTP" settings for host/port/credentials), run a small sync job
+    (`rsync -e ssh` on a cron, or `lsyncd`, or even a scheduled
+    `sftp get`) that mirrors just
+    `minecraft/logs/sentinel-anticheat/violations.jsonl` down to the
+    bot's machine every few seconds, and point `VIOLATIONS_LOG_PATH`
+    at the local mirrored copy.
+  - Some panels (Pterodactyl included) expose a file-contents API
+    endpoint; a short polling script could pull the file over HTTPS
+    instead of SFTP if that's easier given your panel's auth setup.
+
+  Tell me which panel software this is (the screenshot's styling looks
+  like Pterodactyl/Pufferpanel) and whether it gives you SFTP or shell
+  access, and I'll write the exact sync script for it.
+
+- **Simplest of all, if it's an option**: host both the Minecraft
+  server and the bot yourself (e.g. a VPS you fully control) instead of
+  a shared panel — then it's all one filesystem and step 1 above is all
+  you need.
+
+## 3. Discord-side setup
+
+Already done for your server (guild `1120008484176539700`, logging channel
+`1543612788285640837`) — `discord-bot/.env` in this zip is pre-filled with
+those plus your bot token, so `python bot.py` should work as soon as
+dependencies are installed. Two things to double check:
+
+1. **Bot permissions**: the invite link needs `Send Messages`, `Embed
+   Links`, `Use Slash Commands`, **and `Mention Everyone`** (the bot
+   pings `@everyone` in-channel when a player crosses `alertThreshold` —
+   see "Alerting" below). If you invited the bot before this was added,
+   go to Server Settings → Roles → the bot's role, and turn on "Mention
+   @everyone, @here, and All Roles" directly rather than re-inviting.
+2. **Rotate the bot token and DB password when you get a chance** — both
+   were typed into this chat, which isn't a secure long-term place for
+   them. `discord-bot/.env` already has them filled in for you; when you
+   rotate, just swap the two values in that file.
+
+## 4. Database (`minecraft_ac` schema)
+
+1. In HeidiSQL, open a new query tab against the server itself (not
+   inside `Dept Helper DB`), paste in `discord-bot/migration.sql`, and
+   run the whole tab. This creates a new `minecraft_ac` database — a
+   sibling to `department_helper`, nothing existing is touched — with
+   two tables: `violations` (full history) and `players` (current
+   standing per player, upserted on every flag).
+2. `discord-bot/.env` is already pointed at
+   `31.220.111.107:5432` with the `root` credentials you sent. If the
+   bot can't connect once it's actually running (see section 2 above for
+   *where* it runs), the most likely cause is the server's firewall not
+   allowing inbound connections on port 5432 from wherever the bot ends
+   up hosted — that'll show as a connection timeout/refused in the bot's
+   logs, and is a one-line firewall rule to fix once you know the bot's
+   source IP.
+3. Every violation the bot posts to Discord also gets written to
+   `minecraft_ac.violations`, and `minecraft_ac.players` stays up to
+   date automatically — `/recent` and `/playerstats` in Discord read
+   from these tables directly (falling back to in-memory-since-startup
+   if the DB is ever unreachable, so a DB hiccup doesn't take down
+   Discord reporting).
+4. `migration.sql` also includes a commented-out `CREATE USER` for a
+   dedicated `minecraft_ac_bot` account scoped to just this schema — you
+   opted to use `root` directly for now, but that's there whenever you
+   want to switch (just update `DB_USER`/`DB_PASSWORD` in `.env` after).
+
+## Alerting
+
+The bot pings `@everyone` in the log channel any time a player's
+cumulative violation level crosses `alertThreshold` (default 10, set in
+`config/sentinel_ac-server.toml` after the mod's first boot — see
+"Tuning thresholds" below). Every other flag posts quietly as a plain
+embed, no ping. To turn off the `@everyone` ping entirely and just post
+alerts quietly too, set `PING_EVERYONE_ON_ALERT=false` in `.env`.
+
+## Build status
+
+The mod now compiles and jars cleanly against NeoForge 26.1.2.100 with
+JDK 25 (`./gradlew build` → `mod/build/libs/sentinel_ac-1.0.0.jar`). The
+first-build API fixes that were needed:
+
+- `net.minecraft.resources.ResourceLocation` was renamed to `Identifier`
+  (hit `WorldListener`'s ore list).
+- NeoForge's `BlockEvent.BreakEvent` is now
+  `net.neoforged.neoforge.event.level.block.BreakBlockEvent`.
+- `GameProfile.getName()` → `GameProfile.name()`.
+- Command permission gate: `source.hasPermission(2)` →
+  `Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)`.
+- Op check: `PlayerList.isOp(GameProfile)` → `isOp(player.nameAndId())`.
+
+Not yet done: a live server smoke-test (loading the jar into an actual
+26.1.2 server and confirming the listeners fire and the config file
+generates). The code compiles against the real API but hasn't been run.
+
+## Tuning thresholds after launch
+
+Everything in `SentinelConfig.java` becomes an editable line in
+`config/sentinel_ac-server.toml` after first boot. Start in "log only,
+no bans" mode — Sentinel never auto-bans or auto-kicks by design, it
+only logs and (past `alertThreshold`) pings staff — watch it for a few
+days of real player behavior, and raise/lower thresholds based on your
+actual false-positive rate before wiring any punishment automation on
+top of it.
+
+```
+
+`Dockerfile`:
+
+```
+# Discord bot container (Coolify: Build Pack = Dockerfile, leave Base Directory blank).
+# The mod in mod/ is not built here -- it's a Minecraft server jar, built by CI.
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY discord-bot/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY discord-bot/ ./
+
+# Where bot.py mirrors the FTP log to. Override SYNC_LOCAL_PATH / VIOLATIONS_LOG_PATH
+# via env if you mount a volume; otherwise this is ephemeral (re-pulled on restart).
+ENV VIOLATIONS_LOG_PATH=/app/logs/violations.jsonl \
+    SYNC_LOCAL_PATH=/app/logs/violations.jsonl
+
+CMD ["python", "bot.py"]
+
+```
+
+`README.md`:
+
+```md
+# Sentinel AntiCheat
+
+A server-side NeoForge anti-cheat for **NeoForge 26.1.2 / Minecraft 26.1.2**
+with movement, combat and x-ray detection, reporting violations through a
+standalone Discord bot.
+
+- `mod/` — the NeoForge mod (Java, Gradle). See its javadoc-style class
+  comments for what each check does and why.
+- `discord-bot/` — the Python Discord bot that tails the mod's violation
+  log and posts it to a channel.
+- `DEPLOYMENT.md` — **start here** — exactly where each piece goes relative
+  to your server's file manager, and how the bot reaches the log file.
+
+## How it fits together
+
+```
+NeoForge server (mods/sentinel_ac-1.0.0.jar)
+        │  writes JSONL, one line per flag
+        ▼
+logs/sentinel-anticheat/violations.jsonl
+        │  tailed
+        ▼
+discord-bot/bot.py  (separate always-on process)
+        │  posts embeds (@everyone past alertThreshold) ──▶ your Discord channel
+        │
+        └─ writes every flag ──▶ MySQL `minecraft_ac` (violations, players)
+```
+
+## What it detects
+
+- **Movement** — speed, flight, no-fall(*not yet wired, see below*), jesus/water-walk, timer
+- **Combat** — reach, killaura (aim-snap), autoclicker (high CPS + low jitter)
+- **World** — x-ray (ore-to-stone ratio in unexposed mining)
+
+All checks are tick/event-based (no bytecode injection, no mixins, no
+packet interception) — this makes the mod simple to build, review and
+maintain, at the cost of being evadable by a sufficiently sophisticated
+packet-spoofing client. It will reliably catch the cheat clients most
+servers actually deal with. If you outgrow it, the log format and
+Discord pipeline here will work unchanged in front of a more advanced
+detection engine later.
+
+**No auto-punishment is wired up.** Sentinel logs everything and pings
+staff past a configurable threshold; it deliberately never bans/kicks on
+its own, since heuristic false positives on a purely tick-based check are
+common enough that auto-punishment would need a much higher bar of
+confidence than this architecture gives you. Add that layer yourself
+once you've watched real violation data and are confident in your
+thresholds.
+
+## Known limitations (read before you rely on this)
+
+- No-fall detection is stubbed as a `ViolationType` but not wired to a
+  check yet — flag me and I'll add it (it's a straightforward extension
+  of the flight check: track expected vs actual fall damage).
+- The x-ray check only ever flags unexposed mining (skylight-blocked),
+  so it can't be evaded by mining outdoors — but it also can't see
+  through a cheat client's XYZ chat/coordinate sharing at all, only
+  block-breaking patterns.
+- Reach/killaura are evaluated on the attack tick's reported rotation,
+  which is what the server actually received — not what rendered
+  client-side. That's the right thing to check, but it means very fast
+  legitimate flick-shots on a low-ping connection can occasionally sit
+  close to the killaura threshold; tune `killauraMinRotationSnap` up if
+  you see false positives.
+- This was hand-written against the documented 26.1.2 API and hasn't
+  been compiled in this environment (no network route to NeoForge's
+  Maven repo here) — see the caveat in DEPLOYMENT.md.
+
+```
+
+`discord-bot/bot.py`:
+
+```py
+"""
+Sentinel AntiCheat — Discord relay bot.
+
+Tails the JSONL violations log written by the Sentinel AntiCheat NeoForge
+mod and posts formatted embeds into a Discord channel. Runs as its own
+process, independent of the Minecraft server, so a bot crash/restart never
+touches the game.
+
+Setup:
+    pip install -r requirements.txt
+    cp .env.example .env      # fill in your bot token, channel ID, log path
+    python bot.py
+
+The log path in .env MUST point at the same violations.jsonl file the mod
+writes (logs/sentinel-anticheat/violations.jsonl under the server's run
+directory). If this bot runs on a different machine than the Minecraft
+server, see DEPLOYMENT.md for how to get that file onto this machine
+(shared volume, SFTP sync, etc.) — Discord bots cannot read a remote
+filesystem directly.
+"""
+
+import asyncio
+import json
+import logging
+import os
+from collections import defaultdict, deque
+from pathlib import Path
+
+import discord
+from discord import app_commands
+from discord.ext import tasks
+from dotenv import load_dotenv
+
+import db
+import ftpsync
+
+load_dotenv()
+
+BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
+CHANNEL_ID = int(os.environ["DISCORD_CHANNEL_ID"])
+LOG_PATH = Path(os.environ.get("VIOLATIONS_LOG_PATH", "logs/sentinel-anticheat/violations.jsonl"))
+POLL_SECONDS = float(os.environ.get("POLL_SECONDS", "1.0"))
+GUILD_ID = os.environ.get("DISCORD_GUILD_ID", "").strip()  # optional: speeds up slash command sync during dev
+
+# Every violation that crosses the mod's alertThreshold (config/sentinel_ac-server.toml)
+# pings @everyone in the log channel — that's the one alert tier, by design (see chat).
+PING_EVERYONE_ON_ALERT = os.environ.get("PING_EVERYONE_ON_ALERT", "true").strip().lower() == "true"
+
+DB_HOST = os.environ.get("DB_HOST", "").strip()
+DB_PORT = int(os.environ.get("DB_PORT", "3306") or 3306)
+DB_USER = os.environ.get("DB_USER", "").strip()
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "")
+DB_NAME = os.environ.get("DB_NAME", "minecraft_ac").strip()
+DB_ENABLED = bool(DB_HOST and DB_USER)
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+log = logging.getLogger("sentinel-bot")
+
+CATEGORY_COLORS = {
+    "Movement": 0xF1C40F,   # yellow
+    "Combat": 0xE74C3C,     # red
+    "World": 0x9B59B6,      # purple
+}
+ALERT_COLOR = 0xFF0000
+
+intents = discord.Intents.default()
+client = discord.Client(intents=intents)
+tree = app_commands.CommandTree(client)
+
+# Rolling in-memory stats built purely from what we've tailed since bot start —
+# not authoritative history, just enough for quick /playerstats lookups.
+recent_violations: deque = deque(maxlen=200)
+player_totals: dict[str, float] = defaultdict(float)
+player_counts: dict[str, int] = defaultdict(int)
+
+_file_position = 0
+
+
+def format_violation_embed(record: dict) -> discord.Embed:
+    category = record.get("category", "Unknown")
+    check = record.get("check", "?")
+    color = CATEGORY_COLORS.get(category, 0x95A5A6)
+    embed = discord.Embed(
+        title=f"⚠️ {record.get('player_name', 'unknown')} — {check}",
+        description=record.get("details", ""),
+        color=color,
+    )
+    embed.add_field(name="Category", value=category, inline=True)
+    embed.add_field(name="Added VL", value=str(record.get("added_vl", "?")), inline=True)
+    embed.add_field(name="Total VL", value=str(record.get("total_vl", "?")), inline=True)
+    embed.set_footer(text=record.get("player_id", ""))
+    return embed
+
+
+def format_alert_embed(record: dict) -> discord.Embed:
+    embed = discord.Embed(
+        title=f"🚨 ALERT — {record.get('player_name', 'unknown')} crossed threshold",
+        description=f"Total VL **{record.get('total_vl')}**, triggered by **{record.get('triggering_check')}**.\n"
+                     f"Recommend staff review this player (spectate/replay) before acting.",
+        color=ALERT_COLOR,
+    )
+    embed.set_footer(text=record.get("player_id", ""))
+    return embed
+
+
+async def store_in_db(record: dict, is_alert: bool):
+    if not DB_ENABLED:
+        return
+    try:
+        await db.record_violation(record, is_alert)
+    except Exception:
+        log.exception("Failed to write violation to database (Discord posting continues regardless)")
+
+
+async def tail_violations_log():
+    """Poll the log file for new lines, forever. Handles log rotation (file replaced/truncated)."""
+    global _file_position
+    await client.wait_until_ready()
+    channel = client.get_channel(CHANNEL_ID)
+    if channel is None:
+        try:
+            channel = await client.fetch_channel(CHANNEL_ID)
+        except discord.DiscordException as e:
+            log.error("Could not resolve DISCORD_CHANNEL_ID=%s: %s", CHANNEL_ID, e)
+            return
+
+    log.info("Tailing %s", LOG_PATH.resolve())
+
+    while not client.is_closed():
+        try:
+            if LOG_PATH.exists():
+                size = LOG_PATH.stat().st_size
+                if size < _file_position:
+                    # File was truncated/rotated — start over from the beginning.
+                    _file_position = 0
+
+                with LOG_PATH.open("r", encoding="utf-8") as f:
+                    f.seek(_file_position)
+                    new_lines = f.readlines()
+                    _file_position = f.tell()
+
+                for line in new_lines:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        record = json.loads(line)
+                    except json.JSONDecodeError:
+                        log.warning("Skipping malformed log line: %s", line[:200])
+                        continue
+
+                    if record.get("alert"):
+                        mention = "@everyone " if PING_EVERYONE_ON_ALERT else ""
+                        await channel.send(
+                            content=mention or None,
+                            embed=format_alert_embed(record),
+                            allowed_mentions=discord.AllowedMentions(everyone=PING_EVERYONE_ON_ALERT),
+                        )
+                        await store_in_db(record, is_alert=True)
+                    else:
+                        recent_violations.appendleft(record)
+                        name = record.get("player_name", "unknown")
+                        player_totals[name] = record.get("total_vl", player_totals[name])
+                        player_counts[name] += 1
+                        await channel.send(embed=format_violation_embed(record))
+                        await store_in_db(record, is_alert=False)
+        except Exception:
+            log.exception("Error while tailing violations log")
+
+        await asyncio.sleep(POLL_SECONDS)
+
+
+@tree.command(name="recent", description="Show the most recent anti-cheat violations Sentinel has seen.")
+@app_commands.describe(count="How many to show (default 5, max 20)")
+async def recent(interaction: discord.Interaction, count: int = 5):
+    count = max(1, min(count, 20))
+
+    if DB_ENABLED:
+        try:
+            rows = await db.fetch_recent(count)
+            if not rows:
+                await interaction.response.send_message("No violations recorded yet.", ephemeral=True)
+                return
+            lines = [f"**{r['player_name']}** — {r['check_type']} ({r['details']}) — "
+                     f"total VL {r['total_vl']} — {r['created_at']}" for r in rows]
+            await interaction.response.send_message("\n".join(lines))
+            return
+        except Exception:
+            log.exception("DB lookup for /recent failed, falling back to in-memory")
+
+    if not recent_violations:
+        await interaction.response.send_message("No violations recorded since the bot started.", ephemeral=True)
+        return
+    lines = []
+    for record in list(recent_violations)[:count]:
+        lines.append(f"**{record.get('player_name')}** — {record.get('check')} "
+                      f"({record.get('details')}) — total VL {record.get('total_vl')}")
+    await interaction.response.send_message("\n".join(lines))
+
+
+@tree.command(name="playerstats", description="Show a player's violation stats.")
+@app_commands.describe(player="Minecraft username")
+async def playerstats(interaction: discord.Interaction, player: str):
+    if DB_ENABLED:
+        try:
+            row = await db.fetch_player_stats(player)
+            if row:
+                await interaction.response.send_message(
+                    f"**{row['player_name']}** — {row['total_flags']} flags, "
+                    f"current total VL {row['current_total_vl']}, "
+                    f"first seen {row['first_seen_at']}, last flag {row['last_flag_at']}"
+                )
+                return
+        except Exception:
+            log.exception("DB lookup for /playerstats failed, falling back to in-memory")
+
+    if player not in player_counts:
+        await interaction.response.send_message(f"No violations recorded for `{player}`.", ephemeral=True)
+        return
+    await interaction.response.send_message(
+        f"**{player}** — {player_counts[player]} flags, current total VL {player_totals[player]}"
+    )
+
+
+@client.event
+async def on_ready():
+    if DB_ENABLED:
+        try:
+            await db.init_pool(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME)
+        except Exception:
+            log.exception("Could not connect to MySQL — continuing with Discord-only logging (no DB writes, /recent and /playerstats fall back to in-memory).")
+
+    if GUILD_ID:
+        guild = discord.Object(id=int(GUILD_ID))
+        tree.copy_global_to(guild=guild)
+        await tree.sync(guild=guild)
+    else:
+        await tree.sync()
+    log.info("Logged in as %s", client.user)
+
+    ftp_cfg = ftpsync.config_from_env()
+    if ftp_cfg is not None:
+        client.loop.create_task(ftpsync.run_async_loop(ftp_cfg))
+    else:
+        log.info("FTP sync disabled (FTP_HOST/FTP_USER/FTP_PASSWORD not all set); "
+                 "tailing %s directly", LOG_PATH)
+
+    tail_task.start()
+
+
+@client.event
+async def on_close():
+    if DB_ENABLED:
+        await db.close_pool()
+
+
+@tasks.loop(count=1)
+async def tail_task():
+    await tail_violations_log()
+
+
+if __name__ == "__main__":
+    client.run(BOT_TOKEN)
+
+```
+
+`discord-bot/db.py`:
+
+```py
+"""
+Thin async MySQL layer for Sentinel's Discord bot. Every tailed violation
+gets written here in addition to being posted to Discord, so you have a
+queryable history beyond whatever's scrolled past in the channel.
+
+Uses a connection pool (aiomysql) rather than one long-lived connection so
+a dropped connection (network blip to 31.220.111.107) gets transparently
+replaced instead of silently breaking DB writes for the rest of the bot's
+uptime.
+"""
+
+import logging
+
+import aiomysql
+
+log = logging.getLogger("sentinel-bot.db")
+
+_pool: aiomysql.Pool | None = None
+
+
+async def init_pool(host: str, port: int, user: str, password: str, db: str):
+    global _pool
+    _pool = await aiomysql.create_pool(
+        host=host,
+        port=port,
+        user=user,
+        password=password,
+        db=db,
+        autocommit=True,
+        minsize=1,
+        maxsize=5,
+        connect_timeout=10,
+    )
+    log.info("Connected to MySQL at %s:%s/%s", host, port, db)
+
+
+async def close_pool():
+    if _pool is not None:
+        _pool.close()
+        await _pool.wait_closed()
+
+
+async def record_violation(record: dict, is_alert: bool):
+    """Insert one violations row and upsert the players summary row.
+
+    `record` is the same dict parsed from a violations.jsonl line — see
+    the mod's Violation.toJsonLine() for the exact shape. Alert lines from
+    the mod have a slightly different shape (no `check`/`details` in the
+    normal sense), so is_alert callers pass what's available.
+    """
+    if _pool is None:
+        log.warning("DB pool not initialized, dropping violation write")
+        return
+
+    player_id = record.get("player_id", "")
+    player_name = record.get("player_name", "unknown")
+    category = record.get("category", "Alert")
+    check_type = record.get("check", record.get("triggering_check", "Alert"))
+    details = record.get("details", "")[:255]
+    added_vl = float(record.get("added_vl", 0) or 0)
+    total_vl = float(record.get("total_vl", 0) or 0)
+
+    async with _pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO violations
+                    (player_id, player_name, category, check_type, details, added_vl, total_vl, is_alert)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (player_id, player_name, category, check_type, details, added_vl, total_vl, int(is_alert)),
+            )
+            await cur.execute(
+                """
+                INSERT INTO players (player_id, player_name, current_total_vl, total_flags)
+                VALUES (%s, %s, %s, 1)
+                ON DUPLICATE KEY UPDATE
+                    player_name = VALUES(player_name),
+                    current_total_vl = VALUES(current_total_vl),
+                    total_flags = total_flags + 1,
+                    last_flag_at = CURRENT_TIMESTAMP
+                """,
+                (player_id, player_name, total_vl),
+            )
+
+
+async def fetch_player_stats(player_name: str) -> dict | None:
+    if _pool is None:
+        return None
+    async with _pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute(
+                "SELECT * FROM players WHERE player_name = %s LIMIT 1", (player_name,)
+            )
+            return await cur.fetchone()
+
+
+async def fetch_recent(limit: int = 5) -> list[dict]:
+    if _pool is None:
+        return []
+    async with _pool.acquire() as conn:
+        async with conn.cursor(aiomysql.DictCursor) as cur:
+            await cur.execute(
+                "SELECT * FROM violations ORDER BY created_at DESC LIMIT %s", (limit,)
+            )
+            return list(await cur.fetchall())
+
+```
+
+`discord-bot/ftpsync.py`:
+
+```py
+"""
+FTP log sync -- shared by bot.py (as a background task) and sync_log.py
+(as a standalone process).
+
+The Minecraft server (dathost) and this bot run on different machines, so
+the bot can't read the mod's violations.jsonl directly. This polls the
+dathost FTP account for growth in that file and appends only the new bytes
+to a local mirror, which the bot then tails.
+
+FTPS (explicit TLS) is tried first, with fallback to plain FTP. Byte
+position is kept in a sidecar file so restarts resume instead of re-copying.
+
+Sync is active only when FTP_HOST, FTP_USER and FTP_PASSWORD are all set.
+"""
+
+import asyncio
+import ftplib
+import logging
+import os
+import ssl
+from dataclasses import dataclass
+from pathlib import Path
+
+log = logging.getLogger("sentinel-bot.ftpsync")
+
+
+@dataclass(frozen=True)
+class SyncConfig:
+    host: str
+    port: int
+    user: str
+    password: str
+    remote_path: str
+    local_path: Path
+    interval: float
+
+    @property
+    def state_path(self) -> Path:
+        return self.local_path.with_suffix(self.local_path.suffix + ".syncpos")
+
+
+def config_from_env() -> SyncConfig | None:
+    host = os.environ.get("FTP_HOST", "").strip()
+    user = os.environ.get("FTP_USER", "").strip()
+    password = os.environ.get("FTP_PASSWORD", "")
+    if not (host and user and password):
+        return None
+    return SyncConfig(
+        host=host,
+        port=int(os.environ.get("FTP_PORT", "21") or 21),
+        user=user,
+        password=password,
+        remote_path=os.environ.get("FTP_REMOTE_PATH", "logs/sentinel-anticheat/violations.jsonl"),
+        local_path=Path(os.environ.get("SYNC_LOCAL_PATH")
+                        or os.environ.get("VIOLATIONS_LOG_PATH")
+                        or "logs/sentinel-anticheat/violations.jsonl"),
+        interval=float(os.environ.get("SYNC_INTERVAL_SECONDS", "5") or 5),
+    )
+
+
+def _connect(cfg: SyncConfig) -> ftplib.FTP:
+    """Return a logged-in FTP/FTPS connection, preferring FTPS."""
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        ftps = ftplib.FTP_TLS(context=ctx)
+        ftps.connect(cfg.host, cfg.port, timeout=30)
+        ftps.login(cfg.user, cfg.password)
+        ftps.prot_p()
+        return ftps
+    except (ftplib.all_errors, ssl.SSLError) as e:
+        log.warning("FTPS failed (%s); falling back to plain FTP", e)
+
+    ftp = ftplib.FTP()
+    ftp.connect(cfg.host, cfg.port, timeout=30)
+    ftp.login(cfg.user, cfg.password)
+    return ftp
+
+
+def _read_state(cfg: SyncConfig) -> int:
+    try:
+        return int(cfg.state_path.read_text().strip())
+    except (FileNotFoundError, ValueError):
+        return 0
+
+
+def _write_state(cfg: SyncConfig, pos: int) -> None:
+    cfg.state_path.write_text(str(pos))
+
+
+def _remote_size(ftp: ftplib.FTP, cfg: SyncConfig) -> int:
+    try:
+        ftp.voidcmd("TYPE I")
+        return ftp.size(cfg.remote_path) or 0
+    except ftplib.all_errors as e:
+        log.warning("Could not stat %s: %s", cfg.remote_path, e)
+        return -1
+
+
+def sync_once(ftp: ftplib.FTP, cfg: SyncConfig) -> None:
+    local_pos = _read_state(cfg)
+    size = _remote_size(ftp, cfg)
+    if size < 0:
+        return
+
+    if size < local_pos:
+        log.info("Remote log shrank (%d < %d); resyncing from start", size, local_pos)
+        local_pos = 0
+        cfg.local_path.write_bytes(b"")
+
+    if size == local_pos:
+        return
+
+    cfg.local_path.parent.mkdir(parents=True, exist_ok=True)
+    chunks: list[bytes] = []
+    ftp.retrbinary(f"RETR {cfg.remote_path}", chunks.append, rest=local_pos)
+    new_bytes = b"".join(chunks)
+    if not new_bytes:
+        return
+
+    with cfg.local_path.open("ab") as fh:
+        fh.write(new_bytes)
+    new_pos = local_pos + len(new_bytes)
+    _write_state(cfg, new_pos)
+    log.info("Appended %d bytes (%d -> %d)", len(new_bytes), local_pos, new_pos)
+
+
+def run_blocking_loop(cfg: SyncConfig) -> None:
+    """Synchronous forever-loop, used by sync_log.py."""
+    import time
+    log.info("Syncing ftp://%s:%s/%s -> %s every %ss",
+             cfg.host, cfg.port, cfg.remote_path, cfg.local_path, cfg.interval)
+    ftp = None
+    while True:
+        try:
+            if ftp is None:
+                ftp = _connect(cfg)
+            sync_once(ftp, cfg)
+        except ftplib.all_errors as e:
+            log.warning("FTP error (%s); reconnecting next cycle", e)
+            try:
+                if ftp is not None:
+                    ftp.close()
+            except Exception:
+                pass
+            ftp = None
+        except Exception:
+            log.exception("Unexpected sync error")
+        time.sleep(cfg.interval)
+
+
+async def run_async_loop(cfg: SyncConfig) -> None:
+    """Async forever-loop for use as a bot background task. Each blocking
+    FTP cycle runs in a worker thread so the event loop is never stalled."""
+    log.info("FTP sync active: ftp://%s:%s/%s -> %s every %ss",
+             cfg.host, cfg.port, cfg.remote_path, cfg.local_path, cfg.interval)
+
+    state = {"ftp": None}
+
+    def cycle() -> None:
+        try:
+            if state["ftp"] is None:
+                state["ftp"] = _connect(cfg)
+            sync_once(state["ftp"], cfg)
+        except ftplib.all_errors as e:
+            log.warning("FTP error (%s); reconnecting next cycle", e)
+            try:
+                if state["ftp"] is not None:
+                    state["ftp"].close()
+            except Exception:
+                pass
+            state["ftp"] = None
+        except Exception:
+            log.exception("Unexpected sync error")
+
+    while True:
+        await asyncio.to_thread(cycle)
+        await asyncio.sleep(cfg.interval)
+
+```
+
+`discord-bot/migration.sql`:
+
+```sql
+-- Sentinel AntiCheat — database migration
+-- Run this once in HeidiSQL (or any MySQL client) against your "Dept Helper DB"
+-- server at 31.220.111.107:5432. It creates a new schema, `minecraft_ac`,
+-- as a sibling to `department_helper` — it does not touch any existing
+-- database.
+--
+-- How to run it in HeidiSQL:
+--   1. Open a new query tab against the server (not inside an existing DB).
+--   2. Paste this whole file in.
+--   3. Click the "Execute SQL" button (the one that runs the WHOLE tab,
+--      not "Execute current query") so all statements run in order.
+
+CREATE DATABASE IF NOT EXISTS `minecraft_ac`
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE `minecraft_ac`;
+
+-- One row per flag the mod logs — the full history.
+CREATE TABLE IF NOT EXISTS `violations` (
+    `id`             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `player_id`      CHAR(36)      NOT NULL,               -- Minecraft UUID
+    `player_name`    VARCHAR(16)   NOT NULL,
+    `category`       VARCHAR(32)   NOT NULL,                -- Movement / Combat / World
+    `check_type`     VARCHAR(32)   NOT NULL,                -- Speed, Flight, Reach, XRay, ...
+    `details`        VARCHAR(255)  NOT NULL,
+    `added_vl`       DOUBLE        NOT NULL,
+    `total_vl`        DOUBLE        NOT NULL,
+    `is_alert`       TINYINT(1)    NOT NULL DEFAULT 0,      -- 1 = crossed the @everyone alert threshold
+    `created_at`     TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_player_id` (`player_id`),
+    INDEX `idx_player_name` (`player_name`),
+    INDEX `idx_created_at` (`created_at`),
+    INDEX `idx_check_type` (`check_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- One row per player, upserted on every flag — fast current-standing lookups
+-- without scanning the whole violations table.
+CREATE TABLE IF NOT EXISTS `players` (
+    `player_id`        CHAR(36)     NOT NULL PRIMARY KEY,
+    `player_name`      VARCHAR(16)  NOT NULL,
+    `current_total_vl` DOUBLE       NOT NULL DEFAULT 0,
+    `total_flags`      INT UNSIGNED NOT NULL DEFAULT 0,
+    `last_flag_at`     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `first_seen_at`    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_player_name` (`player_name`),
+    INDEX `idx_current_total_vl` (`current_total_vl`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Recommended: a dedicated least-privilege user for the bot instead of root,
+-- scoped to only this schema. Commented out since you've opted to use root
+-- for now — uncomment and run this (with your own password) any time you
+-- want to switch over; the bot only ever needs SELECT/INSERT/UPDATE here.
+--
+-- CREATE USER IF NOT EXISTS 'minecraft_ac_bot'@'%' IDENTIFIED BY 'choose-a-strong-password';
+-- GRANT SELECT, INSERT, UPDATE ON `minecraft_ac`.* TO 'minecraft_ac_bot'@'%';
+-- FLUSH PRIVILEGES;
+
+```
+
+`discord-bot/nixpacks.toml`:
+
+```toml
+# Nixpacks build config for deploying the Discord bot (e.g. via Coolify).
+# In Coolify, set the application's Base Directory to /discord-bot so this
+# file and requirements.txt are at the build root.
+
+[phases.setup]
+nixPkgs = ["python313"]
+
+[phases.install]
+cmds = ["python -m venv /opt/venv", "/opt/venv/bin/pip install -r requirements.txt"]
+
+[start]
+cmd = "/opt/venv/bin/python bot.py"
+
+```
+
+`discord-bot/requirements.txt`:
+
+```txt
+discord.py>=2.4.0
+python-dotenv>=1.0.1
+aiomysql>=0.2.0
+
+```
+
+`discord-bot/sync_log.py`:
+
+```py
+"""
+Sentinel AntiCheat -- standalone FTP log sync.
+
+Runs the FTP mirroring described in ftpsync.py as its own process. Use this
+when bot.py runs somewhere it can't reach the dathost FTP (or you just want
+the sync isolated). If bot.py has the FTP_* env vars set it already does
+this itself -- you don't need both.
+
+    pip install -r requirements.txt
+    cp .env.example .env   # fill in FTP_* and SYNC_* values
+    python sync_log.py
+"""
+
+import logging
+import sys
+
+from dotenv import load_dotenv
+
+import ftpsync
+
+load_dotenv()
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+
+if __name__ == "__main__":
+    cfg = ftpsync.config_from_env()
+    if cfg is None:
+        sys.exit("FTP_HOST, FTP_USER and FTP_PASSWORD must all be set (see .env.example).")
+    ftpsync.run_blocking_loop(cfg)
+
+```
+
+`discord-bot/systemd/sentinel-bot.service`:
+
+```service
+[Unit]
+Description=Sentinel AntiCheat Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/sentinel-anticheat/discord-bot
+ExecStart=/opt/sentinel-anticheat/discord-bot/.venv/bin/python bot.py
+EnvironmentFile=/opt/sentinel-anticheat/discord-bot/.env
+Restart=on-failure
+RestartSec=5
+User=sentinel
+Group=sentinel
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+`discord-bot/systemd/sentinel-sync.service`:
+
+```service
+[Unit]
+Description=Sentinel AntiCheat FTP log sync
+After=network-online.target
+Wants=network-online.target
+Before=sentinel-bot.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/sentinel-anticheat/discord-bot
+ExecStart=/opt/sentinel-anticheat/discord-bot/.venv/bin/python sync_log.py
+EnvironmentFile=/opt/sentinel-anticheat/discord-bot/.env
+Restart=on-failure
+RestartSec=5
+User=sentinel
+Group=sentinel
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+`mod/build.gradle`:
+
+```gradle
+plugins {
+    id 'java-library'
+    id 'net.neoforged.gradle.userdev' version '7.1.38'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// Mojang ships Java 25 to end users in 26.1.2, so mods target Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+repositories {
+    mavenCentral()
+}
+
+runs {
+    configureEach {
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperty 'forge.logging.console.level', 'debug'
+        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
+        modSource project.sourceSets.main
+    }
+
+    server {
+        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        argument '--nogui'
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+}
+
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+```
+
+`mod/gradle.properties`:
+
+```properties
+# Gradle / JVM
+org.gradle.jvmargs=-Xmx2G
+org.gradle.daemon=true
+org.gradle.parallel=true
+org.gradle.caching=true
+
+# Minecraft / NeoForge -- confirmed against the official 26.1.2 MDK
+# (https://github.com/NeoForgeMDKs/MDK-26.1.2-NeoGradle)
+minecraft_version=26.1.2
+minecraft_version_range=[26.1.2]
+neo_version=26.1.2.100
+neo_version_range=[26.1.2,)
+loader_version_range=[1,)
+
+# Mod metadata
+mod_id=sentinel_ac
+mod_name=Sentinel AntiCheat
+mod_license=All Rights Reserved
+mod_version=1.0.0
+mod_group_id=com.anticheat.sentinel
+mod_authors=Charlie
+mod_description=Server-side movement, combat and x-ray detection with Discord violation reporting.
+
+```
+
+`mod/gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.2.1-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`mod/gradlew`:
+
+```
+#!/bin/sh
+
+#
+# Copyright © 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/HEAD/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH="\\\"\\\""
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+```
+
+`mod/gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`mod/settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.neoforged.net/releases' }
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'sentinel-anticheat'
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/SentinelAntiCheat.java`:
+
+```java
+package com.anticheat.sentinel;
+
+import com.anticheat.sentinel.command.AntiCheatCommand;
+import com.anticheat.sentinel.core.ViolationManager;
+import com.anticheat.sentinel.listener.CombatListener;
+import com.anticheat.sentinel.listener.MovementListener;
+import com.anticheat.sentinel.listener.PlayerLifecycleListener;
+import com.anticheat.sentinel.listener.WorldListener;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Sentinel AntiCheat — server-side cheat detection for NeoForge 26.1.2.
+ *
+ * <p>This mod runs entirely server-side. It watches player movement, combat
+ * actions and block-breaking patterns for statistically unusual behaviour,
+ * scores it, and reports violations to a JSONL log file that the companion
+ * Discord bot (see /discord-bot) tails and posts to a Discord channel.
+ *
+ * <p>These are tick-level heuristic checks, not packet-level checks. They
+ * catch obvious/legacy cheat clients reliably and give staff a strong signal
+ * for anything subtler, but a determined attacker using packet-level
+ * spoofing can evade some of them. Treat flags as "go look", not
+ * auto-ban proof, unless you raise the thresholds in the config.
+ */
+@Mod(SentinelAntiCheat.MOD_ID)
+public class SentinelAntiCheat {
+
+    public static final String MOD_ID = "sentinel_ac";
+    public static final Logger LOGGER = LoggerFactory.getLogger("SentinelAntiCheat");
+
+    public SentinelAntiCheat(IEventBus modEventBus, ModContainer modContainer) {
+        modContainer.registerConfig(ModConfig.Type.SERVER, com.anticheat.sentinel.config.SentinelConfig.SPEC);
+
+        modEventBus.addListener(this::commonSetup);
+
+        NeoForge.EVENT_BUS.register(new MovementListener());
+        NeoForge.EVENT_BUS.register(new CombatListener());
+        NeoForge.EVENT_BUS.register(new WorldListener());
+        NeoForge.EVENT_BUS.register(new PlayerLifecycleListener());
+        NeoForge.EVENT_BUS.addListener(this::registerCommands);
+        NeoForge.EVENT_BUS.addListener(this::onServerStopping);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        LOGGER.info("Sentinel AntiCheat initializing — violations will be written to {}", ViolationManager.get().getLogPath());
+    }
+
+    private void registerCommands(RegisterCommandsEvent event) {
+        AntiCheatCommand.register(event.getDispatcher());
+    }
+
+    private void onServerStopping(ServerStoppingEvent event) {
+        ViolationManager.get().shutdown();
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/command/AntiCheatCommand.java`:
+
+```java
+package com.anticheat.sentinel.command;
+
+import com.anticheat.sentinel.core.PlayerCheckData;
+import com.anticheat.sentinel.core.ViolationManager;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+
+/**
+ * /sentinel check <player>  — shows a player's current violation levels in-game.
+ * Staff-only (permission level 2, same as /op default).
+ */
+public final class AntiCheatCommand {
+
+    private AntiCheatCommand() {}
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("sentinel")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(Commands.literal("check")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> {
+                                    ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+                                    PlayerCheckData data = ViolationManager.get().dataFor(target.getUUID());
+                                    ctx.getSource().sendSuccess(() -> Component.literal(
+                                            "[Sentinel] " + target.getGameProfile().name()
+                                                    + " total VL: " + String.format("%.1f", data.totalVl())
+                                                    + " — " + (data.violationLevels.isEmpty() ? "clean" : data.violationLevels.toString())
+                                    ), false);
+                                    return 1;
+                                })))
+                .then(Commands.literal("reload")
+                        .executes(ctx -> {
+                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                    "[Sentinel] Config is file-watched automatically; edit config/sentinel_ac-server.toml and it reloads live."), false);
+                            return 1;
+                        })));
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/config/SentinelConfig.java`:
+
+```java
+package com.anticheat.sentinel.config;
+
+import net.neoforged.neoforge.common.ModConfigSpec;
+
+/**
+ * All detection thresholds live here so staff can tune false-positive rates
+ * per-server without touching code. Ships with conservative defaults tuned
+ * for vanilla survival gameplay (no elytra edge cases fully solved — see
+ * README "Known limitations").
+ */
+public class SentinelConfig {
+
+    public static final ModConfigSpec SPEC;
+
+    // Movement
+    public static final ModConfigSpec.DoubleValue MAX_HORIZONTAL_SPEED;
+    public static final ModConfigSpec.IntValue SPEED_VIOLATION_TICKS;
+    public static final ModConfigSpec.IntValue FLIGHT_AIRBORNE_TICKS;
+    public static final ModConfigSpec.DoubleValue TIMER_MAX_TICKS_PER_SECOND;
+
+    // Combat
+    public static final ModConfigSpec.DoubleValue MAX_ATTACK_REACH;
+    public static final ModConfigSpec.IntValue MAX_CLICKS_PER_SECOND;
+    public static final ModConfigSpec.DoubleValue KILLAURA_MIN_ROTATION_SNAP;
+
+    // World / x-ray
+    public static final ModConfigSpec.DoubleValue XRAY_ORE_RATIO_THRESHOLD;
+    public static final ModConfigSpec.IntValue XRAY_MIN_SAMPLE_SIZE;
+
+    // Reporting
+    public static final ModConfigSpec.IntValue ALERT_THRESHOLD;
+    public static final ModConfigSpec.IntValue VL_DECAY_SECONDS;
+    public static final ModConfigSpec.BooleanValue NOTIFY_STAFF_IN_GAME;
+
+    static {
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+        builder.comment("Movement checks").push("movement");
+        MAX_HORIZONTAL_SPEED = builder
+                .comment("Max blocks/tick of horizontal movement before flagging speed (vanilla sprint ~= 0.28-0.29/tick; sprint-jump bursts go higher, hence the margin).")
+                .defineInRange("maxHorizontalSpeed", 0.55, 0.1, 5.0);
+        SPEED_VIOLATION_TICKS = builder
+                .comment("Consecutive over-speed ticks required before a violation is logged (absorbs single-tick lag spikes).")
+                .defineInRange("speedViolationTicks", 4, 1, 40);
+        FLIGHT_AIRBORNE_TICKS = builder
+                .comment("Ticks a survival player can be airborne with positive/level vertical motion (no elytra, no levitation, no slow-falling) before flagging flight.")
+                .defineInRange("flightAirborneTicks", 15, 5, 100);
+        TIMER_MAX_TICKS_PER_SECOND = builder
+                .comment("Max client-reported ticks/second before flagging a timer/speed-hack client (vanilla is 20).")
+                .defineInRange("timerMaxTicksPerSecond", 22.0, 20.0, 100.0);
+        builder.pop();
+
+        builder.comment("Combat checks").push("combat");
+        MAX_ATTACK_REACH = builder
+                .comment("Max eye-to-hitbox distance (blocks) for a legitimate melee attack. Vanilla survival reach is 3.0.")
+                .defineInRange("maxAttackReach", 3.3, 3.0, 10.0);
+        MAX_CLICKS_PER_SECOND = builder
+                .comment("Attacks/second above this are flagged as autoclicker/macro behaviour if the rate is also suspiciously regular.")
+                .defineInRange("maxClicksPerSecond", 16, 5, 50);
+        KILLAURA_MIN_ROTATION_SNAP = builder
+                .comment("Minimum instantaneous yaw+pitch delta (degrees) between the tick before an attack and the attack tick, used to flag aim-snap/killaura.")
+                .defineInRange("killauraMinRotationSnap", 70.0, 10.0, 180.0);
+        builder.pop();
+
+        builder.comment("World / x-ray checks").push("world");
+        XRAY_ORE_RATIO_THRESHOLD = builder
+                .comment("Fraction of a player's recent mined blocks that are valuable ores above which mining is flagged as x-ray-suspicious.")
+                .defineInRange("xrayOreRatioThreshold", 0.35, 0.05, 1.0);
+        XRAY_MIN_SAMPLE_SIZE = builder
+                .comment("Minimum blocks mined in the rolling window before the ore ratio check activates (avoids flagging players who just got lucky).")
+                .defineInRange("xrayMinSampleSize", 25, 5, 500);
+        builder.pop();
+
+        builder.comment("Violation reporting").push("reporting");
+        ALERT_THRESHOLD = builder
+                .comment("Cumulative violation level at which a player is escalated to a Discord/staff alert instead of just being logged.")
+                .defineInRange("alertThreshold", 10, 1, 1000);
+        VL_DECAY_SECONDS = builder
+                .comment("Seconds of clean play after which a player's violation level decays by 1, so old flags don't haunt them forever.")
+                .defineInRange("vlDecaySeconds", 120, 10, 3600);
+        NOTIFY_STAFF_IN_GAME = builder
+                .comment("Also broadcast alert-level violations to online players with the sentinel_ac.alerts permission.")
+                .define("notifyStaffInGame", true);
+        builder.pop();
+
+        SPEC = builder.build();
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/core/PlayerCheckData.java`:
+
+```java
+package com.anticheat.sentinel.core;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.UUID;
+
+/**
+ * Rolling per-player state used by the individual checks. One instance per
+ * online player, created lazily and cleared on logout.
+ */
+public class PlayerCheckData {
+
+    public final UUID playerId;
+
+    // Movement
+    public double lastX, lastY, lastZ;
+    public boolean initialized = false;
+    public int consecutiveOverSpeedTicks = 0;
+    public int airborneTicks = 0;
+    public double lastGroundY = 0;
+    public int onWaterSurfaceTicks = 0;
+    public long lastTickNanos = 0L;
+    public int clientTickCounter = 0;
+    public long timerWindowStartNanos = 0L;
+
+    // Combat
+    public float lastYaw, lastPitch;
+    public final java.util.ArrayDeque<Long> recentAttackTimestamps = new java.util.ArrayDeque<>();
+    public final java.util.ArrayDeque<Long> recentAttackIntervals = new java.util.ArrayDeque<>();
+
+    // World / x-ray
+    public int recentMinedTotal = 0;
+    public int recentMinedOres = 0;
+    public final java.util.ArrayDeque<Boolean> minedWindow = new java.util.ArrayDeque<>();
+
+    // Scoring
+    public final Map<ViolationType, Double> violationLevels = new EnumMap<>(ViolationType.class);
+    public long lastCleanTickMillis = System.currentTimeMillis();
+
+    public PlayerCheckData(UUID playerId) {
+        this.playerId = playerId;
+    }
+
+    public double totalVl() {
+        return violationLevels.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/core/Violation.java`:
+
+```java
+package com.anticheat.sentinel.core;
+
+import java.util.UUID;
+
+/**
+ * A single flagged incident for one player. Immutable — build a new one per flag.
+ */
+public record Violation(
+        UUID playerId,
+        String playerName,
+        ViolationType type,
+        String details,
+        double addedVl,
+        double totalVl,
+        long epochMillis
+) {
+    /** Compact single-line JSON, hand-rolled to avoid pulling in a JSON library for one struct. */
+    public String toJsonLine() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append('{');
+        sb.append("\"player_id\":\"").append(playerId).append("\",");
+        sb.append("\"player_name\":\"").append(escape(playerName)).append("\",");
+        sb.append("\"category\":\"").append(type.category()).append("\",");
+        sb.append("\"check\":\"").append(type.label()).append("\",");
+        sb.append("\"details\":\"").append(escape(details)).append("\",");
+        sb.append("\"added_vl\":").append(addedVl).append(',');
+        sb.append("\"total_vl\":").append(totalVl).append(',');
+        sb.append("\"timestamp_ms\":").append(epochMillis);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    private static String escape(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ");
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/core/ViolationManager.java`:
+
+```java
+package com.anticheat.sentinel.core;
+
+import com.anticheat.sentinel.SentinelAntiCheat;
+import com.anticheat.sentinel.config.SentinelConfig;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Central scoring + reporting hub. Every check funnels through
+ * {@link #flag(ServerPlayer, ViolationType, double, String)}; this class
+ * owns the JSONL sink the Discord bot tails, VL bookkeeping and decay, and
+ * optional in-game staff pings.
+ *
+ * <p>The log file is the integration point with the Discord bot — see
+ * /discord-bot/bot.py, which tails this exact path.
+ */
+public final class ViolationManager {
+
+    private static final ViolationManager INSTANCE = new ViolationManager();
+
+    public static ViolationManager get() {
+        return INSTANCE;
+    }
+
+    private final Map<UUID, PlayerCheckData> playerData = new ConcurrentHashMap<>();
+    private final Path logDir = Path.of("logs", "sentinel-anticheat");
+    private final Path logPath = logDir.resolve("violations.jsonl");
+    private BufferedWriter writer;
+
+    private ViolationManager() {
+        try {
+            Files.createDirectories(logDir);
+            writer = Files.newBufferedWriter(logPath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            SentinelAntiCheat.LOGGER.error("Could not open violations log at {}", logPath, e);
+        }
+    }
+
+    public Path getLogPath() {
+        return logPath;
+    }
+
+    public PlayerCheckData dataFor(UUID playerId) {
+        return playerData.computeIfAbsent(playerId, PlayerCheckData::new);
+    }
+
+    public void clear(UUID playerId) {
+        playerData.remove(playerId);
+    }
+
+    /**
+     * Record a flag for a player. addedVl is the weight of this specific
+     * detection (tune per-check severity); total VL for that check type is
+     * accumulated and decays over time via {@link #tickDecay(MinecraftServer)}.
+     */
+    public synchronized void flag(ServerPlayer player, ViolationType type, double addedVl, String details) {
+        PlayerCheckData data = dataFor(player.getUUID());
+        double newTotal = data.violationLevels.merge(type, addedVl, Double::sum);
+        data.lastCleanTickMillis = System.currentTimeMillis();
+
+        Violation violation = new Violation(
+                player.getUUID(),
+                player.getGameProfile().name(),
+                type,
+                details,
+                addedVl,
+                newTotal,
+                System.currentTimeMillis()
+        );
+
+        writeToLog(violation);
+
+        double totalAcrossAllChecks = data.totalVl();
+        if (totalAcrossAllChecks >= SentinelConfig.ALERT_THRESHOLD.get()) {
+            escalate(player, violation, totalAcrossAllChecks);
+        }
+    }
+
+    private void writeToLog(Violation violation) {
+        if (writer == null) return;
+        try {
+            writer.write(violation.toJsonLine());
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            SentinelAntiCheat.LOGGER.error("Failed writing violation to log", e);
+        }
+    }
+
+    private void escalate(ServerPlayer player, Violation triggering, double totalVl) {
+        // Also write an explicit ALERT record so the Discord bot can style it differently (e.g. @mention staff).
+        if (writer != null) {
+            try {
+                String line = "{\"alert\":true,\"player_name\":\"" + escape(player.getGameProfile().name())
+                        + "\",\"player_id\":\"" + player.getUUID()
+                        + "\",\"total_vl\":" + totalVl
+                        + ",\"triggering_check\":\"" + triggering.type().label()
+                        + "\",\"timestamp_ms\":" + System.currentTimeMillis() + "}";
+                writer.write(line);
+                writer.newLine();
+                writer.flush();
+            } catch (IOException e) {
+                SentinelAntiCheat.LOGGER.error("Failed writing alert to log", e);
+            }
+        }
+
+        if (SentinelConfig.NOTIFY_STAFF_IN_GAME.get()) {
+            MinecraftServer server = player.level().getServer();
+            if (server != null) {
+                Component alert = Component.literal("[Sentinel] ")
+                        .withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+                        .append(Component.literal(player.getGameProfile().name() + " ")
+                                .withStyle(ChatFormatting.YELLOW))
+                        .append(Component.literal("reached VL " + String.format("%.1f", totalVl)
+                                + " (" + triggering.type().label() + ")").withStyle(ChatFormatting.GRAY));
+                for (ServerPlayer staff : server.getPlayerList().getPlayers()) {
+                    if (server.getPlayerList().isOp(staff.nameAndId())) {
+                        staff.sendSystemMessage(alert);
+                    }
+                }
+            }
+        }
+    }
+
+    /** Call periodically (e.g. once per second) from a server tick handler to decay old VL. */
+    public void tickDecay(MinecraftServer server) {
+        long now = System.currentTimeMillis();
+        int decaySeconds = SentinelConfig.VL_DECAY_SECONDS.get();
+        for (PlayerCheckData data : playerData.values()) {
+            if (now - data.lastCleanTickMillis > decaySeconds * 1000L) {
+                data.violationLevels.replaceAll((type, vl) -> Math.max(0, vl - 1));
+                data.violationLevels.values().removeIf(vl -> vl <= 0);
+                data.lastCleanTickMillis = now;
+            }
+        }
+    }
+
+    public void shutdown() {
+        if (writer != null) {
+            try {
+                writer.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+
+    private static String escape(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/core/ViolationType.java`:
+
+```java
+package com.anticheat.sentinel.core;
+
+public enum ViolationType {
+    SPEED("Movement", "Speed"),
+    FLIGHT("Movement", "Flight"),
+    NOFALL("Movement", "NoFall"),
+    JESUS("Movement", "Jesus/WaterWalk"),
+    TIMER("Movement", "Timer"),
+    REACH("Combat", "Reach"),
+    KILLAURA("Combat", "KillAura"),
+    AUTOCLICKER("Combat", "AutoClicker"),
+    XRAY("World", "X-Ray");
+
+    private final String category;
+    private final String label;
+
+    ViolationType(String category, String label) {
+        this.category = category;
+        this.label = label;
+    }
+
+    public String category() {
+        return category;
+    }
+
+    public String label() {
+        return label;
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/listener/CombatListener.java`:
+
+```java
+package com.anticheat.sentinel.listener;
+
+import com.anticheat.sentinel.config.SentinelConfig;
+import com.anticheat.sentinel.core.PlayerCheckData;
+import com.anticheat.sentinel.core.ViolationManager;
+import com.anticheat.sentinel.core.ViolationType;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+
+import java.util.ArrayDeque;
+
+/**
+ * Reach / killaura(aim-snap) / autoclicker detection, evaluated on every
+ * melee attack a player lands.
+ */
+public class CombatListener {
+
+    private static final int SAMPLE_WINDOW = 20;
+
+    @SubscribeEvent
+    public void onAttack(AttackEntityEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        Entity target = event.getTarget();
+
+        PlayerCheckData data = ViolationManager.get().dataFor(player.getUUID());
+
+        checkReach(player, data, target);
+        checkAutoClicker(player, data);
+        checkKillAura(player, data);
+
+        data.lastYaw = player.getYRot();
+        data.lastPitch = player.getXRot();
+    }
+
+    private void checkReach(ServerPlayer player, PlayerCheckData data, Entity target) {
+        double eyeX = player.getX();
+        double eyeY = player.getEyeY();
+        double eyeZ = player.getZ();
+
+        double distance = target.getBoundingBox().distanceToSqr(new net.minecraft.world.phys.Vec3(eyeX, eyeY, eyeZ));
+        double reach = Math.sqrt(distance);
+        double allowed = SentinelConfig.MAX_ATTACK_REACH.get();
+
+        if (reach > allowed) {
+            ViolationManager.get().flag(player, ViolationType.REACH, 1.5,
+                    String.format("%.2f blocks (limit %.2f) on %s", reach, allowed, target.getName().getString()));
+        }
+    }
+
+    private void checkAutoClicker(ServerPlayer player, PlayerCheckData data) {
+        long now = System.currentTimeMillis();
+        ArrayDeque<Long> timestamps = data.recentAttackTimestamps;
+        timestamps.addLast(now);
+        while (timestamps.size() > SAMPLE_WINDOW) timestamps.removeFirst();
+
+        if (timestamps.size() < SAMPLE_WINDOW) return;
+
+        long windowMs = now - timestamps.peekFirst();
+        double cps = windowMs > 0 ? (timestamps.size() - 1) * 1000.0 / windowMs : 0;
+
+        if (cps <= SentinelConfig.MAX_CLICKS_PER_SECOND.get()) return;
+
+        // High CPS alone isn't proof — humans burst. Autoclickers/macros also
+        // produce suspiciously *regular* intervals (low variance). Combine both.
+        Long[] arr = timestamps.toArray(new Long[0]);
+        double meanInterval = 0;
+        int n = arr.length - 1;
+        for (int i = 1; i < arr.length; i++) meanInterval += (arr[i] - arr[i - 1]);
+        meanInterval /= n;
+
+        double variance = 0;
+        for (int i = 1; i < arr.length; i++) {
+            double diff = (arr[i] - arr[i - 1]) - meanInterval;
+            variance += diff * diff;
+        }
+        variance /= n;
+        double stdDev = Math.sqrt(variance);
+        double coefficientOfVariation = meanInterval > 0 ? stdDev / meanInterval : 1.0;
+
+        if (coefficientOfVariation < 0.10) { // very low jitter = mechanical
+            ViolationManager.get().flag(player, ViolationType.AUTOCLICKER, 1.0,
+                    String.format("%.1f cps, interval CoV %.3f (very low jitter)", cps, coefficientOfVariation));
+            timestamps.clear();
+        }
+    }
+
+    private void checkKillAura(ServerPlayer player, PlayerCheckData data) {
+        float dYaw = wrapDegrees(player.getYRot() - data.lastYaw);
+        float dPitch = player.getXRot() - data.lastPitch;
+        double snap = Math.sqrt(dYaw * dYaw + dPitch * dPitch);
+
+        if (snap >= SentinelConfig.KILLAURA_MIN_ROTATION_SNAP.get()) {
+            ViolationManager.get().flag(player, ViolationType.KILLAURA, 1.5,
+                    String.format("%.1f° instantaneous aim snap on attack tick", snap));
+        }
+    }
+
+    private static float wrapDegrees(float degrees) {
+        degrees = degrees % 360.0f;
+        if (degrees >= 180.0f) degrees -= 360.0f;
+        if (degrees < -180.0f) degrees += 360.0f;
+        return Math.abs(degrees);
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/listener/MovementListener.java`:
+
+```java
+package com.anticheat.sentinel.listener;
+
+import com.anticheat.sentinel.config.SentinelConfig;
+import com.anticheat.sentinel.core.PlayerCheckData;
+import com.anticheat.sentinel.core.ViolationManager;
+import com.anticheat.sentinel.core.ViolationType;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.material.FluidState;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+
+/**
+ * Speed / flight / no-fall / jesus(water-walk) / timer detection.
+ *
+ * These are tick-based positional checks (no packet interception), which
+ * means they're robust against simple movement-cheat clients but can be
+ * evaded by clients that spoof position reports at exactly vanilla-legal
+ * deltas while still gaining an advantage client-side. See README.
+ */
+public class MovementListener {
+
+    private int decayTickCounter = 0;
+
+    @SubscribeEvent
+    public void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.isCreative() || player.isSpectator()) return; // don't flag legitimate creative/spectator flight
+
+        PlayerCheckData data = ViolationManager.get().dataFor(player.getUUID());
+        double x = player.getX(), y = player.getY(), z = player.getZ();
+
+        if (!data.initialized) {
+            data.lastX = x;
+            data.lastY = y;
+            data.lastZ = z;
+            data.lastGroundY = y;
+            data.initialized = true;
+            return;
+        }
+
+        data.clientTickCounter++;
+
+        double dx = x - data.lastX;
+        double dz = z - data.lastZ;
+        double dy = y - data.lastY;
+        double horizontalDist = Math.sqrt(dx * dx + dz * dz);
+
+        checkSpeed(player, data, horizontalDist);
+        checkFlight(player, data, dy);
+        checkJesus(player, data);
+
+        data.lastX = x;
+        data.lastY = y;
+        data.lastZ = z;
+    }
+
+    private void checkSpeed(ServerPlayer player, PlayerCheckData data, double horizontalDist) {
+        boolean hasSpeedEffect = player.hasEffect(MobEffects.SPEED);
+        boolean elytraGliding = player.isFallFlying();
+        boolean riptiding = player.isAutoSpinAttack();
+        if (elytraGliding || riptiding) return; // separate movement domains, not covered here
+
+        double amplifierBonus = hasSpeedEffect
+                ? 0.06 * (player.getEffect(MobEffects.SPEED).getAmplifier() + 1)
+                : 0.0;
+        double allowed = SentinelConfig.MAX_HORIZONTAL_SPEED.get() + amplifierBonus;
+
+        if (horizontalDist > allowed) {
+            data.consecutiveOverSpeedTicks++;
+            if (data.consecutiveOverSpeedTicks >= SentinelConfig.SPEED_VIOLATION_TICKS.get()) {
+                ViolationManager.get().flag(player, ViolationType.SPEED, 1.0,
+                        String.format("%.3f blocks/tick (limit %.3f)", horizontalDist, allowed));
+                data.consecutiveOverSpeedTicks = 0;
+            }
+        } else {
+            data.consecutiveOverSpeedTicks = 0;
+        }
+    }
+
+    private void checkFlight(ServerPlayer player, PlayerCheckData data, double dy) {
+        boolean legitAirborneState = player.getAbilities().flying
+                || player.isFallFlying()
+                || player.hasEffect(MobEffects.LEVITATION)
+                || player.hasEffect(MobEffects.SLOW_FALLING)
+                || player.onGround()
+                || player.isInWater()
+                || player.isInLava()
+                || player.isPassenger()
+                || player.onClimbable();
+
+        if (legitAirborneState) {
+            data.airborneTicks = 0;
+            return;
+        }
+
+        // Airborne with no gravity-consistent descent (dy roughly >= 0, i.e. not falling) is suspicious.
+        if (dy >= -0.02) {
+            data.airborneTicks++;
+            if (data.airborneTicks > SentinelConfig.FLIGHT_AIRBORNE_TICKS.get()) {
+                ViolationManager.get().flag(player, ViolationType.FLIGHT, 2.0,
+                        String.format("%d airborne ticks without descent (dy=%.3f)", data.airborneTicks, dy));
+                data.airborneTicks = 0;
+            }
+        } else {
+            data.airborneTicks = 0;
+        }
+    }
+
+    private void checkJesus(ServerPlayer player, PlayerCheckData data) {
+        FluidState fluidBelow = player.level().getFluidState(player.blockPosition().below());
+        boolean standingOnFluidSurface = !player.isInWater() && !fluidBelow.isEmpty() && player.onGround();
+        boolean hasFrostWalker = !net.minecraft.world.item.enchantment.EnchantmentHelper
+                .getEnchantmentsForCrafting(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET))
+                .isEmpty(); // coarse allowance: any feet enchant (frost walker most likely) relaxes this check
+
+        if (standingOnFluidSurface && !hasFrostWalker) {
+            data.onWaterSurfaceTicks++;
+            if (data.onWaterSurfaceTicks > 20) {
+                ViolationManager.get().flag(player, ViolationType.JESUS, 1.5,
+                        "Standing on fluid surface for " + data.onWaterSurfaceTicks + " ticks without Frost Walker");
+                data.onWaterSurfaceTicks = 0;
+            }
+        } else {
+            data.onWaterSurfaceTicks = 0;
+        }
+    }
+
+    /**
+     * Timer-hack detection lives on the server tick, comparing how many
+     * player-tick events a given player generates versus wall-clock time.
+     * A client running the game loop faster than 20 tps will send movement
+     * packets (and thus generate PlayerTickEvents) faster than real time.
+     */
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent.Post event) {
+        decayTickCounter++;
+        if (decayTickCounter >= 20) { // once per second
+            decayTickCounter = 0;
+            if (event.getServer() != null) {
+                ViolationManager.get().tickDecay(event.getServer());
+                for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+                    checkTimer(player, ViolationManager.get().dataFor(player.getUUID()));
+                }
+            }
+        }
+    }
+
+    private void checkTimer(ServerPlayer player, PlayerCheckData data) {
+        long now = System.nanoTime();
+        if (data.timerWindowStartNanos == 0L) {
+            data.timerWindowStartNanos = now;
+            data.clientTickCounter = 0;
+            return;
+        }
+        double elapsedSeconds = (now - data.timerWindowStartNanos) / 1_000_000_000.0;
+        if (elapsedSeconds >= 1.0) {
+            double ticksPerSecond = data.clientTickCounter / elapsedSeconds;
+            if (ticksPerSecond > SentinelConfig.TIMER_MAX_TICKS_PER_SECOND.get()) {
+                ViolationManager.get().flag(player, ViolationType.TIMER, 2.0,
+                        String.format("%.1f effective ticks/sec", ticksPerSecond));
+            }
+            data.timerWindowStartNanos = now;
+            data.clientTickCounter = 0;
+        }
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/listener/PlayerLifecycleListener.java`:
+
+```java
+package com.anticheat.sentinel.listener;
+
+import com.anticheat.sentinel.core.ViolationManager;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+
+/** Clears rolling per-player check state on logout so it doesn't leak memory over a long uptime. */
+public class PlayerLifecycleListener {
+
+    @SubscribeEvent
+    public void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            ViolationManager.get().clear(player.getUUID());
+        }
+    }
+}
+
+```
+
+`mod/src/main/java/com/anticheat/sentinel/listener/WorldListener.java`:
+
+```java
+package com.anticheat.sentinel.listener;
+
+import com.anticheat.sentinel.config.SentinelConfig;
+import com.anticheat.sentinel.core.PlayerCheckData;
+import com.anticheat.sentinel.core.ViolationManager;
+import com.anticheat.sentinel.core.ViolationType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
+
+import java.util.ArrayDeque;
+import java.util.Set;
+
+/**
+ * X-ray heuristic: watches the ratio of valuable ore blocks to total blocks
+ * a player mines in a rolling window. Legitimate mining (following veins,
+ * strip mining, cave exploring) produces a low, noisy ore ratio because most
+ * broken blocks are stone/deepslate/dirt/etc. A player beelining through
+ * solid, unexposed rock straight to ore after ore produces a ratio far
+ * above what chance explains.
+ *
+ * This is a statistical signal, not proof — always have staff spot-check
+ * flagged players (e.g. via replay/spectate) before acting on it.
+ */
+public class WorldListener {
+
+    private static final int WINDOW_SIZE = 60;
+
+    private static final Set<Identifier> VALUABLE_ORES = Set.of(
+            Identifier.withDefaultNamespace("diamond_ore"),
+            Identifier.withDefaultNamespace("deepslate_diamond_ore"),
+            Identifier.withDefaultNamespace("ancient_debris"),
+            Identifier.withDefaultNamespace("emerald_ore"),
+            Identifier.withDefaultNamespace("deepslate_emerald_ore"),
+            Identifier.withDefaultNamespace("gold_ore"),
+            Identifier.withDefaultNamespace("deepslate_gold_ore"),
+            Identifier.withDefaultNamespace("nether_gold_ore"),
+            Identifier.withDefaultNamespace("redstone_ore"),
+            Identifier.withDefaultNamespace("deepslate_redstone_ore"),
+            Identifier.withDefaultNamespace("lapis_ore"),
+            Identifier.withDefaultNamespace("deepslate_lapis_ore")
+    );
+
+    @SubscribeEvent
+    public void onBlockBreak(BreakBlockEvent event) {
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        if (player.isCreative()) return;
+
+        Block block = event.getState().getBlock();
+        Identifier id = BuiltInRegistries.BLOCK.getKey(block);
+        boolean isOre = VALUABLE_ORES.contains(id);
+
+        // Ignore surface-exposed mining (skylight visible) — legitimate strip mines
+        // and surface quarries shouldn't count toward the x-ray ratio.
+        BlockPos pos = event.getPos();
+        boolean exposedToSky = player.level().canSeeSky(pos);
+        if (exposedToSky) return;
+
+        PlayerCheckData data = ViolationManager.get().dataFor(player.getUUID());
+        ArrayDeque<Boolean> window = data.minedWindow;
+
+        window.addLast(isOre);
+        data.recentMinedTotal++;
+        if (isOre) data.recentMinedOres++;
+
+        if (window.size() > WINDOW_SIZE) {
+            Boolean removed = window.removeFirst();
+            data.recentMinedTotal--;
+            if (removed) data.recentMinedOres--;
+        }
+
+        if (data.recentMinedTotal < SentinelConfig.XRAY_MIN_SAMPLE_SIZE.get()) return;
+
+        double ratio = (double) data.recentMinedOres / data.recentMinedTotal;
+        if (ratio >= SentinelConfig.XRAY_ORE_RATIO_THRESHOLD.get()) {
+            ViolationManager.get().flag(player, ViolationType.XRAY, 3.0,
+                    String.format("%d/%d (%.0f%%) of recent unexposed mining was valuable ore",
+                            data.recentMinedOres, data.recentMinedTotal, ratio * 100));
+            // Reset so we don't spam a flag every single subsequent ore block.
+            window.clear();
+            data.recentMinedTotal = 0;
+            data.recentMinedOres = 0;
+        }
+    }
+}
+
+```
+
+`mod/src/main/resources/META-INF/neoforge.mods.toml`:
+
+```toml
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+[[dependencies.${mod_id}]]
+    modId = "neoforge"
+    type = "required"
+    versionRange = "${neo_version_range}"
+    ordering = "NONE"
+    side = "SERVER"
+
+[[dependencies.${mod_id}]]
+    modId = "minecraft"
+    type = "required"
+    versionRange = "${minecraft_version_range}"
+    ordering = "NONE"
+    side = "SERVER"
+
+```
