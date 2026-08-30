@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Bratah123/Spirit-PTCGO`: entity [[spirit-ptcgo]] (Bratah123; Python PTCGO private-server reimplementation; card rules/effects, account/inventory/economy/shop, versus/tournaments, custom cosmetics, HTTP+game server, protobuf client protocol, card-bundle RE helpers, nginx/Caddy deploy; Private Server / Pokemon TCG Online); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[spirit-ida-plugin]], [[protobufs]], [[packet-sniffer]], and [[ds3os]].
+
 - **2026-08-30** — ingest `description:Bratah123/SpiritIDAPlugin`: entity [[spirit-ida-plugin]] (Bratah123; Python IDAPython IDA Pro plugin; MapleStory packet structure/header extraction, function output generation, text export for offline protocol docs; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[maple-research]], [[packet-sniffer]], [[ida-gameguard-str-dec]], and [[ce-tracer-ida]].
 
 - **2026-08-30** — ingest `description:Brattlof/D3DOverlay-Nvidia-Hijack`: entity [[d3doverlay-nvidia-hijack]] (Brattlof; C++ Direct3D9 overlay framework; ImGui through NVIDIA GeForce overlay window; HWND discovery, transparent click-through, per-frame callback, text/rect/circle helpers; external game tooling with minimal window management; README `[Hijack Nvidia]`); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[nvidia-overlay-hijack]], [[nvidia-overlay]], [[nvidia-overlay-renderer]], [[present-hook]], [[direct3d9-overlay]], and [[kdmapper-1909]].
