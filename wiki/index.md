@@ -1420,6 +1420,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GH AntiDebug Bypass Practice Tool](entities/gh-anti-debug-bypass-practice-tool.md) — Win32 ImGui/DX11 anti-debug bypass training lab (toggle checks → DETECTED; Anti Debugging)
 - [GH D3D11 Hook](entities/gh-d3d11-hook.md) — Guided Hacking DX11 hook sample (heavily commented; no external libs; DirectX Hook)
 - [GH Entity List Finder](entities/gh-entity-list-finder.md) — Guided Hacking entity-list discovery (x64/x86 live-process scan for likely list addresses; cheat / RE tools)
+- [GH Injector Library](entities/gh-injector-library.md) — Broihon C++ Windows DLL inject library (x86/x64/WOW64; Ldr/manual-map loaders; NtCreateThreadEx/APC/thread hijack/SetWindowsHookEx/kernel callbacks; cloaking + .NET assembly load; inject library and tool)
 - [GH Offset Dumper](entities/gh-offset-dumper.md) — Windows signature/netvar offset dumper (C++; live process scan → headers/JSON; Source engine; `[Offset dumper]`)
 - [GuidedHacking Injector](entities/guided-hacking-injector.md) — Qt GUI Windows DLL injector (LoadLibrary/manual map/APC/KM driver; cloaking; Injection Testing)
 - [GuardAC](entities/guardac.md) — Spigot/Paper/Folia Minecraft **1.21.x** AI-assisted server-side AC (Kotlin; cloud API aim-check verdicts; local alerts/violations/punishment ladders; alert-only mode; cross-server reputation; Geyser/WorldGuard exemptions; PalassCQ; Anti Cheat / game:minecraft)
