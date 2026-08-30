@@ -22,4 +22,4 @@ Tick- and event-based movement/combat/world checks (no mixins, no packet interce
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[katapult-anticheat]] · [[grim]] · [[cheatcheck]] · [[amethyst]] · [[minecraft-anticheat-list]] · [[inertia]] · [[sentinel-anti-cheat]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[katapult-anticheat]] · [[grim]] · [[cheatcheck]] · [[amethyst]] · [[bs-anticheat]] · [[minecraft-anticheat-list]] · [[inertia]] · [[sentinel-anti-cheat]]
