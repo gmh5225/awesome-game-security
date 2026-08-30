@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `readme:categories`: Game Develop ~188 (+1; OTFCG/[[awesome-game-analysis]] video-game tech analysis guide); Cheat ~2761 / Anti Cheat ~698 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-29** — ingest `description:BuddyBoi/KernelMoveMouse`: entity [[kernel-move-mouse]] (BuddyBoi; C++ WDK driver skeleton; relative mouse movement from kernel; OS version checks + per-build offset handling; intentionally limited low-level input demo; driver development / game input control learning); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-mouse]], [[mouseclassservicecallbacktrick]], and [[directinput]].
 
 - **2026-08-29** — ingest `description:BuzzerFelix/HWIDSpooferEAC`: entity [[hwid-spoofer-eac]] (BuzzerFelix; C++; ImGui GUI + driver mapper/loader + service handling; low-level hardware identifier changes; practical testing workflow; game bypass / anti-cheat HWID research; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[imgui-spoofer-leaked]], [[hwid-spoofer-eac-be]], [[easy-hwid-spoofer]], and [[hwid-checker-mg]].
