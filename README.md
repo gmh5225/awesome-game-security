@@ -367,6 +367,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/TLeonardUK/ds2os [Dark Souls 2]
 - https://github.com/geekrainian/killingfloor-bot-client [Killing Floor UE2.5 headless client with protocol docs, Steam auth RE, and Ghidra scripts]
 - https://github.com/Bratah123/Spirit-PTCGO [Pokemon TCG Online private server emulator]
+- https://github.com/DragonMinded/bemaniutils [RE toolkit for BEMANI arcade titles: network service emulation, packet sniff/redirect/reconstruct, and binary asset unpack/repack utilities]
 - https://github.com/rathena/rathena [MMORPG]
 - https://github.com/TrinityCore/TrinityCore [Server for WOW]
 - https://github.com/uNetworking/uWebSockets [WebSockets]
