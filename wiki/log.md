@@ -12,6 +12,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `readme:categories`: Cheat ~2764 / Anti Cheat ~700 / other major section counts stable; 41 sections; synced [[bs-anticheat]] Paper/Folia MC heuristic AC into README-map scope on [[overviews/overview]], [[overviews/anti-cheat]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-30** — ingest `description:BoomingTech/Pilot`: entity [[pilot]] (BoomingTech; now Piccolo Engine; compact cross-platform C++ GAMES104 teaching engine+editor; CMake Windows/Linux/macOS; rendering, resource, scripting, tooling; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[cpp-game-engine-book]], [[game-engine-from-scratch]], [[hazel]], [[exengine]], [[metal-game-engine-tutorial]], and [[custom-game-engines]].
 
 - **2026-08-30** — ingest `description:BoondockSulfur/BS-AntiCheat`: entity [[bs-anticheat]] (BoondockSulfur; Java Paper/Folia **1.21.10+** plugin; movement/combat/world-interaction/inventory/vehicle/packet checks—speed, fly, reach, killaura, nuker, autoclicker, x-ray mining; transaction-based lag compensation; configurable violation-level punishments with optional setbacks; SQLite logging; PacketEvents, Discord webhooks, PlaceholderAPI, LuckPerms; false-positive-conscious tunable heuristics; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[grim]], [[sentinel-anticheat-neoforge]], [[icuac]], [[shard]], [[windfall-anticheat]], [[minecraft-anticheat-list]], and [[inertia]].
