@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Brattlof/kdmapper-1909`: entity [[kdmapper-1909]] (Brattlof; C++ kernel driver mapper fork for Win10 1809/1903/1909; Intel `iqvw64e.sys` BYOVD; manual map + PE parsing + service management; kernel research / driver experimentation / AC bypass study); cited on [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[kdmapper-rs]], [[cve-2015-2291]], [[byovd]], and [[known-driver-mappers]].
+
 - **2026-08-30** — ingest `description:Brentdevent/S2x`: entity [[s2x]] (Brentdevent; COD MW2 2009 client modification framework; Arxan anti-tamper bypasses, code healing, integrity-check neutralization, custom console, server emulation, modding infrastructure; cheat / game:cod mw2 modding); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[fix-arxan]], [[cod-boiii]], [[kisakblack]], [[kisakcod]], and [[modernwarfare2-cpp-external]].
 
 - **2026-08-30** — ingest `description:Broihon/GH-Injector-Library`: entity [[gh-injector-library]] (Broihon; C++ Windows DLL injection library; x86/x64/WOW64; Ldr-based + manual-map loaders; NtCreateThreadEx/APC/thread hijack/SetWindowsHookEx/kernel-callback execution; cloaking, hook handling, .NET assembly loading; advanced game-hacking + AC behavior research; inject library and tool); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[guided-hacking-injector]], [[blackbone]], [[inject-all-the-things]], [[windows-process-injection]], and [[process-injection-techniques]].

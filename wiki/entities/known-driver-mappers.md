@@ -5,7 +5,8 @@ topics: [windows-kernel, anti-cheat, game-hacking]
 sources:
   - wiki/sources/descriptions/stuxnet147__Known-Driver-Mappers.md
   - wiki/sources/descriptions/Valthrun__valthrun-uefi-mapper.md
-updated: 2026-08-20
+  - wiki/sources/descriptions/Brattlof__kdmapper-1909.md
+updated: 2026-08-30
 confidence: medium
 ---
 
@@ -13,7 +14,7 @@ confidence: medium
 
 Catalog focused on **known Driver Mappers**, centered on driver development. Aimed at anti-cheat engineers and defensive researchers in the anti-cheat / stress-testing lane—mapping public mapper families and load paths for detection and lab stress rather than shipping a single mapper. (source: wiki/sources/descriptions/stuxnet147__Known-Driver-Mappers.md)
 
-Companion research lane to concrete mapper samples such as [[lsass-extend-mapper]], minimalist BYOVD mappers such as [[umap]] (btbd; C; physmem primitive → full PE map from user mode; no registry / standard load-path traces), BTBD shellcode mappers such as [[smap]] (raw PIC shellcode → kernel pool via BYOVD exec primitive; no PE image), post-map cleanup such as [[revert-mapper]], and EFI early-load mappers such as [[xigmapper]] and [[valthrun-uefi-mapper]] (Rust; bootable ISO/USB; pre-OS game driver map).
+Companion research lane to concrete mapper samples such as [[lsass-extend-mapper]], build-pinned kdmapper forks such as [[kdmapper-1909]] (Brattlof; Win10 1809/1903/1909; `iqvw64e.sys` BYOVD manual map) (source: wiki/sources/descriptions/Brattlof__kdmapper-1909.md), minimalist BYOVD mappers such as [[umap]] (btbd; C; physmem primitive → full PE map from user mode; no registry / standard load-path traces), BTBD shellcode mappers such as [[smap]] (raw PIC shellcode → kernel pool via BYOVD exec primitive; no PE image), post-map cleanup such as [[revert-mapper]], and EFI early-load mappers such as [[xigmapper]] and [[valthrun-uefi-mapper]] (Rust; bootable ISO/USB; pre-OS game driver map).
 
 ## Links
 
@@ -21,4 +22,4 @@ Companion research lane to concrete mapper samples such as [[lsass-extend-mapper
 
 ## Related
 
-[[lsass-extend-mapper]] · [[umap]] · [[smap]] · [[revert-mapper]] · [[xigmapper]] · [[valthrun-uefi-mapper]] · [[byovd]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[kdmapper-1909]] · [[lsass-extend-mapper]] · [[umap]] · [[smap]] · [[revert-mapper]] · [[xigmapper]] · [[valthrun-uefi-mapper]] · [[byovd]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

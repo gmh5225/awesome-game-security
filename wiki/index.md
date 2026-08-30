@@ -1873,6 +1873,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kazmath](entities/kazmath.md) — lightweight portable C 3D math library (vectors/matrices/transforms; CMake; examples/tests; Mathematics)
 - [kbotext](entities/kbotext.md) — LoL LCU bot extension framework (automated scripting and client control; README `[LCU]`; gmh5225; cheat / game:lol)
 - [kdmapper](entities/kdmapper.md) — C++ kernel driver mapper via Intel `iqvw64e.sys` BYOVD (manual PE map; trace cleanup; PDB helpers; TheCruZ)
+- [kdmapper-1909](entities/kdmapper-1909.md) — Build-pinned kdmapper fork for Win10 1809/1903/1909; Intel `iqvw64e.sys` BYOVD manual map (Brattlof; C++; kernel research / AC bypass study)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
 - [KDBG](entities/kdbg.md) — Windows kernel debugging toolkit (driver backend + CLI; user/kernel memory R/W, module/thread enum, tracing; x64; driver-signing setup; cheat / Tool; allogic)
 - [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
