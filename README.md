@@ -4410,6 +4410,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 > Analysis Framework
 - https://github.com/pandora-analysis/pandora
 - https://github.com/cocomelonc/peekaboo [Modular malware-behavior emulator for safe evasion testing, telemetry generation, and detection engineering]
+- https://github.com/BLCCoreStudio/BLCGameSecLab [Authorized game-security validation pipeline with BLCReverseLab intake, evidence graphs, build diffing, and incremental anti-cheat regression planning]
 - https://github.com/LooperSalty/cs2-tracker [CS2 stats tracker with local FastAPI, Game State Integration live match feed, and explainable heuristic anti-cheat suspicion scoring]
 - https://github.com/baldspots440/R6Intel [Rainbow Six Siege player stat analyzer with explainable heuristic suspicion scoring via R6Data API]
 - https://github.com/Remus3/Lanternlight [Anti-cheat-safe Mistfall Hunter companion that derives game state only from logs, saves, and passive screen capture—no process memory, injection, or hooks]
