@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Bratah123/SpiritIDAPlugin`: entity [[spirit-ida-plugin]] (Bratah123; Python IDAPython IDA Pro plugin; MapleStory packet structure/header extraction, function output generation, text export for offline protocol docs; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[maple-research]], [[packet-sniffer]], [[ida-gameguard-str-dec]], and [[ce-tracer-ida]].
+
 - **2026-08-30** — ingest `description:Brattlof/D3DOverlay-Nvidia-Hijack`: entity [[d3doverlay-nvidia-hijack]] (Brattlof; C++ Direct3D9 overlay framework; ImGui through NVIDIA GeForce overlay window; HWND discovery, transparent click-through, per-frame callback, text/rect/circle helpers; external game tooling with minimal window management; README `[Hijack Nvidia]`); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[nvidia-overlay-hijack]], [[nvidia-overlay]], [[nvidia-overlay-renderer]], [[present-hook]], [[direct3d9-overlay]], and [[kdmapper-1909]].
 
 - **2026-08-30** — ingest `description:Brattlof/kdmapper-1909`: entity [[kdmapper-1909]] (Brattlof; C++ kernel driver mapper fork for Win10 1809/1903/1909; Intel `iqvw64e.sys` BYOVD; manual map + PE parsing + service management; kernel research / driver experimentation / AC bypass study); cited on [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[kdmapper-rs]], [[cve-2015-2291]], [[byovd]], and [[known-driver-mappers]].

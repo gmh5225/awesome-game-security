@@ -1676,6 +1676,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [spu2c](entities/spu2c.md) — IDA Python plugin: PS3 Cell SPU opcode C-style annotation (vector lanes; shuffle masks; function scan; firmware/library/anti-cheat RE)
 - [ida-jm-xorstr-decrypt-plugin](entities/ida-jm-xorstr-decrypt-plugin.md) — IDA Pro JM Xorstr decrypt (x64; Python)
 - [ida-gameguard-str-dec](entities/ida-gameguard-str-dec.md) — IDA Pro nProtect GameGuard string decrypt (Python; modding; cheat / IDA Plugins; crtdll)
+- [SpiritIDAPlugin](entities/spirit-ida-plugin.md) — IDA Pro MapleStory packet analysis (Python IDAPython; structure/header extraction, function output, text export; protocol RE; Bratah123; cheat / IDA Plugins)
 - [IDA KMDF](entities/ida-kmdf.md) — IDA Pro KMDF/WDF driver annotator (structures / callbacks / queues; Python)
 - [ida-llm-explainer](entities/ida-llm-explainer.md) — local llama.cpp IDA plugin: explain/rename/struct inference + HITL accept (cheat / IDA Plugins)
 - [IDA Gepetto](entities/ida-gepetto.md) — local LLM IDA plugin: explain decompiled functions + variable rename suggestions (IDAPython; pseudocode UI; cheat / IDA Plugins)
