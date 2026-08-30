@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `readme:categories`: Cheat ~2763 (+2); Anti Cheat ~698 / Game Develop ~188 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-30** — ingest `description:Bratah123/GojoTheSpire`: entity [[gojo-the-spire]] (Bratah123; Java Slay the Spire mod; custom Gojo Satoru character, cards/deck, assets, mod config; gameplay customization and character-mod development; Slay The Spire Remastered Mod / Game Develop); cited on [[overviews/game-hacking]]; cross-linked [[sts2-kitlib]], [[spirit-ptcgo]], and [[spirit-ida-plugin]].
 
 - **2026-08-30** — ingest `description:Bratah123/Spirit-PTCGO`: entity [[spirit-ptcgo]] (Bratah123; Python PTCGO private-server reimplementation; card rules/effects, account/inventory/economy/shop, versus/tournaments, custom cosmetics, HTTP+game server, protobuf client protocol, card-bundle RE helpers, nginx/Caddy deploy; Private Server / Pokemon TCG Online); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[spirit-ida-plugin]], [[protobufs]], [[packet-sniffer]], and [[ds3os]].
