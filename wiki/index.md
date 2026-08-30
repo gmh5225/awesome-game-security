@@ -3294,6 +3294,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnrealModLoader](entities/unreal-mod-loader.md) — UE4 mod loading framework (Blueprint + SDK-based C++ mods; MinHook + ImGui hooks; injector + proxy DLL bootstrap; RussellJerome; Mod Loader)
 - [UnrealEngine5-UltimateStreetFighters](entities/unrealengine5-ultimate-streetfighters.md) — UE5 Street Fighters game (audio / physics / animation; C#/C++; Game Develop / Unreal source)
 - [UnrealDumper-4.25](entities/unrealdumper-4-25.md) — external UE4.25+ SDK dumper (C++; GObjects/GNames pattern scan; no inject)
+- [UnrealSDKDumper-4.25](entities/unrealsdkdumper-4-25.md) — compilable UE4.23–4.27 SDK generator (C++; dependency-aware class ordering, identifier sanitization, sdk.h + SDK folder; wide-character Chinese name handling; BobHUnrealTech; cheat / SDK Dump)
 - [Unreal-Engine-5-PDB](entities/unreal-engine-5-pdb.md) — UE5 PDB symbol mirror (function/type/struct layouts; IDA/x64dbg; RE / Game Engine Explorer:Unreal)
 - [ue5-cardgame](entities/ue5-cardgame.md) — UE5 card game (deck / turn-based / UMG / replication; Game Develop / Unreal source)
 - [ue5-fps-crypt-raider](entities/ue5-fps-crypt-raider.md) — UE5 FPS game (editor tooling / modding; C++/C; Game Develop / Unreal source)
