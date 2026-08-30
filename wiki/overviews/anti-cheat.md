@@ -382,6 +382,7 @@ sources:
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
+  - wiki/sources/descriptions/Charlie328402__Sentinel-Anti-Cheat.md
   - wiki/sources/descriptions/NaySurGithub__Amethyst.md
   - wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md
   - wiki/sources/descriptions/ManulMap__malstring.md
@@ -1082,7 +1083,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 **Fabric server-side moderation AC:** [[cheatcheck]] (EliGamer154; Java Fabric **26.1.x** mod; `/cheatcheck` spectate menu + safemode stealth watching; freeze/vanish/inventory/radar staff tools; `/report` flags plus reach/x-ray-style ore mining/speed heuristics; configurable offense presets, temp bans, pardons, persistent world storage; no client mod required; vanilla-client-compatible enforcement for Fabric server administrators; Anti Cheat / game:minecraft). (source: wiki/sources/descriptions/EliGamer154__CheatCheck.md)
 
-**NeoForge server-side MC AC:** Charlie328402/Sentinel-Anti-Cheat (Java NeoForge mod; movement/combat/x-ray checks + Discord violation bot; server-side enforcement for modded Java hosts; distinct from HEEAAP [[sentinel-anti-cheat]] usermode daemon) (source: wiki/sources/descriptions/Charlie328402__Sentinel-Anti-Cheat.md).
+**NeoForge server-side MC AC:** [[sentinel-anticheat-neoforge]] (Charlie328402; Java NeoForge mod; tick- and event-based movement/combat/world checks—speed, flight, water-walking, reach, killaura, autoclicker, x-ray mining—without mixins or packet interception; JSONL violation log + Python Discord bot with cumulative violation-level staff pings, relational DB history, optional FTP mirroring; alert-only, no automatic bans/kicks; Anti Cheat / game:minecraft) for NeoForge server operators beside integrity-focused mods such as [[katapult-anticheat]] and physics-prediction AC such as [[grim]]; distinct from HEEAAP [[sentinel-anti-cheat]] usermode daemon. (source: wiki/sources/descriptions/Charlie328402__Sentinel-Anti-Cheat.md)
 
 **PowerNukkitX Bedrock prediction AC:** [[amethyst]] (NaySurGithub; Java PowerNukkitX plugin; per-tick Bedrock physics replay from player input; compares simulated vs client-reported positions for unexplained movement rather than threshold-only speed checks; authoritative movement/vehicle simulation, client world-state acknowledgment gating, combat prediction with entity rewind; fly/reach/kill aura/scaffold/inventory/backtrack/malformed-packet checks; server-side movement correction and violation alerting; Anti Cheat / game:minecraft) for PowerNukkitX operators beside Nukkit prediction plugins such as [[ghost-anticheat]] and GeyserMC interceptors such as [[astrox-anticheat]]. (source: wiki/sources/descriptions/NaySurGithub__Amethyst.md)
 
