@@ -1,0 +1,731 @@
+Project Path: arc_BLCCoreStudio_BLCGameSecLab_jk27bor9
+
+Source Tree:
+
+```txt
+arc_BLCCoreStudio_BLCGameSecLab_jk27bor9
+├── LICENSE
+├── README.md
+├── pyproject.toml
+├── src
+│   └── blc_gamesec
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── orchestrator.py
+│       └── reverselab.py
+└── tests
+    └── test_orchestrator.py
+
+```
+
+`LICENSE`:
+
+```
+Apache License 2.0
+
+Copyright 2026 BLCCoreStudio
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+```
+
+`README.md`:
+
+```md
+# BLCGameSecLab
+
+Premium-oriented **authorized game-security validation and regression** platform built around a stateful, evidence-carrying pipeline.
+
+## v0.3 alpha milestone
+
+BLCGameSecLab now understands the new BLCReverseLab recovery layer instead of treating obfuscation as an opaque blob.
+
+Current core capabilities:
+
+- Hard authorization gate before security orchestration starts.
+- Shared `SecurityContext` with stage-to-stage fact propagation.
+- BLCReverseLab schema-aware intake (`blc.reverselab.analysis/v1`).
+- EvidenceGraph intake with node/edge/unresolved-link summaries.
+- Target profile reuse: engine, DEX/native inventory, tracked entries, SHA-256, and JADX status.
+- Recovery-profile intake: obfuscation score, suspicious identifier count, reversible encoding candidates, recovered literals, high-entropy/protected-content signals, and mapping/deobfuscation state.
+- Recovery assessment stage (`low` / `medium` / `high` / `unknown`) that decides whether deeper authorized analysis is warranted.
+- Version-intelligence stage that understands added, removed, and **same-name changed** DEX/native/tracked entries.
+- Automatic incremental retest scope derived from changed build surfaces.
+- Analysis reuse ratio carried into the regression plan.
+- Machine-readable GameSecLab output schema: `blc.gamesec.report/v1`.
+
+## Pipeline
+
+```text
+Authorization
+    -> ReverseLab intake
+    -> Target profile
+    -> Evidence index / graph
+    -> Recovery assessment
+    -> Version intelligence
+    -> Trust model
+    -> Regression plan
+    -> Summary
+```
+
+Each stage consumes the facts and evidence produced by the earlier stages. A later agent therefore knows *why* an earlier stage classified code as obfuscated or protected and can reuse that evidence.
+
+## End-to-end flow
+
+```bash
+# Analyze and recover the current authorized build
+blc-reverselab analyze game-v2.apk --recover -o game-v2.analysis.json
+
+# Compare it with the previous build
+blc-reverselab diff game-v1.analysis.json game-v2.analysis.json -o game-v1-v2.diff.json
+
+# Reuse both outputs in GameSecLab
+blc-gamesec sample-game \
+  --authorized \
+  --reverselab-report game-v2.analysis.json \
+  --version-diff game-v1-v2.diff.json \
+  -o gamesec-report.json
+```
+
+A GameSecLab report can now carry observations such as:
+
+```text
+obfuscation_level: high
+obfuscation_score: 0.76
+reversible_encoding_candidates: 8
+recovered_literal_count: 5
+protected_content_signals: 11
+mapping_supplied: true
+requires_deeper_authorized_analysis: true
+```
+
+These are analysis signals, not a claim that the original source can always be reconstructed.
+
+## Next product layers
+
+- Ghidra/native-analysis intake from BLCReverseLab.
+- Java/Kotlin -> JNI -> native trust-map correlation.
+- Integrity-control inventory and defensive validation results.
+- Evidence timeline and graph visualization.
+- Finding lifecycle: open -> remediated -> retested -> verified.
+- CI regression reports and policy gates.
+- Premium desktop workspace over the same machine-readable core.
+
+## Scope
+
+BLCGameSecLab is for authorized security validation, defensive research, regression testing, CTF/lab targets, and software you own or have permission to assess.
+
+It does **not** provide anti-cheat bypass, stealth, signature/integrity bypass, or online-cheating automation.
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blc-gamesec-lab"
+version = "0.3.0a1"
+description = "Authorized game security validation and regression orchestration."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [{name = "BLCCoreStudio"}]
+dependencies = []
+
+[project.scripts]
+blc-gamesec = "blc_gamesec.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+```
+
+`src/blc_gamesec/__init__.py`:
+
+```py
+__version__ = "0.3.0a1"
+
+```
+
+`src/blc_gamesec/cli.py`:
+
+```py
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+from .orchestrator import Orchestrator
+from .reverselab import ingest_reverselab_report, ingest_version_diff
+
+
+def _load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(prog="blc-gamesec")
+    parser.add_argument("target_name")
+    parser.add_argument(
+        "--authorized",
+        action="store_true",
+        help="Confirm the target is yours or explicitly authorized for testing",
+    )
+    parser.add_argument(
+        "--reverselab-report",
+        type=Path,
+        help="Optional current BLCReverseLab JSON report to import as upstream evidence",
+    )
+    parser.add_argument(
+        "--version-diff",
+        type=Path,
+        help="Optional BLCReverseLab build-to-build diff used to plan incremental retesting",
+    )
+    parser.add_argument("-o", "--output", type=Path, help="Optionally save the GameSecLab report")
+    args = parser.parse_args()
+
+    seed_facts: dict = {}
+    if args.reverselab_report:
+        seed_facts.update(ingest_reverselab_report(_load(args.reverselab_report)))
+    if args.version_diff:
+        seed_facts.update(ingest_version_diff(_load(args.version_diff)))
+
+    ctx = Orchestrator().run(
+        target_name=args.target_name,
+        authorized=args.authorized,
+        seed_facts=seed_facts,
+    )
+    payload = json.dumps(ctx.to_dict(), indent=2, sort_keys=True)
+    print(payload)
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(payload + "\n", encoding="utf-8")
+        print(f"\nSaved: {args.output}")
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`src/blc_gamesec/orchestrator.py`:
+
+```py
+from __future__ import annotations
+
+from collections import Counter
+from dataclasses import asdict, dataclass, field
+from typing import Any, Protocol
+
+REPORT_SCHEMA_VERSION = "blc.gamesec.report/v1"
+
+
+@dataclass(slots=True)
+class Finding:
+    id: str
+    category: str
+    title: str
+    severity: str
+    evidence: list[str] = field(default_factory=list)
+    recommendation: str = ""
+
+
+@dataclass(slots=True)
+class SecurityContext:
+    target_name: str
+    authorized: bool
+    facts: dict[str, Any] = field(default_factory=dict)
+    findings: list[Finding] = field(default_factory=list)
+    completed: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": REPORT_SCHEMA_VERSION,
+            "target_name": self.target_name,
+            "authorized": self.authorized,
+            "facts": self.facts,
+            "findings": [asdict(item) for item in self.findings],
+            "completed": self.completed,
+        }
+
+
+class Stage(Protocol):
+    name: str
+
+    def run(self, ctx: SecurityContext) -> None: ...
+
+
+class AuthorizationGate:
+    name = "authorization-gate"
+
+    def run(self, ctx: SecurityContext) -> None:
+        if not ctx.authorized:
+            raise PermissionError("GameSecLab requires an authorized test target")
+        ctx.facts["authorization_gate"] = "passed"
+
+
+class TargetProfileStage:
+    name = "target-profile"
+
+    def run(self, ctx: SecurityContext) -> None:
+        artifact = dict(ctx.facts.get("artifact_profile") or {})
+        upstream = dict(ctx.facts.get("reverselab") or {})
+        adapters = dict(ctx.facts.get("analysis_adapters") or {})
+        recovery = dict(ctx.facts.get("recovery_profile") or {})
+        ctx.facts["target_profile"] = {
+            "name": ctx.target_name,
+            "artifact_type": upstream.get("file_type", "unknown"),
+            "sha256": upstream.get("sha256"),
+            "detected_engines": list(artifact.get("detected_engines") or []),
+            "dex_count": len(artifact.get("dex_files") or []),
+            "native_library_count": len(artifact.get("native_libraries") or []),
+            "tracked_entry_count": len(artifact.get("tracked_entries") or {}),
+            "upstream_analysis_available": bool(upstream),
+            "jadx_status": dict(adapters.get("jadx") or {}).get("status"),
+            "recovery_status": recovery.get("status"),
+            "obfuscation_score": float(recovery.get("obfuscation_score", 0.0)),
+            "deobfuscation_requested": bool(recovery.get("deobfuscation_requested", False)),
+            "mapping_supplied": bool(recovery.get("mapping_supplied", False)),
+        }
+
+
+class EvidenceIndexStage:
+    name = "evidence-index"
+
+    def run(self, ctx: SecurityContext) -> None:
+        evidence = [item for item in (ctx.facts.get("upstream_evidence") or []) if isinstance(item, dict)]
+        graph = dict(ctx.facts.get("evidence_graph") or {})
+        graph_stats = dict(graph.get("stats") or {})
+
+        kinds = Counter(str(item.get("kind", "unknown")) for item in evidence)
+        sources = Counter(str(item.get("source", "unknown")) for item in evidence)
+        ids = sorted(str(item["id"]) for item in evidence if item.get("id"))
+
+        ctx.facts["evidence_index"] = {
+            "evidence_count": len(evidence),
+            "ids": ids,
+            "kinds": dict(sorted(kinds.items())),
+            "sources": dict(sorted(sources.items())),
+            "graph_node_count": int(graph_stats.get("node_count", len(evidence))),
+            "graph_edge_count": int(graph_stats.get("edge_count", 0)),
+            "unresolved_graph_targets": list(graph.get("unresolved_targets") or []),
+        }
+
+
+class RecoveryAssessmentStage:
+    name = "recovery-assessment"
+
+    def run(self, ctx: SecurityContext) -> None:
+        recovery = dict(ctx.facts.get("recovery_profile") or {})
+        status = recovery.get("status")
+        score = float(recovery.get("obfuscation_score", 0.0))
+        high_entropy = int(recovery.get("high_entropy_literal_count", 0))
+        encoded = int(recovery.get("encoded_literal_candidates", 0))
+        recovered = int(recovery.get("recovered_literal_count", 0))
+
+        if status != "completed":
+            level = "unknown"
+        elif score >= 0.7:
+            level = "high"
+        elif score >= 0.35:
+            level = "medium"
+        else:
+            level = "low"
+
+        ctx.facts["recovery_assessment"] = {
+            "status": status or "not-run",
+            "obfuscation_level": level,
+            "obfuscation_score": score,
+            "protected_content_signals": high_entropy,
+            "reversible_encoding_candidates": encoded,
+            "recovered_literal_count": recovered,
+            "mapping_supplied": bool(recovery.get("mapping_supplied", False)),
+            "deobfuscation_requested": bool(recovery.get("deobfuscation_requested", False)),
+            "requires_deeper_authorized_analysis": bool(
+                status == "completed" and (score >= 0.35 or high_entropy > recovered)
+            ),
+        }
+
+
+class VersionIntelligenceStage:
+    name = "version-intelligence"
+
+    def run(self, ctx: SecurityContext) -> None:
+        if "version_diff" not in ctx.facts:
+            ctx.facts["version_intelligence"] = {
+                "mode": "baseline",
+                "changed_surfaces": [],
+                "analysis_reuse_ratio": 0.0,
+                "engine_changed": False,
+                "manifest_changed": False,
+                "resource_entry_delta": 0,
+            }
+            return
+
+        diff = dict(ctx.facts.get("version_diff") or {})
+        changed: set[str] = set()
+        for key in (
+            "added_native",
+            "removed_native",
+            "changed_native",
+            "added_dex",
+            "removed_dex",
+            "changed_dex",
+            "added_tracked_entries",
+            "removed_tracked_entries",
+            "changed_tracked_entries",
+        ):
+            changed.update(str(item) for item in (diff.get(key) or []))
+
+        manifest_changed = bool(diff.get("manifest_changed", False))
+        resource_delta = int(diff.get("resource_entry_delta", 0))
+        if manifest_changed:
+            changed.add("<manifest>")
+        if resource_delta:
+            changed.add("<resources>")
+
+        before_engines = list(diff.get("engines_before") or [])
+        after_engines = list(diff.get("engines_after") or [])
+        engine_changed = before_engines != after_engines
+        if engine_changed:
+            changed.add("<engine-fingerprint>")
+
+        ctx.facts["version_intelligence"] = {
+            "mode": "incremental",
+            "changed_surfaces": sorted(changed),
+            "change_count": int(diff.get("change_count", len(changed))),
+            "analysis_reuse_ratio": float(diff.get("analysis_reuse_ratio", 0.0)),
+            "engine_changed": engine_changed,
+            "engines_before": before_engines,
+            "engines_after": after_engines,
+            "manifest_changed": manifest_changed,
+            "resource_entry_delta": resource_delta,
+        }
+
+
+class TrustModelStage:
+    name = "trust-model"
+
+    def run(self, ctx: SecurityContext) -> None:
+        ctx.facts.setdefault(
+            "trust_model",
+            {
+                "client_authoritative_surfaces": [],
+                "server_validated_surfaces": [],
+                "integrity_controls": [],
+                "runtime_detection_signals": [],
+            },
+        )
+
+
+class RegressionStage:
+    name = "regression-plan"
+
+    def run(self, ctx: SecurityContext) -> None:
+        version = dict(ctx.facts.get("version_intelligence") or {})
+        changed = list(version.get("changed_surfaces") or [])
+        mode = version.get("mode", "baseline")
+        if mode == "baseline":
+            scope: str | list[str] = "baseline-observed-surfaces"
+        elif changed:
+            scope = changed
+        else:
+            scope = []
+
+        ctx.facts["regression_plan"] = {
+            "reuse_previous_evidence": True,
+            "retest_changed_surfaces_only": mode == "incremental",
+            "preserve_finding_history": True,
+            "upstream_evidence_count": len(ctx.facts.get("upstream_evidence") or []),
+            "analysis_reuse_ratio": float(version.get("analysis_reuse_ratio", 0.0)),
+            "retest_scope": scope,
+        }
+
+
+class SummaryStage:
+    name = "summary"
+
+    def run(self, ctx: SecurityContext) -> None:
+        target = dict(ctx.facts.get("target_profile") or {})
+        evidence = dict(ctx.facts.get("evidence_index") or {})
+        version = dict(ctx.facts.get("version_intelligence") or {})
+        recovery = dict(ctx.facts.get("recovery_assessment") or {})
+        ctx.facts["analysis_summary"] = {
+            "target": ctx.target_name,
+            "engines": list(target.get("detected_engines") or []),
+            "evidence_count": int(evidence.get("evidence_count", 0)),
+            "graph_nodes": int(evidence.get("graph_node_count", 0)),
+            "graph_edges": int(evidence.get("graph_edge_count", 0)),
+            "version_mode": version.get("mode", "baseline"),
+            "changed_surface_count": len(version.get("changed_surfaces") or []),
+            "obfuscation_level": recovery.get("obfuscation_level", "unknown"),
+            "obfuscation_score": float(recovery.get("obfuscation_score", 0.0)),
+            "protected_content_signals": int(recovery.get("protected_content_signals", 0)),
+            "finding_count": len(ctx.findings),
+        }
+
+
+class Orchestrator:
+    def __init__(self, stages: list[Stage] | None = None) -> None:
+        self.stages = stages or [
+            AuthorizationGate(),
+            TargetProfileStage(),
+            EvidenceIndexStage(),
+            RecoveryAssessmentStage(),
+            VersionIntelligenceStage(),
+            TrustModelStage(),
+            RegressionStage(),
+            SummaryStage(),
+        ]
+
+    def run(
+        self,
+        target_name: str,
+        authorized: bool,
+        seed_facts: dict[str, Any] | None = None,
+    ) -> SecurityContext:
+        ctx = SecurityContext(
+            target_name=target_name,
+            authorized=authorized,
+            facts=dict(seed_facts or {}),
+        )
+        for stage in self.stages:
+            stage.run(ctx)
+            ctx.completed.append(stage.name)
+        return ctx
+
+```
+
+`src/blc_gamesec/reverselab.py`:
+
+```py
+from __future__ import annotations
+
+from typing import Any
+
+SUPPORTED_REVERSELAB_SCHEMAS = {None, "blc.reverselab.analysis/v1"}
+
+
+def ingest_reverselab_report(report: dict[str, Any]) -> dict[str, Any]:
+    """Normalize a BLCReverseLab report into GameSecLab seed facts.
+
+    Only analysis metadata, evidence, recovery signals, and fingerprints are
+    imported. The bridge does not execute invasive actions or bypass controls.
+    """
+    schema = report.get("schema_version")
+    if schema not in SUPPORTED_REVERSELAB_SCHEMAS:
+        raise ValueError(f"Unsupported BLCReverseLab schema: {schema}")
+
+    facts = dict(report.get("facts") or {})
+    evidence = list(report.get("evidence") or [])
+    graph = dict(report.get("evidence_graph") or {})
+    recovery = dict(facts.get("recovery") or {})
+    jadx = dict(facts.get("jadx") or {})
+
+    normalized = {
+        "reverselab": {
+            "schema_version": schema or "legacy",
+            "target": report.get("target"),
+            "sha256": report.get("sha256"),
+            "file_type": report.get("file_type"),
+            "completed_steps": list(report.get("completed_steps") or []),
+            "evidence_count": len(evidence),
+        },
+        "artifact_profile": {
+            "detected_engines": list(facts.get("detected_engines") or []),
+            "dex_files": list(facts.get("dex_files") or []),
+            "native_libraries": list(facts.get("native_libraries") or []),
+            "manifest_entries": list(facts.get("manifest_entries") or []),
+            "resource_entry_count": facts.get("resource_entry_count", 0),
+            "tracked_entries": dict(facts.get("tracked_entries") or {}),
+        },
+        "analysis_tools": dict(facts.get("tools") or {}),
+        "analysis_adapters": {
+            "jadx": jadx,
+        },
+        "recovery_profile": {
+            "status": recovery.get("status"),
+            "obfuscation_score": float(recovery.get("obfuscation_score", 0.0)),
+            "suspicious_identifier_count": int(recovery.get("suspicious_identifier_count", 0)),
+            "encoded_literal_candidates": int(recovery.get("encoded_literal_candidates", 0)),
+            "recovered_literal_count": int(recovery.get("recovered_literal_count", 0)),
+            "high_entropy_literal_count": int(recovery.get("high_entropy_literal_count", 0)),
+            "capabilities": dict(recovery.get("capabilities") or {}),
+            "mapping_supplied": bool(jadx.get("mappings_path")),
+            "deobfuscation_requested": bool(jadx.get("deobfuscation_requested", False)),
+        },
+        "upstream_evidence": evidence,
+        "evidence_graph": graph,
+    }
+    return normalized
+
+
+def ingest_version_diff(report: dict[str, Any]) -> dict[str, Any]:
+    """Import BLCReverseLab build-to-build version intelligence."""
+    accepted_lists = (
+        "added_native",
+        "removed_native",
+        "changed_native",
+        "added_dex",
+        "removed_dex",
+        "changed_dex",
+        "added_tracked_entries",
+        "removed_tracked_entries",
+        "changed_tracked_entries",
+        "engines_before",
+        "engines_after",
+        "evidence_added",
+        "evidence_removed",
+    )
+    normalized: dict[str, Any] = {key: list(report.get(key) or []) for key in accepted_lists}
+    normalized.update(
+        {
+            "manifest_changed": bool(report.get("manifest_changed", False)),
+            "resource_entry_delta": int(report.get("resource_entry_delta", 0)),
+            "analysis_reuse_ratio": float(report.get("analysis_reuse_ratio", 0.0)),
+            "change_count": int(report.get("change_count", 0)),
+        }
+    )
+    return {"version_diff": normalized}
+
+```
+
+`tests/test_orchestrator.py`:
+
+```py
+import pytest
+
+from blc_gamesec.orchestrator import Orchestrator
+from blc_gamesec.reverselab import ingest_reverselab_report, ingest_version_diff
+
+
+def test_authorized_pipeline():
+    ctx = Orchestrator().run("sample-game", True)
+    assert ctx.completed == [
+        "authorization-gate",
+        "target-profile",
+        "evidence-index",
+        "recovery-assessment",
+        "version-intelligence",
+        "trust-model",
+        "regression-plan",
+        "summary",
+    ]
+    assert ctx.facts["regression_plan"]["reuse_previous_evidence"] is True
+    assert ctx.facts["version_intelligence"]["mode"] == "baseline"
+    assert ctx.to_dict()["schema_version"] == "blc.gamesec.report/v1"
+
+
+def test_unauthorized_target_is_blocked():
+    with pytest.raises(PermissionError):
+        Orchestrator().run("unknown", False)
+
+
+def test_reverselab_report_becomes_seed_context():
+    report = {
+        "schema_version": "blc.reverselab.analysis/v1",
+        "target": "/tmp/sample.apk",
+        "sha256": "abc123",
+        "file_type": "apk",
+        "completed_steps": ["fingerprint", "android-archive", "jadx", "recovery"],
+        "facts": {
+            "detected_engines": ["unity-il2cpp"],
+            "dex_files": ["classes.dex", "classes2.dex"],
+            "native_libraries": ["lib/arm64-v8a/libil2cpp.so"],
+            "manifest_entries": ["AndroidManifest.xml"],
+            "resource_entry_count": 12,
+            "tracked_entries": {"classes.dex": {"kind": "dex", "crc32": "abcd"}},
+            "tools": {"jadx": True},
+            "jadx": {
+                "status": "completed",
+                "java_file_count": 42,
+                "deobfuscation_requested": True,
+                "mappings_path": "/tmp/mapping.txt",
+            },
+            "recovery": {
+                "status": "completed",
+                "obfuscation_score": 0.76,
+                "suspicious_identifier_count": 31,
+                "encoded_literal_candidates": 8,
+                "recovered_literal_count": 5,
+                "high_entropy_literal_count": 11,
+                "capabilities": {"original_source_guarantee": False},
+            },
+        },
+        "evidence": [
+            {"id": "ev:1", "kind": "artifact", "source": "fingerprint"},
+            {"id": "ev:2", "kind": "structure", "source": "android-archive"},
+            {"id": "ev:recovery", "kind": "recovery-profile", "source": "recovery"},
+        ],
+        "evidence_graph": {
+            "nodes": [{"id": "ev:1"}, {"id": "ev:2"}, {"id": "ev:recovery"}],
+            "edges": [{"source": "ev:2", "target": "ev:1", "relation": "related"}],
+            "unresolved_targets": [],
+            "stats": {"node_count": 3, "edge_count": 1},
+        },
+    }
+    seed = ingest_reverselab_report(report)
+    ctx = Orchestrator().run("sample-game", True, seed)
+
+    assert ctx.facts["target_profile"]["artifact_type"] == "apk"
+    assert ctx.facts["target_profile"]["detected_engines"] == ["unity-il2cpp"]
+    assert ctx.facts["target_profile"]["dex_count"] == 2
+    assert ctx.facts["target_profile"]["tracked_entry_count"] == 1
+    assert ctx.facts["target_profile"]["jadx_status"] == "completed"
+    assert ctx.facts["target_profile"]["obfuscation_score"] == 0.76
+    assert ctx.facts["target_profile"]["mapping_supplied"] is True
+    assert ctx.facts["evidence_index"]["graph_edge_count"] == 1
+    assert ctx.facts["regression_plan"]["upstream_evidence_count"] == 3
+
+    recovery = ctx.facts["recovery_assessment"]
+    assert recovery["obfuscation_level"] == "high"
+    assert recovery["protected_content_signals"] == 11
+    assert recovery["recovered_literal_count"] == 5
+    assert recovery["requires_deeper_authorized_analysis"] is True
+
+
+def test_version_diff_drives_incremental_retest_scope():
+    diff = {
+        "changed_dex": ["classes.dex"],
+        "changed_native": ["lib/arm64-v8a/libgame.so"],
+        "manifest_changed": True,
+        "resource_entry_delta": 3,
+        "engines_before": ["unity"],
+        "engines_after": ["unity-il2cpp"],
+        "analysis_reuse_ratio": 0.82,
+        "change_count": 5,
+    }
+    seed = ingest_version_diff(diff)
+    ctx = Orchestrator().run("sample-game", True, seed)
+
+    version = ctx.facts["version_intelligence"]
+    assert version["mode"] == "incremental"
+    assert version["analysis_reuse_ratio"] == 0.82
+    assert version["engine_changed"] is True
+    assert "classes.dex" in version["changed_surfaces"]
+    assert "<manifest>" in version["changed_surfaces"]
+    assert "<resources>" in version["changed_surfaces"]
+    assert "<engine-fingerprint>" in version["changed_surfaces"]
+    assert ctx.facts["regression_plan"]["retest_scope"] == version["changed_surfaces"]
+
+
+def test_unknown_reverselab_schema_is_rejected():
+    with pytest.raises(ValueError):
+        ingest_reverselab_report({"schema_version": "blc.reverselab.analysis/v999"})
+
+```
