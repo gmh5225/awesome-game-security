@@ -793,6 +793,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [D2GI](entities/d2gi.md) — Hard Truck 2 DirectDraw7/D3D7→D3D9 wrapper (modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks; REDPOWAR; DirectX Compatibility)
 - [d3d12book](entities/d3d12book.md) — DX12 educational sample (shader/rendering/animation; DirectX / guide)
 - [d3dhook_imgui](entities/d3dhook-imgui.md) — D3D/OpenGL/Vulkan ImGui hook base (C/C++; x86/x64; DirectX Hook)
+- [d3doverlay-nvidia-hijack](entities/d3doverlay-nvidia-hijack.md) — D3D9 ImGui overlay via NVIDIA GeForce window hijack (Brattlof; click-through; external game tooling)
 - [UniversalHookX](entities/universalhookx.md) — universal DX9–12/OpenGL/Vulkan ImGui hook library (dummy-device vtable bootstrap; compile-time backend selection; bruhmoment21)
 - [Universal Dear ImGui Hook](entities/universal-dear-imgui-hook.md) — Windows D3D9–12 + partial Vulkan Dear ImGui overlay hook (backend-specific hooks; toggleable in-process menu; overlay prototyping / debug UI; Sh0ckFR)
 - [d810](entities/d810.md) — CKCat; Python IDA Pro microcode deobfuscation at decompilation time; configurable extensible rule sets (malware/game-security RE)

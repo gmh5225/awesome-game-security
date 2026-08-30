@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Brattlof/D3DOverlay-Nvidia-Hijack`: entity [[d3doverlay-nvidia-hijack]] (Brattlof; C++ Direct3D9 overlay framework; ImGui through NVIDIA GeForce overlay window; HWND discovery, transparent click-through, per-frame callback, text/rect/circle helpers; external game tooling with minimal window management; README `[Hijack Nvidia]`); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[nvidia-overlay-hijack]], [[nvidia-overlay]], [[nvidia-overlay-renderer]], [[present-hook]], [[direct3d9-overlay]], and [[kdmapper-1909]].
+
 - **2026-08-30** — ingest `description:Brattlof/kdmapper-1909`: entity [[kdmapper-1909]] (Brattlof; C++ kernel driver mapper fork for Win10 1809/1903/1909; Intel `iqvw64e.sys` BYOVD; manual map + PE parsing + service management; kernel research / driver experimentation / AC bypass study); cited on [[overviews/windows-kernel]]; cross-linked [[kdmapper]], [[kdmapper-rs]], [[cve-2015-2291]], [[byovd]], and [[known-driver-mappers]].
 
 - **2026-08-30** — ingest `description:Brentdevent/S2x`: entity [[s2x]] (Brentdevent; COD MW2 2009 client modification framework; Arxan anti-tamper bypasses, code healing, integrity-check neutralization, custom console, server emulation, modding infrastructure; cheat / game:cod mw2 modding); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[fix-arxan]], [[cod-boiii]], [[kisakblack]], [[kisakcod]], and [[modernwarfare2-cpp-external]].
