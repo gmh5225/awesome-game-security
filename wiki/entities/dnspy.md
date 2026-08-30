@@ -21,4 +21,4 @@ confidence: medium
 
 ## Related
 
-[[dnspy-extension-holly]] · [[dnspy-unity-mono]] · [[mono-debugger-soft]] · [[ilspy]] · [[dncil]] · [[mono]] · [[il2cpp]] · [[confuserex]] · [[obfuscation-methods]] · [[retoolkit]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]]
+[[dnspymcp]] · [[dnspy-extension-holly]] · [[dnspy-unity-mono]] · [[mono-debugger-soft]] · [[ilspy]] · [[dncil]] · [[mono]] · [[il2cpp]] · [[confuserex]] · [[obfuscation-methods]] · [[retoolkit]] · [[overviews/reverse-engineering]] · [[overviews/game-engine]] · [[overviews/game-hacking]]

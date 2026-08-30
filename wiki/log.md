@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:rabbanyhmm/DnSpyMCP`: entity [[dnspymcp]] (rabbanyhmm; C# .NET 8 local MCP server; dnlib + ICSharpCode.Decompiler; 31 tools for .NET assembly inspect/decompile/IL analysis/binary patch; Unity/IL2CPP offset+RVA lookup, struct layout export, dump.cs bridging, cross-refs, multi-DLL workspace search; packet-handler/crypto/secret scans; stdio JSON-RPC for Cursor/Claude Code/Codex/OpenCode; no dnSpy GUI); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[concepts/il2cpp]], [[n0xis]], [[ida-pro-mcp]], and [[x64dbg-mcp]].
+
 - **2026-08-30** — ingest `readme:categories`: Game Develop ~188 (+1; OTFCG/[[awesome-game-analysis]] video-game tech analysis guide); Cheat ~2761 / Anti Cheat ~698 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-29** — ingest `description:BuddyBoi/KernelMoveMouse`: entity [[kernel-move-mouse]] (BuddyBoi; C++ WDK driver skeleton; relative mouse movement from kernel; OS version checks + per-build offset handling; intentionally limited low-level input demo; driver development / game input control learning); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-mouse]], [[mouseclassservicecallbacktrick]], and [[directinput]].

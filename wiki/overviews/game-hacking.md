@@ -1441,6 +1441,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__executor.md
   - wiki/sources/descriptions/gmh5225__egui-d3d11.md
   - wiki/sources/descriptions/rabbanyhmm__ImOverlay-DX11.md
+  - wiki/sources/descriptions/rabbanyhmm__DnSpyMCP.md
   - wiki/sources/descriptions/gmh5225__ExtendedCameraSettings.md
   - wiki/sources/descriptions/gmh5225__DayZ-Cheat.md
   - wiki/sources/descriptions/gmh5225__External-Dayz-Cheat.md
@@ -1722,7 +1723,7 @@ sources:
   - wiki/sources/descriptions/Cracked5pider__earlycascade-injection.md
   - wiki/sources/descriptions/Cracked5pider__KaynStrike.md
   - wiki/sources/descriptions/D3DXVECTOR2__NtUserUpdateWindowTrackingInfo.md
-updated: 2026-08-29
+updated: 2026-08-30
 confidence: high
 ---
 
@@ -1881,6 +1882,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - From-scratch 64-bit MHS successor [[mhsx]] (L-Spiro; C++ Visual Studio; Windows x86/x64 live attach; data-type/pointer/string/expression scans, Oniguruma regex, process-aware hex editor, x86/x64 disasm, PE inspection, speedhack, floating-point studio, hotkeys, found-address management; cheat / memory searcher-debugger) sits beside [[cheat-engine]] and [[squalr-sharp]] as a native Windows memory-analysis alternative. (source: wiki/sources/descriptions/L-Spiro__MhsX.md)
 - Windows x64 user-mode memory research tool [[pointer-lab]] (HeathHowren; C++20 Dear ImGui dockspace UI; multi-type scan + wildcard patterns, ASLR-resilient pointer chains, Zydis disasm, Keystone NOP-padded patch, software breakpoints, Lua 5.4 scripting, `.iretable` project persistence; RE practice / CTF / authorized single-player inspection—not stealth or online AC evasion; cheat / memory scanner) sits beside [[cheat-engine]] and [[mhsx]] as a native Windows memory-analysis alternative. (source: wiki/sources/descriptions/HeathHowren__Pointer-Lab.md)
 - Cross-platform Rust unified static+dynamic RE pipeline [[n0xis]] (LargoScript; PE/ELF SSA decompilation + live value/AOB scan, pointer-path discovery, struct dissection, hooks, cheat tables; CLI + MCP JSON artifacts; Unity IL2CPP + Lua/LuaJIT; N0xHUD; agent-native game reversing beside [[cheat-engine]] GUI workflows) (source: wiki/sources/descriptions/LargoScript__n0xis.md)
+- Headless .NET assembly MCP server [[dnspymcp]] (rabbanyhmm; C# .NET 8; dnlib + ICSharpCode.Decompiler; 31 tools for Unity/IL2CPP offset+RVA lookup, dump.cs bridging, cross-refs, IL patch, packet-handler/crypto/secret scans; stdio JSON-RPC for Cursor/Claude Code; agent-native managed RE beside [[dnspy]] GUI workflows) (source: wiki/sources/descriptions/rabbanyhmm__DnSpyMCP.md)
 - Lightweight injectable speedhack DLL [[speedhack]] (absoIute; C++; Detours hooks on timing APIs to accelerate, slow, or pause perceived runtime; Cheat / SpeedHack lane beside [[cheat-engine]] speedhack) (source: wiki/sources/descriptions/absoIute__Speedhack.md)
 - Cheat Engine–style injectable speed-hack DLL [[speed-hack]] (Letomaniy; C++ Visual Studio; Detours timing hooks; keyboard slowdown/accelerate/restore with configurable values; cheat practice + AC time-manipulation research) (source: wiki/sources/descriptions/Letomaniy__Speed-Hack.md)
 - Compact CE-style speed-hack sample [[ce-speed-hack]] (IamSanjid; C++ Detours timing hooks; focused core hooking logic for learners studying time manipulation and basic user-mode game hacking; cheat practice) (source: wiki/sources/descriptions/IamSanjid__ce_speed_hack.md)
