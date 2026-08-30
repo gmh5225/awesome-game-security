@@ -10,6 +10,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Bratah123/BattleAnalysis176`: entity [[battleanalysis176]] (Bratah123; C++ console; MapleStory v176 farming-performance estimator; pointer/offset memory reads; projected mesos/NX hourly gains; private-server / RE runtime economy metrics; cheat / game:maplestory [Battle Analysis]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[maplestory-v179-cheat-engine]], [[maple-research]], [[spirit-ida-plugin]], and [[electronms]].
+
 - **2026-08-30** — ingest `description:Bratah123/ElectronMS`: entity [[electronms]] (Bratah123; Java MapleStory KMS-316 private-server emulator; SQL schemas; JavaScript event/NPC scripts for bosses/party quests/progression; packet handling + server properties; MMORPG server-architecture RE; Private Server-KMS-316); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[azurev316]], [[spirit-ida-plugin]], [[spirit-ptcgo]], [[maplestory-server]], and [[mnwvs196]].
 
 - **2026-08-30** — ingest `description:Darlenepurpleblack444/Zygisk-Il2CppFucker`: entity [[zygisk-il2cppfucker]] (Darlenepurpleblack444; Zygisk Magisk module; fork of [[zygisk-il2cppdumper]]; Android Unity IL2CPP in-process RE engine; dump.cs incl. [[hybridclr]]; name-based class/field/method resolve; memory R/W, instance scan, `il2cpp_runtime_invoke`; Lua 5.4 + `.cmd` channel + overlay; C++/Gradle; security researchers / mobile game logic manipulation without external attach); cited on [[concepts/il2cpp]] and [[overviews/mobile-security]]; cross-linked [[zygisk-il2cppdumper]], [[frida-il2cpp-bridge]], [[bnm-android]], and [[il2cppdumpdroidgui]].

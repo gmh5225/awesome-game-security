@@ -80,6 +80,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bam-extension-table-hook](entities/bam-extension-table-hook.md) — BAM extension-table process-notify hook PoC (Dor00tkit; swaps `bam!BampCreateProcessCallback`; ntoskrnl offset lookup + notify-mask handling; AC/EDR callback bypass research)
 - [BanMod](entities/banmod.md) — Among Us BepInEx host-side moderation + AntiCheat (Harmony IL2CPP; synced ban lists; AFK/camera/follow detectors; GiannBart)
 - [BareSVM](entities/baresvm.md) — Rust AMD SVM hacked-hypervisor testing (Detection:HV)
+- [BattleAnalysis176](entities/battleanalysis176.md) — MapleStory v176 farming-performance estimator (C++ console; pointer/offset memory reads; projected mesos/NX hourly gains; private-server / RE runtime economy metrics; Bratah123; cheat / game:maplestory [Battle Analysis])
 - [BattleField-1-Internal](entities/battlefield-1-internal.md) — BF1 internal: DirectX / SDK generation / hooking (C++)
 - [BF1-ESP-AND-AIMBOT](entities/bf1-esp-and-aimbot.md) — BF1 ESP/aimbot: DirectX / rendering / hooking (C/C++; gmh5225; cheat / game:battlefield 1)
 - [BF4-Internal-overlay](entities/bf4-internal-overlay.md) — BF4 internal overlay: DirectX / rendering / SDK generation (C++; gmh5225; cheat / game:battlefield 4)
