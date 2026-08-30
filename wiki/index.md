@@ -2772,6 +2772,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Quack](entities/quack.md) — universal anti-cheat research kit (C++; modular client monitoring, game integration examples, docs, red-team adversarial tooling; experimentation—not production; JonathanBerkeley)
 - [QSynthesis](entities/qsynthesis.md) — IDA Pro MBA expression synthesizer (Python; oracle-guided program synthesis + SMT; Hex-Rays; Cheat IDA Plugins)
 - [Qvoid Token Grabber](entities/qvoid-token-grabber.md) — .NET Discord/browser credential stealer (webhook exfil; anti-debug/anti-VM/anti-sandbox; token-abuse malware-analysis research; Enum0x539)
+- [RabsztynCC CS2 Internal](entities/rabsztyncc-cs2-internal.md) — BrufelFX; C++ internal CS2 research framework; ESP/chams/triggerbot/aimbot/bhop; DX11 Present hook + ImGui menu; direct NT syscalls, PE header wipe, signature busting, thread hiding, optional kernel driver + shared-memory IPC; companion loader + Offsets.h SDK; educational game-internals / AC evasion study; cheat / game:cs2 [Internal]
 - [Raccine](entities/raccine.md) — Windows anti-ransomware (Neo23x0; debugger registration for vssadmin/wmic; YARA command-line rules; shadow-copy deletion block; no resident agent; README [EDR])
 - [Raung](entities/raung.md) — Java bytecode assembler/disassembler (early-stage; cheat / RE tools)
 - [Recaf](entities/recaf.md) — modern JVM/Android bytecode editing workstation (Col-E; multi-decompiler, assembly, recompile, deep search, deobfuscation transforms; `[Java]`)
