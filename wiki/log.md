@@ -14,6 +14,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-30** — ingest `description:Black0ffR/omega-sast`: entity [[omega-sast]] (Black0ffR; Node.js OMEGA-5.0 zero-dependency JavaScript SAST; hand-rolled AST + inter-procedural taint; obfuscator fingerprinting + string-array/CFF/JSFuck deobfuscation; XSS/injection/credential-leak/CSRF/ReDoS findings; HTML/JSON/Markdown/SARIF + LLM taint contracts; game-client + AC web-asset RE); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[javascript-obfuscator]], [[ida-security-scanner]], and [[nodejs-tracer]].
+
 - **2026-08-30** — ingest `description:BlackSnufkin/AxHunter`: entity [[axhunter]] (BlackSnufkin; Rust PoC suite for Wellbia XIGNCODE3 `xhunter1.sys`/`xhunter2.sys` CVE-2026-15430; WriteFile command frames → auth bypass, PPL-bypass handles, arbitrary process R/W, LSA/WDigest credential extraction, Defender handle close, SYSTEM via winlogon; driver exploitation / credential-theft research); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[xign-poc-april-2026]], [[xigncode3-blackdesert]], and [[xigncode3-bypass]].
 
 - **2026-08-30** — ingest `readme:categories`: Cheat ~2764 / Anti Cheat ~701 (+1) / Game Network ~29 (+1) / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
