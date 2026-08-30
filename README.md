@@ -1751,6 +1751,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/SamuelTulach/ida-unity-pdb-downloader [Unity PDB Downloader]
 - https://github.com/TrungNguyen1909/aarch64-sysreg-ida [A IDA plugin to show ARM MSRs nicely]
 - https://github.com/danielplohmann/gui-plugin-template [A template for cross-compatible GUI plugins]
+- https://github.com/williballenthin/ida-settings [Python library and GUI plugin for fetching and editing IDA Pro plugin configuration via Hex-Rays HCLI/ida-config.json]
 - https://github.com/gmh5225/IDA-MapSymbolParser [IDA Map File Symbol Renamer]
 - https://github.com/gmh5225/IDA-KallsymsSymbolRenamer [IDA kallsyms Renamer]
 - https://github.com/XMCVE/import-kallsyms [IDA Pro Plugin to import /proc/kallsyms for Linux Kernel]
