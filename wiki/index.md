@@ -2017,6 +2017,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LabSync](entities/labsync.md) — IDA Pro plugin: Git-backed partial IDB sync (YAML export on save; mergetool merge; MD5 input-file identity; Cellebrite Labs; cheat / IDA Plugins)
 - [LaneGuard](entities/laneguard.md) — behavioral anti-cheat test bench (JoshKappler; TypeScript/Next.js; lane-change mobile skill-game sim; attacker ladder, client kinematic/behavioral-texture detector with ROC calibration, headless batch runners, economy break-even; Anti Cheat / behavioral)
 - [lc0](entities/lc0.md) — Leela Chess Zero neural chess engine (MCTS + self-play RL; CUDA/cuDNN/OpenCL; Chess Engine / game AI)
+- [le-chiffre](entities/le-chiffre.md) — lightweight external CS:GO PoC (Blaumaus; C++; bunnyhop, triggerbot, aimbot, glow ESP, radar; educational memory manipulation + RE fundamentals; cheat / game:csgo [External])
 - [learn-awesome-gamedev](entities/learn-awesome-gamedev.md) — mega-list of gamedev learning resources (Game Develop / guide)
 - [learn-directx](entities/learn-directx.md) — DX12 step-by-step tutorials (window creation → command bundles, frame buffering, textures, resource states; synchronization, descriptors, performance API; DirectX / guide)
 - [Learn FPGA Programming](entities/learn-fpga-programming.md) — Packt book companion; chapter-organized SystemVerilog (logic design → I2C/PS/2/VGA/DDR; FPGA fundamentals for DMA/custom hardware; Guide)
