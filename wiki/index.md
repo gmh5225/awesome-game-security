@@ -1129,6 +1129,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EQU8-PoC](entities/equ8-poc.md) — full C++ EQU8 kernel driver reimplementation (explore anticheat:equ8; driver development)
 - [epic-r6-v9](entities/epic-r6-v9.md) — R6 internal: DirectX rendering + SDK generation (C++; cheat / game:r6; beans42)
 - [EpicSurvivalGame](entities/epic-survival-game.md) — UE4 FPS course (action system / event-driven C++; Game Develop / Unreal source)
+- [esoterica](entities/esoterica.md) — BobbyAnguelov MIT C++ prototype engine framework (serialization/resource/reflection codegen/editor; actor/ECS hybrid, animation graphs, PhysX ragdoll; rendering/gameplay-architecture research; Game Engine / source)
 - [evpp](entities/evpp.md) — C++11 libevent TCP/UDP/HTTP event-loop network library (nonblocking servers/clients; timers; async DNS; Memcached/NSQ clients; Game Network / source; Qihoo360)
 - [ErisDbg](entities/erisdbg.md) — VT debugger (C/C++; kernel drivers / modding; cheat / debugging)
 - [Eronana Packer](entities/eronana-packer.md) — Eronana basic Win32 x86 PE packer (C++ + companion compression; Visual Studio + CLI; self-validation extension branch; PE packing / unpacking RE education; Anti Cheat → Binary Packer `[PE X86]`)
