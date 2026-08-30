@@ -382,6 +382,7 @@ sources:
   - wiki/sources/descriptions/KuryCat__GhostJoin.md
   - wiki/sources/descriptions/Eangly99__AstroX-AntiCheat.md
   - wiki/sources/descriptions/GhostNgEnd__Ghost-AntiCheat.md
+  - wiki/sources/descriptions/NaySurGithub__Amethyst.md
   - wiki/sources/descriptions/ManInMyVan__Minecraft-Anticheat-List.md
   - wiki/sources/descriptions/ManulMap__malstring.md
   - wiki/sources/descriptions/Metick__Anti-Debug.md
@@ -1083,7 +1084,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 
 **NeoForge server-side MC AC:** Charlie328402/Sentinel-Anti-Cheat (Java NeoForge mod; movement/combat/x-ray checks + Discord violation bot; server-side enforcement for modded Java hosts; distinct from HEEAAP [[sentinel-anti-cheat]] usermode daemon) (source: wiki/sources/descriptions/Charlie328402__Sentinel-Anti-Cheat.md).
 
-**PowerNukkitX Bedrock prediction AC:** NaySurGithub/Amethyst (Java PowerNukkitX plugin; replays Bedrock physics each tick and compares simulated vs client-reported positions; fly/reach/killaura/scaffold/inventory/backtrack checks; server-side movement correction; Anti Cheat / game:minecraft) (source: wiki/sources/descriptions/NaySurGithub__Amethyst.md).
+**PowerNukkitX Bedrock prediction AC:** [[amethyst]] (NaySurGithub; Java PowerNukkitX plugin; per-tick Bedrock physics replay from player input; compares simulated vs client-reported positions for unexplained movement rather than threshold-only speed checks; authoritative movement/vehicle simulation, client world-state acknowledgment gating, combat prediction with entity rewind; fly/reach/kill aura/scaffold/inventory/backtrack/malformed-packet checks; server-side movement correction and violation alerting; Anti Cheat / game:minecraft) for PowerNukkitX operators beside Nukkit prediction plugins such as [[ghost-anticheat]] and GeyserMC interceptors such as [[astrox-anticheat]]. (source: wiki/sources/descriptions/NaySurGithub__Amethyst.md)
 
 ## README map
 
