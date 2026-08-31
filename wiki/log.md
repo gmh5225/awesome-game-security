@@ -14,6 +14,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:BepInEx/BepInEx`: entity [[bepinex]] (BepInEx; C# plugin/modding framework for Unity Mono, IL2CPP, and other .NET games; chainloading, preloading, logging, configuration, patching/detour tooling; Windows/Linux/macOS; mod authors + game RE communities; plugin/modding framework); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[bepinex-il2cppbase]], [[unityexplorer]], [[il2cpp]], [[monohook]], [[wellsanticheat]], [[banmod]], and [[danis-nightmare]].
+
 - **2026-08-31** — ingest `description:Berk000x/BinaryLens`: entity [[binarylens]] (Berk000x; C++ IDA Pro LLM plugin; bulk function rename, decompiler-context logic explain, local variable rename; IDA SDK + OpenSSL; multi-model backends; large game client / anti-cheat binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[aether]], [[ida-llm-explainer]], [[ida-gpt]], [[gepetto]], and [[idassist]].
 
 - **2026-08-31** — ingest `description:Besty0728/Unity-Skills`: entity [[unity-skills]] (Besty0728; Unity Editor plugin; AI-driven automation skills across animator, audio, camera, Cinemachine, materials, NavMesh, optimization, physics, rendering, shaders, terrain, UI; C# editor scripts; batch executor + localization; Unity developers / technical artists; automated editor workflows + AI-assisted scene manipulation; Game Develop / AI Agents); cited on [[overviews/game-engine]]; cross-linked [[awesome-gamedev-agent-skills]], [[unity-mcp]], [[everything-game-dev-code]], [[unicli]], and [[com-unity-ide-cursor]].

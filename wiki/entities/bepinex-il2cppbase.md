@@ -10,9 +10,9 @@ confidence: medium
 
 # BepInEx-IL2CPPBase
 
-C# **BepInEx IL2CPP mod-menu base** scaffold for Unity titles on the cheat / render-draw lane. Centers on in-game menu rendering plus hooks into rendering, audio, and physics systems so researchers can build toggleable overlays and gameplay mods on top of a shared IL2CPP plugin skeleton. (source: wiki/sources/descriptions/gmh5225__BepInEx-IL2CPPBase.md)
+C# **BepInEx IL2CPP mod-menu base** scaffold for Unity titles on the cheat / render-draw lane. Built on the upstream [[bepinex]] plugin loader; centers on in-game menu rendering plus hooks into rendering, audio, and physics systems so researchers can build toggleable overlays and gameplay mods on top of a shared IL2CPP plugin skeleton. (source: wiki/sources/descriptions/gmh5225__BepInEx-IL2CPPBase.md)
 
-Useful for studying reusable BepInEx IL2CPP menu foundations—upstream of title-specific samples such as [[devour-menu]] and [[goose-goose-duck-hack]], and beside runtime inspectors such as [[unityexplorer]] that also load through BepInEx/MelonLoader on Unity IL2CPP builds.
+Useful for studying reusable BepInEx IL2CPP menu foundations—downstream of [[bepinex]] and upstream of title-specific samples such as [[devour-menu]] and [[goose-goose-duck-hack]], and beside runtime inspectors such as [[unityexplorer]] that also load through BepInEx/MelonLoader on Unity IL2CPP builds.
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for studying reusable BepInEx IL2CPP menu foundations—upstream of title
 
 ## Related
 
-[[il2cpp]] · [[unityexplorer]] · [[devour-menu]] · [[goose-goose-duck-hack]] · [[imgui]] · [[overviews/game-hacking]] · [[overviews/game-engine]]
+[[bepinex]] · [[il2cpp]] · [[unityexplorer]] · [[devour-menu]] · [[goose-goose-duck-hack]] · [[imgui]] · [[overviews/game-hacking]] · [[overviews/game-engine]]
