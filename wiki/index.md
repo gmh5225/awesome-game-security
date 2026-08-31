@@ -3331,6 +3331,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lore](entities/lore.md) — Epic Games open-source Rust VCS for games (content-addressed chunk storage, sparse workspaces, tamper-evident history, large binary assets; cloud-native backends; UEFN; Game CI)
 - [Unity202x-eXternalrEsolve](entities/unity202x-externalresolve.md) — header-only C++17 Unity 2020–2023 external runtime introspection (Mono/IL2CPP GOM scan, IL2CPP metadata, W2S, DumpSDK)
 - [unity-mcp](entities/unity-mcp.md) — MCP server for Unity (justinpbarnett + wondeks; Game Develop / MCP workflow)
+- [unity-skills](entities/unity-skills.md) — Unity Editor AI automation skills plugin (animator/audio/camera/materials/NavMesh/physics/rendering/shaders/terrain/UI; batch executor; Game Develop / AI Agents)
 - [Unity Markdown Viewer](entities/unity-markdown-viewer.md) — zero-setup Unity Editor markdown viewer (Plugins:Unity)
 - [Unity Design Pattern](entities/unity-design-pattern.md) — Unity C# GoF + game programming pattern sample library with runnable scenes (QianMo; Game Engine / Unity Design)
 - [Unity Script Collection](entities/unity-script-collection.md) — maintained free Unity scripts/libraries/plugins/extensions catalog (Game Engine / Plugins:Unity)
