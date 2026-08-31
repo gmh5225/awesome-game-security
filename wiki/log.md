@@ -16,6 +16,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-31** — ingest `readme:categories`: Cheat ~2766 (+1; Dray973/[[aetheris]] PyQt6 MemProcFS/PCILeech-FPGA forensics suite in Cheat DMA lane) / Anti Cheat ~701 / other major section counts stable; 41 sections; entity [[aetheris]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-31** — ingest `description:BeRo1985/pasvulkan`: entity [[pasvulkan]] (BeRo1985; Object Pascal Vulkan header generator + OOP API wrapper + engine framework; vkxml2pas auto-generated C-style Vulkan.pas binding; OOP units for memory management, texture/font loaders, sprite atlases; SDL2 swap-chain and cross-platform windowing; Free Pascal/Delphi; Windows/Linux/Android + optional MoltenVK; Game Engine / Vulkan); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[liblava]], [[lightweightvk]], [[android-vulkan-tutorials]], [[luth]], [[raylib]], and [[kiero2]].
 
 - **2026-08-31** — ingest `description:BeneficialCode/KReClassEx`: entity [[kreclassex]] (BeneficialCode; C++; kernel memory structure reversing environment; WinDbg extension + desktop GUI; debug-session attach, kernel layout inspection, function-pointer resolve, reconstructed type views; networking/config + editor integrations; Windows kernel RE + game anti-cheat research); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[reclass-ex]], [[reclass-net]], [[reclass-net-driverreader]], [[reclass]], [[onlooker]], [[windbg-tool]], and [[winark]].
