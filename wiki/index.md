@@ -163,6 +163,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ac](entities/ac.md) — open-source Windows kernel AC driver (NMI/APC/DPC stack walks, `.text` integrity, ObCallbacks handle strip, chained data-ptr detect; donnaskiez)
 - [access](entities/access.md) — BTBD kernel syscall wrapper (`.data` hook; handleless `PROCESS_ALL_ACCESS` on protected processes; usermode DLL redirect; no SEH; Fortnite-tested; cheat / access)
 - [access-updated](entities/access-updated.md) — bromoket fork of btbd/access (Zydis pattern scan; `xKdEnumerateDebuggingDevices` `.data` hook; handleless KM process ops; Win10 1607+–Win11 24H2; cheat / access)
+- [ACEPatcher](entities/acepatcher.md) — BataBo GUI .NET assembly patcher (C#; dnlib + Harmony; method-map patching; import/export password-protected patch sets; packed/obfuscated managed binaries; repeatable .NET patch automation; [.NET Patcher])
 - [AceTheGame](entities/ace-the-game.md) — open-source Android memory editing platform (C++ scan engine + Kotlin/Java client; process inspection, value edit/freeze, modding/injection; rooted/non-rooted; KuhakuPixel; cheat / Game Hacking Tools)
 - [AcDrv](entities/acdrv.md) — Windows kernel AC research driver (process/module callbacks, memory intercept, syscall monitoring; ETW Hook; gmh5225)
 - [aclist.github.io](entities/aclist-github-io.md) — static site: anti-cheat compatibility list + Linux gaming docs (HTML/CSS/JS; conservative manual verification; Anti-cheat compatibility list)
