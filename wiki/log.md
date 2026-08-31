@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:BarakAharoni/LADD`: entity [[ladd]] (BarakAharoni; Linux C anti-debugging detection; ptrace behavior, LD_PRELOAD tampering, TracerPid in /proc/self/status; early runtime checks; anti-analysis research and defensive hardening experiments; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[adbg]], [[cpp-anti-debug]], [[anti-debugging]], [[kiteshield]], [[pince]], and [[edb-debugger]].
+
 - **2026-08-31** — ingest `description:Barracudach/CallStack-Spoofer`: entity [[callstack-spoofer]] (Barracudach; C++ user/kernel call-stack spoofing toolkit; macros/templates forge frames + proxy calls via generated shellcode paths; x64; compiler settings and control-flow protection constraints; anti-analysis / AC stack-walk evasion research; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[callstackspoofer-2]], [[callstackspoofer]], [[ret-spoofing]], [[unwinder]], and [[spoof-stack-safecall]].
 
 - **2026-08-31** — ingest `description:Barracudach/Swap-control-ioctl`: entity [[swap-control-ioctl]] (Barracudach; Windows kernel PoC; `IRP_MJ_DEVICE_CONTROL` dispatch-pointer trampoline redirect on SpeedFan.sys; custom ioctl handlers for process memory copy/allocation/protection and module-base lookup; driver communication hook + AC detection study; README [Hijack IRP SpeedFan.sys]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-read-write]], [[device-control-hooks-scanner]], [[ioctldump]], and [[cfb]].
