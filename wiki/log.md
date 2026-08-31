@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:Barracudach/CallStack-Spoofer`: entity [[callstack-spoofer]] (Barracudach; C++ user/kernel call-stack spoofing toolkit; macros/templates forge frames + proxy calls via generated shellcode paths; x64; compiler settings and control-flow protection constraints; anti-analysis / AC stack-walk evasion research; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[callstackspoofer-2]], [[callstackspoofer]], [[ret-spoofing]], [[unwinder]], and [[spoof-stack-safecall]].
+
 - **2026-08-31** — ingest `description:Barracudach/Swap-control-ioctl`: entity [[swap-control-ioctl]] (Barracudach; Windows kernel PoC; `IRP_MJ_DEVICE_CONTROL` dispatch-pointer trampoline redirect on SpeedFan.sys; custom ioctl handlers for process memory copy/allocation/protection and module-base lookup; driver communication hook + AC detection study; README [Hijack IRP SpeedFan.sys]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-read-write]], [[device-control-hooks-scanner]], [[ioctldump]], and [[cfb]].
 
 - **2026-08-31** — ingest `description:Bartis1313/csgo`: entity [[csgo]] (Bartis1313; large internal C++ CS:GO cheat framework; SDK wrappers, hook-driven feature modules, configuration tooling, DirectX rendering; aimbot, triggerbot, backtrack, ESP, chams, glow, radar, prediction, visual/world mods; educational cheat client engineering; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[digital-sdk]], [[deadcell-csgo]], [[source-netvars]], [[present-hook]], and [[world-to-screen]].

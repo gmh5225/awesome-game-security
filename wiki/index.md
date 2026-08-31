@@ -517,6 +517,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [callout-poc](entities/callout-poc.md) — kernel callout / spoof-stack PoC (C/C++; Cheat Spoof Stack)
 - [CallMeWin32kDriver](entities/callmewin32kdriver.md) — win32k.sys session-driver unsigned loader; anti-rootkit dump resistance + MmCopyMemory-detection bypass (gmh5225; PUBG cheat-driver lineage)
 - [CallMon](entities/callmon.md) — PsAltSystemCallHandlers kernel syscall monitor (C driver + GUI; per-process trap frame/stack via named pipe; optional Rust driver; AltSystemCallHandlers; DownWithUp)
+- [CallStack-Spoofer](entities/callstack-spoofer.md) — Barracudach C++ user/kernel call-stack spoofing toolkit; macros/templates + shellcode proxy paths; x64; compiler/CET constraints (Cheat Spoof Stack)
 - [CallStackSpoofer](entities/callstackspoofer.md) — WithSecure Labs C++ PoC; spoof arbitrary call stacks on Windows syscalls; selectable stack profiles (Cheat Spoof Stack)
 - [CallStackSpoofer-2](entities/callstackspoofer-2.md) — x64 call-stack spoofing via custom ASM trampolines (gmh5225; Cheat Spoof Stack)
 - [Call Obfuscator](entities/call-obfuscator.md) — PE post-processor: decoy IAT + load-time shellcode resolver (PEB→Ldr export walk; INI-mapped API misdirection; Call Obfuscation; d35ha)
