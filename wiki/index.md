@@ -455,6 +455,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Binoculars](entities/binoculars.md) — IDA Pro plugin: integrated AI assistant; explain/rename, Go pclntab helpers (Python; cheat / IDA Plugins)
 - [binprotect](entities/binprotect.md) — x64 PE bin2bin obfuscator (no new section; BB rewrite; AC Obfuscation Engine)
 - [Binary Internals Viewer](entities/binaryinternals.md) — Java interactive binary format inspector (field/bit-level BMP/class/JPEG/PNG/ZIP; OpenJDK/Maven; reusable format libs; RE education / parser dev)
+- [BinaryLens](entities/binarylens.md) — Berk000x C++ IDA Pro LLM plugin (bulk function rename, decompiler-context explain, local variable rename; IDA SDK + OpenSSL; multi-model backends; large game client / anti-cheat binary RE; cheat / IDA Plugins)
 - [BinaryShield](entities/binary-shield.md) — open-source bin2bin x86-64 code virtualizer (custom bytecode + purpose-built VM; AC Obfuscation Engine `[VM]`; connorjaydunn)
 - [BingusLdr](entities/bingusldr.md) — Crystal Palace Win x64 DLL loader (CET stack spoof; EAF API resolution; heap/image masking; reflective loading; Cobalt Strike .cna)
 - [binsync](entities/binsync.md) — cross-disassembler collaborative RE sync (IDA/Ghidra/BN/angr; Git-backed names/comments/types; cheat / Sync; gmh5225)

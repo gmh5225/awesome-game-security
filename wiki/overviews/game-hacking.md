@@ -1741,6 +1741,7 @@ sources:
   - wiki/sources/descriptions/Cracked5pider__earlycascade-injection.md
   - wiki/sources/descriptions/Cracked5pider__KaynStrike.md
   - wiki/sources/descriptions/D3DXVECTOR2__NtUserUpdateWindowTrackingInfo.md
+  - wiki/sources/descriptions/Berk000x__BinaryLens.md
 updated: 2026-08-31
 confidence: high
 ---
@@ -2091,6 +2092,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - In-IDA Claude-3 chat assistant via [[ida-assistant]] (interactive Q&A / guidance during RE) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/stuxnet147__IDA-Assistant.md)
 - AI-powered IDA 9.0+ assistant for C++ game RE via [[aida]] sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/sigwl__AiDA.md)
 - Local llama.cpp IDA LLM Explainer via [[ida-llm-explainer]] (function explain/rename/struct inference; human-in-the-loop accept; CFG recovery) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/pgarba__ida-llm-explainer.md)
+- C++ LLM bulk rename/explain assistant via [[binarylens]] (Berk000x; function rename at scale, decompiler-context logic explain, local variable rename; IDA SDK + OpenSSL; multi-model backends; large game client / anti-cheat IDBs; cheat / IDA Plugins) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/Berk000x__BinaryLens.md)
 - LLM IDA pseudocode assistant via [[gepetto]] (JusticeRage; Python IDAPython; explain decompiled functions + variable rename + code comments; menu actions + hotkeys; cloud/local multi-provider config; malware/software/game-security RE; cheat / IDA Plugins / `[ChatGPT]`) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/JusticeRage__Gepetto.md)
 - Local LLM IDA pseudocode fork via [[ida-gepetto]] (apkunpacker; explain/rename; offline backends + localization; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/apkunpacker__IDA-Gepetto.md)
 - AI-powered IDA 9.0+ dockable panel via [[idassist]] (Python/PySide6; multi-provider LLM function explain/rename, semantic knowledge graph, RAG, MCP; cheat / IDA Plugins) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/jtang613__IDAssist.md)
