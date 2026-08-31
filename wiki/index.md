@@ -2071,7 +2071,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LockFile-Poc](entities/lockfile-poc.md) — C++ Windows file-lock PoC (AC Stress Testing / Some Tricks Ring3)
 - [LocalAnticheat 1.8.9](entities/local-anticheat-1-8-9.md) — Forge 1.8.9 client mod; passive packet-flow checks (11 modules); local-chat flags; no server reports (freezato; Anti Cheat / game:minecraft)
 - [localroot-all-cve](entities/localroot-all-cve.md) — historical CVE/year-indexed LPE PoC archive (Snoopy-Sec; C/shell/Python; exploit-dev study; README [Root CVE])
-- [logitech-cve (ekknod)](entities/logitech-cve.md) — Logitech driver/CVE research (C/C++; driver development; cheat / triggerbot & aimbot input paths)
+- [logitech-cve](entities/logitech-cve.md) — Logitech virtual-driver input emulation (ekknod C/C++ driver dev; BatogiX Rust typed IOCTL library; triggerbot/aimbot and attack-surface research)
 - [LoudSunRun](entities/loudsunrun.md) — stack spoofing with synthetic frames (namazso / SilentMoonWalk / VulcanRaven; Cheat Spoof Stack)
 - [LOLDrivers](entities/loldrivers.md) — comprehensive LOLdriver catalog (YAML metadata, YARA, HVCI tracking; magicsword-io)
 - [loldrivers-client](entities/loldrivers-client.md) — Go/PowerShell LOLdrivers scan client (cheat / vulnerable driver)

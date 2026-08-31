@@ -10,7 +10,8 @@ sources:
   - wiki/sources/descriptions/KelvinMsft__UsbMon.md
   - wiki/sources/descriptions/ConWan30__QorTroller.md
   - wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md
-updated: 2026-08-28
+  - wiki/sources/descriptions/BatogiX__logitech-cve.md
+updated: 2026-08-31
 confidence: medium
 ---
 
@@ -26,7 +27,7 @@ Input paths that emit **protocol-conformant HID reports** (USB keyboard/mouse) o
 | Arduino / Teensy | Serial commands → ATmega32U4 HID | Low cost; custom firmware |
 | Logitech driver abuse | Inject into G HUB/LGS; internal move APIs | No extra hardware; version-patched |
 
-Logitech-focused driver/CVE research such as [[logitech-cve]] (ekknod; C/C++; driver development; cheat / triggerbot & aimbot) complements G HUB/LGS abuse PoCs when studying vendor-driver mouse input paths. (source: wiki/sources/descriptions/ekknod__logitech-cve.md) Unified multi-backend Windows input libraries such as [[ib-input-simulator]] (Chaoses-Ib; Logitech, Razer Synapse, MouClassInputInjection, DD virtual devices; AHK integration; driver-backed keyboard/mouse when user-mode APIs are blocked) sit beside single-vendor PoCs like [[razer-rzctl]]. (source: wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md)
+Logitech-focused driver/CVE research such as [[logitech-cve]] spans ekknod C/C++ driver-development PoCs (cheat / triggerbot & aimbot) and BatogiX Rust typed libraries over Logitech virtual driver IOCTL handles (input-emulation research, automation, vulnerable-driver attack-surface analysis). (source: wiki/sources/descriptions/ekknod__logitech-cve.md) (source: wiki/sources/descriptions/BatogiX__logitech-cve.md) Unified multi-backend Windows input libraries such as [[ib-input-simulator]] (Chaoses-Ib; Logitech, Razer Synapse, MouClassInputInjection, DD virtual devices; AHK integration; driver-backed keyboard/mouse when user-mode APIs are blocked) sit beside single-vendor PoCs like [[razer-rzctl]]. (source: wiki/sources/descriptions/Chaoses-Ib__IbInputSimulator.md)
 | interception.sys | Filter driver inject | Known signature; widely flagged |
 | KVM middleman | Hardware between mouse and host | Complex setup; limited host software |
 

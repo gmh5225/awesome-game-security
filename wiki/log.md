@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:BatogiX/logitech-cve`: updated entity [[logitech-cve]] (BatogiX Rust library for Logitech virtual driver; typed mouse/keyboard/wheel/text APIs via Windows IOCTL; input-emulation research, automation, vulnerable-driver attack-surface analysis; complements ekknod C/C++ fork); cited on [[overviews/game-hacking]] and [[hardware-input-injection]]; cross-linked [[ib-input-simulator]], [[kernel-mouse]], and [[mouseclassservicecallbacktrick]].
+
 - **2026-08-31** — ingest `description:BaumFX/cpp-anti-debug`: entity [[cpp-anti-debug]] (BaumFX; Windows C++ anti-debugging library; PEB/API/exception/timing/debug-register checks; granular functions + combined runtime security-check entry; anti-tamper prototyping and debugger-detection study; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[al-khaser]], [[antidbg-hackovert]], [[antidbg]], [[makin]], and [[anti-debugging]].
 
 - **2026-08-31** — ingest `description:Dray973/Aetheris`: entity [[aetheris]] (Dray973; PyQt6 Windows forensics suite / Aetheris Quantum Core; MemProcFS + Capstone/Keystone + PCILeech-FPGA guarded DMA R/W; process autopsy with Authenticode, MFT parsing, GeoIP connection monitoring, persistence auditing; hash-chained logging, dry-run, Omega Rollback; plugin API + headless CLI; Cheat DMA lane / live forensics); cited on [[overviews/reverse-engineering]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[memprocfs-analyzer]], and [[overviews/dma-attack]].
