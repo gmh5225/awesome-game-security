@@ -3151,6 +3151,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Swift-String-Obfuscator](entities/swift-string-obfuscator.md) — Swift string crypter (AC Compile Time / String Crypter)
 - [swift-ida](entities/swift-ida.md) — IDA Pro plugin: retag Swift/Golang/fastcall conventions + tuple-like multi-return structs (Python; cheat / IDA Plugins)
 - [swiftshield](entities/swiftshield.md) — Swift identifier obfuscator for iOS (SourceKit rename; vs RE/tweaks)
+- [swap-control-ioctl](entities/swap-control-ioctl.md) — SpeedFan.sys `IRP_MJ_DEVICE_CONTROL` dispatch trampoline hijack; process memory copy/alloc/protect + module-base ioctl handlers (Barracudach; Hijack IRP SpeedFan.sys; driver comm hook / AC detection study)
 - [swapchain-bottleneck](entities/swapchain-bottleneck.md) — DXGI swapchain/MPO overlay injection architecture analysis (Present-hook collisions, TDR cascades, AC whitelist friction; dantebuilds)
 - [super-mario-bros-game](entities/super-mario-bros-game.md) — C++ Super Mario Bros remake (Luxon98; SDL2/SDL_image/SDL_mixer; Visual Studio; original-inspired and custom levels; 2D rendering, level flow, gameplay; game development learning; README [Remake of Super Mario]; Game Develop / source)
 - [super-fighter](entities/super-fighter.md) — Windows DX11 shoot-'em-up remake (MKXJun; C++; Direct3D + HLSL + DirectSound; data-driven stages/enemies, replay, Xbox controller; arcade game loop; README [DX11 Mini Game]; Game Develop / source)

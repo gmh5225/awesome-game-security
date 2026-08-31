@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:Barracudach/Swap-control-ioctl`: entity [[swap-control-ioctl]] (Barracudach; Windows kernel PoC; `IRP_MJ_DEVICE_CONTROL` dispatch-pointer trampoline redirect on SpeedFan.sys; custom ioctl handlers for process memory copy/allocation/protection and module-base lookup; driver communication hook + AC detection study; README [Hijack IRP SpeedFan.sys]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[driver-read-write]], [[device-control-hooks-scanner]], [[ioctldump]], and [[cfb]].
+
 - **2026-08-31** — ingest `description:Bartis1313/csgo`: entity [[csgo]] (Bartis1313; large internal C++ CS:GO cheat framework; SDK wrappers, hook-driven feature modules, configuration tooling, DirectX rendering; aimbot, triggerbot, backtrack, ESP, chams, glow, radar, prediction, visual/world mods; educational cheat client engineering; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[digital-sdk]], [[deadcell-csgo]], [[source-netvars]], [[present-hook]], and [[world-to-screen]].
 
 - **2026-08-31** — ingest `description:BataBo/ACEPatcher`: entity [[acepatcher]] (BataBo; C# GUI .NET assembly patcher; dnlib + Harmony method-map patching; import/export password-protected patch sets; packed/obfuscated managed binaries; repeatable .NET patch automation; [.NET Patcher]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[dnspymcp]], [[bepinex]], [[ilspy]], and [[obfuscation-methods]].

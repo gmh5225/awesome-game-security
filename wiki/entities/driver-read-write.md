@@ -12,7 +12,7 @@ confidence: medium
 
 Manually mapped kernel read/write driver that hijacks `Beep.sys` `IRP_MJ_DEVICE_CONTROL` to expose memory copy and module-base queries. Swaps dispatch on `\Driver\Beep`, validates user requests, attaches to target processes for direct memory access, and reuses the hooked driver object so the mapped payload can masquerade as a more legitimate kernel module. (source: wiki/sources/descriptions/gmh5225__Driver-read_write.md)
 
-Also includes cleanup for `PiDDBCacheTable` and `MmUnloadedDrivers`, making it both a communication example and a post-mapping trace-reduction reference for vulnerable-driver-based mapping workflows. Primarily useful for Windows kernel researchers studying IRP hijacking, basic process memory primitives, and unsigned-driver-loader artifact cleanup.
+Also includes cleanup for `PiDDBCacheTable` and `MmUnloadedDrivers`, making it both a communication example and a post-mapping trace-reduction reference for vulnerable-driver-based mapping workflows. Primarily useful for Windows kernel researchers studying IRP hijacking, basic process memory primitives, and unsigned-driver-loader artifact cleanup. Related SpeedFan.sys variant: [[swap-control-ioctl]] (Barracudach; trampoline dispatch redirect + custom ioctl memory handlers).
 
 ## Links
 
@@ -20,4 +20,4 @@ Also includes cleanup for `PiDDBCacheTable` and `MmUnloadedDrivers`, making it b
 
 ## Related
 
-[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[boom]] · [[read-write-driver]] · [[hide-driver-testing]] · [[known-driver-mappers]] · [[ntmemory]]
+[[overviews/windows-kernel]] · [[overviews/game-hacking]] · [[boom]] · [[swap-control-ioctl]] · [[read-write-driver]] · [[hide-driver-testing]] · [[known-driver-mappers]] · [[ntmemory]]

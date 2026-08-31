@@ -14,7 +14,7 @@ Windows **kernel-mode scanner** (C++ **KMDF** driver) that audits **`IRP_MJ_DEVI
 
 README lane: **device-control-hooks-scanner**.
 
-Complements broader hook-scanning suites such as [[slauc91-anticheat]] (SSDT/IDT/IRP/MSR checks) and GUI anti-rootkit toolkits such as [[openark]]. Offensive `IRP_MJ_DEVICE_CONTROL` hijack samples such as [[driver-read-write]] and [[hwid-kernel-spoofer]] illustrate the dispatch-table tampering this scanner targets. IRP monitoring frameworks such as [[cfb]] log IOCTL traffic rather than validating dispatch pointer integrity.
+Complements broader hook-scanning suites such as [[slauc91-anticheat]] (SSDT/IDT/IRP/MSR checks) and GUI anti-rootkit toolkits such as [[openark]]. Offensive `IRP_MJ_DEVICE_CONTROL` hijack samples such as [[driver-read-write]], [[swap-control-ioctl]] (SpeedFan.sys trampoline redirect), and [[hwid-kernel-spoofer]] illustrate the dispatch-table tampering this scanner targets. IRP monitoring frameworks such as [[cfb]] log IOCTL traffic rather than validating dispatch pointer integrity.
 
 ## Links
 
@@ -22,4 +22,4 @@ Complements broader hook-scanning suites such as [[slauc91-anticheat]] (SSDT/IDT
 
 ## Related
 
-[[slauc91-anticheat]] · [[openark]] · [[driver-read-write]] · [[driver-detect-nullshit]] · [[cfb]] · [[hwid-kernel-spoofer]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[slauc91-anticheat]] · [[openark]] · [[driver-read-write]] · [[swap-control-ioctl]] · [[driver-detect-nullshit]] · [[cfb]] · [[hwid-kernel-spoofer]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
