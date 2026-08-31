@@ -19,6 +19,10 @@ GUI forensics workspace lane distinct from low-level libraries ([[volk-dma]], [[
 
 Not to be confused with CSIT-SG [[aether]] (IDA Pro LLM copilot).
 
+## Audience
+
+Targets security researchers, systems administrators, and power users analyzing machines they control for malware, persistence, privilege escalation, and live system behavior. (source: wiki/sources/descriptions/Dray973__Aetheris.md)
+
 ## Links
 
 - Repo: https://github.com/Dray973/Aetheris

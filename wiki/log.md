@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:Dray973/Aetheris`: entity [[aetheris]] (Dray973; PyQt6 Windows forensics suite / Aetheris Quantum Core; MemProcFS + Capstone/Keystone + PCILeech-FPGA guarded DMA R/W; process autopsy with Authenticode, MFT parsing, GeoIP connection monitoring, persistence auditing; hash-chained logging, dry-run, Omega Rollback; plugin API + headless CLI; Cheat DMA lane / live forensics); cited on [[overviews/reverse-engineering]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[memprocfs-analyzer]], and [[overviews/dma-attack]].
+
 - **2026-08-31** — ingest `readme:categories`: Cheat ~2766 (+1; Dray973/[[aetheris]] PyQt6 MemProcFS/PCILeech-FPGA forensics suite in Cheat DMA lane) / Anti Cheat ~701 / other major section counts stable; 41 sections; entity [[aetheris]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-31** — ingest `description:BeRo1985/pasvulkan`: entity [[pasvulkan]] (BeRo1985; Object Pascal Vulkan header generator + OOP API wrapper + engine framework; vkxml2pas auto-generated C-style Vulkan.pas binding; OOP units for memory management, texture/font loaders, sprite atlases; SDL2 swap-chain and cross-platform windowing; Free Pascal/Delphi; Windows/Linux/Android + optional MoltenVK; Game Engine / Vulkan); cited on [[overviews/graphics-api]] and [[overviews/game-engine]]; cross-linked [[liblava]], [[lightweightvk]], [[android-vulkan-tutorials]], [[luth]], [[raylib]], and [[kiero2]].
