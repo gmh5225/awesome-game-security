@@ -3308,6 +3308,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/forceinline/csgo-external-esp [External]
 - https://github.com/gmh5225/avhook
 - https://github.com/si1kyyy/csgo_cheat_external [External]
+- https://github.com/manka81/csgo_cheat [External modular C++ framework with memory reading, hazedumper offsets, W2S, and DX11 ImGui overlay]
 - https://github.com/gmh5225/nebulite-external [External]
 - https://github.com/lstrsrt/csgo_internal_base [Internal]
 - https://github.com/gmh5225/Astra [External]
