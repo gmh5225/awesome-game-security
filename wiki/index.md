@@ -2585,6 +2585,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [PastDSE](entities/pastdse.md) — DSE bypass via clock rollback + leaked VeriSign certs (BlackBone load)
 - [PeregrineAntiCheat](entities/peregrine-anticheat.md) — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook, ETW-TI, YARA, stack/HWBP scans, named-pipe backend, Tauri GUI, cheat test suite; PatchRequest)
 - [papaw](entities/papaw.md) — Linux ELF packer (LZMA/zstd/miniz; statically-linked; self-replacement on disk; optional anti-debug; papawify/unpapawify; Anti Cheat → Binary Packer `[ELF]` LZMA)
+- [PasVulkan](entities/pasvulkan.md) — Object Pascal Vulkan header generator, OOP API wrapper, and engine framework (BeRo1985; vkxml2pas; SDL2 swap-chain; Free Pascal/Delphi; Windows/Linux/Android + MoltenVK; Game Engine / Vulkan)
 - [pawtrace](entities/pawtrace.md) — Linux x86-64 ptrace syscall tracer (attach/spawn; decodes args, socket addresses, W^X memory, /proc/maps snapshots, JSONL; remote TCP; C + assembly; cocomelonc)
 - [patch-finder](entities/patch-finder.md) — IDA plugin: detect in-memory patches/hooks via executable-region vs on-disk PE byte compare (custom PE parser; highlight diffs in disasm; cheat / IDA Plugins)
 - [patchguard-2023](entities/patchguard-2023.md) — 2023 PatchGuard internals research (timer verification, context encryption, protected-structure list, recovery routines; gmh5225; cheat / PatchGuard-related)
