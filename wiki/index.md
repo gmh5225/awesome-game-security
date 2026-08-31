@@ -698,6 +698,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Csgo-Full-kernel](entities/csgo-full-kernel.md) — KMDF full-kernel CS:GO external; memory, draw, input, offsets in Ring0 without usermode cheat process (Sentient111; Running from kernelmode)
 - [csgo-dma-overlay](entities/csgo-dma-overlay.md) — CS:GO DMA + overlay sample (cheat / game:csgo [DMA])
 - [aqhax-csgo](entities/aqhax-csgo.md) — CS:GO internal cheat AqHax (interface capture, VMT hooks, netvar dump; ESP/aimbot/triggerbot/movement/skin changer; cheat / game:csgo)
+- [csgo-cheat](entities/csgo-cheat.md) — modular external CS:GO C++17 framework (manka81; MemoryReader + pattern scan + hazedumper offsets; W2S; DX11 ImGui overlay; ESP/aim/triggerbot/no-recoil/bhop; WriteProcessMemory/SendInput; INI config; cheat / game:csgo [External])
 - [csgo-cheat-base](entities/csgo-cheat-base.md) — CS:GO internal cheat base (MinHook, ImGui, engine prediction, glow ESP, interface wrappers; designer1337 [Internal])
 - [CSGO-Cheats](entities/csgo-cheats.md) — tutorial external CS:GO examples (HeathHowren; C++ Visual Studio; window/process attach, memory R/W wrappers, offset maintenance; beginner manipulation + defender cheat-pattern study; cheat / game:csgo [External])
 - [csgo-internal-base](entities/csgo-internal-base.md) — CS:GO internal cheat base (CreateInterface, VMT hooks, netvars, pattern scan, ImGui; cheat / game:csgo)

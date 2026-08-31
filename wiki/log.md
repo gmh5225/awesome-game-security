@@ -16,6 +16,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:manka81/csgo_cheat`: entity [[csgo-cheat]] (manka81; C++17 modular external CS:GO framework; MemoryReader + pattern scan + hazedumper offset auto-detection; world-to-screen; transparent DX11 Dear ImGui overlay; ESP boxes/skeletons/snaplines/HUD; aim assist, triggerbot, no-recoil, bunny hop via WriteProcessMemory/SendInput; INI config; external cheat technique study; cheat / game:csgo [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[hazedumper]], [[external-cheat-v3]], [[le-chiffre]], [[csgo-external-cheat]], [[csgo-external-esp]], and [[world-to-screen]].
+
 - **2026-08-31** — ingest `readme:categories`: Cheat ~2765 (+1; Berk000x/BinaryLens IDA Pro LLM plugin in IDA Plugins) / Anti Cheat ~701 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-08-31** — ingest `description:BepInEx/BepInEx`: entity [[bepinex]] (BepInEx; C# plugin/modding framework for Unity Mono, IL2CPP, and other .NET games; chainloading, preloading, logging, configuration, patching/detour tooling; Windows/Linux/macOS; mod authors + game RE communities; plugin/modding framework); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[bepinex-il2cppbase]], [[unityexplorer]], [[il2cpp]], [[monohook]], [[wellsanticheat]], [[banmod]], and [[danis-nightmare]].

@@ -112,6 +112,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__Astra.md
   - wiki/sources/descriptions/forceinline__csgo-external-esp.md
   - wiki/sources/descriptions/Enzo0721__ExternalCheatV3.md
+  - wiki/sources/descriptions/manka81__csgo_cheat.md
   - wiki/sources/descriptions/gmh5225__legit-csgo-cheat-menu.md
   - wiki/sources/descriptions/cazzwastaken__kakhack.md
   - wiki/sources/descriptions/boylin0__AVA-Hack.md
@@ -349,7 +350,7 @@ sources:
   - wiki/sources/descriptions/Sh0ckFR__Universal-Dear-ImGui-Hook.md
   - wiki/sources/descriptions/SeanPesce__Direct3D9-Overlay.md
   - wiki/sources/descriptions/Suprcode__mir3-zircon.md
-updated: 2026-08-30
+updated: 2026-08-31
 confidence: high
 ---
 
@@ -406,7 +407,7 @@ Vtable trampolines on swap chains remain the dominant internal-overlay pattern; 
 - Title-specific Fortnite external DX9 ImGui samples such as [[fortnite-external-cheat-leak]] (Waihbe; leaked external source; DirectX 9 ImGui overlay + in-game feature menu; ESP/aim visualization over driver-assisted out-of-process reads; cheat / game:fortnite [External]) sit in the external layered-window / DX9 ImGui overlay lane beside [[fortnite-external-cheat-source-code]] and [[nigusfn]]. (source: wiki/sources/descriptions/Waihbe__Fortnite-External-Cheat-Leak.md)
 - Title-specific Fortnite external DX9 ImGui frameworks such as [[flirtnite]] (NurdAlert; Hyper-V memory interface + Unreal entity/aim modules; DirectX 9 ImGui menu/ESP overlay; cheat / game:fortnite [External]) sit in that same external layered-window / DX9 ImGui overlay lane beside [[fortnite-external-cheat-leak]] and [[interic-fortnite-external-cheat]]. (source: wiki/sources/descriptions/NurdAlert__flirtnite.md)
 - External CS:GO overlay samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; cheat / game:csgo [External]) sit in the external overlay lane beside [[nebulite-external]] and [[csgo-external-cheat]]. (source: wiki/sources/descriptions/gmh5225__Astra.md)
-- External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same external overlay lane beside [[csgo-external-cheat]] and [[astra]]. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md) External CS:GO ImGui + DirectX 9 framework samples such as [[external-cheat-v3]] (Enzo0721; C++; configurable aim, glow, bunnyhop, and no-flash modules; runtime settings; educational external overlay architecture; cheat / game:csgo [External]) sit in that same external layered-window / DX9 ImGui lane. (source: wiki/sources/descriptions/Enzo0721__ExternalCheatV3.md)
+- External CS:GO ESP samples such as [[csgo-external-esp]] (forceinline; MIT; README `[External]`) sit in the same external overlay lane beside [[csgo-external-cheat]] and [[astra]]. (source: wiki/sources/descriptions/forceinline__csgo-external-esp.md) External CS:GO ImGui + DirectX 9 framework samples such as [[external-cheat-v3]] (Enzo0721; C++; configurable aim, glow, bunnyhop, and no-flash modules; runtime settings; educational external overlay architecture; cheat / game:csgo [External]) sit in that same external layered-window / DX9 ImGui lane. (source: wiki/sources/descriptions/Enzo0721__ExternalCheatV3.md) External CS:GO ImGui + DirectX 11 framework samples such as [[csgo-cheat]] (manka81; C++17; transparent DX11 Dear ImGui overlay; ESP boxes, skeletons, snaplines, HUD; world-to-screen projection; cheat / game:csgo [External]) sit in that external layered-window / DX11 ImGui lane beside DX9 samples such as [[external-cheat-v3]]. (source: wiki/sources/descriptions/manka81__csgo_cheat.md)
 - External CS2 Python overlay samples such as [[pythoncs2]] (Vekor64; PyMeow RPM + overlay draw; DearPyGui config UI; ESP boxes / health / weapon labels / lines; Python External tag) sit in the external overlay lane beside ImGui/C# samples such as [[titled-gui-cs2]]. (source: wiki/sources/descriptions/Vekor64__PythonCS2.md)
 - External CS2 Python overlay samples such as [[violetwing]] (Jesewe; PyMeow RPM + overlay; customtkinter config GUI; ESP/triggerbot/bunnyhop/NoFlash; cs2-dumper startup offset bootstrap; Python external tag) sit in the external overlay lane beside [[pythoncs2]] and [[titled-gui-cs2]]. (source: wiki/sources/descriptions/Jesewe__VioletWing.md)
 - Educational CS2 overlay scaffold samples such as [[cs2-external-base]] (UnnamedZ03; C++; external ESP visualization—box, health, distance, skeleton, text; overlay-side structure only without bundled memory driver; external overlay architecture starter; External tag) sit in the external overlay lane beside full-stack samples such as [[cs2-ext]] and [[pythoncs2]]. (source: wiki/sources/descriptions/UnnamedZ03__CS2-external-base.md)
