@@ -3236,6 +3236,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Trinity](entities/trinity.md) — Windows kernel exploitation framework (modular driver/memory/priv-esc chain → arbitrary kernel code execution; disables & removes Defender; cpz)
 - [TrinityCore](entities/trinitycore.md) — open-source WoW MMORPG server framework (modular auth/world servers; async DB pooling; scripting APIs; multi-expansion combat/quests/achievements/battlegrounds; protocol emulation; cheat / game:wow [Server for WOW])
 - [Tracy](entities/tracy.md) — C++ real-time frame profiler (CPU/GPU; Game Testing)
+- [TraceCleaner](entities/trace-cleaner.md) — minimal C++ KM driver; MmUnloadedDrivers + PiDDBCacheTable cleanup; manual-map trace hygiene; educational kernel forensics (BadPlayer555; Driver Trace Cleaner)
 - [TrollStore](entities/trollstore.md) — iOS perma-signed jailed IPA installer (CoreTrust/AMFI; arbitrary entitlements)
 - [TS-Fucker](entities/ts-fucker.md) — runtime TestSigning toggle via Dell `dbutil_2_3.sys` BYOVD (kernel live-patch; symbol-assisted offsets; no reboot; gmh5225)
 - [TrustDevice Android](entities/trustdevice-android.md) — TrustDecision Android fingerprint SDK (Kotlin/Java; integrity / risk signals)

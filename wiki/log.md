@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:BadPlayer555/TraceCleaner`: entity [[trace-cleaner]] (BadPlayer555; minimal C++ KM driver; clears MmUnloadedDrivers + PiDDBCacheTable; manual-map trace hygiene; educational kernel trace cleanup + anti-cheat detection-surface research; README Driver Trace Cleaner); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[clear-driver-traces]], [[driver-read-write]], [[hide-driver-testing]], [[nullmap]], [[revert-mapper]], and [[kernel-pool-scanning]].
+
 - **2026-08-31** — ingest `description:BarakAharoni/LADD`: entity [[ladd]] (BarakAharoni; Linux C anti-debugging detection; ptrace behavior, LD_PRELOAD tampering, TracerPid in /proc/self/status; early runtime checks; anti-analysis research and defensive hardening experiments; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[adbg]], [[cpp-anti-debug]], [[anti-debugging]], [[kiteshield]], [[pince]], and [[edb-debugger]].
 
 - **2026-08-31** — ingest `description:Barracudach/CallStack-Spoofer`: entity [[callstack-spoofer]] (Barracudach; C++ user/kernel call-stack spoofing toolkit; macros/templates forge frames + proxy calls via generated shellcode paths; x64; compiler settings and control-flow protection constraints; anti-analysis / AC stack-walk evasion research; Cheat Spoof Stack); cited on [[concepts/stack-spoofing]] and [[overviews/game-hacking]]; cross-linked [[callstackspoofer-2]], [[callstackspoofer]], [[ret-spoofing]], [[unwinder]], and [[spoof-stack-safecall]].

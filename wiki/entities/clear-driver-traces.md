@@ -18,4 +18,4 @@ Windows kernel driver for removing forensic traces left by loading other drivers
 
 ## Related
 
-[[hide-driver-testing]] · [[driver-read-write]] · [[nullmap]] · [[revert-mapper]] · [[hlunaaa-github-io]] · [[kernel-pool-scanning]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[trace-cleaner]] · [[hide-driver-testing]] · [[driver-read-write]] · [[nullmap]] · [[revert-mapper]] · [[hlunaaa-github-io]] · [[kernel-pool-scanning]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
