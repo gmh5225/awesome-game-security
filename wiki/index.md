@@ -1899,6 +1899,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)
 - [KDemu](entities/kdemu.md) — hybrid semi-emulated/semi-native Windows kernel driver emulator (PE load, exception handling, dump integration, anti-detection; rootkit/AC analysis; ShallowFeather)
+- [Kernel ReClassEx](entities/kreclassex.md) — kernel memory structure reversing environment (BeneficialCode; C++; WinDbg extension + GUI; debug-session attach, kernel layout inspection, function-pointer resolve, reconstructed type views; Windows kernel RE + game anti-cheat research)
 - [KernelPatch](entities/kernelpatch.md) — Linux kernel hook/modding framework (C/C++; APatch boot patch + KPM lane; Cheat / Hooking the Linux kernel)
 - [KernelSU](entities/kernelsu.md) — Android kernel su root (Kotlin/Rust; Cheat / Android root)
 - [KernelSU Debug](entities/kernelsu-debug.md) — KernelSU fork for debugging (MlgmXyysd; relaxed manager checks, permissive SELinux, init scripts; profile control; Android security research / system debugging; cheat / KernelSU modified for debugging)
