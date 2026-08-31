@@ -126,6 +126,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bevy-personal-test](entities/bevy-personal-test.md) — Rust/Bevy multiplayer security testbed (rollback netcode, shadow-VM Wasm checks, Rhai sandbox VM, server replay validation; XX-Batsu)
 - [big5-decode-ida](entities/big5-decode-ida.md) — IDA plugin: decode bytes as Big5 (Python; cheat / IDA Plugins)
 - [BigBaseV2](entities/bigbasev2.md) — GTA V C++/Lua mod-menu base (rendering / modding / hooking; cheat / game:gta5; gmh5225)
+- [BigWhiteTool](entities/bigwhite-tool.md) — Android native UE memory/SDK utility (C/C++ NDK; GName/GObject metadata traversal, process R/W, SDK dump; ImGui Vulkan/OpenGL overlay; offset finding + runtime inspection; BigWhite666; cheat / [SDK Dump For Android])
 - [abyss](entities/abyss.md) — Android system call hook (C/C++; asset pipelines, SDK generation, hooking; cheat / RE tools)
 - [adbg](entities/adbg.md) — Linux anti-debugging techniques (C/C++; Anti Debugging)
 - [adbi](entities/adbi.md) — Android Dynamic Binary Instrumentation (ARM/Thumb hijack injector + inline entry hooking; NDK; mobile RE / security research; WaterlooBridge fork, crmulliner lineage)
