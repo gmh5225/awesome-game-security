@@ -181,6 +181,7 @@ sources:
   - wiki/sources/descriptions/t3ssellate__unmapper.md
   - wiki/sources/descriptions/pr701__fix-arxan.md
   - wiki/sources/descriptions/BeneficialCode__WinArk.md
+  - wiki/sources/descriptions/BaumFX__cpp-anti-debug.md
   - wiki/sources/descriptions/Black0ffR__omega-sast.md
   - wiki/sources/descriptions/BlackSnufkin__AxHunter.md
   - wiki/sources/descriptions/Brentdevent__S2x.md
@@ -999,6 +1000,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[adb-debug-detect-checker]] — Android Java ADB/debug-state detection reference (whether ADB debugging is available; Anti Debugging; fiord) (source: wiki/sources/descriptions/fiord__ADB-Debug-Detect-Checker.md)
 - [[antidebug-antivm]] — anti-debug + VirtualBox anti-VM technique examples (reference snippets; not a standalone build; Anti Debugging / Detection:Virtual Environments; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__AntiDebug-AntiVM.md)
 - [[antidbg-hackovert]] — Windows curated anti-debug technique collection (HackOvert; C/C++ + x86/x64 asm; memory structure, CPU/timing, forced exceptions; gauntlet sequential test app; RE education + anti-analysis defense evaluation; Anti Debugging) (source: wiki/sources/descriptions/HackOvert__AntiDBG.md)
+- [[cpp-anti-debug]] — Windows C++ anti-debugging library (BaumFX; PEB/API/exception/timing/debug-register checks; per-check functions + combined runtime security-check entry; anti-tamper prototyping and debugger-detection technique study; Anti Debugging) (source: wiki/sources/descriptions/BaumFX__cpp-anti-debug.md)
 - [[showstopper]] — Windows anti-debug exploration tool (CheckPointSW; large malware/research check collection; exposes function addresses; attach debuggers and compare tools/plugins/mitigations; anti-anti-debug validation; Anti Debugging) (source: wiki/sources/descriptions/CheckPointSW__showstopper.md)
 - [[avanguard]] — Win32 anti-intrusion library (GravitLauncher; C/C++; anti-debug, anti-injection, memory/call-stack analysis, integrity checks, callback filtering, module checks; game-client hardening; Anti Debugging) (source: wiki/sources/descriptions/GravitLauncher__Avanguard.md)
 - [[godefender]] — Windows Go security toolkit (EvilBytecode; anti-debug, anti-virtualization, anti-DLL-injection, hook detection; modular internal components; low-level WinAPI defensive signals; security-sensitive Go app hardening; Anti Debugging) (source: wiki/sources/descriptions/EvilBytecode__GoDefender.md)

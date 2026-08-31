@@ -735,6 +735,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CovertThread (brew02)](entities/covert-thread.md) — covert system threads via page-table module removal, custom IDT address space, NMI-blocked inspection; direct kernel fn exec (Windows Ring0 / anti-forensic research)
 - [cpp-3d-game-tutorial-series](entities/cpp-3d-game-tutorial-series.md) — C++ DirectX 11 3D game tutorial (Win32 windowing; DX11 graphics; entity-component + input; staged engine modules vs game project; tagged milestones; README [DirectX]; PardCode)
 - [cpp-android-basic-samples](entities/cpp-android-basic-samples.md) — Google Play Games C++ SDK sample games (Game Develop / Android source)
+- [cpp-anti-debug](entities/cpp-anti-debug.md) — Windows C++ anti-debugging library (BaumFX; PEB/API/exception/timing/debug-register checks; granular functions + combined runtime security-check entry; anti-tamper prototyping and debugger-detection study; Anti Debugging)
 - [cpp-game-engine-book](entities/cpp-game-engine-book.md) — C++/OpenGL hands-on engine book (chapter samples; rendering→animation/GUI/audio/profiling/multithreaded rendering; Lua, Blender, FMOD; Game Engine / guide; ThisisGame)
 - [cpp-veh-dbi](entities/cpp-veh-dbi.md) — C++ VEH-based lightweight DBI (Cheat / dynamic binary instrumentation)
 - [CPUZ-DSEFix](entities/cpuc-dsefix.md) — CPU-Z BYOVD DSE bypass (`g_CiEnable`/`g_CiOptions` patch; unsigned driver load; PatchGuard risk; SamLarenN; cheat / CPU-Z)
