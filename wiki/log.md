@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:Bartis1313/csgo`: entity [[csgo]] (Bartis1313; large internal C++ CS:GO cheat framework; SDK wrappers, hook-driven feature modules, configuration tooling, DirectX rendering; aimbot, triggerbot, backtrack, ESP, chams, glow, radar, prediction, visual/world mods; educational cheat client engineering; cheat / game:csgo [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[csgo-cheat-base]], [[csgo-internal-base]], [[digital-sdk]], [[deadcell-csgo]], [[source-netvars]], [[present-hook]], and [[world-to-screen]].
+
 - **2026-08-31** — ingest `description:BataBo/ACEPatcher`: entity [[acepatcher]] (BataBo; C# GUI .NET assembly patcher; dnlib + Harmony method-map patching; import/export password-protected patch sets; packed/obfuscated managed binaries; repeatable .NET patch automation; [.NET Patcher]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[dnspymcp]], [[bepinex]], [[ilspy]], and [[obfuscation-methods]].
 
 - **2026-08-31** — ingest `description:BatogiX/logitech-cve`: updated entity [[logitech-cve]] (BatogiX Rust library for Logitech virtual driver; typed mouse/keyboard/wheel/text APIs via Windows IOCTL; input-emulation research, automation, vulnerable-driver attack-surface analysis; complements ekknod C/C++ fork); cited on [[overviews/game-hacking]] and [[hardware-input-injection]]; cross-linked [[ib-input-simulator]], [[kernel-mouse]], and [[mouseclassservicecallbacktrick]].

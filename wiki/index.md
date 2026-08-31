@@ -689,6 +689,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CSGO-AC](entities/csgo-ac.md) — ekknod CS:GO proof-of-concept anti-cheat plugin (C++/C; AC research + plugin development; Open Source Anti Cheat System)
 - [CSGO_BacktrackPatch](entities/csgo-backtrack-patch.md) — CS:GO backtrack patch (hooking / memory analysis; cheat / game:csgo)
 - [csgo-aw-v5.1.13](entities/csgo-aw-v5.1.13.md) — leaked AimWare v5.1.13 CS:GO internal (aimbot, visuals, movement, anti-aim, hooking framework; gmh5225 [aw-v5.1.13])
+- [csgo](entities/csgo.md) — large internal CS:GO C++ cheat framework (Bartis1313; SDK wrappers, hook-driven modules, config tooling, DirectX rendering; aimbot, triggerbot, backtrack, ESP, chams, glow, radar, prediction; educational cheat client engineering; cheat / game:csgo [Internal])
 - [csgo-alphen](entities/csgo-alphen.md) — CS:GO internal (full SDK with entity/weapon structures and rendering primitives; ImGui menu; ESP, aimbot, visual mods; gmh5225)
 - [csgo-animation-code-reversed](entities/csgo-animation-code-reversed.md) — CS:GO animation subsystem RE (click4dylan; C++; bone-matrix/pose/sequence logic; cheat / game:csgo)
 - [csgo-bot](entities/csgo-bot.md) — CS:GO bot; driver / OpenGL / shader (C/C++; cheat / game:csgo)
