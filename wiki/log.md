@@ -14,6 +14,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-08-31** — ingest `readme:categories`: Cheat ~2765 (+1; Berk000x/BinaryLens IDA Pro LLM plugin in IDA Plugins) / Anti Cheat ~701 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-31** — ingest `description:BepInEx/BepInEx`: entity [[bepinex]] (BepInEx; C# plugin/modding framework for Unity Mono, IL2CPP, and other .NET games; chainloading, preloading, logging, configuration, patching/detour tooling; Windows/Linux/macOS; mod authors + game RE communities; plugin/modding framework); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[bepinex-il2cppbase]], [[unityexplorer]], [[il2cpp]], [[monohook]], [[wellsanticheat]], [[banmod]], and [[danis-nightmare]].
 
 - **2026-08-31** — ingest `description:Berk000x/BinaryLens`: entity [[binarylens]] (Berk000x; C++ IDA Pro LLM plugin; bulk function rename, decompiler-context logic explain, local variable rename; IDA SDK + OpenSSL; multi-model backends; large game client / anti-cheat binary RE; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[aether]], [[ida-llm-explainer]], [[ida-gpt]], [[gepetto]], and [[idassist]].
