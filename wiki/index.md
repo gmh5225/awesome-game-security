@@ -106,6 +106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [be-injector](entities/be-injector.md) — Windows COW-bypass injection PoC; physical memory mapping to patch signed module code before copy-on-write split; evades thread/API/signature module checks; AC bypass research (Compiled-Code; cheat / Attack COW)
 - [bedaisy-reversal](entities/bedaisy-reversal.md) — BEDaisy.sys comprehensive RE (integrity/callback/HAL/manual-map checks, handle protection, minifilter, physmem scan, CSRSS/graphics verify, thread/image notify; dllcrt0)
 - [BepInEx](entities/bepinex.md) — Unity Mono/IL2CPP and .NET plugin/modding framework (C# chainloading, logging, config, Harmony patching; Windows/Linux/macOS; BepInEx)
+- [BepInEx Utility IL2CPP](entities/bepinex-utility-il2cpp.md) — BepInEx IL2CPP utility plugins (graphics settings, window resize, mute-in-background, Message Center; runtime QoL; BepInEx)
 - [BepInEx-IL2CPPBase](entities/bepinex-il2cppbase.md) — BepInEx Unity IL2CPP mod-menu base (C# rendering/audio/physics hooks; cheat / IL2CPP Menu; gmh5225)
 - [BattlEye Handler BYPASS](entities/battleye-handler-bypass.md) — KMDF driver; re-create handles before ~5s BE strip cycle (IOCTL usermode comms)
 - [BattlEye User-Mode Bypass](entities/battleye-user-mode-bypass.md) — C++ Visual Studio PoC; CreateFileW hook + file-check masquerade; historical UM BE loading-path bypass (HadockKali; SetWindowsHookExW)

@@ -12,7 +12,7 @@ confidence: medium
 
 Plugin and modding framework for **Unity Mono**, **Unity IL2CPP**, and other **.NET-based games**. Primarily C# with chainloading, preloading, logging, and configuration systems for runtime plugin management, plus integrated patching and detour tooling so developers can extend or instrument game behavior on **Windows**, **Linux**, and **macOS**. Used by mod authors and game reverse-engineering communities as a stable loader for managed and native Unity targets. (source: wiki/sources/descriptions/BepInEx__BepInEx.md)
 
-Upstream host for title-specific plugins and research scaffolds such as [[bepinex-il2cppbase]], runtime inspectors like [[unityexplorer]], Harmony moderation/AC plugins ([[wellsanticheat]], [[banmod]]), and debug/cheat command suites ([[danis-nightmare]]). Complements offline [[il2cpp]] dump/resolve tooling and runtime hook libraries such as [[monohook]] when the goal is a persistent in-process plugin host rather than one-off injection.
+Upstream host for title-specific plugins and research scaffolds such as [[bepinex-il2cppbase]], official IL2CPP utility plugin packs such as [[bepinex-utility-il2cpp]] (graphics/window/audio/process QoL), runtime inspectors like [[unityexplorer]], Harmony moderation/AC plugins ([[wellsanticheat]], [[banmod]]), and debug/cheat command suites ([[danis-nightmare]]). Complements offline [[il2cpp]] dump/resolve tooling and runtime hook libraries such as [[monohook]] when the goal is a persistent in-process plugin host rather than one-off injection.
 
 ## Links
 
@@ -20,4 +20,4 @@ Upstream host for title-specific plugins and research scaffolds such as [[bepine
 
 ## Related
 
-[[bepinex-il2cppbase]] · [[unityexplorer]] · [[il2cpp]] · [[monohook]] · [[wellsanticheat]] · [[banmod]] · [[danis-nightmare]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
+[[bepinex-il2cppbase]] · [[bepinex-utility-il2cpp]] · [[unityexplorer]] · [[il2cpp]] · [[monohook]] · [[wellsanticheat]] · [[banmod]] · [[danis-nightmare]] · [[overviews/game-hacking]] · [[overviews/game-engine]] · [[overviews/reverse-engineering]]
