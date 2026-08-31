@@ -14,6 +14,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:BigAnteater/KVM-GPU-Passthrough`: entity [[kvm-gpu-passthrough]] (BigAnteater; Arch Linux GPU passthrough VM lab; GRUB/libvirt/QEMU shell scripts + config templates; IOMMU/VT-d and AMD/Intel BIOS prerequisites; isolated gaming or security-research guests with near-native graphics; README GPU Passthrough); cited on [[concepts/iommu]] and [[overviews/game-hacking]]; cross-linked [[hypervisor-phantom]], [[kvm-performance]], [[apex-dma-kvm-pub]], and [[cs2-kvm-dma]].
+
 - **2026-08-31** — ingest `description:BigWhite666/BigWhiteTool`: entity [[bigwhite-tool]] (BigWhite666; C/C++ Android native game memory utility; Unreal-style GName/GObject metadata discovery + SDK dumping; process memory R/W, dump generation; ImGui Vulkan/OpenGL overlay; NDK CMake; mobile game RE for offset finding, runtime inspection, SDK extraction; cheat / [SDK Dump For Android]); cited on [[overviews/mobile-security]] and [[overviews/game-engine]]; cross-linked [[andue4dumper]], [[frida-ue4dump]], [[ue4dumper]], [[ue4-apk-dumper]], [[ios-ue4dumper]], and [[unreal-object-model]].
 
 - **2026-08-30** — ingest `description:Bigfoot71/r3d`: entity [[r3d]] (Bigfoot71; C/C++ 3D rendering library on raylib; PBR, deferred/forward rendering, shadow mapping, SSAO, bloom, decals, skeletal animation, particle systems; full OpenGL pipeline; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[raylib]], [[learnopengl]], [[gltut]], [[yourgamelib]], and [[cgl]].

@@ -1998,6 +1998,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [KslDump](entities/ksldump.md) — PPL LSASS dump via legacy on-disk Defender `KslD.sys` (IOCTL 0x222044 + MmCopyMemory; no external driver load; andreisss)
 - [kvc](entities/kvc.md) — DSE bypass via signed MS driver (`g_CiOptions` / skci / SeCiCallbacks; PP/PPL→LSASS)
 - [kvm-csgo-cheat](entities/kvm-csgo-cheat.md) — Rust CS:GO cheat in QEMU/KVM/PVE/VBox lane (below-OS VM isolation; gmh5225)
+- [KVM-GPU-Passthrough](entities/kvm-gpu-passthrough.md) — Arch Linux GPU passthrough VM lab (GRUB/libvirt/QEMU scripts; IOMMU/VT-d + AMD/Intel BIOS prerequisites; isolated gaming/security-research guests; BigAnteater; GPU Passthrough)
 - [kvm-kernel-example](entities/kvm-kernel-example.md) — minimal KVM VMM + guest kernel tutorial (hypercalls, mmap, syscalls, ELF load; Guide)
 - [KVM.Performance](entities/kvm-performance.md) — KVM host troubleshooting KB (ioapic tuning, split-lock, WRMSR/RDMSR on Unraid/Proxmox; game/AC launch failures in VMs; SingularityCloud; ioapic)
 - [kur](entities/kur.md) — C/C++ kernel utility via echo_driver.sys BYOVD (kernel R/W, process manipulation, driver load; gmh5225)

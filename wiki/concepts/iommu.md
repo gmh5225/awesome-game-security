@@ -7,7 +7,8 @@ sources:
   - wiki/sources/descriptions/tandasat__HelloIommuPkg.md
   - wiki/sources/descriptions/iqrw0__DieDMAProtection.md
   - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
-updated: 2026-08-16
+  - wiki/sources/descriptions/BigAnteater__KVM-GPU-Passthrough.md
+updated: 2026-08-31
 confidence: high
 ---
 
@@ -67,6 +68,7 @@ Full 16-entry catalog in skill source; techniques 7–16 are mostly academic, AP
 - Fault-rate monitoring (VT-d Fault Recording, AMD-Vi Event Log, WHEA)
 - Live containment: sandbox domain remapping, Bus Master Enable clear, Downstream Port Containment (DPC)
 - Pre-game audit: passthrough domains, oversized IOMMU groups, RMRR overlap with game memory
+- Lab setup guides such as [[kvm-gpu-passthrough]] (BigAnteater; Arch Linux GRUB/libvirt/QEMU templates; IOMMU/VT-d and AMD/Intel BIOS prerequisites for GPU passthrough VMs) document the **host-side isolation topology** researchers must validate before assigning devices to VFIO guests. (source: wiki/sources/descriptions/BigAnteater__KVM-GPU-Passthrough.md)
 
 ## Limits
 
@@ -74,4 +76,4 @@ Misconfigured BIOS, pre-boot DMA, ACS holes, ATS abuse, over-mapped pages, legit
 
 ## Related
 
-[[dma]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
+[[dma]] · [[helloiommupkg]] · [[dmaprotect]] · [[diedmaprotection]] · [[kvm-gpu-passthrough]] · [[byovd]] · [[hvci]] · [[overviews/dma-attack]] · [[overviews/anti-cheat]]
