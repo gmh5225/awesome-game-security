@@ -1967,6 +1967,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Kernel-Cheat-for-directx3D](entities/kernel-cheat-for-directx3d.md) — dxgkrnl `NtDxgkGetTrackedWorkloadStatistics` export hook; `NULL_MEMORY` KM↔UM comms + win32k GDI draw (gmh5225)
 - [KernelDwm](entities/kernel-dwm.md) — kernel-mode DWM composition DirectX hook driver; inject compositor draw commands from Ring0 (cs1ime; `[DWM In Kernel]`)
 - [KernelDrawing](entities/kernel-drawing.md) — hook-free Ring0 GDI draw PoC; spoofed thread context satisfies internal checks; version-dependent NT offsets (Sentient111; Drawing from kernelmode without any hooks)
+- [KernelGDIDraw](entities/kernel-gdi-draw.md) — KM GDI draw PoC; hooks `NtGdiDdDDISubmitCommand` + win32k GDI via InfinityHook syscall interception; screen-update-synchronized draw; latency tradeoffs documented (BadPlayer555; `[Kernel + GDI]`)
 - [Kernel Overlay Hider](entities/kernel-overlay-hider.md) — win32k TAGWND DKOM PoC hides overlay HWND from enumeration; kernel driver + DirectX test harness (J0xna; overlay visibility / AC evasion research)
 - [Kernel-dll-injector](entities/kernel-dll-injector.md) — kernel-mode DLL injector on kernel32 load (Sirifef/Max++ technique; driver + sample DLL; x86; Visual Studio/WDK; APC; alexkrnl)
 - [KernelForge](entities/kernel-forge.md) — VBS/HVCI user-mode kernel invocation library (Cr4sh; C++; signed-driver-wrapper memory primitives + higher-level kernel routine calls; kernel-to-user DLL injection example; exploit-prototyping under Memory Integrity; README [Hijack ROP])

@@ -18,6 +18,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-08-31** — ingest `description:BadPlayer555/KernelGDIDraw`: entity [[kernel-gdi-draw]] (BadPlayer555; C/C++ WDK KM GDI draw PoC; hooks `NtGdiDdDDISubmitCommand` + win32k GDI routines via InfinityHook syscall interception; screen-update-synchronized draw with documented latency tradeoffs; low-level graphics-hook / AC evasion research; README `[Kernel + GDI]`); cited on [[overviews/graphics-api]] and [[overviews/windows-kernel]]; cross-linked [[krnl-gdi-render]], [[kernel-drawing]], [[dxgkrnl-hook]], [[rigel-driver]], [[infinityhook]], and [[trace-cleaner]].
+
 - **2026-08-31** — ingest `description:BadPlayer555/TraceCleaner`: entity [[trace-cleaner]] (BadPlayer555; minimal C++ KM driver; clears MmUnloadedDrivers + PiDDBCacheTable; manual-map trace hygiene; educational kernel trace cleanup + anti-cheat detection-surface research; README Driver Trace Cleaner); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[clear-driver-traces]], [[driver-read-write]], [[hide-driver-testing]], [[nullmap]], [[revert-mapper]], and [[kernel-pool-scanning]].
 
 - **2026-08-31** — ingest `description:BarakAharoni/LADD`: entity [[ladd]] (BarakAharoni; Linux C anti-debugging detection; ptrace behavior, LD_PRELOAD tampering, TracerPid in /proc/self/status; early runtime checks; anti-analysis research and defensive hardening experiments; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[adbg]], [[cpp-anti-debug]], [[anti-debugging]], [[kiteshield]], [[pince]], and [[edb-debugger]].
