@@ -383,6 +383,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Asdf Overlay](entities/asdf-overlay.md) — Rust cross-API overlay library (D3D9/11/12, OpenGL, Vulkan; Detours; named-pipe IPC; Rust/Node.js clients)
 - [AssaultCube](entities/assaultcube.md) — open-source CUBE-engine multiplayer FPS (C/C++; maps, bots, demos; engine study / modding / AC experimentation; assaultcube/AC)
 - [Assault Cube Cheat](entities/assault-cube-cheat.md) — C++ AssaultCube cheat (modding / memory analysis; cheat / game:assault cube; gmh5225)
+- [artemis](entities/artemis.md) — R6 Siege Shadow Legacy internal mod framework (ArtemisDevGroup; C++; injection/hooking + ImGui/MinHook; event/keybind/draw/game managers; modular user extensions; cheat / game:r6 [Internal])
 - [AssetRipper](entities/asset-ripper.md) — .NET Unity serialized-file/AssetBundle extractor (AssetRipper; parsers/converters → native Unity-style outputs; broad Unity version coverage; recovery/reconstruction; modding / Unity RE / content analysis; Extracting assets)
 - [AssetStudio](entities/assetstudio.md) — canonical C# Unity asset/AssetBundle extractor (Perfare; explore/extract/export; wide Unity version + asset types; bundle decompression, scene hierarchy, OBJ/JSON/FBX export; modding / bundle RE; Extracting assets)
 - [AssetStudio (Razviar)](entities/assetstudio-razviar.md) — C# multi-threaded Unity asset extractor fork (Unity 2.x–6; GUI/CLI; parallel bundle load/export; modding / bundle RE; Extracting assets)

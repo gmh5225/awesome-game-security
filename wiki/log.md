@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:ArtemisDevGroup/Artemis`: entity [[artemis]] (ArtemisDevGroup; C++ modular R6 Siege Shadow Legacy internal game-modification framework; injection/hooking + ImGui/MinHook; event/keybind/draw/game-interaction managers; user extension plug-ins; cheat development + RE experimentation; cheat / game:r6 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[r6-internal]], [[internal-rainbow-six-cheat-v3]], [[epic-r6-v9]], [[present-hook]], and [[battleye]].
+
 - **2026-09-01** — ingest `description:AryuInka/Valorant-Cheat-External`: updated entity [[valorant-cheat-external]] (AryuInka; C++ external cheat framework; aimbot/ESP; driver-assisted memory interaction; overlay rendering; HWID spoofing workflows; bundled bypass tooling; cheat / game:valorant [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[vanguard]], [[valo-driver]], [[valorant-externals]], and [[valorant-external-cheat]].
 
 - **2026-09-01** — ingest `description:AsenOsen/frida-stealth`: entity [[frida-stealth]] (AsenOsen; Frida stealth patch set; Android runtime fingerprint reduction—default ports, socket names, thread names, loop labels, frida-core/frida-gum markers; patch files + build instructions; mobile RE / anti-instrumentation bypass); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[strongr-frida-android]], [[florida]], [[phantom-frida]], and [[fridare]].
