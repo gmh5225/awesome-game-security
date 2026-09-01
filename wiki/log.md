@@ -18,6 +18,10 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+---
+
+- **2026-09-01** — ingest `readme:categories`: Cheat ~2767 (+1; mfthomps/[[resim-ghidra-plugins]] RESim/Simics Ghidra Debugger in Cheat RE Tools) / Windows Security Features ~10 (+1; CodeMaxx/[[windows-runtime-attestation-report]] GetRuntimeAttestationReport driver/hotpatch dump) / Anti Cheat ~701 / other major section counts stable; 41 sections; entities [[resim-ghidra-plugins]] and [[windows-runtime-attestation-report]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).
+
 - **2026-08-31** — ingest `description:BadPlayer555/KernelGDIDraw`: entity [[kernel-gdi-draw]] (BadPlayer555; C/C++ WDK KM GDI draw PoC; hooks `NtGdiDdDDISubmitCommand` + win32k GDI routines via InfinityHook syscall interception; screen-update-synchronized draw with documented latency tradeoffs; low-level graphics-hook / AC evasion research; README `[Kernel + GDI]`); cited on [[overviews/graphics-api]] and [[overviews/windows-kernel]]; cross-linked [[krnl-gdi-render]], [[kernel-drawing]], [[dxgkrnl-hook]], [[rigel-driver]], [[infinityhook]], and [[trace-cleaner]].
 
 - **2026-08-31** — ingest `description:BadPlayer555/TraceCleaner`: entity [[trace-cleaner]] (BadPlayer555; minimal C++ KM driver; clears MmUnloadedDrivers + PiDDBCacheTable; manual-map trace hygiene; educational kernel trace cleanup + anti-cheat detection-surface research; README Driver Trace Cleaner); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[clear-driver-traces]], [[driver-read-write]], [[hide-driver-testing]], [[nullmap]], [[revert-mapper]], and [[kernel-pool-scanning]].

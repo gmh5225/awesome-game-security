@@ -86,7 +86,7 @@ sources:
   - wiki/sources/descriptions/Cr4sh__s6_pcie_microblaze.md
   - wiki/sources/descriptions/Cr4sh__pico_dma.md
   - wiki/sources/descriptions/Cr4sh__SmmBackdoorNg.md
-updated: 2026-08-31
+updated: 2026-09-01
 confidence: high
 ---
 
@@ -149,4 +149,4 @@ Tier-6 firmware operating only within driver-mapped domains and matching donor b
 
 ## README map
 
-No top-level DMA section — maps via `Cheat` (~2766) DMA lanes (incl. [[aetheris]] PyQt6 MemProcFS/PCILeech-FPGA forensics dashboard with audited reversible actions) and `Anti Cheat > Detection:DMA` (~701), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~9; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Dray973__Aetheris.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md)
+No top-level DMA section — maps via `Cheat` (~2767) DMA lanes (incl. [[aetheris]] PyQt6 MemProcFS/PCILeech-FPGA forensics dashboard with audited reversible actions) and `Anti Cheat > Detection:DMA` (~701), plus hypervisor/virtualization/HWID detection and `Windows Security Features` (~10; CET/shadow stack + TPM PCR attestation of virt/IOMMU/Secure Boot/VBS/HVCI/DSE/blocklist — e.g. [[sewindows]] local replay and remote attestation + [[windows-runtime-attestation-report]] GetRuntimeAttestationReport driver/hotpatch dump). (source: wiki/sources/README-categories.md) (source: wiki/sources/descriptions/Dray973__Aetheris.md) (source: wiki/sources/descriptions/fsquirt__SEWindows.md) (source: wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md)
