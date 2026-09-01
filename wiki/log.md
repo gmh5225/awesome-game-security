@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AvivShabtay/Stresser`: entity [[stresser]] (AvivShabtay; C++ endpoint security platform; host agents + centralized management; UM/KM telemetry, artifact processing, policy handling, detection logic; ETW-driven monitoring + dynamic/static analysis + coordinated response; malware defense / enterprise endpoint protection experiments; README Anti Virus in fact but also Anti Cheat); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[peregrine-anticheat]], [[openedr]], [[bluespawn]], [[kernelmon]], and [[openprocmon]].
+
 - **2026-09-01** — ingest `description:Dead-Scripts/Dead_antiCheat`: entity [[dead-anticheat]] (Dead-Scripts; FiveM server-side Lua CitizenFX anticheat; noclip/spectate/godmode/infinite-ammo/mod-menu globals; JSON ban list + Discord webhook logging with optional screenshots; configurable event/key/command/entity blacklists; staff bypass); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[atomicshieldclient]], [[gvmp-anticheat]], and [[phake]].
 
 - **2026-09-01** — ingest `description:RooTurkk/ROOTURK-Kernel`: entity [[rooturk-kernel]] (RooTurkk; Android 15 GKI 6.6 POCO X7 Pro custom kernel; AnyKernel3 + Bazel; built-in KernelSU Next + SuSFS root hiding + game-oriented idle tuning; mobile kernel RE / kernel-integrity bypass research; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[kernelsu]]; cross-linked [[android-kernel-xiaomi-sm8475]], [[kernel-xiaomi-sm8250]], [[kernel-build-scripts]], and [[mobile-anti-cheat]].

@@ -3150,6 +3150,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Stockfish](entities/stockfish.md) — open-source chess engine (alpha-beta + NNUE eval; UCI; C++; Chess Engine / game AI)
 - [Storm Engine](entities/storm-engine.md) — Akella Sea Dogs/PotC C++ engine (DX9 / physics / scripting; Game Engine source)
 - [Storytime](entities/storytime.md) — MapleStory remake (branching dialogue / quest progression / interactive storytelling; Game Develop / source)
+- [Stresser](entities/stresser.md) — endpoint security platform (AvivShabtay; C++ UM/KM agents + centralized management; ETW telemetry, dynamic/static detection, policy/response; malware defense / AC-adjacent endpoint experiments)
 - [strings2](entities/strings2.md) — extract strings from binary files and process memory (C/C++; modding / memory analysis; cheat / RE tools)
 - [Strings x64dbg](entities/stringsx64dbg.md) — x64dbg plugin: dedicated string search/browse tab (C++/Qt; SearchStringsWidget; Cheat x64dbg Plugins)
 - [Stride](entities/stride.md) — open-source C# 3D engine (formerly Xenko; PBR / Vulkan+D3D+GL; Game Engine)
