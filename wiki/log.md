@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AzzOnFire/yarka`: entity [[yarka]] (AzzOnFire; Python IDA Pro plugin; YARA rule generation from instructions/strings/raw bytes/decompiler output; built-in editor with syntax highlighting and customizable templates; function-level hunting with data refs; malware/binary analysis; README YARA signature creation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hyara]], [[yara4ida]], [[findyara-ida]], and [[yarascan-ida]].
+
 - **2026-09-01** — ingest `description:BL0odz/BrowserPasswordExportor`: entity [[browser-password-exportor]] (BL0odz; Python Windows browser password decrypt/export; Chromium/Edge/Firefox profile DBs; DPAPI/AES + Firefox key-material parsing; ASN.1 and browser-specific login-storage routines; credential forensics / red-team lab / browser secret-storage RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[custom-dpapi]], [[idontlikefilelocks]], and [[qvoid-token-grabber]].
 
 - **2026-09-01** — ingest `description:BLCCoreStudio/BLCGameSecLab`: entity [[blc-gamesec-lab]] (BLCCoreStudio; Python CLI; authorized game-security validation and regression orchestration; BLCReverseLab intake, evidence graphs, DEX/native build diffing, incremental anti-cheat retest scoping; `blc.gamesec.report/v1`; defensive authorized assessment); cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[quack]], [[apkid]], and [[il2cpp-spy]].

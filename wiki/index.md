@@ -3702,6 +3702,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [yolov5_PUBG](entities/yolov5-pubg.md) — PUBG YOLOv5 object detection (Python; cheat / triggerbot & aimbot; modding)
 - [YOLOv8 Overlay CS2](entities/yolov8-overlay-cs2.md) — Leksa667 CS2 Python real-time overlay (YOLOv8 ONNX + ONNX Runtime; mss capture; Pygame + Win32 transparent overlay; optional CUDA, confidence filter, hotkeys, smooth aim-assist; computer-vision cheat prototyping + AC research; cheat / game:cs2 [YOLOv8 in CS2])
 - [yara4ida](entities/yara4ida.md) — Unofficial YARA IDA Pro plugin (Alt-Y; `plugins.cfg`; cheat / IDA Plugins)
+- [yarka](entities/yarka.md) — IDA Pro YARA signature generator (Python; disasm/decompiler/strings/bytes; built-in editor + templates; function-level hunting; AzzOnFire; cheat / YARA signature creation)
 - [YaraVM](entities/yaravm.md) — IDA processor/loader for compiled YARA (`.yar.bin` bytecode/regex disasm; `libyara.til`; cheat / IDA Plugins)
 - [yarascan-ida](entities/yarascan-ida.md) — IDA Yara file scan plugin (Python; cheat / IDA Plugins)
 - [yaui](entities/yaui.md) — Rust Android inject / emulation research (cheat / injection:android)
