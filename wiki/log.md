@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:Arctium/WoW-Launcher`: entity [[wow-launcher]] (Arctium; C#/.NET public WoW client launcher; valid TLS to custom servers; multi-branch client versions + configurable CDN endpoints; public build strips dev mode/mod loading; private-server ops + client compatibility testing; cheat / game:wow [wow launcher]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[trinitycore]], [[azerothcore-wotlk]], [[mopcore547]], [[5-4-7-wow-source]], [[awesome-wow-rust]], [[dumpwow]], and [[wow-iat-fix]].
+
 - **2026-09-01** — ingest `description:AreWeAntiCheatYet/AreWeAntiCheatYet`: entity [[are-we-anti-cheat-yet]] (community-maintained GNU/Linux/Proton/Wine AC compatibility tracker; JSON catalog + Next.js static site; readiness statuses supported/running/planned/broken/denied; EAC/BattlEye listing; table/card/game pages + RSS; TypeScript/React/Mantine; Steam Deck reference; no bypass promotion); cited on [[overviews/anti-cheat]]; cross-linked [[aclist-github-io]], [[crossover-patcher]], and [[proton]].
 
 - **2026-09-01** — ingest `description:Arisego/UnrealLive2D`: entity [[unreal-live2d]] (Arisego; UE4 Live2D Cubism runtime plugin; C++ + Unreal shaders; model loading, motion playback, physics, rendering; sample Blueprints for expressions, lip sync, eye blink; 2D character animation; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[vtuber-with-ue4]], [[kawaii-physics]], [[flowgraph]], and [[houdini-engine-for-unreal]].

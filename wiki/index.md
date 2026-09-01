@@ -3646,6 +3646,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [writemem](entities/writemem.md) — Java memory utility library for rooted Android (range search, offset filter, read/write, periodic freeze across `/proc` maps; map parsing, socket server; game memory experimentation/automation; ExploitTheLoop)
 - [WoWDumpFix](entities/wowdumpfix.md) — x64dbg plugin; removes anti-dump obstacles from protected Blizzard/WoW processes; Scylla import/dump repair; attach-time breakpoint restore (C/C++; cheat / game:wow / Dump Fix)
 - [wow-IAT-fix](entities/wow-iat-fix.md) — WoW client IAT repair (C/C++; plugin / modding / SDK generation; cheat / game:wow)
+- [WoW Launcher](entities/wow-launcher.md) — WoW custom-server client launcher (Arctium; C#/.NET; TLS routing; multi-branch client versions + CDN endpoints; public build omits dev mode/mod loading; private-server ops + compatibility testing; cheat / game:wow [wow launcher])
 - [wow-wowautofishing](entities/wow-wowautofishing.md) — WoW auto-fishing automation (C/C++; rendering / audio / memory analysis; cheat / game:wow; gmh5225)
 - [vt-debuger](entities/vt-debuger.md) — Intel VT-x thin-hypervisor stealth debugger (VM-exit breakpoints/single-step/memory watch; anti-debug–invisible RE)
 - [vt-debuuger](entities/vt-debuuger.md) — hacked hypervisor testing (C/C++ drivers / plugins)
