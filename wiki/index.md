@@ -3442,7 +3442,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VGK DMA bypass](entities/vgk-dma-bypass.md) — Modified PCILeech Artix-7 CFG-space/MSI-X SystemVerilog for Vanguard DMA threat-model research (d1skq)
 - [valorant-aimbot-bypass](entities/valorant-aimbot-bypass.md) — Valorant aimbot with human-like aim smoothing (cheat / game:valorant; gmh5225)
 - [valorant-cheat](entities/valorant-cheat.md) — Valorant internal cheat (StuzziKLL source fork; anti-cheat research + driver dev; cheat / game:valorant [Internal]; gmh5225)
-- [valorant-cheat-external](entities/valorant-cheat-external.md) — Valorant external cheat (two gmh5225 repos: ValorantCheatExternal ESP/aimbot via kernel RPM; Valorant-CheatExternal driver/shader/rendering scaffold; cheat / game:valorant [External])
+- [valorant-cheat-external](entities/valorant-cheat-external.md) — Valorant external cheat (gmh5225 ValorantCheatExternal ESP/aimbot via kernel RPM; Valorant-CheatExternal driver/shader/rendering scaffold; AryuInka Valorant-Cheat-External C++ aimbot/ESP + driver-assisted memory, overlay, HWID spoofing; cheat / game:valorant [External])
 - [valorant-cheat-internal](entities/valorant-cheat-internal.md) — Valorant internal cheat; Insert-key menu toggle (rebindable); cheat / game:valorant [Internal] (gmh5225)
 - [valorant-dumper](entities/valorant-dumper.md) — Valorant UE offset/SDK dumper (GObjects/GNames; Vanguard research)
 - [valorant-dumper-tool](entities/valorant-dumper-tool.md) — Valorant UE dump tooling (C++; `[Dump]`; cheat / game:valorant; gmh5225)

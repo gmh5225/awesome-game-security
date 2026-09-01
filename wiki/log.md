@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AryuInka/Valorant-Cheat-External`: updated entity [[valorant-cheat-external]] (AryuInka; C++ external cheat framework; aimbot/ESP; driver-assisted memory interaction; overlay rendering; HWID spoofing workflows; bundled bypass tooling; cheat / game:valorant [External]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[vanguard]], [[valo-driver]], [[valorant-externals]], and [[valorant-external-cheat]].
+
 - **2026-09-01** — ingest `description:AsenOsen/frida-stealth`: entity [[frida-stealth]] (AsenOsen; Frida stealth patch set; Android runtime fingerprint reduction—default ports, socket names, thread names, loop labels, frida-core/frida-gum markers; patch files + build instructions; mobile RE / anti-instrumentation bypass); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[strongr-frida-android]], [[florida]], [[phantom-frida]], and [[fridare]].
 
 - **2026-09-01** — ingest `description:AsfhtgkDavid/windmouse`: entity [[windmouse]] (AsfhtgkDavid; Python WindMouse algorithm library; curved non-linear variable-speed mouse paths; AutoHotkey/PyAutoGUI backends; movement-physics tuning; UI automation / game-scripting bot-behavior evasion); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[human-mouse-movement]], [[delbot-mouse]], [[mousedetection]], and [[autohotkey-l]].

@@ -5,13 +5,14 @@ topics: [game-hacking, anti-cheat, windows-kernel, graphics-api]
 sources:
   - wiki/sources/descriptions/gmh5225__ValorantCheatExternal.md
   - wiki/sources/descriptions/gmh5225__Valorant-CheatExternal.md
-updated: 2026-08-10
+  - wiki/sources/descriptions/AryuInka__Valorant-Cheat-External.md
+updated: 2026-09-01
 confidence: medium
 ---
 
 # valorant-cheat-external
 
-Two related **gmh5225** Valorant external cheat repos share this name in the curated cheat / game:valorant lane. Both sit in the out-of-process offensive stack under [[vanguard]] beside kernel memory-read drivers such as [[valo-driver]] and offset feeds such as [[valorant-externals]].
+Several Valorant **external** cheat repos share this slug in the curated cheat / game:valorant lane. They sit in the out-of-process offensive stack under [[vanguard]] beside kernel memory-read drivers such as [[valo-driver]] and offset feeds such as [[valorant-externals]].
 
 ## gmh5225/ValorantCheatExternal
 
@@ -23,11 +24,18 @@ C/C++ **external** Valorant cheat sample (gmh5225) centered on **driver developm
 
 Sits beside other gmh5225 external stacks such as [[valorant-external-source]], [[valorant-external]], and [[valorant-external-1]] rather than in-process internal bases.
 
+## AryuInka/Valorant-Cheat-External
+
+C++ **external** cheat framework (AryuInka; README `[External]`) focused on **aimbot** and **ESP** for Valorant. Combines out-of-process memory interaction, overlay rendering, and **HWID spoofing**-oriented workflows with **driver-assisted** operation and bundled bypass tooling — aimed at offensive game-hacking research under [[vanguard]] rather than defensive anti-cheat engineering. (source: wiki/sources/descriptions/AryuInka__Valorant-Cheat-External.md)
+
+Sits beside modular externals such as [[valorant-external-cheat]] and kernel RPM stacks such as [[valorant-external-source]].
+
 ## Links
 
 - Repo (ValorantCheatExternal): https://github.com/gmh5225/ValorantCheatExternal
 - Repo (Valorant-CheatExternal): https://github.com/gmh5225/Valorant-CheatExternal
+- Repo (Valorant-Cheat-External): https://github.com/AryuInka/Valorant-Cheat-External
 
 ## Related
 
-[[vanguard]] · [[valo-driver]] · [[valorant-externals]] · [[valorant-external-source]] · [[valorant-external]] · [[valorant-esp-hack-with-driver]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]]
+[[vanguard]] · [[valo-driver]] · [[valorant-externals]] · [[valorant-external-source]] · [[valorant-external]] · [[valorant-external-cheat]] · [[valorant-esp-hack-with-driver]] · [[unreal-object-model]] · [[overviews/game-hacking]] · [[overviews/anti-cheat]] · [[overviews/windows-kernel]] · [[overviews/graphics-api]]
