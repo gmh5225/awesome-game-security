@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `readme:categories`: Cheat ~2768 (+1; AyinSama/[[anti-anti-debugger-driver]] WDK ETW-hook anti-anti-debug tutorial in Windows Kernel Explorer) / Anti Cheat ~702 (+1; BLCCoreStudio/[[blc-gamesec-lab]] authorized validation/regression orchestration in Analysis Framework) / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-01** — ingest `description:AyinSama/Anti-AntiDebuggerDriver`: entity [[anti-anti-debugger-driver]] (AyinSama; C++ WDK tutorial kernel driver; hooks native process/thread/handle/system-information syscall paths; hook utilities + disassembly helpers neutralize common anti-debug probes; RE education / protected software analysis; README [ETW Hook]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[titanhide]], [[scyllahide-for-ida9.0rc]], [[steam-anti-anti-debug]], and [[anti-kernel-debug-poc]].
 
 - **2026-09-01** — ingest `description:AzzOnFire/yarka`: entity [[yarka]] (AzzOnFire; Python IDA Pro plugin; YARA rule generation from instructions/strings/raw bytes/decompiler output; built-in editor with syntax highlighting and customizable templates; function-level hunting with data refs; malware/binary analysis; README YARA signature creation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hyara]], [[yara4ida]], [[findyara-ida]], and [[yarascan-ida]].
