@@ -22,6 +22,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:Astronaut00/DoubleDataPointer`: entity [[double-data-pointer]] (Astronaut00; C++ kernel PoC; double-pointer KM↔UM channel for manually mapped driver; virtual/physical memory R/W; PFN cleanup + pool artifact reduction with documented detection risks; anti-cheat bypass / low-level game security research; README [Double Data Pointer]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[data-ptr-swap]], [[data-communication]], [[trace-cleaner]], [[driver-read-write]], and [[astronaut00-apex-external]].
+
 - **2026-09-01** — ingest `description:daveymcq/SimpleMemoryEditor`: entity [[simple-memory-editor]] (daveymcq; portable Windows memory scanner/editor; C + custom NCRT + Win32 GUI; process attach, writable-region enum, int/float/double equal/increased/decreased scans, live edit/freeze, process monitoring; static 32/64-bit XP–Win10 builds; external memory editing for game hacking and in-game variable RE; cheat / memory scanner); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[cheat-engine]], [[pointer-lab]], [[mhsx]], and [[intro-to-gamehacking]].
 
 - **2026-09-01** — ingest `readme:categories`: Cheat ~2769 (+1; Astronaut00/[[astronaut00-apex-external]] Apex external cheat/SDK in Cheat External) / Anti Cheat ~703 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).

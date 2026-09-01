@@ -789,6 +789,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CyberAntLoader](entities/cyber-ant-loader.md) — cheat loader with auth, HWID binding, license verification, and anti-detection inject pipeline (gmh5225)
 - [CYBERSEC 2023 BYOVD Demo](entities/cybersec2023-byovd-demo.md) — CYBERSEC 2023 Taiwan RTCore64.sys BYOVD chain (DSE nullify → unsigned driver load; blind 360 Total Security ObRegisterCallbacks + notify callbacks; gmh5225)
 - [data-communication](entities/data-communication.md) — kernel `.data` pointer swap KM↔UM comms (Sinclairq; C++ driver + usermode; pattern scan; memory R/W + process base; README [NtCompareSigningLevels])
+- [double-data-pointer](entities/double-data-pointer.md) — double-pointer KM↔UM channel for manually mapped driver; virtual/physical R/W; PFN + pool artifact cleanup (Astronaut00; C++; cheat / driver communication)
 - [data-ptr-swap](entities/data-ptr-swap.md) — NtSetCompositionSurfaceAnalogExclusive kernel channel (C/C++)
 - [dataptrswap-driver](entities/dataptrswap-driver.md) — win32kbase data-ptr swap on NtSetCompositionSurfaceAnalogExclusive; MmUnloadedDrivers cleanup (gmh5225; cheat driver)
 - [DataPtrHookWin11](entities/dataptrhookwin11.md) — NtUserSetGestureConfig Win11 data-ptr hook (driver communication)
