@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AsfhtgkDavid/windmouse`: entity [[windmouse]] (AsfhtgkDavid; Python WindMouse algorithm library; curved non-linear variable-speed mouse paths; AutoHotkey/PyAutoGUI backends; movement-physics tuning; UI automation / game-scripting bot-behavior evasion); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[human-mouse-movement]], [[delbot-mouse]], [[mousedetection]], and [[autohotkey-l]].
+
 - **2026-09-01** — ingest `description:AssetRipper/AssetRipper`: entity [[asset-ripper]] (AssetRipper; .NET C# Unity serialized-file/AssetBundle extractor; parsers/converters → native Unity-style outputs; broad Unity version coverage; practical asset recovery/reconstruction; modding / Unity RE / content analysis; README [Extracting assets]); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[assetstudio]], [[assetstudio-razviar]], [[uabe]], [[unityexplorer]], and [[awesome-game-file-format-reversing]].
 
 ---

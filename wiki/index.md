@@ -3568,6 +3568,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [wpp](entities/wpp.md) — WPP trace-infrastructure DeviceControl hijack PoC (`disk.sys`/`mountmgr.sys`; IRP capture; HWID disk-serial research; btbd)
 - [WDUTF](entities/wdutf.md) — Windows Driver Unit Test Framework (user-space MSTest for kernel drivers)
 - [WindEffects](entities/wind-effects.md) — C++23 Vulkan/DX12 engine (ECS, editor, deferred/PBR; Game Engine)
+- [WindMouse](entities/windmouse.md) — Python human-like mouse paths via WindMouse algorithm; curved variable-speed trajectories; AutoHotkey/PyAutoGUI backends (AsfhtgkDavid; UI automation / game scripting)
 - [Windfall Anti-Cheat](entities/windfall-anticheat.md) — Spigot/Paper/Folia/Purpur packet AC (PacketEvents 2; combat/movement/inventory; lag compensation + prediction; Geyser/Bedrock; enis1enis2)
 - [Windfall AntiCheat F](entities/windfall-anticheatf.md) — Fabric **1.21.5+** server-side packet AC (combat/movement/inventory checks; physics prediction + latency compensation; Geyser/Bedrock; enis1enis2)
 - [windbg-decompile-ext](entities/windbg-decompile-ext.md) — WinDbg x64 extension; live disasm + LLM verified pseudocode (WinDbg Plugins)
