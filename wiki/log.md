@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AreWeAntiCheatYet/AreWeAntiCheatYet`: entity [[are-we-anti-cheat-yet]] (community-maintained GNU/Linux/Proton/Wine AC compatibility tracker; JSON catalog + Next.js static site; readiness statuses supported/running/planned/broken/denied; EAC/BattlEye listing; table/card/game pages + RSS; TypeScript/React/Mantine; Steam Deck reference; no bypass promotion); cited on [[overviews/anti-cheat]]; cross-linked [[aclist-github-io]], [[crossover-patcher]], and [[proton]].
+
 - **2026-09-01** — ingest `description:Arisego/UnrealLive2D`: entity [[unreal-live2d]] (Arisego; UE4 Live2D Cubism runtime plugin; C++ + Unreal shaders; model loading, motion playback, physics, rendering; sample Blueprints for expressions, lip sync, eye blink; 2D character animation; Plugins:Unreal); cited on [[overviews/game-engine]]; cross-linked [[vtuber-with-ue4]], [[kawaii-physics]], [[flowgraph]], and [[houdini-engine-for-unreal]].
 
 - **2026-09-01** — ingest `description:ArtemisDevGroup/Artemis`: entity [[artemis]] (ArtemisDevGroup; C++ modular R6 Siege Shadow Legacy internal game-modification framework; injection/hooking + ImGui/MinHook; event/keybind/draw/game-interaction managers; user extension plug-ins; cheat development + RE experimentation; cheat / game:r6 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[r6-internal]], [[internal-rainbow-six-cheat-v3]], [[epic-r6-v9]], [[present-hook]], and [[battleye]].
