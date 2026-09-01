@@ -2902,7 +2902,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
 - [rezygisk](entities/rezygisk.md) — standalone open-source C Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging (PerformanC; Transparent implementation of Zygisk)
 - [RescueX](entities/rescuex.md) — Magisk/KernelSU/APatch boot-loop auto-rescue (watchdog, module snapshots, WebUI recovery)
-- [RESimGhidraPlugins](entities/resim-ghidra-plugins.md) — Ghidra Debugger plugins for RESim reverse-engineering simulator (Simics/gdb integration; bookmarks, watchmarks, stack console; Cheat RE Tools / Ghidra Plugins; mfthomps)
+- [RESimGhidraPlugins](entities/resim-ghidra-plugins.md) — Ghidra Debugger plugins for RESim reverse-engineering simulator (Java; gdb-multiarch/Simics port 9123; bookmarks, watchmarks, stack console, listing hovers; mirrors RESim IDA Pro plugins; Cheat RE Tools / Ghidra Plugins; mfthomps)
 - [Ret-Spoofing](entities/ret-spoofing.md) — minimal x64 return-address spoofing without exception handlers (Peribunt; C++ + ASM stubs; low-overhead fake return targets; Windows x64 nonvolatile-register assumptions; Cheat Spoof Stack)
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
 - [RASD](entities/rasd.md) — R5AC/Apex Legends return-address spoofing detector (cryotb; `RtlCaptureStackBackTrace` stackwalk; gadget + unbacked-RWX heuristics; Detection:Spoof Stack)
