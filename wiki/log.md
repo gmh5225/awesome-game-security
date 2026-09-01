@@ -22,6 +22,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:codedevdev/irontrace`: entity [[irontrace]] (codedevdev; C# WPF/CLI + optional ASP.NET Core server; PCI/PCIe/USB/driver inventory, DMA masquerade indicators, BYOVD/HWID/execution-artifact layers, LOLDrivers correlation; explainable JSON verdicts without auto-ban; optional self-hosted admin triage; Detection:DMA / hardware integrity auditing); cited on [[overviews/anti-cheat]] and [[overviews/dma-attack]]; cross-linked [[pcie-detector]], [[drvscan]], [[driver-risk-scout]], [[loldriverscan]], [[loldrivers]], [[byovd]], and [[device-control-hooks-scanner]].
+
 - **2026-09-01** — ingest `readme:categories`: Anti Cheat ~703 (+1; Dead-Scripts/[[dead-anticheat]] FiveM server-side Lua CitizenFX AC) / Cheat ~2768 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-01** — ingest `description:Atonl200/ProjectNexus-CSGO`: entity [[projectnexus-csgo]] (Atonl200; C++20 CS2 internal suite; injected feature DLL + external DX11 ImGui overlay via shared-memory IPC; aimbot/triggerbot/RCS/ESP/movement/skin changer; MinHook + schema/offset resolution; manual-map loader via direct syscalls; optional kernel driver/BYOVD/PE mapper; cheat architecture + AC evasion research; cheat / game:cs2 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[rabsztyncc-cs2-internal]], [[asphyxia-cs2]], [[cs2-cheat-source]], [[present-hook]], [[byovd]], and [[syscall-detect]].

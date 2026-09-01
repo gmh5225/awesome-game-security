@@ -28,6 +28,7 @@ sources:
   - wiki/sources/descriptions/cs1ime__ceserver-rawmem.md
   - wiki/sources/descriptions/cs1ime__blacksun-framework.md
   - wiki/sources/descriptions/cutecatsandvirtualmachines__DmaProtect.md
+  - wiki/sources/descriptions/codedevdev__irontrace.md
   - wiki/sources/descriptions/paul01784__MeatyEFTRelease.md
   - wiki/sources/descriptions/bytemyass__EFTLeecher.md
   - wiki/sources/descriptions/gmh5225__eft-dma-radar-1.md
@@ -115,7 +116,7 @@ Hypervisor containment ([[hvci]], EPT traps, honeypot pages) and firmware policy
 ## PCIe stack (detection-relevant)
 
 - **TLPs:** Memory Read/Write, Config R/W, Completions; Requester ID (BDF) drives IOMMU lookup; completion splitting (MRRS/RCB/MPS) and tag turnover are donor-class fingerprints.
-- **Config Space:** 256-byte legacy header + extended capabilities (AER, DSN, ATS, ACS, SR-IOV); capability-chain walk, BAR mask probe, R/W consistency on Command/Device Control and W1C bits. Kernel config-space tooling such as [[pcie-detector]] (gmh5225; C++ driver) supports defensive inventory beyond user-mode dumps for anti-cheat engineers in the Detection:DMA lane. (source: wiki/sources/descriptions/gmh5225__PCIE-Detector.md) User-mode scanner/forensics tooling such as [[drvscan]] (ekknod; C; PCIe enumeration plus pcileech-style physical-memory signature scans for cheat/rootkit residue) complements that inventory lane. (source: wiki/sources/descriptions/ekknod__drvscan.md)
+- **Config Space:** 256-byte legacy header + extended capabilities (AER, DSN, ATS, ACS, SR-IOV); capability-chain walk, BAR mask probe, R/W consistency on Command/Device Control and W1C bits. Kernel config-space tooling such as [[pcie-detector]] (gmh5225; C++ driver) supports defensive inventory beyond user-mode dumps for anti-cheat engineers in the Detection:DMA lane. (source: wiki/sources/descriptions/gmh5225__PCIE-Detector.md) User-mode scanner/forensics tooling such as [[drvscan]] (ekknod; C; PCIe enumeration plus pcileech-style physical-memory signature scans for cheat/rootkit residue) complements that inventory lane. (source: wiki/sources/descriptions/ekknod__drvscan.md) Server-administrator integrity suites such as [[irontrace]] (codedevdev; C# WPF/CLI; PCI/PCIe/USB/driver watchlists, DMA masquerade indicators, LOLDrivers correlation, explainable JSON verdicts without auto-ban; optional self-hosted triage) aggregate PCIe/USB/driver signals for human review in the Detection:DMA lane. (source: wiki/sources/descriptions/codedevdev__irontrace.md)
 - **Behavioral:** LTSSM/link width, ASPM transitions, AER correctable-error baselines, MSI/MSI-X interrupt distribution, completion-latency distribution (KS / Anderson–Darling vs donor reference).
 
 Stock [[pcileech-fpga]] builds expose trivial Tier-0/1 signals (placeholder `10EE:0666`, zerowrite4k BAR, missing AER). Sophisticated firmware climbs tiers 2–6 (shadow config → overlay RAM → BAR MMIO + MSI → behavioral emulation → private randomized layouts). (source: wiki/sources/skills/dma-attack.md) Donor-cloning generators such as [[pcileechgen]] automate scan/check/build/validate workflows: Linux VFIO donor capture → SystemVerilog/COE → Vivado bitstreams with dynamic BAR emulation, NVMe admin-queue/DMA bridge, offline MMIO trace import, and TLP latency tuning across many PCILeech-compatible boards. (source: wiki/sources/descriptions/sercanarga__PCILeechGen.md)
