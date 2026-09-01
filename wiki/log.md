@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:Dead-Scripts/Dead_antiCheat`: entity [[dead-anticheat]] (Dead-Scripts; FiveM server-side Lua CitizenFX anticheat; noclip/spectate/godmode/infinite-ammo/mod-menu globals; JSON ban list + Discord webhook logging with optional screenshots; configurable event/key/command/entity blacklists; staff bypass); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[atomicshieldclient]], [[gvmp-anticheat]], and [[phake]].
+
 - **2026-09-01** — ingest `description:RooTurkk/ROOTURK-Kernel`: entity [[rooturk-kernel]] (RooTurkk; Android 15 GKI 6.6 POCO X7 Pro custom kernel; AnyKernel3 + Bazel; built-in KernelSU Next + SuSFS root hiding + game-oriented idle tuning; mobile kernel RE / kernel-integrity bypass research; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[kernelsu]]; cross-linked [[android-kernel-xiaomi-sm8475]], [[kernel-xiaomi-sm8250]], [[kernel-build-scripts]], and [[mobile-anti-cheat]].
 
 - **2026-09-01** — ingest `readme:categories`: Cheat ~2768 (+1; AyinSama/[[anti-anti-debugger-driver]] WDK ETW-hook anti-anti-debug tutorial in Windows Kernel Explorer) / Anti Cheat ~702 (+1; BLCCoreStudio/[[blc-gamesec-lab]] authorized validation/regression orchestration in Analysis Framework) / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
