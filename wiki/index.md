@@ -386,6 +386,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AssetStudio (Razviar)](entities/assetstudio-razviar.md) — C# multi-threaded Unity asset extractor fork (Unity 2.x–6; GUI/CLI; parallel bundle load/export; modding / bundle RE; Extracting assets)
 - [Astra](entities/astra.md) — external CS:GO cheat (C/C++; rendering / modding / overlays; cheat / game:csgo [External]; gmh5225)
 - [AstroX AntiCheat](entities/astrox-anticheat.md) — GeyserMC extension Bedrock AC (Java Maven; raw RakNet/UDP Netty intercept before Java translation; sub-ms off-tick heuristics—reach/hitbox backtracking/flight/autoclicker/device spoof/crash-packet firewall; input-mode reach + leaky-bucket FP reduction; Discord alerts; Anti Cheat / game:minecraft)
+- [atmosphere](entities/atmosphere.md) — Nintendo Switch custom firmware platform (Atmosphere-NX; C/C++; Fusee/Exosphere/Stratosphere; boot/runtime patches, TrustZone, sysmodules, emuMMC; console security research + homebrew; README [Customized firmware])
 - [Aurora](entities/aurora.md) — internal CS2 cheat (ESP / aimbot / visual mods; Source 2 schema + entity enumeration; cheat / game:cs2 [Internal]; gmh5225)
 - [AutoAttach](entities/auto-attach.md) — x64dbg plugin: auto-attach to named process with optional delay (`AutoAttachProcess` / `AutoAttachSleep` / `AutoAttachStatus`; Cheat x64dbg Plugins)
 - [AutoOffsets](entities/auto-offsets.md) — Fortnite offset fetcher via remote API (C++; WinINet; `[Offset]`)

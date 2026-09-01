@@ -12,7 +12,7 @@ confidence: medium
 
 Custom Nintendo Switch bootloader and maintenance toolkit with a graphical front end. Built mostly in C and low-level system code; manages boot into multiple environments, launches payloads, and applies firmware patches. Also provides eMMC/emuMMC backup and restore, partition tools, and hardware diagnostics for console modding, firmware research, and advanced Switch platform experimentation. (source: wiki/sources/descriptions/CTCaer__hekate.md)
 
-Often the entry point for custom firmware stacks that enable homebrew memory tooling such as [[se-tools]] and offline package inspection via [[nstool]] or [[xci-explorer]].
+Often the entry point for custom firmware stacks such as [[atmosphere]] that enable homebrew memory tooling such as [[se-tools]] and offline package inspection via [[nstool]] or [[xci-explorer]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Often the entry point for custom firmware stacks that enable homebrew memory too
 
 ## Related
 
-[[se-tools]] · [[nstool]] · [[xci-explorer]] · [[opensw]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[atmosphere]] · [[se-tools]] · [[nstool]] · [[xci-explorer]] · [[opensw]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

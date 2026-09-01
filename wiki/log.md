@@ -22,6 +22,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:Atmosphere-NX/Atmosphere`: entity [[atmosphere]] (Atmosphere-NX; C/C++ Switch custom firmware; modular Fusee/Exosphere/Stratosphere stack; boot/runtime patches, TrustZone, sysmodules, emuMMC; console security research + homebrew system control; README [Customized firmware]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[hekate]], [[se-tools]], [[opensw]], [[nstool]], and [[xci-explorer]].
+
 - **2026-09-01** — ingest `description:codedevdev/irontrace`: entity [[irontrace]] (codedevdev; C# WPF/CLI + optional ASP.NET Core server; PCI/PCIe/USB/driver inventory, DMA masquerade indicators, BYOVD/HWID/execution-artifact layers, LOLDrivers correlation; explainable JSON verdicts without auto-ban; optional self-hosted admin triage; Detection:DMA / hardware integrity auditing); cited on [[overviews/anti-cheat]] and [[overviews/dma-attack]]; cross-linked [[pcie-detector]], [[drvscan]], [[driver-risk-scout]], [[loldriverscan]], [[loldrivers]], [[byovd]], and [[device-control-hooks-scanner]].
 
 - **2026-09-01** — ingest `readme:categories`: Anti Cheat ~703 (+1; Dead-Scripts/[[dead-anticheat]] FiveM server-side Lua CitizenFX AC) / Cheat ~2768 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

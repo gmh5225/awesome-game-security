@@ -18,4 +18,4 @@ Nintendo Switch homebrew toolkit for game memory editing and cheat development. 
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[mypower]] · [[memmcp]]
+[[atmosphere]] · [[hekate]] · [[opensw]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[mypower]] · [[memmcp]]
