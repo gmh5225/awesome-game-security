@@ -2932,6 +2932,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [RootAppDetector](entities/root-app-detector.md) — Java Android POC: detect installed root-manager apps via package/activity launch + SecurityException (Detection:Android root; apkunpacker)
 - [Root My Galaxy](entities/root-my-galaxy.md) — Samsung Galaxy one-tap KernelSU installer (CVE-2026-43499; Kotlin/Compose + NDK; firmware-profile matching; external exploit/KernelSU feed; KASLR probes; cheat / Android root)
+- [ROOTURK Kernel](entities/rooturk-kernel.md) — POCO X7 Pro Android 15 GKI 6.6 custom kernel (AnyKernel3 + Bazel; KernelSU Next + SuSFS root hiding + game idle tuning; mobile kernel RE; cheat / Android Kernel Source)
 - [Root My Pixel](entities/root-my-pixel.md) — one-tap temporary Pixel root (CVE-2026-43499 IonStack + ReSukiSU/KernelSU; Shizuku; Pixel 7–10; Kotlin/JNI; cheat / Android root)
 - [RootSentry](entities/rootsentry.md) — zero-dependency Python mobile RASP CLI/library (root/jailbreak, emulator, Frida/Xposed hook, tamper scoring → TRUSTED→CRITICAL; fleet cohort + MITRE ATT&CK for Mobile; Kotlin/Swift collectors; cognis-digital)
 - [RootRaven](entities/rootraven.md) — self-hosted Android/iOS pentest web dashboard (Flask; ADB, Frida, JADX, Burp, logcat; SSL pinning, root/jailbreak, anti-debug, biometric, crypto hooks; MASVS tracker; Kakaxh1)
