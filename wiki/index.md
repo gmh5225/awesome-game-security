@@ -3400,6 +3400,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [UnrealNetworkProfiler](entities/unreal-network-profiler.md) — C# UE network profiler (Game Tools; networking / asset pipeline)
 - [UnrealSharp](entities/unrealsharp.md) — Unreal SDK View (Cheat / Game Engine Explorer:Unreal)
 - [Urho3D](entities/urho3d.md) — lightweight cross-platform 2D/3D engine (Game Engine source)
+- [Ursine3D](entities/ursine3d.md) — AustinBrunkhorst academic C++ game engine (ECS + reflection + editor + animation + 3D rendering; Bullet Physics, Wwise audio, CEF HTML/CSS/JS UI; education/prototyping/full projects; Game Engine / source)
 - [Ursus](entities/ursus.md) — Rust Vulkan game engine (render graph + automatic barriers; deferred pipeline + bindless textures + FSR1; lock-free game/render threads; hecs ECS; OBJ/glTF async load; puffin GPU profiling; ash + SPIR-V; Linux/Windows; Game Engine / source)
 - [USN](entities/usn.md) — NTFS USN / change-journal tooling (C++; AC / IS forensics)
 - [SearchEx](entities/searchex.md) — SearchEx IS forensics (C++; hooking / memory analysis; AC)

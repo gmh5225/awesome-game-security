@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AustinBrunkhorst/Ursine3D`: entity [[ursine3d]] (AustinBrunkhorst; academic C++ game engine; ECS + reflection + editor + animation + 3D rendering; Bullet Physics, Wwise audio, CEF HTML/CSS/JS UI; education/prototyping/full projects; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[pilot]], [[esoterica]], [[hazel]], [[cpp-game-engine-book]], and [[custom-game-engines]].
+
 - **2026-09-01** — ingest `description:AvivShabtay/Stresser`: entity [[stresser]] (AvivShabtay; C++ endpoint security platform; host agents + centralized management; UM/KM telemetry, artifact processing, policy handling, detection logic; ETW-driven monitoring + dynamic/static analysis + coordinated response; malware defense / enterprise endpoint protection experiments; README Anti Virus in fact but also Anti Cheat); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[peregrine-anticheat]], [[openedr]], [[bluespawn]], [[kernelmon]], and [[openprocmon]].
 
 - **2026-09-01** — ingest `description:Dead-Scripts/Dead_antiCheat`: entity [[dead-anticheat]] (Dead-Scripts; FiveM server-side Lua CitizenFX anticheat; noclip/spectate/godmode/infinite-ammo/mod-menu globals; JSON ban list + Discord webhook logging with optional screenshots; configurable event/key/command/entity blacklists; staff bypass); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[atomicshieldclient]], [[gvmp-anticheat]], and [[phake]].
