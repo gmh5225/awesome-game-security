@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AyinSama/Anti-AntiDebuggerDriver`: entity [[anti-anti-debugger-driver]] (AyinSama; C++ WDK tutorial kernel driver; hooks native process/thread/handle/system-information syscall paths; hook utilities + disassembly helpers neutralize common anti-debug probes; RE education / protected software analysis; README [ETW Hook]); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[titanhide]], [[scyllahide-for-ida9.0rc]], [[steam-anti-anti-debug]], and [[anti-kernel-debug-poc]].
+
 - **2026-09-01** — ingest `description:AzzOnFire/yarka`: entity [[yarka]] (AzzOnFire; Python IDA Pro plugin; YARA rule generation from instructions/strings/raw bytes/decompiler output; built-in editor with syntax highlighting and customizable templates; function-level hunting with data refs; malware/binary analysis; README YARA signature creation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[hyara]], [[yara4ida]], [[findyara-ida]], and [[yarascan-ida]].
 
 - **2026-09-01** — ingest `description:BL0odz/BrowserPasswordExportor`: entity [[browser-password-exportor]] (BL0odz; Python Windows browser password decrypt/export; Chromium/Edge/Firefox profile DBs; DPAPI/AES + Firefox key-material parsing; ASN.1 and browser-specific login-storage routines; credential forensics / red-team lab / browser secret-storage RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[custom-dpapi]], [[idontlikefilelocks]], and [[qvoid-token-grabber]].
