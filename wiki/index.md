@@ -3125,6 +3125,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [simple-eft-base](entities/simple-eft-base.md) — Escape From Tarkov OOP cheat base (C/C++; driver / rendering / animation; stale offsets)
 - [simple-eft-superman-training-bot](entities/simple-eft-superman-training-bot.md) — EFT Arduino HID training automation (.ino sketches + Python coords; keyboard/mouse emulation; skill-grinding; ZhaoKunqi)
 - [Simple Manual Map Injector](entities/simple-manual-map-injector.md) — compact Windows manual-map DLL injector (x86/x64; optional PE header/section strip; configurable protections; x64 exception handling; sample loader + test DLLs; Manual Map; TheCruZ)
+- [SimpleMemoryEditor](entities/simple-memory-editor.md) — portable Windows memory scanner/editor (C + custom NCRT + Win32 GUI; process attach, value scan/edit/freeze, equal/increased/decreased filters; static 32/64-bit XP–Win10 builds; external game memory editing; daveymcq)
 - [Simple-MmcopyMemory-Hook](entities/simple-mmcopymemory-hook.md) — educational Windows kernel driver hooks MmCopyMemory to observe AC scanner memory-copy telemetry; intentionally simple/unstable/detectable; Spuckwaffel; cheat / Hook MmcopyMemory
 - [simple-rust-base](entities/simple-rust-base.md) — Facepunch Rust OOP cheat base (C/C++; driver / rendering / modding; legacy)
 - [simple-rust-hack](entities/simple-rust-hack.md) — Facepunch Rust simple cheat source (C/C++; cheat / game:rust; gmh5225)
