@@ -1,0 +1,1752 @@
+Project Path: arc_Dead-Scripts_Dead_antiCheat_apz1aavs
+
+Source Tree:
+
+```txt
+arc_Dead-Scripts_Dead_antiCheat_apz1aavs
+├── Credits.md
+├── Enumerators.lua
+├── LICENSE
+├── README.md
+├── ac-bans.json
+├── acloader.lua
+├── client.lua
+├── config.lua
+├── fxmanifest.lua
+└── server.lua
+
+```
+
+`Credits.md`:
+
+```md
+----------------------
+---- Dead Scripts ----
+----------------------
+
+Credits
+    Badger
+        For making the scripts but having a lack of support for the scripts randomly breaking and him and his support staff
+        blaming the one needing support for messing up the config.lua (even when the config.lua was not the issue)
+    Any onther creator that was not mentioned within badgers scripts.
+
+
+I appreciate those who make scripts whether free and paid and actually offer assistance for all issues and try their hardest to help their customers
+Money is not worth losing a customer. You put your name on the line when you make a script and refuse to offer actual support. 
+
+Yes this script is a "forked" version of Badgers. There were numerous flaws within the code that I had found and had been working on fixing and was going
+to be polite and send him the files but after I joined his support server and was treated the way I was when asking for support and there were people with simular 
+issues as mine. Yet the Support staff and Badger himself both were saying "something you did wrong in the config file messed up the script". I could see that if I had
+just installed the scripts but not with them being in my server for multiple months and working one day then the next day (Literally) not working. 
+
+I hope people enjoy the scripts I revised here and if anyone needs support with them join the discord server provided within the Readme.md Files within the script folders and you will get actual assistance and not blamed for an issue.
+```
+
+`Enumerators.lua`:
+
+```lua
+local entityEnumerator = {
+  __gc = function(enum)
+    if enum.destructor and enum.handle then
+      enum.destructor(enum.handle)
+    end
+    enum.destructor = nil
+    enum.handle = nil
+  end
+}
+
+local function EnumerateEntities(initFunc, moveFunc, disposeFunc)
+  return coroutine.wrap(function()
+    local iter, id = initFunc()
+    if not id or id == 0 then
+      disposeFunc(iter)
+      return
+    end
+    
+    local enum = {handle = iter, destructor = disposeFunc}
+    setmetatable(enum, entityEnumerator)
+    
+    local next = true
+    repeat
+      coroutine.yield(id)
+      next, id = moveFunc(iter)
+    until not next
+    
+    enum.destructor, enum.handle = nil, nil
+    disposeFunc(iter)
+  end)
+end
+
+function EnumerateObjects()
+  return EnumerateEntities(FindFirstObject, FindNextObject, EndFindObject)
+end
+
+function EnumeratePeds()
+  return EnumerateEntities(FindFirstPed, FindNextPed, EndFindPed)
+end
+
+function EnumerateVehicles()
+  return EnumerateEntities(FindFirstVehicle, FindNextVehicle, EndFindVehicle)
+end
+
+function EnumeratePickups()
+  return EnumerateEntities(FindFirstPickup, FindNextPickup, EndFindPickup)
+end
+
+function GetAllEnumerators()
+  return {vehicles = EnumerateVehicles, objects = EnumerateObjects, peds = EnumeratePeds, pickups = EnumeratePickups}
+end
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2025 Dead-Scripts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+## Dead's Scripts Community [Discord]
+[![Developer Discord]](https://discord.gg/m39AUuSatU)
+
+## Dead-Anticheat
+Dead's Official Anticheat [code inspirations from DevLanceGood and Bluethefurry on GitHub]
+
+## What it can stop?
+
+· Stops modder noclip
+
+· Stops modder spectating
+
+· Stops modder fake chat messages
+
+· Stops modder peds from being spawned
+
+· Stops MOST modder props (NOTE: Sometimes a regular player may get kicked or caught when the script scans for props since the modder spawned it on them. However, one of the caught players when this happens should be the confirmed modder, but it is up to your discretion to figure out who. As a good train of thought, it's usually the user who is not in your discord or has a low playtime on your server.)
+
+## Summary
+
+Dead-Anticheat can catch modders noclipping, spectating, and even faking chat messages. Badger-Anticheat also will stop the spawning of peds from modders. Don't worry! AI are safe, but Badger-Anticheat just prevents the peds modders spawn from being spawned. Badger-Anticheat also stops blacklisted props from being spawned via the `Config` blacklisted list. If Badger-Anticheat can successfully find the modder who spawned the prop, it then kicks them and logs this via a Discord webhook. The code is quite simple, yet effective. I saw there was no real good anticheats on the forums, so I thought I should put one together. Some of the code comes from other developers, therefore I made sure to credit them within the code too. DevLanceGood is one of these developers, as well as Bluethefurry. I have linked their GitHubs below.
+
+https://github.com/DevLanceGood
+
+https://github.com/Blumlaut
+
+## Commands
+Currenty there are no commands for this anticheat :(
+
+## Screenshots
+
+#### NOTE: These are not actual modders. These are friends of mine who helped test out the anticheat. We used a server-sided resource that mimicked a mod menu in order to thoroughly test to get these results. Upon putting the anticheat on our server, we caught a modder within the first 5 minutes of testing. Ironically he tried spectating whilst we were testing it. He got banned shortly after... lol
+
+![Catching a modder noclipping](https://i.gyazo.com/d1907105b1d065d6ed878366b90620b0.png)
+
+![Catching a modder spectating](https://i.gyazo.com/19d929e023970ae53ad3e7c7246c71b0.png)
+
+![Catching a modder faking a chat message](https://i.gyazo.com/4a58604bcc0d72f378a5f4e42d9e65bf.png)
+
+## Permissions
+
+`Anticheat.Bypass` - bypasses the Anticheat checks. You MUST give this to Staff who have NoClip and Spectating powers.
+
+## Configuration
+
+```
+Config = {
+    TowTruckDrivers = {'S_M_M_TRUCKER_01', 'MP_M_WAREMECH_01'},
+    NoClipTriggerCount = 3,
+    BlacklistedModels = {
+        "rhino",
+        "stt_prop_stunt_track_uturn",
+        "stt_prop_stunt_track_turnice",
+        "stt_prop_stunt_track_hill",
+        "prop_gold_cont_01",
+        "p_cablecar_s",
+        "stt_prop_stunt_tube_l",
+        "stt_prop_stunt_track_dwuturn",
+        "prop_fnclink_05crnr1",
+        "xs_prop_hamburgher_wl",
+        "xs_prop_plastic_bottle_wl",
+        "prop_windmill_01",
+        "p_spinning_anus_s",
+        "stt_prop_ramp_adj_flip_m",
+        "stt_prop_ramp_adj_flip_mb",
+        "stt_prop_ramp_adj_flip_s",
+        "stt_prop_ramp_adj_flip_sb",
+        "stt_prop_ramp_adj_hloop",
+        "stt_prop_ramp_adj_loop",
+        "stt_prop_ramp_jump_l",
+        "stt_prop_ramp_jump_m",
+        "stt_prop_ramp_jump_s",
+        "stt_prop_ramp_jump_xl",
+        "stt_prop_ramp_jump_xs",
+        "stt_prop_ramp_jump_xxl",
+        "stt_prop_ramp_multi_loop_rb",
+        "stt_prop_ramp_spiral_l",
+        "stt_prop_ramp_spiral_l_l",
+        "stt_prop_ramp_spiral_l_m",
+        "stt_prop_ramp_spiral_l_s",
+        "stt_prop_ramp_spiral_l_xxl",
+        "stt_prop_ramp_spiral_m",
+        "stt_prop_ramp_spiral_s",
+        "stt_prop_ramp_spiral_xxl",
+        "stt_prop_stunt_track_dwslope30",
+        "-145066854",
+        "stt_prop_stunt_track_start",
+"stt_prop_stunt_track_slope45",
+"stt_prop_stunt_track_slope30",
+"stt_prop_stunt_track_slope15",
+"stt_prop_stunt_track_short",
+"stt_prop_stunt_track_sh45_a",
+"stt_prop_stunt_track_sh45",
+"stt_prop_stunt_track_sh30",
+"stt_prop_stunt_track_sh15",
+"stt_prop_stunt_track_otake",
+"stt_prop_stunt_track_link",
+"stt_prop_stunt_track_jump",
+"stt_prop_stunt_track_hill2",
+"stt_prop_stunt_track_hill",
+"stt_prop_stunt_track_funnel",
+"stt_prop_stunt_track_funlng",
+"stt_prop_stunt_track_fork",
+"stt_prop_stunt_track_exshort",
+"stt_prop_stunt_track_dwuturn",
+"stt_prop_stunt_track_dwturn",
+"stt_prop_stunt_track_dwslope45",
+"stt_prop_stunt_track_dwslope30",
+"stt_prop_stunt_track_dwslope15",
+"stt_prop_stunt_track_dwshort",
+"stt_prop_stunt_track_dwsh15",
+"stt_prop_stunt_track_dwlink_02",
+"stt_prop_stunt_track_dwlink",
+"stt_prop_stunt_track_cutout",
+"stt_prop_stunt_track_bumps",
+"stt_prop_stunt_target_small",
+"stt_prop_stunt_target",
+"stt_prop_stunt_soccer_sball",
+"stt_prop_stunt_soccer_lball",
+"stt_prop_stunt_soccer_goal",
+"stt_prop_stunt_soccer_ball",
+"stt_prop_stunt_ramp",
+"stt_prop_stunt_landing_zone_01",
+"stt_prop_stunt_jump_sb",
+"stt_prop_stunt_jump_s",
+"stt_prop_stunt_jump_mb",
+"stt_prop_stunt_jump_m",
+"stt_prop_stunt_jump_loop",
+"stt_prop_stunt_jump_lb",
+"stt_prop_stunt_jump_l",
+"stt_prop_stunt_jump45",
+"stt_prop_stunt_jump30",
+"stt_prop_stunt_jump15",
+"stt_prop_stunt_domino",
+"prop_weed_pallet", "hei_prop_carrier_radar_1_l1", "v_res_mexball", "prop_rock_1_a", "prop_rock_1_b", "prop_rock_1_c", "prop_rock_1_d", "prop_player_gasmask", "prop_rock_1_e", "prop_rock_1_f", "prop_rock_1_g", "prop_rock_1_h", "prop_test_boulder_01", "prop_test_boulder_02", "prop_test_boulder_03", "prop_test_boulder_04", "apa_mp_apa_crashed_usaf_01a", "ex_prop_exec_crashdp", "apa_mp_apa_yacht_o1_rail_a", "apa_mp_apa_yacht_o1_rail_b", "apa_mp_h_yacht_armchair_01", "apa_mp_h_yacht_armchair_03", "apa_mp_h_yacht_armchair_04", "apa_mp_h_yacht_barstool_01", "apa_mp_h_yacht_bed_01", "apa_mp_h_yacht_bed_02", "apa_mp_h_yacht_coffee_table_01", "apa_mp_h_yacht_coffee_table_02", "apa_mp_h_yacht_floor_lamp_01", "apa_mp_h_yacht_side_table_01", "apa_mp_h_yacht_side_table_02", "apa_mp_h_yacht_sofa_01", "apa_mp_h_yacht_sofa_02", "apa_mp_h_yacht_stool_01", "apa_mp_h_yacht_strip_chair_01", "apa_mp_h_yacht_table_lamp_01", "apa_mp_h_yacht_table_lamp_02", "apa_mp_h_yacht_table_lamp_03", "prop_flag_columbia", "apa_mp_apa_yacht_o2_rail_a", "apa_mp_apa_yacht_o2_rail_b", "apa_mp_apa_yacht_o3_rail_a", "apa_mp_apa_yacht_o3_rail_b", "apa_mp_apa_yacht_option1", "proc_searock_01", "apa_mp_h_yacht_", "apa_mp_apa_yacht_option1_cola", "apa_mp_apa_yacht_option2", "apa_mp_apa_yacht_option2_cola", "apa_mp_apa_yacht_option2_colb", "apa_mp_apa_yacht_option3", "apa_mp_apa_yacht_option3_cola", "apa_mp_apa_yacht_option3_colb", "apa_mp_apa_yacht_option3_colc", "apa_mp_apa_yacht_option3_cold", "apa_mp_apa_yacht_option3_cole", "apa_mp_apa_yacht_jacuzzi_cam", "apa_mp_apa_yacht_jacuzzi_ripple003", "apa_mp_apa_yacht_jacuzzi_ripple1", "apa_mp_apa_yacht_jacuzzi_ripple2", "apa_mp_apa_yacht_radar_01a", "apa_mp_apa_yacht_win", "prop_crashed_heli", "apa_mp_apa_yacht_door", "prop_shamal_crash", "xm_prop_x17_shamal_crash", "apa_mp_apa_yacht_door2", "apa_mp_apa_yacht", "prop_flagpole_2b", "prop_flagpole_2c", "prop_flag_canada", "apa_prop_yacht_float_1a", "apa_prop_yacht_float_1b", "apa_prop_yacht_glass_01", "apa_prop_yacht_glass_02", "apa_prop_yacht_glass_03", "apa_prop_yacht_glass_04", "apa_prop_yacht_glass_05", "apa_prop_yacht_glass_06", "apa_prop_yacht_glass_07", "apa_prop_yacht_glass_08", "apa_prop_yacht_glass_09", "apa_prop_yacht_glass_10", "prop_flag_canada_s", "prop_flag_eu", "prop_flag_eu_s", "prop_target_blue_arrow", "prop_target_orange_arrow", "prop_target_purp_arrow", "prop_target_red_arrow", "apa_prop_flag_argentina", "apa_prop_flag_australia", "apa_prop_flag_austria", "apa_prop_flag_belgium", "apa_prop_flag_brazil", "apa_prop_flag_canadat_yt", "apa_prop_flag_china", "apa_prop_flag_columbia", "apa_prop_flag_croatia", "apa_prop_flag_czechrep", "apa_prop_flag_denmark", "apa_prop_flag_england", "apa_prop_flag_eu_yt", "apa_prop_flag_finland", "apa_prop_flag_france", "apa_prop_flag_german_yt", "apa_prop_flag_hungary", "apa_prop_flag_ireland", "apa_prop_flag_israel", "apa_prop_flag_italy", "apa_prop_flag_jamaica", "apa_prop_flag_japan_yt", "apa_prop_flag_canada_yt", "apa_prop_flag_lstein", "apa_prop_flag_malta", "apa_prop_flag_mexico_yt", "apa_prop_flag_netherlands", "apa_prop_flag_newzealand", "apa_prop_flag_nigeria", "apa_prop_flag_norway", "apa_prop_flag_palestine", "apa_prop_flag_poland", "apa_prop_flag_portugal", "apa_prop_flag_puertorico", "apa_prop_flag_russia_yt", "apa_prop_flag_scotland_yt", "apa_prop_flag_script", "apa_prop_flag_slovakia", "apa_prop_flag_slovenia", "apa_prop_flag_southafrica", "apa_prop_flag_southkorea", "apa_prop_flag_spain", "apa_prop_flag_sweden", "apa_prop_flag_switzerland", "apa_prop_flag_turkey", "apa_prop_flag_uk_yt", "apa_prop_flag_us_yt", "apa_prop_flag_wales", "prop_flag_uk", "prop_flag_uk_s", "prop_flag_us", "prop_flag_usboat", "prop_flag_us_r", "prop_flag_us_s", "prop_flag_france", "prop_flag_france_s", "prop_flag_german", "prop_flag_german_s", "prop_flag_ireland", "prop_flag_ireland_s", "prop_flag_japan", "prop_flag_japan_s", "prop_flag_ls", "prop_flag_lsfd", "prop_flag_lsfd_s", "prop_flag_lsservices", "prop_flag_lsservices_s", "prop_flag_ls_s", "prop_flag_mexico", "prop_flag_mexico_s", "prop_flag_russia", "prop_flag_russia_s", "prop_flag_s", "prop_flag_sa", "prop_flag_sapd", "prop_flag_sapd_s", "prop_flag_sa_s", "prop_flag_scotland", "prop_flag_scotland_s", "prop_flag_sheriff", "prop_flag_sheriff_s", "prop_flag_uk", "prop_flag_uk_s", "prop_flag_us", "prop_flag_usboat", "prop_flag_us_r", "prop_flag_us_s", "prop_flamingo", "prop_swiss_ball_01", "prop_air_bigradar_l1", "prop_air_bigradar_l2", "prop_air_bigradar_slod", "p_fib_rubble_s", "prop_money_bag_01", "p_cs_mp_jet_01_s", "prop_poly_bag_money", "prop_air_radar_01", "hei_prop_carrier_radar_1", "prop_air_bigradar", "prop_carrier_radar_1_l1", "prop_asteroid_01", "prop_xmas_ext", "p_oil_pjack_01_amo", "p_oil_pjack_01_s", "p_oil_pjack_02_amo", "p_oil_pjack_03_amo", "p_oil_pjack_02_s", "p_oil_pjack_03_s", "prop_aircon_l_03", "prop_med_jet_01", "p_med_jet_01_s", "hei_prop_carrier_jet", "bkr_prop_biker_bblock_huge_01", "bkr_prop_biker_bblock_huge_02", "bkr_prop_biker_bblock_huge_04", "bkr_prop_biker_bblock_huge_05", "hei_prop_heist_emp", "prop_weed_01", "prop_air_bigradar", "prop_juicestand", "prop_lev_des_barge_02", "hei_prop_carrier_defense_01", "prop_aircon_m_04", "prop_mp_ramp_03", "stt_prop_stunt_track_dwuturn", "ch3_12_animplane1_lod", "ch3_12_animplane2_lod", "hei_prop_hei_pic_pb_plane", "light_plane_rig", "prop_cs_plane_int_01", "prop_dummy_plane", "prop_mk_plane", "v_44_planeticket", "prop_planer_01", "ch3_03_cliffrocks03b_lod", "ch3_04_rock_lod_02", "csx_coastsmalrock_01_", "csx_coastsmalrock_02_", "csx_coastsmalrock_03_", "csx_coastsmalrock_04_", "mp_player_introck", "Heist_Yacht", "csx_coastsmalrock_05_", "mp_player_int_rock", "mp_player_introck", "prop_flagpole_1a", "prop_flagpole_2a", "prop_flagpole_3a", "prop_a4_pile_01", "cs2_10_sea_rocks_lod", "cs2_11_sea_marina_xr_rocks_03_lod", "prop_gold_cont_01", "prop_hydro_platform", "ch3_04_viewplatform_slod", "ch2_03c_rnchstones_lod", "proc_mntn_stone01", "prop_beachflag_le", "proc_mntn_stone02", "cs2_10_sea_shipwreck_lod", "des_shipsink_02", "prop_dock_shippad", "des_shipsink_03", "des_shipsink_04", "prop_mk_flag", "prop_mk_flag_2", "proc_mntn_stone03", "FreeModeMale01", "rsn_os_specialfloatymetal_n", "rsn_os_specialfloatymetal", "cs1_09_sea_ufo", "rsn_os_specialfloaty2_light2", "rsn_os_specialfloaty2_light", "rsn_os_specialfloaty2", "rsn_os_specialfloatymetal_n", "rsn_os_specialfloatymetal", "P_Spinning_Anus_S_Main", "P_Spinning_Anus_S_Root", "cs3_08b_rsn_db_aliencover_0001cs3_08b_rsn_db_aliencover_0001_a", "sc1_04_rnmo_paintoverlaysc1_04_rnmo_paintoverlay_a", "rnbj_wallsigns_0001", "proc_sml_stones01", "proc_sml_stones02", "maverick", "Miljet", "proc_sml_stones03", "proc_stones_01", "proc_stones_02", "proc_stones_03", "proc_stones_04", "proc_stones_05", "proc_stones_06", "prop_coral_stone_03", "prop_coral_stone_04", "prop_gravestones_01a", "prop_gravestones_02a", "prop_gravestones_03a", "prop_gravestones_04a", "prop_gravestones_05a", "prop_gravestones_06a", "prop_gravestones_07a", "prop_gravestones_08a", "prop_gravestones_09a", "prop_gravestones_10a", "prop_prlg_gravestone_05a_l1", "prop_prlg_gravestone_06a", "test_prop_gravestones_04a", "test_prop_gravestones_05a", "test_prop_gravestones_07a", "test_prop_gravestones_08a", "test_prop_gravestones_09a", "prop_prlg_gravestone_01a", "prop_prlg_gravestone_02a", "prop_prlg_gravestone_03a", "prop_prlg_gravestone_04a", "prop_stoneshroom1", "prop_stoneshroom2", "v_res_fa_stones01", "test_prop_gravestones_01a", "test_prop_gravestones_02a", "prop_prlg_gravestone_05a", "FreemodeFemale01", "p_cablecar_s", "stt_prop_stunt_tube_l", "stt_prop_stunt_track_dwuturn", "p_spinning_anus_s", "prop_windmill_01", "hei_prop_heist_tug", "prop_air_bigradar", "p_oil_slick_01", "prop_dummy_01", "hei_prop_heist_emp", "p_tram_cash_s", "hw1_blimp_ce2", "prop_fire_exting_1a", "prop_fire_exting_1b", "prop_fire_exting_2a", "prop_fire_exting_3a", "hw1_blimp_ce2_lod", "hw1_blimp_ce_lod", "hw1_blimp_cpr003", "hw1_blimp_cpr_null", "hw1_blimp_cpr_null2", "prop_lev_des_barage_02", "hei_prop_carrier_defense_01", "prop_juicestand", "S_M_M_MovAlien_01", "s_m_m_movalien_01", "s_m_m_movallien_01", "u_m_y_babyd", "CS_Orleans", "A_M_Y_ACult_01", "S_M_M_MovSpace_01", "U_M_Y_Zombie_01", "s_m_y_blackops_01", "a_f_y_topless_01", "a_c_boar", "a_c_cat_01", "a_c_chickenhawk", "a_c_chimp", "s_f_y_hooker_03", "a_c_chop", "a_c_cormorant", "a_c_cow", "a_c_coyote", "v_ilev_found_cranebucket", "p_cs_sub_hook_01_s", "a_c_crow", "a_c_dolphin", "a_c_fish", "hei_prop_heist_hook_01", "prop_rope_hook_01", "prop_sub_crane_hook", "s_f_y_hooker_01", "prop_vehicle_hook", "prop_v_hook_s", "prop_dock_crane_02_hook", "prop_winch_hook_long", "a_c_hen", "a_c_humpback", "a_c_husky", "a_c_killerwhale", "a_c_mtlion", "a_c_pigeon", "a_c_poodle", "prop_coathook_01", "prop_cs_sub_hook_01", "a_c_pug", "a_c_rabbit_01", "a_c_rat", "a_c_retriever", "a_c_rhesus", "a_c_rottweiler", "a_c_sharkhammer", "a_c_sharktiger", "a_c_shepherd", "a_c_stingray", "a_c_westy", "CS_Orleans", "prop_windmill_01", "prop_Ld_ferris_wheel", "p_tram_crash_s", "p_oil_slick_01", "p_ld_stinger_s", "p_ld_soc_ball_01", "p_parachute1_s", "p_cablecar_s", "prop_beach_fire", "prop_lev_des_barge_02", "prop_lev_des_barge_01", "prop_sculpt_fix", "prop_flagpole_2b", "prop_flagpole_2c", "prop_winch_hook_short", "prop_flag_canada", "prop_flag_canada_s", "prop_flag_eu", "prop_flag_eu_s", "prop_flag_france", "prop_flag_france_s", "prop_flag_german", "prop_ld_hook", "prop_flag_german_s", "prop_flag_ireland", "prop_flag_ireland_s", "prop_flag_japan", "prop_flag_japan_s", "prop_flag_ls", "prop_flag_lsfd", "prop_flag_lsfd_s", "prop_cable_hook_01", "prop_flag_lsservices", "prop_flag_lsservices_s", "prop_flag_ls_s", "prop_flag_mexico", "prop_flag_mexico_s", "csx_coastboulder_00", "des_tankercrash_01", "des_tankerexplosion_01", "des_tankerexplosion_02", "des_trailerparka_02", "des_trailerparkb_02", "des_trailerparkc_02", "des_trailerparkd_02", "des_traincrash_root2", "des_traincrash_root3", "des_traincrash_root4", "des_traincrash_root5", "des_finale_vault_end", "des_finale_vault_root001", "des_finale_vault_root002", "des_finale_vault_root003", "des_finale_vault_root004", "des_finale_vault_start", "des_vaultdoor001_root001", "des_vaultdoor001_root002", "des_vaultdoor001_root003", "des_vaultdoor001_root004", "des_vaultdoor001_root005", "des_vaultdoor001_root006", "des_vaultdoor001_skin001", "des_vaultdoor001_start", "des_traincrash_root6", "prop_ld_vault_door", "prop_vault_door_scene", "prop_vault_door_scene", "prop_vault_shutter", "p_fin_vaultdoor_s", "prop_gold_vault_fence_l", "prop_gold_vault_fence_r", "prop_gold_vault_gate_01", "des_traincrash_root7", "prop_flag_russia", "prop_flag_russia_s", "prop_flag_s", "ch2_03c_props_rrlwindmill_lod", "prop_flag_sa", "prop_flag_sapd", "prop_flag_sapd_s", "prop_flag_sa_s", "prop_flag_scotland", "prop_flag_scotland_s", "prop_flag_sheriff", "prop_flag_sheriff_s", "prop_flag_uk", "prop_yacht_lounger", "prop_yacht_seat_01", "prop_yacht_seat_02", "prop_yacht_seat_03", "marina_xr_rocks_02", "marina_xr_rocks_03", "prop_test_rocks01", "prop_test_rocks02", "prop_test_rocks03", "prop_test_rocks04", "marina_xr_rocks_04", "marina_xr_rocks_05", "marina_xr_rocks_06", "prop_yacht_table_01", "csx_searocks_02", "csx_searocks_03", "csx_searocks_04", "csx_searocks_05", "csx_searocks_06", "p_yacht_chair_01_s", "p_yacht_sofa_01_s", "prop_yacht_table_02", "csx_coastboulder_00", "csx_coastboulder_01", "csx_coastboulder_02", "csx_coastboulder_03", "csx_coastboulder_04", "csx_coastboulder_05", "csx_coastboulder_06", "csx_coastboulder_07", "csx_coastrok1", "csx_coastrok2", "csx_coastrok3", "csx_coastrok4", "csx_coastsmalrock_01", "csx_coastsmalrock_02", "csx_coastsmalrock_03", "csx_coastsmalrock_04", "csx_coastsmalrock_05", "prop_yacht_table_03", "prop_flag_uk_s", "prop_flag_us", "prop_flag_usboat", "prop_flag_us_r", "prop_flag_us_s", "p_gasmask_s", "prop_flamingo"
+
+    }
+}
+```
+## Download
+
+```
+
+`ac-bans.json`:
+
+```json
+{}
+```
+
+`acloader.lua`:
+
+```lua
+local ProhibitedVariables = { -- Add as many as you want from mod menus you find! (Remove war menu if you use it!)
+"fESX", "Plane", "TiagoMenu", "Outcasts666", "dexMenu", "Cience", "LynxEvo", "zzzt", "AKTeam",
+"gaybuild", "ariesMenu", "WarMenu", "SwagMenu", "Dopamine", "Gatekeeper", "MIOddhwuie"
+}
+local Enabled = false -- Change this to enable client mod menu checks!
+function CheckVariables()
+    for i, v in pairs(ProhibitedVariables) do
+        if _G[v] ~= nil then
+            local reason = Config.Messages.ProhibitedVariables:gsub("{VARIABLE}", v);
+            TriggerServerEvent('Anticheat:Modder', "[Dead-Anticheat]: " .. reason);
+        end
+    end
+end
+
+if Enabled then
+    Citizen.CreateThread(function()
+        while true do
+            Citizen.Wait(30000)
+            CheckVariables()
+        end
+    end)
+else
+    return "Nil"
+end
+
+```
+
+`client.lua`:
+
+```lua
+function Draw3DText(text, radius, pos)
+    if #(GetEntityCoords(PlayerPedId(), false) - vector3(pos.x, pos.y, pos.z)) < radius then
+        local onScreen, _x, _y = World3dToScreen2d(pos.x,pos.y,pos.z)
+        local distance = #(GetEntityCoords(PlayerPedId(), false) - vector3(pos.x, pos.y, pos.z))
+        local scale = (1 / distance)
+        local fov = (1 / GetGameplayCamFov()) * 75
+        local scale = scale * fov
+        if onScreen then
+            SetTextScale(tonumber(1.0), tonumber(0.35 * (1)))
+            SetTextFont(0)
+            SetTextProportional(true)
+            SetTextColour(255, 255, 255, 255)
+            SetTextOutline()
+            SetTextEntry("STRING")
+            SetTextCentre(true)
+            AddTextComponentString(text)
+            DrawText(_x,_y)
+        end
+    end
+end
+function NetworkDelete(entity)
+    Citizen.CreateThread(function()
+        if DoesEntityExist(entity) and not (IsEntityAPed(entity) and IsPedAPlayer(entity)) then
+            NetworkRequestControlOfEntity(entity)
+            local timeout = 5
+            while timeout > 0 and not NetworkHasControlOfEntity(entity) do
+                Citizen.Wait(1)
+                timeout = timeout - 1
+            end
+            DetachEntity(entity, 0, false)
+            SetEntityCollision(entity, false, false)
+            SetEntityAlpha(entity, 0.0, true)
+            SetEntityAsMissionEntity(entity, true, true)
+            SetEntityAsNoLongerNeeded(entity)
+            DeleteEntity(entity)
+        end
+    end)
+end
+-- Prevent most injection:
+if Config.Components.AntiCommands then 
+    Citizen.CreateThread(function()
+        Citizen.Wait(120000);
+        while true do
+            Citizen.Wait(500);
+            local blacklistedCommands = Config.BlacklistedCommands or {}
+            local registeredCommands = GetRegisteredCommands()
+
+            for _, command in ipairs(registeredCommands) do
+                for _, blacklistedCommand in pairs(blacklistedCommands) do
+                    if (string.lower(command.name) == string.lower(blacklistedCommand) or
+                        string.lower(command.name) == string.lower('+' .. blacklistedCommand) or
+                        string.lower(command.name) == string.lower('_' .. blacklistedCommand) or
+                        string.lower(command.name) == string.lower('-' .. blacklistedCommand) or
+                        string.lower(command.name) == string.lower('/' .. blacklistedCommand)) then
+                        TriggerServerEvent("Anticheat:Modder", "CONFIRMED HACKER [Lua Injection]", 
+                            "[Dead-Anticheat]: " .. Config.Messages.CommandsTriggered:gsub("{COMMAND}", blacklistedCommand));
+                    end
+                end
+            end
+        end
+    end)
+end 
+RegisterNetEvent("anticheat:EntityWipe")
+AddEventHandler("anticheat:EntityWipe", function(id)
+    Citizen.CreateThread(function() 
+        for k,v in pairs(GetAllEnumerators()) do 
+            local enum = v
+            for entity in enum() do 
+                local owner = NetworkGetEntityOwner(entity)
+                local playerID = GetPlayerServerId(owner)
+                if (owner ~= -1 and (id == playerID or id == -1)) then
+                    NetworkDelete(entity)
+                end
+            end
+        end
+    end)
+end)
+
+if Config.Components.AntiESX then 
+    RegisterNetEvent('esx:getSharedObject')
+    AddEventHandler('esx:getSharedObject', function()
+        TriggerServerEvent("Anticheat:ModderESX", "CONFIRMED HACKER [Getting ESX object via client code]", 
+                            "[Dead-Anticheat]: " .. Config.Messages.ESXTriggered);
+    end)
+end
+ 
+if Config.Components.AntiKeys then 
+    -- Prevent keys from being Released 
+    Citizen.CreateThread(function()
+        while true do 
+            Wait(0);
+            local blacklistedKeys = Config.BlacklistedKeys;
+            for i = 1, #blacklistedKeys do 
+                local keyCombo = blacklistedKeys[i][1];
+                local keyStr = blacklistedKeys[i][2];
+                if #keyCombo == 1 then 
+                    local key1 = keyCombo[1];
+                    if IsDisabledControlJustReleased(0, key1) then 
+                        -- They are using a blacklisted key 
+                        TriggerServerEvent('Anticheat:ScreenshotSubmit');
+                        if Config.KickForKeys then 
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", true);
+                        else
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", false);
+                        end
+                    end
+                elseif #keyCombo == 2 then 
+                    local key1 = keyCombo[1];
+                    local key2 = keyCombo[2];
+                    if IsDisabledControlPressed(0, key1) and IsDisabledControlPressed(0, key2) then 
+                        -- They are using blacklisted keys 
+                        TriggerServerEvent('Anticheat:ScreenshotSubmit');
+                        if Config.KickForKeys then 
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", true);
+                        else
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", false);
+                        end
+                        Wait(20000); -- Wait 20 seconds 
+                    end
+                elseif #keyCombo == 3 then 
+                    local key1 = keyCombo[1];
+                    local key2 = keyCombo[2];
+                    local key3 = keyCombo[3];
+                    if IsDisabledControlPressed(0, key1) and IsDisabledControlPressed(0, key2) and 
+                    IsDisabledControlPressed(0, key3) then 
+                        -- They are using blacklisted keys 
+                        TriggerServerEvent('Anticheat:ScreenshotSubmit');
+                        if Config.KickForKeys then 
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", true);
+                        else
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", false);
+                        end
+                    end
+                    Wait(20000); -- Wait 20 seconds 
+                elseif #keyCombo == 4 then 
+                    local key1 = keyCombo[1];
+                    local key2 = keyCombo[2];
+                    local key3 = keyCombo[3];
+                    local key4 = keyCombo[4];
+                    if IsDisabledControlPressed(0, key1) and IsDisabledControlPressed(0, key2) and 
+                    IsDisabledControlPressed(0, key3) and IsDisabledControlPressed(0, key4) then 
+                        -- They are using blacklisted keys 
+                        TriggerServerEvent('Anticheat:ScreenshotSubmit');
+                        if Config.KickForKeys then 
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", true);
+                        else
+                            TriggerServerEvent("Anticheat:ModderNoKick", "HACKER (Probably) [Key Press: `" .. keyStr ..
+                                "`]", "Why you opening a mod menu? Stoopid ass hoe", false);
+                        end
+                    end
+                    Wait(20000); -- Wait 20 seconds 
+                end
+            end
+        end
+    end)
+end
+
+if Config.Components.AntiWeapons then 
+    Citizen.CreateThread(function()
+        while true do 
+            Wait(50);
+            local ped = GetPlayerPed(-1)
+		    local selWeapon = GetSelectedPedWeapon(ped)
+            for i = 1, #Config.BlacklistedWeapons do 
+                local weapon = Config.BlacklistedWeapons[i];
+                if weapon == GetHashKey(selWeapon) then 
+                    -- It is a blacklisted weapon, trigger server event
+                    if Config.BanComponents.AntiWeapons then 
+                        -- Ban them 
+                        TriggerServerEvent("Anticheat:ModderNoKick", Config.Messages.BlacklistedWeaponTriggered, false);
+                    else 
+                        -- Kick them
+                        TriggerServerEvent("Anticheat:ModderNoKick", Config.Messages.BlacklistedWeaponTriggered, true);
+                    end
+                end 
+            end
+        end
+    end)
+end
+
+isStaff = false;
+RegisterNetEvent('Anticheat:CheckStaffReturn')
+AddEventHandler('Anticheat:CheckStaffReturn', function(state)
+    isStaff = state;
+end)
+-- prevent infinite ammo, godmode, invisibility and ped speed hacks 
+-- Props to Anticheese Anticheat for this: [https://github.com/Bluethefurry]
+if Config.Components.AntiCheat then
+    Citizen.CreateThread(function()
+        Wait(10000); -- Wait 10 seconds
+        TriggerServerEvent('Anticheat:CheckStaff');
+        while true do
+		Citizen.Wait(1)
+            if not (isStaff) then                
+                SetPedInfiniteAmmoClip(PlayerPedId(), false)
+                SetEntityInvincible(PlayerPedId(), false)
+                SetEntityCanBeDamaged(PlayerPedId(), true)
+                ResetEntityAlpha(PlayerPedId())
+                local fallin = IsPedFalling(PlayerPedId())
+                local ragg = IsPedRagdoll(PlayerPedId())
+                local parac = GetPedParachuteState(PlayerPedId())
+                if parac >= 0 or ragg or fallin then
+                    SetEntityMaxSpeed(PlayerPedId(), 80.0)
+                else
+                    SetEntityMaxSpeed(PlayerPedId(), 7.1)
+                end
+            end
+        end
+    end)
+end
+-- End props 
+--[[]]--
+-- Props to Anticheese Anticheat for this: [https://github.com/Bluethefurry]
+if Config.Components.AntiNoclip then
+    Citizen.CreateThread(function()
+        Citizen.Wait(10000) -- Wait 10 seconds
+        while true do
+            Citizen.Wait(0)
+            local ped = PlayerPedId()
+            local posx,posy,posz = table.unpack(GetEntityCoords(ped,true))
+            local still = IsPedStill(ped)
+            local vel = GetEntitySpeed(ped)
+            local ped = PlayerPedId()
+            Wait(3000) -- wait 3 seconds and check again
+
+            local newx,newy,newz = table.unpack(GetEntityCoords(ped,true))
+            local newPed = PlayerPedId() -- make sure the peds are still the same, otherwise the player probably respawned
+            if #(vector3(posx, posy, posz) - vector3(newx, newy, newz)) > 200 and still == IsPedStill(ped) and vel == GetEntitySpeed(ped) and ped == newPed then
+                TriggerServerEvent("Anticheat:NoClip", #(vector3(posx, posy, posz) - vector3(newx, newy, newz)))
+            end
+        end
+    end)
+end
+-- End props 
+--[[]]--
+
+
+Citizen.CreateThread(function()
+    while true do
+        Wait(3000);
+        local ped = NetworkIsInSpectatorMode()
+        if ped == 1 then
+            TriggerServerEvent("Anticheat:SpectateTrigger", "[Dead-Anticheat]: " .. Config.Messages.SpectateTriggered);
+        end
+    end
+end)
+
+local function collectAndSendResourceList()
+	local resourceList = {}
+    for i=0,GetNumResources()-1 do
+		resourceList[i+1] = GetResourceByFindIndex(i)
+		Wait(500)
+	end
+	Wait(5000)
+    TriggerServerEvent("ANTICHEAT:CHECKRESOURCES", resourceList)
+end
+if Config.Components.StopUnauthorizedResources then 
+CreateThread(function()
+    while true do
+	    Wait(10000)
+		collectAndSendResourceList()      
+    end
+end)
+end 
+
+```
+
+`config.lua`:
+
+```lua
+Config = {
+    WhitelistPedModels = {'S_M_M_TRUCKER_01', 'MP_M_WAREMECH_01'},
+    NoClipTriggerCount = 3,
+    Components = {
+         AntiCheat = true, --AntiInvincible, AntiInfiniteAmmo, etc.
+         AntiSpectate = true,
+         AntiNoclip = true, 
+         AntiCommands = true,
+         AntiKeys = true, 
+         AntiESX = true,
+         AntiWeapons = true,
+         AntiRemoveOtherPlayersWeapons = true, -- Stops players removing other players weapons. 
+         AntiCancelAnimations = true, -- Stops other players cancelling other people's animations (kicking people out of cars etc.)
+         StopOtherPlayersGivingEachOtherWeapons = true, -- Stops other players giving other people weapons (If you have an admin menu to give weapons this may be an issue. Giving weapons with esx inventories or etc will not cause any issues!)
+         ModMenuChecks = true, -- (READ IMPORTANT) Will check in your resources for any injected code being variables/functions that has been added to our detection lists! Don't forget to also enable it on the client script! In acloader.lua! Will add to every resource so please do not change the AntiCheat Name It must stay as the name it has.  
+         StopUnauthorizedResources = true, -- Will check for resources that have not been allowed by the server! (Common with Eulen tick box menu loading options)
+    },
+    BanComponents = {
+        AntiSpectate = true,
+        AntiNoClip = true,
+        AntiCommands = true,
+        AntiESX = true,
+        AntiFakeMessage = true,
+        AntiBlacklistedEvent = true,
+        AntiWeapons = false, -- KEEP IN MIND: Modders can give other players weapons
+    },
+    Messages = {
+        NoClipTriggered = "Our anticheat caught you noclipping... You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        ChatMessageTriggered = "Our anticheat caught you faking a chat message... You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        BlacklistedEventTriggered = "Our anticheat caught you triggered a blacklisted event [{EVENT}]. You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        BlacklistedEntity = "Our anticheat caught you creating a blacklisted entity [{ENTITY}]. You have been kicked. You may join back, but may be banned under staff's discretion.",
+        UnauthorizedResources = "Our anticheat caught you with an unauthorized resource [{RESOURCE}]. You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        ProhibitedVariables = "Our anticheat caught you with a prohibited variable [{VARIABLE}]. You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        CommandsTriggered = "Our anticheat caught you with a blacklisted command [{COMMAND}]. You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        ESXTriggered = "Our anticheat caught you triggering ESX. You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        SpectateTriggered = "Our anticheat caught you spectating somebody whilst not being staff. You have been banned. You can apply for unban by providing your ban ID in your server ticket.",
+        BlacklistedWeaponTriggered = "Our anticheat caught you using a blacklisted weapon [{WEAPON}]. You have been kicked for this...",
+    },
+    KickForKeys = false, 
+    BlacklistedKeys = { 
+        {{121}, "Insert Key"}, -- Insert Key 
+        {{37, 44}, "Tab + Q Keys"}, -- Tab + Q key 
+        {{47, 21}, "Shift + G Keys"}, -- Shift + G key  
+        {{117}, "Numpad 7 Key"}, -- Lynx Evo Menu 
+        {{214}, "Delete Key"}, -- Delete Menu 
+    },
+    BlacklistedWeapons = {
+        "WEAPON_APPISTOL",
+        "WEAPON_ADVANCEDRIFLE",
+        "WEAPON_ASSAULTRIFLE_MK2",
+        "WEAPON_ASSAULTSHOTGUN",
+        "WEAPON_BZGAS",
+        "WEAPON_BULLPUPRIFLE",
+        "WEAPON_BULLPUPRIFLE_MK2",
+        "WEAPON_BULLPUPSHOTGUN",
+        "WEAPON_CARBINERIFLE_MK2",
+        "WEAPON_COMBATMG",
+        "WEAPON_COMBATMG_MK2",
+        "WEAPON_COMPACTLAUNCHER",
+        "WEAPON_DOUBLEACTION",
+        "WEAPON_DBSHOTGUN",
+        "WEAPON_FIREWORK",
+        "WEAPON_FLARE",
+        "WEAPON_FLAREGUN",
+        "WEAPON_FLASHLIGHT",
+        "WEAPON_GOLFCLUB",
+        "WEAPON_GRENADE",
+        "WEAPON_GRENADELAUNCHER",
+        "WEAPON_GRENADELAUNCHER_SMOKE",
+        "WEAPON_HEAVYPISTOL",
+        "WEAPON_HEAVYSHOTGUN",
+        "WEAPON_HEAVYSNIPER",
+        "WEAPON_HEAVYSNIPER_MK2",
+        "WEAPON_HOMINGLAUNCHER",
+        "WEAPON_MG",
+        "WEAPON_MARKSMANPISTOL",
+        "WEAPON_MARKSMANRIFLE",
+        "WEAPON_MARKSMANRIFLE_MK2",
+        "WEAPON_MINIGUN",
+        "WEAPON_MOLOTOV",
+        "WEAPON_NIGHTVISION",
+        "WEAPON_PETROLCAN",
+        "WEAPON_PIPEBOMB",
+        "WEAPON_PISTOL50",
+        "WEAPON_PISTOL_MK2",
+        "WEAPON_POOLCUE",
+        "WEAPON_PROXMINE",
+        "WEAPON_PUMPSHOTGUN",
+        "WEAPON_PUMPSHOTGUN_MK2",
+        "WEAPON_RPG",
+        "WEAPON_RAILGUN",
+        "WEAPON_REVOLVER",
+        "WEAPON_REVOLVER_MK2",
+        "WEAPON_SMG_MK2",
+        "WEAPON_SNSPISTOL_MK2",
+        "WEAPON_SMOKEGRENADE",
+        "WEAPON_SNIPERIFLE",
+        "WEAPON_SPECIALCARBINE",
+        "WEAPON_SPECIALCARBINE_MK2",
+        "WEAPON_STICKYBOMB",
+        "WEAPON_SWEEPERSHOTGUN",
+        "WEAPON_RAYPISTOL",
+        "WEAPON_RAYCARBINE",
+        "WEAPON_RAYMINIGUN",
+        "WEAPON_STONE_HATCHET",
+    },
+    BlacklistedCommands = {
+        "chocolate",
+        "pk",
+        "haha",
+        "lol",
+        "panickey",
+        "killmenu",
+        "panik",
+        "lynx",
+        "brutan",
+        "saucy",
+    },
+    BlacklistedEvents = {
+        'esx_drugs:startHarvestCoke',
+        'esx_drugs:stoopHarvestCoke',
+        'esx_drugs:startTransformCoke',
+        'esx_drugs:stopTransformCoke',
+        'esx_drugs:startSellCoke',
+        'esx_drugs:stopSellCoke',
+        'esx_drugs:startHarvestMeth',
+        'esx_drugs:stoopHarvestMeth',
+        'esx_drugs:startTransformMeth',
+        'esx_drugs:stopTransformMeth',
+        'esx_drugs:startSellMeth',
+        'esx_drugs:stopSellMeth',
+        'esx_drugs:startHarvestWeed',
+        'esx_drugs:stoopHarvestWeed',
+        'esx_drugs:startTransformWeed',
+        'esx_drugs:stopTransformWeed',
+        'esx_drugs:startSellWeed',
+        'esx_drugs:stopSellWeed',
+        'esx_drugs:startHarvestOpium',
+        'esx_drugs:stopHarvestOpium',
+        'esx_drugs:startTransformOpium',
+        'esx_drugs:stopTransformOpium',
+        'esx_drugs:startSellOpium',
+        'esx_drugs:stopSellOpium',
+        "gcPhone:_internalAddMessageLRAC",
+        "gcPhone:tchat_channelLRAC",
+        "esx_vehicleshop:setVehicleOwnedLRAC",
+        "esx_mafiajob:confiscateLRACPlayerItem",
+        "_chat:messageEntLRACered",
+        "lscustoms:pLRACayGarage",
+        "vrp_slotmachLRACine:server:2",
+        "Banca:dLRACeposit",
+        "bank:depLRACositt",
+        "esx_jobs:caLRACution", "give_back",
+        "esx_fueldLRACelivery:pay",
+        "esx_carthLRACief:pay",
+        "esx_godiLRACrtyjob:pay",
+        "esx_pizza:pLRACay",
+        "esx_ranger:pLRACay",
+        "esx_garbageLRACjob:pay",
+        "esx_truckLRACerjob:pay",
+        "AdminMeLRACnu:giveBank",
+        "AdminMLRACenu:giveCash",
+        "esx_goLRACpostaljob:pay",
+        "esx_baLRACnksecurity:pay",
+        "esx_sloLRACtmachine:sv:2",
+        "esx:giLRACveInventoryItem",
+        "NB:recLRACruterplayer",
+        "esx_biLRAClling:sendBill",
+        "esx_jailer:sendToJail",
+        "esx_jaLRACil:sendToJail",
+        "js:jaLRACiluser",
+        "esx-qalle-jail:jailyer",
+        "esx_dmvschool:pLRACay", 
+        "LegacyFuel:PayFuLRACel",
+        "OG_cuffs:cuffCheckNeLRACarest",
+        "esx_policejob:handcuff",
+        "cuffSeLRACrver",
+        "cuffGLRACranted",
+        "police:cuffGLRACranted",
+        "esx_handcuffs:cufLRACfing",
+        "esx_policejob:haLRACndcuff",
+        "bank:withdLRACraw",
+        "dmv:succeLRACss",
+        "esx_skin:responseSaLRACveSkin",
+        "esx_dmvschool:addLiceLRACnse",
+        "esx_mechanicjob:starLRACtCraft",
+        "esx_drugs:startHarvestWLRACeed",
+        "esx_drugs:startTransfoLRACrmWeed",
+        "esx_drugs:startSellWeLRACed",
+        "esx_drugs:startHarvestLRACCoke",
+        "esx_drugs:startTransLRACformCoke",
+        "esx_drugs:startSellCLRACoke",
+        "esx_drugs:startHarLRACvestMeth",
+        "esx_drugs:startTLRACransformMeth",
+        "esx_drugs:startSellMLRACeth",
+        "esx_drugs:startHLRACarvestOpium",
+        "esx_drugs:startSellLRACOpium",
+        "esx_drugs:starLRACtTransformOpium",
+        "esx_blanchisLRACseur:startWhitening",
+        "esx_drugs:stopHarvLRACestCoke",
+        "esx_drugs:stopTranLRACsformCoke",
+        "esx_drugs:stopSellLRACCoke",
+        "esx_drugs:stopHarvesLRACtMeth",
+        "esx_drugs:stopTranLRACsformMeth",
+        "esx_drugs:stopSellMLRACeth",
+        "esx_drugs:stopHarLRACvestWeed",
+        "esx_drugs:stopTLRACransformWeed",
+        "esx_drugs:stopSellWLRACeed",
+        "esx_drugs:stopHarvestLRACOpium",
+        "esx_drugs:stopTransLRACformOpium",
+        "esx_drugs:stopSellOpiuLRACm",
+        "esx_society:openBosLRACsMenu",
+        "esx_jobs:caLRACution",
+        "esx_tankerjob:LRACpay",
+        "esx_vehicletrunk:givLRACeDirty",
+        "gambling:speLRACnd",
+        "AdminMenu:giveDirtyMLRAConey",
+        "esx_moneywash:depoLRACsit",
+        "esx_moneywash:witLRAChdraw",
+        "mission:completLRACed",
+        "truckerJob:succeLRACss",
+        "99kr-burglary:addMLRAConey",
+        "esx_jailer:unjailTiLRACme",
+        "esx_ambulancejob:reLRACvive",
+        "DiscordBot:plaLRACyerDied",
+        "hentailover:xdlol",
+        "antiLRAC8:anticheat",
+        "antiLRACr6:detection",
+        "esx:getShLRACaredObjLRACect",
+        "esx_society:getOnlLRACinePlayers",
+        "antiLRAC8r4a:anticheat",
+        "antiLRACr4:detect",
+        "js:jaLRACiluser", 
+        "ynx8:anticheat",
+        "LRAC8:anticheat",
+        "adminmenu:allowall",
+        "ljail:jailplayer",
+        "adminmenu:setsalary",
+        "adminmenu:cashoutall",
+        "bank:tranLRACsfer",
+        "paycheck:bonLRACus",
+        "paycheck:salLRACary",
+        "HCheat:TempDisableDetLRACection",
+        "esx_drugs:pickedUpCLRACannabis",
+        "esx_drugs:processCLRACannabis",
+        "esx-qalle-hunting:LRACreward",
+        "esx-qalle-hunting:seLRACll",
+        "esx_mecanojob:onNPCJobCLRACompleted",
+        "BsCuff:Cuff696LRAC999",
+        "veh_SR:CheckMonLRACeyForVeh",
+        "esx_carthief:alertcoLRACps",
+        "mellotrainer:adminTeLRACmpBan",
+        "mellotrainer:adminKickLRAC",
+        "esx_society:putVehicleLRACInGarage",
+        "antilynx8:anticheat",
+        "mellotrainer:adminKick",
+        "Tem2LPs5Para5dCyjuHm87y2catFkMpV",
+        "dqd36JWLRC72k8FDttZ5adUKwvwq9n9m",
+        "antilynx8:anticheat",
+        "antilynxr4:detect",
+        "antilynxr6:detection",
+        "ynx8:anticheat",
+        "antilynx8r4a:anticheat",
+        "lynx8:anticheat",
+        "AntiLynxR4:kick",
+        "AntiLynxR4:log",
+        "h:xd"
+    },
+    BlacklistedModels = {
+        "rhino",
+        "jet",
+        "stt_prop_stunt_track_uturn",
+        "stt_prop_stunt_track_turnice",
+        "stt_prop_stunt_track_hill",
+        "prop_gold_cont_01",
+        "p_cablecar_s",
+        "stt_prop_stunt_tube_l",
+        "stt_prop_stunt_track_dwuturn",
+        "prop_fnclink_05crnr1",
+        "xs_prop_hamburgher_wl",
+        "xs_prop_plastic_bottle_wl",
+        "prop_windmill_01",
+        "p_spinning_anus_s",
+        "stt_prop_ramp_adj_flip_m",
+        "stt_prop_ramp_adj_flip_mb",
+        "stt_prop_ramp_adj_flip_s",
+        "stt_prop_ramp_adj_flip_sb",
+        "stt_prop_ramp_adj_hloop",
+        "stt_prop_ramp_adj_loop",
+        "stt_prop_ramp_jump_l",
+        "stt_prop_ramp_jump_m",
+        "stt_prop_ramp_jump_s",
+        "stt_prop_ramp_jump_xl",
+        "stt_prop_ramp_jump_xs",
+        "stt_prop_ramp_jump_xxl",
+        "stt_prop_ramp_multi_loop_rb",
+        "stt_prop_ramp_spiral_l",
+        "stt_prop_ramp_spiral_l_l",
+        "stt_prop_ramp_spiral_l_m",
+        "stt_prop_ramp_spiral_l_s",
+        "stt_prop_ramp_spiral_l_xxl",
+        "stt_prop_ramp_spiral_m",
+        "stt_prop_ramp_spiral_s",
+        "stt_prop_ramp_spiral_xxl",
+        "stt_prop_stunt_track_dwslope30",
+        "-145066854",
+        "stt_prop_stunt_track_start",
+"stt_prop_stunt_track_slope45",
+"stt_prop_stunt_track_slope30",
+"stt_prop_stunt_track_slope15",
+"stt_prop_stunt_track_short",
+"stt_prop_stunt_track_sh45_a",
+"stt_prop_stunt_track_sh45",
+"stt_prop_stunt_track_sh30",
+"stt_prop_stunt_track_sh15",
+"stt_prop_stunt_track_otake",
+"stt_prop_stunt_track_link",
+"stt_prop_stunt_track_jump",
+"stt_prop_stunt_track_hill2",
+"stt_prop_stunt_track_hill",
+"stt_prop_stunt_track_funnel",
+"stt_prop_stunt_track_funlng",
+"stt_prop_stunt_track_fork",
+"stt_prop_stunt_track_exshort",
+"stt_prop_stunt_track_dwuturn",
+"stt_prop_stunt_track_dwturn",
+"stt_prop_stunt_track_dwslope45",
+"stt_prop_stunt_track_dwslope30",
+"stt_prop_stunt_track_dwslope15",
+"stt_prop_stunt_track_dwshort",
+"stt_prop_stunt_track_dwsh15",
+"stt_prop_stunt_track_dwlink_02",
+"stt_prop_stunt_track_dwlink",
+"stt_prop_stunt_track_cutout",
+"stt_prop_stunt_track_bumps",
+"stt_prop_stunt_target_small",
+"stt_prop_stunt_target",
+"stt_prop_stunt_soccer_sball",
+"stt_prop_stunt_soccer_lball",
+"stt_prop_stunt_soccer_goal",
+"stt_prop_stunt_soccer_ball",
+"stt_prop_stunt_ramp",
+"stt_prop_stunt_landing_zone_01",
+"stt_prop_stunt_jump_sb",
+"stt_prop_stunt_jump_s",
+"stt_prop_stunt_jump_mb",
+"stt_prop_stunt_jump_m",
+"stt_prop_stunt_jump_loop",
+"stt_prop_stunt_jump_lb",
+"stt_prop_stunt_jump_l",
+"stt_prop_stunt_jump45",
+"stt_prop_stunt_jump30",
+"stt_prop_stunt_jump15",
+"stt_prop_stunt_domino",
+"prop_weed_pallet", "hei_prop_carrier_radar_1_l1", "v_res_mexball", "prop_rock_1_a", "prop_rock_1_b", "prop_rock_1_c", "prop_rock_1_d", "prop_player_gasmask", "prop_rock_1_e", "prop_rock_1_f", "prop_rock_1_g", "prop_rock_1_h", "prop_test_boulder_01", "prop_test_boulder_02", "prop_test_boulder_03", "prop_test_boulder_04", "apa_mp_apa_crashed_usaf_01a", "ex_prop_exec_crashdp", "apa_mp_apa_yacht_o1_rail_a", "apa_mp_apa_yacht_o1_rail_b", "apa_mp_h_yacht_armchair_01", "apa_mp_h_yacht_armchair_03", "apa_mp_h_yacht_armchair_04", "apa_mp_h_yacht_barstool_01", "apa_mp_h_yacht_bed_01", "apa_mp_h_yacht_bed_02", "apa_mp_h_yacht_coffee_table_01", "apa_mp_h_yacht_coffee_table_02", "apa_mp_h_yacht_floor_lamp_01", "apa_mp_h_yacht_side_table_01", "apa_mp_h_yacht_side_table_02", "apa_mp_h_yacht_sofa_01", "apa_mp_h_yacht_sofa_02", "apa_mp_h_yacht_stool_01", "apa_mp_h_yacht_strip_chair_01", "apa_mp_h_yacht_table_lamp_01", "apa_mp_h_yacht_table_lamp_02", "apa_mp_h_yacht_table_lamp_03", "prop_flag_columbia", "apa_mp_apa_yacht_o2_rail_a", "apa_mp_apa_yacht_o2_rail_b", "apa_mp_apa_yacht_o3_rail_a", "apa_mp_apa_yacht_o3_rail_b", "apa_mp_apa_yacht_option1", "proc_searock_01", "apa_mp_h_yacht_", "apa_mp_apa_yacht_option1_cola", "apa_mp_apa_yacht_option2", "apa_mp_apa_yacht_option2_cola", "apa_mp_apa_yacht_option2_colb", "apa_mp_apa_yacht_option3", "apa_mp_apa_yacht_option3_cola", "apa_mp_apa_yacht_option3_colb", "apa_mp_apa_yacht_option3_colc", "apa_mp_apa_yacht_option3_cold", "apa_mp_apa_yacht_option3_cole", "apa_mp_apa_yacht_jacuzzi_cam", "apa_mp_apa_yacht_jacuzzi_ripple003", "apa_mp_apa_yacht_jacuzzi_ripple1", "apa_mp_apa_yacht_jacuzzi_ripple2", "apa_mp_apa_yacht_radar_01a", "apa_mp_apa_yacht_win", "prop_crashed_heli", "apa_mp_apa_yacht_door", "prop_shamal_crash", "xm_prop_x17_shamal_crash", "apa_mp_apa_yacht_door2", "apa_mp_apa_yacht", "prop_flagpole_2b", "prop_flagpole_2c", "prop_flag_canada", "apa_prop_yacht_float_1a", "apa_prop_yacht_float_1b", "apa_prop_yacht_glass_01", "apa_prop_yacht_glass_02", "apa_prop_yacht_glass_03", "apa_prop_yacht_glass_04", "apa_prop_yacht_glass_05", "apa_prop_yacht_glass_06", "apa_prop_yacht_glass_07", "apa_prop_yacht_glass_08", "apa_prop_yacht_glass_09", "apa_prop_yacht_glass_10", "prop_flag_canada_s", "prop_flag_eu", "prop_flag_eu_s", "prop_target_blue_arrow", "prop_target_orange_arrow", "prop_target_purp_arrow", "prop_target_red_arrow", "apa_prop_flag_argentina", "apa_prop_flag_australia", "apa_prop_flag_austria", "apa_prop_flag_belgium", "apa_prop_flag_brazil", "apa_prop_flag_canadat_yt", "apa_prop_flag_china", "apa_prop_flag_columbia", "apa_prop_flag_croatia", "apa_prop_flag_czechrep", "apa_prop_flag_denmark", "apa_prop_flag_england", "apa_prop_flag_eu_yt", "apa_prop_flag_finland", "apa_prop_flag_france", "apa_prop_flag_german_yt", "apa_prop_flag_hungary", "apa_prop_flag_ireland", "apa_prop_flag_israel", "apa_prop_flag_italy", "apa_prop_flag_jamaica", "apa_prop_flag_japan_yt", "apa_prop_flag_canada_yt", "apa_prop_flag_lstein", "apa_prop_flag_malta", "apa_prop_flag_mexico_yt", "apa_prop_flag_netherlands", "apa_prop_flag_newzealand", "apa_prop_flag_nigeria", "apa_prop_flag_norway", "apa_prop_flag_palestine", "apa_prop_flag_poland", "apa_prop_flag_portugal", "apa_prop_flag_puertorico", "apa_prop_flag_russia_yt", "apa_prop_flag_scotland_yt", "apa_prop_flag_script", "apa_prop_flag_slovakia", "apa_prop_flag_slovenia", "apa_prop_flag_southafrica", "apa_prop_flag_southkorea", "apa_prop_flag_spain", "apa_prop_flag_sweden", "apa_prop_flag_switzerland", "apa_prop_flag_turkey", "apa_prop_flag_uk_yt", "apa_prop_flag_us_yt", "apa_prop_flag_wales", "prop_flag_uk", "prop_flag_uk_s", "prop_flag_us", "prop_flag_usboat", "prop_flag_us_r", "prop_flag_us_s", "prop_flag_france", "prop_flag_france_s", "prop_flag_german", "prop_flag_german_s", "prop_flag_ireland", "prop_flag_ireland_s", "prop_flag_japan", "prop_flag_japan_s", "prop_flag_ls", "prop_flag_lsfd", "prop_flag_lsfd_s", "prop_flag_lsservices", "prop_flag_lsservices_s", "prop_flag_ls_s", "prop_flag_mexico", "prop_flag_mexico_s", "prop_flag_russia", "prop_flag_russia_s", "prop_flag_s", "prop_flag_sa", "prop_flag_sapd", "prop_flag_sapd_s", "prop_flag_sa_s", "prop_flag_scotland", "prop_flag_scotland_s", "prop_flag_sheriff", "prop_flag_sheriff_s", "prop_flag_uk", "prop_flag_uk_s", "prop_flag_us", "prop_flag_usboat", "prop_flag_us_r", "prop_flag_us_s", "prop_flamingo", "prop_swiss_ball_01", "prop_air_bigradar_l1", "prop_air_bigradar_l2", "prop_air_bigradar_slod", "p_fib_rubble_s", "prop_money_bag_01", "p_cs_mp_jet_01_s", "prop_poly_bag_money", "prop_air_radar_01", "hei_prop_carrier_radar_1", "prop_air_bigradar", "prop_carrier_radar_1_l1", "prop_asteroid_01", "prop_xmas_ext", "p_oil_pjack_01_amo", "p_oil_pjack_01_s", "p_oil_pjack_02_amo", "p_oil_pjack_03_amo", "p_oil_pjack_02_s", "p_oil_pjack_03_s", "prop_aircon_l_03", "prop_med_jet_01", "p_med_jet_01_s", "hei_prop_carrier_jet", "bkr_prop_biker_bblock_huge_01", "bkr_prop_biker_bblock_huge_02", "bkr_prop_biker_bblock_huge_04", "bkr_prop_biker_bblock_huge_05", "hei_prop_heist_emp", "prop_weed_01", "prop_air_bigradar", "prop_juicestand", "prop_lev_des_barge_02", "hei_prop_carrier_defense_01", "prop_aircon_m_04", "prop_mp_ramp_03", "stt_prop_stunt_track_dwuturn", "ch3_12_animplane1_lod", "ch3_12_animplane2_lod", "hei_prop_hei_pic_pb_plane", "light_plane_rig", "prop_cs_plane_int_01", "prop_dummy_plane", "prop_mk_plane", "v_44_planeticket", "prop_planer_01", "ch3_03_cliffrocks03b_lod", "ch3_04_rock_lod_02", "csx_coastsmalrock_01_", "csx_coastsmalrock_02_", "csx_coastsmalrock_03_", "csx_coastsmalrock_04_", "mp_player_introck", "Heist_Yacht", "csx_coastsmalrock_05_", "mp_player_int_rock", "mp_player_introck", "prop_flagpole_1a", "prop_flagpole_2a", "prop_flagpole_3a", "prop_a4_pile_01", "cs2_10_sea_rocks_lod", "cs2_11_sea_marina_xr_rocks_03_lod", "prop_gold_cont_01", "prop_hydro_platform", "ch3_04_viewplatform_slod", "ch2_03c_rnchstones_lod", "proc_mntn_stone01", "prop_beachflag_le", "proc_mntn_stone02", "cs2_10_sea_shipwreck_lod", "des_shipsink_02", "prop_dock_shippad", "des_shipsink_03", "des_shipsink_04", "prop_mk_flag", "prop_mk_flag_2", "proc_mntn_stone03", "FreeModeMale01", "rsn_os_specialfloatymetal_n", "rsn_os_specialfloatymetal", "cs1_09_sea_ufo", "rsn_os_specialfloaty2_light2", "rsn_os_specialfloaty2_light", "rsn_os_specialfloaty2", "rsn_os_specialfloatymetal_n", "rsn_os_specialfloatymetal", "P_Spinning_Anus_S_Main", "P_Spinning_Anus_S_Root", "cs3_08b_rsn_db_aliencover_0001cs3_08b_rsn_db_aliencover_0001_a", "sc1_04_rnmo_paintoverlaysc1_04_rnmo_paintoverlay_a", "rnbj_wallsigns_0001", "proc_sml_stones01", "proc_sml_stones02", "maverick", "Miljet", "proc_sml_stones03", "proc_stones_01", "proc_stones_02", "proc_stones_03", "proc_stones_04", "proc_stones_05", "proc_stones_06", "prop_coral_stone_03", "prop_coral_stone_04", "prop_gravestones_01a", "prop_gravestones_02a", "prop_gravestones_03a", "prop_gravestones_04a", "prop_gravestones_05a", "prop_gravestones_06a", "prop_gravestones_07a", "prop_gravestones_08a", "prop_gravestones_09a", "prop_gravestones_10a", "prop_prlg_gravestone_05a_l1", "prop_prlg_gravestone_06a", "test_prop_gravestones_04a", "test_prop_gravestones_05a", "test_prop_gravestones_07a", "test_prop_gravestones_08a", "test_prop_gravestones_09a", "prop_prlg_gravestone_01a", "prop_prlg_gravestone_02a", "prop_prlg_gravestone_03a", "prop_prlg_gravestone_04a", "prop_stoneshroom1", "prop_stoneshroom2", "v_res_fa_stones01", "test_prop_gravestones_01a", "test_prop_gravestones_02a", "prop_prlg_gravestone_05a", "FreemodeFemale01", "p_cablecar_s", "stt_prop_stunt_tube_l", "stt_prop_stunt_track_dwuturn", "p_spinning_anus_s", "prop_windmill_01", "hei_prop_heist_tug", "prop_air_bigradar", "p_oil_slick_01", "prop_dummy_01", "hei_prop_heist_emp", "p_tram_cash_s", "hw1_blimp_ce2", "prop_fire_exting_1a", "prop_fire_exting_1b", "prop_fire_exting_2a", "prop_fire_exting_3a", "hw1_blimp_ce2_lod", "hw1_blimp_ce_lod", "hw1_blimp_cpr003", "hw1_blimp_cpr_null", "hw1_blimp_cpr_null2", "prop_lev_des_barage_02", "hei_prop_carrier_defense_01", "prop_juicestand", "S_M_M_MovAlien_01", "s_m_m_movalien_01", "s_m_m_movallien_01", "u_m_y_babyd", "CS_Orleans", "A_M_Y_ACult_01", "S_M_M_MovSpace_01", "U_M_Y_Zombie_01", "s_m_y_blackops_01", "a_f_y_topless_01", "a_c_boar", "a_c_cat_01", "a_c_chickenhawk", "a_c_chimp", "s_f_y_hooker_03", "a_c_chop", "a_c_cormorant", "a_c_cow", "a_c_coyote", "v_ilev_found_cranebucket", "p_cs_sub_hook_01_s", "a_c_crow", "a_c_dolphin", "a_c_fish", "hei_prop_heist_hook_01", "prop_rope_hook_01", "prop_sub_crane_hook", "s_f_y_hooker_01", "prop_vehicle_hook", "prop_v_hook_s", "prop_dock_crane_02_hook", "prop_winch_hook_long", "a_c_hen", "a_c_humpback", "a_c_husky", "a_c_killerwhale", "a_c_mtlion", "a_c_pigeon", "a_c_poodle", "prop_coathook_01", "prop_cs_sub_hook_01", "a_c_pug", "a_c_rabbit_01", "a_c_rat", "a_c_retriever", "a_c_rhesus", "a_c_rottweiler", "a_c_sharkhammer", "a_c_sharktiger", "a_c_shepherd", "a_c_stingray", "a_c_westy", "CS_Orleans", "prop_windmill_01", "prop_Ld_ferris_wheel", "p_tram_crash_s", "p_oil_slick_01", "p_ld_soc_ball_01", "p_parachute1_s", "p_cablecar_s", "prop_beach_fire", "prop_lev_des_barge_02", "prop_lev_des_barge_01", "prop_sculpt_fix", "prop_flagpole_2b", "prop_flagpole_2c", "prop_winch_hook_short", "prop_flag_canada", "prop_flag_canada_s", "prop_flag_eu", "prop_flag_eu_s", "prop_flag_france", "prop_flag_france_s", "prop_flag_german", "prop_ld_hook", "prop_flag_german_s", "prop_flag_ireland", "prop_flag_ireland_s", "prop_flag_japan", "prop_flag_japan_s", "prop_flag_ls", "prop_flag_lsfd", "prop_flag_lsfd_s", "prop_cable_hook_01", "prop_flag_lsservices", "prop_flag_lsservices_s", "prop_flag_ls_s", "prop_flag_mexico", "prop_flag_mexico_s", "csx_coastboulder_00", "des_tankercrash_01", "des_tankerexplosion_01", "des_tankerexplosion_02", "des_trailerparka_02", "des_trailerparkb_02", "des_trailerparkc_02", "des_trailerparkd_02", "des_traincrash_root2", "des_traincrash_root3", "des_traincrash_root4", "des_traincrash_root5", "des_finale_vault_end", "des_finale_vault_root001", "des_finale_vault_root002", "des_finale_vault_root003", "des_finale_vault_root004", "des_finale_vault_start", "des_vaultdoor001_root001", "des_vaultdoor001_root002", "des_vaultdoor001_root003", "des_vaultdoor001_root004", "des_vaultdoor001_root005", "des_vaultdoor001_root006", "des_vaultdoor001_skin001", "des_vaultdoor001_start", "des_traincrash_root6", "prop_ld_vault_door", "prop_vault_door_scene", "prop_vault_door_scene", "prop_vault_shutter", "p_fin_vaultdoor_s", "prop_gold_vault_fence_l", "prop_gold_vault_fence_r", "prop_gold_vault_gate_01", "des_traincrash_root7", "prop_flag_russia", "prop_flag_russia_s", "prop_flag_s", "ch2_03c_props_rrlwindmill_lod", "prop_flag_sa", "prop_flag_sapd", "prop_flag_sapd_s", "prop_flag_sa_s", "prop_flag_scotland", "prop_flag_scotland_s", "prop_flag_sheriff", "prop_flag_sheriff_s", "prop_flag_uk", "prop_yacht_lounger", "prop_yacht_seat_01", "prop_yacht_seat_02", "prop_yacht_seat_03", "marina_xr_rocks_02", "marina_xr_rocks_03", "prop_test_rocks01", "prop_test_rocks02", "prop_test_rocks03", "prop_test_rocks04", "marina_xr_rocks_04", "marina_xr_rocks_05", "marina_xr_rocks_06", "prop_yacht_table_01", "csx_searocks_02", "csx_searocks_03", "csx_searocks_04", "csx_searocks_05", "csx_searocks_06", "p_yacht_chair_01_s", "p_yacht_sofa_01_s", "prop_yacht_table_02", "csx_coastboulder_00", "csx_coastboulder_01", "csx_coastboulder_02", "csx_coastboulder_03", "csx_coastboulder_04", "csx_coastboulder_05", "csx_coastboulder_06", "csx_coastboulder_07", "csx_coastrok1", "csx_coastrok2", "csx_coastrok3", "csx_coastrok4", "csx_coastsmalrock_01", "csx_coastsmalrock_02", "csx_coastsmalrock_03", "csx_coastsmalrock_04", "csx_coastsmalrock_05", "prop_yacht_table_03", "prop_flag_uk_s", "prop_flag_us", "prop_flag_usboat", "prop_flag_us_r", "prop_flag_us_s", "p_gasmask_s", "prop_flamingo"
+
+    }
+}
+
+```
+
+`fxmanifest.lua`:
+
+```lua
+fx_version 'bodacious'
+games { 'gta5' }
+
+author 'Dead'
+description "Dead's Official Anticheat"
+
+shared_script 'config.lua'
+
+client_scripts {
+    'Enumerators.lua',
+    'client.lua', 
+    'acloader.lua'
+}
+
+server_scripts {
+    'server.lua',
+}
+```
+
+`server.lua`:
+
+```lua
+-- Server Config:
+webhookURL = ''
+
+
+-- CODE [DO NOT TOUCH]:
+BlacklistedEvents = Config.BlacklistedEvents;
+
+local counter = {}
+
+function BanPlayer(src, reason) 
+    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local cfg = json.decode(config)
+    local ids = ExtractIdentifiers(src);
+    local playerIP = ids.ip;
+    local playerSteam = ids.steam;
+    local playerLicense = ids.license;
+    local playerXbl = ids.xbl;
+    local playerLive = ids.live;
+    local playerDisc = ids.discord;
+    local banData = {};
+    banData['ID'] = tonumber(getNewBanID());
+    banData['ip'] = "NONE SUPPLIED";
+    banData['reason'] = reason;
+    banData['license'] = "NONE SUPPLIED";
+    banData['steam'] = "NONE SUPPLIED";
+    banData['xbl'] = "NONE SUPPLIED";
+    banData['live'] = "NONE SUPPLIED";
+    banData['discord'] = "NONE SUPPLIED";
+    if playerIP ~= nil and playerIP ~= "nil" and playerIP ~= "" then 
+        banData['ip'] = tostring(playerIP);
+    end
+    if playerLicense ~= nil and playerLicense ~= "nil" and playerLicense ~= "" then 
+        banData['license'] = tostring(playerLicense);
+    end
+    if playerSteam ~= nil and playerSteam ~= "nil" and playerSteam ~= "" then 
+        banData['steam'] = tostring(playerSteam);
+    end
+    if playerXbl ~= nil and playerXbl ~= "nil" and playerXbl ~= "" then 
+        banData['xbl'] = tostring(playerXbl);
+    end
+    if playerLive ~= nil and playerLive ~= "nil" and playerLive ~= "" then 
+        banData['live'] = tostring(playerXbl);
+    end
+    if playerDisc ~= nil and playerDisc ~= "nil" and playerDisc ~= "" then 
+        banData['discord'] = tostring(playerDisc);
+    end
+    cfg[tostring(GetPlayerName(src))] = banData;
+    SaveResourceFile(GetCurrentResourceName(), "ac-bans.json", json.encode(cfg, { indent = true }), -1)
+end
+function getNewBanID()
+    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local cfg = json.decode(config)
+    local banID = 0;
+    for k, v in pairs(cfg) do 
+        banID = banID + 1;
+    end
+    return (banID + 1);
+end
+
+RegisterNetEvent('Anticheat:CheckStaff')
+AddEventHandler('Anticheat:CheckStaff', function()
+    local src = source;
+    if IsPlayerAceAllowed(src, 'Anticheat.Bypass') then 
+        TriggerClientEvent('Anticheat:CheckStaffReturn', src, true);
+    else 
+        TriggerClientEvent('Anticheat:CheckStaffReturn', src, false);
+    end
+end)
+
+RegisterNetEvent('Anticheat:ScreenshotSubmit')
+AddEventHandler('Anticheat:ScreenshotSubmit', function()
+    local src = source;
+    if not IsPlayerAceAllowed(src, "Anticheat.Bypass") then 
+        local screenshotOptions = {
+            encoding = 'png',
+            quality = 1
+        }    
+        local ids = ExtractIdentifiers(src);
+        local playerIP = ids.ip;
+        local playerSteam = ids.steam;
+        local playerLicense = ids.license;
+        local playerXbl = ids.xbl;
+        local playerLive = ids.live;
+        local playerDisc = ids.discord;
+        exports['discord-screenshot']:requestCustomClientScreenshotUploadToDiscord(src, webhookURL, screenshotOptions, {
+            username = '[Dead-ANTICHEAT] ',
+            avatar_url = '',
+            content = '',
+            embeds = {
+                {
+                    color = 16711680,
+                    author = {
+                        name = '[Dead-ANTICHEAT]',
+                        icon_url = ''
+                    },
+                    title = '[Possible Modder] Player has triggered blacklisted keys...',
+                    description = '**__Player Identifiers:__** \n\n'
+                    .. '**Server ID:** `' .. src .. '`\n\n'
+                    .. '**Username:** `' .. GetPlayerName(src) .. '`\n\n'
+                    .. '**IP:** `' .. playerIP .. '`\n\n'
+                    .. '**Steam:** `' .. playerSteam .. '`\n\n'
+                    .. '**License:** `' .. playerLicense .. '`\n\n'
+                    .. '**Xbl:** `' .. playerXbl .. '`\n\n'
+                    .. '**Live:** `' .. playerLive .. '`\n\n'
+                    .. '**Discord:** `' .. playerDisc .. '`\n\n',
+                    footer = {
+                        text = "[" .. src .. "]" .. GetPlayerName(src),
+                    }
+                }
+            }
+        });
+    end
+end)
+
+
+RegisterCommand('ac-unban', function(source, args, rawCommand)
+    local src = source;
+    if (src <= 0) then
+        -- Console unban
+        if #args == 0 then 
+            -- Not enough arguments
+            print('^3[^6Dead-Anticheat^3] ^1Not enough arguments...');
+            return; 
+        end
+        local banID = args[1];
+        if tonumber(banID) ~= nil then
+            local playerName = UnbanPlayer(banID);
+            if playerName then
+                print('^3[^6Dead-Anticheat^3] ^0Player ^1' .. playerName 
+                .. ' ^0has been unbanned from the server by ^2CONSOLE');
+                TriggerClientEvent('chatMessage', -1, '^3[^6Dead-Anticheat^3] ^0Player ^1' .. playerName 
+                .. ' ^0has been unbanned from the server by ^2CONSOLE'); 
+            else 
+                -- Not a valid ban ID
+                print('^3[^6Dead-Anticheat^3] ^1That is not a valid ban ID. No one has been unbanned!'); 
+            end
+        end
+        return;
+    end 
+    if IsPlayerAceAllowed(src, "Dead-Anticheat.ACban") then 
+        if #args == 0 then 
+            -- Not enough arguments
+            TriggerClientEvent('chatMessage', src, '^3[^6Dead-Anticheat^3] ^1Not enough arguments...');
+            return; 
+        end
+        local banID = args[1];
+        if tonumber(banID) ~= nil then 
+            -- Is a valid ban ID 
+            local playerName = UnbanPlayer(banID);
+            if playerName then
+                TriggerClientEvent('chatMessage', -1, '^3[^6Dead-Anticheat^3] ^0Player ^1' .. playerName 
+                .. ' ^0has been unbanned from the server by ^2' .. GetPlayerName(src)); 
+            else 
+                -- Not a valid ban ID
+                TriggerClientEvent('chatMessage', src, '^3[^6Dead-Anticheat^3] ^1That is not a valid ban ID. No one has been unbanned!'); 
+            end
+        else 
+            -- Not a valid number
+            TriggerClientEvent('chatMessage', src, '^3[^6Dead-Anticheat^3] ^1That is not a valid number...'); 
+        end
+    end
+end)
+function UnbanPlayer(banID)
+    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local cfg = json.decode(config)
+    for k, v in pairs(cfg) do 
+        local id = tonumber(v['ID']);
+        if id == tonumber(banID) then 
+            local name = k;
+            cfg[k] = nil;
+            SaveResourceFile(GetCurrentResourceName(), "ac-bans.json", json.encode(cfg, { indent = true }), -1)
+            return name;
+        end
+    end
+    return false;
+end 
+--[[
+@param src - The player server ID supplied
+
+function isBanned(src)
+    FOUND: returns { banID: tonumber(banID), reason: tostring(reason) }
+    NOT FOUND: returns false
+]]--
+function isBanned(src)
+    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local cfg = json.decode(config)
+    local ids = ExtractIdentifiers(src);
+    local playerIP = ids.ip;
+    local playerSteam = ids.steam;
+    local playerLicense = ids.license;
+    local playerXbl = ids.xbl;
+    local playerLive = ids.live;
+    local playerDisc = ids.discord;
+    for k, v in pairs(cfg) do 
+        local reason = v['reason']
+        local id = v['ID']
+        local ip = v['ip']
+        local license = v['license']
+        local steam = v['steam']
+        local xbl = v['xbl']
+        local live = v['live']
+        local discord = v['discord']
+        if tostring(ip) == tostring(playerIP) then return { ['banID'] = id, ['reason'] = reason } end;
+        if tostring(license) == tostring(playerLicense) then return { ['banID'] = id, ['reason'] = reason } end;
+        if tostring(steam) == tostring(playerSteam) then return { ['banID'] = id, ['reason'] = reason } end;
+        if tostring(xbl) == tostring(playerXbl) then return { ['banID'] = id, ['reason'] = reason } end;
+        if tostring(live) == tostring(playerLive) then return { ['banID'] = id, ['reason'] = reason } end;
+        if tostring(discord) == tostring(playerDisc) then return { ['banID'] = id, ['reason'] = reason } end;
+    end
+    return false;
+end
+function GetBans()
+    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local cfg = json.decode(config)
+    return cfg;
+end
+local playTracker = {}
+Citizen.CreateThread(function()
+    while true do 
+        Wait(0);
+        for _, id in pairs(GetPlayers()) do 
+            local ip = ExtractIdentifiers(id).ip;
+            if playTracker[ip] ~= nil then 
+                playTracker[ip] = playTracker[ip] + 1;
+            else 
+                playTracker[ip] = 1;
+            end
+        end
+        Wait((1000 * 60)); -- Every minute 
+    end
+end)
+function GetLatest(count)
+    local latest = {};
+    local lowest = 9999999;
+    local lowestUser = nil;
+    local ourCount = 0;
+    local ourArr = {};
+    for ip, playtime in pairs(playTracker) do 
+        ourArr[ip] = playtime;
+    end
+    local retArr = {};
+    while ourCount < count do 
+        lowest = nil;
+        local lowestIP = nil;
+        lowestUser = nil;
+        for ip, playtime in pairs(ourArr) do 
+            for _, pid in pairs(GetPlayers()) do 
+                local playerIP = ExtractIdentifiers(pid).ip;
+                if tostring(ip) == tostring(playerIP) then 
+                    if lowest == nil or lowest >= playtime then 
+                        lowestIP = ip;
+                        lowest = playtime 
+                        lowestUser = pid;
+                    end
+                end 
+            end 
+        end
+        if lowest ~= nil then 
+            ourArr[lowestIP] = nil;
+            table.insert(retArr, {lowestUser, lowest});
+        end 
+        ourCount = ourCount + 1;
+    end
+    return retArr;
+end
+RegisterCommand("entitywipe", function(source, args, raw)
+    local playerID = args[1]
+    if (IsPlayerAceAllowed(source, "AntiCheat.Moderation")) then
+        if (playerID ~= nil and tonumber(playerID) ~= nil) then 
+            EntityWipe(source, tonumber(playerID))
+        end
+    end
+end, false)
+function EntityWipe(source, target)
+    TriggerClientEvent("anticheat:EntityWipe", -1, tonumber(target))
+end
+RegisterCommand("latest", function(source, args, rawCommand) 
+    local latestUsers = GetLatest(6);
+    for i = 1, #latestUsers do 
+        local user = latestUsers[i][1];
+        local playTime = latestUsers[i][2];
+        TriggerClientEvent('chatMessage', source, "^5[^1Dead-Anticheat^5] ^3Player ^3[^4".. tostring(user) .. "^3] ^4" .. 
+            GetPlayerName(user) .. " ^3has played ^4" .. playTime ..
+            " ^3minutes so far...");
+    end
+end)
+--[[
+Citizen.CreateThread(function()
+    while true do 
+        Wait(40000); -- Every 40 seconds 
+        for _, id in pairs(GetPlayers()) do 
+            if isBanned(id) then 
+                -- Banned, kick em 
+                DropPlayer(id, "[Dead-Anticheat] " .. bans[tostring(playerIP)]);
+            end
+        end
+    end
+end)
+]]--
+function OnPlayerConnecting(name, setKickReason, deferrals)
+    deferrals.defer();
+    local src = source;
+    print("[Dead-Anticheat] Checking ban data for "..GetPlayerName(src));
+    local banned = false;
+    local ban = isBanned(src);
+    Citizen.Wait(100);
+    if ban then 
+        -- They are banned 
+        local reason = ban['reason'];
+        local printMessage = nil;
+        if string.find(reason, "[Dead-Anticheat]") then 
+            printMessage = "" 
+        else 
+            printMessage = "[Dead-Anticheat] " 
+        end 
+        print("[BANNED PLAYER] Player " .. GetPlayerName(src) .. " tried to join, but was banned for: " .. reason);
+        deferrals.done(printMessage .. "(BAN ID: " .. ban['banID'] .. ") " .. reason);
+        banned = true;
+        CancelEvent();
+        return;
+    end
+    if not banned then 
+        deferrals.done();
+    end
+end
+RegisterCommand("acban", function(source, args, raw)
+    -- /acban <id> <reason> 
+    local src = source;
+    if IsPlayerAceAllowed(src, "Dead-Anticheat.ACban") then 
+        -- They can ban players this way
+        if #args < 2 then 
+            -- Not valid enough num of arguments 
+            TriggerClientEvent('chatMessage', source, "^5[^1Dead-Anticheat^5] ^1ERROR: You have supplied invalid amount of arguments... " ..
+                "^2Proper Usage: /acban <id> <reason>");
+            return;
+        end
+        local id = args[1]
+        if ExtractIdentifiers(args[1]) ~= nil then 
+            -- Valid player supplied 
+            local ids = ExtractIdentifiers(id);
+            local steam = ids.steam;
+            local gameLicense = ids.license;
+            local discord = ids.discord;
+            local reason = table.concat(args, ' '):gsub(args[1] .. " ", "");
+            BanPlayer(args[1], reason);
+            sendToDisc("[BANNED] Banned by " .. GetPlayerName(src) .. ": _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+                'Reason: **' .. reason .. '**\n' ..
+                'Steam: **' .. steam .. '**\n' ..
+                'GameLicense: **' .. gameLicense .. '**\n' ..
+                'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+                'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+            DropPlayer(id, "[Dead-Anticheat]: Banned by player " .. GetPlayerName(src) .. " for reason: " .. reason);
+        else 
+            -- Not a valid player supplied 
+            TriggerClientEvent('chatMessage', source, "^5[^1Dead-Anticheat^5] ^1ERROR: There is no valid player with that ID online... " ..
+                "^2Proper Usage: /acban <id> <reason>");
+        end
+    end
+end)
+AddEventHandler("playerConnecting", OnPlayerConnecting)
+
+RegisterServerEvent("Anticheat:NoClip")
+AddEventHandler("Anticheat:NoClip", function(distance)
+    if Config.Components.AntiNoclip and not IsPlayerAceAllowed(source, "Anticheat.Bypass") then
+        local name = GetPlayerName(source)
+        local id = source;
+        local ids = ExtractIdentifiers(id);
+        local steam = ids.steam:gsub("steam:", "");
+        local steamDec = tostring(tonumber(steam,16));
+        if counter[ids.steam] ~= nil then 
+            counter[ids.steam] = counter[ids.steam] + 1;
+        else 
+            counter[ids.steam] = 1;
+        end
+        if counter[ids.steam] ~= nil and counter[ids.steam] >= Config.NoClipTriggerCount then 
+            steam = "https://steamcommunity.com/profiles/" .. steamDec;
+            local gameLicense = ids.license;
+            local discord = ids.discord;
+            if (Config.BanComponents.AntiNoClip) then 
+                BanPlayer(id, Config.Messages.NoClipTriggered)
+                sendToDisc("[BANNED] CONFIRMED HACKER (NoClipping around): _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+                'Steam: **' .. steam .. '**\n' ..
+                'GameLicense: **' .. gameLicense .. '**\n' ..
+                'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+                'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+            else 
+                sendToDisc("CONFIRMED HACKER [NoClipping around]: _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+                'Steam: **' .. steam .. '**\n' ..
+                'GameLicense: **' .. gameLicense .. '**\n' ..
+                'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+                'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+            end
+            DropPlayer(id, "[Dead-Anticheat]: " .. Config.Messages.NoClipTriggered)
+        end 
+        Wait(6000);
+        counter[ids.steam] = counter[ids.steam] - 1;
+    end
+end)
+
+-- Props to Lance Good for this code (most of it at least): [https://github.com/DevLanceGood]
+function IsLegal(entity) 
+    local model = GetEntityModel(entity)
+    if (model ~= nil) then
+        if (GetEntityType(entity) == 1 and GetEntityPopulationType(entity) == 7) then 
+            local WhitelistPedModels = Config.WhitelistPedModels;
+            local isWhitelisted = false;
+            for i = 1, #WhitelistPedModels do 
+                if GetHashKey(WhitelistPedModels[i]) == model then 
+                    isWhitelisted = true;
+                end 
+            end 
+            if not isWhitelisted then 
+                --return "Spawning Peds";
+				return false;
+            else
+                return false;
+            end 
+        end
+        for i=1, #Config.BlacklistedModels do 
+            local hashkey = tonumber(Config.BlacklistedModels[i]) ~= nil and tonumber(Config.BlacklistedModels[i]) or GetHashKey(Config.BlacklistedModels[i]) 
+            if (hashkey == model) then
+                if (GetEntityPopulationType(entity) ~= 7) then
+                    return Config.BlacklistedModels[i];
+                else
+                    return false 
+                end
+            end
+        end
+    end
+    return false
+end
+-- End props 
+RegisterNetEvent("Anticheat:ModderESX")
+AddEventHandler("Anticheat:ModderESX", function(type, reason)
+    local id = source;
+    local ids = ExtractIdentifiers(id);
+    local steam = ids.steam:gsub("steam:", "");
+    local steamDec = tostring(tonumber(steam,16));
+    steam = "https://steamcommunity.com/profiles/" .. steamDec;
+    local gameLicense = ids.license;
+    local discord = ids.discord;
+    if Config.BanComponents.AntiESX then 
+        BanPlayer(id, reason);
+        sendToDisc("[BANNED] " .. type .. ": _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+        'Steam: **' .. steam .. '**\n' ..
+        'GameLicense: **' .. gameLicense .. '**\n' ..
+        'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+        'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+    else 
+        sendToDisc("" .. type .. ": _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+        'Steam: **' .. steam .. '**\n' ..
+        'GameLicense: **' .. gameLicense .. '**\n' ..
+        'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+        'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+    end
+    DropPlayer(id, reason)
+end)  
+RegisterNetEvent("Anticheat:Modder")
+AddEventHandler("Anticheat:Modder", function(type, reason)
+    local id = source;
+    local ids = ExtractIdentifiers(id);
+    local steam = ids.steam:gsub("steam:", "");
+    local steamDec = tostring(tonumber(steam,16));
+    steam = "https://steamcommunity.com/profiles/" .. steamDec;
+    local gameLicense = ids.license;
+    local discord = ids.discord;
+    if Config.BanComponents.AntiCommands then 
+        BanPlayer(id, reason);
+        sendToDisc("[BANNED] " .. type .. ": _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+        'Steam: **' .. steam .. '**\n' ..
+        'GameLicense: **' .. gameLicense .. '**\n' ..
+        'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+        'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+    else 
+        sendToDisc("" .. type .. ": _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+        'Steam: **' .. steam .. '**\n' ..
+        'GameLicense: **' .. gameLicense .. '**\n' ..
+        'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+        'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+    end
+    DropPlayer(id, reason)
+end) 
+RegisterNetEvent("Anticheat:ModderNoKick")
+AddEventHandler("Anticheat:ModderNoKick", function(type, reason, bool)
+    local id = source;
+    local ids = ExtractIdentifiers(id);
+    local steam = ids.steam:gsub("steam:", "");
+    local steamDec = tostring(tonumber(steam,16));
+    steam = "https://steamcommunity.com/profiles/" .. steamDec;
+    local gameLicense = ids.license;
+    local discord = ids.discord;
+    sendToDisc("" .. type .. ": _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+        'Steam: **' .. steam .. '**\n' ..
+        'GameLicense: **' .. gameLicense .. '**\n' ..
+        'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+        'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+    if bool then 
+        DropPlayer(id, reason)
+    end
+end)  
+RegisterNetEvent("Anticheat:SpectateTrigger")
+AddEventHandler("Anticheat:SpectateTrigger", function(reason)
+    if Config.Components.AntiSpectate and not IsPlayerAceAllowed(source, "Anticheat.Bypass") then 
+        local id = source;
+        local ids = ExtractIdentifiers(id);
+        local steam = ids.steam:gsub("steam:", "");
+        local steamDec = tostring(tonumber(steam,16));
+        steam = "https://steamcommunity.com/profiles/" .. steamDec;
+        local gameLicense = ids.license;
+        local discord = ids.discord;
+        if Config.BanComponents.AntiSpectate then 
+            BanPlayer(id, reason);
+            sendToDisc("[BANNED] CONFIRMED HACKER (Tried spectating a player): _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+            'Steam: **' .. steam .. '**\n' ..
+            'GameLicense: **' .. gameLicense .. '**\n' ..
+            'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+            'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+        else 
+            sendToDisc("CONFIRMED HACKER [Tried spectating a player]: _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+            'Steam: **' .. steam .. '**\n' ..
+            'GameLicense: **' .. gameLicense .. '**\n' ..
+            'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+            'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+        end
+        DropPlayer(id, reason)
+    end 
+end)  
+AddEventHandler('chatMessage', function(source, name, msg)
+    local id = source;
+    local ids = ExtractIdentifiers(id);
+    local ip = ids.ip;
+    local steam = ids.steam:gsub("steam:", "");
+    local steamDec = tostring(tonumber(steam,16));
+    steam = "https://steamcommunity.com/profiles/" .. steamDec;
+    local gameLicense = ids.license;
+    local discord = ids.discord;
+    local realName = GetPlayerName(source);
+    if (name ~= realName) then 
+        if Config.BanComponents.AntiFakeMessage then 
+            BanPlayer(id, "[Dead-Anticheat]: " .. Config.Messages.ChatMessageTriggered)
+            sendToDisc("[BANNED] CONFIRMED HACKER (Fake Chat Message): _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+            'Steam: **' .. steam .. '**\n' ..
+            'GameLicense: **' .. gameLicense .. '**\n' ..
+            'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+            'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n'
+            .. 'Tried to say: `' .. msg .. '` with name `' .. name .. '`');
+        else 
+            sendToDisc("CONFIRMED HACKER [Fake Chat Message]: _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+            'Steam: **' .. steam .. '**\n' ..
+            'GameLicense: **' .. gameLicense .. '**\n' ..
+            'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+            'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n'
+            .. 'Tried to say: `' .. msg .. '` with name `' .. name .. '`');
+        end
+        DropPlayer(id, "[Dead-Anticheat]: " .. Config.Messages.ChatMessageTriggered)
+    end
+end)
+
+function GetEntityOwner(entity)
+    if (not DoesEntityExist(entity)) then 
+        return nil 
+    end
+    local owner = NetworkGetEntityOwner(entity)
+    if (GetEntityPopulationType(entity) ~= 7) then return nil end
+    return owner
+end
+
+AddEventHandler('explosionEvent', function(sender, ev)
+    local sender = tonumber(sender)
+    CancelEvent()
+    if (sender ~= nil and sender > 0) then 
+        CancelEvent()
+    end
+end)
+
+
+for i=1, #BlacklistedEvents, 1 do
+  RegisterServerEvent(BlacklistedEvents[i])
+    AddEventHandler(BlacklistedEvents[i], function()
+        local id = source;
+        local ids = ExtractIdentifiers(id);
+        local steam = ids.steam:gsub("steam:", "");
+        local steamDec = tostring(tonumber(steam,16));
+        steam = "https://steamcommunity.com/profiles/" .. steamDec;
+        local gameLicense = ids.license;
+        local discord = ids.discord;
+        local reason = Config.Messages.BlacklistedEventTriggered:gsub("{EVENT}", BlacklistedEvents[i]);
+        if Config.BanComponents.AntiBlacklistedEvent then 
+            BanPlayer(id, "[Dead-Anticheat]: " .. reason);
+            sendToDisc("[BANNED] CONFIRMED HACKER (Tried executing `".. BlacklistedEvents[i] .."`): _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+            'Steam: **' .. steam .. '**\n' ..
+            'GameLicense: **' .. gameLicense .. '**\n' ..
+            'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+            'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+        else 
+            sendToDisc("CONFIRMED HACKER [Tried executing `".. BlacklistedEvents[i] .."`]: _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_", 
+            'Steam: **' .. steam .. '**\n' ..
+            'GameLicense: **' .. gameLicense .. '**\n' ..
+            'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+            'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n');
+        end
+      DropPlayer(id, "[Dead-Anticheat]: " .. reason)
+    end)
+end
+
+AddEventHandler("entityCreating",  function(entity)
+    local owner = GetEntityOwner(entity)
+    local cancelled = false
+    local model = IsLegal(entity);
+    if (model) then 
+        if (owner ~= nil and owner > 0) then
+            local id = owner;
+            local ids = ExtractIdentifiers(id);
+            local steam = ids.steam:gsub("steam:", "");
+            local steamDec = tostring(tonumber(steam,16));
+            steam = "https://steamcommunity.com/profiles/" .. steamDec;
+            local gameLicense = ids.license;
+            local discord = ids.discord;
+            local reason = Config.Messages.BlacklistedEntity:gsub("{ENTITY}", tostring(model));
+            sendToDisc("HACKER (Probably) [via Blacklisted Entity]: _[" .. tostring(id) .. "] " .. GetPlayerName(id) .. "_ has spawned something...", 
+                'Steam: **' .. steam .. '**\n' ..
+                'GameLicense: **' .. gameLicense .. '**\n' ..
+                'Discord Tag: **<@' .. discord:gsub('discord:', '') .. '>**\n' ..
+                'Discord UID: **' .. discord:gsub('discord:', '') .. '**\n'
+                .. 'Blacklisted Item: **' .. tostring(model) .. "**");
+            DropPlayer(owner, "[Dead-Anticheat]: " .. reason);
+        end
+        CancelEvent()
+        cancelled = true
+    end
+end)
+function ExtractIdentifiers(src)
+    local identifiers = {
+        steam = "",
+        ip = "",
+        discord = "",
+        license = "",
+        xbl = "",
+        live = ""
+    }
+
+    --Loop over all identifiers
+    for i = 0, GetNumPlayerIdentifiers(src) - 1 do
+        local id = GetPlayerIdentifier(src, i)
+
+        --Convert it to a nice table.
+        if string.find(id, "steam") then
+            identifiers.steam = id
+        elseif string.find(id, "ip") then
+            identifiers.ip = id
+        elseif string.find(id, "discord") then
+            identifiers.discord = id
+        elseif string.find(id, "license") then
+            identifiers.license = id
+        elseif string.find(id, "xbl") then
+            identifiers.xbl = id
+        elseif string.find(id, "live") then
+            identifiers.live = id
+        end
+    end
+
+    return identifiers
+end
+
+function sendToDisc(title, message, footer)
+    local embed = {}
+    embed = {
+        {
+            ["color"] = 16711680, -- GREEN = 65280 --- RED = 16711680
+            ["title"] = "**".. title .."**",
+            ["description"] = "" .. message ..  "",
+            ["footer"] = {
+                ["text"] = footer,
+            },
+        }
+    }
+    PerformHttpRequest(webhookURL, 
+    function(err, text, headers) end, 'POST', json.encode({username = name, embeds = embed}), { ['Content-Type'] = 'application/json' })
+end
+
+
+
+--Optional Features depending on the server disable if not suitable for yours!
+AddEventHandler("clearPedTasksEvent", function(sender, data)
+    if Config.Components.AntiCancelAnimations then 
+    CancelEvent()
+    end 
+    -- Stops other players kicking people out of cars
+end)
+
+AddEventHandler('removeWeaponEvent', function(sender, data)
+    if Config.Components.AntiRemoveOtherPlayersWeapons then 
+        CancelEvent()
+    end 
+    -- Would only affect if you have scripts removing other people's weapons. (stops players removing other players weapons)
+end)
+
+AddEventHandler('giveWeaponEvent', function(sender, data)
+    if Config.Components.StopOtherPlayersGivingEachOtherWeapons then 
+    CancelEvent()
+    end 
+    -- Stops other players giving people weapons (doesn't affect single people unless you have give weapons on menus and etc.)
+end)
+
+
+
+CreateThread(function()
+    if Config.Components.ModMenuChecks then
+        Wait(1000)
+        local added = false
+        for i = 1, GetNumResources() do
+            local resource_id = i - 1
+            local resource_name = GetResourceByFindIndex(resource_id)
+            if resource_name ~= GetCurrentResourceName() then
+                for k, v in pairs({'fxmanifest.lua', '__resource.lua'}) do
+                    local data = LoadResourceFile(resource_name, v)
+                    if data and type(data) == 'string' and string.find(data, 'acloader.lua') == nil then
+                        data = data .. '\nclient_script "@' .. GetCurrentResourceName() .. '/acloader.lua"'
+                        SaveResourceFile(resource_name, v, data, -1)
+                        print('Added to resource: ' .. resource_name)
+                        added = true
+                    end
+                end
+            end
+        end
+        if added then
+            print('Modified 1 or more resources. It is required to restart your server so these changes can now take place.')
+        end
+    else 
+        Wait(1000)
+        local added = false
+        for i = 1, GetNumResources() do
+            local resource_id = i - 1
+            local resource_name = GetResourceByFindIndex(resource_id)
+            if resource_name ~= GetCurrentResourceName() then
+                for k, v in pairs({'fxmanifest.lua', '__resource.lua'}) do
+                    local data = LoadResourceFile(resource_name, v)
+                    if data and type(data) == 'string' and string.find(data, 'acloader.lua') ~= nil then
+                       -- data = data:lower()
+                        local removed = string.gsub(data, 'client_script "%@Dead%-anticheat%-master%/acloader.lua"', "")
+                        SaveResourceFile(resource_name, v, removed, -1)
+                        print('Removed from resource: ' .. resource_name)
+                        added = true
+                    end
+                end
+            end
+        end
+        if added then
+            print('[Dead-AC] Uninstall Mod-Menu-Checks | Modified 1 or more resources. It is required to restart your server so these changes can now take place.')
+        end
+    end
+end)
+
+
+local validResourceList
+local function collectValidResourceList()
+    validResourceList = {}
+    for i = 0, GetNumResources() - 1 do
+        validResourceList[GetResourceByFindIndex(i)] = true
+    end
+end
+collectValidResourceList()
+if Config.Components.StopUnauthorizedResources then
+    AddEventHandler("onResourceListRefresh", collectValidResourceList)
+    RegisterNetEvent("ANTICHEAT:CHECKRESOURCES")
+    AddEventHandler("ANTICHEAT:CHECKRESOURCES", function(givenList)
+        local source = source
+        Wait(50)
+        for _, resource in ipairs(givenList) do
+            if not validResourceList[resource] then
+                BanPlayer(source, "[Dead-Anticheat]: " .. Config.Messages.UnauthorizedResources:gsub("{RESOURCE}", resource));
+            end
+        end
+    end)
+end
+
+```
