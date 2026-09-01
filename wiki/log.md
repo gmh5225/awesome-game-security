@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:BL0odz/BrowserPasswordExportor`: entity [[browser-password-exportor]] (BL0odz; Python Windows browser password decrypt/export; Chromium/Edge/Firefox profile DBs; DPAPI/AES + Firefox key-material parsing; ASN.1 and browser-specific login-storage routines; credential forensics / red-team lab / browser secret-storage RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[custom-dpapi]], [[idontlikefilelocks]], and [[qvoid-token-grabber]].
+
 - **2026-09-01** — ingest `description:BLCCoreStudio/BLCGameSecLab`: entity [[blc-gamesec-lab]] (BLCCoreStudio; Python CLI; authorized game-security validation and regression orchestration; BLCReverseLab intake, evidence graphs, DEX/native build diffing, incremental anti-cheat retest scoping; `blc.gamesec.report/v1`; defensive authorized assessment); cited on [[overviews/anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[quack]], [[apkid]], and [[il2cpp-spy]].
 
 - **2026-09-01** — ingest `description:BabylonJS/Babylon.js`: entity [[babylon-js]] (BabylonJS; TypeScript monorepo browser 3D engine; WebGL/WebGPU backends; scenes/animations/materials/physics/post-processing; SSAO/SSR/TAA; navigation mesh; Game Engine / HTML5); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[three-js]], [[engine]], [[pixijs]], and [[godogen]].

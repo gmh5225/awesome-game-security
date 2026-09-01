@@ -492,6 +492,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bootlicker](entities/bootlicker.md) — UEFI bootkit PoC (Boot Manager / OS loader patch; pre-kernel DSE / PatchGuard / Secure Boot research; gmh5225)
 - [boltgolt/boltobserv](entities/boltobserv.md) — CS:GO radar (player slot numbers on map dots; cheat / game:csgo [Radar])
 - [Branch Monitoring Project](entities/branch-monitoring-project.md) — Intel LBR/BTS branch-trace framework (C KM driver + usermode; PMI; control-flow monitoring)
+- [Browser Password Exportor](entities/browser-password-exportor.md) — Python Windows browser password decrypt/export (BL0odz; Chromium/Edge/Firefox; DPAPI/AES + Firefox key-material parsing; ASN.1 login-storage routines; credential forensics / browser secret-storage RE)
 - [BYOUD](entities/byoud.md) — x64 unwind-metadata stack spoofing framework (klezVirus; Cheat Spoof Stack)
 - [BYOVD Lab](entities/byovd.md) — educational multi-driver AV/EDR kill PoCs (`viragt64.sys`, TfSysMon, ksapi64, BdApiUtil, `wsftprm.sys`; gmh5225)
 - [BYOVDFinder](entities/byovdfinder.md) — identify LOLdrivers not blocked by active HVCI policy (BYOVD path research under Memory Integrity; ghostbyt3)
