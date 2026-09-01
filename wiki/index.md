@@ -476,6 +476,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [bloodhunt-v1-1](entities/bloodhunt-v1-1.md) — Blood Hunt external cheat framework (PhysX1337; C++; UE; DX9 ImGui ESP/aimbot/recoil; hardcoded offsets + actor cache + menu; cheat prototyping / AC evasion research)
 - [blitz](entities/blitz.md) — header-only UM lazy import resolver with direct calls (C++; Anti Cheat / Lazy Importer; emlinhax)
 - [blc](entities/blc.md) — IDA Pro plugin integrating Ghidra decompiler (Binary Lifting Contraption; cheat / IDA Plugins; cseagle)
+- [BLCGameSecLab](entities/blc-gamesec-lab.md) — Authorized game-security validation and regression orchestration CLI (Python; BLCReverseLab intake, evidence graphs, build diffing, incremental anti-cheat retest scoping; BLCCoreStudio)
 - [blender-mcp](entities/blender-mcp.md) — Blender MCP bridge (addon + Python server; scene/object/material edit; AI-assisted 3D prototyping; Game Develop / MCP)
 - [bn](entities/bn.md) — Binary Ninja CLI for agents (Python; agent-facing CLI; plugin development; Cheat Binary Ninja Plugins)
 - [bn-ebpf-solana](entities/bn-ebpf-solana.md) — Binary Ninja Solana eBPF/SBF disasm + decompile (Cheat Binary Ninja Plugins)
