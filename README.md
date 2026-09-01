@@ -1942,6 +1942,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Washi1337/ghidra-nativeaot [Ghidra analyzer/UI plugin for reversing .NET Native AOT binaries (type hierarchy, frozen objects)]
 - https://github.com/DMaroo/GhidRust [Rust decompiler]
 - https://github.com/Comsecuris/gdbghidra [GDB session]
+- https://github.com/mfthomps/RESimGhidraPlugins [Ghidra Debugger plugins for the RESim reverse-engineering simulator (Simics/gdb integration)]
 - https://github.com/hyuunnn/Hyara [Yara]
 - https://github.com/TorgoTorgo/ghidra-findcrypt [Ghidra analyzer that locates and labels cryptographic constants]
 - https://github.com/Deatty/Ghidra-Obfuscation-Detection [Detect obfuscated/complex code]
@@ -4894,6 +4895,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 
 ## Windows Security Features
 - https://github.com/fsquirt/SEWindows [TPM-based verifier for CPU virtualization, IOMMU, Secure Boot, VBS/HVCI, DSE, and vulnerable driver blocklist — local PCR replay and remote attestation]
+- https://github.com/CodeMaxx/windows-runtime-attestation-report [C++ sample calling GetRuntimeAttestationReport to dump signed driver and kernel hotpatch attestation reports (VBS/HVCI)]
 - https://github.com/yardenshafir/cet-research [CET]
 - https://github.com/gmh5225/CET-win10 [CET]
 - [HyperGuard](https://windows-internals.com/hyperguard-secure-kernel-patch-guard-part-1-skpg-initialization)
