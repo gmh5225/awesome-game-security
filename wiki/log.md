@@ -22,6 +22,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `readme:categories`: Cheat ~2769 (+1; Astronaut00/[[astronaut00-apex-external]] Apex external cheat/SDK in Cheat External) / Anti Cheat ~703 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], [[overviews/reverse-engineering]], and [[overviews/anti-cheat]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-01** — ingest `description:Astronaut00/apex-external`: entity [[astronaut00-apex-external]] (Astronaut00; C++ external cheat/SDK ApexCheat; ImGui menu/overlay + glow/aimbot/entity modules; Rust offset dumper for structure maintenance; cheat prototyping + RE experiments; outdated implementation notes; cheat / game:apex legends [External]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[apex-external]], [[apex-external-cheat]], [[nullptr-apex-external]], [[apex-legends-offset-dumper]], and [[apexdream]].
 
 - **2026-09-01** — ingest `description:AsuNa-jp/HotkeybasedKeyloggerDetector`: entity [[hotkeybased-keylogger-detector]] (AsuNa-jp; C++ KMDF kernel driver; scans win32kfull global hotkey table; detects keyloggers abusing `RegisterHotKey` with suspicious registration patterns; defensive endpoint research + Windows security testing; README Detect RegisterHotKey API); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[keyboardkit]], [[driver-detect-nullshit]], [[win32khooker]], [[win32k-file-collection]], and [[autohotkey-l]].
