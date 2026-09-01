@@ -4667,6 +4667,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/Sutaigne/alibi [Read-only Windows forensic kit for game-cheat/DMA/BYOVD and console-rig aimbot evidence]
 - https://github.com/PickAngE/AntiCheat-Scanner [Windows forensic scanner for ACE, EAC, BattlEye, EA AC, and HoYoProtect via drivers, services, BAM, Prefetch, and PE metadata]
 - https://github.com/poli0981/wardsweep [Windows Rust/WPF tool to audit installed kernel anti-cheats (EAC, BE, Vanguard, ACE), export reports, uninstall orphaned drivers/services, and sweep leftover registry and filesystem residue]
+- https://github.com/codedevdev/irontrace [Windows hardware and forensic integrity scanner for game-server anti-cheat with DMA/PCIe/USB watchlists and explainable integrity reports]
 - https://github.com/winzysss/JarAnalyzer [Windows Minecraft screenshare cheat forensics scanner — MFT-walks disks, scans JAR constant pools against blacklists, flags obfuscated archives, exports evidence reports]
 
 > Dynamic Script
