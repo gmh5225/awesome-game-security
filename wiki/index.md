@@ -2738,6 +2738,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ProGuard](entities/proguard.md) — Java bytecode shrinker/optimizer/obfuscator/preverifier (Guardsquare; unused-code removal, bytecode optimize, symbol rename; Gradle/CLI; software protection / deployment hardening; `[Java]`)
 - [Project D Win64 Shipping](entities/project-d-win64-shipping.md) — Veiled Experts UE SDK dump (LagradOst; generated C++ headers—agents, weapons, vehicles, UI, engine subsystems; class hierarchies, offsets, vtables; SDK dumping methodology; cheat / game:veiled experts)
 - [ProjectM](entities/projectm.md) — UE5 tactical FPS/RTS prototype "On All Fronts" (LeroyTechnologies; Mass Entity ECS; tens-of-thousands AI/player battles; AI soldier control + command workflows; large-map architecture; multiplayer security/anti-abuse study; UE5 FPS Game)
+- [Project Nexus CSGO](entities/projectnexus-csgo.md) — Atonl200; C++20 CS2 internal suite; injected feature DLL + external DX11 ImGui overlay via shared-memory IPC; aimbot/triggerbot/RCS/ESP/movement/skin changer; MinHook + schema/offset resolution; manual-map loader via direct syscalls; optional kernel driver/BYOVD/PE mapper; cheat architecture + AC evasion research; cheat / game:cs2 [Internal]
 - [ProxyAPICall](entities/proxy-api-call.md) — custom stack call for proxying API calls through fabricated stacks (C/C++; Cheat Spoof Stack / Custom stack call; evilashz)
 
 - [PPLKiller](entities/pplkiller.md) — BYOVD PPL strip via **`RTCore64.sys`** (patch `EPROCESS` protection level; downgrade antimalware for debug/terminate; gmh5225)

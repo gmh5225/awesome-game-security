@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:Atonl200/ProjectNexus-CSGO`: entity [[projectnexus-csgo]] (Atonl200; C++20 CS2 internal suite; injected feature DLL + external DX11 ImGui overlay via shared-memory IPC; aimbot/triggerbot/RCS/ESP/movement/skin changer; MinHook + schema/offset resolution; manual-map loader via direct syscalls; optional kernel driver/BYOVD/PE mapper; cheat architecture + AC evasion research; cheat / game:cs2 [Internal]); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[rabsztyncc-cs2-internal]], [[asphyxia-cs2]], [[cs2-cheat-source]], [[present-hook]], [[byovd]], and [[syscall-detect]].
+
 - **2026-09-01** — ingest `description:AustinBrunkhorst/Ursine3D`: entity [[ursine3d]] (AustinBrunkhorst; academic C++ game engine; ECS + reflection + editor + animation + 3D rendering; Bullet Physics, Wwise audio, CEF HTML/CSS/JS UI; education/prototyping/full projects; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[pilot]], [[esoterica]], [[hazel]], [[cpp-game-engine-book]], and [[custom-game-engines]].
 
 - **2026-09-01** — ingest `description:AvivShabtay/Stresser`: entity [[stresser]] (AvivShabtay; C++ endpoint security platform; host agents + centralized management; UM/KM telemetry, artifact processing, policy handling, detection logic; ETW-driven monitoring + dynamic/static analysis + coordinated response; malware defense / enterprise endpoint protection experiments; README Anti Virus in fact but also Anti Cheat); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[peregrine-anticheat]], [[openedr]], [[bluespawn]], [[kernelmon]], and [[openprocmon]].
