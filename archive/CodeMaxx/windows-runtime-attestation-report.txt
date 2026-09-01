@@ -1,0 +1,1259 @@
+Project Path: arc_CodeMaxx_windows-runtime-attestation-report_a2hzrcnz
+
+Source Tree:
+
+```txt
+arc_CodeMaxx_windows-runtime-attestation-report_a2hzrcnz
+├── BUILDING.md
+├── LICENSE
+├── README.md
+├── WindowsRuntimeAttestationReport.sln
+└── src
+    ├── DriverReport.cpp
+    ├── DriverReport.h
+    ├── Helpers.cpp
+    ├── Helpers.h
+    ├── HotpatchReport.cpp
+    ├── HotpatchReport.h
+    ├── WindowsRuntimeAttestationReport.vcxproj
+    ├── WindowsRuntimeAttestationReport.vcxproj.filters
+    ├── main.cpp
+    └── packages.config
+
+```
+
+`BUILDING.md`:
+
+```md
+# Building the sample from scratch
+
+Everything you need to compile and run this sample on a clean Windows machine.
+Nothing here assumes any pre-installed developer tooling.
+
+## 1. Prerequisites
+
+### 1.1 C++ toolchain
+
+Install either **Visual Studio 2022** (Community is free) or the **Build Tools
+for Visual Studio 2022** (no IDE, command-line only), with:
+
+- Workload: **Desktop development with C++**, for the MSVC v143 compiler and
+  MSBuild.
+- Component: **MSVC v143 - VS 2022 C++ ARM64 build tools**, needed only for the
+  ARM64 configuration. The workload on its own installs just the x86/x64
+  compiler.
+
+You do **not** need a Windows SDK component; the SDK comes from NuGet (§1.2).
+Any Windows 10 or 11 host will do, x64 or ARM64, whichever target you build.
+
+### 1.2 Windows SDK 10.0.29648
+
+`GetRuntimeAttestationReport` (`sysinfoapi.h`) and the runtime-report structures
+(`winnt.h`) need Windows SDK **10.0.29648**. That is a build-time requirement;
+see §4 for what it takes to *run* the sample.
+
+The SDK ships as a NuGet package rather than an installer, pinned by
+`src\packages.config` to **`10.0.29648.1000-preview`**:
+
+| Package | Provides |
+|---|---|
+| `Microsoft.Windows.SDK.CPP` | Headers and shared build props |
+| `Microsoft.Windows.SDK.CPP.x64` | x64 import libraries |
+| `Microsoft.Windows.SDK.CPP.arm64` | ARM64 import libraries |
+
+A restore (§3) downloads them into `packages\`. Command-line builds need
+`nuget.exe` on your `PATH` — from <https://www.nuget.org/downloads>, or
+`winget install Microsoft.NuGet`. Visual Studio restores on its own.
+
+### 1.3 Unattended install
+
+To set up a fresh machine without the installer UI:
+
+```powershell
+Invoke-WebRequest -Uri 'https://aka.ms/vs/17/release/vs_BuildTools.exe' -OutFile vs_BuildTools.exe
+
+# VC.Tools.x86.x64 is the compiler itself and must be listed explicitly; the
+# workload alone does not pull it in. Drop the ARM64 line if you only need x64.
+.\vs_BuildTools.exe --quiet --wait --norestart `
+  --add Microsoft.VisualStudio.Workload.VCTools `
+  --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+  --add Microsoft.VisualStudio.Component.VC.Tools.ARM64
+```
+
+> With Build Tools rather than the full IDE, `vswhere` hides the installation
+> unless you pass **`-products *`**:
+> ```powershell
+> $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+> $msbuild = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
+> ```
+
+## 2. Get the code
+
+```powershell
+git clone https://github.com/CodeMaxx/windows-runtime-attestation-report.git
+cd windows-runtime-attestation-report
+```
+
+Or download a ZIP from the repository page.
+
+## 3. Build
+
+In Visual Studio, open `WindowsRuntimeAttestationReport.sln`, select **Release**
+and either **x64** or **ARM64**, and build. If the SDK packages do not restore
+by themselves, right-click the solution and choose **Restore NuGet Packages**.
+
+From a **Developer Command Prompt for VS 2022**:
+
+```powershell
+nuget restore WindowsRuntimeAttestationReport.sln
+msbuild WindowsRuntimeAttestationReport.sln /p:Configuration=Release /p:Platform=x64
+msbuild WindowsRuntimeAttestationReport.sln /p:Configuration=Release /p:Platform=ARM64
+```
+
+The restore only has to run once. The executable lands in
+`<Platform>\Release\WindowsRuntimeAttestationReport.exe`.
+
+## 4. Run
+
+```powershell
+x64\Release\WindowsRuntimeAttestationReport.exe [--type driver|hotpatch|all]
+```
+
+- **Windows 11 25H2 or later** for the driver report.
+- **Windows 11 Insider Preview build 29591.1000 or later** for the hotpatch
+  report; earlier builds return `ERROR_INVALID_PARAMETER` for that type.
+- **VBS** enabled, plus **HVCI** for the driver report. Without HVCI that call
+  returns `ERROR_NOT_SUPPORTED` (50).
+
+The sample links the C runtime statically, so the executable is self-contained:
+copy it to a clean machine and it runs, with no redistributable to install.
+
+## 5. Troubleshooting
+
+| Symptom | Cause / fix |
+|---|---|
+| `TRK0005: Failed to locate: "CL.exe"` / `MSB8003: VCToolsInstallDir ... not defined` | The MSVC compiler for that platform is not installed. For x64 add **MSVC v143 - VS 2022 C++ x64/x86 build tools**; for ARM64 add **MSVC v143 - VS 2022 C++ ARM64 build tools** (see §1.1). |
+| `This project references NuGet package(s) that are missing on this computer` | The SDK packages have not been restored. Run `nuget restore WindowsRuntimeAttestationReport.sln` (see §3). |
+| `error: size query failed (50)` / `error: GetRuntimeAttestationReport failed (50)` | Windows returned `ERROR_NOT_SUPPORTED`. Verify that the Windows build and security configuration meet the §4 requirements for the requested report. |
+| `error: one or more parameters passed is invalid, or the requested report type is not supported on this version of Windows` | The requested report type is not supported on this build of Windows. |
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Akash Trehan
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Windows Runtime Attestation Report — Sample
+
+A small C++ console sample that calls the
+[`GetRuntimeAttestationReport`](https://learn.microsoft.com/windows/win32/api/sysinfoapi/nf-sysinfoapi-getruntimeattestationreport)
+Win32 API and prints the returned signed **Runtime Report Package**: the package
+header (digest algorithm and signature scheme) and one or more decoded reports:
+
+- **Driver report** — every loaded kernel driver with its image hash,
+  publisher certificate thumbprint, and flags.
+- **Hotpatch report** — every kernel-mode image that currently has a
+  Microsoft-signed hotpatch applied, with its base address, image size, PE
+  checksum/timestamp, and latest applied patch sequence number.
+
+Which reports are requested and printed is controlled by `--type` (see
+[Running](#running)).
+
+The report structures come from the Windows SDK's `winnt.h`, and the API is
+declared in `sysinfoapi.h`.
+
+> Scope: this sample **retrieves, parses, and prints** the report. It does not
+> perform remote attestation or verify the package's RSA-PSS signature.
+
+> **New here?**
+> [Patch or attack? Inside the Windows Secure Hotpatch Report](https://www.akashtrehan.com/secure-hotpatch-report/)
+> explains what the hotpatch report is, what it proves, what it doesn't, and
+> how security software should use it. This sample is the code behind it.
+
+## Requirements
+
+To **run**:
+
+- Windows 11 **25H2** or later for the *driver* report.
+- A Windows 11 **Insider Preview build 29591.1000** or later for the *hotpatch*
+  report. Asking for it on an earlier build returns `ERROR_INVALID_PARAMETER`
+  rather than an empty report.
+- **VBS** enabled (required to produce any signed report).
+- **HVCI** enabled — required for the *driver* report. The *hotpatch* report is
+  HVCI-independent.
+
+To **build**:
+
+- Visual Studio 2022 or the Build Tools for Visual Studio 2022, with the
+  **Desktop development with C++** workload (MSVC v143). Builds for **x64** and
+  **ARM64**.
+- **Windows SDK 10.0.29648**, consumed as a NuGet package.
+
+The sample links the C runtime statically, so the executable it produces has no
+dependency on the Visual C++ Redistributable and runs as a single self-contained
+file.
+
+## Project layout
+
+```
+src\
+  main.cpp                Entry point: argument parsing, report acquisition,
+                          package envelope walk, and dispatch to each decoder.
+  Helpers.h/.cpp          Bounds checks, structure overlay, hash-algorithm
+                          table, and hex/blob/banner printing.
+  DriverReport.h/.cpp     Driver report decoder.
+  HotpatchReport.h/.cpp   Hotpatch report decoder.
+  packages.config         Windows SDK NuGet package reference.
+```
+
+## Building
+
+Open `WindowsRuntimeAttestationReport.sln` in Visual Studio and build the `x64`
+or `ARM64` configuration, or from a Developer Command Prompt:
+
+```
+nuget restore WindowsRuntimeAttestationReport.sln
+msbuild WindowsRuntimeAttestationReport.sln /p:Configuration=Release /p:Platform=x64
+msbuild WindowsRuntimeAttestationReport.sln /p:Configuration=Release /p:Platform=ARM64
+```
+
+See [BUILDING.md](BUILDING.md) for a from-scratch toolchain setup.
+
+## Running
+
+```
+WindowsRuntimeAttestationReport.exe [--type driver|hotpatch|all]
+```
+
+`--type` selects which report types to request and decode. It defaults to
+`driver` when omitted.
+
+- `driver`   — the loaded-driver report (default).
+- `hotpatch` — the kernel-mode hotpatch report.
+- `all`      — both of the above. The SDK also defines a Code Integrity report
+  type, which this sample does not request.
+
+### Driver report
+
+```
+WindowsRuntimeAttestationReport.exe --type driver
+```
+
+```
+
+========================================================================
+  Runtime Report Package
+========================================================================
+  version   : 1
+  reports   : 1
+  size      : 12800 bytes
+  digest    : SHA-512
+  signature : RSA-PSS SHA-512
+
+========================================================================
+  Report 1 of 1  -  Driver report
+========================================================================
+  128 driver(s)
+
+  [0] crashdmp.sys (loads=1)
+      image hash      (SHA-256): 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      cert thumbprint (SHA-1): 0123456789abcdef0123456789abcdef01234567
+
+  ...
+
+------------------------------------------------------------------------
+  End of Report 1 of 1  -  Driver report
+------------------------------------------------------------------------
+```
+
+Each driver's `image hash` is printed with the digest algorithm Code Integrity
+used to authenticate that image, so a mix of SHA-256 and (legacy) SHA-1 hashes
+across drivers is expected. The certificate thumbprint is a SHA-1 hash by
+definition.
+
+### Hotpatch report
+
+```
+WindowsRuntimeAttestationReport.exe --type hotpatch
+```
+
+```
+
+========================================================================
+  Runtime Report Package
+========================================================================
+  version   : 1
+  reports   : 1
+  size      : 512 bytes
+  digest    : SHA-512
+  signature : RSA-PSS SHA-512
+
+========================================================================
+  Report 1 of 1  -  Hotpatch report
+========================================================================
+  1 patched image(s)
+
+  [0] ntoskrnl.exe
+      base address  : 0xfffff80000000000
+      image size    : 16777216 bytes
+      checksum      : 0x01234567
+      timedatestamp : 0x89abcdef
+      patch sequence: 1
+
+------------------------------------------------------------------------
+  End of Report 1 of 1  -  Hotpatch report
+------------------------------------------------------------------------
+```
+
+The hotpatch report is *active-only*: an image appears only while a hotpatch is
+applied to it, and its entry is removed when the image is unloaded. On a system
+with no active hotpatches the report lists 0 images.
+
+## Further reading
+
+A series of posts at [akashtrehan.com](https://www.akashtrehan.com) explains the
+concepts behind this sample.
+
+- [Patch or attack? Inside the Windows Secure Hotpatch Report](https://www.akashtrehan.com/secure-hotpatch-report/)
+  — what a secure hotpatch looks like in memory, why it is indistinguishable
+  from an inline hook at the byte level, and how the signed report settles it.
+
+More on the trust model, the package format, the driver report, and verifying
+the signature are on the way.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+```
+
+`WindowsRuntimeAttestationReport.sln`:
+
+```sln
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowsRuntimeAttestationReport", "src\WindowsRuntimeAttestationReport.vcxproj", "{746C2722-0892-4D24-82BD-A996895191EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+		Debug|ARM64 = Debug|ARM64
+		Release|ARM64 = Release|ARM64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{746C2722-0892-4D24-82BD-A996895191EA}.Debug|x64.ActiveCfg = Debug|x64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Debug|x64.Build.0 = Debug|x64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Release|x64.ActiveCfg = Release|x64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Release|x64.Build.0 = Release|x64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Debug|ARM64.Build.0 = Debug|ARM64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Release|ARM64.ActiveCfg = Release|ARM64
+		{746C2722-0892-4D24-82BD-A996895191EA}.Release|ARM64.Build.0 = Release|ARM64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {029E6D16-FBE7-4BAA-BCF5-3FBA179EE280}
+	EndGlobalSection
+EndGlobal
+
+```
+
+`src/DriverReport.cpp`:
+
+```cpp
+#include "DriverReport.h"
+#include "Helpers.h"
+
+#include <cstdio>
+
+bool
+PrintDriverReport(const BYTE* report, UINT32 reportSize)
+{
+    if (reportSize < FIELD_OFFSET(DRIVER_RUNTIME_REPORT, DriverEntries)) {
+        std::fprintf(stderr, "error: driver report too small\n");
+        return false;
+    }
+
+    const DRIVER_RUNTIME_REPORT UNALIGNED* driverReport =
+        Overlay<DRIVER_RUNTIME_REPORT>(report, 0);
+
+    static_assert(sizeof(driverReport->NumberOfDrivers) == sizeof(UINT16),
+                  "loop counter width assumes a 16-bit driver count");
+
+    std::printf("  %u driver(s)\n", driverReport->NumberOfDrivers);
+
+    if (driverReport->Flags.ReportOverflowed) {
+        std::printf("  note: report truncated (driver limit reached)\n");
+    }
+
+    if (driverReport->Flags.IncludeBootDrivers) {
+        std::printf("  note: includes boot-loaded drivers\n");
+    }
+
+    for (UINT16 i = 0; i < driverReport->NumberOfDrivers; i += 1) {
+        size_t offset = FIELD_OFFSET(DRIVER_RUNTIME_REPORT, DriverEntries) +
+                        static_cast<size_t>(i) * sizeof(DRIVER_INFO_ENTRY);
+
+        if (!InRange(offset, sizeof(DRIVER_INFO_ENTRY), reportSize)) {
+            std::fprintf(stderr, "error: entry %u out of range\n", i);
+            return false;
+        }
+
+        const DRIVER_INFO_ENTRY UNALIGNED* entry =
+            Overlay<DRIVER_INFO_ENTRY>(report, offset);
+
+        std::printf("\n  [%u] %.*s (loads=%u",
+                    i, DRIVER_REPORT_NAME_MAX_LENGTH, entry->InternalName,
+                    entry->LoadCount);
+
+        if (entry->Flags.Unloaded) {
+            std::printf(" unloaded");
+        }
+
+        if (entry->Flags.BootDriver) {
+            std::printf(" boot");
+        }
+
+        if (entry->Flags.HotPatch) {
+            std::printf(" hotpatch");
+        }
+
+        std::printf(")\n");
+        PrintBlob("image hash", report, reportSize,
+                  entry->ImageHashAlgorithm, entry->ImageHashOffset);
+        PrintBlob("cert thumbprint", report, reportSize,
+                  entry->PublisherThumbprintHashAlgorithm,
+                  entry->PublisherThumbprintOffset);
+
+        if (entry->OemNameSize != 0 &&
+            InRange(entry->OemNameOffset, entry->OemNameSize, reportSize)) {
+            std::printf("      OEM name        : %.*s\n", entry->OemNameSize,
+                        reinterpret_cast<const char*>(report + entry->OemNameOffset));
+        }
+    }
+
+    return true;
+}
+
+```
+
+`src/DriverReport.h`:
+
+```h
+//
+// DriverReport.h
+//
+// Decoder for the driver runtime report.
+//
+
+#pragma once
+
+#include <windows.h>
+
+// Prints a driver runtime report. 'report' points at the report header; every
+// entry offset is relative to it. Returns false if the report is malformed.
+bool
+PrintDriverReport(const BYTE* report, UINT32 reportSize);
+
+```
+
+`src/Helpers.cpp`:
+
+```cpp
+#include "Helpers.h"
+
+#include <wincrypt.h>
+#include <cstdio>
+#include <cstring>
+
+static const HashAlg HashAlgs[] = {
+    { CALG_MD5,     "MD5",     16 },
+    { CALG_SHA1,    "SHA-1",   20 },
+    { CALG_SHA_256, "SHA-256", 32 },
+    { CALG_SHA_384, "SHA-384", 48 },
+    { CALG_SHA_512, "SHA-512", 64 },
+};
+
+const HashAlg*
+FindHashAlg(UINT16 algorithm)
+{
+    for (const HashAlg& alg : HashAlgs) {
+        if (alg.id == algorithm) {
+            return &alg;
+        }
+    }
+    return nullptr;
+}
+
+void
+PrintHex(const BYTE* data, size_t length)
+{
+    for (size_t i = 0; i < length; i += 1) {
+        std::printf("%02x", data[i]);
+    }
+}
+
+void
+PrintRule(char fill)
+{
+    constexpr size_t kRuleWidth = 72;
+    char rule[kRuleWidth + 1];
+    std::memset(rule, fill, kRuleWidth);
+    rule[kRuleWidth] = '\0';
+    std::printf("%s\n", rule);
+}
+
+void
+PrintBanner(const char* title)
+{
+    std::printf("\n");
+    PrintRule('=');
+    std::printf("  %s\n", title);
+    PrintRule('=');
+}
+
+void
+PrintFooter(const char* title)
+{
+    std::printf("\n");
+    PrintRule('-');
+    std::printf("  %s\n", title);
+    PrintRule('-');
+}
+
+void
+PrintBlob(const char* label, const BYTE* report, UINT32 reportSize,
+          UINT16 algorithm, UINT32 offset)
+{
+    const HashAlg* alg = FindHashAlg(algorithm);
+    const char* algName;
+
+    if (alg != nullptr) {
+        algName = alg->name;
+    } else {
+        algName = "unknown";
+    }
+
+    std::printf("      %-15s (%s): ", label, algName);
+
+    if (alg != nullptr && offset != 0 &&
+        InRange(offset, alg->digestLength, reportSize)) {
+        PrintHex(report + offset, alg->digestLength);
+        std::printf("\n");
+    } else {
+        std::printf("(none)\n");
+    }
+}
+
+```
+
+`src/Helpers.h`:
+
+```h
+//
+// Helpers.h
+//
+// Shared helpers for the report decoders: overflow-safe bounds checks, the
+// hash-algorithm table, and output formatting. Report structures are overlaid
+// directly on the package buffer with Overlay. The pointers are UNALIGNED
+// because the package packs its sections with no padding, so a structure may
+// begin at an unaligned offset; UNALIGNED keeps field access correct on x64 and
+// ARM64. Every read from the untrusted package must be guarded by an InRange
+// check first.
+//
+
+#pragma once
+
+#include <windows.h>
+
+// Returns true if [offset, offset + length) fits within a buffer of 'total'
+// bytes, without integer overflow.
+inline bool
+InRange(size_t offset, size_t length, size_t total)
+{
+    return offset <= total && length <= total - offset;
+}
+
+// Overlays a structure on the buffer at the given offset and returns a pointer
+// to it. The pointer is UNALIGNED because a structure may begin at an unaligned
+// offset in the packed package; UNALIGNED makes field access alignment-safe on
+// x64 and ARM64. The caller must bounds-check the fields it reads with InRange
+// first.
+template <typename T>
+inline const T UNALIGNED*
+Overlay(const BYTE* base, size_t offset)
+{
+    return reinterpret_cast<const T UNALIGNED*>(base + offset);
+}
+
+struct HashAlg {
+    ALG_ID id;
+    const char* name;
+    ULONG digestLength;
+};
+
+// Looks up a hash algorithm by its wire identifier. Returns nullptr if unknown.
+const HashAlg*
+FindHashAlg(UINT16 algorithm);
+
+// Prints 'length' bytes as lowercase hex with no separators.
+void
+PrintHex(const BYTE* data, size_t length);
+
+// Prints a horizontal rule made of the given fill character.
+void
+PrintRule(char fill);
+
+// Prints a titled section banner framed by '=' rules, preceded by a blank line.
+void
+PrintBanner(const char* title);
+
+// Prints a titled closing footer framed by '-' rules, preceded by a blank line.
+void
+PrintFooter(const char* title);
+
+// Prints one hash blob identified by its hash algorithm and its offset from the
+// start of the containing report.
+void
+PrintBlob(const char* label, const BYTE* report, UINT32 reportSize,
+          UINT16 algorithm, UINT32 offset);
+
+```
+
+`src/HotpatchReport.cpp`:
+
+```cpp
+#include "HotpatchReport.h"
+#include "Helpers.h"
+
+#include <cstdio>
+
+bool
+PrintHotpatchReport(const BYTE* report, UINT32 reportSize)
+{
+    if (reportSize < FIELD_OFFSET(HOTPATCH_RUNTIME_REPORT, Entries)) {
+        std::fprintf(stderr, "error: hotpatch report too small\n");
+        return false;
+    }
+
+    const HOTPATCH_RUNTIME_REPORT UNALIGNED* hotpatchReport =
+        Overlay<HOTPATCH_RUNTIME_REPORT>(report, 0);
+
+    static_assert(sizeof(hotpatchReport->NumberOfEntries) == sizeof(UINT16),
+                  "loop counter width assumes a 16-bit entry count");
+
+    std::printf("  %u patched image(s)\n", hotpatchReport->NumberOfEntries);
+
+    for (UINT16 i = 0; i < hotpatchReport->NumberOfEntries; i += 1) {
+        size_t offset = FIELD_OFFSET(HOTPATCH_RUNTIME_REPORT, Entries) +
+                        static_cast<size_t>(i) * sizeof(HOTPATCH_INFO_ENTRY);
+
+        if (!InRange(offset, sizeof(HOTPATCH_INFO_ENTRY), reportSize)) {
+            std::fprintf(stderr, "error: entry %u out of range\n", i);
+            return false;
+        }
+
+        const HOTPATCH_INFO_ENTRY UNALIGNED* entry =
+            Overlay<HOTPATCH_INFO_ENTRY>(report, offset);
+
+        std::printf("\n  [%u] %.*s\n",
+                    i, HOTPATCH_REPORT_NAME_MAX_LENGTH, entry->BaseImageName);
+        std::printf("      %-14s: 0x%016llx\n", "base address",
+                    static_cast<unsigned long long>(entry->BaseAddress));
+        std::printf("      %-14s: %u bytes\n", "image size", entry->ImageSize);
+        std::printf("      %-14s: 0x%08x\n", "checksum", entry->BaseCheckSum);
+        std::printf("      %-14s: 0x%08x\n", "timedatestamp",
+                    entry->BaseTimeDateStamp);
+        std::printf("      %-14s: %u\n", "patch sequence",
+                    entry->LatestSequenceNumber);
+    }
+
+    return true;
+}
+
+```
+
+`src/HotpatchReport.h`:
+
+```h
+//
+// HotpatchReport.h
+//
+// Decoder for the hotpatch runtime report.
+//
+
+#pragma once
+
+#include <windows.h>
+
+// Prints a hotpatch runtime report. 'report' points at the report header.
+// Returns false if the report is malformed.
+bool
+PrintHotpatchReport(const BYTE* report, UINT32 reportSize);
+
+```
+
+`src/WindowsRuntimeAttestationReport.vcxproj`:
+
+```vcxproj
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{746C2722-0892-4D24-82BD-A996895191EA}</ProjectGuid>
+    <RootNamespace>WindowsRuntimeAttestationReport</RootNamespace>
+    <ProjectName>WindowsRuntimeAttestationReport</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <!-- DO NOT MOVE: these Windows SDK package props must be imported BEFORE
+       Microsoft.Cpp.props, which consumes the SDK root and version they set.
+       Importing them in the usual place (after Microsoft.Cpp.props) makes the
+       build fail with "cannot open include file: 'windows.h'". Visual Studio's
+       Manage NuGet Packages may try to relocate this group; move it back. -->
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.props" Condition="Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.props')" />
+    <Import Project="$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.x64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.x64.props" Condition="'$(Platform)'=='x64' And Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.x64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.x64.props')" />
+    <Import Project="$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.arm64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.arm64.props" Condition="'$(Platform)'=='ARM64' And Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.arm64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.arm64.props')" />
+  </ImportGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_WIN32_WINNT=0x0A00;NTDDI_VERSION=0x0A000010;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Helpers.cpp" />
+    <ClCompile Include="DriverReport.cpp" />
+    <ClCompile Include="HotpatchReport.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Helpers.h" />
+    <ClInclude Include="DriverReport.h" />
+    <ClInclude Include="HotpatchReport.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.targets" Condition="Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Restore them first (see BUILDING.md). The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.props'))" />
+    <Error Condition="!Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.CPP.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.targets'))" />
+    <Error Condition="'$(Platform)'=='x64' And !Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.x64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.CPP.x64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.x64.props'))" />
+    <Error Condition="'$(Platform)'=='ARM64' And !Exists('$(MSBuildThisFileDirectory)..\packages\Microsoft.Windows.SDK.CPP.arm64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.arm64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Windows.SDK.CPP.arm64.10.0.29648.1000-preview\build\native\Microsoft.Windows.SDK.cpp.arm64.props'))" />
+  </Target>
+</Project>
+
+```
+
+`src/WindowsRuntimeAttestationReport.vcxproj.filters`:
+
+```filters
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DriverReport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HotpatchReport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverReport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HotpatchReport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
+
+```
+
+`src/main.cpp`:
+
+```cpp
+//
+// WindowsRuntimeAttestationReport
+//
+// Sample that calls the GetRuntimeAttestationReport Win32 API and prints the
+// returned signed runtime report package.
+//
+//   WindowsRuntimeAttestationReport [--type driver|hotpatch|all]
+//
+// Requesting the driver report requires HVCI to be enabled.
+//
+
+#include "Helpers.h"
+#include "DriverReport.h"
+#include "HotpatchReport.h"
+
+#include <windows.h>
+#include <bcrypt.h>
+#include <vector>
+#include <new>
+#include <cstdio>
+#include <cstring>
+
+#pragma comment(lib, "onecore.lib")   // GetRuntimeAttestationReport
+#pragma comment(lib, "bcrypt.lib")    // BCryptGenRandom
+
+// Selects which report type(s) to request. Defaults to the driver report.
+// Returns false on a malformed argument.
+static bool
+ParseReportTypes(int argc, char** argv, UINT64* reportTypes)
+{
+    *reportTypes = RUNTIME_REPORT_TYPE_TO_MASK(RuntimeReportTypeDriver);
+
+    for (int i = 1; i < argc; i += 1) {
+        if (_stricmp(argv[i], "--type") != 0) {
+            std::fprintf(stderr, "error: unknown argument '%s'\n", argv[i]);
+            return false;
+        }
+
+        if (i + 1 >= argc) {
+            std::fprintf(stderr, "error: --type requires driver|hotpatch|all\n");
+            return false;
+        }
+
+        i += 1;
+        if (_stricmp(argv[i], "driver") == 0) {
+            *reportTypes = RUNTIME_REPORT_TYPE_TO_MASK(RuntimeReportTypeDriver);
+        } else if (_stricmp(argv[i], "hotpatch") == 0) {
+            *reportTypes = RUNTIME_REPORT_TYPE_TO_MASK(RuntimeReportTypeHotpatch);
+        } else if (_stricmp(argv[i], "all") == 0) {
+            *reportTypes = RUNTIME_REPORT_TYPE_TO_MASK(RuntimeReportTypeDriver) |
+                           RUNTIME_REPORT_TYPE_TO_MASK(RuntimeReportTypeHotpatch);
+        } else {
+            std::fprintf(stderr, "error: unknown --type '%s'\n", argv[i]);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Fetches the runtime report package for the given report-type mask using the
+// two-step size-then-fetch pattern. Fills 'nonce' with fresh random bytes.
+// Returns false and prints the error on failure.
+static bool
+GetReport(std::vector<BYTE>& package, UCHAR nonce[RUNTIME_REPORT_NONCE_SIZE],
+          UINT64 reportTypes)
+{
+    NTSTATUS status = BCryptGenRandom(nullptr, nonce, RUNTIME_REPORT_NONCE_SIZE,
+                                      BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+    if (!BCRYPT_SUCCESS(status)) {
+        std::fprintf(stderr, "error: BCryptGenRandom failed (0x%08lX)\n",
+                     static_cast<unsigned long>(status));
+        return false;
+    }
+
+    UINT32 size = 0;
+    if (!GetRuntimeAttestationReport(nullptr, RUNTIME_REPORT_PACKAGE_VERSION_CURRENT,
+                                     reportTypes, nullptr, &size)) {
+        DWORD error = GetLastError();
+        if (error != ERROR_INSUFFICIENT_BUFFER) {
+            // ERROR_INVALID_PARAMETER can mean a genuinely invalid parameter or
+            // that the requested report type is not supported on this version
+            // of Windows.
+            if (error == ERROR_INVALID_PARAMETER) {
+                std::fprintf(stderr,
+                             "error: one or more parameters passed is "
+                             "invalid, or the requested report type is not "
+                             "supported on this version of Windows\n");
+            } else {
+                std::fprintf(stderr, "error: size query failed (%lu)\n", error);
+            }
+            return false;
+        }
+    }
+
+    // The required size can grow if drivers load or hotpatches are applied
+    // between the size query and the fetch, so retry a bounded number of times.
+    constexpr int kMaxFetchAttempts = 4;
+
+    for (int attempt = 0; attempt < kMaxFetchAttempts; attempt += 1) {
+        package.resize(size);
+        if (GetRuntimeAttestationReport(nonce, RUNTIME_REPORT_PACKAGE_VERSION_CURRENT,
+                                        reportTypes, package.data(), &size)) {
+            package.resize(size);
+            return true;
+        }
+
+        if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+            std::fprintf(stderr, "error: GetRuntimeAttestationReport failed (%lu)\n",
+                         GetLastError());
+            return false;
+        }
+    }
+
+    std::fprintf(stderr, "error: report size kept growing; giving up\n");
+    return false;
+}
+
+// Human-readable name for a runtime report type.
+static const char*
+ReportTypeName(UINT16 reportType)
+{
+    switch (reportType) {
+    case RuntimeReportTypeDriver:
+        return "Driver report";
+    case RuntimeReportTypeHotpatch:
+        return "Hotpatch report";
+    default:
+        return "Unknown report type";
+    }
+}
+
+// Human-readable name for a runtime report signature scheme.
+static const char*
+SignatureSchemeName(UINT16 scheme)
+{
+    if (scheme == RUNTIME_REPORT_SIGNATURE_SCHEME_SHA512_RSA_PSS_SHA512) {
+        return "RSA-PSS SHA-512";
+    }
+    return "unknown";
+}
+
+// Parses the report package envelope and dispatches each contained report to
+// its decoder. Returns false if the package is malformed.
+static bool
+PrintPackage(const std::vector<BYTE>& package)
+{
+    const BYTE* data = package.data();
+    size_t total = package.size();
+
+    if (total < sizeof(RUNTIME_REPORT_PACKAGE_HEADER)) {
+        std::fprintf(stderr, "error: package too small\n");
+        return false;
+    }
+
+    const RUNTIME_REPORT_PACKAGE_HEADER UNALIGNED* header =
+        Overlay<RUNTIME_REPORT_PACKAGE_HEADER>(data, 0);
+
+    if (header->Magic != RUNTIME_REPORT_PACKAGE_MAGIC) {
+        std::fprintf(stderr, "error: unexpected package magic 0x%08X\n",
+                     header->Magic);
+        return false;
+    }
+
+    if (header->PackageVersion != RUNTIME_REPORT_PACKAGE_VERSION_CURRENT) {
+        std::fprintf(stderr, "error: unsupported package version %u\n",
+                     header->PackageVersion);
+        return false;
+    }
+
+    if (header->PackageSize != total) {
+        std::fprintf(stderr,
+                     "error: package declares %u bytes but %zu were returned\n",
+                     header->PackageSize, total);
+        return false;
+    }
+
+    const HashAlg* digestAlg = FindHashAlg(header->ReportDigestType);
+    const char* digestName;
+
+    if (digestAlg != nullptr) {
+        digestName = digestAlg->name;
+    } else {
+        digestName = "unknown";
+    }
+
+    PrintBanner("Runtime Report Package");
+    std::printf("  version   : %u\n", header->PackageVersion);
+    std::printf("  reports   : %u\n", header->NumberOfReports);
+    std::printf("  size      : %u bytes\n", header->PackageSize);
+    std::printf("  digest    : %s\n", digestName);
+    std::printf("  signature : %s\n", SignatureSchemeName(header->SignatureScheme));
+
+    size_t nonceOffset = sizeof(RUNTIME_REPORT_PACKAGE_HEADER);
+    size_t digestsOffset = nonceOffset + RUNTIME_REPORT_NONCE_SIZE;
+    size_t signatureOffset = digestsOffset + header->TotalReportDigestsSize;
+    size_t reportsOffset = signatureOffset + header->SignatureSize;
+
+    if (!InRange(reportsOffset, header->TotalAuthenticatedReportsSize, total)) {
+        std::fprintf(stderr, "error: package sections exceed the buffer\n");
+        return false;
+    }
+    size_t reportsEnd = reportsOffset + header->TotalAuthenticatedReportsSize;
+
+    size_t cursor = reportsOffset;
+    for (UINT16 i = 0; i < header->NumberOfReports; i += 1) {
+        if (!InRange(cursor, sizeof(RUNTIME_REPORT_HEADER), reportsEnd)) {
+            std::fprintf(stderr, "error: truncated report header\n");
+            return false;
+        }
+
+        const RUNTIME_REPORT_HEADER UNALIGNED* reportHeader =
+            Overlay<RUNTIME_REPORT_HEADER>(data, cursor);
+        UINT32 reportSize = reportHeader->ReportSize;
+
+        if (reportSize < sizeof(RUNTIME_REPORT_HEADER) ||
+            !InRange(cursor, reportSize, reportsEnd)) {
+            std::fprintf(stderr, "error: report %u has an invalid size\n", i);
+            return false;
+        }
+
+        char label[96];
+        std::snprintf(label, sizeof(label), "Report %u of %u  -  %s",
+                      static_cast<unsigned>(i + 1),
+                      static_cast<unsigned>(header->NumberOfReports),
+                      ReportTypeName(reportHeader->ReportType));
+        PrintBanner(label);
+
+        bool ok = true;
+        switch (reportHeader->ReportType) {
+        case RuntimeReportTypeDriver:
+            ok = PrintDriverReport(data + cursor, reportSize);
+            break;
+
+        case RuntimeReportTypeHotpatch:
+            ok = PrintHotpatchReport(data + cursor, reportSize);
+            break;
+
+        default:
+            std::printf("  no decoder for report type %u (%u bytes)\n",
+                        reportHeader->ReportType, reportSize);
+            break;
+        }
+
+        if (!ok) {
+            return false;
+        }
+
+        char footer[128];
+        std::snprintf(footer, sizeof(footer), "End of %s", label);
+        PrintFooter(footer);
+
+        cursor += reportSize;
+    }
+
+    if (cursor != reportsEnd) {
+        std::fprintf(stderr,
+                     "error: %zu authenticated bytes were not accounted for by "
+                     "the %u reports in the package\n",
+                     reportsEnd - cursor, header->NumberOfReports);
+        return false;
+    }
+
+    return true;
+}
+
+int
+main(int argc, char** argv)
+{
+    std::vector<BYTE> package;
+    UCHAR nonce[RUNTIME_REPORT_NONCE_SIZE];
+    UINT64 reportTypes;
+
+    if (!ParseReportTypes(argc, argv, &reportTypes)) {
+        return 1;
+    }
+
+    try {
+        if (!GetReport(package, nonce, reportTypes)) {
+            return 1;
+        }
+
+        if (!PrintPackage(package)) {
+            return 1;
+        }
+    } catch (const std::bad_alloc&) {
+        std::fprintf(stderr, "error: out of memory\n");
+        return 1;
+    }
+
+    return 0;
+}
+
+```
+
+`src/packages.config`:
+
+```config
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="Microsoft.Windows.SDK.CPP" version="10.0.29648.1000-preview" targetFramework="native" />
+  <package id="Microsoft.Windows.SDK.CPP.x64" version="10.0.29648.1000-preview" targetFramework="native" />
+  <package id="Microsoft.Windows.SDK.CPP.arm64" version="10.0.29648.1000-preview" targetFramework="native" />
+</packages>
+
+```
