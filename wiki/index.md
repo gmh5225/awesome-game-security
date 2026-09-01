@@ -1624,6 +1624,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rep-mov-ept-detecc](entities/rep-mov-ept-detecc.md) — REP MOVS fault-pattern EPT hook/access monitor detector (Windows C++; JustasMasiulis; overwrite-pattern signal + exception handling; REP MOV based EPT detection)
 - [vmdtstr](entities/vmdtstr.md) — STR-exit VMM fault detector (cryotb; nested HVPP test harness; Detection: Hacked Hypervisor)
 - [honor-of-kings-RE-research](entities/honor-of-kings-re-research.md) — Honor of Kings Android RE (ACE / libtersafe / IL2CPP / KernelPatch KPMs)
+- [Hotkeybased Keylogger Detector](entities/hotkeybased-keylogger-detector.md) — win32kfull global hotkey-table scanner; detects keyloggers abusing RegisterHotKey (AsuNa-jp; KMDF; defensive endpoint research; Detect RegisterHotKey API)
 - [Horizon Engine](entities/horizon-engine.md) — Windows 3D rendering engine (D3D12 / Vulkan / Metal; Game Engine source)
 - [HoudiniEngineForUnreal](entities/houdini-engine-for-unreal.md) — SideFX Houdini Engine UE plugin (HDAs / procedural workflow; Plugins:Unreal)
 - [How to Download and Install WSA](entities/how-to-download-and-install-wsa.md) — step-by-step Win11 WSA manual install guide (Developer Mode + Virtual Machine Platform; dependency packages; Explorer/PowerShell; K3V1991; Cheat WSA / Guide)

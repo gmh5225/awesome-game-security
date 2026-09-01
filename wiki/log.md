@@ -22,6 +22,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:AsuNa-jp/HotkeybasedKeyloggerDetector`: entity [[hotkeybased-keylogger-detector]] (AsuNa-jp; C++ KMDF kernel driver; scans win32kfull global hotkey table; detects keyloggers abusing `RegisterHotKey` with suspicious registration patterns; defensive endpoint research + Windows security testing; README Detect RegisterHotKey API); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[keyboardkit]], [[driver-detect-nullshit]], [[win32khooker]], [[win32k-file-collection]], and [[autohotkey-l]].
+
 - **2026-09-01** — ingest `description:AtawurRahmanTanvir/NEXUS`: entity [[nexus]] (AtawurRahmanTanvir; root-required Kotlin/Compose Android utility; macro-execution via su into DeviceSpoofingEngine/BuildPropEngine for Android ID/MAC/IMEI/build.prop, NetworkEngine/DnsTunnelEngine IP/DNS, MemoryPurgeEngine cache purge, GmailAutomationEngine telemetry cleanup; Ghost Module silent multi-layer ops; live terminal console; device fingerprint evasion / anti-ban identity rotation; cheat / Android); cited on [[overviews/mobile-security]] and [[mobile-anti-cheat]]; cross-linked [[hidemyandroid]], [[spoofing-collection]], [[kernelsu]], [[magisk]], and [[rooturk-kernel]].
 
 - **2026-09-01** — ingest `description:Atmosphere-NX/Atmosphere`: entity [[atmosphere]] (Atmosphere-NX; C/C++ Switch custom firmware; modular Fusee/Exosphere/Stratosphere stack; boot/runtime patches, TrustZone, sysmodules, emuMMC; console security research + homebrew system control; README [Customized firmware]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[hekate]], [[se-tools]], [[opensw]], [[nstool]], and [[xci-explorer]].
