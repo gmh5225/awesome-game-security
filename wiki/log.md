@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:Bad-Jubies/Exploits`: entity [[exploits]] (Bad-Jubies; Windows kernel driver exploit collection; AMD uProf **`AmdPowerProfiler.sys`** arbitrary file write CVE-2025-61969 + kernel write CVE-2026-0466; ASIO64 driver exploitation; MS-BKRP padding-oracle decryption; kernel security / BYOVD research; README `[AmdPowerProfiler.sys]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[hitcon-2023-demo-cve-2023-20562]], [[amd-ryzen-master-driver-v17-exploit]], [[asio-exploit]], and [[windows-kernel-exploits]].
+
 - **2026-09-01** — ingest `description:BadBrojo/UEDumper-MemProcFS`: entity [[uedumper-memprocfs]] (BadBrojo; C++ all-in-one UE dumper + live editor; ImGui; UE 4.19–5.2; SDK generation, class browsing, live R/W; MemProcFS/LeechCore memory backends; Unreal RE / game security analysis; cheat / SDK Dump); cited on [[overviews/game-engine]] and [[concepts/unreal-object-model]]; cross-linked [[uedumper]], [[pcileech]], [[pcileech-memprocfs-mcp]], and [[memprocfs-analyzer]].
 
 - **2026-09-01** — ingest `description:CodeMaxx/windows-runtime-attestation-report`: entity [[windows-runtime-attestation-report]] (CodeMaxx; C++ GetRuntimeAttestationReport console sample; signed driver + kernel hotpatch Runtime Report Packages; VBS/HVCI; x64/ARM64; local runtime integrity inspection; Windows Security Features); cited on [[concepts/hvci]] and [[overviews/anti-cheat]]; cross-linked [[sewindows]].

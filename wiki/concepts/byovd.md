@@ -94,6 +94,7 @@ sources:
   - wiki/sources/descriptions/gmh5225__AvastHV.md
   - wiki/sources/descriptions/gmh5225__BYOVD.md
   - wiki/sources/descriptions/ghostbyt3__BYOVDFinder.md
+  - wiki/sources/descriptions/Bad-Jubies__Exploits.md
   - wiki/sources/descriptions/backengineering__msrexec.md
   - wiki/sources/descriptions/backengineering__VDM.md
   - wiki/sources/descriptions/alfarom256__drivers_and_shit.md
@@ -109,7 +110,7 @@ sources:
   - wiki/sources/descriptions/CyberSecurityUP__ViGEmBus-Driver-Exploitation.md
   - wiki/sources/descriptions/CyberSecurityUP__UrekMazino-Malware.md
   - wiki/sources/descriptions/CaledoniaProject__drivers-binaries.md
-updated: 2026-08-29
+updated: 2026-09-01
 confidence: high
 ---
 
@@ -221,6 +222,8 @@ ViGEmBus **`ViGEmBus.sys`** virtual gamepad driver research PoC such as [[vigemb
 
 HITCON 2023 **`AMDCpuProfiler.sys`** demo such as [[hitcon-2023-demo-cve-2023-20562]] (gmh5225; CVE-2023-20562; AMD signed driver exploitation → local privilege escalation or arbitrary kernel code execution; conference PoC in the AMD driver BYOVD lane) complements physmem-focused [[amd-ryzen-master-driver-v17-exploit]]. (source: wiki/sources/descriptions/gmh5225__HITCON-2023-Demo-CVE-2023-20562.md)
 
+Multi-exploit Windows kernel driver collection such as [[exploits]] (Bad-Jubies; AMD uProf **`AmdPowerProfiler.sys`** arbitrary file write CVE-2025-61969 + kernel write CVE-2026-0466; ASIO64 driver exploitation; MS-BKRP padding-oracle decryption; complements AMD profiling-driver PoCs in the same lane) sits beside [[hitcon-2023-demo-cve-2023-20562]] and [[windows-kernel-exploits]]. (source: wiki/sources/descriptions/Bad-Jubies__Exploits.md)
+
 AMD **`atdcm64a.sys`** LPE PoC such as [[atdcm64a-lpe]] (MrAle98; C++ Visual Studio + deployment scripts; arbitrary pointer dereference in signed AMD driver; lab-oriented kernel exploitation template for driver security hardening and anti-cheat research) extends that AMD signed-driver lane beside [[hitcon-2023-demo-cve-2023-20562]]. (source: wiki/sources/descriptions/MrAle98__ATDCM64a-LPE.md)
 
 Security-product handle-donor abuse such as [[dsark64]] targets Qihoo 360’s WHQL-signed `DsArk64.sys` (suspended installer + shellcode open `\\.\DsArk`, then `DuplicateHandle` → ring-0 process kill + kernel R/W). (source: wiki/sources/descriptions/sai2fast__DsArk64.md)
@@ -291,5 +294,5 @@ Multi-driver exploit collection such as [[win-driver-exp]] (gmh5225; exploit cod
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[ms-vulnerable-driver-list]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[edr-xdr-av-killer]] · [[watchdog-killer]] · [[terminator]] · [[blackout]] · [[avasthv]] · [[evil-kaspersky]] · [[process-killer-byovd]] · [[poison-killer-bof]] · [[killer]] · [[killer-exercice]] · [[kernel-cactus]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[cve-2015-2291]] · [[cve-2017-9769]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[badrentdrv2]] · [[throttlestop-poc]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[nvdrv]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[asusdrv]] · [[asio-exploit]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[mhyprot2drvcontrol]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[ksldump]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[kernel-callbacks]] · [[hvci]] · [[msft-driverblocklist]] · [[ms-vulnerable-driver-list]] · [[loldrivers]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[physmem-drivers]] · [[patchguard]] · [[windows-kernel-exploits]] · [[exploits]] · [[hacksysextremevulnerabledriver]] · [[smep-bypass]] · [[ven0m-ransomware]] · [[av-edr-killer]] · [[edr-xdr-av-killer]] · [[watchdog-killer]] · [[terminator]] · [[blackout]] · [[avasthv]] · [[evil-kaspersky]] · [[process-killer-byovd]] · [[poison-killer-bof]] · [[killer]] · [[killer-exercice]] · [[kernel-cactus]] · [[pplkiller]] · [[ts-fucker]] · [[zam64-zemina]] · [[s4killer]] · [[s4mapper]] · [[rtcore64-vulnerability]] · [[razer-rzctl]] · [[cve-2015-2291]] · [[cve-2017-9769]] · [[qiomem]] · [[amd-ryzen-master-driver-v17-exploit]] · [[badrentdrv2]] · [[throttlestop-poc]] · [[phantomkiller]] · [[dsark64]] · [[360wfp-exploit]] · [[lenovo-cve-2025-8061]] · [[lenovo-mapper]] · [[lenovo-exec]] · [[imxyvimapper]] · [[ucmapper]] · [[nvdrv]] · [[win-driver-exp]] · [[dolboeb-executor]] · [[dbk64-vulnerability-driver]] · [[asus-bsitf-0-day-poc]] · [[asusdrv]] · [[asio-exploit]] · [[windows-10-22h2-vulnerable-driver-communication]] · [[cve-2025-24990-poc]] · [[cpuz]] · [[pdfwkrnl-exploit]] · [[pdfwkrnl-mapper]] · [[ampa-sys-exp]] · [[mhydeath]] · [[mhyprot2]] · [[mhyprot2drvcontrol]] · [[evil-mhyprot-cli]] · [[ms-io-exploit]] · [[gdrv-loader]] · [[gdrv-loader-v2]] · [[gdriver-lib]] · [[kdu]] · [[vdk]] · [[speedfan-exploit]] · [[openhardwaremonitor-poc]] · [[kur]] · [[echoac-poc]] · [[kvc]] · [[kslkatz]] · [[ksldump]] · [[kernel-research-kit]] · [[windefctl]] · [[edrsandblast]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
 

@@ -1192,6 +1192,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Exception-Ret-Spoofing](entities/exception-ret-spoofing.md) — x64 return-address spoofing via exception-handler flow (Peribunt; C++ PoC; gadget-chained spoofed call paths; calling-convention reliability/performance tradeoffs; anti-cheat evasion / control-flow research; Cheat Spoof Stack)
 - [ExpoMon](entities/expomon.md) — x64dbg Qt GUI: live DLL export-table monitor (names/ordinals/addresses; Cheat x64dbg Plugins / Exports monitoring)
 - [exengine](entities/exengine.md) — minimal C99 OpenGL 3D engine (IQM / lighting / scene; Game Engine source)
+- [exploits](entities/exploits.md) — Windows kernel driver exploit collection (Bad-Jubies; AMD uProf `AmdPowerProfiler.sys` CVE-2025-61969/2026-0466; ASIO64; MS-BKRP padding oracle; cheat / [AmdPowerProfiler.sys])
 - [explosion](entities/explosion.md) — cross-platform ECS C++ game engine (ExplosionEngine; Vulkan/DX12/Metal; editor + runtime modules; CMake/Conan; Qt/web-stack tooling; production-style workflows; game teams and rendering researchers)
 - [exe_packer](entities/exe-packer.md) — C/C++ x86/x64 PE packer (Huffman compression; custom stub; NTDLL/KERNEL32 resolve; import decrypt; relocs; Anti Cheat → Binary Packer; andrew9382)
 - [exrop](entities/exrop.md) — Python automatic ROP chain generator (constraint-driven gadget synthesis from binary; Cheat / ROP Generation)
