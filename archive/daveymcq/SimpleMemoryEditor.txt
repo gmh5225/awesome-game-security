@@ -1,0 +1,4026 @@
+Project Path: arc_daveymcq_SimpleMemoryEditor_zyk9_9nm
+
+Source Tree:
+
+```txt
+arc_daveymcq_SimpleMemoryEditor_zyk9_9nm
+├── README.md
+├── build
+│   ├── vs
+│   │   ├── build.bat
+│   │   └── detect.bat
+│   └── vsbuild.py
+├── build.py
+└── src
+    ├── application
+    │   ├── memory-scanner
+    │   │   ├── io.h
+    │   │   ├── process.h
+    │   │   ├── scan.h
+    │   │   └── ui.h
+    │   └── user-interface
+    │       ├── change-value
+    │       │   ├── window-procedure-message-handlers.h
+    │       │   ├── window-procedure.h
+    │       │   └── window.h
+    │       ├── memory-scanner
+    │       │   ├── window-procedure-message-handlers.h
+    │       │   ├── window-procedure.h
+    │       │   └── window.h
+    │       └── select-process
+    │           ├── window-procedure-message-handlers.h
+    │           ├── window-procedure.h
+    │           └── window.h
+    ├── initialize.h
+    ├── libraries
+    │   └── NCRT
+    │       ├── README.md
+    │       ├── lib
+    │       │   ├── convert.c
+    │       │   ├── convert.h
+    │       │   ├── math.c
+    │       │   ├── math.h
+    │       │   ├── memory.c
+    │       │   ├── memory.h
+    │       │   ├── strings.c
+    │       │   ├── strings.h
+    │       │   ├── types.h
+    │       │   ├── web.c
+    │       │   └── web.h
+    │       └── ncrt.h
+    ├── main.c
+    └── resources
+        ├── icon.h
+        ├── icon.rc
+        └── vs.xml
+
+```
+
+`README.md`:
+
+```md
+# SimpleMemoryEditor
+A simple, portable, full featured game cheating utility written in C.
+
+Operating System: Windows XP/Vista/7/8/8.1/10
+
+![alt text](https://raw.githubusercontent.com/daveymcq/SimpleMemoryEditor/master/src/resources/screenshot.png)
+
+```
+
+`build.py`:
+
+```py
+#!/usr/bin/env python3
+
+import sys, subprocess
+sys.path.insert(1, 'build')
+from vsbuild import vs_compile
+from vsbuild import list_vs_installations
+from vsbuild import get_vs_installations
+
+if len(sys.argv) == 1:
+
+    vs_compile()
+
+elif len(sys.argv) == 2:
+
+    if sys.argv[1].lower() == 'list':
+
+        list_vs_installations()
+
+    else:
+
+        vs_compile(sys.argv[1])
+
+
+
+
+```
+
+`build/vs/build.bat`:
+
+```bat
+@echo off
+
+if [%1] == [] (
+
+    echo 'ERROR'
+  
+) else (
+
+    pushd build
+
+    echo .....................................................................................................
+    echo Compiling for x86
+    echo .....................................................................................................
+    
+    call %1 x86>NUL
+
+    mkdir "..\bin\x86" 2>NUL
+    rc "..\src\resources\icon.rc"
+    cl "..\src\main.c*" "..\src\resources\icon.res" /Zl /O1 /MT /link libcmt.lib comctl32.lib gdi32.lib user32.lib kernel32.lib /entry:mainCRTStartup /subsystem:windows,4.02 /out:"..\bin\x86\Simple Memory Editor (32-bit).exe"
+    del "..\bin\x86\*.manifest" 2>NUL
+    del "..\src\resources\*.res" 2>NUL
+    del "*.obj" 2>NUL
+
+    echo .....................................................................................................
+    echo Compiling for x64
+    echo .....................................................................................................
+    
+    call %1 x64>NUL
+
+    mkdir "..\bin\x64" 2>NUL
+    rc "..\src\resources\icon.rc"
+    cl "..\src\main.c*" "..\src\resources\icon.res" /Zl /O1 /MT /link libcmt.lib comctl32.lib gdi32.lib user32.lib kernel32.lib /entry:mainCRTStartup /subsystem:windows,5.02 /out:"..\bin\x64\Simple Memory Editor (64-bit).exe"
+    del "..\bin\x64\*.manifest" 2>NUL
+    del "..\src\resources\*.res" 2>NUL
+    del "*.obj" 2>NUL
+    
+    echo .....................................................................................................
+
+    popd
+)
+```
+
+`build/vs/detect.bat`:
+
+```bat
+@echo off
+
+setlocal EnableDelayedExpansion
+
+set /a vs_directories=0
+
+for /d %%a in ("%programfiles%\Microsoft Visual Studio*") do (
+
+    for /f "tokens=3 delims=\" %%x in ("%%a") do (
+
+        if !vs_directories! gtr 0 echo | set /p=,
+
+        set /a vs_directories+=1 
+        echo | set /p=%%a
+    )
+)
+
+for /d %%a in ("%systemdrive%\Program Files (x86)\Microsoft Visual Studio*") do (
+
+    for /f "tokens=3 delims=\" %%x in ("%%a") do (
+
+        if !vs_directories! gtr 0 echo | set /p=,
+
+        set /a vs_directories+=1 
+        echo | set /p=%%a
+    )
+)
+
+```
+
+`build/vsbuild.py`:
+
+```py
+#!/usr/bin/env python3
+
+import os
+import sys
+import platform
+import subprocess
+
+def list_vs_installations():
+
+    vs_installations = get_vs_installations()
+
+    if len(vs_installations) > 0:
+
+        print('\r')
+
+        for index, vs in enumerate(vs_installations):
+
+            print("{}: {}".format(index + 1, vs))
+    else:
+
+        print('\r\nVisual Studio is not installed on this machine.\n')
+
+def get_vs_installations():
+
+    vs_installations_vcvarsall = []
+    vs_installations = subprocess.getoutput('call build\\vs\\detect.bat').split(',')
+
+    for vs in vs_installations:
+
+        for root, dirs, files in os.walk(vs):
+
+            for file in files:
+
+                if str(file) == 'vcvarsall.bat':
+
+                    vcvarsall = (root + '\\' + str(file))
+                    vs_installations_vcvarsall.append(vcvarsall)
+        
+
+    return vs_installations_vcvarsall
+
+def vs_compile(vcvarsall = None):
+
+    if platform.system() == 'Windows':
+
+        if vcvarsall == None:
+
+            vs_installations = get_vs_installations()
+
+            if len(vs_installations) == 0:
+
+                print('\r\nError: Visual Studio is not installed on this machine. Please install Visual Studio from https://visualstudio.microsoft.com\n')
+                return False
+
+            
+            for vs in vs_installations:
+
+                cmd = "call build\\vs\\build.bat \"{}\"".format(vs)
+                print("\r\nUsing \"{}\" \r\n".format(vs))
+
+                if subprocess.getoutput(cmd) != 'ERROR':
+
+                    print(subprocess.getoutput(cmd))
+                    return True
+                            
+
+        else:
+
+            if os.path.isfile(vcvarsall):
+                
+                cmd = "call build\\vs\\build.bat \"{}\"".format(vcvarsall)
+                print("\r\nUsing \"{}\" \r\n".format(vcvarsall))
+
+                if subprocess.getoutput(cmd) != 'ERROR':
+
+                    print(subprocess.getoutput(cmd))
+                    return True
+
+            else:
+
+                print('\r\nError: The path to your Visual Studio installation\'s "vcvarsall.bat" is invalid.\n')
+                return False
+    else:
+
+        print('\r\nError: You must be running Windows to compile using Visual Studio.\n')
+        return False
+
+
+```
+
+`src/application/memory-scanner/io.h`:
+
+```h
+#ifndef _IO_H
+#define _IO_H
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                   ArrayList implementation                                    //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* Create an ArrayList */
+
+ARRAY_LIST *CreateArrayList(uint64 initial_capacity) 
+{
+    ARRAY_LIST *list = (ARRAY_LIST *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*list));
+
+    if(list)
+    {
+        list->size = 0;
+        list->capacity = initial_capacity;
+        list->array = (MEMORY_BLOCK *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, initial_capacity * sizeof(*list->array));
+
+        if(!list->array)
+        {
+            HeapFree(GetProcessHeap(), 0, list);
+            list = null;
+        }
+    }
+
+    return list;
+}
+
+/* Increase the capacity of an ArrayList */
+
+ARRAY_LIST *ArrayListIncreaseCapacity(ARRAY_LIST *list) 
+{
+    list->capacity *= 2;
+    list->array = (MEMORY_BLOCK *)HeapReAlloc(GetProcessHeap(), 
+                                              HEAP_ZERO_MEMORY, list->array, 
+                                              list->capacity * sizeof(*list->array));
+
+    if(!list->array)
+    {
+        HeapFree(GetProcessHeap(), 0, list->array);
+        list->array = null;
+    }
+
+    return list;
+}
+
+/* Add Item to an ArrayList */
+
+void ArrayListAdd(ARRAY_LIST *list, MEMORY_BLOCK *mb) 
+{
+    if(list->size >= list->capacity) 
+    {
+        ArrayListIncreaseCapacity(list);
+    }
+
+    MemoryCopy(&list->array[list->size++], mb, sizeof(*list->array));
+}
+
+/* Get Item from an ArrayList */
+
+MEMORY_BLOCK *ArrayListGet(ARRAY_LIST *list, uint64 index) 
+{
+    if(index < list->size) 
+    {
+        return &list->array[index];
+    }
+
+    return null;
+}
+
+/* Free resourses used by an ArrayList */
+
+void FreeArrayList(ARRAY_LIST *list) 
+{
+    list->size = 0;
+    list->capacity = 0;
+    HeapFree(GetProcessHeap(), 0, list->array);
+    list->array = null;
+    HeapFree(GetProcessHeap(), 0, list);
+    list = null;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                   Memory IO WinAPI Wrappers                                   //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* A set of helper functions that reads/writes the memory at the address specified. */
+
+real4 ReadFloat(HANDLE process, void *address)
+{
+    real4 value;
+
+    if(ReadProcessMemory(process, address, (real4 *)&value, sizeof(real4), null))
+    {
+        return value;
+    }
+
+    return 0.0f;
+}
+
+real8 ReadDouble(HANDLE process, void *address)
+{
+    real8 value;
+
+    if(ReadProcessMemory(process, address, (real8 *)&value, sizeof(real8), null))
+    {
+        return value;
+    }
+
+    return 0.0;
+}
+
+int64 ReadInteger(HANDLE process, void *address, uint16 data_size)
+{
+    int64 value = 0;
+
+    if(ReadProcessMemory(process, address, (int64 *)&value, data_size, null))
+    {
+        switch(data_size)
+        {
+            case sizeof(int8):
+
+                value = (int8)value;
+                return value;
+
+            break;
+
+            case sizeof(int16):
+
+                value = (int16)value;
+                return value; 
+
+            break;
+            
+            case sizeof(int32):
+
+                value = (int32)value; 
+                return value; 
+
+            break;
+
+            case sizeof(int64):
+
+                value = (int64)value;
+                return value;
+
+            break;
+        }
+    }
+
+    return value;
+}
+
+boolean WriteFloat(HANDLE process, void *address, real4 value)
+{
+    SIZE_T bytes_written = 0;
+
+    if(WriteProcessMemory(process, address, &value, sizeof(value), &bytes_written))
+    {
+        return (bytes_written == sizeof(value)); 
+    }
+
+    return false;
+}
+
+boolean WriteDouble(HANDLE process, void *address, real8 value)
+{
+    SIZE_T bytes_written = 0;
+
+    if(WriteProcessMemory(process, address, &value, sizeof(value), &bytes_written))
+    {
+        return (bytes_written == sizeof(value)); 
+    }
+
+    return false;
+}
+
+boolean WriteInteger(HANDLE process, void *address, int64 value, uint16 data_size)
+{
+    SIZE_T bytes_written = 0;
+
+    if(WriteProcessMemory(process, address, &value, data_size, &bytes_written))
+    {
+        return (bytes_written == data_size);
+    }
+
+    return false;
+}
+
+#endif
+```
+
+`src/application/memory-scanner/process.h`:
+
+```h
+#ifndef _PROCESS_H
+#define _PROCESS_H
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                  Logic Handling Windows Processes                             //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* Calls ResetScan() if the selected thread terminates. */
+
+DWORD WINAPI MonitorSelectedProcess(void)
+{
+    while(null != Scanner)
+    {
+        DWORD code;
+        GetExitCodeProcess(Scanner->process, &code);
+        SelectedProcessOpen = (code == STILL_ACTIVE);
+
+        if(!SelectedProcessOpen)
+        {
+            ResetScan(Scanner, true, true);
+            break;
+        }
+    }
+
+    return EXIT_SUCCESS;
+}
+
+/* Finds all running processes on machine and finds their process id. */
+
+boolean GetProcessNameAndID(void)
+{
+    HANDLE snapshot, process;
+    PROCESSENTRY32 pe;
+
+    snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    if(snapshot != INVALID_HANDLE_VALUE)
+    {
+        pe.dwSize = sizeof(pe);
+
+        if(!Process32First(snapshot, &pe))
+        {
+            CloseHandle(snapshot);
+            return false;
+        }
+
+        do
+        {
+            if(pe.th32ProcessID == GetCurrentProcessId()) 
+            {
+                continue;
+            }
+
+            process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, pe.th32ProcessID); 
+
+            if(null != process)
+            {
+                boolean IsProcess32Bit;
+                boolean IsApplication32Bit;
+
+                typedef boolean (WINAPI *FP_ISWOW64PROCESS) (HANDLE, PBOOL);
+                FP_ISWOW64PROCESS pIsWow64Process = (FP_ISWOW64PROCESS)GetProcAddress(GetModuleHandleA("kernel32"), "IsWow64Process");
+
+                CopyString(Processes[NumberOfProcesses], pe.szExeFile, sizeof(Processes[NumberOfProcesses]));
+
+                if(pIsWow64Process)
+                {
+                    if(pIsWow64Process(GetCurrentProcess(), &IsApplication32Bit))
+                    {
+                        if(pIsWow64Process(process, &IsProcess32Bit))
+                        {
+                            if(IsApplication32Bit)
+                            {
+                                if(!IsProcess32Bit)
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                IntegerToString(pe.th32ProcessID, Pids[NumberOfProcesses], sizeof(Pids[NumberOfProcesses]) - 1, FMT_INT_DECIMAL);
+                NumberOfProcesses++; 
+               
+                CloseHandle(process);
+            }
+
+        } while(Process32Next(snapshot, &pe));
+
+        ProcessCounter = NumberOfProcesses;
+        NumberOfProcesses = 0;
+
+        CloseHandle(snapshot);
+
+        return true;
+    }
+
+    return false;
+}
+
+#endif
+```
+
+`src/application/memory-scanner/scan.h`:
+
+```h
+#ifndef _SCAN_H
+#define _SCAN_H
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                   Memory Scanner Logic                                        //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* Check if the selected address is frozen by comparing it against FrozenAddress */
+
+boolean IsAddressFrozen(string address)
+{
+    uint16 i;
+
+    for(i = 0; i < FREEZE_LIMIT; i++)
+    {
+        if(StringCompare(FrozenAddresses[i], address, false)) 
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/* Checks if the bit in MEMORY_BLOCK.match_flag corresponding to an offset in 
+   MEMORY_BLOCK.address was cleared in the previous scan. */
+
+boolean AddressNotDiscarded(MEMORY_BLOCK *mblock, uint64 offset)
+{
+    MEMORY_BLOCK *mb = mblock;
+
+    if(null != mb)
+    {
+        boolean not_discarded = (mb->match_flag[(offset) / 8] & (1 << ((offset) % 8))); 
+        return not_discarded;
+    }
+
+    return false;
+}
+
+/* Clears the bit in MEMORY_BLOCK.match_flag corresponding to an offset in MEMORY_BLOCK.address. */
+
+boolean DiscardAddress(MEMORY_BLOCK *mblock, uint64 offset)
+{
+    MEMORY_BLOCK *mb = mblock;
+
+    if(null != mb)
+    {
+        mb->match_flag[(offset) / 8] &= ~(1 << ((offset) % 8));
+        return true;
+    }
+
+    return false;
+}
+
+/* Resets all previosly filtered addresses. */
+
+void ResetScan(MEMORY_BLOCK *mblock, boolean reset_pid, boolean disable_process_monitor)
+{
+    SIZE_T i = 0;
+    MEMORY_BLOCK *mb = mblock;
+    
+    SelectedItem = -1;
+    AddressFrozen = false;
+    FirstScanNotRun = true;
+    NumberOfAddressesFrozen = 0;
+    SelectedProcessOpen = false;
+
+    EnableWindow(NewScan, false);
+    EnableWindow(Scan, !reset_pid);
+
+    SendMessageA(ProgressBar, PBM_SETPOS, 0, 0);
+
+    MemoryZero(FrozenValues, sizeof(FrozenValues));
+    MemoryZero(FrozenAddresses, sizeof(FrozenAddresses));
+
+    SetDlgItemText(MemoryScannerWindow, ID_VALUE, 0);
+    SendMessageA(SearchCondition, CB_RESETCONTENT, 0, 0);
+    SendMessageA(SearchCondition, CB_ADDSTRING, 0, (LPARAM)SearchConditions[SEARCH_EQUALS]);
+
+    ListView_DeleteAllItems(ListView);
+
+    while(null != mb)
+    {
+        MemorySet(mb->match_flag, 0xff, mb->size / 8); 
+        mb->matches = mb->size;
+        mb = ArrayListGet(ArrayList, ++i); 
+    }
+
+    SendMessageA(SearchCondition, CB_SETCURSEL, (WPARAM)0, 0);
+    SendMessageA(DataSize, CB_SETCURSEL, (WPARAM)2, 0);
+
+    if(reset_pid)
+    {
+        SetDlgItemText(MemoryScannerWindow, ID_SELECT_PROCESS, (string)"Select Process");
+        SendMessageA(SearchCondition, CB_RESETCONTENT, 0, 0);
+        SendMessageA(DataSize, CB_RESETCONTENT, 0, 0);
+        EnableWindow(SearchCondition, false);
+        EnableWindow(ChoosePid, true);
+        EnableWindow(DataSize, false);
+        EnableWindow(Value, false);
+    }
+
+    if(disable_process_monitor)
+    {
+        if(MonitorSelectedProcessThread && TerminateThread(MonitorSelectedProcessThread, 0))
+        {
+            WaitForSingleObject(MonitorSelectedProcessThread, INFINITE);
+            CloseHandle(MonitorSelectedProcessThread);
+        }
+    }
+
+    if(FreezeThread && TerminateThread(FreezeThread, 0))
+    {
+        WaitForSingleObject(FreezeThread, INFINITE);
+        CloseHandle(FreezeThread);
+    }
+}
+
+/* A thread to monitor addresses for change. */
+
+DWORD WINAPI FreezeSelectedScannedAddresses(void)
+{
+    while(null != Scanner)
+    {
+        uint16 i;
+
+        WaitForSingleObject(Mutex, INFINITE);
+
+        for(i = 0; i < NumberOfAddressesFrozen; i++)
+        {
+            real8 value;
+            void *address;
+            INTFMT search_number_format;
+
+            value = StringToDouble(FrozenValues[i]);
+            address = (PVOID) (uintptr_t)StringToInteger(FrozenAddresses[i], FMT_INT_HEXADECIMAL);
+
+            if((IsNumeric(FrozenValues[i])) && ((FrozenValues[i][0] == '0') && (FrozenValues[i][1] == 'x')))
+            {
+                search_number_format = FMT_INT_HEXADECIMAL;
+            }
+
+            else if(IsNumeric(FrozenValues[i]) && ((FrozenValues[i][0] != '0') && (FrozenValues[i][1] != 'x')))
+            {
+                search_number_format = FMT_INT_DECIMAL;
+            }
+
+            else
+            {
+                search_number_format = (INTFMT)0;
+            }
+
+            if(search_number_format)
+            {
+                value = StringToInteger(FrozenValues[i], search_number_format);
+            }
+
+            switch(Type)
+            {
+                case TYPE_FLOAT:
+
+                    CurrentValue = ReadFloat(Scanner->process, address);
+
+                    if(value != CurrentValue)
+                    {
+                        WriteFloat(Scanner->process, address, value);
+                    }
+
+                break;
+
+                case TYPE_DOUBLE:
+
+                    CurrentValue = ReadDouble(Scanner->process, address);
+
+                    if(value != CurrentValue)
+                    {
+                        WriteDouble(Scanner->process, address, value);
+                    }
+
+                break;
+
+                case TYPE_INTEGER:
+
+                    CurrentValue = ReadInteger(Scanner->process, address, Scanner->data_size);
+
+                    if(value != CurrentValue)
+                    {
+                        WriteInteger(Scanner->process, address, value, Scanner->data_size);
+                    }
+
+                break;
+            }
+        }
+
+        ReleaseMutex(Mutex);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+/* Constructs and allocates the MEMORY_BLOCK linked list structure. */
+
+MEMORY_BLOCK *CreateMemoryBlock(HANDLE process, MEMORY_BASIC_INFORMATION *mbi, uint16 data_size)
+{
+    MEMORY_BLOCK *mb = (MEMORY_BLOCK *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*mb));
+
+    if(null != mb)
+    {
+        mb->process             = process;
+        mb->data_size           = data_size; 
+        mb->matches             = (uint64)mbi->RegionSize;
+        mb->size                = (uint64)mbi->RegionSize;
+        mb->address             = (uint8 *)mbi->BaseAddress;
+        mb->buffer              = (uint8 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, mbi->RegionSize);
+        mb->match_flag          = (uint8 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (mbi->RegionSize / 8));
+        mb->values              = (real8 *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, mbi->RegionSize * sizeof(*mb->values));
+
+        if(mb->match_flag) 
+        {
+            MemorySet(mb->match_flag, 0xff, (mbi->RegionSize / 8));
+        }
+    }
+
+    return mb;
+}
+
+/* Finds the initial valid memory information and sets up for UpdateMemoryBlock(). */
+
+MEMORY_BLOCK *CreateMemoryScanner(uint32 pid, uint16 data_size)
+{
+    MEMORY_BASIC_INFORMATION mbi;
+    MEMORY_BLOCK *mblock;
+    HANDLE process;
+    uint8 *address;
+
+    process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, true, pid);
+
+    if(process)
+    {
+        SelectedProcessOpen = true;
+        CurrentProcess = pid;
+        mblock = null;
+        address = 0;
+
+        while(VirtualQueryEx(process, address, &mbi, sizeof(mbi)) != 0)
+        {
+            if((mbi.State & MEM_COMMIT) && (mbi.Protect & WRITABLE_MEMORY) && !((mbi.Protect & PAGE_GUARD) || (mbi.Protect & PAGE_NOACCESS)))
+            {
+                MEMORY_BLOCK *mb = CreateMemoryBlock(process, &mbi, data_size); 
+
+                if(null != mb)
+                {
+                    ArrayList = (ArrayList) ? ArrayList : CreateArrayList(sizeof(*mb));
+                    ArrayListAdd(ArrayList, mb);
+                }
+            }
+
+            address = (uint8 *)mbi.BaseAddress + mbi.RegionSize;
+        }
+    }
+
+    return ArrayListGet(ArrayList, 0);
+}
+
+/* Finds the number of matches from the last scan. */
+
+SIZE_T GetMatchCountFromLastScan(MEMORY_BLOCK *mblock)
+{
+    MEMORY_BLOCK *mb = mblock;
+    SIZE_T matches = 0;
+    SIZE_T i = 0;
+
+    while(null != mb)
+    {
+        matches += mb->matches;
+        mb = ArrayListGet(ArrayList, ++i); 
+    }
+
+    return matches;
+}
+
+/* Finds the number of blocks in process to scan. */
+
+uint64 GetBlockCount(MEMORY_BLOCK *mblock)
+{
+    MEMORY_BLOCK *mb = mblock;
+    uint64 count = 0;
+    uint64 i = 0;
+
+    while(null != mb)
+    {
+        count += mb->size;
+        mb = ArrayListGet(ArrayList, ++i); 
+    }
+
+    return count;
+}
+
+/* Cleans up the memory allocated by CreateMemoryScanner(). */
+
+void FreeMemoryScanner(MEMORY_BLOCK *mblock)
+{
+    MEMORY_BLOCK *mb = (mblock) ? mblock : ArrayListGet(ArrayList, 0);
+
+    while(null != mb)
+    {
+        if(mb->process)
+        {
+            CloseHandle(mb->process);
+            mb->process = null;
+        }
+
+        if(mb->buffer)
+        {
+            HeapFree(GetProcessHeap(), 0, mb->buffer);
+            mb->buffer = null;
+        }
+
+        if(mb->values)
+        {
+            HeapFree(GetProcessHeap(), 0, mb->values);
+            mb->values = null;
+        }
+
+        if(mb->match_flag)
+        {
+            HeapFree(GetProcessHeap(), 0, mb->match_flag);
+            mb->match_flag = null;
+        }
+
+        mb = ArrayListGet(ArrayList, mb->size + 1);
+    }
+}
+
+/* Filters memory information aquired by CreateMemoryScanner() and subsequent calls to this function. */
+
+void UpdateMemoryBlock(MEMORY_BLOCK *mblock, SEARCH_CONDITION condition, TYPE Type, real8 value)
+{
+    SIZE_T i = 0;
+    MEMORY_BLOCK *mb = mblock;
+
+    WaitForSingleObject(Mutex, INFINITE);
+    
+    while(null != mb)
+    {
+        if(mb->matches > 0)
+        {
+            static uint8 buffer[4096 * 4096];
+            static SIZE_T bytes_to_read;
+            static SIZE_T total_read;
+            static SIZE_T bytes_left;
+            static SIZE_T bytes_read;
+
+            bytes_left = mb->size;
+
+            while(bytes_left > 0)
+            {
+                total_read = 0;
+                mb->matches = 0;
+                bytes_to_read = (bytes_left > sizeof(buffer)) ? sizeof(buffer) : bytes_left;
+
+                if(!ReadProcessMemory(mb->process, mb->address + total_read, buffer, bytes_to_read, &bytes_read)) break;
+
+                if(bytes_read == bytes_to_read) 
+                {
+                    uint64 offset;
+
+                    for(offset = 0; offset < bytes_read; offset += mb->data_size)
+                    {
+                        if(AddressNotDiscarded(mb, total_read + offset)) 
+                        {
+                            real8 tmpval;
+                            real8 prevval;
+                            boolean match;
+
+                            if(Type == TYPE_INTEGER)
+                            {
+                                switch(mb->data_size)
+                                {
+                                    case sizeof(int8):
+
+                                        tmpval = *((int8 *)&buffer[offset]);
+                                        mb->values[total_read + offset] = tmpval;
+                                        prevval = *((int8 *)&mb->buffer[total_read + offset]);
+
+                                    break;
+
+                                    case sizeof(int16):
+
+                                        tmpval = *((int16 *)&buffer[offset]);
+                                        mb->values[total_read + offset] = tmpval;
+                                        prevval = *((int16 *)&mb->buffer[total_read + offset]);
+
+                                    break;
+
+                                    case sizeof(int32):
+
+                                        tmpval = *((int32 *)&buffer[offset]);
+                                        mb->values[total_read + offset] = tmpval;
+                                        prevval = *((int32 *)&mb->buffer[total_read + offset]);
+
+                                    break;
+
+                                    case sizeof(int64):
+
+                                        tmpval = *((int64 *)&buffer[offset]);
+                                        mb->values[total_read + offset] = tmpval;
+                                        prevval = *((int64 *)&mb->buffer[total_read + offset]);
+
+                                    break;
+                                }
+                            }
+
+                            else if(Type == TYPE_FLOAT)
+                            {
+                                if(mb->data_size == sizeof(real4))
+                                {
+                                    tmpval = *((real4 *)&buffer[offset]);
+                                    mb->values[total_read + offset] = tmpval;
+                                    prevval = *((real4 *)&mb->buffer[total_read + offset]);
+                                }
+                            }
+
+                            else if(Type == TYPE_DOUBLE)
+                            {
+                                if(mb->data_size == sizeof(real8))
+                                {
+                                    tmpval = *((real8 *)&buffer[offset]);
+                                    mb->values[total_read + offset] = tmpval;
+                                    prevval = *((real8 *)&mb->buffer[total_read + offset]);
+                                }
+                            }
+
+                            switch(condition)
+                            {
+                                case SEARCH_EQUALS:
+
+                                    match = (tmpval == value);
+
+                                break;
+
+                                case SEARCH_INCREASED:
+
+                                    match = (tmpval > prevval);
+
+                                break;
+
+                                case SEARCH_DECREASED:
+
+                                    match = (tmpval < prevval);
+
+                                break;
+
+                                default:
+
+                                    match = false;
+
+                                break;
+                            }
+
+                            if(match)
+                            {
+                                ++mb->matches;
+                            }
+
+                            else 
+                            {
+                                DiscardAddress(mb, total_read + offset);
+                            }                            
+                        }
+                    }
+
+                    MemoryCopy(mb->buffer + total_read, buffer, bytes_read);
+
+                    bytes_left -= bytes_read;
+                    total_read += bytes_read;
+                }
+            }
+
+            mb->size = total_read;
+        }
+
+        mb = ArrayListGet(ArrayList, ++i); 
+        ReleaseMutex(Mutex);
+    }
+}
+
+/* Add scan results to memory scanner window. */
+
+void DisplayScanResults(MEMORY_BLOCK *mblock, INTFMT display_format, uint32 display_limit)
+{
+    SIZE_T i = 0;
+    uint32 limit = 0;
+    real8 total_scanned = 0;
+    MEMORY_BLOCK *mb = mblock;
+
+    EnableWindow(ListView, false); 
+    WaitForSingleObject(Mutex, INFINITE);
+
+    while(null != mb)
+    {
+        uint64 offset;
+        uint64 total_bytes = GetBlockCount(mb);
+
+        for(offset = 0; offset < mb->size; offset += mb->data_size)
+        {
+            if(AddressNotDiscarded(mb, offset))
+            {
+                int8 val[256];
+                int8 address[256];
+
+                EnableWindow(ListView, false);
+                IntegerToString((uint64)(uintptr_t)mb->address + offset, address, sizeof(address) - 1, FMT_INT_HEXADECIMAL);
+
+                if(Type == TYPE_INTEGER)
+                {
+                    int64 value = mb->values[offset];
+
+                    if(display_format == FMT_INT_DECIMAL)
+                    {
+                        IntegerToString(value, val, sizeof(val) - 1, display_format);
+                    }
+
+                    else if(display_format == FMT_INT_HEXADECIMAL)
+                    {
+                        val[0] = '0';
+                        val[1] = 'x';
+
+                        IntegerToString(value, val + 2, sizeof(val) - 3, display_format);
+                    }
+                }
+
+                else if(Type == TYPE_FLOAT)
+                {
+                    real4 value = (real4)mb->values[offset];
+                    DoubleToString(value, val, sizeof(val) - 1);
+                }
+
+                else if(Type == TYPE_DOUBLE)
+                {
+                    real8 value = mb->values[offset];
+                    DoubleToString(value, val, sizeof(val) - 1);
+                }
+
+                if(limit <= display_limit)
+                {
+                    AddItemToListView(address, val);
+                    ++limit;
+                }
+            }
+
+            total_scanned += mb->data_size;   
+        }
+
+        Progress = ((real8)total_scanned / (real8)total_bytes) * 100.0;
+        SendMessageA(ProgressBar, PBM_SETPOS, (WPARAM)Progress, 0);
+        mb = ArrayListGet(ArrayList, ++i); 
+    }
+
+    SendMessageA(ProgressBar, PBM_SETPOS, 100, 0);
+    EnableWindow(ListView, true); 
+    ReleaseMutex(Mutex);
+}
+
+/* The function function responsible for performing the scan. */
+
+DWORD WINAPI CreateNewScan(void)
+{
+    static int8 pid[256];
+    static int8 val[256];
+    static int8 data_size[256];
+    static int8 condition[256];
+    static int8 status_message[256];
+
+    uint64 matches;
+    int32 selection_id;
+    INTFMT search_number_format;
+
+    search_number_format = FMT_INT_DECIMAL;
+    selection_id = (int32)SendMessageA(DataSize, CB_GETCURSEL, 0, 0);
+
+    CopyString(pid, SelectedPid, sizeof(pid) - 1); 
+
+    SendMessageA(Value, WM_GETTEXT, sizeof(val) - 1, (LPARAM)val);
+    SendMessageA(SearchCondition, WM_GETTEXT, sizeof(condition) - 1, (LPARAM)condition);
+
+    if(selection_id > -1) 
+    {
+        CopyString(data_size, (string)DataSizes[selection_id], sizeof(data_size) - 1);
+    }
+
+    if((val[0] == '0') && (val[1] == 'x'))
+    {
+        search_number_format = FMT_INT_HEXADECIMAL;
+    }
+
+    if((IsNumeric(val)) && ((StringLength(pid) && StringLength(data_size) && StringLength(val) && StringLength(data_size))))
+    {
+        Progress = 0;
+        Scanner = (Scanner) ? Scanner : CreateMemoryScanner((uint32)StringToInteger(pid, FMT_INT_DECIMAL), (uint16)StringToInteger(data_size, FMT_INT_DECIMAL)); 
+
+        if(Scanner)
+        {
+            if(MonitorSelectedProcessThread)
+            {
+                string pstatus_message;
+                int8 selected_search_condition;
+  
+                ScanRunning = true;
+                NumberOfAddressesFrozen = 0;
+                selected_search_condition = (int8)SendMessageA(SearchCondition, CB_GETCURSEL, 0, 0);
+
+                if(selected_search_condition > -1)
+                {
+                    SelectedItem = -1;
+                    Type = (selection_id <= 3) ? TYPE_INTEGER : (selection_id == 5) ? TYPE_DOUBLE : TYPE_FLOAT;
+
+                    SendMessageA(ListView, LVM_DELETEALLITEMS, 0, 0);
+
+                    EnableWindow(SearchCondition, false);
+                    EnableWindow(ChoosePid, false);
+                    EnableWindow(DataSize, false);
+                    EnableWindow(NewScan, false);
+                    EnableWindow(Value, false);
+                    EnableWindow(Scan, false);
+
+                    if(Type == TYPE_INTEGER)
+                    {
+                        void DisplayScanResults(MEMORY_BLOCK *, INTFMT, uint32);
+
+                        switch(selected_search_condition)
+                        {
+                            case SEARCH_EQUALS:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_EQUALS, TYPE_INTEGER, StringToInteger(val, search_number_format)); 
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+
+                            case SEARCH_INCREASED:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_INCREASED, TYPE_INTEGER, 0);
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+
+                            case SEARCH_DECREASED:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_DECREASED, TYPE_INTEGER, 0);
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+                        }
+                    }
+
+                    else if(Type == TYPE_FLOAT)
+                    {
+                        switch(selected_search_condition)
+                        {
+                            case SEARCH_EQUALS:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_EQUALS, TYPE_FLOAT, (real4)StringToDouble(val));
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+
+                            case SEARCH_INCREASED:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_INCREASED, TYPE_FLOAT, 0);
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+
+                            case SEARCH_DECREASED:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_DECREASED, TYPE_FLOAT, 0);
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+                        }
+                    }
+
+                    else if(Type == TYPE_DOUBLE)
+                    {
+                        switch(selected_search_condition)
+                        {
+                            case SEARCH_EQUALS:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_EQUALS, TYPE_DOUBLE, StringToDouble(val));
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+
+                            case SEARCH_INCREASED:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_INCREASED, TYPE_DOUBLE, 0);
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+
+                            case SEARCH_DECREASED:
+
+                                UpdateMemoryBlock(Scanner, SEARCH_DECREASED, TYPE_DOUBLE, 0);
+                                DisplayScanResults(Scanner, search_number_format, FREEZE_LIMIT);
+
+                            break;
+                        }
+                    }
+
+                    matches = GetMatchCountFromLastScan(Scanner);
+
+                    if(matches)
+                    {
+                        if(FreezeThread && TerminateThread(FreezeThread, 0))
+                        {
+                            WaitForSingleObject(FreezeThread, INFINITE); 
+                            CloseHandle(FreezeThread);
+                        }
+
+                        FreezeThread = CreateThread(null, null, (LPTHREAD_START_ROUTINE)FreezeSelectedScannedAddresses, null, null, null); 
+                    }
+
+                    if(FirstScanNotRun)
+                    {
+                        FirstScanNotRun = false;
+
+                        SendMessageA(SearchCondition, CB_ADDSTRING, 0, (LPARAM)SearchConditions[SEARCH_INCREASED]);
+                        SendMessageA(SearchCondition, CB_ADDSTRING, 0, (LPARAM)SearchConditions[SEARCH_DECREASED]);
+                    }
+
+                    pstatus_message = IntegerToString(matches, status_message, sizeof(status_message), FMT_INT_DECIMAL);
+
+                    SetForegroundWindow(MemoryScannerWindow);
+                    EnableWindow(MemoryScannerWindow, false);
+                    EnableWindow(MemoryScannerWindow, true);
+                    EnableWindow(SearchCondition, true);
+                    EnableWindow(ChoosePid, true);
+                    EnableWindow(DataSize, true);
+                    EnableWindow(NewScan, true);
+                    EnableWindow(Value, true);
+                    EnableWindow(Scan, true);
+                    ScanRunning = false;
+                    MessageBeep(MB_OK);
+
+                    StringConcat(pstatus_message, " Matches found!");
+
+                    return MessageBoxA(MemoryScannerWindow, status_message, Title, MB_OK);
+                }
+            }
+        }
+    }
+
+    return EXIT_FAILURE;
+}
+
+#endif
+```
+
+`src/application/memory-scanner/ui.h`:
+
+```h
+#ifndef _UI_H
+#define _UI_H
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//                                   Memory Scanner UI Logic                                     //
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* Add scan results to ListView control. */
+
+void AddItemToListView(string addr, string value)
+{
+    static LVITEMA item;
+    int8 address[256] = "0x";
+
+    CopyString(address + StringLength(address), addr, sizeof(address) - StringLength(address));
+
+    item.mask        = LVIF_TEXT;
+    item.iSubItem    = 0;
+    item.pszText     = (string)address;
+
+    SendMessageA(ListView, LVM_INSERTITEM, 0, (LPARAM)&item);
+
+    item.iSubItem    = 1;
+    item.pszText     = (string)value;
+
+    SendMessageA(ListView, LVM_SETITEM, 0, (LPARAM)&item);
+}
+
+/* Keep ListView control columns fixed. */
+
+void WINAPI DisableListViewResize(void)
+{
+    while(ListView)
+    {
+        uint8 column;
+
+        for(column = 0; column < 2; column++)
+        {
+            SendMessage(ListView, LVM_SETCOLUMNWIDTH, (WPARAM)column, (LPARAM)MulDiv(298, ScreenDPI, 96));
+            UpdateWindow(ListView);
+            UpdateWindow(Value);
+        }
+    }
+}
+
+/* Center a window using the default display. */
+
+void CenterWindow(HWND window)
+{
+    RECT window_rect;
+    DWORD x, y, width, height;
+
+    GetWindowRect(window, &window_rect);
+
+    width = (window_rect.right - window_rect.left);
+    height = (window_rect.bottom - window_rect.top);
+
+    x =  ((GetSystemMetrics(SM_CXSCREEN) - width) / 2);
+    y =  ((GetSystemMetrics(SM_CYSCREEN) - height) / 2);
+
+    MoveWindow(window, x, y, width, height, true);
+    UpdateWindow(window);
+}
+
+/* DPI scale the position and size of the controls */
+
+boolean UpdateWindowForDpi(HWND window, uint32 x, uint32 y, uint32 width, uint32 height) 
+{ 
+    typedef UINT (WINAPI *FP_GETDPIFORWINDOW)(HWND);
+    FP_GETDPIFORWINDOW GetDpiForWindow = (FP_GETDPIFORWINDOW)GetProcAddress(GetModuleHandleA("user32"), "GetDpiForWindow");
+
+    if(GetDpiForWindow)
+    {
+        x = MulDiv(x, ScreenDPI, 96); 
+        y = MulDiv(y, ScreenDPI, 96); 
+        ScreenDPI = GetDpiForWindow(window); 
+        width = MulDiv(width, ScreenDPI, 96); 
+        height = MulDiv(height, ScreenDPI, 96); 
+    }
+    
+    return SetWindowPos(window, HWND_TOP, x, y, width, height, SWP_NOZORDER | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS);
+} 
+
+#endif
+```
+
+`src/application/user-interface/change-value/window-procedure-message-handlers.h`:
+
+```h
+#ifndef _CHANGE_VALUE_WINDOW_PROCEDURE_MESSAGE_HANDLERS_H
+#define _CHANGE_VALUE_WINDOW_PROCEDURE_MESSAGE_HANDLERS_H
+
+/* Once an address is found, this function updates the value at that address. */
+
+boolean ProcessUpdateValueEvent(void)
+{
+    int8 address[256];
+    int8 value[256];
+    int8 buffer[256];
+
+    LVITEM item;
+    INTFMT search_number_format;
+
+    void *addr;
+    real8 val;
+
+    item.mask = LVIF_TEXT;
+    item.iItem = SelectedItem;
+    item.iSubItem = 1;
+    item.pszText = buffer;
+
+    WaitForSingleObject(Mutex, INFINITE);
+
+    ListView_GetItemText(ListView, SelectedItem, 0, address, sizeof(address) - 1);
+    SendMessageA(ChangeValueWindowNewValue, WM_GETTEXT, sizeof(value) - 1, (LPARAM)value);
+    SendMessageA(Value, WM_GETTEXT, sizeof(buffer) - 1, (LPARAM)buffer);
+    
+    ListView_SetItem(ListView, &item);
+
+    if((IsNumeric(value)) && ((value[0] == '0') && (value[1] == 'x')))
+    {
+        search_number_format = FMT_INT_HEXADECIMAL;
+    }
+
+    else if(IsNumeric(value) && ((value[0] != '0') && (value[1] != 'x')))
+    {
+        search_number_format = FMT_INT_DECIMAL;
+    }
+
+    if(Type == TYPE_FLOAT)
+    {
+        addr = (void *)(uintptr_t)StringToInteger(address, FMT_INT_HEXADECIMAL);
+        val = StringToDouble(value);
+
+        if(WriteFloat(Scanner->process, addr, (real4)val))
+        {
+            real4 current_value;
+
+            SendMessageA(ChangeValueWindowNewValue, WM_GETTEXT, sizeof(value) - 1, (LPARAM)value);
+
+            current_value = ReadFloat(Scanner->process, addr);
+
+            DoubleToString((real8)current_value, value, sizeof(value) - 1);
+
+            ListView_SetItemText(ListView, SelectedItem, 1, value);
+
+            DestroyWindow(ChangeValueWindow);
+            SetForegroundWindow(MemoryScannerWindow);
+            ReleaseMutex(Mutex);
+
+            return MessageBeep(MB_OK);
+        }
+    }
+
+    else if(Type == TYPE_DOUBLE)
+    {
+        addr = (PVOID)(uintptr_t)StringToInteger(address, FMT_INT_HEXADECIMAL);
+        val = StringToDouble(value);
+
+        if(WriteDouble(Scanner->process, addr, val))
+        {
+            real8 current_value;
+
+            SendMessageA(ChangeValueWindowNewValue, WM_GETTEXT, sizeof(value) - 1, (LPARAM)value);
+
+            current_value = ReadDouble(Scanner->process, addr);
+
+            DoubleToString(current_value, value, sizeof(value) - 1);
+
+            ListView_SetItemText(ListView, SelectedItem, 1, value);
+
+            DestroyWindow(ChangeValueWindow);
+            SetForegroundWindow(MemoryScannerWindow);
+            ReleaseMutex(Mutex);
+
+            return MessageBeep(MB_OK);
+        }
+    }
+
+    else if(Type == TYPE_INTEGER)
+    {
+        addr = (PVOID)(uintptr_t)StringToInteger(address, FMT_INT_HEXADECIMAL);
+        val = StringToInteger(value, search_number_format);
+
+        if(WriteInteger(Scanner->process, addr, (int64)val, Scanner->data_size))
+        {
+            int64 current_value;
+
+            SendMessageA(ChangeValueWindowNewValue, WM_GETTEXT, sizeof(value) - 1, (LPARAM)value);
+
+            current_value = ReadInteger(Scanner->process, addr, Scanner->data_size);
+
+            if(search_number_format == FMT_INT_HEXADECIMAL)
+            {
+                value[0] = '0';
+                value[1] = 'x';
+
+                IntegerToString(current_value, value + 2, sizeof(value) - 3, search_number_format);
+            }
+
+            else if(search_number_format == FMT_INT_DECIMAL)
+            {
+                IntegerToString(current_value, value, sizeof(value) - 1, search_number_format);
+            }
+
+            ListView_SetItemText(ListView, SelectedItem, 1, value);
+
+            DestroyWindow(ChangeValueWindow);
+            SetForegroundWindow(MemoryScannerWindow);
+            ReleaseMutex(Mutex);
+
+            return MessageBeep(MB_OK);
+        }
+    }
+
+    ReleaseMutex(Mutex);
+    return false;
+}
+
+#endif
+
+```
+
+`src/application/user-interface/change-value/window-procedure.h`:
+
+```h
+#ifndef _CHANGE_VALUE_WINDOW_PROCEDURE_H
+#define _CHANGE_VALUE_WINDOW_PROCEDURE_H
+
+/* ************************************************************************************ */
+
+/* ************************************************************************************ */
+
+/* The window procedure for the dialog that modifies the value of a scan result. */
+
+LRESULT CALLBACK ChangeValueWindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
+{
+    switch(message)
+    {
+        case WM_CLOSE:
+
+            DestroyWindow(window);
+
+        break;
+
+        case WM_DESTROY:
+
+            EnableWindow(MemoryScannerWindow, true);
+            ShowWindow(MemoryScannerWindow, SW_SHOW);
+            SetForegroundWindow(MemoryScannerWindow);
+            CenterWindow(MemoryScannerWindow);
+            UpdateWindow(MemoryScannerWindow);
+            
+
+        break;
+
+        case WM_COMMAND:
+
+            if(LOWORD(wparam) == ID_CHANGE_VALUE_WINDOW_BUTTON)
+            {
+                ProcessUpdateValueEvent();
+            }
+
+        break;
+
+        case WM_DPICHANGED:
+
+            UpdateWindowForDpi(ChangeValueWindow, CW_USEDEFAULT, CW_USEDEFAULT, 300, 75);
+            UpdateWindowForDpi(ChangeValueWindowNewValue, 10, 10, 180, 25);
+            UpdateWindowForDpi(ChangeValueWindowButton, 200, 10, 85, 25);
+            ShowWindow(MemoryScannerWindow, SW_HIDE);
+            CenterWindow(ChangeValueWindow);
+
+        break;
+
+        default:
+
+            return DefWindowProc(window, message, wparam, lparam);
+    }
+
+    return 0;
+}
+
+#endif
+
+
+
+```
+
+`src/application/user-interface/change-value/window.h`:
+
+```h
+#ifndef _CHANGE_VALUE_WINDOW_H
+#define _CHANGE_VALUE_WINDOW_H
+
+HWND CreateChangeValueWindow(void)
+{
+    if(SelectedItem > -1)
+    {
+        WNDCLASSEXA wc;
+
+        wc.cbSize           = sizeof(wc);
+        wc.cbClsExtra       = 0;
+        wc.cbWndExtra       = 0;
+        wc.lpszClassName    = "ChangeValueWindow";
+        wc.hCursor          = LoadCursorA(Instance, IDC_ARROW);
+        wc.lpfnWndProc      = ChangeValueWindowProc;
+        wc.lpszMenuName     = null;
+        wc.hInstance        = Instance;
+        wc.hbrBackground    = GetSysColorBrush(COLOR_3DFACE);
+        wc.hIcon            = LoadIconA(Instance, MAKEINTRESOURCEA(AppIcon));
+        wc.hIconSm          = LoadIconA(Instance, MAKEINTRESOURCEA(AppIcon));
+        wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+
+        UnregisterClassA(wc.lpszClassName, Instance);
+
+        if(RegisterClassExA(&wc))
+        {
+            ChangeValueWindow = CreateWindowExA(WS_EX_DLGMODALFRAME | WS_EX_TOPMOST, wc.lpszClassName, 
+                                                Title, WS_SYSMENU | WS_OVERLAPPED | WS_VISIBLE, 
+                                                10, 10, 10, 10, null, null, 
+                                                Instance, null);
+
+            if(ChangeValueWindow)
+            {
+                int8 value[256];
+
+                ListView_GetItemText(ListView, SelectedItem, 1, value, sizeof(value) - 1);
+
+                ChangeValueWindowNewValue = CreateWindowA("edit", value, WS_VISIBLE | WS_CHILD | WS_BORDER, 
+                                                           10, 10, 180, 25, ChangeValueWindow, 
+                                                           (HMENU)ID_CHANGE_VALUE_WINDOW, 
+                                                           null, null);
+
+                ChangeValueWindowButton = CreateWindowA("button", "Save", WS_VISIBLE | WS_CHILD, 0, 0, 0, 0, ChangeValueWindow, 
+                                                        (HMENU)ID_CHANGE_VALUE_WINDOW_BUTTON, 
+                                                        null, null);
+
+                SendMessageA(ChangeValueWindowNewValue, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+                SendMessageA(ChangeValueWindowButton, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+
+                UpdateWindowForDpi(ChangeValueWindow, CW_USEDEFAULT, CW_USEDEFAULT, 300, 75);
+                UpdateWindowForDpi(ChangeValueWindowNewValue, 10, 10, 180, 25);
+                UpdateWindowForDpi(ChangeValueWindowButton, 200, 10, 85, 25);
+
+                EnableWindow(MemoryScannerWindow, false);
+                ShowWindow(MemoryScannerWindow, SW_HIDE);
+                CenterWindow(ChangeValueWindow);
+
+                return ChangeValueWindow;
+            }
+        }
+    }
+
+    return null;
+}
+
+#endif
+
+```
+
+`src/application/user-interface/memory-scanner/window-procedure-message-handlers.h`:
+
+```h
+#ifndef _MEMORY_SCANNER_WINDOW_PROCEDURE_MESSAGE_HANDLERS_H
+#define _MEMORY_SCANNER_WINDOW_PROCEDURE_MESSAGE_HANDLERS_H
+
+/* Runs when left mouse button is clicked inside ListView on MemoryScannerWindow if ScanRunning == false. */
+
+void HandleListViewLeftClickEvent(void)
+{
+    SelectedItem = (int32)SendMessageA(ListView, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
+    ListView_GetItemText(ListView, SelectedItem, 0, SelectedItemAddress, sizeof(SelectedItemAddress));
+    ListView_GetItemText(ListView, SelectedItem, 1, SelectedItemValue, sizeof(SelectedItemValue)); 
+
+    if(SelectedItem != -1)
+    {
+        if(IsAddressFrozen(SelectedItemAddress))
+        {
+            int32 index = FindFirstOccurrenceOfString(SelectedItemValue, (string)" (FROZEN)", false);
+
+            if(index != -1)
+            {
+                SelectedItemValue[index] = null;
+            }
+        }
+
+        SendMessageA(Value, WM_SETTEXT, 0, (LPARAM)SelectedItemValue);
+    }
+}
+
+/* Runs when right mouse button is clicked inside ListView on MemoryScannerWindow. */
+
+void HandleListViewRightClickEvent(HWND window)
+{
+    SelectedItem = (int32)SendMessageA(ListView, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
+
+    if(SelectedItem != -1)
+    {
+        POINT pos;
+
+        if(GetCursorPos(&pos))
+        {
+            DWORD x, y;
+            HMENU popup_menu;
+
+            x = pos.x;
+            y = pos.y;
+
+            ListView_GetItemText(ListView, SelectedItem, 0, SelectedItemAddress, sizeof(SelectedItemAddress));
+            ListView_GetItemText(ListView, SelectedItem, 1, SelectedItemValue, sizeof(SelectedItemValue)); 
+
+            popup_menu = CreatePopupMenu();
+
+            if(IsAddressFrozen(SelectedItemAddress))
+            {
+                InsertMenu(popup_menu, 0, MF_STRING, ID_CHANGE_VALUE, (string)"Edit");
+                InsertMenu(popup_menu, 0, MF_STRING, ID_THAW_VALUE, (string)"Thaw");
+            }
+
+            else
+            {
+                if(NumberOfAddressesFrozen < FREEZE_LIMIT)
+                {
+                    InsertMenu(popup_menu, 0, MF_STRING, ID_CHANGE_VALUE, (string)"Edit");
+                    InsertMenu(popup_menu, 0, MF_STRING, ID_FREEZE_VALUE, (string)"Freeze");
+                }
+            }
+
+            TrackPopupMenu(popup_menu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, x, y, 0, window, 0);
+        }
+    }
+}
+
+/* Runs when freeze/thaw option is toggled from ListView popup menu on MemoryScannerWindow. */
+
+void HandleFreezeValueButtonEvent(void)
+{
+    SelectedItem = (int32)SendMessageA(ListView, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
+
+    if(SelectedItem != -1)
+    {
+        if(!IsAddressFrozen(SelectedItemAddress))
+        {
+            if(SuspendThread(FreezeThread) != (DWORD)-1)
+            {
+                if(NumberOfAddressesFrozen < FREEZE_LIMIT)
+                {
+                    CopyString(FrozenAddresses[NumberOfAddressesFrozen], SelectedItemAddress, sizeof(FrozenAddresses[NumberOfAddressesFrozen]) - 1);
+                    CopyString(FrozenValues[NumberOfAddressesFrozen], SelectedItemValue, sizeof(FrozenValues[NumberOfAddressesFrozen]) - 1);
+
+                    if((StringCompare(FrozenAddresses[NumberOfAddressesFrozen], SelectedItemAddress, false)) && (StringCompare(FrozenValues[NumberOfAddressesFrozen], SelectedItemValue, false)))
+                    {
+                        int8 selected_value[256];
+                        MemoryZero(&selected_value, sizeof(selected_value));
+                        CopyString(selected_value, StringConcat(SelectedItemValue, (string)" (FROZEN)"), sizeof(selected_value));
+                        ListView_SetItemText(ListView, SelectedItem, 1, selected_value);
+                        NumberOfAddressesFrozen++;
+                    }
+                }
+
+                ResumeThread(FreezeThread);
+            }   
+        }
+    }
+}
+
+void HandleThawValueButtonEvent(void)
+{
+    SelectedItem = (int32)SendMessageA(ListView, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
+
+    if(SelectedItem != -1)
+    {
+        if(IsAddressFrozen(SelectedItemAddress))
+        {
+            if(SuspendThread(FreezeThread) != (DWORD)-1)
+            {
+                uint16 frozen_index;
+                boolean address_frozen = false;
+
+                for(frozen_index = 0; frozen_index < FREEZE_LIMIT; frozen_index++)
+                {
+                    if(StringCompare(FrozenAddresses[frozen_index], SelectedItemAddress, false)) 
+                    {
+                        address_frozen = true;
+                        break;
+                    }
+                }
+
+                if(address_frozen)
+                {
+                    ListView_SetItemText(ListView, SelectedItem, 1, FrozenValues[frozen_index]);
+
+                    MemoryZero(FrozenAddresses[frozen_index], sizeof(FrozenAddresses[frozen_index]));
+                    MemoryZero(FrozenValues[frozen_index], sizeof(FrozenValues[frozen_index]));
+
+                    NumberOfAddressesFrozen--;
+                }
+
+                ResumeThread(FreezeThread);
+            }
+        }
+    }
+}
+
+void HandleMainWindowCloseEvent(HWND window)
+{
+    if(ScanThread && TerminateThread(ScanThread, 0))
+    {
+        CloseHandle(ScanThread);
+    }
+
+    if(FreezeThread && TerminateThread(FreezeThread, 0))
+    {
+        CloseHandle(FreezeThread);
+    }
+
+    if(MonitorSelectedProcessThread && TerminateThread(MonitorSelectedProcessThread, 0))
+    {
+        CloseHandle(MonitorSelectedProcessThread);
+    }
+
+    if(DisableListViewResizeThread && TerminateThread(DisableListViewResizeThread, 0))
+    {
+        CloseHandle(DisableListViewResizeThread);
+    }
+
+    if(Scanner)
+    {
+        FreeMemoryScanner(Scanner);
+    }
+
+    if(ArrayList)
+    {
+        FreeArrayList(ArrayList);
+    }
+
+    DestroyWindow(window);
+}
+
+#endif
+
+```
+
+`src/application/user-interface/memory-scanner/window-procedure.h`:
+
+```h
+#ifndef _MEMORY_SCANNER_WINDOW_PROCEDURE_H
+#define _MEMORY_SCANNER_WINDOW_PROCEDURE_H
+
+/* ************************************************************************************ */
+
+/* ************************************************************************************ */
+
+/* The window procedure for the memory scanner window. */
+
+LRESULT CALLBACK MainWindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
+{
+    LVCOLUMNA address_column;
+    LVCOLUMNA value_column;
+    PAINTSTRUCT ps;
+    HDC hdc;
+
+    switch(message)
+    {
+        case WM_CLOSE:
+
+            HandleMainWindowCloseEvent(window);
+            
+        break;
+
+        case WM_DESTROY:
+
+            PostQuitMessage(0);
+
+        break;
+        
+        case WM_SIZE:
+        case WM_PAINT:
+        case WM_CREATE:
+
+            hdc = BeginPaint(window, &ps);
+            UpdateWindow(window);
+            EndPaint(window, &ps);
+
+        break;
+
+        case WM_COMMAND:
+
+            if(LOWORD(wparam) == ID_FREEZE_VALUE)
+            {
+                HandleFreezeValueButtonEvent();
+            }
+
+            else if(LOWORD(wparam) == ID_THAW_VALUE)
+            {
+                HandleThawValueButtonEvent();
+            }
+
+            else if(LOWORD(wparam) == ID_SCAN)
+            {
+                if(ScanThread)
+                {
+                    WaitForSingleObject(ScanThread, INFINITE);
+
+                    if(!ScanRunning)
+                    {
+                        CloseHandle(ScanThread);
+                    }
+                }
+
+                ScanThread = CreateThread(null, null, (LPTHREAD_START_ROUTINE)CreateNewScan, null, null, null);
+            }
+
+            else if(LOWORD(wparam) == ID_SELECT_PROCESS)
+            {
+                GetProcessNameAndID();
+                CreateSelectProcessWindow();
+            }
+
+            else if(LOWORD(wparam) == ID_CHANGE_VALUE)
+            {
+                if((!IsAddressFrozen(SelectedItemAddress)) && (GetMatchCountFromLastScan(Scanner)))
+                {
+                    CreateChangeValueWindow();
+                }
+            }
+
+            else if(LOWORD(wparam) == ID_NEW_SCAN)
+            {
+                if(Scanner) 
+                {
+                    ResetScan(Scanner, false, false);
+                }
+            }
+
+        break;
+
+        case WM_NOTIFY:
+
+            if(!ScanRunning)
+            {
+                if(((LPNMHDR)lparam)->code == NM_CLICK)
+                {
+                    HandleListViewLeftClickEvent();
+                }
+
+                else if((((LPNMHDR)lparam)->code == NM_RCLICK) && (((LPNMHDR)lparam)->idFrom == ID_LISTVIEW))
+                {
+                    HandleListViewRightClickEvent(window);
+                }
+            }
+
+        break;
+
+        default:
+
+            return DefWindowProc(window, message, wparam, lparam);
+    }
+
+    return 0;
+}
+
+#endif
+
+
+```
+
+`src/application/user-interface/memory-scanner/window.h`:
+
+```h
+#ifndef _MEMORY_SCANNER_WINDOW_H
+#define _MEMORY_SCANNER_WINDOW_H
+
+HWND CreateMemoryScannerWindow(void)
+{
+    WNDCLASSEXA wc;
+
+    wc.cbSize = sizeof(wc);
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
+    wc.hCursor = LoadCursorA(Instance, IDC_ARROW);
+    wc.hIcon = LoadIconA(Instance, MAKEINTRESOURCEA(AppIcon));
+    wc.hIconSm = LoadIconA(Instance, MAKEINTRESOURCEA(AppIcon));
+    wc.hInstance = Instance;
+    wc.lpfnWndProc = (WNDPROC)MainWindowProc;
+    wc.lpszClassName = (string)"MemoryScannerWindow";
+    wc.lpszMenuName = null;
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+
+    UnregisterClassA(wc.lpszClassName, Instance);
+
+    if(RegisterClassExA(&wc))
+    {
+        MemoryScannerWindow = CreateWindowExA(WS_EX_STATICEDGE, wc.lpszClassName, Title,
+                                              WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX, 
+                                              0, 0, 0, 0, null, null, 
+                                              Instance, null);
+        if(MemoryScannerWindow)
+        {
+            uint16 data_types_list_index;
+            NONCLIENTMETRICSA metrics;
+            LVCOLUMNA address_column;
+            LVCOLUMNA value_column;
+             
+            metrics.cbSize = sizeof(metrics);
+            SystemParametersInfoA(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
+
+            Font = CreateFontIndirectA(&metrics.lfMessageFont);
+
+            ListView = CreateWindowExA(WS_EX_CLIENTEDGE, WC_LISTVIEW, null, 
+                                       WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SINGLESEL | LVS_NOSCROLL,
+                                       CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, MemoryScannerWindow, (HMENU)ID_LISTVIEW, Instance, null);
+
+            SearchCondition = CreateWindowA("combobox", null, WS_VISIBLE | WS_CHILD | CBS_DROPDOWNLIST, 
+                                            0, 0, 0, 0, MemoryScannerWindow, 
+                                            (HMENU)ID_SEARCH_CONDITION, 
+                                            Instance, null);
+
+            Value = CreateWindowExA(WS_EX_CLIENTEDGE, "edit", null, WS_VISIBLE | WS_CHILD, 
+                                  0, 0, 0, 0, MemoryScannerWindow, (HMENU)ID_VALUE, 
+                                  Instance, null);
+
+            NewScan = CreateWindowA("button", "Reset", WS_VISIBLE | WS_CHILD, 
+                                    0, 0, 0, 0, MemoryScannerWindow, 
+                                    (HMENU)ID_NEW_SCAN, 
+                                    Instance, null);
+
+            ChoosePid = CreateWindowA("button", "Select Process", WS_VISIBLE | WS_CHILD, 
+                                      0, 0, 0, 0, MemoryScannerWindow, 
+                                      (HMENU)ID_SELECT_PROCESS, 
+                                      Instance, null);
+
+            DataSize = CreateWindowA("combobox", null, WS_VISIBLE | WS_CHILD | WS_BORDER | CBS_DROPDOWNLIST, 
+                                     0, 0, 0, 0, MemoryScannerWindow, (HMENU)ID_VALUE, 
+                                     Instance, null);
+
+            Scan = CreateWindowA("button", "Scan Memory", WS_VISIBLE | WS_CHILD, 
+                                 0, 0, 0, 0, MemoryScannerWindow, (HMENU)ID_SCAN, 
+                                 Instance, null);
+
+            ProgressBar = CreateWindowA(PROGRESS_CLASS, null, WS_CHILD | WS_VISIBLE | PBS_SMOOTH,
+                                        0, 0, 0, 0, MemoryScannerWindow, 
+                                        (HMENU)ID_PROGRESS_BAR, 
+                                        Instance, null);
+
+            SetWindowLongPtr(ProgressBar, GWL_STYLE, GetWindowLongPtr(ProgressBar, GWL_STYLE) | PBS_SMOOTH);
+            SendMessageA(ProgressBar, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
+            SendMessage(ProgressBar, PBM_SETMARQUEE, true, 0);
+            SendMessageA(DataSize, CB_RESETCONTENT, 0, 0);
+            SetTimer(MemoryScannerWindow, 1, 100, null); 
+            SendMessageA(ProgressBar, PBM_SETPOS, 0, 0);
+
+            for(data_types_list_index = 0; data_types_list_index < ARRAYSIZE(DataTypes); data_types_list_index++)
+            {   
+                SendMessageA(DataSize, CB_ADDSTRING, 0, (LPARAM)DataTypes[data_types_list_index]);
+            }
+
+            SendMessageA(ListView, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(ChoosePid, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(NewScan, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(Scan, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(DataSize, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(Value, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(SearchCondition, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+
+            UpdateWindowForDpi(MemoryScannerWindow, CW_USEDEFAULT, CW_USEDEFAULT, 625, 430);
+            UpdateWindowForDpi(ProgressBar, 10, 370, 600, 20);
+            UpdateWindowForDpi(ChoosePid, 10, 245, 200, 22);
+            UpdateWindowForDpi(ListView, 10, 10, 600, 220);
+            UpdateWindowForDpi(SearchCondition, 10, 275, 300, 22);
+            UpdateWindowForDpi(Value, 210, 246, 360, 20);
+            UpdateWindowForDpi(NewScan, 570, 245, 40, 22);
+            UpdateWindowForDpi(DataSize, 310, 275, 300, 20);
+            UpdateWindowForDpi(Scan, 10, 305, 600, 60);
+
+            address_column.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
+            address_column.cx = MulDiv(298, ScreenDPI, 96); 
+            address_column.pszText = (string)"Address";
+            address_column.fmt = LVCFMT_FIXED_WIDTH;
+            address_column.iSubItem = 0;
+
+            value_column.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
+            value_column.cx = MulDiv(298, ScreenDPI, 96);
+            value_column.pszText = (string)"Value";
+            value_column.fmt = LVCFMT_FIXED_WIDTH;
+            value_column.iSubItem = 1;
+
+            DisableListViewResizeThread = CreateThread(null, null, (LPTHREAD_START_ROUTINE)DisableListViewResize, null, null, null);
+
+            if(DisableListViewResizeThread)
+            {
+                SendMessageA(ListView, LVM_INSERTCOLUMN, 0, (LPARAM)&address_column);
+                SendMessageA(ListView, LVM_INSERTCOLUMN, 1, (LPARAM)&value_column);
+                SendMessageA(SearchCondition, CB_ADDSTRING, 0, (LPARAM)SearchConditions[SEARCH_EQUALS]);
+                SendMessageA(ListView, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, (LPARAM)LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER);
+
+                SendMessageA(DataSize, CB_SETCURSEL, (WPARAM)2, 0);
+                SendMessageA(SearchCondition, CB_SETCURSEL, (WPARAM)0, 0);
+                
+                EnableWindow(Scan, false);
+                EnableWindow(NewScan, false);
+                EnableWindow(ProgressBar, false);
+                
+                ShowWindow(MemoryScannerWindow, SW_SHOW);
+                SetForegroundWindow(MemoryScannerWindow);
+                CenterWindow(MemoryScannerWindow);
+                UpdateWindow(MemoryScannerWindow);
+
+                SendMessageA(ProgressBar, PBM_SETPOS, 100, 0);
+                
+                return MemoryScannerWindow;
+            }
+        }
+    }
+
+    return null;
+}
+
+#endif
+
+```
+
+`src/application/user-interface/select-process/window-procedure-message-handlers.h`:
+
+```h
+#ifndef _SELECT_PROCESS_WINDOW_PROCEDURE_MESSAGE_HANDLERS_H
+#define _SELECT_PROCESS_WINDOW_PROCEDURE_MESSAGE_HANDLERS_H
+
+/* Runs when a selection is made or changed in listbox containing process names on process selection dialog. */
+
+void ProcessListboxChangeEvent(void)
+{
+    IndexOfSelectedProcess = (int32)SendMessageA(ProcessSelection, LB_GETCURSEL, 0, 0);
+
+    if(IndexOfSelectedProcess > -1)
+    {
+        int8 selected_process[256];
+
+        ZeroMemory(&selected_process, sizeof(selected_process));
+        CopyString(selected_process, Processes[IndexOfSelectedProcess], sizeof(selected_process) - 1);
+
+        if(StringLength(selected_process))
+        {
+            EnableWindow(ChooseProcess, true);
+        }
+
+        else
+        {
+            EnableWindow(ChooseProcess, false);
+        }
+    }
+}
+
+/* Runs when "Select Process" button is clicked. */
+
+void ProcessSelectProcessButtonEvent(void)
+{
+    uint16 index;
+
+    if(IndexOfSelectedProcess > -1)
+    {
+        int8 pid[256];
+        HANDLE process;
+        uint32 process_id;
+        int8 selected_process[256];
+
+        ZeroMemory(&pid, sizeof(pid));
+        ZeroMemory(&selected_process, sizeof(selected_process));
+        
+        CopyString(pid, Pids[IndexOfSelectedProcess], sizeof(pid) - 1);
+        CopyString(SelectedPid, Pids[IndexOfSelectedProcess], sizeof(SelectedPid) - 1);
+        CopyString(selected_process, Processes[IndexOfSelectedProcess], sizeof(selected_process) - 1);
+
+        process_id = (uint32)StringToInteger(pid, FMT_INT_DECIMAL);
+        process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE, false, process_id);
+
+        if(process)
+        {
+            int8 data_size[256];
+            LRESULT selection_id = SendMessage(DataSize, CB_GETCURSEL, 0, 0);
+
+            if(selection_id > -1) 
+            {
+                ZeroMemory(data_size, sizeof(data_size));
+                CopyString(data_size, (string)DataSizes[selection_id], sizeof(data_size) - 1);
+            }
+
+            if(CurrentProcess != process_id)
+            {
+                CurrentProcess = process_id;
+
+                if(Scanner)
+                {
+                    ResetScan(Scanner, false, true);
+                    FreeMemoryScanner(Scanner);
+                }
+
+                if(ArrayList)
+                {
+                    FreeArrayList(ArrayList);
+                    ArrayList = CreateArrayList(sizeof(*Scanner));
+                }
+
+                Scanner = CreateMemoryScanner(CurrentProcess, (uint16)StringToInteger(data_size, FMT_INT_DECIMAL));
+
+                if(MonitorSelectedProcessThread && TerminateThread(MonitorSelectedProcessThread, 0))
+                {
+                    WaitForSingleObject(MonitorSelectedProcessThread, INFINITE); 
+                    CloseHandle(MonitorSelectedProcessThread);
+                }
+
+                MonitorSelectedProcessThread = CreateThread(null, null, (LPTHREAD_START_ROUTINE)MonitorSelectedProcess, null, null, null);
+            }
+
+            if(StringLength(selected_process))
+            {          
+                SetWindowText(ChoosePid, Processes[IndexOfSelectedProcess]);
+            }
+
+            else
+            {
+                ResetScan(Scanner, true, true);
+            }
+
+            EnableWindow(SearchCondition, true);
+            EnableWindow(ProgressBar, true);
+            EnableWindow(DataSize, true);
+            EnableWindow(NewScan, false);
+            EnableWindow(Value, true);
+            EnableWindow(Scan, true);
+            CloseHandle(process);
+        }
+
+        else
+        {
+            if(Scanner) 
+            {
+                ResetScan(Scanner, true, true);
+            }
+
+            EnableWindow(Scan, false);
+            EnableWindow(ChoosePid, true);
+        }
+
+        DestroyWindow(SelectPidWindow);
+    }
+    
+    SendMessageA(DataSize, CB_RESETCONTENT, 0, 0);
+
+    for(index = 0; index < ARRAYSIZE(DataTypes); index++)
+    {
+        SendMessageA(DataSize, CB_ADDSTRING, 0, (LPARAM)DataTypes[index]);
+    }
+
+    SendMessageA(SearchCondition, CB_SETCURSEL, (WPARAM)0, 0);
+    SendMessageA(DataSize, CB_SETCURSEL, (WPARAM)2, 0);
+
+    SendMessageA(ProgressBar, PBM_SETPOS, 0, 0);
+
+    SetForegroundWindow(MemoryScannerWindow);
+    EnableWindow(MemoryScannerWindow, true);
+}
+
+#endif
+
+```
+
+`src/application/user-interface/select-process/window-procedure.h`:
+
+```h
+#ifndef _SELECT_PROCESS_WINDOW_PROCEDURE_H
+#define _SELECT_PROCESS_WINDOW_PROCEDURE_H
+
+/* ************************************************************************************ */
+
+/* ************************************************************************************ */
+
+/* The window procedure for the process selection dialog. */
+
+LRESULT CALLBACK SelectProcessWindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
+{
+    switch(message)
+    {
+        case WM_CREATE:
+        break;
+
+        case WM_CLOSE:
+
+            DestroyWindow(window);
+
+        break;
+
+        case WM_DESTROY:
+            
+            ShowWindow(MemoryScannerWindow, SW_SHOW);
+            SetForegroundWindow(MemoryScannerWindow);
+            EnableWindow(MemoryScannerWindow, true);
+            CenterWindow(MemoryScannerWindow);
+            UpdateWindow(MemoryScannerWindow);
+
+        break;
+
+        case WM_COMMAND:
+
+            if(LOWORD(wparam) == ID_CHOOSE_PROCESS)
+            {
+                ProcessSelectProcessButtonEvent();
+            }
+
+            else if((LOWORD(wparam) == ID_PROCESSES) && (HIWORD(wparam) == LBN_SELCHANGE))
+            {
+                ProcessListboxChangeEvent();
+            }
+
+        break;
+
+        default:
+
+            return DefWindowProc(window, message, wparam, lparam);
+    }
+
+    return 0;
+}
+
+#endif
+
+
+
+```
+
+`src/application/user-interface/select-process/window.h`:
+
+```h
+#ifndef _SELECT_PROCESS_WINDOW_H
+#define _SELECT_PROCESS_WINDOW_H
+
+HWND CreateSelectProcessWindow(void)
+{
+    WNDCLASSEXA wc;
+
+    wc.cbSize           = sizeof(wc);
+    wc.cbClsExtra       = 0;
+    wc.cbWndExtra       = 0;
+    wc.lpszClassName    = "SelectProcessWindow";
+    wc.hCursor          = LoadCursorA(Instance, IDC_ARROW);
+    wc.lpfnWndProc      = SelectProcessWindowProc;
+    wc.lpszMenuName     = null;
+    wc.hInstance        = Instance;
+    wc.hbrBackground    = GetSysColorBrush(COLOR_3DFACE);
+    wc.hIcon            = LoadIconA(Instance, MAKEINTRESOURCEA(AppIcon));
+    wc.hIconSm          = LoadIconA(Instance, MAKEINTRESOURCEA(AppIcon));
+    wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+
+    UnregisterClassA(wc.lpszClassName, Instance);
+
+    if(RegisterClassExA(&wc))
+    {
+        SelectPidWindow = CreateWindowExA(WS_EX_DLGMODALFRAME | WS_EX_TOPMOST, wc.lpszClassName, Title, 
+                                          WS_SYSMENU | WS_OVERLAPPED | WS_VISIBLE, 
+                                          10, 10, 10, 10, null, null, 
+                                          Instance, null);
+
+        if(SelectPidWindow)
+        {
+            uint16 process_counter_index;
+
+            ProcessSelection = CreateWindowExA(WS_EX_CLIENTEDGE, WC_LISTBOX, null, WS_VSCROLL | LBS_NOTIFY | 
+                                               LBS_DISABLENOSCROLL | WS_VISIBLE | WS_CHILD, 
+                                               10, 10, 10, 10, SelectPidWindow, 
+                                               (HMENU)ID_PROCESSES, 
+                                               Instance, null);
+
+            ChooseProcess = CreateWindowA("button", "Select Process", WS_CHILD | WS_VISIBLE, 
+                                          10, 10, 10, 10, SelectPidWindow, 
+                                          (HMENU)ID_CHOOSE_PROCESS, 
+                                          Instance, null);
+
+            for(process_counter_index = 0; process_counter_index < ProcessCounter; process_counter_index++)
+            {
+                SendMessageA(ProcessSelection, LB_ADDSTRING, 0, (LPARAM)Processes[process_counter_index]);
+            }
+
+            SendMessageA(ProcessSelection, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+            SendMessageA(ChooseProcess, WM_SETFONT, (WPARAM)Font, MAKELPARAM(true, 0));
+
+            EnableWindow(ChooseProcess, false);
+            EnableWindow(MemoryScannerWindow, false);
+
+            UpdateWindowForDpi(SelectPidWindow, CW_USEDEFAULT, CW_USEDEFAULT, 295, 400);
+            UpdateWindowForDpi(ProcessSelection, 10, 10, 270, 300);
+            UpdateWindowForDpi(ChooseProcess, 10, 310, 270, 50);
+    
+            ShowWindow(MemoryScannerWindow, SW_HIDE);
+            CenterWindow(SelectPidWindow);
+
+            return SelectPidWindow;
+        }
+    }
+
+    return null;
+}
+
+#endif
+
+```
+
+`src/initialize.h`:
+
+```h
+#ifndef _INITIALIZE_H
+#define _INITIALIZE_H
+
+#pragma comment(linker,"\"/manifestdependency:type='win32' \
+name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
+processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+
+#define WIN32_LEAN_AND_MEAN
+#define _WIN32_WINNT _WIN32_WINNT_WINXP
+
+#include <windows.h>
+#include <tlhelp32.h>
+#include <commctrl.h>
+
+#include "resources/icon.h"  
+#include "libraries/NCRT/ncrt.h"
+
+/* GUI Code Includes */
+
+#define ID_LISTVIEW (WM_USER + 1000)
+#define ID_SCAN (WM_USER + 1001)
+#define ID_NEW_SCAN (WM_USER + 1002)
+#define ID_VALUE (WM_USER + 1003)
+#define ID_CHANGE_VALUE (WM_USER + 1004)
+#define ID_SIZE (WM_USER + 1005)
+#define ID_PID (WM_USER + 1006)
+#define ID_SEARCH_CONDITION (WM_USER + 1007)
+#define ID_SELECT_PROCESS (WM_USER + 1008)
+#define ID_PROCESS_ID (WM_USER + 1009)
+#define ID_PROCESSES (WM_USER + 1010)
+#define ID_CHOOSE_PROCESS (WM_USER + 1011)
+#define ID_CHANGE_VALUE_WINDOW (WM_USER + 1012)
+#define ID_CHANGE_VALUE_WINDOW_BUTTON (WM_USER + 1013)
+#define ID_FILE_EXIT (WM_USER + 1014)
+#define ID_HELP_ABOUT (WM_USER + 1015)
+#define ID_FREEZE_VALUE (WM_USER + 1016)
+#define ID_THAW_VALUE (WM_USER + 1017)
+#define ID_PROGRESS_BAR (WM_USER + 1018)
+
+#define FREEZE_LIMIT 14
+#define PROCESS_LIMIT 128
+
+#ifndef WM_DPICHANGED
+    #define WM_DPICHANGED 0x02E0
+#endif
+
+#ifndef LVM_SETCOLUMNWIDTH
+    #define LVM_SETCOLUMNWIDTH 0x101E
+#endif
+
+#ifndef LVS_EX_DOUBLEBUFFER
+    #define LVS_EX_DOUBLEBUFFER 0x00010000
+#endif
+
+#ifndef LVCFMT_FIXED_WIDTH
+    #define LVCFMT_FIXED_WIDTH 0x100
+#endif
+
+#ifndef PBS_MARQUEE
+    #define PBS_MARQUEE 0x08 
+#endif
+
+#ifndef PBM_SETMARQUEE
+    #define PBM_SETMARQUEE 0x040A
+#endif
+
+static MSG message;
+
+static LRESULT CALLBACK MainWindowProc(HWND, UINT, WPARAM, LPARAM);
+static LRESULT CALLBACK ChangeValueWindowProc(HWND, UINT, WPARAM, LPARAM);
+static LRESULT CALLBACK SelectProcessWindowProc(HWND, UINT, WPARAM, LPARAM);
+
+static HWND ListView, Scan, Value, ChoosePid, DataSize, ProgressBar,
+            SearchCondition, NewScan, SelectPidWindow, ProcessSelection, ChooseProcess, 
+            MemoryScannerWindow, ChangeValueWindow, ChangeValueWindowNewValue, ChangeValueWindowButton;
+
+static string Title = (string)"Simple Memory Editor";
+static string SearchConditions[] = { (string)"Equals", (string)"Increased", (string)"Decreased" };
+static string DataSizes[] = { (string)"1", (string)"2", (string)"4", (string)"8", (string)"4", (string)"8" };
+static string DataTypes[] = { (string)"Byte", (string)"Short Integer", (string)"Integer", (string)"Long Integer", (string)"Float", (string)"Double" };
+
+static HFONT Font;
+static HINSTANCE Instance;
+static INITCOMMONCONTROLSEX CommonControls;
+
+/* End GUI Code Includes */
+
+/****************************************************************************************************************** 
+ ******************************************************************************************************************/
+
+/* Memory Scanner Code Includes */
+
+#ifndef WRITABLE_MEMORY
+    #define WRITABLE_MEMORY (PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)
+#endif
+
+static real8 Progress;
+static real8 CurrentValue;
+
+static int32 SelectedItem;
+static int32 IndexOfSelectedProcess;
+
+static int8 SelectedPid[256];
+static int8 SelectedItemValue[256]; 
+static int8 Pids[PROCESS_LIMIT][256];
+static int8 SelectedItemAddress[256];
+static int8 Processes[PROCESS_LIMIT][256];
+static int8 FrozenValues[FREEZE_LIMIT][256];
+static int8 FrozenAddresses[FREEZE_LIMIT][256];
+
+static HANDLE Mutex;
+static HANDLE ScanThread;
+static HANDLE FreezeThread;
+static HANDLE DisableListViewResizeThread;
+static HANDLE MonitorSelectedProcessThread;
+
+static uint32 ScreenDPI;
+static uint32 CurrentProcess;
+static uint32 ProcessCounter;
+static uint32 NumberOfProcesses;
+static uint32 NumberOfAddressesFrozen;
+
+static boolean ScanRunning;
+static boolean AddressFrozen;
+static boolean FirstScanNotRun;
+static boolean SelectedProcessOpen;
+
+/* A linked list of memory region information obtained by VirtualQueryEx(). */
+
+typedef struct _MEMORY_BLOCK
+{
+    HANDLE process;
+    uint64 size;
+    uint8 *address;
+    uint8 *buffer;
+    uint8 *match_flag;
+    uint16 data_size;
+    uint64 matches;
+    real8 *values;
+
+} MEMORY_BLOCK;
+
+typedef struct _ARRAY_LIST
+{
+    MEMORY_BLOCK *array;
+    uint64 capacity;
+    uint64 size;
+
+} ARRAY_LIST;
+
+/* Search conditions. */
+
+typedef enum
+{
+    SEARCH_EQUALS,
+    SEARCH_INCREASED,
+    SEARCH_DECREASED
+
+} SEARCH_CONDITION;
+
+typedef enum
+{
+    TYPE_INTEGER,
+    TYPE_FLOAT,
+    TYPE_DOUBLE
+
+} TYPE;
+
+static TYPE Type;
+static ARRAY_LIST *ArrayList;
+static MEMORY_BLOCK *Scanner;
+
+/* End Memory Scanner Code Includes */
+
+/****************************************************************************************************************** 
+ ******************************************************************************************************************/
+
+/* GUI code import */
+
+#include "libraries/NCRT/lib/math.h"
+#include "libraries/NCRT/lib/memory.h"
+#include "libraries/NCRT/lib/strings.h"
+#include "libraries/NCRT/lib/convert.h"
+
+#include "application/memory-scanner/io.h"
+#include "application/memory-scanner/ui.h"
+#include "application/memory-scanner/scan.h"
+#include "application/memory-scanner/process.h"
+
+#include "application/user-interface/change-value/window.h"
+#include "application/user-interface/memory-scanner/window.h"
+#include "application/user-interface/select-process/window.h"
+
+#include "application/user-interface/change-value/window-procedure-message-handlers.h"
+#include "application/user-interface/memory-scanner/window-procedure-message-handlers.h"
+#include "application/user-interface/select-process/window-procedure-message-handlers.h"
+
+#include "application/user-interface/change-value/window-procedure.h"
+#include "application/user-interface/memory-scanner/window-procedure.h"
+#include "application/user-interface/select-process/window-procedure.h"
+
+/* End GUI code import */
+
+/****************************************************************************************************************** 
+ ******************************************************************************************************************/
+
+/* Initialize global variables. */
+
+boolean Initialize(void)
+{
+    ScreenDPI = 96;
+    SelectedItem = -1;
+    FirstScanNotRun = true;
+    Instance =  GetModuleHandleA(null);
+    Mutex = CreateMutex(null, false, null);
+
+    CommonControls.dwICC = ICC_WIN95_CLASSES;
+    CommonControls.dwSize = sizeof(CommonControls);
+
+    return InitCommonControlsEx(&CommonControls);
+}
+
+#endif
+
+```
+
+`src/libraries/NCRT/README.md`:
+
+```md
+Rewrites of various LIBC functions + custom low-level string and memory functions.
+
+```
+
+`src/libraries/NCRT/lib/convert.c`:
+
+```c
+
+/* Converts up to an unsigned 64 bit integer to a string.
+ Supports hexadecimal, decimal, and binary conversions. */
+
+string UnsignedIntegerToString(uint64 integer, string out_result, uint32 out_result_length, INTFMT base)
+{
+    static int8 result[65];
+
+    uint64 value;
+    string presult;
+    uint8 place_values;
+    uint8 exponent;
+    int8 data;
+
+    presult = result;
+    exponent = 1;
+    place_values = 0;
+
+    switch(base)
+    {
+        case FMT_INT_BINARY:
+
+            do
+            {
+                value = (uint64)(integer / Power(base, exponent));
+                exponent++;
+                place_values++;
+
+            } while((value > 0) && (place_values < 64));
+
+            while(place_values)
+            {
+                value = (uint16)(((integer % Power(base, place_values)) - (integer % Power(base, place_values - 1))) / Power(base, place_values - 1));
+
+                data = (value | 0x30);
+
+                *presult = data;
+                presult++;
+                place_values--;
+            }
+
+        break;
+
+        case FMT_INT_DECIMAL:
+
+            do
+            {
+                value = (uint64)(integer / Power(base, exponent));
+                exponent++;
+                place_values++;
+
+            } while((value > 0) && (place_values < 20));
+
+            while(place_values)
+            {
+                value = (uint16)(((integer % Power(base, place_values)) - (integer % Power(base, place_values - 1))) / Power(base, place_values - 1));
+
+                data = (value | 0x30);
+
+                *presult = data;
+                presult++;
+                place_values--;
+            }
+
+        break;
+
+        case FMT_INT_HEXADECIMAL:
+
+            do
+            {
+                value = (uint64)(integer / Power(base, exponent));
+                exponent++;
+                place_values++;
+
+            } while((value > 0) && (place_values < 16));
+
+            while(place_values)
+            {
+                value = (uint16)(((integer % Power(base, place_values)) - (integer % Power(base, place_values - 1))) / Power(base, place_values - 1));
+
+                data = (value | 0x30);
+
+                if(value > 9)
+                {
+                    data += 7;
+                }
+
+                *presult = data;
+                presult++;
+                place_values--;
+            }
+
+        break;
+    }
+
+    *presult = null;
+
+    if(out_result)
+    {
+        MemoryCopy(out_result, result, out_result_length);
+        return (string)out_result;
+    }
+
+    return (string)result;
+}
+
+/* Converts a signed 64 bit integer to a string.
+   Supports hexadecimal, decimal, and binary conversions. */
+
+string SignedIntegerToString(int64 integer, string out_result, uint32 out_result_length, INTFMT base)
+{
+    static int8 result[66];
+
+    string presult = result;
+    boolean negative = (integer < 0);
+
+    if(negative)
+    {
+        *presult++ = '-';
+        integer = -integer;
+    }
+
+    UnsignedIntegerToString(integer, presult, sizeof(presult), base);
+
+    if(out_result)
+    {
+        MemoryCopy(out_result, result, out_result_length);
+        return (string)out_result;
+    }
+
+    return (string)result;
+}
+
+string IntegerToString(int64 integer, string out_result, uint32 out_result_length, INTFMT base)
+{
+    if(integer >= 0)
+    {
+        return UnsignedIntegerToString((uint64)integer, out_result, out_result_length, base);
+    }
+
+    return SignedIntegerToString(integer, out_result, out_result_length, base);
+}
+
+/* Convert real8 precision floating point number to a string.
+   Supports only decimal conversions. */
+
+string DoubleToString(real8 number, string out_result, uint32 out_result_length)
+{
+    static int8 result[83];
+
+    string presult = result;
+    boolean negative = (number < 0);
+    int64 whole = (int64)number;
+    real8 fraction = (number - whole);
+    INTFMT format = FMT_INT_DECIMAL;
+
+    IntegerToString(whole, presult, 20, format);
+
+    presult += StringLength(presult);
+    *presult++ = '.';
+    fraction *= Power(10, 15);
+
+    if(negative)
+    {
+        fraction = -fraction;
+    }
+
+    IntegerToString((int64)fraction, presult, 60, format);
+
+    if(out_result)
+    {
+        MemoryCopy(out_result, result, out_result_length);
+        return (string)out_result;
+    }
+
+    return (string)result;
+}
+
+/* Convert string to an unsigned 64 bit integer.
+   Supports hexadecimal, decimal, and binary conversions. */
+
+uint64 StringToUnsignedInteger(string str, INTFMT base)
+{
+    uint64 result;
+    string pstr = str;
+    uint16 place_values;
+
+    result = 0;
+
+    switch(base)
+    {
+        case FMT_INT_BINARY:
+        {
+            if((*pstr == '0') && (*(pstr + 1) == 'x'))
+            {
+                result = 0xff00ff00ff00ff00;
+                break;
+            }
+
+            else if((*pstr == '0') && (*(pstr + 1) == 'b'))
+            {
+                pstr += 2;
+            }
+
+            place_values = (uint16)StringLength(pstr);
+
+            while(place_values)
+            {
+                uint8 data;
+                uint64 power;
+                uint16 i;
+
+                power = 1;
+
+                if((*pstr <= '1') && (*pstr >= '0'))
+                {
+                    data = (uint8)(*pstr & 0xF);
+                }
+
+                else
+                {
+                    result = 0xff00ff00ff00ff00;
+                    break;
+                }
+
+                for(i = (uint16)power; i < place_values; i++)
+                {
+                    power *= base;
+                }
+
+                result += (uint64)(data * power);
+
+                place_values--;
+                pstr++;
+            }
+        }
+
+        break;
+
+        case FMT_INT_DECIMAL:
+        {
+            if((*pstr == '0') && (*(pstr + 1) == 'x'))
+            {
+                result = 0xff00ff00ff00ff00;
+                break;
+            }
+
+            else if((*pstr == '0') && (*(pstr + 1) == 'b'))
+            {
+                result = 0xff00ff00ff00ff00;
+                break;
+            }
+
+            place_values = (uint16)StringLength(pstr);
+
+            while(place_values)
+            {
+                uint8 data;
+                uint64 power;
+                uint16 i;
+
+                power = 1;
+
+                if((*pstr <= '9') && (*pstr >= '0'))
+                {
+                    data = (uint8)(*pstr & 0xF);
+                }
+
+                else
+                {
+                    result = 0xff00ff00ff00ff00;
+                    break;
+                }
+
+                for(i = (uint16)power; i < place_values; i++)
+                {
+                    power *= base;
+                }
+
+                result += (uint64)(data * power);
+
+                place_values--;
+                pstr++;
+            }
+        }
+
+        break;
+
+        case FMT_INT_HEXADECIMAL:
+        {
+            if((*pstr == '0') && (*(pstr + 1) == 'x'))
+            {
+                pstr += 2;
+            }
+
+            else if((*pstr == '0') && (*(pstr + 1) == 'b'))
+            {
+                result = 0xff00ff00ff00ff00;
+                break;
+            }
+
+            place_values = (uint16)StringLength(pstr);
+
+            while(place_values)
+            {
+                uint8 data;
+                uint64 power;
+                uint16 i;
+
+                power = 1;
+
+                if((*pstr <= 'f') && (*pstr >= 'A'))
+                {
+                    data = (uint8)((*pstr | 0x20) - 0x57);
+                }
+
+                else if((*pstr <= '9') && (*pstr >= '0'))
+                {
+                    data = (uint8)(*pstr & 0xF);
+                }
+
+                else
+                {
+                    result = 0xff00ff00ff00ff00;
+                    break;
+                }
+
+                for(i = (uint16)power; i < place_values; i++)
+                {
+                    power *= base;
+                }
+
+                result += (uint64)(data * power);
+
+                place_values--;
+                pstr++;
+            }
+        }
+
+        break;
+
+        default:
+
+            result = 0xff00ff00ff00ff00;
+
+        break;
+    }
+
+    return result;
+}
+
+/* Convert string to a signed 64 bit integer.
+   Supports hexadecimal, decimal, and binary conversions. */
+
+int64 StringToInteger(string str, INTFMT base)
+{
+    int64 result = 0;
+    string pstr = str;
+    boolean negative = (*pstr == '-');
+
+    if(negative)
+    {
+       result = (int64)StringToUnsignedInteger(pstr + 1, base);
+       result = -result;
+    }
+    
+    else
+    {
+       result = StringToUnsignedInteger(pstr, base);
+    }
+
+    return result;
+}
+
+/* Convert string to a real8 precision floating point.
+   Supports only decimal conversions. */
+
+real8 StringToDouble(string str) 
+{
+    string pstr = str;
+
+    if(pstr)
+    {
+        int64 number = 0;
+        real8 power = 10.0;
+        real8 result = 0.0;
+        int16 exponent = 0;
+        uint16 number_of_digits = 0;
+        uint16 number_of_decimals = 0;
+        boolean negative = false;
+
+        if(*pstr == '-')
+        {
+            negative = true;
+            pstr++;
+        }
+
+        else if(*pstr == '+')
+        {
+            pstr++;
+        }
+
+        while((*pstr <= '9') && (*pstr >= '0')) 
+        {
+            result = result * power + (*pstr - '0');
+            pstr++;
+            number_of_digits++;
+        }
+
+        if(*pstr == '.') 
+        {
+            pstr++;
+
+            while((*pstr <= '9') && (*pstr >= '0')) 
+            {
+                result = result * power + (*pstr - '0');
+                pstr++;
+                number_of_digits++;
+                number_of_decimals++;
+            }
+
+            exponent -= number_of_decimals;
+            number = exponent;
+        }
+
+        if(number_of_digits == 0) 
+        {
+            result = 0.0;
+            return result;
+        }
+
+        if(negative) 
+        {
+            result = -result;
+        }
+
+        if((exponent < -307)  || (exponent > 1024)) 
+        {
+            result = -1;
+            return result;
+        }
+
+        if(number < 0) 
+        {
+            number = -number;
+        }
+
+        while(number) 
+        {
+            if(number & 1) 
+            {
+                if(exponent < 0) 
+                {
+                   result /= power;
+                } 
+
+                else 
+                {
+                   result *= power;
+                }
+            } 
+
+            number >>= 1;
+            power *= power;
+        }
+
+        return result;
+    }
+
+    return 0x00ff00ff00ff00ff;
+}
+
+
+```
+
+`src/libraries/NCRT/lib/convert.h`:
+
+```h
+#ifndef _NCRT_CONVERT_H
+#define _NCRT_CONVERT_H
+
+/* Converts an unsigned 64 bit integer to a string.
+ Supports hexadecimal, decimal, and binary conversions. */
+
+string UnsignedIntegerToString(uint64, string, uint32, INTFMT);
+
+/* Converts a signed 64 bit integer to a string.
+   Supports hexadecimal, decimal, and binary conversions. */
+
+string SignedIntegerToString(int64, string, uint32, INTFMT);
+
+/* Calls SignedIntegerToString() if passed a signed integer,
+   or UnsignedIntegerToString() if passed an unsigned integer. */
+
+string IntegerToString(int64, string, uint32, INTFMT);
+
+/* Convert real8 precision floating point number to a string.
+   Supports only decimal conversions. */
+
+string DoubleToString(real8, string, uint32);
+
+/* Convert string to an unsigned 64 bit integer.
+   Supports hexadecimal, decimal, and binary conversions. */
+
+uint64 StringToUnsignedInteger(string, INTFMT);
+
+/* Convert string to a signed 64 bit integer.
+   Supports hexadecimal, decimal, and binary conversions. */
+
+int64 StringToInteger(string, INTFMT);
+
+/* Convert string to a real8 precision floating point.
+   Supports only decimal conversions. */
+
+real8 StringToDouble(string);
+
+/* Convert wide cstrings to standard cstrings. */
+
+string WideToAscii(wstring);
+
+#endif
+
+```
+
+`src/libraries/NCRT/lib/math.c`:
+
+```c
+
+/* Returns the value of integer {base} raised to the power of {exponent} */
+
+int64 Power(int64 base, int64 exponent)
+{
+    int64 result = 1;
+
+    while(exponent)
+    {
+        if(exponent & 1) 
+        {
+            result *= base;
+        }
+
+        exponent >>= 1;
+        base *= base;
+    }
+
+    return result;
+}
+
+```
+
+`src/libraries/NCRT/lib/math.h`:
+
+```h
+#ifndef _NCRT_MATH_H
+#define _NCRT_MATH_H
+
+/* Returns the value of integer raised to a power. */
+
+int64 Power(int64, int64);
+
+#endif
+
+```
+
+`src/libraries/NCRT/lib/memory.c`:
+
+```c
+
+/* Zero out a memory location. */
+
+uint64 MemoryZero(PVOID address, uint64 length)
+{
+    uint32 bytes_zeroed = 0;
+    int8 *paddress = (int8 *)address;
+
+    while(length) 
+    {
+        paddress[bytes_zeroed++] = 0x00;
+        length--;
+    }
+
+    return bytes_zeroed;
+}
+
+/* Rewrite of libc memset(). */
+
+PVOID MemorySet(PVOID address, int8 value, uint64 length)
+{
+    uint32 bytes_set = 0;
+    int8 *paddress = (int8 *)address;
+
+    while(bytes_set < length)
+    {
+        paddress[bytes_set] = value;
+        bytes_set += sizeof(value);
+    }
+
+    return address;
+}
+
+/* Rewrite of libc memcpy(). */
+
+PVOID MemoryCopy(PVOID dest, PVOID src, uint64 length)
+{
+    uint32 bytes_copied = 0;
+    int8 *pdest = (int8 *)dest;
+    int8 *psrc = (int8 *)src;
+
+    while(length - bytes_copied)
+    {
+        *pdest++ = *psrc++;
+        bytes_copied++;
+    }
+
+    return dest;
+}
+
+/* Bitwies functions: Set and clear bits, convert bits to bytes and vice-versa. */
+
+BIT *ByteToBits(BYTE b, BIT *bits)
+{
+    static BIT result[8];
+    uint8 bit;
+    
+    for(bit = 0; bit < 8; bit++)
+    {
+        result[8 - (bit + 1)].value = (b.value >> bit);
+    }
+
+    if(bits)
+    {
+        MemoryCopy((string)bits, (string)result, sizeof(bits));
+        return bits;
+    }
+
+    return result;
+}
+
+BYTE BitsToByte(BIT *bits)
+{
+    BYTE result;
+    uint8 bit;
+
+    for(bit = 0; bit < 8; bit++)
+    {
+        result.value |= (bits[8 - (bit + 1)].value << bit);
+    }
+
+    return result;
+}
+
+boolean CheckBit(PVOID address, uint8 bit)
+{
+    uint8 *paddress = (uint8 *)address;
+
+    if(paddress)
+    {
+        return ((*paddress >> bit) & 1);
+    }
+
+    return false;
+}
+
+boolean SetBit(PVOID address, uint8 bit)
+{
+    uint8 *paddress = (uint8 *)address;
+
+    if(paddress)
+    {
+        *paddress |= (1 << bit);
+        return CheckBit(paddress, bit);
+    }
+
+    return false;
+}
+
+boolean ClearBit(PVOID address, uint8 bit)
+{
+    uint8 *paddress = (uint8 *)address;
+
+    if(paddress)
+    {
+        *paddress &= ~(1 << bit);
+        return !CheckBit(paddress, bit);
+    }
+
+    return false;
+}
+
+boolean ToggleBit(PVOID address, uint8 bit)
+{
+    uint8 *paddress = (uint8 *)address;
+
+    if(paddress)
+    {
+        boolean current_state;
+        boolean previous_state;
+
+        previous_state = CheckBit(paddress, bit);
+        *paddress ^= (1 << bit);
+        current_state = CheckBit(paddress, bit);
+        return (previous_state != current_state);
+    }
+
+    return false;
+}
+
+```
+
+`src/libraries/NCRT/lib/memory.h`:
+
+```h
+#ifndef _NCRT_MEMORY_H
+#define _NCRT_MEMORY_H
+
+/* Zero out a memory location. */
+
+uint64 MemoryZero(PVOID , uint64);
+
+/* Rewrite of libc memset(). */
+
+PVOID MemorySet(PVOID , int8, uint64);
+
+/* Rewrite of libc memcpy(). */
+
+PVOID MemoryCopy(PVOID , PVOID , uint64);
+
+/* Bitwies functions: Set and clear bits, convert bits to bytes and vice-versa. */
+
+BIT *ByteToBits(BYTE, BIT *);
+BYTE BitsToByte(BIT *);
+
+boolean CheckBit(PVOID , uint8);
+boolean SetBit(PVOID , uint8);
+boolean ClearBit(PVOID , uint8);
+boolean ToggleBit(PVOID , uint8);
+
+#endif
+
+```
+
+`src/libraries/NCRT/lib/strings.c`:
+
+```c
+
+/* Rewrite of libc strcpy(). */
+
+uint32 CopyString(string to, string from, uint32 length)
+{
+    uint32 bytes_copied = 0;
+
+    while(bytes_copied < length)
+    {
+        if(!(to[bytes_copied] = from[bytes_copied])) break;
+        ++bytes_copied; 
+    }
+
+    return bytes_copied;
+}
+
+/* Rewrite of libc strlen(). */
+
+uint32 StringLength(string str)
+{
+    uint32 length = 0;
+    string pstr = str;
+
+    while(*pstr)
+    {
+        ++length;
+        pstr++;
+    }
+
+    return length;
+}
+
+/* Rewrite of libc strcat(). */
+
+string StringConcat(string str1, string str2)
+{
+    CopyString(str1 + StringLength(str1), str2, StringLength(str2));
+    return str1;
+}
+
+/* Checks equality of two c-strings. */
+
+boolean StringCompare(string string_a, string string_b, boolean case_sensitive)
+{
+    boolean result = (StringLength(string_a) == StringLength(string_b));
+
+    if(result)
+    {
+        uint32 offset;
+
+        for(offset = 0; result && (offset < StringLength(string_a)); offset++)
+        {
+            result = (string_a[offset] == string_b[offset]);
+            if(!result && !case_sensitive) result = ((string_a[offset] | 0x20) == (string_b[offset] | 0x20));
+        }
+    }
+
+    return result;
+}
+
+/* Finds first occurrence of a string within another string.
+   Returns the index into the string or -1 if non existent. */
+
+int32 FindFirstOccurrenceOfString(string haystack, string needle, boolean case_sensitive)
+{
+    uint32 index = 0;
+    uint32 needle_length = StringLength(needle);
+    uint32 haystack_length = StringLength(haystack);
+
+    if(haystack_length >= 2048)
+    {
+        return -1; 
+    }
+
+    if(needle_length > haystack_length)
+    {
+        return -1; 
+    }
+
+    while(index < haystack_length)
+    {
+        int8 haystack_buffer[2048];
+ 
+        CopyString((string)haystack_buffer, (string)haystack, haystack_length);
+        haystack_buffer[needle_length] = 0;
+
+        if(StringCompare(haystack_buffer, needle, case_sensitive))
+        {
+            return index; 
+        }
+
+        index++;
+        haystack++;
+    }
+
+    return -1; 
+}
+
+/* Checks if a string is a number. */
+
+boolean IsNumeric(string str)
+{
+    string pstr = str;
+    uint32 index = 0;
+    boolean numeric = (str) ? true : false;
+    boolean hex = ((*pstr == '0') && (*(pstr + 1) == 'x'));
+
+    if(hex)
+    {
+        pstr += 2;
+    }
+
+    while((*pstr) && (numeric))
+    {
+        numeric = (((*pstr >= '0') && (*pstr <= '9')) ||
+                   ((index == 0) && (*pstr == '-')) ||
+                   ((*pstr == '.')));
+
+        if(hex)
+        {
+            numeric = numeric || (((*pstr >= 'a') && (*pstr <= 'f')) ||
+                                  ((*pstr >= 'A') && (*pstr <= 'F')));
+        }
+
+        index++;
+        pstr++;
+    }
+
+    return numeric;
+}
+
+/* Convert wide cstrings to standard cstrings. */
+
+string WideToAscii(wstring src)
+{
+    static int8 result[256];
+
+    uint16 chars_converted = 0;
+    string dst = result;
+
+    while(*src && (chars_converted < sizeof(result)))
+    {
+        *dst = (int8)*src;
+        ++dst;
+        ++src;
+        ++chars_converted;
+    }
+
+    *dst = null;
+
+    return (string)result;
+}
+
+/* Removes a single char from an ascii string. */
+
+string RemoveCharFromString(string s, char char_to_remove) 
+{
+    string src;
+    string dst;
+
+    for(src = dst = s; *src; src++) 
+    {
+        *dst = *src;
+
+        if(*dst != char_to_remove) 
+        {
+            dst++;
+        }
+    }
+
+    *dst = null;
+
+    return dst;
+}
+
+
+```
+
+`src/libraries/NCRT/lib/strings.h`:
+
+```h
+#ifndef _NCRT_STRINGS_H
+#define _NCRT_STRINGS_H
+
+/* Rewrite of libc strcpy(). */
+
+uint32 CopyString(string, string, uint32);
+
+/* Rewrite of libc strlen(). */
+
+uint32 StringLength(string);
+
+/* Rewrite of libc strcat(). */
+
+string StringConcat(string, string);
+
+/* Checks equality of two c-strings. */
+
+boolean StringCompare(string, string, boolean);
+
+/* Finds first occurrence of a string within another string.
+   Returns the index into the string or -1 if non existent. */
+
+int32 FindFirstOccurrenceOfString(string, string, boolean);
+
+/* Checks if a string is a number. */
+
+boolean IsNumeric(string);
+
+/* Convert wide cstrings to standard cstrings. */
+
+string WideToAscii(wstring);
+
+/* Removes a single char from an ascii string. */
+
+string RemoveCharFromString(string, char);
+
+#endif
+
+```
+
+`src/libraries/NCRT/lib/types.h`:
+
+```h
+#ifndef _NCRT_TYPES_H
+#define _NCRT_TYPES_H
+
+#if defined(_MSC_VER)
+    #if (_MSC_VER >= 1400)
+        #ifndef uint64
+             #define uint64 unsigned __int64
+        #endif
+        
+        #ifndef int64
+             #define int64 __int64
+        #endif
+    #endif
+#endif
+
+#ifndef uint8
+    #define uint8 unsigned char
+#endif
+
+#ifndef uint16
+    #define uint16 unsigned short
+#endif
+
+#ifndef uint32
+   #define uint32 unsigned int
+#endif
+
+#ifndef uint64
+    #define uint64 unsigned long long
+#endif
+
+#ifndef int8
+    #define int8 char
+#endif
+
+#ifndef int16
+    #define int16 short
+#endif
+
+#ifndef int32
+   #define int32 int
+#endif
+
+#ifndef int64
+    #define int64 long long
+#endif
+
+#ifndef wchar
+    #define wchar uint16
+#endif
+
+#ifndef null
+    #define null 0x00
+#endif
+
+#ifndef EXIT_SUCCESS
+    #define EXIT_SUCCESS 0x00
+#endif
+
+#ifndef EXIT_FAILURE
+    #define EXIT_FAILURE 0xff
+#endif
+
+#ifndef string
+    #define string int8 *
+#endif
+
+#ifndef wstring
+    #define wstring wchar *
+#endif
+
+#ifndef real4
+    #define real4 float
+#endif
+
+#ifndef real8
+    #define real8 double
+#endif
+
+#ifndef BOOL
+    #define BOOL int32
+#endif
+
+#ifndef bool
+    #define bool int32
+#endif
+
+#ifndef boolean
+    #define boolean int32
+#endif
+
+#ifndef true
+    #define true 0x00000001
+#endif
+
+#ifndef false
+    #define false 0x00000000
+#endif
+
+#ifndef TRUE
+    #define TRUE 0x00000001
+#endif
+
+#ifndef FALSE
+    #define FALSE 0x00000000
+#endif
+
+#ifdef BIT
+    #undef BIT
+#endif
+
+#ifdef BYTE
+    #undef BYTE
+#endif
+
+#ifndef PVOID
+    #define PVOID void *
+#endif
+
+#ifndef VOID
+    #define VOID void
+#endif
+
+typedef enum _INTFMT
+{
+    FMT_INT_BINARY = 2,
+    FMT_INT_DECIMAL = 10,
+    FMT_INT_HEXADECIMAL = 16
+
+} INTFMT;
+
+#pragma pack(push, 1)
+
+typedef struct _BIT
+{
+    bool value : 1;
+
+} _BIT_;
+
+typedef union _BYTE
+{
+    uint8 value;
+
+    struct _BITS
+    {
+        bool bit_0 : 1;
+        bool bit_1 : 1;
+        bool bit_2 : 1;
+        bool bit_3 : 1;
+        bool bit_4 : 1;
+        bool bit_5 : 1;
+        bool bit_6 : 1;
+        bool bit_7 : 1;
+
+    } bits;
+
+} _BYTE_;
+
+#define BIT _BIT_
+#define BYTE _BYTE_
+
+#pragma pack(pop)
+
+#endif
+
+```
+
+`src/libraries/NCRT/lib/web.c`:
+
+```c
+/* Encode URL */
+
+string urlencode(string URL)
+{
+    static int8 encoded_url[2048];
+
+    int8 hex_lookup_table[] = "0123456789ABCDEF";
+    uint32 index, i;
+
+    index = 0;
+
+    if(StringLength(URL) >= sizeof(encoded_url))
+    {
+        encoded_url[index] = null;
+        return (string)encoded_url;
+    }
+
+    MemoryZero(encoded_url, sizeof(encoded_url));
+    
+    for(i = 0; i < StringLength(URL); i++) 
+    {
+        if(('a' <= URL[i] && URL[i] <= 'z')
+            || ('A' <= URL[i] && URL[i] <= 'Z')
+            || ('0' <= URL[i] && URL[i] <= '9')) 
+        {
+            encoded_url[index++] = URL[i];
+        } 
+
+        else 
+        {
+            encoded_url[index++] = '%';
+            encoded_url[index++] = hex_lookup_table[URL[i] >> 0x4];
+            encoded_url[index++] = hex_lookup_table[URL[i] & 0xF];
+        }
+    }
+
+    encoded_url[index] = null;
+    return (string)encoded_url;
+}
+
+/* Decode URL */
+
+string urldecode(string URL)
+{
+    static int8 encoded_url[2048];
+
+    string pURL = URL;
+    uint32 index = 0;
+
+    if(StringLength(URL) >= sizeof(encoded_url))
+    {
+        encoded_url[index] = null;
+        return (string)encoded_url;
+    }
+
+    MemoryZero(encoded_url, sizeof(encoded_url));
+
+    while(*pURL)
+    {
+       if(*pURL == '%')
+       {
+           uint8 code[3];
+
+           code[0] = *(pURL + 1);
+           code[1] = *(pURL + 2);
+           code[2] = null;
+
+           encoded_url[index++] = (uint8)StringToInteger((string)code, FMT_INT_HEXADECIMAL);
+
+           pURL += 3;
+
+           continue;
+       }
+       
+       encoded_url[index++] = *pURL++;
+    }
+
+    encoded_url[index] = null;
+    return (string)encoded_url;
+}
+
+```
+
+`src/libraries/NCRT/lib/web.h`:
+
+```h
+#ifndef _NCRT_WEB_H
+#define _NCRT_WEB_H
+
+/* Encode URL */
+string urlencode(string URL);
+
+/* Decode URL */
+string urldecode(string URL);
+
+#endif
+
+```
+
+`src/libraries/NCRT/ncrt.h`:
+
+```h
+#ifndef _NCRT_H
+#define _NCRT_H
+
+    #include "lib/types.h"
+
+    #include "lib/strings.h"
+    #include "lib/math.h"
+    #include "lib/memory.h"
+    #include "lib/convert.h"
+    #include "lib/web.h"
+
+    #include "lib/strings.c"
+    #include "lib/math.c"
+    #include "lib/memory.c"
+    #include "lib/convert.c"
+    #include "lib/web.c"
+
+#endif
+
+```
+
+`src/main.c`:
+
+```c
+/* Memory Editing Application
+ Author: David McHugh Jr.
+ Last Modified: 09/01/2026 */
+
+#include "initialize.h"
+
+/* Entry point. */
+
+void main(int32 argc, string argv[])
+{
+    if(Initialize())
+    {
+        if(CreateMemoryScannerWindow())
+        {
+            while(GetMessage(&message, null, 0, 0) > 0)
+            {
+                TranslateMessage(&message);
+                DispatchMessage(&message);
+            }
+        }
+    }
+}
+
+```
+
+`src/resources/icon.h`:
+
+```h
+#ifndef RESOURCE_H
+#define RESOURCE_H
+#define AppIcon 10001
+#endif
+
+```
+
+`src/resources/icon.rc`:
+
+```rc
+#include "icon.h"
+AppIcon ICON "icon.ico"
+1 24 "vs.xml"
+```
+
+`src/resources/vs.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assemblyIdentity
+    version="1.0.0.0"
+    processorArchitecture="*"
+    name="CompanyName.ProductName.YourApplication"
+    type="win32"
+/>
+
+<asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"> 
+  <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings"> 
+    <dpiAware>true</dpiAware> 
+  </asmv3:windowsSettings> 
+</asmv3:application>
+
+<dependency>
+    <dependentAssembly>
+        <assemblyIdentity
+            type="win32"
+            name="Microsoft.Windows.Common-Controls"
+            version="6.0.0.0"
+            processorArchitecture="*"
+            publicKeyToken="6595b64144ccf1df"
+            language="*"
+        />
+    </dependentAssembly>
+</dependency>
+</assembly>
+
+```
