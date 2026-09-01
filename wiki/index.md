@@ -1826,6 +1826,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [immortal-rust](entities/immortal-rust.md) — Facepunch Rust OpenGL + SDK generation cheat source (C/C++; cheat / game:rust; gmh5225)
 - [imxyvimapper](entities/imxyvimapper.md) — BYOVD driver mapper via AsUpIO.sys (PE manual map; sections/imports/relocs/entry; gmh5225)
 - [shared-flushfilebuffers-communication](entities/shared-flushfilebuffers-communication.md) — shared buffer + `FlushFileBuffers`-triggered `IRP_MJ_FLUSH_BUFFERS` KM↔UM comm; no worker thread (UCFoxi; C++; cheat / driver communication)
+- [uc-apex-remastered](entities/uc-apex-remastered.md) — Apex Legends hybrid UM+KM cheat framework: C++ Visual Studio/WDK kernel driver + user-mode client; privileged memory ops, gameplay modules, DirectX 9 + ImGui overlay (BaconToaster; cheat / game:apex legends)
 - [ucfoxi-shared-flushfilebuffers-communication-update](entities/ucfoxi-shared-flushfilebuffers-communication-update.md) — `\Driver\PEAUTH` `IRP_MJ_FLUSH_BUFFERS` hijack + registry-seeded shared buffer KM↔UM comm (gmh5225; cheat / driver communication)
 - [ucmapper](entities/ucmapper.md) — BYOVD kernel driver manual mapper via nvaudio.sys (EncodePayLoad reuse; runtime-list cleanup; gmh5225)
 - [ucmiraka-valorant-external](entities/ucmiraka-valorant-external.md) — Valorant external PoC (Chase1803; C++; win32k NtUserGetPointerProprietaryId hook + kernel driver; process memory R/W + PML4 retrieval; user client reads UWorld/ULevel/GameState; driver comm / external data extraction research; cheat / game:valorant [External])
