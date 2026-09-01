@@ -1472,6 +1472,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/xiaomi-sm8450-kernel [xiaomi kernel]
 - https://github.com/Danda420/kernel_xiaomi_sm8250 [xiaomi kernel for POCO F3/F4]
 - https://github.com/LowTension/android_kernel_xiaomi_sm8475 [Pixel Experience Plus for for Redmi K6/POCO F5 Pro]
+- https://github.com/RooTurkk/ROOTURK-Kernel [Android 15 GKI 6.6 kernel source for POCO X7 Pro with built-in KernelSU Next, SuSFS root hiding, and game-oriented idle tuning]
 - https://github.com/GrapheneOS-Archive/kernel_msm-coral [Pixel 4/4XL/4a]
 - https://github.com/msnx/KernelSU-Pixel4XL [KernelSU for Google Pixel4XL]
 - https://github.com/universal5433/android_kernel_samsung_universal5433 [samsung 15433]
@@ -4383,6 +4384,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - [User-mode C++ Anti-Cheat written for German Roleplay Server GVMP.de](https://github.com/divodeuxsevres/gvmp-anticheat)
 - https://github.com/ricardoofnl/open.mp-anticheat [Native open.mp C++ component that detects client mods via self-memory reads vs known cheat signatures]
 - https://github.com/adem-hosni/AtomicShieldClient [Multi-layered FiveM anti-cheat client with tray agent, manual-map loader, and runtime guards]
+- https://github.com/Dead-Scripts/Dead_antiCheat [FiveM server-side Lua anti-cheat detecting noclip, spectate abuse, fake chat, and blacklisted prop spawns with Discord webhook logging]
 - [Cheat developer platform](https://github.com/c4kef/UAC)
 - https://github.com/ekknod/Anti-Cheat-TestBench [TestBench]
 - https://github.com/gmh5225/Malicious-code-detection-bugu [Malicious code detection and obfuscation]
