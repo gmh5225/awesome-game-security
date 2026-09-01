@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:BabylonJS/Babylon.js`: entity [[babylon-js]] (BabylonJS; TypeScript monorepo browser 3D engine; WebGL/WebGPU backends; scenes/animations/materials/physics/post-processing; SSAO/SSR/TAA; navigation mesh; Game Engine / HTML5); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[three-js]], [[engine]], [[pixijs]], and [[godogen]].
+
 - **2026-09-01** — ingest `description:BaconToaster/UC-Apex-Remastered`: entity [[uc-apex-remastered]] (BaconToaster; Windows C++ Apex Legends hybrid UM+KM framework; kernel driver privileged memory ops + communication; UM client gameplay modules; DirectX 9 + ImGui overlay; VS/WDK build; driver-assisted memory access + real-time overlay research; cheat / game:apex legends); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[project-branthium]], [[apex-legends-cheat]], [[apex-mizu-base]], and [[easy-anti-cheat]].
 
 - **2026-09-01** — ingest `description:Bad-Jubies/Exploits`: entity [[exploits]] (Bad-Jubies; Windows kernel driver exploit collection; AMD uProf **`AmdPowerProfiler.sys`** arbitrary file write CVE-2025-61969 + kernel write CVE-2026-0466; ASIO64 driver exploitation; MS-BKRP padding-oracle decryption; kernel security / BYOVD research; README `[AmdPowerProfiler.sys]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[hitcon-2023-demo-cve-2023-20562]], [[amd-ryzen-master-driver-v17-exploit]], [[asio-exploit]], and [[windows-kernel-exploits]].

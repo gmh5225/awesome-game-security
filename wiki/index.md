@@ -68,6 +68,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BNM-Android](entities/bnm-android.md) — C++20 Android Unity IL2CPP modding library by class/method/field names; runtime access, patching, hook-framework integration; supported Unity versions; mobile game modding / RE foundation; [Modding il2cpp games]; ByNameModding
 - [BakaWare4](entities/bakaware4.md) — WIP CS2 cheat (debug unload/unhook; `-insecure`; cheat / game:cs2)
 - [BamboozlEDR](entities/bamboozledr.md) — ETW event generator TUI (multi-provider; EDR/detection lab; AC/IS forensics)
+- [Babylon.js](entities/babylon-js.md) — TypeScript browser 3D engine (WebGL/WebGPU; scenes/animations/materials/physics/post-processing; SSAO/SSR/TAA; Game Engine / HTML5)
 - [Bad-Bugcheck](entities/bad-bugcheck.md) — NSG650; updated kernel BSOD visual hack; Bad Apple frames via crash framebuffer; hooks KeBugCheckEx; display framebuffer mapping (not legacy BOOTVID VGA); stb_image + direct memory copy; bugcheck hooking / crash-screen rendering research
 - [Bad-BugCheck Old](entities/bad-bugcheck-old.md) — NSG650; early kernel BSOD visual PoC; Bootvid VidBitBlt VGA-style animated frames on forced crash screen; triggers bugcheck after playback; legacy BOOTVID crash-screen graphics research
 - [BadRentdrv2](entities/badrentdrv2.md) — Rentdrv2.sys BYOVD (IOCTL → physmem R/W; driver map / kernel patch / AC bypass; gmh5225)
