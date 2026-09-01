@@ -20,6 +20,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-01** — ingest `description:CodeMaxx/windows-runtime-attestation-report`: entity [[windows-runtime-attestation-report]] (CodeMaxx; C++ GetRuntimeAttestationReport console sample; signed driver + kernel hotpatch Runtime Report Packages; VBS/HVCI; x64/ARM64; local runtime integrity inspection; Windows Security Features); cited on [[concepts/hvci]] and [[overviews/anti-cheat]]; cross-linked [[sewindows]].
+
 - **2026-09-01** — ingest `description:mfthomps/RESimGhidraPlugins`: entity [[resim-ghidra-plugins]] (mfthomps; Java Ghidra Debugger extension; RESim/Simics simulation-backed RE front end; gdb-multiarch remote incl. port 9123; bookmarks/watchmarks/stack console/listing hovers; mirrors RESim IDA Pro plugins; Cheat RE Tools / Ghidra Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[gdbghidra]], and [[dynamic-binary-instrumentation]].
 
 - **2026-09-01** — ingest `readme:categories`: Cheat ~2767 (+1; mfthomps/[[resim-ghidra-plugins]] RESim/Simics Ghidra Debugger in Cheat RE Tools) / Windows Security Features ~10 (+1; CodeMaxx/[[windows-runtime-attestation-report]] GetRuntimeAttestationReport driver/hotpatch dump) / Anti Cheat ~701 / other major section counts stable; 41 sections; entities [[resim-ghidra-plugins]] and [[windows-runtime-attestation-report]]; refreshed README-map counts on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/dma-attack]], and [[overviews/windows-kernel]]; light `index.md` section notes (no per-category pages).

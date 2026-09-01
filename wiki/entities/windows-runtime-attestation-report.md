@@ -15,6 +15,13 @@ C++ console sample (Visual Studio 2022; Windows SDK 10.0.29648; x64/ARM64) that 
 
 Listed under README **Windows Security Features**. Complements TPM PCR tooling such as [[sewindows]] by exposing OS-signed runtime driver/hotpatch integrity reports.
 
+## Report types
+
+- **Driver report** — every loaded kernel driver: image hash, publisher certificate thumbprint, flags.
+- **Hotpatch report** — kernel-mode images with Microsoft-signed hotpatches: base address, image size, patch sequence numbers.
+
+Scope is local inspection only: no remote attestation and no RSA-PSS signature verification in the sample.
+
 ## Links
 
 - Repo: https://github.com/CodeMaxx/windows-runtime-attestation-report

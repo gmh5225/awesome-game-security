@@ -22,7 +22,8 @@ sources:
   - wiki/sources/descriptions/Ido-Moshe-Github__CiDllDemo.md
   - wiki/sources/descriptions/Harvester57__CodeIntegrity-DriverBlocklist.md
   - wiki/sources/descriptions/Cr4sh__KernelForge.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md
+updated: 2026-09-01
 confidence: high
 ---
 
@@ -38,7 +39,7 @@ Hypervisor-Enforced Code Integrity (Memory Integrity): a **Virtualization-Based 
 
 ## Game-security role
 
-Raises the cost of classic kernel code patches and some [[byovd]] patterns; baseline assumption alongside Secure Boot/TPM in serious AC and [[dma]] threat models. Does not stop pure external DMA by itself—IOMMU/attestation still required. Research framed as HVCI bypass via PFN swapping (call arbitrary kernel functions from user mode) appears in [[bustercall]]. (source: wiki/sources/descriptions/zer0condition__BusterCall.md)
+Raises the cost of classic kernel code patches and some [[byovd]] patterns; baseline assumption alongside Secure Boot/TPM in serious AC and [[dma]] threat models. Does not stop pure external DMA by itself—IOMMU/attestation still required. Research framed as HVCI bypass via PFN swapping (call arbitrary kernel functions from user mode) appears in [[bustercall]]. (source: wiki/sources/descriptions/zer0condition__BusterCall.md) Local runtime integrity inspection on VBS/HVCI hosts via **GetRuntimeAttestationReport** appears in [[windows-runtime-attestation-report]] (CodeMaxx; signed driver + kernel hotpatch Runtime Report Packages; no remote attestation). (source: wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md)
 
 Early-boot / native-subsystem research such as [[bootbypass]] targets DSE and Memory Integrity together via boot-manager checks, CI.dll validation, and `SeCiCallbacks` patching (`subsystem:native`). (source: wiki/sources/descriptions/wesmar__BootBypass.md)
 
@@ -58,5 +59,5 @@ HVCI/kCET-aware kernel exception research such as [[bugcheck-suppressor]] (XaFF-
 
 ## Related
 
-[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[kernel-forge]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[patchguard]] · [[byovd]] · [[iommu]] · [[bustercall]] · [[bootbypass]] · [[zero-hvci]] · [[kernel-forge]] · [[fake-enclave]] · [[secure-game]] · [[disabling-hyper-v]] · [[solemn]] · [[wdactools]] · [[code-integrity-driverblocklist]] · [[msft-driverblocklist]] · [[hvci-loldrivers-check]] · [[byovdfinder]] · [[loldrivers-client]] · [[goodmans-kernel]] · [[bugcheck-suppressor]] · [[ci-dll-demo]] · [[windows-runtime-attestation-report]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
 
