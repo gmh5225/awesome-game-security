@@ -3136,6 +3136,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [source2dumps](entities/source2dumps.md) — aggregated Source 2 netvars/interfaces/class IDs (Dota 2, Artifact, HL:Alyx, Sandbox; C++ headers; [Dump])
 - [Splendid Implanter](entities/splendid-implanter.md) — BattlEye-compatible user-mode injector (secret.club; exploits UM BE flaw; Injector)
 - [Spoof-RetAddr](entities/spoof-ret-addr.md) — x64 WinAPI return-address spoofing PoC (HulkOperator; C + NASM; stack manipulation; call-stack obfuscation education; Cheat Spoof Stack)
+- [Spoofer (AlfredIU)](entities/spoofer.md) — Windows C++ mixed overlay cheat + HWID-evasion package (user-mode aimbot/ESP/entity cache/projectile prediction via DirectX9 ImGui; kernel driver artifacts; cheat / HWID)
 - [SpoofingCollection](entities/spoofing-collection.md) — Magisk + LSPosed Android device-fingerprint profiles (build props + Build API hooks; Play Integrity / attestation research)
 - [Speed-Hack](entities/speed-hack.md) — Windows C++ Visual Studio injectable DLL (Cheat Engine–style Detours timing hooks; keyboard slowdown/accelerate/restore; cheat practice + AC time-manipulation research; Letomaniy)
 - [Speedhack](entities/speedhack.md) — Lightweight Windows Detours timing-API hook DLL (accelerate/slow/pause perceived runtime; cheat / SpeedHack; time-tampering research)

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:AlfredIU/Spoofer`: entity [[spoofer]] (AlfredIU; Windows C++ mixed overlay cheat + HWID-evasion package; user-mode aimbot/ESP/entity cache/projectile prediction via DirectX9 ImGui; kernel driver build artifacts; offensive cheat architecture + identity-evasion workflows; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac]], [[imgui-spoofer-leaked]], [[fortnite-external-5]], and [[valorant-cheat-external]].
+
 - **2026-09-02** — ingest `description:AlirezaParsi/COPG`: entity [[copg]] (AlirezaParsi; Zygisk module; per-app CPU/GPU/build-prop/IMEI/Widevine/SIM/GAID hardware-profile spoof; stealth copy-on-write or unload-before-launch vs resident GPU/DRM hooks; C++ + JS WebUI; bypass hardware-gated FPS/graphics tiers; mobile game fingerprint research; cheat / Android); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[zygisk]], [[magisk]], [[android-faker]], [[hidemyandroid]], [[nexus]], and [[spoofing-collection]].
 
 - **2026-09-02** — ingest `description:matjam/bunyip`: entity [[bunyip]] (matjam; pure Go game engine; cgo-free generated Vulkan bindings; ECS, 2D/3D physics, skeletal animation, PBR, immediate-mode UI, spatial audio, TCP/TLS/UDP networking; macOS/Windows/Linux; headless screenshot tests; roguelike/strategy/space simulation titles; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[bloom-engine]], [[nightshade]], [[raylib]], [[custom-game-engines]], and [[pilot]].
