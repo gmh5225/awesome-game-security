@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:AndroidModLoader/AndroidModLoader`: entity [[android-mod-loader]] (AndroidModLoader; C++ NDK native mod loader; inject/manage mods; patching, memory write, function hook, interface-based mod APIs; ARM hooking, dependency handling, IL2CPP utilities, mod templates; cheat / Android Mod Loader); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory]], [[and64-inline-hook]], [[il2cpp]], and [[android-mod-menu]].
+
 - **2026-09-02** — ingest `description:AndroidReverser-Test/Kernel-Trace`: entity [[kernel-trace]] (AndroidReverser-Test; C/C++ Linux/Android KPM uprobe kernel module; bulk user-space function hooking; userspace headers for library/offset/metadata config; tracefs output; register/clear probe APIs; dynamic analysis / low-level behavior tracing on Android; cheat / Android kernel driver); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apatch-kpm]], [[kernelpatch]], [[ehook]], and [[stackplz]].
 
 - **2026-09-02** — ingest `description:Anonym0ose/JitDumper`: entity [[jit-dumper]] (Anonym0ose; Windows .NET CIL method-body dumper; C# analysis app + C++ Detours JIT hook; symbol/PDB support; multi-generation .NET; metadata reconstruction for compiled-method inspection; managed-code RE / software-protection analysis; README A CIL method body dumper); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[dncil]], [[ilspy]], [[detours]], and [[vmunprotect-dumper]].
