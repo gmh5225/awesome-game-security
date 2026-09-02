@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Android1337/Fortnite-Offsets`: entity [[android1337-fortnite-offsets]] (Android1337; Fortnite memory offset dump for cheat and RE tooling; original GitHub repo offline; README-listed offset reference in cheat / game:fortnite research category); cited on [[overviews/game-hacking]] and [[concepts/unreal-object-model]]; cross-linked [[fortnite-offsets]], [[trydos-fortnite-offsets]], [[fortnite-offsets-and-sigs]], and [[fortnite-offset-dumper]].
+
 - **2026-09-02** — ingest `description:Android1500/AndroidFaker`: entity [[android-faker]] (Android1500; Xposed/LSPosed module; IMEI, Android ID, MAC, SIM, and tracking-relevant identifier spoofing; randomization + manual edit; privacy-oriented device-identity obfuscation and app fingerprint testing; cheat / Android); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[hidemyandroid]], [[nexus]], [[spoofing-collection]], and [[xposed-module-kit]].
 
 - **2026-09-02** — ingest `description:AndroidModLoader/AndroidModLoader`: entity [[android-mod-loader]] (AndroidModLoader; C++ NDK native mod loader; inject/manage mods; patching, memory write, function hook, interface-based mod APIs; ARM hooking, dependency handling, IL2CPP utilities, mod templates; cheat / Android Mod Loader); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory]], [[and64-inline-hook]], [[il2cpp]], and [[android-mod-menu]].
