@@ -1473,6 +1473,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gdbghidra](entities/gdbghidra.md) — live GDB ↔ Ghidra bridge (Python client + Java extension; cursor/stack sync, register propagation, breakpoints, relocations; Comsecuris; GDB session)
 - [gdbserver9x](entities/gdbserver9x.md) — GDB RSP stub for 32-bit Win98SE/XP (VC6; Binary Ninja adapter)
 - [gdrv-loader](entities/gdrv-loader.md) — Gigabyte `gdrv64.sys` unsigned driver mapper (BYOVD; DSE bypass; kernel research)
+- [gdrv-sys-exploit](entities/gdrv-sys-exploit.md) — Gigabyte `gdrv.sys` PoC exploit toolkit (C++ Visual Studio; arbitrary-write and shellcode examples; Win11; educational BYOVD research; AmitMoshel1)
 - [gdriver-lib](entities/gdriver-lib.md) — C++ library wrapping Gigabyte `gdrv64.sys` (physmem R/W, physical mapping, kernel ops via IOCTLs; BYOVD access primitive)
 - [gdrv-loader-v2](entities/gdrv-loader-v2.md) — Gigabyte `gdrv.sys` loader v2 (C/C++; cheat / vulnerable-driver driver development)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
