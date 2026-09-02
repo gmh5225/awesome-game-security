@@ -1425,6 +1425,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Colorful-glassblock/duchamp-root [CVE-2026-43499]
 - https://github.com/BuSung-dev/Root-My-Galaxy [Samsung Galaxy KernelSU installer — CVE-2026-43499]
 - https://github.com/alex193a/Root-My-Pixel [Jailbreak supported Google Pixel phones with CVE-2026-43499]
+- https://github.com/JoinChang/ghostlock-oneplus [GhostLock (CVE-2026-43499) futex PI UAF exploit with multi-device offset tables for locked-bootloader OnePlus/OPPO/realme/Xiaomi root + KernelSU]
 - https://github.com/YuKongA/ghostlock-app [GhostLock One-Tap Execution App - CVE-2026-43499]
 
 > Android Bootloader Bypass
