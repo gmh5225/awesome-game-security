@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Antelcat/ida_copilot`: entity [[ida-copilot]] (Antelcat; Python IDA Pro plugin; GPT-assisted workflows via IDAPython, Hex-Rays, and LangChain; pseudocode analysis, symbol inspection, comment/rename suggestions; menu actions + shortcut-driven function-level investigation; cheat / IDA Plugins / [ChatGPT]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[aether]], [[gepetto]], [[ida-gpt]], [[binarylens]], and [[idassist]].
+
 - **2026-09-02** — ingest `description:zhurong2020/pyobfus`: entity [[pyobfus]] (zhurong2020; AST-based Python obfuscator; cross-file rename, literal encoding, import rewrite, CFF; YAML + FastAPI/Django/Flask presets; reverse stack-trace mapping, JSON CLI, MCP server, VS Code extension; CPython 3.9–3.14; game tooling / commercial IP hardening); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[pyarmor]] and [[de4py]].
 
 - **2026-09-02** — ingest `readme:categories`: Anti Cheat ~704 (+1; ApexLegendsUC/[[anti-cheat-emulator]] kernel AC telemetry simulation in Stress Testing) / Cheat ~2769 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
