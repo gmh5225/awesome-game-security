@@ -591,6 +591,7 @@ sources:
   - wiki/sources/descriptions/Jamesits__BGRTInjector.md
   - wiki/sources/descriptions/Jesewe__VioletWing.md
   - wiki/sources/descriptions/Jiang-Night__Kernel_driver_hack.md
+  - wiki/sources/descriptions/JoinChang__ghostlock-oneplus.md
   - wiki/sources/descriptions/PierreCiholas__GetPixel-vs-BitBlt_GetDIBits.md
   - wiki/sources/descriptions/PierreCiholas__NotAnOverlay.md
   - wiki/sources/descriptions/abcz316__rwProcMem33.md

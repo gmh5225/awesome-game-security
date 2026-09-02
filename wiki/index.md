@@ -786,7 +786,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CVE-2025-26125](entities/cve-2025-26125.md) — IObit `IMFForceDelete.sys` MSI-based file/folder deletion LPE → SYSTEM (ZeroMemoryEx)
 - [PoC CVE-2025-38352](entities/poc-cve-2025-38352.md) — posix-cpu-timers thread-group-exit vs timer-fire race UAF (LTS 6.12.33; Sep 2025 Android bulletin ITW)
 - [CVE-2026-40369-EXPLOIT](entities/cve-2026-40369-exploit.md) — Win11 24H2–25H2 LPE via NtQuerySystemInformation class 253 (Chrome sandbox)
-- [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0)
+- [CVE-2026-43499-popsicle](entities/cve-2026-43499-popsicle.md) — Xiaomi popsicle Android 16 LPE (CVE-2026-43499; LD_PRELOAD; uid 0; same CVE family as [[ghostlock-oneplus]]/[[ghostlock-app]])
 - [CVE-2026-64560 Analysis](entities/cve-2026-64560-analysis.md) — posix-cpu-timers non-leader exec() race UAF trigger PoC (Linux x86_64 + Android GKI arm64; patch verification)
 - [CVE-2026-XNU-AIO-KEVENT-UAF](entities/cve-2026-xnu-aio-kevent-uaf.md) — XNU kern_aio.c AIO+kevent UAF from sandbox app (panic/double-free; iOS 26.2, patched 26.3; crazymind90)
 - [cve-maker](entities/cve-maker.md) — Python CLI: multi-DB CVE/exploit search (keyword/product/CVE ID; severity + links)
