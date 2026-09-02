@@ -2261,6 +2261,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/d1skq/vgk-dma-bypass [VGK DMA bypass]
 - https://github.com/gmh5225/Pcileech-DMA-NVMe-VMD [Firmware real camouflage through motherboard VMD function.（Pcileech-DMA）]
 - https://github.com/a0yark/ArcRaidersRadar-dma-Radar [DMA radar/ESP, MemProcFS + Unicorn Engine for pointer decryption emulation]
+- https://github.com/TheAustinUS/LuminaryDMA [Call of Duty read-only DMA cheat framework with PCILeech/MockDMA backends, BO6 offsets, and client-info decryption]
 - https://github.com/MGreif/PCILeech_DMA_Proxy [A DLL with Loader that hooks common windows memory API functions and proxies them to the remote device via DMA]
 
 > W2S
