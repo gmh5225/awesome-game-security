@@ -1084,6 +1084,7 @@ sources:
   - wiki/sources/descriptions/bootmgfw__Fortnite-External-Cheat-Base.md
   - wiki/sources/descriptions/bootmgfw__CS2-Cheat-Source.md
   - wiki/sources/descriptions/AsfhtgkDavid__windmouse.md
+  - wiki/sources/descriptions/AntonKukoba1__BetterCallStack.md
   - wiki/sources/descriptions/Archie-osu__PowerHook.md
   - wiki/sources/descriptions/Arctium__WoW-Launcher.md
   - wiki/sources/descriptions/ArtemisDevGroup__Artemis.md
@@ -2193,6 +2194,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Function clustering and organization for large binaries via [[idaclu]] (Qt GUI; i18n; group similar functions by criteria; visual navigation; cheat / IDA Plugins) sits in the same large-binary navigation lane. (source: wiki/sources/descriptions/harlamism__IdaClu.md)
 - Workflow-centric function triage and prioritization via [[ida-spotlight]] (IDA Pro plugin; prioritize which functions to analyze first; large-binary triage bottleneck; cheat / IDA Plugins) sits beside [[idaclu]] and [[ida-func-outline]] in that navigation lane. (source: wiki/sources/descriptions/dyussekeyev__ida-spotlight.md)
 - PS4 module-loader IDA helper via [[ida-ps4-helper]] (companion to ps4-module-loader; PlayStation static RE; cheat / IDA Plugins) sits in the same lane. (source: wiki/sources/descriptions/janisslsm__ida-ps4-helper.md)
+- Windows x64 call-stack reconstruction in IDA via [[better-call-stack]] (AntonKukoba1; C++ IDA debugger plugin; DbgHelp + StackWalk64 for more reliable frames than default debugger view; auto-loads during debug sessions; protected/complex binary RE; cheat / Improve call stack) sits in the Cheat IDA Plugins / debugger lane beside [[lazyida]] and [[tenet]]. (source: wiki/sources/descriptions/AntonKukoba1__BetterCallStack.md)
 - In-IDA Yara rule file scanning via [[yarascan-ida]] (Python; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/senko37__yarascan-ida.md)
 - Unofficial YARA integration for IDA Pro via [[yara4ida]] (default **Alt-Y**; rebind via `plugins.cfg`; cheat / IDA Plugins) sits in the Cheat IDA Plugins / signature-scan lane. (source: wiki/sources/descriptions/kweatherman__yara4ida.md)
 - In-IDA YARA rule scanning with match highlighting via [[findyara-ida]] (gmh5225; run custom rules on the loaded binary; disasm navigation to hits; malware/crypto/packer signatures; cheat / Yara) sits in the Cheat Yara / signature-scan lane. (source: wiki/sources/descriptions/gmh5225__findyara-ida.md)

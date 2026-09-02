@@ -120,6 +120,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [battleye-shellcode](entities/battleye-shellcode.md) — decompiled BE UM shellcode modules (AutoHotKey detection, Present hook scan, stack-walking; dllcrt0; [shellcode])
 - [battle-cats-complete](entities/battle-cats-complete.md) — Battle Cats Rust desktop toolkit (.pack/APK import, decrypt/extract, animation render/export, mod authoring; omochikaeri15)
 - [BattleriteBot](entities/battlerite-bot.md) — Battlerite arena brawler automation bot (memory or screen recognition; ability/targeting/movement; gmh5225)
+- [BetterCallStack](entities/better-call-stack.md) — C++ IDA debugger plugin; Windows x64 call-stack reconstruction via DbgHelp + StackWalk64; more reliable frames than default debugger view; auto-loads during debug sessions; protected/complex binary RE (AntonKukoba1; cheat / Improve call stack)
 - [better-godot-mcp](entities/better-godot-mcp.md) — Godot 4.x composite MCP (TS; scenes/GDScript; Game Develop / MCP)
 - [better-hi3-launcher](entities/better-hi3-launcher.md) — Honkai Impact 3rd enhanced launcher (download/version/server/config; gmh5225)
 - [better-string-analyzer](entities/better-string-analyzer.md) — Ghidra string analyzer plugin (Java; modding / Ghidra Plugins; fuzzypickles14)
