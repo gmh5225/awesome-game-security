@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Archie-osu/PowerHook`: entity [[powerhook]] (Archie-osu; C++ KMDF kernel PoC; hooks KPRCB/PRCB IdlePreselect power-management callback; preserves original handler; thread/process lookups + execution-context logging; Windows internals / low-level game security research; README Hooking KPRCB IdlePreselect); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[windows-kernel-pagehook]], [[page-table-hook]], and [[detect-hiddenthread-via-kprcb]].
+
 - **2026-09-01** — ingest `description:Arctium/WoW-Launcher`: entity [[wow-launcher]] (Arctium; C#/.NET public WoW client launcher; valid TLS to custom servers; multi-branch client versions + configurable CDN endpoints; public build strips dev mode/mod loading; private-server ops + client compatibility testing; cheat / game:wow [wow launcher]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[trinitycore]], [[azerothcore-wotlk]], [[mopcore547]], [[5-4-7-wow-source]], [[awesome-wow-rust]], [[dumpwow]], and [[wow-iat-fix]].
 
 - **2026-09-01** — ingest `description:AreWeAntiCheatYet/AreWeAntiCheatYet`: entity [[are-we-anti-cheat-yet]] (community-maintained GNU/Linux/Proton/Wine AC compatibility tracker; JSON catalog + Next.js static site; readiness statuses supported/running/planned/broken/denied; EAC/BattlEye listing; table/card/game pages + RSS; TypeScript/React/Mantine; Steam Deck reference; no bypass promotion); cited on [[overviews/anti-cheat]]; cross-linked [[aclist-github-io]], [[crossover-patcher]], and [[proton]].
