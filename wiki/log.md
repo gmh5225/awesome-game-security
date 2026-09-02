@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:AlessandroZ/LaZagne`: entity [[lazagne]] (AlessandroZ; Python cross-platform credential recovery framework; modular collectors for browsers, mail clients, databases, chat apps, and other locally stored secrets; post-exploitation, auditing, and forensic credential-exposure assessment); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[browser-password-exportor]], [[kvcforensic]], [[custom-dpapi]], [[dfirtriage]], and [[qvoid-token-grabber]].
+
 - **2026-09-02** — ingest `description:Alex3434/wmi-static-spoofer`: entity [[wmi-static-spoofer]] (Alex3434; kernel-mode PoC; static WMI hardware-serial spoof via direct memory manipulation + registry updates; hook-minimal unload-after-apply; configurable offsets + randomized serial generation; HWID evasion vs anti-cheat/licensing telemetry; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[mutante]], [[easy-hwid-spoofer]], [[hwid-kernel-spoofer]], [[windows-hardware-info]], and [[hwid-checker-mg]].
 
 - **2026-09-02** — ingest `description:AlfredIU/Spoofer`: entity [[spoofer]] (AlfredIU; Windows C++ mixed overlay cheat + HWID-evasion package; user-mode aimbot/ESP/entity cache/projectile prediction via DirectX9 ImGui; kernel driver build artifacts; offensive cheat architecture + identity-evasion workflows; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac]], [[imgui-spoofer-leaked]], [[fortnite-external-5]], and [[valorant-cheat-external]].
