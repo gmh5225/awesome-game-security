@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Anatdx/Kasumi`: entity [[kasumi]] (Anatdx; Android GKI/Linux LKM root-hide framework; ftrace/tracepoint hooks on syscalls, VFS, and procfs; mount info, SELinux context, and file-attribute spoofing; kernel-level path manipulation; cheat / Kernel-level path manipulation and hiding framework for Android GKI/Linux); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[hideroot]], [[android-kernel-hacking-toolkit]], [[kernelsu]], [[mobile-anti-cheat]], and [[advanced-root-checker]].
+
 - **2026-09-02** — ingest `description:JoinChang/ghostlock-oneplus`: entity [[ghostlock-oneplus]] (JoinChang; native CVE-2026-43499 futex PI UAF; pselect6 stack overlay + rb-tree writes; NDK C + Python per-SoC/GKI offset tables; UMH injection or cred patch; locked-bootloader OnePlus/OPPO/realme/Xiaomi + KernelSU without boot-image patch; cheat / Android Root); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ghostlock-app]], [[cve-2026-43499-popsicle]], [[root-my-pixel]], [[duchamp-root]], and [[kernelsu]].
 
 - **2026-09-02** — ingest `description:AndnixSH/APKToolGUI`: entity [[apktoolgui]] (AndnixSH; Windows C#/.NET GUI wrapper for apktool, signapk, zipalign, and baksmali; drag-and-drop decompile/rebuild/sign/align, ADB helpers, framework management, multilingual UI; legitimate Android app analysis and modification; `[Apk]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apktool-mcp-server]], [[jadx]], and [[apk-sh]].
