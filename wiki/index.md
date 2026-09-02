@@ -2926,6 +2926,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RESimGhidraPlugins](entities/resim-ghidra-plugins.md) — Ghidra Debugger plugins for RESim reverse-engineering simulator (Java; gdb-multiarch/Simics port 9123; bookmarks, watchmarks, stack console, listing hovers; mirrors RESim IDA Pro plugins; Cheat RE Tools / Ghidra Plugins; mfthomps)
 - [Ret-Spoofing](entities/ret-spoofing.md) — minimal x64 return-address spoofing without exception handlers (Peribunt; C++ + ASM stubs; low-overhead fake return targets; Windows x64 nonvolatile-register assumptions; Cheat Spoof Stack)
 - [Return-address-spoofer](entities/return-address-spoofer.md) — return-address / stack spoof illustration (C/C++; Cheat Spoof Stack)
+- [Return-address-spoofing](entities/return-address-spoofing.md) — compact x64 return-address spoofing for invoker pipelines (Apex-master; C++ templates + ASM stubs; native function invocation bypass; anti-detection evasion research; Cheat Spoof Stack)
 - [RASD](entities/rasd.md) — R5AC/Apex Legends return-address spoofing detector (cryotb; `RtlCaptureStackBackTrace` stackwalk; gadget + unbacked-RWX heuristics; Detection:Spoof Stack)
 - [ricochet-deobfuscator](entities/ricochet-deobfuscator.md) — Ricochet AC deobfuscator (C/C++; driver / memory analysis)
 - [ricochet-disabler](entities/ricochet-disabler.md) — Ricochet AC disable/bypass (kernel driver + user-mode; COD research)
