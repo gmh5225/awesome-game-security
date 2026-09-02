@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Android1500/AndroidFaker`: entity [[android-faker]] (Android1500; Xposed/LSPosed module; IMEI, Android ID, MAC, SIM, and tracking-relevant identifier spoofing; randomization + manual edit; privacy-oriented device-identity obfuscation and app fingerprint testing; cheat / Android); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[hidemyandroid]], [[nexus]], [[spoofing-collection]], and [[xposed-module-kit]].
+
 - **2026-09-02** — ingest `description:AndroidModLoader/AndroidModLoader`: entity [[android-mod-loader]] (AndroidModLoader; C++ NDK native mod loader; inject/manage mods; patching, memory write, function hook, interface-based mod APIs; ARM hooking, dependency handling, IL2CPP utilities, mod templates; cheat / Android Mod Loader); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[kittymemory]], [[and64-inline-hook]], [[il2cpp]], and [[android-mod-menu]].
 
 - **2026-09-02** — ingest `description:AndroidReverser-Test/Kernel-Trace`: entity [[kernel-trace]] (AndroidReverser-Test; C/C++ Linux/Android KPM uprobe kernel module; bulk user-space function hooking; userspace headers for library/offset/metadata config; tracefs output; register/clear probe APIs; dynamic analysis / low-level behavior tracing on Android; cheat / Android kernel driver); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apatch-kpm]], [[kernelpatch]], [[ehook]], and [[stackplz]].
