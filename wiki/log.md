@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Anonym0usWork1221/C-Android-Memory-Tool`: entity [[c-android-memory-tool]] (Anonym0usWork1221; C++ rooted Android memory toolkit; process search/read/write, offset scan, result management, value freeze; reusable class over process mappings + memory files; cheat-engine style workflows; cheat / RPM); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-memory-tool]], [[writemem]], [[cheap-engine]], [[ace-the-game]], and [[mempatch]].
+
 - **2026-09-02** — ingest `description:Antelcat/ida_copilot`: entity [[ida-copilot]] (Antelcat; Python IDA Pro plugin; GPT-assisted workflows via IDAPython, Hex-Rays, and LangChain; pseudocode analysis, symbol inspection, comment/rename suggestions; menu actions + shortcut-driven function-level investigation; cheat / IDA Plugins / [ChatGPT]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[aether]], [[gepetto]], [[ida-gpt]], [[binarylens]], and [[idassist]].
 
 - **2026-09-02** — ingest `description:zhurong2020/pyobfus`: entity [[pyobfus]] (zhurong2020; AST-based Python obfuscator; cross-file rename, literal encoding, import rewrite, CFF; YAML + FastAPI/Django/Flask presets; reverse stack-trace mapping, JSON CLI, MCP server, VS Code extension; CPython 3.9–3.14; game tooling / commercial IP hardening); cited on [[overviews/reverse-engineering]] and [[concepts/control-flow-flattening]]; cross-linked [[pyarmor]] and [[de4py]].

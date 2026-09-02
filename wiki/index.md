@@ -522,6 +522,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BusterCall](entities/bustercall.md) — enumerate/patch kernel callbacks; HVCI PFN-swap research
 - [bytecode-viewer](entities/bytecode-viewer.md) — Java/Android multi-decompiler suite (CFR/Procyon/FernFlower/JD-GUI/Krakatau; bytecode+Smali+source tabs; JAR/DEX/APK)
 - [BytecodeVM](entities/bytecodevm.md) — Java bytecode virtualizing obfuscator (Gradle/ASM CLI; pure-Java VM; dispatch/threaded/register/FSM architectures; encrypted operands + shuffled CFG; educational Java hardening; NHCM-dev; AC Obfuscation Engine)
+- [C-Android-Memory-Tool](entities/c-android-memory-tool.md) — C++ rooted Android memory toolkit (process search/read/write, offset scan, result management, value freeze; reusable class over process mappings + memory files; cheat-engine style workflows; Anonym0usWork1221; cheat / RPM)
 
 - [byfron-bypass](entities/byfron-bypass.md) — Byfron/Roblox client AC bypass research (C++; asset pipelines / editor tooling; explore anticheat:byfron; gmh5225)
 - [byvalver](entities/byvalver.md) — shellcode bad-byte banisher (2 modes; AC shellcode engine & tricks)
