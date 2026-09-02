@@ -2344,6 +2344,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mono-external-lib](entities/mono-external-lib.md) — external Unity/Mono metadata reader (classes/methods/fields; no inject; C++)
 - [mutaben](entities/mutaben.md) — Python MBA (mixed-boolean-arithmetic) expression generator
 - [mutante](entities/mutante.md) — Windows kernel HWID spoofer; disk serial / SMART / SMBIOS; hook-minimal WDK driver; archival SMBIOS/storage ID research (SamuelTulach; cheat / [HWID])
+- [wmi-static-spoofer](entities/wmi-static-spoofer.md) — kernel-mode PoC for static WMI hardware-serial spoof via memory + registry patches; hook-minimal unload-after-apply; configurable offsets + randomized serials; HWID evasion research (Alex3434; cheat / HWID)
 - [mwclap](entities/mwclap.md) — COD Warzone NVIDIA GeForce Experience overlay hijack (cheat / game:cod warzone)
 - [MxEngine](entities/mxengine.md) — modern C++ OpenGL 3D engine (PBR, screen-space FX, ECS, editor; educational desktop 3D; Game Engine / source)
 - [call-of-duty-vanguard-hack-esp-aimbot-unlock-all](entities/call-of-duty-vanguard-hack-esp-aimbot-unlock-all.md) — COD Vanguard/Warzone external: Win32 RPM + DirectX overlay; ESP / aimbot / unlock-all (gmh5225; cheat / game:cod vanguard [External])

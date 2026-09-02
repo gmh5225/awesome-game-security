@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Alex3434/wmi-static-spoofer`: entity [[wmi-static-spoofer]] (Alex3434; kernel-mode PoC; static WMI hardware-serial spoof via direct memory manipulation + registry updates; hook-minimal unload-after-apply; configurable offsets + randomized serial generation; HWID evasion vs anti-cheat/licensing telemetry; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[mutante]], [[easy-hwid-spoofer]], [[hwid-kernel-spoofer]], [[windows-hardware-info]], and [[hwid-checker-mg]].
+
 - **2026-09-02** — ingest `description:AlfredIU/Spoofer`: entity [[spoofer]] (AlfredIU; Windows C++ mixed overlay cheat + HWID-evasion package; user-mode aimbot/ESP/entity cache/projectile prediction via DirectX9 ImGui; kernel driver build artifacts; offensive cheat architecture + identity-evasion workflows; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[hwid-spoofer-eac]], [[imgui-spoofer-leaked]], [[fortnite-external-5]], and [[valorant-cheat-external]].
 
 - **2026-09-02** — ingest `description:AlirezaParsi/COPG`: entity [[copg]] (AlirezaParsi; Zygisk module; per-app CPU/GPU/build-prop/IMEI/Widevine/SIM/GAID hardware-profile spoof; stealth copy-on-write or unload-before-launch vs resident GPU/DRM hooks; C++ + JS WebUI; bypass hardware-gated FPS/graphics tiers; mobile game fingerprint research; cheat / Android); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[zygisk]], [[magisk]], [[android-faker]], [[hidemyandroid]], [[nexus]], and [[spoofing-collection]].
