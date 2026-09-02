@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:matjam/bunyip`: entity [[bunyip]] (matjam; pure Go game engine; cgo-free generated Vulkan bindings; ECS, 2D/3D physics, skeletal animation, PBR, immediate-mode UI, spatial audio, TCP/TLS/UDP networking; macOS/Windows/Linux; headless screenshot tests; roguelike/strategy/space simulation titles; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[bloom-engine]], [[nightshade]], [[raylib]], [[custom-game-engines]], and [[pilot]].
+
 - **2026-09-02** — ingest `readme:categories`: Game Engine ~157 (+1; Allar/[[ue5-style-guide]] comprehensive UE style guide in Game Engine / Unreal) / Cheat ~2771 / Anti Cheat ~704 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]] and [[overviews/game-engine]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-02** — ingest `description:Allar/ue5-style-guide`: entity [[ue5-style-guide]] (Allar; comprehensive UE style guide; naming conventions, asset organization, workflow rules, and linting guidance for large-project consistency; Game Engine / Unreal); cited on [[overviews/game-engine]] and [[unreal-engine-guide]]; cross-linked [[ue-clang-format]], [[unreal-development-guides-and-tips]], and [[unreal-engine]].
