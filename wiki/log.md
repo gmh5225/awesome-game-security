@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `readme:categories`: Cheat ~2771 (+1; TheAustinUS/[[luminary-dma]] Call of Duty read-only DMA PCILeech/MockDMA framework in Cheat DMA lanes) / Anti Cheat ~704 / other major section counts stable; 41 sections; entity [[luminary-dma]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-02** — ingest `description:AmitMoshel1/gdrv_sys_exploit`: entity [[gdrv-sys-exploit]] (AmitMoshel1; C++ Visual Studio PoC toolkit; Gigabyte `gdrv.sys` arbitrary-write and shellcode-oriented exploit examples on modern Windows/Win11; educational BYOVD kernel exploitation research; README `[gdrv.sys Win11]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[gdrv-loader]], [[gdrv-loader-v2]], [[gdriver-lib]], [[cve-2018-19320]], [[cve-2018-19320-lpe]], [[kdp-compatible-driver-loader]], and [[eac-mapper]].
 
 - **2026-09-02** — ingest `description:AnalogFeelings/KmdfMandelcheck`: entity [[kmdfmandelcheck]] (AnalogFeelings; compact KMDF kernel driver; renders bitmap on BSOD via modified BOOTVID interface; crash-time display / boot-video graphics research; cheat / [BSOD]); cited on [[overviews/windows-kernel]]; cross-linked [[bad-bugcheck-old]], [[bad-bugcheck]], [[bugcheck2linux]], and [[bugcheckhack]].
