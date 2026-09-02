@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:AnarchDevelopment/aegledll`: entity [[aegledll]] (AnarchDevelopment; C++ Aegleseeker internal Minecraft DX11 DLL client; MinHook + ImGui overlay + HLSL blur shaders; pattern scanning; modular combat/movement/visual HUD; config + array-list + optional IRC networking; cheat / game:minecraft [Internal]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[phantom-client]], [[lenrete-mod]], [[yuri]], [[present-hook]], and [[ntminhook]].
+
 - **2026-09-02** — ingest `description:Anatdx/Kasumi`: entity [[kasumi]] (Anatdx; Android GKI/Linux LKM root-hide framework; ftrace/tracepoint hooks on syscalls, VFS, and procfs; mount info, SELinux context, and file-attribute spoofing; kernel-level path manipulation; cheat / Kernel-level path manipulation and hiding framework for Android GKI/Linux); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[hideroot]], [[android-kernel-hacking-toolkit]], [[kernelsu]], [[mobile-anti-cheat]], and [[advanced-root-checker]].
 
 - **2026-09-02** — ingest `description:JoinChang/ghostlock-oneplus`: entity [[ghostlock-oneplus]] (JoinChang; native CVE-2026-43499 futex PI UAF; pselect6 stack overlay + rb-tree writes; NDK C + Python per-SoC/GKI offset tables; UMH injection or cred patch; locked-bootloader OnePlus/OPPO/realme/Xiaomi + KernelSU without boot-image patch; cheat / Android Root); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[ghostlock-app]], [[cve-2026-43499-popsicle]], [[root-my-pixel]], [[duchamp-root]], and [[kernelsu]].

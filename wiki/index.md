@@ -169,6 +169,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [AceTheGame](entities/ace-the-game.md) — open-source Android memory editing platform (C++ scan engine + Kotlin/Java client; process inspection, value edit/freeze, modding/injection; rooted/non-rooted; KuhakuPixel; cheat / Game Hacking Tools)
 - [AcDrv](entities/acdrv.md) — Windows kernel AC research driver (process/module callbacks, memory intercept, syscall monitoring; ETW Hook; gmh5225)
 - [aclist.github.io](entities/aclist-github-io.md) — static site: anti-cheat compatibility list + Linux gaming docs (HTML/CSS/JS; conservative manual verification; Anti-cheat compatibility list)
+- [aegledll](entities/aegledll.md) — AnarchDevelopment Aegleseeker internal Minecraft DX11 DLL client (C++; MinHook + ImGui overlay + HLSL shaders; pattern scan; modular combat/movement/visual HUD; config + array-list + optional IRC; cheat / game:minecraft [Internal])
 - [AetherVisor](entities/aether-visor.md) — AMD SVM hacked-hypervisor testing (feature implementation walkthrough; Detection: Hacked Hypervisor Testing AMD; gmh5225)
 - [AETHER](entities/aether.md) — CSIT-SG IDA Pro LLM copilot (Python; AI decompilation, chatbot with tool-calling, function annotation, vulnerability analysis, RAG from binary DB; multi-provider; prompt templates + custom viewer; malware analysis)
 - [Aetheris](entities/aetheris.md) — Dray973 PyQt6 Windows forensics suite (MemProcFS + PCILeech-FPGA guarded DMA R/W; process autopsy, MFT/network/registry; hash-chained audit log; Omega Rollback; live instrumentation; Cheat DMA lane)
