@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:AmitMoshel1/PatchGuardEncryptorDriver`: entity [[patchguard-encryptor-driver]] (AmitMoshel1; C++ kernel research driver; custom PatchGuard-like integrity monitor; KTIMER/KDPC periodic SSDT/IDT/MSR checks + timer/DPC meta-integrity verification; kernel anti-tamper / integrity-defense research; README [Self-implemented PatchGuard]); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[demystifying-patchguard]], [[sushi]], [[patchguard-2023]], and [[gdrv-sys-exploit]].
+
 - **2026-09-02** — ingest `description:TheAustinUS/LuminaryDMA`: entity [[luminary-dma]] (TheAustinUS; Windows C++ Call of Duty read-only DMA cheat framework; PCILeech FPGA + LeechCore + [[dmalibrary]] or MockDMA test mode; separate host; GamePass/BattleNet auto-detect; BattleNet pointer/client-info decryption; BO6 offsets; ESP/radar/player-info ImGui overlay; DMA external-cheat + AC evasion + protected-memory RE research; cheat / game:call of duty [DMA]); cited on [[overviews/dma-attack]] (title samples) and [[overviews/game-hacking]]; cross-linked [[pcileech]], [[dmalibrary]], [[arc-raiders-radar-dma-radar]], and [[cs2-dma]].
 
 - **2026-09-02** — ingest `readme:categories`: Cheat ~2771 (+1; TheAustinUS/[[luminary-dma]] Call of Duty read-only DMA PCILeech/MockDMA framework in Cheat DMA lanes) / Anti Cheat ~704 / other major section counts stable; 41 sections; entity [[luminary-dma]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

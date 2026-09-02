@@ -22,7 +22,8 @@ sources:
   - wiki/sources/descriptions/NSG650__NoMoreBugCheck.md
   - wiki/sources/descriptions/NSG650__BugCheckHack.md
   - wiki/sources/descriptions/Mattiwatti__EfiGuard.md
-updated: 2026-08-23
+  - wiki/sources/descriptions/AmitMoshel1__PatchGuardEncryptorDriver.md
+updated: 2026-09-02
 confidence: high
 ---
 
@@ -70,6 +71,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[bugcheckhack]] (NSG650) is a **driver + user-mode controller** that resolves kernel offsets and patches **bugcheck-related routines** to alter BSOD appearance and behavior—another runtime lane showing how crash-path patching research sits adjacent to PatchGuard-monitored kernel integrity. (source: wiki/sources/descriptions/NSG650__BugCheckHack.md)
 
+[[patchguard-encryptor-driver]] (AmitMoshel1; C++ kernel driver) implements a **self-contained PatchGuard-like monitor**—periodic KTIMER/KDPC checks over SSDT, IDT, and selected MSRs plus meta-integrity verification of timer/DPC structures—useful for studying kernel anti-tamper design rather than KPP bypass. (source: wiki/sources/descriptions/AmitMoshel1__PatchGuardEncryptorDriver.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheckhack]] · [[efiguard]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[patchguard-encryptor-driver]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheckhack]] · [[efiguard]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
