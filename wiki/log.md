@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Allar/ue5-style-guide`: entity [[ue5-style-guide]] (Allar; comprehensive UE style guide; naming conventions, asset organization, workflow rules, and linting guidance for large-project consistency; Game Engine / Unreal); cited on [[overviews/game-engine]] and [[unreal-engine-guide]]; cross-linked [[ue-clang-format]], [[unreal-development-guides-and-tips]], and [[unreal-engine]].
+
 - **2026-09-02** — ingest `description:AllsafeCyberSecurity/awesome-ghidra`: entity [[awesome-ghidra]] (AllsafeCyberSecurity; curated Ghidra ecosystem index; scripts, plugins, extensions, automation, malware analysis, diffing, workflow enhancements; Java and Python; headless and interactive; cheat / List); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[awesome-ida-x64-olly-plugin]], [[ghidra-manager]], [[ghidra-mcp]], and [[ghidra-bridge]].
 
 - **2026-09-02** — ingest `description:AmbientRun/Ambient`: entity [[ambient]] (AmbientRun; Rust cross-platform multiplayer runtime + game engine; ECS real-time data model; automatic network sync; package workflows + configurable asset pipelines; WebAssembly + WebGPU web/desktop; Game Engine / source); cited on [[overviews/game-engine]] and [[overviews/graphics-api]]; cross-linked [[bevy]], [[nightshade]], [[bloom-engine]], [[lightyear]], and [[babylon-js]].
