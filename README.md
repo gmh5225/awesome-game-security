@@ -151,6 +151,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/nem0/LumixEngine
 - https://github.com/urho3d/Urho3D
 - https://github.com/KorokEngine/Korok [Golang]
+- https://github.com/matjam/bunyip [Pure Go game engine with Vulkan rendering, ECS, physics, and headless screenshot tests]
 - https://github.com/BoomingTech/Pilot
 - https://github.com/Sirkles/JoshoEngine-Native
 - https://github.com/ExplosionEngine/Explosion
