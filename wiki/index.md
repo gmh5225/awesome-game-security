@@ -251,6 +251,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-kernel-motorola-dubai](entities/android-kernel-motorola-dubai.md) — Motorola Dubai (Moto Edge 30) SM7325 Snapdragon 778G GKI Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-oneplus-sm8250](entities/android-kernel-oneplus-sm8250.md) — OnePlus 8/8T/8Pro/(9R?) SM8250 Android kernel source (cheat / Android Kernel Source)
 - [android-kernel-oneplus-sm7250-wksu](entities/android-kernel-oneplus-sm7250-wksu.md) — OnePlus Nord SM7250 Android kernel + KernelSU (cheat / Android Kernel Source)
+- [OPPO/OnePlus/Realme SM8750 kernel builder](entities/oppo-oplus-realme-sm8750.md) — OPPO/OnePlus/Realme SM8750 + MT6991 automated kernel build scripts (OKI/GKI, f2fs patches, KernelSU; Andrea-lyz; cheat / Android Kernel Source)
 
 - [android-kernel-samsung-universal5433](entities/android-kernel-samsung-universal5433.md) — Samsung Exynos 5433 Android kernel (Note 4 / Alpha; cheat / Android Kernel Source)
 - [android-kernel-samsung-sm7150](entities/android-kernel-samsung-sm7150.md) — Samsung SM7150 Android kernel source (cheat / Android Kernel Source)

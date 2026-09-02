@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Andrea-lyz/oppo_oplus_realme_sm8750`: entity [[oppo-oplus-realme-sm8750]] (Andrea-lyz; automated kernel build scripts for OPPO/OnePlus/Realme Snapdragon 8 Elite SM8750 and Dimensity 9400+ MT6991; OKI and GKI compilation modes; f2fs compatibility patches; KernelSU integration; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[kernel-build-scripts]]; cross-linked [[kernelsu]], [[rooturk-kernel]], [[android-kernel-oneplus-sm8250]], and [[mobile-anti-cheat]].
+
 - **2026-09-02** — ingest `description:Android1337/Fortnite-Offsets`: entity [[android1337-fortnite-offsets]] (Android1337; Fortnite memory offset dump for cheat and RE tooling; original GitHub repo offline; README-listed offset reference in cheat / game:fortnite research category); cited on [[overviews/game-hacking]] and [[concepts/unreal-object-model]]; cross-linked [[fortnite-offsets]], [[trydos-fortnite-offsets]], [[fortnite-offsets-and-sigs]], and [[fortnite-offset-dumper]].
 
 - **2026-09-02** — ingest `description:Android1500/AndroidFaker`: entity [[android-faker]] (Android1500; Xposed/LSPosed module; IMEI, Android ID, MAC, SIM, and tracking-relevant identifier spoofing; randomization + manual edit; privacy-oriented device-identity obfuscation and app fingerprint testing; cheat / Android); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[hidemyandroid]], [[nexus]], [[spoofing-collection]], and [[xposed-module-kit]].
