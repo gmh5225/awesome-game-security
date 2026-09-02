@@ -12,7 +12,7 @@ confidence: medium
 
 **Open-source Python deobfuscation and analysis framework** with both **GUI and CLI** interfaces. Supports multiple Python obfuscators and includes analyzers for packed artifacts, hash and string inspection, behavior monitoring, and process-integrated code execution. Core is written in Python with a **PySide6** interface, plus native helper components for injection and hook-assisted tooling on Windows. Designed for malware analysts and reverse engineers who need practical Python unpacking and inspection workflows. (source: wiki/sources/descriptions/Fadi002__de4py.md)
 
-Complements Python obfuscators such as [[pyarmor]] on the analyst side, and sits alongside other Python RE tooling like [[decbench]] (decompiler benchmarking) and [[themida-unmutate]] (native mutation deobfuscation).
+Complements Python obfuscators such as [[pyarmor]] and [[pyobfus]] on the analyst side, and sits alongside other Python RE tooling like [[decbench]] (decompiler benchmarking) and [[themida-unmutate]] (native mutation deobfuscation).
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements Python obfuscators such as [[pyarmor]] on the analyst side, and sits
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[pyarmor]] · [[decbench]] · [[deobfuscator]] · [[peekaboo]] · [[flare-vm]]
+[[overviews/reverse-engineering]] · [[pyarmor]] · [[pyobfus]] · [[decbench]] · [[deobfuscator]] · [[peekaboo]] · [[flare-vm]]

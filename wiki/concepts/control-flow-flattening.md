@@ -19,13 +19,14 @@ sources:
   - wiki/sources/descriptions/Deatty__Ghidra-Obfuscation-Detection.md
   - wiki/sources/descriptions/DNLINYJ__Anti_miHoYo_Jcc_Obfuscate.md
   - wiki/sources/descriptions/CKCat__d810.md
-updated: 2026-08-29
+  - wiki/sources/descriptions/zhurong2020__pyobfus.md
+updated: 2026-09-02
 confidence: high
 ---
 
 # Control Flow Flattening
 
-**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[dll-ollvm]] — LLVM 18 IR plugin with insn sub / bogus CFG / CFF / ctor-trim for manual-map DLL injection hardening; R7flex; source: wiki/sources/descriptions/R7flex__dll-ollvm.md), [[obscura]]). Source-level Rust CFF via proc macros such as [[rust-obfuscator]] (`labyrinth_macros`; automatic project-wide insertion) complements IR and binary flattening. Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md) (source: wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md)
+**CFF** (control-flow flattening) reroutes many basic blocks through a central **dispatcher loop** with a state variable, destroying natural if/else and loop structure in static decompilers. OLLVM-style CFF is common in game clients, AC modules, and LLVM pass-plugin protectors ([[kagura]], [[the-poor-mans-obfuscator]], [[dll-ollvm]] — LLVM 18 IR plugin with insn sub / bogus CFG / CFF / ctor-trim for manual-map DLL injection hardening; R7flex; source: wiki/sources/descriptions/R7flex__dll-ollvm.md), [[obscura]]). Source-level Rust CFF via proc macros such as [[rust-obfuscator]] (`labyrinth_macros`; automatic project-wide insertion) complements IR and binary flattening. Post-compile PE obfuscators such as [[obfuscator]] and [[alcatraz]] apply CFF passes at the binary level without source. Source-level Python CFF via [[pyobfus]] (AST transform; cross-file rename + literal encoding; reverse stack-trace mapping for protected builds; zhurong2020; source: wiki/sources/descriptions/zhurong2020__pyobfus.md) complements native and LLVM flattening for shipped game tooling and commercial Python stacks. Variants include nested dispatchers and encrypted state variables. (source: wiki/sources/skills/reverse-engineering.md) (source: wiki/sources/descriptions/es3n1n__obfuscator.md) (source: wiki/sources/descriptions/dronavallipranav__rust-obfuscator.md)
 
 ## Recovery approaches
 
@@ -42,4 +43,4 @@ CFF often co-occurs with [[mixed-boolean-arithmetic]] and opaque predicates — 
 
 ## Related
 
-[[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
+[[anti-ollvm]] · [[anti-mihoyo-jcc-obfuscate]] · [[frida-vmp-bypass]] · [[idadeflat]] · [[ollvm-unflattener]] · [[pagalaxylab-ghidra-scripts]] · [[d810]] · [[d810-ng]] · [[hex-rays-deob]] · [[emotet-deobfuscator]] · [[obpo-plugin]] · [[unflat]] · [[obfuscator]] · [[rust-obfuscator]] · [[pyobfus]] · [[alcatraz]] · [[obfuscation-detection]] · [[ghidra-obfuscation-detection]] · [[xrefgen]] · [[obfuscation-analysis]] · [[genshinjumpfixer2]] · [[mixed-boolean-arithmetic]] · [[dynamic-binary-instrumentation]] · [[overviews/reverse-engineering]]
