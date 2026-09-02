@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:Anonym0ose/JitDumper`: entity [[jit-dumper]] (Anonym0ose; Windows .NET CIL method-body dumper; C# analysis app + C++ Detours JIT hook; symbol/PDB support; multi-generation .NET; metadata reconstruction for compiled-method inspection; managed-code RE / software-protection analysis; README A CIL method body dumper); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dnspy]], [[dncil]], [[ilspy]], [[detours]], and [[vmunprotect-dumper]].
+
 - **2026-09-02** — ingest `description:Anonym0usWork1221/C-Android-Memory-Tool`: entity [[c-android-memory-tool]] (Anonym0usWork1221; C++ rooted Android memory toolkit; process search/read/write, offset scan, result management, value freeze; reusable class over process mappings + memory files; cheat-engine style workflows; cheat / RPM); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[android-memory-tool]], [[writemem]], [[cheap-engine]], [[ace-the-game]], and [[mempatch]].
 
 - **2026-09-02** — ingest `description:Antelcat/ida_copilot`: entity [[ida-copilot]] (Antelcat; Python IDA Pro plugin; GPT-assisted workflows via IDAPython, Hex-Rays, and LangChain; pseudocode analysis, symbol inspection, comment/rename suggestions; menu actions + shortcut-driven function-level investigation; cheat / IDA Plugins / [ChatGPT]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[aether]], [[gepetto]], [[ida-gpt]], [[binarylens]], and [[idassist]].

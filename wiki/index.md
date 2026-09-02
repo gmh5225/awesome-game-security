@@ -1895,6 +1895,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [JavaScript Obfuscator](entities/javascript-obfuscator.md) — JS/Node.js source obfuscator (TypeScript; CLI + API; CFF / string arrays / self-defending / domain lock; browser games)
 - [JS Debugger Bypass UserScript](entities/js-debugger-bypass-script.md) — JavaScript UserScript; bypass browser DevTools/debugger/timing/window-size anti-debug (web/JS RE)
 - [jazz2-native](entities/jazz2-native.md) — C++ Jazz Jackrabbit 2 remake (custom engine; OpenGL ES; cross-platform; actors/levels/tilesets/mechanics; Game Engine / source)
+- [jit-dumper](entities/jit-dumper.md) — Windows .NET CIL method-body dumper (Anonym0ose; C# analysis app + C++ Detours JIT hook; symbol/PDB support; multi-generation .NET; metadata reconstruction for compiled-method inspection; managed-code RE / software-protection analysis; README A CIL method body dumper)
 - [jmap](entities/jmap.md) — UE4/UE5 .uasset/.umap dependency graphs (reflection data / asset structure)
 - [joshoengine-native](entities/joshoengine-native.md) — C++ native 2D OpenGL engine (vectors/rectangles/circles; cross-platform API; VS build artifacts; roadmap shaders/physics/mobile; Game Engine / source; Sirkles)
 - [job_communication](entities/job-communication.md) — job-object / silo `NtQueryInformationJobObject` Ring0↔Ring3 PoC (gmh5225; cheat / driver communication)
