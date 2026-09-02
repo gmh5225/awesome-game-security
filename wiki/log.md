@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `description:AndnixSH/APKToolGUI`: entity [[apktoolgui]] (AndnixSH; Windows C#/.NET GUI wrapper for apktool, signapk, zipalign, and baksmali; drag-and-drop decompile/rebuild/sign/align, ADB helpers, framework management, multilingual UI; legitimate Android app analysis and modification; `[Apk]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apktool-mcp-server]], [[jadx]], and [[apk-sh]].
+
 - **2026-09-02** — ingest `description:Andrea-lyz/oppo_oplus_realme_sm8750`: entity [[oppo-oplus-realme-sm8750]] (Andrea-lyz; automated kernel build scripts for OPPO/OnePlus/Realme Snapdragon 8 Elite SM8750 and Dimensity 9400+ MT6991; OKI and GKI compilation modes; f2fs compatibility patches; KernelSU integration; cheat / Android Kernel Source); cited on [[overviews/mobile-security]] and [[kernel-build-scripts]]; cross-linked [[kernelsu]], [[rooturk-kernel]], [[android-kernel-oneplus-sm8250]], and [[mobile-anti-cheat]].
 
 - **2026-09-02** — ingest `description:Android1337/Fortnite-Offsets`: entity [[android1337-fortnite-offsets]] (Android1337; Fortnite memory offset dump for cheat and RE tooling; original GitHub repo offline; README-listed offset reference in cheat / game:fortnite research category); cited on [[overviews/game-hacking]] and [[concepts/unreal-object-model]]; cross-linked [[fortnite-offsets]], [[trydos-fortnite-offsets]], [[fortnite-offsets-and-sigs]], and [[fortnite-offset-dumper]].
