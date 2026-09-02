@@ -2137,7 +2137,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [LplPlugin](entities/lplplugin.md) — experimental C++23 FullDive Engine (Vulkan ECS, Morton spatial partitioning, Linux kernel IPC module, OpenBCI BCI stack; Game Engine / source)
 - [Luth](entities/luth.md) — custom C++ Vulkan game engine (render graph, PBR, CSM, GTAO, GPU skinning, ECS, fiber job system, integrated editor; Game Engine / source [C++ 2D])
 - [Lumina-Cheat](entities/lumina-cheat.md) — internal CS:GO; mutation for changing signature (cheat / game:csgo)
-- [LuminaryDMA](entities/luminary-dma.md) — Call of Duty read-only DMA cheat framework: PCILeech/MockDMA backends; GamePass/BattleNet auto-detect; BO6 offsets; client-info decryption; ImGui overlay on separate host (C++; cheat / game:call of duty [DMA]; TheAustinUS)
+- [LuminaryDMA](entities/luminary-dma.md) — Call of Duty read-only DMA cheat framework: PCILeech/MockDMA + DMALibrary; GamePass/BattleNet auto-detect; BO6 offsets; client-info decryption; ESP/radar/player-info ImGui overlay on separate host (C++; cheat / game:call of duty [DMA]; TheAustinUS)
 - [LumixEngine](entities/lumixengine.md) — C/C++ Lumix Engine (shader/render samples; Game Engine / source)
 - [lumixengine_maps](entities/lumixengine-maps.md) — Lumix OSM map downloader (roads/buildings; Plugins:Lumix)
 - [Lumos](entities/lumos.md) — open-source C++ 2D/3D engine (Vulkan/OpenGL PBR; ECS; Dear ImGui editor; Game Engine / source)

@@ -1772,6 +1772,7 @@ sources:
   - wiki/sources/descriptions/D3DXVECTOR2__NtUserUpdateWindowTrackingInfo.md
   - wiki/sources/descriptions/Dead-Scripts__Dead_antiCheat.md
   - wiki/sources/descriptions/Berk000x__BinaryLens.md
+  - wiki/sources/descriptions/TheAustinUS__LuminaryDMA.md
 updated: 2026-09-02
 confidence: high
 ---
