@@ -1307,6 +1307,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [frida-il2cpp-datacollector](entities/frida-il2cpp-datacollector.md) — Frida IL2CPP runtime metadata harvester (Android/iOS; CE MonoDataCollector port; SDK generation)
 - [Frida-RS](entities/frida-rs.md) — KernelSU module wrapping official frida-server; Rust supervisor + Material 3 WebUI; multi-ABI; loopback + token-gated TCP (MiChongs)
 - [Frida-Scripts](entities/frida-scripts.md) — Frida JS/Python scripts (editor tooling / hooking; cheat / Frida)
+- [frida-seccomp](entities/frida-seccomp.md) — Android syscall tracing/hooking (Frida + seccomp trap; SVC capture, stack/reg args; Python orchestration + CModule; Abbbbbi)
 - [frida-smali-trace](entities/frida-smali-trace.md) — Frida ART smali instruction tracer (SeeFlowerX; JS/TS agents; interpreter-path hooks; execution logs; IDA offset prep; Android RE / runtime behavior; cheat / Smali trace)
 - [frida-stealth](entities/frida-stealth.md) — AsenOsen Frida stealth patch set; Android fingerprint reduction (ports, sockets, thread names, loop labels, frida-core/frida-gum markers; patch files + build instructions; anti-instrumentation RE)
 - [FridaScript](entities/fridascript.md) — Frida game/app hook scripts (call intercept, API trace, runtime modify; Android/iOS/desktop; gmh5225; iOS low-level scripting)
