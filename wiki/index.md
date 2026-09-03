@@ -336,6 +336,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anti-Cheat-Amateur](entities/anti-cheat-amateur.md) — MemRE memory editor + GothGirlFeet kdmapper KMDF driver (NUL IOCTL; DBVM shims; UE scan; Tencent ACE research)
 - [anti-cheat-emulator](entities/anti-cheat-emulator.md) — Windows kernel AC simulation driver (C++; system-thread/stack/BigPool/PiDDB/dispatch-table/physical-memory-handle scans + hypervisor/mapping checks; researcher telemetry-pipeline testing; ApexLegendsUC)
 - [anti-crack-system](entities/anti-crack-system.md) — Windows C++ anti-tamper / anti-crack framework prototype (anti-debug/anti-dump/anti-attach, integrity checks, process-kill, self-remapping code, string obfuscation; ReFo0)
+- [anticrack-dotnet](entities/anticrack-dotnet.md) — .NET protection toolkit (AdvDebug; C#; anti-debug/anti-VM/anti-injection/hook detection; PEB/thread flags, sandbox heuristics, syscall probes, integrity hardening; anti-anti-debug hook detection; software hardening and AC component building; [CSharp])
 - [Anti-Debugger-Protector-Loader](entities/anti-debugger-protector-loader.md) — Windows C++ anti-debug protector/loader (debugger process/window/driver scans; optional termination; VMProtect SDK; YouNeverKnow00)
 - [Anti-Debug](entities/anti-debug.md) — Windows C++ PoC; ResumeThread suspend-count debugger detection (minimal single-signal anti-debug sample; Metick; Anti Debugging)
 - [AntiDebugging](entities/anti-debugging.md) — C++ anti-debugging techniques (Anti Cheat → Anti Debugging)
