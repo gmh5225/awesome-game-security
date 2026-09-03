@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Ahora57/RaceCondition`: entity [[racecondition]] (Ahora57; C++ Visual Studio anti-anti-debug PoC; native NT API probes of debug ports, hidden-thread behavior, and debugger artifacts; race-condition timing bypasses against common userland hide mechanisms; RE / anti-debug technique research; Anti Debugging); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[showstopper]], [[ghostdebug]], [[scyllahide-for-ida9.0rc]], [[titanhide]], [[hyperhide]], [[anti-debugging]], and [[antidbg]].
+
 - **2026-09-03** — ingest `description:AimTuxOfficial/AimTux`: entity [[aimtux]] (AimTuxOfficial; Linux CS:GO internal cheat framework; C++; CMake build, GDB-based injection, user config directories; build scripts + injection helpers for feature-rich in-game module deployment; internal cheat architecture + client-side manipulation research; cheat / game:csgo [Linux]); cited on [[overviews/game-hacking]]; cross-linked [[anubis]], [[csgo-linux-cheat-sdk]], [[ghinterfacescsgo]], [[gamesneeze]], [[osiris]], and [[csgo-internal-base]].
 
 - **2026-09-03** — ingest `description:Air14/HyperHide`: entity [[hyperhide]] (Air14; open-source hypervisor-based x64dbg/x32dbg anti-anti-debug plugin; kernel driver + Intel VT-x/EPT; hooks/sanitizes PEB, thread/process flags, and Nt* API queries; 64-bit Windows; RE / game-security research against protected binaries; README [VT debuger]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[hyperdbg]], [[vt-debuger]], [[titanhide]], [[scyllahide-for-ida9.0rc]], [[scyllahidedetector2]], and [[kdbgdecryptor]].
