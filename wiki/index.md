@@ -718,6 +718,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [csgo](entities/csgo.md) — large internal CS:GO C++ cheat framework (Bartis1313; SDK wrappers, hook-driven modules, config tooling, DirectX rendering; aimbot, triggerbot, backtrack, ESP, chams, glow, radar, prediction; educational cheat client engineering; cheat / game:csgo [Internal])
 - [csgo-alphen](entities/csgo-alphen.md) — CS:GO internal (full SDK with entity/weapon structures and rendering primitives; ImGui menu; ESP, aimbot, visual mods; gmh5225)
 - [csgo-animation-code-reversed](entities/csgo-animation-code-reversed.md) — CS:GO animation subsystem RE (click4dylan; C++; bone-matrix/pose/sequence logic; cheat / game:csgo)
+- [csgo-auto-dumper](entities/csgo-auto-dumper.md) — CS:GO C++ auto-dump pipeline (Akandesh; steamcmd + build-ID polling; launches local dumper + scripts on new builds; cheat `[Auto Dump]` / game:csgo)
 - [csgo-bot](entities/csgo-bot.md) — CS:GO bot; driver / OpenGL / shader (C/C++; cheat / game:csgo)
 - [csgo_cheat_external](entities/csgo-cheat-external.md) — external CS:GO; driver development (C++; cheat / game:csgo)
 
