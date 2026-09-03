@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Akatsyk/2k17-club`: entity [[2k17-club]] (Akatsyk; large C++ CS:GO internal framework; aimbot, anti-aim, autowall, chams, grenade helpers, hook-based game events; DirectX9 ImGui + Lua/LuaJIT LuaBridge scripting; cheat development + Source engine RE; cheat / game:csgo); cited on [[overviews/game-hacking]]; cross-linked [[csgo]], [[csgo-cheat-base]], [[digital-sdk]], and [[csgosimple]].
+
 - **2026-09-03** — ingest `description:Aki2k/BEDaisy`: entity [[bedaisy]] (Aki2k; C++ BEDaisy.sys kernel interception PoC; image-load callbacks + IAT hook around MmGetSystemRoutineAddress; APC experimentation; kernel anti-cheat bypass-surface + hardening RE); cited on [[concepts/battleye]] and [[overviews/windows-kernel]]; cross-linked [[bedaisy-reversal]], [[bedaisy-bypass]], [[goodeye]], and [[battleye-re]].
 
 - **2026-09-03** — ingest `description:Akipe/awesome-android-aosp`: entity [[awesome-android-aosp]] (Akipe; curated AOSP/custom-ROM Markdown index; build systems, kernels, device trees, Treble, SELinux, debugging, vendor workflows; low-level platform engineering learning map; cheat / Guide); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-android-security]], [[awesome-android-root]], [[android-rom-list]], and [[kernel-common]].
