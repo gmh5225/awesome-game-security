@@ -181,6 +181,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Anbox](entities/anbox.md) — container-based full Android on Linux (LXC + host daemon; OpenGL ES; C++/CMake; archived reference; Android Emulator)
 - [Akebi Cheat 3.3](entities/akebi-cheat-3.3.md) — Akebi-framework Genshin Impact cheat (3.3 branch; cheat / game:genshin impact; gmh5225)
 - [Akebi Packet Sniffer](entities/akebi-packet-sniffer.md) — Akebi-framework packet sniffer (C++/C; driver development; DirectX/OpenGL; cheat / Packet Sniffer&Filter; gmh5225)
+- [AkHeartbeat-BE](entities/akheartbeat-be.md) — GTA5 Enhanced external C++ tool (D3D11 overlay; RPM/WPM + AOB scan; stat/script editors; BE heartbeat bypass + client–BEDaisy RE notes; cheat / game:gta5 [External]; AkitaYui)
 - [Alaa-8ball-pool-source-exposed](entities/alaa-8ball-pool-source-exposed.md) — exposed 8 Ball Pool mobile cheat source (physics reads; aim assist / trajectory / shot power; guideline overlay; gmh5225)
 - [Alibi](entities/alibi.md) — read-only Windows forensic attestation kit (PowerShell; PC cheat/DMA/HWID-spoofer + console-rig capture-card/vision-aimbot/XIM·Cronus·ReaSnow scan; verdict-tier text/HTML reports; accused-player evidence; Sutaigne)
 - [Alcatraz](entities/alcatraz.md) — x64 PE obfuscator (mutation / CFF / IAT; Zydis + AsmJit; ImGui; AC/obfuscation-engine research)

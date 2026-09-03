@@ -42,7 +42,8 @@ sources:
   - wiki/sources/descriptions/R4YVEN__beservice_intcallbacks.md
   - wiki/sources/descriptions/LilPidgey__BEClient.md
   - wiki/sources/descriptions/JonathanEke__DayZ-Server-Battleye-Remover.md
-updated: 2026-08-25
+  - wiki/sources/descriptions/AkitaYui__AkHeartbeat-BE.md
+updated: 2026-09-03
 confidence: medium
 ---
 
@@ -118,6 +119,8 @@ PUBG commercial P2C loader RE such as [[pubg-p2c-re]] (experienceds) documents i
 
 Server-side executable patching against BE-integrated titles is studied via [[dayz-server-battleye-remover]] (JonathanEke): C++ utility that pattern-scans and patches the DayZ **server** binary to disable specific BE checks, automating re-patch after executable updates for controlled anti-cheat bypass experimentation. (source: wiki/sources/descriptions/JonathanEke__DayZ-Server-Battleye-Remover.md)
 
+GTA V Enhanced BattlEye integration research such as [[akheartbeat-be]] (AkitaYui; external C++ tool; RPM/WPM + AOB resolution of world/script/session/BE flags; runtime patches neutralizing BE detection routines; documents user-mode BE client and **BEDaisy** kernel driver architecture) complements emulator and shellcode RE samples for Rockstar-title heartbeat/bypass study. (source: wiki/sources/descriptions/AkitaYui__AkHeartbeat-BE.md)
+
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[dayz-server-battleye-remover]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[battleye-user-mode-bypass]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[dayz-server-battleye-remover]] · [[akheartbeat-be]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[battleye-user-mode-bypass]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]

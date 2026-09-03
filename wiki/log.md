@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AkitaYui/AkHeartbeat-BE`: entity [[akheartbeat-be]] (AkitaYui; external C++ GTA5 Enhanced tool; D3D11 overlay menu; separate-process RPM/WPM + AOB scan; stat/script global/local editors + teleport; runtime BE detection patches; BEClient↔BEDaisy architecture notes; BattlEye integration + external cheat RE; cheat / game:gta5 [External]); cited on [[concepts/battleye]] and [[overviews/game-hacking]]; cross-linked [[gta5-dma-cheat]], [[phake]], [[beclient]], and [[battleye-re]].
+
 - **2026-09-03** — ingest `description:AlSch092/EasyHandles`: entity [[easy-handles]] (AlSch092; driver+DLL; kernel `ObOpenPointerToObject` + usermode `OpenProcess` hook via IOCTLs; bypass ObRegisterCallbacks handle protection; debugger attach to callback-protected processes; PPL limitations; AC/EDR handle-protection research); cited on [[concepts/kernel-callbacks]], [[overviews/windows-kernel]], and [[overviews/anti-cheat]]; cross-linked [[libelevate]], [[intraceptor]], [[van1338]], and [[ultimate-anti-cheat]].
 
 - **2026-09-03** — ingest `description:AlSch092/UltimateAntiCheat`: entity [[ultimate-anti-cheat]] (AlSch092; open-source Windows C++ anti-cheat framework; user-mode debug/memory-patch/runtime tamper detection; optional client-server heartbeat; configurable hybrid user-mode + kernel-assisted deployment; educational AC evaluation reference); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[sentinel-anti-cheat]], [[oac]], [[rebirth-guard]], and [[peregrine-anticheat]].
