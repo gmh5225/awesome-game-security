@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Air14/KDBGDecryptor`: entity [[kdbgdecryptor]] (Air14; Windows kernel-mode KDBG decrypt sample; C++ VS driver; `KdDecodeBlockData` or manual `KiWaitNever`/`KiWaitAlways` copy-from-memory; stealthier decode path; kernel RE / low-level debugging / AC memory-analysis study); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[nokd]], [[kdbg]], [[kn-live-dbg]], [[windows-kernel-debugging-guide]], and [[windbg-scripts]].
+
 - **2026-09-03** — ingest `description:AirtestProject/Airtest`: entity [[airtest]] (AirtestProject; cross-platform Python UI automation for games and mobile apps; image-recognition element location without process injection; device control APIs, device-farm scaling, CLI/Python, HTML reports, IDE + Poco object hierarchy; Android/iOS/desktop; UI Automation Framework / QA automation); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[games-test-automation-example]], [[unity-automated-qa-examples]], [[fastlogs]], and [[lamda]].
 
 - **2026-09-03** — ingest `description:AitiX/Fastlogs`: entity [[fastlogs]] (AitiX; open-source Unity/GameMaker debug and bug-reporting engine; self-hosted Node.js/SQLite ingest; logs, device info, breadcrumbs, screenshots, scene snapshots → short viewer links; WebGL/mobile/console targets; crash capture, offline outbox, PII scrubbing, Slack/Discord/webhook sinks; headless send + remote command channel for QA/agents; Game Develop / debug); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[unity-mcp]], [[interactive-feedback-mcp]], [[games-test-automation-example]], and [[unity-automated-qa-examples]].

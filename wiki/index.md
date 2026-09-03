@@ -1946,6 +1946,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [kdmapper-1909](entities/kdmapper-1909.md) — Build-pinned kdmapper fork for Win10 1809/1903/1909; Intel `iqvw64e.sys` BYOVD manual map (Brattlof; C++; kernel research / AC bypass study)
 - [kdmapper-rs](entities/kdmapper-rs.md) — Rust kdmapper library (C/C++ core; vulnerable-driver / unsigned map)
 - [KDBG](entities/kdbg.md) — Windows kernel debugging toolkit (driver backend + CLI; user/kernel memory R/W, module/thread enum, tracing; x64; driver-signing setup; cheat / Tool; allogic)
+- [KDBGDecryptor](entities/kdbgdecryptor.md) — kernel-mode KDBG decrypt sample (`KdDecodeBlockData` or manual KiWaitNever/KiWaitAlways; stealth decode path; kernel RE / AC memory analysis; Air14)
 - [kdp-compatible-driver-loader](entities/kdp-compatible-driver-loader.md) — Win10 KDP-aware unsigned driver loader (`gdrv.sys` → `SeCiCallbacks` DSE bypass; gmh5225)
 - [KDU](entities/kdu.md) — Kernel Driver Utility; multi-provider BYOVD mapper (DSE bypass + unsigned PE map; Intel/ASUS/MSI/Gigabyte)
 - [KDemu](entities/kdemu.md) — hybrid semi-emulated/semi-native Windows kernel driver emulator (PE load, exception handling, dump integration, anti-detection; rootkit/AC analysis; ShallowFeather)
