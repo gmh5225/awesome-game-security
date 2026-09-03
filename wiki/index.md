@@ -2923,6 +2923,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ReadPhys](entities/readphys.md) — phys mem via manual PTE map (no MmCopyMemory/MmMapIoSpace; AXE-BASE.sys; ACE)
 - [ReadWriteDriver](entities/read-write-driver.md) — `ntUserSetSysColors` KM↔UM channel (Win11 22000.376; cheat / driver communication)
 - [React](entities/react.md) — Paper/Folia Minecraft aim-assist AC plugin (Java; GCD-error scoring, acceleration-delta tracking, mode-averaged rotation quantization; optional ML inference service; PacketEvents; streak-based violation buffering; staff alerts; g4vrk; Anti Cheat / game:minecraft)
+- [React Native Device Risk Signals](entities/react-native-device-risk-signals.md) — React Native TurboModule device-intel probes (root/jailbreak, emulator, Frida, VPN/proxy, hardware/runtime; raw typed signals for backend fraud models; no client score or vendor upload; Android+iOS)
 - [React Native ShieldScan](entities/react-native-shieldscan.md) — React Native RASP module (root/jailbreak, Frida, debugger, emulator, Xposed/Substrate hooks; weighted risk score; screenshot/recording protection; Android+iOS)
 - [readwrite-kernel-stable](entities/readwrite-kernel-stable.md) — stable kernel read/write driver (C/C++; cheat / RPM; driver development / modding)
 - [rw_socket_driver](entities/rw-socket-driver.md) — kernel socket RPM/WPM for protected processes (manual-map friendly; external cheat comm; adrianyy; cheat / Socket)
