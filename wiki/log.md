@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `readme:categories`: Anti Cheat ~706 (+1; ManInMyVan/[[minecraft-anticheat-list]] curated MC Java/Bedrock anticheat catalog in Guide samples) / Cheat ~2776 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-03** — ingest `description:AdamOron/PatchGuardBypass`: entity [[patchguardbypass]] (AdamOron; in-progress C/C++ dynamic modern-build PatchGuard bypass research; planned disable PG execution, evade runtime integrity checks, verify PG state; kernel security researchers and anti-cheat analysts; low-level Windows internals); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[demystifying-patchguard]], [[kurasagi]], [[patchguard-2023]], and [[vulnerablepatchguardexploit]].
 
 - **2026-09-03** — ingest `description:Adepts-Of-0xCC/MiniDumpWriteDumpPoC`: entity [[minidumpwritedumppoc]] (Adepts-Of-0xCC; C++ MiniDumpWriteDump hook PoC; intercept dump buffers before disk write; optional encrypt + socket exfil; Python decrypt receiver; credential-dump tradecraft / detection engineering / defensive validation; Dump Memory); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[atpminidump]], [[lsass-dump-that-lsass]], and [[minidump]].
