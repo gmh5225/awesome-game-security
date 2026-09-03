@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AitiX/Fastlogs`: entity [[fastlogs]] (AitiX; open-source Unity/GameMaker debug and bug-reporting engine; self-hosted Node.js/SQLite ingest; logs, device info, breadcrumbs, screenshots, scene snapshots → short viewer links; WebGL/mobile/console targets; crash capture, offline outbox, PII scrubbing, Slack/Discord/webhook sinks; headless send + remote command channel for QA/agents; Game Develop / debug); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[unity-mcp]], [[interactive-feedback-mcp]], [[games-test-automation-example]], and [[unity-automated-qa-examples]].
+
 - **2026-09-03** — ingest `description:Akandesh/blazedumper`: entity [[blazedumper]] (Akandesh; maintained CS:GO offset database; JSON + C++/C# offset defs; signature patterns + companion updater pipeline; cheat / game:csgo [Offset]); cited on [[overviews/game-hacking]] and [[concepts/source-netvars]]; cross-linked [[hazedumper]], [[csgo-offsets]], [[csgo-auto-dumper]], [[gh-offset-dumper]], [[csgo-sdk]], and [[csgo-cheat]].
 
 - **2026-09-03** — ingest `description:Akandesh/csgo_auto_dumper`: entity [[csgo-auto-dumper]] (Akandesh; C++ CS:GO auto-dump pipeline; steamcmd + build-ID polling loop; launches local dumper + follow-up scripts on new builds; cheat `[Auto Dump]` / game:csgo); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[hazedumper]], [[csgo-offsets]], [[gh-offset-dumper]], [[rust-auto-dumper]], [[csgo-sdk]], and [[csgo-cheat]].
