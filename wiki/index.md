@@ -455,6 +455,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Blackbone](entities/blackbone.md) — Windows memory hacking library (DarthTon; x86/x64; alloc/R/W/protect, module enum, manual PE map, WOW64 thread control; user+kernel APIs; RE / game-security / AC tooling)
 - [BlackBox](entities/blackbox.md) — deprecated FBlackBox Android virtualization project (README-only removal notice; historical context; cheat / Android)
 - [blacksun-framework](entities/blacksun-framework.md) — modular C++ game cheat framework (user-mode/kernel/DMA access backends; pattern scan, hooking, overlays, comm layers; cs1ime)
+- [blazedumper](entities/blazedumper.md) — maintained CS:GO offset database (Akandesh; JSON + C++/C# defs; signature patterns + updater pipeline; cheat / game:csgo [Offset])
 - [BlackSignatureDriver](entities/black-signature-driver.md) — black-signature kernel driver dev + networking (gmh5225; Anti Cheat → Black Signature)
 - [Blarion AntiCheat](entities/blarion-anticheat.md) — Bedrock ScriptAPI behavior-pack AC (StarBloomMinecraft; JavaScript; 40+ combat/movement/inventory/packet modules; configurable thresholds; admin scan + `/flag` API; vanilla/BDS/LiteLoader; Anti Cheat / game:minecraft)
 - [BlindEye](entities/blindeye.md) — BattlEye report-path pool-alloc drop (“Packet Fucker”)
