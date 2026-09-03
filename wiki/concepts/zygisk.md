@@ -14,6 +14,7 @@ sources:
   - wiki/sources/descriptions/MhmRdd__NoHello.md
   - wiki/sources/descriptions/Dispa1r__Integrated_kernel_module.md
   - wiki/sources/descriptions/zelect0r__zamr.md
+  - wiki/sources/descriptions/Admirepowered__Zygisk_mod.md
 updated: 2026-09-03
 confidence: medium
 ---
@@ -39,6 +40,7 @@ Modules compile as `.so` loaded by Magisk's Zygisk loader ([[magisk]] DenyList /
 
 - **[[rezygisk]]** — open-source C reimplementation of the Zygisk API stack; Magisk/KernelSU/APatch; lighter binaries, module packaging, and operational tooling for transparent Zygisk-compatible injection. (source: wiki/sources/descriptions/PerformanC__ReZygisk.md)
 - **[[zygisk-on-kernelsu]]** — standalone Zygisk runtime with API compatibility for KernelSU; can replace Magisk built-in Zygisk; documents KernelSU/Magisk/APatch requirements and compatibility notes. (source: wiki/sources/descriptions/Dr-TSNG__ZygiskOnKernelSU.md)
+- **[[zygisk-mod]]** — standalone Zygisk runtime interface (Kotlin + native); KernelSU/APatch/Magisk; alternative module-loading path when built-in or closed Zygisk stacks are unavailable; flexible process injection and module experimentation for security/modding research. (source: wiki/sources/descriptions/Admirepowered__Zygisk_mod.md)
 
 ## Game-security uses
 
@@ -53,4 +55,4 @@ Pair with [[research-rigor]] when generalizing injection timing across OEM/Andro
 
 ## Related
 
-[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[integrated-kernel-module]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[zamr]] · [[fox-magisk-module-manager]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]
+[[magisk]] · [[kernelsu]] · [[rezygisk]] · [[zygisk-on-kernelsu]] · [[zygisk-mod]] · [[zygisk-magiskhide]] · [[nohello]] · [[magiskhide]] · [[frida]] · [[ksurusda]] · [[integrated-kernel-module]] · [[il2cpp]] · [[zygisk-dump-dex]] · [[zygisk-imgui-menu]] · [[zygisk-imgui-mod-menu]] · [[zygisk-imgui-modmenu]] · [[zamr]] · [[fox-magisk-module-manager]] · [[mobile-anti-cheat]] · [[overviews/mobile-security]] · [[overviews/game-hacking]]

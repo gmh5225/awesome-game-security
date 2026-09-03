@@ -3813,6 +3813,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [zygisk-imgui-modmenu](entities/zygisk-imgui-modmenu.md) — ImGui with Zygisk (hobby sample; cheat / render-draw research)
 - [Zygisk-MyInjector](entities/zygisk-myinjector.md) — Zygisk injector module (C/C++/Java; kernel-level modding / asset pipeline; Cheat Magisk)
 - [ZygiskOnKernelSU](entities/zygisk-on-kernelsu.md) — standalone Zygisk runtime for KernelSU; API-compatible; can replace Magisk built-in Zygisk; KernelSU/Magisk/APatch notes (Dr-TSNG; Run Zygisk on KernelSU)
+- [Zygisk_mod](entities/zygisk-mod.md) — standalone Zygisk runtime interface (Kotlin + native); KernelSU/APatch/Magisk; alternative module-loading path when built-in or closed Zygisk stacks unavailable (Admirepowered; Standalone implementation of Zygisk)
 
 
 
