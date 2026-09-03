@@ -1317,6 +1317,7 @@ sources:
   - wiki/sources/descriptions/razixNew__CompiledProtection.md
   - wiki/sources/descriptions/dariushoule__x64dbg-rippy.md
   - wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md
+  - wiki/sources/descriptions/AgentSmithers__x64DbgMCPServer.md
   - wiki/sources/descriptions/bromoket__x64dbg_mcp.md
   - wiki/sources/descriptions/Elinam03__Signature-Forge.md
   - wiki/sources/descriptions/EliseZeroTwo__SEH-Helper.md
@@ -2048,6 +2049,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - AI reverse engineering assistant for x64dbg via [[x64dbg-rippy]] (WebView2 in-debugger chat; LLM tool-use for memory/disasm/breakpoints/single-step; Anthropic/OpenAI APIs; Cheat x64dbg Plugins / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-rippy.md)
 - Python x64dbg Automate client via [[x64dbg-automate-pyclient]] (ZeroMQ/msgpack RPC; breakpoints/memory/registers/disasm/session/GUI; optional MCP server; scriptable repeatable debug sessions; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/dariushoule__x64dbg-automate-pyclient.md)
 - Dedicated x64dbg MCP server via [[x64dbg-mcp]] (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/bromoket__x64dbg_mcp.md)
+- C#/.NET x64dbg MCP plugin via [[x64dbgmcpserver]] (AgentSmithers; MCP-compatible HTTP interface; self-hosted listener; memory/disasm/register/label/automation commands; AI-assisted RE and scripted game security analysis; Cheat Debugging / agent-RE lane) (source: wiki/sources/descriptions/AgentSmithers__x64DbgMCPServer.md)
 - Agent-native integrated RE lab via [[open-reverselab]] (LING71671; Python; 180+ technique articles + 100+ MCP automation tools; knowledge router maps signals to attack chains; Ghidra/Frida/x64dbg/jadx; web CTF, Android APK/DEX, Windows PE, crypto, game cheating/AC boards; authorized binary/malware/game-protection investigation; Cheat agent-RE lane) (source: wiki/sources/descriptions/LING71671__open-reverselab.md)
 - AI-assisted RE with deterministic byte-level verification via [[reverify]] (2akouwu; MCP server + CLI; pairs LLM analysis with auditable byte-level checks; Cheat RE Tools) (source: wiki/sources/README-categories.md)
 - Windows x86/x64 debugger [[syser]] (C/C++; RE / plugin development / modding) complements [[x64dbg]] in the Cheat Debugging lane for game-security offensive debug workflows. (source: wiki/sources/descriptions/marakew__syser.md)

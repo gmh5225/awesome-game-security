@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AgentSmithers/x64DbgMCPServer`: entity [[x64dbgmcpserver]] (AgentSmithers; C#/.NET Framework x64dbg plugin; MCP-compatible HTTP interface; self-hosted listener; modular command routing; memory reads, disassembly, register queries, labeling, automation; AI-assisted RE and scripted game security analysis); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-mcp]], [[x64dbg-automate-pyclient]], and [[x64dbg-rippy]].
+
 - **2026-09-03** — ingest `description:Ahmadmansoor/x64dbgScript`: entity [[x64dbg-script]] (Ahmadmansoor; x64dbg script samples + Python IDA label/comment export helpers; multi-step execution control, globals, instruction-sequence search; game/binary RE automation); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-playtime]], [[x64dbgpython]], and [[x64dbg-mapldr]].
 
 - **2026-09-03** — ingest `description:Driw0x/CS2Guard`: entity [[cs2guard]] (Driw0x; Python ML behavioral CS2 cheat detection from demo parsing; tick-level aim/tracking/reaction-time/angular-velocity features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning); cited on [[overviews/anti-cheat]] and [[concepts/ai-aimbot-detection]]; cross-linked [[dlac]], [[cs2ac]], [[cs2-hybrid-anticheat-proposal]], and [[aimbot-detection-prototype]].
