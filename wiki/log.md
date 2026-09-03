@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AdamOron/PatchGuardBypass`: entity [[patchguardbypass]] (AdamOron; in-progress C/C++ dynamic modern-build PatchGuard bypass research; planned disable PG execution, evade runtime integrity checks, verify PG state; kernel security researchers and anti-cheat analysts; low-level Windows internals); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[demystifying-patchguard]], [[kurasagi]], [[patchguard-2023]], and [[vulnerablepatchguardexploit]].
+
 - **2026-09-03** — ingest `description:Adepts-Of-0xCC/MiniDumpWriteDumpPoC`: entity [[minidumpwritedumppoc]] (Adepts-Of-0xCC; C++ MiniDumpWriteDump hook PoC; intercept dump buffers before disk write; optional encrypt + socket exfil; Python decrypt receiver; credential-dump tradecraft / detection engineering / defensive validation; Dump Memory); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[atpminidump]], [[lsass-dump-that-lsass]], and [[minidump]].
 
 - **2026-09-03** — ingest `description:Admirepowered/Zygisk_mod`: entity [[zygisk-mod]] (Admirepowered; standalone Zygisk runtime interface; Kotlin + native; KernelSU/APatch/Magisk; alternative module-loading path when built-in or closed Zygisk stacks unavailable; process injection and module experimentation for Android security/modding research; cheat / Standalone implementation of Zygisk); cited on [[overviews/mobile-security]] and [[concepts/zygisk]]; cross-linked [[rezygisk]], [[zygisk-on-kernelsu]], [[magisk]], [[kernelsu]], and [[zamr]].
