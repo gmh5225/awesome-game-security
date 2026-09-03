@@ -3003,6 +3003,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [rwMem](entities/rwmem.md) — rwProcMem33 fork; Android process-memory R/W (Cheat Memory Explorer)
 - [Rumba](entities/rumba.md) — Python VMProtect analysis (symbolic exec / traces; Fix VMP / MBA-tagged)
 - [rustFrida](entities/rust-frida.md) — Frida-like Android ARM64 hook (QuickJS, Java/native/stealth hook, QBDI; pairs with wxshadow/mkpms; cheat / Frida)
+- [rust-auto-dumper](entities/rust-auto-dumper.md) — Facepunch Rust C++ auto-dump pipeline (Akandesh; Steam build-ID monitoring + dump scripts; regex parse of dump.cs/script data → JSON, C++ headers, C# constants incl. encrypted fields; cheat `[Auto Dump]` / game:rust)
 - [rust-auto-weapon-detection-opencv-example](entities/rust-auto-weapon-detection-opencv-example.md) — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; YouNeverKnow00)
 - [rust-cheat-external](entities/rust-cheat-external.md) — Facepunch Rust external cheat (C/C++; driver / modding / SDK generation; cheat / game:rust [External]; gmh5225)
 - [rust-cheat-external-main](entities/rust-cheat-external-main.md) — Facepunch Rust external framework (Disline1337; Windows driver IOCTL memory R/W + usermode overlay + gameplay SDK helpers; UnityPlayer/GameAssembly module handling; driver-assisted external + AC attack-pattern research; cheat / game:rust [External])
