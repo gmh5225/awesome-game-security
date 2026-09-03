@@ -22,4 +22,4 @@ Movement, combat, world-interaction, inventory, vehicle, and packet-level checks
 
 ## Related
 
-[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[grim]] · [[sentinel-anticheat-neoforge]] · [[icuac]] · [[shard]] · [[windfall-anticheat]] · [[minecraft-anticheat-list]] · [[inertia]]
+[[overviews/anti-cheat]] · [[overviews/game-hacking]] · [[grim]] · [[larping-anti-cheat]] · [[sentinel-anticheat-neoforge]] · [[icuac]] · [[shard]] · [[windfall-anticheat]] · [[minecraft-anticheat-list]] · [[inertia]]

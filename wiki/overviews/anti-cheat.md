@@ -366,6 +366,7 @@ sources:
   - wiki/sources/descriptions/BrufelFX__RabsztynCC-CS2-Internal.md
   - wiki/sources/descriptions/Broihon__GH-Injector-Library.md
   - wiki/sources/descriptions/BoondockSulfur__BS-AntiCheat.md
+  - wiki/sources/descriptions/realkyx29-design__LarpingAntiCheat.md
   - wiki/sources/descriptions/ByteCorum__DragonBurn.md
   - wiki/sources/descriptions/HadockKali__battleye-user-mode-bypass.md
   - wiki/sources/descriptions/HackOvert__AntiDBG.md
@@ -1128,6 +1129,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 **PowerNukkitX Bedrock prediction AC:** [[amethyst]] (NaySurGithub; Java PowerNukkitX plugin; per-tick Bedrock physics replay from player input; compares simulated vs client-reported positions for unexplained movement rather than threshold-only speed checks; authoritative movement/vehicle simulation, client world-state acknowledgment gating, combat prediction with entity rewind; fly/reach/kill aura/scaffold/inventory/backtrack/malformed-packet checks; server-side movement correction and violation alerting; Anti Cheat / game:minecraft) for PowerNukkitX operators beside Nukkit prediction plugins such as [[ghost-anticheat]] and GeyserMC interceptors such as [[astrox-anticheat]]. (source: wiki/sources/descriptions/NaySurGithub__Amethyst.md)
 
 **Paper/Folia heuristic AC:** [[bs-anticheat]] (BoondockSulfur; Java Paper **1.21.10+** plugin; full Folia support; movement/combat/world-interaction/inventory/vehicle/packet checks—speed, fly, reach, killaura, nuker, autoclicker, x-ray mining; transaction-based lag compensation; configurable violation-level punishments with optional setbacks; SQLite logging; PacketEvents, Discord webhooks, PlaceholderAPI, and LuckPerms integrations; false-positive-conscious tunable heuristics for server administrators; Anti Cheat / game:minecraft) for Paper/Folia operators beside physics-prediction AC such as [[grim]] and alert-focused NeoForge mods such as [[sentinel-anticheat-neoforge]]. (source: wiki/sources/descriptions/BoondockSulfur__BS-AntiCheat.md)
+
+**Paper custom-SMP AC (Hyphon):** [[larping-anti-cheat]] (realkyx29-design; Java 21 Paper **1.21+** plugin; modular movement/combat/world checks—fly, speed, reach, kill aura, scaffold, fast break; server-authoritative physics snapshots; per-player violation tracking with decay; honeypot/ESP decoy entities + optional packet-layer fake bases; capability analyzer for custom modifiers/enchantments on modded SMP; low false-positive focus; server-side only; Anti Cheat / game:minecraft) for custom SMP operators beside heuristic Paper plugins such as [[bs-anticheat]] and physics-prediction AC such as [[grim]]. (source: wiki/sources/descriptions/realkyx29-design__LarpingAntiCheat.md)
 
 ## README map
 

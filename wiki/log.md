@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:realkyx29-design/LarpingAntiCheat`: entity [[larping-anti-cheat]] (realkyx29-design; Java 21 Paper **1.21+** plugin Hyphon; modular movement/combat/world checks—fly, speed, reach, kill aura, scaffold, fast break; server-authoritative physics snapshots; per-player violation tracking with decay; honeypot/ESP decoy entities + optional packet-layer fake bases; capability analyzer for modded-SMP custom modifiers/enchantments; low false-positive focus; server-side only; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[grim]], [[bs-anticheat]], [[inertia]], [[minecraft-anticheat-list]], [[uagc]], and [[shard]].
+
 - **2026-09-03** — ingest `readme:categories`: Anti Cheat ~706 (+1; ManInMyVan/[[minecraft-anticheat-list]] curated MC Java/Bedrock anticheat catalog in Guide samples) / Cheat ~2776 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-03** — ingest `description:AdamOron/PatchGuardBypass`: entity [[patchguardbypass]] (AdamOron; in-progress C/C++ dynamic modern-build PatchGuard bypass research; planned disable PG execution, evade runtime integrity checks, verify PG state; kernel security researchers and anti-cheat analysts; low-level Windows internals); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[demystifying-patchguard]], [[kurasagi]], [[patchguard-2023]], and [[vulnerablepatchguardexploit]].
