@@ -479,6 +479,7 @@ sources:
   - wiki/sources/descriptions/AryuInka__Valorant-Cheat-External.md
   - wiki/sources/descriptions/AlSch092__UltimateAntiCheat.md
   - wiki/sources/descriptions/AlSch092__EasyHandles.md
+  - wiki/sources/descriptions/Abdelnour2__MiniAntiCheatV2.md
   - wiki/sources/descriptions/AlfredIU__Spoofer.md
   - wiki/sources/descriptions/AsfhtgkDavid__windmouse.md
   - wiki/sources/descriptions/petercunha__Pine.md
@@ -998,6 +999,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[mm-copy-memory]] — targeted MmCopyMemory scan-path bypass PoC; explains kernel AC memory-scan behavior; minimal C++ example patches a specific check path to alter scan handling; bypass research and defensive kernel memory-inspection study (EBalloon; cheat / Bypass MmCopyMemory) (source: wiki/sources/descriptions/EBalloon__MmCopyMemory.md)
 - [[map-page]] — post-kdmapper mapped-driver memory trace reduction PoC; `MmFreePagesFromMdl` + pool cleanup; `NtUserGetObjectInformation` data-pointer comm channel; driver-mapping stealth / AC bypass research (EBalloon; cheat / `[NtUserGetObjectInformation]`) (source: wiki/sources/descriptions/EBalloon__MapPage.md)
 - [[mandragora]] — educational ring-3 usermode anti-cheat for Assault Cube (purposefully weak; unobfuscated source for RE practice; follow-up after Assault Cube hacking; gmh5225) (source: wiki/sources/descriptions/gmh5225__Mandragora.md)
+- [[mini-anti-cheat-v2]] — educational Windows kernel anti-cheat PoC (Abdelnour2; user-mode game + kernel driver; IOCTL blacklist checks, game PID registration, shield disable; process-creation notify blocks Notepad.exe at start and runtime; V2 ObRegisterCallbacks memory shield strips VM read/write and terminate from other processes; learner-oriented; not production AC) (source: wiki/sources/descriptions/Abdelnour2__MiniAntiCheatV2.md)
 - [[peregrine-anticheat]] — educational full-stack Windows AC (kernel minifilter, ObCallbacks, APC injection, MinHook API hooks, ETW-TI, YARA, in-process stack/HWBP scans, named-pipe backend reports, Tauri GUI, cheat test suite; PatchRequest) (source: wiki/sources/descriptions/PatchRequest__PeregrineAntiCheat.md)
 - [[sentinel-anti-cheat]] — educational usermode AC daemon (HEEAAP; suspended launch + pre-resume attach; remote-debugger checks, HWBP/debug-register scans, PEB-based memory reads, INT 3 code-section breakpoints; configurable log/suspend/terminate policies; TaskDialog splash; Open Source Anti Cheat System) (source: wiki/sources/descriptions/HEEAAP__Sentinel-Anti-Cheat.md)
 - [[pi-defender]] — kernel security driver blocking process injection by filtering dangerous handle rights (remote memory write / operation permissions); docs/tests for hollowing, doppelgänging, ghosting, and DLL injection; defensive AC hardening research (PI-Defender) (source: wiki/sources/descriptions/PI-Defender__pi-defender.md)

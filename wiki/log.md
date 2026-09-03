@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Abdelnour2/MiniAntiCheatV2`: entity [[mini-anti-cheat-v2]] (Abdelnour2; educational Windows kernel anti-cheat PoC; user-mode game + kernel driver; IOCTL blacklist/game-PID/shield-disable; process-creation notify blocks Notepad.exe; V2 ObRegisterCallbacks memory shield strips VM read/write and terminate; learner-oriented); cited on [[concepts/kernel-callbacks]] and [[overviews/anti-cheat]]; cross-linked [[bloom-anticheat]], [[peregrine-anticheat]], [[anticheat-poc]], and [[sentinelac]].
+
 - **2026-09-03** — ingest `description:AbyssEngine/AbyssEngine`: entity [[abyss-engine]] (AbyssEngine; clean-room C classic ARPG engine reimplementation; SDL2/FFmpeg/zlib/libarchive; cross-platform rendering, audio, scene management, MPQ asset handling, media decoding; portability-first without proprietary game code; modding and legacy-behavior research; Game Engine / source; `[ARPG]`); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[devilution]], [[spark-engine]], and [[research-rigor]].
 
 - **2026-09-03** — ingest `description:Accenture/protobuf-finder`: entity [[protobuf-finder]] (Accenture; Python IDAPython IDA plugin; Google protobuf runtime + IDA APIs; decodes embedded descriptors from compiled binaries; dedicated search action and custom result views; recover network/serialization `.proto` definitions; game security and binary analysis; README [Protobuf]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[protobufs]], [[spirit-ida-plugin]], and [[packet-sniffer]].
