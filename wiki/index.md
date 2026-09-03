@@ -3038,7 +3038,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [s4mapper](entities/s4mapper.md) — BYOVD driver mapper via Samsung S4 `SignalRgbDriver.sys` (memory-access IOCTLs; manual unsigned map; gmh5225)
 - [s6-pcie-microblaze](entities/s6-pcie-microblaze.md) — PCIe DIY DMA toolkit for Xilinx SP605 (Verilog + MicroBlaze; raw TLP over Ethernet; Python host R/W + IOMMU audit; UEFI DXE / Hyper-V / Boot Backdoor PoCs; Cr4sh; DMA / FPGA research)
 - [sakura](entities/sakura.md) — CS1.6 public cheat (C++; DirectX + OpenGL + anti-cheat research; cheat / game:cs1.6; bit-paper)
-- [Sako RE Studio](entities/sako-restudio.md) — mobile-first Android disassembler/decompiler (Maxamedxasa; Capstone + IR decompiler; APK/ELF/PE/DEX; ptrace debugger; call graph; SakoScript plugins; offline Jetpack Compose; Cheat RE Tools)
+- [Sako RE Studio](entities/sako-restudio.md) — mobile-first Android disassembler/decompiler (Maxamedxasa; Capstone + IR decompiler; APK/ELF/PE/DEX; ptrace debugger; call graph; SakoScript plugins; SQLite projects; optional AI explain; offline Jetpack Compose; Cheat RE Tools)
 - [saturn-mapper](entities/saturn-mapper.md) — Windows kernel PE manual mapper (iqvw64e.sys; BYOVD / unsigned map)
 - [sumap (ekknod)](entities/sumap.md) — EFI manual map (C/C++; pre-boot unsigned driver PE mapping; driver development / memory analysis; cheat / EFI Manual Map)
 - [sapphire](entities/sapphire.md) — FFXIV private-server emulator (patch 3.3 branch; in development; Private Server / MMORPG; gmh5225)

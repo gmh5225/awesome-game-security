@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Maxamedxasa/SakoREStudio`: entity [[sako-restudio]] (Maxamedxasa; mobile-first Android RE suite; Capstone disasm + IR decompiler + ptrace debugger + call graph + SakoScript plugins; APK/ELF/PE/DEX on ARM64/x86-64; Jetpack Compose + SQLite projects; built-in security/ARM/DEX/string plugins; optional local/OpenAI-compatible AI explain; offline air-gapped workflow; Cheat RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[charlyengine]], [[glass]], [[jadx]], and [[hikarisystem-hexcore]].
+
 - **2026-09-03** — ingest `readme:categories`: Cheat ~2774 (+1; Maxamedxasa/[[sako-restudio]] mobile-first Android disassembler/decompiler in Cheat RE Tools) / Anti Cheat ~704 / other major section counts stable; 41 sections; entity [[sako-restudio]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/mobile-security]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-03** — ingest `description:Air14/KDBGDecryptor`: entity [[kdbgdecryptor]] (Air14; Windows kernel-mode KDBG decrypt sample; C++ VS driver; `KdDecodeBlockData` or manual `KiWaitNever`/`KiWaitAlways` copy-from-memory; stealthier decode path; kernel RE / low-level debugging / AC memory-analysis study); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[nokd]], [[kdbg]], [[kn-live-dbg]], [[windows-kernel-debugging-guide]], and [[windbg-scripts]].
