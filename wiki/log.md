@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-02** — ingest `readme:categories`: Cheat ~2773 (+2; zelect0r/[[zamr]] MMRL Magisk/KernelSU/APatch module catalog in Cheat Magisk + Lixense/[[ff-ace-anticheat-analysis]] Tencent ACE Free Fire libanogs/libanort byte-level RE in Explore AntiCheat System:ACE) / Anti Cheat ~704 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-02** — ingest `description:AlessandroZ/LaZagne`: entity [[lazagne]] (AlessandroZ; Python cross-platform credential recovery framework; modular collectors for browsers, mail clients, databases, chat apps, and other locally stored secrets; post-exploitation, auditing, and forensic credential-exposure assessment); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[browser-password-exportor]], [[kvcforensic]], [[custom-dpapi]], [[dfirtriage]], and [[qvoid-token-grabber]].
 
 - **2026-09-02** — ingest `description:Alex3434/wmi-static-spoofer`: entity [[wmi-static-spoofer]] (Alex3434; kernel-mode PoC; static WMI hardware-serial spoof via direct memory manipulation + registry updates; hook-minimal unload-after-apply; configurable offsets + randomized serial generation; HWID evasion vs anti-cheat/licensing telemetry; cheat / HWID); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[mutante]], [[easy-hwid-spoofer]], [[hwid-kernel-spoofer]], [[windows-hardware-info]], and [[hwid-checker-mg]].
