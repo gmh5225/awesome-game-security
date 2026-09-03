@@ -1106,6 +1106,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [EAFE](entities/eafe.md) — Mineflayer elytra autopilot (vanilla physics FSM; Bézier look-vector AC evasion; cheat / game:minecraft)
 - [Early Cascade Injection](entities/earlycascade-injection.md) — early cascade process-injection PoC (Cracked5pider; C++ Visual Studio; stealthier inject during early process init; build-specific offsets; malware/EDR/defensive detection testing; Injection Testing)
 - [EASY-HWID-SPOOFER](entities/easy-hwid-spoofer.md) — kernel-mode HWID spoofer via driver dispatch hooks + physical-memory patches (disk/NIC/GPU/SMBIOS; Win10; gmh5225)
+- [EasyHandles](entities/easy-handles.md) — driver+DLL handle acquisition bypassing ObRegisterCallbacks via ObOpenPointerToObject + OpenProcess hook (AlSch092; AC/EDR handle-protection research)
 - [EasyAntiPatchGuard](entities/easy-anti-patchguard.md) — Win8–Win10 kernel PoC; driver + assembly hooks observe/short-circuit PatchGuard dispatch paths; call-chain analysis from kernel debugging (armasm; cheat / PatchGuard-related)
 - [easypeasy-gc](entities/easypeasy-gc.md) — Genshin Impact EasyPeasy-framework cheat client (Grasscutter custom server; client-side gameplay mods; gmh5225)
 - [EasyAntiCheat-Emulator](entities/easyanticheat-emulator.md) — lightweight EAC client-interface DLL stub; fake client-side exports for debugging-oriented RE and compatibility testing; no server-side protocol spoofing (CamxxCore; EAC Emulator)

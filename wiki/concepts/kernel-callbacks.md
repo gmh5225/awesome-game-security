@@ -30,7 +30,8 @@ sources:
   - wiki/sources/descriptions/Staatsgeheim__PsImageNotifyRoutineSpamFilter.md
   - wiki/sources/descriptions/Rycooop__Bloom-Anticheat.md
   - wiki/sources/descriptions/Dor00tkit__BamExtensionTableHook.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/AlSch092__EasyHandles.md
+updated: 2026-09-03
 confidence: high
 ---
 
@@ -42,7 +43,7 @@ Windows notify/object registration APIs used by anti-cheat and EDR to observe pr
 
 - `PsSetCreateProcessNotifyRoutine(Ex/2)`, `PsSetCreateThreadNotifyRoutine(Ex)`
 - `PsSetLoadImageNotifyRoutine(Ex)`
-- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md); offensive handle-elevation research such as [[libelevate]] studies obtaining full-access process handles past AC/security strip restrictions for memory R/W (source: wiki/sources/descriptions/notscimmy__libelevate.md); timing-attack handle-elevation PoC [[van1338]] explores object-callback design complexity for AC engineers / stress testing (source: wiki/sources/descriptions/kkent030315__Van1338.md); WNF-backed process-hardening drivers such as [[wnf-driver-meme]] (zensenzay; strip VM read/write, duplicate, suspend/resume on protected processes; covert KM↔UM comm without device objects) (source: wiki/sources/descriptions/zensenzay__wnf-driver-meme.md); multi-component AC prototypes such as [[bloom-anticheat]] (Rycooop; ObRegisterCallbacks protects AC + target processes from hostile handle ops; kernel+UM Windows x64 research scaffold) (source: wiki/sources/descriptions/Rycooop__Bloom-Anticheat.md)
+- `ObRegisterCallbacks` (handle create/duplicate) — defensive AC skeletons such as [[sentinelac]] use Ob + load-image notify for process protection and unauthorized-driver detection (source: wiki/sources/descriptions/vovasicidk__sentinelac.md); offensive handle-elevation research such as [[libelevate]] studies obtaining full-access process handles past AC/security strip restrictions for memory R/W (source: wiki/sources/descriptions/notscimmy__libelevate.md); driver+DLL handle acquisition bypassing callbacks via kernel `ObOpenPointerToObject` + usermode `OpenProcess` hook such as [[easy-handles]] (AlSch092; IOCTL-forwarded requests; debugger attach to callback-protected processes; PPL caveats; AC/EDR handle-protection research) (source: wiki/sources/descriptions/AlSch092__EasyHandles.md); timing-attack handle-elevation PoC [[van1338]] explores object-callback design complexity for AC engineers / stress testing (source: wiki/sources/descriptions/kkent030315__Van1338.md); WNF-backed process-hardening drivers such as [[wnf-driver-meme]] (zensenzay; strip VM read/write, duplicate, suspend/resume on protected processes; covert KM↔UM comm without device objects) (source: wiki/sources/descriptions/zensenzay__wnf-driver-meme.md); multi-component AC prototypes such as [[bloom-anticheat]] (Rycooop; ObRegisterCallbacks protects AC + target processes from hostile handle ops; kernel+UM Windows x64 research scaffold) (source: wiki/sources/descriptions/Rycooop__Bloom-Anticheat.md)
 - `CmRegisterCallback(Ex)`, minifilter `FltRegisterFilter`
 - `KeRegisterBoundCallback` — research sample [[boundcallback]] (cheat / driver-communication lane) (source: wiki/sources/descriptions/sbsbsbssbsbs__boundcallback.md)
 
@@ -56,4 +57,4 @@ Attackers with kernel R/W ([[byovd]]) may try to unlink or patch callback lists;
 
 ## Related
 
-[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[pink-eye]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[dcmb]] · [[kpdb]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[ps-image-notify-routine-spam-filter]] · [[notify-routine-hijack-thread]] · [[bam-extension-table-hook]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[bloom-anticheat]] · [[libelevate]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[hvci]] · [[bustercall]] · [[cheeky-blinder]] · [[boundcallback]] · [[mapped-callback]] · [[pink-eye]] · [[edrsandblast]] · [[kernel-callback-removal]] · [[dcmb]] · [[kpdb]] · [[openark]] · [[winobjex64]] · [[windbg-extensions]] · [[rtoolz]] · [[ps-notif-routine-unloader]] · [[ps-image-notify-routine-spam-filter]] · [[notify-routine-hijack-thread]] · [[bam-extension-table-hook]] · [[kernel-callback-functions-list]] · [[kernel-snippets]] · [[function-collections]] · [[symlink-callback]] · [[vaultguard]] · [[sentinelac]] · [[bloom-anticheat]] · [[libelevate]] · [[easy-handles]] · [[van1338]] · [[wnf-driver-meme]] · [[vanguard]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
