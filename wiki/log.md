@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Adepts-Of-0xCC/MiniDumpWriteDumpPoC`: entity [[minidumpwritedumppoc]] (Adepts-Of-0xCC; C++ MiniDumpWriteDump hook PoC; intercept dump buffers before disk write; optional encrypt + socket exfil; Python decrypt receiver; credential-dump tradecraft / detection engineering / defensive validation; Dump Memory); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[atpminidump]], [[lsass-dump-that-lsass]], and [[minidump]].
+
 - **2026-09-03** — ingest `description:Admirepowered/Zygisk_mod`: entity [[zygisk-mod]] (Admirepowered; standalone Zygisk runtime interface; Kotlin + native; KernelSU/APatch/Magisk; alternative module-loading path when built-in or closed Zygisk stacks unavailable; process injection and module experimentation for Android security/modding research; cheat / Standalone implementation of Zygisk); cited on [[overviews/mobile-security]] and [[concepts/zygisk]]; cross-linked [[rezygisk]], [[zygisk-on-kernelsu]], [[magisk]], [[kernelsu]], and [[zamr]].
 
 - **2026-09-03** — ingest `description:AdvDebug/AntiCrack-DotNet`: entity [[anticrack-dotnet]] (AdvDebug; .NET protection toolkit; C#; anti-debug, anti-VM, anti-injection, hook detection; PEB/thread flags, sandbox heuristics, syscall probes, integrity hardening; anti-anti-debug user-mode hook and runtime tamper detection; software hardening and AC/anti-crack defensive components); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[brovan]], [[godefender]], [[avanguard]], [[antidbg-baka]], [[anti-crack-system]], and [[confuserex]].

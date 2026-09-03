@@ -12,7 +12,7 @@ confidence: medium
 
 C/C++ research project focused on the **aTPMiniDump callback** — user-mode (Ring 3) instrumentation around Windows minidump generation for memory analysis. Aimed at anti-cheat engineers and defensive security researchers studying how security products hook or observe `MiniDumpWriteDump` / DbgHelp callback paths to detect credential dumping and related tamper attempts. (source: wiki/sources/descriptions/b4rtik__ATPMiniDump.md)
 
-Complements offline minidump parse tooling such as [[minidump]] / [[minidumpreader]] / [[libmdmp]], offensive LSASS dump PoCs such as [[lsass-dump-that-lsass]], and post-dump credential forensics such as [[kvcforensic]].
+Complements offline minidump parse tooling such as [[minidump]] / [[minidumpreader]] / [[libmdmp]], offensive LSASS dump PoCs such as [[lsass-dump-that-lsass]], in-memory `MiniDumpWriteDump` hook PoCs such as [[minidumpwritedumppoc]], and post-dump credential forensics such as [[kvcforensic]].
 
 ## Links
 

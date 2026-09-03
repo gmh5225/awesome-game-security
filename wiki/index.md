@@ -2326,6 +2326,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mhxy](entities/mhxy.md) — MHXY (Fantasy Westward Journey) Python driver/modding scaffold (cheat / game:mhxy; gmh5225)
 - [mhxy-kernel](entities/mhxy-kernel.md) — MHXY (Fantasy Westward Journey) kernel modding scaffold (C/C++; cheat / game:mhxy; gmh5225)
 - [minidump](entities/minidump.md) — Python minidump (.dmp) parser (full/mini; LSASS; cross-platform)
+- [MiniDumpWriteDumpPoC](entities/minidumpwritedumppoc.md) — C++ MiniDumpWriteDump hook PoC; intercept dump buffers in-memory; optional encrypt + socket exfil; Python decrypt receiver; credential-dump tradecraft / detection research (Adepts-Of-0xCC; Dump Memory)
 - [miniDumpReader](entities/minidumpreader.md) — Python minidump / memory analysis (AC / Windows kernel dump)
 - [minivers](entities/minivers.md) — pre-modification backup copies for monitored files (change/delete/rename; AC / backup-file)
 - [minivm](entities/minivm.md) — small optimizing VM + JIT runtime (C11 + Cuik TB codegen; Lua tests/benchmarks; GNU Make; desktop + WASM; VM/compiler/runtime performance experimentation; FastVM)
