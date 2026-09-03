@@ -698,7 +698,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [CS2 Hybrid Anti-Cheat Proposal](entities/cs2-hybrid-anticheat-proposal.md) — CS2 hybrid AC proposal (Glicko-2 judges, honeypot entities, shadow monitoring; Python PoC)
 - [CS2AC](entities/cs2ac.md) — open-source server-side CS2 anti-cheat Metamod:Source plugin (aim/movement/input; ~17 modules; kick/ban; Discord webhooks)
 - [CS2KAC](entities/cs2kac.md) — open-source CS2 kernel-mode AC companion (KMDF driver + usermode service; client integrity signals for CS2AC/CS2FOW)
-- [CS2Guard](entities/cs2guard.md) — ML behavioral CS2 cheat detection from demo parsing and feature engineering toward real-time server-side AC (Driw0x; Python; Anti Cheat)
+- [CS2Guard](entities/cs2guard.md) — ML behavioral CS2 cheat detection from demo parsing and feature engineering (aim/tracking/reaction-time signals; CS2CD adapters; anomaly + supervised models; goal: real-time server-side AC; Driw0x; Python; Anti Cheat)
 - [CS2-Internal](entities/cs2-internal.md) — internal CS2: SDK generation / hooking / memory analysis (C++)
 - [cs2-internal-sdk](entities/cs2-internal-sdk.md) — reverse-engineered CS2 internal SDK (clouddss; C++; Source 2 class defs, interface pointers, netvar offsets, schema structures; entity/player/weapon/rendering types; cheat / game:cs2 [Internal])
 - [cs2-internals](entities/cs2-internals.md) — educational CS2/Source 2 internals guide (MkDocs; Schema/Entity, offsets, networking, verification labs; excludes cheat/AC evasion; ianveig29)

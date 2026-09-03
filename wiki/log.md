@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Driw0x/CS2Guard`: entity [[cs2guard]] (Driw0x; Python ML behavioral CS2 cheat detection from demo parsing; tick-level aim/tracking/reaction-time/angular-velocity features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning); cited on [[overviews/anti-cheat]] and [[concepts/ai-aimbot-detection]]; cross-linked [[dlac]], [[cs2ac]], [[cs2-hybrid-anticheat-proposal]], and [[aimbot-detection-prototype]].
+
 - **2026-09-03** — ingest `readme:categories`: Cheat ~2776 (+2; 2akouwu/[[reverify]] MCP byte-level verification + danigargu/[[dereferencing]] IDA register/stack views in Cheat RE Tools/IDA Plugins) / Anti Cheat ~705 (+1; Driw0x/[[cs2guard]] ML behavioral CS2 demo parsing) / other major section counts stable; 41 sections; entities [[reverify]], [[dereferencing]], [[cs2guard]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/anti-cheat]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-03** — ingest `description:danigargu/deREferencing`: entity [[dereferencing]] (danigargu; Python IDAPython plugin; enhanced register/stack debugger windows for live binary analysis; dereferenced pointer chains, color-coded memory annotations, PEDA/GEF/pwndbg-like UX; x86/ARM/MIPS; configurable settings; Cheat IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[lazyida]], [[idaref]], [[ida-pro-mcp]], and [[open-reverselab]].

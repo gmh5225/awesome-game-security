@@ -32,7 +32,8 @@ sources:
   - wiki/sources/descriptions/Fragmentaim__Auto_aim.md
   - wiki/sources/descriptions/Miffyli__gan-aimbots.md
   - wiki/sources/descriptions/LaihoE__DLAC.md
-updated: 2026-08-25
+  - wiki/sources/descriptions/Driw0x__CS2Guard.md
+updated: 2026-09-03
 confidence: medium
 ---
 
@@ -87,6 +88,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[auto-aim]] — Fragmentaim C++ real-time AI aiming assistant core (DXGI Desktop Duplication capture; YOLO via ONNX Runtime/TensorRT; OpenCV; driver-level mouse simulation; CV game-automation research; DXGI + TensorRT + driver-level input)
 - [[gan-aimbots]] — Miffyli academic ML-aimbot research repo (Python; ViZDoom FPS scenarios; data collection, GAN-aimbot training/evaluation, classifier plots, experiment orchestration; reproduces published pipelines with shared GAN-group parameters; offensive + defensive aimbot ML research; cheat / Machine Learning)
 - [[dlac]] — LaihoE CS:GO demo-analysis anti-cheat package (Python inference + Go demo parser; ONNX models; per-shot suspicious-aim prediction; terminal/CSV/in-memory export; tunable confidence thresholds; replay-based behavioral detection research; Anti Cheat / Machine Learning)
+- [[cs2guard]] — Driw0x CS2 ML behavioral cheat detection from demo parsing (Python; tick-level aim/tracking/reaction-time features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[rust-auto-weapon-detection-opencv-example]] — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; no memory reads; YouNeverKnow00)

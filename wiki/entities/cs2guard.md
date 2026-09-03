@@ -11,7 +11,7 @@ confidence: medium
 
 # CS2Guard
 
-**CS2Guard** is an experimental Python machine-learning project that detects suspicious cheating behavior in Counter-Strike 2 by analyzing gameplay telemetry instead of scanning client systems. Parses CS2 demo files for match, player, and tick-level data; engineers behavioral features (aim movement, crosshair placement, target tracking, reaction time, angular velocity); and trains unsupervised anomaly or supervised classification models toward a real-time server-side anti-cheat pipeline. (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
+**CS2Guard** (Driw0x) is an experimental Python machine-learning project that detects suspicious cheating behavior in Counter-Strike 2 by analyzing gameplay telemetry instead of scanning client systems. Parses CS2 demo files for match, player, and tick-level data; engineers behavioral features (aim movement, crosshair placement, target tracking, reaction time, angular velocity); and trains unsupervised anomaly or supervised classification models toward a real-time server-side anti-cheat pipeline. Targets game-security researchers, anti-cheat developers, and analysts studying observable in-game behavior. (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
 
 ## Capabilities
 
