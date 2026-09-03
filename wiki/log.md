@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AirtestProject/Airtest`: entity [[airtest]] (AirtestProject; cross-platform Python UI automation for games and mobile apps; image-recognition element location without process injection; device control APIs, device-farm scaling, CLI/Python, HTML reports, IDE + Poco object hierarchy; Android/iOS/desktop; UI Automation Framework / QA automation); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[games-test-automation-example]], [[unity-automated-qa-examples]], [[fastlogs]], and [[lamda]].
+
 - **2026-09-03** — ingest `description:AitiX/Fastlogs`: entity [[fastlogs]] (AitiX; open-source Unity/GameMaker debug and bug-reporting engine; self-hosted Node.js/SQLite ingest; logs, device info, breadcrumbs, screenshots, scene snapshots → short viewer links; WebGL/mobile/console targets; crash capture, offline outbox, PII scrubbing, Slack/Discord/webhook sinks; headless send + remote command channel for QA/agents; Game Develop / debug); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[unity-mcp]], [[interactive-feedback-mcp]], [[games-test-automation-example]], and [[unity-automated-qa-examples]].
 
 - **2026-09-03** — ingest `description:Akandesh/blazedumper`: entity [[blazedumper]] (Akandesh; maintained CS:GO offset database; JSON + C++/C# offset defs; signature patterns + companion updater pipeline; cheat / game:csgo [Offset]); cited on [[overviews/game-hacking]] and [[concepts/source-netvars]]; cross-linked [[hazedumper]], [[csgo-offsets]], [[csgo-auto-dumper]], [[gh-offset-dumper]], [[csgo-sdk]], and [[csgo-cheat]].
