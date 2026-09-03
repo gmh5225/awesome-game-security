@@ -732,6 +732,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Rebzzel/kiero [X86/64 Windows]
 - https://github.com/kirchesz/kiero2 [kiero v2 — locate Vulkan/D3D/OpenGL API method addresses at runtime; BYO hooking; Win/Linux/macOS]
 - https://github.com/ales-drnz/vocem-overlay [Linux in-game overlay via Vulkan implicit layer and OpenGL interposer]
+- https://github.com/blanec/cyberpunk-better-shaders [Vulkan implicit layer (VkLayer_callisto_spvswap) that hot-swaps Cyberpunk 2077 path-tracer ray-gen SPIR-V at load time via Proton on Linux]
 - https://github.com/bruhmoment21/UniversalHookX [X86/64 Windows]
 - https://github.com/gmh5225/Vulkan-Hook [X86/64 Windows]
 - https://github.com/Sh0ckFR/Universal-Dear-ImGui-Hook
@@ -929,6 +930,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/tomvita/SE-tools [Nintendo Switch]
 - https://github.com/StudentBlake/XCI-Explorer [XCI Explorer]
 - https://github.com/0x5abe/vifterpreter [Rust library for parsing PlayStation 2 VIF1 DMA packets and VIF commands]
+- https://github.com/piffd0s/defcon-dreamcast-planetweb-research [DEF CON Dreamcast PlanetWeb exploit chain — Eden loading, memory-write flaw, and MIME stack overflow to run native SH-4 DOOM without a debugger]
 - https://github.com/Anonym0ose/JitDumper [A CIL method body dumper]
 - https://github.com/cfig/Android_boot_image_editor [A tool for reverse engineering Android ROM images]
 - https://github.com/hasherezade/pe-bear [PE Viewer]
