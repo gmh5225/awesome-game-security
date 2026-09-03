@@ -43,6 +43,7 @@ sources:
   - wiki/sources/descriptions/LilPidgey__BEClient.md
   - wiki/sources/descriptions/JonathanEke__DayZ-Server-Battleye-Remover.md
   - wiki/sources/descriptions/AkitaYui__AkHeartbeat-BE.md
+  - wiki/sources/descriptions/Aki2k__BEDaisy.md
 updated: 2026-09-03
 confidence: medium
 ---
@@ -97,6 +98,8 @@ Handle-stripping bypass via periodic handle re-creation is implemented in [[batt
 
 BEDaisy APC instrumentation is studied via [[goodeye]]: a kernel callback runs in each thread where the BE driver registers an APC, exposing BE’s kernel APC inspection surface for RE. (source: wiki/sources/descriptions/huoji120__goodeye.md)
 
+[[bedaisy]] (Aki2k) is a C++ kernel interception PoC against **BEDaisy.sys**: image-load callbacks plus IAT hooking around **`MmGetSystemRoutineAddress`** to steer subsequent anti-cheat execution paths, with APC-related experimentation for bypass-surface and hardening research. (source: wiki/sources/descriptions/Aki2k__BEDaisy.md)
+
 [[bedaisy-bypass]] targets **BEDaisy.sys** report delivery: suppress outbound detection reports to the BE service while preserving inbound response traffic—useful for studying the kernel-to-service report channel without server-side ban telemetry. (source: wiki/sources/descriptions/gmh5225__bedaisy-bypass.md)
 
 [[battleye-re]] (experienceds) is a defensive RE reference for **BEDaisy.sys**: PE layout, dynamic kernel API resolution, BattlEye device IOCTL dispatch, HAL table verification, anti-DMA behavior, custom VM obfuscation, and security-cookie derivation—JSON findings, address lists, disassembly, and section hex dumps for titles such as Enlisted. (source: wiki/sources/descriptions/experienceds__battleye-re.md)
@@ -123,4 +126,4 @@ GTA V Enhanced BattlEye integration research such as [[akheartbeat-be]] (AkitaYu
 
 ## Related
 
-[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[dayz-server-battleye-remover]] · [[akheartbeat-be]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[battleye-user-mode-bypass]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
+[[easy-anti-cheat]] · [[vanguard]] · [[pubg-p2c-re]] · [[dayz-server-battleye-remover]] · [[akheartbeat-be]] · [[battleye-re]] · [[bedaisy-reversal]] · [[battleye-decryption]] · [[battleye-shellcode]] · [[blindeye]] · [[be-shellcode]] · [[be-battleye-shellcode]] · [[be-shellcode-dump]] · [[be-shellcode-tester]] · [[battleye-shellcode-dumper]] · [[battleye-region-walking]] · [[battleye-rust]] · [[battleye-handler-bypass]] · [[badeye]] · [[bedaisy]] · [[bedaisy-bypass]] · [[be-forcer-fortnite]] · [[be-emulator]] · [[beclient]] · [[beservice-intcallbacks]] · [[arma3beclient]] · [[r6-external]] · [[r6s-external-v2]] · [[external-r6s-cheat]] · [[r6-cheat-dumper]] · [[rainbow-6-siege-cheat]] · [[rainbow-six-siege-rs6-external-esp-aimbot-hack-cheat]] · [[r6s-internal-cheat]] · [[r6-internal-v3]] · [[fakeeye]] · [[noeye]] · [[goodeye]] · [[splendid-implanter]] · [[battleye-user-mode-bypass]] · [[system-thread-finder]] · [[stealth-sytem-thread-finder-be]] · [[skiphook]] · [[present-hook-detection]] · [[present-hook]] · [[libelevate]] · [[overviews/anti-cheat]] · [[kernel-callbacks]]
