@@ -11,7 +11,11 @@ confidence: medium
 
 # deREferencing
 
-**deREferencing** is a Python IDA Pro plugin that adds enhanced register and stack debugger windows for live binary analysis. Dereferences pointers, applies color-coded memory annotations, and surfaces contextual values in a PEDA/GEF/pwndbg-like workflow inside IDA. Supports x86, x86-64, ARM, ARM64, MIPS32, and MIPS64 with configurable settings. (source: wiki/sources/descriptions/danigargu__deREferencing.md)
+**deREferencing** (danigargu/deREferencing) is a Python IDAPython plugin that adds enhanced register and stack debugger windows for **live binary analysis** in IDA Pro. Dereferences pointers, applies color-coded memory annotations, and surfaces contextual values in a PEDA/GEF/pwndbg-like workflow — giving reverse engineers richer visibility into registers, stack contents, and pointer chains while debugging. Supports x86, x86-64, ARM, ARM64, MIPS32, and MIPS64; behavior is tunable via a settings module. (source: wiki/sources/descriptions/danigargu__deREferencing.md)
+
+## Role in the README map
+
+Listed under **Cheat → IDA Plugins** as an IDA debugger UX enhancement beside [[lazyida]], [[idaref]], and [[happyida]].
 
 ## Capabilities
 

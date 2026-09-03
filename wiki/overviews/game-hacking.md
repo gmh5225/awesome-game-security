@@ -1780,6 +1780,7 @@ sources:
   - wiki/sources/descriptions/Berk000x__BinaryLens.md
   - wiki/sources/descriptions/TheAustinUS__LuminaryDMA.md
   - wiki/sources/descriptions/Maxamedxasa__SakoREStudio.md
+  - wiki/sources/descriptions/danigargu__deREferencing.md
 updated: 2026-09-03
 confidence: high
 ---
@@ -2136,6 +2137,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - AI-powered IDA 9.0+ assistant for C++ game RE via [[aida]] sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/sigwl__AiDA.md)
 - Local llama.cpp IDA LLM Explainer via [[ida-llm-explainer]] (function explain/rename/struct inference; human-in-the-loop accept; CFG recovery) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/pgarba__ida-llm-explainer.md)
 - C++ LLM bulk rename/explain assistant via [[binarylens]] (Berk000x; function rename at scale, decompiler-context logic explain, local variable rename; IDA SDK + OpenSSL; multi-model backends; large game client / anti-cheat IDBs; cheat / IDA Plugins) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/Berk000x__BinaryLens.md)
+- Enhanced IDA live-debug register/stack views via [[dereferencing]] (danigargu; Python IDAPython plugin; dereferenced pointer chains with color-coded memory annotations; PEDA/GEF/pwndbg-like workflow; x86/ARM/MIPS; configurable settings; cheat / IDA Plugins) sits in the Cheat IDA Plugins / debugger UX lane beside [[lazyida]] and [[idaref]]. (source: wiki/sources/descriptions/danigargu__deREferencing.md)
 - Mobile-first Android disassembler/decompiler [[sako-restudio]] (Maxamedxasa; Capstone + IR decompiler + ptrace debugger + call graph + SakoScript plugins; APK/ELF/PE/DEX offline; Jetpack Compose; optional local/OpenAI-compatible AI explain; cheat / RE Tools) sits in the Cheat RE Tools / mobile RE lane beside desktop LLM assistants. (source: wiki/sources/descriptions/Maxamedxasa__SakoREStudio.md)
 - LLM IDA pseudocode assistant via [[gepetto]] (JusticeRage; Python IDAPython; explain decompiled functions + variable rename + code comments; menu actions + hotkeys; cloud/local multi-provider config; malware/software/game-security RE; cheat / IDA Plugins / `[ChatGPT]`) sits in the Cheat IDA Plugins / LLM-assistant lane. (source: wiki/sources/descriptions/JusticeRage__Gepetto.md)
 - GPT-assisted IDA copilot via [[ida-copilot]] (Antelcat; Python IDAPython + Hex-Rays + LangChain; pseudocode analysis, symbol inspection, comment/rename suggestions; menu + shortcut function-level investigation; cheat / IDA Plugins / `[ChatGPT]`) sits in the same LLM-assistant lane. (source: wiki/sources/descriptions/Antelcat__ida_copilot.md)
