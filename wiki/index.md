@@ -1244,6 +1244,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Fedoraware](entities/fedoraware.md) — TF2 training software (SE-Owned lineage; rendering / networking / animation; C/C++; cheat / game:team fortress 2; gmh5225)
 - [Fenrir](entities/fenrir.md) — kernel rootkit/driver framework (process hide, memory access, callbacks; jmp rdi stack spoof; gmh5225; Cheat Spoof Stack / Ring0)
 - [FF3 MMO](entities/ff3mmo.md) — browser NES FF3 MMO (Node.js WebSocket; server arbiters; inventory mirror anti-dup; wire validation)
+- [FF ACE Anti-Cheat Analysis](entities/ff-ace-anticheat-analysis.md) — Tencent ACE Free Fire byte-level RE post-mortem (Lixense; libanogs/libanort on armeabi-v7a; IDA decompilation + Python/JS automation; APK hash, cert parsing, inline-hook scans, self-integrity checksum catalog + SQLite findings index; Explore AntiCheat System:ACE)
 - [FightingGame-UE5](entities/fightinggame-ue5.md) — UE5 fighting game (root motion / anim BP / montage combat; Game Develop / Unreal source)
 - [FileRecoveryTool](entities/file-recovery-tool.md) — NTFS/FAT32/ExFAT disk forensics (MFT/USN/carving; Win32)
 - [FTK Imager OSX](entities/ftk-imager-osx.md) — macOS forensic disk imaging package (MrMugiwara; CLI drive acquisition, split outputs, MD5/SHA1 verify, E01/SMART, fragmentation/compression/evidence metadata; DFIR on macOS)
