@@ -906,6 +906,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/lilyco-42/rev-tools-setup [One-click Windows RE toolchain installer (Scoop) with Cheat Engine MCP setup and AI agent pitfalls guide]
 - https://github.com/rollingrock/bethesda-modding-starter [Bootstrap for Bethesda script-extender plugin dev plus Ghidra/x64dbg MCP reverse-engineering toolchain]
 - https://github.com/ling71671/open-reverselab [Agent-native RE lab with knowledge base, 100+ MCP tools, and APK/PE/game-cheating analysis workflows]
+- https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
 - https://github.com/mrexodia/ida-nexus-docker [Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus — runs ordered analysis prompts in isolation and exports audit trails]
 - https://github.com/mrexodia/retoolsync [WebSocket server and plugins (IDA, x64dbg, WinDbg, Binary Ninja, VS Code) to sync cursor navigation and goto requests across reverse-engineering sessions]
@@ -1679,6 +1680,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/gmh5225/LazyIDA [LazyIDA]
 - https://github.com/gmh5225/HappyIDA [Hex-Rays decompiler utilities: parameter labeling, SEH, Rust strings]
 - https://github.com/nologic/idaref [IDA Pro plugin showing full x86-64/ARM/MIPS instruction reference at the cursor]
+- https://github.com/danigargu/deREferencing [IDA Pro plugin adding dereferenced register and stack views with colors for x86, ARM, and MIPS debugging]
 - https://github.com/gmh5225/ida-function-string-associate [IDA 9.X: auto-generate function comments from string literals]
 - https://github.com/gmh5225/qsynthesis [Greybox Synthesizer geared for deobfuscation of assembly instructions]
 - https://github.com/gmh5225/ida_medigate [RTTI]
@@ -4403,6 +4405,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/karola3vax/CS2AC [Open-source server-side CS2 anti-cheat Metamod:Source plugin with aimbot/aimlock/silentaim and related detections]
 - https://github.com/cs2-server-plugins/cs2-calladmin [ModSharp CS2 server plugin for in-game cheater reports with admin claim/resolve workflow and optional Discord notifications]
 - https://github.com/speedskater1610/CS2KAC [Open-source CS2 kernel-mode anti-cheat companion (KMDF driver + usermode service) for client-side integrity signals alongside CS2AC/CS2FOW]
+- https://github.com/Driw0x/CS2Guard [ML behavioral cheat detection for CS2 from demo parsing and feature engineering toward real-time server-side anti-cheat]
 - https://github.com/crazythecoder/IW4MAdmin-SebzAntiCheat [IW4X server-side suspicion telemetry, IW4MAdmin review dashboard, GSC aim/visibility checks, and Discord case workflow]
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/LaihoE/DLAC)
 - [Deep Learning Anti-Cheat For CSGO](https://github.com/gmh5225/anti-cheat)
