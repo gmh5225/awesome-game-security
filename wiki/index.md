@@ -3719,6 +3719,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [x64dbg-mcp](entities/x64dbg-mcp.md) — MCP server for x64dbg (TypeScript; 23 mega-tools / 151 REST endpoints; native plugin REST bridge; stepping/breakpoints/memory/disasm/tracing/anti-debug bypass/CFA/PE dump; Claude/Cursor/Windsurf)
 - [x64dbg Playtime](entities/x64dbg-playtime.md) — x64dbg plugin: embedded Lua scripting (memory/registers/breakpoints/labels/modules/assembler; autorun scripts; ZehMatt; Lua script)
 - [x64dbgpython](entities/x64dbgpython.md) — x64dbg plugin: Python 3 scripting (C++ wrappers mirroring plugin SDK; memory/assembly/module/GUI examples; debugger automation; Running python3 script)
+- [x64dbgScript](entities/x64dbg-script.md) — x64dbg script samples + Python IDA label/comment export helpers (multi-step execution, globals, instruction-sequence search; Ahmadmansoor; Cheat x64dbg Plugins / scripting)
 - [x64dbg Plugin Manager](entities/x64dbg-plugin-manager.md) — x64dbg plugin install/management (C++/C; plugin development / modding; Cheat x64dbg Plugins)
 - [x64dbg Trace Reader](entities/x64dbg-trace-reader.md) — standalone `.trace64` parser (Capstone disasm; register/memory state; regex filter; offline trace analysis)
 - [X64DBG MapLdr](entities/x64dbg-mapldr.md) — x64dbg plugin: load linker/IDA MAP files into symbol database (MSVC/Borland; function/global/segment names; C++; Cheat x64dbg Plugins)
