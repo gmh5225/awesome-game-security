@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Accenture/protobuf-finder`: entity [[protobuf-finder]] (Accenture; Python IDAPython IDA plugin; Google protobuf runtime + IDA APIs; decodes embedded descriptors from compiled binaries; dedicated search action and custom result views; recover network/serialization `.proto` definitions; game security and binary analysis; README [Protobuf]); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[protobufs]], [[spirit-ida-plugin]], and [[packet-sniffer]].
+
 - **2026-09-03** — ingest `description:realkyx29-design/LarpingAntiCheat`: entity [[larping-anti-cheat]] (realkyx29-design; Java 21 Paper **1.21+** plugin Hyphon; modular movement/combat/world checks—fly, speed, reach, kill aura, scaffold, fast break; server-authoritative physics snapshots; per-player violation tracking with decay; honeypot/ESP decoy entities + optional packet-layer fake bases; capability analyzer for modded-SMP custom modifiers/enchantments; low false-positive focus; server-side only; Anti Cheat / game:minecraft); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[grim]], [[bs-anticheat]], [[inertia]], [[minecraft-anticheat-list]], [[uagc]], and [[shard]].
 
 - **2026-09-03** — ingest `readme:categories`: Anti Cheat ~706 (+1; ManInMyVan/[[minecraft-anticheat-list]] curated MC Java/Bedrock anticheat catalog in Guide samples) / Cheat ~2776 / other major section counts stable; 41 sections; refreshed README-map counts on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).

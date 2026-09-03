@@ -12,7 +12,7 @@ confidence: medium
 
 **SteamDatabase/Protobufs** — continuously tracked collection of **protobuf definitions** used by Steam and Valve games. The repository is mostly `.proto` files generated from update pipelines and automated protobuf dumpers, helping researchers keep message schemas current for protocol analysis, tooling maintenance, and game network reverse engineering. Primarily a data resource for developers working with Steam ecosystem internals. (source: wiki/sources/descriptions/SteamDatabase__Protobufs.md)
 
-Complements transport-level references such as [[game-networking-sockets]], wire-capture tooling such as [[packet-sniffer]], and title-specific protocol emulators such as [[ds3os]]. README highlights a CS:GO schema subtree; adjacent Valve engine/runtime study includes [[source-sdk-2013]], [[proton]], and [[vac]].
+Complements transport-level references such as [[game-networking-sockets]], wire-capture tooling such as [[packet-sniffer]], and title-specific protocol emulators such as [[ds3os]]. When schemas are not published, in-IDA descriptor recovery via [[protobuf-finder]] can reconstruct `.proto` definitions from compiled game/client binaries. README highlights a CS:GO schema subtree; adjacent Valve engine/runtime study includes [[source-sdk-2013]], [[proton]], and [[vac]].
 
 ## Links
 
@@ -21,4 +21,4 @@ Complements transport-level references such as [[game-networking-sockets]], wire
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[game-networking-sockets]] · [[packet-sniffer]] · [[ds3os]] · [[source-sdk-2013]] · [[proton]] · [[vac]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[protobuf-finder]] · [[game-networking-sockets]] · [[packet-sniffer]] · [[ds3os]] · [[source-sdk-2013]] · [[proton]] · [[vac]]

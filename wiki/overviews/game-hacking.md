@@ -232,6 +232,7 @@ sources:
   - wiki/sources/descriptions/gigbh__d-process.md
   - wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md
   - wiki/sources/descriptions/AimTuxOfficial__AimTux.md
+  - wiki/sources/descriptions/Accenture__protobuf-finder.md
   - wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md
   - wiki/sources/descriptions/martinjanas__Sensum.md
   - wiki/sources/descriptions/jfmaes__LazySign.md
@@ -1964,6 +1965,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Cross-platform Godot runtime mod loaders such as [[gdpatch]] (Rust; native loader + filesystem interception; GDScript 3.x/4.x patching; Lua mod hooks; Win/Linux/macOS usermode API hooks; runtime mod loading without touching game files; mod loader / Godot RE) sit beside [[gddumper]] in the game engine explorer:Godot lane. (source: wiki/sources/descriptions/GDPatch__GDPatch.md)
 - Cheat Engine value tracing in IDA via [[ce-tracer-ida]] (Python; CheatEngine Value Tracer plugin; memory analysis; cheat / IDA Plugins) bridges CE scan workflows into static IDA analysis. (source: wiki/sources/descriptions/goseungduk__CE_Tracer-IDA.md)
 - MapleStory in-IDA packet analysis via [[spirit-ida-plugin]] (Bratah123; Python IDAPython; automates packet structure extraction, header identification, function output generation, text export for offline protocol documentation; cheat / IDA Plugins) bridges wire-capture RE into static IDA workflows beside [[maple-research]]. (source: wiki/sources/descriptions/Bratah123__SpiritIDAPlugin.md)
+- IDA Protocol Buffer schema recovery via [[protobuf-finder]] (Accenture; Python; decodes embedded protobuf descriptors from game/client binaries; custom search action + result views for recovered `.proto` definitions; network and serialization RE; README [Protobuf]) sits beside published schema dumps such as [[protobufs]] and wire-capture tooling such as [[packet-sniffer]]. (source: wiki/sources/descriptions/Accenture__protobuf-finder.md)
 - IDA mnemonic-pattern breakpoint automation via [[cbs]] (Reodus; Python IDAPython + PyQt; regex on disassembly lines; set/enable/disable/remove breakpoints across functions; cheat / IDA Plugins) speeds repeatable static-analysis breakpoint setup before live debugging. (source: wiki/sources/descriptions/Reodus__CBS.md)
 - IDA Pro + Cheat Engine current-module offset sync via [[doffset]] (dNop90; resolves module RVAs while static IDA analysis runs alongside live debugging in Cheat Engine, x64dbg, and similar tools; cheat / IDA Plugins) bridges multi-tool RE when correlating static addresses with runtime module bases. (source: wiki/sources/descriptions/dNop90__dOffset.md)
 - Disassembler page remapping via [[ce-remap-plugin]] (Delphi CE plugin; hooks CE plugin SDK to remap disassembler memory pages so hidden or obfuscated code is visible in the disassembler view; tested on CE 7.4; cheat / Remap; gmh5225) extends CE static-analysis workflows when targets remap or conceal executable pages from the debugger UI. (source: wiki/sources/descriptions/gmh5225__CE-remap-plugin.md)
