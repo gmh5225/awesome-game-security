@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `readme:categories`: Cheat ~2774 (+1; Maxamedxasa/[[sako-restudio]] mobile-first Android disassembler/decompiler in Cheat RE Tools) / Anti Cheat ~704 / other major section counts stable; 41 sections; entity [[sako-restudio]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], [[overviews/mobile-security]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-03** — ingest `description:Air14/KDBGDecryptor`: entity [[kdbgdecryptor]] (Air14; Windows kernel-mode KDBG decrypt sample; C++ VS driver; `KdDecodeBlockData` or manual `KiWaitNever`/`KiWaitAlways` copy-from-memory; stealthier decode path; kernel RE / low-level debugging / AC memory-analysis study); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[nokd]], [[kdbg]], [[kn-live-dbg]], [[windows-kernel-debugging-guide]], and [[windbg-scripts]].
 
 - **2026-09-03** — ingest `description:AirtestProject/Airtest`: entity [[airtest]] (AirtestProject; cross-platform Python UI automation for games and mobile apps; image-recognition element location without process injection; device control APIs, device-farm scaling, CLI/Python, HTML reports, IDE + Poco object hierarchy; Android/iOS/desktop; UI Automation Framework / QA automation); cited on [[overviews/game-engine]] and [[overviews/mobile-security]]; cross-linked [[games-test-automation-example]], [[unity-automated-qa-examples]], [[fastlogs]], and [[lamda]].
