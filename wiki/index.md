@@ -2198,6 +2198,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [MagiskOnWSALocal](entities/magiskonwsalocal.md) — LSPosed; local Magisk/KernelSU + GApps + LSPosed WSA build scripts (Python/shell; rooted installable WSA for security testing on Win11; Cheat WSA)
 - [Magisk-Tailscaled](entities/magisk-tailscaled.md) — Magisk module running Tailscale daemon on rooted Android (userspace networking; VPN coexistence; remote SSH + ADB-over-tailnet; arm/arm64; anasfanani)
 - [makin](entities/makin.md) — Windows anti-debug/anti-VM probe (30+ checks; C; Anti Debugging)
+- [MAJESTY-technologies](entities/majesty-technologies.md) — experimental Windows kernel driver; anti-debugging/anti-analysis; DKOM-style structure manipulation, instrumentation callback checks, HW breakpoint checks, process/thread flag hardening, anti-hypervisor timing/anomaly probes; AC/protection research (Ahora57; Anti Debugging)
 - [MAMBO](entities/mambo.md) — ARM/AArch64 Linux DBI (software code cache; instruction/block/function hooks; analysis plugins; beehive-lab; cheat / DBI / ARM)
 - [mandibule](entities/mandibule.md) — Linux ptrace ELF injector (icrt; raw syscalls; load/relocate; fake stack; Cheat / injection)
 - [maniac](entities/maniac.md) — external osu!; out-of-process offensive techniques (cheat / game:osu [External]; gmh5225)

@@ -24,4 +24,4 @@ Small **C++ Visual Studio proof-of-concept anti-anti-debug** sample (Ahora57) th
 
 ## Related
 
-[[showstopper]] · [[ghostdebug]] · [[scyllahide-for-ida9.0rc]] · [[titanhide]] · [[hyperhide]] · [[anti-debugging]] · [[antidbg]] · [[makin]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]
+[[majesty-technologies]] · [[showstopper]] · [[ghostdebug]] · [[scyllahide-for-ida9.0rc]] · [[titanhide]] · [[hyperhide]] · [[anti-debugging]] · [[antidbg]] · [[makin]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]]

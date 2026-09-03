@@ -872,6 +872,7 @@ sources:
   - wiki/sources/descriptions/Dead-Scripts__Dead_antiCheat.md
   - wiki/sources/descriptions/u8012146108-bit__anticheat-qa.md
   - wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md
+  - wiki/sources/descriptions/Ahora57__MAJESTY-technologies.md
   - wiki/sources/descriptions/ApexLegendsUC__anti-cheat-emulator.md
 updated: 2026-09-03
 confidence: high
@@ -1028,6 +1029,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[ladd]] — Linux C anti-debugging detection tool (BarakAharoni; ptrace behavior, LD_PRELOAD tampering, TracerPid in /proc/self/status; early runtime checks; anti-analysis research and defensive hardening experiments; Anti Debugging) (source: wiki/sources/descriptions/BarakAharoni__LADD.md)
 - [[showstopper]] — Windows anti-debug exploration tool (CheckPointSW; large malware/research check collection; exposes function addresses; attach debuggers and compare tools/plugins/mitigations; anti-anti-debug validation; Anti Debugging) (source: wiki/sources/descriptions/CheckPointSW__showstopper.md)
 - [[racecondition]] — Windows C++ Visual Studio PoC; native NT API probes of debug ports, hidden-thread behavior, and debugger artifacts; race-condition timing bypasses against common userland hide mechanisms; anti-anti-debug technique research (Ahora57; Anti Debugging) (source: wiki/sources/descriptions/Ahora57__RaceCondition.md)
+- [[majesty-technologies]] — experimental Windows kernel driver; DKOM-style structure manipulation, instrumentation callback checks, hardware breakpoint checks, process/thread flag hardening, anti-hypervisor timing/anomaly probes; anti-cheat and protection research for kernel-level debugger resistance (Ahora57; Anti Debugging) (source: wiki/sources/descriptions/Ahora57__MAJESTY-technologies.md)
 - [[avanguard]] — Win32 anti-intrusion library (GravitLauncher; C/C++; anti-debug, anti-injection, memory/call-stack analysis, integrity checks, callback filtering, module checks; game-client hardening; Anti Debugging) (source: wiki/sources/descriptions/GravitLauncher__Avanguard.md)
 - [[godefender]] — Windows Go security toolkit (EvilBytecode; anti-debug, anti-virtualization, anti-DLL-injection, hook detection; modular internal components; low-level WinAPI defensive signals; security-sensitive Go app hardening; Anti Debugging) (source: wiki/sources/descriptions/EvilBytecode__GoDefender.md)
 - [[chessking]] — Rust Axum multiplayer chess platform with layered server-side AC (risk scoring, device fingerprinting, match integrity, IP reputation, chess-themed CAPTCHA step-up, ban escalation; shakmaty move validation; admin dashboard; educational reference; web-coder-lab) (source: wiki/sources/descriptions/web-coder-lab__chessking.md)
