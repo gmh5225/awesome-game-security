@@ -231,6 +231,7 @@ sources:
   - wiki/sources/descriptions/gcarmix__HexWalk.md
   - wiki/sources/descriptions/gigbh__d-process.md
   - wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md
+  - wiki/sources/descriptions/AimTuxOfficial__AimTux.md
   - wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md
   - wiki/sources/descriptions/martinjanas__Sensum.md
   - wiki/sources/descriptions/jfmaes__LazySign.md
@@ -2446,6 +2447,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Linux CS:GO samples such as [[gamesneeze]] (seksea; Linux tag) and SDK-oriented [[csgo-linux-cheat-sdk]] (otvv; C++; rendering / networking / modding; Linux tag) sit in the same cheat / game:csgo lane for non-Windows offensive research. (source: wiki/sources/descriptions/seksea__gamesneeze.md) (source: wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md)
 - Minimal Linux CS:GO interface/hook scaffolds such as [[ghinterfacescsgo]] (VitorMob; C++; shared-object loader + interface interaction; structure/setup focus rather than bundled gameplay features; educational Linux hook development; Internal tag) sit beside fuller Linux SDKs like [[csgo-linux-cheat-sdk]] for studying Source 1 interface wiring on non-Windows hosts. (source: wiki/sources/descriptions/VitorMob__GHInterfacesCSGO.md)
 - Linux-native internal CS:GO samples such as [[anubis]] (danielkrupinski; C++; process injection; ESP, aimbot, and related features via Source SDK hooks on client rendering and game events; complements [[osiris]] on non-Windows hosts) sit in the same cheat / game:csgo lane for studying Linux internal hook surfaces beside external cross-platform samples like [[goesp]]. (source: wiki/sources/descriptions/danielkrupinski__Anubis.md)
+- Feature-rich Linux internal CS:GO frameworks such as [[aimtux]] (AimTuxOfficial; C++; CMake build, GDB-based injection, config directories; injection helpers and modular in-game deployment; educational internal cheat architecture and client-side manipulation study; Linux tag) sit beside lighter Linux SDK scaffolds like [[csgo-linux-cheat-sdk]] and [[ghinterfacescsgo]]. (source: wiki/sources/descriptions/AimTuxOfficial__AimTux.md)
 - External CS:GO samples such as [[heck-csgo-external]] (C++; modding / SDK generation / memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/soyware__heck_csgo_external.md)
 - External CS:GO samples such as [[nebulite-external]] (gmh5225; C/C++; memory analysis; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__nebulite-external.md)
 - External CS:GO samples such as [[astra]] (gmh5225; C/C++; rendering / modding / overlays; External tag) sit in the same cheat / game:csgo lane. (source: wiki/sources/descriptions/gmh5225__Astra.md)

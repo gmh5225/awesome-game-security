@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AimTuxOfficial/AimTux`: entity [[aimtux]] (AimTuxOfficial; Linux CS:GO internal cheat framework; C++; CMake build, GDB-based injection, user config directories; build scripts + injection helpers for feature-rich in-game module deployment; internal cheat architecture + client-side manipulation research; cheat / game:csgo [Linux]); cited on [[overviews/game-hacking]]; cross-linked [[anubis]], [[csgo-linux-cheat-sdk]], [[ghinterfacescsgo]], [[gamesneeze]], [[osiris]], and [[csgo-internal-base]].
+
 - **2026-09-03** — ingest `description:Air14/HyperHide`: entity [[hyperhide]] (Air14; open-source hypervisor-based x64dbg/x32dbg anti-anti-debug plugin; kernel driver + Intel VT-x/EPT; hooks/sanitizes PEB, thread/process flags, and Nt* API queries; 64-bit Windows; RE / game-security research against protected binaries; README [VT debuger]); cited on [[overviews/reverse-engineering]] and [[overviews/windows-kernel]]; cross-linked [[hyperdbg]], [[vt-debuger]], [[titanhide]], [[scyllahide-for-ida9.0rc]], [[scyllahidedetector2]], and [[kdbgdecryptor]].
 
 - **2026-09-03** — ingest `description:Maxamedxasa/SakoREStudio`: entity [[sako-restudio]] (Maxamedxasa; mobile-first Android RE suite; Capstone disasm + IR decompiler + ptrace debugger + call graph + SakoScript plugins; APK/ELF/PE/DEX on ARM64/x86-64; Jetpack Compose + SQLite projects; built-in security/ARM/DEX/string plugins; optional local/OpenAI-compatible AI explain; offline air-gapped workflow; Cheat RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[charlyengine]], [[glass]], [[jadx]], and [[hikarisystem-hexcore]].
