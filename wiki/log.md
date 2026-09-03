@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AlSch092/UltimateAntiCheat`: entity [[ultimate-anti-cheat]] (AlSch092; open-source Windows C++ anti-cheat framework; user-mode debug/memory-patch/runtime tamper detection; optional client-server heartbeat; configurable hybrid user-mode + kernel-assisted deployment; educational AC evaluation reference); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[sentinel-anti-cheat]], [[oac]], [[rebirth-guard]], and [[peregrine-anticheat]].
+
 - **2026-09-03** — ingest `description:Lixense/ff-ace-anticheat-analysis`: entity [[ff-ace-anticheat-analysis]] (Lixense; Tencent ACE Free Fire byte-level RE post-mortem; libanogs/libanort on armeabi-v7a; IDA decompilation + Python/JS parallel workflows, string decryption, detection catalog + SQLite index; APK hash, cert parsing, inline-hook scans, self-integrity checksums; defensive ACE client study; Explore AntiCheat System:ACE); cited on [[concepts/mobile-anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[honor-of-kings-re-research]], [[pubgm1.6-deadgame]], [[dfm-android-unicorn]], and [[kpm-memreader]].
 
 - **2026-09-03** — ingest `description:zelect0r/zamr`: entity [[zamr]] (zelect0r; curated MMRL module repository for Magisk/KernelSU/APatch; Play Integrity Fix, TEESimulator, Zygisk runtimes, root-hide modules; JSON track/update manifests + GitHub Pages catalog refreshed hourly; mobile game integrity research); cited on [[concepts/mobile-anti-cheat]] and [[concepts/zygisk]]; cross-linked [[fox-magisk-module-manager]], [[webui-x-portable]], [[magisk]], [[kernelsu]], and [[spoofing-collection]].

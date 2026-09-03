@@ -475,6 +475,7 @@ sources:
   - wiki/sources/descriptions/web-coder-lab__chessking.md
   - wiki/sources/descriptions/tgillam__HumanMouseMovement.md
   - wiki/sources/descriptions/AryuInka__Valorant-Cheat-External.md
+  - wiki/sources/descriptions/AlSch092__UltimateAntiCheat.md
   - wiki/sources/descriptions/AlfredIU__Spoofer.md
   - wiki/sources/descriptions/AsfhtgkDavid__windmouse.md
   - wiki/sources/descriptions/petercunha__Pine.md
@@ -871,7 +872,7 @@ sources:
   - wiki/sources/descriptions/u8012146108-bit__anticheat-qa.md
   - wiki/sources/descriptions/CodeMaxx__windows-runtime-attestation-report.md
   - wiki/sources/descriptions/ApexLegendsUC__anti-cheat-emulator.md
-updated: 2026-09-02
+updated: 2026-09-03
 confidence: high
 ---
 
@@ -1010,6 +1011,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[anticheat-android-cheap-engine]] — sample Android anti-cheat implementation (C/C++; open-source AC system lane; defensive researchers; gmh5225) (source: wiki/sources/descriptions/gmh5225__Anticheat-android-cheap-engine.md)
 - [[android-anti-cheat]] — open-source Android anti-cheat research (C/C++; anti-cheat, modding, hooking; codetronik; open-source AC system lane; defensive researchers) (source: wiki/sources/descriptions/codetronik__AndroidAntiCheat.md)
 - [[rebirth-guard]] — Windows C++ open-source anti-cheat library (chztbby; modding / SDK generation; Open Source Anti Cheat System lane; defensive researchers) (source: wiki/sources/descriptions/chztbby__RebirthGuard.md)
+- [[ultimate-anti-cheat]] — open-source Windows C++ anti-cheat framework (AlSch092; user-mode debug/memory-patch/runtime tamper detection; optional client-server heartbeat; configurable hybrid user-mode + kernel-assisted deployment; educational AC evaluation reference; Open Source Anti Cheat System) (source: wiki/sources/descriptions/AlSch092__UltimateAntiCheat.md)
 - [[betashield]] — C++/Boost client-side AC protection (integrity checking, process monitoring, tamper detection; Boost.Asio networking; cross-platform Boost utilities; open-source AC system lane; JackBro) (source: wiki/sources/descriptions/JackBro__BetaShield.md)
 - [[cheatguard]] — Rust engine-agnostic loaded-module scanner (JSON signature ruleset; weighted signals—known cheat names, suspicious paths, unsigned modules, module-count anomalies; Win32 module enum; deterministic 0–100 CLEAN/SUSPICIOUS/MALICIOUS JSON report; library + CLI; blue-team process-integrity / custom AC forensics; JUS7205) (source: wiki/sources/descriptions/JUS7205__cheatguard.md)
 - [[tlac-modern-local-anti-cheat-reunioned]] — lightweight open-source local anti-cheat for Linux (Rust + C eBPF/kernel module + Python ONNX; user-space wildcard memory signature scan, SHA256 self-integrity, HWID bans, Tokio local IPC; optional eBPF tracepoints on open/exec/ptrace/clone; behavioral anomaly detection; MIT-licensed; Steam Deck; TuncorReUnion; Open Source Anti Cheat System) (source: wiki/sources/descriptions/TuncorReUnion__TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED.md)
