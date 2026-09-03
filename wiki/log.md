@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:Akipe/awesome-android-aosp`: entity [[awesome-android-aosp]] (Akipe; curated AOSP/custom-ROM Markdown index; build systems, kernels, device trees, Treble, SELinux, debugging, vendor workflows; low-level platform engineering learning map; cheat / Guide); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[awesome-android-security]], [[awesome-android-root]], [[android-rom-list]], and [[kernel-common]].
+
 - **2026-09-03** — ingest `description:AkitaYui/AkHeartbeat-BE`: entity [[akheartbeat-be]] (AkitaYui; external C++ GTA5 Enhanced tool; D3D11 overlay menu; separate-process RPM/WPM + AOB scan; stat/script global/local editors + teleport; runtime BE detection patches; BEClient↔BEDaisy architecture notes; BattlEye integration + external cheat RE; cheat / game:gta5 [External]); cited on [[concepts/battleye]] and [[overviews/game-hacking]]; cross-linked [[gta5-dma-cheat]], [[phake]], [[beclient]], and [[battleye-re]].
 
 - **2026-09-03** — ingest `description:AlSch092/EasyHandles`: entity [[easy-handles]] (AlSch092; driver+DLL; kernel `ObOpenPointerToObject` + usermode `OpenProcess` hook via IOCTLs; bypass ObRegisterCallbacks handle protection; debugger attach to callback-protected processes; PPL limitations; AC/EDR handle-protection research); cited on [[concepts/kernel-callbacks]], [[overviews/windows-kernel]], and [[overviews/anti-cheat]]; cross-linked [[libelevate]], [[intraceptor]], [[van1338]], and [[ultimate-anti-cheat]].

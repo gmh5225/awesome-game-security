@@ -429,6 +429,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [awesome-anti-virtualization](entities/awesome-anti-virtualization.md) — curated anti-virtualization resources (Detection:Virtual Environments)
 - [awesome-android-root](entities/awesome-android-root.md) — curated Android root resources (Magisk/KernelSU/APatch; Play Integrity Android 14/15 notes; cheat / Android root)
 - [awesome-android-security](entities/awesome-android-security.md) — curated Android security learning index (theory/tools/write-ups/PoCs/CVEs; kernel exploitation, app testing, Frida; Samsung research references)
+- [awesome-android-aosp](entities/awesome-android-aosp.md) — curated AOSP/custom-ROM platform index (build systems, kernels, device trees, Treble, SELinux, debugging, vendor workflows; low-level platform engineering; Akipe; cheat / Guide)
 - [awesome-educational-games](entities/awesome-educational-games.md) — curated educational games (editors / languages / programming; Game Develop Guide)
 - [awesome-executable-packing](entities/awesome-executable-packing.md) — curated executable packing/unpacking resources (PE/ELF/Mach-O; packers, protectors, unpackers, analysis tools; Executable File Packing)
 - [awesome-gamedev](entities/awesome-gamedev.md) — curated free/open gamedev resources (tools, engines, libraries, learning, assets; openly licensed focus; Game Develop / guide)
