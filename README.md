@@ -1631,6 +1631,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/AkashaCorporation/HikariSystem-HexCore [VS Code-based native RE IDE: Capstone/Unicorn/Remill/Helix decompilation pipeline, PE/ELF emulation, YARA/IOC/entropy, headless `.hexcore_job.json` automation, and agent integration]
 - https://github.com/kernelstub/Cognitor [Patch Tuesday semantic diff CLI for Windows build snapshots; driver IOCTL lab, defensive patch review, disclosure workflows]
 - https://github.com/azw413/Glass [Rust, GPL-3.0] Mobile-first GPU disassembler (gpui) for APK/DEX/smali and AArch64 ELF/Mach-O (Android/iOS); CFG, xref, bin/insn search, annotations, in-place patch export; CLI + MCP; free IDA alternative]
+- https://github.com/Maxamedxasa/SakoREStudio [Mobile-first Android disassembler and decompiler for APK, ELF, PE, and DEX with ptrace debugger, call graph, and SakoScript plugins]
 - https://github.com/Col-E/Recaf [Java]
 - https://github.com/gmh5225/bytecode-viewer [Java]
 - https://github.com/gmh5225/deobfuscator [Java]
