@@ -3766,6 +3766,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [yourgamelib](entities/yourgamelib.md) — cross-platform C++11 OpenGL/OpenGL ES game framework (CMake; GLFW/GLM/ImGui/Lua/Box2D/Bullet/miniaudio; desktop/Android/web; Game Engine)
 - [zelda3](entities/zelda3.md) — Zelda 3 reimplementation (playable start-to-end; Game Develop / source)
 - [zam64-zemina](entities/zam64-zemina.md) — BYOVD via Zemana zam64.sys (IOCTL process kill + memory access)
+- [ZAMR](entities/zamr.md) — curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator; hourly JSON catalog; zelect0r; cheat / Magisk)
 - [ZeroHVCI](entities/zero-hvci.md) — HVCI bypass PoC for unsigned kernel code (gmh5225; policy edge cases / vulnerable signed drivers; VBS research)
 - [ZeroThreadKernel](entities/zero-thread-kernel.md) — threadless kernel exec via existing contexts / timers (vs AC thread enum)
 - [ZhangBing-Injector](entities/zhangbing-injector.md) — M3351AN BYOVD DLL injector (C++ usermode + bundled WHQL-signed vulnerable `.sys` drivers; driver memory ops + protected-process injection; credits kdmapper; kernel-assisted injection research)

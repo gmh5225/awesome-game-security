@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:zelect0r/zamr`: entity [[zamr]] (zelect0r; curated MMRL module repository for Magisk/KernelSU/APatch; Play Integrity Fix, TEESimulator, Zygisk runtimes, root-hide modules; JSON track/update manifests + GitHub Pages catalog refreshed hourly; mobile game integrity research); cited on [[concepts/mobile-anti-cheat]] and [[concepts/zygisk]]; cross-linked [[fox-magisk-module-manager]], [[webui-x-portable]], [[magisk]], [[kernelsu]], and [[spoofing-collection]].
+
 - **2026-09-02** — ingest `readme:categories`: Cheat ~2773 (+2; zelect0r/[[zamr]] MMRL Magisk/KernelSU/APatch module catalog in Cheat Magisk + Lixense/[[ff-ace-anticheat-analysis]] Tencent ACE Free Fire libanogs/libanort byte-level RE in Explore AntiCheat System:ACE) / Anti Cheat ~704 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-02** — ingest `description:AlessandroZ/LaZagne`: entity [[lazagne]] (AlessandroZ; Python cross-platform credential recovery framework; modular collectors for browsers, mail clients, databases, chat apps, and other locally stored secrets; post-exploitation, auditing, and forensic credential-exposure assessment); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[pillager]], [[browser-password-exportor]], [[kvcforensic]], [[custom-dpapi]], [[dfirtriage]], and [[qvoid-token-grabber]].
