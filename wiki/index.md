@@ -655,6 +655,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [covcane](entities/covcane.md) — experimental Windows x86-64 DBI framework (C++; loader + instrumentation runtime; translation/rewriting/memory/exception handling; Zydis + AsmJIT; RE / runtime analysis; ZehMatt)
 - [covirt](entities/covirt.md) — x86-64 stack-VM code virtualizer (PE MinGW + ELF; MBA + self-modifying code; marker regions; AC Obfuscation Engine `[VM]`; dmaivel)
 - [brkida](entities/brkida.md) — header-only C++ `BRKIDA` macro; MSVC x64 compile-time stubs + crafted stack-access patterns break IDA Hex-Rays decompilation on protected functions (anti-tamper / software protection; android1337)
+- [brovan](entities/brovan.md) — .NET Unicorn binary analysis/emulation framework (x86/x64/ARM PE/ELF + memory dumps; syscall emulation, API hooking, interactive debugger shell; AdvDebug; Windows User Space Emulator)
 - [crycall](entities/crycall.md) — C++14+ compile-time call obfuscation (lambda/virtual-dispatch wrappers; normal and virtual call macros; hides callee/argument flow; AC Compile Time; android1337)
 - [crystr](entities/crystr.md) — C++20 compile-time string/number obfuscation (XOR keys from compile-time math/timestamps/counters; inline/virtual decrypt; per-char/per-value key variation; AC String Crypter; android1337)
 - [crossover-patcher](entities/crossover-patcher.md) — experimental macOS CrossOver patcher for anti-cheat-protected Windows games (Apple Silicon; Wine/graphics runtime patches; rollback; dazi2011)

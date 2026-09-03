@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AdvDebug/Brovan`: entity [[brovan]] (AdvDebug; .NET Unicorn binary analysis/emulation framework; x86/x64/ARM PE/ELF + memory dumps; syscall emulation, API hooking, interactive debugger shell; Windows User Space Emulator); cited on [[overviews/reverse-engineering]]; cross-linked [[emulator]], [[unicorn-pe]], [[sogen]], [[dumpulator]], [[sk3wldbg]], and [[ews]].
+
 - **2026-09-03** — ingest `description:AfanasievN/react-native-device-risk-signals`: entity [[react-native-device-risk-signals]] (AfanasievN; open-source React Native TurboModule New Architecture; Kotlin/ObjC++/TS; raw typed device-intel and fraud-prevention probes—root/jailbreak, emulator, Frida/debugger, VPN/proxy, hardware/locale/app/runtime; no client risk score or vendor upload; host-controlled consent/timeouts; backend fraud/device-risk enrichment; Android+iOS); cited on [[overviews/mobile-security]] and [[concepts/mobile-anti-cheat]]; cross-linked [[react-native-shieldscan]], [[free-rasp-reactnative]], [[rs-native-kit-security]], [[droidshield]], and [[frida]].
 
 - **2026-09-03** — ingest `description:AgentSmithers/x64DbgMCPServer`: entity [[x64dbgmcpserver]] (AgentSmithers; C#/.NET Framework x64dbg plugin; MCP-compatible HTTP interface; self-hosted listener; modular command routing; memory reads, disassembly, register queries, labeling, automation; AI-assisted RE and scripted game security analysis); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[x64dbg]], [[x64dbg-mcp]], [[x64dbg-automate-pyclient]], and [[x64dbg-rippy]].
