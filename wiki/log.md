@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-03** — ingest `description:AkashaCorporation/HikariSystem-HexCore`: entity [[hikarisystem-hexcore]] (AkashaCorporation; VS Code-based native RE IDE; Capstone/Unicorn/Remill/Rellic lift-decompile pipeline, PE/ELF emulation, YARA/IOC/entropy, HQL anti-analysis queries, headless `.hexcore_job.json` batch automation + agent integration; malware/binary RE desktop environment); cited on [[overviews/reverse-engineering]]; cross-linked [[ghidra]], [[headless-ida]], [[yarka]], [[unicorn-pe]], and [[awesome-ghidra]].
+
 - **2026-09-03** — ingest `description:Akatsyk/2k17-club`: entity [[2k17-club]] (Akatsyk; large C++ CS:GO internal framework; aimbot, anti-aim, autowall, chams, grenade helpers, hook-based game events; DirectX9 ImGui + Lua/LuaJIT LuaBridge scripting; cheat development + Source engine RE; cheat / game:csgo); cited on [[overviews/game-hacking]]; cross-linked [[csgo]], [[csgo-cheat-base]], [[digital-sdk]], and [[csgosimple]].
 
 - **2026-09-03** — ingest `description:Aki2k/BEDaisy`: entity [[bedaisy]] (Aki2k; C++ BEDaisy.sys kernel interception PoC; image-load callbacks + IAT hook around MmGetSystemRoutineAddress; APC experimentation; kernel anti-cheat bypass-surface + hardening RE); cited on [[concepts/battleye]] and [[overviews/windows-kernel]]; cross-linked [[bedaisy-reversal]], [[bedaisy-bypass]], [[goodeye]], and [[battleye-re]].
