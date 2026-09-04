@@ -3597,6 +3597,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [VirtualBox](entities/virtualbox.md) — Oracle open-source x86_64 VMM (CPU/memory virtualization, device emulation, guest additions, COM/IOCTL; hypervisor-internals and VM security research)
 - [VisualUEFI-2.0](entities/visualuefi-2-0.md) — VisualUEFI-style Clang/DWARF UEFI dev setup (EDK2 samples + Visual Studio; VMware + CLion remote GDB; firmware/boot-time RE; Shtan7)
 - [virtualbox-kvm](entities/virtualbox-kvm.md) — VirtualBox with KVM backend (manual GPU accel; cheat / QEMU/KVM/PVE/VBOX research-host lane; cyberus-technology)
+- [virtualkd-redux](entities/virtualkd-redux.md) — VirtualKD revival; VM kernel debug acceleration for VMware/VirtualBox (driver + host-side; Win11 + current WinDbg; modern VS build; 4d61726b)
 - [VMDragonSlayer](entities/vmdragonslayer.md) — VM detection/analysis framework (DTT / SE / ML; Cheat RE Tools)
 - [VMkatz](entities/vmkatz.md) — in-place VM snapshot/VHD cred extract (LSASS/SAM/LSA/NTDS; AC/IS forensics)
 - [VMPLift](entities/vmplift.md) — emulation-first VMProtect 3.8–3.10+ x64 handler walker/lifter (VIP trace, rolling-key recovery, closed-form recovery, LLVM IR/pseudo-C/devirt; IDA/Ghidra; Fix VMP; sexyiam)

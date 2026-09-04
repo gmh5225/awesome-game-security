@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:4d61726b/VirtualKD-Redux`: entity [[virtualkd-redux]] (4d61726b; modernized VirtualKD VM kernel debug acceleration; C/C++ driver + host-side components; VMware/VirtualBox; legacy Windows through Win11; current WinDbg; modern Visual Studio build workflow; low-level kernel debug + systems security research in virtualized labs); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[windows-kernel-debugging-guide]], [[ida-vmware-windows-gdb]], [[virtualbox]], [[ntoseye]], [[windbg-scripts]], [[mcp-windbg]], and [[nokd]].
+
 - **2026-09-04** — ingest `description:4ian/GDevelop`: entity [[gdevelop]] (4ian; open-source cross-platform 2D/3D game engine; GDCore C++ event parsing/codegen, GDevelop.js bindings, Pixi.js GDJS runtime, React newIDE; visual events-based logic; Electron/HTML5 export; extension ecosystem; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[pixijs]], [[godot]], [[babylon-js]], and [[three-js]].
 
 - **2026-09-04** — ingest `description:4l3x777/dse_pg_bypass`: entity [[dse-pg-bypass]] (4l3x777; C++ kernel research PoC; BYOVD bypasses Driver Signature Enforcement + PatchGuard; reversing notes trace signature validation callbacks and integrity-check paths; educational kernel security / defender BYOVD attack-surface study); cited on [[byovd]] and [[patchguard]]; cross-linked [[upgdsed]], [[cybersec2023-byovd-demo]], [[kvc]], and [[shark]].
