@@ -623,6 +623,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ConfuserEx](entities/confuserex.md) — open-source .NET application protector (Confuser successor; AC Binary Packer / CLR protection)
 - [ConfuserEx IDAPython](entities/confuserex-idapython.md) — Python IDAPython deobfuscation script for ConfuserEx (cheat / IDA Plugins)
 - [Corange](entities/corange.md) — pure C game engine (Game Engine / source)
+- [Corner Culling Source Engine](entities/corner-culling-source-engine.md) — 87andrewh Source engine anti-wallhack extension (C++ extension + SourceMod + map occluders; strict server-side visibility culling; ray-cast correctness, low overhead, latency-safe; competitive Source servers; For Source Games)
 - [Cordova Plugin RootGuard](entities/cordova-plugin-rootguard.md) — Cordova root/jailbreak/Frida detection plugin (Binuka97; Magisk/KernelSU/APatch; SAFE/COMPROMISED/UNKNOWN tri-state; Android+iOS)
 - [COPG](entities/copg.md) — Zygisk per-app hardware-profile spoofing (CPU/GPU/build props, IMEI, Widevine, SIM, GAID; stealth CoW/unload-before-launch vs resident GPU/DRM hooks; JS WebUI; hardware-gated FPS/graphics tier bypass; AlirezaParsi; cheat / Android)
 - [Cubyz](entities/cubyz.md) — open-source Zig 3D voxel sandbox (OpenGL; LOD rendering, unbounded 3D chunks, procedural crafting; Windows/Linux; Game Engine / source)

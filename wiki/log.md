@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:87andrewh/CornerCullingSourceEngine`: entity [[corner-culling-source-engine]] (87andrewh; Source engine anti-wallhack extension; C++ extension + SourceMod + map occluders; strict server-side visibility culling; ray-cast correctness, low overhead, latency-safe; competitive Source servers; For Source Games); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[little-anti-cheat]], [[nocheatz-3]], [[source-engine]], [[deepaimdetector]], and [[osanticheat]].
+
 - **2026-09-04** — ingest `description:87andrewh/DeepAimDetector`: entity [[deepaimdetector]] (87andrewh; prototype ML detector for legit-aimbot-assisted gunfights; Go SourceTV demo parser + Python LSTM notebooks; view-angle deltas + crosshair-to-target angular features around attack events; anti-cheat research experiment; Anti Cheat / Deep Learning); cited on [[ai-aimbot-detection]] and [[overviews/anti-cheat]]; cross-linked [[dlac]], [[cs2guard]], [[aimbot-detection-prototype]], and [[research-rigor]].
 
 - **2026-09-04** — ingest `description:89luca89/pakkero`: entity [[pakkero]] (89luca89; educational Go binary packer; compression + AES-256-GCM encryption + payload padding + obfuscation; in-memory execution; optional UPX + metadata mutation; anti-reversing / software protection tradeoff study; Anti Cheat → Binary Packer `[ELF]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[kiteshield]], [[silent-packer]], [[elfcrypt]], and [[embuche]].
