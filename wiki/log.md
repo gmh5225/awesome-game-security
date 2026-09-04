@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:87andrewh/DeepAimDetector`: entity [[deepaimdetector]] (87andrewh; prototype ML detector for legit-aimbot-assisted gunfights; Go SourceTV demo parser + Python LSTM notebooks; view-angle deltas + crosshair-to-target angular features around attack events; anti-cheat research experiment; Anti Cheat / Deep Learning); cited on [[ai-aimbot-detection]] and [[overviews/anti-cheat]]; cross-linked [[dlac]], [[cs2guard]], [[aimbot-detection-prototype]], and [[research-rigor]].
+
 - **2026-09-04** — ingest `description:89luca89/pakkero`: entity [[pakkero]] (89luca89; educational Go binary packer; compression + AES-256-GCM encryption + payload padding + obfuscation; in-memory execution; optional UPX + metadata mutation; anti-reversing / software protection tradeoff study; Anti Cheat → Binary Packer `[ELF]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[elfpacker]], [[kiteshield]], [[silent-packer]], [[elfcrypt]], and [[embuche]].
 
 - **2026-09-04** — ingest `description:9176324/Shark`: entity [[shark]] (9176324; Windows kernel research toolkit; C/C++/assembly; x86/x64 driver + loader; runtime PatchGuard disable; Visual Studio/NMAKE builds; virtualization-assisted loading references; low-level kernel defense and PG bypass study; cheat / PatchGuard-related); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[demystifying-patchguard]], [[kurasagi]], [[patchguard-2023]], and [[kdmapper]].

@@ -34,6 +34,7 @@ sources:
   - wiki/sources/descriptions/Miffyli__gan-aimbots.md
   - wiki/sources/descriptions/LaihoE__DLAC.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
+  - wiki/sources/descriptions/87andrewh__DeepAimDetector.md
 updated: 2026-09-04
 confidence: medium
 ---
@@ -91,6 +92,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[gan-aimbots]] — Miffyli academic ML-aimbot research repo (Python; ViZDoom FPS scenarios; data collection, GAN-aimbot training/evaluation, classifier plots, experiment orchestration; reproduces published pipelines with shared GAN-group parameters; offensive + defensive aimbot ML research; cheat / Machine Learning)
 - [[dlac]] — LaihoE CS:GO demo-analysis anti-cheat package (Python inference + Go demo parser; ONNX models; per-shot suspicious-aim prediction; terminal/CSV/in-memory export; tunable confidence thresholds; replay-based behavioral detection research; Anti Cheat / Machine Learning)
 - [[cs2guard]] — Driw0x CS2 ML behavioral cheat detection from demo parsing (Python; tick-level aim/tracking/reaction-time features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
+- [[deepaimdetector]] — 87andrewh SourceTV demo LSTM prototype (Go demo parser → view-angle delta + crosshair-to-target angular features around attack events; Python notebooks; classifies legit-aimbot-assisted gunfights; research experiment; Anti Cheat / Deep Learning) (source: wiki/sources/descriptions/87andrewh__DeepAimDetector.md)
 - [[nuremx]] — Apex Legends Python YOLOv5 screen-capture cheat (enemy detection, overlay, aiming; trained weights; no memory hooking; Windows/Linux; Zurek0x; cheat / [AI])
 - [[clickpic]] — screen pixel color detection + auto-click (OpenCV + triggerbot; monitors regions for target colors; gmh5225)
 - [[rust-auto-weapon-detection-opencv-example]] — Facepunch Rust OpenCV weapon detection sample (C++; color filtering + weapon index mapping; screen-based state recognition; no memory reads; YouNeverKnow00)
