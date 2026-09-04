@@ -1803,6 +1803,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ida-multi-mcp](entities/ida-multi-mcp.md) — Multi-instance IDA Pro MCP (Python; one endpoint for many GUI/idalib sessions; parallel routing; BCSD cross-binary function similarity; Claude Code/Cursor)
 - [ida-names](entities/ida-names.md) — IDA Pro plugin: batch rename, pattern match, prefix/suffix, import/export for function/symbol names (pseudocode window titles; cheat / IDA Plugins)
 - [ida-nexus-docker](entities/ida-nexus-docker.md) — Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus; ordered LLM analysis prompts in isolation; ZIP audit trails (mrexodia)
+- [ida-nexus-events](entities/ida-nexus-events.md) — Textual TUI viewer for live IDA Nexus `/idb_events` streams; database discovery, execution provenance, color-coded event families (mrexodia)
 - [ida-no-mcp](entities/ida-no-mcp.md) — IDA plugin + Rust/idalib CLI: export Hex-Rays decompilation, disasm fallback, strings/imports/exports/memory as files for AI IDEs without MCP (P4nda0s; cheat / IDA Plugins)
 - [ida-nord-theme](entities/ida-nord-theme.md) — IDA Pro Nord-palette dark color theme (disassembly/hex/graph/editor; cheat / Skins)
 - [ida-phnt-types](entities/ida-phnt-types.md) — PHNT Native API headers → IDA TIL/IDC (Dump-GUY; idaclang/tilib; 32/64-bit; Windows SDK + PHNT types for driver/AC binary RE)
