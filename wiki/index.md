@@ -813,7 +813,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [custom-VEH](entities/custom-veh.md) — RtlpCallVectoredHandlers hook for fast pre-vanilla VEH registration (Ring3 callback research; gmh5225)
 - [cunthook](entities/cunthook.md) — TF2/Source open hacking framework (full SDK; hooks / ESP / aimbot / gameplay mods; internal interfaces + Boost; Linux; gmh5225)
 - [CUTracer](entities/cutracer.md) — CUDA kernel instruction DBI (GPU-side trace + host-side analysis; Cheat / DBI)
-- [Cyberpunk Better Shaders (Callisto SSS)](entities/cyberpunk-better-shaders.md) — Cyberpunk 2077 path-traced skin mod; Vulkan implicit layer hot-swaps SPIR-V ray-gen shaders via Proton/Linux; RED4ext SSS texture hooks; SPIR-V/BRDF RE toolchain (BlaneC; Vulkan)
+- [Cyberpunk Better Shaders (Callisto SSS)](entities/cyberpunk-better-shaders.md) — Callisto SSS Cyberpunk 2077 path-traced skin mod; Callisto BRDF + reshaped SSS; `VkLayer_callisto_spvswap` SPIR-V hot-swap via Proton/Linux + RED4ext CopyTextureRegion hooks; DXIL fingerprint match; SPIR-V census/patch/A-B toolchain; skin-pixel gating (BlaneC; Vulkan / graphics modding)
 - [CyberAntLoader](entities/cyber-ant-loader.md) — cheat loader with auth, HWID binding, license verification, and anti-detection inject pipeline (gmh5225)
 - [CYBERSEC 2023 BYOVD Demo](entities/cybersec2023-byovd-demo.md) — CYBERSEC 2023 Taiwan RTCore64.sys BYOVD chain (DSE nullify → unsigned driver load; blind 360 Total Security ObRegisterCallbacks + notify callbacks; gmh5225)
 - [data-communication](entities/data-communication.md) — kernel `.data` pointer swap KM↔UM comms (Sinclairq; C++ driver + usermode; pattern scan; memory R/W + process base; README [NtCompareSigningLevels])

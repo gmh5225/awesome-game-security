@@ -16,6 +16,7 @@ sources:
   - wiki/sources/descriptions/wongfei__wda_monitor_trick.md
   - wiki/sources/descriptions/wolfpld__tracy.md
   - wiki/sources/descriptions/BadPlayer555__KernelGDIDraw.md
+  - wiki/sources/descriptions/BlaneC__cyberpunk-better-shaders.md
   - wiki/sources/descriptions/Bartis1313__csgo.md
   - wiki/sources/descriptions/binkynz__cstrike-hack.md
   - wiki/sources/descriptions/aufkrawall__capture-engine.md
