@@ -29,4 +29,4 @@ Pair with other vintage FPS educational samples in the CS 1.6 lane such as [[oxw
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[oxware]] · [[hpp-hack]] · [[1-6-c2]] · [[intro-to-gamehacking]] · [[game-reversed-study]] · [[nullhooks]]
+[[overviews/game-hacking]] · [[overviews/reverse-engineering]] · [[taxi-driver]] · [[oxware]] · [[hpp-hack]] · [[1-6-c2]] · [[intro-to-gamehacking]] · [[game-reversed-study]] · [[nullhooks]]

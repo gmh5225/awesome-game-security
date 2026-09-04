@@ -233,6 +233,7 @@ sources:
   - wiki/sources/descriptions/otvv__csgo-linux-cheat-sdk.md
   - wiki/sources/descriptions/AimTuxOfficial__AimTux.md
   - wiki/sources/descriptions/ALittlePatate__ezfrags.md
+  - wiki/sources/descriptions/ALittlePatate__TaxiDriver.md
   - wiki/sources/descriptions/Accenture__protobuf-finder.md
   - wiki/sources/descriptions/s3pt3mb3r__Dainsleif.md
   - wiki/sources/descriptions/martinjanas__Sensum.md
@@ -2298,7 +2299,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - Android aarch64 LKM research toolkits such as [[android-kernel-hacking-toolkit]] (filecopy / hideproc / propedit / syscall_hijack; CFI bypass, kprobes, mmuhack for `sys_call_table`) sit in the Cheat Android kernel / LKM lane. (source: wiki/sources/descriptions/systemnb__android-kernel-hacking-toolkit.md) GKI root-hide LKM [[kasumi]] (Anatdx; ftrace/tracepoint syscall/VFS/procfs hooks; mount/SELinux/file-attribute spoof; cheat / Kernel-level path manipulation and hiding framework for Android GKI/Linux) extends that lane for kernel-level root-detection bypass. (source: wiki/sources/descriptions/Anatdx__Kasumi.md)
 - Android/Linux game-memory LKMs such as [[kernel-hack]] (kernel-mode R/W, process management, verification; Kconfig) sit in the same Cheat Android / Linux kernel memory-ops lane. (source: wiki/sources/descriptions/rogxo__kernel_hack.md)
 - Android kernel driver setups such as [[memkernel]] (Poko-Apps; C/C++ kernel + userland; custom-interface process memory R/W; compile-into-kernel-build integration; cheat / `[RPM]`) sit in the same Cheat Android kernel memory-ops lane. (source: wiki/sources/descriptions/Poko-Apps__MemKernel.md)
-- Android/Linux kernel driver memory access such as [[kernel-driver-hack]] (Jiang-Night; C kernel module + userland; device-interface ioctl for process memory R/W, module base lookup, request dispatch; game memory research / RE / kernel-side tooling) sits in the same Cheat Android kernel memory-ops lane. (source: wiki/sources/descriptions/Jiang-Night__Kernel_driver_hack.md)
+- Android/Linux kernel driver memory access such as [[kernel-driver-hack]] (Jiang-Night; C kernel module + userland; device-interface ioctl for process memory R/W, module base lookup, request dispatch; game memory research / RE / kernel-side tooling) sits in the same Cheat Android kernel memory-ops lane. (source: wiki/sources/descriptions/Jiang-Night__Kernel_driver_hack.md) Desktop Linux LKM + user-mode pair [[taxi-driver]] (ALittlePatate; C/C++; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research; cheat / W/RPM Driver and usermode for Linux) extends that lane for native Linux hosts beside ptrace and `/proc/pid/mem` workflows. (source: wiki/sources/descriptions/ALittlePatate__TaxiDriver.md)
 - Device kernel sources such as [[android-kernel-xiaomi-pipa]] (Xiaomi Pad 6 / pipa) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_xiaomi_pipa.md)
 
 - Device kernel sources such as [[android-kernel-oneplus-sm8250]] (OnePlus 8/8T/8Pro/(9R?) / SM8250) sit in the Cheat Android Kernel Source lane. (source: wiki/sources/descriptions/utziacre__android_kernel_oneplus_sm8250.md)

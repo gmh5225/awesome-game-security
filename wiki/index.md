@@ -3271,6 +3271,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tableflipper](entities/tableflipper.md) — partial PatchGuard disable up to Win11 21H2 (C++; cheat / PatchGuard-related; emlinhax)
 - [tanto](entities/tanto.md) — Binary Ninja program-slicing plugin (Vector35; Python; HLIL variable/block slices for faster comprehension; Cheat / [Slices Functions])
 - [taskbarhero-bot](entities/taskbarhero-bot.md) — TaskbarHero Unity IL2CPP external trainer/bot (C#/.NET 10; ACTk bypass, batch-read automations, WPF panel; matheusbranhann)
+- [TaxiDriver](entities/taxi-driver.md) — ALittlePatate; Linux LKM + user-mode pair; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research (cheat / W/RPM Driver and usermode for Linux)
 - [tastsong-game-programmer-study-notes](entities/tastsong-game-programmer-study-notes.md) — TastSong Unity C# study notes + sample projects (design patterns, rendering, networking, AI, engine architecture; Game Development notes / guide)
 - [TaskScheduler](entities/task-scheduler.md) — cross-platform fiber-based C++ task scheduler (multi-threaded jobs, task grouping, work-stealing; Windows/POSIX; tests/examples; Game Engine / Task Scheduler)
 - [TDE](entities/tde.md) — Themida IDA plugin / Fix Themida (devirtualization engine; sodareverse)

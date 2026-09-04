@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:ALittlePatate/TaxiDriver`: entity [[taxi-driver]] (ALittlePatate; Linux LKM + user-mode pair; C/C++; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research; cheat / W/RPM Driver and usermode for Linux); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[kernel-driver-hack]], [[kernel-hack]], [[pince]], [[mempeek]], and [[ezfrags]].
+
 - **2026-09-04** — ingest `description:ALittlePatate/ezfrags`: entity [[ezfrags]] (ALittlePatate; C++; legacy FPS cheat reverse-engineering reconstruction; IDA-database decompilation workflow + incremental module reimplementation; glow ESP, radar, no-flash, bunny hop, memory/signature utilities; cheat internals, obfuscation patterns, and practical reversing study; cheat / game:cs1.6); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[oxware]], [[hpp-hack]], [[1-6-c2]], [[intro-to-gamehacking]], [[game-reversed-study]], and [[nullhooks]].
 
 - **2026-09-04** — ingest `description:AMXZzzz/SF_TRT_61`: entity [[sf-trt-61]] (AMXZzzz; Windows C++ computer-vision aiming framework; DXGI capture + OpenCV + ImGui; TensorRT and DirectML/ONNX inference; YOLO-style models; PID/FOV movement + trigger logic + multiple input injection; AI-assisted game automation + AC evasion research; cheat / Machine Learning YOLO); cited on [[overviews/game-hacking]] and [[ai-aimbot-detection]]; cross-linked [[auto-aim]], [[rookieai-yolov8]], [[yolov8-overlay-cs2]], [[hardware-input-injection]], and [[waldo]].
