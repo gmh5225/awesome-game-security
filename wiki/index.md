@@ -1850,6 +1850,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Il2CppAssemblyUnhollower](entities/il2cpp-assembly-unhollower.md) — IL2CPP metadata → proxy .NET assemblies for C# modding (unhollower; cheat / game engine explorer:Unity)
 - [Il2CppRuntimeDumper](entities/il2cpp-runtime-dumper.md) — IL2CPP runtime dump via reflection (reconstruct DLLs; cheat / game engine explorer:Unity)
 - [Il2CppSDKGenerator](entities/il2cpp-sdk-generator.md) — Android IL2CPP C++ SDK generator (Octowolve; dnlib C# generator + C++ runtime helpers; DummyDll → typed headers/wrappers for native modules; [Il2Cpp SDK generator for Android])
+- [Il2Cpp Version (4ch12dy)](entities/il2cpp.md) — Unity IL2CPP runtime source archive across Unity generations; libil2cpp C/C++ internals (runtime, metadata, GC, platform layers); version mapping notes; game engine explorer:Unity [Il2Cpp Version]
 - [Il2CppVersions](entities/il2cpp-versions.md) — multi-version Unity IL2CPP headers/metadata (structure/API drift; game engine explorer:Unity)
 - [Il2cppSpy](entities/il2cpp-spy.md) — Unity IL2CPP APK disassembler / two-APK diff
 - [Il2CppDumper](entities/il2cppdumper.md) — canonical Unity IL2CPP static dump (Perfare; C#; ELF/Mach-O/PE/NSO/WASM; dummy DLLs + IDA/Ghidra/BN scripts; [Il2Cpp Dump])

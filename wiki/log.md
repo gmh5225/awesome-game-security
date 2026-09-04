@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:4ch12dy/il2cpp`: entity [[entities/il2cpp]] (4ch12dy; Unity IL2CPP runtime source archive across Unity generations; libil2cpp C/C++ internals — runtime services, metadata, GC, platform abstraction; version-to-engine mapping notes; RE + tooling reference; cheat / `[Il2Cpp Version]`); cited on [[il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cpp-versions]], [[il2cppdumper]], and [[il2cpp-inspector]].
+
 - **2026-09-04** — ingest `description:lannden1245/Void-Engine`: entity [[void-engine]] (lannden1245; Godot 4.x GDScript editor plugin; WhiteVoid AntiCheat autoload — debugger/process/window detection, honeypot integrity checks, HWID ban enforcement; VoidNet ENet/Firebase WebRTC multiplayer; VoidForge editor tooling; Anti Cheat / Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[godot]], [[godot-sandbox]], [[certael]], and [[gatewarden-public]].
 
 - **2026-09-04** — ingest `description:savagedamage/android-security-wizard`: entity [[android-security-wizard]] (savagedamage; integrated Android security research corpus — SKILL.md + 20 companions; static/dynamic APK/DEX/native RE via Frida/Objection/Ghidra/ADB-Shizuku; DexGuard/Bangcle protector bypass; ARM64 kernel exploit methodology; malware detection and C2 attribution; Android 14–18 platform deltas; cheat / Guide); cited on [[overviews/reverse-engineering]] and [[mobile-anti-cheat]].
