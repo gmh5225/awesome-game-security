@@ -866,7 +866,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Deep Learning Anti-Cheat For CSGO](entities/deep-learning-anti-cheat-csgo.md) — CS:GO OSS AC pipeline (memory/code-integrity/process/debugger checks + network packet validation; detection-to-response; gmh5225; Open Source Anti Cheat System)
 - [deepwiki-mcp](entities/deepwiki-mcp.md) — DeepWiki docs MCP server (query/retrieve wikis for AI agents; Game Develop / MCP)
 - [Def1nit3lyN0tAJa1lbr3akTool](entities/def1nit3lyn0tajailbreaktool.md) — iOS 16.0–16.6.1 jailbreak tool (kernel exploitation; trustcache build paths; Objective-C/C; post-exploitation workflows; KpwnZ)
-- [DEF CON Dreamcast PlanetWeb Research](entities/defcon-dreamcast-planetweb-research.md) — Dreamcast PlanetWeb v3.0 browser exploit chain (Eden RCE + memory write + MIME overflow → native SH-4 DOOM; Python DNS/HTTP/POP3 orchestration; DEF CON demo; piffd0s; Cheat)
+- [DEF CON Dreamcast PlanetWeb Research](entities/defcon-dreamcast-planetweb-research.md) — DEF CON demo; PlanetWeb v3.0 Eden RCE + `setRawDeviceID` memory write + MIME stack overflow → native SH-4 DOOM without debugger; Python DNS/HTTP/POP3 + Java staging + Flycast patch; vintage console browser attack-surface RE (piffd0s; Cheat)
 - [defender-control](entities/defender-control.md) — C# GUI: Defender real-time / Tamper Protection / sample-submission toggles (registry/service)
 - [Dead By Daylight Copy](entities/dead-by-daylight.md) — UE4 asymmetric-horror clone (physics / animation / asset pipelines; Game Develop / source)
 - [Delamain](entities/delamain.md) — headless JADX MCP server (APK/DEX/AAB; Frida hooks; AI agents)
