@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:4l3x777/dse_pg_bypass`: entity [[dse-pg-bypass]] (4l3x777; C++ kernel research PoC; BYOVD bypasses Driver Signature Enforcement + PatchGuard; reversing notes trace signature validation callbacks and integrity-check paths; educational kernel security / defender BYOVD attack-surface study); cited on [[byovd]] and [[patchguard]]; cross-linked [[upgdsed]], [[cybersec2023-byovd-demo]], [[kvc]], and [[shark]].
+
 - **2026-09-04** — ingest `description:5ec1cff/TrickyStore`: updated entity [[trickystore]] (5ec1cff upstream; Android module modifying key-attestation certificate chains; per-app package/keybox config; leaf vs generated cert modes; security patch level spoof; Android 10+/12+; integrity / attestation / anti-tamper research); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[keyattestation]], [[android-hardware-attestation-demo]], and [[spoofing-collection]].
 
 - **2026-09-04** — ingest `description:5paceman/nightshade`: entity [[5paceman-nightshade]] (5paceman; Windows C++ internal game framework; injection, runtime hooking, modular feature toggling; Direct3D hooks, DirectInput interception, pattern scan, memory patch, shellcode remote exec; module manager + keybind hot-toggle; RE + cheat/AC research on user-mode internals; cheat / inject tool); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[gameplug]], [[present-hook]], [[universalhookx]], [[simple-ac-internal-cheat]], [[injectors]], and [[nightshade]] (matthewjberger Rust engine).

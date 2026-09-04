@@ -1084,6 +1084,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DSEDodge Signed Kernel Driver](entities/dsedodge-signed-kernel-driver.md) — signed kernel driver DSE bypass via legitimately signed certificate (PTT-based DSE defeat; gmh5225; kernel research)
 - [dse_hook](entities/dse-hook.md) — CI.dll hook / `g_CiEnabled` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
 - [Dse-Patcher-2](entities/dse-patcher-2.md) — CI.dll `g_CiOptions` patch DSE bypass for unsigned driver load (gmh5225; kernel research)
+- [dse_pg_bypass](entities/dse-pg-bypass.md) — 4l3x777; Windows kernel research PoC; BYOVD bypasses DSE + PatchGuard; C++ + reversing notes on signature validation callbacks and integrity-check paths; educational kernel security / defender BYOVD study
 - [ds4-tools](entities/ds4-tools.md) — DualShock 4 HID scripts (input/LED/touchpad/motion/rumble; play + reverse-engineer DS4 on PC; gmh5225)
 - [dsh-cheatengine](entities/dsh-cheatengine.md) — DeepSeek Harness plugin: TCP bridge to Cheat Engine; on-demand `ce_*` scan/debug/script tools; session audit/snapshot; gated writes (TindalosKorone; Game Develop / MCP)
 - [ds2os](entities/ds2os.md) — Deprecated Dark Souls 2 online-service placeholder; README-only migration pointer to [[ds3os]] (Game Network / game:dark souls; TLeonardUK)
