@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:ANYLNK/NSecSoftBYOVD`: entity [[nsecsoft-byovd]] (ANYLNK; BYOVD process-termination PoC; Windows executable + **`NSecKrnl.sys`** vulnerable third-party driver → privileged actions against target PID; real-world abuse framing + assigned CVE; kernel security / offensive tooling analysis / endpoint hardening research; README `[NSecKrnl.sys]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[process-killer-byovd]], [[terminator]], [[watchdog-killer]], [[edr-xdr-av-killer]], and [[loldrivers]].
+
 - **2026-09-04** — ingest `description:APKLab/APKLab`: entity [[apklab]] (APKLab; TypeScript VS Code extension; Apktool + JADX + signing + HTTPS patching helpers; decode/disasm/decompile/rebuild/sign/install/dependency bootstrap; cross-platform desktop IDE; mobile security researchers, malware analysts, app tampering testers; `[Apk]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apktoolgui]], [[jadx]], and [[apk-sh]].
 
 - **2026-09-04** — ingest `description:hfiref0x/SyscallTables`: entity [[syscall-tables]] (hfiref0x; pre-generated ntoskrnl/win32k/IUM SSN maps NT5.2→Win11 x64/ARM64; Zydis ntdll/win32u extraction; scg + sstComposer HTML/Markdown compose; online HTML views; direct-syscall / hooking / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntsleuth]], [[inline-syscall]], [[syscalls-cpp]], and [[ebyte-syscalls]].
