@@ -910,6 +910,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/2akouwu/reverify [AI-assisted reverse engineering with deterministic byte-level verification via MCP server and CLI]
 - https://github.com/LargoScript/n0xis [Cross-platform Rust RE pipeline with static PE/ELF analysis, SSA decompilation, live memory scanning, hardware watchpoints, and MCP/JSON automation for game reversing]
 - https://github.com/mrexodia/ida-nexus-docker [Disposable Docker harness for IDA Pro 9.4+ with Pi and IDA Nexus — runs ordered analysis prompts in isolation and exports audit trails]
+- https://github.com/mrexodia/ida-nexus-events [Live Textual viewer for IDA Nexus /idb_events streams with database discovery, execution provenance, and colored event families for functions, types, patches, and comments]
 - https://github.com/mrexodia/retoolsync [WebSocket server and plugins (IDA, x64dbg, WinDbg, Binary Ninja, VS Code) to sync cursor navigation and goto requests across reverse-engineering sessions]
 - https://github.com/stevemk14ebr/RETools
 - https://github.com/smallworld-re/smallworld [Environment for streamlined binary harnessing for dynamic analysis]
@@ -997,6 +998,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/PartialVolume/shredos.x86_64 [Disk Eraser]
 - https://github.com/ssnob/hidden_syscall_monitoring [monitors hidden syscalls called from call of duty anticheat]
 - https://github.com/xaitax/NTSleuth [Comprehensive Windows syscall extraction and analysis framework]
+- https://github.com/hfiref0x/syscalltables [Combined Windows NT syscall tables (ntoskrnl, win32k, IUM) for x86-64 and ARM64 across NT5.2 through current Windows 11 builds, with online HTML views and composition tooling]
 - https://github.com/cansarigol/pdbr [pdb + Rich library]
 - https://github.com/microsoft/pdb-rs [Tools and documents for working with Microsoft PDB files, in Rust]
 - https://github.com/roger1337/JDBG [Java Runtime Reverse Engineering and Debugging Tool]
