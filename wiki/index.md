@@ -378,6 +378,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apktool](entities/apktool.md) — Java APK decode/rebuild (smali, resources, manifest; `[Apk]`)
 - [apktool-mcp-server](entities/apktool-mcp-server.md) — MCP server wrapping apktool (Android RE suite)
 - [apktoolgui](entities/apktoolgui.md) — Windows GUI for apktool, signapk, zipalign, baksmali (C#/.NET; drag-and-drop APK workflows; `[Apk]`)
+- [apklab](entities/apklab.md) — VS Code Android RE workbench (Apktool, JADX, signing, HTTPS patch; decode/rebuild/sign/install; TypeScript; cross-platform; APKLab; `[Apk]`)
 - [app-manager](entities/app-manager.md) — Full-featured Android package manager and viewer (component/permission/app-op control, APK analysis/sign/edit, backup, logcat, tracker scan; root/ADB; MuntashirAkon; Cheat Android File Explorer)
 - [ApplistDetector](entities/applist-detector.md) — Android detection library + demo (Kotlin + native C++; package/FS/syscall/Xposed/work-profile probes; Magisk/root env; Dr-TSNG; mobile anti-cheat / root-detection research)
 - [ApplyCalleeTypeEx](entities/apply-callee-type-ex.md) — IDA Pro plugin: apply function prototype to indirect CALL sites (Dump-GUY; Python; enhanced callee type propagation; IDA 8.x–9.3+; cheat / IDA Plugins)

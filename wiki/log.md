@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:APKLab/APKLab`: entity [[apklab]] (APKLab; TypeScript VS Code extension; Apktool + JADX + signing + HTTPS patching helpers; decode/disasm/decompile/rebuild/sign/install/dependency bootstrap; cross-platform desktop IDE; mobile security researchers, malware analysts, app tampering testers; `[Apk]`); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[apktool]], [[apktoolgui]], [[jadx]], and [[apk-sh]].
+
 - **2026-09-04** — ingest `description:hfiref0x/SyscallTables`: entity [[syscall-tables]] (hfiref0x; pre-generated ntoskrnl/win32k/IUM SSN maps NT5.2→Win11 x64/ARM64; Zydis ntdll/win32u extraction; scg + sstComposer HTML/Markdown compose; online HTML views; direct-syscall / hooking / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntsleuth]], [[inline-syscall]], [[syscalls-cpp]], and [[ebyte-syscalls]].
 
 - **2026-09-04** — ingest `description:mrexodia/ida-nexus-events`: entity [[ida-nexus-events]] (mrexodia; Python 3.11+ Textual TUI; discovers locally published IDA Nexus databases; streams live `/idb_events` with timestamps, revisions, execution provenance, and color-coded renames/functions/segments/types/patches/comments/Python script ops; real-time Nexus Code Mode observability for reverse engineers and game-security analysts); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-nexus-docker]], [[ida-pro-mcp]], and [[ida-no-mcp]].
