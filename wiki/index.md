@@ -2628,6 +2628,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [oxide](entities/oxide.md) — Rust PE packer (`exe-rs`; compressed payload + TLS-callback unpack stub x86/x64 NASM; extensible obfuscation; Anti Cheat → Binary Packer `[Written by Rust]`)
 - [oxware](entities/oxware.md) — free CS1.6 cheat (C++; alpha; cheat / game:cs1.6)
 - [packer-tutorial](entities/packer-tutorial.md) — step-by-step PE packer-from-scratch tutorial (sections, imports, relocs, compression stub, OEP; Anti Cheat → Binary Packer `[Packer]`)
+- [Pakkero](entities/pakkero.md) — 89luca89 educational Go binary packer (compression + AES-256-GCM + payload padding + obfuscation; in-memory execution; optional UPX + metadata mutation; anti-reversing / software protection tradeoff study; Anti Cheat → Binary Packer `[ELF]`)
 - [Packer](entities/packer.md) — C/C++ PE X86 compress+encrypt packer (stub restore; import/relocation/TLS; Anti Cheat → Binary Packer `[X86]`)
 - [packpeek](entities/packpeek.md) — static C CLI packer/protector fingerprinter (UPX, ASPack, Themida, VMProtect, MPRESS; Shannon entropy; PE/ELF/Mach-O/firmware; JSON + YARA/SARIF; defensive triage; cognis-digital)
 - [pafish](entities/pafish.md) — open-source C anti-analysis testing tool; VM/sandbox/debugger/hook/environment checks (VMware, VirtualBox, QEMU, Wine); reproducible evasion testing (a0rtega)
