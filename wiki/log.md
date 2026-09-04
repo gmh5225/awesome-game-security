@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:hfiref0x/SyscallTables`: entity [[syscall-tables]] (hfiref0x; pre-generated ntoskrnl/win32k/IUM SSN maps NT5.2→Win11 x64/ARM64; Zydis ntdll/win32u extraction; scg + sstComposer HTML/Markdown compose; online HTML views; direct-syscall / hooking / AC evasion research); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[ntsleuth]], [[inline-syscall]], [[syscalls-cpp]], and [[ebyte-syscalls]].
+
 - **2026-09-04** — ingest `description:mrexodia/ida-nexus-events`: entity [[ida-nexus-events]] (mrexodia; Python 3.11+ Textual TUI; discovers locally published IDA Nexus databases; streams live `/idb_events` with timestamps, revisions, execution provenance, and color-coded renames/functions/segments/types/patches/comments/Python script ops; real-time Nexus Code Mode observability for reverse engineers and game-security analysts); cited on [[overviews/reverse-engineering]]; cross-linked [[ida-nexus-docker]], [[ida-pro-mcp]], and [[ida-no-mcp]].
 
 - **2026-09-04** — ingest `description:nocoo/pew-game`: entity [[pew-game]] (nocoo; browser pixel twin-stick shooter; TypeScript/Next.js/Bun canvas engine; HMAC-signed session tokens; server score/wave/duration plausibility + replay prevention; SQLite leaderboard; unit+E2E anti-cheat tests; browser leaderboard score-integrity reference); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[ff3mmo]] and [[bevy-personal-test]].

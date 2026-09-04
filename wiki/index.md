@@ -3255,6 +3255,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [SymlinkCallback](entities/symlink-callback.md) — symlink LinkTarget → access callback (Ring0 / AC research)
 - [syser](entities/syser.md) — Windows x86/x64 debugger (C/C++; RE / plugin / modding; Cheat Debugging)
 - [syscall-detect](entities/syscall-detect.md) — detect direct/indirect syscalls via Instrumentation Callback or stack inspection (C; AC / Windows)
+- [SyscallTables](entities/syscall-tables.md) — combined Windows NT syscall tables (ntoskrnl/win32k/IUM; Vista→Win11 x64/ARM64; Zydis extraction + scg/sstComposer; hfiref0x)
 - [syscalls-cpp](entities/syscalls-cpp.md) — C++20 header-only direct syscall invocation (AC Compile Time)
 - [System Informer](entities/systeminformer.md) — Process Hacker successor; Windows process/system explorer (kernel explorer lane)
 - [StealthAPCDispatcher](entities/stealth-apc-dispatcher.md) — stealth kernel APC dispatch with encrypted shellcode (non-standard queue paths; AC APC monitoring bypass research; gmh5225)
