@@ -15,6 +15,20 @@ confidence: medium
 
 Aimed at reverse engineers, mobile security researchers, and practitioners assessing app protections, instrumentation defenses, and threat behavior on Android devices — listed under README **Cheat > Guide** beside curated Android security indexes such as [[awesome-android-security]].
 
+## Structure
+
+One integrated **SKILL.md** operational guide anchors **twenty companion documents** that walk the full assessment lifecycle: triage → static decode → dynamic instrumentation → native RE → protector bypass → exploit/malware follow-up. (source: wiki/sources/descriptions/savagedamage__android-security-wizard.md)
+
+## Toolchain
+
+| Layer | Tools / focus |
+|-------|----------------|
+| Static | APK/DEX decode, native `.so` disassembly in [[ghidra]] |
+| Dynamic | [[frida]], **Objection**, **ADB/Shizuku** attach and scripting |
+| Protectors | DexGuard, Bangcle, and similar commercial packer bypass |
+| Kernel | ARM64 exploit identification and development methodology |
+| Threat intel | Malware detection patterns and C2 attribution |
+
 ## Coverage areas
 
 - **Static/dynamic APK analysis** — DEX, native `.so`, and runtime instrumentation
@@ -29,4 +43,4 @@ Aimed at reverse engineers, mobile security researchers, and practitioners asses
 
 ## Related
 
-[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[frida]] · [[apklab]] · [[appsealing-reversal]] · [[g-presto-anti-cheat-reverse-engineered]] · [[mobile-anti-cheat]] · [[research-rigor]]
+[[overviews/mobile-security]] · [[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[frida]] · [[ghidra]] · [[apklab]] · [[appsealing-reversal]] · [[g-presto-anti-cheat-reverse-engineered]] · [[mobile-anti-cheat]] · [[research-rigor]]

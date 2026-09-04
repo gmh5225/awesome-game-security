@@ -306,7 +306,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [android-modding](entities/android-modding.md) — curated Android game modding repo collection (IL2CPP YuanShen dump fork; cheat/guide RE)
 - [android-proxy-mcp](entities/android-proxy-mcp.md) — Android HTTP/HTTPS capture MCP (mitmdump + SQLite + NL query)
 - [android-rom-list](entities/android-rom-list.md) — curated Android custom ROM reference list (cheat / Android ROM)
-- [android-security-wizard](entities/android-security-wizard.md) — integrated Android security research corpus (savagedamage; SKILL.md + 20 companions; APK/DEX/native RE, Frida/Shizuku/Objection/Ghidra, DexGuard/Bangcle protector bypass, ARM64 kernel exploit methodology, malware triage; cheat / Guide)
+- [android-security-wizard](entities/android-security-wizard.md) — integrated Android security research corpus (savagedamage; SKILL.md + 20 companions; APK/DEX/native RE, Frida/Objection/Shizuku/Ghidra, DexGuard/Bangcle protector bypass, ARM64 kernel exploit methodology, malware/C2 triage, Android 14–18 deltas; cheat / Guide)
 - [AndroidSuperInject](entities/android-super-inject.md) — Android native `.so` injection (ptrace or Zygote hook; SELinux-protected system services; optional no-root; cheat / injection:android; cs1ime)
 - [Android Terminal Emulator](entities/android-terminal-emulator.md) — VT-100 terminal emulator for built-in Android shell (jackpal; Cheat Terminal Emulator)
 - [android-unpacker](entities/android-unpacker.md) — Android packed-sample unpacker (malware RE; Anti Cheat → Sample Unpacker)
