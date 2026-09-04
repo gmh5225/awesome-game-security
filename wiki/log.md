@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `readme:categories`: Cheat ~2780 (+1; savagedamage/[[android-security-wizard]] integrated Android security research corpus in Guide) / Anti Cheat ~708 (+1; lannden1245/[[void-engine]] Godot 4.x WhiteVoid AntiCheat plugin in Open Source Anti Cheat System) / other major section counts stable; 41 sections; entities [[android-security-wizard]], [[void-engine]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/mobile-security]], [[overviews/game-engine]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-04** — ingest `description:4d61726b/VirtualKD-Redux`: entity [[virtualkd-redux]] (4d61726b; modernized VirtualKD VM kernel debug acceleration; C/C++ driver + host-side components; VMware/VirtualBox; legacy Windows through Win11; current WinDbg; modern Visual Studio build workflow; low-level kernel debug + systems security research in virtualized labs); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[windows-kernel-debugging-guide]], [[ida-vmware-windows-gdb]], [[virtualbox]], [[ntoseye]], [[windbg-scripts]], [[mcp-windbg]], and [[nokd]].
 
 - **2026-09-04** — ingest `description:4ian/GDevelop`: entity [[gdevelop]] (4ian; open-source cross-platform 2D/3D game engine; GDCore C++ event parsing/codegen, GDevelop.js bindings, Pixi.js GDJS runtime, React newIDE; visual events-based logic; Electron/HTML5 export; extension ecosystem; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[pixijs]], [[godot]], [[babylon-js]], and [[three-js]].
