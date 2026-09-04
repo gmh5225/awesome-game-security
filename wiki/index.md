@@ -3838,6 +3838,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ZhangBing-Injector](entities/zhangbing-injector.md) — M3351AN BYOVD DLL injector (C++ usermode + bundled WHQL-signed vulnerable `.sys` drivers; driver memory ops + protected-process injection; credits kdmapper; kernel-assisted injection research)
 - [zig-gamedev](entities/zig-gamedev.md) — cross-platform Zig gamedev libs (DX12/Vulkan/OpenGL/audio; GPU-driven rendering samples; Game Engine)
 - [zig-mcp-server](entities/zig-mcp-server.md) — high-performance memory-efficient MCP protocol implementation in Zig (Game Develop / MCP server)
+- [zodiak](entities/zodiak.md) — CS 1.6 Fastcup full kernel driver cheat (3a1; C/assembly; kernel GDI ESP + MouHID callback aimbot; automatic offset detection, thread context spoofing, compact single-thread model; low-trace kernel cheat engineering + AC evasion research; cheat / game:cs1.6 [Fastcup Full Kernel Driver Cheat])
 - [zn-toolbox](entities/zn-toolbox.md) — host-no-root Android container VM (Twoyi fork; Rust + Kotlin Compose; built-in root + LSPosed; multi-profile sandbox + Scrcpy remote control; Chinaapps; Cheat Xposed)
 - [ZombiesVsPlants](entities/zombies-vs-plants.md) — SDL2 Plants vs. Zombies clone (lane tower defense; plant placement / projectiles / waves / sun; Game Develop / source)
 - [zyemu](entities/zyemu.md) — WIP x86-64 user-mode emulator (JIT handlers + code cache; Zydis decode/encode; CPU/memory core; C++; low-level emulation / binary analysis; ZehMatt)
