@@ -2710,6 +2710,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [pe-sieve](entities/pe-sieve.md) — Lightweight single-process malware/injection scan engine (Detection:hook; hasherezade; lib behind xMalHunter)
 - [PeVisor](entities/pevisor.md) — Early-stage Windows PE analysis/instrumentation toolkit (Nitr0-G; C/C++; Blackbone + Unicorn; process control, hooking, mapping, emulation; protection test material; cheat / [PE])
 - [PEReconstruct](entities/pereconstruct.md) — Python headerless PE rebuild from process memory (manual-map scan/dump, hook analysis, export resolution; no driver/debugger)
+- [Pew Game](entities/pew-game.md) — browser pixel twin-stick shooter (TypeScript/Next.js/Bun; HMAC session tokens; server score/wave/duration plausibility + replay checks; SQLite leaderboard; Anti Cheat / browser game)
 - [pe32-password](entities/pe32-password.md) — PE32 password binary packer (Anti Cheat → Binary Packer)
 - [PE-Packer](entities/pe-packer.md) — C/C++ PE X86 binary packer (Anti Cheat → Binary Packer `[X86]`; czs108)
 - [pe-protector](entities/pe-protector.md) — Windows C++ x86 PE protection framework (instruction mutation, built-in x86 assembler, configurable stub, binary compression; CMake build; software protection / anti-tamper / packer-style defense research; `[X86]`; ATsahikian)

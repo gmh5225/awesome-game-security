@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:nocoo/pew-game`: entity [[pew-game]] (nocoo; browser pixel twin-stick shooter; TypeScript/Next.js/Bun canvas engine; HMAC-signed session tokens; server score/wave/duration plausibility + replay prevention; SQLite leaderboard; unit+E2E anti-cheat tests; browser leaderboard score-integrity reference); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[ff3mmo]] and [[bevy-personal-test]].
+
 - **2026-09-04** — ingest `readme:categories`: Cheat ~2779 (+2; ARandomPerson7/[[appsealing-reversal]] Inka AppSealing shield RE + [[g-presto-anti-cheat-reverse-engineered]] G-Presto native AC RE in Explore AntiCheat) / Anti Cheat ~707 (+1; ATsahikian/[[pe-protector]] x86 PE protection framework in Binary Packer) / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-04** — ingest `description:ARandomPerson7/Appsealing-Reversal`: entity [[appsealing-reversal]] (ARandomPerson7; long-form AppSealing reversal report; Java/native components, detection logic, telemetry, dex-loading design, anti-debug/process-kill routines, hook-based bypass validation; mobile app/game shielding-quality and detection-robustness research); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[apppealing-new]], [[g-presto-anti-cheat-reverse-engineered]], and [[pairipcore]].
