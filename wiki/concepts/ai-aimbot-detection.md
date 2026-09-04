@@ -29,11 +29,12 @@ sources:
   - wiki/sources/descriptions/RootKit-Org__AI-Aimbot.md
   - wiki/sources/descriptions/Passer1072__RookieAI_yolov8.md
   - wiki/sources/descriptions/Leksa667__YOLOv8-Overlay-CS2.md
+  - wiki/sources/descriptions/AMXZzzz__SF_TRT_61.md
   - wiki/sources/descriptions/Fragmentaim__Auto_aim.md
   - wiki/sources/descriptions/Miffyli__gan-aimbots.md
   - wiki/sources/descriptions/LaihoE__DLAC.md
   - wiki/sources/descriptions/Driw0x__CS2Guard.md
-updated: 2026-09-03
+updated: 2026-09-04
 confidence: medium
 ---
 
@@ -86,6 +87,7 @@ Tabular engagement features (reaction time, curvature stats, dx/dy correlation, 
 - [[rookieai-yolov8]] — Passer1072 YOLOv8 Ultralytics FPS aim-assist framework (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
 - [[yolov8-overlay-cs2]] — Leksa667 CS2 Python real-time overlay (YOLOv8 ONNX via ONNX Runtime; mss capture; Pygame + Win32 transparent topmost overlay; optional CUDA, confidence filter, hotkeys, smooth aim-assist; computer-vision cheat prototyping + AC research; cheat / game:cs2 [YOLOv8 in CS2])
 - [[auto-aim]] — Fragmentaim C++ real-time AI aiming assistant core (DXGI Desktop Duplication capture; YOLO via ONNX Runtime/TensorRT; OpenCV; driver-level mouse simulation; CV game-automation research; DXGI + TensorRT + driver-level input)
+- [[sf-trt-61]] — AMXZzzz Windows C++ computer-vision aiming framework (DXGI capture; OpenCV; ImGui; TensorRT + DirectML/ONNX; YOLO-style models; PID/FOV movement + trigger logic; multiple input injection; AI game automation + AC evasion research; cheat / Machine Learning YOLO)
 - [[gan-aimbots]] — Miffyli academic ML-aimbot research repo (Python; ViZDoom FPS scenarios; data collection, GAN-aimbot training/evaluation, classifier plots, experiment orchestration; reproduces published pipelines with shared GAN-group parameters; offensive + defensive aimbot ML research; cheat / Machine Learning)
 - [[dlac]] — LaihoE CS:GO demo-analysis anti-cheat package (Python inference + Go demo parser; ONNX models; per-shot suspicious-aim prediction; terminal/CSV/in-memory export; tunable confidence thresholds; replay-based behavioral detection research; Anti Cheat / Machine Learning)
 - [[cs2guard]] — Driw0x CS2 ML behavioral cheat detection from demo parsing (Python; tick-level aim/tracking/reaction-time features; CS2CD dataset adapters; anomaly + supervised models; visualization/tests; goal of real-time server-side AC without client scans; Anti Cheat / Machine Learning) (source: wiki/sources/descriptions/Driw0x__CS2Guard.md)
