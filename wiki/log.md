@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:ATsahikian/pe-protector`: entity [[pe-protector]] (ATsahikian; Windows C++ x86 PE protection framework; instruction mutation, built-in x86 assembler pipeline, configurable stub logic, binary compression; CMake build + tests; software protection / anti-tamper / packer-style defense research; Anti Cheat → Binary Packer `[X86]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[hm-pe-packer]], and [[packer-tutorial]].
+
 - **2026-09-04** — ingest `description:BlaneC/cyberpunk-better-shaders`: entity [[cyberpunk-better-shaders]] (BlaneC; Callisto SSS Cyberpunk 2077 path-traced skin mod; Callisto BRDF + reshaped SSS kernel; `VkLayer_callisto_spvswap` SPIR-V ray-gen hot-swap via Proton/Linux + RED4ext SSS texture hooks; DXIL fingerprint module match; C/Python/Lua/shell SPIR-V census/patch/A-B toolchain; skin-pixel gating; graphics modding / render-pipeline research—not AC; Vulkan); cited on [[overviews/game-engine]]; cross-linked [[vocem-overlay]], [[shader-injector]], [[game-lag-reducer]], and [[overviews/graphics-api]].
 
 - **2026-09-04** — ingest `description:piffd0s/Defcon-Dreamcast-Planetweb-Research`: entity [[defcon-dreamcast-planetweb-research]] (piffd0s; DEF CON demo; PlanetWeb v3.0 Eden RCE + `setRawDeviceID` memory write + MIME stack overflow → native SH-4 DOOM without debugger; Python DNS/HTTP/POP3 + Java staging + Flycast patch; vintage console browser attack-surface RE; Cheat); cited on [[overviews/reverse-engineering]]; cross-linked [[xemu]] · [[xqemu]] · [[overviews/game-hacking]] · [[research-rigor]].
