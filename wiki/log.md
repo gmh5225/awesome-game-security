@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:5paceman/nightshade`: entity [[5paceman-nightshade]] (5paceman; Windows C++ internal game framework; injection, runtime hooking, modular feature toggling; Direct3D hooks, DirectInput interception, pattern scan, memory patch, shellcode remote exec; module manager + keybind hot-toggle; RE + cheat/AC research on user-mode internals; cheat / inject tool); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[gameplug]], [[present-hook]], [[universalhookx]], [[simple-ac-internal-cheat]], [[injectors]], and [[nightshade]] (matthewjberger Rust engine).
+
 - **2026-09-04** — ingest `description:87andrewh/CornerCulling`: entity [[corner-culling]] (87andrewh; server-side occlusion-culling; C++ + Unreal Engine; analytical ray casts, BVH + recent-occluder caching, latency-aware lookahead; reduces wallhack visibility in multiplayer shooters; scalable line-of-sight enforcement research); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[corner-culling-source-engine]], [[deepaimdetector]], and [[osanticheat]].
 
 - **2026-09-04** — ingest `description:87andrewh/CornerCullingSourceEngine`: entity [[corner-culling-source-engine]] (87andrewh; Source engine anti-wallhack extension; C++ extension + SourceMod + map occluders; strict server-side visibility culling; ray-cast correctness, low overhead, latency-safe; competitive Source servers; For Source Games); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[little-anti-cheat]], [[nocheatz-3]], [[source-engine]], [[deepaimdetector]], and [[osanticheat]].
