@@ -66,6 +66,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [3den Enhanced](entities/3den-enhanced.md) — Arma 3 Eden Editor expansion mod (R3voA3; SQF/config/addon modules; editor UI tools, mission attributes, workflow shortcuts; optional at runtime; Mod Editor / mission-maker tooling)
 - [7DTD](entities/7dtd.md) — full 7 Days to Die cheat ecosystem (IntelSDM; Unity/Mono loader; C# modules + C++ auth/transport backend; ESP/aimbot/weapon mods/player spoofing; anti-cheat bypass; end-to-end delivery research; cheat / game:7dtd)
 - [7DTD AntiCheatMod](entities/7dtd-anticheatmod.md) — server-side 7 Days to Die mod (C# .NET 4.8; cheat command block + fly/teleport/speed/godmode thresholds; admin exemption; warning→kick→ban; non-EAC dedicated hosts; majimaakane)
+- [94q-valorant-internal](entities/94q-valorant-internal.md) — Valorant internal C++ cheat (94q; basic/memory/silent aim; ESP boxes/chams/glow; FOV/fly/third-person; hotkey menu; RE experimentation; cheat / game:valorant [Internal])
 - [BNM-Android](entities/bnm-android.md) — C++20 Android Unity IL2CPP modding library by class/method/field names; runtime access, patching, hook-framework integration; supported Unity versions; mobile game modding / RE foundation; [Modding il2cpp games]; ByNameModding
 - [BakaWare4](entities/bakaware4.md) — WIP CS2 cheat (debug unload/unhook; `-insecure`; cheat / game:cs2)
 - [BamboozlEDR](entities/bamboozledr.md) — ETW event generator TUI (multi-provider; EDR/detection lab; AC/IS forensics)

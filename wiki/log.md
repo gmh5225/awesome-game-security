@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:94q/Valorant-Internal`: entity [[94q-valorant-internal]] (94q; C++ internal; basic/memory/silent aim; ESP boxes/chams/glow; FOV + fly/third-person movement; hotkey menu; game-hacking experimentation and RE practice; cheat / game:valorant [Internal]); cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked [[internal-valorant-cheat]], [[valorant-esp-aimbot-hack]], [[valorant-internal]], and [[valorant-gui-imgui-remake]].
+
 - **2026-09-04** — ingest `description:A1RM4X/HowTo-Palworld`: entity [[howto-palworld]] (A1RM4X; Linux deployment guide + shell scripts; SteamCMD + systemd; install/update/start/backup/restore; Debian/Ubuntu; maintenance automation; primarily server-admin ops; cheat / game:palworld [Server on Linux]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[docker-palworld-dedicated-server]], [[palworld-rcon]], [[palworld-setting-generator]], and [[palopsweb]].
 
 - **2026-09-04** — ingest `description:ALittlePatate/TaxiDriver`: entity [[taxi-driver]] (ALittlePatate; Linux LKM + user-mode pair; C/C++; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research; cheat / W/RPM Driver and usermode for Linux); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[kernel-driver-hack]], [[kernel-hack]], [[pince]], [[mempeek]], and [[ezfrags]].
