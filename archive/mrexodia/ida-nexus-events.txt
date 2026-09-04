@@ -1,0 +1,776 @@
+Project Path: arc_mrexodia_ida-nexus-events_d3fr7mtw
+
+Source Tree:
+
+```txt
+arc_mrexodia_ida-nexus-events_d3fr7mtw
+├── README.md
+├── pyproject.toml
+├── src
+│   └── ida_nexus_events
+│       ├── __init__.py
+│       └── app.py
+└── uv.lock
+
+```
+
+`README.md`:
+
+```md
+# IDA Nexus Event Viewer
+
+A standalone Textual demo for the structured `/idb_events` stream. It discovers
+all locally published Nexus databases, attaches to one selected instance,
+and renders its IDB hook events live with execution provenance.
+
+## Run
+
+Prerequisites: Python 3.11+, `uv`, and at least one IDA database with the Code
+Mode plugin running.
+
+```console
+uv sync
+uv run ida-nexus-events
+```
+
+The left table refreshes every two seconds. Select a ready database with Enter
+or a mouse click. The right pane streams events until another database is
+selected or the application exits.
+
+Bindings:
+
+- `r`: refresh database discovery immediately
+- `c`: clear the current event pane
+- `q`: quit
+
+## Display
+
+Each event row shows local time, revision, event name, provenance, and all
+callback-specific fields. Event families use stable colors for renames,
+functions, segments, types, patches, and comments.
+
+`execute_python()` events show the caller-supplied operation label, with the
+operation ID retained alongside it. Events emitted by the GUI plugin outside
+an execution are labeled `IDA GUI`; this includes direct UI actions and
+background work in the GUI process. A literal `unattributed` fallback remains
+for older Nexus instances that do not provide that label.
+
+Unavailable discovery records remain visible as `BLOCKED` rows with their
+registry state preserved, but only `READY` rows can be attached.
+
+```
+
+`pyproject.toml`:
+
+```toml
+[project]
+name = "ida-nexus-events"
+version = "0.1.0"
+description = "Live terminal viewer for ida-nexus database events"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "ida-nexus>=0.9.1",
+  "textual>=1.0",
+]
+
+[project.scripts]
+ida-nexus-events = "ida_nexus_events.app:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ida_nexus_events"]
+
+
+[dependency-groups]
+dev = [
+  "ruff>=0.12.0",
+]
+
+[tool.ruff]
+line-length = 88
+
+```
+
+`src/ida_nexus_events/__init__.py`:
+
+```py
+"""Terminal event viewer for ida-nexus."""
+
+from .app import EventViewerApp
+
+__all__ = ["EventViewerApp"]
+
+```
+
+`src/ida_nexus_events/app.py`:
+
+```py
+from __future__ import annotations
+
+import reprlib
+import threading
+from datetime import datetime
+from pathlib import Path
+from typing import Any, ClassVar
+
+from ida_nexus import (
+    DatabaseChangeEvent,
+    DatabaseHandle,
+    DiscoveredDatabase,
+    InstanceState,
+    discover_databases,
+)
+from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal, Vertical
+from textual.widgets import DataTable, Footer, Header, Label, RichLog, Static
+
+_EVENT_METADATA = {
+    "event_name",
+    "operation_id",
+    "operation_label",
+    "origin_id",
+    "revision",
+    "timestamp",
+}
+
+
+class EventConnection:
+    """Own one handle and blocking event subscription on a background thread."""
+
+    def __init__(
+        self,
+        app: EventViewerApp,
+        generation: int,
+        database: DiscoveredDatabase,
+    ) -> None:
+        self._app = app
+        self.generation = generation
+        self.database = database
+        self._stop = threading.Event()
+        self._lock = threading.Lock()
+        self._handle: DatabaseHandle | None = None
+        self._subscription: Any = None
+        self._thread = threading.Thread(
+            target=self._run,
+            name=f"idb-events-{database.instance.record_id}",
+            daemon=True,
+        )
+
+    def start(self) -> None:
+        self._thread.start()
+
+    def close(self) -> None:
+        self._stop.set()
+        with self._lock:
+            subscription = self._subscription
+            handle = self._handle
+        if subscription is not None:
+            subscription.close()
+        if handle is not None:
+            handle.close()
+
+    def _dispatch(self, callback: Any, *args: Any) -> None:
+        try:
+            self._app.call_from_thread(callback, self.generation, *args)
+        except RuntimeError:
+            # The app may finish while a socket close wakes this thread.
+            pass
+
+    def _run(self) -> None:
+        handle: DatabaseHandle | None = None
+        subscription: Any = None
+        try:
+            handle = DatabaseHandle.attach(self.database.instance, keepalive=20.0)
+            with self._lock:
+                self._handle = handle
+            if self._stop.is_set():
+                return
+
+            subscription = handle.subscribe_idb_events()
+            with self._lock:
+                self._subscription = subscription
+            if self._stop.is_set():
+                return
+
+            self._dispatch(self._app._connection_ready, self.database)
+            for event in subscription:
+                if self._stop.is_set():
+                    break
+                self._dispatch(self._app._receive_event, event)
+        except Exception as exc:  # noqa: BLE001 - report thread boundary failures
+            if not self._stop.is_set():
+                message = str(exc) or type(exc).__name__
+                self._dispatch(self._app._connection_failed, message)
+        finally:
+            if subscription is not None:
+                subscription.close()
+            if handle is not None:
+                handle.close()
+            with self._lock:
+                self._subscription = None
+                self._handle = None
+
+
+class EventViewerApp(App[None]):
+    """Discover Nexus databases and stream one selected event feed."""
+
+    TITLE = "IDA Nexus Events"
+    SUB_TITLE = "live database provenance"
+    CSS = """
+    Screen {
+        layout: vertical;
+        background: $surface;
+    }
+
+    #workspace {
+        height: 1fr;
+        layout: horizontal;
+    }
+
+    #database-pane {
+        width: 42;
+        min-width: 32;
+        border-right: tall $primary;
+        background: $panel;
+    }
+
+    #event-pane {
+        width: 1fr;
+    }
+
+    .pane-title {
+        height: 3;
+        padding: 1 2 0 2;
+        text-style: bold;
+        color: $text-accent;
+    }
+
+    #database-hint {
+        height: 2;
+        padding: 0 2;
+        color: $text-muted;
+    }
+
+    #databases {
+        height: 1fr;
+        margin: 0 1 1 1;
+    }
+
+    #events {
+        height: 1fr;
+        padding: 0 1;
+        scrollbar-gutter: stable;
+    }
+
+    #status {
+        height: 3;
+        padding: 1 2;
+        background: $boost;
+        color: $text-muted;
+    }
+    """
+
+    BINDINGS: ClassVar = [
+        ("r", "refresh", "Refresh"),
+        ("c", "clear_events", "Clear events"),
+        ("q", "quit", "Quit"),
+    ]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._closed = False
+        self._discovering = threading.Event()
+        self._rows: dict[str, DiscoveredDatabase] = {}
+        self._row_order: list[str] = []
+        self._connection: EventConnection | None = None
+        self._generation = 0
+        self._active_record_id: str | None = None
+        self._event_count = 0
+
+    def compose(self) -> ComposeResult:
+        yield Header(show_clock=True)
+        with Horizontal(id="workspace"):
+            with Vertical(id="database-pane"):
+                yield Label("DATABASES", classes="pane-title")
+                yield Static("Enter or click to attach", id="database-hint")
+                yield DataTable(id="databases", cursor_type="row", zebra_stripes=True)
+            with Vertical(id="event-pane"):
+                yield Label("LIVE EVENTS", classes="pane-title")
+                yield RichLog(id="events", wrap=True, highlight=False, markup=False)
+                yield Static("Discovering Nexus instances…", id="status")
+        yield Footer()
+
+    def on_mount(self) -> None:
+        table = self.query_one("#databases", DataTable)
+        table.add_columns("STATE", "TYPE", "DATABASE")
+        self.refresh_databases()
+        self.set_interval(2.0, self.refresh_databases)
+
+    def on_unmount(self) -> None:
+        self._closed = True
+        if self._connection is not None:
+            self._connection.close()
+
+    def action_refresh(self) -> None:
+        self.refresh_databases()
+
+    def action_clear_events(self) -> None:
+        self.query_one("#events", RichLog).clear()
+        self._event_count = 0
+        self._update_status()
+
+    def refresh_databases(self) -> None:
+        if self._closed or self._discovering.is_set():
+            return
+        self._discovering.set()
+        threading.Thread(
+            target=self._discover,
+            name="ida-nexus-discovery",
+            daemon=True,
+        ).start()
+
+    def _discover(self) -> None:
+        try:
+            databases = discover_databases(timeout=0.5)
+            if not self._closed:
+                self.call_from_thread(self._apply_databases, databases)
+        except Exception as exc:  # noqa: BLE001 - report discovery failures
+            if not self._closed:
+                message = str(exc) or type(exc).__name__
+                self.call_from_thread(self._show_discovery_error, message)
+        finally:
+            self._discovering.clear()
+
+    def _show_discovery_error(self, message: str) -> None:
+        self.query_one("#status", Static).update(
+            Text.assemble(("Discovery failed: ", "bold red"), message)
+        )
+
+    def _apply_databases(self, databases: list[DiscoveredDatabase]) -> None:
+        table = self.query_one("#databases", DataTable)
+        previous_record_id: str | None = None
+        if 0 <= table.cursor_row < len(self._row_order):
+            previous_record_id = self._row_order[table.cursor_row]
+
+        table.clear()
+        self._rows = {item.instance.record_id: item for item in databases}
+        self._row_order = []
+        ready_count = 0
+        for item in databases:
+            instance = item.instance
+            record_id = instance.record_id
+            self._row_order.append(record_id)
+            is_ready = item.state is InstanceState.READY
+            ready_count += int(is_ready)
+            state = (
+                Text("● READY", style="bold green")
+                if is_ready
+                else Text("● BLOCKED", style="bold yellow")
+            )
+            database_path = instance.idb_path or instance.exe_path
+            database_name = Path(database_path).name if database_path else "<unsaved>"
+            table.add_row(
+                state,
+                Text(instance.backend.upper(), style="cyan"),
+                Text(database_name),
+                key=record_id,
+            )
+
+        if previous_record_id in self._row_order:
+            table.move_cursor(row=self._row_order.index(previous_record_id))
+        elif self._active_record_id in self._row_order:
+            table.move_cursor(row=self._row_order.index(self._active_record_id))
+
+        self.query_one("#database-hint", Static).update(
+            f"{ready_count} ready / {len(databases)} discovered"
+        )
+        if not databases and self._connection is None:
+            self.query_one("#status", Static).update(
+                "No live Nexus databases. Open IDA with the plugin enabled."
+            )
+
+    def on_data_table_row_selected(self, message: DataTable.RowSelected) -> None:
+        if message.data_table.id != "databases":
+            return
+        record_id = str(message.row_key.value)
+        database = self._rows.get(record_id)
+        if database is None:
+            return
+        if database.state is not InstanceState.READY:
+            detail = database.detail or "instance is not attachable"
+            self.query_one("#status", Static).update(
+                Text.assemble(("Unavailable: ", "bold yellow"), detail)
+            )
+            return
+        self._attach(database)
+
+    def _attach(self, database: DiscoveredDatabase) -> None:
+        if self._connection is not None:
+            self._connection.close()
+        self._generation += 1
+        self._active_record_id = database.instance.record_id
+        self._event_count = 0
+        self.query_one("#events", RichLog).clear()
+        path = database.instance.idb_path or database.instance.exe_path or "<unsaved>"
+        self.query_one("#status", Static).update(
+            Text.assemble(("Connecting to ", "bold cyan"), path, " …")
+        )
+        connection = EventConnection(self, self._generation, database)
+        self._connection = connection
+        connection.start()
+
+    def _connection_ready(
+        self,
+        generation: int,
+        database: DiscoveredDatabase,
+    ) -> None:
+        if not self._is_current(generation):
+            return
+        path = database.instance.idb_path or database.instance.exe_path or "<unsaved>"
+        self.query_one("#status", Static).update(
+            Text.assemble(("LIVE", "bold white on green"), "  ", path)
+        )
+
+    def _connection_failed(self, generation: int, message: str) -> None:
+        if not self._is_current(generation):
+            return
+        self.query_one("#status", Static).update(
+            Text.assemble(("Disconnected: ", "bold red"), message)
+        )
+
+    def _receive_event(
+        self,
+        generation: int,
+        event: DatabaseChangeEvent,
+    ) -> None:
+        if not self._is_current(generation):
+            return
+        self._event_count += 1
+        self.query_one("#events", RichLog).write(_render_event(event))
+        self._update_status()
+
+    def _update_status(self) -> None:
+        if self._connection is None or self._active_record_id is None:
+            return
+        database = self._rows.get(self._active_record_id)
+        if database is None:
+            path = "attached database"
+        else:
+            instance = database.instance
+            path = instance.idb_path or instance.exe_path or "<unsaved>"
+        self.query_one("#status", Static).update(
+            Text.assemble(
+                ("LIVE", "bold white on green"),
+                "  ",
+                path,
+                (f"  ·  {self._event_count} events", "bold cyan"),
+            )
+        )
+
+    def _is_current(self, generation: int) -> bool:
+        return (
+            self._connection is not None
+            and self._connection.generation == generation
+            and not self._closed
+        )
+
+
+def _render_event(event: DatabaseChangeEvent) -> Text:
+    timestamp_ns = event.get("timestamp", 0)
+    try:
+        timestamp = datetime.fromtimestamp(timestamp_ns / 1_000_000_000).astimezone()
+        time_text = timestamp.strftime("%H:%M:%S.%f")[:-3]
+    except (OSError, OverflowError, ValueError):
+        time_text = "--:--:--.---"
+
+    event_name = str(event.get("event_name", "unknown"))
+    actor = event.get("operation_label") or event.get("operation_id") or "unattributed"
+    actor_style = (
+        "bold yellow" if actor in {"IDA GUI", "unattributed"} else "bold green"
+    )
+    line = Text.assemble(
+        (time_text, "dim cyan"),
+        "  ",
+        (f"r{event.get('revision', '?'):<5}", "cyan"),
+        (f"{event_name:<28}", _event_style(event_name)),
+        (f"{actor}", actor_style),
+    )
+
+    operation_id = event.get("operation_id")
+    if operation_id and operation_id != actor:
+        line.append(f" [{operation_id}]", style="dim green")
+
+    for name, value in event.items():
+        if name in _EVENT_METADATA:
+            continue
+        line.append(f"  {name}=", style="dim")
+        line.append(_short_repr(value), style="white")
+    return line
+
+
+def _event_style(event_name: str) -> str:
+    if "renamed" in event_name or "name" in event_name:
+        return "bold magenta"
+    if "func" in event_name or "frame" in event_name:
+        return "bold green"
+    if "segm" in event_name:
+        return "bold blue"
+    if "type" in event_name or event_name.startswith(("ti_", "lt_", "udm_")):
+        return "bold bright_magenta"
+    if "patched" in event_name or "data" in event_name:
+        return "bold red"
+    if "cmt" in event_name or "comment" in event_name:
+        return "bold cyan"
+    return "bold white"
+
+
+def _short_repr(value: Any) -> str:
+    formatter = reprlib.Repr()
+    formatter.maxstring = 72
+    formatter.maxother = 72
+    formatter.maxlist = 4
+    formatter.maxdict = 4
+    return formatter.repr(value)
+
+
+def main() -> None:
+    EventViewerApp().run()
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`uv.lock`:
+
+```lock
+version = 1
+revision = 3
+requires-python = ">=3.11"
+
+[[package]]
+name = "ida-domain"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "idapro" },
+    { name = "packaging" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/80/34/be087d3ea1c3a6573e0660cb5b40f0c4ade9ae5772cf1c5d98d52472d28b/ida_domain-0.5.1.tar.gz", hash = "sha256:c49f2c417047d882e954f651b50a709a3f27903b33ba533b794aa54d6536d16f", size = 396413, upload-time = "2026-08-10T13:32:48.45Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/78/9c698d818b0fddc6648f703a0821edeeb65b18404b43f556d249c5446c96/ida_domain-0.5.1-py3-none-any.whl", hash = "sha256:bfbb17c7d0cb2ed7d3f21342e1c8787f9018d5c2a94cdfd29e06537dd026a06d", size = 201275, upload-time = "2026-08-10T13:32:46.955Z" },
+]
+
+[[package]]
+name = "ida-nexus"
+version = "0.9.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "ida-domain" },
+    { name = "packaging" },
+    { name = "zeromcp" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2e/44/1b0d07070054ee5508163ffb6d396106dc6e75068a35da97359d0bc04dbd/ida_nexus-0.9.1.tar.gz", hash = "sha256:15adf7b75bd14353e57afa9a6e4b918e4b7f49e0aa9879ee209e2f1cf6dfec0e", size = 195179, upload-time = "2026-08-29T10:44:54.054Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/6e/34ff2fe90a501b5488ad471648dd778f381386c0a2ec8c031ebaba1f78f8/ida_nexus-0.9.1-py3-none-any.whl", hash = "sha256:724480868c43220b196356cebc7efe2f112fd21a7222c4e4dddb6de62b6541d3", size = 133164, upload-time = "2026-08-29T10:44:52.727Z" },
+]
+
+[[package]]
+name = "ida-nexus-events"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "ida-nexus" },
+    { name = "textual" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "ida-nexus", specifier = ">=0.9.1" },
+    { name = "textual", specifier = ">=1.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ruff", specifier = ">=0.12.0" }]
+
+[[package]]
+name = "idapro"
+version = "0.0.10"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/75/249c605cc144a6b3778c48381d31ff9242f3e0b7ae23a9ca9c27224e641a/idapro-0.0.10.tar.gz", hash = "sha256:417c03c4605d18417e470f6a748e397b39d6d5829ebd3bbdedd92ff5b9092d11", size = 1060989, upload-time = "2026-07-15T12:55:22.313Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/83/7b02832cc8b057f686cccdb771fe80282f801a9b798961f8070bb468c73c/idapro-0.0.10-py3-none-any.whl", hash = "sha256:43f227953a0e348ced21c050d277b7ce34103e2ce05fc739b7d8c186ef0e1542", size = 2194897, upload-time = "2026-07-15T12:55:20.88Z" },
+]
+
+[[package]]
+name = "linkify-it-py"
+version = "2.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "uc-micro-py" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2e/c9/06ea13676ef354f0af6169587ae292d3e2406e212876a413bf9eece4eb23/linkify_it_py-2.1.0.tar.gz", hash = "sha256:43360231720999c10e9328dc3691160e27a718e280673d444c38d7d3aaa3b98b", size = 29158, upload-time = "2026-03-01T07:48:47.683Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b4/de/88b3be5c31b22333b3ca2f6ff1de4e863d8fe45aaea7485f591970ec1d3e/linkify_it_py-2.1.0-py3-none-any.whl", hash = "sha256:0d252c1594ecba2ecedc444053db5d3a9b7ec1b0dd929c8f1d74dce89f86c05e", size = 19878, upload-time = "2026-03-01T07:48:46.098Z" },
+]
+
+[[package]]
+name = "markdown-it-py"
+version = "4.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mdurl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/06/ff/7841249c247aa650a76b9ee4bbaeae59370dc8bfd2f6c01f3630c35eb134/markdown_it_py-4.2.0.tar.gz", hash = "sha256:04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49", size = 82454, upload-time = "2026-05-07T12:08:28.36Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/81/4da04ced5a082363ecfa159c010d200ecbd959ae410c10c0264a38cac0f5/markdown_it_py-4.2.0-py3-none-any.whl", hash = "sha256:9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a", size = 91687, upload-time = "2026-05-07T12:08:27.182Z" },
+]
+
+[package.optional-dependencies]
+linkify = [
+    { name = "linkify-it-py" },
+]
+
+[[package]]
+name = "mdit-py-plugins"
+version = "0.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/59/fc/f8d0863f8862f25602c0404d75568e89fb6b4109804645e5cdfb1be5cf56/mdit_py_plugins-0.6.1.tar.gz", hash = "sha256:a2bca0f039f39dbd35fb74ae1b5f998608c437463371f0ff7f49a19a17a114d0", size = 56114, upload-time = "2026-05-13T09:03:38.91Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/69/6da5581c6a7fede7dc261bf4e67d6adca4196f176b43288b55b3db395b6e/mdit_py_plugins-0.6.1-py3-none-any.whl", hash = "sha256:214c82fb2ac524472ab6a5bcab1de80f73b50443e187f401bfd77efbc7c6481d", size = 66663, upload-time = "2026-05-13T09:03:37.76Z" },
+]
+
+[[package]]
+name = "mdurl"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
+]
+
+[[package]]
+name = "packaging"
+version = "26.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79", size = 313412, upload-time = "2026-08-04T18:15:28.737Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c", size = 129956, upload-time = "2026-08-04T18:15:27.159Z" },
+]
+
+[[package]]
+name = "platformdirs"
+version = "4.11.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b8/d7/e7bfbc86e9f99ff7807e24de7703f032e9c9ba80bb355cf26e0e9bc5a75e/platformdirs-4.11.3.tar.gz", hash = "sha256:66a73d38a849810252df809a3d8bcbda8e26f6c189920e7535ad608a48dbb5ab", size = 33050, upload-time = "2026-08-13T22:43:27.52Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/19/a9/c34aebedd3a4c9afe5101b1b8713710b3fec18087c8a36c35d2f909861bd/platformdirs-4.11.3-py3-none-any.whl", hash = "sha256:5ed065d443751de711da036041a7a214122efc4a4de393b3f4137ba5576540e7", size = 23491, upload-time = "2026-08-13T22:43:26.121Z" },
+]
+
+[[package]]
+name = "pygments"
+version = "2.21.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/49/2e/ced460408999b33da6b31b0021b0f37d329e202d4169aeb164493778f25b/pygments-2.21.0.tar.gz", hash = "sha256:610ca751c9bc2492b38eb9a38a7fbc93edbbb2d7182edaf34e66ae493dee5c8c", size = 5005329, upload-time = "2026-08-17T08:02:48.824Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl", hash = "sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9", size = 1250147, upload-time = "2026-08-17T08:02:44.912Z" },
+]
+
+[[package]]
+name = "rich"
+version = "15.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz", hash = "sha256:edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36", size = 230680, upload-time = "2026-04-12T08:24:00.75Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl", hash = "sha256:33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb", size = 310654, upload-time = "2026-04-12T08:24:02.83Z" },
+]
+
+[[package]]
+name = "ruff"
+version = "0.16.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/b3/3213589383f8f1b3938781bd1278713f6d18621a14992b3e81fefb8a5ef9/ruff-0.16.3.tar.gz", hash = "sha256:e76d33a347661a84b5be6d043d0347fdc745dfdcf825a8f4fed64b5e26eebdf2", size = 4891904, upload-time = "2026-08-13T15:17:13.381Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/96/493770daebd68c0a67f1549fdf519f53be51fc435186c0585bcc272fd76c/ruff-0.16.3-py3-none-linux_armv6l.whl", hash = "sha256:0c5710e247a58a4521e66e124ba9a74655b414f61ba3a2e9e3811e11098f48f7", size = 10902799, upload-time = "2026-08-13T15:16:27.382Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/e6/2becf3942fddc29a29b8df47691d456fb1085391a694f74d84513251418c/ruff-0.16.3-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:fe155130631a2471fd2e14a7a664a4dfbd7194b8229c3d7b2a40b21178639081", size = 11135539, upload-time = "2026-08-13T15:16:30.87Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/1e/4b8b72f0d006dbf19326aa99f9ca0ee2ff374187c4d301cf529a51aa06fe/ruff-0.16.3-py3-none-macosx_11_0_arm64.whl", hash = "sha256:e2ed719e14aa64d895c2ee922594a90a43c861a93f0575a95ff8c47cdbd13eb9", size = 10475095, upload-time = "2026-08-13T15:16:33.259Z" },
+    { url = "https://files.pythonhosted.org/packages/92/32/2201fa49ba1f6c101ee321e83f051ac7a4b8d07b0ef6b4d3f2772b302275/ruff-0.16.3-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9e0b1da805eb043654645d74d5de1e5ce2edc686e40790d2b86f56d71cc06a84", size = 10668771, upload-time = "2026-08-13T15:16:35.65Z" },
+    { url = "https://files.pythonhosted.org/packages/c3/66/4afc5c8363bd04d45effce1b7c8713ca037d7a6740b7451a2403a6e3a972/ruff-0.16.3-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:a37bdea0bbe21780f590bf437d6412c8c4e1b6cd010f91a65c2c40c5e5f5f870", size = 10699568, upload-time = "2026-08-13T15:16:38.195Z" },
+    { url = "https://files.pythonhosted.org/packages/53/fd/c67d246bf36bf1698551c56de39e95cd07f70e64433e0098e6267d77061b/ruff-0.16.3-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:09571e6d1288ed9be475207a3ac04ada404f1cd898104be0f6ab8d7df438575b", size = 11499365, upload-time = "2026-08-13T15:16:40.623Z" },
+    { url = "https://files.pythonhosted.org/packages/67/0b/00ecbceb99a263af7b12f6f05ac3c92bc47b905e91adc3f207a836e3bc01/ruff-0.16.3-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:2c18c5a101eb540010638cc1ff3c84944d3adb3df62b8d98ca8f22ba484d3413", size = 12311728, upload-time = "2026-08-13T15:16:43.564Z" },
+    { url = "https://files.pythonhosted.org/packages/54/b2/b7b3bb54f4d3f7db504e476ad4ab8de530dceebe2c061384b2757ee419e8/ruff-0.16.3-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:8457c44f15033c85ddbb77b15d451df9e24e4bd03b628396dd3610cedc3b8f82", size = 11699896, upload-time = "2026-08-13T15:16:46.209Z" },
+    { url = "https://files.pythonhosted.org/packages/c7/30/4c468429ac195addc5ee1b717b6ab1b66632786737ca3b2ed3443fb0c26a/ruff-0.16.3-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:294b95c4ae0cda9388525c2047778aa758d6b8d4bb876fd4e9eaa3ebc92343eb", size = 11058736, upload-time = "2026-08-13T15:16:48.823Z" },
+    { url = "https://files.pythonhosted.org/packages/43/67/7a113cdaddf24b64d7f75b1242a99d04c82fcef4f6921fdbb832beaffb5f/ruff-0.16.3-py3-none-manylinux_2_31_riscv64.whl", hash = "sha256:3d0c7c40c87c2a820509c31ba007968da6e1306468c067b2d82fbfdbcd0e8474", size = 11586911, upload-time = "2026-08-13T15:16:51.913Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/c1/2e66f24c0f3ead25a5e660111778685e505e5da353c82802bf49f0cbe7b9/ruff-0.16.3-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:9f738c0fdfa8eed0b2ce7fb27ee7258208a92a68d7949e62aa15164bc7b389da", size = 10954265, upload-time = "2026-08-13T15:16:54.763Z" },
+    { url = "https://files.pythonhosted.org/packages/c2/ba/4cee23bf52cba9a058d3726de623624daf50ef9638868edd86f4126157f6/ruff-0.16.3-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:fb785f0be25abe69d320415cd4f833b59e17ba7613d9ba6a958023b6bceb0a50", size = 10709886, upload-time = "2026-08-13T15:16:57.339Z" },
+    { url = "https://files.pythonhosted.org/packages/82/df/7da7194fa5d9dc0a285f7e6fa5a4722e7c63faac0b45b614ded9314363a1/ruff-0.16.3-py3-none-musllinux_1_2_i686.whl", hash = "sha256:c5536e3acfbf9563085aa2be7b13c629c3077e902afc5b941ac44024dbb9f506", size = 11210392, upload-time = "2026-08-13T15:17:00.171Z" },
+    { url = "https://files.pythonhosted.org/packages/35/85/7795f6e817af050e7517bf3e7aa9b061cce70ef33d280aad902c956c1ecf/ruff-0.16.3-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:a2d85c02f9b8e165d85e6779184d38c4132de12603dab59c51c28e22584f9e4d", size = 11626910, upload-time = "2026-08-13T15:17:03.299Z" },
+    { url = "https://files.pythonhosted.org/packages/78/9b/475b927cf27a5cbbda3c7bafb69ed6ff77e1d7923d5d85f17c2749d7ae32/ruff-0.16.3-py3-none-win32.whl", hash = "sha256:388cdf2166642bd9b13d52b5932d3170f34f8abed7e8d9a855f1d84b83645a0a", size = 10931415, upload-time = "2026-08-13T15:17:05.726Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/99/e2a2bfc4fbf0a1e8a916bc9ebe6fe6c58cc34c28e0ffc6ce281d572d1c2e/ruff-0.16.3-py3-none-win_amd64.whl", hash = "sha256:e80a7d69ca2a6d1c4d352ec91458cdca6e56c83cdbcabd93e4abe1e53591d948", size = 11445993, upload-time = "2026-08-13T15:17:08.353Z" },
+    { url = "https://files.pythonhosted.org/packages/69/3e/4132e539aed78c148854d4997a2685b0ed4dc4e87110b59ce528564e184e/ruff-0.16.3-py3-none-win_arm64.whl", hash = "sha256:b8ca152da82c1acc1fa8d5874b15951935f0eef46f10e6954c83859011b6178a", size = 11399302, upload-time = "2026-08-13T15:17:10.908Z" },
+]
+
+[[package]]
+name = "textual"
+version = "8.2.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py", extra = ["linkify"] },
+    { name = "mdit-py-plugins" },
+    { name = "platformdirs" },
+    { name = "pygments" },
+    { name = "rich" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/00/21/39a76b01bd5eea82a04baaca7580e105d8c59450df03998345bb2cfb307b/textual-8.2.8.tar.gz", hash = "sha256:3f106a9fbc73e39dd266c9712432087de78a6d644084c7c241d6a25c3169115b", size = 1860502, upload-time = "2026-06-30T06:51:24.495Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/be/35261223d9416a0751cdff1c7b4a6f881387218a12d439fe22fefebc8c04/textual-8.2.8-py3-none-any.whl", hash = "sha256:267375fd402dc8d981457212efa71f0e3365fd17bba144ba9bb3ed7563cb374a", size = 731418, upload-time = "2026-06-30T06:51:26.364Z" },
+]
+
+[[package]]
+name = "typing-extensions"
+version = "4.16.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/cc/6253133b5bb138fc3306cebfbda2c520f545d36b5be2c7255cc528bb45d6/typing_extensions-4.16.0.tar.gz", hash = "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5", size = 113555, upload-time = "2026-07-02T08:40:05.92Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl", hash = "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8", size = 45571, upload-time = "2026-07-02T08:40:04.659Z" },
+]
+
+[[package]]
+name = "uc-micro-py"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/78/67/9a363818028526e2d4579334460df777115bdec1bb77c08f9db88f6389f2/uc_micro_py-2.0.0.tar.gz", hash = "sha256:c53691e495c8db60e16ffc4861a35469b0ba0821fe409a8a7a0a71864d33a811", size = 6611, upload-time = "2026-03-01T06:31:27.526Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/61/73/d21edf5b204d1467e06500080a50f79d49ef2b997c79123a536d4a17d97c/uc_micro_py-2.0.0-py3-none-any.whl", hash = "sha256:3603a3859af53e5a39bc7677713c78ea6589ff188d70f4fee165db88e22b242c", size = 6383, upload-time = "2026-03-01T06:31:26.257Z" },
+]
+
+[[package]]
+name = "zeromcp"
+version = "1.10.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/73/dd/fe1521a0e19b1cc601d82a386334509790cdcefc86bf5f07b1dc113196e8/zeromcp-1.10.0.tar.gz", hash = "sha256:e1e7a389644f62dd8c332c4906cb4041514d07c2495a70e032223c3ac9324c0b", size = 106098, upload-time = "2026-09-01T14:29:06.963Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/0b/fb78160347ac21886933cb53db6485d235c085b823637dcfc84538ba0519/zeromcp-1.10.0-py3-none-any.whl", hash = "sha256:8fcae1e63d597850b954f43ff46fcc6d108d88d2c6be2a519e54506f92e2ed46", size = 26734, upload-time = "2026-09-01T14:29:05.962Z" },
+]
+
+```
