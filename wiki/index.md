@@ -1423,6 +1423,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [GameDev MCP Server](entities/gamedev-mcp-server.md) — engine-agnostic C# ASP.NET Core MCP proxy host for Unity-MCP, Godot-MCP, and Unreal-MCP plugins; SignalR bridge; stdio/streamableHttp; OAuth/session handling; Docker/.NET tool (IvanMurzak; Game Develop / MCP)
 - [GameDev Resources](entities/gamedev-resources.md) — curated index across art/code/engines/tooling/design/monetization; paid/free/OSS availability labels (Kavex; Game Development resources / Game Develop / guide)
 - [bgfx](entities/bgfx.md) — cross-platform rendering library (D3D9/11/12, Metal, OpenGL/ES, Vulkan, WebGPU; shaderc GLSL cross-compiler; Rendering library)
+- [GDevelop](entities/gdevelop.md) — open-source cross-platform 2D/3D game engine (GDCore C++ + GDevelop.js + Pixi.js GDJS + React newIDE; visual events; HTML5/Electron export; Game Engine / source)
 - [GPlayEngine](entities/gplayengine.md) — GamePlay 3D v3.0 fork (BGFX replaces OpenGL 2.x; SDL2 + deferred pipeline + Bullet + ImGui editor; DirectX/Vulkan/Metal/OpenGL; Game Engine / source [C++ 2D/3D])
 - [GameEngineFromScratch](entities/game-engine-from-scratch.md) — Zhihu from-scratch next-gen engine sample (DirectX/OpenGL; Game Engine / guide)
 - [Gameplay](entities/gameplay.md) — cross-platform C++ 3D game framework (OpenGL ES 2.0/3.0, Bullet, OpenAL, Lua; CMake; Win/macOS/Linux/iOS/Android; FBX/Collada→.gpb encoder; Game Engine / source [2D/3D])

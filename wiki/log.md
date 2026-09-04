@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:4ian/GDevelop`: entity [[gdevelop]] (4ian; open-source cross-platform 2D/3D game engine; GDCore C++ event parsing/codegen, GDevelop.js bindings, Pixi.js GDJS runtime, React newIDE; visual events-based logic; Electron/HTML5 export; extension ecosystem; Game Engine / source); cited on [[overviews/game-engine]]; cross-linked [[pixijs]], [[godot]], [[babylon-js]], and [[three-js]].
+
 - **2026-09-04** — ingest `description:4l3x777/dse_pg_bypass`: entity [[dse-pg-bypass]] (4l3x777; C++ kernel research PoC; BYOVD bypasses Driver Signature Enforcement + PatchGuard; reversing notes trace signature validation callbacks and integrity-check paths; educational kernel security / defender BYOVD attack-surface study); cited on [[byovd]] and [[patchguard]]; cross-linked [[upgdsed]], [[cybersec2023-byovd-demo]], [[kvc]], and [[shark]].
 
 - **2026-09-04** — ingest `description:5ec1cff/TrickyStore`: updated entity [[trickystore]] (5ec1cff upstream; Android module modifying key-attestation certificate chains; per-app package/keybox config; leaf vs generated cert modes; security patch level spoof; Android 10+/12+; integrity / attestation / anti-tamper research); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[keyattestation]], [[android-hardware-attestation-demo]], and [[spoofing-collection]].
