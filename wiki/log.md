@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:3r4y/imgui-external-overlay`: entity [[imgui-external-overlay]] (3r4y; C++ Visual Studio template; DirectX9 + Dear ImGui external overlay window + rendering flow; ImGui/DirectX SDK integration notes; ESP/HUD/diagnostics/RE overlay starter; README `[imgui overlay]`); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[imgui]], [[imgui-standalone]], [[imoverlay-dx11]], [[external-imgui-cheat-menu-example-2023]], and [[direct3d9-overlay]].
+
 - **2026-09-04** — ingest `description:3xpl01tc0d3r/ProcessInjection`: entity [[process-injection]] (3xpl01tc0d3r; C# unified CLI process injection toolkit; vanilla/DLL/hollowing/APC queue/KernelCallbackTable; P/Invoke/D/Invoke/direct+indirect syscalls; shellcode formats, optional encryption, PPID spoof; offensive + detection-engineering lab; Various process injection techniques); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[process-injection-techniques]], [[inject-all-the-things]], and [[code-injection]].
 
 - **2026-09-04** — ingest `description:416rehman/DeepZero`: entity [[deepzero]] (416rehman; automated Windows kernel driver vulnerability research framework; parse/decompile drivers at scale; AI-agent analysis of exploitable IOCTLs; BYOVD/LOLDriver attack-surface study); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[driver-vuln-analyzer-ida-plugin]], [[cognitor]], [[ioctl-helper]], [[cfb]], [[byovd]], and [[kernforge]].

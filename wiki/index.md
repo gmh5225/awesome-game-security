@@ -1871,6 +1871,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ImHex](entities/imhex.md) — C++ cross-platform hex editor / binary analysis platform (pattern-language parsing, disassembly, diff/hash, plugins; firmware/file/memory/game binary RE)
 - [Dear ImGui](entities/imgui.md) — bloat-free immediate-mode C++ GUI (DX/GL/Vulkan/Metal; overlays / tool UIs / cheat menus)
 - [ImGUI Advanced Cheat Menu](entities/imgui-advanced-cheat-menu.md) — Windows ImGui cheat-menu framework (C++ SFML; ESP/aim/recoil/HUD modules; hotkey panels; custom widgets + in-memory fonts; starter template; RequestFX; README `[Imgui Menu]`)
+- [ImGui External Overlay](entities/imgui-external-overlay.md) — C++ DX9 external overlay template (3r4y; Visual Studio; ready-made overlay window + ImGui rendering flow; DirectX SDK setup notes; ESP/HUD/RE overlay starter; README `[imgui overlay]`)
 - [ImGui Standalone](entities/imgui-standalone.md) — D3D11 external ImGui framework (EXE/DLL; own render window; VS x86/x64; game tooling / menu prototyping; adamhlt)
 - [ImGuiRDR2Hook](entities/imgui-rdr2-hook.md) — RDR2 Vulkan + DirectX 12 ImGui hook framework (Halen84; MinHook + Kiero + Dear ImGui; render-path intercept; hook entry points, config handling, stable menu/input notes; overlay development / graphics API hooking practice; cheat / render-draw)
 - [imgui_club](entities/imgui-club.md) — official Dear ImGui extensions (hex mem editor / multi-context / threaded draw)
