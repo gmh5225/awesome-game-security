@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:ARandomPerson7/Appsealing-Reversal`: entity [[appsealing-reversal]] (ARandomPerson7; long-form AppSealing reversal report; Java/native components, detection logic, telemetry, dex-loading design, anti-debug/process-kill routines, hook-based bypass validation; mobile app/game shielding-quality and detection-robustness research); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[apppealing-new]], [[g-presto-anti-cheat-reverse-engineered]], and [[pairipcore]].
+
 - **2026-09-04** — ingest `description:ARandomPerson7/G-Presto-Anti-Cheat-Reverse-Engineered`: entity [[g-presto-anti-cheat-reverse-engineered]] (ARandomPerson7; reverse-engineered mobile game anti-cheat native protection; reconstructed C/C++ CPU/emulator checks, Dex handling, utility routines, encrypted loading; detection-path triggers and anti-tamper structure; Android AC internals research); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[android-anti-cheat]], [[ff-ace-anticheat-analysis]], and [[honor-of-kings-re-research]].
 
 - **2026-09-04** — ingest `description:ATsahikian/pe-protector`: entity [[pe-protector]] (ATsahikian; Windows C++ x86 PE protection framework; instruction mutation, built-in x86 assembler pipeline, configurable stub logic, binary compression; CMake build + tests; software protection / anti-tamper / packer-style defense research; Anti Cheat → Binary Packer `[X86]`); cited on [[overviews/reverse-engineering]] and [[overviews/anti-cheat]]; cross-linked [[pe-packer]], [[hm-pe-packer]], and [[packer-tutorial]].
