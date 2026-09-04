@@ -2922,6 +2922,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [r6-internal](entities/r6-internal.md) — R6 internal cheat base: C++ SDK, hooking utils, ImGui + D3D11 overlay; snapline ESP, targeting, entity access (JGonz1337; educational internal architecture; cheat / game:r6 [Internal])
 - [r6-chams-public](entities/r6-chams-public.md) — R6 chams: Chameleon Models + visual check (educational; cheat / game:r6 [Chams])
 - [r6-cheat-dumper](entities/r6-cheat-dumper.md) — R6 external cheat dumper: driver + rendering + animation (C/C++; cheat / game:r6 [External]; gmh5225)
+- [r5apex-usermode](entities/r5apex-usermode.md) — Apex Legends user-mode external framework: C++ shared-memory IPC with mapped kernel driver for process R/W; glow/highlight samples + extensible baseline (3nolan5; external cheat design + driver-assisted memory access research; cheat / game:apex legends [External])
 - [r6-external](entities/r6-external.md) — R6 external: driver development (C/C++; External)
 - [r6-intel](entities/r6-intel.md) — R6 ranked-stat suspicion scorer: R6Data API heuristics (Node.js; integrity / moderation research; baldspots440)
 - [r6-updater](entities/r6-updater.md) — R6 offset dumper/updater: C++ pattern scan + memory modules for post-patch signature refresh (Kix48; cheat / game:r6 [Dump])
