@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:9176324/Shark`: entity [[shark]] (9176324; Windows kernel research toolkit; C/C++/assembly; x86/x64 driver + loader; runtime PatchGuard disable; Visual Studio/NMAKE builds; virtualization-assisted loading references; low-level kernel defense and PG bypass study; cheat / PatchGuard-related); cited on [[concepts/patchguard]] and [[overviews/windows-kernel]]; cross-linked [[demystifying-patchguard]], [[kurasagi]], [[patchguard-2023]], and [[kdmapper]].
+
 - **2026-09-04** — ingest `description:94q/Valorant-Internal`: entity [[94q-valorant-internal]] (94q; C++ internal; basic/memory/silent aim; ESP boxes/chams/glow; FOV + fly/third-person movement; hotkey menu; game-hacking experimentation and RE practice; cheat / game:valorant [Internal]); cited on [[overviews/game-hacking]] and [[vanguard]]; cross-linked [[internal-valorant-cheat]], [[valorant-esp-aimbot-hack]], [[valorant-internal]], and [[valorant-gui-imgui-remake]].
 
 - **2026-09-04** — ingest `description:A1RM4X/HowTo-Palworld`: entity [[howto-palworld]] (A1RM4X; Linux deployment guide + shell scripts; SteamCMD + systemd; install/update/start/backup/restore; Debian/Ubuntu; maintenance automation; primarily server-admin ops; cheat / game:palworld [Server on Linux]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[docker-palworld-dedicated-server]], [[palworld-rcon]], [[palworld-setting-generator]], and [[palopsweb]].

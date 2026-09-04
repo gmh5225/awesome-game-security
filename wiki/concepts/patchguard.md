@@ -24,7 +24,8 @@ sources:
   - wiki/sources/descriptions/Mattiwatti__EfiGuard.md
   - wiki/sources/descriptions/AmitMoshel1__PatchGuardEncryptorDriver.md
   - wiki/sources/descriptions/AdamOron__PatchGuardBypass.md
-updated: 2026-09-03
+  - wiki/sources/descriptions/9176324__Shark.md
+updated: 2026-09-04
 confidence: high
 ---
 
@@ -76,6 +77,8 @@ Kernel CET / shadow-stack work such as [[windows-kernel-shadow-stack]] studies h
 
 [[patchguardbypass]] (AdamOron; in-progress C/C++ research) documents a planned **dynamic modern-build KPP bypass** with goals to disable PG execution, evade runtime integrity checks, and verify PG state — for kernel security and anti-cheat analysts studying defensive attack surface. (source: wiki/sources/descriptions/AdamOron__PatchGuardBypass.md)
 
+[[shark]] (9176324; C/C++/assembly kernel toolkit; driver + loader; x86/x64; runtime PatchGuard disable; Visual Studio/NMAKE workflows; references virtualization-assisted loading) is a kernel research toolkit for low-level PG bypass and kernel-defense study. (source: wiki/sources/descriptions/9176324__Shark.md)
+
 ## Related
 
-[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[patchguard-encryptor-driver]] · [[patchguardbypass]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheckhack]] · [[efiguard]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
+[[hvci]] · [[kernel-callbacks]] · [[byovd]] · [[page-table-hook]] · [[pg1903]] · [[upgdsed]] · [[vulnerablepatchguardexploit]] · [[quickpgtrigger]] · [[patchguard-2023]] · [[patchguard-encryptor-driver]] · [[patchguardbypass]] · [[shark]] · [[tableflipper]] · [[easy-anti-patchguard]] · [[demystifying-patchguard]] · [[sushi]] · [[kurasagi]] · [[nomore-bugcheck]] · [[nomore-bugcheck-reloaded]] · [[bugcheckhack]] · [[efiguard]] · [[dioprocess-private]] · [[windows-kernel-shadow-stack]] · [[cet-research]] · [[overviews/windows-kernel]]
