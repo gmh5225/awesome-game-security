@@ -14,7 +14,7 @@ C/C++ **Windows process injection and persistence** technique collection (Mahmou
 
 README lane: **Injection Testing** — broad inject + persistence lab corpus for AC/EDR evaluation.
 
-Complements broader catalogs such as [[windows-process-injection]], focused PoCs such as [[thread-hijacking-injector]] and [[frankenstein-apc-injection]], harnesses such as [[injectors]], and defensive blockers such as [[pi-defender]] and [[ghost]].
+Complements broader catalogs such as [[windows-process-injection]], unified C# CLI toolkit [[process-injection]] (3xpl01tc0d3r; vanilla/DLL/hollowing/APC queue/KernelCallbackTable; P/Invoke/D/Invoke/syscalls; shellcode formats, encryption, PPID spoof), focused PoCs such as [[thread-hijacking-injector]] and [[frankenstein-apc-injection]], harnesses such as [[injectors]], and defensive blockers such as [[pi-defender]] and [[ghost]].
 
 ## Links
 

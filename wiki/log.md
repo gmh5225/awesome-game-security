@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:3xpl01tc0d3r/ProcessInjection`: entity [[process-injection]] (3xpl01tc0d3r; C# unified CLI process injection toolkit; vanilla/DLL/hollowing/APC queue/KernelCallbackTable; P/Invoke/D/Invoke/direct+indirect syscalls; shellcode formats, optional encryption, PPID spoof; offensive + detection-engineering lab; Various process injection techniques); cited on [[overviews/game-hacking]] and [[overviews/anti-cheat]]; cross-linked [[windows-process-injection]], [[process-injection-techniques]], [[inject-all-the-things]], and [[code-injection]].
+
 - **2026-09-04** — ingest `description:416rehman/DeepZero`: entity [[deepzero]] (416rehman; automated Windows kernel driver vulnerability research framework; parse/decompile drivers at scale; AI-agent analysis of exploitable IOCTLs; BYOVD/LOLDriver attack-surface study); cited on [[overviews/windows-kernel]] and [[overviews/reverse-engineering]]; cross-linked [[driver-vuln-analyzer-ida-plugin]], [[cognitor]], [[ioctl-helper]], [[cfb]], [[byovd]], and [[kernforge]].
 
 - **2026-09-04** — ingest `description:4ch12dy/il2cpp`: entity [[entities/il2cpp]] (4ch12dy; Unity IL2CPP runtime source archive across Unity generations; libil2cpp C/C++ internals — runtime services, metadata, GC, platform abstraction; version-to-engine mapping notes; RE + tooling reference; cheat / `[Il2Cpp Version]`); cited on [[il2cpp]] and [[overviews/game-engine]]; cross-linked [[il2cpp-versions]], [[il2cppdumper]], and [[il2cpp-inspector]].
