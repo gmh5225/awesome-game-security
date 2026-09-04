@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-04** — ingest `description:lannden1245/Void-Engine`: entity [[void-engine]] (lannden1245; Godot 4.x GDScript editor plugin; WhiteVoid AntiCheat autoload — debugger/process/window detection, honeypot integrity checks, HWID ban enforcement; VoidNet ENet/Firebase WebRTC multiplayer; VoidForge editor tooling; Anti Cheat / Open Source Anti Cheat System); cited on [[overviews/anti-cheat]] and [[overviews/game-engine]]; cross-linked [[godot]], [[godot-sandbox]], [[certael]], and [[gatewarden-public]].
+
 - **2026-09-04** — ingest `description:savagedamage/android-security-wizard`: entity [[android-security-wizard]] (savagedamage; integrated Android security research corpus — SKILL.md + 20 companions; static/dynamic APK/DEX/native RE via Frida/Objection/Ghidra/ADB-Shizuku; DexGuard/Bangcle protector bypass; ARM64 kernel exploit methodology; malware detection and C2 attribution; Android 14–18 platform deltas; cheat / Guide); cited on [[overviews/reverse-engineering]] and [[mobile-anti-cheat]].
 
 - **2026-09-04** — ingest `readme:categories`: Cheat ~2780 (+1; savagedamage/[[android-security-wizard]] integrated Android security research corpus in Guide) / Anti Cheat ~708 (+1; lannden1245/[[void-engine]] Godot 4.x WhiteVoid AntiCheat plugin in Open Source Anti Cheat System) / other major section counts stable; 41 sections; entities [[android-security-wizard]], [[void-engine]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/mobile-security]], [[overviews/game-engine]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).

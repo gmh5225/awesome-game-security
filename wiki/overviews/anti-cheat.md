@@ -292,6 +292,7 @@ sources:
   - wiki/sources/descriptions/dmaivel__covirt.md
   - wiki/sources/descriptions/divodeuxsevres__gvmp-anticheat.md
   - wiki/sources/descriptions/layerfsd__phantasm-x86-virtualizer.md
+  - wiki/sources/descriptions/lannden1245__Void-Engine.md
   - wiki/sources/descriptions/lguilhermee__EAC-Extractor-Utility.md
   - wiki/sources/descriptions/ksoju__Eac-Bypass.md
   - wiki/sources/descriptions/lguilhermee__Battleye-Shellcode-Dumper.md
@@ -1051,6 +1052,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[corner-culling-source-engine]] — Source engine anti-wallhack extension (87andrewh; C++ extension + SourceMod + map occluders; strict server-side visibility culling; ray-cast correctness, low overhead, latency-safe; competitive Source servers; For Source Games) (source: wiki/sources/descriptions/87andrewh__CornerCullingSourceEngine.md)
 - [[tf2bd-database]] — community-maintained TF2 cheater/suspicious-player/scammer JSON lists and chat word-filter rules for TF2 Bot Detector (TF2BD v3 playerlist/rules schemas; last-seen metadata + proof; client-side alerts via surepy/tf2_bot_detector; Garou3299) (source: wiki/sources/descriptions/Garou3299__tf2bd-database.md)
 - [[gatewarden-public]] — Godot 4.7 tower defense prototype with published PathValidator placement-abuse rejection codes (flow-field softlock/maze checks; 30 Hz deterministic sim; 59 GUT tests + headless bot; test-driven validation reference; euuuuuuan) (source: wiki/sources/descriptions/euuuuuuan__gatewarden-public.md)
+- [[void-engine]] — Godot 4.x editor plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement); GDScript; VoidNet ENet/Firebase WebRTC multiplayer stack; lannden1245; Open Source Anti Cheat System) (source: wiki/sources/descriptions/lannden1245__Void-Engine.md)
 - [[ricochet-deobfuscator]] — C/C++ Ricochet deobfuscator (driver / memory analysis; explore anticheat:ricochet) (source: wiki/sources/descriptions/weak1337__ricochet_deobfuscator.md)
 - [[aurum-re]] — Aurum RE Ricochet anti-cheat research (reverse engineering + driver development; explore anticheat:ricochet) (source: wiki/sources/descriptions/gmh5225__AurumRE.md)
 - [[ricochet-disabler]] — disable/bypass Ricochet kernel driver and user-mode monitoring for COD AC architecture research (source: wiki/sources/descriptions/gmh5225__ricochet-disabler.md)

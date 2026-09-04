@@ -3579,7 +3579,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [vm (ekknod)](entities/vm.md) — cross-platform C/C++ memory library (unified `vm.h`; kernel/RPM/DMA/KVM/Proton/EFI backends; CR3 walk, PEB/LDR, pattern scan)
 - [vm_str.hpp](entities/vm-str-hpp.md) — header-only C++20 compile-time string obfuscator (obfuscation bytecode schema at compile time + stack-based VM runtime reconstruct; narrow/wide string macros; keeps plaintext out of static data; software hardening / RE resistance; AC String Crypter; Mowokuma)
 
-- [Void Engine](entities/void-engine.md) — Godot 4.x plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement), VoidNet multiplayer stack, and VoidForge editor tooling (lannden1245; Anti Cheat / Open Source Anti Cheat System)
+- [Void Engine](entities/void-engine.md) — Godot 4.x GDScript editor plugin with WhiteVoid AntiCheat autoload (debugger/process/window detection, honeypot integrity checks, HWID ban enforcement), VoidNet ENet/Firebase WebRTC multiplayer stack, and VoidForge editor tooling (lannden1245; Anti Cheat / Open Source Anti Cheat System)
 - [Voidmaw](entities/voidmaw.md) — VEH + PAGE_GUARD code-hiding (AV/AC page-protection research)
 - [VEN0m-Ransomware](entities/ven0m-ransomware.md) — BYOVD via iMFForceDelete.sys (IObit; AV/EDR evasion)
 - [venom](entities/venom.md) — Linux kernel rootkit hooking (LKM hooks; cheat / linux kernel explorer)
