@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:19h/eac-analysis`: entity [[eac-analysis]] (19h; Linux EAC userland `eac.elf` VM reconstruction; dlopen/trace harness, dispatch/VMTAIL probes, bytecode→IR/CFG, handler ISA, static path replay, MBA reducers; GDB dynamic tracing; Anti Cheat / Linux ELF); cited on [[concepts/easy-anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[eac-reversal]], [[eac-extractor-utility]], [[vmattack]], [[mixed-boolean-arithmetic]], and [[chernobog]].
+
 - **2026-09-05** — ingest `description:19h/ida-semray`: entity [[ida-semray]] (19h; Python IDA Pro Gemini plugin; AI-assisted semantic binary analysis; suggests function/variable names and detailed comments from decompiled code or assembly context; interactive context-aware analysis across callers, callees, and references; security analyst RE triage; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[gepetto]], [[ida-copilot]], [[binarylens]], [[aether]], and [[idassist]].
 
 - **2026-09-05** — ingest `description:1hAck-0/UE4-Cheat-Source-Code`: entity [[ue4-cheat-source-code]] (1hAck-0; educational UE4 cheat codebase + guide; C++ ESP/aimbot/trigger + gameplay manipulation; function hooking + pattern scanning; hands-on game-security/RE training in controlled environments; cheat / guide); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ue4-hacking-guideline]], [[intro-to-gamehacking]], [[ue4-base]], [[clean-cheat]], [[dumper-7]], [[unreal-object-model]], and [[world-to-screen]].

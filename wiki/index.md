@@ -1110,6 +1110,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [e3](entities/e3.md) — C++ homomorphic encryption framework (MoMA Lab; FHE backends; encrypted compute; AC Encrypt Variable research)
 - [e9patch](entities/e9patch.md) — Linux x86-64 ELF static binary rewriter (instruction punning + eviction; jumps/trampolines/instrumentation without reassembly; GJDuck)
+- [eac-analysis](entities/eac-analysis.md) — 19h Linux EAC userland (`eac.elf`) VM reconstruction; dlopen/trace harness, dispatch/VMTAIL probes, bytecode→IR/CFG, handler ISA, static path replay, MBA reducers; GDB dynamic tracing (Anti Cheat / Linux ELF)
 - [eac-bypass](entities/eac-bypass.md) — offensive EAC bypass research (C++; kernel driver + shader work)
 - [eac-bypass-1](entities/eac-bypass-1.md) — EAC bypass via `NtMapVisualRelativePoints` KM↔UM channel (C++; driver communication; gmh5225)
 - [eac-cr3-bypass](entities/eac-cr3-bypass.md) — UM+KM EAC CR3 bypass teaching sample (C/C++; driver dev)
