@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1401199262/HookHvcallCodeVa`: entity [[hook-hvcall-code-va]] (1401199262; Windows kernel PoC; HvcallCodeVa hypercall code callback hook during address-space switching; pattern-scan internals, custom callback, enlightenment-flag adjustment, CR3 + per-CPU hypercall page setup; kernel internals / hypervisor-behavior research; README HvcallCodeVa); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hook-swap-context]], [[driver-hypercall-page-hook]], [[hook-hvl-switch-virtual-address-space]], [[hyperdeceit]], [[yumekage]], [[nmi-stack-walk]], and [[remote-call]].
+
 - **2026-09-05** — ingest `description:1401199262/HookSwapContext`: entity [[hook-swap-context]] (1401199262; Windows kernel PoC; ETW/CKCL-based SwapContext scheduling-path hook + custom stack-frame checks; C++ trace control, syscall-facing hooks, kernel utilities; thread scheduling interception research; README SwapContext hook); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kernel-snippets]], [[hook-hvl-switch-virtual-address-space]], [[driver-hypercall-page-hook]], [[hook-guard]], [[yumekage]], [[nmi-stack-walk]], [[remote-call]], and [[etw-threat-intelligence]].
 
 - **2026-09-05** — ingest `description:ntdlll/Scalpel`: entity [[scalpel]] (ntdlll; Java 21/Swing Ghidra dockable dark-mode hex/ASCII editor; Listing-synced cursor; 256 B–64 KiB read window; wildcard hex/UTF-8 search; inline transaction patching; game-security/AC RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-hexeditor]], [[imhex]], and [[hexwalk]].
