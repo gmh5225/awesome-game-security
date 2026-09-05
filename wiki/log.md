@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1hAck-0/UE4-Cheat-Source-Code`: entity [[ue4-cheat-source-code]] (1hAck-0; educational UE4 cheat codebase + guide; C++ ESP/aimbot/trigger + gameplay manipulation; function hooking + pattern scanning; hands-on game-security/RE training in controlled environments; cheat / guide); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[ue4-hacking-guideline]], [[intro-to-gamehacking]], [[ue4-base]], [[clean-cheat]], [[dumper-7]], [[unreal-object-model]], and [[world-to-screen]].
+
 - **2026-09-05** — ingest `description:1hAck-0/zeroimport`: entity [[zeroimport]] (1hAck-0; C++ kernel driver runtime import resolver; hashed ntoskrnl export walk for functions/variables such as MmIsAddressValid and PsInitialSystemProcess; no cleartext API strings, optional cache; minimizes import-table artifacts for driver dev / static-analysis resistance; Anti Cheat / Lazy Importer); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[lazy-importer]], [[kli]], [[kli-ex]], [[noimportz]], and [[kernelmode-manual-mapping-through-iat]].
 
 - **2026-09-05** — ingest `description:Elcapitanoe/pif-config-generator`: entity [[pif-config-generator]] (Elcapitanoe; Python automated pipeline; tracks upstream Pixel build.prop tags, parses partition system.prop, validates Pydantic PIF JSON schemas; pif-gen CLI for ADB dumps/URLs, batch CI, GitHub releases; Play Integrity attestation spoof configs; cheat / Android); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[zamr]], [[nai64-patches]], [[pixel-flasher]], [[keyattestation]], [[magisk]], and [[kernelsu]].
