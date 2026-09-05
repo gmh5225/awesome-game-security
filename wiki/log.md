@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:19h/chernobog`: entity [[chernobog]] (19h; C++ Hex-Rays IDA Pro plugin; automatic Hikari LLVM deobfuscation—CFF/bogus-branch restore, indirect control-transfer resolution, encrypted data recovery; Z3 symbolic reasoning + MBA simplification; malware/game-security RE); cited on [[mixed-boolean-arithmetic]] and [[control-flow-flattening]]; cross-linked [[goomba]], [[d810]], [[hex-rays-deob]], and [[eac-analysis]].
+
 - **2026-09-05** — ingest `description:19h/eac-analysis`: entity [[eac-analysis]] (19h; Linux EAC userland `eac.elf` VM reconstruction; dlopen/trace harness, dispatch/VMTAIL probes, bytecode→IR/CFG, handler ISA, static path replay, MBA reducers; GDB dynamic tracing; Anti Cheat / Linux ELF); cited on [[concepts/easy-anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[eac-reversal]], [[eac-extractor-utility]], [[vmattack]], [[mixed-boolean-arithmetic]], and [[chernobog]].
 
 - **2026-09-05** — ingest `description:19h/ida-semray`: entity [[ida-semray]] (19h; Python IDA Pro Gemini plugin; AI-assisted semantic binary analysis; suggests function/variable names and detailed comments from decompiled code or assembly context; interactive context-aware analysis across callers, callees, and references; security analyst RE triage; cheat / IDA Plugins); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[gepetto]], [[ida-copilot]], [[binarylens]], [[aether]], and [[idassist]].

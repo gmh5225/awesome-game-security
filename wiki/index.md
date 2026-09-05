@@ -23,7 +23,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [BattlEye](concepts/battleye.md)
 - [BYOVD](concepts/byovd.md)
 - [Compiled Wiki](concepts/compiled-wiki.md)
-- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic/simulated exec ([[ollvm-unflattener]], [[idadeflat]], [[anti-ollvm]] Arm64), [[d810]]/[[d810-ng]], OBPO; pairs MBA recovery
+- [Control Flow Flattening](concepts/control-flow-flattening.md) — OLLVM-style dispatcher loops; deflatten via symbolic/simulated exec ([[ollvm-unflattener]], [[idadeflat]], [[anti-ollvm]] Arm64), [[d810]]/[[d810-ng]]/[[chernobog]] (Hikari LLVM), OBPO; pairs MBA recovery
 - [DMA](concepts/dma.md) — PCIe host R/W; AC detection pipeline (config integrity, latency fingerprinting, IOMMU containment, TPM attestation)
 - [Draw Call Hook](concepts/draw-call-hook.md) — draw/shader/pipeline intercept for wallhack/chams vs Present-only overlays
 - [Dynamic Binary Instrumentation](concepts/dynamic-binary-instrumentation.md) — Frida/Pin/DynamoRIO/[[drmemory]]/[[tinyinst]]/[[river]]/[[mambo]]; trap-and-emulate CFT; WHP user-mode hypervisor tracing ([[vmtrace]]); driver IOCTL tracing
@@ -36,7 +36,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [IOMMU](concepts/iommu.md) — VT-d/AMD-Vi translation; six out-of-domain paths; ACS/ATS-untrusted; bypass catalog + containment
 - [Kernel Callbacks](concepts/kernel-callbacks.md)
 - [Kernel Pool Scanning](concepts/kernel-pool-scanning.md) — Segment Heap–era hidden driver/shellcode pool walks; PiDDBCache/MmUnloadedDrivers forensics; KDP rule tables
-- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/goomba (Hex-Rays + Z3)/GAMBA (Python simplifier + benchmark datasets)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
+- [Mixed Boolean-Arithmetic](concepts/mixed-boolean-arithmetic.md) — linear/polynomial MBA obfuscation; CoBRA/mbased/MBA (CUDA)/goomba (Hex-Rays + Z3)/chernobog (Hikari LLVM Hex-Rays)/GAMBA (Python simplifier + benchmark datasets)/mba-wasm (Rust/WASM web UI)/gnn-deobfuscation (GNN ML)/ProMBA/Kong/QSynthesis/DrillAndJoin/msynth/SMT simplification; mixed-boolean-transform / limba compile-time source obfuscation; VMProtect/Themida/LLVM passes
 - [Mobile Anti-Cheat](concepts/mobile-anti-cheat.md) — mobile root/Frida/emulator/integrity detection; ACE/RASP SDKs; G-Presto native AC RE; bypass research framing
 - [OBS Game Capture](concepts/obs-game-capture.md) — OBS Game/Window/Display/Virtual Camera modes; AI visual pipeline + detection signals
 - [PatchGuard](concepts/patchguard.md)
@@ -593,6 +593,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [ChainOfFools](entities/chainoffools.md) — CVE-2020-0601 Windows CryptoAPI ECC root-spoof PoC (Python + OpenSSL; CurveBall/ChainOfFools; gmh5225)
 - [ChaiScript Plugin](entities/chaiscript-plugin.md) — x64dbg plugin: ChaiScript automation (three commands; thorough API; Cheat x64dbg Plugins)
 - [Chasm](entities/chasm.md) — high-performance runtime x86-64 assembler library (C; instruction IR, relative ref linking, AVX-256; JIT/emulator/runtime optimization; aqilc)
+- [chernobog](entities/chernobog.md) — 19h Hex-Rays IDA Pro plugin; automatic Hikari LLVM deobfuscation (CFF/bogus-branch restore, indirect control-transfer resolution, encrypted data recovery; Z3 + MBA simplification; malware/game-security RE)
 - [ChinaPubg](entities/china-pubg.md) — Android NDK PUBG RE/manipulation toolkit (C/C++; inline hooks, ptrace inject, memory tooling, ImGui, offsets/map/patch; mobile AC research; Super-Cssdiv; cheat / game:pubgm)
 - [CheekyBlinder](entities/cheeky-blinder.md) — enumerate/modify kernel callbacks via signed vulnerable MSI driver (BYOVD PoC; br-sn)
 - [checkhv_um](entities/checkhv-um.md) — user-mode HV detection (CPUID / RDTSC / VMCS / signatures)
