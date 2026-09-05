@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:ShivamXD6/ROM-Shifter`: entity [[rom-shifter]] (ShivamXD6; Kotlin/Jetpack Compose + custom shell backend; custom-ROM flash wizard, partition backup/restore, batch APK install, app/device data migration, debloat/systemize; Magisk/KernelSU/APatch; cheat / Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pixel-flasher]], [[android-rom-list]], [[android-bootable-recovery-ofrp]], [[magisk]], [[kernelsu]], and [[apatch]].
+
 - **2026-09-05** — ingest `description:201580ag/AssaultCube_Cheat`: entity [[assaultcube-cheat]] (201580ag; multi-version internal/external AssaultCube cheat practice; aimbot, ESP, overlays, memory utilities, offset handling; C/C++/C#; ImGui, OpenGL hooks; controlled training context; cheat / practice); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[assaultcube]], [[assault-cube-cheat]], [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[voltclient]].
 
 - **2026-09-05** — ingest `description:2601677867/One-Click-Run_Source_Server`: entity [[one-click-run-source-server]] (2601677867; Linux one-click shell script; Debian/Ubuntu/CentOS env checks, SteamCMD, game server download, Sourcemod/Metamod install, troubleshooting; community Source dedicated server deployment; Server for Source Engine); cited on [[overviews/game-engine]]; cross-linked [[source-engine]], [[little-anti-cheat]], [[nocheatz-3]], and [[corner-culling-source-engine]].
