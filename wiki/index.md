@@ -372,6 +372,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [apc-research](entities/apc-research.md) — APC internals research samples + lib (cheat / windows kernel explorer)
 - [Api Breakpoint](entities/api-breakpoint.md) — x64dbg GUI plugin: visual API breakpoint configure/manage workflow (C++; x86/x64; Windows API tracing; Kwansy98; Cheat x64dbg Plugins / Api Breakpoint)
 - [AppInitHook](entities/appinithook.md) — AppInit_DLLs registry startup inject + MinHook hooking (INI dispatch; CMake/cmkr; cheat / hook)
+- [Apprentice](entities/apprentice.md) — open-source Windows game trainer and memory editor (Electron + React/TS + C++ N-API; offline attach; value cheats, code patches, Lua, CE `.CT` import/export; Mono JIT introspection; bundled read-only MCP for AI agents; Valheim/Elden Ring profiles; digital-dev)
 - [apic](entities/apic.md) — local APIC R/W + xAPIC/x2APIC IPI (KM; timing/detection research)
 - [APICallProxy](entities/apicallproxy.md) — Windows API call obfuscation via kernel-driver IOCTL proxy (C/C++; file/process/memory/registry/network; APC injection + driver-load samples; API monitoring evasion research; MahmoudZohdy)
 - [APKiD](entities/apkid.md) — Android APK/DEX packer·obfuscator·anti-analysis ID (YARA; PEiD for Android)
