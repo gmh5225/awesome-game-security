@@ -1270,6 +1270,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Fox2Code/FoxMagiskModuleManager [A module manager for Magisk]
 - https://github.com/MMRLApp/WebUI-X-Portable [Portable Android app providing the MMRL WebUI X interface for browsing, installing, and managing Magisk/APatch/KernelSU modules]
 - https://github.com/zelect0r/zamr [Curated MMRL module repository for Magisk/KernelSU/APatch (Play Integrity Fix, Zygisk, root-hide, TEESimulator)]
+- https://github.com/Elcapitanoe/pif-config-generator [Automated pipeline to track upstream Android build.prop tags and publish validated Play Integrity Fix (PIF) JSON profiles]
 - https://github.com/Dr-TSNG/ZygiskOnKernelSU [Run Zygisk on KernelSU]
 - https://github.com/svoboda18/magiskboot [Boot Image Modification Tool]
 - https://github.com/xiaoxindada/magiskboot_ndk_on_linux [Boot Image Modification Tool]
@@ -1460,6 +1461,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://sourceforge.net/projects/recovery-for-xiaomi-devices/files [TWRP for xiaomi]
 - https://github.com/cfig/Android_boot_image_editor [Android ROM tool]
 - https://github.com/badabing2005/PixelFlasher [Android ROM tool for Pixel]
+- https://github.com/ShivamXD6/ROM-Shifter [Android app for fast ROM backup, restore, migration, and post-flash tooling with Magisk, KernelSU, and APatch support]
 - https://github.com/Zenlua/Tool-Tree [Android ROM/APK unpack-repack toolkit for root and non-root ARM64 devices]
 - https://github.com/Ctapchuk/android_bootable_recovery-OFRP [OrangeFox Recovery]
 
