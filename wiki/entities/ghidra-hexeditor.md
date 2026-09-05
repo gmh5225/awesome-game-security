@@ -12,7 +12,7 @@ confidence: medium
 
 Dockable hex editor Ghidra script plugin for viewing and patching the raw bytes of a program loaded in Ghidra. Written primarily in Java with a Swing-based UI forked from javadev/hexeditor; opens as a dockable Ghidra window alongside the Listing and Decompiler or falls back to a standalone window when docking is unavailable. Supports in-place byte editing, binary search, saving modified executables through Ghidra's BinaryExporter, and automatically matches Ghidra's look and feel including optional dark mode. Aimed at reverse engineering and game security workflows where researchers need to inspect and patch binaries without leaving the Ghidra environment. (source: wiki/sources/descriptions/sengi12__ghidra-hexEditor.md)
 
-In-Ghidra byte editing complements standalone hex workbenches such as [[imhex]] and [[hexwalk]], and sits beside other Ghidra plugin tooling such as [[ghidra-findcrypt]] and [[ghidra-nativeaot]].
+In-Ghidra byte editing complements standalone hex workbenches such as [[imhex]] and [[hexwalk]], and sits beside other Ghidra plugin tooling such as [[scalpel]], [[ghidra-findcrypt]] and [[ghidra-nativeaot]].
 
 ## Links
 
@@ -20,4 +20,4 @@ In-Ghidra byte editing complements standalone hex workbenches such as [[imhex]] 
 
 ## Related
 
-[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[imhex]] · [[hexwalk]] · [[ghidra-findcrypt]]
+[[overviews/reverse-engineering]] · [[overviews/game-hacking]] · [[ghidra]] · [[scalpel]] · [[imhex]] · [[hexwalk]] · [[ghidra-findcrypt]]

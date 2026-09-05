@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `readme:categories`: Cheat ~2785 (+1; ntdlll/[[scalpel]] Ghidra dark-mode hex/ASCII editor in RE Tools) / Anti Cheat ~708 / other major section counts stable; 41 sections; entity [[scalpel]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-05** — ingest `description:1401199262/NMIStackWalk`: entity [[nmi-stack-walk]] (1401199262; Windows kernel PoC; NMI to selected CPUs + stack backtrace in NMI callback; hidden no-module mapped-driver detection; C VS kernel driver; anti-rootkit / AC detection research; README Mapped Driver by NMI Callback); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback-handler]], [[nomad]], [[kernel-anti-cheat]], [[ac]], [[nmi]], and [[kernel-callbacks]].
 
 - **2026-09-05** — ingest `description:1401199262/RemoteCall`: entity [[remote-call]] (1401199262; C++ Windows kernel technique; kernel APC + KeUserModeCallback chain, driver I/O pivot, controlled context restore; avoids RWX shellcode allocation in target; advanced process injection + AC detection trade-off research; README [APC Remote Call]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[keusermodecallback]], [[apc-research]], [[injdrv]], [[kinject]], [[process-injection-techniques]], and [[windows-process-injection]].
