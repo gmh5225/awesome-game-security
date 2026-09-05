@@ -3493,6 +3493,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unxorer](entities/unxorer.md) — IDA Pro/Home stack-string deobfuscator (C++; Unicorn emulation; branching-path exploration + stack scan; configurable start points; cheat / IDA Plugins; SamuelTulach)
 - [usb-monitor-bof](entities/usb-monitor-bof.md) — Cobalt Strike async BOF: USB connect/disconnect via WM_DEVICECHANGE (Conquest; optional NetNTLM coerce; Some Tricks / Ring3)
 - [usbmon (KelvinMsft)](entities/usbmon.md) — kernel USB/HID monitoring framework; IRP/IOCTL/URB hooks + HID report parse; trace device data flows to consumer processes; input-stack RE / HID attack-detection surfaces
+- [usbliter8-fun](entities/usbliter8-fun.md) — iOS 27.0 beta CFW jailbreak via usbliter8 SecureROM exploit (34306; iPhone 11 Pro/A12–A13; RP2350 Pico 2 + Lightning PWN DFU; Python CFW/patch/ramdisk tooling; destructive — breaks SEP/WiFi/baseband/Apple services)
 - [usbsn (ekknod)](entities/usbsn.md) — root-only USB serial number changer (C++/Java; Windows/Linux/mobile; Some Tricks / Android; peripheral HWID spoof)
 - [UWPDumper](entities/uwp-dumper.md) — UWP runtime package dumper (C++ DLL + injector; Windows 10 SDK; inject into target process; Explore UWP / Microsoft Store game RE; Wunkolo)
 - [uwpinject](entities/uwpinject.md) — UWP early-startup CLI DLL injector (C; Win32 + AppModel APIs; suspended launch flow; UWP RE, runtime instrumentation, and debugging; Francesco149)
