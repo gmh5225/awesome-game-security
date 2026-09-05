@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:16SalomonArs/Pcileech-DMA-Firmware-Guide`: entity [[pcileech-dma-firmware-guide]] (16SalomonArs; Windows-first [[pcileech-fpga]] donor-emulation guide—BAR/capability/TLP work beyond VID/DID swap; shadow config, writemask protection, Python COE; Arbor/TeleScan PE; Squirrel/CaptainDMA/LeetDMA/Enigma/ZDMA flash, cold-boot validation, Zero4K BAR, Vivado ILA; optional Linux capture; Guide); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[dma-cfw-guide]], [[dma-fw-guide-2.0]], and [[pcileechgen]].
+
 - **2026-09-05** — ingest `description:19h/chernobog`: entity [[chernobog]] (19h; C++ Hex-Rays IDA Pro plugin; automatic Hikari LLVM deobfuscation—CFF/bogus-branch restore, indirect control-transfer resolution, encrypted data recovery; Z3 symbolic reasoning + MBA simplification; malware/game-security RE); cited on [[mixed-boolean-arithmetic]] and [[control-flow-flattening]]; cross-linked [[goomba]], [[d810]], [[hex-rays-deob]], and [[eac-analysis]].
 
 - **2026-09-05** — ingest `description:19h/eac-analysis`: entity [[eac-analysis]] (19h; Linux EAC userland `eac.elf` VM reconstruction; dlopen/trace harness, dispatch/VMTAIL probes, bytecode→IR/CFG, handler ISA, static path replay, MBA reducers; GDB dynamic tracing; Anti Cheat / Linux ELF); cited on [[concepts/easy-anti-cheat]] and [[overviews/reverse-engineering]]; cross-linked [[eac-reversal]], [[eac-extractor-utility]], [[vmattack]], [[mixed-boolean-arithmetic]], and [[chernobog]].
