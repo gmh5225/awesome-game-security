@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:2x7EQ13/CreateProcessAsPPL`: entity [[createprocessasppl]] (2x7EQ13; C++ CLI loader; launches processes at WinTCB/Windows/Antimalware/LSA PPL levels; protected-process boundary / tooling compatibility / defensive-assumption research; cheat / loader); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[pplkiller]], [[easy-handles]], [[ghostdebug]], [[remap]], and [[meme-rw]].
+
 - **2026-09-05** — ingest `description:34306/mdc0`: entity [[mdc0]] (34306; Swift jailed-device iOS UI customization app; iOS 15.0–18.3.2; exploit path modifies normally read-only system files for dock/blur/lockscreen tweaks + respring helper; CVE-2025-24203; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dirty-zero]], [[trollstore]], [[ipapatch]], [[vphone-aio]], and [[usbliter8-fun]].
 
 - **2026-09-05** — ingest `description:34306/usbliter8-fun`: entity [[usbliter8-fun]] (34306; iOS 27.0 beta CFW jailbreak via usbliter8 SecureROM exploit; RP2350/Pico 2 + Lightning PWN DFU; Python CFW build/restore + DeviceTree/kernel patches + SSH ramdisk + userland binary patch; USB Restricted Mode / sandbox / AMFI trust-cache / SEP workarounds; bootstrap + package manager; A12/A13 iPhone 11 Pro only; destructive — breaks SEP/WiFi/baseband/Apple services; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[palera1n]], [[momentarius]], [[vphone-aio]], [[vphone-cli]], and [[embedded-hacking]].

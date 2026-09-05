@@ -18,4 +18,4 @@ Windows BYOVD tool that disables **Protected Process Light (PPL)** on target pro
 
 ## Related
 
-[[byovd]] · [[rtcore64-vulnerability]] · [[phantomkiller]] · [[process-killer-byovd]] · [[kslkatz]] · [[kvc]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[byovd]] · [[createprocessasppl]] · [[rtcore64-vulnerability]] · [[phantomkiller]] · [[process-killer-byovd]] · [[kslkatz]] · [[kvc]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]

@@ -20,7 +20,8 @@ sources:
   - wiki/sources/descriptions/V-i-x-x__kernel-callback-removal.md
   - wiki/sources/descriptions/Mr-Un1k0d3r__AMSI-ETW-Patch.md
   - wiki/sources/descriptions/Idov31__EtwLeakKernel.md
-updated: 2026-08-26
+  - wiki/sources/descriptions/2x7EQ13__CreateProcessAsPPL.md
+updated: 2026-09-05
 confidence: high
 ---
 
@@ -42,6 +43,7 @@ Consumer-side **stack trace** fields can expose **kernel pointers** when provide
 
 - Provider name: `Microsoft-Windows-Threat-Intelligence`
 - Availability: Protected Process Light (PPL) and above
+- Lab PPL spawn tooling such as [[createprocessasppl]] (2x7EQ13; C++ CLI; WinTCB/Windows/Antimalware/LSA launch modes; synthetic protected targets for cross-process telemetry and tooling compatibility tests) (source: wiki/sources/descriptions/2x7EQ13__CreateProcessAsPPL.md)
 - Typical events: `NtReadVirtualMemory`, `NtWriteVirtualMemory`, `NtMapViewOfSection` targeting protected processes
 - Defensive consumers: [[tietwagent]] (krabsetw/Yara; ELAM/PPL agent lane) (source: wiki/sources/descriptions/xuanxuan0__TiEtwAgent.md)
 - Research consumers without driver/PPL: [[threat-intelligence-consumer]] (Win11 24H2/25H2) (source: wiki/sources/descriptions/preludeorg__ThreatIntelligenceConsumer.md)
@@ -71,4 +73,4 @@ Stress-testing samples such as [[disable-threat-tracing]] sit on the disable/bli
 
 ## Related
 
-[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[infinityhook-pro]] · [[infinityhookpro-main]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
+[[kernel-callbacks]] · [[hvci]] · [[etw-explorer]] · [[etw-watcher]] · [[etwleakkernel]] · [[etwti-fluctuation-monitor]] · [[etw-syscall-monitor]] · [[etw-syscall]] · [[infinityhook]] · [[etwhook-infinityhookclass]] · [[infinityhook-promax]] · [[infinityhook-latest]] · [[infinityhook-pro]] · [[infinityhookpro-main]] · [[tietwagent]] · [[threat-intelligence-consumer]] · [[etwti-syscall-hook]] · [[disable-threat-tracing]] · [[amsi-etw-patch]] · [[kernel-callback-removal]] · [[createprocessasppl]] · [[overviews/windows-kernel]] · [[overviews/anti-cheat]]
