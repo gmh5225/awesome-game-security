@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `readme:categories`: Cheat ~2782 (+2; mytechnotalent/[[hacking-rust]] Rust RE course + [[go-hacking]] Golang RE course in Guide) / Anti Cheat ~708 / other major section counts stable; 41 sections; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-05** — ingest `description:2x7EQ13/CreateProcessAsPPL`: entity [[createprocessasppl]] (2x7EQ13; C++ CLI loader; launches processes at WinTCB/Windows/Antimalware/LSA PPL levels; protected-process boundary / tooling compatibility / defensive-assumption research; cheat / loader); cited on [[overviews/windows-kernel]] and [[concepts/etw-threat-intelligence]]; cross-linked [[pplkiller]], [[easy-handles]], [[ghostdebug]], [[remap]], and [[meme-rw]].
 
 - **2026-09-05** — ingest `description:34306/mdc0`: entity [[mdc0]] (34306; Swift jailed-device iOS UI customization app; iOS 15.0–18.3.2; exploit path modifies normally read-only system files for dock/blur/lockscreen tweaks + respring helper; CVE-2025-24203; cheat / iOS jailbreak); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[dirty-zero]], [[trollstore]], [[ipapatch]], [[vphone-aio]], and [[usbliter8-fun]].
