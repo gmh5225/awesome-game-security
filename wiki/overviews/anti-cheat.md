@@ -577,6 +577,7 @@ sources:
   - wiki/sources/descriptions/donnaskiez__ac.md
   - wiki/sources/descriptions/donnaskiez__nmi-callback-handler.md
   - wiki/sources/descriptions/1401199262__NMIStackWalk.md
+  - wiki/sources/descriptions/1401199262__HookSwapContext.md
   - wiki/sources/descriptions/dobin__SuperMega.md
   - wiki/sources/descriptions/doomedraven__Tools.md
   - wiki/sources/descriptions/theo-abel__awesome-anti-virtualization.md
@@ -1071,6 +1072,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[hook-hvl-switch-virtual-address-space]] — `HvlSwitchVirtualAddressSpace` hook; CR3 transition manipulation hides pages from process memory scans during address-space context switches (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Hook-HvlSwitchVirtualAddressSpace.md)
 - [[hook-guard]] — global exception-hook chain driver; monitors/obfuscates CR3 address-space switches and logs protected-context transition attempts; PatchGuard-aware/HVCI-compatible defensive memory-access-control research (SamuelTulach; README Global exception/KdpDebugRoutineSelect) (source: wiki/sources/descriptions/SamuelTulach__HookGuard.md)
 - [[driver-hypercall-page-hook]] — `nt!HvcallCodeVa` hypercall-page hook; custom dispatcher + `HvlEnlightenments` flip routes context-switch hypercalls through callbacks (gmh5225; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/gmh5225__Driver-HypercallPageHook.md)
+- [[hook-swap-context]] — ETW/CKCL-based SwapContext scheduling-path hook; custom stack-frame checks invoke handler during selected thread scheduling flow (1401199262; C++ kernel PoC; README SwapContext hook) (source: wiki/sources/descriptions/1401199262__HookSwapContext.md)
 - [[hyperdeceit]] — reusable C++ Hyper-V impersonation library; intercepts selected kernel hypercalls with ready-to-hook TLB flush, sleep/shutdown, address-space switch, and spinlock paths (Xyrem; README `[HvcallCodeVa]`) (source: wiki/sources/descriptions/Xyrem__HyperDeceit.md)
 - [[x14-08-coverstory-blizzard]] — WoW cheat framework with Warden loader hooks / RunScript injection (research ref for Warden internals) (source: wiki/sources/descriptions/xakepru__x14.08-coverstory-blizzard.md)
 - [[sky-engine]] — WoW protected-Lua unlocker via taint-state reset (adde88; C++; cheat prototyping and client-script detection research; cheat / game:wow [Wow Lua Unlocker]) (source: wiki/sources/descriptions/adde88__SkyEngine.md)

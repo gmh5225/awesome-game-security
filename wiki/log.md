@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1401199262/HookSwapContext`: entity [[hook-swap-context]] (1401199262; Windows kernel PoC; ETW/CKCL-based SwapContext scheduling-path hook + custom stack-frame checks; C++ trace control, syscall-facing hooks, kernel utilities; thread scheduling interception research; README SwapContext hook); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kernel-snippets]], [[hook-hvl-switch-virtual-address-space]], [[driver-hypercall-page-hook]], [[hook-guard]], [[yumekage]], [[nmi-stack-walk]], [[remote-call]], and [[etw-threat-intelligence]].
+
 - **2026-09-05** — ingest `description:ntdlll/Scalpel`: entity [[scalpel]] (ntdlll; Java 21/Swing Ghidra dockable dark-mode hex/ASCII editor; Listing-synced cursor; 256 B–64 KiB read window; wildcard hex/UTF-8 search; inline transaction patching; game-security/AC RE); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[ghidra]], [[ghidra-hexeditor]], [[imhex]], and [[hexwalk]].
 
 - **2026-09-05** — ingest `readme:categories`: Cheat ~2785 (+1; ntdlll/[[scalpel]] Ghidra dark-mode hex/ASCII editor in RE Tools) / Anti Cheat ~708 / other major section counts stable; 41 sections; entity [[scalpel]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
