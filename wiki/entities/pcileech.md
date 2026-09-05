@@ -12,7 +12,8 @@ sources:
   - wiki/sources/descriptions/Herooyyy__Pcileech-Activator-Anti-crack.md
   - wiki/sources/descriptions/Herooyyy__Pcileech-AMDPCI.md
   - wiki/sources/descriptions/Herooyyy__Free-DMA-Firmware-pcileech.md
-updated: 2026-08-24
+  - wiki/sources/descriptions/12i192i1043__pcileech-cmedia-cmi8738.md
+updated: 2026-09-05
 confidence: high
 ---
 
@@ -35,4 +36,4 @@ Unmodified [[pcileech-fpga]] builds commonly expose Tier-0/1 detection signals: 
 
 ## Related
 
-[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-activator-anti-crack]] · [[pcileech-amdpci]] · [[free-dma-firmware-pcileech]] · [[pcileech-intel-i226-v-fullemu]] · [[pcileech-isabridge]] · [[pcileech-dma-proxy]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-memprocfs-mcp]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[dma]] · [[iommu]] · [[pcileech-fpga]] · [[pcileech-activator-anti-crack]] · [[pcileech-amdpci]] · [[free-dma-firmware-pcileech]] · [[pcileech-intel-i226-v-fullemu]] · [[pcileech-isabridge]] · [[pcileech-cmedia-cmi8738]] · [[pcileech-dma-proxy]] · [[pcileech-dma-fullstealth]] · [[pcileech-fpga-dma-vmd]] · [[pcileech-dma-nvme-vmd]] · [[pcileech-memprocfs-mcp]] · [[dma-invoker]] · [[dma-cheat-engine-loader]] · [[dma-speedtest-memflow-rs]] · [[overviews/dma-attack]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
