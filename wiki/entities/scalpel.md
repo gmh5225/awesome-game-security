@@ -14,6 +14,14 @@ Native Java/Swing Ghidra extension providing a dockable dark-mode hex and ASCII 
 
 Complements [[ghidra-hexeditor]] and standalone workbenches such as [[imhex]] and [[hexwalk]]; sits in the Cheat → RE Tools / Ghidra Plugins lane.
 
+## Features
+
+- Dockable terminal-inspired dark-mode hex/ASCII grid synced to the Ghidra Listing cursor
+- Arbitrary address jumps; configurable read window from 256 bytes to 64 KiB
+- Inline byte patching through Ghidra transactions
+- Memory search with wildcard hex patterns or quoted UTF-8 strings
+- Copy selected bytes as hex or ASCII; unreadable ranges handled gracefully
+
 ## Links
 
 - Repo: https://github.com/ntdlll/Scalpel
