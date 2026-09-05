@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:34306/vphone-aio`: entity [[vphone-aio]] (34306; all-in-one macOS shell script + compressed archive; pre-jailbroken vphone iOS emulator with full bootstrap; automates download/merge/extract of [[vphone-cli]]; SIP disabled + AMFI bypassed; iOS security RE / app analysis and testing; cheat / IOS Emulator [1 script run the vphone]); cited on [[overviews/mobile-security]] and [[overviews/reverse-engineering]]; cross-linked [[vphone-cli]], [[xnu-qemu-arm64]], [[darwin-vm]], [[qemu-apple-silicon]], and [[utm]].
+
 - **2026-09-05** — ingest `description:360NENZ/Taiga74164-Akebi-GC`: entity [[taiga74164-akebi-gc]] (360NENZ/Taiga74164; large C++ Genshin Impact modification framework; injector + in-game menu; protection bypass, player/world modifiers, teleport, ESP visuals, debug utilities; multilingual docs; cheat / game:genshin impact [Cheat]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[genshin-akebi-gc]], [[akebi-cheat-3.3]], [[akebi-packet-sniffer]], [[genshin-impact-base]], and [[il2cpp]].
 
 - **2026-09-04** — ingest `description:3a1/Evelion`: entity [[evelion]] (3a1; C++ external ESP for CS 1.6; ImGui overlay with configurable visuals; stream-proof presentation model outside normal game capture paths; Visual Studio; windowed-mode legacy target; external cheat architecture + overlay rendering + basic AC evasion; cheat / game:cs1.6 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[zodiak]], [[imgui-external-overlay]], [[ezfrags]], [[oxware]], [[hpp-hack]], and [[anti-screenshot-capture]].
