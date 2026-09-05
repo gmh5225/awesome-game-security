@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:10HEAD/ValorantOffsets`: entity [[valorantoffsets]] (10HEAD; lightweight Valorant offset pack; C/C++ engine function + gameplay structure constants; intentionally minimal for quick post-patch updates; external RE and automation tooling; cheat / game:valorant [Offset]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[valorant-offsets]], [[valorant-externals]], [[valorant-offsets-autoupdater]], and [[vanguard]].
+
 - **2026-09-05** — ingest `description:12i192i1043/pcileech-cmedia-cmi8738`: entity [[pcileech-cmedia-cmi8738]] (12i192i1043; C-Media CMI8738/PCI-SX legacy sound-card [[pcileech-fpga]] firmware; SystemVerilog/Vivado; donor config space + full BAR0; null audio endpoint with position-counter interrupts; optional fake MRd generator for bus-activity mimicry while isolating PCILeech DMA; Captain DMA/Enigma x1/Squirrel/Screamer M.2/TBX4; hardware emulation + driver/PCIe/DMA-AC research; cheat / DMA); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech]], [[pcileech-fpga]], [[pcileech-dma-firmware-guide]], [[pcileech-isabridge]], and [[dma-pcileech]].
 
 - **2026-09-05** — ingest `description:1337kenzo/gdrv-loader-updated`: entity [[gdrv-loader-updated]] (1337kenzo; C/C++ updated `gdrv.sys` unsigned loader; Win10/11 compatibility; streamlined vulnerable-driver byte loading; CLI load/unload; kernel security research; README `[gdrv.sys Win11]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[gdrv-loader]], [[gdrv-loader-v2]], and [[gdrv-sys-exploit]].
