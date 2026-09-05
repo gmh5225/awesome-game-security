@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1337kenzo/gdrv-loader-updated`: entity [[gdrv-loader-updated]] (1337kenzo; C/C++ updated `gdrv.sys` unsigned loader; Win10/11 compatibility; streamlined vulnerable-driver byte loading; CLI load/unload; kernel security research; README `[gdrv.sys Win11]`); cited on [[overviews/windows-kernel]] and [[byovd]]; cross-linked [[gdrv-loader]], [[gdrv-loader-v2]], and [[gdrv-sys-exploit]].
+
 - **2026-09-05** — ingest `description:1401199262/HookHvcallCodeVa`: entity [[hook-hvcall-code-va]] (1401199262; Windows kernel PoC; HvcallCodeVa hypercall code callback hook during address-space switching; pattern-scan internals, custom callback, enlightenment-flag adjustment, CR3 + per-CPU hypercall page setup; kernel internals / hypervisor-behavior research; README HvcallCodeVa); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[hook-swap-context]], [[driver-hypercall-page-hook]], [[hook-hvl-switch-virtual-address-space]], [[hyperdeceit]], [[yumekage]], [[nmi-stack-walk]], and [[remote-call]].
 
 - **2026-09-05** — ingest `description:1401199262/HookSwapContext`: entity [[hook-swap-context]] (1401199262; Windows kernel PoC; ETW/CKCL-based SwapContext scheduling-path hook + custom stack-frame checks; C++ trace control, syscall-facing hooks, kernel utilities; thread scheduling interception research; README SwapContext hook); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[kernel-snippets]], [[hook-hvl-switch-virtual-address-space]], [[driver-hypercall-page-hook]], [[hook-guard]], [[yumekage]], [[nmi-stack-walk]], [[remote-call]], and [[etw-threat-intelligence]].

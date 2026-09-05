@@ -1521,6 +1521,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [gdrv-sys-exploit](entities/gdrv-sys-exploit.md) — Gigabyte `gdrv.sys` PoC exploit toolkit (C++ Visual Studio; arbitrary-write and shellcode examples; Win11; educational BYOVD research; AmitMoshel1)
 - [gdriver-lib](entities/gdriver-lib.md) — C++ library wrapping Gigabyte `gdrv64.sys` (physmem R/W, physical mapping, kernel ops via IOCTLs; BYOVD access primitive)
 - [gdrv-loader-v2](entities/gdrv-loader-v2.md) — Gigabyte `gdrv.sys` loader v2 (C/C++; cheat / vulnerable-driver driver development)
+- [gdrv-loader-updated](entities/gdrv-loader-updated.md) — Updated Gigabyte `gdrv.sys` unsigned loader (C/C++; Win10/11; CLI load/unload; kernel research; 1337kenzo)
 - [GDB-Windows-Binaries](entities/gdb-windows-binaries.md) — portable Windows GDB (mingw-w64; TUI/Python; Cheat Debugging)
 - [GDDumper](entities/gddumper.md) — Cheat Engine Lua: Godot 3.x/4.x SceneTree / GDScript runtime dump (Win x86/x64)
 - [GDPatch](entities/gdpatch.md) — cross-platform Godot 3.x/4.x mod loader (Rust; runtime GDScript patching, Lua hooks, filesystem virtualization; Win/Linux/macOS; runtime mod loading without modifying game files)

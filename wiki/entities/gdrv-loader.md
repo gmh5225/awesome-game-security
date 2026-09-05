@@ -12,7 +12,7 @@ confidence: medium
 
 Windows tool that loads unsigned kernel drivers by exploiting Gigabyte's signed vulnerable **`gdrv64.sys`** driver. The manual-mapping pipeline uses gdrv's arbitrary memory read/write IOCTLs to map a custom driver into kernel memory, bypassing Driver Signature Enforcement (DSE) through [[byovd]]. Aimed at kernel researchers studying Gigabyte driver exploitation and DSE bypass. (source: wiki/sources/descriptions/gmh5225__gdrv-loader.md)
 
-Complements [[gdrv-loader-v2]] (alternate `gdrv.sys` loader implementation), multi-provider mappers such as [[kdu]], and Gigabyte-family tooling in [[loldrivers]] / [[msft-driverblocklist]] blocklist research.
+Complements [[gdrv-loader-v2]] (alternate `gdrv.sys` loader implementation), [[gdrv-loader-updated]] (Win10/11 updated loader), multi-provider mappers such as [[kdu]], and Gigabyte-family tooling in [[loldrivers]] / [[msft-driverblocklist]] blocklist research.
 
 ## Links
 
@@ -20,4 +20,4 @@ Complements [[gdrv-loader-v2]] (alternate `gdrv.sys` loader implementation), mul
 
 ## Related
 
-[[byovd]] · [[gdrv-loader-v2]] · [[kdu]] · [[saturn-mapper]] · [[known-driver-mappers]] · [[loldrivers]] · [[msft-driverblocklist]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
+[[byovd]] · [[gdrv-loader-v2]] · [[gdrv-loader-updated]] · [[kdu]] · [[saturn-mapper]] · [[known-driver-mappers]] · [[loldrivers]] · [[msft-driverblocklist]] · [[overviews/windows-kernel]] · [[overviews/game-hacking]]
