@@ -1,0 +1,1166 @@
+Project Path: arc_Elcapitanoe_pif-config-generator_lx5p_tl0
+
+Source Tree:
+
+```txt
+arc_Elcapitanoe_pif-config-generator_lx5p_tl0
+├── LICENSE
+├── README.md
+├── pyproject.toml
+├── requirements.txt
+├── src
+│   └── pif_generator
+│       ├── __init__.py
+│       ├── builder.py
+│       ├── cli.py
+│       ├── models.py
+│       ├── pipeline.py
+│       └── release.py
+├── state
+│   ├── last_beta_tag.txt
+│   └── last_stable_tag.txt
+└── tests
+    ├── test_builder.py
+    └── test_release.py
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 Domi Adiwijaya
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# PIF Config Generator
+
+Automated pipeline for tracking Android build properties and compiling validated Play Integrity Fix (PIF) JSON profiles.
+
+```
+Upstream Repositories
+  ├── Pixel-Props/build.prop (Stable)
+  └── Elcapitanoe/Build-Prop-BETA (Beta)
+            │
+            ▼
+  [ pif-gen check ] ─── Poll tags vs local state/
+            │
+            ▼ (On tag update)
+  [ pif-gen build ] ─── Download ZIPs ──> Extract system.prop ──> Parse & Validate
+            │
+            ▼
+  [ pif-gen publish ] ─ Deploy unified release bundle (vYYYY.MM.DD)
+```
+
+---
+
+## Schema Reference
+
+Properties are resolved across partition namespaces (`system_ext` > `system` > `product` > `vendor`) and validated against Pydantic schemas.
+
+### Extended Profile Schema
+
+| Key | Property Resolution Order | Description |
+|:---|:---|:---|
+| `ID` | `ro.system_ext.build.id` → `ro.system.build.id` → `ro.build.id` → `ro.vendor.build.id` | Android build identifier |
+| `BRAND` | `ro.product.system_ext.brand` → `ro.product.system.brand` → `ro.product.brand` | Device brand (`google`) |
+| `DEVICE` | `ro.product.system_ext.device` → `ro.product.system.device` → `ro.product.device` | Hardware board codename |
+| `MANUFACTURER` | `ro.product.system_ext.manufacturer` → `ro.product.manufacturer` | Hardware manufacturer |
+| `MODEL` | `ro.product.system_ext.model` → `ro.product.system.model` → `ro.product.model` | Commercial model name |
+| `PRODUCT` | `ro.product.system_ext.name` → `ro.product.system.name` → `ro.product.name` | Product codename |
+| `FINGERPRINT` | `ro.system_ext.build.fingerprint` → `ro.build.fingerprint` → `ro.vendor.build.fingerprint` | Build fingerprint |
+| `SECURITY_PATCH` | `ro.build.version.security_patch` → parsed date pattern | Patch date (`YYYY-MM-DD`) |
+| `DEVICE_INITIAL_SDK_INT` | `ro.product.first_api_level` → `ro.board.first_api_level` → `ro.system.build.version.sdk` | Factory launch SDK |
+| `RELEASE` | `ro.system_ext.build.version.release` → `ro.build.version.release` | Android OS version |
+| `TYPE` | `ro.system_ext.build.type` → `ro.build.type` | Build type (`user`) |
+| `TAG` | `ro.system_ext.build.tags` → `ro.build.tags` | Signing key tag (`release-keys`) |
+| `DEBUG` | Evaluated (`ro.debuggable == 1` or `TYPE != user`) | Debug build flag (`false`) |
+
+### Generated Output Example
+
+```json
+{
+  "ID": "CP41.260814.003.B1",
+  "BRAND": "google",
+  "DEVICE": "komodo",
+  "MANUFACTURER": "Google",
+  "FINGERPRINT": "google/komodo_beta/komodo:17/CP41.260814.003.B1/16166531:user/release-keys",
+  "MODEL": "Pixel 9 Pro XL",
+  "PRODUCT": "komodo_beta",
+  "SECURITY_PATCH": "2026-08-14",
+  "DEVICE_INITIAL_SDK_INT": "34",
+  "TYPE": "user",
+  "TAG": "release-keys",
+  "RELEASE": "17",
+  "DEBUG": false,
+  "spoofBuild": "1",
+  "spoofProps": "0",
+  "spoofProvider": "0",
+  "spoofSignature": "0",
+  "spoofVendingSdk": "0",
+  "verboseLogs": "0"
+}
+```
+
+---
+
+## Installation
+
+### Prerequisites
+
+Install `Python 3.10+`, `pip`, and `git`:
+
+**Ubuntu / Debian / WSL:**
+```bash
+sudo apt update && sudo apt install -y python3 python3-pip python3-venv git
+```
+
+**Fedora / RHEL:**
+```bash
+sudo dnf install -y python3 python3-pip git
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S --needed python python-pip git
+```
+
+**macOS (Homebrew):**
+```bash
+brew install python git
+```
+
+**Windows:**
+Install Python 3.10+ via [python.org](https://www.python.org/downloads/) or winget:
+```powershell
+winget install Python.Python.3.12 Git.Git
+```
+
+### Setup
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Elcapitanoe/pif-config-generator.git
+cd pif-config-generator
+
+# 2. Create and activate an isolated virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Upgrade pip and install package in editable mode with dev tools
+pip install --upgrade pip
+pip install -e ".[dev]"
+```
+
+Verify the installation:
+
+```bash
+pif-gen --help
+```
+
+---
+
+## Usage
+
+### 1. Build a Single Profile Locally
+
+Generate a validated PIF JSON profile from a local `system.prop` or property dump. No network access or GitHub token required.
+
+```bash
+pif-gen build --file path/to/system.prop --output-dir output
+```
+
+Or extract directly from a remote ZIP URL:
+
+```bash
+pif-gen build --url "https://github.com/.../device.zip" --output-dir output
+```
+
+Options:
+- `--file <path>`: Path to the input property dump file.
+- `--url <url>`: Direct URL to an upstream property ZIP archive.
+- `--output-dir <dir>`: Destination directory for the generated JSON file (defaults to current directory `.`).
+- `--format <extended|legacy>`: Profile schema to target (`extended` for modern modules, `legacy` for older modules; default: `extended`).
+- `--channel <stable|beta>`: Target release channel label (default: `stable`).
+
+#### Capturing device properties with ADB
+
+To dump build properties directly from a connected Android device:
+
+```bash
+adb shell getprop | sed -r 's/\[(.*)\]: \[(.*)\]/\1=\2/' > system.prop
+pif-gen build --file system.prop --output-dir output
+```
+
+#### Sample `system.prop`
+
+```properties
+ro.system_ext.build.id=CP41.260814.003.B1
+ro.product.system_ext.brand=google
+ro.product.system_ext.device=komodo
+ro.product.system_ext.manufacturer=Google
+ro.product.system_ext.model=Pixel 9 Pro XL
+ro.product.system_ext.name=komodo_beta
+ro.system_ext.build.fingerprint=google/komodo_beta/komodo:17/CP41.260814.003.B1/16166531:user/release-keys
+ro.build.version.security_patch=2026-08-14
+ro.product.first_api_level=34
+ro.system_ext.build.version.release=17
+ro.system_ext.build.type=user
+ro.system_ext.build.tags=release-keys
+ro.debuggable=0
+```
+
+---
+
+### 2. Check for Upstream Updates
+
+Poll monitored upstream repositories (`Pixel-Props/build.prop` for stable, `Elcapitanoe/Build-Prop-BETA` for beta) and compare latest releases against local tracking tags in `state/last_<channel>_tag.txt`.
+
+Works unauthenticated for checking public releases (subject to standard GitHub API rate limits), or authenticated via personal access token:
+
+```bash
+# Optional: Set token to avoid rate limits
+export GITHUB_TOKEN="ghp_xxx"
+
+pif-gen check --state-dir state
+```
+
+Options:
+- `--state-dir <dir>`: Directory storing release tag state files (default: `state`).
+- `--token <token>`: GitHub personal access token (falls back to the `GITHUB_TOKEN` environment variable).
+
+Sample output:
+
+```json
+{
+  "new_release": true,
+  "results": [
+    {
+      "channel": "beta",
+      "tag": "2026.08.14",
+      "assets": [
+        {
+          "name": "Komodo_beta.zip",
+          "url": "https://github.com/.../Komodo_beta.zip"
+        }
+      ],
+      "count": 1
+    }
+  ]
+}
+```
+
+---
+
+### 3. Batch Build from Asset ZIPs (CI Pipeline)
+
+Download property ZIP archives from URLs, extract `system.prop` in memory, validate against the Pydantic schema, write JSON files to disk, and write a manifest list of generated paths:
+
+```bash
+pif-gen build \
+  --channel beta \
+  --assets-json '[{"name": "Komodo_beta.zip", "url": "https://github.com/.../Komodo_beta.zip"}]' \
+  --output-dir output \
+  --manifest output/manifest.txt
+```
+
+Options:
+- `--channel <stable|beta>`: Target release channel for the asset payloads.
+- `--assets-json <json>`: JSON array of `{ "name": "...", "url": "..." }` asset descriptors.
+- `--output-dir <dir>`: Output directory for generated JSON files.
+- `--manifest <path>`: Output text file tracking generated profile paths.
+
+---
+
+### 4. Publish Release to GitHub
+
+Upload generated profiles from a manifest file to GitHub Releases on the target repository using unified daily version tags (`vYYYY.MM.DD`):
+
+```bash
+export GITHUB_TOKEN="ghp_xxx"
+pif-gen publish \
+  --repo "owner/repo" \
+  --manifest output/manifest.txt
+```
+
+Options:
+- `--repo <owner/repo>`: Target GitHub repository.
+- `--manifest <path>`: Path to the manifest file containing paths of files to upload.
+- `--token <token>`: GitHub personal access token (falls back to `GITHUB_TOKEN`).
+
+---
+
+## Tests
+
+Run the test suite using `pytest`:
+
+```bash
+pytest tests/ -v
+```
+
+Or using the standard library test runner:
+
+```bash
+python3 -m unittest discover tests -v
+```
+
+---
+
+```
+
+`pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pif-config-generator"
+version = "1.0.0"
+description = "Automated pipeline for extracting and generating Play Integrity Fix (PIF) device profiles from upstream build properties."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "PyGithub>=2.1.1",
+    "pydantic>=2.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+pif-gen = "pif_generator.cli:main"
+
+```
+
+`requirements.txt`:
+
+```txt
+requests>=2.31.0
+PyGithub>=2.1.1
+pydantic>=2.5.0
+
+```
+
+`src/pif_generator/__init__.py`:
+
+```py
+"""PIF Config Generator package."""
+
+__version__ = "1.0.0"
+
+```
+
+`src/pif_generator/builder.py`:
+
+```py
+import io
+import re
+import zipfile
+from typing import Dict
+import requests
+
+from .models import ExtendedPIFProfile, LegacyPIFProfile
+
+
+class PropParser:
+    @staticmethod
+    def parse(content: str) -> Dict[str, str]:
+        props: Dict[str, str] = {}
+        for line in content.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, val = line.split("=", 1)
+            props[key.strip()] = val.strip()
+        return props
+
+    @staticmethod
+    def extract_first(props: Dict[str, str], *keys: str, default: str = "") -> str:
+        for k in keys:
+            val = props.get(k, "").strip()
+            if val:
+                return val
+        return default
+
+
+class ProfileBuilder:
+    @staticmethod
+    def extract_security_patch(props: Dict[str, str], fingerprint: str, build_id: str) -> str:
+        direct_patch = PropParser.extract_first(
+            props,
+            "ro.build.version.security_patch",
+            "ro.vendor.build.security_patch",
+            "ro.system.build.version.security_patch",
+        )
+        if direct_patch and len(direct_patch) == 10:
+            return direct_patch
+
+        # Date pattern inside build IDs: BP3A.251005.004 -> 2025-10-05
+        date_pattern = r"\.(\d{2})(\d{2})(\d{2})\."
+        if build_id:
+            match = re.search(date_pattern, build_id)
+            if match:
+                y, m, d = match.groups()
+                return f"20{y}-{m}-{d}"
+
+        if fingerprint:
+            fp_match = re.search(r"/([A-Z0-9]+\.\d{6}\.[^/]+)/", fingerprint)
+            if fp_match:
+                match = re.search(date_pattern, fp_match.group(1))
+                if match:
+                    y, m, d = match.groups()
+                    return f"20{y}-{m}-{d}"
+
+        return direct_patch
+
+    @classmethod
+    def build_legacy(cls, props: Dict[str, str]) -> LegacyPIFProfile:
+        fingerprint = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.fingerprint",
+            "ro.system.build.fingerprint",
+            "ro.build.fingerprint",
+            "ro.product.build.fingerprint",
+            "ro.bootimage.build.fingerprint",
+            "ro.vendor.build.fingerprint",
+        )
+        build_id = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.id",
+            "ro.system.build.id",
+            "ro.build.id",
+            "ro.vendor.build.id",
+        )
+        product = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.name",
+            "ro.product.system.name",
+            "ro.build.product",
+            "ro.product.device",
+            "ro.product.name",
+            "ro.product.board",
+        )
+        device = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.device",
+            "ro.product.system.device",
+            "ro.product.device",
+            "ro.build.product",
+            "ro.product.board",
+        )
+        first_api_level = PropParser.extract_first(
+            props,
+            "ro.product.first_api_level",
+            "ro.board.first_api_level",
+            "ro.board.api_level",
+            "ro.system_ext.build.version.sdk",
+            "ro.system.build.version.sdk",
+            "ro.build.version.sdk",
+            default="0",
+        )
+
+        security_patch = cls.extract_security_patch(props, fingerprint, build_id)
+
+        return LegacyPIFProfile(
+            MANUFACTURER=PropParser.extract_first(props, "ro.product.manufacturer", default="Google"),
+            MODEL=PropParser.extract_first(props, "ro.product.model", default="Unknown"),
+            FINGERPRINT=fingerprint,
+            BRAND=PropParser.extract_first(props, "ro.product.brand", default="google"),
+            PRODUCT=product,
+            DEVICE=device,
+            SECURITY_PATCH=security_patch,
+            FIRST_API_LEVEL=str(int(first_api_level)),
+        )
+
+    @classmethod
+    def build_extended(cls, props: Dict[str, str]) -> ExtendedPIFProfile:
+        fingerprint = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.fingerprint",
+            "ro.system.build.fingerprint",
+            "ro.build.fingerprint",
+            "ro.product.build.fingerprint",
+            "ro.bootimage.build.fingerprint",
+            "ro.vendor.build.fingerprint",
+            "ro.system_dlkm.build.fingerprint",
+        )
+        build_id = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.id",
+            "ro.system.build.id",
+            "ro.build.id",
+            "ro.vendor.build.id",
+            "ro.system_dlkm.build.id",
+        )
+        product = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.name",
+            "ro.product.system.name",
+            "ro.product.name",
+            "ro.build.product",
+            "ro.product.system_ext.device",
+            "ro.product.device",
+            "ro.product.board",
+        )
+        device = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.device",
+            "ro.product.system.device",
+            "ro.product.device",
+            "ro.build.product",
+            "ro.product.board",
+        )
+        brand = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.brand",
+            "ro.product.system.brand",
+            "ro.product.brand",
+            default="google",
+        )
+        manufacturer = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.manufacturer",
+            "ro.product.system.manufacturer",
+            "ro.product.manufacturer",
+            default="Google",
+        )
+        model = PropParser.extract_first(
+            props,
+            "ro.product.system_ext.model",
+            "ro.product.system.model",
+            "ro.product.model",
+            default="Unknown",
+        )
+        initial_sdk = PropParser.extract_first(
+            props,
+            "ro.product.first_api_level",
+            "ro.board.first_api_level",
+            "ro.board.api_level",
+            "ro.system_ext.build.version.sdk",
+            "ro.system.build.version.sdk",
+            "ro.build.version.sdk",
+            default="0",
+        )
+        build_type = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.type",
+            "ro.system.build.type",
+            "ro.build.type",
+            default="user",
+        )
+        build_tags = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.tags",
+            "ro.system.build.tags",
+            "ro.build.tags",
+            default="release-keys",
+        )
+        release = PropParser.extract_first(
+            props,
+            "ro.system_ext.build.version.release",
+            "ro.system.build.version.release",
+            "ro.build.version.release",
+            "ro.build.version.release_or_codename",
+        )
+        debuggable = PropParser.extract_first(props, "ro.debuggable", default="0")
+        is_debug = build_type in ["userdebug", "eng"] or debuggable == "1"
+        security_patch = cls.extract_security_patch(props, fingerprint, build_id)
+
+        return ExtendedPIFProfile(
+            ID=build_id,
+            BRAND=brand,
+            DEVICE=device,
+            MANUFACTURER=manufacturer,
+            FINGERPRINT=fingerprint,
+            MODEL=model,
+            PRODUCT=product,
+            SECURITY_PATCH=security_patch,
+            DEVICE_INITIAL_SDK_INT=str(int(initial_sdk)),
+            TYPE=build_type,
+            TAG=build_tags,
+            RELEASE=release,
+            DEBUG=is_debug,
+        )
+
+
+class Extractor:
+    @staticmethod
+    def from_zip_bytes(content: bytes) -> str:
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            for name in archive.namelist():
+                if name.endswith("system.prop"):
+                    return archive.read(name).decode("utf-8")
+        raise FileNotFoundError("Target 'system.prop' not found in ZIP archive")
+
+    @classmethod
+    def from_url(cls, url: str, timeout: int = 120) -> str:
+        response = requests.get(url, timeout=timeout)
+        response.raise_for_status()
+        return cls.from_zip_bytes(response.content)
+
+```
+
+`src/pif_generator/cli.py`:
+
+```py
+import argparse
+import json
+import logging
+import os
+import sys
+from pathlib import Path
+from urllib.parse import urlparse
+
+from .models import ChannelType, OutputFormat
+from .pipeline import PIFPipeline
+from .release import ReleaseManager
+
+
+def setup_logging(verbose: bool = False) -> None:
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=level,
+    )
+
+
+def handle_check(args: argparse.Namespace) -> None:
+    manager = ReleaseManager(token=args.token)
+    results = manager.check_upstream_updates(state_dir=Path(args.state_dir))
+
+    has_updates = len(results) > 0
+    payload = {"new_release": has_updates, "results": results}
+
+    if github_output := os.getenv("GITHUB_OUTPUT"):
+        with open(github_output, "a", encoding="utf-8") as f:
+            f.write(f"new_release={'true' if has_updates else 'false'}\n")
+            f.write(f"results={json.dumps(results)}\n")
+
+    print(json.dumps(payload, indent=2))
+
+
+def handle_build(args: argparse.Namespace) -> None:
+    if not args.file and not args.url and not args.assets_json:
+        sys.exit("Error: either --file, --url, or --assets-json must be provided.")
+
+    pipeline = PIFPipeline(
+        channel=ChannelType(args.channel),
+        format_type=OutputFormat(args.format),
+        output_dir=Path(args.output_dir),
+    )
+
+    if args.file:
+        content = Path(args.file).read_text(encoding="utf-8")
+        profile = pipeline.process_prop_content(content)
+        out_path = Path(args.output_dir) / f"{Path(args.file).stem}.json"
+        out_path.write_text(profile.model_dump_json(indent=2), encoding="utf-8")
+        print(f"Generated: {out_path}")
+        return
+
+    if args.url:
+        parsed_url = urlparse(args.url)
+        asset_name = Path(parsed_url.path).name or "profile.zip"
+        dest = pipeline.process_zip_url(asset_name, args.url)
+        print(f"Generated: {dest}")
+        return
+
+    if args.assets_json:
+        assets = json.loads(args.assets_json)
+        generated_paths = []
+        for item in assets:
+            try:
+                dest = pipeline.process_zip_url(item["name"], item["url"])
+                generated_paths.append(str(dest))
+            except Exception as exc:
+                logging.error("Failed processing %s: %s", item.get("name"), exc)
+
+        if args.manifest:
+            Path(args.manifest).write_text("\n".join(generated_paths), encoding="utf-8")
+
+        print(f"Generated {len(generated_paths)} files.")
+
+
+def handle_publish(args: argparse.Namespace) -> None:
+    manager = ReleaseManager(token=args.token)
+    files = [
+        Path(line.strip())
+        for line in Path(args.manifest).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    manager.publish_release(
+        target_repo=args.repo,
+        files=files,
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        prog="pif-gen",
+        description="Automated Play Integrity profile extraction and release tool.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose debug logging")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Check
+    p_check = subparsers.add_parser(
+        "check",
+        help="Check upstream repositories for new releases",
+        description="Poll upstream repositories and report pending releases based on local tag state.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    p_check.add_argument("--token", default=None, help="GitHub token (defaults to GITHUB_TOKEN environment variable)")
+    p_check.add_argument("--state-dir", default="state", help="Directory storing upstream release tag state files")
+    p_check.set_defaults(func=handle_check)
+
+    # Build
+    p_build = subparsers.add_parser(
+        "build",
+        help="Extract and build PIF JSON profiles",
+        description="Extract and validate Play Integrity profiles from a local .prop file or batch asset URLs.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    p_build.add_argument("--channel", choices=["stable", "beta"], default="stable", help="Upstream channel branch")
+    p_build.add_argument("--format", choices=["extended", "legacy"], default="extended", help="Target PIF JSON schema format")
+    p_build.add_argument("--output-dir", default=".", help="Directory to save generated JSON profiles")
+    p_build.add_argument("--file", help="Path to a single input property dump file (e.g. system.prop)")
+    p_build.add_argument("--url", help="Direct URL to an upstream property ZIP archive")
+    p_build.add_argument("--assets-json", help="JSON array of asset descriptors containing 'name' and 'url'")
+    p_build.add_argument("--manifest", default="generated_files.txt", help="Path to output manifest listing generated file paths")
+    p_build.set_defaults(func=handle_build)
+
+    # Publish
+    p_pub = subparsers.add_parser(
+        "publish",
+        help="Publish generated profiles to a GitHub release",
+        description="Upload generated profiles listed in a manifest file to GitHub Releases on the target repository.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    p_pub.add_argument("--token", default=None, help="GitHub token (defaults to GITHUB_TOKEN environment variable)")
+    p_pub.add_argument("--repo", required=True, help="Target GitHub repository in owner/repo format")
+    p_pub.add_argument("--manifest", default="generated_files.txt", help="Manifest file containing paths of files to upload")
+    p_pub.set_defaults(func=handle_publish)
+
+    args = parser.parse_args()
+    setup_logging(args.verbose)
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
+
+```
+
+`src/pif_generator/models.py`:
+
+```py
+from enum import Enum
+from pydantic import BaseModel, Field, field_validator
+
+
+class OutputFormat(str, Enum):
+    EXTENDED = "extended"
+    LEGACY = "legacy"
+
+
+class ChannelType(str, Enum):
+    STABLE = "stable"
+    BETA = "beta"
+
+
+class LegacyPIFProfile(BaseModel):
+    MANUFACTURER: str = Field(..., min_length=1)
+    MODEL: str = Field(..., min_length=1)
+    FINGERPRINT: str = Field(..., min_length=1)
+    BRAND: str = Field(..., min_length=1)
+    PRODUCT: str = Field(..., min_length=1)
+    DEVICE: str = Field(..., min_length=1)
+    SECURITY_PATCH: str = Field(..., min_length=1)
+    FIRST_API_LEVEL: str = Field(..., min_length=1)
+
+    @field_validator("FIRST_API_LEVEL")
+    @classmethod
+    def validate_api_level(cls, v: str) -> str:
+        if not v.isdigit() or int(v) < 21:
+            raise ValueError(f"Invalid FIRST_API_LEVEL (must be integer >= 21): {v}")
+        return v
+
+    @field_validator("SECURITY_PATCH")
+    @classmethod
+    def validate_security_patch(cls, v: str) -> str:
+        if len(v) != 10 or v.count("-") != 2:
+            raise ValueError(f"Invalid SECURITY_PATCH format (expected YYYY-MM-DD): {v}")
+        return v
+
+
+class ExtendedPIFProfile(BaseModel):
+    ID: str = Field(..., min_length=1)
+    BRAND: str = Field(..., min_length=1)
+    DEVICE: str = Field(..., min_length=1)
+    MANUFACTURER: str = Field(..., min_length=1)
+    FINGERPRINT: str = Field(..., min_length=1)
+    MODEL: str = Field(..., min_length=1)
+    PRODUCT: str = Field(..., min_length=1)
+    SECURITY_PATCH: str = Field(..., min_length=1)
+    DEVICE_INITIAL_SDK_INT: str = Field(..., min_length=1)
+    TYPE: str = Field(default="user")
+    TAG: str = Field(default="release-keys")
+    RELEASE: str = Field(..., min_length=1)
+    DEBUG: bool = Field(default=False)
+    spoofBuild: str = Field(default="1")
+    spoofProps: str = Field(default="0")
+    spoofProvider: str = Field(default="0")
+    spoofSignature: str = Field(default="0")
+    spoofVendingSdk: str = Field(default="0")
+    verboseLogs: str = Field(default="0")
+
+    @field_validator("DEVICE_INITIAL_SDK_INT")
+    @classmethod
+    def validate_initial_sdk(cls, v: str) -> str:
+        if not v.isdigit() or int(v) < 21:
+            raise ValueError(f"Invalid DEVICE_INITIAL_SDK_INT (must be integer >= 21): {v}")
+        return v
+
+    @field_validator("SECURITY_PATCH")
+    @classmethod
+    def validate_security_patch(cls, v: str) -> str:
+        if len(v) != 10 or v.count("-") != 2:
+            raise ValueError(f"Invalid SECURITY_PATCH format (expected YYYY-MM-DD): {v}")
+        return v
+
+```
+
+`src/pif_generator/pipeline.py`:
+
+```py
+import logging
+from pathlib import Path
+from typing import Union
+
+from .builder import Extractor, ProfileBuilder, PropParser
+from .models import ChannelType, ExtendedPIFProfile, LegacyPIFProfile, OutputFormat
+
+logger = logging.getLogger(__name__)
+
+
+class PIFPipeline:
+    def __init__(
+        self,
+        channel: ChannelType = ChannelType.STABLE,
+        format_type: OutputFormat = OutputFormat.EXTENDED,
+        output_dir: Path = Path("."),
+    ):
+        self.channel = channel
+        self.format_type = format_type
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def process_prop_content(self, prop_content: str) -> Union[ExtendedPIFProfile, LegacyPIFProfile]:
+        props = PropParser.parse(prop_content)
+        if self.format_type == OutputFormat.LEGACY:
+            return ProfileBuilder.build_legacy(props)
+        return ProfileBuilder.build_extended(props)
+
+    def process_zip_url(self, asset_name: str, url: str) -> Path:
+        base_name = asset_name[:-4] if asset_name.endswith(".zip") else asset_name
+        output_filename = f"{base_name}.json"
+        dest_path = self.output_dir / output_filename
+
+        logger.info("Fetching and extracting system.prop from %s", url)
+        prop_content = Extractor.from_url(url)
+        profile = self.process_prop_content(prop_content)
+
+        dest_path.write_text(profile.model_dump_json(indent=2), encoding="utf-8")
+        logger.info("Generated profile at %s", dest_path)
+        return dest_path
+
+```
+
+`src/pif_generator/release.py`:
+
+```py
+import logging
+import os
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from github import Auth, Github, GithubException
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class MonitoredRepo:
+    owner: str
+    name: str
+    channel: str  # "stable" or "beta"
+
+
+DEFAULT_TARGETS = [
+    MonitoredRepo(owner="Pixel-Props", name="build.prop", channel="stable"),
+    MonitoredRepo(owner="Elcapitanoe", name="Build-Prop-BETA", channel="beta"),
+]
+
+
+class ReleaseManager:
+    def __init__(self, token: Optional[str] = None):
+        self.token = token or os.getenv("GITHUB_TOKEN")
+        if self.token:
+            self.client = Github(auth=Auth.Token(self.token))
+        else:
+            self.client = Github()
+
+    def check_upstream_updates(
+        self,
+        repos: Optional[List[MonitoredRepo]] = None,
+        state_dir: Path = Path("state"),
+    ) -> List[Dict[str, Any]]:
+        targets = repos or DEFAULT_TARGETS
+        state_dir = Path(state_dir)
+        state_dir.mkdir(parents=True, exist_ok=True)
+
+        pending_releases = []
+
+        for target in targets:
+            full_repo_name = f"{target.owner}/{target.name}"
+            tracker_file = state_dir / f"last_{target.channel}_tag.txt"
+            last_tag = tracker_file.read_text(encoding="utf-8").strip() if tracker_file.exists() else ""
+
+            try:
+                repo = self.client.get_repo(full_repo_name)
+                try:
+                    latest = repo.get_latest_release()
+                except GithubException as exc:
+                    if exc.status == 404:
+                        logger.warning("No release found on repository %s", full_repo_name)
+                        continue
+                    raise
+
+                current_tag = latest.tag_name
+                if last_tag == current_tag:
+                    logger.info("%s @ %s is up-to-date", full_repo_name, current_tag)
+                    continue
+
+                zip_assets = [
+                    {"name": asset.name, "url": asset.browser_download_url}
+                    for asset in latest.get_assets()
+                    if asset.name.endswith(".zip")
+                ]
+
+                if not zip_assets:
+                    logger.warning("Release %s on %s has no ZIP assets", current_tag, full_repo_name)
+                    continue
+
+                logger.info("Discovered new release %s on %s (%d assets)", current_tag, full_repo_name, len(zip_assets))
+                pending_releases.append({
+                    "channel": target.channel,
+                    "tag": current_tag,
+                    "assets": zip_assets,
+                    "count": len(zip_assets),
+                })
+            except Exception as exc:
+                logger.error("Error inspecting %s: %s", full_repo_name, exc)
+
+        return pending_releases
+
+    def publish_release(
+        self,
+        target_repo: str,
+        files: List[Path],
+    ) -> None:
+        if not self.token:
+            raise ValueError("GitHub access token is required to publish releases.")
+        repo = self.client.get_repo(target_repo)
+        now = datetime.now(timezone.utc)
+        date_tag = now.strftime("%Y.%m.%d")
+        date_str = now.strftime("%Y-%m-%d")
+
+        release_tag = f"v{date_tag}"
+        title = f"PIF Profiles · {date_tag}"
+
+        body = (
+            f"### Unified Release\n"
+            f"- Release Tag: `{release_tag}`\n"
+            f"- Release Date: {date_str} UTC\n"
+            f"- Artifacts: {len(files)} JSON profiles (Stable & Beta)\n\n"
+            f"Automated build from monitored upstream repositories."
+        )
+
+        try:
+            release = repo.create_git_release(
+                tag=release_tag,
+                name=title,
+                message=body,
+            )
+            logger.info("Created release: %s (%s)", release_tag, title)
+        except GithubException as exc:
+            if exc.status == 422:
+                release = repo.get_release(release_tag)
+                logger.info("Found existing release: %s", release_tag)
+            else:
+                raise
+
+        existing_assets = {asset.name: asset for asset in release.get_assets()}
+        uploaded, skipped = 0, 0
+
+        for file_path in files:
+            path = Path(file_path)
+            if not path.is_file():
+                logger.warning("Artifact not found: %s", path)
+                continue
+
+            if path.name in existing_assets:
+                logger.debug("Skipping already uploaded artifact: %s", path.name)
+                skipped += 1
+                continue
+
+            try:
+                release.upload_asset(str(path))
+                logger.info("Uploaded artifact: %s", path.name)
+                uploaded += 1
+            except GithubException as exc:
+                logger.error("Failed to upload %s: %s", path.name, exc)
+
+        logger.info("Upload completed. Uploaded: %d, Skipped: %d, Total: %d", uploaded, skipped, len(files))
+
+```
+
+`state/last_beta_tag.txt`:
+
+```txt
+beta-20260905
+
+```
+
+`state/last_stable_tag.txt`:
+
+```txt
+build-20260901
+
+```
+
+`tests/test_builder.py`:
+
+```py
+import unittest
+from pif_generator.builder import ProfileBuilder, PropParser
+from pif_generator.models import ExtendedPIFProfile, LegacyPIFProfile
+
+
+SAMPLE_PROP = """
+ro.product.manufacturer=Google
+ro.product.model=Pixel 9 Pro XL
+ro.product.brand=google
+ro.product.device=komodo
+ro.product.system_ext.name=komodo_beta
+ro.system_ext.build.id=CP41.260814.003.B1
+ro.system_ext.build.fingerprint=google/komodo_beta/komodo:17/CP41.260814.003.B1/16166531:user/release-keys
+ro.system_ext.build.type=user
+ro.system_ext.build.tags=release-keys
+ro.system_ext.build.version.release=17
+ro.product.first_api_level=34
+ro.debuggable=0
+"""
+
+
+class TestPIFBuilder(unittest.TestCase):
+    def test_prop_parser(self):
+        props = PropParser.parse(SAMPLE_PROP)
+        self.assertEqual(props["ro.product.model"], "Pixel 9 Pro XL")
+        self.assertEqual(props["ro.system_ext.build.id"], "CP41.260814.003.B1")
+        self.assertEqual(props["ro.product.device"], "komodo")
+
+    def test_build_extended_profile(self):
+        props = PropParser.parse(SAMPLE_PROP)
+        profile = ProfileBuilder.build_extended(props)
+        self.assertIsInstance(profile, ExtendedPIFProfile)
+        self.assertEqual(profile.ID, "CP41.260814.003.B1")
+        self.assertEqual(profile.BRAND, "google")
+        self.assertEqual(profile.DEVICE, "komodo")
+        self.assertEqual(profile.MANUFACTURER, "Google")
+        self.assertEqual(profile.MODEL, "Pixel 9 Pro XL")
+        self.assertEqual(profile.PRODUCT, "komodo_beta")
+        self.assertEqual(profile.SECURITY_PATCH, "2026-08-14")
+        self.assertEqual(profile.DEVICE_INITIAL_SDK_INT, "34")
+        self.assertEqual(profile.TYPE, "user")
+        self.assertEqual(profile.TAG, "release-keys")
+        self.assertEqual(profile.RELEASE, "17")
+        self.assertFalse(profile.DEBUG)
+        self.assertEqual(profile.spoofBuild, "1")
+
+    def test_build_legacy_profile(self):
+        props = PropParser.parse(SAMPLE_PROP)
+        profile = ProfileBuilder.build_legacy(props)
+        self.assertIsInstance(profile, LegacyPIFProfile)
+        self.assertEqual(profile.MODEL, "Pixel 9 Pro XL")
+        self.assertEqual(profile.FIRST_API_LEVEL, "34")
+        self.assertEqual(profile.SECURITY_PATCH, "2026-08-14")
+
+    def test_invalid_sdk_validation(self):
+        props = PropParser.parse(SAMPLE_PROP)
+        props["ro.product.first_api_level"] = "10"
+        with self.assertRaises(Exception):
+            ProfileBuilder.build_extended(props)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
+
+`tests/test_release.py`:
+
+```py
+import unittest
+from unittest.mock import MagicMock, patch
+from pathlib import Path
+from pif_generator.release import ReleaseManager
+
+
+class TestReleaseManager(unittest.TestCase):
+    def test_unauthenticated_init(self):
+        with patch.dict("os.environ", {}, clear=True):
+            manager = ReleaseManager(token=None)
+            self.assertIsNone(manager.token)
+            self.assertIsNotNone(manager.client)
+
+    def test_publish_requires_token(self):
+        with patch.dict("os.environ", {}, clear=True):
+            manager = ReleaseManager(token=None)
+            with self.assertRaises(ValueError):
+                manager.publish_release(target_repo="dummy/repo", files=[])
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
