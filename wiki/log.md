@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1401199262/NMIStackWalk`: entity [[nmi-stack-walk]] (1401199262; Windows kernel PoC; NMI to selected CPUs + stack backtrace in NMI callback; hidden no-module mapped-driver detection; C VS kernel driver; anti-rootkit / AC detection research; README Mapped Driver by NMI Callback); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[nmi-callback-handler]], [[nomad]], [[kernel-anti-cheat]], [[ac]], [[nmi]], and [[kernel-callbacks]].
+
 - **2026-09-05** — ingest `description:1401199262/RemoteCall`: entity [[remote-call]] (1401199262; C++ Windows kernel technique; kernel APC + KeUserModeCallback chain, driver I/O pivot, controlled context restore; avoids RWX shellcode allocation in target; advanced process injection + AC detection trade-off research; README [APC Remote Call]); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[keusermodecallback]], [[apc-research]], [[injdrv]], [[kinject]], [[process-injection-techniques]], and [[windows-process-injection]].
 
 - **2026-09-05** — ingest `description:16SalomonArs/Pcileech-DMA-Firmware-Guide`: entity [[pcileech-dma-firmware-guide]] (16SalomonArs; Windows-first [[pcileech-fpga]] donor-emulation guide—BAR/capability/TLP work beyond VID/DID swap; shadow config, writemask protection, Python COE; Arbor/TeleScan PE; Squirrel/CaptainDMA/LeetDMA/Enigma/ZDMA flash, cold-boot validation, Zero4K BAR, Vivado ILA; optional Linux capture; Guide); cited on [[overviews/dma-attack]] and [[concepts/dma]]; cross-linked [[pcileech-fpga]], [[dma-cfw-guide]], [[dma-fw-guide-2.0]], and [[pcileechgen]].

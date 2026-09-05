@@ -2494,6 +2494,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Nmi (ekknod)](entities/nmi.md) — block NMI interrupts (C/C++; cheat / windows kernel explorer; README [Blocking NMI interrupts])
 - [NMI Callback](entities/nmi-callback.md) — C/C++ kernel NMI callback driver research (Detection: Hacked Hypervisor)
 - [NMI Callback Handler](entities/nmi-callback-handler.md) — Windows kernel driver; NMI callback interrupted-RIP stack walk for mapped-driver detection (donnaskiez; README Mapped Driver by NMI Callback)
+- [NMI Stack Walk](entities/nmi-stack-walk.md) — Windows kernel PoC; NMI callback stack backtrace on selected CPUs for hidden no-module mapped-driver detection (1401199262; README Mapped Driver by NMI Callback)
 - [NMICallbackBlocker2](entities/nmi-callback-blocker2.md) — C++ kernel PoC to disable NMI callbacks (cheat / windows kernel explorer; gmh5225)
 - [NMI EnumNmiCallback](entities/nmi-enum-nmi-callback.md) — C/C++ kernel PoC to enumerate registered NMI callbacks (cheat / windows kernel explorer; gmh5225)
 - [NMI nmi_callback](entities/nmi-nmi-callback.md) — Windows kernel PoC to register/trigger NMI callbacks and inspect thread contexts (BattlEye-style detection study; gmh5225)
