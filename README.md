@@ -814,6 +814,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/Squalr/Squalr-Sharp [C# game memory editor with scanning, pointers, and assembly injection]
 - https://github.com/daveymcq/SimpleMemoryEditor [Portable Windows game memory scanner/editor in C with process attach, value scan, and freeze UI]
 - https://github.com/HeathHowren/Pointer-Lab [Windows x64 user-mode memory scanner and debugger with pointer chains, disassembly, patching, and ImGui UI]
+- https://github.com/digital-dev/Apprentice [Open-source Windows game trainer and memory editor (Electron + C++ N-API) with value freezes, code patches, Mono/IL2CPP support, and .CT import/export]
 - https://github.com/WoahToasty/ToastyLink [From-scratch C++17 XBDM trainer/debug toolkit for Xbox 360 (RGH/JTAG): pointer chains, value scanning, freeze engine, PPC patches, and shareable JSON cheat tables]
 - https://github.com/TASEmulators/BizHawk [Multi-system C# emulator with memory inspection, rerecording, and per-core debugging tools for retro game analysis]
 - https://github.com/SinaKarvandi/Hypervisor-From-Scratch [Hypervisor]
@@ -1605,6 +1606,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/jsherman212/xnuspy [an iOS kernel function hooking framework for checkra1n'able devices]
 - https://gist.github.com/gmh5225/95151b245267a27b3cdbea949632c680 [DirtyZero Exp]
 - https://github.com/MxIris-Reverse-Engineering/RuntimeViewer [Objective-C Runtime Viewer for macOS and iOS]
+- https://github.com/vaenshine/VansonMod [TrollStore iOS memory editor with value scanning, hex editing, pointer analysis, RVA patching, signatures, scripts, and app archive management]
 
 > IOS File Explorer
 - https://github.com/DerekSelander/dynadump [A runtime ObjC class-dump]
