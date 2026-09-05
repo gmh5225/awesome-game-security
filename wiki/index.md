@@ -3126,6 +3126,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [sherloq](entities/sherloq.md) — open-source digital image forensics GUI (Python; ELA, EXIF, frequency/gradient/histogram, cloning detection, TruFor NN; AC screenshot tampering / authenticity review; GuidoBartoli)
 - [shellcode-factory](entities/shellcode-factory.md) — C++ shellcode factory tooling (AC shellcode engine & tricks)
 - [shellcode-obfuscation](entities/shellcode-obfuscation.md) — Caesar-cipher encoding pipeline (Python obfuscator + C VirtualAlloc loader; AV bypass-rate measurements; academic lab)
+- [Shellcoder](entities/shellcoder.md) — Binary Ninja plugin: multi-arch shellcode assemble/disassemble; inline/spaced hex, Python byte strings, C arrays; rapid payload iteration (0xricksanchez; RE / exploit prototyping)
 - [shellcrypt](entities/shellcrypt.md) — Cross-platform Python shellcode obfuscation; AES/ChaCha20/RC4/Salsa20/XOR; chained encode/compress; C/C#/Go/Rust/Nim/Python/PowerShell emit (Lavender-exe; payload packing / loader prototyping)
 - [shellcode-EntropyFix](entities/shellcode-entropyfix.md) — Shannon entropy reduction for shellcode/packed payloads (English-word substitution / padding; AV/EDR evasion)
 - [shellcode-plain-sight](entities/shellcode-plain-sight.md) — C demo; hide shellcode in large randomized RW region at random offset; VirtualProtect to RX; post-exec zero cleanup (LloydLabs; memory evasion / AC detection testing)
