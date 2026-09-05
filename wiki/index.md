@@ -2287,6 +2287,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [mcpup](entities/mcpup.md) — MCP server lifecycle manager (discover/install/configure/run; Unity AI-assisted dev; Game Develop / MCP for unity; gmh5225)
 - [mcore-decompiler](entities/mcore-decompiler.md) — IDA Pro 9.4 Motorola M·CORE decompiler plugin; custom IR pipeline → structured C pseudocode with stack-frame and control-flow recovery; embedded firmware / feature-phone RE (Siesta; cheat / IDA Plugins)
 - [mcrit-plugin](entities/mcrit-plugin.md) — IDA Pro plugin for MCRIT MinHash function similarity (upload samples, query matches, manage MCRIT server from disassembler)
+- [mdc0](entities/mdc0.md) — Swift jailed-device iOS UI customization app (34306; iOS 15.0–18.3.2; exploit writes read-only system files; dock/blur/lockscreen tweaks; respring helper; CVE-2025-24203; cheat / iOS jailbreak)
 - [gui-plugin-template](entities/gui-plugin-template.md) — Python cross-disassembler GUI plugin template (PyQt/PySide; IDA/Ghidra/Binary Ninja/Cutter; harmonized API; danielplohmann)
 - [mkpms](entities/mkpms.md) — wxshadow KPM stealth breakpoint/hook (R^X page split; bypass self-read integrity; cheat / Android kernel explorer)
 - [mkPIVM](entities/mk-pivm.md) — process-independent PIVM obfuscation engine (x86/x64→custom IR→polymorphic VM bytecode with encrypted handlers; PE dispatcher embed; arbitrary shellcode input; AC Obfuscation Engine `[VM]`; D7EAD)
