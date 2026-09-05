@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1013503897/Morphida`: entity [[morphida]] (1013503897; thin CI pipeline; polymorphic anti-detection Android arm64 `frida-server`; per-build upstream Frida clone; randomized process/memfd/thread/path strings; NDK `llvm-strip` of `gum_*`/`frida_*`; CI strings gate; adb connect helpers; mobile RE / static and cheap runtime Frida-detection evasion); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[strongr-frida-android]], [[frida-stealth]], [[phantom-frida]], [[florida]], and [[fridare]].
+
 - **2026-09-05** — ingest `description:1027565/InstrumentationCallbacks`: entity [[instrumentation-callbacks-lib]] (1027565; user-mode Instrumentation Callback library PoC; C++/asm; syscall/APC/exception/user-mode-callback/thread-init kernel→user transitions; NTDLL-only deps; x64; Windows internals + EDR telemetry research; Instrumentation Callback); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[instrumentation-callbacks]], [[instrumentation-callback-syscall-logger]], [[hooking-via-instrumentation-callback]], [[syscall-detect]], [[etwti-syscall-hook]], [[nasty-alignment]], and [[beservice-intcallbacks]].
 
 - **2026-09-05** — ingest `description:10HEAD/ValorantOffsets`: entity [[valorantoffsets]] (10HEAD; lightweight Valorant offset pack; C/C++ engine function + gameplay structure constants; intentionally minimal for quick post-patch updates; external RE and automation tooling; cheat / game:valorant [Offset]); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[valorant-offsets]], [[valorant-externals]], [[valorant-offsets-autoupdater]], and [[vanguard]].

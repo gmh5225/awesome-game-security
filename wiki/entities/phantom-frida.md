@@ -12,7 +12,7 @@ confidence: medium
 
 Build system that patches upstream Frida and produces stealth `frida-server` binaries that evade common anti-instrumentation detection. Python patch scripts and name generators randomize recognizable Frida strings, symbols, and build artifacts during compilation; WSL build support and JavaScript-based tests help reproduce hardened builds. Targets mobile reverse engineers and security researchers who need anti-Frida-resistant Frida deployments against protected apps and mobile anti-cheat checks. (source: wiki/sources/descriptions/TheQmaks__phantom-frida.md)
 
-Related patch/repack lanes include source-level automation via [[florida]] and hex-replace repacks such as [[fridare]].
+Related patch/repack lanes include source-level automation via [[florida]], CI polymorphic builds via [[morphida]], and hex-replace repacks such as [[fridare]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Related patch/repack lanes include source-level automation via [[florida]] and h
 
 ## Related
 
-[[frida]] · [[florida]] · [[fridare]] · [[florida-zygisk]] · [[antifrida]] · [[frida-detection]] · [[detect-frida]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
+[[frida]] · [[florida]] · [[morphida]] · [[fridare]] · [[florida-zygisk]] · [[antifrida]] · [[frida-detection]] · [[detect-frida]] · [[overviews/mobile-security]] · [[overviews/reverse-engineering]]
