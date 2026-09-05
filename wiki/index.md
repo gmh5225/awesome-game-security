@@ -3000,7 +3000,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [retoolsync](entities/retoolsync.md) — multi-tool RE cursor/goto sync (mrexodia; Tornado WebSocket hub; IDA/BN/x64dbg/WinDbg/VS Code plugins; Ctrl+click hex jump)
 - [RetDec](entities/retdec.md) — retargetable machine-code decompiler (binary lifting; limited maintenance; Cheat Decompiler)
 - [rev-tools-setup](entities/rev-tools-setup.md) — One-click Windows RE toolchain (Scoop): CE/Ghidra/x64dbg + read-only CE MCP + AI agent client config
-- [reverify](entities/reverify.md) — AI-assisted RE with deterministic byte-level verification via MCP server and CLI (2akouwu; Cheat RE Tools)
+- [reverify](entities/reverify.md) — Python AI-assisted RE toolkit; PE/ELF/Mach-O parse/disasm/emulate; Capstone/Unicorn/LIEF; deterministic VERIFIED/REFUTED/INCONCLUSIVE claim verifier + reconstruction-agent loop with established-facts ledger; Frida hook gen; MCP + CLI (2akouwu; Cheat RE Tools)
 - [Retract](entities/retract.md) — Go static binary workbench (PE/ELF/Mach-O; disasm, CFG, pseudocode, YARA; browser UI)
 - [reverse-engineering](entities/reverse-engineering.md) — curated RE awesome list (networking / editors; Cheat guide lane)
 - [revert-mapper](entities/revert-mapper.md) — post-execution cleanup for manually mapped kernel drivers
