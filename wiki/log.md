@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:201580ag/AssaultCube_Cheat`: entity [[assaultcube-cheat]] (201580ag; multi-version internal/external AssaultCube cheat practice; aimbot, ESP, overlays, memory utilities, offset handling; C/C++/C#; ImGui, OpenGL hooks; controlled training context; cheat / practice); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[assaultcube]], [[assault-cube-cheat]], [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[voltclient]].
+
 - **2026-09-05** — ingest `description:2601677867/One-Click-Run_Source_Server`: entity [[one-click-run-source-server]] (2601677867; Linux one-click shell script; Debian/Ubuntu/CentOS env checks, SteamCMD, game server download, Sourcemod/Metamod install, troubleshooting; community Source dedicated server deployment; Server for Source Engine); cited on [[overviews/game-engine]]; cross-linked [[source-engine]], [[little-anti-cheat]], [[nocheatz-3]], and [[corner-culling-source-engine]].
 
 - **2026-09-05** — ingest `description:2akouwu/reverify`: entity [[reverify]] (2akouwu; Python AI-assisted RE toolkit; PE/ELF/Mach-O parse/disasm/emulate; Capstone/Unicorn/LIEF; deterministic VERIFIED/REFUTED/INCONCLUSIVE claim verifier + reconstruction-agent loop with established-facts ledger; Frida hook gen; MCP + CLI; malware/CTF/interop RE; cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[research-rigor]]; cross-linked [[ida-pro-mcp]], [[binarylens]], [[re-harness]], [[ida-no-mcp]], [[open-reverselab]], and [[n0xis]].

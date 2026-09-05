@@ -12,7 +12,7 @@ confidence: medium
 
 C++ AssaultCube cheat research sample (gmh5225/AssaultCubeCheat). Centers on **modding** and **memory analysis** for offensive techniques against the open-source AssaultCube FPS — a common beginner title for studying client-side cheat mechanics. (source: wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md)
 
-Useful for game security researchers and reverse engineers studying AssaultCube memory layout and mod workflows alongside [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[mandragora]].
+Useful for game security researchers and reverse engineers studying AssaultCube memory layout and mod workflows alongside [[assaultcube-cheat]], [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[mandragora]].
 
 ## Links
 
@@ -20,4 +20,4 @@ Useful for game security researchers and reverse engineers studying AssaultCube 
 
 ## Related
 
-[[simple-ac-internal-cheat]] · [[external-esp-hack-assaultcube]] · [[mandragora]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]
+[[assaultcube-cheat]] · [[simple-ac-internal-cheat]] · [[external-esp-hack-assaultcube]] · [[mandragora]] · [[overviews/game-hacking]] · [[overviews/reverse-engineering]]

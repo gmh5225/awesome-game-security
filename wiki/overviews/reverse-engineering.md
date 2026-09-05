@@ -988,6 +988,7 @@ sources:
   - wiki/sources/descriptions/ALittlePatate__TaxiDriver.md
   - wiki/sources/descriptions/gmh5225__Apex-ApexCheat.md
   - wiki/sources/descriptions/gmh5225__AssaultCubeCheat.md
+  - wiki/sources/descriptions/201580ag__AssaultCube_Cheat.md
   - wiki/sources/descriptions/korcankaraokcu__PINCE.md
   - wiki/sources/descriptions/krampus-nuggets__ce-tutorial.md
   - wiki/sources/descriptions/kweatherman__yara4ida.md
@@ -1377,6 +1378,7 @@ Portable PyQt/PySide GUI scaffolding via [[gui-plugin-template]] (Python; harmon
 
 
 - Game-targeted x86 ROP compiler [[rop-compiler]] (Speedi13; C++; assembly-like scripts → ROP chains with gadget scanning and offset handling; CS:GO/BF3/BF4 cheat payload examples—triggerbot, glow ESP, minimap spotting; exploit-style cheat execution and AC evasion research; cheat / ROP Generation) sits beside [[ropgadget]] (JonathanSalwan; Python CLI; Capstone; ELF/PE/Mach-O/raw multi-arch gadget search, filter, optional chain generation; cheat / ROP Finder), [[ropium]] (Boyan-MILANOV; C++ core + Python bindings; gadget extract/analyze + semantic query chain builder; CLI + scriptable workflows; exploit dev / binary security education; cheat / ROP Generation), [[ropgadget-rs]], [[agafi]], [[exrop]], and [[angrop]] in the ROP chain synthesis lane. (source: wiki/sources/descriptions/Speedi13__ROP-COMPILER.md) (source: wiki/sources/descriptions/JonathanSalwan__ROPgadget.md) (source: wiki/sources/descriptions/Boyan-MILANOV__ropium.md)
+- Multi-version AssaultCube cheat practice such as [[assaultcube-cheat]] (201580ag; internal/external samples; aimbot, ESP, overlays, memory utilities, offset handling; C/C++/C#; ImGui and OpenGL hooks; controlled training for game hacking and RE) complements [[assault-cube-cheat]], [[simple-ac-internal-cheat]], and [[external-esp-hack-assaultcube]] on the open-source [[assaultcube]] learning title. (source: wiki/sources/descriptions/201580ag__AssaultCube_Cheat.md)
 
 ## Related concepts
 
