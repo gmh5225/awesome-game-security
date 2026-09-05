@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:360NENZ/Taiga74164-Akebi-GC`: entity [[taiga74164-akebi-gc]] (360NENZ/Taiga74164; large C++ Genshin Impact modification framework; injector + in-game menu; protection bypass, player/world modifiers, teleport, ESP visuals, debug utilities; multilingual docs; cheat / game:genshin impact [Cheat]); cited on [[overviews/game-hacking]] and [[overviews/game-engine]]; cross-linked [[genshin-akebi-gc]], [[akebi-cheat-3.3]], [[akebi-packet-sniffer]], [[genshin-impact-base]], and [[il2cpp]].
+
 - **2026-09-04** — ingest `description:3a1/Evelion`: entity [[evelion]] (3a1; C++ external ESP for CS 1.6; ImGui overlay with configurable visuals; stream-proof presentation model outside normal game capture paths; Visual Studio; windowed-mode legacy target; external cheat architecture + overlay rendering + basic AC evasion; cheat / game:cs1.6 [External]); cited on [[overviews/game-hacking]] and [[overviews/graphics-api]]; cross-linked [[zodiak]], [[imgui-external-overlay]], [[ezfrags]], [[oxware]], [[hpp-hack]], and [[anti-screenshot-capture]].
 
 - **2026-09-04** — ingest `description:3a1/Zodiak`: entity [[zodiak]] (3a1; C/assembly full kernel driver cheat for CS 1.6 Fastcup; kernel GDI ESP + MouHID callback aimbot; automatic offset detection, thread context spoofing, compact single-thread model; minimize user-visible traces; kernel cheat engineering + AC evasion research; cheat / game:cs1.6 [Fastcup Full Kernel Driver Cheat]); cited on [[overviews/game-hacking]] and [[overviews/windows-kernel]]; cross-linked [[kernel-gdi-draw]], [[kernel-drawing]], [[mouhid-input-hook]], [[csgo-full-kernel]], [[oxware]], [[hpp-hack]], and [[ezfrags]].

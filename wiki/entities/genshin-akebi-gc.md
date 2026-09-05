@@ -12,7 +12,7 @@ confidence: medium
 
 Genshin Impact **cheat client** built on the **Akebi** framework with **Grasscutter** private-server support. Provides teleportation, god mode, speed hacks, and auto-play by manipulating the **Unity/IL2CPP** game client and custom server communication. (source: wiki/sources/descriptions/gmh5225__Genshin-Akebi-GC.md)
 
-Sits in the same HoYoverse title lane as version-pinned Akebi cheat references ([[akebi-cheat-3.3]]), sibling Grasscutter clients ([[easypeasy-gc]]), gameplay cheats ([[genshin-cheat]], [[genshin-cheetos]]), upstream scaffold [[genshin-impact-base]], offline dataset mirrors such as [[genshin-genshin-data]], and AC-bypass samples ([[genshin-easy-peasy-bypass]], [[genshin-debugger-bypass]]).
+Fork of the upstream **Akebi GC** stack ([[taiga74164-akebi-gc]]). Sits in the same HoYoverse title lane as version-pinned Akebi cheat references ([[akebi-cheat-3.3]]), sibling Grasscutter clients ([[easypeasy-gc]]), gameplay cheats ([[genshin-cheat]], [[genshin-cheetos]]), upstream scaffold [[genshin-impact-base]], offline dataset mirrors such as [[genshin-genshin-data]], and AC-bypass samples ([[genshin-easy-peasy-bypass]], [[genshin-debugger-bypass]]).
 
 ## Links
 
@@ -20,4 +20,4 @@ Sits in the same HoYoverse title lane as version-pinned Akebi cheat references (
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[il2cpp]] · [[akebi-cheat-3.3]] · [[akebi-packet-sniffer]] · [[easypeasy-gc]] · [[genshin-cheat]] · [[genshin-cheetos]] · [[genshin-impact-base]] · [[genshin-genshin-data]] · [[genshin-easy-peasy-bypass]] · [[genshin-debugger-bypass]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[il2cpp]] · [[taiga74164-akebi-gc]] · [[akebi-cheat-3.3]] · [[akebi-packet-sniffer]] · [[easypeasy-gc]] · [[genshin-cheat]] · [[genshin-cheetos]] · [[genshin-impact-base]] · [[genshin-genshin-data]] · [[genshin-easy-peasy-bypass]] · [[genshin-debugger-bypass]]

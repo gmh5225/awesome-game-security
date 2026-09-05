@@ -3287,6 +3287,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [tabby](entities/tabby.md) — minimal PIC C shellcode micro-framework (PEB/EAT + FNV-1a API hashing; indirect NT syscalls; Linux mingw-w64/nasm → flat `.bin`; cocomelonc; AC shellcode engine & tricks)
 - [Tartarus-TpAllocInject](entities/tartarus-tp-alloc-inject.md) — TpAllocInject loader + Tartarus' Gate indirect syscalls (cheat / injection:windows)
 - [tableflipper](entities/tableflipper.md) — partial PatchGuard disable up to Win11 21H2 (C++; cheat / PatchGuard-related; emlinhax)
+- [Taiga74164 Akebi GC](entities/taiga74164-akebi-gc.md) — upstream Akebi GC Genshin Impact mod framework (C++ injector + in-game menu; protection bypass, teleport, ESP, debug utilities; 360NENZ/Taiga74164)
 - [tanto](entities/tanto.md) — Binary Ninja program-slicing plugin (Vector35; Python; HLIL variable/block slices for faster comprehension; Cheat / [Slices Functions])
 - [taskbarhero-bot](entities/taskbarhero-bot.md) — TaskbarHero Unity IL2CPP external trainer/bot (C#/.NET 10; ACTk bypass, batch-read automations, WPF panel; matheusbranhann)
 - [TaxiDriver](entities/taxi-driver.md) — ALittlePatate; Linux LKM + user-mode pair; device-interface RPM/WPM, base-address lookup, example clients; low-level game memory tooling + Linux security research (cheat / W/RPM Driver and usermode for Linux)
