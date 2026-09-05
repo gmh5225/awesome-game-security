@@ -1,0 +1,1323 @@
+Project Path: arc_ntdlll_Scalpel_6dgdpdcr
+
+Source Tree:
+
+```txt
+arc_ntdlll_Scalpel_6dgdpdcr
+├── LICENSE.txt
+├── Module.manifest
+├── README.md
+├── build.gradle
+├── docs
+│   ├── ARCHITECTURE.md
+│   ├── RELEASE.md
+│   └── assets
+├── extension.properties
+├── gradle.properties
+├── scripts
+│   ├── build.ps1
+│   ├── build.sh
+│   ├── release.ps1
+│   └── release.sh
+├── settings.gradle
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── org
+    │   │       └── nullhook
+    │   │           └── scalpel
+    │   │               ├── ByteCell.java
+    │   │               ├── HexByteEditor.java
+    │   │               ├── HexEditorPanel.java
+    │   │               ├── HexPatchResult.java
+    │   │               ├── HexPatchSink.java
+    │   │               ├── HexPattern.java
+    │   │               ├── HexTableModel.java
+    │   │               ├── ScalpelPlugin.java
+    │   │               └── ScalpelProvider.java
+    │   └── resources
+    │       └── images
+    └── test
+        └── java
+            └── org
+                └── nullhook
+                    └── scalpel
+
+```
+
+`LICENSE.txt`:
+
+```txt
+MIT License
+
+Copyright (c) 2026 nullhook
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`Module.manifest`:
+
+```manifest
+MODULE FILE LICENSE.txt
+MODULE FILE README.md
+
+```
+
+`README.md`:
+
+```md
+# Scalpel
+
+Dark-mode hex editing for Ghidra
+
+Scalpel is a native Java/Swing Ghidra extension for reverse engineers and any low-level programmers/researchers
+
+![Scalpel running inside Ghidra](docs/assets/scalpel-ghidra.png)
+
+## Features
+
+- Dockable Ghidra tool window
+- Dark terminal-inspired hex and ASCII grid
+- Follows the current Listing cursor
+- Jump to address
+- Configurable read window from 256 bytes to 64 KiB
+- Inline byte patching through Ghidra transactions
+- Hex search with `??` wildcards
+- Quoted UTF-8 search, for example `"MZ"` or `"powershell"`
+- Copy selected bytes as hex or ASCII
+- Handles unreadable memory ranges without crashing the view
+
+## Style
+
+BinEd's Ghidra extension helped anchor the packaging expectation: a Java extension with a dockable editor inside Ghidra
+
+- [BinEd Ghidra Extension](https://bined.exbin.org/ghidra-extension/)
+
+## Build
+
+Install Ghidra and Gradle, then point Gradle at your Ghidra folder
+
+Windows PowerShell:
+
+```powershell
+$env:GHIDRA_INSTALL_DIR="C:\path\to\ghidra_12.1_PUBLIC"
+.\scripts\build.ps1
+```
+
+Linux:
+
+```bash
+export GHIDRA_INSTALL_DIR="$HOME/tools/ghidra_12.1_PUBLIC"
+./scripts/build.sh
+```
+
+Optional wrapper setup:
+
+```powershell
+gradle wrapper --gradle-version 8.8
+.\gradlew buildExtension
+```
+
+On Linux, the wrapper command is:
+
+```bash
+./gradlew buildExtension
+```
+
+The extension zip will be written under `dist/`
+
+## Install
+
+1. Open Ghidra.
+2. Go to `File > Install Extensions`
+3. Select the Scalpel zip from `dist/`
+4. Restart Ghidra.
+5. Open a program and choose `Window > Scalpel`
+
+The extension zip is platform-neutral Java bytecode. A zip built on Windows can be installed on Linux, and a zip built on Linux can be installed on Windows, as long as the target Ghidra version is compatible
+
+## Usage
+
+Open the Scalpel window and move around the Listing. With `follow` enabled, the table reloads at the current cursor address. Type an address and press `go` to inspect another region
+
+To patch a byte, edit a hex cell with a two-digit value such as `90`, `CC`, or `00`. Ghidra records the edit through a transaction named `Scalpel patch`
+
+Search accepts contiguous or spaced hex:
+
+```text
+4D 5A
+4D5A
+48 8B ?? ?? 90
+"powershell"
+```
+
+## Roadmap
+
+- Diff mode against original bytes
+- Byte histogram and entropy gutter
+- Selection-driven Ghidra navigation
+- Patch bookmarks
+- Search across full memory blocks
+- Import/export patch sets
+
+```
+
+`build.gradle`:
+
+```gradle
+plugins {
+    id "java"
+}
+
+group = "org.nullhook"
+version = "0.1.0"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 21
+}
+
+def ghidraInstallDir = providers.gradleProperty("GHIDRA_INSTALL_DIR")
+    .orElse(providers.environmentVariable("GHIDRA_INSTALL_DIR"))
+    .orNull
+
+if (ghidraInstallDir) {
+    apply from: "${ghidraInstallDir}/support/buildExtension.gradle"
+} else {
+    tasks.register("buildExtension") {
+        group = "ghidra"
+        doLast {
+            throw new GradleException("Set GHIDRA_INSTALL_DIR to your Ghidra install path.")
+        }
+    }
+}
+
+```
+
+`docs/ARCHITECTURE.md`:
+
+```md
+# Architecture
+
+Scalpel is just simple
+
+## Plugin
+
+`ScalpelPlugin` listens for active-program and Listing-location changes, then forwards them to the provider
+
+## Provider
+
+`ScalpelProvider` owns the dockable Ghidra component and keeps a stable Swing root component for the docking framework
+
+## UI
+
+`HexEditorPanel` handles controls, rendering, search, clipboard export, and byte patching. It uses plain Swing so the extension has no runtime dependency beyond Ghidra
+
+## Model
+
+`HexTableModel` reads a bounded window of program memory into `ByteCell` values. Unreadable ranges are represented in the model and rendered as gaps instead of throwing through the UI
+
+## Patching
+
+Byte edits go through `Program.startTransaction` and `Program.endTransaction`. Failed writes roll back
+
+```
+
+`docs/RELEASE.md`:
+
+```md
+# Release
+
+1. Update `version` in `build.gradle`
+2. Update `CHANGELOG.md`
+3. Build the extension:
+
+```powershell
+$env:GHIDRA_INSTALL_DIR="C:\path\to\ghidra_12.1_PUBLIC"
+.\scripts\build.ps1
+```
+
+Linux:
+
+```bash
+export GHIDRA_INSTALL_DIR="$HOME/tools/ghidra_12.1_PUBLIC"
+./scripts/build.sh
+```
+
+4. Create a GitHub release
+5. Attach the zip from `dist/`
+
+```
+
+`extension.properties`:
+
+```properties
+name=Scalpel
+description=Dark-mode hex editor for malware triage and reverse engineering in Ghidra.
+author=nullhook
+createdOn=2026-06-10
+version=@extversion@
+
+```
+
+`gradle.properties`:
+
+```properties
+org.gradle.jvmargs=-Xmx1g -Dfile.encoding=UTF-8
+
+```
+
+`scripts/build.ps1`:
+
+```ps1
+param(
+    [string] $GhidraInstallDir = $env:GHIDRA_INSTALL_DIR
+)
+
+if (-not $GhidraInstallDir) {
+    throw "Set GHIDRA_INSTALL_DIR or pass -GhidraInstallDir."
+}
+
+$env:GHIDRA_INSTALL_DIR = $GhidraInstallDir
+gradle buildExtension
+
+```
+
+`scripts/build.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${GHIDRA_INSTALL_DIR:-}" ]]; then
+    echo "Set GHIDRA_INSTALL_DIR to your Ghidra install path." >&2
+    exit 1
+fi
+
+if [[ -x "./gradlew" ]]; then
+    ./gradlew buildExtension
+else
+    gradle buildExtension
+fi
+
+```
+
+`scripts/release.ps1`:
+
+```ps1
+param(
+    [string] $GhidraInstallDir = $env:GHIDRA_INSTALL_DIR
+)
+
+if (-not $GhidraInstallDir) {
+    throw "Set GHIDRA_INSTALL_DIR or pass -GhidraInstallDir."
+}
+
+$env:GHIDRA_INSTALL_DIR = $GhidraInstallDir
+gradle clean buildExtension
+
+```
+
+`scripts/release.sh`:
+
+```sh
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${GHIDRA_INSTALL_DIR:-}" ]]; then
+    echo "Set GHIDRA_INSTALL_DIR to your Ghidra install path." >&2
+    exit 1
+fi
+
+if [[ -x "./gradlew" ]]; then
+    ./gradlew clean buildExtension
+else
+    gradle clean buildExtension
+fi
+
+```
+
+`settings.gradle`:
+
+```gradle
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+    }
+}
+
+rootProject.name = "scalpel"
+
+```
+
+`src/main/java/org/nullhook/scalpel/ByteCell.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import ghidra.program.model.address.Address;
+
+final class ByteCell {
+    final Address address;
+    final int value;
+    final boolean readable;
+
+    ByteCell(Address address, int value, boolean readable) {
+        this.address = address;
+        this.value = value & 0xff;
+        this.readable = readable;
+    }
+
+    static ByteCell missing(Address address) {
+        return new ByteCell(address, 0, false);
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/HexByteEditor.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import java.awt.Component;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+
+final class HexByteEditor extends DefaultCellEditor {
+    private final JTextField field;
+
+    HexByteEditor(JTextField field) {
+        super(field);
+        this.field = field;
+        setClickCountToStart(1);
+    }
+
+    @Override
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean selected, int row, int column) {
+        Component c = super.getTableCellEditorComponent(table, value, selected, row, column);
+        field.selectAll();
+        return c;
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/HexEditorPanel.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.util.Locale;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressFormatException;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.MemoryAccessException;
+
+final class HexEditorPanel extends JPanel implements HexPatchSink {
+    private static final Color BG = new Color(0x0b0f12);
+    private static final Color PANEL = new Color(0x11171b);
+    private static final Color GRID = new Color(0x263139);
+    private static final Color TEXT = new Color(0xd8f3e8);
+    private static final Color MUTED = new Color(0x71838c);
+    private static final Color ACCENT = new Color(0x49f2a4);
+    private static final Color CYAN = new Color(0x65d8ff);
+    private static final Color WARN = new Color(0xffc857);
+    private static final Color BAD = new Color(0xff6b7a);
+
+    private final HexTableModel model;
+    private final JTable table;
+    private final JTextField addressField;
+    private final JTextField searchField;
+    private final JComboBox<Integer> lengthBox;
+    private final JCheckBox followCursor;
+    private final JLabel title;
+    private final JLabel status;
+
+    private Program program;
+    private Address lastCursor;
+    private int searchCursor;
+
+    HexEditorPanel() {
+        super(new BorderLayout());
+        model = new HexTableModel(this);
+        table = new JTable(model);
+        addressField = field(22);
+        searchField = field(18);
+        lengthBox = new JComboBox<>(new Integer[] {256, 1024, 4096, 16384, 65536});
+        lengthBox.setSelectedItem(4096);
+        followCursor = new JCheckBox("follow");
+        title = new JLabel("$ scalpel");
+        status = new JLabel("open a program");
+
+        build();
+    }
+
+    void setProgram(Program program) {
+        this.program = program;
+        String name = program == null ? "no program" : program.getName();
+        title.setText("$ scalpel --target " + name);
+        status(program == null ? "open a program" : "ready", false);
+        if (program == null) {
+            model.load(null, null, 0);
+            addressField.setText("");
+            return;
+        }
+        Address start = program.getImageBase();
+        lastCursor = start;
+        load(start);
+    }
+
+    void follow(Address address) {
+        lastCursor = address;
+        if (address != null && followCursor.isSelected()) {
+            load(address);
+        }
+    }
+
+    void dispose() {
+        program = null;
+    }
+
+    @Override
+    public HexPatchResult patch(Address address, int value) {
+        if (program == null || address == null) {
+            return HexPatchResult.fail("no writable program");
+        }
+        int tx = program.startTransaction("Scalpel patch");
+        boolean commit = false;
+        try {
+            program.getMemory().setByte(address, (byte) value);
+            commit = true;
+            status("patched " + address + " = " + String.format(Locale.ROOT, "%02X", value), false);
+            return HexPatchResult.ok("patched");
+        } catch (MemoryAccessException e) {
+            status("patch failed: " + e.getMessage(), true);
+            return HexPatchResult.fail(e.getMessage());
+        } finally {
+            program.endTransaction(tx, commit);
+        }
+    }
+
+    private void build() {
+        setBackground(BG);
+        setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, GRID));
+
+        JToolBar top = new JToolBar();
+        top.setFloatable(false);
+        top.setBackground(BG);
+        top.setBorder(new EmptyBorder(8, 10, 8, 10));
+
+        title.setForeground(ACCENT);
+        title.setFont(mono(Font.BOLD, 13));
+        top.add(title);
+        top.addSeparator(new Dimension(18, 1));
+        top.add(label("addr"));
+        top.add(addressField);
+        top.add(button("go", this::go));
+        top.add(button("cursor", e -> {
+            if (lastCursor != null) {
+                load(lastCursor);
+            }
+        }));
+        top.addSeparator(new Dimension(10, 1));
+        top.add(label("len"));
+        styleCombo(lengthBox);
+        top.add(lengthBox);
+        top.add(button("reload", e -> reload()));
+        styleCheck(followCursor);
+        top.add(followCursor);
+        top.addSeparator(new Dimension(10, 1));
+        top.add(label("find"));
+        top.add(searchField);
+        top.add(button("next", this::findNext));
+        top.add(button("hex", e -> copyHex()));
+        top.add(button("ascii", e -> copyAscii()));
+
+        add(top, BorderLayout.NORTH);
+
+        table.setFont(mono(Font.PLAIN, 13));
+        table.setRowHeight(24);
+        table.setBackground(PANEL);
+        table.setForeground(TEXT);
+        table.setSelectionBackground(new Color(0x173a34));
+        table.setSelectionForeground(Color.WHITE);
+        table.setGridColor(GRID);
+        table.setShowGrid(true);
+        table.setFillsViewportHeight(true);
+        table.setCellSelectionEnabled(true);
+        table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        table.setDefaultRenderer(Object.class, new HexCellRenderer());
+        table.setDefaultEditor(Object.class, new HexByteEditor(field(2)));
+        table.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+            .put(KeyStroke.getKeyStroke("control C"), "copyHex");
+        table.getActionMap().put("copyHex", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                copyHex();
+            }
+        });
+
+        JTableHeader header = table.getTableHeader();
+        header.setFont(mono(Font.BOLD, 12));
+        header.setBackground(new Color(0x0d1317));
+        header.setForeground(CYAN);
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, GRID));
+        sizeColumns();
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.getViewport().setBackground(BG);
+        scroll.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, GRID));
+        add(scroll, BorderLayout.CENTER);
+
+        status.setFont(mono(Font.PLAIN, 12));
+        status.setForeground(MUTED);
+        status.setBorder(new EmptyBorder(7, 10, 7, 10));
+        status.setBackground(BG);
+        status.setOpaque(true);
+        add(status, BorderLayout.SOUTH);
+    }
+
+    private void sizeColumns() {
+        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+            TableColumn col = table.getColumnModel().getColumn(i);
+            if (i == 0) {
+                col.setPreferredWidth(145);
+            } else if (i == HexTableModel.BYTES_PER_ROW + 1) {
+                col.setPreferredWidth(150);
+                col.setMinWidth(150);
+            } else {
+                col.setPreferredWidth(38);
+                col.setMinWidth(38);
+                col.setMaxWidth(46);
+            }
+        }
+    }
+
+    private void go(ActionEvent event) {
+        if (program == null) {
+            return;
+        }
+        try {
+            Address address = program.getAddressFactory().getAddress(addressField.getText().trim());
+            if (address == null) {
+                throw new AddressFormatException("invalid address");
+            }
+            load(address);
+        } catch (AddressFormatException e) {
+            status("bad address", true);
+        }
+    }
+
+    private void reload() {
+        load(model.base());
+    }
+
+    private void load(Address address) {
+        if (program == null || address == null) {
+            return;
+        }
+        int len = (Integer) lengthBox.getSelectedItem();
+        model.load(program, address, len);
+        addressField.setText(address.toString());
+        searchCursor = 0;
+        status("mapped " + len + " bytes from " + address, false);
+    }
+
+    private void findNext(ActionEvent event) {
+        HexPattern pattern = HexPattern.parse(searchField.getText());
+        if (pattern.isEmpty()) {
+            status("search accepts hex bytes, ?? wildcards, or quoted text", true);
+            return;
+        }
+        int hit = model.find(pattern, searchCursor);
+        if (hit < 0 && searchCursor > 0) {
+            hit = model.find(pattern, 0);
+        }
+        if (hit < 0) {
+            status("not found", true);
+            return;
+        }
+        selectOffset(hit, pattern.length());
+        ByteCell cell = model.cellAtOffset(hit);
+        status("hit at " + (cell == null ? "unknown" : cell.address), false);
+        searchCursor = hit + 1;
+    }
+
+    private void selectOffset(int offset, int length) {
+        int row = offset / HexTableModel.BYTES_PER_ROW;
+        int col = offset % HexTableModel.BYTES_PER_ROW + 1;
+        int end = Math.min(offset + Math.max(1, length) - 1, model.byteCount() - 1);
+        int endRow = end / HexTableModel.BYTES_PER_ROW;
+        int endCol = end % HexTableModel.BYTES_PER_ROW + 1;
+        table.changeSelection(row, col, false, false);
+        table.changeSelection(endRow, endCol, false, true);
+        table.scrollRectToVisible(table.getCellRect(row, col, true));
+    }
+
+    private void copyHex() {
+        copy(model.selectedHex(table.getSelectedRows(), table.getSelectedColumns()), "copied hex");
+    }
+
+    private void copyAscii() {
+        copy(model.selectedAscii(table.getSelectedRows(), table.getSelectedColumns()), "copied ascii");
+    }
+
+    private void copy(String text, String ok) {
+        if (text == null || text.isBlank()) {
+            status("nothing selected", true);
+            return;
+        }
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(text), null);
+        status(ok, false);
+    }
+
+    private JButton button(String text, java.awt.event.ActionListener action) {
+        JButton button = new JButton(text);
+        button.addActionListener(action);
+        button.setFont(mono(Font.BOLD, 12));
+        button.setBackground(new Color(0x13211e));
+        button.setForeground(ACCENT);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(0x275247)),
+            new EmptyBorder(4, 9, 4, 9)
+        ));
+        button.setFocusable(false);
+        return button;
+    }
+
+    private JLabel label(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(MUTED);
+        label.setFont(mono(Font.BOLD, 12));
+        label.setBorder(new EmptyBorder(0, 6, 0, 4));
+        return label;
+    }
+
+    private JTextField field(int cols) {
+        JTextField field = new JTextField(cols);
+        field.setFont(mono(Font.PLAIN, 13));
+        field.setBackground(new Color(0x0f1519));
+        field.setForeground(TEXT);
+        field.setCaretColor(ACCENT);
+        field.setSelectionColor(new Color(0x204842));
+        field.setSelectedTextColor(Color.WHITE);
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(GRID),
+            new EmptyBorder(4, 7, 4, 7)
+        ));
+        return field;
+    }
+
+    private void styleCombo(JComboBox<Integer> combo) {
+        combo.setFont(mono(Font.PLAIN, 12));
+        combo.setBackground(new Color(0x0f1519));
+        combo.setForeground(TEXT);
+        combo.setFocusable(false);
+    }
+
+    private void styleCheck(JCheckBox check) {
+        check.setFont(mono(Font.BOLD, 12));
+        check.setBackground(BG);
+        check.setForeground(CYAN);
+        check.setFocusable(false);
+        check.setSelected(true);
+    }
+
+    private Font mono(int style, int size) {
+        return new Font(Font.MONOSPACED, style, size);
+    }
+
+    private void status(String message, boolean error) {
+        SwingUtilities.invokeLater(() -> {
+            status.setText(message);
+            status.setForeground(error ? BAD : MUTED);
+        });
+    }
+
+    private final class HexCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        protected void setValue(Object value) {
+            setText(value == null ? "" : value.toString());
+        }
+
+        @Override
+        public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean selected,
+                boolean focused, int row, int col) {
+            java.awt.Component c = super.getTableCellRendererComponent(table, value, selected, focused, row, col);
+            setHorizontalAlignment(col == HexTableModel.BYTES_PER_ROW + 1 ? LEFT : CENTER);
+            if (!selected) {
+                c.setBackground(col == 0 || col == HexTableModel.BYTES_PER_ROW + 1 ? BG : PANEL);
+                c.setForeground(col == 0 ? CYAN : col == HexTableModel.BYTES_PER_ROW + 1 ? ACCENT : TEXT);
+                int offset = model.offsetFor(row, col);
+                ByteCell cell = model.cellAtOffset(offset);
+                if (cell != null && !cell.readable) {
+                    c.setForeground(WARN);
+                }
+            }
+            setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+            return c;
+        }
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/HexPatchResult.java`:
+
+```java
+package org.nullhook.scalpel;
+
+final class HexPatchResult {
+    final boolean ok;
+    final String message;
+
+    private HexPatchResult(boolean ok, String message) {
+        this.ok = ok;
+        this.message = message;
+    }
+
+    static HexPatchResult ok(String message) {
+        return new HexPatchResult(true, message);
+    }
+
+    static HexPatchResult fail(String message) {
+        return new HexPatchResult(false, message);
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/HexPatchSink.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import ghidra.program.model.address.Address;
+
+interface HexPatchSink {
+    HexPatchResult patch(Address address, int value);
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/HexPattern.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+final class HexPattern {
+    private final int[] values;
+    private final boolean[] wildcards;
+
+    private HexPattern(int[] values, boolean[] wildcards) {
+        this.values = values;
+        this.wildcards = wildcards;
+    }
+
+    static HexPattern parse(String text) {
+        String trimmed = text == null ? "" : text.trim();
+        if (trimmed.isEmpty()) {
+            return new HexPattern(new int[0], new boolean[0]);
+        }
+        if (trimmed.startsWith("\"") && trimmed.endsWith("\"") && trimmed.length() > 1) {
+            byte[] bytes = trimmed.substring(1, trimmed.length() - 1).getBytes(StandardCharsets.UTF_8);
+            int[] values = new int[bytes.length];
+            boolean[] wildcards = new boolean[bytes.length];
+            for (int i = 0; i < bytes.length; i++) {
+                values[i] = bytes[i] & 0xff;
+            }
+            return new HexPattern(values, wildcards);
+        }
+
+        String clean = trimmed.replace("0x", "").replace("0X", "")
+            .replace(",", " ").replace(":", " ").replace("-", " ");
+        String[] parts = clean.contains(" ") ? clean.split("\\s+") : splitPairs(clean);
+        List<Integer> values = new ArrayList<>();
+        List<Boolean> wildcards = new ArrayList<>();
+        for (String part : parts) {
+            if (part.isBlank()) {
+                continue;
+            }
+            if (part.equals("?") || part.equals("??")) {
+                values.add(0);
+                wildcards.add(true);
+                continue;
+            }
+            if (part.length() != 2 || !part.matches("[0-9a-fA-F]{2}")) {
+                return new HexPattern(new int[0], new boolean[0]);
+            }
+            values.add(Integer.parseInt(part, 16));
+            wildcards.add(false);
+        }
+        int[] v = new int[values.size()];
+        boolean[] w = new boolean[wildcards.size()];
+        for (int i = 0; i < values.size(); i++) {
+            v[i] = values.get(i);
+            w[i] = wildcards.get(i);
+        }
+        return new HexPattern(v, w);
+    }
+
+    int length() {
+        return values.length;
+    }
+
+    boolean isEmpty() {
+        return values.length == 0;
+    }
+
+    boolean matches(int offset, int value) {
+        return wildcards[offset] || values[offset] == (value & 0xff);
+    }
+
+    private static String[] splitPairs(String clean) {
+        if ((clean.length() & 1) != 0) {
+            return new String[] {clean};
+        }
+        String[] parts = new String[clean.length() / 2];
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = clean.substring(i * 2, i * 2 + 2);
+        }
+        return parts;
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/HexTableModel.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import java.util.Locale;
+
+import javax.swing.table.AbstractTableModel;
+
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressOverflowException;
+import ghidra.program.model.listing.Program;
+import ghidra.program.model.mem.Memory;
+import ghidra.program.model.mem.MemoryAccessException;
+
+final class HexTableModel extends AbstractTableModel {
+    static final int BYTES_PER_ROW = 16;
+
+    private final HexPatchSink patchSink;
+    private Program program;
+    private Address base;
+    private ByteCell[] cells = new ByteCell[0];
+
+    HexTableModel(HexPatchSink patchSink) {
+        this.patchSink = patchSink;
+    }
+
+    void load(Program program, Address base, int count) {
+        this.program = program;
+        this.base = base;
+        if (program == null || base == null || count <= 0) {
+            cells = new ByteCell[0];
+            fireTableDataChanged();
+            return;
+        }
+
+        Memory memory = program.getMemory();
+        ByteCell[] next = new ByteCell[count];
+        for (int i = 0; i < count; i++) {
+            Address address = add(base, i);
+            if (address == null || !memory.contains(address)) {
+                next[i] = ByteCell.missing(address);
+                continue;
+            }
+            try {
+                next[i] = new ByteCell(address, memory.getByte(address), true);
+            } catch (MemoryAccessException e) {
+                next[i] = ByteCell.missing(address);
+            }
+        }
+        cells = next;
+        fireTableDataChanged();
+    }
+
+    Address base() {
+        return base;
+    }
+
+    int byteCount() {
+        return cells.length;
+    }
+
+    ByteCell cellAtOffset(int offset) {
+        if (offset < 0 || offset >= cells.length) {
+            return null;
+        }
+        return cells[offset];
+    }
+
+    int offsetFor(int row, int col) {
+        int byteCol = col - 1;
+        if (byteCol < 0 || byteCol >= BYTES_PER_ROW) {
+            return -1;
+        }
+        int offset = row * BYTES_PER_ROW + byteCol;
+        return offset < cells.length ? offset : -1;
+    }
+
+    int find(HexPattern pattern, int startOffset) {
+        if (pattern.isEmpty()) {
+            return -1;
+        }
+        int last = cells.length - pattern.length();
+        for (int i = Math.max(0, startOffset); i <= last; i++) {
+            boolean hit = true;
+            for (int j = 0; j < pattern.length(); j++) {
+                ByteCell cell = cells[i + j];
+                if (!cell.readable || !pattern.matches(j, cell.value)) {
+                    hit = false;
+                    break;
+                }
+            }
+            if (hit) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int getRowCount() {
+        return (cells.length + BYTES_PER_ROW - 1) / BYTES_PER_ROW;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return BYTES_PER_ROW + 2;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        if (column == 0) {
+            return "offset";
+        }
+        if (column == BYTES_PER_ROW + 1) {
+            return "ascii";
+        }
+        return String.format(Locale.ROOT, "%02X", column - 1);
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int col) {
+        int offset = offsetFor(row, col);
+        ByteCell cell = cellAtOffset(offset);
+        return program != null && cell != null && cell.readable;
+    }
+
+    @Override
+    public Object getValueAt(int row, int col) {
+        if (col == 0) {
+            return rowAddress(row);
+        }
+        if (col == BYTES_PER_ROW + 1) {
+            return ascii(row);
+        }
+        ByteCell cell = cellAtOffset(offsetFor(row, col));
+        if (cell == null) {
+            return "";
+        }
+        return cell.readable ? String.format(Locale.ROOT, "%02X", cell.value) : "..";
+    }
+
+    @Override
+    public void setValueAt(Object value, int row, int col) {
+        ByteCell cell = cellAtOffset(offsetFor(row, col));
+        if (cell == null || !cell.readable || value == null) {
+            return;
+        }
+        int parsed = parseByte(value.toString());
+        if (parsed < 0 || parsed == cell.value) {
+            fireTableCellUpdated(row, col);
+            return;
+        }
+        HexPatchResult result = patchSink.patch(cell.address, parsed);
+        if (result.ok) {
+            cells[offsetFor(row, col)] = new ByteCell(cell.address, parsed, true);
+            fireTableRowsUpdated(row, row);
+        } else {
+            fireTableCellUpdated(row, col);
+        }
+    }
+
+    String selectedHex(int[] rows, int[] cols) {
+        StringBuilder out = new StringBuilder();
+        for (int row : rows) {
+            for (int col : cols) {
+                int offset = offsetFor(row, col);
+                ByteCell cell = cellAtOffset(offset);
+                if (cell != null && cell.readable) {
+                    if (out.length() > 0) {
+                        out.append(' ');
+                    }
+                    out.append(String.format(Locale.ROOT, "%02X", cell.value));
+                }
+            }
+        }
+        return out.toString();
+    }
+
+    String selectedAscii(int[] rows, int[] cols) {
+        StringBuilder out = new StringBuilder();
+        for (int row : rows) {
+            for (int col : cols) {
+                int offset = offsetFor(row, col);
+                ByteCell cell = cellAtOffset(offset);
+                if (cell != null && cell.readable) {
+                    int c = cell.value;
+                    out.append(c >= 32 && c <= 126 ? (char) c : '.');
+                }
+            }
+        }
+        return out.toString();
+    }
+
+    private String rowAddress(int row) {
+        Address address = add(base, (long) row * BYTES_PER_ROW);
+        return address == null ? "" : address.toString();
+    }
+
+    private String ascii(int row) {
+        StringBuilder out = new StringBuilder(BYTES_PER_ROW);
+        int start = row * BYTES_PER_ROW;
+        for (int i = 0; i < BYTES_PER_ROW; i++) {
+            ByteCell cell = cellAtOffset(start + i);
+            if (cell == null) {
+                out.append(' ');
+            } else if (!cell.readable) {
+                out.append('.');
+            } else {
+                int c = cell.value;
+                out.append(c >= 32 && c <= 126 ? (char) c : '.');
+            }
+        }
+        return out.toString();
+    }
+
+    private static Address add(Address address, long offset) {
+        if (address == null) {
+            return null;
+        }
+        try {
+            return address.addNoWrap(offset);
+        } catch (AddressOverflowException e) {
+            return null;
+        }
+    }
+
+    private static int parseByte(String text) {
+        String s = text.trim().replace("0x", "").replace("0X", "");
+        if (s.length() == 1) {
+            s = "0" + s;
+        }
+        if (s.length() != 2 || !s.matches("[0-9a-fA-F]{2}")) {
+            return -1;
+        }
+        return Integer.parseInt(s, 16);
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/ScalpelPlugin.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import docking.ActionContext;
+import docking.action.DockingAction;
+import docking.action.MenuData;
+import ghidra.app.plugin.PluginCategoryNames;
+import ghidra.app.plugin.ProgramPlugin;
+import ghidra.framework.main.UtilityPluginPackage;
+import ghidra.framework.plugintool.PluginInfo;
+import ghidra.framework.plugintool.PluginTool;
+import ghidra.framework.plugintool.util.PluginStatus;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+import ghidra.program.util.ProgramLocation;
+
+@PluginInfo(
+    status = PluginStatus.RELEASED,
+    packageName = UtilityPluginPackage.NAME,
+    category = PluginCategoryNames.ANALYSIS,
+    shortDescription = "Dark hex editor",
+    description = "Dark-mode hex editor for malware triage and reverse engineering."
+)
+public class ScalpelPlugin extends ProgramPlugin {
+    private final ScalpelProvider provider;
+
+    public ScalpelPlugin(PluginTool tool) {
+        super(tool);
+        provider = new ScalpelProvider(tool, getName());
+        installActions();
+    }
+
+    @Override
+    protected void dispose() {
+        provider.dispose();
+        super.dispose();
+    }
+
+    @Override
+    protected void programActivated(Program program) {
+        provider.setProgram(program);
+    }
+
+    @Override
+    protected void programDeactivated(Program program) {
+        provider.setProgram(null);
+    }
+
+    @Override
+    protected void locationChanged(ProgramLocation location) {
+        Address address = location == null ? null : location.getAddress();
+        provider.follow(address);
+    }
+
+    void showProvider() {
+        provider.show();
+    }
+
+    private void installActions() {
+        DockingAction show = new DockingAction("Show Scalpel", getName()) {
+            @Override
+            public void actionPerformed(ActionContext context) {
+                showProvider();
+            }
+        };
+        show.setMenuBarData(new MenuData(new String[] {"Window", "Scalpel"}));
+        tool.addAction(show);
+    }
+}
+
+```
+
+`src/main/java/org/nullhook/scalpel/ScalpelProvider.java`:
+
+```java
+package org.nullhook.scalpel;
+
+import java.awt.BorderLayout;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
+import docking.ComponentProvider;
+import docking.WindowPosition;
+import ghidra.framework.plugintool.PluginTool;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
+
+final class ScalpelProvider extends ComponentProvider {
+    private final JPanel root;
+    private final HexEditorPanel panel;
+
+    ScalpelProvider(PluginTool tool, String owner) {
+        super(tool, "Scalpel", owner);
+        panel = new HexEditorPanel();
+        root = new JPanel(new BorderLayout());
+        root.add(panel, BorderLayout.CENTER);
+        setTitle("Scalpel");
+        setDefaultWindowPosition(WindowPosition.RIGHT);
+        addToTool();
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return root;
+    }
+
+    void setProgram(Program program) {
+        panel.setProgram(program);
+    }
+
+    void follow(Address address) {
+        panel.follow(address);
+    }
+
+    void show() {
+        setVisible(true);
+        toFront();
+    }
+
+    public void dispose() {
+        panel.dispose();
+        removeFromTool();
+    }
+}
+
+```
