@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:Elcapitanoe/pif-config-generator`: entity [[pif-config-generator]] (Elcapitanoe; Python automated pipeline; tracks upstream Pixel build.prop tags, parses partition system.prop, validates Pydantic PIF JSON schemas; pif-gen CLI for ADB dumps/URLs, batch CI, GitHub releases; Play Integrity attestation spoof configs; cheat / Android); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[zamr]], [[nai64-patches]], [[pixel-flasher]], [[keyattestation]], [[magisk]], and [[kernelsu]].
+
 - **2026-09-05** — ingest `description:ShivamXD6/ROM-Shifter`: entity [[rom-shifter]] (ShivamXD6; Kotlin/Jetpack Compose + custom shell backend; custom-ROM flash wizard, partition backup/restore, batch APK install, app/device data migration, debloat/systemize; Magisk/KernelSU/APatch; cheat / Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pixel-flasher]], [[android-rom-list]], [[android-bootable-recovery-ofrp]], [[magisk]], [[kernelsu]], and [[apatch]].
 
 - **2026-09-05** — ingest `description:201580ag/AssaultCube_Cheat`: entity [[assaultcube-cheat]] (201580ag; multi-version internal/external AssaultCube cheat practice; aimbot, ESP, overlays, memory utilities, offset handling; C/C++/C#; ImGui, OpenGL hooks; controlled training context; cheat / practice); cited on [[overviews/game-hacking]] and [[overviews/reverse-engineering]]; cross-linked [[assaultcube]], [[assault-cube-cheat]], [[simple-ac-internal-cheat]], [[external-esp-hack-assaultcube]], and [[voltclient]].

@@ -2782,6 +2782,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pitaya](entities/pitaya.md) — distributed multiplayer game server framework (Game Network / Server framework)
 - [PixiJS](entities/pixijs.md) — lightweight 2D WebGL/WebGPU JS/TS library (shaders/render; Game Engine / HTML5)
 - [PixelFlasher](entities/pixel-flasher.md) — cross-platform Pixel flashing GUI (bootloader unlock, OTA/factory flash, Magisk/KernelSU/APatch root, boot-image patch, backup; cheat / Android ROM tool for Pixel)
+- [PIF Config Generator](entities/pif-config-generator.md) — automated Python pipeline for validated Play Integrity Fix JSON device profiles (Pixel build.prop tracking, Pydantic schemas, pif-gen CLI; Elcapitanoe; cheat / Android attestation spoof)
 - [PlayCanvas Engine](entities/engine.md) — open-source WebGL/WebGPU JS engine (PBR / Ammo.js / XR; HTML5 3D)
 - [Playnite](entities/playnite.md) — OSS Windows game library manager/launcher (C#/XAML/.NET; plugin integrations/themes/automation; emulation + local metadata; Game Manager / JosefNemec)
 - [PltPatcher](entities/plt-patcher.md) — IDA Pro plugin set: repair ELF64 PLT entries when auto-analysis fails; thunk type preserver for extern-call decompilation (GAMMACASE; Python IDAPython; cheat / IDA Plugins)
