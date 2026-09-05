@@ -9,7 +9,8 @@ sources:
   - wiki/sources/descriptions/gmh5225__L4D2Basic.md
   - wiki/sources/descriptions/gmh5225__L4D2-Cheat.md
   - wiki/sources/descriptions/SwagSoftware__Kisak-Strike.md
-updated: 2026-08-20
+  - wiki/sources/descriptions/2601677867__One-Click-Run_Source_Server.md
+updated: 2026-09-05
 confidence: medium
 ---
 
@@ -25,4 +26,4 @@ Complements AlliedModders HL2 SDK references such as [[hl2sdk]] (alliedmodders; 
 
 ## Related
 
-[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]] · [[hl2sdk]] · [[source-engine-2003]] · [[source-engine-2007]] · [[source-sdk-2013]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[kisak-strike]] · [[sdk]] · [[source2gen]] · [[sourceengineexplorer]] · [[teamfortress2-internal]] · [[l4d2-basic]] · [[l4d2-cheat]] · [[nocheatz-3]] · [[cs16-client]] · [[regamedll-cs]] · [[hl-mods]] · [[xash-rt]] · [[tiny-csgo-client]]
+[[overviews/game-engine]] · [[overviews/reverse-engineering]] · [[overviews/anti-cheat]] · [[hl2sdk]] · [[source-engine-2003]] · [[source-engine-2007]] · [[source-sdk-2013]] · [[source-sdk-orangebox]] · [[cstrike15-src]] · [[kisak-strike]] · [[one-click-run-source-server]] · [[sdk]] · [[source2gen]] · [[sourceengineexplorer]] · [[teamfortress2-internal]] · [[l4d2-basic]] · [[l4d2-cheat]] · [[nocheatz-3]] · [[cs16-client]] · [[regamedll-cs]] · [[hl-mods]] · [[xash-rt]] · [[tiny-csgo-client]]
