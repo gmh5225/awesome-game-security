@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:1hAck-0/zeroimport`: entity [[zeroimport]] (1hAck-0; C++ kernel driver runtime import resolver; hashed ntoskrnl export walk for functions/variables such as MmIsAddressValid and PsInitialSystemProcess; no cleartext API strings, optional cache; minimizes import-table artifacts for driver dev / static-analysis resistance; Anti Cheat / Lazy Importer); cited on [[overviews/anti-cheat]] and [[overviews/windows-kernel]]; cross-linked [[lazy-importer]], [[kli]], [[kli-ex]], [[noimportz]], and [[kernelmode-manual-mapping-through-iat]].
+
 - **2026-09-05** — ingest `description:Elcapitanoe/pif-config-generator`: entity [[pif-config-generator]] (Elcapitanoe; Python automated pipeline; tracks upstream Pixel build.prop tags, parses partition system.prop, validates Pydantic PIF JSON schemas; pif-gen CLI for ADB dumps/URLs, batch CI, GitHub releases; Play Integrity attestation spoof configs; cheat / Android); cited on [[concepts/mobile-anti-cheat]] and [[overviews/mobile-security]]; cross-linked [[zamr]], [[nai64-patches]], [[pixel-flasher]], [[keyattestation]], [[magisk]], and [[kernelsu]].
 
 - **2026-09-05** — ingest `description:ShivamXD6/ROM-Shifter`: entity [[rom-shifter]] (ShivamXD6; Kotlin/Jetpack Compose + custom shell backend; custom-ROM flash wizard, partition backup/restore, batch APK install, app/device data migration, debloat/systemize; Magisk/KernelSU/APatch; cheat / Android); cited on [[overviews/mobile-security]] and [[overviews/game-hacking]]; cross-linked [[pixel-flasher]], [[android-rom-list]], [[android-bootable-recovery-ofrp]], [[magisk]], [[kernelsu]], and [[apatch]].
