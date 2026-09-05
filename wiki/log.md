@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-05** — ingest `description:0xrawsec/whids`: entity [[whids]] (0xrawsec; open-source Windows EDR; Go; detection-driven response; ETW + Sysmon telemetry; Gene rule engine; alert-triggered artifact collection—files, registry, process memory; manager service + admin API; incident response / enterprise endpoint monitoring; README [EDR]); cited on [[overviews/windows-kernel]] and [[overviews/anti-cheat]]; cross-linked [[openedr]], [[bluespawn]], [[bamboozledr]], [[fibratus]], [[openprocmon]], [[etw-threat-intelligence]], and [[stresser]].
+
 - **2026-09-05** — ingest `description:0xricksanchez/Shellcoder`: entity [[shellcoder]] (0xricksanchez; Python Binary Ninja plugin; multi-arch shellcode assemble/disassemble; inline/spaced hex, Python byte strings, C arrays; rapid payload iteration; RE / exploit prototyping / shellcode research; README BinaryNinja Shellcoder Plugin); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[shellcrypt]], [[shellcode-factory]], [[quickasm]], [[seh-helper]], [[bn]], and [[binary-ninja-mcp]].
 
 - **2026-09-05** — ingest `description:1013503897/Morphida`: entity [[morphida]] (1013503897; thin CI pipeline; polymorphic anti-detection Android arm64 `frida-server`; per-build upstream Frida clone; randomized process/memfd/thread/path strings; NDK `llvm-strip` of `gum_*`/`frida_*`; CI strings gate; adb connect helpers; mobile RE / static and cheap runtime Frida-detection evasion); cited on [[concepts/frida]] and [[overviews/mobile-security]]; cross-linked [[strongr-frida-android]], [[frida-stealth]], [[phantom-frida]], [[florida]], and [[fridare]].

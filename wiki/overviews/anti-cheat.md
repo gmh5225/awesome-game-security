@@ -518,6 +518,7 @@ sources:
   - wiki/sources/descriptions/CDJuaum__RunEXE.md
   - wiki/sources/descriptions/Compiled-Code__be-injector.md
   - wiki/sources/descriptions/ComodoSecurity__openedr.md
+  - wiki/sources/descriptions/0xrawsec__whids.md
   - wiki/sources/descriptions/ContionMig__LSASS-Usermode-Bypass.md
   - wiki/sources/descriptions/ConWan30__QorTroller.md
   - wiki/sources/descriptions/Cracked5pider__KaynStrike.md
@@ -1016,6 +1017,7 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 - [[raccine]] — lightweight Windows anti-ransomware (Neo23x0; debugger registration for `vssadmin`/`wmic`; YARA command-line rules; parent-chain termination + event logging; no resident agent; blocks shadow-copy deletion; C/C++/C#; README [EDR]) (source: wiki/sources/descriptions/Neo23x0__Raccine.md)
 - [[bluespawn]] — open-source Windows active defense / EDR platform (ION28; Hunt/Mitigate/Monitor/Scan workflows; ATT&CK-oriented detections, YARA scanning, ETW monitoring, automated quarantine/process suspension; C++; rule-driven content; blue-team endpoint defense; README [EDR]) (source: wiki/sources/descriptions/ION28__BLUESPAWN.md)
 - [[openedr]] — open-source EDR platform (Comodo Security; C++; system monitoring, event collection, threat detection, AWS SDK cloud analysis integration; real-time Windows endpoint telemetry/response; EDR architecture / endpoint monitoring study; README [EDR]) (source: wiki/sources/descriptions/ComodoSecurity__openedr.md)
+- [[whids]] — open-source Windows EDR platform (0xrawsec; Go; detection-driven response; ETW + Sysmon telemetry; Gene rule engine; near real-time alert-triggered artifact collection; manager + admin API; incident response / enterprise endpoint monitoring; README [EDR]) (source: wiki/sources/descriptions/0xrawsec__whids.md)
 - [[stresser]] — endpoint security platform (AvivShabtay; C++ host agents + centralized management; UM/KM telemetry, artifact processing, policy handling, detection logic; ETW-driven monitoring + dynamic/static analysis + coordinated response; malware defense / enterprise endpoint protection experiments; README Anti Virus in fact but also Anti Cheat) (source: wiki/sources/descriptions/AvivShabtay__Stresser.md)
 - [[irontrace]] — Windows hardware and forensic integrity scanner for game-server administrators (codedevdev; C# WPF/CLI + optional ASP.NET Core server; PCI/PCIe/USB/driver inventory, DMA masquerade indicators, BYOVD/HWID/execution-artifact layers, LOLDrivers correlation; explainable JSON verdicts without auto-ban; optional self-hosted admin triage; Detection:DMA / hardware integrity auditing) (source: wiki/sources/descriptions/codedevdev__irontrace.md)
 - [[basic-anti-cheat]] — basic C/C++ anti-cheat teaching sample (process integrity, cheat signature scan, debugger detection, suspicious module enum, memory region validation; gmh5225; beginners) (source: wiki/sources/descriptions/gmh5225__Basic_Anti-Cheat.md)

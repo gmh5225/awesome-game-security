@@ -3682,6 +3682,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [WaryasSWHE](entities/waryasswhe.md) — usermode shatter-attack AC bypass PoC (0day; cheat / RPM; C++)
 - [Wells Anti Cheat](entities/wellsanticheat.md) — Among Us host-side BepInEx AC (RPC abuse / crashers / spam; Harmony)
 - [Weird Anti Cheat Ideas](entities/weird-anti-cheat-ideas.md) — unconventional AC design guide (anti-cheat research, networking, modding; Anti Cheat / guide; gmh5225)
+- [WHIDS](entities/whids.md) — open-source Windows EDR platform (0xrawsec; Go; detection-driven response; ETW + Sysmon; Gene rules; alert-triggered artifact collection; manager + admin API; incident response / enterprise monitoring; README [EDR])
 - [window_hijack](entities/window-hijack.md) — KM window-handle hijack for covert KM↔UM I/O (thread contexts)
 - [Window-Hijack (SurgeGotTappedAgain)](entities/window-hijack-overlay.md) — external overlay window hijack PoC: existing HWND model + native flags; SetWindowsHookEx input; DX11/ImGui; visibility/detection tradeoff research
 - [WindowProtect](entities/windowprotect.md) — window-hide research (driver / hooking; cheat / hide; gmh5225)
