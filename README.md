@@ -698,6 +698,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/CnCNet/cnc-ddraw [Old Game]
 - https://github.com/openeggbert/free-direct [DirectX 3 (DirectDraw/DirectSound) subset reimplemented on SDL3 for running legacy 2D games]
 - https://github.com/elishacloud/dxwrapper [DirectX DLL wrapper for older games on Win10/11; Dd7to9/d3d8to9, DDrawCompat, ASI loader]
+- https://github.com/ShyVortex/dlss-unlocked [DirectX 12 DLL wrapper unlocking DLSS-G, multi-frame generation, and DLSS-NR on RTX 20xx/30xx/40xx in supported games (Windows and Proton)]
 - https://github.com/REDPOWAR/D2GI [DirectDraw7/D3D7 to D3D9 wrapper for Hard Truck 2 (King of the Road) — modern resolutions, MSAA, anisotropic filtering, graphics fixes, widescreen hooks]
 - https://github.com/aleko2144/KoTR_Modern_Patch [King of the Road / Hard Truck 2 ASI patch — collision, camera, physics, AI traffic, trailer and UI fixes; complements D2GI; ModUtils + Ultimate ASI Loader]
 - https://github.com/xoxor4d/gta4-rtx [GTA IV RTX Remix compatibility mod — adapts Complete Edition for NVIDIA RTX Remix path-traced remaster pipeline; complements FusionFix]
@@ -4389,6 +4390,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/StarBloomMinecraft/BlarionAntiCheat [Minecraft Bedrock behavior-pack anti-cheat on ScriptAPI with 40+ combat/movement/inventory detection modules]
 - https://github.com/Eangly99/AstroX-AntiCheat [GeyserMC extension anti-cheat for Minecraft Bedrock intercepting raw RakNet packets before Java translation]
 - https://github.com/majimaakane/7dtd-AntiCheatMod [Server-side 7 Days to Die mod blocking cheat commands and detecting fly, teleport, speedhack, and godmode]
+- https://github.com/Pryaxis/TShock [Mature open-source Terraria server framework with built-in server-side anti-cheat, permissions, and community moderation tools]
 - https://github.com/Garou3299/tf2bd-database [Community-maintained TF2 cheater and suspicious-player JSON lists for surepy/tf2_bot_detector]
 - https://github.com/somewhatpublicacc/wellsanticheat [Among Us host-side BepInEx anti-cheat for RPC abuse, crashers, spam, and lobby cheats]
 - https://github.com/GiannBart/BanMod [Among Us BepInEx mod with host-side AntiCheat module for RPC/task abuse, crashers, and lobby integrity]
@@ -4438,6 +4440,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/Mandragora [For Assault Cube]
 - https://github.com/J-Tanzanite/Little-Anti-Cheat [For Source Games]
 - https://github.com/noahware/darken-anticheat [Kernel anti-cheat for protecting software]
+- https://github.com/mikio815/linux-anticheat [WIP kernel-level Linux console anti-cheat using LSM BPF, a thin kernel module, and BitVisor hypervisor EPT write-protection]
 - https://github.com/TOSTcRa/vigil [Open-source Linux-native anti-cheat powered by eBPF]
 - https://github.com/TuncorReUnion/TLAC-MODERN-LOCAL-ANTI-CHEAT-REUNIONED [Linux user-space anti-cheat with eBPF, signature scanning, HWID bans, and AI anomaly detection]
 
