@@ -4898,6 +4898,7 @@ Adds drag- to- resize functionality to the main GTA V window](https://github.com
 - https://github.com/gmh5225/pmctrace [Real-time collection of PMCs via ETW]
 - https://github.com/Idov31/EtwLeakKernel [Leaking kernel addresses from ETW consumers. Requires Administrator privileges]
 - https://github.com/SamuelTulach/SecureGame [POC game using VBS enclaves to protect itself from cheating]
+- https://github.com/egeorcun/discord-dpi-bridge [User-space ByeDPI SOCKS5 relay and DoH setup to reach Discord without loading WinDivert kernel drivers that break EAC/Denuvo games]
 - https://github.com/Teach2Breach/moonwalk [find dll base addresses without PEB WALK]
 - https://github.com/brew02/KiUserExceptionDispatcherHook [Hooking the Windows usermode exception handler]
 - https://github.com/brew02/MountSystemPartition [Mounting the system partition on Windows]
