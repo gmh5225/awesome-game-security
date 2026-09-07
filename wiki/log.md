@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-07** — ingest `readme:categories`: Anti Cheat ~712 (+2; Pryaxis/[[tshock]] Terraria Bouncer server-side AC + mikio815/[[linux-anticheat]] WIP Linux kernel/eBPF AC in Open Source Anti Cheat System) / DirectX ~40 (+1; ShyVortex/[[dlss-unlocked]] DLSS unlock wrapper in Compatibility) / Cheat ~2788 / other major section counts stable; 41 sections; entities [[tshock]], [[linux-anticheat]], [[dlss-unlocked]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/graphics-api]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3850 entities (3889 unique pages); removed duplicate [[pcileech-dma-firmware-guide]] entity index entry; overview wikilink spot-check (9 pages) — 0 broken links; 6 cross-kind slug collisions noted ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — no repair needed.
 
 - **2026-09-07** — ingest `description:000-aki-000/GameDebugMenu`: entity [[game-debug-menu]] (000-aki-000; UE debug menu plugin; C++ module + Blueprint/UI assets; console commands, gameplay property/function editing, localization, persisted menu state; dev/QA runtime testing and tuning; Game Engine / Plugins:Unreal); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[cheat-manager-menu]], [[unreal-imgui-tools]], [[unrealcpp]], and [[unreal-mod-loader]].
