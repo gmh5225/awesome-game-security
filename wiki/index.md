@@ -1127,7 +1127,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [DXInject-UC](entities/dxinject-uc.md) — D3D11 GPU payload transport + compute-shader decode; GPU-assisted process hollowing PoC (a0yark; injection:windows research)
 - [DXGICaptureApplication](entities/dxgicaptureapplication.md) — C/C++ desktop capture app (shader work; `[Capture Desktop]`; anti-cheat / screenshot research; bavulapati) — C/C++ desktop capture app (shader work; `[Capture Desktop]`; anti-cheat / screenshot research; bavulapati)
 - [DxWrapper](entities/dxwrapper.md) — DirectX compatibility proxy DLL (DDraw/D3D8–9/DInput; DDrawCompat/d3d8to9/Dd7to9; DirectX Compatibility)
-- [DLSS Unlocked](entities/dlss-unlocked.md) — DirectX 12 DLL wrapper unlocking DLSS-G/multi-frame generation/DLSS-NR on RTX 20xx–40xx (ShyVortex; NGX/Streamline proxy; OptiScaler/FSR 3.1 bridge; Windows + Proton; DirectX Compatibility)
+- [DLSS Unlocked](entities/dlss-unlocked.md) — DirectX 12 mod/installer unlocking DLSS-G/multi-frame generation/DLSS-NR on RTX 20xx–40xx (ShyVortex; NGX/Streamline proxy DLL inject; OptiScaler/FSR 3.1 bridge; driver-signature bypass; ASI/DXGI loaders; Windows + Proton; DirectX Compatibility)
 
 - [dxgkrnl_hook](entities/dxgkrnl-hook.md) — dxgkrnl screen-buffer hook (kernel overlay / render-draw)
 - [e3](entities/e3.md) — C++ homomorphic encryption framework (MoMA Lab; FHE backends; encrypted compute; AC Encrypt Variable research)
