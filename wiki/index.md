@@ -2183,7 +2183,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [libmem](entities/libmem.md) — cross-platform game-hacking lib (memory / hook / scan; Win/Linux/FreeBSD; C/C++/Rust/Python/Lua)
 - [libwsk](entities/libwsk.md) — kernel WSK socket-style library (C/C++; NuGet/MSBuild; connect/send/recv; WDK/VS driver workflows; Kernel-Mode Winsock library)
 - [linjector-rs](entities/linjector-rs.md) — Rust Android code injection without ptrace (modding; cheat / injection:android; erfur)
-- [linux-anticheat](entities/linux-anticheat.md) — WIP kernel-level Linux console AC (mikio815; Rust daemon + LSM eBPF + thin C kernel module + planned BitVisor EPT write-protect; Aya; Linux 5.17+ BTF + BPF LSM; Steam Deck; Open Source Anti Cheat System)
+- [linux-anticheat](entities/linux-anticheat.md) — WIP four-layer Linux console AC (mikio815; Rust daemon + LSM eBPF ptrace/W^X/bpf() + C kernel module eBPF-integrity guard + planned BitVisor VMX/EPT; Aya; Linux 5.17+ BTF/BPF LSM; Steam Deck / Secure Boot / lockdown / TPM; Open Source Anti Cheat System)
 - [lisa-py](entities/lisa-py.md) — LLDB MCP server (Python plugin + MCP bridge; breakpoints, backtraces, disasm, memory reads; ant4g0nist; MCP for LLDB)
 - [LitePCIe](entities/litepcie.md) — Python/Migen PCIe endpoint core (DMA engines, LTSSM trace, user-space drivers; KC705/KCU105/XCU1525/Acorn; enjoy-digital; DMA / FPGA research)
 - [Little Anti-Cheat](entities/little-anti-cheat.md) — open-source SourceMod anti-cheat plugin for Source engine servers (SourcePawn; aimbot/aimlock, abnormal angles, bhop/fast duck, ConVar checks; interpolation/backtrack countermeasures; TF2/CS community servers; J-Tanzanite; For Source Games)

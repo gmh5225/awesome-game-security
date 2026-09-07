@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-07** — ingest `description:mikio815/linux-anticheat`: entity [[linux-anticheat]] (mikio815; WIP four-layer Linux console AC—Rust daemon, LSM eBPF ptrace/W^X/bpf() guards, C kernel module for eBPF integrity, planned BitVisor VMX/EPT static-kernel write-protect; Aya; Linux 5.17+ BTF/BPF LSM; Steam Deck / Secure Boot / lockdown / TPM attestation); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vigil]], [[tlac-modern-local-anti-cheat-reunioned]], [[are-we-anti-cheat-yet]], and [[aclist-github-io]].
+
 - **2026-09-07** — ingest `readme:categories`: Anti Cheat ~712 (+2; Pryaxis/[[tshock]] Terraria Bouncer server-side AC + mikio815/[[linux-anticheat]] WIP Linux kernel/eBPF AC in Open Source Anti Cheat System) / DirectX ~40 (+1; ShyVortex/[[dlss-unlocked]] DLSS unlock wrapper in Compatibility) / Cheat ~2788 / other major section counts stable; 41 sections; entities [[tshock]], [[linux-anticheat]], [[dlss-unlocked]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/anti-cheat]], [[overviews/graphics-api]], [[overviews/dma-attack]], and [[overviews/reverse-engineering]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3850 entities (3889 unique pages); removed duplicate [[pcileech-dma-firmware-guide]] entity index entry; overview wikilink spot-check (9 pages) — 0 broken links; 6 cross-kind slug collisions noted ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — no repair needed.
