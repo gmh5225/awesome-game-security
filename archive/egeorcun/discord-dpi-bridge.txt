@@ -1,0 +1,1013 @@
+Project Path: arc_egeorcun_discord-dpi-bridge_2ssajpcu
+
+Source Tree:
+
+```txt
+arc_egeorcun_discord-dpi-bridge_2ssajpcu
+├── LICENSE
+├── README.md
+├── config.json
+├── fix-discord.ps1
+├── install.ps1
+├── relay.ps1
+├── status.ps1
+└── uninstall.ps1
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 egeorcun
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# discord-dpi-bridge
+
+**Türkiye'de Discord'a girmek için GoodbyeDPI kullanıyorsun ama anti-cheat'li oyunlar (ARC Raiders, vb.) açılmıyor mu?** Bu araç tam o sorun için.
+
+GoodbyeDPI ve zapret gibi araçlar DPI engelini **çekirdek seviyesinde** bir sürücüyle (`WinDivert64.sys`) aşar. Denuvo Anti-Cheat, EAC gibi anti-cheat'ler bu tür paket müdahale sürücülerini gördüğünde oyunu başlatmayı reddeder — ARC Raiders'ta bu "Oyun çöktü, 0x1: Yanlış işlev" hatası olarak görünür.
+
+**discord-dpi-bridge** aynı işi **hiç çekirdek sürücüsü yüklemeden** yapar. Discord çalışır, oyun çalışır, ikisi aynı anda çalışır.
+
+> English summary at the bottom.
+
+---
+
+## Nasıl çalışıyor
+
+Discord tek bir program değil, iki ayrı ağ istemcisi taşıyor ve ikisi farklı davranıyor:
+
+| Bileşen | Ne | Proxy kullanır mı |
+|---|---|---|
+| Sohbet / uygulama | Chromium | ✅ `--proxy-server` bayrağıyla |
+| **Güncelleyici** | Rust (`reqwest`) | ❌ Hiçbir ayarla — doğrudan bağlanır |
+
+Bu yüzden dört parça var:
+
+```
+                     ┌──────────────────────────────────────────────┐
+ Discord (Chromium) ─┤ --proxy-server=socks5://127.0.0.1:1080        │
+                     │        │                                       │
+ Discord updater ────┤ hosts: updates.discord.com → 127.0.0.1:443    │
+                     │        │  relay.ps1 (TCP→SOCKS5 köprüsü)       │
+                     │        ▼                                       │
+                     │   ByeDPI (ciadpi.exe) SOCKS5, kullanıcı alanı  │──▶ internet
+                     │                                                │
+ Windows DNS ────────┤ DNS over HTTPS (Cloudflare) — 53/udp'yi        │
+                     │ ele geçiren operatör DNS'ini atlar             │
+                     └──────────────────────────────────────────────┘
+```
+
+1. **ByeDPI** — DPI atlatmayı kullanıcı alanında yapan yerel SOCKS5 proxy. Sürücü yok.
+2. **relay.ps1** — Proxy kullanamayan güncelleyici için köprü. **Windows'ta yerleşik gelen PowerShell ile yazıldı; Python veya başka bir bağımlılık gerektirmez.** hosts dosyası `updates.discord.com`'u `127.0.0.1`'e yönlendirir; köprü o portu dinler ve bağlantıyı ByeDPI üzerinden gerçek sunucuya taşır. TLS'e dokunmaz, sertifika doğrulaması olduğu gibi kalır.
+3. **DNS over HTTPS** — Operatör düz DNS sorgularını şeffaf şekilde ele geçirip engel sayfası IP'si (`195.175.254.2`) döndürüyor; `1.1.1.1` yazmak yetmiyor. DoH bunu bitirir.
+4. **Discord bayrağı** — Kısayollara ve "Windows ile başlat" kaydına `--proxy-server` eklenir.
+
+Hepsi yeniden başlatmada kendiliğinden gelir (Startup klasöründe bir `.vbs`).
+
+## Gereksinimler
+
+- Windows 10 21H2+ / Windows 11 (DoH desteği için)
+- **Başka hiçbir şey yok** — köprü Windows'ta yerleşik gelen PowerShell 5.1 ile çalışır. Python veya harici kurulum gerekmez.
+- Yönetici yetkisi — sadece kurulumda (hosts + DNS için); çalışma zamanında hiçbir şey yönetici değildir
+
+## Kurulum
+
+```powershell
+git clone https://github.com/egeorcun/discord-dpi-bridge
+cd discord-dpi-bridge
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+UAC penceresini onayla. Betik sırayla:
+
+1. GoodbyeDPI / WinDivert bulursa **sorar** ve kaldırır (klasörüne dokunmaz, sadece Windows servisini siler)
+2. Çalışma ortamını doğrular (yerleşik PowerShell — kurulacak bir şey yok)
+3. ByeDPI'yi GitHub'dan indirir (`%LOCALAPPDATA%\discord-dpi-bridge\byedpi\`)
+4. DoH'u açar, DNS'i Cloudflare yapar (eskisini `dns-backup.json`'a yedekler)
+5. hosts dosyasına yazar (yedek: `hosts.discord-dpi-bridge.bak`)
+6. Startup girdisini oluşturur ve hemen başlatır
+7. Discord kısayollarını düzenler
+8. `status.ps1` ile doğrular
+
+GoodbyeDPI kaldırıldıysa **bilgisayarı yeniden başlat** — sürücü ancak öyle boşalır.
+
+Önce ne yapacağını görmek istersen: `.\install.ps1 -DryRun` (yönetici gerektirmez, hiçbir şeyi değiştirmez).
+
+## Kontrol
+
+```powershell
+.\status.ps1
+```
+
+Her parçayı ayrı test eder ve nerede takıldığını söyler. Bir şey bozulduğunda ilk bakılacak yer bu.
+
+## Discord güncellenince bozulursa
+
+Discord kendini güncellediğinde kısayolları sıfırlayabiliyor. Discord açılmıyorsa:
+
+```powershell
+.\fix-discord.ps1
+```
+
+Yönetici gerekmez.
+
+## Kaldırma
+
+```powershell
+.\uninstall.ps1
+```
+
+hosts, DNS, Startup, Discord bayrakları — hepsini geri alır. DoH'u tutmak istersen `-KeepDoH`. GoodbyeDPI'yi geri kurmaz.
+
+## Sık sorulanlar
+
+**Windows Defender `ciadpi.exe`'yi karantinaya aldı.**
+ByeDPI'nin bilinen bir yanlış pozitifi (PUA). Windows Güvenliği → Koruma geçmişi → "Cihazda izin ver", sonra `install.ps1`'i tekrar çalıştır.
+
+**`nslookup discord.com` timeout veriyor.**
+Normal. `nslookup` ham UDP gönderir, DoH kullanmaz. Doğru kontrol: `Resolve-DnsName discord.com`.
+
+**Discord güncelleyici hâlâ dönüyor.**
+`status.ps1` çalıştır. `%APPDATA%\discord\logs\Discord_updater_rCURRENT.log` içinde hangi alan adına takıldığına bak; `updates.discord.com` ve `dl.discordapp.net` dışında bir şeyse `config.json`'daki `routes` ve `hosts_entries.map`'e ekleyip `install.ps1`'i tekrar çalıştır.
+
+**Discord açılıyor ama bazı şeyler yüklenmiyor / ses yok.**
+Ses (UDP) proxy'den geçmez, doğrudan gider; genelde bu sorun olmaz çünkü engel alan adı bazlı. Çalışmıyorsa `config.json` → `byedpi.args`'ı operatörüne göre ayarlamak gerekebilir ([ByeDPI README](https://github.com/hufrea/byedpi)).
+
+**Python gerekiyor mu?**
+Hayır. Köprü (`relay.ps1`) Windows'ta yerleşik gelen PowerShell 5.1 ile yazıldı; hiçbir ek çalışma ortamı kurman gerekmez. (Eski sürümlerde `relay.py` vardı; artık kaldırıldı.)
+
+**Bu ayarlar hangi operatörde çalışır?**
+Varsayılan `byedpi.args` Türk Telekom'da test edildi. Farklı operatörde ByeDPI parametrelerini değiştirmen gerekebilir; DoH ve köprü kısmı operatörden bağımsızdır.
+
+**Başka oyunlar / başka anti-cheat'ler?**
+Buradaki hiçbir parça çekirdek sürücüsü yüklemediği için anti-cheat'lerin görebileceği bir şey yok. Denuvo Anti-Cheat (ARC Raiders) ile doğrulandı. Ama her anti-cheat'i test etmedim; sorumluluk sende.
+
+**`udpfallback=no` ne demek, tehlikeli mi?**
+DoH başarısız olursa Windows zehirlenmiş düz DNS'e **geri dönmez** — engel geri gelmesin diye. Yan etkisi: `1.1.1.1`'e HTTPS erişimi kesilirse DNS tamamen susar. Bunu istemiyorsan `install.ps1 -AllowDnsFallback`.
+
+**VPN kullansam olmaz mıydı?**
+Olur, ama iki bedeli var: tüm oyun trafiği tünelden geçer (ping artar) ya da split tunneling gerekir — Proton VPN gibi istemcilerin split tunneling'i de WFP callout sürücüsü yüklüyor, o da anti-cheat açısından WinDivert'e benzer risk taşıyor.
+
+## Güvenlik ve doğrulama
+
+- Bu depo **hiçbir ikili (çalıştırılabilir) dosya taşımaz.** Tek ikili olan `ciadpi.exe` (ByeDPI), kurulum sırasında [ByeDPI'nin resmi GitHub sürümünden](https://github.com/hufrea/byedpi/releases) iner; `install.ps1` indirdiği sürümü `byedpi\version.txt`'e yazar. Geri kalan her şey okunabilir kaynak koddur (`.ps1`, `.py`) — indir, aç, oku.
+- **Neden antivirüs "PUA/HackTool" diyor?** ByeDPI bir DPI atlatma aracı olduğu için bazı motorlar onu "Riskware / PUA / HackTool / not-a-virus" diye işaretler. Bu bir **zararlı yazılım tespiti değil, kategori uyarısıdır** — aracın ne yaptığına bakıp koydukları etiket. ByeDPI açık kaynaktır, kodu incelenebilir. Windows Defender `ciadpi.exe`'yi karantinaya alırsa: Windows Güvenliği → Koruma geçmişi → "Cihazda izin ver", sonra `install.ps1`'i tekrar çalıştır.
+
+### VirusTotal — `ciadpi.exe`
+
+Doğrulanan sürüm: **ByeDPI v0.17.3**, `byedpi-17.3-x86_64-w64.zip` içindeki `ciadpi.exe`.
+
+| Alan | Değer |
+|---|---|
+| SHA-256 | `eb53ceeeb981cc6735ac24bb1e51e725280b86630e80fdf19ddc4ee4a5b54ef4` |
+| Boyut | 129 024 bayt |
+| VirusTotal | **https://www.virustotal.com/gui/file/eb53ceeeb981cc6735ac24bb1e51e725280b86630e80fdf19ddc4ee4a5b54ef4** |
+
+> Bağlantı, dosyanın **o an geçerli** VirusTotal taramasını gösterir (oran zamanla değişebilir). DPI araçları için birkaç motorun "PUA/Riskware" işaretlemesi beklenen bir durumdur; önemli olan tespitin türü, sayısı değil. Bu SHA-256, ByeDPI'nin resmi sürümündeki `ciadpi.exe` ile aynıdır — yani üst(upstream) ile birebir doğrulayabilirsin.
+
+### Kaynak dosyalar (bütünlük)
+
+Aşağıdakiler bu deponun kendi kaynak dosyaları. `git clone` ile alındıklarında (satır sonları `.gitattributes` ile sabitlenir: `.ps1` = CRLF, `.py`/`.json` = LF) SHA-256'ları:
+
+| Dosya | SHA-256 |
+|---|---|
+| `relay.ps1` | `54d0f861842fcf18e03825a395056d486c46059c9bc6a17201004eb0e249ef98` |
+| `install.ps1` | `3492f672ca72b996393b321c76a272ae146aa6d10f97601bf532e90b59240c7f` |
+| `uninstall.ps1` | `d3d1d7c07dfbf1da687a8ec65dc1e8e9abd001fe5fba8f7cce17e1a87d8d124a` |
+| `status.ps1` | `a3c07fbb3e49df0f2eb7f5d45e2b556fd9f0520497d6dc08f4bed43b47da4e3f` |
+| `fix-discord.ps1` | `2f195dbca2a222ff97e852f4069ab69f1f98e316f989fe587038bea9053c558e` |
+| `config.json` | `43da260d90a56ff8886e94b5664774241d4d934f61a598db88f4365e31b37c5d` |
+
+Kendi indirdiğin dosyayı doğrulamak için:
+
+```powershell
+Get-FileHash .\ciadpi.exe -Algorithm SHA256   # ByeDPI ikili — yukaridaki ile karsilastir
+Get-FileHash .\relay.ps1  -Algorithm SHA256
+```
+
+> Not: Bu betikler bu deponun yeni dosyaları; VirusTotal'da henüz taranmamış olabilirler. İstersen kendin yükleyip tarat — hepsi düz metin, gizli bir şey yok. Metin dosyalarının hash'i satır sonu ayarına duyarlıdır; şüphede kalırsan `git clone` ile al ya da dosyayı doğrudan oku. İkili `ciadpi.exe`'nin hash'i satır sonundan etkilenmez, en güvenilir doğrulama noktası odur.
+
+## Sınırlar — dürüstçe
+
+- Bu bir **çözüm değil, geçici yol**. Discord istemcisini değiştirdiğinde (yeni bir alan adı, güncelleyicinin davranışı) kırılabilir.
+- Chromium tarafı ECH (şifreli SNI) + DoH ile bazen proxy'siz de bağlanabiliyor; buna güvenilmedi çünkü operatör istediği an ECH'i kesebilir.
+- `relay.ps1` yalnızca IPv4 hedefleri çözer.
+- DPI atlatma araçlarının hukuki durumu ülkeye göre değişir. Bu araç bir iletişim uygulamasına erişmek içindir; yerel mevzuat ve hizmet şartlarına uyum kullanıcının sorumluluğundadır.
+
+## Teşekkür
+
+- [ByeDPI](https://github.com/hufrea/byedpi) — hufrea. Kullanıcı alanında DPI atlatmanın tamamı onun işi.
+- [GoodbyeDPI](https://github.com/ValdikSS/GoodbyeDPI) — ValdikSS. Sorunu yaşayana kadar yıllarca işimizi gördü.
+
+## Lisans
+
+MIT. ByeDPI ayrı lisanslıdır (MIT) ve kurulumda ayrıca indirilir; bu depoda barındırılmaz.
+
+---
+
+## English summary
+
+**Problem.** In Turkey, Discord is DPI-blocked. The usual fix (GoodbyeDPI / zapret) works via the `WinDivert64.sys` kernel packet-interception driver — which kernel anti-cheats (Denuvo Anti-Cheat, EAC, …) refuse to coexist with. ARC Raiders shows this as "Game crashed, 0x1: Incorrect function."
+
+**What this does.** Reaches Discord with **no kernel driver at all**, so the game and Discord run side by side:
+
+1. **ByeDPI** — user-space SOCKS5 proxy doing the DPI desync.
+2. **relay.ps1** — Discord's updater is a separate Rust/`reqwest` client that ignores every proxy setting (Chromium flag, `HTTPS_PROXY`, `settings.json`). So `hosts` points `updates.discord.com` at a loopback address, and this bridge forwards that TCP connection through ByeDPI to the real server. TLS is untouched; certificate validation stays intact. The bridge resolves the real IP via DoH and hands SOCKS5 an **IP**, not a hostname — otherwise ByeDPI would resolve the hosts entry and loop back into the bridge. **Written in built-in Windows PowerShell — no Python or other dependency.**
+3. **DNS over HTTPS** — the ISP transparently hijacks plain port-53 DNS and returns a block-page IP; setting `1.1.1.1` alone doesn't help.
+4. **`--proxy-server`** added to Discord's shortcuts and Run key.
+
+`install.ps1` (self-elevates; `-DryRun` to preview), `status.ps1` (health check, no admin), `fix-discord.ps1` (re-apply flags after a Discord update), `uninstall.ps1` (reverts everything). Config in `config.json`. Requires only Windows 10 21H2+/11 — the bridge runs on built-in PowerShell 5.1, **no Python or other dependency**.
+
+Tested on Türk Telekom with Denuvo Anti-Cheat (ARC Raiders). Other ISPs may need different `byedpi.args`. This is a workaround, not a fix; it may break when Discord changes its client. Legal status of DPI circumvention varies by country — compliance is the user's responsibility.
+
+```
+
+`config.json`:
+
+```json
+{
+  "_aciklama": "discord-dpi-bridge ayarlari. install.ps1 bu dosyayi okur; relay.py 'socks', 'doh' ve 'routes' alanlarini kullanir.",
+
+  "socks": { "host": "127.0.0.1", "port": 1080 },
+
+  "byedpi": {
+    "_aciklama": "ByeDPI (ciadpi.exe) desync parametreleri. Operatore gore degisebilir; calismazsa https://github.com/hufrea/byedpi README'sine bak.",
+    "args": "--split 1 --disorder 3+s --mod-http=h,d --auto=torst --tlsrec 1+s"
+  },
+
+  "doh": {
+    "_aciklama": "relay.py gercek IP'yi buradan cozer (hosts dosyasini atlamak icin).",
+    "url": "https://1.1.1.1/dns-query",
+    "ttl": 300
+  },
+
+  "dns": {
+    "_aciklama": "Windows DNS over HTTPS ayari. Operator duz DNS'i (53/udp) ele gecirdigi icin gerekli.",
+    "template": "https://cloudflare-dns.com/dns-query",
+    "v4": ["1.1.1.1", "1.0.0.1"],
+    "v6": ["2606:4700:4700::1111", "2606:4700:4700::1001"]
+  },
+
+  "routes": [
+    { "listen": "127.0.0.1", "host": "updates.discord.com", "port": 443 },
+    { "listen": "127.0.0.2", "host": "dl.discordapp.net",   "port": 443 },
+    { "listen": "127.0.0.3", "host": "discord.com",         "port": 443 }
+  ],
+
+  "hosts_entries": {
+    "_aciklama": "Hosts dosyasina yazilacak alan adlari. Sadece proxy'yi KULLANAMAYAN istemcinin gittigi alanlar burada olmali; discord.com bilerek disarida (Chromium tarafi zaten --proxy-server ile gidiyor).",
+    "map": {
+      "updates.discord.com": "127.0.0.1",
+      "dl.discordapp.net": "127.0.0.2"
+    }
+  },
+
+  "discord": {
+    "_aciklama": "Discord kisayollarina ve otomatik baslatma kaydina eklenecek Chromium bayragi.",
+    "proxy_server": "socks5://127.0.0.1:1080"
+  }
+}
+
+```
+
+`fix-discord.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  Discord kisayollarina ve otomatik baslatma kaydina --proxy-server bayragini ekler (veya kaldirir).
+.DESCRIPTION
+  Discord kendini guncelledikten sonra kisayollari sifirlayabilir; o zaman bunu tekrar calistir.
+  Yonetici yetkisi GEREKMEZ.
+.PARAMETER ProxyServer
+  Chromium'a verilecek proxy (varsayilan: config.json -> discord.proxy_server).
+.PARAMETER Remove
+  Bayraklari kaldirir.
+#>
+[CmdletBinding()]
+param(
+  [string]$ProxyServer,
+  [switch]$Remove,
+  [switch]$Quiet
+)
+$ErrorActionPreference = 'Stop'
+if (-not $ProxyServer) {
+  $cfgPath = Join-Path $PSScriptRoot 'config.json'
+  if (Test-Path $cfgPath) { $ProxyServer = (Get-Content $cfgPath -Raw | ConvertFrom-Json).discord.proxy_server }
+  if (-not $ProxyServer) { $ProxyServer = 'socks5://127.0.0.1:1080' }
+}
+$flag = "--proxy-server=$ProxyServer"
+$psa  = "--process-start-args `"$flag`""
+$changed = 0
+
+function Say($m) { if (-not $Quiet) { Write-Host $m } }
+
+# 1) HKCU Run kaydi (Discord'un "Windows ile baslat" ayari)
+$runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+$cur = (Get-ItemProperty $runKey -Name Discord -ErrorAction SilentlyContinue).Discord
+if ($cur) {
+  $new = $cur
+  if ($Remove) {
+    $new = ($cur -replace [regex]::Escape(" $psa"), '') -replace [regex]::Escape(" $flag"), ''
+  } elseif ($cur -notmatch 'proxy-server') {
+    if ($cur -match 'Update\.exe') { $new = "$cur $psa" } else { $new = "$cur $flag" }
+  }
+  if ($new -ne $cur) { Set-ItemProperty $runKey -Name Discord -Value $new; $changed++; Say "  [+] Run kaydi guncellendi" }
+}
+
+# 2) Kisayollar (masaustu + baslat menusu)
+$sh = New-Object -ComObject WScript.Shell
+$dirs = @("$env:USERPROFILE\Desktop", "$env:PUBLIC\Desktop",
+          "$env:APPDATA\Microsoft\Windows\Start Menu\Programs",
+          "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Discord Inc")
+foreach ($d in $dirs) {
+  if (-not (Test-Path $d)) { continue }
+  foreach ($lnkPath in (Get-ChildItem $d -Filter 'Discord*.lnk' -ErrorAction SilentlyContinue)) {
+    $lnk = $sh.CreateShortcut($lnkPath.FullName)
+    if ($lnk.TargetPath -notmatch 'Discord') { continue }
+    $args0 = $lnk.Arguments
+    $args1 = $args0
+    if ($Remove) {
+      $args1 = ((($args0 -replace [regex]::Escape($psa), '') -replace [regex]::Escape($flag), '') -replace '\s{2,}', ' ').Trim()
+    } elseif ($args0 -notmatch 'proxy-server') {
+      if ($lnk.TargetPath -match 'Update\.exe') { $args1 = ("$args0 $psa").Trim() } else { $args1 = ("$args0 $flag").Trim() }
+    }
+    if ($args1 -ne $args0) {
+      try { $lnk.Arguments = $args1; $lnk.Save(); $changed++; Say "  [+] $($lnkPath.FullName)" }
+      catch { Say "  [!] Yazilamadi (yetki?): $($lnkPath.FullName)" }
+    }
+  }
+}
+if ($changed -eq 0) {
+  if ($Remove) { Say "  [=] Degisiklik gerekmedi (bayrak yoktu)" } else { Say "  [=] Degisiklik gerekmedi (zaten ayarli)" }
+}
+exit 0
+
+```
+
+`install.ps1`:
+
+```ps1
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+  discord-dpi-bridge kurulumu: Discord'u cekirdek surucusu OLMADAN DPI engelinden gecirir,
+  boylece Denuvo/EAC gibi anti-cheat'ler WinDivert yuzunden oyunu reddetmez.
+.DESCRIPTION
+  Yaptiklari (hepsi geri alinabilir, uninstall.ps1 ile):
+   1. GoodbyeDPI / WinDivert gibi cakisan servisleri bulur, onayla kaldirir
+   2. Python'u kontrol eder (yoksa winget ile kurmayi teklif eder)
+   3. ByeDPI'yi GitHub'dan indirir (kullanici alaninda SOCKS5 proxy)
+   4. Windows'ta DNS over HTTPS acar (operatorun duz DNS'i ele gecirmesine karsi)
+   5. hosts dosyasina updates.discord.com -> 127.0.0.1 yazar
+   6. Acilista ByeDPI + kopruyu baslatan Startup girdisi olusturur ve hemen baslatir
+   7. Discord kisayollarina --proxy-server bayragini ekler
+   8. status.ps1 ile dogrular
+  Yonetici yetkisi gerekir (kendisi UAC ile ister). -DryRun ile hicbir sey degistirmeden ne yapacagini gosterir.
+.PARAMETER DryRun       Degisiklik yapma, sadece anlat.
+.PARAMETER Yes          Sorulari sormadan evet say.
+.PARAMETER AllowDnsFallback  DoH basarisiz olursa duz DNS'e dusmeye izin ver (guvenli ama engel geri gelebilir).
+.PARAMETER SkipDoH      DNS ayarlarina dokunma.
+.PARAMETER SkipHosts    hosts dosyasina dokunma.
+.PARAMETER SkipDiscord  Discord kisayollarina dokunma.
+.PARAMETER KeepConflicts  GoodbyeDPI/WinDivert'i kaldirmayi teklif etme.
+.PARAMETER ByeDpiTag    Belirli bir ByeDPI surumu (ornek: v0.17.3). Bos = en yeni.
+#>
+[CmdletBinding()]
+param(
+  [switch]$DryRun,
+  [switch]$Yes,
+  [switch]$AllowDnsFallback,
+  [switch]$SkipDoH,
+  [switch]$SkipHosts,
+  [switch]$SkipDiscord,
+  [switch]$KeepConflicts,
+  [string]$ByeDpiTag = ''
+)
+$ErrorActionPreference = 'Stop'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# ---------- yardimcilar ----------
+function Step($t) { Write-Host "`n== $t" -ForegroundColor Cyan }
+function Ok($t)   { Write-Host "   [OK] $t" -ForegroundColor Green }
+function Info($t) { Write-Host "   $t" }
+function Warn($t) { Write-Host "   [!] $t" -ForegroundColor Yellow }
+function Fail($t) { Write-Host "   [HATA] $t" -ForegroundColor Red }
+function Ask($q) {
+  if ($Yes) { return $true }
+  $a = Read-Host "   $q [e/H]"
+  return ($a -match '^(e|evet|y|yes)$')
+}
+function Act($desc, [scriptblock]$do) {
+  if ($DryRun) { Info "(dry-run) $desc"; return $null }
+  Info $desc
+  return (& $do)
+}
+function Test-Admin {
+  $id = [Security.Principal.WindowsIdentity]::GetCurrent()
+  return (New-Object Security.Principal.WindowsPrincipal($id)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+# ---------- yonetici yukseltme ----------
+if (-not $DryRun -and -not (Test-Admin)) {
+  $parts = @()
+  foreach ($k in $PSBoundParameters.Keys) {
+    $v = $PSBoundParameters[$k]
+    if ($v -is [switch]) { if ($v.IsPresent) { $parts += "-$k" } }
+    else { $parts += "-$k"; $parts += ('"' + $v + '"') }
+  }
+  Write-Host "Yonetici yetkisi gerekiyor; UAC penceresi acilacak..." -ForegroundColor Yellow
+  Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -NoExit -File `"$PSCommandPath`" " + ($parts -join ' '))
+  exit
+}
+
+$Root    = $PSScriptRoot
+$Install = Join-Path $env:LOCALAPPDATA 'discord-dpi-bridge'
+$Startup = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\discord-dpi-bridge.vbs'
+$cfg     = Get-Content (Join-Path $Root 'config.json') -Raw | ConvertFrom-Json
+
+Write-Host "discord-dpi-bridge kurulum" -ForegroundColor Cyan
+if ($DryRun) { Warn "DRY-RUN: hicbir sey degistirilmeyecek" }
+Info "Kaynak : $Root"
+Info "Hedef  : $Install"
+
+# ---------- 1) cakisan suruculer ----------
+Step "Cakisan cekirdek suruculeri"
+$conflictSvcs = @('GoodbyeDPI', 'zapret', 'winws')
+$found = @()
+foreach ($n in $conflictSvcs) { if (Get-Service -Name $n -ErrorAction SilentlyContinue) { $found += $n } }
+$drv = @(Get-CimInstance Win32_SystemDriver | Where-Object { $_.Name -match 'WinDivert' })
+foreach ($d in $drv) { $found += $d.Name }
+if ($found.Count -eq 0) { Ok "Cakisan servis/surucu yok" }
+else {
+  Warn ("Bulundu: " + ($found -join ', '))
+  Info "Bunlar cekirdek seviyesinde paket mudahalesi yapar; Denuvo Anti-Cheat (ARC Raiders) ve benzerleri oyunu baslatmaz."
+  if ($KeepConflicts) { Warn "KeepConflicts: dokunulmuyor. Oyun bunlar yukluyken acilmayacaktir." }
+  elseif (Ask "Bu servisleri durdurup kaldirayim mi? (GoodbyeDPI klasorun silinmez, sadece Windows servisi kalkar)") {
+    foreach ($n in $found) {
+      Act "sc stop/delete $n" { & sc.exe stop $n 2>&1 | Out-Null; Start-Sleep -Milliseconds 800; & sc.exe delete $n 2>&1 | Out-Null } | Out-Null
+    }
+    Ok "Kaldirildi. Surucunun cekirdekten tamamen bosalmasi icin kurulum bitince YENIDEN BASLATMAN gerekir."
+  } else { Warn "Kaldirilmadi. Oyun bunlar yukluyken acilmayacaktir." }
+}
+
+# ---------- 2) PowerShell (yerlesik, bagimlilik yok) ----------
+Step "Calisma ortami"
+$psexe = Join-Path $env:WINDIR 'System32\WindowsPowerShell\v1.0\powershell.exe'
+if (-not (Test-Path $psexe)) { $psexe = 'powershell.exe' }
+Ok "Kopru yerlesik Windows PowerShell ile calisir (Python/harici bagimlilik yok): $psexe"
+
+# ---------- 3) dosyalar + ByeDPI ----------
+Step "Dosyalar ve ByeDPI"
+Act "Klasor: $Install" { New-Item -ItemType Directory -Force -Path $Install, (Join-Path $Install 'byedpi') | Out-Null } | Out-Null
+foreach ($f in 'relay.ps1', 'config.json') {
+  Act "kopyala $f" { Copy-Item (Join-Path $Root $f) (Join-Path $Install $f) -Force } | Out-Null
+}
+$ciadpi = Join-Path $Install 'byedpi\ciadpi.exe'
+$verFile = Join-Path $Install 'byedpi\version.txt'
+$haveVer = ''
+if (Test-Path $verFile) { $haveVer = (Get-Content $verFile -Raw).Trim() }
+$needDl = -not (Test-Path $ciadpi)
+if ($ByeDpiTag -and $haveVer -ne $ByeDpiTag) { $needDl = $true }
+if ($needDl) {
+  try {
+    $api = 'https://api.github.com/repos/hufrea/byedpi/releases/latest'
+    if ($ByeDpiTag) { $api = "https://api.github.com/repos/hufrea/byedpi/releases/tags/$ByeDpiTag" }
+    $rel = Invoke-RestMethod $api -Headers @{ 'User-Agent' = 'discord-dpi-bridge' }
+    $asset = $rel.assets | Where-Object { $_.name -like '*x86_64-w64.zip' } | Select-Object -First 1
+    if (-not $asset) { throw "surumde x86_64-w64 zip yok" }
+    Info "ByeDPI $($rel.tag_name): $($asset.name)"
+    Act "indir + ac" {
+      $tmp = Join-Path $env:TEMP 'byedpi-dl'
+      New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+      $zip = Join-Path $tmp $asset.name
+      Invoke-WebRequest $asset.browser_download_url -OutFile $zip -UseBasicParsing
+      Expand-Archive $zip -DestinationPath $tmp -Force
+      Copy-Item (Join-Path $tmp 'ciadpi.exe') $ciadpi -Force
+      Set-Content $verFile $rel.tag_name
+      Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+    } | Out-Null
+    if (-not $DryRun -and -not (Test-Path $ciadpi)) {
+      Fail "ciadpi.exe kopyalandi ama yerinde yok. Buyuk ihtimalle Windows Defender 'PUA' diye karantinaya aldi."
+      Info "Windows Guvenligi > Virus ve tehdit korumasi > Koruma gecmisi'nden 'Cihazda izin ver' de, sonra install.ps1'i tekrar calistir."
+      exit 1
+    }
+    Ok "ByeDPI hazir"
+  } catch { Fail "ByeDPI indirilemedi: $($_.Exception.Message)"; Info "Elle: https://github.com/hufrea/byedpi/releases -> x86_64-w64.zip -> ciadpi.exe'yi $Install\byedpi\ icine koy."; if (-not $DryRun) { exit 1 } }
+} else { Ok "ByeDPI zaten var ($haveVer)" }
+
+# ---------- 4) DNS over HTTPS ----------
+Step "DNS over HTTPS"
+if ($SkipDoH) { Warn "SkipDoH: atlandi" }
+else {
+  $fb = 'no'; if ($AllowDnsFallback) { $fb = 'yes' }
+  $servers = @($cfg.dns.v4) + @($cfg.dns.v6)
+  foreach ($s in $servers) {
+    Act "netsh dns encryption $s (udpfallback=$fb)" {
+      & netsh dns add encryption server=$s dohtemplate=$($cfg.dns.template) autoupgrade=yes udpfallback=$fb 2>&1 | Out-Null
+      if ($LASTEXITCODE -ne 0) { & netsh dns set encryption server=$s dohtemplate=$($cfg.dns.template) autoupgrade=yes udpfallback=$fb 2>&1 | Out-Null }
+    } | Out-Null
+  }
+  $adapters = @(Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' })
+  if ($adapters.Count -eq 0) { Warn "Aktif (internete cikan) adaptor bulunamadi; DNS adaptor ayari atlandi" }
+  $backup = Join-Path $Install 'dns-backup.json'
+  if (-not (Test-Path $backup)) {
+    $bk = @()
+    foreach ($a in $adapters) {
+      $bk += [pscustomobject]@{
+        Alias = $a.InterfaceAlias; Index = $a.InterfaceIndex
+        V4 = @((Get-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -AddressFamily IPv4).ServerAddresses)
+        V6 = @((Get-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -AddressFamily IPv6).ServerAddresses)
+      }
+    }
+    Act "eski DNS ayarlarini yedekle -> dns-backup.json" { $bk | ConvertTo-Json -Depth 4 | Set-Content $backup -Encoding UTF8 } | Out-Null
+  }
+  foreach ($a in $adapters) {
+    Act "adaptor '$($a.InterfaceAlias)': DNS = $($cfg.dns.v4 -join ', ')" {
+      Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ServerAddresses @($cfg.dns.v4)
+      Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ServerAddresses @($cfg.dns.v6)
+    } | Out-Null
+  }
+  Act "DNS onbellegini temizle" { Clear-DnsClientCache } | Out-Null
+  Ok "DoH ayarlandi. Not: 'nslookup' DoH kullanmaz ve timeout verir; kontrol icin Resolve-DnsName kullan."
+}
+
+# ---------- 5) hosts ----------
+Step "hosts dosyasi"
+$hostsPath = "$env:WINDIR\System32\drivers\etc\hosts"
+if ($SkipHosts) { Warn "SkipHosts: atlandi" }
+else {
+  $bakH = "$hostsPath.discord-dpi-bridge.bak"
+  if (-not (Test-Path $bakH)) { Act "yedek -> hosts.discord-dpi-bridge.bak" { Copy-Item $hostsPath $bakH } | Out-Null }
+  $lines = @(Get-Content $hostsPath)
+  $out = @(); $skip = $false
+  foreach ($l in $lines) {
+    if ($l -eq '# >>> discord-dpi-bridge') { $skip = $true; continue }
+    if ($l -eq '# <<< discord-dpi-bridge') { $skip = $false; continue }
+    if (-not $skip) { $out += $l }
+  }
+  $out += '# >>> discord-dpi-bridge'
+  foreach ($kv in $cfg.hosts_entries.map.PSObject.Properties) { $out += ("{0} {1}" -f $kv.Value, $kv.Name); Info ("{0} -> {1}" -f $kv.Name, $kv.Value) }
+  $out += '# <<< discord-dpi-bridge'
+  Act "hosts dosyasini yaz" { [IO.File]::WriteAllLines($hostsPath, $out) ; & ipconfig /flushdns | Out-Null } | Out-Null
+  Ok "hosts guncellendi"
+}
+
+# ---------- 6) startup + baslat ----------
+Step "Acilis girdisi ve baslatma"
+$vbs = @"
+' discord-dpi-bridge: ByeDPI (SOCKS5) + kopru. Kullanici alaninda calisir, cekirdek surucusu yok.
+' install.ps1 tarafindan uretildi - elle duzenleme, install.ps1'i tekrar calistir.
+Set sh = CreateObject("WScript.Shell")
+base = "$Install\"
+sh.CurrentDirectory = base
+sh.Run """" & base & "byedpi\ciadpi.exe"" -i $($cfg.socks.host) -p $($cfg.socks.port) $($cfg.byedpi.args)", 0, False
+WScript.Sleep 1500
+sh.Run "$psexe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File """ & base & "relay.ps1"" """ & base & "config.json""", 0, False
+"@
+Act "Startup: $Startup" { Set-Content -Path $Startup -Value $vbs -Encoding ASCII } | Out-Null
+Act "eski ciadpi/relay sureclerini durdur" {
+  Get-Process ciadpi -ErrorAction SilentlyContinue | Stop-Process -Force
+  # eski Python koprusu (varsa) + yeni PowerShell koprusu
+  Get-CimInstance Win32_Process | Where-Object { ($_.Name -match '^python' -and $_.CommandLine -match 'relay\.py') -or ($_.Name -eq 'powershell.exe' -and $_.CommandLine -match 'relay\.ps1') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  Start-Sleep -Seconds 1
+} | Out-Null
+Act "simdi baslat (wscript)" { Start-Process wscript.exe -ArgumentList "`"$Startup`""; Start-Sleep -Seconds 4 } | Out-Null
+Ok "Acilista otomatik baslayacak"
+
+# ---------- 7) discord ----------
+Step "Discord kisayollari"
+if ($SkipDiscord) { Warn "SkipDiscord: atlandi" }
+elseif ($DryRun) { Info "(dry-run) fix-discord.ps1 -ProxyServer $($cfg.discord.proxy_server)" }
+else { & (Join-Path $Root 'fix-discord.ps1') -ProxyServer $cfg.discord.proxy_server; Ok "Bayrak eklendi (Discord kendini guncelleyip silerse: fix-discord.ps1)" }
+
+# ---------- 8) dogrula ----------
+if (-not $DryRun) {
+  Step "Dogrulama"
+  & (Join-Path $Root 'status.ps1')
+  $rc = $LASTEXITCODE
+  Write-Host ''
+  if ($found.Count -gt 0 -and -not $KeepConflicts) { Warn "Cakisan surucu kaldirildi -> simdi YENIDEN BASLAT, sonra Discord'u ve oyunu dene." }
+  else { Info "Discord acikti ise tamamen kapatip (tepsiden de) masaustu kisayolundan tekrar ac." }
+  exit $rc
+}
+Write-Host "`nDry-run bitti; degisiklik yapilmadi." -ForegroundColor Yellow
+
+```
+
+`relay.ps1`:
+
+```ps1
+<#
+  discord-dpi-bridge relay (PowerShell surumu - Python GEREKTIRMEZ)
+
+  Proxy desteklemeyen istemciler (Discord'un Rust guncelleyicisi) icin yerel
+  TCP -> SOCKS5 koprusu. Hosts dosyasi hedef alan adini bir loopback IP'ye
+  yonlendirir; bu betik o IP'yi dinler ve baglantiyi ByeDPI'nin SOCKS5 proxy'si
+  uzerinden gercek sunucuya tasir. TLS'e dokunulmaz; sertifika dogrulamasi
+  istemcide oldugu gibi kalir.
+
+  Kritik ayrinti: hedef alan adi hosts'ta loopback'e cevrildigi icin SOCKS5'e
+  alan adi VERILEMEZ (proxy de ayni DNS'i kullanip kendine geri baglanir).
+  Gercek IP DoH ile cozulup SOCKS5'e IP olarak verilir. SNI TLS ClientHello
+  icinde tasindigindan ByeDPI'nin DPI atlatmasi bundan etkilenmez.
+
+  Yalnizca Windows'ta yerlesik gelen PowerShell 5.1 ve .NET ile calisir.
+  Kullanim:  powershell -NoProfile -ExecutionPolicy Bypass -File relay.ps1 [config.json]
+#>
+param([string]$ConfigPath)
+$ErrorActionPreference = 'Stop'
+
+if (-not $ConfigPath) { $ConfigPath = Join-Path $PSScriptRoot 'config.json' }
+$ConfigPath = (Resolve-Path $ConfigPath).Path
+$cfg        = Get-Content $ConfigPath -Raw | ConvertFrom-Json
+$SocksHost  = $cfg.socks.host
+$SocksPort  = [int]$cfg.socks.port
+$DohUrl     = $cfg.doh.url
+$DohTtl     = [int]$cfg.doh.ttl
+$LogPath    = Join-Path (Split-Path -Parent $ConfigPath) 'relay.log'
+$LogMax     = 5MB
+
+$script:cache = @{}
+$script:conns = New-Object System.Collections.ArrayList
+
+function Write-Log([string]$msg) {
+    $line = "[{0}] {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $msg
+    try {
+        if ((Test-Path $LogPath) -and (Get-Item $LogPath).Length -gt $LogMax) {
+            Move-Item $LogPath "$LogPath.old" -Force
+        }
+        Add-Content -Path $LogPath -Value $line -Encoding UTF8
+    } catch { }
+    try { [Console]::Out.WriteLine($line) } catch { }
+}
+
+function Resolve-RealIp([string]$hostname) {
+    $hit = $script:cache[$hostname]
+    if ($hit -and $hit.exp -gt (Get-Date)) { return $hit.ip }
+    $ip = $null
+    try {
+        $r = Invoke-RestMethod -Uri ("{0}?name={1}&type=A" -f $DohUrl, $hostname) `
+             -Headers @{ accept = 'application/dns-json' } -TimeoutSec 10
+        foreach ($a in $r.Answer) {
+            if ($a.type -eq 1) {
+                $cand = [System.Net.IPAddress]::Parse($a.data)
+                if (-not [System.Net.IPAddress]::IsLoopback($cand)) { $ip = $a.data; break }
+            }
+        }
+        if ($ip) { Write-Log ("DoH: {0} -> {1}" -f $hostname, $ip) }
+    } catch {
+        Write-Log ("DoH basarisiz ({0}): {1}; sistem cozumleyicisi deneniyor" -f $hostname, $_.Exception.Message)
+    }
+    if (-not $ip) {
+        foreach ($a in [System.Net.Dns]::GetHostAddresses($hostname)) {
+            if ($a.AddressFamily -eq 'InterNetwork' -and -not [System.Net.IPAddress]::IsLoopback($a)) { $ip = $a.ToString(); break }
+        }
+    }
+    if (-not $ip) { throw "$hostname icin loopback disinda A kaydi bulunamadi" }
+    $script:cache[$hostname] = @{ ip = $ip; exp = (Get-Date).AddSeconds($DohTtl) }
+    return $ip
+}
+
+function Read-Exact($stream, [int]$n) {
+    $buf = New-Object byte[] $n
+    $off = 0
+    while ($off -lt $n) {
+        $r = $stream.Read($buf, $off, $n - $off)
+        if ($r -le 0) { throw "baglanti erken kapandi" }
+        $off += $r
+    }
+    return $buf
+}
+
+function Connect-Socks([string]$ip, [int]$port) {
+    $up = New-Object System.Net.Sockets.TcpClient
+    $up.Connect($SocksHost, $SocksPort)
+    $ns = $up.GetStream()
+    # greeting: VER=5, 1 yontem, 0x00 (auth yok)
+    $ns.Write([byte[]](5, 1, 0), 0, 3)
+    $sel = Read-Exact $ns 2
+    if ($sel[0] -ne 5 -or $sel[1] -ne 0) { $up.Close(); throw "SOCKS5 el sikisma reddedildi" }
+    # connect: VER,CMD=1,RSV,ATYP=1(IPv4)+addr+port
+    $addr = ([System.Net.IPAddress]::Parse($ip)).GetAddressBytes()
+    $req  = [byte[]]@(5, 1, 0, 1) + $addr + @([byte](($port -shr 8) -band 0xFF), [byte]($port -band 0xFF))
+    $ns.Write($req, 0, $req.Length)
+    $rep = Read-Exact $ns 4
+    if ($rep[1] -ne 0) { $up.Close(); throw ("SOCKS5 connect hata kodu {0}" -f $rep[1]) }
+    switch ($rep[3]) {
+        1 { [void](Read-Exact $ns 6) }                       # IPv4 + port
+        4 { [void](Read-Exact $ns 18) }                      # IPv6 + port
+        3 { $l = (Read-Exact $ns 1)[0]; [void](Read-Exact $ns ($l + 2)) }
+    }
+    return $up
+}
+
+function Start-Bridge($client, [string]$hostname, [int]$port) {
+    $ip = Resolve-RealIp $hostname
+    $up = Connect-Socks $ip $port
+    $cs = $client.GetStream()
+    $us = $up.GetStream()
+    # cift yonlu pompalama .NET I/O thread'lerinde olur; PS thread'i bloke olmaz
+    $t1 = $cs.CopyToAsync($us)
+    $t2 = $us.CopyToAsync($cs)
+    [void]$script:conns.Add([pscustomobject]@{ c = $client; u = $up; t1 = $t1; t2 = $t2 })
+}
+
+function Reap-Connections {
+    for ($k = $script:conns.Count - 1; $k -ge 0; $k--) {
+        $cn = $script:conns[$k]
+        if ($cn.t1.IsCompleted -or $cn.t2.IsCompleted) {
+            try { $cn.c.Close() } catch { }
+            try { $cn.u.Close() } catch { }
+            $script:conns.RemoveAt($k)
+        }
+    }
+}
+
+# ---- dinleyicileri ac ----
+$routes = @($cfg.routes)
+if ($routes.Count -eq 0) { Write-Log "[HATA] config.json icinde 'routes' bos"; exit 2 }
+$listeners = @()
+foreach ($r in $routes) {
+    $lport = if ($r.listen_port) { [int]$r.listen_port } else { [int]$r.port }
+    try {
+        $L = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Parse($r.listen), $lport)
+        $L.Start()
+    } catch {
+        Write-Log ("[HATA] {0}:{1} dinlenemiyor: {2}" -f $r.listen, $lport, $_.Exception.Message)
+        continue
+    }
+    $listeners += [pscustomobject]@{ L = $L; host = $r.host; port = [int]$r.port; lip = $r.listen; lport = $lport }
+    Write-Log ("[OK] {0}:{1} -> {2}:{3} (SOCKS5 {4}:{5})" -f $r.listen, $lport, $r.host, $r.port, $SocksHost, $SocksPort)
+}
+if ($listeners.Count -eq 0) { Write-Log "[HATA] hicbir dinleyici ayaga kalkmadi; cikiliyor"; exit 1 }
+
+# ilk baglantida takilmamak icin hedefleri onceden coz
+foreach ($x in $listeners) { try { [void](Resolve-RealIp $x.host) } catch { } }
+
+# ---- kabul dongusu: tek thread, WaitAny ile 3 dinleyici + 1sn'lik reap zamanlayicisi ----
+$acc = @($listeners | ForEach-Object { $_.L.AcceptTcpClientAsync() })
+while ($true) {
+    $delay = [System.Threading.Tasks.Task]::Delay(1000)
+    $arr = [System.Threading.Tasks.Task[]]($acc + $delay)
+    $i = [System.Threading.Tasks.Task]::WaitAny($arr)
+    if ($i -lt $acc.Count) {
+        try {
+            $client = $acc[$i].Result
+            Start-Bridge $client $listeners[$i].host $listeners[$i].port
+        } catch {
+            Write-Log ("[HATA] {0}:{1} -> {2}" -f $listeners[$i].host, $listeners[$i].port, $_.Exception.Message)
+            try { $client.Close() } catch { }
+        }
+        $acc[$i] = $listeners[$i].L.AcceptTcpClientAsync()   # yeniden kur
+    }
+    Reap-Connections
+}
+
+```
+
+`status.ps1`:
+
+```ps1
+<#
+.SYNOPSIS
+  discord-dpi-bridge saglik kontrolu. Yonetici GEREKMEZ.
+.DESCRIPTION
+  Her bileseni tek tek test eder ve sorun varsa nerede oldugunu soyler.
+  Cikis kodu 0 = her sey yolunda, 1 = sorun var.
+.PARAMETER NoNetwork
+  Internet gerektiren testleri atlar.
+#>
+[CmdletBinding()]
+param([switch]$NoNetwork)
+$ErrorActionPreference = 'SilentlyContinue'
+$cfg = Get-Content (Join-Path $PSScriptRoot 'config.json') -Raw | ConvertFrom-Json
+$script:problems = 0
+
+function Row([object]$ok, [string]$name, [string]$detail) {
+  # $ok: $true / $false / 'info' (bilgi satiri, sayilmaz)
+  if ($ok -is [string] -and $ok -eq 'info') { $mark = '[--]  '; $color = 'DarkGray' }
+  elseif ([bool]$ok) { $mark = '[OK]  '; $color = 'Green' }
+  else { $mark = '[HATA]'; $color = 'Red'; $script:problems++ }
+  Write-Host ("  {0} {1,-36} {2}" -f $mark, $name, $detail) -ForegroundColor $color
+}
+
+Write-Host "`ndiscord-dpi-bridge durum`n" -ForegroundColor Cyan
+
+# --- 1) Cakisan cekirdek suruculeri
+Write-Host "Cakisan suruculer" -ForegroundColor Yellow
+$bad = @(Get-CimInstance Win32_SystemDriver | Where-Object { $_.State -eq 'Running' -and $_.Name -match 'WinDivert' })
+if ($bad.Count -gt 0) { Row $false 'WinDivert (GoodbyeDPI/zapret)' ("CALISIYOR: " + ($bad.Name -join ', ') + " -> anti-cheat bunu reddeder") }
+else { Row $true 'WinDivert (GoodbyeDPI/zapret)' 'yuklu degil' }
+$svc = Get-Service -Name GoodbyeDPI
+if ($null -ne $svc) { Row $false 'GoodbyeDPI servisi' "kayitli ($($svc.Status)) -> kaldirilmali" } else { Row $true 'GoodbyeDPI servisi' 'yok' }
+
+# --- 2) ByeDPI
+Write-Host "`nByeDPI (SOCKS5 proxy)" -ForegroundColor Yellow
+$p = @(Get-Process ciadpi)
+if ($p.Count -gt 0) { Row $true 'ciadpi.exe sureci' "PID $($p.Id -join ',')" } else { Row $false 'ciadpi.exe sureci' 'calismiyor' }
+$l = @(Get-NetTCPConnection -LocalPort $cfg.socks.port -State Listen)
+if ($l.Count -gt 0) { Row $true "port $($cfg.socks.port) dinleniyor" $l[0].LocalAddress } else { Row $false "port $($cfg.socks.port) dinleniyor" 'hayir' }
+
+# --- 3) Kopru
+Write-Host "`nKopru (relay.ps1)" -ForegroundColor Yellow
+$rp = @(Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'powershell.exe' -and $_.CommandLine -match 'relay\.ps1' })
+if ($rp.Count -gt 0) { Row $true 'relay.ps1 sureci' "PID $($rp.ProcessId -join ',')" } else { Row $false 'relay.ps1 sureci' 'calismiyor' }
+foreach ($r in $cfg.routes) {
+  $lp = $r.port; if ($r.listen_port) { $lp = $r.listen_port }
+  $ok = @(Get-NetTCPConnection -LocalAddress $r.listen -LocalPort $lp -State Listen)
+  if ($ok.Count -gt 0) { Row $true "$($r.listen):$lp -> $($r.host)" 'dinleniyor' } else { Row $false "$($r.listen):$lp -> $($r.host)" 'dinlenmiyor' }
+}
+
+# --- 4) hosts
+Write-Host "`nHosts dosyasi" -ForegroundColor Yellow
+$hosts = Get-Content "$env:WINDIR\System32\drivers\etc\hosts"
+foreach ($kv in $cfg.hosts_entries.map.PSObject.Properties) {
+  $pat = "^\s*" + [regex]::Escape($kv.Value) + "\s+" + [regex]::Escape($kv.Name) + "\s*$"
+  $ok = @($hosts | Where-Object { $_ -match $pat })
+  if ($ok.Count -gt 0) { Row $true $kv.Name "-> $($kv.Value)" } else { Row $false $kv.Name 'girdi yok (install.ps1 yonetici olarak)' }
+}
+
+# --- 5) DoH
+Write-Host "`nDNS over HTTPS" -ForegroundColor Yellow
+$want = @($cfg.dns.v4) + @($cfg.dns.v6)
+$doh = @(Get-DnsClientDohServerAddress | Where-Object { $want -contains $_.ServerAddress -and $_.AutoUpgrade })
+if ($doh.Count -gt 0) { Row $true 'DoH sablonu (autoupgrade)' ($doh.ServerAddress -join ', ') } else { Row $false 'DoH sablonu (autoupgrade)' 'kayitli degil' }
+$act = @(Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' })
+foreach ($a in $act) {
+  $srv = @((Get-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -AddressFamily IPv4).ServerAddresses)
+  $hit = @($srv | Where-Object { $cfg.dns.v4 -contains $_ })
+  Row ($hit.Count -gt 0) "adaptor '$($a.InterfaceAlias)' DNS" ($srv -join ', ')
+}
+
+# --- 6) Discord bayraklari
+Write-Host "`nDiscord" -ForegroundColor Yellow
+$run = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name Discord).Discord
+if ($run -match 'proxy-server') { Row $true 'otomatik baslatma kaydi' 'proxy bayragi var' }
+elseif ($run) { Row $false 'otomatik baslatma kaydi' 'bayrak YOK -> fix-discord.ps1' }
+else { Row 'info' 'otomatik baslatma kaydi' 'kayit yok' }
+$sh = New-Object -ComObject WScript.Shell
+$lnk = Get-Item "$env:USERPROFILE\Desktop\Discord.lnk"
+if ($null -ne $lnk) {
+  $a = $sh.CreateShortcut($lnk.FullName).Arguments
+  if ($a -match 'proxy-server') { Row $true 'masaustu kisayolu' 'proxy bayragi var' } else { Row $false 'masaustu kisayolu' 'bayrak YOK -> fix-discord.ps1' }
+}
+$upd = "$env:APPDATA\discord\logs\Discord_updater_rCURRENT.log"
+if (Test-Path $upd) {
+  $err = Get-Content $upd | Select-String -CaseSensitive 'ERROR' | Select-Object -Last 1
+  if ($null -eq $err) { Row $true 'guncelleyici logu' 'hata yok' }
+  else {
+    $m = $err.Line -replace '.*source: ', ''
+    if ($m.Length -gt 90) { $m = $m.Substring(0, 90) + '...' }
+    Row $false 'guncelleyici logu' $m
+  }
+}
+
+# --- 7) Ag testleri
+if (-not $NoNetwork) {
+  Write-Host "`nAg testleri" -ForegroundColor Yellow
+  $curl = Get-Command curl.exe
+  if ($null -ne $curl) {
+    $t1 = & curl.exe -s -m 15 -o NUL -w '%{http_code}' --socks5-hostname "$($cfg.socks.host):$($cfg.socks.port)" 'https://discord.com/api/v9/gateway'
+    Row ($t1 -eq '200') 'discord.com (SOCKS5 uzerinden)' "HTTP $t1"
+    $t2 = & curl.exe -s -m 15 -o NUL -w '%{http_code}' 'https://updates.discord.com/distributions/app/manifests/latest?channel=stable&platform=win&arch=x64'
+    Row ($t2 -eq '200') 'updates.discord.com (hosts->kopru)' "HTTP $t2"
+    $t3 = & curl.exe -s -m 10 -o NUL -w '%{http_code}' 'https://discord.com/'
+    if ($t3 -eq '200') { Row 'info' 'discord.com (dogrudan, bilgi)' 'HTTP 200 (ECH/DoH sayesinde olabilir)' } else { Row 'info' 'discord.com (dogrudan, bilgi)' "HTTP $t3 (engelli - beklenen)" }
+  } else { Row 'info' 'curl.exe' 'bulunamadi, ag testi atlandi' }
+  try {
+    $sys = @((Resolve-DnsName discord.com -Type A | Where-Object IPAddress).IPAddress)
+    $ans = (Invoke-RestMethod "$($cfg.doh.url)?name=discord.com&type=A" -Headers @{accept='application/dns-json'}).Answer
+    $real = @($ans | Where-Object { $_.type -eq 1 } | ForEach-Object { $_.data })
+    $poison = @($sys | Where-Object { $real -notcontains $_ })
+    if ($poison.Count -eq 0) { Row $true 'DNS zehirlenmesi' 'yok (sistem = DoH)' } else { Row $false 'DNS zehirlenmesi' "sistem $($poison -join ',') donuyor, gercek: $($real -join ',')" }
+  } catch { Row 'info' 'DNS karsilastirma' 'yapilamadi' }
+}
+
+Write-Host ''
+if ($script:problems -eq 0) { Write-Host "Her sey yolunda." -ForegroundColor Green; exit 0 }
+Write-Host "$($script:problems) sorun bulundu." -ForegroundColor Red
+exit 1
+
+```
+
+`uninstall.ps1`:
+
+```ps1
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+  discord-dpi-bridge'i kaldirir ve install.ps1'in yaptigi her seyi geri alir.
+.DESCRIPTION
+  - ByeDPI ve kopru sureclerini durdurur, Startup girdisini siler
+  - hosts dosyasindaki discord-dpi-bridge blogunu kaldirir
+  - DNS ayarlarini dns-backup.json'dan geri yukler ve DoH sablonlarini siler (-KeepDoH ile korunur)
+  - Discord kisayollarindan --proxy-server bayragini kaldirir
+  - Kurulum klasorunu siler (sorar)
+  GoodbyeDPI'yi GERI KURMAZ; istersen kendi service_install*.cmd'ni calistirirsin.
+.PARAMETER KeepDoH   DNS over HTTPS ayarini birak (zararsiz, genelde faydali).
+.PARAMETER Yes       Sormadan evet say.
+#>
+[CmdletBinding()]
+param([switch]$KeepDoH, [switch]$Yes)
+$ErrorActionPreference = 'Continue'
+
+function Step($t) { Write-Host "`n== $t" -ForegroundColor Cyan }
+function Ok($t)   { Write-Host "   [OK] $t" -ForegroundColor Green }
+function Info($t) { Write-Host "   $t" }
+function Warn($t) { Write-Host "   [!] $t" -ForegroundColor Yellow }
+function Ask($q)  { if ($Yes) { return $true }; return ((Read-Host "   $q [e/H]") -match '^(e|evet|y|yes)$') }
+function Test-Admin {
+  $id = [Security.Principal.WindowsIdentity]::GetCurrent()
+  return (New-Object Security.Principal.WindowsPrincipal($id)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+if (-not (Test-Admin)) {
+  $parts = @(); foreach ($k in $PSBoundParameters.Keys) { if ($PSBoundParameters[$k].IsPresent) { $parts += "-$k" } }
+  Write-Host "Yonetici yetkisi gerekiyor; UAC penceresi acilacak..." -ForegroundColor Yellow
+  Start-Process powershell.exe -Verb RunAs -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -NoExit -File `"$PSCommandPath`" " + ($parts -join ' '))
+  exit
+}
+
+$Root    = $PSScriptRoot
+$Install = Join-Path $env:LOCALAPPDATA 'discord-dpi-bridge'
+$Startup = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\discord-dpi-bridge.vbs'
+$cfg     = Get-Content (Join-Path $Root 'config.json') -Raw | ConvertFrom-Json
+
+Step "Surecler ve Startup"
+Get-Process ciadpi -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-CimInstance Win32_Process | Where-Object { ($_.Name -match '^python' -and $_.CommandLine -match 'relay\.py') -or ($_.Name -eq 'powershell.exe' -and $_.CommandLine -match 'relay\.ps1') } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+if (Test-Path $Startup) { Remove-Item $Startup -Force }
+Ok "durduruldu, Startup girdisi silindi"
+
+Step "hosts dosyasi"
+$hostsPath = "$env:WINDIR\System32\drivers\etc\hosts"
+$out = @(); $skip = $false; $removed = 0
+foreach ($l in (Get-Content $hostsPath)) {
+  if ($l -eq '# >>> discord-dpi-bridge') { $skip = $true; continue }
+  if ($l -eq '# <<< discord-dpi-bridge') { $skip = $false; continue }
+  if ($skip) { $removed++; continue }
+  $out += $l
+}
+[IO.File]::WriteAllLines($hostsPath, $out); & ipconfig /flushdns | Out-Null
+Ok "$removed girdi kaldirildi"
+
+Step "DNS"
+if ($KeepDoH) { Info "KeepDoH: DNS ayarlari korunuyor" }
+else {
+  $backup = Join-Path $Install 'dns-backup.json'
+  if (Test-Path $backup) {
+    foreach ($b in (Get-Content $backup -Raw | ConvertFrom-Json)) {
+      $a = Get-NetAdapter -InterfaceAlias $b.Alias -ErrorAction SilentlyContinue
+      if (-not $a) { $a = Get-NetAdapter -InterfaceIndex $b.Index -ErrorAction SilentlyContinue }
+      if (-not $a) { Warn "adaptor bulunamadi: $($b.Alias)"; continue }
+      if ($b.V4 -and @($b.V4).Count -gt 0) { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ServerAddresses @($b.V4) }
+      else { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ResetServerAddresses }
+      Info "'$($b.Alias)' DNS geri yuklendi: $(if ($b.V4) { $b.V4 -join ', ' } else { 'otomatik (DHCP)' })"
+    }
+  } else {
+    foreach ($a in (Get-NetIPConfiguration | Where-Object { $_.IPv4DefaultGateway })) {
+      Set-DnsClientServerAddress -InterfaceIndex $a.InterfaceIndex -ResetServerAddresses
+      Info "'$($a.InterfaceAlias)' DNS otomatik (DHCP) yapildi"
+    }
+  }
+  foreach ($s in (@($cfg.dns.v4) + @($cfg.dns.v6))) { & netsh dns delete encryption server=$s 2>&1 | Out-Null }
+  Clear-DnsClientCache
+  Ok "DoH sablonlari silindi, DNS eski haline dondu"
+}
+
+Step "Discord kisayollari"
+& (Join-Path $Root 'fix-discord.ps1') -Remove
+Ok "bayrak kaldirildi"
+
+Step "Kurulum klasoru"
+if (Test-Path $Install) {
+  if (Ask "$Install silinsin mi? (ByeDPI, kopru, loglar)") { Remove-Item $Install -Recurse -Force; Ok "silindi" } else { Info "birakildi" }
+}
+Write-Host "`nKaldirma tamamlandi. Discord'u tamamen kapatip tekrar ac." -ForegroundColor Green
+
+```
