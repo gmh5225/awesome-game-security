@@ -883,6 +883,7 @@ sources:
   - wiki/sources/descriptions/Remus3__Lanternlight.md
   - wiki/sources/descriptions/RiseShieldDev__AntiXrayViewer.md
   - wiki/sources/descriptions/boggymc__PetalAntiFreecam.md
+  - wiki/sources/descriptions/Pryaxis__TShock.md
   - wiki/sources/descriptions/Rwkeith__Diglett.md
   - wiki/sources/descriptions/Rwkeith__Nomad.md
   - wiki/sources/descriptions/Rycooop__Bloom-Anticheat.md
@@ -1174,6 +1175,8 @@ Structured research indexes such as [[anti-cheat-research-index]] catalog public
 **Paper custom-SMP AC (Hyphon):** [[larping-anti-cheat]] (realkyx29-design; Java 21 Paper **1.21+** plugin; modular movement/combat/world checks—fly, speed, reach, kill aura, scaffold, fast break; server-authoritative physics snapshots; per-player violation tracking with decay; honeypot/ESP decoy entities + optional packet-layer fake bases; capability analyzer for custom modifiers/enchantments on modded SMP; low false-positive focus; server-side only; Anti Cheat / game:minecraft) for custom SMP operators beside heuristic Paper plugins such as [[bs-anticheat]] and physics-prediction AC such as [[grim]]. (source: wiki/sources/descriptions/realkyx29-design__LarpingAntiCheat.md)
 
 **Paper freecam mitigation:** [[petal-anti-freecam]] (boggymc; Java Paper/CanvasMC **1.21** plugin; PacketEvents outgoing chunk masking; ChunkMasker replaces underground sections with air below configurable hide-Y for players above cutoff; tile-entity filtering; per-tick refresh budget; runtime reload; optional CanvasMC async teleport visibility listeners; server-side anti-freecam/wallhack without client mods; Anti Cheat / game:minecraft) for operators needing packet-layer terrain stripping beside investigation plugins such as [[antixrayviewer]] and QA clients such as [[anticheat-qa]]. (source: wiki/sources/descriptions/boggymc__PetalAntiFreecam.md)
+
+**Terraria server-side:** [[tshock]] (Pryaxis; C# .NET Terraria Server API plugin; **Bouncer** packet/action anti-cheat; permissions, regions, warps, item bans; SQLite/MySQL/PostgreSQL + REST + plugin system; protocol guards for known Terraria networking flaws; Open Source Anti Cheat System / game:terraria) for dedicated-host operators needing server-authoritative cheat prevention beside other title-specific server mods such as [[7dtd-anticheatmod]]. (source: wiki/sources/descriptions/Pryaxis__TShock.md)
 
 **Meteor Litematica printer (offensive):** [[dino-printer]] (Gingerbeard5773; Java Fabric Meteor Client addon; auto-builds Litematica schematics with BlockState property matching for stairs, slabs, and rotatable blocks; multi-point raytracing for line-of-sight placement checks; hack rotation; configurable delay/range/sneak/inventory; built from scratch to adapt placement timing to strict/anarchy server rules rather than bypass detection; cheat / game:minecraft) illustrates client-side automation that conforms to server placement validation targeted by scaffold/fast-break modules in plugins such as [[hexze-anticheat]], [[larping-anti-cheat]], and [[grim]]. (source: wiki/sources/descriptions/Gingerbeard5773__dino-printer.md)
 

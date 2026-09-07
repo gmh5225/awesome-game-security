@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-07** — ingest `description:Pryaxis/TShock`: entity [[tshock]] (Pryaxis; C# .NET Terraria Server API plugin; **Bouncer** packet/action anti-cheat; server-side characters, permissions, item bans, regions, warps; SQLite/MySQL/PostgreSQL + REST + plugin system; protocol guards for known Terraria networking flaws; mature open-source community server framework; Anti Cheat / game:terraria); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[7dtd-anticheatmod]], [[dead-anticheat]], and [[petal-anti-freecam]].
+
 - **2026-09-07** — ingest `description:ShyVortex/dlss-unlocked`: entity [[dlss-unlocked]] (ShyVortex; DirectX 12 mod/installer; NGX/Streamline proxy DLL inject; DLSS 3 frame gen + multi-frame gen + DLSS-NR on RTX 20xx–40xx; OptiScaler/FSR 3.1 bridge; registry or bundled-library driver-signature bypass; Inno Setup + ASI/DXGI loader variants; Windows + Proton; Detours-style vendor graphics-library interception; DirectX Compatibility); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[dxwrapper]], [[shader-injector]], [[detours]], and [[present-hook]].
 
 - **2026-09-07** — ingest `description:mikio815/linux-anticheat`: entity [[linux-anticheat]] (mikio815; WIP four-layer Linux console AC—Rust daemon, LSM eBPF ptrace/W^X/bpf() guards, C kernel module for eBPF integrity, planned BitVisor VMX/EPT static-kernel write-protect; Aya; Linux 5.17+ BTF/BPF LSM; Steam Deck / Secure Boot / lockdown / TPM attestation); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[vigil]], [[tlac-modern-local-anti-cheat-reunioned]], [[are-we-anti-cheat-yet]], and [[aclist-github-io]].
