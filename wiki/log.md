@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3853 entities (3892 unique pages); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check — removed dead [[index]] wikilink on [[compiled-wiki]] (index.md is catalog, not a wikilink target); 6 cross-kind slug collisions noted ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — no repair needed.
+
 - **2026-09-07** — ingest `description:Pryaxis/TShock`: entity [[tshock]] (Pryaxis; C# .NET Terraria Server API plugin; **Bouncer** packet/action anti-cheat; server-side characters, permissions, item bans, regions, warps; SQLite/MySQL/PostgreSQL + REST + plugin system; protocol guards for known Terraria networking flaws; mature open-source community server framework; Anti Cheat / game:terraria); cited on [[overviews/anti-cheat]] and [[overviews/game-hacking]]; cross-linked [[7dtd-anticheatmod]], [[dead-anticheat]], and [[petal-anti-freecam]].
 
 - **2026-09-07** — ingest `description:ShyVortex/dlss-unlocked`: entity [[dlss-unlocked]] (ShyVortex; DirectX 12 mod/installer; NGX/Streamline proxy DLL inject; DLSS 3 frame gen + multi-frame gen + DLSS-NR on RTX 20xx–40xx; OptiScaler/FSR 3.1 bridge; registry or bundled-library driver-signature bypass; Inno Setup + ASI/DXGI loader variants; Windows + Proton; Detours-style vendor graphics-library interception; DirectX Compatibility); cited on [[overviews/graphics-api]] and [[overviews/game-hacking]]; cross-linked [[dxwrapper]], [[shader-injector]], [[detours]], and [[present-hook]].

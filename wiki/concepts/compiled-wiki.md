@@ -33,4 +33,4 @@ For topical questions (DMA, EAC, Present hooks, HVCI, …): start at [[overviews
 
 ## Related
 
-[[overviews/overview]] · [[research-rigor]] · [[AGENTS]] · [[index]]
+[[overviews/overview]] · [[research-rigor]] · [[AGENTS]]
