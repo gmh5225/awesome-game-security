@@ -2756,8 +2756,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Pcileech ISABridge](entities/pcileech-isabridge.md) — ISA-bridge-style PCILeech FPGA firmware (Herooyyy; Verilog/SystemVerilog + Vivado bitstreams; PID/VID spoofing via bridge-device simulation; Faceit-class PCIe hardware filtering research; cheat / DMA)
 - [PCILeech](entities/pcileech.md) — PCIe DMA host tool (LeechCore → PCILeech/MemProcFS/vmm); stock firmware fingerprints; ufrisk / cheat / DMA
 - [PCILeech DMA Proxy](entities/pcileech-dma-proxy.md) — DLL proxy + loader; MinHook on Win32 memory APIs; redirects to remote PCILeech/MemProcFS DMA; input/registry access (MGreif; cheat / DMA)
-- [Pcileech DMA Firmware Guide](entities/pcileech-dma-firmware-guide.md) — Windows-first [[pcileech-fpga]] donor-emulation guide (BAR/capability/TLP beyond VID/DID; shadow config, writemask, Python COE; Arbor/TeleScan PE; Squirrel/CaptainDMA/LeetDMA/Enigma/ZDMA; cold-boot validation, Zero4K BAR, ILA; 16SalomonArs; Guide)
-- [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
+- [PCILeech-DMA-Fullstealth](entities/pcileech-dma-fullstealth.md) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1) — Quantumstealth Fullstealth PCILeech DMA FPGA firmware (Vivado; M2/Squirrel/Captain 75T/Enigma X1)
 - [Pcileech QuantumStealth Max](entities/pcileech-quantumstealth-max.md) — NoviceLevel PCILeech FPGA firmware collection (Vivado; M2/Squirrel/100T/Captain 75T/Enigma X1/Immortal 75T; config-space/BRAM/FIFO IP cores; batch build scripts)
 - [Pcileech-DMA-NVMe-VMD](entities/pcileech-dma-nvme-vmd.md) — PCILeech DMA firmware: motherboard VMD/NVMe real camouflage; Windows reinstall may be needed for driver init (gmh5225)
 - [PCILeech-FPGA](entities/pcileech-fpga.md) — FPGA HDL/firmware (Vivado; shadow config, BAR impls); firmware sophistication tiers 0–6

@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3850 entities (3889 unique pages); removed duplicate [[pcileech-dma-firmware-guide]] entity index entry; overview wikilink spot-check (9 pages) — 0 broken links; 6 cross-kind slug collisions noted ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — no repair needed.
+
 - **2026-09-07** — ingest `description:000-aki-000/GameDebugMenu`: entity [[game-debug-menu]] (000-aki-000; UE debug menu plugin; C++ module + Blueprint/UI assets; console commands, gameplay property/function editing, localization, persisted menu state; dev/QA runtime testing and tuning; Game Engine / Plugins:Unreal); cited on [[overviews/game-engine]] and [[overviews/game-hacking]]; cross-linked [[cheat-manager-menu]], [[unreal-imgui-tools]], [[unrealcpp]], and [[unreal-mod-loader]].
 
 - **2026-09-07** — ingest `description:00christian00/UnityDecompiled`: entity [[unity-decompiled]] (00christian00; unofficial ILSpy decompiled Unity 5.x editor/engine assembly mirror; large C# solution; internal APIs and editor behavior; engine RE, tooling research, compatibility analysis; decompiled Unity dll files); cited on [[overviews/game-engine]] and [[overviews/reverse-engineering]]; cross-linked [[unity-cs-reference]], [[ilspy]], [[dnspy]], [[unityexplorer]], and [[asset-ripper]].
