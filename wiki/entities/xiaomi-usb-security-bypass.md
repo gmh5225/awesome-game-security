@@ -1,7 +1,7 @@
 ---
 title: Xiaomi USB Security Bypass
 kind: entity
-topics: [mobile-security, game-hacking]
+topics: [mobile-security, game-hacking, reverse-engineering]
 sources:
   - wiki/sources/descriptions/CHERWING__xiaomi_usb_security_bypass.md
   - wiki/sources/README-categories.md
