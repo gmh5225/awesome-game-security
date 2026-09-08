@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-08** — ingest `readme:categories`: Cheat ~2789 (+1; wesmar/[[undervolter]] pre-boot Intel MSR undervolting in EFI Driver) / Some Tricks ~118 (+1; egeorcun/[[discord-dpi-bridge]] user-space Discord DPI relay avoiding WinDivert/EAC/Denuvo in Windows Ring3) / Anti Cheat ~712 / other major section counts stable; 41 sections; entities [[undervolter]], [[discord-dpi-bridge]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3853 entities (3892 index entries, 3886 unique slugs); index.md fully synced (0 missing, 0 dead); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (30 pages) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no file edits required.
 
 - **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3853 entities (3892 unique pages); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check — removed dead [[index]] wikilink on [[compiled-wiki]] (index.md is catalog, not a wikilink target); 6 cross-kind slug collisions noted ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — no repair needed.
