@@ -47,6 +47,7 @@ sources:
   - wiki/sources/descriptions/34306__mdc0.md
   - wiki/sources/descriptions/vaenshine__VansonMod.md
   - wiki/sources/descriptions/Lakr233__vphone-cli.md
+  - wiki/sources/descriptions/zqxwce__vphone-ws.md
   - wiki/sources/descriptions/LaurieWired__Malimite.md
   - wiki/sources/descriptions/LeoChen-CoreMind__elf-got-patcher.md
   - wiki/sources/descriptions/LGLTeam__Android-Mod-Menu.md

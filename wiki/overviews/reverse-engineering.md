@@ -67,6 +67,7 @@ sources:
   - wiki/sources/descriptions/34306__usbliter8-fun.md
   - wiki/sources/descriptions/34306__mdc0.md
   - wiki/sources/descriptions/Lakr233__vphone-cli.md
+  - wiki/sources/descriptions/zqxwce__vphone-ws.md
   - wiki/sources/descriptions/LargoScript__n0xis.md
   - wiki/sources/descriptions/LaurieWired__Malimite.md
   - wiki/sources/descriptions/LaurieWired__GhidraMCP.md
