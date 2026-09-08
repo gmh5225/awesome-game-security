@@ -903,6 +903,7 @@ sources:
   - wiki/sources/descriptions/vs-sr-dev__pc-wackywheels-doc.md
   - wiki/sources/descriptions/vsaint1__kernel-mouse.md
   - wiki/sources/descriptions/wesmar__EfiTool.md
+  - wiki/sources/descriptions/wesmar__UnderVolter.md
   - wiki/sources/descriptions/wesjian__GenericGameDetourAPIHook.md
   - wiki/sources/descriptions/sa413x__UEFI-Bootloader.md
   - wiki/sources/descriptions/mrexodia__AppInitHook.md

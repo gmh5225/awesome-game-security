@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-08** — ingest `description:wesmar/UnderVolter`: entity [[undervolter]] (wesmar; native UEFI x64 Intel CPU undervolting via MSR/MMIO before OS/hypervisor; FIVR MSR 0x150; NVRAM Setup/CFG Lock unlock; Secure Boot SelfEnroll; bypasses Hyper-V/VBS MSR filtering; Sandy Bridge–Arrow Lake INI profiles; Plundervolt-class pre-boot voltage-interface + UEFI trust-chain research; cheat / EFI Driver); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[efitool]], [[perfectsmbios]], and [[hvci]].
+
 - **2026-09-08** — ingest `readme:categories`: Cheat ~2789 (+1; wesmar/[[undervolter]] pre-boot Intel MSR undervolting in EFI Driver) / Some Tricks ~118 (+1; egeorcun/[[discord-dpi-bridge]] user-space Discord DPI relay avoiding WinDivert/EAC/Denuvo in Windows Ring3) / Anti Cheat ~712 / other major section counts stable; 41 sections; entities [[undervolter]], [[discord-dpi-bridge]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
 
 - **2026-09-07** — lint: index vs disk scan — 9 overviews, 30 concepts, 3853 entities (3892 index entries, 3886 unique slugs); index.md fully synced (0 missing, 0 dead); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (30 pages) — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no file edits required.

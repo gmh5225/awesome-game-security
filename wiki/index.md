@@ -3550,7 +3550,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [unitySpeedTools](entities/unityspeedtools.md) — iOS Unity IL2CPP speed/modding tools (C/C++ / ObjC)
 - [Uncloaking-RAID0-HWID-Serials](entities/uncloaking-raid0-hwid-serials.md) — RAID0 disk-serial uncloaking for HWID detection (gmh5225; Detection:HWID)
 - [UltraDriver Game Cheat](entities/ultra-driver-game-cheat.md) — kernel driver cheat framework (physical translate / MDL mapping; AC handle bypass; Cheat Driver; gmh5225)
-- [UnderVolter](entities/undervolter.md) — native UEFI x64 Intel CPU undervolting via MSR/MMIO before OS load; NVRAM Setup patching; Secure Boot SelfEnroll; Plundervolt-class pre-boot research (wesmar; Cheat / EFI Driver)
+- [UnderVolter](entities/undervolter.md) — native UEFI x64 Intel CPU undervolting via MSR/MMIO before OS/hypervisor; FIVR MSR 0x150; NVRAM Setup/CFG Lock unlock; Secure Boot SelfEnroll; bypasses Hyper-V/VBS MSR filtering; Sandy Bridge–Arrow Lake; Plundervolt-class pre-boot research (wesmar; Cheat / EFI Driver)
 - [underthehoodofexecutables](entities/underthehoodofexecutables.md) — C source→binary guide: linking, loading, executable formats (cheat/guide + AC engineer primer)
 - [unflat](entities/unflat.md) — Python unflattener; plugin development (Fix OLLVM / CFF recovery)
 - [unflutter](entities/unflutter.md) — Flutter/Dart AOT snapshot static analyzer (symbol recovery)

@@ -1,7 +1,7 @@
 ---
 title: UnderVolter
 kind: entity
-topics: [game-hacking, windows-kernel]
+topics: [game-hacking, windows-kernel, reverse-engineering]
 sources:
   - wiki/sources/descriptions/wesmar__UnderVolter.md
   - wiki/sources/README-categories.md
@@ -15,11 +15,11 @@ confidence: medium
 
 ## Mechanism
 
-C with x64 assembly for direct MSR and MMIO access; EFI multiprocessor services apply settings across cores; INI profiles for Sandy Bridge through Arrow Lake. Capabilities include FIVR voltage-domain programming (MSR 0x150), NVRAM Setup variable patching (CFG/OC Lock), and Secure Boot certificate self-enrollment. Runs at firmware boot time, bypassing hypervisor MSR filtering from Hyper-V, VBS, and similar protections that block the same writes from user-mode or kernel tools.
+C with x64 assembly for direct MSR and MMIO access; EFI multiprocessor services apply settings across cores; INI profiles for **Sandy Bridge through Arrow Lake**. Capabilities include FIVR voltage-domain programming (MSR 0x150), NVRAM Setup variable patching to unlock hidden BIOS options (CFG/OC Lock), and Secure Boot certificate self-enrollment. Runs at firmware boot time, bypassing hypervisor MSR filtering from **Hyper-V**, **VBS**, and similar protections that block the same writes from user-mode or kernel tools. (source: wiki/sources/descriptions/wesmar__UnderVolter.md)
 
 ## Research relevance
 
-Pre-boot CPU control and **Plundervolt-class** voltage fault-injection surfaces; UEFI trust-chain manipulation beside tools such as [[efitool]] and [[perfectsmbios]].
+Pre-boot CPU control and **Plundervolt-class** voltage fault-injection surfaces; UEFI trust-chain manipulation beside tools such as [[efitool]] and [[perfectsmbios]]. Aimed at firmware security researchers, reverse engineers, and low-level hardware researchers studying pre-boot CPU power management.
 
 ## Links
 
