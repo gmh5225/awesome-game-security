@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-08** — ingest `readme:categories`: Cheat ~2794 (+1; CHERWING/[[xiaomi-usb-security-bypass]] Magisk MIUI USB debugging/fastboot account-SIM gate bypass for scrcpy input injection in Magisk) / Anti Cheat ~713 / other major section counts stable; 41 sections; entity [[xiaomi-usb-security-bypass]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/mobile-security]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
+
 - **2026-09-08** — ingest `description:GalaxyBatMan111/dsh-plugins`: entity [[dsh-plugins]] (GalaxyBatMan111; DSH plugin bundle; PyGhidra Ghidra bridge + radare2/RetDec/tshark/mitmproxy forensics + Claude Code/Codex/Marvis agent bridges; JavaScript + Python; web-scraping adapters; Windows bundle profiles; malware/game-binary/network-forensics AI-assisted RE; Cheat / RE Tools); cited on [[overviews/reverse-engineering]] and [[overviews/game-hacking]]; cross-linked [[dsh-cheatengine]], [[ghidra-bridge]], [[ghidra-headless-mcp]], and [[reverify]].
 
 - **2026-09-08** — ingest `readme:categories`: Cheat ~2793 (+1; GalaxyBatMan111/[[dsh-plugins]] DSH PyGhidra Ghidra bridge in RE Tools) / Anti Cheat ~713 / IOS Emulator ~5 / other major section counts stable; 41 sections; entity [[dsh-plugins]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; fixed IOS Emulator ~5 scope drift on [[overviews/game-hacking]]; light `index.md` section notes (no per-category pages).
