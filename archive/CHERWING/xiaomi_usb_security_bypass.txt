@@ -1,0 +1,358 @@
+Project Path: arc_CHERWING_xiaomi_usb_security_bypass_l85_vqdi
+
+Source Tree:
+
+```txt
+arc_CHERWING_xiaomi_usb_security_bypass_l85_vqdi
+├── LICENSE
+├── README.md
+├── build_zip.py
+├── customize.sh
+├── module.prop
+├── service.sh
+└── system.prop
+
+```
+
+`LICENSE`:
+
+```
+MIT License
+
+Copyright (c) 2026 CHERWING
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+`README.md`:
+
+```md
+# Xiaomi USB Security Bypass
+
+> 免小米账号 / SIM 卡，root 后强制开启 MIUI「USB 调试(安全设置)」「USB 安装」「FASTBOOT 刷机模式」的 Magisk 模块。
+
+[![Magisk](https://img.shields.io/badge/Magisk-20.4%2B-00B8FF.svg)](https://github.com/topics/magisk-module)
+[![Android](https://img.shields.io/badge/Android-9%2B-3DDC84.svg)](https://www.android.com/)
+[![MIUI](https://img.shields.io/badge/MIUI-10~14%20%2F%20HyperOS-FF6900.svg)](https://www.mi.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+## 目录
+
+- [解决的问题](#解决的问题)
+- [适用机型](#适用机型)
+- [原理](#原理)
+- [安装](#安装)
+- [验证是否生效](#验证是否生效)
+- [与 scrcpy 联动](#与-scrcpy-联动)
+- [卸载](#卸载)
+- [自行构建刷机包](#自行构建刷机包)
+- [仓库文件说明](#仓库文件说明)
+- [故障排查](#故障排查)
+- [安全与免责声明](#安全与免责声明)
+- [致谢与参考](#致谢与参考)
+
+---
+
+## 解决的问题
+
+小米 / 红米（MIUI）手机连接电脑后，**画面能看、鼠标键盘不能控制**，典型报错：
+
+```text
+java.lang.SecurityException: Injecting to another application requires INJECT_EVENTS permission
+```
+
+根因：MIUI 把“反控 / 模拟点击”权限拆成了一个独立开关 —— **「USB 调试(安全设置)」**。它和普通「USB 调试」是两项不同的开关：
+
+| 开关 | 作用 | 开启前提 |
+|---|---|---|
+| USB 调试 | 允许 adb 连接（看屏幕、文件、日志） | 仅需弹窗授权 |
+| **USB 调试(安全设置)** | 允许 adb / scrcpy **模拟点击、按键** | **登录小米账号 + 插入 SIM 卡** |
+| USB 安装 | 允许 `adb install` | 登录小米账号 + 插入 SIM 卡 |
+| FASTBOOT 刷机模式 | 允许电脑通过 USB 刷机 | 同上 |
+
+`scrcpy`、`Total Control`、`monkey`、`uiautomator`、`appops`、`pm grant` 等都会受此限制。
+
+本模块通过 **root 直接改写底层 persist 属性**，绕过账号 / SIM 验证，**不需要插卡、不需要登录**。
+
+## 适用机型
+
+- 已解锁 Bootloader 并刷入 **Magisk** 的小米 / 红米手机（须有 root）
+- MIUI 10 ~ 14、HyperOS 均已有成功案例；Android 9 及以上通用
+- 已在 **小米 9 Pro 5G (crux) + MIUI 12** 实测通过
+
+> ⚠️ 普通 adb（如 Shizuku）权限不够，必须完整 root（Magisk / KernelSU 亦可，脚本自带 `resetprop` 兜底）。
+
+## 原理
+
+MIUI 开发者选项里这三个开关，最终都落到三个 **persist 系统属性**：
+
+| 属性 | 对应开关 |
+|---|---|
+| `persist.security.adbinput` | USB 调试(安全设置)（模拟点击/按键） |
+| `persist.security.adbinstall` | USB 安装 |
+| `persist.fastboot.enable` | FASTBOOT 刷机模式 |
+
+UI 上打开开关时，MIUI 强制联网验证小米账号并校验 SIM 卡，验证通过才允许写入。而系统注入事件时只检查属性的**当前值**（动态读取，无需重启）。
+
+因此 root 后直接把这几个属性置 `1` 即可，等于绕过了整条验证链路。本模块在开机时自动完成这件事：
+
+1. **`system.prop`** —— Magisk 在启动早期用 `resetprop` 应用属性（不经过 property_service，无 SELinux 限制）；
+2. **`service.sh`** —— 启动后期兜底再设一遍；`setprop` 若被 SELinux 拦截，自动降级为 `resetprop` / `/product/bin/resetprop`。
+
+双保险保证开机后属性一定是 `1`，无论系统更新还是属性被重置。
+
+## 安装
+
+### 方式一：Magisk 应用（推荐）
+
+1. 下载 Release 里的 `xiaomi_usb_security_bypass_vX.Y.zip`（或自行构建，见下文）；
+2. 打开 **Magisk App → 模块 → 从本地安装**，选择该 zip；
+3. **重启手机**；
+4. 在“模块”列表确认 `Xiaomi USB Security Bypass` 已启用。
+
+### 方式二：命令行（免手动操作）
+
+```bash
+# 将 zip 推到手机后，root shell 安装
+adb push xiaomi_usb_security_bypass_v1.0.zip /sdcard/Download/
+adb shell su -c "magisk --install-module /sdcard/Download/xiaomi_usb_security_bypass_v1.0.zip"
+
+# 重启生效
+adb reboot
+```
+
+> 首次用 Magisk 安装模块必须重启一次，模块文件才会落盘并执行 `service.sh`。
+
+### 方式三：手动（不想装模块时应急）
+
+```bash
+adb shell su -c setprop persist.security.adbinput 1
+adb shell su -c setprop persist.security.adbinstall 1
+adb shell su -c setprop persist.fastboot.enable 1
+```
+
+> ⚠️ Windows 下 `adb shell su -c '多条; 命令'` 的引号常被吞掉，务必**逐条执行**。
+
+## 验证是否生效
+
+```bash
+# 1) 三个属性都应为 1
+adb shell getprop persist.security.adbinput
+adb shell getprop persist.security.adbinstall
+adb shell getprop persist.fastboot.enable
+
+# 2) 输入注入测试：能回桌面且无报错即代表已放行
+adb shell input keyevent KEYCODE_HOME
+```
+
+放行前报 `SecurityException: ... INJECT_EVENTS permission`，放行后静默成功。
+
+## 与 scrcpy 联动
+
+```bash
+# 下载 scrcpy Windows 版并解压后，直接运行
+scrcpy.exe
+```
+
+生效后即可用鼠标 / 键盘完整控制手机。常用快捷键：`右键`=返回、`中键`=HOME、`Alt+f`=全屏。
+
+## 卸载
+
+**Magisk App → 模块 → Xiaomi USB Security Bypass → 卸载 → 重启** 即可。
+
+> 卸载模块只停止“开机自动置位”，已写为 1 的 persist 属性会保留，直到被系统/其他操作改回 0。
+
+## 自行构建刷机包
+
+仓库根目录即模块源码，克隆后可一键打包：
+
+```bash
+git clone https://github.com/CHERWING/xiaomi_usb_security_bypass.git
+cd xiaomi_usb_security_bypass
+python build_zip.py      # 输出 xiaomi_usb_security_bypass_vX.Y.zip
+```
+
+打包脚本用 Python 标准库 `zipfile`，无第三方依赖，且会给脚本写入可执行位（0755）。
+
+## 仓库文件说明
+
+| 文件 | 说明 |
+|---|---|
+| `module.prop` | Magisk 模块元信息（id / name / version / author / description） |
+| `system.prop` | 开机早期由 Magisk resetprop 应用的属性清单 |
+| `service.sh` | 开机后期兜底脚本：`setprop` → `resetprop` → `/product/bin/resetprop` 三级降级 |
+| `customize.sh` | 安装时确保脚本可执行 |
+| `build_zip.py` | 一键打包脚本（生成可刷入的 zip） |
+| `README.md` | 本文档 |
+
+## 故障排查
+
+| 现象 | 原因 / 处理 |
+|---|---|
+| 属性是 1 但 scrcpy 仍不能控制 | 重启一次手机；确认开发者选项里「USB 调试」本身已开 |
+| 重启后属性变回 0 | 模块未启用 / 被移除；Magisk 版本过低（需 ≥ 20.4） |
+| 安装后模块列表为空 | 重启后才会显示，确认 zip 为官方打包（根含 module.prop） |
+| 注入仍报 INJECT_EVENTS | 确认前台当前用户与 adb 会话一致；个别双开/分身环境请切回主空间测试 |
+| 找不到「USB 调试(安全设置)」开关 | 属正常，模块生效后该开关状态由属性驱动，功能不受 UI 显示影响 |
+
+## 安全与免责声明
+
+- 本模块会**降低设备安全性**：开启后，任何拿到你数据线 / 无线调试权限的人都能远程模拟点击。**请勿在公用设备、演示机或存有敏感数据的手机上使用**，使用完建议卸载并重置相关开关。
+- 开启 FASTBOOT 模式后，电脑可直接刷机，误操作有变砖风险。
+- 本项目仅供个人技术研究与合法用途。**请遵守当地法律法规与设备厂商条款**，因使用本模块造成的任何损失由使用者自行承担。
+
+## 致谢与参考
+
+- 思路来源与验证：[不登陆小米账号启用 MIUI 的 ADB 调试(安全设置)](https://blog.remiki.ren/archives/5/) · [使用 root 跳过小米 USB 安装应用确认](https://bl.ocks.org/the-eric-kwok/19b378d5ff0b02271a8307b144a4db35) · [XDA: Settings in Developer Options](https://xdaforums.com/t/settings-in-developer-options.4357631/)
+- 相关工具：[scrcpy](https://github.com/Genymobile/scrcpy) · [Magisk](https://github.com/topjohnwu/Magisk)
+
+## License
+
+[MIT](LICENSE) © 2026 CHERWING
+
+```
+
+`build_zip.py`:
+
+```py
+# -*- coding: utf-8 -*-
+"""Build a flashable Magisk module zip from the repo root.
+
+Usage:  python build_zip.py
+Output: <module_id>_v<version>.zip   (e.g. xiaomi_usb_security_bypass_v1.0.zip)
+"""
+import os
+import re
+import zipfile
+
+BASE = os.path.dirname(os.path.abspath(__file__))
+
+# Files packaged into the flashable zip (executable scripts get 0755)
+FILES = [
+    ("module.prop", 0o644),
+    ("system.prop", 0o644),
+    ("service.sh", 0o755),
+    ("customize.sh", 0o755),
+    ("README.md", 0o644),
+]
+
+
+def read_prop(name):
+    with open(os.path.join(BASE, "module.prop"), encoding="utf-8") as f:
+        m = re.search(rf"^{name}=(.*)$", f.read(), re.M)
+    return m.group(1).strip() if m else "unknown"
+
+
+def build():
+    mod_id = read_prop("id")
+    version = read_prop("version").lstrip("v")  # "v1.0" -> "1.0"
+    out = os.path.join(BASE, f"xiaomi_usb_security_bypass_v{version}.zip")
+
+    if os.path.exists(out):
+        os.remove(out)
+
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+        for rel, mode in FILES:
+            full = os.path.join(BASE, rel)
+            if not os.path.exists(full):
+                print(f"!! skip missing: {rel}")
+                continue
+            with open(full, "rb") as f:
+                data = f.read()
+            info = zipfile.ZipInfo(rel)
+            info.date_time = (2026, 1, 1, 0, 0, 0)
+            info.external_attr = mode << 16  # Unix permission bits
+            z.writestr(info, data)
+
+    print(f"OK -> {out}")
+    with zipfile.ZipFile(out) as z:
+        for i in z.infolist():
+            print("  %-16s mode=%o size=%d" % (
+                i.filename, (i.external_attr >> 16) & 0xFFFF, i.file_size))
+    return out
+
+
+if __name__ == "__main__":
+    build()
+
+```
+
+`customize.sh`:
+
+```sh
+#!/system/bin/sh
+# Module installer - ensure scripts are executable
+chmod 0755 "$MODPATH/service.sh" 2>/dev/null || true
+chmod 0755 "$MODPATH/system.prop" 2>/dev/null || true
+
+```
+
+`module.prop`:
+
+```prop
+id=xiaomi_usb_sec_bypass
+name=Xiaomi USB Security Bypass
+version=v1.0
+versionCode=1
+author=CHERWIN
+description=Enable "USB debugging (Security settings)" / "USB install" / fastboot on rooted MIUI without Mi account & SIM. Sets persist.security.adbinstall, persist.security.adbinput, persist.fastboot.enable to 1 on every boot so scrcpy/Total Control etc. can inject input.
+
+```
+
+`service.sh`:
+
+```sh
+#!/system/bin/sh
+# Xiaomi USB Security Bypass - boot script
+# Enables (without Mi account / SIM):
+#   - USB debugging (Security settings)  -> persist.security.adbinput
+#   - Install via USB                    -> persist.security.adbinstall
+#   - FASTBOOT flashing mode             -> persist.fastboot.enable
+#
+# These props normally need the developer-options toggle, which on MIUI
+# requires an online Mi-account + SIM verification. On a rooted device we
+# simply force the underlying persist props to 1 at every boot.
+# If SELinux blocks setprop (context u:object_r:system_prop), fall back to
+# Magisk resetprop which bypasses the property_service SELinux check.
+
+set_p() {
+    # $1 = prop name, $2 = value
+    setprop "$1" "$2" 2>/dev/null
+    [ "$(getprop "$1")" = "$2" ] && return 0
+    resetprop "$1" "$2" 2>/dev/null
+    [ "$(getprop "$1")" = "$2" ] && return 0
+    /product/bin/resetprop "$1" "$2" 2>/dev/null
+    return 0
+}
+
+set_p persist.security.adbinstall 1
+set_p persist.security.adbinput 1
+set_p persist.fastboot.enable 1
+
+```
+
+`system.prop`:
+
+```prop
+persist.security.adbinstall=1
+persist.security.adbinput=1
+persist.fastboot.enable=1
+
+```
