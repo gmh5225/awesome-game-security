@@ -3087,7 +3087,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [RookieAI_yolov8](entities/rookieai-yolov8.md) — Passer1072 YOLOv8 Ultralytics FPS aim-assist (Python; multi-process capture/inference; PyTorch/TensorRT/ONNX; Win32/Logitech/kmNet input; configurable aim/trigger; cheat / Machine Learning YOLOv8)
 - [rootAVD](entities/rootavd.md) — root Android Virtual Devices (Magisk/AVD; Cheat Magisk / Android Emulator)
 - [RootAppDetector](entities/root-app-detector.md) — Java Android POC: detect installed root-manager apps via package/activity launch + SecurityException (Detection:Android root; apkunpacker)
-- [Root Detection Low level](entities/root-detection-low-level.md) — Frida script hooking `java.io.File` and `Runtime.exec` to log suspicious paths/commands and Java stack traces for Android root-detection analysis (3v1lC0d3; cheat / Frida)
+- [Root Detection Low level](entities/root-detection-low-level.md) — Frida JS dynamic analysis: `java.io.File`/`Runtime.exec` hooks, keyword path filters (`su`/`bin`/`apk`), shell-command logging, Java stack traces for root-detection/malware RE (3v1lC0d3; cheat / Frida)
 - [Root My Galaxy](entities/root-my-galaxy.md) — Samsung Galaxy one-tap KernelSU installer (CVE-2026-43499; Kotlin/Compose + NDK; firmware-profile matching; external exploit/KernelSU feed; KASLR probes; cheat / Android root)
 - [ROOTURK Kernel](entities/rooturk-kernel.md) — POCO X7 Pro Android 15 GKI 6.6 custom kernel (AnyKernel3 + Bazel; KernelSU Next + SuSFS root hiding + game idle tuning; mobile kernel RE; cheat / Android Kernel Source)
 - [Root My Pixel](entities/root-my-pixel.md) — one-tap temporary Pixel root (CVE-2026-43499 IonStack + ReSukiSU/KernelSU; Shizuku; Pixel 7–10; Kotlin/JNI; cheat / Android root)
