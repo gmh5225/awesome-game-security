@@ -1958,6 +1958,7 @@ npx skills add https://github.com/gmh5225/awesome-game-security --skill reverse-
 - https://github.com/danbrodsky/GFred [Command Palette]
 - https://github.com/Nalen98/AngryGhidra [Use angr in Ghidra]
 - https://github.com/justfoxing/ghidra_bridge [Python 3 bridge to Ghidra's Python scripting]
+- https://github.com/GalaxyBatMan111/dsh-plugins [DSH plugin bundle with PyGhidra Ghidra bridge for binary import, decompilation, strings, and xrefs]
 - https://github.com/atlas0fd00m/viv-ghidra-decompiler [Vivisect extension bridging symbolik analysis to a headless Ghidra backend for decompiled C pseudocode]
 - https://github.com/0xeb/libghidra [Typed API for Ghidra program databases from C++/Python/Rust; functions, types, memory, decompiler; LibGhidraHost HTTP extension or offline Sleigh backend]
 - https://github.com/astrelsky/GhidraOrbis [Orbis OS specific software and file formats]
