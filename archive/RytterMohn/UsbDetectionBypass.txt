@@ -1,0 +1,2324 @@
+Project Path: arc_RytterMohn_UsbDetectionBypass_pmhv3ri2
+
+Source Tree:
+
+```txt
+arc_RytterMohn_UsbDetectionBypass_pmhv3ri2
+├── README.md
+├── README.zh-CN.md
+├── app
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       ├── androidTest
+│       │   └── java
+│       │       └── io
+│       │           └── github
+│       │               └── ryttermohn
+│       │                   └── usbdetectionbypass
+│       │                       └── ExampleInstrumentedTest.kt
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   ├── assets
+│       │   │   ├── native_init
+│       │   │   └── xposed_init
+│       │   ├── cpp
+│       │   │   ├── CMakeLists.txt
+│       │   │   ├── native_api.h
+│       │   │   └── usb_detection_bypass.cpp
+│       │   ├── java
+│       │   │   └── io
+│       │   │       └── github
+│       │   │           └── ryttermohn
+│       │   │               └── usbdetectionbypass
+│       │   │                   ├── HookEntry.kt
+│       │   │                   └── LogUtil.kt
+│       │   └── res
+│       │       ├── drawable
+│       │       │   ├── ic_launcher_background.xml
+│       │       │   └── ic_launcher_foreground.xml
+│       │       ├── mipmap-anydpi-v26
+│       │       │   ├── ic_launcher.xml
+│       │       │   └── ic_launcher_round.xml
+│       │       ├── mipmap-hdpi
+│       │       ├── mipmap-mdpi
+│       │       ├── mipmap-xhdpi
+│       │       ├── mipmap-xxhdpi
+│       │       ├── mipmap-xxxhdpi
+│       │       ├── values
+│       │       │   ├── arrays.xml
+│       │       │   ├── colors.xml
+│       │       │   ├── strings.xml
+│       │       │   └── themes.xml
+│       │       ├── values-night
+│       │       │   └── themes.xml
+│       │       └── xml
+│       │           ├── backup_rules.xml
+│       │           └── data_extraction_rules.xml
+│       └── test
+│           └── java
+│               └── io
+│                   └── github
+│                       └── ryttermohn
+│                           └── usbdetectionbypass
+│                               └── ExampleUnitTest.kt
+├── build.gradle.kts
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+└── settings.gradle.kts
+
+```
+
+`README.md`:
+
+```md
+# UsbDetectionBypass
+
+[简体中文](README.zh-CN.md)
+
+UsbDetectionBypass is an LSPosed/Xposed module focused only on bypassing USB connection and USB debugging detection inside scoped Android apps. It masks common Java/framework and native signals so the target process sees a disconnected, non-debuggable USB state.
+
+Use it only for authorized testing and research on devices and apps you are allowed to inspect.
+
+## Features
+
+- Masks `adb_enabled` and `development_settings_enabled`.
+- Masks `android.os.SystemProperties` and native `__system_property_get`.
+- Sanitizes `USB_STATE` and `ACTION_BATTERY_CHANGED` broadcasts.
+- Hooks `Intent` extra reads for USB and battery state.
+- Hooks common `UsbManager` APIs so scoped apps see no attached USB devices or enabled USB functions.
+- Rewrites selected command checks including `getprop`, `settings`, `dumpsys usb`, `dumpsys battery`, and common sysfs reads.
+- Hooks native `open`, `openat`, and `fopen` for USB-related sysfs paths such as `/sys/class/power_supply/*usb*`, `/sys/class/android_usb/*`, and `/config/usb_gadget/*`.
+- Logs module loading and hook hits through LSPosed logs, logcat, and a per-app diagnostic file.
+
+## Project Layout
+
+- `app/src/main/java/io/github/ryttermohn/usbdetectionbypass/HookEntry.kt`  
+  Main LSPosed Java entry point. Installs Java/framework hooks and diagnostic logging.
+
+- `app/src/main/java/io/github/ryttermohn/usbdetectionbypass/LogUtil.kt`  
+  Bridges native logs into LSPosed and logcat.
+
+- `app/src/main/cpp/usb_detection_bypass.cpp`  
+  LSPosed native entry point. Installs native USB property and file-read hooks.
+
+- `app/src/main/assets/xposed_init`  
+  Xposed module entry declaration.
+
+- `app/src/main/assets/native_init`  
+  LSPosed native module declaration.
+
+## Build
+
+Use JDK 17 or newer. Android Studio's bundled JBR also works.
+
+```powershell
+.\gradlew.bat assembleDebug
+```
+
+The debug APK is generated at:
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Usage
+
+1. Install the APK on a rooted device with LSPosed enabled.
+2. Enable the module in LSPosed.
+3. Select your authorized target app in the module scope.
+4. Reboot the device, or fully stop and restart the target app after changing scope.
+5. Check logs with:
+
+```bash
+adb logcat -s UsbBypass UsbBypassNative UsbDetectionBypassNative
+```
+
+The module also writes `UsbDetectionBypass.log` under the target app's external files directory when `Application.attach()` is reached.
+
+## Notes
+
+- The module package is `io.github.ryttermohn.usbdetectionbypass`.
+- The default LSPosed scope resource is intentionally empty. Select target apps from LSPosed or add package names to `app/src/main/res/values/arrays.xml`.
+- If no `UsbBypass` log appears, the module has not entered the target process. Recheck LSPosed scope, module enablement, package/process name, and whether the target app was restarted after module changes.
+
+```
+
+`README.zh-CN.md`:
+
+```md
+# UsbDetectionBypass
+
+[English](README.md)
+
+UsbDetectionBypass 是一个专注于绕过 Android 应用 USB 连接检测和 USB 调试检测的 LSPosed/Xposed 模块。它会在已勾选作用域的目标进程内伪装常见 Java/framework 层和 native 层信号，让目标应用看到“未连接 USB、未开启调试”的状态。
+
+请只在你有权测试的设备和应用上使用。
+
+## 功能
+
+- 伪装 `adb_enabled`、`development_settings_enabled`。
+- 伪装 `android.os.SystemProperties` 和 native `__system_property_get`。
+- 清理 `USB_STATE` 和 `ACTION_BATTERY_CHANGED` 广播。
+- Hook `Intent` extra 读取，覆盖 USB 状态和电池插入状态。
+- Hook 常见 `UsbManager` API，让作用域应用看到空 USB 设备列表和未启用的 USB 功能。
+- 改写部分命令检测结果，包括 `getprop`、`settings`、`dumpsys usb`、`dumpsys battery` 和常见 sysfs 读取。
+- Hook native `open`、`openat`、`fopen`，伪装 `/sys/class/power_supply/*usb*`、`/sys/class/android_usb/*`、`/config/usb_gadget/*` 等 USB 相关路径。
+- 通过 LSPosed 日志、logcat 和目标应用目录下的诊断文件记录模块加载和 hook 命中情况。
+
+## 项目结构
+
+- `app/src/main/java/io/github/ryttermohn/usbdetectionbypass/HookEntry.kt`  
+  LSPosed Java 入口，负责安装 Java/framework 层 hook 和诊断日志。
+
+- `app/src/main/java/io/github/ryttermohn/usbdetectionbypass/LogUtil.kt`  
+  将 native 层日志桥接到 LSPosed 和 logcat。
+
+- `app/src/main/cpp/usb_detection_bypass.cpp`  
+  LSPosed native 入口，负责安装 native USB 属性和文件读取 hook。
+
+- `app/src/main/assets/xposed_init`  
+  Xposed 模块入口声明。
+
+- `app/src/main/assets/native_init`  
+  LSPosed native 模块声明。
+
+## 构建
+
+需要 JDK 17 或更高版本。Android Studio 自带的 JBR 也可以。
+
+```powershell
+.\gradlew.bat assembleDebug
+```
+
+Debug APK 输出位置：
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+## 使用方法
+
+1. 在已 root 且启用 LSPosed 的设备上安装 APK。
+2. 在 LSPosed 中启用该模块。
+3. 在模块作用域中勾选你有权测试的目标应用。
+4. 修改作用域后，重启设备，或至少完全停止并重新启动目标应用。
+5. 使用下面的命令查看日志：
+
+```bash
+adb logcat -s UsbBypass UsbBypassNative UsbDetectionBypassNative
+```
+
+当执行到 `Application.attach()` 时，模块还会在目标应用的外部文件目录下写入 `UsbDetectionBypass.log` 诊断日志。
+
+## 注意事项
+
+- 模块包名是 `io.github.ryttermohn.usbdetectionbypass`。
+- 默认 LSPosed 作用域资源刻意保持为空。请在 LSPosed 中选择目标应用，或将包名添加到 `app/src/main/res/values/arrays.xml`。
+- 如果看不到任何 `UsbBypass` 日志，说明模块没有进入目标进程。请检查 LSPosed 作用域、模块启用状态、真实包名/进程名，以及目标应用是否在修改模块后重新启动。
+
+```
+
+`app/build.gradle.kts`:
+
+```kts
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace = "io.github.ryttermohn.usbdetectionbypass"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "io.github.ryttermohn.usbdetectionbypass"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+    buildFeatures {
+        viewBinding = true
+    }
+}
+
+dependencies {
+    compileOnly("de.robv.android.xposed:api:82")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.constraintlayout)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+}
+
+```
+
+`app/proguard-rules.pro`:
+
+```pro
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
+
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
+```
+
+`app/src/androidTest/java/io/github/ryttermohn/usbdetectionbypass/ExampleInstrumentedTest.kt`:
+
+```kt
+package io.github.ryttermohn.usbdetectionbypass
+
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
+
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import org.junit.Assert.*
+
+/**
+ * Instrumented test, which will execute on an Android device.
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+@RunWith(AndroidJUnit4::class)
+class ExampleInstrumentedTest {
+    @Test
+    fun useAppContext() {
+        // Context of the app under test.
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals("io.github.ryttermohn.usbdetectionbypass", appContext.packageName)
+    }
+}
+
+```
+
+`app/src/main/AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.UsbDetectionBypass"
+        android:multiArch="true"
+        android:extractNativeLibs="false"
+        tools:targetApi="31">
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="Bypass USB connection and USB debugging detection in scoped apps" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="54" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposedscope"/>
+    </application>
+
+</manifest>
+
+```
+
+`app/src/main/assets/native_init`:
+
+```
+libusb_detection_bypass.so
+
+```
+
+`app/src/main/assets/xposed_init`:
+
+```
+io.github.ryttermohn.usbdetectionbypass.HookEntry
+
+```
+
+`app/src/main/cpp/CMakeLists.txt`:
+
+```txt
+# For more information about using CMake with Android Studio, read the
+# documentation: https://d.android.com/studio/projects/add-native-code.html.
+# For more examples on how to use CMake, see https://github.com/android/ndk-samples.
+
+# Sets the minimum CMake version required for this project.
+cmake_minimum_required(VERSION 3.22.1)
+
+# Declares the project name. The project name can be accessed via ${ PROJECT_NAME},
+# Since this is the top level CMakeLists.txt, the project name is also accessible
+# with ${CMAKE_PROJECT_NAME} (both CMake variables are in-sync within the top level
+# build script scope).
+project("usb_detection_bypass")
+
+# Creates and names a library, sets it as either STATIC
+# or SHARED, and provides the relative paths to its source code.
+# You can define multiple libraries, and CMake builds them for you.
+# Gradle automatically packages shared libraries with your APK.
+#
+# In this top level CMakeLists.txt, ${CMAKE_PROJECT_NAME} is used to define
+# the target library name; in the sub-module's CMakeLists.txt, ${PROJECT_NAME}
+# is preferred for the same purpose.
+#
+# In order to load a library into your app from Java/Kotlin, you must call
+# System.loadLibrary() and pass the name of the library defined here;
+# for GameActivity/NativeActivity derived applications, the same library name must be
+# used in the AndroidManifest.xml file.
+add_library(${CMAKE_PROJECT_NAME} SHARED
+        # List C/C++ source files with relative paths to this CMakeLists.txt.
+        usb_detection_bypass.cpp)
+
+# Specifies libraries CMake should link to your target library. You
+# can link libraries from various origins, such as libraries defined in this
+# build script, prebuilt third-party libraries, or Android system libraries.
+target_link_libraries(${CMAKE_PROJECT_NAME}
+        # List libraries link to the target library
+        android
+        log)
+
+```
+
+`app/src/main/cpp/native_api.h`:
+
+```h
+// native_api.h
+
+#pragma once
+#include <stdint.h>
+
+typedef int (*HookFunType)(void *func, void *replace, void **backup);
+
+typedef int (*UnhookFunType)(void *func);
+
+typedef void (*NativeOnModuleLoaded)(const char *name, void *handle);
+
+typedef struct {
+    uint32_t version;
+    HookFunType hook_func;
+    UnhookFunType unhook_func;
+} NativeAPIEntries;
+
+typedef NativeOnModuleLoaded (*NativeInit)(const NativeAPIEntries *entries);
+
+```
+
+`app/src/main/cpp/usb_detection_bypass.cpp`:
+
+```cpp
+#include <jni.h>
+#include <android/log.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <stdarg.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include "native_api.h"
+
+#define LOG_TAG "UsbDetectionBypassNative"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+
+static JavaVM *g_JavaVm = nullptr;
+static jclass g_LogUtilClass = nullptr;
+static jmethodID g_LogFromNativeMethod = nullptr;
+static HookFunType g_HookFunction = nullptr;
+
+using SystemPropertyGet = int (*)(const char *name, char *value);
+using OpenFunc = int (*)(const char *pathname, int flags, ...);
+using OpenAtFunc = int (*)(int dirfd, const char *pathname, int flags, ...);
+using FopenFunc = FILE *(*)(const char *pathname, const char *mode);
+
+static SystemPropertyGet g_OriginalSystemPropertyGet = nullptr;
+static OpenFunc g_OriginalOpen = nullptr;
+static OpenAtFunc g_OriginalOpenAt = nullptr;
+static FopenFunc g_OriginalFopen = nullptr;
+
+static bool g_SystemPropertyHookInstalled = false;
+static bool g_FileAccessHooksInstalled = false;
+
+static void XLog(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), format, args);
+    va_end(args);
+
+    LOGI("[XPOSED] %s", buf);
+
+    JNIEnv *env = nullptr;
+    if (g_JavaVm && g_LogUtilClass && g_LogFromNativeMethod &&
+        g_JavaVm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) == JNI_OK) {
+        jstring jmsg = env->NewStringUTF(buf);
+        env->CallStaticVoidMethod(g_LogUtilClass, g_LogFromNativeMethod, jmsg);
+        env->DeleteLocalRef(jmsg);
+    }
+}
+
+static bool str_contains(const char *s, const char *sub) {
+    return s && sub && strstr(s, sub) != nullptr;
+}
+
+static const char *fake_property_value(const char *name) {
+    if (!name) return nullptr;
+
+    if (strcmp(name, "sys.usb.config") == 0) return "none";
+    if (strcmp(name, "sys.usb.state") == 0) return "none";
+    if (strcmp(name, "persist.sys.usb.config") == 0) return "none";
+    if (strcmp(name, "vendor.usb.config") == 0) return "none";
+    if (strcmp(name, "vendor.usb.state") == 0) return "none";
+    if (strcmp(name, "persist.vendor.usb.config") == 0) return "none";
+    if (strcmp(name, "sys.usb.ffs.ready") == 0) return "0";
+    if (strcmp(name, "init.svc.adbd") == 0) return "stopped";
+    if (strcmp(name, "init.svc_debug_pid.adbd") == 0) return "0";
+    if (strcmp(name, "service.adb.tcp.port") == 0) return "-1";
+    if (strcmp(name, "persist.adb.tcp.port") == 0) return "-1";
+    if (strcmp(name, "persist.service.adb.enable") == 0) return "0";
+    if (strcmp(name, "persist.sys.usb.adb") == 0) return "0";
+    if (strcmp(name, "ro.debuggable") == 0) return "0";
+    if (strcmp(name, "ro.secure") == 0) return "1";
+
+    return nullptr;
+}
+
+static int write_property_value(char *value, const char *fake) {
+    if (!value || !fake) return 0;
+    size_t len = strlen(fake);
+    memcpy(value, fake, len + 1);
+    return static_cast<int>(len);
+}
+
+static int replaced_system_property_get(const char *name, char *value) {
+    const char *fake = fake_property_value(name);
+    if (fake) {
+        XLog("hook hit: native __system_property_get, %s -> %s", name ? name : "(null)", fake);
+        return write_property_value(value, fake);
+    }
+
+    if (g_OriginalSystemPropertyGet) {
+        return g_OriginalSystemPropertyGet(name, value);
+    }
+    return 0;
+}
+
+static const char *fake_file_content(const char *path) {
+    if (!path) return nullptr;
+
+    if (str_contains(path, "/sys/class/power_supply/") && str_contains(path, "usb") &&
+        (str_contains(path, "/online") || str_contains(path, "/present"))) {
+        return "0\n";
+    }
+    if (str_contains(path, "/sys/class/power_supply/") && str_contains(path, "usb") &&
+        (str_contains(path, "/type") || str_contains(path, "/real_type"))) {
+        return "Unknown\n";
+    }
+    if (str_contains(path, "/sys/class/power_supply/") && str_contains(path, "usb") &&
+        (str_contains(path, "/current_now") || str_contains(path, "/voltage_now"))) {
+        return "0\n";
+    }
+    if (str_contains(path, "/sys/class/power_supply/usb/online")) return "0\n";
+    if (str_contains(path, "/sys/class/power_supply/usb/present")) return "0\n";
+    if (str_contains(path, "/sys/class/power_supply/usb/type")) return "Unknown\n";
+    if (str_contains(path, "/sys/class/power_supply/usb/real_type")) return "Unknown\n";
+    if (str_contains(path, "/sys/class/power_supply/battery/status")) return "Discharging\n";
+    if (str_contains(path, "/sys/class/android_usb") && str_contains(path, "state")) {
+        return "DISCONNECTED\n";
+    }
+    if (str_contains(path, "/sys/class/android_usb") && str_contains(path, "functions")) {
+        return "none\n";
+    }
+    if (str_contains(path, "/config/usb_gadget") && str_contains(path, "UDC")) {
+        return "\n";
+    }
+    if (str_contains(path, "/config/usb_gadget") && str_contains(path, "functions")) {
+        return "none\n";
+    }
+    if (str_contains(path, "/dev/usb-ffs/adb") || str_contains(path, "/dev/mtp_usb")) {
+        return "\n";
+    }
+
+    return nullptr;
+}
+
+static bool is_read_only_open(int flags) {
+    return (flags & O_ACCMODE) == O_RDONLY && (flags & O_DIRECTORY) == 0;
+}
+
+static int create_fake_read_fd(const char *path, const char *content) {
+    int pipe_fds[2];
+    if (pipe(pipe_fds) != 0) {
+        XLog("fake file pipe failed for %s: %s", path ? path : "(null)", strerror(errno));
+        errno = ENOENT;
+        return -1;
+    }
+
+    size_t remaining = strlen(content);
+    const char *cursor = content;
+    while (remaining > 0) {
+        ssize_t written = write(pipe_fds[1], cursor, remaining);
+        if (written <= 0) break;
+        cursor += written;
+        remaining -= static_cast<size_t>(written);
+    }
+    close(pipe_fds[1]);
+
+    XLog("hook hit: native file read, %s -> %s", path ? path : "(null)", content);
+    return pipe_fds[0];
+}
+
+static int replaced_open(const char *pathname, int flags, ...) {
+    mode_t mode = 0;
+    if (flags & O_CREAT) {
+        va_list args;
+        va_start(args, flags);
+        mode = static_cast<mode_t>(va_arg(args, int));
+        va_end(args);
+    }
+
+    const char *fake = fake_file_content(pathname);
+    if (fake && is_read_only_open(flags)) {
+        return create_fake_read_fd(pathname, fake);
+    }
+
+    if (!g_OriginalOpen) {
+        errno = ENOENT;
+        return -1;
+    }
+    if (flags & O_CREAT) return g_OriginalOpen(pathname, flags, mode);
+    return g_OriginalOpen(pathname, flags);
+}
+
+static int replaced_openat(int dirfd, const char *pathname, int flags, ...) {
+    mode_t mode = 0;
+    if (flags & O_CREAT) {
+        va_list args;
+        va_start(args, flags);
+        mode = static_cast<mode_t>(va_arg(args, int));
+        va_end(args);
+    }
+
+    const char *fake = fake_file_content(pathname);
+    if (fake && is_read_only_open(flags)) {
+        return create_fake_read_fd(pathname, fake);
+    }
+
+    if (!g_OriginalOpenAt) {
+        errno = ENOENT;
+        return -1;
+    }
+    if (flags & O_CREAT) return g_OriginalOpenAt(dirfd, pathname, flags, mode);
+    return g_OriginalOpenAt(dirfd, pathname, flags);
+}
+
+static FILE *replaced_fopen(const char *pathname, const char *mode) {
+    const char *fake = fake_file_content(pathname);
+    if (fake && mode && mode[0] == 'r') {
+        int fd = create_fake_read_fd(pathname, fake);
+        if (fd < 0) return nullptr;
+        FILE *fp = fdopen(fd, mode);
+        if (!fp) close(fd);
+        return fp;
+    }
+
+    if (!g_OriginalFopen) {
+        errno = ENOENT;
+        return nullptr;
+    }
+    return g_OriginalFopen(pathname, mode);
+}
+
+static void *find_libc_symbol(const char *symbol_name) {
+    void *libc = dlopen("libc.so", RTLD_NOW);
+    void *symbol = libc ? dlsym(libc, symbol_name) : nullptr;
+    if (!symbol) {
+        symbol = dlsym(RTLD_DEFAULT, symbol_name);
+    }
+    return symbol;
+}
+
+static bool hook_libc_symbol(const char *symbol_name, void *replacement, void **backup) {
+    void *symbol = find_libc_symbol(symbol_name);
+    if (!symbol) {
+        XLog("failed to find %s", symbol_name);
+        return false;
+    }
+
+    int result = g_HookFunction(symbol, replacement, backup);
+    if (result == 0) {
+        XLog("native %s hook installed", symbol_name);
+        return true;
+    }
+
+    XLog("native %s hook failed: %d", symbol_name, result);
+    return false;
+}
+
+static void install_system_property_hook() {
+    if (g_SystemPropertyHookInstalled || !g_HookFunction) return;
+
+    if (hook_libc_symbol(
+            "__system_property_get",
+            reinterpret_cast<void *>(replaced_system_property_get),
+            reinterpret_cast<void **>(&g_OriginalSystemPropertyGet)
+    )) {
+        g_SystemPropertyHookInstalled = true;
+    }
+}
+
+static void install_file_access_hooks() {
+    if (g_FileAccessHooksInstalled || !g_HookFunction) return;
+
+    bool hooked = false;
+    hooked = hook_libc_symbol(
+            "open",
+            reinterpret_cast<void *>(replaced_open),
+            reinterpret_cast<void **>(&g_OriginalOpen)
+    ) || hooked;
+    hooked = hook_libc_symbol(
+            "openat",
+            reinterpret_cast<void *>(replaced_openat),
+            reinterpret_cast<void **>(&g_OriginalOpenAt)
+    ) || hooked;
+    hooked = hook_libc_symbol(
+            "fopen",
+            reinterpret_cast<void *>(replaced_fopen),
+            reinterpret_cast<void **>(&g_OriginalFopen)
+    ) || hooked;
+
+    g_FileAccessHooksInstalled = hooked;
+}
+
+static void on_library_loaded(const char *name, void *handle) {
+    XLog("library loaded: %s, handle=%p", name ? name : "(null)", handle);
+    install_system_property_hook();
+    install_file_access_hooks();
+}
+
+extern "C" [[gnu::visibility("default")]] [[gnu::used]]
+NativeOnModuleLoaded native_init(const NativeAPIEntries *entries) {
+    XLog("native_init called, api version=%u", entries ? entries->version : 0);
+    g_HookFunction = entries ? entries->hook_func : nullptr;
+    install_system_property_hook();
+    install_file_access_hooks();
+    return on_library_loaded;
+}
+
+extern "C" [[gnu::visibility("default")]] [[gnu::used]]
+jint JNI_OnLoad(JavaVM *vm, void *) {
+    g_JavaVm = vm;
+    JNIEnv *env = nullptr;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;
+    }
+
+    jclass clazz = env->FindClass("io/github/ryttermohn/usbdetectionbypass/LogUtil");
+    if (!clazz) {
+        XLog("LogUtil class not found");
+        return JNI_VERSION_1_6;
+    }
+    g_LogUtilClass = static_cast<jclass>(env->NewGlobalRef(clazz));
+    env->DeleteLocalRef(clazz);
+
+    g_LogFromNativeMethod = env->GetStaticMethodID(
+            g_LogUtilClass,
+            "logFromNative",
+            "(Ljava/lang/String;)V"
+    );
+
+    XLog(g_LogFromNativeMethod ? "JNI_OnLoad completed" : "logFromNative method not found");
+    return JNI_VERSION_1_6;
+}
+
+```
+
+`app/src/main/java/io/github/ryttermohn/usbdetectionbypass/HookEntry.kt`:
+
+```kt
+package io.github.ryttermohn.usbdetectionbypass
+
+import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
+import android.os.Bundle
+import android.os.Handler
+import android.util.Log
+import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedBridge
+import de.robv.android.xposed.XposedHelpers
+import de.robv.android.xposed.callbacks.XC_LoadPackage
+import java.io.File
+import java.io.FileWriter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.HashMap
+import java.util.Locale
+
+class HookEntry : IXposedHookLoadPackage, IXposedHookZygoteInit {
+
+    override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
+        log("zygote init, modulePath=${startupParam.modulePath}")
+    }
+
+    override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+        log("loadPackage package=${lpparam.packageName}, process=${lpparam.processName}, firstApplication=${lpparam.isFirstApplication}")
+        if (!shouldHookPackage(lpparam.packageName)) {
+            log("skip package=${lpparam.packageName}, process=${lpparam.processName}")
+            return
+        }
+
+        try {
+            hookApplicationAttach()
+            hideUsbDebuggingSignals(lpparam.classLoader)
+            loadNativeHooks()
+            log("module active for package=${lpparam.packageName}, process=${lpparam.processName}")
+        } catch (e: Throwable) {
+            log("fatal while installing hooks: ${e.javaClass.name}: ${e.message}")
+        }
+    }
+
+    private fun shouldHookPackage(packageName: String): Boolean {
+        if (packageName == MODULE_PACKAGE) return false
+        if (SKIP_PACKAGE_NAMES.contains(packageName)) return false
+        if (SKIP_PACKAGE_PREFIXES.any { packageName.startsWith(it) }) return false
+        return true
+    }
+
+    private fun hideUsbDebuggingSignals(classLoader: ClassLoader) {
+        hookSettingsClass("android.provider.Settings\$Global", classLoader)
+        hookSettingsClass("android.provider.Settings\$Secure", classLoader)
+        hookSettingsClass("android.provider.Settings\$System", classLoader)
+        hookSystemProperties(classLoader)
+        hookShellCommands()
+        hookIntentExtraReads()
+        hookUsbStateStickyBroadcasts(classLoader)
+        hookUsbManager(classLoader)
+        hookJavaFileChecks()
+        hookDebuggerState()
+        log("USB connection/debugging hide hooks installed")
+    }
+
+    private fun hookApplicationAttach() {
+        hookMethodSafely(Application::class.java, "attach", Context::class.java, object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                val context = param.args.firstOrNull() as? Context ?: return
+                initFileLogger(context)
+                log("Application.attach package=${context.packageName}, filesDir=${context.filesDir.absolutePath}")
+            }
+        })
+    }
+
+    private fun loadNativeHooks() {
+        try {
+            System.loadLibrary("usb_detection_bypass")
+            log("System.loadLibrary(\"usb_detection_bypass\") succeeded")
+        } catch (e: Throwable) {
+            log("failed to load native library: ${e.message}")
+        }
+    }
+
+    private fun hookSettingsClass(className: String, classLoader: ClassLoader) {
+        hookMethodSafely(className, classLoader, "getString", contentResolverClass(), String::class.java, settingsStringHook())
+        hookMethodSafely(className, classLoader, "getInt", contentResolverClass(), String::class.java, settingsIntHook())
+        hookMethodSafely(className, classLoader, "getInt", contentResolverClass(), String::class.java, Int::class.javaPrimitiveType!!, settingsIntHook())
+        hookMethodSafely(className, classLoader, "getLong", contentResolverClass(), String::class.java, settingsLongHook())
+        hookMethodSafely(className, classLoader, "getLong", contentResolverClass(), String::class.java, Long::class.javaPrimitiveType!!, settingsLongHook())
+    }
+
+    private fun hookSystemProperties(classLoader: ClassLoader) {
+        hookMethodSafely("android.os.SystemProperties", classLoader, "get", String::class.java, systemPropertyStringHook())
+        hookMethodSafely("android.os.SystemProperties", classLoader, "get", String::class.java, String::class.java, systemPropertyStringHook())
+        hookMethodSafely("android.os.SystemProperties", classLoader, "getInt", String::class.java, Int::class.javaPrimitiveType!!, systemPropertyIntHook())
+        hookMethodSafely("android.os.SystemProperties", classLoader, "getLong", String::class.java, Long::class.javaPrimitiveType!!, systemPropertyLongHook())
+        hookMethodSafely("android.os.SystemProperties", classLoader, "getBoolean", String::class.java, Boolean::class.javaPrimitiveType!!, systemPropertyBooleanHook())
+    }
+
+    private fun hookShellCommands() {
+        hookRuntimeExec(String::class.java)
+        hookRuntimeExec(Array<String>::class.java)
+        hookRuntimeExec(String::class.java, Array<String>::class.java)
+        hookRuntimeExec(Array<String>::class.java, Array<String>::class.java)
+        hookRuntimeExec(String::class.java, Array<String>::class.java, File::class.java)
+        hookRuntimeExec(Array<String>::class.java, Array<String>::class.java, File::class.java)
+
+        hookMethodSafely(ProcessBuilder::class.java, "start", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val builder = param.thisObject as? ProcessBuilder ?: return
+                val original = commandToText(builder.command())
+                val replacement = replacementShellArray(builder.command()) ?: return
+                builder.command(*replacement)
+                logHookHit("ProcessBuilder.start", original, commandToText(replacement))
+            }
+        })
+    }
+
+    private fun hookIntentExtraReads() {
+        hookMethodSafely(Intent::class.java, "getIntExtra", String::class.java, Int::class.javaPrimitiveType!!, object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val intent = param.thisObject as? Intent ?: return
+                val key = param.args.firstOrNull() as? String ?: return
+                val fake = fakeIntentIntExtra(intent.action, key) ?: return
+                param.result = fake
+                logHookHit("Intent.getIntExtra", "${intent.action}:$key", fake.toString())
+            }
+        })
+
+        hookMethodSafely(Intent::class.java, "getBooleanExtra", String::class.java, Boolean::class.javaPrimitiveType!!, object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val intent = param.thisObject as? Intent ?: return
+                val key = param.args.firstOrNull() as? String ?: return
+                val fake = fakeIntentBooleanExtra(intent.action, key) ?: return
+                param.result = fake
+                logHookHit("Intent.getBooleanExtra", "${intent.action}:$key", fake.toString())
+            }
+        })
+
+        hookMethodSafely(Intent::class.java, "getStringExtra", String::class.java, object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val intent = param.thisObject as? Intent ?: return
+                val key = param.args.firstOrNull() as? String ?: return
+                val fake = fakeIntentStringExtra(intent.action, key) ?: return
+                param.result = fake
+                logHookHit("Intent.getStringExtra", "${intent.action}:$key", fake)
+            }
+        })
+
+        hookMethodSafely(Intent::class.java, "getExtras", object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                val intent = param.thisObject as? Intent ?: return
+                val bundle = param.result as? Bundle ?: return
+                if (sanitizeExtrasBundle(intent.action, bundle)) {
+                    logHookHit("Intent.getExtras", intent.action.orEmpty(), "sanitized")
+                }
+            }
+        })
+    }
+
+    private fun hookRuntimeExec(vararg parameterTypes: Class<*>) {
+        hookMethodSafely(Runtime::class.java, "exec", *parameterTypes, object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val original = commandToText(param.args.firstOrNull())
+                val replacement = replacementShellCommand(param.args.firstOrNull()) ?: return
+                param.args[0] = replacement
+                logHookHit("Runtime.exec", original, commandToText(replacement))
+            }
+        })
+    }
+
+    private fun hookUsbStateStickyBroadcasts(classLoader: ClassLoader) {
+        val hook = object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                val filter = param.args.getOrNull(1) as? IntentFilter ?: return
+                if (!filter.hasAction(USB_STATE_ACTION) && !filter.hasAction(Intent.ACTION_BATTERY_CHANGED)) return
+                val intent = param.result as? Intent ?: return
+                if (sanitizeUsbStateIntent(intent)) {
+                    logHookHit("USB_STATE broadcast", "adb", "false")
+                }
+                if (sanitizeBatteryIntent(intent)) {
+                    logHookHit("BATTERY_CHANGED broadcast", BatteryManager.EXTRA_PLUGGED, "0")
+                }
+            }
+        }
+
+        hookMethodSafely("android.content.ContextWrapper", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, hook)
+        hookMethodSafely("android.content.ContextWrapper", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, Int::class.javaPrimitiveType!!, hook)
+        hookMethodSafely("android.content.ContextWrapper", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, String::class.java, Handler::class.java, hook)
+        hookMethodSafely("android.content.ContextWrapper", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, String::class.java, Handler::class.java, Int::class.javaPrimitiveType!!, hook)
+        hookMethodSafely("android.app.ContextImpl", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, hook)
+        hookMethodSafely("android.app.ContextImpl", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, Int::class.javaPrimitiveType!!, hook)
+        hookMethodSafely("android.app.ContextImpl", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, String::class.java, Handler::class.java, hook)
+        hookMethodSafely("android.app.ContextImpl", classLoader, "registerReceiver", BroadcastReceiver::class.java, IntentFilter::class.java, String::class.java, Handler::class.java, Int::class.javaPrimitiveType!!, hook)
+    }
+
+    private fun hookUsbManager(classLoader: ClassLoader) {
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getDeviceList", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = HashMap<String, Any>()
+                logHookHit("UsbManager.getDeviceList", "devices", "empty")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getAccessoryList", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = null
+                logHookHit("UsbManager.getAccessoryList", "accessories", "null")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getPorts", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = emptyList<Any>()
+                logHookHit("UsbManager.getPorts", "ports", "empty")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getCurrentFunctions", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = 0L
+                logHookHit("UsbManager.getCurrentFunctions", "functions", "0")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getDefaultFunctions", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = 0L
+                logHookHit("UsbManager.getDefaultFunctions", "functions", "0")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getCurrentFunction", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = "none"
+                logHookHit("UsbManager.getCurrentFunction", "function", "none")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "getDefaultFunction", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = "none"
+                logHookHit("UsbManager.getDefaultFunction", "function", "none")
+            }
+        })
+        hookMethodSafely("android.hardware.usb.UsbManager", classLoader, "isFunctionEnabled", String::class.java, object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val function = param.args.firstOrNull()?.toString().orEmpty()
+                param.result = false
+                logHookHit("UsbManager.isFunctionEnabled", function, "false")
+            }
+        })
+    }
+
+    private fun hookJavaFileChecks() {
+        hookMethodSafely(File::class.java, "exists", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val file = param.thisObject as? File ?: return
+                if (!isSensitiveUsbPath(file.path)) return
+                param.result = false
+                logHookHit("File.exists", file.path, "false")
+            }
+        })
+        hookMethodSafely(File::class.java, "canRead", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val file = param.thisObject as? File ?: return
+                if (!isSensitiveUsbPath(file.path)) return
+                param.result = false
+                logHookHit("File.canRead", file.path, "false")
+            }
+        })
+        hookMethodSafely(File::class.java, "length", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                val file = param.thisObject as? File ?: return
+                if (!isSensitiveUsbPath(file.path)) return
+                param.result = 0L
+                logHookHit("File.length", file.path, "0")
+            }
+        })
+    }
+
+    private fun hookDebuggerState() {
+        hookMethodSafely("android.os.Debug", null, "isDebuggerConnected", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = false
+                logHookHit("Debug.isDebuggerConnected", "debugger", "false")
+            }
+        })
+        hookMethodSafely("android.os.Debug", null, "waitingForDebugger", object : XC_MethodHook() {
+            override fun beforeHookedMethod(param: MethodHookParam) {
+                param.result = false
+                logHookHit("Debug.waitingForDebugger", "debugger", "false")
+            }
+        })
+    }
+
+    private fun settingsStringHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val name = param.args.getOrNull(1) as? String ?: return
+            if (isUsbDebugSetting(name)) {
+                param.result = "0"
+                logHookHit("Settings.getString", name, "0")
+            }
+        }
+    }
+
+    private fun settingsIntHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val name = param.args.getOrNull(1) as? String ?: return
+            if (isUsbDebugSetting(name)) {
+                param.result = 0
+                logHookHit("Settings.getInt", name, "0")
+            }
+        }
+    }
+
+    private fun settingsLongHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val name = param.args.getOrNull(1) as? String ?: return
+            if (isUsbDebugSetting(name)) {
+                param.result = 0L
+                logHookHit("Settings.getLong", name, "0")
+            }
+        }
+    }
+
+    private fun systemPropertyStringHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val key = param.args.firstOrNull() as? String ?: return
+            val fake = fakeSystemProperty(key) ?: return
+            param.result = fake
+            logHookHit("SystemProperties.get", key, fake)
+        }
+    }
+
+    private fun systemPropertyIntHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val key = param.args.firstOrNull() as? String ?: return
+            val fake = fakeSystemProperty(key)?.toIntOrNull() ?: return
+            param.result = fake
+            logHookHit("SystemProperties.getInt", key, fake.toString())
+        }
+    }
+
+    private fun systemPropertyLongHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val key = param.args.firstOrNull() as? String ?: return
+            val fake = fakeSystemProperty(key)?.toLongOrNull() ?: return
+            param.result = fake
+            logHookHit("SystemProperties.getLong", key, fake.toString())
+        }
+    }
+
+    private fun systemPropertyBooleanHook() = object : XC_MethodHook() {
+        override fun beforeHookedMethod(param: MethodHookParam) {
+            val key = param.args.firstOrNull() as? String ?: return
+            val fake = fakeSystemProperty(key) ?: return
+            val result = fake == "1" || fake.equals("true", ignoreCase = true)
+            param.result = result
+            logHookHit("SystemProperties.getBoolean", key, result.toString())
+        }
+    }
+
+    private fun replacementShellCommand(command: Any?): Any? {
+        val output = fakeShellOutput(commandToText(command)) ?: return null
+        return when (command) {
+            is String -> "echo $output"
+            is Array<*> -> shellArrayForOutput(output)
+            else -> null
+        }
+    }
+
+    private fun replacementShellArray(command: List<String>): Array<String>? {
+        val output = fakeShellOutput(commandToText(command)) ?: return null
+        return shellArrayForOutput(output)
+    }
+
+    private fun shellArrayForOutput(output: String): Array<String> {
+        val escaped = output.replace("'", "'\\''")
+        return arrayOf("sh", "-c", "printf '$escaped\\n'")
+    }
+
+    private fun fakeShellOutput(commandText: String): String? {
+        val normalized = commandText.lowercase(Locale.US)
+        fakeSysfsCommandOutput(normalized)?.let { return it }
+
+        if (normalized.contains("dumpsys usb")) {
+            return "USB connected: false"
+        }
+        if (normalized.contains("dumpsys battery")) {
+            return "USB powered: false"
+        }
+        if (normalized.contains("lsusb") || normalized.contains("/sys/bus/usb/devices")) {
+            return ""
+        }
+        if (!looksLikeUsbConnectionCheck(normalized)) return null
+
+        return when {
+            normalized.contains("adb_enabled") -> "0"
+            normalized.contains("development_settings_enabled") -> "0"
+            normalized.contains("init.svc.adbd") -> "stopped"
+            normalized.contains("init.svc_debug_pid.adbd") -> "0"
+            normalized.contains("adb.tcp.port") -> "-1"
+            normalized.contains("ro.debuggable") -> "0"
+            normalized.contains("ro.secure") -> "1"
+            normalized.contains("sys.usb.config") -> "none"
+            normalized.contains("sys.usb.state") -> "none"
+            normalized.contains("persist.sys.usb.config") -> "none"
+            normalized.contains("vendor.usb.config") -> "none"
+            normalized.contains("vendor.usb.state") -> "none"
+            normalized.contains("persist.vendor.usb.config") -> "none"
+            normalized.contains("sys.usb.ffs.ready") -> "0"
+            else -> ""
+        }
+    }
+
+    private fun fakeSysfsCommandOutput(commandText: String): String? {
+        return when {
+            commandText.contains("/sys/class/power_supply/") &&
+                commandText.contains("usb") &&
+                (commandText.contains("/online") || commandText.contains("/present")) -> "0"
+            commandText.contains("/sys/class/power_supply/") &&
+                commandText.contains("usb") &&
+                (commandText.contains("/type") || commandText.contains("/real_type")) -> "Unknown"
+            commandText.contains("/sys/class/power_supply/") &&
+                commandText.contains("usb") &&
+                (commandText.contains("/current_now") || commandText.contains("/voltage_now")) -> "0"
+            commandText.contains("/sys/class/power_supply/usb/online") -> "0"
+            commandText.contains("/sys/class/power_supply/usb/present") -> "0"
+            commandText.contains("/sys/class/power_supply/usb/type") -> "Unknown"
+            commandText.contains("/sys/class/power_supply/usb/real_type") -> "Unknown"
+            commandText.contains("/sys/class/power_supply/battery/status") -> "Discharging"
+            commandText.contains("/sys/class/android_usb") && commandText.contains("state") -> "DISCONNECTED"
+            commandText.contains("/sys/class/android_usb") && commandText.contains("functions") -> "none"
+            commandText.contains("/config/usb_gadget") && commandText.contains("udc") -> ""
+            commandText.contains("/config/usb_gadget") && commandText.contains("functions") -> "none"
+            commandText.contains("/dev/usb-ffs/adb") -> ""
+            commandText.contains("/dev/mtp_usb") -> ""
+            else -> null
+        }
+    }
+
+    private fun looksLikeUsbConnectionCheck(commandText: String): Boolean {
+        return USB_DEBUG_TOKENS.any { commandText.contains(it) } ||
+            USB_CONNECTION_TOKENS.any { commandText.contains(it) }
+    }
+
+    private fun commandToText(command: Any?): String {
+        return when (command) {
+            is String -> command
+            is Array<*> -> command.joinToString(" ") { it?.toString().orEmpty() }
+            is Iterable<*> -> command.joinToString(" ") { it?.toString().orEmpty() }
+            else -> command?.toString().orEmpty()
+        }
+    }
+
+    private fun sanitizeUsbStateIntent(intent: Intent?): Boolean {
+        if (intent?.action != USB_STATE_ACTION) return false
+        USB_STATE_BOOLEAN_KEYS.forEach { intent.putExtra(it, false) }
+        USB_STATE_STRING_KEYS.forEach { intent.putExtra(it, "none") }
+        return true
+    }
+
+    private fun sanitizeBatteryIntent(intent: Intent?): Boolean {
+        if (intent?.action != Intent.ACTION_BATTERY_CHANGED) return false
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, 0)
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_DISCHARGING)
+        intent.putExtra("usb_online", 0)
+        intent.putExtra("usb_present", 0)
+        intent.putExtra("charger_type", "none")
+        return true
+    }
+
+    private fun sanitizeExtrasBundle(action: String?, bundle: Bundle): Boolean {
+        return when (action) {
+            USB_STATE_ACTION -> {
+                USB_STATE_BOOLEAN_KEYS.forEach { bundle.putBoolean(it, false) }
+                USB_STATE_STRING_KEYS.forEach { bundle.putString(it, "none") }
+                true
+            }
+            Intent.ACTION_BATTERY_CHANGED -> {
+                bundle.putInt(BatteryManager.EXTRA_PLUGGED, 0)
+                bundle.putInt(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_DISCHARGING)
+                bundle.putInt("usb_online", 0)
+                bundle.putInt("usb_present", 0)
+                bundle.putString("charger_type", "none")
+                true
+            }
+            else -> false
+        }
+    }
+
+    private fun fakeIntentIntExtra(action: String?, key: String): Int? {
+        if (action != Intent.ACTION_BATTERY_CHANGED) return null
+        return when (key) {
+            BatteryManager.EXTRA_PLUGGED -> 0
+            BatteryManager.EXTRA_STATUS -> BatteryManager.BATTERY_STATUS_DISCHARGING
+            "usb_online", "usb_present" -> 0
+            else -> null
+        }
+    }
+
+    private fun fakeIntentBooleanExtra(action: String?, key: String): Boolean? {
+        if (action == USB_STATE_ACTION && USB_STATE_BOOLEAN_KEYS.contains(key)) return false
+        if (action == Intent.ACTION_BATTERY_CHANGED && key.startsWith("usb", ignoreCase = true)) return false
+        return null
+    }
+
+    private fun fakeIntentStringExtra(action: String?, key: String): String? {
+        if (action == USB_STATE_ACTION && USB_STATE_STRING_KEYS.contains(key)) return "none"
+        if (action == Intent.ACTION_BATTERY_CHANGED && key == "charger_type") return "none"
+        return null
+    }
+
+    private fun isUsbDebugSetting(name: String): Boolean {
+        return SETTINGS_KEYS.contains(name.lowercase(Locale.US))
+    }
+
+    private fun fakeSystemProperty(key: String): String? {
+        return PROPERTY_VALUES[key.lowercase(Locale.US)]
+    }
+
+    private fun isSensitiveUsbPath(path: String): Boolean {
+        val normalized = path.lowercase(Locale.US)
+        if (normalized.contains("/sys/class/power_supply/") && normalized.contains("usb")) return true
+        return USB_PATH_TOKENS.any { normalized.contains(it) }
+    }
+
+    private fun contentResolverClass(): Class<*> {
+        return android.content.ContentResolver::class.java
+    }
+
+    private fun hookMethodSafely(
+        className: String,
+        classLoader: ClassLoader?,
+        methodName: String,
+        vararg parameterTypesAndCallback: Any
+    ) {
+        try {
+            XposedHelpers.findAndHookMethod(className, classLoader, methodName, *parameterTypesAndCallback)
+        } catch (e: Throwable) {
+            log("skip hook $className.$methodName: ${e.javaClass.simpleName}")
+        }
+    }
+
+    private fun hookMethodSafely(
+        clazz: Class<*>,
+        methodName: String,
+        vararg parameterTypesAndCallback: Any
+    ) {
+        try {
+            XposedHelpers.findAndHookMethod(clazz, methodName, *parameterTypesAndCallback)
+        } catch (e: Throwable) {
+            log("skip hook ${clazz.name}.$methodName: ${e.javaClass.simpleName}")
+        }
+    }
+
+    private fun log(message: String) {
+        val line = "[$TAG] $message"
+        try {
+            XposedBridge.log(line)
+        } catch (_: Throwable) {
+        }
+        try {
+            Log.i(TAG, message)
+        } catch (_: Throwable) {
+        }
+        writeFileLog(message)
+    }
+
+    private fun logHookHit(source: String, key: String, fakeValue: String) {
+        log("hook hit: $source, $key -> $fakeValue")
+    }
+
+    private fun initFileLogger(context: Context) {
+        synchronized(LOG_LOCK) {
+            if (diagnosticLogFile != null) return
+
+            val dir = context.getExternalFilesDir(null) ?: context.filesDir
+            diagnosticLogFile = File(dir, "UsbDetectionBypass.log")
+            writeFileLogLocked("file logger initialized: ${diagnosticLogFile?.absolutePath}")
+            pendingFileLogs.forEach { writeFileLogLocked(it) }
+            pendingFileLogs.clear()
+        }
+    }
+
+    private fun writeFileLog(message: String) {
+        synchronized(LOG_LOCK) {
+            if (diagnosticLogFile == null) {
+                if (pendingFileLogs.size >= MAX_PENDING_FILE_LOGS) {
+                    pendingFileLogs.removeAt(0)
+                }
+                pendingFileLogs.add(message)
+                return
+            }
+            writeFileLogLocked(message)
+        }
+    }
+
+    private fun writeFileLogLocked(message: String) {
+        val file = diagnosticLogFile ?: return
+        try {
+            val timestamp = LOG_TIME_FORMAT.format(Date())
+            FileWriter(file, true).use { writer ->
+                writer.append(timestamp)
+                    .append(' ')
+                    .append(message)
+                    .append('\n')
+            }
+        } catch (_: Throwable) {
+        }
+    }
+
+    private companion object {
+        private const val TAG = "UsbBypass"
+        private const val MODULE_PACKAGE = "io.github.ryttermohn.usbdetectionbypass"
+        private const val MAX_PENDING_FILE_LOGS = 200
+        private const val USB_STATE_ACTION = "android.hardware.usb.action.USB_STATE"
+        private val LOG_LOCK = Any()
+        private val LOG_TIME_FORMAT = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US)
+        private val pendingFileLogs = mutableListOf<String>()
+        @Volatile
+        private var diagnosticLogFile: File? = null
+
+        private val SKIP_PACKAGE_NAMES = setOf(
+            "android"
+        )
+
+        private val SKIP_PACKAGE_PREFIXES = listOf(
+            "com.android.",
+            "com.google.android.",
+            "com.miui.",
+            "com.xiaomi.",
+            "de.robv.android.xposed",
+            "org.lsposed."
+        )
+
+        private val SETTINGS_KEYS = setOf(
+            "adb_enabled",
+            "development_settings_enabled"
+        )
+
+        private val PROPERTY_VALUES = mapOf(
+            "sys.usb.config" to "none",
+            "sys.usb.state" to "none",
+            "persist.sys.usb.config" to "none",
+            "vendor.usb.config" to "none",
+            "vendor.usb.state" to "none",
+            "persist.vendor.usb.config" to "none",
+            "sys.usb.ffs.ready" to "0",
+            "init.svc.adbd" to "stopped",
+            "init.svc_debug_pid.adbd" to "0",
+            "service.adb.tcp.port" to "-1",
+            "persist.adb.tcp.port" to "-1",
+            "persist.service.adb.enable" to "0",
+            "persist.sys.usb.adb" to "0",
+            "ro.debuggable" to "0",
+            "ro.secure" to "1"
+        )
+
+        private val USB_DEBUG_TOKENS = listOf(
+            "adb_enabled",
+            "development_settings_enabled",
+            "sys.usb.config",
+            "sys.usb.state",
+            "persist.sys.usb.config",
+            "vendor.usb.config",
+            "vendor.usb.state",
+            "persist.vendor.usb.config",
+            "sys.usb.ffs.ready",
+            "init.svc.adbd",
+            "init.svc_debug_pid.adbd",
+            "adb.tcp.port",
+            "ro.debuggable",
+            "ro.secure"
+        )
+
+        private val USB_CONNECTION_TOKENS = listOf(
+            "dumpsys usb",
+            "dumpsys battery",
+            "usb powered",
+            "plugged",
+            "android_usb",
+            "usb_gadget",
+            "power_supply/usb",
+            "mtp_usb",
+            "usb-ffs/adb",
+            "usb_state"
+        )
+
+        private val USB_STATE_BOOLEAN_KEYS = listOf(
+            "connected",
+            "configured",
+            "adb",
+            "mtp",
+            "ptp",
+            "rndis",
+            "midi",
+            "accessory",
+            "audio_source",
+            "uvc",
+            "unlocked",
+            "host_connected"
+        )
+
+        private val USB_STATE_STRING_KEYS = listOf(
+            "function",
+            "functions",
+            "currentFunctions",
+            "defaultFunctions",
+            "configuredFunctions"
+        )
+
+        private val USB_PATH_TOKENS = listOf(
+            "/sys/class/power_supply/usb",
+            "/sys/class/android_usb",
+            "/config/usb_gadget",
+            "/sys/bus/usb/devices",
+            "/dev/mtp_usb",
+            "/dev/usb-ffs/adb"
+        )
+    }
+}
+
+```
+
+`app/src/main/java/io/github/ryttermohn/usbdetectionbypass/LogUtil.kt`:
+
+```kt
+package io.github.ryttermohn.usbdetectionbypass
+
+import android.util.Log
+import de.robv.android.xposed.XposedBridge
+
+object LogUtil {
+    private const val TAG = "UsbBypassNative"
+
+    @JvmStatic
+    fun logFromNative(msg: String) {
+        try {
+            XposedBridge.log("[$TAG] $msg")
+        } catch (_: Throwable) {
+        }
+        try {
+            Log.i(TAG, msg)
+        } catch (_: Throwable) {
+        }
+    }
+}
+
+```
+
+`app/src/main/res/drawable/ic_launcher_background.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#3DDC84"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M9,0L9,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,0L19,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,0L29,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,0L39,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M49,0L49,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M59,0L59,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M69,0L69,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,0L79,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M89,0L89,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M99,0L99,108"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,9L108,9"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,19L108,19"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,29L108,29"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,39L108,39"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,49L108,49"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,59L108,59"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,69L108,69"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,79L108,79"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,89L108,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,99L108,99"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,29L89,29"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,39L89,39"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,49L89,49"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,59L89,59"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,69L89,69"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M19,79L89,79"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M29,19L29,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M39,19L39,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M49,19L49,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M59,19L59,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M69,19L69,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M79,19L79,89"
+        android:strokeWidth="0.8"
+        android:strokeColor="#33FFFFFF" />
+</vector>
+
+```
+
+`app/src/main/res/drawable/ic_launcher_foreground.xml`:
+
+```xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="85.84757"
+                android:endY="92.4963"
+                android:startX="42.9492"
+                android:startY="49.59793"
+                android:type="linear">
+                <item
+                    android:color="#44000000"
+                    android:offset="0.0" />
+                <item
+                    android:color="#00000000"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillType="nonZero"
+        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
+        android:strokeWidth="1"
+        android:strokeColor="#00000000" />
+</vector>
+```
+
+`app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+```
+
+`app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
+```
+
+`app/src/main/res/values-night/themes.xml`:
+
+```xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.UsbDetectionBypass" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+</resources>
+
+```
+
+`app/src/main/res/values/arrays.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposedscope">
+        <!-- Add authorized target package names in LSPosed scope. -->
+        <item>com.knight.union.mi</item>
+    </string-array>
+</resources>
+
+```
+
+`app/src/main/res/values/colors.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
+```
+
+`app/src/main/res/values/strings.xml`:
+
+```xml
+<resources>
+    <string name="app_name">UsbDetectionBypass</string>
+</resources>
+
+```
+
+`app/src/main/res/values/themes.xml`:
+
+```xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.UsbDetectionBypass" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+</resources>
+
+```
+
+`app/src/main/res/xml/backup_rules.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?><!--
+   Sample backup rules file; uncomment and customize as necessary.
+   See https://developer.android.com/guide/topics/data/autobackup
+   for details.
+   Note: This file is ignored for devices older that API 31
+   See https://developer.android.com/about/versions/12/backup-restore
+-->
+<full-backup-content>
+    <!--
+   <include domain="sharedpref" path="."/>
+   <exclude domain="sharedpref" path="device.xml"/>
+-->
+</full-backup-content>
+```
+
+`app/src/main/res/xml/data_extraction_rules.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?><!--
+   Sample data extraction rules file; uncomment and customize as necessary.
+   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   for details.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- TODO: Use <include> and <exclude> to control what is backed up.
+        <include .../>
+        <exclude .../>
+        -->
+    </cloud-backup>
+    <!--
+    <device-transfer>
+        <include .../>
+        <exclude .../>
+    </device-transfer>
+    -->
+</data-extraction-rules>
+```
+
+`app/src/test/java/io/github/ryttermohn/usbdetectionbypass/ExampleUnitTest.kt`:
+
+```kt
+package io.github.ryttermohn.usbdetectionbypass
+
+import org.junit.Test
+
+import org.junit.Assert.*
+
+/**
+ * Example local unit test, which will execute on the development machine (host).
+ *
+ * See [testing documentation](http://d.android.com/tools/testing).
+ */
+class ExampleUnitTest {
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(4, 2 + 2)
+    }
+}
+
+```
+
+`build.gradle.kts`:
+
+```kts
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+}
+```
+
+`gradle.properties`:
+
+```properties
+# Project-wide Gradle settings.
+# IDE (e.g. Android Studio) users:
+# Gradle settings configured through the IDE *will override*
+# any settings specified in this file.
+# For more details on how to configure your build environment visit
+# http://www.gradle.org/docs/current/userguide/build_environment.html
+# Specifies the JVM arguments used for the daemon process.
+# The setting is particularly useful for tweaking memory settings.
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+# When configured, Gradle will run in incubating parallel mode.
+# This option should only be used with decoupled projects. For more details, visit
+# https://developer.android.com/r/tools/gradle-multi-project-decoupled-projects
+# org.gradle.parallel=true
+# AndroidX package structure to make it clearer which packages are bundled with the
+# Android operating system, and which are packaged with your app's APK
+# https://developer.android.com/topic/libraries/support-library/androidx-rn
+android.useAndroidX=true
+# Kotlin code style for this project: "official" or "obsolete":
+kotlin.code.style=official
+# Enables namespacing of each library's R class so that its R class includes only the
+# resources declared in the library itself and none from the library's dependencies,
+# thereby reducing the size of the R class for that library
+android.nonTransitiveRClass=true
+```
+
+`gradle/libs.versions.toml`:
+
+```toml
+[versions]
+agp = "8.7.1"
+kotlin = "1.9.24"
+coreKtx = "1.16.0"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+appcompat = "1.6.1"
+material = "1.10.0"
+constraintlayout = "2.1.4"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+
+```
+
+`gradle/wrapper/gradle-wrapper.properties`:
+
+```properties
+#Fri Dec 19 21:25:48 CST 2025
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.9-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+```
+
+`gradlew`:
+
+```
+#!/usr/bin/env sh
+
+#
+# Copyright 2015 the original author or authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+##############################################################################
+##
+##  Gradle start up script for UN*X
+##
+##############################################################################
+
+# Attempt to set APP_HOME
+# Resolve links: $0 may be a link
+PRG="$0"
+# Need this for relative symlinks.
+while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        PRG="$link"
+    else
+        PRG=`dirname "$PRG"`"/$link"
+    fi
+done
+SAVED="`pwd`"
+cd "`dirname \"$PRG\"`/" >/dev/null
+APP_HOME="`pwd -P`"
+cd "$SAVED" >/dev/null
+
+APP_NAME="Gradle"
+APP_BASE_NAME=`basename "$0"`
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD="maximum"
+
+warn () {
+    echo "$*"
+}
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+}
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "`uname`" in
+  CYGWIN* )
+    cygwin=true
+    ;;
+  Darwin* )
+    darwin=true
+    ;;
+  MINGW* )
+    msys=true
+    ;;
+  NONSTOP* )
+    nonstop=true
+    ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD="$JAVA_HOME/jre/sh/java"
+    else
+        JAVACMD="$JAVA_HOME/bin/java"
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD="java"
+    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+fi
+
+# Increase the maximum file descriptors if we can.
+if [ "$cygwin" = "false" -a "$darwin" = "false" -a "$nonstop" = "false" ] ; then
+    MAX_FD_LIMIT=`ulimit -H -n`
+    if [ $? -eq 0 ] ; then
+        if [ "$MAX_FD" = "maximum" -o "$MAX_FD" = "max" ] ; then
+            MAX_FD="$MAX_FD_LIMIT"
+        fi
+        ulimit -n $MAX_FD
+        if [ $? -ne 0 ] ; then
+            warn "Could not set maximum file descriptor limit: $MAX_FD"
+        fi
+    else
+        warn "Could not query maximum file descriptor limit: $MAX_FD_LIMIT"
+    fi
+fi
+
+# For Darwin, add options to specify how the application appears in the dock
+if $darwin; then
+    GRADLE_OPTS="$GRADLE_OPTS \"-Xdock:name=$APP_NAME\" \"-Xdock:icon=$APP_HOME/media/gradle.icns\""
+fi
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if [ "$cygwin" = "true" -o "$msys" = "true" ] ; then
+    APP_HOME=`cygpath --path --mixed "$APP_HOME"`
+    CLASSPATH=`cygpath --path --mixed "$CLASSPATH"`
+
+    JAVACMD=`cygpath --unix "$JAVACMD"`
+
+    # We build the pattern for arguments to be converted via cygpath
+    ROOTDIRSRAW=`find -L / -maxdepth 1 -mindepth 1 -type d 2>/dev/null`
+    SEP=""
+    for dir in $ROOTDIRSRAW ; do
+        ROOTDIRS="$ROOTDIRS$SEP$dir"
+        SEP="|"
+    done
+    OURCYGPATTERN="(^($ROOTDIRS))"
+    # Add a user-defined pattern to the cygpath arguments
+    if [ "$GRADLE_CYGPATTERN" != "" ] ; then
+        OURCYGPATTERN="$OURCYGPATTERN|($GRADLE_CYGPATTERN)"
+    fi
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    i=0
+    for arg in "$@" ; do
+        CHECK=`echo "$arg"|egrep -c "$OURCYGPATTERN" -`
+        CHECK2=`echo "$arg"|egrep -c "^-"`                                 ### Determine if an option
+
+        if [ $CHECK -ne 0 ] && [ $CHECK2 -eq 0 ] ; then                    ### Added a condition
+            eval `echo args$i`=`cygpath --path --ignore --mixed "$arg"`
+        else
+            eval `echo args$i`="\"$arg\""
+        fi
+        i=`expr $i + 1`
+    done
+    case $i in
+        0) set -- ;;
+        1) set -- "$args0" ;;
+        2) set -- "$args0" "$args1" ;;
+        3) set -- "$args0" "$args1" "$args2" ;;
+        4) set -- "$args0" "$args1" "$args2" "$args3" ;;
+        5) set -- "$args0" "$args1" "$args2" "$args3" "$args4" ;;
+        6) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" ;;
+        7) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" "$args6" ;;
+        8) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" "$args6" "$args7" ;;
+        9) set -- "$args0" "$args1" "$args2" "$args3" "$args4" "$args5" "$args6" "$args7" "$args8" ;;
+    esac
+fi
+
+# Escape application args
+save () {
+    for i do printf %s\\n "$i" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/' \\\\/" ; done
+    echo " "
+}
+APP_ARGS=`save "$@"`
+
+# Collect all arguments for the java command, following the shell quoting and substitution rules
+eval set -- $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS "\"-Dorg.gradle.appname=$APP_BASE_NAME\"" -classpath "\"$CLASSPATH\"" org.gradle.wrapper.GradleWrapperMain "$APP_ARGS"
+
+exec "$JAVACMD" "$@"
+
+```
+
+`gradlew.bat`:
+
+```bat
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+
+@if "%DEBUG%" == "" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%" == "" set DIRNAME=.
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if "%ERRORLEVEL%" == "0" goto execute
+
+echo.
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo.
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if "%ERRORLEVEL%"=="0" goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
+exit /b 1
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+```
+
+`settings.gradle.kts`:
+
+```kts
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url =  uri("https://maven.aliyun.com/repository/public/") } //添加这一行
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven { url =  uri("https://maven.aliyun.com/repository/public/") } //添加这一行
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "UsbDetectionBypass"
+include(":app")
+ 
+
+```
