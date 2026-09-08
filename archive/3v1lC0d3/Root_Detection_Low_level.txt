@@ -1,0 +1,73 @@
+Project Path: arc_3v1lC0d3_Root_Detection_Low_level_wiluhmha
+
+Source Tree:
+
+```txt
+arc_3v1lC0d3_Root_Detection_Low_level_wiluhmha
+├── README.md
+└── Root_Detection.js
+
+```
+
+`README.md`:
+
+```md
+# A Frida-based dynamic analysis script for Android applications that monitors suspicious file-system activity and system command execution at runtime.
+
+The script hooks `java.io.File` and `java.lang.Runtime.exec()` to identify potentially interesting paths and commands, while capturing Java stack traces to help trace the origin of the activity.A Frida-based dynamic analysis script for Android applications that monitors suspicious file-system activity and system command execution at runtime.
+
+The script hooks `java.io.File` and `java.lang.Runtime.exec()` to identify potentially interesting paths and commands, while capturing Java stack traces to help trace the origin of the activity.Android Runtime Monitoring with Frida
+
+A Frida-based dynamic analysis script for Android applications that monitors suspicious file-system activity and system command execution at runtime.
+
+The script hooks `java.io.File` and `java.lang.Runtime.exec()` to identify potentially interesting paths and commands, while capturing Java stack traces to help trace the origin of the activity.
+
+### Features
+
+* Monitor suspicious `File` object creation.
+* Detect paths containing keywords such as `su`, `bin`, and `apk`.
+* Capture Java stack traces for suspicious file operations.
+* Monitor commands executed through `Runtime.exec()`.
+* Useful for Android malware analysis, reverse engineering, and security research.
+
+### Use Cases
+
+* Android application security testing
+* Malware and threat analysis
+* Dynamic reverse engineering
+* Root-detection analysis
+* Runtime behavior investigation
+
+> **Disclaimer:** This project is intended for authorized security research, malware analysis, and educational purposes only.
+
+```
+
+`Root_Detection.js`:
+
+```js
+Java.perform(function () {
+    // 1. Interceptar la inicialización de CUALQUIER objeto File
+    let File = Java.use("java.io.File");
+    File.$init.overload('java.lang.String').implementation = function (pathname) {
+        // Si la ruta contiene palabras sospechosas (ya descifradas en memoria)
+        if (pathname.includes("su") || pathname.includes("bin") || pathname.includes("apk")) {
+            console.log("\n[!] Objeto File creado con ruta: " + pathname);
+            // Imprimir el Stack Trace para ver qué función oculta lo originó
+            let Thread = Java.use("java.lang.Thread");
+            let stack = Thread.currentThread().getStackTrace();
+            for (let i = 0; i < stack.length; i++) {
+                console.log("    -> " + stack[i].toString());
+            }
+        }
+        return this.$init(pathname);
+    };
+
+    // 2. Interceptar la ejecución de comandos del sistema
+    let Runtime = Java.use("java.lang.Runtime");
+    Runtime.exec.overload('java.lang.String').implementation = function (command) {
+        console.log("\n[!] Comando ejecutado: " + command);
+        return this.exec(command);
+    };
+});
+
+```
