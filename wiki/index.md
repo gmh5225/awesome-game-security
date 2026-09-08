@@ -941,7 +941,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [dk](entities/dk.md) — WinDbg extension; refactored tokenext; token/heap pointer SVG overlays (WinDbg Plugins)
 - [DisableParallelLoader](entities/disable-parallel-loader.md) — x64dbg plugin: disable Win10+ parallel DLL loader (`LdrpMapAndSnapWork`; phnt; sequential load order)
 - [DisableNvidiaScreenshot](entities/disablenvidiascreenshot.md) — DWM anti-screenshot (C++; NVIDIA / capture lane; Cheat Anti Screenshot)
-- [discord-dpi-bridge](entities/discord-dpi-bridge.md) — user-space ByeDPI SOCKS5 + DoH Discord relay avoiding WinDivert kernel drivers that break EAC/Denuvo (egeorcun; PowerShell scripts; Some Tricks / Windows Ring3)
+- [discord-dpi-bridge](entities/discord-dpi-bridge.md) — user-space ByeDPI SOCKS5 + DoH + TCP relay + hosts/Chromium proxy flags for Discord client/updater; PowerShell install/status/fix/uninstall + JSON config; avoids WinDivert kernel drivers that break EAC/Denuvo (egeorcun; Some Tricks / Windows Ring3)
 - [discord-overlay-hook](entities/discord-overlay-hook.md) — Discord overlay DX11 hook sample (C++; rendering / modding / hooking)
 
 - [dll-hot-reload](entities/dll-hot-reload.md) — injectable DLL hot-reload wrapper (ergrelet; reload payload on disk change; cheat / injection:windows)

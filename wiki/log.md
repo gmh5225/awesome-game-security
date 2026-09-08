@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-08** — ingest `description:egeorcun/discord-dpi-bridge`: entity [[discord-dpi-bridge]] (egeorcun; user-space ByeDPI SOCKS5 + PowerShell TCP relay + DoH + hosts/Chromium proxy flags; install/status/fix/uninstall scripts + JSON config; built-in PowerShell only; region-blocked Discord + EAC/Denuvo titles such as ARC Raiders without GoodbyeDPI/WinDivert kernel drivers; Some Tricks / Windows Ring3); cited on [[concepts/easy-anti-cheat]] and [[entities/divert]]; cross-linked [[gecit]] and [[divert]].
+
 - **2026-09-08** — ingest `description:wesmar/UnderVolter`: entity [[undervolter]] (wesmar; native UEFI x64 Intel CPU undervolting via MSR/MMIO before OS/hypervisor; FIVR MSR 0x150; NVRAM Setup/CFG Lock unlock; Secure Boot SelfEnroll; bypasses Hyper-V/VBS MSR filtering; Sandy Bridge–Arrow Lake INI profiles; Plundervolt-class pre-boot voltage-interface + UEFI trust-chain research; cheat / EFI Driver); cited on [[overviews/windows-kernel]] and [[overviews/game-hacking]]; cross-linked [[efitool]], [[perfectsmbios]], and [[hvci]].
 
 - **2026-09-08** — ingest `readme:categories`: Cheat ~2789 (+1; wesmar/[[undervolter]] pre-boot Intel MSR undervolting in EFI Driver) / Some Tricks ~118 (+1; egeorcun/[[discord-dpi-bridge]] user-space Discord DPI relay avoiding WinDivert/EAC/Denuvo in Windows Ring3) / Anti Cheat ~712 / other major section counts stable; 41 sections; entities [[undervolter]], [[discord-dpi-bridge]]; refreshed README-map counts and scope on [[overviews/overview]], [[overviews/game-hacking]], [[overviews/anti-cheat]], [[overviews/windows-kernel]], [[overviews/reverse-engineering]], and [[overviews/dma-attack]]; light `index.md` section notes (no per-category pages).
