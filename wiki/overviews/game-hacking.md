@@ -22,6 +22,7 @@ sources:
   - wiki/sources/descriptions/januwA__game-reversed-study.md
   - wiki/sources/descriptions/janisslsm__ida-ps4-helper.md
   - wiki/sources/descriptions/kovidomi__game-reversing.md
+  - wiki/sources/descriptions/krakensuit__ZenWare.cc.md
   - wiki/sources/descriptions/krampus-nuggets__ce-tutorial.md
   - wiki/sources/descriptions/kotae4__intro-to-gamehacking.md
   - wiki/sources/descriptions/1401199262__RemoteCall.md
@@ -2537,6 +2538,7 @@ C++ Unity cheat frameworks such as [[unityresolve-hpp]] (rendering / physics / m
 - SE-Owned–lineage TF2 training software such as [[fedoraware]] (gmh5225; C/C++; rendering / networking / animation; cheat / game:team fortress 2) sits in the same TF2 internal lane for studying feature-complete Source 1 cheat architecture beside hook-focused starters. (source: wiki/sources/descriptions/gmh5225__Fedoraware.md)
 - Basic Left 4 Dead 2 cheat frameworks such as [[l4d2-basic]] (gmh5225; Source engine hook structures, interface resolution, starter template) sit in the cheat / game:left 4 dead 2 lane for bootstrapping Source 1 internal hook work beside TF2 and CS:GO samples. (source: wiki/sources/descriptions/gmh5225__L4D2Basic.md)
 - Internal Left 4 Dead 2 samples such as [[l4d2-cheat]] (gmh5225; Source engine SDK; VMT hooks + engine interface exploitation; ESP, aimbot, gameplay mods; Linux tag) sit in the same cheat / game:left 4 dead 2 lane beside starter frameworks. (source: wiki/sources/descriptions/gmh5225__L4D2-Cheat.md)
+- Documented L4D2 internal + external training frameworks such as [[zenware-cc]] (krakensuit; C++17 Win32 x86; MinHook function/vtable hooks; pattern-based offsets + signature verification; injectable DLL + GUI loader + RPM/GDI external overlay; ESP/chams/aim/movement; educational/local insecure-server only; explicit no-AC-bypass / no-VAC policy) sit in the same cheat / game:left 4 dead 2 lane for studying dual-mode Source 1 cheat architecture beside VMT-focused internals. (source: wiki/sources/descriptions/krakensuit__ZenWare.cc.md)
 - Half-Life 2 ESP samples such as [[hl2esp]] (codereversing; C/C++; hooking-centered ESP; cheat / game:half-life 2) sit in the same Source 1 internal lane beside L4D2 and TF2 samples for studying HL2-specific hook and ESP patterns. (source: wiki/sources/descriptions/codereversing__hl2esp.md) Classic Call of Duty v1.5 educational hack collections such as [[cod-hacks]] (attilathedud; Desk.dll multi-hack, internal [[world-to-screen]] ESP, OpenGL `glDrawElements` wallhack, syscall wallhack, pattern-scan trainer; internal DLL + external trainer) sit in the same vintage FPS cheat-architecture lane for OpenGL hooking and memory-scan study. (source: wiki/sources/descriptions/attilathedud__CoD_Hacks.md)
 - Half-Life 2 aimbot samples such as [[hl2aimbot]] (codereversing; C/C++; aimbot-focused internal hooking; cheat / game:half-life 2) sit beside [[hl2esp]] in the same HL2 Source 1 lane for comparing ESP vs aimbot hook patterns. (source: wiki/sources/descriptions/codereversing__hl2aimbot.md)
 

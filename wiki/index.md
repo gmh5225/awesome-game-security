@@ -2144,7 +2144,7 @@ Compiled knowledge catalog for awesome-game-security.
 - [Lazenca S](entities/lazenca-s.md) — Android anti-cheat engine (Java + JNI native C/C++; debugging, root, speed-hack, binary modification, VM indicators; mobile game protection experiments / AC detection study; Lazenca; Android Platform)
 - [L4D2 Basic](entities/l4d2-basic.md) — Left 4 Dead 2 basic cheat framework (Source engine hooks, interface resolution, starter template; gmh5225)
 - [L4D2 Cheat](entities/l4d2-cheat.md) — Left 4 Dead 2 internal cheat (Source engine SDK; VMT hooks + interface exploitation; ESP/aimbot/gameplay mods; Linux; gmh5225)
-- [ZenWare.cc](entities/zenware-cc.md) — L4D2 internal + external training framework (krakensuit; C++17 x86 MinHook; loader/DLL/GDI external; educational/local-server; cheat / game:l4d2)
+- [ZenWare.cc](entities/zenware-cc.md) — L4D2 internal + external training framework (krakensuit; C++17 x86 MinHook; pattern offsets + signature verify; injectable DLL + GUI loader + RPM/GDI external; ESP/chams/aim/movement; educational/local insecure-server; no AC bypass / no VAC; cheat / game:l4d2)
 - [l-assemblies](entities/l-assemblies.md) — C# LeagueSharp champion plugins (Orbwalker/TargetSelector combos; ward/cooldown minimap tracker; gmh5225; cheat / game:lol)
 - [lazysight](entities/lazysight.md) — internal Ironsight multihack (DirectX overlay ESP/aimbot; entity lists, weapon managers, W2S SDK reads; Internal; gmh5225; cheat / game:ironsight)
 - [last-island-of-survival-ioscheat-source](entities/last-island-of-survival-ioscheat-source.md) — Last Island of Survival / Last Day Rules iOS cheat source (Objective-C runtime manipulation; gameplay mods; gmh5225; cheat / iOS)

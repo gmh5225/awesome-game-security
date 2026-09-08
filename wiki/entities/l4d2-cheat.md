@@ -12,7 +12,7 @@ confidence: medium
 
 Internal **Left 4 Dead 2** cheat (gmh5225) built on the Source engine SDK. Provides ESP, aimbot, and gameplay modifications through VMT hooking and engine interface exploitation in the Valve Source engine. README tags it `[Linux]`. (source: wiki/sources/descriptions/gmh5225__L4D2-Cheat.md)
 
-Feature-complete L4D2 internal sample beside starter scaffolds such as [[l4d2-basic]] and other Source 1 internals ([[teamfortress2-internal]], [[csgo-internal-base]]).
+Feature-complete L4D2 internal sample beside starter scaffolds such as [[l4d2-basic]], dual-mode training frameworks such as [[zenware-cc]], and other Source 1 internals ([[teamfortress2-internal]], [[csgo-internal-base]]).
 
 ## Hooking model
 
@@ -28,4 +28,4 @@ Feature-complete L4D2 internal sample beside starter scaffolds such as [[l4d2-ba
 
 ## Related
 
-[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-engine]] · [[l4d2-basic]] · [[teamfortress2-internal]] · [[csgo-internal-base]] · [[source-netvars]] · [[sourceengineexplorer]]
+[[overviews/game-hacking]] · [[overviews/game-engine]] · [[source-engine]] · [[l4d2-basic]] · [[zenware-cc]] · [[teamfortress2-internal]] · [[csgo-internal-base]] · [[source-netvars]] · [[sourceengineexplorer]]
