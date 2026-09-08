@@ -4,6 +4,8 @@ Append-only journal of ingest / lint / skill-sync activity.
 
 ---
 
+- **2026-09-08** — lint: index vs disk scan — 9 overviews, 30 concepts, 3862 entities (3901 index entries); index.md fully synced (0 missing, 0 dead, 0 duplicate entries); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (30 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no structural edits required.
+
 - **2026-09-08** — lint: index vs disk scan — 9 overviews, 30 concepts, 3862 entities (3901 index entries); index.md fully synced (0 missing, 0 dead); overview wikilink spot-check (9 pages) — 0 broken links; concept spot-check (30 pages) — 0 broken links; index.md wikilink scan — 0 broken links; 6 cross-kind slug collisions ([[game-hacking]], [[anti-cheat]], [[reverse-engineering]], [[il2cpp]], [[byovd]], [[dma]]) — expected, no repair needed; no file edits required.
 
 - **2026-09-08** — ingest `description:CHERWING/xiaomi_usb_security_bypass`: entity [[xiaomi-usb-security-bypass]] (CHERWING; Magisk module; resetprop `persist.security.adbinput`/`adbinstall` + `persist.fastboot.enable` via `system.prop` + `service.sh` SELinux fallback; USB debugging security settings, USB install, fastboot without Mi account/SIM; scrcpy/Total Control/`monkey`/`uiautomator` INJECT_EVENTS; shell + `build_zip.py`; Cheat / Magisk); cited on [[overviews/mobile-security]], [[overviews/game-hacking]], and [[concepts/mobile-anti-cheat]]; cross-linked [[usb-detection-bypass]] and [[xiaomi-hyperos-bootloader-bypass]].
